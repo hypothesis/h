@@ -203,6 +203,7 @@ $base-font-size: 14px;
   margin-top: 5px;
   overflow: hidden;
   position: relative;
+  text-align: center;
   height: 30px;
   width: 30px;
 
@@ -211,6 +212,7 @@ $base-font-size: 14px;
     border-radius: 4px 0 0 4px;
     border-right-style: none;
     margin-top: 0;
+    padding-right: 6px;
     width: 36px;
     z-index: 1;
   }
@@ -228,15 +230,10 @@ $base-font-size: 14px;
   a {
     @include single-transition(background-color, .25s, .25s);
     background: $white;
-    font-size: 18px;
-    padding: 1px 6px;
-    line-height: 28px;
-    top: -1px;
-    left: -1px;
-
-    position: absolute;
     color: $gray-light;
-
+    font-size: 18px;
+    line-height: 28px;
+    padding: 5px;
     text-decoration: none;
   }
 
