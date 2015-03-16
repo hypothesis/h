@@ -51,7 +51,7 @@ def create_app(global_config, **settings):
     config.add_jinja2_renderer('.js')
     config.add_jinja2_renderer('.txt')
     config.add_jinja2_renderer('.html')
-    config.add_jinja2_renderer('.atom')
+    config.add_jinja2_renderer('.xml')
 
     if config.registry.feature('accounts'):
         config.set_authentication_policy(session_authn)

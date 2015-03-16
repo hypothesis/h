@@ -1,9 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
+{# Generic template for rendering an Atom feed given a feed dict.
+
+The feed dict should be a logical representation of an Atom feed as a Python
+dict, including a list of dicts for the feed's entries. This template will
+render the feed to Atom XML.
+
+#}<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>{{ feed.id }}</id>
   <title>{{ feed.title }}</title>
   <subtitle>{{ feed.subtitle }}</subtitle>
-  <updated>{{ feed.entries[0].updated }}</updated>
+  <updated>{{ feed.updated }}</updated>
 
   {% for link in feed.links %}
   <link rel="{{ link.rel }}" type="{{ link.type }}" href="{{ link.href }}" />
@@ -12,18 +18,19 @@
   {% for entry in feed.entries %}
   <entry>
     <id>{{ entry.id }}</id>
-    <title>{{ entry.username }} on {{ entry.document_title }} ({{ entry.domain }})</title>
+    <title>{{ entry.title }}</title>
     <updated>{{ entry.updated }}</updated>
-    <published>{{ entry.created }}</published>
+    <published>{{ entry.published }}</published>
     <author>
-      <name>{{ entry.username }}</name>
+      <name>{{ entry.author.name }}</name>
     </author>
     {% for link in entry.links %}
     <link rel="{{ link.rel }}" type="{{ link.type }}" href="{{ link.href }}" />
     {% endfor %}
     <content type="html">
-      &lt;blockquote&gt;{{ entry.selection }}&lt;/blockquote&gt;
-      {{ entry.text }}
+        {# This is already HTML-escaped in Python, so we don't escape it again
+           here. #}
+        {{ entry.content|safe }}
     </content>
   </entry>
   {% endfor %}
