@@ -6,7 +6,14 @@ import pyramid.traversal
 
 class APIError(Exception):
 
-    """Exception that's raised when a request to the API fails."""
+    """Raised when a request to the API fails for any reason."""
+
+    pass
+
+
+class Timeout(APIError):
+
+    """Raised when a request to the API times out."""
 
     pass
 
@@ -43,8 +50,9 @@ class HypothesisAPIClient(object):
 
         """
         url = "/".join([self.base_url.rstrip("/"), path.lstrip("/")])
-        # TODO: Handle timeouts.
         try:
-            return requests.get(url, params=params).json()
+            return requests.get(url, params=params, timeout=0.2).json()
         except requests.exceptions.ConnectionError as err:
             raise APIError(err)
+        except requests.exceptions.Timeout as err:
+            raise Timeout(err)

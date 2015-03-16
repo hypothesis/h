@@ -125,6 +125,8 @@ def atom_stream(context, request):
             "/search", params={"limit": 10})["rows"]
     except api_client.APIError as err:
         raise httpexceptions.HTTPGatewayTimeout
+    except api_client.Timeout:
+        raise httpexceptions.HTTPGatewayTimeout
 
     entries = []
     for annotation in annotations:
