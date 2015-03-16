@@ -103,6 +103,9 @@ class AppController
       # Reload the view.
       $route.reload()
 
+    $scope.$on 'clearSelection', ->
+      $scope.clearSelection()
+
     $scope.login = ->
       $scope.dialog.visible = true
       identity.request {oncancel}
