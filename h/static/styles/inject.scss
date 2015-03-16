@@ -17,13 +17,14 @@ $base-font-size: 14px;
   margin-top: -50px;
   padding: 0;
   position: absolute;
+  background: $white;
   border: 3px solid $border;
   border-radius: 4px;
   z-index: 999;
 
   &:before {
     @include rotate(45deg);
-    background: #fdfdfd;
+    background: $white;
     bottom: -8px;
     border-bottom: 4px solid $border;
     border-right: 4px solid $border;
@@ -49,16 +50,8 @@ $base-font-size: 14px;
     margin: 0;
     padding: 0;
     text-align: center;
-    background: white !important;
+    background: $white !important;
     color: $gray-light !important;
-
-    &::-moz-focus-inner {
-      border: 0;
-    }
-
-    &:hover {
-      color: $hoverborder !important;
-    }
   }
 
   &:hover {
