@@ -13,6 +13,7 @@ import pyramid.i18n
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
+import h.api_client.api_client as api_client
 
 log = logging.getLogger(__name__)
 _ = pyramid.i18n.TranslationStringFactory(__package__)
@@ -119,8 +120,11 @@ def stream(context, request):
 @view_config(layout='app', route_name='atom_stream',
              renderer='h:templates/stream.atom')
 def atom_stream(context, request):
-    annotations = request.api_client.get(
-        "/search", params={"limit": 10})["rows"]
+    try:
+        annotations = request.api_client.get(
+            "/search", params={"limit": 10})["rows"]
+    except api_client.APIError as err:
+        raise httpexceptions.HTTPGatewayTimeout
 
     entries = []
     for annotation in annotations:

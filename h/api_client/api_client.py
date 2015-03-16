@@ -4,6 +4,13 @@ import requests
 import pyramid.traversal
 
 
+class APIError(Exception):
+
+    """Exception that's raised when a request to the API fails."""
+
+    pass
+
+
 class HypothesisAPIClient(object):
     """A client for the Hypothesis API.
 
@@ -37,4 +44,7 @@ class HypothesisAPIClient(object):
         """
         url = "/".join([self.base_url.rstrip("/"), path.lstrip("/")])
         # TODO: Handle timeouts.
-        return requests.get(url, params=params).json()
+        try:
+            return requests.get(url, params=params).json()
+        except requests.exceptions.ConnectionError as err:
+            raise APIError(err)
