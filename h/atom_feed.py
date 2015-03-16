@@ -98,7 +98,7 @@ def _feed_from_annotations(annotations, atom_url, html_url, title=None,
 
     """
     return {
-        "id": None,  # FIXME
+        "id": atom_url,
         "title": title or _("Hypothes.is Stream"),
         "subtitle": subtitle or _("The Web. Annotated"),
         "updated": annotations[0]["updated"],
@@ -155,5 +155,5 @@ def render_feed(request, annotations, atom_url, html_url,
     return pyramid.renderers.render(
         'h:templates/atom.xml',
         {"feed": _feed_from_annotations(
-            annotations, html_url, atom_url, title, subtitle)},
+            annotations, atom_url, html_url, title, subtitle)},
         request=request)

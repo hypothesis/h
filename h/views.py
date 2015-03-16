@@ -131,8 +131,8 @@ def atom_stream(context, request):
         h.atom_feed.render_feed(
             request,
             h.atom_feed.augment_annotations(request, annotations),
-            html_url=request.route_url("stream"),
             atom_url=request.route_url("atom_stream"),
+            html_url=request.route_url("stream"),
             title=request.registry.settings.get("h.feed.title"),
             subtitle=request.registry.settings.get("h.feed.subtitle")),
         content_type=b"application/atom+xml")
