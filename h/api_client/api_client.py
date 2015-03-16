@@ -63,3 +63,5 @@ class HypothesisAPIClient(object):
             raise ConnectionError(err)
         except requests.exceptions.Timeout as err:
             raise Timeout(err)
+        except requests.exceptions.RequestException as err:
+            raise APIError(err)
