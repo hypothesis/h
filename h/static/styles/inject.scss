@@ -9,7 +9,7 @@ $base-font-size: 14px;
 //ADDER////////////////////////////////
 .annotator-adder {
   $border: $gray;
-  $hoverborder: $gray-dark;
+  $border-hover: $gray-dark;
   @include box-sizing(border-box);
   direction: ltr;
   height: 35px;
@@ -53,19 +53,13 @@ $base-font-size: 14px;
     background: $white !important;
     color: $gray-light !important;
 
-    &.h-icon-mode-comment, &.h-icon-border-color {
-      &:hover {
-        color: $gray-dark !important;
-      }
+    &:hover {
+      color: $border-hover !important;
     }
   }
 
-  &:hover {
-    border-color: $hoverborder;
-
-    &:before {
-      border-color: $hoverborder;
-    }
+  &:hover, &:before:hover {
+    border-color: $border-hover;
   }
 }
 
