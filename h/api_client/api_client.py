@@ -43,7 +43,7 @@ class HypothesisAPIClient(object):
         """
         self.base_url = base_url
 
-    def get(self, path, params):
+    def get(self, path, params=None):
         """Make a GET request to the Hypothesis API and return the response.
 
         :returns: the JSON response from the API as a Python object
