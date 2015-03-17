@@ -1,101 +1,92 @@
-Installing
-######################
+Installation guide
+##################
 
-Dependencies:
+This document contains instructions for deploying h to a production environment.
+If you are looking for instructions on setting up a development environment for
+h, please consult :doc:`HACKING` instead.
 
-* Python v2.7+ (No Python 3 support yet -- want to help?)
-* CoffeeScript_ v1.6+
-* Sass_ v3.2+
-* Compass_ v0.12+
-* ElasticSearch_ v1.0+
-* `ElasticSearch ICU Analysis`_ plugin
+h is deployed exclusively as a Docker_ container. This allows the development
+team to focus their efforts on developing for a single, consistent environment.
+It also means that across a wide variety of platforms (those support by Docker
+itself) the instructions for configuring and deploying h are identical.
 
-Platform Specific Instructions
-------------------------------
+In addition to the Docker container, h depends on the following services:
 
-To install the dependencies on any specific platform, follow the instructions in one of the following files (see below).
+-  An SQL database. We only officially support PostgreSQL_.
+-  ElasticSearch_ v1.0+, with the `ElasticSearch ICU Analysis`_ plugin
+   installed. Used for storing annotation data.
+-  NSQ_, a distributed message queue. Used for interprocess communication.
+-  Redis_, a fast key-value store. Used for persistent session storage.
 
-* ArchLinux_
-* Debian_
-* Fedora_
-* OSX_
-* Ubuntu_
+.. _Docker: https://www.docker.com/
+.. _PostgreSQL: http://www.postgresql.org/
+.. _ElasticSearch: https://www.elastic.co/products/elasticsearch
+.. _ElasticSearch ICU Analysis: https://github.com/elastic/elasticsearch-analysis-icu
+.. _NSQ: http://nsq.io/
+.. _Redis: http://redis.io/
 
-Feel free to add instructions for a new platform in a file named
-``Install.<Platform>.rst`` particularly if you think it
-may be a niche use case. Contributions (and updates) to the other install
-instruction files are *very* welcome.
 
-Setting up the python virtual environment
------------------------------------------
+Prerequisites
+-------------
 
-First, install virtualenvwrapper_.
-Then
+You will need to have installed and configured Docker (v1.4 or greater) in order
+to deploy h. Please follow `the Docker team's instructions on how to install
+Docker`_.
 
-.. code-block:: bash
+.. _the Docker team's instructions on how to install Docker: https://docs.docker.com/installation/
 
-    mkvirtualenv h
 
-and now you have a virtual environment for h, and you will
-install any python dependencies there.
+Building the image
+------------------
 
-You will notice that the your shell prompt changes to include a (h) symbol.
-That means that you now have your virtual environment activated. This is
-required for running the code.
+We do not currently publish a built image for h. You must build the base image
+for h by running the following from the root of the repository::
 
-At any later time, you can activate your virtualenv by running
+    $ docker build -t hypothesis/h .
 
-.. code-block:: bash
+This will take some time to complete, as it will install and configure a
+complete image of h and all its direct dependencies.
 
-    workon h
 
-General Instructions
---------------------
+Running the container
+---------------------
 
-Once the basic dependencies are installed, the `ElasticSearch ICU Analysis`_
-plugin is needed. Follow the instructions_ available from that project.
+You can now run a Docker container using the ``hypothesis/h`` image you just
+built. At its simplest, this consists of running::
 
-The project code itself is a pyramid_ application which can be integrated
-into any WSGI_ compatible framework and run on any WSGI web server, such as
-as gunicorn_ or uWSGI_. However, at this time support for the WebSocket
-protocol assumes gunicorn.
+    $ docker run hypothesis/h
 
-For building the static assets, requirements currently include CoffeeScript_
-and Sass_ with Compass_ installed. CoffeeScript will be installed for you but
-Sass and Compass must be installed manually. These tools are widely available
-in package repositories. Check the platform-specific installation instructions
-for details.
+but this will usually result in a container which is missing some important
+configuration. In particular, you need to let the running h instance know where
+its external service dependencies are. This is most easily done by configuring
+one or more of the following Docker link names, which will result in automatic
+configuration of these services:
 
-For production use, the application will use UglifyJS_ and clean-css_ for
-minification needs. These are not required when running the project in a
-development configuration but will be installed locally.
+-  ``elasticsearch``
+-  ``mail``
+-  ``nsqd``
+-  ``redis``
+-  ``statsd``
 
-In the future, releases will include built versions of static assets which
-will eliminate the need for those who wish to integrate with their own
-Python web services but do not need to modify the front-end sources.
+In a production environment you should set the following container environment
+variables:
 
-Troubleshooting
----------------
+-  ``APP_URL`` the base URL of the application
+-  ``DATABASE_URL`` an SQLAlchemy compatible database URL
+-  ``SECRET_KEY`` a secret key for use in cryptographic operations
 
-By default, ElasticSearch may try to join other nodes on the network resulting
-in ``IndexAlreadyExists`` errors at startup. See the documentation for how to
-turn off discovery.
+.. note::
+   You can generate an appropriate secret key as follows::
 
-.. _pyramid: http://www.pylonsproject.org/
-.. _WSGI: http://www.wsgi.org/
-.. _gunicorn: http://gunicorn.org/
-.. _uWSGI: http://projects.unbit.it/uwsgi/
-.. _ElasticSearch: http://www.elasticsearch.org/
-.. _ElasticSearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
-.. _CoffeeScript: http://coffeescript.org/
-.. _Sass: http://sass-lang.com/
-.. _Compass: http://compass-style.org/
-.. _UglifyJS: http://marijnhaverbeke.nl//uglifyjs
-.. _clean-css: https://github.com/GoalSmashers/clean-css
-.. _ArchLinux: INSTALL.ArchLinux.rst
-.. _Debian: INSTALL.Debian.rst
-.. _Fedora: INSTALL.Fedora.rst
-.. _OSX: INSTALL.OSX.rst
-.. _Ubuntu: INSTALL.Ubuntu.rst
-.. _instructions: http://www.elasticsearch.org/guide/en/elasticsearch/guide/master/icu-plugin.html
-.. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
+       $ python -c 'import base64; import os; print(base64.b64encode(os.urandom(64))).strip(b"=")'
+
+You will probably also want to set one or more of the following configuration
+options:
+
+- ``ALLOWED_ORIGINS`` origins allowed to connect over the WebSocket protocol
+- ``CLIENT_ID`` a unique API key for authentication
+- ``CLIENT_SECRET`` a unique API secret for signing authentication requests
+- ``ELASTICSEARCH_INDEX`` the ElasticSearch index name for annotation storage
+- ``MAIL_DEFAULT_SENDER`` a sender address for outbound mail
+- ``WEBASSETS_BASE_DIR`` the base directory for static assets
+- ``WEBASSETS_BASE_URL`` the base URL for static asset routes
