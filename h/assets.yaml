@@ -36,6 +36,16 @@ angular_tags_input:
   contents: h:static/scripts/vendor/ng-tags-input.js
 
 
+angular_toastr:
+  contents:
+    - filters: uglifyjs
+      output: scripts/vendor/angular-toastr/angular-toastr.min.js
+      contents: h:static/scripts/vendor/angular-toastr/angular-toastr.js
+    - filters: cleancss
+      output: scripts/vendor/angular-toastr/angular-toastr.min.css
+      contents: h:static/scripts/vendor/angular-toastr/angular-toastr.css
+
+
 # jQuery
 jquery:
   filters: uglifyjs
@@ -98,6 +108,7 @@ app:
     - angular_route
     - angular_sanitize
     - angular_tags_input
+    - angular_toastr
     - annotator
     - autofill
     - bind

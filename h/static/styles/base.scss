@@ -29,45 +29,9 @@
   background: url("../images/noise_1.png");
 }
 
-//FLASH/TOAST/ALERTS///////////////////////////////
-.annotator-notice {
-  @include box-shadow(inset 2px 1px 1px hsla(0, 0%, 0%, .1));
-  @include single-transition(opacity, .2s);
-  direction: ltr;
-  font-family: $sans-font-family;
-  font-weight: 300;
-  line-height: 29px;
-  opacity: 0;
-  position: relative;
-  text-align: center;
-  z-index: 5;
-
-  &.show, &.annotator-notice-show {
-    opacity: 1;
-  }
-}
-
 .annotator-hide {
   display: none;
   visibility: hidden;
-}
-
-.annotator-notice-info {
-  color: #3a87ad;
-  background-color: #d9edf7;
-  border-color: #98BED1;
-}
-
-.annotator-notice-success {
-  color: #468847;
-  background-color: #dff0d8;
-  border-color: #8DC98E;
-}
-
-.annotator-notice-error {
-  color: #b94a48;
-  background-color: #f2dede;
-  border-color: #F5A1A0;
 }
 
 // Icons

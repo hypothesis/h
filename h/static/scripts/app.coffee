@@ -11,6 +11,7 @@ imports = [
   'ngRoute'
   'ngSanitize'
   'ngTagsInput'
+  'h.flash'
   'h.helpers'
   'h.identity'
   'h.session'

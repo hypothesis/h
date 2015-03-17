@@ -48,8 +48,9 @@ class AuthController
         timeout = $timeout ->
           angular.copy {}, $scope.model
           $scope.form?.$setPristine()
-          flash 'info',
+          flash.info(
             'For your security, the forms have been reset due to inactivity.'
+          )
         , 300000
 
 
