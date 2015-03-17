@@ -8,8 +8,6 @@ $base-font-size: 14px;
 
 //ADDER////////////////////////////////
 .annotator-adder {
-  $border: $gray;
-  $border-hover: $gray-dark;
   @include box-sizing(border-box);
   direction: ltr;
   height: 35px;
@@ -26,8 +24,8 @@ $base-font-size: 14px;
     @include rotate(45deg);
     background: $white;
     bottom: -8px;
-    border-bottom: 4px solid $border;
-    border-right: 4px solid $border;
+    border-bottom: 4px solid $gray;
+    border-right: 4px solid $gray;
     content: "";
     display: block;
     height: 6px;
@@ -40,7 +38,7 @@ $base-font-size: 14px;
   }
 
   button {
-    @include sweetbutton;
+    @include box-shadow(none);
     font-family: h;
     border: none;
     cursor: pointer;
@@ -53,13 +51,14 @@ $base-font-size: 14px;
     background: $white !important;
     color: $gray-light !important;
 
-    &:hover {
-      color: $border-hover !important;
+    &:active {
+      @include single-transition(background-color, .25s);
+      background-color: $gray-light !important;
     }
-  }
 
-  &:hover, &:before:hover {
-    border-color: $border-hover;
+    &:hover {
+      color: $gray-dark !important;
+    }
   }
 }
 
