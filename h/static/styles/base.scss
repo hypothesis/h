@@ -69,3 +69,11 @@
   background-color: #f2dede;
   border-color: #F5A1A0;
 }
+
+// Icons
+[class^="h-icon-"], [class*=" h-icon-"] {
+  vertical-align: middle;
+  &:before {
+    font-size: 130%;
+  }
+}

@@ -13,8 +13,5 @@
 @mixin icons {
   [class^="h-icon-"], [class*=" h-icon-"] {
     @content;
-    &:before {
-      font-size: 130%;
-    }
   }
 }
