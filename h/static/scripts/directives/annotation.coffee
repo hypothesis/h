@@ -29,12 +29,13 @@ validate = (value) ->
 # {@link annotationMapper AnnotationMapper service} for persistence.
 ###
 AnnotationController = [
-  '$scope', '$timeout', '$rootScope', '$document',
-  'auth', 'drafts', 'flash', 'permissions',
+  '$scope', '$timeout', '$q', '$rootScope', '$document',
+  'auth', 'drafts', 'flash', 'permissions', 'tagHelpers',
   'timeHelpers', 'annotationUI', 'annotationMapper'
-  ($scope,   $timeout,   $rootScope,   $document,
-   auth,   drafts,   flash,   permissions,
+  ($scope,   $timeout,   $q,   $rootScope,   $document,
+   auth,   drafts,   flash,   permissions,   tagHelpers,
    timeHelpers, annotationUI, annotationMapper) ->
+
     @annotation = {}
     @action = 'view'
     @document = null
@@ -49,6 +50,15 @@ AnnotationController = [
     highlight = model.$highlight
     original = null
     vm = this
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#tagsAutoComplete.
+    # @returns {Promise} immediately resolved to {string[]} -
+    # the tags to show in autocomplete.
+    ###
+    this.tagsAutoComplete = (query) ->
+      $q.when(tagHelpers.filterTags(query))
 
     ###*
     # @ngdoc method
@@ -144,6 +154,11 @@ AnnotationController = [
         return flash 'info', 'Please sign in to save your annotations.'
       unless validate(@annotation)
         return flash 'info', 'Please add text or a tag before publishing.'
+
+      # Update stored tags with the new tags of this annotation
+      tags = @annotation.tags.filter (tag) ->
+        tag.text not in (model.tags or [])
+      tagHelpers.storeTags(tags)
 
       angular.extend model, @annotation,
         tags: (tag.text for tag in @annotation.tags)

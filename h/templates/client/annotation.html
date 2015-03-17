@@ -80,7 +80,11 @@
               placeholder="Add tags…"
               min-length="1"
               replace-spaces-with-dashes="false"
-              enable-editing-last-tag="true"></tags-input>
+              enable-editing-last-tag="true">
+      <auto-complete source="vm.tagsAutoComplete($query)"
+                     min-length="1"
+                     max-results-to-show="10"></auto-complete>
+  </tags-input>
 </div>
 
 <div class="annotation-section tags tags-read-only"
