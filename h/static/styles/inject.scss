@@ -193,6 +193,7 @@ $base-font-size: 14px;
   border: solid 1px $gray-lighter;
   border-radius: 4px;
   left: 0;
+  font-size: 18px;
   margin-top: 5px;
   overflow: hidden;
   position: relative;
@@ -224,10 +225,13 @@ $base-font-size: 14px;
     @include single-transition(background-color, .25s, .25s);
     background: $white;
     color: $gray-light;
-    font-size: 18px;
     line-height: 28px;
-    padding: 5px;
     text-decoration: none;
+    height: 28px;
+    width: 28px;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   a:active {

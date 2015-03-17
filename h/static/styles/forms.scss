@@ -179,12 +179,10 @@
   float: right;
 
   > * {
-    float: left;
     margin-left: 10px;
-  }
-
-  > *:first-child {
-    margin-left: 0;
+    &:first-child {
+      margin-left: 0;
+    }
   }
 }
 
@@ -259,9 +257,7 @@
 
 // Positions the icon nicely within the button.
 .btn-icon {
-  position: relative;
-  top: 1px;
-  right: 3px;
+  vertical-align: middle;
 }
 
 // Absolutely positions a message/icon to the left of a button.
@@ -270,30 +266,21 @@
 }
 
 .btn-message {
-  font-size: 13px;
   font-style: italic;
   color: $gray-light;
-  margin-right: 6px;
+  margin-right: .5em;
   position: absolute;
   right: 100%;
-  top: 50%;
-  margin-top: -9px;
+  top: 0;
   white-space: nowrap;
 }
 
 .btn-message-icon {
   display: inline-block;
-  position: relative;
-  top: 0px;
   background: $success-green;
   border-radius: 50%;
   color: #FFF;
-  font-size: 12px;
-  height: 20px;
-  line-height: 13px;
-  margin-left: 4px;
-  padding: 4px;
-  width: 20px;
+  padding: 2px;
 }
 
 // Handles state transitions from "default" -> "loading" -> "success"
@@ -305,8 +292,8 @@
 
 [status-button-state=success] .btn-message-success,
 [status-button-state=loading] .btn-message-loading {
-  top: 50%;
   left: auto;
+  top: 0;
   right: 100%;
 }
 
