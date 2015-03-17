@@ -1,6 +1,11 @@
 {% extends "layouts/base.html" %}
 
 {% block meta %}
+  <link href='http://fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
+  <!-- Override app body stylings for just this page -->
+  <style type="text/css">
+    body {background: #FFF !important;}
+  </style>
   {{ super() }}
   {% if is_onboarding %}
     <meta name="hypothesis-intent" content="first-run" />

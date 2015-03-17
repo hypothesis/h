@@ -4,6 +4,7 @@
   padding-top: 2.5em;
   padding-bottom: 2.5em;
   background: $body-background;
+  font-family: 'Lato', sans-serif !important;
 
   @include breakpoint(920px) {
     padding-right: 460px;
@@ -154,5 +155,15 @@
 
   @include icons {
     font-size: 12px;
+  }
+}
+
+/*
+  Mobile layout
+*/
+
+@media screen and (max-width: 30em) {
+  .help-page-sidebar {
+    display: none;
   }
 }
