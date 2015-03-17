@@ -162,14 +162,14 @@ privacy {
 
   &:after {
     border-color: rgba(255, 255, 255, 0);
-    border-top-color: #fff;
+    border-top-color: $white;
     border-width: 5px;
     margin-right: -5px;
   }
 
   &:before {
     border-color: rgba(211, 211, 211, 0);
-    border-top-color: #d3d3d3;
+    border-top-color: $gray-lighter;
     border-width: 6px;
     margin-right: -6px;
   }
