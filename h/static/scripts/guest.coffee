@@ -37,7 +37,7 @@ module.exports = class Annotator.Guest extends Annotator
   html: jQuery.extend {}, Annotator::html,
     adder: '''
       <div class="annotator-adder">
-        <button class="h-icon-mode-comment" data-action="comment"></button>
+        <button class="h-icon-insert-comment" data-action="comment"></button>
         <button class="h-icon-border-color" data-action="highlight"></button>
       </div>
     '''

@@ -50,7 +50,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           @annotator.setVisibleHighlights state
     ,
       "title": "New Comment"
-      "class": "h-icon-mode-comment"
+      "class": "h-icon-insert-comment"
       "on":
         "click": (event) =>
           event.preventDefault()

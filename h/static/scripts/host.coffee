@@ -66,8 +66,8 @@ module.exports = class Annotator.Host extends Annotator.Guest
 
     if @toolbar?
       @toolbar.find('.annotator-toolbar-toggle')
-      .removeClass('h-icon-arrow-back')
-      .addClass('h-icon-arrow-forward')
+      .removeClass('h-icon-chevron-left')
+      .addClass('h-icon-chevron-right')
 
   hideFrame: ->
       @frame.css 'margin-left': ''
@@ -76,8 +76,8 @@ module.exports = class Annotator.Host extends Annotator.Guest
 
       if @toolbar?
         @toolbar.find('.annotator-toolbar-toggle')
-        .removeClass('h-icon-arrow-forward')
-        .addClass('h-icon-arrow-back')
+        .removeClass('h-icon-chevron-right')
+        .addClass('h-icon-chevron-left')
 
 
   _addCrossFrameListeners: ->
