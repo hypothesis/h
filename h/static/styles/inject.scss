@@ -106,17 +106,8 @@ $base-font-size: 14px;
   z-index: 2147483638;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 
-  .h-icon-arrow-back {
-    transform: rotate(180deg);
-    font-weight: 600;
-  }
-
   &.annotator-collapsed {
     margin-left: 0;
-
-    .h-icon-arrow-back {
-      transform: rotate(0deg);
-    }
   }
 
   * {

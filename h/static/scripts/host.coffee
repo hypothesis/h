@@ -64,10 +64,21 @@ module.exports = class Annotator.Host extends Annotator.Guest
       @frame.addClass 'annotator-no-transition'
     @frame.removeClass 'annotator-collapsed'
 
+    if @toolbar?
+      @toolbar.find('.annotator-toolbar-toggle')
+      .removeClass('h-icon-arrow-back')
+      .addClass('h-icon-arrow-forward')
+
   hideFrame: ->
       @frame.css 'margin-left': ''
       @frame.removeClass 'annotator-no-transition'
       @frame.addClass 'annotator-collapsed'
+
+      if @toolbar?
+        @toolbar.find('.annotator-toolbar-toggle')
+        .removeClass('h-icon-arrow-forward')
+        .addClass('h-icon-arrow-back')
+
 
   _addCrossFrameListeners: ->
     @crossframe.on('showFrame', this.showFrame.bind(this, null))
