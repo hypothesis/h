@@ -29,7 +29,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
 
     items = [
       "title": "Toggle Sidebar"
-      "class": "annotator-toolbar-toggle"
+      "class": "annotator-toolbar-toggle h-icon-chevron-left"
       "on":
         "click": (event) =>
           event.preventDefault()
