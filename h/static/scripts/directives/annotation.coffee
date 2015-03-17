@@ -45,8 +45,8 @@ AnnotationController = [
     @showDiff = undefined
     @timestamp = null
 
-    highlight = annotationUI.tool is 'highlight'
     model = $scope.annotationGet()
+    highlight = model.$highlight
     original = null
     vm = this
 
@@ -265,13 +265,12 @@ AnnotationController = [
           $scope.$emit('annotationUpdate')
 
       # Save highlights once logged in.
-      if highlight and this.isHighlight()
+      if this.isHighlight() and highlight
         if model.user and not model.id
-          highlight = false  # skip this on future updates
           model.permissions = permissions.private()
           model.$create().then ->
             $rootScope.$emit('annotationCreated', model)
-          highlight = false  # skip this on future updates
+          highlight = false # Prevents double highlight creation.
         else
           drafts.add model, => this.revert()
 
@@ -280,7 +279,7 @@ AnnotationController = [
     , true
 
     # Start editing brand new annotations immediately
-    unless model.id? or (highlight and this.isHighlight()) then this.edit()
+    unless model.id? or (this.isHighlight() and highlight) then this.edit()
 
     this
 ]

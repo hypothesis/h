@@ -8,26 +8,24 @@ $base-font-size: 14px;
 
 //ADDER////////////////////////////////
 .annotator-adder {
-  $border: $gray;
-  $hoverborder: $gray-dark;
   @include box-sizing(border-box);
   direction: ltr;
-  height: 40px;
+  height: 35px;
   margin-left: -20px;
   margin-top: -50px;
   padding: 0;
   position: absolute;
-  border: 4px solid $border;
-  border-radius: 8px;
-  width: 40px;
+  background: $white;
+  border: 3px solid $gray;
+  border-radius: 4px;
   z-index: 999;
 
   &:before {
     @include rotate(45deg);
-    background: #fdfdfd;
+    background: $white;
     bottom: -8px;
-    border-bottom: 4px solid $border;
-    border-right: 4px solid $border;
+    border-bottom: 4px solid $gray;
+    border-right: 4px solid $gray;
     content: "";
     display: block;
     height: 6px;
@@ -40,33 +38,26 @@ $base-font-size: 14px;
   }
 
   button {
-    @include sweetbutton;
+    @include box-shadow(none);
     font-family: h;
     border: none;
     cursor: pointer;
     height: 100%;
-    width: 100%;
+    width: 35px;
     font-size: 18px;
     margin: 0;
     padding: 0;
     text-align: center;
-    background: white !important;
-    color: $border !important;
+    background: $white !important;
+    color: $gray-light !important;
 
-    &::-moz-focus-inner {
-      border: 0;
+    &:active {
+      @include single-transition(background-color, .25s);
+      background-color: $gray-light !important;
     }
 
     &:hover {
-      color: $hoverborder !important;
-    }
-  }
-
-  &:hover {
-    border-color: $hoverborder;
-
-    &:before {
-      border-color: $hoverborder;
+      color: $gray-dark !important;
     }
   }
 }
@@ -192,9 +183,11 @@ $base-font-size: 14px;
   border: solid 1px $gray-lighter;
   border-radius: 4px;
   left: 0;
+  font-size: 18px;
   margin-top: 5px;
   overflow: hidden;
   position: relative;
+  text-align: center;
   height: 30px;
   width: 30px;
 
@@ -203,6 +196,7 @@ $base-font-size: 14px;
     border-radius: 4px 0 0 4px;
     border-right-style: none;
     margin-top: 0;
+    padding-right: 6px;
     width: 36px;
     z-index: 1;
   }
@@ -213,32 +207,31 @@ $base-font-size: 14px;
     z-index: 1;
 
     a {
-      color: $link-color;
+      color: $text-color;
     }
   }
 
   a {
+    @include single-transition(background-color, .25s, .25s);
     background: $white;
-    font-size: 1.3em;
+    color: $gray-light;
     line-height: 28px;
-
-    position: absolute;
-    left: 5px;
-    color: rgba(200, 200, 200, .3);
-
     text-decoration: none;
-    text-shadow: 0 0 2px $gray-lightest, 0 0 0 $gray;
+    height: 28px;
+    width: 28px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  a:active {
+    @include single-transition(background-color, .25s);
+    background-color: $gray-light;
   }
 
   a:focus, a:hover {
     outline: 0;
-    color: $link-color-hover;
-  }
-
-  .annotator-toolbar-toggle {
-    &:hover, &:focus {
-      color: fade-out($gray-lightest, .9);
-    }
+    color: $text-color;
   }
 }
 

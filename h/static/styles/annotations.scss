@@ -136,18 +136,15 @@ privacy {
 
 .share-dialog {
   position: absolute;
-  right: 100%;
+  right: 0;
   bottom: 100%;
-  width: 240px;
-  margin-right: -46px;
-  margin-bottom: 2px;
-  padding: 3px 5px 3px 23px;
+  padding: 3px;
   z-index: 1;
   display: block;
-  line-height: 1.4;
-  background: #fff;
-  border: 1px solid #d3d3d3;
+  background: $white;
+  border: 1px solid $gray-lighter;
   border-radius: 2px;
+  white-space: nowrap;
 
   &:after, &:before {
     top: 100%;
@@ -162,33 +159,22 @@ privacy {
 
   &:after {
     border-color: rgba(255, 255, 255, 0);
-    border-top-color: #fff;
+    border-top-color: $white;
     border-width: 5px;
     margin-right: -5px;
   }
 
   &:before {
     border-color: rgba(211, 211, 211, 0);
-    border-top-color: #d3d3d3;
+    border-top-color: $gray-lighter;
     border-width: 6px;
     margin-right: -6px;
   }
 
-  a {
-    position: absolute;
-    left: 0;
-    line-height: 1.4;
-    left: 5px;
-    vertical-align: middle;
-  }
-
   input {
     padding: 0;
-    width: 100%;
-    font-size: 0.84em;
-    padding: 1px 3px;
+    width: 220px;
     border: none;
     color: $text-color;
-    outline: $gray-lighter solid 1px;
   }
 }

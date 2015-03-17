@@ -99,7 +99,7 @@ describe 'h.directives.annotation', ->
 
   describe 'when the annotation is a highlight', ->
     beforeEach ->
-      fakeAnnotationUI.tool = 'highlight'
+      annotation.$highlight = true
       annotation.$create = sinon.stub().returns
         then: angular.noop
         catch: angular.noop

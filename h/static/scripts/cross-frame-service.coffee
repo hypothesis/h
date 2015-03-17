@@ -20,7 +20,7 @@ class CrossFrameService
       new Discovery($window, options)
 
     createAnnotationSync = ->
-      whitelist = ['target', 'document', 'uri']
+      whitelist = ['$highlight', 'target', 'document', 'uri']
       options =
         formatter: (annotation) ->
           formatted = {}

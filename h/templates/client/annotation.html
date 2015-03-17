@@ -8,9 +8,9 @@
        target="_blank"
        ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
        >{{vm.annotation.user | persona}}</a>
-    <i class="small h-icon-locked" ng-show="vm.isPrivate() && !vm.editing"></i>
-    <i class="small h-icon-highlighter" ng-show="vm.isHighlight() && !vm.editing"></i>
-    <i class="small h-icon-comment" ng-show="vm.isComment()"></i>
+    <i class="h-icon-lock" ng-show="vm.isPrivate() && !vm.editing"></i>
+    <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing"></i>
+    <i class="h-icon-insert-comment" ng-show="vm.isComment()"></i>
     <span class="annotation-citation"
           ng-if="!vm.embedded"
           ng-show="vm.document.title">
@@ -99,16 +99,16 @@
   <div class="form-actions-buttons form-actions-left">
     <button ng-switch-when="edit"
             ng-click="vm.save()"
-            class="btn"><i class="h-icon-checkmark btn-icon"></i> Save</button>
+            class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
     <button ng-switch-when="delete"
             ng-click="vm.save()"
-            class="btn"><i class="h-icon-checkmark btn-icon"></i> Delete</button>
+            class="btn"><i class="h-icon-check btn-icon"></i> Delete</button>
     <button ng-switch-default
             ng-click="vm.save()"
-            class="btn"><i class="h-icon-checkmark btn-icon"></i> Save</button>
+            class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
     <button class="btn btn-clean"
             ng-click="vm.revert()"
-            ><i class="h-icon-x btn-icon"></i> Cancel</button>
+            ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
   </div>
 </div>
 
@@ -137,9 +137,9 @@
       ><i class="h-icon-reply"></i> Reply</a>
     <span class="magicontrol share-dialog-wrapper">
       <a class="small" href="" title="Share" ng-click="share($event)"
-        ><i class="h-icon-export"></i> Share</a>
+        ><i class="h-icon-share"></i> Share</a>
       <span class="share-dialog" ng-click="$event.stopPropagation()">
-        <a class="h-icon-export"
+      <a class="h-icon-share"
           target="_blank"
           ng-href="{{vm.annotationURI}}"></a>
         <input type="text" value="{{vm.annotationURI}}" readonly>
@@ -148,10 +148,10 @@
     <a class="small magicontrol" href="" title="Edit"
       ng-show="vm.authorize('update')"
       ng-click="vm.edit()"
-      ><i class="h-icon-copy"></i> Edit</a>
+      ><i class="h-icon-edit"></i> Edit</a>
     <a class="small magicontrol" href="" title="Delete"
       ng-show="vm.authorize('delete')"
       ng-click="vm.delete()"
-      ><i class="h-icon-x"></i> Delete…</a>
+      ><i class="h-icon-delete"></i> Delete…</a>
   </div>
 </footer>

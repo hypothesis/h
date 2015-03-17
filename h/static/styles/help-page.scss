@@ -11,6 +11,7 @@
 
   .masthead {
     margin-bottom: 2.5em;
+    margin-left: -1em;
   }
 }
 
@@ -32,11 +33,6 @@
   color: $gray-darker;
   margin-bottom: 1em;
   font-size: 1.5em;
-}
-
-.help-page-heading,
-.help-page-lede {
-  text-align: center;
 }
 
 .help-page-lede {

@@ -46,18 +46,6 @@ describe 'h:directives.simple-search', ->
     $element.find('form').triggerHandler('submit')
     sinon.assert.calledWith($scope.update, "Test query")
 
-  it 'calls the given clear function', ->
-    $element.find('.simple-search-clear').click()
-    assert($scope.clear.called)
-
-  it 'clears the search-bar', ->
-    isolate.query = ''
-    isolate.$digest()
-    isolate.searchtext = "Test query"
-    isolate.$digest()
-    $element.find('.simple-search-clear').click()
-    assert.equal(isolate.searchtext, '')
-
   it 'invokes callbacks when the input model changes', ->
     $scope.query = "Test query"
     $scope.$digest()

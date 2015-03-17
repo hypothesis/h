@@ -9,6 +9,12 @@ Util = Annotator.Util
 delete Annotator.prototype.events[".annotator-hl mouseover"]
 delete Annotator.prototype.events[".annotator-hl mouseout"]
 
+# Add createHighlight
+Annotator.prototype.createHighlight = ->
+  annotation = {$highlight: true}
+  this.publish('beforeAnnotationCreated', [annotation])
+  annotation
+
 # Override setupAnnotation
 Annotator.prototype.setupAnnotation = (annotation) ->
   # If this is a new annotation, we might have to add the targets
