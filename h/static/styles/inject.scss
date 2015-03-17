@@ -52,6 +52,12 @@ $base-font-size: 14px;
     text-align: center;
     background: $white !important;
     color: $gray-light !important;
+
+    &.h-icon-mode-comment, &.h-icon-border-color {
+      &:hover {
+        color: $gray-dark !important;
+      }
+    }
   }
 
   &:hover {
