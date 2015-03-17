@@ -42,18 +42,3 @@
     border-color: #f3f3f3 !important;
   }
 }
-
-.simple-search-clear {
-  position: absolute;
-  top: 0;
-  right: 0;
-  border: none;
-  background: none;
-  color: $gray;
-  line-height: inherit;
-  padding: 0;
-
-  &:focus, &:hover, &:active:not([disabled]) {
-    color: $text-color;
-  }
-}
