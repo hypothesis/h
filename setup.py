@@ -73,7 +73,7 @@ install_requires = [
 ]
 
 development_extras = ['pyramid_debugtoolbar>=2.1', 'prospector', 'pep257']
-testing_extras = ['mock', 'pytest>=2.5', 'pytest-cov']
+testing_extras = ['mock', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
 
 setup(
     name='h',
