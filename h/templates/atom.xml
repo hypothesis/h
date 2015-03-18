@@ -4,7 +4,8 @@ The feed dict should be a logical representation of an Atom feed as a Python
 dict, including a list of dicts for the feed's entries. This template will
 render the feed to Atom XML.
 
-#}<?xml version="1.0" encoding="utf-8"?>
+-#}
+<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>{{ feed.id }}</id>
   <title>{{ feed.title }}</title>
