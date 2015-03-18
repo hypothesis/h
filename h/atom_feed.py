@@ -100,7 +100,7 @@ def _feed_from_annotations(annotations, atom_url, html_url, title=None,
     """
     return {
         "id": atom_url,
-        "title": title or _("Hypothes.is Stream"),
+        "title": title or _("Hypothesis Stream"),
         "subtitle": subtitle or _("The Web. Annotated"),
         "updated": annotations[0]["updated"],
         "entries": [_feed_entry_from_annotation(a) for a in annotations],
