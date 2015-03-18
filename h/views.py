@@ -117,7 +117,7 @@ def stream(context, request):
 
 
 @view_config(layout='app', route_name='atom_stream')
-def atom_stream(context, request):
+def atom_stream(request):
     try:
         annotations = request.api_client.get(
             "/search", params={"limit": 10})["rows"]
