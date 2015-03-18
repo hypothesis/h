@@ -12,7 +12,7 @@ import pyramid.response
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
-import h.api_client.api_client as api_client
+import h.api_client
 import h.atom_feed
 
 log = logging.getLogger(__name__)
@@ -121,9 +121,9 @@ def atom_stream(context, request):
     try:
         annotations = request.api_client.get(
             "/search", params={"limit": 10})["rows"]
-    except api_client.ConnectionError as err:
+    except h.api_client.ConnectionError as err:
         raise httpexceptions.HTTPServiceUnavailable(err)
-    except api_client.Timeout as err:
+    except h.api_client.Timeout as err:
         raise httpexceptions.HTTPGatewayTimeout(err)
 
     return pyramid.response.Response(

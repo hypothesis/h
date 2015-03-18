@@ -3,7 +3,7 @@ import mock
 import pytest
 import requests.exceptions
 
-import h.api_client.api_client as api_client
+import h.api_client as api_client
 
 
 @mock.patch("requests.get")

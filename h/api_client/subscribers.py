@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pyramid.events
 
-import h.api_client.api_client as api_client
+import h.api_client
 
 
 def _get_api_url(request):
@@ -25,7 +25,7 @@ def _make_api_client(request):
     Configured with this app's configured API base URL.
 
     """
-    return api_client.Client(_get_api_url(request))
+    return h.api_client.Client(_get_api_url(request))
 
 
 @pyramid.events.subscriber(pyramid.events.NewRequest)
