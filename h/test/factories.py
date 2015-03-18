@@ -6,6 +6,7 @@ import factory
 
 
 class Annotation(factory.Factory):
+
     """A factory class that generates test annotation dicts.
 
     Usage:
@@ -48,6 +49,7 @@ class Annotation(factory.Factory):
 
 
     """
+
     class Meta:
         model = dict
         exclude = ["username", "random_number", "num_tags"]
@@ -56,8 +58,8 @@ class Annotation(factory.Factory):
     random_number = factory.LazyAttribute(lambda n: random.randint(1, 10))
     num_tags = None
 
-    id = factory.Sequence(lambda n: "test_id_{n}".format(n=n+1))
-    text = factory.Sequence(lambda n: "Test annotation {n}".format(n=n+1))
+    id = factory.Sequence(lambda n: "test_id_{n}".format(n=n + 1))
+    text = factory.Sequence(lambda n: "Test annotation {n}".format(n=n + 1))
     user = factory.LazyAttribute(
         lambda n: "acct:{username}@127.0.0.1".format(username=n.username))
     consumer = "nosuchid"
@@ -71,8 +73,8 @@ class Annotation(factory.Factory):
     @factory.LazyAttribute
     def tags(stub):
         num = (stub.num_tags if stub.num_tags is not None else
-                random.randint(1, 11))
-        return ["tag_{n}".format(n=n) for n in range(1, num+1)]
+               random.randint(1, 11))
+        return ["tag_{n}".format(n=n) for n in range(1, num + 1)]
 
     @factory.LazyAttribute
     def uri(stub):

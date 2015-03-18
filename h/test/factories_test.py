@@ -5,6 +5,7 @@ import h.test.factories as factories
 
 
 class TestAnnotation(object):
+
     """Unit tests for the Annotation factory class."""
 
     def test_id(self):
@@ -32,7 +33,7 @@ class TestAnnotation(object):
         assert "username" not in annotation
 
     def test_created_date(self):
-        """Test annotations should have a created date from the current time."""
+        """Annotations should have a created date from the current time."""
         before = datetime.datetime.now()
 
         annotation = factories.Annotation()
@@ -44,19 +45,19 @@ class TestAnnotation(object):
         assert before < created < after
 
     def test_updated_date(self):
-        """Test annotations should have an updated date from the current time."""
+        """Annotations should have an updated date from the current time."""
         before = datetime.datetime.now()
 
         annotation = factories.Annotation()
 
         after = datetime.datetime.now()
-        updated= datetime.datetime.strptime(
+        updated = datetime.datetime.strptime(
             annotation["updated"], "%Y-%m-%dT%H:%M:%S.%f")
 
         assert before < updated < after
 
     def test_tags(self):
-        """It should be possible to specify the number of tags with num_tags."""
+        """It should be possible to choose the number of tags with num_tags."""
         # If num_tags isn't passed the factory chooses a random number of tags.
         # Here we choose a num_tags higher than the upper range of this random
         # choice, so there's no chance of random false positive test passes.
@@ -74,7 +75,8 @@ class TestAnnotation(object):
         assert "random_number" not in annotation
 
     def test_source(self):
-        assert factories.Annotation(random_number=3)["target"][0]["source"] == (
+        annotation = factories.Annotation(random_number=3)
+        assert annotation["target"][0]["source"] == (
             "http://example.com/document_3")
 
     def test_permissions(self):
