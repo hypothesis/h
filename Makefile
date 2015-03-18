@@ -15,7 +15,6 @@ deps:
 	@pip install -q --use-wheel -e .[dev,testing,YAML]
 
 clean:
-	@rm -rf h/static/.webassets-cache
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 	find h/static/scripts -mindepth 1 -name '*.min.js' -delete

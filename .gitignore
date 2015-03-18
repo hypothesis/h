@@ -9,7 +9,6 @@ node_modules/
 
 *.db
 *.db-journal
-.webassets-cache
 
 # All minified javascript is built
 *.min.js
