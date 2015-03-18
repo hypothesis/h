@@ -25,6 +25,7 @@ class Timeout(APIError):
 
 
 class HypothesisAPIClient(object):
+
     """A client for the Hypothesis API.
 
     Provides simple methods for calling the API over HTTP.
@@ -33,6 +34,7 @@ class HypothesisAPIClient(object):
     app and from Pyramid.
 
     """
+
     def __init__(self, base_url):
         """Initialize a new API client.
 
