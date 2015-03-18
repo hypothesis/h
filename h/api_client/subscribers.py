@@ -20,12 +20,12 @@ def _get_api_url(request):
 
 
 def _make_api_client(request):
-    """Return a HypothesisAPIClient instance for this app.
+    """Return an api_client.Client instance for this app.
 
     Configured with this app's configured API base URL.
 
     """
-    return api_client.HypothesisAPIClient(_get_api_url(request))
+    return api_client.Client(_get_api_url(request))
 
 
 @pyramid.events.subscriber(pyramid.events.NewRequest)

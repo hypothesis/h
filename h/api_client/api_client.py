@@ -23,7 +23,7 @@ class Timeout(APIError):
     pass
 
 
-class HypothesisAPIClient(object):
+class Client(object):
 
     """A client for the Hypothesis API.
 
