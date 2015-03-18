@@ -1,3 +1,4 @@
+"""Functions for generating Atom feeds."""
 import re
 import urlparse
 import cgi
@@ -16,7 +17,7 @@ def _username_from_annotation(annotation):
 
     """
     match = re.match(r'^acct:([^@]+)@(.*)$', annotation["user"])
-    username, domain = match.groups()
+    username, _ = match.groups()
     return username
 
 
@@ -127,8 +128,8 @@ def augment_annotations(request, annotations):
     return annotations
 
 
-def render_feed(request, annotations, atom_url, html_url,
-                title=None, subtitle=None):
+def render_feed(
+        request, annotations, atom_url, html_url, title=None, subtitle=None):
     """Return an Atom feed of the given list of annotations.
 
     :param annotations: An augmented list of Hypothes API annotation dicts,
