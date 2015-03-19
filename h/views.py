@@ -120,21 +120,37 @@ def stream(context, request):
         return context
 
 
+def _atom_stream_validate_limit(request):
+    """Return the limit (max number of annotations) to use for the Atom stream.
+
+    Return the ?limit=n param from the URL.
+    If that's is missing or invalid return the h.stream.atom.limit setting
+    from the config file.
+    If that's also missing or invalid return 10.
+
+    """
+    def default():
+        return request.registry.settings.get("h.stream.atom.limit")
+
+    def validate(limit):
+        limit = int(limit)
+        if limit < 1:
+            raise ValueError
+        return limit
+
+    try:
+        return validate(request.params.get("limit"))
+    except (ValueError, TypeError):
+        try:
+            return validate(default())
+        except (ValueError, TypeError):
+            return 10
+
+
 @view_config(layout='app', route_name='atom_stream')
 def atom_stream(request):
 
-    def validate_limit(params):
-        default = 10
-        limit = params.get("limit", default)
-        try:
-            limit = int(limit)
-        except ValueError:
-            limit = default
-        if limit < 1:
-            limit = default
-        return limit
-
-    limit = validate_limit(request.params)
+    limit = _atom_stream_validate_limit(request)
 
     try:
         annotations = request.api_client.get(
