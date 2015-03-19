@@ -8,6 +8,12 @@ Supported grant types
 - A client credentials grant using the session and authenticating the client
   with cross-site request forgery tokens.
 
+- A JSON Web Token Bearer Grant using the JSON Web Token Profile for OAuth 2.0
+  Client Authentication and Authorization Grants [jwt-bearer]_.
+
+.. [jwt-bearer] https://tools.ietf.org/html/draft-ietf-oauth-jwt-bearer
+
+
 Supported token types
 ---------------------
 
@@ -38,6 +44,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.util import action_method
 
 from .interfaces import IClientFactory
+from .oauth import JWT_BEARER
 
 LEEWAY = 240  # allowance for clock skew in verification
 
@@ -45,6 +52,12 @@ LEEWAY = 240  # allowance for clock skew in verification
 class RequestValidator(_RequestValidator):
 
     """Validates JSON Web Tokens."""
+
+    def client_authentication_required(self, request):
+        if request.grant_type == JWT_BEARER:
+            return False
+
+        return True
 
     def authenticate_client(self, request):
         client = None
@@ -97,7 +110,6 @@ class RequestValidator(_RequestValidator):
 
         request.client = client
         request.user = sub
-        request.scopes = None
 
         return True
 
@@ -105,6 +117,9 @@ class RequestValidator(_RequestValidator):
         return True
 
     def get_default_scopes(self, client_id, request):
+        return None
+
+    def get_original_scopes(self, assertion, request):
         return None
 
     def validate_scopes(self, client_id, scopes, client, request):
@@ -215,9 +230,14 @@ def includeme(config):
     settings = registry.settings
 
     config.include('pyramid_oauthlib')
+    config.add_oauth_param('assertion')
 
     # Use session credentials as a client credentials authorization grant
     config.add_grant_type('oauthlib.oauth2.ClientCredentialsGrant',
+                          request_validator=validator)
+
+    # Use web tokens as an authorization grant
+    config.add_grant_type('h.oauth.JWTBearerGrant', JWT_BEARER,
                           request_validator=validator)
 
     # Use web tokens for resource authorization
