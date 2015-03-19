@@ -31,7 +31,6 @@ Limitations
 import datetime
 
 import jwt
-import jwt.api
 from jwt.compat import constant_time_compare
 from oauthlib.common import generate_client_id
 from oauthlib.oauth2 import RequestValidator as _RequestValidator
@@ -89,7 +88,7 @@ class RequestValidator(_RequestValidator):
             return False
 
         try:
-            payload, signing_input, header, signature = jwt.api.load(token)
+            payload = jwt.decode(token, verify=False)
         except jwt.InvalidTokenError:
             return False
 
@@ -102,9 +101,10 @@ class RequestValidator(_RequestValidator):
             return False
 
         try:
-            jwt.api.verify_signature(payload, signing_input, header, signature,
-                                     key=client.client_secret, audience=aud,
-                                     leeway=LEEWAY)
+            payload = jwt.decode(token, key=client.client_secret,
+                                 audience=aud, leeway=LEEWAY,
+                                 algorithms=['HS256'])
+
         except jwt.InvalidTokenError:
             return False
 
