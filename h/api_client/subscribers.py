@@ -19,7 +19,7 @@ def api_url(request):
         "h.api_url", request.resource_url(request.root, "api")).rstrip("/")
 
 
-def _make_api_client(request):
+def api_client(request):
     """Return an api_client.Client instance for this app.
 
     Configured with this app's configured API base URL.
@@ -42,9 +42,7 @@ def add_api_client(event):
     object itself.
 
     """
-    if not hasattr(event.request, "api_client"):
-        event.request.set_property(
-            _make_api_client, name="api_client", reify=True)
+    event.request.set_property(api_client, name="api_client", reify=True)
 
 
 def includeme(config):
