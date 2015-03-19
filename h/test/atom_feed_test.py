@@ -34,14 +34,15 @@ def test_entry_author_name():
 
 def test_entry_title():
     """Entries should have a title based on the annotated document's title."""
+    title = "My Test Document"
     annotation = factories.Annotation(
-        random_number=1, html_url="http://example.com/annotations/12345")
+        document_title=title, html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
         [annotation], atom_url="http://www.example.com/annotations.atom")
 
     entry = feed["entries"][0]
-    assert entry["title"] == "Example Document 1"
+    assert entry["title"] == title
 
 
 def test_entry_published_date():

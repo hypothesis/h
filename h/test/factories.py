@@ -52,12 +52,14 @@ class Annotation(factory.Factory):
 
     class Meta:
         model = dict
-        exclude = ["username", "random_number", "num_tags", "exact_text"]
+        exclude = ["username", "random_number", "num_tags", "exact_text",
+                   "document_title"]
 
     username = "seanh"
     random_number = factory.LazyAttribute(lambda n: random.randint(1, 10))
     num_tags = None
     exact_text = None
+    document_title = None
 
     id = factory.Sequence(lambda n: "test_id_{n}".format(n=n + 1))
     text = factory.Sequence(lambda n: "Test annotation {n}".format(n=n + 1))
@@ -118,7 +120,8 @@ class Annotation(factory.Factory):
     def document(stub):
         return {
             "eprints": {},
-            "title": "Example Document {n}".format(n=stub.random_number),
+            "title": (stub.document_title or
+                      "Example Document {n}".format(n=stub.random_number)),
             "twitter": {},
             "dc": {},
             "prism": {},
