@@ -36,6 +36,8 @@ class AnnotationUISync
         show()
         annotations = getAnnotationsByTags(tags)
         annotationUI.selectAnnotations(annotations)
+      clearSelection: (ctx) ->
+        $rootScope.$broadcast('clearSelection')
       focusAnnotations: (ctx, tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.focusAnnotations(annotations)

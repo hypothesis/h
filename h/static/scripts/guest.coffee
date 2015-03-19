@@ -248,6 +248,10 @@ module.exports = class Annotator.Guest extends Annotator
       method: "showAnnotations"
       params: (a.$$tag for a in annotations)
 
+  clearSelection: =>
+    @crossframe?.notify
+      method: "clearSelection"
+
   toggleAnnotationSelection: (annotations) =>
     @crossframe?.notify
       method: "toggleAnnotationSelection"
@@ -397,11 +401,14 @@ module.exports = class Annotator.Guest extends Annotator
     event.preventDefault()
     event.stopPropagation()
     @adder.hide()
-    switch event.target.dataset.action
+    this.clearSelection()
+    annotation = this.setupAnnotation(this.createAnnotation())
+    Annotator.Util.getGlobal().getSelection().removeAllRanges()
+    this.showEditor(annotation)
+
+  onSetTool: (name) ->
+    switch name
+      when 'comment'
+        this.setVisibleHighlights this.visibleHighlights
       when 'highlight'
         this.setVisibleHighlights true
-        annotation = this.setupAnnotation(this.createHighlight())
-      when 'comment'
-        annotation = this.setupAnnotation(this.createAnnotation())
-        this.showEditor(annotation)
-    Annotator.Util.getGlobal().getSelection().removeAllRanges()
