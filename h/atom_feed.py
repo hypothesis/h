@@ -99,7 +99,7 @@ def _feed_from_annotations(annotations, atom_url, html_url=None, title=None,
     to XML (including a list of dicts for the feed's entries).
 
     """
-    links = [{"rel": "self", "type": "application/atom", "href": atom_url}]
+    links = [{"rel": "self", "type": "application/atom+xml", "href": atom_url}]
     if html_url:
         links.append(
             {"rel": "alternate", "type": "text/html", "href": html_url})

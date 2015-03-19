@@ -229,7 +229,7 @@ def test_feed_self_link():
 
     assert feed["links"][0]["href"] == atom_url
     assert feed["links"][0]["rel"] == "self"
-    assert feed["links"][0]["type"] == "application/atom"
+    assert feed["links"][0]["type"] == "application/atom+xml"
 
 
 def test_feed_html_link():
