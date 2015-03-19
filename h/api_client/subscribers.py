@@ -4,7 +4,7 @@ import pyramid.events
 import h.api_client
 
 
-def _get_api_url(request):
+def api_url(request):
     """Return the configured base URL for this app's Hypothesis API instance.
 
     Returns the value of the h.api_url setting from the config file,
@@ -25,7 +25,13 @@ def _make_api_client(request):
     Configured with this app's configured API base URL.
 
     """
-    return h.api_client.Client(_get_api_url(request))
+    return h.api_client.Client(api_url(request))
+
+
+@pyramid.events.subscriber(pyramid.events.NewRequest)
+def add_api_url_method(event):
+    """Add a .api_url convenience property to the request."""
+    event.request.set_property(api_url)
 
 
 @pyramid.events.subscriber(pyramid.events.NewRequest)
