@@ -90,7 +90,7 @@ def _feed_entry_from_annotation(annotation):
     return entry
 
 
-def _feed_from_annotations(annotations, atom_url, html_url, title=None,
+def _feed_from_annotations(annotations, atom_url, html_url=None, title=None,
                            subtitle=None):
     """Return an Atom feed for the given list of annotations.
 
@@ -99,17 +99,20 @@ def _feed_from_annotations(annotations, atom_url, html_url, title=None,
     to XML (including a list of dicts for the feed's entries).
 
     """
-    return {
+    links = [{"rel": "self", "type": "application/atom", "href": atom_url}]
+    if html_url:
+        links.append(
+            {"rel": "alternate", "type": "text/html", "href": html_url})
+    feed = {
         "id": atom_url,
         "title": title or _("Hypothesis Stream"),
         "subtitle": subtitle or _("The Web. Annotated"),
         "updated": annotations[0]["updated"],
         "entries": [_feed_entry_from_annotation(a) for a in annotations],
-        "links": [
-            {"rel": "self", "type": "application/atom", "href": atom_url},
-            {"rel": "alternate", "type": "text/html", "href": html_url},
-        ]
+        "links": links
     }
+
+    return feed
 
 
 def augment_annotations(request, annotations):
