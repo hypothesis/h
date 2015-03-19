@@ -122,9 +122,23 @@ def stream(context, request):
 
 @view_config(layout='app', route_name='atom_stream')
 def atom_stream(request):
+
+    def validate_limit(params):
+        default = 10
+        limit = params.get("limit", default)
+        try:
+            limit = int(limit)
+        except ValueError:
+            limit = default
+        if limit < 1:
+            limit = default
+        return limit
+
+    limit = validate_limit(request.params)
+
     try:
         annotations = request.api_client.get(
-            "/search", params={"limit": 10})["rows"]
+            "/search", params={"limit": limit})["rows"]
     except h.api_client.ConnectionError as err:
         raise httpexceptions.HTTPServiceUnavailable(err)
     except h.api_client.Timeout as err:
