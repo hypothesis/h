@@ -151,9 +151,9 @@ AnnotationController = [
     ###
     this.save = ->
       unless model.user or model.deleted
-        return flash 'info', 'Please sign in to save your annotations.'
+        return flash.info('Please sign in to save your annotations.')
       unless validate(@annotation)
-        return flash 'info', 'Please add text or a tag before publishing.'
+        return flash.info('Please add text or a tag before publishing.')
 
       # Update stored tags with the new tags of this annotation
       tags = @annotation.tags.filter (tag) ->

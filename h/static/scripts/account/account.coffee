@@ -89,7 +89,7 @@ configure = [
           authCheck.reject 'no session'
           return null
         .catch (err) ->
-          flash 'error', 'Sign out failed!'
+          flash.error('Sign out failed!')
           throw err
     ]
 

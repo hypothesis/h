@@ -60,7 +60,8 @@ class SessionProvider
 
         # Fire flash messages.
         for q, msgs of data.flash
-          flash q, msgs
+          for m in msgs
+            flash[q](m)
 
         xsrf.token = model.csrf
 

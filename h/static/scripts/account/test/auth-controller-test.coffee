@@ -18,7 +18,7 @@ class MockSession
     $promise:
       finally: sandbox.stub()
 
-mockFlash = sandbox.spy()
+mockFlash = info: sandbox.spy()
 mockFormHelpers = applyValidationErrors: sandbox.spy()
 
 describe 'h:AuthController', ->
@@ -117,7 +117,7 @@ describe 'h:AuthController', ->
       $timeout.lastCall.args[0]()
       assert.called $scope.form.$setPristine, 'the form is pristine'
       assert.deepEqual $scope.model, {}, 'the model is erased'
-      assert.called mockFlash, 'a notification is flashed'
+      assert.called mockFlash.info, 'a flash notification is shown'
 
     it 'should not happen if the model is empty', ->
       $scope.model = undefined

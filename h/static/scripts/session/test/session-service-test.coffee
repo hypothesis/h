@@ -19,8 +19,8 @@ describe 'h.session', ->
   beforeEach module ($provide, sessionProvider) ->
     sandbox = sinon.sandbox.create()
 
-    fakeFlash = sandbox.spy()
     fakeDocument = {prop: -> '/session'}
+    fakeFlash = error: sandbox.spy()
     fakeXsrf = {token: 'faketoken'}
 
     $provide.value '$document', fakeDocument
@@ -56,11 +56,11 @@ describe 'h.session', ->
       it 'should invoke the flash service with any flash messages', ->
         response =
           flash:
-            error: 'fail'
+            error: ['fail']
         $httpBackend.expectPOST(url).respond(response)
         result = session.login({})
         $httpBackend.flush()
-        assert.calledWith fakeFlash, 'error', 'fail'
+        assert.calledWith fakeFlash.error, 'fail'
 
       it 'should assign errors and status reasons to the model', ->
         response =

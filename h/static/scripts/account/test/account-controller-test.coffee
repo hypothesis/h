@@ -26,7 +26,11 @@ describe 'h:AccountController', ->
   beforeEach module ($provide, $filterProvider) ->
     sandbox = sinon.sandbox.create()
     fakeSession = {}
-    fakeFlash = sandbox.spy()
+    fakeFlash =
+      success: sandbox.spy()
+      info: sandbox.spy()
+      warning: sandbox.spy()
+      error: sandbox.spy()
     fakeIdentity =
       logout: sandbox.spy()
     fakeFormHelpers =
@@ -120,9 +124,7 @@ describe 'h:AccountController', ->
       controller = createController()
       $scope.submit(fakeForm)
 
-      assert.calledWith(fakeFlash, 'success', [
-        'Your profile has been updated.'
-      ])
+      assert.calledWith(fakeFlash.success, 'Your profile has been updated.')
 
     it 'displays a flash message if a server error occurs', ->
       fakeForm = createFakeForm()
@@ -136,7 +138,7 @@ describe 'h:AccountController', ->
           flash:
             error: ['Something bad happened']
 
-      assert.calledWith(fakeFlash, 'error', ['Something bad happened'])
+      assert.calledWith(fakeFlash.error, 'Something bad happened')
 
     it 'displays a fallback flash message if none are present', ->
       fakeForm = createFakeForm()
@@ -148,7 +150,8 @@ describe 'h:AccountController', ->
         status: 500
         data: {}
 
-      assert.calledWith(fakeFlash, 'error', 'Sorry, we were unable to perform your request')
+      assert.calledWith(fakeFlash.error,
+        'Sorry, we were unable to perform your request')
 
   describe '.delete', ->
     createFakeForm = (overrides={}) ->
@@ -217,9 +220,9 @@ describe 'h:AccountController', ->
           flash:
             error: ['Something bad happened']
 
-      assert.calledWith(fakeFlash, 'error', ['Something bad happened'])
+      assert.calledWith(fakeFlash.error, 'Something bad happened')
 
-    it 'displays a fallback flash message if none are present', ->
+    it 'displays a fallback toast message if none are present', ->
       fakeForm = createFakeForm()
       controller = createController()
       $scope.delete(fakeForm)
@@ -229,4 +232,5 @@ describe 'h:AccountController', ->
         status: 500
         data: {}
 
-      assert.calledWith(fakeFlash, 'error', 'Sorry, we were unable to perform your request')
+      assert.calledWith(fakeFlash.error,
+        'Sorry, we were unable to perform your request')

@@ -10,7 +10,8 @@ class AccountController
     onSuccess = (form, response) ->
       # Fire flash messages.
       for type, msgs of response.flash
-        flash(type, msgs)
+        for m in msgs
+          flash[type](m)
 
       form.$setPristine()
       formModel = form.$name.slice(0, -4)
@@ -26,9 +27,11 @@ class AccountController
         formHelpers.applyValidationErrors(form, response.data.errors)
       else
         if response.data.flash
-          flash(type, msgs) for own type, msgs of response.data.flash
+          for own type, msgs of response.data.flash
+            for m in msgs
+              flash[type](m)
         else
-          flash('error', 'Sorry, we were unable to perform your request')
+          flash.error('Sorry, we were unable to perform your request')
 
       $scope.$broadcast 'formState', form.$name, ''  # Update status btn
 
