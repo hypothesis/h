@@ -16,6 +16,7 @@ describe 'h:controllers', ->
     fakeAuth = null
     fakeDrafts = null
     fakeIdentity = null
+    fakeHost = null
     fakeLocation = null
     fakeParams = null
     fakePermissions = null
@@ -53,6 +54,9 @@ describe 'h:controllers', ->
       fakeIdentity = {
         watch: sandbox.spy()
         request: sandbox.spy()
+      }
+
+      fakeHost = {
       }
 
       fakeLocation = {
@@ -94,6 +98,7 @@ describe 'h:controllers', ->
       $provide.value 'auth', fakeAuth
       $provide.value 'drafts', fakeDrafts
       $provide.value 'identity', fakeIdentity
+      $provide.value 'host', fakeHost
       $provide.value '$location', fakeLocation
       $provide.value '$routeParams', fakeParams
       $provide.value 'permissions', fakePermissions
