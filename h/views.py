@@ -47,6 +47,7 @@ def annotation(context, request):
     return {
         'meta_attrs': (
             {'property': 'og:title', 'content': title},
+            {'property': 'og:description', 'content': ''},
             {'property': 'og:image', 'content': '/assets/images/logo.png'},
             {'property': 'og:site_name', 'content': 'Hypothes.is'},
             {'property': 'og:url', 'content': request.url},

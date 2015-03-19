@@ -19,6 +19,7 @@ describe 'h.directives.annotation', ->
   fakePermissions = null
   fakePersonaFilter = null
   fakeStore = null
+  fakeTagHelpers = null
   fakeTimeHelpers = null
   fakeUrlEncodeFilter = null
   sandbox = null
@@ -48,6 +49,7 @@ describe 'h.directives.annotation', ->
       remove: sandbox.stub()
     }
     fakeFlash = sandbox.stub()
+
     fakeMomentFilter = sandbox.stub().returns('ages ago')
     fakePermissions = {
       isPublic: sandbox.stub().returns(true)
@@ -57,6 +59,10 @@ describe 'h.directives.annotation', ->
       private: sandbox.stub().returns({read: ['justme']})
     }
     fakePersonaFilter = sandbox.stub().returnsArg(0)
+    fakeTagsHelpers = {
+      filterTags: sandbox.stub().returns('a while ago')
+      refreshTags: sandbox.stub().returns(30)
+    }
     fakeTimeHelpers = {
       toFuzzyString: sandbox.stub().returns('a while ago')
       nextFuzzyUpdate: sandbox.stub().returns(30)
@@ -72,6 +78,7 @@ describe 'h.directives.annotation', ->
     $provide.value 'permissions', fakePermissions
     $provide.value 'personaFilter', fakePersonaFilter
     $provide.value 'store', fakeStore
+    $provide.value 'tagHelpers', fakeTagHelpers
     $provide.value 'timeHelpers', fakeTimeHelpers
     $provide.value 'urlencodeFilter', fakeUrlEncodeFilter
     return
@@ -99,7 +106,7 @@ describe 'h.directives.annotation', ->
 
   describe 'when the annotation is a highlight', ->
     beforeEach ->
-      fakeAnnotationUI.tool = 'highlight'
+      annotation.$highlight = true
       annotation.$create = sinon.stub().returns
         then: angular.noop
         catch: angular.noop

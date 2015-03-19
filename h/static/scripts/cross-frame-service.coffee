@@ -4,12 +4,12 @@ class CrossFrameService
 
   this.inject = [
     '$rootScope', '$document', '$window', 'store', 'annotationUI'
-    'Discovery', 'Bridge',
+    'Discovery', 'bridge',
     'AnnotationSync', 'AnnotationUISync'
   ]
   constructor: (
     $rootScope, $document, $window, store, annotationUI
-    Discovery, Bridge,
+    Discovery, bridge,
     AnnotationSync, AnnotationUISync
   ) ->
     @providers = []
@@ -19,15 +19,8 @@ class CrossFrameService
         server: true
       new Discovery($window, options)
 
-    # Set up the bridge plugin, which bridges the main annotation methods
-    # between the host page and the panel widget.
-    createBridge = ->
-      options =
-        scope: 'annotator:bridge'
-      new Bridge(options)
-
-    createAnnotationSync = (bridge) ->
-      whitelist = ['target', 'document', 'uri']
+    createAnnotationSync = ->
+      whitelist = ['$highlight', 'target', 'document', 'uri']
       options =
         formatter: (annotation) ->
           formatted = {}
@@ -48,7 +41,7 @@ class CrossFrameService
 
       new AnnotationSync(bridge, options)
 
-    createAnnotationUISync = (bridge, annotationSync) ->
+    createAnnotationUISync = (annotationSync) ->
       new AnnotationUISync($rootScope, $window, bridge, annotationSync, annotationUI)
 
     addProvider = (channel) =>
@@ -63,11 +56,10 @@ class CrossFrameService
 
     this.connect = ->
       discovery = createDiscovery()
-      bridge = createBridge()
 
       bridge.onConnect(addProvider)
-      annotationSync = createAnnotationSync(bridge)
-      annotationUISync = createAnnotationUISync(bridge, annotationSync)
+      annotationSync = createAnnotationSync()
+      annotationUISync = createAnnotationUISync(annotationSync)
 
       onDiscoveryCallback = (source, origin, token) ->
         bridge.createChannel(source, origin, token)

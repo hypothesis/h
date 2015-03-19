@@ -14,7 +14,7 @@
               class="dropdown-toggle"
               data-toggle="dropdown">{% raw %}{{ auth.user|persona }}{% endraw %}<!--
           --><span class="provider" ng-show="auth.user">/{% raw %}{{ auth.user|persona:'provider' }}{% endraw %}</span><!--
-          --><i class="h-icon-triangle"></i></span>
+          --><i class="h-icon-arrow-drop-down"></i></span>
         <ul class="dropdown-menu pull-right" role="menu">
           <li ng-show="auth.user"><a href="" ng-click="dialog.visible='true'">Account</a></li>
           <li><a href="mailto:support@hypothes.is">Feedback</a></li>
@@ -43,7 +43,7 @@
     <!-- Dialog -->
     <div class="content ng-cloak" ng-if="dialog.visible">
       <div id="dialog" class="sheet">
-        <i class="close h-icon-cancel"
+        <i class="close h-icon-close"
            role="button"
            title="Close"
            ng-click="dialog.visible = false"></i>

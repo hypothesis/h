@@ -29,12 +29,13 @@ validate = (value) ->
 # {@link annotationMapper AnnotationMapper service} for persistence.
 ###
 AnnotationController = [
-  '$scope', '$timeout', '$rootScope', '$document',
-  'auth', 'drafts', 'flash', 'permissions',
+  '$scope', '$timeout', '$q', '$rootScope', '$document',
+  'auth', 'drafts', 'flash', 'permissions', 'tagHelpers',
   'timeHelpers', 'annotationUI', 'annotationMapper'
-  ($scope,   $timeout,   $rootScope,   $document,
-   auth,   drafts,   flash,   permissions,
+  ($scope,   $timeout,   $q,   $rootScope,   $document,
+   auth,   drafts,   flash,   permissions,   tagHelpers,
    timeHelpers, annotationUI, annotationMapper) ->
+
     @annotation = {}
     @action = 'view'
     @document = null
@@ -45,10 +46,19 @@ AnnotationController = [
     @showDiff = undefined
     @timestamp = null
 
-    highlight = annotationUI.tool is 'highlight'
     model = $scope.annotationGet()
+    highlight = model.$highlight
     original = null
     vm = this
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#tagsAutoComplete.
+    # @returns {Promise} immediately resolved to {string[]} -
+    # the tags to show in autocomplete.
+    ###
+    this.tagsAutoComplete = (query) ->
+      $q.when(tagHelpers.filterTags(query))
 
     ###*
     # @ngdoc method
@@ -144,6 +154,11 @@ AnnotationController = [
         return flash 'info', 'Please sign in to save your annotations.'
       unless validate(@annotation)
         return flash 'info', 'Please add text or a tag before publishing.'
+
+      # Update stored tags with the new tags of this annotation
+      tags = @annotation.tags.filter (tag) ->
+        tag.text not in (model.tags or [])
+      tagHelpers.storeTags(tags)
 
       angular.extend model, @annotation,
         tags: (tag.text for tag in @annotation.tags)
@@ -265,13 +280,12 @@ AnnotationController = [
           $scope.$emit('annotationUpdate')
 
       # Save highlights once logged in.
-      if highlight and this.isHighlight()
+      if this.isHighlight() and highlight
         if model.user and not model.id
-          highlight = false  # skip this on future updates
           model.permissions = permissions.private()
           model.$create().then ->
             $rootScope.$emit('annotationCreated', model)
-          highlight = false  # skip this on future updates
+          highlight = false # Prevents double highlight creation.
         else
           drafts.add model, => this.revert()
 
@@ -280,7 +294,7 @@ AnnotationController = [
     , true
 
     # Start editing brand new annotations immediately
-    unless model.id? or (highlight and this.isHighlight()) then this.edit()
+    unless model.id? or (this.isHighlight() and highlight) then this.edit()
 
     this
 ]

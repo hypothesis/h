@@ -7,7 +7,7 @@ sinon.assert.expose assert, prefix: null
 
 describe 'Bridge', ->
   sandbox = sinon.sandbox.create()
-  createBridge = null
+  bridge = null
   createChannel = null
 
   before ->
@@ -15,9 +15,8 @@ describe 'Bridge', ->
     require('../bridge')
 
   beforeEach module('h')
-  beforeEach inject (Bridge) ->
-    createBridge = (options) ->
-      new Bridge(options)
+  beforeEach inject (_bridge_) ->
+    bridge = _bridge_
 
     createChannel = ->
       call: sandbox.stub()
@@ -34,21 +33,19 @@ describe 'Bridge', ->
   describe '.createChannel', ->
     it 'creates a new channel with the provided options', ->
       Channel.build.returns(createChannel())
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
 
       assert.called(Channel.build)
       assert.calledWith(Channel.build, {
         window: 'WINDOW'
         origin: 'ORIGIN'
-        scope: 'bridge:TOKEN'
+        scope: 'TOKEN'
         onReady: sinon.match.func
       })
 
     it 'adds the channel to the .links property', ->
       channel = createChannel()
       Channel.build.returns(channel)
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
 
       assert.include(bridge.links, {channel: channel, window: 'WINDOW'})
@@ -57,7 +54,6 @@ describe 'Bridge', ->
       channel = createChannel()
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       bridge.on('message1', sinon.spy())
       bridge.on('message2', sinon.spy())
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
@@ -70,7 +66,6 @@ describe 'Bridge', ->
       channel = createChannel()
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       ret = bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
 
       assert.equal(ret, channel)
@@ -80,7 +75,6 @@ describe 'Bridge', ->
       channel = createChannel()
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.call({method: 'method1', params: 'params1'})
 
@@ -93,7 +87,6 @@ describe 'Bridge', ->
       channel = createChannel()
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.call({method: 'method1', params: 'params1'})
 
@@ -108,7 +101,6 @@ describe 'Bridge', ->
 
       callback = sandbox.stub()
 
-      bridge = createBridge()
       Channel.build.returns(channel1)
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       Channel.build.returns(channel2)
@@ -127,7 +119,6 @@ describe 'Bridge', ->
       channel2.call.yieldsTo('success', 'result2')
 
       callback = sandbox.stub()
-      bridge = createBridge()
 
       Channel.build.returns(channel1)
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
@@ -144,7 +135,6 @@ describe 'Bridge', ->
       channel.call.yieldsTo('error', new Error(''), 'A reason for the error')
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.call({method: 'method1', params: 'params1', callback: sandbox.stub()})
 
@@ -155,7 +145,6 @@ describe 'Bridge', ->
       channel.call.yieldsTo('error', new Error(''), 'A reason for the error')
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.call({method: 'method1', params: 'params1', callback: sandbox.stub()})
       bridge.call({method: 'method1', params: 'params1', callback: sandbox.stub()})
@@ -168,7 +157,6 @@ describe 'Bridge', ->
       Channel.build.returns(channel)
 
       callback = sandbox.stub()
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.call({method: 'method1', params: 'params1', callback: callback})
 
@@ -180,7 +168,6 @@ describe 'Bridge', ->
       channel.call.yieldsTo('error', 'timeout_error', 'timeout')
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       ret = bridge.call({method: 'method1', params: 'params1'})
       assert.isFunction(ret.then)
 
@@ -190,7 +177,6 @@ describe 'Bridge', ->
       message = {method: 'message1', params: 'params'}
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.notify(message)
 
@@ -202,7 +188,6 @@ describe 'Bridge', ->
       channel = createChannel()
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.on('message1', sandbox.spy())
 
@@ -210,7 +195,6 @@ describe 'Bridge', ->
       assert.calledWith(channel.bind, 'message1', sinon.match.func)
 
     it 'only allows one message to be registered per method', ->
-      bridge = createBridge()
       bridge.on('message1', sandbox.spy())
       assert.throws ->
         bridge.on('message1', sandbox.spy())
@@ -220,7 +204,6 @@ describe 'Bridge', ->
       channel = createChannel()
       Channel.build.returns(channel)
 
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.off('message1', sandbox.spy())
 
@@ -229,7 +212,6 @@ describe 'Bridge', ->
       channel2 = createChannel()
       Channel.build.returns(channel1)
 
-      bridge = createBridge()
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.off('message1', sandbox.spy())
 
@@ -243,7 +225,6 @@ describe 'Bridge', ->
       Channel.build.yieldsTo('onReady', channel)
 
       callback = sandbox.stub()
-      bridge = createBridge()
       bridge.onConnect(callback)
 
       bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
@@ -258,7 +239,6 @@ describe 'Bridge', ->
 
       callback1 = sandbox.stub()
       callback2 = sandbox.stub()
-      bridge = createBridge()
       bridge.onConnect(callback1)
       bridge.onConnect(callback2)
 

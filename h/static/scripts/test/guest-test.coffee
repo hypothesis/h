@@ -39,10 +39,6 @@ describe 'Annotator.Guest', ->
     sandbox.restore()
 
   describe 'setting up the bridge', ->
-    it 'sets the scope for the cross frame bridge', ->
-      guest = createGuest()
-      options = Annotator.Plugin.CrossFrame.lastCall.args[1]
-      assert.equal(options.scope, 'annotator:bridge')
 
     it 'provides an event bus for the annotation sync module', ->
       guest = createGuest()
@@ -270,29 +266,6 @@ describe 'Annotator.Guest', ->
         ctx = {complete: sandbox.stub(), delayReturn: sandbox.stub()}
         emitGuestEvent('getDocumentInfo', ctx)
         assert.calledWith(ctx.delayReturn, true)
-
-    describe 'on "setTool" event', ->
-      it 'updates the .tool property', ->
-        guest = createGuest()
-        emitGuestEvent('setTool', 'ctx', 'highlighter')
-        assert.equal(guest.tool, 'highlighter')
-
-      it 'publishes the "setTool" event', ->
-        handler = sandbox.stub()
-        guest = createGuest()
-        guest.subscribe('setTool', handler)
-        emitGuestEvent('setTool', 'ctx', 'highlighter')
-        assert.called(handler)
-        assert.calledWith(handler, 'highlighter')
-
-    describe 'on "setVisibleHighlights" event', ->
-      it 'publishes the "setVisibleHighlights" event', ->
-        handler = sandbox.stub()
-        guest = createGuest()
-        guest.subscribe('setTool', handler)
-        emitGuestEvent('setTool', 'ctx', 'highlighter')
-        assert.called(handler)
-        assert.calledWith(handler, 'highlighter')
 
   describe 'onAdderMouseUp', ->
     it 'it prevents the default browser action when triggered', () ->

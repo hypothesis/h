@@ -206,9 +206,6 @@ class ViewerController
 
     loadAnnotations = ->
       query = {}
-      if annotationUI.tool is 'highlight'
-        return unless auth.user
-        query.user = auth.user
 
       for p in crossframe.providers
         for e in p.entities when e not in loaded
@@ -218,14 +215,7 @@ class ViewerController
 
       streamfilter.resetFilter().addClause('/uri', 'one_of', loaded)
 
-      if auth.user and annotationUI.tool is 'highlight'
-        streamfilter.addClause('/user', 'equals', auth.user)
-
       streamer.send({filter: streamfilter.getFilter()})
-
-    $scope.$watch (-> annotationUI.tool), (newVal, oldVal) ->
-      return if newVal is oldVal
-      $route.reload()
 
     $scope.$watchCollection (-> crossframe.providers), loadAnnotations
 
@@ -251,7 +241,7 @@ class ViewerController
         true
 
     $scope.hasFocus = (annotation) ->
-      annotation?.$$tag in ($scope.focusedAnnotations ? [])
+      !!($scope.focusedAnnotations ? {})[annotation?.$$tag]
 
 angular.module('h')
 .controller('AppController', AppController)

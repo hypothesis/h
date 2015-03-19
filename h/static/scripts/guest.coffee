@@ -17,7 +17,6 @@ module.exports = class Annotator.Guest extends Annotator
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-adder button mouseup":   "onAdderMouseup"
-    "setTool": "onSetTool"
     "setVisibleHighlights": "setVisibleHighlights"
 
   # Plugin configuration
@@ -33,11 +32,15 @@ module.exports = class Annotator.Guest extends Annotator
     FragmentSelector: {}
 
   # Internal state
-  tool: 'comment'
   visibleHighlights: false
 
   html: jQuery.extend {}, Annotator::html,
-    adder: '<div class="annotator-adder"><button class="h-icon-pen"></button></div>'
+    adder: '''
+      <div class="annotator-adder">
+        <button class="h-icon-insert-comment" data-action="comment"></button>
+        <button class="h-icon-border-color" data-action="highlight"></button>
+      </div>
+    '''
 
   constructor: (element, options, config = {}) ->
     options.noScan = true
@@ -60,7 +63,6 @@ module.exports = class Annotator.Guest extends Annotator
     delete @options.app
 
     cfOptions =
-      scope: 'annotator:bridge'
       on: (event, handler) =>
         this.subscribe(event, handler)
       emit: (event, args...) =>
@@ -188,20 +190,13 @@ module.exports = class Annotator.Guest extends Annotator
         .catch (e) ->
 
       trans.delayReturn(true)
-    crossframe.on 'setTool', (ctx, name) =>
-      @tool = name
-      this.publish 'setTool', name
     crossframe.on 'setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
 
   _setupWrapper: ->
     @wrapper = @element
     .on 'click', (event) =>
-      if @selectedTargets?.length
-        if @tool is 'highlight'
-          # Create the annotation
-          annotation = this.setupAnnotation(this.createAnnotation())
-      else
+      if !@selectedTargets?.length
         @triggerHideFrame()
     this
 
@@ -239,6 +234,11 @@ module.exports = class Annotator.Guest extends Annotator
     this.removeEvents()
 
   createAnnotation: ->
+    annotation = super
+    this.plugins.CrossFrame.sync([annotation])
+    annotation
+
+  createHighlight: ->
     annotation = super
     this.plugins.CrossFrame.sync([annotation])
     annotation
@@ -293,13 +293,6 @@ module.exports = class Annotator.Guest extends Annotator
     return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
 
   onSuccessfulSelection: (event, immediate) ->
-    if @tool is 'highlight'
-      # Do we really want to make this selection?
-      return false unless this.confirmSelection()
-      # Describe the selection with targets
-      @selectedTargets = (@_getTargetFromSelection(s) for s in event.segments)
-      return
-
     unless event?
       throw "Called onSuccessfulSelection without an event!"
     unless event.segments?
@@ -336,33 +329,25 @@ module.exports = class Annotator.Guest extends Annotator
       # Tell sidebar to show the viewer for these annotations
       this.showAnnotations annotations
 
-  # When hovering on a highlight in highlighting mode,
-  # tell the sidebar to hilite the relevant annotations
+  # When Mousing over a highlight, tell the sidebar to focus the relevant annotations
   onAnchorMouseover: (event) ->
-    if @visibleHighlights or @tool is 'highlight'
+    if @visibleHighlights
       event.stopPropagation()
       annotations = event.data.getAnnotations(event)
       this.focusAnnotations annotations
 
-  # When leaving a highlight (with the cursor) in highlighting mode,
-  # tell the sidebar to stop hiliting the relevant annotations
+  # Tell the sidebar to stop highlighting the relevant annotations
   onAnchorMouseout: (event) ->
-    if @visibleHighlights or @tool is 'highlight'
+    if @visibleHighlights
       event.stopPropagation()
       this.focusAnnotations []
 
-  # When clicking on a highlight in highlighting mode,
-  # tell the sidebar to bring up the viewer for the relevant annotations
+  # When clicking on a highlight, tell the sidebar to bring up the viewer for the relevant annotations
   onAnchorClick: (event) =>
-    if @visibleHighlights or @tool is 'highlight'
+    if @visibleHighlights
       event.stopPropagation()
       this.selectAnnotations (event.data.getAnnotations event),
         (event.metaKey or event.ctrlKey)
-
-  setTool: (name) ->
-    @crossframe?.notify
-      method: 'setTool'
-      params: name
 
   # Pass true to show the highlights in the frame or false to disable.
   setVisibleHighlights: (shouldShowHighlights) ->
@@ -382,8 +367,12 @@ module.exports = class Annotator.Guest extends Annotator
 
     @visibleHighlights = shouldShowHighlights
 
+  # Might not be needed anymore. Perhaps should just use on adderclick or perhaps new note?
   addComment: ->
-    this.showEditor(this.createAnnotation())
+    @adder.hide()
+    annotation = this.setupAnnotation(this.createAnnotation())
+    Annotator.Util.getGlobal().getSelection().removeAllRanges()
+    this.showEditor(annotation)
 
   # Open the sidebar
   triggerShowFrame: ->
@@ -408,13 +397,11 @@ module.exports = class Annotator.Guest extends Annotator
     event.preventDefault()
     event.stopPropagation()
     @adder.hide()
-    annotation = this.setupAnnotation(this.createAnnotation())
-    Annotator.Util.getGlobal().getSelection().removeAllRanges()
-    this.showEditor(annotation)
-
-  onSetTool: (name) ->
-    switch name
-      when 'comment'
-        this.setVisibleHighlights this.visibleHighlights
+    switch event.target.dataset.action
       when 'highlight'
         this.setVisibleHighlights true
+        annotation = this.setupAnnotation(this.createHighlight())
+      when 'comment'
+        annotation = this.setupAnnotation(this.createAnnotation())
+        this.showEditor(annotation)
+    Annotator.Util.getGlobal().getSelection().removeAllRanges()

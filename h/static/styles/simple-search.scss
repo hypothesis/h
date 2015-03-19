@@ -18,13 +18,10 @@
 
 @include icons {
   &.simple-search-icon {
-    float: left;
-    display: inline;
-    font-size: 1.1em;
-    line-height: 2;
-    margin-left: -100%;
-    position: relative;
-    right: 19 / 14 * 1em;
+    line-height: inherit;
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 }
 
@@ -36,39 +33,12 @@
   float: left;
   outline: none;
   color: $text-color;
+  line-height: inherit;
   width: 100%;
   border: none !important; // Override base input styles.
-  padding: .4615em 0 0;
+  padding: 0;
 
   .simple-search-inactive &:not(:focus) {
     border-color: #f3f3f3 !important;
-  }
-}
-
-.simple-search-clear {
-  @include icons {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-top: -.5em;
-    margin-left: -.5em;
-    font-size: 0.85em;
-  }
-
-  float: left;
-  position: relative;
-  top: 6 / 13 * 1em;
-  margin-right: -1.33em;
-  padding: 0;
-  outline: none;
-  border: none;
-  background: none;
-  color: $gray;
-  width: 1.33em;
-  height: 1.33em;
-  @include box-shadow(none);
-
-  &:focus, &:hover, &:active:not([disabled]) {
-    color: $text-color;
   }
 }

@@ -126,6 +126,7 @@ require('./auth-service')
 require('./cross-frame-service')
 require('./flash-service')
 require('./permissions-service')
+require('./local-storage-service')
 require('./store-service')
 require('./threading-service')
 

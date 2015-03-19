@@ -3,6 +3,7 @@
 
 @import "mixins/forms";
 @import "compass/css3/user-interface";
+@import "variables";
 
 tags-input {
   .host {
@@ -101,3 +102,49 @@ tags-input {
   }
 }
 
+tags-input .autocomplete {
+  margin-top: .3em;
+  position: absolute;
+  padding: .3em 0;
+  z-index: 999;
+  width: 100%;
+  background-color: white;
+  border: thin solid rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 0 .3em .6em rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 .3em .6em rgba(0, 0, 0, 0.2);
+  box-shadow: 0 .3em .6em rgba(0, 0, 0, 0.2);
+
+  .suggestion-list {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+
+  .suggestion-item {
+    padding: .3em .6em;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: $sans-font-family;
+    color: black;
+    background-color: white;
+
+     em {
+       font-family: $sans-font-family;
+       font-weight: bold;
+       font-style: normal;
+       color: black;
+       background-color: white;
+    }
+
+    &.selected {
+      color: white;
+      background-color: #0097cf;
+      em {
+        color: white;
+        background-color: #0097cf;
+      }
+    }
+  }
+}
