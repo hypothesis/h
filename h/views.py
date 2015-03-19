@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import logging
-import re
 
 from pyramid import httpexceptions
 from pyramid.events import ContextFound
@@ -102,7 +101,7 @@ def stream(context, request):
     query = None
 
     if stream_type == 'user':
-        parts = re.match(r'^acct:([^@]+)@(.*)$', stream_key)
+        parts = h.util.split_user(stream_key)
         if parts is not None and parts.groups()[1] == request.domain:
             query = {'q': 'user:{}'.format(parts.groups()[0])}
         else:

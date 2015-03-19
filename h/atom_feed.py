@@ -1,24 +1,13 @@
 """Functions for generating Atom feeds."""
-import re
 import urlparse
 import cgi
 import datetime
 
 import pyramid.i18n
 
+import h.util
+
 _ = pyramid.i18n.TranslationStringFactory(__package__)
-
-
-def _username_from_annotation(annotation):
-    """Return the username from the given annotation.
-
-    For example if the annotation contains
-    {"user": "acct:seanh@hypothes.is", ...} then return "seanh".
-
-    """
-    match = re.match(r'^acct:([^@]+)@(.*)$', annotation["user"])
-    username, _ = match.groups()
-    return username
 
 
 def _created_day_string_from_annotation(annotation):
@@ -59,9 +48,10 @@ def _feed_entry_from_annotation(annotation):
     :rtype: dict
 
     """
+    name = h.util.split_user(annotation["user"])[0]
     entry = {
         "id": _atom_id_for_annotation(annotation),
-        "author": {"name": _username_from_annotation(annotation)},
+        "author": {"name": name},
         "title": annotation["document"]["title"],
         "updated": annotation["updated"],
         "published": annotation["created"],
