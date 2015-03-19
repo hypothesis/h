@@ -107,10 +107,12 @@ def _feed_from_annotations(annotations, atom_url, html_url=None, title=None,
         "id": atom_url,
         "title": title or _("Hypothesis Stream"),
         "subtitle": subtitle or _("The Web. Annotated"),
-        "updated": annotations[0]["updated"],
         "entries": [_feed_entry_from_annotation(a) for a in annotations],
         "links": links
     }
+
+    if annotations:
+        feed["updated"] = annotations[0]["updated"]
 
     return feed
 
