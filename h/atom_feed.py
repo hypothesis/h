@@ -79,12 +79,13 @@ def _feed_entry_from_annotation(annotation):
             selection=cgi.escape(get_selection(annotation)),
             text=cgi.escape(annotation["text"])))
 
-    entry["links"] = [
-        {"rel": "alternate", "type": "text/html",
-         "href": annotation["html_url"]},
-        {"rel": "alternate", "type": "application/json",
-         "href": annotation["json_url"]},
-    ]
+    entry["links"] = []
+    if annotation.get("html_url"):
+        entry["links"].append({"rel": "alternate", "type": "text/html",
+                               "href": annotation["html_url"]})
+    if annotation.get("json_url"):
+        entry["links"].append({"rel": "alternate", "type": "application/json",
+                               "href": annotation["json_url"]})
 
     return entry
 
