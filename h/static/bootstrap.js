@@ -59,6 +59,15 @@ if (window.hasOwnProperty('hypothesisRole')) {
   }
 }
 
+// Simple IE autodetect function
+// See for example https://stackoverflow.com/questions/19999388/jquery-check-if-user-is-using-ie/21712356#21712356
+var ua = window.navigator.userAgent;
+if ((ua.indexOf("MSIE ") > 0) ||     // for IE <=10
+    (ua.indexOf('Trident/') > 0) ||  // for IE 11
+    (ua.indexOf('Edge/') > 0)) {     // for IE 12
+  options["DomTextMapper"] = {"skip": true}
+}
+
 if (window.hasOwnProperty('hypothesisConfig')) {
   if (typeof window.hypothesisConfig === 'function') {
     options = jQuery.extend(options, window.hypothesisConfig());

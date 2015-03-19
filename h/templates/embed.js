@@ -1,7 +1,7 @@
 (function () {
   // Injects the hypothesis dependencies. These can be either js or css, the
   // file extension is used to determine the loading method. This file is
-  // pre-processed in order to insert the wgxpath and inject scripts.
+  // pre-processed in order to insert the wgxpath, url and inject scripts.
   //
   // Custom injectors can be provided to load the scripts into a different
   // environment. Both script and stylesheet methods are provided with a url
@@ -44,6 +44,20 @@
 
     if (!window.document.evaluate) {
       resources = resources.concat(['{{ layout.xpath_polyfill_urls | map("string") | join("', '") | safe }}']);
+    }
+
+    // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/url/parser.js
+    var url, urlWorks;
+    try {
+      // have to actually try use it, because Safari defines a dud constructor
+      url = new URL('http://modernizr.com/');
+      urlWorks = url.href === 'http://modernizr.com/';
+    }
+    catch (err) {
+      urlWorks = false;
+    }
+    if (!urlWorks) {
+      resources = resources.concat(['{{ layout.url_polyfill_urls | map("string") | join("', '") | safe }}']);
     }
 
     if (typeof window.Annotator === 'undefined') {
