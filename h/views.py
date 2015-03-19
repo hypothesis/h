@@ -114,6 +114,9 @@ def stream(context, request):
         location = request.resource_url(context, 'stream', query=query)
         return httpexceptions.HTTPFound(location=location)
     else:
+        context["link_tags"] = [{
+            "rel": "alternate", "href": request.route_url("atom_stream"),
+            "type": "application/atom+xml"}]
         return context
 
 
