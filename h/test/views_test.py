@@ -41,9 +41,9 @@ class TestAtomStreamView(object):
         assert settings[views._ATOM_STREAM_LIMIT_SETTINGS_KEY] == 10
 
     def test_validate_default_atom_stream_limit_invalid(self):
-        """Should raise ConfigError given an invalid value in settings."""
+        """Should raise RuntimeError given an invalid value in settings."""
         for value in (None, "", -2, -23.7, "foo", True, False, [], {}):
-            with pytest.raises(views.ConfigError):
+            with pytest.raises(RuntimeError):
                 views._validate_default_atom_stream_limit(
                     {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: value})
 

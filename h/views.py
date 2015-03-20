@@ -149,10 +149,6 @@ def _validate_atom_stream_limit(limit):
     return limit
 
 
-class ConfigError(Exception):
-    pass
-
-
 _ATOM_STREAM_LIMIT_SETTINGS_KEY = "h.stream.atom.limit"
 
 
@@ -164,7 +160,7 @@ def _validate_default_atom_stream_limit(settings):
     Will add "h.stream.atom.limit": 10 into the settings if there's no
     "h.stream.atom.limit" in there.
 
-    :raises ConfigError: if the setting is invalid
+    :raises RuntimeError: if the setting is invalid
 
     """
     if _ATOM_STREAM_LIMIT_SETTINGS_KEY in settings:
@@ -175,7 +171,7 @@ def _validate_default_atom_stream_limit(settings):
         settings[_ATOM_STREAM_LIMIT_SETTINGS_KEY] = (
             _validate_atom_stream_limit(limit))
     except (ValueError, TypeError):
-        raise ConfigError(
+        raise RuntimeError(
             '{key} setting is invalid: "{limit}"'.format(
                 key=_ATOM_STREAM_LIMIT_SETTINGS_KEY, limit=limit))
 
