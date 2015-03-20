@@ -16,7 +16,7 @@ def _api_url(request):
 
     """
     return request.registry.settings.get(
-        "h.api_url", request.resource_url(request.root, "api")).rstrip("/")
+        "h.api_url", request.resource_url(request.root, "api"))
 
 
 def get_api_client(request):
@@ -29,4 +29,7 @@ def get_api_client(request):
 
 
 def includeme(config):
+    settings = config.registry.settings
+    if "h.api_url" in settings:
+        settings["h.api_url"] = settings["h.api_url"].rstrip("/")
     config.add_request_method(get_api_client, 'api_client', reify=True)
