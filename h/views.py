@@ -7,6 +7,7 @@ from pyramid.events import ContextFound
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 import pyramid.response
+import pyramid.i18n
 
 from . import session
 from .models import Annotation
@@ -15,6 +16,8 @@ import h.api_client
 import h.atom_feed
 
 log = logging.getLogger(__name__)
+
+_ = pyramid.i18n.TranslationStringFactory(__package__)
 
 
 @view_config(context=Exception, renderer='h:templates/5xx.html')
@@ -119,37 +122,82 @@ def stream(context, request):
         return context
 
 
-def _atom_stream_validate_limit(request):
-    """Return the limit (max number of annotations) to use for the Atom stream.
+def _validate_atom_stream_limit(limit):
+    """Validate the given limit and return it as an int.
 
-    Return the ?limit=n param from the URL.
-    If that's is missing or invalid return the h.stream.atom.limit setting
-    from the config file.
-    If that's also missing or invalid return 10.
+    The limit should be a number >= 1 as an int, float, string or unicode.
+
+    :param limit: the number to validate
+    :type limit: int, float, string or unicode
+
+    :returns: the validated number
+    :rtype: int
+
+    :raises ValueError: if ``limit`` is an invalid string that can't be
+        converted to an int
+
+    :raises ValueError: if ``limit`` is less than 1
+
+    :raises TypeError: if ``limit`` isn't a string or a number
 
     """
-    def default():
-        return request.registry.settings.get("h.stream.atom.limit")
+    if limit in (True, False):
+        raise TypeError
+    limit = int(limit)
+    if limit < 1:
+        raise ValueError
+    return limit
 
-    def validate(limit):
-        limit = int(limit)
-        if limit < 1:
-            raise ValueError
-        return limit
 
+class ConfigError(Exception):
+    pass
+
+
+_ATOM_STREAM_LIMIT_SETTINGS_KEY = "h.stream.atom.limit"
+
+
+def _validate_default_atom_stream_limit(settings):
+    """Validate the h.stream.atom.limit setting.
+
+    Will convert the setting from a string or number to an int.
+
+    Will add "h.stream.atom.limit": 10 into the settings if there's no
+    "h.stream.atom.limit" in there.
+
+    :raises ConfigError: if the setting is invalid
+
+    """
+    if _ATOM_STREAM_LIMIT_SETTINGS_KEY in settings:
+        limit = settings[_ATOM_STREAM_LIMIT_SETTINGS_KEY]
+    else:
+        limit = 10
     try:
-        return validate(request.params.get("limit"))
+        settings[_ATOM_STREAM_LIMIT_SETTINGS_KEY] = (
+            _validate_atom_stream_limit(limit))
     except (ValueError, TypeError):
-        try:
-            return validate(default())
-        except (ValueError, TypeError):
-            return 10
+        raise ConfigError(
+            '{key} setting is invalid: "{limit}"'.format(
+                key=_ATOM_STREAM_LIMIT_SETTINGS_KEY, limit=limit))
+
+
+def _atom_stream_limit(request):
+    """Return the Atom stream limit from the request params, or the default.
+
+    Raises ValueError or TypeError if the URL param is invalid.
+
+    """
+    return _validate_atom_stream_limit(
+        request.params.get(
+            "limit", request.registry.settings.get(
+                _ATOM_STREAM_LIMIT_SETTINGS_KEY)))
 
 
 @view_config(layout='app', route_name='atom_stream')
 def atom_stream(request):
-
-    limit = _atom_stream_validate_limit(request)
+    try:
+        limit = _atom_stream_limit(request)
+    except (ValueError, TypeError):
+        raise httpexceptions.HTTPBadRequest(_("Invalid limit param"))
 
     try:
         annotations = request.api_client.get(
@@ -190,5 +238,7 @@ def includeme(config):
     config.add_route('onboarding', '/welcome')
     config.add_route('stream', '/stream')
     config.add_route('atom_stream', '/stream.atom')
+
+    _validate_default_atom_stream_limit(config.registry.settings)
 
     config.scan(__name__)
