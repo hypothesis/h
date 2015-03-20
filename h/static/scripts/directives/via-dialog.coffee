@@ -11,23 +11,11 @@ viaLinkDialog = ['$timeout', '$document', ($timeout, $document) ->
         scope.$watch (-> scope.viaLinkVisible), (visble) ->
             if visble
                 $timeout (-> elem.find('#via').focus().select()), 0, false
-                
-    controller: ($scope, $element, $attrs, $document) ->
-    	$scope.viaLinkVisible = false
-    	$scope.viaPageLink = 'https://via.hypothes.is/h/' + $document[0].referrer
+        
+        scope.viaPageLink = 'https://via.hypothes.is/h/' + $document[0].referrer
+    controller: 'AppController'
     templateUrl: 'via_dialog.html'
 ]
 
-###*
-# @ngdoc directive
-# @name shareThisPage
-# @restrict A
-# @description Link to show the via dialog.
-###
-shareThisPage = ->
-    require: '?^viaLink'		
-    template: '<a href="" ng-click="viaLinkVisible = true">Share this page</a>'
-
 angular.module('h')
-.directive('shareThisPage', shareThisPage)
 .directive('viaLinkDialog', viaLinkDialog)
