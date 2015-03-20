@@ -49,7 +49,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           state = not @annotator.visibleHighlights
           @annotator.setVisibleHighlights state
     ,
-      "title": "New Comment"
+      "title": "New Note"
       "class": "h-icon-insert-comment"
       "on":
         "click": (event) =>
