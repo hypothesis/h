@@ -28,16 +28,6 @@ def get_api_client(request):
     return api_client.Client(_api_url(request))
 
 
-@events.subscriber(events.NewRequest)
-def add_api_client(event):
-    """Add an API client object to the request.
-
-    This avoids each view that needs it having to initialize an API client
-    object itself.
-
-    """
-    event.request.set_property(get_api_client, name="api_client", reify=True)
-
-
 def includeme(config):
+    config.add_request_method(get_api_client, 'api_client', reify=True)
     config.scan(__name__)
