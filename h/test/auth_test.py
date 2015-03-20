@@ -22,10 +22,8 @@ class TestRequestValidator(unittest.TestCase):
     def setUp(self):
         self.client_patcher = patch('h.auth.get_client')
         self.client = self.client_patcher.start()
-        self.load_patcher = patch('jwt.api.load')
-        self.load = self.load_patcher.start()
-        self.verify_patcher = patch('jwt.api.verify_signature')
-        self.verify = self.verify_patcher.start()
+        self.decode_patcher = patch('jwt.decode')
+        self.decode = self.decode_patcher.start()
         self.request = testing.DummyRequest(client=None, user=None)
         self.validator = auth.RequestValidator()
         self.request.registry.settings['h.client_id'] = KEY
@@ -33,8 +31,7 @@ class TestRequestValidator(unittest.TestCase):
 
     def tearDown(self):
         self.client_patcher.stop()
-        self.load_patcher.stop()
-        self.verify_patcher.stop()
+        self.decode_patcher.stop()
 
     def test_authenticate_client_ok(self):
         client = MockClient(self.request, KEY)
@@ -79,41 +76,37 @@ class TestRequestValidator(unittest.TestCase):
 
     def test_validate_bearer_token_client_invalid(self):
         self.client.return_value = None
-        self.load.return_value = (
-            {'iss': 'fake-client'},
-            'input', 'header', 'signature',
-        )
+        self.decode.return_value = {'iss': 'fake-client'}
         res = self.validator.validate_bearer_token('', None, self.request)
         assert res is False
         self.client.assert_called_once_with(self.request, 'fake-client')
 
     def test_validate_bearer_token_format_invalid(self):
-        self.load.side_effect = jwt.InvalidTokenError
+        self.decode.side_effect = jwt.InvalidTokenError
         res = self.validator.validate_bearer_token('', None, self.request)
         assert res is False
 
     def test_validate_bearer_token_signature_invalid(self):
         client = MockClient(self.request, KEY)
         self.client.return_value = client
-        self.load.return_value = (
-            {'iss': KEY},
-            'input', 'header', 'signature',
-        )
-        self.verify.side_effect = jwt.InvalidTokenError
+        self.decode.return_value = {'iss': KEY}
+        self.decode.side_effect = jwt.InvalidTokenError
         res = self.validator.validate_bearer_token('', [], self.request)
-        self.verify.assert_called_with(*self.load.return_value,
-                                       key=SECRET,
-                                       audience=self.request.host_url,
-                                       leeway=ANY)
+
+        expected = [
+            ('', {'verify': False}),
+            ('', {'key': SECRET, 'audience': self.request.host_url,
+                  'leeway': ANY, 'algorithms': ['HS256']})
+        ]
+
+        self.decode.call_args_list == expected
+
         assert res is False
 
     def test_validate_bearer_token_valid(self):
         client = MockClient(self.request, KEY)
         self.client.return_value = client
-        self.load.return_value = (
-            {'iss': KEY, 'sub': 'citizen'},
-            'input', 'header', 'signature',
-        )
+        self.decode.return_value = {'iss': KEY, 'sub': 'citizen'}
         res = self.validator.validate_bearer_token('', None, self.request)
         assert res is True
         assert self.request.client is client
