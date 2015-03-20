@@ -1,4 +1,6 @@
 """Unit tests for h/atom_feed.py."""
+import datetime
+
 import pyramid.testing
 
 import h.atom_feed as atom_feed
@@ -11,6 +13,7 @@ def test_entry_id():
     """Entry IDs should be tag URIs based on domain, day and annotation ID."""
     annotation = factories.Annotation(
         id="12345",
+        created=datetime.datetime(year=2015, month=3, day=19).isoformat(),
         html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
