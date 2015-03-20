@@ -189,7 +189,7 @@ def _stream_atom_limit(request):
                 _STREAM_ATOM_LIMIT_SETTINGS_KEY)))
 
 
-@view_config(layout='app', route_name='stream_atom')
+@view_config(renderer='annotations_atom', route_name='stream_atom')
 def stream_atom(request):
     try:
         limit = _stream_atom_limit(request)
@@ -204,14 +204,12 @@ def stream_atom(request):
     except api_client.Timeout as err:
         raise httpexceptions.HTTPGatewayTimeout(err)
 
-    return response.Response(
-        atom_feed.render(
-            request, annotations,
-            atom_url=request.route_url("stream_atom"),
-            html_url=request.route_url("stream"),
-            title=request.registry.settings.get("h.feed.title"),
-            subtitle=request.registry.settings.get("h.feed.subtitle")),
-        content_type=b"application/atom+xml")
+    return dict(
+        annotations=annotations,
+        atom_url=request.route_url("stream_atom"),
+        html_url=request.route_url("stream"),
+        title=request.registry.settings.get("h.feed.title"),
+        subtitle=request.registry.settings.get("h.feed.subtitle"))
 
 
 @forbidden_view_config(renderer='h:templates/notfound.html')
