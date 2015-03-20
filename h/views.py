@@ -14,6 +14,7 @@ from .models import Annotation
 from .resources import Application, Stream
 from . import api_client
 from . import atom_feed
+from . import util
 
 log = logging.getLogger(__name__)
 
@@ -104,7 +105,7 @@ def stream(context, request):
     query = None
 
     if stream_type == 'user':
-        parts = h.util.split_user(stream_key)
+        parts = util.split_user(stream_key)
         if parts is not None and parts.groups()[1] == request.domain:
             query = {'q': 'user:{}'.format(parts.groups()[0])}
         else:
