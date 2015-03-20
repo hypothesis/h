@@ -35,22 +35,22 @@ ENV PATH=/srv/h/bin:/src/h/bin:/src/h/node_modules/.bin:$PATH
 WORKDIR /src/h
 
 # Python dependencies
-ADD CHANGES.txt README.rst       ./
-ADD setup.* requirements.txt     ./
-ADD versioneer.py                ./
-ADD h/_version.py                ./h/
+ADD CHANGES.txt README.rst       /src/h/
+ADD setup.* requirements.txt     /src/h/
+ADD versioneer.py                /src/h/
+ADD h/_version.py                /src/h/h/
 RUN pip install -r requirements.txt
 
 # Node dependencies
-ADD package.json                 ./
+ADD package.json                 /src/h/
 RUN npm install --production
 
 # Install the h application
-ADD Makefile                     ./
-ADD gunicorn.conf.py             ./
-ADD bin                          ./bin
-ADD conf                         ./conf
-ADD h                            ./h
+ADD Makefile                     /src/h/
+ADD gunicorn.conf.py             /src/h/
+ADD bin                          /src/h/bin
+ADD conf                         /src/h/conf
+ADD h                            /src/h/h
 RUN pip install -r requirements.txt
 
 # Services (for runit)
