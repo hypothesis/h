@@ -30,4 +30,3 @@ def get_api_client(request):
 
 def includeme(config):
     config.add_request_method(get_api_client, 'api_client', reify=True)
-    config.scan(__name__)
