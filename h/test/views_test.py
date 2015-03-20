@@ -32,66 +32,66 @@ class TestAnnotationView(unittest.TestCase):
 
 class TestAtomStreamView(object):
 
-    def test_validate_default_atom_stream_limit_fallback(self):
+    def test_validate_default_stream_atom_limit_fallback(self):
         """It should return 10 if there's no value in the config file."""
         settings = {}
 
-        views._validate_default_atom_stream_limit(settings)
+        views._validate_default_stream_atom_limit(settings)
 
-        assert settings[views._ATOM_STREAM_LIMIT_SETTINGS_KEY] == 10
+        assert settings[views._STREAM_ATOM_LIMIT_SETTINGS_KEY] == 10
 
-    def test_validate_default_atom_stream_limit_invalid(self):
+    def test_validate_default_stream_atom_limit_invalid(self):
         """Should raise RuntimeError given an invalid value in settings."""
         for value in (None, "", -2, -23.7, "foo", True, False, [], {}):
             with pytest.raises(RuntimeError):
-                views._validate_default_atom_stream_limit(
-                    {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: value})
+                views._validate_default_stream_atom_limit(
+                    {views._STREAM_ATOM_LIMIT_SETTINGS_KEY: value})
 
-    def test_validate_default_atom_stream_limit_int(self):
-        settings = {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: 5}
+    def test_validate_default_stream_atom_limit_int(self):
+        settings = {views._STREAM_ATOM_LIMIT_SETTINGS_KEY: 5}
 
-        views._validate_default_atom_stream_limit(settings)
+        views._validate_default_stream_atom_limit(settings)
 
-        assert settings[views._ATOM_STREAM_LIMIT_SETTINGS_KEY] == 5
+        assert settings[views._STREAM_ATOM_LIMIT_SETTINGS_KEY] == 5
 
-    def test_validate_default_atom_stream_limit_float(self):
-        settings = {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: 5.2}
+    def test_validate_default_stream_atom_limit_float(self):
+        settings = {views._STREAM_ATOM_LIMIT_SETTINGS_KEY: 5.2}
 
-        views._validate_default_atom_stream_limit(settings)
+        views._validate_default_stream_atom_limit(settings)
 
-        assert settings[views._ATOM_STREAM_LIMIT_SETTINGS_KEY] == 5
+        assert settings[views._STREAM_ATOM_LIMIT_SETTINGS_KEY] == 5
 
-    def test_validate_default_atom_stream_limit_string(self):
-        settings = {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: "11"}
+    def test_validate_default_stream_atom_limit_string(self):
+        settings = {views._STREAM_ATOM_LIMIT_SETTINGS_KEY: "11"}
 
-        views._validate_default_atom_stream_limit(settings)
+        views._validate_default_stream_atom_limit(settings)
 
-        assert settings[views._ATOM_STREAM_LIMIT_SETTINGS_KEY] == 11
+        assert settings[views._STREAM_ATOM_LIMIT_SETTINGS_KEY] == 11
 
-    def test_atom_stream_limit_valid(self):
+    def test_stream_atom_limit_valid(self):
         request = mock.Mock()
-        request.registry.settings = {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: 10}
+        request.registry.settings = {views._STREAM_ATOM_LIMIT_SETTINGS_KEY: 10}
         request.params = {"limit": "7"}
-        assert views._atom_stream_limit(request) == 7
+        assert views._stream_atom_limit(request) == 7
 
-    def test_atom_stream_limit_default(self):
+    def test_stream_atom_limit_default(self):
         request = mock.Mock()
-        request.registry.settings = {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: 13}
+        request.registry.settings = {views._STREAM_ATOM_LIMIT_SETTINGS_KEY: 13}
         request.params = {}
-        assert views._atom_stream_limit(request) == 13
+        assert views._stream_atom_limit(request) == 13
 
-    def test_atom_stream_limit_TypeError(self):
+    def test_stream_atom_limit_TypeError(self):
         request = mock.Mock()
-        request.registry.settings = {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: 13}
+        request.registry.settings = {views._STREAM_ATOM_LIMIT_SETTINGS_KEY: 13}
         for value in (None, True, False, [], {}):
             request.params = {"limit": value}
             with pytest.raises(TypeError):
-                views._atom_stream_limit(request)
+                views._stream_atom_limit(request)
 
-    def test_atom_stream_limit_ValueError(self):
+    def test_stream_atom_limit_ValueError(self):
         request = mock.Mock()
-        request.registry.settings = {views._ATOM_STREAM_LIMIT_SETTINGS_KEY: 13}
+        request.registry.settings = {views._STREAM_ATOM_LIMIT_SETTINGS_KEY: 13}
         for value in ("", -2, -23.7, "foo"):
             request.params = {"limit": value}
             with pytest.raises(ValueError):
-                views._atom_stream_limit(request)
+                views._stream_atom_limit(request)

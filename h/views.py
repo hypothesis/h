@@ -118,12 +118,12 @@ def stream(context, request):
         return httpexceptions.HTTPFound(location=location)
     else:
         context["link_tags"] = [{
-            "rel": "alternate", "href": request.route_url("atom_stream"),
+            "rel": "alternate", "href": request.route_url("stream_atom"),
             "type": "application/atom+xml"}]
         return context
 
 
-def _validate_atom_stream_limit(limit):
+def _validate_stream_atom_limit(limit):
     """Validate the given limit and return it as an int.
 
     The limit should be a number >= 1 as an int, float, string or unicode.
@@ -150,10 +150,10 @@ def _validate_atom_stream_limit(limit):
     return limit
 
 
-_ATOM_STREAM_LIMIT_SETTINGS_KEY = "h.stream.atom.limit"
+_STREAM_ATOM_LIMIT_SETTINGS_KEY = "h.stream.atom.limit"
 
 
-def _validate_default_atom_stream_limit(settings):
+def _validate_default_stream_atom_limit(settings):
     """Validate the h.stream.atom.limit setting.
 
     Will convert the setting from a string or number to an int.
@@ -164,35 +164,35 @@ def _validate_default_atom_stream_limit(settings):
     :raises RuntimeError: if the setting is invalid
 
     """
-    if _ATOM_STREAM_LIMIT_SETTINGS_KEY in settings:
-        limit = settings[_ATOM_STREAM_LIMIT_SETTINGS_KEY]
+    if _STREAM_ATOM_LIMIT_SETTINGS_KEY in settings:
+        limit = settings[_STREAM_ATOM_LIMIT_SETTINGS_KEY]
     else:
         limit = 10
     try:
-        settings[_ATOM_STREAM_LIMIT_SETTINGS_KEY] = (
-            _validate_atom_stream_limit(limit))
+        settings[_STREAM_ATOM_LIMIT_SETTINGS_KEY] = (
+            _validate_stream_atom_limit(limit))
     except (ValueError, TypeError):
         raise RuntimeError(
             '{key} setting is invalid: "{limit}"'.format(
-                key=_ATOM_STREAM_LIMIT_SETTINGS_KEY, limit=limit))
+                key=_STREAM_ATOM_LIMIT_SETTINGS_KEY, limit=limit))
 
 
-def _atom_stream_limit(request):
+def _stream_atom_limit(request):
     """Return the Atom stream limit from the request params, or the default.
 
     Raises ValueError or TypeError if the URL param is invalid.
 
     """
-    return _validate_atom_stream_limit(
+    return _validate_stream_atom_limit(
         request.params.get(
             "limit", request.registry.settings.get(
-                _ATOM_STREAM_LIMIT_SETTINGS_KEY)))
+                _STREAM_ATOM_LIMIT_SETTINGS_KEY)))
 
 
-@view_config(layout='app', route_name='atom_stream')
-def atom_stream(request):
+@view_config(layout='app', route_name='stream_atom')
+def stream_atom(request):
     try:
-        limit = _atom_stream_limit(request)
+        limit = _stream_atom_limit(request)
     except (ValueError, TypeError):
         raise httpexceptions.HTTPBadRequest(_("Invalid limit param"))
 
@@ -207,7 +207,7 @@ def atom_stream(request):
     return response.Response(
         atom_feed.render(
             request, annotations,
-            atom_url=request.route_url("atom_stream"),
+            atom_url=request.route_url("stream_atom"),
             html_url=request.route_url("stream"),
             title=request.registry.settings.get("h.feed.title"),
             subtitle=request.registry.settings.get("h.feed.subtitle")),
@@ -233,8 +233,8 @@ def includeme(config):
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome')
     config.add_route('stream', '/stream')
-    config.add_route('atom_stream', '/stream.atom')
+    config.add_route('stream_atom', '/stream.atom')
 
-    _validate_default_atom_stream_limit(config.registry.settings)
+    _validate_default_stream_atom_limit(config.registry.settings)
 
     config.scan(__name__)
