@@ -1,23 +1,33 @@
 """Unit tests for h/atom_feed.py."""
 import datetime
 
-from pyramid import testing
+import mock
 
-from h import app
 from h import atom_feed
-from h import resources
 from . import factories
+
+
+def _mock_annotation_url_function():
+    annotation_url = mock.Mock()
+    annotation_url.return_value = "http://example.com/annotations/12345"
+    return annotation_url
+
+
+def _mock_annotation_api_url_function():
+    annotation_url = mock.Mock()
+    annotation_url.return_value = "http://example.com/annotations/12345.json"
+    return annotation_url
 
 
 def test_entry_id():
     """Entry IDs should be tag URIs based on domain, day and annotation ID."""
     annotation = factories.Annotation(
         id="12345",
-        created=datetime.datetime(year=2015, month=3, day=19).isoformat(),
-        html_url="http://example.com/annotations/12345")
+        created=datetime.datetime(year=2015, month=3, day=19).isoformat())
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     assert entry["id"] == "tag:example.com,2015-03-19:12345"
@@ -29,7 +39,8 @@ def test_entry_author_name():
         username="jon", html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     assert entry["author"]["name"] == "jon"
@@ -42,7 +53,8 @@ def test_entry_title():
         document_title=title, html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     assert entry["title"] == title
@@ -55,7 +67,8 @@ def test_entry_published_date():
         html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     assert entry["published"] == datestring
@@ -68,7 +81,8 @@ def test_entry_updated_date():
         html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     assert entry["updated"] == datestring
@@ -82,7 +96,8 @@ def test_entry_content_includes_selected_text():
         html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     assert (
@@ -97,7 +112,8 @@ def test_entry_content_includes_annotation_text():
         text=text, html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     assert text in entry["content"]
@@ -112,7 +128,8 @@ def test_entry_content_is_escaped():
         html_url="http://example.com/annotations/12345")
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     for s in ["<code>", "</code>", "<b>", "</b>", "&#374;", "&#355;"]:
@@ -125,7 +142,8 @@ def test_html_link():
     annotation = factories.Annotation(html_url=html_url)
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     entry = feed["entries"][0]
     matching_links = [l for l in entry["links"]
@@ -138,16 +156,17 @@ def test_html_link():
 
 def test_json_link():
     """Entries should have links to their JSON representation."""
-    html_url = "http://example.com/annotations/12345"
-    json_url = "http://example.com/annotations/12345.json"
-    annotation = factories.Annotation(html_url=html_url, json_url=json_url)
+    annotation = factories.Annotation()
 
     feed = atom_feed._feed_from_annotations(
-        [annotation], atom_url="http://www.example.com/annotations.atom")
+        [annotation], atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function(),
+        annotation_api_url=_mock_annotation_api_url_function())
 
     entry = feed["entries"][0]
-    matching_links = [l for l in entry["links"]
-                      if l["href"] == json_url]
+    matching_links = [
+        l for l in entry["links"]
+        if l["href"] == "http://example.com/annotations/12345.json"]
     assert len(matching_links) == 1
     matching_link = matching_links[0]
     assert matching_link["rel"] == "alternate"
@@ -162,7 +181,8 @@ def test_feed_entries():
         for n in range(1, 4)]
 
     feed = atom_feed._feed_from_annotations(
-        annotations, atom_url="http://www.example.com/annotations.atom")
+        annotations, atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     assert [entry["title"] for entry in feed["entries"]] == [
         "Example Document 1", "Example Document 2", "Example Document 3"]
@@ -175,7 +195,8 @@ def test_feed_id():
     feed = atom_feed._feed_from_annotations(
         annotations=factories.Annotation.create_batch(
             3, html_url="http://example.com/annotations/12345"),
-        atom_url=atom_url)
+        atom_url=atom_url,
+        annotation_url=_mock_annotation_url_function())
 
     assert feed["id"] == atom_url
 
@@ -186,7 +207,8 @@ def test_feed_title():
         annotations=factories.Annotation.create_batch(
             3, html_url="http://example.com/annotations/12345"),
         atom_url="http://www.example.com/annotations.atom",
-        title="My Custom Feed Title")
+        title="My Custom Feed Title",
+        annotation_url=_mock_annotation_url_function())
 
     assert feed["title"] == "My Custom Feed Title"
 
@@ -196,7 +218,8 @@ def test_default_feed_title():
     feed = atom_feed._feed_from_annotations(
         annotations=factories.Annotation.create_batch(
             3, html_url="http://example.com/annotations/12345"),
-        atom_url="http://www.example.com/annotations.atom")
+        atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     assert feed["title"] == "Hypothesis Stream"
 
@@ -207,7 +230,8 @@ def test_feed_subtitle():
         annotations=factories.Annotation.create_batch(
             3, html_url="http://example.com/annotations/12345"),
         atom_url="http://www.example.com/annotations.atom",
-        subtitle="My Custom Feed Subtitle")
+        subtitle="My Custom Feed Subtitle",
+        annotation_url=_mock_annotation_url_function())
 
     assert feed["subtitle"] == "My Custom Feed Subtitle"
 
@@ -217,7 +241,8 @@ def test_default_feed_subtitle():
     feed = atom_feed._feed_from_annotations(
         annotations=factories.Annotation.create_batch(
             3, html_url="http://example.com/annotations/12345"),
-        atom_url="http://www.example.com/annotations.atom")
+        atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     assert feed["subtitle"] == "The Web. Annotated"
 
@@ -228,7 +253,8 @@ def test_feed_self_link():
     feed = atom_feed._feed_from_annotations(
         annotations=factories.Annotation.create_batch(
             3, html_url="http://example.com/annotations/12345"),
-        atom_url=atom_url)
+        atom_url=atom_url,
+        annotation_url=_mock_annotation_url_function())
 
     assert feed["links"][0]["href"] == atom_url
     assert feed["links"][0]["rel"] == "self"
@@ -242,7 +268,8 @@ def test_feed_html_link():
         annotations=factories.Annotation.create_batch(
             3, html_url="http://example.com/annotations/12345"),
         atom_url="http://www.example.com/annotations.atom",
-        html_url=html_url)
+        html_url=html_url,
+        annotation_url=_mock_annotation_url_function())
 
     assert feed["links"][1]["href"] == html_url
     assert feed["links"][1]["rel"] == "alternate"
@@ -252,38 +279,7 @@ def test_feed_html_link():
 def test_render_feed_with_no_annotations():
     feed = atom_feed._feed_from_annotations(
         annotations=[],
-        atom_url="http://www.example.com/annotations.atom")
+        atom_url="http://www.example.com/annotations.atom",
+        annotation_url=_mock_annotation_url_function())
 
     assert feed["entries"] == []
-
-
-class TestAugmentAnnotations(object):
-
-    def setup(self):
-        self.request = testing.DummyRequest()
-        self.request.root = resources.create_root(self.request)
-
-    def teardown(self):
-        testing.tearDown()
-
-    def test_that_augment_annotations_adds_the_html_url(self):
-        annotations = factories.Annotation.create_batch(3)
-
-        augmented_annotations = atom_feed.augment_annotations(
-            self.request, annotations)
-
-        for annotation in augmented_annotations:
-            assert annotation["html_url"] == (
-                "http://example.com/a/{id_}".format(
-                    id_=annotation["id"]))
-
-    def test_that_augment_annotations_adds_the_json_url(self):
-        annotations = factories.Annotation.create_batch(3)
-
-        augmented_annotations = atom_feed.augment_annotations(
-            self.request, annotations)
-
-        for annotation in augmented_annotations:
-            assert annotation["json_url"] == (
-                "http://example.com/api/annotation/{id_}".format(
-                    id_=annotation["id"]))

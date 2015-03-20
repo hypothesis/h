@@ -22,24 +22,40 @@ def _created_day_string_from_annotation(annotation):
         annotation["created"][:10], "%Y-%m-%d").strftime("%Y-%m-%d")
 
 
-def _atom_id_for_annotation(annotation):
+def _atom_id_for_annotation(annotation, annotation_url):
     """Return an Atom entry ID for the given annotation.
 
-    Returns a tag URI (RFC 4151) for use as the ID for the Atom entry.
+    :param annotation: An annotation from the API
+    :type annotation: dict
+
+    :param annotation_url: A function that returns the HTML permalink for an
+        annotation
+    :type annotation_url: callable
+
+    :returns: A tag URI (RFC 4151) for use as the ID for the Atom entry.
+    :rtype: string
 
     """
     return "tag:{domain},{day}:{id_}".format(
-        domain=urlparse.urlparse(annotation["html_url"]).netloc,
+        domain=urlparse.urlparse(annotation_url(annotation)).netloc,
         day=_created_day_string_from_annotation(annotation),
         id_=annotation["id"])
 
 
-def _feed_entry_from_annotation(annotation):
+def _feed_entry_from_annotation(
+        annotation, annotation_url, annotation_api_url=None):
     """Return an Atom feed entry for the given annotation.
 
-    :param annotation: An augmented Hypothesis API annotation,
-        as returned by augment_annotations().
+    :param annotation: An annotation from the API
     :type annotation: dict
+
+    :param annotation_url: A function that returns the HTML permalink for an
+        annotation
+    :type annotation_url: callable
+
+    :param annotation_api_url: A function that returns the JSON API link for an
+        annotation
+    :type annotation_api_url: callable
 
     :returns: A logical representation of the Atom feed entry as a dict,
         containing all of the data that a template would need to render the
@@ -49,7 +65,7 @@ def _feed_entry_from_annotation(annotation):
     """
     name = util.split_user(annotation["user"])[0]
     entry = {
-        "id": _atom_id_for_annotation(annotation),
+        "id": _atom_id_for_annotation(annotation, annotation_url),
         "author": {"name": name},
         "title": annotation["document"]["title"],
         "updated": annotation["updated"],
@@ -69,18 +85,20 @@ def _feed_entry_from_annotation(annotation):
             text=cgi.escape(annotation["text"])))
 
     entry["links"] = []
-    if annotation.get("html_url"):
-        entry["links"].append({"rel": "alternate", "type": "text/html",
-                               "href": annotation["html_url"]})
-    if annotation.get("json_url"):
+
+    entry["links"].append({"rel": "alternate", "type": "text/html",
+                           "href": annotation_url(annotation)})
+
+    if annotation_api_url:
         entry["links"].append({"rel": "alternate", "type": "application/json",
-                               "href": annotation["json_url"]})
+                               "href": annotation_api_url(annotation)})
 
     return entry
 
 
-def _feed_from_annotations(annotations, atom_url, html_url=None, title=None,
-                           subtitle=None):
+def _feed_from_annotations(
+        annotations, atom_url, annotation_url, annotation_api_url=None,
+        html_url=None, title=None, subtitle=None):
     """Return an Atom feed for the given list of annotations.
 
     This returns a logical representation of an Atom feed as a Python dict
@@ -89,14 +107,20 @@ def _feed_from_annotations(annotations, atom_url, html_url=None, title=None,
 
     """
     links = [{"rel": "self", "type": "application/atom+xml", "href": atom_url}]
+
     if html_url:
         links.append(
             {"rel": "alternate", "type": "text/html", "href": html_url})
+
+    entries = [
+        _feed_entry_from_annotation(a, annotation_url, annotation_api_url)
+        for a in annotations]
+
     feed = {
         "id": atom_url,
         "title": title or _("Hypothesis Stream"),
         "subtitle": subtitle or _("The Web. Annotated"),
-        "entries": [_feed_entry_from_annotation(a) for a in annotations],
+        "entries": entries,
         "links": links
     }
 
@@ -106,29 +130,12 @@ def _feed_from_annotations(annotations, atom_url, html_url=None, title=None,
     return feed
 
 
-def augment_annotations(request, annotations):
-    """Augment a list of annotations with additional data from the request.
-
-    Adds additional values which are needed to generate an Atom feed to the
-    given list of annotations. These are values that we need the Pyramid
-    request object to compute, we compute them here in a seperate function so
-    that other functions in this module can be independent from Pyramid.
-
-    """
-    for annotation in annotations:
-        annotation["html_url"] = request.resource_url(
-            request.root, "a", annotation["id"])
-        annotation["json_url"] = request.resource_url(
-            request.root, "api", "annotation", annotation["id"])
-    return annotations
-
-
 def render_feed(
         request, annotations, atom_url, html_url, title=None, subtitle=None):
     """Return an Atom feed of the given list of annotations.
 
-    :param annotations: An augmented list of Hypothes API annotation dicts,
-        as returned by augment_annotations().
+    :param annotations: A list of annotations from the API
+    :type annotations: list of dicts
 
     :param atom_url: The URL where this Atom feed will be hosted
         (the feed will contain a link to this URL)
@@ -148,8 +155,19 @@ def render_feed(
     :rtype: unicode
 
     """
+    def annotation_url(annotation):
+        """Return the HTML permalink URL for the given annotation."""
+        return request.resource_url(request.root, "a", annotation["id"])
+
+    def annotation_api_url(annotation):
+        """Return the JSON API URL for the given annotation."""
+        return request.resource_url(request.root, "api", "annotation",
+                                    annotation["id"])
+
+    feed = _feed_from_annotations(
+        annotations=annotations, atom_url=atom_url,
+        annotation_url=annotation_url, annotation_api_url=annotation_api_url,
+        html_url=html_url, title=title, subtitle=subtitle)
+
     return renderers.render(
-        'h:templates/atom.xml',
-        {"feed": _feed_from_annotations(
-            annotations, atom_url, html_url, title, subtitle)},
-        request=request)
+        'h:templates/atom.xml', {"feed": feed}, request=request)

@@ -206,8 +206,7 @@ def atom_stream(request):
 
     return response.Response(
         atom_feed.render_feed(
-            request,
-            atom_feed.augment_annotations(request, annotations),
+            request, annotations,
             atom_url=request.route_url("atom_stream"),
             html_url=request.route_url("stream"),
             title=request.registry.settings.get("h.feed.title"),
