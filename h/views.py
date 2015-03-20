@@ -6,18 +6,18 @@ from pyramid import httpexceptions
 from pyramid.events import ContextFound
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
-import pyramid.response
-import pyramid.i18n
+from pyramid import response
+from pyramid import i18n
 
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
-import h.api_client
-import h.atom_feed
+from . import api_client
+from . import atom_feed
 
 log = logging.getLogger(__name__)
 
-_ = pyramid.i18n.TranslationStringFactory(__package__)
+_ = i18n.TranslationStringFactory(__package__)
 
 
 @view_config(context=Exception, renderer='h:templates/5xx.html')
@@ -202,15 +202,15 @@ def atom_stream(request):
     try:
         annotations = request.api_client.get(
             "/search", params={"limit": limit})["rows"]
-    except h.api_client.ConnectionError as err:
+    except api_client.ConnectionError as err:
         raise httpexceptions.HTTPServiceUnavailable(err)
-    except h.api_client.Timeout as err:
+    except api_client.Timeout as err:
         raise httpexceptions.HTTPGatewayTimeout(err)
 
-    return pyramid.response.Response(
-        h.atom_feed.render_feed(
+    return response.Response(
+        atom_feed.render_feed(
             request,
-            h.atom_feed.augment_annotations(request, annotations),
+            atom_feed.augment_annotations(request, annotations),
             atom_url=request.route_url("atom_stream"),
             html_url=request.route_url("stream"),
             title=request.registry.settings.get("h.feed.title"),

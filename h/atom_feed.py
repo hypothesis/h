@@ -3,11 +3,12 @@ import urlparse
 import cgi
 import datetime
 
-import pyramid.i18n
+from pyramid import i18n
+from pyramid import renderers
 
-import h.util
+from . import util
 
-_ = pyramid.i18n.TranslationStringFactory(__package__)
+_ = i18n.TranslationStringFactory(__package__)
 
 
 def _created_day_string_from_annotation(annotation):
@@ -46,7 +47,7 @@ def _feed_entry_from_annotation(annotation):
     :rtype: dict
 
     """
-    name = h.util.split_user(annotation["user"])[0]
+    name = util.split_user(annotation["user"])[0]
     entry = {
         "id": _atom_id_for_annotation(annotation),
         "author": {"name": name},
@@ -147,7 +148,7 @@ def render_feed(
     :rtype: unicode
 
     """
-    return pyramid.renderers.render(
+    return renderers.render(
         'h:templates/atom.xml',
         {"feed": _feed_from_annotations(
             annotations, atom_url, html_url, title, subtitle)},

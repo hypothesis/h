@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import pyramid.events
+from pyramid import events
 
-import h.api_client
+from . import api_client
 
 
 def _api_url(request):
@@ -19,16 +19,16 @@ def _api_url(request):
         "h.api_url", request.resource_url(request.root, "api")).rstrip("/")
 
 
-def api_client(request):
+def get_api_client(request):
     """Return an api_client.Client instance for this app.
 
     Configured with this app's configured API base URL.
 
     """
-    return h.api_client.Client(_api_url(request))
+    return api_client.Client(_api_url(request))
 
 
-@pyramid.events.subscriber(pyramid.events.NewRequest)
+@events.subscriber(events.NewRequest)
 def add_api_client(event):
     """Add an API client object to the request.
 
@@ -36,7 +36,7 @@ def add_api_client(event):
     object itself.
 
     """
-    event.request.set_property(api_client, name="api_client", reify=True)
+    event.request.set_property(get_api_client, name="api_client", reify=True)
 
 
 def includeme(config):

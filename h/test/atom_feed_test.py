@@ -1,12 +1,12 @@
 """Unit tests for h/atom_feed.py."""
 import datetime
 
-import pyramid.testing
+from pyramid import testing
 
-import h.atom_feed as atom_feed
-import h.test.factories as factories
-import h.resources
-import h.app
+from h import app
+from h import atom_feed
+from h import resources
+from . import factories
 
 
 def test_entry_id():
@@ -260,11 +260,11 @@ def test_render_feed_with_no_annotations():
 class TestAugmentAnnotations(object):
 
     def setup(self):
-        self.request = pyramid.testing.DummyRequest()
-        self.request.root = h.resources.create_root(self.request)
+        self.request = testing.DummyRequest()
+        self.request.root = resources.create_root(self.request)
 
     def teardown(self):
-        pyramid.testing.tearDown()
+        testing.tearDown()
 
     def test_that_augment_annotations_adds_the_html_url(self):
         annotations = factories.Annotation.create_batch(3)
