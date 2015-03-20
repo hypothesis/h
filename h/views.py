@@ -6,14 +6,12 @@ from pyramid import httpexceptions
 from pyramid.events import ContextFound
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
-from pyramid import response
 from pyramid import i18n
 
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
 from . import api_client
-from . import atom_feed
 from . import util
 
 log = logging.getLogger(__name__)
