@@ -580,7 +580,8 @@ def websocket(request):
     return request.get_response(request.registry.websocket)
 
 
-def bad_handshake(request):
+def bad_handshake(exc, request):
+    log.error("streamer websocket handshake error: %s", exc)
     return HTTPBadRequest()
 
 
