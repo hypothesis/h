@@ -1,5 +1,5 @@
 ***************************
-Contributing to Development
+Contributing to development
 ***************************
 
 Introduction
@@ -51,10 +51,10 @@ you have any questions, please contact us.
     2261 Market St #632
     SF, CA 94114
 
-Making Contributions
+Making contributions
 ====================
 
-Code Style
+Code style
 ----------
 Notes on code style follow for the different languages used in the
 project. Most important, though, is to follow the style of the code
@@ -95,10 +95,10 @@ recommended guides, which differ slightly but are both very good.
 * https://github.com/johnpapa/angularjs-styleguide
 * https://github.com/toddmotto/angularjs-styleguide
 
-Getting Changes Merged
+Getting changes merged
 ----------------------
 
-Committer Policy
+Committer policy
 ^^^^^^^^^^^^^^^^
 "Committers" are those with push access to the `main repository`. These
 people should feel free to commit small changes in good faith. It is
@@ -110,7 +110,7 @@ be uncontroversial and do not require up front code review.
 Larger changes, and changes being submitted by non-committers, should
 follow the branching and merging strategy outlined in the next section.
 
-Branching and Pull Requests
+Branching and pull requests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 For trivial changes, such as documentation changes or minor errors,
 PRs may be submitted directly to master. This also applies to changes
