@@ -205,7 +205,7 @@ def atom_stream(request):
         raise httpexceptions.HTTPGatewayTimeout(err)
 
     return response.Response(
-        atom_feed.render_feed(
+        atom_feed.render(
             request, annotations,
             atom_url=request.route_url("atom_stream"),
             html_url=request.route_url("stream"),

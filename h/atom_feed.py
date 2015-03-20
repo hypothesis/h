@@ -130,7 +130,7 @@ def _feed_from_annotations(
     return feed
 
 
-def render_feed(
+def render(
         request, annotations, atom_url, html_url, title=None, subtitle=None):
     """Return an Atom feed of the given list of annotations.
 

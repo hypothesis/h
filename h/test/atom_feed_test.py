@@ -276,7 +276,7 @@ def test_feed_html_link():
     assert feed["links"][1]["type"] == "text/html"
 
 
-def test_render_feed_with_no_annotations():
+def test_with_no_annotations():
     feed = atom_feed._feed_from_annotations(
         annotations=[],
         atom_url="http://www.example.com/annotations.atom",
