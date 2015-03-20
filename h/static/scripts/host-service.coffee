@@ -19,8 +19,8 @@ class HostService
         break
 
     channelListeners =
-      back: @hideSidebar
-      open: @showSidebar
+      back: => @hideSidebar()
+      open: => @showSidebar()
 
     for own channel, listener of channelListeners
       bridge.on(channel, listener)

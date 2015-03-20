@@ -50,16 +50,34 @@ describe 'Host service', ->
     host = _host_
     $digest = sandbox.stub($rootScope, '$digest')
 
-  describe 'on "back" event', ->
-    it 'sends the "hideFrame" message to the host only', ->
-      publish({method: 'back'})
-      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'hideFrame')
-      assert.notCalled(fakeBridge.links[1].channel.notify)
-      assert.notCalled(fakeBridge.links[2].channel.notify)
+  describe 'the public API', ->
 
-  describe 'on "open" event', ->
-    it 'sends the "showFrame" message to the host only', ->
-      publish({method: 'open'})
-      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
-      assert.notCalled(fakeBridge.links[1].channel.notify)
-      assert.notCalled(fakeBridge.links[2].channel.notify)
+    describe 'showSidebar()', ->
+      it 'sends the "showFrame" message to the host only', ->
+        host.showSidebar()
+        assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
+        assert.notCalled(fakeBridge.links[1].channel.notify)
+        assert.notCalled(fakeBridge.links[2].channel.notify)
+
+    describe 'hideSidebar()', ->
+      it 'sends the "hideFrame" message to the host only', ->
+        host.hideSidebar()
+        assert.calledWith(fakeBridge.links[0].channel.notify, method: 'hideFrame')
+        assert.notCalled(fakeBridge.links[1].channel.notify)
+        assert.notCalled(fakeBridge.links[2].channel.notify)
+
+  describe 'reacting to the bridge', ->
+
+    describe 'on "back" event', ->
+
+      it 'triggers the hideSidebar() API', ->
+        sandbox.spy host, "hideSidebar"
+        publish method: 'back'
+        assert.called host.hideSidebar
+
+    describe 'on "open" event', ->
+
+      it 'triggers the showSidebar() API', ->
+        sandbox.spy host, "showSidebar"
+        publish  method: 'open'
+        assert.called host.showSidebar
