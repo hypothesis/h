@@ -201,6 +201,8 @@ def stream_atom(request):
         raise httpexceptions.HTTPServiceUnavailable(err)
     except api_client.Timeout as err:
         raise httpexceptions.HTTPGatewayTimeout(err)
+    except api_client.APIError as err:
+        raise httpexceptions.HTTPBadGateway(err)
 
     return dict(
         annotations=annotations,

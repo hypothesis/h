@@ -58,10 +58,15 @@ class Client(object):
         """
         url = "/".join([self.base_url.rstrip("/"), path.lstrip("/")])
         try:
-            return requests.get(url, params=params, timeout=0.2).json()
+            response = requests.get(url, params=params, timeout=0.2)
         except requests.exceptions.ConnectionError as err:
             raise ConnectionError(err)
         except requests.exceptions.Timeout as err:
             raise Timeout(err)
         except requests.exceptions.RequestException as err:
+            raise APIError(err)
+
+        try:
+            return response.json()
+        except ValueError as err:
             raise APIError(err)
