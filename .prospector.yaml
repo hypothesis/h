@@ -5,6 +5,9 @@ inherits:
 pep8:
   options:
     max-line-length: 79
+pylint:
+  enable:
+    - relative-import
 ignore-paths:
   - h/_version.py
   - h/migrations/
