@@ -46,6 +46,7 @@ def create_app(global_config, **settings):
     config.include('.features')
     config.include('.queue')
     config.include('.views')
+    config.include('.api_client')
 
     config.include('pyramid_jinja2')
     config.add_jinja2_renderer('.js')
@@ -66,8 +67,6 @@ def create_app(global_config, **settings):
         # not take precedence over the index when a virtual root is in use.
         config.add_view(api_view, name='api', decorator=strip_vhm,
                         route_name='index')
-
-    config.include('.api_client')
 
     if config.registry.feature('claim'):
         config.include('.claim')
