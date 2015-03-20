@@ -24,9 +24,7 @@ def _created_day_string_from_annotation(annotation):
 def _atom_id_for_annotation(annotation):
     """Return an Atom entry ID for the given annotation.
 
-    Returns a tag URI for use as the ID for the Atom entry.
-
-    See: http://web.archive.org/web/20110514113830/http://diveintomark.org/archives/2004/05/28/howto-atom-id
+    Returns a tag URI (RFC 4151) for use as the ID for the Atom entry.
 
     """
     return "tag:{domain},{day}:{id_}".format(
