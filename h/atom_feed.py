@@ -73,16 +73,24 @@ def _feed_entry_from_annotation(
     }
 
     def get_selection(annotation):
-        for target in annotation["target"]:
-            for selector in target["selector"]:
-                if "exact" in selector:
-                    return selector["exact"]
+        targets = annotation.get("target")
+        if targets:
+            for target in targets:
+                for selector in target["selector"]:
+                    if "exact" in selector:
+                        return selector["exact"]
+
+    selection = get_selection(annotation)
+    if selection:
+        selection = cgi.escape(selection)
+
+    text = annotation.get("text")
+    if text:
+        text = cgi.escape(text)
 
     entry["content"] = (
-        "&lt;blockquote&gt;{selection}&lt;/blockquote&gt;"
-        "{text}".format(
-            selection=cgi.escape(get_selection(annotation)),
-            text=cgi.escape(annotation["text"])))
+        u"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;"
+        u"{text}".format(selection=selection, text=text))
 
     entry["links"] = []
 
