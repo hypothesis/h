@@ -66,12 +66,8 @@ class AppController
     cleanupAnnotations = ->
       # Clean up any annotations that need to be unloaded.
       for id, container of $scope.threading.idTable when container.message
-        # Remove annotations not belonging to this user when highlighting.
-        if annotationUI.tool is 'highlight' and annotation.user != auth.user
-          $scope.$emit('annotationDeleted', container.message)
-          drafts.remove annotation
         # Remove annotations the user is not authorized to view.
-        else if not permissions.permits 'read', container.message, auth.user
+        if not permissions.permits 'read', container.message, auth.user
           $scope.$emit('annotationDeleted', container.message)
           drafts.remove container.message
 
