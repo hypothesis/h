@@ -335,8 +335,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
 
     # React to the changes to the input
     inputEl.bind 'blur change keyup', ->
-      ctrl.$setViewValue inputEl.val()
-      scope.$digest()
+      $timeout -> ctrl.$setViewValue inputEl.val()
 
     # Reset height of output div incase it has been changed.
     # Re-render when it becomes uneditable.
