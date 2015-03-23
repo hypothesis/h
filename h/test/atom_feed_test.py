@@ -291,3 +291,25 @@ def test_annotation_with_no_text_or_target():
         annotation_url=_mock_annotation_url_function())
 
     feed["entries"][0]["content"] = ""
+
+
+def test_annotation_with_no_document():
+    annotation = factories.Annotation()
+    del annotation["document"]
+
+    feed = atom_feed._feed_from_annotations(
+        [annotation], atom_url=None,
+        annotation_url=_mock_annotation_url_function())
+
+    feed["entries"][0]["title"] == ""
+
+
+def test_annotation_with_no_document_title():
+    annotation = factories.Annotation()
+    del annotation["document"]["title"]
+
+    feed = atom_feed._feed_from_annotations(
+        [annotation], atom_url=None,
+        annotation_url=_mock_annotation_url_function())
+
+    feed["entries"][0]["title"] == ""
