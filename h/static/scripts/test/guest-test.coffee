@@ -19,6 +19,7 @@ describe 'Annotator.Guest', ->
     fakeCrossFrame =
       onConnect: sandbox.stub()
       on: sandbox.stub()
+      sync: sandbox.stub()
 
     # Mock out the anchoring plugin. Oh how I wish I didn't have to do crazy
     # shit like this.
@@ -87,7 +88,7 @@ describe 'Annotator.Guest', ->
         guest = createGuest()
         options = Annotator.Plugin.CrossFrame.lastCall.args[1]
 
-      it 'calls deleteAnnotation when an annotationDeleted event is recieved', ->
+      it 'calls deleteAnnotation when an annotationDeleted event is received', ->
         ann = {id: 1, $$tag: 'tag1'}
         sandbox.stub(guest, 'deleteAnnotation')
 
@@ -103,7 +104,7 @@ describe 'Annotator.Guest', ->
         # Called only once by the deleteAnnotation() method.
         assert.calledOnce(handler)
 
-      it 'calls loadAnnotations when an loadAnnotations event is recieved', ->
+      it 'calls loadAnnotations when an loadAnnotations event is received', ->
         ann = {id: 1, $$tag: 'tag1'}
         target = sandbox.stub(guest, 'loadAnnotations')
 
@@ -279,3 +280,14 @@ describe 'Annotator.Guest', ->
       guest = createGuest()
       guest.onAdderMouseup(event)
       assert.isTrue(event.isPropagationStopped())
+
+  describe 'annotation sync', ->
+    it 'calls sync for createAnnotation', ->
+      guest = createGuest()
+      guest.createAnnotation({})
+      assert.called(fakeCrossFrame.sync)
+
+    it 'calls sync for setupAnnotation', ->
+      guest = createGuest()
+      guest.setupAnnotation({ranges: []})
+      assert.called(fakeCrossFrame.sync)
