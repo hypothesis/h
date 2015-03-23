@@ -121,82 +121,11 @@ def stream(context, request):
         return context
 
 
-def _validate_stream_atom_limit(limit):
-    """Validate the given limit and return it as an int.
-
-    The limit should be a number >= 1 as an int, float, string or unicode.
-
-    :param limit: the number to validate
-    :type limit: int, float, string or unicode
-
-    :returns: the validated number
-    :rtype: int
-
-    :raises ValueError: if ``limit`` is an invalid string that can't be
-        converted to an int
-
-    :raises ValueError: if ``limit`` is less than 1
-
-    :raises TypeError: if ``limit`` isn't a string or a number
-
-    """
-    if limit in (True, False):
-        raise TypeError
-    limit = int(limit)
-    if limit < 1:
-        raise ValueError
-    return limit
-
-
-_STREAM_ATOM_LIMIT_SETTINGS_KEY = "h.stream.atom.limit"
-
-
-def _validate_default_stream_atom_limit(settings):
-    """Validate the h.stream.atom.limit setting.
-
-    Will convert the setting from a string or number to an int.
-
-    Will add "h.stream.atom.limit": 10 into the settings if there's no
-    "h.stream.atom.limit" in there.
-
-    :raises RuntimeError: if the setting is invalid
-
-    """
-    if _STREAM_ATOM_LIMIT_SETTINGS_KEY in settings:
-        limit = settings[_STREAM_ATOM_LIMIT_SETTINGS_KEY]
-    else:
-        limit = 10
-    try:
-        settings[_STREAM_ATOM_LIMIT_SETTINGS_KEY] = (
-            _validate_stream_atom_limit(limit))
-    except (ValueError, TypeError):
-        raise RuntimeError(
-            '{key} setting is invalid: "{limit}"'.format(
-                key=_STREAM_ATOM_LIMIT_SETTINGS_KEY, limit=limit))
-
-
-def _stream_atom_limit(request):
-    """Return the Atom stream limit from the request params, or the default.
-
-    Raises ValueError or TypeError if the URL param is invalid.
-
-    """
-    return _validate_stream_atom_limit(
-        request.params.get(
-            "limit", request.registry.settings.get(
-                _STREAM_ATOM_LIMIT_SETTINGS_KEY)))
-
-
 @view_config(renderer='annotations_atom', route_name='stream_atom')
 def stream_atom(request):
     try:
-        limit = _stream_atom_limit(request)
-    except (ValueError, TypeError):
-        raise httpexceptions.HTTPBadRequest(_("Invalid limit param"))
-
-    try:
         annotations = request.api_client.get(
-            "/search", params={"limit": limit})["rows"]
+            "/search", params={"limit": 1000})["rows"]
     except api_client.ConnectionError as err:
         raise httpexceptions.HTTPServiceUnavailable(err)
     except api_client.Timeout as err:
@@ -232,7 +161,5 @@ def includeme(config):
     config.add_route('onboarding', '/welcome')
     config.add_route('stream', '/stream')
     config.add_route('stream_atom', '/stream.atom')
-
-    _validate_default_stream_atom_limit(config.registry.settings)
 
     config.scan(__name__)
