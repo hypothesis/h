@@ -99,10 +99,8 @@ class AsyncFormViewMapper(object):
             meth = getattr(inst, self.attr)
             result = meth()
             result = ajax_form(request, result)
-            if 'model' in result:
-                result['model'].update(session.model(request))
-            else:
-                result['model'] = session.model(request)
+            model = result.setdefault('model', {})
+            model.update(session.model(request))
             result.pop('form', None)
             return result
         return wrapper
