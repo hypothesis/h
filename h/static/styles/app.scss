@@ -152,19 +152,12 @@ ol {
   .masthead-heading {
     margin: 0;
     padding-top: 4px;
-  }
-
-  .masthead-subheading {
-    font-size: 1.231em;
-    margin: 0;
-  }
-
-  img {
-    float: left;
-    opacity: .7;
+    font-size: 1.1em;
+    font-weight: 400;
+    color: $gray;
 
     &:hover {
-      opacity: 1;
+      color: $gray-dark;
     }
   }
 }
@@ -181,7 +174,7 @@ ol {
   }
 
   .masthead-heading {
-    font-size: 20px;
+    font-size: 1.1em;
     line-height: 1em;
   }
 
