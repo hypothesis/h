@@ -71,56 +71,7 @@ describe 'AnnotationUISync', ->
         createAnnotationUISync()
         assert.notCalled(channel.notify)
 
-  describe 'on "back" event', ->
-    it 'sends the "hideFrame" message to the host only', ->
-      createAnnotationUISync()
-      publish({method: 'back'})
-      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'hideFrame')
-      assert.notCalled(fakeBridge.links[1].channel.notify)
-      assert.notCalled(fakeBridge.links[2].channel.notify)
-
-    it 'triggers a digest', ->
-      createAnnotationUISync()
-      publish({method: 'back'})
-      assert.called($digest)
-
-  describe 'on "open" event', ->
-    it 'sends the "showFrame" message to the host only', ->
-      createAnnotationUISync()
-      publish({method: 'open'})
-      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
-      assert.notCalled(fakeBridge.links[1].channel.notify)
-      assert.notCalled(fakeBridge.links[2].channel.notify)
-
-    it 'triggers a digest', ->
-      createAnnotationUISync()
-      publish({method: 'open'})
-      assert.called($digest)
-
-  describe 'on "showEditor" event', ->
-    it 'sends the "showFrame" message to the host only', ->
-      createAnnotationUISync()
-      publish({method: 'showEditor'})
-      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
-      assert.notCalled(fakeBridge.links[1].channel.notify)
-      assert.notCalled(fakeBridge.links[2].channel.notify)
-
-    it 'triggers a digest', ->
-      createAnnotationUISync()
-      publish({method: 'showEditor'})
-      assert.called($digest)
-
   describe 'on "showAnnotations" event', ->
-    it 'sends the "showFrame" message to the host only', ->
-      createAnnotationUISync()
-      publish({
-        method: 'showAnnotations',
-        params: ['tag1', 'tag2', 'tag3']
-      })
-      assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
-      assert.notCalled(fakeBridge.links[1].channel.notify)
-      assert.notCalled(fakeBridge.links[2].channel.notify)
-
     it 'updates the annotationUI to include the shown annotations', ->
       createAnnotationUISync()
       publish({
