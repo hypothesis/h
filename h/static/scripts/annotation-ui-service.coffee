@@ -6,10 +6,6 @@ createAnnotationUI = ->
     if Object.keys(selection).length then selection else null
 
   {
-    TOOL_COMMENT: 'comment'
-    TOOL_HIGHLIGHT: 'highlight'
-
-    tool: 'comment'
 
     visibleHighlights: false
 

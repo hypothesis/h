@@ -27,9 +27,6 @@ class AnnotationUISync
       toggleAnnotationSelection: (ctx, tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.xorSelectedAnnotations(annotations)
-      setTool: (ctx, name) ->
-        annotationUI.tool = name
-        bridge.notify(method: 'setTool', params: name)
       setVisibleHighlights: (ctx, state) ->
         annotationUI.visibleHighlights = Boolean(state)
         bridge.notify(method: 'setVisibleHighlights', params: state)
@@ -48,10 +45,6 @@ class AnnotationUISync
     onConnect = (channel, source) ->
       # Allow the host to define its own state
       unless source is $window.parent
-        channel.notify
-          method: 'setTool'
-          params: annotationUI.tool
-
         channel.notify
           method: 'setVisibleHighlights'
           params: annotationUI.visibleHighlights
