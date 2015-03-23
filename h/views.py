@@ -84,7 +84,6 @@ def help_page(context, request):
 
 @view_config(accept='application/json', context=Application, renderer='json')
 def session_view(request):
-    request.add_response_callback(session.set_csrf_token)
     flash = session.pop_flash(request)
     model = session.model(request)
     return dict(status='okay', flash=flash, model=model)
