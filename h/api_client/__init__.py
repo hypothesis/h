@@ -28,7 +28,7 @@ def includeme(config):
     """Add a request.get_api_client() to the request object."""
     settings = config.registry.settings
 
-    api_url = settings.get("h.api_url", "").rstrip("/")
+    api_url = settings.get("h.api_url", "")
     timeout = _validate_timeout(settings)
 
     def get_api_client(request):

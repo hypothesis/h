@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import urlparse
+
 import requests
 
 
@@ -45,7 +47,10 @@ class Client(object):
         :type timeout: float
 
         """
+        if not base_url.endswith("/"):
+            base_url = base_url + "/"
         self.base_url = base_url
+
         self.timeout = timeout or 0.2
 
     def get(self, path, params=None):
@@ -61,7 +66,7 @@ class Client(object):
         :type params: dict
 
         """
-        url = "/".join([self.base_url.rstrip("/"), path.lstrip("/")])
+        url = urlparse.urljoin(self.base_url, path.lstrip("/"))
         try:
             response = requests.get(url, params=params, timeout=self.timeout)
         except requests.exceptions.ConnectionError as err:
