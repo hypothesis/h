@@ -67,7 +67,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
         slice1 = text.before.slice(text.before.length - markupL.length)
         slice2 = text.after.slice(0, markupR.length)
         if (slice1 == markupL and slice2 == markupR)
-          # Remove markup 
+          # Remove markup
           newtext = (
             text.before.slice(0, (text.before.length - markupL.length)) +
             text.selection + text.after.slice(markupR.length)
@@ -110,7 +110,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       else
         # Check to see if markup has already been applied to avoid double presses.
         if text.selection == "Link Text" or text.selection == "https://example.com"
-          return          
+          return
         newtext = text.before + '[' + text.selection + '](https://example.com)' + text.after
         start = (text.before + text.selection).length + 3
         end = (text.before + text.selection).length + 22
@@ -126,7 +126,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
       else
         # Check to see if markup has already been applied to avoid double presses.
         if text.selection == "https://yourimage.jpg"
-          return     
+          return
         newtext = text.before + '![' + text.selection + '](https://yourimage.jpg)' + text.after
         start = (text.before + text.selection).length + 4
         end = (text.before + text.selection).length + 25
@@ -184,7 +184,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
             end = (text.before + text.selection + markup).length
             insertMarkup(value, start, end)
             return
-        # Sets input value and selection for cases where there are new lines in the selection 
+        # Sets input value and selection for cases where there are new lines in the selection
         # or the selection is at the start
         value = text.before + newstring + text.after
         start = (text.before + newstring).length
@@ -210,7 +210,7 @@ markdown = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitize, $sc
             index = i
           i += 1
         if !index # If the line of text happens to fall on the first line and index is not set.
-          # Check to see if markup has already been inserted and undo it. 
+          # Check to see if markup has already been inserted and undo it.
           if text.before.slice(0, markup.length) == markup
             newtext = text.before.substring(markup.length) + text.after
             start = text.before.length - markup.length
