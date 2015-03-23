@@ -313,3 +313,25 @@ def test_annotation_with_no_document_title():
         annotation_url=_mock_annotation_url_function())
 
     feed["entries"][0]["title"] == ""
+
+
+def test_annotation_with_non_unicode_characters():
+    username = u"seanh\u2119h"
+    exact_text = u"Some selected \u01b4 non-ascii text"
+    document_title = u"Non-ascii \u2602 title"
+    text = u"Some non-ascii \u210c annotation text"
+    annotation = factories.Annotation(
+        username=username,
+        exact_text=exact_text,
+        document_title=document_title,
+        text=text)
+
+    feed = atom_feed._feed_from_annotations(
+        [annotation], atom_url=None,
+        annotation_url=_mock_annotation_url_function())
+
+    entry = feed["entries"][0]
+    assert entry["author"]["name"] == username
+    assert exact_text in entry["content"]
+    assert entry["title"] == document_title
+    assert text in entry["content"]

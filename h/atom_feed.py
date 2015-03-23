@@ -36,7 +36,7 @@ def _atom_id_for_annotation(annotation, annotation_url):
     :rtype: string
 
     """
-    return "tag:{domain},{day}:{id_}".format(
+    return u"tag:{domain},{day}:{id_}".format(
         domain=urlparse.urlparse(annotation_url(annotation)).netloc,
         day=_created_day_string_from_annotation(annotation),
         id_=annotation["id"])
