@@ -93,9 +93,12 @@ def _feed_entry_from_annotation(
     if text:
         text = cgi.escape(text)
 
-    entry["content"] = (
-        u"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;"
-        u"{text}".format(selection=selection, text=text))
+    content = ""
+    if selection:
+        content += u"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
+            selection=selection)
+    content += u"{text}".format(text=text)
+    entry["content"] = content
 
     entry["links"] = []
 
