@@ -265,7 +265,7 @@ def test_annotation_with_no_target():
         [annotation], atom_url=None,
         annotation_url=_mock_annotation_url_function())
 
-    feed["entries"][0]["content"] == annotation["text"]
+    assert feed["entries"][0]["content"] == annotation["text"]
 
 
 def test_annotation_with_no_text():
@@ -277,7 +277,7 @@ def test_annotation_with_no_text():
         [annotation], atom_url=None,
         annotation_url=_mock_annotation_url_function())
 
-    feed["entries"][0]["content"] = (
+    assert feed["entries"][0]["content"] == (
         "&lt;blockquote&gt;{text}&lt;/blockquote&gt;".format(text=text))
 
 
@@ -290,7 +290,7 @@ def test_annotation_with_no_text_or_target():
         [annotation], atom_url=None,
         annotation_url=_mock_annotation_url_function())
 
-    feed["entries"][0]["content"] = ""
+    assert feed["entries"][0]["content"] == ""
 
 
 def test_annotation_with_no_document():
@@ -301,7 +301,7 @@ def test_annotation_with_no_document():
         [annotation], atom_url=None,
         annotation_url=_mock_annotation_url_function())
 
-    feed["entries"][0]["title"] == ""
+    assert feed["entries"][0]["title"] == ""
 
 
 def test_annotation_with_no_document_title():
@@ -312,7 +312,7 @@ def test_annotation_with_no_document_title():
         [annotation], atom_url=None,
         annotation_url=_mock_annotation_url_function())
 
-    feed["entries"][0]["title"] == ""
+    assert feed["entries"][0]["title"] == ""
 
 
 def test_annotation_with_non_unicode_characters():

@@ -66,7 +66,7 @@ def _feed_entry_from_annotation(
     name = util.split_user(annotation["user"])[0]
     document = annotation.get("document")
     if document:
-        title = document.get("title")
+        title = document.get("title", "")
     else:
         title = ""
     entry = {
@@ -85,19 +85,19 @@ def _feed_entry_from_annotation(
                     if "exact" in selector:
                         return selector["exact"]
 
+    content = ""
+
     selection = get_selection(annotation)
     if selection:
         selection = cgi.escape(selection)
+        content += u"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
+            selection=selection)
 
     text = annotation.get("text")
     if text:
         text = cgi.escape(text)
+        content += u"{text}".format(text=text)
 
-    content = ""
-    if selection:
-        content += u"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
-            selection=selection)
-    content += u"{text}".format(text=text)
     entry["content"] = content
 
     entry["links"] = []
