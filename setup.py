@@ -106,7 +106,7 @@ setup(
         'YAML': ['PyYAML']
     },
     tests_require=development_extras + testing_extras + ['PyYAML'],
-    setup_require=['setuptools_git'],
+    setup_requires=['setuptools_git'],
     cmdclass=cmdclass,
     package_data={
         'h': [
