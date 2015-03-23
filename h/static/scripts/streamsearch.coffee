@@ -26,12 +26,24 @@ class StreamSearchController
     store.SearchResource.get query, ({rows}) ->
       annotationMapper.loadAnnotations(rows)
 
+      # Fetch parents
+      ancestors = []
+      for annotation in rows
+        if annotation.references?
+          for id in annotation.references
+            ancestors.push(id) if id not in ancestors
+
+      for id in ancestors
+        store.AnnotationResource.read {id: id}, (annotation) ->
+          annotationMapper.loadAnnotations([annotation])
+
     $scope.isEmbedded = false
     $scope.isStream = true
 
     $scope.sort.name = 'Newest'
 
-    $scope.shouldShowThread = (container) -> true
+    $scope.shouldShowThread = (container) ->
+      container.message isnt null
 
     $scope.$on '$destroy', ->
       $scope.search.query = ''
