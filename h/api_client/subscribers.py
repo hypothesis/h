@@ -25,7 +25,9 @@ def get_api_client(request):
     Configured with this app's configured API base URL.
 
     """
-    return api_client.Client(_api_url(request))
+    return api_client.Client(
+        _api_url(request),
+        request.registry.settings.get("h.api_timeout"))
 
 
 def includeme(config):

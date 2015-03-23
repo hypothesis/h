@@ -34,14 +34,19 @@ class Client(object):
 
     """
 
-    def __init__(self, base_url):
+    def __init__(self, base_url, timeout=None):
         """Initialize a new API client.
 
         :param base_url: The base URL to the Hypothesis API instance to use.
             For example: ``"http://hypothesis.is/api"``.
 
+        :param timeout: How long to wait (in seconds) for a response from the
+            API, before raising Timeout
+        :type timeout: float
+
         """
         self.base_url = base_url
+        self.timeout = timeout or 0.2
 
     def get(self, path, params=None):
         """Make a GET request to the Hypothesis API and return the response.
@@ -58,7 +63,7 @@ class Client(object):
         """
         url = "/".join([self.base_url.rstrip("/"), path.lstrip("/")])
         try:
-            response = requests.get(url, params=params, timeout=0.2)
+            response = requests.get(url, params=params, timeout=self.timeout)
         except requests.exceptions.ConnectionError as err:
             raise ConnectionError(err)
         except requests.exceptions.Timeout as err:
