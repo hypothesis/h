@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from pyramid import events
-
 from . import api_client
 
 
