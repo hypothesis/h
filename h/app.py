@@ -46,6 +46,7 @@ def create_app(global_config, **settings):
     config.include('.features')
     config.include('.queue')
     config.include('.views')
+    config.include('.api_client')
 
     config.include('pyramid_jinja2')
     config.add_jinja2_renderer('.js')
