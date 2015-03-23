@@ -233,6 +233,11 @@ module.exports = class Annotator.Guest extends Annotator
 
     this.removeEvents()
 
+  setupAnnotation: ->
+    annotation = super
+    this.plugins.CrossFrame.sync([annotation])
+    annotation
+
   createAnnotation: ->
     annotation = super
     this.plugins.CrossFrame.sync([annotation])
