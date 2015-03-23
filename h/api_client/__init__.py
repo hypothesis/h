@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """A Python client for the Hypothesis API."""
-import api_client
 from .api_client import Client, APIError, ConnectionError, Timeout
 
 __all__ = ['Client', 'APIError', 'ConnectionError', 'Timeout']
@@ -8,7 +7,7 @@ __all__ = ['Client', 'APIError', 'ConnectionError', 'Timeout']
 
 def _get_api_client(api_url, timeout, request):
     api_url = api_url or request.resource_url(request.root, "api")
-    return api_client.Client(api_url, timeout)
+    return Client(api_url, timeout)
 
 
 def _validate_timeout(settings):
