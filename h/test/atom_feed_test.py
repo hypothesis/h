@@ -255,3 +255,14 @@ def test_with_no_annotations():
         annotation_url=_mock_annotation_url_function())
 
     assert feed["entries"] == []
+
+
+def test_annotation_with_no_target():
+    annotation = factories.Annotation()
+    del annotation["target"]
+
+    feed = atom_feed._feed_from_annotations(
+        [annotation], atom_url=None,
+        annotation_url=_mock_annotation_url_function())
+
+    feed["entries"][0]["content"] == annotation["text"]
