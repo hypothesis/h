@@ -64,10 +64,15 @@ def _feed_entry_from_annotation(
 
     """
     name = util.split_user(annotation["user"])[0]
+    document = annotation.get("document")
+    if document:
+        title = document.get("title")
+    else:
+        title = ""
     entry = {
         "id": _atom_id_for_annotation(annotation, annotation_url),
         "author": {"name": name},
-        "title": annotation["document"]["title"],
+        "title": title,
         "updated": annotation["updated"],
         "published": annotation["created"],
     }
