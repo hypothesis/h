@@ -17,6 +17,13 @@
       {%- endblock -%}
     </title>
 
+    {% if link_tags %}
+      {% for link in link_tags %}
+        <link rel="{{ link.rel }}" type="{{ link.type }}"
+              href="{{ link.href }}"/>
+      {% endfor %}
+    {% endif %}
+
     {% for attrs in link_attrs -%}
       <link {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}

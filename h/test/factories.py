@@ -52,16 +52,19 @@ class Annotation(factory.Factory):
 
     class Meta:
         model = dict
-        exclude = ["username", "random_number", "num_tags"]
+        exclude = ["username", "random_number", "num_tags", "exact_text",
+                   "document_title"]
 
     username = "seanh"
     random_number = factory.LazyAttribute(lambda n: random.randint(1, 10))
     num_tags = None
+    exact_text = None
+    document_title = None
 
     id = factory.Sequence(lambda n: "test_id_{n}".format(n=n + 1))
     text = factory.Sequence(lambda n: "Test annotation {n}".format(n=n + 1))
     user = factory.LazyAttribute(
-        lambda n: "acct:{username}@127.0.0.1".format(username=n.username))
+        lambda n: u"acct:{username}@127.0.0.1".format(username=n.username))
     consumer = "nosuchid"
 
     @factory.LazyAttribute
@@ -96,7 +99,8 @@ class Annotation(factory.Factory):
                  "type": "TextPositionSelector"},
                 {"type": "TextQuoteSelector",
                  "prefix": "text quote prefix",
-                 "exact": "The exact text that was selected",
+                 "exact": (stub.exact_text if stub.exact_text is not None
+                           else "The exact text that was selected"),
                  "suffix": "text quote suffix"},
                 {"type": "FragmentSelector",
                  "value": ""}
@@ -116,7 +120,8 @@ class Annotation(factory.Factory):
     def document(stub):
         return {
             "eprints": {},
-            "title": "Example Document {n}".format(n=stub.random_number),
+            "title": (stub.document_title or
+                      "Example Document {n}".format(n=stub.random_number)),
             "twitter": {},
             "dc": {},
             "prism": {},

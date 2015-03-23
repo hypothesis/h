@@ -46,11 +46,14 @@ def create_app(global_config, **settings):
     config.include('.features')
     config.include('.queue')
     config.include('.views')
+    config.include('.renderers')
+    config.include('.api_client')
 
     config.include('pyramid_jinja2')
     config.add_jinja2_renderer('.js')
     config.add_jinja2_renderer('.txt')
     config.add_jinja2_renderer('.html')
+    config.add_jinja2_renderer('.xml')
 
     if config.registry.feature('accounts'):
         config.set_authentication_policy(session_authn)
