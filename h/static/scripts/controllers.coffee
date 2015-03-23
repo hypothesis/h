@@ -20,13 +20,15 @@ class AnnotationUIController
 
 class AppController
   this.$inject = [
-    '$controller', '$document', '$location', '$route', '$scope', '$window',
+    '$controller', '$document', '$location', '$rootScope', '$route', '$scope',
+    '$window',
     'auth', 'drafts', 'identity',
     'permissions', 'streamer', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
-     $controller,   $document,   $location,   $route,   $scope,   $window,
+     $controller,   $document,   $location,   $rootScope,   $route,   $scope,
+     $window,
      auth,   drafts,   identity,
      permissions,   streamer,   annotationUI,
      annotationMapper, threading
@@ -102,6 +104,9 @@ class AppController
 
       # Reload the view.
       $route.reload()
+
+    $rootScope.$on 'beforeAnnotationCreated', ->
+      $scope.clearSelection()
 
     $scope.login = ->
       $scope.dialog.visible = true
