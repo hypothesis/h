@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import logging
-import re
 
 from pyramid import httpexceptions
 from pyramid.events import ContextFound
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
+from pyramid import i18n
 
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
+from . import api_client
+from . import util
 
 log = logging.getLogger(__name__)
+
+_ = i18n.TranslationStringFactory(__package__)
 
 
 @view_config(context=Exception, renderer='h:templates/5xx.html')
@@ -99,7 +103,7 @@ def stream(context, request):
     query = None
 
     if stream_type == 'user':
-        parts = re.match(r'^acct:([^@]+)@(.*)$', stream_key)
+        parts = util.split_user(stream_key)
         if parts is not None and parts.groups()[1] == request.domain:
             query = {'q': 'user:{}'.format(parts.groups()[0])}
         else:
@@ -111,7 +115,30 @@ def stream(context, request):
         location = request.resource_url(context, 'stream', query=query)
         return httpexceptions.HTTPFound(location=location)
     else:
+        context["link_tags"] = [{
+            "rel": "alternate", "href": request.route_url("stream_atom"),
+            "type": "application/atom+xml"}]
         return context
+
+
+@view_config(renderer='annotations_atom', route_name='stream_atom')
+def stream_atom(request):
+    try:
+        annotations = request.api_client.get(
+            "/search", params={"limit": 1000})["rows"]
+    except api_client.ConnectionError as err:
+        raise httpexceptions.HTTPServiceUnavailable(err)
+    except api_client.Timeout as err:
+        raise httpexceptions.HTTPGatewayTimeout(err)
+    except api_client.APIError as err:
+        raise httpexceptions.HTTPBadGateway(err)
+
+    return dict(
+        annotations=annotations,
+        atom_url=request.route_url("stream_atom"),
+        html_url=request.route_url("stream"),
+        title=request.registry.settings.get("h.feed.title"),
+        subtitle=request.registry.settings.get("h.feed.subtitle"))
 
 
 @forbidden_view_config(renderer='h:templates/notfound.html')
@@ -133,5 +160,6 @@ def includeme(config):
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome')
     config.add_route('stream', '/stream')
+    config.add_route('stream_atom', '/stream.atom')
 
     config.scan(__name__)
