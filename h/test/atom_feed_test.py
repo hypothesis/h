@@ -266,3 +266,28 @@ def test_annotation_with_no_target():
         annotation_url=_mock_annotation_url_function())
 
     feed["entries"][0]["content"] == annotation["text"]
+
+
+def test_annotation_with_no_text():
+    text = "Some annotated text from a web page"
+    annotation = factories.Annotation(exact_text=text)
+    del annotation["text"]
+
+    feed = atom_feed._feed_from_annotations(
+        [annotation], atom_url=None,
+        annotation_url=_mock_annotation_url_function())
+
+    feed["entries"][0]["content"] = (
+        "&lt;blockquote&gt;{text}&lt;/blockquote&gt;".format(text=text))
+
+
+def test_annotation_with_no_text_or_target():
+    annotation = factories.Annotation()
+    del annotation["target"]
+    del annotation["text"]
+
+    feed = atom_feed._feed_from_annotations(
+        [annotation], atom_url=None,
+        annotation_url=_mock_annotation_url_function())
+
+    feed["entries"][0]["content"] = ""
