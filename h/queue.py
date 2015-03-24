@@ -2,6 +2,17 @@ from pyramid.settings import aslist
 import gnsq
 
 
+class NamespacedNsqd(object):
+    def __init__(self, namespace, *args, **kwargs):
+        self.client = gnsq.Nsqd(*args, **kwargs)
+        self.namespace = namespace
+
+    def publish(self, topic, data):
+        if self.namespace is not None:
+            topic = '{0}-{1}'.format(self.namespace, topic)
+        return self.client.publish(topic, data)
+
+
 def get_reader(request, topic, channel):
     """
     Get a :py:class:`gnsq.Reader` instance configured to connect to the
@@ -11,9 +22,11 @@ def get_reader(request, topic, channel):
     The caller is responsible for adding appropriate `on_message` hooks and
     starting the reader.
     """
+    ns = request.registry.settings.get('nsq.namespace')
     addrs = aslist(request.registry.settings.get('nsq.reader.addresses',
                                                  'localhost:4150'))
-    topic = _topic_name(request, topic)
+    if ns is not None:
+        topic = '{0}-{1}'.format(ns, topic)
     reader = gnsq.Reader(topic, channel, nsqd_tcp_addresses=addrs)
     return reader
 
@@ -24,18 +37,12 @@ def get_writer(request):
     writer address configured in settings. The writer communicates over the
     nsq HTTP API and does not hold a connection open to the nsq instance.
     """
-    setting = request.registry.settings.get('nsq.writer.address',
-                                            'localhost:4151')
-    hostname, port = setting.split(':', 1)
-    nsqd = gnsq.Nsqd(hostname, http_port=port)
-    return nsqd
-
-
-def _topic_name(request, name):
     ns = request.registry.settings.get('nsq.namespace')
-    if ns is None:
-        return name
-    return '{0}-{1}'.format(ns, name)
+    addr = request.registry.settings.get('nsq.writer.address',
+                                         'localhost:4151')
+    hostname, port = addr.split(':', 1)
+    nsqd = NamespacedNsqd(ns, hostname, http_port=port)
+    return nsqd
 
 
 def includeme(config):
