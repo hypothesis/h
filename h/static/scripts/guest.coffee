@@ -244,7 +244,8 @@ module.exports = class Annotator.Guest extends Annotator
     annotation
 
   createHighlight: ->
-    annotation = super
+    annotation = $highlight: true
+    this.publish 'beforeAnnotationCreated', [annotation]
     this.plugins.CrossFrame.sync([annotation])
     annotation
 
@@ -368,13 +369,6 @@ module.exports = class Annotator.Guest extends Annotator
 
     @visibleHighlights = shouldShowHighlights
 
-  # Might not be needed anymore. Perhaps should just use on adderclick or perhaps new note?
-  addComment: ->
-    @adder.hide()
-    this.setupAnnotation(this.createAnnotation())
-    Annotator.Util.getGlobal().getSelection().removeAllRanges()
-    this.triggerShowFrame()
-
   # Open the sidebar
   triggerShowFrame: ->
     @crossframe?.notify method: 'open'
@@ -395,8 +389,8 @@ module.exports = class Annotator.Guest extends Annotator
   onAdderMousedown: ->
 
   onAdderClick: (event) =>
-    event.preventDefault()
-    event.stopPropagation()
+    event.preventDefault?()
+    event.stopPropagation?()
     @adder.hide()
     switch event.target.dataset.action
       when 'highlight'
