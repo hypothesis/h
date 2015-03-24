@@ -33,7 +33,7 @@ module.exports = class AppController
           annotationMapper.loadAnnotations data
         when 'delete'
           for annotation in data
-            if a = threading.idTable[annotation.id]?.message
+            if a = $scope.threading.idTable[annotation.id]?.message
               $scope.$emit('annotationDeleted', a)
 
     streamer.onmessage = (data) ->
@@ -46,9 +46,15 @@ module.exports = class AppController
     oncancel = ->
       $scope.dialog.visible = false
 
-    cleanupAnnotations = ->
-      # Clean up any annotations that need to be unloaded.
+    $rootScope.getAnnotationContainers = ->
+      containers = []
       for id, container of $scope.threading.idTable when container.message
+        containers.push container
+      containers
+
+    $scope.cleanupAnnotations = ->
+      # Clean up any annotations that need to be unloaded.
+      for container in $rootScope.getAnnotationContainers()
         # Remove annotations the user is not authorized to view.
         if not permissions.permits 'read', container.message, auth.user
           $scope.$emit('annotationDeleted', container.message)
@@ -79,7 +85,7 @@ module.exports = class AppController
       streamer.open($window.WebSocket, streamerUrl)
 
       # Clean up annotations that should be removed
-      cleanupAnnotations()
+      $scope.cleanupAnnotations()
 
       # Reload the view.
       $route.reload()

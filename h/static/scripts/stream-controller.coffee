@@ -5,28 +5,36 @@ mail = require('./vendor/jwz')
 module.exports = class StreamController
   this.inject = [
     '$scope', '$rootScope', '$routeParams',
-    'auth', 'queryParser', 'searchFilter', 'store',
+    'queryParser', 'searchFilter', 'store',
     'streamer', 'streamFilter', 'annotationMapper'
   ]
   constructor: (
      $scope,   $rootScope,   $routeParams
-     auth,   queryParser,   searchFilter,   store,
+     queryParser,   searchFilter,   store,
      streamer,   streamFilter, annotationMapper
   ) ->
     # Initialize cards
     $scope.threadRoot = mail.messageContainer()
+    $scope.threading.idTable = {}
 
     $rootScope.$on 'beforeAnnotationCreated', (event, annotation) ->
       container = mail.messageContainer(annotation)
       $scope.threadRoot.addChild container
+      if annotation.id?
+        $scope.threading.idTable[annotation.id] = container
 
     $rootScope.$on 'annotationCreated', (event, annotation) ->
       for child in ($scope.threadRoot.children or []) \
       when child.message is annotation
+        if child.message.id
+          delete $scope.threading.idTable[child.id]
         child.message = null
         $scope.threadRoot.removeChild child
+
         container = mail.messageContainer(annotation)
         $scope.threadRoot.addChild container
+        if annotation.id?
+          $scope.threading.idTable[annotation.id] = container
         break
 
     $rootScope.$on 'annotationDeleted', (event, annotation) ->
@@ -34,12 +42,19 @@ module.exports = class StreamController
       when child.message is annotation
         child.message = null
         $scope.threadRoot.removeChild child
+        if annotation.id?
+          delete $scope.threading.idTable[annotation.id]
         break
 
     $rootScope.$on 'annotationsLoaded', (event, annotations) ->
       for annotation in annotations
         container = mail.messageContainer(annotation)
         $scope.threadRoot.addChild container
+        if annotation.id?
+          $scope.threading.idTable[annotation.id] = container
+
+    $rootScope.getAnnotationContainers = ->
+      $scope.threadRoot.children
 
     # Initialize the base filter
     streamFilter
