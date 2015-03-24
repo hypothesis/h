@@ -11,9 +11,9 @@ def get_reader(request, topic, channel):
     The caller is responsible for adding appropriate `on_message` hooks and
     starting the reader.
     """
-    setting = request.registry.settings.get('nsq.reader.addresses',
-                                            'localhost:4150')
-    addrs = aslist(setting)
+    addrs = aslist(request.registry.settings.get('nsq.reader.addresses',
+                                                 'localhost:4150'))
+    topic = _topic_name(request, topic)
     reader = gnsq.Reader(topic, channel, nsqd_tcp_addresses=addrs)
     return reader
 
@@ -29,6 +29,13 @@ def get_writer(request):
     hostname, port = setting.split(':', 1)
     nsqd = gnsq.Nsqd(hostname, http_port=port)
     return nsqd
+
+
+def _topic_name(request, name):
+    ns = request.registry.settings.get('nsq.namespace')
+    if ns is None:
+        return name
+    return '{0}-{1}'.format(ns, name)
 
 
 def includeme(config):

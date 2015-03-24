@@ -1,3 +1,4 @@
+import pytest
 from pyramid import testing
 from mock import patch
 
@@ -24,6 +25,17 @@ def test_get_reader(fake_reader):
                                    'channel4',
                                    nsqd_tcp_addresses=['foo:1234',
                                                        'bar:4567'])
+
+@patch('gnsq.Reader')
+def test_get_reader_namespace(fake_reader):
+    req = testing.DummyRequest()
+    req.registry.settings.update({
+        'nsq.namespace': "abc123"
+    })
+    queue.get_reader(req, 'safari', 'elephants')
+    fake_reader.assert_called_with('abc123-safari',
+                                   'elephants',
+                                   nsqd_tcp_addresses=['localhost:4150'])
 
 
 @patch('gnsq.Nsqd')
