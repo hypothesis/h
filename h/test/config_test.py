@@ -153,6 +153,17 @@ def test_nsqd_environment():
 
 
 @patch.dict(os.environ)
+def test_nsq_namespace():
+    os.environ['NSQ_NAMESPACE'] = 'staging'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'nsq.namespace': 'staging',
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
 def test_redis_database_environment():
     os.environ['REDIS_PORT'] = 'tcp://127.0.0.1:4567'
     os.environ['REDIS_PORT_6379_TCP_ADDR'] = '127.0.0.1'
