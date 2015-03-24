@@ -1,4 +1,5 @@
 angular = require('angular')
+mail = require('./vendor/jwz')
 
 
 module.exports = class StreamController
@@ -12,6 +13,34 @@ module.exports = class StreamController
      auth,   queryParser,   searchFilter,   store,
      streamer,   streamFilter, annotationMapper
   ) ->
+    # Initialize cards
+    $scope.threadRoot = mail.messageContainer()
+
+    $rootScope.$on 'beforeAnnotationCreated', (event, annotation) ->
+      container = mail.messageContainer(annotation)
+      $scope.threadRoot.addChild container
+
+    $rootScope.$on 'annotationCreated', (event, annotation) ->
+      for child in ($scope.threadRoot.children or []) \
+      when child.message is annotation
+        child.message = null
+        $scope.threadRoot.removeChild child
+        container = mail.messageContainer(annotation)
+        $scope.threadRoot.addChild container
+        break
+
+    $rootScope.$on 'annotationDeleted', (event, annotation) ->
+      for child in ($scope.threadRoot.children or []) \
+      when child.message is annotation
+        child.message = null
+        $scope.threadRoot.removeChild child
+        break
+
+    $rootScope.$on 'annotationsLoaded', (event, annotations) ->
+      for annotation in annotations
+        container = mail.messageContainer(annotation)
+        $scope.threadRoot.addChild container
+
     # Initialize the base filter
     streamFilter
       .resetFilter()
