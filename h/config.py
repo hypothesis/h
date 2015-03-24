@@ -128,6 +128,9 @@ def _setup_nsqd(settings):
         w_port = os.environ['NSQD_PORT_4151_TCP_PORT']
         settings['nsq.writer.address'] = '{}:{}'.format(w_host, w_port)
 
+    if 'NSQ_NAMESPACE' in os.environ:
+        settings['nsq.namespace'] = os.environ['NSQ_NAMESPACE']
+
 
 def _setup_redis(settings):
     if 'REDIS_PORT' in os.environ:
