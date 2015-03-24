@@ -23,6 +23,7 @@ from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from .api.auth import get_user  # FIXME: should not import from .api
+from annotator import document
 from .models import Annotation
 
 log = logging.getLogger(__name__)
@@ -473,6 +474,27 @@ class WebSocket(_WebSocket):
         data = json.dumps(packet)
         self.send(data)
 
+    def _expand_clauses(self, payload):
+        for clause in payload['clauses']:
+            if clause['field'] == '/uri':
+                self._expand_uris(clause)
+
+    def _expand_uris(self, clause):
+        uris = clause['value']
+        if not isinstance(uris, list):
+            uris = [uris]
+
+        if len(uris) < 1:
+            return
+
+        available_uris = set(uris)
+        for uri in uris:
+            doc = document.Document.get_by_uri(uri)
+            for eq_uri in doc.uris():
+                available_uris.add(eq_uri)
+
+        clause['value'] = list(available_uris)
+
     def received_message(self, msg):
         transaction.begin()
         try:
@@ -485,6 +507,10 @@ class WebSocket(_WebSocket):
 
                 # Let's try to validate the schema
                 validate(payload, filter_schema)
+
+                # Add backend expands for clauses
+                self._expand_clauses(payload)
+
                 self.filter = FilterHandler(payload)
                 self.query = FilterToElasticFilter(payload, self.request)
                 self.offsetFrom = 0
