@@ -32,6 +32,10 @@ class StreamSearchController
     $scope.sort.name = 'Newest'
 
     $scope.shouldShowThread = (container) -> true
+    $scope.threadRoot = children: $scope.threading?.streamRoot
+
+    $scope.$watch 'threading.streamRoot', (messageRoot) ->
+      $scope.threadRoot = messageRoot
 
     $scope.$on '$destroy', ->
       $scope.search.query = ''

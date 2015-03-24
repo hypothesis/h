@@ -4,16 +4,21 @@ mail = require('./vendor/jwz')
 class ThreadingService
   # Mix in message thread properties into the prototype. The body of the
   # class will overwrite any methods applied here. If you need inheritance
-  # assign the message thread to a local varible.
+  # assign the message thread to a local variable.
   # The mail object is exported by the jwz.js library.
   $.extend(this.prototype, mail.messageThread())
 
   root: null
+  # XXX: This will be moved to an other component
+  # when the threading service stops being the
+  # client side store for annotations
+  streamRoot: null
 
   this.$inject = ['$rootScope']
   constructor: ($rootScope) ->
     # Create a root container.
     @root = mail.messageContainer()
+    @streamRoot = mail.messageContainer()
     $rootScope.$on('beforeAnnotationCreated', this.beforeAnnotationCreated)
     $rootScope.$on('annotationCreated', this.annotationCreated)
     $rootScope.$on('annotationDeleted', this.annotationDeleted)
@@ -55,7 +60,11 @@ class ThreadingService
           prev.addChild(thread)
 
     this.pruneEmpties(@root)
-    @root
+
+    @streamRoot = mail.messageContainer()
+    for message in (@root.flattenChildren() or [])
+      container = mail.messageContainer(message)
+      @streamRoot.addChild container
 
   pruneEmpties: (parent) ->
     for container in parent.children
@@ -93,6 +102,12 @@ class ThreadingService
       for child in parent.children when child.message is annotation
         child.message = null
         this.pruneEmpties(@root)
+        break
+
+    for child in @streamRoot.children
+      if child.message? and child.message.id is annotation.id
+        child.message = null
+        @streamRoot.removeChild(child)
         break
 
   annotationsLoaded: (event, annotations) =>
