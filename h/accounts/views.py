@@ -54,17 +54,8 @@ def ajax_form(request, result):
     return result
 
 
-def ensure_csrf_token(view_fn):
-    def wrapper(context, request):
-        request.add_response_callback(session.set_csrf_token)
-        return view_fn(context, request)
-
-    return wrapper
-
-
 def view_auth_defaults(fn, *args, **kwargs):
     kwargs.setdefault('accept', 'text/html')
-    kwargs.setdefault('decorator', ensure_csrf_token)
     kwargs.setdefault('layout', 'auth')
     kwargs.setdefault('renderer', 'h:templates/auth.html')
     return view_defaults(*args, **kwargs)(fn)
@@ -88,7 +79,6 @@ class AsyncFormViewMapper(object):
 
     def __call__(self, view):
         def wrapper(context, request):
-            request.add_response_callback(session.set_csrf_token)
             if request.method == 'POST':
                 data = request.json_body
                 data.update(request.params)

@@ -55,6 +55,8 @@ def create_app(global_config, **settings):
     config.add_jinja2_renderer('.html')
     config.add_jinja2_renderer('.xml')
 
+    config.add_tween('h.tweens.csrf_tween_factory')
+
     if config.registry.feature('accounts'):
         config.set_authentication_policy(session_authn)
         config.set_authorization_policy(acl_authz)

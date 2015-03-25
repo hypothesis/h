@@ -28,12 +28,6 @@ def pop_flash(request):
     return queues
 
 
-def set_csrf_token(request, response):
-    csrft = request.session.get_csrf_token()
-    if request.cookies.get('XSRF-TOKEN') != csrft:
-        response.set_cookie('XSRF-TOKEN', csrft)
-
-
 def includeme(config):
     registry = config.registry
     settings = registry.settings
