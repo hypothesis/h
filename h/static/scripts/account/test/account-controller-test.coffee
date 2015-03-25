@@ -9,7 +9,7 @@ describe 'h:AccountController', ->
   fakeFlash = null
   fakeSession = null
   fakeIdentity = null
-  fakeFormHelpers = null
+  fakeFormRespond = null
   fakeAuth = null
   editProfilePromise = null
   disableUserPromise = null
@@ -33,8 +33,7 @@ describe 'h:AccountController', ->
       error: sandbox.spy()
     fakeIdentity =
       logout: sandbox.spy()
-    fakeFormHelpers =
-      applyValidationErrors: sandbox.spy()
+    fakeFormRespond = sandbox.spy()
     fakeAuth =
       user: 'egon@columbia.edu'
 
@@ -44,7 +43,7 @@ describe 'h:AccountController', ->
     $provide.value 'session', fakeSession
     $provide.value 'flash', fakeFlash
     $provide.value 'identity', fakeIdentity
-    $provide.value 'formHelpers', fakeFormHelpers
+    $provide.value 'formRespond', fakeFormRespond
     $provide.value 'auth', fakeAuth
     return
 
@@ -110,7 +109,7 @@ describe 'h:AccountController', ->
           errors:
             pwd: 'this is wrong'
 
-      assert.calledWith fakeFormHelpers.applyValidationErrors, fakeForm,
+      assert.calledWith fakeFormRespond, fakeForm,
         pwd: 'this is wrong'
 
     it 'displays a flash message on success', ->
@@ -205,7 +204,7 @@ describe 'h:AccountController', ->
           errors:
             pwd: 'this is wrong'
 
-      assert.calledWith fakeFormHelpers.applyValidationErrors, fakeForm,
+      assert.calledWith fakeFormRespond, fakeForm,
         pwd: 'this is wrong'
 
     it 'displays a flash message if a server error occurs', ->

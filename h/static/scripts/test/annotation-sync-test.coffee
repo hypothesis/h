@@ -15,7 +15,7 @@ describe 'AnnotationSync', ->
 
   before ->
     angular.module('h', [])
-    require('../annotation-sync')
+    .value('AnnotationSync', require('../annotation-sync'))
 
   beforeEach module('h')
   beforeEach inject (AnnotationSync, $rootScope) ->

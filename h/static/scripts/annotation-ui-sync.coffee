@@ -1,6 +1,6 @@
 # Uses a channel between the sidebar and the attached providers to ensure
 # the interface remains in sync.
-class AnnotationUISync
+module.exports = class AnnotationUISync
   ###*
   # @name AnnotationUISync
   # @param {$window} $window An Angular window service.
@@ -50,5 +50,3 @@ class AnnotationUISync
           params: annotationUI.visibleHighlights
 
     bridge.onConnect(onConnect)
-
-angular.module('h').value('AnnotationUISync', AnnotationUISync)
