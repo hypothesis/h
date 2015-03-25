@@ -7,14 +7,14 @@ module.exports = class AppController
     '$window',
     'auth', 'drafts', 'identity',
     'permissions', 'streamer', 'annotationUI',
-    'annotationMapper', 'threading'
+    'annotationMapper'
   ]
   constructor: (
      $controller,   $document,   $location,   $rootScope,   $route,   $scope,
      $window,
      auth,   drafts,   identity,
      permissions,   streamer,   annotationUI,
-     annotationMapper, threading
+     annotationMapper
   ) ->
     $controller('AnnotationUIController', {$scope})
 
@@ -25,6 +25,10 @@ module.exports = class AppController
     streamerUrl.protocol = streamerUrl.protocol.replace('http', 'ws')
     streamerUrl = streamerUrl.href
 
+    $scope.lookup =
+      getAnnotationContainers: -> []
+      hasAnnotation: -> null
+
     applyUpdates = (action, data) ->
       # Update the application with new data from the websocket.
       return unless data?.length
@@ -33,7 +37,7 @@ module.exports = class AppController
           annotationMapper.loadAnnotations data
         when 'delete'
           for annotation in data
-            if a = $scope.threading.idTable[annotation.id]?.message
+            if a = $scope.lookup.hasAnnotation(annotation)
               $scope.$emit('annotationDeleted', a)
 
     streamer.onmessage = (data) ->
@@ -46,15 +50,9 @@ module.exports = class AppController
     oncancel = ->
       $scope.dialog.visible = false
 
-    $rootScope.getAnnotationContainers = ->
-      containers = []
-      for id, container of $scope.threading.idTable when container.message
-        containers.push container
-      containers
-
-    $scope.cleanupAnnotations = ->
+    cleanupAnnotations = ->
       # Clean up any annotations that need to be unloaded.
-      for container in $rootScope.getAnnotationContainers()
+      for container in $scope.lookup.getAnnotationContainers()
         # Remove annotations the user is not authorized to view.
         if not permissions.permits 'read', container.message, auth.user
           $scope.$emit('annotationDeleted', container.message)
@@ -85,7 +83,7 @@ module.exports = class AppController
       streamer.open($window.WebSocket, streamerUrl)
 
       # Clean up annotations that should be removed
-      $scope.cleanupAnnotations()
+      cleanupAnnotations()
 
       # Reload the view.
       $route.reload()
@@ -123,5 +121,4 @@ module.exports = class AppController
           annotationUI.clearSelectedAnnotations()
 
     $scope.sort = name: 'Location'
-    $scope.threading = threading
-    $scope.threadRoot = $scope.threading?.root
+    $scope.threadRoot = []
