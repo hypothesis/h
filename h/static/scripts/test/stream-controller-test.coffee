@@ -67,9 +67,6 @@ describe 'StreamController', ->
 
     return
 
-  afterEach ->
-    sandbox.restore()
-
   createController = null
 
   beforeEach inject ($controller, $rootScope) ->
@@ -79,12 +76,22 @@ describe 'StreamController', ->
     $scope.search = {
       query: ''
     }
+    $scope.lookup = {
+      hasAnnotation: sinon.spy()
+      getAnnotationContainers: sinon.spy()
+    }
     $scope.sort = {
       name: 'Newest'
     }
 
     createController = ->
-      $controller('StreamController', {$scope: $scope})
+      controller = $controller('StreamController', {$scope: $scope})
+      controller.threadRoot.children = []
+      controller.idTable = {}
+      controller
+
+  afterEach ->
+    sandbox.restore()
 
   describe '$routeParams', ->
     it 'gets populates the search query from routeParams.q', ->
