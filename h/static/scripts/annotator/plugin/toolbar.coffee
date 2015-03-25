@@ -12,15 +12,22 @@ makeButton = (item) ->
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   PUSHED_CLASS = 'annotator-pushed'
 
+  mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
   events:
     '.annotator-toolbar mouseenter': 'show'
     '.annotator-toolbar mouseleave': 'hide'
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
+  mobilehtml: '<div class="annotator-toolbar"></div>'
   html: '<div class="annotator-toolbar annotator-hide"></div>'
 
   pluginInit: ->
-    @annotator.toolbar = @toolbar = $(@html)
+    # On mobile, we don't hide the toolbar.
+    if mobile
+      @annotator.toolbar = @toolbar = $(@mobilehtml)
+    else
+      @annotator.toolbar = @toolbar = $(@html)
     if @options.container?
       $(@options.container).append @toolbar
     else
@@ -48,6 +55,14 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           state = not @annotator.visibleHighlights
           @annotator.setVisibleHighlights state
     ,
+      "title": "Highlight"
+      "class": "h-icon-border-color"
+      "on":
+        "click": (event) =>
+          event.preventDefault()
+          event.stopPropagation()
+          @annotator.onAdderClick target: dataset: action: "highlight"
+    ,
       "title": "New Note"
       "class": "h-icon-insert-comment"
       "on":
@@ -56,7 +71,21 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           event.stopPropagation()
           @annotator.onAdderClick(event)
     ]
-    @buttons = $(makeButton(item) for item in items)
+    # @buttons = $(makeButton(item) for item in items)
+    # Perhaps we make the buttons but add a hidden class to highligght button? We show it on mobile when
+    # A selection is made...
+
+    @buttons = $(
+      for item in items
+        if item.title == "Highlight"
+          # The highlight button is only shown on mobile.
+          if /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            makeButton(item)
+          else
+            continue
+        else
+          makeButton(item)
+    )
 
     list = $('<ul></ul>')
     @buttons.appendTo(list)
@@ -67,9 +96,13 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     # psuedo-class to a clicked element.
     @toolbar.on('mouseup', 'a', (event) -> $(event.target).blur())
 
-  show: -> this.toolbar.removeClass('annotator-hide')
+  show: ->
+    if !mobile
+      this.toolbar.removeClass('annotator-hide')
 
-  hide: -> this.toolbar.addClass('annotator-hide')
+  hide: ->
+    if !mobile
+      this.toolbar.addClass('annotator-hide')
 
   onSetVisibleHighlights: (state) ->
     if state

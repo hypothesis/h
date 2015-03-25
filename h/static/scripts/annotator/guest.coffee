@@ -167,17 +167,6 @@ module.exports = class Guest extends Annotator
     metadata.link?.forEach (link) => link.href = @_removeHash link.href
     metadata
 
-  # Needed to get text selection working on iOS. Only used for touch screen devices.
-  userSelectionChanged: ->
-    # wait 500 ms after the last selection change event
-    if selectionEndTimeout
-      clearTimeout selectionEndTimeout
-    selectionEndTimeout = setTimeout((->
-      @Annotator.Util.getGlobal().trigger 'selectionEnd'
-      return
-    ), 500)
-    return
-
   _connectAnnotationUISync: (crossframe) ->
     crossframe.onConnect(=> this.publish('panelReady'))
     crossframe.on('onEditorHide', this.onEditorHide)
@@ -290,6 +279,17 @@ module.exports = class Guest extends Annotator
       params: (a.$$tag for a in annotations)
 
   onAnchorMousedown: ->
+
+  # Needed to get text selection working on iOS. Only used for touch screen devices.
+  userSelectionChanged: ->
+    # wait 500 ms after the last selection change event
+    if selectionEndTimeout
+      clearTimeout selectionEndTimeout
+    selectionEndTimeout = setTimeout((->
+      @Annotator.Util.getGlobal().trigger 'selectionEnd'
+      return
+    ), 500)
+    return
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the

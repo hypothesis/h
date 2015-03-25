@@ -2,9 +2,10 @@
 <html prefix="og: http://ogp.me/ns#">
   <head>
     {% block meta %}
+      <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
       <meta charset="UTF-8" />
       <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-      <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <meta name="mobile-web-app-capable" content="yes">
       {% for attrs in meta_attrs -%}
         <meta {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
       {% endfor -%}
