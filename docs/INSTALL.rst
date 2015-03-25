@@ -48,13 +48,44 @@ This will take some time to complete, as it will install and configure a
 complete image of h and all its direct dependencies.
 
 
+Configuring container dependencies
+----------------------------------
+
+At a minimum, you will need:
+
+-  a PostgreSQL database
+-  an ElasticSearch server with the ICU analysis plugin enabled
+-  an nsqd server
+-  a Redis server
+-  a mailer
+
+One option is to containerise these services, although you should investigate
+for yourself if this is a sensible approach for your environment.
+
+For example, we choose to run ElasticSearch, nsqd, and Redis in containers. We
+also use an `ambassador container`_ to point to our mailserver::
+
+    $ docker run -d --name elasticsearch nickstenning/elasticsearch-icu
+    $ docker run -d --name nsqd --expose 4150 --expose 4151 nsqio/nsq /nsqd
+    $ docker run -d --name redis redis
+    $ docker run -d --name mail --expose 25 -e MAIL_PORT_25_TCP=tcp://smtp.mydomain.com:25 svendowideit/ambassador
+
+And configure a PostgreSQL database identified by the following `SQLAlchemy
+database URL`_::
+
+    postgresql://scott:tiger@dbserver/mydatabase
+
+.. _ambassador container: https://docs.docker.com/articles/ambassador_pattern_linking/
+.. _SQLAlchemy database URL: http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls
+
+
 Running the container
 ---------------------
 
 You can now run a Docker container using the ``hypothesis/h`` image you just
 built. At its simplest, this consists of running::
 
-    $ docker run hypothesis/h
+    $ docker run -d -p 8000:8000 hypothesis/h
 
 but this will usually result in a container which is missing some important
 configuration. In particular, you need to let the running h instance know where
@@ -68,11 +99,24 @@ configuration of these services:
 -  ``redis``
 -  ``statsd``
 
-In a production environment you should set the following container environment
-variables:
+Using the example given in the previous section, in which we started containers
+for our external services, we can use `docker links`_ to configure the h
+container::
+
+    $ docker run -d -p 8000:8000 \
+                 -e DATABASE_URL=postgresql://scott:tiger@dbserver/mydatabase \
+                 --link elasticsearch:elasticsearch \
+                 --link nsqd:nsqd \
+                 --link redis:redis \
+                 --link mail:mail \
+                 hypothesis/h
+
+.. _docker links: https://docs.docker.com/userguide/dockerlinks/
+
+In a production environment you should also set the following container
+environment variables:
 
 -  ``APP_URL`` the base URL of the application
--  ``DATABASE_URL`` an SQLAlchemy compatible database URL
 -  ``SECRET_KEY`` a secret key for use in cryptographic operations
 
 .. note::
