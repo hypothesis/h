@@ -15,7 +15,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   events:
     '.annotator-toolbar mouseenter': 'show'
     '.annotator-toolbar mouseleave': 'hide'
-    'setTool': 'onSetTool'
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
   html: '<div class="annotator-toolbar annotator-hide"></div>'
@@ -55,7 +54,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         "click": (event) =>
           event.preventDefault()
           event.stopPropagation()
-          @annotator.onAdderClick target: dataset: action: "comment"
+          @annotator.onAdderClick(event)
     ]
     @buttons = $(makeButton(item) for item in items)
 
@@ -71,13 +70,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   show: -> this.toolbar.removeClass('annotator-hide')
 
   hide: -> this.toolbar.addClass('annotator-hide')
-
-  onSetTool: (name) ->
-    if name is 'highlight'
-      $(@buttons[2]).addClass(PUSHED_CLASS)
-    else
-      $(@buttons[2]).removeClass(PUSHED_CLASS)
-    this._updateStickyButtons()
 
   onSetVisibleHighlights: (state) ->
     if state

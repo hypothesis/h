@@ -6,12 +6,16 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
     @$ = Annotator.$
 
     # Register the event handlers required for creating a selection
-    $(document).bind({
-      "mouseup": @checkForEndSelection
-    })
+    if /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      $(document).bind({
+        "touchend": @checkForEndSelection
+      })
+    else
+      $(document).bind({
+        "mouseup": @checkForEndSelection
+      })
 
     null
-
 
   # Code used to create annotations around text ranges =====================
 
@@ -61,7 +65,7 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
       selection.addRange(range.toRange()) if range
       range
 
-  # This is called then the mouse is released.
+  # This is called when the mouse is released.
   # Checks to see if a selection has been made on mouseup and if so,
   # calls Annotator's onSuccessfulSelection method.
   # Also resets the @mouseIsDown property.

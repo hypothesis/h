@@ -5,11 +5,24 @@ module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
 
   # Events to be bound on Annotator#element.
-  events:
-    ".annotator-adder button click":     "onAdderClick"
-    ".annotator-adder button mousedown": "onAdderMousedown"
-    ".annotator-adder button mouseup":   "onAdderMouseup"
-    "setVisibleHighlights": "setVisibleHighlights"
+  # We bind different events depending on whether the browser supports touch.
+  if not /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    events:
+      ".annotator-adder button click":     "onAdderClick"
+      ".annotator-adder button mousedown": "onAdderMousedown"
+      ".annotator-adder button mouseup":   "onAdderMouseup"
+      "setVisibleHighlights": "setVisibleHighlights"
+  else
+    events:
+      "setVisibleHighlights": "setVisibleHighlights"
+      "document onselectionchange": "userSelectionChanged"
+    # This hack is needed for iOS Safari.
+    $(window).bind 'selectionEnd', ->
+      # reset selection timeout
+      selectionEndTimeout = null
+      # get user selection
+      selectedText = getSelectionText()
+      return
 
   # Plugin configuration
   options:
@@ -154,6 +167,17 @@ module.exports = class Guest extends Annotator
     metadata.link?.forEach (link) => link.href = @_removeHash link.href
     metadata
 
+  # Needed to get text selection working on iOS. Only used for touch screen devices.
+  userSelectionChanged: ->
+    # wait 500 ms after the last selection change event
+    if selectionEndTimeout
+      clearTimeout selectionEndTimeout
+    selectionEndTimeout = setTimeout((->
+      @Annotator.Util.getGlobal().trigger 'selectionEnd'
+      return
+    ), 500)
+    return
+
   _connectAnnotationUISync: (crossframe) ->
     crossframe.onConnect(=> this.publish('panelReady'))
     crossframe.on('onEditorHide', this.onEditorHide)
@@ -197,10 +221,14 @@ module.exports = class Guest extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
   _setupDocumentEvents: ->
-    $(document).bind({
-      # omit the "mouseup" check
-      "mousedown": this.checkForStartSelection
-    })
+    if not /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      $(document).bind({
+        "mousedown": @checkForStartSelection
+      })
+    else
+      $(document).bind({
+        "touchstart": @checkForStartSelection
+      })
     this
 
   destroy: ->
@@ -384,11 +412,10 @@ module.exports = class Guest extends Annotator
     event.preventDefault?()
     event.stopPropagation?()
     @adder.hide()
-    switch event.target.dataset.action
-      when 'highlight'
-        this.setVisibleHighlights true
-        this.setupAnnotation(this.createHighlight())
-      when 'comment'
-        this.setupAnnotation(this.createAnnotation())
-        this.triggerShowFrame()
+    if event.target.dataset.action == 'highlight'
+      this.setVisibleHighlights true
+      this.setupAnnotation(this.createHighlight())
+    else
+      this.setupAnnotation(this.createAnnotation())
+      this.triggerShowFrame()
     Annotator.Util.getGlobal().getSelection().removeAllRanges()
