@@ -9,4 +9,8 @@ def split_user(username):
     ("seanh", "hypothes.is").
 
     """
-    return re.match(r'^acct:([^@]+)@(.*)$', username).groups()
+    match = re.match(r'^acct:([^@]+)@(.*)$', username)
+    if match:
+        return match.groups()
+    # Passed username didn't match
+    return None
