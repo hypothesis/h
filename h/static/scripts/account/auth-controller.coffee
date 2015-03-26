@@ -18,7 +18,12 @@ class AuthController
       $scope.form?.$setPristine()
 
     failure = (form, response) ->
-      {errors, reason} = response.data
+      try
+        {errors, reason} = response.data
+      catch
+        form.responseErrorMessage = "Oops, something went wrong on the server.
+          Please try again later!"
+        return
       formHelpers.applyValidationErrors(form, errors, reason)
 
     this.submit = (form) ->
