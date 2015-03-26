@@ -1,6 +1,6 @@
 module.exports = ->
-  link: (scope, elem, attr, [form, model, validator]) ->
-    return unless form?.$name and model.$name and validator
+  link: (scope, elem, attr, [model, validator]) ->
+    return unless model
 
     fieldClassName = 'form-field'
     errorClassName = 'form-field-error'
@@ -20,13 +20,14 @@ module.exports = ->
       toggleClass(model.$invalid and model.$dirty)
       render()
 
-    validator.addControl(model)
-    scope.$on '$destroy', -> validator.removeControl this
+    if validator?
+      validator.addControl(model)
+      scope.$on '$destroy', -> validator.removeControl model
 
     scope.$watch ->
       if model.$modelValue? or model.$pristine
         toggleClass(model.$invalid and model.$dirty)
       return
 
-  require: ['^?form', '?ngModel', '^?formValidate']
+  require: ['?ngModel', '^?formValidate']
   restrict: 'C'

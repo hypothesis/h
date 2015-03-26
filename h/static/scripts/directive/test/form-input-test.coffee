@@ -12,7 +12,6 @@ describe 'form-input', ->
   before ->
     angular.module('h', ['ng'])
     .directive('formInput', require('../form-input'))
-    .directive('formValidate', require('../form-validate'))
 
   beforeEach module('h')
   beforeEach inject (_$compile_, _$rootScope_) ->
@@ -23,16 +22,14 @@ describe 'form-input', ->
     $scope.model = {username: undefined}
 
     template = '''
-      <form form-validate name="login" onsubmit="return false">
-        <div class="form-field">
-          <input type="text" class="form-input" name="username"
-                 ng-model="model.username" name="username"
-                 required ng-minlength="3" />
-        </div>
-      </form>
+      <div class="form-field">
+        <input type="text" class="form-input" name="username"
+               ng-model="model.username" name="username"
+               required ng-minlength="3" />
+      </div>
     '''
 
-    $field = $compile(angular.element(template))($scope).find('div')
+    $field = $compile(angular.element(template))($scope)
     $scope.$digest()
 
   it 'should remove an error class to an valid field on change', ->
@@ -109,3 +106,17 @@ describe 'form-input', ->
     $scope.$digest()
 
     assert.notInclude($field.prop('className'), 'form-field-error')
+
+  describe 'with form-validate', ->
+    link = require('../form-input')().link
+
+    it 'should register its model with the validator', ->
+      model = {'$parsers': []}
+      validator = {addControl: sinon.spy(), removeControl: sinon.spy()}
+      link($scope, $field, null, [model, validator])
+      assert.calledOnce(validator.addControl)
+      assert.calledWith(validator.addControl, model)
+      assert.notCalled(validator.removeControl)
+      $scope.$destroy()
+      assert.calledOnce(validator.removeControl)
+      assert.calledWith(validator.removeControl, model)
