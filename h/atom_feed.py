@@ -63,7 +63,11 @@ def _feed_entry_from_annotation(
     :rtype: dict
 
     """
-    name = util.split_user(annotation["user"])[0]
+    parts = util.split_user(annotation["user"])
+    if parts is None:
+        name = annotation["user"]
+    else:
+        name = parts[0]
     document = annotation.get("document")
     if document:
         title = document.get("title", "")

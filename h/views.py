@@ -103,8 +103,8 @@ def stream(context, request):
 
     if stream_type == 'user':
         parts = util.split_user(stream_key)
-        if parts is not None and parts.groups()[1] == request.domain:
-            query = {'q': 'user:{}'.format(parts.groups()[0])}
+        if parts is not None and parts[1] == request.domain:
+            query = {'q': 'user:{}'.format(parts[0])}
         else:
             query = {'q': 'user:{}'.format(stream_key)}
     elif stream_type == 'tag':
