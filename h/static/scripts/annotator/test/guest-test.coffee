@@ -1,5 +1,5 @@
 Annotator = require('annotator')
-require('../annotator/monkey')
+require('../monkey')
 Guest = require('../guest')
 
 assert = chai.assert
