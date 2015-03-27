@@ -32,8 +32,10 @@ Annotator.prototype.setupAnnotation = (annotation) ->
       console.log "Error in setupAnnotation for", annotation.id,
         ":", exception.stack ? exception
 
-  annotation
+  if annotation.target?.length and not annotation.anchors?.length
+    annotation.$orphan = true
 
+  annotation
 
 # Override deleteAnnotation to deal with anchors, not highlights.
 Annotator.prototype.deleteAnnotation = (annotation) ->

@@ -70,3 +70,5 @@ module.exports = class WidgetController
 
     $scope.hasFocus = (annotation) ->
       !!($scope.focusedAnnotations ? {})[annotation?.$$tag]
+
+    $scope.notOrphan = (container) -> !container?.message?.$orphan
