@@ -32,6 +32,11 @@ describe 'Guest', ->
 
       getHighlights: sandbox.stub().returns([])
       getAnchors: sandbox.stub().returns([])
+      createAnchor: sandbox.spy (annotation, target) ->
+        anchor = "anchor for " + target
+        annotation.anchors.push anchor
+
+        result: anchor
     }
 
     Annotator.Plugin.CrossFrame = -> fakeCrossFrame
@@ -292,3 +297,24 @@ describe 'Guest', ->
       guest = createGuest()
       guest.setupAnnotation({ranges: []})
       assert.called(fakeCrossFrame.sync)
+
+  describe 'Annotator monkey patch', ->
+    describe 'setupAnnotation()', ->
+      it "doesn't declare annotation without targets as orphans", ->
+        guest = createGuest()
+        annotation = target: []
+        guest.setupAnnotation(annotation)
+        assert.isFalse !!annotation.$orphan
+
+      it "doesn't declare annotations with a working target as orphans", ->
+        guest = createGuest()
+        annotation = target: ["test target"]
+        guest.setupAnnotation(annotation)
+        assert.isFalse !!annotation.$orphan
+
+      it "declares annotations with broken targets as orphans", ->
+        guest = createGuest()
+        guest.anchoring.createAnchor = -> result: null
+        annotation = target: ["broken target"]
+        guest.setupAnnotation(annotation)
+        assert !!annotation.$orphan
