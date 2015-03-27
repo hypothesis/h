@@ -1,4 +1,4 @@
-class AnnotationSync
+module.exports = class AnnotationSync
   # Default configuration
   options:
     # Formats an annotation into a message body for sending across the bridge.
@@ -186,8 +186,3 @@ class AnnotationSync
       tag: ann.$$tag
       msg: @options.formatter(ann)
     }
-
-if angular?
-  angular.module('h').value('AnnotationSync', AnnotationSync)
-else
-  Annotator.Plugin.CrossFrame.AnnotationSync = AnnotationSync

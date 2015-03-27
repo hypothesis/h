@@ -13,7 +13,7 @@ extract = extract = (obj, keys...) ->
 # frame acts as the bridge client, the sidebar is the server. This plugin
 # can also be used to send messages through to the sidebar using the
 # notify method.
-CrossFrame = class Annotator.Plugin.CrossFrame extends Annotator.Plugin
+module.exports = class CrossFrame extends Annotator.Plugin
   constructor: (elem, options) ->
     super
 
@@ -46,5 +46,3 @@ CrossFrame = class Annotator.Plugin.CrossFrame extends Annotator.Plugin
 
     this.onConnect = (fn) ->
       bridge.onConnect(fn)
-
-exports.CrossFrame = CrossFrame

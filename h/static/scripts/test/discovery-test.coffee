@@ -12,7 +12,7 @@ describe 'Discovery', ->
 
   before ->
     angular.module('h', [])
-    require('../discovery')
+    .value('Discovery', require('../discovery'))
 
   beforeEach module('h')
   beforeEach inject (Discovery) ->

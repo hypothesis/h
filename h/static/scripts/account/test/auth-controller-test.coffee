@@ -19,7 +19,7 @@ class MockSession
       finally: sandbox.stub()
 
 mockFlash = info: sandbox.spy()
-mockFormHelpers = applyValidationErrors: sandbox.spy()
+mockFormRespond = sandbox.spy()
 
 describe 'h:AuthController', ->
   $scope = null
@@ -38,7 +38,7 @@ describe 'h:AuthController', ->
     $provide.value '$timeout', sandbox.spy()
     $provide.value 'flash', mockFlash
     $provide.value 'session', new MockSession()
-    $provide.value 'formHelpers', mockFormHelpers
+    $provide.value 'formRespond', mockFormRespond
     return
 
   beforeEach inject ($controller, $rootScope, _$timeout_, _session_) ->
@@ -81,7 +81,7 @@ describe 'h:AuthController', ->
 
       auth.submit(form)
 
-      assert.calledWith mockFormHelpers.applyValidationErrors, form,
+      assert.calledWith mockFormRespond, form,
         {username: 'taken'},
         'registration error'
 

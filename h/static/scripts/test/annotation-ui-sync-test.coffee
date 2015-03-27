@@ -18,7 +18,7 @@ describe 'AnnotationUISync', ->
 
   before ->
     angular.module('h', [])
-    require('../annotation-ui-sync')
+    .value('AnnotationUISync', require('../annotation-ui-sync'))
 
   beforeEach module('h')
   beforeEach inject (AnnotationUISync, $rootScope) ->

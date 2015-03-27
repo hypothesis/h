@@ -45,6 +45,7 @@
   },
   "browser": {
     "annotator": "./h/static/scripts/vendor/annotator.js",
+    "annotator-auth": "./h/static/scripts/vendor/annotator.auth.js",
     "angular": "./h/static/scripts/vendor/angular.js",
     "angular-mock": "./h/static/scripts/vendor/angular-mocks.js",
     "diff-match-patch": "./h/static/scripts/vendor/diff_match_patch_uncompressed.js",
@@ -57,13 +58,29 @@
     "text-match-engines": "./h/static/scripts/vendor/text_match_engines.js"
   },
   "browserify-shim": {
-    "annotator": "global:Annotator",
-    "angular": "global:angular",
+    "annotator": {
+      "exports": "Annotator",
+      "depends": [
+        "jquery"
+      ]
+    },
+    "annotator-auth": {
+      "depends": [
+        "jquery",
+        "annotator"
+      ]
+    },
+    "angular": {
+      "exports": "global:angular",
+      "depends": [
+        "jquery"
+      ]
+    },
     "angular-mock": "global:angular.mock",
     "diff-match-patch": "diff_match_patch",
     "dom-text-mapper": "DomTextMapper",
     "dom-text-matcher": "DomTextMatcher",
-    "jquery": "global:jQuery",
+    "jquery": "$",
     "jquery-scrollintoview": {
       "depends": [
         "jquery"
