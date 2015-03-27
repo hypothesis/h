@@ -16,7 +16,6 @@ Annotator.prototype.setupAnnotation = (annotation) ->
   @selectedTargets = []
 
   annotation.anchors = []
-  hasAnchor = false
 
   for t in annotation.target ? []
     try
@@ -28,13 +27,12 @@ Annotator.prototype.setupAnnotation = (annotation) ->
       if anchor?
         t.diffHTML = anchor.diffHTML
         t.diffCaseOnly = anchor.diffCaseOnly
-        hasAnchor = true
 
     catch exception
       console.log "Error in setupAnnotation for", annotation.id,
         ":", exception.stack ? exception
 
-  if annotation.target?.length and not hasAnchor
+  if annotation.target?.length and not annotation.anchors?.length
     annotation.$orphan = true
 
   annotation
