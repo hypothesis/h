@@ -19,12 +19,26 @@ log = logging.getLogger(__name__)
 _ = i18n.TranslationStringFactory(__package__)
 
 
-@view_config(context=Exception, renderer='h:templates/5xx.html')
+@view_config(context=Exception, accept='text/html',
+             renderer='h:templates/5xx.html')
 def error(context, request):
     """Display an error message."""
     log.exception('%s: %s', type(context).__name__, str(context))
     request.response.status_int = 500
     return {}
+
+
+@view_config(context=Exception, accept='application/json', renderer='json')
+def json_error(context, request):
+    """"Return a JSON-formatted error message."""
+    log.exception('%s: %s', type(context).__name__, str(context))
+    request.response.status_int = 500
+    return {"reason": _(
+        "Uh-oh, something went wrong! We're very sorry, our "
+        "application wasn't able to load this page. The team has been "
+        "notified and we'll fix it shortly. If the problem persists or you'd "
+        "like more information please email support@hypothes.is with the "
+        "subject 'Internal Server Error'.")}
 
 
 @view_config(
