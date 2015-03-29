@@ -15,9 +15,6 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
 
-from h.api.db import create_db, delete_db
-from h.api.db import store_from_settings
-
 
 @pytest.fixture(scope='session', autouse=True)
 def settings():
@@ -88,17 +85,6 @@ def dummy_db_session(config):
     sess = DummySession()
     config.registry.registerUtility(sess, IDBSession)
     return sess
-
-
-@pytest.fixture()
-def es_connection(request, settings):
-    es = store_from_settings(settings)
-    create_db()
-    # Pylint issue #258: https://bitbucket.org/logilab/pylint/issue/258
-    #
-    # pylint: disable=unexpected-keyword-arg
-    es.conn.cluster.health(wait_for_status='yellow')
-    request.addfinalizer(delete_db)
 
 
 @pytest.fixture()

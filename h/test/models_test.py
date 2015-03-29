@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import unittest
-import pytest
 
 from pytest import fixture, raises
 from pyramid import security
@@ -58,22 +57,3 @@ class TestAnnotationPermissions(unittest.TestCase):
         actual = annotation.__acl__()
         expect = [(security.Allow, security.Authenticated, 'read')]
         assert actual == expect
-
-
-@pytest.mark.usefixtures('es_connection')
-def test_uri_mapping():
-    permissions = {
-        'read': ['group:__world__'],
-    }
-    a1 = models.Annotation(uri='http://example.com/page#hashtag',
-                           permissions=permissions)
-    a1.save()
-    a2 = models.Annotation(uri='http://example.com/page',
-                           permissions=permissions)
-    a2.save()
-    a3 = models.Annotation(uri='http://totallydifferent.domain.com/',
-                           permissions=permissions)
-    a3.save()
-
-    res = models.Annotation.search(query={'uri': 'example.com/page'})
-    assert len(res) == 2
