@@ -79,7 +79,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       for item in items
         if item.title == "Highlight"
           # The highlight button is only shown on mobile.
-          if /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+          if mobile
             makeButton(item)
           else
             continue

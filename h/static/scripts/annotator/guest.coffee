@@ -6,7 +6,8 @@ module.exports = class Guest extends Annotator
 
   # Events to be bound on Annotator#element.
   # We bind different events depending on whether the browser supports touch.
-  if not /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  if not mobile
     events:
       ".annotator-adder button click":     "onAdderClick"
       ".annotator-adder button mousedown": "onAdderMousedown"
@@ -210,7 +211,7 @@ module.exports = class Guest extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
   _setupDocumentEvents: ->
-    if not /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    if not mobile
       $(document).bind({
         "mousedown": @checkForStartSelection
       })
