@@ -21,9 +21,8 @@ class AuthController
       try
         {errors, reason} = response.data
       catch
-        form.responseErrorMessage = "Oops, something went wrong on the server.
-          Please try again later!"
-        return
+        reason = "Oops, something went wrong on the server. Please try again
+            later!"
       formHelpers.applyValidationErrors(form, errors, reason)
 
     this.submit = (form) ->
