@@ -26,6 +26,7 @@ describe 'h:AuthController', ->
   $timeout = null
   auth = null
   session = null
+  $controller = null
 
   before ->
     angular.module('h', [])
@@ -41,9 +42,10 @@ describe 'h:AuthController', ->
     $provide.value 'formRespond', mockFormRespond
     return
 
-  beforeEach inject ($controller, $rootScope, _$timeout_, _session_) ->
+  beforeEach inject (_$controller_, $rootScope, _$timeout_, _session_) ->
     $scope = $rootScope.$new()
     $timeout = _$timeout_
+    $controller = _$controller_
     auth = $controller 'AuthController', {$scope}
     session = _session_
     sandbox.spy session, 'login'
@@ -84,6 +86,44 @@ describe 'h:AuthController', ->
       assert.calledWith mockFormRespond, form,
         {username: 'taken'},
         'registration error'
+
+    it 'should apply reason-only validation errors from the server', ->
+      # Make a mock session that returns an error response with a "reason" but
+      # no "errors" in the JSON object.
+      reason = 'Argh, crashed! :|'
+      myMockSession = new MockSession()
+      myMockSession.register = (data, callback, errback) ->
+        errback({data: {reason: reason}})
+        $promise: {finally: sandbox.stub()}
+
+      # Get an AuthController object with our mock session.
+      authCtrl = $controller(
+        'AuthController', {$scope:$scope, session:myMockSession})
+
+      form = {$name: 'register', $valid: true}
+
+      authCtrl.submit(form)
+
+      assert.calledWith(mockFormRespond, form, undefined, reason)
+
+    it 'should handle invalid error responses from the server', ->
+      # A mock session that returns an error that isn't a valid JSON object
+      # in the form that the frontend expects. This happens if there's an
+      # uncaught exception on the server.
+      myMockSession = new MockSession()
+      myMockSession.register = (data, callback, errback) ->
+        errback('Oh no!!')
+        $promise: {finally: sandbox.stub()}
+
+      authCtrl = $controller(
+        'AuthController', {$scope:$scope, session:myMockSession})
+
+      form = {$name: 'register', $valid: true}
+
+      authCtrl.submit(form)
+
+      assert.calledWith(mockFormRespond, form, undefined,
+        "Oops, something went wrong on the server. Please try again later!")
 
     it 'should emit an auth event once authenticated', ->
       form =
