@@ -106,6 +106,25 @@ describe 'h:AuthController', ->
 
       assert.calledWith(mockFormRespond, form, undefined, reason)
 
+    it 'should handle invalid error responses from the server', ->
+      # A mock session that returns an error that isn't a valid JSON object
+      # in the form that the frontend expects. This happens if there's an
+      # uncaught exception on the server.
+      myMockSession = new MockSession()
+      myMockSession.register = (data, callback, errback) ->
+        errback('Oh no!!')
+        $promise: {finally: sandbox.stub()}
+
+      authCtrl = $controller(
+        'AuthController', {$scope:$scope, session:myMockSession})
+
+      form = {$name: 'register', $valid: true}
+
+      authCtrl.submit(form)
+
+      assert.calledWith(mockFormRespond, form, undefined,
+        "Oops, something went wrong on the server. Please try again later!")
+
     it 'should emit an auth event once authenticated', ->
       form =
         $name: 'login'
