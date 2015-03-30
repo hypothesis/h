@@ -225,7 +225,7 @@ class TestWebSocket(unittest.TestCase):
         self.s.opened()
         self.s.request.get_queue_reader.assert_called_once_with('annotations', ANY)
 
-    def test_filter_message_with_uri_gets_patched(self):
+    def test_filter_message_with_uri_gets_expanded(self):
         filter_message = json.dumps({
             'filter': {
                 'actions': {},
@@ -255,6 +255,30 @@ class TestWebSocket(unittest.TestCase):
             assert 'http://example.com' in uri_values
             assert 'http://example.com/alter' in uri_values
             assert 'http://example.com/print' in uri_values
+
+    def test_filter_message_will_not_change_for_empty_doc(self):
+        filter_message = json.dumps({
+            'filter': {
+                'actions': {},
+                'match_policy': 'include_all',
+                'clauses': [{
+                    'field': '/uri',
+                    'operator': 'equals',
+                    'value': 'http://example.com',
+                }],
+            }
+        })
+
+        with patch('annotator.document.Document.get_by_uri') as doc:
+            doc.return_value = []
+            msg = MagicMock()
+            msg.data = filter_message
+
+            self.s.received_message(msg)
+
+            uri_filter = self.s.filter.filter['clauses'][0]
+            uri_values = uri_filter['value']
+            assert 'http://example.com' == uri_values
 
 
 class TestBroadcast(unittest.TestCase):
