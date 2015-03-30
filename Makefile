@@ -24,9 +24,6 @@ dev:
 	@gunicorn --reload --paste conf/development.ini
 
 test:
-	@echo -n "Checking to see if elasticsearch is running..."
-	$(eval es := $(shell wget --quiet --output-document - http://localhost:9200))
-	@if [ -n '${es}' ] ; then echo "yes." ; else echo "no!"; exit 1; fi
 	@python setup.py test
 	@"$$(npm bin)"/karma start h/static/scripts/karma.config.js --single-run
 	@"$$(npm bin)"/karma start h/browser/chrome/karma.config.js --single-run

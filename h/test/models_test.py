@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import unittest
-import pytest
 
 from pytest import fixture, raises
 from pyramid import security
+import re
 
 from h import models
 
@@ -60,20 +60,30 @@ class TestAnnotationPermissions(unittest.TestCase):
         assert actual == expect
 
 
-@pytest.mark.usefixtures('es_connection')
-def test_uri_mapping():
-    permissions = {
-        'read': ['group:__world__'],
-    }
-    a1 = models.Annotation(uri='http://example.com/page#hashtag',
-                           permissions=permissions)
-    a1.save()
-    a2 = models.Annotation(uri='http://example.com/page',
-                           permissions=permissions)
-    a2.save()
-    a3 = models.Annotation(uri='http://totallydifferent.domain.com/',
-                           permissions=permissions)
-    a3.save()
+analysis = models.Annotation.__analysis__
+index_patterns = analysis['filter']['uri_index']['patterns']
+search_patterns = analysis['filter']['uri_search']['patterns']
 
-    res = models.Annotation.search(query={'uri': 'example.com/page'})
-    assert len(res) == 2
+
+def test_uri_search_indexes_hash_variants():
+    caps = _pattern_captures(index_patterns, 'http://example.com/page#hash')
+
+    assert 'example.com/page' in caps
+
+
+def test_uri_search_searches_hash_variants():
+    caps = _pattern_captures(search_patterns, 'http://example.com/page#hash')
+
+    assert 'example.com/page' in caps
+
+
+# Simulate the ElasticSearch pattern_capture filter!
+def _pattern_captures(patterns, uri):
+    result = []
+    patterns_re = [re.compile(p) for p in patterns]
+    for p in patterns_re:
+        m = p.search(uri)
+        if m is not None:
+            result.append(m.group(1))
+    return result
+

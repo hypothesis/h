@@ -2,9 +2,6 @@ language:
   - python
 python:
   - '2.7'
-before_install:
-  - sudo /usr/share/elasticsearch/bin/plugin -install elasticsearch/elasticsearch-analysis-icu/2.4.1
-  - sudo service elasticsearch restart
 install:
   - gem install sass
   - gem install compass
@@ -18,8 +15,8 @@ script:
   - make test
   - make cover
   - make lint
-  - hypothesis-buildext conf/development.ini chrome --base http://localhost
-  - hypothesis-buildext conf/development.ini firefox --base http://localhost
+  - hypothesis-buildext conf/testext.ini chrome --base http://localhost
+  - hypothesis-buildext conf/testext.ini firefox --base http://localhost
   - "hypothesis-buildext conf/production.ini chrome
     --base https://hypothes.is
     --assets chrome-extension://notarealkey/public"
