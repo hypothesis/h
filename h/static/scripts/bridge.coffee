@@ -3,7 +3,7 @@ Channel = require('jschannel')
 
 # The Bridge service sets up a channel between frames
 # and provides an events API on top of it.
-class Bridge
+module.exports = class Bridge
   # Connected links to other frames
   links: null
   channelListeners: null
@@ -102,8 +102,3 @@ class Bridge
         (options.origin.match /^resource:\/\//)
       options = $.extend {}, options, {origin: '*'}
     channel = Channel.build(options)
-
-if angular?
-  angular.module('h').service 'bridge', Bridge
-else
-  Annotator.Plugin.CrossFrame.Bridge = Bridge

@@ -1,6 +1,6 @@
 class AuthController
-  this.$inject = ['$scope', '$timeout', 'flash', 'session', 'formHelpers']
-  constructor:   ( $scope,   $timeout,   flash,   session,   formHelpers ) ->
+  this.$inject = ['$scope', '$timeout', 'flash', 'session', 'formRespond']
+  constructor:   ( $scope,   $timeout,   flash,   session,   formRespond ) ->
     timeout = null
 
     success = (data) ->
@@ -23,10 +23,10 @@ class AuthController
       catch
         reason = "Oops, something went wrong on the server. Please try again
             later!"
-      formHelpers.applyValidationErrors(form, errors, reason)
+      formRespond(form, errors, reason)
 
     this.submit = (form) ->
-      formHelpers.applyValidationErrors(form)
+      formRespond(form)
       return unless form.$valid
 
       $scope.$broadcast 'formState', form.$name, 'loading'

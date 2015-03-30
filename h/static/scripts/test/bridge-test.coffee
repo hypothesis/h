@@ -12,7 +12,7 @@ describe 'Bridge', ->
 
   before ->
     angular.module('h', [])
-    require('../bridge')
+    .service('bridge', require('../bridge'))
 
   beforeEach module('h')
   beforeEach inject (_bridge_) ->

@@ -1,23 +1,6 @@
+Annotator = require('annotator')
 angular = require('angular')
 uuid = require('node-uuid')
-
-# These services are provided in their own angular modules and thus must be
-# loaded first.
-require('./identity-service')
-require('./streamer-service')
-
-imports = [
-  'ngAnimate'
-  'ngRoute'
-  'ngSanitize'
-  'ngTagsInput'
-  'h.flash'
-  'h.helpers'
-  'h.identity'
-  'h.session'
-  'h.streamer'
-]
-
 
 resolve =
   auth: ['$q', '$rootScope', 'auth', ($q, $rootScope, auth) ->
@@ -52,12 +35,12 @@ configureRoutes = ['$routeProvider', ($routeProvider) ->
     templateUrl: 'viewer.html'
     resolve: resolve
   $routeProvider.when '/viewer',
-    controller: 'ViewerController'
+    controller: 'WidgetController'
     templateUrl: 'viewer.html'
     reloadOnSearch: false
     resolve: resolve
   $routeProvider.when '/stream',
-    controller: 'StreamSearchController'
+    controller: 'StreamController'
     templateUrl: 'viewer.html'
     resolve: resolve
   $routeProvider.otherwise
@@ -93,50 +76,81 @@ setupStreamer = [
     $http.defaults.headers.common['X-Client-Id'] = clientId
 ]
 
-module = angular.module('h', imports)
+module.exports = angular.module('h', [
+  'bootstrap'
+  'ngAnimate'
+  'ngResource'
+  'ngRoute'
+  'ngSanitize'
+  'ngTagsInput'
+  'toastr'
+])
+
 .config(configureDocument)
 .config(configureLocation)
 .config(configureRoutes)
 .config(configureTemplates)
 
-unless mocha? # Crude method of detecting test environment.
-  module.run(setupCrossFrame)
-  module.run(setupStreamer)
-  module.run(setupHost)
+.controller('AppController', require('./app-controller'))
+.controller('AnnotationUIController', require('./annotation-ui-controller'))
+.controller('AnnotationViewerController', require('./annotation-viewer-controller'))
+.controller('StreamController', require('./stream-controller'))
+.controller('WidgetController', require('./widget-controller'))
 
-require('./vendor/annotator.auth.js')
-require('./annotator/monkey')
+.directive('annotation', require('./directive/annotation'))
+.directive('deepCount', require('./directive/deep-count'))
+.directive('formInput', require('./directive/form-input'))
+.directive('formValidate', require('./directive/form-validate'))
+.directive('markdown', require('./directive/markdown'))
+.directive('privacy', require('./directive/privacy'))
+.directive('repeatAnim', require('./directive/repeat-anim'))
+.directive('simpleSearch', require('./directive/simple-search'))
+.directive('statusButton', require('./directive/status-button'))
+.directive('thread', require('./directive/thread'))
+.directive('threadFilter', require('./directive/thread-filter'))
+.directive('whenscrolled', require('./directive/whenscrolled'))
+.directive('match', require('./directive/match'))
+.directive('tabbable', require('./directive/tabbable'))
+.directive('tabReveal', require('./directive/tab-reveal'))
 
-require('./controllers')
+.filter('converter', require('./filter/converter'))
+.filter('moment', require('./filter/moment'))
+.filter('persona', require('./filter/persona'))
+.filter('urlencode', require('./filter/urlencode'))
 
-require('./directives')
-require('./directives/annotation')
-require('./directives/deep-count')
-require('./directives/markdown')
-require('./directives/privacy')
-require('./directives/simple-search')
-require('./directives/status-button')
-require('./directives/thread-filter')
-require('./directives/thread')
+.provider('identity', require('./identity'))
+.provider('session', require('./session'))
 
-require('./filters')
-require('./searchfilters')
+.service('annotator', -> new Annotator(angular.element('<div>')))
+.service('annotationMapper', require('./annotation-mapper'))
+.service('annotationUI', require('./annotation-ui'))
+.service('auth', require('./auth'))
+.service('bridge', require('./bridge'))
+.service('crossframe', require('./cross-frame'))
+.service('drafts', require('./drafts'))
+.service('flash', require('./flash'))
+.service('formRespond', require('./form-respond'))
+.service('host', require('./host'))
+.service('localStorage', require('./local-storage'))
+.service('permissions', require('./permissions'))
+.service('pulse', require('./pulse'))
+.service('queryParser', require('./query-parser'))
+.service('render', require('./render'))
+.service('searchFilter', require('./search-filter'))
+.service('store', require('./store'))
+.service('streamFilter', require('./stream-filter'))
+.service('streamer', require('./streamer'))
+.service('tags', require('./tags'))
+.service('time', require('./time'))
+.service('threading', require('./threading'))
+.service('unicode', require('./unicode'))
+.service('viewFilter', require('./view-filter'))
 
-require('./services')
-require('./annotation-mapper-service')
-require('./annotation-ui-service')
-require('./auth-service')
-require('./cross-frame-service')
-require('./host-service')
-require('./flash-service')
-require('./permissions-service')
-require('./local-storage-service')
-require('./store-service')
-require('./threading-service')
+.value('xsrf', token: null)
+.value('AnnotationSync', require('./annotation-sync'))
+.value('AnnotationUISync', require('./annotation-ui-sync'))
+.value('Discovery', require('./discovery'))
 
-require('./streamsearch')
-
-require('./annotation-sync')
-require('./annotation-ui-sync')
-require('./bridge')
-require('./discovery')
+.run(setupCrossFrame)
+.run(setupStreamer)
+.run(setupHost)

@@ -1,59 +1,84 @@
-Annotator = require('annotator')
-Host = require('../host')
+{module, inject} = require('angular-mock')
 
 assert = chai.assert
-sinon.assert.expose(assert, prefix: '')
+sinon.assert.expose assert, prefix: null
 
-describe 'Annotator.Host', ->
-  sandbox = sinon.sandbox.create()
-  fakeCrossFrame = null
+describe 'host', ->
+  sandbox = null
+  host = null
+  createChannel = -> notify: sandbox.stub()
+  fakeBridge = null
+  $digest = null
+  publish = null
+  PARENT_WINDOW = 'PARENT_WINDOW'
+  dumpListeners = null
 
-  createHost = (options={}) ->
-    element = document.createElement('div')
-    return new Host(element, options)
+  before ->
+    angular.module('h', [])
+    .service('host', require('../host'))
 
-  beforeEach ->
-    # Disable Annotator's ridiculous logging.
-    sandbox.stub(console, 'log')
+  beforeEach module('h')
 
-    fakeCrossFrame = {}
-    fakeCrossFrame.onConnect = sandbox.stub().returns(fakeCrossFrame)
-    fakeCrossFrame.on = sandbox.stub().returns(fakeCrossFrame)
-    fakeCrossFrame.notify = sandbox.stub().returns(fakeCrossFrame)
+  beforeEach module ($provide) ->
+    sandbox = sinon.sandbox.create()
+    fakeWindow = parent: PARENT_WINDOW
 
-    sandbox.stub(Annotator.Plugin, 'CrossFrame').returns(fakeCrossFrame)
+    listeners = {}
 
-  afterEach -> sandbox.restore()
+    publish = ({method, params}) ->
+      listeners[method]('ctx', params)
 
-  describe 'options', ->
-    it 'enables highlighting when showHighlights option is provided', (done) ->
-      host = createHost(showHighlights: true)
-      host.on 'panelReady', ->
-        assert.isTrue(host.visibleHighlights)
-        done()
-      host.publish('panelReady')
+    fakeBridge =
+      ls: listeners
+      on: sandbox.spy (method, fn) -> listeners[method] = fn
+      notify: sandbox.stub()
+      onConnect: sandbox.stub()
+      links: [
+        {window: PARENT_WINDOW,    channel: createChannel()}
+        {window: 'ANOTHER_WINDOW', channel: createChannel()}
+        {window: 'THIRD_WINDOW',   channel: createChannel()}
+      ]
 
-    it 'does not enable highlighting when no showHighlights option is provided', (done) ->
-      host = createHost({})
-      host.on 'panelReady', ->
-        assert.isFalse(host.visibleHighlights)
-        done()
-      host.publish('panelReady')
+    $provide.value 'bridge', fakeBridge
+    $provide.value '$window', fakeWindow
 
-  describe 'crossframe listeners', ->
-    emitHostEvent = (event, args...) ->
-      fn(args...) for [evt, fn] in fakeCrossFrame.on.args when event == evt
+    return
 
-    describe 'on "showFrame" event', ->
-      it 'shows the frame', ->
-        target = sandbox.stub(Annotator.Host.prototype, 'showFrame')
-        host = createHost()
-        emitHostEvent('showFrame')
-        assert.called(target)
+  afterEach ->
+    sandbox.restore()
 
-    describe 'on "hideFrame" event', ->
-      it 'hides the frame', ->
-        target = sandbox.stub(Annotator.Host.prototype, 'hideFrame')
-        host = createHost()
-        emitHostEvent('hideFrame')
-        assert.called(target)
+  beforeEach inject ($rootScope, _host_) ->
+    host = _host_
+    $digest = sandbox.stub($rootScope, '$digest')
+
+  describe 'the public API', ->
+
+    describe 'showSidebar()', ->
+      it 'sends the "showFrame" message to the host only', ->
+        host.showSidebar()
+        assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
+        assert.notCalled(fakeBridge.links[1].channel.notify)
+        assert.notCalled(fakeBridge.links[2].channel.notify)
+
+    describe 'hideSidebar()', ->
+      it 'sends the "hideFrame" message to the host only', ->
+        host.hideSidebar()
+        assert.calledWith(fakeBridge.links[0].channel.notify, method: 'hideFrame')
+        assert.notCalled(fakeBridge.links[1].channel.notify)
+        assert.notCalled(fakeBridge.links[2].channel.notify)
+
+  describe 'reacting to the bridge', ->
+
+    describe 'on "back" event', ->
+
+      it 'triggers the hideSidebar() API', ->
+        sandbox.spy host, "hideSidebar"
+        publish method: 'back'
+        assert.called host.hideSidebar
+
+    describe 'on "open" event', ->
+
+      it 'triggers the showSidebar() API', ->
+        sandbox.spy host, "showSidebar"
+        publish  method: 'open'
+        assert.called host.showSidebar

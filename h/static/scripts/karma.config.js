@@ -46,7 +46,8 @@ module.exports = function(config) {
       'test/bootstrap.coffee',
 
       // Tests
-      '**/*-test.coffee'
+      '**/*-test.coffee',
+      '**/*-test.js'
     ],
 
 
@@ -63,7 +64,8 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      '**/*.coffee': ['browserify'],
+      '**/*-test.js': ['browserify'],
+      '**/*-test.coffee': ['browserify'],
       '../../templates/client/*.html': ['ng-html2js'],
     },
 

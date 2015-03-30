@@ -1,8 +1,8 @@
 class AccountController
   @inject = [  '$scope', '$filter',
-               'auth', 'flash', 'formHelpers', 'identity', 'session']
+               'auth', 'flash', 'formRespond', 'identity', 'session']
   constructor: ($scope,   $filter,
-                auth,   flash,   formHelpers,   identity,   session) ->
+                auth,   flash,   formRespond,   identity,   session) ->
     persona_filter = $filter('persona')
     $scope.subscriptionDescription =
       reply: 'Someone replies to one of my annotations'
@@ -24,7 +24,7 @@ class AccountController
 
     onError = (form, response) ->
       if response.status >= 400 and response.status < 500
-        formHelpers.applyValidationErrors(form, response.data.errors)
+        formRespond(form, response.data.errors)
       else
         if response.data.flash
           for own type, msgs of response.data.flash
@@ -62,7 +62,7 @@ class AccountController
       promise.$promise.then(successHandler, errorHandler)
 
     $scope.submit = (form) ->
-      formHelpers.applyValidationErrors(form)
+      formRespond(form)
       return unless form.$valid
 
       username = persona_filter auth.user

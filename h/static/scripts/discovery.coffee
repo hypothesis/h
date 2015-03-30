@@ -20,7 +20,7 @@
 #     // Establish a message bus to the new server window.
 #     server.stopDiscovery();
 #   }
-class Discovery
+module.exports = class Discovery
   # Origins allowed to communicate on the channel
   server: false
 
@@ -141,8 +141,3 @@ class Discovery
 
   _generateToken: ->
     ('' + Math.random()).replace(/\D/g, '')
-
-if angular?
-  angular.module('h').value('Discovery', Discovery)
-else
-  Annotator.Plugin.CrossFrame.Discovery = Discovery
