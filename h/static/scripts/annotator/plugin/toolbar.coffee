@@ -26,6 +26,12 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     # On mobile, we don't hide the toolbar.
     if mobile
       @annotator.toolbar = @toolbar = $(@mobilehtml)
+      # When there is a selection on mobile show/hide highlighter
+      document.addEventListener "selectstart", ->
+        if window.getSelection().toString() != ""
+          annotator.plugins.Toolbar.showHighlightButton(false)
+        else
+          annotator.plugins.Toolbar.showHighlightButton(true)
     else
       @annotator.toolbar = @toolbar = $(@html)
     if @options.container?
@@ -55,14 +61,6 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           state = not @annotator.visibleHighlights
           @annotator.setVisibleHighlights state
     ,
-      "title": "Highlight"
-      "class": "h-icon-border-color"
-      "on":
-        "click": (event) =>
-          event.preventDefault()
-          event.stopPropagation()
-          @annotator.onAdderClick target: dataset: action: "highlight"
-    ,
       "title": "New Note"
       "class": "h-icon-insert-comment"
       "on":
@@ -70,26 +68,22 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           event.preventDefault()
           event.stopPropagation()
           @annotator.onAdderClick(event)
+    ,
+      "title": "Highlight"
+      "class": "h-icon-border-color"
+      "on":
+        "click": (event) =>
+          event.preventDefault()
+          event.stopPropagation()
+          @annotator.onAdderClick target: dataset: action: "highlight"
+          @annotator.plugins.Toolbar.showHighlightButton(false)
     ]
-    # @buttons = $(makeButton(item) for item in items)
-    # Perhaps we make the buttons but add a hidden class to highligght button? We show it on mobile when
-    # A selection is made...
-
-    @buttons = $(
-      for item in items
-        if item.title == "Highlight"
-          # The highlight button is only shown on mobile.
-          if mobile
-            makeButton(item)
-          else
-            continue
-        else
-          makeButton(item)
-    )
-
+    @buttons = $(makeButton(item) for item in items)
     list = $('<ul></ul>')
     @buttons.appendTo(list)
     @toolbar.append(list)
+    # Hide highlight button.
+    $(@buttons[3]).hide()
 
     # Remove focus from the anchors when clicked, this removes the focus
     # styles intended only for keyboard navigation. IE/FF apply the focus
@@ -103,6 +97,12 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   hide: ->
     if !mobile
       this.toolbar.addClass('annotator-hide')
+
+  showHighlightButton: (state)->
+    if state
+      $(@buttons[3]).show()
+    else
+      $(@buttons[3]).hide()
 
   onSetVisibleHighlights: (state) ->
     if state
