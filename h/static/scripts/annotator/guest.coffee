@@ -13,7 +13,7 @@ module.exports = class Guest extends Annotator
     "document onselectionchange": "userSelectionChanged"
 
   # We bind different events depending on whether the browser supports touch.
-  mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  mobile = 'ontouchstart' in window or window.DocumentTouch and document instanceof DocumentTouch
   if mobile
     # This hack is needed for iOS Safari.
     $(window).bind 'selectionEnd', ->
