@@ -18,7 +18,6 @@ describe 'AppController', ->
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
-  fakeThreading = null
 
   sandbox = null
 
@@ -87,12 +86,6 @@ describe 'AppController', ->
       getFilter: sandbox.stub().returns({})
     }
 
-    fakeThreading = {
-      idTable: {}
-      register: (annotation) ->
-        @idTable[annotation.id] = message: annotation
-    }
-
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'auth', fakeAuth
@@ -104,7 +97,6 @@ describe 'AppController', ->
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamfilter', fakeStreamFilter
-    $provide.value 'threading', fakeThreading
     return
 
   beforeEach inject (_$controller_, $rootScope) ->
@@ -148,7 +140,7 @@ describe 'AppController', ->
         payload: anns
       assert.calledWith fakeAnnotationMapper.loadAnnotations, anns
 
-    it 'looks up annotations at threading upon "delete" action', ->
+    it 'ask lookup.hasAnnotation "delete" action', ->
       createController()
       $scope.$emit = sinon.spy()
 
@@ -157,8 +149,9 @@ describe 'AppController', ->
         id: "fake ID"
         data: "local data"
 
-      # Introduce our annotation into threading
-      fakeThreading.register localAnnotation
+      # Register our fake hasAnnotation function
+      $scope.lookup.hasAnnotation = ->
+        return localAnnotation
 
       # Prepare the annotation that will come "from the wire"
       remoteAnnotation =

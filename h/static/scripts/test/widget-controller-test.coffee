@@ -13,6 +13,7 @@ describe 'WidgetController', ->
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
+  fakeThreading = null
   sandbox = null
   viewer = null
 
@@ -57,6 +58,13 @@ describe 'WidgetController', ->
       getFilter: sandbox.stub().returns({})
     }
 
+    fakeThreading = {
+      idTable: {}
+      register: (annotation) ->
+        @idTable[annotation.id] = message: annotation
+    }
+
+
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'auth', fakeAuth
@@ -64,10 +72,12 @@ describe 'WidgetController', ->
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamFilter', fakeStreamFilter
+    $provide.value 'threading', fakeThreading
     return
 
   beforeEach inject ($controller, $rootScope) ->
     $scope = $rootScope.$new()
+    $scope.lookup = {}
     viewer = $controller 'WidgetController', {$scope}
 
   afterEach ->

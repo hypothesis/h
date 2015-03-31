@@ -4,15 +4,26 @@ angular = require('angular')
 module.exports = class WidgetController
   this.$inject = [
     '$scope', 'annotationUI', 'crossframe', 'annotationMapper',
-    'auth', 'streamer', 'streamFilter', 'store'
+    'auth', 'streamer', 'streamFilter', 'store', 'threading'
   ]
   constructor:   (
      $scope,   annotationUI, crossframe, annotationMapper,
-     auth,   streamer,   streamFilter,   store
+     auth,   streamer,   streamFilter,   store,   threading
   ) ->
     # Tells the view that these annotations are embedded into the owner doc
     $scope.isEmbedded = true
     $scope.isStream = true
+
+    $scope.threadRoot = threading?.root
+
+    $scope.lookup.hasAnnotation = (annotation) ->
+      threading.idTable[annotation.id]?.message
+
+    $scope.lookup.getAnnotationContainers = ->
+      containers = []
+      for id, container of threading.idTable when container.message
+        containers.push container
+      containers
 
     loaded = []
 
