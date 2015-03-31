@@ -57,6 +57,5 @@ RUN pip install -r requirements.txt
 ADD ./svc /etc/service
 
 # Startup and ports
-ENTRYPOINT ["/sbin/my_init"]
-CMD []
+CMD ["/sbin/my_init"]
 EXPOSE 8000
