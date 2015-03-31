@@ -5,18 +5,16 @@ module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
 
   # Events to be bound on Annotator#element.
+  events:
+    "setVisibleHighlights": "setVisibleHighlights"
+    ".annotator-adder button click":     "onAdderClick"
+    ".annotator-adder button mousedown": "onAdderMousedown"
+    ".annotator-adder button mouseup":   "onAdderMouseup"
+    "document onselectionchange": "userSelectionChanged"
+
   # We bind different events depending on whether the browser supports touch.
   mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  if not mobile
-    events:
-      ".annotator-adder button click":     "onAdderClick"
-      ".annotator-adder button mousedown": "onAdderMousedown"
-      ".annotator-adder button mouseup":   "onAdderMouseup"
-      "setVisibleHighlights": "setVisibleHighlights"
-  else
-    events:
-      "setVisibleHighlights": "setVisibleHighlights"
-      "document onselectionchange": "userSelectionChanged"
+  if mobile
     # This hack is needed for iOS Safari.
     $(window).bind 'selectionEnd', ->
       # reset selection timeout
