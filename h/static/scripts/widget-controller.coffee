@@ -14,11 +14,12 @@ module.exports = class WidgetController
     $scope.isEmbedded = true
     $scope.isStream = true
 
+    @chunkSize = 200
     loaded = []
 
-    _loadAnnotationsFrom = (query, offset) ->
+    _loadAnnotationsFrom = (query, offset) =>
       queryCore =
-        limit: 20
+        limit: @chunkSize
         offset: offset
         sort: 'created'
         order: 'asc'
