@@ -1,32 +1,22 @@
 Annotator = require('annotator')
 $ = Annotator.$
 
-th = require('../texthighlights')
+highlight = require('../highlight')
 
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
 
-describe 'Annotator.Plugin.TextHighlight', ->
+describe 'TextHighlight', ->
   sandbox = null
   scrollTarget = null
 
   createTestHighlight = ->
-    anchor =
-      id: "test anchor"
-      annotation: "test annotation"
-      anchoring:
-        id: "test anchoring manager"
-        annotator:
-          id: "test annotator"
-          element:
-            delegate: sinon.spy()
-
-    new th.TextHighlight anchor, "test page", "test range"
+    new highlight.TextHighlight "test range"
 
   beforeEach ->
     sandbox = sinon.sandbox.create()
-    sandbox.stub th.TextHighlight, 'highlightRange',
+    sandbox.stub highlight.TextHighlight, 'highlightRange',
       (normedRange, cssClass) ->
         hl = document.createElement "hl"
         hl.appendChild document.createTextNode "test highlight span"
@@ -43,16 +33,11 @@ describe 'Annotator.Plugin.TextHighlight', ->
   describe "constructor", ->
     it 'wraps a highlight span around the given range', ->
       hl = createTestHighlight()
-      assert.calledWith th.TextHighlight.highlightRange, "test range"
+      assert.calledWith highlight.TextHighlight.highlightRange, "test range"
 
     it 'stores the created highlight spans in _highlights', ->
       hl = createTestHighlight()
       assert.equal hl._highlights.textContent, "test highlight span"
-
-    it "assigns the annotation as data to the highlight span", ->
-      hl = createTestHighlight()
-      annotation = Annotator.$(hl._highlights).data "annotation"
-      assert.equal annotation, "test annotation"
 
   describe "getBoundingClientRect", ->
 
@@ -86,7 +71,7 @@ describe 'Annotator.Plugin.TextHighlight', ->
       fakeHighlights = rects.map (r) ->
         return getBoundingClientRect: -> r
       hl = _highlights: fakeHighlights
-      result = th.TextHighlight.prototype.getBoundingClientRect.call(hl)
+      result = highlight.TextHighlight.prototype.getBoundingClientRect.call(hl)
       assert.equal(result.left, 10)
       assert.equal(result.top, 10)
       assert.equal(result.right, 30)

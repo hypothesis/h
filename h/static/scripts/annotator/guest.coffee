@@ -2,6 +2,17 @@ Promise = require('es6-promise').Promise
 Annotator = require('annotator')
 $ = Annotator.$
 
+anchor = require('./lib/anchor')
+highlight = require('./lib/highlight')
+
+ANCHOR_TYPES = [
+  anchor.FragmentAnchor
+  anchor.RangeAnchor
+  anchor.TextPositionAnchor
+  anchor.TextQuoteAnchor
+]
+
+
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
 
@@ -15,14 +26,7 @@ module.exports = class Guest extends Annotator
   # Plugin configuration
   options:
     TextHighlights: {}
-    EnhancedAnchoring: {}
-    DomTextMapper: {}
     TextSelection: {}
-    TextRange: {}
-    TextPosition: {}
-    TextQuote: {}
-    FuzzyTextAnchors: {}
-    FragmentSelector: {}
 
   # Internal state
   visibleHighlights: false
@@ -36,9 +40,10 @@ module.exports = class Guest extends Annotator
     '''
 
   constructor: (element, options, config = {}) ->
-    options.noScan = true
     super
-    delete @options.noScan
+
+    this.anchored = []
+    this.unanchored = []
 
     # Are going to be able to use the PDF plugin here?
     if window.PDFTextMapper?.applicable()
@@ -85,50 +90,6 @@ module.exports = class Guest extends Annotator
       if not @plugins[name] and Annotator.Plugin[name]
         this.addPlugin(name, opts)
 
-    unless config.dontScan
-      # Scan the document text with the DOM Text libraries
-      this.anchoring._scan()
-
-    # Watch for newly rendered highlights, and update positions in sidebar
-    this.subscribe "highlightsCreated", (highlights) =>
-      unless Array.isArray highlights
-        highlights = [highlights]
-      highlights.forEach (hl) ->
-        hls = hl.anchor.highlight  # Fetch all the highlights
-        # Get the pages we have highlights on (for the given anchor)
-        pages = Object.keys(hls).map (s) -> parseInt s
-        firstPage = pages.sort()[0]  # Determine the first page
-        firstHl = hls[firstPage]     # Determine the first (topmost) hl
-        # Store the position of this anchor inside target
-        hl.anchor.target.pos =
-          top: hl.getTop()
-          height: hl.getHeight()
-
-      # Collect all impacted annotations
-      annotations = (hl.annotation for hl in highlights)
-
-      # Announce the new positions, so that the sidebar knows
-      this.plugins.CrossFrame.sync(annotations)
-
-    # Watch for removed highlights, and update positions in sidebar
-    this.subscribe "highlightRemoved", (highlight) =>
-      hls = highlight.anchor.highlight  # Fetch all the highlights
-      # Get the pages we have highlights on (for the given anchor)
-      pages = Object.keys(hls).map (s) -> parseInt s
-      # Do we have any highlights left?
-      if pages.length
-        firstPage = pages.sort()[0]  # Determine the first page
-        firstHl = hls[firstPage]     # Determine the first (topmost) hl
-        # Store the position of this anchor inside target
-        highlight.anchor.target.pos =
-          top: highlight.getTop()
-          heigth: highlight.getHeight()
-      else
-        delete highlight.anchor.target.pos
-
-      # Announce the new positions, so that the sidebar knows
-      this.plugins.CrossFrame.sync([highlight.annotation])
-
   # Utility function to remove the hash part from a URL
   _removeHash: (url) ->
     url = new URL url
@@ -156,15 +117,13 @@ module.exports = class Guest extends Annotator
     crossframe.on('onEditorHide', this.onEditorHide)
     crossframe.on('onEditorSubmit', this.onEditorSubmit)
     crossframe.on 'focusAnnotations', (ctx, tags=[]) =>
-      for hl in @anchoring.getHighlights()
-        if hl.annotation.$$tag in tags
-          hl.setFocused true
-        else
-          hl.setFocused false
+      for info in @anchored
+        toggle = info.annotation.$$tag in tags
+        $(info.highlights).toggleClass('annotator-hl-focused', toggle)
     crossframe.on 'scrollToAnnotation', (ctx, tag) =>
-      for a in @anchoring.getAnchors()
-        if a.annotation.$$tag is tag
-          a.scrollToView()
+      for info in @anchored
+        if info.annotation.$$tag is tag
+          $(info.highlights).scrollintoview()
           return
     crossframe.on 'getDocumentInfo', (trans) =>
       (@plugins.PDF?.getMetaData() ? Promise.reject())
@@ -211,9 +170,51 @@ module.exports = class Guest extends Annotator
 
     this.removeEvents()
 
-  setupAnnotation: ->
-    annotation = super
-    this.plugins.CrossFrame.sync([annotation])
+  setupAnnotation: (annotation) ->
+    unless annotation.target?
+      if @selectedRanges?
+        annotation.target = (@_getTargetFromRange(r) for r in @selectedRanges)
+        @selectedRanges = null
+      else
+        annotation.target = [this.getHref()]
+
+    # Create a TextHighlight for a range.
+    highlightRange = (range) =>
+      normedRange = Annotator.Range.sniff(range).normalize(@element[0])
+      return highlight.highlightRange(normedRange)
+
+    # Factories to close over the loop variable, below.
+    succeed = (target) ->
+      (highlights) -> {annotation, target, highlights}
+
+    fail = (target) ->
+      (reason) -> {annotation, target}
+
+    # Function to collect anchoring promises
+    finish = (results) =>
+      anchored = false
+
+      for result in results
+        if result.highlights?
+          anchored = true
+          @anchored.push(result)
+        else
+          @unanchored.push(result)
+
+      if results.length and not anchored
+        annotation.$orphan = true
+
+      this.plugins.CrossFrame.sync([annotation])
+
+    # Anchor all the targets, highlighting the successes.
+    promises = for target in annotation.target ? [] when target.selector
+      this.anchorTarget(target)
+      .then(highlightRange)
+      .then(succeed(target), fail(target))
+
+    # Collect the results.
+    Promise.all(promises).then(finish)
+
     annotation
 
   createAnnotation: ->
@@ -226,6 +227,89 @@ module.exports = class Guest extends Annotator
     this.publish 'beforeAnnotationCreated', [annotation]
     this.plugins.CrossFrame.sync([annotation])
     annotation
+
+  deleteAnnotation: (annotation) ->
+    for info in @anchored when info.annotation is annotation
+      for h in info.highlights when h.parentNode?
+        child = h.childNodes[0]
+        $(h).replaceWith(h.childNodes)
+
+    @anchored = (a for a in @anchored when a.annotation isnt annotation)
+    @unanchored = (a for a in @unanchored when a.annotation isnt annotation)
+
+    this.publish('annotationDeleted', [annotation])
+    annotation
+
+  ###*
+  # Anchor a target.
+  #
+  # This function converts an annotation target into a document range using
+  # its selectors. It encapsulates the core anchoring algorithm that uses the
+  # selectors alone or in combination to establish an anchor within the document.
+  #
+  # :root Node target: The root Node of the anchoring context.
+  # :param Object target: The target to anchor.
+  # :return: A Promise that resolves to a Range on success.
+  # :rtype: Promise
+  ####
+  anchorTarget: (target) ->
+    root = @element[0]
+
+    # Selectors
+    fragment = null
+    position = null
+    quote = null
+    range = null
+
+    # Collect all the selectors
+    for selector in target.selector ? []
+      switch selector.type
+        when 'FragmentSelector'
+          fragment = selector
+        when 'TextPositionSelector'
+          position = selector
+        when 'TextQuoteSelector'
+          quote = selector
+        when 'RangeSelector'
+          range = selector
+
+    # Until we successfully anchor, we fail.
+    promise = Promise.reject('unable to anchor')
+
+    if fragment?
+      promise = promise.catch =>
+        a = anchor.FragmentAnchor.fromSelector(fragment)
+        r = a.toRange(root)
+        if quote?.exact? and r.toString() != quote.exact
+          throw new Error('quote mismatch')
+        else
+          return r
+
+    if range?
+      promise = promise.catch =>
+        a = anchor.RangeAnchor.fromSelector(range, root)
+        r = a.toRange(root)
+        if quote?.exact? and r.toString() != quote.exact
+          throw new Error('quote mismatch')
+        else
+          return r
+
+    if position?
+      promise = promise.catch =>
+        a = anchor.TextPositionAnchor.fromSelector(position)
+        r = a.toRange(root)
+        if quote?.exact? and r.toString() != quote.exact
+          throw new Error('quote mismatch')
+        else
+          return r
+
+    if quote?
+      promise = promise.catch =>
+        # The quote is implicitly checked during range conversion.
+        a = anchor.TextQuoteAnchor.fromSelector(quote, position)
+        r = a.toRange(root)
+
+    return promise
 
   showAnnotations: (annotations) =>
     @crossframe?.notify
@@ -249,29 +333,26 @@ module.exports = class Guest extends Annotator
 
   onAnchorMousedown: ->
 
-  # This is called to create a target from a raw selection,
-  # using selectors created by the registered selector creators
-  _getTargetFromSelection: (selection) ->
-    source: @getHref()
-    selector: @anchoring.getSelectorsFromSelection(selection)
+  # Create a target from a raw selection using all the anchor types.
+  _getTargetFromRange: (range) ->
+    selector = for type in ANCHOR_TYPES
+      try
+        type.fromRange(range).toSelector(@element[0])
+      catch
+        continue
 
-  confirmSelection: ->
-    return true unless @selectedTargets.length is 1
-
-    quote = @getQuoteForTarget @selectedTargets[0]
-
-    if quote.length > 2 then return true
-
-    return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
+    return {
+      source: this.getHref()
+      selector: selector
+    }
 
   onSuccessfulSelection: (event, immediate) ->
     unless event?
       throw "Called onSuccessfulSelection without an event!"
-    unless event.segments?
-      throw "Called onSuccessulSelection with an event with missing segments!"
+    unless event.ranges?
+      throw "Called onSuccessulSelection with an event with missing ranges!"
 
-    # Describe the selection with targets
-    @selectedTargets = (@_getTargetFromSelection s for s in event.segments)
+    @selectedRanges = event.ranges
 
     # Do we want immediate annotation?
     if immediate
@@ -287,7 +368,7 @@ module.exports = class Guest extends Annotator
 
   onFailedSelection: (event) ->
     @adder.hide()
-    @selectedTargets = []
+    @selectedRanges = []
 
   # Select some annotations.
   #

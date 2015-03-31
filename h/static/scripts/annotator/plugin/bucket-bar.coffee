@@ -1,8 +1,46 @@
 raf = require('raf')
 
 Annotator = require('annotator')
-
 $ = Annotator.$
+
+
+# Get the bounding client rectangle of a collection in viewport coordinates.
+getBoundingClientRect = (collection) ->
+  # Reduce the client rectangles of the highlights to a bounding box
+  rects = collection.map((n) -> n.getBoundingClientRect())
+  return rects.reduce (acc, r) ->
+    top: Math.min(acc.top, r.top)
+    left: Math.min(acc.left, r.left)
+    bottom: Math.max(acc.bottom, r.bottom)
+    right: Math.max(acc.right, r.right)
+
+
+# Scroll to the next closest anchor off screen in the given direction.
+scrollToClosest = (objs, direction) ->
+  dir = if direction is "up" then +1 else -1
+  {next} = objs.reduce (acc, obj) ->
+    {start, next} = acc
+    rect = getBoundingClientRect(obj.highlights)
+
+    # Ignore if it's not in the right direction.
+    if (dir is 1 and rect.top >= 0)
+      return acc
+    else if (dir is -1 and rect.top <= window.innerHeight)
+      return acc
+
+    # Select the closest to carry forward
+    if not next?
+      start: rect.top
+      next: obj
+    else if start * dir < rect.top * dir
+      start: rect.top
+      next: obj
+    else
+        acc
+  , {}
+
+  $(next.highlights).scrollintoview()
+
 
 class Annotator.Plugin.BucketBar extends Annotator.Plugin
   # prototype constants
@@ -50,27 +88,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     $(window).on 'resize scroll', this._scheduleUpdate
     $(document.body).on 'resize scroll', '*', this._scheduleUpdate
 
-    # Event handler to to update when new highlights have been created
-    @annotator.subscribe "highlightsCreated", (highlights) =>
-      # All the highlights are guaranteed to belong to one anchor,
-      # so we can do this:
-      anchor = if Array.isArray highlights # Did we got a list ?
-        highlights[0].anchor
-      else
-        # I see that somehow if I publish an array with a signel element,
-        # by the time it arrives, it's not an array any more.
-        # Weird, but for now, let's work around it.
-        highlights.anchor
-      if anchor.annotation.id? # Is this a finished annotation ?
-        this._scheduleUpdate()
-
-    # Event handler to to update when highlights have been removed
-    @annotator.subscribe "highlightRemoved", (highlight) =>
-      if highlight.annotation.id? # Is this a finished annotation ?
-        this._scheduleUpdate()
-
-    addEventListener "docPageScrolling", this._scheduleUpdate
-
   # Update sometime soon
   _scheduleUpdate: =>
     return if @_updatePending?
@@ -86,104 +103,29 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
         return 1
     return 0
 
-  _collectVirtualAnnotations: (startPage, endPage) ->
-    results = []
-    for page in [startPage .. endPage]
-      anchors = @annotator.anchoring.anchors[page]
-      if anchors?
-        $.merge results, (anchor.annotation for anchor in anchors when not anchor.fullyRealized)
-    results
-
-  # Find the first/last annotation from the list, based on page number,
-  # and Y offset, if already known, and jump to it.
-  # If the Y offsets are not yet known, just jump the page,
-  # wait for the highlights to be realized, and finish the selection then.
-  _jumpMinMax: (annotations, direction) ->
-    unless direction in ["up", "down"]
-      throw "Direction is mandatory!"
-    dir = if direction is "up" then +1 else -1
-    {next} = annotations.reduce (acc, ann) ->
-      {start, next} = acc
-      anchor = ann.anchors[0]
-      hl = anchor.highlight[anchor.startPage]
-
-      # Ignore this anchor if its highlight is currently on screen.
-      if hl?
-        rect = hl.getBoundingClientRect()
-        switch dir
-          when 1
-            if rect.bottom >= 0
-              return acc
-          when -1
-            if rect.top <= window.innerHeight
-              return acc
-
-      if not next? or start.page*dir < anchor.startPage*dir
-        # This one is obviously better
-        start:
-          page: anchor.startPage
-          top: anchor.highlight[anchor.startPage]?.getTop()
-        next: [anchor]
-      else if start.page is anchor.startPage
-        # This is on the same page, might be better
-        if hl?
-          # We have a real highlight, let's compare coordinates
-          if start.top*dir < hl.getTop()*dir
-            # OK, this one is better
-            start:
-              page: start.page
-              top: hl.getTop()
-            next: [anchor]
-          else
-            # No, let's keep the old one instead
-            acc
-        else
-          # The page is not yet rendered, can't decide yet.
-          # Let's just store this one, too
-          start: page: start.page
-          next: $.merge next, [anchor]
-      else
-        # No, we have clearly seen better alternatives
-        acc
-    , {}
-
-    # Get an anchor from the page we want to go to
-    anchor = next[0]
-    anchor.scrollToView()
-
   _update: =>
-    wrapper = @annotator.wrapper
-    highlights = @annotator.anchoring.getHighlights()
-    defaultView = wrapper[0].ownerDocument.defaultView
-
     # Keep track of buckets of annotations above and below the viewport
     above = []
     below = []
 
-    # Get the page numbers
-    mapper = @annotator.anchoring.document
-    return unless mapper? # Maybe it's too soon to do this
-    firstPage = 0
-    currentPage = mapper.getPageIndex()
-    lastPage = mapper.getPageCount() - 1
-
-    # Collect the virtual anchors from above and below
-    $.merge above, this._collectVirtualAnnotations 0, currentPage-1
-    $.merge below, this._collectVirtualAnnotations currentPage+1, lastPage
-
     # Construct indicator points
-    points = highlights.reduce (points, hl, i) =>
-      d = hl.annotation
-      x = hl.getTop() - defaultView.pageYOffset
-      h = hl.getHeight()
+    points = @annotator.anchored.reduce (points, obj, i) =>
+      hl = obj.highlights
+
+      if hl.length is 0
+        return points
+
+      rect = getBoundingClientRect(hl)
+      x = rect.top
+      h = rect.bottom - rect.top
 
       if x < 0
-        if d not in above then above.push d
+        if obj not in above then above.push obj
       else if x + h > window.innerHeight
-        if d not in below then below.push d
+        if obj not in below then below.push obj
       else
-        points.push [x, 1, d]
-        points.push [x + h, -1, d]
+        points.push [x, 1, obj]
+        points.push [x + h, -1, obj]
       points
     , []
 
@@ -209,23 +151,23 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     .sort(this._collate)
     .reduce ({buckets, index, carry}, [x, d, a], i, points) =>
       if d > 0                                            # Add annotation
-        if (j = carry.annotations.indexOf a) < 0
-          carry.annotations.unshift a
+        if (j = carry.objs.indexOf a) < 0
+          carry.objs.unshift a
           carry.counts.unshift 1
         else
           carry.counts[j]++
       else                                                # Remove annotation
-        j = carry.annotations.indexOf a                   # XXX: assert(i >= 0)
+        j = carry.objs.indexOf a                          # XXX: assert(i >= 0)
         if --carry.counts[j] is 0
-          carry.annotations.splice j, 1
+          carry.objs.splice j, 1
           carry.counts.splice j, 1
 
       if (
         (index.length is 0 or i is points.length - 1) or  # First or last?
-        carry.annotations.length is 0 or                  # A zero marker?
+        carry.objs.length is 0 or                         # A zero marker?
         x - index[index.length-1] > @options.gapSize      # A large gap?
       )                                                   # Mark a new bucket.
-        buckets.push carry.annotations.slice()
+        buckets.push carry.objs.slice()
         index.push x
       else
         # Merge the previous bucket, making sure its predecessor contains
@@ -238,7 +180,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
         else
           last = buckets[buckets.length-1]
           toMerge = []
-        last.push a0 for a0 in carry.annotations when a0 not in last
+        last.push a0 for a0 in carry.objs when a0 not in last
         last.push a0 for a0 in toMerge when a0 not in last
 
       {buckets, index, carry}
@@ -246,7 +188,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       buckets: []
       index: []
       carry:
-        annotations: []
+        objs: []
         counts: []
         latest: 0
 
@@ -289,31 +231,30 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       # TODO: This should use event delegation on the container.
       .on 'mousemove', (event) =>
         bucket = @tabs.index(event.currentTarget)
-        for hl in @annotator.anchoring.getHighlights()
-          if hl.annotation in @buckets[bucket]
-            hl.setFocused true
-          else
-            hl.setFocused false
+        for obj in @annotator.anchored
+          toggle = obj in @buckets[bucket]
+          $(obj.highlights).toggleClass('annotator-hl-focused', toggle)
 
       # Gets rid of them after
-      .on 'mouseout', =>
-        for hl in @annotator.anchoring.getHighlights()
-          hl.setFocused false
+      .on 'mouseout', (event) =>
+        bucket = @tabs.index(event.currentTarget)
+        for obj in @buckets[bucket]
+          $(obj.highlights).removeClass('annotator-hl-focused')
 
       # Does one of a few things when a tab is clicked depending on type
       .on 'click', (event) =>
         bucket = @tabs.index(event.currentTarget)
         event.stopPropagation()
-        pad = defaultView.innerHeight * .2
+        pad = window.innerHeight * .2
 
         # If it's the upper tab, scroll to next anchor above
         if (@isUpper bucket)
-          @_jumpMinMax @buckets[bucket], "up"
+          scrollToClosest(@buckets[bucket], 'up')
         # If it's the lower tab, scroll to next anchor below
         else if (@isLower bucket)
-          @_jumpMinMax @buckets[bucket], "down"
+          scrollToClosest(@buckets[bucket], 'down')
         else
-          annotations = @buckets[bucket].slice()
+          annotations = (obj.annotation for obj in @buckets[bucket])
           annotator.selectAnnotations annotations,
             (event.ctrlKey or event.metaKey),
 

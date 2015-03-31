@@ -1,6 +1,5 @@
 Promise = require('es6-promise').Promise
 Annotator = require('annotator')
-require('../monkey')
 Guest = require('../guest')
 
 assert = chai.assert
@@ -22,23 +21,6 @@ describe 'Guest', ->
       onConnect: sandbox.stub()
       on: sandbox.stub()
       sync: sandbox.stub()
-
-    # Mock out the anchoring plugin. Oh how I wish I didn't have to do crazy
-    # shit like this.
-    Annotator.Plugin.EnhancedAnchoring = -> {
-      pluginInit: ->
-        @annotator.anchoring = this
-
-      _scan: sandbox.stub()
-
-      getHighlights: sandbox.stub().returns([])
-      getAnchors: sandbox.stub().returns([])
-      createAnchor: sandbox.spy (annotation, target) ->
-        anchor = "anchor for " + target
-        annotation.anchors.push anchor
-
-        result: anchor
-    }
 
     Annotator.Plugin.CrossFrame = -> fakeCrossFrame
     sandbox.spy(Annotator.Plugin, 'CrossFrame')
@@ -195,36 +177,38 @@ describe 'Guest', ->
 
     describe 'on "focusAnnotations" event', ->
       it 'focuses any annotations with a matching tag', ->
+        highlight0 = {setFocused: sandbox.stub()}
+        highlight1 = {setFocused: sandbox.stub()}
         guest = createGuest()
-        highlights = [
-          {annotation: {$$tag: 'tag1'}, setFocused: sandbox.stub()}
-          {annotation: {$$tag: 'tag2'}, setFocused: sandbox.stub()}
+        guest.anchored = [
+          {annotation: {$$tag: 'tag1'}, highlight: highlight0}
+          {annotation: {$$tag: 'tag2'}, highlight: highlight1}
         ]
-        guest.anchoring.getHighlights.returns(highlights)
         emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
-        assert.called(highlights[0].setFocused)
-        assert.calledWith(highlights[0].setFocused, true)
+        assert.called(highlight0.setFocused)
+        assert.calledWith(highlight0.setFocused, true)
 
       it 'unfocuses any annotations without a matching tag', ->
+        highlight0 = {setFocused: sandbox.stub()}
+        highlight1 = {setFocused: sandbox.stub()}
         guest = createGuest()
-        highlights = [
-          {annotation: {$$tag: 'tag1'}, setFocused: sandbox.stub()}
-          {annotation: {$$tag: 'tag2'}, setFocused: sandbox.stub()}
+        guest.anchored = [
+          {annotation: {$$tag: 'tag1'}, highlight: highlight0}
+          {annotation: {$$tag: 'tag2'}, highlight: highlight1}
         ]
-        guest.anchoring.getHighlights.returns(highlights)
         emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
-        assert.called(highlights[1].setFocused)
-        assert.calledWith(highlights[1].setFocused, false)
+        assert.called(highlight1.setFocused)
+        assert.calledWith(highlight1.setFocused, false)
 
     describe 'on "scrollToAnnotation" event', ->
       it 'scrolls to the anchor with the matching tag', ->
+        highlight = {scrollToView: sandbox.stub()}
         guest = createGuest()
-        anchors = [
-          {annotation: {$$tag: 'tag1'}, scrollToView: sandbox.stub()}
+        guest.anchored = [
+          {annotation: {$$tag: 'tag1'}, highlight: highlight}
         ]
-        guest.anchoring.getAnchors.returns(anchors)
         emitGuestEvent('scrollToAnnotation', 'ctx', 'tag1')
-        assert.called(anchors[0].scrollToView)
+        assert.called(highlight.scrollToView)
 
     describe 'on "getDocumentInfo" event', ->
       guest = null
@@ -294,28 +278,36 @@ describe 'Guest', ->
       guest.createAnnotation({})
       assert.called(fakeCrossFrame.sync)
 
-    it 'calls sync for setupAnnotation', ->
+    it 'calls sync for setupAnnotation', (done) ->
       guest = createGuest()
-      guest.setupAnnotation({ranges: []})
-      assert.called(fakeCrossFrame.sync)
+      guest.plugins.Document = {uri: -> 'http://example.com'}
+      guest.setupAnnotation({})
+      setTimeout ->
+        assert.called(fakeCrossFrame.sync)
+        done()
 
-  describe 'Annotator monkey patch', ->
-    describe 'setupAnnotation()', ->
-      it "doesn't declare annotation without targets as orphans", ->
-        guest = createGuest()
-        annotation = target: []
-        guest.setupAnnotation(annotation)
+  describe 'setupAnnotation()', ->
+    it "doesn't declare annotation without targets as orphans", (done) ->
+      guest = createGuest()
+      annotation = target: []
+      guest.setupAnnotation(annotation)
+      setTimeout ->
         assert.isFalse !!annotation.$orphan
+        done()
 
-      it "doesn't declare annotations with a working target as orphans", ->
-        guest = createGuest()
-        annotation = target: ["test target"]
-        guest.setupAnnotation(annotation)
+    it "doesn't declare annotations with a working target as orphans", (done) ->
+      guest = createGuest()
+      annotation = target: ["test target"]
+      guest.setupAnnotation(annotation)
+      setTimeout ->
         assert.isFalse !!annotation.$orphan
+        done()
 
-      it "declares annotations with broken targets as orphans", ->
-        guest = createGuest()
-        guest.anchoring.createAnchor = -> result: null
-        annotation = target: ["broken target"]
-        guest.setupAnnotation(annotation)
+    it "declares annotations with broken targets as orphans", (done) ->
+      guest = createGuest()
+      sandbox.stub(guest, 'anchorTarget').returns(Promise.reject())
+      annotation = target: [{selector: 'broken selector'}]
+      guest.setupAnnotation(annotation)
+      setTimeout ->
         assert !!annotation.$orphan
+        done()

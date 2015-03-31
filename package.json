@@ -55,14 +55,12 @@
     "angular": "./h/static/scripts/vendor/angular.js",
     "angular-mock": "./h/static/scripts/vendor/angular-mocks.js",
     "diff-match-patch": "./h/static/scripts/vendor/diff_match_patch_uncompressed.js",
-    "dom-text-mapper": "./h/static/scripts/vendor/dom_text_mapper.js",
     "dom-text-matcher": "./h/static/scripts/vendor/dom_text_matcher.js",
     "es6-promise": "./node_modules/es6-promise/dist/es6-promise.js",
     "hammerjs": "./node_modules/hammerjs/hammer.js",
     "jquery": "./h/static/scripts/vendor/jquery.js",
     "jquery-scrollintoview": "./h/static/scripts/vendor/jquery.scrollintoview.js",
     "jschannel": "./h/static/scripts/vendor/jschannel.js",
-    "page-text-mapper-core": "./h/static/scripts/vendor/page_text_mapper_core.js",
     "text-match-engines": "./h/static/scripts/vendor/text_match_engines.js"
   },
   "browserify-shim": {
@@ -86,7 +84,6 @@
     },
     "angular-mock": "global:angular.mock",
     "diff-match-patch": "diff_match_patch",
-    "dom-text-mapper": "DomTextMapper",
     "dom-text-matcher": "DomTextMatcher",
     "es6-promise": "ES6Promise",
     "hammerjs": "Hammer",
@@ -97,7 +94,6 @@
       ]
     },
     "jschannel": "Channel",
-    "page-text-mapper-core": "PageTextMapperCore",
     "text-match-engines": "TextMatchEngines"
   }
 }
