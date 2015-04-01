@@ -12,7 +12,7 @@ makeButton = (item) ->
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   PUSHED_CLASS = 'annotator-pushed'
 
-  mobile = 'ontouchstart' in window or window.DocumentTouch and document instanceof DocumentTouch
+  touch = 'ontouchstart' in window or window.DocumentTouch and document instanceof DocumentTouch
 
   events:
     'setVisibleHighlights': 'onSetVisibleHighlights'
@@ -20,10 +20,9 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   html: '<div class="annotator-toolbar"></div>'
 
   pluginInit: ->
-    # On mobile, we don't hide the toolbar.
     @annotator.toolbar = @toolbar = $(@html)
-    if mobile
-      # When there is a selection on mobile show/hide highlighter
+    if touch
+      # When there is a selection on touch devices show/hide highlighter
       document.addEventListener "selectstart", ->
         if window.getSelection().toString() != ""
           annotator.plugins.Toolbar.showHighlightButton(false)
@@ -103,7 +102,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       $(@buttons[1]).children().addClass('h-icon-visibility-off')
 
   _updateStickyButtons: ->
-    # The highlight button is hidden except when there is a selection on mobile
+    # The highlight button is hidden except when there is a selection on touch devices
     if $(@buttons[3]).css('display') == 'none'
       height = 105
     else height = 140
