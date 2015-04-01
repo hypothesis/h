@@ -152,33 +152,8 @@ $base-font-size: 14px;
   }
 }
 
-.annotator-frame .annotator-toolbar.annotator-hide {
-  display: block;
-  visibility: visible;
-
-  li {
-    @include transition-delay(.75s);
-    @include transition-timing-function(cubic-bezier(1, .1, .55, 0));
-    height: 0;
-    left: 34px;
-    margin-top: -2px;
-    &:first-child, &.annotator-pushed {
-      @include transition-delay(0);
-      left: 3px;
-      height: 30px;
-    }
-    &.annotator-pushed {
-      margin-top: 5px;
-    }
-  }
-}
-
 .annotator-frame .annotator-toolbar li {
   @include smallshadow;
-  @include transition-property(left, height, margin-top);
-  @include transition-duration(.25s);
-  @include transition-delay(0);
-  @include transition-timing-function(cubic-bezier(0, .55, .1, 1));
   background: $white;
   border: solid 1px $gray-lighter;
   border-radius: 4px;
@@ -199,16 +174,6 @@ $base-font-size: 14px;
     padding-right: 6px;
     width: 36px;
     z-index: 1;
-  }
-
-  &.annotator-pushed {
-    @include box-shadow(none);
-    left: 3px;
-    z-index: 1;
-
-    a {
-      color: $text-color;
-    }
   }
 
   a {

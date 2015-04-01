@@ -15,25 +15,20 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
   mobile = 'ontouchstart' in window or window.DocumentTouch and document instanceof DocumentTouch
 
   events:
-    '.annotator-toolbar mouseenter': 'show'
-    '.annotator-toolbar mouseleave': 'hide'
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
-  mobilehtml: '<div class="annotator-toolbar"></div>'
-  html: '<div class="annotator-toolbar annotator-hide"></div>'
+  html: '<div class="annotator-toolbar"></div>'
 
   pluginInit: ->
     # On mobile, we don't hide the toolbar.
+    @annotator.toolbar = @toolbar = $(@html)
     if mobile
-      @annotator.toolbar = @toolbar = $(@mobilehtml)
       # When there is a selection on mobile show/hide highlighter
       document.addEventListener "selectstart", ->
         if window.getSelection().toString() != ""
           annotator.plugins.Toolbar.showHighlightButton(false)
         else
           annotator.plugins.Toolbar.showHighlightButton(true)
-    else
-      @annotator.toolbar = @toolbar = $(@html)
     if @options.container?
       $(@options.container).append @toolbar
     else
@@ -52,7 +47,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           else
             @annotator.triggerHideFrame()
     ,
-      "title": "Show Annotations"
+      "title": "Toggle Highlight Visibility"
       "class": "h-icon-visibility"
       "on":
         "click": (event) =>
@@ -82,6 +77,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     list = $('<ul></ul>')
     @buttons.appendTo(list)
     @toolbar.append(list)
+
     # Hide highlight button.
     $(@buttons[3]).hide()
 
@@ -89,35 +85,28 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     # styles intended only for keyboard navigation. IE/FF apply the focus
     # psuedo-class to a clicked element.
     @toolbar.on('mouseup', 'a', (event) -> $(event.target).blur())
-
-  show: ->
-    if !mobile
-      this.toolbar.removeClass('annotator-hide')
-
-  hide: ->
-    if !mobile
-      this.toolbar.addClass('annotator-hide')
+    this._updateStickyButtons()
 
   showHighlightButton: (state)->
     if state
       $(@buttons[3]).show()
     else
       $(@buttons[3]).hide()
+    this._updateStickyButtons()
 
   onSetVisibleHighlights: (state) ->
     if state
-      $(@buttons[1]).addClass(PUSHED_CLASS)
+      $(@buttons[1]).children().removeClass('h-icon-visibility-off')
+      $(@buttons[1]).children().addClass('h-icon-visibility')
     else
-      $(@buttons[1]).removeClass(PUSHED_CLASS)
-    this._updateStickyButtons()
+      $(@buttons[1]).children().removeClass('h-icon-visibility')
+      $(@buttons[1]).children().addClass('h-icon-visibility-off')
 
   _updateStickyButtons: ->
-    count = $(@buttons).filter(-> $(this).hasClass(PUSHED_CLASS)).length
-    if count
-      height = (count + 1) * 35  # +1 -- top button is always visible
-      this.toolbar.css("min-height", "#{height}px")
-    else
-      height = 35
-      this.toolbar.css("min-height", "")
+    # The highlight button is hidden except when there is a selection on mobile
+    if $(@buttons[3]).css('display') == 'none'
+      height = 105
+    else height = 140
+    this.toolbar.css("min-height", "#{height}px")
     this.annotator.plugins.BucketBar?.BUCKET_THRESHOLD_PAD = height
     this.annotator.plugins.BucketBar?._update()
