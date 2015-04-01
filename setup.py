@@ -103,6 +103,7 @@ setup(
     extras_require={
         'dev': development_extras,
         'testing': testing_extras,
+        'claim': ['mandrill'],
         'YAML': ['PyYAML']
     },
     tests_require=development_extras + testing_extras + ['PyYAML'],
@@ -136,6 +137,7 @@ setup(
         'console_scripts': [
             'hypothesis=h.script:main',
             'hypothesis-buildext=h.buildext:main',
+            'hypothesis-invite=h.claim.invite:main',
             'hypothesis-worker=h.worker:main',
         ],
         'h.worker': [
