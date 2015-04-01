@@ -5,16 +5,16 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
     @Annotator = Annotator
     @$ = Annotator.$
 
-    touch = 'ontouchstart' in window or window.DocumentTouch and document instanceof DocumentTouch
-
     # Register the event handlers required for creating a selection
-    if touch
+    if /iPhone|iPad|iPod/i.test(navigator.userAgent)
+      # Mobile safari doesn't want this to be bound to anything else.
       $(document).bind({
         "touchend": @checkForEndSelection
       })
     else
       $(document).bind({
         "mouseup": @checkForEndSelection
+        "touchend": @checkForEndSelection
       })
 
     null
