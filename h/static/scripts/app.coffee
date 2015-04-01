@@ -112,6 +112,7 @@ module.exports = angular.module('h', [
 .directive('match', require('./directive/match'))
 .directive('tabbable', require('./directive/tabbable'))
 .directive('tabReveal', require('./directive/tab-reveal'))
+.directive('scrolltome', require('./directive/scrolltome'))
 
 .filter('converter', require('./filter/converter'))
 .filter('moment', require('./filter/moment'))

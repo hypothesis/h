@@ -45,6 +45,7 @@ AnnotationController = [
     @hasDiff = false
     @showDiff = undefined
     @timestamp = null
+    @element_created_at = new Date().getTime()
 
     model = $scope.annotationGet()
     highlight = model.$highlight
