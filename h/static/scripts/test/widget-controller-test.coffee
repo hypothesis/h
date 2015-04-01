@@ -75,6 +75,7 @@ describe 'WidgetController', ->
 
   describe 'loadAnnotations', ->
     it 'loads all annotation for a provider', ->
+      viewer.chunkSize = 20
       fakeCrossFrame.providers.push {entities: ['http://example.com']}
       $scope.$digest()
       loadSpy = fakeAnnotationMapper.loadAnnotations
