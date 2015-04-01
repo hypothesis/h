@@ -1,3 +1,5 @@
+uuid = require('node-uuid')
+
 ###*
 # @ngdoc type
 # @name thread.ThreadController
@@ -148,6 +150,8 @@ ThreadController = [
       else
         0
 
+    this.uuid = uuid.v4()
+
     this
 ]
 
@@ -174,8 +178,8 @@ isHiddenThread = (elem) ->
 # Directive that instantiates {@link thread.ThreadController ThreadController}.
 ###
 module.exports = [
-  '$parse', '$window', 'pulse', 'render',
-  ($parse,   $window,   pulse,   render) ->
+  '$parse', '$window', '$location', '$anchorScroll', 'pulse', 'render',
+  ($parse,   $window, $location, $anchorScroll, pulse,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter, filter]) ->
 
       # We would ideally use require for this, but searching parents only for a
@@ -183,6 +187,7 @@ module.exports = [
       ctrl.parent = elem.parent().controller('thread')
       ctrl.counter = counter
       ctrl.filter = filter
+      ctrl.id = attrs.id
 
       # Track the number of messages in the thread
       if counter?
@@ -210,6 +215,10 @@ module.exports = [
         render ->
           ctrl.container = thread
           scope.$digest()
+          if (ctrl.id and not ctrl.container?.message?.id)
+            # Scroll the sidebar to show new annotations.
+            $location.hash(ctrl.id)
+            $anchorScroll()
 
     controller: ThreadController
     controllerAs: 'vm'
