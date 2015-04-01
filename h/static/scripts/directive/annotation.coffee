@@ -116,6 +116,7 @@ AnnotationController = [
       @action = if model.id? then 'edit' else 'create'
       @editing = true
       @preview = 'no'
+      $rootScope.$emit("editorOpened", @annotation)
 
     ###*
     # @ngdoc method

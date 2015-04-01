@@ -87,6 +87,9 @@ module.exports = class AppController
     $rootScope.$on 'beforeAnnotationCreated', ->
       $scope.clearSelection()
 
+    $rootScope.$on 'editorOpened', (annotation) ->
+      $rootScope.scrollTo(annotation)
+
     $scope.login = ->
       $scope.dialog.visible = true
       identity.request {oncancel}
