@@ -411,10 +411,11 @@ module.exports = class Guest extends Annotator
     event.preventDefault?()
     event.stopPropagation?()
     @adder.hide()
-    if event.target.dataset.action == 'highlight'
-      this.setVisibleHighlights true
-      this.setupAnnotation(this.createHighlight())
-    else
-      this.setupAnnotation(this.createAnnotation())
-      this.triggerShowFrame()
+    switch event.target.dataset.action
+      when 'highlight'
+        this.setVisibleHighlights true
+        this.setupAnnotation(this.createHighlight())
+      when 'comment'
+        this.setupAnnotation(this.createAnnotation())
+        this.triggerShowFrame()
     Annotator.Util.getGlobal().getSelection().removeAllRanges()

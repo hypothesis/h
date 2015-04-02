@@ -61,6 +61,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         "click": (event) =>
           event.preventDefault()
           event.stopPropagation()
+          event.target.dataset.action = "comment"
           @annotator.onAdderClick(event)
     ,
       "title": "Highlight"
