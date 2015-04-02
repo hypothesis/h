@@ -3,10 +3,11 @@
 assert = chai.assert
 
 
-describe 'h:directives.simple-search', ->
+describe 'simple-search', ->
   $compile = null
   $element = null
   $scope = null
+  fakeHttp = null
   fakeWindow = null
   isolate = null
 
@@ -15,6 +16,11 @@ describe 'h:directives.simple-search', ->
     .directive('simpleSearch', require('../simple-search'))
 
   beforeEach module('h')
+
+  beforeEach module ($provide) ->
+    fakeHttp = {pendingRequests: []}
+    $provide.service('$http', -> fakeHttp)
+    return
 
   beforeEach inject (_$compile_, _$rootScope_) ->
     $compile = _$compile_
@@ -64,3 +70,11 @@ describe 'h:directives.simple-search', ->
 
     $form = $element.find('.simple-search-form')
     assert.notInclude($form.prop('className'), 'simple-search-inactive')
+
+  it 'sets the `loading` scope key when http requests are in progress', ->
+    fakeHttp.pendingRequests = []
+    isolate.$digest()
+    assert.isFalse(isolate.loading)
+    fakeHttp.pendingRequests = ['bogus']
+    isolate.$digest()
+    assert.isTrue(isolate.loading)

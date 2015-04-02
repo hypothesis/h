@@ -1,8 +1,5 @@
-module.exports = ['$parse', ($parse) ->
-  uuid = 0
+module.exports = ['$http', '$parse', ($http, $parse) ->
   link: (scope, elem, attr, ctrl) ->
-    scope.viewId = uuid++
-
     scope.reset = (event) ->
       event.preventDefault()
       scope.query = ''
@@ -11,6 +8,9 @@ module.exports = ['$parse', ($parse) ->
     scope.search = (event) ->
       event.preventDefault()
       scope.query = scope.searchtext
+
+    scope.$watch (-> $http.pendingRequests.length), (pending) ->
+      scope.loading = (pending > 0)
 
     scope.$watch 'query', (query) ->
       return if query is undefined
@@ -27,8 +27,15 @@ module.exports = ['$parse', ($parse) ->
     onClear: '&'
   template: '''
             <form class="simple-search-form" ng-class="!searchtext && 'simple-search-inactive'" name="searchBox" ng-submit="search($event)">
-              <input id="simple-search-{{viewId}}" class="simple-search-input" type="text" ng-model="searchtext" name="searchText" placeholder="Search…" />
-              <label for="simple-search-{{viewId}}" class="simple-search-icon h-icon-search"></label>
+              <input class="simple-search-input" type="text" ng-model="searchtext" name="searchText"
+                     placeholder="{{loading && 'Loading' || 'Search'}}…"
+                     ng-disabled="loading" />
+              <span class="simple-search-icon" ng-hide="loading">
+                <i class="h-icon-search"></i>
+              </span>
+              <span class="simple-search-icon" ng-show="loading">
+                <i class="spinner"></i>
+              </span>
             </form>
             '''
 ]
