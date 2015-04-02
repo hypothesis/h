@@ -33,11 +33,3 @@
   display: none;
   visibility: hidden;
 }
-
-// Icons
-[class^="h-icon-"], [class*=" h-icon-"] {
-  vertical-align: middle;
-  &:before {
-    font-size: 130%;
-  }
-}
