@@ -1,6 +1,7 @@
 Annotator = require('annotator')
 $ = Annotator.$
 Util = Annotator.Util
+selectionEndTimeout = null
 
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
