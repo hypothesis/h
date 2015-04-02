@@ -6,34 +6,27 @@
 //   <!-- Three nested spans -->
 //   <span class="spinner"><span><span></span></span></span>
 
-@-webkit-keyframes spin {
-  to { @include transform(rotate(1turn)); }
-}
+$container-width: 1em;
+$container-height: $container-width;
+$part-width: .1em;
+$part-height: 3 * $part-width;
 
-@-moz-keyframes spin {
-  to { @include transform(rotate(1turn)); }
-}
-
-@-o-keyframes spin {
-  to { @include transform(rotate(1turn)); }
-}
-
-@keyframes spin {
+@include keyframes(spin) {
   to { @include transform(rotate(1turn)); }
 }
 
 .spinner {
   position: relative;
-  display: inline-block;
-  width: 2em;
-  height: 2em;
-  font-size: 10px;
+  display: inline-block !important;
+  width: $container-width;
+  height: $container-width;
   text-indent: 999em;
   overflow: hidden;
-  -webkit-animation: spin 1.25s infinite steps(12); /* Safari 4+ */
-  -moz-animation: spin 1.25s infinite steps(12); /* Fx 5+ */
-  -o-animation: spin 1.25s infinite steps(12); /* Opera 12+ */
-  animation: spin 1.25s infinite steps(12); /* IE 10+, Fx 29+ */
+  @include animation(spin 1.25s infinite steps(12));
+
+  &.ng-hide {
+    display: none !important;
+  }
 }
 
 .spinner:before,
@@ -45,13 +38,13 @@
   content: '';
   position: absolute;
   top: 0;
-  left: 0.9em; /* (container width - part width)/2  */
-  width: 0.2em;
-  height: 0.6em;
+  left: ($container-width - $part-width) / 2;
+  width: $part-width;
+  height: $part-height;
   border-radius: 0.1em;
   background: #eee;
-  @include box-shadow(0 1.4em rgba(0, 0, 0, 0.15)); /* container height - part height */
-  @include transform-origin(50%, 1em); /* container height / 2 */
+  @include box-shadow(0 ($container-height - $part-height) rgba(0, 0, 0, 0.15));
+  @include transform-origin(50%, $container-height / 2);
 }
 
 .spinner:before {
