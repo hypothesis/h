@@ -1,5 +1,6 @@
 Annotator = require('annotator')
 $ = Annotator.$
+Util = Annotator.Util
 
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
@@ -287,7 +288,7 @@ module.exports = class Guest extends Annotator
     if selectionEndTimeout
       clearTimeout selectionEndTimeout
     selectionEndTimeout = setTimeout((->
-      @Annotator.Util.getGlobal().trigger 'selectionEnd'
+      Util.getGlobal().trigger 'selectionEnd'
       return
     ), 500)
     return
