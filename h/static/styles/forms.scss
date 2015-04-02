@@ -257,7 +257,9 @@
 
 // Positions the icon nicely within the button.
 .btn-icon {
-  vertical-align: middle;
+  font-size: 1.4em;
+  margin-right: .25em;
+  vertical-align: top;
 }
 
 // Absolutely positions a message/icon to the left of a button.
