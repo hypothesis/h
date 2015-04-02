@@ -7,7 +7,7 @@
 # Example
 #
 #   <button status-button="test-form">Submit</button>
-module.exports = ->
+module.exports = ['$compile', ($compile) ->
   STATE_ATTRIBUTE = 'status-button-state'
   STATE_LOADING = 'loading'
   STATE_SUCCESS = 'success'
@@ -15,7 +15,7 @@ module.exports = ->
   template = '''
   <span class="btn-with-message">
     <span class="btn-message btn-message-loading">
-      <span class="btn-icon spinner"><span><span></span></span></span>
+      <span class="btn-icon spinner"></span>
     </span>
     <span class="btn-message btn-message-success">
       <span class="btn-message-text">Saved!</span> <i class="btn-message-icon h-icon-check"></i>
@@ -30,6 +30,7 @@ module.exports = ->
       throw new Error('status-button attribute should provide a form name')
 
     elem = angular.element(template).attr(STATE_ATTRIBUTE, '')
+    $compile(elem)(scope)
     placeholder.after(elem)
     transclude(scope, (clone) -> elem.append(clone))
 
@@ -39,3 +40,4 @@ module.exports = ->
         formState = ''
       elem.attr(STATE_ATTRIBUTE, formState)
   transclude: 'element'
+]

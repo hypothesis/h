@@ -17,16 +17,12 @@ $part-height: 3 * $part-width;
 
 .spinner {
   position: relative;
-  display: inline-block !important;
+  display: inline-block;
   width: $container-width;
   height: $container-width;
   text-indent: 999em;
   overflow: hidden;
   @include animation(spin 1.25s infinite steps(12));
-
-  &.ng-hide {
-    display: none !important;
-  }
 }
 
 .spinner:before,

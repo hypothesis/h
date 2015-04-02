@@ -105,6 +105,7 @@ module.exports = angular.module('h', [
 .directive('threadFilter', require('./directive/thread-filter'))
 .directive('whenscrolled', require('./directive/whenscrolled'))
 .directive('match', require('./directive/match'))
+.directive('spinner', require('./directive/spinner'))
 .directive('tabbable', require('./directive/tabbable'))
 .directive('tabReveal', require('./directive/tab-reveal'))
 
