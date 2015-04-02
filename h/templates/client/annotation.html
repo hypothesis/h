@@ -136,12 +136,13 @@
   </div>
 
   <div class="annotation-actions">
-    <a class="small magicontrol" href="" title="Reply"
-      ng-click="vm.reply()"
-      ><i class="h-icon-reply"></i> Reply</a>
+    <button class="small btn-clean"
+            ng-click="vm.reply()"
+            ><i class="h-icon-reply btn-icon"></i> Reply</button>
     <span class="magicontrol share-dialog-wrapper">
-      <a class="small" href="" title="Share" ng-click="share($event)"
-        ><i class="h-icon-share"></i> Share</a>
+      <button class="small btn-clean"
+              ng-click="share($event)"
+              ><i class="h-icon-share btn-icon"></i> Share</button>
       <span class="share-dialog" ng-click="$event.stopPropagation()">
       <a class="h-icon-share"
           target="_blank"
@@ -149,13 +150,13 @@
         <input type="text" value="{{vm.annotationURI}}" readonly>
       </span>
     </span>
-    <a class="small magicontrol" href="" title="Edit"
-      ng-show="vm.authorize('update')"
-      ng-click="vm.edit()"
-      ><i class="h-icon-edit"></i> Edit</a>
-    <a class="small magicontrol" href="" title="Delete"
-      ng-show="vm.authorize('delete')"
-      ng-click="vm.delete()"
-      ><i class="h-icon-delete"></i> Delete…</a>
+    <button class="small btn-clean"
+            ng-show="vm.authorize('update')"
+            ng-click="vm.edit()"
+            ><i class="h-icon-edit btn-icon"></i> Edit</button>
+    <button class="small btn-clean"
+            ng-show="vm.authorize('delete')"
+            ng-click="vm.delete()"
+            ><i class="h-icon-delete btn-icon"></i> Delete…</button>
   </div>
 </footer>

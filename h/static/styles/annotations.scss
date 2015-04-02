@@ -53,9 +53,11 @@
   float: right;
   margin-top: 0;
 
-  .magicontrol {
-    margin-left: 0.8em;
-    margin-right: 0;
+  button {
+    color: $gray-light;
+    .annotation:hover & {
+      color: $link-color;
+    }
   }
 }
 
@@ -102,24 +104,6 @@
 privacy {
   position: relative;
   top: 2px;
-}
-
-
-//MAGICONTROL////////////////////////////////
-.magicontrol {
-  margin-right: .8em;
-
-  &, a {
-    color: $gray-light;
-  }
-
-  &.dropdown {
-    top: 4px;
-  }
-
-  .annotation:hover &, .annotation:hover & a {
-    color: $link-color;
-  }
 }
 
 .share-dialog-wrapper {
