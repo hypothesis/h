@@ -59,7 +59,6 @@ describe 'WidgetController', ->
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
-    $provide.value 'auth', fakeAuth
     $provide.value 'crossframe', fakeCrossFrame
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer

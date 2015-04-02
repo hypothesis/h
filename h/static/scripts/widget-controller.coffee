@@ -4,11 +4,11 @@ angular = require('angular')
 module.exports = class WidgetController
   this.$inject = [
     '$scope', 'annotationUI', 'crossframe', 'annotationMapper',
-    'auth', 'streamer', 'streamFilter', 'store'
+    'streamer', 'streamFilter', 'store'
   ]
   constructor:   (
      $scope,   annotationUI, crossframe, annotationMapper,
-     auth,   streamer,   streamFilter,   store
+     streamer,   streamFilter,   store
   ) ->
     # Tells the view that these annotations are embedded into the owner doc
     $scope.isEmbedded = true
