@@ -179,7 +179,7 @@ isHiddenThread = (elem) ->
 ###
 module.exports = [
   '$parse', '$window', '$location', '$anchorScroll', 'pulse', 'render',
-  ($parse,   $window, $location, $anchorScroll, pulse,   render) ->
+  ($parse,   $window,   $location,   $anchorScroll,   pulse,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter, filter]) ->
 
       # We would ideally use require for this, but searching parents only for a
