@@ -8,11 +8,12 @@ describe 'WidgetController', ->
   $scope = null
   fakeAnnotationMapper = null
   fakeAnnotationUI = null
-  fakeAuth = null
   fakeCrossFrame = null
+  fakeDrafts = null
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
+  fakeThreading = null
   sandbox = null
   viewer = null
 
@@ -30,8 +31,9 @@ describe 'WidgetController', ->
       tool: 'comment'
       clearSelectedAnnotations: sandbox.spy()
     }
-    fakeAuth = {user: null}
     fakeCrossFrame = {providers: []}
+
+    fakeDrafts = {remove: sandbox.spy()}
 
     fakeStore = {
       SearchResource:
@@ -57,12 +59,20 @@ describe 'WidgetController', ->
       getFilter: sandbox.stub().returns({})
     }
 
+    fakeThreading = {
+      idTable: {}
+      register: (annotation) ->
+        @idTable[annotation.id] = message: annotation
+    }
+
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'crossframe', fakeCrossFrame
+    $provide.value 'drafts', fakeDrafts
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamFilter', fakeStreamFilter
+    $provide.value 'threading', fakeThreading
     return
 
   beforeEach inject ($controller, $rootScope) ->
@@ -84,3 +94,52 @@ describe 'WidgetController', ->
       assert.calledWith(loadSpy, [40..59])
       assert.calledWith(loadSpy, [60..79])
       assert.calledWith(loadSpy, [80..99])
+
+  describe 'streamer.onmessage', ->
+    it 'calls annotationMapper.loadAnnotations() upon "create" action', ->
+      anns = ["my", "annotations"]
+      fakeStreamer.onmessage
+        type: "annotation-notification"
+        options: action: "create"
+        payload: anns
+      assert.calledWith fakeAnnotationMapper.loadAnnotations, anns
+
+    it 'calls annotationMapper.loadAnnotations() upon "update" action', ->
+      anns = ["my", "annotations"]
+      fakeStreamer.onmessage
+        type: "annotation-notification"
+        options: action: "update"
+        payload: anns
+      assert.calledWith fakeAnnotationMapper.loadAnnotations, anns
+
+    it 'calls annotationMapper.loadAnnotations() upon "past" action', ->
+      anns = ["my", "annotations"]
+      fakeStreamer.onmessage
+        type: "annotation-notification"
+        options: action: "past"
+        payload: anns
+      assert.calledWith fakeAnnotationMapper.loadAnnotations, anns
+
+    it 'looks up annotations at threading upon "delete" action', ->
+      $scope.$emit = sinon.spy()
+
+      # Prepare the annotation that we have locally
+      localAnnotation =
+        id: "fake ID"
+        data: "local data"
+
+      # Introduce our annotation into threading
+      fakeThreading.register localAnnotation
+
+      # Prepare the annotation that will come "from the wire"
+      remoteAnnotation =
+        id: localAnnotation.id  # same id as locally
+        data: "remote data"     # different data
+
+      # Simulate a delete action
+      fakeStreamer.onmessage
+        type: "annotation-notification"
+        options: action: "delete"
+        payload: [ remoteAnnotation ]
+
+      assert.calledWith $scope.$emit, "annotationDeleted", localAnnotation
