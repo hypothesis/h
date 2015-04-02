@@ -138,6 +138,17 @@ ThreadController = [
         return true
       return @filter.check(@container)
 
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#isNew
+    # @description
+    # Return true if this is a newly-created annotation (e.g. the user has just
+    # created it by clicking the new annotation button in the browser),
+    # false otherwise.
+    ###
+    this.isNew = ->
+      return (this.id and not this.container?.message?.id)
+
     this._isFilterActive = ->
       if @filter
         @filter.active()
@@ -214,7 +225,7 @@ module.exports = [
         render ->
           ctrl.container = thread
           scope.$digest()
-          if (ctrl.id and not ctrl.container?.message?.id)
+          if ctrl.isNew()
             # Scroll the sidebar to show new annotations.
             $location.hash(ctrl.id)
             $anchorScroll()
