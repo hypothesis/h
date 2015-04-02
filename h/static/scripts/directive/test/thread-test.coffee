@@ -42,25 +42,6 @@ describe 'thread', ->
 
   describe 'controller', ->
 
-    it 'returns true from isNew() for a new annotation', ->
-      createDirective()
-
-      # When the user clicks to create a new annotation in the browser, we get
-      # a ThreadController with a container with a message (the annotation)
-      # with no id.
-      controller.container = {message: {}}
-
-      assert(controller.isNew())
-
-    it 'returns false from isNew() for an old annotation', ->
-      createDirective()
-
-      # When we create a ThreadController for an old annotation, the controller
-      # has a container with a message (the annotation) with an id.
-      controller.container = {message: {id: 123}}
-
-      assert(not controller.isNew())
-
     describe '#toggleCollapsed', ->
       count = null
 
