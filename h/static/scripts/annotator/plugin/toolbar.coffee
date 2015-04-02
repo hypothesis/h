@@ -23,11 +23,11 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     @annotator.toolbar = @toolbar = $(@html)
     if touch
       # When there is a selection on touch devices show/hide highlighter
-      document.addEventListener "selectstart", ->
+      document.addEventListener "selectstart", =>
         if window.getSelection().toString() != ""
-          annotator.plugins.Toolbar.showHighlightButton(false)
+          this.showHighlightButton(false)
         else
-          annotator.plugins.Toolbar.showHighlightButton(true)
+          this.showHighlightButton(true)
     if @options.container?
       $(@options.container).append @toolbar
     else
@@ -71,7 +71,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           event.preventDefault()
           event.stopPropagation()
           @annotator.onAdderClick target: dataset: action: "highlight"
-          @annotator.plugins.Toolbar.showHighlightButton(false)
+          this.showHighlightButton(false)
     ]
     @buttons = $(makeButton(item) for item in items)
     list = $('<ul></ul>')

@@ -221,8 +221,10 @@ module.exports = class Guest extends Annotator
 
   destroy: ->
     $(document).unbind({
-      "mouseup":   this.checkForEndSelection
-      "mousedown": this.checkForStartSelection
+      "mouseup":    this.checkForEndSelection
+      "mousedown":  this.checkForStartSelection
+      "touchstart": this.checkForStartSelection
+      "touchend":   this.checkForEndSelection
     })
 
     $('#annotator-dynamic-style').remove()
