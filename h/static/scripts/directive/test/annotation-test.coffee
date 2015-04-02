@@ -364,7 +364,7 @@ describe 'annotation', ->
         dialog = $element.find('.share-dialog-wrapper')
 
       it 'sets and unsets the open class on the share wrapper', ->
-        $element.find('a').filter(-> this.title == 'Share').click()
+        dialog.find('button').click()
         isolateScope.$digest()
         assert.ok(dialog.hasClass('open'))
         $document.click()
