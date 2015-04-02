@@ -12,7 +12,7 @@ makeButton = (item) ->
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   PUSHED_CLASS = 'annotator-pushed'
 
-  touch = 'ontouchstart' in window or window.DocumentTouch and document instanceof DocumentTouch
+  touch = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 
   events:
     'setVisibleHighlights': 'onSetVisibleHighlights'

@@ -12,7 +12,9 @@ module.exports = class Guest extends Annotator
     ".annotator-adder button mouseup":   "onAdderMouseup"
     "document onselectionchange": "userSelectionChanged"
 
-  # This hack is needed for iOS Safari.
+  touch = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+  # This hack is needed for iOS Safari only.
   if /iPhone|iPad|iPod/i.test(navigator.userAgent)
     $(window).bind 'selectionEnd', ->
       # reset selection timeout
@@ -207,15 +209,13 @@ module.exports = class Guest extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
   _setupDocumentEvents: ->
-    # Mobile Safari is very picky about binding with both events.
-    if /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    if not touch
       $(document).bind({
-        "touchstart": @checkForStartSelection
+        "mousedown": @checkForStartSelection
       })
     else
       $(document).bind({
         "touchstart": @checkForStartSelection
-        "mousedown": @checkForStartSelection
       })
     this
 
