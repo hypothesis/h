@@ -150,7 +150,7 @@ ThreadController = [
       else
         0
 
-    this.uuid = uuid.v4()
+    this.id = uuid.v4()
 
     this
 ]
@@ -187,7 +187,6 @@ module.exports = [
       ctrl.parent = elem.parent().controller('thread')
       ctrl.counter = counter
       ctrl.filter = filter
-      ctrl.id = attrs.id
 
       # Track the number of messages in the thread
       if counter?
