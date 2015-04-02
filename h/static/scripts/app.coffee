@@ -86,11 +86,6 @@ module.exports = angular.module('h', [
   'toastr'
 ])
 
-.config(configureDocument)
-.config(configureLocation)
-.config(configureRoutes)
-.config(configureTemplates)
-
 .controller('AppController', require('./app-controller'))
 .controller('AnnotationUIController', require('./annotation-ui-controller'))
 .controller('AnnotationViewerController', require('./annotation-viewer-controller'))
@@ -150,6 +145,11 @@ module.exports = angular.module('h', [
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))
 .value('Discovery', require('./discovery'))
+
+.config(configureDocument)
+.config(configureLocation)
+.config(configureRoutes)
+.config(configureTemplates)
 
 .run(setupCrossFrame)
 .run(setupStreamer)
