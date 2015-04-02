@@ -211,15 +211,15 @@ AnnotationController = [
       @annotationURI = new URL("/a/#{@annotation.id}", this.baseURI).href
 
       # Extract the document metadata.
+      uri = model.uri
+      domain = new URL(uri).hostname
       if model.document
-        uri = model.uri
         if uri.indexOf("urn") is 0
           # This URI is not clickable, see if we have something better
           for link in model.document.link when link.href.indexOf("urn")
             uri = link.href
             break
 
-        domain = new URL(uri).hostname
         documentTitle = if Array.isArray(model.document.title)
           model.document.title[0]
         else
@@ -229,11 +229,14 @@ AnnotationController = [
           uri: uri
           domain: domain
           title: documentTitle or domain
-
-        if @document.title.length > 30
-          @document.title = @document.title[0..29] + '…'
       else
-        @document = null
+        @document =
+          uri: uri
+          domain: domain
+          title: domain
+
+      if @document.title.length > 30
+        @document.title = @document.title[0..29] + '…'
 
       # Form the tags for ngTagsInput.
       @annotation.tags = ({text} for text in (model.tags or []))
