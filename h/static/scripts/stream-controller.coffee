@@ -109,25 +109,13 @@ module.exports = class StreamController
         $scope.$emit('annotationDeleted', container.message)
         drafts.remove container.message
 
-    # rootScope listeners
-    listeners = []
-
-    listeners.push(
+    listeners = [
       $rootScope.$on('beforeAnnotationCreated', beforeAnnotationCreated)
-    )
-    listeners.push(
       $rootScope.$on('annotationCreated', annotationCreated)
-    )
-    listeners.push(
       $rootScope.$on('annotationDeleted', annotationDeleted)
-    )
-    listeners.push(
       $rootScope.$on('annotationsLoaded', annotationsLoaded)
-    )
-    listeners.push(
       $rootScope.$on('cleanupAnnotations', cleanupAnnotations)
-    )
+    ]
 
     $scope.$on '$destroy', ->
-      # Deregister listeners
-      listener() for listener in listeners
+      unbind() for unbind in listeners
