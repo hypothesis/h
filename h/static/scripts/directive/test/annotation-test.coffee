@@ -209,10 +209,20 @@ describe 'annotation', ->
       controller.render()
       assert.equal(controller.document.title, 'example.com')
 
-    it 'skips the document object if no document is present on the annotation', ->
+    it 'still sets the uri correctly if the annotation has no document', ->
       delete annotation.document
       controller.render()
-      assert.isNull(controller.document)
+      assert(controller.document.uri == $scope.annotation.uri)
+
+    it 'still sets the domain correctly if the annotation has no document', ->
+      delete annotation.document
+      controller.render()
+      assert(controller.document.domain == 'example.com')
+
+    it 'uses the domain for the title when the annotation has no document', ->
+      delete annotation.document
+      controller.render()
+      assert(controller.document.title == 'example.com')
 
     describe 'when there are no targets', ->
       beforeEach ->
