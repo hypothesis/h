@@ -6,6 +6,7 @@ install:
   - gem install sass
   - gem install compass
   - pip install coveralls
+  - pip install mandrill
   - pip install prospector
   - make
 services:

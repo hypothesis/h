@@ -90,6 +90,7 @@ class User(UserMixin, Base):
             )
         ).first()
 
+    # TODO: remove all this status bitfield stuff
     @property
     def email_confirmed(self):
         return bool((self.status or 0) & 0b001)
@@ -122,6 +123,17 @@ class User(UserMixin, Base):
             self.status = (self.status or 0) | 0b100
         else:
             self.status = (self.status or 0) & ~0b100
+
+    @property
+    def invited(self):
+        return bool((self.status or 0) & 0b1000)
+
+    @invited.setter
+    def invited(self, value):
+        if value:
+            self.status = (self.status or 0) | 0b1000
+        else:
+            self.status = (self.status or 0) & ~0b1000
 
 
 def _username_to_uid(username):
