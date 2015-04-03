@@ -96,6 +96,8 @@ class AsyncFormViewMapper(object):
             result = ajax_form(request, result)
             model = result.setdefault('model', {})
             model.update(session.model(request))
+            if 'email' not in model and 'email' in request.params:
+                model['email'] = request.params['email']
             result.pop('form', None)
             return result
         return wrapper
@@ -303,8 +305,8 @@ class ProfileController(horus.views.ProfileController):
 
     def profile(self):
         request = self.request
-        model = {}
         userid = request.authenticated_userid
+        model = {"email": self.User.get_by_id(request, userid).email}
         if request.registry.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 request,

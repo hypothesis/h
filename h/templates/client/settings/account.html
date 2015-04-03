@@ -1,5 +1,41 @@
 <div class="tab-pane" title="Account">
   <form class="account-form form"
+        name="changeEmailForm"
+        ng-submit="changeEmail(changeEmailForm)"
+        novalidate form-validate>
+
+    <h2 class="form-heading"><span>Change Your Email Address</span></h2>
+
+    <div class="form-field">
+      <label class="form-label" for="field-email">Email Address:</label>
+      <input id="field-email" class="form-input" type="email" name="email" placeholder="{{email}}" required ng-model="changeEmail.email" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="changeEmailForm.email.$error.required">Please enter your new email address.</li>
+        <li class="form-error" ng-show="changeEmailForm.email.$error.email">Please enter a valid email address.</li>
+        <li class="form-error" ng-show="changeEmailForm.email.$error.response">{{changeEmailForm.email.responseErrorMessage}}</li>
+      </ul>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="field-pwd">Password:</label>
+      <input id="field-pwd" class="form-input" type="password" name="pwd" required ng-model="changeEmail.pwd" />
+
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="changeEmailForm.pwd.$error.required">Please enter your password.</li>
+        <li class="form-error" ng-show="changeEmailForm.pwd.$error.minlength">Your password does not match the one we have on record.</li>
+        <li class="form-error" ng-show="changeEmailForm.pwd.$error.response">{{changeEmailForm.pwd.responseErrorMessage}}</li>
+      </ul>
+    </div>
+
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit"
+                status-button="changeEmailForm">Update</button>
+      </div>
+    </div>
+  </form>
+
+  <form class="account-form form"
         name="changePasswordForm"
         ng-submit="submit(changePasswordForm)"
         novalidate form-validate>

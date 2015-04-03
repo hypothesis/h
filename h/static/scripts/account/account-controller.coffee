@@ -17,6 +17,7 @@ class AccountController
       formModel = form.$name.slice(0, -4)
       $scope[formModel] = {} # Reset form fields.
       $scope.$broadcast 'formState', form.$name, 'success'  # Update status btn
+      $scope.email = response.email
 
     onDelete = (form, response) ->
       identity.logout()
@@ -39,6 +40,7 @@ class AccountController
     session.profile().$promise
       .then (result) =>
         $scope.subscriptions = result.subscriptions
+        $scope.email = result.email
 
     # Data for each of the forms
     $scope.editProfile = {}
@@ -70,6 +72,23 @@ class AccountController
         username: username
         pwd: form.pwd.$modelValue
         password: form.password.$modelValue
+
+      successHandler = angular.bind(null, onSuccess, form)
+      errorHandler   = angular.bind(null, onError, form)
+
+      $scope.$broadcast 'formState', form.$name, 'loading'  # Update status btn
+      promise = session.edit_profile(packet)
+      promise.$promise.then(successHandler, errorHandler)
+
+    $scope.changeEmail = (form) ->
+      formRespond(form)
+      return unless form.$valid
+
+      username = persona_filter auth.user
+      packet =
+        username: username
+        pwd: form.pwd.$modelValue
+        email: form.email.$modelValue
 
       successHandler = angular.bind(null, onSuccess, form)
       errorHandler   = angular.bind(null, onError, form)
