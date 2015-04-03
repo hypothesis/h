@@ -12,16 +12,22 @@ makeButton = (item) ->
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
   PUSHED_CLASS = 'annotator-pushed'
 
+  touch = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
   events:
-    '.annotator-toolbar mouseenter': 'show'
-    '.annotator-toolbar mouseleave': 'hide'
-    'setTool': 'onSetTool'
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
-  html: '<div class="annotator-toolbar annotator-hide"></div>'
+  html: '<div class="annotator-toolbar"></div>'
 
   pluginInit: ->
     @annotator.toolbar = @toolbar = $(@html)
+    if touch
+      # When there is a selection on touch devices show/hide highlighter
+      document.addEventListener "selectstart", =>
+        if window.getSelection().toString() != ""
+          this.showHighlightButton(false)
+        else
+          this.showHighlightButton(true)
     if @options.container?
       $(@options.container).append @toolbar
     else
@@ -40,7 +46,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           else
             @annotator.triggerHideFrame()
     ,
-      "title": "Show Annotations"
+      "title": "Toggle Highlight Visibility"
       "class": "h-icon-visibility"
       "on":
         "click": (event) =>
@@ -55,44 +61,52 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         "click": (event) =>
           event.preventDefault()
           event.stopPropagation()
-          @annotator.onAdderClick target: dataset: action: "comment"
+          event.target.dataset.action = "comment"
+          @annotator.onAdderClick(event)
+    ,
+      "title": "Highlight"
+      "class": "h-icon-border-color"
+      "on":
+        "click": (event) =>
+          event.preventDefault()
+          event.stopPropagation()
+          @annotator.onAdderClick target: dataset: action: "highlight"
+          this.showHighlightButton(false)
     ]
     @buttons = $(makeButton(item) for item in items)
-
     list = $('<ul></ul>')
     @buttons.appendTo(list)
     @toolbar.append(list)
+
+    # Hide highlight button.
+    $(@buttons[3]).hide()
 
     # Remove focus from the anchors when clicked, this removes the focus
     # styles intended only for keyboard navigation. IE/FF apply the focus
     # psuedo-class to a clicked element.
     @toolbar.on('mouseup', 'a', (event) -> $(event.target).blur())
+    this._updateStickyButtons()
 
-  show: -> this.toolbar.removeClass('annotator-hide')
-
-  hide: -> this.toolbar.addClass('annotator-hide')
-
-  onSetTool: (name) ->
-    if name is 'highlight'
-      $(@buttons[2]).addClass(PUSHED_CLASS)
+  showHighlightButton: (state)->
+    if state
+      $(@buttons[3]).show()
     else
-      $(@buttons[2]).removeClass(PUSHED_CLASS)
+      $(@buttons[3]).hide()
     this._updateStickyButtons()
 
   onSetVisibleHighlights: (state) ->
     if state
-      $(@buttons[1]).addClass(PUSHED_CLASS)
+      $(@buttons[1]).children().removeClass('h-icon-visibility-off')
+      $(@buttons[1]).children().addClass('h-icon-visibility')
     else
-      $(@buttons[1]).removeClass(PUSHED_CLASS)
-    this._updateStickyButtons()
+      $(@buttons[1]).children().removeClass('h-icon-visibility')
+      $(@buttons[1]).children().addClass('h-icon-visibility-off')
 
   _updateStickyButtons: ->
-    count = $(@buttons).filter(-> $(this).hasClass(PUSHED_CLASS)).length
-    if count
-      height = (count + 1) * 35  # +1 -- top button is always visible
-      this.toolbar.css("min-height", "#{height}px")
-    else
-      height = 35
-      this.toolbar.css("min-height", "")
+    # The highlight button is hidden except when there is a selection on touch devices
+    if $(@buttons[3]).css('display') == 'none'
+      height = 105
+    else height = 140
+    this.toolbar.css("min-height", "#{height}px")
     this.annotator.plugins.BucketBar?.BUCKET_THRESHOLD_PAD = height
     this.annotator.plugins.BucketBar?._update()

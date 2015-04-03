@@ -1,15 +1,29 @@
 Annotator = require('annotator')
 $ = Annotator.$
+Util = Annotator.Util
+selectionEndTimeout = null
 
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
 
   # Events to be bound on Annotator#element.
   events:
+    "setVisibleHighlights": "setVisibleHighlights"
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-adder button mouseup":   "onAdderMouseup"
-    "setVisibleHighlights": "setVisibleHighlights"
+    "document onselectionchange": "userSelectionChanged"
+
+  touch = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+  # This hack is needed for iOS Safari only.
+  if /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    $(window).bind 'selectionEnd', ->
+      # reset selection timeout
+      selectionEndTimeout = null
+      # get user selection
+      selectedText = getSelectionText()
+      return
 
   # Plugin configuration
   options:
@@ -197,16 +211,22 @@ module.exports = class Guest extends Annotator
   _setupViewer: -> this
   _setupEditor: -> this
   _setupDocumentEvents: ->
-    $(document).bind({
-      # omit the "mouseup" check
-      "mousedown": this.checkForStartSelection
-    })
+    if not touch
+      $(document).bind({
+        "mousedown": @checkForStartSelection
+      })
+    else
+      $(document).bind({
+        "touchstart": @checkForStartSelection
+      })
     this
 
   destroy: ->
     $(document).unbind({
-      "mouseup":   this.checkForEndSelection
-      "mousedown": this.checkForStartSelection
+      "mouseup":    this.checkForEndSelection
+      "mousedown":  this.checkForStartSelection
+      "touchstart": this.checkForStartSelection
+      "touchend":   this.checkForEndSelection
     })
 
     $('#annotator-dynamic-style').remove()
@@ -262,6 +282,17 @@ module.exports = class Guest extends Annotator
       params: (a.$$tag for a in annotations)
 
   onAnchorMousedown: ->
+
+  # Needed to get text selection working on iOS. Only used for touch screen devices.
+  userSelectionChanged: ->
+    # wait 500 ms after the last selection change event
+    if selectionEndTimeout
+      clearTimeout selectionEndTimeout
+    selectionEndTimeout = setTimeout((->
+      Util.getGlobal().trigger 'selectionEnd'
+      return
+    ), 500)
+    return
 
   checkForStartSelection: (event) =>
     # Override to prevent Annotator choking when this ties to access the
