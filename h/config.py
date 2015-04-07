@@ -11,6 +11,7 @@ log = logging.getLogger(__name__)
 def settings_from_environment():
     settings = {}
 
+    _setup_analytics(settings)
     _setup_heroku(settings)
     _setup_db(settings)
     _setup_elasticsearch(settings)
@@ -34,6 +35,11 @@ def normalise_database_url(url):
     if url.startswith('postgres://'):
         url = 'postgresql+psycopg2://' + url[len('postgres://'):]
     return url
+
+
+def _setup_analytics(settings):
+    if 'GOOGLE_ANALYTICS_TRACKING_ID' in os.environ:
+        settings['ga_tracking_id'] = os.environ['GOOGLE_ANALYTICS_TRACKING_ID']
 
 
 def _setup_heroku(settings):

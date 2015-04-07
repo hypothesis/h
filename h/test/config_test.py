@@ -5,6 +5,17 @@ from h.config import settings_from_environment
 
 
 @patch.dict(os.environ)
+def test_google_analytics():
+    os.environ['GOOGLE_ANALYTICS_TRACKING_ID'] = '12345-1'
+
+    actual_config = settings_from_environment()
+    expected_config = {
+        'ga_tracking_id': '12345-1',
+    }
+    assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
 def test_heroku_bonsai():
     url = 'http://ql9lsrn8:img5ndnsbtaahloy@redwood-94865.us-east-1.bonsai.io/'
     os.environ['BONSAI_URL'] = url
