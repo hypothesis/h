@@ -1,15 +1,18 @@
 $ = Annotator.$
 
 makeButton = (item) ->
-  anchor = $('<a></a>')
+  anchor = $('<button></button>')
   .attr('href', '')
   .attr('title', item.title)
+  .attr('name', item.name)
   .on(item.on)
   .addClass(item.class)
   button = $('<li></li>').append(anchor)
   return button[0]
 
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
+  HIDE_CLASS = 'annotator-hide'
+
   events:
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
@@ -24,7 +27,8 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
 
     items = [
       "title": "Toggle Sidebar"
-      "class": "annotator-toolbar-toggle h-icon-chevron-left"
+      "class": "h-icon-chevron-left"
+      "name": "sidebar-toggle"
       "on":
         "click": (event) =>
           event.preventDefault()
@@ -37,6 +41,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     ,
       "title": "Hide Highlights"
       "class": "h-icon-visibility"
+      "name": "highlight-visibility"
       "on":
         "click": (event) =>
           event.preventDefault()
@@ -46,6 +51,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     ,
       "title": "New Note"
       "class": "h-icon-insert-comment"
+      "name": "insert-comment"
       "on":
         "click": (event) =>
           event.preventDefault()
@@ -65,10 +71,12 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
 
   onSetVisibleHighlights: (state) ->
     if state
-      $(@buttons[1]).children().removeClass('h-icon-visibility-off')
-      $(@buttons[1]).children().addClass('h-icon-visibility')
-      $(@buttons[1]).children().prop('title', 'Hide Highlights');
+      $('[name=highlight-visibility]')
+      .removeClass('h-icon-visibility-off')
+      .addClass('h-icon-visibility')
+      .prop('title', 'Hide Highlights');
     else
-      $(@buttons[1]).children().removeClass('h-icon-visibility')
-      $(@buttons[1]).children().addClass('h-icon-visibility-off')
-      $(@buttons[1]).children().prop('title', 'Show Highlights');
+      $('[name=highlight-visibility]')
+      .removeClass('h-icon-visibility')
+      .addClass('h-icon-visibility-off')
+      .prop('title', 'Show Highlights');

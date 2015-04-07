@@ -196,19 +196,9 @@ module.exports = class Guest extends Annotator
   _setupDynamicStyle: -> this
   _setupViewer: -> this
   _setupEditor: -> this
-  _setupDocumentEvents: ->
-    $(document).bind({
-      # omit the "mouseup" check
-      "mousedown": this.checkForStartSelection
-    })
-    this
+  _setupDocumentEvents: -> this
 
   destroy: ->
-    $(document).unbind({
-      "mouseup":   this.checkForEndSelection
-      "mousedown": this.checkForStartSelection
-    })
-
     $('#annotator-dynamic-style').remove()
 
     @adder.remove()
@@ -262,13 +252,6 @@ module.exports = class Guest extends Annotator
       params: (a.$$tag for a in annotations)
 
   onAnchorMousedown: ->
-
-  checkForStartSelection: (event) =>
-    # Override to prevent Annotator choking when this ties to access the
-    # viewer but preserve the manipulation of the attribute `mouseIsDown` which
-    # is needed for preventing the panel from closing while annotating.
-    unless event and this.isAnnotator(event.target)
-      @mouseIsDown = true
 
   # This is called to create a target from a raw selection,
   # using selectors created by the registered selector creators
