@@ -10,8 +10,6 @@ makeButton = (item) ->
   return button[0]
 
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
-  PUSHED_CLASS = 'annotator-pushed'
-
   events:
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
