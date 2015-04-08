@@ -78,17 +78,6 @@ class TextHighlight
     @_highlights = TextHighlight.highlightRange(normedRange)
     $(@_highlights).data "annotation", @annotation
 
-  # Is this a temporary hl?
-  isTemporary: -> @_temporary
-
-  # Mark/unmark this hl as active
-  setTemporary: (value) ->
-    @_temporary = value
-    if value
-      $(@_highlights).addClass('annotator-hl-temporary')
-    else
-      $(@_highlights).removeClass('annotator-hl-temporary')
-
   # Mark/unmark this hl as focused
   setFocused: (value) ->
     if value
