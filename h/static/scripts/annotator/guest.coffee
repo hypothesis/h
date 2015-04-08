@@ -29,8 +29,8 @@ module.exports = class Guest extends Annotator
   html: jQuery.extend {}, Annotator::html,
     adder: '''
       <div class="annotator-adder">
-        <button class="h-icon-insert-comment" data-action="comment" title="New Note"></button>
         <button class="h-icon-border-color" data-action="highlight" title="Highlight"></button>
+        <button class="h-icon-insert-comment" data-action="comment" title="New Note"></button>
       </div>
     '''
 
