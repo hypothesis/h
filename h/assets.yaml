@@ -37,6 +37,17 @@ angular_toastr:
       contents: h:static/scripts/vendor/angular-toastr/angular-toastr.css
 
 
+# Analytics
+angulartics:
+  filters: uglifyjs
+  output: scripts/vendor/angulartics.min.js
+  contents: h:static/scripts/vendor/angulartics.js
+angulartics_ga:
+  filters: uglifyjs
+  output: scripts/vendor/angulartics-ga.min.js
+  contents: h:static/scripts/vendor/angulartics-ga.js
+
+
 # jQuery
 jquery:
   filters: uglifyjs
@@ -100,6 +111,8 @@ app:
     - angular_sanitize
     - angular_tags_input
     - angular_toastr
+    - angulartics
+    - angulartics_ga
     - autofill
     - bind
     - katex

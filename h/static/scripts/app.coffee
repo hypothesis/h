@@ -77,6 +77,8 @@ setupStreamer = [
 ]
 
 module.exports = angular.module('h', [
+  'angulartics'
+  'angulartics.google.analytics'
   'bootstrap'
   'ngAnimate'
   'ngResource'
