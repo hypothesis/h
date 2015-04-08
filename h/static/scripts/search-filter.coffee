@@ -2,6 +2,22 @@
 # It expects a search query string where the search term are separated by space character
 # and collects them into the given term arrays
 module.exports = class SearchFilter
+  # Splits a search term into filter and data
+  # i.e.
+  #   'user:johndoe' -> ['user', 'johndoe']
+  #   'example:text' -> [null, 'example:text']
+  _splitTerm: (term) ->
+    filter = term.slice 0, term.indexOf ":"
+    unless filter?
+      # The whole term is data
+      return [null, term]
+
+    if filter in ['quote', 'result', 'since', 'tag', 'text', 'uri', 'user']
+      data = term[filter.length+1..]
+      return [filter, data]
+    else
+      # The filter is not a power search filter, so the whole term is data
+      return [null, term]
 
   # This function will slice the search-text input
   # Slice character: space,
@@ -34,12 +50,9 @@ module.exports = class SearchFilter
     # Remove quotes for power search.
     # I.e. 'tag:"foo bar"' -> 'tag:foo bar'
     for token, index in tokens
-      filter = token.slice 0, token.indexOf ":"
-      unless filter? then filter = ""
-
-      if filter in ['quote', 'result', 'since', 'tag', 'text', 'uri', 'user']
-        tokenPart = token[filter.length+1..]
-        tokens[index] = filter + ':' + (_removeQuoteCharacter tokenPart)
+      [filter, data] = @_splitTerm(token)
+      if filter?
+        tokens[index] = filter + ':' + (_removeQuoteCharacter data)
 
     tokens
 
@@ -61,8 +74,8 @@ module.exports = class SearchFilter
     if searchtext
       terms = @_tokenize(searchtext)
       for term in terms
-        [filter, data] = term.split(':')
-        unless data
+        [filter, data] = @_splitTerm(term)
+        unless filter?
           filter = 'any'
           data = term
         addToObj(filterToBackendFilter(filter), data)
