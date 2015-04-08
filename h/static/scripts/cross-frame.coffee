@@ -36,8 +36,7 @@ module.exports = class CrossFrame
           $rootScope.$apply ->
             $rootScope.$emit.call($rootScope, args...)
         on: (event, handler) ->
-          $rootScope.$apply ->
-            $rootScope.$on(event, (event, args...) -> handler.apply(this, args))
+          $rootScope.$on(event, (event, args...) -> handler.apply(this, args))
 
       new AnnotationSync(bridge, options)
 

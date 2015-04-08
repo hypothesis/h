@@ -35,6 +35,19 @@
     {% endif %}
     {% block styles %}{% endblock %}
 
+    {% if ga_tracking_id %}
+      <!-- Google Analytics -->
+      <script async src='//www.google-analytics.com/analytics.js'></script>
+      <script>
+       window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+       ga('create', 'UA-{{ga_tracking_id}}', {{ga_create_options|safe}});
+       {% if not layout.app -%}
+       ga('send', 'pageview');
+       {%- endif -%}
+      </script>
+      <!-- End Google Analytics -->
+    {% endif %}
+
     {% if base_url %}
       <base target="_top" href="{{ base_url }}" />
     {% endif %}

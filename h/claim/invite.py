@@ -104,15 +104,18 @@ def send_invitations(request, api_key, users):
     log.info('Collecting merge vars and recipients.')
     merge_vars = list(get_merge_vars(request, users))
     recipients = list(get_recipients(users))
+    message = {
+        'merge_vars': merge_vars,
+        'to': recipients,
+        'google_analytics_domains': [request.domain],
+        'google_analytics_campaign': 'invite',
+    }
 
     try:
         results = mandrill.Mandrill(api_key).messages.send_template(
             template_content=[],
             template_name='activation-email-to-reserved-usernames',
-            message={
-                'merge_vars': merge_vars,
-                'to': recipients,
-            }
+            message=message,
         )
     except mandrill.Error:
         log.exception('Error sending invitations.')
