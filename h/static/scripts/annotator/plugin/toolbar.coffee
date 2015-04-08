@@ -10,14 +10,10 @@ makeButton = (item) ->
   return button[0]
 
 class Annotator.Plugin.Toolbar extends Annotator.Plugin
-  PUSHED_CLASS = 'annotator-pushed'
-
   events:
-    '.annotator-toolbar mouseenter': 'show'
-    '.annotator-toolbar mouseleave': 'hide'
     'setVisibleHighlights': 'onSetVisibleHighlights'
 
-  html: '<div class="annotator-toolbar annotator-hide"></div>'
+  html: '<div class="annotator-toolbar"></div>'
 
   pluginInit: ->
     @annotator.toolbar = @toolbar = $(@html)
@@ -39,7 +35,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           else
             @annotator.triggerHideFrame()
     ,
-      "title": "Show Annotations"
+      "title": "Hide Highlights"
       "class": "h-icon-visibility"
       "on":
         "click": (event) =>
@@ -67,16 +63,15 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
     # psuedo-class to a clicked element.
     @toolbar.on('mouseup', 'a', (event) -> $(event.target).blur())
 
-  show: -> this.toolbar.removeClass('annotator-hide')
-
-  hide: -> this.toolbar.addClass('annotator-hide')
-
   onSetVisibleHighlights: (state) ->
     if state
-      $(@buttons[1]).addClass(PUSHED_CLASS)
+      $(@buttons[1]).children().removeClass('h-icon-visibility-off')
+      $(@buttons[1]).children().addClass('h-icon-visibility')
+      $(@buttons[1]).children().prop('title', 'Hide Highlights');
     else
-      $(@buttons[1]).removeClass(PUSHED_CLASS)
-    this._updateStickyButtons()
+      $(@buttons[1]).children().removeClass('h-icon-visibility')
+      $(@buttons[1]).children().addClass('h-icon-visibility-off')
+      $(@buttons[1]).children().prop('title', 'Show Highlights');
 
   _updateStickyButtons: ->
     count = $(@buttons).filter(-> $(this).hasClass(PUSHED_CLASS)).length
