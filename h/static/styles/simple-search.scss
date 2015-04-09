@@ -13,32 +13,33 @@
 }
 
 .simple-search-form * {
-  box-sizing: border-box;
+  line-height: inherit;
 }
 
-@include icons {
-  &.simple-search-icon {
-    line-height: inherit;
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
+.simple-search-icon {
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 :not(:focus) ~ .simple-search-icon {
   color: $gray-lighter;
 }
 
-.simple-search-input {
+input.simple-search-input {
   float: left;
   outline: none;
   color: $text-color;
-  line-height: inherit;
   width: 100%;
-  border: none !important; // Override base input styles.
+  border: none;
   padding: 0;
 
   .simple-search-inactive &:not(:focus) {
-    border-color: #f3f3f3 !important;
+    border-color: #f3f3f3;
+  }
+
+  &:disabled {
+    background: none;
+    color: $gray-light;
   }
 }
