@@ -208,7 +208,7 @@ The full range of possibilities here is still in need of documentation and we
 would appreciate any help to improve that.
 
 
-Serving h over ssl in development
+Serving h over SSL in development
 ---------------------------------
 
 If you want to annotate a site that's served over https then you'll need to
