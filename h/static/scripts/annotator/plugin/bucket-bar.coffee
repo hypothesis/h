@@ -184,9 +184,9 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       x = hl.getTop() - defaultView.pageYOffset
       h = hl.getHeight()
 
-      if x <= @BUCKET_SIZE + @BUCKET_THRESHOLD_PAD
+      if x < 0
         if d not in above then above.push d
-      else if x + h >= $(window).height() - @BUCKET_SIZE
+      else if x + h > window.innerHeight
         if d not in below then below.push d
       else
         points.push [x, 1, d]
