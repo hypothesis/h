@@ -4,7 +4,7 @@ $ = Annotator.$
 
 class Annotator.Plugin.BucketBar extends Annotator.Plugin
   # prototype constants
-  BUCKET_THRESHOLD_PAD: 30
+  BUCKET_THRESHOLD_PAD: 106
   BUCKET_SIZE: 16
 
   # svg skeleton

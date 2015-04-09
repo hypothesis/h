@@ -72,14 +72,3 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
       $(@buttons[1]).children().removeClass('h-icon-visibility')
       $(@buttons[1]).children().addClass('h-icon-visibility-off')
       $(@buttons[1]).children().prop('title', 'Show Highlights');
-
-  _updateStickyButtons: ->
-    count = $(@buttons).filter(-> $(this).hasClass(PUSHED_CLASS)).length
-    if count
-      height = (count + 1) * 35  # +1 -- top button is always visible
-      this.toolbar.css("min-height", "#{height}px")
-    else
-      height = 35
-      this.toolbar.css("min-height", "")
-    this.annotator.plugins.BucketBar?.BUCKET_THRESHOLD_PAD = height
-    this.annotator.plugins.BucketBar?._update()
