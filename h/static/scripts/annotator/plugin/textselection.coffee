@@ -7,11 +7,18 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
 
     # Register the event handlers required for creating a selection
     $(document).bind({
+      "touchend": @checkForEndSelection
       "mouseup": @checkForEndSelection
     })
 
     null
 
+  destroy: ->
+    $(document).unbind({
+      "touchend": @checkForEndSelection
+      "mouseup": @checkForEndSelection
+    })
+    super
 
   # Code used to create annotations around text ranges =====================
 
@@ -61,10 +68,9 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
       selection.addRange(range.toRange()) if range
       range
 
-  # This is called then the mouse is released.
+  # This is called when the mouse is released.
   # Checks to see if a selection has been made on mouseup and if so,
   # calls Annotator's onSuccessfulSelection method.
-  # Also resets the @mouseIsDown property.
   #
   # event - The event triggered this. Usually it's a mouseup Event,
   #         but that's not necessary. The coordinates will be used,
@@ -74,11 +80,6 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
   #
   # Returns nothing.
   checkForEndSelection: (event = {}) =>
-    @annotator.mouseIsDown = false
-
-    # We don't care about the adder button click
-    return if @annotator.inAdderClick
-
     # Get the currently selected ranges.
     selectedRanges = @_getSelectedRanges()
 

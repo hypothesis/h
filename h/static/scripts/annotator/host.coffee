@@ -64,19 +64,19 @@ module.exports = class Host extends Guest
     @frame.removeClass 'annotator-collapsed'
 
     if @toolbar?
-      @toolbar.find('.annotator-toolbar-toggle')
+      @toolbar.find('[name=sidebar-toggle]')
       .removeClass('h-icon-chevron-left')
       .addClass('h-icon-chevron-right')
 
   hideFrame: ->
-      @frame.css 'margin-left': ''
-      @frame.removeClass 'annotator-no-transition'
-      @frame.addClass 'annotator-collapsed'
+    @frame.css 'margin-left': ''
+    @frame.removeClass 'annotator-no-transition'
+    @frame.addClass 'annotator-collapsed'
 
-      if @toolbar?
-        @toolbar.find('.annotator-toolbar-toggle')
-        .removeClass('h-icon-chevron-right')
-        .addClass('h-icon-chevron-left')
+    if @toolbar?
+      @toolbar.find('[name=sidebar-toggle]')
+      .removeClass('h-icon-chevron-right')
+      .addClass('h-icon-chevron-left')
 
 
   _addCrossFrameListeners: ->

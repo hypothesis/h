@@ -176,9 +176,10 @@ $base-font-size: 14px;
     z-index: 1;
   }
 
-  a {
+  button {
     @include single-transition(background-color, .25s, .25s);
     background: $white;
+    border: none;
     color: $gray-light;
     line-height: 28px;
     text-decoration: none;
@@ -189,12 +190,12 @@ $base-font-size: 14px;
     left: 0;
   }
 
-  a:active {
+  button:active {
     @include single-transition(background-color, .25s);
     background-color: $gray-light;
   }
 
-  a:focus, a:hover {
+  button:focus, button:hover {
     outline: 0;
     color: $text-color;
   }
