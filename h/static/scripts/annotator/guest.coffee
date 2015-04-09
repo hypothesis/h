@@ -48,10 +48,6 @@ module.exports = class Guest extends Annotator
       # let's load the Document plugin instead.
       @options.Document = {}
 
-    @frame = $('<div></div>')
-    .appendTo(@wrapper)
-    .addClass('annotator-frame annotator-outer annotator-collapsed')
-
     delete @options.app
 
     cfOptions =
@@ -202,7 +198,6 @@ module.exports = class Guest extends Annotator
     $('#annotator-dynamic-style').remove()
 
     @adder.remove()
-    @frame.remove()
 
     @wrapper.find('.annotator-hl').each ->
       $(this).contents().insertBefore(this)

@@ -31,6 +31,10 @@ module.exports = class Host extends Guest
     .attr('seamless', '')
     .attr('src', src)
 
+    @frame = $('<div></div>')
+    .addClass('annotator-frame annotator-outer annotator-collapsed')
+    .appendTo(element)
+
     super element, options, dontScan: true
     this._addCrossFrameListeners()
 
@@ -53,6 +57,10 @@ module.exports = class Host extends Guest
       @plugins.BucketBar.element.on 'click', (event) =>
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
+
+  destroy: ->
+    @frame.remove()
+    super
 
   showFrame: (options={transition: true}) ->
     unless @drag.enabled
