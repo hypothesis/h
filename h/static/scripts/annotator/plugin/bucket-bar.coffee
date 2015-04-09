@@ -45,13 +45,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     for event in events
       @annotator.subscribe event, this._scheduleUpdate
 
-    @element.on 'click', (event) =>
-      event.stopPropagation()
-      @annotator.showFrame()
-
-    @element.on 'mouseup', (event) =>
-      event.stopPropagation()
-
     $(window).on 'resize scroll', this._scheduleUpdate
     $(document.body).on 'resize scroll', '*', this._scheduleUpdate
 

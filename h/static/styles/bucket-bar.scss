@@ -2,7 +2,7 @@
 
 .annotator-bucket-bar {
   background: hsla(0, 0, 0, .1);
-  cursor: ew-resize;
+  pointer-events: none;
   position: absolute;
   height: 100%;
   width: $bucket-bar-width;
