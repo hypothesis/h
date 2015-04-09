@@ -105,6 +105,16 @@ class TextHighlight
   # Get the height of the highlight.
   getHeight: -> $(@_highlights).outerHeight true
 
+  # Get the bounding rectangle in viewport coordinates.
+  getBoundingClientRect: ->
+    # Reduce the client rectangles of the highlights to a bounding box
+    rects = $(@_highlights).map(-> this.getBoundingClientRect()).get()
+    return rects.reduce (acc, r) ->
+      top: Math.min(acc.top, r.top)
+      left: Math.min(acc.left, r.left)
+      bottom: Math.max(acc.bottom, r.bottom)
+      right: Math.max(acc.right, r.right)
+
   # Scroll the highlight into view
   scrollToView: ->
     $(@_highlights).scrollintoview()

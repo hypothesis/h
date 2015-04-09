@@ -112,6 +112,19 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     {next} = annotations.reduce (acc, ann) ->
       {start, next} = acc
       anchor = ann.anchors[0]
+      hl = anchor.highlight[anchor.startPage]
+
+      # Ignore this anchor if its highlight is currently on screen.
+      if hl?
+        rect = hl.getBoundingClientRect()
+        switch dir
+          when 1
+            if rect.bottom >= 0
+              return acc
+          when -1
+            if rect.top <= window.innerHeight
+              return acc
+
       if not next? or start.page*dir < anchor.startPage*dir
         # This one is obviously better
         start:
@@ -120,7 +133,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
         next: [anchor]
       else if start.page is anchor.startPage
         # This is on the same page, might be better
-        hl = anchor.highlight[start.page]
         if hl?
           # We have a real highlight, let's compare coordinates
           if start.top*dir < hl.getTop()*dir
