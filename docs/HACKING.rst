@@ -217,18 +217,14 @@ give a mixed-content warning.
 
 To serve your local dev instance of h over https:
 
-1. Generate a private key::
+1. Generate a private key and certificate signing request::
 
-    openssl genpkey -algorithm RSA -out key.pem
+    openssl req -newkey rsa:1024 -nodes -keyout key.pem -out req.pem
 
-2. Generate a certificate signing request::
-
-    openssl req -new -key key.pem -out req.pem
-
-3. Generate a self-signed certificate::
+2. Generate a self-signed certificate::
 
     openssl x509 -req -in req.pem -signkey key.pem -out server.crt
 
-4. Run ``gunicorn`` with the ``certfile`` and ``keyfile`` options::
+3. Run ``gunicorn`` with the ``certfile`` and ``keyfile`` options::
 
     gunicorn --reload --paste conf/development.ini --certfile=server.crt --keyfile=key.pem
