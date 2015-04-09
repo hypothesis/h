@@ -1,3 +1,5 @@
+@import 'base';
+
 .annotator-bucket-bar {
   background: hsla(0, 0, 0, .1);
   cursor: ew-resize;
@@ -58,6 +60,9 @@
   }
 
   &.lower, &.upper {
+    @include smallshadow;
+    z-index: 1;
+
     &:before, &:after {
       left: 50%;
       bottom: 100%;
