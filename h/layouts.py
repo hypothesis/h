@@ -31,6 +31,10 @@ class BaseLayout(object):
         return self.request.registry.resources(requirements)
 
     @property
+    def promise_polyfill_urls(self):
+        return self.request.webassets_env['promise'].urls()
+
+    @property
     def xpath_polyfill_urls(self):
         return self.request.webassets_env['wgxpath'].urls()
 

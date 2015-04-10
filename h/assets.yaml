@@ -71,6 +71,10 @@ bind:
   filters: uglifyjs
   output: scripts/vendor/polyfills/bind.min.js
   contents: h:static/scripts/vendor/polyfills/bind.js
+promise:
+  filters: uglifyjs
+  output: scripts/vendor/polyfills/promise.min.js
+  contents: h:static/scripts/vendor/polyfills/promise.js
 wgxpath:
   filters: uglifyjs
   output: scripts/vendor/polyfills/wgxpath.install.min.js

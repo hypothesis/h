@@ -60,6 +60,26 @@
       resources = resources.concat(['{{ layout.url_polyfill_urls | map("string") | join("', '") | safe }}']);
     }
 
+    // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/es6/promises.js
+    var promiseWorks = 'Promise' in window &&
+    // Some of these methods are missing from
+    // Firefox/Chrome experimental implementations
+    'resolve' in window.Promise &&
+    'reject' in window.Promise &&
+    'all' in window.Promise &&
+    'race' in window.Promise &&
+    // Older version of the spec had a resolver object
+    // as the arg rather than a function
+    (function() {
+      var resolve;
+      new window.Promise(function(r) { resolve = r; });
+      return typeof resolve === 'function';
+    }());
+
+    if (!promiseWorks) {
+      resources = resources.concat(['{{ layout.promise_polyfill_urls | map("string") | join("', '") | safe }}']);
+    }
+
     if (typeof window.Annotator === 'undefined') {
       resources = resources.concat(['{{ layout.app_inject_urls | map("string") | join("', '") | safe }}']);
     }
