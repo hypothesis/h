@@ -23,9 +23,16 @@
   }
   RestrictedProtocolError.prototype = Object.create(ExtensionError);
 
+  function BlockedSiteError(message) {
+    Error.apply(this, arguments);
+    this.message = message;
+  }
+  BlockedSiteError.prototype = Object.create(ExtensionError);
+
   h.ExtensionError = ExtensionError;
   h.LocalFileError = LocalFileError;
   h.NoFileAccessError = NoFileAccessError;
   h.RestrictedProtocolError = RestrictedProtocolError;
+  h.BlockedSiteError = BlockedSiteError;
 
 })(window.h || (window.h = {}));

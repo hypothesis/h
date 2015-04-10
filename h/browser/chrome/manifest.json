@@ -35,7 +35,8 @@
       "lib/help-page.js",
       "lib/errors.js",
       "lib/hypothesis-chrome-extension.js",
-      "lib/install.js"
+      "lib/install.js",
+      "lib/blocklist.js"
     ]
   },
   "browser_action": {

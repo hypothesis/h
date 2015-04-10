@@ -27,7 +27,8 @@ module.exports = function(config) {
       'lib/browser-action.js',
       'lib/help-page.js',
       'lib/hypothesis-chrome-extension.js',
-      'test/*-test.js'
+      'test/*-test.js',
+      '../../static/scripts/blocklist.js'
     ],
 
 
