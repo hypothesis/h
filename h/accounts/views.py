@@ -7,8 +7,13 @@ import horus.events
 import horus.views
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
+from horus.interfaces import IForgotPasswordForm
+from horus.interfaces import IForgotPasswordSchema
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
+from pyramid.url import route_url
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message
 
 from h import session
 from h.models import _
@@ -130,7 +135,63 @@ class AsyncAuthController(AuthController):
 @view_config(attr='forgot_password', route_name='forgot_password')
 @view_config(attr='reset_password', route_name='reset_password')
 class ForgotPasswordController(horus.views.ForgotPasswordController):
-    pass
+    def forgot_password(self):
+        req = self.request
+        schema = req.registry.getUtility(IForgotPasswordSchema)
+        schema = schema().bind(request=req)
+
+        form = req.registry.getUtility(IForgotPasswordForm)
+        form = form(schema)
+
+        if req.method == 'GET':
+            if req.user:
+                return httpexceptions.HTTPFound(
+                    location=self.forgot_password_redirect_view)
+            else:
+                return {'form': form.render()}
+
+        controls = req.POST.items()
+        try:
+            captured = form.validate(controls)
+        except deform.ValidationFailure as e:
+            return {'form': e.render(), 'errors': e.error.children}
+
+        user = self.User.get_by_email(req, captured['email'])
+        activation = self.Activation()
+        self.db.add(activation)
+        user.activation = activation
+
+        mailer = get_mailer(req)
+        username = getattr(user, 'short_name', '') or \
+            getattr(user, 'full_name', '') or \
+            getattr(user, 'username', '') or user.email
+        emailtext = ("Hello, {username}!\n\n"
+                     "Someone requested resetting your password. If it was "
+                     "you, reset your password by using this reset code:\n\n"
+                     "{code}\n\n"
+                     "Alternatively, you can reset your password by "
+                     "clicking on this link:\n\n"
+                     "{link}\n\n"
+                     "If you don't want to change your password, please "
+                     "ignore this email message.\n\n"
+                     "Regards,\n"
+                     "The Hypothesis Team\n")
+        body = emailtext.format(
+            code=user.activation.code,
+            link=route_url('reset_password', req, code=user.activation.code),
+            username=username)
+        subject = self.Str.reset_password_email_subject
+        message = Message(
+            subject=subject,
+            recipients=[user.email],
+            body=body)
+        mailer.send(message)
+        FlashMessage(
+            self.request,
+            self.Str.reset_password_email_sent,
+            kind='success')
+        return httpexceptions.HTTPFound(
+            location=self.reset_password_redirect_view)
 
 
 @view_defaults(accept='application/json', context=Application, renderer='json')
