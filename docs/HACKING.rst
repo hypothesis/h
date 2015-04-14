@@ -56,7 +56,7 @@ a Python "virtualenv". First, follow the instructions for your platform on
 installing virtualenvwrapper_. Then, at a shell, you can create a virtualenv for
 the h application with::
 
-    $ mkvirtualenv h
+    $ mkvirtualenv h  # apparently now just virtualenv 
 
 You will notice that the your shell prompt changes to include a (h) symbol. That
 means that you now have your virtual environment activated. This is required for
