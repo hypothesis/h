@@ -1,15 +1,16 @@
 Annotator = require('annotator')
 $ = Annotator.$
 
+Hammer = require('hammerjs')
+
 Guest = require('./guest')
 
+# Minimum width to which the frame can be resized.
+MIN_RESIZE = 280
+
+
 module.exports = class Host extends Guest
-  # Drag state variables
-  drag:
-    delta: 0
-    enabled: false
-    last: null
-    tick: false
+  gestureState: null
 
   constructor: (element, options) ->
     # Create the iframe
@@ -53,7 +54,7 @@ module.exports = class Host extends Guest
       this.publish('setVisibleHighlights', !!options.showHighlights)
 
     if @plugins.BucketBar?
-      this._setupDragEvents()
+      this._setupGestures()
       @plugins.BucketBar.element.on 'click', (event) =>
         if @frame.hasClass 'annotator-collapsed'
           this.showFrame()
@@ -63,12 +64,11 @@ module.exports = class Host extends Guest
     super
 
   showFrame: (options={transition: true}) ->
-    unless @drag.enabled
-      @frame.css 'margin-left': "#{-1 * @frame.width()}px"
     if options.transition
       @frame.removeClass 'annotator-no-transition'
     else
       @frame.addClass 'annotator-no-transition'
+    @frame.css 'margin-left': "#{-1 * @frame.width()}px"
     @frame.removeClass 'annotator-collapsed'
 
     if @toolbar?
@@ -86,61 +86,89 @@ module.exports = class Host extends Guest
       .removeClass('h-icon-chevron-right')
       .addClass('h-icon-chevron-left')
 
-
   _addCrossFrameListeners: ->
     @crossframe.on('showFrame', this.showFrame.bind(this, null))
     @crossframe.on('hideFrame', this.hideFrame.bind(this, null))
 
-  _setupDragEvents: ->
-    el = document.createElementNS 'http://www.w3.org/1999/xhtml', 'canvas'
-    el.width = el.height = 1
-    @element.append el
+  _initializeGestureState: ->
+    @gestureState =
+      acc: null
+      initial: null
+      renderFrame: null
 
-    dragStart = (event) =>
-      event.dataTransfer.dropEffect = 'none'
-      event.dataTransfer.effectAllowed = 'none'
-      event.dataTransfer.setData 'text/plain', ''
-      event.dataTransfer.setDragImage el, 0, 0
-      @drag.enabled = true
-      @drag.last = event.screenX
+  onPan: (event) =>
+    # Smooth updates
+    _updateLayout = =>
+      # Only schedule one frame at a time
+      return if @gestureState.renderFrame
+      # Schedule update
+      @gestureState.renderFrame = window.requestAnimationFrame =>
+        # Clear the frame
+        @gestureState.renderFrame = null
+        # Stop if finished
+        return unless @gestureState.acc?
+        # Set style
+        m = @gestureState.acc
+        w = -m
+        @frame.css('margin-left', "#{m}px")
+        if w >= MIN_RESIZE then @frame.css('width', "#{-m}px")
 
-      m = parseInt (getComputedStyle @frame[0]).marginLeft
-      @frame.css
-        'margin-left': "#{m}px"
-      this.showFrame()
+    switch event.type
+      when 'panstart'
+        # Initialize the gesture state
+        this._initializeGestureState()
+        # Immadiate response
+        @frame.addClass 'annotator-no-transition'
+        # Escape iframe capture
+        @frame.css('pointer-events', 'none')
+        # Set origin margin
+        @gestureState.initial = parseInt(getComputedStyle(@frame[0]).marginLeft)
 
-    dragEnd = (event) =>
-      @drag.enabled = false
-      @drag.last = null
+      when 'panend'
+        # Re-enable transitions
+        @frame.removeClass 'annotator-no-transition'
+        # Re-enable iframe events
+        @frame.css('pointer-events', '')
+        # Consider the frame open if it open to at least a minimum width
+        if @gestureState.acc <= -MIN_RESIZE then this.showFrame()
+        # Reset the gesture state
+        this._initializeGestureState()
 
-    for handle in [@plugins.BucketBar.element[0], @plugins.Toolbar.buttons[0]]
-      handle.draggable = true
-      handle.addEventListener 'dragstart', dragStart
-      handle.addEventListener 'dragend', dragEnd
+      when 'panleft', 'panright'
+        return unless @gestureState.initial?
+        # Compute new margin from delta and initial conditions
+        m = @gestureState.initial
+        d = event.deltaX
+        acc = Math.min(Math.round(m + d), 0)
+        @gestureState.acc = acc
+        # Start updating
+        _updateLayout()
 
-    document.addEventListener 'dragover', (event) =>
-      this._dragUpdate event.screenX
+  onSwipe: (event) =>
+    switch event.type
+      when 'swipeleft'
+        this.showFrame()
+      when 'swiperight'
+        this.hideFrame()
 
-  _dragUpdate: (screenX) =>
-    unless @drag.enabled then return
-    if @drag.last?
-      @drag.delta += screenX - @drag.last
-    @drag.last = screenX
-    unless @drag.tick
-      @drag.tick = true
-      window.requestAnimationFrame this._dragRefresh
+  _setupGestures: ->
+    $toggle = @toolbar.find('[name=sidebar-toggle]')
 
-  _dragRefresh: =>
-    d = @drag.delta
-    @drag.delta = 0
-    @drag.tick = false
+    # Prevent any default gestures on the handle
+    $toggle.on('touchmove', (event) -> event.preventDefault())
 
-    m = parseInt (getComputedStyle @frame[0]).marginLeft
-    w = -1 * m
-    m += d
-    w -= d
+    # Set up the Hammer instance and handlers
+    mgr = new Hammer.Manager($toggle[0])
+    .on('panstart panend panleft panright', this.onPan)
+    .on('swipeleft swiperight', this.onSwipe)
 
-    @frame.addClass 'annotator-no-transition'
-    @frame.css
-      'margin-left': "#{m}px"
-      width: "#{w}px"
+    # Set up the gesture recognition
+    pan = mgr.add(new Hammer.Pan({direction: Hammer.DIRECTION_HORIZONTAL}))
+    swipe = mgr.add(new Hammer.Swipe({direction: Hammer.DIRECTION_HORIZONTAL}))
+    swipe.recognizeWith(pan)
+
+    # Set up the initial state
+    this._initializeGestureState()
+
+    # Return this for chaining
+    this

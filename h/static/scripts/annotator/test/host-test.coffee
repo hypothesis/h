@@ -58,3 +58,82 @@ describe 'Host', ->
         host = createHost()
         emitHostEvent('hideFrame')
         assert.called(target)
+
+  describe 'pan gestures', ->
+    host = null
+
+    beforeEach ->
+      host = createHost({})
+
+    describe 'panstart event', ->
+      beforeEach ->
+        sandbox.stub(window, 'getComputedStyle').returns({marginLeft: '100px'})
+        host.onPan({type: 'panstart'})
+
+      it 'disables pointer events and transitions on the widget', ->
+        assert.isTrue(host.frame.hasClass('annotator-no-transition'))
+        assert.equal(host.frame.css('pointer-events'), 'none')
+
+      it 'captures the left margin as the gesture initial state', ->
+        assert.equal(host.gestureState.initial, '100')
+
+    describe 'panend event', ->
+      it 'enables pointer events and transitions on the widget', ->
+        host.gestureState = {acc: 0}
+        host.onPan({type: 'panend'})
+        assert.isFalse(host.frame.hasClass('annotator-no-transition'))
+        assert.equal(host.frame.css('pointer-events'), '')
+
+      it 'calls `showFrame` if the widget is fully visible', ->
+        host.gestureState = {acc: -500}
+        showFrame = sandbox.stub(host, 'showFrame')
+        host.onPan({type: 'panend'})
+        assert.calledOnce(showFrame)
+
+      it 'does not call `showFrame` if the widget is not fully visible', ->
+        host.gestureState = {acc: -100}
+        showFrame = sandbox.stub(host, 'showFrame')
+        host.onPan({type: 'panend'})
+        assert.notCalled(showFrame)
+
+    describe 'panleft and panright events', ->
+      raf = null
+
+      # PhantomJS may or may not have rAF so the normal sandbox approach
+      # doesn't quite work. We assign and delete it ourselves instead when
+      # it isn't already present.
+      beforeEach ->
+        if window.requestAnimationFrame?
+          sandbox.stub(window, 'requestAnimationFrame')
+        else
+          raf = window.requestAnimationFrame = sandbox.stub()
+
+      afterEach ->
+        if raf?
+          raf = null
+          delete window.requestAnimationFrame
+
+      it 'shrinks or grows the widget to match the delta', ->
+        host.gestureState = {initial: -100}
+
+        host.onPan({type: 'panleft', deltaX: -50})
+        assert.equal(host.gestureState.acc, -150)
+
+        host.onPan({type: 'panright', deltaX: 100})
+        assert.equal(host.gestureState.acc, 0)
+
+  describe 'swipe gestures', ->
+    host = null
+
+    beforeEach ->
+      host = createHost({})
+
+    it 'opens the sidebar on swipeleft', ->
+      showFrame = sandbox.stub(host, 'showFrame')
+      host.onSwipe({type: 'swipeleft'})
+      assert.calledOnce(showFrame)
+
+    it 'closes the sidebar on swiperight', ->
+      hideFrame = sandbox.stub(host, 'hideFrame')
+      host.onSwipe({type: 'swiperight'})
+      assert.calledOnce(hideFrame)
