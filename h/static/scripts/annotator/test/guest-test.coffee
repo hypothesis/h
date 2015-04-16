@@ -1,3 +1,4 @@
+Promise = require('es6-promise').Promise
 Annotator = require('annotator')
 require('../monkey')
 Guest = require('../guest')
