@@ -25,7 +25,7 @@ module.exports = class StreamController
 
     # Perform the search
     searchParams = searchFilter.toObject $scope.search.query
-    query = angular.extend limit: 10, searchParams
+    query = angular.extend limit: 20, searchParams
     store.SearchResource.get query, ({rows}) ->
       annotationMapper.loadAnnotations(rows)
 
