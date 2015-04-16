@@ -221,3 +221,13 @@ def test_session_secret_environment():  # bw compat
         'secret_key': 's3kr1t',
     }
     assert actual_config == expected_config
+
+
+@patch.dict(os.environ)
+def test_blocklist():
+    blocklist = '{"seanh.cc": {}, "twitter.com": {}, "finance.yahoo.com": {}'
+    os.environ['BLOCKLIST'] = blocklist
+
+    actual_config = settings_from_environment()
+
+    assert actual_config == {'h.blocklist': blocklist}

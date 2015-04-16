@@ -1,3 +1,7 @@
+{% if blocklist -%}
+{% include 'h:static/scripts/blocklist.js' %}
+{% endif -%}
+
 (function () {
   // Injects the hypothesis dependencies. These can be either js or css, the
   // file extension is used to determine the loading method. This file is
@@ -41,6 +45,18 @@
 
       document.head.appendChild(script);
     };
+
+    {% if blocklist %}
+      // For certain blocklisted hostnames we bail out and don't inject
+      // Hypothesis.
+      var url = window.location.toString();
+      if (blocklist.isBlocked(url, {{ blocklist|safe }})) {
+        window.alert(
+          "We're sorry, but Hypothesis doesn't work on " +
+          window.location.hostname + " yet.");
+        return;
+      }
+    {% endif %}
 
     if (!window.document.evaluate) {
       resources = resources.concat(['{{ layout.xpath_polyfill_urls | map("string") | join("', '") | safe }}']);

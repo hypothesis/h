@@ -42,6 +42,16 @@ describe('HelpPage', function () {
       });
     });
 
+    it('renders the "blocked-site" page when passed a BlockedSiteError', function () {
+      help.showHelpForError({id: 1, index: 1}, new h.BlockedSiteError('msg'));
+      sinon.assert.called(fakeChromeTabs.create);
+      sinon.assert.calledWith(fakeChromeTabs.create, {
+        index: 2,
+        openerTabId: 1,
+        url: 'CRX_PATH/help/index.html#blocked-site'
+      });
+    });
+
     it('throws an error if an unsupported error is provided', function () {
       assert.throws(function () {
         help.showHelpForError(new Error('Random Error'));

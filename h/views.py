@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import logging
+import json
 
 from pyramid import httpexceptions
 from pyramid.events import ContextFound
@@ -77,7 +78,9 @@ def annotation(context, request):
 @view_config(name='embed.js', renderer='h:templates/embed.js')
 def js(context, request):
     request.response.content_type = b'text/javascript'
-    return {}
+    return {
+        'blocklist': json.dumps(request.registry.settings['h.blocklist'])
+    }
 
 
 @view_config(layout='app', name='app.html', renderer='h:templates/app.html')
@@ -164,6 +167,32 @@ def notfound(context, request):
     return {}
 
 
+def _validate_blocklist(config):
+    """Validate the "h.blocklist" config file setting.
+
+    h.blocklist in the config file should be a JSON object as a string, for
+    example:
+
+        h.blocklist = {
+          "www.quirksmode.org": {},
+          "finance.yahoo.com": {}
+        }
+
+    This function replaces the string value on registry.settings with a dict.
+    It inserts a default value ({}) if there's nothing in the config file.
+
+    :raises RuntimeError: if the value in the config file is invalid
+
+    """
+    try:
+        config.registry.settings['h.blocklist'] = json.loads(
+            config.registry.settings.get('h.blocklist', '{}'))
+    except ValueError as err:
+        raise ValueError(
+            "The h.blocklist setting in the config file is invalid: " +
+            str(err))
+
+
 def includeme(config):
     config.include('h.assets')
     config.include('h.layouts')
@@ -174,5 +203,7 @@ def includeme(config):
     config.add_route('onboarding', '/welcome')
     config.add_route('stream', '/stream')
     config.add_route('stream_atom', '/stream.atom')
+
+    _validate_blocklist(config)
 
     config.scan(__name__)

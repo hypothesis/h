@@ -9,6 +9,7 @@ import os.path
 import shutil
 import textwrap
 import urlparse
+import json
 
 from jinja2 import Template
 from pyramid import paster
@@ -169,6 +170,8 @@ def build_chrome(args):
     copytree('h/browser/chrome/images', 'build/chrome/images')
     copytree('h/browser/chrome/lib', 'build/chrome/lib')
     copytree('h/static/images', 'build/chrome/public/images')
+    shutil.copyfile(
+        'h/static/scripts/blocklist.js', 'build/chrome/lib/blocklist.js')
 
     # Render the sidebar html.
     if webassets_env.url.startswith('chrome-extension:'):
@@ -186,6 +189,10 @@ def build_chrome(args):
     with open('build/chrome/manifest.json', 'w') as fp:
         data = chrome_manifest(env['request'])
         fp.write(data)
+
+    # Render the blocklist as a JSON file.
+    with open('build/chrome/blocklist.json', 'w') as fp:
+        fp.write(json.dumps(env['registry'].settings['h.blocklist']))
 
 
 def build_firefox(args):

@@ -27,6 +27,20 @@
       throw new TypeError('isAllowedFileSchemeAccess must be a function');
     }
 
+    /* Return a Promise whose value is the blocklist from the blocklist.json
+     * file that's packaged with the Chrome extension, as an object.
+     */
+    function loadBlocklist() {
+      return new Promise(function(resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.onload = function() {
+          resolve(JSON.parse(this.responseText));
+        };
+        request.open('GET', '/blocklist.json');
+        request.send(null);
+      });
+    }
+
     /* Injects the Hypothesis sidebar into the tab provided.
      *
      * tab - A tab object representing the tab to insert the sidebar into.
@@ -35,11 +49,19 @@
      * otherwise it will be rejected with an error.
      */
     this.injectIntoTab = function (tab) {
-      if (isFileURL(tab.url)) {
-        return injectIntoLocalDocument(tab);
-      } else {
-        return injectIntoRemoteDocument(tab);
-      }
+      return loadBlocklist().then(function(blocklist) {
+        if (h.blocklist.isBlocked(tab.url, blocklist)) {
+          return Promise.reject(
+            new h.BlockedSiteError(
+              "Hypothesis doesn't work on this site yet."));
+        }
+
+        if (isFileURL(tab.url)) {
+          return injectIntoLocalDocument(tab);
+        } else {
+          return injectIntoRemoteDocument(tab);
+        }
+      });
     };
 
     /* Removes the Hypothesis sidebar from the tab provided.
