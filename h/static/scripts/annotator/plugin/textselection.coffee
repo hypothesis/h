@@ -1,10 +1,11 @@
+Annotator = require('annotator')
+$ = Annotator.$
+
+
 # This plugin implements the UI code for creating text annotations
 class Annotator.Plugin.TextSelection extends Annotator.Plugin
 
   pluginInit: ->
-    @Annotator = Annotator
-    @$ = Annotator.$
-
     # Register the event handlers required for creating a selection
     $(document).bind({
       "touchend": @checkForEndSelection
@@ -37,14 +38,14 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
   #
   # Returns Array of NormalizedRange instances.
   _getSelectedRanges: ->
-    selection = @Annotator.Util.getGlobal().getSelection()
+    selection = Annotator.Util.getGlobal().getSelection()
 
     ranges = []
     rangesToIgnore = []
     unless selection.isCollapsed
       ranges = for i in [0...selection.rangeCount]
         r = selection.getRangeAt(i)
-        browserRange = new @Annotator.Range.BrowserRange(r)
+        browserRange = new Annotator.Range.BrowserRange(r)
         normedRange = browserRange.normalize().limit @annotator.wrapper[0]
 
         # If the new range falls fully outside the wrapper, we
@@ -63,7 +64,7 @@ class Annotator.Plugin.TextSelection extends Annotator.Plugin
       selection.addRange(r)
 
     # Remove any ranges that fell outside of @wrapper.
-    @$.grep ranges, (range) ->
+    $.grep ranges, (range) ->
       # Add the normed range back to the selection if it exists.
       selection.addRange(range.toRange()) if range
       range

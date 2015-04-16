@@ -1,3 +1,6 @@
+Annotator = require('annotator')
+
+
 # This anhor type stores information about a piece of text,
 # described using the actual reference to the range in the DOM.
 #
@@ -18,16 +21,11 @@
 # If the TextPosition plugin is loaded, it will create a TextPosition
 # anchor; otherwise it will record a TextRangeAnchor.
 class TextRangeAnchor extends Annotator.Anchor
-
-  @Annotator = Annotator
-
   constructor: (annotator, annotation, target, @range, quote) ->
 
     super annotator, annotation, target, 0, 0, quote
 
     unless @range? then throw new Error "range is required!"
-
-    @Annotator = TextRangeAnchor.Annotator
 
   # This is how we create a highlight out of this kind of anchor
   _getSegment: ->
@@ -39,9 +37,6 @@ class TextRangeAnchor extends Annotator.Anchor
 class Annotator.Plugin.TextRange extends Annotator.Plugin
 
   pluginInit: ->
-
-    @Annotator = Annotator
-
     @anchoring = @annotator.anchoring
 
     # Register the creator for range selectors
@@ -89,7 +84,7 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
 
     # Try to apply the saved XPath
     try
-      range = @Annotator.Range.sniff serializedRange
+      range = Annotator.Range.sniff serializedRange
       normedRange = range.normalize @annotator.wrapper[0]
     catch error
       return null
@@ -123,7 +118,7 @@ class Annotator.Plugin.TextRange extends Annotator.Plugin
       # Create a TextPositionAnchor from the start and end offsets
       # of this range
       # (to be used with dom-text-mapper)
-      new @Annotator.TextPositionAnchor @anchoring, annotation, target,
+      new Annotator.TextPositionAnchor @anchoring, annotation, target,
         startInfo.start, endInfo.end,
         (startInfo.pageIndex ? 0), (endInfo.pageIndex ? 0),
         currentQuote

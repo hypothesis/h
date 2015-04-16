@@ -1,8 +1,8 @@
+Annotator = require('annotator')
+
+
 # This plugin defines the TextQuote selector
 class Annotator.Plugin.TextQuote extends Annotator.Plugin
-
-  @Annotator = Annotator
-  @$ = Annotator.$
 
   # Plugin initialization
   pluginInit: ->

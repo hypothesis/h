@@ -1,3 +1,4 @@
+Annotator = require('annotator')
 $ = Annotator.$
 require('jquery-scrollintoview')
 

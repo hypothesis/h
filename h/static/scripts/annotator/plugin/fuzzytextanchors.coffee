@@ -1,3 +1,6 @@
+Annotator = require('annotator')
+
+
 # Annotator plugin for fuzzy text matching
 class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
@@ -6,8 +9,6 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
     unless @annotator.plugins.TextPosition
       console.warn "The FuzzyTextAnchors Annotator plugin requires the TextPosition plugin. Skipping."
       return
-
-    @Annotator = Annotator
 
     @anchoring = @annotator.anchoring
 
@@ -70,7 +71,7 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
     # OK, we have everything
     # Create a TextPositionAnchor from this data
-    new @Annotator.TextPositionAnchor @anchoring, annotation, target,
+    new Annotator.TextPositionAnchor @anchoring, annotation, target,
       match.start, match.end,
       (document.getPageIndexForPos match.start),
       (document.getPageIndexForPos match.end),
@@ -124,7 +125,7 @@ class Annotator.Plugin.FuzzyTextAnchors extends Annotator.Plugin
 
     # OK, we have everything
     # Create a TextPosutionAnchor from this data
-    new @Annotator.TextPositionAnchor @anchoring, annotation, target,
+    new Annotator.TextPositionAnchor @anchoring, annotation, target,
       match.start, match.end,
       (document.getPageIndexForPos match.start),
       (document.getPageIndexForPos match.end),

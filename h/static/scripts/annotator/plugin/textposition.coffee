@@ -1,9 +1,9 @@
+Annotator = require('annotator')
+
+
 # This anchor type stores information about a piece of text,
 # described using start and end character offsets
 class TextPositionAnchor extends Annotator.Anchor
-
-  @Annotator = Annotator
-
   constructor: (anchoring, annotation, target,
       @start, @end, startPage, endPage,
       quote, diffHTML, diffCaseOnly) ->
@@ -17,8 +17,6 @@ class TextPositionAnchor extends Annotator.Anchor
     unless @start? then throw new Error "start is required!"
     unless @end? then throw new Error "end is required!"
 
-    @Annotator = TextPositionAnchor.Annotator
-
   # This is how we create a highlight out of this kind of anchor
   _getSegment: (page) ->
 
@@ -29,7 +27,7 @@ class TextPositionAnchor extends Annotator.Anchor
     realRange = mappings.sections[page].realRange
 
     # Get a BrowserRange
-    browserRange = new @Annotator.Range.BrowserRange realRange
+    browserRange = new Annotator.Range.BrowserRange realRange
 
     # Get a NormalizedRange
     normedRange = browserRange.normalize @anchoring.annotator.wrapper[0]
@@ -41,9 +39,6 @@ class TextPositionAnchor extends Annotator.Anchor
 class Annotator.Plugin.TextPosition extends Annotator.Plugin
 
   pluginInit: ->
-
-    @Annotator = Annotator
-
     @anchoring = @annotator.anchoring
 
     # Register the creator for text quote selectors
@@ -59,7 +54,7 @@ class Annotator.Plugin.TextPosition extends Annotator.Plugin
       code: @createFromPositionSelector
 
     # Export the anchor type
-    @Annotator.TextPositionAnchor = TextPositionAnchor
+    Annotator.TextPositionAnchor = TextPositionAnchor
 
   # Create a TextPositionSelector around a range
   _getTextPositionSelector: (selection) =>
