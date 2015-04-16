@@ -1,5 +1,5 @@
 if (window.annotator) {
-    console.warn("Not deploying Hypothes.is, in order to avoid double deployment.");
+    // Not deploying Hypothes.is, in order to avoid double deployment
     return;
 }
 
