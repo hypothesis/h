@@ -1,3 +1,8 @@
+if (window.annotator) {
+    // Not deploying app, in order to avoid double deployment
+    return;
+}
+
 var Annotator = require('annotator');
 
 // Monkeypatch annotator!
