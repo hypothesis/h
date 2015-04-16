@@ -1,3 +1,6 @@
+Annotator = require('annotator')
+$ = Annotator.$
+
 detectedPDFjsVersion = PDFJS?.version.split(".").map parseFloat
 
 # Compare two versions, given as arrays of numbers
@@ -202,9 +205,6 @@ class window.PDFTextMapper extends PageTextMapperCore
 
 # Annotator plugin for annotating documents handled by PDF.js
 class Annotator.Plugin.PDF extends Annotator.Plugin
-
-  $ = Annotator.$
-
   pluginInit: ->
     # We need dom-text-mapper
     unless @annotator.plugins.DomTextMapper
