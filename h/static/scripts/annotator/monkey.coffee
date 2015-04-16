@@ -52,9 +52,6 @@ Annotator.prototype.deleteAnnotation = (annotation) ->
 g = Annotator.Util.getGlobal()
 if g.wgxpath? then g.wgxpath.install()
 
-# Checks for the presence of ES6Promise polyfill
-if g.ES6Promise then g.ES6Promise.polyfill()
-
 Range.BrowserRange.prototype.normalize = (root) ->
   if @tainted
     console.error(_t("You may only call normalize() once on a BrowserRange!"))

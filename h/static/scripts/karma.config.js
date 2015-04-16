@@ -39,11 +39,9 @@ module.exports = function(config) {
 
       // Test deps
       'vendor/angular-mocks.js',
-      'vendor/polyfills/promise.js',
       'vendor/sinon.js',
       'vendor/chai.js',
       '../../templates/client/*.html',
-      'test/bootstrap.coffee',
 
       // Tests
       '**/*-test.coffee',
