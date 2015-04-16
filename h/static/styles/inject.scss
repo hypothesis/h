@@ -162,7 +162,6 @@ $base-font-size: 14px;
   margin-top: 5px;
   overflow: hidden;
   position: relative;
-  text-align: center;
   height: 30px;
   width: 30px;
 
@@ -181,13 +180,10 @@ $base-font-size: 14px;
     background: $white;
     border: none;
     color: $gray-light;
-    line-height: 28px;
     text-decoration: none;
     height: 28px;
     width: 28px;
-    position: absolute;
-    top: 0;
-    left: 0;
+    padding: 0;
   }
 
   button:active {
