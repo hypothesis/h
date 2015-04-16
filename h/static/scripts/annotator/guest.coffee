@@ -183,6 +183,9 @@ module.exports = class Guest extends Annotator
 
   _setupWrapper: ->
     @wrapper = @element
+    .on 'click', (event) =>
+      if !@selectedTargets?.length
+        @triggerHideFrame()
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
