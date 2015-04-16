@@ -10,9 +10,15 @@ export PIP_REQUIRE_VIRTUALENV
 
 default: deps
 
-deps:
-	@npm install
+h.egg-info: setup.py
 	@pip install -q --use-wheel -e .[dev,testing,YAML]
+	@touch h.egg-info
+
+node_modules: package.json
+	@npm install
+	@touch node_modules
+
+deps: h.egg-info node_modules
 
 clean:
 	find . -type f -name "*.py[co]" -delete
@@ -20,7 +26,7 @@ clean:
 	find h/static/scripts -mindepth 1 -name '*.min.js' -delete
 	find h/static/styles -mindepth 1 -name '*.css' -delete
 
-dev:
+dev: deps
 	@gunicorn --reload --paste conf/development.ini
 
 test:
