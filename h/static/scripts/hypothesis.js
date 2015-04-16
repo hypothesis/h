@@ -1,5 +1,5 @@
 if (window.annotator) {
-    // Not deploying Hypothes.is, in order to avoid double deployment
+    // Not deploying app, in order to avoid double deployment
     return;
 }
 
