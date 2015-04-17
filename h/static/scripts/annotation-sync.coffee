@@ -1,3 +1,6 @@
+extend = require('extend')
+
+
 module.exports = class AnnotationSync
   # Default configuration
   options:
@@ -30,7 +33,7 @@ module.exports = class AnnotationSync
   cache: null
 
   constructor: (@bridge, options) ->
-    @options = $.extend(true, {}, @options, options)
+    @options = extend(true, {}, @options, options)
 
     @cache = {}
 

@@ -85,5 +85,6 @@ if (window.hasOwnProperty('hypothesisConfig')) {
   }
 }
 
-window.annotator = new Klass(document.body, options);
-Annotator.noConflict().$.noConflict(true);
+Annotator.noConflict().$.noConflict(true)(function () {
+  window.annotator = new Klass(document.body, options);
+});
