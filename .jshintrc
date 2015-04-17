@@ -1,0 +1,31 @@
+{
+    "eqeqeq": true,
+    "es3": true,
+    "freeze": true,
+    "latedef": "nofunc",
+    "maxcomplexity": 10,
+    "node": true,
+    "strict": true,
+    "undef": true,
+    "unused": true,
+    "predef": ["-Promise"],
+    "globals": {
+        "chrome": true,
+        "document": true,
+        "window": true,
+        "localStorage": true,
+        "JSON": true,
+        "Promise": true,
+        "h": true,
+        "describe": true,
+        "it": true,
+        "chai": true,
+        "sinon": true,
+        "assert": true,
+        "beforeEach": true,
+        "afterEach": true,
+        "angular": true,
+        "XMLHttpRequest": true
+    }
+}
+
