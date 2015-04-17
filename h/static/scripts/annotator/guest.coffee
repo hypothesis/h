@@ -348,11 +348,6 @@ module.exports = class Guest extends Annotator
   triggerHideFrame: ->
     @crossframe?.notify method: 'back'
 
-  addToken: (token) =>
-    @api.notify
-      method: 'addToken'
-      params: token
-
   onAdderMouseup: (event) ->
     event.preventDefault()
     event.stopPropagation()
