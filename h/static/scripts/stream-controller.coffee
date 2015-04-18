@@ -1,30 +1,37 @@
 angular = require('angular')
+mail = require('./vendor/jwz')
 
 
 module.exports = class StreamController
   this.inject = [
     '$scope', '$rootScope', '$routeParams',
     'queryParser', 'searchFilter', 'store',
-    'streamer', 'streamFilter', 'annotationMapper'
+    'streamer', 'streamFilter', 'threading', 'annotationMapper'
   ]
   constructor: (
      $scope,   $rootScope,   $routeParams
      queryParser,   searchFilter,   store,
-     streamer,   streamFilter, annotationMapper
+     streamer,   streamFilter,   threading,   annotationMapper
   ) ->
+    # XXX: disable page search
+    $scope.search = {}
+
+    # XXX: Reset the threading service
+    threading.createIdTable([])
+    $scope.threadRoot = threading.root = mail.messageContainer()
+
     # Initialize the base filter
     streamFilter
       .resetFilter()
       .setMatchPolicyIncludeAll()
 
     # Apply query clauses
-    $scope.search.query = $routeParams.q
-    terms = searchFilter.generateFacetedFilter $scope.search.query
+    terms = searchFilter.generateFacetedFilter $routeParams.q
     queryParser.populateFilter streamFilter, terms
     streamer.send({filter: streamFilter.getFilter()})
 
     # Perform the search
-    searchParams = searchFilter.toObject $scope.search.query
+    searchParams = searchFilter.toObject $routeParams.q
     query = angular.extend limit: 20, searchParams
     store.SearchResource.get query, ({rows}) ->
       annotationMapper.loadAnnotations(rows)
@@ -35,6 +42,3 @@ module.exports = class StreamController
     $scope.sort.name = 'Newest'
 
     $scope.shouldShowThread = (container) -> true
-
-    $scope.$on '$destroy', ->
-      $scope.search.query = ''
