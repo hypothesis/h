@@ -4,12 +4,12 @@ angular = require('angular')
 module.exports = class StreamController
   this.inject = [
     '$scope', '$rootScope', '$routeParams',
-    'auth', 'queryParser', 'searchFilter', 'store',
+    'queryParser', 'searchFilter', 'store',
     'streamer', 'streamFilter', 'annotationMapper'
   ]
   constructor: (
      $scope,   $rootScope,   $routeParams
-     auth,   queryParser,   searchFilter,   store,
+     queryParser,   searchFilter,   store,
      streamer,   streamFilter, annotationMapper
   ) ->
     # Initialize the base filter
