@@ -39,6 +39,7 @@ $base-font-size: 14px;
 
   button {
     @include box-shadow(none);
+    display: inline-block;
     font-family: h;
     border: none;
     cursor: pointer;
