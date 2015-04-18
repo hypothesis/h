@@ -178,7 +178,7 @@ def build_chrome(args):
         build_extension_common(env, bundle_app=True)
         env['request'].layout_manager.layout.csp = ''
         with open(content_dir + '/app.html', 'w') as fp:
-            data = render_view(env['root'], env['request'], 'app.html')
+            data = render_view(env['root'], env['request'], 'viewer')
             fp.write(data)
         shutil.copyfile('h/static/icomoon.css',
                         'build/chrome/public/icomoon.css')
