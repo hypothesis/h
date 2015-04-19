@@ -1,4 +1,11 @@
 (function () {
+// Prevent double embedding
+if (typeof(window.annotator) === 'undefined') {
+    window.annotator = {};
+} else {
+    return;
+}
+
 {% if blocklist -%}
 {% include 'h:static/scripts/blocklist.js' %}
 {%- endif %}
