@@ -9,30 +9,29 @@ import pyramid
 class Browserify(ExternalTool):
     """
     An input filter for webassets that browserifies CoffeeScript or JavaScript.
-
-    The browserify command-line client has several limitations when piping
-    input to STDIN:
-
-    - it uses a dummy name for the piped file in sourcemaps
-    - because it does not know the real name of the piped file, it cannot
-      accept CoffeeScript, because it does not know the real extension of the
-      piped file
-
-    The filter uses the browserify-pipe tool, shipped in ``tools/`` in the
-    repository root, which circumvents these issues.
     """
     name = 'browserify'
-    options = {'binary': 'BROWSERIFY_PIPE_BIN'}
+    options = {
+        'binary': 'BROWSERIFY_BIN',
+        'extra_args': 'BROWSERIFY_EXTRA_ARGS',
+    }
+    extra_args = None
     max_debug_level = None
 
-    def input(self, in_, out, source_path, **kwargs):
-        args = [self.binary or 'browserify-pipe']
+    def input(self, in_, out, **kwargs):
+        args = [self.binary or 'browserify']
+
+        args.append(kwargs['source_path'])
 
         if self.get_config('debug'):
             args.append('-d')
 
-        args.append(source_path)
-        self.subprocess(args, out, in_)
+        if self.extra_args is not None:
+            if isinstance(self.extra_args, basestring):
+                self.extra_args = self.extra_args.split()
+            args.extend(self.extra_args)
+
+        self.subprocess(args, out)
 
 register_filter(Browserify)
 
