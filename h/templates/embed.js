@@ -1,8 +1,8 @@
+(function () {
 {% if blocklist -%}
 {% include 'h:static/scripts/blocklist.js' %}
-{% endif -%}
+{%- endif %}
 
-(function () {
   // Injects the hypothesis dependencies. These can be either js or css, the
   // file extension is used to determine the loading method. This file is
   // pre-processed in order to insert the wgxpath, url and inject scripts.
