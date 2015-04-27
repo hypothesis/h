@@ -2,17 +2,22 @@ $ = require('jquery')
 angular = require('angular')
 mail = require('./vendor/jwz')
 
-module.exports = class Threading
-  # Mix in message thread properties into the prototype. The body of the
-  # class will overwrite any methods applied here. If you need inheritance
-  # assign the message thread to a local varible.
-  # The mail object is exported by the jwz.js library.
-  $.extend(this.prototype, mail.messageThread())
 
+
+module.exports = class Threading
   root: null
 
   this.$inject = ['$rootScope']
   constructor: ($rootScope) ->
+    # XXX: gross hack to inherit from messageThread, which doesn't have an
+    # accessible prototype.
+    thread = new mail.messageThread()
+    threadInheritedProperties = {}
+    for key in Object.getOwnPropertyNames(thread) when not this[key]?
+      descriptor = Object.getOwnPropertyDescriptor(thread, key)
+      threadInheritedProperties[key] = descriptor
+    Object.defineProperties(this, threadInheritedProperties)
+
     # Create a root container.
     @root = mail.messageContainer()
     $rootScope.$on('beforeAnnotationCreated', this.beforeAnnotationCreated)
