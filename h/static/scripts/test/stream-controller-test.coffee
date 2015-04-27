@@ -63,7 +63,8 @@ describe 'StreamController', ->
     }
 
     fakeThreading = {
-      createIdTable: sandbox.spy()
+      createIdTable: sandbox.stub().returns('a')
+      idTable: null
     }
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
@@ -94,3 +95,4 @@ describe 'StreamController', ->
     assert.calledWith(fakeThreading.createIdTable, [])
     assert.isObject(fakeThreading.root)
     assert.strictEqual(fakeThreading.root, $scope.threadRoot)
+    assert.equal(fakeThreading.idTable, 'a')
