@@ -17,7 +17,7 @@ module.exports = class StreamController
     $scope.search = {}
 
     # XXX: Reset the threading service
-    threading.createIdTable([])
+    threading.idTable = threading.createIdTable([])
     $scope.threadRoot = threading.root = mail.messageContainer()
 
     # Initialize the base filter
