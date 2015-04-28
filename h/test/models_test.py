@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-import unittest
-
-from pytest import fixture, raises
-from pyramid import security
+import itertools
 import re
+import unittest
+import urllib
+
+from pytest import raises
+from pyramid import security
 
 from h import models
 
@@ -61,29 +63,55 @@ class TestAnnotationPermissions(unittest.TestCase):
 
 
 analysis = models.Annotation.__analysis__
-index_patterns = analysis['filter']['uri_index']['patterns']
-search_patterns = analysis['filter']['uri_search']['patterns']
 
 
-def test_uri_search_indexes_hash_variants():
-    caps = _pattern_captures(index_patterns, 'http://example.com/page#hash')
+def test_strip_scheme_char_filter():
+    f = analysis['char_filter']['strip_scheme']
+    p = f['pattern']
+    r = f['replacement']
+    assert(re.sub(p, r, 'http://ping/pong#hash') == 'ping/pong#hash')
+    assert(re.sub(p, r, 'chrome-extension://1234/a.js') == '1234/a.js')
+    assert(re.sub(p, r, 'a+b.c://1234/a.js') == '1234/a.js')
+    assert(re.sub(p, r, 'uri:x-pdf:1234') == 'x-pdf:1234')
+    assert(re.sub(p, r, 'example.com') == 'example.com')
+    # This is ambiguous, and possibly cannot be expected to work.
+    # assert(re.sub(p, r, 'localhost:5000') == 'localhost:5000')
 
-    assert 'example.com/page' in caps
+
+def test_path_url_filter():
+    patterns = analysis['filter']['path_url']['patterns']
+    assert(captures(patterns, 'example.com/foo/bar?query#hash') == [
+        'example.com/foo/bar'
+    ])
+    assert(captures(patterns, 'example.com/foo/bar/') == [
+        'example.com/foo/bar/'
+    ])
 
 
-def test_uri_search_searches_hash_variants():
-    caps = _pattern_captures(search_patterns, 'http://example.com/page#hash')
+def test_rstrip_slash_filter():
+    p = analysis['filter']['rstrip_slash']['pattern']
+    r = analysis['filter']['rstrip_slash']['replacement']
+    assert(re.sub(p, r, 'example.com/') == 'example.com')
+    assert(re.sub(p, r, 'example.com/foo/bar/') == 'example.com/foo/bar')
 
-    assert 'example.com/page' in caps
+
+def test_uri_part_tokenizer():
+    text = 'http://a.b/foo/bar?c=d#stuff'
+    pattern = analysis['tokenizer']['uri_part']['pattern']
+    assert(re.split(pattern, text) == [
+        'http', '', '', 'a', 'b', 'foo', 'bar', 'c', 'd', 'stuff'
+    ])
+
+    text = urllib.quote_plus(text)
+    assert(re.split(pattern, 'http://jump.to/?u=' + text) == [
+        'http', '', '', 'jump', 'to', '', 'u',
+        'http', '', '', 'a', 'b', 'foo', 'bar', 'c', 'd', 'stuff'
+    ])
 
 
-# Simulate the ElasticSearch pattern_capture filter!
-def _pattern_captures(patterns, uri):
-    result = []
-    patterns_re = [re.compile(p) for p in patterns]
-    for p in patterns_re:
-        m = p.search(uri)
-        if m is not None:
-            result.append(m.group(1))
-    return result
+def captures(patterns, text):
+    return list(itertools.chain(*(groups(p, text) for p in patterns)))
 
+
+def groups(pattern, text):
+    return re.search(pattern, text).groups() or []
