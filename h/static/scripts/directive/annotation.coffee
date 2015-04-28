@@ -11,6 +11,14 @@ validate = (value) ->
   (value.target?.length and not worldReadable)
 
 
+# Return an error message based on a server response.
+errorMessage = (reason) ->
+  message = reason.status + " " + reason.statusText
+  if reason.data.reason
+    message = message + ": " + reason.data.reason
+  message
+
+
 ###*
 # @ngdoc type
 # @name annotation.AnnotationController
@@ -105,8 +113,10 @@ AnnotationController = [
     this.delete = ->
       $timeout ->  # Don't use confirm inside the digest cycle
         if confirm "Are you sure you want to delete this annotation?"
+          onRejected = (reason) =>
+            flash.error(errorMessage(reason), "Deleting annotation failed")
           $scope.$apply ->
-            annotationMapper.deleteAnnotation model
+            annotationMapper.deleteAnnotation(model).then(null, onRejected)
       , true
 
     ###*
@@ -123,6 +133,16 @@ AnnotationController = [
     ###*
     # @ngdoc method
     # @name annotation.AnnotationController#view
+    # @description Switches the view to a viewer, closing the editor controls
+    #              if they are open.
+    ###
+    this.view = ->
+      @editing = false
+      @action = 'view'
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#revert
     # @description Reverts an edit in progress and returns to the viewer.
     ###
     this.revert = ->
@@ -131,8 +151,7 @@ AnnotationController = [
         $rootScope.$emit('annotationDeleted', model)
       else
         this.render()
-        @action = 'view'
-        @editing = false
+        this.view()
 
     # Calculates the visual diff flags from the targets
     #
@@ -146,6 +165,13 @@ AnnotationController = [
         t.diffHTML? and not t.diffCaseOnly
 
       {hasDiff, shouldShowDiff}
+
+    # Update the given annotation domain model object with the data from the
+    # given annotation view model object.
+    updateDomainModel = (domainModel, viewModel) ->
+        angular.extend(
+          domainModel, viewModel,
+          {tags: (tag.text for tag in viewModel.tags)})
 
     ###*
     # @ngdoc method
@@ -163,19 +189,27 @@ AnnotationController = [
         tag.text not in (model.tags or [])
       tags.store(newTags)
 
-      angular.extend model, @annotation,
-        tags: (tag.text for tag in @annotation.tags)
-
       switch @action
         when 'create'
-          model.$create().then ->
+          updateDomainModel(model, @annotation)
+          onFulfilled = =>
             $rootScope.$emit('annotationCreated', model)
-        when 'delete', 'edit'
-          model.$update(id: model.id).then ->
+            @view()
+          onRejected = (reason) =>
+            flash.error(errorMessage(reason), "Saving annotation failed")
+          model.$create().then(onFulfilled, onRejected)
+        when 'edit'
+          updatedModel = angular.copy(model)
+          updateDomainModel(updatedModel, @annotation)
+          onFulfilled = =>
+            angular.copy(updatedModel, model)
             $rootScope.$emit('annotationUpdated', model)
+            @view()
+          onRejected = (reason) =>
+            flash.error(errorMessage(reason), "Saving annotation failed")
+          updatedModel.$update(id: updatedModel.id).then(
+            onFulfilled, onRejected)
 
-      @editing = false
-      @action = 'view'
 
     ###*
     # @ngdoc method
