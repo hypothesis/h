@@ -1,3 +1,5 @@
+uuid = require('node-uuid')
+
 ###*
 # @ngdoc type
 # @name thread.ThreadController
@@ -136,6 +138,17 @@ ThreadController = [
         return true
       return @filter.check(@container)
 
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#isNew
+    # @description
+    # Return true if this is a newly-created annotation (e.g. the user has just
+    # created it by clicking the new annotation button in the browser),
+    # false otherwise.
+    ###
+    this.isNew = ->
+      return (this.id and not this.container?.message?.id)
+
     this._isFilterActive = ->
       if @filter
         @filter.active()
@@ -147,6 +160,8 @@ ThreadController = [
         @counter.count(name)
       else
         0
+
+    this.id = uuid.v4()
 
     this
 ]
@@ -174,8 +189,8 @@ isHiddenThread = (elem) ->
 # Directive that instantiates {@link thread.ThreadController ThreadController}.
 ###
 module.exports = [
-  '$parse', '$window', 'pulse', 'render',
-  ($parse,   $window,   pulse,   render) ->
+  '$parse', '$window', '$location', '$anchorScroll', 'pulse', 'render',
+  ($parse,   $window,   $location,   $anchorScroll,   pulse,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter, filter]) ->
 
       # We would ideally use require for this, but searching parents only for a
@@ -210,6 +225,10 @@ module.exports = [
         render ->
           ctrl.container = thread
           scope.$digest()
+          if ctrl.isNew()
+            # Scroll the sidebar to show new annotations.
+            $location.hash(ctrl.id)
+            $anchorScroll()
 
     controller: ThreadController
     controllerAs: 'vm'
