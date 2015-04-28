@@ -86,36 +86,13 @@ describe('SidebarInjector', function () {
         var promise = injector.injectIntoTab({id: 1, url: url});
         this.server.respond();
         return promise.then(function () {
-          sinon.assert.callCount(spy, 4);
+          sinon.assert.callCount(spy, 2);
           sinon.assert.calledWith(spy, 1, {
-            file: 'public/embed.js'
+            code: sinon.match('/public/config.js')
           });
-        });
-      });
-
-      it('sets the global annotator variable to true', function () {
-        var spy = fakeChromeTabs.executeScript;
-        var url = 'http://example.com/foo.html';
-
-        var promise = injector.injectIntoTab({id: 1, url: url});
-        this.server.respond();
-        return promise.then(function () {
-          sinon.assert.callCount(spy, 4);
           sinon.assert.calledWith(spy, 1, {
-            code: 'window.annotator = true'
+            code: sinon.match('/public/embed.js')
           });
-        });
-      });
-
-      it('is not injected twice', function () {
-        fakeChromeTabs.executeScript.withArgs(1, {code: 'window.annotator'}).yields([true]);
-        var spy = fakeChromeTabs.executeScript;
-        var url = 'http://example.com/foo.html';
-
-        var promise = injector.injectIntoTab({id: 1, url: url});
-        this.server.respond();
-        return promise.then(function () {
-          sinon.assert.calledOnce(spy);
         });
       });
     });
@@ -323,16 +300,6 @@ describe('SidebarInjector', function () {
         return injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'}).then(function () {
           sinon.assert.calledWith(stub, 1, {
             code: sinon.match('/public/destroy.js')
-          });
-        });
-      });
-
-      it('does nothing if the sidebar has not been injected into the page', function () {
-        var stub = fakeChromeTabs.executeScript.yields([false]);
-        return injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'}).then(function () {
-          sinon.assert.calledOnce(stub);
-          sinon.assert.calledWith(stub, 1, {
-            code: sinon.match('window.annotator')
           });
         });
       });

@@ -157,13 +157,13 @@ describe('HypothesisChromeExtension', function () {
 
     describe('when a tab is created', function () {
       beforeEach(function () {
-        fakeTabState.deactivateTab = sandbox.spy();
+        fakeTabState.clearTab = sandbox.spy();
         ext.listen({addEventListener: sandbox.stub()});
       });
 
-      it('registers the new tab', function () {
+      it('clears the new tab state', function () {
         onCreatedHandler({id: 1, url: 'http://example.com/foo.html'});
-        sinon.assert.calledWith(fakeTabState.deactivateTab, 1);
+        sinon.assert.calledWith(fakeTabState.clearTab, 1);
       });
     });
 
@@ -173,6 +173,7 @@ describe('HypothesisChromeExtension', function () {
       }
 
       beforeEach(function () {
+        fakeTabState.clearTab = sandbox.spy()
         fakeTabState.restorePreviousState = sandbox.spy();
         ext.listen({addEventListener: sandbox.stub()});
       });
@@ -184,11 +185,11 @@ describe('HypothesisChromeExtension', function () {
         sinon.assert.calledWith(fakeSidebarInjector.injectIntoTab, tab);
       });
 
-      it('removes the sidebar if inactive', function () {
+      it('clears the tab state if the sidebar is not active', function () {
         var tab = {id: 1, url: 'http://example.com/foo.html', status: 'complete'};
-        fakeTabState.isTabInactive.withArgs(1).returns(true);
+        fakeTabState.isTabActive.withArgs(1).returns(false);
         onUpdatedHandler(tab.id, {status: 'complete'}, tab);
-        sinon.assert.calledWith(fakeSidebarInjector.removeFromTab, tab);
+        sinon.assert.calledWith(fakeTabState.clearTab, tab.id);
       });
 
       it('updates the browser action to the active state when active', function () {

@@ -131,6 +131,9 @@
       if (state.isTabActive(tabId)) {
         browserAction.activate(tabId);
       } else {
+        // Clear the state to express that the user has no preference.
+        // This allows the publisher embed to persist without us destroying it.
+        state.clearTab(tabId);
         browserAction.deactivate(tabId);
       }
 
@@ -138,7 +141,8 @@
     }
 
     function onTabCreated(tab) {
-      state.deactivateTab(tab.id);
+      // Clear the state in case there is old, conflicting data in storage.
+      state.clearTab(tab.id);
     }
 
     function onTabRemoved(tabId) {

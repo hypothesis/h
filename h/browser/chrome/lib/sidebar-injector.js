@@ -146,20 +146,8 @@
           return reject(new h.RestrictedProtocolError('Cannot load Hypothesis into ' + protocol + ' pages'));
         }
 
-        return isSidebarInjected(tab.id).then(function (isInjected) {
-          if (!isInjected) {
-            injectConfig(tab.id).then(function () {
-              chromeTabs.executeScript(tab.id, {
-                code: 'window.annotator = true'
-              }, function () {
-                chromeTabs.executeScript(tab.id, {
-                  file: 'public/embed.js'
-                }, resolve);
-              });
-            });
-          } else {
-            resolve();
-          }
+        return injectScript(tab.id, '/public/config.js').then(function () {
+          injectScript(tab.id, '/public/embed.js').then(resolve);
         });
       });
     }
@@ -178,42 +166,19 @@
         if (!isSupportedURL(tab.url)) {
           return resolve();
         }
-
-        return isSidebarInjected(tab.id).then(function (isInjected) {
-          var src  = extensionURL('/public/destroy.js');
-          var code = 'var script = document.createElement("script");' +
-            'script.src = "{}";' +
-            'document.body.appendChild(script);' +
-            'delete window.annotator;';
-
-          if (isInjected) {
-            chromeTabs.executeScript(tab.id, {
-              code: code.replace('{}', src)
-            }, resolve);
-          } else {
-            resolve();
-          }
-        });
+        injectScript(tab.id, '/public/destroy.js').then(resolve);
       });
     }
 
-    function isSidebarInjected(tabId) {
-      return new Promise(function (resolve, reject) {
-        return chromeTabs.executeScript(tabId, {code: 'window.annotator'}, function (result) {
-          var isAnnotatorSet = !!(result && result[0]);
-          resolve(isAnnotatorSet);
-        });
-      });
-    }
-
-    function injectConfig(tabId) {
+    function injectScript(tabId, path) {
       return new Promise(function (resolve) {
-        var src  = extensionURL('/public/config.js');
+        var src  = extensionURL(path);
         var code = 'var script = document.createElement("script");' +
           'script.src = "{}";' +
           'document.body.appendChild(script);';
+        var code = code.replace('{}', src);
 
-        chromeTabs.executeScript(tabId, {code: code.replace('{}', src)}, resolve);
+        chromeTabs.executeScript(tabId, {code: code}, resolve);
       });
     }
   }
