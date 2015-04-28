@@ -7,6 +7,10 @@
  * Copyright (c) 2011 Robert Koritnik
  * Licensed under the terms of the MIT license
  * http://www.opensource.org/licenses/mit-license.php
+ *
+ * Modifications from the original by Hypothes.is Project and contributors:
+ * Copyright (c) Hypothes.is Project and contributors
+ * Licensed under the terms of the MIT license
  */
 
 (function ($) {
@@ -109,18 +113,24 @@
 
 				var animOptions = {};
 
+				var yDir = "none";
+
 				// vertical scroll
 				if (options.direction.y === true)
 				{
 					if (rel.top < 0)
 					{
 						animOptions.scrollTop = dim.s.scroll.top + rel.top;
+						yDir = "up"
 					}
 					else if (rel.top > 0 && rel.bottom < 0)
 					{
 						animOptions.scrollTop = dim.s.scroll.top + Math.min(rel.top, -rel.bottom);
+						yDir = "down"
 					}
 				}
+
+				var xDir = "none";
 
 				// horizontal scroll
 				if (options.direction.x === true)
@@ -128,10 +138,12 @@
 					if (rel.left < 0)
 					{
 						animOptions.scrollLeft = dim.s.scroll.left + rel.left;
+						xDir = "left"
 					}
 					else if (rel.left > 0 && rel.right < 0)
 					{
 						animOptions.scrollLeft = dim.s.scroll.left + Math.min(rel.left, -rel.right);
+						xDir = "right"
 					}
 				}
 
@@ -146,14 +158,14 @@
 						.animate(animOptions, options.duration)
 						.eq(0) // we want function to be called just once (ref. "html,body")
 						.queue(function (next) {
-							$.isFunction(options.complete) && options.complete.call(scroller[0]);
+							$.isFunction(options.complete) && options.complete.call(scroller[0], xDir, yDir);
 							next();
 						});
 				}
 				else
 				{
 					// when there's nothing to scroll, just call the "complete" function
-					$.isFunction(options.complete) && options.complete.call(scroller[0]);
+					$.isFunction(options.complete) && options.complete.call(scroller[0], xDir, yDir);
 				}
 			}
 

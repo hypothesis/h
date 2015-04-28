@@ -10,6 +10,7 @@ sinon.assert.expose(assert, prefix: '')
 describe 'Annotator.Plugin.TextHighlight', ->
   sandbox = null
   scrollTarget = null
+  animation = null
 
   createTestHighlight = ->
     anchor =
@@ -32,9 +33,10 @@ describe 'Annotator.Plugin.TextHighlight', ->
         hl.appendChild document.createTextNode "test highlight span"
         hl
 
+    Annotator.$.fn.animate = sinon.spy (options) -> animation = options
+
     Annotator.$.fn.scrollintoview = sinon.spy (options) ->
       scrollTarget = this[0]
-      options?.complete?()
 
   afterEach ->
     sandbox.restore()
@@ -93,6 +95,8 @@ describe 'Annotator.Plugin.TextHighlight', ->
       assert.equal(result.bottom, 30)
 
   describe "scrollToView", ->
+    beforeEach ->
+      this.ownerDocument = {body: "asd"}     
 
     it 'calls jQuery scrollintoview', ->
       hl = createTestHighlight()
@@ -103,3 +107,35 @@ describe 'Annotator.Plugin.TextHighlight', ->
       hl = createTestHighlight()
       hl.scrollToView()
       assert.equal scrollTarget, hl._highlights
+
+    it 'does the rigth (padding) correction after scrolling down', ->
+      Annotator.$.fn.scrollintoview = sinon.spy (options) ->
+        context =
+          parentNode: document
+          ownerDocument: document
+        options?.complete?.call context, "fake xdir", "down"
+
+      Annotator.$.fn.scrollTop = sinon.spy -> 100
+
+      Annotator.$.fn.innerHeight = sinon.spy -> 1000
+
+      hl = createTestHighlight()
+
+      hl.scrollToView()
+      assert.deepEqual animation, scrollTop: 100 + 1000 * 0.33
+
+    it 'does the rigth (padding) correction after scrolling up', ->
+      Annotator.$.fn.scrollintoview = sinon.spy (options) ->
+        context =
+          parentNode: document
+          ownerDocument: document
+        options?.complete?.call context, "fake xdir", "up"
+
+      Annotator.$.fn.scrollTop = sinon.spy -> 2000
+
+      Annotator.$.fn.innerHeight = sinon.spy -> 1000
+
+      hl = createTestHighlight()
+
+      hl.scrollToView()
+      assert.deepEqual animation, scrollTop: 2000 - 1000 * 0.33
