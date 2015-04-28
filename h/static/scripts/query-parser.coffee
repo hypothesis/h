@@ -65,7 +65,7 @@ module.exports = class QueryParser
          query_type: 'multi_match'
          match_type: 'cross_fields'
          and_or: 'and'
-         fields:   ['quote', 'tags', 'text', 'uri', 'user']
+         fields:   ['quote', 'tags', 'text', 'uri.parts', 'user']
 
   populateFilter: (filter, query) =>
     # Populate a filter with a query object
