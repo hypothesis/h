@@ -61,6 +61,14 @@ describe 'thread', ->
 
       assert(not controller.isNew())
 
+    it 'returns false from isNew() for a null annotation', ->
+      createDirective()
+
+      # The ThreadController may be an empty container.
+      controller.container = {}
+
+      assert(not controller.isNew())
+
     describe '#toggleCollapsed', ->
       count = null
 

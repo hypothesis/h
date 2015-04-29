@@ -147,7 +147,7 @@ ThreadController = [
     # false otherwise.
     ###
     this.isNew = ->
-      return (this.id and not this.container?.message?.id)
+      return (this.container?.message? and not this.container?.message?.id)
 
     this._isFilterActive = ->
       if @filter
