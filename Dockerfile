@@ -31,7 +31,7 @@ RUN npm install -g npm
 RUN gem install compass
 RUN virtualenv /srv/h
 RUN mkdir -p /src/h
-ENV PATH=/srv/h/bin:/src/h/bin:/src/h/node_modules/.bin:$PATH
+ENV PATH=/src/h/node_modules/.bin:$PATH
 WORKDIR /src/h
 
 # Python dependencies
@@ -48,7 +48,6 @@ RUN npm install --production
 # Install the h application
 ADD Makefile                     /src/h/
 ADD gunicorn.conf.py             /src/h/
-ADD bin                          /src/h/bin
 ADD conf                         /src/h/conf
 ADD h                            /src/h/h
 RUN pip install -r requirements.txt
