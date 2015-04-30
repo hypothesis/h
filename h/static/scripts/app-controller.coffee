@@ -84,9 +84,6 @@ module.exports = class AppController
       # Reload the view.
       $route.reload()
 
-    $rootScope.$on 'beforeAnnotationCreated', ->
-      $scope.clearSelection()
-
     $scope.login = ->
       $scope.dialog.visible = true
       identity.request {oncancel}

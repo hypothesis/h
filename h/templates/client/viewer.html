@@ -42,7 +42,7 @@
       ng-click="scrollTo(child.message)"
       ng-mouseleave="focus()"
       ng-repeat="child in threadRoot.children | filter:notOrphan | orderBy : sort.predicate"
-      ng-show="shouldShowThread(child) && (count('edit') || count('match') || !threadFilter.active())">
+      ng-show="shouldShowThread(child) && (count('edit') || count('match') || !threadFilter.active()) || vm.isNew()">
   </li>
 </ul>
 <!-- / Thread view -->

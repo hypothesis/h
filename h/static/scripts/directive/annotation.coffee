@@ -353,7 +353,9 @@ module.exports = [
           if editing
             counter.count 'edit', 1
             # Disable the filter and freeze it to always match while editing.
-            threadFilter?.freeze()
+            if thread? and threadFilter?
+              threadFilter.active(false)
+              threadFilter.freeze(true)
           else if old
             counter.count 'edit', -1
             threadFilter?.freeze(false)
