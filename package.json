@@ -13,6 +13,7 @@
     "extend": "^2.0.0",
     "hammerjs": "^2.0.4",
     "node-uuid": "^1.4.3",
+    "strip-bomify": "^0.1.0",
     "uglify-js": "^2.4.14"
   },
   "devDependencies": {
@@ -42,6 +43,7 @@
   "homepage": "https://github.com/hypothesis/h",
   "browserify": {
     "transform": [
+      "strip-bomify",
       "coffeeify",
       "browserify-shim"
     ]
