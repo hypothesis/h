@@ -31,7 +31,7 @@ RUN npm install -g npm
 RUN gem install compass
 RUN virtualenv /srv/h
 RUN mkdir -p /src/h
-ENV PATH=/src/h/node_modules/.bin:$PATH
+ENV PATH=/srv/h/bin:/src/h/node_modules/.bin:$PATH
 WORKDIR /src/h
 
 # Python dependencies
