@@ -30,6 +30,10 @@ subparsers.required = True
 
 def _add_common_args(parser):
     parser.add_argument('config_uri', help='paster configuration URI')
+    parser.add_argument('--base',
+                        help='Base URL',
+                        default='http://localhost:5000',
+                        metavar='URL')
 
 
 def init_db(args):
@@ -48,7 +52,7 @@ _add_common_args(parser_init_db)
 def assets(args):
     """Build the static assets."""
     paster.setup_logging(args.config_uri)
-    request = Request.blank('', base_url=os.environ.get('APP_URL'))
+    request = Request.blank('', base_url=args.base)
     env = paster.bootstrap(args.config_uri, request=request)
     assets_env = env['request'].webassets_env
     for bundle in assets_env:
