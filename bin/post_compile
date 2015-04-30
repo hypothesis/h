@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-echo "-----> Compiling assets"
-source /etc/profile
-hypothesis assets conf/production.ini
