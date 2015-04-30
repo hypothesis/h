@@ -23,7 +23,10 @@ deps: h.egg-info node_modules
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-	find h/static/scripts -mindepth 1 -name '*.min.js' -delete
+	rm -f h/static/scripts/vendor/*.min.js
+	rm -f h/static/scripts/account.*js
+	rm -f h/static/scripts/app.*js
+	rm -f h/static/scripts/hypothesis.*js
 	rm -f h/static/styles/*.css
 
 dev: deps

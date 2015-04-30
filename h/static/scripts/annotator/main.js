@@ -1,35 +1,35 @@
 var Annotator = require('annotator');
 
 // Monkeypatch annotator!
-require('./annotator/monkey');
+require('./monkey');
 
 // Applications
-Annotator.Guest = require('./annotator/guest')
-Annotator.Host = require('./annotator/host')
+Annotator.Guest = require('./guest')
+Annotator.Host = require('./host')
 
 // Cross-frame communication
-Annotator.Plugin.CrossFrame = require('./annotator/plugin/cross-frame')
-Annotator.Plugin.CrossFrame.Bridge = require('./bridge')
-Annotator.Plugin.CrossFrame.AnnotationSync = require('./annotation-sync')
-Annotator.Plugin.CrossFrame.Discovery = require('./discovery')
+Annotator.Plugin.CrossFrame = require('./plugin/cross-frame')
+Annotator.Plugin.CrossFrame.Bridge = require('../bridge')
+Annotator.Plugin.CrossFrame.AnnotationSync = require('../annotation-sync')
+Annotator.Plugin.CrossFrame.Discovery = require('../discovery')
 
 // Document plugin
-require('./vendor/annotator.document');
+require('../vendor/annotator.document');
 
 // Bucket bar
-require('./annotator/plugin/bucket-bar');
+require('./plugin/bucket-bar');
 
 // Toolbar
-require('./annotator/plugin/toolbar');
+require('./plugin/toolbar');
 
 // Drawing highlights
-require('./annotator/plugin/texthighlights');
+require('./plugin/texthighlights');
 
 // Creating selections
-require('./annotator/plugin/textselection');
+require('./plugin/textselection');
 
 // URL fragments
-require('./annotator/plugin/fragmentselector');
+require('./plugin/fragmentselector');
 
 // Anchoring dependencies
 require('diff-match-patch')
@@ -39,13 +39,13 @@ require('page-text-mapper-core')
 require('text-match-engines')
 
 // Anchoring plugins
-require('./annotator/plugin/enhancedanchoring');
-require('./annotator/plugin/domtextmapper');
-require('./annotator/plugin/fuzzytextanchors');
-require('./annotator/plugin/pdf');
-require('./annotator/plugin/textquote');
-require('./annotator/plugin/textposition');
-require('./annotator/plugin/textrange');
+require('./plugin/enhancedanchoring');
+require('./plugin/domtextmapper');
+require('./plugin/fuzzytextanchors');
+require('./plugin/pdf');
+require('./plugin/textquote');
+require('./plugin/textposition');
+require('./plugin/textrange');
 
 var Klass = Annotator.Host;
 var docs = 'https://github.com/hypothesis/h/blob/master/README.rst#customized-embedding';

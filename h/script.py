@@ -8,7 +8,6 @@ import sys
 from elasticsearch import Elasticsearch
 from pyramid import paster
 from pyramid.request import Request
-import webassets.script
 
 from h import __version__, reindexer
 
@@ -51,9 +50,9 @@ def assets(args):
     paster.setup_logging(args.config_uri)
     request = Request.blank('', base_url=os.environ.get('APP_URL'))
     env = paster.bootstrap(args.config_uri, request=request)
-
     assets_env = env['request'].webassets_env
-    webassets.script.main(['build'], assets_env)
+    for bundle in assets_env:
+        bundle.urls()
 
 parser_assets = subparsers.add_parser('assets', help=assets.__doc__)
 _add_common_args(parser_assets)

@@ -119,14 +119,15 @@ app:
 
 app_js:
   output: scripts/app.min.js
-  filters:
-    - browserify
-    - uglifyjs
-  contents: h:static/scripts/app.coffee
-  depends:
-    - h:static/scripts/*.coffee
-    - h:static/scripts/directive/*.coffee
-    - h:static/scripts/filter/*.coffee
+  filters: uglifyjs
+  contents:
+    - output: scripts/app.js
+      filters: browserify
+      contents: h:static/scripts/app.coffee
+      depends:
+        - h:static/scripts/*.coffee
+        - h:static/scripts/directive/*.coffee
+        - h:static/scripts/filter/*.coffee
 
 app_css:
   output: styles/app.min.css
@@ -171,11 +172,12 @@ account:
     - angular_bootstrap
     - angular_route
     - output: scripts/account.min.js
-      filters:
-        - browserify
-        - uglifyjs
-      contents: h:static/scripts/account/account.coffee
-      depends: h:static/scripts/account/*
+      filters: uglifyjs
+      contents:
+        - output: scripts/account.js
+          filters: browserify
+          contents: h:static/scripts/account/account.coffee
+          depends: h:static/scripts/account/*
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
@@ -189,13 +191,18 @@ inject:
 inject_js:
   contents:
   - output: scripts/hypothesis.min.js
-    filters:
-      - browserify
-      - uglifyjs
-    contents: h:static/scripts/hypothesis.js
-    depends:
-      - h:static/scripts/annotator/*.coffee
-      - h:static/scripts/annotator/plugin/*.coffee
+    filters: uglifyjs
+    contents:
+      - output: scripts/hypothesis.js
+        filters: browserify
+        contents: h:static/scripts/annotator/main.js
+        depends:
+          - h:static/scripts/annotation-sync.coffee
+          - h:static/scripts/bridge.coffee
+          - h:static/scripts/discovery.coffee
+          - h:static/scripts/annotator/*.coffee
+          - h:static/scripts/annotator/plugin/*.coffee
+          - h:static/scripts/vendor/annotator.auth.js
 
 inject_css:
   output: styles/hypothesis.min.css
