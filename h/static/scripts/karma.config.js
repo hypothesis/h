@@ -30,7 +30,7 @@ module.exports = function(config) {
       'vendor/annotator.js',
       'vendor/polyfills/autofill-event.js',
       'vendor/polyfills/bind.js',
-      'vendor/katex/katex.js',
+      'vendor/katex.js',
       'vendor/moment-with-langs.js',
       'vendor/jstz.js',
       'vendor/moment-timezone.js',
