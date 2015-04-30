@@ -14,7 +14,9 @@
 
   browserExtension.listen(window);
   chrome.runtime.onInstalled.addListener(onInstalled);
-  chrome.runtime.onUpdateAvailable.addListener(onUpdateAvailable);
+  chrome.runtime.requestUpdateCheck(function (status) {
+    chrome.runtime.onUpdateAvailable.addListener(onUpdateAvailable);
+  });
 
   function onInstalled(installDetails) {
     if (installDetails.reason === 'install') {
@@ -36,7 +38,6 @@
   }
 
   function onUpdateAvailable() {
-    // TODO: Implement a "reload" notification that tears down the current
-    // tabs and calls chrome.runtime.reload().
+    chrome.runtime.reload();
   }
 })();
