@@ -10,6 +10,7 @@ describe 'StreamController', ->
   fakeAnnotationMapper = null
   fakeParams = null
   fakeQueryParser = null
+  fakeRoute = null
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
@@ -37,6 +38,10 @@ describe 'StreamController', ->
 
     fakeQueryParser = {
       populateFilter: sandbox.spy()
+    }
+
+    fakeRoute = {
+      reload: sandbox.spy()
     }
 
     fakeSearchFilter = {
@@ -67,6 +72,7 @@ describe 'StreamController', ->
     }
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
+    $provide.value '$route', fakeRoute
     $provide.value '$routeParams', fakeParams
     $provide.value 'queryParser', fakeQueryParser
     $provide.value 'searchFilter', fakeSearchFilter
@@ -94,3 +100,18 @@ describe 'StreamController', ->
     assert.calledWith(fakeThreading.createIdTable, [])
     assert.isObject(fakeThreading.root)
     assert.strictEqual(fakeThreading.root, $scope.threadRoot)
+
+  describe 'on $routeUpdate', ->
+
+    it 'reloads the route when the query changes', ->
+      fakeParams.q = 'test query'
+      createController()
+      fakeParams.q = 'new query'
+      $scope.$broadcast('$routeUpdate')
+      assert.calledOnce(fakeRoute.reload)
+
+    it 'does not reload the route when the query is the same', ->
+      fakeParams.q = 'test query'
+      createController()
+      $scope.$broadcast('$routeUpdate')
+      assert.notCalled(fakeRoute.reload)

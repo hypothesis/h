@@ -42,6 +42,7 @@ configureRoutes = ['$routeProvider', ($routeProvider) ->
   $routeProvider.when '/stream',
     controller: 'StreamController'
     templateUrl: 'viewer.html'
+    reloadOnSearch: false
     resolve: resolve
   $routeProvider.otherwise
     redirectTo: '/viewer'

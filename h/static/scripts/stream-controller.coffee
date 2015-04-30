@@ -4,17 +4,23 @@ mail = require('./vendor/jwz')
 
 module.exports = class StreamController
   this.inject = [
-    '$scope', '$rootScope', '$routeParams',
+    '$scope', '$route', '$rootScope', '$routeParams',
     'queryParser', 'searchFilter', 'store',
     'streamer', 'streamFilter', 'threading', 'annotationMapper'
   ]
   constructor: (
-     $scope,   $rootScope,   $routeParams
+     $scope,   $route,   $rootScope,   $routeParams
      queryParser,   searchFilter,   store,
      streamer,   streamFilter,   threading,   annotationMapper
   ) ->
     # XXX: disable page search
     $scope.search = {}
+
+    # Reload on query change (ignore hash change)
+    lastQuery = $routeParams.q
+    $scope.$on '$routeUpdate', ->
+      if $routeParams.q isnt lastQuery
+        $route.reload()
 
     # XXX: Reset the threading service
     threading.createIdTable([])
