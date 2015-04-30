@@ -10,8 +10,6 @@ install:
   - pip install prospector
   - pip install pyramid_redis_sessions
   - make
-services:
-  - elasticsearch
 script:
   - make test
   - make cover
