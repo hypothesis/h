@@ -158,6 +158,7 @@ app_css:
         - h:static/styles/styled-text.scss
         - h:static/styles/simple-search.scss
         - h:static/styles/tags-input.scss
+        - h:static/styles/topbar.scss
         - h:static/styles/page.scss
         - h:static/styles/help-page.scss
         - h:static/styles/variables.scss
@@ -214,19 +215,3 @@ inject_css:
         - h:static/styles/reset.scss
         - h:static/styles/variables.scss
         - h:static/styles/mixins/icons.scss
-
-
-topbar:
-  output: styles/topbar.min.css
-  filters:
-    - cleancss
-    - cssrewrite
-  contents:
-    - output: styles/topbar.css
-      filters: compass
-      contents:
-        - h:static/styles/topbar.scss
-      depends:
-        - h:static/styles/base.scss
-        - h:static/styles/variables.scss
-        - h:static/styles/mixins/responsive.scss
