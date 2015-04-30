@@ -8,6 +8,7 @@ install:
   - pip install coveralls
   - pip install mandrill
   - pip install prospector
+  - pip install pyramid_redis_sessions
   - make
 services:
   - elasticsearch
