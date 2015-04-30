@@ -24,7 +24,7 @@ clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 	find h/static/scripts -mindepth 1 -name '*.min.js' -delete
-	find h/static/styles -mindepth 1 -name '*.css' -delete
+	rm -f h/static/styles/*.css
 
 dev: deps
 	@gunicorn --reload --paste conf/development.ini

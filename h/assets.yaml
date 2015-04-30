@@ -30,11 +30,8 @@ angular_tags_input:
 angular_toastr:
   contents:
     - filters: uglifyjs
-      output: scripts/vendor/angular-toastr/angular-toastr.min.js
-      contents: h:static/scripts/vendor/angular-toastr/angular-toastr.js
-    - filters: cleancss
-      output: scripts/vendor/angular-toastr/angular-toastr.min.css
-      contents: h:static/scripts/vendor/angular-toastr/angular-toastr.css
+      output: scripts/vendor/angular-toastr.min.js
+      contents: h:static/scripts/vendor/angular-toastr.js
 
 
 # Analytics
@@ -58,8 +55,8 @@ jquery:
 # TeX rendering
 katex:
   filters: uglifyjs
-  output: scripts/vendor/katex/katex.min.js
-  contents: h:static/scripts/vendor/katex/katex.js
+  output: scripts/vendor/katex.min.js
+  contents: h:static/scripts/vendor/katex.js
 
 
 # Polyfills
@@ -101,7 +98,6 @@ momentjs:
 # Application
 app:
   contents:
-    - h:static/icomoon.css
     - jquery
     - angular
     - angular_animate
@@ -133,34 +129,38 @@ app_js:
     - h:static/scripts/filter/*.coffee
 
 app_css:
-    filters: cleancss
-    output: styles/app.min.css
-    contents:
-      - h:static/scripts/vendor/katex/katex.min.css
-      - filters: compass
-        output: styles/app.css
-        contents:
-          - h:static/styles/app.scss
-        depends:
-          - h:static/styles/base.scss
-          - h:static/styles/annotations.scss
-          - h:static/styles/mixins/forms.scss
-          - h:static/styles/mixins/icons.scss
-          - h:static/styles/mixins/responsive.scss
-          - h:static/styles/mixins/grid.scss
-          - h:static/styles/common.scss
-          - h:static/styles/grid.scss
-          - h:static/styles/threads.scss
-          - h:static/styles/forms.scss
-          - h:static/styles/markdown-editor.scss
-          - h:static/styles/reset.scss
-          - h:static/styles/spinner.scss
-          - h:static/styles/styled-text.scss
-          - h:static/styles/simple-search.scss
-          - h:static/styles/tags-input.scss
-          - h:static/styles/page.scss
-          - h:static/styles/help-page.scss
-          - h:static/styles/variables.scss
+  output: styles/app.min.css
+  filters:
+    - cleancss
+    - cssrewrite
+  contents:
+    - h:static/styles/vendor/icomoon.css
+    - h:static/styles/vendor/angular-toastr.css
+    - h:static/styles/vendor/katex.min.css
+    - output: styles/app.css
+      filters: compass
+      contents:
+        - h:static/styles/app.scss
+      depends:
+        - h:static/styles/base.scss
+        - h:static/styles/annotations.scss
+        - h:static/styles/mixins/forms.scss
+        - h:static/styles/mixins/icons.scss
+        - h:static/styles/mixins/responsive.scss
+        - h:static/styles/mixins/grid.scss
+        - h:static/styles/common.scss
+        - h:static/styles/grid.scss
+        - h:static/styles/threads.scss
+        - h:static/styles/forms.scss
+        - h:static/styles/markdown-editor.scss
+        - h:static/styles/reset.scss
+        - h:static/styles/spinner.scss
+        - h:static/styles/styled-text.scss
+        - h:static/styles/simple-search.scss
+        - h:static/styles/tags-input.scss
+        - h:static/styles/page.scss
+        - h:static/styles/help-page.scss
+        - h:static/styles/variables.scss
 
 
 account:
@@ -182,7 +182,6 @@ account:
 # plugin.
 inject:
   contents:
-    - h:static/icomoon.css
     - inject_css
     - inject_js
 
@@ -199,10 +198,13 @@ inject_js:
 
 inject_css:
   output: styles/hypothesis.min.css
-  filters: cleancss
+  filters:
+    - cleancss
+    - cssrewrite
   contents:
-    - filters: compass
-      output: styles/inject.css
+    - h:static/styles/vendor/icomoon.css
+    - output: styles/hypothesis.css
+      filters: compass
       contents:
         - h:static/styles/inject.scss
         - h:static/styles/pdfjs-overrides.scss
@@ -216,7 +218,9 @@ inject_css:
 
 topbar:
   output: styles/topbar.min.css
-  filters: cleancss
+  filters:
+    - cleancss
+    - cssrewrite
   contents:
     - output: styles/topbar.css
       filters: compass
