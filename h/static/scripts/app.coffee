@@ -33,6 +33,7 @@ configureRoutes = ['$routeProvider', ($routeProvider) ->
   $routeProvider.when '/a/:id',
     controller: 'AnnotationViewerController'
     templateUrl: 'viewer.html'
+    reloadOnSearch: false
     resolve: resolve
   $routeProvider.when '/viewer',
     controller: 'WidgetController'
