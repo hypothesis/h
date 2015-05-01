@@ -13,8 +13,11 @@ module.exports = class StreamController
      queryParser,   searchFilter,   store,
      streamer,   streamFilter,   threading,   annotationMapper
   ) ->
-    # XXX: disable page search
-    $scope.search = {}
+    # Disable the thread filter (client-side search)
+    $scope.$on '$routeChangeSuccess', ->
+      if $scope.threadFilter?
+        $scope.threadFilter.active(false)
+        $scope.threadFilter.freeze(true)
 
     # Reload on query change (ignore hash change)
     lastQuery = $routeParams.q

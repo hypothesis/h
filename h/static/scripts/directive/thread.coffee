@@ -224,11 +224,10 @@ module.exports = [
         # We call $digest to trigger a scope local update.
         render ->
           ctrl.container = thread
-          scope.$digest()
           if ctrl.isNew()
             # Scroll the sidebar to show new annotations.
             $location.hash(ctrl.id)
-            $anchorScroll()
+          scope.$digest()
 
     controller: ThreadController
     controllerAs: 'vm'

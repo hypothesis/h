@@ -90,16 +90,23 @@ describe 'StreamController', ->
   afterEach ->
     sandbox.restore()
 
-  it 'disables page search by shadowing the search field', ->
-    createController()
-    assert.match($scope.search, {})
-
   it 'resets the threading service', ->
     createController()
     assert.calledOnce(fakeThreading.createIdTable)
     assert.calledWith(fakeThreading.createIdTable, [])
     assert.isObject(fakeThreading.root)
     assert.strictEqual(fakeThreading.root, $scope.threadRoot)
+
+  describe 'on $routeChangeSuccess', ->
+
+    it 'disables page search', ->
+      createController()
+      $scope.threadFilter = {active: sinon.stub(), freeze: sinon.stub()}
+      $scope.$broadcast('$routeChangeSuccess')
+      assert.calledOnce($scope.threadFilter.active)
+      assert.calledWith($scope.threadFilter.active, false)
+      assert.calledOnce($scope.threadFilter.freeze)
+      assert.calledWith($scope.threadFilter.freeze, true)
 
   describe 'on $routeUpdate', ->
 
