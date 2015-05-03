@@ -26,6 +26,7 @@ clean:
 	rm -f h/static/scripts/vendor/*.min.js
 	rm -f h/static/scripts/account.*js
 	rm -f h/static/scripts/app.*js
+	rm -f h/static/scripts/config.*js
 	rm -f h/static/scripts/hypothesis.*js
 	rm -f h/static/styles/*.css
 

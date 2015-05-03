@@ -146,7 +146,6 @@ module.exports = angular.module('h', [
 .service('unicode', require('./unicode'))
 .service('viewFilter', require('./view-filter'))
 
-.value('xsrf', token: null)
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))
 .value('Discovery', require('./discovery'))

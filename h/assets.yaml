@@ -95,6 +95,17 @@ momentjs:
       contents: h:static/scripts/vendor/moment-timezone-data.js
 
 
+# Configuration
+config:
+  output: scripts/config.min.js
+  filters: uglifyjs
+  contents:
+    - output: scripts/config.js
+      filters: browserify
+      contents:
+        - h:static/scripts/config/accounts.coffee
+
+
 # Application
 app:
   contents:
@@ -128,6 +139,7 @@ app_js:
         - h:static/scripts/*.coffee
         - h:static/scripts/directive/*.coffee
         - h:static/scripts/filter/*.coffee
+    - config
 
 app_css:
   output: styles/app.min.css
