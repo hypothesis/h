@@ -106,6 +106,9 @@ class AsyncFormViewMapper(object):
 @view_config(attr='logout', route_name='logout')
 class AuthController(horus.views.AuthController):
     def login(self):
+        if self.request.authenticated_userid is not None:
+            return httpexceptions.HTTPFound(location=self.login_redirect_view)
+
         try:
             user = self.form.validate(self.request.POST.items())['user']
         except deform.ValidationFailure as e:
