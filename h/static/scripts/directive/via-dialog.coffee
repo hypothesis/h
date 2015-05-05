@@ -5,8 +5,8 @@
 # @description The dialog that generates a via link to the page h is currently
 # loaded on.
 ###
-module.exports = ['$timeout', 'crossframe', ($timeout, crossframe) ->
-    viaUrl = 'https://via.hypothes.is/h/'
+module.exports = ['$timeout', 'crossframe', 'via', (
+                   $timeout,   crossframe,   via) ->
     link: (scope, elem, attrs, ctrl) ->
         scope.viaPageLink = ''
 
@@ -21,7 +21,7 @@ module.exports = ['$timeout', 'crossframe', ($timeout, crossframe) ->
                 p = crossframe.providers[0]
                 if p.entities?.length
                     e = p.entities[0]
-                    scope.viaPageLink = viaUrl + e
+                    scope.viaPageLink = via.url + e
     controller: 'AppController'
     templateUrl: 'via_dialog.html'
 ]
