@@ -26,12 +26,12 @@
 }
 
 @mixin form-input-error {
-  color: $error-red;
-  border-color: $error-red-light;
-  background-color: $error-red-lightest;
+  color: $error-color;
+  border-color: color-weight($error-color, 300);
+  background-color: color-weight($error-color, 100);
 
   @include placeholder {
-    color: $error-red-light;
+    color: tint($error-color, 5%);
   }
 }
 

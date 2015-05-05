@@ -10,19 +10,39 @@ $gray-lighter: #d3d3d3 !default;
 $gray-lightest: #f9f9f9 !default;
 
 //COLORS
-$hypothered: #bd1c2b !default;
-$hypothered-desat: #bd5862 !default;
-
-$error-red: $hypothered-desat !default;
-$error-red-light: #e0b0b0 !default;
-$error-red-lightest: #fff1f3 !default;
+$brand-color: #bd1c2b !default;
 
 $button-text-color: $gray-dark !default;
 $button-background-start: $white !default;
 $button-background-end: #f0f0f0 !default;
 $button-background-gradient: top, $button-background-start, $button-background-end !default;
 
-$success-green: #76B800 !default;
+$error-color: #f0480c !default;
+$success-color: #1cbd41 !default;
+
+@function color-weight($c, $n: 500) {
+  @if $n == 50 {
+    @return tint($c, 85%);
+  } @if $n == 100 {
+    @return tint($c, 70%);
+  } @if $n == 200 {
+    @return tint($c, 50%);
+  } @if $n == 300 {
+    @return tint($c, 30%);
+  } @if $n == 400 {
+    @return tint($c, 15%);
+  } @if $n == 500 {
+    @return $c;
+  } @if $n == 600 {
+    @return shade($c, 15%);
+  } @if $n == 700 {
+    @return shade($c, 30%);
+  } @if $n == 800 {
+    @return shade($c, 50%);
+  } @if $n == 900 {
+    @return shade($c, 85%);
+  }
+}
 
 // Scaffolding
 // -------------------------
@@ -30,8 +50,8 @@ $body-background:        $white !default;
 $text-color:             $gray-dark !default;
 
 //LINKS
-$link-color:             $hypothered-desat !default;
-$link-color-hover:       $hypothered !default;
+$link-color:             $brand-color !default;
+$link-color-hover:       color-weight($brand-color, 700) !default;
 
 // Typography
 // -------------------------
