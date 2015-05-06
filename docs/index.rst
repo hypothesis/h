@@ -7,7 +7,7 @@ Contents:
    :maxdepth: 2
 
    INSTALL
-   HACKING
+   hacking/index
    internals
    api
 
