@@ -28,7 +28,7 @@
 @mixin form-input-error {
   color: $error-color;
   border-color: color-weight($error-color, 300);
-  background-color: color-weight($error-color, 100);
+  background-color: color-weight($error-color, 50);
 
   @include placeholder {
     color: tint($error-color, 5%);
