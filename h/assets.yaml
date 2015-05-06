@@ -100,10 +100,14 @@ config:
   output: scripts/config.min.js
   filters: uglifyjs
   contents:
-    - output: scripts/config.js
+    - output: scripts/config.accounts.js
       filters: browserify
       contents:
         - h:static/scripts/config/accounts.coffee
+    - output: scripts/config.via.js
+      filters: browserify
+      contents:
+        - h:static/scripts/config/via.coffee
 
 
 # Application

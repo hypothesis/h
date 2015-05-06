@@ -16,6 +16,7 @@
           --><span class="provider" ng-show="auth.user">/{% raw %}{{ auth.user|persona:'provider' }}{% endraw %}</span><!--
           --><i class="h-icon-arrow-drop-down"></i></span>
         <ul class="dropdown-menu pull-right" role="menu">
+          <li ng-hide="isStream"><a href="" ng-click="viaLinkVisible = true">Share this page</a></li>
           <li ng-show="auth.user"><a href="" ng-click="dialog.visible='true'">Account</a></li>
           <li><a href="mailto:support@hypothes.is">Feedback</a></li>
           <li><a href="/docs/help" target="_blank">Help</a></li>
@@ -68,6 +69,10 @@
     </div>
     <!-- / Dialog -->
 
+    <!-- Via Link Dialog -->
+    <div via-link-dialog="" ng-show="viaLinkVisible"></div>
+    <!-- / Via Link Dialog -->
+
     <!-- Angular view -->
     <main class="content" ng-view=""></main>
   </div>
@@ -83,6 +88,9 @@
   </script>
   <script type="text/ng-template" id="privacy.html">
     {{ include_raw("h:templates/client/privacy.html") }}
+  </script>
+  <script type="text/ng-template" id="via_dialog.html">
+    {{ include_raw("h:templates/client/via_dialog.html") }}
   </script>
   <script type="text/ng-template" id="viewer.html">
     {{ include_raw("h:templates/client/viewer.html") }}

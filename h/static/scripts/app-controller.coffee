@@ -46,6 +46,12 @@ module.exports = class AppController
     oncancel = ->
       $scope.dialog.visible = false
 
+    $scope.viaLinkVisible = false
+
+    # Check to see if we are on the stream page.
+    if $window.top is $window
+      $scope.isStream = true
+
     cleanupAnnotations = ->
       # Clean up any annotations that need to be unloaded.
       for id, container of $scope.threading.idTable when container.message

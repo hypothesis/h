@@ -112,6 +112,7 @@ module.exports = angular.module('h', [
 .directive('spinner', require('./directive/spinner'))
 .directive('tabbable', require('./directive/tabbable'))
 .directive('tabReveal', require('./directive/tab-reveal'))
+.directive('viaLinkDialog', require('./directive/via-dialog'))
 
 .filter('converter', require('./filter/converter'))
 .filter('moment', require('./filter/moment'))
