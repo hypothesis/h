@@ -1,5 +1,36 @@
-Next Release
-============
+0.4.0 (2015-05-05)
+=================
+
+Highlights
+----------
+
+- Add Markdown Editor (#1479)
+- Add Math support for annotations (#1558)
+- Simpler CSS grid system (#1577)
+- Improved Chrome extensions handling of PDF.js viewer (#1563)
+- Post-install Welcome page for user onboarding (#1579)
+- Switched to Jinja2 for server-side templates (#1628)
+- Initial Firefox Addon (#1434)
+- Add `./bin/hypothesis reindex` command (#1715)
+- Rework Back End Authentication and Authorization (#1791)
+- Import Annotator (#1856)
+- Depend on upstream Annotator (#1866)
+- Enable Sentry logging in production environments (#1906)
+- Open Graph protocol metadata added to Annotation view (#1921)
+- Refactor auth and separate API from main app (#1951)
+- Use key derivation to provide secret keys (#1981)
+- Add claim account system (#1941)
+- Browserify ALL THE THINGS (#1972)
+- Add `./bin/hypothesis token' command to generate OAuth tokens  (#2032)
+- Refactor UX (#2031)
+- Auto-complete tags (#2042)
+- Add Atom feed support for `/stream` (#2072)
+- Improve packaging, bundling and module boilerplate (#2092)
+- Google Analytics support (#2139)
+- Mobile support (#2137)
+- Protect against double embedding/injecting (#2166)
+- Add a blocklist of sites h doesn't work on (#2157)
+- Overhaul URI analysis (#2184)
 
 0.3.2 (2014-09-24)
 ==================
