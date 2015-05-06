@@ -3,7 +3,7 @@ Installation guide
 
 This document contains instructions for deploying h to a production environment.
 If you are looking for instructions on setting up a development environment for
-h, please consult :doc:`HACKING` instead.
+h, please consult :doc:`/hacking/index` instead.
 
 h is deployed exclusively as a Docker_ container. This allows the development
 team to focus their efforts on developing for a single, consistent environment.
