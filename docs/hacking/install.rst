@@ -54,7 +54,7 @@ add the ``universe`` package repositories.)
 
 Install the following packages::
 
-    $ apt-get -y --no-install-recommends \
+    $ apt-get install -y --no-install-recommends \
         build-essential \
         git \
         libevent-dev \
