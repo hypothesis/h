@@ -49,6 +49,8 @@ class User(UserMixin, Base):
                           sa.Unicode(30),
                           nullable=False,
                           unique=True)
+    # Not In Public Site Areas flag
+    nipsa = sa.Column(sa.BOOLEAN, default=False, nullable=False)
 
     def _get_username(self):
         return self._username
