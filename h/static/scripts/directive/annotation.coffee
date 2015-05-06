@@ -50,7 +50,9 @@ AnnotationController = [
     highlight = model.$highlight
     original = null
     vm = this
-
+    via =
+      url: 'https://via.hypothes.is/'
+      oldUrls: ['https://via.hypothes.is/h/']
     ###*
     # @ngdoc method
     # @name annotation.AnnotationController#tagsAutoComplete.
@@ -197,6 +199,23 @@ AnnotationController = [
         else
           reply.permissions = permissions.private()
 
+    this._extractUri = (uri) ->
+      # Strip the uri from the via url
+      extractUri = uri
+
+      # Annotations could be saved with any of these urls.
+      for url in [via.url, via.oldUrls...]
+        if uri.indexOf(url) is 0
+          try
+            viaRemovedUri = uri.substring(url.length)
+            testUri = new URL(viaRemovedUri)
+            extractUri = viaRemovedUri
+            break
+          catch
+            # viaRemovedUri was not a valid URL
+            continue
+      return extractUri
+
     ###*
     # @ngdoc method
     # @name annotation.AnnotationController#render
@@ -211,8 +230,9 @@ AnnotationController = [
       @annotationURI = new URL("/a/#{@annotation.id}", this.baseURI).href
 
       # Extract the document metadata.
-      uri = model.uri
+      uri = this._extractUri(model.uri)
       domain = new URL(uri).hostname
+
       if model.document
         if uri.indexOf("urn") is 0
           # This URI is not clickable, see if we have something better

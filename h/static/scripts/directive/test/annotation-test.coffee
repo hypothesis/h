@@ -204,6 +204,11 @@ describe 'annotation', ->
       controller.render()
       assert.equal(controller.document.domain, 'example.com')
 
+    it 'removes the via link for extracting domain from the uri', ->
+      annotation.uri = 'https://via.hypothes.is/http://example.com'
+      controller.render()
+      assert.equal(controller.document.domain, 'example.com')
+
     it 'uses the domain for the title if the title is not present', ->
       delete annotation.document.title
       controller.render()
