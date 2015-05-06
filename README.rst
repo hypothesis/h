@@ -37,7 +37,7 @@ environment.
 Development
 -----------
 
-See `<docs/HACKING.rst>`_ for instructions on setting up a development
+See `<docs/hacking/install.rst>`_ for instructions on setting up a development
 environment for h.
 
 
