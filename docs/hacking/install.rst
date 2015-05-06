@@ -1,6 +1,11 @@
 Installing h in a development environment
 #########################################
 
+This document contains instructions on setting up a development environment for
+h. If you are looking for instructions on deploying h in a production
+environment, please consult the :doc:`/INSTALL` instead.
+
+
 Requirements
 ------------
 
@@ -173,6 +178,8 @@ it crash for some reason.
     Using the bookmarklet or otherwise embedding the application may not
     be possible on sites accessed via HTTPS due to browser policy restricting
     the inclusion of non-SSL content.
+
+.. _running-the-tests:
 
 Running the tests
 -----------------

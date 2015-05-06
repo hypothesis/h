@@ -1,16 +1,18 @@
 Hacking guide
 #############
 
-This document contains instructions on setting up a development environment for
-h. If you are looking for instructions on deploying h in a production
-environment, please consult the :doc:`/INSTALL` instead.
+The following sections document how to setup a development environment for h
+and how to contribute code or documentation to the project.
 
 .. toctree::
    :maxdepth: 1
 
+   communications
+   cla
    install
    browser-extensions
-   linting
+   submitting-a-pr
+   code-style
    documentation
    customized-embedding
    ssl
