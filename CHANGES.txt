@@ -1,5 +1,5 @@
 0.4.0 (2015-05-05)
-=================
+==================
 
 Highlights
 ----------
@@ -21,7 +21,7 @@ Highlights
 - Use key derivation to provide secret keys (#1981)
 - Add claim account system (#1941)
 - Browserify ALL THE THINGS (#1972)
-- Add `./bin/hypothesis token' command to generate OAuth tokens  (#2032)
+- Add `./bin/hypothesis token` command to generate OAuth tokens  (#2032)
 - Refactor UX (#2031)
 - Auto-complete tags (#2042)
 - Add Atom feed support for `/stream` (#2072)

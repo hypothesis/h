@@ -10,6 +10,7 @@ Contents:
    hacking/index
    internals
    api
+   CHANGES
 
 
 Indices and tables
