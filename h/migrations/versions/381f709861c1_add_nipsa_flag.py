@@ -31,8 +31,11 @@ def upgrade():
             nipsa=False
         )
     )
-    op.alter_column('user', 'nipsa', nullable=False)
+
+    with op.batch_alter_table('user') as batch_op:
+        batch_op.alter_column('nipsa', nullable=False)
 
 
 def downgrade():
-    op.drop_column('user', 'nipsa')
+    with op.batch_alter_table('user') as batch_op:
+        batch_op.drop_column('nipsa')
