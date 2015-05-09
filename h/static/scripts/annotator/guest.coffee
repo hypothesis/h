@@ -45,17 +45,6 @@ module.exports = class Guest extends Annotator
     this.anchored = []
     this.unanchored = []
 
-    # Are going to be able to use the PDF plugin here?
-    if window.PDFTextMapper?.applicable()
-      # If we can, let's load the PDF plugin.
-      @options.PDF = {}
-    else
-      # If we can't use the PDF plugin,
-      # let's load the Document plugin instead.
-      @options.Document = {}
-
-    delete @options.app
-
     cfOptions =
       on: (event, handler) =>
         this.subscribe(event, handler)
@@ -73,7 +62,6 @@ module.exports = class Guest extends Annotator
             this.publish(event, args)
       formatter: (annotation) =>
         formatted = {}
-        formatted.uri = @getHref()
         for k, v of annotation when k isnt 'anchors'
           formatted[k] = v
         # Work around issue in jschannel where a repeated object is considered
@@ -90,27 +78,21 @@ module.exports = class Guest extends Annotator
       if not @plugins[name] and Annotator.Plugin[name]
         this.addPlugin(name, opts)
 
-  # Utility function to remove the hash part from a URL
-  _removeHash: (url) ->
-    url = new URL url
-    url.hash = ""
-    url.toString()
+  # Get the document info
+  getDocumentInfo: ->
+    if @plugins.PDF?
+      metadataPromise = Promise.resolve(@plugins.PDF.getMetadata())
+      uriPromise = Promise.resolve(@plugins.PDF.uri())
+    if @plugins.Document?
+      uriPromise = Promise.resolve(@plugins.Document.uri())
+      metadataPromise = Promise.resolve(@plugins.Document.metadata)
 
-  # Utility function to get the decoded form of the document URI
-  getRawHref: ->
-    if @plugins.PDF
-      @plugins.PDF.uri()
-    else
-      @plugins.Document.uri()
-
-  # Utility function to get a de-hashed form of the document URI
-  getHref: -> @_removeHash @getRawHref()
-
-  # Utility function to filter metadata and de-hash the URIs
-  getMetadata: =>
-    metadata = @plugins.Document?.metadata
-    metadata.link?.forEach (link) => link.href = @_removeHash link.href
-    metadata
+    return metadataPromise.then (metadata) =>
+      return uriPromise.then (href) =>
+        uri = new URL(href)
+        uri.hash = ''
+        uri = uri.toString()
+        return {uri, metadata}
 
   _connectAnnotationUISync: (crossframe) ->
     crossframe.onConnect(=> this.publish('panelReady'))
@@ -126,18 +108,10 @@ module.exports = class Guest extends Annotator
           $(info.highlights).scrollintoview()
           return
     crossframe.on 'getDocumentInfo', (trans) =>
-      (@plugins.PDF?.getMetaData() ? Promise.reject())
-        .then (md) =>
-           trans.complete
-             uri: @getHref()
-             metadata: md
-        .catch (problem) =>
-           trans.complete
-             uri: @getHref()
-             metadata: @getMetadata()
-        .catch (e) ->
-
       trans.delayReturn(true)
+      this.getDocumentInfo()
+      .then((info) -> trans.complete(info))
+      .catch((reason) -> trans.error(reason))
     crossframe.on 'setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
 
@@ -171,18 +145,6 @@ module.exports = class Guest extends Annotator
     this.removeEvents()
 
   setupAnnotation: (annotation) ->
-    unless annotation.target?
-      if @selectedRanges?
-        annotation.target = (@_getTargetFromRange(r) for r in @selectedRanges)
-        @selectedRanges = null
-      else
-        annotation.target = [this.getHref()]
-
-    # Create a TextHighlight for a range.
-    highlightRange = (range) =>
-      normedRange = Annotator.Range.sniff(range).normalize(@element[0])
-      return highlight.highlightRange(normedRange)
-
     # Factories to close over the loop variable, below.
     succeed = (target) ->
       (highlights) -> {annotation, target, highlights}
@@ -204,29 +166,42 @@ module.exports = class Guest extends Annotator
       if results.length and not anchored
         annotation.$orphan = true
 
+      # Sync the results
       this.plugins.CrossFrame.sync([annotation])
 
-    # Anchor all the targets, highlighting the successes.
-    promises = for target in annotation.target ? [] when target.selector
-      this.anchorTarget(target)
-      .then(highlightRange)
-      .then(succeed(target), fail(target))
+    # Create a TextHighlight for a range.
+    highlightRange = (range) =>
+      normedRange = Annotator.Range.sniff(range).normalize(@element[0])
+      return highlight.highlightRange(normedRange)
 
-    # Collect the results.
-    Promise.all(promises).then(finish)
+    # Try to anchor all the targets
+    anchorTargets = (targets = []) =>
+      anchorPromises = for target in targets when target.selector
+        try
+          this.anchorTarget(target)
+          .then(highlightRange)
+          .then(succeed(target), fail(target))
+        catch error
+          Promise.reject(error).catch(fail(target))
+      return Promise.all(anchorPromises).then(finish)
+
+    # Start anchoring in the background
+    anchorTargets(annotation.target)
 
     annotation
 
-  createAnnotation: ->
-    annotation = super
-    this.plugins.CrossFrame.sync([annotation])
-    annotation
+  createAnnotation: (annotation = {}) ->
+    ranges = @selectedRanges
+    @selectedRanges = null
+    return this.getDocumentInfo().then (info) =>
+      annotation.uri = info.uri
+      this.createTargets(ranges).then (targets) =>
+        annotation.target = targets
+        this.publish('beforeAnnotationCreated', [annotation])
+        return this.setupAnnotation(annotation)
 
   createHighlight: ->
-    annotation = $highlight: true
-    this.publish 'beforeAnnotationCreated', [annotation]
-    this.plugins.CrossFrame.sync([annotation])
-    annotation
+    return this.createAnnotation({$highlight: true})
 
   deleteAnnotation: (annotation) ->
     for info in @anchored when info.annotation is annotation
@@ -279,35 +254,39 @@ module.exports = class Guest extends Annotator
     if fragment?
       promise = promise.catch =>
         a = anchor.FragmentAnchor.fromSelector(fragment)
-        r = a.toRange(root)
-        if quote?.exact? and r.toString() != quote.exact
-          throw new Error('quote mismatch')
-        else
-          return r
+        Promise.resolve(a).then (a) ->
+          Promise.resolve(a.toRange(root)).then (r) ->
+            if quote?.exact? and r.toString() != quote.exact
+              throw new Error('quote mismatch')
+            else
+              return r
 
     if range?
       promise = promise.catch =>
         a = anchor.RangeAnchor.fromSelector(range, root)
-        r = a.toRange(root)
-        if quote?.exact? and r.toString() != quote.exact
-          throw new Error('quote mismatch')
-        else
-          return r
+        Promise.resolve(a).then (a) ->
+          Promise.resolve(a.toRange(root)).then (r) ->
+            if quote?.exact? and r.toString() != quote.exact
+              throw new Error('quote mismatch')
+            else
+              return r
 
     if position?
       promise = promise.catch =>
         a = anchor.TextPositionAnchor.fromSelector(position)
-        r = a.toRange(root)
-        if quote?.exact? and r.toString() != quote.exact
-          throw new Error('quote mismatch')
-        else
-          return r
+        Promise.resolve(a).then (a) ->
+          Promise.resolve(a.toRange(root)).then (r) ->
+            if quote?.exact? and r.toString() != quote.exact
+              throw new Error('quote mismatch')
+            else
+              return r
 
     if quote?
       promise = promise.catch =>
         # The quote is implicitly checked during range conversion.
         a = anchor.TextQuoteAnchor.fromSelector(quote, position)
-        r = a.toRange(root)
+        Promise.resolve(a).then (a) ->
+          Promise.resolve(a.toRange(root))
 
     return promise
 
@@ -333,18 +312,34 @@ module.exports = class Guest extends Annotator
 
   onAnchorMousedown: ->
 
-  # Create a target from a raw selection using all the anchor types.
-  _getTargetFromRange: (range) ->
-    selector = for type in ANCHOR_TYPES
-      try
-        type.fromRange(range).toSelector(@element[0])
-      catch
-        continue
+  createTargets: (ranges) ->
+    info = this.getDocumentInfo()
+    if ranges?
+      targets = ranges.map (range) =>
+        this.createSelectors(range).then (selectors) =>
+          info.then (info) =>
+            return {
+              source: info.uri
+              selector: selectors
+            }
+    else
+      targets = [info.then(({uri}) -> {source: uri})]
 
-    return {
-      source: this.getHref()
-      selector: selector
-    }
+    return Promise.all(targets)
+
+  createSelectors: (range) ->
+    root = @element[0]
+    toSelector = (anchor) -> anchor.toSelector(root)
+    softFail = (reason) -> null
+    notNull = (selectors) -> (s for s in selectors when s?)
+    selectors = ANCHOR_TYPES.map (type) =>
+      try
+        Promise.resolve(type.fromRange(range)).then (a) ->
+          Promise.resolve(a.toSelector(root))
+        , softFail
+      catch
+        Promise.resolve()
+    return Promise.all(selectors).then(notNull)
 
   onSuccessfulSelection: (event, immediate) ->
     unless event?
@@ -442,8 +437,8 @@ module.exports = class Guest extends Annotator
     switch event.target.dataset.action
       when 'highlight'
         this.setVisibleHighlights true
-        this.setupAnnotation(this.createHighlight())
+        this.createHighlight()
       when 'comment'
-        this.setupAnnotation(this.createAnnotation())
+        this.createAnnotation()
         this.triggerShowFrame()
     Annotator.Util.getGlobal().getSelection().removeAllRanges()
