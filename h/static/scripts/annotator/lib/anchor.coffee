@@ -128,15 +128,13 @@ class TextPositionAnchor extends Anchor
     filter = options.filter or null
 
     range = new xpathRange.BrowserRange(range).normalize(root)
-    walker = new textWalker.TextWalker(root, filter)
+    iter = seek.createTextIterator(root, filter)
 
-    walker.currentNode = range.start
-    start = walker.tell()
-
-    walker.currentNode = range.end
-    end = walker.tell() + range.end.textContent.length
-
-    return new TextPositionAnchor(start, end)
+    iter.seek(range.start).then (count) ->
+      start = count
+      iter.seek(range.end).then (count) ->
+        end = start + count + range.end.textContent.length
+        new TextPositionAnchor(start, end)
 
   @fromSelector: (selector) ->
     return new TextPositionAnchor(selector.start, selector.end)
@@ -145,16 +143,18 @@ class TextPositionAnchor extends Anchor
     root = options.root or document.body
     filter = options.filter or null
 
-    walker = new textWalker.TextWalker(root, filter)
     range = document.createRange()
+    iter = seek.createTextIterator(root, filter)
 
-    offset = walker.seek(@start, textWalker.SEEK_SET)
-    range.setStart(walker.currentNode, @start - offset)
-
-    offset = walker.seek(@end - offset, textWalker.SEEK_CUR)
-    range.setEnd(walker.currentNode, @end - offset)
-
-    return range
+    {start, end} = this
+    iter.seek(start).then (count) ->
+      remainder = start - count
+      length = remainder + (end - start)
+      range.setStart(iter.referenceNode, remainder)
+      iter.seek(length).then (count) ->
+        remainder = length - count
+        range.setEnd(iter.referenceNode, remainder)
+        return range
 
   toSelector: ->
     return {
@@ -185,22 +185,18 @@ class TextQuoteAnchor extends Anchor
     filter = options.filter or null
 
     range = new xpathRange.BrowserRange(range).normalize(root)
-    walker = new textWalker.TextWalker(root, filter)
+    iter = seek.createTextIterator(root, filter)
 
-    walker.currentNode = range.start
-    start = walker.tell()
-
-    walker.currentNode = range.end
-    end = walker.tell() + range.end.textContent.length
-
-    prefixStart = Math.max(start - 32, 0)
-
-    corpus = root.textContent
-    exact = corpus.substr(start, end - start)
-    prefix = corpus.substr(prefixStart, start - prefixStart)
-    suffix = corpus.substr(end, 32)
-
-    return new TextQuoteAnchor(exact, prefix, suffix, start, end)
+    iter.seek(range.start).then (count) ->
+      start = count
+      iter.seek(range.end).then (count) ->
+        end = start + count + range.end.textContent.length
+        prefixStart = Math.max(start - 32, 0)
+        corpus = root.textContent
+        exact = corpus.substr(start, end - start)
+        prefix = corpus.substr(prefixStart, start - prefixStart)
+        suffix = corpus.substr(end, 32)
+        return new TextQuoteAnchor(exact, prefix, suffix, start, end)
 
   @fromSelector: (selector, options = {}) ->
     {start, end} = options.position ? {}
