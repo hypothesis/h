@@ -228,7 +228,9 @@ module.exports = class Guest extends Annotator
   # :rtype: Promise
   ####
   anchorTarget: (target) ->
-    root = @element[0]
+    options =
+      ignoreSelector: '[class^="annotator-"]'
+      root: @element[0]
 
     # Selectors
     fragment = null
@@ -253,9 +255,9 @@ module.exports = class Guest extends Annotator
 
     if fragment?
       promise = promise.catch =>
-        a = anchor.FragmentAnchor.fromSelector(fragment)
+        a = anchor.FragmentAnchor.fromSelector(fragment, options)
         Promise.resolve(a).then (a) ->
-          Promise.resolve(a.toRange(root)).then (r) ->
+          Promise.resolve(a.toRange(options)).then (r) ->
             if quote?.exact? and r.toString() != quote.exact
               throw new Error('quote mismatch')
             else
@@ -263,9 +265,9 @@ module.exports = class Guest extends Annotator
 
     if range?
       promise = promise.catch =>
-        a = anchor.RangeAnchor.fromSelector(range, root)
+        a = anchor.RangeAnchor.fromSelector(range, options)
         Promise.resolve(a).then (a) ->
-          Promise.resolve(a.toRange(root)).then (r) ->
+          Promise.resolve(a.toRange(options)).then (r) ->
             if quote?.exact? and r.toString() != quote.exact
               throw new Error('quote mismatch')
             else
@@ -273,9 +275,9 @@ module.exports = class Guest extends Annotator
 
     if position?
       promise = promise.catch =>
-        a = anchor.TextPositionAnchor.fromSelector(position)
+        a = anchor.TextPositionAnchor.fromSelector(position, options)
         Promise.resolve(a).then (a) ->
-          Promise.resolve(a.toRange(root)).then (r) ->
+          Promise.resolve(a.toRange(options)).then (r) ->
             if quote?.exact? and r.toString() != quote.exact
               throw new Error('quote mismatch')
             else
@@ -284,9 +286,9 @@ module.exports = class Guest extends Annotator
     if quote?
       promise = promise.catch =>
         # The quote is implicitly checked during range conversion.
-        a = anchor.TextQuoteAnchor.fromSelector(quote, position)
+        a = anchor.TextQuoteAnchor.fromSelector(quote, options)
         Promise.resolve(a).then (a) ->
-          Promise.resolve(a.toRange(root))
+          Promise.resolve(a.toRange(options))
 
     return promise
 
@@ -328,17 +330,21 @@ module.exports = class Guest extends Annotator
     return Promise.all(targets)
 
   createSelectors: (range) ->
-    root = @element[0]
-    toSelector = (anchor) -> anchor.toSelector(root)
-    softFail = (reason) -> null
-    notNull = (selectors) -> (s for s in selectors when s?)
+    options =
+      ignoreSelector: '[class^="annotator-"]'
+      root: @element[0]
+
+    notNull = (selectors) ->
+      (s for s in selectors when s?)
+
     selectors = ANCHOR_TYPES.map (type) =>
       try
-        Promise.resolve(type.fromRange(range)).then (a) ->
-          Promise.resolve(a.toSelector(root))
-        , softFail
+        Promise.resolve(type.fromRange(range, options)).then (a) ->
+          Promise.resolve(a.toSelector(options))
+        , -> null
       catch
         Promise.resolve()
+
     return Promise.all(selectors).then(notNull)
 
   onSuccessfulSelection: (event, immediate) ->

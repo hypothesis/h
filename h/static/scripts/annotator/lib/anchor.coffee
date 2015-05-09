@@ -7,7 +7,7 @@ Annotator = require('annotator')
 $ = Annotator.$
 xpathRange = Annotator.Range
 
-textWalker = require('./text-walker')
+seek = require('dom-seek')
 
 
 # Helper functions for throwing common errors
@@ -82,7 +82,8 @@ class RangeAnchor extends Anchor
     return new RangeAnchor(range)
 
   # Create and anchor using the saved Range selector.
-  @fromSelector: (selector, root=document.body) ->
+  @fromSelector: (selector, options = {}) ->
+    root = options.root or document.body
     data = {
       start: selector.startContainer
       startOffset: selector.startOffset
@@ -95,7 +96,9 @@ class RangeAnchor extends Anchor
   toRange: ->
     return @range
 
-  toSelector: (root=document.body, ignoreSelector='[class^="annotator-"]') ->
+  toSelector: (options = {}) ->
+    root = options.root or document.body
+    ignoreSelector = options.ignoreSelector
     range = new xpathRange.BrowserRange(@range).serialize(root, ignoreSelector)
     return {
       type: 'RangeSelector'
@@ -120,7 +123,10 @@ class TextPositionAnchor extends Anchor
     unless @start? then missingParameter('start')
     unless @end? then missingParameter('end')
 
-  @fromRange: (range, root=document.body, filter=null) ->
+  @fromRange: (range, options = {}) ->
+    root = options.root or document.body
+    filter = options.filter or null
+
     range = new xpathRange.BrowserRange(range).normalize(root)
     walker = new textWalker.TextWalker(root, filter)
 
@@ -135,7 +141,10 @@ class TextPositionAnchor extends Anchor
   @fromSelector: (selector) ->
     return new TextPositionAnchor(selector.start, selector.end)
 
-  toRange: (root=document.body, filter=null) ->
+  toRange: (options = {}) ->
+    root = options.root or document.body
+    filter = options.filter or null
+
     walker = new textWalker.TextWalker(root, filter)
     range = document.createRange()
 
@@ -171,7 +180,10 @@ class TextQuoteAnchor extends Anchor
   constructor: (@quote, @prefix='', @suffix='', @start, @end) ->
     unless @quote? then missingParameter('quote')
 
-  @fromRange: (range, root=document.body, filter=null) ->
+  @fromRange: (range, options = {}) ->
+    root = options.root or document.body
+    filter = options.filter or null
+
     range = new xpathRange.BrowserRange(range).normalize(root)
     walker = new textWalker.TextWalker(root, filter)
 
@@ -190,22 +202,22 @@ class TextQuoteAnchor extends Anchor
 
     return new TextQuoteAnchor(exact, prefix, suffix, start, end)
 
-  @fromSelector: (selector, position) ->
+  @fromSelector: (selector, options = {}) ->
+    {start, end} = options.position ? {}
     {exact, prefix, suffix} = selector
-    {start, end} = position ? {}
     return new TextQuoteAnchor(exact, prefix, suffix, start, end)
 
-  toRange: (root=document.body) ->
+  toRange: (options = {}) ->
+    root = options.root or document.body
     corpus = root.textContent
     matcher = new DomTextMatcher(-> corpus)
 
-    options =
-      matchDistance: corpus.length * 2
-      contextMatchDistance: corpus.length * 2
-      contextMatchThreshold: 0.5
-      patternMatchThreshold: 0.5
-      flexContext: true
-      withFuzzyComparison: true
+    options.matchDistance ?= corpus.length * 2
+    options.contextMatchDistance ?= corpus.length * 2
+    options.contextMatchThreshold ?= 0.5
+    options.patternMatchThreshold ?= 0.5
+    options.flexContext ?= true
+    options.withFuzzyComparison ?= true
 
     if @prefix.length and @suffix.length
       result = matcher.searchFuzzyWithContext(
