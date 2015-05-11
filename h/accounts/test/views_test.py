@@ -33,6 +33,8 @@ def configure(config):
     config.registry.registerUtility(SubmitForm, IProfileForm)
     config.registry.registerUtility(MagicMock(), IRegisterSchema)
     config.registry.registerUtility(MagicMock(), IRegisterForm)
+    config.registry.feature = MagicMock()
+    config.registry.feature.return_value = None
 
 
 def _get_fake_request(username, password, with_subscriptions=False, active=True):
@@ -53,6 +55,19 @@ def _get_fake_request(username, password, with_subscriptions=False, active=True)
     return fake_request
 
 
+@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+def test_profile_returns_email(config, user_model):
+    """profile() should include the user's email in the dict it returns."""
+    request = _get_fake_request("john", "doe")
+    user_model.get_by_id.return_value = FakeUser(
+        email="test_user@test_email.com")
+    configure(config)
+
+    profile = ProfileController(request).profile()
+
+    assert profile["model"]["email"] == "test_user@test_email.com"
+
+
 @pytest.mark.usefixtures('activation_model',
                          'dummy_db_session')
 def test_profile_invalid_password(config, user_model):
@@ -69,6 +84,37 @@ def test_profile_invalid_password(config, user_model):
     assert result['code'] == 401
     assert any('pwd' in err for err in result['errors'])
 
+
+@pytest.mark.usefixtures('activation_model',
+                         'dummy_db_session')
+def test_edit_profile_with_non_matching_emails(config, user_model):
+    """edit_profile() should return an error if the emails don't match."""
+    request = _get_fake_request('john', 'doe')
+    request.params["email"] = "example@example.com"
+    request.params["emailAgain"] = "different@example.com"
+    configure(config)
+
+    profile = ProfileController(request)
+    result = profile.edit_profile()
+
+    assert "errors" in result
+    assert result["errors"][0][1] == "The emails must match."
+
+
+@pytest.mark.usefixtures('activation_model',
+                         'dummy_db_session')
+def test_edit_profile_successfully(config, user_model):
+    """edit_profile() returns a dict with key "form" when successful."""
+    request = _get_fake_request('john', 'doe')
+    request.params["email"] = "example@example.com"
+    request.params["emailAgain"] = "example@example.com"
+    configure(config)
+
+    profile = ProfileController(request)
+    result = profile.edit_profile()
+
+    assert "form" in result
+    assert "errors" not in result
 
 @pytest.mark.usefixtures('activation_model',
                          'user_model')
