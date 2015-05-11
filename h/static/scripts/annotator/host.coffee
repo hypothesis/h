@@ -125,8 +125,11 @@ module.exports = class Host extends Guest
         @frame.removeClass 'annotator-no-transition'
         # Re-enable iframe events
         @frame.css('pointer-events', '')
-        # Consider the frame open if it open to at least a minimum width
-        if @gestureState.acc <= -MIN_RESIZE then this.showFrame()
+        # Snap open or closed
+        if @gestureState.acc <= -MIN_RESIZE
+          this.showFrame()
+        else
+          this.hideFrame()
         # Reset the gesture state
         this._initializeGestureState()
 
