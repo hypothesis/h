@@ -1,3 +1,5 @@
+raf = require('raf')
+
 Annotator = require('annotator')
 
 $ = Annotator.$
@@ -71,12 +73,10 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
   # Update sometime soon
   _scheduleUpdate: =>
-    return if @_updatePending
-    @_updatePending = true
-    setTimeout =>
+    return if @_updatePending?
+    @_updatePending = raf =>
       delete @_updatePending
       @_update()
-    , 60 / 1000
 
   _collate: (a, b) ->
     for i in [0..a.length-1]
