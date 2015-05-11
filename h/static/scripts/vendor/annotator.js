@@ -1,13 +1,13 @@
 
 /*
-** Annotator v1.2.9-dev-57f15b8
+** Annotator v1.2.10-dev-6536160
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2015, the Annotator project contributors.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2015-01-30 15:29:04Z
+** Built at: 2015-05-11 18:53:38Z
  */
 
 
@@ -1670,16 +1670,16 @@
             left: event.pageX - mousedown.left
           };
           if (mousedown.element === resize[0]) {
-            height = textarea.outerHeight();
-            width = textarea.outerWidth();
+            height = textarea.height();
+            width = textarea.width();
             directionX = editor.hasClass(classes.invert.x) ? -1 : 1;
             directionY = editor.hasClass(classes.invert.y) ? 1 : -1;
             textarea.height(height + (diff.top * directionY));
             textarea.width(width + (diff.left * directionX));
-            if (textarea.outerHeight() !== height) {
+            if (textarea.height() !== height) {
               mousedown.top = event.pageY;
             }
-            if (textarea.outerWidth() !== width) {
+            if (textarea.width() !== width) {
               mousedown.left = event.pageX;
             }
           } else if (mousedown.element === controls[0]) {

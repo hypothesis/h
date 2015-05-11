@@ -1,13 +1,13 @@
 
 /*
-** Annotator v1.2.9-dev-57f15b8
+** Annotator v1.2.10-dev-6536160
 ** https://github.com/okfn/annotator/
 **
 ** Copyright 2015, the Annotator project contributors.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2015-01-30 15:29:04Z
+** Built at: 2015-05-11 18:53:38Z
  */
 
 
