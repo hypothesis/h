@@ -176,17 +176,14 @@ module.exports = class Guest extends Annotator
 
     # Try to anchor all the targets
     anchorTargets = (targets = []) =>
-      anchorPromises = for target in targets when target.selector
-        try
-          this.anchorTarget(target)
-          .then(highlightRange)
-          .then(succeed(target), fail(target))
-        catch error
-          Promise.reject(error).catch(fail(target))
-      return Promise.all(anchorPromises).then(finish)
+      for target in targets when target.selector
+        Promise.resolve()
+        .then(=> this.anchorTarget(target))
+        .then(highlightRange)
+        .then(succeed(target), fail(target))
 
     # Start anchoring in the background
-    anchorTargets(annotation.target)
+    Promise.all(anchorTargets(annotation.target)).then(finish)
 
     annotation
 
@@ -337,13 +334,11 @@ module.exports = class Guest extends Annotator
     notNull = (selectors) ->
       (s for s in selectors when s?)
 
-    selectors = ANCHOR_TYPES.map (type) =>
-      try
-        Promise.resolve(type.fromRange(range, options)).then (a) ->
+    selectors = for type in ANCHOR_TYPES
+      promise = Promise.resolve(type).then (t) ->
+        Promise.resolve(t.fromRange(range, options)).then (a) ->
           Promise.resolve(a.toSelector(options))
-        , -> null
-      catch
-        Promise.resolve()
+      promise.catch(-> null)
 
     return Promise.all(selectors).then(notNull)
 
