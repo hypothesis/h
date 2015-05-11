@@ -13,20 +13,12 @@ module.exports = class Host extends Guest
   gestureState: null
 
   constructor: (element, options) ->
-    # Create the iframe
-    if document.baseURI and window.PDFView?
-      # XXX: Hack around PDF.js resource: origin. Bug in jschannel?
-      hostOrigin = '*'
-    else
-      hostOrigin = window.location.origin
-      # XXX: Hack for missing window.location.origin in FF
-      hostOrigin ?= window.location.protocol + "//" + window.location.host
-
     src = options.app
     if options.firstRun
       # Allow options.app to contain query string params.
       src = src + (if '?' in src then '&' else '?') + 'firstrun'
 
+    # Create the iframe
     app = $('<iframe></iframe>')
     .attr('name', 'hyp_sidebar_frame')
     .attr('seamless', '')
