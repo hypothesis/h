@@ -189,6 +189,11 @@ class EditProfileSchema(CSRFSchema):
         default='',
         missing=colander.null
     )
+    emailAgain = colander.SchemaNode(
+        colander.String(),
+        default='',
+        missing=colander.null,
+    )
     password = colander.SchemaNode(
         colander.String(),
         title=_('Password'),

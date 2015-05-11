@@ -231,6 +231,13 @@ class AsyncRegisterController(RegisterController):
     __view_mapper__ = AsyncFormViewMapper
 
 
+def _emails_must_match_validator(form, value):
+    if value.get("email") != value.get("emailAgain"):
+        exc = colander.Invalid(form, "The emails must match")
+        exc["emailAgain"] = "The emails must match."
+        raise exc
+
+
 @view_auth_defaults
 @view_config(attr='edit_profile', route_name='edit_profile')
 @view_config(attr='disable_user', route_name='disable_user')
@@ -238,7 +245,8 @@ class AsyncRegisterController(RegisterController):
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         request = self.request
-        schema = schemas.EditProfileSchema().bind(request=request)
+        schema = schemas.EditProfileSchema(
+            validator=_emails_must_match_validator).bind(request=request)
         form = deform.Form(schema)
 
         try:

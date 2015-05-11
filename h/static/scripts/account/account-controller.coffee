@@ -89,6 +89,7 @@ class AccountController
         username: username
         pwd: form.pwd.$modelValue
         email: form.email.$modelValue
+        emailAgain: form.emailAgain.$modelValue
 
       successHandler = angular.bind(null, onSuccess, form)
       errorHandler   = angular.bind(null, onError, form)

@@ -17,6 +17,16 @@
     </div>
 
     <div class="form-field">
+      <label class="form-label" for="field-emailAgain">Enter Your Email Address Again:</label>
+      <input id="field-emailAgain" class="form-input" type="email" name="emailAgain" placeholder="{{email}}" required ng-model="changeEmail.emailAgain" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="changeEmailForm.emailAgain.$error.required">Please enter your new email address twice.</li>
+        <li class="form-error" ng-show="changeEmailForm.emailAgain.$error.email">Please enter a valid email address.</li>
+        <li class="form-error" ng-show="changeEmailForm.emailAgain.$error.response">{{changeEmailForm.emailAgain.responseErrorMessage}}</li>
+      </ul>
+    </div>
+
+    <div class="form-field">
       <label class="form-label" for="field-pwd">Password:</label>
       <input id="field-pwd" class="form-input" type="password" name="pwd" required ng-model="changeEmail.pwd" />
 
