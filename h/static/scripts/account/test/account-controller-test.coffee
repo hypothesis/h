@@ -233,3 +233,99 @@ describe 'h:AccountController', ->
 
       assert.calledWith(fakeFlash.error,
         'Sorry, we were unable to perform your request')
+
+describe "h:AccountController", ->
+
+  before(->
+    try
+      # If this runs without error then the h module has already been defined
+      # by an earlier top-level describe() in this file.
+      angular.module("h")
+    catch error
+      # The h module hasn't been defined yet, so we need to define it
+      # (this happens when it.only() is used in this describe()).
+      angular.module("h", [])
+    require("../account-controller")
+  )
+
+  beforeEach module('h')
+
+  # Return the $controller service from Angular.
+  getControllerService = ->
+    $controller = null
+    inject((_$controller_) ->
+      $controller = _$controller_
+    )
+    return $controller
+
+  # Return the $rootScope service from Angular.
+  getRootScope = ->
+    $rootScope = null
+    inject((_$rootScope_) ->
+      $rootScope = _$rootScope_
+    )
+    return $rootScope
+
+  ###
+  Return an AccountController instance and stub services.
+
+  Returns an object containing:
+
+  * an AccountController instance with all the services it depends on
+    stubbed, and
+  * each of the stubbed services
+
+  The returned object looks like this:
+
+      {"ctrl": the AccountController instance
+       "$scope": the scope attached to ctrl
+       "$filter": the stub filter injected into ctrl
+       "auth": the stub auth service injected into ctrl
+       ... (more stubbed services here)
+      }
+
+   Use CoffeeScript's destructuring assignment to pull out just the things
+   you need from the returned object. For example:
+
+       {ctrl, $scope} = controller()
+
+   By default this does the minimum amount of stubbing necessary to create an
+   AccountController without it crashing. For each of the services that gets
+   stubbed the caller can optionally pass in their own object to be used
+   instead of the minimal stub. For example:
+
+       session = {profile: -> {$promise: ...}}
+       {ctrl, $scope} = controller(session: session)
+  ###
+  controller = ({$scope, $filter, auth, flash, formRespond, identity,
+                session}) ->
+    locals = {
+      $scope: $scope or getRootScope().$new()
+      $filter: $filter or -> -> {}
+      auth: auth or {}
+      flash: flash or {}
+      formRespond: formRespond or {}
+      identity: identity or {}
+      session: session or {profile: -> {$promise: Promise.resolve()}}
+    }
+    locals["ctrl"] = getControllerService()("AccountController", locals)
+    return locals
+
+  ###
+  The controller sets $scope.email to the user's current email address on
+  controller initialization. The templates use this for the placeholder
+  value of the email input fields.
+  ###
+  it "adds the current email address to the scope when initialized", ->
+    # The controller actually calls session.profile() on init which returns
+    # a promise, and when that promise resolves it uses the value to set
+    # $scope.email. So we need to stub that promise here.
+    profilePromise = Promise.resolve({
+      email: "test_user@test_email.com"
+    })
+    session = {profile: -> {$promise: profilePromise}}
+    {ctrl, $scope} = controller(session: session)
+
+    profilePromise.then(->
+      assert $scope.email == "test_user@test_email.com"
+    )
