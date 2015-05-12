@@ -2,15 +2,8 @@ Promise = global.Promise or require('es6-promise').Promise
 Annotator = require('annotator')
 $ = Annotator.$
 
-anchor = require('./lib/anchor')
+anchoring = require('./anchoring/html')
 highlight = require('./lib/highlight')
-
-ANCHOR_TYPES = [
-  anchor.FragmentAnchor
-  anchor.RangeAnchor
-  anchor.TextPositionAnchor
-  anchor.TextQuoteAnchor
-]
 
 
 module.exports = class Guest extends Annotator
@@ -145,57 +138,61 @@ module.exports = class Guest extends Annotator
     this.removeEvents()
 
   setupAnnotation: (annotation) ->
-    # Factories to close over the loop variable, below.
-    succeed = (target) ->
-      (highlights) -> {annotation, target, highlights}
+    {anchored, unanchored, plugins} = this
+    root = @element[0]
+    ignoreSelector = '[class^="annotator-"]'
 
-    fail = (target) ->
-      (reason) -> {annotation, target}
+    maybeAnchor = (target) ->
+      anchoring.anchor(target.selector, {root, ignoreSelector})
+      .then(highlightRange)
+      .then((highlights) -> {annotation, target, highlights})
+      .catch((reason) -> {annotation, target, reason})
 
-    # Function to collect anchoring promises
-    finish = (results) =>
-      anchored = false
+    highlightRange = (range) ->
+      normedRange = Annotator.Range.sniff(range).normalize(root)
+      return highlight.highlightRange(normedRange)
+
+    storeAndSync = (results) ->
+      highlighted = false
 
       for result in results
         if result.highlights?
-          anchored = true
-          @anchored.push(result)
+          highlighted = true
+          anchored.push(result)
         else
-          @unanchored.push(result)
+          unanchored.push(result)
 
-      if results.length and not anchored
-        annotation.$orphan = true
+      annotation.$orphan = (results.length and not highlighted)
+      plugins.CrossFrame.sync([annotation])
 
-      # Sync the results
-      this.plugins.CrossFrame.sync([annotation])
-
-    # Create a TextHighlight for a range.
-    highlightRange = (range) =>
-      normedRange = Annotator.Range.sniff(range).normalize(@element[0])
-      return highlight.highlightRange(normedRange)
-
-    # Try to anchor all the targets
-    anchorTargets = (targets = []) =>
-      for target in targets when target.selector
-        Promise.resolve()
-        .then(=> this.anchorTarget(target))
-        .then(highlightRange)
-        .then(succeed(target), fail(target))
-
-    # Start anchoring in the background
-    Promise.all(anchorTargets(annotation.target)).then(finish)
+    targets = (maybeAnchor(target) for target in annotation.target ? [])
+    Promise.all(targets).then(storeAndSync)
 
     annotation
 
   createAnnotation: (annotation = {}) ->
+    root = @element[0]
+    ignoreSelector = '[class^="annotator-"]'
+
+    options = {root, ignoreSelector}
     ranges = @selectedRanges
     @selectedRanges = null
-    return this.getDocumentInfo().then (info) =>
-      annotation.uri = info.uri
-      this.createTargets(ranges).then (targets) =>
-        annotation.target = targets
-        this.publish('beforeAnnotationCreated', [annotation])
-        return this.setupAnnotation(annotation)
+
+    info = this.getDocumentInfo()
+
+    Promise.all(ranges.map((r) -> anchoring.describe(r, options)))
+    .then((targets) ->
+      info.then((info) ->
+        if info.metadata?
+          annotation.document = info.metadata
+        annotation.uri = source = info.uri
+        annotation.target = ({source, selector} for selector in targets)
+      )
+    )
+    .then(=> this.publish('beforeAnnotationCreated', [annotation]))
+    .then(=> this.setupAnnotation(annotation))
+
+    annotation
 
   createHighlight: ->
     return this.createAnnotation({$highlight: true})
@@ -211,83 +208,6 @@ module.exports = class Guest extends Annotator
 
     this.publish('annotationDeleted', [annotation])
     annotation
-
-  ###*
-  # Anchor a target.
-  #
-  # This function converts an annotation target into a document range using
-  # its selectors. It encapsulates the core anchoring algorithm that uses the
-  # selectors alone or in combination to establish an anchor within the document.
-  #
-  # :root Node target: The root Node of the anchoring context.
-  # :param Object target: The target to anchor.
-  # :return: A Promise that resolves to a Range on success.
-  # :rtype: Promise
-  ####
-  anchorTarget: (target) ->
-    options =
-      ignoreSelector: '[class^="annotator-"]'
-      root: @element[0]
-
-    # Selectors
-    fragment = null
-    position = null
-    quote = null
-    range = null
-
-    # Collect all the selectors
-    for selector in target.selector ? []
-      switch selector.type
-        when 'FragmentSelector'
-          fragment = selector
-        when 'TextPositionSelector'
-          position = selector
-        when 'TextQuoteSelector'
-          quote = selector
-        when 'RangeSelector'
-          range = selector
-
-    # Until we successfully anchor, we fail.
-    promise = Promise.reject('unable to anchor')
-
-    if fragment?
-      promise = promise.catch =>
-        a = anchor.FragmentAnchor.fromSelector(fragment, options)
-        Promise.resolve(a).then (a) ->
-          Promise.resolve(a.toRange(options)).then (r) ->
-            if quote?.exact? and r.toString() != quote.exact
-              throw new Error('quote mismatch')
-            else
-              return r
-
-    if range?
-      promise = promise.catch =>
-        a = anchor.RangeAnchor.fromSelector(range, options)
-        Promise.resolve(a).then (a) ->
-          Promise.resolve(a.toRange(options)).then (r) ->
-            if quote?.exact? and r.toString() != quote.exact
-              throw new Error('quote mismatch')
-            else
-              return r
-
-    if position?
-      promise = promise.catch =>
-        a = anchor.TextPositionAnchor.fromSelector(position, options)
-        Promise.resolve(a).then (a) ->
-          Promise.resolve(a.toRange(options)).then (r) ->
-            if quote?.exact? and r.toString() != quote.exact
-              throw new Error('quote mismatch')
-            else
-              return r
-
-    if quote?
-      promise = promise.catch =>
-        # The quote is implicitly checked during range conversion.
-        a = anchor.TextQuoteAnchor.fromSelector(quote, options)
-        Promise.resolve(a).then (a) ->
-          Promise.resolve(a.toRange(options))
-
-    return promise
 
   showAnnotations: (annotations) =>
     @crossframe?.notify
@@ -310,37 +230,6 @@ module.exports = class Guest extends Annotator
       params: (a.$$tag for a in annotations)
 
   onAnchorMousedown: ->
-
-  createTargets: (ranges) ->
-    info = this.getDocumentInfo()
-    if ranges?
-      targets = ranges.map (range) =>
-        this.createSelectors(range).then (selectors) =>
-          info.then (info) =>
-            return {
-              source: info.uri
-              selector: selectors
-            }
-    else
-      targets = [info.then(({uri}) -> {source: uri})]
-
-    return Promise.all(targets)
-
-  createSelectors: (range) ->
-    options =
-      ignoreSelector: '[class^="annotator-"]'
-      root: @element[0]
-
-    notNull = (selectors) ->
-      (s for s in selectors when s?)
-
-    selectors = for type in ANCHOR_TYPES
-      promise = Promise.resolve(type).then (t) ->
-        Promise.resolve(t.fromRange(range, options)).then (a) ->
-          Promise.resolve(a.toSelector(options))
-      promise.catch(-> null)
-
-    return Promise.all(selectors).then(notNull)
 
   onSuccessfulSelection: (event, immediate) ->
     unless event?
