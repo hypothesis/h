@@ -103,8 +103,11 @@ AnnotationController = [
     # @description Deletes the annotation.
     ###
     this.delete = ->
-      if confirm "Are you sure you want to delete this annotation?"
-        annotationMapper.deleteAnnotation model
+      $timeout ->  # Don't use confirm inside the digest cycle
+        if confirm "Are you sure you want to delete this annotation?"
+          $scope.$apply ->
+            annotationMapper.deleteAnnotation model
+      , true
 
     ###*
     # @ngdoc method
