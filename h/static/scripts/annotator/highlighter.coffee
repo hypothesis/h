@@ -22,9 +22,3 @@ exports.highlightRange = (normedRange, cssClass='annotator-hl') ->
 
   nodes = $(normedRange.textNodes()).filter((i) -> not white.test @nodeValue)
   r = nodes.wrap(hl).parent().show().toArray()
-  for node in nodes
-    event = document.createEvent "UIEvents"
-    event.initUIEvent "domChange", true, false, window, 0
-    event.reason = "created hilite"
-    node.dispatchEvent event
-  r
