@@ -3,7 +3,7 @@ Annotator = require('annotator')
 $ = Annotator.$
 
 anchoring = require('./anchoring/html')
-highlight = require('./lib/highlight')
+highlighter = require('./highlighter')
 
 
 module.exports = class Guest extends Annotator
@@ -150,7 +150,7 @@ module.exports = class Guest extends Annotator
 
     highlightRange = (range) ->
       normedRange = Annotator.Range.sniff(range).normalize(root)
-      return highlight.highlightRange(normedRange)
+      return highlighter.highlightRange(normedRange)
 
     storeAndSync = (results) ->
       highlighted = false
