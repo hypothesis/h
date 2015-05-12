@@ -108,6 +108,7 @@ search
       }
 
    :query limit: number of results to return
+   :query offset: index into the complete result set
    :query uri: limit results to annotations of `uri` (must be urlencoded)
    :query user: limit results to annotations created by `user`
    :query quote: limit results to annotations where quoted text contains `quote`
