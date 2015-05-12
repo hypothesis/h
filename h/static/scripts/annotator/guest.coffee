@@ -1,3 +1,4 @@
+raf = require('raf')
 Promise = global.Promise or require('es6-promise').Promise
 Annotator = require('annotator')
 $ = Annotator.$
@@ -149,8 +150,9 @@ module.exports = class Guest extends Annotator
       .catch((reason) -> {annotation, target, reason})
 
     highlightRange = (range) ->
-      normedRange = Annotator.Range.sniff(range).normalize(root)
-      return highlighter.highlightRange(normedRange)
+      return new Promise(raf).then ->
+        normedRange = Annotator.Range.sniff(range).normalize(root)
+        return highlighter.highlightRange(normedRange)
 
     storeAndSync = (results) ->
       highlighted = false
