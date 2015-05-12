@@ -1,4 +1,5 @@
 *.min.js
 /account.*js
 /app.*js
+/config.*js
 /hypothesis.*js
