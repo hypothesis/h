@@ -7,13 +7,11 @@ install:
   - gem install compass
   - pip install coveralls
   - pip install mandrill
-  - pip install prospector
   - pip install pyramid_redis_sessions
   - make
 script:
   - make test
   - make cover
-  - make lint
   - hypothesis-buildext conf/testext.ini chrome --base http://localhost
   - hypothesis-buildext conf/testext.ini firefox --base http://localhost
   - "hypothesis-buildext conf/production.ini chrome
