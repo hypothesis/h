@@ -25,6 +25,7 @@ module.exports = class Host extends Guest
     .attr('src', src)
 
     @frame = $('<div></div>')
+    .css('display', 'none')
     .addClass('annotator-frame annotator-outer annotator-collapsed')
     .appendTo(element)
 
@@ -44,6 +45,9 @@ module.exports = class Host extends Guest
       # calls. If we call set directly the other plugins will never recieve
       # these events and the UI will be out of sync.
       this.publish('setVisibleHighlights', !!options.showHighlights)
+
+      # Time to actually show the UI
+      @frame.css('display', '')
 
     if @plugins.BucketBar?
       this._setupGestures()

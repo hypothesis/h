@@ -26,6 +26,16 @@ describe 'Host', ->
 
   afterEach -> sandbox.restore()
 
+  describe 'widget visibility', ->
+    it 'starts hidden', ->
+      host = createHost()
+      assert.equal(host.frame.css('display'), 'none')
+
+    it 'becomes visible when the "panelReady" event fires', ->
+      host = createHost()
+      host.publish('panelReady')
+      assert.equal(host.frame.css('display'), '')
+
   describe 'options', ->
     it 'enables highlighting when showHighlights option is provided', (done) ->
       host = createHost(showHighlights: true)
