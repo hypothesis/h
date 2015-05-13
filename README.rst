@@ -10,6 +10,9 @@ Hypothesis
 .. image:: https://landscape.io/github/hypothesis/h/master/landscape.svg?style=flat
    :target: https://landscape.io/github/hypothesis/h/master
    :alt: Code Health
+.. image:: https://www.irccloud.com/invite-svg?channel=%23hypothes.is&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1
+   :target: https://www.irccloud.com/invite?channel=%23hypothes.is&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1
+   :alt: #hypothes.is IRC channel
 
 
 About
