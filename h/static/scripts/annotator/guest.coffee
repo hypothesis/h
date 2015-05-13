@@ -77,9 +77,15 @@ module.exports = class Guest extends Annotator
     if @plugins.PDF?
       metadataPromise = Promise.resolve(@plugins.PDF.getMetadata())
       uriPromise = Promise.resolve(@plugins.PDF.uri())
-    if @plugins.Document?
+    else if @plugins.Document?
       uriPromise = Promise.resolve(@plugins.Document.uri())
       metadataPromise = Promise.resolve(@plugins.Document.metadata)
+    else
+      uriPromise = Promise.resolve(decodeURIComponent(window.location.href))
+      metadataPromise = Promise.resolve({
+        title: document.title
+        link: [{href: decodeURIComponent(window.location.href)}]
+      })
 
     return metadataPromise.then (metadata) =>
       return uriPromise.then (href) =>
