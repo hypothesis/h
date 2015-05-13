@@ -6,20 +6,43 @@ class PDF extends Annotator.Plugin
   documentPromise: null
 
   pluginInit: ->
-    @documentPromise = new Promise (resolveDocument, rejectDocument) ->
-      resolveDocumentAndCleanup = (evt) ->
-        window.removeEventListener('documentload', resolveDocumentAndCleanup)
-        debugger
-        resolveDocument(evt)
-      window.addEventListener('documentload', resolveDocument)
+    if PDFViewerApplication.loading
+      @documentLoaded = new Promise (resolve) ->
+        finish = (evt) ->
+          window.removeEventListener('documentload', finish)
+          resolve()
+        window.addEventListener('documentload', finish)
+    else
+      @documentLoaded = Promise.resolve()
 
     window.addEventListener('pagerendered', @onpagerendered)
 
   destroy: ->
     window.removeEventListener('pagerendered', @onpagerendered)
 
+  uri: ->
+    @documentLoaded.then ->
+      PDFViewerApplication.url
+
   getMetadata: ->
-    Promise.resolve({})
+    @documentLoaded.then ->
+      info = PDFViewerApplication.documentInfo
+      metadata = PDFViewerApplication.metadata
+
+      # Taken from PDFViewerApplication#load
+      if metadata?.has('dc:title') and metadata.get('dc:title') isnt 'Untitled'
+        title = metadata.get('dc:title')
+      else if info?['Title']
+        title = info['Title']
+      else
+        title = document.title
+
+      # This is an experimental URN,
+      # as per http://tools.ietf.org/html/rfc3406#section-3.0
+      urn = "urn:x-pdf:" + PDFViewerApplication.documentFingerprint
+      link = [{href: urn}, {href: PDFViewerApplication.url}]
+
+      return {title, link}
 
   onpagerendered: =>
     succeed = ({annotation, target}) ->
