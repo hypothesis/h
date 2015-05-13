@@ -60,6 +60,9 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     # then that annotation will not be merged into the bucket
     gapSize: 60
 
+    # Selectors for the scrollable elements on the page
+    scrollables: null
+
   # buckets of annotations that overlap
   buckets: []
 
@@ -86,7 +89,15 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       @annotator.subscribe event, this._scheduleUpdate
 
     $(window).on 'resize scroll', this._scheduleUpdate
-    $(document.body).on 'resize scroll', '*', this._scheduleUpdate
+
+    for scrollable in @options.scrollables ? []
+      $(scrollable).on 'resize scroll', this._scheduleUpdate
+
+  destroy: ->
+    $(window).off 'resize scroll', this._scheduleUpdate
+
+    for scrollable in @options.scrollables ? []
+      $(scrollable).off 'resize scroll', this._scheduleUpdate
 
   # Update sometime soon
   _scheduleUpdate: =>

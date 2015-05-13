@@ -31,13 +31,14 @@ require('./plugin/textselection');
 var docs = 'https://h.readthedocs.org/en/latest/hacking/customized-embedding.html';
 var options = {
   app: jQuery('link[type="application/annotator+html"]').attr('href'),
-  BucketBar: {container: '.annotator-frame'},
+  BucketBar: {container: '.annotator-frame', scrollables: ['body']},
   Toolbar: {container: '.annotator-frame'}
 };
 
 // Document metadata plugins
 if (window.PDFViewerApplication) {
   require('./plugin/pdf')
+  options['BucketBar']['scrollables'] = ['#viewerContainer']
   options['PDF'] = {};
 } else {
   require('../vendor/annotator.document');
