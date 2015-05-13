@@ -15,10 +15,10 @@ class PDF extends Annotator.Plugin
     else
       @documentLoaded = Promise.resolve()
 
-    window.addEventListener('pagerendered', @onpagerendered)
+    document.addEventListener('pagerendered', @onpagerendered)
 
   destroy: ->
-    window.removeEventListener('pagerendered', @onpagerendered)
+    document.removeEventListener('pagerendered', @onpagerendered)
 
   uri: ->
     @documentLoaded.then ->
