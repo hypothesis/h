@@ -56,6 +56,9 @@
               {% if feature('notification') %}
                 {{ include_raw("h:templates/client/settings/notifications.html") }}
               {% endif %}
+              {% if feature('admin') %}
+                {{ include_raw("h:templates/client/settings/admin.html") }}
+              {% endif %}
             </div>
           {% endblock %}
         </div>

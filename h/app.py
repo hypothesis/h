@@ -62,6 +62,9 @@ def create_app(global_config, **settings):
         config.set_authorization_policy(acl_authz)
         config.include('.accounts')
 
+        if config.registry.feature('nipsa'):
+            config.include('.accounts.admin')
+
     if config.registry.feature('api'):
         api_app = create_api(settings)
         api_view = wsgiapp2(api_app)
@@ -97,6 +100,7 @@ def create_api(global_config, **settings):
                           'pyramid.events.ContextFound')
     config.add_tween('h.api.tweens.auth_token')
 
+    config.include('.features')  # FixMe: Should not be included!
     config.include('.api.db')
     config.include('.api.views')
     config.include('.auth')

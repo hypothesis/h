@@ -330,7 +330,7 @@ class TestShouldSendEvent(unittest.TestCase):
 
     def test_non_sending_socket_receives_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_giraffe, {}, data)
+        assert should_send_event(self.sock_giraffe, {'user': 'test'}, data)
 
     def test_sending_socket_does_not_receive_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}

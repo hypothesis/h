@@ -23,6 +23,8 @@ from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from .api.auth import get_user  # FIXME: should not import from .api
+from .api.views import filter_nipsa  # FIXME: should not import from .api
+from .api.views import get_nipsa_users  # FIXME: should not import from .api
 from annotator import document
 from .models import Annotation
 
@@ -468,6 +470,15 @@ class WebSocket(_WebSocket):
         request = self.request
         user = get_user(request)
         annotations = Annotation.search_raw(query=self.query.query, user=user)
+
+        if request.registry.feature('nipsa'):
+            results = {
+                'total': len(annotations),
+                'rows': annotations
+            }
+            results = filter_nipsa(request, results, user)
+            annotations = results['rows']
+
         self.received = len(annotations)
 
         packet = _annotation_packet(annotations, 'past')
@@ -587,6 +598,13 @@ def should_send_event(socket, annotation, event_data):
 
     if not socket.filter.match(annotation, event_data['action']):
         return False
+
+    if socket.request.registry.feature('nipsa'):
+        user = socket.request.unauthenticated_userid
+        nipsa_users = get_nipsa_users(socket.request)
+
+        if annotation['user'] in nipsa_users and annotation['user'] != user:
+            return False
 
     return True
 
