@@ -45,26 +45,9 @@ class PDF extends Annotator.Plugin
       return {title, link}
 
   onpagerendered: =>
-    succeed = ({annotation, target}) ->
-      (highlights) -> {annotation, target, highlights}
-
-    fail = ({annotation, target}) ->
-      (reason) -> {annotation, target}
-
-    finish = (results) =>
-      anchored = @annotator.anchored
-      unanchored = @annotator.unanchored
-      updated = for result in results when result.highlights?
-        delete result.annotation.$orphan
-        anchored.push(result)
-        result
-      @annotator.unanchored = unanchored.filter((o) -> o not in anchored)
-      @annotator.plugins.CrossFrame.sync(updated) if updated.length
-
-    promises = for obj in @annotator.unanchored
-      @annotator.anchorTarget(obj.target).then(succeed(obj), fail(obj))
-
-    Promise.all(promises).then(finish)
+    unanchored = @annotator.unanchored.splice(0, @annotator.unanchored.length)
+    for obj in unanchored
+      @annotator.setupAnnotation(obj.annotation)
 
 Annotator.Plugin.PDF = PDF
 
