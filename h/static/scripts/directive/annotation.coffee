@@ -13,10 +13,14 @@ validate = (value) ->
 
 # Return an error message based on a server response.
 errorMessage = (reason) ->
-  message = reason.status + " " + reason.statusText
-  if reason.data.reason
-    message = message + ": " + reason.data.reason
-  message
+  if reason.status is 0
+    message = "Service unreachable."
+  else
+    message = reason.status + " " + reason.statusText
+    if reason.data.reason
+      message = message + ": " + reason.data.reason
+
+  return message
 
 
 ###*

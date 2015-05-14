@@ -412,6 +412,16 @@ describe 'annotation', ->
       window.confirm.returns(false)
       assert fakeAnnotationMapper.deleteAnnotation.notCalled
 
+    it "flashes a generic error if the server cannot be reached", ->
+      window.confirm.returns(true)
+      fakeAnnotationMapper.deleteAnnotation.returns(Promise.reject({status: 0}))
+
+      controller.delete().then(->
+        assert fakeFlash.error.calledWith(
+          "Service unreachable.", "Saving annotation failed")
+      )
+      $timeout.flush()
+
     it "flashes an error if the delete fails on the server", ->
       window.confirm.returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns(Promise.reject({
@@ -448,6 +458,14 @@ describe 'annotation', ->
         assert $rootScope.$emit.calledWith("annotationCreated")
       )
 
+    it "flashes a generic error if the server cannot be reached", ->
+      annotation.$create.returns(Promise.reject({status: 0}))
+
+      controller.save().then(->
+        assert fakeFlash.error.calledWith(
+          "Service unreachable.", "Saving annotation failed")
+      )
+
     it "flashes an error if saving the annotation fails on the server", ->
       annotation.$create.returns(Promise.reject({
           status: 500,
@@ -473,6 +491,14 @@ describe 'annotation', ->
       fakeFlash.error = sandbox.stub()
       controller.action = 'edit'
       annotation.$update = sandbox.stub()
+
+    it "flashes a generic error if the server cannot be reached", ->
+      annotation.$update.returns(Promise.reject({status: 0}))
+
+      controller.save().then(->
+        assert fakeFlash.error.calledWith(
+          "Service unreachable.", "Saving annotation failed")
+      )
 
     it "flashes an error if saving the annotation fails on the server", ->
       annotation.$update.returns(Promise.reject({
