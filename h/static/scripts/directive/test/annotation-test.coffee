@@ -7,6 +7,7 @@ describe 'annotation', ->
   $compile = null
   $document = null
   $element = null
+  $rootScope = null
   $scope = null
   $timeout = null
   annotation = null
@@ -69,7 +70,8 @@ describe 'annotation', ->
     }
     fakePersonaFilter = sandbox.stub().returnsArg(0)
     fakeTags = {
-      filter: sandbox.stub().returns('a while ago')
+      filter: sandbox.stub().returns('a while ago'),
+      store: sandbox.stub()
     }
     fakeTime = {
       toFuzzyString: sandbox.stub().returns('a while ago')
@@ -91,10 +93,11 @@ describe 'annotation', ->
     $provide.value 'urlencodeFilter', fakeUrlEncodeFilter
     return
 
-  beforeEach inject (_$compile_, _$document_, $rootScope, _$timeout_) ->
+  beforeEach inject (_$compile_, _$document_, _$rootScope_, _$timeout_) ->
     $compile = _$compile_
     $document = _$document_
     $timeout = _$timeout_
+    $rootScope = _$rootScope_
     $scope = $rootScope.$new()
     $scope.annotation = annotation =
       id: 'deadbeef'
@@ -387,3 +390,283 @@ describe 'annotation', ->
       annotation.updated = '456'
       $scope.$digest()
       assert.calledWith(isolateScope.$emit, 'annotationUpdate')
+
+  describe "deleteAnnotation() method", ->
+    before ->
+      sinon.stub(window, "confirm")
+
+    beforeEach ->
+      createDirective()
+      fakeAnnotationMapper.deleteAnnotation = sandbox.stub()
+      fakeFlash.error = sandbox.stub()
+
+    it "calls annotationMapper.delete() if the delete is confirmed", ->
+      window.confirm.returns(true)
+      fakeAnnotationMapper.deleteAnnotation.returns(Promise.resolve())
+      controller.delete().then(->
+        assert fakeAnnotationMapper.deleteAnnotation.calledWith(annotation)
+      )
+      $timeout.flush()
+
+    it "doesn't call annotationMapper.delete() if the delete is cancelled", ->
+      window.confirm.returns(false)
+      assert fakeAnnotationMapper.deleteAnnotation.notCalled
+
+    it "flashes a generic error if the server cannot be reached", ->
+      window.confirm.returns(true)
+      fakeAnnotationMapper.deleteAnnotation.returns(Promise.reject({status: 0}))
+
+      controller.delete().then(->
+        assert fakeFlash.error.calledWith(
+          "Service unreachable.", "Saving annotation failed")
+      )
+      $timeout.flush()
+
+    it "flashes an error if the delete fails on the server", ->
+      window.confirm.returns(true)
+      fakeAnnotationMapper.deleteAnnotation.returns(Promise.reject({
+          status: 500,
+          statusText: "Server Error",
+          data: {}
+        })
+      )
+      controller.delete().then(->
+        assert fakeFlash.error.calledWith(
+          "500 Server Error", "Deleting annotation failed")
+      )
+      $timeout.flush()
+
+    it "doesn't flash an error if the delete succeeds", ->
+      window.confirm.returns(true)
+      fakeAnnotationMapper.deleteAnnotation.returns(Promise.resolve())
+      controller.delete().then(->
+        assert fakeFlash.error.notCalled
+      )
+      $timeout.flush()
+
+  describe "creating a new annotation", ->
+    beforeEach ->
+      createDirective()
+      fakeFlash.error = sandbox.stub()
+      controller.action = 'create'
+      annotation.$create = sandbox.stub()
+
+    it "emits annotationCreated when saving an annotation succeeds", ->
+      sandbox.spy($rootScope, '$emit')
+      annotation.$create.returns(Promise.resolve())
+      controller.save().then(->
+        assert $rootScope.$emit.calledWith("annotationCreated")
+      )
+
+    it "flashes a generic error if the server cannot be reached", ->
+      annotation.$create.returns(Promise.reject({status: 0}))
+
+      controller.save().then(->
+        assert fakeFlash.error.calledWith(
+          "Service unreachable.", "Saving annotation failed")
+      )
+
+    it "flashes an error if saving the annotation fails on the server", ->
+      annotation.$create.returns(Promise.reject({
+          status: 500,
+          statusText: "Server Error",
+          data: {}
+        })
+      )
+      controller.save().then(->
+        assert fakeFlash.error.calledWith(
+          "500 Server Error", "Saving annotation failed")
+      )
+
+    it "doesn't flash an error when saving an annotation succeeds", ->
+      annotation.$create.returns(Promise.resolve())
+      controller.save().then(->
+        assert fakeFlash.error.notCalled
+      )
+
+  describe "editing an annotation", ->
+
+    beforeEach ->
+      createDirective()
+      fakeFlash.error = sandbox.stub()
+      controller.action = 'edit'
+      annotation.$update = sandbox.stub()
+
+    it "flashes a generic error if the server cannot be reached", ->
+      annotation.$update.returns(Promise.reject({status: 0}))
+
+      controller.save().then(->
+        assert fakeFlash.error.calledWith(
+          "Service unreachable.", "Saving annotation failed")
+      )
+
+    it "flashes an error if saving the annotation fails on the server", ->
+      annotation.$update.returns(Promise.reject({
+          status: 500,
+          statusText: "Server Error",
+          data: {}
+        })
+      )
+
+      controller.save().then(->
+        assert fakeFlash.error.calledWith(
+          "500 Server Error", "Saving annotation failed")
+      )
+
+    it "doesn't flash an error if saving the annotation succeeds", ->
+      annotation.$update.returns(Promise.resolve())
+
+      controller.save().then(->
+        assert fakeFlash.error.notCalled
+      )
+
+describe("AnnotationController", ->
+
+  before(->
+    angular.module("h", [])
+    .directive("annotation", require("../annotation"))
+  )
+
+  beforeEach(module("h"))
+
+  beforeEach(module("h.templates"))
+
+  # Return Angular's $compile service.
+  getCompileService = ->
+    $compile = null
+    inject((_$compile_) ->
+      $compile = _$compile_
+    )
+    $compile
+
+  # Return Angular's $rootScope.
+  getRootScope = ->
+    $rootScope = null
+    inject((_$rootScope_) ->
+      $rootScope = _$rootScope_
+    )
+    $rootScope
+
+  ###
+  Return an annotation directive instance and stub services etc.
+  ###
+  createAnnotationDirective = ({annotation, personaFilter, momentFilter,
+                                urlencodeFilter, auth, drafts, flash,
+                                permissions, tags, time, annotationUI,
+                                annotationMapper}) ->
+    locals = {
+      personaFilter: personaFilter or {}
+      momentFilter: momentFilter or {}
+      urlencodeFilter: urlencodeFilter or {}
+      auth: auth or {}
+      drafts: drafts or {
+        add: ->
+      }
+      flash: flash or {}
+      permissions: permissions or {}
+      tags: tags or {}
+      time: time or {
+        toFuzzyString: ->
+        nextFuzzyUpdate: ->
+      }
+      annotationUI: annotationUI or {}
+      annotationMapper: annotationMapper or {}
+    }
+    module(($provide) ->
+      $provide.value("personaFilter", locals.personaFilter)
+      $provide.value("momentFilter", locals.momentFilter)
+      $provide.value("urlencodeFilter", locals.urlencodeFilter)
+      $provide.value("auth", locals.auth)
+      $provide.value("drafts", locals.drafts)
+      $provide.value("flash", locals.flash)
+      $provide.value("permissions", locals.permissions)
+      $provide.value("tags", locals.tags)
+      $provide.value("time", locals.time)
+      $provide.value("annotationUI", locals.annotationUI)
+      $provide.value("annotationMapper", locals.annotationMapper)
+      return
+    )
+
+    locals.element = angular.element('<div annotation="annotation">')
+    compiledElement = getCompileService()(locals.element)
+    locals.$rootScope = getRootScope()
+    locals.parentScope = locals.$rootScope.$new()
+    locals.parentScope.annotation = annotation or {}
+    locals.directive = compiledElement(locals.parentScope)
+
+    locals.$rootScope.$digest()
+
+    locals.controller = locals.element.controller("annotation")
+    locals.isolateScope = locals.element.isolateScope()
+
+    locals
+
+  describe("createAnnotationDirective", ->
+    it("creates the directive without crashing", ->
+      createAnnotationDirective({})
+    )
+  )
+
+  ###
+  Simulate what happens when the user edits an annotation, clicks Save,
+  gets an error because the server fails to save the annotation, then clicks
+  Cancel - in the frontend the annotation should be restored to its original
+  value, the edits lost.
+  ###
+  it "restores the original text when editing is cancelled", ->
+    {controller} = createAnnotationDirective(
+      annotation: {
+        id: "test-annotation-id"
+        user: "acct:bill@localhost"
+        text: "Initial annotation body text"
+        # Allow the initial save of the annotation to succeed.
+        $create: ->
+          Promise.resolve()
+        # Simulate saving the edit of the annotation to the server failing.
+        $update: ->
+          Promise.reject({
+            status: 500,
+            statusText: "Server Error",
+            data: {}
+          })
+      }
+      flash: {
+        info: ->
+        error: ->
+      }
+      personaFilter: ->
+      permissions: {
+        isPrivate: -> false
+        permits: -> true
+      }
+      tags: {
+        store: ->
+      }
+      drafts: {
+        add: ->
+        remove: ->
+      }
+    )
+
+    original_text = controller.annotation.text
+
+    # Simulate the user clicking the Edit button on the annotation.
+    controller.edit()
+
+    # Simulate the user typing some text into the annotation editor textarea.
+    controller.annotation.text = "changed by test code"
+
+    # Simulate the user hitting the Save button and wait for the
+    # (unsuccessful) response from the server.
+    controller.save().then(->
+      # At this point the annotation editor controls are still open, and the
+      # annotation's text is still the modified (unsaved) text.
+      assert controller.annotation.text == "changed by test code"
+
+      # Simulate the user clicking the Cancel button.
+      controller.revert()
+
+      # Now the original text should be restored.
+      assert controller.annotation.text == original_text
+    )
+)

@@ -122,7 +122,9 @@ describe 'annotationMapper', ->
       p.catch ->
         assert.notCalled($rootScope.$emit)
 
-    it 'returns the annotation', ->
+    it 'return a promise that resolves to the deleted annotation', ->
       p = Promise.resolve()
       ann  = {$delete: sandbox.stub().returns(p)}
-      assert.equal(annotationMapper.deleteAnnotation(ann), ann)
+      return annotationMapper.deleteAnnotation(ann).then((value) ->
+        assert.equal(value, ann)
+      )
