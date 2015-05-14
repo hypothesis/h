@@ -100,11 +100,11 @@ describe 'Host', ->
         host.onPan({type: 'panend'})
         assert.calledOnce(showFrame)
 
-      it 'does not call `showFrame` if the widget is not fully visible', ->
+      it 'calls `hideFrame` if the widget is not fully visible', ->
         host.gestureState = {acc: -100}
-        showFrame = sandbox.stub(host, 'showFrame')
+        hideFrame = sandbox.stub(host, 'hideFrame')
         host.onPan({type: 'panend'})
-        assert.notCalled(showFrame)
+        assert.calledOnce(hideFrame)
 
     describe 'panleft and panright events', ->
       raf = null
