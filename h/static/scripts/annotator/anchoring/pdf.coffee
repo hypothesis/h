@@ -109,7 +109,7 @@ exports.anchor = (selectors) ->
       return range
 
   if position?
-    promise = promise.catch =>
+    promise = promise.catch ->
       findPage(position.start)
       .then(({index, offset}) ->
         textLayer = getPageTextLayer(index)

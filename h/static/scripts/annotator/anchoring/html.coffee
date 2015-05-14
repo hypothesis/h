@@ -50,25 +50,25 @@ exports.anchor = (selectors) ->
       return range
 
   if fragment?
-    promise = promise.catch =>
+    promise = promise.catch ->
       Promise.resolve(FragmentAnchor.fromSelector(fragment, options))
       .then((a) -> a.toRange(options))
       .then(assertQuote)
 
   if range?
-    promise = promise.catch =>
+    promise = promise.catch ->
       Promise.resolve(RangeAnchor.fromSelector(range, options))
       .then((a) -> a.toRange(options))
       .then(assertQuote)
 
   if position?
-    promise = promise.catch =>
+    promise = promise.catch ->
       Promise.resolve(TextPositionAnchor.fromSelector(position, options))
       .then((a) -> a.toRange(options))
       .then(assertQuote)
 
   if quote?
-    promise = promise.catch =>
+    promise = promise.catch ->
       Promise.resolve(TextQuoteAnchor.fromSelector(quote, options))
       .then((a) -> a.toRange(options))
 
