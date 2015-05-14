@@ -329,3 +329,225 @@ describe "h:AccountController", ->
     profilePromise.then(->
       assert $scope.email == "test_user@test_email.com"
     )
+
+  describe "changeEmail", ->
+
+    it "calls sesson.edit_profile() with the right data on form submission", ->
+
+      new_email_address = "new_email_address@test.com"
+
+      # Stub the session.edit_profile() function.
+      edit_profile = sinon.stub()
+      edit_profile.returns({$promise: Promise.resolve({})})
+
+      session = {
+        edit_profile: edit_profile
+        profile: -> {$promise: Promise.resolve()}
+      }
+
+      {$scope} = controller(
+        formRespond: ->
+        session: session
+        # Simulate a logged-in user with username "joeuser"
+        $filter: -> -> "joeuser")
+
+      form = {
+        $name: "changeEmailForm"
+        email: $modelValue: new_email_address
+        emailAgain: $modelValue: new_email_address
+        pwd: $modelValue: "pass"
+        $valid: true
+        $setPristine: ->
+      }
+
+      $scope.changeEmail(form).then(->
+        assert edit_profile.calledWithExactly({
+          username: "joeuser"
+          pwd: "pass"
+          email: new_email_address
+          emailAgain: new_email_address
+        })
+      )
+
+    it "updates placeholder after successfully changing the email address", ->
+      new_email_addr = "new_email_address@test.com"
+
+      session = {
+        # AccountController expects session.edit_profile() to respond with the
+        # newly saved email address.
+        edit_profile: -> {$promise: Promise.resolve({email: new_email_addr})}
+        profile: -> {$promise: Promise.resolve()}
+      }
+
+      {$scope} = controller(
+        formRespond: ->
+        session: session)
+
+      form = {
+        $name: "changeEmailForm"
+        email: $modelValue: new_email_addr
+        emailAgain: $modelValue: new_email_addr
+        pwd: $modelValue: "pass"
+        $valid: true
+        $setPristine: ->
+      }
+
+      $scope.changeEmail(form).then(->
+        assert $scope.email == new_email_addr
+      )
+
+    it "shows an error if the emails don't match", ->
+      server_response = {
+        status: 400,
+        statusText: "Bad Request"
+        data:
+          errors:
+            emailAgain: "The emails must match."
+      }
+
+      session = {
+        edit_profile: -> {$promise: Promise.reject(server_response)}
+        profile: -> {$promise: Promise.resolve()}
+      }
+
+      {$scope} = controller(
+        formRespond: require("../../form-respond")()
+        session: session
+      )
+
+      form = {
+        $name: "changeEmailForm"
+        email: $modelValue: "my_new_email_address@yahoo.com"
+        emailAgain:
+          $modelValue: "a_different_email_address@bluebottle.com"
+          $setValidity: ->
+        pwd: $modelValue: "pass"
+        $valid: true
+        $setPristine: ->
+        $setValidity: ->
+      }
+
+      $scope.changeEmail(form).then(->
+        assert form.emailAgain.responseErrorMessage == "The emails must match."
+      )
+
+    it "broadcasts 'formState' 'changeEmailForm' 'loading' on submit", ->
+      new_email_address = "new_email_address@test.com"
+      session = {
+        edit_profile: -> {$promise: Promise.resolve({})}
+        profile: -> {$promise: Promise.resolve()}
+      }
+      {$scope} = controller(
+        formRespond: ->
+        session: session)
+
+      $scope.$broadcast = sinon.stub()
+
+      form = {
+        $name: "changeEmailForm"
+        email: $modelValue: new_email_address
+        emailAgain: $modelValue: new_email_address
+        pwd: $modelValue: "pass"
+        $valid: true
+        $setPristine: ->
+      }
+      $scope.changeEmail(form)
+
+      assert $scope.$broadcast.calledWithExactly(
+        "formState", "changeEmailForm", "loading")
+
+    it "broadcasts 'formState' 'changeEmailForm' 'success' on success", ->
+      new_email_address = "new_email_address@test.com"
+
+      session = {
+        edit_profile: -> {$promise: Promise.resolve({})}
+        profile: -> {$promise: Promise.resolve()}
+      }
+
+      {$scope} = controller(
+        formRespond: ->
+        session: session)
+
+      $scope.$broadcast = sinon.stub()
+
+      form = {
+        $name: "changeEmailForm"
+        email: $modelValue: new_email_address
+        emailAgain: $modelValue: new_email_address
+        pwd: $modelValue: "pass"
+        $valid: true
+        $setPristine: ->
+      }
+
+      $scope.changeEmail(form).then(->
+        assert $scope.$broadcast.calledWithExactly(
+          "formState", "changeEmailForm", "success")
+      )
+
+    it "broadcasts 'formState' 'changeEmailForm' '' on error", ->
+      new_email_address = "new_email_address@test.com"
+
+      session = {
+        edit_profile: -> {$promise: Promise.reject({data: {}})}
+        profile: -> {$promise: Promise.resolve()}
+      }
+
+      {$scope} = controller(
+        formRespond: ->
+        session: session
+        flash: {error: ->}
+      )
+
+      $scope.$broadcast = sinon.stub()
+
+      form = {
+        $name: "changeEmailForm"
+        email: $modelValue: new_email_address
+        emailAgain: $modelValue: new_email_address
+        pwd: $modelValue: "pass"
+        $valid: true
+        $setPristine: ->
+      }
+
+      $scope.changeEmail(form).then(->
+        assert $scope.$broadcast.calledWithExactly(
+          "formState", "changeEmailForm", "")
+      )
+
+    it "shows an error if the password is wrong", ->
+      new_email_address = "new_email_address@test.com"
+
+      # Mock of the server response you get when you enter the wrong password.
+      server_response = {
+        data:
+          errors:
+            pwd: "Invalid password"
+        status: 401
+        statusText: "Unauthorized"
+      }
+
+      session = {
+        edit_profile: -> {$promise: Promise.reject(server_response)}
+        profile: -> {$promise: Promise.resolve()}
+      }
+
+      {$scope} = controller(
+        formRespond: require("../../form-respond")()
+        session: session
+      )
+
+      form = {
+        $name: "changeEmailForm"
+        email: $modelValue: new_email_address
+        emailAgain: $modelValue: new_email_address
+        pwd:
+          $modelValue: "pass"
+          $setValidity: ->
+        $valid: true
+        $setPristine: ->
+        $setValidity: ->
+      }
+
+      $scope.changeEmail(form).then(->
+        assert form.pwd.responseErrorMessage == "Invalid password"
+      )
