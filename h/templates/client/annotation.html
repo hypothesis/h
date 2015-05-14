@@ -142,11 +142,12 @@
     <span class="share-dialog-wrapper">
       <button class="small btn-clean"
               ng-click="share($event)"
-              ><i class="h-icon-share btn-icon"></i> Share</button>
+              ><i class="h-icon-link btn-icon"></i> Link</button>
       <span class="share-dialog" ng-click="$event.stopPropagation()">
-      <a class="h-icon-share"
-          target="_blank"
-          ng-href="{{vm.annotationURI}}"></a>
+        <a target="_blank"
+           class="h-icon-link"
+           ng-href="{{vm.annotationURI}}"
+           title="Open in new tab"></a>
         <input type="text" value="{{vm.annotationURI}}" readonly>
       </span>
     </span>
