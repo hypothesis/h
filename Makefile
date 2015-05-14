@@ -25,6 +25,7 @@ clean:
 	find . -type d -name "__pycache__" -delete
 	rm -f h/static/scripts/vendor/*.min.js
 	rm -f h/static/scripts/account.*js
+	rm -f h/static/scripts/admin.*js
 	rm -f h/static/scripts/app.*js
 	rm -f h/static/scripts/config.*js
 	rm -f h/static/scripts/hypothesis.*js

@@ -50,6 +50,7 @@ module.exports = [
       plugins.Auth.withToken (payload) =>
         _checkingToken = false
         auth.user = payload.userId
+        auth.isAdmin = payload.admin ? false
         token = plugins.Auth.token
         $http.defaults.headers.common['X-Annotator-Auth-Token'] = token
         $rootScope.$apply()
