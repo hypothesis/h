@@ -287,7 +287,7 @@ describe "h:AccountController", ->
    Use CoffeeScript's destructuring assignment to pull out just the things
    you need from the returned object. For example:
 
-       {ctrl, $scope} = controller()
+       {ctrl, $scope} = controller({})
 
    By default this does the minimum amount of stubbing necessary to create an
    AccountController without it crashing. For each of the services that gets
