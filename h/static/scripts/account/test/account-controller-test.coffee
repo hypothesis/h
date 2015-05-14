@@ -324,7 +324,7 @@ describe "h:AccountController", ->
       email: "test_user@test_email.com"
     })
     session = {profile: -> {$promise: profilePromise}}
-    {ctrl, $scope} = controller(session: session)
+    {$scope} = controller(session: session)
 
     profilePromise.then(->
       assert $scope.email == "test_user@test_email.com"
