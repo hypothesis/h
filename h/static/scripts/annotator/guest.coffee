@@ -3,7 +3,7 @@ Promise = global.Promise or require('es6-promise').Promise
 Annotator = require('annotator')
 $ = Annotator.$
 
-anchoring = require('./anchoring/html')
+anchoring = require('./anchoring/main')
 highlighter = require('./highlighter')
 
 
@@ -145,19 +145,17 @@ module.exports = class Guest extends Annotator
     this.removeEvents()
 
   setupAnnotation: (annotation) ->
-    {anchored, unanchored, plugins} = this
-    root = @element[0]
-    ignoreSelector = '[class^="annotator-"]'
+    {anchored, unanchored, element, plugins} = this
 
     maybeAnchor = (target) ->
-      anchoring.anchor(target.selector, {root, ignoreSelector})
+      anchoring.anchor(target.selector)
       .then(highlightRange)
       .then((highlights) -> {annotation, target, highlights})
       .catch((reason) -> {annotation, target, reason})
 
     highlightRange = (range) ->
       return new Promise(raf).then ->
-        normedRange = Annotator.Range.sniff(range).normalize(root)
+        normedRange = Annotator.Range.sniff(range).normalize(element[0])
         return highlighter.highlightRange(normedRange)
 
     storeAndSync = (results) ->
@@ -179,16 +177,12 @@ module.exports = class Guest extends Annotator
     annotation
 
   createAnnotation: (annotation = {}) ->
-    root = @element[0]
-    ignoreSelector = '[class^="annotator-"]'
-
-    options = {root, ignoreSelector}
     ranges = @selectedRanges
     @selectedRanges = null
 
     info = this.getDocumentInfo()
 
-    Promise.all(ranges.map((r) -> anchoring.describe(r, options)))
+    Promise.all(ranges.map(anchoring.describe))
     .then((targets) ->
       info.then((info) ->
         if info.metadata?

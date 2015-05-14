@@ -16,7 +16,11 @@
 # :return: A Promise that resolves to a Range on success.
 # :rtype: Promise
 ####
-exports.anchor = (selectors, options) ->
+exports.anchor = (selectors) ->
+  options =
+    root: document.body
+    ignoreSelector: '[class^="annotator-"]'
+
   # Selectors
   fragment = null
   position = null
@@ -48,34 +52,38 @@ exports.anchor = (selectors, options) ->
   if fragment?
     promise = promise.catch =>
       Promise.resolve(FragmentAnchor.fromSelector(fragment, options))
-      .then((a) -> Promise.resolve(a.toRange(options)))
+      .then((a) -> a.toRange(options))
       .then(assertQuote)
 
   if range?
     promise = promise.catch =>
       Promise.resolve(RangeAnchor.fromSelector(range, options))
-      .then((a) -> Promise.resolve(a.toRange(options)))
+      .then((a) -> a.toRange(options))
       .then(assertQuote)
 
   if position?
     promise = promise.catch =>
       Promise.resolve(TextPositionAnchor.fromSelector(position, options))
-      .then((a) -> Promise.resolve(a.toRange(options)))
+      .then((a) -> a.toRange(options))
       .then(assertQuote)
 
   if quote?
     promise = promise.catch =>
       Promise.resolve(TextQuoteAnchor.fromSelector(quote, options))
-      .then((a) -> Promise.resolve(a.toRange(options)))
+      .then((a) -> a.toRange(options))
 
   return promise
 
 
-exports.describe = (range, options) ->
+exports.describe = (range) ->
+  options =
+    root: document.body
+    ignoreSelector: '[class^="annotator-"]'
+
   maybeDescribeWith = (type) ->
     return Promise.resolve(type)
-    .then((t) -> Promise.resolve(t.fromRange(range, options)))
-    .then((a) -> Promise.resolve(a.toSelector(options)))
+    .then((t) -> t.fromRange(range, options))
+    .then((a) -> a.toSelector(options))
     .catch(-> null)
 
   selectors = (maybeDescribeWith(type) for type in [

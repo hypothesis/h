@@ -1,3 +1,4 @@
+raf = require('raf')
 Promise = require('es6-promise').Promise
 Annotator = require('annotator')
 
@@ -44,10 +45,21 @@ class PDF extends Annotator.Plugin
 
       return {title, link}
 
-  onpagerendered: =>
-    unanchored = @annotator.unanchored.splice(0, @annotator.unanchored.length)
-    for obj in unanchored
-      @annotator.setupAnnotation(obj.annotation)
+  onpagerendered: (event) =>
+    annotator = @annotator
+    unanchored = @annotator.unanchored
+    page = PDFViewerApplication.pdfViewer.pages[event.detail.pageNumber - 1]
+
+    waitForTextLayer = ->
+      unless (page.textLayer.renderingDone)
+        return new Promise(raf).then(waitForTextLayer)
+
+    reanchor = ->
+      unanchored = unanchored.splice(0, unanchored.length)
+      for obj in unanchored
+        annotator.setupAnnotation(obj.annotation)
+
+    waitForTextLayer().then(reanchor)
 
 Annotator.Plugin.PDF = PDF
 
