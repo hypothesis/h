@@ -273,6 +273,25 @@ describe "h:AccountController", ->
       edit_profile: edit_profile or -> {$promise: Promise.resolve({})}
     }
 
+  # Return a minimal stub version of the object that AccountController's
+  # changeEmail() method receives when the user submits the changeEmailForm.
+  getStubChangeEmailForm = ({email, emailAgain, password}) ->
+    return {
+      $name: "changeEmailForm"
+      email:
+        $modelValue: email
+        $setValidity: ->
+      emailAgain:
+        $modelValue: emailAgain
+        $setValidity: ->
+      pwd:
+        $modelValue: password
+        $setValidity: ->
+      $valid: true
+      $setPristine: ->
+      $setValidity: ->
+    }
+
   ###
   Return an AccountController instance and stub services.
 
@@ -340,7 +359,7 @@ describe "h:AccountController", ->
 
     it "calls sesson.edit_profile() with the right data on form submission", ->
 
-      new_email_address = "new_email_address@test.com"
+      new_email_addr = "new_email_address@test.com"
 
       # Stub the session.edit_profile() function.
       edit_profile = sinon.stub()
@@ -351,21 +370,15 @@ describe "h:AccountController", ->
         # Simulate a logged-in user with username "joeuser"
         $filter: -> -> "joeuser")
 
-      form = {
-        $name: "changeEmailForm"
-        email: $modelValue: new_email_address
-        emailAgain: $modelValue: new_email_address
-        pwd: $modelValue: "pass"
-        $valid: true
-        $setPristine: ->
-      }
+      form = getStubChangeEmailForm(
+        email: new_email_addr, emailAgain: new_email_addr, password: "pass")
 
       $scope.changeEmail(form).then(->
         assert edit_profile.calledWithExactly({
           username: "joeuser"
           pwd: "pass"
-          email: new_email_address
-          emailAgain: new_email_address
+          email: new_email_addr
+          emailAgain: new_email_addr
         })
       )
 
@@ -382,14 +395,8 @@ describe "h:AccountController", ->
           )
       )
 
-      form = {
-        $name: "changeEmailForm"
-        email: $modelValue: new_email_addr
-        emailAgain: $modelValue: new_email_addr
-        pwd: $modelValue: "pass"
-        $valid: true
-        $setPristine: ->
-      }
+      form = getStubChangeEmailForm(
+        email: new_email_addr, emailAgain: new_email_addr, password: "pass")
 
       $scope.changeEmail(form).then(->
         assert $scope.email == new_email_addr
@@ -411,56 +418,36 @@ describe "h:AccountController", ->
         )
       )
 
-      form = {
-        $name: "changeEmailForm"
-        email: $modelValue: "my_new_email_address@yahoo.com"
-        emailAgain:
-          $modelValue: "a_different_email_address@bluebottle.com"
-          $setValidity: ->
-        pwd: $modelValue: "pass"
-        $valid: true
-        $setPristine: ->
-        $setValidity: ->
-      }
+      form = getStubChangeEmailForm(
+        email: "my_new_email_address@yahoo.com"
+        emailAgain: "a_different_email_address@bluebottle.com"
+        pwd: "pass")
 
       $scope.changeEmail(form).then(->
         assert form.emailAgain.responseErrorMessage == "The emails must match."
       )
 
     it "broadcasts 'formState' 'changeEmailForm' 'loading' on submit", ->
-      new_email_address = "new_email_address@test.com"
       {$scope} = controller({})
 
       $scope.$broadcast = sinon.stub()
 
-      form = {
-        $name: "changeEmailForm"
-        email: $modelValue: new_email_address
-        emailAgain: $modelValue: new_email_address
-        pwd: $modelValue: "pass"
-        $valid: true
-        $setPristine: ->
-      }
+      form = getStubChangeEmailForm(
+        email: "new_email_address@test.com",
+        emailAgain: "new_email_address@test.com", password: "pass")
       $scope.changeEmail(form)
 
       assert $scope.$broadcast.calledWithExactly(
         "formState", "changeEmailForm", "loading")
 
     it "broadcasts 'formState' 'changeEmailForm' 'success' on success", ->
-      new_email_address = "new_email_address@test.com"
-
       {$scope} = controller({})
 
       $scope.$broadcast = sinon.stub()
 
-      form = {
-        $name: "changeEmailForm"
-        email: $modelValue: new_email_address
-        emailAgain: $modelValue: new_email_address
-        pwd: $modelValue: "pass"
-        $valid: true
-        $setPristine: ->
-      }
+      form = getStubChangeEmailForm(
+        email: "new_email_address@test.com",
+        emailAgain: "new_email_address@test.com", password: "pass")
 
       $scope.changeEmail(form).then(->
         assert $scope.$broadcast.calledWithExactly(
@@ -468,8 +455,6 @@ describe "h:AccountController", ->
       )
 
     it "broadcasts 'formState' 'changeEmailForm' '' on error", ->
-      new_email_address = "new_email_address@test.com"
-
       {$scope} = controller(
         flash: {error: ->}
         session: getStubSession(
@@ -479,14 +464,9 @@ describe "h:AccountController", ->
 
       $scope.$broadcast = sinon.stub()
 
-      form = {
-        $name: "changeEmailForm"
-        email: $modelValue: new_email_address
-        emailAgain: $modelValue: new_email_address
-        pwd: $modelValue: "pass"
-        $valid: true
-        $setPristine: ->
-      }
+      form = getStubChangeEmailForm(
+        email: "new_email_address@test.com",
+        emailAgain: "new_email_address@test.com", password: "pass")
 
       $scope.changeEmail(form).then(->
         assert $scope.$broadcast.calledWithExactly(
@@ -494,8 +474,6 @@ describe "h:AccountController", ->
       )
 
     it "shows an error if the password is wrong", ->
-      new_email_address = "new_email_address@test.com"
-
       # Mock of the server response you get when you enter the wrong password.
       server_response = {
         data:
@@ -512,17 +490,9 @@ describe "h:AccountController", ->
         )
       )
 
-      form = {
-        $name: "changeEmailForm"
-        email: $modelValue: new_email_address
-        emailAgain: $modelValue: new_email_address
-        pwd:
-          $modelValue: "pass"
-          $setValidity: ->
-        $valid: true
-        $setPristine: ->
-        $setValidity: ->
-      }
+      form = getStubChangeEmailForm(
+        email: "new_email_address@test.com",
+        emailAgain: "new_email_address@test.com", password: "pass")
 
       $scope.changeEmail(form).then(->
         assert form.pwd.responseErrorMessage == "Invalid password"
