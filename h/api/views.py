@@ -232,7 +232,8 @@ def filter_nipsa(request, results, user):
     # the user can see his/her own annotations
     # So remove the user from the nipsa list
     nipsa_users = [u for u in nipsa_users if user is None or u != user.id]
-    results['rows'] = [a for a in results['rows'] if a['user'] not in nipsa_users]
+    results['rows'] =\
+        [a for a in results['rows'] if a['user'] not in nipsa_users]
     # FixMe: Update total correctly
     new_total = len(results['rows'])
     results['total'] -= (total - new_total)

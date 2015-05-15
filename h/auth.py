@@ -44,7 +44,7 @@ from pyramid.util import action_method
 
 from .interfaces import IClientFactory
 from .oauth import JWT_BEARER
-from .accounts.admin import get_admins, get_username  # FIXME: Conditional import
+from .accounts.admin import get_admins, get_username  # FIXME: Separation
 
 LEEWAY = 240  # allowance for clock skew in verification
 

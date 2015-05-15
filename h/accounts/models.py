@@ -95,7 +95,7 @@ class User(UserMixin, Base):
     @classmethod
     def get_nipsa_users(cls, request):
         session = get_session(request)
-        users = session.query(cls).filter(cls.nipsa == True).all()
+        users = session.query(cls).filter(cls.nipsa).all()
         return [u.username for u in users]
 
     # TODO: remove all this status bitfield stuff
