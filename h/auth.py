@@ -44,6 +44,7 @@ from pyramid.util import action_method
 
 from .interfaces import IClientFactory
 from .oauth import JWT_BEARER
+from .accounts.admin import get_admins, get_username  # FIXME: Separation
 
 LEEWAY = 240  # allowance for clock skew in verification
 
@@ -168,6 +169,11 @@ def generate_signed_token(request):
         'ttl': int(ttl.total_seconds()),
         'userId': request.user,
     })
+
+    if request.registry.feature('nipsa'):
+        user = get_username(request.user, request.domain)
+        if user in get_admins():
+            claims['admin'] = True
 
     claims.update(request.extra_credentials or {})
     return jwt.encode(claims, request.client.client_secret)

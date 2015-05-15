@@ -16,7 +16,8 @@
           --><span class="provider" ng-show="auth.user">/{% raw %}{{ auth.user|persona:'provider' }}{% endraw %}</span><!--
           --><i class="h-icon-arrow-drop-down"></i></span>
         <ul class="dropdown-menu pull-right" role="menu">
-          <li ng-show="auth.user"><a href="" ng-click="dialog.visible='true'">Account</a></li>
+          <li ng-show="auth.user"><a href="" ng-click="dialog.visible='true'; adminDialog.visible='false'">Account</a></li>
+          <li ng-show="auth.isAdmin"><a href="" ng-click="adminDialog.visible='true'; dialog.visible='false'">Admin</a></li>
           <li><a href="mailto:support@hypothes.is">Feedback</a></li>
           <li><a href="/docs/help" target="_blank">Help</a></li>
           <li ng-show="auth.user"><a href="/stream?q=user:{% raw %}{{ auth.user|persona }}{% endraw %}"
@@ -67,6 +68,28 @@
       </div>
     </div>
     <!-- / Dialog -->
+
+    <!-- NipsaAdminDialog -->
+    {% if feature('nipsa') %}
+      <div class="content ng-cloak" ng-if="adminDialog.visible">
+        <div id="adminDialog" class="sheet">
+          <i class="close h-icon-close"
+             role="button"
+             title="Close"
+             ng-click="adminDialog.visible = false"></i>
+          <div>
+            {% block adminSettings %}
+              <div class="tabbable"
+                   ng-controller="AdminController"
+                   ng-model="tab">
+                {{ include_raw("h:templates/client/settings/admin.html") }}
+              </div>
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    <!-- / NipsaAdminDialog -->
 
     <!-- Angular view -->
     <main class="content" ng-view=""></main>

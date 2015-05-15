@@ -55,7 +55,8 @@ class BaseLayout(object):
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
-    requirements = (('app', None), ('account', None), ('topbar', None))
+    requirements = (('app', None), ('account', None), ('admin', None),
+                    ('topbar', None))  # FIXME: Use nipsa flag
 
 
 def includeme(config):

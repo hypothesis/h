@@ -191,6 +191,20 @@ account:
           contents: h:static/scripts/account/account.coffee
           depends: h:static/scripts/account/*
 
+admin:
+  contents:
+    - jquery
+    - angular
+    - angular_bootstrap
+    - angular_route
+    - output: scripts/admin.min.js
+      filters: uglifyjs
+      contents:
+        - output: scripts/admin.js
+          filters: browserify
+          contents: h:static/scripts/admin/admin.coffee
+          depends: h:static/scripts/admin/*
+
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
 # between frames participating in annotation by using the annotator bridge

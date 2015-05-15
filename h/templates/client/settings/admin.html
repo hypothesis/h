@@ -1,0 +1,51 @@
+<div class="tab-pane active" title="Admin">
+  <form class="set-nipsa-form form"
+	name="setNipsaForm"
+	ng-submit="submit(setNipsaForm, true)"
+	novalidate form-validate>
+    <h2 class="form-heading"><span>NIPSA restrictions</span></h2>
+    <p class="form-description">You can use this form to inflict NIPSA restrictions on users whom you find unacceptably naughty. Use this power wisely!</p>
+    <div class="form-field">
+      <label class="form-label" for="field-username">User to hide from the public eye:</label>
+      <input id="field-username" class="form-input" name="username" required ng-model="setNipsa.username" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="setNipsaForm.username.$error.required">Please tell me who has been saying dirty things!</li>
+      </ul>
+    </div>
+
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn btn-danger" type="submit"
+                status-button="setNipsaForm">Restrain!</button>
+      </div>
+    </div>
+
+  </form>
+
+  <form class="clear-nipsa-form form"
+	name="clearNipsaForm"
+	ng-submit="submit(clearNipsaForm, false)"
+	novalidate form-validate>
+    <h2 class="form-heading"><span>Lift restrictions</span></h2>
+    <div class="form-field">
+      <label class="form-label" for="field-username">User to un-hide:</label>
+      <input id="field-username" class="form-input" name="username" required ng-model="clearNipsa.username" />
+      <ul class="form-error-list">
+        <li class="form-error" ng-show="clearNipsaForm.username.$error.required">Please tell me who has received your pardon!</li>
+      </ul>
+    </div>
+
+    <div class="form-actions">
+      <div class="form-actions-buttons">
+        <button class="btn" type="submit"
+                status-button="clearNipsaForm">Release!</button>
+      </div>
+    </div>
+
+  </form>
+
+  <div>
+    Current blacklist is available <a target="_blank" href="/admin/nipsa.list">here</a>.
+  </div>
+
+</div>

@@ -12,6 +12,11 @@ from .models import Annotation
 from .resources import Root
 from .resources import Annotations
 
+# FixMe: Maybe do conditional import
+from ..accounts.models import User
+from hem.interfaces import IDBSession
+from pyramid_basemodel import Session
+
 log = logging.getLogger(__name__)
 
 
@@ -74,7 +79,13 @@ def search(request):
     """Search the database for annotations matching with the given query."""
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    return _search(request.params, user)
+
+    nipsa = request.registry.feature('nipsa')
+    results = _search(request.params, user)
+    if nipsa:
+        results = filter_nipsa(request, results, user)
+
+    return results
 
 
 @api_config(context=Root, name='access_token')
@@ -204,6 +215,29 @@ def _api_error(request, reason, status_code):
         'reason': reason,
     }
     return response_info
+
+
+def get_nipsa_users(request):
+    # FIXME: Add caching
+    nipsa_users = User.get_nipsa_users(request)
+    return ['acct:' + u + '@' + request.domain for u in nipsa_users]
+
+
+def filter_nipsa(request, results, user):
+    nipsa_users = get_nipsa_users(request)
+
+    total = len(results['rows'])
+
+    # If a flagged user is logged on, then
+    # the user can see his/her own annotations
+    # So remove the user from the nipsa list
+    nipsa_users = [u for u in nipsa_users if user is None or u != user.id]
+    results['rows'] =\
+        [a for a in results['rows'] if a['user'] not in nipsa_users]
+    # FixMe: Update total correctly
+    new_total = len(results['rows'])
+    results['total'] -= (total - new_total)
+    return results
 
 
 def _search(request_params, user=None):
@@ -355,4 +389,10 @@ def _anonymize_deletes(annotation):
 
 
 def includeme(config):
+    registry = config.registry
+
+    if registry.feature('nipsa'):
+        if not registry.queryUtility(IDBSession):
+            registry.registerUtility(Session, IDBSession)
+
     config.scan(__name__)

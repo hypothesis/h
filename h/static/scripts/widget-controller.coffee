@@ -28,7 +28,7 @@ module.exports = class WidgetController
       store.SearchResource.get q, (results) ->
         total = results.total
         offset += results.rows.length
-        if offset < total
+        if offset < total and results.rows.length
           _loadAnnotationsFrom query, offset
 
         annotationMapper.loadAnnotations(results.rows)
