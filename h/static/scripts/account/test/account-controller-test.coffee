@@ -292,37 +292,7 @@ describe "h:AccountController", ->
       $setValidity: ->
     }
 
-  ###
-  Return an AccountController instance and stub services.
-
-  Returns an object containing:
-
-  * an AccountController instance with all the services it depends on
-    stubbed, and
-  * each of the stubbed services
-
-  The returned object looks like this:
-
-      {"ctrl": the AccountController instance
-       "$scope": the scope attached to ctrl
-       "$filter": the stub filter injected into ctrl
-       "auth": the stub auth service injected into ctrl
-       ... (more stubbed services here)
-      }
-
-   Use CoffeeScript's destructuring assignment to pull out just the things
-   you need from the returned object. For example:
-
-       {ctrl, $scope} = controller({})
-
-   By default this does the minimum amount of stubbing necessary to create an
-   AccountController without it crashing. For each of the services that gets
-   stubbed the caller can optionally pass in their own object to be used
-   instead of the minimal stub. For example:
-
-       session = {profile: -> {$promise: ...}}
-       {ctrl, $scope} = controller(session: session)
-  ###
+  # Return an AccountController instance and stub services.
   createAccountController = ({$scope, $filter, auth, flash, formRespond,
                               identity, session}) ->
     locals = {
