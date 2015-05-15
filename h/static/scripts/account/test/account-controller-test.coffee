@@ -311,7 +311,7 @@ describe "h:AccountController", ->
       $filter: $filter or -> -> {}
       auth: auth or {}
       flash: flash or {}
-      formRespond: formRespond or {}
+      formRespond: formRespond or ->
       identity: identity or {}
       session: session or getStubSession({})
     }
@@ -347,7 +347,6 @@ describe "h:AccountController", ->
       edit_profile.returns({$promise: Promise.resolve({})})
 
       {$scope} = controller(
-        formRespond: ->
         session: getStubSession(edit_profile: edit_profile)
         # Simulate a logged-in user with username "joeuser"
         $filter: -> -> "joeuser")
@@ -374,7 +373,6 @@ describe "h:AccountController", ->
       new_email_addr = "new_email_address@test.com"
 
       {$scope} = controller(
-        formRespond: ->
         # AccountController expects session.edit_profile() to respond with the
         # newly saved email address.
         session: getStubSession(
@@ -431,7 +429,7 @@ describe "h:AccountController", ->
 
     it "broadcasts 'formState' 'changeEmailForm' 'loading' on submit", ->
       new_email_address = "new_email_address@test.com"
-      {$scope} = controller(formRespond: ->)
+      {$scope} = controller({})
 
       $scope.$broadcast = sinon.stub()
 
@@ -451,7 +449,7 @@ describe "h:AccountController", ->
     it "broadcasts 'formState' 'changeEmailForm' 'success' on success", ->
       new_email_address = "new_email_address@test.com"
 
-      {$scope} = controller(formRespond: ->)
+      {$scope} = controller({})
 
       $scope.$broadcast = sinon.stub()
 
@@ -473,7 +471,6 @@ describe "h:AccountController", ->
       new_email_address = "new_email_address@test.com"
 
       {$scope} = controller(
-        formRespond: ->
         flash: {error: ->}
         session: getStubSession(
           edit_profile: -> {$promise: Promise.reject({data: {}})}
