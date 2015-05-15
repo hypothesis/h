@@ -1,3 +1,11 @@
+Current Development Version (master branch)
+===========================================
+
+- Added support for URL parameters to the Atom feed at ``/stream.atom``.
+  For example: ``/stream.atom?user=seanh`` or
+  ``/stream.atom?user=seanh&tags=foo,bar``.
+
+
 0.4.0 (2015-05-05)
 ==================
 
