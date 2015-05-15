@@ -266,6 +266,13 @@ describe "h:AccountController", ->
     )
     return $rootScope
 
+  # Return a minimal stub version of h's session service.
+  getStubSession = ({profile, edit_profile}) ->
+    return {
+      profile: -> profile or {$promise: Promise.resolve({})}
+      edit_profile: edit_profile or -> {$promise: Promise.resolve({})}
+    }
+
   ###
   Return an AccountController instance and stub services.
 
@@ -306,7 +313,7 @@ describe "h:AccountController", ->
       flash: flash or {}
       formRespond: formRespond or {}
       identity: identity or {}
-      session: session or {profile: -> {$promise: Promise.resolve()}}
+      session: session or getStubSession({})
     }
     locals["ctrl"] = getControllerService()("AccountController", locals)
     return locals
@@ -323,8 +330,7 @@ describe "h:AccountController", ->
     profilePromise = Promise.resolve({
       email: "test_user@test_email.com"
     })
-    session = {profile: -> {$promise: profilePromise}}
-    {$scope} = controller(session: session)
+    {$scope} = controller(session: {profile: -> {$promise: profilePromise}})
 
     profilePromise.then(->
       assert $scope.email == "test_user@test_email.com"
@@ -340,14 +346,9 @@ describe "h:AccountController", ->
       edit_profile = sinon.stub()
       edit_profile.returns({$promise: Promise.resolve({})})
 
-      session = {
-        edit_profile: edit_profile
-        profile: -> {$promise: Promise.resolve()}
-      }
-
       {$scope} = controller(
         formRespond: ->
-        session: session
+        session: getStubSession(edit_profile: edit_profile)
         # Simulate a logged-in user with username "joeuser"
         $filter: -> -> "joeuser")
 
@@ -372,16 +373,16 @@ describe "h:AccountController", ->
     it "updates placeholder after successfully changing the email address", ->
       new_email_addr = "new_email_address@test.com"
 
-      session = {
-        # AccountController expects session.edit_profile() to respond with the
-        # newly saved email address.
-        edit_profile: -> {$promise: Promise.resolve({email: new_email_addr})}
-        profile: -> {$promise: Promise.resolve()}
-      }
-
       {$scope} = controller(
         formRespond: ->
-        session: session)
+        # AccountController expects session.edit_profile() to respond with the
+        # newly saved email address.
+        session: getStubSession(
+            edit_profile: -> {
+              $promise: Promise.resolve({email: new_email_addr})
+            }
+          )
+      )
 
       form = {
         $name: "changeEmailForm"
@@ -405,14 +406,11 @@ describe "h:AccountController", ->
             emailAgain: "The emails must match."
       }
 
-      session = {
-        edit_profile: -> {$promise: Promise.reject(server_response)}
-        profile: -> {$promise: Promise.resolve()}
-      }
-
       {$scope} = controller(
         formRespond: require("../../form-respond")()
-        session: session
+        session: getStubSession(
+          edit_profile: -> {$promise: Promise.reject(server_response)}
+        )
       )
 
       form = {
@@ -433,13 +431,7 @@ describe "h:AccountController", ->
 
     it "broadcasts 'formState' 'changeEmailForm' 'loading' on submit", ->
       new_email_address = "new_email_address@test.com"
-      session = {
-        edit_profile: -> {$promise: Promise.resolve({})}
-        profile: -> {$promise: Promise.resolve()}
-      }
-      {$scope} = controller(
-        formRespond: ->
-        session: session)
+      {$scope} = controller(formRespond: ->)
 
       $scope.$broadcast = sinon.stub()
 
@@ -459,14 +451,7 @@ describe "h:AccountController", ->
     it "broadcasts 'formState' 'changeEmailForm' 'success' on success", ->
       new_email_address = "new_email_address@test.com"
 
-      session = {
-        edit_profile: -> {$promise: Promise.resolve({})}
-        profile: -> {$promise: Promise.resolve()}
-      }
-
-      {$scope} = controller(
-        formRespond: ->
-        session: session)
+      {$scope} = controller(formRespond: ->)
 
       $scope.$broadcast = sinon.stub()
 
@@ -487,15 +472,12 @@ describe "h:AccountController", ->
     it "broadcasts 'formState' 'changeEmailForm' '' on error", ->
       new_email_address = "new_email_address@test.com"
 
-      session = {
-        edit_profile: -> {$promise: Promise.reject({data: {}})}
-        profile: -> {$promise: Promise.resolve()}
-      }
-
       {$scope} = controller(
         formRespond: ->
-        session: session
         flash: {error: ->}
+        session: getStubSession(
+          edit_profile: -> {$promise: Promise.reject({data: {}})}
+        )
       )
 
       $scope.$broadcast = sinon.stub()
@@ -526,14 +508,11 @@ describe "h:AccountController", ->
         statusText: "Unauthorized"
       }
 
-      session = {
-        edit_profile: -> {$promise: Promise.reject(server_response)}
-        profile: -> {$promise: Promise.resolve()}
-      }
-
       {$scope} = controller(
         formRespond: require("../../form-respond")()
-        session: session
+        session: getStubSession(
+          edit_profile: -> {$promise: Promise.reject(server_response)}
+        )
       )
 
       form = {
