@@ -1,14 +1,58 @@
 output-format: grouped
-inherits:
-  - full_pep8
-  - strictness_low
+strictness: veryhigh
+test-warnings: true
+doc-warnings: true
+max-line-length: 79
 pep8:
-  options:
-    max-line-length: 79
+  full: true
 pylint:
   enable:
     - relative-import
+  disable:
+    - C0111  # Missing %s docstring
+    - R0201  # Method could be a function
+    - W0704  # Except doesn't do anything
+    - R0903  # Too few public methods
+    - W0142  # Used * or ** magic
+  options:
+    # Some good names that pylint would otherwise reject:
+    #
+    # - _: placeholder
+    # - i,j,k: counters
+    # - k,v: dict iteration
+    # - db,fn: common abbreviations
+    # - fp: python idiom for file handles
+    #
+    # Some good "constant" names that pylint would otherwise reject:
+    #
+    # - log: common in "log = logging.getLogger(__name__)" pattern
+    # - parser: common in modules that use argparse
+    #
+    good-names: _,i,j,k,v,e,db,fn,fp,log,parser
+
+    # Allow longer function and method names.
+    #
+    # By default PyLint doesn't allow function or method names longer than 30
+    # chars, but lots of test methods do (and should) have longer names. It'd
+    # be better to restrict this setting to tests only.
+    #
+    # This also allows capital letters in function and method names (just not
+    # at the start), to allow names like
+    # test_instance_conforms_to_IDataManager().
+    method-rgx: '[a-z_][a-zA-Z0-9_]{2,64}$'
+    function-rgx: '[a-z_][a-zA-Z0-9_]{2,64}$'
+pep257:
+  disable:
+    - D100  # Missing docstring in public module
+    - D101  # Missing docstring in public class
+    - D102  # Missing docstring in public method
+    - D103  # Missing docstring in public function
+pyroma:
+  run: true
 ignore-paths:
+  - gunicorn.conf.py
   - h/_version.py
   - h/migrations/
   - versioneer.py
+ignore-patterns:
+  - '.*\.egg'
