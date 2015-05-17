@@ -16,9 +16,7 @@ def run(request):
     the same channel. NSQ will distribute messages among available workers in a
     round-robin fashion.
     """
-    def handle_message(reader, message=None):
-        if message is None:
-            return
+    for message in request.get_queue_reader('annotations', 'notification'):
         data = json.loads(message.body)
         action = data['action']
         annotation = Annotation(**data['annotation'])
@@ -28,7 +26,4 @@ def run(request):
             m = Message(subject=subject, recipients=recipients,
                         body=body, html=html)
             mailer.send_immediately(m)
-
-    reader = request.get_queue_reader('annotations', 'notification')
-    reader.on_message.connect(handle_message)
-    reader.start(block=True)
+        message.fin()

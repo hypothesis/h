@@ -46,11 +46,11 @@ install_requires = [
     'cryptography>=0.7',
     'deform>=0.9,<1.0',
     'elasticsearch>=1.1.0',
-    'gnsq>=0.2.0,<0.3.0',
     'gunicorn>=19.2,<20',
     'horus>=0.9.15',
     'jsonpointer==1.0',
     'jsonschema==1.3.0',
+    'nsq-py>=0.1.7,<0.2',
     'oauthlib==0.6.3',
     'pyramid>=1.5',
     'pyramid-basemodel>=0.2',
@@ -63,7 +63,7 @@ install_requires = [
     'pyramid_webassets>=0.9,<1.0',
     'pyramid-jinja2>=2.3.3',
     'raven>=5.1.1,<5.2.0',
-    'requests>=2.2.1',
+    'requests==2.2.1',
     'ws4py>=0.3,<0.4',
 
     # Version pin for known bug

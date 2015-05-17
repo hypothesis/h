@@ -421,7 +421,7 @@ class FilterHandler(object):
 
 class WebSocket(_WebSocket):
     # Class attributes
-    event_queue = None
+    reader = None
     instances = weakref.WeakSet()
     origins = []
 
@@ -446,22 +446,14 @@ class WebSocket(_WebSocket):
 
     @classmethod
     def start_reader(cls, request):
-        cls.event_queue = gevent.queue.Queue()
         reader_id = 'stream-{}#ephemeral'.format(_random_id())
-        reader = request.get_queue_reader('annotations', reader_id)
-        reader.on_message.connect(cls.on_queue_message)
-        reader.start(block=False)
-        gevent.spawn(broadcast_from_queue, cls.event_queue, cls.instances)
-
-    @classmethod
-    def on_queue_message(cls, reader, message=None):
-        if message is not None:
-            cls.event_queue.put(message)
+        cls.reader = request.get_queue_reader('annotations', reader_id)
+        gevent.spawn(broadcast_from_queue, cls.reader, cls.instances)
 
     def opened(self):
         transaction.commit()  # Release the database transaction
 
-        if self.event_queue is None:
+        if self.reader is None:
             self.start_reader(self.request)
 
     def send_annotations(self):
@@ -561,6 +553,7 @@ def broadcast_from_queue(queue, sockets):
         for socket in list(sockets):
             if should_send_event(socket, annotation, data_in):
                 socket.send(data_out)
+        message.fin()
 
 
 def should_send_event(socket, annotation, event_data):
