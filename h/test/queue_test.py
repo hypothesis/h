@@ -1,12 +1,10 @@
-import pytest
 from pyramid import testing
 from mock import patch
 
 from h import queue
 
 
-
-@patch('gnsq.Reader')
+@patch('nsq.reader.Reader')
 def test_get_reader_default(fake_reader):
     req = testing.DummyRequest()
     queue.get_reader(req, 'ethics-in-games-journalism', 'channel4')
@@ -15,7 +13,7 @@ def test_get_reader_default(fake_reader):
                                    nsqd_tcp_addresses=['localhost:4150'])
 
 
-@patch('gnsq.Reader')
+@patch('nsq.reader.Reader')
 def test_get_reader(fake_reader):
     req = testing.DummyRequest()
     req.registry.settings.update({
@@ -27,7 +25,8 @@ def test_get_reader(fake_reader):
                                    nsqd_tcp_addresses=['foo:1234',
                                                        'bar:4567'])
 
-@patch('gnsq.Reader')
+
+@patch('nsq.reader.Reader')
 def test_get_reader_namespace(fake_reader):
     """
     When the ``nsq.namespace`` setting is provided, `get_reader` should return
@@ -44,35 +43,38 @@ def test_get_reader_namespace(fake_reader):
                                    nsqd_tcp_addresses=['localhost:4150'])
 
 
-@patch('gnsq.Nsqd')
-def test_get_writer_default(fake_nsqd):
+@patch('nsq.client.Client')
+def test_get_writer_default(fake_writer):
     req = testing.DummyRequest()
     queue.get_writer(req)
-    fake_nsqd.assert_called_with('localhost', http_port='4151')
+    fake_writer.assert_called_with(nsqd_tcp_addresses=['localhost:4150'])
 
 
-@patch('gnsq.Nsqd')
-def test_get_writer(fake_nsqd):
+@patch('nsq.client.Client')
+def test_get_writer(fake_writer):
     req = testing.DummyRequest()
-    req.registry.settings.update({'nsq.writer.address': 'philae:2014'})
+    req.registry.settings.update({
+        'nsq.writer.address': 'philae:2014'})
     queue.get_writer(req)
-    fake_nsqd.assert_called_with('philae', http_port='2014')
+    fake_writer.assert_called_with(nsqd_tcp_addresses=['philae:2014'])
 
 
-@patch('gnsq.Nsqd')
-def test_get_writer_namespace(fake_nsqd):
+@patch('nsq.client.Client')
+def test_get_writer_namespace(fake_writer):
     """
     When the ``nsq.namespace`` setting is provided, `get_writer` should return
-    a writer that automatically prefixes the namespace onto the topic names
-    given to :method:`gnsq.Nsqd.publish` or :method:`gnsq.Nsqd.mpublish`.
+    a writer that automatically prefixes the namespace onto the topic names.
     """
-    fake_client = fake_nsqd.return_value
     req = testing.DummyRequest()
     req.registry.settings.update({
         'nsq.namespace': "abc123"
     })
 
     writer = queue.get_writer(req)
+    fake_writer.assert_called_with(nsqd_tcp_addresses=['localhost:4150'])
 
-    writer.publish('sometopic', 'somedata')
-    fake_client.publish.assert_called_with('abc123-sometopic', 'somedata')
+    writer.pub('sometopic', 'somedata')
+    fake_writer.pub.assert_called_with(writer, 'abc123-sometopic', 'somedata')
+
+    writer.mpub('sometopic', 'somedata')
+    fake_writer.mpub.assert_called_with(writer, 'abc123-sometopic', 'somedata')

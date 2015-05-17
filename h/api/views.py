@@ -194,7 +194,7 @@ def _publish_annotation_event(request, annotation, action):
         'annotation': annotation,
         'src_client_id': request.headers.get('X-Client-Id'),
     }
-    queue.publish('annotations', json.dumps(data))
+    queue.pub('annotations', json.dumps(data))
 
 
 def _api_error(request, reason, status_code):

@@ -18,7 +18,7 @@ from h.streamer import broadcast_from_queue
 from h.streamer import websocket
 
 
-FakeMessage = namedtuple('FakeMessage', 'body')
+FakeMessage = namedtuple('FakeMessage', 'body fin')
 
 
 class FakeSocket(object):
@@ -294,7 +294,10 @@ class TestBroadcast(unittest.TestCase):
              'action': 'delete',
              'src_client_id': 'cat'},
         ]
-        self.messages = [FakeMessage(json.dumps(m)) for m in self.message_data]
+        self.messages = []
+
+        for data in self.message_data:
+            self.messages.append(FakeMessage(json.dumps(data), MagicMock()))
 
         self.queue = MagicMock()
         self.queue.__iter__.return_value = self.messages
@@ -316,6 +319,13 @@ class TestBroadcast(unittest.TestCase):
         sock = FakeSocket('pidgeon')
         broadcast_from_queue(self.queue, [sock])
         assert sock.send.called is False
+
+    def test_fin_is_called(self):
+        self.should.return_value = False
+        sock = FakeSocket('cat')
+        broadcast_from_queue(self.queue, [sock])
+        for message in self.messages:
+            assert message.fin.called
 
 
 class TestShouldSendEvent(unittest.TestCase):

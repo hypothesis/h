@@ -1,48 +1,49 @@
+from nsq import client, reader
 from pyramid.settings import aslist
-import gnsq
-
-
-class NamespacedNsqd(object):
-    def __init__(self, namespace, *args, **kwargs):
-        self.client = gnsq.Nsqd(*args, **kwargs)
-        self.namespace = namespace
-
-    def publish(self, topic, data):
-        if self.namespace is not None:
-            topic = '{0}-{1}'.format(self.namespace, topic)
-        return self.client.publish(topic, data)
 
 
 def get_reader(request, topic, channel):
     """
-    Get a :py:class:`gnsq.Reader` instance configured to connect to the
+    Get a :py:class:`nsq.Reader` instance configured to connect to the
     nsqd reader addresses specified in settings. The reader will read from
-    the specified topic and channel.
-
-    The caller is responsible for adding appropriate `on_message` hooks and
-    starting the reader.
+    the specified topic and channel, optionally prefixing the topic with a
+    namespace.
     """
     ns = request.registry.settings.get('nsq.namespace')
     addrs = aslist(request.registry.settings.get('nsq.reader.addresses',
                                                  'localhost:4150'))
+
     if ns is not None:
         topic = '{0}-{1}'.format(ns, topic)
-    reader = gnsq.Reader(topic, channel, nsqd_tcp_addresses=addrs)
-    return reader
+
+    return reader.Reader(topic, channel, nsqd_tcp_addresses=addrs)
 
 
 def get_writer(request):
     """
-    Get a :py:class:`gnsq.Nsqd` instance configured to connect to the nsqd
-    writer address configured in settings. The writer communicates over the
-    nsq HTTP API and does not hold a connection open to the nsq instance.
+    Get a :py:class:`nsq.client.Client` instance configured to connect to the
+    nsqd address configured in settings, optionally prefixing topics with a
+    namespace.
     """
     ns = request.registry.settings.get('nsq.namespace')
-    addr = request.registry.settings.get('nsq.writer.address',
-                                         'localhost:4151')
-    hostname, port = addr.split(':', 1)
-    nsqd = NamespacedNsqd(ns, hostname, http_port=port)
-    return nsqd
+    addrs = aslist(request.registry.settings.get('nsq.writer.address',
+                                                 'localhost:4150'))
+
+    writer = client.Client(nsqd_tcp_addresses=addrs)
+
+    if ns is not None:
+        def pub(topic, msg):
+            topic = '{0}-{1}'.format(ns, topic)
+            client.Client.pub(writer, topic, msg)
+
+        def mpub(topic, msg):
+            topic = '{0}-{1}'.format(ns, topic)
+            client.Client.mpub(writer, topic, msg)
+
+        writer.pub = pub
+        writer.mpub = mpub
+
+    return writer
 
 
 def includeme(config):
