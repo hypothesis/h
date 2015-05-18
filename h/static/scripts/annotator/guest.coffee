@@ -15,6 +15,9 @@ module.exports = class Guest extends Annotator
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-adder button mouseup":   "onAdderMouseup"
+    ".annotator-hl click":               "onHighlightClick"
+    ".annotator-hl mouseover":           "onHighlightMouseover"
+    ".annotator-hl mouseout":            "onHighlightMouseout"
     "setVisibleHighlights": "setVisibleHighlights"
 
   # Plugin configuration
@@ -233,8 +236,6 @@ module.exports = class Guest extends Annotator
       method: "focusAnnotations"
       params: (a.$$tag for a in annotations)
 
-  onAnchorMousedown: ->
-
   onSuccessfulSelection: (event, immediate) ->
     unless event?
       throw "Called onSuccessfulSelection without an event!"
@@ -272,25 +273,28 @@ module.exports = class Guest extends Annotator
       this.triggerShowFrame()
       this.showAnnotations annotations
 
-  # When Mousing over a highlight, tell the sidebar to focus the relevant annotations
-  onAnchorMouseover: (event) ->
+  onHighlightMouseover: (event) ->
     if @visibleHighlights
       event.stopPropagation()
-      annotations = event.data.getAnnotations(event)
+      annotations = []
+      for obj in @anchored
+        if event.target in obj.highlights
+          annotations.push(obj.annotation)
       this.focusAnnotations annotations
 
-  # Tell the sidebar to stop highlighting the relevant annotations
-  onAnchorMouseout: (event) ->
+  onHighlightMouseout: (event) ->
     if @visibleHighlights
       event.stopPropagation()
       this.focusAnnotations []
 
-  # When clicking on a highlight, tell the sidebar to bring up the viewer for the relevant annotations
-  onAnchorClick: (event) =>
+  onHighlightClick: (event) =>
     if @visibleHighlights
       event.stopPropagation()
-      this.selectAnnotations (event.data.getAnnotations event),
-        (event.metaKey or event.ctrlKey)
+      annotations = []
+      for obj in @anchored
+        if event.target in obj.highlights
+          annotations.push(obj.annotation)
+      this.selectAnnotations annotations, (event.metaKey or event.ctrlKey)
 
   # Pass true to show the highlights in the frame or false to disable.
   setVisibleHighlights: (shouldShowHighlights) ->
