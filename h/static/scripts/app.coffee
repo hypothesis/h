@@ -50,6 +50,27 @@ configureRoutes = ['$routeProvider', ($routeProvider) ->
 ]
 
 
+configureStreamer = ['$provide', ($provide) ->
+  $provide.service('streamer', [
+    '$http', '$injector', '$window', 'feature'
+    ($http,   $injector,   $window,   feature) ->
+      if feature('streamer')
+        streamer = $injector.instantiate(require('./streamer'))
+        clientId = uuid.v4()
+        streamer.clientId = clientId
+        $.ajaxSetup(headers: {'X-Client-Id': clientId})
+        $http.defaults.headers.common['X-Client-Id'] = clientId
+      else
+        streamer =
+          open: angular.noop
+          close: angular.noop
+          send: angular.noop
+
+      return streamer
+  ])
+]
+
+
 configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
   # Configure CSP for templates
   # XXX: IE workaround for the lack of document.baseURI property
@@ -142,7 +163,6 @@ module.exports = angular.module('h', [
 .service('searchFilter', require('./search-filter'))
 .service('store', require('./store'))
 .service('streamFilter', require('./stream-filter'))
-.service('streamer', require('./streamer'))
 .service('tags', require('./tags'))
 .service('time', require('./time'))
 .service('threading', require('./threading'))
@@ -156,8 +176,8 @@ module.exports = angular.module('h', [
 .config(configureDocument)
 .config(configureLocation)
 .config(configureRoutes)
+.config(configureStreamer)
 .config(configureTemplates)
 
 .run(setupCrossFrame)
-.run(setupStreamer)
 .run(setupHost)
