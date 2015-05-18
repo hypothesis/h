@@ -20,8 +20,8 @@ getNodeTextLayer = (node) ->
   return node.getElementsByClassName('textLayer')[0]
 
 
-getPageTextLayer = (pageIndex) ->
-  return PDFViewerApplication.pdfViewer.pages[pageIndex].textLayer
+getPage = (pageIndex) ->
+  return PDFViewerApplication.pdfViewer.pages[pageIndex]
 
 
 getPageTextContent = (pageIndex) ->
@@ -112,14 +112,27 @@ exports.anchor = (selectors) ->
     promise = promise.catch ->
       findPage(position.start)
       .then(({index, offset}) ->
-        textLayer = getPageTextLayer(index)
-        start = position.start - offset
-        end = position.end - offset
-        root = textLayer.textLayerDiv
-        Promise.resolve(TextPositionAnchor.fromSelector({start, end}, {root}))
-        .then((a) -> Promise.resolve(a.toRange({root})))
+        page = getPage(index)
+        if page.textLayer?.renderingDone
+          root = page.textLayer.textLayerDiv
+          start = position.start - offset
+          end = position.end - offset
+          Promise.resolve(TextPositionAnchor.fromSelector({start, end}, {root}))
+          .then((a) -> Promise.resolve(a.toRange({root})))
+          .then(assertQuote)
+        else
+          el = page.el
+          placeholder = el.getElementsByClassName('annotator-placeholder')[0]
+          unless placeholder?
+            placeholder = document.createElement('span')
+            placeholder.classList.add('annotator-placeholder')
+            placeholder.textContent = 'Loading annotations…'
+            page.el.appendChild(placeholder)
+          range = document.createRange()
+          range.setStartBefore(placeholder)
+          range.setEndAfter(placeholder)
+          return range
       )
-      .then(assertQuote)
 
   return promise
 

@@ -206,9 +206,7 @@ module.exports = class Guest extends Annotator
 
   deleteAnnotation: (annotation) ->
     for info in @anchored when info.annotation is annotation
-      for h in info.highlights when h.parentNode?
-        child = h.childNodes[0]
-        $(h).replaceWith(h.childNodes)
+      highlighter.removeHighlights(info.highlights)
 
     @anchored = (a for a in @anchored when a.annotation isnt annotation)
     @unanchored = (a for a in @unanchored when a.annotation isnt annotation)

@@ -131,6 +131,10 @@ $base-font-size: 14px;
   @include transition(none !important);
 }
 
+.annotator-placeholder {
+  position: absolute;
+}
+
 
 //CONTROLBAR STUFF////////////////////////////////
 .annotator-frame .annotator-toolbar {

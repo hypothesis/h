@@ -2,6 +2,8 @@ raf = require('raf')
 Promise = require('es6-promise').Promise
 Annotator = require('annotator')
 
+highlighter = require('../highlighter')
+
 
 class PDF extends Annotator.Plugin
   documentPromise: null
@@ -46,8 +48,7 @@ class PDF extends Annotator.Plugin
       return {title, link}
 
   onpagerendered: (event) =>
-    annotator = @annotator
-    unanchored = @annotator.unanchored
+    annotator = {anchored, unanchored} = @annotator
     page = PDFViewerApplication.pdfViewer.pages[event.detail.pageNumber - 1]
 
     waitForTextLayer = ->
@@ -56,6 +57,28 @@ class PDF extends Annotator.Plugin
 
     reanchor = ->
       unanchored = unanchored.splice(0, unanchored.length)
+
+      placeholder = page.el.getElementsByClassName('annotator-placeholder')[0]
+      if placeholder?
+        unchanged = []
+        for info in anchored
+          attempt = false
+
+          for hl in info.highlights
+            if placeholder.contains(hl)
+              attempt = true
+              break
+
+          if attempt
+            highlighter.removeHighlights(info.highlights)
+            delete info.highlights
+            unanchored.push(info)
+          else
+            unchanged.push(info)
+
+        anchored.splice(0, anchored.length, unchanged...)
+        page.el.removeChild(placeholder)
+
       for obj in unanchored
         annotator.setupAnnotation(obj.annotation)
 

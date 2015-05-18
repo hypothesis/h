@@ -22,3 +22,9 @@ exports.highlightRange = (normedRange, cssClass='annotator-hl') ->
 
   nodes = $(normedRange.textNodes()).filter((i) -> not white.test @nodeValue)
   r = nodes.wrap(hl).parent().show().toArray()
+
+
+exports.removeHighlights = (highlights) ->
+  for h in highlights when h.parentNode?
+    child = h.childNodes[0]
+    $(h).replaceWith(h.childNodes)
