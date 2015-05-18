@@ -1,6 +1,6 @@
 import statsd
 
-__all__ = ['get_client']
+__all__ = ('get_client',)
 
 
 def get_client(request):
