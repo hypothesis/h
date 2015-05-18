@@ -37,7 +37,7 @@ versioneer.versionfile_build = 'h/_version.py'
 versioneer.tag_prefix = 'v'
 versioneer.parentdir_prefix = 'h-'
 
-install_requires = [
+INSTALL_REQUIRES = [
     'PyJWT>=1.0.0,<2.0.0',
     'SQLAlchemy>=0.8.0',
     'alembic>=0.7.0',
@@ -71,8 +71,8 @@ install_requires = [
     'repoze.sendmail<4.2',
 ]
 
-development_extras = ['pyramid_debugtoolbar>=2.1', 'prospector', 'pep257']
-testing_extras = ['mock', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
+DEV_EXTRAS = ['pyramid_debugtoolbar>=2.1', 'prospector', 'pep257']
+TESTING_EXTRAS = ['mock', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
 
 setup(
     name='h',
@@ -98,14 +98,14 @@ setup(
     packages=find_packages(exclude=['*.test']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=install_requires,
+    install_requires=INSTALL_REQUIRES,
     extras_require={
-        'dev': development_extras,
-        'testing': testing_extras,
+        'dev': DEV_EXTRAS,
+        'testing': TESTING_EXTRAS,
         'claim': ['mandrill'],
         'YAML': ['PyYAML']
     },
-    tests_require=development_extras + testing_extras + ['PyYAML'],
+    tests_require=DEV_EXTRAS + TESTING_EXTRAS,
     setup_requires=['setuptools_git'],
     cmdclass=cmdclass,
     package_data={
