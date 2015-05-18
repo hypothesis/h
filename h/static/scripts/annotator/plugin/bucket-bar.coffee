@@ -99,13 +99,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     for scrollable in @options.scrollables ? []
       $(scrollable).off 'resize scroll', this._scheduleUpdate
 
-  # Update sometime soon
-  _scheduleUpdate: =>
-    return if @_updatePending?
-    @_updatePending = raf =>
-      delete @_updatePending
-      @_update()
-
   _collate: (a, b) ->
     for i in [0..a.length-1]
       if a[i] < b[i]
@@ -113,6 +106,17 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       if a[i] > b[i]
         return 1
     return 0
+
+  # Update sometime soon
+  update: ->
+    this._scheduleUpdate()
+
+  _scheduleUpdate: =>
+    return if @_updatePending?
+    @_updatePending = raf =>
+      delete @_updatePending
+      @_update()
+
 
   _update: =>
     # Keep track of buckets of annotations above and below the viewport
