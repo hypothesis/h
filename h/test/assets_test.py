@@ -4,8 +4,6 @@ from mock import Mock
 from pyramid.urldispatch import Route
 from pyramid.testing import DummyRequest
 
-from h import assets
-
 
 class DummyEvent(object):
     """A dummy event for testing registry events."""
@@ -20,7 +18,8 @@ def test_subscriber_predicate(config):
     It should correctly match asset requests when its value is ``True``,
     and other requests when ``False``.
     """
-    config.include(assets)
+    config.include('pyramid_webassets')
+    config.add_subscriber_predicate('asset_request', 'h.assets.AssetRequest')
 
     mock1 = Mock()
     mock2 = Mock()

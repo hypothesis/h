@@ -51,5 +51,6 @@ def includeme(config):
 
     config.include('pyramid_jinja2')
     for extension in JINJA2_FILE_EXTENSIONS:
+        args = (config, extension)
+        config.action(None, setup_jinja2_environment, args=args, order=1)
         config.add_jinja2_renderer(extension)
-        config.action(None, setup_jinja2_environment, (config, extension))

@@ -78,6 +78,11 @@ setupStreamer = [
     $http.defaults.headers.common['X-Client-Id'] = clientId
 ]
 
+angular.module('h.config', [])
+.provider('identity', require('./identity'))
+.provider('session', require('./session'))
+
+
 module.exports = angular.module('h', [
   'angulartics'
   'angulartics.google.analytics'
@@ -88,6 +93,7 @@ module.exports = angular.module('h', [
   'ngSanitize'
   'ngTagsInput'
   'toastr'
+  'h.config'
 ])
 
 .controller('AppController', require('./app-controller'))
@@ -117,9 +123,6 @@ module.exports = angular.module('h', [
 .filter('moment', require('./filter/moment'))
 .filter('persona', require('./filter/persona'))
 .filter('urlencode', require('./filter/urlencode'))
-
-.provider('identity', require('./identity'))
-.provider('session', require('./session'))
 
 .service('annotator', -> new Annotator(angular.element('<div>')))
 .service('annotationMapper', require('./annotation-mapper'))
