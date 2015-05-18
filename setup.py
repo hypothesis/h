@@ -73,6 +73,8 @@ INSTALL_REQUIRES = [
 
 DEV_EXTRAS = ['pyramid_debugtoolbar>=2.1', 'prospector', 'pep257']
 TESTING_EXTRAS = ['mock', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
+CLAIM_EXTRAS = ['mandrill']
+YAML_EXTRAS = ['PyYAML']
 
 setup(
     name='h',
@@ -100,10 +102,10 @@ setup(
     zip_safe=False,
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'dev': DEV_EXTRAS + ['PyYAML'],
+        'dev': DEV_EXTRAS + YAML_EXTRAS,
         'testing': TESTING_EXTRAS,
-        'claim': ['mandrill'],
-        'YAML': ['PyYAML']
+        'claim': CLAIM_EXTRAS,
+        'YAML': YAML_EXTRAS,
     },
     tests_require=DEV_EXTRAS + TESTING_EXTRAS,
     setup_requires=['setuptools_git'],
