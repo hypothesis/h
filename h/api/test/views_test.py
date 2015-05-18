@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=protected-access
 
 """Defines unit tests for h.api.views."""
 
