@@ -1,5 +1,7 @@
 from . import atom_feed
 
+JINJA2_FILE_EXTENSIONS = ['.js', '.txt', '.html', '.xml']
+
 
 class AnnotationsAtomRendererFactory(object):
 
@@ -37,7 +39,17 @@ class AnnotationsAtomRendererFactory(object):
         return atom_feed.render_annotations(request=system["request"], **value)
 
 
+def setup_jinja2_environment(config, extension):
+    env = config.get_jinja2_environment(extension)
+    env.globals['feature'] = config.feature
+
+
 def includeme(config):
     config.add_renderer(
         name="annotations_atom",
         factory="h.renderers.AnnotationsAtomRendererFactory")
+
+    config.include('pyramid_jinja2')
+    for extension in JINJA2_FILE_EXTENSIONS:
+        config.add_jinja2_renderer(extension)
+        config.action(None, setup_jinja2_environment, (config, extension))
