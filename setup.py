@@ -100,7 +100,7 @@ setup(
     zip_safe=False,
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'dev': DEV_EXTRAS,
+        'dev': DEV_EXTRAS + ['PyYAML'],
         'testing': TESTING_EXTRAS,
         'claim': ['mandrill'],
         'YAML': ['PyYAML']
