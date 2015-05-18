@@ -53,6 +53,8 @@ ignore-paths:
   - gunicorn.conf.py
   - h/_version.py
   - h/migrations/
+  - h/static/
+  - node_modules/
   - versioneer.py
 ignore-patterns:
   - '.*\.egg'
