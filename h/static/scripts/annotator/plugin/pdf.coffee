@@ -9,6 +9,9 @@ class PDF extends Annotator.Plugin
   documentPromise: null
 
   pluginInit: ->
+    viewer = PDFViewerApplication.pdfViewer.viewer
+    viewer.classList.add('has-transparent-text-layer')
+
     if PDFViewerApplication.loading
       @documentLoaded = new Promise (resolve) ->
         finish = (evt) ->
