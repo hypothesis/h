@@ -169,6 +169,8 @@ module.exports = class Guest extends Annotator
           unanchored.push(result)
 
       annotation.$orphan = (results.length and not highlighted)
+
+      plugins.BucketBar.update()
       plugins.CrossFrame.sync([annotation])
 
     targets = (maybeAnchor(target) for target in annotation.target ? [])
