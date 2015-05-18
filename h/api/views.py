@@ -2,15 +2,15 @@
 
 """HTTP/REST API for interacting with the annotation store."""
 
-import json
 import logging
 
 from pyramid.view import view_config
 
-from .auth import get_user
-from .models import Annotation
-from .resources import Root
-from .resources import Annotations
+from h.api.auth import get_user
+from h.api.events import AnnotationEvent
+from h.api.models import Annotation
+from h.api.resources import Root
+from h.api.resources import Annotations
 
 log = logging.getLogger(__name__)
 
@@ -188,13 +188,8 @@ def delete(context, request):
 
 def _publish_annotation_event(request, annotation, action):
     """Publish an event to the annotations queue for this annotation action"""
-    queue = request.get_queue_writer()
-    data = {
-        'action': action,
-        'annotation': annotation,
-        'src_client_id': request.headers.get('X-Client-Id'),
-    }
-    queue.publish('annotations', json.dumps(data))
+    event = AnnotationEvent(request, annotation, action)
+    request.registry.notify(event)
 
 
 def _api_error(request, reason, status_code):

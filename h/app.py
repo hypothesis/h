@@ -8,9 +8,9 @@ from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.wsgi import wsgiapp2
 
-from .auth import acl_authz, remote_authn, session_authn
-from .config import settings_from_environment
-from .security import derive_key
+from h.auth import acl_authz, remote_authn, session_authn
+from h.config import settings_from_environment
+from h.security import derive_key
 
 log = logging.getLogger(__name__)
 
@@ -43,11 +43,11 @@ def create_app(global_config, **settings):
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
 
-    config.include('.features')
-    config.include('.queue')
-    config.include('.views')
-    config.include('.renderers')
-    config.include('.api_client')
+    config.include('h.features')
+
+    config.include('h.views')
+    config.include('h.renderers')
+    config.include('h.api_client')
 
     config.include('pyramid_jinja2')
     config.add_jinja2_renderer('.js')
@@ -60,7 +60,7 @@ def create_app(global_config, **settings):
     if config.feature('accounts'):
         config.set_authentication_policy(session_authn)
         config.set_authorization_policy(acl_authz)
-        config.include('.accounts')
+        config.include('h.accounts')
 
     if config.feature('api'):
         api_app = create_api(settings)
@@ -72,13 +72,16 @@ def create_app(global_config, **settings):
                         route_name='index')
 
     if config.feature('claim'):
-        config.include('.claim')
+        config.include('h.claim')
+
+    if config.feature('queue'):
+        config.include('h.queue')
 
     if config.feature('streamer'):
-        config.include('.streamer')
+        config.include('h.streamer')
 
     if config.feature('notification'):
-        config.include('.notification')
+        config.include('h.notification')
 
     return config.make_wsgi_app()
 
@@ -97,10 +100,15 @@ def create_api(global_config, **settings):
                           'pyramid.events.ContextFound')
     config.add_tween('h.api.tweens.auth_token')
 
-    config.include('.api.db')
-    config.include('.api.views')
-    config.include('.auth')
-    config.include('.queue')
+    config.include('h.features')
+
+    config.include('h.auth')
+    config.include('h.api.db')
+    config.include('h.api.views')
+
+    if config.feature('queue'):
+        config.include('h.queue')
+        config.include('h.api.queue')
 
     return config.make_wsgi_app()
 
