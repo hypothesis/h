@@ -72,3 +72,15 @@ describe 'store', ->
       saved.id = annotation.id
       return [201, {}, {}]
     $httpBackend.flush()
+
+  describe 'ephemeral properties', ->
+    afterEach ->
+      $httpBackend.verifyNoOutstandingExpectation()
+
+    it 'are removed', ->
+      annotation = {_local: true, $highlight: true}
+      annotation = new store.AnnotationResource(annotation)
+      annotation.$create()
+      $httpBackend.expectPOST('http://example.com/api/annotations', {})
+      .respond(-> {id: 'test'})
+      $httpBackend.flush()

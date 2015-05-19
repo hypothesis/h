@@ -1,3 +1,11 @@
+# Return a serialized model suitable for persistence.
+serialize = (model) ->
+  result = {}
+  for own k of model when k[0] not in ['$', '_']
+    result[k] = model[k]
+  return angular.toJson(result)
+
+
 ###*
 # @ngdoc service
 # @name store
@@ -34,6 +42,8 @@ module.exports = [
             # For the search resource, one URL is given for all actions.
             # For the annotations, each action has its own URL.
             prop = "#{camelize(name)}Resource"
+            for action, options of actions when angular.isObject(options)
+              options.transformRequest = [serialize]
             store[prop] = $resource(actions.url or svc, {}, actions)
           store
 ]

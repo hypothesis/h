@@ -30,8 +30,8 @@ angular_tags_input:
 angular_toastr:
   contents:
     - filters: uglifyjs
-      output: scripts/vendor/angular-toastr.min.js
-      contents: h:static/scripts/vendor/angular-toastr.js
+      output: scripts/vendor/angular-toastr.tpls.min.js
+      contents: h:static/scripts/vendor/angular-toastr.tpls.js
 
 
 # Analytics

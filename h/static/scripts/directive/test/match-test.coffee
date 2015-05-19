@@ -24,18 +24,12 @@ describe 'match', ->
 
     $element = $compile('<input name="confirmation" ng-model="model.b" match="model.a" />')($scope)
     $isolateScope = $element.isolateScope()
-    $scope.$digest()
 
   it 'is valid if both properties have the same value', ->
-    controller = $element.controller('ngModel')
-    assert.isFalse(controller.$error.match)
-
-  it 'is invalid if the local property differs', ->
-    $isolateScope.match = 2
-    $isolateScope.$digest()
+    $scope.$digest()
 
     controller = $element.controller('ngModel')
-    assert.isTrue(controller.$error.match)
+    assert.isUndefined(controller.$error.match)
 
   it 'is invalid if the matched property differs', ->
     $scope.model.a = 2
