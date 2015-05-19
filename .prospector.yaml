@@ -9,7 +9,6 @@ pylint:
   enable:
     - relative-import
   disable:
-    - C0111  # Missing %s docstring
     - R0903  # Too few public methods
     - W0142  # Used * or ** magic
   options:
