@@ -29,6 +29,8 @@ Limitations
 
 """
 import datetime
+import logging
+log = logging.getLogger(__name__)
 
 import jwt
 from jwt.compat import constant_time_compare
@@ -170,10 +172,17 @@ def generate_signed_token(request):
         'userId': request.user,
     })
 
+    log.info('--------------------------------------')
     if request.registry.feature('nipsa'):
+        log.info('HAS nipsa')
         user = get_username(request.user, request.domain)
+
+        log.info(user)
+        log.info(get_admins())
         if user in get_admins():
+            log.info('adding admin flag to claim')
             claims['admin'] = True
+    log.info('--------------------------------------')
 
     claims.update(request.extra_credentials or {})
     return jwt.encode(claims, request.client.client_secret)
