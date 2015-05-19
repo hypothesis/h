@@ -214,9 +214,9 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
     # Scroll down
     @buckets.push [], below, []
-    @index.push $(window).height() - @BUCKET_SIZE - 12,
-      $(window).height() - @BUCKET_SIZE - 11,
-      $(window).height()
+    @index.push window.innerHeight - @BUCKET_SIZE - 12,
+      window.innerHeight - @BUCKET_SIZE - 11,
+      window.innerHeight
 
     # Calculate the total count for each bucket (without replies) and the
     # maximum count.
@@ -260,7 +260,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       .on 'click', (event) =>
         bucket = @tabs.index(event.currentTarget)
         event.stopPropagation()
-        pad = window.innerHeight * .2
 
         # If it's the upper tab, scroll to next anchor above
         if (@isUpper bucket)
