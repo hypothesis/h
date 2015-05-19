@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=protected-access
+# pylint: disable=protected-access,no-self-use
 from __future__ import unicode_literals
 import json
 

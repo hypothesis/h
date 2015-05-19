@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=no-self-use
 import itertools
 import re
 import unittest
