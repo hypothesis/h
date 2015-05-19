@@ -34,6 +34,7 @@ exports.anchor = (selectors) ->
         fragment = selector
       when 'TextPositionSelector'
         position = selector
+        options.position = position  # TextQuoteAnchor hint
       when 'TextQuoteSelector'
         quote = selector
       when 'RangeSelector'
