@@ -11,7 +11,6 @@ pylint:
   disable:
     - C0111  # Missing %s docstring
     - R0201  # Method could be a function
-    - W0704  # Except doesn't do anything
     - R0903  # Too few public methods
     - W0142  # Used * or ** magic
   options:
