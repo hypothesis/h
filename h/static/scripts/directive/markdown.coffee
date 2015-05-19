@@ -313,14 +313,19 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
         else
           endMath = index
         if startMath != null and endMath != null
-          math = katex.renderToString(textToCheck.substring(startMath, endMath))
-          textToCheck = (
-            textToCheck.substring(0, (startMath - 2)) + math +
-            textToCheck.substring(endMath + 2)
-          )
-          startMath = null
-          endMath = null
-          return renderInlineMath(textToCheck)
+          try
+            math = katex.renderToString(textToCheck.substring(startMath, endMath))
+            textToCheck = (
+              textToCheck.substring(0, (startMath - 2)) + math +
+              textToCheck.substring(endMath + 2)
+            )
+            startMath = null
+            endMath = null
+            return renderInlineMath(textToCheck)
+          catch
+            loadMathJax()
+            mathJaxFallback = true
+            $sanitize textToCheck.substring(startMath, endMath)
       return textToCheck
 
     # Re-render the markdown when the view needs updating.
