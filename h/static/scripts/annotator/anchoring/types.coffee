@@ -218,12 +218,13 @@ class TextQuoteAnchor extends Anchor
     if @prefix.length and @suffix.length
       result = matcher.searchFuzzyWithContext(
         @prefix, @suffix, @quote, @start, @end, true, options)
-    else if quote.length >= 32
+
+    if not result?.matches.length and @quote.length >= 32
       # For short quotes, this is bound to return false positives.
       # See https://github.com/hypothesis/h/issues/853 for details.
       result = matcher.searchFuzzy(@quote, @start, true, options)
 
-    if result.matches.length
+    if result?.matches.length
       match = result.matches[0]
       positionAnchor = new TextPositionAnchor(match.start, match.end)
       return positionAnchor.toRange()
