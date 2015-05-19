@@ -35,12 +35,8 @@ pylint:
     # By default PyLint doesn't allow function or method names longer than 30
     # chars, but lots of test methods do (and should) have longer names. It'd
     # be better to restrict this setting to tests only.
-    #
-    # This also allows capital letters in function and method names (just not
-    # at the start), to allow names like
-    # test_instance_conforms_to_IDataManager().
-    method-rgx: '[a-z_][a-zA-Z0-9_]{2,64}$'
-    function-rgx: '[a-z_][a-zA-Z0-9_]{2,64}$'
+    method-rgx: '((test_[a-z0-9_]{2,59})|([a-z_][a-z0-9_]{2,30}))$'
+    function-rgx: '((test_[a-z0-9_]{2,59})|([a-z_][a-z0-9_]{2,30}))$'
 pep257:
   disable:
     - D100  # Missing docstring in public module
