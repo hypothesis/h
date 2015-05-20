@@ -53,4 +53,6 @@ def _features_from_settings(settings, prefix=__package__ + '.feature.'):
 
 
 def includeme(config):
-    config.registry.feature = get_client(config)
+    def directive(config, name):
+        return get_client(config)(name)
+    config.add_directive('feature', directive)
