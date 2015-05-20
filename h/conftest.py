@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=no-self-use
 """
 The `conftest` module is automatically loaded by py.test and serves as a place
 to put fixture functions that are useful application-wide.

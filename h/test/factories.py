@@ -69,6 +69,7 @@ class Annotation(factory.Factory):
 
     @factory.LazyAttribute
     def created(stub):
+        # pylint: disable=no-self-use
         return datetime.datetime.now().isoformat()
 
     updated = factory.SelfAttribute('created')

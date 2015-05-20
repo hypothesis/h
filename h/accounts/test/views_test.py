@@ -1,3 +1,4 @@
+# pylint: disable=no-self-use
 from mock import patch, Mock, MagicMock
 import pytest
 
