@@ -106,7 +106,7 @@ def create_api(global_config, **settings):
     config.include('h.api.db')
     config.include('h.api.views')
 
-    if config.feature('queue'):
+    if config.registry.feature('queue'):
         config.include('h.queue')
         config.include('h.api.queue')
 
