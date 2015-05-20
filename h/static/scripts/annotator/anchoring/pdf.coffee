@@ -153,24 +153,24 @@ exports.describe = (range) ->
   startPageIndex = getSiblingIndex(startTextLayer.parentNode)
   endPageIndex = getSiblingIndex(endTextLayer.parentNode)
 
-  iter = seek.createTextIterator(startTextLayer)
+  iter = document.createNodeIterator(startTextLayer, NodeFilter.SHOW_TEXT)
 
-  return iter.seek(range.start).then (start) ->
-    iter.seek(range.end).then (length) ->
-      end = start + length + range.end.textContent.length
-      getPageOffset(startPageIndex).then (offset) ->
-        # XXX: range covers only one page
-        start += offset
-        end += offset
-        position = new TextPositionAnchor(start, end).toSelector()
+  start = seek(iter, range.start)
+  end = seek(iter, range.end) + start + range.end.textContent.length
 
-        options = {root: startTextLayer}
+  return getPageOffset(startPageIndex).then (pageOffset) ->
+    # XXX: range covers only one page
+    start += pageOffset
+    end += pageOffset
 
-        r = document.createRange()
-        r.setStartBefore(startRange.start)
-        r.setEndAfter(endRange.end)
+    position = new TextPositionAnchor(start, end).toSelector()
 
-        quote = Promise.resolve(TextQuoteAnchor.fromRange(r, options))
-        .then((a) -> a.toSelector())
+    r = document.createRange()
+    r.setStartBefore(startRange.start)
+    r.setEndAfter(endRange.end)
 
-        return Promise.all([position, quote])
+    options = {root: startTextLayer}
+    quote = Promise.resolve(TextQuoteAnchor.fromRange(r, options))
+    .then((a) -> a.toSelector())
+
+    return Promise.all([position, quote])

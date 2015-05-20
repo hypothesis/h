@@ -128,13 +128,11 @@ class TextPositionAnchor extends Anchor
     filter = options.filter or null
 
     range = new xpathRange.BrowserRange(range).normalize(root)
-    iter = seek.createTextIterator(root, filter)
+    iter = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, filter)
 
-    iter.seek(range.start).then (count) ->
-      start = count
-      iter.seek(range.end).then (count) ->
-        end = start + count + range.end.textContent.length
-        new TextPositionAnchor(start, end)
+    start = seek(iter, range.start)
+    end = seek(iter, range.end) + start + range.end.textContent.length
+    new TextPositionAnchor(start, end)
 
   @fromSelector: (selector) ->
     return new TextPositionAnchor(selector.start, selector.end)
@@ -144,17 +142,28 @@ class TextPositionAnchor extends Anchor
     filter = options.filter or null
 
     range = document.createRange()
-    iter = seek.createTextIterator(root, filter)
+    iter = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, filter)
 
     {start, end} = this
-    iter.seek(start).then (count) ->
-      remainder = start - count
-      length = remainder + (end - start)
+    count = seek(iter, start)
+    remainder = start - count
+
+    if iter.pointerBeforeReferenceNode
       range.setStart(iter.referenceNode, remainder)
-      iter.seek(length).then (count) ->
-        remainder = length - count
-        range.setEnd(iter.referenceNode, remainder)
-        return range
+    else
+      range.setStart(iter.nextNode(), remainder)
+      iter.previousNode()
+
+    length = (end - start) + remainder
+    count = seek(iter, length)
+    remainder = length - count
+
+    if iter.pointerBeforeReferenceNode
+      range.setEnd(iter.referenceNode, remainder)
+    else
+      range.setEnd(iter.nextNode(), remainder)
+
+    return range
 
   toSelector: ->
     return {
@@ -185,18 +194,20 @@ class TextQuoteAnchor extends Anchor
     filter = options.filter or null
 
     range = new xpathRange.BrowserRange(range).normalize(root)
-    iter = seek.createTextIterator(root, filter)
+    iter = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, filter)
 
-    iter.seek(range.start).then (count) ->
-      start = count
-      iter.seek(range.end).then (count) ->
-        end = start + count + range.end.textContent.length
-        prefixStart = Math.max(start - 32, 0)
-        corpus = root.textContent
-        exact = corpus.substr(start, end - start)
-        prefix = corpus.substr(prefixStart, start - prefixStart)
-        suffix = corpus.substr(end, 32)
-        return new TextQuoteAnchor(exact, prefix, suffix, start, end)
+    start = seek(iter, range.start)
+    count = seek(iter, range.end)
+    end = start + count + range.end.textContent.length
+
+    corpus = root.textContent
+    prefixStart = Math.max(start - 32, 0)
+
+    exact = corpus.substr(start, end - start)
+    prefix = corpus.substr(prefixStart, start - prefixStart)
+    suffix = corpus.substr(end, 32)
+
+    return new TextQuoteAnchor(exact, prefix, suffix, start, end)
 
   @fromSelector: (selector, options = {}) ->
     {start, end} = options.position ? {}

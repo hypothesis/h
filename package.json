@@ -9,7 +9,7 @@
     "clean-css": "2.2.2",
     "coffee-script": "1.7.1",
     "coffeeify": "^1.0.0",
-    "dom-seek": "tilgovi/dom-seek",
+    "dom-seek": "^1.0.0-beta.1",
     "es6-promise": "^2.1.0",
     "extend": "^2.0.0",
     "hammerjs": "^2.0.4",
