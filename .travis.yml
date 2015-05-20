@@ -1,3 +1,5 @@
+# use Travis container build infrastructure
+sudo: false
 language:
   - python
 python:
