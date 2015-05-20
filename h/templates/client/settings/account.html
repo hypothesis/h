@@ -6,9 +6,11 @@
 
     <h2 class="form-heading"><span>Change Your Email Address</span></h2>
 
+    <p class="form-description">Your current email address is: {{email}}.</p>
+
     <div class="form-field">
-      <label class="form-label" for="field-email">Email Address:</label>
-      <input id="field-email" class="form-input" type="email" name="email" placeholder="{{email}}" required ng-model="changeEmail.email" />
+      <label class="form-label" for="field-email">New Email Address:</label>
+      <input id="field-email" class="form-input" type="email" name="email" required ng-model="changeEmail.email" />
       <ul class="form-error-list">
         <li class="form-error" ng-show="changeEmailForm.email.$error.required">Please enter your new email address.</li>
         <li class="form-error" ng-show="changeEmailForm.email.$error.email">Please enter a valid email address.</li>
@@ -17,8 +19,8 @@
     </div>
 
     <div class="form-field">
-      <label class="form-label" for="field-emailAgain">Enter Your Email Address Again:</label>
-      <input id="field-emailAgain" class="form-input" type="email" name="emailAgain" placeholder="{{email}}" required ng-model="changeEmail.emailAgain" />
+      <label class="form-label" for="field-emailAgain">Enter Your New Email Address Again:</label>
+      <input id="field-emailAgain" class="form-input" type="email" name="emailAgain" required ng-model="changeEmail.emailAgain" />
       <ul class="form-error-list">
         <li class="form-error" ng-show="changeEmailForm.emailAgain.$error.required">Please enter your new email address twice.</li>
         <li class="form-error" ng-show="changeEmailForm.emailAgain.$error.email">Please enter a valid email address.</li>
