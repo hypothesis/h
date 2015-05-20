@@ -43,5 +43,6 @@ cover:
 
 lint:
 	@prospector
+	@jshint .
 
 .PHONY: clean cover deps dev lint test

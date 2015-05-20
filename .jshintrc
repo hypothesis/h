@@ -1,0 +1,26 @@
+{
+    "eqeqeq": true,
+    "es3": true,
+    "freeze": true,
+    "latedef": "nofunc",
+    "maxcomplexity": 10,
+    "strict": true,
+    "undef": true,
+    "unused": true,
+    "globals": {
+      "chrome": false,
+      "h": false,
+      "Promise": false,
+      "angular": false,
+      "chai": false,
+      "moment": false,
+      "jstz": false,
+      "sinon": false,
+      "JSON": false
+    },
+    "browser": true,
+    "browserify": true,
+    "mocha": true,
+    "phantom": true,
+    "jquery": true
+}
