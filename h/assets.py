@@ -92,23 +92,9 @@ def asset_response_subscriber(event):
     event.response.headers['Access-Control-Allow-Origin'] = '*'
 
 
-def setup_jinja2_enviroment(config):
-    jinja2_env = config.get_jinja2_environment('__webassets__')
-    jinja2_env.globals['feature'] = config.feature
-    jinja2_env.variable_start_string = '"{{'
-    jinja2_env.variable_end_string = '}}"'
-
-    webassets_env = config.get_webassets_env()
-    webassets_env.config['jinja2_env'] = jinja2_env
-
-
 def includeme(config):
     config.registry.settings.setdefault('webassets.bundles', 'h:assets.yaml')
     config.include('pyramid_webassets')
-
-    config.include('pyramid_jinja2')
-    config.add_jinja2_renderer('__webassets__')
-    config.action(None, setup_jinja2_enviroment, args=(config,), order=1)
 
     # Set up a predicate and subscriber to set CORS headers on asset responses
     config.add_subscriber_predicate('asset_request', AssetRequest)

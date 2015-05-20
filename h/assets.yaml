@@ -101,13 +101,9 @@ config:
   filters: uglifyjs
   contents:
     - output: scripts/config.js
-      filters:
-        - browserify
-        - jinja2
+      filters: browserify
       contents:
-        - h:static/scripts/config/features.coffee
-      depends:
-        - h:static/scripts/config/*
+        - h:static/scripts/config/accounts.coffee
 
 
 # Application

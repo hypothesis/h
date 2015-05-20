@@ -50,27 +50,6 @@ configureRoutes = ['$routeProvider', ($routeProvider) ->
 ]
 
 
-configureStreamer = ['$provide', ($provide) ->
-  $provide.service('streamer', [
-    '$http', '$injector', '$window', 'feature'
-    ($http,   $injector,   $window,   feature) ->
-      if feature('streamer')
-        streamer = $injector.instantiate(require('./streamer'))
-        clientId = uuid.v4()
-        streamer.clientId = clientId
-        $.ajaxSetup(headers: {'X-Client-Id': clientId})
-        $http.defaults.headers.common['X-Client-Id'] = clientId
-      else
-        streamer =
-          open: angular.noop
-          close: angular.noop
-          send: angular.noop
-
-      return streamer
-  ])
-]
-
-
 configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
   # Configure CSP for templates
   # XXX: IE workaround for the lack of document.baseURI property
@@ -99,11 +78,6 @@ setupStreamer = [
     $http.defaults.headers.common['X-Client-Id'] = clientId
 ]
 
-angular.module('h.config', [])
-.provider('identity', require('./identity'))
-.provider('session', require('./session'))
-
-
 module.exports = angular.module('h', [
   'angulartics'
   'angulartics.google.analytics'
@@ -114,7 +88,6 @@ module.exports = angular.module('h', [
   'ngSanitize'
   'ngTagsInput'
   'toastr'
-  'h.config'
 ])
 
 .controller('AppController', require('./app-controller'))
@@ -144,6 +117,9 @@ module.exports = angular.module('h', [
 .filter('persona', require('./filter/persona'))
 .filter('urlencode', require('./filter/urlencode'))
 
+.provider('identity', require('./identity'))
+.provider('session', require('./session'))
+
 .service('annotator', -> new Annotator(angular.element('<div>')))
 .service('annotationMapper', require('./annotation-mapper'))
 .service('annotationUI', require('./annotation-ui'))
@@ -162,6 +138,7 @@ module.exports = angular.module('h', [
 .service('searchFilter', require('./search-filter'))
 .service('store', require('./store'))
 .service('streamFilter', require('./stream-filter'))
+.service('streamer', require('./streamer'))
 .service('tags', require('./tags'))
 .service('time', require('./time'))
 .service('threading', require('./threading'))
@@ -175,8 +152,8 @@ module.exports = angular.module('h', [
 .config(configureDocument)
 .config(configureLocation)
 .config(configureRoutes)
-.config(configureStreamer)
 .config(configureTemplates)
 
 .run(setupCrossFrame)
+.run(setupStreamer)
 .run(setupHost)

@@ -11,17 +11,14 @@ SESSION_ACTIONS = [
 ]
 
 
-module.exports = [
-  '$httpProvider', '$provide', 'identityProvider', 'sessionProvider'
-  ($httpProvider,   $provide,   identityProvider,   sessionProvider) ->
+configure = [
+  '$httpProvider', 'identityProvider', 'sessionProvider'
+  ($httpProvider,   identityProvider,   sessionProvider) ->
     # Pending authentication check
     authCheck = null
 
     # Use the Pyramid XSRF header name
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-Token'
-
-    # Provide an XSRF token for the session provider
-    $provide.constant('xsrf', token: null)
 
     identityProvider.checkAuthentication = [
       '$q', 'session',
@@ -73,3 +70,8 @@ module.exports = [
           __formid__: action
         withCredentials: true
 ]
+
+
+angular.module('h')
+.value('xsrf', token: null)
+.config(configure)

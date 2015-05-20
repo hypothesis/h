@@ -57,12 +57,12 @@ def create_app(global_config, **settings):
 
     config.add_tween('h.tweens.csrf_tween_factory')
 
-    if config.feature('accounts'):
+    if config.registry.feature('accounts'):
         config.set_authentication_policy(session_authn)
         config.set_authorization_policy(acl_authz)
         config.include('h.accounts')
 
-    if config.feature('api'):
+    if config.registry.feature('api'):
         api_app = create_api(settings)
         api_view = wsgiapp2(api_app)
         config.add_view(api_view, name='api', decorator=strip_vhm)
@@ -71,16 +71,16 @@ def create_app(global_config, **settings):
         config.add_view(api_view, name='api', decorator=strip_vhm,
                         route_name='index')
 
-    if config.feature('claim'):
+    if config.registry.feature('claim'):
         config.include('h.claim')
 
-    if config.feature('queue'):
+    if config.registry.feature('queue'):
         config.include('h.queue')
 
-    if config.feature('streamer'):
+    if config.registry.feature('streamer'):
         config.include('h.streamer')
 
-    if config.feature('notification'):
+    if config.registry.feature('notification'):
         config.include('h.notification')
 
     return config.make_wsgi_app()
