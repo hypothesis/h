@@ -1,0 +1,9 @@
+coffeescript:
+  enabled: false
+javascript:
+  config_file: .jshintrc
+  ignore_file: .jshintignore
+ruby:
+  enabled: false
+scss:
+  enabled: false

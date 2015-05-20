@@ -1,0 +1,7 @@
+build/
+docs/
+node_modules/
+h/browser/chrome/content/
+h/static/scripts/vendor/
+h/templates/
+**/*.min.js
