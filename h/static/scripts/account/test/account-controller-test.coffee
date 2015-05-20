@@ -274,7 +274,7 @@ describe "h:AccountController", ->
     }
 
   # Return a minimal stub version of the object that AccountController's
-  # changeEmail() method receives when the user submits the changeEmailForm.
+  # changeEmailSubmit() method receives when the user submits the changeEmailForm.
   getStubChangeEmailForm = ({email, emailAgain, password}) ->
     return {
       $name: "changeEmailForm"
@@ -344,7 +344,7 @@ describe "h:AccountController", ->
       form = getStubChangeEmailForm(
         email: new_email_addr, emailAgain: new_email_addr, password: "pass")
 
-      $scope.changeEmail(form).then(->
+      $scope.changeEmailSubmit(form).then(->
         assert edit_profile.calledWithExactly({
           username: "joeuser"
           pwd: "pass"
@@ -369,7 +369,7 @@ describe "h:AccountController", ->
       form = getStubChangeEmailForm(
         email: new_email_addr, emailAgain: new_email_addr, password: "pass")
 
-      $scope.changeEmail(form).then(->
+      $scope.changeEmailSubmit(form).then(->
         assert $scope.email == new_email_addr
       )
 
@@ -394,7 +394,7 @@ describe "h:AccountController", ->
         emailAgain: "a_different_email_address@bluebottle.com"
         pwd: "pass")
 
-      $scope.changeEmail(form).then(->
+      $scope.changeEmailSubmit(form).then(->
         assert form.emailAgain.responseErrorMessage == "The emails must match."
       )
 
@@ -406,7 +406,7 @@ describe "h:AccountController", ->
       form = getStubChangeEmailForm(
         email: "new_email_address@test.com",
         emailAgain: "new_email_address@test.com", password: "pass")
-      $scope.changeEmail(form)
+      $scope.changeEmailSubmit(form)
 
       assert $scope.$broadcast.calledWithExactly(
         "formState", "changeEmailForm", "loading")
@@ -420,7 +420,7 @@ describe "h:AccountController", ->
         email: "new_email_address@test.com",
         emailAgain: "new_email_address@test.com", password: "pass")
 
-      $scope.changeEmail(form).then(->
+      $scope.changeEmailSubmit(form).then(->
         assert $scope.$broadcast.calledWithExactly(
           "formState", "changeEmailForm", "success")
       )
@@ -439,7 +439,7 @@ describe "h:AccountController", ->
         email: "new_email_address@test.com",
         emailAgain: "new_email_address@test.com", password: "pass")
 
-      $scope.changeEmail(form).then(->
+      $scope.changeEmailSubmit(form).then(->
         assert $scope.$broadcast.calledWithExactly(
           "formState", "changeEmailForm", "")
       )
@@ -465,6 +465,6 @@ describe "h:AccountController", ->
         email: "new_email_address@test.com",
         emailAgain: "new_email_address@test.com", password: "pass")
 
-      $scope.changeEmail(form).then(->
+      $scope.changeEmailSubmit(form).then(->
         assert form.pwd.responseErrorMessage == "Invalid password"
       )
