@@ -80,7 +80,7 @@ class AccountController
       promise = session.edit_profile(packet)
       promise.$promise.then(successHandler, errorHandler)
 
-    $scope.changeEmail = (form) ->
+    $scope.changeEmailSubmit = (form) ->
       formRespond(form)
       return unless form.$valid
 
