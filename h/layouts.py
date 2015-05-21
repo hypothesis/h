@@ -55,7 +55,7 @@ class BaseLayout(object):
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
-    requirements = (('app', None), ('account', None), ('topbar', None))
+    requirements = (('app', None), ('account', None))
 
 
 def includeme(config):
