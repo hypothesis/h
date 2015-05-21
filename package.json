@@ -13,6 +13,7 @@
     "es6-promise": "^2.1.0",
     "extend": "^2.0.0",
     "hammerjs": "^2.0.4",
+    "node-iterator-shim": "^1.0.0-beta.1",
     "node-uuid": "^1.4.3",
     "raf": "^2.0.4",
     "strip-bomify": "^0.1.0",
