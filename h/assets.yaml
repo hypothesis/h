@@ -216,3 +216,24 @@ inject_css:
         - h:static/styles/reset.scss
         - h:static/styles/variables.scss
         - h:static/styles/mixins/icons.scss
+
+
+# Help page
+help_page:
+  contents:
+    - help_page_css
+
+help_page_css:
+  output: styles/help-page.min.css
+  filters:
+    - cleancss
+    - cssrewrite
+  contents:
+    - h:static/styles/vendor/icomoon.css
+    - output: styles/help-page.css
+      filters: compass
+      contents:
+        - h:static/styles/help-page.scss
+      depends:
+        - h:static/styles/*.scss
+        - h:static/styles/mixins/*.scss

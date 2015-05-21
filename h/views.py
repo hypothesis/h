@@ -96,9 +96,15 @@ def page(context, request):
     return {}
 
 
-@view_config(renderer='h:templates/help.html', route_name='index')
-@view_config(renderer='h:templates/help.html', route_name='help')
-@view_config(renderer='h:templates/help.html', route_name='onboarding')
+@view_config(layout='help',
+             renderer='h:templates/help.html',
+             route_name='index')
+@view_config(layout='help',
+             renderer='h:templates/help.html',
+             route_name='help')
+@view_config(layout='help',
+             renderer='h:templates/help.html',
+             route_name='onboarding')
 def help_page(context, request):
     current_route = request.matched_route.name
     return {
