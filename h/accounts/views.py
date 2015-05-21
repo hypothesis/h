@@ -19,6 +19,7 @@ from h import session
 from h.models import _
 from h.notification.models import Subscriptions
 from h.resources import Application
+import h.accounts.models
 
 from . import schemas
 from .events import LoginEvent, LogoutEvent
@@ -96,8 +97,14 @@ class AsyncFormViewMapper(object):
             result = ajax_form(request, result)
             model = result.setdefault('model', {})
             model.update(session.model(request))
-            if 'email' not in model and 'email' in request.params:
-                model['email'] = request.params['email']
+
+            # Add the user's email into the model. This is needed so that the
+            # edit profile forms can show the value of the user's current
+            # email.
+            if 'email' not in model and request.authenticated_userid:
+                model['email'] = h.accounts.models.User.get_by_id(
+                    request, request.authenticated_userid).email
+
             result.pop('form', None)
             return result
         return wrapper

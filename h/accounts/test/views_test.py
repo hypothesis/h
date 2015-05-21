@@ -37,6 +37,25 @@ def configure(config):
     config.registry.feature.return_value = None
 
 
+def _mock_db_session_query_method():
+    """Return a mock session.query() that passes unique_email validation.
+
+    Return a callable that returns an object with a filter() method that
+    returns an object with a first() method that returns None.
+
+    When attached to a dummy_db_session object as dummy_db_session.query()
+    this callable will cause Horus's unique_email validation check to pass.
+
+    """
+    result = MagicMock()
+    result.first.return_value = None
+    filter_ = MagicMock()
+    filter_.filter.return_value = result
+    def query(*args, **kwargs):
+        return filter_
+    return query
+
+
 def _get_fake_request(username, password, with_subscriptions=False, active=True):
     fake_request = DummyRequest()
 
@@ -88,12 +107,15 @@ def test_profile_invalid_password(config, user_model):
 
 @pytest.mark.usefixtures('activation_model',
                          'dummy_db_session')
-def test_edit_profile_with_non_matching_emails(config, user_model):
+def test_edit_profile_with_non_matching_emails(
+        config, user_model, dummy_db_session):
     """edit_profile() should return an error if the emails don't match."""
     request = _get_fake_request('john', 'doe')
     request.params["email"] = "example@example.com"
     request.params["emailAgain"] = "different@example.com"
     configure(config)
+
+    dummy_db_session.query = _mock_db_session_query_method()
 
     profile = ProfileController(request)
     result = profile.edit_profile()
@@ -104,12 +126,61 @@ def test_edit_profile_with_non_matching_emails(config, user_model):
 
 @pytest.mark.usefixtures('activation_model',
                          'dummy_db_session')
-def test_edit_profile_successfully(config, user_model):
+def test_edit_profile_with_invalid_email(config, user_model, dummy_db_session):
+    """edit_profile() should return an error if the new email is invalid."""
+    request = _get_fake_request('john', 'doe')
+    request.params["email"] = "foo@bar"
+    request.params["emailAgain"] = "foo@bar"
+    configure(config)
+
+    dummy_db_session.query = _mock_db_session_query_method()
+
+    profile = ProfileController(request)
+    result = profile.edit_profile()
+
+    assert result["errors"][0][1][0] == "Invalid email address"
+
+
+@pytest.mark.usefixtures('activation_model',
+                         'dummy_db_session')
+def test_edit_profile_with_taken_email(config, user_model, dummy_db_session):
+    """edit_profile() should return an error if the email is already taken."""
+    request = _get_fake_request('john', 'doe')
+    request.params["email"] = "john@doe.com"
+    request.params["emailAgain"] = "john@doe.com"
+    configure(config)
+
+    # Mock dummy_db_session.query() so that Horus's unique_email validation
+    # check will fail.
+    first = MagicMock()
+    first.email = "john@doe.com"
+    results = MagicMock()
+    results.first.return_value = first
+    filter_ = MagicMock()
+    filter_.filter.return_value = results
+    def query(*args, **kwargs):
+        return filter_
+    dummy_db_session.query = query
+
+    profile = ProfileController(request)
+    result = profile.edit_profile()
+
+    assert "errors" in result
+    assert result["errors"][0][1][0] == (
+        "Sorry, an account with the email john@doe.com already exists. Try "
+        "logging in instead.")
+
+
+@pytest.mark.usefixtures('activation_model',
+                         'dummy_db_session')
+def test_edit_profile_successfully(config, user_model, dummy_db_session):
     """edit_profile() returns a dict with key "form" when successful."""
     request = _get_fake_request('john', 'doe')
     request.params["email"] = "example@example.com"
     request.params["emailAgain"] = "example@example.com"
     configure(config)
+
+    dummy_db_session.query = _mock_db_session_query_method()
 
     profile = ProfileController(request)
     result = profile.edit_profile()
