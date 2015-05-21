@@ -1,10 +1,19 @@
-Current Development Version (master branch)
-===========================================
+0.4.1 (2015-05-21)
+==================
 
+- Add NIPSA flag to user table (migration needed!)
+- Upgrade to Annotator v1.2.x tip (6536160)
+- Hide the widget panel until ready for input (#2207)
+- Fix UI z-index to actual maximum (#1909)
+- Change annotation card action from 'share' to 'link'
+- Add a client-side error when saving an annotation fails
+- Snap the sidebar closed as well as open (#2162)
+- Put NSQ usage behind feature flag. The API no longer requires NSQ.
+- For development, disable WebSocket streaming, email notifications, and NSQ.
+- Lots of linting.
 - Added support for URL parameters to the Atom feed at ``/stream.atom``.
   For example: ``/stream.atom?user=seanh`` or
   ``/stream.atom?user=seanh&tags=foo,bar``.
-
 
 0.4.0 (2015-05-05)
 ==================
