@@ -245,19 +245,30 @@ def _emails_must_match_validator(form, value):
         raise exc
 
 
+def _validate_edit_profile_request(request):
+    """Validate the given request using the EditProfileSchema.
+
+    :returns: if the request is valid returns a Deform "appstruct" with keys
+        ``"username"``, ``"pwd"`` and ``"email"``
+    :rtype: dict
+
+    :raises deform.ValidationFailure: if the request is invalid
+
+    """
+    schema = schemas.EditProfileSchema(
+        validator=_emails_must_match_validator).bind(request=request)
+    form = deform.Form(schema)
+    return form.validate(request.POST.items())
+
+
 @view_auth_defaults
 @view_config(attr='edit_profile', route_name='edit_profile')
 @view_config(attr='disable_user', route_name='disable_user')
 @view_config(attr='profile', route_name='profile')
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
-        request = self.request
-        schema = schemas.EditProfileSchema(
-            validator=_emails_must_match_validator).bind(request=request)
-        form = deform.Form(schema)
-
         try:
-            appstruct = form.validate(request.POST.items())
+            appstruct = _validate_edit_profile_request(self.request)
         except deform.ValidationFailure as e:
             return dict(errors=e.error.children)
 
@@ -269,7 +280,7 @@ class ProfileController(horus.views.ProfileController):
             # Update the subscriptions table
             subs = json.loads(subscriptions)
             if username == subs['uri']:
-                s = Subscriptions.get_by_id(request, subs['id'])
+                s = Subscriptions.get_by_id(self.request, subs['id'])
                 if s:
                     s.active = subs['active']
                     self.db.add(s)
@@ -287,9 +298,9 @@ class ProfileController(horus.views.ProfileController):
                 )
 
         # Password check
-        user = self.User.get_user(request, username, pwd)
+        user = self.User.get_user(self.request, username, pwd)
         if user:
-            request.context = user
+            self.request.context = user
             return super(ProfileController, self).edit_profile()
         else:
             return dict(errors=[{'pwd': _('Invalid password')}], code=401)
