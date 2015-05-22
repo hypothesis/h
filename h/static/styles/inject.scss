@@ -87,6 +87,10 @@ $base-font-size: 14px;
   }
 }
 
+.annotator-hl.annotator-hl-selected {
+  background-color: $highlight-color-third;
+}
+
 // Sidebar
 .annotator-frame {
   @import 'reset';

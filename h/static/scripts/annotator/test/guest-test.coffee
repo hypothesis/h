@@ -216,6 +216,41 @@ describe 'Guest', ->
         assert.called(highlights[1].setFocused)
         assert.calledWith(highlights[1].setFocused, false)
 
+    describe 'on "selectAnnotations" event', ->
+      it 'selects any annotations with a matching tag', ->
+        guest = createGuest()
+        highlights = [
+          {annotation: {$$tag: 'tag1'}, setSelected: sandbox.stub()}
+          {annotation: {$$tag: 'tag2'}, setSelected: sandbox.stub()}
+        ]
+        guest.anchoring.getHighlights.returns(highlights)
+        emitGuestEvent('selectAnnotations', 'ctx', ['tag1'])
+        assert.called(highlights[0].setSelected)
+        assert.calledWith(highlights[0].setSelected, true)
+
+      it 'deselects any annotations without a matching tag', ->
+        guest = createGuest()
+        highlights = [
+          {annotation: {$$tag: 'tag1'}, setSelected: sandbox.stub()}
+          {annotation: {$$tag: 'tag2'}, setSelected: sandbox.stub()}
+        ]
+        guest.anchoring.getHighlights.returns(highlights)
+        emitGuestEvent('selectAnnotations', 'ctx', ['tag1'])
+        assert.called(highlights[1].setSelected)
+        assert.calledWith(highlights[1].setSelected, false)
+
+    describe 'on "deselectAnnotations" event', ->
+      it 'deselects any annotations with a matching tag', ->
+        guest = createGuest()
+        highlights = [
+          {annotation: {$$tag: 'tag1'}, setSelected: sandbox.stub()}
+          {annotation: {$$tag: 'tag2'}, setSelected: sandbox.stub()}
+        ]
+        guest.anchoring.getHighlights.returns(highlights)
+        emitGuestEvent('deselectAnnotations', 'ctx', ['tag1'])
+        assert.called(highlights[0].setSelected)
+        assert.calledWith(highlights[0].setSelected, false)
+
     describe 'on "scrollToAnnotation" event', ->
       it 'scrolls to the anchor with the matching tag', ->
         guest = createGuest()

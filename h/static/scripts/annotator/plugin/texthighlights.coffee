@@ -47,7 +47,15 @@ class TextHighlight
     $(event.target)
       .parents('.annotator-hl')
       .andSelf()
-      .map(-> $(this).data("annotation"))
+      .map(-> $(this).data("highlight").annotation)
+      .toArray()
+
+  # Collect the highlight impacted by an event
+  @getHighlights: (event) ->
+    $(event.target)
+      .parents('.annotator-hl')
+      .andSelf()
+      .map(-> $(this).data("highlight"))
       .toArray()
 
   # Set up events for this annotator
@@ -77,7 +85,7 @@ class TextHighlight
 
     # Create highlights and link them with the annotation
     @_highlights = TextHighlight.highlightRange(normedRange)
-    $(@_highlights).data "annotation", @annotation
+    $(@_highlights).data "highlight", this
 
   # Mark/unmark this hl as focused
   setFocused: (value) ->
@@ -85,6 +93,20 @@ class TextHighlight
       $(@_highlights).addClass('annotator-hl-focused')
     else
       $(@_highlights).removeClass('annotator-hl-focused')
+
+  # Test the selection state
+  isSelected: -> @_selected
+
+  # Mark/unmark this hl as selected
+  setSelected: (value) ->
+    @_selected = value
+    if value
+      $(@_highlights).addClass('annotator-hl-selected')
+    else
+      $(@_highlights).removeClass('annotator-hl-selected')
+
+  # Toggle the selection state
+  toggleSelected: -> @setSelected !@isSelected()
 
   # Remove all traces of this hl from the document
   removeFromDocument: ->
