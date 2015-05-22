@@ -9,6 +9,7 @@
     "clean-css": "2.2.2",
     "coffee-script": "1.7.1",
     "coffeeify": "^1.0.0",
+    "diff-match-patch": "^1.0.0",
     "dom-seek": "^1.0.0-beta.1",
     "es6-promise": "^2.1.0",
     "extend": "^2.0.0",
@@ -56,14 +57,11 @@
     "annotator-auth": "./h/static/scripts/vendor/annotator.auth.js",
     "angular": "./h/static/scripts/vendor/angular.js",
     "angular-mock": "./h/static/scripts/vendor/angular-mocks.js",
-    "diff-match-patch": "./h/static/scripts/vendor/diff_match_patch_uncompressed.js",
-    "dom-text-matcher": "./h/static/scripts/vendor/dom_text_matcher.js",
     "es6-promise": "./node_modules/es6-promise/dist/es6-promise.js",
     "hammerjs": "./node_modules/hammerjs/hammer.js",
     "jquery": "./h/static/scripts/vendor/jquery.js",
     "jquery-scrollintoview": "./h/static/scripts/vendor/jquery.scrollintoview.js",
-    "jschannel": "./h/static/scripts/vendor/jschannel.js",
-    "text-match-engines": "./h/static/scripts/vendor/text_match_engines.js"
+    "jschannel": "./h/static/scripts/vendor/jschannel.js"
   },
   "browserify-shim": {
     "annotator": {
@@ -85,8 +83,6 @@
       ]
     },
     "angular-mock": "global:angular.mock",
-    "diff-match-patch": "diff_match_patch",
-    "dom-text-matcher": "DomTextMatcher",
     "es6-promise": "ES6Promise",
     "hammerjs": "Hammer",
     "jquery": "$",
@@ -95,7 +91,6 @@
         "jquery"
       ]
     },
-    "jschannel": "Channel",
-    "text-match-engines": "TextMatchEngines"
+    "jschannel": "Channel"
   }
 }
