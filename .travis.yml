@@ -27,6 +27,7 @@ after_success:
   - coveralls
 cache:
   directories:
+    - node_modules
     - $HOME/.cache/pip
 notifications:
   irc:
