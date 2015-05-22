@@ -245,6 +245,15 @@ def _emails_must_match_validator(form, value):
         raise exc
 
 
+class _InvalidEditProfileRequestError(Exception):
+
+    """Raised if validating an edit user profile request fails."""
+
+    def __init__(self, errors):
+        super(_InvalidEditProfileRequestError, self).__init__()
+        self.errors = errors
+
+
 def _validate_edit_profile_request(request):
     """Validate the given request using the EditProfileSchema.
 
@@ -252,13 +261,16 @@ def _validate_edit_profile_request(request):
         ``"username"``, ``"pwd"`` and ``"email"``
     :rtype: dict
 
-    :raises deform.ValidationFailure: if the request is invalid
+    :raises _InvalidEditProfileRequestError: if the request is invalid
 
     """
     schema = schemas.EditProfileSchema(
         validator=_emails_must_match_validator).bind(request=request)
     form = deform.Form(schema)
-    return form.validate(request.POST.items())
+    try:
+        return form.validate(request.POST.items())
+    except deform.ValidationFailure as err:
+        raise _InvalidEditProfileRequestError(errors=err.error.children)
 
 
 @view_auth_defaults
@@ -269,8 +281,8 @@ class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
         try:
             appstruct = _validate_edit_profile_request(self.request)
-        except deform.ValidationFailure as e:
-            return dict(errors=e.error.children)
+        except _InvalidEditProfileRequestError as err:
+            return dict(errors=err.errors)
 
         username = appstruct['username']
         pwd = appstruct['pwd']
