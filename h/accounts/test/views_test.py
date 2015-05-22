@@ -10,10 +10,13 @@ from horus.interfaces import (
 from horus.schemas import ProfileSchema
 from horus.forms import SubmitForm
 from horus.strings import UIStringsBase
+import deform
+import colander
 
 import h.accounts.views
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
+import h.accounts.schemas as schemas
 from h.models import _
 
 
@@ -54,6 +57,29 @@ def _get_fake_request(username, password, with_subscriptions=False, active=True)
         subs = subs.replace('activestate', str(active).lower()).replace('username', username)
         fake_request.POST['subscriptions'] = subs
     return fake_request
+
+
+class TestEmailsMustMatchValidator(object):
+
+    """Unit tests for _emails_must_match_validator()."""
+
+    def test_it_raises_invalid_if_the_emails_do_not_match(self):
+        form = deform.Form(schemas.EditProfileSchema())
+        value = {
+            "email": "foo",
+            "emailAgain": "bar"
+        }
+        with pytest.raises(colander.Invalid):
+            h.accounts.views._emails_must_match_validator(form, value)
+
+    def test_it_returns_None_if_the_emails_match(self):
+        form = deform.Form(schemas.EditProfileSchema())
+        value = {
+            "email": "foo",
+            "emailAgain": "foo"
+        }
+        assert h.accounts.views._emails_must_match_validator(form, value) == (
+            None)
 
 
 class TestProfile(object):
