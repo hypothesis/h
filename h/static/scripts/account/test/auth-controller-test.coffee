@@ -18,15 +18,36 @@ class MockSession
     $promise:
       finally: sandbox.stub()
 
-mockFlash = info: sandbox.spy()
-mockFormRespond = sandbox.spy()
-
-describe 'h:AuthController', ->
+# Return an AuthController instance and associated objects for tests to use.
+_controller = (mocksession) ->
+  controller = null
   $scope = null
   $timeout = null
-  auth = null
   session = null
-  $controller = null
+  mockFlash = info: sandbox.spy()
+  mockFormRespond = sandbox.spy()
+  inject(($controller, $rootScope) ->
+    session = mocksession or new MockSession()
+    $scope = $rootScope.$new()
+    $timeout = sandbox.spy()
+    params =
+      $scope: $scope
+      $timeout: $timeout
+      flash: mockFlash
+      session: session
+      formRespond: mockFormRespond
+    controller = $controller('AuthController', params)
+  )
+  return(
+    auth: controller
+    $scope: $scope
+    $timeout: $timeout
+    session: session
+    mockFlash: mockFlash
+    mockFormRespond: mockFormRespond
+  )
+
+describe 'h:AuthController', ->
 
   before ->
     angular.module('h', [])
@@ -35,26 +56,13 @@ describe 'h:AuthController', ->
   beforeEach module('h')
   beforeEach module('h.templates')
 
-  beforeEach module ($provide) ->
-    $provide.value '$timeout', sandbox.spy()
-    $provide.value 'flash', mockFlash
-    $provide.value 'session', new MockSession()
-    $provide.value 'formRespond', mockFormRespond
-    return
-
-  beforeEach inject (_$controller_, $rootScope, _$timeout_, _session_) ->
-    $scope = $rootScope.$new()
-    $timeout = _$timeout_
-    $controller = _$controller_
-    auth = $controller 'AuthController', {$scope}
-    session = _session_
-    sandbox.spy session, 'login'
-
   afterEach ->
     sandbox.restore()
 
   describe '#submit()', ->
     it 'should call session methods on submit', ->
+      {auth, session} = _controller()
+      sandbox.spy(session, 'login')
 
       auth.submit
         $name: 'login'
@@ -64,6 +72,8 @@ describe 'h:AuthController', ->
       assert.called session.login
 
     it 'should do nothing when the form is invalid', ->
+      {auth, session} = _controller()
+      sandbox.spy(session, 'login')
       auth.submit
         $name: 'login'
         $valid: false
@@ -72,6 +82,7 @@ describe 'h:AuthController', ->
       assert.notCalled session.login
 
     it 'should apply validation errors on submit', ->
+      {auth, mockFormRespond} = _controller()
       form =
         $name: 'register'
         $valid: true
@@ -96,13 +107,11 @@ describe 'h:AuthController', ->
         errback({data: {reason: reason}})
         $promise: {finally: sandbox.stub()}
 
-      # Get an AuthController object with our mock session.
-      authCtrl = $controller(
-        'AuthController', {$scope:$scope, session:myMockSession})
+      {auth, mockFormRespond} = _controller(myMockSession)
 
       form = {$name: 'register', $valid: true}
 
-      authCtrl.submit(form)
+      auth.submit(form)
 
       assert.calledWith(mockFormRespond, form, undefined, reason)
 
@@ -115,17 +124,17 @@ describe 'h:AuthController', ->
         errback('Oh no!!')
         $promise: {finally: sandbox.stub()}
 
-      authCtrl = $controller(
-        'AuthController', {$scope:$scope, session:myMockSession})
+      {auth, mockFormRespond} = _controller(myMockSession)
 
       form = {$name: 'register', $valid: true}
 
-      authCtrl.submit(form)
+      auth.submit(form)
 
       assert.calledWith(mockFormRespond, form, undefined,
         "Oops, something went wrong on the server. Please try again later!")
 
     it 'should emit an auth event once authenticated', ->
+      {auth, $scope} = _controller()
       form =
         $name: 'login'
         $valid: true
@@ -137,12 +146,14 @@ describe 'h:AuthController', ->
       assert.calledWith $scope.$emit, 'auth', null, userid: 'alice'
 
     it 'should emit an auth event if destroyed before authentication', ->
+      {$scope} = _controller()
       sandbox.spy $scope, '$emit'
       $scope.$destroy()
       assert.calledWith $scope.$emit, 'auth', 'cancel'
 
   describe 'timeout', ->
     it 'should happen after a period of inactivity', ->
+      {$scope, $timeout, mockFlash} = _controller()
       sandbox.spy $scope, '$broadcast'
       $scope.form = $setPristine: sandbox.stub()
       $scope.model =
@@ -160,6 +171,7 @@ describe 'h:AuthController', ->
       assert.called mockFlash.info, 'a flash notification is shown'
 
     it 'should not happen if the model is empty', ->
+      {$scope, $timeout} = _controller()
       $scope.model = undefined
       $scope.$digest()
       assert.notCalled $timeout
