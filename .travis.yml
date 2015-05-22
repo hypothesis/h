@@ -7,8 +7,7 @@ python:
 install:
   - gem install compass
   - pip install -U pip wheel
-  - pip install coveralls
-  - pip install pyramid_redis_sessions
+  - pip install coveralls pyramid_redis_sessions
   - make
 script:
   - make test
