@@ -134,6 +134,37 @@ exports.anchor = (selectors) ->
           return range
       )
 
+  if quote?
+    promise = promise.catch ->
+      {pagesCount} = PDFViewerApplication.pdfViewer
+
+      pageSearches = for pageIndex in [0...pagesCount]
+        page = getPage(pageIndex)
+        continue unless page.textLayer?.renderingDone
+
+        content = getPageTextContent(pageIndex)
+        offset = getPageOffset(pageIndex)
+
+        Promise.all([content, offset, page]).then((results) ->
+          [content, offset, page] = results
+          quoteOptions = {root: page.textLayer.textLayerDiv}
+          if position?
+            # XXX: must be on one page
+            start = position.start - offset
+            end = position.end - offset
+            quoteOptions.position = {start, end}
+
+          return TextQuoteAnchor
+          .fromSelector(quote, quoteOptions)
+          .toRange(quoteOptions)
+        ).catch(-> null)
+
+      return Promise.all(pageSearches).then((results) ->
+        for result in results when result?
+          return result
+        throw new Error('quote not found')
+      )
+
   return promise
 
 
