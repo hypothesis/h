@@ -239,6 +239,7 @@ class AsyncRegisterController(RegisterController):
 
 
 def _emails_must_match_validator(form, value):
+    """Raise colander.Invalid if "email" and "emailAgain" don't match."""
     if value.get("email") != value.get("emailAgain"):
         exc = colander.Invalid(form, "The emails must match")
         exc["emailAgain"] = "The emails must match."
