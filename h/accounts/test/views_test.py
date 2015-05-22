@@ -56,18 +56,22 @@ def _get_fake_request(username, password, with_subscriptions=False, active=True)
     return fake_request
 
 
-@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-def test_profile_returns_email(config, user_model, authn_policy):
-    """profile() should include the user's email in the dict it returns."""
-    request = _get_fake_request("john", "doe")
-    authn_policy.authenticated_userid.return_value = "john"
-    user_model.get_by_id.return_value = FakeUser(
-        email="test_user@test_email.com")
-    configure(config)
+class TestProfile(object):
 
-    profile = ProfileController(request).profile()
+    """Unit tests for ProfileController's profile() method."""
 
-    assert profile["model"]["email"] == "test_user@test_email.com"
+    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+    def test_profile_returns_email(self, config, user_model, authn_policy):
+        """profile() should include the user's email in the dict it returns."""
+        request = _get_fake_request("john", "doe")
+        authn_policy.authenticated_userid.return_value = "john"
+        user_model.get_by_id.return_value = FakeUser(
+            email="test_user@test_email.com")
+        configure(config)
+
+        profile = ProfileController(request).profile()
+
+        assert profile["model"]["email"] == "test_user@test_email.com"
 
 
 class TestEditProfile(object):
