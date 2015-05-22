@@ -151,10 +151,11 @@ module.exports = class Guest extends Annotator
     {anchored, unanchored, element, plugins} = this
 
     maybeAnchor = (target) ->
-      anchoring.anchor(target.selector)
-      .then(highlightRange)
-      .then((highlights) -> {annotation, target, highlights})
-      .catch((reason) -> {annotation, target, reason})
+      return new Promise(raf).then ->
+        anchoring.anchor(target.selector)
+        .then(highlightRange)
+        .then((highlights) -> {annotation, target, highlights})
+        .catch((reason) -> {annotation, target, reason})
 
     highlightRange = (range) ->
       return new Promise(raf).then ->
