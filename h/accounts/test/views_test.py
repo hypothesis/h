@@ -13,10 +13,10 @@ from horus.strings import UIStringsBase
 import deform
 import colander
 
-import h.accounts.views
+from h.accounts import schemas
+from h.accounts import views
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
-import h.accounts.schemas as schemas
 from h.models import _
 
 
@@ -70,7 +70,7 @@ class TestEmailsMustMatchValidator(object):
             "emailAgain": "bar"
         }
         with pytest.raises(colander.Invalid):
-            h.accounts.views._emails_must_match_validator(form, value)
+            views._emails_must_match_validator(form, value)
 
     def test_it_returns_None_if_the_emails_match(self):
         form = deform.Form(schemas.EditProfileSchema())
@@ -78,8 +78,7 @@ class TestEmailsMustMatchValidator(object):
             "email": "foo",
             "emailAgain": "foo"
         }
-        assert h.accounts.views._emails_must_match_validator(form, value) == (
-            None)
+        assert views._emails_must_match_validator(form, value) is None
 
 
 class TestProfile(object):
@@ -139,8 +138,7 @@ class TestEditProfile(object):
         with patch(
                 "h.accounts.views._validate_edit_profile_request") as validate:
             validate.side_effect = (
-                h.accounts.views._InvalidEditProfileRequestError(
-                    errors=errors))
+                views._InvalidEditProfileRequestError(errors=errors))
             result = profile.edit_profile()
 
         assert result["errors"] == errors
