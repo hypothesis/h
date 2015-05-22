@@ -40,6 +40,8 @@ test:
 
 cover:
 	@python setup.py test --cov
+	@"$$(npm bin)"/karma start h/static/scripts/karma.config.js --single-run
+	@"$$(npm bin)"/karma start h/browser/chrome/karma.config.js --single-run
 
 lint:
 	@prospector

@@ -10,8 +10,9 @@ install:
   - pip install coveralls pyramid_redis_sessions
   - make
 script:
-  - make test
+  # Run all tests, with coverage if possible
   - make cover
+  # Test building browser extensions
   - hypothesis-buildext conf/testext.ini chrome --base http://localhost
   - hypothesis-buildext conf/testext.ini firefox --base http://localhost
   - "hypothesis-buildext conf/production.ini chrome
