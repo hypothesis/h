@@ -70,80 +70,81 @@ def test_profile_returns_email(config, user_model, authn_policy):
     assert profile["model"]["email"] == "test_user@test_email.com"
 
 
-@pytest.mark.usefixtures('activation_model',
-                         'dummy_db_session')
-def test_profile_invalid_password(config, user_model):
-    """Make sure our edit_profile call validates the user password"""
-    request = _get_fake_request('john', 'doe')
-    configure(config)
+class TestEditProfile(object):
 
-    # With an invalid password, get_user returns None
-    user_model.get_user.return_value = None
+    """Unit tests for the edit_profile() function."""
 
-    profile = ProfileController(request)
-    result = profile.edit_profile()
+    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+    def test_profile_invalid_password(self, config, user_model):
+        """Make sure our edit_profile call validates the user password."""
+        request = _get_fake_request('john', 'doe')
+        configure(config)
 
-    assert result['code'] == 401
-    assert any('pwd' in err for err in result['errors'])
+        # With an invalid password, get_user returns None
+        user_model.get_user.return_value = None
 
-
-@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-def test_edit_profile_with_validation_failure(config, user_model):
-    """If _validate_edit_profile_request() raises it should return an error.
-
-    If _validate_edit_profile_request() raises an exception then edit_profile()
-    should return a dict with an "errors" list containing a list of the
-    error(s) from the exception's .errors property.
-
-    """
-    configure(config)
-    profile = ProfileController(DummyRequest())
-    errors = [
-        ("email", ["That email is invalid", "That email is taken"]),
-        ("emailAgain", "The emails must match."),
-        ("password", ["That password is wrong"])
-    ]
-
-    with patch("h.accounts.views._validate_edit_profile_request") as validate:
-        validate.side_effect = (
-            h.accounts.views._InvalidEditProfileRequestError(errors=errors))
-        result = profile.edit_profile()
-
-    assert result["errors"] == errors
-
-
-@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-def test_edit_profile_successfully(config, user_model):
-    """edit_profile() returns a dict with key "form" when successful."""
-    configure(config)
-    profile = ProfileController(DummyRequest())
-
-    with patch("h.accounts.views._validate_edit_profile_request") as validate:
-        validate.return_value = {
-            "username": "johndoe",
-            "pwd": "password",
-            "subscriptions": []
-        }
-        result = profile.edit_profile()
-
-    assert "form" in result
-    assert "errors" not in result
-
-@pytest.mark.usefixtures('activation_model',
-                         'user_model')
-def test_subscription_update(config, dummy_db_session):
-    """
-    Make sure that the new status is written into the DB
-    """
-    request = _get_fake_request('acct:john@doe', 'smith', True, True)
-    configure(config)
-
-    with patch('h.accounts.views.Subscriptions') as mock_subs:
-        mock_subs.get_by_id = MagicMock()
-        mock_subs.get_by_id.return_value = Mock(active=True)
         profile = ProfileController(request)
-        profile.edit_profile()
-        assert dummy_db_session.added
+        result = profile.edit_profile()
+
+        assert result['code'] == 401
+        assert any('pwd' in err for err in result['errors'])
+
+    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+    def test_edit_profile_with_validation_failure(self, config, user_model):
+        """If validation raises edit_profile() should return an error.
+
+        If _validate_edit_profile_request() raises an exception then
+        edit_profile() should return a dict with an "errors" list containing a
+        list of the error(s) from the exception's .errors property.
+
+        """
+        configure(config)
+        profile = ProfileController(DummyRequest())
+        errors = [
+            ("email", ["That email is invalid", "That email is taken"]),
+            ("emailAgain", "The emails must match."),
+            ("password", ["That password is wrong"])
+        ]
+
+        with patch(
+                "h.accounts.views._validate_edit_profile_request") as validate:
+            validate.side_effect = (
+                h.accounts.views._InvalidEditProfileRequestError(
+                    errors=errors))
+            result = profile.edit_profile()
+
+        assert result["errors"] == errors
+
+    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+    def test_edit_profile_successfully(self, config, user_model):
+        """edit_profile() returns a dict with key "form" when successful."""
+        configure(config)
+        profile = ProfileController(DummyRequest())
+
+        with patch(
+                "h.accounts.views._validate_edit_profile_request") as validate:
+            validate.return_value = {
+                "username": "johndoe",
+                "pwd": "password",
+                "subscriptions": []
+            }
+            result = profile.edit_profile()
+
+        assert "form" in result
+        assert "errors" not in result
+
+    @pytest.mark.usefixtures('activation_model', 'user_model')
+    def test_subscription_update(self, config, dummy_db_session):
+        """Make sure that the new status is written into the DB."""
+        request = _get_fake_request('acct:john@doe', 'smith', True, True)
+        configure(config)
+
+        with patch('h.accounts.views.Subscriptions') as mock_subs:
+            mock_subs.get_by_id = MagicMock()
+            mock_subs.get_by_id.return_value = Mock(active=True)
+            profile = ProfileController(request)
+            profile.edit_profile()
+            assert dummy_db_session.added
 
 
 @pytest.mark.usefixtures('activation_model',
