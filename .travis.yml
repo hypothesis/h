@@ -9,7 +9,6 @@ install:
   - gem install compass
   - pip install -U pip wheel
   - pip install coveralls
-  - pip install mandrill
   - pip install pyramid_redis_sessions
   - make
 script:
