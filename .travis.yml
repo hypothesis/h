@@ -1,17 +1,18 @@
+# use Travis container build infrastructure
+sudo: false
 language:
   - python
 python:
   - '2.7'
 install:
-  - gem install sass
   - gem install compass
-  - pip install coveralls
-  - pip install mandrill
-  - pip install pyramid_redis_sessions
+  - pip install -U pip wheel
+  - pip install coveralls pyramid_redis_sessions
   - make
 script:
-  - make test
+  # Run all tests, with coverage if possible
   - make cover
+  # Test building browser extensions
   - hypothesis-buildext conf/testext.ini chrome --base http://localhost
   - hypothesis-buildext conf/testext.ini firefox --base http://localhost
   - "hypothesis-buildext conf/production.ini chrome
@@ -22,6 +23,10 @@ script:
     --assets resource://notarealkey/hypothesis/data"
 after_success:
   - coveralls
+cache:
+  directories:
+    - node_modules
+    - $HOME/.cache/pip
 notifications:
   irc:
     channels:
