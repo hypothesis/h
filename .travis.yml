@@ -5,7 +5,6 @@ language:
 python:
   - '2.7'
 install:
-  - gem install sass
   - gem install compass
   - pip install -U pip wheel
   - pip install coveralls
