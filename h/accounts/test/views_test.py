@@ -76,7 +76,7 @@ class TestProfile(object):
 
 class TestEditProfile(object):
 
-    """Unit tests for the edit_profile() function."""
+    """Unit tests for ProfileController's edit_profile() method."""
 
     @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
     def test_profile_invalid_password(self, config, user_model):
