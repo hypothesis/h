@@ -30,7 +30,8 @@ def ajax_form(request, result):
 
     if isinstance(result, httpexceptions.HTTPRedirection):
         request.response.headers.extend(result.headers)
-        result = {'status': 'okay'}
+        result = result.json
+        result["status"] = "okay"
     elif isinstance(result, httpexceptions.HTTPError):
         request.response.status_code = result.code
         result = {'status': 'failure', 'reason': str(result)}
@@ -97,14 +98,6 @@ class AsyncFormViewMapper(object):
             result = ajax_form(request, result)
             model = result.setdefault('model', {})
             model.update(session.model(request))
-
-            # Add the user's email into the model. This is needed so that the
-            # edit profile forms can show the value of the user's current
-            # email.
-            if 'email' not in model and request.authenticated_userid:
-                model['email'] = h.accounts.models.User.get_by_id(
-                    request, request.authenticated_userid).email
-
             result.pop('form', None)
             return result
         return wrapper
@@ -314,7 +307,17 @@ class ProfileController(horus.views.ProfileController):
         user = self.User.get_user(self.request, username, pwd)
         if user:
             self.request.context = user
-            return super(ProfileController, self).edit_profile()
+            response = super(ProfileController, self).edit_profile()
+
+            # Add the user's email into the model dict that eventually gets
+            # returned to the browser. This is needed so that the edit profile
+            # forms can show the value of the user's current email.
+            if self.request.authenticated_userid:
+                user = h.accounts.models.User.get_by_id(
+                    self.request, self.request.authenticated_userid)
+                response.json = {"model": {"email": user.email}}
+
+            return response
         else:
             return dict(errors=[{'pwd': _('Invalid password')}], code=401)
 
