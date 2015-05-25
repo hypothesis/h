@@ -2,6 +2,7 @@
 from mock import patch, Mock, MagicMock
 import pytest
 
+from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
 from horus.interfaces import (
     IUserClass, IActivationClass, IUIStrings, IProfileSchema, IProfileForm,
@@ -17,6 +18,7 @@ from h.accounts import schemas
 from h.accounts import views
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
+from h.accounts.views import AsyncFormViewMapper
 from h.models import _
 
 
@@ -161,6 +163,55 @@ class TestEditProfile(object):
         assert "form" in result
         assert "errors" not in result
 
+    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+    def test_edit_profile_returns_email(self, config, user_model,
+                                        authn_policy):
+        """edit_profile()'s response should contain the user's current email.
+
+        For a valid edit_profile() request
+        horus.views.ProfileController.edit_profile() returns an HTTPRedirection
+        object. h.accounts.views.ProfileController.edit_profile() should
+        add a JSON body to this response containing a "model" dict with the
+        user's current email address.
+
+        AsyncFormViewMapper will pick up this JSON body and preserve it in the
+        body of the 200 OK response that is finally sent back to the browser.
+
+        The frontend uses this email field to show the user's current email
+        address in the form.
+
+        """
+        configure(config)
+        validate_patcher = patch(
+            "h.accounts.views._validate_edit_profile_request")
+        edit_profile_patcher = patch(
+            "horus.views.ProfileController.edit_profile")
+        get_by_id_patcher = patch("h.accounts.models.User.get_by_id")
+
+        result = None
+        try:
+            validate = validate_patcher.start()
+            validate.return_value = {
+                "username": "fake user name",
+                "pwd": "fake password",
+                "subscriptions": []
+            }
+
+            edit_profile = edit_profile_patcher.start()
+            edit_profile.return_value = httpexceptions.HTTPFound("fake url")
+
+            get_by_id = get_by_id_patcher.start()
+            get_by_id.return_value = FakeUser(email="fake email")
+
+            result = ProfileController(DummyRequest()).edit_profile()
+
+            assert result.json["model"]["email"] == "fake email"
+
+        finally:
+            validate = validate_patcher.stop()
+            edit_profile = edit_profile_patcher.stop()
+            get_by_id = get_by_id_patcher.stop()
+
     @pytest.mark.usefixtures('activation_model', 'user_model')
     def test_subscription_update(self, config, dummy_db_session):
         """Make sure that the new status is written into the DB."""
@@ -173,6 +224,37 @@ class TestEditProfile(object):
             profile = ProfileController(request)
             profile.edit_profile()
             assert dummy_db_session.added
+
+
+class TestAsyncFormViewMapper(object):
+
+    """Unit tests for AsyncFormViewMapper."""
+
+    def test_it_preserves_email_in_response(self):
+        """AsyncFormViewMapper should preserve the email in the response.
+
+        ProfileController.edit_profile() returns an HTTPFound with a JSON body
+        containing a model dict with the user's email address in it.
+
+        AsyncFormViewMapper should preserve this email address in the dict
+        that it returns.
+
+        """
+        mapper = AsyncFormViewMapper(attr="edit_profile")
+
+        class ViewController(object):
+
+            def __init__(self, request):
+                pass
+
+            def edit_profile(self):
+                response = httpexceptions.HTTPFound("fake url")
+                response.json = {"model": {"email": "fake email"}}
+                return response
+
+        result = mapper(ViewController)({}, DummyRequest())
+
+        assert result["model"]["email"] == "fake email"
 
 
 @pytest.mark.usefixtures('activation_model',
