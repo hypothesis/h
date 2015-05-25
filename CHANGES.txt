@@ -14,6 +14,7 @@
 - Added support for URL parameters to the Atom feed at ``/stream.atom``.
   For example: ``/stream.atom?user=seanh`` or
   ``/stream.atom?user=seanh&tags=foo,bar``.
+- Users can now change their email addresses using the Account form (#2131)
 
 0.4.0 (2015-05-05)
 ==================
