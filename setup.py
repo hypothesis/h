@@ -71,7 +71,7 @@ INSTALL_REQUIRES = [
     'repoze.sendmail<4.2',
 ]
 
-DEV_EXTRAS = ['pyramid_debugtoolbar>=2.1', 'prospector', 'pep257']
+DEV_EXTRAS = ['pyramid_debugtoolbar>=2.1', 'prospector[with_pyroma]', 'pep257']
 TESTING_EXTRAS = ['mock', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
 CLAIM_EXTRAS = ['mandrill']
 YAML_EXTRAS = ['PyYAML']
