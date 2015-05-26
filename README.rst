@@ -11,7 +11,7 @@ Hypothesis
    :target: https://landscape.io/github/hypothesis/h/master
    :alt: Code Health
 .. image:: https://img.shields.io/badge/IRC-%23hypothes.is-blue.svg
-   :target: https://www.irccloud.com/invite?channel=%23hypothes.is&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1
+   :target: `#hypothes.is`_
    :alt: #hypothes.is IRC channel
 
 
@@ -33,15 +33,16 @@ Hypothesis is a tool for annotating the web.
 Installation and deployment
 ---------------------------
 
-See `<docs/INSTALL.rst>`_ for instructions on deploying h in a production
-environment.
+See the
+`Installation guide <https://h.readthedocs.org/en/latest/INSTALL.html>`_ for
+instructions on deploying h in a production environment.
 
 
 Development
 -----------
 
-See `<docs/hacking/install.rst>`_ for instructions on setting up a development
-environment for h.
+See the `Contributor's guide`_ for instructions on setting up a development
+environment and contributing to h.
 
 
 Community
@@ -50,16 +51,16 @@ Community
 Join us in `#hypothes.is`_ on freenode_ for discussion.
 
 If you'd like to contribute to the project, you should also `subscribe`_ to the
-`development mailing list`_ and read our `contributor's guide`_. Then consider
+`development mailing list`_ and read our `Contributor's guide`_. Then consider
 getting started on one of the issues that are ready for work. Issues tagged with
 the label '`New Contributor Friendly`_' are ideal for those just getting
 started.
 
-.. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
+.. _#hypothes.is: https://www.irccloud.com/invite?channel=%23hypothes.is&amp;hostname=irc.freenode.net&amp;port=6667&amp;ssl=1
 .. _freenode: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
-.. _development mailing list: http://list.hypothes.is/archive/
-.. _contributor's guide: CONTRIBUTING.rst
+.. _development mailing list: https://groups.google.com/a/list.hypothes.is/forum/#!forum/dev
+.. _Contributor's guide: https://h.readthedocs.org/en/latest/hacking/
 .. _New Contributor Friendly: https://github.com/hypothesis/h/issues?q=is%3Aopen+is%3Aissue+label%3A%22New+Contributor+Friendly%22
 
 
