@@ -22,6 +22,22 @@ from sqlalchemy import or_
 from sqlalchemy.ext.declarative import declared_attr
 
 
+# Silence some SQLAlchemy warnings caused by the Horus library.
+import warnings
+warnings.filterwarnings("ignore", message=r".*Unmanaged access of declarative "
+                                          "attribute __tablename__ from "
+                                          "non-mapped class UserGroupMixin")
+warnings.filterwarnings("ignore", message=r".*Unmanaged access of declarative "
+                                          "attribute __tablename__ from "
+                                          "non-mapped class GroupMixin")
+warnings.filterwarnings("ignore", message=r".*Unmanaged access of declarative "
+                                          "attribute __tablename__ from "
+                                          "non-mapped class ActivationMixin")
+warnings.filterwarnings("ignore", message=r".*Unmanaged access of declarative "
+                                          "attribute __tablename__ from "
+                                          "non-mapped class UserMixin")
+
+
 class Activation(ActivationMixin, Base):
     def __init__(self, *args, **kwargs):
         super(Activation, self).__init__(*args, **kwargs)
