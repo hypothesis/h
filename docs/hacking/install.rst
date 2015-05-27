@@ -49,7 +49,9 @@ This section describes how to install h's system dependencies on Ubuntu 14.04.
 These steps will also probably work with little or no changes on other versions
 of Ubuntu, Debian, or other Debian-based GNU/Linux distributions.
 
-Install the following packages::
+Install the following packages:
+
+.. code-block:: bash
 
     $ sudo apt-get install -y --no-install-recommends \
         build-essential \
@@ -67,16 +69,22 @@ Install the following packages::
         ruby-dev
 
 Add a ``node`` symlink. This is needed because the node binary from Ubuntu is
-called ``nodejs`` but many packages will try to run it as ``node``::
+called ``nodejs`` but many packages will try to run it as ``node``:
+
+.. code-block:: bash
 
     $ sudo ln -s /usr/bin/nodejs /usr/bin/node
 
-Upgrade pip and npm::
+Upgrade pip and npm:
+
+.. code-block:: bash
 
     $ sudo pip install -U pip virtualenv
     $ sudo npm install -g npm
 
-Install compass::
+Install compass:
+
+.. code-block:: bash
 
     $ sudo gem install compass
 
@@ -90,7 +98,9 @@ The instructions that follow assume you have previously installed Homebrew_.
 
 .. _Homebrew: http://brew.sh/
 
-Install the following packages::
+Install the following packages:
+
+.. code-block:: bash
 
     $ brew install \
         libevent \
@@ -99,7 +109,9 @@ Install the following packages::
         node \
         python
 
-Install compass::
+Install compass:
+
+.. code-block:: bash
 
     $ gem install compass
 
@@ -142,7 +154,9 @@ with h in a development environment.
 Get the h source code from GitHub
 ---------------------------------
 
-Use ``git`` to download the h source code::
+Use ``git`` to download the h source code:
+
+.. code-block:: bash
 
     $ git clone https://github.com/hypothesis/h.git
 
@@ -156,7 +170,9 @@ Install h into a Python virtualenv
 Although it is strictly optional, we highly recommend that you install h inside
 a Python "virtualenv". First, follow the instructions for your platform on
 installing virtualenvwrapper_. Then, at a shell, you can create a virtualenv for
-the h application with::
+the h application with:
+
+.. code-block:: bash
 
     $ mkvirtualenv h  
 
@@ -164,12 +180,16 @@ You will notice that the your shell prompt changes to include a (h) symbol. That
 means that you now have your virtual environment activated. This is required for
 running the code.
 
-At any later time, you can activate your virtualenv by running::
+At any later time, you can activate your virtualenv by running:
+
+.. code-block:: bash
 
     $ workon h
 
 Install h's Python dependencies into the virtual environment, and its Node
-dependencies into the ``h/node_modules`` directory::
+dependencies into the ``h/node_modules`` directory:
+
+.. code-block:: bash
 
     $ cd h
     $ make deps
@@ -198,7 +218,9 @@ Add Node modules to your PATH
 If you don't have your ``h/node_modules/.bin`` directory on your ``PATH`` then
 you'll get errors because the Node modules you've installed can't be found
 (for example: ``Program file not found: uglifyjs``).
-To add the Node modules to your ``PATH``::
+To add the Node modules to your ``PATH``:
+
+.. code-block:: bash
 
     $ export PATH=./node_modules/.bin:$PATH
 
@@ -210,7 +232,9 @@ Running h
 ---------
 
 Now that you've installed h and all of its dependencies, you should be able to
-run h in your development environment with this command::
+run h in your development environment with this command:
+
+.. code-block:: bash
 
     $ make dev
 
@@ -230,15 +254,21 @@ Running the tests
 
 There are test suites for both the frontend and backend code.
 
-To run the Python suite, invoke the tests in the standard fashion::
+To run the Python suite, invoke the tests in the standard fashion:
+
+.. code-block:: bash
 
     $ python setup.py test
 
-To run the JavaScript suite, run::
+To run the JavaScript suite, run:
+
+.. code-block:: bash
 
     $ $(npm bin)/karma start h/static/scripts/karma.config.js --single-run
 
-As a convenience, there is a make target which will do all of the above::
+As a convenience, there is a make target which will do all of the above:
+
+.. code-block:: bash
 
     $ make test
 
