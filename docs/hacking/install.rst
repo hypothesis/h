@@ -53,7 +53,7 @@ Install the following packages:
 
 .. code-block:: bash
 
-    $ sudo apt-get install -y --no-install-recommends \
+    sudo apt-get install -y --no-install-recommends \
         build-essential \
         git \
         libevent-dev \
@@ -73,20 +73,20 @@ called ``nodejs`` but many packages will try to run it as ``node``:
 
 .. code-block:: bash
 
-    $ sudo ln -s /usr/bin/nodejs /usr/bin/node
+    sudo ln -s /usr/bin/nodejs /usr/bin/node
 
 Upgrade pip and npm:
 
 .. code-block:: bash
 
-    $ sudo pip install -U pip virtualenv
-    $ sudo npm install -g npm
+    sudo pip install -U pip virtualenv
+    sudo npm install -g npm
 
 Install compass:
 
 .. code-block:: bash
 
-    $ sudo gem install compass
+    sudo gem install compass
 
 
 Installing the system dependencies on OS X
@@ -102,7 +102,7 @@ Install the following packages:
 
 .. code-block:: bash
 
-    $ brew install \
+    brew install \
         libevent \
         libffi \
         libyaml \
@@ -113,7 +113,7 @@ Install compass:
 
 .. code-block:: bash
 
-    $ gem install compass
+    gem install compass
 
 
 Installing ElasticSearch
@@ -158,7 +158,7 @@ Use ``git`` to download the h source code:
 
 .. code-block:: bash
 
-    $ git clone https://github.com/hypothesis/h.git
+    git clone https://github.com/hypothesis/h.git
 
 This will download the code into an ``h`` directory in your current working
 directory.
@@ -174,7 +174,7 @@ the h application with:
 
 .. code-block:: bash
 
-    $ mkvirtualenv h  
+    mkvirtualenv h  
 
 You will notice that the your shell prompt changes to include a (h) symbol. That
 means that you now have your virtual environment activated. This is required for
@@ -184,15 +184,15 @@ At any later time, you can activate your virtualenv by running:
 
 .. code-block:: bash
 
-    $ workon h
+    workon h
 
 Install h's Python dependencies into the virtual environment, and its Node
 dependencies into the ``h/node_modules`` directory:
 
 .. code-block:: bash
 
-    $ cd h
-    $ make deps
+    cd h
+    make deps
 
 .. note::
 
@@ -206,8 +206,8 @@ dependencies into the ``h/node_modules`` directory:
 
    So to reinstall all the dependencies after a failure or crash do::
 
-       $ rm -rf h.egg_info node_modules
-       $ make deps
+       rm -rf h.egg_info node_modules
+       make deps
 
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
 
@@ -222,7 +222,7 @@ To add the Node modules to your ``PATH``:
 
 .. code-block:: bash
 
-    $ export PATH=./node_modules/.bin:$PATH
+    export PATH=./node_modules/.bin:$PATH
 
 If you add the above line to your ``~/.bashrc`` file then you won't have to
 enter it every time you start a new terminal.
@@ -236,7 +236,7 @@ run h in your development environment with this command:
 
 .. code-block:: bash
 
-    $ make dev
+    make dev
 
 This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
@@ -258,19 +258,19 @@ To run the Python suite, invoke the tests in the standard fashion:
 
 .. code-block:: bash
 
-    $ python setup.py test
+    python setup.py test
 
 To run the JavaScript suite, run:
 
 .. code-block:: bash
 
-    $ $(npm bin)/karma start h/static/scripts/karma.config.js --single-run
+    $(npm bin)/karma start h/static/scripts/karma.config.js --single-run
 
 As a convenience, there is a make target which will do all of the above:
 
 .. code-block:: bash
 
-    $ make test
+    make test
 
 
 Debugging h
