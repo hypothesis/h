@@ -8,7 +8,8 @@ require('jquery-scrollintoview')
 var g = Annotator.Util.getGlobal();
 if (g.wgxpath) g.wgxpath.install();
 
-require('node-iterator-shim').install();
+var nodeIteratorShim = require('node-iterator-shim')
+nodeIteratorShim();
 
 // Applications
 Annotator.Guest = require('./guest')

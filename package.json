@@ -14,7 +14,7 @@
     "es6-promise": "^2.1.0",
     "extend": "^2.0.0",
     "hammerjs": "^2.0.4",
-    "node-iterator-shim": "^1.0.0-beta.1",
+    "node-iterator-shim": "^1.0.0-beta.3",
     "node-uuid": "^1.4.3",
     "raf": "^2.0.4",
     "strip-bomify": "^0.1.0",
@@ -61,7 +61,8 @@
     "hammerjs": "./node_modules/hammerjs/hammer.js",
     "jquery": "./h/static/scripts/vendor/jquery.js",
     "jquery-scrollintoview": "./h/static/scripts/vendor/jquery.scrollintoview.js",
-    "jschannel": "./h/static/scripts/vendor/jschannel.js"
+    "jschannel": "./h/static/scripts/vendor/jschannel.js",
+    "node-iterator-shim": "./node_modules/node-iterator-shim/dist/node-iterator-shim.js"
   },
   "browserify-shim": {
     "annotator": {
@@ -91,6 +92,7 @@
         "jquery"
       ]
     },
-    "jschannel": "Channel"
+    "jschannel": "Channel",
+    "node-iterator-shim": "nodeIteratorShim"
   }
 }
