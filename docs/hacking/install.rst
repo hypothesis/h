@@ -38,23 +38,22 @@ Installing the system dependencies
 
 Installing h's system dependencies is different on different operating systems.
 Follow either the
-`Installing the system dependencies on Debian or Ubuntu`_ or the
+`Installing the system dependencies on Ubuntu 14.04`_ or the
 `Installing the system dependencies on OS X`_ section below.
 
 
-Installing the system dependencies on Debian or Ubuntu
-``````````````````````````````````````````````````````
+Installing the system dependencies on Ubuntu 14.04
+``````````````````````````````````````````````````
 
-This section describes how to install h's system dependencies on Debian and
-Debian-like GNU/Linux distributions (such as Ubuntu).
+This section describes how to install h's system dependencies on Ubuntu 14.04.
+These steps will also probably work with little or no changes on other versions
+of Ubuntu, Debian, or other Debian-based GNU/Linux distributions.
 
-Not all required packages are necessarily part of the ``stable`` distribution;
-you may need to fetch some stuff from ``unstable``. (On Ubuntu, you may need to
-add the ``universe`` package repositories.)
+Install the following packages:
 
-Install the following packages::
+.. code-block:: bash
 
-    $ apt-get install -y --no-install-recommends \
+    sudo apt-get install -y --no-install-recommends \
         build-essential \
         git \
         libevent-dev \
@@ -69,14 +68,25 @@ Install the following packages::
         ruby \
         ruby-dev
 
-Upgrade pip and npm::
+Add a ``node`` symlink. This is needed because the node binary from Ubuntu is
+called ``nodejs`` but many packages will try to run it as ``node``:
 
-    $ pip install -U pip virtualenv
-    $ npm install -g npm
+.. code-block:: bash
 
-Install compass::
+    sudo ln -s /usr/bin/nodejs /usr/bin/node
 
-    $ gem install compass
+Upgrade pip and npm:
+
+.. code-block:: bash
+
+    sudo pip install -U pip virtualenv
+    sudo npm install -g npm
+
+Install compass:
+
+.. code-block:: bash
+
+    sudo gem install compass
 
 
 Installing the system dependencies on OS X
@@ -88,18 +98,22 @@ The instructions that follow assume you have previously installed Homebrew_.
 
 .. _Homebrew: http://brew.sh/
 
-Install the following packages::
+Install the following packages:
 
-    $ brew install \
+.. code-block:: bash
+
+    brew install \
         libevent \
         libffi \
         libyaml \
         node \
         python
 
-Install compass::
+Install compass:
 
-    $ gem install compass
+.. code-block:: bash
+
+    gem install compass
 
 
 Installing ElasticSearch
@@ -137,38 +151,92 @@ with h in a development environment.
 .. _instructions on installing NSQ: http://nsq.io/deployment/installing.html
 
 
+Get the h source code from GitHub
+---------------------------------
+
+Use ``git`` to download the h source code:
+
+.. code-block:: bash
+
+    git clone https://github.com/hypothesis/h.git
+
+This will download the code into an ``h`` directory in your current working
+directory.
+
+
 Install h into a Python virtualenv
 ----------------------------------
 
 Although it is strictly optional, we highly recommend that you install h inside
 a Python "virtualenv". First, follow the instructions for your platform on
 installing virtualenvwrapper_. Then, at a shell, you can create a virtualenv for
-the h application with::
+the h application with:
 
-    $ mkvirtualenv h  
+.. code-block:: bash
+
+    mkvirtualenv h  
 
 You will notice that the your shell prompt changes to include a (h) symbol. That
 means that you now have your virtual environment activated. This is required for
 running the code.
 
-At any later time, you can activate your virtualenv by running::
+At any later time, you can activate your virtualenv by running:
 
-    $ workon h
+.. code-block:: bash
 
-Once platform dependencies are installed::
+    workon h
 
-    $ make deps
+Install h's Python dependencies into the virtual environment, and its Node
+dependencies into the ``h/node_modules`` directory:
+
+.. code-block:: bash
+
+    cd h
+    make deps
+
+.. note::
+
+   If ``make deps`` fails for any reason re-running it may not install all the
+   dependencies because it sees the ``h.egg_info`` and ``node_modules``
+   directories that it created before it failed and assumes that because they
+   exist its work is done. You may see ``make: Nothing to be done for `deps'``
+   or you may get no output, or you may see it doing some work (e.g. installing
+   Python dependencies) but it may not do *all* the work (e.g. not installing
+   missing Node dependencies).
+
+   So to reinstall all the dependencies after a failure or crash do::
+
+       rm -rf h.egg_info node_modules
+       make deps
 
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
+
+
+Add Node modules to your PATH
+-----------------------------
+
+If you don't have your ``h/node_modules/.bin`` directory on your ``PATH`` then
+you'll get errors because the Node modules you've installed can't be found
+(for example: ``Program file not found: uglifyjs``).
+To add the Node modules to your ``PATH``:
+
+.. code-block:: bash
+
+    export PATH=./node_modules/.bin:$PATH
+
+If you add the above line to your ``~/.bashrc`` file then you won't have to
+enter it every time you start a new terminal.
 
 
 Running h
 ---------
 
 Now that you've installed h and all of its dependencies, you should be able to
-run h in your development environment with this command::
+run h in your development environment with this command:
 
-    $ make dev
+.. code-block:: bash
+
+    make dev
 
 This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
@@ -186,17 +254,23 @@ Running the tests
 
 There are test suites for both the frontend and backend code.
 
-To run the Python suite, invoke the tests in the standard fashion::
+To run the Python suite, invoke the tests in the standard fashion:
 
-    $ python setup.py test
+.. code-block:: bash
 
-To run the JavaScript suite, run::
+    python setup.py test
 
-    $ $(npm bin)/karma start h/static/scripts/karma.config.js --single-run
+To run the JavaScript suite, run:
 
-As a convenience, there is a make target which will do all of the above::
+.. code-block:: bash
 
-    $ make test
+    $(npm bin)/karma start h/static/scripts/karma.config.js --single-run
+
+As a convenience, there is a make target which will do all of the above:
+
+.. code-block:: bash
+
+    make test
 
 
 Debugging h
