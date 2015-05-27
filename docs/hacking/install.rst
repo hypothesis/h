@@ -38,23 +38,20 @@ Installing the system dependencies
 
 Installing h's system dependencies is different on different operating systems.
 Follow either the
-`Installing the system dependencies on Debian or Ubuntu`_ or the
+`Installing the system dependencies on Ubuntu 14.04`_ or the
 `Installing the system dependencies on OS X`_ section below.
 
 
-Installing the system dependencies on Debian or Ubuntu
-``````````````````````````````````````````````````````
+Installing the system dependencies on Ubuntu 14.04
+``````````````````````````````````````````````````
 
-This section describes how to install h's system dependencies on Debian and
-Debian-like GNU/Linux distributions (such as Ubuntu).
-
-Not all required packages are necessarily part of the ``stable`` distribution;
-you may need to fetch some stuff from ``unstable``. (On Ubuntu, you may need to
-add the ``universe`` package repositories.)
+This section describes how to install h's system dependencies on Ubuntu 14.04.
+These steps will also probably work with little or no changes on other versions
+of Ubuntu, Debian, or other Debian-based GNU/Linux distributions.
 
 Install the following packages::
 
-    $ apt-get install -y --no-install-recommends \
+    $ sudo apt-get install -y --no-install-recommends \
         build-essential \
         git \
         libevent-dev \
@@ -69,14 +66,19 @@ Install the following packages::
         ruby \
         ruby-dev
 
+Add a ``node`` symlink. This is needed because the node binary from Ubuntu is
+called ``nodejs`` but many packages will try to run it as ``node``::
+
+    $ sudo ln -s /usr/bin/nodejs /usr/bin/node
+
 Upgrade pip and npm::
 
-    $ pip install -U pip virtualenv
-    $ npm install -g npm
+    $ sudo pip install -U pip virtualenv
+    $ sudo npm install -g npm
 
 Install compass::
 
-    $ gem install compass
+    $ sudo gem install compass
 
 
 Installing the system dependencies on OS X
@@ -137,6 +139,17 @@ with h in a development environment.
 .. _instructions on installing NSQ: http://nsq.io/deployment/installing.html
 
 
+Get the h source code from GitHub
+---------------------------------
+
+Use ``git`` to download the h source code::
+
+    $ git clone https://github.com/hypothesis/h.git
+
+This will download the code into an ``h`` directory in your current working
+directory.
+
+
 Install h into a Python virtualenv
 ----------------------------------
 
@@ -155,11 +168,42 @@ At any later time, you can activate your virtualenv by running::
 
     $ workon h
 
-Once platform dependencies are installed::
+Install h's Python dependencies into the virtual environment, and its Node
+dependencies into the ``h/node_modules`` directory::
 
+    $ cd h
     $ make deps
 
+.. note::
+
+   If ``make deps`` fails for any reason re-running it may not install all the
+   dependencies because it sees the ``h.egg_info`` and ``node_modules``
+   directories that it created before it failed and assumes that because they
+   exist its work is done. You may see ``make: Nothing to be done for `deps'``
+   or you may get no output, or you may see it doing some work (e.g. installing
+   Python dependencies) but it may not do *all* the work (e.g. not installing
+   missing Node dependencies).
+
+   So to reinstall all the dependencies after a failure or crash do::
+
+       $ rm -rf h.egg_info node_modules
+       $ make deps
+
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
+
+
+Add Node modules to your PATH
+-----------------------------
+
+If you don't have your ``h/node_modules/.bin`` directory on your ``PATH`` then
+you'll get errors because the Node modules you've installed can't be found
+(for example: ``Program file not found: uglifyjs``).
+To add the Node modules to your ``PATH``::
+
+    $ export PATH=./node_modules/.bin:$PATH
+
+If you add the above line to your ``~/.bashrc`` file then you won't have to
+enter it every time you start a new terminal.
 
 
 Running h
