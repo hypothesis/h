@@ -59,28 +59,31 @@ class PDF extends Annotator.Plugin
         return new Promise(raf).then(waitForTextLayer)
 
     reanchor = ->
+      placeholder = page.el.getElementsByClassName('annotator-placeholder')[0]
+
+      unless placeholder?
+        return
+
       unanchored = unanchored.splice(0, unanchored.length)
 
-      placeholder = page.el.getElementsByClassName('annotator-placeholder')[0]
-      if placeholder?
-        unchanged = []
-        for info in anchored
-          attempt = false
+      unchanged = []
+      for info in anchored
+        attempt = false
 
-          for hl in info.highlights
-            if placeholder.contains(hl)
-              attempt = true
-              break
+        for hl in info.highlights
+          if placeholder.contains(hl)
+            attempt = true
+            break
 
-          if attempt
-            highlighter.removeHighlights(info.highlights)
-            delete info.highlights
-            unanchored.push(info)
-          else
-            unchanged.push(info)
+        if attempt
+          highlighter.removeHighlights(info.highlights)
+          delete info.highlights
+          unanchored.push(info)
+        else
+          unchanged.push(info)
 
-        anchored.splice(0, anchored.length, unchanged...)
-        page.el.removeChild(placeholder)
+      anchored.splice(0, anchored.length, unchanged...)
+      page.el.removeChild(placeholder)
 
       for obj in unanchored
         annotator.setupAnnotation(obj.annotation)
