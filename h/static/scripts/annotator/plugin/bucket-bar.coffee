@@ -117,7 +117,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       delete @_updatePending
       @_update()
 
-
   _update: =>
     # Keep track of buckets of annotations above and below the viewport
     above = []
