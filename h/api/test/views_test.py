@@ -6,6 +6,7 @@
 from mock import patch, MagicMock, Mock
 from pytest import fixture, raises
 from pyramid.testing import DummyRequest, DummyResource
+import webob
 
 from .. import views
 
@@ -44,7 +45,7 @@ class DictMock(Mock):
         self.side_effect = side_effect
 
 
-@fixture(autouse=True)
+@fixture()
 def replace_io(monkeypatch):
     """For all tests, mock paths to the "outside" world"""
     monkeypatch.setattr(views, 'Annotation', DictMock())
@@ -65,7 +66,7 @@ def user(monkeypatch):
     return user
 
 
-def test_index():
+def test_index(replace_io):
     """Get the API descriptor"""
 
     result = views.index(DummyResource(), DummyRequest())
@@ -85,7 +86,7 @@ def test_index():
     assert links['search']['url'] == host + '/search'
 
 
-def test_search_parameters():
+def test_search_parameters(replace_io):
     request_params = {
         'offset': '3',
         'limit': '100',
@@ -108,7 +109,7 @@ def test_search_parameters():
     }
 
 
-def test_bad_search_parameters():
+def test_bad_search_parameters(replace_io):
     request_params = {
         'offset': '3foo',
         'limit': '\' drop table annotations',
@@ -121,7 +122,7 @@ def test_bad_search_parameters():
 
 
 @patch('h.api.views._create_annotation')
-def test_create(mock_create_annotation, user):
+def test_create(mock_create_annotation, user, replace_io):
     request = DummyRequest(json_body=_new_annotation)
 
     annotation = views.create(request)
@@ -131,7 +132,7 @@ def test_create(mock_create_annotation, user):
     _assert_event_published('create')
 
 
-def test_create_annotation(user):
+def test_create_annotation(user, replace_io):
     annotation = views._create_annotation(_new_annotation, user)
     assert annotation['text'] == 'blabla'
     assert annotation['user'] == 'alice'
@@ -140,7 +141,7 @@ def test_create_annotation(user):
     annotation.save.assert_called_once()
 
 
-def test_read():
+def test_read(replace_io):
     annotation = DummyResource()
 
     result = views.read(annotation, DummyRequest())
@@ -150,7 +151,7 @@ def test_read():
 
 
 @patch('h.api.views._update_annotation')
-def test_update(mock_update_annotation):
+def test_update(mock_update_annotation, replace_io):
     annotation = views.Annotation(_old_annotation)
     request = DummyRequest(json_body=_new_annotation)
     request.has_permission = MagicMock(return_value=True)
@@ -164,7 +165,7 @@ def test_update(mock_update_annotation):
     assert result is annotation, "Annotation should have been returned"
 
 
-def test_update_annotation(user):
+def test_update_annotation(user, replace_io):
     annotation = views.Annotation(_old_annotation)
 
     views._update_annotation(annotation, _new_annotation, True)
@@ -178,7 +179,7 @@ def test_update_annotation(user):
 
 
 @patch('h.api.views._anonymize_deletes')
-def test_update_anonymize_deletes(mock_anonymize_deletes):
+def test_update_anonymize_deletes(mock_anonymize_deletes, replace_io):
     annotation = views.Annotation(_old_annotation)
     annotation['deleted'] = True
     request = DummyRequest(json_body=_new_annotation)
@@ -188,7 +189,7 @@ def test_update_anonymize_deletes(mock_anonymize_deletes):
     views._anonymize_deletes.assert_called_once_with(annotation)
 
 
-def test_anonymize_deletes():
+def test_anonymize_deletes(replace_io):
     annotation = views.Annotation(_old_annotation)
     annotation['deleted'] = True
 
@@ -203,7 +204,7 @@ def test_anonymize_deletes():
     }
 
 
-def test_update_change_permissions_disallowed():
+def test_update_change_permissions_disallowed(replace_io):
     annotation = views.Annotation(_old_annotation)
 
     with raises(RuntimeError):
@@ -213,7 +214,7 @@ def test_update_change_permissions_disallowed():
     assert annotation.save.call_count == 0
 
 
-def test_delete():
+def test_delete(replace_io):
     annotation = views.Annotation(_old_annotation)
 
     result = views.delete(annotation, DummyRequest())
@@ -258,3 +259,345 @@ _old_annotation = {
         'delete': ['alice'],
     },
 }
+
+
+class TestSearch(object):
+    # pylint: disable=no-self-use
+
+    """Unit tests for the _search() function."""
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_offset_defaults_to_0(self, search_raw):
+        """If no offset is given search_raw() is called with "from": 0."""
+        views._search(request_params={})
+
+        first_call = search_raw.call_args_list[0]
+        assert first_call[0][0]["from"] == 0
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_custom_offsets_are_passed_in(self, search_raw):
+        """If an offset is given it's passed to search_raw() as "from"."""
+        views._search(request_params={"offset": 7})
+
+        first_call = search_raw.call_args_list[0]
+        assert first_call[0][0]["from"] == 7
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_offset_string_is_converted_to_int(self, search_raw):
+        """'offset' arguments should be converted from strings to ints."""
+        views._search(request_params={"offset": "23"})
+
+        first_call = search_raw.call_args_list[0]
+        assert first_call[0][0]["from"] == 23
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_invalid_offset(self, search_raw):
+        """Invalid 'offset' params should be ignored."""
+        for invalid_offset in ("foo", '', '   ', "-23", "32.7"):
+            views._search(request_params={"offset": invalid_offset})
+
+            first_call = search_raw.call_args_list[0]
+            assert first_call[0][0]["from"] == 0
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_limit_defaults_to_20(self, search_raw):
+        """If no limit is given search_raw() is called with "size": 20."""
+        views._search(request_params={})
+
+        first_call = search_raw.call_args_list[0]
+        assert first_call[0][0]["size"] == 20
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_custom_limits_are_passed_in(self, search_raw):
+        """If a limit is given it's passed to search_raw() as "size"."""
+        views._search(request_params={"limit": 7})
+
+        first_call = search_raw.call_args_list[0]
+        assert first_call[0][0]["size"] == 7
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_limit_strings_are_converted_to_ints(self, search_raw):
+        """String values for limit should be converted to ints."""
+        views._search(request_params={"limit": "17"})
+
+        first_call = search_raw.call_args_list[0]
+        assert first_call[0][0]["size"] == 17
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_invalid_limit(self, search_raw):
+        """Invalid 'limit' params should be ignored."""
+        for invalid_limit in ("foo", '', '   ', "-23", "32.7"):
+            views._search(request_params={"limit": invalid_limit})
+
+            first_call = search_raw.call_args_list[0]
+            assert first_call[0][0]["size"] == 20  # (20 is the default value.)
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_query_defaults_to_match_all(self, search_raw):
+        """If no query is given search_raw is called with "match_all": {}."""
+        views._search(request_params={})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {"bool": {"must": [{"match_all": {}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_sort_defaults_to_updated(self, search_raw):
+        """If no sort is given search_raw() is called with sort "updated"."""
+        views._search(request_params={})
+
+        first_call = search_raw.call_args_list[0]
+        sort = first_call[0][0]["sort"]
+        assert len(sort) == 1
+        assert sort[0].keys() == ["updated"]
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_sort_includes_ignore_unmapped(self, search_raw):
+        """'ignore_unmapped': True is automatically passed to search_raw()."""
+        views._search(request_params={})
+
+        first_call = search_raw.call_args_list[0]
+        sort = first_call[0][0]["sort"]
+        assert sort[0]["updated"]["ignore_unmapped"] == True
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_custom_sort(self, search_raw):
+        """Custom sorts should be passed on to search_raw()."""
+        views._search(request_params={"sort": "title"})
+
+        first_call = search_raw.call_args_list[0]
+
+        sort = first_call[0][0]["sort"]
+        assert sort == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
+
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_order_defaults_to_desc(self, search_raw):
+        """If no sort order is given "order": "desc" is to search_raw()."""
+        views._search(request_params={})
+
+        first_call = search_raw.call_args_list[0]
+        sort = first_call[0][0]["sort"]
+        assert sort[0]["updated"]["order"] == "desc"
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_custom_order(self, search_raw):
+        """'order' params are passed to search_raw() if given."""
+        views._search(request_params={"order": "asc"})
+
+        first_call = search_raw.call_args_list[0]
+
+        sort = first_call[0][0]["sort"]
+        assert sort[0]["updated"]["order"] == "asc"
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_search_for_user(self, search_raw):
+        """'user' params are passed to search_raw() in the "match"."""
+        views._search(request_params={"user": "bob"})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"match": {"user": "bob"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_search_for_multiple_users(self, search_raw):
+        """Multiple "user" params go into multiple "match" dicts."""
+        params = webob.multidict.MultiDict()
+        params.add("user", "fred")
+        params.add("user", "bob")
+
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {
+                "must": [
+                    {"match": {"user": "fred"}},
+                    {"match": {"user": "bob"}}
+                ]
+            }
+        }
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_search_for_tag(self, search_raw):
+        """'tags' params are passed to search_raw() in the "match"."""
+        views._search(request_params={"tags": "foo"})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"match": {"tags": "foo"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_search_for_multiple_tags(self, search_raw):
+        """Multiple "tags" params go into multiple "match" dicts."""
+        params = webob.multidict.MultiDict()
+        params.add("tags", "foo")
+        params.add("tags", "bar")
+
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {
+                "must": [
+                    {"match": {"tags": "foo"}},
+                    {"match": {"tags": "bar"}}
+                ]
+            }
+        }
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_combined_user_and_tag_search(self, search_raw):
+        """A 'user' and a 'param' at the same time are handled correctly."""
+        views._search(request_params={"user": "bob", "tags": "foo"})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [
+                {"match": {"user": "bob"}},
+                {"match": {"tags": "foo"}},
+            ]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_keyword_search(self, search_raw):
+        """Keywords are passed to search_raw() as a multi_match query."""
+        params = webob.multidict.MultiDict()
+        params.add("any", "howdy")
+
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"multi_match": {
+                "fields": ["quote", "tags", "text", "uri.parts", "user"],
+                "query": ["howdy"],
+                "type": "cross_fields"
+            }}]}
+        }
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_multiple_keyword_search(self, search_raw):
+        """Multiple keywords at once are handled correctly."""
+        params = webob.multidict.MultiDict()
+        params.add("any", "howdy")
+        params.add("any", "there")
+
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"multi_match": {
+                "fields": ["quote", "tags", "text", "uri.parts", "user"],
+                "query": ["howdy", "there"],
+                "type": "cross_fields"
+            }}]}
+        }
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_uri_search(self, search_raw):
+        """_search() passes "uri" args on to search_raw() in the "match" dict.
+
+        This is what happens when you open the sidebar on a page and it loads
+        all the annotations of that page.
+
+        """
+        views._search(request_params={"uri": "http://example.com/"})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_single_text_param(self, search_raw):
+        """_search() passes "text" params to search_raw() in a "match" dict."""
+        views._search(request_params={"text": "foobar"})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"match": {"text": "foobar"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_multiple_text_params(self, search_raw):
+        """Multiple "test" request params produce multiple "match" dicts."""
+        params = webob.multidict.MultiDict()
+        params.add("text", "foo")
+        params.add("text", "bar")
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {
+                "must": [
+                    {"match": {"text": "foo"}},
+                    {"match": {"text": "bar"}}
+                ]
+            }
+        }
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_single_quote_param(self, search_raw):
+        """_search() passes a "quote" param to search_raw() in a "match"."""
+        views._search(request_params={"quote": "foobar"})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"match": {"quote": "foobar"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_multiple_quote_params(self, search_raw):
+        """Multiple "quote" request params produce multiple "match" dicts."""
+        params = webob.multidict.MultiDict()
+        params.add("quote", "foo")
+        params.add("quote", "bar")
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {
+                "must": [
+                    {"match": {"quote": "foo"}},
+                    {"match": {"quote": "bar"}}
+                ]
+            }
+        }
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_user_object(self, search_raw):
+        """If _search_params() gets a user arg it passes it to search_raw().
+
+        Note: This test is testing the function's user param. You can also
+        pass one or more user arguments in the request.params, those are
+        tested elsewhere.
+
+        """
+        user = MagicMock()
+
+        views._search(request_params={}, user=user)
+
+        first_call = search_raw.call_args_list[0]
+        assert first_call[1]["user"] == user
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_with_evil_arguments(self, search_raw):
+        params = webob.multidict.MultiDict({
+            "offset": "3foo",
+            "limit": '\' drop table annotations'
+        })
+
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {'bool': {'must': [{'match_all': {}}]}}
