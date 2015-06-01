@@ -305,7 +305,7 @@ class ProfileController(horus.views.ProfileController):
         request = self.request
         model = {}
         userid = request.authenticated_userid
-        if request.registry.feature('notification'):
+        if request.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 request,
                 userid
