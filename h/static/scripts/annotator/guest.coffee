@@ -1,5 +1,5 @@
 raf = require('raf')
-Promise = global.Promise or require('es6-promise').Promise
+Promise = global.Promise ? require('es6-promise').Promise
 Annotator = require('annotator')
 $ = Annotator.$
 
