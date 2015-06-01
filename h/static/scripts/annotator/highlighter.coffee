@@ -26,5 +26,4 @@ exports.highlightRange = (normedRange, cssClass='annotator-hl') ->
 
 exports.removeHighlights = (highlights) ->
   for h in highlights when h.parentNode?
-    child = h.childNodes[0]
     $(h).replaceWith(h.childNodes)

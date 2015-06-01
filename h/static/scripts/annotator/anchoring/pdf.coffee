@@ -119,7 +119,9 @@ exports.anchor = (selectors) ->
       findPage(position.start)
       .then(({index, offset}) ->
         page = getPage(index)
-        if page.textLayer?.renderingDone
+        renderingState = page.renderingState
+        renderingDone = page.textLayer?.renderingDone
+        if renderingState is RenderingStates.FINISHED and renderingDone
           root = page.textLayer.textLayerDiv
           start = position.start - offset
           end = position.end - offset
@@ -127,13 +129,13 @@ exports.anchor = (selectors) ->
           .then((a) -> Promise.resolve(a.toRange({root})))
           .then(assertQuote)
         else
-          el = page.el
-          placeholder = el.getElementsByClassName('annotator-placeholder')[0]
+          div = page.div ? page.el
+          placeholder = div.getElementsByClassName('annotator-placeholder')[0]
           unless placeholder?
             placeholder = document.createElement('span')
             placeholder.classList.add('annotator-placeholder')
             placeholder.textContent = 'Loading annotations…'
-            page.el.appendChild(placeholder)
+            div.appendChild(placeholder)
           range = document.createRange()
           range.setStartBefore(placeholder)
           range.setEndAfter(placeholder)

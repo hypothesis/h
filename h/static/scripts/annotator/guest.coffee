@@ -39,8 +39,7 @@ module.exports = class Guest extends Annotator
   constructor: (element, options, config = {}) ->
     super
 
-    this.anchored = []
-    this.unanchored = []
+    this.anchors = []
 
     cfOptions =
       on: (event, handler) =>
@@ -102,13 +101,13 @@ module.exports = class Guest extends Annotator
     crossframe.on('onEditorHide', this.onEditorHide)
     crossframe.on('onEditorSubmit', this.onEditorSubmit)
     crossframe.on 'focusAnnotations', (ctx, tags=[]) =>
-      for info in @anchored
-        toggle = info.annotation.$$tag in tags
-        $(info.highlights).toggleClass('annotator-hl-focused', toggle)
+      for anchor in @anchors when anchor.highlights?
+        toggle = anchor.annotation.$$tag in tags
+        $(anchor.highlights).toggleClass('annotator-hl-focused', toggle)
     crossframe.on 'scrollToAnnotation', (ctx, tag) =>
-      for info in @anchored
-        if info.annotation.$$tag is tag
-          $(info.highlights).scrollintoview()
+      for anchor in @anchors when anchor.highlights?
+        if anchor.annotation.$$tag is tag
+          $(anchor.highlights).scrollintoview()
           return
     crossframe.on 'getDocumentInfo', (trans) =>
       trans.delayReturn(true)
@@ -148,57 +147,86 @@ module.exports = class Guest extends Annotator
     this.removeEvents()
 
   setupAnnotation: (annotation) ->
-    {anchored, unanchored, element, plugins} = this
+    self = this
 
-    maybeAnchor = (target) ->
-      return new Promise(raf).then ->
-        anchoring.anchor(target.selector)
-        .then(highlightRange)
-        .then((highlights) -> {annotation, target, highlights})
-        .catch((reason) -> {annotation, target, reason})
+    setup = ->
+      anchors = []
+      anchoredTargets = []
+      deadHighlights = []
 
-    highlightRange = (range) ->
-      return new Promise(raf).then ->
-        normedRange = Annotator.Range.sniff(range).normalize(element[0])
-        return highlighter.highlightRange(normedRange)
+      _anchor = (target) ->
+        return new Promise(raf)
+        .then(-> anchoring.anchor(target.selector))
+        .then((range) -> {annotation, target, range})
+        .catch(-> {annotation, target})
 
-    storeAndSync = (results) ->
-      highlighted = false
+      _highlight = (anchor) ->
+        if anchor.range?
+          return new Promise(raf).then ->
+            range = Annotator.Range.sniff(anchor.range)
+            normedRange = range.normalize(self.element[0])
+            anchor.highlights = highlighter.highlightRange(normedRange)
+            return anchor
+        return anchor
 
-      for result in results
-        if result.highlights?
-          highlighted = true
-          anchored.push(result)
+      for anchor in self.anchors.splice(0, self.anchors.length)
+        if anchor.annotation is annotation
+          if anchor.range? and anchor.target in annotation.target
+            anchors.push(anchor)
+            anchoredTargets.push(anchor.target)
+          else if anchor.highlights?
+            deadHighlights.push(anchor.highlights)
+            delete anchor.highlights
+            delete anchor.range
         else
-          unanchored.push(result)
+          self.anchors.push(anchor)
 
-      annotation.$orphan = (results.length and not highlighted)
+      deadHighlights = Array::concat(deadHighlights...)
+      new Promise(raf).then(-> highlighter.removeHighlights(deadHighlights))
 
-      plugins.BucketBar.update()
-      plugins.CrossFrame.sync([annotation])
+      for target in annotation.target when target not in anchoredTargets
+        anchor = _anchor(target).then(_highlight)
+        anchors.push(anchor)
 
-    targets = (maybeAnchor(target) for target in annotation.target ? [])
-    Promise.all(targets).then(storeAndSync)
+      return Promise.all(anchors)
 
-    annotation
+    sync = (anchors) ->
+      annotation.$orphan = anchors.length > 0
+      for anchor in anchors
+        if anchor.range?
+          annotation.$orphan = false
+
+      self.anchors = self.anchors.concat(anchors)
+      self.plugins.BucketBar.update()
+      self.plugins.CrossFrame.sync([annotation])
+
+    annotation.target ?= []
+    annotation.anchors ?= Promise.resolve(annotation.anchors)
+    .then(setup)
+    .then(sync)
+    .then(-> delete annotation.anchors)
+
+    return annotation
 
   createAnnotation: (annotation = {}) ->
     ranges = @selectedRanges
     @selectedRanges = null
 
-    info = this.getDocumentInfo()
+    setDocumentInfo = ({metadata, uri}) ->
+      annotation.uri = uri
+      if metadata?
+        annotation.document = metadata
 
-    Promise.all(ranges.map(anchoring.describe))
-    .then((targets) ->
-      info.then((info) ->
-        if info.metadata?
-          annotation.document = info.metadata
-        annotation.uri = source = info.uri
-        annotation.target = ({source, selector} for selector in targets)
-      )
-    )
-    .then(=> this.publish('beforeAnnotationCreated', [annotation]))
-    .then(=> this.setupAnnotation(annotation))
+    setTargets = ([info, selectors]) ->
+      source = info.uri
+      annotation.target = ({source, selector} for selector in selectors)
+
+    info = this.getDocumentInfo().then(setDocumentInfo)
+    selectors = Promise.all(ranges.map(anchoring.describe))
+    targets = Promise.all([info, selectors]).then(setTargets)
+
+    targets.then(=> this.setupAnnotation(annotation))
+    targets.then(=> this.publish('beforeAnnotationCreated', [annotation]))
 
     annotation
 
@@ -206,14 +234,23 @@ module.exports = class Guest extends Annotator
     return this.createAnnotation({$highlight: true})
 
   deleteAnnotation: (annotation) ->
-    for info in @anchored when info.annotation is annotation
-      highlighter.removeHighlights(info.highlights)
+    anchors = []
+    targets = []
+    unhighlight = []
 
-    @anchored = (a for a in @anchored when a.annotation isnt annotation)
-    @unanchored = (a for a in @unanchored when a.annotation isnt annotation)
+    for anchor in @anchors
+      if anchor.annotation is annotation
+        unhighlight.push(anchor.highlights ? [])
+      else
+        anchors.push(anchor)
 
+    this.anchors = anchors
     this.publish('annotationDeleted', [annotation])
-    annotation
+
+    unhighlight = Array::concat(unhighlight...)
+    new Promise(raf).then(-> highlighter.removeHighlights(unhighlight))
+
+    return annotation
 
   showAnnotations: (annotations) =>
     @crossframe?.notify
@@ -276,9 +313,9 @@ module.exports = class Guest extends Annotator
     if @visibleHighlights
       event.stopPropagation()
       annotations = []
-      for obj in @anchored
-        if event.target in obj.highlights
-          annotations.push(obj.annotation)
+      for anchor in @anchors
+        if event.target in (anchor.highlights ? [])
+          annotations.push(anchor.annotation)
       this.focusAnnotations annotations
 
   onHighlightMouseout: (event) ->
@@ -290,9 +327,9 @@ module.exports = class Guest extends Annotator
     if @visibleHighlights
       event.stopPropagation()
       annotations = []
-      for obj in @anchored
-        if event.target in obj.highlights
-          annotations.push(obj.annotation)
+      for anchor in @anchors
+        if event.target in (anchor.highlights ? [])
+          annotations.push(anchor.annotation)
       this.selectAnnotations annotations, (event.metaKey or event.ctrlKey)
 
   # Pass true to show the highlights in the frame or false to disable.

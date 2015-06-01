@@ -1,16 +1,17 @@
-raf = require('raf')
 Promise = require('es6-promise').Promise
 Annotator = require('annotator')
 
-highlighter = require('../highlighter')
-
 
 class PDF extends Annotator.Plugin
-  documentPromise: null
+  documentLoaded: null
+  observer: null
+  pdfViewer: null
+  updatePromise: null
+  updateTimeout: null
 
   pluginInit: ->
-    viewer = PDFViewerApplication.pdfViewer.viewer
-    viewer.classList.add('has-transparent-text-layer')
+    @pdfViewer = PDFViewerApplication.pdfViewer
+    @pdfViewer.viewer.classList.add('has-transparent-text-layer')
 
     if PDFViewerApplication.loading
       @documentLoaded = new Promise (resolve) ->
@@ -21,10 +22,17 @@ class PDF extends Annotator.Plugin
     else
       @documentLoaded = Promise.resolve()
 
-    document.addEventListener('pagerendered', @onpagerendered)
+    @observer = new MutationObserver((mutations) => this.update())
+    @observer.observe(@pdfViewer.viewer, {
+      attributes: true
+      attributeFilter: ['data-loaded']
+      childList: true
+      subtree: true
+    })
 
   destroy: ->
-    document.removeEventListener('pagerendered', @onpagerendered)
+    @pdfViewer.viewer.classList.remove('has-transparent-text-layer')
+    @observer.disconnect()
 
   uri: ->
     @documentLoaded.then ->
@@ -50,45 +58,51 @@ class PDF extends Annotator.Plugin
 
       return {title, link}
 
-  onpagerendered: (event) =>
-    annotator = {anchored, unanchored} = @annotator
-    page = PDFViewerApplication.pdfViewer.pages[event.detail.pageNumber - 1]
+  update: ->
+    self = this
+    {annotator, pdfViewer} = this
 
-    waitForTextLayer = ->
-      unless (page.textLayer.renderingDone)
-        return new Promise(raf).then(waitForTextLayer)
+    _throttle = ->
+      if self.updateTimeout?
+        clearTimeout(self.updateTimeout)
+      self.updateTimeout = setTimeout(_update, 200)
 
-    reanchor = ->
-      placeholder = page.el.getElementsByClassName('annotator-placeholder')[0]
+    _update = ->
+      anchors = []
+      annotations = []
 
-      unless placeholder?
-        return
+      for page in pdfViewer.pages when page.textLayer?.renderingDone
+        div = page.div ? page.el
+        placeholder = div.getElementsByClassName('annotator-placeholder')[0]
 
-      unanchored = unanchored.splice(0, unanchored.length)
+        switch page.renderingState
+          when RenderingStates.INITIAL
+            page.textLayer = null
+          when RenderingStates.FINISHED
+            if placeholder?
+              placeholder.parentNode.removeChild(placeholder)
 
-      unchanged = []
-      for info in anchored
-        attempt = false
+      for anchor in annotator.anchors when anchor.annotation not in annotations
+        unless anchor.range? and anchor.highlights?
+          delete anchor.range
+          annotations.push(anchor.annotation)
+          continue
 
-        for hl in info.highlights
-          if placeholder.contains(hl)
-            attempt = true
+        for hl in anchor.highlights
+          if not document.body.contains(hl)
+            delete anchor.range
+            annotations.push(anchor.annotation)
             break
 
-        if attempt
-          highlighter.removeHighlights(info.highlights)
-          delete info.highlights
-          unanchored.push(info)
-        else
-          unchanged.push(info)
+      for annotation in annotations
+        annotator.setupAnnotation(annotation)
+        anchors.push(annotation.anchors)
 
-      anchored.splice(0, anchored.length, unchanged...)
-      page.el.removeChild(placeholder)
+      self.updateTimeout = null
+      self.updatePromise = Promise.all(anchors)
 
-      for obj in unanchored
-        annotator.setupAnnotation(obj.annotation)
-
-    waitForTextLayer().then(reanchor)
+    @annotator.plugins.BucketBar?.update()
+    Promise.resolve(@updatePromise).then(_throttle)
 
 Annotator.Plugin.PDF = PDF
 

@@ -5,6 +5,9 @@ $ = Annotator.$
 
 
 # Get the bounding client rectangle of a collection in viewport coordinates.
+# Unfortunately, Chrome has issues[1] with Range.getBoundingClient rect or we
+# could just use that.
+# [1] https://code.google.com/p/chromium/issues/detail?id=324437
 getBoundingClientRect = (collection) ->
   # Reduce the client rectangles of the highlights to a bounding box
   rects = collection.map((n) -> n.getBoundingClientRect())
@@ -16,11 +19,14 @@ getBoundingClientRect = (collection) ->
 
 
 # Scroll to the next closest anchor off screen in the given direction.
-scrollToClosest = (objs, direction) ->
+scrollToClosest = (anchors, direction) ->
   dir = if direction is "up" then +1 else -1
-  {next} = objs.reduce (acc, obj) ->
+  {next} = anchors.reduce (acc, anchor) ->
+    unless anchor.highlights?.length
+      return acc
+
     {start, next} = acc
-    rect = getBoundingClientRect(obj.highlights)
+    rect = getBoundingClientRect(anchor.highlights)
 
     # Ignore if it's not in the right direction.
     if (dir is 1 and rect.top >= 0)
@@ -31,10 +37,10 @@ scrollToClosest = (objs, direction) ->
     # Select the closest to carry forward
     if not next?
       start: rect.top
-      next: obj
+      next: anchor
     else if start * dir < rect.top * dir
       start: rect.top
-      next: obj
+      next: anchor
     else
         acc
   , {}
@@ -81,23 +87,24 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       $(element).append @element
 
   pluginInit: ->
+
     events = [
       'annotationCreated', 'annotationUpdated', 'annotationDeleted',
       'annotationsLoaded'
     ]
     for event in events
-      @annotator.subscribe event, this._scheduleUpdate
+      @annotator.subscribe event, @update
 
-    $(window).on 'resize scroll', this._scheduleUpdate
+    $(window).on 'resize scroll', @update
 
     for scrollable in @options.scrollables ? []
-      $(scrollable).on 'resize scroll', this._scheduleUpdate
+      $(scrollable).on 'resize scroll', @update
 
   destroy: ->
-    $(window).off 'resize scroll', this._scheduleUpdate
+    $(window).off 'resize scroll', @update
 
     for scrollable in @options.scrollables ? []
-      $(scrollable).off 'resize scroll', this._scheduleUpdate
+      $(scrollable).off 'resize scroll', @update
 
   _collate: (a, b) ->
     for i in [0..a.length-1]
@@ -108,38 +115,33 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     return 0
 
   # Update sometime soon
-  update: ->
-    this._scheduleUpdate()
-
-  _scheduleUpdate: =>
+  update: =>
     return if @_updatePending?
     @_updatePending = raf =>
       delete @_updatePending
       @_update()
 
-  _update: =>
+  _update: ->
     # Keep track of buckets of annotations above and below the viewport
     above = []
     below = []
 
     # Construct indicator points
-    points = @annotator.anchored.reduce (points, obj, i) =>
-      hl = obj.highlights
-
-      if hl.length is 0
+    points = @annotator.anchors.reduce (points, anchor, i) =>
+      unless anchor.highlights?.length
         return points
 
-      rect = getBoundingClientRect(hl)
+      rect = getBoundingClientRect(anchor.highlights)
       x = rect.top
       h = rect.bottom - rect.top
 
       if x < 0
-        if obj not in above then above.push obj
+        if anchor not in above then above.push anchor
       else if x + h > window.innerHeight
-        if obj not in below then below.push obj
+        if anchor not in below then below.push anchor
       else
-        points.push [x, 1, obj]
-        points.push [x + h, -1, obj]
+        points.push [x, 1, anchor]
+        points.push [x + h, -1, anchor]
       points
     , []
 
@@ -165,23 +167,23 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
     .sort(this._collate)
     .reduce ({buckets, index, carry}, [x, d, a], i, points) =>
       if d > 0                                            # Add annotation
-        if (j = carry.objs.indexOf a) < 0
-          carry.objs.unshift a
+        if (j = carry.anchors.indexOf a) < 0
+          carry.anchors.unshift a
           carry.counts.unshift 1
         else
           carry.counts[j]++
       else                                                # Remove annotation
-        j = carry.objs.indexOf a                          # XXX: assert(i >= 0)
+        j = carry.anchors.indexOf a                       # XXX: assert(i >= 0)
         if --carry.counts[j] is 0
-          carry.objs.splice j, 1
+          carry.anchors.splice j, 1
           carry.counts.splice j, 1
 
       if (
         (index.length is 0 or i is points.length - 1) or  # First or last?
-        carry.objs.length is 0 or                         # A zero marker?
+        carry.anchors.length is 0 or                      # A zero marker?
         x - index[index.length-1] > @options.gapSize      # A large gap?
       )                                                   # Mark a new bucket.
-        buckets.push carry.objs.slice()
+        buckets.push carry.anchors.slice()
         index.push x
       else
         # Merge the previous bucket, making sure its predecessor contains
@@ -194,7 +196,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
         else
           last = buckets[buckets.length-1]
           toMerge = []
-        last.push a0 for a0 in carry.objs when a0 not in last
+        last.push a0 for a0 in carry.anchors when a0 not in last
         last.push a0 for a0 in toMerge when a0 not in last
 
       {buckets, index, carry}
@@ -202,7 +204,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       buckets: []
       index: []
       carry:
-        objs: []
+        anchors: []
         counts: []
         latest: 0
 
@@ -241,19 +243,19 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
       div.addClass('annotator-bucket-indicator')
 
-      # Creates highlights corresponding bucket when mouse is hovered
+      # Focus corresponding highlights bucket when mouse is hovered
       # TODO: This should use event delegation on the container.
       .on 'mousemove', (event) =>
         bucket = @tabs.index(event.currentTarget)
-        for obj in @annotator.anchored
-          toggle = obj in @buckets[bucket]
-          $(obj.highlights).toggleClass('annotator-hl-focused', toggle)
+        for anchor in @annotator.anchors
+          toggle = anchor in @buckets[bucket]
+          $(anchor.highlights).toggleClass('annotator-hl-focused', toggle)
 
       # Gets rid of them after
       .on 'mouseout', (event) =>
         bucket = @tabs.index(event.currentTarget)
-        for obj in @buckets[bucket]
-          $(obj.highlights).removeClass('annotator-hl-focused')
+        for anchor in @buckets[bucket]
+          $(anchor.highlights).removeClass('annotator-hl-focused')
 
       # Does one of a few things when a tab is clicked depending on type
       .on 'click', (event) =>
@@ -267,7 +269,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
         else if (@isLower bucket)
           scrollToClosest(@buckets[bucket], 'down')
         else
-          annotations = (obj.annotation for obj in @buckets[bucket])
+          annotations = (anchor.annotation for anchor in @buckets[bucket])
           annotator.selectAnnotations annotations,
             (event.ctrlKey or event.metaKey),
 
