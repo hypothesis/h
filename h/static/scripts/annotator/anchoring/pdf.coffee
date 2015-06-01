@@ -27,12 +27,18 @@ getPage = (pageIndex) ->
 getPageTextContent = (pageIndex) ->
   return PDFViewerApplication.pdfViewer.getPageTextContent(pageIndex)
 
+# XXX: This will break if the viewer changes documents
+_pageOffsetCache = {}
 
 getPageOffset = (pageIndex) ->
   index = -1
 
+  if _pageOffsetCache[pageIndex]?
+    return Promise.resolve(_pageOffsetCache[pageIndex])
+
   next = (offset) ->
     if ++index is pageIndex
+      _pageOffsetCache[pageIndex] = offset
       return Promise.resolve(offset)
 
     return getPageTextContent(index)
