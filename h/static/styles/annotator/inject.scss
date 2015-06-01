@@ -132,7 +132,10 @@ $base-font-size: 14px;
 }
 
 .annotator-placeholder {
+  opacity: 0;
   position: absolute;
+  top: 50%;
+  z-index: -1;
 }
 
 
