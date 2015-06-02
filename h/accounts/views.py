@@ -242,7 +242,7 @@ class _InvalidEditProfileRequestError(Exception):
 
 
 def _validate_edit_profile_request(request):
-    """Validate the given request using the EditProfileSchema.
+    """Validate the given request using the ProfileSchema.
 
     :returns: if the request is valid returns a Deform "appstruct" with keys
         ``"username"``, ``"pwd"`` and ``"email"``
@@ -251,7 +251,7 @@ def _validate_edit_profile_request(request):
     :raises _InvalidEditProfileRequestError: if the request is invalid
 
     """
-    schema = schemas.EditProfileSchema().bind(request=request)
+    schema = schemas.ProfileSchema().bind(request=request)
     form = deform.Form(schema)
     try:
         return form.validate(request.POST.items())
@@ -315,7 +315,7 @@ class ProfileController(horus.views.ProfileController):
 
     def disable_user(self):
         request = self.request
-        schema = schemas.EditProfileSchema().bind(request=request)
+        schema = schemas.ProfileSchema().bind(request=request)
         form = deform.Form(schema)
 
         try:
