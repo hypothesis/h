@@ -241,44 +241,15 @@ class AsyncRegisterController(RegisterController):
     __view_mapper__ = AsyncFormViewMapper
 
 
-
-class _InvalidEditProfileRequestError(Exception):
-
-    """Raised if validating an edit user profile request fails."""
-
-    def __init__(self, errors):
-        super(_InvalidEditProfileRequestError, self).__init__()
-        self.errors = errors
-
-
-def _validate_edit_profile_request(request):
-    """Validate the given request using the ProfileSchema.
-
-    :returns: if the request is valid returns a Deform "appstruct" with keys
-        ``"username"``, ``"pwd"`` and ``"email"``
-    :rtype: dict
-
-    :raises _InvalidEditProfileRequestError: if the request is invalid
-
-    """
-    schema = schemas.ProfileSchema().bind(request=request)
-    form = deform.Form(schema)
-    try:
-        return form.validate(request.POST.items())
-    except deform.ValidationFailure as err:
-        raise _InvalidEditProfileRequestError(errors=err.error.children)
-
-
 @view_auth_defaults
 @view_config(attr='edit_profile', route_name='edit_profile')
 @view_config(attr='disable_user', route_name='disable_user')
 @view_config(attr='profile', route_name='profile')
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
-        try:
-            appstruct = _validate_edit_profile_request(self.request)
-        except _InvalidEditProfileRequestError as err:
-            return dict(errors=err.errors)
+        err, appstruct = validate_form(self.form, self.request.POST.items())
+        if err is not None:
+            return err
 
         username = appstruct['username']
         pwd = appstruct['pwd']
@@ -324,20 +295,15 @@ class ProfileController(horus.views.ProfileController):
             return dict(errors=[{'pwd': _('Invalid password')}], code=401)
 
     def disable_user(self):
-        request = self.request
-        schema = schemas.ProfileSchema().bind(request=request)
-        form = deform.Form(schema)
-
-        try:
-            appstruct = form.validate(request.POST.items())
-        except deform.ValidationFailure as e:
-            return dict(errors=e.error.children)
+        err, appstruct = validate_form(self.form, self.request.POST.items())
+        if err is not None:
+            return err
 
         username = appstruct['username']
         pwd = appstruct['pwd']
 
         # Password check
-        user = self.User.get_user(request, username, pwd)
+        user = self.User.get_user(self.request, username, pwd)
         if user:
             # TODO: maybe have an explicit disabled flag in the status
             user.password = self.User.generate_random_password()
