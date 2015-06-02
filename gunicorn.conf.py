@@ -12,6 +12,13 @@ if 'STATSD_PORT' in os.environ:
 
 
 def post_fork(_server, _worker):
+    # Support back-ported SSL changes on Debian / Ubuntu
+    import _ssl
+    import gevent.hub
+    if not hasattr(_ssl, '_sslwrap'):
+        gevent.hub.PYGTE279 = True
+        gevent.hub.reinit()
+
     try:
         import psycogreen.gevent
         psycogreen.gevent.patch_psycopg()
