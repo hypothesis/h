@@ -5,13 +5,13 @@ import pytest
 from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
 from horus.interfaces import (
-    IUserClass,
     IActivationClass,
-    IUIStrings,
-    IProfileSchema,
     IProfileForm,
-    IRegisterSchema,
+    IProfileSchema,
     IRegisterForm,
+    IRegisterSchema,
+    IUIStrings,
+    IUserClass,
 )
 from horus.schemas import ProfileSchema
 from horus.forms import SubmitForm
