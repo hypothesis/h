@@ -189,7 +189,6 @@ class TestEditProfile(object):
         configure(config)
         edit_profile_patcher = patch(
             "horus.views.ProfileController.edit_profile")
-        get_by_id_patcher = patch("h.accounts.models.User.get_by_id")
 
         form_validator.return_value = (None, {
             "username": "fake user name",
@@ -202,8 +201,7 @@ class TestEditProfile(object):
             edit_profile = edit_profile_patcher.start()
             edit_profile.return_value = httpexceptions.HTTPFound("fake url")
 
-            get_by_id = get_by_id_patcher.start()
-            get_by_id.return_value = FakeUser(email="fake email")
+            user_model.get_by_id.return_value = FakeUser(email="fake email")
 
             result = ProfileController(DummyRequest()).edit_profile()
 
@@ -211,7 +209,6 @@ class TestEditProfile(object):
 
         finally:
             edit_profile = edit_profile_patcher.stop()
-            get_by_id = get_by_id_patcher.stop()
 
     @pytest.mark.usefixtures('activation_model', 'user_model')
     def test_subscription_update(self, config, dummy_db_session, form_validator):
@@ -324,10 +321,12 @@ def test_registration_does_not_autologin(config, authn_policy):
 
 
 @pytest.fixture
-def user_model(config):
-    mock = MagicMock()
-    config.registry.registerUtility(mock, IUserClass)
-    return mock
+def user_model(config, request):
+    patcher = patch('h.accounts.views.User', autospec=True)
+    request.addfinalizer(patcher.stop)
+    user = patcher.start()
+    config.registry.registerUtility(user, IUserClass)
+    return user
 
 
 @pytest.fixture
