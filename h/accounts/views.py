@@ -19,7 +19,7 @@ from h import session
 from h.models import _
 from h.notification.models import Subscriptions
 from h.resources import Application
-import h.accounts.models
+from h.accounts.models import User
 
 from . import schemas
 from .events import LoginEvent, LogoutEvent
@@ -280,7 +280,7 @@ class ProfileController(horus.views.ProfileController):
                 )
 
         # Password check
-        user = self.User.get_user(self.request, username, pwd)
+        user = User.get_user(self.request, username, pwd)
         if user:
             self.request.context = user
             response = super(ProfileController, self).edit_profile()
@@ -289,7 +289,7 @@ class ProfileController(horus.views.ProfileController):
             # returned to the browser. This is needed so that the edit profile
             # forms can show the value of the user's current email.
             if self.request.authenticated_userid:
-                user = h.accounts.models.User.get_by_id(
+                user = User.get_by_id(
                     self.request, self.request.authenticated_userid)
                 response.json = {"model": {"email": user.email}}
 
@@ -306,10 +306,10 @@ class ProfileController(horus.views.ProfileController):
         pwd = appstruct['pwd']
 
         # Password check
-        user = self.User.get_user(self.request, username, pwd)
+        user = User.get_user(self.request, username, pwd)
         if user:
             # TODO: maybe have an explicit disabled flag in the status
-            user.password = self.User.generate_random_password()
+            user.password = User.generate_random_password()
             self.db.add(user)
             FlashMessage(self.request, _('Account disabled.'), kind='success')
             return {}
@@ -321,7 +321,7 @@ class ProfileController(horus.views.ProfileController):
         userid = request.authenticated_userid
         model = {}
         if userid:
-            model["email"] = self.User.get_by_id(request, userid).email
+            model["email"] = User.get_by_id(request, userid).email
         if request.registry.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 request,
