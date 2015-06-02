@@ -17,7 +17,6 @@ def post_fork(_server, _worker):
     import gevent.hub
     if not hasattr(_ssl, '_sslwrap'):
         gevent.hub.PYGTE279 = True
-        gevent.hub.reinit()
 
     try:
         import psycogreen.gevent
