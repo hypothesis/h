@@ -61,6 +61,16 @@ def ajax_form(request, result):
     return result
 
 
+def validate_form(form, data):
+    """Validate POST payload data for a form."""
+    try:
+        appstruct = form.validate(data)
+    except deform.ValidationFailure as err:
+        return {'errors': err.error.children}, None
+    else:
+        return None, appstruct
+
+
 def view_auth_defaults(fn, *args, **kwargs):
     kwargs.setdefault('accept', 'text/html')
     kwargs.setdefault('layout', 'auth')

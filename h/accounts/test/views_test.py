@@ -1,7 +1,10 @@
 # pylint: disable=no-self-use
+from collections import namedtuple
+
 from mock import patch, Mock, MagicMock
 import pytest
 
+import deform
 from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
 from horus.interfaces import (
@@ -19,6 +22,7 @@ from horus.strings import UIStringsBase
 
 from h.accounts import schemas
 from h.accounts import views
+from h.accounts.views import validate_form
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
 from h.accounts.views import AsyncFormViewMapper
@@ -62,6 +66,40 @@ def _get_fake_request(username, password, with_subscriptions=False, active=True)
         subs = subs.replace('activestate', str(active).lower()).replace('username', username)
         fake_request.POST['subscriptions'] = subs
     return fake_request
+
+
+# A fake version of colander.Invalid for use when testing validate_form
+FakeInvalid = namedtuple('FakeInvalid', 'children')
+
+
+def test_validate_form_passes_data_to_validate():
+    idata = {}
+    form = MagicMock()
+
+    err, data = validate_form(form, idata)
+
+    form.validate.assert_called_with(idata)
+
+
+def test_validate_form_failure():
+    invalid = FakeInvalid(children=object())
+    form = MagicMock()
+    form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
+
+    err, data = validate_form(form, {})
+
+    assert err == {'errors': invalid.children}
+    assert data is None
+
+
+def test_validate_form_ok():
+    form = MagicMock()
+    form.validate.return_value = {'foo': 'bar'}
+
+    err, odata = validate_form(form, {})
+
+    assert err is None
+    assert odata == {'foo': 'bar'}
 
 
 class TestProfile(object):
