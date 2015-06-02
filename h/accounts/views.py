@@ -19,6 +19,7 @@ from h import session
 from h.models import _
 from h.notification.models import Subscriptions
 from h.resources import Application
+import h.accounts.models
 
 from . import schemas
 from .events import LoginEvent, LogoutEvent
@@ -29,7 +30,8 @@ def ajax_form(request, result):
 
     if isinstance(result, httpexceptions.HTTPRedirection):
         request.response.headers.extend(result.headers)
-        result = {'status': 'okay'}
+        result = result.json
+        result["status"] = "okay"
     elif isinstance(result, httpexceptions.HTTPError):
         request.response.status_code = result.code
         result = {'status': 'failure', 'reason': str(result)}
@@ -229,20 +231,52 @@ class AsyncRegisterController(RegisterController):
     __view_mapper__ = AsyncFormViewMapper
 
 
+def _emails_must_match_validator(form, value):
+    """Raise colander.Invalid if "email" and "emailAgain" don't match."""
+    if value.get("email") != value.get("emailAgain"):
+        exc = colander.Invalid(form, "The emails must match")
+        exc["emailAgain"] = "The emails must match."
+        raise exc
+
+
+class _InvalidEditProfileRequestError(Exception):
+
+    """Raised if validating an edit user profile request fails."""
+
+    def __init__(self, errors):
+        super(_InvalidEditProfileRequestError, self).__init__()
+        self.errors = errors
+
+
+def _validate_edit_profile_request(request):
+    """Validate the given request using the EditProfileSchema.
+
+    :returns: if the request is valid returns a Deform "appstruct" with keys
+        ``"username"``, ``"pwd"`` and ``"email"``
+    :rtype: dict
+
+    :raises _InvalidEditProfileRequestError: if the request is invalid
+
+    """
+    schema = schemas.EditProfileSchema(
+        validator=_emails_must_match_validator).bind(request=request)
+    form = deform.Form(schema)
+    try:
+        return form.validate(request.POST.items())
+    except deform.ValidationFailure as err:
+        raise _InvalidEditProfileRequestError(errors=err.error.children)
+
+
 @view_auth_defaults
 @view_config(attr='edit_profile', route_name='edit_profile')
 @view_config(attr='disable_user', route_name='disable_user')
 @view_config(attr='profile', route_name='profile')
 class ProfileController(horus.views.ProfileController):
     def edit_profile(self):
-        request = self.request
-        schema = schemas.EditProfileSchema().bind(request=request)
-        form = deform.Form(schema)
-
         try:
-            appstruct = form.validate(request.POST.items())
-        except deform.ValidationFailure as e:
-            return dict(errors=e.error.children)
+            appstruct = _validate_edit_profile_request(self.request)
+        except _InvalidEditProfileRequestError as err:
+            return dict(errors=err.errors)
 
         username = appstruct['username']
         pwd = appstruct['pwd']
@@ -252,7 +286,7 @@ class ProfileController(horus.views.ProfileController):
             # Update the subscriptions table
             subs = json.loads(subscriptions)
             if username == subs['uri']:
-                s = Subscriptions.get_by_id(request, subs['id'])
+                s = Subscriptions.get_by_id(self.request, subs['id'])
                 if s:
                     s.active = subs['active']
                     self.db.add(s)
@@ -270,10 +304,20 @@ class ProfileController(horus.views.ProfileController):
                 )
 
         # Password check
-        user = self.User.get_user(request, username, pwd)
+        user = self.User.get_user(self.request, username, pwd)
         if user:
-            request.context = user
-            return super(ProfileController, self).edit_profile()
+            self.request.context = user
+            response = super(ProfileController, self).edit_profile()
+
+            # Add the user's email into the model dict that eventually gets
+            # returned to the browser. This is needed so that the edit profile
+            # forms can show the value of the user's current email.
+            if self.request.authenticated_userid:
+                user = h.accounts.models.User.get_by_id(
+                    self.request, self.request.authenticated_userid)
+                response.json = {"model": {"email": user.email}}
+
+            return response
         else:
             return dict(errors=[{'pwd': _('Invalid password')}], code=401)
 
@@ -303,8 +347,10 @@ class ProfileController(horus.views.ProfileController):
 
     def profile(self):
         request = self.request
-        model = {}
         userid = request.authenticated_userid
+        model = {}
+        if userid:
+            model["email"] = self.User.get_by_id(request, userid).email
         if request.registry.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 request,

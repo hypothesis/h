@@ -186,8 +186,14 @@ class EditProfileSchema(CSRFSchema):
     )
     email = colander.SchemaNode(
         colander.String(),
+        validator=colander.All(colander.Email(), unique_email),
         default='',
         missing=colander.null
+    )
+    emailAgain = colander.SchemaNode(
+        colander.String(),
+        default='',
+        missing=colander.null,
     )
     password = colander.SchemaNode(
         colander.String(),
