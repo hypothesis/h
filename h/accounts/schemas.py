@@ -184,7 +184,15 @@ class ActivateSchema(CSRFSchema):
     )
 
 
-class EditProfileSchema(CSRFSchema):
+class ProfileSchema(CSRFSchema):
+
+    """
+    Validates a user profile form.
+
+    This form is broken into multiple parts, for updating the email address,
+    password, and subscriptions, so multiple fields are nullable.
+    """
+
     username = colander.SchemaNode(colander.String())
     pwd = colander.SchemaNode(
         colander.String(),
@@ -217,7 +225,7 @@ class EditProfileSchema(CSRFSchema):
     )
 
     def validator(self, node, value):
-        super(EditProfileSchema, self).validator(node, value)
+        super(ProfileSchema, self).validator(node, value)
 
         # Check that emails match
         matching_emails(node, value)
@@ -231,7 +239,7 @@ def includeme(config):
         (interfaces.IRegisterSchema, RegisterSchema),
         (interfaces.IForgotPasswordSchema, ForgotPasswordSchema),
         (interfaces.IResetPasswordSchema, ResetPasswordSchema),
-        (interfaces.IProfileSchema, EditProfileSchema)
+        (interfaces.IProfileSchema, ProfileSchema)
     ]
 
     for iface, imp in schemas:

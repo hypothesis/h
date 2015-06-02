@@ -71,7 +71,7 @@ def test_unblacklisted_username(config):
 
 
 def test_matching_emails_with_mismatched_emails():
-    form = deform.Form(schemas.EditProfileSchema())
+    form = deform.Form(schemas.ProfileSchema())
     value = {
         "email": "foo",
         "emailAgain": "bar"
@@ -81,7 +81,7 @@ def test_matching_emails_with_mismatched_emails():
 
 
 def test_matching_emails_with_matched_emails():
-    form = deform.Form(schemas.EditProfileSchema())
+    form = deform.Form(schemas.ProfileSchema())
     value = {
         "email": "foo",
         "emailAgain": "foo"
