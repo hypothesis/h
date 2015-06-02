@@ -231,13 +231,6 @@ class AsyncRegisterController(RegisterController):
     __view_mapper__ = AsyncFormViewMapper
 
 
-def _emails_must_match_validator(form, value):
-    """Raise colander.Invalid if "email" and "emailAgain" don't match."""
-    if value.get("email") != value.get("emailAgain"):
-        exc = colander.Invalid(form, "The emails must match")
-        exc["emailAgain"] = "The emails must match."
-        raise exc
-
 
 class _InvalidEditProfileRequestError(Exception):
 
@@ -258,8 +251,7 @@ def _validate_edit_profile_request(request):
     :raises _InvalidEditProfileRequestError: if the request is invalid
 
     """
-    schema = schemas.EditProfileSchema(
-        validator=_emails_must_match_validator).bind(request=request)
+    schema = schemas.EditProfileSchema().bind(request=request)
     form = deform.Form(schema)
     try:
         return form.validate(request.POST.items())
