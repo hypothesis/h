@@ -251,6 +251,7 @@ class ProfileController(object):
         self.form = deform.Form(self.schema)
 
     def edit_profile(self):
+        """Handle POST payload from profile update form."""
         if self.request.method != 'POST':
             return httpexceptions.HTTPMethodNotAllowed()
 
@@ -319,6 +320,7 @@ class ProfileController(object):
         return response
 
     def disable_user(self):
+        """Disable the user by setting a random password."""
         err, appstruct = validate_form(self.form, self.request.POST.items())
         if err is not None:
             return err
@@ -337,6 +339,11 @@ class ProfileController(object):
             return dict(errors=[{'pwd': _('Invalid password')}], code=401)
 
     def profile(self):
+        """
+        Return a serialisation of the user's profile.
+
+        For use by the frontend. Includes current email and subscriptions data.
+        """
         request = self.request
         userid = request.authenticated_userid
         model = {}
