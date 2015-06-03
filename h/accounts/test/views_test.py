@@ -94,18 +94,62 @@ def test_validate_form_ok():
     assert odata == {'foo': 'bar'}
 
 
-@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-def test_profile_returns_email(config, user_model, authn_policy):
-    """profile() should include the user's email in the dict it returns."""
-    request = _get_fake_request("john", "doe")
-    authn_policy.authenticated_userid.return_value = "john"
-    user_model.get_by_id.return_value = FakeUser(
-        email="test_user@test_email.com")
-    configure(config)
+@pytest.mark.usefixtures('subscriptions_model')
+def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
+    """
+    When fetching the profile, we should look up the currently logged in user.
+
+    (And not, for example, use any data passed to us in params.)
+    """
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
 
     profile = ProfileController(request).profile()
 
-    assert profile["model"]["email"] == "test_user@test_email.com"
+    user_model.get_by_id.assert_called_with(request, "acct:foo@bar.com")
+
+
+@pytest.mark.usefixtures('user_model')
+def test_profile_looks_up_subs_by_logged_in_user(authn_policy,
+                                                 subscriptions_model):
+    """
+    When fetching the profile, we should look up the subscriptions for the
+    currently logged in user.
+
+    (And not, for example, use any data passed to us in params.)
+    """
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
+
+    profile = ProfileController(request).profile()
+
+    subscriptions_model.get_subscriptions_for_uri.assert_called_with(
+        request, "acct:foo@bar.com")
+
+
+@pytest.mark.usefixtures('subscriptions_model')
+def test_profile_returns_email(authn_policy, user_model):
+    """The profile should include the user's email."""
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
+    user_model.get_by_id.return_value = FakeUser(email="foo@bar.com")
+
+    result = ProfileController(request).profile()
+
+    assert result["model"]["email"] == "foo@bar.com"
+
+
+@pytest.mark.usefixtures('user_model')
+def test_profile_returns_subscriptions(authn_policy, subscriptions_model):
+    """The profile should include the user's subscriptions."""
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
+    subscriptions_model.get_subscriptions_for_uri.return_value = \
+        {"some": "data"}
+
+    result = ProfileController(request).profile()
+
+    assert result["model"]["subscriptions"] == {"some": "data"}
 
 
 def test_edit_profile_invalid_password(authn_policy, form_validator, user_model):
