@@ -15,7 +15,7 @@ def post_fork(_server, _worker):
     # Support back-ported SSL changes on Debian / Ubuntu
     import _ssl
     import gevent.hub
-    if not hasattr(_ssl, '_sslwrap'):
+    if hasattr(_ssl, 'SSLContext') and not hasattr(_ssl, '_sslwrap'):
         gevent.hub.PYGTE279 = True
 
     try:
