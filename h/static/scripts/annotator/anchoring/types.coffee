@@ -238,8 +238,9 @@ class TextQuoteAnchor extends Anchor
     slices = @quote.match(/(.|[\r\n]){1,32}/g)
     loc = @start ? root.textContent.length / 2
 
+    # TODO: use the suffix
     dmp.Match_Distance = root.textContent.length * 2
-    if @prefix?
+    if @prefix? and @quote.length < 32
       loc = Math.max(0, loc - @prefix.length)
       result = dmp.match_main(root.textContent, @prefix, loc)
       start = result + @prefix.length
