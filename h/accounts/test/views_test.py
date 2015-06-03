@@ -208,13 +208,12 @@ def test_asyncformviewmapper_preserves_email_in_response():
 
 @pytest.mark.usefixtures('activation_model',
                          'dummy_db_session')
-def test_disable_invalid_password(config, form_validator, user_model):
+def test_disable_user_with_invalid_password(config, form_validator, user_model):
     """
     Make sure our disable_user call validates the user password
     """
-    request = _get_fake_request('john', 'doe')
+    request = DummyRequest(method='POST')
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
-    configure(config)
 
     # With an invalid password, get_user returns None
     user_model.get_user.return_value = None
@@ -226,15 +225,13 @@ def test_disable_invalid_password(config, form_validator, user_model):
     assert any('pwd' in err for err in result['errors'])
 
 
-@pytest.mark.usefixtures('activation_model',
-                         'dummy_db_session')
-def test_user_disabled(config, form_validator, user_model):
+@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+def test_disable_user_sets_random_password(config, form_validator, user_model):
     """
     Check if the user is disabled
     """
-    request = _get_fake_request('john', 'doe')
+    request = DummyRequest(method='POST')
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
-    configure(config)
 
     user = FakeUser(password='abc')
     user_model.get_user.return_value = user
