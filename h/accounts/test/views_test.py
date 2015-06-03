@@ -45,21 +45,6 @@ def configure(config):
     config.registry.feature.return_value = None
 
 
-def _get_fake_request(username, password):
-    fake_request = DummyRequest()
-
-    def get_fake_token():
-        return 'fake_token'
-
-    fake_request.method = 'POST'
-    fake_request.params['csrf_token'] = 'fake_token'
-    fake_request.session.get_csrf_token = get_fake_token
-    fake_request.POST['username'] = username
-    fake_request.POST['pwd'] = password
-
-    return fake_request
-
-
 # A fake version of colander.Invalid for use when testing validate_form
 FakeInvalid = namedtuple('FakeInvalid', 'children')
 
