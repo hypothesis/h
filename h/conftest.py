@@ -109,6 +109,15 @@ def mailer(config):
 
 
 @pytest.fixture()
+def notify(config, request):
+    from mock import patch
+
+    patcher = patch.object(config.registry, 'notify', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture()
 def routes_mapper(config):
     from pyramid.interfaces import IRoutesMapper
 

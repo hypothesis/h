@@ -11,6 +11,7 @@ from horus.interfaces import IForgotPasswordForm
 from horus.interfaces import IForgotPasswordSchema
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
+from pyramid.security import forget
 from pyramid.url import route_url
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
@@ -115,27 +116,34 @@ class AsyncFormViewMapper(object):
 @view_auth_defaults
 @view_config(attr='login', route_name='login')
 @view_config(attr='logout', route_name='logout')
-class AuthController(horus.views.AuthController):
+class AuthController(object):
+    def __init__(self, request):
+        self.request = request
+        self.schema = schemas.LoginSchema().bind(request=self.request)
+        self.form = deform.Form(self.schema)
+
+        self.login_redirect = self.request.route_url('stream')
+        self.logout_redirect = self.request.route_url('index')
+
     def login(self):
         if self.request.authenticated_userid is not None:
-            return httpexceptions.HTTPFound(location=self.login_redirect_view)
+            return httpexceptions.HTTPFound(location=self.login_redirect)
 
-        try:
-            user = self.form.validate(self.request.POST.items())['user']
-        except deform.ValidationFailure as e:
-            return {
-                'status': 'failure',
-                'errors': e.error.children,
-                'reason': e.error.msg,
-            }
+        err, appstruct = validate_form(self.form, self.request.POST.items())
+        if err is not None:
+            return err
 
+        user = appstruct['user']
         self.request.registry.notify(LoginEvent(self.request, user))
-
-        return {'status': 'okay'}
+        return {}
 
     def logout(self):
         self.request.registry.notify(LogoutEvent(self.request))
-        return super(AuthController, self).logout()
+        self.request.session.invalidate()
+        FlashMessage(self.request, _('You have logged out.'), kind='success')
+        headers = forget(self.request)
+        return httpexceptions.HTTPFound(location=self.logout_redirect,
+                                        headers=headers)
 
 
 @view_defaults(accept='application/json', context=Application, renderer='json')
