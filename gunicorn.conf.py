@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 import urlparse
 
 # Smart detect heroku stack and assume a trusted proxy.
@@ -13,10 +14,12 @@ if 'STATSD_PORT' in os.environ:
 
 def post_fork(_server, _worker):
     # Support back-ported SSL changes on Debian / Ubuntu
-    import _ssl
-    import gevent.hub
-    if not hasattr(_ssl, '_sslwrap'):
-        gevent.hub.PYGTE279 = True
+    major, minor, micro, _, _ = sys.version_info
+    if major == 2 and minor == 7 and micro >= 9:
+        import _ssl
+        import gevent.hub
+        if not hasattr(_ssl, '_sslwrap'):
+            gevent.hub.PYGTE279 = True
 
     try:
         import psycogreen.gevent
