@@ -1,22 +1,6 @@
 @import 'base';
 @import 'mixins/responsive';
 
-body {
-  background-color: transparent;
-  font-size: .8em;
-  height: 100%;
-  width: 100%;
-  padding-top: 30px;
-  position: fixed;
-}
-
-#wrapper {
-  height: 100%;
-  overflow-y: auto;
-  position: relative;
-  -webkit-overflow-scrolling: touch;
-}
-
 .topbar {
   background: $white;
   border: solid 1px $gray-lighter;

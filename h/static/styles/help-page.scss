@@ -1,18 +1,38 @@
+@import 'compass';
+
+@import 'reset';
+@import 'common';
 @import "./mixins/icons";
+
+body {
+  background: #fff;
+}
 
 .help-page {
   padding-top: 2.5em;
   padding-bottom: 2.5em;
   background: $body-background;
   font-family: 'Lato', sans-serif !important;
+  font-weight: 300;
 
   @include breakpoint(920px) {
     padding-right: 460px;
   }
 
   .masthead {
-    margin-bottom: 2.5em;
-    margin-left: -1em;
+    padding: 2.5em;
+    padding-top: 0;
+
+    .masthead-heading {
+      padding-top: 4px;
+      font-size: 1.1em;
+      font-weight: 400;
+      color: $gray;
+
+      &:hover {
+        color: $gray-dark;
+      }
+    }
   }
 }
 

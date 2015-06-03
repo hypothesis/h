@@ -55,7 +55,15 @@ class BaseLayout(object):
 class AppLayout(BaseLayout):
     app = 'h'
     controller = 'AppController'
-    requirements = (('app', None), ('account', None), ('topbar', None))
+    requirements = (('app', None), ('account', None))
+
+
+@layout_config(name='help', template='h:templates/layouts/base.html')
+class HelpPageLayout(BaseLayout):
+
+    """Layout for the help, app index, and extension first-run pages."""
+
+    requirements = (('help_page', None),)
 
 
 def includeme(config):
