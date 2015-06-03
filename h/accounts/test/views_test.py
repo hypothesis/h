@@ -35,11 +35,6 @@ class FakeUser(object):
             setattr(self, k, kwargs[k])
 
 
-class FakeDB(object):
-    def add(self):
-        return True
-
-
 def configure(config):
     config.registry.registerUtility(UIStringsBase, IUIStrings)
     config.registry.registerUtility(ProfileSchema, IProfileSchema)
