@@ -88,6 +88,17 @@ def dummy_db_session(config):
     return sess
 
 
+@pytest.fixture(autouse=True)
+def feature_flags(config):
+    class DummyFeatureClient(object):
+        def __init__(self):
+            self.flags = {}
+        def __call__(self, name, *args, **kwargs):
+            return self.flags.get(name, True)
+
+    config.registry.feature = DummyFeatureClient()
+
+
 @pytest.fixture()
 def mailer(config):
     from pyramid_mailer.interfaces import IMailer

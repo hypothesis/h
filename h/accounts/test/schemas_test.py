@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import colander
+import deform
 import pytest
 from mock import PropertyMock, patch
 from pyramid.exceptions import BadCSRFToken
@@ -67,6 +68,25 @@ def test_unblacklisted_username(config):
                   node,
                   "PostMaster",
                   blacklist)
+
+
+def test_matching_emails_with_mismatched_emails():
+    form = deform.Form(schemas.ProfileSchema())
+    value = {
+        "email": "foo",
+        "emailAgain": "bar"
+    }
+    with pytest.raises(colander.Invalid):
+        schemas.matching_emails(form, value)
+
+
+def test_matching_emails_with_matched_emails():
+    form = deform.Form(schemas.ProfileSchema())
+    value = {
+        "email": "foo",
+        "emailAgain": "foo"
+    }
+    assert schemas.matching_emails(form, value) is None
 
 
 def test_login_bad_csrf(config):

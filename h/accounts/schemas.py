@@ -51,6 +51,14 @@ def unblacklisted_username(node, value, blacklist=None):
         raise colander.Invalid(node, str_.registration_username_exists)
 
 
+def matching_emails(node, value):
+    """Colander validator that ensures email and emailAgain fields match."""
+    if value.get("email") != value.get("emailAgain"):
+        exc = colander.Invalid(node, "The emails must match")
+        exc["emailAgain"] = "The emails must match."
+        raise exc
+
+
 class CSRFSchema(colander.Schema):
     """
     A CSRFSchema backward-compatible with the one from the hem module.
@@ -176,7 +184,15 @@ class ActivateSchema(CSRFSchema):
     )
 
 
-class EditProfileSchema(CSRFSchema):
+class ProfileSchema(CSRFSchema):
+
+    """
+    Validates a user profile form.
+
+    This form is broken into multiple parts, for updating the email address,
+    password, and subscriptions, so multiple fields are nullable.
+    """
+
     username = colander.SchemaNode(colander.String())
     pwd = colander.SchemaNode(
         colander.String(),
@@ -208,6 +224,12 @@ class EditProfileSchema(CSRFSchema):
         default=''
     )
 
+    def validator(self, node, value):
+        super(ProfileSchema, self).validator(node, value)
+
+        # Check that emails match
+        matching_emails(node, value)
+
 
 def includeme(config):
     registry = config.registry
@@ -217,7 +239,7 @@ def includeme(config):
         (interfaces.IRegisterSchema, RegisterSchema),
         (interfaces.IForgotPasswordSchema, ForgotPasswordSchema),
         (interfaces.IResetPasswordSchema, ResetPasswordSchema),
-        (interfaces.IProfileSchema, EditProfileSchema)
+        (interfaces.IProfileSchema, ProfileSchema)
     ]
 
     for iface, imp in schemas:
