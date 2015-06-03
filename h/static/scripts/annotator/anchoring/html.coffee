@@ -72,11 +72,7 @@ exports.anchor = (selectors, options = {}) ->
   return promise
 
 
-exports.describe = (range) ->
-  options =
-    root: document.body
-    ignoreSelector: '[class^="annotator-"]'
-
+exports.describe = (range, options = {}) ->
   maybeDescribeWith = (type) ->
     return Promise.resolve(type)
     .then((t) -> t.fromRange(range, options))

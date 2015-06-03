@@ -178,11 +178,9 @@ class TextPositionAnchor extends Anchor
 # :param String quote: The anchor text to match.
 # :param String prefix: A prefix that preceeds the anchor text.
 # :param String suffix: A suffix that follows the anchor text.
-# :param Number start: The start offset for the anchor text.
-# :param Number end: The end offset for the anchor text.
 ###
 class TextQuoteAnchor extends Anchor
-  constructor: (@quote, @prefix='', @suffix='', @start, @end) ->
+  constructor: (@quote, @prefix='', @suffix='') ->
     unless @quote? then missingParameter('quote')
 
   @fromRange: (range, options = {}) ->
@@ -203,12 +201,11 @@ class TextQuoteAnchor extends Anchor
     prefix = corpus.substr(prefixStart, start - prefixStart)
     suffix = corpus.substr(end, 32)
 
-    return new TextQuoteAnchor(exact, prefix, suffix, start, end)
+    return new TextQuoteAnchor(exact, prefix, suffix)
 
-  @fromSelector: (selector, options = {}) ->
-    {start, end} = options.position ? {}
+  @fromSelector: (selector) ->
     {exact, prefix, suffix} = selector
-    return new TextQuoteAnchor(exact, prefix, suffix, start, end)
+    return new TextQuoteAnchor(exact, prefix, suffix)
 
   toRange: (options = {}) ->
     return this.toPositionAnchor(options).toRange()
@@ -236,7 +233,7 @@ class TextQuoteAnchor extends Anchor
       return acc
 
     slices = @quote.match(/(.|[\r\n]){1,32}/g)
-    loc = @start ? root.textContent.length / 2
+    loc = options.position?.start ? root.textContent.length / 2
 
     # TODO: use the suffix
     dmp.Match_Distance = root.textContent.length * 2

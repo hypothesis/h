@@ -160,7 +160,7 @@ exports.anchor = (selectors, options = {}) ->
   return promise
 
 
-exports.describe = (range) ->
+exports.describe = (range, options = {}) ->
   range = new xpathRange.BrowserRange(range).normalize()
 
   startTextLayer = getNodeTextLayer(range.start)
@@ -192,8 +192,8 @@ exports.describe = (range) ->
     r.setStartBefore(startRange.start)
     r.setEndAfter(endRange.end)
 
-    options = {root: startTextLayer}
-    quote = Promise.resolve(TextQuoteAnchor.fromRange(r, options))
+    pageOptions = {root: startTextLayer}
+    quote = Promise.resolve(TextQuoteAnchor.fromRange(r, pageOptions))
     .then((a) -> a.toSelector())
 
     return Promise.all([position, quote])

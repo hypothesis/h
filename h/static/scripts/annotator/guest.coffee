@@ -149,26 +149,26 @@ module.exports = class Guest extends Annotator
   setupAnnotation: (annotation) ->
     self = this
 
+    locate = (target) ->
+      options = {ignoreSelector: '[class^="annotator-"]'}
+      return new Promise(raf)
+      .then(-> anchoring.anchor(target.selector, options))
+      .then((range) -> {annotation, target, range})
+      .catch(-> {annotation, target})
+
+    highlight = (anchor) ->
+      if anchor.range?
+        return new Promise(raf).then ->
+          range = Annotator.Range.sniff(anchor.range)
+          normedRange = range.normalize(self.element[0])
+          anchor.highlights = highlighter.highlightRange(normedRange)
+          return anchor
+      return anchor
+
     setup = ->
       anchors = []
       anchoredTargets = []
       deadHighlights = []
-
-      _anchor = (target) ->
-        options = {ignoreSelector: '[class^="annotator-"]'}
-        return new Promise(raf)
-        .then(-> anchoring.anchor(target.selector, options))
-        .then((range) -> {annotation, target, range})
-        .catch(-> {annotation, target})
-
-      _highlight = (anchor) ->
-        if anchor.range?
-          return new Promise(raf).then ->
-            range = Annotator.Range.sniff(anchor.range)
-            normedRange = range.normalize(self.element[0])
-            anchor.highlights = highlighter.highlightRange(normedRange)
-            return anchor
-        return anchor
 
       for anchor in self.anchors.splice(0, self.anchors.length)
         if anchor.annotation is annotation
@@ -186,7 +186,7 @@ module.exports = class Guest extends Annotator
       new Promise(raf).then(-> highlighter.removeHighlights(deadHighlights))
 
       for target in annotation.target when target not in anchoredTargets
-        anchor = _anchor(target).then(_highlight)
+        anchor = locate(target).then(highlight)
         anchors.push(anchor)
 
       return Promise.all(anchors)
@@ -201,17 +201,24 @@ module.exports = class Guest extends Annotator
       self.plugins.BucketBar.update()
       self.plugins.CrossFrame.sync([annotation])
 
+    cleanup = ->
+      delete annotation.anchors
+
     annotation.target ?= []
     annotation.anchors ?= Promise.resolve(annotation.anchors)
     .then(setup)
     .then(sync)
-    .then(-> delete annotation.anchors)
+    .then(cleanup, cleanup)
 
     return annotation
 
   createAnnotation: (annotation = {}) ->
     ranges = @selectedRanges
     @selectedRanges = null
+
+    getSelectors = (range) ->
+      options = {ignoreSelector: '[class^="annotator-"]'}
+      return anchoring.describe(range, options)
 
     setDocumentInfo = ({metadata, uri}) ->
       annotation.uri = uri
@@ -223,7 +230,7 @@ module.exports = class Guest extends Annotator
       annotation.target = ({source, selector} for selector in selectors)
 
     info = this.getDocumentInfo().then(setDocumentInfo)
-    selectors = Promise.all(ranges.map(anchoring.describe))
+    selectors = Promise.all(ranges.map(getSelectors))
     targets = Promise.all([info, selectors]).then(setTargets)
 
     targets.then(=> this.setupAnnotation(annotation))
