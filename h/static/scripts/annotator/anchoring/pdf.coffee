@@ -3,10 +3,8 @@ seek = require('dom-seek')
 Annotator = require('annotator')
 xpathRange = Annotator.Range
 
-{
-  TextPositionAnchor
-  TextQuoteAnchor
-} = require('./types')
+html = require('./html')
+{TextPositionAnchor, TextQuoteAnchor} = require('./types')
 
 
 getSiblingIndex = (node) ->
@@ -77,11 +75,7 @@ findPage = (offset) ->
 # :return: A Promise that resolves to a Range on success.
 # :rtype: Promise
 ####
-exports.anchor = (selectors) ->
-  options =
-    root: document.getElementById('viewer')
-    ignoreSelector: '[class^="annotator-"]'
-
+exports.anchor = (selectors, options = {}) ->
   # Selectors
   position = null
   quote = null
@@ -104,37 +98,37 @@ exports.anchor = (selectors) ->
     else
       return range
 
+  anchorByPosition = (page, anchor) ->
+    renderingState = page.renderingState
+    renderingDone = page.textLayer?.renderingDone
+    if renderingState is RenderingStates.FINISHED and renderingDone
+      root = page.textLayer.textLayerDiv
+      selector = anchor.toSelector()
+      return html.anchor([selector], {root})
+    else
+      div = page.div ? page.el
+      placeholder = div.getElementsByClassName('annotator-placeholder')[0]
+      unless placeholder?
+        placeholder = document.createElement('span')
+        placeholder.classList.add('annotator-placeholder')
+        placeholder.textContent = 'Loading annotations…'
+        div.appendChild(placeholder)
+      range = document.createRange()
+      range.setStartBefore(placeholder)
+      range.setEndAfter(placeholder)
+      return range
+
   if position?
     promise = promise.catch ->
-      findPage(position.start)
-      .then(({index, offset, textContent}) ->
+      return findPage(position.start)
+      .then ({index, offset, textContent}) ->
         page = getPage(index)
-
         start = position.start - offset
         end = position.end - offset
         length = end - start
-
         assertQuote(textContent.substr(start, length))
-
-        renderingState = page.renderingState
-        renderingDone = page.textLayer?.renderingDone
-        if renderingState is RenderingStates.FINISHED and renderingDone
-          root = page.textLayer.textLayerDiv
-          Promise.resolve(TextPositionAnchor.fromSelector({start, end}, {root}))
-          .then((a) -> Promise.resolve(a.toRange({root})))
-        else
-          div = page.div ? page.el
-          placeholder = div.getElementsByClassName('annotator-placeholder')[0]
-          unless placeholder?
-            placeholder = document.createElement('span')
-            placeholder.classList.add('annotator-placeholder')
-            placeholder.textContent = 'Loading annotations…'
-            div.appendChild(placeholder)
-          range = document.createRange()
-          range.setStartBefore(placeholder)
-          range.setEndAfter(placeholder)
-          return range
-      )
+        anchor = new TextPositionAnchor(start, end)
+        return anchorByPosition(page, anchor)
 
   if quote?
     promise = promise.catch ->
@@ -142,30 +136,26 @@ exports.anchor = (selectors) ->
 
       pageSearches = for pageIndex in [0...pagesCount]
         page = getPage(pageIndex)
-        continue unless page.textLayer?.renderingDone
-
         content = getPageTextContent(pageIndex)
         offset = getPageOffset(pageIndex)
-
-        Promise.all([content, offset, page]).then((results) ->
+        Promise.all([content, offset, page]).then (results) ->
           [content, offset, page] = results
-          quoteOptions = {root: page.textLayer.textLayerDiv}
+          pageOptions = {root: {textContent: content}}
           if position?
             # XXX: must be on one page
             start = position.start - offset
             end = position.end - offset
-            quoteOptions.position = {start, end}
+            pageOptions.position = {start, end}
+          anchor = new TextQuoteAnchor.fromSelector(quote, pageOptions)
+          return Promise.resolve(anchor)
+          .then((a) -> return a.toPositionAnchor(pageOptions))
+          .then((a) -> return anchorByPosition(page, a))
 
-          return TextQuoteAnchor
-          .fromSelector(quote, quoteOptions)
-          .toRange(quoteOptions)
-        ).catch(-> null)
-
-      return Promise.all(pageSearches).then((results) ->
+      pageSearches = (p.catch(-> null) for p in pageSearches)
+      return Promise.all(pageSearches).then (results) ->
         for result in results when result?
           return result
         throw new Error('quote not found')
-      )
 
   return promise
 

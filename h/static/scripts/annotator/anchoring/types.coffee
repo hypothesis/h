@@ -211,6 +211,18 @@ class TextQuoteAnchor extends Anchor
     return new TextQuoteAnchor(exact, prefix, suffix, start, end)
 
   toRange: (options = {}) ->
+    return this.toPositionAnchor(options).toRange()
+
+  toSelector: ->
+    selector = {
+      type: 'TextQuoteSelector'
+      exact: @quote
+    }
+    if @prefix? then selector.prefix = @prefix
+    if @suffix? then selector.suffix = @suffix
+    return selector
+
+  toPositionAnchor: (options = {}) ->
     root = options.root or document.body
     dmp = new DiffMatchPatch()
 
@@ -245,16 +257,7 @@ class TextQuoteAnchor extends Anchor
     dmp.Match_Distance = 64
     {start, end} = slices.reduce(foldSlices, {start, end, loc})
 
-    return new TextPositionAnchor(start, end).toRange(options)
-
-  toSelector: ->
-    selector = {
-      type: 'TextQuoteSelector'
-      exact: @quote
-    }
-    if @prefix? then selector.prefix = @prefix
-    if @suffix? then selector.suffix = @suffix
-    return selector
+    return new TextPositionAnchor(start, end)
 
 exports.Anchor = Anchor
 exports.FragmentAnchor = FragmentAnchor

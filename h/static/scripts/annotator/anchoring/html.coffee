@@ -16,11 +16,7 @@
 # :return: A Promise that resolves to a Range on success.
 # :rtype: Promise
 ####
-exports.anchor = (selectors) ->
-  options =
-    root: document.body
-    ignoreSelector: '[class^="annotator-"]'
-
+exports.anchor = (selectors, options = {}) ->
   # Selectors
   fragment = null
   position = null

@@ -155,8 +155,9 @@ module.exports = class Guest extends Annotator
       deadHighlights = []
 
       _anchor = (target) ->
+        options = {ignoreSelector: '[class^="annotator-"]'}
         return new Promise(raf)
-        .then(-> anchoring.anchor(target.selector))
+        .then(-> anchoring.anchor(target.selector, options))
         .then((range) -> {annotation, target, range})
         .catch(-> {annotation, target})
 
