@@ -1,6 +1,5 @@
 output-format: grouped
 strictness: veryhigh
-test-warnings: true
 doc-warnings: true
 max-line-length: 79
 pep8:
