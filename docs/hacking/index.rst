@@ -10,7 +10,8 @@ and how to contribute code or documentation to the project.
    communications
    cla
    install
-   browser-extensions
+   chrome-extension
+   firefox-extension
    submitting-a-pr
    code-style
    documentation
