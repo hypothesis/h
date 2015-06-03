@@ -99,126 +99,116 @@ def test_validate_form_ok():
     assert odata == {'foo': 'bar'}
 
 
-class TestProfile(object):
+@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+def test_profile_returns_email(config, user_model, authn_policy):
+    """profile() should include the user's email in the dict it returns."""
+    request = _get_fake_request("john", "doe")
+    authn_policy.authenticated_userid.return_value = "john"
+    user_model.get_by_id.return_value = FakeUser(
+        email="test_user@test_email.com")
+    configure(config)
 
-    """Unit tests for ProfileController's profile() method."""
+    profile = ProfileController(request).profile()
 
-    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-    def test_profile_returns_email(self, config, user_model, authn_policy):
-        """profile() should include the user's email in the dict it returns."""
-        request = _get_fake_request("john", "doe")
-        authn_policy.authenticated_userid.return_value = "john"
-        user_model.get_by_id.return_value = FakeUser(
-            email="test_user@test_email.com")
-        configure(config)
-
-        profile = ProfileController(request).profile()
-
-        assert profile["model"]["email"] == "test_user@test_email.com"
+    assert profile["model"]["email"] == "test_user@test_email.com"
 
 
-class TestEditProfile(object):
+def test_edit_profile_invalid_password(authn_policy, form_validator, user_model):
+    """Make sure our edit_profile call validates the user password."""
+    authn_policy.authenticated_userid.return_value = "johndoe"
+    form_validator.return_value = (None, {
+        "username": "john",
+        "pwd": "blah",
+        "subscriptions": "",
+    })
 
-    """Unit tests for ProfileController's edit_profile() method."""
+    # Mock an invalid password
+    user_model.validate_user.return_value = False
 
-    def test_edit_profile_invalid_password(self, authn_policy, form_validator, user_model):
-        """Make sure our edit_profile call validates the user password."""
-        authn_policy.authenticated_userid.return_value = "johndoe"
-        form_validator.return_value = (None, {
-            "username": "john",
-            "pwd": "blah",
-            "subscriptions": "",
-        })
+    request = DummyRequest(method='POST')
+    profile = ProfileController(request)
+    result = profile.edit_profile()
 
-        # Mock an invalid password
-        user_model.validate_user.return_value = False
-
-        request = DummyRequest(method='POST')
-        profile = ProfileController(request)
-        result = profile.edit_profile()
-
-        assert result['code'] == 401
-        assert any('pwd' in err for err in result['errors'])
-
-    def test_edit_profile_with_validation_failure(self, authn_policy, form_validator):
-        """If form validation fails, return the error object."""
-        authn_policy.authenticated_userid.return_value = "johndoe"
-        form_validator.return_value = ({"errors": "BOOM!"}, None)
-
-        request = DummyRequest(method='POST')
-        profile = ProfileController(request)
-        result = profile.edit_profile()
-
-        assert result == {"errors": "BOOM!"}
-
-    def test_edit_profile_successfully(self, authn_policy, form_validator, user_model):
-        """edit_profile() returns a dict with key "form" when successful."""
-        authn_policy.authenticated_userid.return_value = "johndoe"
-        form_validator.return_value = (None, {
-            "username": "johndoe",
-            "pwd": "password",
-            "subscriptions": "",
-        })
-        user_model.validate_user.return_value = True
-        user_model.get_by_id.return_value = FakeUser(email="john@doe.com")
-
-        request = DummyRequest(method='POST')
-        profile = ProfileController(request)
-        result = profile.edit_profile()
-
-        assert result == {"model": {"email": "john@doe.com"}}
-
-    def test_subscription_update(self, authn_policy, form_validator,
-                                 subscriptions_model, user_model):
-        """Make sure that the new status is written into the DB."""
-        authn_policy.authenticated_userid.return_value = "acct:john@doe"
-        form_validator.return_value = (None, {
-            "username": "acct:john@doe",
-            "pwd": "smith",
-            "subscriptions": '{"active":true,"uri":"acct:john@doe","id":1}',
-        })
-        mock_sub = Mock(active=False, uri="acct:john@doe")
-        subscriptions_model.get_by_id.return_value = mock_sub
-        user_model.get_by_id.return_value = FakeUser(email="john@doe")
-
-        request = DummyRequest(method='POST')
-        profile = ProfileController(request)
-        result = profile.edit_profile()
-
-        assert mock_sub.active == True
-        assert result == {"model": {"email": "john@doe"}}
+    assert result['code'] == 401
+    assert any('pwd' in err for err in result['errors'])
 
 
+def test_edit_profile_with_validation_failure(authn_policy, form_validator):
+    """If form validation fails, return the error object."""
+    authn_policy.authenticated_userid.return_value = "johndoe"
+    form_validator.return_value = ({"errors": "BOOM!"}, None)
 
-class TestAsyncFormViewMapper(object):
+    request = DummyRequest(method='POST')
+    profile = ProfileController(request)
+    result = profile.edit_profile()
 
-    """Unit tests for AsyncFormViewMapper."""
+    assert result == {"errors": "BOOM!"}
 
-    def test_it_preserves_email_in_response(self):
-        """AsyncFormViewMapper should preserve the email in the response.
 
-        ProfileController.edit_profile() returns an HTTPFound with a JSON body
-        containing a model dict with the user's email address in it.
+def test_edit_profile_successfully(authn_policy, form_validator, user_model):
+    """edit_profile() returns a dict with key "form" when successful."""
+    authn_policy.authenticated_userid.return_value = "johndoe"
+    form_validator.return_value = (None, {
+        "username": "johndoe",
+        "pwd": "password",
+        "subscriptions": "",
+    })
+    user_model.validate_user.return_value = True
+    user_model.get_by_id.return_value = FakeUser(email="john@doe.com")
 
-        AsyncFormViewMapper should preserve this email address in the dict
-        that it returns.
+    request = DummyRequest(method='POST')
+    profile = ProfileController(request)
+    result = profile.edit_profile()
 
-        """
-        mapper = AsyncFormViewMapper(attr="edit_profile")
+    assert result == {"model": {"email": "john@doe.com"}}
 
-        class ViewController(object):
 
-            def __init__(self, request):
-                pass
+def test_subscription_update(authn_policy, form_validator,
+                             subscriptions_model, user_model):
+    """Make sure that the new status is written into the DB."""
+    authn_policy.authenticated_userid.return_value = "acct:john@doe"
+    form_validator.return_value = (None, {
+        "username": "acct:john@doe",
+        "pwd": "smith",
+        "subscriptions": '{"active":true,"uri":"acct:john@doe","id":1}',
+    })
+    mock_sub = Mock(active=False, uri="acct:john@doe")
+    subscriptions_model.get_by_id.return_value = mock_sub
+    user_model.get_by_id.return_value = FakeUser(email="john@doe")
 
-            def edit_profile(self):
-                response = httpexceptions.HTTPFound("fake url")
-                response.json = {"model": {"email": "fake email"}}
-                return response
+    request = DummyRequest(method='POST')
+    profile = ProfileController(request)
+    result = profile.edit_profile()
 
-        result = mapper(ViewController)({}, DummyRequest())
+    assert mock_sub.active == True
+    assert result == {"model": {"email": "john@doe"}}
 
-        assert result["model"]["email"] == "fake email"
+
+def test_asyncformviewmapper_preserves_email_in_response():
+    """AsyncFormViewMapper should preserve the email in the response.
+
+    ProfileController.edit_profile() returns an HTTPFound with a JSON body
+    containing a model dict with the user's email address in it.
+
+    AsyncFormViewMapper should preserve this email address in the dict
+    that it returns.
+
+    """
+    mapper = AsyncFormViewMapper(attr="edit_profile")
+
+    class ViewController(object):
+
+        def __init__(self, request):
+            pass
+
+        def edit_profile(self):
+            response = httpexceptions.HTTPFound("fake url")
+            response.json = {"model": {"email": "fake email"}}
+            return response
+
+    result = mapper(ViewController)({}, DummyRequest())
+
+    assert result["model"]["email"] == "fake email"
 
 
 @pytest.mark.usefixtures('activation_model',
