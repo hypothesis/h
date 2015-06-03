@@ -30,11 +30,7 @@ def ajax_form(request, result):
 
     if isinstance(result, httpexceptions.HTTPRedirection):
         request.response.headers.extend(result.headers)
-        if result.body != '':
-            result = result.json
-        else:
-            result = {}
-        result["status"] = "okay"
+        result = {'status': 'okay'}
     elif isinstance(result, httpexceptions.HTTPError):
         request.response.status_code = result.code
         result = {'status': 'failure', 'reason': str(result)}

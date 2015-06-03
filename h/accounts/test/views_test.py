@@ -223,33 +223,6 @@ def test_subscription_update(authn_policy, form_validator,
     assert result == {"model": {"email": "john@doe"}}
 
 
-def test_asyncformviewmapper_preserves_email_in_response():
-    """AsyncFormViewMapper should preserve the email in the response.
-
-    ProfileController.edit_profile() returns an HTTPFound with a JSON body
-    containing a model dict with the user's email address in it.
-
-    AsyncFormViewMapper should preserve this email address in the dict
-    that it returns.
-
-    """
-    mapper = AsyncFormViewMapper(attr="edit_profile")
-
-    class ViewController(object):
-
-        def __init__(self, request):
-            pass
-
-        def edit_profile(self):
-            response = httpexceptions.HTTPFound("fake url")
-            response.json = {"model": {"email": "fake email"}}
-            return response
-
-    result = mapper(ViewController)({}, DummyRequest())
-
-    assert result["model"]["email"] == "fake email"
-
-
 @pytest.mark.usefixtures('activation_model',
                          'dummy_db_session')
 def test_disable_user_with_invalid_password(config, form_validator, user_model):
