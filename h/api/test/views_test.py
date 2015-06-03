@@ -346,6 +346,26 @@ class TestSearch(object):
             "bool": {"must": [{"match": {"user": "bob"}}]}}
 
     @patch("annotator.annotation.Annotation.search_raw")
+    def test_search_for_multiple_users(self, search_raw):
+        """Multiple "user" params go into multiple "match" dicts."""
+        params = webob.multidict.MultiDict()
+        params.add("user", "fred")
+        params.add("user", "bob")
+
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {
+                "must": [
+                    {"match": {"user": "fred"}},
+                    {"match": {"user": "bob"}}
+                ]
+            }
+        }
+
+    @patch("annotator.annotation.Annotation.search_raw")
     def test_search_for_tag(self, search_raw):
         """'tags' params are passed to search_raw() in the "match"."""
         views._search(request_params={"tags": "foo"})
@@ -354,6 +374,26 @@ class TestSearch(object):
         query = first_call[0][0]["query"]
         assert query == {
             "bool": {"must": [{"match": {"tags": "foo"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_search_for_multiple_tags(self, search_raw):
+        """Multiple "tags" params go into multiple "match" dicts."""
+        params = webob.multidict.MultiDict()
+        params.add("tags", "foo")
+        params.add("tags", "bar")
+
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {
+                "must": [
+                    {"match": {"tags": "foo"}},
+                    {"match": {"tags": "bar"}}
+                ]
+            }
+        }
 
     @patch("annotator.annotation.Annotation.search_raw")
     def test_combined_user_and_tag_search(self, search_raw):
@@ -419,3 +459,61 @@ class TestSearch(object):
         query = first_call[0][0]["query"]
         assert query == {
             "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_single_text_param(self, search_raw):
+        """_search() passes "text" params to search_raw() in a "match" dict."""
+        views._search(request_params={"text": "foobar"})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"match": {"text": "foobar"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_multiple_text_params(self, search_raw):
+        """Multiple "test" request params produce multiple "match" dicts."""
+        params = webob.multidict.MultiDict()
+        params.add("text", "foo")
+        params.add("text", "bar")
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {
+                "must": [
+                    {"match": {"text": "foo"}},
+                    {"match": {"text": "bar"}}
+                ]
+            }
+        }
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_single_quote_param(self, search_raw):
+        """_search() passes a "quote" param to search_raw() in a "match"."""
+        views._search(request_params={"quote": "foobar"})
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {"must": [{"match": {"quote": "foobar"}}]}}
+
+    @patch("annotator.annotation.Annotation.search_raw")
+    def test_multiple_quote_params(self, search_raw):
+        """Multiple "quote" request params produce multiple "match" dicts."""
+        params = webob.multidict.MultiDict()
+        params.add("quote", "foo")
+        params.add("quote", "bar")
+        views._search(request_params=params)
+
+        first_call = search_raw.call_args_list[0]
+        query = first_call[0][0]["query"]
+        assert query == {
+            "bool": {
+                "must": [
+                    {"match": {"quote": "foo"}},
+                    {"match": {"quote": "bar"}}
+                ]
+            }
+        }
