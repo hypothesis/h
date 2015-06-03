@@ -22,6 +22,7 @@ from horus.strings import UIStringsBase
 
 from h.accounts import schemas
 from h.accounts import views
+from h.accounts.views import ajax_form
 from h.accounts.views import validate_form
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
@@ -47,6 +48,104 @@ def configure(config):
 
 # A fake version of colander.Invalid for use when testing validate_form
 FakeInvalid = namedtuple('FakeInvalid', 'children')
+
+
+def test_ajax_form_handles_http_redirect_as_success():
+    request = DummyRequest()
+    result = ajax_form(request, httpexceptions.HTTPFound())
+
+    assert result['status'] == 'okay'
+    assert request.response.status_code == 200
+
+
+def test_ajax_form_handles_http_error_as_error():
+    request = DummyRequest()
+    result = ajax_form(request, httpexceptions.HTTPInsufficientStorage())
+
+    assert result['status'] == 'failure'
+    assert result['reason'] == 'There was not enough space to save the resource'
+    assert request.response.status_code == 507
+
+
+def test_ajax_form_sets_failure_status_on_errors():
+    request = DummyRequest()
+    result = ajax_form(request, {'errors': 'data'})
+
+    assert result['status'] == 'failure'
+
+
+def test_ajax_form_sets_status_code_400_on_errors():
+    request = DummyRequest()
+    result = ajax_form(request, {'errors': 'data'})
+
+    assert request.response.status_code == 400
+
+
+def test_ajax_form_sets_status_code_from_input_on_errors():
+    request = DummyRequest()
+    result = ajax_form(request, {'errors': 'data', 'code': 418})
+
+    assert request.response.status_code == 418
+
+
+def test_ajax_form_aggregates_errors_on_success():
+    request = DummyRequest()
+    errors = [
+        {'name': 'Name is too weird'},
+        {'email': 'Email must be @hotmail.com'},
+    ]
+    result = ajax_form(request, {'errors': errors})
+
+    assert result['errors'] == {'name': 'Name is too weird',
+                                'email': 'Email must be @hotmail.com'}
+
+
+def test_ajax_form_passes_data_through_on_success():
+    request = DummyRequest()
+    result = ajax_form(request, {'some': 'data', 'no': 'errors'})
+
+    assert result['some'] == 'data'
+    assert result['no'] == 'errors'
+    assert request.response.status_code == 200
+
+
+def test_ajax_form_ignores_status_code_from_input_on_success():
+    request = DummyRequest()
+    result = ajax_form(request, {'some': 'data', 'code': 418})
+
+    assert request.response.status_code == 200
+
+
+def test_ajax_form_includes_flash_data(pop_flash):
+    request = DummyRequest()
+    pop_flash.return_value = {'success': ['Well done!']}
+    result = ajax_form(request, {'some': 'data'})
+
+    assert result['flash'] == {'success': ['Well done!']}
+
+
+def test_ajax_form_sets_status_code_400_on_flash_error(pop_flash):
+    request = DummyRequest()
+    pop_flash.return_value = {'error': ['I asplode!']}
+    result = ajax_form(request, {'some': 'data'})
+
+    assert request.response.status_code == 400
+
+
+def test_ajax_form_sets_status_failure_on_flash_error(pop_flash):
+    request = DummyRequest()
+    pop_flash.return_value = {'error': ['I asplode!']}
+    result = ajax_form(request, {'some': 'data'})
+
+    assert result['status'] == 'failure'
+
+
+def test_ajax_form_sets_reason_on_flash_error(pop_flash):
+    request = DummyRequest()
+    pop_flash.return_value = {'error': ['I asplode!']}
+    result = ajax_form(request, {'some': 'data'})
+
+    assert result['reason'] == 'I asplode!'
 
 
 def test_validate_form_passes_data_to_validate():
@@ -262,6 +361,13 @@ def test_registration_does_not_autologin(config, authn_policy):
     ctrl.register()
 
     assert not authn_policy.remember.called
+
+
+@pytest.fixture
+def pop_flash(request):
+    patcher = patch('h.accounts.views.session.pop_flash', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
 
 
 @pytest.fixture
