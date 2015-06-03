@@ -20,14 +20,10 @@ from horus.schemas import ProfileSchema
 from horus.forms import SubmitForm
 from horus.strings import UIStringsBase
 
-from h.accounts import schemas
-from h.accounts import views
 from h.accounts.views import ajax_form
 from h.accounts.views import validate_form
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
-from h.accounts.views import AsyncFormViewMapper
-from h.models import _
 
 
 class FakeUser(object):
@@ -63,7 +59,8 @@ def test_ajax_form_handles_http_error_as_error():
     result = ajax_form(request, httpexceptions.HTTPInsufficientStorage())
 
     assert result['status'] == 'failure'
-    assert result['reason'] == 'There was not enough space to save the resource'
+    assert result['reason'] == \
+        'There was not enough space to save the resource'
     assert request.response.status_code == 507
 
 
@@ -76,14 +73,14 @@ def test_ajax_form_sets_failure_status_on_errors():
 
 def test_ajax_form_sets_status_code_400_on_errors():
     request = DummyRequest()
-    result = ajax_form(request, {'errors': 'data'})
+    _ = ajax_form(request, {'errors': 'data'})
 
     assert request.response.status_code == 400
 
 
 def test_ajax_form_sets_status_code_from_input_on_errors():
     request = DummyRequest()
-    result = ajax_form(request, {'errors': 'data', 'code': 418})
+    _ = ajax_form(request, {'errors': 'data', 'code': 418})
 
     assert request.response.status_code == 418
 
@@ -127,7 +124,7 @@ def test_ajax_form_includes_flash_data(pop_flash):
 def test_ajax_form_sets_status_code_400_on_flash_error(pop_flash):
     request = DummyRequest()
     pop_flash.return_value = {'error': ['I asplode!']}
-    result = ajax_form(request, {'some': 'data'})
+    _ = ajax_form(request, {'some': 'data'})
 
     assert request.response.status_code == 400
 
@@ -149,12 +146,11 @@ def test_ajax_form_sets_reason_on_flash_error(pop_flash):
 
 
 def test_validate_form_passes_data_to_validate():
-    idata = {}
     form = MagicMock()
 
-    err, data = validate_form(form, idata)
+    _, _ = validate_form(form, {})
 
-    form.validate.assert_called_with(idata)
+    form.validate.assert_called_with({})
 
 
 def test_validate_form_failure():
@@ -172,23 +168,23 @@ def test_validate_form_ok():
     form = MagicMock()
     form.validate.return_value = {'foo': 'bar'}
 
-    err, odata = validate_form(form, {})
+    err, data = validate_form(form, {})
 
     assert err is None
-    assert odata == {'foo': 'bar'}
+    assert data == {'foo': 'bar'}
 
 
 @pytest.mark.usefixtures('subscriptions_model')
 def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
     """
-    When fetching the profile, we should look up the currently logged in user.
+    When fetching the profile, look up email for the logged in user.
 
-    (And not, for example, use any data passed to us in params.)
+    (And don't, for example, use a 'username' passed to us in params.)
     """
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
 
-    profile = ProfileController(request).profile()
+    ProfileController(request).profile()
 
     user_model.get_by_id.assert_called_with(request, "acct:foo@bar.com")
 
@@ -197,15 +193,14 @@ def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
 def test_profile_looks_up_subs_by_logged_in_user(authn_policy,
                                                  subscriptions_model):
     """
-    When fetching the profile, we should look up the subscriptions for the
-    currently logged in user.
+    When fetching the profile, look up subscriptions for the logged in user.
 
-    (And not, for example, use any data passed to us in params.)
+    (And don't, for example, use a 'username' passed to us in params.)
     """
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
 
-    profile = ProfileController(request).profile()
+    ProfileController(request).profile()
 
     subscriptions_model.get_subscriptions_for_uri.assert_called_with(
         request, "acct:foo@bar.com")
@@ -303,16 +298,13 @@ def test_subscription_update(authn_policy, form_validator,
     profile = ProfileController(request)
     result = profile.edit_profile()
 
-    assert mock_sub.active == True
+    assert mock_sub.active is True
     assert result == {"model": {"email": "john@doe"}}
 
 
-@pytest.mark.usefixtures('activation_model',
-                         'dummy_db_session')
-def test_disable_user_with_invalid_password(config, form_validator, user_model):
-    """
-    Make sure our disable_user call validates the user password
-    """
+@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+def test_disable_user_with_invalid_password(form_validator, user_model):
+    """Make sure our disable_user call validates the user password."""
     request = DummyRequest(method='POST')
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
 
@@ -327,10 +319,8 @@ def test_disable_user_with_invalid_password(config, form_validator, user_model):
 
 
 @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-def test_disable_user_sets_random_password(config, form_validator, user_model):
-    """
-    Check if the user is disabled
-    """
+def test_disable_user_sets_random_password(form_validator, user_model):
+    """Check if the user is disabled."""
     request = DummyRequest(method='POST')
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
 
