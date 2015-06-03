@@ -1,8 +1,5 @@
-@import 'base';
-@import 'mixins/icons';
-@import 'compass/css3/user-interface';
-@import 'compass/layout/stretching';
-@import 'compass/reset/utilities';
+@import '../base';
+@import '../mixins/icons';
 
 $base-font-size: 14px;
 
@@ -89,8 +86,8 @@ $base-font-size: 14px;
 
 // Sidebar
 .annotator-frame {
-  @import 'reset';
-  @import 'bucket-bar';
+  @import '../reset';
+  @import './bucket-bar';
   @include nested-reset;
   @include reset-box-model;
   @include user-select(none);

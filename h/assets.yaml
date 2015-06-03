@@ -208,11 +208,11 @@ inject_css:
     - output: styles/hypothesis.css
       filters: compass
       contents:
-        - h:static/styles/inject.scss
-        - h:static/styles/pdfjs-overrides.scss
+        - h:static/styles/annotator/inject.scss
+        - h:static/styles/annotator/pdfjs-overrides.scss
       depends:
+        - h:static/styles/annotator/*.scss
         - h:static/styles/base.scss
-        - h:static/styles/bucket-bar.scss
         - h:static/styles/reset.scss
         - h:static/styles/variables.scss
         - h:static/styles/mixins/icons.scss
