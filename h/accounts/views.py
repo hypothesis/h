@@ -270,26 +270,9 @@ class ProfileController(object):
         subscriptions = appstruct.get('subscriptions')
         if subscriptions:
             data = json.loads(subscriptions)
-            s = Subscriptions.get_by_id(self.request, data['id'])
-            if s is None:
-                return {
-                    'errors': [{'subscriptions': _('Subscription not found')}],
-                }
-
-            # If we're trying to update a subscription for anyone other than
-            # the currently logged-in user, bail fast.
-            #
-            # The error message is deliberately identical to the one above, so
-            # as not to leak any information about who which subscription ids
-            # belong to.
-            if s.uri != self.request.authenticated_userid:
-                return {
-                    'errors': [{'subscriptions': _('Subscription not found')}],
-                }
-
-            s.active = data.get('active', True)
-
-            FlashMessage(self.request, _('Changes saved!'), kind='success')
+            err = _update_subscription_data(self.request, data)
+            if err is not None:
+                return err
             return response
 
         # Any updates to fields below this point require password validation.
@@ -373,6 +356,35 @@ class ProfileController(object):
 @view_config(attr='unsubscribe', request_param='__formid__=unsubscribe')
 class AsyncProfileController(ProfileController):
     __view_mapper__ = AsyncFormViewMapper
+
+
+def _update_subscription_data(request, subscription):
+    """
+    Update the subscriptions in the database from form data.
+
+    Using data from the passed subscription struct, find a subscription in the
+    database, and update it (if it belongs to the current logged-in user).
+    """
+    sub = Subscriptions.get_by_id(request, subscription['id'])
+    if sub is None:
+        return {
+            'errors': [{'subscriptions': _('Subscription not found')}],
+        }
+
+    # If we're trying to update a subscription for anyone other than
+    # the currently logged-in user, bail fast.
+    #
+    # The error message is deliberately identical to the one above, so
+    # as not to leak any information about who which subscription ids
+    # belong to.
+    if sub.uri != request.authenticated_userid:
+        return {
+            'errors': [{'subscriptions': _('Subscription not found')}],
+        }
+
+    sub.active = subscription.get('active', True)
+
+    FlashMessage(request, _('Changes saved!'), kind='success')
 
 
 def includeme(config):
