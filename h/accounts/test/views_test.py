@@ -56,6 +56,7 @@ def _get_fake_request(username, password):
     def get_fake_token():
         return 'fake_token'
 
+    fake_request.method = 'POST'
     fake_request.params['csrf_token'] = 'fake_token'
     fake_request.session.get_csrf_token = get_fake_token
     fake_request.POST['username'] = username
@@ -120,114 +121,73 @@ class TestEditProfile(object):
 
     """Unit tests for ProfileController's edit_profile() method."""
 
-    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-    def test_edit_profile_invalid_password(self, config, form_validator, user_model):
+    def test_edit_profile_invalid_password(self, authn_policy, form_validator, user_model):
         """Make sure our edit_profile call validates the user password."""
-        configure(config)
+        authn_policy.authenticated_userid.return_value = "johndoe"
         form_validator.return_value = (None, {
             "username": "john",
             "pwd": "blah",
             "subscriptions": "",
         })
 
-        # With an invalid password, get_user returns None
-        user_model.get_user.return_value = None
+        # Mock an invalid password
+        user_model.validate_user.return_value = False
 
-        request = _get_fake_request('john', 'doe')
+        request = DummyRequest(method='POST')
         profile = ProfileController(request)
         result = profile.edit_profile()
 
         assert result['code'] == 401
         assert any('pwd' in err for err in result['errors'])
 
-    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-    def test_edit_profile_with_validation_failure(self, config, form_validator, user_model):
+    def test_edit_profile_with_validation_failure(self, authn_policy, form_validator):
         """If form validation fails, return the error object."""
-        configure(config)
+        authn_policy.authenticated_userid.return_value = "johndoe"
         form_validator.return_value = ({"errors": "BOOM!"}, None)
 
-        profile = ProfileController(DummyRequest())
+        request = DummyRequest(method='POST')
+        profile = ProfileController(request)
         result = profile.edit_profile()
 
         assert result == {"errors": "BOOM!"}
 
-    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-    def test_edit_profile_successfully(self, config, form_validator, user_model):
+    def test_edit_profile_successfully(self, authn_policy, form_validator, user_model):
         """edit_profile() returns a dict with key "form" when successful."""
-        configure(config)
+        authn_policy.authenticated_userid.return_value = "johndoe"
         form_validator.return_value = (None, {
             "username": "johndoe",
             "pwd": "password",
             "subscriptions": "",
         })
+        user_model.validate_user.return_value = True
+        user_model.get_by_id.return_value = FakeUser(email="john@doe.com")
 
-        profile = ProfileController(DummyRequest())
-
+        request = DummyRequest(method='POST')
+        profile = ProfileController(request)
         result = profile.edit_profile()
 
-        assert "form" in result
-        assert "errors" not in result
+        assert result == {"model": {"email": "john@doe.com"}}
 
-    @pytest.mark.usefixtures('activation_model', 'dummy_db_session')
-    def test_edit_profile_returns_email(self, config, form_validator, user_model,
-                                        authn_policy):
-        """edit_profile()'s response should contain the user's current email.
-
-        For a valid edit_profile() request
-        horus.views.ProfileController.edit_profile() returns an HTTPRedirection
-        object. h.accounts.views.ProfileController.edit_profile() should
-        add a JSON body to this response containing a "model" dict with the
-        user's current email address.
-
-        AsyncFormViewMapper will pick up this JSON body and preserve it in the
-        body of the 200 OK response that is finally sent back to the browser.
-
-        The frontend uses this email field to show the user's current email
-        address in the form.
-
-        """
-        configure(config)
-        edit_profile_patcher = patch(
-            "horus.views.ProfileController.edit_profile")
-
-        form_validator.return_value = (None, {
-            "username": "fake user name",
-            "pwd": "fake password",
-            "subscriptions": "",
-        })
-
-        result = None
-        try:
-            edit_profile = edit_profile_patcher.start()
-            edit_profile.return_value = httpexceptions.HTTPFound("fake url")
-
-            user_model.get_by_id.return_value = FakeUser(email="fake email")
-
-            result = ProfileController(DummyRequest()).edit_profile()
-
-            assert result.json["model"]["email"] == "fake email"
-
-        finally:
-            edit_profile = edit_profile_patcher.stop()
-
-    @pytest.mark.usefixtures('activation_model', 'user_model')
-    def test_subscription_update(self, config, dummy_db_session, form_validator):
+    def test_subscription_update(self, authn_policy, form_validator,
+                                 subscriptions_model, user_model):
         """Make sure that the new status is written into the DB."""
-        configure(config)
-        request = _get_fake_request('acct:john@doe', 'smith')
-
+        authn_policy.authenticated_userid.return_value = "acct:john@doe"
         form_validator.return_value = (None, {
             "username": "acct:john@doe",
             "pwd": "smith",
-            "subscriptions": '{"active":true,"uri":"acct:john@doe","id": 1}',
+            "subscriptions": '{"active":true,"uri":"acct:john@doe","id":1}',
         })
+        mock_sub = Mock(active=False, uri="acct:john@doe")
+        subscriptions_model.get_by_id.return_value = mock_sub
+        user_model.get_by_id.return_value = FakeUser(email="john@doe")
 
-        with patch('h.accounts.views.Subscriptions') as mock_subs:
-            mock_subs.get_by_id = MagicMock()
-            mock_subs.get_by_id.return_value = Mock(active=True)
-            profile = ProfileController(request)
-            profile.edit_profile()
-            assert dummy_db_session.added
+        request = DummyRequest(method='POST')
+        profile = ProfileController(request)
+        result = profile.edit_profile()
+
+        assert mock_sub.active == True
+        assert result == {"model": {"email": "john@doe"}}
+
 
 
 class TestAsyncFormViewMapper(object):
@@ -318,6 +278,13 @@ def test_registration_does_not_autologin(config, authn_policy):
     ctrl.register()
 
     assert not authn_policy.remember.called
+
+
+@pytest.fixture
+def subscriptions_model(request):
+    patcher = patch('h.accounts.views.Subscriptions', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
 
 
 @pytest.fixture
