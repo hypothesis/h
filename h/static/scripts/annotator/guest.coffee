@@ -149,6 +149,12 @@ module.exports = class Guest extends Annotator
   setupAnnotation: (annotation) ->
     self = this
 
+    anchors = []
+    anchoredTargets = []
+    deadHighlights = []
+
+    annotation.target ?= []
+
     locate = (target) ->
       options = {ignoreSelector: '[class^="annotator-"]'}
       return new Promise(raf)
@@ -165,32 +171,6 @@ module.exports = class Guest extends Annotator
           return anchor
       return anchor
 
-    setup = ->
-      anchors = []
-      anchoredTargets = []
-      deadHighlights = []
-
-      for anchor in self.anchors.splice(0, self.anchors.length)
-        if anchor.annotation is annotation
-          if anchor.range? and anchor.target in annotation.target
-            anchors.push(anchor)
-            anchoredTargets.push(anchor.target)
-          else if anchor.highlights?
-            deadHighlights.push(anchor.highlights)
-            delete anchor.highlights
-            delete anchor.range
-        else
-          self.anchors.push(anchor)
-
-      deadHighlights = Array::concat(deadHighlights...)
-      new Promise(raf).then(-> highlighter.removeHighlights(deadHighlights))
-
-      for target in annotation.target when target not in anchoredTargets
-        anchor = locate(target).then(highlight)
-        anchors.push(anchor)
-
-      return Promise.all(anchors)
-
     sync = (anchors) ->
       annotation.$orphan = anchors.length > 0
       for anchor in anchors
@@ -201,14 +181,26 @@ module.exports = class Guest extends Annotator
       self.plugins.BucketBar.update()
       self.plugins.CrossFrame.sync([annotation])
 
-    cleanup = ->
-      delete annotation.anchors
+    for anchor in self.anchors.splice(0, self.anchors.length)
+      if anchor.annotation is annotation
+        if anchor.range? and anchor.target in annotation.target
+          anchors.push(anchor)
+          anchoredTargets.push(anchor.target)
+        else if anchor.highlights?
+          deadHighlights.push(anchor.highlights)
+          delete anchor.highlights
+          delete anchor.range
+      else
+        self.anchors.push(anchor)
 
-    annotation.target ?= []
-    annotation.anchors ?= Promise.resolve(annotation.anchors)
-    .then(setup)
-    .then(sync)
-    .then(cleanup, cleanup)
+    deadHighlights = Array::concat(deadHighlights...)
+    new Promise(raf).then(-> highlighter.removeHighlights(deadHighlights))
+
+    for target in annotation.target when target not in anchoredTargets
+      anchor = locate(target).then(highlight)
+      anchors.push(anchor)
+
+    Promise.all(anchors).then(sync)
 
     return annotation
 

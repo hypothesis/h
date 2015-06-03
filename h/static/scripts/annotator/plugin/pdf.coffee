@@ -6,8 +6,6 @@ class PDF extends Annotator.Plugin
   documentLoaded: null
   observer: null
   pdfViewer: null
-  updatePromise: null
-  updateTimeout: null
 
   pluginInit: ->
     @pdfViewer = PDFViewerApplication.pdfViewer
@@ -59,50 +57,39 @@ class PDF extends Annotator.Plugin
       return {title, link}
 
   update: ->
-    self = this
     {annotator, pdfViewer} = this
 
-    _throttle = ->
-      if self.updateTimeout?
-        clearTimeout(self.updateTimeout)
-      self.updateTimeout = setTimeout(_update, 200)
+    stableAnchors = []
+    pendingAnchors = []
+    refreshAnnotations = []
 
-    _update = ->
-      anchors = []
-      annotations = []
+    for page in pdfViewer.pages when page.textLayer?.renderingDone
+      div = page.div ? page.el
+      placeholder = div.getElementsByClassName('annotator-placeholder')[0]
 
-      for page in pdfViewer.pages when page.textLayer?.renderingDone
-        div = page.div ? page.el
-        placeholder = div.getElementsByClassName('annotator-placeholder')[0]
+      switch page.renderingState
+        when RenderingStates.INITIAL
+          page.textLayer = null
+        when RenderingStates.FINISHED
+          if placeholder?
+            placeholder.parentNode.removeChild(placeholder)
 
-        switch page.renderingState
-          when RenderingStates.INITIAL
-            page.textLayer = null
-          when RenderingStates.FINISHED
-            if placeholder?
-              placeholder.parentNode.removeChild(placeholder)
+    for anchor in annotator.anchors when anchor.highlights?
+      if anchor.annotation in refreshAnnotations
+        continue
 
-      for anchor in annotator.anchors when anchor.annotation not in annotations
-        unless anchor.range? and anchor.highlights?
+      for hl in anchor.highlights
+        if not document.body.contains(hl)
+          delete anchor.highlights
           delete anchor.range
-          annotations.push(anchor.annotation)
-          continue
+          refreshAnnotations.push(anchor.annotation)
+          break
 
-        for hl in anchor.highlights
-          if not document.body.contains(hl)
-            delete anchor.range
-            annotations.push(anchor.annotation)
-            break
+    for annotation in refreshAnnotations
+      annotator.setupAnnotation(annotation)
+      pendingAnchors.push(annotation.anchors)
 
-      for annotation in annotations
-        annotator.setupAnnotation(annotation)
-        anchors.push(annotation.anchors)
-
-      self.updateTimeout = null
-      self.updatePromise = Promise.all(anchors)
-
-    @annotator.plugins.BucketBar?.update()
-    Promise.resolve(@updatePromise).then(_throttle)
+    annotator.plugins.BucketBar?.update()
 
 Annotator.Plugin.PDF = PDF
 
