@@ -26,6 +26,8 @@ getPage = (pageIndex) ->
 
 getPageTextContent = (pageIndex) ->
   return PDFViewerApplication.pdfViewer.getPageTextContent(pageIndex)
+  .then((textContent) -> (item.str for item in textContent.items).join(''))
+
 
 # XXX: This will break if the viewer changes documents
 _pageOffsetCache = {}
@@ -42,38 +44,26 @@ getPageOffset = (pageIndex) ->
       return Promise.resolve(offset)
 
     return getPageTextContent(index)
-    .then(getTextContentLength)
-    .then((length) -> next(offset + length))
+    .then((textContent) -> next(offset + textContent.length))
 
   return next(0)
 
-
-getTextContentLength = (textContent) ->
-  sum = 0
-  for item in textContent.items
-    sum += item.str.length
-  return sum
 
 
 findPage = (offset) ->
   index = 0
   total = 0
 
-  next = (length) ->
-    if total + length >= offset
+  count = (textContent) ->
+    if total + textContent.length >= offset
       offset = total
-      return Promise.resolve({index, offset})
+      return Promise.resolve({index, offset, textContent})
     else
       index++
-      total += length
-      return count()
+      total += textContent.length
+      return getPageTextContent(index).then(count)
 
-  count = ->
-    return getPageTextContent(index)
-    .then(getTextContentLength)
-    .then(next)
-
-  return count()
+  return getPageTextContent(0).then(count)
 
 
 ###*
@@ -117,17 +107,21 @@ exports.anchor = (selectors) ->
   if position?
     promise = promise.catch ->
       findPage(position.start)
-      .then(({index, offset}) ->
+      .then(({index, offset, textContent}) ->
         page = getPage(index)
+
+        start = position.start - offset
+        end = position.end - offset
+        length = end - start
+
+        assertQuote(textContent.substr(start, length))
+
         renderingState = page.renderingState
         renderingDone = page.textLayer?.renderingDone
         if renderingState is RenderingStates.FINISHED and renderingDone
           root = page.textLayer.textLayerDiv
-          start = position.start - offset
-          end = position.end - offset
           Promise.resolve(TextPositionAnchor.fromSelector({start, end}, {root}))
           .then((a) -> Promise.resolve(a.toRange({root})))
-          .then(assertQuote)
         else
           div = page.div ? page.el
           placeholder = div.getElementsByClassName('annotator-placeholder')[0]
