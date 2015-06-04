@@ -86,41 +86,6 @@ def test_index(replace_io):
     assert links['search']['url'] == host + '/search'
 
 
-def test_search_parameters(replace_io):
-    request_params = {
-        'offset': '3',
-        'limit': '100',
-        'sort': 'text',
-        'order': 'asc',
-        'uri': 'http://bla.test',
-        'some_field': 'something',
-    }
-    user = object()
-    assert views._search_params(request_params, user=user) == {
-        'query': {
-            'uri': 'http://bla.test',
-            'some_field': 'something',
-        },
-        'offset': 3,
-        'limit': 100,
-        'sort': 'text',
-        'order': 'asc',
-        'user': user,
-    }
-
-
-def test_bad_search_parameters(replace_io):
-    request_params = {
-        'offset': '3foo',
-        'limit': '\' drop table annotations',
-    }
-    user = object()
-    assert views._search_params(request_params, user=user) == {
-        'query': {},
-        'user': user,
-    }
-
-
 @patch('h.api.views._create_annotation')
 def test_create(mock_create_annotation, user, replace_io):
     request = DummyRequest(json_body=_new_annotation)
@@ -269,7 +234,7 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_offset_defaults_to_0(self, search_raw):
         """If no offset is given search_raw() is called with "from": 0."""
-        views._search(request_params={})
+        views._search(request_params=webob.multidict.NestedMultiDict())
 
         first_call = search_raw.call_args_list[0]
         assert first_call[0][0]["from"] == 0
@@ -277,7 +242,7 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_custom_offsets_are_passed_in(self, search_raw):
         """If an offset is given it's passed to search_raw() as "from"."""
-        views._search(request_params={"offset": 7})
+        views._search(request_params=webob.multidict.NestedMultiDict({"offset": 7}))
 
         first_call = search_raw.call_args_list[0]
         assert first_call[0][0]["from"] == 7
@@ -302,7 +267,7 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_limit_defaults_to_20(self, search_raw):
         """If no limit is given search_raw() is called with "size": 20."""
-        views._search(request_params={})
+        views._search(request_params=webob.multidict.NestedMultiDict())
 
         first_call = search_raw.call_args_list[0]
         assert first_call[0][0]["size"] == 20
@@ -310,7 +275,7 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_custom_limits_are_passed_in(self, search_raw):
         """If a limit is given it's passed to search_raw() as "size"."""
-        views._search(request_params={"limit": 7})
+        views._search(request_params=webob.multidict.NestedMultiDict({"limit": 7}))
 
         first_call = search_raw.call_args_list[0]
         assert first_call[0][0]["size"] == 7
@@ -335,16 +300,16 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_query_defaults_to_match_all(self, search_raw):
         """If no query is given search_raw is called with "match_all": {}."""
-        views._search(request_params={})
+        views._search(request_params=webob.multidict.NestedMultiDict())
 
         first_call = search_raw.call_args_list[0]
         query = first_call[0][0]["query"]
         assert query == {"bool": {"must": [{"match_all": {}}]}}
 
     @patch("annotator.annotation.Annotation.search_raw")
-    def test_sort_defaults_to_updated(self, search_raw):
-        """If no sort is given search_raw() is called with sort "updated"."""
-        views._search(request_params={})
+    def test_sort_is_by_updated(self, search_raw):
+        """search_raw() is called with sort "updated"."""
+        views._search(request_params=webob.multidict.NestedMultiDict())
 
         first_call = search_raw.call_args_list[0]
         sort = first_call[0][0]["sort"]
@@ -354,7 +319,7 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_sort_includes_ignore_unmapped(self, search_raw):
         """'ignore_unmapped': True is automatically passed to search_raw()."""
-        views._search(request_params={})
+        views._search(request_params=webob.multidict.NestedMultiDict())
 
         first_call = search_raw.call_args_list[0]
         sort = first_call[0][0]["sort"]
@@ -363,7 +328,8 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_custom_sort(self, search_raw):
         """Custom sorts should be passed on to search_raw()."""
-        views._search(request_params={"sort": "title"})
+        views._search(
+            request_params=webob.multidict.NestedMultiDict({"sort": "title"}))
 
         first_call = search_raw.call_args_list[0]
 
@@ -373,8 +339,8 @@ class TestSearch(object):
 
     @patch("annotator.annotation.Annotation.search_raw")
     def test_order_defaults_to_desc(self, search_raw):
-        """If no sort order is given "order": "desc" is to search_raw()."""
-        views._search(request_params={})
+        """'order': "desc" is to search_raw()."""
+        views._search(request_params=webob.multidict.NestedMultiDict())
 
         first_call = search_raw.call_args_list[0]
         sort = first_call[0][0]["sort"]
@@ -383,7 +349,8 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_custom_order(self, search_raw):
         """'order' params are passed to search_raw() if given."""
-        views._search(request_params={"order": "asc"})
+        views._search(
+            request_params=webob.multidict.NestedMultiDict({"order": "asc"}))
 
         first_call = search_raw.call_args_list[0]
 
@@ -393,7 +360,8 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_search_for_user(self, search_raw):
         """'user' params are passed to search_raw() in the "match"."""
-        views._search(request_params={"user": "bob"})
+        views._search(
+            request_params=webob.multidict.NestedMultiDict({"user": "bob"}))
 
         first_call = search_raw.call_args_list[0]
         query = first_call[0][0]["query"]
@@ -423,7 +391,8 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_search_for_tag(self, search_raw):
         """'tags' params are passed to search_raw() in the "match"."""
-        views._search(request_params={"tags": "foo"})
+        views._search(
+            request_params=webob.multidict.NestedMultiDict({"tags": "foo"}))
 
         first_call = search_raw.call_args_list[0]
         query = first_call[0][0]["query"]
@@ -453,7 +422,9 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_combined_user_and_tag_search(self, search_raw):
         """A 'user' and a 'param' at the same time are handled correctly."""
-        views._search(request_params={"user": "bob", "tags": "foo"})
+        views._search(
+            request_params=webob.multidict.NestedMultiDict(
+                {"user": "bob", "tags": "foo"}))
 
         first_call = search_raw.call_args_list[0]
         query = first_call[0][0]["query"]
@@ -474,11 +445,18 @@ class TestSearch(object):
         first_call = search_raw.call_args_list[0]
         query = first_call[0][0]["query"]
         assert query == {
-            "bool": {"must": [{"multi_match": {
-                "fields": ["quote", "tags", "text", "uri.parts", "user"],
-                "query": ["howdy"],
-                "type": "cross_fields"
-            }}]}
+            "bool": {
+                "must": [
+                    {
+                        "multi_match": {
+                            "fields": ["quote", "tags", "text", "uri.parts",
+                                       "user"],
+                            "query": ["howdy"],
+                            "type": "cross_fields"
+                        }
+                    }
+                ]
+            }
         }
 
     @patch("annotator.annotation.Annotation.search_raw")
@@ -508,7 +486,9 @@ class TestSearch(object):
         all the annotations of that page.
 
         """
-        views._search(request_params={"uri": "http://example.com/"})
+        views._search(
+            request_params=webob.multidict.NestedMultiDict(
+                {"uri": "http://example.com/"}))
 
         first_call = search_raw.call_args_list[0]
         query = first_call[0][0]["query"]
@@ -518,7 +498,8 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_single_text_param(self, search_raw):
         """_search() passes "text" params to search_raw() in a "match" dict."""
-        views._search(request_params={"text": "foobar"})
+        views._search(
+            request_params=webob.multidict.NestedMultiDict({"text": "foobar"}))
 
         first_call = search_raw.call_args_list[0]
         query = first_call[0][0]["query"]
@@ -547,7 +528,8 @@ class TestSearch(object):
     @patch("annotator.annotation.Annotation.search_raw")
     def test_single_quote_param(self, search_raw):
         """_search() passes a "quote" param to search_raw() in a "match"."""
-        views._search(request_params={"quote": "foobar"})
+        views._search(
+            request_params=webob.multidict.NestedMultiDict({"quote": "foobar"}))
 
         first_call = search_raw.call_args_list[0]
         query = first_call[0][0]["query"]
@@ -575,7 +557,7 @@ class TestSearch(object):
 
     @patch("annotator.annotation.Annotation.search_raw")
     def test_user_object(self, search_raw):
-        """If _search_params() gets a user arg it passes it to search_raw().
+        """If _search() gets a user arg it passes it to search_raw().
 
         Note: This test is testing the function's user param. You can also
         pass one or more user arguments in the request.params, those are
@@ -584,14 +566,14 @@ class TestSearch(object):
         """
         user = MagicMock()
 
-        views._search(request_params={}, user=user)
+        views._search(request_params=webob.multidict.NestedMultiDict(), user=user)
 
         first_call = search_raw.call_args_list[0]
         assert first_call[1]["user"] == user
 
     @patch("annotator.annotation.Annotation.search_raw")
     def test_with_evil_arguments(self, search_raw):
-        params = webob.multidict.MultiDict({
+        params = webob.multidict.NestedMultiDict({
             "offset": "3foo",
             "limit": '\' drop table annotations'
         })

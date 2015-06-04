@@ -201,88 +201,78 @@ def _api_error(request, reason, status_code):
     return response_info
 
 
-def _search(request_params, user=None):
-    # Compile search parameters
-    search_params = _search_params(request_params, user=user)
+def _query(request_params):
+    """Return an Elasticsearch query dict for the given h search API params.
 
+    Translates the HTTP request params accepted by the h search API into an
+    Elasticsearch query dict.
+
+    :param request_params: the HTTP request params that were posted to the
+        h search API
+    :type request_params: webob.multidict.NestedMultiDict
+
+    :returns: an Elasticsearch query dict corresponding to the given h search
+        API params
+    :rtype: dict
+
+    """
+    # NestedMultiDict objects are read-only, so we need to copy to make it
+    # modifiable.
+    request_params = request_params.copy()
+
+    try:
+        from_ = int(request_params.pop("offset"))
+    except (ValueError, KeyError):
+        from_ = 0
+
+    try:
+        size = int(request_params.pop("limit"))
+    except (ValueError, KeyError):
+        size = 20
+
+    query = {
+        "from": from_,
+        "size": size,
+        "sort": [
+            {
+                request_params.pop("sort", "updated"): {
+                    "ignore_unmapped": True,
+                    "order": request_params.pop("order", "desc")
+                }
+            }
+        ]
+    }
+
+    matches = []
+    if "any" in request_params:
+        matches.append({
+            "multi_match": {
+                "fields": ["quote", "tags", "text", "uri.parts", "user"],
+                "query": request_params.getall("any"),
+                "type": "cross_fields"
+            }
+        })
+        del request_params["any"]
+
+    for key, value in request_params.items():
+        matches.append({"match": {key: value}})
+    matches = matches or [{"match_all": {}}]
+
+    query["query"] = {"bool": {"must": matches}}
+
+    return query
+
+
+def _search(request_params, user=None):
     log.debug("Searching with user=%s, for uri=%s",
               user.id if user else 'None',
               request_params.get('uri'))
 
-    if 'any' in search_params['query']:
-        # Handle any field parameters
-        query = _add_any_field_params_into_query(search_params)
-        results = Annotation.search_raw(query)
-
-        params = {'search_type': 'count'}
-        count = Annotation.search_raw(query, params, raw_result=True)
-        total = count['hits']['total']
-    else:
-        results = Annotation.search(**search_params)
-        total = Annotation.count(**search_params)
-
-    return {
-        'rows': results,
-        'total': total,
-    }
-
-
-def _search_params(request_params, user=None):
-    """Turn request parameters into annotator-store search parameters."""
-    request_params = request_params.copy()
-    search_params = {}
-
-    # Take limit, offset, sort and order out of the parameters
-    try:
-        search_params['offset'] = int(request_params.pop('offset'))
-    except (KeyError, ValueError):
-        pass
-    try:
-        search_params['limit'] = int(request_params.pop('limit'))
-    except (KeyError, ValueError):
-        pass
-    try:
-        search_params['sort'] = request_params.pop('sort')
-    except (KeyError, ValueError):
-        pass
-    try:
-        search_params['order'] = request_params.pop('order')
-    except (KeyError, ValueError):
-        pass
-
-    # All remaining parameters are considered searched fields.
-    search_params['query'] = request_params
-
-    search_params['user'] = user
-    return search_params
-
-
-def _add_any_field_params_into_query(search_params):
-    """Add any_field parameters to ES query."""
-    any_terms = search_params['query'].getall('any')
-    del search_params['query']['any']
-
-    query = search_params.get('query', None)
-    offset = search_params.get('offset', None)
-    limit = search_params.get('limit', None)
-    sort = search_params.get('sort', None)
-    order = search_params.get('order', None)
-    query = Annotation._build_query(query, offset, limit, sort, order)
-
-    multi_match_query = {
-        'multi_match': {
-            'query': any_terms,
-            'type': 'cross_fields',
-            'fields': ['quote', 'tags', 'text', 'uri.parts', 'user']
-        }
-    }
-
-    # Remove match_all if we add the multi-match part
-    if 'match_all' in query['query']['bool']['must'][0]:
-        query['query']['bool']['must'] = []
-    query['query']['bool']['must'].append(multi_match_query)
-
-    return query
+    query = _query(request_params)
+    results = Annotation.search_raw(query, user=user)
+    count = Annotation.search_raw(query, {'search_type': 'count'},
+                                  raw_result=True)
+    return {"rows": results, "total": count["hits"]["total"]}
 
 
 def _create_annotation(fields, user):
