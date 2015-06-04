@@ -363,6 +363,7 @@ module.exports = class Guest extends Annotator
         this.setVisibleHighlights true
         this.setupAnnotation(this.createHighlight())
       when 'comment'
+        this.setVisibleHighlights true
         this.setupAnnotation(this.createAnnotation())
         this.triggerShowFrame()
     Annotator.Util.getGlobal().getSelection().removeAllRanges()

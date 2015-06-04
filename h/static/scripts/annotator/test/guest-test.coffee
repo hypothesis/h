@@ -288,6 +288,23 @@ describe 'Guest', ->
       guest.onAdderMouseup(event)
       assert.isTrue(event.isPropagationStopped())
 
+  describe 'onAdderClick', ->
+    it 'it sets visiblehighlights to true when making a highlight', () ->
+      guest = createGuest()
+      event = jQuery.Event('click')
+      guest.setVisibleHighlights = sandbox.stub()
+      guest.onAdderClick target: dataset: action: "highlight"
+      assert.called(guest.setVisibleHighlights)
+      assert.calledWith(guest.setVisibleHighlights, true)
+
+    it 'it sets visiblehighlights to true when making an annotation', () ->
+      guest = createGuest()
+      event = jQuery.Event('click')
+      guest.setVisibleHighlights = sandbox.stub()
+      guest.onAdderClick target: dataset: action: "comment"
+      assert.called(guest.setVisibleHighlights)
+      assert.calledWith(guest.setVisibleHighlights, true)
+
   describe 'annotation sync', ->
     it 'calls sync for createAnnotation', ->
       guest = createGuest()
