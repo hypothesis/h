@@ -157,8 +157,18 @@ class AsyncAuthController(AuthController):
 
 
 @view_auth_defaults
-@view_config(attr='forgot_password', route_name='forgot_password')
-@view_config(attr='reset_password', route_name='reset_password')
+@view_config(attr='forgot_password',
+             route_name='forgot_password',
+             request_method='POST')
+@view_config(attr='forgot_password_form',
+             route_name='forgot_password',
+             request_method='GET')
+@view_config(attr='reset_password',
+             route_name='reset_password',
+             request_method='POST')
+@view_config(attr='reset_password_form',
+             route_name='reset_password',
+             request_method='GET')
 class ForgotPasswordController(object):
 
     """Controller for handling password reset forms."""
@@ -179,9 +189,6 @@ class ForgotPasswordController(object):
         """
         schema = schemas.ForgotPasswordSchema().bind(request=self.request)
         form = deform.Form(schema)
-
-        if self.request.method != 'POST':
-            return httpexceptions.HTTPMethodNotAllowed()
 
         # Nothing to do here for logged-in users
         if self.request.authenticated_userid is not None:
@@ -218,6 +225,16 @@ class ForgotPasswordController(object):
                      kind="success")
 
         return httpexceptions.HTTPFound(location=self.reset_password_redirect)
+
+    # FIXME: generate a form here and progressively enhance it rather than
+    # relying entirely on Angular.
+    def forgot_password_form(self):
+        """Render the forgot password form."""
+        if self.request.authenticated_userid is not None:
+            return httpexceptions.HTTPFound(
+                location=self.forgot_password_redirect)
+
+        return {}
 
     def reset_password(self):
         """
@@ -259,6 +276,12 @@ class ForgotPasswordController(object):
         self.request.registry.notify(PasswordResetEvent(self.request, user))
 
         return httpexceptions.HTTPFound(location=self.reset_password_redirect)
+
+    # FIXME: generate a form here and progressively enhance it rather than
+    # relying entirely on Angular.
+    def reset_password_form(self):
+        """Render the reset password form."""
+        return {}
 
 
 @view_defaults(accept='application/json', context=Application, renderer='json')

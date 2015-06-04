@@ -301,24 +301,6 @@ forgot_password_fixtures = pytest.mark.usefixtures('activation_model',
                                                    'routes_mapper',
                                                    'user_model')
 
-@forgot_password_fixtures
-def test_forgot_password_forbids_GET():
-    request = DummyRequest()
-
-    result = ForgotPasswordController(request).forgot_password()
-
-    assert isinstance(result, httpexceptions.HTTPMethodNotAllowed)
-
-
-@forgot_password_fixtures
-def test_forgot_password_redirects_when_logged_in(authn_policy):
-    request = DummyRequest(method='POST')
-    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
-
-    result = ForgotPasswordController(request).forgot_password()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-
 
 @forgot_password_fixtures
 def test_forgot_password_returns_error_when_validation_fails(authn_policy,
@@ -430,6 +412,16 @@ def test_forgot_password_redirects_on_success(authn_policy,
     result = ForgotPasswordController(request).forgot_password()
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_forgot_password_form_redirects_when_logged_in(authn_policy):
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+
+    result = ForgotPasswordController(request).forgot_password_form()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
 
 
 reset_password_fixtures = pytest.mark.usefixtures('activation_model',
