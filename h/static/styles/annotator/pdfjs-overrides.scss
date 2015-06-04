@@ -1,4 +1,4 @@
-@import "variables";
+@import "../variables";
 
 // Newer versions of PDFjs use apply a transparency to the textLayer element.
 // In order for our highlights to be visible we need to use solid colors. The

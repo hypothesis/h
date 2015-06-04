@@ -1,5 +1,7 @@
 @import "compass/css3";
-@import "variables";
+@import 'compass/reset/utilities';
+
+@import "./variables";
 
 /* Style input placeholders */
 @mixin placeholder {
