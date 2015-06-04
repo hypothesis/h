@@ -87,14 +87,6 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       $(element).append @element
 
   pluginInit: ->
-
-    events = [
-      'annotationCreated', 'annotationUpdated', 'annotationDeleted',
-      'annotationsLoaded'
-    ]
-    for event in events
-      @annotator.subscribe event, @update
-
     $(window).on 'resize scroll', @update
 
     for scrollable in @options.scrollables ? []

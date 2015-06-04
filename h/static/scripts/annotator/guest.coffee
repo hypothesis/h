@@ -246,6 +246,7 @@ module.exports = class Guest extends Annotator
 
     this.anchors = anchors
     this.publish('annotationDeleted', [annotation])
+    this.plugins.BucketBar.update()
 
     unhighlight = Array::concat(unhighlight...)
     new Promise(raf).then(-> highlighter.removeHighlights(unhighlight))
