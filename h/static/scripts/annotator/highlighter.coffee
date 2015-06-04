@@ -27,3 +27,17 @@ exports.highlightRange = (normedRange, cssClass='annotator-hl') ->
 exports.removeHighlights = (highlights) ->
   for h in highlights when h.parentNode?
     $(h).replaceWith(h.childNodes)
+
+
+# Get the bounding client rectangle of a collection in viewport coordinates.
+# Unfortunately, Chrome has issues[1] with Range.getBoundingClient rect or we
+# could just use that.
+# [1] https://code.google.com/p/chromium/issues/detail?id=324437
+exports.getBoundingClientRect = (collection) ->
+  # Reduce the client rectangles of the highlights to a bounding box
+  rects = collection.map((n) -> n.getBoundingClientRect())
+  return rects.reduce (acc, r) ->
+    top: Math.min(acc.top, r.top)
+    left: Math.min(acc.left, r.left)
+    bottom: Math.max(acc.bottom, r.bottom)
+    right: Math.max(acc.right, r.right)

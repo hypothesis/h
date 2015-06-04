@@ -3,19 +3,7 @@ raf = require('raf')
 Annotator = require('annotator')
 $ = Annotator.$
 
-
-# Get the bounding client rectangle of a collection in viewport coordinates.
-# Unfortunately, Chrome has issues[1] with Range.getBoundingClient rect or we
-# could just use that.
-# [1] https://code.google.com/p/chromium/issues/detail?id=324437
-getBoundingClientRect = (collection) ->
-  # Reduce the client rectangles of the highlights to a bounding box
-  rects = collection.map((n) -> n.getBoundingClientRect())
-  return rects.reduce (acc, r) ->
-    top: Math.min(acc.top, r.top)
-    left: Math.min(acc.left, r.left)
-    bottom: Math.max(acc.bottom, r.bottom)
-    right: Math.max(acc.right, r.right)
+highlighter = require('../highlighter')
 
 
 # Scroll to the next closest anchor off screen in the given direction.
@@ -26,7 +14,7 @@ scrollToClosest = (anchors, direction) ->
       return acc
 
     {start, next} = acc
-    rect = getBoundingClientRect(anchor.highlights)
+    rect = highlighter.getBoundingClientRect(anchor.highlights)
 
     # Ignore if it's not in the right direction.
     if (dir is 1 and rect.top >= 0)
@@ -123,7 +111,7 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       unless anchor.highlights?.length
         return points
 
-      rect = getBoundingClientRect(anchor.highlights)
+      rect = highlighter.getBoundingClientRect(anchor.highlights)
       x = rect.top
       h = rect.bottom - rect.top
 

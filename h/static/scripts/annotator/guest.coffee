@@ -167,11 +167,17 @@ module.exports = class Guest extends Annotator
         return new Promise(raf).then ->
           range = Annotator.Range.sniff(anchor.range)
           normedRange = range.normalize(self.element[0])
-          anchor.highlights = highlighter.highlightRange(normedRange)
+          highlights = highlighter.highlightRange(normedRange)
+          rect = highlighter.getBoundingClientRect(highlights)
+          anchor.highlights = highlights
+          anchor.pos =
+            left: rect.left + window.scrollX
+            top: rect.top + window.scrollY
           return anchor
       return anchor
 
     sync = (anchors) ->
+      annotation.$anchors = ({pos} for {pos} in anchors)
       annotation.$orphan = anchors.length > 0
       for anchor in anchors
         if anchor.range?

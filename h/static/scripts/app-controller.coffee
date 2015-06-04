@@ -74,7 +74,11 @@ module.exports = class AppController
       predicate = switch name
         when 'Newest' then ['-!!message', '-message.updated']
         when 'Oldest' then ['-!!message',  'message.updated']
-        when 'Location' then ['-!!message', 'message.target[0].pos.top']
+        when 'Location' then [
+          '-!!message'
+          'message.$anchors[0].pos.top'
+          'message.$anchors[0].pos.left'
+        ]
       $scope.sort = {name, predicate}
 
     $scope.$watch (-> auth.user), (newVal, oldVal) ->
