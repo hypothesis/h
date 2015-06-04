@@ -22,6 +22,7 @@ from horus.strings import UIStringsBase
 
 from h.accounts.views import ajax_form
 from h.accounts.views import validate_form
+from h.accounts.views import AuthController
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
 
@@ -172,6 +173,123 @@ def test_validate_form_ok():
 
     assert err is None
     assert data == {'foo': 'bar'}
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_redirects_when_logged_in(authn_policy):
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+
+    result = AuthController(request).login()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_returns_error_when_validation_fails(authn_policy,
+                                                   form_validator):
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = None  # Logged out
+    form_validator.return_value = ({"errors": "KABOOM!"}, None)
+
+    result = AuthController(request).login()
+
+    assert result == {"errors": "KABOOM!"}
+
+
+@pytest.mark.usefixtures('routes_mapper')
+@patch('h.accounts.views.LoginEvent', autospec=True)
+def test_login_no_event_when_validation_fails(loginevent,
+                                              authn_policy,
+                                              form_validator,
+                                              notify):
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = None  # Logged out
+    form_validator.return_value = ({"errors": "KABOOM!"}, None)
+
+    AuthController(request).login()
+
+    assert not loginevent.called
+    assert not notify.called
+
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_returns_success_when_validation_succeeds(authn_policy,
+                                                        form_validator):
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = None  # Logged out
+    form_validator.return_value = (None, {"user": FakeUser()})
+
+    result = AuthController(request).login()
+
+    assert result == {}
+
+
+@pytest.mark.usefixtures('routes_mapper')
+@patch('h.accounts.views.LoginEvent', autospec=True)
+def test_login_event_when_validation_succeeds(loginevent,
+                                              authn_policy,
+                                              form_validator,
+                                              notify):
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = None  # Logged out
+    elephant = FakeUser()
+    form_validator.return_value = (None, {"user": elephant})
+
+    AuthController(request).login()
+
+    loginevent.assert_called_with(request, elephant)
+    notify.assert_called_with(loginevent.return_value)
+
+
+@pytest.mark.usefixtures('routes_mapper')
+@patch('h.accounts.views.LogoutEvent', autospec=True)
+def test_logout_event(logoutevent, notify):
+    request = DummyRequest()
+
+    result = AuthController(request).logout()
+
+    logoutevent.assert_called_with(request)
+    notify.assert_called_with(logoutevent.return_value)
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_logout_invalidates_session():
+    request = DummyRequest()
+    request.session["foo"] = "bar"
+
+    result = AuthController(request).logout()
+
+    assert "foo" not in request.session
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_logout_redirects():
+    request = DummyRequest()
+
+    result = AuthController(request).logout()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_logout_forgets_authenticated_user(authn_policy):
+    request = DummyRequest()
+
+    AuthController(request).logout()
+
+    authn_policy.forget.assert_called_with(request)
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_logout_response_has_forget_headers(authn_policy):
+    request = DummyRequest()
+    authn_policy.forget.return_value = {'x-erase-fingerprints': 'on the hob'}
+
+    result = AuthController(request).logout()
+
+    assert result.headers['x-erase-fingerprints'] == 'on the hob'
 
 
 @pytest.mark.usefixtures('subscriptions_model')
