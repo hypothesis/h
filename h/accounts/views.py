@@ -8,25 +8,22 @@ import horus.views
 from hem.db import get_session
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
-from horus.interfaces import IForgotPasswordForm
-from horus.interfaces import IForgotPasswordSchema
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 from pyramid.security import forget
-from pyramid.url import route_url
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
-from h import session
-from h.models import _
-from h.notification.models import Subscriptions
 from h.resources import Application
-from h.accounts.models import Activation
+from h.notification.models import Subscriptions
+from h.models import _
 from h.accounts.models import User
-
-from . import schemas
-from .events import LoginEvent, LogoutEvent
-from .events import PasswordResetEvent
+from h.accounts.models import Activation
+from h.accounts.events import PasswordResetEvent
+from h.accounts.events import LogoutEvent
+from h.accounts.events import LoginEvent
+from h.accounts import schemas
+from h import session
 
 
 def ajax_form(request, result):
