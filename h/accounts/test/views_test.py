@@ -23,6 +23,7 @@ from horus.strings import UIStringsBase
 from h.accounts.views import ajax_form
 from h.accounts.views import validate_form
 from h.accounts.views import AuthController
+from h.accounts.views import ForgotPasswordController
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
 
@@ -292,6 +293,272 @@ def test_logout_response_has_forget_headers(authn_policy):
     assert result.headers['x-erase-fingerprints'] == 'on the hob'
 
 
+forgot_password_fixtures = pytest.mark.usefixtures('activation_model',
+                                                   'authn_policy',
+                                                   'dummy_db_session',
+                                                   'form_validator',
+                                                   'mailer',
+                                                   'routes_mapper',
+                                                   'user_model')
+
+@forgot_password_fixtures
+def test_forgot_password_forbids_GET():
+    request = DummyRequest()
+
+    result = ForgotPasswordController(request).forgot_password()
+
+    assert isinstance(result, httpexceptions.HTTPMethodNotAllowed)
+
+
+@forgot_password_fixtures
+def test_forgot_password_redirects_when_logged_in(authn_policy):
+    request = DummyRequest(method='POST')
+    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+
+    result = ForgotPasswordController(request).forgot_password()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+
+
+@forgot_password_fixtures
+def test_forgot_password_returns_error_when_validation_fails(authn_policy,
+                                                             form_validator):
+    request = DummyRequest(method='POST')
+    authn_policy.authenticated_userid.return_value = None
+    form_validator.return_value = ({"errors": "KABOOM!"}, None)
+
+    result = ForgotPasswordController(request).forgot_password()
+
+    assert result == {"errors": "KABOOM!"}
+
+
+@forgot_password_fixtures
+def test_forgot_password_fetches_user_by_form_email(authn_policy,
+                                                    form_validator,
+                                                    user_model):
+    request = DummyRequest(method='POST')
+    authn_policy.authenticated_userid.return_value = None
+    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+
+    ForgotPasswordController(request).forgot_password()
+
+    user_model.get_by_email.assert_called_with(request, "giraffe@thezoo.org")
+
+
+@forgot_password_fixtures
+def test_forgot_password_creates_activation_for_user(activation_model,
+                                                     authn_policy,
+                                                     dummy_db_session,
+                                                     form_validator,
+                                                     user_model):
+    request = DummyRequest(method='POST')
+    authn_policy.authenticated_userid.return_value = None
+    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+
+    ForgotPasswordController(request).forgot_password()
+
+
+    user = user_model.get_by_email.return_value
+    activation = activation_model.return_value
+
+    activation_model.assert_called_with()
+    assert activation in dummy_db_session.added
+    assert user.activation == activation
+
+
+@patch('h.accounts.views.reset_password_link')
+@forgot_password_fixtures
+def test_forgot_password_generates_reset_link_from_activation(reset_link,
+                                                              activation_model,
+                                                              authn_policy,
+                                                              form_validator):
+    request = DummyRequest(method='POST')
+    authn_policy.authenticated_userid.return_value = None
+    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+    activation_model.return_value.code = "abcde12345"
+
+    ForgotPasswordController(request).forgot_password()
+
+    reset_link.assert_called_with(request, "abcde12345")
+
+
+@patch('h.accounts.views.reset_password_email')
+@patch('h.accounts.views.reset_password_link')
+@forgot_password_fixtures
+def test_forgot_password_generates_mail(reset_link,
+                                        reset_mail,
+                                        activation_model,
+                                        authn_policy,
+                                        form_validator,
+                                        user_model):
+    request = DummyRequest(method='POST')
+    authn_policy.authenticated_userid.return_value = None
+    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+    activation_model.return_value.code = "abcde12345"
+    reset_link.return_value = "http://example.com"
+    giraffe = FakeUser()
+    user_model.get_by_email.return_value = giraffe
+
+    ForgotPasswordController(request).forgot_password()
+
+    reset_mail.assert_called_with(giraffe, "abcde12345", "http://example.com")
+
+
+@patch('h.accounts.views.reset_password_email')
+@forgot_password_fixtures
+def test_forgot_password_sends_mail(reset_mail,
+                                    authn_policy,
+                                    mailer,
+                                    form_validator):
+    request = DummyRequest(method='POST')
+    authn_policy.authenticated_userid.return_value = None
+    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+    message = reset_mail.return_value
+
+    ForgotPasswordController(request).forgot_password()
+
+    assert message in mailer.outbox
+
+
+@forgot_password_fixtures
+def test_forgot_password_redirects_on_success(authn_policy,
+                                              form_validator):
+    request = DummyRequest(method='POST')
+    authn_policy.authenticated_userid.return_value = None
+    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+
+    result = ForgotPasswordController(request).forgot_password()
+
+    assert isinstance(result, httpexceptions.HTTPRedirection)
+
+
+reset_password_fixtures = pytest.mark.usefixtures('activation_model',
+                                                  'dummy_db_session',
+                                                  'notify',
+                                                  'routes_mapper',
+                                                  'user_model')
+
+
+@reset_password_fixtures
+def test_reset_password_not_found_if_code_missing():
+    request = DummyRequest(method='POST')
+
+    result = ForgotPasswordController(request).reset_password()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@reset_password_fixtures
+def test_reset_password_looks_up_code_in_database(activation_model):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    activation_model.get_by_code.return_value = None
+
+    result = ForgotPasswordController(request).reset_password()
+
+    activation_model.get_by_code.assert_called_with(request, 'abc123')
+
+
+@reset_password_fixtures
+def test_reset_password_not_found_if_code_not_found(activation_model):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    activation_model.get_by_code.return_value = None
+
+    result = ForgotPasswordController(request).reset_password()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@reset_password_fixtures
+def test_reset_password_looks_up_user_by_activation(activation_model,
+                                                    user_model):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    activation = activation_model.get_by_code.return_value
+    user_model.get_by_activation.return_value = None
+
+    result = ForgotPasswordController(request).reset_password()
+
+    user_model.get_by_activation.assert_called_with(request, activation)
+
+
+@reset_password_fixtures
+def test_reset_password_not_found_if_user_not_found(user_model):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    user_model.get_by_activation.return_value = None
+
+    result = ForgotPasswordController(request).reset_password()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@reset_password_fixtures
+def test_reset_password_forbids_GET():
+    request = DummyRequest(matchdict={'code': 'abc123'})
+
+    result = ForgotPasswordController(request).reset_password()
+
+    assert isinstance(result, httpexceptions.HTTPMethodNotAllowed)
+
+
+@reset_password_fixtures
+def test_reset_password_returns_error_on_error(form_validator):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    form_validator.return_value = ({"errors": "KABOOM!"}, None)
+
+    result = ForgotPasswordController(request).reset_password()
+
+    assert result == {"errors": "KABOOM!"}
+
+
+@reset_password_fixtures
+def test_reset_password_sets_user_password_from_form(form_validator,
+                                                     user_model):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    form_validator.return_value = (None, {"password": "s3cure!"})
+    elephant = FakeUser(password='password1')
+    user_model.get_by_activation.return_value = elephant
+
+    ForgotPasswordController(request).reset_password()
+
+    assert elephant.password == 's3cure!'
+
+
+@reset_password_fixtures
+def test_reset_password_deletes_activation(activation_model,
+                                           dummy_db_session,
+                                           form_validator):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    form_validator.return_value = (None, {"password": "s3cure!"})
+    activation = activation_model.get_by_code.return_value
+
+    ForgotPasswordController(request).reset_password()
+
+    assert activation in dummy_db_session.deleted
+
+
+@patch('h.accounts.views.PasswordResetEvent', autospec=True)
+@reset_password_fixtures
+def test_reset_password_emits_event(event, form_validator, notify, user_model):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    form_validator.return_value = (None, {"password": "s3cure!"})
+    elephant = FakeUser(password='password1')
+    user_model.get_by_activation.return_value = elephant
+
+    ForgotPasswordController(request).reset_password()
+
+    event.assert_called_with(request, elephant)
+    notify.assert_called_with(event.return_value)
+
+
+@reset_password_fixtures
+def test_reset_password_redirects_on_success(form_validator):
+    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+    form_validator.return_value = (None, {"password": "s3cure!"})
+
+    result = ForgotPasswordController(request).reset_password()
+
+    assert isinstance(result, httpexceptions.HTTPRedirection)
+
+
 @pytest.mark.usefixtures('subscriptions_model')
 def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
     """
@@ -495,10 +762,12 @@ def user_model(config, request):
 
 
 @pytest.fixture
-def activation_model(config):
-    mock = MagicMock()
-    config.registry.registerUtility(mock, IActivationClass)
-    return mock
+def activation_model(config, request):
+    patcher = patch('h.accounts.views.Activation', autospec=True)
+    request.addfinalizer(patcher.stop)
+    activation = patcher.start()
+    config.registry.registerUtility(activation, IActivationClass)
+    return activation
 
 
 @pytest.fixture
