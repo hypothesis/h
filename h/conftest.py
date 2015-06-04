@@ -75,10 +75,14 @@ def dummy_db_session(config):
     class DummySession(object):
         def __init__(self):
             self.added = []
+            self.deleted = []
             self.flushed = False
 
         def add(self, obj):
             self.added.append(obj)
+
+        def delete(self, obj):
+            self.deleted.append(obj)
 
         def flush(self):
             self.flushed = True
