@@ -5,25 +5,25 @@ import colander
 import deform
 import horus.events
 import horus.views
+from hem.db import get_session
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
-from horus.interfaces import IForgotPasswordForm
-from horus.interfaces import IForgotPasswordSchema
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 from pyramid.security import forget
-from pyramid.url import route_url
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
-from h import session
-from h.models import _
-from h.notification.models import Subscriptions
 from h.resources import Application
+from h.notification.models import Subscriptions
+from h.models import _
 from h.accounts.models import User
-
-from . import schemas
-from .events import LoginEvent, LogoutEvent
+from h.accounts.models import Activation
+from h.accounts.events import PasswordResetEvent
+from h.accounts.events import LogoutEvent
+from h.accounts.events import LoginEvent
+from h.accounts import schemas
+from h import session
 
 
 def ajax_form(request, result):
@@ -154,66 +154,131 @@ class AsyncAuthController(AuthController):
 
 
 @view_auth_defaults
-@view_config(attr='forgot_password', route_name='forgot_password')
-@view_config(attr='reset_password', route_name='reset_password')
-class ForgotPasswordController(horus.views.ForgotPasswordController):
+@view_config(attr='forgot_password',
+             route_name='forgot_password',
+             request_method='POST')
+@view_config(attr='forgot_password_form',
+             route_name='forgot_password',
+             request_method='GET')
+@view_config(attr='reset_password',
+             route_name='reset_password',
+             request_method='POST')
+@view_config(attr='reset_password_form',
+             route_name='reset_password',
+             request_method='GET')
+class ForgotPasswordController(object):
+
+    """Controller for handling password reset forms."""
+
+    def __init__(self, request):
+        self.request = request
+        self.forgot_password_redirect = self.request.route_url('index')
+        self.reset_password_redirect = self.request.route_url('index')
+
     def forgot_password(self):
-        req = self.request
-        schema = req.registry.getUtility(IForgotPasswordSchema)
-        schema = schema().bind(request=req)
+        """
+        Handle submission of the forgot password form.
 
-        form = req.registry.getUtility(IForgotPasswordForm)
-        form = form(schema)
+        Validates that the email is one we know about, and then generates a new
+        activation for the associated user, and dispatches a "reset your
+        password" email which contains a token and/or link to the reset
+        password form.
+        """
+        schema = schemas.ForgotPasswordSchema().bind(request=self.request)
+        form = deform.Form(schema)
 
-        if req.method == 'GET':
-            if req.user:
-                return httpexceptions.HTTPFound(
-                    location=self.forgot_password_redirect_view)
-            else:
-                return {'form': form.render()}
+        # Nothing to do here for logged-in users
+        if self.request.authenticated_userid is not None:
+            return httpexceptions.HTTPFound(
+                location=self.forgot_password_redirect)
 
-        controls = req.POST.items()
-        try:
-            captured = form.validate(controls)
-        except deform.ValidationFailure as e:
-            return {'form': e.render(), 'errors': e.error.children}
+        err, appstruct = validate_form(form, self.request.POST.items())
+        if err is not None:
+            return err
 
-        user = self.User.get_by_email(req, captured['email'])
-        activation = self.Activation()
-        self.db.add(activation)
+        # If the validation passes, we assume the user exists.
+        #
+        # TODO: fix this latent race condition by returning a user object in
+        # the appstruct.
+        user = User.get_by_email(self.request, appstruct['email'])
+
+        # Create a new activation for this user. Any previous activation will
+        # get overwritten.
+        activation = Activation()
+        db = get_session(self.request)
+        db.add(activation)
         user.activation = activation
 
-        mailer = get_mailer(req)
-        username = getattr(user, 'short_name', '') or \
-            getattr(user, 'full_name', '') or \
-            getattr(user, 'username', '') or user.email
-        emailtext = ("Hello, {username}!\n\n"
-                     "Someone requested resetting your password. If it was "
-                     "you, reset your password by using this reset code:\n\n"
-                     "{code}\n\n"
-                     "Alternatively, you can reset your password by "
-                     "clicking on this link:\n\n"
-                     "{link}\n\n"
-                     "If you don't want to change your password, please "
-                     "ignore this email message.\n\n"
-                     "Regards,\n"
-                     "The Hypothesis Team\n")
-        body = emailtext.format(
-            code=user.activation.code,
-            link=route_url('reset_password', req, code=user.activation.code),
-            username=username)
-        subject = self.Str.reset_password_email_subject
-        message = Message(
-            subject=subject,
-            recipients=[user.email],
-            body=body)
+        # Send the reset password email
+        code = user.activation.code
+        link = reset_password_link(self.request, code)
+        message = reset_password_email(user, code, link)
+        mailer = get_mailer(self.request)
         mailer.send(message)
-        FlashMessage(
-            self.request,
-            self.Str.reset_password_email_sent,
-            kind='success')
-        return httpexceptions.HTTPFound(
-            location=self.reset_password_redirect_view)
+
+        FlashMessage(self.request,
+                     _("Please check your email to finish resetting your "
+                       "password."),
+                     kind="success")
+
+        return httpexceptions.HTTPFound(location=self.reset_password_redirect)
+
+    # FIXME: generate a form here and progressively enhance it rather than
+    # relying entirely on Angular.
+    def forgot_password_form(self):
+        """Render the forgot password form."""
+        if self.request.authenticated_userid is not None:
+            return httpexceptions.HTTPFound(
+                location=self.forgot_password_redirect)
+
+        return {}
+
+    def reset_password(self):
+        """
+        Handle submission of the reset password form.
+
+        This function checks that the activation code (i.e. reset token)
+        provided by the form is valid, retrieves the user associated with the
+        activation code, and resets their password.
+        """
+        schema = schemas.ResetPasswordSchema().bind(request=self.request)
+        form = deform.Form(schema)
+
+        code = self.request.matchdict.get('code')
+        if code is None:
+            return httpexceptions.HTTPNotFound()
+
+        activation = Activation.get_by_code(self.request, code)
+        if activation is None:
+            return httpexceptions.HTTPNotFound()
+
+        user = User.get_by_activation(self.request, activation)
+        if user is None:
+            return httpexceptions.HTTPNotFound()
+
+        if self.request.method != 'POST':
+            return httpexceptions.HTTPMethodNotAllowed()
+
+        err, appstruct = validate_form(form, self.request.POST.items())
+        if err is not None:
+            return err
+
+        user.password = appstruct['password']
+        db = get_session(self.request)
+        db.delete(activation)
+
+        FlashMessage(self.request,
+                     _('Your password has been reset!'),
+                     kind='success')
+        self.request.registry.notify(PasswordResetEvent(self.request, user))
+
+        return httpexceptions.HTTPFound(location=self.reset_password_redirect)
+
+    # FIXME: generate a form here and progressively enhance it rather than
+    # relying entirely on Angular.
+    def reset_password_form(self):
+        """Render the reset password form."""
+        return {}
 
 
 @view_defaults(accept='application/json', context=Application, renderer='json')
@@ -366,6 +431,37 @@ class AsyncProfileController(ProfileController):
     __view_mapper__ = AsyncFormViewMapper
 
 
+def reset_password_email(user, reset_code, reset_link):
+    """
+    Generate a 'reset your password' email for the specified user.
+
+    :rtype: pyramid_mailer.message.Message
+    """
+    emailtext = ("Hello, {username}!\n\n"
+                 "Someone requested resetting your password. If it was "
+                 "you, reset your password by using this reset code:\n\n"
+                 "{code}\n\n"
+                 "Alternatively, you can reset your password by "
+                 "clicking on this link:\n\n"
+                 "{link}\n\n"
+                 "If you don't want to change your password, please "
+                 "ignore this email message.\n\n"
+                 "Regards,\n"
+                 "The Hypothesis Team\n")
+    body = emailtext.format(code=reset_code,
+                            link=reset_link,
+                            username=user.username)
+    msg = Message(subject=_("Reset your password"),
+                  recipients=[user.email],
+                  body=body)
+    return msg
+
+
+def reset_password_link(request, reset_code):
+    """Transform an activation code into a password reset link."""
+    return request.route_url('reset_password', code=reset_code)
+
+
 def _update_subscription_data(request, subscription):
     """
     Update the subscriptions in the database from form data.
@@ -399,6 +495,7 @@ def includeme(config):
     config.add_route('disable_user', '/disable/{userid}',
                      factory=UserFactory,
                      traverse="/{userid}")
-
+    config.add_route('forgot_password', '/forgot_password')
+    config.add_route('reset_password', '/reset_password/{code}')
     config.include('horus')
     config.scan(__name__)

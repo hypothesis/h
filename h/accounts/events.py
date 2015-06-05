@@ -7,3 +7,9 @@ class LoginEvent(object):
 class LogoutEvent(object):
     def __init__(self, request):
         self.request = request
+
+
+class PasswordResetEvent(object):
+    def __init__(self, request, user):
+        self.request = request
+        self.user = user
