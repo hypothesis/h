@@ -9,20 +9,15 @@ from pyramid.settings import asbool
 from horus.events import (
     NewRegistrationEvent,
     RegistrationActivatedEvent,
-    PasswordResetEvent,
 )
 
-from .events import (
-    LoginEvent,
-    LogoutEvent,
-)
-
+from h.accounts import events
 from h.stats import get_client as stats
 
 
-@subscriber(LoginEvent)
+@subscriber(events.LoginEvent)
 @subscriber(NewRegistrationEvent, autologin=True)
-@subscriber(PasswordResetEvent, autologin=True)
+@subscriber(events.PasswordResetEvent, autologin=True)
 @subscriber(RegistrationActivatedEvent)
 def login(event):
     request = event.request
@@ -39,7 +34,7 @@ def login(event):
     request.response.headerlist.extend(headers)
 
 
-@subscriber(LogoutEvent)
+@subscriber(events.LogoutEvent)
 def logout(event):
     stats(event.request).get_counter('auth.local.logout').increment()
 
@@ -49,7 +44,7 @@ def new_registration(event):
     stats(event.request).get_counter('auth.local.register').increment()
 
 
-@subscriber(PasswordResetEvent)
+@subscriber(events.PasswordResetEvent)
 def password_reset(event):
     stats(event.request).get_counter('auth.local.reset_password').increment()
 
