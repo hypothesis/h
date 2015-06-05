@@ -322,3 +322,12 @@ def test_search_with_user_object(search_raw):
 
     first_call = search_raw.call_args_list[0]
     assert first_call[1]["user"] == user
+
+
+@mock.patch("h.api.search.search")
+def test_index_limit_is_20(search_func):
+    """index() calls search with "limit": 20."""
+    search.index()
+
+    first_call = search_func.call_args_list[0]
+    assert first_call[0][0]["limit"] == 20

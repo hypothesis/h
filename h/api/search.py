@@ -112,4 +112,4 @@ def index(user=None):
     or that are public if user is None.
 
     """
-    return search(webob.multidict.NestedMultiDict(), user=user)
+    return search(webob.multidict.NestedMultiDict({"limit": 20}), user=user)
