@@ -38,6 +38,14 @@ describe 'form-respond', ->
     assert.equal(form.username.responseErrorMessage, 'must be at least 3 characters')
     assert.equal(form.password.responseErrorMessage, 'must be present')
 
+  it 'sets the "response" error key if the form has a top-level error', ->
+    formRespond form, {'': 'Explosions!'}
+    assert.calledWith(form.$setValidity, 'response', false)
+
+  it 'adds an error message if the form has a top-level error', ->
+    formRespond form, {'': 'Explosions!'}
+    assert.equal(form.responseErrorMessage, 'Explosions!')
+
   it 'sets the "response" error key if the form has a failure reason', ->
     formRespond form, null, 'fail'
     assert.calledWith(form.$setValidity, 'response', false)

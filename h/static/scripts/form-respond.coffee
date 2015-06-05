@@ -4,9 +4,17 @@
 # will contain the API error message.
 module.exports = ->
   (form, errors, reason) ->
-    for own field, error of errors
-      form[field].$setValidity('response', false)
-      form[field].responseErrorMessage = error
-
     form.$setValidity('response', !reason)
     form.responseErrorMessage = reason
+
+    for own field, error of errors
+      # If there's an empty-string field, it's a top-level form error. Set the
+      # overall form validity from this field, but only if there wasn't already
+      # a reason.
+      if !reason and field == ''
+        form.$setValidity('response', false)
+        form.responseErrorMessage = error
+        continue
+
+      form[field].$setValidity('response', false)
+      form[field].responseErrorMessage = error
