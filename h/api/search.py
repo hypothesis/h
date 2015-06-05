@@ -31,11 +31,15 @@ def _build_query(request_params):
 
     try:
         from_ = int(request_params.pop("offset"))
+        if from_ < 0:
+            raise ValueError
     except (ValueError, KeyError):
         from_ = 0
 
     try:
         size = int(request_params.pop("limit"))
+        if size < 0:
+            raise ValueError
     except (ValueError, KeyError):
         size = 20
 
