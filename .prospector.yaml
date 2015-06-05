@@ -50,3 +50,4 @@ ignore-paths:
   - versioneer.py
 ignore-patterns:
   - '.*\.egg'
+  - '.*conftest\.py'
