@@ -130,7 +130,6 @@ def test_login_good(config):
 
 def test_login_email(config):
     config.registry.settings.update({
-        'horus.allow_email_auth': True,
         'horus.require_activation': False,
     })
     config.include(models)
