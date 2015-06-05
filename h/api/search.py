@@ -1,6 +1,7 @@
 """The h API search functions.
 
-All search and Elasticsearch stuff should be encapsulated in this module.
+All search (Annotation.search(), Annotation.search_raw()) and Elasticsearch
+stuff should be encapsulated in this module.
 
 """
 import logging
