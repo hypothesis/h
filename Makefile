@@ -29,7 +29,7 @@ clean:
 	rm -f h/static/scripts/config.*js
 	rm -f h/static/scripts/hypothesis.*js
 	rm -f h/static/styles/*.css
-	rm .coverage
+	rm -f .coverage
 
 dev: deps
 	@gunicorn --reload --paste conf/development.ini
