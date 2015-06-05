@@ -54,8 +54,8 @@ def unblacklisted_username(node, value, blacklist=None):
 def matching_emails(node, value):
     """Colander validator that ensures email and emailAgain fields match."""
     if value.get("email") != value.get("emailAgain"):
-        exc = colander.Invalid(node, "The emails must match")
-        exc["emailAgain"] = "The emails must match."
+        exc = colander.Invalid(node)
+        exc["emailAgain"] = _("The emails must match")
         raise exc
 
 
