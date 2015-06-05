@@ -22,7 +22,8 @@ def test_build_query_custom_offsets_are_passed_in():
 
 def test_build_query_offset_string_is_converted_to_int():
     """'offset' arguments should be converted from strings to ints."""
-    query = search.build_query(request_params={"offset": "23"})
+    query = search.build_query(
+        request_params=multidict.NestedMultiDict({"offset": "23"}))
 
     assert query["from"] == 23
 
@@ -30,7 +31,9 @@ def test_build_query_offset_string_is_converted_to_int():
 def test_build_query_with_invalid_offset():
     """Invalid 'offset' params should be ignored."""
     for invalid_offset in ("foo", '', '   ', "-23", "32.7"):
-        query = search.build_query(request_params={"offset": invalid_offset})
+        query = search.build_query(
+            request_params=multidict.NestedMultiDict(
+                {"offset": invalid_offset}))
 
         assert query["from"] == 0
 
@@ -53,7 +56,8 @@ def test_build_query_custom_limits_are_passed_in():
 
 def test_build_query_limit_strings_are_converted_to_ints():
     """String values for limit should be converted to ints."""
-    query = search.build_query(request_params={"limit": "17"})
+    query = search.build_query(
+        request_params=multidict.NestedMultiDict({"limit": "17"}))
 
     assert query["size"] == 17
 
@@ -61,7 +65,8 @@ def test_build_query_limit_strings_are_converted_to_ints():
 def test_build_query_with_invalid_limit():
     """Invalid 'limit' params should be ignored."""
     for invalid_limit in ("foo", '', '   ', "-23", "32.7"):
-        query = search.build_query(request_params={"limit": invalid_limit})
+        query = search.build_query(
+            request_params=multidict.NestedMultiDict({"limit": invalid_limit}))
 
         assert query["size"] == 20  # (20 is the default value.)
 
