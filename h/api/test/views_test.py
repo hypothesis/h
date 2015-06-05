@@ -4,6 +4,7 @@
 """Defines unit tests for h.api.views."""
 
 from mock import patch, MagicMock, Mock
+import pytest
 from pytest import fixture, raises
 from pyramid.testing import DummyRequest, DummyResource
 import webob
@@ -66,7 +67,8 @@ def user(monkeypatch):
     return user
 
 
-def test_index(replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_index():
     """Get the API descriptor"""
 
     result = views.index(DummyResource(), DummyRequest())
@@ -87,7 +89,8 @@ def test_index(replace_io):
 
 
 @patch('h.api.views._create_annotation')
-def test_create(mock_create_annotation, user, replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_create(mock_create_annotation, user):
     request = DummyRequest(json_body=_new_annotation)
 
     annotation = views.create(request)
@@ -97,7 +100,8 @@ def test_create(mock_create_annotation, user, replace_io):
     _assert_event_published('create')
 
 
-def test_create_annotation(user, replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_create_annotation(user):
     annotation = views._create_annotation(_new_annotation, user)
     assert annotation['text'] == 'blabla'
     assert annotation['user'] == 'alice'
@@ -106,7 +110,8 @@ def test_create_annotation(user, replace_io):
     annotation.save.assert_called_once()
 
 
-def test_read(replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_read():
     annotation = DummyResource()
 
     result = views.read(annotation, DummyRequest())
@@ -116,7 +121,8 @@ def test_read(replace_io):
 
 
 @patch('h.api.views._update_annotation')
-def test_update(mock_update_annotation, replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_update(mock_update_annotation):
     annotation = views.Annotation(_old_annotation)
     request = DummyRequest(json_body=_new_annotation)
     request.has_permission = MagicMock(return_value=True)
@@ -130,7 +136,8 @@ def test_update(mock_update_annotation, replace_io):
     assert result is annotation, "Annotation should have been returned"
 
 
-def test_update_annotation(user, replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_update_annotation(user):
     annotation = views.Annotation(_old_annotation)
 
     views._update_annotation(annotation, _new_annotation, True)
@@ -144,7 +151,8 @@ def test_update_annotation(user, replace_io):
 
 
 @patch('h.api.views._anonymize_deletes')
-def test_update_anonymize_deletes(mock_anonymize_deletes, replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_update_anonymize_deletes(mock_anonymize_deletes):
     annotation = views.Annotation(_old_annotation)
     annotation['deleted'] = True
     request = DummyRequest(json_body=_new_annotation)
@@ -154,7 +162,8 @@ def test_update_anonymize_deletes(mock_anonymize_deletes, replace_io):
     views._anonymize_deletes.assert_called_once_with(annotation)
 
 
-def test_anonymize_deletes(replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_anonymize_deletes():
     annotation = views.Annotation(_old_annotation)
     annotation['deleted'] = True
 
@@ -169,7 +178,8 @@ def test_anonymize_deletes(replace_io):
     }
 
 
-def test_update_change_permissions_disallowed(replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_update_change_permissions_disallowed():
     annotation = views.Annotation(_old_annotation)
 
     with raises(RuntimeError):
@@ -179,7 +189,8 @@ def test_update_change_permissions_disallowed(replace_io):
     assert annotation.save.call_count == 0
 
 
-def test_delete(replace_io):
+@pytest.mark.usefixtures('replace_io')
+def test_delete():
     annotation = views.Annotation(_old_annotation)
 
     result = views.delete(annotation, DummyRequest())
