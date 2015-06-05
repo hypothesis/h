@@ -6,19 +6,13 @@ from pyramid import security
 from pyramid.events import subscriber
 from pyramid.settings import asbool
 
-from horus.events import (
-    NewRegistrationEvent,
-    RegistrationActivatedEvent,
-)
-
 from h.accounts import events
 from h.stats import get_client as stats
 
 
+@subscriber(events.ActivationEvent, autologin=True)
 @subscriber(events.LoginEvent)
-@subscriber(NewRegistrationEvent, autologin=True)
 @subscriber(events.PasswordResetEvent, autologin=True)
-@subscriber(RegistrationActivatedEvent)
 def login(event):
     request = event.request
     user = event.user
@@ -39,8 +33,8 @@ def logout(event):
     stats(event.request).get_counter('auth.local.logout').increment()
 
 
-@subscriber(NewRegistrationEvent)
-def new_registration(event):
+@subscriber(events.RegistrationEvent)
+def registration(event):
     stats(event.request).get_counter('auth.local.register').increment()
 
 
@@ -49,8 +43,8 @@ def password_reset(event):
     stats(event.request).get_counter('auth.local.reset_password').increment()
 
 
-@subscriber(RegistrationActivatedEvent)
-def registration_activated(event):
+@subscriber(events.ActivationEvent)
+def activation(event):
     stats(event.request).get_counter('auth.local.activate').increment()
 
 
