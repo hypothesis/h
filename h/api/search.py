@@ -13,7 +13,7 @@ from h.api.models import Annotation
 log = logging.getLogger(__name__)
 
 
-def _build_query(request_params):
+def build_query(request_params):
     """Return an Elasticsearch query dict for the given h search API params.
 
     Translates the HTTP request params accepted by the h search API into an
@@ -98,7 +98,7 @@ def search(request_params, user=None):
               user.id if user else 'None',
               request_params.get('uri'))
 
-    query = _build_query(request_params)
+    query = build_query(request_params)
     results = Annotation.search_raw(query, user=user)
     count = Annotation.search_raw(query, {'search_type': 'count'},
                                   raw_result=True)

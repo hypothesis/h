@@ -8,7 +8,7 @@ import h.api.search as search
 
 def test_build_query_offset_defaults_to_0():
     """If no offset is given then "from": 0 is used in the query by default."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict())
 
     assert query["from"] == 0
@@ -16,7 +16,7 @@ def test_build_query_offset_defaults_to_0():
 
 def test_build_query_custom_offsets_are_passed_in():
     """If an offset is given it's returned in the query dict."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict({"offset": 7}))
 
     assert query["from"] == 7
@@ -24,7 +24,7 @@ def test_build_query_custom_offsets_are_passed_in():
 
 def test_build_query_offset_string_is_converted_to_int():
     """'offset' arguments should be converted from strings to ints."""
-    query = search._build_query(request_params={"offset": "23"})
+    query = search.build_query(request_params={"offset": "23"})
 
     assert query["from"] == 23
 
@@ -32,14 +32,14 @@ def test_build_query_offset_string_is_converted_to_int():
 def test_build_query_with_invalid_offset():
     """Invalid 'offset' params should be ignored."""
     for invalid_offset in ("foo", '', '   ', "-23", "32.7"):
-        query = search._build_query(request_params={"offset": invalid_offset})
+        query = search.build_query(request_params={"offset": invalid_offset})
 
         assert query["from"] == 0
 
 
 def test_build_query_limit_defaults_to_20():
     """If no limit is given "size": 20 is used in the query by default."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict())
 
     assert query["size"] == 20
@@ -47,7 +47,7 @@ def test_build_query_limit_defaults_to_20():
 
 def test_build_query_custom_limits_are_passed_in():
     """If a limit is given it's returned in the query dict as "size"."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict({"limit": 7}))
 
     assert query["size"] == 7
@@ -55,7 +55,7 @@ def test_build_query_custom_limits_are_passed_in():
 
 def test_build_query_limit_strings_are_converted_to_ints():
     """String values for limit should be converted to ints."""
-    query = search._build_query(request_params={"limit": "17"})
+    query = search.build_query(request_params={"limit": "17"})
 
     assert query["size"] == 17
 
@@ -63,14 +63,14 @@ def test_build_query_limit_strings_are_converted_to_ints():
 def test_build_query_with_invalid_limit():
     """Invalid 'limit' params should be ignored."""
     for invalid_limit in ("foo", '', '   ', "-23", "32.7"):
-        query = search._build_query(request_params={"limit": invalid_limit})
+        query = search.build_query(request_params={"limit": invalid_limit})
 
         assert query["size"] == 20  # (20 is the default value.)
 
 
 def test_build_query_query_defaults_to_match_all():
     """If no query params are given a "match_all": {} query is returned."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict())
 
     assert query["query"] == {"bool": {"must": [{"match_all": {}}]}}
@@ -78,7 +78,7 @@ def test_build_query_query_defaults_to_match_all():
 
 def test_build_query_sort_is_by_updated():
     """Sort defaults to "updated"."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict())
 
     sort = query["sort"]
@@ -88,7 +88,7 @@ def test_build_query_sort_is_by_updated():
 
 def test_build_query_sort_includes_ignore_unmapped():
     """'ignore_unmapped': True is used in the sort clause."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict())
 
     sort = query["sort"]
@@ -97,7 +97,7 @@ def test_build_query_sort_includes_ignore_unmapped():
 
 def test_build_query_with_custom_sort():
     """Custom sorts are returned in the query dict."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict({"sort": "title"}))
 
     sort = query["sort"]
@@ -106,7 +106,7 @@ def test_build_query_with_custom_sort():
 
 def test_build_query_order_defaults_to_desc():
     """'order': "desc" is returned in the query dict by default."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict())
 
     sort = query["sort"]
@@ -115,7 +115,7 @@ def test_build_query_order_defaults_to_desc():
 
 def test_build_query_with_custom_order():
     """'order' params are returned in the query dict if given."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict({"order": "asc"}))
 
     sort = query["sort"]
@@ -124,7 +124,7 @@ def test_build_query_with_custom_order():
 
 def test_build_query_for_user():
     """'user' params returned in the query dict in "match" clauses."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict({"user": "bob"}))
 
     assert query["query"] == {
@@ -137,7 +137,7 @@ def test_build_query_for_multiple_users():
     params.add("user", "fred")
     params.add("user", "bob")
 
-    query = search._build_query(request_params=params)
+    query = search.build_query(request_params=params)
 
     assert query["query"] == {
         "bool": {
@@ -151,7 +151,7 @@ def test_build_query_for_multiple_users():
 
 def test_build_query_for_tag():
     """'tags' params are returned in the query dict in "match" clauses."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict({"tags": "foo"}))
 
     assert query["query"] == {
@@ -164,7 +164,7 @@ def test_build_query_for_multiple_tags():
     params.add("tags", "foo")
     params.add("tags", "bar")
 
-    query = search._build_query(request_params=params)
+    query = search.build_query(request_params=params)
 
     assert query["query"] == {
         "bool": {
@@ -178,7 +178,7 @@ def test_build_query_for_multiple_tags():
 
 def test_build_query_with_combined_user_and_tag_query():
     """A 'user' and a 'param' at the same time are handled correctly."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict(
             {"user": "bob", "tags": "foo"}))
 
@@ -194,7 +194,7 @@ def test_build_query_with_keyword():
     params = webob.multidict.MultiDict()
     params.add("any", "howdy")
 
-    query = search._build_query(request_params=params)
+    query = search.build_query(request_params=params)
 
     assert query["query"] == {
         "bool": {
@@ -218,7 +218,7 @@ def test_build_query_with_multiple_keywords():
     params.add("any", "howdy")
     params.add("any", "there")
 
-    query = search._build_query(request_params=params)
+    query = search.build_query(request_params=params)
 
     assert query["query"] == {
         "bool": {"must": [{"multi_match": {
@@ -236,7 +236,7 @@ def test_build_query_for_uri():
     all the annotations of that page.
 
     """
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict(
             {"uri": "http://example.com/"}))
 
@@ -246,7 +246,7 @@ def test_build_query_for_uri():
 
 def test_build_query_with_single_text_param():
     """'text' params are returned in the query dict in "match" clauses."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict({"text": "foobar"}))
 
     assert query["query"] == {
@@ -258,7 +258,7 @@ def test_build_query_with_multiple_text_params():
     params = webob.multidict.MultiDict()
     params.add("text", "foo")
     params.add("text", "bar")
-    query = search._build_query(request_params=params)
+    query = search.build_query(request_params=params)
 
     assert query["query"] == {
         "bool": {
@@ -272,7 +272,7 @@ def test_build_query_with_multiple_text_params():
 
 def test_build_query_with_single_quote_param():
     """'quote' params are returned in the query dict in "match" clauses."""
-    query = search._build_query(
+    query = search.build_query(
         request_params=webob.multidict.NestedMultiDict({"quote": "foobar"}))
 
     assert query["query"] == {
@@ -284,7 +284,7 @@ def test_build_query_with_multiple_quote_params():
     params = webob.multidict.MultiDict()
     params.add("quote", "foo")
     params.add("quote", "bar")
-    query = search._build_query(request_params=params)
+    query = search.build_query(request_params=params)
 
     assert query["query"] == {
         "bool": {
@@ -302,7 +302,7 @@ def test_build_query_with_evil_arguments():
         "limit": '\' drop table annotations'
     })
 
-    query = search._build_query(request_params=params)
+    query = search.build_query(request_params=params)
 
     assert query["query"] == {'bool': {'must': [{'match_all': {}}]}}
 
