@@ -1,5 +1,4 @@
 """Tests for h/api/search.py."""
-# pylint: disable=protected-access
 import mock
 import webob.multidict
 
