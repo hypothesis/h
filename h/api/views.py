@@ -11,6 +11,7 @@ from h.api.events import AnnotationEvent
 from h.api.models import Annotation
 from h.api.resources import Root
 from h.api.resources import Annotations
+import h.api.search
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ def search(request):
     """Search the database for annotations matching with the given query."""
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    return _search(request.params, user)
+    return h.api.search.search(request.params, user)
 
 
 @api_config(context=Root, name='access_token')
@@ -199,80 +200,6 @@ def _api_error(request, reason, status_code):
         'reason': reason,
     }
     return response_info
-
-
-def _query(request_params):
-    """Return an Elasticsearch query dict for the given h search API params.
-
-    Translates the HTTP request params accepted by the h search API into an
-    Elasticsearch query dict.
-
-    :param request_params: the HTTP request params that were posted to the
-        h search API
-    :type request_params: webob.multidict.NestedMultiDict
-
-    :returns: an Elasticsearch query dict corresponding to the given h search
-        API params
-    :rtype: dict
-
-    """
-    # NestedMultiDict objects are read-only, so we need to copy to make it
-    # modifiable.
-    request_params = request_params.copy()
-
-    try:
-        from_ = int(request_params.pop("offset"))
-    except (ValueError, KeyError):
-        from_ = 0
-
-    try:
-        size = int(request_params.pop("limit"))
-    except (ValueError, KeyError):
-        size = 20
-
-    query = {
-        "from": from_,
-        "size": size,
-        "sort": [
-            {
-                request_params.pop("sort", "updated"): {
-                    "ignore_unmapped": True,
-                    "order": request_params.pop("order", "desc")
-                }
-            }
-        ]
-    }
-
-    matches = []
-    if "any" in request_params:
-        matches.append({
-            "multi_match": {
-                "fields": ["quote", "tags", "text", "uri.parts", "user"],
-                "query": request_params.getall("any"),
-                "type": "cross_fields"
-            }
-        })
-        del request_params["any"]
-
-    for key, value in request_params.items():
-        matches.append({"match": {key: value}})
-    matches = matches or [{"match_all": {}}]
-
-    query["query"] = {"bool": {"must": matches}}
-
-    return query
-
-
-def _search(request_params, user=None):
-    log.debug("Searching with user=%s, for uri=%s",
-              user.id if user else 'None',
-              request_params.get('uri'))
-
-    query = _query(request_params)
-    results = Annotation.search_raw(query, user=user)
-    count = Annotation.search_raw(query, {'search_type': 'count'},
-                                  raw_result=True)
-    return {"rows": results, "total": count["hits"]["total"]}
 
 
 def _create_annotation(fields, user):
