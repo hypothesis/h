@@ -11,6 +11,7 @@ from h.api.events import AnnotationEvent
 from h.api.models import Annotation
 from h.api.resources import Root
 from h.api.resources import Annotations
+import h.api.search
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ def search(request):
     """Search the database for annotations matching with the given query."""
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    return _search(request.params, user)
+    return h.api.search.search(request.params, user)
 
 
 @api_config(context=Root, name='access_token')
@@ -99,7 +100,7 @@ def annotations_index(request):
     are ordered most recent first.
     """
     user = get_user(request)
-    return Annotation.search(user=user)
+    return h.api.search.index(user=user)
 
 
 @api_config(context=Annotations, request_method='POST', permission='create')
@@ -199,90 +200,6 @@ def _api_error(request, reason, status_code):
         'reason': reason,
     }
     return response_info
-
-
-def _search(request_params, user=None):
-    # Compile search parameters
-    search_params = _search_params(request_params, user=user)
-
-    log.debug("Searching with user=%s, for uri=%s",
-              user.id if user else 'None',
-              request_params.get('uri'))
-
-    if 'any' in search_params['query']:
-        # Handle any field parameters
-        query = _add_any_field_params_into_query(search_params)
-        results = Annotation.search_raw(query)
-
-        params = {'search_type': 'count'}
-        count = Annotation.search_raw(query, params, raw_result=True)
-        total = count['hits']['total']
-    else:
-        results = Annotation.search(**search_params)
-        total = Annotation.count(**search_params)
-
-    return {
-        'rows': results,
-        'total': total,
-    }
-
-
-def _search_params(request_params, user=None):
-    """Turn request parameters into annotator-store search parameters."""
-    request_params = request_params.copy()
-    search_params = {}
-
-    # Take limit, offset, sort and order out of the parameters
-    try:
-        search_params['offset'] = int(request_params.pop('offset'))
-    except (KeyError, ValueError):
-        pass
-    try:
-        search_params['limit'] = int(request_params.pop('limit'))
-    except (KeyError, ValueError):
-        pass
-    try:
-        search_params['sort'] = request_params.pop('sort')
-    except (KeyError, ValueError):
-        pass
-    try:
-        search_params['order'] = request_params.pop('order')
-    except (KeyError, ValueError):
-        pass
-
-    # All remaining parameters are considered searched fields.
-    search_params['query'] = request_params
-
-    search_params['user'] = user
-    return search_params
-
-
-def _add_any_field_params_into_query(search_params):
-    """Add any_field parameters to ES query."""
-    any_terms = search_params['query'].getall('any')
-    del search_params['query']['any']
-
-    query = search_params.get('query', None)
-    offset = search_params.get('offset', None)
-    limit = search_params.get('limit', None)
-    sort = search_params.get('sort', None)
-    order = search_params.get('order', None)
-    query = Annotation._build_query(query, offset, limit, sort, order)
-
-    multi_match_query = {
-        'multi_match': {
-            'query': any_terms,
-            'type': 'cross_fields',
-            'fields': ['quote', 'tags', 'text', 'uri.parts', 'user']
-        }
-    }
-
-    # Remove match_all if we add the multi-match part
-    if 'match_all' in query['query']['bool']['must'][0]:
-        query['query']['bool']['must'] = []
-    query['query']['bool']['must'].append(multi_match_query)
-
-    return query
 
 
 def _create_annotation(fields, user):

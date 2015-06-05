@@ -4,6 +4,7 @@
 """Defines unit tests for h.api.views."""
 
 from mock import patch, MagicMock, Mock
+import pytest
 from pytest import fixture, raises
 from pyramid.testing import DummyRequest, DummyResource
 
@@ -44,7 +45,7 @@ class DictMock(Mock):
         self.side_effect = side_effect
 
 
-@fixture(autouse=True)
+@fixture()
 def replace_io(monkeypatch):
     """For all tests, mock paths to the "outside" world"""
     monkeypatch.setattr(views, 'Annotation', DictMock())
@@ -65,6 +66,7 @@ def user(monkeypatch):
     return user
 
 
+@pytest.mark.usefixtures('replace_io')
 def test_index():
     """Get the API descriptor"""
 
@@ -85,42 +87,8 @@ def test_index():
     assert links['search']['url'] == host + '/search'
 
 
-def test_search_parameters():
-    request_params = {
-        'offset': '3',
-        'limit': '100',
-        'sort': 'text',
-        'order': 'asc',
-        'uri': 'http://bla.test',
-        'some_field': 'something',
-    }
-    user = object()
-    assert views._search_params(request_params, user=user) == {
-        'query': {
-            'uri': 'http://bla.test',
-            'some_field': 'something',
-        },
-        'offset': 3,
-        'limit': 100,
-        'sort': 'text',
-        'order': 'asc',
-        'user': user,
-    }
-
-
-def test_bad_search_parameters():
-    request_params = {
-        'offset': '3foo',
-        'limit': '\' drop table annotations',
-    }
-    user = object()
-    assert views._search_params(request_params, user=user) == {
-        'query': {},
-        'user': user,
-    }
-
-
 @patch('h.api.views._create_annotation')
+@pytest.mark.usefixtures('replace_io')
 def test_create(mock_create_annotation, user):
     request = DummyRequest(json_body=_new_annotation)
 
@@ -131,6 +99,7 @@ def test_create(mock_create_annotation, user):
     _assert_event_published('create')
 
 
+@pytest.mark.usefixtures('replace_io')
 def test_create_annotation(user):
     annotation = views._create_annotation(_new_annotation, user)
     assert annotation['text'] == 'blabla'
@@ -140,6 +109,7 @@ def test_create_annotation(user):
     annotation.save.assert_called_once()
 
 
+@pytest.mark.usefixtures('replace_io')
 def test_read():
     annotation = DummyResource()
 
@@ -150,6 +120,7 @@ def test_read():
 
 
 @patch('h.api.views._update_annotation')
+@pytest.mark.usefixtures('replace_io')
 def test_update(mock_update_annotation):
     annotation = views.Annotation(_old_annotation)
     request = DummyRequest(json_body=_new_annotation)
@@ -164,6 +135,7 @@ def test_update(mock_update_annotation):
     assert result is annotation, "Annotation should have been returned"
 
 
+@pytest.mark.usefixtures('replace_io')
 def test_update_annotation(user):
     annotation = views.Annotation(_old_annotation)
 
@@ -178,6 +150,7 @@ def test_update_annotation(user):
 
 
 @patch('h.api.views._anonymize_deletes')
+@pytest.mark.usefixtures('replace_io')
 def test_update_anonymize_deletes(mock_anonymize_deletes):
     annotation = views.Annotation(_old_annotation)
     annotation['deleted'] = True
@@ -188,6 +161,7 @@ def test_update_anonymize_deletes(mock_anonymize_deletes):
     views._anonymize_deletes.assert_called_once_with(annotation)
 
 
+@pytest.mark.usefixtures('replace_io')
 def test_anonymize_deletes():
     annotation = views.Annotation(_old_annotation)
     annotation['deleted'] = True
@@ -203,6 +177,7 @@ def test_anonymize_deletes():
     }
 
 
+@pytest.mark.usefixtures('replace_io')
 def test_update_change_permissions_disallowed():
     annotation = views.Annotation(_old_annotation)
 
@@ -213,6 +188,7 @@ def test_update_change_permissions_disallowed():
     assert annotation.save.call_count == 0
 
 
+@pytest.mark.usefixtures('replace_io')
 def test_delete():
     annotation = views.Annotation(_old_annotation)
 
