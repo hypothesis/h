@@ -100,7 +100,7 @@ def annotations_index(request):
     are ordered most recent first.
     """
     user = get_user(request)
-    return Annotation.search(user=user)
+    return h.api.search.index(user=user)
 
 
 @api_config(context=Annotations, request_method='POST', permission='create')

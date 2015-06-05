@@ -5,6 +5,8 @@ All search and Elasticsearch stuff should be encapsulated in this module.
 """
 import logging
 
+import webob.multidict
+
 from h.api.models import Annotation
 
 log = logging.getLogger(__name__)
@@ -100,3 +102,13 @@ def search(request_params, user=None):
     count = Annotation.search_raw(query, {'search_type': 'count'},
                                   raw_result=True)
     return {"rows": results, "total": count["hits"]["total"]}
+
+
+def index(user=None):
+    """Return the 20 most recent annotations, most-recent first.
+
+    Returns the 20 most recent annotations that are visible to the given user,
+    or that are public if user is None.
+
+    """
+    return search(webob.multidict.NestedMultiDict(), user=user)
