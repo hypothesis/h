@@ -90,9 +90,6 @@ class LoginSchema(CSRFSchema):
         registry = request.registry
         settings = registry.settings
 
-        allow_email_auth = asbool(
-            settings.get('horus.allow_email_auth', False)
-        )
         allow_inactive_login = asbool(
             settings.get('horus.allow_inactive_login', False)
         )
@@ -106,7 +103,7 @@ class LoginSchema(CSRFSchema):
         password = value.get('password')
 
         user = user_ctor.get_by_username(request, username)
-        if user is None and allow_email_auth:
+        if user is None:
             user = user_ctor.get_by_email(request, username)
 
         if user is None:
