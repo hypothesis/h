@@ -27,8 +27,6 @@ from h import session
 
 
 def ajax_form(request, result):
-    flash = session.pop_flash(request)
-
     if isinstance(result, httpexceptions.HTTPRedirection):
         request.response.headers.extend(result.headers)
         result = {'status': 'okay'}
@@ -49,14 +47,7 @@ def ajax_form(request, result):
                 elif isinstance(e, dict):
                     result['errors'].update(e)
 
-        reasons = flash.pop('error', [])
-        if reasons:
-            assert(len(reasons) == 1)
-            request.response.status_code = 400
-            result['status'] = 'failure'
-            result['reason'] = reasons[0]
-
-    result['flash'] = flash
+    result['flash'] = session.pop_flash(request)
 
     return result
 

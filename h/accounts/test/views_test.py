@@ -123,30 +123,6 @@ def test_ajax_form_includes_flash_data(pop_flash):
     assert result['flash'] == {'success': ['Well done!']}
 
 
-def test_ajax_form_sets_status_code_400_on_flash_error(pop_flash):
-    request = DummyRequest()
-    pop_flash.return_value = {'error': ['I asplode!']}
-    _ = ajax_form(request, {'some': 'data'})
-
-    assert request.response.status_code == 400
-
-
-def test_ajax_form_sets_status_failure_on_flash_error(pop_flash):
-    request = DummyRequest()
-    pop_flash.return_value = {'error': ['I asplode!']}
-    result = ajax_form(request, {'some': 'data'})
-
-    assert result['status'] == 'failure'
-
-
-def test_ajax_form_sets_reason_on_flash_error(pop_flash):
-    request = DummyRequest()
-    pop_flash.return_value = {'error': ['I asplode!']}
-    result = ajax_form(request, {'some': 'data'})
-
-    assert result['reason'] == 'I asplode!'
-
-
 def test_validate_form_passes_data_to_validate():
     form = MagicMock()
 
