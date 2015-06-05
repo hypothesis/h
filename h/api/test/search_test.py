@@ -1,4 +1,3 @@
-"""Tests for h/api/search.py."""
 import mock
 import webob.multidict
 
