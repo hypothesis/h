@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 
-import colander
 import deform
 import horus.events
 import horus.views
@@ -27,36 +26,17 @@ from h import session
 
 
 def ajax_form(request, result):
-    flash = session.pop_flash(request)
-
     if isinstance(result, httpexceptions.HTTPRedirection):
         request.response.headers.extend(result.headers)
         result = {'status': 'okay'}
     elif isinstance(result, httpexceptions.HTTPError):
         request.response.status_code = result.code
         result = {'status': 'failure', 'reason': str(result)}
-    else:
-        errors = result.pop('errors', None)
-        if errors is not None:
-            status_code = result.pop('code', 400)
-            request.response.status_code = status_code
-            result['status'] = 'failure'
+    elif 'errors' in result:
+        request.response.status_code = result.pop('code', 400)
+        result['status'] = 'failure'
 
-            result.setdefault('errors', {})
-            for e in errors:
-                if isinstance(e, colander.Invalid):
-                    result['errors'].update(e.asdict())
-                elif isinstance(e, dict):
-                    result['errors'].update(e)
-
-        reasons = flash.pop('error', [])
-        if reasons:
-            assert(len(reasons) == 1)
-            request.response.status_code = 400
-            result['status'] = 'failure'
-            result['reason'] = reasons[0]
-
-    result['flash'] = flash
+    result['flash'] = session.pop_flash(request)
 
     return result
 
@@ -66,7 +46,7 @@ def validate_form(form, data):
     try:
         appstruct = form.validate(data)
     except deform.ValidationFailure as err:
-        return {'errors': err.error.children}, None
+        return {'errors': err.error.asdict()}, None
     else:
         return None, appstruct
 
@@ -354,7 +334,7 @@ class ProfileController(object):
         #   `password` (used below) is optional, and is the new password
         #
         if not User.validate_user(user, appstruct.get('pwd')):
-            return {'errors': [{'pwd': _('Invalid password')}], 'code': 401}
+            return {'errors': {'pwd': _('Invalid password')}, 'code': 401}
 
         email = appstruct.get('email')
         if email:
@@ -363,7 +343,7 @@ class ProfileController(object):
             if email_user:
                 if email_user.id != user.id:
                     return {
-                        'errors': [{'pwd': _('That email is already used')}],
+                        'errors': {'pwd': _('That email is already used')},
                     }
 
             response['model']['email'] = user.email = email
@@ -392,7 +372,7 @@ class ProfileController(object):
             FlashMessage(self.request, _('Account disabled.'), kind='success')
             return {}
         else:
-            return dict(errors=[{'pwd': _('Invalid password')}], code=401)
+            return dict(errors={'pwd': _('Invalid password')}, code=401)
 
     def profile(self):
         """
@@ -472,7 +452,7 @@ def _update_subscription_data(request, subscription):
     sub = Subscriptions.get_by_id(request, subscription['id'])
     if sub is None:
         return {
-            'errors': [{'subscriptions': _('Subscription not found')}],
+            'errors': {'subscriptions': _('Subscription not found')},
         }
 
     # If we're trying to update a subscription for anyone other than
@@ -483,7 +463,7 @@ def _update_subscription_data(request, subscription):
     # belong to.
     if sub.uri != request.authenticated_userid:
         return {
-            'errors': [{'subscriptions': _('Subscription not found')}],
+            'errors': {'subscriptions': _('Subscription not found')},
         }
 
     sub.active = subscription.get('active', True)

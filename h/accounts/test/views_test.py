@@ -45,7 +45,12 @@ def configure(config):
 
 
 # A fake version of colander.Invalid for use when testing validate_form
-FakeInvalid = namedtuple('FakeInvalid', 'children')
+class FakeInvalid(object):
+    def __init__(self, errors):
+        self.errors = errors
+
+    def asdict(self):
+        return self.errors
 
 
 def test_ajax_form_handles_http_redirect_as_success():
@@ -68,34 +73,36 @@ def test_ajax_form_handles_http_error_as_error():
 
 def test_ajax_form_sets_failure_status_on_errors():
     request = DummyRequest()
-    result = ajax_form(request, {'errors': 'data'})
+    result = ajax_form(request, {'errors': {}})
 
     assert result['status'] == 'failure'
 
 
 def test_ajax_form_sets_status_code_400_on_errors():
     request = DummyRequest()
-    _ = ajax_form(request, {'errors': 'data'})
+    _ = ajax_form(request, {'errors': {}})
 
     assert request.response.status_code == 400
 
 
 def test_ajax_form_sets_status_code_from_input_on_errors():
     request = DummyRequest()
-    _ = ajax_form(request, {'errors': 'data', 'code': 418})
+    _ = ajax_form(request, {'errors': {}, 'code': 418})
 
     assert request.response.status_code == 418
 
 
-def test_ajax_form_aggregates_errors_on_success():
+def test_ajax_form_passes_errors_through_on_errors():
     request = DummyRequest()
-    errors = [
-        {'name': 'Name is too weird'},
-        {'email': 'Email must be @hotmail.com'},
-    ]
+    errors = {
+        '': 'Top level error',
+        'name': 'Name is too weird',
+        'email': 'Email must be @hotmail.com',
+    }
     result = ajax_form(request, {'errors': errors})
 
-    assert result['errors'] == {'name': 'Name is too weird',
+    assert result['errors'] == {'': 'Top level error',
+                                'name': 'Name is too weird',
                                 'email': 'Email must be @hotmail.com'}
 
 
@@ -123,30 +130,6 @@ def test_ajax_form_includes_flash_data(pop_flash):
     assert result['flash'] == {'success': ['Well done!']}
 
 
-def test_ajax_form_sets_status_code_400_on_flash_error(pop_flash):
-    request = DummyRequest()
-    pop_flash.return_value = {'error': ['I asplode!']}
-    _ = ajax_form(request, {'some': 'data'})
-
-    assert request.response.status_code == 400
-
-
-def test_ajax_form_sets_status_failure_on_flash_error(pop_flash):
-    request = DummyRequest()
-    pop_flash.return_value = {'error': ['I asplode!']}
-    result = ajax_form(request, {'some': 'data'})
-
-    assert result['status'] == 'failure'
-
-
-def test_ajax_form_sets_reason_on_flash_error(pop_flash):
-    request = DummyRequest()
-    pop_flash.return_value = {'error': ['I asplode!']}
-    result = ajax_form(request, {'some': 'data'})
-
-    assert result['reason'] == 'I asplode!'
-
-
 def test_validate_form_passes_data_to_validate():
     form = MagicMock()
 
@@ -156,13 +139,13 @@ def test_validate_form_passes_data_to_validate():
 
 
 def test_validate_form_failure():
-    invalid = FakeInvalid(children=object())
+    invalid = FakeInvalid({'': 'Asplode!', 'email': 'No @ sign!'})
     form = MagicMock()
     form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
 
     err, data = validate_form(form, {})
 
-    assert err == {'errors': invalid.children}
+    assert err == {'errors': {'': 'Asplode!', 'email': 'No @ sign!'}}
     assert data is None
 
 
