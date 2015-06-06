@@ -534,6 +534,301 @@ def test_reset_password_redirects_on_success(form_validator):
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
 
+register_fixtures = pytest.mark.usefixtures('activation_model',
+                                            'dummy_db_session',
+                                            'form_validator',
+                                            'mailer',
+                                            'notify',
+                                            'routes_mapper',
+                                            'user_model')
+
+@register_fixtures
+def test_register_returns_errors_when_validation_fails(form_validator):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = ({"errors": "BANG!"}, None)
+
+    result = RegisterController(request).register()
+
+    assert result == {"errors": "BANG!"}
+
+
+@register_fixtures
+def test_register_creates_user_from_form_data(form_validator, user_model):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = (None, {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "s3crets",
+        "random_other_field": "something else",
+    })
+
+    RegisterController(request).register()
+
+    user_model.assert_called_with(username="bob",
+                                  email="bob@example.com",
+                                  password="s3crets")
+
+
+@register_fixtures
+def test_register_adds_new_user_to_session(dummy_db_session,
+                                           form_validator,
+                                           user_model):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = (None, {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "s3crets",
+    })
+
+    RegisterController(request).register()
+
+    assert user_model.return_value in dummy_db_session.added
+
+
+@register_fixtures
+def test_register_creates_new_activation(activation_model,
+                                         form_validator,
+                                         user_model):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = (None, {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "s3crets",
+    })
+    new_user = user_model.return_value
+
+    RegisterController(request).register()
+
+    assert new_user.activation == activation_model.return_value
+
+
+@patch('h.accounts.views.activation_email')
+@register_fixtures
+def test_register_generates_activation_email_from_user(activation_email,
+                                                       form_validator,
+                                                       user_model):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = (None, {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "s3crets",
+    })
+    new_user = user_model.return_value
+
+    RegisterController(request).register()
+
+    activation_email.assert_called_with(request, new_user)
+
+
+@patch('h.accounts.views.activation_email')
+@register_fixtures
+def test_register_sends_activation_email(activation_email,
+                                         form_validator,
+                                         mailer):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = (None, {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "s3crets",
+    })
+
+    RegisterController(request).register()
+
+    assert activation_email.return_value in mailer.outbox
+
+
+@patch('h.accounts.views.RegistrationEvent')
+@register_fixtures
+def test_register_no_event_when_validation_fails(event,
+                                                 form_validator,
+                                                 notify):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = ({"errors": "Kablooey!"}, None)
+
+    RegisterController(request).register()
+
+    assert not event.called
+    assert not notify.called
+
+
+@patch('h.accounts.views.RegistrationEvent')
+@register_fixtures
+def test_register_event_when_validation_succeeds(event,
+                                                 form_validator,
+                                                 notify,
+                                                 user_model):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = (None, {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "s3crets",
+    })
+    new_user = user_model.return_value
+
+    RegisterController(request).register()
+
+    event.assert_called_with(request, new_user)
+    notify.assert_called_with(event.return_value)
+
+
+@register_fixtures
+def test_register_event_redirects_on_success(form_validator):
+    request = DummyRequest(method='POST')
+    form_validator.return_value = (None, {
+        "username": "bob",
+        "email": "bob@example.com",
+        "password": "s3crets",
+    })
+
+    result = RegisterController(request).register()
+
+    assert isinstance(result, httpexceptions.HTTPRedirection)
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_register_form_redirects_when_logged_in(authn_policy):
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+
+    result = RegisterController(request).register_form()
+
+    assert isinstance(result, httpexceptions.HTTPRedirection)
+
+
+activate_fixtures = pytest.mark.usefixtures('activation_model',
+                                            'dummy_db_session',
+                                            'notify',
+                                            'routes_mapper',
+                                            'user_model')
+
+@activate_fixtures
+def test_activate_returns_not_found_if_code_missing():
+    request = DummyRequest(matchdict={'id': '123'})
+
+    result = RegisterController(request).activate()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@activate_fixtures
+def test_activate_returns_not_found_if_id_missing():
+    request = DummyRequest(matchdict={'code': 'abc123'})
+
+    result = RegisterController(request).activate()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@activate_fixtures
+def test_activate_returns_not_found_if_id_not_integer():
+    request = DummyRequest(matchdict={'id': 'abc', 'code': 'abc456'})
+
+    result = RegisterController(request).activate()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@activate_fixtures
+def test_activate_looks_up_activation_by_code(activation_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+
+    result = RegisterController(request).activate()
+
+    activation_model.get_by_code.assert_called_with(request, 'abc456')
+
+
+@activate_fixtures
+def test_activate_returns_not_found_if_activation_unknown(activation_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    activation_model.get_by_code.return_value = None
+
+    result = RegisterController(request).activate()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@activate_fixtures
+def test_activate_looks_up_user_by_activation(activation_model, user_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    activation = activation_model.get_by_code.return_value
+
+    result = RegisterController(request).activate()
+
+    user_model.get_by_activation.assert_called_with(request, activation)
+
+
+@activate_fixtures
+def test_activate_returns_not_found_if_user_not_found(user_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    user_model.get_by_activation.return_value = None
+
+    result = RegisterController(request).activate()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@activate_fixtures
+def test_activate_returns_not_found_if_user_id_does_not_match(user_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    giraffe = FakeUser(id=456)
+    user_model.get_by_activation.return_value = giraffe
+
+    result = RegisterController(request).activate()
+
+    assert isinstance(result, httpexceptions.HTTPNotFound)
+
+
+@activate_fixtures
+def test_activate_redirects_on_success(user_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    giraffe = FakeUser(id=123)
+    user_model.get_by_activation.return_value = giraffe
+
+    result = RegisterController(request).activate()
+
+    assert isinstance(result, httpexceptions.HTTPRedirection)
+
+
+@activate_fixtures
+def test_activate_activates_user(activation_model,
+                                 dummy_db_session,
+                                 user_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    activation = activation_model.get_by_code.return_value
+    giraffe = FakeUser(id=123)
+    user_model.get_by_activation.return_value = giraffe
+
+    result = RegisterController(request).activate()
+
+    assert activation in dummy_db_session.deleted
+
+
+@patch('h.accounts.views.ActivationEvent')
+@activate_fixtures
+def test_activate_no_event_on_failure(event, notify):
+    request = DummyRequest()
+
+    RegisterController(request).activate()
+
+    assert not event.called
+    assert not notify.called
+
+
+@patch('h.accounts.views.ActivationEvent')
+@activate_fixtures
+def test_activate_event_when_validation_succeeds(event,
+                                                 notify,
+                                                 user_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    giraffe = FakeUser(id=123)
+    user_model.get_by_activation.return_value = giraffe
+
+    RegisterController(request).activate()
+
+    event.assert_called_with(request, giraffe)
+    notify.assert_called_with(event.return_value)
+
+
 @pytest.mark.usefixtures('subscriptions_model')
 def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
     """
@@ -691,26 +986,6 @@ def test_disable_user_sets_random_password(form_validator, user_model):
     profile.disable_user()
 
     assert user.password == user_model.generate_random_password.return_value
-
-
-@pytest.mark.usefixtures('activation_model',
-                         'dummy_db_session',
-                         'mailer',
-                         'routes_mapper',
-                         'user_model')
-def test_registration_does_not_autologin(config, authn_policy):
-    configure(config)
-
-    request = DummyRequest()
-    request.method = 'POST'
-    request.POST.update({'email': 'giraffe@example.com',
-                         'password': 'secret',
-                         'username': 'giraffe'})
-
-    ctrl = RegisterController(request)
-    ctrl.register()
-
-    assert not authn_policy.remember.called
 
 
 @pytest.fixture

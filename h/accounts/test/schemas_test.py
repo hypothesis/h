@@ -8,42 +8,11 @@ from pyramid.testing import DummyRequest
 
 from h.accounts import models, schemas
 
-valid_username = 'test'
-valid_email = 'raven@poe.net'
-valid_password = 'shhh'
-valid_user = {'username': valid_username,
-              'email': valid_email,
-              'password': valid_password}
-
 
 def csrf_request(config):
     request = DummyRequest(registry=config.registry)
     request.headers['X-CSRF-Token'] = request.session.get_csrf_token()
     return request
-
-
-@pytest.yield_fixture(autouse=True)
-def mock_user_ctor():
-    def get_by_username(request, username):
-        if username == valid_user['username']:
-            return models.User(**valid_user)
-            return None
-
-    def get_by_email(request, email):
-        if email == valid_user['email']:
-            return models.User(**valid_user)
-            return None
-
-    def validate_user(user, password):
-        return password == valid_user['password']
-
-    is_activated = PropertyMock(return_value=False)
-    with patch('h.accounts.models.User', autospec=True) as MockUser:
-        MockUser.get_by_username.side_effect = get_by_username
-        MockUser.get_by_email.side_effect = get_by_email
-        MockUser.validate_user.side_effect = validate_user
-        type(MockUser.return_value).is_activated = is_activated
-        yield MockUser
 
 
 def test_unblacklisted_username(config):
@@ -89,66 +58,92 @@ def test_matching_emails_with_matched_emails():
     assert schemas.matching_emails(form, value) is None
 
 
-def test_login_bad_csrf(config):
-    request = DummyRequest(registry=config.registry)
+def test_login_bad_csrf(config, user_model):
+    request = DummyRequest()
     schema = schemas.LoginSchema().bind(request=request)
+    user = user_model.get_by_username.return_value
+    user.is_activated = True
+
     with pytest.raises(BadCSRFToken):
-        schema.deserialize(valid_user)
+        schema.deserialize({
+            'username': 'jeannie',
+            'password': 'cake',
+        })
 
 
-def test_login_bad_username(config):
+def test_login_bad_username(config, user_model):
     config.include(models)
     request = csrf_request(config)
     schema = schemas.LoginSchema().bind(request=request)
+    user_model.get_by_username.return_value = None
+    user_model.get_by_email.return_value = None
+
     with pytest.raises(colander.Invalid) as exc:
-        schema.deserialize({'username': 'bogus', 'password': 'foo'})
+        schema.deserialize({
+            'username': 'jeannie',
+            'password': 'cake',
+        })
+
     assert 'username' in exc.value.asdict()
 
 
-def test_login_bad_password(config):
-    config.include(models)
+def test_login_bad_password(config, user_model):
     request = csrf_request(config)
     schema = schemas.LoginSchema().bind(request=request)
+    user_model.validate_user.return_value = False
+
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({
-            'username': valid_username,
-            'password': 'bogus',
+            'username': 'jeannie',
+            'password': 'cake',
         })
+
     assert 'password' in exc.value.asdict()
 
 
-def test_login_good(config):
-    config.registry.settings.update({'horus.require_activation': False})
-    config.include(models)
+def test_login_good(config, user_model):
     request = csrf_request(config)
+    user = user_model.get_by_username.return_value
+    user.is_activated = True
+
     schema = schemas.LoginSchema().bind(request=request)
+
     assert 'user' in schema.deserialize({
-        'username': valid_username,
-        'password': valid_password,
+        'username': 'jeannie',
+        'password': 'cake',
     })
 
 
-def test_login_email(config):
-    config.registry.settings.update({
-        'horus.require_activation': False,
-    })
-    config.include(models)
+def test_login_email(config, user_model):
     request = csrf_request(config)
     schema = schemas.LoginSchema().bind(request=request)
+    user_model.get_by_username.return_value = None
+    user = user_model.get_by_email.return_value
+    user.is_activated = True
+
     assert 'user' in schema.deserialize({
-        'username': valid_email,
-        'password': valid_password,
+        'username': 'jeannie',
+        'password': 'cake',
     })
 
 
-def test_login_inactive(config):
-    config.registry.settings.update({
-        'horus.allow_inactive_login': False,
-        'horus.require_activation': True,
-    })
-    config.include(models)
+def test_login_inactive(config, user_model):
     request = csrf_request(config)
+    user = user_model.get_by_username.return_value
+    user.is_activated = False
     schema = schemas.LoginSchema().bind(request=request)
+
     with pytest.raises(colander.Invalid) as exc:
-        schema.deserialize(valid_user)
+        schema.deserialize({
+            'username': 'jeannie',
+            'password': 'cake',
+        })
+
     assert 'not active' in exc.value.msg
+
+
+@pytest.fixture
+def user_model(config, request):
+    patcher = patch('h.accounts.schemas.User', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()

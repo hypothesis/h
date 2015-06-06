@@ -16,7 +16,6 @@ from horus.models import (
 )
 from horus.strings import UIStringsBase
 from pyramid_basemodel import Base, Session
-from pyramid.threadlocal import get_current_request
 import sqlalchemy as sa
 from sqlalchemy import or_
 from sqlalchemy.ext.declarative import declared_attr
@@ -39,18 +38,7 @@ warnings.filterwarnings("ignore", message=r".*Unmanaged access of declarative "
 
 
 class Activation(ActivationMixin, Base):
-    def __init__(self, *args, **kwargs):
-        super(Activation, self).__init__(*args, **kwargs)
-
-        # XXX: Horus currently has a bug where the Activation model isn't
-        # flushed before the email is generated, causing the link to be
-        # broken (hypothesis/h#1156).
-        #
-        # Fixed in horus@90f838cef12be249a9e9deb5f38b37151649e801
-        request = get_current_request()
-        db = get_session(request)
-        db.add(self)
-        db.flush()
+    pass
 
 
 class Group(GroupMixin, Base):

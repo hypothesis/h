@@ -5,10 +5,10 @@ import colander
 import deform
 from horus import interfaces
 from horus.schemas import email_exists, unique_email
-from pyramid.settings import asbool
 from pyramid.session import check_csrf_token
 
 from h.models import _
+from h.accounts.models import User
 
 USERNAME_BLACKLIST = None
 
@@ -32,8 +32,7 @@ def get_blacklist():
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
     request = node.bindings['request']
-    user_ctor = request.registry.getUtility(interfaces.IUserClass)
-    user = user_ctor.get_by_username(request, value)
+    user = User.get_by_username(request, value)
     if user:
         strings = request.registry.getUtility(interfaces.IUIStrings)
         raise colander.Invalid(node, strings.registration_username_exists)
@@ -87,37 +86,25 @@ class LoginSchema(CSRFSchema):
     def validator(self, node, value):
         super(LoginSchema, self).validator(node, value)
         request = node.bindings['request']
-        registry = request.registry
-        settings = registry.settings
-
-        allow_inactive_login = asbool(
-            settings.get('horus.allow_inactive_login', False)
-        )
-        require_activation = asbool(
-            settings.get('horus.require_activation', True)
-        )
-
-        user_ctor = registry.getUtility(interfaces.IUserClass)
 
         username = value.get('username')
         password = value.get('password')
 
-        user = user_ctor.get_by_username(request, username)
+        user = User.get_by_username(request, username)
         if user is None:
-            user = user_ctor.get_by_email(request, username)
+            user = User.get_by_email(request, username)
 
         if user is None:
             err = colander.Invalid(node)
             err['username'] = _('User does not exist.')
             raise err
 
-        if not user_ctor.validate_user(user, password):
+        if not User.validate_user(user, password):
             err = colander.Invalid(node)
             err['password'] = _('Incorrect password. Please try again.')
             raise err
 
-        if not allow_inactive_login and require_activation \
-                and not user.is_activated:
+        if not user.is_activated:
             reason = _('Your account is not active. Please check your e-mail.')
             raise colander.Invalid(node, reason)
 

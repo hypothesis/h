@@ -2,8 +2,6 @@
 import json
 
 import deform
-import horus.events
-import horus.views
 from hem.db import get_session
 from horus.lib import FlashMessage
 from horus.resources import UserFactory
@@ -18,9 +16,11 @@ from h.notification.models import Subscriptions
 from h.models import _
 from h.accounts.models import User
 from h.accounts.models import Activation
+from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
+from h.accounts.events import RegistrationEvent
 from h.accounts import schemas
 from h import session
 
@@ -280,10 +280,105 @@ class AsyncForgotPasswordController(ForgotPasswordController):
 
 
 @view_auth_defaults
-@view_config(attr='register', route_name='register')
-@view_config(attr='activate', route_name='activate')
-class RegisterController(horus.views.RegisterController):
-    pass
+@view_config(attr='register', route_name='register', request_method='POST')
+@view_config(attr='register_form', route_name='register', request_method='GET')
+@view_config(attr='activate', route_name='activate', request_method='GET')
+class RegisterController(object):
+    def __init__(self, request):
+        self.request = request
+        self.schema = schemas.RegisterSchema().bind(request=self.request)
+        self.form = deform.Form(self.schema)
+
+    def register(self):
+        """
+        Handle submission of the new user registration form.
+
+        Validates the form data, creates a new activation for the user, sends
+        the activation mail, and then redirects the user to the index.
+        """
+        err, appstruct = validate_form(self.form, self.request.POST.items())
+        if err is not None:
+            return err
+
+        db = get_session(self.request)
+
+        # Create the new user from selected form fields
+        props = {k: appstruct[k] for k in ['username', 'email', 'password']}
+        user = User(**props)
+        db.add(user)
+
+        # Create a new activation for the user
+        activation = Activation()
+        db.add(activation)
+        user.activation = activation
+
+        # Flush the session to ensure that the user can be created and the
+        # activation is successfully wired up
+        db.flush()
+
+        # Send the activation email
+        message = activation_email(self.request, user)
+        mailer = get_mailer(self.request)
+        mailer.send(message)
+
+        FlashMessage(self.request,
+                     _("Thank you for registering! Please check your e-mail "
+                       "now. You can continue by clicking the activation link "
+                       "we have sent you."),
+                     kind='success')
+        self.request.registry.notify(RegistrationEvent(self.request, user))
+
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url('index'))
+
+    # FIXME: generate a form here and progressively enhance it rather than
+    # relying entirely on Angular.
+    def register_form(self):
+        """Render the registration form."""
+        # Logged in users shouldn't be able to register...
+        if self.request.authenticated_userid is not None:
+            return httpexceptions.HTTPFound(self.request.route_url('stream'))
+
+        return {}
+
+    def activate(self):
+        """
+        Handle a request for a user activation link.
+
+        Checks if the activation code passed is valid, and (as a safety check)
+        that it is an activation for the passed user id. If all is well,
+        activate the user and redirect them to the stream.
+        """
+        code = self.request.matchdict.get('code')
+        id_ = self.request.matchdict.get('id')
+
+        if code is None or id_ is None:
+            return httpexceptions.HTTPNotFound()
+
+        try:
+            id_ = int(id_)
+        except ValueError:
+            return httpexceptions.HTTPNotFound()
+
+        activation = Activation.get_by_code(self.request, code)
+        if activation is None:
+            return httpexceptions.HTTPNotFound()
+
+        user = User.get_by_activation(self.request, activation)
+        if user is None or user.id != id_:
+            return httpexceptions.HTTPNotFound()
+
+        # Activate the user (by deleting the activation)
+        db = get_session(self.request)
+        db.delete(activation)
+
+        FlashMessage(self.request,
+                     _("Your e-mail address has been verified. Thank you!"),
+                     kind='success')
+        self.request.registry.notify(ActivationEvent(self.request, user))
+
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url('index'))
 
 
 @view_defaults(accept='application/json', context=Application, renderer='json')
@@ -411,6 +506,23 @@ class AsyncProfileController(ProfileController):
     __view_mapper__ = AsyncFormViewMapper
 
 
+def activation_email(request, user):
+    """
+    Generate an 'activate your account' email for the specified user.
+
+    :rtype: pyramid_mailer.message.Message
+    """
+    link = request.route_url('activate', id=user.id, code=user.activation.code)
+
+    emailtext = ("Please validate your email and activate your account by "
+                 "visiting: {link}")
+    body = emailtext.format(link=link)
+    msg = Message(subject=_("Please activate your account"),
+                  recipients=[user.email],
+                  body=body)
+    return msg
+
+
 def reset_password_email(user, reset_code, reset_link):
     """
     Generate a 'reset your password' email for the specified user.
@@ -475,6 +587,8 @@ def includeme(config):
     config.add_route('disable_user', '/disable/{userid}',
                      factory=UserFactory,
                      traverse="/{userid}")
+    config.add_route('register', '/register')
+    config.add_route('activate', '/activate/{id}/{code}')
     config.add_route('forgot_password', '/forgot_password')
     config.add_route('reset_password', '/reset_password/{code}')
     config.include('horus')
