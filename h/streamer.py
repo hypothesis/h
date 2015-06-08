@@ -23,6 +23,7 @@ from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from .api.auth import get_user  # FIXME: should not import from .api
+from h.api import nipsa
 from annotator import document
 from .models import Annotation
 
@@ -109,6 +110,10 @@ class FilterToElasticFilter(object):
                 self.query['filter'] = {}
             scripts = ' AND '.join(self.filter_scripts_to_add)
             self.query['filter']['script'] = '"script": ' + scripts
+
+        self.query = nipsa.nipsa_filter(
+            self.query, request.authenticated_userid)
+
 
     @staticmethod
     def equals(field, value):

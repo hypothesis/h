@@ -58,6 +58,7 @@ def includeme(config):
     config.include('h.views')
     config.include('h.renderers')
     config.include('h.api_client')
+    config.include('h.nipsa')
 
     config.include('pyramid_jinja2')
     config.add_jinja2_extension('h.jinja_extensions.IncludeRawExtension')
@@ -74,6 +75,8 @@ def includeme(config):
     config.include('h.streamer')
 
     config.include('h.api', route_prefix='/api')
+    config.include('h.api.nipsa')
+    config.include('h.db')
 
     # Override the traversal path for the api index route.
     config.add_route('api', '/api/', traverse='/api/')

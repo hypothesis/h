@@ -4,12 +4,16 @@ All search (Annotation.search(), Annotation.search_raw()) and Elasticsearch
 stuff should be encapsulated in this module.
 
 """
+import copy
 import logging
 
+import elasticsearch
+from elasticsearch import helpers
 import webob.multidict
 
 from h.api import models
 from h.api import uri
+from h.api import nipsa
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +35,20 @@ def _match_clause_for_uri(uristr):
     }
 
 
-def build_query(request_params):
+def _es_client():
+    """Return an elasticsearch.Elasticsearch client object."""
+    return elasticsearch.Elasticsearch([{"host": "localhost", "port": 9200}])
+
+
+def scan(query, fields):
+    return helpers.scan(_es_client(), query=query, fields=fields)
+
+
+def bulk(actions):
+    return helpers.bulk(_es_client(), actions)
+
+
+def build_query(request_params, user_id=None):
     """Return an Elasticsearch query dict for the given h search API params.
 
     Translates the HTTP request params accepted by the h search API into an
@@ -40,6 +57,11 @@ def build_query(request_params):
     :param request_params: the HTTP request params that were posted to the
         h search API
     :type request_params: webob.multidict.NestedMultiDict
+
+    :param user_id: the ID of the authorized user (optional, default: None),
+        if a user_id is given then this user's annotations will never be
+        filtered out even if they have a NIPSA flag
+    :type user_id: unicode or None
 
     :returns: an Elasticsearch query dict corresponding to the given h search
         API params
@@ -98,7 +120,7 @@ def build_query(request_params):
 
     query["query"] = {"bool": {"must": matches}}
 
-    return query
+    return nipsa.nipsa_filter(query, user_id=user_id)
 
 
 def search(request_params, user=None):
@@ -116,11 +138,11 @@ def search(request_params, user=None):
     :rtype: dict
 
     """
+    user_id = user.id if user else None
     log.debug("Searching with user=%s, for uri=%s",
-              user.id if user else 'None',
-              request_params.get('uri'))
+              str(user_id), request_params.get('uri'))
 
-    query = build_query(request_params)
+    query = build_query(request_params, user_id=user_id)
     results = models.Annotation.search_raw(query, user=user, raw_result=True)
 
     total = results['hits']['total']
