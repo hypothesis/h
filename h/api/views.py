@@ -84,6 +84,13 @@ def access_token(request):
     return request.create_token_response()
 
 
+# N.B. Like the rest of the API, this view is exposed behind WSGI middleware
+# that enables appropriate CORS headers and response to preflight request.
+#
+# However, this view requires credentials (a cookie) so is in fact not
+# currently accessible off-origin. Given that this method of authenticating to
+# the API is not intended to remain, this seems like a limitation we do not
+# need to lift any time soon.
 @api_config(context=Root, name='token', renderer='string')
 def annotator_token(request):
     """The Annotator Auth token view."""
