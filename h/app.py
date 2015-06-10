@@ -8,6 +8,7 @@ from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.wsgi import wsgiapp2
 
+from h.api.middleware import permit_cors
 from h.auth import acl_authz, remote_authn, session_authn
 from h.config import settings_from_environment
 from h.security import derive_key
@@ -110,7 +111,13 @@ def create_api(global_config, **settings):
         config.include('h.queue')
         config.include('h.api.queue')
 
-    return config.make_wsgi_app()
+    app = config.make_wsgi_app()
+    app = permit_cors(app,
+                      allow_headers=('Authorization',
+                                     'X-Annotator-Auth-Token'),
+                      allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+
+    return app
 
 
 def get_settings(global_config, **settings):
