@@ -83,11 +83,14 @@ module.exports = class Guest extends Annotator
       uriPromise = Promise.resolve(@plugins.Document.uri())
       metadataPromise = Promise.resolve(@plugins.Document.metadata)
     else
-      uriPromise = Promise.resolve(decodeURIComponent(window.location.href))
-      metadataPromise = Promise.resolve({
-        title: document.title
-        link: [{href: decodeURIComponent(window.location.href)}]
-      })
+      uriPromise = Promise.reject()
+      metadataPromise = Promise.reject()
+
+    uriPromise = uriPromise.catch(-> decodeURIComponent(window.location.href))
+    metadataPromise = metadataPromise.catch(-> {
+      title: document.title
+      link: [{href: decodeURIComponent(window.location.href)}]
+    })
 
     return metadataPromise.then (metadata) =>
       return uriPromise.then (href) =>
@@ -184,8 +187,8 @@ module.exports = class Guest extends Annotator
           annotation.$orphan = false
 
       self.anchors = self.anchors.concat(anchors)
-      self.plugins.BucketBar.update()
-      self.plugins.CrossFrame.sync([annotation])
+      self.plugins.BucketBar?.update()
+      self.plugins.CrossFrame?.sync([annotation])
 
     for anchor in self.anchors.splice(0, self.anchors.length)
       if anchor.annotation is annotation
@@ -211,7 +214,7 @@ module.exports = class Guest extends Annotator
     return annotation
 
   createAnnotation: (annotation = {}) ->
-    ranges = @selectedRanges
+    ranges = @selectedRanges ? []
     @selectedRanges = null
 
     getSelectors = (range) ->
@@ -252,7 +255,7 @@ module.exports = class Guest extends Annotator
 
     this.anchors = anchors
     this.publish('annotationDeleted', [annotation])
-    this.plugins.BucketBar.update()
+    this.plugins.BucketBar?.update()
 
     unhighlight = Array::concat(unhighlight...)
     new Promise(raf).then(-> highlighter.removeHighlights(unhighlight))
