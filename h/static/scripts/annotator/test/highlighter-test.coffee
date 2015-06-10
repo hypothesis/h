@@ -1,90 +1,98 @@
 Annotator = require('annotator')
 $ = Annotator.$
 
-highlight = require('../highlight')
+highlighter = require('../highlighter')
 
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
 
 
-describe 'TextHighlight', ->
-  sandbox = null
-  scrollTarget = null
+describe "highlightRange", ->
+  it 'wraps a highlight span around the given range', ->
+    txt = document.createTextNode('test highlight span')
+    el = document.createElement('span')
+    el.appendChild(txt)
+    r = new Annotator.Range.NormalizedRange({
+      commonAncestor: el,
+      start: txt,
+      end: txt
+    })
+    result = highlighter.highlightRange(r)
+    assert.equal(result.length, 1)
+    assert.strictEqual(el.childNodes[0], result[0])
+    assert.isTrue(result[0].classList.contains('annotator-hl'))
 
-  createTestHighlight = ->
-    new highlight.TextHighlight "test range"
+  it 'skips text nodes that are only white space', ->
+    txt = document.createTextNode('one')
+    blank = document.createTextNode(' ')
+    txt2 = document.createTextNode('two')
+    el = document.createElement('span')
+    el.appendChild(txt)
+    el.appendChild(blank)
+    el.appendChild(txt2)
+    r = new Annotator.Range.NormalizedRange({
+      commonAncestor: el,
+      start: txt,
+      end: txt2
+    })
+    result = highlighter.highlightRange(r)
+    assert.equal(result.length, 2)
+    assert.strictEqual(el.childNodes[0], result[0])
+    assert.strictEqual(el.childNodes[2], result[1])
 
-  beforeEach ->
-    sandbox = sinon.sandbox.create()
-    sandbox.stub highlight.TextHighlight, 'highlightRange',
-      (normedRange, cssClass) ->
-        hl = document.createElement "hl"
-        hl.appendChild document.createTextNode "test highlight span"
-        hl
 
-    Annotator.$.fn.scrollintoview = sinon.spy (options) ->
-      scrollTarget = this[0]
-      options?.complete?()
+describe 'removeHighlights', ->
+  it 'unwraps all the elements', ->
+    txt = document.createTextNode('word')
+    el = document.createElement('span')
+    hl = document.createElement('span')
+    div = document.createElement('div')
+    el.appendChild(txt)
+    hl.appendChild(el)
+    div.appendChild(hl)
+    highlighter.removeHighlights([hl])
+    assert.isNull(hl.parentNode)
+    assert.strictEqual(el.parentNode, div)
 
-  afterEach ->
-    sandbox.restore()
-    scrollTarget = null
+  it 'does not fail on nodes with no parent', ->
+    txt = document.createTextNode('no parent')
+    hl = document.createElement('span')
+    hl.appendChild(txt)
+    highlighter.removeHighlights([hl])
 
-  describe "constructor", ->
-    it 'wraps a highlight span around the given range', ->
-      hl = createTestHighlight()
-      assert.calledWith highlight.TextHighlight.highlightRange, "test range"
 
-    it 'stores the created highlight spans in _highlights', ->
-      hl = createTestHighlight()
-      assert.equal hl._highlights.textContent, "test highlight span"
-
-  describe "getBoundingClientRect", ->
-
-    it 'returns the bounding box of all the highlight client rectangles', ->
-      rects = [
-        {
-          top: 20
-          left: 15
-          bottom: 30
-          right: 25
-        }
-        {
-          top: 10
-          left: 15
-          bottom: 20
-          right: 25
-        }
-        {
-          top: 15
-          left: 20
-          bottom: 25
-          right: 30
-        }
-        {
-          top: 15
-          left: 10
-          bottom: 25
-          right: 20
-        }
-      ]
-      fakeHighlights = rects.map (r) ->
-        return getBoundingClientRect: -> r
-      hl = _highlights: fakeHighlights
-      result = highlight.TextHighlight.prototype.getBoundingClientRect.call(hl)
-      assert.equal(result.left, 10)
-      assert.equal(result.top, 10)
-      assert.equal(result.right, 30)
-      assert.equal(result.bottom, 30)
-
-  describe "scrollToView", ->
-
-    it 'calls jQuery scrollintoview', ->
-      hl = createTestHighlight()
-      hl.scrollToView()
-      assert.called Annotator.$.fn.scrollintoview
-
-    it 'scrolls to the created highlight span', ->
-      hl = createTestHighlight()
-      hl.scrollToView()
-      assert.equal scrollTarget, hl._highlights
+describe "getBoundingClientRect", ->
+  it 'returns the bounding box of all the highlight client rectangles', ->
+    rects = [
+      {
+        top: 20
+        left: 15
+        bottom: 30
+        right: 25
+      }
+      {
+        top: 10
+        left: 15
+        bottom: 20
+        right: 25
+      }
+      {
+        top: 15
+        left: 20
+        bottom: 25
+        right: 30
+      }
+      {
+        top: 15
+        left: 10
+        bottom: 25
+        right: 20
+      }
+    ]
+    fakeHighlights = rects.map (r) ->
+      return getBoundingClientRect: -> r
+    result = highlighter.getBoundingClientRect(fakeHighlights)
+    assert.equal(result.left, 10)
+    assert.equal(result.top, 10)
+    assert.equal(result.right, 30)
+    assert.equal(result.bottom, 30)
