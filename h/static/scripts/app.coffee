@@ -98,6 +98,7 @@ module.exports = angular.module('h', [
 
 .directive('annotation', require('./directive/annotation'))
 .directive('deepCount', require('./directive/deep-count'))
+.directive('excerpt', require('./directive/excerpt'))
 .directive('formInput', require('./directive/form-input'))
 .directive('formValidate', require('./directive/form-validate'))
 .directive('markdown', require('./directive/markdown'))

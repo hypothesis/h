@@ -66,12 +66,20 @@
 
 .annotation-quote {
   @include quote;
+  max-height: 2.9em;
+  overflow: hidden;
+
   del {
     background:#ffe6e6;
   }
   ins {
     background:#e6ffe6;
   }
+}
+
+.annotation-body {
+  max-height: 13.5em;
+  overflow: hidden;
 }
 
 .annotation-citation-domain {
