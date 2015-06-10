@@ -1,9 +1,17 @@
 Promise = global.Promise ? require('es6-promise').Promise
 Annotator = require('annotator')
 Guest = require('../guest')
+anchoring = require('../anchoring/html')
 
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
+
+
+waitForSync = (annotation) ->
+  if annotation.$anchors?
+    return Promise.resolve()
+  else
+    return new Promise(setTimeout).then(-> waitForSync(annotation))
 
 
 describe 'Guest', ->
@@ -127,13 +135,7 @@ describe 'Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        guest.plugins.Document = {uri: -> 'http://example.com'}
         options = Annotator.Plugin.CrossFrame.lastCall.args[1]
-
-      it 'applies a "uri" property to the formatted object', ->
-        ann = {$$tag: 'tag1'}
-        formatted = options.formatter(ann)
-        assert.equal(formatted.uri, 'http://example.com/')
 
       it 'keeps an existing uri property', ->
         ann = {$$tag: 'tag1', uri: 'http://example.com/foo'}
@@ -177,52 +179,60 @@ describe 'Guest', ->
 
     describe 'on "focusAnnotations" event', ->
       it 'focuses any annotations with a matching tag', ->
-        highlight0 = {setFocused: sandbox.stub()}
-        highlight1 = {setFocused: sandbox.stub()}
+        highlight0 = $('<span></span>')
+        highlight1 = $('<span></span>')
         guest = createGuest()
-        guest.anchored = [
-          {annotation: {$$tag: 'tag1'}, highlight: highlight0}
-          {annotation: {$$tag: 'tag2'}, highlight: highlight1}
+        guest.anchors = [
+          {annotation: {$$tag: 'tag1'}, highlights: highlight0.toArray()}
+          {annotation: {$$tag: 'tag2'}, highlights: highlight1.toArray()}
         ]
         emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
-        assert.called(highlight0.setFocused)
-        assert.calledWith(highlight0.setFocused, true)
+        assert.isTrue(highlight0.hasClass('annotator-hl-focused'))
 
       it 'unfocuses any annotations without a matching tag', ->
-        highlight0 = {setFocused: sandbox.stub()}
-        highlight1 = {setFocused: sandbox.stub()}
+        highlight0 = $('<span class="annotator-hl-focused"></span>')
+        highlight1 = $('<span class="annotator-hl-focused"></span>')
         guest = createGuest()
-        guest.anchored = [
-          {annotation: {$$tag: 'tag1'}, highlight: highlight0}
-          {annotation: {$$tag: 'tag2'}, highlight: highlight1}
+        guest.anchors = [
+          {annotation: {$$tag: 'tag1'}, highlights: highlight0.toArray()}
+          {annotation: {$$tag: 'tag2'}, highlights: highlight1.toArray()}
         ]
         emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
-        assert.called(highlight1.setFocused)
-        assert.calledWith(highlight1.setFocused, false)
+        assert.isFalse(highlight1.hasClass('annotator-hl-focused'))
 
     describe 'on "scrollToAnnotation" event', ->
+      beforeEach ->
+        $.fn.scrollintoview = sandbox.stub()
+
+      afterEach ->
+        delete $.fn.scrollintoview
+
       it 'scrolls to the anchor with the matching tag', ->
-        highlight = {scrollToView: sandbox.stub()}
+        highlight = $('<span></span>')
         guest = createGuest()
-        guest.anchored = [
-          {annotation: {$$tag: 'tag1'}, highlight: highlight}
+        guest.anchors = [
+          {annotation: {$$tag: 'tag1'}, highlights: highlight.toArray()}
         ]
         emitGuestEvent('scrollToAnnotation', 'ctx', 'tag1')
-        assert.called(highlight.scrollToView)
+        assert.calledOn($.fn.scrollintoview, sinon.match(highlight))
 
     describe 'on "getDocumentInfo" event', ->
       guest = null
 
       beforeEach ->
+        sandbox.stub(document, 'title', 'hi')
         guest = createGuest()
         guest.plugins.PDF =
-          uri: sandbox.stub().returns('http://example.com')
-          getMetaData: sandbox.stub()
+          uri: sandbox.stub().returns(window.location.href)
+          getMetadata: sandbox.stub()
+
+      afterEach ->
+        sandbox.restore()
 
       it 'calls the callback with the href and pdf metadata', (done) ->
         assertComplete = (payload) ->
           try
-            assert.equal(payload.uri, 'http://example.com/')
+            assert.equal(payload.uri, document.location.href)
             assert.equal(payload.metadata, metadata)
             done()
           catch e
@@ -231,27 +241,27 @@ describe 'Guest', ->
         ctx = {complete: assertComplete, delayReturn: sandbox.stub()}
         metadata = {title: 'hi'}
         promise = Promise.resolve(metadata)
-        guest.plugins.PDF.getMetaData.returns(promise)
+        guest.plugins.PDF.getMetadata.returns(promise)
 
         emitGuestEvent('getDocumentInfo', ctx)
 
-      it 'calls the callback with the href and document metadata if pdf check fails', (done) ->
+      it 'calls the callback with the href and basic metadata if pdf fails', (done) ->
         assertComplete = (payload) ->
           try
-            assert.equal(payload.uri, 'http://example.com/')
-            assert.equal(payload.metadata, metadata)
+            assert.equal(payload.uri, window.location.href)
+            assert.deepEqual(payload.metadata, metadata)
             done()
           catch e
             done(e)
 
         ctx = {complete: assertComplete, delayReturn: sandbox.stub()}
-        metadata = {title: 'hi'}
-        guest.plugins.Document = {metadata: metadata}
+        metadata = {title: 'hi', link: [{href: window.location.href}]}
 
         promise = Promise.reject(new Error('Not a PDF document'))
-        guest.plugins.PDF.getMetaData.returns(promise)
+        guest.plugins.PDF.getMetadata.returns(promise)
 
         emitGuestEvent('getDocumentInfo', ctx)
+
       it 'notifies the channel that the return value is async', ->
         delete guest.plugins.PDF
 
@@ -272,42 +282,77 @@ describe 'Guest', ->
       guest.onAdderMouseup(event)
       assert.isTrue(event.isPropagationStopped())
 
-  describe 'annotation sync', ->
-    it 'calls sync for createAnnotation', ->
+  describe 'createAnnotation()', ->
+    it 'adds metadata to the annotation object', (done) ->
       guest = createGuest()
-      guest.createAnnotation({})
-      assert.called(fakeCrossFrame.sync)
-
-    it 'calls sync for setupAnnotation', (done) ->
-      guest = createGuest()
-      guest.plugins.Document = {uri: -> 'http://example.com'}
-      guest.setupAnnotation({})
+      sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
+        metadata: {title: 'hello'}
+        uri: 'http://example.com/'
+      }))
+      annotation = {}
+      guest.createAnnotation(annotation)
       setTimeout ->
-        assert.called(fakeCrossFrame.sync)
+        assert.equal(annotation.uri, 'http://example.com/')
+        assert.deepEqual(annotation.document, {title: 'hello'})
         done()
 
+    it 'treats an argument as the annotation object', ->
+      guest = createGuest()
+      annotation = {foo: 'bar'}
+      annotation = guest.createAnnotation(annotation)
+      assert.equal(annotation.foo, 'bar')
+
   describe 'setupAnnotation()', ->
+    el = null
+    range = null
+
+    beforeEach ->
+      el = document.createElement('span')
+      txt = document.createTextNode('hello')
+      el.appendChild(txt)
+      document.body.appendChild(el)
+      range = document.createRange()
+      range.selectNode(el)
+
+    afterEach ->
+      document.body.removeChild(el)
+      sandbox.restore()
+
     it "doesn't declare annotation without targets as orphans", (done) ->
       guest = createGuest()
       annotation = target: []
       guest.setupAnnotation(annotation)
-      setTimeout ->
-        assert.isFalse !!annotation.$orphan
+      waitForSync(annotation).then ->
+        assert.isFalse(annotation.$orphan)
         done()
 
     it "doesn't declare annotations with a working target as orphans", (done) ->
       guest = createGuest()
-      annotation = target: ["test target"]
+      annotation = target: [{selector: "test"}]
+      sandbox.stub(anchoring, 'anchor').returns(range)
       guest.setupAnnotation(annotation)
-      setTimeout ->
-        assert.isFalse !!annotation.$orphan
+      waitForSync(annotation).then ->
+        assert.isFalse(annotation.$orphan)
         done()
 
     it "declares annotations with broken targets as orphans", (done) ->
       guest = createGuest()
-      sandbox.stub(guest, 'anchorTarget').returns(Promise.reject())
       annotation = target: [{selector: 'broken selector'}]
+      sandbox.stub(anchoring, 'anchor').throws()
       guest.setupAnnotation(annotation)
-      setTimeout ->
-        assert !!annotation.$orphan
+      waitForSync(annotation).then ->
+        assert.isTrue(annotation.$orphan)
+        done()
+
+    it 'updates the cross frame and bucket bar plugins', (done) ->
+      guest = createGuest()
+      guest.plugins.CrossFrame =
+        sync: sinon.stub()
+      guest.plugins.BucketBar =
+        update: sinon.stub()
+      annotation = {}
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        assert.called(guest.plugins.BucketBar.update)
+        assert.called(guest.plugins.CrossFrame.sync)
         done()
