@@ -13,6 +13,7 @@ describe 'annotation', ->
   fakeAnnotationMapper = null
   fakeAnnotationUI = null
   fakeDrafts = null
+  fakeFeatures = null
   fakeFlash = null
   fakeGroups = null
   fakeMomentFilter = null
@@ -56,6 +57,9 @@ describe 'annotation', ->
       add: sandbox.stub()
       remove: sandbox.stub()
     }
+    fakeFeatures = {
+      flagEnabled: sandbox.stub().returns(true)
+    }
     fakeFlash = sandbox.stub()
 
     fakeMomentFilter = sandbox.stub().returns('ages ago')
@@ -92,6 +96,7 @@ describe 'annotation', ->
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'drafts', fakeDrafts
+    $provide.value 'features', fakeFeatures
     $provide.value 'flash', fakeFlash
     $provide.value 'momentFilter', fakeMomentFilter
     $provide.value 'permissions', fakePermissions
@@ -610,7 +615,7 @@ describe("AnnotationController", ->
   Return an annotation directive instance and stub services etc.
   ###
   createAnnotationDirective = ({annotation, personaFilter, momentFilter,
-                                urlencodeFilter, drafts, flash,
+                                urlencodeFilter, drafts, features, flash,
                                 permissions, session, tags, time, annotationUI,
                                 annotationMapper, groups,
                                 documentTitleFilter, documentDomainFilter}) ->
@@ -621,6 +626,9 @@ describe("AnnotationController", ->
       drafts: drafts or {
         add: ->
         remove: ->
+      }
+      features: features or {
+        flagEnabled: -> true
       }
       flash: flash or {
         info: ->
@@ -651,6 +659,7 @@ describe("AnnotationController", ->
       $provide.value("momentFilter", locals.momentFilter)
       $provide.value("urlencodeFilter", locals.urlencodeFilter)
       $provide.value("drafts", locals.drafts)
+      $provide.value("features", locals.features)
       $provide.value("flash", locals.flash)
       $provide.value("permissions", locals.permissions)
       $provide.value("session", locals.session)

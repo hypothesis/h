@@ -1,0 +1,31 @@
+@import "compass/css3/images";
+
+.excerpt {
+  position: relative;
+  overflow: hidden;
+}
+
+.excerpt--collapsed:after {
+  position: absolute;
+  bottom: 0;
+  height: $base-line-height * 2; // This controls the apparent height of the gradient.
+  width: 100%;
+  content: "";
+  pointer-events: none;
+  @include background(linear-gradient(
+    to bottom,
+    $mask-start-color,
+    $mask-end-color
+  ));
+}
+
+.excerpt--uncollapsed {
+  max-height: 100% !important;
+}
+
+.excerpt-control a {
+  display: block;
+  text-align: right;
+  font-weight: bold;
+  width: 100%;
+}

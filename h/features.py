@@ -14,6 +14,7 @@ FEATURES = {
     'streamer': "Enable 'live streaming' for annotations via the websocket?",
     'search_normalized': "Assume all data has normalized URI fields?",
     'show_unanchored_annotations': "Show annotations that fail to anchor?",
+    'truncate_annotations': "Truncate long quotes and bodies in annotations?",
 }
 
 

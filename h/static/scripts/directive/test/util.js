@@ -15,26 +15,31 @@ function hyphenate(name) {
  *     attrA: 'initial-value'
  *   }, {
  *     scopePropery: scopeValue
- *   });
+ *   },
+ *   'Hello, world!');
  *
- * Will generate '<my-component attr-a="attrA"></my-component>' and
+ * Will generate '<my-component attr-a="attrA">Hello, world!</my-component>' and
  * compile and link it with the scope:
  *
  *  { attrA: 'initial-value', scopeProperty: scopeValue }
  *
  * @param {Document} document - The DOM Document to create the element in
  * @param {string} name - The name of the directive to instantiate
- * @param {Object} attrs - A map of attribute names (in camelCase) to initial values.
- * @param {Object} initialScope - A dictionary of properties to set on the
- *                                scope when the element is linked
+ * @param {Object} [attrs] - A map of attribute names (in camelCase) to initial
+ *                           values.
+ * @param {Object} [initialScope] - A dictionary of properties to set on the
+ *                                  scope when the element is linked
+ * @param {string} [initialHtml] - Initial inner HTML content for the directive
+ *                                 element.
  *
  * @return {DOMElement} The Angular jqLite-wrapped DOM element for the component.
  *                      The returned object has a link(scope) method which will
  *                      re-link the component with new properties.
  */
-function createDirective(document, name, attrs, initialScope) {
+function createDirective(document, name, attrs, initialScope, initialHtml) {
   attrs = attrs || {};
   initialScope = initialScope || {};
+  initialHtml = initialHtml || '';
 
   // create a template consisting of a single element, the directive
   // we want to create and compile it
@@ -53,6 +58,7 @@ function createDirective(document, name, attrs, initialScope) {
     }
     templateElement.setAttribute(attrName, attrKey);
   });
+  templateElement.innerHTML = initialHtml;
 
   // setup initial scope
   Object.keys(attrs).forEach(function (key) {
