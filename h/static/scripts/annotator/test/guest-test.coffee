@@ -2,6 +2,7 @@ Promise = global.Promise ? require('es6-promise').Promise
 Annotator = require('annotator')
 Guest = require('../guest')
 anchoring = require('../anchoring/html')
+highlighter = require('../highlighter')
 
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
@@ -316,7 +317,6 @@ describe 'Guest', ->
 
     afterEach ->
       document.body.removeChild(el)
-      sandbox.restore()
 
     it "doesn't declare annotation without targets as orphans", (done) ->
       guest = createGuest()
@@ -355,4 +355,34 @@ describe 'Guest', ->
       waitForSync(annotation).then ->
         assert.called(guest.plugins.BucketBar.update)
         assert.called(guest.plugins.CrossFrame.sync)
+        done()
+
+    it 'saves the anchor positions on the annotation', (done) ->
+      guest = createGuest()
+      sandbox.stub(anchoring, 'anchor').returns(range)
+      clientRect = {top: 100, left: 200}
+      window.scrollX = 50
+      window.scrollY = 25
+      sandbox.stub(highlighter, 'getBoundingClientRect').returns(clientRect)
+      annotation = guest.setupAnnotation({target: [{selector: []}]})
+      waitForSync(annotation).then ->
+        assert.equal(annotation.$anchors.length, 1)
+        pos = annotation.$anchors[0].pos
+        assert.equal(pos.top, 125)
+        assert.equal(pos.left, 250)
+        done()
+
+    it 'adds the anchor to the "anchors" instance property"', (done) ->
+      guest = createGuest()
+      highlights = [document.createElement('span')]
+      sandbox.stub(anchoring, 'anchor').returns(range)
+      sandbox.stub(highlighter, 'highlightRange').returns(highlights)
+      target = [{selector: []}]
+      annotation = guest.setupAnnotation({target: [target]})
+      waitForSync(annotation).then ->
+        assert.equal(guest.anchors.length, 1)
+        assert.strictEqual(guest.anchors[0].annotation, annotation)
+        assert.strictEqual(guest.anchors[0].target, target)
+        assert.strictEqual(guest.anchors[0].range, range)
+        assert.strictEqual(guest.anchors[0].highlights, highlights)
         done()
