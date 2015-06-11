@@ -1,3 +1,4 @@
+raf = require('raf')
 Promise = global.Promise ? require('es6-promise').Promise
 Annotator = require('annotator')
 Guest = require('../guest')
@@ -412,3 +413,45 @@ describe 'Guest', ->
           assert.equal(guest.anchors.length, 1)
           assert.calledOnce(stub)
           done()
+
+  describe 'deleteAnnotation()', ->
+    it 'removes the anchors from the "anchors" instance variable', (done) ->
+      guest = createGuest()
+      annotation = {}
+      guest.anchors.push({annotation})
+      guest.deleteAnnotation(annotation)
+      new Promise(raf).then ->
+        assert.equal(guest.anchors.length, 0)
+        done()
+
+    it 'updates the bucket bar plugin', (done) ->
+      guest = createGuest()
+      guest.plugins.BucketBar = update: sinon.stub()
+      annotation = {}
+      guest.anchors.push({annotation})
+      guest.deleteAnnotation(annotation)
+      new Promise(raf).then ->
+        assert.calledOnce(guest.plugins.BucketBar.update)
+        done()
+
+    it 'publishes the "annotationDeleted" event', (done) ->
+      guest = createGuest()
+      annotation = {}
+      publish = sandbox.stub(guest, 'publish')
+      guest.deleteAnnotation(annotation)
+      new Promise(raf).then ->
+        assert.calledOnce(publish)
+        assert.calledWith(publish, 'annotationDeleted', [annotation])
+        done()
+
+    it 'removes any highlights associated with the annotation', (done) ->
+      guest = createGuest()
+      annotation = {}
+      highlights = [document.createElement('span')]
+      removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
+      guest.anchors.push({annotation, highlights})
+      guest.deleteAnnotation(annotation)
+      new Promise(raf).then ->
+        assert.calledOnce(removeHighlights)
+        assert.calledWith(removeHighlights, highlights)
+        done()
