@@ -386,3 +386,29 @@ describe 'Guest', ->
         assert.strictEqual(guest.anchors[0].range, range)
         assert.strictEqual(guest.anchors[0].highlights, highlights)
         done()
+
+    it 'destroys targets that have been removed from the annotation', (done) ->
+      annotation = {}
+      target = {}
+      highlights = []
+      guest = createGuest()
+      guest.anchors = [{annotation, target, highlights}]
+      removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        assert.equal(guest.anchors.length, 0)
+        assert.calledWith(removeHighlights, highlights)
+        done()
+
+    it 'does not reanchor targets that are already anchored', (done) ->
+      guest = createGuest()
+      annotation = target: [{selector: "test"}]
+      stub = sandbox.stub(anchoring, 'anchor').returns(range)
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        delete annotation.$anchors
+        guest.setupAnnotation(annotation)
+        waitForSync(annotation).then ->
+          assert.equal(guest.anchors.length, 1)
+          assert.calledOnce(stub)
+          done()
