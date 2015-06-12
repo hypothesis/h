@@ -3,7 +3,6 @@ import json
 
 import deform
 from hem.db import get_session
-from horus.lib import FlashMessage
 from horus.resources import UserFactory
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
@@ -120,7 +119,7 @@ class AuthController(object):
     def logout(self):
         self.request.registry.notify(LogoutEvent(self.request))
         self.request.session.invalidate()
-        FlashMessage(self.request, _('You have logged out.'), kind='success')
+        self.request.session.flash(_('You have logged out.'), 'success')
         headers = forget(self.request)
         return httpexceptions.HTTPFound(location=self.logout_redirect,
                                         headers=headers)
@@ -196,10 +195,9 @@ class ForgotPasswordController(object):
         mailer = get_mailer(self.request)
         mailer.send(message)
 
-        FlashMessage(self.request,
-                     _("Please check your email to finish resetting your "
-                       "password."),
-                     kind="success")
+        self.request.session.flash(_("Please check your email to finish "
+                                     "resetting your password."),
+                                   "success")
 
         return httpexceptions.HTTPFound(location=self.reset_password_redirect)
 
@@ -247,9 +245,8 @@ class ForgotPasswordController(object):
         db = get_session(self.request)
         db.delete(activation)
 
-        FlashMessage(self.request,
-                     _('Your password has been reset!'),
-                     kind='success')
+        self.request.session.flash(_('Your password has been reset!'),
+                                   'success')
         self.request.registry.notify(PasswordResetEvent(self.request, user))
 
         return httpexceptions.HTTPFound(location=self.reset_password_redirect)
@@ -321,11 +318,11 @@ class RegisterController(object):
         mailer = get_mailer(self.request)
         mailer.send(message)
 
-        FlashMessage(self.request,
-                     _("Thank you for registering! Please check your e-mail "
-                       "now. You can continue by clicking the activation link "
-                       "we have sent you."),
-                     kind='success')
+        self.request.session.flash(_("Thank you for registering! Please check "
+                                     "your e-mail now. You can continue by "
+                                     "clicking the activation link we have "
+                                     "sent you."),
+                                   'success')
         self.request.registry.notify(RegistrationEvent(self.request, user))
 
         return httpexceptions.HTTPFound(
@@ -372,9 +369,9 @@ class RegisterController(object):
         db = get_session(self.request)
         db.delete(activation)
 
-        FlashMessage(self.request,
-                     _("Your e-mail address has been verified. Thank you!"),
-                     kind='success')
+        self.request.session.flash(_("Your e-mail address has been verified. "
+                                     "Thank you!"),
+                                   'success')
         self.request.registry.notify(ActivationEvent(self.request, user))
 
         return httpexceptions.HTTPFound(
@@ -463,7 +460,7 @@ class ProfileController(object):
         if user:
             # TODO: maybe have an explicit disabled flag in the status
             user.password = User.generate_random_password()
-            FlashMessage(self.request, _('Account disabled.'), kind='success')
+            self.request.session.flash(_('Account disabled.'), 'success')
             return {}
         else:
             return dict(errors={'pwd': _('Invalid password')}, code=401)
@@ -579,7 +576,7 @@ def _update_subscription_data(request, subscription):
 
     sub.active = subscription.get('active', True)
 
-    FlashMessage(request, _('Changes saved!'), kind='success')
+    request.session.flash(_('Changes saved!'), 'success')
 
 
 def includeme(config):
