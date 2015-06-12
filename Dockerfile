@@ -35,10 +35,12 @@ ENV PATH=/srv/h/bin:/src/h/node_modules/.bin:$PATH
 WORKDIR /src/h
 
 # Python dependencies
-ADD CHANGES.txt README.rst       /src/h/
 ADD setup.* requirements.txt     /src/h/
 ADD versioneer.py                /src/h/
 ADD h/_version.py                /src/h/h/
+# These files aren't needed in the container, but setup.py gets upset if they
+# are missing:
+RUN touch CHANGES.txt README.rst
 RUN pip install -r requirements.txt
 
 # Node dependencies
