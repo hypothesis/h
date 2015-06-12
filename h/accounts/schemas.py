@@ -3,8 +3,6 @@ from pkg_resources import resource_stream
 
 import colander
 import deform
-from horus import interfaces
-from horus.schemas import email_exists, unique_email
 from pyramid.session import check_csrf_token
 
 from h.models import _
@@ -29,13 +27,34 @@ def get_blacklist():
     return USERNAME_BLACKLIST
 
 
+def email_exists(node, value):
+    '''Colander validator that ensures a user with this email exists.'''
+    request = node.bindings['request']
+    user = User.get_by_email(request, value)
+    if not user:
+        msg = _('We have no user with the email address "{}". Try correcting '
+                'this address or try another.')
+        raise colander.Invalid(node, msg)
+
+
+def unique_email(node, value):
+    '''Colander validator that ensures no user with this email exists.'''
+    request = node.bindings['request']
+    user = User.get_by_email(request, value)
+    if user:
+        msg = _("Sorry, an account with this email address already exists. "
+                "Try logging in instead.")
+        raise colander.Invalid(node, msg)
+
+
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
     request = node.bindings['request']
     user = User.get_by_username(request, value)
     if user:
-        strings = request.registry.getUtility(interfaces.IUIStrings)
-        raise colander.Invalid(node, strings.registration_username_exists)
+        msg = _("Sorry, an account with this username already exists. "
+                "Please enter another one.")
+        raise colander.Invalid(node, msg)
 
 
 def unblacklisted_username(node, value, blacklist=None):
@@ -45,9 +64,9 @@ def unblacklisted_username(node, value, blacklist=None):
     if value.lower() in blacklist:
         # We raise a generic "user with this name already exists" error so as
         # not to make explicit the presence of a blacklist.
-        req = node.bindings['request']
-        str_ = req.registry.getUtility(interfaces.IUIStrings)
-        raise colander.Invalid(node, str_.registration_username_exists)
+        msg = _("Sorry, an account with this username already exists. "
+                "Please enter another one.")
+        raise colander.Invalid(node, msg)
 
 
 def matching_emails(node, value):
@@ -216,16 +235,4 @@ class ProfileSchema(CSRFSchema):
 
 
 def includeme(config):
-    registry = config.registry
-
-    schemas = [
-        (interfaces.ILoginSchema, LoginSchema),
-        (interfaces.IRegisterSchema, RegisterSchema),
-        (interfaces.IForgotPasswordSchema, ForgotPasswordSchema),
-        (interfaces.IResetPasswordSchema, ResetPasswordSchema),
-        (interfaces.IProfileSchema, ProfileSchema)
-    ]
-
-    for iface, imp in schemas:
-        if not registry.queryUtility(iface):
-            registry.registerUtility(imp, iface)
+    pass
