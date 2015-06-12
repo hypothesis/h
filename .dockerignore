@@ -1,0 +1,17 @@
+.git/
+MANIFEST
+build/
+dist/
+docs/_build/
+node_modules/
+
+*.egg
+*.egg-info
+
+*.db
+*.db-journal
+
+*.pyc
+*.pyo
+
+*.log
