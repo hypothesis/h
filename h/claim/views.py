@@ -1,7 +1,6 @@
 import logging
 
 import deform
-from horus.lib import FlashMessage
 from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 
@@ -41,7 +40,7 @@ def update_account(request):
     user.password = appstruct['password']
 
     msg = _('Your account has been successfully claimed.')
-    FlashMessage(request, msg, kind='success')
+    request.session.flash(msg, 'success')
 
     request.registry.notify(LoginEvent(request, user))
     return exc.HTTPFound(location=request.route_url('index'))
@@ -86,13 +85,13 @@ def _form_for_update_account(request):
 
 def _perform_already_claimed_redirect(request):
     msg = _('This account has already been claimed.')
-    FlashMessage(request, msg, kind='error')
+    request.session.flash(msg, 'error')
     raise exc.HTTPFound(location=request.route_url('stream'))
 
 
 def _perform_logged_in_redirect(request):
     msg = _('You are already signed in, please log out to claim an account.')
-    FlashMessage(request, msg, kind='error')
+    request.session.flash(msg, 'error')
     raise exc.HTTPFound(location=request.route_url('stream'))
 
 

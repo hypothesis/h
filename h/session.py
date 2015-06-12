@@ -11,21 +11,8 @@ def model(request):
 
 
 def pop_flash(request):
-    session = request.session
-
-    queues = {
-        name[3:]: [msg for msg in session.pop_flash(name[3:])]
-        for name in session.keys()
-        if name.startswith('_f_')
-    }
-
-    # Deal with bag.web.pyramid.flash_msg style mesages
-    for msg in queues.pop('', []):
-        q = getattr(msg, 'kind', '')
-        msg = getattr(msg, 'plain', msg)
-        queues.setdefault(q, []).append(msg)
-
-    return queues
+    return {k: request.session.pop_flash(k)
+            for k in ['error', 'info', 'warning', 'success']}
 
 
 def includeme(config):
