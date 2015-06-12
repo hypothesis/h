@@ -7,18 +7,6 @@ import pytest
 import deform
 from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
-from horus.interfaces import (
-    IActivationClass,
-    IProfileForm,
-    IProfileSchema,
-    IRegisterForm,
-    IRegisterSchema,
-    IUIStrings,
-    IUserClass,
-)
-from horus.schemas import ProfileSchema
-from horus.forms import SubmitForm
-from horus.strings import UIStringsBase
 
 from h.accounts.views import ajax_form
 from h.accounts.views import validate_form
@@ -35,11 +23,6 @@ class FakeUser(object):
 
 
 def configure(config):
-    config.registry.registerUtility(UIStringsBase, IUIStrings)
-    config.registry.registerUtility(ProfileSchema, IProfileSchema)
-    config.registry.registerUtility(SubmitForm, IProfileForm)
-    config.registry.registerUtility(MagicMock(), IRegisterSchema)
-    config.registry.registerUtility(MagicMock(), IRegisterForm)
     config.registry.feature = MagicMock()
     config.registry.feature.return_value = None
 
@@ -1006,18 +989,14 @@ def subscriptions_model(request):
 def user_model(config, request):
     patcher = patch('h.accounts.views.User', autospec=True)
     request.addfinalizer(patcher.stop)
-    user = patcher.start()
-    config.registry.registerUtility(user, IUserClass)
-    return user
+    return patcher.start()
 
 
 @pytest.fixture
 def activation_model(config, request):
     patcher = patch('h.accounts.views.Activation', autospec=True)
     request.addfinalizer(patcher.stop)
-    activation = patcher.start()
-    config.registry.registerUtility(activation, IActivationClass)
-    return activation
+    return patcher.start()
 
 
 @pytest.fixture

@@ -2,11 +2,17 @@
 import colander
 import deform
 import pytest
-from mock import PropertyMock, patch
+from mock import patch
 from pyramid.exceptions import BadCSRFToken
 from pyramid.testing import DummyRequest
 
-from h.accounts import models, schemas
+from h.accounts import models
+from h.accounts import schemas
+
+
+class DummyNode(object):
+    def __init__(self, request):
+        self.bindings = {'request': request}
 
 
 def csrf_request(config):
@@ -37,6 +43,70 @@ def test_unblacklisted_username(config):
                   node,
                   "PostMaster",
                   blacklist)
+
+
+def test_email_exists_looks_up_user_by_email(user_model):
+    request = DummyRequest()
+    node = DummyNode(request)
+
+    try:
+        schemas.email_exists(node, "foo@bar.com")
+    except:
+        pass
+
+    user_model.get_by_email.assert_called_with(request, "foo@bar.com")
+
+
+def test_email_exists_valid_when_user_exists(user_model):
+    request = DummyRequest()
+    node = DummyNode(request)
+
+    result = schemas.email_exists(node, "foo@bar.com")
+
+    assert result is None
+
+
+def test_email_exists_invalid_when_user_does_not_exist(user_model):
+    request = DummyRequest()
+    node = DummyNode(request)
+    user_model.get_by_email.return_value = None
+
+    pytest.raises(colander.Invalid,
+                  schemas.email_exists,
+                  node,
+                  "foo@bar.com")
+
+
+def test_unique_email_looks_up_user_by_email(user_model):
+    request = DummyRequest()
+    node = DummyNode(request)
+
+    try:
+        schemas.unique_email(node, "foo@bar.com")
+    except:
+        pass
+
+    user_model.get_by_email.assert_called_with(request, "foo@bar.com")
+
+
+def test_unique_email_invalid_when_user_exists(user_model):
+    request = DummyRequest()
+    node = DummyNode(request)
+
+    pytest.raises(colander.Invalid,
+                  schemas.unique_email,
+                  node,
+                  "foo@bar.com")
+
+
+def test_unique_email_invalid_when_user_does_not_exist(user_model):
+    request = DummyRequest()
+    node = DummyNode(request)
+    user_model.get_by_email.return_value = None
+
+    result = schemas.unique_email(node, "foo@bar.com")
+
+    assert result is None
 
 
 def test_matching_emails_with_mismatched_emails():
