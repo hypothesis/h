@@ -4,6 +4,7 @@ dist/
 docs/_build/
 node_modules/
 
+.eggs/
 *.egg
 *.egg-info
 
