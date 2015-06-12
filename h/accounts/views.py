@@ -447,7 +447,6 @@ class ProfileController(object):
         if password:
             user.password = password
 
-        FlashMessage(self.request, _('Changes saved!'), kind='success')
         return response
 
     def disable_user(self):
