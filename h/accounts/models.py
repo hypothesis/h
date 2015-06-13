@@ -161,7 +161,7 @@ class User(Base):
         session = get_session(request)
 
         user = session.query(cls).filter(
-            cls.activation_id == activation.id_value
+            cls.activation_id == activation.id
         ).first()
 
         return user
