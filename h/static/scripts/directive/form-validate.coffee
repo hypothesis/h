@@ -2,15 +2,15 @@ module.exports = ->
   controller: ->
     controls = {}
 
-    addControl: (control) ->
+    this.addControl = (control) ->
       if control.$name
         controls[control.$name] = control
 
-    removeControl: (control) ->
+    this.removeControl = (control) ->
       if control.$name
         delete controls[control.$name]
 
-    submit: ->
+    this.submit = ->
       # make all the controls dirty and re-render them
       for _, control of controls
         control.$setViewValue(control.$viewValue)

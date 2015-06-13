@@ -19,43 +19,36 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
   link: (scope, elem, attrs, controller) ->
     return unless controller?
 
-    controller.$formatters.push (selectedPermissions) ->
-      return unless selectedPermissions?
-
-      if permissions.isPublic(selectedPermissions)
-        getLevel(VISIBILITY_PUBLIC)
+    controller.$formatters.push (value) ->
+      if value?.read?.length
+        if permissions.isPublic(value)
+          return getLevel(VISIBILITY_PUBLIC)
+        else
+          return getLevel(VISIBILITY_PRIVATE)
       else
-        getLevel(VISIBILITY_PRIVATE)
+        return undefined
 
-    controller.$parsers.push (privacy) ->
-      return unless privacy?
-
-      if isPublic(privacy.name)
-        newPermissions = permissions.public()
+    controller.$parsers.push (value) ->
+      if isPublic(value.name)
+        return permissions.public()
       else
-        newPermissions = permissions.private()
-
-      # Cannot change the $modelValue into a new object
-      # Just update its properties
-      for key,val of newPermissions
-        controller.$modelValue[key] = val
-
-      controller.$modelValue
+        return permissions.private()
 
     controller.$render = ->
-      unless controller.$modelValue.read?.length
-        name = localStorage.getItem VISIBILITY_KEY
-        name ?= VISIBILITY_PUBLIC
-        level = getLevel(name)
-        controller.$setViewValue level
-
-      scope.level = controller.$viewValue
+      if controller.$viewValue?
+        scope.level = controller.$viewValue
+      else
+        name = localStorage.getItem(VISIBILITY_KEY)
+        level = getLevel(name ? VISIBILITY_PUBLIC)
+        scope.setLevel(level)
 
     scope.levels = levels
+
     scope.setLevel = (level) ->
-      localStorage.setItem VISIBILITY_KEY, level.name
-      controller.$setViewValue level
+      localStorage.setItem(VISIBILITY_KEY, level.name)
+      controller.$setViewValue(level)
       controller.$render()
+
     scope.isPublic = isPublic
 
   require: '?ngModel'

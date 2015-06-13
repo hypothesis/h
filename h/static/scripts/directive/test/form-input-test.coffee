@@ -84,7 +84,7 @@ describe 'form-input', ->
 
     assert.include($field.prop('className'), 'form-field-error', 'Fail fast check')
 
-    controller.$setViewValue('abc')
+    controller.$setViewValue('abcd')
     $scope.$digest()
 
     assert.notInclude($field.prop('className'), 'form-field-error')
