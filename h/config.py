@@ -61,10 +61,10 @@ def _setup_heroku(settings):
 def _setup_db(settings):
     # Allow overriding the model autocreation/deletion from the environment
     if 'MODEL_CREATE_ALL' in os.environ:
-        settings['basemodel.should_create_all'] = asbool(
+        settings['h.db.should_create_all'] = asbool(
             os.environ['MODEL_CREATE_ALL'])
     if 'MODEL_DROP_ALL' in os.environ:
-        settings['basemodel.should_drop_all'] = asbool(
+        settings['h.db.should_drop_all'] = asbool(
             os.environ['MODEL_DROP_ALL'])
 
 

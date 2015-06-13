@@ -135,7 +135,7 @@ def includeme(config):
     store_from_settings(settings)
 
     # Maybe initialize the models
-    if asbool(settings.get('basemodel.should_drop_all', False)):
+    if asbool(settings.get('h.db.should_drop_all', False)):
         delete_db()
-    if asbool(settings.get('basemodel.should_create_all', False)):
+    if asbool(settings.get('h.db.should_create_all', False)):
         create_db()
