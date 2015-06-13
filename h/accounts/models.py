@@ -152,17 +152,6 @@ class User(Base):
         ).first()
 
     @classmethod
-    def get_by_email_password(cls, request, email, password):
-        """Fetch a user by email address and validate their password."""
-        user = cls.get_by_email(request, email)
-
-        if user:
-            valid = cls.validate_user(user, password)
-
-            if valid:
-                return user
-
-    @classmethod
     def get_by_activation(cls, request, activation):
         """Fetch a user by activation instance."""
         user = cls.query.filter(
