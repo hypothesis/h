@@ -152,7 +152,7 @@ class User(Base):
         ).first()
 
     @classmethod
-    def get_by_activation(cls, request, activation):
+    def get_by_activation(cls, activation):
         """Fetch a user by activation instance."""
         user = cls.query.filter(
             cls.activation_id == activation.id

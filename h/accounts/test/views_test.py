@@ -442,7 +442,7 @@ def test_reset_password_looks_up_user_by_activation(activation_model,
 
     result = ForgotPasswordController(request).reset_password()
 
-    user_model.get_by_activation.assert_called_with(request, activation)
+    user_model.get_by_activation.assert_called_with(activation)
 
 
 @reset_password_fixtures
@@ -739,7 +739,7 @@ def test_activate_looks_up_user_by_activation(activation_model, user_model):
 
     result = RegisterController(request).activate()
 
-    user_model.get_by_activation.assert_called_with(request, activation)
+    user_model.get_by_activation.assert_called_with(activation)
 
 
 @activate_fixtures

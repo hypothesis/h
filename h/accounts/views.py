@@ -231,7 +231,7 @@ class ForgotPasswordController(object):
         if activation is None:
             return httpexceptions.HTTPNotFound()
 
-        user = User.get_by_activation(self.request, activation)
+        user = User.get_by_activation(activation)
         if user is None:
             return httpexceptions.HTTPNotFound()
 
@@ -359,7 +359,7 @@ class RegisterController(object):
         if activation is None:
             return httpexceptions.HTTPNotFound()
 
-        user = User.get_by_activation(self.request, activation)
+        user = User.get_by_activation(activation)
         if user is None or user.id != id_:
             return httpexceptions.HTTPNotFound()
 
