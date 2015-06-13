@@ -227,7 +227,7 @@ class ForgotPasswordController(object):
         if code is None:
             return httpexceptions.HTTPNotFound()
 
-        activation = Activation.get_by_code(self.request, code)
+        activation = Activation.get_by_code(code)
         if activation is None:
             return httpexceptions.HTTPNotFound()
 
@@ -355,7 +355,7 @@ class RegisterController(object):
         except ValueError:
             return httpexceptions.HTTPNotFound()
 
-        activation = Activation.get_by_code(self.request, code)
+        activation = Activation.get_by_code(code)
         if activation is None:
             return httpexceptions.HTTPNotFound()
 

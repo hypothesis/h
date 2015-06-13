@@ -54,7 +54,7 @@ class Activation(Base):
                             default=datetime.utcnow() + timedelta(days=3))
 
     @classmethod
-    def get_by_code(cls, request, code):
+    def get_by_code(cls, code):
         """Fetch an activation by code."""
         return cls.query.filter(cls.code == code).first()
 

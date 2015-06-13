@@ -420,7 +420,7 @@ def test_reset_password_looks_up_code_in_database(activation_model):
 
     result = ForgotPasswordController(request).reset_password()
 
-    activation_model.get_by_code.assert_called_with(request, 'abc123')
+    activation_model.get_by_code.assert_called_with('abc123')
 
 
 @reset_password_fixtures
@@ -719,7 +719,7 @@ def test_activate_looks_up_activation_by_code(activation_model):
 
     result = RegisterController(request).activate()
 
-    activation_model.get_by_code.assert_called_with(request, 'abc456')
+    activation_model.get_by_code.assert_called_with('abc456')
 
 
 @activate_fixtures
