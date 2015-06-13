@@ -67,6 +67,7 @@ INSTALL_REQUIRES = [
     'raven>=5.3.0,<5.4.0',
     'requests>=2.2.1',
     'ws4py>=0.3,<0.4',
+    'zope.sqlalchemy>=0.7.6,<0.8.0',
 
     # Version pin for known bug
     # https://github.com/repoze/repoze.sendmail/issues/31

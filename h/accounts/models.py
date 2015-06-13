@@ -220,6 +220,7 @@ class User(Base):
 
     @classmethod
     def get_by_username(cls, request, username):
+        """Fetch a user by username."""
         session = get_session(request)
 
         uid = _username_to_uid(username)
