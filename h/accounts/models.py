@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from datetime import timedelta
+import hashlib
+import random
 import re
+import string
 
 import cryptacular.bcrypt
 from hem.db import get_session
 from hem.interfaces import IDBSession
-from hem.text import generate_random_string
 from pyramid_basemodel import Base
 from pyramid_basemodel import Session
+from pyramid.compat import text_type
 import sqlalchemy as sa
 from sqlalchemy import or_
 from sqlalchemy.ext.declarative import declared_attr
@@ -16,6 +19,16 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
+
+
+def _generate_random_string(length=12):
+    """Generate a random ascii string of the requested length."""
+    m = hashlib.sha256()
+    word = ''
+    for i in range(length):
+        word += random.choice(string.ascii_letters)
+    m.update(word.encode('ascii'))
+    return text_type(m.hexdigest()[:length])
 
 
 class Activation(Base):
@@ -35,7 +48,7 @@ class Activation(Base):
     code = sa.Column(sa.Unicode(30),
                      nullable=False,
                      unique=True,
-                     default=generate_random_string)
+                     default=_generate_random_string)
 
     # FIXME: remove these unused columns
     created_by = sa.Column(sa.Unicode(30), nullable=False, default=u'web')
@@ -126,14 +139,14 @@ class User(Base):
 
     def _hash_password(self, password):
         if not self.salt:
-            self.salt = generate_random_string(24)
+            self.salt = _generate_random_string(24)
 
         return unicode(CRYPT.encode(password + self.salt))
 
     @classmethod
     def generate_random_password(cls, chars=12):
         """Generate a random string of fixed length."""
-        return generate_random_string(chars)
+        return _generate_random_string(chars)
 
     @classmethod
     def get_by_email(cls, request, email):
