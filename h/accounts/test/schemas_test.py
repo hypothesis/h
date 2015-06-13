@@ -11,8 +11,7 @@ from h.accounts import schemas
 
 
 class DummyNode(object):
-    def __init__(self, request=None):
-        self.bindings = {'request': request}
+    pass
 
 
 def csrf_request(config):

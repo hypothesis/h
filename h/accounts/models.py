@@ -161,9 +161,9 @@ class User(Base):
         return user
 
     @classmethod
-    def get_user(cls, request, username, password):
+    def get_user(cls, username, password):
         """Fetch a user by username and validate their password."""
-        user = cls.get_by_username(request, username)
+        user = cls.get_by_username(username)
 
         valid = cls.validate_user(user, password)
 
@@ -195,11 +195,11 @@ class User(Base):
         """
         match = re.match(r'acct:([^@]+)@{}'.format(request.domain), userid)
         if match:
-            return cls.get_by_username(request, match.group(1))
+            return cls.get_by_username(match.group(1))
         return cls.query.filter(cls.id == userid).first()
 
     @classmethod
-    def get_by_username(cls, request, username):
+    def get_by_username(cls, username):
         """Fetch a user by username."""
         uid = _username_to_uid(username)
         return cls.query.filter(cls.uid == uid).first()

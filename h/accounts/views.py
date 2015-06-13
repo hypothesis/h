@@ -453,7 +453,7 @@ class ProfileController(object):
         pwd = appstruct['pwd']
 
         # Password check
-        user = User.get_user(self.request, username, pwd)
+        user = User.get_user(username, pwd)
         if user:
             # TODO: maybe have an explicit disabled flag in the status
             user.password = User.generate_random_password()
