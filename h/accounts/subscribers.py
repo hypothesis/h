@@ -66,8 +66,6 @@ class AutoLogin(object):
     def __call__(self, event):
         request = event.request
         settings = request.registry.settings
-        # We use our own autologin setting in order to prevent horus autologin
-        # interfering with the value of the logged-in user in the session.
         autologin = asbool(settings.get('h.autologin', False))
         return self.val == autologin
 
