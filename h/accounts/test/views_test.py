@@ -299,7 +299,7 @@ def test_forgot_password_fetches_user_by_form_email(authn_policy,
 
     ForgotPasswordController(request).forgot_password()
 
-    user_model.get_by_email.assert_called_with(request, "giraffe@thezoo.org")
+    user_model.get_by_email.assert_called_with("giraffe@thezoo.org")
 
 
 @forgot_password_fixtures

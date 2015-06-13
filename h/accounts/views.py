@@ -177,7 +177,7 @@ class ForgotPasswordController(object):
         #
         # TODO: fix this latent race condition by returning a user object in
         # the appstruct.
-        user = User.get_by_email(self.request, appstruct['email'])
+        user = User.get_by_email(appstruct['email'])
 
         # Create a new activation for this user. Any previous activation will
         # get overwritten.
@@ -427,7 +427,7 @@ class ProfileController(object):
 
         email = appstruct.get('email')
         if email:
-            email_user = User.get_by_email(self.request, email)
+            email_user = User.get_by_email(email)
 
             if email_user:
                 if email_user.id != user.id:

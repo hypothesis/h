@@ -145,7 +145,7 @@ class User(Base):
         return _generate_random_string(chars)
 
     @classmethod
-    def get_by_email(cls, request, email):
+    def get_by_email(cls, email):
         """Fetch a user by email address."""
         return cls.query.filter(
             sa.func.lower(cls.email) == email.lower()
