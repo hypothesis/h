@@ -7,8 +7,6 @@ from pyramid.events import subscriber
 from pyramid.security import Everyone, principals_allowed_by_permission
 from pyramid.renderers import render
 from hem.db import get_session
-from horus.events import NewRegistrationEvent
-
 
 from h.notification.notifier import TemplateRenderException
 from h.notification import types
@@ -16,7 +14,7 @@ from h.notification.models import Subscriptions
 from h.notification.gateway import user_name, \
     user_profile_url, standalone_url, get_user_by_name
 from h.notification.types import ROOT_PATH, REPLY_TYPE
-from h.accounts.events import LoginEvent
+from h.accounts.events import LoginEvent, RegistrationEvent
 from h.models import Annotation
 
 log = logging.getLogger(__name__)
@@ -163,7 +161,7 @@ def create_subscription(request, uri, active):
     session.flush()
 
 
-@subscriber(NewRegistrationEvent)
+@subscriber(RegistrationEvent)
 def registration_subscriptions(event):
     request = event.request
     user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
