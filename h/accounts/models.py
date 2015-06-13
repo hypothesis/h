@@ -9,7 +9,6 @@ import string
 import cryptacular.bcrypt
 from pyramid.compat import text_type
 import sqlalchemy as sa
-from sqlalchemy import or_
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -203,16 +202,6 @@ class User(Base):
         """Fetch a user by username."""
         uid = _username_to_uid(username)
         return cls.query.filter(cls.uid == uid).first()
-
-    @classmethod
-    def get_by_username_or_email(cls, request, username, email):
-        uid = _username_to_uid(username)
-        return cls.query.filter(
-            or_(
-                cls.uid == uid,
-                cls.email == email
-            )
-        ).first()
 
     # TODO: remove all this status bitfield stuff
     @property
