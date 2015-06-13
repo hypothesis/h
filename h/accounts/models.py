@@ -7,28 +7,25 @@ import re
 import string
 
 import cryptacular.bcrypt
-from hem.db import get_session
-from hem.interfaces import IDBSession
-from pyramid_basemodel import Base
-from pyramid_basemodel import Session
 from pyramid.compat import text_type
 import sqlalchemy as sa
 from sqlalchemy import or_
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from h.db import Base
 
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
 
 
 def _generate_random_string(length=12):
     """Generate a random ascii string of the requested length."""
-    m = hashlib.sha256()
+    msg = hashlib.sha256()
     word = ''
-    for i in range(length):
+    for _ in range(length):
         word += random.choice(string.ascii_letters)
-    m.update(word.encode('ascii'))
-    return text_type(m.hexdigest()[:length])
+    msg.update(word.encode('ascii'))
+    return text_type(msg.hexdigest()[:length])
 
 
 class Activation(Base):
@@ -59,8 +56,7 @@ class Activation(Base):
     @classmethod
     def get_by_code(cls, request, code):
         """Fetch an activation by code."""
-        session = get_session(request)
-        return session.query(cls).filter(cls.code == code).first()
+        return cls.query.filter(cls.code == code).first()
 
 
 class User(Base):
@@ -151,9 +147,7 @@ class User(Base):
     @classmethod
     def get_by_email(cls, request, email):
         """Fetch a user by email address."""
-        session = get_session(request)
-
-        return session.query(cls).filter(
+        return cls.query.filter(
             sa.func.lower(cls.email) == email.lower()
         ).first()
 
@@ -171,9 +165,7 @@ class User(Base):
     @classmethod
     def get_by_activation(cls, request, activation):
         """Fetch a user by activation instance."""
-        session = get_session(request)
-
-        user = session.query(cls).filter(
+        user = cls.query.filter(
             cls.activation_id == activation.id
         ).first()
 
@@ -215,23 +207,18 @@ class User(Base):
         match = re.match(r'acct:([^@]+)@{}'.format(request.domain), userid)
         if match:
             return cls.get_by_username(request, match.group(1))
-        session = get_session(request)
-        return session.query(cls).filter(cls.id == userid).first()
+        return cls.query.filter(cls.id == userid).first()
 
     @classmethod
     def get_by_username(cls, request, username):
         """Fetch a user by username."""
-        session = get_session(request)
-
         uid = _username_to_uid(username)
-        return session.query(cls).filter(cls.uid == uid).first()
+        return cls.query.filter(cls.uid == uid).first()
 
     @classmethod
     def get_by_username_or_email(cls, request, username, email):
-        session = get_session(request)
-
         uid = _username_to_uid(username)
-        return session.query(cls).filter(
+        return cls.query.filter(
             or_(
                 cls.uid == uid,
                 cls.email == email
@@ -293,8 +280,5 @@ def _username_to_uid(username):
     return username.replace('.', '').lower()
 
 
-def includeme(config):
-    registry = config.registry
-
-    if not registry.queryUtility(IDBSession):
-        registry.registerUtility(Session, IDBSession)
+def includeme(_):
+    pass

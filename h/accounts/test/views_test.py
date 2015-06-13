@@ -6,7 +6,9 @@ import pytest
 
 import deform
 from pyramid import httpexceptions
-from pyramid.testing import DummyRequest
+from pyramid.testing import DummyRequest as _DummyRequest
+
+from h.conftest import DummySession
 
 from h.accounts.views import ajax_form
 from h.accounts.views import validate_form
@@ -14,6 +16,14 @@ from h.accounts.views import AuthController
 from h.accounts.views import ForgotPasswordController
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
+
+
+class DummyRequest(_DummyRequest):
+    def __init__(self, *args, **kwargs):
+        # Add a dummy database session to the request
+        params = {'db': DummySession()}
+        params.update(kwargs)
+        super(DummyRequest, self).__init__(*args, **params)
 
 
 class FakeUser(object):
@@ -261,7 +271,6 @@ def test_logout_response_has_forget_headers(authn_policy):
 
 forgot_password_fixtures = pytest.mark.usefixtures('activation_model',
                                                    'authn_policy',
-                                                   'dummy_db_session',
                                                    'form_validator',
                                                    'mailer',
                                                    'routes_mapper',
@@ -296,7 +305,6 @@ def test_forgot_password_fetches_user_by_form_email(authn_policy,
 @forgot_password_fixtures
 def test_forgot_password_creates_activation_for_user(activation_model,
                                                      authn_policy,
-                                                     dummy_db_session,
                                                      form_validator,
                                                      user_model):
     request = DummyRequest(method='POST')
@@ -310,7 +318,7 @@ def test_forgot_password_creates_activation_for_user(activation_model,
     activation = activation_model.return_value
 
     activation_model.assert_called_with()
-    assert activation in dummy_db_session.added
+    assert activation in request.db.added
     assert user.activation == activation
 
 
@@ -391,7 +399,6 @@ def test_forgot_password_form_redirects_when_logged_in(authn_policy):
 
 
 reset_password_fixtures = pytest.mark.usefixtures('activation_model',
-                                                  'dummy_db_session',
                                                   'notify',
                                                   'routes_mapper',
                                                   'user_model')
@@ -481,16 +488,15 @@ def test_reset_password_sets_user_password_from_form(form_validator,
 
 
 @reset_password_fixtures
-def test_reset_password_deletes_activation(activation_model,
-                                           dummy_db_session,
-                                           form_validator):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
+def test_reset_password_deletes_activation(activation_model, form_validator):
+    request = DummyRequest(method='POST',
+                           matchdict={'code': 'abc123'})
     form_validator.return_value = (None, {"password": "s3cure!"})
     activation = activation_model.get_by_code.return_value
 
     ForgotPasswordController(request).reset_password()
 
-    assert activation in dummy_db_session.deleted
+    assert activation in request.db.deleted
 
 
 @patch('h.accounts.views.PasswordResetEvent', autospec=True)
@@ -518,7 +524,6 @@ def test_reset_password_redirects_on_success(form_validator):
 
 
 register_fixtures = pytest.mark.usefixtures('activation_model',
-                                            'dummy_db_session',
                                             'form_validator',
                                             'mailer',
                                             'notify',
@@ -553,9 +558,7 @@ def test_register_creates_user_from_form_data(form_validator, user_model):
 
 
 @register_fixtures
-def test_register_adds_new_user_to_session(dummy_db_session,
-                                           form_validator,
-                                           user_model):
+def test_register_adds_new_user_to_session(form_validator, user_model):
     request = DummyRequest(method='POST')
     form_validator.return_value = (None, {
         "username": "bob",
@@ -565,7 +568,7 @@ def test_register_adds_new_user_to_session(dummy_db_session,
 
     RegisterController(request).register()
 
-    assert user_model.return_value in dummy_db_session.added
+    assert user_model.return_value in request.db.added
 
 
 @register_fixtures
@@ -679,7 +682,6 @@ def test_register_form_redirects_when_logged_in(authn_policy):
 
 
 activate_fixtures = pytest.mark.usefixtures('activation_model',
-                                            'dummy_db_session',
                                             'notify',
                                             'routes_mapper',
                                             'user_model')
@@ -773,9 +775,7 @@ def test_activate_redirects_on_success(user_model):
 
 
 @activate_fixtures
-def test_activate_activates_user(activation_model,
-                                 dummy_db_session,
-                                 user_model):
+def test_activate_activates_user(activation_model, user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     activation = activation_model.get_by_code.return_value
     giraffe = FakeUser(id=123)
@@ -783,7 +783,7 @@ def test_activate_activates_user(activation_model,
 
     result = RegisterController(request).activate()
 
-    assert activation in dummy_db_session.deleted
+    assert activation in request.db.deleted
 
 
 @patch('h.accounts.views.ActivationEvent')
@@ -940,7 +940,7 @@ def test_subscription_update(authn_policy, form_validator,
     assert result == {"model": {"email": "john@doe"}}
 
 
-@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+@pytest.mark.usefixtures('activation_model')
 def test_disable_user_with_invalid_password(form_validator, user_model):
     """Make sure our disable_user call validates the user password."""
     request = DummyRequest(method='POST')
@@ -956,7 +956,7 @@ def test_disable_user_with_invalid_password(form_validator, user_model):
     assert any('pwd' in err for err in result['errors'])
 
 
-@pytest.mark.usefixtures('activation_model', 'dummy_db_session')
+@pytest.mark.usefixtures('activation_model')
 def test_disable_user_sets_random_password(form_validator, user_model):
     """Check if the user is disabled."""
     request = DummyRequest(method='POST')

@@ -6,7 +6,6 @@ from datetime import datetime
 from pyramid.events import subscriber
 from pyramid.security import Everyone, principals_allowed_by_permission
 from pyramid.renderers import render
-from hem.db import get_session
 
 from h.notification.notifier import TemplateRenderException
 from h.notification import types
@@ -150,15 +149,14 @@ def generate_notifications(request, annotation, action):
 
 # Create a reply template for a uri
 def create_subscription(request, uri, active):
-    session = get_session(request)
     subs = Subscriptions(
         uri=uri,
         type=types.REPLY_TYPE,
         active=active
     )
 
-    session.add(subs)
-    session.flush()
+    request.db.add(subs)
+    request.db.flush()
 
 
 @subscriber(RegistrationEvent)

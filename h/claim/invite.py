@@ -166,8 +166,7 @@ def main():
         time.sleep(5)
 
     log.info('Collecting reserved users.')
-    session = models.get_session(request)
-    users = get_users(session, limit=args.limit)
+    users = get_users(request.db, limit=args.limit)
 
     if args.dry_run:
         log.info('Skipping actions ignored by dry run.')
@@ -177,7 +176,7 @@ def main():
         success, error = send_invitations(request, args.key, users)
 
         log.info('Marking users as invited.')
-        mark_invited(session, success)
+        mark_invited(request.db, success)
 
         log.info('%d succeeded / %d failed', len(success), len(error))
 

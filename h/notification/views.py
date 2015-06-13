@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from hem.db import get_session
 from pyramid.view import view_config
 
 from h.notification.models import Subscriptions
@@ -16,11 +15,10 @@ def unsubscribe(request):
         payload['type'],
     )
 
-    db = get_session(request)
     for s in subscriptions:
         if s.active:
             s.active = False
-            db.add(s)
+            request.db.add(s)
 
     return {}
 

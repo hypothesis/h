@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-from hem.db import get_session
-from hem.interfaces import IDBSession
-from pyramid_basemodel import Base
-from pyramid_basemodel import Session
 import sqlalchemy as sa
 from sqlalchemy import func, and_
+
+from h.db import Base
 
 
 class Subscriptions(Base):
@@ -19,18 +17,15 @@ class Subscriptions(Base):
     @classmethod
     def get_by_id(cls, request, id):
         """Get a subscription by its primary key."""
-        session = get_session(request)
-        return session.query(cls).filter(cls.id == id).first()
+        return cls.query.filter(cls.id == id).first()
 
     @classmethod
     def get_active_subscriptions(cls, request):
-        session = get_session(request)
-        return session.query(cls).filter(cls.active).all()
+        return cls.query.filter(cls.active).all()
 
     @classmethod
     def get_active_subscriptions_for_a_type(cls, request, ttype):
-        session = get_session(request)
-        return session.query(cls).filter(
+        return cls.query.filter(
             and_(
                 cls.active,
                 func.lower(cls.type) == func.lower(ttype)
@@ -39,15 +34,13 @@ class Subscriptions(Base):
 
     @classmethod
     def get_subscriptions_for_uri(cls, request, uri):
-        session = get_session(request)
-        return session.query(cls).filter(
+        return cls.query.filter(
             func.lower(cls.uri) == func.lower(uri)
         ).all()
 
     @classmethod
     def get_templates_for_uri_and_type(cls, request, uri, ttype):
-        session = get_session(request)
-        return session.query(cls).filter(
+        return cls.query.filter(
             and_(
                 func.lower(cls.uri) == func.lower(uri),
                 func.lower(cls.type) == func.lower(ttype)
@@ -61,10 +54,5 @@ class Subscriptions(Base):
                 'active': self.active}
 
 
-def includeme(config):
-    registry = config.registry
-
-    if not registry.queryUtility(IDBSession):
-        registry.registerUtility(Session, IDBSession)
-
-    config.scan(__name__)
+def includeme(_):
+    pass

@@ -2,7 +2,6 @@
 import json
 
 import deform
-from hem.db import get_session
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 from pyramid.security import forget
@@ -183,13 +182,12 @@ class ForgotPasswordController(object):
         # Create a new activation for this user. Any previous activation will
         # get overwritten.
         activation = Activation()
-        db = get_session(self.request)
-        db.add(activation)
+        self.request.db.add(activation)
         user.activation = activation
 
         # Write the new activation to the database in order to set up the
         # foreign key field and generate the code.
-        db.flush()
+        self.request.db.flush()
 
         # Send the reset password email
         code = user.activation.code
@@ -245,8 +243,7 @@ class ForgotPasswordController(object):
             return err
 
         user.password = appstruct['password']
-        db = get_session(self.request)
-        db.delete(activation)
+        self.request.db.delete(activation)
 
         self.request.session.flash(_('Your password has been reset!'),
                                    'success')
@@ -300,21 +297,19 @@ class RegisterController(object):
         if err is not None:
             return err
 
-        db = get_session(self.request)
-
         # Create the new user from selected form fields
         props = {k: appstruct[k] for k in ['username', 'email', 'password']}
         user = User(**props)
-        db.add(user)
+        self.request.db.add(user)
 
         # Create a new activation for the user
         activation = Activation()
-        db.add(activation)
+        self.request.db.add(activation)
         user.activation = activation
 
         # Flush the session to ensure that the user can be created and the
         # activation is successfully wired up
-        db.flush()
+        self.request.db.flush()
 
         # Send the activation email
         message = activation_email(self.request, user)
@@ -369,8 +364,7 @@ class RegisterController(object):
             return httpexceptions.HTTPNotFound()
 
         # Activate the user (by deleting the activation)
-        db = get_session(self.request)
-        db.delete(activation)
+        self.request.db.delete(activation)
 
         self.request.session.flash(_("Your e-mail address has been verified. "
                                      "Thank you!"),
