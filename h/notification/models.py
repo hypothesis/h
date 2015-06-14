@@ -1,37 +1,26 @@
 # -*- coding: utf-8 -*-
-import logging
-import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy import func, and_
-
 from hem.db import get_session
 from hem.interfaces import IDBSession
-from horus.models import BaseModel
 from pyramid_basemodel import Base
 from pyramid_basemodel import Session
+import sqlalchemy as sa
+from sqlalchemy import func, and_
 
-log = logging.getLogger(__name__)
 
+class Subscriptions(Base):
+    __tablename__ = 'subscriptions'
+    __table_args__ = sa.Index('subs_uri_idx_subscriptions', 'uri'),
 
-class SubscriptionsMixin(BaseModel):
-    @declared_attr
-    def __table_args__(self):
-        return sa.Index('subs_uri_idx_%s' % self.__tablename__, 'uri'),
+    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    uri = sa.Column(sa.Unicode(256), nullable=False)
+    type = sa.Column(sa.VARCHAR(64), nullable=False)
+    active = sa.Column(sa.BOOLEAN, default=True, nullable=False)
 
-    @declared_attr
-    def uri(self):
-        return sa.Column(
-            sa.Unicode(256),
-            nullable=False
-        )
-
-    @declared_attr
-    def type(self):
-        return sa.Column(sa.VARCHAR(64), nullable=False)
-
-    @declared_attr
-    def active(self):
-        return sa.Column(sa.BOOLEAN, default=True, nullable=False)
+    @classmethod
+    def get_by_id(cls, request, id):
+        """Get a subscription by its primary key."""
+        session = get_session(request)
+        return session.query(cls).filter(cls.id == id).first()
 
     @classmethod
     def get_active_subscriptions(cls, request):
@@ -65,9 +54,11 @@ class SubscriptionsMixin(BaseModel):
             )
         ).all()
 
-
-class Subscriptions(SubscriptionsMixin, Base):
-    pass
+    def __json__(self, request):
+        return {'id': self.id,
+                'uri': self.uri,
+                'type': self.type,
+                'active': self.active}
 
 
 def includeme(config):
