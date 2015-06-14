@@ -3,7 +3,6 @@ import json
 
 import deform
 from hem.db import get_session
-from horus.resources import UserFactory
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 from pyramid.security import forget
@@ -584,12 +583,13 @@ def _update_subscription_data(request, subscription):
 
 
 def includeme(config):
-    config.add_route('disable_user', '/disable/{userid}',
-                     factory=UserFactory,
-                     traverse="/{userid}")
+    config.add_route('login', '/login')
+    config.add_route('logout', '/logout')
     config.add_route('register', '/register')
     config.add_route('activate', '/activate/{id}/{code}')
+    config.add_route('profile', '/profile')
+    config.add_route('edit_profile', '/profile/edit')
     config.add_route('forgot_password', '/forgot_password')
     config.add_route('reset_password', '/reset_password/{code}')
-    config.include('horus')
+    config.add_route('disable_user', '/account/disable')
     config.scan(__name__)
