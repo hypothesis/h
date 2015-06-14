@@ -188,6 +188,10 @@ class ForgotPasswordController(object):
         db.add(activation)
         user.activation = activation
 
+        # Write the new activation to the database in order to set up the
+        # foreign key field and generate the code.
+        db.flush()
+
         # Send the reset password email
         code = user.activation.code
         link = reset_password_link(self.request, code)
