@@ -8,6 +8,8 @@ pylint:
   enable:
     - relative-import
   disable:
+    - line-too-long  # PEP8 checks this and doesn't complain about
+                     # unavoidable long lines (such as URLs).
     - R0903  # Too few public methods
     - W0142  # Used * or ** magic
   options:
@@ -25,14 +27,6 @@ pylint:
     # - parser: common in modules that use argparse
     #
     good-names: _,i,j,k,v,e,db,fn,fp,log,parser
-
-    # Allow longer function and method names.
-    #
-    # By default PyLint doesn't allow function or method names longer than 30
-    # chars, but lots of test methods do (and should) have longer names. It'd
-    # be better to restrict this setting to tests only.
-    method-rgx: '((test_[a-z0-9_]{2,59})|([a-z_][a-z0-9_]{2,30}))$'
-    function-rgx: '((test_[a-z0-9_]{2,59})|([a-z_][a-z0-9_]{2,30}))$'
 pep257:
   disable:
     - D100  # Missing docstring in public module
