@@ -41,7 +41,7 @@ ADD h/_version.py                /src/h/h/
 # These files aren't needed in the container, but setup.py gets upset if they
 # are missing:
 RUN touch CHANGES.txt README.rst
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Node dependencies
 ADD package.json                 /src/h/
@@ -52,7 +52,7 @@ ADD Makefile                     /src/h/
 ADD gunicorn.conf.py             /src/h/
 ADD conf                         /src/h/conf
 ADD h                            /src/h/h
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Services (for runit)
 ADD ./svc /etc/service
