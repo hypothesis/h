@@ -15,7 +15,7 @@ class Subscriptions(Base):
     active = sa.Column(sa.BOOLEAN, default=True, nullable=False)
 
     @classmethod
-    def get_by_id(cls, request, id):
+    def get_by_id(cls, id):
         """Get a subscription by its primary key."""
         return cls.query.filter(cls.id == id).first()
 

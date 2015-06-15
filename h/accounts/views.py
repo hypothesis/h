@@ -483,7 +483,7 @@ class ProfileController(object):
     def unsubscribe(self):
         request = self.request
         subscription_id = request.GET['subscription_id']
-        subscription = Subscriptions.get_by_id(request, subscription_id)
+        subscription = Subscriptions.get_by_id(subscription_id)
         if subscription:
             subscription.active = False
             return {}
@@ -554,7 +554,7 @@ def _update_subscription_data(request, subscription):
     Using data from the passed subscription struct, find a subscription in the
     database, and update it (if it belongs to the current logged-in user).
     """
-    sub = Subscriptions.get_by_id(request, subscription['id'])
+    sub = Subscriptions.get_by_id(subscription['id'])
     if sub is None:
         return {
             'errors': {'subscriptions': _('Subscription not found')},
