@@ -79,7 +79,7 @@
 .annotation-license {
   clear: both;
   border-top: #cccccc 1px solid;
-  font-size: 0.9em;
+  font-size: 0.8em;
   padding-top: 0.583em;
 
   a {
@@ -88,8 +88,8 @@
   }
 
   @include icons {
-    font-size: 16px;
-    vertical-align: -3px;
+    font-size: 13px;
+    vertical-align: -2px;
     margin-right: 1px;
   }
 }
