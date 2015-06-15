@@ -17,7 +17,7 @@ def standalone_url(request, annotation_id):
 
 
 def get_user_by_name(request, username):
-    return models.User.get_by_username(request, username)
+    return models.User.get_by_username(username)
 
 
 def includeme(config):

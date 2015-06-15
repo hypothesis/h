@@ -8,13 +8,30 @@ import pytest
 
 from pyramid import testing
 from pyramid.paster import get_appsettings
-
-import pyramid_basemodel
 import transaction
 
-from sqlalchemy import engine_from_config
-from sqlalchemy.orm import scoped_session, sessionmaker
-from zope.sqlalchemy import ZopeTransactionExtension
+from h import db
+
+
+class DummySession(object):
+
+    """
+    A dummy database session.
+    """
+
+    def __init__(self):
+        self.added = []
+        self.deleted = []
+        self.flushed = False
+
+    def add(self, obj):
+        self.added.append(obj)
+
+    def delete(self, obj):
+        self.deleted.append(obj)
+
+    def flush(self):
+        self.flushed = True
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -54,42 +71,16 @@ def authn_policy(config):
 @pytest.fixture()
 def db_session(request, settings):
     """SQLAlchemy session."""
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    pyramid_basemodel.Session = _make_session()
-    pyramid_basemodel.bind_engine(engine, should_create=True, should_drop=True)
+    engine = db.make_engine(settings)
+    db.bind_engine(engine, should_create=True, should_drop=True)
 
     def destroy():
         transaction.commit()
-        pyramid_basemodel.Base.metadata.drop_all(engine)
-        pyramid_basemodel.Session.close()
+        db.Session.remove()
 
     request.addfinalizer(destroy)
 
-    return pyramid_basemodel.Session
-
-
-@pytest.fixture()
-def dummy_db_session(config):
-    from hem.interfaces import IDBSession
-
-    class DummySession(object):
-        def __init__(self):
-            self.added = []
-            self.deleted = []
-            self.flushed = False
-
-        def add(self, obj):
-            self.added.append(obj)
-
-        def delete(self, obj):
-            self.deleted.append(obj)
-
-        def flush(self):
-            self.flushed = True
-
-    sess = DummySession()
-    config.registry.registerUtility(sess, IDBSession)
-    return sess
+    return db.Session
 
 
 @pytest.fixture(autouse=True)

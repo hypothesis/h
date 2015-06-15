@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from hem.db import get_session
 from pyramid.view import view_config
 
 from h.notification.models import Subscriptions
@@ -11,16 +10,13 @@ def unsubscribe(request):
     payload = request.registry.notification_serializer.loads(token)
 
     subscriptions = Subscriptions.get_templates_for_uri_and_type(
-        request,
         payload['uri'],
-        payload['type'],
-    )
+        payload['type'])
 
-    db = get_session(request)
     for s in subscriptions:
         if s.active:
             s.active = False
-            db.add(s)
+            request.db.add(s)
 
     return {}
 

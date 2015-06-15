@@ -29,8 +29,7 @@ def get_blacklist():
 
 def email_exists(node, value):
     '''Colander validator that ensures a user with this email exists.'''
-    request = node.bindings['request']
-    user = User.get_by_email(request, value)
+    user = User.get_by_email(value)
     if not user:
         msg = _('We have no user with the email address "{}". Try correcting '
                 'this address or try another.')
@@ -39,8 +38,7 @@ def email_exists(node, value):
 
 def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
-    request = node.bindings['request']
-    user = User.get_by_email(request, value)
+    user = User.get_by_email(value)
     if user:
         msg = _("Sorry, an account with this email address already exists. "
                 "Try logging in instead.")
@@ -49,8 +47,7 @@ def unique_email(node, value):
 
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
-    request = node.bindings['request']
-    user = User.get_by_username(request, value)
+    user = User.get_by_username(value)
     if user:
         msg = _("Sorry, an account with this username already exists. "
                 "Please enter another one.")
@@ -104,14 +101,13 @@ class LoginSchema(CSRFSchema):
 
     def validator(self, node, value):
         super(LoginSchema, self).validator(node, value)
-        request = node.bindings['request']
 
         username = value.get('username')
         password = value.get('password')
 
-        user = User.get_by_username(request, username)
+        user = User.get_by_username(username)
         if user is None:
-            user = User.get_by_email(request, username)
+            user = User.get_by_email(username)
 
         if user is None:
             err = colander.Invalid(node)

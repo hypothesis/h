@@ -11,8 +11,7 @@ from h.accounts import schemas
 
 
 class DummyNode(object):
-    def __init__(self, request):
-        self.bindings = {'request': request}
+    pass
 
 
 def csrf_request(config):
@@ -46,20 +45,18 @@ def test_unblacklisted_username(config):
 
 
 def test_email_exists_looks_up_user_by_email(user_model):
-    request = DummyRequest()
-    node = DummyNode(request)
+    node = DummyNode()
 
     try:
         schemas.email_exists(node, "foo@bar.com")
     except:
         pass
 
-    user_model.get_by_email.assert_called_with(request, "foo@bar.com")
+    user_model.get_by_email.assert_called_with("foo@bar.com")
 
 
 def test_email_exists_valid_when_user_exists(user_model):
-    request = DummyRequest()
-    node = DummyNode(request)
+    node = DummyNode()
 
     result = schemas.email_exists(node, "foo@bar.com")
 
@@ -67,8 +64,7 @@ def test_email_exists_valid_when_user_exists(user_model):
 
 
 def test_email_exists_invalid_when_user_does_not_exist(user_model):
-    request = DummyRequest()
-    node = DummyNode(request)
+    node = DummyNode()
     user_model.get_by_email.return_value = None
 
     pytest.raises(colander.Invalid,
@@ -78,20 +74,18 @@ def test_email_exists_invalid_when_user_does_not_exist(user_model):
 
 
 def test_unique_email_looks_up_user_by_email(user_model):
-    request = DummyRequest()
-    node = DummyNode(request)
+    node = DummyNode()
 
     try:
         schemas.unique_email(node, "foo@bar.com")
     except:
         pass
 
-    user_model.get_by_email.assert_called_with(request, "foo@bar.com")
+    user_model.get_by_email.assert_called_with("foo@bar.com")
 
 
 def test_unique_email_invalid_when_user_exists(user_model):
-    request = DummyRequest()
-    node = DummyNode(request)
+    node = DummyNode()
 
     pytest.raises(colander.Invalid,
                   schemas.unique_email,
@@ -100,8 +94,7 @@ def test_unique_email_invalid_when_user_exists(user_model):
 
 
 def test_unique_email_invalid_when_user_does_not_exist(user_model):
-    request = DummyRequest()
-    node = DummyNode(request)
+    node = DummyNode()
     user_model.get_by_email.return_value = None
 
     result = schemas.unique_email(node, "foo@bar.com")

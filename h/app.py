@@ -46,6 +46,7 @@ def create_app(global_config, **settings):
 
     config.include('h.features')
 
+    config.include('h.db')
     config.include('h.views')
     config.include('h.renderers')
     config.include('h.api_client')

@@ -6,7 +6,6 @@ from datetime import datetime
 from pyramid.events import subscriber
 from pyramid.security import Everyone, principals_allowed_by_permission
 from pyramid.renderers import render
-from hem.db import get_session
 
 from h.notification.notifier import TemplateRenderException
 from h.notification import types
@@ -123,9 +122,7 @@ def generate_notifications(request, annotation, action):
     }
 
     subscriptions = Subscriptions.get_active_subscriptions_for_a_type(
-        request,
-        types.REPLY_TYPE
-    )
+        types.REPLY_TYPE)
     for subscription in subscriptions:
         data['subscription'] = subscription.__json__(request)
 
@@ -150,15 +147,14 @@ def generate_notifications(request, annotation, action):
 
 # Create a reply template for a uri
 def create_subscription(request, uri, active):
-    session = get_session(request)
     subs = Subscriptions(
         uri=uri,
         type=types.REPLY_TYPE,
         active=active
     )
 
-    session.add(subs)
-    session.flush()
+    request.db.add(subs)
+    request.db.flush()
 
 
 @subscriber(RegistrationEvent)
@@ -174,11 +170,8 @@ def registration_subscriptions(event):
 def check_reply_subscriptions(event):
     request = event.request
     user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
-    res = Subscriptions.get_templates_for_uri_and_type(
-        request,
-        user_uri,
-        types.REPLY_TYPE
-    )
+    res = Subscriptions.get_templates_for_uri_and_type(user_uri,
+                                                       types.REPLY_TYPE)
     if not len(res):
         create_subscription(event.request, user_uri, True)
         event.user.subscriptions = True

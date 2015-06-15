@@ -1,21 +1,30 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from datetime import timedelta
+import hashlib
+import random
 import re
+import string
 
 import cryptacular.bcrypt
-from hem.db import get_session
-from hem.interfaces import IDBSession
-from hem.text import generate_random_string
-from pyramid_basemodel import Base
-from pyramid_basemodel import Session
+from pyramid.compat import text_type
 import sqlalchemy as sa
-from sqlalchemy import or_
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from h.db import Base
 
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
+
+
+def _generate_random_string(length=12):
+    """Generate a random ascii string of the requested length."""
+    msg = hashlib.sha256()
+    word = ''
+    for _ in range(length):
+        word += random.choice(string.ascii_letters)
+    msg.update(word.encode('ascii'))
+    return text_type(msg.hexdigest()[:length])
 
 
 class Activation(Base):
@@ -35,7 +44,7 @@ class Activation(Base):
     code = sa.Column(sa.Unicode(30),
                      nullable=False,
                      unique=True,
-                     default=generate_random_string)
+                     default=_generate_random_string)
 
     # FIXME: remove these unused columns
     created_by = sa.Column(sa.Unicode(30), nullable=False, default=u'web')
@@ -44,10 +53,9 @@ class Activation(Base):
                             default=datetime.utcnow() + timedelta(days=3))
 
     @classmethod
-    def get_by_code(cls, request, code):
+    def get_by_code(cls, code):
         """Fetch an activation by code."""
-        session = get_session(request)
-        return session.query(cls).filter(cls.code == code).first()
+        return cls.query.filter(cls.code == code).first()
 
 
 class User(Base):
@@ -126,50 +134,35 @@ class User(Base):
 
     def _hash_password(self, password):
         if not self.salt:
-            self.salt = generate_random_string(24)
+            self.salt = _generate_random_string(24)
 
         return unicode(CRYPT.encode(password + self.salt))
 
     @classmethod
     def generate_random_password(cls, chars=12):
         """Generate a random string of fixed length."""
-        return generate_random_string(chars)
+        return _generate_random_string(chars)
 
     @classmethod
-    def get_by_email(cls, request, email):
+    def get_by_email(cls, email):
         """Fetch a user by email address."""
-        session = get_session(request)
-
-        return session.query(cls).filter(
+        return cls.query.filter(
             sa.func.lower(cls.email) == email.lower()
         ).first()
 
     @classmethod
-    def get_by_email_password(cls, request, email, password):
-        """Fetch a user by email address and validate their password."""
-        user = cls.get_by_email(request, email)
-
-        if user:
-            valid = cls.validate_user(user, password)
-
-            if valid:
-                return user
-
-    @classmethod
-    def get_by_activation(cls, request, activation):
+    def get_by_activation(cls, activation):
         """Fetch a user by activation instance."""
-        session = get_session(request)
-
-        user = session.query(cls).filter(
+        user = cls.query.filter(
             cls.activation_id == activation.id
         ).first()
 
         return user
 
     @classmethod
-    def get_user(cls, request, username, password):
+    def get_user(cls, username, password):
         """Fetch a user by username and validate their password."""
-        user = cls.get_by_username(request, username)
+        user = cls.get_by_username(username)
 
         valid = cls.validate_user(user, password)
 
@@ -201,28 +194,14 @@ class User(Base):
         """
         match = re.match(r'acct:([^@]+)@{}'.format(request.domain), userid)
         if match:
-            return cls.get_by_username(request, match.group(1))
-        session = get_session(request)
-        return session.query(cls).filter(cls.id == userid).first()
+            return cls.get_by_username(match.group(1))
+        return cls.query.filter(cls.id == userid).first()
 
     @classmethod
-    def get_by_username(cls, request, username):
-        session = get_session(request)
-
+    def get_by_username(cls, username):
+        """Fetch a user by username."""
         uid = _username_to_uid(username)
-        return session.query(cls).filter(cls.uid == uid).first()
-
-    @classmethod
-    def get_by_username_or_email(cls, request, username, email):
-        session = get_session(request)
-
-        uid = _username_to_uid(username)
-        return session.query(cls).filter(
-            or_(
-                cls.uid == uid,
-                cls.email == email
-            )
-        ).first()
+        return cls.query.filter(cls.uid == uid).first()
 
     # TODO: remove all this status bitfield stuff
     @property
@@ -279,8 +258,5 @@ def _username_to_uid(username):
     return username.replace('.', '').lower()
 
 
-def includeme(config):
-    registry = config.registry
-
-    if not registry.queryUtility(IDBSession):
-        registry.registerUtility(Session, IDBSession)
+def includeme(_):
+    pass

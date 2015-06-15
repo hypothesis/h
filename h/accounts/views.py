@@ -2,7 +2,6 @@
 import json
 
 import deform
-from hem.db import get_session
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
 from pyramid.security import forget
@@ -178,18 +177,17 @@ class ForgotPasswordController(object):
         #
         # TODO: fix this latent race condition by returning a user object in
         # the appstruct.
-        user = User.get_by_email(self.request, appstruct['email'])
+        user = User.get_by_email(appstruct['email'])
 
         # Create a new activation for this user. Any previous activation will
         # get overwritten.
         activation = Activation()
-        db = get_session(self.request)
-        db.add(activation)
+        self.request.db.add(activation)
         user.activation = activation
 
         # Write the new activation to the database in order to set up the
         # foreign key field and generate the code.
-        db.flush()
+        self.request.db.flush()
 
         # Send the reset password email
         code = user.activation.code
@@ -229,11 +227,11 @@ class ForgotPasswordController(object):
         if code is None:
             return httpexceptions.HTTPNotFound()
 
-        activation = Activation.get_by_code(self.request, code)
+        activation = Activation.get_by_code(code)
         if activation is None:
             return httpexceptions.HTTPNotFound()
 
-        user = User.get_by_activation(self.request, activation)
+        user = User.get_by_activation(activation)
         if user is None:
             return httpexceptions.HTTPNotFound()
 
@@ -245,8 +243,7 @@ class ForgotPasswordController(object):
             return err
 
         user.password = appstruct['password']
-        db = get_session(self.request)
-        db.delete(activation)
+        self.request.db.delete(activation)
 
         self.request.session.flash(_('Your password has been reset!'),
                                    'success')
@@ -300,21 +297,19 @@ class RegisterController(object):
         if err is not None:
             return err
 
-        db = get_session(self.request)
-
         # Create the new user from selected form fields
         props = {k: appstruct[k] for k in ['username', 'email', 'password']}
         user = User(**props)
-        db.add(user)
+        self.request.db.add(user)
 
         # Create a new activation for the user
         activation = Activation()
-        db.add(activation)
+        self.request.db.add(activation)
         user.activation = activation
 
         # Flush the session to ensure that the user can be created and the
         # activation is successfully wired up
-        db.flush()
+        self.request.db.flush()
 
         # Send the activation email
         message = activation_email(self.request, user)
@@ -360,17 +355,16 @@ class RegisterController(object):
         except ValueError:
             return httpexceptions.HTTPNotFound()
 
-        activation = Activation.get_by_code(self.request, code)
+        activation = Activation.get_by_code(code)
         if activation is None:
             return httpexceptions.HTTPNotFound()
 
-        user = User.get_by_activation(self.request, activation)
+        user = User.get_by_activation(activation)
         if user is None or user.id != id_:
             return httpexceptions.HTTPNotFound()
 
         # Activate the user (by deleting the activation)
-        db = get_session(self.request)
-        db.delete(activation)
+        self.request.db.delete(activation)
 
         self.request.session.flash(_("Your e-mail address has been verified. "
                                      "Thank you!"),
@@ -433,7 +427,7 @@ class ProfileController(object):
 
         email = appstruct.get('email')
         if email:
-            email_user = User.get_by_email(self.request, email)
+            email_user = User.get_by_email(email)
 
             if email_user:
                 if email_user.id != user.id:
@@ -459,7 +453,7 @@ class ProfileController(object):
         pwd = appstruct['pwd']
 
         # Password check
-        user = User.get_user(self.request, username, pwd)
+        user = User.get_user(username, pwd)
         if user:
             # TODO: maybe have an explicit disabled flag in the status
             user.password = User.generate_random_password()
@@ -481,15 +475,13 @@ class ProfileController(object):
             model["email"] = User.get_by_id(request, userid).email
         if request.registry.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
-                request,
-                userid
-            )
+                userid)
         return {'model': model}
 
     def unsubscribe(self):
         request = self.request
         subscription_id = request.GET['subscription_id']
-        subscription = Subscriptions.get_by_id(request, subscription_id)
+        subscription = Subscriptions.get_by_id(subscription_id)
         if subscription:
             subscription.active = False
             return {}
@@ -560,7 +552,7 @@ def _update_subscription_data(request, subscription):
     Using data from the passed subscription struct, find a subscription in the
     database, and update it (if it belongs to the current logged-in user).
     """
-    sub = Subscriptions.get_by_id(request, subscription['id'])
+    sub = Subscriptions.get_by_id(subscription['id'])
     if sub is None:
         return {
             'errors': {'subscriptions': _('Subscription not found')},
