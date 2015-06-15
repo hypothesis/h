@@ -10,10 +10,8 @@ def unsubscribe(request):
     payload = request.registry.notification_serializer.loads(token)
 
     subscriptions = Subscriptions.get_templates_for_uri_and_type(
-        request,
         payload['uri'],
-        payload['type'],
-    )
+        payload['type'])
 
     for s in subscriptions:
         if s.active:

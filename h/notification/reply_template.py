@@ -170,11 +170,8 @@ def registration_subscriptions(event):
 def check_reply_subscriptions(event):
     request = event.request
     user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
-    res = Subscriptions.get_templates_for_uri_and_type(
-        request,
-        user_uri,
-        types.REPLY_TYPE
-    )
+    res = Subscriptions.get_templates_for_uri_and_type(user_uri,
+                                                       types.REPLY_TYPE)
     if not len(res):
         create_subscription(event.request, user_uri, True)
         event.user.subscriptions = True

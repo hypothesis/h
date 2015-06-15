@@ -35,7 +35,7 @@ class Subscriptions(Base):
         ).all()
 
     @classmethod
-    def get_templates_for_uri_and_type(cls, request, uri, ttype):
+    def get_templates_for_uri_and_type(cls, uri, ttype):
         return cls.query.filter(
             and_(
                 func.lower(cls.uri) == func.lower(uri),
