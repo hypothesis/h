@@ -475,9 +475,7 @@ class ProfileController(object):
             model["email"] = User.get_by_id(request, userid).email
         if request.registry.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
-                request,
-                userid
-            )
+                userid)
         return {'model': model}
 
     def unsubscribe(self):

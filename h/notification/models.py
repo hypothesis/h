@@ -29,7 +29,7 @@ class Subscriptions(Base):
         ).all()
 
     @classmethod
-    def get_subscriptions_for_uri(cls, request, uri):
+    def get_subscriptions_for_uri(cls, uri):
         return cls.query.filter(
             func.lower(cls.uri) == func.lower(uri)
         ).all()

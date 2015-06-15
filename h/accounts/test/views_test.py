@@ -841,7 +841,7 @@ def test_profile_looks_up_subs_by_logged_in_user(authn_policy,
     ProfileController(request).profile()
 
     subscriptions_model.get_subscriptions_for_uri.assert_called_with(
-        request, "acct:foo@bar.com")
+        "acct:foo@bar.com")
 
 
 @pytest.mark.usefixtures('subscriptions_model')
