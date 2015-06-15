@@ -20,10 +20,6 @@ class Subscriptions(Base):
         return cls.query.filter(cls.id == id).first()
 
     @classmethod
-    def get_active_subscriptions(cls, request):
-        return cls.query.filter(cls.active).all()
-
-    @classmethod
     def get_active_subscriptions_for_a_type(cls, request, ttype):
         return cls.query.filter(
             and_(
