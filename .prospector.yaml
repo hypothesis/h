@@ -8,6 +8,8 @@ pylint:
   enable:
     - relative-import
   disable:
+    - line-too-long  # PEP8 checks this and doesn't complain about
+                     # unavoidable long lines (such as URLs).
     - R0903  # Too few public methods
     - W0142  # Used * or ** magic
   options:
