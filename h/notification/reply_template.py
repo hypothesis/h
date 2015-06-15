@@ -122,9 +122,7 @@ def generate_notifications(request, annotation, action):
     }
 
     subscriptions = Subscriptions.get_active_subscriptions_for_a_type(
-        request,
-        types.REPLY_TYPE
-    )
+        types.REPLY_TYPE)
     for subscription in subscriptions:
         data['subscription'] = subscription.__json__(request)
 
