@@ -8,9 +8,30 @@ import logging
 
 import webob.multidict
 
-from h.api.models import Annotation
+from h.api import models
 
 log = logging.getLogger(__name__)
+
+
+def _match_clause_for_uri(uri):
+    """Return an Elasticsearch match clause dict for the given URI."""
+    if not uri:
+        return None
+
+    # Attempt to expand the query to include URIs for other representations of
+    # the same document, using information we may have on hand about the
+    # document.
+    doc = models.Document.get_by_uri(uri)
+    if doc:
+        uri_matchers = [{"match": {"uri": u}} for u in doc.uris()]
+        return {
+            "bool": {
+                "minimum_should_match": 1,
+                "should": uri_matchers
+            }
+        }
+    else:
+        return {"match": {"uri": "http://example.com/"}}
 
 
 def build_query(request_params):
@@ -60,6 +81,10 @@ def build_query(request_params):
     }
 
     matches = []
+    uri_match_clause = _match_clause_for_uri(request_params.pop("uri", None))
+    if uri_match_clause:
+        matches.append(uri_match_clause)
+
     if "any" in request_params:
         matches.append({
             "multi_match": {
@@ -99,9 +124,9 @@ def search(request_params, user=None):
               request_params.get('uri'))
 
     query = build_query(request_params)
-    results = Annotation.search_raw(query, user=user)
-    count = Annotation.search_raw(query, {'search_type': 'count'},
-                                  raw_result=True)
+    results = models.Annotation.search_raw(query, user=user)
+    count = models.Annotation.search_raw(query, {'search_type': 'count'},
+                                         raw_result=True)
     return {"rows": results, "total": count["hits"]["total"]}
 
 
