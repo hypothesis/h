@@ -232,19 +232,58 @@ def test_build_query_with_multiple_keywords():
     }
 
 
-def test_build_query_for_uri():
+@mock.patch("h.api.search.models")
+def test_build_query_for_uri(models):
     """'uri' args are returned in the query dict in a "match" clause.
 
     This is what happens when you open the sidebar on a page and it loads
     all the annotations of that page.
 
     """
+    models.Document.get_by_uri.return_value = None
+
     query = search.build_query(
         request_params=multidict.NestedMultiDict(
             {"uri": "http://example.com/"}))
 
     assert query["query"] == {
         "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
+
+
+@mock.patch("h.api.search.models")
+def test_build_query_for_uri_with_multiple_representations(models):
+    """It should search for any URI returned by the Document class.
+
+    If models.Document.get_by_uri() returns multiple documents for the URI then
+    build_query() should return a query that finds annotations that match one
+    or more of these documents' URIs.
+
+    """
+    doc = mock.MagicMock()
+    doc.uris.return_value = [
+        "http://example.com/", "http://example2.com/", "http://example3.com/"]
+    models.Document.get_by_uri.return_value = doc
+
+    query = search.build_query(
+        request_params=multidict.NestedMultiDict(
+            {"uri": "http://example.com/"}))
+
+    assert query["query"] == {
+        "bool": {
+            "must": [
+                {
+                    "bool": {
+                        "minimum_should_match": 1,
+                        "should": [
+                            {"match": {"uri": "http://example.com/"}},
+                            {"match": {"uri": "http://example2.com/"}},
+                            {"match": {"uri": "http://example3.com/"}}
+                        ]
+                    }
+                }
+            ]
+        }
+    }
 
 
 def test_build_query_with_single_text_param():
