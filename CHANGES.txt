@@ -1,3 +1,25 @@
+0.4.2 (2015-06-16)
+==================
+
+- Silence SQLAlchemy warnings (#2258)
+- Show errors when math parsing fails (#2241)
+- Let users change their email address (#2131)
+- Fix inappropriate WebSocket error reporting in logs (#2256)
+- Support for Python 2.7.9
+- Improve extension build documentation (#2265)
+- Remove dependency on horus
+  (#2274, #2281, #2284, #2291, #2313, #2312, #2317, #2318)
+- Keep CSS for annotator component separate from the site (#2279)
+- Prevent environment variables from interfering with tests (#2283)
+- Clearly indicate support for using email addresses for login (#2288)
+- Improve search code (#2282)
+- Improve reporting of form errors (#2290)
+- Support anonymous CORS in the API (#2303)
+- Remove unnecessary toast messages when editing a user profile (#2310)
+- Improve Docker build caching (#2311)
+- Upgrade gnsq dependency
+- Simplify database session handling (#2320)
+
 0.4.1 (2015-05-21)
 ==================
 
