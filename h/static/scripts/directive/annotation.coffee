@@ -56,6 +56,7 @@ AnnotationController = [
     @embedded = false
     @hasDiff = false
     @showDiff = undefined
+    @privacyLevel = null
     @timestamp = null
 
     model = $scope.annotationGet()

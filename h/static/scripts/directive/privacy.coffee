@@ -60,6 +60,7 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
 
   require: '?ngModel'
   restrict: 'E'
-  scope: {}
+  scope:
+    level: '='
   templateUrl: 'privacy.html'
 ]
