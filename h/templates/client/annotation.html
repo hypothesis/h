@@ -9,8 +9,7 @@
        ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
        >{{vm.annotation.user | persona}}</a>
     <i class="h-icon-lock" ng-show="vm.isPrivate() && !vm.editing"></i>
-    <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing"></i>
-    <i class="h-icon-insert-comment" ng-show="vm.isComment()"></i>
+    <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
     <span class="annotation-citation"
           ng-if="!vm.embedded"
           ng-show="vm.document.title">
