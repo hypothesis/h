@@ -1,19 +1,11 @@
 @import "base.scss";
 @import "mixins/icons";
 
-.simple-search {
-  overflow: hidden;
-}
-
 .simple-search-form {
   @include clearfix;
   position: relative;
-  padding: 0 1.5385em;
-  color: $gray-darker;
-}
-
-.simple-search-form * {
-  line-height: inherit;
+  padding: 0 2em;
+  color: $gray-dark;
 }
 
 .simple-search-icon {
@@ -27,7 +19,6 @@
 }
 
 input.simple-search-input {
-  float: left;
   outline: none;
   color: $text-color;
   width: 100%;

@@ -30,12 +30,12 @@ module.exports = ['$http', '$parse', ($http, $parse) ->
               <input class="simple-search-input" type="text" ng-model="searchtext" name="searchText"
                      placeholder="{{loading && 'Loading' || 'Search'}}…"
                      ng-disabled="loading" />
-              <span class="simple-search-icon" ng-hide="loading">
-                <i class="h-icon-search"></i>
-              </span>
-              <span class="simple-search-icon" ng-show="loading">
-                <i class="spinner"></i>
-              </span>
+              <button class="simple-search-icon btn btn-clean" ng-hide="loading">
+                <i class="h-icon-search btn-icon"></i>
+              </button>
+              <button class="simple-search-icon btn btn-clean" ng-show="loading" disabled>
+                <span class="btn-icon"><span class="spinner"></span></span>
+              </button>
             </form>
             '''
 ]

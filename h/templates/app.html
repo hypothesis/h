@@ -7,34 +7,33 @@
 {% block content %}
   <!-- Toolbar -->
   <div class="ng-cloak topbar" ng-class="frame.visible && 'shown'">
-    <div class="inner" ng-switch="auth.user">
-      <span class="pull-right" ng-switch-when="undefined">⋯</span>
-      <div class="dropdown pull-right user-picker">
-        <span role="button"
-              class="dropdown-toggle"
-              data-toggle="dropdown">{% raw %}{{ auth.user|persona }}{% endraw %}<!--
-          --><span class="provider" ng-show="auth.user">/{% raw %}{{ auth.user|persona:'provider' }}{% endraw %}</span><!--
-          --><i class="h-icon-arrow-drop-down"></i></span>
-        <ul class="dropdown-menu pull-right" role="menu">
-          <li ng-show="auth.user"><a href="" ng-click="accountDialog.visible='true'">Account</a></li>
-          <li><a href="mailto:support@hypothes.is">Feedback</a></li>
-          <li><a href="/docs/help" target="_blank">Help</a></li>
-          <li ng-show="auth.user"><a href="/stream?q=user:{% raw %}{{ auth.user|persona }}{% endraw %}"
-                 target="_blank">My Annotations</a></li>
-          <li ng-show="auth.user"><a href="" ng-click="logout()">Sign out</a></li>
-        </ul>
+    <div class="inner content">
+      <div class="pull-left">
+        <button class="btn btn-clean"
+              ng-click="shareDialog.visible = !shareDialog.visible"
+              ng-show="showShareButton"
+              ><i href="" title="Share this page" class="h-icon-share btn-icon"></i></button>
       </div>
-      <a class="pull-right" href=""
-         ng-click="login()"
-         ng-switch-when="null">Sign in</a>
 
-      <!-- Share this page -->
-      <span class="share-dialog-toggle" ng-show="showShareButton">
-        <i class="h-icon-share"
-           title="Share this page"
-           ng-click="shareDialog.visible = !shareDialog.visible"></i>
-      </span>
-      <!-- / Share this page -->
+      <div class="pull-right" ng-switch="auth.user">
+        <span ng-switch-when="undefined">⋯</span>
+        <a href="" ng-click="login()" ng-switch-when="null">Sign in</a>
+        <div class="dropdown pull-right user-picker">
+          <span role="button"
+                class="dropdown-toggle"
+                data-toggle="dropdown">{% raw %}{{ auth.user|persona }}{% endraw %}<!--
+            --><span class="provider" ng-show="auth.user">/{% raw %}{{ auth.user|persona:'provider' }}{% endraw %}</span><!--
+            --><i class="h-icon-arrow-drop-down"></i></span>
+          <ul class="dropdown-menu pull-right" role="menu">
+            <li ng-show="auth.user"><a href="" ng-click="accountDialog.visible='true'">Account</a></li>
+            <li><a href="mailto:support@hypothes.is">Feedback</a></li>
+            <li><a href="/docs/help" target="_blank">Help</a></li>
+            <li ng-show="auth.user"><a href="/stream?q=user:{% raw %}{{ auth.user|persona }}{% endraw %}"
+                                       target="_blank">My Annotations</a></li>
+            <li ng-show="auth.user"><a href="" ng-click="logout()">Sign out</a></li>
+          </ul>
+        </div>
+      </div>
 
       <!-- Searchbar -->
       <div class="simple-search"

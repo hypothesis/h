@@ -110,22 +110,6 @@ html {
   }
 }
 
-
-// Share this view /////////////////////
-.share-dialog-toggle {
-  top: 1px;
-  left: 8px;
-  position: relative;
-  cursor: pointer;
-  color: $gray-light;
-  float: left;
-  margin-right: 15px;
-
-  &:hover {
-    color: $gray-dark;
-  }
-}
-
 .share-links {
   a {
     font-size: 1.5em;
