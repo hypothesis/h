@@ -35,6 +35,13 @@
     <!-- / Editing controls -->
   </span>
 
+  <span class="annotation-collapsed-replies">
+    <a class="reply-count small" href=""
+       ng-click="replyCountClick()"
+       ng-pluralize count="replyCount"
+       when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
+  </span>
+
   <!-- Timestamp -->
   <a class="annotation-timestamp small pull-right"
      target="_blank"

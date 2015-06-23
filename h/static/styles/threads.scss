@@ -16,9 +16,40 @@ $threadexp-width: 1em;
   }
 }
 
+.annotation-collapsed-replies {
+  display: none;
+}
+
 .thread-replies {
   .thread:first-child {
     margin-top: 0.5em;
+  }
+
+  .reply-count {
+    display: none;
+  }
+
+  .thread-message {
+    &.collapsed {
+      margin-bottom: -2.5em;
+    }
+  }
+
+  .annotation {
+    &.collapsed {
+      .annotation-body, .tags, .annotation-actions {
+        display: none;
+      }
+
+      .annotation-collapsed-replies {
+        display: inline;
+
+        .reply-count {
+          display: inline;
+          margin-left: .4em;
+        }
+      }
+    }
   }
 }
 
@@ -58,10 +89,10 @@ $threadexp-width: 1em;
     height: 1.4em;
     top: 0;
     left: -.7em;
+    font-size: 1.4em;
 
     span {
       position: absolute;
-      top: (1.4 - $threadexp-width) / 2;
       left: (1.4 - $threadexp-width) / 2;
       width: $threadexp-width;
       height: $threadexp-width;
