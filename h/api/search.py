@@ -31,7 +31,7 @@ def _match_clause_for_uri(uri):
             }
         }
     else:
-        return {"match": {"uri": "http://example.com/"}}
+        return {"match": {"uri": uri}}
 
 
 def build_query(request_params):
