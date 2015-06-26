@@ -71,6 +71,7 @@ search
 ------
 
 .. http:get:: /api/search
+.. _part: https://github.com/hypothesis/h/blob/eaa949280e19d8b4f28040e6ecd0b0aaffdba159/h/models.py#L149
 
    Search for annotations.
 
@@ -110,6 +111,7 @@ search
    :query limit: number of results to return
    :query offset: index into the complete result set
    :query uri: limit results to annotations of `uri` (must be urlencoded)
+   :query uri.parts: limit results to annotations containing any part_ of `uri.parts`
    :query user: limit results to annotations created by `user`
    :query quote: limit results to annotations where quoted text contains `quote`
    :query text: limit results to annotations where body test contains `text`
