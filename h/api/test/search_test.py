@@ -242,12 +242,17 @@ def test_build_query_for_uri(models):
     """
     models.Document.get_by_uri.return_value = None
 
-    query = search.build_query(
+    query1 = search.build_query(
         request_params=multidict.NestedMultiDict(
             {"uri": "http://example.com/"}))
+    query2 = search.build_query(
+        request_params=multidict.NestedMultiDict(
+            {"uri": "http://whitehouse.gov/"}))
 
-    assert query["query"] == {
+    assert query1["query"] == {
         "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
+    assert query2["query"] == {
+        "bool": {"must": [{"match": {"uri": "http://whitehouse.gov/"}}]}}
 
 
 @mock.patch("h.api.search.models")
