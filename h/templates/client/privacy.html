@@ -5,7 +5,7 @@
         data-toggle="dropdown">
         <i class="small" ng-class="{'h-icon-public': isPublic(level.name),
                                     'h-icon-lock': !isPublic(level.name)}"></i>
-        {{level.text}}
+        <span ng-bind="level.text"></span>
         <i class="h-icon-arrow-drop-down"></i>
   </span>
   <ul class="dropdown-menu" role="menu">
@@ -13,7 +13,7 @@
       <a href="">
         <i class="small" ng-class="{'h-icon-public': isPublic(level.name),
                                     'h-icon-lock': !isPublic(level.name)}"></i>
-        {{level.text}}
+        <span ng-bind="level.text"></span>
       </a>
     </li>
   </ul>
