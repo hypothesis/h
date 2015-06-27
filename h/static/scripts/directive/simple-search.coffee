@@ -1,5 +1,10 @@
 module.exports = ['$http', '$parse', ($http, $parse) ->
   link: (scope, elem, attr, ctrl) ->
+    button = elem.find('button')
+    input = elem.find('input')
+
+    button.on('click', -> input.focus())
+
     scope.reset = (event) ->
       event.preventDefault()
       scope.query = ''
