@@ -73,6 +73,10 @@ findPage = (offset) ->
 # :rtype: Promise
 ####
 exports.anchor = (selectors, options = {}) ->
+  # Cache of anchoring data
+  cache = options.cache ? {}
+  cache.quotePosition ?= {}
+
   # Selectors
   position = null
   quote = null
@@ -131,10 +135,18 @@ exports.anchor = (selectors, options = {}) ->
     promise = promise.catch ->
       {pagesCount} = PDFViewerApplication.pdfViewer
 
+      if cache.quotePosition[quote.exact]?
+        {page, anchor} = cache.quotePosition[quote.exact]
+        return anchorByPosition(page, anchor)
+
+      storeAndAnchor = (page, anchor) ->
+        cache.quotePosition[quote.exact] = {page, anchor}
+        return anchorByPosition(page, anchor)
+
       pageSearches = for pageIndex in [0...pagesCount]
         page = getPage(pageIndex)
         content = getPageTextContent(pageIndex)
-        offset = getPageOffset(pageIndex, options.cache)
+        offset = getPageOffset(pageIndex, cache)
         Promise.all([content, offset, page]).then (results) ->
           [content, offset, page] = results
           pageOptions = {root: {textContent: content}}
@@ -146,7 +158,7 @@ exports.anchor = (selectors, options = {}) ->
           anchor = new TextQuoteAnchor.fromSelector(quote, pageOptions)
           return Promise.resolve(anchor)
           .then((a) -> return a.toPositionAnchor(pageOptions))
-          .then((a) -> return anchorByPosition(page, a))
+          .then((a) -> return storeAndAnchor(page, a))
 
       pageSearches = (p.catch(-> null) for p in pageSearches)
       return Promise.all(pageSearches).then (results) ->
@@ -158,6 +170,9 @@ exports.anchor = (selectors, options = {}) ->
 
 
 exports.describe = (range, options = {}) ->
+  # Cache of anchoring data
+  cache = options.cache ? {}
+
   range = new xpathRange.BrowserRange(range).normalize()
 
   startTextLayer = getNodeTextLayer(range.start)
@@ -178,7 +193,7 @@ exports.describe = (range, options = {}) ->
   start = seek(iter, range.start)
   end = seek(iter, range.end) + start + range.end.textContent.length
 
-  return getPageOffset(startPageIndex, options.cache).then (pageOffset) ->
+  return getPageOffset(startPageIndex, cache).then (pageOffset) ->
     # XXX: range covers only one page
     start += pageOffset
     end += pageOffset
