@@ -143,11 +143,12 @@ exports.anchor = (selectors, options = {}) ->
         cache.quotePosition[quote.exact] = {page, anchor}
         return anchorByPosition(page, anchor)
 
-      pageSearches = for pageIndex in [0...pagesCount]
+      findInPages = ([pageIndex, rest...]) ->
         page = getPage(pageIndex)
         content = getPageTextContent(pageIndex)
         offset = getPageOffset(pageIndex, cache)
-        Promise.all([content, offset, page]).then (results) ->
+        Promise.all([content, offset, page])
+        .then (results) ->
           [content, offset, page] = results
           pageOptions = {root: {textContent: content}}
           if position?
@@ -159,12 +160,13 @@ exports.anchor = (selectors, options = {}) ->
           return Promise.resolve(anchor)
           .then((a) -> return a.toPositionAnchor(pageOptions))
           .then((a) -> return storeAndAnchor(page, a))
+        .catch ->
+          if rest.length
+            return findInPages(rest)
+          else
+            throw new Error('quote not found')
 
-      pageSearches = (p.catch(-> null) for p in pageSearches)
-      return Promise.all(pageSearches).then (results) ->
-        for result in results when result?
-          return result
-        throw new Error('quote not found')
+      return findInPages([0...pagesCount])
 
   return promise
 
