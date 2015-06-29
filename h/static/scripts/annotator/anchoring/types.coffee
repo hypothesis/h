@@ -74,7 +74,9 @@ class RangeAnchor extends Anchor
   constructor: (@range) ->
     unless @range? then missingParameter('range')
 
-  @fromRange: (range) ->
+  @fromRange: (range, options = {}) ->
+    root = options.root or document.body
+    range = xpathRange.sniff(range).normalize(root)
     return new RangeAnchor(range)
 
   # Create and anchor using the saved Range selector.
@@ -86,16 +88,17 @@ class RangeAnchor extends Anchor
       end: selector.endContainer
       endOffset: selector.endOffset
     }
-    range = new xpathRange.SerializedRange(data).normalize(root).toRange()
+    range = new xpathRange.SerializedRange(data).normalize(root)
     return new RangeAnchor(range)
 
-  toRange: ->
-    return @range
+  toRange: (options = {}) ->
+    root = options.root or document.body
+    return @range.toRange()
 
   toSelector: (options = {}) ->
     root = options.root or document.body
     ignoreSelector = options.ignoreSelector
-    range = new xpathRange.BrowserRange(@range).serialize(root, ignoreSelector)
+    range = @range.serialize(root, ignoreSelector)
     return {
       type: 'RangeSelector'
       startContainer: range.start
