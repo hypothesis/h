@@ -75,6 +75,7 @@ findPage = (offset) ->
 exports.anchor = (selectors, options = {}) ->
   # Cache of anchoring data
   cache = options.cache ? {}
+  cache.pageOffset ?= {}
   cache.quotePosition ?= {}
 
   # Selectors
@@ -146,7 +147,7 @@ exports.anchor = (selectors, options = {}) ->
       findInPages = ([pageIndex, rest...]) ->
         page = getPage(pageIndex)
         content = getPageTextContent(pageIndex)
-        offset = getPageOffset(pageIndex, cache)
+        offset = getPageOffset(pageIndex, cache.pageOffset)
         Promise.all([content, offset, page])
         .then (results) ->
           [content, offset, page] = results
@@ -166,7 +167,22 @@ exports.anchor = (selectors, options = {}) ->
           else
             throw new Error('quote not found')
 
-      return findInPages([0...pagesCount])
+      pages = [0...pagesCount]
+
+      if position?
+        return findPage(position.start)
+        .then ({index, offset, textContent}) ->
+          left = pages.slice(0, index)
+          right = pages.slice(index)
+          pages = []
+          while left.length or right.length
+            if right.length
+              pages.push(right.shift())
+            if left.length
+              pages.push(left.pop())
+          return findInPages(pages)
+      else
+        findInPages(pages)
 
   return promise
 
@@ -174,6 +190,8 @@ exports.anchor = (selectors, options = {}) ->
 exports.describe = (range, options = {}) ->
   # Cache of anchoring data
   cache = options.cache ? {}
+  cache.pageOffset ?= {}
+  cache.quotePosition ?= {}
 
   range = new xpathRange.BrowserRange(range).normalize()
 
@@ -195,7 +213,7 @@ exports.describe = (range, options = {}) ->
   start = seek(iter, range.start)
   end = seek(iter, range.end) + start + range.end.textContent.length
 
-  return getPageOffset(startPageIndex, cache).then (pageOffset) ->
+  return getPageOffset(startPageIndex, cache.pageOffset).then (pageOffset) ->
     # XXX: range covers only one page
     start += pageOffset
     end += pageOffset
