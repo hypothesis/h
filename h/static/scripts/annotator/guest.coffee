@@ -40,6 +40,7 @@ module.exports = class Guest extends Annotator
     super
 
     this.anchors = []
+    this.anchoringCache = {}
 
     cfOptions =
       on: (event, handler) =>
@@ -159,7 +160,10 @@ module.exports = class Guest extends Annotator
     annotation.target ?= []
 
     locate = (target) ->
-      options = {ignoreSelector: '[class^="annotator-"]'}
+      options = {
+        cache: self.anchoringCache
+        ignoreSelector: '[class^="annotator-"]'
+      }
       return new Promise(raf)
       .then(-> anchoring.anchor(target.selector, options))
       .then((range) -> {annotation, target, range})
@@ -214,11 +218,16 @@ module.exports = class Guest extends Annotator
     return annotation
 
   createAnnotation: (annotation = {}) ->
+    self = this
+
     ranges = @selectedRanges ? []
     @selectedRanges = null
 
     getSelectors = (range) ->
-      options = {ignoreSelector: '[class^="annotator-"]'}
+      options = {
+        cache: self.anchoringCache
+        ignoreSelector: '[class^="annotator-"]'
+      }
       return anchoring.describe(range, options)
 
     setDocumentInfo = ({metadata, uri}) ->

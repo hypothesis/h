@@ -27,18 +27,15 @@ getPageTextContent = (pageIndex) ->
   .then((textContent) -> (item.str for item in textContent.items).join(''))
 
 
-# XXX: This will break if the viewer changes documents
-_pageOffsetCache = {}
-
-getPageOffset = (pageIndex) ->
+getPageOffset = (pageIndex, cache = {}) ->
   index = -1
 
-  if _pageOffsetCache[pageIndex]?
-    return Promise.resolve(_pageOffsetCache[pageIndex])
+  if cache[pageIndex]?
+    return Promise.resolve(cache[pageIndex])
 
   next = (offset) ->
     if ++index is pageIndex
-      _pageOffsetCache[pageIndex] = offset
+      cache[pageIndex] = offset
       return Promise.resolve(offset)
 
     return getPageTextContent(index)
@@ -137,7 +134,7 @@ exports.anchor = (selectors, options = {}) ->
       pageSearches = for pageIndex in [0...pagesCount]
         page = getPage(pageIndex)
         content = getPageTextContent(pageIndex)
-        offset = getPageOffset(pageIndex)
+        offset = getPageOffset(pageIndex, options.cache)
         Promise.all([content, offset, page]).then (results) ->
           [content, offset, page] = results
           pageOptions = {root: {textContent: content}}
@@ -181,7 +178,7 @@ exports.describe = (range, options = {}) ->
   start = seek(iter, range.start)
   end = seek(iter, range.end) + start + range.end.textContent.length
 
-  return getPageOffset(startPageIndex).then (pageOffset) ->
+  return getPageOffset(startPageIndex, options.cache).then (pageOffset) ->
     # XXX: range covers only one page
     start += pageOffset
     end += pageOffset
