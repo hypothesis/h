@@ -164,14 +164,13 @@ module.exports = class Guest extends Annotator
         cache: self.anchoringCache
         ignoreSelector: '[class^="annotator-"]'
       }
-      return new Promise(raf)
-      .then(-> anchoring.anchor(target.selector, options))
+      return anchoring.anchor(target.selector, options)
       .then((range) -> {annotation, target, range})
       .catch(-> {annotation, target})
 
     highlight = (anchor) ->
       if anchor.range?
-        return new Promise(raf).then ->
+        raf ->
           range = Annotator.Range.sniff(anchor.range)
           normedRange = range.normalize(self.element[0])
           highlights = highlighter.highlightRange(normedRange)
@@ -180,7 +179,6 @@ module.exports = class Guest extends Annotator
           anchor.pos =
             left: rect.left + window.scrollX
             top: rect.top + window.scrollY
-          return anchor
       return anchor
 
     sync = (anchors) ->
@@ -207,7 +205,7 @@ module.exports = class Guest extends Annotator
         self.anchors.push(anchor)
 
     deadHighlights = Array::concat(deadHighlights...)
-    new Promise(raf).then(-> highlighter.removeHighlights(deadHighlights))
+    raf -> highlighter.removeHighlights(deadHighlights)
 
     for target in annotation.target when target not in anchoredTargets
       anchor = locate(target).then(highlight)
@@ -267,7 +265,7 @@ module.exports = class Guest extends Annotator
     this.plugins.BucketBar?.update()
 
     unhighlight = Array::concat(unhighlight...)
-    new Promise(raf).then(-> highlighter.removeHighlights(unhighlight))
+    raf -> highlighter.removeHighlights(unhighlight)
 
     return annotation
 
