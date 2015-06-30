@@ -182,7 +182,7 @@ def render_annotations(
 
     def annotation_api_url(annotation):
         """Return the JSON API URL for the given annotation."""
-        return request.resource_url(request.root, "api", "annotation",
+        return request.resource_url(request.root, "api", "annotations",
                                     annotation["id"])
 
     feed = _feed_from_annotations(
