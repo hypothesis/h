@@ -26,13 +26,14 @@ getPageTextContent = (pageIndex, cache) ->
   if cache[pageIndex]?
     return Promise.resolve(cache[pageIndex])
   else
-    return PDFViewerApplication.pdfViewer.getPageTextContent(pageIndex)
-    .then((textContent) -> (item.str for item in textContent.items).join(''))
-    .then((textContent) ->
+    joinItems = ({items}) ->
+      nonEmpty = (item.str for item in items when /\S/.test(item.str))
+      textContent = nonEmpty.join('')
       cache[pageIndex] = textContent
       return textContent
-    )
 
+    return PDFViewerApplication.pdfViewer.getPageTextContent(pageIndex)
+    .then(joinItems)
 
 getPageOffset = (pageIndex, cache = {}) ->
   index = -1
