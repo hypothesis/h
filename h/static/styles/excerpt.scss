@@ -1,0 +1,50 @@
+.excerpt {
+  position: relative;
+
+  &.show-full-excerpt {
+    max-height: 100% !important;
+  }
+
+  .more, .less {
+    color: rgba(189, 28, 43, 0.5);
+    background: #fff;
+    font-style: italic;
+    font-family: Georgia,"Bitstream Charter","Times","Times New Roman",serif;
+
+    &:hover {
+      color: #BD1C2B;
+    }
+  }
+
+  .more {
+    position: relative;
+    float: right;
+    margin-top: -1.99em;
+    -webkit-margin-end: -2em;
+
+    &:before {
+      opacity: .8;
+      content: " ";
+      margin-left: -3em;
+      padding-right: 40px;
+      background: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, 0)), to(white), color-stop(50%, white));
+      background: -moz-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+      background: -o-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+      background: -ms-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+      background: linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+    }
+  }
+}
+
+// Hide excerpts when editing annotation.
+.editing {
+  .annotation-body {
+    .more {
+      display: none;
+    }
+    .less {
+      display: none;
+    }
+  }
+}
+
