@@ -8,6 +8,9 @@ class PDF extends Annotator.Plugin
   pdfViewer: null
 
   pluginInit: ->
+    @annotator.anchoringCache.pageText = {}
+    @annotator.anchoringCache.quotePosition = {}
+
     @pdfViewer = PDFViewerApplication.pdfViewer
     @pdfViewer.viewer.classList.add('has-transparent-text-layer')
 
