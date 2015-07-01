@@ -8,6 +8,7 @@ install:
   - gem install compass
   - pip install -U pip wheel
   - pip install coveralls pyramid_redis_sessions
+  - npm install
   - make
 script:
   # Run all tests, with coverage if possible
