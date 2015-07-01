@@ -354,6 +354,29 @@ def test_build_query_with_evil_arguments():
     assert query["query"] == {'bool': {'must': [{'match_all': {}}]}}
 
 
+def test_build_query_with_arbitrary_params():
+    """You can pass any ?foo=bar param to the search API.
+
+    Arbitrary parameters that aren't handled specially are simply passed to
+    Elasticsearch as match clauses. This way search queries can match against
+    any fields in the Elasticsearch object.
+
+    """
+    params = multidict.NestedMultiDict({"foo.bar": "arbitrary"})
+
+    query = search.build_query(request_params=params)
+
+    assert query["query"] == {
+        'bool': {
+            'must': [
+                {
+                    'match': {'foo.bar': 'arbitrary'}
+                }
+            ]
+        }
+    }
+
+
 @mock.patch("annotator.annotation.Annotation.search_raw")
 def test_search_with_user_object(search_raw):
     """If search() gets a user arg it passes it to search_raw().
