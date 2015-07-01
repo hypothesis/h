@@ -1,3 +1,4 @@
+extend = require('extend')
 Promise = global.Promise ? require('es6-promise').Promise
 Annotator = require('annotator')
 
@@ -8,8 +9,21 @@ class PDF extends Annotator.Plugin
   pdfViewer: null
 
   pluginInit: ->
-    @annotator.anchoringCache.pageText = {}
-    @annotator.anchoringCache.quotePosition = {}
+    cache = {
+      pageText: {}
+      quotePosition: {}
+    }
+
+    anchoring = require('../anchoring/pdf')
+
+    @annotator.anchoring = {
+      anchor: (selectors, options = {}) ->
+        options = extend({}, options, {cache})
+        return anchoring.anchor(selectors, options)
+      describe: (range, options = {}) ->
+        options = extend({}, options, {cache})
+        return anchoring.describe(range, options)
+    }
 
     @pdfViewer = PDFViewerApplication.pdfViewer
     @pdfViewer.viewer.classList.add('has-transparent-text-layer')

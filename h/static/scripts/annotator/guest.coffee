@@ -3,7 +3,6 @@ Promise = global.Promise ? require('es6-promise').Promise
 Annotator = require('annotator')
 $ = Annotator.$
 
-anchoring = require('./anchoring/main')
 highlighter = require('./highlighter')
 
 
@@ -25,7 +24,11 @@ module.exports = class Guest extends Annotator
     TextHighlights: {}
     TextSelection: {}
 
+  # Anchoring module
+  anchoring: require('./anchoring/html')
+
   # Internal state
+  anchors: null
   visibleHighlights: false
 
   html: jQuery.extend {}, Annotator::html,
@@ -36,11 +39,10 @@ module.exports = class Guest extends Annotator
       </div>
     '''
 
-  constructor: (element, options, config = {}) ->
+  constructor: (element, options) ->
     super
 
     this.anchors = []
-    this.anchoringCache = {}
 
     cfOptions =
       on: (event, handler) =>
@@ -164,7 +166,7 @@ module.exports = class Guest extends Annotator
         cache: self.anchoringCache
         ignoreSelector: '[class^="annotator-"]'
       }
-      return anchoring.anchor(target.selector, options)
+      return self.anchoring.anchor(target.selector, options)
       .then((range) -> {annotation, target, range})
       .catch(-> {annotation, target})
 
@@ -226,7 +228,7 @@ module.exports = class Guest extends Annotator
         cache: self.anchoringCache
         ignoreSelector: '[class^="annotator-"]'
       }
-      return anchoring.describe(range, options)
+      return self.anchoring.describe(range, options)
 
     setDocumentInfo = ({metadata, uri}) ->
       annotation.uri = uri
