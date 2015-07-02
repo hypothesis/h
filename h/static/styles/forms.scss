@@ -238,7 +238,8 @@
 }
 
 .btn-clean {
-  &, &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
+  &, &:focus, &:hover, &:active, &[disabled],
+  &.js-hover, &.js-focus, &.js-active, &.js-disabled {
     @include box-shadow(none);
     padding-left: 0;
     padding-right: 0;
@@ -252,6 +253,10 @@
 
   &:active, &.js-active {
     color: $link-color-hover;
+  }
+
+  &[disabled], &.js-disabled {
+    color: $text-color;
   }
 }
 

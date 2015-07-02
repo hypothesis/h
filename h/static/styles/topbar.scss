@@ -6,42 +6,42 @@
   border: solid 1px $gray-lighter;
   border-style: solid none;
   height: 30px;
-  line-height: 28px;
   position: fixed;
   left: 0;
   right: 0;
   top: 0;
   z-index: 5;
 
-  .barbutton {
-    &:hover {
-      @include box-shadow(inset 0 1px 3px hsla(0, 0%, 0%, .1));
-    }
-
-    &:active {
-      @include box-shadow(inset 0 2px 3px hsla(0, 0%, 0%, .1));
-    }
-  }
-
   .inner {
-    margin: 0 auto;
-    max-width: $break-tablet;
-    padding: 0 4em;
-    position: relative;
+    * {
+      font-size: 14px;
+      line-height: 28px;
+
+      .btn-icon {
+        font-size: 18px;
+      }
+    }
 
     @include respond-to(wide-handhelds handhelds) {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    &.pull-right {
-      display: inline-block;
-      font-family: $sans-font-family;
-    }
-
-    & > *:first-child, & > *:last-child {
-      line-height: 28px;
       margin: 0 .72em;
     }
+  }
+}
+
+.topbar .btn {
+  color: $gray-light;
+  height: 28px;
+  min-width: 28px;
+
+  border: 0;
+  padding: 0;
+
+  &:active, .js-active {
+    @include single-transition(background-color, .25s);
+    background-color: $gray-light;
+  }
+
+  &:focus, .js-focus, &:hover, .js-hover {
+    color: $gray-dark;
   }
 }
