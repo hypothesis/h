@@ -1,7 +1,9 @@
 -e .[YAML]
+certifi
 cffi
 gunicorn
 psycogreen
 psycopg2
 pyramid_redis_sessions
+requests[security]
 wsaccel
