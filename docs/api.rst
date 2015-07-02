@@ -107,12 +107,75 @@ search
           "total": 1
       }
 
-   :query limit: number of results to return
-   :query offset: index into the complete result set
-   :query uri: limit results to annotations of `uri` (must be urlencoded)
-   :query user: limit results to annotations created by `user`
-   :query quote: limit results to annotations where quoted text contains `quote`
-   :query text: limit results to annotations where body test contains `text`
+   :query limit: The maximum number of annotations to return, for example:
+       ``/api/search?limit=30``. (Default: 20)
+
+   :query offset: The minimum number of initial annotations to skip. This is
+       used for pagination. For example if there are 65 annotations matching
+       our search query and we're retrieving up to 30 annotations at a time,
+       then to retrieve the last 5 do: ``/api/search?limit=30&offset=60``.
+       (Default: 0)
+
+   :query sort: Specify which field the annotations should be sorted by. For
+       example to sort annotations by the name of the user that created them,
+       do: ``/api/search?sort=user`` (default: updated)
+
+   :query order: Specify which order (ascending or descending) the annotations
+       should be sorted in. For example to sort annotations in ascending
+       order of created time (i.e. oldest annotations first) do:
+       ``/api/search?sort=created&order=asc``. (Default: desc)
+
+   :query uri: Search for annotations of a particular URI, for example
+       ``/api/search?uri=www.example.com``. URI searches will also find
+       annotations of *equivalent* URIs. For example if the HTML document at
+       ``http://www.example.com/document.html`` includes a
+       ``<link rel="canonical" href="http://www.example.com/canonical_document.html">``
+       then annotations of ``http://www.example.com/canonical_document.html``
+       will also be included in the search results. Other forms of document
+       equivalence that are supported include rel="alternate" links, DOIs,
+       PDF file IDs, and more.
+
+   :query uri.parts: Search for annotations where any part(s) of the annotated
+       URI match some text. For example ``/api/search?uri=example`` won't
+       match any annotations because the ``uri`` field has to be the full
+       URI ``www.example.com``, but ``/api/search?uri.parts=example``
+       (or ``/api/search?uri.parts=example.com``) will find any annotations
+       of ``www.example.com`` (or of any sub-pages like
+       ``www.example.com/foo.html``).
+
+   :query user: Search for annotations by a particular user. For example
+       ``/api/search?user=tim``  will find all annotations by users named
+       ``tim`` at any provider, ``/api/search?user=tim@hypothes.is`` will only
+       find annotations by ``tim@hypothes.is``.
+
+   :query text: Search for annotations whose body text contains some text,
+       for example: ``/api/search?text=foobar``
+
+   :query any: Search for annotations whose ``quote``, ``tags``, ``text``,
+       ``uri.parts`` or ``user`` fields match some query text.
+       For example: ``/api/search?any=foobar``.
+
+   .. todo:: Document the ``document`` query parameter.
+
+      This parameter is treated specially. We're holding off documenting it for
+      now because upcoming work on document equivalence is likely to change it.
+
+   You can also search for any other field that you see in annotations returned
+   by the h API. Visit ``/api/search`` with no parameters to see some
+   annotations and their fields. For example to search for all annotations
+   with the tag "climatefeedback" do::
+
+       /api/search?tags=climatefeedback
+
+   or to search for all annotations that user ``seanh@hypothes.is`` has
+   permission to delete do::
+
+       /api/search?permissions.delete=acct:seanh@hypothes.is
+
+   You can give any query parameter multiple times. For example
+   ``/api/search?tags=climate&tags=feedback`` will only find annotations that
+   have both the tags "climate" *and* "feedback".
+
    :reqheader Accept: desired response content type
    :resheader Content-Type: response content type
    :statuscode 200: no error
