@@ -47,21 +47,12 @@ require('./plugin/textquote');
 require('./plugin/textposition');
 require('./plugin/textrange');
 
-var Klass = Annotator.Host;
-var docs = 'https://github.com/hypothesis/h/blob/master/README.rst#customized-embedding';
+var docs = 'https://h.readthedocs.org/en/latest/hacking/customized-embedding.html';
 var options = {
   app: jQuery('link[type="application/annotator+html"]').attr('href'),
   BucketBar: {container: '.annotator-frame'},
   Toolbar: {container: '.annotator-frame'}
 };
-
-if (window.hasOwnProperty('hypothesisRole')) {
-  if (typeof window.hypothesisRole === 'function') {
-    Klass = window.hypothesisRole;
-  } else {
-    throw new TypeError('hypothesisRole must be a constructor function, see: ' + docs);
-  }
-}
 
 // Simple IE autodetect function
 // See for example https://stackoverflow.com/questions/19999388/jquery-check-if-user-is-using-ie/21712356#21712356
@@ -81,5 +72,10 @@ if (window.hasOwnProperty('hypothesisConfig')) {
 }
 
 Annotator.noConflict().$.noConflict(true)(function () {
+  var Klass = Annotator.Host;
+  if (options.hasOwnProperty('constructor')) {
+    Klass = options.constructor;
+    delete options.constructor;
+  }
   window.annotator = new Klass(document.body, options);
 });
