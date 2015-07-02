@@ -51,7 +51,7 @@ class Client(object):
             base_url = base_url + "/"
         self.base_url = base_url
 
-        self.timeout = timeout or 0.2
+        self.timeout = timeout or 2.0
 
     def get(self, path, params=None):
         """Make a GET request to the Hypothesis API and return the response.
