@@ -5,7 +5,6 @@ import logging
 import os
 
 from pyramid.config import Configurator
-from pyramid.renderers import JSON
 from pyramid.wsgi import wsgiapp2
 
 from h.api.middleware import permit_cors
@@ -97,7 +96,6 @@ def create_api(global_config, **settings):
     config.set_authorization_policy(acl_authz)
     config.set_root_factory('h.api.resources.create_root')
 
-    config.add_renderer('json', JSON(indent=4))
     config.add_subscriber('h.api.subscribers.set_user_from_oauth',
                           'pyramid.events.ContextFound')
     config.add_tween('h.api.tweens.auth_token')
