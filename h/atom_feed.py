@@ -82,12 +82,10 @@ def _feed_entry_from_annotation(
     }
 
     def get_selection(annotation):
-        targets = annotation.get("target")
-        if targets:
-            for target in targets:
-                for selector in target["selector"]:
-                    if "exact" in selector:
-                        return selector["exact"]
+        for target in annotation.get("target", []):
+            for selector in target["selector"]:
+                if "exact" in selector:
+                    return selector["exact"]
 
     content = ""
 
@@ -112,6 +110,10 @@ def _feed_entry_from_annotation(
     if annotation_api_url:
         entry["links"].append({"rel": "alternate", "type": "application/json",
                                "href": annotation_api_url(annotation)})
+
+    for target in annotation.get('target', []):
+        entry["links"].append({"rel": "related",
+                               "href": target.get('source')})
 
     return entry
 

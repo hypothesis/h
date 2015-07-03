@@ -13,7 +13,7 @@ render the feed to Atom XML.
   <updated>{{ feed.updated }}</updated>
 
   {% for link in feed.links %}
-  <link rel="{{ link.rel }}" type="{{ link.type }}" href="{{ link.href }}" />
+  <link rel="{{ link.rel }}" {% if link.type %}type="{{ link.type }}"{% endif %} type="{{ link.type }}" href="{{ link.href }}" />
   {% endfor %}
 
   {% for entry in feed.entries %}
@@ -26,7 +26,7 @@ render the feed to Atom XML.
       <name>{{ entry.author.name }}</name>
     </author>
     {% for link in entry.links %}
-    <link rel="{{ link.rel }}" type="{{ link.type }}" href="{{ link.href }}" />
+    <link rel="{{ link.rel }}" {% if link.type %}type="{{ link.type }}"{% endif %} href="{{ link.href }}" />
     {% endfor %}
     <content type="html">
         {# This is already HTML-escaped in Python, so we don't escape it again
