@@ -82,8 +82,18 @@ def _feed_entry_from_annotation(
     }
 
     def get_selection(annotation):
-        for target in annotation.get("target", []):
-            for selector in target["selector"]:
+        targets = annotation.get("target")
+        if not isinstance(targets, list):
+            return
+        for target in targets:
+            if not isinstance(target, dict):
+                continue
+            selectors = target.get("selector")
+            if not isinstance(selectors, list):
+                continue
+            for selector in selectors:
+                if not isinstance(selector, dict):
+                    continue
                 if "exact" in selector:
                     return selector["exact"]
 
@@ -111,9 +121,15 @@ def _feed_entry_from_annotation(
         entry["links"].append({"rel": "alternate", "type": "application/json",
                                "href": annotation_api_url(annotation)})
 
-    for target in annotation.get('target', []):
-        entry["links"].append({"rel": "related",
-                               "href": target.get('source')})
+    targets = annotation.get("target")
+    if isinstance(targets, list):
+        for target in targets:
+            if not isinstance(target, dict):
+                continue
+            source = target.get("source")
+            if source is None:
+                continue
+            entry["links"].append({"rel": "related", "href": source})
 
     return entry
 
