@@ -33,11 +33,6 @@ ThreadController = [
                  !!value
                else
                  not @collapsed
-
-      # We only allow uncollapsing of the thread if there are some replies to
-      # display.
-      if newval == false and this.numReplies() <= 0
-        return
       @collapsed = newval
 
     ###*
@@ -198,6 +193,11 @@ module.exports = [
       ctrl.parent = elem.parent().controller('thread')
       ctrl.counter = counter
       ctrl.filter = filter
+
+      # If annotation is a reply, it should be uncollapsed so that when
+      # shown, replies don't have to be individually expanded.
+      if ctrl.parent?
+        ctrl.collapsed = false
 
       # Track the number of messages in the thread
       if counter?

@@ -2,8 +2,8 @@
    class="threadexp"
    title="{{vm.collapsed && 'Expand' || 'Collapse'}}"
    ng-click="vm.toggleCollapsed()">
-   <span ng-class="{'h-icon-expand-more': !!vm.collapsed,
-                    'h-icon-expand-less': !vm.collapsed}"></span>
+   <span ng-class="{'h-icon-arrow-right': !!vm.collapsed,
+                    'h-icon-arrow-drop-down': !vm.collapsed}"></span>
 </a>
 
 <!-- Annotation -->
@@ -11,7 +11,7 @@
   <p><em>Message not available.</em></p>
 </div>
 
-<article class="annotation thread-message"
+<article class="annotation thread-message {{vm.collapsed && 'collapsed'}}"
          name="annotation"
          annotation="vm.container.message"
          annotation-embedded="{{isEmbedded}}"

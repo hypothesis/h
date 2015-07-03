@@ -18,7 +18,10 @@
 }
 
 .annotation-timestamp {
-  line-height: 2;
+  float: right;
+  font-size: .8em;
+  line-height: 1;
+  margin-top: (1 / (1 - .8)) * .1em;  // scale up .1em offset to align baseline
   color: $text-color;
   &:hover { color: $link-color-hover; }
   &:focus { outline: 0; }
@@ -160,5 +163,26 @@ privacy {
     width: 220px;
     border: none;
     color: $text-color;
+  }
+}
+
+
+.annotation-collapsed-replies {
+  display: none;
+}
+
+.annotation.collapsed {
+  margin-bottom: 0;
+
+  .annotation-header {
+    margin: 0;
+  }
+
+  .annotation-body, .tags, .annotation-actions, .annotation-footer {
+    display: none;
+  }
+
+  .annotation-collapsed-replies {
+    display: inline;
   }
 }
