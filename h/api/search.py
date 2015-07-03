@@ -124,10 +124,13 @@ def search(request_params, user=None):
               request_params.get('uri'))
 
     query = build_query(request_params)
-    results = models.Annotation.search_raw(query, user=user)
-    count = models.Annotation.search_raw(query, {'search_type': 'count'},
-                                         raw_result=True)
-    return {"rows": results, "total": count["hits"]["total"]}
+    results = models.Annotation.search_raw(query, user=user, raw_result=True)
+
+    total = results['hits']['total']
+    docs = results['hits']['hits']
+    rows = [models.Annotation(d['_source'], id=d['_id']) for d in docs]
+
+    return {"rows": rows, "total": total}
 
 
 def index(user=None):

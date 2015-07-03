@@ -153,14 +153,17 @@ def stream_atom(request):
     params = dict(request.params)
 
     # The maximum value that this function allows the limit param.
-    max_limit = 1000
+    default_limit = 100
+    max_limit = 500
 
     try:
-        params["limit"] = int(params.get("limit", max_limit))
+        params["limit"] = int(params.get("limit", default_limit))
     except (ValueError, TypeError):
-        params["limit"] = max_limit
+        params["limit"] = default_limit
 
-    if not 0 <= params["limit"] <= max_limit:
+    if params["limit"] < 0:
+        params["limit"] = default_limit
+    if params["limit"] > max_limit:
         params["limit"] = max_limit
 
     try:
