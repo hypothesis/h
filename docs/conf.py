@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 #
 # The Hypothesis Annotation Framework documentation build configuration file, created by
 # sphinx-quickstart on Fri Oct 12 19:21:42 2012.
@@ -31,8 +32,12 @@ extensions = [
   'sphinx.ext.autodoc',
   'sphinx.ext.intersphinx',
   'sphinx.ext.viewcode',
+  'sphinx.ext.todo',
   'sphinxcontrib.httpdomain',
 ]
+
+# Render .. todo:: directives in the output.
+todo_include_todos = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
