@@ -84,9 +84,6 @@ describe 'thread', ->
         after = controller.collapsed
         assert.equal(before, !after)
 
-      it 'defaults to collapsed if it is a top level annotation', ->
-        assert.isTrue(controller.collapsed)
-
       it 'can accept an argument to force a particular state', ->
         controller.toggleCollapsed(true)
         assert.isTrue(controller.collapsed)
@@ -97,11 +94,13 @@ describe 'thread', ->
         controller.toggleCollapsed(false)
         assert.isFalse(controller.collapsed)
 
-      it 'allows collapsing the thread even if there are no replies', ->
+      it 'does not allow uncollapsing the thread if there are no replies', ->
         count.withArgs('message').returns(1)
         controller.toggleCollapsed()
-        assert.isFalse(controller.collapsed)
+        assert.isTrue(controller.collapsed)
         controller.toggleCollapsed()
+        assert.isTrue(controller.collapsed)
+        controller.toggleCollapsed(false)
         assert.isTrue(controller.collapsed)
 
     describe '#shouldShowAsReply', ->

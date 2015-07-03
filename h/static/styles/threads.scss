@@ -1,4 +1,5 @@
 $thread-padding: 1em;
+$threadexp-width: 1em;
 
 .stream-list {
   & > * {
@@ -15,11 +16,14 @@ $thread-padding: 1em;
   }
 }
 
-.thread-replies .thread:first-child {
-  margin-top: 0.5em;
+.thread-replies {
+  .thread:first-child {
+    margin-top: 0.5em;
+  }
 }
 
 .thread {
+  @include pie-clearfix;
   cursor: pointer;
   position: relative;
 
@@ -47,18 +51,27 @@ $thread-padding: 1em;
   }
 
   .threadexp {
+    background: $white;
+    color: $gray-light;
     position: absolute;
-    left: -.7em;
     width: 1.4em;
     height: 1.4em;
-    font-size: 1.1em;
+    top: 0;
+    left: -.7em;
 
     span {
-      background: $white;
-      color: $gray-light;
-      display: block;
-      line-height: inherit;
-      text-align: center;
+      position: absolute;
+      top: (1.4 - $threadexp-width) / 2;
+      left: (1.4 - $threadexp-width) / 2;
+      width: $threadexp-width;
+      height: $threadexp-width;
+
+      &:before {
+        font-size: $threadexp-width;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
     }
   }
 }
