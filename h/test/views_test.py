@@ -170,16 +170,16 @@ class TestStreamAtomView(object):
         views.stream_atom(request)
 
         params = request.api_client.get.call_args[1]["params"]
-        assert params["limit"] == 1000
+        assert "limit" in params
 
     def test_it_forwards_user_supplied_limits(self):
         """User-supplied ``limit`` params should be forwarded.
 
-        If the user supplies a ``limit`` param < 1000 this should be forwarded
+        If the user supplies a ``limit`` param < 500 this should be forwarded
         to the search API.
 
         """
-        for limit in (0, 500, 1000):
+        for limit in (0, 250, 500):
             request = mock.MagicMock()
             request.params = {"limit": limit}
 
@@ -188,22 +188,22 @@ class TestStreamAtomView(object):
             params = request.api_client.get.call_args[1]["params"]
             assert params["limit"] == limit
 
-    def test_it_ignores_limits_greater_than_1000(self):
-        """It doesn't let the user specify a ``limit`` > 1000.
+    def test_it_ignores_limits_greater_than_500(self):
+        """It doesn't let the user specify a ``limit`` > 500.
 
-        It just reduces the limit to 1000.
+        It just reduces the limit to 500.
 
         """
         request = mock.MagicMock()
-        request.params = {"limit": 1001}
+        request.params = {"limit": 501}
 
         views.stream_atom(request)
 
         params = request.api_client.get.call_args[1]["params"]
-        assert params["limit"] == 1000
+        assert params["limit"] == 500
 
-    def test_it_falls_back_to_1000_if_limit_is_invalid(self):
-        """If the user gives an invalid limit value it falls back to 1000."""
+    def test_it_falls_back_to_100_if_limit_is_invalid(self):
+        """If the user gives an invalid limit value it falls back to 100."""
         for limit in ("not a valid integer", None, [1, 2, 3]):
             request = mock.MagicMock()
             request.params = {"limit": limit}
@@ -211,17 +211,17 @@ class TestStreamAtomView(object):
             views.stream_atom(request)
 
             params = request.api_client.get.call_args[1]["params"]
-            assert params["limit"] == 1000
+            assert params["limit"] == 100
 
-    def test_it_falls_back_to_1000_if_limit_is_negative(self):
-        """If given a negative number for limit it falls back to 1000."""
+    def test_it_falls_back_to_100_if_limit_is_negative(self):
+        """If given a negative number for limit it falls back to 100."""
         request = mock.MagicMock()
         request.params = {"limit": -50}
 
         views.stream_atom(request)
 
         params = request.api_client.get.call_args[1]["params"]
-        assert params["limit"] == 1000
+        assert params["limit"] == 100
 
     def test_it_forwards_url_params_to_the_api(self):
         """Any URL params are forwarded to the search API."""
