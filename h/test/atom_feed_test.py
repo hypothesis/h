@@ -356,3 +356,22 @@ def test_annotation_with_targets():
     assert feed["entries"][0]["links"][1]["href"] == target1["source"]
     assert feed["entries"][0]["links"][2]["rel"] == "related"
     assert feed["entries"][0]["links"][2]["href"] == target2["source"]
+
+
+def test_malformed_target():
+    # This annotation has a broken target (a dict instead of a list), but we
+    # shouldn't explode in this case.
+    annotation = factories.Annotation()
+    annotation['target'] = {
+        'selector': [
+            {'start': None, 'end': None, 'type': 'TextPositionSelector'},
+            {'exact': None, 'prefix': None, 'type': 'TextQuoteSelector', 'suffix': None}
+        ]
+    }
+
+    feed = atom_feed._feed_from_annotations(
+        [annotation],
+        atom_url=None,
+        annotation_url=_mock_annotation_url_function())
+
+    assert len(feed["entries"]) == 1
