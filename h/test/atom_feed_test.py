@@ -336,3 +336,23 @@ def test_annotation_with_non_unicode_characters():
     assert exact_text in entry["content"]
     assert entry["title"] == document_title
     assert text in entry["content"]
+
+
+def test_annotation_with_targets():
+    annotation = factories.Annotation()
+    annotation2 = factories.Annotation()
+
+    target1 = annotation["target"][0]
+    target2 = annotation2["target"][0]
+
+    annotation["target"] = [target1, target2]
+
+    feed = atom_feed._feed_from_annotations(
+        [annotation], atom_url=None,
+        annotation_url=_mock_annotation_url_function())
+
+    assert len(feed["entries"][0]["links"]) == 3
+    assert feed["entries"][0]["links"][1]["rel"] == "related"
+    assert feed["entries"][0]["links"][1]["href"] == target1["source"]
+    assert feed["entries"][0]["links"][2]["rel"] == "related"
+    assert feed["entries"][0]["links"][2]["href"] == target2["source"]
