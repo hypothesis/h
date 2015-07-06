@@ -225,6 +225,7 @@ class TextQuoteAnchor extends Anchor
   toPositionAnchor: (options = {}) ->
     root = options.root or document.body
     dmp = new DiffMatchPatch()
+    dmp.Match_Distance = root.textContent.length * 2
 
     foldSlices = (acc, slice) ->
       result = dmp.match_main(root.textContent, slice, acc.loc)
@@ -237,24 +238,22 @@ class TextQuoteAnchor extends Anchor
 
     slices = @quote.match(/(.|[\r\n]){1,32}/g)
     loc = options.position?.start ? root.textContent.length / 2
+    start = -1
 
-    # TODO: use the suffix
-    dmp.Match_Distance = root.textContent.length * 2
-    if @prefix? and @quote.length < 32
-      loc = Math.max(0, loc - @prefix.length)
+    if @prefix?
       result = dmp.match_main(root.textContent, @prefix, loc)
-      start = result + @prefix.length
-      end = start
-    else
+      if result > -1
+        loc = end = start = result + @prefix.length
+
+    if start is -1
       firstSlice = slices.shift()
       result = dmp.match_main(root.textContent, firstSlice, loc)
-      start = result
-      end = start + firstSlice.length
+      if result > -1
+        start = result
+        loc = end = start + firstSlice.length
+      else
+        throw new Error('no match found')
 
-    if result is -1
-      throw new Error('no match found')
-
-    loc = end
     dmp.Match_Distance = 64
     {start, end} = slices.reduce(foldSlices, {start, end, loc})
 
