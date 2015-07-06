@@ -15,7 +15,7 @@ describe 'share-dialog', ->
   beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
-    fakeCrossFrame = {providers: []}
+    fakeCrossFrame = {frames: []}
 
     $provide.value 'crossframe', fakeCrossFrame
     return
@@ -26,7 +26,7 @@ describe 'share-dialog', ->
 
   it 'generates new via link', ->
     $element = $compile('<div share-dialog="">')($scope)
-    fakeCrossFrame.providers.push {entities: ['http://example.com']}
+    fakeCrossFrame.frames.push({uri: 'http://example.com'})
     $scope.$digest()
     assert.equal($scope.viaPageLink,
                  'https://via.hypothes.is/http://example.com')

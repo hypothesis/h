@@ -1,4 +1,4 @@
-# Uses a channel between the sidebar and the attached providers to ensure
+# Uses a channel between the sidebar and the attached frames to ensure
 # the interface remains in sync.
 module.exports = class AnnotationUISync
   ###*

@@ -31,7 +31,7 @@ describe 'WidgetController', ->
       clearSelectedAnnotations: sandbox.spy()
     }
     fakeAuth = {user: null}
-    fakeCrossFrame = {providers: []}
+    fakeCrossFrame = {frames: []}
 
     fakeStore = {
       SearchResource:
@@ -73,9 +73,9 @@ describe 'WidgetController', ->
     sandbox.restore()
 
   describe 'loadAnnotations', ->
-    it 'loads all annotation for a provider', ->
+    it 'loads all annotations for a frame', ->
       viewer.chunkSize = 20
-      fakeCrossFrame.providers.push {entities: ['http://example.com']}
+      fakeCrossFrame.frames.push({uri: 'http://example.com'})
       $scope.$digest()
       loadSpy = fakeAnnotationMapper.loadAnnotations
       assert.callCount(loadSpy, 5)

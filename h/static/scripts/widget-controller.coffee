@@ -33,20 +33,17 @@ module.exports = class WidgetController
 
         annotationMapper.loadAnnotations(results.rows)
 
-    loadAnnotations = ->
-      query = {}
-
-      for p in crossframe.providers
-        for e in p.entities when e not in loaded
-          loaded.push e
-          q = angular.extend(uri: e, query)
-          _loadAnnotationsFrom q, 0
+    loadAnnotations = (frames) ->
+      for f in frames
+        if f.uri in loaded
+          continue
+        loaded.push(f.uri)
+        _loadAnnotationsFrom({uri: f.uri}, 0)
 
       streamFilter.resetFilter().addClause('/uri', 'one_of', loaded)
-
       streamer.send({filter: streamFilter.getFilter()})
 
-    $scope.$watchCollection (-> crossframe.providers), loadAnnotations
+    $scope.$watchCollection (-> crossframe.frames), loadAnnotations
 
     $scope.focus = (annotation) ->
       if angular.isObject annotation
