@@ -35,6 +35,8 @@
     <!-- / Editing controls -->
   </span>
 
+  <span ng-if="!vm.annotation.user">Sign in to save this annotation.</span>
+
   <span class="annotation-collapsed-replies">
     <a class="reply-count small" href=""
        ng-click="replyCountClick()"
