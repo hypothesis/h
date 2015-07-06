@@ -6,6 +6,15 @@ $ = Annotator.$
 highlighter = require('./highlighter')
 
 
+animationPromise = (fn) ->
+  return new Promise (resolve, reject) ->
+    raf ->
+      try
+        resolve(fn())
+      catch
+        reject()
+
+
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
 
@@ -171,17 +180,17 @@ module.exports = class Guest extends Annotator
       .catch(-> {annotation, target})
 
     highlight = (anchor) ->
-      if anchor.range?
-        raf ->
-          range = Annotator.Range.sniff(anchor.range)
-          normedRange = range.normalize(self.element[0])
-          highlights = highlighter.highlightRange(normedRange)
-          rect = highlighter.getBoundingClientRect(highlights)
-          anchor.highlights = highlights
-          anchor.pos =
-            left: rect.left + window.scrollX
-            top: rect.top + window.scrollY
-      return anchor
+      return anchor unless anchor.range?
+      return animationPromise ->
+        range = Annotator.Range.sniff(anchor.range)
+        normedRange = range.normalize(self.element[0])
+        highlights = highlighter.highlightRange(normedRange)
+        rect = highlighter.getBoundingClientRect(highlights)
+        anchor.highlights = highlights
+        anchor.pos =
+          left: rect.left + window.scrollX
+          top: rect.top + window.scrollY
+        return anchor
 
     sync = (anchors) ->
       annotation.$anchors = ({pos} for {pos} in anchors)
