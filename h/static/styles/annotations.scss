@@ -166,23 +166,24 @@ privacy {
   }
 }
 
-
 .annotation-collapsed-replies {
   display: none;
 }
 
-.annotation.collapsed {
-  margin-bottom: 0;
+.thread-replies {
+  .annotation.collapsed {
+    margin-bottom: 0;
 
-  .annotation-header {
-    margin: 0;
-  }
+    .annotation-header {
+      margin: 0;
+    }
 
-  .annotation-body, .tags, .annotation-actions, .annotation-footer {
-    display: none;
-  }
+    .annotation-body, .tags, .annotation-actions, .annotation-footer {
+      display: none;
+    }
 
-  .annotation-collapsed-replies {
-    display: inline;
+    .annotation-collapsed-replies {
+      display: inline;
+    }
   }
 }
