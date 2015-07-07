@@ -114,22 +114,9 @@ setup(
     cmdclass=cmdclass,
     package_data={
         'h': [
-            'css/*.css',
-            'js/*.js',
-            'js/**/*.js',
-            'lib/*.css',
-            'lib/*.js',
-            'lib/images/*',
-            'lib/polyfills/*.js',
-            'locale/*',
-            'images/*.png',
-            'images/icomoon/fonts/*',
-            'images/svg/*.svg',
-            'templates/*.html',
-            'templates/*.pt',
-            'templates/*.txt',
-            'templates/deform/*.pt',
-            'templates/emails/*.txt',
+            'browser/**/*',
+            'static/**/*',
+            'templates/**/*',
         ]
     },
     entry_points={
