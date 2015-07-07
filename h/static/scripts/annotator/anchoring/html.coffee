@@ -48,43 +48,41 @@ exports.anchor = (selectors, options = {}) ->
 
   if fragment?
     promise = promise.catch ->
-      Promise.resolve(FragmentAnchor.fromSelector(fragment, options))
-      .then((a) -> a.toRange(options))
-      .then(assertQuote)
+      anchor = FragmentAnchor.fromSelector(fragment, options)
+      range = anchor.toRange(options)
+      assertQuote(range)
+      return range
 
   if range?
     promise = promise.catch ->
-      Promise.resolve(RangeAnchor.fromSelector(range, options))
-      .then((a) -> a.toRange(options))
-      .then(assertQuote)
+      anchor = RangeAnchor.fromSelector(range, options)
+      range = anchor.toRange(options)
+      assertQuote(range)
+      return range
 
   if position?
     promise = promise.catch ->
-      Promise.resolve(TextPositionAnchor.fromSelector(position, options))
-      .then((a) -> a.toRange(options))
-      .then(assertQuote)
+      anchor = TextPositionAnchor.fromSelector(position, options)
+      range = anchor.toRange(options)
+      assertQuote(range)
+      return range
 
   if quote?
     promise = promise.catch ->
-      Promise.resolve(TextQuoteAnchor.fromSelector(quote, options))
-      .then((a) -> a.toRange(options))
+      anchor = TextQuoteAnchor.fromSelector(quote, options)
+      return anchor.toRange(options)
 
   return promise
 
 
 exports.describe = (range, options = {}) ->
-  maybeDescribeWith = (type) ->
-    return Promise.resolve(type)
-    .then((t) -> t.fromRange(range, options))
-    .then((a) -> a.toSelector(options))
-    .catch(-> null)
+  types = [FragmentAnchor, RangeAnchor, TextPositionAnchor, TextQuoteAnchor]
 
-  selectors = (maybeDescribeWith(type) for type in [
-      FragmentAnchor
-      RangeAnchor
-      TextPositionAnchor
-      TextQuoteAnchor
-  ])
+  selectors = for type in types
+    try
+      anchor = type.fromRange(range, options)
+      selector = anchor.toSelector(options)
+    catch
+      continue
 
-  return Promise.all(selectors)
-  .then((selectors) -> (s for s in selectors when s?))
+  return selectors

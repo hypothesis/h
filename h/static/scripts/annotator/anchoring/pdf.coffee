@@ -225,7 +225,6 @@ exports.describe = (range, options = {}) ->
     r.setEndAfter(endRange.end)
 
     pageOptions = {root: startTextLayer}
-    quote = Promise.resolve(TextQuoteAnchor.fromRange(r, pageOptions))
-    .then((a) -> a.toSelector())
+    quote = TextQuoteAnchor.fromRange(r, pageOptions).toSelector()
 
     return Promise.all([position, quote])
