@@ -184,12 +184,17 @@ module.exports = class Guest extends Annotator
       return animationPromise ->
         range = Annotator.Range.sniff(anchor.range)
         normedRange = range.normalize(self.element[0])
+
         highlights = highlighter.highlightRange(normedRange)
         rect = highlighter.getBoundingClientRect(highlights)
+
+        $(highlights).data('annotation', anchor.annotation)
+
         anchor.highlights = highlights
         anchor.pos =
           left: rect.left + window.scrollX
           top: rect.top + window.scrollY
+
         return anchor
 
     sync = (anchors) ->
@@ -324,41 +329,33 @@ module.exports = class Guest extends Annotator
     @adder.hide()
     @selectedRanges = []
 
-  # Select some annotations.
-  #
-  # toggle: should this toggle membership in an existing selection?
   selectAnnotations: (annotations, toggle) =>
+    this.triggerShowFrame()
     if toggle
-      # Tell sidebar to add these annotations to the sidebar if not already
-      # selected, otherwise remove them.
       this.toggleAnnotationSelection annotations
     else
-      # Tell sidebar to show the viewer for these annotations
-      this.triggerShowFrame()
       this.showAnnotations annotations
 
   onHighlightMouseover: (event) ->
-    if @visibleHighlights
-      event.stopPropagation()
-      annotations = []
-      for anchor in @anchors
-        if event.target in (anchor.highlights ? [])
-          annotations.push(anchor.annotation)
-      this.focusAnnotations annotations
+    return unless @visibleHighlights
+    annotation = $(event.currentTarget).data('annotation')
+    annotations = event.annotations ?= []
+    annotations.push(annotation)
+    if event.target is event.currentTarget
+      setTimeout => this.focusAnnotations(annotations)
 
   onHighlightMouseout: (event) ->
-    if @visibleHighlights
-      event.stopPropagation()
-      this.focusAnnotations []
+    return unless @visibleHighlights
+    this.focusAnnotations []
 
   onHighlightClick: (event) =>
-    if @visibleHighlights
-      event.stopPropagation()
-      annotations = []
-      for anchor in @anchors
-        if event.target in (anchor.highlights ? [])
-          annotations.push(anchor.annotation)
-      this.selectAnnotations annotations, (event.metaKey or event.ctrlKey)
+    return unless @visibleHighlights
+    annotation = $(event.currentTarget).data('annotation')
+    annotations = event.annotations ?= []
+    annotations.push(annotation)
+    if event.target is event.currentTarget
+      xor = (event.metaKey or event.ctrlKey)
+      setTimeout => this.selectAnnotations(annotations, xor)
 
   # Pass true to show the highlights in the frame or false to disable.
   setVisibleHighlights: (shouldShowHighlights) ->
