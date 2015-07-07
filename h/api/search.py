@@ -9,29 +9,26 @@ import logging
 import webob.multidict
 
 from h.api import models
+from h.api import uri
 
 log = logging.getLogger(__name__)
 
 
-def _match_clause_for_uri(uri):
+def _match_clause_for_uri(uristr):
     """Return an Elasticsearch match clause dict for the given URI."""
-    if not uri:
+    if not uristr:
         return None
 
-    # Attempt to expand the query to include URIs for other representations of
-    # the same document, using information we may have on hand about the
-    # document.
-    doc = models.Document.get_by_uri(uri)
-    if doc:
-        uri_matchers = [{"match": {"uri": u}} for u in doc.uris()]
-        return {
-            "bool": {
-                "minimum_should_match": 1,
-                "should": uri_matchers
-            }
+    uristrs = uri.expand(uri.normalise(uristr))
+    matchers = [{"match": {"uri": uri.normalise(u)}} for u in uristrs]
+    if len(matchers) == 1:
+        return matchers[0]
+    return {
+        "bool": {
+            "minimum_should_match": 1,
+            "should": matchers
         }
-    else:
-        return {"match": {"uri": uri}}
+    }
 
 
 def build_query(request_params):
