@@ -35,8 +35,17 @@
     <!-- / Editing controls -->
   </span>
 
+  <span ng-if="!vm.annotation.user">Sign in to save this annotation.</span>
+
+  <span class="annotation-collapsed-replies">
+    <a class="reply-count small" href=""
+       ng-click="replyCountClick()"
+       ng-pluralize count="replyCount"
+       when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
+  </span>
+
   <!-- Timestamp -->
-  <a class="annotation-timestamp small pull-right"
+  <a class="annotation-timestamp"
      target="_blank"
      title="{{vm.annotation.updated | moment:'LLLL'}}"
      ng-if="!vm.editing && vm.annotation.updated"
@@ -76,7 +85,7 @@
 <!-- / Body -->
 
 <!-- Tags -->
-<div class="annotation-section form-field" ng-if="vm.editing">
+<div class="annotation-body form-field" ng-if="vm.editing">
   <tags-input ng-model="vm.annotation.tags"
               name="tags"
               class="tags"
@@ -100,52 +109,48 @@
 </div>
 <!-- / Tags -->
 
-<div class="annotation-section small" ng-if="vm.editing">
-  <p ng-show="vm.privacyLevel.text == 'Only Me'">
-    <i class="h-icon-lock"></i> This annotation is viewable only to you.</p>
-  <p ng-show="vm.privacyLevel.text == 'Public'">
-    <i class="h-icon-public"></i> This annotation is viewable to everyone.</p>
-</div>
-
-<div class="annotation-section form-actions"
-        ng-if="vm.editing"
-        ng-switch="vm.action">
-  <div class="form-actions-buttons form-actions-left">
-    <button ng-switch-when="edit"
-            ng-click="vm.save()"
-            class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
-    <button ng-switch-when="delete"
-            ng-click="vm.save()"
-            class="btn"><i class="h-icon-check btn-icon"></i> Delete</button>
-    <button ng-switch-default
-            ng-click="vm.save()"
-            class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
-    <button class="btn btn-clean"
-            ng-click="vm.revert()"
-            ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
+<footer class="annotation-footer">
+  <div class="small" ng-if="vm.editing">
+    <p ng-show="vm.privacyLevel.text == 'Only Me'">
+      <i class="h-icon-lock"></i> This annotation is viewable only to you.</p>
+    <p ng-show="vm.privacyLevel.text == 'Public'">
+      <i class="h-icon-public"></i> This annotation is viewable to everyone.</p>
   </div>
-</div>
 
-<div class="annotation-section annotation-license" ng-if="vm.editing">
-  <a href="http://creativecommons.org/publicdomain/zero/1.0/"
-     title="View more information about the Creative Commons Public Domain license"
-     target="_blank">
-    <i class="h-icon-cc-logo"></i><i class="h-icon-cc-zero"></i>
-    Annotations can be freely reused by anyone for any purpose.
-  </a>
-</div>
+  <div class="form-actions" ng-if="vm.editing" ng-switch="vm.action">
+    <div class="form-actions-buttons form-actions-left">
+      <button ng-switch-when="edit"
+              ng-click="vm.save()"
+              class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
+      <button ng-switch-when="delete"
+              ng-click="vm.save()"
+              class="btn"><i class="h-icon-check btn-icon"></i> Delete</button>
+      <button ng-switch-default
+              ng-click="vm.save()"
+              class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
+      <button class="btn btn-clean"
+              ng-click="vm.revert()"
+              ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
+    </div>
+  </div>
 
-<footer class="annotation-footer"
-        ng-if="!vm.editing && vm.annotation.id">
+  <div class="annotation-section annotation-license" ng-if="vm.editing">
+    <a href="http://creativecommons.org/publicdomain/zero/1.0/"
+       title="View more information about the Creative Commons Public Domain license"
+       target="_blank">
+      <i class="h-icon-cc-logo"></i><i class="h-icon-cc-zero"></i>
+      Annotations can be freely reused by anyone for any purpose.
+    </a>
+  </div>
 
-  <div class="annotation-replies">
+  <div class="annotation-replies" ng-if="replyCount > 0">
     <a class="reply-count small" href=""
        ng-click="replyCountClick()"
        ng-pluralize count="replyCount"
        when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
   </div>
 
-  <div class="annotation-actions">
+  <div class="annotation-actions" ng-if="!vm.editing && vm.annotation.id">
     <button class="small btn-clean"
             ng-click="vm.reply()"
             ><i class="h-icon-reply btn-icon"></i> Reply</button>
