@@ -91,8 +91,7 @@ class RangeAnchor extends Anchor
     range = new xpathRange.SerializedRange(data).normalize(root)
     return new RangeAnchor(range)
 
-  toRange: (options = {}) ->
-    root = options.root or document.body
+  toRange: () ->
     return @range.toRange()
 
   toSelector: (options = {}) ->
