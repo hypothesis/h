@@ -1,9 +1,23 @@
+raf = require('raf')
+
 {
   FragmentAnchor
   RangeAnchor
   TextPositionAnchor
   TextQuoteAnchor
 } = require('./types')
+
+
+querySelector = (type, selector, options) ->
+  doQuery = (resolve, reject) ->
+    try
+      anchor = type.fromSelector(selector, options)
+      range = anchor.toRange(options)
+      resolve(range)
+    catch error
+      reject(error)
+  return new Promise(doQuery)
+
 
 ###*
 # Anchor a set of selectors.
@@ -36,41 +50,35 @@ exports.anchor = (selectors, options = {}) ->
       when 'RangeSelector'
         range = selector
 
-  # Until we successfully anchor, we fail.
-  promise = Promise.reject('unable to anchor')
-
   # Assert the quote matches the stored quote, if applicable
-  assertQuote = (range) ->
+  maybeAssertQuote = (range) ->
     if quote?.exact? and range.toString() != quote.exact
       throw new Error('quote mismatch')
     else
       return range
 
+  # Until we successfully anchor, we fail.
+  promise = Promise.reject('unable to anchor')
+
   if fragment?
     promise = promise.catch ->
-      anchor = FragmentAnchor.fromSelector(fragment, options)
-      range = anchor.toRange(options)
-      assertQuote(range)
-      return range
+      return querySelector(FragmentAnchor, fragment, options)
+      .then(maybeAssertQuote)
 
   if range?
     promise = promise.catch ->
-      anchor = RangeAnchor.fromSelector(range, options)
-      range = anchor.toRange(options)
-      assertQuote(range)
-      return range
+      return querySelector(RangeAnchor, range, options)
+      .then(maybeAssertQuote)
 
   if position?
     promise = promise.catch ->
-      anchor = TextPositionAnchor.fromSelector(position, options)
-      range = anchor.toRange(options)
-      assertQuote(range)
-      return range
+      return querySelector(TextPositionAnchor, position, options)
+      .then(maybeAssertQuote)
 
   if quote?
     promise = promise.catch ->
-      anchor = TextQuoteAnchor.fromSelector(quote, options)
-      return anchor.toRange(options)
+      # Note: similarity of the quote is implied.
+      return querySelector(TextQuoteAnchor, quote, options)
 
   return promise
 
