@@ -13,6 +13,23 @@ import transaction
 from h import db
 
 
+class DummyFeature(object):
+
+    """
+    A dummy feature flag looker-upper.
+
+    Because we're probably testing all feature-flagged functionality, this
+    feature client defaults every flag to *True*, which is the exact opposite
+    of what happens outside of testing.
+    """
+
+    def __init__(self):
+        self.flags = {}
+
+    def __call__(self, name, *args, **kwargs):
+        return self.flags.get(name, True)
+
+
 class DummySession(object):
 
     """
@@ -81,17 +98,6 @@ def db_session(request, settings):
     request.addfinalizer(destroy)
 
     return db.Session
-
-
-@pytest.fixture(autouse=True)
-def feature_flags(config):
-    class DummyFeatureClient(object):
-        def __init__(self):
-            self.flags = {}
-        def __call__(self, name, *args, **kwargs):
-            return self.flags.get(name, True)
-
-    config.registry.feature = DummyFeatureClient()
 
 
 @pytest.fixture()

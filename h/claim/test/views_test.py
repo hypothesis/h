@@ -4,11 +4,23 @@ import pytest
 
 import deform
 from pytest import raises
-from pyramid.testing import DummyRequest
+from pyramid.testing import DummyRequest as _DummyRequest
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
+
+from h.conftest import DummyFeature
 
 from ..views import claim_account
 from ..views import update_account
+
+
+class DummyRequest(_DummyRequest):
+    def __init__(self, *args, **kwargs):
+        params = {
+            # Add a dummy feature flag querier to the request
+            'feature': DummyFeature(),
+        }
+        params.update(kwargs)
+        super(DummyRequest, self).__init__(*args, **params)
 
 
 def test_claim_account_returns_form():

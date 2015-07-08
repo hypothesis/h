@@ -1,56 +1,65 @@
 # -*- coding: utf-8 -*-
-from pyramid.settings import asbool
+from __future__ import unicode_literals
 
+import sqlalchemy as sa
 
-class Client(object):
-    """
-    Client provides access to the current configuration of feature flags as
-    recorded in the underlying (dict-like) storage.
+from h.db import Base
 
-    Typical simple usage involves creating a client with a storage and then
-    querying it for the current state of named features:
-
-        feature = Client(storage)
-        ...
-        if feature('widgets_enabled'):
-            widgets.enable()
-    """
-
-    def __init__(self, storage):
-        self.storage = storage
-
-    def __call__(self, name):
-        res = self.storage.get(name)
-
-        if res is None:
-            raise UnknownFeatureError(name)
-
-        return res
+FEATURES = {
+    'claim': "Enable 'claim your username' web views?",
+    'notification': "Send email notifications?",
+    'queue': "Enable dispatch of annotation events to NSQ?",
+    'streamer': "Enable 'live streaming' for annotations via the websocket?",
+}
 
 
 class UnknownFeatureError(Exception):
     pass
 
 
-def get_client(config):
+class Feature(Base):
+
+    """A feature flag for the application."""
+
+    __tablename__ = 'feature'
+
+    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    name = sa.Column(sa.String(50), nullable=False, unique=True)
+
+    # Is the feature enabled for everyone?
+    everyone = sa.Column(sa.Boolean,
+                         nullable=False,
+                         default=False,
+                         server_default=sa.sql.expression.false())
+
+    @classmethod
+    def get_by_name(cls, name):
+        """Fetch a flag by name."""
+        return cls.query.filter(cls.name == name).first()
+
+
+def flag_enabled(request, name):
     """
-    get_client returns a feature client configured using data found in the
-    settings of the current application.
+    Determine if the named feature is enabled for the current request.
+
+    If the feature has no override in the database, it will default to False.
+    Features must be documented, and an UnknownFeatureError will be thrown if
+    an undocumented feature is interrogated.
     """
-    storage = _features_from_settings(config.registry.settings)
+    if name not in FEATURES:
+        raise UnknownFeatureError(
+            '{0} is not a valid feature name'.format(name))
 
-    return Client(storage)
+    feat = Feature.get_by_name(name)
 
-
-def _features_from_settings(settings, prefix=__package__ + '.feature.'):
-    storage = {}
-
-    for k, v in settings.items():
-        if k.startswith(prefix):
-            storage[k[len(prefix):]] = asbool(v)
-
-    return storage
+    # Features that don't exist in the database are off.
+    if feat is None:
+        return False
+    # Features that are on for everyone are on.
+    if feat.everyone:
+        return True
+    return False
 
 
 def includeme(config):
-    config.registry.feature = get_client(config)
+    config.add_request_method(flag_enabled, name='feature')

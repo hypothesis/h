@@ -1,6 +1,5 @@
 import os
 import logging
-import re
 import urlparse
 
 from pyramid.settings import asbool
@@ -16,7 +15,6 @@ def settings_from_environment():
     _setup_db(settings)
     _setup_elasticsearch(settings)
     _setup_email(settings)
-    _setup_features(settings)
     _setup_nsqd(settings)
     _setup_redis(settings)
     _setup_secrets(settings)
@@ -112,18 +110,6 @@ def _setup_email(settings):
         mail_port = os.environ['MAIL_PORT_25_TCP_PORT']
         settings['mail.host'] = mail_host
         settings['mail.port'] = mail_port
-
-
-def _setup_features(settings):
-    # Allow feature flag overrides from the environment. For example, to
-    # override the 'foo_bar' feature you can set the environment variable
-    # FEATURE_FOO_BAR.
-    patt = re.compile(r'FEATURE_([A-Z_]+)')
-    keys = [k for k in os.environ.iterkeys() if patt.match(k)]
-    for k in keys:
-        name = 'h.feature.{}'.format(patt.match(k).group(1).lower())
-        value = asbool(os.environ[k])
-        settings[name] = value
 
 
 def _setup_nsqd(settings):
