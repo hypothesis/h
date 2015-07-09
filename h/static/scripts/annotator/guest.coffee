@@ -11,8 +11,8 @@ animationPromise = (fn) ->
     raf ->
       try
         resolve(fn())
-      catch
-        reject()
+      catch error
+        reject(error)
 
 
 module.exports = class Guest extends Annotator
