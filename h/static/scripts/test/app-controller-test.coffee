@@ -11,6 +11,7 @@ describe 'AppController', ->
   fakeAnnotationUI = null
   fakeAuth = null
   fakeDrafts = null
+  fakeFeatures = null
   fakeIdentity = null
   fakeLocation = null
   fakeParams = null
@@ -52,6 +53,11 @@ describe 'AppController', ->
       remove: sandbox.spy()
       all: sandbox.stub().returns([])
       discard: sandbox.spy()
+    }
+
+    fakeFeatures = {
+      fetch: sandbox.spy()
+      flagEnabled: sandbox.stub().returns(false)
     }
 
     fakeIdentity = {
@@ -97,6 +103,7 @@ describe 'AppController', ->
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'auth', fakeAuth
     $provide.value 'drafts', fakeDrafts
+    $provide.value 'features', fakeFeatures
     $provide.value 'identity', fakeIdentity
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams

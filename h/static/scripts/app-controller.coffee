@@ -5,18 +5,23 @@ module.exports = class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$rootScope', '$route', '$scope',
     '$window',
-    'auth', 'drafts', 'identity',
+    'auth', 'drafts', 'features', 'identity',
     'permissions', 'streamer', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
      $controller,   $document,   $location,   $rootScope,   $route,   $scope,
      $window,
-     auth,   drafts,   identity,
+     auth,   drafts,   features,   identity,
      permissions,   streamer,   annotationUI,
      annotationMapper, threading
   ) ->
     $controller('AnnotationUIController', {$scope})
+
+    # Allow all child scopes to look up feature flags as:
+    #
+    #     if ($scope.feature('foo')) { ... }
+    $scope.feature = features.flagEnabled
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')

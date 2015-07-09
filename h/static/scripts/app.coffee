@@ -78,6 +78,8 @@ setupStreamer = [
     $http.defaults.headers.common['X-Client-Id'] = clientId
 ]
 
+setupFeatures = ['features', (features) -> features.fetch()]
+
 module.exports = angular.module('h', [
   'angulartics'
   'angulartics.google.analytics'
@@ -128,6 +130,7 @@ module.exports = angular.module('h', [
 .service('bridge', require('./bridge'))
 .service('crossframe', require('./cross-frame'))
 .service('drafts', require('./drafts'))
+.service('features', require('./features'))
 .service('flash', require('./flash'))
 .service('formRespond', require('./form-respond'))
 .service('host', require('./host'))
@@ -155,6 +158,7 @@ module.exports = angular.module('h', [
 .config(configureRoutes)
 .config(configureTemplates)
 
+.run(setupFeatures)
 .run(setupCrossFrame)
 .run(setupStreamer)
 .run(setupHost)
