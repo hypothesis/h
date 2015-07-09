@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from pyramid.view import view_config
 import sqlalchemy as sa
 
 from h.db import Base
@@ -61,5 +62,18 @@ def flag_enabled(request, name):
     return False
 
 
+@view_config(route_name='features_status',
+             request_method='GET',
+             accept='application/json',
+             renderer='json')
+def features_status(request):
+    """Report current feature flag values."""
+    return {k: flag_enabled(request, k) for k in FEATURES.keys()}
+
+
 def includeme(config):
     config.add_request_method(flag_enabled, name='feature')
+
+    config.add_route('features_status', '/app/features')
+
+    config.scan(__name__)
