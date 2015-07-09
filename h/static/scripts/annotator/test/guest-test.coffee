@@ -330,7 +330,7 @@ describe 'Guest', ->
     it "doesn't declare annotations with a working target as orphans", (done) ->
       guest = createGuest()
       annotation = target: [{selector: "test"}]
-      sandbox.stub(anchoring, 'anchor').returns(range)
+      sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       guest.setupAnnotation(annotation)
       waitForSync(annotation).then ->
         assert.isFalse(annotation.$orphan)
@@ -339,7 +339,7 @@ describe 'Guest', ->
     it "declares annotations with broken targets as orphans", (done) ->
       guest = createGuest()
       annotation = target: [{selector: 'broken selector'}]
-      sandbox.stub(anchoring, 'anchor').throws()
+      sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
       guest.setupAnnotation(annotation)
       waitForSync(annotation).then ->
         assert.isTrue(annotation.$orphan)
@@ -360,7 +360,7 @@ describe 'Guest', ->
 
     it 'saves the anchor positions on the annotation', (done) ->
       guest = createGuest()
-      sandbox.stub(anchoring, 'anchor').returns(range)
+      sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       clientRect = {top: 100, left: 200}
       window.scrollX = 50
       window.scrollY = 25
@@ -376,7 +376,7 @@ describe 'Guest', ->
     it 'adds the anchor to the "anchors" instance property"', (done) ->
       guest = createGuest()
       highlights = [document.createElement('span')]
-      sandbox.stub(anchoring, 'anchor').returns(range)
+      sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       sandbox.stub(highlighter, 'highlightRange').returns(highlights)
       target = [{selector: []}]
       annotation = guest.setupAnnotation({target: [target]})
@@ -404,7 +404,7 @@ describe 'Guest', ->
     it 'does not reanchor targets that are already anchored', (done) ->
       guest = createGuest()
       annotation = target: [{selector: "test"}]
-      stub = sandbox.stub(anchoring, 'anchor').returns(range)
+      stub = sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       guest.setupAnnotation(annotation)
       waitForSync(annotation).then ->
         delete annotation.$anchors
