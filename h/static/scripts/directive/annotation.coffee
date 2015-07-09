@@ -198,6 +198,7 @@ AnnotationController = [
         when 'create'
           updateDomainModel(model, @annotation)
           onFulfilled = =>
+            $scope.$broadcast('annotationCreated')
             $rootScope.$emit('annotationCreated', model)
             @view()
           onRejected = (reason) =>
@@ -208,6 +209,7 @@ AnnotationController = [
           updateDomainModel(updatedModel, @annotation)
           onFulfilled = =>
             angular.copy(updatedModel, model)
+            $scope.$broadcast('annotationUpdated')
             $rootScope.$emit('annotationUpdated', model)
             @view()
           onRejected = (reason) =>
