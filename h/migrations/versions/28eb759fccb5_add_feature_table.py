@@ -21,7 +21,7 @@ def upgrade():
     feature_table = op.create_table('feature',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.Unicode(length=50), nullable=False),
-        sa.Column('everyone', sa.Boolean(), server_default=sa.text(u'0'), nullable=False),
+        sa.Column('everyone', sa.Boolean(), server_default=sa.sql.expression.false(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name'))
 
