@@ -51,6 +51,7 @@ def _validate_request(request):
     Check that the passed request is appropriate for proceeding with account
     claim. Asserts that:
 
+    - the 'claim' feature is toggled on
     - no-one is logged in
     - the claim token is provided and authentic
     - the user referred to in the token exists
@@ -58,6 +59,9 @@ def _validate_request(request):
 
     and raises for redirect or 404 otherwise.
     """
+    if not request.feature('claim'):
+        raise exc.HTTPNotFound()
+
     # If signed in, redirect to stream
     if request.authenticated_userid is not None:
         _perform_logged_in_redirect(request)

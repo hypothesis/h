@@ -10,6 +10,11 @@ def annotation(event):
     request = event.request
     annotation = event.annotation
     action = event.action
+
+    # We only publish these events to NSQ if the 'queue' feature is enabled.
+    if not request.feature('queue'):
+        return
+
     queue = request.get_queue_writer()
     data = {
         'action': action,

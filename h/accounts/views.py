@@ -473,7 +473,7 @@ class ProfileController(object):
         model = {}
         if userid:
             model["email"] = User.get_by_id(request, userid).email
-        if request.registry.feature('notification'):
+        if request.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 userid)
         return {'model': model}

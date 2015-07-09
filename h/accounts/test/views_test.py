@@ -8,6 +8,7 @@ import deform
 from pyramid import httpexceptions
 from pyramid.testing import DummyRequest as _DummyRequest
 
+from h.conftest import DummyFeature
 from h.conftest import DummySession
 
 from h.accounts.views import ajax_form
@@ -20,8 +21,12 @@ from h.accounts.views import ProfileController
 
 class DummyRequest(_DummyRequest):
     def __init__(self, *args, **kwargs):
-        # Add a dummy database session to the request
-        params = {'db': DummySession()}
+        params = {
+            # Add a dummy database session to the request
+            'db': DummySession(),
+            # Add a dummy feature flag querier to the request
+            'feature': DummyFeature(),
+        }
         params.update(kwargs)
         super(DummyRequest, self).__init__(*args, **params)
 
@@ -30,11 +35,6 @@ class FakeUser(object):
     def __init__(self, **kwargs):
         for k in kwargs:
             setattr(self, k, kwargs[k])
-
-
-def configure(config):
-    config.registry.feature = MagicMock()
-    config.registry.feature.return_value = None
 
 
 # A fake version of colander.Invalid for use when testing validate_form

@@ -58,31 +58,21 @@ def create_app(global_config, **settings):
 
     config.add_tween('h.tweens.csrf_tween_factory')
 
-    if config.registry.feature('accounts'):
-        config.set_authentication_policy(session_authn)
-        config.set_authorization_policy(acl_authz)
-        config.include('h.accounts')
+    config.set_authentication_policy(session_authn)
+    config.set_authorization_policy(acl_authz)
+    config.include('h.accounts')
+    config.include('h.claim')
+    config.include('h.notification')
+    config.include('h.queue')
+    config.include('h.streamer')
 
-    if config.registry.feature('api'):
-        api_app = create_api(settings)
-        api_view = wsgiapp2(api_app)
-        config.add_view(api_view, name='api', decorator=strip_vhm)
-        # Add the view again with the 'index' route name, otherwise it will
-        # not take precedence over the index when a virtual root is in use.
-        config.add_view(api_view, name='api', decorator=strip_vhm,
-                        route_name='index')
-
-    if config.registry.feature('claim'):
-        config.include('h.claim')
-
-    if config.registry.feature('queue'):
-        config.include('h.queue')
-
-    if config.registry.feature('streamer'):
-        config.include('h.streamer')
-
-    if config.registry.feature('notification'):
-        config.include('h.notification')
+    api_app = create_api(settings)
+    api_view = wsgiapp2(api_app)
+    config.add_view(api_view, name='api', decorator=strip_vhm)
+    # Add the view again with the 'index' route name, otherwise it will
+    # not take precedence over the index when a virtual root is in use.
+    config.add_view(api_view, name='api', decorator=strip_vhm,
+                    route_name='index')
 
     return config.make_wsgi_app()
 
@@ -104,11 +94,8 @@ def create_api(global_config, **settings):
 
     config.include('h.auth')
     config.include('h.api.db')
+    config.include('h.api.queue')
     config.include('h.api.views')
-
-    if config.registry.feature('queue'):
-        config.include('h.queue')
-        config.include('h.api.queue')
 
     app = config.make_wsgi_app()
     app = permit_cors(app,

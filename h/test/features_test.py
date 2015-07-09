@@ -1,46 +1,55 @@
-import unittest
-
-from mock import patch
+import mock
 from pyramid.testing import DummyRequest
 import pytest
 
-from h.features import Client
-from h.features import UnknownFeatureError
-from h.features import get_client
+from h import features
 
 
-class TestClient(unittest.TestCase):
-    def setUp(self):
-        self.storage = {
-            'enabled_feature': True,
-            'disabled_feature': False
-        }
+def test_flag_enabled_raises_for_undocumented_feature():
+    request = DummyRequest()
 
-    def test_call_truthiness(self):
-        c = Client(self.storage)
-
-        assert c('enabled_feature')
-        assert not c('disabled_feature')
-
-    def test_call_raises(self):
-        c = Client(self.storage)
-
-        with pytest.raises(UnknownFeatureError):
-            c('unknown_feature')
+    with pytest.raises(features.UnknownFeatureError):
+        features.flag_enabled(request, 'wibble')
 
 
-@patch('h.features.Client')
-def test_get_client(client_mock, config):
-    config.registry.settings.update({
-        'h.feature.enabled_feature': 'on',
-        'h.feature.disabled_feature': False,
-        'unrelated_feature': 123,
-    })
+def test_flag_enabled_looks_up_feature_by_name(feature_model):
+    request = DummyRequest()
 
-    request = DummyRequest(registry=config.registry)
-    get_client(request)
+    features.flag_enabled(request, 'notification')
 
-    client_mock.assert_called_with({
-        'enabled_feature': True,
-        'disabled_feature': False
-    })
+    feature_model.get_by_name.assert_called_with('notification')
+
+
+def test_flag_enabled_false_if_not_in_database(feature_model):
+    feature_model.get_by_name.return_value = None
+    request = DummyRequest()
+
+    result = features.flag_enabled(request, 'notification')
+
+    assert not result
+
+
+def test_flag_enabled_false_if_everyone_false(feature_model):
+    feature_model.get_by_name.return_value.everyone = False
+    request = DummyRequest()
+
+    result = features.flag_enabled(request, 'notification')
+
+    assert not result
+
+
+def test_flag_enabled_true_if_everyone_true(feature_model):
+    feature_model.get_by_name.return_value.everyone = True
+    request = DummyRequest()
+
+    result = features.flag_enabled(request, 'notification')
+
+    assert result
+
+
+@pytest.fixture
+def feature_model(request):
+    patcher = mock.patch('h.features.Feature', autospec=True)
+    request.addfinalizer(patcher.stop)
+    model = patcher.start()
+    return model
