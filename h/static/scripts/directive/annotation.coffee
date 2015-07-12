@@ -185,7 +185,7 @@ AnnotationController = [
     ###
     this.save = ->
       unless model.user or model.deleted
-        return flash.info('Please sign in to save your annotations.')
+        return flash.info('Please sign in to save your annotations. (If you've entered text, copy it now and paste after you sign in.)')
       unless validate(@annotation)
         return flash.info('Please add text or a tag before publishing.')
 
