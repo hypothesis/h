@@ -104,9 +104,10 @@ def token(args):
     if not args.config_uri.endswith('#api'):
         args.config_uri += '#api'
 
+    request = Request.blank("/", base_url=args.base)
+
     paster.setup_logging(args.config_uri)
-    env = paster.bootstrap(args.config_uri)
-    request = env['request']
+    env = paster.bootstrap(args.config_uri, request=request)
     registry = env['registry']
 
     request.client = get_client(request, registry.settings['h.client_id'])
