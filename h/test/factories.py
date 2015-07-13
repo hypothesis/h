@@ -4,6 +4,8 @@ import datetime
 
 import factory
 
+from h.accounts import models
+
 
 class Annotation(factory.Factory):
 
@@ -130,3 +132,22 @@ class Annotation(factory.Factory):
             "facebook": {},
             "link": [{"href": stub.uri}]
         }
+
+
+class User(factory.Factory):
+
+    """A factory class that generates h.accounts.models.User objects.
+
+    Note that this class doesn't add the User to the database session for you,
+    if tests want the user added to a session they should do that themselves.
+
+    """
+
+    class Meta(object):
+        model = models.User
+
+    uid = factory.Sequence(lambda n: "test_user_{n}".format(n=n + 1))
+    username = factory.Sequence(lambda n: "test_user_{n}".format(n=n + 1))
+    email = factory.LazyAttribute(
+        lambda n: "{username}@test_users.com".format(username=n.username))
+    password = "pass"

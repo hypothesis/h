@@ -6,11 +6,14 @@ import os
 import sys
 import textwrap
 
+import transaction
 from elasticsearch import Elasticsearch
 from pyramid import paster
 from pyramid.request import Request
 
-from h import __version__, reindexer
+from h import __version__
+from h import reindexer
+from h import accounts
 
 
 ENV_OVERRIDES = {
@@ -53,6 +56,20 @@ def init_db(args):
 
 parser_init_db = subparsers.add_parser('init_db', help=init_db.__doc__)
 _add_common_args(parser_init_db)
+
+
+def admin(args):
+    """Make a user an admin."""
+    paster.bootstrap(args.config_uri, request=Request.blank(''))
+    accounts.make_admin(unicode(args.user_id, sys.getfilesystemencoding()))
+    transaction.commit()
+
+
+parser_admin = subparsers.add_parser('admin', help=admin.__doc__)
+parser_admin.add_argument(
+    'user_id',
+    help="the ID of the user to make into an admin, e.g. 'fred'")
+parser_admin.add_argument('config_uri', help='paster configuration URI')
 
 
 def assets(args):
@@ -161,6 +178,7 @@ parser_version = subparsers.add_parser('version', help=version.__doc__)
 
 COMMANDS = {
     'assets': assets,
+    'admin': admin,
     'extension': extension,
     'init_db': init_db,
     'reindex': reindex,

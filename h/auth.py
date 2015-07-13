@@ -44,6 +44,7 @@ from pyramid.util import action_method
 
 from .interfaces import IClientFactory
 from .oauth import JWT_BEARER
+from h.accounts import models
 
 LEEWAY = 240  # allowance for clock skew in verification
 
@@ -127,18 +128,24 @@ class RequestValidator(_RequestValidator):
 
 
 def effective_principals(userid, request):
-    """Return the effective principals for a request.
+    """Return the list of additional effective principals for this request.
 
-    The effective principals are the authorized userid and a consumer group
-    for the client associated with the request.
+    Return the list of additional effective principals for the given userid and
+    request (in addition to pyramid.security.Everyone,
+    pyramid.security.Authenticated, and the user's ID which are automatically
+    inserted by Pyramid).
+
     """
-    groups = []
+    additional_principals = []
 
     if getattr(request, 'client', None) is not None:
         consumer_group = 'consumer:{}'.format(request.client.client_id)
-        groups.append(consumer_group)
+        additional_principals.append(consumer_group)
 
-    return groups
+    if models.User.get_by_id(request, userid).admin:
+        additional_principals.append('group:admin')
+
+    return additional_principals
 
 
 def generate_signed_token(request):

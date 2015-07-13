@@ -11,6 +11,7 @@ from pyramid_mailer.message import Message
 from h.resources import Application
 from h.notification.models import Subscriptions
 from h.models import _
+from h import accounts
 from h.accounts.models import User
 from h.accounts.models import Activation
 from h.accounts.events import ActivationEvent
@@ -574,6 +575,61 @@ def _update_subscription_data(request, subscription):
     request.session.flash(_('Changes saved!'), 'success')
 
 
+@view_config(attr='index', route_name='admin_users_index',
+             renderer='h:templates/admin_users.html',
+             permission='admin')
+@view_config(attr='create', route_name='admin_users_index',
+             request_method='POST', renderer='h:templates/admin_users.html',
+             permission='admin')
+@view_config(attr='delete', route_name='admin_user_delete',
+             request_method='POST', renderer='h:templates/admin_users.html',
+             permission='admin')
+class AdminController(object):
+
+    """A controller to contain the views for managing admin users.
+
+    For example listing all admin users, making a user an admin, removing admin
+    permissions from a user.
+
+    """
+
+    def __init__(self, request):
+        self.request = request
+
+    @staticmethod
+    def index():
+        """A list of all the admin users as an HTML page."""
+        return {"admin_users": [u.username for u in User.admins()]}
+
+    def create(self):
+        """Make a given user an admin."""
+        try:
+            user_id = self.request.params['add']
+        except KeyError:
+            raise httpexceptions.HTTPNotFound
+
+        try:
+            accounts.make_admin(user_id)
+        except accounts.NoSuchUserError:
+            self.request.session.flash(
+                _("User {user_id} doesn't exist.".format(user_id=user_id)),
+                "error")
+        return self.index()
+
+    def delete(self):
+        """Remove a user from the admins."""
+        if len(User.admins()) > 1:
+            try:
+                user_id = self.request.params['remove']
+            except KeyError:
+                raise httpexceptions.HTTPNotFound
+
+            user = User.get_by_username(user_id)
+            user.admin = False
+        return httpexceptions.HTTPSeeOther(
+            location=self.request.route_url('admin_users_index'))
+
+
 def includeme(config):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
@@ -584,4 +640,6 @@ def includeme(config):
     config.add_route('forgot_password', '/forgot_password')
     config.add_route('reset_password', '/reset_password/{code}')
     config.add_route('disable_user', '/account/disable')
+    config.add_route('admin_users_index', '/admins')
+    config.add_route('admin_user_delete', '/admins/delete')
     config.scan(__name__)
