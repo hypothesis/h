@@ -103,7 +103,7 @@ config:
     - output: scripts/config.js
       filters: browserify
       contents:
-        - h:static/scripts/config/accounts.coffee
+        - h:static/scripts/config/accounts.js
 
 
 # Application
