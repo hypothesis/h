@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import os
 import sys
+import textwrap
 
 from elasticsearch import Elasticsearch
 from pyramid import paster
@@ -29,11 +30,16 @@ subparsers.required = True
 
 
 def _add_common_args(parser):
-    parser.add_argument('config_uri', help='paster configuration URI')
-    parser.add_argument('--base',
-                        help='Base URL',
-                        default='http://localhost:5000',
-                        metavar='URL')
+    parser.add_argument(
+        'config_uri',
+        help="the path to your paster config file, for example: "
+             "'conf/development.ini'")
+    parser.add_argument(
+        '--base',
+        help="the base URL of your h instance (default: "
+             "'http://localhost:5000')",
+        default='http://localhost:5000',
+        metavar='URL')
 
 
 def init_db(args):
@@ -98,15 +104,29 @@ parser_reindex.add_argument('alias', nargs='?',
 
 
 def token(args):
-    """Generate an OAuth bearer token for the specified principal."""
+    """
+    Generate an OAuth bearer token for the specified principal.
+
+    This token is suitable for authenticating HTTP requests to the h API.
+
+    For example, to authorize yourself as user seanh to your local dev instance
+    of h do:
+
+        hypothesis token --base 'http://localhost:5000' --sub 'acct:seanh@localhost' conf/development.ini
+
+    Then copy the output and pass it to the h API as the value of an
+    X-Annotator-Auth-Token header.
+
+    """
     from h.auth import get_client, generate_signed_token
 
     if not args.config_uri.endswith('#api'):
         args.config_uri += '#api'
 
+    request = Request.blank("/", base_url=args.base)
+
     paster.setup_logging(args.config_uri)
-    env = paster.bootstrap(args.config_uri)
-    request = env['request']
+    env = paster.bootstrap(args.config_uri, request=request)
     registry = env['registry']
 
     request.client = get_client(request, registry.settings['h.client_id'])
@@ -118,12 +138,18 @@ def token(args):
 
     print(token)
 
-parser_token = subparsers.add_parser('token', help=token.__doc__)
+parser_token = subparsers.add_parser(
+    'token', description=textwrap.dedent(token.__doc__),
+    formatter_class=argparse.RawDescriptionHelpFormatter)
 _add_common_args(parser_token)
-parser_token.add_argument('--sub',
-                          help='Subject (userid, group, etc.) of the token')
-parser_token.add_argument('--ttl', type=int, default=3600,
-                          help='Token time-to-live (default: 1h)')
+parser_token.add_argument(
+    '--sub',
+    help="subject (userid, group, etc.) of the token, for example: "
+         "'acct:seanh@127.0.0.1'")
+parser_token.add_argument(
+    '--ttl', type=int, default=3600,
+    help='token time-to-live in seconds, for example: 60 (default: 3600, '
+         'one hour)')
 
 
 def version(args):
