@@ -50,7 +50,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           @annotator.setVisibleHighlights state
     ,
       "title": "New Page Note"
-      "class": "h-icon-insert-comment"
+      "class": "h-icon-insert-comment toolbar-insert-comment"
       "name": "insert-comment"
       "on":
         "click": (event) =>
