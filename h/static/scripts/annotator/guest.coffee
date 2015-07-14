@@ -163,6 +163,7 @@ module.exports = class Guest extends Annotator
 
   setupAnnotation: (annotation) ->
     self = this
+    root = @element[0]
 
     anchors = []
     anchoredTargets = []
@@ -175,7 +176,7 @@ module.exports = class Guest extends Annotator
         cache: self.anchoringCache
         ignoreSelector: '[class^="annotator-"]'
       }
-      return self.anchoring.anchor(target.selector, options)
+      return self.anchoring.anchor(root, target.selector, options)
       .then((range) -> {annotation, target, range})
       .catch(-> {annotation, target})
 
@@ -183,7 +184,7 @@ module.exports = class Guest extends Annotator
       return anchor unless anchor.range?
       return animationPromise ->
         range = Annotator.Range.sniff(anchor.range)
-        normedRange = range.normalize(self.element[0])
+        normedRange = range.normalize(root)
 
         highlights = highlighter.highlightRange(normedRange)
         rect = highlighter.getBoundingClientRect(highlights)
@@ -233,6 +234,7 @@ module.exports = class Guest extends Annotator
 
   createAnnotation: (annotation = {}) ->
     self = this
+    root = @element[0]
 
     ranges = @selectedRanges ? []
     @selectedRanges = null
@@ -242,7 +244,7 @@ module.exports = class Guest extends Annotator
         cache: self.anchoringCache
         ignoreSelector: '[class^="annotator-"]'
       }
-      return self.anchoring.describe(range, options)
+      return self.anchoring.describe(root, range, options)
 
     setDocumentInfo = ({metadata, uri}) ->
       annotation.uri = uri

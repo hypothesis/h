@@ -17,12 +17,12 @@ class PDF extends Annotator.Plugin
     anchoring = require('../anchoring/pdf')
 
     @annotator.anchoring = {
-      anchor: (selectors, options = {}) ->
+      anchor: (root, selectors, options = {}) ->
         options = extend({}, options, {cache})
-        return anchoring.anchor(selectors, options)
-      describe: (range, options = {}) ->
+        return anchoring.anchor(root, selectors, options)
+      describe: (root, range, options = {}) ->
         options = extend({}, options, {cache})
-        return anchoring.describe(range, options)
+        return anchoring.describe(root, range, options)
     }
 
     @pdfViewer = PDFViewerApplication.pdfViewer

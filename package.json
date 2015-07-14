@@ -10,6 +10,9 @@
     "coffee-script": "1.7.1",
     "coffeeify": "^1.0.0",
     "diff-match-patch": "^1.0.0",
+    "dom-anchor-fragment": "^1.0.0",
+    "dom-anchor-text-position": "^1.0.1",
+    "dom-anchor-text-quote": "^1.1.2",
     "dom-seek": "^1.0.0",
     "es6-promise": "^2.1.0",
     "extend": "^2.0.0",
@@ -57,6 +60,9 @@
     "annotator-auth": "./h/static/scripts/vendor/annotator.auth.js",
     "angular": "./h/static/scripts/vendor/angular.js",
     "angular-mock": "./h/static/scripts/vendor/angular-mocks.js",
+    "dom-anchor-fragment": "./node_modules/dom-anchor-fragment/dist/dom-anchor-fragment.js",
+    "dom-anchor-text-position": "./node_modules/dom-anchor-text-position/dist/dom-anchor-text-position.js",
+    "dom-anchor-text-quote": "./node_modules/dom-anchor-text-quote/dist/dom-anchor-text-quote.js",
     "dom-seek": "./node_modules/dom-seek/dist/seek.js",
     "es6-promise": "./node_modules/es6-promise/dist/es6-promise.js",
     "hammerjs": "./node_modules/hammerjs/hammer.js",
@@ -85,6 +91,20 @@
       ]
     },
     "angular-mock": "global:angular.mock",
+    "dom-anchor-fragment": "domAnchorFragment",
+    "dom-anchor-text-position": {
+      "depends": [
+        "dom-seek:seek"
+      ],
+      "exports": "domAnchorTextPosition"
+    },
+    "dom-anchor-text-quote": {
+      "depends": [
+        "diff-match-patch:DiffMatchPatch",
+        "dom-anchor-text-position:TextPositionAnchor"
+      ],
+      "exports": "domAnchorTextQuote"
+    },
     "dom-seek": "seek",
     "es6-promise": "ES6Promise",
     "hammerjs": "Hammer",

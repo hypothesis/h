@@ -8,10 +8,10 @@ raf = require('raf')
 } = require('./types')
 
 
-querySelector = (type, selector, options) ->
+querySelector = (type, root, selector, options) ->
   doQuery = (resolve, reject) ->
     try
-      anchor = type.fromSelector(selector, options)
+      anchor = type.fromSelector(root, selector, options)
       range = anchor.toRange(options)
       resolve(range)
     catch error
@@ -26,11 +26,13 @@ querySelector = (type, selector, options) ->
 # It encapsulates the core anchoring algorithm, using the selectors alone or
 # in combination to establish the best anchor within the document.
 #
+# :param Element root: The root element of the anchoring context.
 # :param Array selectors: The selectors to try.
+# :param Object options: Options to pass to the anchor implementations.
 # :return: A Promise that resolves to a Range on success.
 # :rtype: Promise
 ####
-exports.anchor = (selectors, options = {}) ->
+exports.anchor = (root, selectors, options = {}) ->
   # Selectors
   fragment = null
   position = null
@@ -44,7 +46,7 @@ exports.anchor = (selectors, options = {}) ->
         fragment = selector
       when 'TextPositionSelector'
         position = selector
-        options.position = position  # TextQuoteAnchor hint
+        options.hint = position.start  # TextQuoteAnchor hint
       when 'TextQuoteSelector'
         quote = selector
       when 'RangeSelector'
@@ -62,33 +64,33 @@ exports.anchor = (selectors, options = {}) ->
 
   if fragment?
     promise = promise.catch ->
-      return querySelector(FragmentAnchor, fragment, options)
+      return querySelector(FragmentAnchor, root, fragment, options)
       .then(maybeAssertQuote)
 
   if range?
     promise = promise.catch ->
-      return querySelector(RangeAnchor, range, options)
+      return querySelector(RangeAnchor, root, range, options)
       .then(maybeAssertQuote)
 
   if position?
     promise = promise.catch ->
-      return querySelector(TextPositionAnchor, position, options)
+      return querySelector(TextPositionAnchor, root, position, options)
       .then(maybeAssertQuote)
 
   if quote?
     promise = promise.catch ->
       # Note: similarity of the quote is implied.
-      return querySelector(TextQuoteAnchor, quote, options)
+      return querySelector(TextQuoteAnchor, root, quote, options)
 
   return promise
 
 
-exports.describe = (range, options = {}) ->
+exports.describe = (root, range, options = {}) ->
   types = [FragmentAnchor, RangeAnchor, TextPositionAnchor, TextQuoteAnchor]
 
   selectors = for type in types
     try
-      anchor = type.fromRange(range, options)
+      anchor = type.fromRange(root, range, options)
       selector = anchor.toSelector(options)
     catch
       continue

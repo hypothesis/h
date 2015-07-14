@@ -72,11 +72,13 @@ findPage = (offset, cache = {}) ->
 # It encapsulates the core anchoring algorithm, using the selectors alone or
 # in combination to establish the best anchor within the document.
 #
+# :param Element root: The root element of the anchoring context.
 # :param Array selectors: The selectors to try.
+# :param Object options: Options to pass to the anchor implementations.
 # :return: A Promise that resolves to a Range on success.
 # :rtype: Promise
 ####
-exports.anchor = (selectors, options = {}) ->
+exports.anchor = (root, selectors, options = {}) ->
   cache = options.cache ? {}
 
   # Selectors
@@ -106,8 +108,8 @@ exports.anchor = (selectors, options = {}) ->
     renderingDone = page.textLayer?.renderingDone
     if renderingState is RenderingStates.FINISHED and renderingDone
       root = page.textLayer.textLayerDiv
-      selector = anchor.toSelector()
-      return html.anchor([selector], {root})
+      selector = anchor.toSelector(options)
+      return html.anchor(root, [selector])
     else
       div = page.div ? page.el
       placeholder = div.getElementsByClassName('annotator-placeholder')[0]
@@ -130,7 +132,7 @@ exports.anchor = (selectors, options = {}) ->
         end = position.end - offset
         length = end - start
         assertQuote(textContent.substr(start, length))
-        anchor = new TextPositionAnchor(start, end)
+        anchor = new TextPositionAnchor(root, start, end)
         return anchorByPosition(page, anchor)
 
   if quote?
@@ -142,12 +144,6 @@ exports.anchor = (selectors, options = {}) ->
          {page, anchor} = cache.quotePosition[quote.exact][position.start]
          return anchorByPosition(page, anchor)
 
-      storeAndAnchor = (page, anchor) ->
-        if position?
-          cache.quotePosition[quote.exact] ?= {}
-          cache.quotePosition[quote.exact][position.start] = {page, anchor}
-        return anchorByPosition(page, anchor)
-
       findInPages = ([pageIndex, rest...]) ->
         page = getPage(pageIndex)
         content = getPageTextContent(pageIndex, cache.pageText)
@@ -155,16 +151,15 @@ exports.anchor = (selectors, options = {}) ->
         Promise.all([content, offset, page])
         .then (results) ->
           [content, offset, page] = results
-          pageOptions = {root: {textContent: content}}
+          root = {textContent: content}
+          pageOptions = {}
           if position?
-            # XXX: must be on one page
-            start = position.start - offset
-            end = position.end - offset
-            pageOptions.position = {start, end}
-          anchor = new TextQuoteAnchor.fromSelector(quote, pageOptions)
-          return Promise.resolve(anchor)
-          .then((a) -> return a.toPositionAnchor(pageOptions))
-          .then((a) -> return storeAndAnchor(page, a))
+            pageOptions.hint = position.start - offset
+          anchor = new TextQuoteAnchor.fromSelector(root, quote)
+          anchor = anchor.toPositionAnchor(pageOptions)
+          cache.quotePosition[quote.exact] ?= {}
+          cache.quotePosition[quote.exact][position.start] = {page, anchor}
+          return anchorByPosition(page, anchor)
         .catch ->
           if rest.length
             return findInPages(rest)
@@ -191,7 +186,7 @@ exports.anchor = (selectors, options = {}) ->
   return promise
 
 
-exports.describe = (range, options = {}) ->
+exports.describe = (root, range, options = {}) ->
   cache = options.cache ? {}
   range = new xpathRange.BrowserRange(range).normalize()
 
@@ -218,13 +213,12 @@ exports.describe = (range, options = {}) ->
     start += pageOffset
     end += pageOffset
 
-    position = new TextPositionAnchor(start, end).toSelector()
+    position = new TextPositionAnchor(root, start, end).toSelector(options)
 
     r = document.createRange()
     r.setStartBefore(startRange.start)
     r.setEndAfter(endRange.end)
 
-    pageOptions = {root: startTextLayer}
-    quote = TextQuoteAnchor.fromRange(r, pageOptions).toSelector()
+    quote = TextQuoteAnchor.fromRange(root, r, options).toSelector(options)
 
     return Promise.all([position, quote])
