@@ -1,178 +1,183 @@
-<header class="annotation-header">
-  <!-- Deletion notice -->
-  <span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
-
-  <!-- User -->
-  <span ng-if="vm.annotation.user">
-    <a class="annotation-user"
-       target="_blank"
-       ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
-       >{{vm.annotation.user | persona}}</a>
-    <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
-    <span ng-show="vm.isPrivate() && !vm.editing"
-          title="This annotation is viewable only to you.">
-      <i class="h-icon-lock"></i> Private
-    </span>
-    <span class="annotation-citation"
-          ng-if="!vm.embedded"
-          ng-show="vm.document.title">
-      on &ldquo;<a href="{{vm.document.uri}}" target="_blank"
-                   >{{vm.document.title}}</a>&rdquo;
-      <span class="annotation-citation-domain"
-            ng-show="vm.document.domain != vm.document.title"
-            >({{vm.document.domain}})</span>
-    </span>
-    <!-- Editing controls -->
-    <aside class="pull-right" ng-if="vm.editing">
-      <privacy ng-click="$event.stopPropagation()"
-               ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
-               ng-model="vm.annotation.permissions"
-               level="vm.privacyLevel"
-               user="{{vm.annotation.user}}"
-               class="dropdown privacy pull-right"
-               name="privacy" />
-    </aside>
-    <!-- / Editing controls -->
-  </span>
-
-  <span ng-if="!vm.annotation.user">Sign in to save this annotation.</span>
-
-  <span class="annotation-collapsed-replies">
-    <a class="reply-count small" href=""
-       ng-click="replyCountClick()"
-       ng-pluralize count="replyCount"
-       when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
-  </span>
-
-  <!-- Timestamp -->
-  <a class="annotation-timestamp"
-     target="_blank"
-     title="{{vm.annotation.updated | moment:'LLLL'}}"
-     ng-if="!vm.editing && vm.annotation.updated"
-     ng-href="{{vm.baseURI}}a/{{vm.annotation.id}}"
-     >{{vm.timestamp}}</a>
+<header class="annotation-header" ng-if="!vm.annotation.user">
+  <strong>You must be signed in to create annotations.</strong>
 </header>
 
-<!-- Excerpts -->
-<section class="annotation-section"
-         ng-repeat="target in vm.annotation.target track by $index">
-  <blockquote class="annotation-quote"
-              ng-hide="target.diffHTML && vm.showDiff"
-              ng-bind-html="selector.exact"
-              ng-repeat="selector in target.selector
-                         | filter : {'type': 'TextQuoteSelector'}
-                         track by $index"></blockquote>
-  <blockquote class="annotation-quote"
-              ng-bind-html="target.diffHTML"
-              ng-show="target.diffHTML && vm.showDiff"></blockquote>
-  <div class="small show-differences"
-       ng-show="vm.hasDiff">
-    <input type="checkbox"
-           ng-model="vm.showDiff"
-           ng-click="$event.stopPropagation()"> Show differences</input>
-  </div>
-</section>
+<div ng-if="vm.annotation.user">
+  <header class="annotation-header">
+    <!-- Deletion notice -->
+    <span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
 
-<!-- / Excerpts -- >
-
-<!-- Body -->
-<section name="text"
-         class="annotation-body"
-         ng-model="vm.annotation.text"
-         ng-readonly="!vm.editing"
-         markdown>
-</section>
-<!-- / Body -->
-
-<!-- Tags -->
-<div class="annotation-body form-field" ng-if="vm.editing">
-  <tags-input ng-model="vm.annotation.tags"
-              name="tags"
-              class="tags"
-              placeholder="Add tags…"
-              min-length="1"
-              replace-spaces-with-dashes="false"
-              enable-editing-last-tag="true">
-      <auto-complete source="vm.tagsAutoComplete($query)"
-                     min-length="1"
-                     max-results-to-show="10"></auto-complete>
-  </tags-input>
-</div>
-
-<div class="annotation-section tags tags-read-only"
-     ng-if="vm.annotation.tags.length && !vm.editing">
-  <ul class="tag-list">
-    <li class="tag-item" ng-repeat="tag in vm.annotation.tags">
-      <a href="/stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
-    </li>
-  </ul>
-</div>
-<!-- / Tags -->
-
-<footer class="annotation-footer">
-  <div class="small" ng-if="vm.editing">
-    <p ng-show="vm.privacyLevel.text == 'Only Me'">
-      <i class="h-icon-lock"></i> This annotation is visible only to you.</p>
-    <p ng-show="vm.privacyLevel.text == 'Public'">
-      <i class="h-icon-public"></i> This annotation is visible to everyone.</p>
-  </div>
-
-  <div class="form-actions" ng-if="vm.editing" ng-switch="vm.action">
-    <div class="form-actions-buttons form-actions-left">
-      <button ng-switch-when="edit"
-              ng-click="vm.save()"
-              class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
-      <button ng-switch-when="delete"
-              ng-click="vm.save()"
-              class="btn"><i class="h-icon-check btn-icon"></i> Delete</button>
-      <button ng-switch-default
-              ng-click="vm.save()"
-              class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
-      <button class="btn btn-clean"
-              ng-click="vm.revert()"
-              ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
-    </div>
-  </div>
-
-  <div class="annotation-section annotation-license" ng-if="vm.editing">
-    <a href="http://creativecommons.org/publicdomain/zero/1.0/"
-       title="View more information about the Creative Commons Public Domain license"
-       target="_blank">
-      <i class="h-icon-cc-logo"></i><i class="h-icon-cc-zero"></i>
-      Annotations can be freely reused by anyone for any purpose.
-    </a>
-  </div>
-
-  <div class="annotation-replies" ng-if="replyCount > 0">
-    <a class="reply-count small" href=""
-       ng-click="replyCountClick()"
-       ng-pluralize count="replyCount"
-       when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
-  </div>
-
-  <div class="annotation-actions" ng-if="!vm.editing && vm.annotation.id">
-    <button class="small btn-clean"
-            ng-click="vm.reply()"
-            ><i class="h-icon-reply btn-icon"></i> Reply</button>
-    <span class="share-dialog-wrapper">
-      <button class="small btn-clean"
-              ng-click="share($event)"
-              ><i class="h-icon-link btn-icon"></i> Link</button>
-      <span class="share-dialog" ng-click="$event.stopPropagation()">
-        <a target="_blank"
-           class="h-icon-link"
-           ng-href="{{vm.annotationURI}}"
-           title="Open in new tab"></a>
-        <input type="text" value="{{vm.annotationURI}}" readonly>
+    <!-- User -->
+    <span ng-if="vm.annotation.user">
+      <a class="annotation-user"
+         target="_blank"
+         ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
+         >{{vm.annotation.user | persona}}</a>
+      <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
+      <span ng-show="vm.isPrivate() && !vm.editing"
+            title="This annotation is viewable only to you.">
+        <i class="h-icon-lock"></i> Private
       </span>
+      <span class="annotation-citation"
+            ng-if="!vm.embedded"
+            ng-show="vm.document.title">
+        on &ldquo;<a href="{{vm.document.uri}}" target="_blank"
+                     >{{vm.document.title}}</a>&rdquo;
+        <span class="annotation-citation-domain"
+              ng-show="vm.document.domain != vm.document.title"
+              >({{vm.document.domain}})</span>
+      </span>
+      <!-- Editing controls -->
+      <aside class="pull-right" ng-if="vm.editing">
+        <privacy ng-click="$event.stopPropagation()"
+                 ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
+                 ng-model="vm.annotation.permissions"
+                 level="vm.privacyLevel"
+                 user="{{vm.annotation.user}}"
+                 class="dropdown privacy pull-right"
+                 name="privacy" />
+      </aside>
+      <!-- / Editing controls -->
     </span>
-    <button class="small btn-clean"
-            ng-show="vm.authorize('update')"
-            ng-click="vm.edit()"
-            ><i class="h-icon-edit btn-icon"></i> Edit</button>
-    <button class="small btn-clean"
-            ng-show="vm.authorize('delete')"
-            ng-click="vm.delete()"
-            ><i class="h-icon-delete btn-icon"></i> Delete…</button>
+
+
+    <span class="annotation-collapsed-replies">
+      <a class="reply-count small" href=""
+         ng-click="replyCountClick()"
+         ng-pluralize count="replyCount"
+         when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
+    </span>
+
+    <!-- Timestamp -->
+    <a class="annotation-timestamp"
+       target="_blank"
+       title="{{vm.annotation.updated | moment:'LLLL'}}"
+       ng-if="!vm.editing && vm.annotation.updated"
+       ng-href="{{vm.baseURI}}a/{{vm.annotation.id}}"
+       >{{vm.timestamp}}</a>
+  </header>
+
+  <!-- Excerpts -->
+  <section class="annotation-section"
+           ng-repeat="target in vm.annotation.target track by $index">
+    <blockquote class="annotation-quote"
+                ng-hide="target.diffHTML && vm.showDiff"
+                ng-bind-html="selector.exact"
+                ng-repeat="selector in target.selector
+                           | filter : {'type': 'TextQuoteSelector'}
+                           track by $index"></blockquote>
+    <blockquote class="annotation-quote"
+                ng-bind-html="target.diffHTML"
+                ng-show="target.diffHTML && vm.showDiff"></blockquote>
+    <div class="small show-differences"
+         ng-show="vm.hasDiff">
+      <input type="checkbox"
+             ng-model="vm.showDiff"
+             ng-click="$event.stopPropagation()"> Show differences</input>
+    </div>
+  </section>
+
+  <!-- / Excerpts -- >
+
+  <!-- Body -->
+  <section name="text"
+           class="annotation-body"
+           ng-model="vm.annotation.text"
+           ng-readonly="!vm.editing"
+           markdown>
+  </section>
+  <!-- / Body -->
+
+  <!-- Tags -->
+  <div class="annotation-body form-field" ng-if="vm.editing">
+    <tags-input ng-model="vm.annotation.tags"
+                name="tags"
+                class="tags"
+                placeholder="Add tags…"
+                min-length="1"
+                replace-spaces-with-dashes="false"
+                enable-editing-last-tag="true">
+        <auto-complete source="vm.tagsAutoComplete($query)"
+                       min-length="1"
+                       max-results-to-show="10"></auto-complete>
+    </tags-input>
   </div>
-</footer>
+
+  <div class="annotation-section tags tags-read-only"
+       ng-if="vm.annotation.tags.length && !vm.editing">
+    <ul class="tag-list">
+      <li class="tag-item" ng-repeat="tag in vm.annotation.tags">
+        <a href="/stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
+      </li>
+    </ul>
+  </div>
+  <!-- / Tags -->
+
+  <footer class="annotation-footer">
+    <div class="small" ng-if="vm.editing">
+      <p ng-show="vm.privacyLevel.text == 'Only Me'">
+        <i class="h-icon-lock"></i> This annotation is visible only to you.</p>
+      <p ng-show="vm.privacyLevel.text == 'Public'">
+        <i class="h-icon-public"></i> This annotation is visible to everyone.</p>
+    </div>
+
+    <div class="form-actions" ng-if="vm.editing" ng-switch="vm.action">
+      <div class="form-actions-buttons form-actions-left">
+        <button ng-switch-when="edit"
+                ng-click="vm.save()"
+                class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
+        <button ng-switch-when="delete"
+                ng-click="vm.save()"
+                class="btn"><i class="h-icon-check btn-icon"></i> Delete</button>
+        <button ng-switch-default
+                ng-click="vm.save()"
+                class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
+        <button class="btn btn-clean"
+                ng-click="vm.revert()"
+                ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
+      </div>
+    </div>
+
+    <div class="annotation-section annotation-license" ng-if="vm.editing">
+      <a href="http://creativecommons.org/publicdomain/zero/1.0/"
+         title="View more information about the Creative Commons Public Domain license"
+         target="_blank">
+        <i class="h-icon-cc-logo"></i><i class="h-icon-cc-zero"></i>
+        Annotations can be freely reused by anyone for any purpose.
+      </a>
+    </div>
+
+    <div class="annotation-replies" ng-if="replyCount > 0">
+      <a class="reply-count small" href=""
+         ng-click="replyCountClick()"
+         ng-pluralize count="replyCount"
+         when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
+    </div>
+
+    <div class="annotation-actions" ng-if="!vm.editing && vm.annotation.id">
+      <button class="small btn-clean"
+              ng-click="vm.reply()"
+              ><i class="h-icon-reply btn-icon"></i> Reply</button>
+      <span class="share-dialog-wrapper">
+        <button class="small btn-clean"
+                ng-click="share($event)"
+                ><i class="h-icon-link btn-icon"></i> Link</button>
+        <span class="share-dialog" ng-click="$event.stopPropagation()">
+          <a target="_blank"
+             class="h-icon-link"
+             ng-href="{{vm.annotationURI}}"
+             title="Open in new tab"></a>
+          <input type="text" value="{{vm.annotationURI}}" readonly>
+        </span>
+      </span>
+      <button class="small btn-clean"
+              ng-show="vm.authorize('update')"
+              ng-click="vm.edit()"
+              ><i class="h-icon-edit btn-icon"></i> Edit</button>
+      <button class="small btn-clean"
+              ng-show="vm.authorize('delete')"
+              ng-click="vm.delete()"
+              ><i class="h-icon-delete btn-icon"></i> Delete…</button>
+    </div>
+  </footer>
+</div>
