@@ -198,6 +198,7 @@ AnnotationController = [
         when 'create'
           updateDomainModel(model, @annotation)
           onFulfilled = =>
+            $scope.$broadcast('annotationCreated')
             $rootScope.$emit('annotationCreated', model)
             @view()
           onRejected = (reason) =>
@@ -208,6 +209,7 @@ AnnotationController = [
           updateDomainModel(updatedModel, @annotation)
           onFulfilled = =>
             angular.copy(updatedModel, model)
+            $scope.$broadcast('annotationUpdated')
             $rootScope.$emit('annotationUpdated', model)
             @view()
           onRejected = (reason) =>
@@ -393,12 +395,14 @@ module.exports = [
         # Propagate changes through the counters.
         scope.$watch (-> ctrl.editing), (editing, old) ->
           if editing
+            elem.addClass('editing')
             counter.count 'edit', 1
             # Disable the filter and freeze it to always match while editing.
             if thread? and threadFilter?
               threadFilter.active(false)
               threadFilter.freeze(true)
           else if old
+            elem.removeClass('editing')
             counter.count 'edit', -1
             threadFilter?.freeze(false)
 

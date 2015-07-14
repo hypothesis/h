@@ -13,7 +13,8 @@ uuid = require('node-uuid')
 # the collapsing behavior.
 ###
 ThreadController = [
-  ->
+  '$scope',
+  ($scope) ->
     @container = null
     @collapsed = true
     @parent = null
@@ -33,6 +34,7 @@ ThreadController = [
                  !!value
                else
                  not @collapsed
+      $scope.$broadcast('threadToggleCollapse', value)
       @collapsed = newval
 
     ###*

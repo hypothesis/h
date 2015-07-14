@@ -56,7 +56,7 @@
 <!-- Excerpts -->
 <section class="annotation-section"
          ng-repeat="target in vm.annotation.target track by $index">
-  <blockquote class="annotation-quote"
+  <blockquote class="annotation-quote excerpt"
               ng-hide="target.diffHTML && vm.showDiff"
               ng-bind-html="selector.exact"
               ng-repeat="selector in target.selector
@@ -77,7 +77,7 @@
 
 <!-- Body -->
 <section name="text"
-         class="annotation-body"
+         class="annotation-body excerpt"
          ng-model="vm.annotation.text"
          ng-readonly="!vm.editing"
          markdown>
