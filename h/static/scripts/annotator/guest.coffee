@@ -164,13 +164,27 @@ module.exports = class Guest extends Annotator
     self = this
     root = @element[0]
 
+    # Anchors for all annotations are in the `anchors` instance property. These
+    # are anchors for this annotation only. After all the targets have been
+    # processed these will be appended to the list of anchors known to the
+    # instance. Anchors hold an annotation, a target of that annotation, a
+    # document range for that target and an Array of highlights.
     anchors = []
+
+    # The targets that are already anchored. This function consults this to
+    # determine which targets can be left alone.
     anchoredTargets = []
+
+    # These are the highlights for existing anchors of this annotation with
+    # targets that have since been removed from the annotation. These will
+    # be removed by this function.
     deadHighlights = []
 
+    # Initialize the target array.
     annotation.target ?= []
 
     locate = (target) ->
+      # Find a target using the anchoring module.
       options = {
         cache: self.anchoringCache
         ignoreSelector: '[class^="annotator-"]'
@@ -180,6 +194,7 @@ module.exports = class Guest extends Annotator
       .catch(-> {annotation, target})
 
     highlight = (anchor) ->
+      # Highlight the range for an anchor.
       return anchor unless anchor.range?
       return animationPromise ->
         range = Annotator.Range.sniff(anchor.range)
@@ -198,35 +213,46 @@ module.exports = class Guest extends Annotator
         return anchor
 
     sync = (anchors) ->
+      # Store the results of anchoring.
       annotation.$anchors = ({pos} for {pos} in anchors)
       annotation.$orphan = anchors.length > 0
       for anchor in anchors
         if anchor.range?
           annotation.$orphan = false
 
+      # Add the anchors for this annotation to instance storage.
       self.anchors = self.anchors.concat(anchors)
+
+      # Let plugins know about the new information.
       self.plugins.BucketBar?.update()
       self.plugins.CrossFrame?.sync([annotation])
 
+    # Remove all the anchors for this annotation from the instance storage.
     for anchor in self.anchors.splice(0, self.anchors.length)
       if anchor.annotation is annotation
+        # Anchors are valid as long as they still have a range and their target
+        # is still in the list of targets for this annotation.
         if anchor.range? and anchor.target in annotation.target
           anchors.push(anchor)
           anchoredTargets.push(anchor.target)
         else if anchor.highlights?
-          deadHighlights.push(anchor.highlights)
+          # These highlights are no longer valid and should be removed.
+          deadHighlights = deadHighlights.concat(anchor.highlights)
           delete anchor.highlights
           delete anchor.range
       else
+        # These can be ignored, so push them back onto the new list.
         self.anchors.push(anchor)
 
-    deadHighlights = Array::concat(deadHighlights...)
+    # Remove all the highlights that have no corresponding target anymore.
     raf -> highlighter.removeHighlights(deadHighlights)
 
+    # Anchor any targets of this annotation that are not anchored already.
     for target in annotation.target when target not in anchoredTargets
       anchor = locate(target).then(highlight)
       anchors.push(anchor)
 
+    # Wait for all the anchoring tasks to complete then call sync.
     Promise.all(anchors).then(sync)
 
     return annotation
