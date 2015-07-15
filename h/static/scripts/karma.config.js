@@ -36,6 +36,7 @@ module.exports = function(config) {
       'vendor/moment-timezone.js',
       'vendor/moment-timezone-data.js',
       'vendor/polyfills/url.js',
+      '../../../node_modules/es6-promise/dist/es6-promise.js',
 
       // Test deps
       'vendor/angular-mocks.js',

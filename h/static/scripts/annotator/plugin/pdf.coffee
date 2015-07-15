@@ -1,5 +1,4 @@
 extend = require('extend')
-Promise = global.Promise ? require('es6-promise').Promise
 Annotator = require('annotator')
 
 

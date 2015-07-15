@@ -1,5 +1,4 @@
 raf = require('raf')
-Promise = global.Promise ? require('es6-promise').Promise
 Annotator = require('annotator')
 Guest = require('../guest')
 anchoring = require('../anchoring/html')
