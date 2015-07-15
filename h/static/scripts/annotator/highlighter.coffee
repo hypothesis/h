@@ -11,7 +11,6 @@ $ = Annotator.$
 # Returns an array of highlight Elements.
 exports.highlightRange = (normedRange, cssClass='annotator-hl') ->
   white = /^\s*$/
-
   hl = $("<span class='#{cssClass}'></span>")
 
   # Ignore text nodes that contain only whitespace characters. This prevents
@@ -19,9 +18,9 @@ exports.highlightRange = (normedRange, cssClass='annotator-hl') ->
   # subset of nodes such as table rows and lists. This does mean that there
   # may be the odd abandoned whitespace node in a paragraph that is skipped
   # but better than breaking table layouts.
-
   nodes = $(normedRange.textNodes()).filter((i) -> not white.test @nodeValue)
-  r = nodes.wrap(hl).parent().show().toArray()
+
+  return nodes.wrap(hl).parent().toArray()
 
 
 exports.removeHighlights = (highlights) ->
