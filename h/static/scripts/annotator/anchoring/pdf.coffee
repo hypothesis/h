@@ -7,6 +7,11 @@ html = require('./html')
 {TextPositionAnchor, TextQuoteAnchor} = require('./types')
 
 
+# Caches for performance
+pageTextCache = {}
+quotePositionCache = {}
+
+
 getSiblingIndex = (node) ->
   siblings = Array.prototype.slice.call(node.parentNode.childNodes)
   return siblings.indexOf(node)
@@ -22,34 +27,35 @@ getPage = (pageIndex) ->
   return PDFViewerApplication.pdfViewer.pages[pageIndex]
 
 
-getPageTextContent = (pageIndex, cache) ->
-  if cache[pageIndex]?
-    return Promise.resolve(cache[pageIndex])
+getPageTextContent = (pageIndex) ->
+  if pageTextCache[pageIndex]?
+    return Promise.resolve(pageTextCache[pageIndex])
   else
     joinItems = ({items}) ->
       nonEmpty = (item.str for item in items when /\S/.test(item.str))
       textContent = nonEmpty.join('')
-      cache[pageIndex] = textContent
+      pageTextCache[pageIndex] = textContent
       return textContent
 
     return PDFViewerApplication.pdfViewer.getPageTextContent(pageIndex)
     .then(joinItems)
 
-getPageOffset = (pageIndex, cache = {}) ->
+
+getPageOffset = (pageIndex) ->
   index = -1
 
   next = (offset) ->
     if ++index is pageIndex
       return Promise.resolve(offset)
 
-    return getPageTextContent(index, cache)
+    return getPageTextContent(index)
     .then((textContent) -> next(offset + textContent.length))
 
   return next(0)
 
 
 
-findPage = (offset, cache = {}) ->
+findPage = (offset) ->
   index = 0
   total = 0
 
@@ -60,9 +66,9 @@ findPage = (offset, cache = {}) ->
     else
       index++
       total += textContent.length
-      return getPageTextContent(index, cache).then(count)
+      return getPageTextContent(index).then(count)
 
-  return getPageTextContent(0, cache).then(count)
+  return getPageTextContent(0).then(count)
 
 
 ###*
@@ -79,8 +85,6 @@ findPage = (offset, cache = {}) ->
 # :rtype: Promise
 ####
 exports.anchor = (root, selectors, options = {}) ->
-  cache = options.cache ? {}
-
   # Selectors
   position = null
   quote = null
@@ -125,7 +129,7 @@ exports.anchor = (root, selectors, options = {}) ->
 
   if position?
     promise = promise.catch ->
-      return findPage(position.start, cache.pageText)
+      return findPage(position.start)
       .then ({index, offset, textContent}) ->
         page = getPage(index)
         start = position.start - offset
@@ -140,14 +144,14 @@ exports.anchor = (root, selectors, options = {}) ->
       {pagesCount} = PDFViewerApplication.pdfViewer
 
       if position?
-        if cache.quotePosition[quote.exact]?[position.start]?
-         {page, anchor} = cache.quotePosition[quote.exact][position.start]
+        if quotePositionCache[quote.exact]?[position.start]?
+         {page, anchor} = quotePositionCache[quote.exact][position.start]
          return anchorByPosition(page, anchor)
 
       findInPages = ([pageIndex, rest...]) ->
         page = getPage(pageIndex)
-        content = getPageTextContent(pageIndex, cache.pageText)
-        offset = getPageOffset(pageIndex, cache.pageText)
+        content = getPageTextContent(pageIndex)
+        offset = getPageOffset(pageIndex)
         Promise.all([content, offset, page])
         .then (results) ->
           [content, offset, page] = results
@@ -157,8 +161,8 @@ exports.anchor = (root, selectors, options = {}) ->
             pageOptions.hint = position.start - offset
           anchor = new TextQuoteAnchor.fromSelector(root, quote)
           anchor = anchor.toPositionAnchor(pageOptions)
-          cache.quotePosition[quote.exact] ?= {}
-          cache.quotePosition[quote.exact][position.start] = {page, anchor}
+          quotePositionCache[quote.exact] ?= {}
+          quotePositionCache[quote.exact][position.start] = {page, anchor}
           return anchorByPosition(page, anchor)
         .catch ->
           if rest.length
@@ -169,7 +173,7 @@ exports.anchor = (root, selectors, options = {}) ->
       pages = [0...pagesCount]
 
       if position?
-        return findPage(position.start, cache.pageText)
+        return findPage(position.start)
         .then ({index, offset, textContent}) ->
           left = pages.slice(0, index)
           right = pages.slice(index)
@@ -187,7 +191,6 @@ exports.anchor = (root, selectors, options = {}) ->
 
 
 exports.describe = (root, range, options = {}) ->
-  cache = options.cache ? {}
   range = new xpathRange.BrowserRange(range).normalize()
 
   startTextLayer = getNodeTextLayer(range.start)
@@ -208,7 +211,7 @@ exports.describe = (root, range, options = {}) ->
   start = seek(iter, range.start)
   end = seek(iter, range.end) + start + range.end.textContent.length
 
-  return getPageOffset(startPageIndex, cache.pageText).then (pageOffset) ->
+  return getPageOffset(startPageIndex).then (pageOffset) ->
     # XXX: range covers only one page
     start += pageOffset
     end += pageOffset
@@ -222,3 +225,8 @@ exports.describe = (root, range, options = {}) ->
     quote = TextQuoteAnchor.fromRange(root, r, options).toSelector(options)
 
     return Promise.all([position, quote])
+
+
+exports.purgeCache = ->
+  pageTextCache = {}
+  quotePositionCache = {}

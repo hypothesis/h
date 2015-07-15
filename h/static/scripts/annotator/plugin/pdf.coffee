@@ -9,21 +9,7 @@ class PDF extends Annotator.Plugin
   pdfViewer: null
 
   pluginInit: ->
-    cache = {
-      pageText: {}
-      quotePosition: {}
-    }
-
-    anchoring = require('../anchoring/pdf')
-
-    @annotator.anchoring = {
-      anchor: (root, selectors, options = {}) ->
-        options = extend({}, options, {cache})
-        return anchoring.anchor(root, selectors, options)
-      describe: (root, range, options = {}) ->
-        options = extend({}, options, {cache})
-        return anchoring.describe(root, range, options)
-    }
+    @annotator.anchoring = require('../anchoring/pdf')
 
     @pdfViewer = PDFViewerApplication.pdfViewer
     @pdfViewer.viewer.classList.add('has-transparent-text-layer')
