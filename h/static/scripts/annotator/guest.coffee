@@ -271,21 +271,22 @@ module.exports = class Guest extends Annotator
       }
       return self.anchoring.describe(root, range, options)
 
-    setDocumentInfo = ({metadata, uri}) ->
-      annotation.uri = uri
-      if metadata?
-        annotation.document = metadata
+    setDocumentInfo = (info) ->
+      annotation.document = info.metadata
+      annotation.uri = info.uri
 
     setTargets = ([info, selectors]) ->
       source = info.uri
       annotation.target = ({source, selector} for selector in selectors)
 
-    info = this.getDocumentInfo().then(setDocumentInfo)
+    info = this.getDocumentInfo()
     selectors = Promise.all(ranges.map(getSelectors))
+
+    metadata = info.then(setDocumentInfo)
     targets = Promise.all([info, selectors]).then(setTargets)
 
-    targets.then(=> this.setupAnnotation(annotation))
-    targets.then(=> this.publish('beforeAnnotationCreated', [annotation]))
+    targets.then(-> self.setupAnnotation(annotation))
+    targets.then(-> self.publish('beforeAnnotationCreated', [annotation]))
 
     annotation
 
