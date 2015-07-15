@@ -22,7 +22,7 @@ querySelector = (type, root, selector, options) ->
 ###*
 # Anchor a set of selectors.
 #
-# This function converts a set of selectors into a document range using.
+# This function converts a set of selectors into a document range.
 # It encapsulates the core anchoring algorithm, using the selectors alone or
 # in combination to establish the best anchor within the document.
 #
@@ -59,7 +59,8 @@ exports.anchor = (root, selectors, options = {}) ->
     else
       return range
 
-  # Until we successfully anchor, we fail.
+  # From a default of failure, we build up catch clauses to try selectors in
+  # order, from simple to complex.
   promise = Promise.reject('unable to anchor')
 
   if fragment?

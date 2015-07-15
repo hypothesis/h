@@ -32,6 +32,10 @@ getPageTextContent = (pageIndex) ->
     return Promise.resolve(pageTextCache[pageIndex])
   else
     joinItems = ({items}) ->
+      # Skip empty items since PDF-js leaves their text layer divs blank.
+      # Excluding them makes our measurements match the rendered text layer.
+      # Otherwise, the selectors we generate would not match this stored text.
+      # See the appendText method of TextLayerBuilder in pdf.js.
       nonEmpty = (item.str for item in items when /\S/.test(item.str))
       textContent = nonEmpty.join('')
       pageTextCache[pageIndex] = textContent
@@ -74,7 +78,7 @@ findPage = (offset) ->
 ###*
 # Anchor a set of selectors.
 #
-# This function converts a set of selectors into a document range using.
+# This function converts a set of selectors into a document range.
 # It encapsulates the core anchoring algorithm, using the selectors alone or
 # in combination to establish the best anchor within the document.
 #
