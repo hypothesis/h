@@ -1,5 +1,4 @@
 Annotator = require('annotator')
-$ = Annotator.$
 xpathRange = Annotator.Range
 
 
