@@ -369,6 +369,11 @@ module.exports = class Guest extends Annotator
     annotation = $(event.currentTarget).data('annotation')
     annotations = event.annotations ?= []
     annotations.push(annotation)
+
+    # The innermost highlight will execute this.
+    # The timeout gives time for the event to bubble, letting any overlapping
+    # highlights have time to add their annotations to the list stored on the
+    # event object.
     if event.target is event.currentTarget
       setTimeout => this.focusAnnotations(annotations)
 
@@ -381,6 +386,8 @@ module.exports = class Guest extends Annotator
     annotation = $(event.currentTarget).data('annotation')
     annotations = event.annotations ?= []
     annotations.push(annotation)
+
+    # See the comment in onHighlightMouseover
     if event.target is event.currentTarget
       xor = (event.metaKey or event.ctrlKey)
       setTimeout => this.selectAnnotations(annotations, xor)
