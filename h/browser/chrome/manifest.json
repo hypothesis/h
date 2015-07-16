@@ -1,55 +1,55 @@
 {
-  "name": "Hypothesis - Web & PDF Annotation",
-  "short_name": "Hypothesis",
-  "version": "{{ version }}",
-  "manifest_version": 2,
+    "name": "Hypothesis - Web & PDF Annotation",
+    "short_name": "Hypothesis",
+    "version": "{{ version }}",
+    "manifest_version": 2,
 
-  "description": "Collaboratively annotate, highlight, and tag web pages and PDF documents.",
-  "icons": {
-    "16": "images/icon16.png",
-    "48": "images/icon48.png",
-    "128": "images/icon128.png"
-  },
+    "description": "Collaboratively annotate, highlight, and tag web pages and PDF documents.",
+    "icons": {
+        "16": "images/icon16.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
 
-  "homepage_url": "https://hypothes.is/",
-  "incognito": "split",
+    "homepage_url": "https://hypothes.is/",
+    "incognito": "split",
 
-  "offline_enabled": false,
-  "permissions": [
-    "<all_urls>",
+    "offline_enabled": false,
+    "permissions": [
+        "<all_urls>",
 
-    "contentSettings",
-    "tabs"
-  ],
-  "content_security_policy":
-    "script-src 'self' 'unsafe-eval' {{ src }} https://cdn.mathjax.org; object-src 'self'; font-src 'self' data:;",
+        "contentSettings",
+        "tabs"
+    ],
+    "content_security_policy":
+        "script-src 'self' 'unsafe-eval' {{ src }} https://cdn.mathjax.org; object-src 'self'; font-src 'self' data:;",
 
-  "background": {
-    "persistent": true,
-    "scripts": [
-      "lib/tab-store.js",
-      "lib/tab-state.js",
-      "lib/tab-error-cache.js",
-      "lib/sidebar-injector.js",
-      "lib/browser-action.js",
-      "lib/help-page.js",
-      "lib/errors.js",
-      "lib/hypothesis-chrome-extension.js",
-      "lib/install.js",
-      "lib/blocklist.js"
+    "background": {
+        "persistent": true,
+        "scripts": [
+            "lib/tab-store.js",
+            "lib/tab-state.js",
+            "lib/tab-error-cache.js",
+            "lib/sidebar-injector.js",
+            "lib/browser-action.js",
+            "lib/help-page.js",
+            "lib/errors.js",
+            "lib/hypothesis-chrome-extension.js",
+            "lib/install.js",
+            "lib/blocklist.js"
+        ]
+    },
+    "browser_action": {
+        "default_icon": {
+            "19": "images/browser-icon-inactive.png",
+            "38": "images/browser-icon-inactive@2x.png"
+        }
+    },
+    "web_accessible_resources": [
+        "public/*",
+        "content/*",
+        "lib/*",
+        "help/*",
+        "content/web/viewer.html"
     ]
-  },
-  "browser_action": {
-    "default_icon": {
-      "19": "images/browser-icon-inactive.png",
-      "38": "images/browser-icon-inactive@2x.png"
-    }
-  },
-  "web_accessible_resources": [
-    "public/*",
-    "content/*",
-    "lib/*",
-    "help/*",
-    "content/web/viewer.html"
-  ]
 }

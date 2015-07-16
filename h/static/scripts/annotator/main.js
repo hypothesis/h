@@ -49,9 +49,9 @@ require('./plugin/textrange');
 
 var docs = 'https://h.readthedocs.org/en/latest/hacking/customized-embedding.html';
 var options = {
-  app: jQuery('link[type="application/annotator+html"]').attr('href'),
-  BucketBar: {container: '.annotator-frame'},
-  Toolbar: {container: '.annotator-frame'}
+    app: jQuery('link[type="application/annotator+html"]').attr('href'),
+    BucketBar: {container: '.annotator-frame'},
+    Toolbar: {container: '.annotator-frame'}
 };
 
 // Simple IE autodetect function
@@ -60,22 +60,22 @@ var ua = window.navigator.userAgent;
 if ((ua.indexOf("MSIE ") > 0) ||     // for IE <=10
     (ua.indexOf('Trident/') > 0) ||  // for IE 11
     (ua.indexOf('Edge/') > 0)) {     // for IE 12
-  options["DomTextMapper"] = {"skip": true}
+    options["DomTextMapper"] = {"skip": true}
 }
 
 if (window.hasOwnProperty('hypothesisConfig')) {
-  if (typeof window.hypothesisConfig === 'function') {
-    options = jQuery.extend(options, window.hypothesisConfig());
-  } else {
-    throw new TypeError('hypothesisConfig must be a function, see: ' + docs);
-  }
+    if (typeof window.hypothesisConfig === 'function') {
+      options = jQuery.extend(options, window.hypothesisConfig());
+    } else {
+      throw new TypeError('hypothesisConfig must be a function, see: ' + docs);
+    }
 }
 
 Annotator.noConflict().$.noConflict(true)(function () {
-  var Klass = Annotator.Host;
-  if (options.hasOwnProperty('constructor')) {
-    Klass = options.constructor;
-    delete options.constructor;
-  }
-  window.annotator = new Klass(document.body, options);
+    var Klass = Annotator.Host;
+    if (options.hasOwnProperty('constructor')) {
+      Klass = options.constructor;
+      delete options.constructor;
+    }
+    window.annotator = new Klass(document.body, options);
 });
