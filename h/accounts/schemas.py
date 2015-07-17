@@ -5,8 +5,10 @@ import colander
 import deform
 from pyramid.session import check_csrf_token
 
-from h.models import _
+from h import i18n
 from h.accounts.models import User
+
+_ = i18n.TranslationString
 
 USERNAME_BLACKLIST = None
 

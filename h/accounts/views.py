@@ -10,8 +10,8 @@ from pyramid_mailer.message import Message
 
 from h.resources import Application
 from h.notification.models import Subscriptions
-from h.models import _
 from h import accounts
+from h import i18n
 from h.accounts.models import User
 from h.accounts.models import Activation
 from h.accounts.events import ActivationEvent
@@ -21,6 +21,8 @@ from h.accounts.events import LoginEvent
 from h.accounts.events import RegistrationEvent
 from h.accounts import schemas
 from h import session
+
+_ = i18n.TranslationString
 
 
 def ajax_form(request, result):
