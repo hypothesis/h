@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from annotator import annotation, document
-from pyramid.i18n import TranslationStringFactory
 from pyramid.security import Allow, Authenticated, Everyone, ALL_PERMISSIONS
-
-_ = TranslationStringFactory(__package__)
 
 
 class Annotation(annotation.Annotation):

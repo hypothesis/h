@@ -4,11 +4,12 @@ import deform
 from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 
-from . import schemas
-from ..models import _
-from ..accounts.models import User
-from ..accounts.events import LoginEvent
+from h import i18n
+from h.accounts.models import User
+from h.accounts.events import LoginEvent
+from h.claim import schemas
 
+_ = i18n.TranslationString
 
 log = logging.getLogger(__name__)
 
