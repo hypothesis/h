@@ -239,6 +239,8 @@ def _create_annotation(fields, user):
     if nipsa.has_nipsa(user.id):
         annotation["nipsa"] = True
 
+    uri.normalise_annotation_uris(annotation)
+
     # Save it in the database
     annotation.save()
 
@@ -268,6 +270,8 @@ def _update_annotation(annotation, fields, has_admin_permission):
     # If the annotation is flagged as deleted, remove mentions of the user
     if annotation.get('deleted', False):
         _anonymize_deletes(annotation)
+
+    uri.normalise_annotation_uris(annotation)
 
     # Save the annotation in the database, overwriting the old version.
     annotation.save()
