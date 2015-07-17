@@ -8,7 +8,7 @@ import urllib
 from pytest import raises
 from pyramid import security
 
-from h import models
+from h.api import models
 
 
 class TestAnnotationPermissions(unittest.TestCase):
