@@ -232,15 +232,16 @@ def test_build_query_with_multiple_keywords():
     }
 
 
-@mock.patch("h.api.search.models")
-def test_build_query_for_uri(models):
+@mock.patch("h.api.search.uri")
+def test_build_query_for_uri(uri):
     """'uri' args are returned in the query dict in a "match" clause.
 
     This is what happens when you open the sidebar on a page and it loads
     all the annotations of that page.
 
     """
-    models.Document.get_by_uri.return_value = None
+    uri.expand.side_effect = lambda x: [x]
+    uri.normalise.side_effect = lambda x: x
 
     query1 = search.build_query(
         request_params=multidict.NestedMultiDict(
@@ -255,19 +256,20 @@ def test_build_query_for_uri(models):
         "bool": {"must": [{"match": {"uri": "http://whitehouse.gov/"}}]}}
 
 
-@mock.patch("h.api.search.models")
-def test_build_query_for_uri_with_multiple_representations(models):
-    """It should search for any URI returned by the Document class.
+@mock.patch("h.api.search.uri")
+def test_build_query_for_uri_with_multiple_representations(uri):
+    """It should expand the search to all URIs.
 
-    If models.Document.get_by_uri() returns multiple documents for the URI then
+    If h.api.uri.expand returns multiple documents for the URI then
     build_query() should return a query that finds annotations that match one
     or more of these documents' URIs.
 
     """
-    doc = mock.MagicMock()
-    doc.uris.return_value = [
-        "http://example.com/", "http://example2.com/", "http://example3.com/"]
-    models.Document.get_by_uri.return_value = doc
+    results = ["http://example.com/",
+               "http://example2.com/",
+               "http://example3.com/"]
+    uri.expand.side_effect = lambda x: results
+    uri.normalise.side_effect = lambda x: x
 
     query = search.build_query(
         request_params=multidict.NestedMultiDict(
