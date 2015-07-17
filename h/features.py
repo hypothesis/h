@@ -12,6 +12,7 @@ FEATURES = {
     'notification': "Send email notifications?",
     'queue': "Enable dispatch of annotation events to NSQ?",
     'streamer': "Enable 'live streaming' for annotations via the websocket?",
+    'search_normalised': "Assume all data has normalised URI fields?",
 }
 
 

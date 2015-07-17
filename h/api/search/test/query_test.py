@@ -70,8 +70,7 @@ def test_build_defaults_to_match_all():
     """If no query params are given a "match_all": {} query is returned."""
     q = query.build(request_params=multidict.NestedMultiDict())
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match_all": {}}]}}
+    assert q["query"]["filtered"]["query"] == {"match_all": {}}
 
 
 def test_build_sort_is_by_updated():
@@ -283,6 +282,38 @@ def test_build_for_uri_with_multiple_representations(uri):
     }
 
 
+@mock.patch("h.api.search.query.uri")
+def test_build_for_uri_normalised(uri):
+    """
+    Uses a term filter against target.source_normalised to filter for URI.
+
+    When querying for a URI with search_normalised_uris set to true, build
+    should use a term filter against the normalised version of the target
+    source field.
+
+    It should expand the input URI before searching, and normalise the results
+    of the expansion.
+    """
+    uri.expand.side_effect = lambda x: [
+        "http://giraffes.com/",
+        "https://elephants.com/",
+    ]
+    uri.normalise.side_effect = lambda x: x[:-1]  # Strip the trailing slash
+
+    params = multidict.NestedMultiDict({"uri": "http://example.com/"})
+
+    q = query.build(request_params=params,
+                    search_normalised_uris=True)
+
+    uri.expand.assert_called_with("http://example.com/")
+
+    expected_filter = {"or": [
+        {"term": {"target.source_normalised": "http://giraffes.com"}},
+        {"term": {"target.source_normalised": "https://elephants.com"}},
+    ]}
+    assert expected_filter in q["query"]["filtered"]["filter"]["and"]
+
+
 def test_build_with_single_text_param():
     """'text' params are returned in the query dict in "match" clauses."""
     q = query.build(
@@ -343,8 +374,7 @@ def test_build_with_evil_arguments():
 
     q = query.build(request_params=params)
 
-    assert q["query"]["filtered"]["query"] == {
-        'bool': {'must': [{'match_all': {}}]}}
+    assert q["query"]["filtered"]["query"] == {'match_all': {}}
 
 
 @mock.patch("h.api.nipsa.nipsa_filter")
@@ -354,7 +384,7 @@ def test_build_returns_nipsa_filter(nipsa_filter):
 
     q = query.build(multidict.NestedMultiDict())
 
-    assert q["query"]["filtered"]["filter"] == "foobar!"
+    assert q["query"]["filtered"]["filter"] == {"and": ["foobar!"]}
 
 
 @mock.patch("h.api.nipsa.nipsa_filter")
@@ -390,10 +420,3 @@ def test_build_with_arbitrary_params():
             ]
         }
     }
-
-
-def test_build_users_own_annotations_are_not_filtered():
-    q = query.build(multidict.NestedMultiDict(), userid="fred")
-
-    assert {'term': {'user': 'fred'}} in (
-        q["query"]["filtered"]["filter"]["bool"]["should"])

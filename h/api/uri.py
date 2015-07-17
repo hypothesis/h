@@ -60,15 +60,28 @@ This package is responsible for defining URI normalisation and expansion
 routines for use elsewhere in the Hypothesis application.
 """
 
+import urlparse
+
 from h.api import models
 
 
-def normalise(uri):
+URL_SCHEMES = set(['http', 'https'])
+
+
+def normalise(uristr):
     """Translate the given URI into a normalised form."""
-    # For now this is simply the identity function. We will add normalisation
-    # logic here a piece at a time as we transfer these responsibilities into
-    # the URI package.
-    return uri
+    # Try to extract the scheme
+    uri = urlparse.urlsplit(uristr)
+
+    # If this isn't a URL, we don't perform any normalisation
+    if uri.scheme.lower() not in URL_SCHEMES:
+        return uristr
+
+    uri = _normalise_hostname_case(uri)
+    uri = _normalise_hostname_port(uri)
+    uri = _normalise_fragment(uri)
+
+    return uri.geturl()
 
 
 def expand(uri):
@@ -85,3 +98,55 @@ def expand(uri):
     return doc.uris()
 
 
+def _normalise_hostname_case(uri):
+    s, netloc, p, q, f = uri
+
+    if '@' in netloc:
+        userinfo, origin = netloc.rsplit('@', 1)
+        netloc = '@'.join([userinfo, origin.lower()])
+    else:
+        netloc = netloc.lower()
+
+    return urlparse.SplitResult(s, netloc, p, q, f)
+
+
+def _normalise_hostname_port(uri):
+    s, netloc, p, q, f = uri
+
+    ipv6_hostname = '[' in netloc and ']' in netloc
+
+    username = uri.username
+    password = uri.password
+    hostname = uri.hostname
+    port = uri.port
+
+    if uri.scheme == 'http' and port == 80:
+        port = None
+    elif uri.scheme == 'https' and port == 443:
+        port = None
+
+    userinfo = None
+    if username is not None:
+        userinfo = username
+    if password is not None:
+        userinfo += ':' + password
+
+    if ipv6_hostname:
+        hostname = '[' + hostname + ']'
+
+    hostinfo = hostname
+    if port is not None:
+        hostinfo += ':' + str(port)
+
+    if userinfo is not None:
+        netloc = '@'.join([userinfo, hostinfo])
+    else:
+        netloc = hostinfo
+
+    return urlparse.SplitResult(s, netloc, p, q, f)
+
+
+def _normalise_fragment(uri):
+    s, n, p, q, frag = uri
+
+    return urlparse.SplitResult(s, n, p, q, None)

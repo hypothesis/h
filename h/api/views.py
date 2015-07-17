@@ -7,6 +7,7 @@ import logging
 from pyramid.view import view_config
 
 from h.api import search as search_lib
+from h.api import uri
 from h.api.auth import get_user
 from h.api.events import AnnotationEvent
 from h.api.models import Annotation
@@ -76,9 +77,13 @@ def index(context, request):
 @api_config(context=Root, name='search')
 def search(request):
     """Search the database for annotations matching with the given query."""
+    search_normalised_uris = request.feature('search_normalised')
+
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    return search_lib.search(request.params, user)
+    return search_lib.search(request.params,
+                             user=user,
+                             search_normalised_uris=search_normalised_uris)
 
 
 @api_config(context=Root, name='access_token')
@@ -109,8 +114,11 @@ def annotations_index(request):
     This will use the default limit, 20 at time of writing, and results
     are ordered most recent first.
     """
+    search_normalised_uris = request.feature('search_normalised')
+
     user = get_user(request)
-    return search_lib.index(user=user)
+    return search_lib.index(user=user,
+                            search_normalised_uris=search_normalised_uris)
 
 
 @api_config(context=Annotations, request_method='POST', permission='create')

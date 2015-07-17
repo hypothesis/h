@@ -69,6 +69,12 @@ class Annotation(annotation.Annotation):
                     'search_analyzer': 'uri',
                     'copy_to': ['uri'],
                 },
+                # We store the 'source_normalised' unanalyzed and only do term
+                # filters against this field.
+                'source_normalised': {
+                    'type': 'string',
+                    'index': 'not_analyzed',
+                },
                 'selector': {
                     'properties': {
                         'type': {'type': 'string', 'index': 'no'},
