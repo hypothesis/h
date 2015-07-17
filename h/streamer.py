@@ -495,8 +495,7 @@ class WebSocket(_WebSocket):
         available_uris = set(uris)
         for uri in uris:
             doc = document.Document.get_by_uri(uri)
-            # get_by_uri() returns an empty list when no document is found
-            if isinstance(doc, list):
+            if doc is None:
                 return
             for eq_uri in doc.uris():
                 available_uris.add(eq_uri)

@@ -270,7 +270,7 @@ class TestWebSocket(unittest.TestCase):
         })
 
         with patch('annotator.document.Document.get_by_uri') as doc:
-            doc.return_value = []
+            doc.return_value = None
             msg = MagicMock()
             msg.data = filter_message
 
