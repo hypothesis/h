@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from pyramid import security
+
 from .models import Annotation
 
 
@@ -49,7 +51,9 @@ class Stream(Resource):
 
 
 class Root(Resource):
-    pass
+    __acl__ = [
+        (security.Allow, 'group:admin', security.ALL_PERMISSIONS),
+    ]
 
 
 def create_root(_):

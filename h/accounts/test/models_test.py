@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy import exc
 
 from h.accounts import models
+from h.test import factories
 
 
 def test_activation_has_asciinumeric_code(db_session):
@@ -44,3 +45,36 @@ def test_cannot_create_case_variant_of_user(db_session):
     db_session.add(bob2)
     with pytest.raises(exc.IntegrityError):
         db_session.flush()
+
+
+def test_admins_when_no_admins():
+    assert models.User.admins() == []
+
+
+def test_admins_when_one_admin(db_session):
+    admin = factories.User(admin=True)
+    db_session.add(admin)
+
+    admins = models.User.admins()
+
+    assert admins == [admin]
+
+
+def test_admins_when_multiple_admins(db_session):
+    admins = [factories.User(admin=True) for _ in range(0, 2)]
+    db_session.add_all(admins)
+
+    result = models.User.admins()
+
+    assert result == admins
+
+
+def test_admins_does_not_return_non_admin_users(db_session):
+    non_admins = [factories.User(admin=False) for _ in range(0, 2)]
+    db_session.add_all(non_admins)
+    db_session.add_all([factories.User(admin=True) for _ in range(0, 2)])
+
+    admins = models.User.admins()
+
+    for non_admin in non_admins:
+        assert non_admin not in admins

@@ -11,6 +11,7 @@ from pyramid.compat import text_type
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import expression
 
 from h.db import Base
 
@@ -76,6 +77,11 @@ class User(Base):
                       default=False,
                       server_default=sa.sql.expression.false(),
                       nullable=False)
+
+    admin = sa.Column(sa.BOOLEAN,
+                      default=False,
+                      nullable=False,
+                      server_default=sa.sql.expression.false())
 
     def _get_username(self):
         return self._username
@@ -247,6 +253,12 @@ class User(Base):
             self.status = (self.status or 0) | 0b1000
         else:
             self.status = (self.status or 0) & ~0b1000
+
+    @classmethod
+    def admins(cls):
+        """Return a list of all admin users."""
+        return cls.query.filter(
+            cls.admin == expression.true()).all()
 
     def __repr__(self):
         return '<User: %s>' % self.username
