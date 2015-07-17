@@ -133,6 +133,21 @@ class ForgotPasswordSchema(CSRFSchema):
     )
 
 
+def _new_password_schema_node():
+    """Return a colander.SchemaNode for a new password.
+
+    For use when registering a new account, changing the password of an
+    existing account - whenever a new password is being created and needs to
+    be validated.
+
+    """
+    return colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(min=2),
+        widget=deform.widget.PasswordWidget()
+    )
+
+
 class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
@@ -150,11 +165,7 @@ class RegisterSchema(CSRFSchema):
             unique_email,
         ),
     )
-    password = colander.SchemaNode(
-        colander.String(),
-        validator=colander.Length(min=2),
-        widget=deform.widget.PasswordWidget()
-    )
+    password = _new_password_schema_node()
 
 
 class ResetPasswordSchema(CSRFSchema):
@@ -163,11 +174,7 @@ class ResetPasswordSchema(CSRFSchema):
         widget=deform.widget.TextInputWidget(template='readonly/textinput'),
         missing=colander.null,
     )
-    password = colander.SchemaNode(
-        colander.String(),
-        validator=colander.Length(min=2),
-        widget=deform.widget.PasswordWidget()
-    )
+    password = _new_password_schema_node()
 
 
 class ActivateSchema(CSRFSchema):
@@ -175,12 +182,8 @@ class ActivateSchema(CSRFSchema):
         colander.String(),
         title=_("Security Code")
     )
-    password = colander.SchemaNode(
-        colander.String(),
-        title=_('New Password'),
-        validator=colander.Length(min=2),
-        widget=deform.widget.PasswordWidget()
-    )
+    password = _new_password_schema_node()
+    password.title = _("New Password")
 
 
 class ProfileSchema(CSRFSchema):
@@ -193,6 +196,9 @@ class ProfileSchema(CSRFSchema):
     """
 
     username = colander.SchemaNode(colander.String())
+
+    # This is the user's current password (not their new one, if they're
+    # trying to change their password).
     pwd = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.PasswordWidget(),
@@ -210,13 +216,14 @@ class ProfileSchema(CSRFSchema):
         default='',
         missing=colander.null,
     )
-    password = colander.SchemaNode(
-        colander.String(),
-        title=_('Password'),
-        widget=deform.widget.PasswordWidget(),
-        default='',
-        missing=colander.null
-    )
+
+    # This is the user's new password, when they're trying to change their
+    # password.
+    password = _new_password_schema_node()
+    password.title = _("Password")
+    password.default = ''
+    password.missing = colander.null
+
     subscriptions = colander.SchemaNode(
         colander.String(),
         missing=colander.null,
