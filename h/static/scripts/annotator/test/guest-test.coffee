@@ -1,10 +1,18 @@
-Promise = require('es6-promise').Promise
+raf = require('raf')
 Annotator = require('annotator')
-require('../monkey')
 Guest = require('../guest')
+anchoring = require('../anchoring/html')
+highlighter = require('../highlighter')
 
 assert = chai.assert
 sinon.assert.expose(assert, prefix: '')
+
+
+waitForSync = (annotation) ->
+  if annotation.$anchors?
+    return Promise.resolve()
+  else
+    return new Promise(setTimeout).then(-> waitForSync(annotation))
 
 
 describe 'Guest', ->
@@ -22,23 +30,6 @@ describe 'Guest', ->
       onConnect: sandbox.stub()
       on: sandbox.stub()
       sync: sandbox.stub()
-
-    # Mock out the anchoring plugin. Oh how I wish I didn't have to do crazy
-    # shit like this.
-    Annotator.Plugin.EnhancedAnchoring = -> {
-      pluginInit: ->
-        @annotator.anchoring = this
-
-      _scan: sandbox.stub()
-
-      getHighlights: sandbox.stub().returns([])
-      getAnchors: sandbox.stub().returns([])
-      createAnchor: sandbox.spy (annotation, target) ->
-        anchor = "anchor for " + target
-        annotation.anchors.push anchor
-
-        result: anchor
-    }
 
     Annotator.Plugin.CrossFrame = -> fakeCrossFrame
     sandbox.spy(Annotator.Plugin, 'CrossFrame')
@@ -145,13 +136,7 @@ describe 'Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        guest.plugins.Document = {uri: -> 'http://example.com'}
         options = Annotator.Plugin.CrossFrame.lastCall.args[1]
-
-      it 'applies a "uri" property to the formatted object', ->
-        ann = {$$tag: 'tag1'}
-        formatted = options.formatter(ann)
-        assert.equal(formatted.uri, 'http://example.com/')
 
       it 'keeps an existing uri property', ->
         ann = {$$tag: 'tag1', uri: 'http://example.com/foo'}
@@ -195,50 +180,60 @@ describe 'Guest', ->
 
     describe 'on "focusAnnotations" event', ->
       it 'focuses any annotations with a matching tag', ->
+        highlight0 = $('<span></span>')
+        highlight1 = $('<span></span>')
         guest = createGuest()
-        highlights = [
-          {annotation: {$$tag: 'tag1'}, setFocused: sandbox.stub()}
-          {annotation: {$$tag: 'tag2'}, setFocused: sandbox.stub()}
+        guest.anchors = [
+          {annotation: {$$tag: 'tag1'}, highlights: highlight0.toArray()}
+          {annotation: {$$tag: 'tag2'}, highlights: highlight1.toArray()}
         ]
-        guest.anchoring.getHighlights.returns(highlights)
         emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
-        assert.called(highlights[0].setFocused)
-        assert.calledWith(highlights[0].setFocused, true)
+        assert.isTrue(highlight0.hasClass('annotator-hl-focused'))
 
       it 'unfocuses any annotations without a matching tag', ->
+        highlight0 = $('<span class="annotator-hl-focused"></span>')
+        highlight1 = $('<span class="annotator-hl-focused"></span>')
         guest = createGuest()
-        highlights = [
-          {annotation: {$$tag: 'tag1'}, setFocused: sandbox.stub()}
-          {annotation: {$$tag: 'tag2'}, setFocused: sandbox.stub()}
+        guest.anchors = [
+          {annotation: {$$tag: 'tag1'}, highlights: highlight0.toArray()}
+          {annotation: {$$tag: 'tag2'}, highlights: highlight1.toArray()}
         ]
-        guest.anchoring.getHighlights.returns(highlights)
         emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
-        assert.called(highlights[1].setFocused)
-        assert.calledWith(highlights[1].setFocused, false)
+        assert.isFalse(highlight1.hasClass('annotator-hl-focused'))
 
     describe 'on "scrollToAnnotation" event', ->
+      beforeEach ->
+        $.fn.scrollintoview = sandbox.stub()
+
+      afterEach ->
+        delete $.fn.scrollintoview
+
       it 'scrolls to the anchor with the matching tag', ->
+        highlight = $('<span></span>')
         guest = createGuest()
-        anchors = [
-          {annotation: {$$tag: 'tag1'}, scrollToView: sandbox.stub()}
+        guest.anchors = [
+          {annotation: {$$tag: 'tag1'}, highlights: highlight.toArray()}
         ]
-        guest.anchoring.getAnchors.returns(anchors)
         emitGuestEvent('scrollToAnnotation', 'ctx', 'tag1')
-        assert.called(anchors[0].scrollToView)
+        assert.calledOn($.fn.scrollintoview, sinon.match(highlight))
 
     describe 'on "getDocumentInfo" event', ->
       guest = null
 
       beforeEach ->
+        sandbox.stub(document, 'title', 'hi')
         guest = createGuest()
         guest.plugins.PDF =
-          uri: sandbox.stub().returns('http://example.com')
-          getMetaData: sandbox.stub()
+          uri: sandbox.stub().returns(window.location.href)
+          getMetadata: sandbox.stub()
+
+      afterEach ->
+        sandbox.restore()
 
       it 'calls the callback with the href and pdf metadata', (done) ->
         assertComplete = (payload) ->
           try
-            assert.equal(payload.uri, 'http://example.com/')
+            assert.equal(payload.uri, document.location.href)
             assert.equal(payload.metadata, metadata)
             done()
           catch e
@@ -247,27 +242,27 @@ describe 'Guest', ->
         ctx = {complete: assertComplete, delayReturn: sandbox.stub()}
         metadata = {title: 'hi'}
         promise = Promise.resolve(metadata)
-        guest.plugins.PDF.getMetaData.returns(promise)
+        guest.plugins.PDF.getMetadata.returns(promise)
 
         emitGuestEvent('getDocumentInfo', ctx)
 
-      it 'calls the callback with the href and document metadata if pdf check fails', (done) ->
+      it 'calls the callback with the href and basic metadata if pdf fails', (done) ->
         assertComplete = (payload) ->
           try
-            assert.equal(payload.uri, 'http://example.com/')
-            assert.equal(payload.metadata, metadata)
+            assert.equal(payload.uri, window.location.href)
+            assert.deepEqual(payload.metadata, metadata)
             done()
           catch e
             done(e)
 
         ctx = {complete: assertComplete, delayReturn: sandbox.stub()}
-        metadata = {title: 'hi'}
-        guest.plugins.Document = {metadata: metadata}
+        metadata = {title: 'hi', link: [{href: window.location.href}]}
 
         promise = Promise.reject(new Error('Not a PDF document'))
-        guest.plugins.PDF.getMetaData.returns(promise)
+        guest.plugins.PDF.getMetadata.returns(promise)
 
         emitGuestEvent('getDocumentInfo', ctx)
+
       it 'notifies the channel that the return value is async', ->
         delete guest.plugins.PDF
 
@@ -288,34 +283,174 @@ describe 'Guest', ->
       guest.onAdderMouseup(event)
       assert.isTrue(event.isPropagationStopped())
 
-  describe 'annotation sync', ->
-    it 'calls sync for createAnnotation', ->
+  describe 'createAnnotation()', ->
+    it 'adds metadata to the annotation object', (done) ->
       guest = createGuest()
-      guest.createAnnotation({})
-      assert.called(fakeCrossFrame.sync)
+      sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
+        metadata: {title: 'hello'}
+        uri: 'http://example.com/'
+      }))
+      annotation = {}
+      guest.createAnnotation(annotation)
+      setTimeout ->
+        assert.equal(annotation.uri, 'http://example.com/')
+        assert.deepEqual(annotation.document, {title: 'hello'})
+        done()
 
-    it 'calls sync for setupAnnotation', ->
+    it 'treats an argument as the annotation object', ->
       guest = createGuest()
-      guest.setupAnnotation({ranges: []})
-      assert.called(fakeCrossFrame.sync)
+      annotation = {foo: 'bar'}
+      annotation = guest.createAnnotation(annotation)
+      assert.equal(annotation.foo, 'bar')
 
-  describe 'Annotator monkey patch', ->
-    describe 'setupAnnotation()', ->
-      it "doesn't declare annotation without targets as orphans", ->
-        guest = createGuest()
-        annotation = target: []
-        guest.setupAnnotation(annotation)
-        assert.isFalse !!annotation.$orphan
+  describe 'setupAnnotation()', ->
+    el = null
+    range = null
 
-      it "doesn't declare annotations with a working target as orphans", ->
-        guest = createGuest()
-        annotation = target: ["test target"]
-        guest.setupAnnotation(annotation)
-        assert.isFalse !!annotation.$orphan
+    beforeEach ->
+      el = document.createElement('span')
+      txt = document.createTextNode('hello')
+      el.appendChild(txt)
+      document.body.appendChild(el)
+      range = document.createRange()
+      range.selectNode(el)
 
-      it "declares annotations with broken targets as orphans", ->
-        guest = createGuest()
-        guest.anchoring.createAnchor = -> result: null
-        annotation = target: ["broken target"]
+    afterEach ->
+      document.body.removeChild(el)
+
+    it "doesn't declare annotation without targets as orphans", (done) ->
+      guest = createGuest()
+      annotation = target: []
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        assert.isFalse(annotation.$orphan)
+        done()
+
+    it "doesn't declare annotations with a working target as orphans", (done) ->
+      guest = createGuest()
+      annotation = target: [{selector: "test"}]
+      sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        assert.isFalse(annotation.$orphan)
+        done()
+
+    it "declares annotations with broken targets as orphans", (done) ->
+      guest = createGuest()
+      annotation = target: [{selector: 'broken selector'}]
+      sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        assert.isTrue(annotation.$orphan)
+        done()
+
+    it 'updates the cross frame and bucket bar plugins', (done) ->
+      guest = createGuest()
+      guest.plugins.CrossFrame =
+        sync: sinon.stub()
+      guest.plugins.BucketBar =
+        update: sinon.stub()
+      annotation = {}
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        assert.called(guest.plugins.BucketBar.update)
+        assert.called(guest.plugins.CrossFrame.sync)
+        done()
+
+    it 'saves the anchor positions on the annotation', (done) ->
+      guest = createGuest()
+      sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
+      clientRect = {top: 100, left: 200}
+      window.scrollX = 50
+      window.scrollY = 25
+      sandbox.stub(highlighter, 'getBoundingClientRect').returns(clientRect)
+      annotation = guest.setupAnnotation({target: [{selector: []}]})
+      waitForSync(annotation).then ->
+        assert.equal(annotation.$anchors.length, 1)
+        pos = annotation.$anchors[0].pos
+        assert.equal(pos.top, 125)
+        assert.equal(pos.left, 250)
+        done()
+
+    it 'adds the anchor to the "anchors" instance property"', (done) ->
+      guest = createGuest()
+      highlights = [document.createElement('span')]
+      sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
+      sandbox.stub(highlighter, 'highlightRange').returns(highlights)
+      target = [{selector: []}]
+      annotation = guest.setupAnnotation({target: [target]})
+      waitForSync(annotation).then ->
+        assert.equal(guest.anchors.length, 1)
+        assert.strictEqual(guest.anchors[0].annotation, annotation)
+        assert.strictEqual(guest.anchors[0].target, target)
+        assert.strictEqual(guest.anchors[0].range, range)
+        assert.strictEqual(guest.anchors[0].highlights, highlights)
+        done()
+
+    it 'destroys targets that have been removed from the annotation', (done) ->
+      annotation = {}
+      target = {}
+      highlights = []
+      guest = createGuest()
+      guest.anchors = [{annotation, target, highlights}]
+      removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        assert.equal(guest.anchors.length, 0)
+        assert.calledWith(removeHighlights, highlights)
+        done()
+
+    it 'does not reanchor targets that are already anchored', (done) ->
+      guest = createGuest()
+      annotation = target: [{selector: "test"}]
+      stub = sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
+      guest.setupAnnotation(annotation)
+      waitForSync(annotation).then ->
+        delete annotation.$anchors
         guest.setupAnnotation(annotation)
-        assert !!annotation.$orphan
+        waitForSync(annotation).then ->
+          assert.equal(guest.anchors.length, 1)
+          assert.calledOnce(stub)
+          done()
+
+  describe 'deleteAnnotation()', ->
+    it 'removes the anchors from the "anchors" instance variable', (done) ->
+      guest = createGuest()
+      annotation = {}
+      guest.anchors.push({annotation})
+      guest.deleteAnnotation(annotation)
+      new Promise(raf).then ->
+        assert.equal(guest.anchors.length, 0)
+        done()
+
+    it 'updates the bucket bar plugin', (done) ->
+      guest = createGuest()
+      guest.plugins.BucketBar = update: sinon.stub()
+      annotation = {}
+      guest.anchors.push({annotation})
+      guest.deleteAnnotation(annotation)
+      new Promise(raf).then ->
+        assert.calledOnce(guest.plugins.BucketBar.update)
+        done()
+
+    it 'publishes the "annotationDeleted" event', (done) ->
+      guest = createGuest()
+      annotation = {}
+      publish = sandbox.stub(guest, 'publish')
+      guest.deleteAnnotation(annotation)
+      new Promise(raf).then ->
+        assert.calledOnce(publish)
+        assert.calledWith(publish, 'annotationDeleted', [annotation])
+        done()
+
+    it 'removes any highlights associated with the annotation', (done) ->
+      guest = createGuest()
+      annotation = {}
+      highlights = [document.createElement('span')]
+      removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
+      guest.anchors.push({annotation, highlights})
+      guest.deleteAnnotation(annotation)
+      new Promise(raf).then ->
+        assert.calledOnce(removeHighlights)
+        assert.calledWith(removeHighlights, highlights)
+        done()

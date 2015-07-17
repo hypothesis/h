@@ -1,6 +1,18 @@
-Promise = require('es6-promise').Promise
+raf = require('raf')
 Annotator = require('annotator')
 $ = Annotator.$
+
+highlighter = require('./highlighter')
+
+
+animationPromise = (fn) ->
+  return new Promise (resolve, reject) ->
+    raf ->
+      try
+        resolve(fn())
+      catch error
+        reject(error)
+
 
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
@@ -10,21 +22,21 @@ module.exports = class Guest extends Annotator
     ".annotator-adder button click":     "onAdderClick"
     ".annotator-adder button mousedown": "onAdderMousedown"
     ".annotator-adder button mouseup":   "onAdderMouseup"
+    ".annotator-hl click":               "onHighlightClick"
+    ".annotator-hl mouseover":           "onHighlightMouseover"
+    ".annotator-hl mouseout":            "onHighlightMouseout"
     "setVisibleHighlights": "setVisibleHighlights"
 
   # Plugin configuration
   options:
     TextHighlights: {}
-    EnhancedAnchoring: {}
-    DomTextMapper: {}
     TextSelection: {}
-    TextRange: {}
-    TextPosition: {}
-    TextQuote: {}
-    FuzzyTextAnchors: {}
-    FragmentSelector: {}
+
+  # Anchoring module
+  anchoring: require('./anchoring/html')
 
   # Internal state
+  anchors: null
   visibleHighlights: false
 
   html: jQuery.extend {}, Annotator::html,
@@ -35,21 +47,10 @@ module.exports = class Guest extends Annotator
       </div>
     '''
 
-  constructor: (element, options, config = {}) ->
-    options.noScan = true
+  constructor: (element, options) ->
     super
-    delete @options.noScan
 
-    # Are going to be able to use the PDF plugin here?
-    if window.PDFTextMapper?.applicable()
-      # If we can, let's load the PDF plugin.
-      @options.PDF = {}
-    else
-      # If we can't use the PDF plugin,
-      # let's load the Document plugin instead.
-      @options.Document = {}
-
-    delete @options.app
+    this.anchors = []
 
     cfOptions =
       on: (event, handler) =>
@@ -68,7 +69,6 @@ module.exports = class Guest extends Annotator
             this.publish(event, args)
       formatter: (annotation) =>
         formatted = {}
-        formatted.uri = @getHref()
         for k, v of annotation when k isnt 'anchors'
           formatted[k] = v
         # Work around issue in jschannel where a repeated object is considered
@@ -85,100 +85,49 @@ module.exports = class Guest extends Annotator
       if not @plugins[name] and Annotator.Plugin[name]
         this.addPlugin(name, opts)
 
-    unless config.dontScan
-      # Scan the document text with the DOM Text libraries
-      this.anchoring._scan()
-
-    # Watch for newly rendered highlights, and update positions in sidebar
-    this.subscribe "highlightsCreated", (highlights) =>
-      unless Array.isArray highlights
-        highlights = [highlights]
-      highlights.forEach (hl) ->
-        hls = hl.anchor.highlight  # Fetch all the highlights
-        # Get the pages we have highlights on (for the given anchor)
-        pages = Object.keys(hls).map (s) -> parseInt s
-        firstPage = pages.sort()[0]  # Determine the first page
-        firstHl = hls[firstPage]     # Determine the first (topmost) hl
-        # Store the position of this anchor inside target
-        hl.anchor.target.pos =
-          top: hl.getTop()
-          height: hl.getHeight()
-
-      # Collect all impacted annotations
-      annotations = (hl.annotation for hl in highlights)
-
-      # Announce the new positions, so that the sidebar knows
-      this.plugins.CrossFrame.sync(annotations)
-
-    # Watch for removed highlights, and update positions in sidebar
-    this.subscribe "highlightRemoved", (highlight) =>
-      hls = highlight.anchor.highlight  # Fetch all the highlights
-      # Get the pages we have highlights on (for the given anchor)
-      pages = Object.keys(hls).map (s) -> parseInt s
-      # Do we have any highlights left?
-      if pages.length
-        firstPage = pages.sort()[0]  # Determine the first page
-        firstHl = hls[firstPage]     # Determine the first (topmost) hl
-        # Store the position of this anchor inside target
-        highlight.anchor.target.pos =
-          top: highlight.getTop()
-          heigth: highlight.getHeight()
-      else
-        delete highlight.anchor.target.pos
-
-      # Announce the new positions, so that the sidebar knows
-      this.plugins.CrossFrame.sync([highlight.annotation])
-
-  # Utility function to remove the hash part from a URL
-  _removeHash: (url) ->
-    url = new URL url
-    url.hash = ""
-    url.toString()
-
-  # Utility function to get the decoded form of the document URI
-  getRawHref: ->
-    if @plugins.PDF
-      @plugins.PDF.uri()
+  # Get the document info
+  getDocumentInfo: ->
+    if @plugins.PDF?
+      metadataPromise = Promise.resolve(@plugins.PDF.getMetadata())
+      uriPromise = Promise.resolve(@plugins.PDF.uri())
+    else if @plugins.Document?
+      uriPromise = Promise.resolve(@plugins.Document.uri())
+      metadataPromise = Promise.resolve(@plugins.Document.metadata)
     else
-      @plugins.Document.uri()
+      uriPromise = Promise.reject()
+      metadataPromise = Promise.reject()
 
-  # Utility function to get a de-hashed form of the document URI
-  getHref: -> @_removeHash @getRawHref()
+    uriPromise = uriPromise.catch(-> decodeURIComponent(window.location.href))
+    metadataPromise = metadataPromise.catch(-> {
+      title: document.title
+      link: [{href: decodeURIComponent(window.location.href)}]
+    })
 
-  # Utility function to filter metadata and de-hash the URIs
-  getMetadata: =>
-    metadata = @plugins.Document?.metadata
-    metadata.link?.forEach (link) => link.href = @_removeHash link.href
-    metadata
+    return metadataPromise.then (metadata) =>
+      return uriPromise.then (href) =>
+        uri = new URL(href)
+        uri.hash = ''
+        uri = uri.toString()
+        return {uri, metadata}
 
   _connectAnnotationUISync: (crossframe) ->
     crossframe.onConnect(=> this.publish('panelReady'))
     crossframe.on('onEditorHide', this.onEditorHide)
     crossframe.on('onEditorSubmit', this.onEditorSubmit)
     crossframe.on 'focusAnnotations', (ctx, tags=[]) =>
-      for hl in @anchoring.getHighlights()
-        if hl.annotation.$$tag in tags
-          hl.setFocused true
-        else
-          hl.setFocused false
+      for anchor in @anchors when anchor.highlights?
+        toggle = anchor.annotation.$$tag in tags
+        $(anchor.highlights).toggleClass('annotator-hl-focused', toggle)
     crossframe.on 'scrollToAnnotation', (ctx, tag) =>
-      for a in @anchoring.getAnchors()
-        if a.annotation.$$tag is tag
-          a.scrollToView()
+      for anchor in @anchors when anchor.highlights?
+        if anchor.annotation.$$tag is tag
+          $(anchor.highlights).scrollintoview()
           return
     crossframe.on 'getDocumentInfo', (trans) =>
-      (@plugins.PDF?.getMetaData() ? Promise.reject())
-        .then (md) =>
-           trans.complete
-             uri: @getHref()
-             metadata: md
-        .catch (problem) =>
-           trans.complete
-             uri: @getHref()
-             metadata: @getMetadata()
-        .catch (e) ->
-
       trans.delayReturn(true)
+      this.getDocumentInfo()
+      .then((info) -> trans.complete(info))
+      .catch((reason) -> trans.error(reason))
     crossframe.on 'setVisibleHighlights', (ctx, state) =>
       this.publish 'setVisibleHighlights', state
 
@@ -211,21 +160,158 @@ module.exports = class Guest extends Annotator
 
     this.removeEvents()
 
-  setupAnnotation: ->
-    annotation = super
-    this.plugins.CrossFrame.sync([annotation])
-    annotation
+  setupAnnotation: (annotation) ->
+    self = this
+    root = @element[0]
 
-  createAnnotation: ->
-    annotation = super
-    this.plugins.CrossFrame.sync([annotation])
+    # Anchors for all annotations are in the `anchors` instance property. These
+    # are anchors for this annotation only. After all the targets have been
+    # processed these will be appended to the list of anchors known to the
+    # instance. Anchors hold an annotation, a target of that annotation, a
+    # document range for that target and an Array of highlights.
+    anchors = []
+
+    # The targets that are already anchored. This function consults this to
+    # determine which targets can be left alone.
+    anchoredTargets = []
+
+    # These are the highlights for existing anchors of this annotation with
+    # targets that have since been removed from the annotation. These will
+    # be removed by this function.
+    deadHighlights = []
+
+    # Initialize the target array.
+    annotation.target ?= []
+
+    locate = (target) ->
+      # Find a target using the anchoring module.
+      options = {
+        cache: self.anchoringCache
+        ignoreSelector: '[class^="annotator-"]'
+      }
+      return self.anchoring.anchor(root, target.selector, options)
+      .then((range) -> {annotation, target, range})
+      .catch(-> {annotation, target})
+
+    highlight = (anchor) ->
+      # Highlight the range for an anchor.
+      return anchor unless anchor.range?
+      return animationPromise ->
+        range = Annotator.Range.sniff(anchor.range)
+        normedRange = range.normalize(root)
+
+        highlights = highlighter.highlightRange(normedRange)
+        rect = highlighter.getBoundingClientRect(highlights)
+
+        $(highlights).data('annotation', anchor.annotation)
+
+        anchor.highlights = highlights
+        anchor.pos =
+          left: rect.left + window.scrollX
+          top: rect.top + window.scrollY
+
+        return anchor
+
+    sync = (anchors) ->
+      # Store the results of anchoring.
+      annotation.$anchors = ({pos} for {pos} in anchors)
+      annotation.$orphan = anchors.length > 0
+      for anchor in anchors
+        if anchor.range?
+          annotation.$orphan = false
+
+      # Add the anchors for this annotation to instance storage.
+      self.anchors = self.anchors.concat(anchors)
+
+      # Let plugins know about the new information.
+      self.plugins.BucketBar?.update()
+      self.plugins.CrossFrame?.sync([annotation])
+
+    # Remove all the anchors for this annotation from the instance storage.
+    for anchor in self.anchors.splice(0, self.anchors.length)
+      if anchor.annotation is annotation
+        # Anchors are valid as long as they still have a range and their target
+        # is still in the list of targets for this annotation.
+        if anchor.range? and anchor.target in annotation.target
+          anchors.push(anchor)
+          anchoredTargets.push(anchor.target)
+        else if anchor.highlights?
+          # These highlights are no longer valid and should be removed.
+          deadHighlights = deadHighlights.concat(anchor.highlights)
+          delete anchor.highlights
+          delete anchor.range
+      else
+        # These can be ignored, so push them back onto the new list.
+        self.anchors.push(anchor)
+
+    # Remove all the highlights that have no corresponding target anymore.
+    raf -> highlighter.removeHighlights(deadHighlights)
+
+    # Anchor any targets of this annotation that are not anchored already.
+    for target in annotation.target when target not in anchoredTargets
+      anchor = locate(target).then(highlight)
+      anchors.push(anchor)
+
+    # Wait for all the anchoring tasks to complete then call sync.
+    Promise.all(anchors).then(sync)
+
+    return annotation
+
+  createAnnotation: (annotation = {}) ->
+    self = this
+    root = @element[0]
+
+    ranges = @selectedRanges ? []
+    @selectedRanges = null
+
+    getSelectors = (range) ->
+      options = {
+        cache: self.anchoringCache
+        ignoreSelector: '[class^="annotator-"]'
+      }
+      return self.anchoring.describe(root, range, options)
+
+    setDocumentInfo = (info) ->
+      annotation.document = info.metadata
+      annotation.uri = info.uri
+
+    setTargets = ([info, selectors]) ->
+      source = info.uri
+      annotation.target = ({source, selector} for selector in selectors)
+
+    info = this.getDocumentInfo()
+    selectors = Promise.all(ranges.map(getSelectors))
+
+    metadata = info.then(setDocumentInfo)
+    targets = Promise.all([info, selectors]).then(setTargets)
+
+    targets.then(-> self.setupAnnotation(annotation))
+    targets.then(-> self.publish('beforeAnnotationCreated', [annotation]))
+
     annotation
 
   createHighlight: ->
-    annotation = $highlight: true
-    this.publish 'beforeAnnotationCreated', [annotation]
-    this.plugins.CrossFrame.sync([annotation])
-    annotation
+    return this.createAnnotation({$highlight: true})
+
+  deleteAnnotation: (annotation) ->
+    anchors = []
+    targets = []
+    unhighlight = []
+
+    for anchor in @anchors
+      if anchor.annotation is annotation
+        unhighlight.push(anchor.highlights ? [])
+      else
+        anchors.push(anchor)
+
+    this.anchors = anchors
+    this.publish('annotationDeleted', [annotation])
+    this.plugins.BucketBar?.update()
+
+    unhighlight = Array::concat(unhighlight...)
+    raf -> highlighter.removeHighlights(unhighlight)
+
+    return annotation
 
   showAnnotations: (annotations) =>
     @crossframe?.notify
@@ -247,31 +333,13 @@ module.exports = class Guest extends Annotator
       method: "focusAnnotations"
       params: (a.$$tag for a in annotations)
 
-  onAnchorMousedown: ->
-
-  # This is called to create a target from a raw selection,
-  # using selectors created by the registered selector creators
-  _getTargetFromSelection: (selection) ->
-    source: @getHref()
-    selector: @anchoring.getSelectorsFromSelection(selection)
-
-  confirmSelection: ->
-    return true unless @selectedTargets.length is 1
-
-    quote = @getQuoteForTarget @selectedTargets[0]
-
-    if quote.length > 2 then return true
-
-    return confirm "You have selected a very short piece of text: only " + length + " chars. Are you sure you want to highlight this?"
-
   onSuccessfulSelection: (event, immediate) ->
     unless event?
       throw "Called onSuccessfulSelection without an event!"
-    unless event.segments?
-      throw "Called onSuccessulSelection with an event with missing segments!"
+    unless event.ranges?
+      throw "Called onSuccessulSelection with an event with missing ranges!"
 
-    # Describe the selection with targets
-    @selectedTargets = (@_getTargetFromSelection s for s in event.segments)
+    @selectedRanges = event.ranges
 
     # Do we want immediate annotation?
     if immediate
@@ -287,40 +355,42 @@ module.exports = class Guest extends Annotator
 
   onFailedSelection: (event) ->
     @adder.hide()
-    @selectedTargets = []
+    @selectedRanges = []
 
-  # Select some annotations.
-  #
-  # toggle: should this toggle membership in an existing selection?
   selectAnnotations: (annotations, toggle) =>
+    this.triggerShowFrame()
     if toggle
-      # Tell sidebar to add these annotations to the sidebar if not already
-      # selected, otherwise remove them.
       this.toggleAnnotationSelection annotations
     else
-      # Tell sidebar to show the viewer for these annotations
-      this.triggerShowFrame()
       this.showAnnotations annotations
 
-  # When Mousing over a highlight, tell the sidebar to focus the relevant annotations
-  onAnchorMouseover: (event) ->
-    if @visibleHighlights
-      event.stopPropagation()
-      annotations = event.data.getAnnotations(event)
-      this.focusAnnotations annotations
+  onHighlightMouseover: (event) ->
+    return unless @visibleHighlights
+    annotation = $(event.currentTarget).data('annotation')
+    annotations = event.annotations ?= []
+    annotations.push(annotation)
 
-  # Tell the sidebar to stop highlighting the relevant annotations
-  onAnchorMouseout: (event) ->
-    if @visibleHighlights
-      event.stopPropagation()
-      this.focusAnnotations []
+    # The innermost highlight will execute this.
+    # The timeout gives time for the event to bubble, letting any overlapping
+    # highlights have time to add their annotations to the list stored on the
+    # event object.
+    if event.target is event.currentTarget
+      setTimeout => this.focusAnnotations(annotations)
 
-  # When clicking on a highlight, tell the sidebar to bring up the viewer for the relevant annotations
-  onAnchorClick: (event) =>
-    if @visibleHighlights
-      event.stopPropagation()
-      this.selectAnnotations (event.data.getAnnotations event),
-        (event.metaKey or event.ctrlKey)
+  onHighlightMouseout: (event) ->
+    return unless @visibleHighlights
+    this.focusAnnotations []
+
+  onHighlightClick: (event) =>
+    return unless @visibleHighlights
+    annotation = $(event.currentTarget).data('annotation')
+    annotations = event.annotations ?= []
+    annotations.push(annotation)
+
+    # See the comment in onHighlightMouseover
+    if event.target is event.currentTarget
+      xor = (event.metaKey or event.ctrlKey)
+      setTimeout => this.selectAnnotations(annotations, xor)
 
   # Pass true to show the highlights in the frame or false to disable.
   setVisibleHighlights: (shouldShowHighlights) ->
@@ -361,8 +431,8 @@ module.exports = class Guest extends Annotator
     switch event.target.dataset.action
       when 'highlight'
         this.setVisibleHighlights true
-        this.setupAnnotation(this.createHighlight())
+        this.createHighlight()
       when 'comment'
-        this.setupAnnotation(this.createAnnotation())
+        this.createAnnotation()
         this.triggerShowFrame()
     Annotator.Util.getGlobal().getSelection().removeAllRanges()

@@ -197,6 +197,8 @@ inject_js:
           - h:static/scripts/bridge.coffee
           - h:static/scripts/discovery.coffee
           - h:static/scripts/annotator/*.coffee
+          - h:static/scripts/annotator/*.js
+          - h:static/scripts/annotator/anchoring/*.coffee
           - h:static/scripts/annotator/plugin/*.coffee
           - h:static/scripts/vendor/annotator.auth.js
 

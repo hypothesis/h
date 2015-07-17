@@ -1,4 +1,3 @@
-Promise = require('es6-promise').Promise
 {module, inject} = require('angular-mock')
 
 assert = chai.assert
