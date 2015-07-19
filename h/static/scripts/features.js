@@ -24,42 +24,42 @@
 var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function features ($document, $http, $log) {
-    var cache = null;
-    var featuresURL = new URL('/app/features', $document.prop('baseURI'));
+  var cache = null;
+  var featuresURL = new URL('/app/features', $document.prop('baseURI'));
 
-    function fetch() {
-        $http.get(featuresURL)
-        .success(function(data) {
-            cache = [Date.now(), data];
-        })
-        .error(function() {
-            $log.warn('features service: failed to load features data');
-        });
+  function fetch() {
+    $http.get(featuresURL)
+    .success(function(data) {
+      cache = [Date.now(), data];
+    })
+    .error(function() {
+      $log.warn('features service: failed to load features data');
+    });
+  }
+
+  function flagEnabled(name) {
+    // Trigger a fetch if the cache is more than CACHE_TTL milliseconds old.
+    // We don't wait for the fetch to complete, so it's not this call that
+    // will see new data.
+    if (cache === null || (Date.now() - cache[0]) > CACHE_TTL) {
+      fetch();
     }
 
-    function flagEnabled(name) {
-        // Trigger a fetch if the cache is more than CACHE_TTL milliseconds old.
-        // We don't wait for the fetch to complete, so it's not this call that
-        // will see new data.
-        if (cache === null || (Date.now() - cache[0]) > CACHE_TTL) {
-            fetch();
-        }
-
-        if (cache === null) {
-            return false;
-        }
-        var flags = cache[1];
-        if (!flags.hasOwnProperty(name)) {
-            $log.warn('features service: looked up unknown feature:', name);
-            return false;
-        }
-        return flags[name];
+    if (cache === null) {
+      return false;
     }
+    var flags = cache[1];
+    if (!flags.hasOwnProperty(name)) {
+      $log.warn('features service: looked up unknown feature:', name);
+      return false;
+    }
+    return flags[name];
+  }
 
-    return {
-        fetch: fetch,
-        flagEnabled: flagEnabled
-    };
+  return {
+    fetch: fetch,
+    flagEnabled: flagEnabled
+  };
 }
 
 module.exports = ['$document', '$http', '$log', features];

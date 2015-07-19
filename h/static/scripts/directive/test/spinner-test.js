@@ -6,31 +6,31 @@ var assert = chai.assert;
 sinon.assert.expose(assert, {prefix: null});
 
 describe('spinner', function () {
-    var $animate = null;
-    var $element = null
-    var sandbox = null;
+  var $animate = null;
+  var $element = null
+  var sandbox = null;
 
-    before(function () {
-        angular.module('h', []).directive('spinner', require('../spinner'));
-    });
+  before(function () {
+    angular.module('h', []).directive('spinner', require('../spinner'));
+  });
 
-    beforeEach(module('h'));
+  beforeEach(module('h'));
 
-    beforeEach(inject(function (_$animate_, $compile, $rootScope) {
-        sandbox = sinon.sandbox.create();
+  beforeEach(inject(function (_$animate_, $compile, $rootScope) {
+    sandbox = sinon.sandbox.create();
 
-        $animate = _$animate_;
-        sandbox.spy($animate, 'enabled');
+    $animate = _$animate_;
+    sandbox.spy($animate, 'enabled');
 
-        $element = angular.element('<span class="spinner"></span>');
-        $compile($element)($rootScope.$new());
-    }));
+    $element = angular.element('<span class="spinner"></span>');
+    $compile($element)($rootScope.$new());
+  }));
 
-    afterEach(function () {
-        sandbox.restore();
-    });
+  afterEach(function () {
+    sandbox.restore();
+  });
 
-    it('disables ngAnimate animations for itself', function () {
-        assert.calledWith($animate.enabled, false, sinon.match($element));
-    });
+  it('disables ngAnimate animations for itself', function () {
+    assert.calledWith($animate.enabled, false, sinon.match($element));
+  });
 });
