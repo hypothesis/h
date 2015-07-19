@@ -12,7 +12,7 @@
     "diff-match-patch": "^1.0.0",
     "dom-anchor-fragment": "^1.0.0",
     "dom-anchor-text-position": "^1.0.1",
-    "dom-anchor-text-quote": "^1.1.2",
+    "dom-anchor-text-quote": "^1.2.0",
     "dom-seek": "^1.0.0",
     "es6-promise": "^2.1.0",
     "extend": "^2.0.0",
