@@ -58,7 +58,6 @@ getPageOffset = (pageIndex) ->
   return next(0)
 
 
-
 findPage = (offset) ->
   index = 0
   total = 0
@@ -73,6 +72,89 @@ findPage = (offset) ->
       return getPageTextContent(index).then(count)
 
   return getPageTextContent(0).then(count)
+
+
+# Search for a position anchor within a page, creating a placeholder and
+# anchoring to that if the page is not rendered.
+anchorByPosition = (page, anchor, options) ->
+  renderingState = page.renderingState
+  renderingDone = page.textLayer?.renderingDone
+  if renderingState is RenderingStates.FINISHED and renderingDone
+    root = page.textLayer.textLayerDiv
+    selector = anchor.toSelector(options)
+    return html.anchor(root, [selector])
+  else
+    div = page.div ? page.el
+    placeholder = div.getElementsByClassName('annotator-placeholder')[0]
+    unless placeholder?
+      placeholder = document.createElement('span')
+      placeholder.classList.add('annotator-placeholder')
+      placeholder.textContent = 'Loading annotations…'
+      div.appendChild(placeholder)
+    range = document.createRange()
+    range.setStartBefore(placeholder)
+    range.setEndAfter(placeholder)
+    return range
+
+
+# Search for a quote (with optional position hint) in the given pages.
+findInPages = ([pageIndex, rest...], quote, position) ->
+  unless pageIndex?
+    return Promise.reject('quote not found')
+
+  attempt = (info) ->
+    # Try to find the quote in the current page.
+    [page, content, offset] = info
+    root = {textContent: content}
+    anchor = new TextQuoteAnchor.fromSelector(root, quote)
+    if position?
+      hint = position.start - offset
+      hint = Math.max(0, hint)
+      hint = Math.min(hint, content.length)
+      return anchor.toPositionAnchor({hint})
+    else
+      return anchor.toPositionAnchor()
+
+  next = ->
+    return findInPages(rest, quote, position)
+
+  cacheAndFinish = (anchor) ->
+    quotePositionCache[quote.exact] ?= {}
+    quotePositionCache[quote.exact][position.start] = {page, anchor}
+    return anchorByPosition(page, anchor)
+
+  page = getPage(pageIndex)
+  content = getPageTextContent(pageIndex)
+  offset = getPageOffset(pageIndex)
+
+  return Promise.all([page, content, offset])
+  .then(attempt, next)
+  .then(cacheAndFinish)
+
+
+# When a position anchor is available, quote search can prioritize pages by
+# the position, searching pages outward starting from the page containing the
+# expected offset. This should speed up anchoring by searching fewer pages.
+prioritizePages = (position) ->
+  {pagesCount} = PDFViewerApplication.pdfViewer
+  pageIndices = [0...pagesCount]
+
+  sort = (pageIndex) ->
+    left = pageIndices.slice(0, pageIndex)
+    right = pageIndices.slice(pageIndex)
+    result = []
+    while left.length or right.length
+      if right.length
+        result.push(right.shift())
+      if left.length
+        result.push(left.pop())
+    return result
+
+  if position?
+    return findPage(position.start)
+    .then(({index}) -> return sort(index))
+  else
+    return Promise.resolve(pageIndices)
 
 
 ###*
@@ -111,26 +193,6 @@ exports.anchor = (root, selectors, options = {}) ->
     else
       return range
 
-  anchorByPosition = (page, anchor) ->
-    renderingState = page.renderingState
-    renderingDone = page.textLayer?.renderingDone
-    if renderingState is RenderingStates.FINISHED and renderingDone
-      root = page.textLayer.textLayerDiv
-      selector = anchor.toSelector(options)
-      return html.anchor(root, [selector])
-    else
-      div = page.div ? page.el
-      placeholder = div.getElementsByClassName('annotator-placeholder')[0]
-      unless placeholder?
-        placeholder = document.createElement('span')
-        placeholder.classList.add('annotator-placeholder')
-        placeholder.textContent = 'Loading annotations…'
-        div.appendChild(placeholder)
-      range = document.createRange()
-      range.setStartBefore(placeholder)
-      range.setEndAfter(placeholder)
-      return range
-
   if position?
     promise = promise.catch ->
       return findPage(position.start)
@@ -141,55 +203,16 @@ exports.anchor = (root, selectors, options = {}) ->
         length = end - start
         assertQuote(textContent.substr(start, length))
         anchor = new TextPositionAnchor(root, start, end)
-        return anchorByPosition(page, anchor)
+        return anchorByPosition(page, anchor, options)
 
   if quote?
     promise = promise.catch ->
-      {pagesCount} = PDFViewerApplication.pdfViewer
+      if position? and quotePositionCache[quote.exact]?[position.start]?
+        {page, anchor} = quotePositionCache[quote.exact][position.start]
+        return anchorByPosition(page, anchor, options)
 
-      if position?
-        if quotePositionCache[quote.exact]?[position.start]?
-         {page, anchor} = quotePositionCache[quote.exact][position.start]
-         return anchorByPosition(page, anchor)
-
-      findInPages = ([pageIndex, rest...]) ->
-        page = getPage(pageIndex)
-        content = getPageTextContent(pageIndex)
-        offset = getPageOffset(pageIndex)
-        Promise.all([content, offset, page])
-        .then (results) ->
-          [content, offset, page] = results
-          root = {textContent: content}
-          pageOptions = {}
-          if position?
-            pageOptions.hint = position.start - offset
-          anchor = new TextQuoteAnchor.fromSelector(root, quote)
-          anchor = anchor.toPositionAnchor(pageOptions)
-          quotePositionCache[quote.exact] ?= {}
-          quotePositionCache[quote.exact][position.start] = {page, anchor}
-          return anchorByPosition(page, anchor)
-        .catch ->
-          if rest.length
-            return findInPages(rest)
-          else
-            throw new Error('quote not found')
-
-      pages = [0...pagesCount]
-
-      if position?
-        return findPage(position.start)
-        .then ({index, offset, textContent}) ->
-          left = pages.slice(0, index)
-          right = pages.slice(index)
-          pages = []
-          while left.length or right.length
-            if right.length
-              pages.push(right.shift())
-            if left.length
-              pages.push(left.pop())
-          return findInPages(pages)
-      else
-        findInPages(pages)
+      return prioritizePages(position)
+      .then((pageIndices) -> findInPages(pageIndices, quote, position))
 
   return promise
 
