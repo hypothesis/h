@@ -15,13 +15,11 @@ module.exports = ['crossframe', (crossframe) ->
       if visible
         scope.$evalAsync(-> elem.find('#via').focus().select())
 
-    scope.$watchCollection (-> crossframe.providers), ->
-      if crossframe.providers?.length
-        # XXX: Consider multiple providers in the future
-        p = crossframe.providers[0]
-        if p.entities?.length
-          e = p.entities[0]
-          scope.viaPageLink = 'https://via.hypothes.is/' + e
+    scope.$watchCollection (-> crossframe.frames), (frames) ->
+      if not frames.length
+        return
+      # XXX: Consider sharing multiple frames in the future?
+      scope.viaPageLink = 'https://via.hypothes.is/' + frames[0].uri
 
   restrict: 'A'
   templateUrl: 'share_dialog.html'

@@ -64,8 +64,8 @@ describe 'CrossFrame', ->
         'source', 'origin', 'token')
 
     it 'queries discovered frames for metadata', ->
-      info = {metadata: link: [{href: 'http://example.com'}]}
-      channel = {call: sandbox.stub().yieldsTo('success', info)}
+      uri = 'http://example.com'
+      channel = {call: sandbox.stub().yieldsTo('success', {uri: uri})}
       fakeBridge.onConnect.yields(channel)
       crossframe.connect()
       assert.calledWith(channel.call, {
@@ -73,13 +73,13 @@ describe 'CrossFrame', ->
         success: sinon.match.func
       })
 
-    it 'updates the providers array', ->
-      info = {metadata: link: [{href: 'http://example.com'}]}
-      channel = {call: sandbox.stub().yieldsTo('success', info)}
+    it 'updates the frames array', ->
+      uri = 'http://example.com'
+      channel = {call: sandbox.stub().yieldsTo('success', {uri: uri})}
       fakeBridge.onConnect.yields(channel)
       crossframe.connect()
-      assert.deepEqual(crossframe.providers, [
-        {channel: channel, entities: ['http://example.com']}
+      assert.deepEqual(crossframe.frames, [
+        {channel: channel, uri: uri}
       ])
 
 

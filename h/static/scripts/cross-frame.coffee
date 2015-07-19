@@ -1,7 +1,5 @@
 # Instantiates all objects used for cross frame discovery and communication.
 module.exports = class CrossFrame
-  providers: null
-
   this.inject = [
     '$rootScope', '$document', '$window', 'store', 'annotationUI'
     'Discovery', 'bridge',
@@ -12,7 +10,7 @@ module.exports = class CrossFrame
     Discovery, bridge,
     AnnotationSync, AnnotationUISync
   ) ->
-    @providers = []
+    @frames = []
 
     createDiscovery = ->
       options =
@@ -46,20 +44,17 @@ module.exports = class CrossFrame
     createAnnotationUISync = (annotationSync) ->
       new AnnotationUISync($rootScope, $window, bridge, annotationSync, annotationUI)
 
-    addProvider = (channel) =>
-      provider = {channel: channel, entities: []}
-
+    addFrame = (channel) =>
       channel.call
         method: 'getDocumentInfo'
         success: (info) =>
           $rootScope.$apply =>
-            provider.entities = (link.href for link in info.metadata.link)
-            @providers.push(provider)
+            @frames.push({channel: channel, uri: info.uri})
 
     this.connect = ->
       discovery = createDiscovery()
 
-      bridge.onConnect(addProvider)
+      bridge.onConnect(addFrame)
       annotationSync = createAnnotationSync()
       annotationUISync = createAnnotationUISync(annotationSync)
 
