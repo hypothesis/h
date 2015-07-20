@@ -34,47 +34,47 @@ def test_index_with_multiple_users(NipsaUser):
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_nipsa_gets_user_by_id(NipsaUser):
-    logic.nipsa(request=mock.Mock(), userid="test_id")
+def test_add_nipsa_gets_user_by_id(NipsaUser):
+    logic.add_nipsa(request=mock.Mock(), userid="test_id")
 
     NipsaUser.get_by_id.assert_called_once_with("test_id")
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_nipsa_does_not_add_when_user_already_exists(NipsaUser):
+def test_add_nipsa_does_not_add_when_user_already_exists(NipsaUser):
     """
-    nipsa() should not call db.add() if the user already exists.
+    add_nipsa() should not call db.add() if the user already exists.
     """
     request = mock.Mock()
     nipsa_user = mock.Mock()
     NipsaUser.get_by_id.return_value = nipsa_user
 
-    logic.nipsa(request=request, userid="test_id")
+    logic.add_nipsa(request=request, userid="test_id")
 
     assert not request.db.add.called
 
 
 @mock.patch("h.api.nipsa.logic._publish")
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_nipsa_publishes_when_user_already_exists(
+def test_add_nipsa_publishes_when_user_already_exists(
         NipsaUser, _publish):
     """
-    Even if the user is already NIPSA'd, nipsa() should still publish a
-    "nipsa" message to the queue.
+    Even if the user is already NIPSA'd, add_nipsa() should still publish an
+    "add_nipsa" message to the queue.
     """
     nipsa_user = mock.Mock()
     NipsaUser.get_by_id.return_value = nipsa_user
     request = mock.Mock()
 
-    logic.nipsa(request=request, userid="test_id")
+    logic.add_nipsa(request=request, userid="test_id")
 
     _publish.assert_called_once_with(
-        request, json.dumps({"action": "nipsa", "userid": "test_id"}))
+        request, json.dumps({"action": "add_nipsa", "userid": "test_id"}))
     NipsaUser.get_by_id.assert_called_once_with("test_id")
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_nipsa_adds_user_if_user_does_not_exist(NipsaUser):
+def test_add_nipsa_adds_user_if_user_does_not_exist(NipsaUser):
     request = mock.Mock()
 
     nipsa_user = mock.Mock()
@@ -82,7 +82,7 @@ def test_nipsa_adds_user_if_user_does_not_exist(NipsaUser):
 
     NipsaUser.get_by_id.return_value = None
 
-    logic.nipsa(request=request, userid="test_id")
+    logic.add_nipsa(request=request, userid="test_id")
 
     NipsaUser.assert_called_once_with("test_id")
     request.db.add.assert_called_once_with(nipsa_user)
@@ -90,7 +90,7 @@ def test_nipsa_adds_user_if_user_does_not_exist(NipsaUser):
 
 @mock.patch("h.api.nipsa.logic._publish")
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_nipsa_publishes_if_user_does_not_exist(NipsaUser, _publish):
+def test_add_nipsa_publishes_if_user_does_not_exist(NipsaUser, _publish):
     request = mock.Mock()
 
     nipsa_user = mock.Mock()
@@ -99,77 +99,77 @@ def test_nipsa_publishes_if_user_does_not_exist(NipsaUser, _publish):
 
     NipsaUser.get_by_id.return_value = None
 
-    logic.nipsa(request=request, userid="test_id")
+    logic.add_nipsa(request=request, userid="test_id")
 
     _publish.assert_called_once_with(
-        request, json.dumps({"action": "nipsa", "userid": "test_id"}))
+        request, json.dumps({"action": "add_nipsa", "userid": "test_id"}))
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_unnipsa_gets_user_by_id(NipsaUser):
+def test_remove_nipsa_gets_user_by_id(NipsaUser):
     request = mock.Mock()
     request.matchdict = {"userid": "test_id"}
 
-    logic.unnipsa(request=request, userid="test_id")
+    logic.remove_nipsa(request=request, userid="test_id")
 
     NipsaUser.get_by_id.assert_called_once_with("test_id")
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_unnipsa_does_not_delete_user_that_does_not_exist(NipsaUser):
+def test_remove_nipsa_does_not_delete_user_that_does_not_exist(NipsaUser):
     """
-    unnipsa() should not call db.delete() if the user isn't NIPSA'd.
+    remove_nipsa() should not call db.delete() if the user isn't NIPSA'd.
     """
     NipsaUser.get_by_id.return_value = None
     request = mock.Mock()
 
-    logic.unnipsa(request=request, userid="test_id")
+    logic.remove_nipsa(request=request, userid="test_id")
 
     assert not request.db.delete.called
 
 
 @mock.patch("h.api.nipsa.logic._publish")
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_unnipsa_publishes_when_user_does_not_exist(NipsaUser, _publish):
+def test_remove_nipsa_publishes_when_user_does_not_exist(NipsaUser, _publish):
     """
-    Even if the user is not NIPSA'd, unnipsa() should still publish an
-    "unnipsa" message to the queue.
+    Even if the user is not NIPSA'd, remove_nipsa() should still publish an
+    "remove_nipsa" message to the queue.
     """
     NipsaUser.get_by_id.return_value = None
     request = mock.Mock()
 
-    logic.unnipsa(request=request, userid="test_id")
+    logic.remove_nipsa(request=request, userid="test_id")
 
     _publish.assert_called_once_with(
-        request, json.dumps({"action": "unnipsa", "userid": "test_id"}))
+        request, json.dumps({"action": "remove_nipsa", "userid": "test_id"}))
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_unnipsa_deletes_user(NipsaUser):
+def test_remove_nipsa_deletes_user(NipsaUser):
     request = mock.Mock()
 
     nipsa_user = mock.Mock()
     nipsa_user.userid = "test_id"
     NipsaUser.get_by_id.return_value = nipsa_user
 
-    logic.unnipsa(request=request, userid="test_id")
+    logic.remove_nipsa(request=request, userid="test_id")
 
     request.db.delete.assert_called_once_with(nipsa_user)
 
 
 @mock.patch("h.api.nipsa.logic._publish")
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_unnipsa_publishes_if_user_exists(NipsaUser, _publish):
+def test_remove_nipsa_publishes_if_user_exists(NipsaUser, _publish):
     request = mock.Mock()
 
     nipsa_user = mock.Mock()
     nipsa_user.userid = "test_id"
     NipsaUser.get_by_id.return_value = nipsa_user
 
-    logic.unnipsa(request=request, userid="test_id")
+    logic.remove_nipsa(request=request, userid="test_id")
 
     _publish.assert_called_once_with(
-        request, json.dumps({"action": "unnipsa", "userid": "test_id"}))
+        request, json.dumps({"action": "remove_nipsa", "userid": "test_id"}))
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")

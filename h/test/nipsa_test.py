@@ -33,9 +33,10 @@ def test_index_with_multiple_nipsad_users(nipsa_api):
 def test_nipsa_calls_nipsa_api_with_userid(nipsa_api):
     request = testing.DummyRequest(params={"add": "kiki"})
 
-    nipsa.nipsa(request)
+    nipsa.add_nipsa(request)
 
-    nipsa_api.nipsa.assert_called_once_with(request, "acct:kiki@example.com")
+    nipsa_api.add_nipsa.assert_called_once_with(
+        request, "acct:kiki@example.com")
 
 
 @mock.patch("h.nipsa.index")
@@ -44,25 +45,26 @@ def test_nipsa_returns_index(nipsa_api, index):
     request = testing.DummyRequest(params={"add": "kiki"})
     index.return_value = "Keine Bange!"
 
-    assert nipsa.nipsa(request) == "Keine Bange!"
+    assert nipsa.add_nipsa(request) == "Keine Bange!"
 
 
 @mock.patch("h.nipsa.nipsa_api")
-def test_unnipsa_calls_nipsa_api_with_userid(nipsa_api):
+def test_remove_nipsa_calls_nipsa_api_with_userid(nipsa_api):
     request = mock.Mock(params={"remove": "kiki"}, domain="hypothes.is")
 
-    nipsa.unnipsa(request)
+    nipsa.remove_nipsa(request)
 
-    nipsa_api.unnipsa.assert_called_once_with(request, "acct:kiki@hypothes.is")
+    nipsa_api.remove_nipsa.assert_called_once_with(
+        request, "acct:kiki@hypothes.is")
 
 
 @mock.patch("h.nipsa.nipsa_api")
-def test_unnipsa_redirects_to_index(nipsa_api):
+def test_remove_nipsa_redirects_to_index(nipsa_api):
     request = mock.Mock(
         params={"remove": "kiki"}, domain="hypothes.is",
         route_url=mock.Mock(return_value="/nipsa"))
 
-    response = nipsa.unnipsa(request)
+    response = nipsa.remove_nipsa(request)
 
     assert isinstance(response, httpexceptions.HTTPSeeOther)
     assert response.location == "/nipsa"

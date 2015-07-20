@@ -19,29 +19,29 @@ def index(_):
 @view.view_config(route_name='nipsa_index', request_method='POST',
                   renderer='h:templates/nipsa.html',
                   permission='admin')
-def nipsa(request):
+def add_nipsa(request):
     username = request.params["add"]
 
     # It's important that we nipsa the full user ID
     # ("acct:seanh@hypothes.is" not just "seanh").
     userid = util.userid_from_username(username, request)
 
-    nipsa_api.nipsa(request, userid)
+    nipsa_api.add_nipsa(request, userid)
     return index(request)
 
 
-@view.view_config(route_name='unnipsa', request_method='POST',
+@view.view_config(route_name='remove_nipsa', request_method='POST',
                   renderer='h:templates/nipsa.html',
                   permission='admin')
-def unnipsa(request):
+def remove_nipsa(request):
     username = request.params["remove"]
     userid = util.userid_from_username(username, request)
-    nipsa_api.unnipsa(request, userid)
+    nipsa_api.remove_nipsa(request, userid)
     return httpexceptions.HTTPSeeOther(
         location=request.route_url("nipsa_index"))
 
 
 def includeme(config):
     config.add_route('nipsa_index', '/nipsa')
-    config.add_route('unnipsa', '/unnipsa')
+    config.add_route(remove_nipsa, 'remove_nipsa')
     config.scan(__name__)
