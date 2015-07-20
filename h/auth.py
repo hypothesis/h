@@ -37,9 +37,6 @@ from oauthlib.oauth2 import RequestValidator as _RequestValidator
 from pyramid.exceptions import BadCSRFToken
 from pyramid import session
 
-from pyramid.authentication import RemoteUserAuthenticationPolicy
-from pyramid.authentication import SessionAuthenticationPolicy
-from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.util import action_method
 
 from .interfaces import IClientFactory
@@ -70,7 +67,7 @@ class RequestValidator(_RequestValidator):
                 return False
             client_id = request.registry.settings['h.client_id']
             client = get_client(request, client_id)
-            user = request.session.get('userid')
+            user = request.authenticated_userid
         elif request.client_secret is not None:
             client_id = request.client_id
             client_secret = request.client_secret
@@ -142,8 +139,10 @@ def effective_principals(userid, request):
         consumer_group = 'consumer:{}'.format(request.client.client_id)
         additional_principals.append(consumer_group)
 
-    if models.User.get_by_id(request, userid).admin:
-        additional_principals.append('group:admin')
+    primary_user = models.User.get_by_id(request, userid)
+    if primary_user is not None:
+        if primary_user.admin:
+            additional_principals.append('group:admin')
 
     return additional_principals
 
@@ -226,9 +225,6 @@ def set_client_factory(config, factory):
     config.action(IClientFactory, register, introspectables=(intr,))
 
 
-remote_authn = RemoteUserAuthenticationPolicy(callback=effective_principals)
-session_authn = SessionAuthenticationPolicy('', callback=effective_principals)
-acl_authz = ACLAuthorizationPolicy()
 validator = RequestValidator()
 
 

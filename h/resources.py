@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pyramid import security
 
+from .api import create_root as create_api
 from .models import Annotation
 
 
@@ -56,11 +57,12 @@ class Root(Resource):
     ]
 
 
-def create_root(_):
+def create_root(request):
     """
     Returns a new traversal tree root.
     """
     r = Root()
+    r.add('api', create_api(request))
     r.add('app', Application())
     r.add('stream', Stream())
     r.add('a', AnnotationFactory())

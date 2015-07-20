@@ -1,35 +1,15 @@
 # -*- coding: utf-8 -*-
 """The main h application."""
-import functools
 import logging
 import os
 
 from pyramid.config import Configurator
-from pyramid.wsgi import wsgiapp2
 
 from h.api.middleware import permit_cors
-from h.auth import acl_authz, remote_authn, session_authn
 from h.config import settings_from_environment
 from h.security import derive_key
 
 log = logging.getLogger(__name__)
-
-
-def strip_vhm(view):
-    """A view decorator that strips the X-Vhm-Root header from the request.
-
-    The X-Vhm-Root header is used by Pyramid for virtual hosting. The router
-    treats the value of this header as a traversal prefix. When a view
-    callable itself is an embedded Pyramid application, the inner application
-    should not process this header again. In this situation, this decorator
-    makes the virtual root work as intended.
-    """
-    @functools.wraps(view)
-    def wrapped(context, request):
-        request.headers.pop('X-Vhm-Root', None)
-        return view(context, request)
-
-    return wrapped
 
 
 def create_app(global_config, **settings):
@@ -42,6 +22,28 @@ def create_app(global_config, **settings):
 
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
+    config.add_subscriber('h.subscribers.set_user_from_oauth',
+                          'pyramid.events.NewRequest')
+
+    config.add_tween('h.tweens.csrf_tween_factory')
+    config.add_tween('h.tweens.auth_token')
+
+    config.include(__name__)
+
+    app = config.make_wsgi_app()
+    app = permit_cors(app,
+                      allow_headers=(
+                          'Authorization',
+                          'Content-Type',
+                          'X-Annotator-Auth-Token',
+                          'X-Client-Id',
+                      ),
+                      allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+
+    return app
+
+
+def includeme(config):
 
     config.include('h.features')
 
@@ -57,54 +59,23 @@ def create_app(global_config, **settings):
     config.add_jinja2_renderer('.html')
     config.add_jinja2_renderer('.xml')
 
-    config.add_tween('h.tweens.csrf_tween_factory')
-
-    config.set_authentication_policy(session_authn)
-    config.set_authorization_policy(acl_authz)
     config.include('h.accounts')
+    config.include('h.auth')
     config.include('h.claim')
     config.include('h.notification')
     config.include('h.queue')
     config.include('h.streamer')
 
-    api_app = create_api(settings)
-    api_view = wsgiapp2(api_app)
-    config.add_view(api_view, name='api', decorator=strip_vhm)
-    # Add the view again with the 'index' route name, otherwise it will
-    # not take precedence over the index when a virtual root is in use.
-    config.add_view(api_view, name='api', decorator=strip_vhm,
+    config.include('h.api', route_prefix='/api')
+
+    # Override the traversal path for the api index route.
+    config.add_route('api', '/api/', traverse='/api/')
+
+    # Support virtual hosting the API over the index route with X-Vhm-Root.
+    config.add_view('h.api.views.index',
+                    context='h.api.resources.Root',
+                    renderer='json',
                     route_name='index')
-
-    return config.make_wsgi_app()
-
-
-def create_api(global_config, **settings):
-    settings = get_settings(global_config, **settings)
-
-    config = Configurator(settings=settings)
-
-    config.set_authentication_policy(remote_authn)
-    config.set_authorization_policy(acl_authz)
-    config.set_root_factory('h.api.resources.create_root')
-
-    config.add_subscriber('h.api.subscribers.set_user_from_oauth',
-                          'pyramid.events.ContextFound')
-    config.add_tween('h.api.tweens.auth_token')
-
-    config.include('h.features')
-
-    config.include('h.auth')
-    config.include('h.api.db')
-    config.include('h.api.queue')
-    config.include('h.api.views')
-
-    app = config.make_wsgi_app()
-    app = permit_cors(app,
-                      allow_headers=('Authorization',
-                                     'X-Annotator-Auth-Token'),
-                      allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
-
-    return app
 
 
 def get_settings(global_config, **settings):

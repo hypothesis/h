@@ -20,6 +20,10 @@ class MockClient(object):
 class TestRequestValidator(unittest.TestCase):
 
     def setUp(self):
+        self.config = testing.setUp()
+        self.security = testing.DummySecurityPolicy()
+        self.config.set_authorization_policy(self.security)
+        self.config.set_authentication_policy(self.security)
         self.client_patcher = patch('h.auth.get_client')
         self.client = self.client_patcher.start()
         self.decode_patcher = patch('jwt.decode')
@@ -30,6 +34,7 @@ class TestRequestValidator(unittest.TestCase):
         self.request.registry.settings['h.client_secret'] = SECRET
 
     def tearDown(self):
+        testing.tearDown()
         self.client_patcher.stop()
         self.decode_patcher.stop()
 
@@ -55,16 +60,16 @@ class TestRequestValidator(unittest.TestCase):
 
     def test_authenticate_client_csrf_ok(self):
         client = MockClient(self.request, KEY)
+        self.security.userid = 'hooper'
         self.request.client_id = None
         self.request.client_secret = None
         self.client.return_value = client
         with patch('pyramid.session.check_csrf_token') as csrf:
             csrf.return_value = True
-            self.request.session = {'userid': 'hopper'}
             res = self.validator.authenticate_client(self.request)
         assert res is True
         assert self.request.client is client
-        assert self.request.user == 'hopper'
+        assert self.request.user == 'hooper'
 
     def test_authenticate_client_csrf_not_ok(self):
         self.request.client_id = None

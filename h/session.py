@@ -5,8 +5,9 @@ from .security import derive_key
 
 
 def model(request):
-    session = {k: v for k, v in request.session.items() if k[0] != '_'}
+    session = {}
     session['csrf'] = request.session.get_csrf_token()
+    session['userid'] = request.authenticated_userid
     return session
 
 
