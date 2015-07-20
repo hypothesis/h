@@ -1,8 +1,11 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/base.html.jinja2" %}
 
 {% block title %}Pattern Library{% endblock %}
 
 {% block styles %}
+  {% assets "app_css", "inject_css" %}
+    <link rel="stylesheet" href="{{ ASSETS_URL }}">
+  {% endassets %}
   <style>
     body {
       background: none;

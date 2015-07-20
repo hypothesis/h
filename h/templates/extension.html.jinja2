@@ -1,0 +1,7 @@
+{% extends "app.html.jinja2" %}
+
+{# We include ng-csp in the extension template to disable Angular features that
+   can break Content-Security-Policy rules. #}
+{% block body_tag %}
+<body ng-app="h" ng-controller="AppController" ng-csp="">
+{% endblock %}

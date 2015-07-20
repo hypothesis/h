@@ -5,7 +5,8 @@ from pyramid.view import view_config
 from h.notification.models import Subscriptions
 
 
-@view_config(route_name='unsubscribe', renderer='h:templates/unsubscribe.html')
+@view_config(route_name='unsubscribe',
+             renderer='h:templates/unsubscribe.html.jinja2')
 def unsubscribe(request):
     if not request.feature('notification'):
         raise exc.HTTPNotFound()

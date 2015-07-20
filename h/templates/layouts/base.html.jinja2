@@ -27,9 +27,6 @@
     {% for attrs in link_attrs -%}
       <link {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}
-    {% for href in layout.css_links %}
-      <link rel="stylesheet" href="{{ href }}" />
-    {% endfor %}
     {% if service_url %}
       <link rel="service" type="application/annotatorsvc+json" href="{{ service_url }}" />
     {% endif %}
@@ -41,9 +38,9 @@
       <script>
        window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
        ga('create', 'UA-{{ga_tracking_id}}', {{ga_create_options|safe}});
-       {% if not layout.app -%}
+       {% block ga_pageview %}
        ga('send', 'pageview');
-       {%- endif -%}
+       {% endblock %}
       </script>
       <!-- End Google Analytics -->
     {% endif %}

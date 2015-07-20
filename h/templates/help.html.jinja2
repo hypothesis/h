@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/base.html.jinja2" %}
 
 {% block meta %}
   <link href='//fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
@@ -11,15 +11,21 @@
       function hypothesisConfig() { return {firstRun: true} }
     </script>
     <script async defer>
-      {% include "embed.js" %}
+      {% include "embed.js.jinja2" %}
     </script>
   {% endif %}
+{% endblock %}
+
+{% block styles %}
+  {% assets "help_page_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
 {% endblock %}
 
 {% block content %}
   <div class="help-page">
     <div class="help-page-content masthead-small">
-      {% include "includes/header.html" %}
+      {% include "includes/header.html.jinja2" %}
     </div>
     <article class="help-page-content">
       {% if is_help %}
@@ -49,7 +55,7 @@
           <p class="help-page-lede">Great, you've got the server up and running, you're now ready to start kicking the tires.</p>
           <div class="numbered-list grid">
             <div class="column-desktop-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
-            <div class="column-desktop-1-2"><div class="numbered-list-item">Annotate this page or use this bookmarklet: {% include "includes/bookmarklet.html" %}</div></div>
+            <div class="column-desktop-1-2"><div class="numbered-list-item">Annotate this page or use this bookmarklet: {% include "includes/bookmarklet.html.jinja2" %}</div></div>
           </div>
         </section>
       {% endif %}

@@ -18,9 +18,9 @@ from h.models import Annotation
 
 log = logging.getLogger(__name__)
 
-TXT_TEMPLATE = ROOT_PATH + 'reply_notification.txt'
-HTML_TEMPLATE = ROOT_PATH + 'reply_notification.html'
-SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt'
+TXT_TEMPLATE = ROOT_PATH + 'reply_notification.txt.jinja2'
+HTML_TEMPLATE = ROOT_PATH + 'reply_notification.html.jinja2'
+SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt.jinja2'
 
 
 def parent_values(annotation):

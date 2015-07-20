@@ -1,25 +1,22 @@
 # -*- coding: utf-8 -*-
 from pyramid.view import view_config
-from pyramid_layout.layout import layout_config
 from pyramid_mailer.interfaces import IMailer
 from pyramid_mailer.testing import DummyMailer
 from pyramid.renderers import render
 
-from h.layouts import BaseLayout
 from h.notification import reply_template
 
 import logging
 log = logging.getLogger(__name__)
 
 
-@view_config(layout='pattern_library',
-             renderer='h:templates/pattern_library.html',
+@view_config(renderer='h:templates/pattern_library.html.jinja2',
              route_name='pattern_library')
 def page(context, request):
     return {}
 
 
-@view_config(renderer='h:templates/email_preview.html',
+@view_config(renderer='h:templates/email_preview.html.jinja2',
              route_name='email_preview')
 def email_preview(context, request):
     notification_email_data = {
@@ -56,14 +53,6 @@ def email_preview(context, request):
     }
 
 
-@layout_config(name='pattern_library', template='h:templates/base.pt')
-class PatternLibraryLayout(BaseLayout):
-    requirements = (
-        ('app', None),
-        ('inject_css', None),
-    )
-
-
 class LoggingMailer(DummyMailer):
     class Destination(list):
         def __init__(self, prefix):
@@ -80,8 +69,6 @@ class LoggingMailer(DummyMailer):
 
 
 def includeme(config):
-    config.include('pyramid_layout')
-
     config.add_route('pattern_library', '/dev/pattern-library')
     config.add_route('email_preview', '/dev/emails')
 
