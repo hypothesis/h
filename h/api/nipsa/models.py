@@ -19,7 +19,7 @@ class NipsaUser(db.Base):
     def get_by_id(cls, user_id):
         """Return the NipsaUser object for the given user_id, or None."""
         try:
-            return db.Session.query(cls).filter(
+            return cls.query.filter(
                 cls.user_id == user_id).one()
         except exc.NoResultFound:
             return None
@@ -27,4 +27,4 @@ class NipsaUser(db.Base):
     @classmethod
     def all(cls):
         """Return a list of all NipsaUser objects in the db."""
-        return db.Session.query(cls).all()
+        return cls.query.all()
