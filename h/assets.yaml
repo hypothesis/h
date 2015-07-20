@@ -103,7 +103,7 @@ config:
     - output: scripts/config.js
       filters: browserify
       contents:
-        - h:static/scripts/config/accounts.coffee
+        - h:static/scripts/config/accounts.js
 
 
 # Application
@@ -165,7 +165,7 @@ account_js:
   contents:
     - output: scripts/account.js
       filters: browserify
-      contents: h:static/scripts/account/account.coffee
+      contents: h:static/scripts/account/account.js
       depends: h:static/scripts/account/*
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
