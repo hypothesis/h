@@ -1,9 +1,9 @@
 """Worker functions for the NIPSA feature."""
 import json
 
+from elasticsearch import helpers
 import annotator
 
-from h.api import search
 from h.api.nipsa import search as nipsa_search
 
 
@@ -39,9 +39,9 @@ def add_or_remove_nipsa(userid, action, es_client):
         query = nipsa_search.nipsad_annotations(userid)
         action_func = remove_nipsa_action
 
-    annotations = search.scan(es_client=es_client, query=query, fields=[])
+    annotations = helpers.scan(client=es_client, query=query, fields=[])
     actions = [action_func(a) for a in annotations]
-    search.bulk(es_client=es_client, actions=actions)
+    helpers.bulk(client=es_client, actions=actions)
 
 
 def worker(request):

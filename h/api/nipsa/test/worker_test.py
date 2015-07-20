@@ -27,7 +27,7 @@ def test_remove_nipsa_action():
     }
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
 def test_add_nipsa_gets_query(nipsa_search, _):
     worker.add_or_remove_nipsa("test_userid", "add_nipsa", mock.Mock())
@@ -35,7 +35,7 @@ def test_add_nipsa_gets_query(nipsa_search, _):
     nipsa_search.not_nipsad_annotations.assert_called_once_with("test_userid")
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
 def test_remove_nipsa_gets_query(nipsa_search, _):
     worker.add_or_remove_nipsa("test_userid", "remove_nipsa", mock.Mock())
@@ -43,87 +43,87 @@ def test_remove_nipsa_gets_query(nipsa_search, _):
     nipsa_search.nipsad_annotations.assert_called_once_with("test_userid")
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
-def test_add_nipsa_passes_es_client_to_scan(_, search):
+def test_add_nipsa_passes_es_client_to_scan(_, helpers):
     es_client = mock.Mock()
 
     worker.add_or_remove_nipsa("test_userid", "add_nipsa", es_client)
 
-    assert search.scan.call_args[1]["es_client"] == es_client
+    assert helpers.scan.call_args[1]["client"] == es_client
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
-def test_remove_nipsa_passes_es_client_to_scan(_, search):
+def test_remove_nipsa_passes_es_client_to_scan(_, helpers):
     es_client = mock.Mock()
 
     worker.add_or_remove_nipsa("test_userid", "remove_nipsa", es_client)
 
-    assert search.scan.call_args[1]["es_client"] == es_client
+    assert helpers.scan.call_args[1]["client"] == es_client
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
-def test_add_nipsa_passes_query_to_scan(nipsa_search, search):
+def test_add_nipsa_passes_query_to_scan(nipsa_search, helpers):
     query = mock.MagicMock()
     nipsa_search.not_nipsad_annotations.return_value = query
 
     worker.add_or_remove_nipsa("test_userid", "add_nipsa", mock.Mock())
 
-    assert search.scan.call_args[1]["query"] == query
+    assert helpers.scan.call_args[1]["query"] == query
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
-def test_remove_nipsa_passes_query_to_scan(nipsa_search, search):
+def test_remove_nipsa_passes_query_to_scan(nipsa_search, helpers):
     query = mock.MagicMock()
     nipsa_search.nipsad_annotations.return_value = query
 
     worker.add_or_remove_nipsa("test_userid", "remove_nipsa", mock.Mock())
 
-    assert search.scan.call_args[1]["query"] == query
+    assert helpers.scan.call_args[1]["query"] == query
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
-def test_add_nipsa_passes_actions_to_bulk(_, search):
-    search.scan.return_value = [
+def test_add_nipsa_passes_actions_to_bulk(_, helpers):
+    helpers.scan.return_value = [
         {"_id": "foo"}, {"_id": "bar"}, {"_id": "gar"}]
 
     worker.add_or_remove_nipsa("test_userid", "add_nipsa", mock.Mock())
 
-    actions = search.bulk.call_args[1]["actions"]
+    actions = helpers.bulk.call_args[1]["actions"]
     assert [action["_id"] for action in actions] == ["foo", "bar", "gar"]
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
-def test_remove_nipsa_passes_actions_to_bulk(_, search):
-    search.scan.return_value = [
+def test_remove_nipsa_passes_actions_to_bulk(_, helpers):
+    helpers.scan.return_value = [
         {"_id": "foo"}, {"_id": "bar"}, {"_id": "gar"}]
 
     worker.add_or_remove_nipsa("test_userid", "remove_nipsa", mock.Mock())
 
-    actions = search.bulk.call_args[1]["actions"]
+    actions = helpers.bulk.call_args[1]["actions"]
     assert [action["_id"] for action in actions] == ["foo", "bar", "gar"]
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
-def test_add_nipsa_passes_es_client_to_bulk(_, search):
+def test_add_nipsa_passes_es_client_to_bulk(_, helpers):
     es_client = mock.Mock()
 
     worker.add_or_remove_nipsa("test_userid", "add_nipsa", es_client)
 
-    assert search.bulk.call_args[1]["es_client"] == es_client
+    assert helpers.bulk.call_args[1]["client"] == es_client
 
 
-@mock.patch("h.api.nipsa.worker.search")
+@mock.patch("h.api.nipsa.worker.helpers")
 @mock.patch("h.api.nipsa.worker.nipsa_search")
-def test_remove_nipsa_passes_actions_to_bulk(_, search):
+def test_remove_nipsa_passes_actions_to_bulk(_, helpers):
     es_client = mock.Mock()
 
     worker.add_or_remove_nipsa("test_userid", "remove_nipsa", es_client)
 
-    assert search.bulk.call_args[1]["es_client"] == es_client
+    assert helpers.bulk.call_args[1]["client"] == es_client
