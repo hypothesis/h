@@ -28,7 +28,6 @@ def make_admin(user_id):
 def includeme(config):
     """A local identity provider."""
     config.include('.layouts')
-    config.include('.models')
     config.include('.schemas')
     config.include('.subscribers')
     config.include('.views')

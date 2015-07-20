@@ -6,7 +6,6 @@ from mock import patch
 from pyramid.exceptions import BadCSRFToken
 from pyramid.testing import DummyRequest
 
-from h.accounts import models
 from h.accounts import schemas
 
 
@@ -21,8 +20,6 @@ def csrf_request(config):
 
 
 def test_unblacklisted_username(config):
-    config.include(models)
-
     request = DummyRequest()
     node = colander.SchemaNode(colander.String()).bind(request=request)
     blacklist = set(['admin', 'root', 'postmaster'])
@@ -135,7 +132,6 @@ def test_login_bad_csrf(config, user_model):
 
 
 def test_login_bad_username(config, user_model):
-    config.include(models)
     request = csrf_request(config)
     schema = schemas.LoginSchema().bind(request=request)
     user_model.get_by_username.return_value = None
