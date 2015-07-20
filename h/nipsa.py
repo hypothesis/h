@@ -43,5 +43,5 @@ def remove_nipsa(request):
 
 def includeme(config):
     config.add_route('nipsa_index', '/nipsa')
-    config.add_route(remove_nipsa, 'remove_nipsa')
+    config.add_route('remove_nipsa', '/remove_nipsa')
     config.scan(__name__)
