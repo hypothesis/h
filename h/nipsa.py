@@ -4,7 +4,6 @@ from pyramid import i18n
 
 from h.api import nipsa as nipsa_api
 from h import util
-from h.accounts import models
 
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -23,16 +22,11 @@ def index(request):
 def nipsa(request):
     username = request.params["add"]
 
-    user = models.User.get_by_username(username)
-    if user:
-        # It's important that we nipsa the full user ID
-        # ("acct:seanh@hypothes.is" not just "seanh").
-        userid = util.userid_from_username(user.username, request)
-        nipsa_api.nipsa(request, userid)
-    else:
-        request.session.flash(
-            _("User {username} doesn't exist.".format(username=username)),
-            "error")
+    # It's important that we nipsa the full user ID
+    # ("acct:seanh@hypothes.is" not just "seanh").
+    userid = util.userid_from_username(username, request)
+
+    nipsa_api.nipsa(request, userid)
     return index(request)
 
 
@@ -42,8 +36,7 @@ def nipsa(request):
 def unnipsa(request):
     username = request.params["remove"]
     userid = util.userid_from_username(username, request)
-    if userid:
-        nipsa_api.unnipsa(request, userid)
+    nipsa_api.unnipsa(request, userid)
     return httpexceptions.HTTPSeeOther(
         location=request.route_url("nipsa_index"))
 
