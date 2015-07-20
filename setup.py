@@ -34,6 +34,7 @@ cmdclass['test'] = PyTest
 INSTALL_REQUIRES = [
     'PyJWT>=1.0.0,<2.0.0',
     'SQLAlchemy>=0.8.0',
+    'Unidecode>=0.4.18,<0.5.0',
     'alembic>=0.7.0',
     'annotator>=0.14.2,<0.15',
     'blinker>=1.3,<1.4',
@@ -56,6 +57,7 @@ INSTALL_REQUIRES = [
     'pyramid_webassets>=0.9,<1.0',
     'pyramid-jinja2>=2.3.3',
     'raven>=5.3.0,<5.4.0',
+    'regex==2015.7.19',
     'requests>=2.7.0',
     'ws4py>=0.3,<0.4',
     'zope.sqlalchemy>=0.7.6,<0.8.0',
