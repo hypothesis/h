@@ -173,23 +173,23 @@ def test_unnipsa_publishes_if_user_exists(NipsaUser, _publish):
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_is_nipsad_gets_user_by_id(NipsaUser):
-    logic.is_nipsad(userid="test_id")
+def test_has_nipsa_gets_user_by_id(NipsaUser):
+    logic.has_nipsa(userid="test_id")
 
     NipsaUser.get_by_id.assert_called_once_with("test_id")
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_is_nipsad_returns_True_if_user_is_nipsad(NipsaUser):
+def test_has_nipsa_returns_True_if_user_has_nipsa(NipsaUser):
     nipsa_user = mock.Mock()
     nipsa_user.userid = "test_id"
     NipsaUser.get_by_id.return_value = nipsa_user
 
-    assert logic.is_nipsad(userid="test_id") is True
+    assert logic.has_nipsa(userid="test_id") is True
 
 
 @mock.patch("h.api.nipsa.models.NipsaUser")
-def test_is_nipsad_returns_False_if_user_is_not_nipsad(NipsaUser):
+def test_has_nipsa_returns_False_if_user_is_not_nipsad(NipsaUser):
     NipsaUser.get_by_id.return_value = None
 
-    assert logic.is_nipsad(userid="test_user") is False
+    assert logic.has_nipsa(userid="test_user") is False

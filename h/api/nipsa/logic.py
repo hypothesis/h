@@ -46,6 +46,6 @@ def unnipsa(request, userid):
     _publish(request, json.dumps({"action": "unnipsa", "userid": userid}))
 
 
-def is_nipsad(userid):
+def has_nipsa(userid):
     """Return True if the given user is on the NIPSA list, False if not."""
     return (models.NipsaUser.get_by_id(userid) is not None)
