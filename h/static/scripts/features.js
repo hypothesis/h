@@ -19,7 +19,7 @@
  * change at any time and should write code accordingly. Feature flags should
  * not be cached, and should not be interrogated only at setup time.
  */
-"use strict";
+'use strict';
 
 var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
