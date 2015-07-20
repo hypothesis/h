@@ -1,10 +1,10 @@
 import sqlalchemy
 from sqlalchemy.orm import exc
 
-from h import db
+from h.api import db
 
 
-class NipsaUser(db.Base):
+class NipsaUser(db.BASE):
 
     """A NIPSA entry for a user (SQLAlchemy ORM class)."""
 
