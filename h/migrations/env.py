@@ -18,9 +18,7 @@ fileConfig(config.config_file_name)
 
 # Import all model modules here in order to populate the metadata
 from h import db
-from h.accounts import models
-from h.notification import models
-from h import features
+from h import models
 
 target_metadata = db.Base.metadata
 

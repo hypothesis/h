@@ -48,7 +48,3 @@ class Subscriptions(Base):
                 'uri': self.uri,
                 'type': self.type,
                 'active': self.active}
-
-
-def includeme(_):
-    pass
