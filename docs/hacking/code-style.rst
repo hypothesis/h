@@ -38,6 +38,15 @@ spacing is followed for blank lines.
 
 .. _Google JavaScript Style Guide: https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
 
+We use a combination of [JSHint](http://jshint.com) and
+[JSCS](http://jscs.info) for helping confirm code style conformance.
+
+You can run both from the root of the repo specifying the directory of the
+JavaScript files to check::
+
+    $ jshint h/static/scripts/
+    $ jscs h/static/scripts/
+
 HTML and CSS
 ------------
 
