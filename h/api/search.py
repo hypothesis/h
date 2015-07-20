@@ -35,10 +35,36 @@ def _match_clause_for_uri(uristr):
 
 
 def scan(es_client, query, fields):
+    """Return the result of an Elasticsearch scan search.
+
+    A scan search returns _all_ documents matching the search at once quickly
+    and cheaply, but without sorting the documents in any way.
+
+    :param es_client: The Elasticsearch client object to use
+    :type es_client: elasticsearch.Elasticsearch
+
+    :param query: The Elasticsearch query to search for,
+        in Elasticsearch query DSL format
+    :type query: dict
+
+    :param fields: The list of fields to return for each hit
+    :type fields: list
+
+    """
     return helpers.scan(es_client, query=query, fields=fields)
 
 
 def bulk(es_client, actions):
+    """Return the result of an Elasticsearch bulk update of many documents.
+
+    :param es_client: The Elasticsearch client object to use
+    :type es_client: elasticsearch.Elasticsearch
+
+    :param actions: A list of Elasticsearch action dicts specifying which
+        updates should be done to which documents
+    :type actions: list of dicts
+
+    """
     return helpers.bulk(es_client, actions)
 
 
