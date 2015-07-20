@@ -3,11 +3,8 @@
 
 def add_renderer_globals(event):
     request = event['request']
-    # Set the base url to use in the <base> tag
-    event['base_url'] = request.resource_url(request.root, '')
-    # Set the service url to use for API discovery
-    event['service_url'] = request.resource_url(request.root, 'api', '')
-    # Allow templates to check for feature flags
+    event['base_url'] = request.route_url('index')
+    event['service_url'] = request.route_url('api')
     event['feature'] = request.feature
 
     # Add Google Analytics
@@ -18,3 +15,11 @@ def add_renderer_globals(event):
             event['ga_create_options'] = "'none'"
         else:
             event['ga_create_options'] = "'auto'"
+
+
+def set_user_from_oauth(event):
+    """A subscriber that checks requests for OAuth credentials and sets the
+    'REMOTE_USER' environment key to the authorized user (or ``None``)."""
+    request = event.request
+    request.verify_request()
+    request.environ['REMOTE_USER'] = getattr(request, 'user', None)

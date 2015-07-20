@@ -4,6 +4,7 @@ cffi
 gunicorn
 psycogreen
 psycopg2
+pyramid_multiauth
 pyramid_redis_sessions
 requests[security]
 wsaccel

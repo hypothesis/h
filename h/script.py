@@ -137,9 +137,6 @@ def token(args):
     """
     from h.auth import get_client, generate_signed_token
 
-    if not args.config_uri.endswith('#api'):
-        args.config_uri += '#api'
-
     request = Request.blank("/", base_url=args.base)
 
     paster.setup_logging(args.config_uri)

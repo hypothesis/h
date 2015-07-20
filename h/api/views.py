@@ -31,6 +31,7 @@ def api_config(**kwargs):
 
 
 @api_config(context=Root)
+@api_config(route_name='api')
 def index(context, request):
     """Return the API descriptor document.
 
