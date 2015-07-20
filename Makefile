@@ -10,7 +10,7 @@ export PIP_REQUIRE_VIRTUALENV
 
 default: deps
 
-h.egg-info: requirements.txt setup.py
+h.egg-info: setup.py
 	@pip install -q --use-wheel -e .[dev,testing,YAML]
 	@touch h.egg-info
 
