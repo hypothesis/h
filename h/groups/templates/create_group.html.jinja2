@@ -1,0 +1,40 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}Create a new group{% endblock page_title %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
+
+{% block content %}
+  <div class="content paper">
+    {% include "h:templates/includes/header.html.jinja2" %}
+    <div class="form-vertical">
+      <form class="form" action="{{ form.action }}" method="{{ form.method }}">
+        {{ form['csrf_token'].render() | safe }}
+        <div class="form-field{% if form['name'].error %} form-field-error{% endif %}">
+          <label class="form-label" for="field-group-name">
+            Group name:
+            <span class="form-hint">(a human-readable name for your group)</span>
+          </label>
+          <input class="form-input" id="field-group-name"
+                 type="text" name="name" value="" required />
+          {% if form['name'].error %}
+            <ul class="form-error-list">
+              {% for err in form['name'].error.asdict().values() %}
+                <li class="form-error">{{ err }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        <div class="form-actions">
+          <div class="form-actions-buttons">
+            <button class="btn" type="submit">Create group</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock content %}
