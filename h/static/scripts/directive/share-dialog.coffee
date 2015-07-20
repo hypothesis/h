@@ -18,8 +18,12 @@ module.exports = ['crossframe', (crossframe) ->
     scope.$watchCollection (-> crossframe.frames), (frames) ->
       if not frames.length
         return
-      # XXX: Consider sharing multiple frames in the future?
-      scope.viaPageLink = 'https://via.hypothes.is/' + frames[0].uri
+      # Check to see if we are on a via page. If so, we just return the URI.
+      re = /https:\/\/via\.hypothes\.is/
+      if re.test(frames[0].uri)
+        scope.viaPageLink = frames[0].uri
+      else
+        scope.viaPageLink = 'https://via.hypothes.is/' + frames[0].uri
 
   restrict: 'A'
   templateUrl: 'share_dialog.html'
