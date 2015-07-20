@@ -52,6 +52,7 @@ INSTALL_REQUIRES = [
     'pyramid-oauthlib>=0.2.0,<0.3.0',
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
+    'python-slugify>=1.1.3,<1.2.0',
     'python-statsd>=1.7.0,<1.8.0',
     'pyramid_webassets>=0.9,<1.0',
     'pyramid-jinja2>=2.3.3',

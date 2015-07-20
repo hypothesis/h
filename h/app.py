@@ -70,6 +70,7 @@ def includeme(config):
     config.include('h.admin')
     config.include('h.auth')
     config.include('h.claim')
+    config.include('h.groups')
     config.include('h.notification')
     config.include('h.queue')
     config.include('h.streamer')
