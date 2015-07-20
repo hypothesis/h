@@ -35,17 +35,12 @@ def _match_clause_for_uri(uristr):
     }
 
 
-def _es_client():
-    """Return an elasticsearch.Elasticsearch client object."""
-    return elasticsearch.Elasticsearch([{"host": "localhost", "port": 9200}])
+def scan(es_client, query, fields):
+    return helpers.scan(es_client, query=query, fields=fields)
 
 
-def scan(query, fields):
-    return helpers.scan(_es_client(), query=query, fields=fields)
-
-
-def bulk(actions):
-    return helpers.bulk(_es_client(), actions)
+def bulk(es_client, actions):
+    return helpers.bulk(es_client, actions)
 
 
 def build_query(request_params, user_id=None):
@@ -160,3 +155,14 @@ def index(user=None):
 
     """
     return search(webob.multidict.NestedMultiDict({"limit": 20}), user=user)
+
+
+def includeme(config):
+    """Add a ``request.es_client`` property to the request."""
+    es_host = config.registry.settings.get('es.host')
+    if es_host:
+        es_client = elasticsearch.Elasticsearch([es_host])
+    else:
+        es_client = elasticsearch.Elasticsearch()
+    config.add_request_method(
+        lambda _: es_client, 'es_client', reify=True)

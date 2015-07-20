@@ -73,6 +73,9 @@ def includeme(config):
     config.include('h.notification')
     config.include('h.queue')
     config.include('h.streamer')
+    config.include('h.api.search')   # This is needed here for now so that
+                                     # request.es_client is available t
+                                     # worker functions.
 
     config.include('h.api', route_prefix='/api')
     config.include('h.api.nipsa')

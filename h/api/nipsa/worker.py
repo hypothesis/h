@@ -29,7 +29,7 @@ def remove_nipsa_action(annotation):
     }
 
 
-def add_or_remove_nipsa(user_id, action):
+def add_or_remove_nipsa(user_id, action, es_client):
     """Add/remove the NIPSA flag to/from all of the user's annotations."""
     assert action in ("nipsa", "unnipsa")
 
@@ -38,19 +38,14 @@ def add_or_remove_nipsa(user_id, action):
     else:
         query = nipsa_search.nipsad_annotations(user_id)
 
-    annotations = search.scan(query=query, fields=[])
+    annotations = search.scan(es_client=es_client, query=query, fields=[])
 
     if action == "nipsa":
         actions = [add_nipsa_action(a) for a in annotations]
     else:
         actions = [remove_nipsa_action(a) for a in annotations]
 
-    search.bulk(actions)
-
-
-def _handle_message(_, message):
-    """Handle a message on the "nipsa_users_annotations" channel."""
-    add_or_remove_nipsa(**json.loads(message.body))
+    search.bulk(es_client=es_client, actions=actions)
 
 
 def worker(request):
@@ -62,7 +57,13 @@ def worker(request):
     of the NIPSA'd user's annotations.
 
     """
+    def handle_message(_, message):
+        """Handle a message on the "nipsa_users_annotations" channel."""
+        add_or_remove_nipsa(
+            es_client=request.es_client,
+            **json.loads(message.body))
+
     reader = request.get_queue_reader(
         "nipsa_user_requests", "nipsa_users_annotations")
-    reader.on_message.connect(_handle_message)
+    reader.on_message.connect(handle_message)
     reader.start(block=True)
