@@ -48,8 +48,4 @@ def unnipsa(request, user_id):
 
 def is_nipsad(user_id):
     """Return True if the given user is on the NIPSA list, False if not."""
-    user_nipsa = models.NipsaUser.get_by_id(user_id)
-    if user_nipsa:
-        return True
-    else:
-        return False
+    return (models.NipsaUser.get_by_id(user_id) is not None)
