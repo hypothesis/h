@@ -45,8 +45,6 @@ def build_query(request_params, userid=None):
     :type request_params: webob.multidict.NestedMultiDict
 
     :param userid: the ID of the authorized user (optional, default: None),
-        if a userid is given then this user's annotations will never be
-        filtered out even if they have a NIPSA flag
     :type userid: unicode or None
 
     :returns: an Elasticsearch query dict corresponding to the given h search
