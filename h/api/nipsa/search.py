@@ -21,7 +21,7 @@ def nipsa_filter(userid=None):
     """
     # If any one of these "should" clauses is true then the annotation will
     # get through the filter.
-    should_clauses = [{"not": {"term": {"not_in_public_site_areas": True}}}]
+    should_clauses = [{"not": {"term": {"nipsa": True}}}]
 
     if userid:
         # Always show the logged-in user's annotations even if they have nipsa.
@@ -49,7 +49,7 @@ def nipsad_annotations(userid):
     """Return an Elasticsearch query for the user's NIPSA'd annotations."""
     query = query_for_users_annotations(userid)
     query["query"]["filtered"]["filter"]["bool"]["must"].append(
-        {"term": {"not_in_public_site_areas": True}})
+        {"term": {"nipsa": True}})
     return query
 
 
@@ -57,5 +57,5 @@ def not_nipsad_annotations(userid):
     """Return an Elasticsearch query for the user's non-NIPSA'd annotations."""
     query = query_for_users_annotations(userid)
     query["query"]["filtered"]["filter"]["bool"]["must"].append(
-        {"not": {"term": {"not_in_public_site_areas": True}}})
+        {"not": {"term": {"nipsa": True}}})
     return query

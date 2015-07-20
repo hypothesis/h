@@ -11,7 +11,7 @@ def test_add_nipsa_action():
         "_index": "annotator",
         "_type": "annotation",
         "_id": "test_id",
-        "doc": {"not_in_public_site_areas": True}
+        "doc": {"nipsa": True}
     }
 
 
@@ -23,7 +23,7 @@ def test_remove_nipsa_action():
         "_index": "annotator",
         "_type": "annotation",
         "_id": "test_id",
-        "script": "ctx._source.remove(\"not_in_public_site_areas\")"
+        "script": "ctx._source.remove(\"nipsa\")"
     }
 
 

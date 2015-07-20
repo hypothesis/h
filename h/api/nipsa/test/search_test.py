@@ -8,7 +8,7 @@ def test_nipsa_filter_filters_out_nipsad_annotations():
     assert search.nipsa_filter() == {
         "bool": {
             "should": [
-                {'not': {'term': {'not_in_public_site_areas': True}}}
+                {'not': {'term': {'nipsa': True}}}
             ]
         }
     }
@@ -39,12 +39,12 @@ def test_nipsad_annotations_filters_by_nipsa():
     query = search.nipsad_annotations("test_userid")
 
     must_clauses = query["query"]["filtered"]["filter"]["bool"]["must"]
-    assert {"term": {"not_in_public_site_areas": True}} in must_clauses
+    assert {"term": {"nipsa": True}} in must_clauses
 
 
 def test_not_nipsad_annotations_filters_by_nipsa():
     query = search.not_nipsad_annotations("test_userid")
 
     must_clauses = query["query"]["filtered"]["filter"]["bool"]["must"]
-    assert {"not": {"term": {"not_in_public_site_areas": True}}} in (
+    assert {"not": {"term": {"nipsa": True}}} in (
         must_clauses)

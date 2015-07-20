@@ -229,7 +229,7 @@ def _create_annotation(fields, user):
     annotation['consumer'] = user.consumer.key
 
     if nipsa.has_nipsa(user.id):
-        annotation["not_in_public_site_areas"] = True
+        annotation["nipsa"] = True
 
     # Save it in the database
     annotation.save()

@@ -112,7 +112,7 @@ def test_create_adds_nipsa_flag(get_user, has_nipsa, _):
 
     annotation = views.create(request)
 
-    assert annotation.get("not_in_public_site_areas") is True
+    assert annotation.get("nipsa") is True
 
 
 @patch("h.api.views.Annotation.save")
@@ -126,7 +126,7 @@ def test_create_does_not_add_nipsa_flag(get_user, has_nipsa, _):
 
     annotation = views.create(request)
 
-    assert not annotation.get("not_in_public_site_areas")
+    assert not annotation.get("nipsa")
 
 
 @pytest.mark.usefixtures('replace_io')
