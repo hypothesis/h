@@ -5,5 +5,5 @@ from h.api.nipsa.logic import is_nipsad
 from h.api.nipsa.search import nipsa_filter
 
 
-def includeme(config):
+def includeme(_):
     pass

@@ -4,7 +4,6 @@ All search (Annotation.search(), Annotation.search_raw()) and Elasticsearch
 stuff should be encapsulated in this module.
 
 """
-import copy
 import logging
 
 import elasticsearch

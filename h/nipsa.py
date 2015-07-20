@@ -12,7 +12,7 @@ _ = i18n.TranslationStringFactory(__package__)
 @view.view_config(route_name='nipsa_index', request_method='GET',
                   renderer='h:templates/nipsa.html',
                   permission='admin')
-def index(request):
+def index(_):
     return {"userids": [util.split_user(u)[0] for u in nipsa_api.index()]}
 
 

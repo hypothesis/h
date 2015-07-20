@@ -114,7 +114,6 @@ class FilterToElasticFilter(object):
         self.query = nipsa.nipsa_filter(
             self.query, request.authenticated_userid)
 
-
     @staticmethod
     def equals(field, value):
         if isinstance(value, list):

@@ -10,7 +10,7 @@ class NipsaUser(db.BASE):
 
     __tablename__ = 'nipsa'
     userid = sqlalchemy.Column(sqlalchemy.UnicodeText, primary_key=True,
-                                index=True)
+                               index=True)
 
     def __init__(self, userid):
         self.userid = userid
