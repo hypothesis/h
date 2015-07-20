@@ -12,6 +12,12 @@ from h.security import derive_key
 log = logging.getLogger(__name__)
 
 
+def configure_jinja2_assets(config):
+    assets_env = config.get_webassets_env()
+    jinja2_env = config.get_jinja2_environment()
+    jinja2_env.assets_environment = assets_env
+
+
 def create_app(global_config, **settings):
     """Configure and add static routes and views. Return the WSGI app."""
     settings = get_settings(global_config, **settings)
@@ -54,10 +60,11 @@ def includeme(config):
     config.include('h.api_client')
 
     config.include('pyramid_jinja2')
-    config.add_jinja2_renderer('.js')
-    config.add_jinja2_renderer('.txt')
-    config.add_jinja2_renderer('.html')
-    config.add_jinja2_renderer('.xml')
+    config.add_jinja2_extension('h.jinja_extensions.IncludeRawExtension')
+    config.add_jinja2_extension('webassets.ext.jinja2.AssetsExtension')
+    # Register a deferred action to bind the webassets environment to the
+    # Jinja2 webassets extension when the configuration is committed.
+    config.action(None, configure_jinja2_assets, args=(config,))
 
     config.include('h.accounts')
     config.include('h.auth')

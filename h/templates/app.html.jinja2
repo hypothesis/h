@@ -1,7 +1,13 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/base.html.jinja2" %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
 
 {% block body_tag %}
-<body ng-app="{{ layout.app }}" ng-controller="{{ layout.controller }}"{% if layout.csp %} ng-csp="{{ layout.csp }}"{% endif %}>
+<body ng-app="h" ng-controller="AppController">
 {% endblock %}
 
 {% block content %}
@@ -105,8 +111,12 @@
   </script>
 {% endblock %}
 
+{# Override ga_pageview block to prevent a 'pageview' event from being sent to
+   Google Analytics #}
+{% block ga_pageview %}{% endblock %}
+
 {% block scripts %}
-  {% for src in layout.js_links %}
-    <script src="{{src}}"></script>
-  {% endfor %}
+  {% assets "app_vendor_js", "app_js", "account_js" %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
 {% endblock %}

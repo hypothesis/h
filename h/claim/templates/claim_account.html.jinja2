@@ -1,10 +1,16 @@
-{% extends "h:templates/layouts/base.html" %}
+{% extends "h:templates/layouts/base.html.jinja2" %}
 
 {% block page_title %}Claim account{% endblock page_title %}
 
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
+
 {% block content %}
   <div id="claim" class="content paper">
-    {% include "h:templates/includes/header.html" %}
+    {% include "h:templates/includes/header.html.jinja2" %}
     <div class="form-vertical">
       <form class="form" action="{{ form.action }}" method="{{ form.method }}">
         {{ form['csrf_token'].render() | safe }}

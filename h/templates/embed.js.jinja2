@@ -66,7 +66,9 @@ window.hypothesisInstall = function (inject) {
   {% endif %}
 
   if (!window.document.evaluate) {
-    resources = resources.concat(['{{ layout.xpath_polyfill_urls | map("string") | join("', '") | safe }}']);
+    {%- assets "wgxpath" %}
+    resources.push('{{ ASSET_URL | safe }}');
+    {%- endassets %}
   }
 
   // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/url/parser.js
@@ -80,11 +82,15 @@ window.hypothesisInstall = function (inject) {
     urlWorks = false;
   }
   if (!urlWorks) {
-    resources = resources.concat(['{{ layout.url_polyfill_urls | map("string") | join("', '") | safe }}']);
+    {%- assets "url" %}
+    resources.push('{{ ASSET_URL | safe }}');
+    {%- endassets %}
   }
 
   if (typeof window.Annotator === 'undefined') {
-    resources = resources.concat(['{{ layout.app_inject_urls | map("string") | join("', '") | safe }}']);
+    {%- assets "inject" %}
+    resources.push('{{ ASSET_URL | safe }}');
+    {%- endassets %}
   }
 
   (function next(err) {

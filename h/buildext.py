@@ -13,7 +13,6 @@ import json
 
 from jinja2 import Template
 from pyramid import paster
-from pyramid.events import ContextFound
 from pyramid.path import AssetResolver
 from pyramid.request import Request
 from pyramid.renderers import render
@@ -54,7 +53,7 @@ def build_extension_common(env, bundle_app=False):
         else:
             app_uri = request.resource_url(request.root, 'app.html')
         value = {'app_uri': app_uri}
-        data = render('h:templates/embed.js', value, request=request)
+        data = render('h:templates/embed.js.jinja2', value, request=request)
         fp.write(data)
 
 
@@ -129,8 +128,6 @@ def get_env(config_uri, base_url):
     request.webassets_env.append_path(resolve('h:static').abspath(),
                                       request.webassets_env.url)
 
-    request.registry.notify(ContextFound(request))  # pyramid_layout attrs
-
     return env
 
 
@@ -176,9 +173,8 @@ def build_chrome(args):
     # Render the sidebar html.
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(env, bundle_app=True)
-        env['request'].layout_manager.layout.csp = ''
         with open(content_dir + '/app.html', 'w') as fp:
-            data = render_view(env['root'], env['request'], 'viewer')
+            data = render_view(env['root'], env['request'], 'extension')
             fp.write(data)
     else:
         build_extension_common(env)

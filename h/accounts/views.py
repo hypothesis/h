@@ -53,8 +53,7 @@ def validate_form(form, data):
 
 def view_auth_defaults(fn, *args, **kwargs):
     kwargs.setdefault('accept', 'text/html')
-    kwargs.setdefault('layout', 'auth')
-    kwargs.setdefault('renderer', 'h:templates/auth.html')
+    kwargs.setdefault('renderer', 'h:templates/auth.html.jinja2')
     return view_defaults(*args, **kwargs)(fn)
 
 
@@ -578,13 +577,13 @@ def _update_subscription_data(request, subscription):
 
 
 @view_config(attr='index', route_name='admin_users_index',
-             renderer='h:templates/admin_users.html',
+             renderer='h:templates/admin_users.html.jinja2',
              permission='admin')
 @view_config(attr='create', route_name='admin_users_index',
-             request_method='POST', renderer='h:templates/admin_users.html',
+             request_method='POST', renderer='h:templates/admin_users.html.jinja2',
              permission='admin')
 @view_config(attr='delete', route_name='admin_user_delete',
-             request_method='POST', renderer='h:templates/admin_users.html',
+             request_method='POST', renderer='h:templates/admin_users.html.jinja2',
              permission='admin')
 class AdminController(object):
 

@@ -4,7 +4,6 @@ import logging
 import json
 
 from pyramid import httpexceptions
-from pyramid.events import ContextFound
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 from pyramid import i18n
@@ -21,7 +20,7 @@ _ = i18n.TranslationStringFactory(__package__)
 
 
 @view_config(context=Exception, accept='text/html',
-             renderer='h:templates/5xx.html')
+             renderer='h:templates/5xx.html.jinja2')
 def error(context, request):
     """Display an error message."""
     log.exception('%s: %s', type(context).__name__, str(context))
@@ -43,10 +42,9 @@ def json_error(context, request):
 
 
 @view_config(
-    layout='app',
     context=Annotation,
     permission='read',
-    renderer='h:templates/app.html',
+    renderer='h:templates/app.html.jinja2',
 )
 def annotation(context, request):
     if 'title' in context.get('document', {}):
@@ -75,7 +73,7 @@ def annotation(context, request):
     }
 
 
-@view_config(name='embed.js', renderer='h:templates/embed.js')
+@view_config(name='embed.js', renderer='h:templates/embed.js.jinja2')
 def js(context, request):
     request.response.content_type = b'text/javascript'
     return {
@@ -89,22 +87,17 @@ def widget(context, request):
     return httpexceptions.HTTPTemporaryRedirect(location=location)
 
 
-@view_config(layout='app', name='viewer', renderer='h:templates/app.html')
-@view_config(layout='app', name='editor', renderer='h:templates/app.html')
-@view_config(layout='app', name='page_search', renderer='h:templates/app.html')
+@view_config(name='viewer', renderer='h:templates/app.html.jinja2')
+@view_config(name='editor', renderer='h:templates/app.html.jinja2')
+@view_config(name='page_search', renderer='h:templates/app.html.jinja2')
+@view_config(name='extension', renderer='h:templates/extension.html.jinja2')
 def page(context, request):
     return {}
 
 
-@view_config(layout='help',
-             renderer='h:templates/help.html',
-             route_name='index')
-@view_config(layout='help',
-             renderer='h:templates/help.html',
-             route_name='help')
-@view_config(layout='help',
-             renderer='h:templates/help.html',
-             route_name='onboarding')
+@view_config(renderer='h:templates/help.html.jinja2', route_name='index')
+@view_config(renderer='h:templates/help.html.jinja2', route_name='help')
+@view_config(renderer='h:templates/help.html.jinja2', route_name='onboarding')
 def help_page(context, request):
     current_route = request.matched_route.name
     return {
@@ -121,9 +114,8 @@ def session_view(request):
     return dict(status='okay', flash=flash, model=model)
 
 
-@view_config(layout='app', context=Stream, renderer='h:templates/app.html')
-@view_config(layout='app', route_name='stream',
-             renderer='h:templates/app.html')
+@view_config(context=Stream, renderer='h:templates/app.html.jinja2')
+@view_config(route_name='stream', renderer='h:templates/app.html.jinja2')
 def stream(context, request):
     stream_type = context.get('stream_type')
     stream_key = context.get('stream_key')
@@ -184,13 +176,9 @@ def stream_atom(request):
         subtitle=request.registry.settings.get("h.feed.subtitle"))
 
 
-@forbidden_view_config(renderer='h:templates/notfound.html')
-@notfound_view_config(renderer='h:templates/notfound.html')
+@forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
+@notfound_view_config(renderer='h:templates/notfound.html.jinja2')
 def notfound(context, request):
-    # Dispatch ContextFound for pyramid_layout subscriber
-    event = ContextFound(request)
-    request.context = context
-    request.registry.notify(event)
     return {}
 
 
@@ -222,8 +210,6 @@ def _validate_blocklist(config):
 
 def includeme(config):
     config.include('h.assets')
-    config.include('h.layouts')
-    config.include('h.panels')
 
     config.add_route('index', '/')
     config.add_route('help', '/docs/help')

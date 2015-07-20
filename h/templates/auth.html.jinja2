@@ -1,0 +1,30 @@
+{% extends "layouts/base.html.jinja2" %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
+
+{% block body_tag %}
+<body ng-app="h" ng-controller="AuthAppController">
+{% endblock %}
+
+{% block content %}
+  <div id="auth" class="content paper ng-cloak">
+    {% include "h:templates/includes/header.html.jinja2" %}
+    <main ng-view></main>
+  </div>
+{% endblock %}
+
+{% block templates %}
+  <script type="text/ng-template" id="auth.html">
+    {{ include_raw("h:templates/client/auth.html") }}
+  </script>
+{% endblock %}
+
+{% block scripts %}
+  {% assets "app_vendor_js", "app_js", "account_js" %}
+    <script src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock %}

@@ -1,6 +1,12 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/base.html.jinja2" %}
 
 {% block title %}Page Not Found{% endblock %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
 
 {% block content %}
   <div id="home" style="margin-top:20px" class="content paper styled-text page">
