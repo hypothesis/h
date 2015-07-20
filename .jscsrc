@@ -1,5 +1,7 @@
 {
   "preset": "google",
+  "requireSemicolons": true,
+
   "excludeFiles": [
     "node_modules/**",
     "h/static/scripts/vendor"
