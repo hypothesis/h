@@ -14,7 +14,7 @@ _ = i18n.TranslationStringFactory(__package__)
                   renderer='h:templates/nipsa.html',
                   permission='admin')
 def index(request):
-    return {"user_ids": [util.split_user(u)[0] for u in nipsa_api.index()]}
+    return {"userids": [util.split_user(u)[0] for u in nipsa_api.index()]}
 
 
 @view.view_config(route_name='nipsa_index', request_method='POST',

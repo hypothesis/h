@@ -7,7 +7,7 @@ from h.api.nipsa import models
 @pytest.mark.usefixtures("db_session")
 def test_init():
     nipsa_user = models.NipsaUser("test_id")
-    assert nipsa_user.user_id == "test_id"
+    assert nipsa_user.userid == "test_id"
 
 
 def test_get_by_id_with_matching_user(db_session):

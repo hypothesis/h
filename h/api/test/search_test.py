@@ -371,13 +371,13 @@ def test_build_query_returns_nipsa_filter(nipsa_filter):
 @mock.patch("h.api.search.nipsa.nipsa_filter")
 def test_build_query_does_not_pass_userid_to_nipsa_filter(nipsa_filter):
     search.build_query(multidict.NestedMultiDict())
-    assert nipsa_filter.call_args[1]["user_id"] is None
+    assert nipsa_filter.call_args[1]["userid"] is None
 
 
 @mock.patch("h.api.search.nipsa.nipsa_filter")
 def test_build_query_does_pass_userid_to_nipsa_filter(nipsa_filter):
-    search.build_query(multidict.NestedMultiDict(), user_id="fred")
-    assert nipsa_filter.call_args[1]["user_id"] == "fred"
+    search.build_query(multidict.NestedMultiDict(), userid="fred")
+    assert nipsa_filter.call_args[1]["userid"] == "fred"
 
 
 def test_build_query_with_arbitrary_params():
@@ -404,7 +404,7 @@ def test_build_query_with_arbitrary_params():
 
 
 def test_build_query_users_own_annotations_are_not_filtered():
-    query = search.build_query(multidict.NestedMultiDict(), user_id="fred")
+    query = search.build_query(multidict.NestedMultiDict(), userid="fred")
 
     assert {'term': {'user': 'fred'}} in (
         query["query"]["filtered"]["filter"]["bool"]["should"])
@@ -429,19 +429,19 @@ def test_search_with_user_object(search_raw):
 
 @mock.patch("annotator.annotation.Annotation.search_raw")
 @mock.patch("h.api.search.build_query")
-def test_search_does_not_pass_user_id_to_build_query(build_query, _):
+def test_search_does_not_pass_userid_to_build_query(build_query, _):
     search.search(multidict.NestedMultiDict())
-    assert build_query.call_args[1]["user_id"] is None
+    assert build_query.call_args[1]["userid"] is None
 
 
 @mock.patch("annotator.annotation.Annotation.search_raw")
 @mock.patch("h.api.search.build_query")
-def test_search_does_pass_user_id_to_build_query(build_query, _):
+def test_search_does_pass_userid_to_build_query(build_query, _):
     user = mock.Mock(id="test_id")
 
     search.search(multidict.NestedMultiDict(), user=user)
 
-    assert build_query.call_args[1]["user_id"] == "test_id"
+    assert build_query.call_args[1]["userid"] == "test_id"
 
 
 @mock.patch("h.api.search.search")

@@ -29,14 +29,14 @@ def remove_nipsa_action(annotation):
     }
 
 
-def add_or_remove_nipsa(user_id, action, es_client):
+def add_or_remove_nipsa(userid, action, es_client):
     """Add/remove the NIPSA flag to/from all of the user's annotations."""
     assert action in ("nipsa", "unnipsa")
 
     if action == "nipsa":
-        query = nipsa_search.not_nipsad_annotations(user_id)
+        query = nipsa_search.not_nipsad_annotations(userid)
     else:
-        query = nipsa_search.nipsad_annotations(user_id)
+        query = nipsa_search.nipsad_annotations(userid)
 
     annotations = search.scan(es_client=es_client, query=query, fields=[])
 

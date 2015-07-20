@@ -9,14 +9,14 @@ from h import nipsa
 def test_index_with_no_nipsad_users(nipsa_api):
     nipsa_api.index.return_value = []
 
-    assert nipsa.index(testing.DummyRequest()) == {"user_ids": []}
+    assert nipsa.index(testing.DummyRequest()) == {"userids": []}
 
 
 @mock.patch("h.nipsa.nipsa_api")
 def test_index_with_one_nipsad_users(nipsa_api):
     nipsa_api.index.return_value = ["acct:kiki@hypothes.is"]
 
-    assert nipsa.index(testing.DummyRequest()) == {"user_ids": ["kiki"]}
+    assert nipsa.index(testing.DummyRequest()) == {"userids": ["kiki"]}
 
 
 @mock.patch("h.nipsa.nipsa_api")
@@ -26,12 +26,12 @@ def test_index_with_multiple_nipsad_users(nipsa_api):
         "acct:osono@hypothes.is"]
 
     assert nipsa.index(testing.DummyRequest()) == {
-        "user_ids": ["kiki", "ursula", "osono"]}
+        "userids": ["kiki", "ursula", "osono"]}
 
 
 @mock.patch("h.nipsa.models")
 @mock.patch("h.nipsa.nipsa_api")
-def test_nipsa_calls_nipsa_api_with_user_id(nipsa_api, models):
+def test_nipsa_calls_nipsa_api_with_userid(nipsa_api, models):
     models.User.get_by_username.return_value = mock.Mock(username="kiki")
     request = testing.DummyRequest(params={"add": "kiki"})
 
@@ -87,7 +87,7 @@ def test_nipsa_returns_index_when_user_does_not_exist(nipsa_api, models,
 
 @mock.patch("h.nipsa.models")
 @mock.patch("h.nipsa.nipsa_api")
-def test_unnipsa_calls_nipsa_api_with_user_id(nipsa_api, models):
+def test_unnipsa_calls_nipsa_api_with_userid(nipsa_api, models):
     models.User.get_by_username.return_value = mock.Mock(username="kiki")
     request = mock.Mock(params={"remove": "kiki"}, domain="hypothes.is")
 

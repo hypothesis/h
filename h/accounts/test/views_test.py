@@ -755,7 +755,7 @@ def test_activate_returns_not_found_if_user_not_found(user_model):
 
 
 @activate_fixtures
-def test_activate_returns_not_found_if_user_id_does_not_match(user_model):
+def test_activate_returns_not_found_if_userid_does_not_match(user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     giraffe = FakeUser(id=456)
     user_model.get_by_activation.return_value = giraffe

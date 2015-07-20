@@ -9,18 +9,18 @@ class NipsaUser(db.Base):
     """A NIPSA entry for a user (SQLAlchemy ORM class)."""
 
     __tablename__ = 'nipsa'
-    user_id = sqlalchemy.Column(sqlalchemy.UnicodeText, primary_key=True,
+    userid = sqlalchemy.Column(sqlalchemy.UnicodeText, primary_key=True,
                                 index=True)
 
-    def __init__(self, user_id):
-        self.user_id = user_id
+    def __init__(self, userid):
+        self.userid = userid
 
     @classmethod
-    def get_by_id(cls, user_id):
-        """Return the NipsaUser object for the given user_id, or None."""
+    def get_by_id(cls, userid):
+        """Return the NipsaUser object for the given userid, or None."""
         try:
             return cls.query.filter(
-                cls.user_id == user_id).one()
+                cls.userid == userid).one()
         except exc.NoResultFound:
             return None
 

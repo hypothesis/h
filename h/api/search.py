@@ -43,7 +43,7 @@ def bulk(es_client, actions):
     return helpers.bulk(es_client, actions)
 
 
-def build_query(request_params, user_id=None):
+def build_query(request_params, userid=None):
     """Return an Elasticsearch query dict for the given h search API params.
 
     Translates the HTTP request params accepted by the h search API into an
@@ -53,10 +53,10 @@ def build_query(request_params, user_id=None):
         h search API
     :type request_params: webob.multidict.NestedMultiDict
 
-    :param user_id: the ID of the authorized user (optional, default: None),
-        if a user_id is given then this user's annotations will never be
+    :param userid: the ID of the authorized user (optional, default: None),
+        if a userid is given then this user's annotations will never be
         filtered out even if they have a NIPSA flag
-    :type user_id: unicode or None
+    :type userid: unicode or None
 
     :returns: an Elasticsearch query dict corresponding to the given h search
         API params
@@ -115,7 +115,7 @@ def build_query(request_params, user_id=None):
 
     query["query"] = {"bool": {"must": matches}}
 
-    return nipsa.nipsa_filter(query, user_id=user_id)
+    return nipsa.nipsa_filter(query, userid=userid)
 
 
 def search(request_params, user=None):
@@ -133,11 +133,11 @@ def search(request_params, user=None):
     :rtype: dict
 
     """
-    user_id = user.id if user else None
+    userid = user.id if user else None
     log.debug("Searching with user=%s, for uri=%s",
-              str(user_id), request_params.get('uri'))
+              str(userid), request_params.get('uri'))
 
-    query = build_query(request_params, user_id=user_id)
+    query = build_query(request_params, userid=userid)
     results = models.Annotation.search_raw(query, user=user, raw_result=True)
 
     total = results['hits']['total']
