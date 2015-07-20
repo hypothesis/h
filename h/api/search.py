@@ -140,7 +140,14 @@ def build_query(request_params, userid=None):
 
     query["query"] = {"bool": {"must": matches}}
 
-    return nipsa.nipsa_filter(query, userid=userid)
+    query["query"] = {
+        "filtered": {
+            "filter": nipsa.nipsa_filter(userid=userid),
+            "query": query["query"]
+        }
+    }
+
+    return query
 
 
 def search(request_params, user=None):

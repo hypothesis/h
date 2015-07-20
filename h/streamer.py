@@ -111,8 +111,13 @@ class FilterToElasticFilter(object):
             scripts = ' AND '.join(self.filter_scripts_to_add)
             self.query['filter']['script'] = '"script": ' + scripts
 
-        self.query = nipsa.nipsa_filter(
-            self.query, request.authenticated_userid)
+        self.query["query"] = {
+            "filtered": {
+                "filter": nipsa.nipsa_filter(
+                    userid=request.authenticated_userid),
+                "query": self.query["query"]
+            }
+        }
 
     @staticmethod
     def equals(field, value):

@@ -365,7 +365,7 @@ def test_build_query_returns_nipsa_filter(nipsa_filter):
 
     query = search.build_query(multidict.NestedMultiDict())
 
-    assert query == "foobar!"
+    assert query["query"]["filtered"]["filter"] == "foobar!"
 
 
 @mock.patch("h.api.search.nipsa.nipsa_filter")
