@@ -11,6 +11,7 @@ from pyramid.paster import get_appsettings
 import transaction
 
 from h import db
+from h.api import db as api_db
 
 
 class DummyFeature(object):
@@ -90,6 +91,8 @@ def db_session(request, settings):
     """SQLAlchemy session."""
     engine = db.make_engine(settings)
     db.bind_engine(engine, should_create=True, should_drop=True)
+
+    api_db.use_session(db.Session)
 
     def destroy():
         transaction.commit()
