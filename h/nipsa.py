@@ -10,14 +10,14 @@ _ = i18n.TranslationStringFactory(__package__)
 
 
 @view.view_config(route_name='nipsa_index', request_method='GET',
-                  renderer='h:templates/nipsa.html',
+                  renderer='h:templates/nipsa.html.jinja2',
                   permission='admin')
 def index(_):
     return {"userids": [util.split_user(u)[0] for u in nipsa_api.index()]}
 
 
 @view.view_config(route_name='nipsa_index', request_method='POST',
-                  renderer='h:templates/nipsa.html',
+                  renderer='h:templates/nipsa.html.jinja2',
                   permission='admin')
 def add_nipsa(request):
     username = request.params["add"]
@@ -31,7 +31,7 @@ def add_nipsa(request):
 
 
 @view.view_config(route_name='remove_nipsa', request_method='POST',
-                  renderer='h:templates/nipsa.html',
+                  renderer='h:templates/nipsa.html.jinja2',
                   permission='admin')
 def remove_nipsa(request):
     username = request.params["remove"]
