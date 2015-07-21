@@ -14,7 +14,7 @@ from .models import Document
 
 
 log = logging.getLogger(__name__)
-BASE = declarative.declarative_base()
+Base = declarative.declarative_base()  # pylint: disable=invalid-name
 
 
 def store_from_settings(settings):
@@ -129,12 +129,12 @@ def delete_db():
     Document.drop_all()
 
 
-def use_session(session, base=BASE):
+def use_session(session, base=Base):
     """Configure the SQLAlchemy base class to use the given session."""
     base.query = session.query_property()
 
 
-def bind_engine(engine, base=BASE, should_create=False, should_drop=False):
+def bind_engine(engine, base=Base, should_create=False, should_drop=False):
     """Bind the SQLAlchemy base class to the given engine."""
     base.metadata.bind = engine
     if should_drop:
