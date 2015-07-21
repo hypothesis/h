@@ -1,3 +1,80 @@
+Next release
+============
+
+Features
+--------
+
+- Share a link to a page with annotations using the Via proxy service.
+  See https://github.com/hypothesis/h/pulls/2215
+
+- Make the privacy setting more obvious on new annotations.
+  See https://github.com/hypothesis/h/pulls/2322
+
+- Use better security practices when making HTTPS requests.
+  See https://github.com/hypothesis/h/issues/2343
+
+- Make it possible for administrators to enable and disable features without
+  redeploying.
+  See https://github.com/hypothesis/h/issues/2354
+
+- Preliminary support for admin users.
+  See https://github.com/hypothesis/h/pulls/2358
+
+Bug fixes
+---------
+
+- Improve performance, reliability, and responsiveness on complex or dynamic
+  pages, avoiding non-responsive script errors and anchoring failures.
+  See https://github.com/hypothesis/h/pulls/2362
+
+- Prevent annotating when not signed in to avoid confusing users with data
+  loss.
+  See https://github.com/hypothesis/h/pulls/2361
+
+- Make it possible to embed a guest frame once again, that participates in
+  annotation with an existing sidebar.
+  See https://github.com/hypothesis/h/pulls/2340
+
+- Fix formatting issues with the Atom feed.
+  See https://github.com/hypothesis/h/pulls/2341 and
+  https://github.com/hypothesis/h/pulls/2338
+
+- Fix an issue where badly formatted annotations could break the Atom feed.
+  See https://github.com/hypothesis/h/pulls/2345
+
+- Speed up searches by avoiding an extra request on the backend.
+  See https://github.com/hypothesis/h/pulls/2346
+
+- Speed up searches by avoiding extra requests on the frontend.
+  See https://github.com/hypothesis/h/pulls/2348
+
+- Address several causes of stuck transactions that make migrations difficult
+  and could, in some cases, make the server return errors for many requests.
+  See https://github.com/hypothesis/h/pulls/2381
+
+- Fix an issue where failed document equivalence searches resulted in
+  annotations on http://example.com/ being returned.
+  See https://github.com/hypothesis/h/pulls/2334
+
+- Avoid some problems caused by annotating the application itself, such as
+  by annotating the stream page.
+
+- User experience and usability improvements.
+  See https://github.com/hypothesis/h/pulls/2330
+  https://github.com/hypothesis/h/pulls/2352 and
+  https://github.com/hypothesis/h/pulls/2349
+
+- Fix the token command-line tool to generate proper tokens even when the
+  server is running on a port other than the default.
+  See https://github.com/hypothesis/h/pulls/2357
+
+Documentation
+-------------
+
+- Expand the search API documentation to better describe the available fields
+  for filtering.
+  See https://github.com/hypothesis/h/pulls/2344
+
 0.4.2 (2015-06-16)
 ==================
 
