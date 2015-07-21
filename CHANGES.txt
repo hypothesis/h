@@ -1,3 +1,11 @@
+0.5.1 (2015-07-21)
+==================
+
+Bug fixes
+---------
+
+- Fix an error preventing the Atom feed from working.
+
 0.5.0 (2015-07-21)
 ==================
 
