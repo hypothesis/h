@@ -147,8 +147,9 @@ app_css:
     - cleancss
     - cssrewrite
   contents:
-    - h:static/styles/vendor/icomoon.css
+    - h:static/styles/vendor/angular-csp.css
     - h:static/styles/vendor/angular-toastr.css
+    - h:static/styles/vendor/icomoon.css
     - h:static/styles/vendor/katex.min.css
     - output: styles/app.css
       filters: compass
