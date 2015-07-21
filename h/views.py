@@ -90,7 +90,6 @@ def widget(context, request):
 @view_config(name='viewer', renderer='h:templates/app.html.jinja2')
 @view_config(name='editor', renderer='h:templates/app.html.jinja2')
 @view_config(name='page_search', renderer='h:templates/app.html.jinja2')
-@view_config(name='extension', renderer='h:templates/extension.html.jinja2')
 def page(context, request):
     return {}
 
