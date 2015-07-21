@@ -334,6 +334,7 @@ module.exports = class Guest extends Annotator
       params: (a.$$tag for a in annotations)
 
   onSuccessfulSelection: (event, immediate) ->
+    document.getElementsByClassName('toolbar-insert-comment')[0].title = "New Note"
     unless event?
       throw "Called onSuccessfulSelection without an event!"
     unless event.ranges?
@@ -354,6 +355,7 @@ module.exports = class Guest extends Annotator
     true
 
   onFailedSelection: (event) ->
+    document.getElementsByClassName('toolbar-insert-comment')[0].title = "New Page Note"
     @adder.hide()
     @selectedRanges = []
 
