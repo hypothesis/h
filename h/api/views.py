@@ -134,7 +134,8 @@ def create(request):
     return annotation
 
 
-@api_config(context=Annotation, request_method='GET', permission='read')
+@api_config(containment=Root, context=Annotation,
+            request_method='GET', permission='read')
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     annotation = context
@@ -145,7 +146,8 @@ def read(context, request):
     return annotation
 
 
-@api_config(context=Annotation, request_method='PUT', permission='update')
+@api_config(containment=Root, context=Annotation,
+            request_method='PUT', permission='update')
 def update(context, request):
     """Update the fields we received and store the updated version."""
     annotation = context
@@ -177,7 +179,8 @@ def update(context, request):
     return annotation
 
 
-@api_config(context=Annotation, request_method='DELETE', permission='delete')
+@api_config(containment=Root, context=Annotation,
+            request_method='DELETE', permission='delete')
 def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context
