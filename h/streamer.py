@@ -536,6 +536,7 @@ class WebSocket(_WebSocket):
             elif msg_type == 'client_id':
                 self.client_id = data.get('value')
         except:
+            # TODO: clean this up, catch specific errors, narrow the scope
             log.exception("Parsing filter: %s", msg)
             self.close()
             raise
