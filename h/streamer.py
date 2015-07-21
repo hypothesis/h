@@ -538,6 +538,7 @@ class WebSocket(_WebSocket):
         except:
             log.exception("Parsing filter: %s", msg)
             self.close()
+            raise
 
 
 def _annotation_packet(annotations, action):
