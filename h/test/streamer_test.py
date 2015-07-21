@@ -362,3 +362,22 @@ class TestShouldSendEvent(unittest.TestCase):
         sock = self.sock_giraffe
         assert should_send_event(sock, anno, data) is False
         assert sock.request.has_permission.called_with('read', anno)
+
+    def test_should_send_event_does_not_send_nipsad_annotations(self):
+        """Users should not see annotations from NIPSA'd users."""
+        annotation = {'user': 'fred', 'nipsa': True}
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.has_permission.return_value = True
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        assert not should_send_event(socket, annotation, event_data)
+
+    def test_should_send_event_does_send_nipsad_annotations(self):
+        """NIPSA'd users should see their own annotations."""
+        annotation = {'user': 'fred', 'nipsa': True}
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.has_permission.return_value = True
+        socket.request.authenticated_userid = 'fred'  # The annotation creator.
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        assert should_send_event(socket, annotation, event_data)
