@@ -20,12 +20,14 @@ def add_nipsa_action(annotation):
 
 def remove_nipsa_action(annotation):
     """Return an Elasticsearch action to remove NIPSA from the annotation."""
+    source = annotation["_source"].copy()
+    source.pop("nipsa", None)
     return {
-        "_op_type": "update",
+        "_op_type": "index",
         "_index": annotator.es.index,
         "_type": "annotation",
         "_id": annotation["_id"],
-        "script": "ctx._source.remove(\"nipsa\")"
+        "_source": source,
     }
 
 
@@ -39,7 +41,7 @@ def add_or_remove_nipsa(userid, action, es_client):
         query = nipsa_search.nipsad_annotations(userid)
         action_func = remove_nipsa_action
 
-    annotations = helpers.scan(client=es_client, query=query, fields=[])
+    annotations = helpers.scan(client=es_client, query=query)
     actions = [action_func(a) for a in annotations]
     helpers.bulk(client=es_client, actions=actions)
 

@@ -16,14 +16,15 @@ def test_add_nipsa_action():
 
 
 def test_remove_nipsa_action():
-    action = worker.remove_nipsa_action({"_id": "test_id"})
+    annotation = {"_id": "test_id", "_source": {"nipsa": True, "foo": "bar"}}
+    action = worker.remove_nipsa_action(annotation)
 
     assert action == {
-        "_op_type": "update",
+        "_op_type": "index",
         "_index": "annotator",
         "_type": "annotation",
         "_id": "test_id",
-        "script": "ctx._source.remove(\"nipsa\")"
+        "_source": {"foo": "bar"},
     }
 
 
