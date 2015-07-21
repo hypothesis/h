@@ -19,6 +19,10 @@ def run(request):
     def handle_message(reader, message=None):
         if message is None:
             return
+        with request.tm:
+            send_notifications(message)
+
+    def send_notifications(message):
         # We start the reader regardless, otherwise messages will pile up in
         # the notification channel, but we only actually handle them and try
         # and mail them if the 'notification' feature is toggled on.

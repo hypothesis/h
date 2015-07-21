@@ -17,7 +17,6 @@ from jsonschema import validate
 from pyramid.config import aslist
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
 from pyramid.threadlocal import get_current_request
-import transaction
 from ws4py.exc import HandshakeError
 from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
@@ -212,7 +211,9 @@ class FilterToElasticFilter(object):
                     field.append(f[1:].replace('/', '.'))
             else:
                 field = clause['field'][1:].replace('/', '.')
-            es = clause['options']['es'] if 'es' in clause['options'] else None
+
+            options = clause.get('options', {})
+            es = options.get('es')
             if es:
                 query_type = es.get('query_type', 'simple')
             else:
@@ -446,6 +447,8 @@ class WebSocket(_WebSocket):
 
     @classmethod
     def start_reader(cls, request):
+        if cls.event_queue is not None:
+            return
         cls.event_queue = gevent.queue.Queue()
         reader_id = 'stream-{}#ephemeral'.format(_random_id())
         reader = request.get_queue_reader('annotations', reader_id)
@@ -459,19 +462,19 @@ class WebSocket(_WebSocket):
             cls.event_queue.put(message)
 
     def opened(self):
-        transaction.commit()  # Release the database transaction
-
         # The websocket server runs regardless, but we don't attempt to connect
         # to NSQ unless 'streamer' is toggled on.
-        if not self.request.feature('streamer'):
-            return
-
-        if self.event_queue is None:
+        if self.request.feature('streamer'):
             self.start_reader(self.request)
 
+        # Store the user
+        self.user = get_user(self.request)
+
+        # Release the database transaction
+        self.request.tm.commit()
+
     def send_annotations(self):
-        request = self.request
-        user = get_user(request)
+        user = self.user
         annotations = Annotation.search_raw(query=self.query.query, user=user)
         self.received = len(annotations)
 
@@ -503,7 +506,10 @@ class WebSocket(_WebSocket):
         clause['value'] = list(available_uris)
 
     def received_message(self, msg):
-        transaction.begin()
+        with self.request.tm:
+            self._process_message(msg)
+
+    def _process_message(self, msg):
         try:
             data = json.loads(msg.data)
             msg_type = data.get('messageType', 'filter')
@@ -532,11 +538,10 @@ class WebSocket(_WebSocket):
             elif msg_type == 'client_id':
                 self.client_id = data.get('value')
         except:
+            # TODO: clean this up, catch specific errors, narrow the scope
             log.exception("Parsing filter: %s", msg)
-            transaction.abort()
             self.close()
-        else:
-            transaction.commit()
+            raise
 
 
 def _annotation_packet(annotations, action):
