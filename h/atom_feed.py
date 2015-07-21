@@ -209,4 +209,4 @@ def render_annotations(
         html_url=html_url, title=title, subtitle=subtitle)
 
     return renderers.render(
-        'h:templates/atom.xml', {"feed": feed}, request=request)
+        'h:templates/atom.xml.jinja2', {"feed": feed}, request=request)
