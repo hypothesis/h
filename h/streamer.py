@@ -211,7 +211,9 @@ class FilterToElasticFilter(object):
                     field.append(f[1:].replace('/', '.'))
             else:
                 field = clause['field'][1:].replace('/', '.')
-            es = clause['options']['es'] if 'es' in clause['options'] else None
+
+            options = clause.get('options', {})
+            es = options.get('es')
             if es:
                 query_type = es.get('query_type', 'simple')
             else:
