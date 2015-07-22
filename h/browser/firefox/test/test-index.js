@@ -1,10 +1,10 @@
-var main = require("./main");
+var main = require("../index");
 
-exports["test main"] = function(assert) {
+exports["test index"] = function(assert) {
   assert.pass("Unit test running!");
 };
 
-exports["test main async"] = function(assert, done) {
+exports["test index async"] = function(assert, done) {
   assert.pass("async Unit test running!");
   done();
 };

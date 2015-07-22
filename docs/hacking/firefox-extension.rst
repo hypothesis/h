@@ -29,3 +29,11 @@ the start page or by running the ``assets`` command::
 
     optional arguments:
       -h, --help  show this help message and exit
+
+To package the build or test it in a live Firefox, install use the Jetpack
+Manager tool, ``jpm``. For example::
+
+    $ cd build/firefox
+    $ jpm -b /path/to/firefox xpi
+
+See the documentation for ``jpm`` for more help packaging the Firefox addon.
