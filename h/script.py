@@ -61,14 +61,14 @@ _add_common_args(parser_init_db)
 def admin(args):
     """Make a user an admin."""
     paster.bootstrap(args.config_uri, request=Request.blank(''))
-    accounts.make_admin(unicode(args.userid, sys.getfilesystemencoding()))
+    accounts.make_admin(unicode(args.username, sys.getfilesystemencoding()))
     transaction.commit()
 
 
 parser_admin = subparsers.add_parser('admin', help=admin.__doc__)
 parser_admin.add_argument(
-    'userid',
-    help="the ID of the user to make into an admin, e.g. 'fred'")
+    'username',
+    help="the name of the user to make into an admin, e.g. 'fred'")
 parser_admin.add_argument('config_uri', help='paster configuration URI')
 
 
