@@ -31,12 +31,6 @@ class PyTest(TestCommand):
 cmdclass = versioneer.get_cmdclass()
 cmdclass['test'] = PyTest
 
-versioneer.VCS = 'git'
-versioneer.versionfile_source = 'h/_version.py'
-versioneer.versionfile_build = 'h/_version.py'
-versioneer.tag_prefix = 'v'
-versioneer.parentdir_prefix = 'h-'
-
 INSTALL_REQUIRES = [
     'PyJWT>=1.0.0,<2.0.0',
     'SQLAlchemy>=0.8.0',

@@ -2,6 +2,7 @@
   "name": "Hypothesis - Web & PDF Annotation",
   "short_name": "Hypothesis",
   "version": "{{ version }}",
+  "version_name": "{{ version }} ({{ version_name }})",
   "manifest_version": 2,
 
   "description": "Collaboratively annotate, highlight, and tag web pages and PDF documents.",
