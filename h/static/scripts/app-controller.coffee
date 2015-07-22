@@ -5,13 +5,13 @@ module.exports = class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$route', '$scope', '$window',
     'auth', 'drafts', 'features', 'identity',
-    'streamer', 'annotationUI',
+    'session', 'streamer', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
      $controller,   $document,   $location,   $route,   $scope,   $window,
      auth,   drafts,   features,   identity,
-     streamer,   annotationUI,
+     session,   streamer,   annotationUI,
      annotationMapper, threading
   ) ->
     $controller('AnnotationUIController', {$scope})
@@ -20,6 +20,9 @@ module.exports = class AppController
     #
     #     if ($scope.feature('foo')) { ... }
     $scope.feature = features.flagEnabled
+
+    # Allow all child scopes access to the session
+    $scope.session = session
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
