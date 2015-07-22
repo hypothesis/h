@@ -9,8 +9,7 @@ class NipsaUser(db.Base):
     """A NIPSA entry for a user (SQLAlchemy ORM class)."""
 
     __tablename__ = 'nipsa'
-    userid = sqlalchemy.Column(sqlalchemy.UnicodeText, primary_key=True,
-                               index=True)
+    userid = sqlalchemy.Column(sqlalchemy.UnicodeText, primary_key=True)
 
     def __init__(self, userid):
         self.userid = userid
