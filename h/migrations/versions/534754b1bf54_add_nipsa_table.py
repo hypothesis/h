@@ -17,7 +17,7 @@ import sqlalchemy as sa
 def upgrade():
     op.create_table(
         'nipsa',
-        sa.Column('userid', sa.UnicodeText, primary_key=True)
+        sa.Column('userid', sa.Unicode(length=512), primary_key=True)
     )
 
 
