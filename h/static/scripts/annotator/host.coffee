@@ -6,7 +6,7 @@ Hammer = require('hammerjs')
 Guest = require('./guest')
 
 # Minimum width to which the frame can be resized.
-MIN_RESIZE = 280
+MIN_RESIZE = 80
 
 
 module.exports = class Host extends Guest
