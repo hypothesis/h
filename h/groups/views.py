@@ -23,6 +23,9 @@ def create_group_form(request):
 
 @view_config(route_name='group_create', request_method='POST')
 def create_group(request):
+    if not request.feature('groups'):
+        raise exc.HTTPNotFound()
+
     group = models.Group(name=request.params["name"])
     request.db.add(group)
 
@@ -37,6 +40,9 @@ def create_group(request):
              request_method='GET',
              renderer='h:groups/templates/read_group.html.jinja2')
 def read_group(request):
+    if not request.feature('groups'):
+        raise exc.HTTPNotFound()
+
     id_ = int(request.matchdict["id"])
     group = models.Group.get_by_id(id_)
     if group is None:
