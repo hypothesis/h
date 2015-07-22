@@ -126,7 +126,7 @@ def test_create_does_not_add_nipsa_flag(get_user, has_nipsa, _):
 
     annotation = views.create(request)
 
-    assert not annotation.get("nipsa")
+    assert "nipsa" not in annotation
 
 
 @pytest.mark.usefixtures('replace_io')
