@@ -42,6 +42,12 @@
         </div>
       </div>
 
+      <div class="pull-right dropdown group-list"
+           ng-if="auth.user && feature('groups')"
+           group-list=""
+           groups="session.state.groups">
+      </div>
+
       <!-- Searchbar -->
       <div class="simple-search"
            query="search.query"
@@ -93,6 +99,9 @@
 {% block templates %}
   <script type="text/ng-template" id="annotation.html">
     {{ include_raw("h:templates/client/annotation.html") }}
+  </script>
+  <script type="text/ng-template" id="group_list.html">
+    {{ include_raw("h:templates/client/group_list.html") }}
   </script>
   <script type="text/ng-template" id="markdown.html">
     {{ include_raw("h:templates/client/markdown.html") }}
