@@ -37,6 +37,14 @@ class Group(Base):
     def __repr__(self):
         return '<Group: %s>' % self.slug
 
+    @classmethod
+    def get_by_id(cls, id_):
+        try:
+            return cls.query.filter(
+                cls.id == id_).one()
+        except exc.NoResultFound:
+            return None
+
 
 user_group_table = sa.Table('user_group', Base.metadata,
     sa.Column('user_id',
