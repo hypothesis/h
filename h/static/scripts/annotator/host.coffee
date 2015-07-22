@@ -10,6 +10,7 @@ MIN_RESIZE = 280
 
 
 module.exports = class Host extends Guest
+  renderFrame: null
   gestureState: null
 
   constructor: (element, options) ->
@@ -86,27 +87,10 @@ module.exports = class Host extends Guest
 
   _initializeGestureState: ->
     @gestureState =
-      acc: null
       initial: null
-      renderFrame: null
+      final: null
 
   onPan: (event) =>
-    # Smooth updates
-    _updateLayout = =>
-      # Only schedule one frame at a time
-      return if @gestureState.renderFrame
-      # Schedule update
-      @gestureState.renderFrame = window.requestAnimationFrame =>
-        # Clear the frame
-        @gestureState.renderFrame = null
-        # Stop if finished
-        return unless @gestureState.acc?
-        # Set style
-        m = @gestureState.acc
-        w = -m
-        @frame.css('margin-left', "#{m}px")
-        if w >= MIN_RESIZE then @frame.css('width', "#{-m}px")
-
     switch event.type
       when 'panstart'
         # Initialize the gesture state
@@ -124,7 +108,7 @@ module.exports = class Host extends Guest
         # Re-enable iframe events
         @frame.css('pointer-events', '')
         # Snap open or closed
-        if @gestureState.acc <= -MIN_RESIZE
+        if @gestureState.final <= -MIN_RESIZE
           this.showFrame()
         else
           this.hideFrame()
@@ -136,10 +120,9 @@ module.exports = class Host extends Guest
         # Compute new margin from delta and initial conditions
         m = @gestureState.initial
         d = event.deltaX
-        acc = Math.min(Math.round(m + d), 0)
-        @gestureState.acc = acc
+        @gestureState.final = Math.min(Math.round(m + d), 0)
         # Start updating
-        _updateLayout()
+        this._updateLayout()
 
   onSwipe: (event) =>
     switch event.type
@@ -169,3 +152,20 @@ module.exports = class Host extends Guest
 
     # Return this for chaining
     this
+
+  # Schedule any changes needed to update the layout of the widget or page
+  # in response to interface changes.
+  _updateLayout: ->
+    # Only schedule one frame at a time
+    return if @renderFrame
+
+    # Schedule a frame
+    @renderFrame = window.requestAnimationFrame =>
+      @renderFrame = null  # Clear the schedule
+
+      # Process the resize gesture
+      if @gestureState.final isnt @gestureState.initial
+        m = @gestureState.final
+        w = -m
+        @frame.css('margin-left', "#{m}px")
+        if w >= MIN_RESIZE then @frame.css('width', "#{w}px")

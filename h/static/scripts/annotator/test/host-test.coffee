@@ -89,19 +89,19 @@ describe 'Host', ->
 
     describe 'panend event', ->
       it 'enables pointer events and transitions on the widget', ->
-        host.gestureState = {acc: 0}
+        host.gestureState = {final: 0}
         host.onPan({type: 'panend'})
         assert.isFalse(host.frame.hasClass('annotator-no-transition'))
         assert.equal(host.frame.css('pointer-events'), '')
 
       it 'calls `showFrame` if the widget is fully visible', ->
-        host.gestureState = {acc: -500}
+        host.gestureState = {final: -500}
         showFrame = sandbox.stub(host, 'showFrame')
         host.onPan({type: 'panend'})
         assert.calledOnce(showFrame)
 
       it 'calls `hideFrame` if the widget is not fully visible', ->
-        host.gestureState = {acc: -100}
+        host.gestureState = {final: -100}
         hideFrame = sandbox.stub(host, 'hideFrame')
         host.onPan({type: 'panend'})
         assert.calledOnce(hideFrame)
@@ -127,10 +127,10 @@ describe 'Host', ->
         host.gestureState = {initial: -100}
 
         host.onPan({type: 'panleft', deltaX: -50})
-        assert.equal(host.gestureState.acc, -150)
+        assert.equal(host.gestureState.final, -150)
 
         host.onPan({type: 'panright', deltaX: 100})
-        assert.equal(host.gestureState.acc, 0)
+        assert.equal(host.gestureState.final, 0)
 
   describe 'swipe gestures', ->
     host = null
