@@ -23,7 +23,7 @@ def nipsa_filter(userid=None):
     # get through the filter.
     should_clauses = [{"not": {"term": {"nipsa": True}}}]
 
-    if userid:
+    if userid is not None:
         # Always show the logged-in user's annotations even if they have nipsa.
         should_clauses.append({"term": {"user": userid}})
 
