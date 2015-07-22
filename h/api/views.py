@@ -12,6 +12,8 @@ from h.api.models import Annotation
 from h.api.resources import Root
 from h.api.resources import Annotations
 import h.api.search
+from h.api import nipsa
+
 
 log = logging.getLogger(__name__)
 
@@ -225,6 +227,9 @@ def _create_annotation(fields, user):
 
     annotation['user'] = user.id
     annotation['consumer'] = user.consumer.key
+
+    if nipsa.has_nipsa(user.id):
+        annotation["nipsa"] = True
 
     # Save it in the database
     annotation.save()

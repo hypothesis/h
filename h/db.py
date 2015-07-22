@@ -22,6 +22,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from zope.sqlalchemy import ZopeTransactionExtension
 
+from h.api import db as api_db
+
 __all__ = [
     'Base',
     'Session',
@@ -63,6 +65,8 @@ def bind_engine(engine,
         base.metadata.drop_all(engine)
     if should_create:
         base.metadata.create_all(engine)
+    api_db.bind_engine(engine, should_create=should_create,
+                       should_drop=should_drop)
 
 
 def make_engine(settings):
@@ -88,3 +92,5 @@ def includeme(config):
         'should_create': should_create,
         'should_drop': should_drop
     })
+
+    api_db.use_session(Session)

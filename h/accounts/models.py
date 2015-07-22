@@ -72,12 +72,6 @@ class User(Base):
                           nullable=False,
                           unique=True)
 
-    # Not In Public Site Areas flag
-    nipsa = sa.Column(sa.BOOLEAN,
-                      default=False,
-                      server_default=sa.sql.expression.false(),
-                      nullable=False)
-
     admin = sa.Column(sa.BOOLEAN,
                       default=False,
                       nullable=False,

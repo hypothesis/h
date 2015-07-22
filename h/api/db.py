@@ -6,12 +6,15 @@ import time
 from annotator import es
 from elasticsearch import exceptions as elasticsearch_exceptions
 from pyramid.settings import asbool
+from sqlalchemy.ext import declarative
+
 
 from .models import Annotation
 from .models import Document
 
 
 log = logging.getLogger(__name__)
+Base = declarative.declarative_base()  # pylint: disable=invalid-name
 
 
 def store_from_settings(settings):
@@ -124,6 +127,20 @@ def delete_db():
     """Delete the Annotation and Document databases."""
     Annotation.drop_all()
     Document.drop_all()
+
+
+def use_session(session, base=Base):
+    """Configure the SQLAlchemy base class to use the given session."""
+    base.query = session.query_property()
+
+
+def bind_engine(engine, base=Base, should_create=False, should_drop=False):
+    """Bind the SQLAlchemy base class to the given engine."""
+    base.metadata.bind = engine
+    if should_drop:
+        base.metadata.drop_all(engine)
+    if should_create:
+        base.metadata.create_all(engine)
 
 
 def includeme(config):

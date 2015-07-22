@@ -51,6 +51,8 @@ def replace_io(monkeypatch):
     monkeypatch.setattr(views, 'Annotation', DictMock())
     monkeypatch.setattr(views, '_publish_annotation_event', MagicMock())
     monkeypatch.setattr(views, '_api_error', MagicMock())
+    nipsa = Mock(has_nipsa=Mock(return_value=False))
+    monkeypatch.setattr(views, 'nipsa', nipsa)
 
 
 @fixture()
@@ -97,6 +99,34 @@ def test_create(mock_create_annotation, user):
     views._create_annotation.assert_called_once_with(_new_annotation, user)
     assert annotation == views._create_annotation.return_value
     _assert_event_published('create')
+
+
+@patch("h.api.views.Annotation.save")
+@patch("h.api.views.nipsa.has_nipsa")
+@patch("h.api.views.get_user")
+def test_create_adds_nipsa_flag(get_user, has_nipsa, _):
+    get_user.return_value = Mock(
+        id="test_id", consumer=Mock(key="test_key"))
+    has_nipsa.return_value = True
+    request = DummyRequest(json_body=_new_annotation)
+
+    annotation = views.create(request)
+
+    assert annotation.get("nipsa") is True
+
+
+@patch("h.api.views.Annotation.save")
+@patch("h.api.views.nipsa.has_nipsa")
+@patch("h.api.views.get_user")
+def test_create_does_not_add_nipsa_flag(get_user, has_nipsa, _):
+    get_user.return_value = Mock(
+        id="test_id", consumer=Mock(key="test_key"))
+    has_nipsa.return_value = False
+    request = DummyRequest(json_body=_new_annotation)
+
+    annotation = views.create(request)
+
+    assert "nipsa" not in annotation
 
 
 @pytest.mark.usefixtures('replace_io')

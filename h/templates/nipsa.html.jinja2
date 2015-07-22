@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>NIPSA</title>
+  </head>
+  <body>
+
+  {% for message in request.session.pop_flash('error') %}
+    {{ message }}
+  {% endfor %}
+
+  <form method="POST">
+    <input type="text" name="add"></input>
+    <input type="submit" value="Add"></input>
+
+    <ul>
+      {% for userid in userids %}
+        <li>
+          {{ userid }}
+          <button type="submit" name="remove" value="{{ userid }}"
+                  formaction="{{ request.route_url('remove_nipsa') }}">
+            remove
+          </button>
+        </li>
+      {% endfor %}
+    </ul>
+  </form>
+
+  </body>
+</html>

@@ -605,15 +605,15 @@ class AdminController(object):
     def create(self):
         """Make a given user an admin."""
         try:
-            user_id = self.request.params['add']
+            username = self.request.params['add']
         except KeyError:
             raise httpexceptions.HTTPNotFound
 
         try:
-            accounts.make_admin(user_id)
+            accounts.make_admin(username)
         except accounts.NoSuchUserError:
             self.request.session.flash(
-                _("User {user_id} doesn't exist.".format(user_id=user_id)),
+                _("User {username} doesn't exist.".format(username=username)),
                 "error")
         return self.index()
 
@@ -621,11 +621,11 @@ class AdminController(object):
         """Remove a user from the admins."""
         if len(User.admins()) > 1:
             try:
-                user_id = self.request.params['remove']
+                username = self.request.params['remove']
             except KeyError:
                 raise httpexceptions.HTTPNotFound
 
-            user = User.get_by_username(user_id)
+            user = User.get_by_username(username)
             user.admin = False
         return httpexceptions.HTTPSeeOther(
             location=self.request.route_url('admin_users_index'))

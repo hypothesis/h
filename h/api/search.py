@@ -6,10 +6,13 @@ stuff should be encapsulated in this module.
 """
 import logging
 
+import elasticsearch
+from elasticsearch import helpers
 import webob.multidict
 
 from h.api import models
 from h.api import uri
+from h.api import nipsa
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +34,7 @@ def _match_clause_for_uri(uristr):
     }
 
 
-def build_query(request_params):
+def build_query(request_params, userid=None):
     """Return an Elasticsearch query dict for the given h search API params.
 
     Translates the HTTP request params accepted by the h search API into an
@@ -40,6 +43,9 @@ def build_query(request_params):
     :param request_params: the HTTP request params that were posted to the
         h search API
     :type request_params: webob.multidict.NestedMultiDict
+
+    :param userid: the ID of the authorized user (optional, default: None),
+    :type userid: unicode or None
 
     :returns: an Elasticsearch query dict corresponding to the given h search
         API params
@@ -98,6 +104,13 @@ def build_query(request_params):
 
     query["query"] = {"bool": {"must": matches}}
 
+    query["query"] = {
+        "filtered": {
+            "filter": nipsa.nipsa_filter(userid=userid),
+            "query": query["query"]
+        }
+    }
+
     return query
 
 
@@ -116,11 +129,11 @@ def search(request_params, user=None):
     :rtype: dict
 
     """
+    userid = user.id if user else None
     log.debug("Searching with user=%s, for uri=%s",
-              user.id if user else 'None',
-              request_params.get('uri'))
+              str(userid), request_params.get('uri'))
 
-    query = build_query(request_params)
+    query = build_query(request_params, userid=userid)
     results = models.Annotation.search_raw(query, user=user, raw_result=True)
 
     total = results['hits']['total']
@@ -138,3 +151,14 @@ def index(user=None):
 
     """
     return search(webob.multidict.NestedMultiDict({"limit": 20}), user=user)
+
+
+def includeme(config):
+    """Add a ``request.es_client`` property to the request."""
+    es_host = config.registry.settings.get('es.host')
+    if es_host:
+        es_client = elasticsearch.Elasticsearch([es_host])
+    else:
+        es_client = elasticsearch.Elasticsearch()
+    config.add_request_method(
+        lambda _: es_client, 'es_client', reify=True)

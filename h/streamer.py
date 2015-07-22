@@ -22,6 +22,7 @@ from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from .api.auth import get_user  # FIXME: should not import from .api
+from h.api import nipsa
 from annotator import document
 from .models import Annotation
 
@@ -108,6 +109,14 @@ class FilterToElasticFilter(object):
                 self.query['filter'] = {}
             scripts = ' AND '.join(self.filter_scripts_to_add)
             self.query['filter']['script'] = '"script": ' + scripts
+
+        self.query["query"] = {
+            "filtered": {
+                "filter": nipsa.nipsa_filter(
+                    userid=request.authenticated_userid),
+                "query": self.query["query"]
+            }
+        }
 
     @staticmethod
     def equals(field, value):
@@ -588,6 +597,10 @@ def should_send_event(socket, annotation, event_data):
         return False
 
     if not socket.request.has_permission('read', annotation):
+        return False
+
+    if annotation.get('nipsa') and (
+            socket.request.authenticated_userid != annotation.get('user', '')):
         return False
 
     # We don't send anything until we have received a filter from the client

@@ -76,7 +76,8 @@ def test_build_query_query_defaults_to_match_all():
     query = search.build_query(
         request_params=multidict.NestedMultiDict())
 
-    assert query["query"] == {"bool": {"must": [{"match_all": {}}]}}
+    assert query["query"]["filtered"]["query"] == {
+        "bool": {"must": [{"match_all": {}}]}}
 
 
 def test_build_query_sort_is_by_updated():
@@ -130,7 +131,7 @@ def test_build_query_for_user():
     query = search.build_query(
         request_params=multidict.NestedMultiDict({"user": "bob"}))
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"user": "bob"}}]}}
 
 
@@ -142,7 +143,7 @@ def test_build_query_for_multiple_users():
 
     query = search.build_query(request_params=params)
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {
             "must": [
                 {"match": {"user": "fred"}},
@@ -157,7 +158,7 @@ def test_build_query_for_tag():
     query = search.build_query(
         request_params=multidict.NestedMultiDict({"tags": "foo"}))
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"tags": "foo"}}]}}
 
 
@@ -169,7 +170,7 @@ def test_build_query_for_multiple_tags():
 
     query = search.build_query(request_params=params)
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {
             "must": [
                 {"match": {"tags": "foo"}},
@@ -185,7 +186,7 @@ def test_build_query_with_combined_user_and_tag_query():
         request_params=multidict.NestedMultiDict(
             {"user": "bob", "tags": "foo"}))
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {"must": [
             {"match": {"user": "bob"}},
             {"match": {"tags": "foo"}},
@@ -199,7 +200,7 @@ def test_build_query_with_keyword():
 
     query = search.build_query(request_params=params)
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {
             "must": [
                 {
@@ -223,7 +224,7 @@ def test_build_query_with_multiple_keywords():
 
     query = search.build_query(request_params=params)
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {"must": [{"multi_match": {
             "fields": ["quote", "tags", "text", "uri.parts", "user"],
             "query": ["howdy", "there"],
@@ -250,9 +251,9 @@ def test_build_query_for_uri(uri):
         request_params=multidict.NestedMultiDict(
             {"uri": "http://whitehouse.gov/"}))
 
-    assert query1["query"] == {
+    assert query1["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
-    assert query2["query"] == {
+    assert query2["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"uri": "http://whitehouse.gov/"}}]}}
 
 
@@ -275,7 +276,7 @@ def test_build_query_for_uri_with_multiple_representations(uri):
         request_params=multidict.NestedMultiDict(
             {"uri": "http://example.com/"}))
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {
             "must": [
                 {
@@ -298,7 +299,7 @@ def test_build_query_with_single_text_param():
     query = search.build_query(
         request_params=multidict.NestedMultiDict({"text": "foobar"}))
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"text": "foobar"}}]}}
 
 
@@ -309,7 +310,7 @@ def test_build_query_with_multiple_text_params():
     params.add("text", "bar")
     query = search.build_query(request_params=params)
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {
             "must": [
                 {"match": {"text": "foo"}},
@@ -324,7 +325,7 @@ def test_build_query_with_single_quote_param():
     query = search.build_query(
         request_params=multidict.NestedMultiDict({"quote": "foobar"}))
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"quote": "foobar"}}]}}
 
 
@@ -335,7 +336,7 @@ def test_build_query_with_multiple_quote_params():
     params.add("quote", "bar")
     query = search.build_query(request_params=params)
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         "bool": {
             "must": [
                 {"match": {"quote": "foo"}},
@@ -353,7 +354,30 @@ def test_build_query_with_evil_arguments():
 
     query = search.build_query(request_params=params)
 
-    assert query["query"] == {'bool': {'must': [{'match_all': {}}]}}
+    assert query["query"]["filtered"]["query"] == {
+        'bool': {'must': [{'match_all': {}}]}}
+
+
+@mock.patch("h.api.search.nipsa.nipsa_filter")
+def test_build_query_returns_nipsa_filter(nipsa_filter):
+    """_build_query() returns a nipsa-filtered query."""
+    nipsa_filter.return_value = "foobar!"
+
+    query = search.build_query(multidict.NestedMultiDict())
+
+    assert query["query"]["filtered"]["filter"] == "foobar!"
+
+
+@mock.patch("h.api.search.nipsa.nipsa_filter")
+def test_build_query_does_not_pass_userid_to_nipsa_filter(nipsa_filter):
+    search.build_query(multidict.NestedMultiDict())
+    assert nipsa_filter.call_args[1]["userid"] is None
+
+
+@mock.patch("h.api.search.nipsa.nipsa_filter")
+def test_build_query_does_pass_userid_to_nipsa_filter(nipsa_filter):
+    search.build_query(multidict.NestedMultiDict(), userid="fred")
+    assert nipsa_filter.call_args[1]["userid"] == "fred"
 
 
 def test_build_query_with_arbitrary_params():
@@ -368,7 +392,7 @@ def test_build_query_with_arbitrary_params():
 
     query = search.build_query(request_params=params)
 
-    assert query["query"] == {
+    assert query["query"]["filtered"]["query"] == {
         'bool': {
             'must': [
                 {
@@ -377,6 +401,13 @@ def test_build_query_with_arbitrary_params():
             ]
         }
     }
+
+
+def test_build_query_users_own_annotations_are_not_filtered():
+    query = search.build_query(multidict.NestedMultiDict(), userid="fred")
+
+    assert {'term': {'user': 'fred'}} in (
+        query["query"]["filtered"]["filter"]["bool"]["should"])
 
 
 @mock.patch("annotator.annotation.Annotation.search_raw")
@@ -394,6 +425,23 @@ def test_search_with_user_object(search_raw):
 
     first_call = search_raw.call_args_list[0]
     assert first_call[1]["user"] == user
+
+
+@mock.patch("annotator.annotation.Annotation.search_raw")
+@mock.patch("h.api.search.build_query")
+def test_search_does_not_pass_userid_to_build_query(build_query, _):
+    search.search(multidict.NestedMultiDict())
+    assert build_query.call_args[1]["userid"] is None
+
+
+@mock.patch("annotator.annotation.Annotation.search_raw")
+@mock.patch("h.api.search.build_query")
+def test_search_does_pass_userid_to_build_query(build_query, _):
+    user = mock.Mock(id="test_id")
+
+    search.search(multidict.NestedMultiDict(), user=user)
+
+    assert build_query.call_args[1]["userid"] == "test_id"
 
 
 @mock.patch("h.api.search.search")

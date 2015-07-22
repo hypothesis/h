@@ -131,6 +131,7 @@ setup(
         ],
         'h.worker': [
             'notification=h.notification.worker:run',
+            'nipsa=h.api.nipsa.worker:worker',
         ]
     },
 )

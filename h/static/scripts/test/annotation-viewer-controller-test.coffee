@@ -1,21 +1,51 @@
-{module, inject} = require('angular-mock')
+{inject, module} = require('angular-mock')
 
 assert = chai.assert
-sinon.assert.expose assert, prefix: null
 
-
-describe 'AnnotationViewerController', ->
-  annotationViewerController = null
+describe "AnnotationViewerController", ->
 
   before ->
-    angular.module('h', ['ngRoute'])
-    .controller('AnnotationViewerController', require('../annotation-viewer-controller'))
+    angular.module("h", [])
+      .controller(
+        'AnnotationViewerController',
+        require('../annotation-viewer-controller'))
 
-  beforeEach inject ($controller, $rootScope) ->
-    $scope = $rootScope.$new()
-    $scope.search = {}
-    annotationViewerController = $controller 'AnnotationViewerController',
-      $scope: $scope
+  beforeEach(module("h"))
 
-    it 'sets the isEmbedded property to false', ->
-      assert.isFalse($scope.isEmbedded)
+  # Return the $controller service from Angular.
+  getControllerService = ->
+    $controller = null
+    inject((_$controller_) ->
+      $controller = _$controller_
+    )
+    return $controller
+
+  # Return a new AnnotationViewerController instance.
+  createAnnotationViewerController = ({$location, $routeParams, $scope,
+                                       streamer, store, streamFilter,
+                                       annotationMapper}) ->
+    locals = {
+      $location: $location or {}
+      $routeParams: $routeParams or {id: "test_annotation_id"}
+      $scope: $scope or {search: {}}
+      streamer: streamer or {send: ->}
+      store: store or {
+        AnnotationResource: {read: sinon.spy()},
+        SearchResource: {get: ->}}
+      streamFilter: streamFilter or {
+        setMatchPolicyIncludeAny: -> {addClause: -> {addClause: ->}}
+        getFilter: ->
+      }
+      annotationMapper: annotationMapper or {loadAnnotations: sinon.spy()}
+    }
+    locals["ctrl"] = getControllerService()(
+      "AnnotationViewerController", locals)
+    return locals
+
+  it "sets the isEmbedded property to false", ->
+    {$scope} = createAnnotationViewerController({})
+    assert.isFalse($scope.isEmbedded)
+
+  it "calls the annotation API to get the annotation", ->
+    {store} = createAnnotationViewerController({})
+    assert store.AnnotationResource.read.args[0][0].id == "test_annotation_id"

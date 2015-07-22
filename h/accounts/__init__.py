@@ -16,9 +16,9 @@ class NoSuchUserError(Error):
     pass
 
 
-def make_admin(user_id):
+def make_admin(username):
     """Make the given user an admin."""
-    user = models.User.get_by_username(user_id)
+    user = models.User.get_by_username(username)
     if user:
         user.admin = True
     else:

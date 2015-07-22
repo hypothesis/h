@@ -76,7 +76,7 @@ def test_zero_clauses():
     }
 
     fef = FilterToElasticFilter(filter_json, request)
-    assert fef.query['query'] == {"match_all": {}}
+    assert fef.query['query']['filtered']['query'] == {"match_all": {}}
 
 
 def test_policy_include_any():
@@ -97,7 +97,7 @@ def test_policy_include_any():
     }
 
     fef = FilterToElasticFilter(filter_json, request)
-    assert 'should' in fef.query['query']['bool']
+    assert 'should' in fef.query['query']['filtered']['query']['bool']
 
 
 def test_policy_include_all():
@@ -118,7 +118,7 @@ def test_policy_include_all():
     }
 
     fef = FilterToElasticFilter(filter_json, request)
-    assert 'must' in fef.query['query']['bool']
+    assert 'must' in fef.query['query']['filtered']['query']['bool']
 
 
 def test_policy_exclude_any():
@@ -139,7 +139,7 @@ def test_policy_exclude_any():
     }
 
     fef = FilterToElasticFilter(filter_json, request)
-    assert 'must_not' in fef.query['query']['bool']
+    assert 'must_not' in fef.query['query']['filtered']['query']['bool']
 
 
 def test_policy_exclude_all():
@@ -160,7 +160,8 @@ def test_policy_exclude_all():
     }
 
     fef = FilterToElasticFilter(filter_json, request)
-    assert 'must' in fef.query['query']['bool']['must_not']['bool']
+    assert 'must' in (
+        fef.query['query']['filtered']['query']['bool']['must_not']['bool'])
 
 
 def test_operator_call():
@@ -181,7 +182,7 @@ def test_operator_call():
     }
 
     generated = FilterToElasticFilter(filter_json, request)
-    query = generated.query['query']['bool']['must'][0]
+    query = generated.query['query']['filtered']['query']['bool']['must'][0]
     expected = 'foo bar'
 
     assert query['term']['text'] == expected
@@ -361,3 +362,22 @@ class TestShouldSendEvent(unittest.TestCase):
         sock = self.sock_giraffe
         assert should_send_event(sock, anno, data) is False
         assert sock.request.has_permission.called_with('read', anno)
+
+    def test_should_send_event_does_not_send_nipsad_annotations(self):
+        """Users should not see annotations from NIPSA'd users."""
+        annotation = {'user': 'fred', 'nipsa': True}
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.has_permission.return_value = True
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        assert not should_send_event(socket, annotation, event_data)
+
+    def test_should_send_event_does_send_nipsad_annotations(self):
+        """NIPSA'd users should see their own annotations."""
+        annotation = {'user': 'fred', 'nipsa': True}
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.has_permission.return_value = True
+        socket.request.authenticated_userid = 'fred'  # The annotation creator.
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        assert should_send_event(socket, annotation, event_data)
