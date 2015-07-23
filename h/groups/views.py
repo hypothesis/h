@@ -3,6 +3,7 @@
 import deform
 import colander
 from pyramid import httpexceptions as exc
+from pyramid import security
 from pyramid.view import view_config
 
 from h.groups import schemas
@@ -11,7 +12,8 @@ from h.groups import models
 
 @view_config(route_name='group_create',
              request_method='GET',
-             renderer='h:groups/templates/create_group.html.jinja2')
+             renderer='h:groups/templates/create_group.html.jinja2',
+             permission="authenticated")
 def create_group_form(request):
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
@@ -24,7 +26,8 @@ def create_group_form(request):
 
 @view_config(route_name='group_create',
              request_method='POST',
-             renderer='h:groups/templates/create_group.html.jinja2')
+             renderer='h:groups/templates/create_group.html.jinja2',
+             permission="authenticated")
 def create_group(request):
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
