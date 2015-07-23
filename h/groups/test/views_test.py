@@ -13,7 +13,8 @@ def _mock_request(feature=None, settings=None, params=None,
     params = params or {"foo": "bar"}
     return mock.Mock(
         feature=feature or (lambda feature: True),
-        registry=mock.Mock(settings=settings or {"secret_key": "secret"}),
+        registry=mock.Mock(settings=settings or {
+            "h.hashids.salt": "test salt"}),
         params=params, POST=params,
         authenticated_userid=authenticated_userid or "acct:fred@hypothes.is",
         route_url=route_url or mock.Mock(return_value="test-read-url"),
@@ -62,7 +63,7 @@ def test_create_group_form_returns_empty_form_data(Form):
 
 # The fixtures required to mock all of create_group()'s dependencies.
 create_group_fixtures = pytest.mark.usefixtures(
-    'GroupSchema', 'Form', 'Group', 'User')
+    'GroupSchema', 'Form', 'Group', 'User', 'hashids')
 
 
 @create_group_fixtures
@@ -130,7 +131,7 @@ def test_create_group_uses_name_from_validated_data(Form, User, Group):
 @create_group_fixtures
 def test_create_group_adds_group_to_db(Group):
     """It should add the new group to the database session."""
-    group = mock.Mock()
+    group = mock.Mock(id=6)
     Group.return_value = group
     request = _mock_request()
 
@@ -140,16 +141,17 @@ def test_create_group_adds_group_to_db(Group):
 
 
 @create_group_fixtures
-def test_create_group_redirects_to_group_read_page(Group):
+def test_create_group_redirects_to_group_read_page(Group, hashids):
     """After successfully creating a new group it should redirect."""
     group = mock.Mock(id='test-id', slug='test-slug')
     Group.return_value = group
     request = _mock_request()
+    hashids.encode.return_value = "testhashid"
 
     redirect = views.create_group(request)
 
     request.route_url.assert_called_once_with(
-        "group_read", id="test-id", slug="test-slug")
+        "group_read", hashid="testhashid", slug="test-slug")
     assert redirect.status_int == 303
     assert redirect.location == "test-read-url"
 
@@ -160,7 +162,7 @@ def test_create_group_with_non_ascii_name():
 
 
 # The fixtures required to mock all of read_group()'s dependencies.
-read_group_fixtures = pytest.mark.usefixtures('Group')
+read_group_fixtures = pytest.mark.usefixtures('Group', 'hashids')
 
 
 @read_group_fixtures
@@ -170,10 +172,20 @@ def test_read_group_404s_if_groups_feature_is_off():
 
 
 @read_group_fixtures
-def test_read_group_uses_id_from_params(Group):
-    request = _mock_request(matchdict={"id": "1"})
+def test_read_group_decodes_hashid(hashids):
+    request = _mock_request(matchdict={"hashid": "abc", "slug": "slug"})
 
     views.read_group(request)
+
+    hashids.decode.assert_called_once_with(
+        request, "h.groups", "abc")
+
+
+@read_group_fixtures
+def test_read_group_gets_group_by_id(Group, hashids):
+    hashids.decode.return_value = 1
+
+    views.read_group(_mock_request(matchdict={"hashid": "1", "slug": "slug"}))
 
     Group.get_by_id.assert_called_once_with(1)
 
@@ -182,7 +194,8 @@ def test_read_group_uses_id_from_params(Group):
 def test_read_group_returns_the_group(Group):
     group = Group.get_by_id.return_value
 
-    template_data = views.read_group(_mock_request(matchdict={"id": "1"}))
+    template_data = views.read_group(_mock_request(
+        matchdict={"hashid": "1", "slug": "slug"}))
 
     assert template_data["group"] == group
 
@@ -192,7 +205,24 @@ def test_read_group_404s_when_group_does_not_exist(Group):
     Group.get_by_id.return_value = None
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        views.read_group(_mock_request(matchdict={"id": "1"}))
+        views.read_group(_mock_request(
+            matchdict={"hashid": "1", "slug": "slug"}))
+
+
+@read_group_fixtures
+def test_read_group_without_slug_redirects(Group):
+    """/groups/<hashid> should redirect to /groups/<hashid>/<slug>."""
+    Group.return_value = mock.Mock(slug="my-group")
+    matchdict = {"hashid": "1"}  # No slug.
+    request = _mock_request(
+        matchdict=matchdict,
+        route_url=mock.Mock(return_value="/1/my-group"))
+
+    redirect = views.read_group(request)
+
+    assert request.route_url.called_with(
+        "group_read", hashid="1", slug="my-group")
+    assert redirect.location == "/1/my-group"
 
 
 @pytest.fixture
@@ -219,5 +249,12 @@ def Group(request):
 @pytest.fixture
 def User(request):
     patcher = mock.patch('h.groups.views.accounts_models.User', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def hashids(request):
+    patcher = mock.patch('h.groups.views.hashids', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

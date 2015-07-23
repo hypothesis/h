@@ -119,4 +119,11 @@ def missing_secrets(settings):
             secret = missing['secret_key']
         missing['redis.sessions.secret'] = derive_key(secret, 'h.session')
 
+    if 'h.hashids.salt' not in settings:
+        log.warn('No salt provided for hashids: using transient value. This '
+                 'will result in URLs that are unstable across application '
+                 'restarts! Configure the h.hashids.salt setting or the '
+                 'HASHID_SALT environment variable!')
+        missing['h.hashids.salt'] = os.urandom(64)
+
     return missing
