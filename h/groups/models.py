@@ -22,7 +22,8 @@ class Group(Base):
     # We store information about who created the group -- we don't use this
     # currently, but it seems careless to lose this information when in the
     # future these people may be the first admins of their groups.
-    creator_id = sa.Column(sa.Integer, sa.ForeignKey('user.id'))
+    creator_id = sa.Column(
+        sa.Integer, sa.ForeignKey('user.id'), nullable=False)
     creator = sa.orm.relationship('User')
 
     # Group membership
