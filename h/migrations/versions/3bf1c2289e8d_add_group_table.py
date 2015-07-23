@@ -20,7 +20,7 @@ def upgrade():
         sa.Column('name', sa.Unicode(length=100), nullable=False),
         sa.Column('created', sa.DateTime(), server_default=sa.func.now(), nullable=False),
         sa.Column('updated', sa.DateTime(), server_default=sa.func.now(), nullable=False),
-        sa.Column('creator_id', sa.Integer(), nullable=True),
+        sa.Column('creator_id', sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['creator_id'], ['user.id'])
     )
