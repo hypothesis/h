@@ -8,6 +8,7 @@ from pyramid.view import view_config
 
 from h.groups import schemas
 from h.groups import models
+from h.accounts import models as accounts_models
 
 
 @view_config(route_name='group_create',
@@ -38,7 +39,9 @@ def create_group(request):
     except deform.ValidationFailure as err:
         return {'form': form, 'data': request.params}
 
-    group = models.Group(name=appstruct["name"])
+    user = accounts_models.User.get_by_id(
+        request, request.authenticated_userid)
+    group = models.Group(name=appstruct["name"], creator=user)
     request.db.add(group)
 
     # We need to flush the db session here so that group.id will be generated.

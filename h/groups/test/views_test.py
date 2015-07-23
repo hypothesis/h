@@ -50,20 +50,23 @@ def test_create_group_form_returns_empty_form_data(GroupSchema, Form):
     assert template_data["data"] == {}
 
 
+@mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
-def test_create_group_404s_if_groups_feature_is_off(GroupSchema, Form, Group):
+def test_create_group_404s_if_groups_feature_is_off(
+        GroupSchema, Form, Group, User):
     request = mock.Mock(feature=mock.Mock(return_value=False))
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         views.create_group(request)
 
 
+@mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
-def test_create_group_inits_form_with_schema(GroupSchema, Form, Group):
+def test_create_group_inits_form_with_schema(GroupSchema, Form, Group, User):
     schema = mock.Mock()
     GroupSchema.return_value = mock.Mock(bind=mock.Mock(return_value=schema))
 
@@ -72,10 +75,11 @@ def test_create_group_inits_form_with_schema(GroupSchema, Form, Group):
     Form.assert_called_once_with(schema)
 
 
+@mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
-def test_create_group_validates_form(GroupSchema, Form, Group):
+def test_create_group_validates_form(GroupSchema, Form, Group, User):
     Form.return_value = form = mock.Mock()
     form.validate.return_value = {"name": "new group"}
     params = {"foo": "bar"}
@@ -86,11 +90,12 @@ def test_create_group_validates_form(GroupSchema, Form, Group):
     form.validate.assert_called_once_with(params.items())
 
 
+@mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
 def test_create_group_rerenders_form_on_validation_failure(
-        GroupSchema, Form, Group):
+        GroupSchema, Form, Group, User):
     Form.return_value = form = mock.Mock()
     form.validate.side_effect = deform.ValidationFailure(None, None, None)
     params = {"foo": "bar"}
@@ -102,22 +107,41 @@ def test_create_group_rerenders_form_on_validation_failure(
     assert template_data['data'] == params
 
 
+@mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
-def test_create_group_uses_name_from_validated_data(GroupSchema, Form, Group):
+def test_create_group_gets_user_with_authenticated_id(
+        GroupSchema, Form, Group, User):
     """It uses the "name" from the validated data to create a new group."""
     Form.return_value = mock.Mock(validate=lambda data: {"name": "test-group"})
+    request = mock.Mock(authenticated_userid="acct:fred@hypothes.is")
+
+    views.create_group(request)
+
+    User.get_by_id.assert_called_once_with(request, "acct:fred@hypothes.is")
+
+
+@mock.patch('h.groups.views.accounts_models.User')
+@mock.patch('h.groups.views.models.Group')
+@mock.patch('h.groups.views.deform.Form')
+@mock.patch('h.groups.views.schemas.GroupSchema')
+def test_create_group_uses_name_from_validated_data(
+        GroupSchema, Form, Group, User):
+    """It uses the "name" from the validated data to create a new group."""
+    Form.return_value = mock.Mock(validate=lambda data: {"name": "test-group"})
+    User.get_by_id.return_value = user = mock.Mock()
 
     views.create_group(request=mock.Mock())
 
-    Group.assert_called_once_with(name="test-group")
+    Group.assert_called_once_with(name="test-group", creator=user)
 
 
+@mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
-def test_create_group_adds_group_to_db(GroupSchema, Form, Group):
+def test_create_group_adds_group_to_db(GroupSchema, Form, Group, User):
     """It should add the new group to the database session."""
     group = mock.Mock()
     Group.return_value = group
@@ -128,10 +152,12 @@ def test_create_group_adds_group_to_db(GroupSchema, Form, Group):
     request.db.add.assert_called_once_with(group)
 
 
+@mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
-def test_create_group_redirects_to_group_read_page(GroupSchema, Form, Group):
+def test_create_group_redirects_to_group_read_page(
+        GroupSchema, Form, Group, User):
     """After successfully creating a new group it should redirect."""
     group = mock.Mock(id='test-id', slug='test-slug')
     Group.return_value = group
@@ -145,10 +171,11 @@ def test_create_group_redirects_to_group_read_page(GroupSchema, Form, Group):
     assert redirect.location == "test-read-url"
 
 
+@mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
-def test_create_group_with_non_ascii_name(GroupSchema, Form, Group):
+def test_create_group_with_non_ascii_name(GroupSchema, Form, Group, User):
     name = u"☆ ßüper Gröup ☆"
     request = mock.Mock(params={"name": name})
 
