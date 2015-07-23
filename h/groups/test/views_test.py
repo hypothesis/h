@@ -69,8 +69,9 @@ def test_create_group_404s_if_groups_feature_is_off(
 def test_create_group_inits_form_with_schema(GroupSchema, Form, Group, User):
     schema = mock.Mock()
     GroupSchema.return_value = mock.Mock(bind=mock.Mock(return_value=schema))
+    request = mock.Mock(registry=mock.Mock(settings={"secret_key": "secret"}))
 
-    views.create_group(request=mock.Mock())
+    views.create_group(request=request)
 
     Form.assert_called_once_with(schema)
 
@@ -83,7 +84,9 @@ def test_create_group_validates_form(GroupSchema, Form, Group, User):
     Form.return_value = form = mock.Mock()
     form.validate.return_value = {"name": "new group"}
     params = {"foo": "bar"}
-    request = mock.Mock(POST=params)
+    request = mock.Mock(
+        POST=params,
+        registry=mock.Mock(settings={"secret_key": "secret"}))
 
     views.create_group(request)
 
@@ -115,7 +118,9 @@ def test_create_group_gets_user_with_authenticated_id(
         GroupSchema, Form, Group, User):
     """It uses the "name" from the validated data to create a new group."""
     Form.return_value = mock.Mock(validate=lambda data: {"name": "test-group"})
-    request = mock.Mock(authenticated_userid="acct:fred@hypothes.is")
+    request = mock.Mock(
+        registry=mock.Mock(settings={"secret_key": "secret"}),
+        authenticated_userid="acct:fred@hypothes.is")
 
     views.create_group(request)
 
@@ -131,8 +136,9 @@ def test_create_group_uses_name_from_validated_data(
     """It uses the "name" from the validated data to create a new group."""
     Form.return_value = mock.Mock(validate=lambda data: {"name": "test-group"})
     User.get_by_id.return_value = user = mock.Mock()
+    request = mock.Mock(registry=mock.Mock(settings={"secret_key": "secret"}))
 
-    views.create_group(request=mock.Mock())
+    views.create_group(request)
 
     Group.assert_called_once_with(name="test-group", creator=user)
 
@@ -143,30 +149,34 @@ def test_create_group_uses_name_from_validated_data(
 @mock.patch('h.groups.views.schemas.GroupSchema')
 def test_create_group_adds_group_to_db(GroupSchema, Form, Group, User):
     """It should add the new group to the database session."""
-    group = mock.Mock()
+    group = mock.Mock(id=6)
     Group.return_value = group
-    request = mock.Mock()
+    request = mock.Mock(registry=mock.Mock(settings={"secret_key": "secret"}))
 
     views.create_group(request)
 
     request.db.add.assert_called_once_with(group)
 
 
+@mock.patch('h.groups.views._encode_hashid')
 @mock.patch('h.groups.views.accounts_models.User')
 @mock.patch('h.groups.views.models.Group')
 @mock.patch('h.groups.views.deform.Form')
 @mock.patch('h.groups.views.schemas.GroupSchema')
 def test_create_group_redirects_to_group_read_page(
-        GroupSchema, Form, Group, User):
+        GroupSchema, Form, Group, User, _encode_hashid):
     """After successfully creating a new group it should redirect."""
     group = mock.Mock(id='test-id', slug='test-slug')
     Group.return_value = group
-    request = mock.Mock(route_url=mock.Mock(return_value="test-read-url"))
+    request = mock.Mock(
+        registry=mock.Mock(settings={"secret_key": "secret"}),
+        route_url=mock.Mock(return_value="test-read-url"))
+    _encode_hashid.return_value = "testhashid"
 
     redirect = views.create_group(request)
 
     request.route_url.assert_called_once_with(
-        "group_read", id="test-id", slug="test-slug")
+        "group_read", hashid="testhashid", slug="test-slug")
     assert redirect.status_int == 303
     assert redirect.location == "test-read-url"
 
@@ -177,43 +187,70 @@ def test_create_group_redirects_to_group_read_page(
 @mock.patch('h.groups.views.schemas.GroupSchema')
 def test_create_group_with_non_ascii_name(GroupSchema, Form, Group, User):
     name = u"☆ ßüper Gröup ☆"
-    request = mock.Mock(params={"name": name})
+    request = mock.Mock(
+        params={"name": name},
+        registry=mock.Mock(settings={"secret_key": "secret"}))
 
     views.create_group(request)
 
 
+@mock.patch('h.groups.views._decode_hashid')
 @mock.patch('h.groups.views.models.Group')
-def test_read_group_404s_if_groups_feature_is_off(Group):
+def test_read_group_404s_if_groups_feature_is_off(Group, _decode_hashid):
     request = mock.Mock(feature=mock.Mock(return_value=False))
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         views.read_group(request)
 
 
+@mock.patch('h.groups.views._decode_hashid')
 @mock.patch('h.groups.views.models.Group')
-def test_read_group_uses_id_from_params(Group):
-    request = mock.Mock(matchdict={"id": "1"})
+def test_read_group_decodes_hashid(Group, _decode_hashid):
+    request = mock.Mock(
+        matchdict={"hashid": "1"},
+        registry=mock.Mock(settings={"secret_key": "secret"}))
+
+    views.read_group(request)
+
+    _decode_hashid.assert_called_once_with(request, "1")
+
+
+@mock.patch('h.groups.views._decode_hashid')
+@mock.patch('h.groups.views.models.Group')
+def test_read_group_gets_group_by_id(Group, _decode_hashid):
+    request = mock.Mock(
+        matchdict={"hashid": "1"},
+        registry=mock.Mock(settings={"secret_key": "secret"}))
+    _decode_hashid.return_value = 1
 
     views.read_group(request)
 
     Group.get_by_id.assert_called_once_with(1)
 
 
+@mock.patch('h.groups.views._decode_hashid')
 @mock.patch('h.groups.views.models.Group')
-def test_read_group_returns_the_group(Group):
-    request = mock.Mock(matchdict={"id": "1"})
+def test_read_group_returns_the_group(Group, _decode_hashid):
+    request = mock.Mock(
+        matchdict={"hashid": "1"},
+        registry=mock.Mock(settings={"secret_key": "secret"}))
     group = mock.Mock()
     Group.get_by_id.return_value = group
+    _decode_hashid.return_value = 1
 
     template_data = views.read_group(request)
 
     assert template_data["group"] == group
 
 
+@mock.patch('h.groups.views._decode_hashid')
 @mock.patch('h.groups.views.models.Group')
-def test_read_group_404s_when_group_does_not_exist(Group):
-    request = mock.Mock(matchdict={"id": "1"})
+def test_read_group_404s_when_group_does_not_exist(Group, _decode_hashid):
+    request = mock.Mock(
+        matchdict={"hashid": "1"},
+        registry=mock.Mock(settings={"secret_key": "secret"}))
     Group.get_by_id.return_value = None
+    _decode_hashid.return_value = 1
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         views.read_group(request=request)
