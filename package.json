@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "description": "The Internet, peer reviewed.",
   "dependencies": {
+    "base-url": "^1.0.0",
     "browserify": "^9.0.3",
     "browserify-shim": "^3.8.3",
     "clean-css": "2.2.2",

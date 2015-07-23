@@ -1,3 +1,4 @@
+baseURI = require('base-url')()
 raf = require('raf')
 Annotator = require('annotator')
 $ = Annotator.$
@@ -105,7 +106,7 @@ module.exports = class Guest extends Annotator
 
     return metadataPromise.then (metadata) =>
       return uriPromise.then (href) =>
-        uri = new URL(href)
+        uri = new URL(href, baseURI)
         uri.hash = ''
         uri = uri.toString()
         return {uri, metadata}
