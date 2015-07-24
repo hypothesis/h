@@ -57,6 +57,13 @@ describe('h:features', function () {
     $httpBackend.flush();
   });
 
+  it('fetch should only send one request at a time', function () {
+    defaultHandler();
+    features.fetch();
+    features.fetch();
+    $httpBackend.flush();
+  });
+
   it('flagEnabled should retrieve features data', function () {
     defaultHandler();
     features.flagEnabled('foo');
