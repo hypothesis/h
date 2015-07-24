@@ -172,7 +172,7 @@ def test_read_group_404s_if_groups_feature_is_off():
 
 @read_group_fixtures
 def test_read_group_decodes_hashid(_decode_hashid):
-    request = _mock_request(matchdict={"hashid": "1"})
+    request = _mock_request(matchdict={"hashid": "1", "slug": "slug"})
 
     views.read_group(request)
 
@@ -183,7 +183,7 @@ def test_read_group_decodes_hashid(_decode_hashid):
 def test_read_group_gets_group_by_id(Group, _decode_hashid):
     _decode_hashid.return_value = 1
 
-    views.read_group(_mock_request(matchdict={"hashid": "1"}))
+    views.read_group(_mock_request(matchdict={"hashid": "1", "slug": "slug"}))
 
     Group.get_by_id.assert_called_once_with(1)
 
@@ -194,7 +194,8 @@ def test_read_group_returns_the_group(Group, _decode_hashid):
     Group.get_by_id.return_value = group
     _decode_hashid.return_value = 1
 
-    template_data = views.read_group(_mock_request(matchdict={"hashid": "1"}))
+    template_data = views.read_group(_mock_request(
+        matchdict={"hashid": "1", "slug": "slug"}))
 
     assert template_data["group"] == group
 
@@ -205,7 +206,24 @@ def test_read_group_404s_when_group_does_not_exist(Group, _decode_hashid):
     _decode_hashid.return_value = 1
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        views.read_group(_mock_request(matchdict={"hashid": "1"}))
+        views.read_group(_mock_request(
+            matchdict={"hashid": "1", "slug": "slug"}))
+
+
+@read_group_fixtures
+def test_read_group_without_slug_redirects(Group):
+    """/groups/<hashid> should redirect to /groups/<hashid>/<slug>."""
+    Group.return_value = mock.Mock(slug="my-group")
+    matchdict = {"hashid": "1"}  # No slug.
+    request = _mock_request(
+        matchdict=matchdict,
+        route_url=mock.Mock(return_value="/1/my-group"))
+
+    redirect = views.read_group(request)
+
+    assert request.route_url.called_with(
+        "group_read", hashid="1", slug="my-group")
+    assert redirect.location == "/1/my-group"
 
 
 @pytest.fixture
