@@ -28,11 +28,9 @@ describe('h:session', function () {
     };
     fakeDocument.prop.withArgs('baseURI').returns('http://foo.com/');
     fakeFlash = {error: sandbox.spy()};
-    fakeXsrf = {token: 'faketoken'};
 
     $provide.value('$document', fakeDocument);
     $provide.value('flash', fakeFlash);
-    $provide.value('xsrf', fakeXsrf);
   }));
 
 
@@ -99,7 +97,7 @@ describe('h:session', function () {
       $httpBackend.expectPOST(url).respond({model: model});
       session.login({});
       $httpBackend.flush();
-      assert.equal(fakeXsrf.token, token);
+      assert.equal(session.state.csrf, token);
 
       $httpBackend.expectPOST(url, {}, headers).respond({});
       session.login({});

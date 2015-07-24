@@ -56,8 +56,8 @@ function sessionActions(options) {
  */
  // TODO: Move accounts data management (e.g. profile, edit_profile,
  // disable_user, etc) into another module with another route.
-session.$inject = ['$document', '$http', '$resource', 'flash', 'xsrf'];
-function session(   $document,   $http,   $resource,   flash,   xsrf) {
+session.$inject = ['$document', '$http', '$resource', 'flash'];
+function session(   $document,   $http,   $resource,   flash) {
   var actions = sessionActions({
     transformRequest: prepare,
     transformResponse: process,
@@ -71,7 +71,10 @@ function session(   $document,   $http,   $resource,   flash,   xsrf) {
   resource.state = {};
 
   function prepare(data, headersGetter) {
-    headersGetter()[$http.defaults.xsrfHeaderName] = xsrf.token;
+    var csrfTok = resource.state.csrf;
+    if (typeof csrfTok !== 'undefined') {
+      headersGetter()[$http.defaults.xsrfHeaderName] = csrfTok;
+    }
     return angular.toJson(data);
   }
 
@@ -98,7 +101,7 @@ function session(   $document,   $http,   $resource,   flash,   xsrf) {
       }
     }
 
-    xsrf.token = model.csrf;
+    // Copy the model data (including the CSRF token) into `resource.state`.
     angular.copy(model, resource.state);
 
     // Return the model

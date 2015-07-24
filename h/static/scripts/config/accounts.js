@@ -62,6 +62,4 @@ function configure(   $httpProvider,   identityProvider) {
   ];
 }
 
-angular.module('h')
-  .value('xsrf', {token: null})
-  .config(configure);
+angular.module('h').config(configure);
