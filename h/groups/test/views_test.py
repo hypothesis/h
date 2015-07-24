@@ -14,7 +14,7 @@ def _mock_request(feature=None, settings=None, params=None,
     return mock.Mock(
         feature=feature or (lambda feature: True),
         registry=mock.Mock(settings=settings or {
-            "secret_key": "secret", "h.hashids.salt": "test salt"}),
+            "h.hashids.salt": "test salt"}),
         params=params, POST=params,
         authenticated_userid=authenticated_userid or "acct:fred@hypothes.is",
         route_url=route_url or mock.Mock(return_value="test-read-url"),
