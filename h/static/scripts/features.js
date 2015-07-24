@@ -25,15 +25,24 @@ var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function features ($document, $http, $log) {
   var cache = null;
+  var pending = false;
   var featuresURL = new URL('/app/features', $document.prop('baseURI'));
 
   function fetch() {
+    // Short-circuit if a fetch is already in progress...
+    if (pending) {
+      return;
+    }
+    pending = true;
     $http.get(featuresURL)
     .success(function(data) {
       cache = [Date.now(), data];
     })
     .error(function() {
       $log.warn('features service: failed to load features data');
+    })
+    .finally(function() {
+      pending = false;
     });
   }
 
