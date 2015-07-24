@@ -32,6 +32,11 @@ class Feature(Base):
                          nullable=False,
                          default=False,
                          server_default=sa.sql.expression.false())
+    # Is the feature enabled for admins?
+    admins = sa.Column(sa.Boolean,
+                       nullable=False,
+                       default=False,
+                       server_default=sa.sql.expression.false())
 
     @classmethod
     def get_by_name(cls, name):
@@ -58,6 +63,9 @@ def flag_enabled(request, name):
         return False
     # Features that are on for everyone are on.
     if feat.everyone:
+        return True
+    # Features that are on for admin are on if the current user is an admin.
+    if feat.admins and 'group:admin' in request.effective_principals:
         return True
     return False
 
