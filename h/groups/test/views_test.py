@@ -178,7 +178,7 @@ def test_read_group_decodes_hashid(hashids):
     views.read_group(request)
 
     hashids.decode_hashid.assert_called_once_with(
-        request, "h.groups.hashids", "1")
+        request, "h.groups", "1")
 
 
 @read_group_fixtures
