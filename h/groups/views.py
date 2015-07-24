@@ -14,7 +14,8 @@ from h import security
 
 def _get_hashids(request):
     salt = security.derive_key(
-        request.registry.settings["secret_key"], "h.groups.hashid", length=20)
+        request.registry.settings["h.hashids.salt"], "h.groups.hashid",
+        length=20)
     return hashids.Hashids(salt=salt, min_length=6)
 
 
@@ -98,6 +99,8 @@ def read_group(request):
 
 
 def includeme(config):
+    assert config.registry.settings.get("h.hashids.salt"), (
+        "There needs to be a h.hashids.salt config setting")
     config.add_route('group_create', '/groups/new')
     config.add_route('group_read', '/groups/{hashid}/{slug}')
     config.add_route('group_read_no_slug', '/groups/{hashid}')
