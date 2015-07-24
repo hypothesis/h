@@ -2,29 +2,13 @@
 
 import deform
 import colander
-import hashids
 from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 
 from h.groups import schemas
 from h.groups import models
 from h.accounts import models as accounts_models
-from h import security
-
-
-def _get_hashids(request):
-    salt = security.derive_key(
-        request.registry.settings["h.hashids.salt"], "h.groups.hashid",
-        length=20)
-    return hashids.Hashids(salt=salt, min_length=6)
-
-
-def _encode_hashid(request, number):
-    return _get_hashids(request).encode(number)
-
-
-def _decode_hashid(request, hashid):
-    return _get_hashids(request).decode(str(hashid))[0]
+from h import hashids
 
 
 @view_config(route_name='group_create',
@@ -63,7 +47,7 @@ def create_group(request):
     # We need to flush the db session here so that group.id will be generated.
     request.db.flush()
 
-    hashid = _encode_hashid(request, group.id)
+    hashid = hashids.encode_hashid(request, "h.groups.hashids", group.id)
     return exc.HTTPSeeOther(
         location=request.route_url(
             'group_read', hashid=hashid, slug=group.slug))
@@ -83,7 +67,7 @@ def read_group(request):
         raise exc.HTTPNotFound()
 
     hashid = request.matchdict["hashid"]
-    group_id = _decode_hashid(request, hashid)
+    group_id = hashids.decode_hashid(request, "h.groups.hashids", hashid)
 
     group = models.Group.get_by_id(group_id)
     if group is None:

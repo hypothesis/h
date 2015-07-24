@@ -13,7 +13,8 @@ def _mock_request(feature=None, settings=None, params=None,
     params = params or {"foo": "bar"}
     return mock.Mock(
         feature=feature or (lambda feature: True),
-        registry=mock.Mock(settings=settings or {"secret_key": "secret"}),
+        registry=mock.Mock(settings=settings or {
+            "secret_key": "secret", "h.hashids.salt": "test salt"}),
         params=params, POST=params,
         authenticated_userid=authenticated_userid or "acct:fred@hypothes.is",
         route_url=route_url or mock.Mock(return_value="test-read-url"),
@@ -62,7 +63,7 @@ def test_create_group_form_returns_empty_form_data(Form):
 
 # The fixtures required to mock all of create_group()'s dependencies.
 create_group_fixtures = pytest.mark.usefixtures(
-    'GroupSchema', 'Form', 'Group', 'User', '_encode_hashid')
+    'GroupSchema', 'Form', 'Group', 'User', 'hashids')
 
 
 @create_group_fixtures
@@ -140,12 +141,12 @@ def test_create_group_adds_group_to_db(Group):
 
 
 @create_group_fixtures
-def test_create_group_redirects_to_group_read_page(Group, _encode_hashid):
+def test_create_group_redirects_to_group_read_page(Group, hashids):
     """After successfully creating a new group it should redirect."""
     group = mock.Mock(id='test-id', slug='test-slug')
     Group.return_value = group
     request = _mock_request()
-    _encode_hashid.return_value = "testhashid"
+    hashids.encode_hashid.return_value = "testhashid"
 
     redirect = views.create_group(request)
 
@@ -161,7 +162,7 @@ def test_create_group_with_non_ascii_name():
 
 
 # The fixtures required to mock all of read_group()'s dependencies.
-read_group_fixtures = pytest.mark.usefixtures('Group', '_decode_hashid')
+read_group_fixtures = pytest.mark.usefixtures('Group', 'hashids')
 
 
 @read_group_fixtures
@@ -171,17 +172,18 @@ def test_read_group_404s_if_groups_feature_is_off():
 
 
 @read_group_fixtures
-def test_read_group_decodes_hashid(_decode_hashid):
+def test_read_group_decodes_hashid(hashids):
     request = _mock_request(matchdict={"hashid": "1", "slug": "slug"})
 
     views.read_group(request)
 
-    _decode_hashid.assert_called_once_with(request, "1")
+    hashids.decode_hashid.assert_called_once_with(
+        request, "h.groups.hashids", "1")
 
 
 @read_group_fixtures
-def test_read_group_gets_group_by_id(Group, _decode_hashid):
-    _decode_hashid.return_value = 1
+def test_read_group_gets_group_by_id(Group, hashids):
+    hashids.decode_hashid.return_value = 1
 
     views.read_group(_mock_request(matchdict={"hashid": "1", "slug": "slug"}))
 
@@ -189,10 +191,10 @@ def test_read_group_gets_group_by_id(Group, _decode_hashid):
 
 
 @read_group_fixtures
-def test_read_group_returns_the_group(Group, _decode_hashid):
+def test_read_group_returns_the_group(Group, hashids):
     group = mock.Mock()
     Group.get_by_id.return_value = group
-    _decode_hashid.return_value = 1
+    hashids.decode_hashid.return_value = 1
 
     template_data = views.read_group(_mock_request(
         matchdict={"hashid": "1", "slug": "slug"}))
@@ -201,9 +203,9 @@ def test_read_group_returns_the_group(Group, _decode_hashid):
 
 
 @read_group_fixtures
-def test_read_group_404s_when_group_does_not_exist(Group, _decode_hashid):
+def test_read_group_404s_when_group_does_not_exist(Group, hashids):
     Group.get_by_id.return_value = None
-    _decode_hashid.return_value = 1
+    hashids.decode_hashid.return_value = 1
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         views.read_group(_mock_request(
@@ -255,14 +257,7 @@ def User(request):
 
 
 @pytest.fixture
-def _encode_hashid(request):
-    patcher = mock.patch('h.groups.views._encode_hashid', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def _decode_hashid(request):
-    patcher = mock.patch('h.groups.views._decode_hashid', autospec=True)
+def hashids(request):
+    patcher = mock.patch('h.groups.views.hashids', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
