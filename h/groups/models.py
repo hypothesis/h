@@ -31,6 +31,11 @@ class Group(Base):
                                   secondary='user_group',
                                   backref='groups')
 
+    def __init__(self, name, creator):
+        self.name = name
+        self.creator = creator
+        self.members.append(creator)
+
     @property
     def slug(self):
         return slugify.slugify(self.name)
