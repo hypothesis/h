@@ -30,7 +30,6 @@ def test_flag_enabled_false_if_not_in_database(feature_model):
 
 
 def test_flag_enabled_false_if_everyone_false(feature_model):
-    feature_model.get_by_name.return_value.everyone = False
     request = DummyRequest()
 
     result = features.flag_enabled(request, 'notification')
@@ -47,9 +46,30 @@ def test_flag_enabled_true_if_everyone_true(feature_model):
     assert result
 
 
+def test_flag_enabled_false_when_admins_true_normal_request(feature_model):
+    feature_model.get_by_name.return_value.admins = True
+    request = DummyRequest()
+
+    result = features.flag_enabled(request, 'notification')
+
+    assert not result
+
+
+def test_flag_enabled_true_when_admins_true_admin_request(authn_policy,
+                                                          feature_model):
+    authn_policy.effective_principals.return_value = ['group:admin']
+    feature_model.get_by_name.return_value.admins = True
+    request = DummyRequest()
+
+    result = features.flag_enabled(request, 'notification')
+
+    assert result
+
 @pytest.fixture
 def feature_model(request):
     patcher = mock.patch('h.features.Feature', autospec=True)
     request.addfinalizer(patcher.stop)
     model = patcher.start()
+    model.get_by_name.return_value.everyone = False
+    model.get_by_name.return_value.admins = False
     return model
