@@ -146,7 +146,7 @@ def test_create_group_redirects_to_group_read_page(Group, hashids):
     group = mock.Mock(id='test-id', slug='test-slug')
     Group.return_value = group
     request = _mock_request()
-    hashids.encode_hashid.return_value = "testhashid"
+    hashids.encode.return_value = "testhashid"
 
     redirect = views.create_group(request)
 
@@ -177,13 +177,13 @@ def test_read_group_decodes_hashid(hashids):
 
     views.read_group(request)
 
-    hashids.decode_hashid.assert_called_once_with(
+    hashids.decode.assert_called_once_with(
         request, "h.groups", "1")
 
 
 @read_group_fixtures
 def test_read_group_gets_group_by_id(Group, hashids):
-    hashids.decode_hashid.return_value = 1
+    hashids.decode.return_value = 1
 
     views.read_group(_mock_request(matchdict={"hashid": "1", "slug": "slug"}))
 
@@ -194,7 +194,7 @@ def test_read_group_gets_group_by_id(Group, hashids):
 def test_read_group_returns_the_group(Group, hashids):
     group = mock.Mock()
     Group.get_by_id.return_value = group
-    hashids.decode_hashid.return_value = 1
+    hashids.decode.return_value = 1
 
     template_data = views.read_group(_mock_request(
         matchdict={"hashid": "1", "slug": "slug"}))
@@ -205,7 +205,7 @@ def test_read_group_returns_the_group(Group, hashids):
 @read_group_fixtures
 def test_read_group_404s_when_group_does_not_exist(Group, hashids):
     Group.get_by_id.return_value = None
-    hashids.decode_hashid.return_value = 1
+    hashids.decode.return_value = 1
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         views.read_group(_mock_request(

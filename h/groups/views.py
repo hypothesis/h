@@ -47,7 +47,7 @@ def create_group(request):
     # We need to flush the db session here so that group.id will be generated.
     request.db.flush()
 
-    hashid = hashids.encode_hashid(request, "h.groups", group.id)
+    hashid = hashids.encode(request, "h.groups", group.id)
     return exc.HTTPSeeOther(
         location=request.route_url(
             'group_read', hashid=hashid, slug=group.slug))
@@ -67,7 +67,7 @@ def read_group(request):
         raise exc.HTTPNotFound()
 
     hashid = request.matchdict["hashid"]
-    group_id = hashids.decode_hashid(request, "h.groups", hashid)
+    group_id = hashids.decode(request, "h.groups", hashid)
 
     group = models.Group.get_by_id(group_id)
     if group is None:
