@@ -12,8 +12,7 @@
   <div class="content paper">
     {% include "h:templates/includes/header.html.jinja2" %}
     This is group {{ group.name }}.
-    You're a member of this group.
-    You can invite other people to join this group by sending them the link
-    to this page: {{ group_url }}
+    Click to
+    <a href="{{ join_url }}">join this group</a>.
   </div>
 {% endblock content %}
