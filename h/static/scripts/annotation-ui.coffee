@@ -1,9 +1,8 @@
 value = (selection) ->
   if Object.keys(selection).length then selection else null
 
-# Holds the current state between the current state of the annotator in the
-# attached iframes for display in the sidebar. This covers both tool and
-# rendered state such as selected highlights.
+# Holds the current state of the annotator in the attached iframes. This covers
+# both tool and rendered state such as selected highlights.
 module.exports = ->
   visibleHighlights: false
 
