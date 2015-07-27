@@ -45,6 +45,13 @@ angulartics_ga:
   contents: h:static/scripts/vendor/angulartics-ga.js
 
 
+# Bootstrap (for admin areas only)
+bootstrap:
+  filters: uglifyjs
+  output: scripts/vendor/bootstrap.min.js
+  contents: h:static/scripts/vendor/bootstrap.js
+
+
 # jQuery
 jquery:
   filters: uglifyjs
@@ -93,6 +100,22 @@ momentjs:
     - filters: uglifyjs
       output: scripts/vendor/moment-timezone-data.min.js
       contents: h:static/scripts/vendor/moment-timezone-data.js
+
+
+# Admin areas
+admin_css:
+  output: styles/admin.min.css
+  filters:
+    - compass
+    - cleancss
+    - cssrewrite
+  contents: h:static/styles/admin.scss
+
+admin_js:
+  output: scripts/admin.min.js
+  contents:
+    - jquery
+    - bootstrap
 
 
 # Configuration
