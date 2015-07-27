@@ -226,13 +226,11 @@ def build_firefox(args):
     # Prepare a fresh build.
     clean('build/firefox')
     os.makedirs('build/firefox')
+    copytree('h/browser/firefox', 'build/firefox')
 
     # Bundle the extension assets.
     webassets_env = env['request'].webassets_env
     content_dir = webassets_env.directory
-    os.makedirs(content_dir)
-    copytree('h/browser/firefox/data', 'build/firefox/data')
-    copytree('h/browser/firefox/lib', 'build/firefox/lib')
 
     # Don't minify vendor libs per Mozilla policy.
     # This is a bit hacky.
