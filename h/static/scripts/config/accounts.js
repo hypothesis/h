@@ -1,13 +1,7 @@
 var angular = require('angular');
 
-var SESSION_ACTIONS = [
-  'login', 'logout', 'register', 'forgot_password',
-  'reset_password', 'edit_profile', 'disable_user'
-];
-
-
-configure.$inject = ['$httpProvider', 'identityProvider', 'sessionProvider'];
-function configure(   $httpProvider,   identityProvider,   sessionProvider) {
+configure.$inject = ['$httpProvider', 'identityProvider'];
+function configure(   $httpProvider,   identityProvider) {
   // Pending authentication check
   var authCheck = null;
 
@@ -66,32 +60,6 @@ function configure(   $httpProvider,   identityProvider,   sessionProvider) {
       });
     }
   ];
-
-  sessionProvider.actions.load = {
-    method: 'GET',
-    withCredentials: true
-  };
-
-  sessionProvider.actions.profile = {
-    method: 'GET',
-    params: {
-      __formid__: 'profile'
-    },
-    withCredentials: true
-  };
-
-  for (var i = 0; i < SESSION_ACTIONS.length; i++) {
-    var action = SESSION_ACTIONS[i];
-    sessionProvider.actions[action] = {
-      method: 'POST',
-      params: {
-        __formid__: action
-      },
-      withCredentials: true
-    };
-  }
 }
 
-angular.module('h')
-  .value('xsrf', {token: null})
-  .config(configure);
+angular.module('h').config(configure);

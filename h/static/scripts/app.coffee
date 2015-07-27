@@ -121,7 +121,6 @@ module.exports = angular.module('h', [
 .filter('urlencode', require('./filter/urlencode'))
 
 .provider('identity', require('./identity'))
-.provider('session', require('./session'))
 
 .service('annotator', -> new Annotator(angular.element('<div>')))
 .service('annotationMapper', require('./annotation-mapper'))
@@ -140,6 +139,7 @@ module.exports = angular.module('h', [
 .service('queryParser', require('./query-parser'))
 .service('render', require('./render'))
 .service('searchFilter', require('./search-filter'))
+.service('session', require('./session'))
 .service('store', require('./store'))
 .service('streamFilter', require('./stream-filter'))
 .service('streamer', require('./streamer'))
