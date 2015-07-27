@@ -26,7 +26,7 @@ var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 function features ($document, $http, $log) {
   var cache = null;
   var pending = false;
-  var featuresURL = new URL('/app/features', $document.prop('baseURI'));
+  var featuresUrl = new URL('/app/features', $document.prop('baseURI')).href;
 
   function fetch() {
     // Short-circuit if a fetch is already in progress...
@@ -34,7 +34,7 @@ function features ($document, $http, $log) {
       return;
     }
     pending = true;
-    $http.get(featuresURL)
+    $http.get(featuresUrl)
     .success(function(data) {
       cache = [Date.now(), data];
     })
