@@ -178,6 +178,7 @@ def stream_atom(request):
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
 @notfound_view_config(renderer='h:templates/notfound.html.jinja2')
 def notfound(context, request):
+    request.response.status_int = 404
     return {}
 
 
