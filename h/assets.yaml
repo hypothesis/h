@@ -195,7 +195,6 @@ inject_js:
           - h:static/scripts/annotator/*.js
           - h:static/scripts/annotator/anchoring/*.coffee
           - h:static/scripts/annotator/plugin/*.coffee
-          - h:static/scripts/vendor/annotator.auth.js
 
 inject_css:
   output: styles/hypothesis.min.css
