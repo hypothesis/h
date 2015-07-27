@@ -125,6 +125,43 @@ class AuthController(object):
                                         headers=headers)
 
 
+@view_defaults(route_name='synchronous_login',
+               renderer='h:templates/synchronous_login.html.jinja2')
+class SynchronousAuthController(object):
+
+    def __init__(self, request):
+        self.request = request
+        self.redirect = self.request.params.get('redirect') or (
+            self.request.route_url('stream'))
+        self.schema = schemas.LoginSchema().bind(request=self.request)
+        self.form = deform.Form(self.schema)
+
+    @view_config(request_method='GET')
+    def login_form(self):
+        """Render the login form."""
+        if self.request.authenticated_userid is not None:
+            return httpexceptions.HTTPFound(location=self.redirect)
+
+        return {'form': self.form, 'data': {'redirect': self.redirect}}
+
+    @view_config(request_method='POST')
+    def login(self):
+        """Handle a login form submission."""
+        if self.request.authenticated_userid is not None:
+            return httpexceptions.HTTPFound(location=self.redirect)
+
+        try:
+            appstruct = self.form.validate(self.request.POST.items())
+        except deform.ValidationFailure as err:
+            return {'errors': err.error.asdict(), 'form': self.form,
+                    'data': self.request.params}
+
+        user = appstruct['user']
+        self.request.registry.notify(LoginEvent(self.request, user))
+
+        return httpexceptions.HTTPFound(location=self.redirect)
+
+
 @view_defaults(accept='application/json', context=Application, renderer='json')
 @view_config(attr='login', request_param='__formid__=login')
 @view_config(attr='logout', request_param='__formid__=logout')
@@ -643,4 +680,5 @@ def includeme(config):
     config.add_route('disable_user', '/account/disable')
     config.add_route('admin_users_index', '/admins')
     config.add_route('admin_user_delete', '/admins/delete')
+    config.add_route('synchronous_login', '/synchronous_login')
     config.scan(__name__)

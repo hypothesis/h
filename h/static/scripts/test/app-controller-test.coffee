@@ -16,6 +16,7 @@ describe 'AppController', ->
   fakeLocation = null
   fakeParams = null
   fakePermissions = null
+  fakeSession = null
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
@@ -75,6 +76,8 @@ describe 'AppController', ->
       permits: sandbox.stub().returns(true)
     }
 
+    fakeSession = {}
+
     fakeStore = {
       SearchResource: {
         get: sinon.spy()
@@ -108,6 +111,7 @@ describe 'AppController', ->
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams
     $provide.value 'permissions', fakePermissions
+    $provide.value 'session', fakeSession
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamfilter', fakeStreamFilter

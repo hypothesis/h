@@ -1,0 +1,19 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}{{ group.name }}{% endblock page_title %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
+
+{% block content %}
+  <div class="content paper">
+    {% include "h:templates/includes/header.html.jinja2" %}
+    This is group {{ group.name }}.
+    You're a member of this group.
+    You can invite other people to join this group by sending them the link
+    to this page: {{ group_url }}
+  </div>
+{% endblock content %}

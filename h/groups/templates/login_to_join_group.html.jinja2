@@ -1,0 +1,20 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}{{ group.name }}{% endblock page_title %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock %}
+
+{% block content %}
+  <div class="content paper">
+    {% include "h:templates/includes/header.html.jinja2" %}
+    This is group {{ group.name }}.
+    <a href="{{ request.route_url('synchronous_login') }}?redirect={{ redirect }}">
+      Login to join this group.
+    </a>
+  </div>
+{% endblock content %}
+
