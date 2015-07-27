@@ -53,31 +53,27 @@ def create_group(request):
             'group_read', hashid=hashid, slug=group.slug))
 
 
-@view_config(route_name='group_read_no_slug',
-             request_method='GET',
-             renderer='h:groups/templates/read_group.html.jinja2')
-@view_config(route_name='group_read_no_slug_trailing_slash',
-             request_method='GET',
-             renderer='h:groups/templates/read_group.html.jinja2')
 @view_config(route_name='group_read',
              request_method='GET',
              renderer='h:groups/templates/read_group.html.jinja2')
+@view_config(route_name='group_read_noslug', request_method='GET')
 def read_group(request):
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
 
     hashid = request.matchdict["hashid"]
+    slug = request.matchdict.get("slug")
     group_id = hashids.decode(request, "h.groups", hashid)
 
     group = models.Group.get_by_id(group_id)
     if group is None:
-        raise exc.HTTPNotFound
+        raise exc.HTTPNotFound()
 
-    # /groups/<hashid> redirects to /groups/<hashid>/<slug>.
-    if "slug" not in request.matchdict:
-        return exc.HTTPSeeOther(
-            location=request.route_url(
-                'group_read', hashid=hashid, slug=group.slug))
+    if slug is None or slug != group.slug:
+        canonical = request.route_url('group_read',
+                                      hashid=hashid,
+                                      slug=group.slug)
+        return exc.HTTPMovedPermanently(location=canonical)
 
     return {"group": group}
 
@@ -86,7 +82,7 @@ def includeme(config):
     assert config.registry.settings.get("h.hashids.salt"), (
         "There needs to be a h.hashids.salt config setting")
     config.add_route('group_create', '/groups/new')
-    config.add_route('group_read', '/groups/{hashid}/{slug}')
-    config.add_route('group_read_no_slug', '/groups/{hashid}')
-    config.add_route('group_read_no_slug_trailing_slash', '/groups/{hashid}/')
+    # Match "/groups/<hashid>/": we redirect to the version with the slug.
+    config.add_route('group_read', '/groups/{hashid}/{slug:[^/]*}')
+    config.add_route('group_read_noslug', '/groups/{hashid}')
     config.scan(__name__)

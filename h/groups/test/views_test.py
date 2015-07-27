@@ -193,6 +193,7 @@ def test_read_group_gets_group_by_id(Group, hashids):
 @read_group_fixtures
 def test_read_group_returns_the_group(Group):
     group = Group.get_by_id.return_value
+    group.slug = 'slug'
 
     template_data = views.read_group(_mock_request(
         matchdict={"hashid": "1", "slug": "slug"}))
@@ -214,6 +215,22 @@ def test_read_group_without_slug_redirects(Group):
     """/groups/<hashid> should redirect to /groups/<hashid>/<slug>."""
     Group.return_value = mock.Mock(slug="my-group")
     matchdict = {"hashid": "1"}  # No slug.
+    request = _mock_request(
+        matchdict=matchdict,
+        route_url=mock.Mock(return_value="/1/my-group"))
+
+    redirect = views.read_group(request)
+
+    assert request.route_url.called_with(
+        "group_read", hashid="1", slug="my-group")
+    assert redirect.location == "/1/my-group"
+
+
+@read_group_fixtures
+def test_read_group_with_wrong_slug_redirects(Group):
+    """/groups/<hashid>/<wrong> should redirect to /groups/<hashid>/<slug>."""
+    Group.return_value = mock.Mock(slug="my-group")
+    matchdict = {"hashid": "1", "slug": "my-gro"}
     request = _mock_request(
         matchdict=matchdict,
         route_url=mock.Mock(return_value="/1/my-group"))
