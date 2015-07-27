@@ -101,7 +101,19 @@ def read_group(request):
              renderer='h:groups/templates/read_group.html.jinja2',
              permission='authenticated')
 def join_group(request):
-    pass
+    if not request.feature('groups'):
+        raise exc.HTTPNotFound()
+
+    user = accounts_models.User.get_by_id(
+        request, request.authenticated_userid)
+
+    hashid = request.matchdict["hashid"]
+    group_id = hashids.decode(request, "h.groups", hashid)
+    group = models.Group.get_by_id(group_id)
+
+    group.members.append(user)
+
+    return exc.HTTPSeeOther(_url_for_group(request, group))
 
 
 def includeme(config):
