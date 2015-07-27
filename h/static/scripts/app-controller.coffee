@@ -97,7 +97,7 @@ module.exports = class AppController
       streamer.close()
       streamer.open($window.WebSocket, streamerUrl)
 
-      # Clean up annotations that should be removed
+      # Clean up annotations that should be removed.
       cleanupAnnotations()
 
       # Reload the view.
