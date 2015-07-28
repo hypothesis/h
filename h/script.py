@@ -85,14 +85,6 @@ parser_assets = subparsers.add_parser('assets', help=assets.__doc__)
 _add_common_args(parser_assets)
 
 
-def extension(args):
-    print('This command has been removed. Please use the hypothesis-buildext '
-          'tool instead.', file=sys.stderr)
-    sys.exit(1)
-
-parser_extension = subparsers.add_parser('extension', help='DEPRECATED.')
-
-
 def reindex(args):
     """Reindex the annotations into a new Elasticsearch index."""
     paster.setup_logging(args.config_uri)
@@ -176,7 +168,6 @@ parser_version = subparsers.add_parser('version', help=version.__doc__)
 COMMANDS = {
     'assets': assets,
     'admin': admin,
-    'extension': extension,
     'init_db': init_db,
     'reindex': reindex,
     'token': token,
