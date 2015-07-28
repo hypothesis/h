@@ -6,7 +6,6 @@ import os
 import sys
 import textwrap
 
-from elasticsearch import Elasticsearch
 from pyramid import paster
 from pyramid.request import Request
 
@@ -95,13 +94,7 @@ def reindex(args):
     """Reindex the annotations into a new Elasticsearch index."""
     request = bootstrap(args)
 
-    if 'es.host' in request.registry.settings:
-        host = request.registry.settings['es.host']
-        conn = Elasticsearch([host])
-    else:
-        conn = Elasticsearch()
-
-    r = reindexer.Reindexer(conn, interactive=True)
+    r = reindexer.Reindexer(request.es.conn, interactive=True)
 
     r.reindex(args.old_index, args.new_index)
 

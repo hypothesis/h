@@ -6,7 +6,6 @@ stuff should be encapsulated in this module.
 """
 import logging
 
-import elasticsearch
 from elasticsearch import helpers
 import webob.multidict
 
@@ -151,14 +150,3 @@ def index(user=None):
 
     """
     return search(webob.multidict.NestedMultiDict({"limit": 20}), user=user)
-
-
-def includeme(config):
-    """Add a ``request.es_client`` property to the request."""
-    es_host = config.registry.settings.get('es.host')
-    if es_host:
-        es_client = elasticsearch.Elasticsearch([es_host])
-    else:
-        es_client = elasticsearch.Elasticsearch()
-    config.add_request_method(
-        lambda _: es_client, 'es_client', reify=True)
