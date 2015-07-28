@@ -2,36 +2,35 @@
 import json
 
 from elasticsearch import helpers
-import annotator
 
 from h.api.nipsa import search as nipsa_search
 
 
-def add_nipsa_action(annotation):
+def add_nipsa_action(index, annotation):
     """Return an Elasticsearch action for adding NIPSA to the annotation."""
     return {
         "_op_type": "update",
-        "_index": annotator.es.index,
+        "_index": index,
         "_type": "annotation",
         "_id": annotation["_id"],
         "doc": {"nipsa": True}
     }
 
 
-def remove_nipsa_action(annotation):
+def remove_nipsa_action(index, annotation):
     """Return an Elasticsearch action to remove NIPSA from the annotation."""
     source = annotation["_source"].copy()
     source.pop("nipsa", None)
     return {
         "_op_type": "index",
-        "_index": annotator.es.index,
+        "_index": index,
         "_type": "annotation",
         "_id": annotation["_id"],
         "_source": source,
     }
 
 
-def add_or_remove_nipsa(userid, action, es_client):
+def add_or_remove_nipsa(client, index, userid, action):
     """Add/remove the NIPSA flag to/from all of the user's annotations."""
     assert action in ("add_nipsa", "remove_nipsa")
     if action == "add_nipsa":
@@ -41,9 +40,9 @@ def add_or_remove_nipsa(userid, action, es_client):
         query = nipsa_search.nipsad_annotations(userid)
         action_func = remove_nipsa_action
 
-    annotations = helpers.scan(client=es_client, query=query)
-    actions = [action_func(a) for a in annotations]
-    helpers.bulk(client=es_client, actions=actions)
+    annotations = helpers.scan(client=client, query=query)
+    actions = [action_func(index, a) for a in annotations]
+    helpers.bulk(client=client, actions=actions)
 
 
 def worker(request):
@@ -58,7 +57,8 @@ def worker(request):
     def handle_message(_, message):
         """Handle a message on the "nipsa_users_annotations" channel."""
         add_or_remove_nipsa(
-            es_client=request.es_client,
+            client=request.es.conn,
+            index=request.es.index,
             **json.loads(message.body))
 
     reader = request.get_queue_reader(
