@@ -6,7 +6,6 @@ import os
 import sys
 import textwrap
 
-import transaction
 from elasticsearch import Elasticsearch
 from pyramid import paster
 from pyramid.request import Request
@@ -45,14 +44,25 @@ def _add_common_args(parser):
         metavar='URL')
 
 
+def bootstrap(args):
+    """
+    Bootstrap the application from the given arguments.
+
+    Returns a bootstrapped request object.
+    """
+    paster.setup_logging(args.config_uri)
+    request = Request.blank('/', base_url=args.base)
+    paster.bootstrap(args.config_uri, request=request)
+    return request
+
+
 def init_db(args):
     """Create database tables and elasticsearch indices."""
     # Force model creation using the MODEL_CREATE_ALL env var
     os.environ['MODEL_CREATE_ALL'] = 'True'
 
     # Start the application, triggering model creation
-    paster.setup_logging(args.config_uri)
-    paster.bootstrap(args.config_uri)
+    bootstrap(args)
 
 parser_init_db = subparsers.add_parser('init_db', help=init_db.__doc__)
 _add_common_args(parser_init_db)
@@ -60,46 +70,33 @@ _add_common_args(parser_init_db)
 
 def admin(args):
     """Make a user an admin."""
-    paster.bootstrap(args.config_uri, request=Request.blank(''))
+    request = bootstrap(args)
     accounts.make_admin(unicode(args.username, sys.getfilesystemencoding()))
-    transaction.commit()
-
+    request.tm.commit()
 
 parser_admin = subparsers.add_parser('admin', help=admin.__doc__)
+_add_common_args(parser_admin)
 parser_admin.add_argument(
     'username',
     help="the name of the user to make into an admin, e.g. 'fred'")
-parser_admin.add_argument('config_uri', help='paster configuration URI')
 
 
 def assets(args):
     """Build the static assets."""
-    paster.setup_logging(args.config_uri)
-    request = Request.blank('', base_url=args.base)
-    env = paster.bootstrap(args.config_uri, request=request)
-    assets_env = env['request'].webassets_env
-    for bundle in assets_env:
+    request = bootstrap(args)
+    for bundle in request.webassets_env:
         bundle.urls()
 
 parser_assets = subparsers.add_parser('assets', help=assets.__doc__)
 _add_common_args(parser_assets)
 
 
-def extension(args):
-    print('This command has been removed. Please use the hypothesis-buildext '
-          'tool instead.', file=sys.stderr)
-    sys.exit(1)
-
-parser_extension = subparsers.add_parser('extension', help='DEPRECATED.')
-
-
 def reindex(args):
     """Reindex the annotations into a new Elasticsearch index."""
-    paster.setup_logging(args.config_uri)
-    env = paster.bootstrap(args.config_uri)
+    request = bootstrap(args)
 
-    if 'es.host' in env['registry'].settings:
-        host = env['registry'].settings['es.host']
+    if 'es.host' in request.registry.settings:
+        host = request.registry.settings['es.host']
         conn = Elasticsearch([host])
     else:
         conn = Elasticsearch()
@@ -137,11 +134,8 @@ def token(args):
     """
     from h.auth import get_client, generate_signed_token
 
-    request = Request.blank("/", base_url=args.base)
-
-    paster.setup_logging(args.config_uri)
-    env = paster.bootstrap(args.config_uri, request=request)
-    registry = env['registry']
+    request = bootstrap(args)
+    registry = request.registry
 
     request.client = get_client(request, registry.settings['h.client_id'])
     request.user = args.sub
@@ -176,7 +170,6 @@ parser_version = subparsers.add_parser('version', help=version.__doc__)
 COMMANDS = {
     'assets': assets,
     'admin': admin,
-    'extension': extension,
     'init_db': init_db,
     'reindex': reindex,
     'token': token,
