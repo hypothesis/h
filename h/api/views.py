@@ -6,6 +6,7 @@ import logging
 
 from pyramid.view import view_config
 
+from h.api import renderers
 from h.api import search as search_lib
 from h.api import uri
 from h.api.auth import get_user
@@ -81,9 +82,14 @@ def search(request):
 
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    return search_lib.search(request.params,
-                             user=user,
-                             search_normalised_uris=search_normalised_uris)
+    results = search_lib.search(request.params,
+                                user=user,
+                                search_normalised_uris=search_normalised_uris)
+
+    return {
+        'total': results['total'],
+        'rows': [renderers.render_annotation(a) for a in results['rows']],
+    }
 
 
 @api_config(context=Root, name='access_token')
@@ -117,8 +123,13 @@ def annotations_index(request):
     search_normalised_uris = request.feature('search_normalised')
 
     user = get_user(request)
-    return search_lib.index(user=user,
-                            search_normalised_uris=search_normalised_uris)
+    results = search_lib.index(user=user,
+                               search_normalised_uris=search_normalised_uris)
+
+    return {
+        'total': results['total'],
+        'rows': [renderers.render_annotation(a) for a in results['rows']],
+    }
 
 
 @api_config(context=Annotations, request_method='POST', permission='create')
@@ -141,7 +152,7 @@ def create(request):
     _publish_annotation_event(request, annotation, 'create')
 
     # Return it so the client gets to know its ID and such
-    return annotation
+    return renderers.render_annotation(annotation)
 
 
 @api_config(containment=Root, context=Annotation,
@@ -153,7 +164,7 @@ def read(context, request):
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'read')
 
-    return annotation
+    return renderers.render_annotation(annotation)
 
 
 @api_config(containment=Root, context=Annotation,
@@ -186,7 +197,7 @@ def update(context, request):
     _publish_annotation_event(request, annotation, 'update')
 
     # Return the updated version that was just stored.
-    return annotation
+    return renderers.render_annotation(annotation)
 
 
 @api_config(containment=Root, context=Annotation,
