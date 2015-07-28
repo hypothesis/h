@@ -2,10 +2,14 @@
 from __future__ import print_function
 
 import argparse
+import logging
 import os
 import sys
 import textwrap
 
+from pkg_resources import iter_entry_points
+
+from elasticsearch import helpers as es_helpers
 from pyramid import paster
 from pyramid.request import Request
 
@@ -13,6 +17,7 @@ from h import __version__
 from h import reindexer
 from h import accounts
 
+ANNOTOOL_OPERATIONS = {e.name: e for e in iter_entry_points('h.annotool')}
 
 ENV_OVERRIDES = {
     'MODEL_CREATE_ALL': 'False',
@@ -21,6 +26,8 @@ ENV_OVERRIDES = {
 }
 os.environ.update(ENV_OVERRIDES)
 
+
+log = logging.getLogger('h')
 
 parser = argparse.ArgumentParser(
     'hypothesis',
@@ -78,6 +85,57 @@ _add_common_args(parser_admin)
 parser_admin.add_argument(
     'username',
     help="the name of the user to make into an admin, e.g. 'fred'")
+
+
+def annotool(args):
+    """
+    Perform operations on the annotation database.
+
+    This command provides a way of running named commands across the database
+    of annotations and can be used to run data migrations, analytics, etc.
+
+    **NB**: This tool cannot currently be used for making changes to the
+    annotation "document" field.
+    """
+    request = bootstrap(args)
+
+    annotations = es_helpers.scan(request.es.conn,
+                                  query={'query': {'match_all': {}}},
+                                  index=request.es.index,
+                                  doc_type='annotation')
+
+    total = 0
+    chunksize = 1000
+    pending = []
+
+    for annotation in annotations:
+        func = ANNOTOOL_OPERATIONS[args.operation].load()
+        func(annotation['_source'])
+
+        pending.append(annotation)
+
+        if len(pending) < chunksize:
+            continue
+
+        bodies = [{
+            '_index': request.es.index,
+            '_type': 'annotation',
+            '_op_type': 'update',
+            '_id': x['_id'],
+            'doc': x['_source'],
+        } for x in pending]
+        es_helpers.bulk(request.es.conn, bodies)
+
+        total += len(pending)
+        log.info("processed %d annotations", total)
+        pending = []
+
+parser_annotool = subparsers.add_parser('annotool', help=annotool.__doc__)
+_add_common_args(parser_annotool)
+parser_annotool.add_argument(
+    'operation',
+    choices=ANNOTOOL_OPERATIONS,
+    help="the operation to perform on all annotations")
 
 
 def assets(args):
@@ -163,6 +221,7 @@ parser_version = subparsers.add_parser('version', help=version.__doc__)
 COMMANDS = {
     'assets': assets,
     'admin': admin,
+    'annotool': annotool,
     'init_db': init_db,
     'reindex': reindex,
     'token': token,

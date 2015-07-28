@@ -129,6 +129,9 @@ setup(
         'h.worker': [
             'notification=h.notification.worker:run',
             'nipsa=h.api.nipsa.worker:worker',
+        ],
+        'h.annotool': [
+            'normalise-uris=h.api.uri:normalise_annotation_uris',
         ]
     },
 )
