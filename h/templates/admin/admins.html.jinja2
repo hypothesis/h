@@ -1,0 +1,51 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'admins' %}
+{% set page_title = 'Administrators' %}
+
+{% block content %}
+  <p>
+    On this page you can give users admin privileges! Admin privileges are
+    powerful, so please be careful who you give them to.
+  </p>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Add an admin</h3>
+    </div>
+    <div class="panel-body">
+      <form method="POST" class="form-inline">
+        <div class="form-group">
+          <label for="add">Username</label>
+          <input type="text" class="form-control" name="add">
+          <input type="submit" class="btn btn-default" value="Add">
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Current administrators</h3>
+    </div>
+    <div class="panel-body">
+      <form
+        method="POST" 
+        action="{{ request.route_url('admin_admins_remove') }}">
+        <ul>
+          {% for user in admin_users %}
+            <li>
+              {{ user }}
+              {% if admin_users|length > 1 %}
+                <button type="submit" class="btn btn-link btn-sm"
+                        name="remove" value="{{ user }}">
+                  Remove
+                </button>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </form>
+    </div>
+  </div>
+{% endblock %}

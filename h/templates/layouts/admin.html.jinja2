@@ -1,0 +1,63 @@
+{%- set nav_pages = [
+    ('index', 'Home', request.route_url('admin_index')),
+    ('nipsa', 'NIPSA', request.route_url('admin_nipsa')),
+    ('admins', 'Administrators', request.route_url('admin_admins')),
+] -%}
+
+{%- set page_id = page_id|default('home') -%}
+{%- set page_title = page_title|default('Administration pages') -%}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>
+      Hypothesis: {{ page_title }}
+    </title>
+
+    {% block styles %}
+      {% assets "admin_css" %}<link rel="stylesheet" href="{{ ASSET_URL }}">{% endassets %}
+    {% endblock %}
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Hypothesis Admin</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            {% for id, title, href in nav_pages %}
+            <li{% if id == page_id %} class="active"{% endif %}>
+              <a href="{{ href }}">{{ title }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 main">
+          {% include "h:templates/includes/flashbar.html.jinja2" %}
+          <h1 class="page-header">{{ page_title }}</h1>
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+
+    {% block scripts %}
+      {% assets "admin_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+    {% endblock %}
+  </body>
+</html>

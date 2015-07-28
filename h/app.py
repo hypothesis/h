@@ -58,7 +58,6 @@ def includeme(config):
     config.include('h.views')
     config.include('h.renderers')
     config.include('h.api_client')
-    config.include('h.nipsa')
 
     config.include('pyramid_jinja2')
     config.add_jinja2_extension('h.jinja_extensions.IncludeRawExtension')
@@ -68,6 +67,7 @@ def includeme(config):
     config.action(None, configure_jinja2_assets, args=(config,))
 
     config.include('h.accounts')
+    config.include('h.admin')
     config.include('h.auth')
     config.include('h.claim')
     config.include('h.notification')

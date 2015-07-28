@@ -11,14 +11,12 @@ from pyramid.testing import DummyRequest as _DummyRequest
 from h.conftest import DummyFeature
 from h.conftest import DummySession
 
-from h import accounts
 from h.accounts.views import ajax_form
 from h.accounts.views import validate_form
 from h.accounts.views import AuthController
 from h.accounts.views import ForgotPasswordController
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
-from h.accounts.views import AdminController
 
 
 class DummyRequest(_DummyRequest):
@@ -971,157 +969,6 @@ def test_disable_user_sets_random_password(form_validator, user_model):
     profile.disable_user()
 
     assert user.password == user_model.generate_random_password.return_value
-
-
-@patch("h.accounts.views.User.admins")
-def test_admin_index_when_no_admins(admins):
-    admins.return_value = []
-
-    assert AdminController.index()["admin_users"] == []
-
-
-@patch("h.accounts.views.User.admins")
-def test_admin_index_when_one_admin(admins):
-    admins.return_value = [Mock(username="fred")]
-
-    assert AdminController.index()["admin_users"] == ["fred"]
-
-
-@patch("h.accounts.views.User.admins")
-def test_admin_index_when_multiple_admins(admins_function):
-    admins_function.return_value = [
-        Mock(username="fred"), Mock(username="bob"), Mock(username="frank")]
-
-    template_data = AdminController.index()
-
-    assert template_data["admin_users"] == ["fred", "bob", "frank"]
-
-
-def test_admin_create_when_no_add_param():
-    """create() should 404 if the request has no "add" param."""
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        AdminController(DummyRequest()).create()
-
-
-@patch("h.accounts.make_admin")
-@patch("h.accounts.views.User.admins")
-def test_admin_create_calls_make_admin(admins, make_admin):
-    AdminController(DummyRequest(params={"add": "seanh"})).create()
-
-    make_admin.assert_called_once_with("seanh")
-
-
-@patch("h.accounts.views.AdminController.index")
-@patch("h.accounts.make_admin")
-@patch("h.accounts.views.User.admins")
-def test_admin_create_returns_index_on_success(admins, make_admin, index):
-    index.return_value = "expected data"
-
-    template_data = AdminController(
-        DummyRequest(params={"add": "seanh"})).create()
-
-    assert template_data == "expected data"
-
-
-@patch("h.accounts.make_admin")
-@patch("h.accounts.views.User.admins")
-def test_admin_create_flashes_on_NoSuchUserError(admins, make_admin):
-    make_admin.side_effect = accounts.NoSuchUserError
-    request = DummyRequest(params={"add": "seanh"})
-    request.session.flash = Mock()
-
-    AdminController(request).create()
-
-    assert request.session.flash.call_count == 1
-
-
-@patch("h.accounts.views.AdminController.index")
-@patch("h.accounts.make_admin")
-@patch("h.accounts.views.User.admins")
-def test_admin_create_returns_index_on_NoSuchUserError(
-        _, make_admin, index):
-    make_admin.side_effect = accounts.NoSuchUserError
-    index.return_value = "expected data"
-    request = DummyRequest(params={"add": "seanh"})
-
-    template_data = AdminController(request).create()
-
-    assert template_data == "expected data"
-
-
-@patch("h.accounts.views.User.get_by_username")
-@patch("h.accounts.views.User.admins")
-def test_admin_delete_calls_get_by_username(admins, get_by_username):
-    admins.return_value = [
-        Mock(username="fred"), Mock(username="bob"), Mock(username="frank")]
-    request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
-
-    AdminController(request).delete()
-
-    get_by_username.assert_called_once_with("fred")
-
-
-@patch("h.accounts.views.User.get_by_username")
-@patch("h.accounts.views.User.admins")
-def test_admin_delete_sets_admin_to_False(admins, get_by_username):
-    admins.return_value = [
-        Mock(username="fred"), Mock(username="bob"), Mock(username="frank")]
-    request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
-    user = Mock(admin=True)
-    get_by_username.return_value = user
-
-    AdminController(request).delete()
-
-    assert user.admin is False
-
-
-@patch("h.accounts.views.User.get_by_username")
-@patch("h.accounts.views.User.admins")
-def test_admin_delete_returns_redirect_on_success(admins, _):
-    admins.return_value = [
-        Mock(username="fred"), Mock(username="bob"), Mock(username="frank")]
-    request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
-
-    response = AdminController(request).delete()
-
-    assert isinstance(response, httpexceptions.HTTPSeeOther)
-
-
-@patch("h.accounts.views.User.admins")
-def test_admin_delete_404s_if_no_remove_param(admins):
-    admins.return_value = [
-        Mock(username="fred"), Mock(username="bob"), Mock(username="frank")]
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        AdminController(DummyRequest()).delete()
-
-
-@patch("h.accounts.views.User.admins")
-def test_admin_delete_returns_redirect_when_too_few_admins(admins):
-    admins.return_value = [Mock(username="fred")]
-    request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
-
-    response = AdminController(request).delete()
-
-    assert isinstance(response, httpexceptions.HTTPSeeOther)
-
-
-@patch("h.accounts.views.User.get_by_username")
-@patch("h.accounts.views.User.admins")
-def test_admin_delete_does_not_delete_last_admin(admins, get_by_username):
-    admins.return_value = [Mock(username="fred")]
-    request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
-    user = Mock(admin=True)
-    get_by_username.return_value = user
-
-    AdminController(request).delete()
-
-    assert user.admin is True
 
 
 @pytest.fixture
