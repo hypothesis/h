@@ -249,28 +249,28 @@ describe 'Guest', ->
     afterEach ->
       document.body.removeChild(el)
 
-    it "doesn't declare annotation without targets as orphans", (done) ->
+    it "declares annotations without targets as anchored", (done) ->
       guest = createGuest()
       annotation = target: []
       guest.anchor(annotation).then ->
-        assert.isFalse(annotation.$orphan)
-        done()
+        assert.isTrue(annotation.$anchored)
+      .then(done, done)
 
-    it "doesn't declare annotations with a working target as orphans", (done) ->
+    it "declares annotations with a working target anchored", (done) ->
       guest = createGuest()
       annotation = target: [{selector: "test"}]
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       guest.anchor(annotation).then ->
-        assert.isFalse(annotation.$orphan)
-        done()
+        assert.isTrue(annotation.$anchored)
+      .then(done, done)
 
-    it "declares annotations with broken targets as orphans", (done) ->
+    it "declares annotations with broken targets not anchored", (done) ->
       guest = createGuest()
       annotation = target: [{selector: 'broken selector'}]
       sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
       guest.anchor(annotation).then ->
-        assert.isTrue(annotation.$orphan)
-        done()
+        assert.isFalse(annotation.$anchored)
+      .then(done, done)
 
     it 'updates the cross frame and bucket bar plugins', (done) ->
       guest = createGuest()
@@ -282,7 +282,7 @@ describe 'Guest', ->
       guest.anchor(annotation).then ->
         assert.called(guest.plugins.BucketBar.update)
         assert.called(guest.plugins.CrossFrame.sync)
-        done()
+      .then(done, done)
 
     it 'returns a promise of the anchors for the annotation', (done) ->
       guest = createGuest()
@@ -292,7 +292,7 @@ describe 'Guest', ->
       target = [{selector: []}]
       guest.anchor({target: [target]}).then (anchors) ->
         assert.equal(anchors.length, 1)
-        done()
+      .then(done, done)
 
     it 'adds the anchor to the "anchors" instance property"', (done) ->
       guest = createGuest()
@@ -307,7 +307,7 @@ describe 'Guest', ->
         assert.strictEqual(guest.anchors[0].target, target)
         assert.strictEqual(guest.anchors[0].range, range)
         assert.strictEqual(guest.anchors[0].highlights, highlights)
-        done()
+      .then(done, done)
 
     it 'destroys targets that have been removed from the annotation', (done) ->
       annotation = {}
@@ -321,7 +321,7 @@ describe 'Guest', ->
         assert.equal(guest.anchors.length, 0)
         assert.calledOnce(removeHighlights, highlights)
         assert.calledWith(removeHighlights, highlights)
-        done()
+      .then(done, done)
 
     it 'does not reanchor targets that are already anchored', (done) ->
       guest = createGuest()
@@ -331,7 +331,7 @@ describe 'Guest', ->
         guest.anchor(annotation).then ->
           assert.equal(guest.anchors.length, 1)
           assert.calledOnce(stub)
-          done()
+      .then(done, done)
 
   describe 'detach()', ->
     it 'removes the anchors from the "anchors" instance variable', ->
