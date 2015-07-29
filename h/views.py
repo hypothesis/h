@@ -81,16 +81,8 @@ def js(context, request):
     }
 
 
-@view_config(name='app.html')
+@view_config(name='app.html', renderer='h:templates/app.html.jinja2')
 def widget(context, request):
-    location = request.resource_url(context, 'viewer', query=request.GET)
-    return httpexceptions.HTTPTemporaryRedirect(location=location)
-
-
-@view_config(name='viewer', renderer='h:templates/app.html.jinja2')
-@view_config(name='editor', renderer='h:templates/app.html.jinja2')
-@view_config(name='page_search', renderer='h:templates/app.html.jinja2')
-def page(context, request):
     return {}
 
 
