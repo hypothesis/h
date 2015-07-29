@@ -19,7 +19,7 @@ module.exports = class CrossFrame
 
     createAnnotationSync = ->
       whitelist = [
-        '$anchors', '$highlight', '$orphan',
+        '$highlight', '$orphan',
         'target', 'document', 'uri'
       ]
       options =
