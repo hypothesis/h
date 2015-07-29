@@ -131,7 +131,7 @@ setup(
             'nipsa=h.api.nipsa.worker:worker',
         ],
         'h.annotool': [
-            'normalise-uris=h.api.uri:normalise_annotation_uris',
+            'prepare=h.api.search:prepare',
         ]
     },
 )

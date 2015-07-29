@@ -84,16 +84,6 @@ def normalise(uristr):
     return uri.geturl()
 
 
-def normalise_annotation_uris(annotation):
-    """
-    Add normalised URI fields to the passed annotation.
-
-    Scan the passed annotation for any target URIs or document metadata URIs
-    and add normalised versions of these to the document.
-    """
-    _normalise_annotation_target_uris(annotation)
-
-
 def expand(uri):
     """
     Return all URIs which refer to the same underlying document as `uri`.
@@ -160,18 +150,3 @@ def _normalise_fragment(uri):
     s, n, p, q, frag = uri
 
     return urlparse.SplitResult(s, n, p, q, None)
-
-
-def _normalise_annotation_target_uris(annotation):
-    if 'target' not in annotation:
-        return
-    if not isinstance(annotation['target'], list):
-        return
-    for target in annotation['target']:
-        if not isinstance(target, dict):
-            continue
-        if not 'source' in target:
-            continue
-        if not isinstance(target['source'], basestring):
-            continue
-        target['source_normalised'] = normalise(target['source'])

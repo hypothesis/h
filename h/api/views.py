@@ -6,9 +6,7 @@ import logging
 
 from pyramid.view import view_config
 
-from h.api import renderers
 from h.api import search as search_lib
-from h.api import uri
 from h.api.auth import get_user
 from h.api.events import AnnotationEvent
 from h.api.models import Annotation
@@ -88,7 +86,7 @@ def search(request):
 
     return {
         'total': results['total'],
-        'rows': [renderers.render_annotation(a) for a in results['rows']],
+        'rows': [search_lib.render(a) for a in results['rows']],
     }
 
 
@@ -128,7 +126,7 @@ def annotations_index(request):
 
     return {
         'total': results['total'],
-        'rows': [renderers.render_annotation(a) for a in results['rows']],
+        'rows': [search_lib.render(a) for a in results['rows']],
     }
 
 
@@ -152,7 +150,7 @@ def create(request):
     _publish_annotation_event(request, annotation, 'create')
 
     # Return it so the client gets to know its ID and such
-    return renderers.render_annotation(annotation)
+    return search_lib.render(annotation)
 
 
 @api_config(containment=Root, context=Annotation,
@@ -164,7 +162,7 @@ def read(context, request):
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'read')
 
-    return renderers.render_annotation(annotation)
+    return search_lib.render(annotation)
 
 
 @api_config(containment=Root, context=Annotation,
@@ -197,7 +195,7 @@ def update(context, request):
     _publish_annotation_event(request, annotation, 'update')
 
     # Return the updated version that was just stored.
-    return renderers.render_annotation(annotation)
+    return search_lib.render(annotation)
 
 
 @api_config(containment=Root, context=Annotation,
@@ -250,9 +248,8 @@ def _create_annotation(fields, user):
     if nipsa.has_nipsa(user.id):
         annotation["nipsa"] = True
 
-    uri.normalise_annotation_uris(annotation)
-
     # Save it in the database
+    search_lib.prepare(annotation)
     annotation.save()
 
     log.debug('Created annotation; user: %s, consumer key: %s',
@@ -282,9 +279,8 @@ def _update_annotation(annotation, fields, has_admin_permission):
     if annotation.get('deleted', False):
         _anonymize_deletes(annotation)
 
-    uri.normalise_annotation_uris(annotation)
-
     # Save the annotation in the database, overwriting the old version.
+    search_lib.prepare(annotation)
     annotation.save()
 
 
