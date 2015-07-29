@@ -81,14 +81,22 @@ class AsyncFormViewMapper(object):
                 request.content_type = 'application/x-www-form-urlencoded'
                 request.POST.clear()
                 request.POST.update(data)
+
             inst = view(request)
             meth = getattr(inst, self.attr)
             result = meth()
+
+            if isinstance(result, httpexceptions.HTTPRedirection):
+                result.location = request.path_url
+                return result
+
             result = ajax_form(request, result)
+
             model = result.setdefault('model', {})
             model.update(session.model(request))
-            result.pop('form', None)
+
             return result
+
         return wrapper
 
 
