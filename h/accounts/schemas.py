@@ -34,7 +34,7 @@ def email_exists(node, value):
     user = User.get_by_email(value)
     if not user:
         msg = _('We have no user with the email address "{}". Try correcting '
-                'this address or try another.')
+                'this address or try another.').format(value)
         raise colander.Invalid(node, msg)
 
 
