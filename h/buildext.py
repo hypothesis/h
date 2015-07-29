@@ -185,7 +185,7 @@ def build_chrome(args):
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(env, bundle_app=True)
         with open(content_dir + '/app.html', 'w') as fp:
-            data = render_view(env['root'], env['request'], 'viewer')
+            data = render_view(env['root'], env['request'], 'app.html')
             fp.write(data)
     else:
         build_extension_common(env)
