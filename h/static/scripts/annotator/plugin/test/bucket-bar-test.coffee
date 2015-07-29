@@ -1,8 +1,5 @@
 bb = require('../bucket-bar')
 
-assert = chai.assert
-sinon.assert.expose(assert, prefix: '')
-
 describe 'Annotator.BucketBar', ->
   createBucketBar = (options) ->
     element = document.createElement('div')

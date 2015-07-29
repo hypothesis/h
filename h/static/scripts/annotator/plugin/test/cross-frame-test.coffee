@@ -1,9 +1,5 @@
 CrossFrame = require('../cross-frame')
 
-assert = chai.assert
-sinon.assert.expose(assert, prefix: '')
-
-
 describe 'Annotator.Plugin.CrossFrame', ->
   fakeDiscovery = null
   fakeBridge = null

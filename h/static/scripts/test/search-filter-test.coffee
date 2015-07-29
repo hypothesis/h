@@ -1,8 +1,5 @@
 {module, inject} = require('angular-mock')
 
-assert = chai.assert
-sinon.assert.expose assert, prefix: null
-
 describe 'searchFilter', ->
   sandbox = null
   searchFilter = null
@@ -66,4 +63,3 @@ describe 'searchFilter', ->
       assert.equal(result.any[1], 'john:doe')
       assert.equal(result.any[2], 'hi-fi')
       assert.equal(result.any[3], 'a:bc')
-

@@ -1,7 +1,5 @@
 {inject, module} = require('angular-mock')
 
-assert = chai.assert
-
 describe "AnnotationViewerController", ->
 
   before ->

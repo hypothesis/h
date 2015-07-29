@@ -2,9 +2,6 @@ var angularMock = require('angular-mock');
 var module = angularMock.module;
 var inject = angularMock.inject;
 
-var assert = chai.assert;
-sinon.assert.expose(assert, {prefix: null});
-
 describe('spinner', function () {
   var $animate = null;
   var $element = null

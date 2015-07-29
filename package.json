@@ -25,15 +25,19 @@
     "uglify-js": "^2.4.14"
   },
   "devDependencies": {
+    "chai": "^3.2.0",
     "jscs": "^1.13.1",
     "karma": "^0.12.17",
     "karma-browserify": "^3.0.3",
+    "karma-chai-sinon": "^0.1.5",
     "karma-cli": "0.0.4",
     "karma-mocha": "^0.1.4",
     "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
     "mocha": "^1.20.1",
-    "phantomjs": "^1.9.7"
+    "phantomjs": "^1.9.7",
+    "sinon": "^1.15.4",
+    "sinon-chai": "^2.8.0"
   },
   "engines": {
     "node": "0.10.x"

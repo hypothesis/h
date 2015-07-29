@@ -1,9 +1,5 @@
 {module, inject} = require('angular-mock')
 
-assert = chai.assert
-sinon.assert.expose assert, prefix: null
-
-
 describe 'AnnotationUIController', ->
   $scope = null
   $rootScope = null

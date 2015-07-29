@@ -1,9 +1,5 @@
 {module, inject} = require('angular-mock')
-
-assert = chai.assert
-sinon.assert.expose assert, prefix: null
 sandbox = sinon.sandbox.create()
-
 
 describe 'identityProvider', ->
   provider = null

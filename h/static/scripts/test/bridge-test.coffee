@@ -1,10 +1,6 @@
 {module, inject} = require('angular-mock')
 Channel = require('jschannel')
 
-assert = chai.assert
-sinon.assert.expose assert, prefix: null
-
-
 describe 'Bridge', ->
   sandbox = sinon.sandbox.create()
   bridge = null

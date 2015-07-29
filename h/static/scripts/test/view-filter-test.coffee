@@ -1,8 +1,5 @@
 {module, inject} = require('angular-mock')
 
-assert = chai.assert
-sinon.assert.expose assert, prefix: null
-
 poem =
   tiger: 'Tiger! Tiger! burning bright
           In the forest of the night

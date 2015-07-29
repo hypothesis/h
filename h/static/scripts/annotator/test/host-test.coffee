@@ -1,10 +1,6 @@
 Annotator = require('annotator')
 Host = require('../host')
 
-assert = chai.assert
-sinon.assert.expose(assert, prefix: '')
-
-
 describe 'Host', ->
   sandbox = sinon.sandbox.create()
   fakeCrossFrame = null
