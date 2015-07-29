@@ -6,12 +6,12 @@ import logging
 
 from pyramid.view import view_config
 
+from h.api import search as search_lib
 from h.api.auth import get_user
 from h.api.events import AnnotationEvent
 from h.api.models import Annotation
 from h.api.resources import Root
 from h.api.resources import Annotations
-import h.api.search
 from h.api import nipsa
 
 
@@ -78,7 +78,7 @@ def search(request):
     """Search the database for annotations matching with the given query."""
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    return h.api.search.search(request.params, user)
+    return search_lib.search(request.params, user)
 
 
 @api_config(context=Root, name='access_token')
@@ -110,7 +110,7 @@ def annotations_index(request):
     are ordered most recent first.
     """
     user = get_user(request)
-    return h.api.search.index(user=user)
+    return search_lib.index(user=user)
 
 
 @api_config(context=Annotations, request_method='POST', permission='create')
