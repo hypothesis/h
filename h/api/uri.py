@@ -79,6 +79,7 @@ def normalise(uristr):
 
     uri = _normalise_hostname_case(uri)
     uri = _normalise_hostname_port(uri)
+    uri = _normalise_pathinfo(uri)
     uri = _normalise_fragment(uri)
 
     return uri.geturl()
@@ -144,6 +145,15 @@ def _normalise_hostname_port(uri):
         netloc = hostinfo
 
     return urlparse.SplitResult(s, netloc, p, q, f)
+
+
+def _normalise_pathinfo(uri):
+    s, n, pathinfo, q, f = uri
+
+    if pathinfo.endswith('/'):
+        pathinfo = pathinfo[:-1]
+
+    return urlparse.SplitResult(s, n, pathinfo, q, f)
 
 
 def _normalise_fragment(uri):
