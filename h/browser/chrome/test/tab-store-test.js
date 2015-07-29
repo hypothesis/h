@@ -1,7 +1,6 @@
 describe('TabStore', function () {
   'use strict';
 
-  var assert = chai.assert;
   var TabStore = h.TabStore;
   var store;
   var fakeLocalStorage;

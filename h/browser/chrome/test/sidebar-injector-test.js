@@ -1,7 +1,6 @@
 describe('SidebarInjector', function () {
   'use strict';
 
-  var assert = chai.assert;
   var SidebarInjector = h.SidebarInjector;
   var injector;
   var fakeChromeTabs;

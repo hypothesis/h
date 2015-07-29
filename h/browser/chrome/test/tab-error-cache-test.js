@@ -1,6 +1,5 @@
 describe('TabErrorCache', function () {
  var cache;
- var assert = chai.assert;
 
  beforeEach(function () {
    cache = new h.TabErrorCache();

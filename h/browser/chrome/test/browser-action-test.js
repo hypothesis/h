@@ -1,7 +1,6 @@
 describe('BrowserAction', function () {
   'use strict';
 
-  var assert = chai.assert;
   var BrowserAction = h.BrowserAction;
   var TabState = h.TabState;
   var action;

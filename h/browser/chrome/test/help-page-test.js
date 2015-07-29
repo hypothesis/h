@@ -1,5 +1,4 @@
 describe('HelpPage', function () {
-  var assert = chai.assert;
   var HelpPage = h.HelpPage;
   var fakeChromeTabs;
   var help;

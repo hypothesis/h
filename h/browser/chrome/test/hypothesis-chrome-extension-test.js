@@ -1,7 +1,6 @@
 describe('HypothesisChromeExtension', function () {
   'use strict';
 
-  var assert = chai.assert;
   var sandbox = sinon.sandbox.create();
   var HypothesisChromeExtension = h.HypothesisChromeExtension;
   var ext;

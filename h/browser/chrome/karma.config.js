@@ -10,15 +10,13 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha'],
+    frameworks: ['mocha', 'chai-sinon'],
 
 
     // list of files / patterns to load in the browser
     files: [
       '../../../node_modules/es6-promise/dist/es6-promise.js',
       '../../static/scripts/vendor/polyfills/bind.js',
-      '../../static/scripts/vendor/sinon.js',
-      '../../static/scripts/vendor/chai.js',
       'lib/errors.js',
       'lib/tab-store.js',
       'lib/tab-state.js',
