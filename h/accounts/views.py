@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
+import datetime
 import json
 
 import deform
 from pyramid import httpexceptions
 from pyramid.view import view_config, view_defaults
-from pyramid.security import forget
+from pyramid.security import forget, remember
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
 from h.resources import Application
 from h.notification.models import Subscriptions
-from h import accounts
 from h import i18n
 from h.accounts.models import User
 from h.accounts.models import Activation
@@ -113,8 +113,15 @@ class AuthController(object):
             return err
 
         user = appstruct['user']
+        user.last_login_date = datetime.datetime.utcnow()
+
         self.request.registry.notify(LoginEvent(self.request, user))
-        return {}
+
+        userid = 'acct:{}@{}'.format(user.username, self.request.domain)
+        headers = remember(self.request, userid)
+
+        return httpexceptions.HTTPFound(location=self.login_redirect,
+                                        headers=headers)
 
     def logout(self):
         self.request.registry.notify(LogoutEvent(self.request))

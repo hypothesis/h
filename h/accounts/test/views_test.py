@@ -190,17 +190,16 @@ def test_login_no_event_when_validation_fails(loginevent,
     assert not notify.called
 
 
-
 @pytest.mark.usefixtures('routes_mapper')
-def test_login_returns_success_when_validation_succeeds(authn_policy,
-                                                        form_validator):
+def test_login_redirects_when_validation_succeeds(authn_policy,
+                                                  form_validator):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    form_validator.return_value = (None, {"user": FakeUser()})
+    form_validator.return_value = (None, {"user": FakeUser(username='cara')})
 
     result = AuthController(request).login()
 
-    assert result == {}
+    assert isinstance(result, httpexceptions.HTTPFound)
 
 
 @pytest.mark.usefixtures('routes_mapper')
@@ -211,7 +210,7 @@ def test_login_event_when_validation_succeeds(loginevent,
                                               notify):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    elephant = FakeUser()
+    elephant = FakeUser(username='avocado')
     form_validator.return_value = (None, {"user": elephant})
 
     AuthController(request).login()
