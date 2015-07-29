@@ -60,6 +60,7 @@ This package is responsible for defining URI normalisation and expansion
 routines for use elsewhere in the Hypothesis application.
 """
 
+import urllib
 import urlparse
 
 from h.api import models
@@ -80,7 +81,7 @@ def normalise(uristr):
     scheme = uri.scheme
     netloc = _normalise_netloc(uri)
     path = _normalise_path(uri)
-    query = uri.query
+    query = _normalise_query(uri)
     fragment = None
 
     uri = urlparse.SplitResult(scheme, netloc, path, query, fragment)
@@ -149,3 +150,23 @@ def _normalise_path(uri):
         path = path[:-1]
 
     return path
+
+
+def _normalise_query(uri):
+    qs = uri.query
+
+    try:
+        items = urlparse.parse_qsl(qs,
+                                   keep_blank_values=True,
+                                   strict_parsing=True)
+    except ValueError:
+        # If we can't parse the query string, we better preserve it as it was.
+        return qs
+
+    # Python sorts are stable, so preserving relative ordering of items with
+    # the same key doesn't require any work from us
+    items = sorted(items, key=lambda x: x[0])
+
+    qs = urllib.urlencode(items)
+
+    return qs

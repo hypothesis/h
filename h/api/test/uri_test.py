@@ -52,6 +52,19 @@ from h.api import uri
 
     # Should remove empty query strings
     ("http://example.com?", "http://example.com"),
+
+    # Should preserve garbage query strings because we probably can't do any
+    # better...
+    ("http://example.com?&&&&aa7&&!&&", "http://example.com?&&&&aa7&&!&&"),
+
+    # Should sort query string parameters
+    ("http://example.com?a=1&b=2", "http://example.com?a=1&b=2"),
+    ("http://example.com?b=2&a=1", "http://example.com?a=1&b=2"),
+
+    # Should preserve relative ordering of multiple query string params with
+    # the same key
+    ("http://example.com?b=2&b=3&b=1&a=1", "http://example.com?a=1&b=2&b=3&b=1"),
+    ("http://example.com?b=&b=3&b=1&a=1", "http://example.com?a=1&b=&b=3&b=1"),
 ])
 def test_normalise(url_in, url_out):
     assert uri.normalise(url_in) == url_out
