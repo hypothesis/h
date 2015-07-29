@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Tools for dealing with URIs within the Hypothesis API.
 
@@ -83,6 +85,8 @@ BLACKLISTED_QUERY_PARAMS = set([
 
 def normalise(uristr):
     """Translate the given URI into a normalised form."""
+    uristr = uristr.encode('utf-8')
+
     # Try to extract the scheme
     uri = urlparse.urlsplit(uristr)
 

@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 import pytest
 from mock import patch
 
@@ -56,6 +60,9 @@ from h.api import uri
     # Should preserve garbage query strings because we probably can't do any
     # better...
     ("http://example.com?&&&&aa7&&!&&", "http://example.com?&&&&aa7&&!&&"),
+
+    # Should appropriately urlencode unicode query strings
+    ("http://example.com?love=♥", "http://example.com?love=%E2%99%A5"),
 
     # Should sort query string parameters
     ("http://example.com?a=1&b=2", "http://example.com?a=1&b=2"),
