@@ -69,7 +69,7 @@ def bad_csrf_token(context, request):
     }
 
 
-class AsyncFormViewMapper(object):
+class AjaxFormViewMapper(object):
     def __init__(self, **kw):
         self.attr = kw['attr']
 
@@ -143,8 +143,8 @@ class AuthController(object):
 @view_defaults(accept='application/json', context=Application, renderer='json')
 @view_config(attr='login', request_param='__formid__=login')
 @view_config(attr='logout', request_param='__formid__=logout')
-class AsyncAuthController(AuthController):
-    __view_mapper__ = AsyncFormViewMapper
+class AjaxAuthController(AuthController):
+    __view_mapper__ = AjaxFormViewMapper
 
 
 @view_auth_defaults
@@ -284,13 +284,13 @@ class ForgotPasswordController(object):
     attr='reset_password',
     request_param='__formid__=reset_password'
 )
-class AsyncForgotPasswordController(ForgotPasswordController):
-    __view_mapper__ = AsyncFormViewMapper
+class AjaxForgotPasswordController(ForgotPasswordController):
+    __view_mapper__ = AjaxFormViewMapper
 
     def reset_password(self):
         request = self.request
         request.matchdict = request.POST
-        return super(AsyncForgotPasswordController, self).reset_password()
+        return super(AjaxForgotPasswordController, self).reset_password()
 
 
 @view_auth_defaults
@@ -395,8 +395,8 @@ class RegisterController(object):
 @view_defaults(accept='application/json', context=Application, renderer='json')
 @view_config(attr='register', request_param='__formid__=register')
 @view_config(attr='activate', request_param='__formid__=activate')
-class AsyncRegisterController(RegisterController):
-    __view_mapper__ = AsyncFormViewMapper
+class AjaxRegisterController(RegisterController):
+    __view_mapper__ = AjaxFormViewMapper
 
 
 @view_auth_defaults
@@ -510,8 +510,8 @@ class ProfileController(object):
 @view_config(attr='disable_user', request_param='__formid__=disable_user')
 @view_config(attr='profile', request_param='__formid__=profile')
 @view_config(attr='unsubscribe', request_param='__formid__=unsubscribe')
-class AsyncProfileController(ProfileController):
-    __view_mapper__ = AsyncFormViewMapper
+class AjaxProfileController(ProfileController):
+    __view_mapper__ = AjaxFormViewMapper
 
 
 def activation_email(request, user):
