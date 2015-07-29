@@ -65,6 +65,17 @@ from h.api import uri
     # the same key
     ("http://example.com?b=2&b=3&b=1&a=1", "http://example.com?a=1&b=2&b=3&b=1"),
     ("http://example.com?b=&b=3&b=1&a=1", "http://example.com?a=1&b=&b=3&b=1"),
+
+    # Should remove query string parameters known to be irrelevant for document
+    # identity
+    ("http://example.com?utm_source=abcde", "http://example.com"),
+    ("http://example.com?utm_medium=abcde", "http://example.com"),
+    ("http://example.com?utm_term=abcde", "http://example.com"),
+    ("http://example.com?utm_content=abcde", "http://example.com"),
+    ("http://example.com?utm_campaign=abcde", "http://example.com"),
+    ("http://example.com?utm_source=abcde&utm_medium=wibble", "http://example.com"),
+    ("http://example.com?a=1&utm_term=foo", "http://example.com?a=1"),
+    ("http://example.com?a=1&utm_term=foo&b=2", "http://example.com?a=1&b=2"),
 ])
 def test_normalise(url_in, url_out):
     assert uri.normalise(url_in) == url_out

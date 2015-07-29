@@ -68,6 +68,18 @@ from h.api import models
 
 URL_SCHEMES = set(['http', 'https'])
 
+BLACKLISTED_QUERY_PARAMS = set([
+    # Google Analytics campaigns. Reference:
+    #
+    #     https://support.google.com/analytics/answer/1033867?hl=en
+    #
+    'utm_campaign',
+    'utm_content',
+    'utm_medium',
+    'utm_source',
+    'utm_term',
+])
+
 
 def normalise(uristr):
     """Translate the given URI into a normalised form."""
@@ -166,6 +178,9 @@ def _normalise_query(uri):
     # Python sorts are stable, so preserving relative ordering of items with
     # the same key doesn't require any work from us
     items = sorted(items, key=lambda x: x[0])
+
+    # Remove query params that are blacklisted
+    items = [i for i in items if i[0] not in BLACKLISTED_QUERY_PARAMS]
 
     qs = urllib.urlencode(items)
 
