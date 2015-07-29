@@ -77,10 +77,13 @@ def normalise(uristr):
     if uri.scheme.lower() not in URL_SCHEMES:
         return uristr
 
-    uri = _normalise_hostname_case(uri)
-    uri = _normalise_hostname_port(uri)
-    uri = _normalise_pathinfo(uri)
-    uri = _normalise_fragment(uri)
+    scheme = uri.scheme
+    netloc = _normalise_netloc(uri)
+    path = _normalise_path(uri)
+    query = uri.query
+    fragment = None
+
+    uri = urlparse.SplitResult(scheme, netloc, path, query, fragment)
 
     return uri.geturl()
 
@@ -99,21 +102,8 @@ def expand(uri):
     return doc.uris()
 
 
-def _normalise_hostname_case(uri):
-    s, netloc, p, q, f = uri
-
-    if '@' in netloc:
-        userinfo, origin = netloc.rsplit('@', 1)
-        netloc = '@'.join([userinfo, origin.lower()])
-    else:
-        netloc = netloc.lower()
-
-    return urlparse.SplitResult(s, netloc, p, q, f)
-
-
-def _normalise_hostname_port(uri):
-    s, netloc, p, q, f = uri
-
+def _normalise_netloc(uri):
+    netloc = uri.netloc
     ipv6_hostname = '[' in netloc and ']' in netloc
 
     username = uri.username
@@ -121,11 +111,16 @@ def _normalise_hostname_port(uri):
     hostname = uri.hostname
     port = uri.port
 
+    # Normalise hostname to lower case
+    hostname = hostname.lower()
+
+    # Remove port if default for the scheme
     if uri.scheme == 'http' and port == 80:
         port = None
     elif uri.scheme == 'https' and port == 443:
         port = None
 
+    # Put it all back together again...
     userinfo = None
     if username is not None:
         userinfo = username
@@ -144,19 +139,13 @@ def _normalise_hostname_port(uri):
     else:
         netloc = hostinfo
 
-    return urlparse.SplitResult(s, netloc, p, q, f)
+    return netloc
 
 
-def _normalise_pathinfo(uri):
-    s, n, pathinfo, q, f = uri
+def _normalise_path(uri):
+    path = uri.path
 
-    if pathinfo.endswith('/'):
-        pathinfo = pathinfo[:-1]
+    if path.endswith('/'):
+        path = path[:-1]
 
-    return urlparse.SplitResult(s, n, pathinfo, q, f)
-
-
-def _normalise_fragment(uri):
-    s, n, p, q, frag = uri
-
-    return urlparse.SplitResult(s, n, p, q, None)
+    return path
