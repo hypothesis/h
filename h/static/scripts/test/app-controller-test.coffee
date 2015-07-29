@@ -46,6 +46,7 @@ describe 'AppController', ->
     }
 
     fakeDrafts = {
+      contains: sandbox.stub()
       remove: sandbox.spy()
       all: sandbox.stub().returns([])
       discard: sandbox.spy()
@@ -113,7 +114,6 @@ describe 'AppController', ->
   beforeEach inject (_$controller_, $rootScope) ->
     $controller = _$controller_
     $scope = $rootScope.$new()
-    $scope.$digest = sinon.spy()
 
   afterEach ->
     sandbox.restore()
@@ -179,3 +179,25 @@ describe 'AppController', ->
         payload: [ remoteAnnotation ]
 
       assert.calledWith $scope.$emit, "annotationDeleted", localAnnotation
+
+  it 'deletes annotations, but not drafts, on user change', ->
+    createController()
+    $scope.$emit = sinon.spy()
+
+    annotation1 = id: 'abaca'
+    annotation2 = id: 'deadbeef'
+
+    fakeThreading.register(annotation1)
+    fakeThreading.register(annotation2)
+
+    fakeDrafts.contains.withArgs(annotation1).returns(true)
+    fakeDrafts.contains.withArgs(annotation2).returns(false)
+
+    fakeAuth.user = null
+    $scope.$digest()
+
+    fakeAuth.user = 'acct:loki@example.com'
+    $scope.$digest()
+
+    assert.neverCalledWith($scope.$emit, 'annotationDeleted', annotation1)
+    assert.calledWith($scope.$emit, 'annotationDeleted', annotation2)

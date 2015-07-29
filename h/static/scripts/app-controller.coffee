@@ -62,12 +62,13 @@ module.exports = class AppController
       $scope.accountDialog.visible = false
 
     cleanupAnnotations = ->
-      # Clean up any annotations that need to be unloaded.
+      # Clean up all the annotations
       for id, container of $scope.threading.idTable when container.message
-        # Remove annotations the user is not authorized to view.
-        if not permissions.permits 'read', container.message, auth.user
+        # Keep drafts. When logging out, drafts are already discarded.
+        if drafts.contains(container.message)
+          continue
+        else
           $scope.$emit('annotationDeleted', container.message)
-          drafts.remove container.message
 
     $scope.$watch 'sort.name', (name) ->
       return unless name
