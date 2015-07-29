@@ -1,40 +1,10 @@
-"""The h API search functions.
-
-All search (Annotation.search(), Annotation.search_raw()) and Elasticsearch
-stuff should be encapsulated in this module.
-
-"""
-import logging
-
-from elasticsearch import helpers
-import webob.multidict
-
-from h.api import models
 from h.api import uri
 from h.api import nipsa
 
-log = logging.getLogger(__name__)
 
-
-def _match_clause_for_uri(uristr):
-    """Return an Elasticsearch match clause dict for the given URI."""
-    if not uristr:
-        return None
-
-    uristrs = uri.expand(uri.normalise(uristr))
-    matchers = [{"match": {"uri": uri.normalise(u)}} for u in uristrs]
-    if len(matchers) == 1:
-        return matchers[0]
-    return {
-        "bool": {
-            "minimum_should_match": 1,
-            "should": matchers
-        }
-    }
-
-
-def build_query(request_params, userid=None):
-    """Return an Elasticsearch query dict for the given h search API params.
+def build(request_params, userid=None):
+    """
+    Return an Elasticsearch query dict for the given h search API params.
 
     Translates the HTTP request params accepted by the h search API into an
     Elasticsearch query dict.
@@ -49,7 +19,6 @@ def build_query(request_params, userid=None):
     :returns: an Elasticsearch query dict corresponding to the given h search
         API params
     :rtype: dict
-
     """
     # NestedMultiDict objects are read-only, so we need to copy to make it
     # modifiable.
@@ -113,40 +82,19 @@ def build_query(request_params, userid=None):
     return query
 
 
-def search(request_params, user=None):
-    """Search with the given params and return the matching annotations.
+def _match_clause_for_uri(uristr):
+    """Return an Elasticsearch match clause dict for the given URI."""
+    if not uristr:
+        return None
 
-    :param request_params: the HTTP request params that were posted to the
-        h search API
-    :type request_params: webob.multidict.NestedMultiDict
+    uristrs = uri.expand(uristr)
+    matchers = [{"match": {"uri": u}} for u in uristrs]
 
-    :param user: the authorized user, or None
-    :type user: h.accounts.models.User or None
-
-    :returns: a dict with keys "rows" (the list of matching annotations, as
-        dicts) and "total" (the number of matching annotations, an int)
-    :rtype: dict
-
-    """
-    userid = user.id if user else None
-    log.debug("Searching with user=%s, for uri=%s",
-              str(userid), request_params.get('uri'))
-
-    query = build_query(request_params, userid=userid)
-    results = models.Annotation.search_raw(query, user=user, raw_result=True)
-
-    total = results['hits']['total']
-    docs = results['hits']['hits']
-    rows = [models.Annotation(d['_source'], id=d['_id']) for d in docs]
-
-    return {"rows": rows, "total": total}
-
-
-def index(user=None):
-    """Return the 20 most recent annotations, most-recent first.
-
-    Returns the 20 most recent annotations that are visible to the given user,
-    or that are public if user is None.
-
-    """
-    return search(webob.multidict.NestedMultiDict({"limit": 20}), user=user)
+    if len(matchers) == 1:
+        return matchers[0]
+    return {
+        "bool": {
+            "minimum_should_match": 1,
+            "should": matchers
+        }
+    }
