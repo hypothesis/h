@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import deform
-import colander
 from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 
@@ -38,7 +37,7 @@ def create(request):
     form = deform.Form(schemas.GroupSchema().bind(request=request))
     try:
         appstruct = form.validate(request.POST.items())
-    except deform.ValidationFailure as err:
+    except deform.ValidationFailure:
         return {'form': form, 'data': request.params}
 
     user = accounts_models.User.get_by_id(
