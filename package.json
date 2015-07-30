@@ -37,8 +37,7 @@
     "karma-sinon": "^1.0.4",
     "mocha": "^1.20.1",
     "phantomjs": "^1.9.7",
-    "sinon": "^1.15.4",
-    "sinon-chai": "^2.8.0"
+    "sinon": "^1.15.4"
   },
   "engines": {
     "node": "0.10.x"
