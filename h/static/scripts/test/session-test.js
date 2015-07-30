@@ -1,6 +1,6 @@
 "use strict";
 
-var mock = require('angular-mock');
+var mock = angular.mock;
 
 describe('h:session', function () {
   var $httpBackend;

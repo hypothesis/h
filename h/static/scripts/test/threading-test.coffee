@@ -1,4 +1,4 @@
-{module, inject} = require('angular-mock')
+{module, inject} = angular.mock
 
 describe 'Threading', ->
   instance = null

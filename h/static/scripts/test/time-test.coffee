@@ -1,4 +1,4 @@
-{module, inject} = require('angular-mock')
+{module, inject} = angular.mock
 
 minute = 60
 hour = minute * 60

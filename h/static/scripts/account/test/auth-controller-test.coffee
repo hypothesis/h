@@ -1,4 +1,4 @@
-{inject, module} = require('angular-mock')
+{inject, module} = angular.mock
 sandbox = sinon.sandbox.create()
 
 class MockSession

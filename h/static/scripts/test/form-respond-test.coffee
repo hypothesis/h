@@ -1,6 +1,4 @@
-{module, inject} = require('angular-mock')
-angular = require('angular')
-
+{module, inject} = angular.mock
 
 describe 'form-respond', ->
   $scope = null

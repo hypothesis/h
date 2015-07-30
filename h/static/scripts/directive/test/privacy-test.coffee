@@ -1,6 +1,4 @@
-{module, inject} = require('angular-mock')
-
-assert = chai.assert
+{module, inject} = angular.mock
 
 VISIBILITY_KEY ='hypothesis.visibility'
 VISIBILITY_PUBLIC = 'public'

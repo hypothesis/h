@@ -1,7 +1,4 @@
-{module, inject} = require('angular-mock')
-
-assert = chai.assert
-
+{module, inject} = angular.mock
 
 describe 'h:directives.status-button', ->
   $scope = null

@@ -1,4 +1,4 @@
-{module, inject} = require('angular-mock')
+{module, inject} = angular.mock
 
 poem =
   tiger: 'Tiger! Tiger! burning bright

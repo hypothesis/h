@@ -1,8 +1,4 @@
-{module, inject} = require('angular-mock')
-
-assert = chai.assert
-angular = require('angular')
-
+{module, inject} = angular.mock
 
 describe 'form-input', ->
   $compile = null

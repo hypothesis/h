@@ -1,6 +1,5 @@
-var angularMock = require('angular-mock');
-var module = angularMock.module;
-var inject = angularMock.inject;
+var module = angular.mock.module;
+var inject = angular.mock.inject;
 
 describe('persona', function () {
   var filter = null;

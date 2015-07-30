@@ -1,4 +1,4 @@
-{inject, module} = require('angular-mock')
+{inject, module} = angular.mock
 
 describe 'h:AccountController', ->
   $scope = null

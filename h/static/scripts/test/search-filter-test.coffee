@@ -1,4 +1,4 @@
-{module, inject} = require('angular-mock')
+{module, inject} = angular.mock
 
 describe 'searchFilter', ->
   sandbox = null
@@ -7,7 +7,6 @@ describe 'searchFilter', ->
   before ->
     angular.module('h', [])
     .service('searchFilter', require('../search-filter'))
-
 
   beforeEach module('h')
 

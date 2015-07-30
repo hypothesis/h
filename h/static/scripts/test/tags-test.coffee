@@ -1,4 +1,4 @@
-{module, inject} = require('angular-mock')
+{module, inject} = angular.mock
 
 describe 'tags', ->
   TAGS_LIST_KEY = 'hypothesis.user.tags.list'

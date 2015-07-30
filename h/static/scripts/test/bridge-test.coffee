@@ -1,4 +1,4 @@
-{module, inject} = require('angular-mock')
+{module, inject} = angular.mock
 Channel = require('jschannel')
 
 describe 'Bridge', ->

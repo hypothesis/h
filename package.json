@@ -66,7 +66,6 @@
     "annotator": "./h/static/scripts/vendor/annotator.js",
     "annotator-auth": "./h/static/scripts/vendor/annotator.auth.js",
     "angular": "./h/static/scripts/vendor/angular.js",
-    "angular-mock": "./h/static/scripts/vendor/angular-mocks.js",
     "dom-anchor-fragment": "./node_modules/dom-anchor-fragment/dist/dom-anchor-fragment.js",
     "dom-anchor-text-position": "./node_modules/dom-anchor-text-position/dist/dom-anchor-text-position.js",
     "dom-anchor-text-quote": "./node_modules/dom-anchor-text-quote/dist/dom-anchor-text-quote.js",
@@ -97,7 +96,6 @@
         "jquery"
       ]
     },
-    "angular-mock": "global:angular.mock",
     "dom-anchor-fragment": "domAnchorFragment",
     "dom-anchor-text-position": {
       "depends": [
