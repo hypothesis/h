@@ -45,9 +45,10 @@ module.exports = class CrossFrame
       new AnnotationUISync($rootScope, $window, bridge, annotationSync, annotationUI)
 
     addFrame = (channel) =>
-      channel.call
-        method: 'getDocumentInfo'
-        success: (info) =>
+      channel.call 'getDocumentInfo', (err, info) =>
+        if err
+          channel.destroy()
+        else
           $rootScope.$apply =>
             @frames.push({channel: channel, uri: info.uri})
 
@@ -62,6 +63,6 @@ module.exports = class CrossFrame
         bridge.createChannel(source, origin, token)
       discovery.startDiscovery(onDiscoveryCallback)
 
-      this.notify = bridge.notify.bind(bridge)
+      this.call = bridge.call.bind(bridge)
 
-    this.notify = -> throw new Error('connect() must be called before notify()')
+    this.call = -> throw new Error('connect() must be called before call()')

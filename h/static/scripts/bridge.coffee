@@ -1,5 +1,5 @@
-$ = require('jquery')
-Channel = require('jschannel')
+extend = require('extend')
+RPC = require('frame-rpc')
 
 # The Bridge service sets up a channel between frames
 # and provides an events API on top of it.
@@ -14,20 +14,28 @@ module.exports = class Bridge
     @channelListeners = {}
     @onConnectListeners = []
 
-  createChannel: (source, origin, scope) ->
-    # Set up a channel
-    channelOptions =
-      window: source
-      origin: origin
-      scope: scope
-      onReady: (channel) =>
-        for callback in @onConnectListeners
-          callback.call(this, channel, source)
-    channel = this._buildChannel channelOptions
+  createChannel: (source, origin, token) ->
+    channel = null
+    connected = false
 
-    # Attach channel message listeners
-    for own method, callback of @channelListeners
-      channel.bind method, callback
+    ready = =>
+      return if connected
+      connected = true
+      for cb in @onConnectListeners
+        cb.call(null, channel, source)
+
+    connect = (_token, cb) =>
+      if _token is token
+        cb()
+        ready()
+
+    listeners = extend({connect}, @channelListeners)
+
+    # Set up a channel
+    channel = new RPC(window, source, origin, listeners)
+
+    # Fire off a connection attempt
+    channel.call('connect', token, ready)
 
     # Store the newly created channel in our collection
     @links.push
@@ -38,55 +46,50 @@ module.exports = class Bridge
 
   # Make a method call on all links, collect the results and pass them to a
   # callback when all results are collected. Parameters:
-  # - options.method (required): name of remote method to call
-  # - options.params: parameters to pass to remote method
-  # - options.callback: called with array of results
-  call: (options) ->
+  # - method (required): name of remote method to call
+  # - args...: parameters to pass to remote method
+  # - callback: (optional) called with error, if any, and an Array of results
+  call: (method, args...) ->
+    cb = null
+    if typeof(args[args.length - 1]) is 'function'
+      cb = args[args.length - 1]
+      args = args.slice(0, -1)
+
     _makeDestroyFn = (c) =>
-      (error, reason) =>
+      (error) =>
         c.destroy()
         @links = (l for l in @links when l.channel isnt c)
+        throw error
 
-    deferreds = @links.map (l) ->
-      d = $.Deferred().fail(_makeDestroyFn l.channel)
-      callOptions = {
-        method: options.method
-        params: options.params
-        success: (result) -> d.resolve result
-        error: (error, reason) ->
-          if error isnt 'timeout_error'
-            d.reject error, reason
-          else
-            d.resolve null
-        timeout: 1000
-      }
-      l.channel.call callOptions
-      d.promise()
+    promises = @links.map (l) ->
+      p = new Promise (resolve, reject) ->
+        timeout = setTimeout((-> resolve(null)), 1000)
+        try
+          l.channel.call method, args..., (err, result) ->
+            clearTimeout(timeout)
+            if err then reject(err) else resolve(result)
+        catch err
+          reject(err)
 
-    $.when(deferreds...)
-    .then (results...) =>
-      options.callback? null, results
-    .fail (failure) =>
-      options.callback? failure
+      # Don't assign here. The disconnect is handled asynchronously.
+      return p.catch(_makeDestroyFn(l.channel))
 
-  # Publish a notification to all links
-  notify: (options) ->
-    for l in @links
-      l.channel.notify options
-    return
+    resultPromise = Promise.all(promises)
+
+    if cb?
+      resultPromise = resultPromise
+        .then((results) -> cb(null, results))
+        .catch((error) -> cb(error))
+
+    return resultPromise
 
   on: (method, callback) ->
     if @channelListeners[method]
       throw new Error("Listener '#{method}' already bound in Bridge")
-
     @channelListeners[method] = callback
-    for l in @links
-      l.channel.bind method, callback
     return this
 
   off: (method) ->
-    for l in @links
-      l.channel.unbind method
     delete @channelListeners[method]
     return this
 
@@ -94,11 +97,3 @@ module.exports = class Bridge
   onConnect: (callback) ->
     @onConnectListeners.push(callback)
     this
-
-  # Construct a channel to another frame
-  _buildChannel: (options) ->
-    # jschannel chokes on FF and Chrome extension origins.
-    if (options.origin.match /^chrome-extension:\/\//) or
-        (options.origin.match /^resource:\/\//)
-      options = $.extend {}, options, {origin: '*'}
-    channel = Channel.build(options)

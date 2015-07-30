@@ -51,15 +51,11 @@ module.exports = class WidgetController
         highlights = [annotation.$$tag]
       else
         highlights = []
-      crossframe.notify
-        method: 'focusAnnotations'
-        params: highlights
+      crossframe.call('focusAnnotations', highlights)
 
     $scope.scrollTo = (annotation) ->
       if angular.isObject annotation
-        crossframe.notify
-          method: 'scrollToAnnotation'
-          params: annotation.$$tag
+        crossframe.call('scrollToAnnotation', annotation.$$tag)
 
     $scope.shouldShowThread = (container) ->
       if annotationUI.hasSelectedAnnotations() and not container.parent.parent

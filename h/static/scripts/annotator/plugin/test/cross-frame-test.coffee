@@ -21,7 +21,7 @@ describe 'Annotator.Plugin.CrossFrame', ->
     fakeBridge =
       createChannel: sandbox.stub()
       onConnect: sandbox.stub()
-      notify: sandbox.stub()
+      call: sandbox.stub()
       on: sandbox.stub()
 
     fakeAnnotationSync =
@@ -91,11 +91,11 @@ describe 'Annotator.Plugin.CrossFrame', ->
       bridge.on('event', 'arg')
       assert.calledWith(fakeBridge.on, 'event', 'arg')
 
-  describe '.notify', ->
+  describe '.call', ->
     it 'proxies the call to the bridge', ->
       bridge = createCrossFrame()
-      bridge.notify(method: 'method')
-      assert.calledWith(fakeBridge.notify, method: 'method')
+      bridge.call('method', 'arg1', 'arg2')
+      assert.calledWith(fakeBridge.call, 'method', 'arg1', 'arg2')
 
   describe '.onConnect', ->
     it 'proxies the call to the bridge', ->

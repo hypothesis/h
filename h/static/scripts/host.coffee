@@ -11,13 +11,13 @@ module.exports = [
   '$window', 'bridge'
   ($window,   bridge) ->
     host =
-      showSidebar: -> notifyHost method: 'showFrame'
-      hideSidebar: -> notifyHost method: 'hideFrame'
+      showSidebar: -> callHost('showFrame')
+      hideSidebar: -> callHost('hideFrame')
 
     # Sends a message to the host frame
-    notifyHost = (message) ->
+    callHost = (method) ->
       for {channel, window} in bridge.links when window is $window.parent
-        channel.notify(message)
+        channel.call(method)
         break
 
     channelListeners =

@@ -26,7 +26,7 @@ describe 'CrossFrame', ->
     fakeDiscovery =
       startDiscovery: sandbox.stub()
     fakeBridge =
-      notify: sandbox.stub()
+      call: sandbox.stub()
       createChannel: sandbox.stub()
       onConnect: sandbox.stub()
     fakeAnnotationSync = {}
@@ -61,28 +61,16 @@ describe 'CrossFrame', ->
 
     it 'queries discovered frames for metadata', ->
       uri = 'http://example.com'
-      channel = {call: sandbox.stub().yieldsTo('success', {uri: uri})}
+      channel = {call: sandbox.stub().yields(null, {uri: uri})}
       fakeBridge.onConnect.yields(channel)
       crossframe.connect()
-      assert.calledWith(channel.call, {
-        method: 'getDocumentInfo'
-        success: sinon.match.func
-      })
+      assert.calledWith(channel.call, 'getDocumentInfo', sinon.match.func)
 
     it 'updates the frames array', ->
       uri = 'http://example.com'
-      channel = {call: sandbox.stub().yieldsTo('success', {uri: uri})}
+      channel = {call: sandbox.stub().yields(null, {uri: uri})}
       fakeBridge.onConnect.yields(channel)
       crossframe.connect()
       assert.deepEqual(crossframe.frames, [
         {channel: channel, uri: uri}
       ])
-
-
-  describe '.notify()', ->
-    it 'proxies the call to the bridge', ->
-      message = {method: 'foo', params: 'bar'}
-      crossframe.connect() # create the bridge.
-      crossframe.notify(message)
-      assert.calledOn(fakeBridge.notify, fakeBridge)
-      assert.calledWith(fakeBridge.notify, message)

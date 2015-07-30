@@ -72,10 +72,6 @@ module.exports = class Guest extends Annotator
         formatted = {}
         for k, v of annotation when k isnt 'anchors'
           formatted[k] = v
-        # Work around issue in jschannel where a repeated object is considered
-        # recursive, even if it is not its own ancestor.
-        if formatted.document?.title
-          formatted.document.title = formatted.document.title.slice()
         formatted
 
     this.addPlugin('CrossFrame', cfOptions)
@@ -115,21 +111,20 @@ module.exports = class Guest extends Annotator
     crossframe.onConnect(=> this.publish('panelReady'))
     crossframe.on('onEditorHide', this.onEditorHide)
     crossframe.on('onEditorSubmit', this.onEditorSubmit)
-    crossframe.on 'focusAnnotations', (ctx, tags=[]) =>
+    crossframe.on 'focusAnnotations', (tags=[]) =>
       for anchor in @anchors when anchor.highlights?
         toggle = anchor.annotation.$$tag in tags
         $(anchor.highlights).toggleClass('annotator-hl-focused', toggle)
-    crossframe.on 'scrollToAnnotation', (ctx, tag) =>
+    crossframe.on 'scrollToAnnotation', (tag) =>
       for anchor in @anchors when anchor.highlights?
         if anchor.annotation.$$tag is tag
           $(anchor.highlights).scrollintoview()
           return
-    crossframe.on 'getDocumentInfo', (trans) =>
-      trans.delayReturn(true)
+    crossframe.on 'getDocumentInfo', (cb) =>
       this.getDocumentInfo()
-      .then((info) -> trans.complete(info))
-      .catch((reason) -> trans.error(reason))
-    crossframe.on 'setVisibleHighlights', (ctx, state) =>
+      .then((info) -> cb(null, info))
+      .catch((reason) -> cb(reason))
+    crossframe.on 'setVisibleHighlights', (state) =>
       this.publish 'setVisibleHighlights', state
 
   _setupWrapper: ->
@@ -315,24 +310,20 @@ module.exports = class Guest extends Annotator
     return annotation
 
   showAnnotations: (annotations) =>
-    @crossframe?.notify
-      method: "showAnnotations"
-      params: (a.$$tag for a in annotations)
+    tags = (a.$$tag for a in annotations)
+    @crossframe?.call('showAnnotations', tags)
 
   toggleAnnotationSelection: (annotations) =>
-    @crossframe?.notify
-      method: "toggleAnnotationSelection"
-      params: (a.$$tag for a in annotations)
+    tags = (a.$$tag for a in annotations)
+    @crossframe?.call('toggleAnnotationSelection', tags)
 
   updateAnnotations: (annotations) =>
-    @crossframe?.notify
-      method: "updateAnnotations"
-      params: (a.$$tag for a in annotations)
+    tags = (a.$$tag for a in annotations)
+    @crossframe?.call('updateAnnotations', tags)
 
   focusAnnotations: (annotations) =>
-    @crossframe?.notify
-      method: "focusAnnotations"
-      params: (a.$$tag for a in annotations)
+    tags = (a.$$tag for a in annotations)
+    @crossframe?.call('focusAnnotations', tags)
 
   onSuccessfulSelection: (event, immediate) ->
     unless event?
@@ -396,11 +387,7 @@ module.exports = class Guest extends Annotator
   # Pass true to show the highlights in the frame or false to disable.
   setVisibleHighlights: (shouldShowHighlights) ->
     return if @visibleHighlights == shouldShowHighlights
-
-    @crossframe?.notify
-      method: 'setVisibleHighlights'
-      params: shouldShowHighlights
-
+    @crossframe?.call('setVisibleHighlights', shouldShowHighlights)
     this.toggleHighlightClass(shouldShowHighlights)
 
   toggleHighlightClass: (shouldShowHighlights) ->
@@ -413,11 +400,11 @@ module.exports = class Guest extends Annotator
 
   # Open the sidebar
   showFrame: ->
-    @crossframe?.notify method: 'open'
+    @crossframe?.call('open')
 
   # Close the sidebar
   hideFrame: ->
-    @crossframe?.notify method: 'back'
+    @crossframe?.call('back')
 
   onAdderMouseup: (event) ->
     event.preventDefault()
