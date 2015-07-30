@@ -1,3 +1,38 @@
+Next release
+============
+
+Bug fixes
+---------
+
+- Support for relative URLs return from document metadata plugins.
+
+- Fix a possible infinite digest cycle in the features client.
+
+- All not found responses now have a 404 status code.
+
+Features
+--------
+
+- Support for flagging users as "Not In Public Site Areas" or "NIPSA".
+  See https://github.com/hypothesis/h/pull/2300
+
+- Support for admin users.
+
+- Support for turning features on only for admins.
+
+- A new administration page for admins.
+
+Backwards Incompatibilities
+---------------------------
+
+- Support for the h.autologin feature has been removed.
+
+Security
+--------
+
+- Session cookies are now marked as HttpOnly to prevent session stealing by
+  cross-site scripting attacks.
+
 0.5.1 (2015-07-21)
 ==================
 
