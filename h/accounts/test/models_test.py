@@ -78,3 +78,36 @@ def test_admins_does_not_return_non_admin_users(db_session):
 
     for non_admin in non_admins:
         assert non_admin not in admins
+
+
+def test_staff_members_when_no_staff():
+    assert models.User.staff_members() == []
+
+
+def test_staff_members_when_one_staff_member(db_session):
+    staff_member = factories.User(staff=True)
+    db_session.add(staff_member)
+
+    staff_members = models.User.staff_members()
+
+    assert staff_members == [staff_member]
+
+
+def test_staff_members_when_multiple_staff_members(db_session):
+    staff_members = [factories.User(staff=True) for _ in range(0, 2)]
+    db_session.add_all(staff_members)
+
+    result = models.User.staff_members()
+
+    assert result == staff_members
+
+
+def test_staff_members_does_not_return_non_staff_users(db_session):
+    non_staff = [factories.User(staff=False) for _ in range(0, 2)]
+    db_session.add_all(non_staff)
+    db_session.add_all([factories.User(staff=True) for _ in range(0, 2)])
+
+    staff = models.User.staff_members()
+
+    for non_staff in non_staff:
+        assert non_staff not in staff

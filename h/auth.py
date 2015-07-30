@@ -140,9 +140,13 @@ def effective_principals(userid, request):
         additional_principals.append(consumer_group)
 
     primary_user = models.User.get_by_id(request, userid)
+
     if primary_user is not None:
         if primary_user.admin:
             additional_principals.append('group:admin')
+
+        if primary_user.staff:
+            additional_principals.append('group:staff')
 
     return additional_principals
 

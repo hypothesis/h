@@ -25,6 +25,15 @@ def make_admin(username):
         raise NoSuchUserError
 
 
+def make_staff(username):
+    """Make the given user a staff member."""
+    user = models.User.get_by_username(username)
+    if user:
+        user.staff = True
+    else:
+        raise NoSuchUserError
+
+
 def includeme(config):
     """A local identity provider."""
     config.include('.schemas')

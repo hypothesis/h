@@ -9,23 +9,27 @@ from h import accounts
 from h import admin
 
 
-@patch("h.admin.nipsa")
-def test_nipsa_index_with_no_nipsad_users(nipsa_api):
-    nipsa_api.index.return_value = []
+# The fixtures required to mock all of nipsa_index()'s dependencies.
+nipsa_index_fixtures = pytest.mark.usefixtures('nipsa')
+
+
+@nipsa_index_fixtures
+def test_nipsa_index_with_no_nipsad_users(nipsa):
+    nipsa.index.return_value = []
 
     assert admin.nipsa_index(DummyRequest()) == {"userids": []}
 
 
-@patch("h.admin.nipsa")
-def test_index_with_one_nipsad_users(nipsa_api):
-    nipsa_api.index.return_value = ["acct:kiki@hypothes.is"]
+@nipsa_index_fixtures
+def test_nipsa_index_with_one_nipsad_users(nipsa):
+    nipsa.index.return_value = ["acct:kiki@hypothes.is"]
 
     assert admin.nipsa_index(DummyRequest()) == {"userids": ["kiki"]}
 
 
-@patch("h.admin.nipsa")
-def test_index_with_multiple_nipsad_users(nipsa_api):
-    nipsa_api.index.return_value = [
+@nipsa_index_fixtures
+def test_nipsa_index_with_multiple_nipsad_users(nipsa):
+    nipsa.index.return_value = [
         "acct:kiki@hypothes.is", "acct:ursula@hypothes.is",
         "acct:osono@hypothes.is"]
 
@@ -33,37 +37,44 @@ def test_index_with_multiple_nipsad_users(nipsa_api):
         "userids": ["kiki", "ursula", "osono"]}
 
 
-@patch("h.admin.nipsa")
-def test_nipsa_add_calls_nipsa_api_with_userid(nipsa_api):
+# The fixtures required to mock all of nipsa_add()'s dependencies.
+nipsa_add_fixtures = pytest.mark.usefixtures('nipsa', 'nipsa_index')
+
+
+@nipsa_add_fixtures
+def test_nipsa_add_calls_nipsa_api_with_userid(nipsa):
     request = DummyRequest(params={"add": "kiki"})
 
     admin.nipsa_add(request)
 
-    nipsa_api.add_nipsa.assert_called_once_with(
+    nipsa.add_nipsa.assert_called_once_with(
         request, "acct:kiki@example.com")
 
 
-@patch("h.admin.nipsa_index")
-@patch("h.admin.nipsa")
-def test_nipsa_add_returns_index(nipsa_api, index):
+@nipsa_add_fixtures
+def test_nipsa_add_returns_index(nipsa_index):
     request = DummyRequest(params={"add": "kiki"})
-    index.return_value = "Keine Bange!"
+    nipsa_index.return_value = "Keine Bange!"
 
     assert admin.nipsa_add(request) == "Keine Bange!"
 
 
-@patch("h.admin.nipsa")
-def test_nipsa_remove_calls_nipsa_api_with_userid(nipsa_api):
+# The fixtures required to mock all of nipsa_remove()'s dependencies.
+nipsa_remove_fixtures = pytest.mark.usefixtures('nipsa')
+
+
+@nipsa_remove_fixtures
+def test_nipsa_remove_calls_nipsa_api_with_userid(nipsa):
     request = Mock(params={"remove": "kiki"}, domain="hypothes.is")
 
     admin.nipsa_remove(request)
 
-    nipsa_api.remove_nipsa.assert_called_once_with(
+    nipsa.remove_nipsa.assert_called_once_with(
         request, "acct:kiki@hypothes.is")
 
 
-@patch("h.admin.nipsa")
-def test_nipsa_remove_redirects_to_index(nipsa_api):
+@nipsa_remove_fixtures
+def test_nipsa_remove_redirects_to_index():
     request = Mock(params={"remove": "kiki"},
                    domain="hypothes.is",
                    route_url=Mock(return_value="/nipsa"))
@@ -74,43 +85,54 @@ def test_nipsa_remove_redirects_to_index(nipsa_api):
     assert response.location == "/nipsa"
 
 
-def test_admins_index_when_no_admins(user_model):
+# The fixtures required to mock all of admins_index()'s dependencies.
+admins_index_fixtures = pytest.mark.usefixtures('User')
+
+
+@admins_index_fixtures
+def test_admins_index_when_no_admins(User):
     request = DummyRequest()
-    user_model.admins.return_value = []
+    User.admins.return_value = []
 
     result = admin.admins_index(request)
 
     assert result["admin_users"] == []
 
 
-def test_admins_index_when_one_admin(user_model):
+@admins_index_fixtures
+def test_admins_index_when_one_admin(User):
     request = DummyRequest()
-    user_model.admins.return_value = [Mock(username="fred")]
+    User.admins.return_value = [Mock(username="fred")]
 
     result = admin.admins_index(request)
 
     assert result["admin_users"] == ["fred"]
 
 
-def test_admins_index_when_multiple_admins(user_model):
+@admins_index_fixtures
+def test_admins_index_when_multiple_admins(User):
     request = DummyRequest()
-    user_model.admins.return_value = [Mock(username="fred"),
-                                      Mock(username="bob"),
-                                      Mock(username="frank")]
+    User.admins.return_value = [Mock(username="fred"),
+                                Mock(username="bob"),
+                                Mock(username="frank")]
 
     result = admin.admins_index(request)
 
     assert result["admin_users"] == ["fred", "bob", "frank"]
 
 
+# The fixtures required to mock all of admins_add()'s dependencies.
+admins_add_fixtures = pytest.mark.usefixtures('make_admin', 'admins_index')
+
+
+@admins_add_fixtures
 def test_admins_add_when_no_add_param():
-    """create() should 404 if the request has no "add" param."""
+    """It should 404 if the request has no "add" param."""
     with pytest.raises(httpexceptions.HTTPNotFound):
         admin.admins_add(DummyRequest())
 
 
-@patch("h.accounts.make_admin")
-@pytest.mark.usefixtures("user_model")
+@admins_add_fixtures
 def test_admins_add_calls_make_admin(make_admin):
     request = DummyRequest(params={"add": "seanh"})
 
@@ -119,20 +141,17 @@ def test_admins_add_calls_make_admin(make_admin):
     make_admin.assert_called_once_with("seanh")
 
 
-@patch("h.admin.admins_index")
-@patch("h.accounts.make_admin")
-@pytest.mark.usefixtures("user_model")
-def test_admins_add_returns_index_on_success(make_admin, index):
+@admins_add_fixtures
+def test_admins_add_returns_index_on_success(admins_index):
     request = DummyRequest(params={"add": "seanh"})
-    index.return_value = "expected data"
+    admins_index.return_value = "expected data"
 
     result = admin.admins_add(request)
 
     assert result == "expected data"
 
 
-@patch("h.accounts.make_admin")
-@pytest.mark.usefixtures("user_model")
+@admins_add_fixtures
 def test_admins_add_flashes_on_NoSuchUserError(make_admin):
     make_admin.side_effect = accounts.NoSuchUserError
     request = DummyRequest(params={"add": "seanh"})
@@ -143,12 +162,10 @@ def test_admins_add_flashes_on_NoSuchUserError(make_admin):
     assert request.session.flash.call_count == 1
 
 
-@patch("h.admin.admins_index")
-@patch("h.accounts.make_admin")
-@pytest.mark.usefixtures("user_model")
-def test_admins_add_returns_index_on_NoSuchUserError(make_admin, index):
+@admins_add_fixtures
+def test_admins_add_returns_index_on_NoSuchUserError(make_admin, admins_index):
     make_admin.side_effect = accounts.NoSuchUserError
-    index.return_value = "expected data"
+    admins_index.return_value = "expected data"
     request = DummyRequest(params={"add": "seanh"})
 
     result = admin.admins_add(request)
@@ -156,36 +173,43 @@ def test_admins_add_returns_index_on_NoSuchUserError(make_admin, index):
     assert result == "expected data"
 
 
-def test_admins_remove_calls_get_by_username(user_model):
-    user_model.admins.return_value = [Mock(username="fred"),
-                                      Mock(username="bob"),
-                                      Mock(username="frank")]
+# The fixtures required to mock all of admins_remove()'s dependencies.
+admins_remove_fixtures = pytest.mark.usefixtures('User')
+
+
+@admins_remove_fixtures
+def test_admins_remove_calls_get_by_username(User):
+    User.admins.return_value = [Mock(username="fred"),
+                                Mock(username="bob"),
+                                Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
     request.route_url = Mock()
 
     admin.admins_remove(request)
 
-    user_model.get_by_username.assert_called_once_with("fred")
+    User.get_by_username.assert_called_once_with("fred")
 
 
-def test_admis_remove_sets_admin_to_False(user_model):
-    user_model.admins.return_value = [Mock(username="fred"),
-                                      Mock(username="bob"),
-                                      Mock(username="frank")]
+@admins_remove_fixtures
+def test_admins_remove_sets_admin_to_False(User):
+    User.admins.return_value = [Mock(username="fred"),
+                                Mock(username="bob"),
+                                Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
     request.route_url = Mock()
     user = Mock(admin=True)
-    user_model.get_by_username.return_value = user
+    User.get_by_username.return_value = user
 
     admin.admins_remove(request)
 
     assert user.admin is False
 
 
-def test_admin_delete_returns_redirect_on_success(user_model):
-    user_model.admins.return_value = [Mock(username="fred"),
-                                      Mock(username="bob"),
-                                      Mock(username="frank")]
+@admins_remove_fixtures
+def test_admins_remove_returns_redirect_on_success(User):
+    User.admins.return_value = [Mock(username="fred"),
+                                Mock(username="bob"),
+                                Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
     request.route_url = Mock()
 
@@ -194,17 +218,19 @@ def test_admin_delete_returns_redirect_on_success(user_model):
     assert isinstance(response, httpexceptions.HTTPSeeOther)
 
 
-def test_admin_delete_404s_if_no_remove_param(user_model):
-    user_model.admins.return_value = [Mock(username="fred"),
-                                      Mock(username="bob"),
-                                      Mock(username="frank")]
+@admins_remove_fixtures
+def test_admins_remove_404s_if_no_remove_param(User):
+    User.admins.return_value = [Mock(username="fred"),
+                                Mock(username="bob"),
+                                Mock(username="frank")]
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         admin.admins_remove(DummyRequest())
 
 
-def test_admin_delete_returns_redirect_when_too_few_admins(user_model):
-    user_model.admins.return_value = [Mock(username="fred")]
+@admins_remove_fixtures
+def test_admins_remove_returns_redirect_when_too_few_admins(User):
+    User.admins.return_value = [Mock(username="fred")]
     request = DummyRequest(params={"remove": "fred"})
     request.route_url = Mock()
 
@@ -213,20 +239,202 @@ def test_admin_delete_returns_redirect_when_too_few_admins(user_model):
     assert isinstance(response, httpexceptions.HTTPSeeOther)
 
 
-def test_admin_delete_does_not_delete_last_admin(user_model):
-    user_model.admins.return_value = [Mock(username="fred")]
+@admins_remove_fixtures
+def test_admins_remove_does_not_delete_last_admin(User):
+    User.admins.return_value = [Mock(username="fred")]
     request = DummyRequest(params={"remove": "fred"})
     request.route_url = Mock()
     user = Mock(admin=True)
-    user_model.get_by_username.return_value = user
+    User.get_by_username.return_value = user
 
     admin.admins_remove(request)
 
     assert user.admin is True
 
 
+# The fixtures required to mock all of staff_index()'s dependencies.
+staff_index_fixtures = pytest.mark.usefixtures('User')
+
+
+@staff_index_fixtures
+def test_staff_index_when_no_staff(User):
+    request = DummyRequest()
+    User.staff_members.return_value = []
+
+    result = admin.staff_index(request)
+
+    assert result["staff"] == []
+
+
+@staff_index_fixtures
+def test_staff_index_when_one_staff(User):
+    request = DummyRequest()
+    User.staff_members.return_value = [Mock(username="fred")]
+
+    result = admin.staff_index(request)
+
+    assert result["staff"] == ["fred"]
+
+
+@staff_index_fixtures
+def test_staff_index_when_multiple_staff(User):
+    request = DummyRequest()
+    User.staff_members.return_value = [Mock(username="fred"),
+                                       Mock(username="bob"),
+                                       Mock(username="frank")]
+
+    result = admin.staff_index(request)
+
+    assert result["staff"] == ["fred", "bob", "frank"]
+
+
+# The fixtures required to mock all of staff_add()'s dependencies.
+staff_add_fixtures = pytest.mark.usefixtures('make_staff', 'staff_index')
+
+
+@staff_add_fixtures
+def test_staff_add_when_no_add_param():
+    """It should 404 if the request has no "add" param."""
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        admin.staff_add(DummyRequest())
+
+
+@staff_add_fixtures
+def test_staff_add_calls_make_staff(make_staff):
+    request = DummyRequest(params={"add": "seanh"})
+
+    admin.staff_add(request)
+
+    make_staff.assert_called_once_with("seanh")
+
+
+@staff_add_fixtures
+def test_staff_add_returns_index_on_success(staff_index):
+    request = DummyRequest(params={"add": "seanh"})
+    staff_index.return_value = "expected data"
+
+    result = admin.staff_add(request)
+
+    assert result == "expected data"
+
+
+@staff_add_fixtures
+def test_staff_add_flashes_on_NoSuchUserError(make_staff):
+    make_staff.side_effect = accounts.NoSuchUserError
+    request = DummyRequest(params={"add": "seanh"})
+    request.session.flash = Mock()
+
+    admin.staff_add(request)
+
+    assert request.session.flash.call_count == 1
+
+
+@staff_add_fixtures
+def test_staff_add_returns_index_on_NoSuchUserError(make_staff, staff_index):
+    make_staff.side_effect = accounts.NoSuchUserError
+    staff_index.return_value = "expected data"
+    request = DummyRequest(params={"add": "seanh"})
+
+    result = admin.staff_add(request)
+
+    assert result == "expected data"
+
+
+# The fixtures required to mock all of staff_remove()'s dependencies.
+staff_remove_fixtures = pytest.mark.usefixtures('User')
+
+
+@staff_remove_fixtures
+def test_staff_remove_calls_get_by_username(User):
+    User.staff_members.return_value = [Mock(username="fred"),
+                                       Mock(username="bob"),
+                                       Mock(username="frank")]
+    request = DummyRequest(params={"remove": "fred"})
+    request.route_url = Mock()
+
+    admin.staff_remove(request)
+
+    User.get_by_username.assert_called_once_with("fred")
+
+
+@staff_remove_fixtures
+def test_staff_remove_sets_staff_to_False(User):
+    User.staff_members.return_value = [Mock(username="fred"),
+                                       Mock(username="bob"),
+                                       Mock(username="frank")]
+    request = DummyRequest(params={"remove": "fred"})
+    request.route_url = Mock()
+    user = Mock(staff=True)
+    User.get_by_username.return_value = user
+
+    admin.staff_remove(request)
+
+    assert user.staff is False
+
+
+@staff_remove_fixtures
+def test_staff_remove_returns_redirect_on_success(User):
+    User.admins.return_value = [Mock(username="fred"),
+                                Mock(username="bob"),
+                                Mock(username="frank")]
+    request = DummyRequest(params={"remove": "fred"})
+    request.route_url = Mock()
+
+    response = admin.admins_remove(request)
+
+    assert isinstance(response, httpexceptions.HTTPSeeOther)
+
+
+@staff_remove_fixtures
+def test_staff_remove_404s_if_no_remove_param():
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        admin.staff_remove(DummyRequest())
+
+
 @pytest.fixture
-def user_model(config, request):
+def nipsa(config, request):  # pylint:disable=unused-argument
+    patcher = patch('h.admin.nipsa', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def nipsa_index(config, request):  # pylint:disable=unused-argument
+    patcher = patch('h.admin.nipsa_index', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def User(config, request):  # pylint:disable=unused-argument
     patcher = patch('h.admin.models.User', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def make_admin(config, request):  # pylint:disable=unused-argument
+    patcher = patch('h.admin.accounts.make_admin', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def make_staff(config, request):  # pylint:disable=unused-argument
+    patcher = patch('h.admin.accounts.make_staff', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def admins_index(config, request):  # pylint:disable=unused-argument
+    patcher = patch('h.admin.admins_index', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def staff_index(config, request):  # pylint:disable=unused-argument
+    patcher = patch('h.admin.staff_index', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

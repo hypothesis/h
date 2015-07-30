@@ -77,6 +77,12 @@ class User(Base):
                       nullable=False,
                       server_default=sa.sql.expression.false())
 
+    # Is this user a staff member?
+    staff = sa.Column(sa.Boolean,
+                      nullable=False,
+                      default=False,
+                      server_default=sa.sql.expression.false())
+
     def _get_username(self):
         return self._username
 
@@ -253,6 +259,12 @@ class User(Base):
         """Return a list of all admin users."""
         return cls.query.filter(
             cls.admin == expression.true()).all()
+
+    @classmethod
+    def staff_members(cls):
+        """Return a list of all staff members."""
+        return cls.query.filter(
+            cls.staff == expression.true()).all()
 
     def __repr__(self):
         return '<User: %s>' % self.username
