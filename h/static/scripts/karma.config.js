@@ -12,7 +12,8 @@ module.exports = function(config) {
     frameworks: [
       'browserify',
       'mocha',
-      'chai-sinon'
+      'chai',
+      'sinon'
     ],
 
     // list of files / patterns to load in the browser
@@ -40,6 +41,7 @@ module.exports = function(config) {
       // Test deps
       'vendor/angular-mocks.js',
       '../../templates/client/*.html',
+      'test/bootstrap.js',
 
       // Tests
       '**/*-test.coffee',

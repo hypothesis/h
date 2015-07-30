@@ -2,10 +2,6 @@
 
 var mock = require('angular-mock');
 
-var assert = chai.assert;
-sinon.assert.expose(assert, {prefix: null});
-
-
 describe('h:features', function () {
   var $httpBackend;
   var features;

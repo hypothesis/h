@@ -19,7 +19,7 @@ describe('BrowserAction', function () {
     it('sets the active browser icon', function () {
       var spy = fakeChromeBrowserAction.setIcon;
       action.activate(1);
-      sinon.assert.calledWith(spy, {
+      assert.calledWith(spy, {
         tabId: 1,
         path: BrowserAction.icons[TabState.states.ACTIVE],
       });
@@ -28,7 +28,7 @@ describe('BrowserAction', function () {
     it('sets the title of the browser icon', function () {
       var spy = fakeChromeBrowserAction.setTitle;
       action.activate(1);
-      sinon.assert.calledWith(spy, {
+      assert.calledWith(spy, {
         tabId: 1,
         title: 'Hypothesis is active'
       });
@@ -39,7 +39,7 @@ describe('BrowserAction', function () {
     it('sets the inactive browser icon', function () {
       var spy = fakeChromeBrowserAction.setIcon;
       action.deactivate(1);
-      sinon.assert.calledWith(spy, {
+      assert.calledWith(spy, {
         tabId: 1,
         path: BrowserAction.icons[TabState.states.INACTIVE],
       });
@@ -48,7 +48,7 @@ describe('BrowserAction', function () {
     it('sets the title of the browser icon', function () {
       var spy = fakeChromeBrowserAction.setTitle;
       action.deactivate(1);
-      sinon.assert.calledWith(spy, {
+      assert.calledWith(spy, {
         tabId: 1,
         title: 'Hypothesis is inactive'
       });
@@ -59,7 +59,7 @@ describe('BrowserAction', function () {
     it('sets the inactive browser icon', function () {
       var spy = fakeChromeBrowserAction.setIcon;
       action.error(1);
-      sinon.assert.calledWith(spy, {
+      assert.calledWith(spy, {
         tabId: 1,
         path: BrowserAction.icons[TabState.states.INACTIVE],
       });
@@ -68,7 +68,7 @@ describe('BrowserAction', function () {
     it('sets the title of the browser icon', function () {
       var spy = fakeChromeBrowserAction.setTitle;
       action.error(1);
-      sinon.assert.calledWith(spy, {
+      assert.calledWith(spy, {
         tabId: 1,
         title: 'Hypothesis has failed to load'
       });
@@ -77,7 +77,7 @@ describe('BrowserAction', function () {
     it('shows a badge', function () {
       var spy = fakeChromeBrowserAction.setBadgeText;
       action.error(1);
-      sinon.assert.calledWith(spy, {
+      assert.calledWith(spy, {
         tabId: 1,
         text: '!'
       });
@@ -88,7 +88,7 @@ describe('BrowserAction', function () {
     it('allows the state to be set via a constant', function () {
       var spy = fakeChromeBrowserAction.setIcon;
       action.setState(1, TabState.states.ACTIVE);
-      sinon.assert.calledWith(spy, {
+      assert.calledWith(spy, {
         tabId: 1,
         path: BrowserAction.icons[TabState.states.ACTIVE],
       });

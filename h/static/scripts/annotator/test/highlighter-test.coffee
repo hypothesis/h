@@ -3,10 +3,6 @@ $ = Annotator.$
 
 highlighter = require('../highlighter')
 
-assert = chai.assert
-sinon.assert.expose(assert, prefix: '')
-
-
 describe "highlightRange", ->
   it 'wraps a highlight span around the given range', ->
     txt = document.createTextNode('test highlight span')

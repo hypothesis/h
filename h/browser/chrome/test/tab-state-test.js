@@ -40,14 +40,14 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.activateTab(2);
-      sinon.assert.calledWith(onChange, 2, TabState.states.ACTIVE, null);
+      assert.calledWith(onChange, 2, TabState.states.ACTIVE, null);
     });
 
     it('options.force can be used to re-trigger the current state', function () {
       state.activateTab(2);
       state.activateTab(2, {force: true});
-      sinon.assert.calledWith(onChange, 2, TabState.states.ACTIVE, null);
-      sinon.assert.calledTwice(onChange);
+      assert.calledWith(onChange, 2, TabState.states.ACTIVE, null);
+      assert.calledTwice(onChange);
     });
   });
 
@@ -59,14 +59,14 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.deactivateTab(2);
-      sinon.assert.calledWith(onChange, 2, TabState.states.INACTIVE, null);
+      assert.calledWith(onChange, 2, TabState.states.INACTIVE, null);
     });
 
     it('options.force can be used to re-trigger the current state', function () {
       state.deactivateTab(2);
       state.deactivateTab(2, {force: true});
-      sinon.assert.calledWith(onChange, 2, TabState.states.INACTIVE, null);
-      sinon.assert.calledTwice(onChange);
+      assert.calledWith(onChange, 2, TabState.states.INACTIVE, null);
+      assert.calledTwice(onChange);
     });
   });
 
@@ -78,14 +78,14 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.errorTab(2);
-      sinon.assert.calledWith(onChange, 2, TabState.states.ERRORED, null);
+      assert.calledWith(onChange, 2, TabState.states.ERRORED, null);
     });
 
     it('options.force can be used to re-trigger the current state', function () {
       state.errorTab(2);
       state.errorTab(2, {force: true});
-      sinon.assert.calledWith(onChange, 2, TabState.states.ERRORED, null);
-      sinon.assert.calledTwice(onChange);
+      assert.calledWith(onChange, 2, TabState.states.ERRORED, null);
+      assert.calledTwice(onChange);
     });
   });
 
@@ -99,7 +99,7 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.clearTab(1);
-      sinon.assert.calledWith(onChange, 1, null);
+      assert.calledWith(onChange, 1, null);
     });
   });
 
@@ -123,7 +123,7 @@ describe('TabState', function () {
       state.errorTab(1);
       state.deactivateTab(1);
       state.deactivateTab(1, {force: true});
-      sinon.assert.calledWith(onChange, 1, TabState.states.INACTIVE, TabState.states.ERRORED);
+      assert.calledWith(onChange, 1, TabState.states.INACTIVE, TabState.states.ERRORED);
     });
   });
 
@@ -152,7 +152,7 @@ describe('TabState', function () {
     it('provides the previous value to the handler', function () {
       state.errorTab(1);
       state.deactivateTab(1);
-      sinon.assert.calledWith(onChange, 1, TabState.states.INACTIVE, TabState.states.ERRORED);
+      assert.calledWith(onChange, 1, TabState.states.INACTIVE, TabState.states.ERRORED);
     });
   });
 });

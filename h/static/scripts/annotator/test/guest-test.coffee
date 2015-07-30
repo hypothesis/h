@@ -4,10 +4,6 @@ Guest = require('../guest')
 anchoring = require('../anchoring/html')
 highlighter = require('../highlighter')
 
-assert = chai.assert
-sinon.assert.expose(assert, prefix: '')
-
-
 waitForSync = (annotation) ->
   if annotation.$anchors?
     return Promise.resolve()

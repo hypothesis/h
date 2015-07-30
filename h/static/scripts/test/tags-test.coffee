@@ -1,7 +1,5 @@
 {module, inject} = require('angular-mock')
 
-assert = chai.assert
-
 describe 'tags', ->
   TAGS_LIST_KEY = 'hypothesis.user.tags.list'
   TAGS_MAP_KEY = 'hypothesis.user.tags.map'

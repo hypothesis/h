@@ -1,7 +1,6 @@
 describe('parseUrl', function () {
   'use strict';
 
-  var assert = chai.assert;
   var blocklist = require('../blocklist');
   var parseUrl = blocklist.parseUrl;
 

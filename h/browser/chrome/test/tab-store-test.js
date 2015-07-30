@@ -37,21 +37,21 @@ describe('TabStore', function () {
     it('inserts a JSON string into the store for the tab id', function () {
       var expected = JSON.stringify({1: 'active'});
       store.set(1, 'active');
-      sinon.assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
+      assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
     });
 
     it('adds new properties to the serialized object with each new call', function () {
       var expected = JSON.stringify({1: 'active', 2: 'inactive'});
       store.set(1, 'active');
       store.set(2, 'inactive');
-      sinon.assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
+      assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
     });
 
     it('overrides existing properties on the serialized object', function () {
       var expected = JSON.stringify({1: 'inactive'});
       store.set(1, 'active');
       store.set(1, 'inactive');
-      sinon.assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
+      assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
     });
   });
 
@@ -63,7 +63,7 @@ describe('TabStore', function () {
 
     it('removes a property from the serialized object', function () {
       store.unset(1);
-      sinon.assert.called(fakeLocalStorage.setItem, '{}');
+      assert.called(fakeLocalStorage.setItem, '{}');
     });
   });
 

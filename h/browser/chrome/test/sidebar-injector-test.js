@@ -54,7 +54,7 @@ describe('SidebarInjector', function () {
         var promise = injector.injectIntoTab({id: 1, url: url}).then(
           assertReject, function (err) {
             assert.instanceOf(err, h.RestrictedProtocolError);
-            sinon.assert.notCalled(spy);
+            assert.notCalled(spy);
           }
         );
         this.server.respond();
@@ -70,7 +70,7 @@ describe('SidebarInjector', function () {
         var promise = injector.injectIntoTab({id: 1, url: url});
         this.server.respond();
         return promise.then(function () {
-          sinon.assert.calledWith(spy, 1, {
+          assert.calledWith(spy, 1, {
             url: 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent(url)
           });
         });
@@ -85,11 +85,11 @@ describe('SidebarInjector', function () {
         var promise = injector.injectIntoTab({id: 1, url: url});
         this.server.respond();
         return promise.then(function () {
-          sinon.assert.callCount(spy, 2);
-          sinon.assert.calledWith(spy, 1, {
+          assert.callCount(spy, 2);
+          assert.calledWith(spy, 1, {
             code: sinon.match('/public/config.js')
           });
-          sinon.assert.calledWith(spy, 1, {
+          assert.calledWith(spy, 1, {
             code: sinon.match('/public/embed.js')
           });
         });
@@ -104,8 +104,8 @@ describe('SidebarInjector', function () {
 
           var promise = injector.injectIntoTab({id: 1, url: url}).then(
             function () {
-              sinon.assert.called(spy);
-              sinon.assert.calledWith(spy, 1, {
+              assert.called(spy);
+              assert.calledWith(spy, 1, {
                 url: 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent('file://foo.pdf')
               });
             }
@@ -144,7 +144,7 @@ describe('SidebarInjector', function () {
       it('retuns an error before loading the config', function () {
         var url = 'file://foo.html';
         var promise = injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
-          sinon.assert.notCalled(fakeChromeTabs.executeScript);
+          assert.notCalled(fakeChromeTabs.executeScript);
         });
         this.server.respond();
         return promise;
@@ -159,7 +159,7 @@ describe('SidebarInjector', function () {
       this.server.respond();
       return promise.then(
         function onFulfill() {
-          sinon.assert.called(fakeChromeTabs.executeScript);
+          assert.called(fakeChromeTabs.executeScript);
         },
         function onRejected(reason) {
           assert(false, "The promise should not be rejected");
@@ -172,7 +172,7 @@ describe('SidebarInjector', function () {
       this.server.respond();
       return promise.then(
         function onFulfill() {
-          sinon.assert.called(fakeChromeTabs.executeScript);
+          assert.called(fakeChromeTabs.executeScript);
         },
         function onRejected(reason) {
           assert(false, "The promise should not be rejected");
@@ -187,7 +187,7 @@ describe('SidebarInjector', function () {
           assert(false, "The promise should not be fulfilled");
         },
         function onRejected(reason) {
-          sinon.assert.notCalled(fakeChromeTabs.executeScript);
+          assert.notCalled(fakeChromeTabs.executeScript);
       });
     });
 
@@ -200,7 +200,7 @@ describe('SidebarInjector', function () {
           assert(false, "The promise should not be fulfilled");
         },
         function onRejected(reason) {
-          sinon.assert.notCalled(fakeChromeTabs.executeScript);
+          assert.notCalled(fakeChromeTabs.executeScript);
       });
     });
 
@@ -213,7 +213,7 @@ describe('SidebarInjector', function () {
           assert(false, "The promise should not be fulfilled");
         },
         function onRejected(reason) {
-          sinon.assert.notCalled(fakeChromeTabs.executeScript);
+          assert.notCalled(fakeChromeTabs.executeScript);
       });
     });
 
@@ -226,7 +226,7 @@ describe('SidebarInjector', function () {
           assert(false, "The promise should not be fulfilled");
         },
         function onRejected(reason) {
-          sinon.assert.notCalled(fakeChromeTabs.executeScript);
+          assert.notCalled(fakeChromeTabs.executeScript);
       });
     });
 
@@ -239,7 +239,7 @@ describe('SidebarInjector', function () {
           assert(false, "The promise should not be fulfilled");
         },
         function onRejected(reason) {
-          sinon.assert.notCalled(fakeChromeTabs.executeScript);
+          assert.notCalled(fakeChromeTabs.executeScript);
       });
     });
 
@@ -252,7 +252,7 @@ describe('SidebarInjector', function () {
           assert(false, "The promise should not be fulfilled");
         },
         function onRejected(reason) {
-          sinon.assert.notCalled(fakeChromeTabs.executeScript);
+          assert.notCalled(fakeChromeTabs.executeScript);
       });
     });
   });
@@ -264,7 +264,7 @@ describe('SidebarInjector', function () {
       var url = 'chrome://extensions/';
 
       return injector.removeFromTab({id: 1, url: url}).then(function () {
-        sinon.assert.notCalled(spy);
+        assert.notCalled(spy);
       });
     });
 
@@ -275,7 +275,7 @@ describe('SidebarInjector', function () {
         var url = protocol + '//foobar/';
 
         return injector.removeFromTab({id: 1, url: url}).then(function () {
-          sinon.assert.notCalled(spy);
+          assert.notCalled(spy);
         });
       });
     });
@@ -286,7 +286,7 @@ describe('SidebarInjector', function () {
         var url = 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent('http://example.com/foo.pdf');
 
         return injector.removeFromTab({id: 1, url: url}).then(function () {
-          sinon.assert.calledWith(spy, 1, {
+          assert.calledWith(spy, 1, {
             url: 'http://example.com/foo.pdf'
           });
         });
@@ -297,7 +297,7 @@ describe('SidebarInjector', function () {
       it('injects a destroy script into the page', function () {
         var stub = fakeChromeTabs.executeScript.yields([true]);
         return injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'}).then(function () {
-          sinon.assert.calledWith(stub, 1, {
+          assert.calledWith(stub, 1, {
             code: sinon.match('/public/destroy.js')
           });
         });

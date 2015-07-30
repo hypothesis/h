@@ -1,6 +1,4 @@
 {module, inject} = require('angular-mock')
-
-assert = chai.assert
 angular = require('angular')
 
 

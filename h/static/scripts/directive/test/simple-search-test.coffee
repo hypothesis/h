@@ -1,8 +1,5 @@
 {module, inject} = require('angular-mock')
 
-assert = chai.assert
-
-
 describe 'simple-search', ->
   $compile = null
   $element = null
@@ -50,15 +47,15 @@ describe 'simple-search', ->
     isolate.searchtext = "Test query"
     isolate.$digest()
     $element.find('form').triggerHandler('submit')
-    sinon.assert.calledWith($scope.update, "Test query")
+    assert.calledWith($scope.update, "Test query")
 
   it 'invokes callbacks when the input model changes', ->
     $scope.query = "Test query"
     $scope.$digest()
-    sinon.assert.calledOnce($scope.update)
+    assert.calledOnce($scope.update)
     $scope.query = ""
     $scope.$digest()
-    sinon.assert.calledOnce($scope.clear)
+    assert.calledOnce($scope.clear)
 
   it 'adds a class to the form when there is no input value', ->
     $form = $element.find('.simple-search-form')

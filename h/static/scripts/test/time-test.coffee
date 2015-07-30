@@ -1,7 +1,5 @@
 {module, inject} = require('angular-mock')
 
-assert = chai.assert
-
 minute = 60
 hour = minute * 60
 day = hour * 24
