@@ -35,9 +35,9 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           event.stopPropagation()
           collapsed = @annotator.frame.hasClass('annotator-collapsed')
           if collapsed
-            @annotator.triggerShowFrame()
+            @annotator.showFrame()
           else
-            @annotator.triggerHideFrame()
+            @annotator.hideFrame()
     ,
       "title": "Hide Highlights"
       "class": "h-icon-visibility"

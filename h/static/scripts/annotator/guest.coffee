@@ -136,7 +136,7 @@ module.exports = class Guest extends Annotator
     @wrapper = @element
     .on 'click', (event) =>
       if !@selectedTargets?.length
-        @triggerHideFrame()
+        this.hideFrame()
     this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
@@ -359,7 +359,7 @@ module.exports = class Guest extends Annotator
     @selectedRanges = []
 
   selectAnnotations: (annotations, toggle) =>
-    this.triggerShowFrame()
+    this.showFrame()
     if toggle
       this.toggleAnnotationSelection annotations
     else
@@ -412,11 +412,11 @@ module.exports = class Guest extends Annotator
     @visibleHighlights = shouldShowHighlights
 
   # Open the sidebar
-  triggerShowFrame: ->
+  showFrame: ->
     @crossframe?.notify method: 'open'
 
   # Close the sidebar
-  triggerHideFrame: ->
+  hideFrame: ->
     @crossframe?.notify method: 'back'
 
   onAdderMouseup: (event) ->
@@ -435,5 +435,5 @@ module.exports = class Guest extends Annotator
         this.createHighlight()
       when 'comment'
         this.createAnnotation()
-        this.triggerShowFrame()
+        this.showFrame()
     Annotator.Util.getGlobal().getSelection().removeAllRanges()
