@@ -3,17 +3,15 @@ angular = require('angular')
 
 module.exports = class AppController
   this.$inject = [
-    '$controller', '$document', '$location', '$rootScope', '$route', '$scope',
-    '$window',
+    '$controller', '$document', '$location', '$route', '$scope', '$window',
     'auth', 'drafts', 'features', 'identity',
-    'permissions', 'streamer', 'annotationUI',
+    'streamer', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
-     $controller,   $document,   $location,   $rootScope,   $route,   $scope,
-     $window,
+     $controller,   $document,   $location,   $route,   $scope,   $window,
      auth,   drafts,   features,   identity,
-     permissions,   streamer,   annotationUI,
+     streamer,   annotationUI,
      annotationMapper, threading
   ) ->
     $controller('AnnotationUIController', {$scope})

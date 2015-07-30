@@ -11,7 +11,6 @@ describe 'AppController', ->
   fakeIdentity = null
   fakeLocation = null
   fakeParams = null
-  fakePermissions = null
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
@@ -68,10 +67,6 @@ describe 'AppController', ->
 
     fakeParams = {id: 'test'}
 
-    fakePermissions = {
-      permits: sandbox.stub().returns(true)
-    }
-
     fakeStore = {
       SearchResource: {
         get: sinon.spy()
@@ -104,7 +99,6 @@ describe 'AppController', ->
     $provide.value 'identity', fakeIdentity
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams
-    $provide.value 'permissions', fakePermissions
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamfilter', fakeStreamFilter
