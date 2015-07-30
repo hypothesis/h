@@ -13,9 +13,9 @@ from h import hashids
 
 @view_config(route_name='group_create',
              request_method='GET',
-             renderer='h:groups/templates/create_group.html.jinja2',
+             renderer='h:groups/templates/create.html.jinja2',
              permission="authenticated")
-def create_group_form(request):
+def create_form(request):
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
 
@@ -27,9 +27,9 @@ def create_group_form(request):
 
 @view_config(route_name='group_create',
              request_method='POST',
-             renderer='h:groups/templates/create_group.html.jinja2',
+             renderer='h:groups/templates/create.html.jinja2',
              permission="authenticated")
-def create_group(request):
+def create(request):
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
 
@@ -55,9 +55,9 @@ def create_group(request):
 
 @view_config(route_name='group_read',
              request_method='GET',
-             renderer='h:groups/templates/read_group.html.jinja2')
+             renderer='h:groups/templates/read.html.jinja2')
 @view_config(route_name='group_read_noslug', request_method='GET')
-def read_group(request):
+def read(request):
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
 
