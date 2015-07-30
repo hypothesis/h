@@ -52,7 +52,8 @@ class Group(Base):
             return None
 
 
-user_group_table = sa.Table('user_group', Base.metadata,
+USER_GROUP_TABLE = sa.Table(
+    'user_group', Base.metadata,
     sa.Column('user_id',
               sa.Integer,
               sa.ForeignKey('user.id'),

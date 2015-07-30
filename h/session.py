@@ -31,11 +31,12 @@ def _current_groups(request):
     user = models.User.get_by_id(request, userid)
     if user is None:
         return groups
-    for g in user.groups:
-        hid = hashids.encode(request, 'h.groups', g.id)
+    for group in user.groups:
+        hid = hashids.encode(request, 'h.groups', group.id)
         groups.append({
-            'name': g.name,
-            'url': request.route_url('group_read', hashid=hid, slug=g.slug),
+            'name': group.name,
+            'url': request.route_url(
+                'group_read', hashid=hid, slug=group.slug),
         })
     return groups
 
