@@ -25,8 +25,12 @@ pylint:
     #
     # - log: common in "log = logging.getLogger(__name__)" pattern
     # - parser: common in modules that use argparse
+    # - id: Commonly used as a class attribute / database column name in
+    #       sqlalchemy model classes. Note that if you use id as the name of
+    #       a local variable or parameter, pylint will still complain that
+    #       you're shadowing the builtin.
     #
-    good-names: _,i,j,k,v,e,db,fn,fp,log,parser
+    good-names: _,i,j,k,v,e,db,fn,fp,log,parser,id
 pep257:
   disable:
     - D100  # Missing docstring in public module
