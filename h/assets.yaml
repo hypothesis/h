@@ -129,7 +129,9 @@ config:
     - output: scripts/config.js
       filters: browserify
       contents:
-        - h:static/scripts/config/accounts.js
+        - h:static/scripts/config/module.js
+      depends:
+        - h:static/scripts/config/*.js
 
 
 # Application

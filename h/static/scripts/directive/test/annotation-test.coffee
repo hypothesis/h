@@ -12,12 +12,12 @@ describe 'annotation', ->
   isolateScope = null
   fakeAnnotationMapper = null
   fakeAnnotationUI = null
-  fakeAuth = null
   fakeDrafts = null
   fakeFlash = null
   fakeMomentFilter = null
   fakePermissions = null
   fakePersonaFilter = null
+  fakeSession = null
   fakeStore = null
   fakeTags = null
   fakeTime = null
@@ -40,8 +40,6 @@ describe 'annotation', ->
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
-    fakeAuth =
-      user: 'acct:bill@localhost'
     fakeAnnotationMapper =
       createAnnotation: sandbox.stub().returns
         permissions:
@@ -66,6 +64,11 @@ describe 'annotation', ->
       private: sandbox.stub().returns({read: ['justme']})
     }
     fakePersonaFilter = sandbox.stub().returnsArg(0)
+
+    fakeSession =
+      state:
+        userid: 'acct:bill@localhost'
+
     fakeTags = {
       filter: sandbox.stub().returns('a while ago'),
       store: sandbox.stub()
@@ -78,12 +81,12 @@ describe 'annotation', ->
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
-    $provide.value 'auth', fakeAuth
     $provide.value 'drafts', fakeDrafts
     $provide.value 'flash', fakeFlash
     $provide.value 'momentFilter', fakeMomentFilter
     $provide.value 'permissions', fakePermissions
     $provide.value 'personaFilter', fakePersonaFilter
+    $provide.value 'session', fakeSession
     $provide.value 'store', fakeStore
     $provide.value 'tags', fakeTags
     $provide.value 'time', fakeTime
@@ -118,10 +121,11 @@ describe 'annotation', ->
     it 'persists upon login', ->
       delete annotation.id
       delete annotation.user
+      fakeSession.state.userid = null
       createDirective()
       $scope.$digest()
       assert.notCalled annotation.$create
-      annotation.user = 'acct:ted@wyldstallyns.com'
+      fakeSession.state.userid = 'acct:ted@wyldstallyns.com'
       $scope.$digest()
       assert.calledOnce annotation.$create
 
@@ -383,7 +387,7 @@ describe 'annotation', ->
       assert.notCalled(isolateScope.$emit)
 
     it "fires when another user's annotation is updated", ->
-      fakeAuth.user = 'acct:jane@localhost'
+      fakeSession.state.userid = 'acct:jane@localhost'
       annotation.updated = '456'
       $scope.$digest()
       assert.calledWith(isolateScope.$emit, 'annotationUpdate')
@@ -548,19 +552,19 @@ describe("AnnotationController", ->
   Return an annotation directive instance and stub services etc.
   ###
   createAnnotationDirective = ({annotation, personaFilter, momentFilter,
-                                urlencodeFilter, auth, drafts, flash,
-                                permissions, tags, time, annotationUI,
+                                urlencodeFilter, drafts, flash,
+                                permissions, session, tags, time, annotationUI,
                                 annotationMapper}) ->
     locals = {
       personaFilter: personaFilter or {}
       momentFilter: momentFilter or {}
       urlencodeFilter: urlencodeFilter or {}
-      auth: auth or {}
       drafts: drafts or {
         add: ->
       }
       flash: flash or {}
       permissions: permissions or {}
+      session: session or {state: {}}
       tags: tags or {}
       time: time or {
         toFuzzyString: ->
@@ -573,10 +577,10 @@ describe("AnnotationController", ->
       $provide.value("personaFilter", locals.personaFilter)
       $provide.value("momentFilter", locals.momentFilter)
       $provide.value("urlencodeFilter", locals.urlencodeFilter)
-      $provide.value("auth", locals.auth)
       $provide.value("drafts", locals.drafts)
       $provide.value("flash", locals.flash)
       $provide.value("permissions", locals.permissions)
+      $provide.value("session", locals.session)
       $provide.value("tags", locals.tags)
       $provide.value("time", locals.time)
       $provide.value("annotationUI", locals.annotationUI)

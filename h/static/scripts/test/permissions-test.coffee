@@ -2,7 +2,7 @@
 
 describe 'h:permissions', ->
   sandbox = null
-  fakeAuth = null
+  fakeSession = null
 
   before ->
     angular.module('h', [])
@@ -12,11 +12,13 @@ describe 'h:permissions', ->
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
-    fakeAuth = {
-      user: 'acct:flash@gordon'
+    fakeSession = {
+      state: {
+        userid: 'acct:flash@gordon'
+      }
     }
 
-    $provide.value 'auth', fakeAuth
+    $provide.value 'session', fakeSession
     return
 
   afterEach ->
