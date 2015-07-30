@@ -9,8 +9,10 @@ def _get_hashids(request, context):
 
 
 def encode(request, context, number):
+    """Return a hashid of the given number."""
     return _get_hashids(request, context).encode(number)
 
 
 def decode(request, context, hashid):
+    """Decode the given hashid and return the original number."""
     return _get_hashids(request, context).decode(str(hashid))[0]

@@ -16,6 +16,7 @@ from h import hashids
              renderer='h:groups/templates/create.html.jinja2',
              permission="authenticated")
 def create_form(request):
+    """Render the form for creating a new group."""
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
 
@@ -30,6 +31,7 @@ def create_form(request):
              renderer='h:groups/templates/create.html.jinja2',
              permission="authenticated")
 def create(request):
+    """Respond to a submission of the create group form."""
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
 
@@ -58,6 +60,7 @@ def create(request):
              renderer='h:groups/templates/read.html.jinja2')
 @view_config(route_name='group_read_noslug', request_method='GET')
 def read(request):
+    """Render the page for a group."""
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
 

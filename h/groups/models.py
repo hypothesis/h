@@ -38,6 +38,7 @@ class Group(Base):
 
     @property
     def slug(self):
+        """A version of this group's name suitable for use in a URL."""
         return slugify.slugify(self.name)
 
     def __repr__(self):
@@ -45,6 +46,7 @@ class Group(Base):
 
     @classmethod
     def get_by_id(cls, id_):
+        """Return the group with the given id, or None."""
         try:
             return cls.query.filter(
                 cls.id == id_).one()

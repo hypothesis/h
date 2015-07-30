@@ -20,9 +20,10 @@ def pop_flash(request):
 
 
 def _current_groups(request):
-    """
-    Return a list of the groups the current user is a member of to be returned
-    to the client in the "session" model.
+    """Return a list of the groups the current user is a member of.
+
+    This list is meant to be returned to the client in the "session" model.
+
     """
     groups = []
     userid = request.authenticated_userid
