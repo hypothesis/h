@@ -1,12 +1,39 @@
 from pyramid import view
 from pyramid import httpexceptions
-from pyramid import i18n
+from pyramid import security
 
 from h.api import nipsa
 from h.i18n import TranslationString as _
 from h import accounts
 from h import models
 from h import util
+
+
+class AdminResource(object):
+
+    """The context resource factory for the admin views.
+
+    Authorizes requests with the 'group:admin' principal to use views with the
+    'admin' permission.
+
+    To make a view accessible by admins only you should first add the 'admin'
+    permission to the view:
+
+        @view.view_config(route_name='my_route', permission='admin')
+        def my_route(request):
+            ...
+
+    Then add the AdminResource factory to the route that points to the
+    view:
+
+        config.add_route('my_route', '/my_route', factory=AdminResource)
+
+    """
+
+    __acl__ = [(security.Allow, 'group:admin', 'admin')]
+
+    def __init__(self, request):
+        pass
 
 
 @view.view_config(route_name='admin_index',
@@ -100,9 +127,14 @@ def admins_remove(request):
 
 
 def includeme(config):
-    config.add_route('admin_index', '/admin')
-    config.add_route('admin_nipsa', '/admin/nipsa')
-    config.add_route('admin_nipsa_remove', '/admin/nipsa/remove')
-    config.add_route('admin_admins', '/admin/admins')
-    config.add_route('admin_admins_remove', '/admin/admins/delete')
+    config.add_route('admin_index', '/admin',
+                     factory=AdminResource)
+    config.add_route('admin_nipsa', '/admin/nipsa',
+                     factory=AdminResource)
+    config.add_route('admin_nipsa_remove', '/admin/nipsa/remove',
+                     factory=AdminResource)
+    config.add_route('admin_admins', '/admin/admins',
+                     factory=AdminResource)
+    config.add_route('admin_admins_remove', '/admin/admins/delete',
+                     factory=AdminResource)
     config.scan(__name__)
