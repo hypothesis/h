@@ -7,7 +7,8 @@
 {% endblock %}
 
 {% block body_tag %}
-<body ng-app="h" ng-controller="AuthAppController">
+{# ng-strict-di is a (harmless) noop until we upgrade to Angular 1.3 #}
+<body ng-app="h" ng-strict-di ng-controller="AuthAppController">
 {% endblock %}
 
 {% block content %}
