@@ -236,6 +236,7 @@ def build_firefox(args):
     # This is a bit hacky.
     if webassets_env.debug is False:
         webassets_env.debug = True
+        os.makedirs(content_dir + '/styles/vendor')
         os.makedirs(content_dir + '/scripts/vendor')
         os.makedirs(content_dir + '/scripts/vendor/katex')
         os.makedirs(content_dir + '/scripts/vendor/polyfills')
