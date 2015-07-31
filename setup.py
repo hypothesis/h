@@ -44,6 +44,8 @@ INSTALL_REQUIRES = [
     'gevent>=1.0.2,<1.1.0',
     'gnsq>=0.3.0,<0.4.0',
     'gunicorn>=19.2,<20',
+    'hashids==1.1.0',  # hashid format may change with updated hashid package,
+                       # so always pin.
     'jsonpointer==1.0',
     'jsonschema==1.3.0',
     'oauthlib==0.6.3',
@@ -52,6 +54,7 @@ INSTALL_REQUIRES = [
     'pyramid-oauthlib>=0.2.0,<0.3.0',
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
+    'python-slugify>=1.1.3,<1.2.0',
     'python-statsd>=1.7.0,<1.8.0',
     'pyramid_webassets>=0.9,<1.0',
     'pyramid-jinja2>=2.3.3',

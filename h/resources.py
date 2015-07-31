@@ -52,7 +52,9 @@ class Stream(Resource):
 
 
 class Root(Resource):
-    pass
+    __acl__ = [
+        (security.Allow, security.Authenticated, 'authenticated'),
+    ]
 
 
 def create_root(request):

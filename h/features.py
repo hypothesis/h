@@ -8,6 +8,7 @@ from h.db import Base
 
 FEATURES = {
     'claim': "Enable 'claim your username' web views?",
+    'groups': "Enable private annotation groups?",
     'notification': "Send email notifications?",
     'queue': "Enable dispatch of annotation events to NSQ?",
     'streamer': "Enable 'live streaming' for annotations via the websocket?",

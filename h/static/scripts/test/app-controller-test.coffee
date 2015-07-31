@@ -11,6 +11,7 @@ describe 'AppController', ->
   fakeIdentity = null
   fakeLocation = null
   fakeParams = null
+  fakeSession = null
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
@@ -67,6 +68,8 @@ describe 'AppController', ->
 
     fakeParams = {id: 'test'}
 
+    fakeSession = {}
+
     fakeStore = {
       SearchResource: {
         get: sinon.spy()
@@ -99,6 +102,7 @@ describe 'AppController', ->
     $provide.value 'identity', fakeIdentity
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams
+    $provide.value 'session', fakeSession
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamfilter', fakeStreamFilter
