@@ -1,11 +1,5 @@
-AuthController.$inject = [
-  '$scope', '$timeout',
-  'flash', 'session', 'formRespond'
-];
-function AuthController(
-  $scope,    $timeout,
-  flash,    session,   formRespond
-) {
+// @ngInject
+function AuthController($scope, $timeout, flash, session, formRespond) {
   var pendingTimeout = null;
 
   function success(data) {

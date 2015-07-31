@@ -1,13 +1,7 @@
 var angular = require('angular');
 
-AuthAppController.$inject = [
-  '$location', '$scope', '$timeout', '$window',
-  'session'
-];
-function AuthAppController(
-  $location,    $scope,   $timeout,   $window,
-  session
-) {
+// @ngInject
+function AuthAppController($location, $scope, $timeout, $window, session) {
   function onlogin() {
     window.location.href = '/stream';
   };
@@ -38,15 +32,15 @@ function AuthAppController(
 }
 
 
-AuthPageController.$inject = ['$routeParams', '$scope'];
-function AuthPageController(   $routeParams,   $scope) {
+// @ngInject
+function AuthPageController($routeParams, $scope) {
   $scope.model.code = $routeParams.code;
   $scope.hasActivationCode = !!$routeParams.code;
 }
 
 
-configure.$inject = ['$httpProvider', '$locationProvider', '$routeProvider'];
-function configure(   $httpProvider,   $locationProvider,   $routeProvider) {
+// @ngInject
+function configure($httpProvider, $locationProvider, $routeProvider) {
   // Use the Pyramid XSRF header name
   $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-Token';
 

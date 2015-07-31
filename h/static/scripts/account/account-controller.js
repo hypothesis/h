@@ -1,13 +1,8 @@
 var angular = require('angular');
 
-AccountController.inject = [
-  '$scope', '$filter',
-  'auth', 'flash', 'formRespond', 'identity', 'session'
-];
-function AccountController(
-  $scope,    $filter,
-  auth,    flash,   formRespond,   identity,   session
-) {
+// @ngInject
+function AccountController($scope, $filter, auth, flash, formRespond, identity,
+                           session) {
   var personaFilter = $filter('persona');
 
   $scope.subscriptionDescription = {
