@@ -53,11 +53,12 @@ function sessionActions(options) {
  *
  * In addition, this service also provides helper methods for mutating the
  * session state, by, e.g. logging in, logging out, etc.
+ *
+ * @ngInject
  */
+function session($document, $http, $resource, flash) {
  // TODO: Move accounts data management (e.g. profile, edit_profile,
  // disable_user, etc) into another module with another route.
-session.$inject = ['$document', '$http', '$resource', 'flash'];
-function session(   $document,   $http,   $resource,   flash) {
   var actions = sessionActions({
     transformRequest: prepare,
     transformResponse: process,

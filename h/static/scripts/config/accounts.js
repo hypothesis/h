@@ -1,7 +1,7 @@
 var angular = require('angular');
 
-configure.$inject = ['$httpProvider', 'identityProvider'];
-function configure(   $httpProvider,   identityProvider) {
+// @ngInject
+function configure($httpProvider, identityProvider) {
   // Pending authentication check
   var authCheck = null;
 
