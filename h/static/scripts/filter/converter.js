@@ -1,15 +1,13 @@
-var Markdown = require('../vendor/Markdown.Converter');
+var showdown = require('showdown');
 
-function Converter() {
-  Markdown.Converter.call(this);
-  this.hooks.chain('preConversion', function (text) {
-    return text || '';
-  });
-  this.hooks.chain('postConversion', function (text) {
-    return text.replace(/<a href=/g, "<a target=\"_blank\" href=");
-  });
+function targetBlank(converter) {
+  function filter(text) {
+    return text.replace(/<a href=/g, '<a target="_blank" href=');
+  }
+  return [{type: 'output', filter: filter}];
 }
 
 module.exports = function () {
-  return (new Converter()).makeHtml;
+  var converter = new showdown.Converter({extensions: [targetBlank]});
+  return converter.makeHtml.bind(converter);
 };

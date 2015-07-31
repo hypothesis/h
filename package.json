@@ -34,6 +34,7 @@
     "node-iterator-shim": "^1.0.1",
     "node-uuid": "^1.4.3",
     "raf": "^2.0.4",
+    "showdown": "^1.2.1",
     "strip-bomify": "^0.1.0",
     "uglify-js": "^2.4.14"
   },
