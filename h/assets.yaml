@@ -2,11 +2,11 @@
 angular:
   filters: uglifyjs
   output: scripts/vendor/angular.min.js
-  contents: h:static/scripts/vendor/angular.js
+  contents: ../../node_modules/angular/angular.js
 angular_animate:
   filters: uglifyjs
   output: scripts/vendor/angular-animate.min.js
-  contents: h:static/scripts/vendor/angular-animate.js
+  contents: ../../node_modules/angular-animate/angular-animate.js
 angular_bootstrap:
   filters: uglifyjs
   output: scripts/vendor/angular-bootstrap.min.js
@@ -14,49 +14,51 @@ angular_bootstrap:
 angular_resource:
   filters: uglifyjs
   output: scripts/vendor/angular-resource.min.js
-  contents: h:static/scripts/vendor/angular-resource.js
+  contents: ../../node_modules/angular-resource/angular-resource.js
 angular_route:
   filters: uglifyjs
   output: scripts/vendor/angular-route.min.js
-  contents: h:static/scripts/vendor/angular-route.js
+  contents: ../../node_modules/angular-route/angular-route.js
 angular_sanitize:
   filters: uglifyjs
   output: scripts/vendor/angular-sanitize.min.js
   contents: h:static/scripts/vendor/angular-sanitize.js
 angular_tags_input:
-  filters: uglifyjs
-  output: scripts/vendor/ng-tags-input.min.js
-  contents: h:static/scripts/vendor/ng-tags-input.js
+  output: scripts/vendor/angular-tags-input.min.js
+  contents: ../../node_modules/ng-tags-input/build/ng-tags-input.min.js
 angular_toastr:
-  contents:
-    - filters: uglifyjs
-      output: scripts/vendor/angular-toastr.min.js
-      contents: h:static/scripts/vendor/angular-toastr.js
+  filters: uglifyjs
+  output: scripts/vendor/angular-toastr.min.js
+  contents: h:static/scripts/vendor/angular-toastr.js
 
 
 # Analytics
 angulartics:
   filters: uglifyjs
   output: scripts/vendor/angulartics.min.js
-  contents: h:static/scripts/vendor/angulartics.js
+  contents: ../../node_modules/angulartics/src/angulartics.js
 angulartics_ga:
   filters: uglifyjs
   output: scripts/vendor/angulartics-ga.min.js
-  contents: h:static/scripts/vendor/angulartics-ga.js
+  contents: ../../node_modules/angulartics/src/angulartics-ga.js
 
 
 # Bootstrap (for admin areas only)
 bootstrap:
   filters: uglifyjs
   output: scripts/vendor/bootstrap.min.js
-  contents: h:static/scripts/vendor/bootstrap.js
+  contents: ../../node_modules/bootstrap/dist/js/bootstrap.js
+bootstrap_css:
+  filters: cleancss
+  output: styles/vendor/bootstrap.min.css
+  contents: ../../node_modules/bootstrap/dist/css/bootstrap.css
 
 
 # jQuery
 jquery:
   filters: uglifyjs
   output: scripts/vendor/jquery.min.js
-  contents: h:static/scripts/vendor/jquery.js
+  contents: ../../node_modules/jquery/dist/jquery.js
 
 
 # TeX rendering
@@ -90,13 +92,13 @@ momentjs:
   contents:
     - filters: uglifyjs
       output: scripts/vendor/moment.min.js
-      contents: h:static/scripts/vendor/moment-with-langs.js
+      contents: ../../node_modules/moment/min/moment-with-langs.js
     - filters: uglifyjs
       output: scripts/vendor/jstz.min.js
-      contents: h:static/scripts/vendor/jstz.js
+      contents: ../../node_modules/jstimezonedetect/jstz.js
     - filters: uglifyjs
       output: scripts/vendor/moment-timezone.min.js
-      contents: h:static/scripts/vendor/moment-timezone.js
+      contents: ../../node_modules/moment-timezone/moment-timezone.js
     - filters: uglifyjs
       output: scripts/vendor/moment-timezone-data.min.js
       contents: h:static/scripts/vendor/moment-timezone-data.js
@@ -104,15 +106,16 @@ momentjs:
 
 # Admin areas
 admin_css:
-  output: styles/admin.min.css
-  filters:
-    - compass
-    - cleancss
-    - cssrewrite
-  contents: h:static/styles/admin.scss
-
+  contents:
+    - bootstrap_css
+    - output: styles/admin.min.css
+      filters:
+      - compass
+      - cleancss
+      - cssrewrite
+      contents:
+        - h:static/styles/admin.scss
 admin_js:
-  output: scripts/admin.min.js
   contents:
     - jquery
     - bootstrap
@@ -130,7 +133,7 @@ config:
 
 
 # Application
-app_vendor_js:
+app_js:
   contents:
     - jquery
     - angular
@@ -148,13 +151,10 @@ app_vendor_js:
     - katex
     - momentjs
     - url
-
-app_js:
-  output: scripts/app.min.js
-  filters: uglifyjs
-  contents:
-    - output: scripts/app.js
-      filters: browserify
+    - output: scripts/app.min.js
+      filters:
+        - browserify
+        - uglifyjs
       contents: h:static/scripts/app.coffee
       depends:
         - h:static/scripts/*.coffee
