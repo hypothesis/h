@@ -24,12 +24,12 @@ from zope.sqlalchemy import ZopeTransactionExtension
 
 from h.api import db as api_db
 
-__all__ = [
+__all__ = (
     'Base',
     'Session',
     'bind_engine',
     'make_engine',
-]
+)
 
 # Create a thread-local session factory (which can also be used directly as a
 # session):
