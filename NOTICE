@@ -14,17 +14,9 @@ This product also includes the following third-party components:
 
    Copyright 2012 Aron Carroll, Rufus Pollock, and Nick Stenning
 
- * jQuery (http://jquery.com/)
-
-   Copyright 2013 jQuery Foundation and other contributors
-
  * jschannel (https://github.com/mozilla/jschannel)
 
    Copyright (C) 2010, Lloyd Hilaiel
-
- * sockjs (https://github.com/sockjs)
-
-   Copyright (c) 2011-2012 VMware, Inc.
 
  * Gentleface icon set (http://www.gentleface.com/free_icon_set.html)
 
@@ -45,12 +37,6 @@ This product also includes the following third-party components:
  * Cuticons (http://drbl.in/eztK)
 
    By Vaibhav Bhat
-
- * PageDown (http://code.google.com/p/pagedown/)
-
-   Copyright © 2009-2010 Dominic Baggott
-   Copyright © 2009-2010 Ash Berlin
-   Copyright © 2011 Christoph Dorn
 
  * Autofill event polyfill (https://github.com/tbosch/autofill-event)
 
