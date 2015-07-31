@@ -18,13 +18,13 @@ def upgrade():
     with op.batch_alter_table('feature') as batch_op:
         batch_op.add_column(
             sa.Column('staff',
-                      sa.Boolean(),
+                      sa.Boolean,
                       nullable=False,
                       default=False,
                       server_default=sa.sql.expression.false()))
 
     with op.batch_alter_table('user') as batch_op:
-        batch_op.add_column(sa.Column('staff', sa.BOOLEAN, nullable=False,
+        batch_op.add_column(sa.Column('staff', sa.Boolean, nullable=False,
                             server_default=sa.sql.expression.false()))
 
 

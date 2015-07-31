@@ -22,7 +22,7 @@ def upgrade():
 def downgrade():
     with op.batch_alter_table('user') as batch_op:
         batch_op.add_column(sa.Column('nipsa',
-                            sa.BOOLEAN,
+                            sa.Boolean,
                             default=False,
                             server_default=sa.sql.expression.false(),
                             nullable=False))

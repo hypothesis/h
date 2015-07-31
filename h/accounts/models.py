@@ -72,7 +72,7 @@ class User(Base):
                           nullable=False,
                           unique=True)
 
-    admin = sa.Column(sa.BOOLEAN,
+    admin = sa.Column(sa.Boolean,
                       default=False,
                       nullable=False,
                       server_default=sa.sql.expression.false())

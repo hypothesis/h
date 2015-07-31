@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     op.add_column('user', sa.Column('nipsa',
-                                    sa.BOOLEAN,
+                                    sa.Boolean,
                                     default=False,
                                     server_default=sa.sql.expression.false(),
                                     nullable=False))

@@ -53,7 +53,7 @@ def upgrade():
         sa.Column('id', sa.INTEGER, primary_key=True),
         sa.Column('uri', sa.Unicode(256), nullable=False),
         sa.Column('type', sa.VARCHAR(64), nullable=False),
-        sa.Column('active', sa.BOOLEAN, default=True, nullable=False)
+        sa.Column('active', sa.Boolean, default=True, nullable=False)
     )
 
 
@@ -74,7 +74,7 @@ def downgrade():
         sa.Column('description', sa.VARCHAR(256), default=""),
         sa.Column('template', template_enum, nullable=False,
                   default='custom_search'),
-        sa.Column('active', sa.BOOLEAN, default=True, nullable=False),
+        sa.Column('active', sa.Boolean, default=True, nullable=False),
         sa.Column('query', JSONEncodedDict(4096), nullable=False),
         sa.Column('type', type_enum, nullable=False, default='user'),
     )

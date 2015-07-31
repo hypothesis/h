@@ -17,7 +17,7 @@ from sqlalchemy.dialects import postgresql
 def upgrade():
     with op.batch_alter_table('feature') as batch_op:
         batch_op.add_column(sa.Column('admins',
-                                      sa.Boolean(),
+                                      sa.Boolean,
                                       nullable=False,
                                       default=False,
                                       server_default=sa.sql.expression.false()))
