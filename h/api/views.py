@@ -186,7 +186,7 @@ def update(context, request):
 def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context
-    id = annotation['id']
+    id_ = annotation['id']
     # Delete the annotation from the database.
     annotation.delete()
 
@@ -195,7 +195,7 @@ def delete(context, request):
 
     # Return a confirmation
     return {
-        'id': id,
+        'id': id_,
         'deleted': True,
     }
 
