@@ -126,6 +126,52 @@ def admins_remove(request):
         location=request.route_url('admin_admins'))
 
 
+@view.view_config(route_name='admin_staff',
+                  request_method='GET',
+                  renderer='h:templates/admin/staff.html.jinja2',
+                  permission='admin')
+def staff_index(_):
+    """A list of all the staff members as an HTML page."""
+    return {"staff": [u.username for u in models.User.staff_members()]}
+
+
+@view.view_config(route_name='admin_staff',
+                  request_method='POST',
+                  renderer='h:templates/admin/staff.html.jinja2',
+                  permission='admin')
+def staff_add(request):
+    """Make a given user a staff member."""
+    try:
+        username = request.params['add']
+    except KeyError:
+        raise httpexceptions.HTTPNotFound()
+
+    try:
+        accounts.make_staff(username)
+    except accounts.NoSuchUserError:
+        request.session.flash(
+            _("User {username} doesn't exist.".format(username=username)),
+            "error")
+    return staff_index(request)
+
+
+@view.view_config(route_name='admin_staff_remove',
+                  request_method='POST',
+                  renderer='h:templates/admin/staff.html.jinja2',
+                  permission='admin')
+def staff_remove(request):
+    """Remove a user from the staff."""
+    try:
+        username = request.params['remove']
+    except KeyError:
+        raise httpexceptions.HTTPNotFound()
+
+    user = models.User.get_by_username(username)
+    user.staff = False
+    return httpexceptions.HTTPSeeOther(
+        location=request.route_url('admin_staff'))
+
+
 def includeme(config):
     config.add_route('admin_index', '/admin',
                      factory=AdminResource)
@@ -136,5 +182,9 @@ def includeme(config):
     config.add_route('admin_admins', '/admin/admins',
                      factory=AdminResource)
     config.add_route('admin_admins_remove', '/admin/admins/delete',
+                     factory=AdminResource)
+    config.add_route('admin_staff', '/admin/staff',
+                     factory=AdminResource)
+    config.add_route('admin_staff_remove', '/admin/staff/delete',
                      factory=AdminResource)
     config.scan(__name__)

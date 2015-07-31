@@ -153,14 +153,14 @@ def test_get_client_bad_secret(config):
 
 @patch("h.auth.models.User.get_by_id")
 def test_effective_principals_returns_no_principals(get_by_id):
-    """It should return no principals if no client or admin.
+    """It should return no principals if no client, admin or staff.
 
-    If the request has no client and the user is not an admin, then it
-    should return no principals.
+    If the request has no client and the user is not an admin or staff member,
+    then it should return no principals.
 
     """
     request = MagicMock(client=None)
-    get_by_id.return_value = MagicMock(admin=False)
+    get_by_id.return_value = MagicMock(admin=False, staff=False)
 
     assert auth.effective_principals("jiji", request) == []
 
@@ -171,7 +171,7 @@ def test_effective_principals_returns_client_id_as_consumer(get_by_id):
     If the request has a client ID it's returned as a "consumer:" principal.
     """
     request = MagicMock(client=MagicMock(client_id="test_id"))
-    get_by_id.return_value = MagicMock(admin=False)
+    get_by_id.return_value = MagicMock(admin=False, staff=False)
 
     assert auth.effective_principals("jiji", request) == ["consumer:test_id"]
 
@@ -180,7 +180,7 @@ def test_effective_principals_returns_client_id_as_consumer(get_by_id):
 def test_effective_principals_with_admin_user(get_by_id):
     """If the user is an admin it should return a "group:admin" principal."""
     request = MagicMock(client=None)
-    get_by_id.return_value = MagicMock(admin=True)
+    get_by_id.return_value = MagicMock(admin=True, staff=False)
 
     assert auth.effective_principals("jiji", request) == ["group:admin"]
 
@@ -188,7 +188,25 @@ def test_effective_principals_with_admin_user(get_by_id):
 @patch("h.auth.models.User.get_by_id")
 def test_effective_principals_client_id_and_admin_together(get_by_id):
     request = MagicMock(client=MagicMock(client_id="test_id"))
-    get_by_id.return_value = MagicMock(admin=True)
+    get_by_id.return_value = MagicMock(admin=True, staff=False)
 
     assert auth.effective_principals("jiji", request) == [
-            "consumer:test_id", "group:admin"]
+        "consumer:test_id", "group:admin"]
+
+
+@patch("h.auth.models.User.get_by_id")
+def test_effective_principals_with_staff_user(get_by_id):
+    """If the user is staff it should return a "group:staff" principal."""
+    request = MagicMock(client=None)
+    get_by_id.return_value = MagicMock(admin=False, staff=True)
+
+    assert auth.effective_principals("jiji", request) == ["group:staff"]
+
+
+@patch("h.auth.models.User.get_by_id")
+def test_effective_principals_client_id_and_admin_and_staff(get_by_id):
+    request = MagicMock(client=MagicMock(client_id="test_id"))
+    get_by_id.return_value = MagicMock(admin=True, staff=True)
+
+    assert auth.effective_principals("jiji", request) == [
+        "consumer:test_id", "group:admin", "group:staff"]

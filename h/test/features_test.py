@@ -65,6 +65,35 @@ def test_flag_enabled_true_when_admins_true_admin_request(authn_policy,
 
     assert result
 
+
+def test_flag_enabled_false_when_staff_true_normal_request(feature_model):
+    """It should return False for staff features if user is not staff.
+
+    If a feature is enabled for staff, and the user is not a staff member,
+    flag_enabled() should return False.
+
+    """
+    # The feature is enabled for staff members.
+    feature_model.get_by_name.return_value.staff = True
+
+    request = DummyRequest()
+
+    assert features.flag_enabled(request, 'notification') is False
+
+
+def test_flag_enabled_true_when_staff_true_staff_request(authn_policy,
+                                                         feature_model):
+    # The authorized user is a staff member.
+    authn_policy.effective_principals.return_value = ['group:staff']
+
+    # The feature is enabled for staff.
+    feature_model.get_by_name.return_value.staff = True
+
+    request = DummyRequest()
+
+    assert features.flag_enabled(request, 'notification') is True
+
+
 @pytest.fixture
 def feature_model(request):
     patcher = mock.patch('h.features.Feature', autospec=True)

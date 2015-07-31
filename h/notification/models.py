@@ -12,7 +12,7 @@ class Subscriptions(Base):
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     uri = sa.Column(sa.Unicode(256), nullable=False)
     type = sa.Column(sa.VARCHAR(64), nullable=False)
-    active = sa.Column(sa.BOOLEAN, default=True, nullable=False)
+    active = sa.Column(sa.Boolean, default=True, nullable=False)
 
     @classmethod
     def get_by_id(cls, id_):
