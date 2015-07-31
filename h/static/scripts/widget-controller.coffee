@@ -40,8 +40,9 @@ module.exports = class WidgetController
         loaded.push(f.uri)
         _loadAnnotationsFrom({uri: f.uri}, 0)
 
-      streamFilter.resetFilter().addClause('/uri', 'one_of', loaded)
-      streamer.send({filter: streamFilter.getFilter()})
+      if loaded.length > 0
+        streamFilter.resetFilter().addClause('/uri', 'one_of', loaded)
+        streamer.send({filter: streamFilter.getFilter()})
 
     $scope.$watchCollection (-> crossframe.frames), loadAnnotations
 
