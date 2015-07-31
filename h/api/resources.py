@@ -38,7 +38,6 @@ class Annotations(object):
 
 class Root(Resource):
     __acl__ = [
-        (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, Authenticated, 'create'),
     ]
 
