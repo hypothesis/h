@@ -3,21 +3,30 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
   VISIBILITY_PUBLIC = 'public'
   VISIBILITY_PRIVATE = 'private'
 
-  levels = [
-    {name: VISIBILITY_PUBLIC, text: 'Public'}
-    {name: VISIBILITY_PRIVATE, text: 'Only Me'}
-  ]
-
-  getLevel = (name) ->
-    for level in levels
-      if level.name == name
-        return level
-    undefined
 
   isPublic  = (level) -> level == VISIBILITY_PUBLIC
 
   link: (scope, elem, attrs, controller) ->
     return unless controller?
+
+    getLevels = ->
+      group = scope.group()
+      if group
+        text = group.name
+        isGroup = true
+      else
+        text = 'Public'
+        isGroup = false
+      [
+        {name: VISIBILITY_PUBLIC, text: text, isGroup: isGroup}
+        {name: VISIBILITY_PRIVATE, text: 'Only Me'}
+      ]
+
+    getLevel = (name) ->
+      for level in getLevels()
+        if level.name == name
+          return level
+      undefined
 
     controller.$formatters.push (selectedPermissions) ->
       return unless selectedPermissions?
@@ -51,7 +60,7 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
 
       scope.level = controller.$viewValue
 
-    scope.levels = levels
+    scope.levels = getLevels()
     scope.setLevel = (level) ->
       localStorage.setItem VISIBILITY_KEY, level.name
       controller.$setViewValue level
@@ -62,5 +71,6 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
   restrict: 'E'
   scope:
     level: '='
+    group: '&'
   templateUrl: 'privacy.html'
 ]

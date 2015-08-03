@@ -79,6 +79,11 @@ describe 'annotation', ->
     }
     fakeUrlEncodeFilter = (v) -> encodeURIComponent(v)
 
+    fakeGroupService = {
+      focusedGroup: -> {}
+      getGroup: ->
+    }
+
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'drafts', fakeDrafts
@@ -91,6 +96,7 @@ describe 'annotation', ->
     $provide.value 'tags', fakeTags
     $provide.value 'time', fakeTime
     $provide.value 'urlencodeFilter', fakeUrlEncodeFilter
+    $provide.value 'group', fakeGroupService
     return
 
   beforeEach inject (_$compile_, _$document_, _$rootScope_, _$timeout_) ->
@@ -557,24 +563,32 @@ describe("AnnotationController", ->
   createAnnotationDirective = ({annotation, personaFilter, momentFilter,
                                 urlencodeFilter, drafts, flash,
                                 permissions, session, tags, time, annotationUI,
-                                annotationMapper}) ->
+                                annotationMapper, group}) ->
     locals = {
-      personaFilter: personaFilter or {}
+      personaFilter: personaFilter or ->
       momentFilter: momentFilter or {}
       urlencodeFilter: urlencodeFilter or {}
       drafts: drafts or {
         add: ->
+        remove: ->
       }
-      flash: flash or {}
-      permissions: permissions or {}
+      flash: flash or {
+        info: ->
+        error: ->
+      }
+      permissions: permissions or {
+        isPrivate: -> false
+        permits: -> true
+      }
       session: session or {state: {}}
-      tags: tags or {}
+      tags: tags or {store: ->}
       time: time or {
         toFuzzyString: ->
         nextFuzzyUpdate: ->
       }
       annotationUI: annotationUI or {}
       annotationMapper: annotationMapper or {}
+      group: group or {getGroup: ->}
     }
     module(($provide) ->
       $provide.value("personaFilter", locals.personaFilter)
@@ -588,6 +602,7 @@ describe("AnnotationController", ->
       $provide.value("time", locals.time)
       $provide.value("annotationUI", locals.annotationUI)
       $provide.value("annotationMapper", locals.annotationMapper)
+      $provide.value("group", locals.group)
       return
     )
 
@@ -608,6 +623,35 @@ describe("AnnotationController", ->
   describe("createAnnotationDirective", ->
     it("creates the directive without crashing", ->
       createAnnotationDirective({})
+    )
+  )
+
+  describe("save", ->
+    it("Passes group:<hashid> to the server when saving a new annotation", ->
+      annotation = {
+        # The annotation needs to have a user or the controller will refuse to
+        # save it.
+        user: 'acct:fred@hypothes.is'
+        # The annotation needs to have some text or it won't validate.
+        text: 'foo'
+      }
+      # Stub $create so we can spy on what gets sent to the server.
+      annotation.$create = sinon.stub().returns(Promise.resolve())
+
+      {controller} = createAnnotationDirective({
+        annotation: annotation
+        # Mock the group service, pretend that there's a group with hashid
+        # "test-group" focused.
+        group: {
+          focusedGroup: -> {hashid: "test-group"}
+          getGroup: ->
+        }
+      })
+      controller.action = 'create'
+
+      controller.save().then(->
+        assert annotation.$create.lastCall.thisValue.group == "test-group"
+      )
     )
   )
 
@@ -633,22 +677,6 @@ describe("AnnotationController", ->
             statusText: "Server Error",
             data: {}
           })
-      }
-      flash: {
-        info: ->
-        error: ->
-      }
-      personaFilter: ->
-      permissions: {
-        isPrivate: -> false
-        permits: -> true
-      }
-      tags: {
-        store: ->
-      }
-      drafts: {
-        add: ->
-        remove: ->
       }
     )
 

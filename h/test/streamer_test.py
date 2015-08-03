@@ -355,3 +355,33 @@ class TestShouldSendEvent(unittest.TestCase):
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
         assert should_send_event(socket, annotation, event_data)
+
+    def test_should_send_event_does_not_send_group_annotations(self):
+        """Users shouldn't see annotations in groups they aren't members of."""
+        annotation = {'user': 'fred', 'group': 'private-group'}
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.effective_principals = []  # No 'group:private-group'.
+        socket.request.has_permission.return_value = True
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        assert not should_send_event(socket, annotation, event_data)
+
+    def test_should_send_event_does_send_nipsad_annotations(self):
+        """Users should see annotations from groups they are members of."""
+        annotation = {'user': 'fred', 'group': 'private-group'}
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.has_permission.return_value = True
+        socket.request.effective_principals = ['group:private-group']
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        assert should_send_event(socket, annotation, event_data)
+
+    def test_should_send_event_does_not_crash_if_no_group(self):
+        """Users should see annotations from groups they are members of."""
+        annotation = {'user': 'fred'}  # No 'group'.
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.has_permission.return_value = True
+        socket.request.effective_principals = ['group:private-group']
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        should_send_event(socket, annotation, event_data)

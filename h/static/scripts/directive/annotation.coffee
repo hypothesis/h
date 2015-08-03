@@ -43,10 +43,10 @@ errorMessage = (reason) ->
 AnnotationController = [
   '$scope', '$timeout', '$q', '$rootScope', '$document',
   'drafts', 'flash', 'permissions', 'tags', 'time',
-  'annotationUI', 'annotationMapper', 'session'
+  'annotationUI', 'annotationMapper', 'session', 'group'
   ($scope,   $timeout,   $q,   $rootScope,   $document,
    drafts,   flash,   permissions,   tags,   time,
-   annotationUI,   annotationMapper,   session) ->
+   annotationUI,   annotationMapper,   session,   group) ->
 
     @annotation = {}
     @action = 'view'
@@ -163,6 +163,9 @@ AnnotationController = [
         this.render()
         this.view()
 
+    this.group = ->
+      group.getGroup(model.group)
+
     # Calculates the visual diff flags from the targets
     #
     # hasDiff is set to true is there are any targets with a difference
@@ -202,6 +205,10 @@ AnnotationController = [
       switch @action
         when 'create'
           updateDomainModel(model, @annotation)
+
+          if group.focusedGroup().hashid != '__public__'
+            model.group = group.focusedGroup().hashid
+
           onFulfilled = =>
             $rootScope.$emit('annotationCreated', model)
             @view()

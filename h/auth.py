@@ -42,6 +42,8 @@ from pyramid.util import action_method
 from .interfaces import IClientFactory
 from .oauth import JWT_BEARER
 from h.accounts import models
+from h.api import groups
+
 
 LEEWAY = 240  # allowance for clock skew in verification
 
@@ -143,10 +145,13 @@ def effective_principals(userid, request):
 
     if primary_user is not None:
         if primary_user.admin:
-            additional_principals.append('group:admin')
+            additional_principals.append('group:__admin__')
 
         if primary_user.staff:
-            additional_principals.append('group:staff')
+            additional_principals.append('group:__staff__')
+
+        additional_principals.extend(
+            groups.group_principals(primary_user, request))
 
     return additional_principals
 

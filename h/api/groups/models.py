@@ -4,6 +4,7 @@ from sqlalchemy.orm import exc
 import slugify
 
 from h.db import Base
+from h import hashids
 
 
 class Group(Base):
@@ -36,14 +37,6 @@ class Group(Base):
         self.creator = creator
         self.members.append(creator)
 
-    @property
-    def slug(self):
-        """A version of this group's name suitable for use in a URL."""
-        return slugify.slugify(self.name)
-
-    def __repr__(self):
-        return '<Group: %s>' % self.slug
-
     @classmethod
     def get_by_id(cls, id_):
         """Return the group with the given id, or None."""
@@ -52,6 +45,31 @@ class Group(Base):
                 cls.id == id_).one()
         except exc.NoResultFound:
             return None
+
+    @classmethod
+    def get_by_hashid(cls, request, hashid):
+        """Return the group with the given hashid, or None."""
+        id_ = hashids.decode(request, 'h.groups', hashid)
+        return cls.get_by_id(id_)
+
+    @property
+    def slug(self):
+        """A version of this group's name suitable for use in a URL."""
+        return slugify.slugify(self.name)
+
+    def __repr__(self):
+        return '<Group: %s>' % self.slug
+
+    def hashid(self, request):
+        """Return a public hashid that uniquely identifies this group."""
+        return hashids.encode(request, 'h.groups', self.id)
+
+    def as_dict(self, request):
+        """Return a JSON-serializable dict representation of this group."""
+        return {
+            'name': self.name,
+            'hashid': self.hashid(request),
+        }
 
 
 USER_GROUP_TABLE = sa.Table(
@@ -65,3 +83,8 @@ USER_GROUP_TABLE = sa.Table(
               sa.ForeignKey('group.id'),
               nullable=False)
 )
+
+
+def includeme(config):
+    assert config.registry.settings.get("h.hashids.salt"), (
+        "There needs to be a h.hashids.salt config setting")

@@ -6,6 +6,7 @@ import logging
 
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
+from pyramid import httpexceptions
 
 from h.api import cors
 from h.api.auth import get_user
@@ -15,6 +16,7 @@ from h.api.resources import Root
 from h.api.resources import Annotations
 from h.api import search as search_lib
 from h.api import logic
+from h.api import groups
 
 
 log = logging.getLogger(__name__)
@@ -89,7 +91,8 @@ def search(request):
 
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    results = search_lib.search(request_params=request.params,
+    results = search_lib.search(request=request,
+                                request_params=request.params,
                                 user=user,
                                 search_normalized_uris=search_normalized_uris)
 
@@ -153,7 +156,12 @@ def create(request):
     user = get_user(request)
 
     # Create the annotation
-    annotation = logic.create_annotation(fields, user)
+    try:
+        annotation = logic.create_annotation(
+            fields=fields, user=user,
+            effective_principals=request.effective_principals)
+    except RuntimeError as err:
+        return _api_error(request, err.args[0], status_code=err.args[1])
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
@@ -167,6 +175,10 @@ def create(request):
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     annotation = context
+
+    if not groups.authorized_to_read_group(
+            request.effective_principals, annotation.get('group')):
+        raise httpexceptions.HTTPNotFound()
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'read')
@@ -193,7 +205,8 @@ def update(context, request):
 
     # Update and store the annotation
     try:
-        logic.update_annotation(annotation, fields, has_admin_permission)
+        logic.update_annotation(annotation, fields, has_admin_permission,
+                                request.effective_principals)
     except RuntimeError as err:
         return _api_error(
             request,
@@ -212,16 +225,18 @@ def update(context, request):
 def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context
-    id_ = annotation['id']
-    # Delete the annotation from the database.
-    annotation.delete()
+
+    try:
+        logic.delete_annotation(annotation, request.effective_principals)
+    except RuntimeError as err:
+        return _api_error(request, err.args[0], status_code=err.args[1])
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'delete')
 
     # Return a confirmation
     return {
-        'id': id_,
+        'id': annotation['id'],
         'deleted': True,
     }
 

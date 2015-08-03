@@ -122,6 +122,9 @@ class Annotation(annotation.Annotation):
         'thread': {
             'type': 'string',
             'analyzer': 'thread'
+        },
+        'group': {
+            'type': 'string',
         }
     }
     __analysis__ = {

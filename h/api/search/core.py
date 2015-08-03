@@ -10,9 +10,12 @@ from h.api.search import query
 log = logging.getLogger(__name__)
 
 
-def search(request_params, user=None, search_normalized_uris=False):
+def search(request, request_params, user=None, search_normalized_uris=False):
     """
     Search with the given params and return the matching annotations.
+
+    :param request: the Pyramid request object
+    :type request: pyramid.request.Request
 
     :param request_params: the HTTP request params that were posted to the
         h search API
@@ -33,8 +36,8 @@ def search(request_params, user=None, search_normalized_uris=False):
     log.debug("Searching with user=%s, for uri=%s",
               str(userid), request_params.get('uri'))
 
-    body = query.build(request_params,
-                       userid=userid,
+    body = query.build(request,
+                       request_params,
                        search_normalized_uris=search_normalized_uris)
     results = models.Annotation.search_raw(body, user=user, raw_result=True)
 

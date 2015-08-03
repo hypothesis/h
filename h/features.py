@@ -90,11 +90,11 @@ def flag_enabled(request, name):
     if feat.everyone:
         return True
     # Features that are on for admin are on if the current user is an admin.
-    if feat.admins and 'group:admin' in request.effective_principals:
+    if feat.admins and 'group:__admin__' in request.effective_principals:
         return True
     # Features that are on for staff are on if the current user is a staff
     # member.
-    if feat.staff and 'group:staff' in request.effective_principals:
+    if feat.staff and 'group:__staff__' in request.effective_principals:
         return True
     return False
 

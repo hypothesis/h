@@ -93,7 +93,7 @@ $group-list-width: 225px;
 }
 
 .group-list .dropdown-menu .group-name {
-  max-width: $group-list-width - 45px;
+  width: $group-list-width - 45px;
   overflow: hidden;
   text-overflow: ellipsis;
 }

@@ -94,7 +94,6 @@ module.exports = angular.module('h', [
 .directive('deepCount', require('./directive/deep-count'))
 .directive('formInput', require('./directive/form-input'))
 .directive('formValidate', require('./directive/form-validate'))
-.directive('groupList', require('./directive/group-list'))
 .directive('markdown', require('./directive/markdown'))
 .directive('privacy', require('./directive/privacy'))
 .directive('simpleSearch', require('./directive/simple-search'))
@@ -142,6 +141,7 @@ module.exports = angular.module('h', [
 .service('viewFilter', require('./view-filter'))
 
 .factory('serviceUrl', require('./service-url'))
+.factory('group', require('./group-service'))
 
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))
@@ -156,3 +156,5 @@ module.exports = angular.module('h', [
 .run(setupCrossFrame)
 .run(setupStreamer)
 .run(setupHost)
+
+require('./group-list-controller')

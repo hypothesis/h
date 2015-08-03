@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from h import i18n
+
 from h.api.models import Annotation
 from h.api import search as search_lib
+from h.api import groups
 
 
+_ = i18n.TranslationString
 log = logging.getLogger(__name__)
 
 
@@ -12,14 +16,25 @@ log = logging.getLogger(__name__)
 PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 
 
-def create_annotation(fields, user):
-    """Create and store an annotation."""
+def create_annotation(fields, user, effective_principals):
+    """Create and store an annotation.
+
+    :raises RuntimeError: If the request isn't authorized to write to the
+        annotation's group.
+
+    """
     # Some fields are not to be set by the user, ignore them
     for field in PROTECTED_FIELDS:
         fields.pop(field, None)
 
     # Create Annotation instance
     annotation = Annotation(fields)
+
+    groups.set_group_if_reply(annotation)
+
+    if not groups.authorized_to_write_group(
+            effective_principals, annotation.get('group')):
+        raise RuntimeError(_('Not authorized to write to group.'), 401)
 
     annotation['user'] = user.id
     annotation['consumer'] = user.consumer.key
@@ -51,7 +66,16 @@ def _anonymize_deletes(annotation):
         annotation['permissions'][action] = filtered
 
 
-def update_annotation(annotation, fields, has_admin_permission):
+def update_annotation(annotation, fields, has_admin_permission,
+                      effective_principals):
+    """Update the given annotation with the given new fields.
+
+    :raises RuntimeError: if the fields attempt to change the annotation's
+       permissions and has_admin_permission is False, or if
+       effective_principals aren't authorized to write to the annotation's
+       group
+
+    """
     # Some fields are not to be set by the user, ignore them
     for field in PROTECTED_FIELDS:
         fields.pop(field, None)
@@ -62,11 +86,20 @@ def update_annotation(annotation, fields, has_admin_permission):
         fields['permissions'] != annotation.get('permissions', {})
     )
     if changing_permissions and not has_admin_permission:
-        raise RuntimeError("Not authorized to change annotation permissions.",
-                           401)  # Unauthorized
+        raise RuntimeError(
+            _('Not authorized to change annotation permissions.'), 401)
+
+    can_write_old_group = groups.authorized_to_write_group(
+        effective_principals, annotation.get('group'))
+    can_write_new_group = groups.authorized_to_write_group(
+        effective_principals, fields.get('group'))
+    if not (can_write_old_group and can_write_new_group):
+        raise RuntimeError(_('Not authorized to write to group.'), 401)
 
     # Update the annotation with the new data
     annotation.update(fields)
+
+    groups.set_group_if_reply(annotation)
 
     # If the annotation is flagged as deleted, remove mentions of the user
     if annotation.get('deleted', False):
@@ -75,3 +108,10 @@ def update_annotation(annotation, fields, has_admin_permission):
     # Save the annotation in the database, overwriting the old version.
     search_lib.prepare(annotation)
     annotation.save()
+
+
+def delete_annotation(annotation, effective_principals):
+    if not groups.authorized_to_write_group(
+            effective_principals, annotation.get('group')):
+        raise RuntimeError(_('Not authorized to write to group.'), 401)
+    annotation.delete()

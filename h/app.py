@@ -66,6 +66,7 @@ def includeme(config):
 
     config.include('h.api', route_prefix='/api')
     config.include('h.api.nipsa')
+    config.include('h.api.groups')
     config.include('h.db')
 
     # Override the traversal path for the api index route.

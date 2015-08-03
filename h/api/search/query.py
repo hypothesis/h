@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 from h.api import uri
 from h.api import nipsa
+from h.api import groups
 
 
-def build(request_params, userid=None, search_normalized_uris=False):
+def build(request, request_params, search_normalized_uris=False):
     """
     Return an Elasticsearch query dict for the given h search API params.
 
     Translates the HTTP request params accepted by the h search API into an
     Elasticsearch query dict.
 
+    :param request: the Pyramid request object
+    :type request: pyramid.request.Request
+
     :param request_params: the HTTP request params that were posted to the
         h search API
     :type request_params: webob.multidict.NestedMultiDict
-
-    :param userid: the ID of the authorized user (optional, default: None),
-    :type userid: unicode or None
 
     :param search_normalized_uris: Whether or not to use the "uri" param to
         search against pre-normalized URI fields.
@@ -74,8 +75,12 @@ def build(request_params, userid=None, search_normalized_uris=False):
     for key, value in request_params.items():
         matches.append({"match": {key: value}})
 
+    userid = request.authenticated_userid
+
     # Add a filter for "not in public site areas" considerations
     filters.append(nipsa.nipsa_filter(userid=userid))
+
+    filters.append(groups.group_filter(request))
 
     query = {"match_all": {}}
 

@@ -24,6 +24,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from .api.auth import get_user  # FIXME: should not import from .api
 from h.api import nipsa
 from h.api import uri
+from h.api import groups
 from .models import Annotation
 
 log = logging.getLogger(__name__)
@@ -112,8 +113,15 @@ class FilterToElasticFilter(object):
 
         self.query["query"] = {
             "filtered": {
-                "filter": nipsa.nipsa_filter(
-                    userid=request.authenticated_userid),
+                "filter": {
+                    "bool": {
+                        "must": [
+                            nipsa.nipsa_filter(
+                                userid=request.authenticated_userid),
+                            groups.group_filter(request)
+                        ]
+                    }
+                },
                 "query": self.query["query"]
             }
         }
@@ -581,6 +589,11 @@ def should_send_event(socket, annotation, event_data):
     if annotation.get('nipsa') and (
             socket.request.authenticated_userid != annotation.get('user', '')):
         return False
+
+    if annotation.get('group'):
+        if 'group:' + annotation['group'] not in (
+                socket.request.effective_principals):
+            return False
 
     # We don't send anything until we have received a filter from the client
     if socket.filter is None:
