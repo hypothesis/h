@@ -42,11 +42,11 @@ errorMessage = (reason) ->
 ###
 AnnotationController = [
   '$scope', '$timeout', '$q', '$rootScope', '$document',
-  'auth', 'drafts', 'flash', 'permissions', 'tags', 'time',
-  'annotationUI', 'annotationMapper'
+  'drafts', 'flash', 'permissions', 'tags', 'time',
+  'annotationUI', 'annotationMapper', 'session'
   ($scope,   $timeout,   $q,   $rootScope,   $document,
-   auth,   drafts,   flash,   permissions,   tags,   time,
-   annotationUI, annotationMapper) ->
+   drafts,   flash,   permissions,   tags,   time,
+   annotationUI,   annotationMapper,   session) ->
 
     @annotation = {}
     @action = 'view'
@@ -108,7 +108,12 @@ AnnotationController = [
     ###
     this.authorize = (action) ->
       return false unless model?
-      permissions.permits action, model, auth.user
+      # TODO: this should use auth instead of permissions but we might need
+      # an auth cache or the JWT -> userid decoding might start to be a
+      # performance bottleneck and we would need to get the id token into the
+      # session, which we should probably do anyway (and move to opaque bearer
+      # tokens for the access token).
+      return permissions.permits action, model, session.state.userid
 
     ###*
     # @ngdoc method
@@ -233,7 +238,7 @@ AnnotationController = [
 
       reply = annotationMapper.createAnnotation({references, uri})
 
-      if auth.user?
+      if session.state.userid
         if permissions.isPublic model.permissions
           reply.permissions = permissions.public()
         else
@@ -321,7 +326,7 @@ AnnotationController = [
 
         # Propagate an update event up the thread (to pulse changing threads),
         # but only if this is someone else's annotation.
-        if model.user != auth.user
+        if model.user != session.state.userid
           $scope.$emit('annotationUpdate')
 
       # Save highlights once logged in.
@@ -337,6 +342,12 @@ AnnotationController = [
       updateTimestamp(model is old)  # repeat on first run
       this.render()
     , true
+
+    # Watch the current user
+    # TODO: fire events instead since watchers are not free and auth is rare
+    $scope.$watch (-> session.state.userid), (userid) ->
+      model.permissions ?= {}
+      model.user ?= userid
 
     # Start editing brand new annotations immediately
     unless model.id? or (this.isHighlight() and highlight) then this.edit()

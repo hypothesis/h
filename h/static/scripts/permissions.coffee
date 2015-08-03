@@ -6,7 +6,7 @@
 # This service can set default permissions to annotations properly and
 # offers some utility functions regarding those.
 ###
-module.exports = ['auth', (auth) ->
+module.exports = ['session', (session) ->
   ALL_PERMISSIONS = {}
   GROUP_WORLD = 'group:__world__'
   ADMIN_PARTY = [{
@@ -37,10 +37,10 @@ module.exports = ['auth', (auth) ->
   # Typical use: annotation.permissions = permissions.private()
   ###
   private: ->
-    read: [auth.user]
-    update: [auth.user]
-    delete: [auth.user]
-    admin: [auth.user]
+    read: [session.state.userid]
+    update: [session.state.userid]
+    delete: [session.state.userid]
+    admin: [session.state.userid]
 
   ###*
   # @ngdoc method
@@ -51,9 +51,9 @@ module.exports = ['auth', (auth) ->
   ###
   public: ->
     read: [GROUP_WORLD]
-    update: [auth.user]
-    delete: [auth.user]
-    admin: [auth.user]
+    update: [session.state.userid]
+    delete: [session.state.userid]
+    admin: [session.state.userid]
 
   ###*
   # @ngdoc method
@@ -87,6 +87,7 @@ module.exports = ['auth', (auth) ->
   # @param {String} user the userId
   #
   # User access-level-control function
+  # TODO: this should move to the auth service and take multiple principals
   ###
   permits: (action, context, user) ->
     acl = _acl context

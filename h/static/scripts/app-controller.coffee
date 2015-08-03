@@ -16,6 +16,10 @@ module.exports = class AppController
   ) ->
     $controller('AnnotationUIController', {$scope})
 
+    # This stores information the current userid.
+    # It is initially undefined until resolved.
+    $scope.auth = user: undefined
+
     # Allow all child scopes to look up feature flags as:
     #
     #     if ($scope.feature('foo')) { ... }
@@ -24,7 +28,6 @@ module.exports = class AppController
     # Allow all child scopes access to the session
     $scope.session = session
 
-    $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
 
     streamerUrl = new URL('/ws', $document.prop('baseURI'))
@@ -59,9 +62,6 @@ module.exports = class AppController
     else
       $scope.showShareButton = true
 
-    oncancel = ->
-      $scope.accountDialog.visible = false
-
     cleanupAnnotations = ->
       # Clean up all the annotations
       for id, container of $scope.threading.idTable when container.message
@@ -70,6 +70,12 @@ module.exports = class AppController
           continue
         else
           $scope.$emit('annotationDeleted', container.message)
+
+    identity.watch({
+      onlogin: (identity) -> $scope.auth.user = auth.userid(identity)
+      onlogout: -> $scope.auth.user = null
+      onready: -> $scope.auth.user ?= null
+    })
 
     $scope.$watch 'sort.name', (name) ->
       return unless name
@@ -83,17 +89,13 @@ module.exports = class AppController
         ]
       $scope.sort = {name, predicate}
 
-    $scope.$watch (-> auth.user), (newVal, oldVal) ->
+    $scope.$watch 'auth.user', (newVal, oldVal) ->
       return if newVal is oldVal
 
       if isFirstRun and not (newVal or oldVal)
         $scope.login()
       else
         $scope.accountDialog.visible = false
-
-      # Update any edits in progress.
-      for draft in drafts.all()
-        $scope.$emit('beforeAnnotationCreated', draft)
 
       # Reopen the streamer.
       streamer.close()
@@ -102,12 +104,15 @@ module.exports = class AppController
       # Clean up annotations that should be removed.
       cleanupAnnotations()
 
-      # Reload the view.
-      $route.reload()
+      # Reload the view if this is not the initial load.
+      if oldVal isnt undefined
+        $route.reload()
 
     $scope.login = ->
       $scope.accountDialog.visible = true
-      identity.request {oncancel}
+      identity.request({
+        oncancel: -> $scope.accountDialog.visible = false
+      })
 
     $scope.logout = ->
       return unless drafts.discard()

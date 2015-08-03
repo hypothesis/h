@@ -42,7 +42,7 @@ describe 'AppController', ->
     }
 
     fakeAuth = {
-      user: undefined
+      userid: sandbox.stub()
     }
 
     fakeDrafts = {
@@ -115,6 +115,29 @@ describe 'AppController', ->
 
   afterEach ->
     sandbox.restore()
+
+  it 'watches the identity service for identity change events', ->
+    createController()
+    assert.calledOnce(fakeIdentity.watch)
+
+  it 'sets the user to null when the identity has been checked', ->
+    createController()
+    {onready} = fakeIdentity.watch.args[0][0]
+    onready()
+    assert.isNull($scope.auth.user)
+
+  it 'sets auth.user to the authorized user at login', ->
+    createController()
+    fakeAuth.userid.withArgs('test-assertion').returns('acct:hey@joe')
+    {onlogin} = fakeIdentity.watch.args[0][0]
+    onlogin('test-assertion')
+    assert.equal($scope.auth.user, 'acct:hey@joe')
+
+  it 'sets auth.user to null at logout', ->
+    createController()
+    {onlogout} = fakeIdentity.watch.args[0][0]
+    onlogout()
+    assert.strictEqual($scope.auth.user, null)
 
   it 'does not show login form for logged in users', ->
     createController()
@@ -191,10 +214,10 @@ describe 'AppController', ->
     fakeDrafts.contains.withArgs(annotation1).returns(true)
     fakeDrafts.contains.withArgs(annotation2).returns(false)
 
-    fakeAuth.user = null
+    $scope.auth.user = null
     $scope.$digest()
 
-    fakeAuth.user = 'acct:loki@example.com'
+    $scope.auth.user = 'acct:loki@example.com'
     $scope.$digest()
 
     assert.neverCalledWith($scope.$emit, 'annotationDeleted', annotation1)

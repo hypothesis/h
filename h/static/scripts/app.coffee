@@ -1,16 +1,9 @@
-Annotator = require('annotator')
 angular = require('angular')
+require('angular-jwt')
+
 uuid = require('node-uuid')
 
 resolve =
-  auth: ['$q', '$rootScope', 'auth', ($q, $rootScope, auth) ->
-    dfd = $q.defer()
-    unwatch = $rootScope.$watch (-> auth.user), (user) ->
-      return if user is undefined
-      dfd.resolve(auth)
-      unwatch()
-    dfd.promise
-  ]
   store: ['store', (store) -> store.$promise]
 
 
@@ -83,6 +76,7 @@ setupFeatures = ['features', (features) -> features.fetch()]
 module.exports = angular.module('h', [
   'angulartics'
   'angulartics.google.analytics'
+  'angular-jwt'
   'bootstrap'
   'ngAnimate'
   'ngResource'
@@ -123,7 +117,6 @@ module.exports = angular.module('h', [
 
 .provider('identity', require('./identity'))
 
-.service('annotator', -> new Annotator(angular.element('<div>')))
 .service('annotationMapper', require('./annotation-mapper'))
 .service('annotationUI', require('./annotation-ui'))
 .service('auth', require('./auth'))
@@ -149,6 +142,8 @@ module.exports = angular.module('h', [
 .service('threading', require('./threading'))
 .service('unicode', require('./unicode'))
 .service('viewFilter', require('./view-filter'))
+
+.factory('serviceUrl', require('./service-url'))
 
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))
