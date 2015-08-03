@@ -76,7 +76,7 @@ bind:
 wgxpath:
   filters: uglifyjs
   output: scripts/vendor/polyfills/wgxpath.install.min.js
-  contents: h:static/scripts/vendor/polyfills/wgxpath.install.js
+  contents: ../../node_modules/wgxpath/wgxpath.install.js
 url:
   filters: uglifyjs
   output: scripts/vendor/polyfills/url.min.js
