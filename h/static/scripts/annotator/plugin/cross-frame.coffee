@@ -12,7 +12,7 @@ extract = extract = (obj, keys...) ->
 # as keeping the annotation state in sync with the sidebar application, this
 # frame acts as the bridge client, the sidebar is the server. This plugin
 # can also be used to send messages through to the sidebar using the
-# notify method.
+# call method.
 module.exports = class CrossFrame extends Annotator.Plugin
   constructor: (elem, options) ->
     super
@@ -41,8 +41,8 @@ module.exports = class CrossFrame extends Annotator.Plugin
     this.on = (event, fn) ->
       bridge.on(event, fn)
 
-    this.notify = (message) ->
-      bridge.notify(message)
+    this.call = (message, args...) ->
+      bridge.call(message, args...)
 
     this.onConnect = (fn) ->
       bridge.onConnect(fn)

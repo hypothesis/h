@@ -16,7 +16,7 @@ describe 'Host', ->
     fakeCrossFrame = {}
     fakeCrossFrame.onConnect = sandbox.stub().returns(fakeCrossFrame)
     fakeCrossFrame.on = sandbox.stub().returns(fakeCrossFrame)
-    fakeCrossFrame.notify = sandbox.stub().returns(fakeCrossFrame)
+    fakeCrossFrame.call = sandbox.spy()
 
     Annotator.Plugin.CrossFrame = -> fakeCrossFrame
 

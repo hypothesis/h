@@ -18,18 +18,18 @@ module.exports = class AnnotationUISync
       tags.map(annotationSync.getAnnotationForTag, annotationSync)
 
     channelListeners =
-      showAnnotations: (ctx, tags=[]) ->
+      showAnnotations: (tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.selectAnnotations(annotations)
-      focusAnnotations: (ctx, tags=[]) ->
+      focusAnnotations: (tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.focusAnnotations(annotations)
-      toggleAnnotationSelection: (ctx, tags=[]) ->
+      toggleAnnotationSelection: (tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.xorSelectedAnnotations(annotations)
-      setVisibleHighlights: (ctx, state) ->
+      setVisibleHighlights: (state) ->
         annotationUI.visibleHighlights = Boolean(state)
-        bridge.notify(method: 'setVisibleHighlights', params: state)
+        bridge.call('setVisibleHighlights', state)
 
     # Because the channel events are all outside of the angular framework we
     # need to inform Angular that it needs to re-check it's state and re-draw
@@ -45,8 +45,6 @@ module.exports = class AnnotationUISync
     onConnect = (channel, source) ->
       # Allow the host to define its own state
       unless source is $window.parent
-        channel.notify
-          method: 'setVisibleHighlights'
-          params: annotationUI.visibleHighlights
+        channel.call('setVisibleHighlights', annotationUI.visibleHighlights)
 
     bridge.onConnect(onConnect)

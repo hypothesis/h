@@ -5,7 +5,7 @@ describe 'AnnotationSync', ->
   publish = null
   fakeBridge = null
   createAnnotationSync = null
-  createChannel = -> {notify: sandbox.stub()}
+  createChannel = -> {call: sandbox.stub()}
   options = null
   PARENT_WINDOW = 'PARENT_WINDOW'
 
@@ -16,13 +16,12 @@ describe 'AnnotationSync', ->
   beforeEach module('h')
   beforeEach inject (AnnotationSync, $rootScope) ->
     listeners = {}
-    publish = ({method, params}) -> listeners[method]('ctx', params)
+    publish = (method, args...) -> listeners[method](args...)
 
     fakeWindow = parent: PARENT_WINDOW
     fakeBridge =
       on: sandbox.spy((method, fn) -> listeners[method] = fn)
       call: sandbox.stub()
-      notify: sandbox.stub()
       onConnect: sandbox.stub()
       links: []
 
@@ -47,11 +46,9 @@ describe 'AnnotationSync', ->
       channel = createChannel()
       fakeBridge.onConnect.yield(channel)
 
-      assert.called(channel.notify)
-      assert.calledWith(channel.notify, {
-        method: 'loadAnnotations'
-        params: [tag: 'tag1', msg: ann]
-      })
+      assert.called(channel.call)
+      assert.calledWith(channel.call, 'loadAnnotations',
+        [tag: 'tag1', msg: ann])
 
     it 'does nothing if the cache is empty', ->
       annSync = createAnnotationSync()
@@ -59,7 +56,7 @@ describe 'AnnotationSync', ->
       channel = createChannel()
       fakeBridge.onConnect.yield(channel)
 
-      assert.notCalled(channel.notify)
+      assert.notCalled(channel.call)
 
   describe '.getAnnotationForTag', ->
     it 'returns the annotation if present in the cache', ->
@@ -80,18 +77,20 @@ describe 'AnnotationSync', ->
       it 'broadcasts the "' + publishEvent + '" event over the local event bus', ->
         ann = {id: 1, $$tag: 'tag1'}
         annSync = createAnnotationSync()
-        publish(method: channelEvent, params: {msg: ann})
+        publish(channelEvent, {msg: ann}, ->)
         assert.called(options.emit)
         assert.calledWith(options.emit, publishEvent, ann)
 
     assertReturnValue = (channelEvent) ->
-      it 'returns a formatted annotation to be sent to the calling frame', ->
+      it 'calls back with a formatted annotation', (done) ->
         ann = {id: 1, $$tag: 'tag1'}
         annSync = createAnnotationSync()
 
-        ret = publish(method: channelEvent, params: {msg: ann})
-
-        assert.deepEqual(ret, {tag: 'tag1', msg: ann})
+        callback = (err, ret) ->
+          assert.isNull(err)
+          assert.deepEqual(ret, {tag: 'tag1', msg: ann})
+          done()
+        publish(channelEvent, {msg: ann}, callback)
 
     assertCacheState = (channelEvent) ->
       it 'removes an existing entry from the cache before the event is triggered', ->
@@ -101,13 +100,13 @@ describe 'AnnotationSync', ->
         annSync = createAnnotationSync()
         annSync.cache['tag1'] = ann
 
-        publish(method: channelEvent, params: {msg: ann})
+        publish(channelEvent, {msg: ann}, ->)
 
       it 'ensures the annotation is inserted in the cache', ->
         ann = {id: 1, $$tag: 'tag1'}
         annSync = createAnnotationSync()
 
-        publish(method: channelEvent, params: {msg: ann})
+        publish(channelEvent, {msg: ann}, ->)
 
         assert.equal(annSync.cache['tag1'], ann)
 
@@ -138,29 +137,33 @@ describe 'AnnotationSync', ->
         annSync = createAnnotationSync()
         annSync.cache['tag1'] = ann
 
-        publish(method: 'deleteAnnotation', params: {msg: ann})
+        publish('deleteAnnotation', {msg: ann}, ->)
 
       it 'removes the annotation from the cache', ->
         ann = {id: 1, $$tag: 'tag1'}
         annSync = createAnnotationSync()
 
-        publish(method: 'deleteAnnotation', params: {msg: ann})
+        publish('deleteAnnotation', {msg: ann}, ->)
 
         assert(!annSync.cache['tag1'])
 
     describe 'the "sync" event', ->
-      it 'returns an array of parsed and formatted annotations', ->
+      it 'calls back with parsed and formatted annotations', (done) ->
         options.parser = sinon.spy((x) -> x)
         options.formatter = sinon.spy((x) -> x)
         annSync = createAnnotationSync()
 
         annotations = [{id: 1, $$tag: 'tag1'}, {id: 2, $$tag: 'tag2'}, {id: 3, $$tag: 'tag3'}]
         bodies = ({msg: ann, tag: ann.$$tag} for ann in annotations)
-        ret = publish(method: 'sync', params: bodies)
 
-        assert.deepEqual(ret, ret)
-        assert.called(options.parser)
-        assert.called(options.formatter)
+        callback = (err, ret) ->
+          assert.isNull(err)
+          assert.deepEqual(ret, bodies)
+          assert.called(options.parser)
+          assert.called(options.formatter)
+          done()
+
+        publish('sync', bodies, callback)
 
     describe 'the "loadAnnotations" event', ->
       it 'publishes the "loadAnnotations" event with parsed annotations', ->
@@ -169,7 +172,7 @@ describe 'AnnotationSync', ->
 
         annotations = [{id: 1, $$tag: 'tag1'}, {id: 2, $$tag: 'tag2'}, {id: 3, $$tag: 'tag3'}]
         bodies = ({msg: ann, tag: ann.$$tag} for ann in annotations)
-        ret = publish(method: 'loadAnnotations', params: bodies)
+        publish('loadAnnotations', bodies, ->)
 
         assert.called(options.parser)
         assert.calledWith(options.emit, 'loadAnnotations', annotations)
@@ -182,11 +185,8 @@ describe 'AnnotationSync', ->
         options.emit('beforeAnnotationCreated', ann)
 
         assert.called(fakeBridge.call)
-        assert.calledWith(fakeBridge.call, {
-          method: 'beforeCreateAnnotation',
-          params: {msg: ann, tag: ann.$$tag},
-          callback: sinon.match.func
-        })
+        assert.calledWith(fakeBridge.call, 'beforeCreateAnnotation',
+          {msg: ann, tag: ann.$$tag}, sinon.match.func)
 
       it 'returns early if the annotation has a tag', ->
         ann = {id: 1, $$tag: 'tag1'}
@@ -203,11 +203,8 @@ describe 'AnnotationSync', ->
         options.emit('annotationCreated', ann)
 
         assert.called(fakeBridge.call)
-        assert.calledWith(fakeBridge.call, {
-          method: 'createAnnotation',
-          params: {msg: ann, tag: ann.$$tag},
-          callback: sinon.match.func
-        })
+        assert.calledWith(fakeBridge.call, 'createAnnotation',
+          {msg: ann, tag: ann.$$tag}, sinon.match.func)
 
       it 'returns early if the annotation has a tag but is not cached', ->
         ann = {id: 1, $$tag: 'tag1'}
@@ -231,11 +228,8 @@ describe 'AnnotationSync', ->
         options.emit('annotationUpdated', ann)
 
         assert.called(fakeBridge.call)
-        assert.calledWith(fakeBridge.call, {
-          method: 'updateAnnotation',
-          params: {msg: ann, tag: ann.$$tag},
-          callback: sinon.match.func
-        })
+        assert.calledWith(fakeBridge.call, 'updateAnnotation',
+          {msg: ann, tag: ann.$$tag}, sinon.match.func)
 
       it 'returns early if the annotation has a tag but is not cached', ->
         ann = {id: 1, $$tag: 'tag1'}
@@ -259,11 +253,8 @@ describe 'AnnotationSync', ->
         options.emit('annotationDeleted', ann)
 
         assert.called(fakeBridge.call)
-        assert.calledWith(fakeBridge.call, {
-          method: 'deleteAnnotation',
-          params: {msg: ann, tag: ann.$$tag},
-          callback: sinon.match.func
-        })
+        assert.calledWith(fakeBridge.call, 'deleteAnnotation',
+          {msg: ann, tag: ann.$$tag}, sinon.match.func)
 
       it 'parses the result returned by the call', ->
         ann = {id: 1, $$tag: 'tag1'}
@@ -273,7 +264,7 @@ describe 'AnnotationSync', ->
         options.emit('annotationDeleted', ann)
 
         body = {msg: {}, tag: 'tag1'}
-        fakeBridge.call.yieldTo('callback', null, [body])
+        fakeBridge.call.yield(null, [body])
         assert.called(options.parser)
         assert.calledWith(options.parser, {})
 
@@ -283,7 +274,7 @@ describe 'AnnotationSync', ->
         annSync.cache.tag1 = ann
         options.emit('annotationDeleted', ann)
 
-        fakeBridge.call.yieldTo('callback', null, [])
+        fakeBridge.call.yield(null, [])
         assert.isUndefined(annSync.cache.tag1)
 
       it 'does not remove the annotation from the cache if an error occurs', ->
@@ -292,7 +283,7 @@ describe 'AnnotationSync', ->
         annSync.cache.tag1 = ann
         options.emit('annotationDeleted', ann)
 
-        fakeBridge.call.yieldTo('callback', new Error('Error'), [])
+        fakeBridge.call.yield(new Error('Error'), [])
         assert.equal(annSync.cache.tag1, ann)
 
       it 'returns early if the annotation has a tag but is not cached', ->
@@ -326,11 +317,9 @@ describe 'AnnotationSync', ->
         annSync = createAnnotationSync()
         options.emit('annotationsLoaded', annotations)
 
-        assert.called(fakeBridge.notify)
-        assert.calledWith(fakeBridge.notify, {
-          method: 'loadAnnotations',
-          params: {msg: a, tag: a.$$tag} for a in annotations
-        })
+        assert.called(fakeBridge.call)
+        assert.calledWith(fakeBridge.call, 'loadAnnotations',
+          ({msg: a, tag: a.$$tag} for a in annotations))
 
       it 'does not send annotations that have already been tagged', ->
         annotations = [{id: 1, $$tag: 'tag1'}, {id: 2, $$tag: 'tag2'}, {id: 3}]
@@ -338,14 +327,12 @@ describe 'AnnotationSync', ->
         annSync = createAnnotationSync()
         options.emit('annotationsLoaded', annotations)
 
-        assert.called(fakeBridge.notify)
-        assert.calledWith(fakeBridge.notify, {
-          method: 'loadAnnotations',
-          params: [{msg: annotations[2], tag: annotations[2].$$tag}]
-        })
+        assert.called(fakeBridge.call)
+        assert.calledWith(fakeBridge.call, 'loadAnnotations',
+          [{msg: annotations[2], tag: annotations[2].$$tag}])
 
       it 'returns early if no annotations are loaded', ->
         annSync = createAnnotationSync()
         options.emit('annotationsLoaded', [])
 
-        assert.notCalled(fakeBridge.notify)
+        assert.notCalled(fakeBridge.call)

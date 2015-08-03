@@ -1,10 +1,11 @@
 {module, inject} = angular.mock
-Channel = require('jschannel')
+RPC = require('frame-rpc')
 
 describe 'Bridge', ->
   sandbox = sinon.sandbox.create()
   bridge = null
   createChannel = null
+  fakeWindow = null
 
   before ->
     angular.module('h', [])
@@ -15,230 +16,175 @@ describe 'Bridge', ->
     bridge = _bridge_
 
     createChannel = ->
-      call: sandbox.stub()
-      bind: sandbox.stub()
-      unbind: sandbox.stub()
-      notify: sandbox.stub()
-      destroy: sandbox.stub()
+      bridge.createChannel(fakeWindow, 'http://example.com', 'TOKEN')
 
-    sandbox.stub(Channel, 'build')
+    fakeWindow = {
+      postMessage: sandbox.stub()
+    }
+
+    sandbox.stub(window, 'addEventListener')
+    sandbox.stub(window, 'removeEventListener')
 
   afterEach ->
     sandbox.restore()
 
   describe '.createChannel', ->
     it 'creates a new channel with the provided options', ->
-      Channel.build.returns(createChannel())
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-
-      assert.called(Channel.build)
-      assert.calledWith(Channel.build, {
-        window: 'WINDOW'
-        origin: 'ORIGIN'
-        scope: 'TOKEN'
-        onReady: sinon.match.func
-      })
+      channel = createChannel()
+      assert.equal(channel.src, window)
+      assert.equal(channel.dst, fakeWindow)
+      assert.equal(channel.origin, 'http://example.com')
 
     it 'adds the channel to the .links property', ->
       channel = createChannel()
-      Channel.build.returns(channel)
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-
-      assert.include(bridge.links, {channel: channel, window: 'WINDOW'})
+      assert.include(bridge.links, {channel: channel, window: fakeWindow})
 
     it 'registers any existing listeners on the channel', ->
+      message1 = sandbox.spy()
+      message2 = sandbox.spy()
+      bridge.on('message1', message1)
+      bridge.on('message2', message2)
       channel = createChannel()
-      Channel.build.returns(channel)
-
-      bridge.on('message1', sinon.spy())
-      bridge.on('message2', sinon.spy())
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-
-      assert.called(channel.bind)
-      assert.calledWith(channel.bind, 'message1', sinon.match.func)
-      assert.calledWith(channel.bind, 'message2', sinon.match.func)
+      assert.propertyVal(channel._methods, 'message1', message1)
+      assert.propertyVal(channel._methods, 'message2', message2)
 
     it 'returns the newly created channel', ->
       channel = createChannel()
-      Channel.build.returns(channel)
-
-      ret = bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-
-      assert.equal(ret, channel)
+      assert.instanceOf(channel, RPC)
 
   describe '.call', ->
     it 'forwards the call to every created channel', ->
       channel = createChannel()
-      Channel.build.returns(channel)
-
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      bridge.call({method: 'method1', params: 'params1'})
-
+      sandbox.stub(channel, 'call')
+      bridge.call('method1', 'params1')
       assert.called(channel.call)
-      message = channel.call.lastCall.args[0]
-      assert.equal(message.method, 'method1')
-      assert.equal(message.params, 'params1')
+      assert.calledWith(channel.call, 'method1', 'params1')
 
-    it 'provides a timeout', ->
+    it 'provides a timeout', (done) ->
       channel = createChannel()
-      Channel.build.returns(channel)
+      sandbox.stub(channel, 'call')
+      sto = sandbox.stub(window, 'setTimeout').yields()
+      bridge.call('method1', 'params1', done)
 
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      bridge.call({method: 'method1', params: 'params1'})
-
-      message = channel.call.lastCall.args[0]
-      assert.isNumber(message.timeout)
-
-    it 'calls options.callback when all channels return successfully', ->
+    it 'calls a callback when all channels return successfully', (done) ->
       channel1 = createChannel()
-      channel2 = createChannel()
-      channel1.call.yieldsTo('success', 'result1')
-      channel2.call.yieldsTo('success', 'result2')
+      channel2 = bridge.createChannel(fakeWindow, 'http://example.com', 'NEKOT')
+      sandbox.stub(channel1, 'call').yields(null, 'result1')
+      sandbox.stub(channel2, 'call').yields(null, 'result2')
 
-      callback = sandbox.stub()
+      callback = (err, results) ->
+        assert.isNull(err)
+        assert.deepEqual(results, ['result1', 'result2'])
+        done()
 
-      Channel.build.returns(channel1)
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      Channel.build.returns(channel2)
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
+      bridge.call('method1', 'params1', callback)
 
-      bridge.call({method: 'method1', params: 'params1', callback: callback})
-
-      assert.called(callback)
-      assert.calledWith(callback, null, ['result1', 'result2'])
-
-    it 'calls options.callback with an error when one or more channels fail', ->
-      err = new Error('Uh oh')
+    it 'calls a callback with an error when a channels fails', (done) ->
+      error = new Error('Uh oh')
       channel1 = createChannel()
-      channel1.call.yieldsTo('error', err, 'A reason for the error')
-      channel2 = createChannel()
-      channel2.call.yieldsTo('success', 'result2')
+      channel2 = bridge.createChannel(fakeWindow, 'http://example.com', 'NEKOT')
+      sandbox.stub(channel1, 'call').throws(error)
+      sandbox.stub(channel2, 'call').yields(null, 'result2')
 
-      callback = sandbox.stub()
+      callback = (err, results) ->
+        assert.equal(err, error)
+        done()
 
-      Channel.build.returns(channel1)
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      Channel.build.returns(channel2)
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
+      bridge.call('method1', 'params1', callback)
 
-      bridge.call({method: 'method1', params: 'params1', callback: callback})
-
-      assert.called(callback)
-      assert.calledWith(callback, err)
-
-    it 'destroys the channel when a call fails', ->
+    it 'destroys the channel when a call fails', (done) ->
       channel = createChannel()
-      channel.call.yieldsTo('error', new Error(''), 'A reason for the error')
-      Channel.build.returns(channel)
+      sandbox.stub(channel, 'call').throws(new Error(''))
+      sandbox.stub(channel, 'destroy')
 
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      bridge.call({method: 'method1', params: 'params1', callback: sandbox.stub()})
+      callback = ->
+        assert.called(channel.destroy)
+        done()
 
-      assert.called(channel.destroy)
+      bridge.call('method1', 'params1', callback)
 
-    it 'no longer publishes to a channel that has had an errored response', ->
+    it 'no longer publishes to a channel that has had an error', (done) ->
       channel = createChannel()
-      channel.call.yieldsTo('error', new Error(''), 'A reason for the error')
-      Channel.build.returns(channel)
+      sandbox.stub(channel, 'call').throws(new Error('oeunth'))
+      bridge.call 'method1', 'params1', ->
+        assert.calledOnce(channel.call)
+        bridge.call 'method1', 'params1', ->
+          assert.calledOnce(channel.call)
+          done()
 
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      bridge.call({method: 'method1', params: 'params1', callback: sandbox.stub()})
-      bridge.call({method: 'method1', params: 'params1', callback: sandbox.stub()})
-
-      assert.calledOnce(channel.call)
-
-    it 'treats a timeout as a success with no result', ->
+    it 'treats a timeout as a success with no result', (done) ->
       channel = createChannel()
-      channel.call.yieldsTo('error', 'timeout_error', 'timeout')
-      Channel.build.returns(channel)
-
-      callback = sandbox.stub()
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      bridge.call({method: 'method1', params: 'params1', callback: callback})
-
-      assert.called(callback)
-      assert.calledWith(callback, null, [null])
+      sandbox.stub(channel, 'call')
+      sto = sandbox.stub(window, 'setTimeout').yields()
+      bridge.call 'method1', 'params1', (err, res) ->
+        assert.isNull(err)
+        assert.deepEqual(res, [null])
+        done()
 
     it 'returns a promise object', ->
       channel = createChannel()
-      channel.call.yieldsTo('error', 'timeout_error', 'timeout')
-      Channel.build.returns(channel)
-
-      ret = bridge.call({method: 'method1', params: 'params1'})
-      assert.isFunction(ret.then)
-
-  describe '.notify', ->
-    it 'publishes the message on every created channel', ->
-      channel = createChannel()
-      message = {method: 'message1', params: 'params'}
-      Channel.build.returns(channel)
-
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      bridge.notify(message)
-
-      assert.called(channel.notify)
-      assert.calledWith(channel.notify, message)
+      ret = bridge.call('method1', 'params1')
+      assert.instanceOf(ret, Promise)
 
   describe '.on', ->
-    it 'registers an event listener on all created channels', ->
+    it 'adds a method to the method registry', ->
       channel = createChannel()
-      Channel.build.returns(channel)
-
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
       bridge.on('message1', sandbox.spy())
+      assert.isFunction(bridge.channelListeners['message1'])
 
-      assert.called(channel.bind)
-      assert.calledWith(channel.bind, 'message1', sinon.match.func)
-
-    it 'only allows one message to be registered per method', ->
+    it 'only allows registering a method once', ->
       bridge.on('message1', sandbox.spy())
       assert.throws ->
         bridge.on('message1', sandbox.spy())
 
   describe '.off', ->
-    it 'removes the event listener from the created channels', ->
+    it 'removes the method from the method registry', ->
       channel = createChannel()
-      Channel.build.returns(channel)
-
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      bridge.off('message1', sandbox.spy())
-
-    it 'ensures that the event is no longer bound when new channels are created', ->
-      channel1 = createChannel()
-      channel2 = createChannel()
-      Channel.build.returns(channel1)
-
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      bridge.off('message1', sandbox.spy())
-
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-      assert.notCalled(channel2.bind)
+      bridge.on('message1', sandbox.spy())
+      bridge.off('message1')
+      assert.isUndefined(bridge.channelListeners['message1'])
 
   describe '.onConnect', ->
-    it 'adds a callback that is called when a new channel is connected', ->
-      channel = createChannel()
-      Channel.build.returns(channel)
-      Channel.build.yieldsTo('onReady', channel)
+    it 'adds a callback that is called when a channel is connected', (done) ->
+      callback = (c, s) ->
+        assert.strictEqual(c, channel)
+        assert.strictEqual(s, fakeWindow)
+        done()
 
-      callback = sandbox.stub()
+      data = {
+        protocol: 'frame-rpc'
+        method: 'connect'
+        arguments: ['TOKEN']
+      }
+
+      event = {
+        origin: 'http://example.com'
+        data: data
+      }
+
+      addEventListener.yieldsAsync(event)
       bridge.onConnect(callback)
-
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
-
-      assert.called(callback)
-      assert.calledWith(callback, channel)
-
-    it 'allows multiple callbacks to be registered', ->
       channel = createChannel()
-      Channel.build.returns(channel)
-      Channel.build.yieldsTo('onReady', channel)
 
-      callback1 = sandbox.stub()
-      callback2 = sandbox.stub()
-      bridge.onConnect(callback1)
-      bridge.onConnect(callback2)
+    it 'allows multiple callbacks to be registered', (done) ->
+      callbackCount = 0
+      callback = (c, s) ->
+        assert.strictEqual(c, channel)
+        assert.strictEqual(s, fakeWindow)
+        if ++callbackCount is 2 then done()
 
-      bridge.createChannel('WINDOW', 'ORIGIN', 'TOKEN')
+      data = {
+        protocol: 'frame-rpc'
+        method: 'connect'
+        arguments: ['TOKEN']
+      }
 
-      assert.called(callback1)
-      assert.called(callback2)
+      event = {
+        origin: 'http://example.com'
+        data: data
+      }
+
+      addEventListener.callsArgWithAsync(1, event)
+      bridge.onConnect(callback)
+      bridge.onConnect(callback)
+      channel = createChannel()

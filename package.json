@@ -26,6 +26,7 @@
     "dom-seek": "^1.0.1",
     "es6-promise": "^2.1.0",
     "extend": "^2.0.0",
+    "frame-rpc": "^1.3.1",
     "hammerjs": "^2.0.4",
     "jquery": "1.11.1",
     "jstimezonedetect": "1.0.5",
@@ -83,8 +84,7 @@
     "es6-promise": "./node_modules/es6-promise/dist/es6-promise.js",
     "hammerjs": "./node_modules/hammerjs/hammer.js",
     "jquery": "./node_modules/jquery/dist/jquery.js",
-    "jquery-scrollintoview": "./h/static/scripts/vendor/jquery.scrollintoview.js",
-    "jschannel": "./h/static/scripts/vendor/jschannel.js"
+    "jquery-scrollintoview": "./h/static/scripts/vendor/jquery.scrollintoview.js"
   },
   "browserify-shim": {
     "annotator": {
@@ -106,7 +106,6 @@
       "depends": [
         "jquery"
       ]
-    },
-    "jschannel": "Channel"
+    }
   }
 }

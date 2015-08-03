@@ -58,49 +58,47 @@ module.exports = class AnnotationSync
   getAnnotationForTag: (tag) ->
     @cache[tag] or null
 
-  sync: (annotations, cb) ->
+  sync: (annotations) ->
     annotations = (this._format a for a in annotations)
-    @bridge.call
-      method: 'sync'
-      params: annotations
-      callback: cb
+    @bridge.call 'sync', annotations, (err, annotations = []) =>
+      for a in annotations
+        this._parse(a)
     this
 
   # Handlers for messages arriving through a channel
   _channelListeners:
-    'beforeCreateAnnotation': (txn, body) ->
+    'beforeCreateAnnotation': (body, cb) ->
       annotation = this._parse(body)
       delete @cache[annotation.$$tag]
       @_emit 'beforeAnnotationCreated', annotation
       @cache[annotation.$$tag] = annotation
-      this._format annotation
+      cb(null, this._format(annotation))
 
-    'createAnnotation': (txn, body) ->
+    'createAnnotation': (body, cb) ->
       annotation = this._parse(body)
       delete @cache[annotation.$$tag]
       @_emit 'annotationCreated', annotation
       @cache[annotation.$$tag] = annotation
-      this._format annotation
+      cb(null, this._format(annotation))
 
-    'updateAnnotation': (txn, body) ->
+    'updateAnnotation': (body, cb) ->
       annotation = this._parse(body)
       delete @cache[annotation.$$tag]
       @_emit('beforeAnnotationUpdated', annotation)
       @_emit('annotationUpdated', annotation)
       @cache[annotation.$$tag] = annotation
-      this._format annotation
+      cb(null, this._format(annotation))
 
-    'deleteAnnotation': (txn, body) ->
+    'deleteAnnotation': (body, cb) ->
       annotation = this._parse(body)
       delete @cache[annotation.$$tag]
       @_emit('annotationDeleted', annotation)
-      res = this._format(annotation)
-      res
+      cb(null, this._format(annotation))
 
-    'sync': (ctx, bodies) ->
-      (this._format(this._parse(b)) for b in bodies)
+    'sync': (bodies, cb) ->
+      cb(null, (this._format(this._parse(b)) for b in bodies))
 
-    'loadAnnotations': (txn, bodies) ->
+    'loadAnnotations': (bodies) ->
       annotations = (this._parse(a) for a in bodies)
       @_emit('loadAnnotations', annotations)
 
@@ -127,17 +125,13 @@ module.exports = class AnnotationSync
     'annotationsLoaded': (annotations) ->
       bodies = (this._format a for a in annotations when not a.$$tag)
       return unless bodies.length
-      @bridge.notify
-        method: 'loadAnnotations'
-        params: bodies
+      @bridge.call('loadAnnotations', bodies)
 
   _syncCache: (channel) ->
     # Synchronise (here to there) the items in our cache
     annotations = (this._format a for t, a of @cache)
     if annotations.length
-      channel.notify
-        method: 'loadAnnotations'
-        params: annotations
+      channel.call('loadAnnotations', annotations)
 
   _mkCallRemotelyAndParseResults: (method, callBack) ->
     (annotation) =>
@@ -148,11 +142,7 @@ module.exports = class AnnotationSync
         callBack? failure, results
 
       # Call the remote method
-      options =
-        method: method
-        callback: wrappedCallback
-        params: this._format(annotation)
-      @bridge.call(options)
+      @bridge.call(method, this._format(annotation), wrappedCallback)
 
   # Parse returned message bodies to update cache with any changes made remotely
   _parseResults: (results) ->

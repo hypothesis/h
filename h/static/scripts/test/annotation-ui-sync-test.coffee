@@ -9,7 +9,7 @@ describe 'AnnotationUISync', ->
   fakeAnnotationUI = null
   fakeAnnotationSync = null
   createAnnotationUISync = null
-  createChannel = -> {notify: sandbox.stub()}
+  createChannel = -> {call: sandbox.stub()}
   PARENT_WINDOW = 'PARENT_WINDOW'
 
   before ->
@@ -20,12 +20,12 @@ describe 'AnnotationUISync', ->
   beforeEach inject (AnnotationUISync, $rootScope) ->
     $digest = sandbox.stub($rootScope, '$digest')
     listeners = {}
-    publish = ({method, params}) -> listeners[method]('ctx', params)
+    publish = (method, args...) -> listeners[method](args...)
 
     fakeWindow = parent: PARENT_WINDOW
     fakeBridge =
       on: sandbox.spy((method, fn) -> listeners[method] = fn)
-      notify: sandbox.stub()
+      call: sandbox.stub()
       onConnect: sandbox.stub()
       links: [
         {window: PARENT_WINDOW,    channel: createChannel()}
@@ -54,26 +54,20 @@ describe 'AnnotationUISync', ->
 
         createAnnotationUISync()
 
-        assert.calledWith(channel.notify, {
-          method: 'setVisibleHighlights'
-          params: false
-        })
+        assert.calledWith(channel.call, 'setVisibleHighlights', false)
 
     describe 'when the source is the parent window', ->
       it 'does nothing', ->
-        channel = notify: sandbox.stub()
+        channel = call: sandbox.stub()
         fakeBridge.onConnect.callsArgWith(0, channel, PARENT_WINDOW)
 
         createAnnotationUISync()
-        assert.notCalled(channel.notify)
+        assert.notCalled(channel.call)
 
   describe 'on "showAnnotations" event', ->
     it 'updates the annotationUI to include the shown annotations', ->
       createAnnotationUISync()
-      publish({
-        method: 'showAnnotations',
-        params: ['tag1', 'tag2', 'tag3']
-      })
+      publish('showAnnotations', ['tag1', 'tag2', 'tag3'])
       assert.called(fakeAnnotationUI.selectAnnotations)
       assert.calledWith(fakeAnnotationUI.selectAnnotations, [
         {id: 1}, {id: 2}, {id: 3}
@@ -81,19 +75,13 @@ describe 'AnnotationUISync', ->
 
     it 'triggers a digest', ->
       createAnnotationUISync()
-      publish({
-        method: 'showAnnotations',
-        params: ['tag1', 'tag2', 'tag3']
-      })
+      publish('showAnnotations', ['tag1', 'tag2', 'tag3'])
       assert.called($digest)
 
   describe 'on "focusAnnotations" event', ->
     it 'updates the annotationUI to show the provided annotations', ->
       createAnnotationUISync()
-      publish({
-        method: 'focusAnnotations',
-        params: ['tag1', 'tag2', 'tag3']
-      })
+      publish('focusAnnotations', ['tag1', 'tag2', 'tag3'])
       assert.called(fakeAnnotationUI.focusAnnotations)
       assert.calledWith(fakeAnnotationUI.focusAnnotations, [
         {id: 1}, {id: 2}, {id: 3}
@@ -101,19 +89,13 @@ describe 'AnnotationUISync', ->
 
     it 'triggers a digest', ->
       createAnnotationUISync()
-      publish({
-        method: 'focusAnnotations',
-        params: ['tag1', 'tag2', 'tag3']
-      })
+      publish('focusAnnotations', ['tag1', 'tag2', 'tag3'])
       assert.called($digest)
 
   describe 'on "toggleAnnotationSelection" event', ->
     it 'updates the annotationUI to show the provided annotations', ->
       createAnnotationUISync()
-      publish({
-        method: 'toggleAnnotationSelection',
-        params: ['tag1', 'tag2', 'tag3']
-     })
+      publish('toggleAnnotationSelection', ['tag1', 'tag2', 'tag3'])
       assert.called(fakeAnnotationUI.xorSelectedAnnotations)
       assert.calledWith(fakeAnnotationUI.xorSelectedAnnotations, [
         {id: 1}, {id: 2}, {id: 3}
@@ -121,36 +103,21 @@ describe 'AnnotationUISync', ->
 
     it 'triggers a digest', ->
       createAnnotationUISync()
-      publish({
-        method: 'toggleAnnotationSelection',
-        params: ['tag1', 'tag2', 'tag3']
-      })
+      publish('toggleAnnotationSelection', ['tag1', 'tag2', 'tag3'])
       assert.called($digest)
 
   describe 'on "setVisibleHighlights" event', ->
     it 'updates the annotationUI with the new value', ->
       createAnnotationUISync()
-      publish({
-        method: 'setVisibleHighlights',
-        params: true
-      })
+      publish('setVisibleHighlights', true)
       assert.equal(fakeAnnotationUI.visibleHighlights, true)
 
     it 'notifies the other frames of the change', ->
       createAnnotationUISync()
-      publish({
-        method: 'setVisibleHighlights',
-        params: true
-      })
-      assert.calledWith(fakeBridge.notify, {
-        method: 'setVisibleHighlights'
-        params: true
-      })
+      publish('setVisibleHighlights', true)
+      assert.calledWith(fakeBridge.call, 'setVisibleHighlights', true)
 
     it 'triggers a digest of the application state', ->
       createAnnotationUISync()
-      publish({
-        method: 'setVisibleHighlights',
-        params: true
-      })
+      publish('setVisibleHighlights', true)
       assert.called($digest)

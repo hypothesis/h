@@ -3,7 +3,7 @@
 describe 'host', ->
   sandbox = null
   host = null
-  createChannel = -> notify: sandbox.stub()
+  createChannel = -> call: sandbox.stub()
   fakeBridge = null
   $digest = null
   publish = null
@@ -22,13 +22,13 @@ describe 'host', ->
 
     listeners = {}
 
-    publish = ({method, params}) ->
-      listeners[method]('ctx', params)
+    publish = (method, args...) ->
+      listeners[method](args...)
 
     fakeBridge =
       ls: listeners
       on: sandbox.spy (method, fn) -> listeners[method] = fn
-      notify: sandbox.stub()
+      call: sandbox.stub()
       onConnect: sandbox.stub()
       links: [
         {window: PARENT_WINDOW,    channel: createChannel()}
@@ -53,16 +53,16 @@ describe 'host', ->
     describe 'showSidebar()', ->
       it 'sends the "showFrame" message to the host only', ->
         host.showSidebar()
-        assert.calledWith(fakeBridge.links[0].channel.notify, method: 'showFrame')
-        assert.notCalled(fakeBridge.links[1].channel.notify)
-        assert.notCalled(fakeBridge.links[2].channel.notify)
+        assert.calledWith(fakeBridge.links[0].channel.call, 'showFrame')
+        assert.notCalled(fakeBridge.links[1].channel.call)
+        assert.notCalled(fakeBridge.links[2].channel.call)
 
     describe 'hideSidebar()', ->
       it 'sends the "hideFrame" message to the host only', ->
         host.hideSidebar()
-        assert.calledWith(fakeBridge.links[0].channel.notify, method: 'hideFrame')
-        assert.notCalled(fakeBridge.links[1].channel.notify)
-        assert.notCalled(fakeBridge.links[2].channel.notify)
+        assert.calledWith(fakeBridge.links[0].channel.call, 'hideFrame')
+        assert.notCalled(fakeBridge.links[1].channel.call)
+        assert.notCalled(fakeBridge.links[2].channel.call)
 
   describe 'reacting to the bridge', ->
 
@@ -70,12 +70,12 @@ describe 'host', ->
 
       it 'triggers the hideSidebar() API', ->
         sandbox.spy host, "hideSidebar"
-        publish method: 'back'
+        publish 'back'
         assert.called host.hideSidebar
 
     describe 'on "open" event', ->
 
       it 'triggers the showSidebar() API', ->
         sandbox.spy host, "showSidebar"
-        publish  method: 'open'
+        publish 'open'
         assert.called host.showSidebar

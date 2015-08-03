@@ -144,17 +144,10 @@ describe 'Guest', ->
         formatted = options.formatter(ann)
         assert.equal(formatted.$$tag, 'tag1')
 
-      it 'strips the "anchors" property', ->
+      it 'strips properties that are not whitelisted', ->
         ann = {$$tag: 'tag1', anchors: []}
         formatted = options.formatter(ann)
         assert.notProperty(formatted, 'anchors')
-
-      it 'clones the document.title array if present', ->
-        title = ['Page Title']
-        ann = {$$tag: 'tag1', document: {title: title}}
-        formatted = options.formatter(ann)
-        assert.notStrictEqual(title, formatted.document.title)
-        assert.deepEqual(title, formatted.document.title)
 
   describe 'annotation UI events', ->
     emitGuestEvent = (event, args...) ->
@@ -183,7 +176,7 @@ describe 'Guest', ->
           {annotation: {$$tag: 'tag1'}, highlights: highlight0.toArray()}
           {annotation: {$$tag: 'tag2'}, highlights: highlight1.toArray()}
         ]
-        emitGuestEvent('focusAnnotations', 'ctx', ['tag1'])
+        emitGuestEvent('focusAnnotations', ['tag1'])
         assert.isTrue(highlight0.hasClass('annotator-hl-focused'))
 
       it 'unfocuses any annotations without a matching tag', ->
@@ -210,7 +203,7 @@ describe 'Guest', ->
         guest.anchors = [
           {annotation: {$$tag: 'tag1'}, highlights: highlight.toArray()}
         ]
-        emitGuestEvent('scrollToAnnotation', 'ctx', 'tag1')
+        emitGuestEvent('scrollToAnnotation', 'tag1')
         assert.calledOn($.fn.scrollintoview, sinon.match(highlight))
 
     describe 'on "getDocumentInfo" event', ->
@@ -227,7 +220,7 @@ describe 'Guest', ->
         sandbox.restore()
 
       it 'calls the callback with the href and pdf metadata', (done) ->
-        assertComplete = (payload) ->
+        assertComplete = (err, payload) ->
           try
             assert.equal(payload.uri, document.location.href)
             assert.equal(payload.metadata, metadata)
@@ -235,15 +228,14 @@ describe 'Guest', ->
           catch e
             done(e)
 
-        ctx = {complete: assertComplete, delayReturn: sandbox.stub()}
         metadata = {title: 'hi'}
         promise = Promise.resolve(metadata)
         guest.plugins.PDF.getMetadata.returns(promise)
 
-        emitGuestEvent('getDocumentInfo', ctx)
+        emitGuestEvent('getDocumentInfo', assertComplete)
 
       it 'calls the callback with the href and basic metadata if pdf fails', (done) ->
-        assertComplete = (payload) ->
+        assertComplete = (err, payload) ->
           try
             assert.equal(payload.uri, window.location.href)
             assert.deepEqual(payload.metadata, metadata)
@@ -251,20 +243,11 @@ describe 'Guest', ->
           catch e
             done(e)
 
-        ctx = {complete: assertComplete, delayReturn: sandbox.stub()}
         metadata = {title: 'hi', link: [{href: window.location.href}]}
-
         promise = Promise.reject(new Error('Not a PDF document'))
         guest.plugins.PDF.getMetadata.returns(promise)
 
-        emitGuestEvent('getDocumentInfo', ctx)
-
-      it 'notifies the channel that the return value is async', ->
-        delete guest.plugins.PDF
-
-        ctx = {complete: sandbox.stub(), delayReturn: sandbox.stub()}
-        emitGuestEvent('getDocumentInfo', ctx)
-        assert.calledWith(ctx.delayReturn, true)
+        emitGuestEvent('getDocumentInfo', assertComplete)
 
   describe 'onAdderMouseUp', ->
     it 'it prevents the default browser action when triggered', () ->
