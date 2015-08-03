@@ -83,23 +83,6 @@ url:
   contents: h:static/scripts/vendor/polyfills/url.js
 
 
-# Other dependencies
-momentjs:
-  contents:
-    - filters: uglifyjs
-      output: scripts/vendor/moment.min.js
-      contents: ../../node_modules/moment/min/moment-with-langs.js
-    - filters: uglifyjs
-      output: scripts/vendor/jstz.min.js
-      contents: ../../node_modules/jstimezonedetect/jstz.js
-    - filters: uglifyjs
-      output: scripts/vendor/moment-timezone.min.js
-      contents: ../../node_modules/moment-timezone/moment-timezone.js
-    - filters: uglifyjs
-      output: scripts/vendor/moment-timezone-data.min.js
-      contents: h:static/scripts/vendor/moment-timezone-data.js
-
-
 # Admin areas
 admin_css:
   contents:
@@ -146,7 +129,6 @@ app_js:
     - angulartics_ga
     - bind
     - katex
-    - momentjs
     - url
     - output: scripts/app.min.js
       filters:

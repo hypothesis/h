@@ -1,3 +1,8 @@
+var jstz = require('jstimezonedetect').jstz;
+var moment = require('moment');
+require('moment-timezone');
+
+
 module.exports = ['$window', function ($window) {
   return function (value, format) {
     // Determine the timezone name and browser language.
@@ -6,7 +11,7 @@ module.exports = ['$window', function ($window) {
 
     // Now make a localized date and set the language.
     var momentDate = moment(value);
-    momentDate.lang(userLang);
+    momentDate.locale(userLang);
 
     // Try to localize to the browser's timezone.
     try {
