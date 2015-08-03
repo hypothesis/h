@@ -1,5 +1,5 @@
 # Shared helper methods for working with unicode strings
-unorm = require('./vendor/unorm')
+unorm = require('unorm')
 
 # Unicode combining characters
 # from http://xregexp.com/addons/unicode/unicode-categories.js line:30
