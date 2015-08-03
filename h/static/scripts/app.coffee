@@ -1,3 +1,4 @@
+baseURI = require('base-url')()
 angular = require('angular')
 require('angular-jwt')
 
@@ -9,9 +10,6 @@ resolve =
 
 configureDocument = ['$provide', ($provide) ->
   $provide.decorator '$document', ($delegate) ->
-    baseURI = $delegate.prop('baseURI')
-    baseURI ?= $delegate.find('base').prop('href')  # fallback
-    baseURI ?= $delegate.prop('URL')                # fallback
     $delegate.prop('baseURI', baseURI)
 ]
 
