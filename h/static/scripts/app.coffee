@@ -1,3 +1,4 @@
+require('autofill-event')
 baseURI = require('base-url')()
 angular = require('angular')
 require('angular-jwt')

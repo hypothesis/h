@@ -69,10 +69,6 @@ katex:
 
 
 # Polyfills
-autofill:
-  filters: uglifyjs
-  output: scripts/vendor/polyfills/autofill-event.min.js
-  contents: h:static/scripts/vendor/polyfills/autofill-event.js
 bind:
   filters: uglifyjs
   output: scripts/vendor/polyfills/bind.min.js
@@ -148,7 +144,6 @@ app_js:
     - angular_toastr
     - angulartics
     - angulartics_ga
-    - autofill
     - bind
     - katex
     - momentjs

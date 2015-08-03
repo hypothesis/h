@@ -34,7 +34,6 @@ module.exports = function(config) {
       'vendor/annotator.js',
       'vendor/katex.js',
       'vendor/moment-timezone-data.js',
-      'vendor/polyfills/autofill-event.js',
       'vendor/polyfills/bind.js',
       'vendor/polyfills/url.js',
 
