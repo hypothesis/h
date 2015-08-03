@@ -1,7 +1,5 @@
 var querystring = require('querystring');
 
-var JWT_BEARER = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
-
 var authPromise = null;
 var tokenPromise = null;
 
@@ -16,13 +14,12 @@ function fetchToken($http, $q, jwtHelper, serviceUrl, session) {
     if (tokenPromise === null) {
       // Set up the token request data.
       var data = {
-        assertion: session.state.id_token,
-        grant_type: JWT_BEARER
+        assertion: session.state.csrf
       };
 
       // Skip JWT authorization for the token request itself.
       var config = {
-        data: data,
+        params: data,
         skipAuthorization: true,
         transformRequest: function (data) {
           return querystring.stringify(data);
