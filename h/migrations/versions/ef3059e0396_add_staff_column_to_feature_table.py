@@ -1,14 +1,14 @@
 """Add the staff columns to the feature and user tables.
 
 Revision ID: ef3059e0396
-Revises: 17a69c28b6c2
+Revises: 3bf1c2289e8d
 Create Date: 2015-07-30 16:25:14.837823
 
 """
 
 # revision identifiers, used by Alembic.
 revision = 'ef3059e0396'
-down_revision = '17a69c28b6c2'
+down_revision = '3bf1c2289e8d'
 
 from alembic import op
 import sqlalchemy as sa
