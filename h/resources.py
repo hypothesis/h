@@ -54,6 +54,7 @@ class Stream(Resource):
 class Root(Resource):
     __acl__ = [
         (security.Allow, security.Authenticated, 'authenticated'),
+        (security.Allow, 'group:admin', 'admin'),
     ]
 
 
