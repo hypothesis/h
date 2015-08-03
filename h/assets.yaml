@@ -22,7 +22,7 @@ angular_route:
 angular_sanitize:
   filters: uglifyjs
   output: scripts/vendor/angular-sanitize.min.js
-  contents: h:static/scripts/vendor/angular-sanitize.js
+  contents: ../../node_modules/angular-sanitize/angular-sanitize.js
 angular_tags_input:
   output: scripts/vendor/angular-tags-input.min.js
   contents: ../../node_modules/ng-tags-input/build/ng-tags-input.min.js

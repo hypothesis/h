@@ -24,13 +24,13 @@ module.exports = function(config) {
       '../../../node_modules/angular-animate/angular-animate.js',
       '../../../node_modules/angular-resource/angular-resource.js',
       '../../../node_modules/angular-route/angular-route.js',
+      '../../../node_modules/angular-sanitize/angular-sanitize.js',
       '../../../node_modules/ng-tags-input/build/ng-tags-input.min.js',
       '../../../node_modules/es6-promise/dist/es6-promise.js',
       '../../../node_modules/moment/min/moment-with-langs.js',
       '../../../node_modules/jstimezonedetect/jstz.js',
       '../../../node_modules/moment-timezone/moment-timezone.js',
       'vendor/angular-bootstrap.js',
-      'vendor/angular-sanitize.js',
       'vendor/annotator.js',
       'vendor/katex.js',
       'vendor/moment-timezone-data.js',
@@ -39,7 +39,7 @@ module.exports = function(config) {
       'vendor/polyfills/url.js',
 
       // Test deps
-      'vendor/angular-mocks.js',
+      '../../../node_modules/angular-mocks/angular-mocks.js',
       '../../templates/client/*.html',
       'test/bootstrap.js',
 
