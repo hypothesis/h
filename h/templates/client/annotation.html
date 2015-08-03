@@ -13,6 +13,13 @@
          target="_blank"
          ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
          >{{vm.annotation.user | persona}}</a>
+      <span class="small" ng-if="vm.group() && vm.group().url">
+        to
+        <a target="_blank" href="{{vm.group().url}}">
+          <i class="h-icon-group" title="{{vm.group.name}}"></i>
+          {{vm.group().name}}
+        </a>
+      </span>
       <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
       <span ng-show="vm.isPrivate() && !vm.editing"
             title="This annotation is visible only to you.">
@@ -31,11 +38,7 @@
       <aside class="pull-right" ng-if="vm.editing">
         <privacy ng-click="$event.stopPropagation()"
                  ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
-                 ng-model="vm.annotation.permissions"
-                 level="vm.privacyLevel"
-                 user="{{vm.annotation.user}}"
-                 class="dropdown privacy pull-right"
-                 name="privacy" />
+                 model="annotation">
       </aside>
       <!-- / Editing controls -->
     </span>
@@ -115,10 +118,19 @@
 
   <footer class="annotation-footer">
     <div class="small" ng-if="vm.editing">
-      <p ng-show="vm.privacyLevel.text == 'Only Me'">
-        <i class="h-icon-lock"></i> This annotation is visible only to you.</p>
-      <p ng-show="vm.privacyLevel.text == 'Public'">
-        <i class="h-icon-public"></i> This annotation is visible to everyone.</p>
+      <p ng-show="vm.isPrivate()">
+        <i class="h-icon-lock"></i>
+        This annotation will be visible only to you.
+      </p>
+      <p ng-show="vm.isShared() && vm.group().public">
+        <i class="h-icon-public"></i>
+        This annotation will be visible to everyone.
+      </p>
+      <p ng-show="vm.isShared() && !vm.group().public">
+        <i class="h-icon-group"></i>
+        This annotation will be visible to everyone in the
+        <strong ng-bind="vm.group().name"></strong> group.
+      </p>
     </div>
 
     <div class="form-actions" ng-if="vm.editing" ng-switch="vm.action">
@@ -139,7 +151,7 @@
     </div>
 
     <div class="annotation-section annotation-license"
-         ng-show="vm.privacyLevel.name != 'private' && vm.editing">
+         ng-show="vm.isShared() && vm.editing">
       <a href="http://creativecommons.org/publicdomain/zero/1.0/"
          title="View more information about the Creative Commons Public Domain license"
          target="_blank">

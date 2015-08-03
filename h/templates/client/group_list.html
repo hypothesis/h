@@ -1,16 +1,30 @@
-<span role="button" class="dropdown-toggle" data-toggle="dropdown">
-  Groups
-  <i class="h-icon-arrow-drop-down"></i>
-</span>
-<ul class="dropdown-menu pull-right" role="menu">
-  <li ng-repeat="group in groups">
-    <a ng-href="{{group.url}}" ng-bind="group.name" target="_blank"
-       class="group-name pull-left"></a>
-    <a ng-href="{{group.url}}" target="_blank" class="h-icon-link pull-right"
-       title="Share this group"></a>
-    <div style="clear:both;"></div>
-  </li>
-  <li>
-    <a href="/groups/new" target="_blank"><i class="h-icon-add"></i> New Group</a>
-  </li>
-</ul>
+<div class="pull-right dropdown">
+  <span class="dropdown-toggle"
+        data-toggle="dropdown"
+        role="button"
+        ng-switch on="groups.focused().public">
+    <i class="h-icon-public" ng-switch-when="true"></i>
+    <i class="h-icon-group" ng-switch-default></i>
+    {{groups.focused().name}}
+    <i class="h-icon-arrow-drop-down"></i>
+  </span>
+  <ul class="dropdown-menu pull-right" role="menu">
+    <li ng-repeat="group in groups.all()"
+        ng-class="group.hashid == groups.focused().hashid? 'selected' : ''">
+      <a class="group-name"
+         href=""
+         ng-click="groups.focus(group.hashid)"
+         ng-switch on="group.public">
+        <i class="h-icon-public" ng-switch-when="true"></i>
+        <i class="h-icon-group" ng-switch-default></i>
+        {{group.name}}
+      </a>
+      <a ng-href="{{group.url}}" ng-if="group.url"
+         target="_blank" class="h-icon-link" title="Share this group"></a>
+    </li>
+    <li>
+      <a href="/groups/new" target="_blank"><i class="h-icon-add"></i>
+      New Group</a>
+    </li>
+  </ul>
+</div>

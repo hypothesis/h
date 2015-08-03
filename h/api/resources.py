@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.security import Allow, Authenticated
+from pyramid.security import Allow, Deny, Authenticated, Everyone
 
 from .models import Annotation
 
@@ -27,6 +27,19 @@ class Annotations(object):
     Annotations is a container resource that exposes annotations as its
     children in the tree.
     """
+    def __init__(self, request):
+        self.request = request
+
+    def __acl__(self):
+        aces = []
+        try:
+            group = self.request.json_body.get('group') or '__world__'
+        except ValueError:
+            pass
+        else:
+            aces.append((Allow, 'group:' + group, 'create'))
+        return aces + [(Deny, Everyone, 'create')]
+
     def __getitem__(self, key):
         instance = Annotation.fetch(key)
         if instance is None:
@@ -39,14 +52,14 @@ class Annotations(object):
 class Root(Resource):
     __acl__ = [
         (Allow, Authenticated, 'create'),
-        (Allow, 'group:admin', 'admin'),
+        (Allow, 'group:__admin__', 'admin'),
     ]
 
 
-def create_root(_):
+def create_root(request):
     """
     Returns a new traversal tree root.
     """
     r = Root()
-    r.add('annotations', Annotations())
+    r.add('annotations', Annotations(request))
     return r

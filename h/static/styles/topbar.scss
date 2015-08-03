@@ -35,6 +35,11 @@
   @include flex-grow(1);
   -ms-flex: 1;  /* IE10 support */
   margin-right: .75em;
+  overflow: hidden;
+}
+
+.topbar .inner .group-list {
+  margin-right: .75em;
 }
 
 .topbar .btn {

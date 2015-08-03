@@ -425,7 +425,7 @@ def Group(request):
 
 @pytest.fixture
 def User(request):
-    patcher = mock.patch('h.groups.views.accounts_models.User', autospec=True)
+    patcher = mock.patch('h.groups.views.models.User', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 

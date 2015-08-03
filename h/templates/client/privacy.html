@@ -3,17 +3,26 @@
         role="button"
         class="dropdown-toggle"
         data-toggle="dropdown">
-        <i class="small" ng-class="{'h-icon-public': isPublic(level.name),
-                                    'h-icon-lock': !isPublic(level.name)}"></i>
-        <span ng-bind="level.text"></span>
+        <i class="small"
+           ng-class="{'h-icon-public': vm.level().type === 'public',
+                      'h-icon-group': vm.level().type === 'group',
+                      'h-icon-lock': vm.level().type === 'private'}"></i>
+        <span ng-bind="vm.level().name"></span>
         <i class="h-icon-arrow-drop-down"></i>
   </span>
   <ul class="dropdown-menu" role="menu">
-    <li ng-repeat="level in levels" ng-click="setLevel(level)">
+    <li ng-click="vm.setLevel('shared')">
       <a href="">
-        <i class="small" ng-class="{'h-icon-public': isPublic(level.name),
-                                    'h-icon-lock': !isPublic(level.name)}"></i>
-        <span ng-bind="level.text"></span>
+        <i class="small"
+           ng-class="{'h-icon-public': vm.shared().type === 'public',
+                      'h-icon-group': vm.shared().type === 'group'}"></i>
+        <span ng-bind="vm.shared().name"></span>
+      </a>
+    </li>
+    <li ng-click="vm.setLevel('private')">
+      <a href="">
+        <i class="small h-icon-lock"></i>
+        <span ng-bind="vm.private().name"></span>
       </a>
     </li>
   </ul>

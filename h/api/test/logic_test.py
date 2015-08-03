@@ -23,7 +23,7 @@ search_annotations_fixtures = pytest.mark.usefixtures('search_lib')
 @search_annotations_fixtures
 def test_search_calls_search(search_lib):
     """It should call search_lib.search() once."""
-    logic.search_annotations(mock.Mock(), mock.Mock())
+    logic.search_annotations(mock.Mock(), [], mock.Mock())
 
     assert search_lib.search.call_count == 1
 
@@ -33,15 +33,25 @@ def test_search_passes_params_to_search(search_lib):
     """It should pass request.params to search_lib.search()."""
     params = mock.Mock()
 
-    logic.search_annotations(params, mock.Mock())
+    logic.search_annotations(params, [], mock.Mock())
 
-    assert search_lib.search.call_args[1]['request_params'] == params
+    assert search_lib.search.call_args[0][0] == params
+
+
+@search_annotations_fixtures
+def test_search_passes_effective_principals_to_search(search_lib):
+    """It should pass request.effective_principals to search_lib.search()."""
+    principals = mock.Mock()
+
+    logic.search_annotations(mock.Mock(), principals, mock.Mock())
+
+    assert search_lib.search.call_args[0][1] == principals
 
 
 @search_annotations_fixtures
 def test_search_passes_user_to_search(search_lib):
     """It should pass the user from get_user() to search_lib.search()."""
-    logic.search_annotations(mock.Mock(), mock.sentinel.user)
+    logic.search_annotations(mock.Mock(), [], mock.sentinel.user)
 
     assert search_lib.search.call_args[1]['user'] == mock.sentinel.user
 
@@ -50,7 +60,7 @@ def test_search_passes_user_to_search(search_lib):
 def test_search_passes_search_normalized_uris(search_lib):
     """It should pass search_normalized from request.feature() to search()."""
     logic.search_annotations(
-        mock.Mock(), mock.Mock(), mock.sentinel.search_normalized_uris)
+        mock.Mock(), [], mock.Mock(), mock.sentinel.search_normalized_uris)
 
     assert search_lib.search.call_args[1]['search_normalized_uris'] == (
         mock.sentinel.search_normalized_uris)
@@ -168,6 +178,35 @@ def test_create_annotation_returns_the_annotation(Annotation):
     assert logic.create_annotation({}, mock.Mock()) == Annotation.return_value
 
 
+@create_annotation_fixtures
+def test_create_annotation_does_not_crash_if_annotation_has_no_group(
+        Annotation):
+    assert 'group' not in Annotation.return_value
+    fields = {}  # No group here either.
+
+    logic.create_annotation(fields, mock.Mock())
+
+
+@create_annotation_fixtures
+def test_create_annotation_does_not_crash_if_annotations_parent_has_no_group(
+        Annotation):
+    """It shouldn't crash if the parent annotation has no group.
+
+    It shouldn't crash if the annotation is a reply and its parent annotation
+    has no 'group' field.
+
+    """
+    # No group in the original annotation/reply itself.
+    Annotation.return_value = _mock_annotation()
+    assert 'group' not in Annotation.return_value
+    fields = {}  # No group here either.
+
+    # And no group in the parent annotation either.
+    Annotation.fetch.return_value = {}
+
+    logic.create_annotation(fields, mock.Mock())
+
+
 # The fixtures required to mock all of update_annotation()'s dependencies.
 update_annotation_fixtures = pytest.mark.usefixtures('search_lib')
 
@@ -233,6 +272,16 @@ def test_update_annotation_calls_update():
     logic.update_annotation(annotation, fields, False)
 
     annotation.update.assert_called_once_with(fields)
+
+
+@update_annotation_fixtures
+def test_update_annotation_user_can_change_group():
+    annotation = _mock_annotation(group='old')
+    fields = {'group': 'new'}
+
+    logic.update_annotation(annotation, fields, False)
+
+    assert annotation['group'] == 'new'
 
 
 @update_annotation_fixtures
@@ -329,6 +378,56 @@ def test_update_annotation_calls_save():
     logic.update_annotation(annotation, {}, False)
 
     annotation.save.assert_called_once_with()
+
+
+@update_annotation_fixtures
+def test_update_annotation_does_not_crash_if_annotation_has_no_group():
+    annotation = _mock_annotation()
+    assert 'group' not in annotation
+
+    logic.update_annotation(annotation, {}, False)
+
+
+@update_annotation_fixtures
+def test_update_annotation_does_not_crash_if_annotations_parent_has_no_group(
+        Annotation):
+    """It shouldn't crash if the parent annotation has no group.
+
+    It shouldn't crash if the annotation is a reply and its parent annotation
+    has no 'group' field.
+
+    """
+    # No group in the original annotation/reply itself.
+    annotation = _mock_annotation()
+    assert 'group' not in annotation
+
+    # And no group in the parent annotation either.
+    Annotation.fetch.return_value = {}
+
+    logic.update_annotation(annotation, {}, False)
+
+
+# The fixtures required to mock all of delete_annotation()'s dependencies.
+delete_annotation_fixtures = pytest.mark.usefixtures()
+
+
+@delete_annotation_fixtures
+def test_delete_does_not_crash_if_annotation_has_no_group():
+    annotation = mock.MagicMock()
+    annotation_data = {}  # No 'group' key.
+    annotation.get.side_effect = annotation_data.get
+    annotation.__getitem__.side_effect = annotation_data.__getitem__
+
+    logic.delete_annotation(annotation)
+
+
+@delete_annotation_fixtures
+def test_delete_annotation_calls_delete():
+    annotation = mock.MagicMock()
+
+    logic.delete_annotation(annotation)
+
+    annotation.delete.assert_called_once_with()
 
 
 @pytest.fixture

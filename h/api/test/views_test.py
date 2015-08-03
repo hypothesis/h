@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Defines unit tests for h.api.views."""
+
 import mock
 import pytest
 from pyramid import testing
+from pyramid import httpexceptions
 
+from h import api
 from h.api import views
 
 
@@ -67,7 +71,8 @@ def test_search_calls_search_annotations(logic, get_user):
     views.search(request)
 
     logic.search_annotations.assert_called_once_with(
-        request.params, get_user.return_value, request.feature.return_value)
+        request.params, request.effective_principals,
+        get_user.return_value, request.feature.return_value)
 
 
 @search_fixtures
@@ -227,9 +232,47 @@ def test_create_returns_error_if_parsing_json_fails():
 def test_create_calls_logic(logic, get_user):
     """It should call logic.create_annotation() appropriately."""
     request = mock.Mock()
-    user = get_user.return_value
+
     views.create(request)
-    logic.create_annotation.assert_called_once_with(request.json_body, user)
+
+    logic.create_annotation.assert_called_once_with(
+        fields=request.json_body, user=get_user.return_value)
+
+
+@create_fixtures
+def test_create_calls_create_annotation_once(logic):
+    """It should call logic.create_annotation() exactly once."""
+    request = mock.Mock()
+
+    views.create(request)
+
+    assert logic.create_annotation.call_count == 1
+
+
+@create_fixtures
+def test_create_passes_json_to_create_annotation(logic):
+    """It should pass the JSON from the request to create_annotation()."""
+    request = mock.Mock()
+
+    views.create(request)
+
+    assert logic.create_annotation.call_args[1]['fields'] == request.json_body
+
+
+@create_fixtures
+def test_create_passes_user_to_create_annotation(get_user, logic):
+    """It should pass the user from get_user() to logic.create_annotation()."""
+    views.create(mock.Mock())
+
+    assert logic.create_annotation.call_args[1]['user'] == (
+        get_user.return_value)
+
+
+@create_fixtures
+def test_create_inits_AnnotationEvent_once(AnnotationEvent):
+    views.create(mock.Mock())
+
+    assert AnnotationEvent.call_count == 1
 
 
 @create_fixtures
@@ -237,7 +280,9 @@ def test_create_event(AnnotationEvent, logic):
     request = mock.Mock()
     annotation = logic.create_annotation.return_value
     event = AnnotationEvent.return_value
+
     views.create(request)
+
     AnnotationEvent.assert_called_once_with == (request, annotation, 'create')
     request.registry.notify.assert_called_once_with(event)
 
@@ -262,27 +307,41 @@ read_fixtures = pytest.mark.usefixtures('search_lib', 'AnnotationEvent')
 
 @read_fixtures
 def test_read_event(AnnotationEvent):
-    request = mock.Mock()
-    annotation = mock.Mock()
+    annotation = _mock_annotation()
+    request = mock.Mock(effective_principals=[])
     event = AnnotationEvent.return_value
+
     views.read(annotation, request)
+
     AnnotationEvent.assert_called_once_with(request, annotation, 'read')
     request.registry.notify.assert_called_once_with(event)
 
 
 @read_fixtures
 def test_read_calls_render(search_lib):
-    annotation = mock.Mock()
+    annotation = _mock_annotation()
 
-    views.read(context=annotation, request=mock.Mock())
+    views.read(context=annotation,
+               request=mock.Mock(effective_principals=[]))
 
     search_lib.render.assert_called_once_with(annotation)
 
 
 @read_fixtures
 def test_read_returns_rendered_annotation(search_lib):
-    assert views.read(mock.Mock(), mock.Mock()) == (
-        search_lib.render.return_value)
+    response_data = views.read(
+        _mock_annotation(),
+        mock.Mock(effective_principals=[]))
+
+    assert response_data == search_lib.render.return_value
+
+
+@read_fixtures
+def test_read_does_not_crash_if_annotation_has_no_group():
+    annotation = _mock_annotation()
+    assert 'group' not in annotation
+
+    views.read(annotation, mock.Mock(effective_principals=[]))
 
 
 # The fixtures required to mock all of update()'s dependencies.
@@ -380,42 +439,58 @@ def test_update_returns_rendered_annotation(search_lib):
 
 
 # The fixtures required to mock all of delete()'s dependencies.
-delete_fixtures = pytest.mark.usefixtures('AnnotationEvent')
+delete_fixtures = pytest.mark.usefixtures('AnnotationEvent', 'logic')
 
 
 @delete_fixtures
-def test_delete_calls_delete():
-    annotation = _mock_annotation(id='foo')
+def test_delete_calls_delete_annotation(logic):
+    annotation = mock.MagicMock()
+    request = mock.Mock()
 
-    views.delete(annotation, mock.Mock())
+    views.delete(annotation, request)
 
-    annotation.delete.assert_called_once_with()
+    logic.delete_annotation.assert_called_once_with(annotation)
 
 
 @delete_fixtures
 def test_delete_event(AnnotationEvent):
-    request = mock.Mock()
-    annotation = _mock_annotation(id='foo')
+    annotation = _mock_annotation(id='foo', group='test-group')
+    request = mock.Mock(effective_principals=['group:test-group'])
     event = AnnotationEvent.return_value
+
     views.delete(annotation, request)
+
     AnnotationEvent.assert_called_once_with(request, annotation, 'delete')
     request.registry.notify.assert_called_once_with(event)
 
 
 @delete_fixtures
 def test_delete_returns_id():
-    annotation = _mock_annotation(id='foo')
+    annotation = _mock_annotation(id='foo', group='test-group')
 
-    response_data = views.delete(annotation, mock.Mock())
+    response_data = views.delete(
+        annotation, mock.Mock(effective_principals=['group:test-group']))
 
     assert response_data['id'] == annotation['id']
 
 
 @delete_fixtures
 def test_delete_returns_deleted():
-    response_data = views.delete(_mock_annotation(id='foo'), mock.Mock())
+    response_data = views.delete(
+        _mock_annotation(id='foo', group='test-group'),
+        mock.Mock(effective_principals=['group:test-group']))
 
     assert response_data['deleted'] is True
+
+
+@delete_fixtures
+def test_delete_does_not_crash_if_annotation_has_no_group():
+    annotation = _mock_annotation(id='foo')
+    assert 'group' not in annotation
+
+    views.delete(
+        annotation,
+        mock.Mock(effective_principals=['group:test-group']))
 
 
 @pytest.fixture
