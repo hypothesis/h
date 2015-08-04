@@ -69,18 +69,10 @@ katex:
 
 
 # Polyfills
-bind:
-  filters: uglifyjs
-  output: scripts/vendor/polyfills/bind.min.js
-  contents: h:static/scripts/vendor/polyfills/bind.js
 wgxpath:
   filters: uglifyjs
   output: scripts/vendor/polyfills/wgxpath.install.min.js
   contents: ../../node_modules/wgxpath/wgxpath.install.js
-url:
-  filters: uglifyjs
-  output: scripts/vendor/polyfills/url.min.js
-  contents: h:static/scripts/vendor/polyfills/url.js
 
 
 # Admin areas
@@ -127,9 +119,7 @@ app_js:
     - angular_toastr
     - angulartics
     - angulartics_ga
-    - bind
     - katex
-    - url
     - output: scripts/app.min.js
       filters:
         - browserify

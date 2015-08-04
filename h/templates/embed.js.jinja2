@@ -71,22 +71,6 @@ window.hypothesisInstall = function (inject) {
     {%- endassets %}
   }
 
-  // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/url/parser.js
-  var url, urlWorks;
-  try {
-    // have to actually try use it, because Safari defines a dud constructor
-    url = new URL('http://modernizr.com/');
-    urlWorks = url.href === 'http://modernizr.com/';
-  }
-  catch (err) {
-    urlWorks = false;
-  }
-  if (!urlWorks) {
-    {%- assets "url" %}
-    resources.push('{{ ASSET_URL | safe }}');
-    {%- endassets %}
-  }
-
   if (typeof window.Annotator === 'undefined') {
     {%- assets "inject" %}
     resources.push('{{ ASSET_URL | safe }}');

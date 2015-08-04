@@ -15,8 +15,6 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      '../../../node_modules/es6-promise/dist/es6-promise.js',
-      '../../static/scripts/vendor/polyfills/bind.js',
       'lib/errors.js',
       'lib/tab-store.js',
       'lib/tab-state.js',
@@ -25,9 +23,15 @@ module.exports = function(config) {
       'lib/browser-action.js',
       'lib/help-page.js',
       'lib/hypothesis-chrome-extension.js',
+      '../../static/scripts/blocklist.js',
+
       'test/bootstrap.js',
-      'test/*-test.js',
-      '../../static/scripts/blocklist.js'
+
+      // These are needed until PhantomJS 2.0
+      '../../../node_modules/es6-promise/dist/es6-promise.js',
+      '../../static/scripts/test/polyfills/bind.js',
+
+      'test/*-test.js'
     ],
 
 
