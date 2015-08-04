@@ -30,15 +30,15 @@ module.exports = function(config) {
       'vendor/annotator.js',
       'vendor/katex.js',
 
+      // These are needed until PhantomJS 2.0
+      '../../../node_modules/es6-promise/dist/es6-promise.js',
+      'vendor/bind.js',
+      'vendor/url.js',
+
       // Test deps
       '../../../node_modules/angular-mocks/angular-mocks.js',
       '../../templates/client/*.html',
       'test/bootstrap.js',
-
-      // These are needed until PhantomJS 2.0
-      '../../../node_modules/es6-promise/dist/es6-promise.js',
-      'test/polyfills/bind.js',
-      'test/polyfills/url.js',
 
       // Tests
       '**/*-test.coffee',

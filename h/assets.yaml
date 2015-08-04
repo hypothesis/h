@@ -68,13 +68,15 @@ katex:
   contents: h:static/scripts/vendor/katex.js
 
 
-# Wicked Good XPath (polyfill)
+# Polyfills
 wgxpath:
-  filters:
-    - browserify
-    - uglifyjs
+  filters: uglifyjs
   output: scripts/vendor/wgxpath.install.min.js
-  contents: ../../node_modules/wgxpath/wgxpath.install.js
+  contents: h:static/scripts/vendor/wgxpath.install.js
+url:
+  filters: uglifyjs
+  output: scripts/vendor/url.min.js
+  contents: h:static/scripts/vendor/url.js
 
 
 # Admin areas
@@ -122,6 +124,7 @@ app_js:
     - angulartics
     - angulartics_ga
     - katex
+    - url
     - output: scripts/app.min.js
       filters:
         - browserify
