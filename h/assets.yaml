@@ -68,10 +68,12 @@ katex:
   contents: h:static/scripts/vendor/katex.js
 
 
-# Polyfills
+# Wicked Good XPath (polyfill)
 wgxpath:
-  filters: uglifyjs
-  output: scripts/vendor/polyfills/wgxpath.install.min.js
+  filters:
+    - browserify
+    - uglifyjs
+  output: scripts/vendor/wgxpath.install.min.js
   contents: ../../node_modules/wgxpath/wgxpath.install.js
 
 
