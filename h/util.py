@@ -9,6 +9,12 @@ def split_user(userid):
     ("seanh", "hypothes.is").
 
     """
+    # Don't crash if people pass None to this function.
+    # This is convenient, means calling code doesn't always need to test userid
+    # for None.
+    if not userid:
+        return None
+
     match = re.match(r'^acct:([^@]+)@(.*)$', userid)
     if match:
         return match.groups()
