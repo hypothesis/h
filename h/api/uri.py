@@ -191,7 +191,7 @@ def _normalise_netloc(uri):
 def _normalise_path(uri):
     path = uri.path
 
-    if path.endswith('/'):
+    while path.endswith('/'):
         path = path[:-1]
 
     segments = path.split('/')

@@ -59,7 +59,9 @@ from h.api import uri
 
     # Path: remove trailing slashes
     ("http://example.com/", "http://example.com"),
+    ("http://example.com/////", "http://example.com"),
     ("http://example.com/foo/bar/baz/", "http://example.com/foo/bar/baz"),
+    ("http://example.com/foo/bar/baz/////", "http://example.com/foo/bar/baz"),
 
     # Path: ensure UNRESERVED characters are decoded
     ("http://example.com/%7Ealice", "http://example.com/~alice"),
