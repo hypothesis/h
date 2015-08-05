@@ -119,6 +119,7 @@ function requestAuthentication($injector, $q, $rootScope) {
         deferred.reject(err);
       } else {
         $injector.invoke(fetchToken).then(function (token) {
+          authPromise = deferred.promise;
           deferred.resolve(token);
         });
       }
