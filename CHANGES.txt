@@ -1,3 +1,31 @@
+Next release
+============
+
+Bug fixes
+---------
+
+- Only update the stream websocket filter when there is at least one URI to
+  search.
+  See https://github.com/hypothesis/h/pull/2419
+
+- Don't give admins permissions globally, but require instead that resources
+  specifically grant privileges to admins.
+  See https://github.com/hypothesis/h/pull/2424
+
+- Ensure that API requests always have a valid token if the user is logged in.
+  See https://github.com/hypothesis/h/pull/2415
+
+Features
+--------
+
+- Enable users to create groups.
+  See https://github.com/hypothesis/h/pull/2402
+
+- Add a staff flag to the user table.
+  See https://github.com/hypothesis/h/pull/2416
+
+- Add a NIPSA service worker definition.
+
 0.6.0 (2015-07-29)
 ==================
 
