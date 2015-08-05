@@ -113,7 +113,6 @@ function forgetAuthentication($q, flash, session) {
 function requestAuthentication($injector, $q, $rootScope) {
   return authPromise.catch(function () {
     var deferred = $q.defer();
-    authPromise = deferred.promise;
 
     $rootScope.$on('auth', function(event, err, data) {
       if (err) {
@@ -125,7 +124,7 @@ function requestAuthentication($injector, $q, $rootScope) {
       }
     });
 
-    return authPromise;
+    return deferred.promise;
   });
 }
 
