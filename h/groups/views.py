@@ -40,8 +40,7 @@ def create(request):
     except deform.ValidationFailure:
         return {'form': form, 'data': request.params}
 
-    user = accounts_models.User.get_by_id(
-        request, request.authenticated_userid)
+    user = accounts_models.User.get_by_id(request.authenticated_userid)
     group = models.Group(name=appstruct["name"], creator=user)
     request.db.add(group)
 
