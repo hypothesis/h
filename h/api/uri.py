@@ -82,6 +82,35 @@ BLACKLISTED_QUERY_PARAMS = set([
     'utm_term',
 ])
 
+# From RFC3986. The ABNF for path segments is
+#
+#   path-abempty  = *( "/" segment )
+#   ...
+#   segment       = *pchar
+#   ...
+#   pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+#   ...
+#   unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+#   sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
+#                    / "*" / "+" / "," / ";" / "="
+#
+# Taken together, this implies the following set of "unreserved" characters for
+# path segments (excluding ALPHA and DIGIT which are handled already).
+UNRESERVED_PATHSEGMENT = "-._~:@!$&'()*+,;="
+
+# From RFC3986. The ABNF for query strings is
+#
+#   query         = *( pchar / "/" / "?" )
+#
+# Where the definition of pchar is as given above.
+#
+# We exclude "&" and ";" from both names and values, and "=" from names, as
+# they are used as delimiters in HTTP URL query strings. In addition, "+" is
+# used to denote the space character, so for legacy reasons this is also
+# excluded.
+UNRESERVED_QUERY_NAME = "-._~:@!$'()*,"
+UNRESERVED_QUERY_VALUE = "-._~:@!$'()*,="
+
 
 def normalise(uristr):
     """Translate the given URI into a normalised form."""
@@ -165,19 +194,25 @@ def _normalise_path(uri):
     if path.endswith('/'):
         path = path[:-1]
 
+    segments = path.split('/')
+    segments = [_normalise_pathsegment(s) for s in segments]
+    path = '/'.join(segments)
+
     return path
 
 
+def _normalise_pathsegment(segment):
+    return urllib.quote(urllib.unquote(segment), safe=UNRESERVED_PATHSEGMENT)
+
+
 def _normalise_query(uri):
-    qs = uri.query
+    query = uri.query
 
     try:
-        items = urlparse.parse_qsl(qs,
-                                   keep_blank_values=True,
-                                   strict_parsing=True)
+        items = urlparse.parse_qsl(query, keep_blank_values=True)
     except ValueError:
         # If we can't parse the query string, we better preserve it as it was.
-        return qs
+        return query
 
     # Python sorts are stable, so preserving relative ordering of items with
     # the same key doesn't require any work from us
@@ -186,6 +221,23 @@ def _normalise_query(uri):
     # Remove query params that are blacklisted
     items = [i for i in items if i[0] not in BLACKLISTED_QUERY_PARAMS]
 
-    qs = urllib.urlencode(items)
+    # Normalise percent-encoding for query items
+    query = _normalise_queryitems(items)
 
-    return qs
+    return query
+
+
+def _normalise_queryitems(items):
+    segments = ['='.join([_normalise_queryname(i[0]),
+                          _normalise_queryvalue(i[1])]) for i in items]
+    return '&'.join(segments)
+
+
+def _normalise_queryname(name):
+    return urllib.quote_plus(urllib.unquote_plus(name),
+                             safe=UNRESERVED_QUERY_NAME)
+
+
+def _normalise_queryvalue(value):
+    return urllib.quote_plus(urllib.unquote_plus(value),
+                             safe=UNRESERVED_QUERY_VALUE)
