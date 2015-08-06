@@ -129,8 +129,23 @@ ol {
   }
 }
 
+
+/* The groups dropdown list. */
+
 .group-list {
   margin-right: 0.5em;
+}
+
+$group-list-width: 225px;
+
+.group-list .dropdown-menu {
+  width: $group-list-width;
+}
+
+.group-list .dropdown-menu .group-name {
+  max-width: $group-list-width - 45px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-picker {

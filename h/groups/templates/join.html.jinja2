@@ -10,15 +10,12 @@
 
 {% block content %}
   <div class="content paper">
-    {% for message in request.session.pop_flash('success') %}
-      {{ message }}
-    {% endfor %}
-
     {% include "h:templates/includes/header.html.jinja2" %}
-
     This is group {{ group.name }}.
-    You're a member of this group.
-    You can invite other people to join this group by sending them the link
-    to this page: {{ group_url }}
+    <form method="POST">
+      <button type="submit">
+        Join this group
+      </button>
+    </form>
   </div>
 {% endblock content %}
