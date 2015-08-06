@@ -28,7 +28,7 @@ def settings_from_environment():
     return settings
 
 
-def normalise_database_url(url):
+def normalize_database_url(url):
     # Heroku database URLs start with postgres://, which is an old and
     # deprecated dialect as far as sqlalchemy is concerned. We upgrade this
     # to postgresql+psycopg2 by default.
@@ -49,7 +49,7 @@ def _setup_heroku(settings):
 
     # DATABASE_URL matches the Heroku environment variable
     if 'DATABASE_URL' in os.environ:
-        settings['sqlalchemy.url'] = normalise_database_url(
+        settings['sqlalchemy.url'] = normalize_database_url(
             os.environ['DATABASE_URL'])
 
     # REDISTOGO_URL matches the Heroku environment variable for Redis To Go

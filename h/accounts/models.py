@@ -271,6 +271,6 @@ class User(Base):
 
 
 def _username_to_uid(username):
-    # We normalise usernames by dots and case in order to discourage attempts
+    # We normalize usernames by dots and case in order to discourage attempts
     # at impersonation.
     return username.replace('.', '').lower()
