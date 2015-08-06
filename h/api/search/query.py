@@ -42,39 +42,23 @@ def build(request_params, userid=None, search_normalised_uris=False):
     except (ValueError, KeyError):
         size = 20
 
-    query = {
-        "from": from_,
-        "size": size,
-        "sort": [
-            {
-                request_params.pop("sort", "updated"): {
-                    "ignore_unmapped": True,
-                    "order": request_params.pop("order", "desc")
-                }
-            }
-        ],
-        # The base query is a filtered query, with an "And" filter to which
-        # multiple conditions can be added, and a "Bool" query for search
-        # matches.
-        "query": {
-            "filtered": {
-                "filter": {"and": []},
-                "query": {"bool": {"must": []}},
-            },
-        },
-    }
+    sort = [{
+        request_params.pop("sort", "updated"): {
+            "ignore_unmapped": True,
+            "order": request_params.pop("order", "desc")
+        }
+    }]
 
-    filters = query["query"]["filtered"]["filter"]["and"]
-    matches = query["query"]["filtered"]["query"]["bool"]["must"]
+    filters = []
+    matches = []
 
-    uri = request_params.pop("uri", None)
-
-    if uri is None:
+    uri_param = request_params.pop("uri", None)
+    if uri_param is None:
         pass
     elif search_normalised_uris:
-        filters.append(_filter_clause_for_uri(uri))
+        filters.append(_term_clause_for_uri(uri_param))
     else:
-        matches.append(_match_clause_for_uri(uri))
+        matches.append(_match_clause_for_uri(uri_param))
 
     if "any" in request_params:
         matches.append({
@@ -92,17 +76,25 @@ def build(request_params, userid=None, search_normalised_uris=False):
     # Add a filter for "not in public site areas" considerations
     filters.append(nipsa.nipsa_filter(userid=userid))
 
-    # And now we simplify the query. If there are no added matches, then we can
-    # skip the "Bool" clause and simply make the base query a "Match All".
-    if not matches:
-        query["query"]["filtered"]["query"] = {"match_all": {}}
+    query = {"match_all": {}}
 
-    # Likewise, if there are no filters, then we can
-    # skip the entire filtered query and just pass the query, unfiltered
-    if not filters:
-        query["query"] = query["query"]["filtered"]["query"]
+    if matches:
+        query = {"bool": {"must": matches}}
 
-    return query
+    if filters:
+        query = {
+            "filtered": {
+                "filter": {"and": filters},
+                "query": query,
+            }
+        }
+
+    return {
+        "from": from_,
+        "size": size,
+        "sort": sort,
+        "query": query,
+    }
 
 
 def _match_clause_for_uri(uristr):
@@ -120,8 +112,8 @@ def _match_clause_for_uri(uristr):
     }
 
 
-def _filter_clause_for_uri(uristr):
-    """Return an Elasticsearch filter clause for the given URI."""
+def _term_clause_for_uri(uristr):
+    """Return an Elasticsearch term clause for the given URI."""
     uristrs = uri.expand(uristr)
     filters = [{"term": {"target.source_normalised": uri.normalise(u)}}
                for u in uristrs]
