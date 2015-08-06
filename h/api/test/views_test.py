@@ -139,7 +139,7 @@ def test_create_annotation(user):
     annotation.save.assert_called_once()
 
 
-@pytest.mark.usefixtures('replace_io')
+@pytest.mark.usefixtures('replace_io', 'search_render')
 def test_read():
     annotation = DummyResource()
 
@@ -150,7 +150,7 @@ def test_read():
 
 
 @patch('h.api.views._update_annotation')
-@pytest.mark.usefixtures('replace_io')
+@pytest.mark.usefixtures('replace_io', 'search_render')
 def test_update(mock_update_annotation):
     annotation = views.Annotation(_old_annotation)
     request = DummyRequest(json_body=_new_annotation)
@@ -264,3 +264,11 @@ _old_annotation = {
         'delete': ['alice'],
     },
 }
+
+@pytest.fixture
+def search_render(request):
+    patcher = patch('h.api.search.render', autospec=True)
+    func = patcher.start()
+    request.addfinalizer(patcher.stop)
+    func.side_effect = lambda x: x
+    return func

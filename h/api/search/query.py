@@ -2,7 +2,7 @@ from h.api import uri
 from h.api import nipsa
 
 
-def build(request_params, userid=None):
+def build(request_params, userid=None, search_normalized_uris=False):
     """
     Return an Elasticsearch query dict for the given h search API params.
 
@@ -15,6 +15,10 @@ def build(request_params, userid=None):
 
     :param userid: the ID of the authorized user (optional, default: None),
     :type userid: unicode or None
+
+    :param search_normalized_uris: Whether or not to use the "uri" param to
+        search against pre-normalized URI fields.
+    :type search_normalized_uris: bool
 
     :returns: an Elasticsearch query dict corresponding to the given h search
         API params
@@ -38,23 +42,23 @@ def build(request_params, userid=None):
     except (ValueError, KeyError):
         size = 20
 
-    query = {
-        "from": from_,
-        "size": size,
-        "sort": [
-            {
-                request_params.pop("sort", "updated"): {
-                    "ignore_unmapped": True,
-                    "order": request_params.pop("order", "desc")
-                }
-            }
-        ]
-    }
+    sort = [{
+        request_params.pop("sort", "updated"): {
+            "ignore_unmapped": True,
+            "order": request_params.pop("order", "desc")
+        }
+    }]
 
+    filters = []
     matches = []
-    uri_match_clause = _match_clause_for_uri(request_params.pop("uri", None))
-    if uri_match_clause:
-        matches.append(uri_match_clause)
+
+    uri_param = request_params.pop("uri", None)
+    if uri_param is None:
+        pass
+    elif search_normalized_uris:
+        filters.append(_term_clause_for_uri(uri_param))
+    else:
+        matches.append(_match_clause_for_uri(uri_param))
 
     if "any" in request_params:
         matches.append({
@@ -68,25 +72,33 @@ def build(request_params, userid=None):
 
     for key, value in request_params.items():
         matches.append({"match": {key: value}})
-    matches = matches or [{"match_all": {}}]
 
-    query["query"] = {"bool": {"must": matches}}
+    # Add a filter for "not in public site areas" considerations
+    filters.append(nipsa.nipsa_filter(userid=userid))
 
-    query["query"] = {
-        "filtered": {
-            "filter": nipsa.nipsa_filter(userid=userid),
-            "query": query["query"]
+    query = {"match_all": {}}
+
+    if matches:
+        query = {"bool": {"must": matches}}
+
+    if filters:
+        query = {
+            "filtered": {
+                "filter": {"and": filters},
+                "query": query,
+            }
         }
-    }
 
-    return query
+    return {
+        "from": from_,
+        "size": size,
+        "sort": sort,
+        "query": query,
+    }
 
 
 def _match_clause_for_uri(uristr):
     """Return an Elasticsearch match clause dict for the given URI."""
-    if not uristr:
-        return None
-
     uristrs = uri.expand(uristr)
     matchers = [{"match": {"uri": u}} for u in uristrs]
 
@@ -97,4 +109,17 @@ def _match_clause_for_uri(uristr):
             "minimum_should_match": 1,
             "should": matchers
         }
+    }
+
+
+def _term_clause_for_uri(uristr):
+    """Return an Elasticsearch term clause for the given URI."""
+    uristrs = uri.expand(uristr)
+    filters = [{"term": {"target.source_normalized": uri.normalize(u)}}
+               for u in uristrs]
+
+    if len(filters) == 1:
+        return filters[0]
+    return {
+        "or": filters
     }

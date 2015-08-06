@@ -11,7 +11,7 @@ from h.api.search import query
 log = logging.getLogger(__name__)
 
 
-def search(request_params, user=None):
+def search(request_params, user=None, search_normalized_uris=False):
     """
     Search with the given params and return the matching annotations.
 
@@ -22,6 +22,10 @@ def search(request_params, user=None):
     :param user: the authorized user, or None
     :type user: h.accounts.models.User or None
 
+    :param search_normalized_uris: Whether or not to use the "uri" param to
+        search against pre-normalized URI fields.
+    :type search_normalized_uris: bool
+
     :returns: a dict with keys "rows" (the list of matching annotations, as
         dicts) and "total" (the number of matching annotations, an int)
     :rtype: dict
@@ -30,7 +34,9 @@ def search(request_params, user=None):
     log.debug("Searching with user=%s, for uri=%s",
               str(userid), request_params.get('uri'))
 
-    body = query.build(request_params, userid=userid)
+    body = query.build(request_params,
+                       userid=userid,
+                       search_normalized_uris=search_normalized_uris)
     results = models.Annotation.search_raw(body, user=user, raw_result=True)
 
     total = results['hits']['total']
@@ -40,11 +46,13 @@ def search(request_params, user=None):
     return {"rows": rows, "total": total}
 
 
-def index(user=None):
+def index(user=None, search_normalized_uris=False):
     """
     Return the 20 most recent annotations, most-recent first.
 
     Returns the 20 most recent annotations that are visible to the given user,
     or that are public if user is None.
     """
-    return search(webob.multidict.NestedMultiDict({"limit": 20}), user=user)
+    return search(webob.multidict.NestedMultiDict({"limit": 20}),
+                  user=user,
+                  search_normalized_uris=search_normalized_uris)
