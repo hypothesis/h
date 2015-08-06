@@ -2,7 +2,7 @@ from h.api import uri
 from h.api import nipsa
 
 
-def build(request_params, userid=None, search_normalised_uris=False):
+def build(request_params, userid=None, search_normalized_uris=False):
     """
     Return an Elasticsearch query dict for the given h search API params.
 
@@ -16,9 +16,9 @@ def build(request_params, userid=None, search_normalised_uris=False):
     :param userid: the ID of the authorized user (optional, default: None),
     :type userid: unicode or None
 
-    :param search_normalised_uris: Whether or not to use the "uri" param to
-        search against pre-normalised URI fields.
-    :type search_normalised_uris: bool
+    :param search_normalized_uris: Whether or not to use the "uri" param to
+        search against pre-normalized URI fields.
+    :type search_normalized_uris: bool
 
     :returns: an Elasticsearch query dict corresponding to the given h search
         API params
@@ -55,7 +55,7 @@ def build(request_params, userid=None, search_normalised_uris=False):
     uri_param = request_params.pop("uri", None)
     if uri_param is None:
         pass
-    elif search_normalised_uris:
+    elif search_normalized_uris:
         filters.append(_term_clause_for_uri(uri_param))
     else:
         matches.append(_match_clause_for_uri(uri_param))
@@ -115,7 +115,7 @@ def _match_clause_for_uri(uristr):
 def _term_clause_for_uri(uristr):
     """Return an Elasticsearch term clause for the given URI."""
     uristrs = uri.expand(uristr)
-    filters = [{"term": {"target.source_normalised": uri.normalise(u)}}
+    filters = [{"term": {"target.source_normalized": uri.normalize(u)}}
                for u in uristrs]
 
     if len(filters) == 1:

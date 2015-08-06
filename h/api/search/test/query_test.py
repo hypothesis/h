@@ -230,7 +230,7 @@ def test_build_for_uri(uri):
 
     """
     uri.expand.side_effect = lambda x: [x]
-    uri.normalise.side_effect = lambda x: x
+    uri.normalize.side_effect = lambda x: x
 
     q1 = query.build(
         request_params=multidict.NestedMultiDict(
@@ -258,7 +258,7 @@ def test_build_for_uri_with_multiple_representations(uri):
                "http://example2.com/",
                "http://example3.com/"]
     uri.expand.side_effect = lambda x: results
-    uri.normalise.side_effect = lambda x: x
+    uri.normalize.side_effect = lambda x: x
 
     q = query.build(
         request_params=multidict.NestedMultiDict(
@@ -283,33 +283,33 @@ def test_build_for_uri_with_multiple_representations(uri):
 
 
 @mock.patch("h.api.search.query.uri")
-def test_build_for_uri_normalised(uri):
+def test_build_for_uri_normalized(uri):
     """
-    Uses a term filter against target.source_normalised to filter for URI.
+    Uses a term filter against target.source_normalized to filter for URI.
 
-    When querying for a URI with search_normalised_uris set to true, build
-    should use a term filter against the normalised version of the target
+    When querying for a URI with search_normalized_uris set to true, build
+    should use a term filter against the normalized version of the target
     source field.
 
-    It should expand the input URI before searching, and normalise the results
+    It should expand the input URI before searching, and normalize the results
     of the expansion.
     """
     uri.expand.side_effect = lambda x: [
         "http://giraffes.com/",
         "https://elephants.com/",
     ]
-    uri.normalise.side_effect = lambda x: x[:-1]  # Strip the trailing slash
+    uri.normalize.side_effect = lambda x: x[:-1]  # Strip the trailing slash
 
     params = multidict.NestedMultiDict({"uri": "http://example.com/"})
 
     q = query.build(request_params=params,
-                    search_normalised_uris=True)
+                    search_normalized_uris=True)
 
     uri.expand.assert_called_with("http://example.com/")
 
     expected_filter = {"or": [
-        {"term": {"target.source_normalised": "http://giraffes.com"}},
-        {"term": {"target.source_normalised": "https://elephants.com"}},
+        {"term": {"target.source_normalized": "http://giraffes.com"}},
+        {"term": {"target.source_normalized": "https://elephants.com"}},
     ]}
     assert expected_filter in q["query"]["filtered"]["filter"]["and"]
 

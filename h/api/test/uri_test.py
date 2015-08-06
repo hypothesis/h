@@ -19,17 +19,17 @@ from h.api import uri
     ("http%3A%2F%2Fexample.com", "http%3A%2F%2Fexample.com"),
     ("http%3A%2F%2Fexample.com%2Ffoo%2F", "http%3A%2F%2Fexample.com%2Ffoo%2F"),
 
-    # Should leave already-normalised URLs as they are
+    # Should leave already-normalized URLs as they are
     ("http://example.com", "http://example.com"),
     ("https://foo.bar.org", "https://foo.bar.org"),
 
-    # Should case-normalise scheme
+    # Should case-normalize scheme
     ("HtTp://example.com", "http://example.com"),
     ("HTTP://example.com", "http://example.com"),
     ("HtTpS://example.com", "https://example.com"),
     ("HTTPS://example.com", "https://example.com"),
 
-    # Should case-normalise hostname
+    # Should case-normalize hostname
     ("http://EXAMPLE.COM", "http://example.com"),
     ("http://EXampLE.COM", "http://example.com"),
 
@@ -84,8 +84,8 @@ from h.api import uri
     ("http://example.com/كذا", "http://example.com/%D9%83%D8%B0%D8%A7"),
     ("http://example.com/snowman/☃", "http://example.com/snowman/%E2%98%83"),
 
-    # Path: normalise case of encodings
-    ("http://example.com/case%2fnormalised", "http://example.com/case%2Fnormalised"),
+    # Path: normalize case of encodings
+    ("http://example.com/case%2fnormalized", "http://example.com/case%2Fnormalized"),
 
     # Query: remove empty
     ("http://example.com?", "http://example.com"),
@@ -114,7 +114,7 @@ from h.api import uri
     ("http://example.com?你好世界=γειά σου κόσμος", "http://example.com?%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C=%CE%B3%CE%B5%CE%B9%CE%AC+%CF%83%CE%BF%CF%85+%CE%BA%CF%8C%CF%83%CE%BC%CE%BF%CF%82"),
     ("http://example.com?love=♥", "http://example.com?love=%E2%99%A5"),
 
-    # Query: normalise case of encodings
+    # Query: normalize case of encodings
     ("http://example.com?love=%e2%99%a5", "http://example.com?love=%E2%99%A5"),
 
     # Query: lexically sort parameters by name
@@ -135,8 +135,8 @@ from h.api import uri
     ("http://example.com?a=1&utm_term=foo", "http://example.com?a=1"),
     ("http://example.com?a=1&utm_term=foo&b=2", "http://example.com?a=1&b=2"),
 ])
-def test_normalise(url_in, url_out):
-    assert uri.normalise(url_in) == url_out
+def test_normalize(url_in, url_out):
+    assert uri.normalize(url_in) == url_out
 
 
 def test_expand_no_document(document_model):

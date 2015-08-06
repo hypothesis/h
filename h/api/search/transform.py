@@ -12,11 +12,11 @@ def prepare(annotation):
     Prepare the given annotation for indexing.
 
     Scan the passed annotation for any target URIs or document metadata URIs
-    and add normalised versions of these to the document.
+    and add normalized versions of these to the document.
     """
     # FIXME: When this becomes simply part of a search indexing operation, this
     # should probably not mutate its argument.
-    _normalise_annotation_target_uris(annotation)
+    _normalize_annotation_target_uris(annotation)
 
 
 def render(annotation):
@@ -28,12 +28,12 @@ def render(annotation):
     """
     data = copy.deepcopy(annotation)
 
-    _filter_target_normalised_uris(data)
+    _filter_target_normalized_uris(data)
 
     return data
 
 
-def _normalise_annotation_target_uris(annotation):
+def _normalize_annotation_target_uris(annotation):
     if 'target' not in annotation:
         return
     if not isinstance(annotation['target'], list):
@@ -45,11 +45,11 @@ def _normalise_annotation_target_uris(annotation):
             continue
         if not isinstance(target['source'], basestring):
             continue
-        target['source_normalised'] = uri.normalise(target['source'])
+        target['source_normalized'] = uri.normalize(target['source'])
 
 
-def _filter_target_normalised_uris(data):
-    """Remove 'source_normalised' keys from targets, where present."""
+def _filter_target_normalized_uris(data):
+    """Remove 'source_normalized' keys from targets, where present."""
     if 'target' not in data:
         return
     if not isinstance(data['target'], list):
@@ -57,6 +57,6 @@ def _filter_target_normalised_uris(data):
     for target in data['target']:
         if not isinstance(data, dict):
             continue
-        if 'source_normalised' not in target:
+        if 'source_normalized' not in target:
             continue
-        del target['source_normalised']
+        del target['source_normalized']

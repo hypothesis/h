@@ -76,13 +76,13 @@ def index(context, request):
 @api_config(context=Root, name='search')
 def search(request):
     """Search the database for annotations matching with the given query."""
-    search_normalised_uris = request.feature('search_normalised')
+    search_normalized_uris = request.feature('search_normalized')
 
     # The search results are filtered for the authenticated user
     user = get_user(request)
     results = search_lib.search(request.params,
                                 user=user,
-                                search_normalised_uris=search_normalised_uris)
+                                search_normalized_uris=search_normalized_uris)
 
     return {
         'total': results['total'],
@@ -118,11 +118,11 @@ def annotations_index(request):
     This will use the default limit, 20 at time of writing, and results
     are ordered most recent first.
     """
-    search_normalised_uris = request.feature('search_normalised')
+    search_normalized_uris = request.feature('search_normalized')
 
     user = get_user(request)
     results = search_lib.index(user=user,
-                               search_normalised_uris=search_normalised_uris)
+                               search_normalized_uris=search_normalized_uris)
 
     return {
         'total': results['total'],
