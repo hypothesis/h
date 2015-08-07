@@ -66,4 +66,3 @@ def permit_cors(req,
         headers['Access-Control-Expose-Headers'] = ', '.join(expose_headers)
 
     return resp
-
