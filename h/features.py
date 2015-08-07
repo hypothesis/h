@@ -47,6 +47,22 @@ class Feature(Base):
                       default=False,
                       server_default=sa.sql.expression.false())
 
+    @property
+    def description(self):
+        return FEATURES[self.name]
+
+    @classmethod
+    def all(cls):
+        """Fetch (or, if necessary, create) rows for all defined features."""
+        results = []
+        for name in FEATURES:
+            feat = cls.get_by_name(name)
+            if feat is None:
+                feat = cls(name=name)
+                cls.query.session.add(feat)
+            results.append(feat)
+        return results
+
     @classmethod
     def get_by_name(cls, name):
         """Fetch a flag by name."""
