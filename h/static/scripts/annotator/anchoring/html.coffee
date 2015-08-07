@@ -1,5 +1,3 @@
-raf = require('raf')
-
 {
   FragmentAnchor
   RangeAnchor

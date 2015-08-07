@@ -33,6 +33,7 @@ module.exports = function(config) {
       // These are needed until PhantomJS 2.0
       '../../../node_modules/es6-promise/dist/es6-promise.js',
       'vendor/bind.js',
+      'vendor/raf.js',
       'vendor/url.js',
 
       // Test deps

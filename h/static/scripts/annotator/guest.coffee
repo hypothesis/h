@@ -1,5 +1,4 @@
 baseURI = require('base-url')()
-raf = require('raf')
 Annotator = require('annotator')
 $ = Annotator.$
 
@@ -8,7 +7,7 @@ highlighter = require('./highlighter')
 
 animationPromise = (fn) ->
   return new Promise (resolve, reject) ->
-    raf ->
+    requestAnimationFrame ->
       try
         resolve(fn())
       catch error
@@ -241,7 +240,7 @@ module.exports = class Guest extends Annotator
         self.anchors.push(anchor)
 
     # Remove all the highlights that have no corresponding target anymore.
-    raf -> highlighter.removeHighlights(deadHighlights)
+    requestAnimationFrame -> highlighter.removeHighlights(deadHighlights)
 
     # Anchor any targets of this annotation that are not anchored already.
     for target in annotation.target when target not in anchoredTargets
@@ -305,7 +304,7 @@ module.exports = class Guest extends Annotator
     this.plugins.BucketBar?.update()
 
     unhighlight = Array::concat(unhighlight...)
-    raf -> highlighter.removeHighlights(unhighlight)
+    requestAnimationFrame -> highlighter.removeHighlights(unhighlight)
 
     return annotation
 

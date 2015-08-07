@@ -1,4 +1,3 @@
-raf = require('raf')
 Annotator = require('annotator')
 Guest = require('../guest')
 anchoring = require('../anchoring/html')
@@ -398,7 +397,7 @@ describe 'Guest', ->
       annotation = {}
       guest.anchors.push({annotation})
       guest.deleteAnnotation(annotation)
-      new Promise(raf).then ->
+      new Promise(requestAnimationFrame).then ->
         assert.equal(guest.anchors.length, 0)
         done()
 
@@ -408,7 +407,7 @@ describe 'Guest', ->
       annotation = {}
       guest.anchors.push({annotation})
       guest.deleteAnnotation(annotation)
-      new Promise(raf).then ->
+      new Promise(requestAnimationFrame).then ->
         assert.calledOnce(guest.plugins.BucketBar.update)
         done()
 
@@ -417,7 +416,7 @@ describe 'Guest', ->
       annotation = {}
       publish = sandbox.stub(guest, 'publish')
       guest.deleteAnnotation(annotation)
-      new Promise(raf).then ->
+      new Promise(requestAnimationFrame).then ->
         assert.calledOnce(publish)
         assert.calledWith(publish, 'annotationDeleted', [annotation])
         done()
@@ -429,7 +428,7 @@ describe 'Guest', ->
       removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
       guest.anchors.push({annotation, highlights})
       guest.deleteAnnotation(annotation)
-      new Promise(raf).then ->
+      new Promise(requestAnimationFrame).then ->
         assert.calledOnce(removeHighlights)
         assert.calledWith(removeHighlights, highlights)
         done()

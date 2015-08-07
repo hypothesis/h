@@ -103,21 +103,8 @@ describe 'Host', ->
         assert.calledOnce(hideFrame)
 
     describe 'panleft and panright events', ->
-      raf = null
-
-      # PhantomJS may or may not have rAF so the normal sandbox approach
-      # doesn't quite work. We assign and delete it ourselves instead when
-      # it isn't already present.
       beforeEach ->
-        if window.requestAnimationFrame?
-          sandbox.stub(window, 'requestAnimationFrame')
-        else
-          raf = window.requestAnimationFrame = sandbox.stub()
-
-      afterEach ->
-        if raf?
-          raf = null
-          delete window.requestAnimationFrame
+        sandbox.stub(window, 'requestAnimationFrame')
 
       it 'shrinks or grows the widget to match the delta', ->
         host.gestureState = {initial: -100}
