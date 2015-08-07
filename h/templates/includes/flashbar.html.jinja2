@@ -1,10 +1,16 @@
-{% if request.session.peek_flash('error') %}
-  <div class="flashbar">
-    {% for message in request.session.pop_flash('error') %}
-      <div class="alert alert-danger alert-dismissable" role="alert">
+{%- set flash_types = [
+  ('error', 'danger'),
+  ('info', 'info'),
+  ('warning', 'warning'),
+  ('success', 'success'),
+] -%}
+<div class="flashbar">
+  {% for flashkey, classname in flash_types %}
+    {% for message in request.session.pop_flash(flashkey) %}
+      <div class="alert alert-{{ classname }} alert-dismissable" role="alert">
 	<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 	{{ message }}
       </div>
     {% endfor %}
-  </div>
-{% endif %}
+  {% endfor %}
+</div>
