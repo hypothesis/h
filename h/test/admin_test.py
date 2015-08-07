@@ -9,6 +9,68 @@ from h import accounts
 from h import admin
 
 
+class DummyFeature(object):
+    def __init__(self, name):
+        self.name = name
+        self.everyone = False
+        self.admins = False
+        self.staff = False
+
+
+features_save_fixtures = pytest.mark.usefixtures('Feature',
+                                                 'check_csrf_token',
+                                                 'routes_mapper')
+
+
+@features_save_fixtures
+def test_features_save_sets_attributes_when_checkboxes_on(Feature):
+    foo = DummyFeature(name='foo')
+    bar = DummyFeature(name='bar')
+    Feature.all.return_value = [foo, bar]
+    request = DummyRequest(post={'foo[everyone]': 'on',
+                                 'foo[staff]': 'on',
+                                 'bar[admins]': 'on'})
+
+    admin.features_save(request)
+
+    assert foo.everyone == foo.staff == bar.admins == True
+
+
+@features_save_fixtures
+def test_features_save_sets_attributes_when_checkboxes_off(Feature):
+    foo = DummyFeature(name='foo')
+    foo.everyone = True
+    foo.staff = True
+    Feature.all.return_value = [foo]
+    request = DummyRequest(post={})
+
+    admin.features_save(request)
+
+    assert foo.everyone == foo.staff == False
+
+
+@features_save_fixtures
+def test_features_save_ignores_unknown_fields(Feature):
+    foo = DummyFeature(name='foo')
+    Feature.all.return_value = [foo]
+    request = DummyRequest(post={'foo[wibble]': 'on',
+                                 'foo[admins]': 'ignoreme'})
+
+    admin.features_save(request)
+
+    assert foo.admins == False
+
+
+@features_save_fixtures
+def test_features_save_checks_csrf_token(Feature, check_csrf_token):
+    Feature.all.return_value = []
+    request = DummyRequest(post={})
+
+    admin.features_save(request)
+
+    check_csrf_token.assert_called_with(request)
+
+
 # The fixtures required to mock all of nipsa_index()'s dependencies.
 nipsa_index_fixtures = pytest.mark.usefixtures('nipsa')
 
@@ -389,6 +451,20 @@ def test_staff_remove_returns_redirect_on_success(User):
 def test_staff_remove_404s_if_no_remove_param():
     with pytest.raises(httpexceptions.HTTPNotFound):
         admin.staff_remove(DummyRequest())
+
+
+@pytest.fixture
+def Feature(request):
+    patcher = patch('h.models.Feature', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def check_csrf_token(request):
+    patcher = patch('pyramid.session.check_csrf_token', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
 
 
 @pytest.fixture

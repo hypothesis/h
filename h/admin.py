@@ -1,3 +1,4 @@
+from pyramid import session
 from pyramid import view
 from pyramid import httpexceptions
 
@@ -14,6 +15,31 @@ from h import util
                   permission='admin')
 def index(_):
     return {}
+
+
+@view.view_config(route_name='admin_features',
+                  request_method='GET',
+                  renderer='h:templates/admin/features.html.jinja2',
+                  permission='admin')
+def features_index(_):
+    return {"features": models.Feature.all()}
+
+
+@view.view_config(route_name='admin_features',
+                  request_method='POST',
+                  permission='admin')
+def features_save(request):
+    session.check_csrf_token(request)
+    for feat in models.Feature.all():
+        for attr in ['everyone', 'admins', 'staff']:
+            val = request.POST.get('{0}[{1}]'.format(feat.name, attr))
+            if val == 'on':
+                setattr(feat, attr, True)
+            else:
+                setattr(feat, attr, False)
+    request.session.flash(_("Changes saved."), "success")
+    return httpexceptions.HTTPSeeOther(
+        location=request.route_url('admin_features'))
 
 
 @view.view_config(route_name='admin_nipsa',
@@ -146,6 +172,7 @@ def staff_remove(request):
 
 def includeme(config):
     config.add_route('admin_index', '/admin')
+    config.add_route('admin_features', '/admin/features')
     config.add_route('admin_nipsa', '/admin/nipsa')
     config.add_route('admin_nipsa_remove', '/admin/nipsa/remove')
     config.add_route('admin_admins', '/admin/admins')
