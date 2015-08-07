@@ -1,6 +1,8 @@
 Annotator = require('annotator')
 $ = Annotator.$
 
+scrollIntoView = require('scroll-into-view')
+
 highlighter = require('../highlighter')
 
 
@@ -31,7 +33,7 @@ scrollToClosest = (anchors, direction) ->
         acc
   , {}
 
-  $(next.highlights).scrollintoview()
+  scrollIntoView(next.highlights[0]);
 
 
 class Annotator.Plugin.BucketBar extends Annotator.Plugin

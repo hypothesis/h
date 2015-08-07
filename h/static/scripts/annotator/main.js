@@ -1,9 +1,5 @@
 var Annotator = require('annotator');
 
-// Scroll plugin for jQuery
-// TODO: replace me
-require('jquery-scrollintoview');
-
 // Polyfills
 var g = Annotator.Util.getGlobal();
 if (g.wgxpath) {

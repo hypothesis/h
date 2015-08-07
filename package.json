@@ -38,6 +38,7 @@
     "ng-tags-input": "2.2.0",
     "node-iterator-shim": "^1.0.1",
     "node-uuid": "^1.4.3",
+    "scroll-into-view": "^1.2.0",
     "showdown": "^1.2.1",
     "uglify-js": "^2.4.14",
     "unorm": "^1.3.3"
@@ -85,7 +86,6 @@
     "es6-promise": "./node_modules/es6-promise/dist/es6-promise.js",
     "hammerjs": "./node_modules/hammerjs/hammer.js",
     "jquery": "./node_modules/jquery/dist/jquery.js",
-    "jquery-scrollintoview": "./h/static/scripts/vendor/jquery.scrollintoview.js",
     "moment": "./node_modules/moment/min/moment-with-locales.js"
   },
   "browserify-shim": {
@@ -103,11 +103,6 @@
     },
     "es6-promise": "ES6Promise",
     "hammerjs": "Hammer",
-    "jquery": "$",
-    "jquery-scrollintoview": {
-      "depends": [
-        "jquery"
-      ]
-    }
+    "jquery": "$"
   }
 }
