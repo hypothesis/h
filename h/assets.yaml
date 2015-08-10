@@ -132,8 +132,10 @@ app_js:
       contents: h:static/scripts/app.coffee
       depends:
         - h:static/scripts/*.coffee
+        - h:static/scripts/auth.js
         - h:static/scripts/features.js
         - h:static/scripts/session.js
+        - h:static/scripts/service-url.js
         - h:static/scripts/directive/*.coffee
         - h:static/scripts/directive/*.js
         - h:static/scripts/filter/*.js
