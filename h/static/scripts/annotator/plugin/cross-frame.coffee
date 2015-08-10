@@ -1,7 +1,5 @@
 Annotator = require('annotator')
 
-$ = Annotator.$
-
 # Extracts individual keys from an object and returns a new one.
 extract = extract = (obj, keys...) ->
   ret = {}
