@@ -1,7 +1,21 @@
-Annotator = require('annotator')
-Guest = require('../guest')
-anchoring = require('../anchoring/html')
-highlighter = require('../highlighter')
+highlighter = {}
+anchoring = {}
+
+CrossFrame = sinon.stub()
+CrossFrame['@noCallThru'] = true
+
+scrollIntoView = sinon.stub()
+scrollIntoView['@noCallThru'] = true
+
+proxyquire = require('proxyquire')
+Guest = proxyquire('../guest', {
+  './highlighter': highlighter,
+  './anchoring/html': anchoring,
+  './plugin/cross-frame': CrossFrame,
+  'scroll-into-view': scrollIntoView,
+})
+
+$ = require('jquery')
 
 waitForSync = (annotation) ->
   if annotation.$anchors?
@@ -20,14 +34,14 @@ describe 'Guest', ->
 
   beforeEach ->
     sandbox = sinon.sandbox.create()
+    fakeCrossFrame = {
+      onConnect: sinon.stub()
+      on: sinon.stub()
+      sync: sinon.stub()
+    }
 
-    fakeCrossFrame =
-      onConnect: sandbox.stub()
-      on: sandbox.stub()
-      sync: sandbox.stub()
-
-    Annotator.Plugin.CrossFrame = -> fakeCrossFrame
-    sandbox.spy(Annotator.Plugin, 'CrossFrame')
+    CrossFrame.reset()
+    CrossFrame.returns(fakeCrossFrame)
 
   afterEach ->
     sandbox.restore()
@@ -36,13 +50,13 @@ describe 'Guest', ->
 
     it 'provides an event bus for the annotation sync module', ->
       guest = createGuest()
-      options = Annotator.Plugin.CrossFrame.lastCall.args[1]
+      options = CrossFrame.lastCall.args[1]
       assert.isFunction(options.on)
       assert.isFunction(options.emit)
 
     it 'provides a formatter for the annotation sync module', ->
       guest = createGuest()
-      options = Annotator.Plugin.CrossFrame.lastCall.args[1]
+      options = CrossFrame.lastCall.args[1]
       assert.isFunction(options.formatter)
 
     it 'publishes the "panelReady" event when a connection is established', ->
@@ -58,7 +72,7 @@ describe 'Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        options = Annotator.Plugin.CrossFrame.lastCall.args[1]
+        options = CrossFrame.lastCall.args[1]
 
       it 'proxies the event into the annotator event system', ->
         fooHandler = sandbox.stub()
@@ -79,7 +93,7 @@ describe 'Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        options = Annotator.Plugin.CrossFrame.lastCall.args[1]
+        options = CrossFrame.lastCall.args[1]
 
       it 'calls deleteAnnotation when an annotationDeleted event is received', ->
         ann = {id: 1, $$tag: 'tag1'}
@@ -131,7 +145,7 @@ describe 'Guest', ->
 
       beforeEach ->
         guest = createGuest()
-        options = Annotator.Plugin.CrossFrame.lastCall.args[1]
+        options = CrossFrame.lastCall.args[1]
 
       it 'keeps an existing uri property', ->
         ann = {$$tag: 'tag1', uri: 'http://example.com/foo'}
@@ -190,11 +204,9 @@ describe 'Guest', ->
         assert.isFalse(highlight1.hasClass('annotator-hl-focused'))
 
     describe 'on "scrollToAnnotation" event', ->
-      beforeEach ->
-        $.fn.scrollintoview = sandbox.stub()
 
-      afterEach ->
-        delete $.fn.scrollintoview
+      beforeEach ->
+        scrollIntoView.reset()
 
       it 'scrolls to the anchor with the matching tag', ->
         highlight = $('<span></span>')
@@ -203,7 +215,8 @@ describe 'Guest', ->
           {annotation: {$$tag: 'tag1'}, highlights: highlight.toArray()}
         ]
         emitGuestEvent('scrollToAnnotation', 'tag1')
-        assert.calledOn($.fn.scrollintoview, sinon.match(highlight))
+        assert.called(scrollIntoView)
+        assert.calledWith(scrollIntoView, highlight[0])
 
     describe 'on "getDocumentInfo" event', ->
       guest = null

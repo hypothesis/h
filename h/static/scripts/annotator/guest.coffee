@@ -1,5 +1,8 @@
 baseURI = require('base-url')()
+scrollIntoView = require('scroll-into-view')
+
 Annotator = require('annotator')
+Annotator.Plugin.CrossFrame = require('./plugin/cross-frame')
 $ = Annotator.$
 
 highlighter = require('./highlighter')
@@ -117,7 +120,7 @@ module.exports = class Guest extends Annotator
     crossframe.on 'scrollToAnnotation', (tag) =>
       for anchor in @anchors when anchor.highlights?
         if anchor.annotation.$$tag is tag
-          $(anchor.highlights).scrollintoview()
+          scrollIntoView(anchor.highlights[0])
           return
     crossframe.on 'getDocumentInfo', (cb) =>
       this.getDocumentInfo()

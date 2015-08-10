@@ -66,7 +66,12 @@ module.exports = function(config) {
 
     browserify: {
       debug: true,
-      extensions: ['.coffee']
+      extensions: ['.coffee'],
+      configure: function (bundle) {
+        bundle
+          .transform('coffeeify')
+          .plugin('proxyquire-universal');
+      }
     },
 
     // test results reporter to use
