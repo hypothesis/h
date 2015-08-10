@@ -66,7 +66,6 @@ setupStreamer = [
   ($http,   $window,   streamer) ->
     clientId = uuid.v4()
     streamer.clientId = clientId
-    $.ajaxSetup(headers: {'X-Client-Id': clientId})
     $http.defaults.headers.common['X-Client-Id'] = clientId
 ]
 
