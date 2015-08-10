@@ -18,11 +18,24 @@ Bug fixes
 Features
 --------
 
-- Enable users to create groups.
-  See https://github.com/hypothesis/h/pull/2402
+- Enable users to create and share groups.
+  See https://github.com/hypothesis/h/pull/2402 and
+  https://github.com/hypothesis/h/pull/2412
 
-- Add a staff flag to the user table.
+- New, experimental URI normalization, accessible by turning on the
+  'search_normalized' feature.
+  See https://github.com/hypothesis/h/pull/2413
+
+- Add a staff user designation and support feature toggles for staff only.
   See https://github.com/hypothesis/h/pull/2416
+
+- Support feature toggles for admins only.
+  See https://github.com/hypothesis/h/pull/2435
+
+- Improve the scrolling experience when clicking on bucket tabs and annotation
+  cards. The view now scrolls the annotation to the center of the viewport.
+
+- Support for the PDF.js viewer shipping in Firefox 40.
 
 - Add a NIPSA service worker definition.
 
