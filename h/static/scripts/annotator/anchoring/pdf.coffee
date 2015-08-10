@@ -24,7 +24,7 @@ getNodeTextLayer = (node) ->
 
 
 getPage = (pageIndex) ->
-  return PDFViewerApplication.pdfViewer.pages[pageIndex]
+  return PDFViewerApplication.pdfViewer.getPageView(pageIndex)
 
 
 getPageTextContent = (pageIndex) ->

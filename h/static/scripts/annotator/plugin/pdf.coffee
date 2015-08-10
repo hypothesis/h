@@ -66,7 +66,10 @@ class PDF extends Annotator.Plugin
     refreshAnnotations = []
 
     # Check all the pages with text layers that have finished rendering.
-    for page in pdfViewer.pages when page.textLayer?.renderingDone
+    for pageIndex in [0...pdfViewer.pagesCount]
+      page = pdfViewer.getPageView(pageIndex)
+      continue unless page.textLayer?.renderingDone
+
       div = page.div ? page.el
       placeholder = div.getElementsByClassName('annotator-placeholder')[0]
 
