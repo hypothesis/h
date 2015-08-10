@@ -10,15 +10,8 @@
 # store.SearchResource().
 ###
 module.exports = [
-  '$document', '$http', '$resource',
-  ($document,   $http,   $resource) ->
-
-    # Find any service link tag
-    svc = $document.find('link')
-    .filter -> @rel is 'service' and @type is 'application/annotatorsvc+json'
-    .filter -> @href
-    .prop('href') or ''
-
+  '$http', '$resource', 'serviceUrl'
+  ($http,   $resource,   serviceUrl) ->
     camelize = (string) ->
       string.replace /(?:^|_)([a-z])/g, (_, char) -> char.toUpperCase()
 
@@ -26,7 +19,7 @@ module.exports = [
       $resolved: false
       # We call the service_url and the backend api gives back
       # the actions and urls it provides.
-      $promise: $http.get(svc)
+      $promise: $http.get(serviceUrl)
         .finally -> store.$resolved = true
         .then (response) ->
           for name, actions of response.data.links
@@ -34,6 +27,6 @@ module.exports = [
             # For the search resource, one URL is given for all actions.
             # For the annotations, each action has its own URL.
             prop = "#{camelize(name)}Resource"
-            store[prop] = $resource(actions.url or svc, {}, actions)
+            store[prop] = $resource(actions.url or serviceUrl, {}, actions)
           store
 ]

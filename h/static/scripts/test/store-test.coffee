@@ -4,7 +4,6 @@ describe 'store', ->
   $httpBackend = null
   sandbox = null
   store = null
-  fakeDocument = null
 
   before ->
     angular.module('h', ['ngResource'])
@@ -14,18 +13,7 @@ describe 'store', ->
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
-
-    link = document.createElement("link")
-    link.rel = 'service'
-    link.type = 'application/annotatorsvc+json'
-    link.href = 'http://example.com/api'
-
-    fakeDocument = {
-      find: sandbox.stub().returns($(link))
-    }
-
-    $provide.value '$document', fakeDocument
-
+    $provide.value 'serviceUrl', 'http://example.com/api'
     return
 
   afterEach ->
