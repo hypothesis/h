@@ -27,7 +27,6 @@ module.exports = function(config) {
       '../../../node_modules/angular-sanitize/angular-sanitize.js',
       '../../../node_modules/ng-tags-input/build/ng-tags-input.min.js',
       'vendor/angular-bootstrap.js',
-      'vendor/annotator.js',
       'vendor/katex.js',
 
       // These are needed until PhantomJS 2.0
