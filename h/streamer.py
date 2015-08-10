@@ -23,7 +23,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from .api.auth import get_user  # FIXME: should not import from .api
 from h.api import nipsa
-from annotator import document
+from h.api import uri
 from .models import Annotation
 
 log = logging.getLogger(__name__)
@@ -498,21 +498,15 @@ class WebSocket(_WebSocket):
 
     def _expand_uris(self, clause):
         uris = clause['value']
+        expanded = set()
+
         if not isinstance(uris, list):
             uris = [uris]
 
-        if len(uris) < 1:
-            return
+        for item in uris:
+            expanded.update(uri.expand(item))
 
-        available_uris = set(uris)
-        for uri in uris:
-            doc = document.Document.get_by_uri(uri)
-            if doc is None:
-                return
-            for eq_uri in doc.uris():
-                available_uris.add(eq_uri)
-
-        clause['value'] = list(available_uris)
+        clause['value'] = list(expanded)
 
     def received_message(self, msg):
         with self.request.tm:

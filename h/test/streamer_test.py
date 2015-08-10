@@ -239,12 +239,10 @@ class TestWebSocket(unittest.TestCase):
             }
         })
 
-        with patch('annotator.document.Document.get_by_uri') as doc:
-            uris = Mock()
-            uris.return_value = ['http://example.com',
-                                 'http://example.com/alter',
-                                 'http://example.com/print']
-            doc.return_value = Mock(uris=uris)
+        with patch('h.api.uri.expand') as expand:
+            expand.return_value = ['http://example.com',
+                                   'http://example.com/alter',
+                                   'http://example.com/print']
             msg = MagicMock()
             msg.data = filter_message
 
@@ -256,30 +254,6 @@ class TestWebSocket(unittest.TestCase):
             assert 'http://example.com' in uri_values
             assert 'http://example.com/alter' in uri_values
             assert 'http://example.com/print' in uri_values
-
-    def test_filter_message_will_not_change_for_empty_doc(self):
-        filter_message = json.dumps({
-            'filter': {
-                'actions': {},
-                'match_policy': 'include_all',
-                'clauses': [{
-                    'field': '/uri',
-                    'operator': 'equals',
-                    'value': 'http://example.com',
-                }],
-            }
-        })
-
-        with patch('annotator.document.Document.get_by_uri') as doc:
-            doc.return_value = None
-            msg = MagicMock()
-            msg.data = filter_message
-
-            self.s.received_message(msg)
-
-            uri_filter = self.s.filter.filter['clauses'][0]
-            uri_values = uri_filter['value']
-            assert 'http://example.com' == uri_values
 
 
 class TestBroadcast(unittest.TestCase):
