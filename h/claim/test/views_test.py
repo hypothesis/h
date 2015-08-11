@@ -50,7 +50,7 @@ def test_claim_account_invalid_token_404s():
 
 
 def test_claim_account_valid_token_unknown_user_404s(user_model):
-    user_model.get_by_id.return_value = None
+    user_model.get_by_userid.return_value = None
 
     request = _get_request()
 
@@ -70,7 +70,7 @@ def test_claim_account_signed_in_redirects(authn_policy):
 
 
 def test_claim_account_already_claimed_redirects(user_model):
-    user_model.get_by_id.return_value = FakeUser(password='alreadyset')
+    user_model.get_by_userid.return_value = FakeUser(password='alreadyset')
 
     request = _get_request()
 
@@ -81,7 +81,7 @@ def test_claim_account_already_claimed_redirects(user_model):
 
 
 def test_update_account_updates_password(user_model):
-    user_model.get_by_id.return_value = user = FakeUser(password='')
+    user_model.get_by_userid.return_value = user = FakeUser(password='')
 
     request = _post_request(post={'password': 'donkeys'})
 
@@ -91,7 +91,7 @@ def test_update_account_updates_password(user_model):
 
 
 def test_update_account_redirects_to_index(user_model):
-    user_model.get_by_id.return_value = FakeUser(password='')
+    user_model.get_by_userid.return_value = FakeUser(password='')
 
     request = _post_request(post={'password': 'donkeys'})
 
@@ -107,7 +107,7 @@ def test_update_account_rerenders_form_on_validation_error(form, user_model):
     form.return_value.validate.side_effect = deform.ValidationFailure(None,
                                                                       None,
                                                                       None)
-    user_model.get_by_id.return_value = FakeUser(password='')
+    user_model.get_by_userid.return_value = FakeUser(password='')
 
     res = update_account(request)
 
@@ -126,7 +126,7 @@ def test_update_account_signed_in_redirects(authn_policy):
 
 
 def test_update_account_already_claimed_redirects(user_model):
-    user_model.get_by_id.return_value = FakeUser(password='alreadyset')
+    user_model.get_by_userid.return_value = FakeUser(password='alreadyset')
 
     request = _post_request()
 
@@ -157,7 +157,7 @@ def test_update_account_invalid_token_not_found():
 
 def test_update_account_redirects_when_registered(user_model):
     request = _post_request()
-    user_model.get_by_id.return_value = FakeUser(password='alreadyset')
+    user_model.get_by_userid.return_value = FakeUser(password='alreadyset')
 
     with raises(HTTPFound) as excinfo:
         update_account(request)
@@ -212,7 +212,7 @@ def user_model(request):
     patcher = mock.patch('h.claim.views.User', autospec=True)
     request.addfinalizer(patcher.stop)
     model = patcher.start()
-    model.get_by_id.return_value = FakeUser(password='')
+    model.get_by_userid.return_value = FakeUser(password='')
     return model
 
 

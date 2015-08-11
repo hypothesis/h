@@ -24,7 +24,7 @@ def add_nipsa(request, userid):
     message for the user will still be published to the queue).
 
     """
-    nipsa_user = models.NipsaUser.get_by_id(userid)
+    nipsa_user = models.NipsaUser.get_by_userid(userid)
     if not nipsa_user:
         nipsa_user = models.NipsaUser(userid)
         request.db.add(nipsa_user)
@@ -39,7 +39,7 @@ def remove_nipsa(request, userid):
     message for the user will still be published to the queue).
 
     """
-    nipsa_user = models.NipsaUser.get_by_id(userid)
+    nipsa_user = models.NipsaUser.get_by_userid(userid)
     if nipsa_user:
         request.db.delete(nipsa_user)
 
@@ -48,4 +48,4 @@ def remove_nipsa(request, userid):
 
 def has_nipsa(userid):
     """Return True if the given user is on the NIPSA list, False if not."""
-    return models.NipsaUser.get_by_id(userid) is not None
+    return models.NipsaUser.get_by_userid(userid) is not None

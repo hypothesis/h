@@ -823,7 +823,7 @@ def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
 
     ProfileController(request).profile()
 
-    user_model.get_by_id.assert_called_with(request.domain, "acct:foo@bar.com")
+    user_model.get_by_userid.assert_called_with(request.domain, "acct:foo@bar.com")
 
 
 @pytest.mark.usefixtures('user_model')
@@ -848,7 +848,7 @@ def test_profile_returns_email(authn_policy, user_model):
     """The profile should include the user's email."""
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
-    user_model.get_by_id.return_value = FakeUser(email="foo@bar.com")
+    user_model.get_by_userid.return_value = FakeUser(email="foo@bar.com")
 
     result = ProfileController(request).profile()
 
@@ -909,7 +909,7 @@ def test_edit_profile_successfully(authn_policy, form_validator, user_model):
         "subscriptions": "",
     })
     user_model.validate_user.return_value = True
-    user_model.get_by_id.return_value = FakeUser(email="john@doe.com")
+    user_model.get_by_userid.return_value = FakeUser(email="john@doe.com")
 
     request = DummyRequest(method='POST')
     profile = ProfileController(request)
@@ -929,7 +929,7 @@ def test_subscription_update(authn_policy, form_validator,
     })
     mock_sub = Mock(active=False, uri="acct:john@doe")
     subscriptions_model.get_by_id.return_value = mock_sub
-    user_model.get_by_id.return_value = FakeUser(email="john@doe")
+    user_model.get_by_userid.return_value = FakeUser(email="john@doe")
 
     request = DummyRequest(method='POST')
     profile = ProfileController(request)

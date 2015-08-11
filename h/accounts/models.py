@@ -190,13 +190,13 @@ class User(Base):
         return valid
 
     @classmethod
-    def get_by_id(cls, domain, userid):
+    def get_by_userid(cls, domain, userid):
         """Return the user with the given ID, or None.
 
         :param domain: The domain for the current request, for example:
             u'hypothes.is'. This must match the domain part of the userid
-            argument - you can't retrieve users who don't belong to the domain
-            of the current request.
+            argument - you can't retrieve users who don't belong to the given
+            domain.
         :type domain: unicode
 
         :param userid: A userid unicode string, for example:

@@ -29,7 +29,7 @@ def _current_groups(request):
     userid = request.authenticated_userid
     if userid is None:
         return groups
-    user = models.User.get_by_id(request.domain, userid)
+    user = models.User.get_by_userid(request.domain, userid)
     if user is None:
         return groups
     for group in user.groups:

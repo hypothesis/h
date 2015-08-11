@@ -10,16 +10,16 @@ def test_init():
     assert nipsa_user.userid == "test_id"
 
 
-def test_get_by_id_with_matching_user(db_session):
+def test_get_by_userid_with_matching_user(db_session):
     nipsa_user = models.NipsaUser("test_id")
     db_session.add(nipsa_user)
 
-    assert models.NipsaUser.get_by_id("test_id") == nipsa_user
+    assert models.NipsaUser.get_by_userid("test_id") == nipsa_user
 
 
 @pytest.mark.usefixtures("db_session")
-def test_get_by_id_not_found():
-    assert models.NipsaUser.get_by_id("does not exist") is None
+def test_get_by_userid_not_found():
+    assert models.NipsaUser.get_by_userid("does not exist") is None
 
 
 @pytest.mark.usefixtures("db_session")

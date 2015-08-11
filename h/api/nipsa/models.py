@@ -16,7 +16,7 @@ class NipsaUser(db.Base):
         self.userid = userid
 
     @classmethod
-    def get_by_id(cls, userid):
+    def get_by_userid(cls, userid):
         """Return the NipsaUser object for the given userid, or None."""
         try:
             return cls.query.filter(
