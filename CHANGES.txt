@@ -33,7 +33,9 @@ Features
   See https://github.com/hypothesis/h/pull/2435
 
 - Improve the scrolling experience when clicking on bucket tabs and annotation
-  cards. The view now scrolls the annotation to the center of the viewport.
+  cards. The view now scrolls so that the annotation is one fifth of the way
+  down the screen, allowing room for navigation bars but leaving the annotation
+  near the top of the screen.
 
 - Support for the PDF.js viewer shipping in Firefox 40.
 
