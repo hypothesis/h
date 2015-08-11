@@ -14,6 +14,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import expression
 
 from h.db import Base
+from h import util
 
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
 
@@ -189,19 +190,22 @@ class User(Base):
         return valid
 
     @classmethod
-    def get_by_id(cls, request, userid):
-        """
-        Fetch a user by integer id or by full `userid`.
+    def get_by_id(cls, userid):
+        """Return the user with the given ID, or None.
 
-        If `userid` is a string of the form "acct:name@domain.tld" and
-        "domain.tld" is the app's current domain, then fetch the user with
-        username "name". Otherwise, lookup the user with integer primary key
-        `userid`.
+        :param userid: A userid unicode string, example:
+            u'acct:kim@hypothes.is'
+        :type userid: unicode
+
+        :rtype: h.accounts.models.User or None
+
         """
-        match = re.match(r'acct:([^@]+)@{}'.format(request.domain), userid)
-        if match:
-            return cls.get_by_username(match.group(1))
-        return cls.query.filter(cls.id == userid).first()
+        parts = util.split_user(userid)
+        if parts is None:
+            return None
+        else:
+            username = parts[0]
+            return cls.get_by_username(username)
 
     @classmethod
     def get_by_username(cls, username):

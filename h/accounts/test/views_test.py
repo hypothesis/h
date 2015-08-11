@@ -818,12 +818,11 @@ def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
 
     (And don't, for example, use a 'username' passed to us in params.)
     """
-    request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
 
-    ProfileController(request).profile()
+    ProfileController(DummyRequest()).profile()
 
-    user_model.get_by_id.assert_called_with(request, "acct:foo@bar.com")
+    user_model.get_by_id.assert_called_with("acct:foo@bar.com")
 
 
 @pytest.mark.usefixtures('user_model')

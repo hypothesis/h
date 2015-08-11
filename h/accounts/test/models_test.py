@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import re
 
 import pytest
+import mock
 from sqlalchemy import exc
 
 from h.accounts import models
@@ -111,3 +112,41 @@ def test_staff_members_does_not_return_non_staff_users(db_session):
 
     for non_staff in non_staff:
         assert non_staff not in staff
+
+
+@mock.patch('h.accounts.models.User.get_by_username')
+@mock.patch('h.accounts.models.util.split_user')
+def test_get_by_id_with_invalid_id(split_user, get_by_username):
+    """If split_user returns None it should return None."""
+    split_user.return_value = None
+
+    assert models.User.get_by_id("invalid id") is None
+    assert not get_by_username.called
+
+
+@mock.patch('h.accounts.models.User.get_by_username')
+@mock.patch('h.accounts.models.util.split_user')
+def test_get_by_id_uses_username_from_split_user(split_user, get_by_username):
+    """It should get the username by passing the userid to split_user().
+
+    And it should pass the username to get_by_username().
+
+    """
+    split_user.return_value = ("test_username", "test_domain")
+
+    models.User.get_by_id("test_userid")
+
+    split_user.assert_called_once_with("test_userid")
+    get_by_username.assert_called_once_with("test_username")
+
+
+@mock.patch('h.accounts.models.User.get_by_username')
+@mock.patch('h.accounts.models.util.split_user')
+def test_get_by_id_returns_user(_, get_by_username):
+    """It should return when get_by_username() returns.
+
+    If split_user() returns a non-None result then get_by_id() should return
+    whatever get_by_username() returns.
+
+    """
+    assert models.User.get_by_id("test_userid") == get_by_username.return_value
