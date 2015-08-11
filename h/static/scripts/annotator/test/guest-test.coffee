@@ -4,15 +4,15 @@ anchoring = {}
 CrossFrame = sinon.stub()
 CrossFrame['@noCallThru'] = true
 
-scrollIntoView = sinon.stub()
-scrollIntoView['@noCallThru'] = true
+scrollToElement = sinon.stub()
+scrollToElement['@noCallThru'] = true
 
 proxyquire = require('proxyquire')
 Guest = proxyquire('../guest', {
   './highlighter': highlighter,
   './anchoring/html': anchoring,
   './plugin/cross-frame': CrossFrame,
-  'scroll-into-view': scrollIntoView,
+  'scroll-to-element': scrollToElement,
 })
 
 $ = require('jquery')
@@ -206,7 +206,7 @@ describe 'Guest', ->
     describe 'on "scrollToAnnotation" event', ->
 
       beforeEach ->
-        scrollIntoView.reset()
+        scrollToElement.reset()
 
       it 'scrolls to the anchor with the matching tag', ->
         highlight = $('<span></span>')
@@ -215,8 +215,8 @@ describe 'Guest', ->
           {annotation: {$$tag: 'tag1'}, highlights: highlight.toArray()}
         ]
         emitGuestEvent('scrollToAnnotation', 'tag1')
-        assert.called(scrollIntoView)
-        assert.calledWith(scrollIntoView, highlight[0])
+        assert.called(scrollToElement)
+        assert.calledWith(scrollToElement, highlight[0])
 
     describe 'on "getDocumentInfo" event', ->
       guest = null
