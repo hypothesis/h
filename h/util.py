@@ -2,14 +2,14 @@
 import re
 
 
-def split_user(username):
-    """Return the user and domain parts from the given user account name.
+def split_user(userid):
+    """Return the user and domain parts from the given user id.
 
-    For example if username is "acct:seanh@hypothes.is" then return
-    ("seanh", "hypothes.is").
+    For example if userid is u'acct:seanh@hypothes.is' then return
+    (u'seanh', u'hypothes.is').
 
     """
-    match = re.match(r'^acct:([^@]+)@(.*)$', username)
+    match = re.match(r'^acct:([^@]+)@(.*)$', userid)
     if match:
         return match.groups()
     # Passed username didn't match

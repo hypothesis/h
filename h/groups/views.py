@@ -47,7 +47,7 @@ def create(request):
         return {'form': form, 'data': request.params}
 
     user = accounts_models.User.get_by_id(
-        request, request.authenticated_userid)
+        request.domain, request.authenticated_userid)
     group = models.Group(name=appstruct["name"], creator=user)
     request.db.add(group)
 
@@ -122,7 +122,7 @@ def read(request):
         return _login_to_join(request, group)
     else:
         user = accounts_models.User.get_by_id(
-            request, request.authenticated_userid)
+            request.domain, request.authenticated_userid)
         if group in user.groups:
             return _read_group(request, group)
         else:
@@ -145,7 +145,7 @@ def join(request):
         raise exc.HTTPNotFound()
 
     user = accounts_models.User.get_by_id(
-        request, request.authenticated_userid)
+        request.domain, request.authenticated_userid)
 
     group.members.append(user)
 

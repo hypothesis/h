@@ -13,6 +13,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import expression
 
+from h import util
 from h.db import Base
 
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
@@ -189,19 +190,33 @@ class User(Base):
         return valid
 
     @classmethod
-    def get_by_id(cls, request, userid):
-        """
-        Fetch a user by integer id or by full `userid`.
+    def get_by_id(cls, domain, userid):
+        """Return the user with the given ID, or None.
 
-        If `userid` is a string of the form "acct:name@domain.tld" and
-        "domain.tld" is the app's current domain, then fetch the user with
-        username "name". Otherwise, lookup the user with integer primary key
-        `userid`.
+        :param domain: The domain for the current request, for example:
+            u'hypothes.is'. This must match the domain part of the userid
+            argument - you can't retrieve users who don't belong to the domain
+            of the current request.
+        :type domain: unicode
+
+        :param userid: A userid unicode string, for example:
+            u'acct:kim@hypothes.is'
+        :type userid: unicode
+
+        :rtype: h.accounts.models.User or None
+
         """
-        match = re.match(r'acct:([^@]+)@{}'.format(request.domain), userid)
-        if match:
-            return cls.get_by_username(match.group(1))
-        return cls.query.filter(cls.id == userid).first()
+        try:
+            # pylint: disable=unpacking-non-sequence
+            username, userdomain = util.split_user(userid)
+        except TypeError:
+            # userid didn't match the pattern that split_user() expects.
+            return None
+
+        if userdomain != domain:
+            return None
+
+        return cls.get_by_username(username)
 
     @classmethod
     def get_by_username(cls, username):

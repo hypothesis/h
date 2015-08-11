@@ -139,7 +139,7 @@ def effective_principals(userid, request):
         consumer_group = 'consumer:{}'.format(request.client.client_id)
         additional_principals.append(consumer_group)
 
-    primary_user = models.User.get_by_id(request, userid)
+    primary_user = models.User.get_by_id(request.domain, userid)
 
     if primary_user is not None:
         if primary_user.admin:

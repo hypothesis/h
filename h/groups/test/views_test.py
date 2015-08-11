@@ -125,7 +125,7 @@ def test_create_gets_user_with_authenticated_id(Form, User):
     views.create(request)
 
     User.get_by_id.assert_called_once_with(
-        request, request.authenticated_userid)
+        request.domain, request.authenticated_userid)
 
 
 @create_fixtures
@@ -456,7 +456,7 @@ def test_join_gets_user_with_authenticated_userid(User):
     views.join(request)
 
     User.get_by_id.assert_called_once_with(
-        request, request.authenticated_userid)
+        request.domain, request.authenticated_userid)
 
 
 @join_fixtures

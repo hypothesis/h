@@ -422,7 +422,8 @@ class ProfileController(object):
         if err is not None:
             return err
 
-        user = User.get_by_id(self.request, self.request.authenticated_userid)
+        user = User.get_by_id(
+            self.request.domain, self.request.authenticated_userid)
         response = {'model': {'email': user.email}}
 
         # We allow updating subscriptions without validating a password
@@ -489,7 +490,7 @@ class ProfileController(object):
         userid = request.authenticated_userid
         model = {}
         if userid:
-            model["email"] = User.get_by_id(request, userid).email
+            model["email"] = User.get_by_id(request.domain, userid).email
         if request.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 userid)

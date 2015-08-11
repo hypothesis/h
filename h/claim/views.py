@@ -71,7 +71,7 @@ def _validate_request(request):
     if payload is None:
         raise exc.HTTPNotFound()
 
-    user = User.get_by_id(request, payload['userid'])
+    user = User.get_by_id(request.domain, payload['userid'])
     if user is None:
         log.warn('got claim token with invalid userid=%r', payload['userid'])
         raise exc.HTTPNotFound()
