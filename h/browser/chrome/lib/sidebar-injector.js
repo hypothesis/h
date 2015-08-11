@@ -56,7 +56,9 @@
               "Hypothesis doesn't work on this site yet."));
         }
 
-        if (isFileURL(tab.url)) {
+        if (isPDFURL(tab.url)) {
+          return reloadPDF(tab);
+        } else if (isFileURL(tab.url)) {
           return injectIntoLocalDocument(tab);
         } else if (!isPDFViewerURL(tab.url)) {
           return injectIntoHTML(tab);
@@ -72,12 +74,24 @@
      * otherwise it will be rejected with an error.
      */
     this.removeFromTab = function (tab) {
-      return removeFromHTML(tab);
+      if (isPDFViewerURL(tab.url)) {
+        return removePDFViewer(tab);
+      } else {
+        return removeFromHTML(tab);
+      }
     };
 
     function getPDFViewerURL(url) {
       var PDF_VIEWER_URL = extensionURL('/content/web/viewer.html');
       return PDF_VIEWER_URL + '?file=' + encodeURIComponent(url);
+    }
+
+    function isPDFURL(url) {
+      if (!isPDFViewerURL(url)) {
+        return url.toLowerCase().indexOf('.pdf') > 0;
+      } else {
+        return false;
+      }
     }
 
     function isPDFViewerURL(url) {
@@ -95,8 +109,15 @@
       });
     }
 
-    function injectIntoLocalDocument(tab) {
+     function injectIntoLocalDocument(tab) {
       return Promise.reject(new h.LocalFileError('Local non-PDF files are not supported'));
+    }
+
+    function reloadPDF(tab) {
+      // reload PDF so the PDF.js Viewer can take over
+      return new Promise(function (resolve) {
+        chromeTabs.update(tab.id, {url: tab.url}, resolve);
+      });
     }
 
     function injectIntoHTML(tab) {
@@ -118,6 +139,16 @@
           return resolve();
         }
         injectScript(tab.id, '/public/destroy.js').then(resolve);
+      });
+    }
+
+    function removePDFViewer(tab) {
+      // TODO: probablly should be more careful about this file name extraction
+      // ...using code injection doesn't work because we'd need
+      // chrome-extension:// perms...
+      var pdf_url = decodeURIComponent(tab.url.split('?file=')[1]);
+      return new Promise(function (resolve) {
+        chromeTabs.update(tab.id, {url: pdf_url}, resolve);
       });
     }
 

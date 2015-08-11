@@ -1,3 +1,27 @@
+
+"use strict";
+
+/**
+ * Get the header from the list of headers for a given name.
+ * @param {Array} headers responseHeaders of webRequest.onHeadersReceived
+ * @return {undefined|{name: string, value: string}} The header, if found.
+ */
+function getHeaderFromHeaders(headers, headerName) {
+  for (var i=0; i<headers.length; ++i) {
+    var header = headers[i];
+    if (header.name.toLowerCase() === headerName) {
+      return header;
+    }
+  }
+}
+
+(function (h) {
+
+  var state;
+  function pdfHandler(stateObj) {
+    state = stateObj;
+  }
+
 /* -*- Mode: Java; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
 /*
@@ -16,8 +40,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 /* globals chrome, Features, saveReferer */
-
-'use strict';
 
 var VIEWER_URL = chrome.extension.getURL('content/web/viewer.html');
 
@@ -42,20 +64,6 @@ function isPdfDownloadable(details) {
   var cdHeader = (details.responseHeaders &&
     getHeaderFromHeaders(details.responseHeaders, 'content-disposition'));
   return (cdHeader && /^attachment/i.test(cdHeader.value));
-}
-
-/**
- * Get the header from the list of headers for a given name.
- * @param {Array} headers responseHeaders of webRequest.onHeadersReceived
- * @return {undefined|{name: string, value: string}} The header, if found.
- */
-function getHeaderFromHeaders(headers, headerName) {
-  for (var i=0; i<headers.length; ++i) {
-    var header = headers[i];
-    if (header.name.toLowerCase() === headerName) {
-      return header;
-    }
-  }
 }
 
 /**
@@ -99,6 +107,11 @@ function getHeadersWithContentDispositionAttachment(details) {
 
 chrome.webRequest.onHeadersReceived.addListener(
   function(details) {
+    // if we're not an active tab, do nothing
+    if (!state.isTabActive(details.tabId)) {
+      return;
+    }
+
     if (details.method !== 'GET') {
       // Don't intercept POST requests until http://crbug.com/104058 is fixed.
       return;
@@ -180,6 +193,11 @@ chrome.webRequest.onHeadersReceived.addListener(
 
 chrome.webRequest.onBeforeRequest.addListener(
   function onBeforeRequestForFTP(details) {
+    // if we're not an active tab, do nothing
+    if (!state.isTabActive(details.tabId)) {
+      return;
+    }
+
     if (!Features.extensionSupportsFTP) {
       chrome.webRequest.onBeforeRequest.removeListener(onBeforeRequestForFTP);
       return;
@@ -201,6 +219,11 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
+    // if we're not an active tab, do nothing
+    if (!state.isTabActive(details.tabId)) {
+      return;
+    }
+
     if (isPdfDownloadable(details)) {
       return;
     }
@@ -220,3 +243,6 @@ chrome.webRequest.onBeforeRequest.addListener(
     types: ['main_frame', 'sub_frame']
   },
   ['blocking']);
+
+  h.pdfHandler = pdfHandler;
+})(window.h || (window.h = {}));
