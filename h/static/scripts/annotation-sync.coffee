@@ -96,7 +96,9 @@ module.exports = class AnnotationSync
       cb(null, this._format(annotation))
 
     'sync': (bodies, cb) ->
-      cb(null, (this._format(this._parse(b)) for b in bodies))
+      annotations = (this._format(this._parse(b)) for b in bodies)
+      @_emit('sync', annotations)
+      cb(null, annotations)
 
     'loadAnnotations': (bodies) ->
       annotations = (this._parse(a) for a in bodies)
