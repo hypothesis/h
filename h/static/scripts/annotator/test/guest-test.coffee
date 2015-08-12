@@ -17,13 +17,6 @@ Guest = proxyquire('../guest', {
 
 $ = require('jquery')
 
-waitForSync = (annotation) ->
-  if annotation.$anchors?
-    return Promise.resolve()
-  else
-    return new Promise(setTimeout).then(-> waitForSync(annotation))
-
-
 describe 'Guest', ->
   sandbox = null
   fakeCrossFrame = null
@@ -313,7 +306,7 @@ describe 'Guest', ->
       guest = createGuest()
       annotation = target: []
       guest.setupAnnotation(annotation)
-      waitForSync(annotation).then ->
+      annotation.$anchors.then ->
         assert.isFalse(annotation.$orphan)
         done()
 
@@ -322,7 +315,7 @@ describe 'Guest', ->
       annotation = target: [{selector: "test"}]
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       guest.setupAnnotation(annotation)
-      waitForSync(annotation).then ->
+      annotation.$anchors.then ->
         assert.isFalse(annotation.$orphan)
         done()
 
@@ -331,7 +324,7 @@ describe 'Guest', ->
       annotation = target: [{selector: 'broken selector'}]
       sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
       guest.setupAnnotation(annotation)
-      waitForSync(annotation).then ->
+      annotation.$anchors.then ->
         assert.isTrue(annotation.$orphan)
         done()
 
@@ -343,24 +336,21 @@ describe 'Guest', ->
         update: sinon.stub()
       annotation = {}
       guest.setupAnnotation(annotation)
-      waitForSync(annotation).then ->
+      annotation.$anchors.then ->
         assert.called(guest.plugins.BucketBar.update)
         assert.called(guest.plugins.CrossFrame.sync)
         done()
 
-    it 'saves the anchor positions on the annotation', (done) ->
+    it 'saves a promise of the anchors on the annotation', (done) ->
       guest = createGuest()
+      highlights = [document.createElement('span')]
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
-      clientRect = {top: 100, left: 200}
-      window.scrollX = 50
-      window.scrollY = 25
-      sandbox.stub(highlighter, 'getBoundingClientRect').returns(clientRect)
-      annotation = guest.setupAnnotation({target: [{selector: []}]})
-      waitForSync(annotation).then ->
-        assert.equal(annotation.$anchors.length, 1)
-        pos = annotation.$anchors[0].pos
-        assert.equal(pos.top, 125)
-        assert.equal(pos.left, 250)
+      sandbox.stub(highlighter, 'highlightRange').returns(highlights)
+      target = [{selector: []}]
+      annotation = guest.setupAnnotation({target: [target]})
+      assert.instanceOf(annotation.$anchors, Promise)
+      annotation.$anchors.then (anchors) ->
+        assert.equal(anchors.length, 1)
         done()
 
     it 'adds the anchor to the "anchors" instance property"', (done) ->
@@ -370,7 +360,7 @@ describe 'Guest', ->
       sandbox.stub(highlighter, 'highlightRange').returns(highlights)
       target = [{selector: []}]
       annotation = guest.setupAnnotation({target: [target]})
-      waitForSync(annotation).then ->
+      annotation.$anchors.then ->
         assert.equal(guest.anchors.length, 1)
         assert.strictEqual(guest.anchors[0].annotation, annotation)
         assert.strictEqual(guest.anchors[0].target, target)
@@ -386,7 +376,7 @@ describe 'Guest', ->
       guest.anchors = [{annotation, target, highlights}]
       removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
       guest.setupAnnotation(annotation)
-      waitForSync(annotation).then ->
+      annotation.$anchors.then ->
         assert.equal(guest.anchors.length, 0)
         assert.calledWith(removeHighlights, highlights)
         done()
@@ -396,10 +386,10 @@ describe 'Guest', ->
       annotation = target: [{selector: "test"}]
       stub = sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       guest.setupAnnotation(annotation)
-      waitForSync(annotation).then ->
+      annotation.$anchors.then ->
         delete annotation.$anchors
         guest.setupAnnotation(annotation)
-        waitForSync(annotation).then ->
+        annotation.$anchors.then ->
           assert.equal(guest.anchors.length, 1)
           assert.calledOnce(stub)
           done()

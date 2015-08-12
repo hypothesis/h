@@ -200,22 +200,13 @@ module.exports = class Guest extends Annotator
       return animationPromise ->
         range = Annotator.Range.sniff(anchor.range)
         normedRange = range.normalize(root)
-
         highlights = highlighter.highlightRange(normedRange)
-        rect = highlighter.getBoundingClientRect(highlights)
-
         $(highlights).data('annotation', anchor.annotation)
-
         anchor.highlights = highlights
-        anchor.pos =
-          left: rect.left + window.scrollX
-          top: rect.top + window.scrollY
-
         return anchor
 
     sync = (anchors) ->
       # Store the results of anchoring.
-      annotation.$anchors = ({pos} for {pos} in anchors)
       annotation.$orphan = anchors.length > 0
       for anchor in anchors
         if anchor.range?
@@ -253,8 +244,8 @@ module.exports = class Guest extends Annotator
       anchor = locate(target).then(highlight)
       anchors.push(anchor)
 
-    # Wait for all the anchoring tasks to complete then call sync.
-    Promise.all(anchors).then(sync)
+    annotation.$anchors = Promise.all(anchors)
+    annotation.$anchors.then(sync)
 
     return annotation
 
