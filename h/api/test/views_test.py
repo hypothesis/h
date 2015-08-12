@@ -282,42 +282,12 @@ def test_create_returns_error_if_parsing_json_fails():
 
 
 @create_fixtures
-def test_create_gets_user(get_user):
-    """It should get the user by passing the request to get_user()."""
+def test_create_calls_logic(logic, get_user):
+    """It should call logic.create_annotation() appropriately."""
     request = mock.Mock()
-
+    user = get_user.return_value
     views.create(request)
-
-    get_user.assert_called_once_with(request)
-
-
-@create_fixtures
-def test_create_calls_create_annotation_once(logic):
-    """It should call logic.create_annotation() exactly once."""
-    request = mock.Mock()
-
-    views.create(request)
-
-    assert logic.create_annotation.call_count == 1
-
-
-@create_fixtures
-def test_create_passes_json_to_create_annotation(logic):
-    """It should pass the JSON from the request to create_annotation()."""
-    request = mock.Mock()
-
-    views.create(request)
-
-    assert logic.create_annotation.call_args[1]['fields'] == request.json_body
-
-
-@create_fixtures
-def test_create_passes_user_to_create_annotation(get_user, logic):
-    """It should pass the user from get_user() to logic.create_annotation()."""
-    views.create(mock.Mock())
-
-    assert logic.create_annotation.call_args[1]['user'] == (
-        get_user.return_value)
+    logic.create_annotation.assert_called_once_with(request.json_body, user)
 
 
 @create_fixtures
