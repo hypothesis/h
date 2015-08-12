@@ -161,7 +161,7 @@ module.exports = class Guest extends Annotator
 
     this.removeEvents()
 
-  setupAnnotation: (annotation) ->
+  anchor: (annotation) ->
     self = this
     root = @element[0]
 
@@ -200,22 +200,13 @@ module.exports = class Guest extends Annotator
       return animationPromise ->
         range = Annotator.Range.sniff(anchor.range)
         normedRange = range.normalize(root)
-
         highlights = highlighter.highlightRange(normedRange)
-        rect = highlighter.getBoundingClientRect(highlights)
-
         $(highlights).data('annotation', anchor.annotation)
-
         anchor.highlights = highlights
-        anchor.pos =
-          left: rect.left + window.scrollX
-          top: rect.top + window.scrollY
-
         return anchor
 
     sync = (anchors) ->
       # Store the results of anchoring.
-      annotation.$anchors = ({pos} for {pos} in anchors)
       annotation.$orphan = anchors.length > 0
       for anchor in anchors
         if anchor.range?
@@ -227,6 +218,8 @@ module.exports = class Guest extends Annotator
       # Let plugins know about the new information.
       self.plugins.BucketBar?.update()
       self.plugins.CrossFrame?.sync([annotation])
+
+      return anchors
 
     # Remove all the anchors for this annotation from the instance storage.
     for anchor in self.anchors.splice(0, self.anchors.length)
@@ -253,9 +246,12 @@ module.exports = class Guest extends Annotator
       anchor = locate(target).then(highlight)
       anchors.push(anchor)
 
-    # Wait for all the anchoring tasks to complete then call sync.
-    Promise.all(anchors).then(sync)
+    return Promise.all(anchors).then(sync)
 
+  # Provided for backward compatibility.
+  # Currently only used by #loadAnnotations().
+  setupAnnotation: (annotation) ->
+    this.anchor(annotation)
     return annotation
 
   createAnnotation: (annotation = {}) ->
@@ -286,8 +282,8 @@ module.exports = class Guest extends Annotator
     metadata = info.then(setDocumentInfo)
     targets = Promise.all([info, selectors]).then(setTargets)
 
-    targets.then(-> self.setupAnnotation(annotation))
     targets.then(-> self.publish('beforeAnnotationCreated', [annotation]))
+    targets.then(-> self.anchor(annotation))
 
     annotation
 

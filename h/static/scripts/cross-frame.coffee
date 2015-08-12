@@ -18,10 +18,7 @@ module.exports = class CrossFrame
       new Discovery($window, options)
 
     createAnnotationSync = ->
-      whitelist = [
-        '$anchors', '$highlight', '$orphan',
-        'target', 'document', 'uri'
-      ]
+      whitelist = ['$highlight', '$orphan','target', 'document', 'uri']
       options =
         formatter: (annotation) ->
           formatted = {}

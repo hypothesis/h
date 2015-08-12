@@ -104,7 +104,7 @@ class PDF extends Annotator.Plugin
           break
 
     for annotation in refreshAnnotations
-      annotator.setupAnnotation(annotation)
+      annotator.anchor(annotation)
 
 Annotator.Plugin.PDF = PDF
 
