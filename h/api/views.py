@@ -6,20 +6,16 @@ import logging
 
 from pyramid.view import view_config
 
-from h.api import search as search_lib
 from h.api.auth import get_user
 from h.api.events import AnnotationEvent
 from h.api.models import Annotation
 from h.api.resources import Root
 from h.api.resources import Annotations
-from h.api import nipsa
+from h.api import search as search_lib
+from h.api import logic
 
 
 log = logging.getLogger(__name__)
-
-
-# These annotation fields are not to be set by the user.
-PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 
 
 def api_config(**kwargs):
@@ -80,7 +76,7 @@ def search(request):
 
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    results = search_lib.search(request.params,
+    results = search_lib.search(request_params=request.params,
                                 user=user,
                                 search_normalized_uris=search_normalized_uris)
 
@@ -133,8 +129,6 @@ def annotations_index(request):
 @api_config(context=Annotations, request_method='POST', permission='create')
 def create(request):
     """Read the POSTed JSON-encoded annotation and persist it."""
-    user = get_user(request)
-
     # Read the annotation from the request payload
     try:
         fields = request.json_body
@@ -143,8 +137,10 @@ def create(request):
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
 
+    user = get_user(request)
+
     # Create the annotation
-    annotation = _create_annotation(fields, user)
+    annotation = logic.create_annotation(fields=fields, user=user)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
@@ -184,7 +180,7 @@ def update(context, request):
 
     # Update and store the annotation
     try:
-        _update_annotation(annotation, fields, has_admin_permission)
+        logic.update_annotation(annotation, fields, has_admin_permission)
     except RuntimeError as err:
         return _api_error(
             request,
@@ -219,7 +215,8 @@ def delete(context, request):
 
 def _publish_annotation_event(request, annotation, action):
     """Publish an event to the annotations queue for this annotation action"""
-    event = AnnotationEvent(request, annotation, action)
+    event = AnnotationEvent(
+        request=request, annotation=annotation, action=action)
     request.registry.notify(event)
 
 
@@ -230,75 +227,6 @@ def _api_error(request, reason, status_code):
         'reason': reason,
     }
     return response_info
-
-
-def _create_annotation(fields, user):
-    """Create and store an annotation."""
-
-    # Some fields are not to be set by the user, ignore them
-    for field in PROTECTED_FIELDS:
-        fields.pop(field, None)
-
-    # Create Annotation instance
-    annotation = Annotation(fields)
-
-    annotation['user'] = user.id
-    annotation['consumer'] = user.consumer.key
-
-    if nipsa.has_nipsa(user.id):
-        annotation["nipsa"] = True
-
-    # Save it in the database
-    search_lib.prepare(annotation)
-    annotation.save()
-
-    log.debug('Created annotation; user: %s, consumer key: %s',
-              annotation['user'], annotation['consumer'])
-
-    return annotation
-
-
-def _update_annotation(annotation, fields, has_admin_permission):
-    # Some fields are not to be set by the user, ignore them
-    for field in PROTECTED_FIELDS:
-        fields.pop(field, None)
-
-    # If the user is changing access permissions, check if it's allowed.
-    changing_permissions = (
-        'permissions' in fields and
-        fields['permissions'] != annotation.get('permissions', {})
-    )
-    if changing_permissions and not has_admin_permission:
-        raise RuntimeError("Not authorized to change annotation permissions.",
-                           401)  # Unauthorized
-
-    # Update the annotation with the new data
-    annotation.update(fields)
-
-    # If the annotation is flagged as deleted, remove mentions of the user
-    if annotation.get('deleted', False):
-        _anonymize_deletes(annotation)
-
-    # Save the annotation in the database, overwriting the old version.
-    search_lib.prepare(annotation)
-    annotation.save()
-
-
-def _anonymize_deletes(annotation):
-    """Clear the author and remove the user from the annotation permissions."""
-
-    # Delete the annotation author, if present
-    user = annotation.pop('user')
-
-    # Remove the user from the permissions, but keep any others in place.
-    permissions = annotation.get('permissions', {})
-    for action in permissions.keys():
-        filtered = [
-            role
-            for role in annotation['permissions'][action]
-            if role != user
-        ]
-        annotation['permissions'][action] = filtered
 
 
 def includeme(config):

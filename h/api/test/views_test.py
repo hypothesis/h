@@ -1,78 +1,24 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=protected-access
-
-"""Defines unit tests for h.api.views."""
-
-from mock import patch, MagicMock, Mock
+import mock
 import pytest
-from pytest import fixture, raises
-from pyramid.testing import DummyRequest, DummyResource
+from pyramid import testing
 
-from .. import views
-
-
-class DictMock(Mock):
-    """A mock class providing basic dict semantics
-
-    Usage example:
-        Annotation = DictMock()
-        a = Annotation({'text': 'bla'})
-        a['user'] = 'alice'
-
-        assert a['text'] == 'bla'
-        assert a['user'] == 'alice'
-    """
-    def __init__(self, *args, **kwargs):
-        super(DictMock, self).__init__(*args, **kwargs)
-        self.instances = []
-        def side_effect(*args_, **kwargs_):
-            d = dict(*args_, **kwargs_)
-            def getitem(name):
-                return d[name]
-            def setitem(name, value):
-                d[name] = value
-            def contains(name):
-                return name in d
-            m = Mock()
-            m.__getitem__ = Mock(side_effect=getitem)
-            m.__setitem__ = Mock(side_effect=setitem)
-            m.__contains__ = Mock(side_effect=contains)
-            m.get = Mock(side_effect=d.get)
-            m.pop = Mock(side_effect=d.pop)
-            m.update = Mock(side_effect=d.update)
-            self.instances.append(m)
-            return m
-        self.side_effect = side_effect
+from h.api import views
 
 
-@fixture()
-def replace_io(monkeypatch):
-    """For all tests, mock paths to the "outside" world"""
-    monkeypatch.setattr(views, 'Annotation', DictMock())
-    monkeypatch.setattr(views, '_publish_annotation_event', MagicMock())
-    monkeypatch.setattr(views, '_api_error', MagicMock())
-    nipsa = Mock(has_nipsa=Mock(return_value=False))
-    monkeypatch.setattr(views, 'nipsa', nipsa)
+def _mock_annotation(**kwargs):
+    """Return a mock h.api.models.Annotation object."""
+    annotation = mock.MagicMock()
+    annotation.__getitem__.side_effect = kwargs.__getitem__
+    annotation.__setitem__.side_effect = kwargs.__setitem__
+    annotation.get.side_effect = kwargs.get
+    annotation.__contains__.side_effect = kwargs.__contains__
+    return annotation
 
 
-@fixture()
-def user(monkeypatch):
-    """Provide a mock user"""
-    user = MagicMock()
-    user.id = 'alice'
-    user.consumer.key = 'consumer_key'
-
-    # Make auth.get_user() return our alice
-    monkeypatch.setattr(views, 'get_user', lambda r: user)
-
-    return user
-
-
-@pytest.mark.usefixtures('replace_io')
 def test_index():
     """Get the API descriptor"""
-
-    result = views.index(DummyResource(), DummyRequest())
+    result = views.index(testing.DummyResource(), testing.DummyRequest())
 
     # Pyramid's host url defaults to http://example.com
     host = 'http://example.com'
@@ -89,186 +35,600 @@ def test_index():
     assert links['search']['url'] == host + '/search'
 
 
-@patch('h.api.views._create_annotation')
-@pytest.mark.usefixtures('replace_io')
-def test_create(mock_create_annotation, user):
-    request = DummyRequest(json_body=_new_annotation)
-
-    annotation = views.create(request)
-
-    views._create_annotation.assert_called_once_with(_new_annotation, user)
-    assert annotation == views._create_annotation.return_value
-    _assert_event_published('create')
+# The fixtures required to mock all of search()'s dependencies.
+search_fixtures = pytest.mark.usefixtures('get_user', 'search_lib')
 
 
-@patch("h.api.views.Annotation.save")
-@patch("h.api.views.nipsa.has_nipsa")
-@patch("h.api.views.get_user")
-def test_create_adds_nipsa_flag(get_user, has_nipsa, _):
-    get_user.return_value = Mock(
-        id="test_id", consumer=Mock(key="test_key"))
-    has_nipsa.return_value = True
-    request = DummyRequest(json_body=_new_annotation)
+@search_fixtures
+def test_search_calls_get_user(get_user):
+    """It should call get_user() once passing the request."""
+    request = mock.Mock()
 
-    annotation = views.create(request)
+    views.search(request)
 
-    assert annotation.get("nipsa") is True
+    get_user.assert_called_once_with(request)
 
 
-@patch("h.api.views.Annotation.save")
-@patch("h.api.views.nipsa.has_nipsa")
-@patch("h.api.views.get_user")
-def test_create_does_not_add_nipsa_flag(get_user, has_nipsa, _):
-    get_user.return_value = Mock(
-        id="test_id", consumer=Mock(key="test_key"))
-    has_nipsa.return_value = False
-    request = DummyRequest(json_body=_new_annotation)
+@search_fixtures
+def test_search_calls_search(search_lib):
+    """It should call search_lib.search() once."""
+    views.search(mock.Mock())
 
-    annotation = views.create(request)
-
-    assert "nipsa" not in annotation
+    assert search_lib.search.call_count == 1
 
 
-@pytest.mark.usefixtures('replace_io')
-def test_create_annotation(user):
-    annotation = views._create_annotation(_new_annotation, user)
-    assert annotation['text'] == 'blabla'
-    assert annotation['user'] == 'alice'
-    assert annotation['consumer'] == 'consumer_key'
-    assert annotation['permissions'] == _new_annotation['permissions']
-    annotation.save.assert_called_once()
+@search_fixtures
+def test_search_passes_params_to_search(search_lib):
+    """It should pass request.params to search_lib.search()."""
+    request = mock.Mock()
+
+    views.search(request)
+
+    assert search_lib.search.call_args[1]['request_params'] == request.params
 
 
-@pytest.mark.usefixtures('replace_io', 'search_render')
-def test_read():
-    annotation = DummyResource()
+@search_fixtures
+def test_search_passes_user_to_search(get_user, search_lib):
+    """It should pass the user from get_user() to search_lib.search()."""
+    views.search(mock.Mock())
 
-    result = views.read(annotation, DummyRequest())
-
-    _assert_event_published('read')
-    assert result == annotation, "Annotation should have been returned"
+    assert search_lib.search.call_args[1]['user'] == get_user.return_value
 
 
-@patch('h.api.views._update_annotation')
-@pytest.mark.usefixtures('replace_io', 'search_render')
-def test_update(mock_update_annotation):
-    annotation = views.Annotation(_old_annotation)
-    request = DummyRequest(json_body=_new_annotation)
-    request.has_permission = MagicMock(return_value=True)
+@search_fixtures
+def test_search_calls_feature():
+    """It should call request.feature() once, passing 'search_normalized'."""
+    request = mock.Mock()
 
-    result = views.update(annotation, request)
+    views.search(request)
 
-    views._update_annotation.assert_called_once_with(annotation,
-                                                   _new_annotation,
-                                                   True)
-    _assert_event_published('update')
-    assert result is annotation, "Annotation should have been returned"
+    request.feature.assert_called_once_with('search_normalized')
 
 
-@pytest.mark.usefixtures('replace_io')
-def test_update_annotation(user):
-    annotation = views.Annotation(_old_annotation)
+@search_fixtures
+def test_search_passes_search_normalized_uris(search_lib):
+    """It should pass search_normalized from request.feature() to search()."""
+    request = mock.Mock()
 
-    views._update_annotation(annotation, _new_annotation, True)
+    views.search(request)
 
-    assert annotation['text'] == 'blabla'
-    assert annotation['quote'] == 'original_quote'
-    assert annotation['user'] == 'alice'
-    assert annotation['consumer'] == 'consumer_key'
-    assert annotation['permissions'] == _new_annotation['permissions']
-    annotation.save.assert_called_once()
+    assert search_lib.search.call_args[1]['search_normalized_uris'] == (
+        request.feature.return_value)
 
 
-@patch('h.api.views._anonymize_deletes')
-@pytest.mark.usefixtures('replace_io')
-def test_update_anonymize_deletes(mock_anonymize_deletes):
-    annotation = views.Annotation(_old_annotation)
-    annotation['deleted'] = True
-    request = DummyRequest(json_body=_new_annotation)
+@search_fixtures
+def test_search_returns_total(search_lib):
+    """It should return the total from search_lib.search()."""
+    search_lib.search.return_value = {
+        'total': 3,
+        # In production these would be annotation dicts, not strings.
+        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+    }
+
+    response_data = views.search(mock.Mock())
+
+    assert response_data['total'] == 3
+
+
+@search_fixtures
+def test_search_returns_rendered_annotations(search_lib):
+    """It should return the rendered annotations.
+
+    It should pass the annotations from search_lib.search() through
+    search_lib.render() and return the results.
+
+    """
+    search_lib.search.return_value = {
+        'total': 3,
+        # In production these would be annotation dicts, not strings.
+        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+    }
+    # Our mock render function just appends '_rendered' onto our mock
+    # annotation strings.
+    search_lib.render.side_effect = lambda annotation: annotation + '_rendered'
+
+    response_data = views.search(mock.Mock())
+
+    assert response_data['rows'] == [
+        'annotation_1_rendered', 'annotation_2_rendered',
+        'annotation_3_rendered']
+
+
+def test_access_token_returns_create_token_response():
+    """It should return request.create_token_response()."""
+    request = mock.Mock()
+
+    response_data = views.access_token(request)
+
+    request.create_token_response.assert_called_with()
+    assert response_data == request.create_token_response.return_value
+
+
+# The fixtures required to mock all of annotator_token()'s dependencies.
+annotator_token_fixtures = pytest.mark.usefixtures('access_token')
+
+
+@annotator_token_fixtures
+def test_annotator_token_sets_grant_type():
+    request = mock.Mock()
+
+    views.annotator_token(request)
+
+    assert request.grant_type == 'client_credentials'
+
+
+@annotator_token_fixtures
+def test_annotator_token_calls_access_token(access_token):
+    request = mock.Mock()
+
+    views.annotator_token(request)
+
+    access_token.assert_called_once_with(request)
+
+
+@annotator_token_fixtures
+def test_annotator_token_gets_access_token_from_response_json(access_token):
+    response = access_token.return_value = mock.Mock()
+
+    views.annotator_token(mock.Mock())
+
+    response.json_body.get.assert_called_once_with('access_token', response)
+
+
+# The fixtures required to mock all of annotations_index()'s dependencies.
+annotations_index_fixtures = pytest.mark.usefixtures('get_user', 'search_lib')
+
+
+@annotations_index_fixtures
+def test_annotations_index_calls_get_user(get_user):
+    """It should call get_user() once passing the request."""
+    request = mock.Mock()
+
+    views.annotations_index(request)
+
+    get_user.assert_called_once_with(request)
+
+
+@annotations_index_fixtures
+def test_annotations_index_calls_index(search_lib):
+    """It should call search_lib.index() once."""
+    views.annotations_index(mock.Mock())
+
+    assert search_lib.index.call_count == 1
+
+
+@annotations_index_fixtures
+def test_annotations_index_passes_user_to_index(get_user, search_lib):
+    """It should pass the user from get_user() to search_lib.index()."""
+    views.annotations_index(mock.Mock())
+
+    assert search_lib.index.call_args[1]['user'] == get_user.return_value
+
+
+@annotations_index_fixtures
+def test_annotations_index_calls_feature():
+    """It should call request.feature() once, passing 'search_normalized'."""
+    request = mock.Mock()
+
+    views.annotations_index(request)
+
+    request.feature.assert_called_once_with('search_normalized')
+
+
+@annotations_index_fixtures
+def test_annotations_index_passes_search_normalized_uris(search_lib):
+    """It should pass search_normalized from request.feature() to index()."""
+    request = mock.Mock()
+
+    views.annotations_index(request)
+
+    assert search_lib.index.call_args[1]['search_normalized_uris'] == (
+        request.feature.return_value)
+
+
+@annotations_index_fixtures
+def test_annotations_index_returns_total(search_lib):
+    """It should return the total from search_lib.index()."""
+    search_lib.index.return_value = {
+        'total': 3,
+        # In production these would be annotation dicts, not strings.
+        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+    }
+
+    response_data = views.annotations_index(mock.Mock())
+
+    assert response_data['total'] == 3
+
+
+@annotations_index_fixtures
+def test_annotations_index_returns_rendered_annotations(search_lib):
+    """It should return the rendered annotations.
+
+    It should pass the annotations from search_lib.index() through
+    search_lib.render() and return the results.
+
+    """
+    search_lib.index.return_value = {
+        'total': 3,
+        # In production these would be annotation dicts, not strings.
+        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+    }
+    # Our mock render function just appends '_rendered' onto our mock
+    # annotation strings.
+    search_lib.render.side_effect = lambda annotation: annotation + '_rendered'
+
+    response_data = views.annotations_index(mock.Mock())
+
+    assert response_data['rows'] == [
+        'annotation_1_rendered', 'annotation_2_rendered',
+        'annotation_3_rendered']
+
+
+# The fixtures required to mock all of create()'s dependencies.
+create_fixtures = pytest.mark.usefixtures(
+    'get_user', 'logic', 'AnnotationEvent', 'search_lib')
+
+
+@create_fixtures
+def test_create_returns_error_if_parsing_json_fails():
+    """It should return an error if JSON parsing of the request body fails."""
+    request = mock.Mock()
+    # Make accessing the request.json_body property raise ValueError.
+    type(request).json_body = mock.PropertyMock(side_effect=ValueError)
+
+    error = views.create(request)
+
+    assert error['status'] == 'failure'
+
+
+@create_fixtures
+def test_create_gets_user(get_user):
+    """It should get the user by passing the request to get_user()."""
+    request = mock.Mock()
+
+    views.create(request)
+
+    get_user.assert_called_once_with(request)
+
+
+@create_fixtures
+def test_create_calls_create_annotation_once(logic):
+    """It should call logic.create_annotation() exactly once."""
+    request = mock.Mock()
+
+    views.create(request)
+
+    assert logic.create_annotation.call_count == 1
+
+
+@create_fixtures
+def test_create_passes_json_to_create_annotation(logic):
+    """It should pass the JSON from the request to create_annotation()."""
+    request = mock.Mock()
+
+    views.create(request)
+
+    assert logic.create_annotation.call_args[1]['fields'] == request.json_body
+
+
+@create_fixtures
+def test_create_passes_user_to_create_annotation(get_user, logic):
+    """It should pass the user from get_user() to logic.create_annotation()."""
+    views.create(mock.Mock())
+
+    assert logic.create_annotation.call_args[1]['user'] == (
+        get_user.return_value)
+
+
+@create_fixtures
+def test_create_inits_AnnotationEvent_once(AnnotationEvent):
+    views.create(mock.Mock())
+
+    assert AnnotationEvent.call_count == 1
+
+
+@create_fixtures
+def test_create_passes_request_to_AnnotationEvent(AnnotationEvent):
+    request = mock.Mock()
+
+    views.create(request)
+
+    assert AnnotationEvent.call_args[1]['request'] == request
+
+
+@create_fixtures
+def test_create_passes_annotation_to_AnnotationEvent(logic, AnnotationEvent):
+    """
+    It passes the annotation from logic.create_annotation() to AnnotationEvent.
+    """
+    views.create(mock.Mock())
+
+    assert AnnotationEvent.call_args[1]['annotation'] == (
+        logic.create_annotation.return_value)
+
+
+@create_fixtures
+def test_create_passes_action_to_AnnotationEvent(AnnotationEvent):
+    """It should pass 'create' as the action to AnnotationEvent."""
+    views.create(mock.Mock())
+
+    assert AnnotationEvent.call_args[1]['action'] == 'create'
+
+
+@create_fixtures
+def test_create_publishes_create_event(AnnotationEvent):
+    """It should call notify() with the AnnotationEvent."""
+    request = mock.Mock()
+
+    views.create(request)
+
+    request.registry.notify.assert_called_once_with(
+        AnnotationEvent.return_value)
+
+
+@create_fixtures
+def test_create_passes_annotation_to_render(logic, search_lib):
+    views.create(mock.Mock())
+
+    search_lib.render.assert_called_once_with(
+        logic.create_annotation.return_value)
+
+
+@create_fixtures
+def test_create_returns_render(search_lib):
+    """It should return what render() returns."""
+    assert views.create(mock.Mock()) == search_lib.render.return_value
+
+
+# The fixtures required to mock all of read()'s dependencies.
+read_fixtures = pytest.mark.usefixtures('search_lib', 'AnnotationEvent')
+
+
+@read_fixtures
+def test_read_inits_AnnotationEvent(AnnotationEvent):
+    annotation = mock.Mock()
+    request = mock.Mock()
+
+    views.read(context=annotation, request=request)
+
+    AnnotationEvent.assert_called_once_with(
+        request=request, annotation=annotation, action='read')
+
+
+@read_fixtures
+def test_read_publishes_event(AnnotationEvent):
+    request = mock.Mock()
+
+    views.read(mock.Mock(), request=request)
+
+    request.registry.notify.assert_called_once_with(
+        AnnotationEvent.return_value)
+
+
+@read_fixtures
+def test_read_calls_render(search_lib):
+    annotation = mock.Mock()
+
+    views.read(context=annotation, request=mock.Mock())
+
+    search_lib.render.assert_called_once_with(annotation)
+
+
+@read_fixtures
+def test_read_returns_rendered_annotation(search_lib):
+    assert views.read(mock.Mock(), mock.Mock()) == (
+        search_lib.render.return_value)
+
+
+# The fixtures required to mock all of update()'s dependencies.
+update_fixtures = pytest.mark.usefixtures('logic', 'Annotation', 'search_lib')
+
+
+@update_fixtures
+def test_update_returns_error_if_json_parsing_fails():
+    request = mock.Mock()
+    # Make accessing the request.json_body property raise ValueError.
+    type(request).json_body = mock.PropertyMock(side_effect=ValueError)
+
+    error = views.update(mock.Mock(), request)
+
+    assert error['status'] == 'failure'
+
+
+@update_fixtures
+def test_update_calls_has_permission():
+    annotation = mock.Mock()
+    request = mock.Mock()
 
     views.update(annotation, request)
 
-    views._anonymize_deletes.assert_called_once_with(annotation)
+    request.has_permission.assert_called_once_with('admin', annotation)
 
 
-@pytest.mark.usefixtures('replace_io')
-def test_anonymize_deletes():
-    annotation = views.Annotation(_old_annotation)
-    annotation['deleted'] = True
+@update_fixtures
+def test_update_calls_update_annotation_once(logic):
+    views.update(mock.Mock(), mock.Mock())
 
-    views._anonymize_deletes(annotation)
-
-    assert 'user' not in annotation
-    assert annotation['permissions'] == {
-        'admin': [],
-        'update': ['bob'],
-        'read': ['group:__world__'],
-        'delete': [],
-    }
+    assert logic.update_annotation.call_count == 1
 
 
-@pytest.mark.usefixtures('replace_io')
-def test_update_change_permissions_disallowed():
-    annotation = views.Annotation(_old_annotation)
+@update_fixtures
+def test_update_passes_annotation_to_update_annotation(logic):
+    annotation = mock.Mock()
 
-    with raises(RuntimeError):
-        views._update_annotation(annotation, _new_annotation, False)
+    views.update(annotation, mock.Mock())
 
-    assert annotation['text'] == 'old_text'
-    assert annotation.save.call_count == 0
+    assert logic.update_annotation.call_args[0][0] == annotation
 
 
-@pytest.mark.usefixtures('replace_io')
-def test_delete():
-    annotation = views.Annotation(_old_annotation)
+@update_fixtures
+def test_update_passes_fields_to_update_annotation(logic):
+    request = mock.Mock()
 
-    result = views.delete(annotation, DummyRequest())
+    views.update(mock.Mock(), request)
 
-    assert annotation.delete.assert_called_once()
-    _assert_event_published('delete')
-    assert result == {'id': '1234', 'deleted': True}, "Deletion confirmation should have been returned"
+    assert logic.update_annotation.call_args[0][1] == request.json_body
 
 
-def _assert_event_published(action):
-    assert views._publish_annotation_event.call_count == 1
-    assert views._publish_annotation_event.call_args[0][2] == action
+@update_fixtures
+def test_update_passes_has_admin_permission_to_update_annotation(logic):
+    request = mock.Mock()
+
+    views.update(mock.Mock(), request)
+
+    assert logic.update_annotation.call_args[0][2] == (
+        request.has_permission.return_value)
 
 
-_new_annotation = {
-    'text': 'blabla',
-    'created': '2040-05-20',
-    'updated': '2040-05-23',
-    'user': 'eve',
-    'consumer': 'fake_consumer',
-    'id': '1337',
-    'permissions': {
-        'admin': ['alice'],
-        'update': ['alice'],
-        'read': ['alice', 'group:__world__'],
-        'delete': ['alice'],
-    },
-}
+@update_fixtures
+def test_update_returns_error_if_update_annotation_raises(logic):
+    logic.update_annotation.side_effect = RuntimeError("Nope", 401)
 
-_old_annotation = {
-    'text': 'old_text',
-    'quote': 'original_quote',
-    'created': '2010-01-01',
-    'updated': '2010-01-02',
-    'user': 'alice',
-    'consumer': 'consumer_key',
-    'id': '1234',
-    'permissions': {
-        'admin': ['alice'],
-        'update': ['alice', 'bob'],
-        'read': ['alice', 'group:__world__'],
-        'delete': ['alice'],
-    },
-}
+    error = views.update(mock.Mock(), mock.Mock())
+
+    assert error['status'] == 'failure'
+
+
+@update_fixtures
+def test_update_calls_AnnotationEvent(AnnotationEvent):
+    annotation = mock.Mock()
+    request = mock.Mock()
+
+    views.update(annotation, request)
+
+    AnnotationEvent.assert_called_once_with(
+        request=request, annotation=annotation, action='update')
+
+
+@update_fixtures
+def test_update_publishes_event(AnnotationEvent):
+    request = mock.Mock()
+
+    views.update(mock.Mock(), request)
+
+    request.registry.notify.assert_called_once_with(
+        AnnotationEvent.return_value)
+
+
+@update_fixtures
+def test_update_calls_render(search_lib):
+    annotation = mock.Mock()
+
+    views.update(annotation, mock.Mock())
+
+    search_lib.render.assert_called_once_with(annotation)
+
+
+@update_fixtures
+def test_update_returns_rendered_annotation(search_lib):
+    assert views.update(mock.Mock(), mock.Mock()) == (
+        search_lib.render.return_value)
+
+
+# The fixtures required to mock all of delete()'s dependencies.
+delete_fixtures = pytest.mark.usefixtures('AnnotationEvent')
+
+
+@delete_fixtures
+def test_delete_calls_delete():
+    annotation = _mock_annotation(id='foo')
+
+    views.delete(annotation, mock.Mock())
+
+    annotation.delete.assert_called_once_with()
+
+
+@delete_fixtures
+def test_delete_calls_AnnotationEvent(AnnotationEvent):
+    annotation = _mock_annotation(id='foo')
+    request = mock.Mock()
+
+    views.delete(annotation, request)
+
+    AnnotationEvent.assert_called_once_with(
+        request=request, annotation=annotation, action='delete')
+
+
+@delete_fixtures
+def test_delete_calls_notify(AnnotationEvent):
+    request = mock.Mock()
+
+    views.delete(_mock_annotation(id='foo'), request)
+
+    request.registry.notify.assert_called_once_with(
+        AnnotationEvent.return_value)
+
+
+@delete_fixtures
+def test_delete_returns_id():
+    annotation = _mock_annotation(id='foo')
+
+    response_data = views.delete(annotation, mock.Mock())
+
+    assert response_data['id'] == annotation['id']
+
+
+@delete_fixtures
+def test_delete_returns_deleted():
+    response_data = views.delete(_mock_annotation(id='foo'), mock.Mock())
+
+    assert response_data['deleted'] is True
+
 
 @pytest.fixture
 def search_render(request):
-    patcher = patch('h.api.search.render', autospec=True)
+    patcher = mock.patch('h.api.search.render', autospec=True)
     func = patcher.start()
     request.addfinalizer(patcher.stop)
     func.side_effect = lambda x: x
     return func
+
+
+@pytest.fixture
+def search_lib(request):
+    patcher = mock.patch('h.api.views.search_lib', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def AnnotationEvent(request):
+    patcher = mock.patch('h.api.views.AnnotationEvent', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def Annotation(request):
+    patcher = mock.patch('h.api.views.Annotation', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def get_user(request):
+    patcher = mock.patch('h.api.views.get_user', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def logic(request):
+    patcher = mock.patch('h.api.views.logic', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def _publish_annotation_event(request):
+    patcher = mock.patch('h.api.views._publish_annotation_event',
+                         autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def access_token(request):
+    patcher = mock.patch('h.api.views.access_token', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
