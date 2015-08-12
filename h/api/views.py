@@ -215,8 +215,7 @@ def delete(context, request):
 
 def _publish_annotation_event(request, annotation, action):
     """Publish an event to the annotations queue for this annotation action"""
-    event = AnnotationEvent(
-        request=request, annotation=annotation, action=action)
+    event = AnnotationEvent(request, annotation, action)
     request.registry.notify(event)
 
 
