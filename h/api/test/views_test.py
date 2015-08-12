@@ -321,49 +321,13 @@ def test_create_passes_user_to_create_annotation(get_user, logic):
 
 
 @create_fixtures
-def test_create_inits_AnnotationEvent_once(AnnotationEvent):
-    views.create(mock.Mock())
-
-    assert AnnotationEvent.call_count == 1
-
-
-@create_fixtures
-def test_create_passes_request_to_AnnotationEvent(AnnotationEvent):
+def test_create_event(AnnotationEvent, logic):
     request = mock.Mock()
-
+    annotation = logic.create_annotation.return_value
+    event = AnnotationEvent.return_value
     views.create(request)
-
-    assert AnnotationEvent.call_args[1]['request'] == request
-
-
-@create_fixtures
-def test_create_passes_annotation_to_AnnotationEvent(logic, AnnotationEvent):
-    """
-    It passes the annotation from logic.create_annotation() to AnnotationEvent.
-    """
-    views.create(mock.Mock())
-
-    assert AnnotationEvent.call_args[1]['annotation'] == (
-        logic.create_annotation.return_value)
-
-
-@create_fixtures
-def test_create_passes_action_to_AnnotationEvent(AnnotationEvent):
-    """It should pass 'create' as the action to AnnotationEvent."""
-    views.create(mock.Mock())
-
-    assert AnnotationEvent.call_args[1]['action'] == 'create'
-
-
-@create_fixtures
-def test_create_publishes_create_event(AnnotationEvent):
-    """It should call notify() with the AnnotationEvent."""
-    request = mock.Mock()
-
-    views.create(request)
-
-    request.registry.notify.assert_called_once_with(
-        AnnotationEvent.return_value)
+    AnnotationEvent.assert_called_once_with == (request, annotation, 'create')
+    request.registry.notify.assert_called_once_with(event)
 
 
 @create_fixtures
@@ -385,24 +349,13 @@ read_fixtures = pytest.mark.usefixtures('search_lib', 'AnnotationEvent')
 
 
 @read_fixtures
-def test_read_inits_AnnotationEvent(AnnotationEvent):
+def test_read_event(AnnotationEvent):
+    request = mock.Mock()
     annotation = mock.Mock()
-    request = mock.Mock()
-
-    views.read(context=annotation, request=request)
-
-    AnnotationEvent.assert_called_once_with(
-        request=request, annotation=annotation, action='read')
-
-
-@read_fixtures
-def test_read_publishes_event(AnnotationEvent):
-    request = mock.Mock()
-
-    views.read(mock.Mock(), request=request)
-
-    request.registry.notify.assert_called_once_with(
-        AnnotationEvent.return_value)
+    event = AnnotationEvent.return_value
+    views.read(annotation, request)
+    AnnotationEvent.assert_called_once_with(request, annotation, 'read')
+    request.registry.notify.assert_called_once_with(event)
 
 
 @read_fixtures
@@ -490,24 +443,13 @@ def test_update_returns_error_if_update_annotation_raises(logic):
 
 
 @update_fixtures
-def test_update_calls_AnnotationEvent(AnnotationEvent):
+def test_update_event(AnnotationEvent):
+    request = mock.Mock()
     annotation = mock.Mock()
-    request = mock.Mock()
-
+    event = AnnotationEvent.return_value
     views.update(annotation, request)
-
-    AnnotationEvent.assert_called_once_with(
-        request=request, annotation=annotation, action='update')
-
-
-@update_fixtures
-def test_update_publishes_event(AnnotationEvent):
-    request = mock.Mock()
-
-    views.update(mock.Mock(), request)
-
-    request.registry.notify.assert_called_once_with(
-        AnnotationEvent.return_value)
+    AnnotationEvent.assert_called_once_with(request, annotation, 'update')
+    request.registry.notify.assert_called_once_with(event)
 
 
 @update_fixtures
@@ -539,24 +481,13 @@ def test_delete_calls_delete():
 
 
 @delete_fixtures
-def test_delete_calls_AnnotationEvent(AnnotationEvent):
+def test_delete_event(AnnotationEvent):
+    request = mock.Mock()
     annotation = _mock_annotation(id='foo')
-    request = mock.Mock()
-
+    event = AnnotationEvent.return_value
     views.delete(annotation, request)
-
-    AnnotationEvent.assert_called_once_with(
-        request=request, annotation=annotation, action='delete')
-
-
-@delete_fixtures
-def test_delete_calls_notify(AnnotationEvent):
-    request = mock.Mock()
-
-    views.delete(_mock_annotation(id='foo'), request)
-
-    request.registry.notify.assert_called_once_with(
-        AnnotationEvent.return_value)
+    AnnotationEvent.assert_called_once_with(request, annotation, 'delete')
+    request.registry.notify.assert_called_once_with(event)
 
 
 @delete_fixtures
