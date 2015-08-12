@@ -121,9 +121,6 @@ module.exports = class AppController
       $scope.accountDialog.visible = false
       identity.logout()
 
-    $scope.loadMore = (number) ->
-      streamer.send({messageType: 'more_hits', moreHits: number})
-
     $scope.clearSelection = ->
       $scope.search.query = ''
       annotationUI.clearSelectedAnnotations()

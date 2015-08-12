@@ -51,3 +51,6 @@ module.exports = class StreamController
     $scope.sort.name = 'Newest'
 
     $scope.shouldShowThread = (container) -> true
+
+    $scope.loadMore = (number) ->
+      streamer.send({messageType: 'more_hits', moreHits: number})
