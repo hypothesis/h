@@ -36,7 +36,7 @@
     "ng-tags-input": "2.2.0",
     "node-iterator-shim": "^1.0.1",
     "node-uuid": "^1.4.3",
-    "scroll-to-element": "0.0.2",
+    "scroll-into-view": "^1.3.1",
     "showdown": "^1.2.1",
     "uglify-js": "^2.4.14",
     "unorm": "^1.3.3"

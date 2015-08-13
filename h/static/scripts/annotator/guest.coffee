@@ -1,5 +1,5 @@
 baseURI = require('base-url')()
-scrollToElement = require('scroll-to-element')
+scrollIntoView = require('scroll-into-view')
 
 Annotator = require('annotator')
 Annotator.Plugin.BucketBar = BucketBar = require('./plugin/bucket-bar')
@@ -116,11 +116,7 @@ module.exports = class Guest extends Annotator
     crossframe.on 'scrollToAnnotation', (tag) =>
       for anchor in @anchors when anchor.highlights?
         if anchor.annotation.$$tag is tag
-          scrollToElement(anchor.highlights[0], {
-            ease: 'out-expo',
-            offset: -(BucketBar.BUCKET_TOP_THRESHOLD + BucketBar.BUCKET_SIZE),
-            duration: 1000,
-          })
+          scrollIntoView(anchor.highlights[0])
 
     crossframe.on 'getDocumentInfo', (cb) =>
       this.getDocumentInfo()

@@ -1,7 +1,7 @@
 Annotator = require('annotator')
 $ = Annotator.$
 
-scrollToElement = require('scroll-to-element')
+scrollIntoView = require('scroll-into-view')
 
 highlighter = require('../highlighter')
 
@@ -37,11 +37,7 @@ scrollToClosest = (anchors, direction) ->
         acc
   , {}
 
-  scrollToElement(next.highlights[0], {
-    ease: 'out-expo',
-    offset: -(BUCKET_TOP_THRESHOLD + BUCKET_SIZE),
-    duration: 1000,
-  })
+  scrollIntoView(next.highlights[0])
 
 
 class BucketBar extends Annotator.Plugin
