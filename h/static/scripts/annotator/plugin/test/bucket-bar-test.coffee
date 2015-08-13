@@ -1,9 +1,9 @@
-bb = require('../bucket-bar')
+BucketBar = require('../bucket-bar')
 
 describe 'Annotator.BucketBar', ->
   createBucketBar = (options) ->
     element = document.createElement('div')
-    new bb.BucketBar(element, options || {})
+    new BucketBar(element, options || {})
 
   # Yes this is testing a private method. Yes this is bad practice, but I'd
   # rather test this functionality in a private method than not test it at all.
@@ -14,8 +14,8 @@ describe 'Annotator.BucketBar', ->
       bucketBar.buckets = [['AN ANNOTATION?']]
       bucketBar.index = [
         0,
-        bucketBar.BUCKET_THRESHOLD_PAD - 12,
-        bucketBar.BUCKET_THRESHOLD_PAD + bucketBar.BUCKET_SIZE + 6
+        BucketBar.BUCKET_TOP_THRESHOLD - 1,
+        BucketBar.BUCKET_TOP_THRESHOLD,
       ]
       bucketBar
 

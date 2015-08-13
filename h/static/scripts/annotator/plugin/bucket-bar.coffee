@@ -5,6 +5,10 @@ scrollToElement = require('scroll-to-element')
 
 highlighter = require('../highlighter')
 
+BUCKET_SIZE = 16                              # Regular bucket size
+BUCKET_NAV_SIZE = BUCKET_SIZE + 6             # Bucket plus arrow (up/down)
+BUCKET_TOP_THRESHOLD = 100 + BUCKET_NAV_SIZE  # Toolbar
+
 
 # Scroll to the next closest anchor off screen in the given direction.
 scrollToClosest = (anchors, direction) ->
@@ -17,9 +21,9 @@ scrollToClosest = (anchors, direction) ->
     rect = highlighter.getBoundingClientRect(anchor.highlights)
 
     # Ignore if it's not in the right direction.
-    if (dir is 1 and rect.top >= 0)
+    if (dir is 1 and rect.top >= BUCKET_TOP_THRESHOLD)
       return acc
-    else if (dir is -1 and rect.top <= window.innerHeight)
+    else if (dir is -1 and rect.top <= window.innerHeight - BUCKET_NAV_SIZE)
       return acc
 
     # Select the closest to carry forward
@@ -35,16 +39,12 @@ scrollToClosest = (anchors, direction) ->
 
   scrollToElement(next.highlights[0], {
     ease: 'out-expo',
-    offset: window.innerHeight * -.2,
+    offset: -(BUCKET_TOP_THRESHOLD + BUCKET_SIZE),
     duration: 1000,
   })
 
 
-class Annotator.Plugin.BucketBar extends Annotator.Plugin
-  # prototype constants
-  BUCKET_THRESHOLD_PAD: 106
-  BUCKET_SIZE: 16
-
+class BucketBar extends Annotator.Plugin
   # svg skeleton
   html: """
         <div class="annotator-bucket-bar">
@@ -119,9 +119,9 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       x = rect.top
       h = rect.bottom - rect.top
 
-      if x < 0
+      if x < BUCKET_TOP_THRESHOLD
         if anchor not in above then above.push anchor
-      else if x + h > window.innerHeight
+      else if x > window.innerHeight - BUCKET_NAV_SIZE
         if anchor not in below then below.push anchor
       else
         points.push [x, 1, anchor]
@@ -194,13 +194,12 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
 
     # Scroll up
     @buckets.unshift [], above, []
-    @index.unshift 0, @BUCKET_THRESHOLD_PAD + 6,
-      (@BUCKET_THRESHOLD_PAD + @BUCKET_SIZE) + 6
+    @index.unshift 0, BUCKET_TOP_THRESHOLD - 1, BUCKET_TOP_THRESHOLD
 
     # Scroll down
     @buckets.push [], below, []
-    @index.push window.innerHeight - @BUCKET_SIZE - 12,
-      window.innerHeight - @BUCKET_SIZE - 11,
+    @index.push window.innerHeight - BUCKET_NAV_SIZE,
+      window.innerHeight - BUCKET_NAV_SIZE + 1,
       window.innerHeight
 
     # Calculate the total count for each bucket (without replies) and the
@@ -274,9 +273,14 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
       el.toggleClass('upper', @isUpper(d))
       el.toggleClass('lower', @isLower(d))
 
+      if @isUpper(d) or @isLower(d)
+        bucketSize = BUCKET_NAV_SIZE
+      else
+        bucketSize = BUCKET_SIZE
+
       el.css({
         top: (@index[d] + @index[d+1]) / 2
-        marginTop: if @isUpper(d) or @isLower(d) then -9 else -8
+        marginTop: -bucketSize / 2
         display: unless bucketLength then 'none' else ''
       })
 
@@ -286,4 +290,11 @@ class Annotator.Plugin.BucketBar extends Annotator.Plugin
   isUpper:   (i) -> i == 1
   isLower:   (i) -> i == @index.length - 2
 
-exports.BucketBar = Annotator.Plugin.BucketBar
+
+# Export constants
+BucketBar.BUCKET_SIZE = BUCKET_SIZE
+BucketBar.BUCKET_NAV_SIZE = BUCKET_NAV_SIZE
+BucketBar.BUCKET_TOP_THRESHOLD = BUCKET_TOP_THRESHOLD
+
+# Export as a module
+module.exports = BucketBar

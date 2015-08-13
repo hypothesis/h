@@ -2,7 +2,8 @@ baseURI = require('base-url')()
 scrollToElement = require('scroll-to-element')
 
 Annotator = require('annotator')
-Annotator.Plugin.CrossFrame = require('./plugin/cross-frame')
+Annotator.Plugin.BucketBar = BucketBar = require('./plugin/bucket-bar')
+Annotator.Plugin.CrossFrame = CrossFrame = require('./plugin/cross-frame')
 $ = Annotator.$
 
 highlighter = require('./highlighter')
@@ -117,7 +118,7 @@ module.exports = class Guest extends Annotator
         if anchor.annotation.$$tag is tag
           scrollToElement(anchor.highlights[0], {
             ease: 'out-expo',
-            offset: window.innerHeight * -.2,
+            offset: -(BucketBar.BUCKET_TOP_THRESHOLD + BucketBar.BUCKET_SIZE),
             duration: 1000,
           })
 
