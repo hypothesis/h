@@ -1,3 +1,29 @@
+Next release
+============
+
+Bug fixes
+---------
+
+- Clicking on annotation cards and the navigational bucket indicators should
+  work once more in the PDF.js viewer.
+
+- Fixed an issue with timezone localization that caused unnecessary errors to
+  be thrown and caught. Auditing this resulted in a removal of some significant
+  bloat from unnecessary code.
+
+Features
+--------
+
+- When sorting annotations by document location the TextPositionSelector
+  information is now used instead of highlight position information. This
+  causes less shuffling and re-rendering on load and when lazy-rendered pages
+  in the PDF.js viewer appear and disappear at the cost of seeing annotations
+  that have changed position or that target content within fixed position
+  containers sometimes appear to be out of order.
+
+- Removed an unnecessary call, originating in the infinite scrolling code, from
+  the sidebar widget.
+
 0.7.0 (2015-08-10)
 ==================
 
