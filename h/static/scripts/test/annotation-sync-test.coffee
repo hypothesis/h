@@ -166,7 +166,7 @@ describe 'AnnotationSync', ->
         publish('sync', bodies, callback)
 
     describe 'the "loadAnnotations" event', ->
-      it 'publishes the "loadAnnotations" event with parsed annotations', ->
+      it 'publishes the "annotationsLoaded" event with parsed annotations', ->
         options.parser = sinon.spy((x) -> x)
         annSync = createAnnotationSync()
 
@@ -175,7 +175,7 @@ describe 'AnnotationSync', ->
         publish('loadAnnotations', bodies, ->)
 
         assert.called(options.parser)
-        assert.calledWith(options.emit, 'loadAnnotations', annotations)
+        assert.calledWith(options.emit, 'annotationsLoaded', annotations)
 
   describe 'application event handlers', ->
     describe 'the "beforeAnnotationCreated" event', ->

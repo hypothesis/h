@@ -95,14 +95,14 @@ module.exports = class AnnotationSync
       @_emit('annotationDeleted', annotation)
       cb(null, this._format(annotation))
 
+    'loadAnnotations': (bodies, cb) ->
+      annotations = (this._parse(a) for a in bodies)
+      @_emit('annotationsLoaded', annotations)
+      cb(null, annotations)
+
     'sync': (bodies, cb) ->
       annotations = (this._format(this._parse(b)) for b in bodies)
       @_emit('sync', annotations)
-      cb(null, annotations)
-
-    'loadAnnotations': (bodies, cb) ->
-      annotations = (this._parse(a) for a in bodies)
-      @_emit('loadAnnotations', annotations)
       cb(null, annotations)
 
   # Handlers for events coming from this frame, to send them across the channel

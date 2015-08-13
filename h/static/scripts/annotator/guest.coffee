@@ -59,25 +59,14 @@ module.exports = class Guest extends Annotator
       on: (event, handler) =>
         this.subscribe(event, handler)
       emit: (event, args...) =>
-        switch event
-          # AnnotationSync tries to emit some events without taking actions.
-          # We catch them and perform the right action (which will then emit
-          # the event for real)
-          when 'annotationDeleted'
-            this.deleteAnnotation(args...)
-          when 'loadAnnotations'
-            this.loadAnnotations(args...)
-          # Other events can simply be emitted.
-          else
-            this.publish(event, args)
-      formatter: (annotation) =>
-        formatted = {}
-        for k, v of annotation when k isnt 'anchors'
-          formatted[k] = v
-        formatted
+        this.publish(event, args)
 
     this.addPlugin('CrossFrame', cfOptions)
-    @crossframe = this._connectAnnotationUISync(this.plugins.CrossFrame)
+    @crossframe = this.plugins.CrossFrame
+
+    @crossframe.onConnect(=> this.publish('panelReady'))
+    this._connectAnnotationSync(@crossframe)
+    this._connectAnnotationUISync(@crossframe)
 
     # Load plugins
     for own name, opts of @options
@@ -109,14 +98,20 @@ module.exports = class Guest extends Annotator
         uri = uri.toString()
         return {uri, metadata}
 
+  _connectAnnotationSync: (crossframe) ->
+    this.subscribe 'annotationDeleted', (annotation) =>
+      this.detach(annotation)
+
+    this.subscribe 'annotationsLoaded', (annotations) =>
+      for annotation in annotations
+        this.anchor(annotation)
+
   _connectAnnotationUISync: (crossframe) ->
-    crossframe.onConnect(=> this.publish('panelReady'))
-    crossframe.on('onEditorHide', this.onEditorHide)
-    crossframe.on('onEditorSubmit', this.onEditorSubmit)
     crossframe.on 'focusAnnotations', (tags=[]) =>
       for anchor in @anchors when anchor.highlights?
         toggle = anchor.annotation.$$tag in tags
         $(anchor.highlights).toggleClass('annotator-hl-focused', toggle)
+
     crossframe.on 'scrollToAnnotation', (tag) =>
       for anchor in @anchors when anchor.highlights?
         if anchor.annotation.$$tag is tag
@@ -125,10 +120,12 @@ module.exports = class Guest extends Annotator
             offset: window.innerHeight * -.2,
             duration: 1000,
           })
+
     crossframe.on 'getDocumentInfo', (cb) =>
       this.getDocumentInfo()
       .then((info) -> cb(null, info))
       .catch((reason) -> cb(reason))
+
     crossframe.on 'setVisibleHighlights', (state) =>
       this.publish 'setVisibleHighlights', state
 
@@ -248,11 +245,23 @@ module.exports = class Guest extends Annotator
 
     return Promise.all(anchors).then(sync)
 
-  # Provided for backward compatibility.
-  # Currently only used by #loadAnnotations().
-  setupAnnotation: (annotation) ->
-    this.anchor(annotation)
-    return annotation
+  detach: (annotation) ->
+    anchors = []
+    targets = []
+    unhighlight = []
+
+    for anchor in @anchors
+      if anchor.annotation is annotation
+        unhighlight.push(anchor.highlights ? [])
+      else
+        anchors.push(anchor)
+
+    this.anchors = anchors
+
+    unhighlight = Array::concat(unhighlight...)
+    requestAnimationFrame =>
+      highlighter.removeHighlights(unhighlight)
+      this.plugins.BucketBar?.update()
 
   createAnnotation: (annotation = {}) ->
     self = this
@@ -289,26 +298,6 @@ module.exports = class Guest extends Annotator
 
   createHighlight: ->
     return this.createAnnotation({$highlight: true})
-
-  deleteAnnotation: (annotation) ->
-    anchors = []
-    targets = []
-    unhighlight = []
-
-    for anchor in @anchors
-      if anchor.annotation is annotation
-        unhighlight.push(anchor.highlights ? [])
-      else
-        anchors.push(anchor)
-
-    this.anchors = anchors
-    this.publish('annotationDeleted', [annotation])
-    this.plugins.BucketBar?.update()
-
-    unhighlight = Array::concat(unhighlight...)
-    requestAnimationFrame -> highlighter.removeHighlights(unhighlight)
-
-    return annotation
 
   showAnnotations: (annotations) =>
     tags = (a.$$tag for a in annotations)

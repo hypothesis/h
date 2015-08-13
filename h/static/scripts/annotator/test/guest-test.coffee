@@ -39,18 +39,13 @@ describe 'Guest', ->
   afterEach ->
     sandbox.restore()
 
-  describe 'setting up the bridge', ->
+  describe 'cross frame', ->
 
     it 'provides an event bus for the annotation sync module', ->
       guest = createGuest()
       options = CrossFrame.lastCall.args[1]
       assert.isFunction(options.on)
       assert.isFunction(options.emit)
-
-    it 'provides a formatter for the annotation sync module', ->
-      guest = createGuest()
-      options = CrossFrame.lastCall.args[1]
-      assert.isFunction(options.formatter)
 
     it 'publishes the "panelReady" event when a connection is established', ->
       handler = sandbox.stub()
@@ -59,7 +54,7 @@ describe 'Guest', ->
       fakeCrossFrame.onConnect.yield()
       assert.called(handler)
 
-    describe 'the event bus .on method', ->
+    describe 'event subscription', ->
       options = null
       guest = null
 
@@ -80,7 +75,7 @@ describe 'Guest', ->
         assert.calledWith(fooHandler, '1', '2')
         assert.calledWith(barHandler, '1', '2')
 
-    describe 'the event bus .emit method', ->
+    describe 'event publication', ->
       options = null
       guest = null
 
@@ -88,36 +83,21 @@ describe 'Guest', ->
         guest = createGuest()
         options = CrossFrame.lastCall.args[1]
 
-      it 'calls deleteAnnotation when an annotationDeleted event is received', ->
+      it 'detaches annotations on "annotationDeleted"', ->
         ann = {id: 1, $$tag: 'tag1'}
-        sandbox.stub(guest, 'deleteAnnotation')
-
+        sandbox.stub(guest, 'detach')
         options.emit('annotationDeleted', ann)
-        assert.called(guest.deleteAnnotation)
-        assert.calledWith(guest.deleteAnnotation, ann)
+        assert.calledOnce(guest.detach)
+        assert.calledWith(guest.detach, ann)
 
-      it 'does not proxy the annotationDeleted event', ->
-        handler = sandbox.stub()
-        guest.subscribe('annotationDeleted', handler)
-
-        options.emit('annotationDeleted', {})
-        # Called only once by the deleteAnnotation() method.
-        assert.calledOnce(handler)
-
-      it 'calls loadAnnotations when an loadAnnotations event is received', ->
-        ann = {id: 1, $$tag: 'tag1'}
-        target = sandbox.stub(guest, 'loadAnnotations')
-
-        options.emit('loadAnnotations', [ann])
-        assert.called(target)
-        assert.calledWith(target, [ann])
-
-      it 'does not proxy the loadAnnotations event', ->
-        handler = sandbox.stub()
-        guest.subscribe('loadAnnotations', handler)
-
-        options.emit('loadAnnotations', [])
-        assert.notCalled(handler)
+      it 'anchors annotations on "annotationsLoaded"', ->
+        ann1 = {id: 1, $$tag: 'tag1'}
+        ann2 = {id: 2, $$tag: 'tag2'}
+        sandbox.stub(guest, 'anchor')
+        options.emit('annotationsLoaded', [ann1, ann2])
+        assert.calledTwice(guest.anchor)
+        assert.calledWith(guest.anchor, ann1)
+        assert.calledWith(guest.anchor, ann2)
 
       it 'proxies all other events into the annotator event system', ->
         fooHandler = sandbox.stub()
@@ -132,46 +112,9 @@ describe 'Guest', ->
         assert.calledWith(fooHandler, '1', '2')
         assert.calledWith(barHandler, '1', '2')
 
-    describe 'the formatter', ->
-      options = null
-      guest = null
-
-      beforeEach ->
-        guest = createGuest()
-        options = CrossFrame.lastCall.args[1]
-
-      it 'keeps an existing uri property', ->
-        ann = {$$tag: 'tag1', uri: 'http://example.com/foo'}
-        formatted = options.formatter(ann)
-        assert.equal(formatted.uri, 'http://example.com/foo')
-
-      it 'copies the properties from the provided annotation', ->
-        ann = {$$tag: 'tag1'}
-        formatted = options.formatter(ann)
-        assert.equal(formatted.$$tag, 'tag1')
-
-      it 'strips properties that are not whitelisted', ->
-        ann = {$$tag: 'tag1', anchors: []}
-        formatted = options.formatter(ann)
-        assert.notProperty(formatted, 'anchors')
-
   describe 'annotation UI events', ->
     emitGuestEvent = (event, args...) ->
       fn(args...) for [evt, fn] in fakeCrossFrame.on.args when event == evt
-
-    describe 'on "onEditorHide" event', ->
-      it 'hides the editor', ->
-        target = sandbox.stub(Guest.prototype, 'onEditorHide')
-        guest = createGuest()
-        emitGuestEvent('onEditorHide')
-        assert.called(target)
-
-    describe 'on "onEditorSubmit" event', ->
-      it 'sumbits the editor', ->
-        target = sandbox.stub(Guest.prototype, 'onEditorSubmit')
-        guest = createGuest()
-        emitGuestEvent('onEditorSubmit')
-        assert.called(target)
 
     describe 'on "focusAnnotations" event', ->
       it 'focuses any annotations with a matching tag', ->
