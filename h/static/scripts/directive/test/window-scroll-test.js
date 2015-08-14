@@ -1,4 +1,3 @@
-var module = angular.mock.module;
 var inject = angular.mock.inject;
 
 var windowScroll = require('../window-scroll');
@@ -13,12 +12,6 @@ describe('windowScroll', function () {
   var scope = null;
   var elem = null;
   var attr = null;
-
-  before(function () {
-    angular.module('h', []);
-  });
-
-  beforeEach(module('h'));
 
   beforeEach(inject(function ($injector) {
     directive = $injector.invoke(windowScroll);
