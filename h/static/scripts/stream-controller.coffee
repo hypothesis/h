@@ -13,6 +13,18 @@ module.exports = class StreamController
      queryParser,   searchFilter,   store,
      streamer,   streamFilter,   threading,   annotationMapper
   ) ->
+    offset = 0
+
+    fetch = (limit) ->
+      options = {offset, limit}
+      searchParams = searchFilter.toObject($routeParams.q)
+      query = angular.extend(options, searchParams)
+      store.SearchResource.get(query, load)
+
+    load = ({rows}) ->
+        offset += rows.length
+        annotationMapper.loadAnnotations(rows)
+
     # Disable the thread filter (client-side search)
     $scope.$on '$routeChangeSuccess', ->
       if $scope.threadFilter?
@@ -39,11 +51,8 @@ module.exports = class StreamController
     queryParser.populateFilter streamFilter, terms
     streamer.send({filter: streamFilter.getFilter()})
 
-    # Perform the search
-    searchParams = searchFilter.toObject $routeParams.q
-    query = angular.extend limit: 20, searchParams
-    store.SearchResource.get query, ({rows}) ->
-      annotationMapper.loadAnnotations(rows)
+    # Perform the initial search
+    fetch(20)
 
     $scope.isEmbedded = false
     $scope.isStream = true
@@ -52,5 +61,4 @@ module.exports = class StreamController
 
     $scope.shouldShowThread = (container) -> true
 
-    $scope.loadMore = (number) ->
-      streamer.send({messageType: 'more_hits', moreHits: number})
+    $scope.loadMore = fetch

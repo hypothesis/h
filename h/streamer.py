@@ -441,9 +441,6 @@ class WebSocket(_WebSocket):
     request = None
     query = None
 
-    offsetFrom = 0
-    received = 0
-
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('heartbeat_freq', 30.0)
         super(WebSocket, self).__init__(*args, **kwargs)
@@ -485,8 +482,6 @@ class WebSocket(_WebSocket):
     def send_annotations(self):
         user = self.user
         annotations = Annotation.search_raw(query=self.query.query, user=user)
-        self.received = len(annotations)
-
         packet = _annotation_packet(annotations, 'past')
         data = json.dumps(packet)
         self.send(data)
@@ -519,7 +514,6 @@ class WebSocket(_WebSocket):
 
             if msg_type == 'filter':
                 payload = data['filter']
-                self.offsetFrom = 0
 
                 # Let's try to validate the schema
                 validate(payload, filter_schema)
@@ -529,15 +523,6 @@ class WebSocket(_WebSocket):
 
                 self.filter = FilterHandler(payload)
                 self.query = FilterToElasticFilter(payload, self.request)
-                self.offsetFrom = 0
-            elif msg_type == 'more_hits':
-                if self.query is not None:
-                    more_hits = data.get('moreHits', 10)
-
-                    self.query.query['from'] = self.offsetFrom
-                    self.query.query['size'] = more_hits
-                    self.send_annotations()
-                    self.offsetFrom += self.received
             elif msg_type == 'client_id':
                 self.client_id = data.get('value')
         except:
