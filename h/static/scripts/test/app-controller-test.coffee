@@ -19,8 +19,9 @@ describe 'AppController', ->
 
   sandbox = null
 
-  createController = ->
-    $controller('AppController', {$scope: $scope})
+  createController = (locals={}) ->
+    locals.$scope = $scope
+    $controller('AppController', locals)
 
   before ->
     angular.module('h', ['ngRoute'])
@@ -115,6 +116,19 @@ describe 'AppController', ->
 
   afterEach ->
     sandbox.restore()
+
+  describe 'isEmbedded property', ->
+
+    it 'is false if the window is the top window', ->
+      $window = {}
+      $window.top = $window
+      createController({$window})
+      assert.isFalse($scope.isEmbedded)
+
+    it 'is true if the window is not the top window', ->
+      $window = {top: {}}
+      createController({$window})
+      assert.isTrue($scope.isEmbedded)
 
   it 'watches the identity service for identity change events', ->
     createController()

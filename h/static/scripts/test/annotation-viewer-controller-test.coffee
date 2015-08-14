@@ -40,10 +40,6 @@ describe "AnnotationViewerController", ->
       "AnnotationViewerController", locals)
     return locals
 
-  it "sets the isEmbedded property to false", ->
-    {$scope} = createAnnotationViewerController({})
-    assert.isFalse($scope.isEmbedded)
-
   it "calls the annotation API to get the annotation", ->
     {store} = createAnnotationViewerController({})
     assert store.AnnotationResource.read.args[0][0].id == "test_annotation_id"
