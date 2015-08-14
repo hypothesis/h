@@ -2,7 +2,6 @@
 
 import logging
 
-from elasticsearch import helpers
 import webob.multidict
 
 from h.api import models
