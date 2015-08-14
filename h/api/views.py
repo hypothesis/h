@@ -2,8 +2,10 @@
 
 """HTTP/REST API for interacting with the annotation store."""
 
+import json
 import logging
 
+import gevent
 from pyramid import httpexceptions
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
@@ -217,6 +219,55 @@ def delete(context, request):
         'id': annotation['id'],
         'deleted': True,
     }
+
+
+@view_config(context=Root, name='events', renderer='events', http_cache=0)
+def event_source(request):
+    percolator = search_lib.percolator(request, request.params)
+    percolator['_ttl'] = 60000
+
+    if 'X-Client-Id' in request.headers:
+        percolator['id'] = request.headers['X-Client-Id']
+    else:
+        percolator.save()
+
+    return _consume_annotation_events(request, percolator)
+
+
+def _consume_annotation_events(request, percolator):
+    topic_id = 'percolator-{}#ephemeral'.format(percolator['id'])
+    reader = request.get_queue_reader(topic_id, 'client#ephemeral')
+    queue = gevent.queue.Queue(maxsize=1)
+
+    def on_message(reader, message=None):
+        event = json.loads(message.body)
+        event['data'] = search_lib.render(event['data'])
+        queue.put(event)
+
+    reader.on_message.connect(on_message)
+    reader.start(block=False)
+
+    def refresh():
+        while True:
+            percolator.save()
+            gevent.sleep(30)
+
+    refresher = gevent.spawn(refresh)
+
+    try:
+        while True:
+            try:
+                yield queue.get(block=True, timeout=30)
+            except gevent.queue.Empty:
+                yield None  # heartbeat
+    finally:
+        # Silence a warning log line on close.
+        # TODO: maybe file with nsqd to ignore EBADF.
+        reader.logger.setLevel(logging.ERROR)
+        reader.close()
+        reader.join()
+        refresher.kill()
+        refresher.join()
 
 
 @forbidden_view_config(containment=Root, renderer='json')
