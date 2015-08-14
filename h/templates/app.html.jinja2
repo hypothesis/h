@@ -18,7 +18,7 @@
       <div class="pull-left">
         <button class="btn btn-clean"
                 ng-click="shareDialog.visible = !shareDialog.visible"
-                ng-show="showShareButton"
+                ng-if="isEmbedded"
                 title="Share this page">
                 <i class="h-icon-share btn-icon"></i></button>
       </div>

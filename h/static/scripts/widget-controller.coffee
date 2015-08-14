@@ -10,8 +10,6 @@ module.exports = class WidgetController
      $scope,   annotationUI, crossframe, annotationMapper,
      streamer,   streamFilter,   store
   ) ->
-    # Tells the view that these annotations are embedded into the owner doc
-    $scope.isEmbedded = true
     $scope.isStream = true
 
     @chunkSize = 200

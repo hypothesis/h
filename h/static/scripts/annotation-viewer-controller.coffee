@@ -11,7 +11,6 @@ module.exports = class AnnotationViewerController
      streamer,   store,   streamFilter,   annotationMapper
   ) ->
     # Tells the view that these annotations are standalone
-    $scope.isEmbedded = false
     $scope.isStream = false
 
     # Provide no-ops until these methods are moved elsewere. They only apply

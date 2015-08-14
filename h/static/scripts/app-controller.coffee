@@ -57,10 +57,7 @@ module.exports = class AppController
     $scope.shareDialog = visible: false
 
     # Check to see if we are on the stream page so we can hide share button.
-    if $window.top is $window
-      $scope.showShareButton = false
-    else
-      $scope.showShareButton = true
+    $scope.isEmbedded = $window.top isnt $window
 
     cleanupAnnotations = ->
       # Clean up all the annotations

@@ -54,7 +54,6 @@ module.exports = class StreamController
     # Perform the initial search
     fetch(20)
 
-    $scope.isEmbedded = false
     $scope.isStream = true
 
     $scope.sort.name = 'Newest'
