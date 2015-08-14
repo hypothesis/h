@@ -101,12 +101,12 @@ module.exports = angular.module('h', [
 .directive('statusButton', require('./directive/status-button'))
 .directive('thread', require('./directive/thread'))
 .directive('threadFilter', require('./directive/thread-filter'))
-.directive('whenscrolled', require('./directive/whenscrolled'))
 .directive('match', require('./directive/match'))
 .directive('spinner', require('./directive/spinner'))
 .directive('tabbable', require('./directive/tabbable'))
 .directive('tabReveal', require('./directive/tab-reveal'))
 .directive('shareDialog', require('./directive/share-dialog'))
+.directive('windowScroll', require('./directive/window-scroll'))
 
 .filter('converter', require('./filter/converter'))
 .filter('moment', require('./filter/moment'))

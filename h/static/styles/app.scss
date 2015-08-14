@@ -9,10 +9,7 @@ body {
   font-family: $sans-font-family;
   font-weight: 300;
   font-size: .8em;
-  height: 100%;
-  width: 100%;
   padding-top: 30px;
-  position: fixed;
 }
 
 #{nest("hgroup", "#{headings()}")} {
@@ -27,12 +24,7 @@ ol {
 }
 
 #wrapper {
-  height: 100%;
   padding: .72em;
-  text-align: center;
-  overflow-y: auto;
-  position: relative;
-  -webkit-overflow-scrolling: touch;
 
   @include respond-to(tablets desktops) {
     padding-bottom: 4em;
@@ -50,7 +42,6 @@ ol {
 .content {
   margin-left: auto;
   margin-right: auto;
-  text-align: left;
 
   @include respond-to(tablets desktops) {
     margin: auto;
