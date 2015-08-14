@@ -14,6 +14,7 @@ __all__ = (
     'Document',
     'Feature',
     'Group',
+    'Percolator',
     'NipsaUser',
     'Subscriptions',
     'User',
@@ -26,6 +27,7 @@ Document = api_models.Document
 Feature = features.Feature
 Group = groups_models.Group
 NipsaUser = nipsa_models.NipsaUser
+Percolator = api_models.Percolator
 Subscriptions = notification_models.Subscriptions
 User = accounts_models.User
 
