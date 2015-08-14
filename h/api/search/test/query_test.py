@@ -213,7 +213,7 @@ def test_build_for_user():
     q = query.build(multidict.NestedMultiDict({"user": "bob"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"user": "bob"}}]}}
+        "bool": {"should": [{"match": {"user": "bob"}}]}}
 
 
 @build_fixtures
@@ -227,7 +227,7 @@ def test_build_for_multiple_users():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"user": "fred"}},
                 {"match": {"user": "bob"}}
             ]
@@ -241,7 +241,7 @@ def test_build_for_tag():
     q = query.build(multidict.NestedMultiDict({"tags": "foo"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"tags": "foo"}}]}}
+        "bool": {"should": [{"match": {"tags": "foo"}}]}}
 
 
 @build_fixtures
@@ -255,7 +255,7 @@ def test_build_for_multiple_tags():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"tags": "foo"}},
                 {"match": {"tags": "bar"}}
             ]
@@ -270,7 +270,7 @@ def test_build_with_combined_user_and_tag_query():
         multidict.NestedMultiDict({"user": "bob", "tags": "foo"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [
+        "bool": {"should": [
             {"match": {"user": "bob"}},
             {"match": {"tags": "foo"}},
         ]}}
@@ -286,7 +286,7 @@ def test_build_with_keyword():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {
                     "multi_match": {
                         "fields": ["quote", "tags", "text", "uri.parts",
@@ -310,7 +310,7 @@ def test_build_with_multiple_keywords():
     q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"multi_match": {
+        "bool": {"should": [{"multi_match": {
             "fields": ["quote", "tags", "text", "uri.parts", "user"],
             "query": ["howdy", "there"],
             "type": "cross_fields"
@@ -427,7 +427,7 @@ def test_build_with_single_text_param():
     q = query.build(multidict.NestedMultiDict({"text": "foobar"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"text": "foobar"}}]}}
+        "bool": {"should": [{"match": {"text": "foobar"}}]}}
 
 
 @build_fixtures
@@ -440,7 +440,7 @@ def test_build_with_multiple_text_params():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"text": "foo"}},
                 {"match": {"text": "bar"}}
             ]
@@ -454,7 +454,7 @@ def test_build_with_single_quote_param():
     q = query.build(multidict.NestedMultiDict({"quote": "foobar"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"quote": "foobar"}}]}}
+        "bool": {"should": [{"match": {"quote": "foobar"}}]}}
 
 
 @build_fixtures
@@ -467,7 +467,7 @@ def test_build_with_multiple_quote_params():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"quote": "foo"}},
                 {"match": {"quote": "bar"}}
             ]
@@ -523,7 +523,7 @@ def test_build_with_arbitrary_params():
 
     assert q["query"]["filtered"]["query"] == {
         'bool': {
-            'must': [
+            'should': [
                 {
                     'match': {'foo.bar': 'arbitrary'}
                 }

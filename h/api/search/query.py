@@ -103,7 +103,7 @@ def build(request_params, effective_principals, userid=None,
     query = {"match_all": {}}
 
     if matches:
-        query = {"bool": {"must": matches}}
+        query = {"bool": {"should": matches}}
 
     if filters:
         query = {
