@@ -1,3 +1,20 @@
+Next release
+============
+
+Bug fixes
+---------
+
+- Fixed a regression that prevented infinite scroll from working on the stream.
+
+Features
+--------
+
+- Improve scrolling performance by using a fluidly sized body and scrolling
+  the whole document rather than a fixed body.
+
+- Rewrite infinite scroll pagination to use regular HTTP requests instead of
+  WebSocket.
+
 0.7.1 (2015-08-13)
 ==================
 
