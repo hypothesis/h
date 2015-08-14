@@ -319,7 +319,7 @@ def test_build_with_multiple_keywords():
 
 
 @build_fixtures
-def test_build_for_uri(uri):
+def test_build_for_uri(auth_filter, nipsa, uri):
     """'uri' args are returned in the query dict in a "match" clause.
 
     This is what happens when you open the sidebar on a page and it loads
@@ -334,14 +334,20 @@ def test_build_for_uri(uri):
     q2 = query.build(
         multidict.NestedMultiDict({"uri": "http://whitehouse.gov/"}), [])
 
-    assert q1["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
-    assert q2["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"uri": "http://whitehouse.gov/"}}]}}
+    assert q1["query"]["filtered"]["filter"]["and"] == [
+        auth_filter.return_value,
+        nipsa.nipsa_filter.return_value,
+        {"query": {"match": {"uri": "http://example.com/"}}},
+    ]
+    assert q2["query"]["filtered"]["filter"]["and"] == [
+        auth_filter.return_value,
+        nipsa.nipsa_filter.return_value,
+        {"query": {"match": {"uri": "http://whitehouse.gov/"}}},
+    ]
 
 
 @build_fixtures
-def test_build_for_uri_with_multiple_representations(uri):
+def test_build_for_uri_with_multiple_representations(auth_filter, nipsa, uri):
     """It should expand the search to all URIs.
 
     If h.api.uri.expand returns multiple documents for the URI then
@@ -358,26 +364,25 @@ def test_build_for_uri_with_multiple_representations(uri):
     q = query.build(
         multidict.NestedMultiDict({"uri": "http://example.com/"}), [])
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {
-            "must": [
-                {
-                    "bool": {
-                        "minimum_should_match": 1,
-                        "should": [
-                            {"match": {"uri": "http://example.com/"}},
-                            {"match": {"uri": "http://example2.com/"}},
-                            {"match": {"uri": "http://example3.com/"}}
-                        ]
-                    }
+    assert q["query"]["filtered"]["filter"]["and"] == [
+        auth_filter.return_value,
+        nipsa.nipsa_filter.return_value,
+        {
+            "query": {
+                "bool": {
+                    "should": [
+                        {"match": {"uri": "http://example.com/"}},
+                        {"match": {"uri": "http://example2.com/"}},
+                        {"match": {"uri": "http://example3.com/"}}
+                    ]
                 }
-            ]
-        }
-    }
+            }
+        },
+    ]
 
 
-@mock.patch("h.api.search.query.uri")
-def test_build_for_uri_normalized(uri):
+@build_fixtures
+def test_build_for_uri_normalized(auth_filter, nipsa, uri):
     """
     Uses a term filter against target.scope to filter for URI.
 
@@ -400,11 +405,20 @@ def test_build_for_uri_normalized(uri):
 
     uri.expand.assert_called_with("http://example.com/")
 
-    expected_filter = {"or": [
-        {"term": {"target.scope": "http://giraffes.com"}},
-        {"term": {"target.scope": "https://elephants.com"}},
-    ]}
-    assert expected_filter in q["query"]["filtered"]["filter"]["and"]
+    terms_filter = {
+        "terms": {
+            "target.scope": [
+                "http://giraffes.com",
+                "https://elephants.com",
+            ]
+        }
+    }
+
+    assert q["query"]["filtered"]["filter"]["and"] == [
+        auth_filter.return_value,
+        nipsa.nipsa_filter.return_value,
+        terms_filter,
+    ]
 
 
 @build_fixtures
