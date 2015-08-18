@@ -133,7 +133,7 @@ def annotations_index(request):
     search_normalized_uris = request.feature('search_normalized')
 
     user = get_user(request)
-    results = search_lib.index(user=user,
+    results = search_lib.index(request, user=user,
                                search_normalized_uris=search_normalized_uris)
 
     return {

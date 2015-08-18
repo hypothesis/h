@@ -48,13 +48,13 @@ def search(request, request_params, user=None, search_normalized_uris=False):
     return {"rows": rows, "total": total}
 
 
-def index(user=None, search_normalized_uris=False):
+def index(request, user=None, search_normalized_uris=False):
     """
     Return the 20 most recent annotations, most-recent first.
 
     Returns the 20 most recent annotations that are visible to the given user,
     or that are public if user is None.
     """
-    return search(webob.multidict.NestedMultiDict({"limit": 20}),
+    return search(request, webob.multidict.NestedMultiDict({"limit": 20}),
                   user=user,
                   search_normalized_uris=search_normalized_uris)
