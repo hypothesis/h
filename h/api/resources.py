@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS
+from pyramid.security import Allow, Authenticated
 
 from .models import Annotation
 
