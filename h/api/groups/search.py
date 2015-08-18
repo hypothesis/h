@@ -33,7 +33,7 @@ def group_filter(request):
     if len(hashids) > 1:
         should_clauses.append({'terms': {'group': hashids}})
     elif len(hashids) == 1:
-        should_clauses.append({'term':{ 'group': hashids[0]}})
+        should_clauses.append({'term': {'group': hashids[0]}})
 
     if len(should_clauses) > 1:
         # Combining the should_clauses with a {'bool': {'should': [...]}}
