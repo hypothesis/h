@@ -289,3 +289,12 @@ use and configure it.
 .. _pyramid_debugtoolbar: https://github.com/Pylons/pyramid_debugtoolbar
 .. _pyramid_debugtoolbar documentation: http://docs.pylonsproject.org/projects/pyramid-debugtoolbar/en/latest/
 
+
+Feature Flags
+-------------
+
+Features flags allow admins to enable or disable features for certain groups
+of users. You can enable or disable them from the administration dashboard.
+Please consult the :doc:`administration` documentation for more information
+on accessing the admin dashboard.
+

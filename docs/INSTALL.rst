@@ -1,5 +1,5 @@
-Installation guide
-##################
+Deploying to a production environment
+#####################################
 
 This document contains instructions for deploying h to a production environment.
 If you are looking for instructions on setting up a development environment for
