@@ -159,12 +159,12 @@
     </div>
 
     <div class="annotation-actions" ng-if="!vm.editing && vm.annotation.id">
-      <button class="small btn-clean"
+      <button class="small btn btn-clean"
               ng-click="vm.reply()"
               ><i class="h-icon-reply btn-icon"></i>
         <span class="btn-text">Reply</span></button>
       <span class="share-dialog-wrapper">
-        <button class="small btn-clean"
+        <button class="small btn btn-clean"
                 ng-click="share($event)"
                 ><i class="h-icon-link btn-icon"></i>
           <span class="btn-text">Link</span></button>
@@ -176,12 +176,12 @@
           <input type="text" value="{{vm.annotationURI}}" readonly>
         </span>
       </span>
-      <button class="small btn-clean"
+      <button class="small btn btn-clean"
               ng-show="vm.authorize('update')"
               ng-click="vm.edit()"
               ><i class="h-icon-edit btn-icon"></i>
         <span class="btn-text">Edit</span></button>
-      <button class="small btn-clean"
+      <button class="small btn btn-clean"
               ng-show="vm.authorize('delete')"
               ng-click="vm.delete()"
               ><i class="h-icon-delete btn-icon"></i>

@@ -235,13 +235,12 @@
 }
 
 .btn-clean {
+  border: none;
+
   &, &:focus, &:hover, &:active, &[disabled],
   &.js-hover, &.js-focus, &.js-active, &.js-disabled {
     @include box-shadow(none);
-    padding-left: 0;
-    padding-right: 0;
     background: none;
-    border-color: transparent;
   }
 
   &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
