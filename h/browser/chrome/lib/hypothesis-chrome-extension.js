@@ -37,7 +37,7 @@
     var store = new h.TabStore(localStorage);
     var state = new h.TabState(store.all(), onTabStateChange);
     var browserAction = new h.BrowserAction(chromeBrowserAction);
-    var pdfHandler = new h.pdfHandler(state);
+    var pdfHandler = new h.PdfHandler(state);
     var sidebar = new h.SidebarInjector(chromeTabs, {
       extensionURL: dependencies.extensionURL,
       isAllowedFileSchemeAccess: dependencies.isAllowedFileSchemeAccess,
