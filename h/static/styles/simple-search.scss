@@ -1,17 +1,22 @@
+@import 'compass/css3/flexbox';
+
 @import "base.scss";
 @import "mixins/icons";
 
 .simple-search-form {
-  @include clearfix;
+  @include display-flex;
+  @include flex-flow(row nowrap);
+
+    /* IE10 support */
+  display: -ms-flexbox;
+  -ms-flex-flow: row nowrap;
+
   position: relative;
-  padding: 0 2em;
   color: $gray-dark;
 }
 
 .simple-search-icon {
-  position: absolute;
-  left: 0;
-  top: 0;
+  @include order(0);
 }
 
 :not(:focus) ~ .simple-search-icon {
@@ -19,15 +24,17 @@
 }
 
 input.simple-search-input {
-  outline: none;
-  color: $text-color;
-  width: 100%;
-  border: none;
-  padding: 0;
+  @include flex-grow(1);
+  @include order(1);
 
-  .simple-search-inactive &:not(:focus) {
-    border-color: #f3f3f3;
-  }
+  /* IE10 support */
+  -ms-flex: 1;
+  -ms-flex-order: 1;
+
+  color: $text-color;
+  border: none;
+  outline: none;
+  padding: 0;
 
   &:disabled {
     background: none;

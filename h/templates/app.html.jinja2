@@ -15,15 +15,27 @@
   <!-- Toolbar -->
   <div class="ng-cloak topbar" ng-class="frame.visible && 'shown'">
     <div class="inner content">
-      <div class="pull-left">
-        <button class="btn btn-clean"
-                ng-click="shareDialog.visible = !shareDialog.visible"
-                ng-if="isEmbedded"
-                title="Share this page">
-                <i class="h-icon-share btn-icon"></i></button>
+      <button class="btn btn-clean"
+              ng-click="shareDialog.visible = !shareDialog.visible"
+              ng-if="isEmbedded"
+              title="Share this page">
+        <i class="h-icon-share btn-icon"></i>
+      </button>
+
+      <!-- Searchbar -->
+      <div class="simple-search"
+           query="search.query"
+           on-search="search.update(query)"
+           on-clear="search.clear()"></div>
+      <!-- / Searchbar -->
+
+      <div class="dropdown group-list"
+           ng-if="auth.user && feature('groups')"
+           group-list=""
+           groups="session.state.groups">
       </div>
 
-      <div class="pull-right" ng-switch="auth.user">
+      <div ng-switch="auth.user">
         <span ng-switch-when="undefined">⋯</span>
         <a href="" ng-click="login()" ng-switch-when="null">Sign in</a>
         <div class="dropdown pull-right user-picker">
@@ -42,19 +54,6 @@
           </ul>
         </div>
       </div>
-
-      <div class="pull-right dropdown group-list"
-           ng-if="auth.user && feature('groups')"
-           group-list=""
-           groups="session.state.groups">
-      </div>
-
-      <!-- Searchbar -->
-      <div class="simple-search"
-           query="search.query"
-           on-search="search.update(query)"
-           on-clear="search.clear()"></div>
-      <!-- / Searchbar -->
     </div>
   </div>
   <!-- / Toolbar -->
