@@ -257,8 +257,13 @@
   }
 }
 
-// Positions the icon nicely within the button.
+.btn-text {
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .btn-icon {
+  display: inline-block;
   font-size: 1.4em;
   vertical-align: middle;
 }
