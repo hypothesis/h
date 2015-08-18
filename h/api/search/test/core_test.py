@@ -40,7 +40,7 @@ def test_search_passes_request_to_build(build, _):
 @mock.patch("h.api.search.core.search")
 def test_index_limit_is_20(search_func):
     """index() calls search with "limit": 20."""
-    core.index()
+    core.index(mock.Mock())
 
     first_call = search_func.call_args_list[0]
-    assert first_call[0][0]["limit"] == 20
+    assert first_call[0][1]["limit"] == 20
