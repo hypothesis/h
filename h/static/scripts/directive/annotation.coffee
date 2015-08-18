@@ -164,7 +164,10 @@ AnnotationController = [
         this.view()
 
     this.group = ->
-      group.getGroup(model.group)
+      if model.group
+        group.getGroup(model.group)
+      else
+        group.focusedGroup()
 
     # Calculates the visual diff flags from the targets
     #

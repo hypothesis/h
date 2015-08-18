@@ -588,7 +588,10 @@ describe("AnnotationController", ->
       }
       annotationUI: annotationUI or {}
       annotationMapper: annotationMapper or {}
-      group: group or {getGroup: ->}
+      group: group or {
+        getGroup: ->
+        focusedGroup: ->
+      }
     }
     module(($provide) ->
       $provide.value("personaFilter", locals.personaFilter)
@@ -638,19 +641,21 @@ describe("AnnotationController", ->
       # Stub $create so we can spy on what gets sent to the server.
       annotation.$create = sinon.stub().returns(Promise.resolve())
 
+      group = {hashid: "test-hashid"}
+
       {controller} = createAnnotationDirective({
         annotation: annotation
         # Mock the group service, pretend that there's a group with hashid
         # "test-group" focused.
         group: {
-          focusedGroup: -> {hashid: "test-group"}
+          focusedGroup: -> group
           getGroup: ->
         }
       })
       controller.action = 'create'
 
       controller.save().then(->
-        assert annotation.$create.lastCall.thisValue.group == "test-group"
+        assert annotation.$create.lastCall.thisValue.group == "test-hashid"
       )
     )
   )
