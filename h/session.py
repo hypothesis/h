@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from pyramid.session import SignedCookieSessionFactory
 
-from h import hashids
 from h import models
 from h.security import derive_key
 from h import groups
