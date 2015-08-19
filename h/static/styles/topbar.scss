@@ -8,7 +8,7 @@
   border: solid 1px $gray-lighter;
   border-style: solid none;
   height: 30px;
-  font-size: 14px;
+  font-size: 15px;
   position: fixed;
   left: 0;
   right: 0;
@@ -47,6 +47,7 @@
 .topbar .btn {
   color: $gray-light;
   min-width: 28px;
+  height: 28px;
 
   border: 0;
   padding: 0;

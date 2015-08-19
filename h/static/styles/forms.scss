@@ -256,15 +256,9 @@
   }
 }
 
-.btn-text {
-  display: inline-block;
-  vertical-align: middle;
-}
-
 .btn-icon {
   display: inline-block;
-  font-size: 1.4em;
-  vertical-align: middle;
+  transform: scale(1.2);
 }
 
 // Positions a message/icon to the left of a button.
