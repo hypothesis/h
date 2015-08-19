@@ -9,7 +9,12 @@ body {
   font-family: $sans-font-family;
   font-weight: 300;
   font-size: .8em;
-  padding-top: 30px;
+  margin-top: 30px;
+  padding: .72rem;
+
+  @include respond-to(tablets desktops) {
+    padding-bottom: 4rem;
+  }
 }
 
 #{nest("hgroup", "#{headings()}")} {
@@ -21,14 +26,6 @@ svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
 ol {
   list-style-type: decimal;
   padding-left: 3em;
-}
-
-#wrapper {
-  padding: .72rem;
-
-  @include respond-to(tablets desktops) {
-    padding-bottom: 4rem;
-  }
 }
 
 #home {
