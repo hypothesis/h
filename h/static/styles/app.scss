@@ -82,11 +82,11 @@ ol {
 
 /* The groups dropdown list. */
 
-.group-list {
-  margin-right: 0.5em;
-}
-
 $group-list-width: 225px;
+
+.group-list .dropdown {
+  white-space: nowrap;
+}
 
 .group-list .dropdown-menu {
   width: $group-list-width;
