@@ -30,7 +30,6 @@ body {
   position: relative;
   background-color: $body-background;
   color: $text-color;
-  line-height: 1.4;
 }
 
 p {
@@ -319,8 +318,6 @@ html {
 }
 
 .tab-content {
-  line-height: 1.4;
-
   .tab-pane {
     display: none;
     &.active {
