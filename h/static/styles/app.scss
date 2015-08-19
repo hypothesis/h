@@ -1,5 +1,8 @@
 @import 'compass';
 
+$base-font-size: 12px;
+$base-line-height: 20px;
+
 @import 'reset';
 @import 'common';
 
@@ -27,14 +30,6 @@ ol {
   padding-left: 3em;
 }
 
-#home {
-  border-top: none;
-
-  @include respond-to(tablets desktops) {
-    padding: 2rem 4rem 4rem;
-  }
-}
-
 .content {
   margin-left: auto;
   margin-right: auto;
@@ -44,39 +39,6 @@ ol {
     max-width: $break-tablet;
     padding-left: 4rem;
     padding-right: 4rem;
-  }
-
-  & > header {
-    @include respond-to(handhelds) {
-      text-align: center;
-    }
-
-    @include respond-to(wide-handhelds tablets desktops) {
-      @include pie-clearfix;
-      text-align: left;
-    }
-
-    margin-bottom: 1em;
-
-    hgroup h1 {
-      margin-bottom: 0 !important;
-    }
-  }
-
-  .domain {
-    margin: 3px 0 4px;
-  }
-
-  .domain .favicon {
-    margin: 0 8px;
-  }
-
-  .page {
-    margin-bottom: 16px;
-
-    a {
-      font-weight: bold;
-    }
   }
 }
 
@@ -158,35 +120,14 @@ $group-list-width: 225px;
 }
 
 .masthead {
+  margin-bottom: 1em;
+
   .masthead-heading {
-    margin: 0;
-    padding-top: 4px;
-    font-size: 1.1em;
-    font-weight: 400;
     color: $gray;
+    font-size: 1.1em;
 
     &:hover {
       color: $gray-dark;
     }
-  }
-}
-
-.masthead-small {
-  img {
-    width: 48px;
-    height: auto;
-    padding-top: 1px;
-  }
-
-  hgroup {
-    margin-left: 54px;
-  }
-
-  .masthead-heading {
-    font-size: 1.1em;
-  }
-
-  .masthead-subheading {
-    font-size: 14px;
   }
 }
