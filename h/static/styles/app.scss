@@ -118,16 +118,3 @@ $group-list-width: 225px;
     display: inline;
   }
 }
-
-.masthead {
-  margin-bottom: 1em;
-
-  .masthead-heading {
-    color: $gray;
-    font-size: 1.1em;
-
-    &:hover {
-      color: $gray-dark;
-    }
-  }
-}

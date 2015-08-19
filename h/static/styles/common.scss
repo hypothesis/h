@@ -269,6 +269,20 @@ html {
   }
 }
 
+.masthead {
+  margin-bottom: 1em;
+
+  .masthead-heading {
+    color: $gray;
+    font-size: 1.1em;
+    font-weight: 400;
+
+    &:hover {
+      color: $gray-dark;
+    }
+  }
+}
+
 //TABS////////////////////////////////
 .nav-tabs {
   margin-bottom: .7em;
