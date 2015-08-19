@@ -17,6 +17,83 @@ def _mock_annotation(**kwargs):
     return annotation
 
 
+search_annotations_fixtures = pytest.mark.usefixtures('search_lib')
+
+
+@search_annotations_fixtures
+def test_search_calls_search(search_lib):
+    """It should call search_lib.search() once."""
+    logic.search_annotations(mock.Mock(), mock.Mock())
+
+    assert search_lib.search.call_count == 1
+
+
+@search_annotations_fixtures
+def test_search_passes_params_to_search(search_lib):
+    """It should pass request.params to search_lib.search()."""
+    params = mock.Mock()
+
+    logic.search_annotations(params, mock.Mock())
+
+    assert search_lib.search.call_args[1]['request_params'] == params
+
+
+@search_annotations_fixtures
+def test_search_passes_user_to_search(search_lib):
+    """It should pass the user from get_user() to search_lib.search()."""
+    logic.search_annotations(mock.Mock(), mock.sentinel.user)
+
+    assert search_lib.search.call_args[1]['user'] == mock.sentinel.user
+
+
+@search_annotations_fixtures
+def test_search_passes_search_normalized_uris(search_lib):
+    """It should pass search_normalized from request.feature() to search()."""
+    logic.search_annotations(
+        mock.Mock(), mock.Mock(), mock.sentinel.search_normalized_uris)
+
+    assert search_lib.search.call_args[1]['search_normalized_uris'] == (
+        mock.sentinel.search_normalized_uris)
+
+
+@search_annotations_fixtures
+def test_search_returns_total(search_lib):
+    """It should return the total from search_lib.search()."""
+    search_lib.search.return_value = {
+        'total': 3,
+        # In production these would be annotation dicts, not strings.
+        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+    }
+
+    response_data = logic.search_annotations(mock.Mock(), mock.Mock())
+
+    assert response_data['total'] == 3
+
+
+@search_annotations_fixtures
+def test_search_returns_rendered_annotations(search_lib):
+    """It should return the rendered annotations.
+
+    It should pass the annotations from search_lib.search() through
+    search_lib.render() and return the results.
+
+    """
+    search_lib.search.return_value = {
+        'total': 3,
+        # In production these would be annotation dicts, not strings.
+        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+    }
+    # Our mock render function just appends '_rendered' onto our mock
+    # annotation strings.
+    search_lib.render.side_effect = lambda annotation: annotation + '_rendered'
+
+    response_data = logic.search_annotations(mock.Mock(), mock.Mock())
+
+    assert response_data['rows'] == [
+        'annotation_1_rendered', 'annotation_2_rendered',
+        'annotation_3_rendered']
+
+
 # The fixtures required to mock all of create_annotation()'s dependencies.
 create_annotation_fixtures = pytest.mark.usefixtures(
     'Annotation', 'search_lib')

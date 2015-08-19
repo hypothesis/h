@@ -36,12 +36,12 @@ def test_index():
 
 
 # The fixtures required to mock all of search()'s dependencies.
-search_fixtures = pytest.mark.usefixtures('get_user', 'search_lib')
+search_fixtures = pytest.mark.usefixtures('logic', 'get_user')
 
 
 @search_fixtures
-def test_search_calls_get_user(get_user):
-    """It should call get_user() once passing the request."""
+def test_search_calls_get_user(logic, get_user):
+    """It should call get_user() once with the right args."""
     request = mock.Mock()
 
     views.search(request)
@@ -50,34 +50,8 @@ def test_search_calls_get_user(get_user):
 
 
 @search_fixtures
-def test_search_calls_search(search_lib):
-    """It should call search_lib.search() once."""
-    views.search(mock.Mock())
-
-    assert search_lib.search.call_count == 1
-
-
-@search_fixtures
-def test_search_passes_params_to_search(search_lib):
-    """It should pass request.params to search_lib.search()."""
-    request = mock.Mock()
-
-    views.search(request)
-
-    assert search_lib.search.call_args[1]['request_params'] == request.params
-
-
-@search_fixtures
-def test_search_passes_user_to_search(get_user, search_lib):
-    """It should pass the user from get_user() to search_lib.search()."""
-    views.search(mock.Mock())
-
-    assert search_lib.search.call_args[1]['user'] == get_user.return_value
-
-
-@search_fixtures
-def test_search_calls_feature():
-    """It should call request.feature() once, passing 'search_normalized'."""
+def test_search_calls_feature(logic, get_user):
+    """It should call request.feature() once with the right args."""
     request = mock.Mock()
 
     views.search(request)
@@ -86,52 +60,20 @@ def test_search_calls_feature():
 
 
 @search_fixtures
-def test_search_passes_search_normalized_uris(search_lib):
-    """It should pass search_normalized from request.feature() to search()."""
+def test_search_calls_search_annotations(logic, get_user):
+    """It should call search_annotations() once with the right args."""
     request = mock.Mock()
 
     views.search(request)
 
-    assert search_lib.search.call_args[1]['search_normalized_uris'] == (
-        request.feature.return_value)
+    logic.search_annotations.assert_called_once_with(
+        request.params, get_user.return_value, request.feature.return_value)
 
 
 @search_fixtures
-def test_search_returns_total(search_lib):
-    """It should return the total from search_lib.search()."""
-    search_lib.search.return_value = {
-        'total': 3,
-        # In production these would be annotation dicts, not strings.
-        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
-    }
-
-    response_data = views.search(mock.Mock())
-
-    assert response_data['total'] == 3
-
-
-@search_fixtures
-def test_search_returns_rendered_annotations(search_lib):
-    """It should return the rendered annotations.
-
-    It should pass the annotations from search_lib.search() through
-    search_lib.render() and return the results.
-
-    """
-    search_lib.search.return_value = {
-        'total': 3,
-        # In production these would be annotation dicts, not strings.
-        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
-    }
-    # Our mock render function just appends '_rendered' onto our mock
-    # annotation strings.
-    search_lib.render.side_effect = lambda annotation: annotation + '_rendered'
-
-    response_data = views.search(mock.Mock())
-
-    assert response_data['rows'] == [
-        'annotation_1_rendered', 'annotation_2_rendered',
-        'annotation_3_rendered']
+def test_search_returns_search_annotations(logic, get_user):
+    """It should return what search_annotations() returns."""
+    assert views.search(mock.Mock()) == logic.search_annotations.return_value
 
 
 def test_access_token_returns_create_token_response():

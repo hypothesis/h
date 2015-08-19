@@ -85,18 +85,11 @@ def index(context, request):
 @api_config(context=Root, name='search')
 def search(request):
     """Search the database for annotations matching with the given query."""
-    search_normalized_uris = request.feature('search_normalized')
-
-    # The search results are filtered for the authenticated user
-    user = get_user(request)
-    results = search_lib.search(request_params=request.params,
-                                user=user,
-                                search_normalized_uris=search_normalized_uris)
-
-    return {
-        'total': results['total'],
-        'rows': [search_lib.render(a) for a in results['rows']],
-    }
+    return logic.search_annotations(
+        request.params,
+        get_user(request),
+        request.feature('search_normalized')
+    )
 
 
 @api_config(context=Root, name='access_token')
