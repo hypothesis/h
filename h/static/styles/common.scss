@@ -2,10 +2,6 @@
 @import 'compass/layout/stretching';
 @import 'base';
 
-$base-font-size: 12px;
-$base-line-height: 20px;
-$headings-color: $text-color;
-
 @import 'mixins/responsive';
 @import 'grid';
 @import 'annotations';

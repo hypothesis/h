@@ -1,5 +1,8 @@
 @import 'compass';
 
+$base-font-size: 16px;
+$base-line-height: 22px;
+
 @import 'reset';
 @import 'common';
 @import "./mixins/icons";
@@ -24,7 +27,6 @@ body {
     padding-top: 0;
 
     .masthead-heading {
-      padding-top: 4px;
       font-size: 1.1em;
       font-weight: 400;
       color: $gray;
