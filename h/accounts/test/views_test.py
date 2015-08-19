@@ -945,8 +945,8 @@ def test_disable_user_with_invalid_password(form_validator, user_model):
     request = DummyRequest(method='POST')
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
 
-    # With an invalid password, get_user returns None
-    user_model.get_user.return_value = None
+    # With an invalid password, validate_user() returns False.
+    user_model.validate_user.return_value = False
 
     profile = ProfileController(request)
     result = profile.disable_user()
@@ -962,7 +962,7 @@ def test_disable_user_sets_random_password(form_validator, user_model):
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
 
     user = FakeUser(password='abc')
-    user_model.get_user.return_value = user
+    user_model.get_by_userid.return_value = user
 
     profile = ProfileController(request)
     profile.disable_user()
