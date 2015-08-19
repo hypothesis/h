@@ -125,20 +125,16 @@
       <div class="form-actions-buttons form-actions-left">
         <button ng-switch-when="edit"
                 ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i>
-          <span class="btn-text">Save</span></button>
+                class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
         <button ng-switch-when="delete"
                 ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i>
-          <span clas="btn-text">Delete</span></button>
+                class="btn"><i class="h-icon-check btn-icon"></i> Delete</button>
         <button ng-switch-default
                 ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i>
-          <span class="btn-text">Save</span></button>
+                class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
         <button class="btn btn-clean"
                 ng-click="vm.revert()"
-                ><i class="h-icon-cancel btn-icon"></i>
-          <span class="btn-text">Cancel</span></button>
+                ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
       </div>
     </div>
 
@@ -161,13 +157,11 @@
     <div class="annotation-actions" ng-if="!vm.editing && vm.annotation.id">
       <button class="small btn btn-clean"
               ng-click="vm.reply()"
-              ><i class="h-icon-reply btn-icon"></i>
-        <span class="btn-text">Reply</span></button>
+              ><i class="h-icon-reply btn-icon"></i> Reply</button>
       <span class="share-dialog-wrapper">
         <button class="small btn btn-clean"
                 ng-click="share($event)"
-                ><i class="h-icon-link btn-icon"></i>
-          <span class="btn-text">Link</span></button>
+                ><i class="h-icon-link btn-icon"></i> Link</button>
         <span class="share-dialog" ng-click="$event.stopPropagation()">
           <a target="_blank"
              class="h-icon-link"
@@ -179,13 +173,11 @@
       <button class="small btn btn-clean"
               ng-show="vm.authorize('update')"
               ng-click="vm.edit()"
-              ><i class="h-icon-edit btn-icon"></i>
-        <span class="btn-text">Edit</span></button>
+              ><i class="h-icon-edit btn-icon"></i> Edit</button>
       <button class="small btn btn-clean"
               ng-show="vm.authorize('delete')"
               ng-click="vm.delete()"
-              ><i class="h-icon-delete btn-icon"></i>
-        <span class="btn-text">Delete…</span></button>
+              ><i class="h-icon-delete btn-icon"></i> Delete…</button>
     </div>
   </footer>
 </div>
