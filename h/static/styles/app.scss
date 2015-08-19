@@ -24,10 +24,10 @@ ol {
 }
 
 #wrapper {
-  padding: .72em;
+  padding: .72rem;
 
   @include respond-to(tablets desktops) {
-    padding-bottom: 4em;
+    padding-bottom: 4rem;
   }
 }
 
@@ -35,7 +35,7 @@ ol {
   border-top: none;
 
   @include respond-to(tablets desktops) {
-    padding: 2em 4em 4em;
+    padding: 2rem 4rem 4rem;
   }
 }
 
@@ -46,8 +46,8 @@ ol {
   @include respond-to(tablets desktops) {
     margin: auto;
     max-width: $break-tablet;
-    padding-left: 4em;
-    padding-right: 4em;
+    padding-left: 4rem;
+    padding-right: 4rem;
   }
 
   & > header {
