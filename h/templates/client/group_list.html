@@ -15,8 +15,8 @@
         <i ng-if="group.hashid != '__public__'" class="h-icon-group"></i>
         {{group.name}}
       </a>
-      <a ng-href="{{group.url}}" target="_blank" class="h-icon-link"
-         title="Share this group"></a>
+      <a ng-href="{{group.url}}" ng-if="group.hashid != '__public__'"
+         target="_blank" class="h-icon-link" title="Share this group"></a>
     </li>
     <li>
       <a href="/groups/new" target="_blank"><i class="h-icon-add"></i>

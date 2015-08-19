@@ -92,6 +92,10 @@ $group-list-width: 225px;
   width: $group-list-width;
 }
 
+.group-list .dropdown-menu li {
+  @include pie-clearfix;
+}
+
 .group-list .dropdown-menu .group-name {
   float: left;
   overflow: hidden;
