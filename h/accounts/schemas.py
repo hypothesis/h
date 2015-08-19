@@ -193,8 +193,6 @@ class ProfileSchema(CSRFSchema):
     This form is broken into multiple parts, for updating the email address,
     password, and subscriptions, so multiple fields are nullable.
     """
-
-    username = colander.SchemaNode(colander.String())
     pwd = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.PasswordWidget(),
