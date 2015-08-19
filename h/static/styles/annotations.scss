@@ -59,7 +59,8 @@
   button {
     color: $gray-light;
     font-weight: normal;
-    padding: 0 .125em;
+    margin: 0 .2em;
+    padding: 0;
 
     .annotation:hover & {
       color: $link-color;
