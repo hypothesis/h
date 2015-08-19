@@ -70,6 +70,10 @@
     margin-bottom: .291em;
   }
 
+  li, p {
+    line-height: 1.3;
+  }
+
   a {
     text-decoration: underline;
   }
@@ -85,6 +89,10 @@
 
     p, ol, ul, img, pre, blockquote {
       margin: .7063em 0;
+    }
+
+    p, li {
+      line-height: 1.5;
     }
   }
 
