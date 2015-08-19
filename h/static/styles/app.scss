@@ -93,9 +93,10 @@ $group-list-width: 225px;
 }
 
 .group-list .dropdown-menu .group-name {
-  width: $group-list-width - 45px;
+  float: left;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: $group-list-width - 30px;
 }
 
 .user-picker {
