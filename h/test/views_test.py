@@ -90,16 +90,17 @@ class TestStreamAtomView(object):
 
     """Unit tests for the stream_atom() view callable."""
 
-    def test_it_returns_the_annotations_from_the_search_api(self):
+    @mock.patch('h.views.api')
+    def test_it_returns_the_annotations_from_the_search_api(self, api):
         annotations = factories.Annotation.create_batch(10)
-        request = mock.MagicMock()
-        request.api_client.get.return_value = {"rows": annotations}
+        api.search_annotations.return_value = {"rows": annotations}
 
-        data = views.stream_atom(request)
+        data = views.stream_atom(mock.MagicMock())
 
         assert data["annotations"] == annotations
 
-    def test_it_returns_the_atom_url(self):
+    @mock.patch('h.views.api')
+    def test_it_returns_the_atom_url(self, api):
         """It returns the URL of the 'stream_atom' route as 'atom_url'.
 
         This is the URL to the Atom version of this Atom feed.
@@ -117,7 +118,8 @@ class TestStreamAtomView(object):
 
         assert data["atom_url"] == atom_url
 
-    def test_it_returns_the_stream_url(self):
+    @mock.patch('h.views.api')
+    def test_it_returns_the_stream_url(self, api):
         """It returns the URL of the 'stream' route as 'html_url'.
 
         This is the URL to the HTML page corresponding to this feed.
@@ -135,7 +137,8 @@ class TestStreamAtomView(object):
 
         assert data["html_url"] == html_url
 
-    def test_it_returns_the_feed_title(self):
+    @mock.patch('h.views.api')
+    def test_it_returns_the_feed_title(self, api):
         """It returns the 'h.feed.title' from the config as 'title'."""
         title = "Hypothesis Atom Feed"
         request = mock.MagicMock()
@@ -149,7 +152,8 @@ class TestStreamAtomView(object):
 
         assert data["title"] == title
 
-    def test_it_returns_the_feed_subtitle(self):
+    @mock.patch('h.views.api')
+    def test_it_returns_the_feed_subtitle(self, api):
         """It returns the 'h.feed.subtitle' from the config as 'subtitle'."""
         subtitle = "A feed of all our annotations"
         request = mock.MagicMock()
@@ -163,16 +167,18 @@ class TestStreamAtomView(object):
 
         assert data["subtitle"] == subtitle
 
-    def test_it_adds_a_limit_param_if_none_is_given(self):
+    @mock.patch('h.views.api')
+    def test_it_adds_a_limit_param_if_none_is_given(self, api):
         request = mock.MagicMock()
         request.params = {}
 
         views.stream_atom(request)
 
-        params = request.api_client.get.call_args[1]["params"]
+        params = api.search_annotations.call_args[1]["params"]
         assert "limit" in params
 
-    def test_it_forwards_user_supplied_limits(self):
+    @mock.patch('h.views.api')
+    def test_it_forwards_user_supplied_limits(self, api):
         """User-supplied ``limit`` params should be forwarded.
 
         If the user supplies a ``limit`` param < 500 this should be forwarded
@@ -185,10 +191,11 @@ class TestStreamAtomView(object):
 
             views.stream_atom(request)
 
-            params = request.api_client.get.call_args[1]["params"]
+            params = api.search_annotations.call_args[1]["params"]
             assert params["limit"] == limit
 
-    def test_it_ignores_limits_greater_than_500(self):
+    @mock.patch('h.views.api')
+    def test_it_ignores_limits_greater_than_500(self, api):
         """It doesn't let the user specify a ``limit`` > 500.
 
         It just reduces the limit to 500.
@@ -199,10 +206,11 @@ class TestStreamAtomView(object):
 
         views.stream_atom(request)
 
-        params = request.api_client.get.call_args[1]["params"]
+        params = api.search_annotations.call_args[1]["params"]
         assert params["limit"] == 500
 
-    def test_it_falls_back_to_100_if_limit_is_invalid(self):
+    @mock.patch('h.views.api')
+    def test_it_falls_back_to_100_if_limit_is_invalid(self, api):
         """If the user gives an invalid limit value it falls back to 100."""
         for limit in ("not a valid integer", None, [1, 2, 3]):
             request = mock.MagicMock()
@@ -210,20 +218,22 @@ class TestStreamAtomView(object):
 
             views.stream_atom(request)
 
-            params = request.api_client.get.call_args[1]["params"]
+            params = api.search_annotations.call_args[1]["params"]
             assert params["limit"] == 100
 
-    def test_it_falls_back_to_100_if_limit_is_negative(self):
+    @mock.patch('h.views.api')
+    def test_it_falls_back_to_100_if_limit_is_negative(self, api):
         """If given a negative number for limit it falls back to 100."""
         request = mock.MagicMock()
         request.params = {"limit": -50}
 
         views.stream_atom(request)
 
-        params = request.api_client.get.call_args[1]["params"]
+        params = api.search_annotations.call_args[1]["params"]
         assert params["limit"] == 100
 
-    def test_it_forwards_url_params_to_the_api(self):
+    @mock.patch('h.views.api')
+    def test_it_forwards_url_params_to_the_api(self, api):
         """Any URL params are forwarded to the search API."""
         request = mock.MagicMock()
         request.params = {
@@ -234,28 +244,7 @@ class TestStreamAtomView(object):
 
         views.stream_atom(request)
 
-        params = request.api_client.get.call_args[1]["params"]
+        params = api.search_annotations.call_args[1]["params"]
         assert params["user"] == "seanh"
         assert params["tags"] == "JavaScript"
         assert params["foo"] == "bar"
-
-    def test_it_raises_httpserviceunavailable_for_connectionerror(self):
-        request = mock.MagicMock()
-        request.api_client.get.side_effect = api_client.ConnectionError
-
-        with pytest.raises(pyramid.httpexceptions.HTTPServiceUnavailable):
-            views.stream_atom(request)
-
-    def test_it_raises_httpgatewaytimeout_for_timeout(self):
-        request = mock.MagicMock()
-        request.api_client.get.side_effect = api_client.Timeout
-
-        with pytest.raises(pyramid.httpexceptions.HTTPGatewayTimeout):
-            views.stream_atom(request)
-
-    def test_it_raises_httpbadgateway_for_apierror(self):
-        request = mock.MagicMock()
-        request.api_client.get.side_effect = api_client.APIError
-
-        with pytest.raises(pyramid.httpexceptions.HTTPBadGateway):
-            views.stream_atom(request)

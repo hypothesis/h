@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 
 
-def search_annotations(params, user, search_normalized_uris=False):
+def search_annotations(params, user=None, search_normalized_uris=False):
     results = search_lib.search(request_params=params,
                                 user=user,
                                 search_normalized_uris=search_normalized_uris)

@@ -13,6 +13,7 @@ from .models import Annotation
 from .resources import Application, Stream
 from . import api_client
 from . import util
+from h import api
 
 log = logging.getLogger(__name__)
 
@@ -150,15 +151,10 @@ def stream_atom(request):
     if params["limit"] > max_limit:
         params["limit"] = max_limit
 
-    try:
-        annotations = request.api_client.get(
-            "/search", params=params)["rows"]
-    except api_client.ConnectionError as err:
-        raise httpexceptions.HTTPServiceUnavailable(err)
-    except api_client.Timeout as err:
-        raise httpexceptions.HTTPGatewayTimeout(err)
-    except api_client.APIError as err:
-        raise httpexceptions.HTTPBadGateway(err)
+    annotations = api.search_annotations(
+        params=params,
+        search_normalized_uris=request.feature('search_normalized')
+    )["rows"]
 
     return dict(
         annotations=annotations,
