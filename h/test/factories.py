@@ -5,7 +5,8 @@ import datetime
 
 import factory
 
-from h.accounts import models
+from h.api import models as api_models
+from h.accounts import models as accounts_models
 
 
 class Annotation(factory.Factory):
@@ -54,7 +55,7 @@ class Annotation(factory.Factory):
     """
 
     class Meta:
-        model = dict
+        model = api_models.Annotation
         exclude = ["username", "random_number", "num_tags", "exact_text",
                    "document_title"]
 
@@ -145,7 +146,7 @@ class User(factory.Factory):
     """
 
     class Meta(object):
-        model = models.User
+        model = accounts_models.User
 
     uid = factory.Sequence(lambda n: "test_user_{n}".format(n=n + 1))
     username = factory.Sequence(lambda n: "test_user_{n}".format(n=n + 1))

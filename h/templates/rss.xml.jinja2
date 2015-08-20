@@ -1,0 +1,28 @@
+{# Generic template for rendering an RSS feed given a feed dict.
+
+The feed dict should be a logical representation of an RSS feed as a Python
+dict, including a list of dicts for the feed's items. This template will
+render the feed to RSS XML.
+
+-#}
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ feed.title }}</title>
+    <link>{{ feed.html_url }}</link>
+    <atom:link href="{{ feed.rss_url }}" rel="self" type="application/rss+xml" />
+    <description>{{ feed.description }}</description>
+    <pubDate>{{ feed.pubDate }}</pubDate>
+    <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+
+    {% for item in feed.entries %}
+    <item>
+       <title>{{ item.title }}</title>
+       <description>{{ item.description|safe }}</description>
+       <pubDate>{{ item.pubDate }}</pubDate>
+       <guid isPermaLink="true">{{ item.guid }}</guid>
+       <link>{{ item.link }}</link>
+    </item>
+    {% endfor %}
+  </channel>
+</rss>
