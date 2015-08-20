@@ -2,6 +2,7 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import exc
 import slugify
+from pyramid import exceptions
 
 from h.db import Base
 from h import hashids
@@ -86,5 +87,6 @@ USER_GROUP_TABLE = sa.Table(
 
 
 def includeme(config):
-    assert config.registry.settings.get("h.hashids.salt"), (
-        "There needs to be a h.hashids.salt config setting")
+    if not config.registry.settings.get("h.hashids.salt"):
+        raise exceptions.ConfigurationError(
+            "There needs to be a h.hashids.salt config setting")
