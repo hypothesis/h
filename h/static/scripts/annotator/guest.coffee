@@ -69,6 +69,13 @@ module.exports = class Guest extends Annotator
     this._connectAnnotationSync(@crossframe)
     this._connectAnnotationUISync(@crossframe)
 
+    if !@options.disableClickToClose
+      @wrapper = @element
+      .on 'click', (event) =>
+        if !@selectedTargets?.length
+          this.hideFrame()
+      this
+
     # Load plugins
     for own name, opts of @options
       if not @plugins[name] and Annotator.Plugin[name]
@@ -125,13 +132,6 @@ module.exports = class Guest extends Annotator
 
     crossframe.on 'setVisibleHighlights', (state) =>
       this.publish 'setVisibleHighlights', state
-
-  _setupWrapper: ->
-    @wrapper = @element
-    .on 'click', (event) =>
-      if !@selectedTargets?.length
-        this.hideFrame()
-    this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
   _setupDynamicStyle: -> this

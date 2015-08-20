@@ -60,8 +60,9 @@ module.exports = class Host extends Guest
 
   showFrame: (options={transition: true}) ->
     # Emit event for integrators to be able to react to sidebar.
-    showFrameEvent = new Event('hypothesisSidebarOpen')
-    window.dispatchEvent(showFrameEvent)
+    try
+      showFrameEvent = new Event('hypothesisSidebarOpen')
+      window.dispatchEvent(showFrameEvent)
 
     if options.transition
       @frame.removeClass 'annotator-no-transition'
@@ -77,8 +78,9 @@ module.exports = class Host extends Guest
 
   hideFrame: ->
     # Emit event for integrators to be able to react to sidebar.
-    hideFrameEvent = new Event('hypothesisSidebarClosed')
-    window.dispatchEvent(hideFrameEvent)
+    try
+      hideFrameEvent = new Event('hypothesisSidebarClosed')
+      window.dispatchEvent(hideFrameEvent)
 
     @frame.css 'margin-left': ''
     @frame.removeClass 'annotator-no-transition'
