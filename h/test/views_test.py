@@ -11,7 +11,6 @@ from pyramid import testing
 import pytest
 
 from h import views
-from h import api_client
 from . import factories
 
 

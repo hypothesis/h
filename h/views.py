@@ -11,7 +11,6 @@ from pyramid import i18n
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
-from . import api_client
 from . import util
 from h import api
 
