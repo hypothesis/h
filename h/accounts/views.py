@@ -463,6 +463,9 @@ class ProfileController(object):
 
     def disable_user(self):
         """Disable the user by setting a random password."""
+        if self.request.authenticated_userid is None:
+            return httpexceptions.HTTPUnauthorized()
+
         err, appstruct = validate_form(self.form, self.request.POST.items())
         if err is not None:
             return err
