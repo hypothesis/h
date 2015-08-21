@@ -463,16 +463,17 @@ class ProfileController(object):
 
     def disable_user(self):
         """Disable the user by setting a random password."""
+        if self.request.authenticated_userid is None:
+            return httpexceptions.HTTPUnauthorized()
+
         err, appstruct = validate_form(self.form, self.request.POST.items())
         if err is not None:
             return err
 
-        username = appstruct['username']
-        pwd = appstruct['pwd']
+        user = User.get_by_userid(
+            self.request.domain, self.request.authenticated_userid)
 
-        # Password check
-        user = User.get_user(username, pwd)
-        if user:
+        if User.validate_user(user, appstruct['pwd']):  # Password check.
             # TODO: maybe have an explicit disabled flag in the status
             user.password = User.generate_random_password()
             self.request.session.flash(_('Account disabled.'), 'success')
