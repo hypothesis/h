@@ -56,7 +56,7 @@ INSTALL_REQUIRES = [
     'python-dateutil>=2.1',
     'python-slugify>=1.1.3,<1.2.0',
     'python-statsd>=1.7.0,<1.8.0',
-    'webassets==0.10',
+    'webassets>=0.10,<0.11',
     'pyramid_webassets>=0.9,<1.0',
     'pyramid-jinja2>=2.3.3',
     'raven>=5.3.0,<5.4.0',
