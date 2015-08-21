@@ -20,6 +20,7 @@ def test_subscriber_predicate(config):
     It should correctly match asset requests when its value is ``True``,
     and other requests when ``False``.
     """
+    assert False
     config.include(assets)
 
     mock1 = Mock()
