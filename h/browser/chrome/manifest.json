@@ -30,7 +30,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "lib/pdfHandler.js",
+      "lib/pdf-handler.js",
       "lib/tab-store.js",
       "lib/tab-state.js",
       "lib/tab-error-cache.js",
