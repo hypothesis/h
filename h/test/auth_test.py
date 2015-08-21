@@ -53,7 +53,7 @@ class TestRequestValidator(unittest.TestCase):
         self.request.client_secret = SECRET
         self.client.return_value = None
         res = self.validator.authenticate_client(self.request)
-        self.client.assert_called()
+        assert self.client.called
         assert res is False
         assert self.request.client is None
         assert self.request.user is None

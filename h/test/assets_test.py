@@ -41,5 +41,5 @@ def test_subscriber_predicate(config):
     config.registry.notify(event1)
     config.registry.notify(event2)
 
-    mock1.assert_called_onceventwith(event1)
-    mock2.assert_called_onceventwith(event2)
+    mock1.assert_called_once_with(event1)
+    mock2.assert_called_once_with(event2)
