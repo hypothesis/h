@@ -976,6 +976,37 @@ def test_disable_user_with_no_authenticated_user():
     assert isinstance(exc, httpexceptions.HTTPUnauthorized)
 
 
+@patch('h.accounts.views.Subscriptions')
+def test_unsubscribe_sets_active_to_False(Subscriptions):
+    """It sets the active field of the subscription to False."""
+    Subscriptions.get_by_id.return_value = Mock(
+        uri='acct:bob@hypothes.is', active=True)
+    request = MagicMock(
+        authenticated_userid='acct:bob@hypothes.is',
+        GET={'subscription_id': 'subscription_id'}
+    )
+
+    ProfileController(request).unsubscribe()
+
+    assert Subscriptions.get_by_id.return_value.active is False
+
+
+@patch('h.accounts.views.Subscriptions')
+def test_unsubscribe_not_authorized(Subscriptions):
+    """If you try to unsubscribe someone else's subscription you get a 401."""
+    Subscriptions.get_by_id.return_value = Mock(
+        uri='acct:bob@hypothes.is', active=True)
+    request = MagicMock(
+        authenticated_userid='acct:fred@hypothes.is',
+        GET={'subscription_id': 'subscription_id'}
+    )
+
+    with pytest.raises(httpexceptions.HTTPUnauthorized):
+        ProfileController(request).unsubscribe()
+
+    assert Subscriptions.get_by_id.return_value.active is True
+
+
 @pytest.fixture
 def pop_flash(request):
     patcher = patch('h.accounts.views.session.pop_flash', autospec=True)
