@@ -1,20 +1,18 @@
 'use strict';
 
-angular.module('h').controller(
-  'GroupListCtrl', ['group', function(group) {
-        var self = this;
+// @ngInject
+module.exports = function GroupListController(group) {
+  var self = this;
 
-        self.groups = function() {
-          return group.groups();
-        };
+  this.groups = function() {
+    return group.groups();
+  };
 
-        self.focusedGroup = function() {
-          return group.focusedGroup();
-        };
+  this.focusedGroup = function() {
+    return group.focusedGroup();
+  };
 
-        self.focusGroup = function(hashid) {
-          return group.focusGroup(hashid);
-        };
-      }
-    ]
-  );
+  this.focusGroup = function(hashid) {
+    return group.focusGroup(hashid);
+  };
+};

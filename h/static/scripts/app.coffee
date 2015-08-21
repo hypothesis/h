@@ -89,6 +89,7 @@ module.exports = angular.module('h', [
 .controller('AnnotationViewerController', require('./annotation-viewer-controller'))
 .controller('StreamController', require('./stream-controller'))
 .controller('WidgetController', require('./widget-controller'))
+.controller('GroupListController', require('./group-list-controller'))
 
 .directive('annotation', require('./directive/annotation'))
 .directive('deepCount', require('./directive/deep-count'))

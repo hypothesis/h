@@ -9,11 +9,11 @@ var getControllerService = function() {
   return $controller;
 };
 
-describe('GroupListCtrl', function() {
+describe('GroupListController', function() {
 
   before(function() {
-    angular.module('h');
-    require('../group-list-controller');
+    angular.module('h')
+      .controller('GroupListController', require('../group-list-controller'));
   });
 
   beforeEach(angular.mock.module('h'));
@@ -22,7 +22,7 @@ describe('GroupListCtrl', function() {
     var locals = {
       group: group || {}
     };
-    locals.ctrl = getControllerService()('GroupListCtrl', locals);
+    locals.ctrl = getControllerService()('GroupListController', locals);
     return locals;
   };
 
