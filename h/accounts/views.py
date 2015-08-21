@@ -502,6 +502,8 @@ class ProfileController(object):
         subscription_id = request.GET['subscription_id']
         subscription = Subscriptions.get_by_id(subscription_id)
         if subscription:
+            if request.authenticated_userid != subscription.uri:
+                raise httpexceptions.HTTPUnauthorized()
             subscription.active = False
             return {}
         return {}
