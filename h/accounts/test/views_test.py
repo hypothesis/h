@@ -942,7 +942,7 @@ def test_subscription_update(authn_policy, form_validator,
 @pytest.mark.usefixtures('activation_model')
 def test_disable_user_with_invalid_password(form_validator, user_model):
     """Make sure our disable_user call validates the user password."""
-    request = DummyRequest(method='POST')
+    request = Mock(method='POST', authenticated_userid='john')
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
 
     # With an invalid password, validate_user() returns False.
@@ -958,7 +958,7 @@ def test_disable_user_with_invalid_password(form_validator, user_model):
 @pytest.mark.usefixtures('activation_model')
 def test_disable_user_sets_random_password(form_validator, user_model):
     """Check if the user is disabled."""
-    request = DummyRequest(method='POST')
+    request = Mock(method='POST', authenticated_userid='john')
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
 
     user = FakeUser(password='abc')
@@ -968,6 +968,12 @@ def test_disable_user_sets_random_password(form_validator, user_model):
     profile.disable_user()
 
     assert user.password == user_model.generate_random_password.return_value
+
+
+def test_disable_user_with_no_authenticated_user():
+    exc = ProfileController(Mock(authenticated_userid=None)).disable_user()
+
+    assert isinstance(exc, httpexceptions.HTTPUnauthorized)
 
 
 @pytest.fixture
