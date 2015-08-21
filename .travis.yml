@@ -11,6 +11,7 @@ install:
   - npm install
   - make
 script:
+  - pip freeze
   # Run all tests, with coverage if possible
   - make cover
   # Test building browser extensions
