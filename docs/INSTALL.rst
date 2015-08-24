@@ -85,7 +85,7 @@ Running the container
 You can now run a Docker container using the ``hypothesis/h`` image you just
 built. At its simplest, this consists of running::
 
-    $ docker run -d -p 8000:8000 hypothesis/h
+    $ docker run -d -p 5000:5000 hypothesis/h
 
 but this will usually result in a container which is missing some important
 configuration. In particular, you need to let the running h instance know where
@@ -103,7 +103,7 @@ Using the example given in the previous section, in which we started containers
 for our external services, we can use `docker links`_ to configure the h
 container::
 
-    $ docker run -d -p 8000:8000 \
+    $ docker run -d -p 5000:5000 \
                  -e DATABASE_URL=postgresql://scott:tiger@dbserver/mydatabase \
                  --link elasticsearch:elasticsearch \
                  --link nsqd:nsqd \
