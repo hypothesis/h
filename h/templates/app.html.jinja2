@@ -58,37 +58,39 @@
   </div>
   <!-- / Toolbar -->
 
-  <!-- Account Dialog -->
-  <div class="content sheet" ng-if="accountDialog.visible">
-    <i class="close h-icon-close"
-       role="button"
-       title="Close"
-       ng-click="accountDialog.visible = false"></i>
-    <div ng-if="auth.user">
-      {% block settings %}
-      <div class="tabbable"
-           ng-controller="AccountController"
-           ng-model="tab">
-        {{ include_raw("h:templates/client/settings/account.html") }}
-        {{ include_raw("h:templates/client/settings/notifications.html") }}
+  <div class="content">
+    <!-- Account Dialog -->
+    <div class="sheet" ng-if="accountDialog.visible">
+      <i class="close h-icon-close"
+         role="button"
+         title="Close"
+         ng-click="accountDialog.visible = false"></i>
+      <div ng-if="auth.user">
+        {% block settings %}
+        <div class="tabbable"
+             ng-controller="AccountController"
+             ng-model="tab">
+          {{ include_raw("h:templates/client/settings/account.html") }}
+          {{ include_raw("h:templates/client/settings/notifications.html") }}
+        </div>
+        {% endblock %}
       </div>
-      {% endblock %}
+      <div ng-if="!auth.user">
+        {% block auth %}
+        {{ include_raw("h:templates/client/auth.html") }}
+        {% endblock %}
+      </div>
     </div>
-    <div ng-if="!auth.user">
-      {% block auth %}
-      {{ include_raw("h:templates/client/auth.html") }}
-      {% endblock %}
-    </div>
+    <!-- / Account Dialog -->
+
+    <!-- Share View Dialog -->
+    <div share-dialog="" ng-show="shareDialog.visible"></div>
+    <!-- / Share View Dialog -->
+
+    <!-- Angular view -->
+    <main ng-view=""></main>
+    <!-- / Angular view -->
   </div>
-  <!-- / Account Dialog -->
-
-  <!-- Share View Dialog -->
-  <div share-dialog="" ng-show="shareDialog.visible"></div>
-  <!-- / Share View Dialog -->
-
-  <!-- Angular view -->
-  <main class="content" ng-view=""></main>
-  <!-- / Wrapper -->
 {% endblock %}
 
 {% block templates %}
