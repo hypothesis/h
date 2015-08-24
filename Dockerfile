@@ -1,62 +1,55 @@
-FROM phusion/baseimage:0.9.16
+FROM gliderlabs/alpine:3.2
 MAINTAINER Hypothes.is Project and contributors
 
-# System dependencies
-RUN apt-add-repository ppa:brightbox/ruby-ng
-RUN apt-get -q -y update
-RUN DEBIAN_FRONTEND=noninteractive apt-get -q -y --no-install-recommends install \
-  build-essential \
-  git \
-  libevent-dev \
-  libffi-dev \
-  libpq-dev \
-  libyaml-dev \
-  nodejs \
-  npm \
-  python-dev \
-  python-pip \
-  python-virtualenv \
-  ruby2.2 \
-  ruby2.2-dev
+# Update the base image and install runtime dependencies.
+RUN apk update \
+  && apk upgrade \
+  && apk add ca-certificates libffi libpq python nodejs ruby
 
-# Provide /usr/bin/node as well as /usr/bin/nodejs
-RUN update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10
+# Create the hypothesis user, group, home directory and package directory.
+RUN addgroup -S hypothesis \
+  && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
+WORKDIR /var/lib/hypothesis
 
-# Clean apt state
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Copy packaging
+COPY h/_version.py ./h/
+COPY package.json setup.* requirements.txt versioneer.py ./
 
-# Base environment
-RUN pip install -U pip virtualenv
-RUN npm install -g npm
-RUN gem install compass
-RUN virtualenv /srv/h
-RUN mkdir -p /src/h
-ENV PATH=/srv/h/bin:/src/h/node_modules/.bin:$PATH
-WORKDIR /src/h
-
-# Python dependencies
-ADD setup.* requirements.txt     /src/h/
-ADD versioneer.py                /src/h/
-ADD h/_version.py                /src/h/h/
-# These files aren't needed in the container, but setup.py gets upset if they
-# are missing:
+# These files must exist to satisfy setup.py.
 RUN touch CHANGES.txt README.rst
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Node dependencies
-ADD package.json                 /src/h/
-RUN npm install --production
+# Install build dependencies, build, then clean up.
+RUN apk add --virtual build-deps \
+    libffi-dev \
+    g++ \
+    make \
+    postgresql-dev \
+    python-dev \
+    ruby-dev \
+  && apk add py-pip \
+  && gem install --no-ri compass \
+  && npm install --production \
+  && pip install --no-cache-dir -U pip \
+  && pip install --no-cache-dir -r requirements.txt \
+  && apk del build-deps postgresql-dev \
+  && npm cache clean \
+  && rm -rf /tmp/* /var/cache/apk/*
 
-# Install the h application
-ADD Makefile                     /src/h/
-ADD gunicorn.conf.py             /src/h/
-ADD conf                         /src/h/conf
-ADD h                            /src/h/h
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the rest of the application files
+COPY Procfile gunicorn.conf.py ./
+COPY conf ./conf/
+COPY h ./h/
 
-# Services (for runit)
-ADD ./svc /etc/service
+# Change ownership of all the files and switch to the hypothesis user.
+RUN chown -R hypothesis:hypothesis .
+USER hypothesis
 
-# Startup and ports
-CMD ["/sbin/my_init"]
-EXPOSE 8000
+# Expose the default port.
+EXPOSE 5000
+
+# Persist the static directory.
+VOLUME ["/var/lib/hypothesis/h/static"]
+
+# Use honcho and start all the daemons by default.
+ENTRYPOINT ["honcho"]
+CMD ["start", "-c", "all=1,assets=0,initdb=0"]

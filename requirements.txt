@@ -2,6 +2,7 @@
 certifi
 cffi
 gunicorn
+honcho
 psycogreen
 psycopg2
 pyramid_multiauth
