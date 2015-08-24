@@ -1,4 +1,4 @@
-def group_filter(request):
+def group_filter(effective_principals):
     """Return an Elasticsearch filter for the given user's groups.
 
     This will filter out annotations that belong to groups that the given user
@@ -18,8 +18,7 @@ def group_filter(request):
             }
         }
 
-    :param request: The Pyramid request object
-    :type request: pyramid.request.Request
+    :param effective_principals: request.effective_principals
 
     """
     # Annotations that have no 'group' field or a null value for the group
@@ -32,7 +31,7 @@ def group_filter(request):
 
     # Annotations whose 'group' field's value matches one of the hashids in
     # the request's 'group:<hashid>' principals should pass through the filter.
-    hashids.extend([p.split(':', 1)[1] for p in request.effective_principals
+    hashids.extend([p.split(':', 1)[1] for p in effective_principals
                     if p.startswith('group:')])
 
     if len(hashids) > 1:

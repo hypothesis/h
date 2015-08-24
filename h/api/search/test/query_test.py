@@ -501,7 +501,7 @@ def test_build_passes_request_to_group_filter(groups):
 
     query.build(request, multidict.NestedMultiDict())
 
-    groups.group_filter.assert_called_once_with(request)
+    groups.group_filter.assert_called_once_with(request.effective_principals)
 
 
 @build_fixtures

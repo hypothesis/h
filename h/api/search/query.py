@@ -80,7 +80,7 @@ def build(request, request_params, search_normalized_uris=False):
     # Add a filter for "not in public site areas" considerations
     filters.append(nipsa.nipsa_filter(userid=userid))
 
-    filters.append(groups.group_filter(request))
+    filters.append(groups.group_filter(request.effective_principals))
 
     query = {"match_all": {}}
 

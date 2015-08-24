@@ -4,9 +4,9 @@ from h.api.groups import search
 
 
 def test_group_filter_with_0_groups():
-    request = mock.Mock(effective_principals=['foo', 'bar'])
+    effective_principals = ['foo', 'bar']
 
-    group_filter = search.group_filter(request)
+    group_filter = search.group_filter(effective_principals)
 
     assert group_filter == {
         'bool': {
@@ -19,9 +19,9 @@ def test_group_filter_with_0_groups():
 
 
 def test_group_filter_with_1_group():
-    request = mock.Mock(effective_principals=['foo', 'bar', 'group:testgroup'])
+    effective_principals = ['foo', 'bar', 'group:testgroup']
 
-    group_filter = search.group_filter(request)
+    group_filter = search.group_filter(effective_principals)
 
     assert group_filter == {
         'bool': {
@@ -34,11 +34,11 @@ def test_group_filter_with_1_group():
 
 
 def test_group_filter_with_3_groups():
-    request = mock.Mock(
-            effective_principals=['foo', 'bar', 'group:testgroup',
-                'group:my-group', 'group:another-group'])
+    effective_principals = [
+        'foo', 'bar', 'group:testgroup', 'group:my-group',
+        'group:another-group']
 
-    group_filter = search.group_filter(request)
+    group_filter = search.group_filter(effective_principals)
 
     assert group_filter == {
         'bool': {

@@ -118,7 +118,7 @@ class FilterToElasticFilter(object):
                         "must": [
                             nipsa.nipsa_filter(
                                 userid=request.authenticated_userid),
-                            groups.group_filter(request)
+                            groups.group_filter(request.effective_principals)
                         ]
                     }
                 },
