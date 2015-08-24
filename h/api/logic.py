@@ -70,7 +70,9 @@ def update_annotation(annotation, fields, has_admin_permission):
     """Update the given annotation with the given new fields.
 
     :raises RuntimeError: if the fields attempt to change the annotation's
-        permissions and has_admin_permission is False.
+        permissions and has_admin_permission is False, or if they are attempting
+        to move the annotation between groups.
+
     """
     # Some fields are not to be set by the user, ignore them
     for field in PROTECTED_FIELDS:
@@ -84,6 +86,10 @@ def update_annotation(annotation, fields, has_admin_permission):
     if changing_permissions and not has_admin_permission:
         raise RuntimeError(
             _('Not authorized to change annotation permissions.'), 401)
+
+    if 'group' in fields and fields['group'] != annotation.get('group'):
+        raise RuntimeError(
+            _("You can't move annotations between groups."), 401)
 
     # Update the annotation with the new data
     annotation.update(fields)

@@ -275,13 +275,12 @@ def test_update_annotation_calls_update():
 
 
 @update_annotation_fixtures
-def test_update_annotation_user_can_change_group():
+def test_update_annotation_user_cannot_change_group():
     annotation = _mock_annotation(group='old')
     fields = {'group': 'new'}
 
-    logic.update_annotation(annotation, fields, False)
-
-    assert annotation['group'] == 'new'
+    with pytest.raises(RuntimeError):
+        logic.update_annotation(annotation, fields, False)
 
 
 @update_annotation_fixtures
