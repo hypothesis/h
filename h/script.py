@@ -62,7 +62,7 @@ def bootstrap(args):
     return request
 
 
-def init_db(args):
+def initdb(args):
     """Create database tables and elasticsearch indices."""
     # Force model creation using the MODEL_CREATE_ALL env var
     os.environ['MODEL_CREATE_ALL'] = 'True'
@@ -70,8 +70,8 @@ def init_db(args):
     # Start the application, triggering model creation
     bootstrap(args)
 
-parser_init_db = subparsers.add_parser('init_db', help=init_db.__doc__)
-_add_common_args(parser_init_db)
+parser_initdb = subparsers.add_parser('initdb', help=initdb.__doc__)
+_add_common_args(parser_initdb)
 
 
 def admin(args):
@@ -222,7 +222,7 @@ COMMANDS = {
     'assets': assets,
     'admin': admin,
     'annotool': annotool,
-    'init_db': init_db,
+    'initdb': initdb,
     'reindex': reindex,
     'token': token,
     'version': version,
