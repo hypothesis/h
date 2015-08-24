@@ -243,35 +243,24 @@ def test_update_annotation_calls_set_group_if_reply(groups):
 
 
 @update_annotation_fixtures
-def test_update_annotation_user_can_change_group():
+def test_update_annotation_user_cannot_change_group():
     annotation = _mock_annotation(group='old')
     fields = {'group': 'new'}
 
-    # Since effective_principals has both 'group:old' and the 'group:new' we
-    # should be able to change the annotation's group from 'old' to 'new'.
-    logic.update_annotation(
+    with pytest.raises(RuntimeError):
+        logic.update_annotation(
             annotation, fields, False, ['group:old', 'group:new'])
-
-    assert annotation['group'] == 'new'
 
 
 @update_annotation_fixtures
-def test_update_annotation_calls_authorized_to_write_group_twice(groups):
-    """It should call authorized_to_write_group() twice.
-
-    Once with the annotation's old group and once with the new one.
-
-    """
-    annotation = _mock_annotation(group='old')
-    fields = {'group': 'new'}
+def test_update_annotation_calls_authorized_to_write_group(groups):
+    annotation = _mock_annotation(group='test-group')
     effective_principals = mock.sentinel.effective_principals
 
-    logic.update_annotation(annotation, fields, False, effective_principals)
+    logic.update_annotation(annotation, {}, False, effective_principals)
 
-    assert groups.authorized_to_write_group.call_args_list == [
-        mock.call(effective_principals, 'old'),
-        mock.call(effective_principals, 'new')
-    ]
+    groups.authorized_to_write_group.assert_called_once_with(
+        effective_principals, 'test-group')
 
 
 @update_annotation_fixtures

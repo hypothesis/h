@@ -89,11 +89,12 @@ def update_annotation(annotation, fields, has_admin_permission,
         raise RuntimeError(
             _('Not authorized to change annotation permissions.'), 401)
 
-    can_write_old_group = groups.authorized_to_write_group(
-        effective_principals, annotation.get('group'))
-    can_write_new_group = groups.authorized_to_write_group(
-        effective_principals, fields.get('group'))
-    if not (can_write_old_group and can_write_new_group):
+    if 'group' in fields and fields['group'] != annotation.get('group'):
+        raise RuntimeError(
+            _("You can't move annotations between groups."), 401)
+
+    if not groups.authorized_to_write_group(
+            effective_principals, annotation.get('group')):
         raise RuntimeError(_('Not authorized to write to group.'), 401)
 
     # Update the annotation with the new data
