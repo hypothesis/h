@@ -189,7 +189,7 @@ def test_read_gets_group_by_hashid(Group):
 
     views.read(request)
 
-    Group.get_by_hashid.assert_called_once_with(request, "foo")
+    Group.get_by_hashid.assert_called_once_with(request.hashids, "foo")
 
 
 @read_fixtures
@@ -282,7 +282,7 @@ def test_read_if_not_a_member_gets_hashid_from_group(Group, User):
 
     views.read(request)
 
-    group.hashid.assert_called_once_with(request)
+    group.hashid.assert_called_once_with(request.hashids)
     assert request.route_url.call_args[1]['hashid'] == (
         group.hashid.return_value)
 
@@ -423,7 +423,8 @@ def test_join_uses_hashid_from_matchdict_to_get_group(Group):
 
     views.join(request)
 
-    Group.get_by_hashid.assert_called_once_with(request, matchdict["hashid"])
+    Group.get_by_hashid.assert_called_once_with(
+        request.hashids, matchdict["hashid"])
 
 
 @join_fixtures

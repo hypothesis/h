@@ -90,7 +90,7 @@ def _join(request, group):
     visits the group's URL.
 
     """
-    hashid = group.hashid(request)
+    hashid = group.hashid(request.hashids)
     join_url = request.route_url('group_read', hashid=hashid, slug=group.slug)
     template_data = {'group': group, 'join_url': join_url}
     return renderers.render_to_response(
@@ -108,7 +108,7 @@ def read(request):
     hashid = request.matchdict["hashid"]
     slug = request.matchdict.get("slug")
 
-    group = models.Group.get_by_hashid(request, hashid)
+    group = models.Group.get_by_hashid(request.hashids, hashid)
     if group is None:
         raise exc.HTTPNotFound()
 
@@ -136,7 +136,7 @@ def join(request):
         raise exc.HTTPNotFound()
 
     hashid = request.matchdict["hashid"]
-    group = models.Group.get_by_hashid(request, hashid)
+    group = models.Group.get_by_hashid(request.hashids, hashid)
 
     if group is None:
         raise exc.HTTPNotFound()

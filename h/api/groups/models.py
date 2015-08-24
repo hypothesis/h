@@ -2,10 +2,8 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import exc
 import slugify
-from pyramid import exceptions
 
 from h.db import Base
-from h import hashids
 
 
 class Group(Base):
@@ -48,9 +46,9 @@ class Group(Base):
             return None
 
     @classmethod
-    def get_by_hashid(cls, request, hashid):
+    def get_by_hashid(cls, hashids, hashid):
         """Return the group with the given hashid, or None."""
-        id_ = hashids.decode(request, 'h.groups', hashid)
+        id_ = hashids.decode('h.groups', hashid)
         return cls.get_by_id(id_)
 
     @property
@@ -61,15 +59,15 @@ class Group(Base):
     def __repr__(self):
         return '<Group: %s>' % self.slug
 
-    def hashid(self, request):
+    def hashid(self, hashids):
         """Return a public hashid that uniquely identifies this group."""
-        return hashids.encode(request, 'h.groups', self.id)
+        return hashids.encode('h.groups', self.id)
 
-    def as_dict(self, request):
+    def as_dict(self, hashids):
         """Return a JSON-serializable dict representation of this group."""
         return {
             'name': self.name,
-            'hashid': self.hashid(request),
+            'hashid': self.hashid(hashids),
         }
 
 
@@ -84,9 +82,3 @@ USER_GROUP_TABLE = sa.Table(
               sa.ForeignKey('group.id'),
               nullable=False)
 )
-
-
-def includeme(config):
-    if not config.registry.settings.get("h.hashids.salt"):
-        raise exceptions.ConfigurationError(
-            "There needs to be a h.hashids.salt config setting")

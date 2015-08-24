@@ -34,7 +34,7 @@ def authorized_to_read_group(effective_principals, group_hashid):
     return _authorized_for_group(effective_principals, group_hashid)
 
 
-def group_principals(user, request):
+def group_principals(user, hashids):
     """Return any 'group:<hashid>' principals for the given user.
 
     Return a list of 'group:<hashid>' principals for the groups that the given
@@ -43,10 +43,10 @@ def group_principals(user, request):
     :param user: the authorized user, as a User object
     :type user: h.accounts.models.User
 
-    :param request: the current request
-    :type request: pyramid.request.Request
+    :param hashids: the request.hashids object
+    :type hashids: h.hashids.SimplerHashids
 
     :rtype: list of strings
 
     """
-    return ['group:' + group.hashid(request) for group in user.groups]
+    return ['group:' + group.hashid(hashids) for group in user.groups]

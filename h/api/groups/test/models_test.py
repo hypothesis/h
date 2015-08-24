@@ -32,46 +32,42 @@ def test_slug(db_session):
     assert group.slug == "my-hypothesis-group"
 
 
-@mock.patch('h.api.groups.models.hashids')
-def test_hashid_calls_encode(hashids, db_session):
-    request = mock.Mock()
+def test_hashid_calls_encode(db_session):
+    hashids = mock.Mock()
     group = models.Group('my-group', factories.User())
 
-    group.hashid(request)
+    group.hashid(hashids)
 
-    hashids.encode.assert_called_once_with(request, 'h.groups', group.id)
+    hashids.encode.assert_called_once_with('h.groups', group.id)
 
 
-@mock.patch('h.api.groups.models.hashids')
-def test_hashid_returns_encoded_hashid(hashids, db_session):
-    hashid = models.Group('my-group', factories.User()).hashid(mock.Mock())
+def test_hashid_returns_encoded_hashid(db_session):
+    hashids = mock.Mock()
+    hashid = models.Group('my-group', factories.User()).hashid(hashids)
 
     assert hashid == hashids.encode.return_value
 
 
 @mock.patch('h.api.groups.models.Group.get_by_id')
-@mock.patch('h.api.groups.models.hashids')
-def test_get_by_hashid_calls_decode(hashids, get_by_id):
-    request = mock.Mock()
+def test_get_by_hashid_calls_decode(get_by_id):
+    hashids = mock.Mock()
 
-    models.Group.get_by_hashid(request, 'test-hashid')
+    models.Group.get_by_hashid(hashids, 'test-hashid')
 
-    hashids.decode.assert_called_once_with(request, 'h.groups', 'test-hashid')
+    hashids.decode.assert_called_once_with('h.groups', 'test-hashid')
 
 
 @mock.patch('h.api.groups.models.Group.get_by_id')
-@mock.patch('h.api.groups.models.hashids')
-def test_get_by_hashid_calls_get_by_id(hashids, get_by_id):
-    request = mock.Mock()
+def test_get_by_hashid_calls_get_by_id(get_by_id):
+    hashids = mock.Mock()
 
-    models.Group.get_by_hashid(request, 'test-hashid')
+    models.Group.get_by_hashid(hashids, 'test-hashid')
 
     get_by_id.assert_called_once_with(hashids.decode.return_value)
 
 
 @mock.patch('h.api.groups.models.Group.get_by_id')
-@mock.patch('h.api.groups.models.hashids')
-def test_get_by_hashid_calls_get_by_id(hashids, get_by_id):
+def test_get_by_hashid_calls_get_by_id(get_by_id):
     user = models.Group.get_by_hashid(mock.Mock(), 'test-hashid')
 
     assert user == get_by_id.return_value
@@ -116,9 +112,9 @@ def test_as_dict(db_session):
     group = models.Group(name=name, creator=user)
     db_session.add(group)
     db_session.flush()
-    request = mock.MagicMock()
+    hashids = mock.Mock()
 
-    assert group.as_dict(request) == {
+    assert group.as_dict(hashids) == {
         'name': 'My Hypothesis Group',
-        'hashid': group.hashid(request)
+        'hashid': group.hashid(hashids)
     }
