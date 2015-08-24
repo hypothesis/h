@@ -26,19 +26,21 @@ def group_filter(request):
     # field should pass through the filter.
     should_clauses = [{'missing': {'field': 'group'}}]
 
+    # We always want group: '__none__' annotations to pass through the groups
+    # search filter.
+    hashids = ['__none__']
+
     # Annotations whose 'group' field's value matches one of the hashids in
     # the request's 'group:<hashid>' principals should pass through the filter.
-    hashids = [p.split(':', 1)[1] for p in request.effective_principals
-               if p.startswith('group:')]
+    hashids.extend([p.split(':', 1)[1] for p in request.effective_principals
+                    if p.startswith('group:')])
+
     if len(hashids) > 1:
         should_clauses.append({'terms': {'group': hashids}})
-    elif len(hashids) == 1:
+    else:
         should_clauses.append({'term': {'group': hashids[0]}})
 
-    if len(should_clauses) > 1:
-        # Combining the should_clauses with a {'bool': {'should': [...]}}
-        # filter means that if any one of the should clauses passes then the
-        # annotation will pass through the filter.
-        return {'bool': {'should': should_clauses}}
-    else:
-        return should_clauses[0]
+    # Combining the should_clauses with a {'bool': {'should': [...]}}
+    # filter means that if any one of the should clauses passes then the
+    # annotation will pass through the filter.
+    return {'bool': {'should': should_clauses}}

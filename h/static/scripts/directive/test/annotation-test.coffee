@@ -590,7 +590,7 @@ describe("AnnotationController", ->
       annotationMapper: annotationMapper or {}
       group: group or {
         getGroup: ->
-        focusedGroup: ->
+        focusedGroup: -> {}
       }
     }
     module(($provide) ->

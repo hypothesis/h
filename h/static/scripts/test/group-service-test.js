@@ -23,30 +23,26 @@ describe('GroupService', function() {
   describe('.groups() method', function() {
 
     context("the session doesn't contain any groups", function() {
-      it('returns just the public group', function() {
+      it('returns no groups', function() {
         var session = {state: {groups: []}};
 
         var groups = getGroupService(session).groups();
 
-        assert(groups.length === 1);
-        assert(groups[0].name === 'Public');
-        assert(groups[0].hashid === '__public__');
+        assert(groups.length === 0);
       });
     });
 
     context("the session contains some groups", function() {
-      it('returns the public group and the session groups', function() {
+      it('returns the groups from the session', function() {
         var groups = getGroupService(sessionWithThreeGroups()).groups();
 
-        assert(groups.length === 4);
-        assert(groups[0].name === 'Public');
-        assert(groups[0].hashid === '__public__');
-        assert(groups[1].name === 'Group 1');
-        assert(groups[1].hashid === 'hashid1');
-        assert(groups[2].name === 'Group 2');
-        assert(groups[2].hashid === 'hashid2');
-        assert(groups[3].name === 'Group 3');
-        assert(groups[3].hashid === 'hashid3');
+        assert(groups.length === 3);
+        assert(groups[0].name === 'Group 1');
+        assert(groups[0].hashid === 'hashid1');
+        assert(groups[1].name === 'Group 2');
+        assert(groups[1].hashid === 'hashid2');
+        assert(groups[2].name === 'Group 3');
+        assert(groups[2].hashid === 'hashid3');
       });
     });
   });
@@ -75,10 +71,10 @@ describe('GroupService', function() {
       assert(groupService.focusedGroup().hashid === 'hashid2');
     });
 
-    it('returns the public group initially', function() {
+    it('returns the first group initially', function() {
       var groupService = getGroupService(sessionWithThreeGroups());
 
-      assert(groupService.focusedGroup().hashid === '__public__');
+      assert(groupService.focusedGroup().hashid === 'hashid1');
     });
   });
 
@@ -91,22 +87,12 @@ describe('GroupService', function() {
       assert(groupService.focusedGroup().hashid === 'hashid2');
     });
 
-    it('can set .focusedGroup() to the public group', function() {
-      var groupService = getGroupService(sessionWithThreeGroups());
-      groupService.focusGroup('hashid2');
-
-      groupService.focusGroup('__public__');
-
-      assert(groupService.focusedGroup().hashid === '__public__');
-      assert(groupService.focusedGroup().name === 'Public');
-    });
-
     it("does nothing if the named group isn't recognised", function() {
       var groupService = getGroupService(sessionWithThreeGroups());
 
       groupService.focusGroup('foobar');
 
-      assert(groupService.focusedGroup().hashid === '__public__');
+      assert(groupService.focusedGroup().hashid === 'hashid1');
     });
   });
 });

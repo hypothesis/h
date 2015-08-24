@@ -50,6 +50,7 @@ describe 'privacy', ->
   beforeEach inject (_$compile_, _$rootScope_, _$window_) ->
     $compile = _$compile_
     $scope = _$rootScope_.$new()
+    $scope.group = -> {}
     $window = _$window_
 
   afterEach ->
@@ -59,7 +60,7 @@ describe 'privacy', ->
 
     it 'stores the default visibility level when it changes', ->
       $scope.permissions = {read: ['acct:user@example.com']}
-      $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel">')($scope)
+      $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel" group="group">')($scope)
       $scope.$digest()
       $isolateScope = $element.isolateScope()
       $isolateScope.setLevel(name: VISIBILITY_PUBLIC)
@@ -77,7 +78,7 @@ describe 'privacy', ->
 
         it 'defaults to public', ->
           $scope.permissions = {read: []}
-          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel">')($scope)
+          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel" group="group">')($scope)
           $scope.$digest()
           $isolateScope = $element.isolateScope()
           assert.equal $isolateScope.level.name, VISIBILITY_PUBLIC
@@ -87,7 +88,7 @@ describe 'privacy', ->
           fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PUBLIC
 
           $scope.permissions = {read: []}
-          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel">')($scope)
+          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel" group="group">')($scope)
           $scope.$digest()
 
         it 'sets the initial permissions based on the stored privacy level', ->
@@ -104,7 +105,7 @@ describe 'privacy', ->
           fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
 
           $scope.permissions = {read: ['group:__world__']}
-          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel">')($scope)
+          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel" group="group">')($scope)
           $scope.$digest()
           $isolateScope = $element.isolateScope()
           assert.equal($isolateScope.level.name, VISIBILITY_PUBLIC)
@@ -115,14 +116,14 @@ describe 'privacy', ->
 
         it 'fills the permissions fields with the auth.user name', ->
           fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PRIVATE
-          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel">')($scope)
+          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel" group="group">')($scope)
           $scope.$digest()
 
           assert.deepEqual $scope.permissions, fakePermissions.private()
 
         it 'puts group_world into the read permissions for public visibility', ->
           fakeLocalStorage.setItem VISIBILITY_KEY, VISIBILITY_PUBLIC
-          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel">')($scope)
+          $element = $compile('<privacy ng-model="permissions" level="vm.privacylevel" group="group">')($scope)
           $scope.$digest()
 
           assert.deepEqual $scope.permissions, fakePermissions.public()

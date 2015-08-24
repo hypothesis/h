@@ -10,15 +10,12 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
     return unless controller?
 
     getLevels = ->
-      group = scope.group()
-      if group
-        text = group.name
-        isGroup = true
-      else
-        text = 'Public'
-        isGroup = false
       [
-        {name: VISIBILITY_PUBLIC, text: text, isGroup: isGroup}
+        {
+           name: VISIBILITY_PUBLIC,
+           text: scope.group().name,
+           isGroup: scope.group().hashid != '__none__'
+        }
         {name: VISIBILITY_PRIVATE, text: 'Only Me'}
       ]
 

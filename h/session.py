@@ -25,7 +25,9 @@ def _current_groups(request):
     This list is meant to be returned to the client in the "session" model.
 
     """
-    current_groups = []
+    current_groups = [
+        {'name': 'Public', 'hashid': '__none__'},  # No 'url'.
+    ]
     userid = request.authenticated_userid
     if userid is None:
         return current_groups

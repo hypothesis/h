@@ -1,5 +1,7 @@
 def _authorized_for_group(effective_principals, group_hashid):
-    if group_hashid:
+    if group_hashid == '__none__':
+        return True
+    elif group_hashid:
         required_principal = 'group:' + group_hashid
         return required_principal in effective_principals
     else:

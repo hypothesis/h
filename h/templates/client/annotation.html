@@ -128,12 +128,12 @@
         This annotation will be visible only to you.
       </p>
       <p ng-show="vm.privacyLevel.name == 'public'">
-        <span ng-if="vm.group()">
+        <span ng-if="vm.privacyLevel.isGroup">
           <i class="h-icon-group"></i>
           This annotation will be visible to everyone in the
           <strong>{{vm.group().name}}</strong> group.
         </span>
-        <span ng-if="!vm.group()">
+        <span ng-if="!vm.privacyLevel.isGroup">
           <i class="h-icon-public"></i>
           This annotation will be visible to everyone.
         </span>

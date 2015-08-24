@@ -8,7 +8,14 @@ def test_group_filter_with_0_groups():
 
     group_filter = search.group_filter(request)
 
-    assert group_filter == {'missing': {'field': 'group'}}
+    assert group_filter == {
+        'bool': {
+            'should': [
+                {'missing': {'field': 'group'}},
+                {'term': {'group': '__none__'}}
+            ]
+        }
+    }
 
 
 def test_group_filter_with_1_group():
@@ -20,7 +27,7 @@ def test_group_filter_with_1_group():
         'bool': {
             'should': [
                 {'missing': {'field': 'group'}},
-                {'term': {'group': 'testgroup'}}
+                {'terms': {'group': ['__none__', 'testgroup']}}
             ]
         }
     }
@@ -39,7 +46,8 @@ def test_group_filter_with_3_groups():
                 {'missing': {'field': 'group'}},
                 {
                     'terms': {
-                        'group': ['testgroup', 'my-group', 'another-group']
+                        'group': ['__none__', 'testgroup', 'my-group',
+                                  'another-group']
                     }
                 }
             ]

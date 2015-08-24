@@ -60,6 +60,9 @@ AnnotationController = [
     @timestamp = null
 
     model = $scope.annotationGet()
+    if not model.group
+      model.group = group.focusedGroup().hashid
+
     highlight = model.$highlight
     original = null
     vm = this
@@ -164,10 +167,7 @@ AnnotationController = [
         this.view()
 
     this.group = ->
-      if model.group
-        group.getGroup(model.group)
-      else
-        group.focusedGroup()
+      group.getGroup(model.group)
 
     # Calculates the visual diff flags from the targets
     #
@@ -208,10 +208,6 @@ AnnotationController = [
       switch @action
         when 'create'
           updateDomainModel(model, @annotation)
-
-          if group.focusedGroup().hashid != '__public__'
-            model.group = group.focusedGroup().hashid
-
           onFulfilled = =>
             $rootScope.$emit('annotationCreated', model)
             @view()

@@ -61,6 +61,7 @@ def test_prepare_sets_nipsa_field(ann, nipsa, has_nipsa):
      {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
 ])
 def test_render_noop_when_nothing_to_remove(ann_in, ann_out):
+    ann_out['group'] = '__none__'
     assert transform.render(ann_in) == ann_out
 
 
@@ -72,6 +73,7 @@ def test_render_noop_when_nothing_to_remove(ann_in, ann_out):
      {"target": [{"source": "giraffe"}, "foo"]}),
 ])
 def test_render_removes_source_normalized_field(ann_in, ann_out):
+    ann_out['group'] = '__none__'
     assert transform.render(ann_in) == ann_out
 
 
