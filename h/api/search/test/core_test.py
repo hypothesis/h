@@ -19,9 +19,7 @@ def test_search_with_user_object(_, search_raw):
     """
     user = mock.MagicMock()
 
-    core.search(
-        testing.DummyRequest(), request_params=multidict.NestedMultiDict(),
-        user=user)
+    core.search(multidict.NestedMultiDict(), [], user=user)
 
     first_call = search_raw.call_args_list[0]
     assert first_call[1]["user"] == user
@@ -29,18 +27,18 @@ def test_search_with_user_object(_, search_raw):
 
 @mock.patch("annotator.annotation.Annotation.search_raw")
 @mock.patch("h.api.search.query.build")
-def test_search_passes_request_to_build(build, _):
-    request = mock.Mock()
+def test_search_passes_effective_principals_to_build(build, _):
+    effective_principals = mock.Mock()
 
-    core.search(request, request.params, mock.Mock())
+    core.search(mock.Mock(), effective_principals, user=mock.Mock())
 
-    assert build.call_args[0][0] == request
+    assert build.call_args[0][1] == effective_principals
 
 
 @mock.patch("h.api.search.core.search")
 def test_index_limit_is_20(search_func):
     """index() calls search with "limit": 20."""
-    core.index(mock.Mock())
+    core.index([])
 
     first_call = search_func.call_args_list[0]
-    assert first_call[0][1]["limit"] == 20
+    assert first_call[0][0]["limit"] == 20

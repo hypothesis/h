@@ -91,10 +91,10 @@ def search(request):
 
     # The search results are filtered for the authenticated user
     user = get_user(request)
-    results = search_lib.search(request=request,
-                                request_params=request.params,
-                                user=user,
-                                search_normalized_uris=search_normalized_uris)
+    results = search_lib.search(
+        request_params=request.params,
+        effective_principals=request.effective_principals, user=user,
+        search_normalized_uris=search_normalized_uris)
 
     return {
         'total': results['total'],
@@ -133,7 +133,7 @@ def annotations_index(request):
     search_normalized_uris = request.feature('search_normalized')
 
     user = get_user(request)
-    results = search_lib.index(request, user=user,
+    results = search_lib.index(request.effective_principals, user=user,
                                search_normalized_uris=search_normalized_uris)
 
     return {

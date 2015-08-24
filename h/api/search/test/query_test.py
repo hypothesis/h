@@ -15,8 +15,7 @@ build_fixtures = pytest.mark.usefixtures('nipsa', 'groups', 'uri')
 @build_fixtures
 def test_build_offset_defaults_to_0():
     """If no offset is given then "from": 0 is used in the query by default."""
-    q = query.build(
-        testing.DummyRequest(), request_params=multidict.NestedMultiDict())
+    q = query.build(multidict.NestedMultiDict(), [])
 
     assert q["from"] == 0
 
@@ -24,9 +23,7 @@ def test_build_offset_defaults_to_0():
 @build_fixtures
 def test_build_custom_offsets_are_passed_in():
     """If an offset is given it's returned in the query dict."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"offset": 7}))
+    q = query.build(multidict.NestedMultiDict({"offset": 7}), [])
 
     assert q["from"] == 7
 
@@ -34,9 +31,7 @@ def test_build_custom_offsets_are_passed_in():
 @build_fixtures
 def test_build_offset_string_is_converted_to_int():
     """'offset' arguments should be converted from strings to ints."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"offset": "23"}))
+    q = query.build(multidict.NestedMultiDict({"offset": "23"}), [])
 
     assert q["from"] == 23
 
@@ -45,10 +40,8 @@ def test_build_offset_string_is_converted_to_int():
 def test_build_with_invalid_offset():
     """Invalid 'offset' params should be ignored."""
     for invalid_offset in ("foo", '', '   ', "-23", "32.7"):
-        q = query.build(
-            testing.DummyRequest(),
-            request_params=multidict.NestedMultiDict(
-                {"offset": invalid_offset}))
+        q = query.build(multidict.NestedMultiDict({"offset": invalid_offset}),
+                        [])
 
         assert q["from"] == 0
 
@@ -56,8 +49,7 @@ def test_build_with_invalid_offset():
 @build_fixtures
 def test_build_limit_defaults_to_20():
     """If no limit is given "size": 20 is used in the query by default."""
-    q = query.build(
-        testing.DummyRequest(), request_params=multidict.NestedMultiDict())
+    q = query.build(multidict.NestedMultiDict(), [])
 
     assert q["size"] == 20
 
@@ -65,9 +57,7 @@ def test_build_limit_defaults_to_20():
 @build_fixtures
 def test_build_custom_limits_are_passed_in():
     """If a limit is given it's returned in the query dict as "size"."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"limit": 7}))
+    q = query.build(multidict.NestedMultiDict({"limit": 7}), [])
 
     assert q["size"] == 7
 
@@ -75,9 +65,7 @@ def test_build_custom_limits_are_passed_in():
 @build_fixtures
 def test_build_limit_strings_are_converted_to_ints():
     """String values for limit should be converted to ints."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"limit": "17"}))
+    q = query.build(multidict.NestedMultiDict({"limit": "17"}), [])
 
     assert q["size"] == 17
 
@@ -87,8 +75,7 @@ def test_build_with_invalid_limit():
     """Invalid 'limit' params should be ignored."""
     for invalid_limit in ("foo", '', '   ', "-23", "32.7"):
         q = query.build(
-            testing.DummyRequest(),
-            request_params=multidict.NestedMultiDict({"limit": invalid_limit}))
+            multidict.NestedMultiDict({"limit": invalid_limit}), [])
 
         assert q["size"] == 20  # (20 is the default value.)
 
@@ -96,8 +83,7 @@ def test_build_with_invalid_limit():
 @build_fixtures
 def test_build_defaults_to_match_all():
     """If no query params are given a "match_all": {} query is returned."""
-    q = query.build(
-        testing.DummyRequest(), request_params=multidict.NestedMultiDict())
+    q = query.build(multidict.NestedMultiDict(), [])
 
     assert q["query"]["filtered"]["query"] == {"match_all": {}}
 
@@ -105,8 +91,7 @@ def test_build_defaults_to_match_all():
 @build_fixtures
 def test_build_sort_is_by_updated():
     """Sort defaults to "updated"."""
-    q = query.build(
-        testing.DummyRequest(), request_params=multidict.NestedMultiDict())
+    q = query.build(multidict.NestedMultiDict(), [])
 
     sort = q["sort"]
     assert len(sort) == 1
@@ -116,8 +101,7 @@ def test_build_sort_is_by_updated():
 @build_fixtures
 def test_build_sort_includes_ignore_unmapped():
     """'ignore_unmapped': True is used in the sort clause."""
-    q = query.build(
-        testing.DummyRequest(), request_params=multidict.NestedMultiDict())
+    q = query.build(multidict.NestedMultiDict(), [])
 
     sort = q["sort"]
     assert sort[0]["updated"]["ignore_unmapped"] == True
@@ -126,9 +110,7 @@ def test_build_sort_includes_ignore_unmapped():
 @build_fixtures
 def test_build_with_custom_sort():
     """Custom sorts are returned in the query dict."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"sort": "title"}))
+    q = query.build(multidict.NestedMultiDict({"sort": "title"}), [])
 
     sort = q["sort"]
     assert sort == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
@@ -137,8 +119,7 @@ def test_build_with_custom_sort():
 @build_fixtures
 def test_build_order_defaults_to_desc():
     """'order': "desc" is returned in the q dict by default."""
-    q = query.build(
-        testing.DummyRequest(), request_params=multidict.NestedMultiDict())
+    q = query.build(multidict.NestedMultiDict(), [])
 
     sort = q["sort"]
     assert sort[0]["updated"]["order"] == "desc"
@@ -147,9 +128,7 @@ def test_build_order_defaults_to_desc():
 @build_fixtures
 def test_build_with_custom_order():
     """'order' params are returned in the query dict if given."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"order": "asc"}))
+    q = query.build(multidict.NestedMultiDict({"order": "asc"}), [])
 
     sort = q["sort"]
     assert sort[0]["updated"]["order"] == "asc"
@@ -158,9 +137,7 @@ def test_build_with_custom_order():
 @build_fixtures
 def test_build_for_user():
     """'user' params returned in the query dict in "match" clauses."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"user": "bob"}))
+    q = query.build(multidict.NestedMultiDict({"user": "bob"}), [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"user": "bob"}}]}}
@@ -173,7 +150,7 @@ def test_build_for_multiple_users():
     params.add("user", "fred")
     params.add("user", "bob")
 
-    q = query.build(testing.DummyRequest(), request_params=params)
+    q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
@@ -188,9 +165,7 @@ def test_build_for_multiple_users():
 @build_fixtures
 def test_build_for_tag():
     """'tags' params are returned in the query dict in "match" clauses."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"tags": "foo"}))
+    q = query.build(multidict.NestedMultiDict({"tags": "foo"}), [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"tags": "foo"}}]}}
@@ -203,7 +178,7 @@ def test_build_for_multiple_tags():
     params.add("tags", "foo")
     params.add("tags", "bar")
 
-    q = query.build(testing.DummyRequest(), request_params=params)
+    q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
@@ -219,9 +194,7 @@ def test_build_for_multiple_tags():
 def test_build_with_combined_user_and_tag_query():
     """A 'user' and a 'param' at the same time are handled correctly."""
     q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict(
-            {"user": "bob", "tags": "foo"}))
+        multidict.NestedMultiDict({"user": "bob", "tags": "foo"}), [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {"must": [
@@ -236,7 +209,7 @@ def test_build_with_keyword():
     params = multidict.MultiDict()
     params.add("any", "howdy")
 
-    q = query.build(testing.DummyRequest(), request_params=params)
+    q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
@@ -261,7 +234,7 @@ def test_build_with_multiple_keywords():
     params.add("any", "howdy")
     params.add("any", "there")
 
-    q = query.build(testing.DummyRequest(), request_params=params)
+    q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {"must": [{"multi_match": {
@@ -284,13 +257,9 @@ def test_build_for_uri(uri):
     uri.normalize.side_effect = lambda x: x
 
     q1 = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict(
-            {"uri": "http://example.com/"}))
+        multidict.NestedMultiDict({"uri": "http://example.com/"}), [])
     q2 = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict(
-            {"uri": "http://whitehouse.gov/"}))
+        multidict.NestedMultiDict({"uri": "http://whitehouse.gov/"}), [])
 
     assert q1["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
@@ -314,9 +283,7 @@ def test_build_for_uri_with_multiple_representations(uri):
     uri.normalize.side_effect = lambda x: x
 
     q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict(
-            {"uri": "http://example.com/"}))
+        multidict.NestedMultiDict({"uri": "http://example.com/"}), [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
@@ -356,9 +323,7 @@ def test_build_for_uri_normalized(uri):
 
     params = multidict.NestedMultiDict({"uri": "http://example.com/"})
 
-    q = query.build(testing.DummyRequest(),
-                    request_params=params,
-                    search_normalized_uris=True)
+    q = query.build(params, [], search_normalized_uris=True)
 
     uri.expand.assert_called_with("http://example.com/")
 
@@ -372,9 +337,7 @@ def test_build_for_uri_normalized(uri):
 @build_fixtures
 def test_build_with_single_text_param():
     """'text' params are returned in the query dict in "match" clauses."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"text": "foobar"}))
+    q = query.build(multidict.NestedMultiDict({"text": "foobar"}), [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"text": "foobar"}}]}}
@@ -386,7 +349,7 @@ def test_build_with_multiple_text_params():
     params = multidict.MultiDict()
     params.add("text", "foo")
     params.add("text", "bar")
-    q = query.build(testing.DummyRequest(), request_params=params)
+    q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
@@ -401,9 +364,7 @@ def test_build_with_multiple_text_params():
 @build_fixtures
 def test_build_with_single_quote_param():
     """'quote' params are returned in the query dict in "match" clauses."""
-    q = query.build(
-        testing.DummyRequest(),
-        request_params=multidict.NestedMultiDict({"quote": "foobar"}))
+    q = query.build(multidict.NestedMultiDict({"quote": "foobar"}), [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {"must": [{"match": {"quote": "foobar"}}]}}
@@ -415,7 +376,7 @@ def test_build_with_multiple_quote_params():
     params = multidict.MultiDict()
     params.add("quote", "foo")
     params.add("quote", "bar")
-    q = query.build(testing.DummyRequest(), request_params=params)
+    q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
@@ -434,7 +395,7 @@ def test_build_with_evil_arguments():
         "limit": '\' drop table annotations'
     })
 
-    q = query.build(testing.DummyRequest(), request_params=params)
+    q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {'match_all': {}}
 
@@ -444,21 +405,20 @@ def test_build_returns_nipsa_filter(nipsa):
     """_build() returns a nipsa-filtered query."""
     nipsa.nipsa_filter.return_value = "foobar!"
 
-    q = query.build(testing.DummyRequest(), multidict.NestedMultiDict())
+    q = query.build(multidict.NestedMultiDict(), [])
 
     assert "foobar!" in q["query"]["filtered"]["filter"]["and"]
 
 
 @build_fixtures
 def test_build_does_not_pass_userid_to_nipsa_filter(nipsa):
-    query.build(testing.DummyRequest(), multidict.NestedMultiDict())
+    query.build(multidict.NestedMultiDict(), [])
     assert nipsa.nipsa_filter.call_args[1]["userid"] is None
 
 
 @build_fixtures
 def test_build_does_pass_userid_to_nipsa_filter(nipsa):
-    request = mock.Mock(authenticated_userid='fred', effective_principals=[])
-    query.build(request, multidict.NestedMultiDict())
+    query.build(multidict.NestedMultiDict(), [], userid='fred')
     assert nipsa.nipsa_filter.call_args[1]["userid"] == "fred"
 
 
@@ -473,7 +433,7 @@ def test_build_with_arbitrary_params():
     """
     params = multidict.NestedMultiDict({"foo.bar": "arbitrary"})
 
-    q = query.build(testing.DummyRequest(), request_params=params)
+    q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
         'bool': {
@@ -489,7 +449,7 @@ def test_build_with_arbitrary_params():
 @build_fixtures
 def test_build_nipsa_filter_is_included(nipsa):
     request = mock.Mock(authenticated_userid='fred', effective_principals=[])
-    q = query.build(request, multidict.NestedMultiDict())
+    q = query.build(multidict.NestedMultiDict(), [])
 
     assert nipsa.nipsa_filter.return_value in (
         q["query"]["filtered"]["filter"]["and"])
@@ -497,18 +457,16 @@ def test_build_nipsa_filter_is_included(nipsa):
 
 @build_fixtures
 def test_build_passes_request_to_group_filter(groups):
-    request = mock.Mock()
+    effective_principals = mock.Mock()
 
-    query.build(request, multidict.NestedMultiDict())
+    query.build(multidict.NestedMultiDict(), effective_principals)
 
-    groups.group_filter.assert_called_once_with(request.effective_principals)
+    groups.group_filter.assert_called_once_with(effective_principals)
 
 
 @build_fixtures
 def test_build_groups_filter_is_included(groups):
-    query_ = query.build(
-        mock.Mock(effective_principals=[]),
-        multidict.NestedMultiDict())
+    query_ = query.build(multidict.NestedMultiDict(), [])
 
     assert groups.group_filter.return_value in (
         query_["query"]["filtered"]["filter"]["and"])

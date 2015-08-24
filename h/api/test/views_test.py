@@ -62,12 +62,13 @@ def test_search_calls_search(search_lib):
 
 
 @search_fixtures
-def test_search_passes_request_to_search_lib(search_lib):
+def test_search_passes_effective_principals_to_search_lib(search_lib):
     request = mock.Mock()
 
     views.search(request)
 
-    assert search_lib.search.call_args[1]['request'] == request
+    assert search_lib.search.call_args[1]['effective_principals'] == (
+        request.effective_principals)
 
 
 @search_fixtures
