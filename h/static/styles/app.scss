@@ -13,6 +13,7 @@ body {
   font-weight: 300;
   padding: .72rem;
   padding-top: calc(.72em + 30px);
+  -webkit-overflow-scrolling: touch;
 
   @include respond-to(tablets desktops) {
     padding-bottom: 4rem;
