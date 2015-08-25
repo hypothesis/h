@@ -38,7 +38,8 @@ def search(request_params, effective_principals, user=None,
 
     body = query.build(request_params, effective_principals, userid,
                        search_normalized_uris=search_normalized_uris)
-    results = models.Annotation.search_raw(body, user=user, raw_result=True)
+    results = models.Annotation.search_raw(
+        body, user=user, raw_result=True, authorization_enabled=False)
 
     total = results['hits']['total']
     docs = results['hits']['hits']

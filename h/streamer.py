@@ -25,7 +25,9 @@ from .api.auth import get_user  # FIXME: should not import from .api
 from h.api import nipsa
 from h.api import uri
 from h.api import groups
+from h.api import search
 from .models import Annotation
+
 
 log = logging.getLogger(__name__)
 
@@ -116,9 +118,9 @@ class FilterToElasticFilter(object):
                 "filter": {
                     "bool": {
                         "must": [
+                            search.auth_filter(request.effective_principals),
                             nipsa.nipsa_filter(
                                 userid=request.authenticated_userid),
-                            groups.group_filter(request.effective_principals)
                         ]
                     }
                 },
@@ -590,10 +592,9 @@ def should_send_event(socket, annotation, event_data):
             socket.request.authenticated_userid != annotation.get('user', '')):
         return False
 
-    if annotation.get('group'):
-        if 'group:' + annotation['group'] not in (
-                socket.request.effective_principals):
-            return False
+    if not groups.authorized_to_read(
+            socket.request.effective_principals, annotation):
+        return False
 
     # We don't send anything until we have received a filter from the client
     if socket.filter is None:

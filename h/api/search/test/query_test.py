@@ -9,7 +9,7 @@ from h.api.search import query
 
 
 # The fixtures required to mock all of build()'s dependencies.
-build_fixtures = pytest.mark.usefixtures('nipsa', 'groups', 'uri')
+build_fixtures = pytest.mark.usefixtures('nipsa', 'uri')
 
 
 @build_fixtures
@@ -455,33 +455,9 @@ def test_build_nipsa_filter_is_included(nipsa):
         q["query"]["filtered"]["filter"]["and"])
 
 
-@build_fixtures
-def test_build_passes_request_to_group_filter(groups):
-    effective_principals = mock.Mock()
-
-    query.build(multidict.NestedMultiDict(), effective_principals)
-
-    groups.group_filter.assert_called_once_with(effective_principals)
-
-
-@build_fixtures
-def test_build_groups_filter_is_included(groups):
-    query_ = query.build(multidict.NestedMultiDict(), [])
-
-    assert groups.group_filter.return_value in (
-        query_["query"]["filtered"]["filter"]["and"])
-
-
 @pytest.fixture
 def nipsa(request):
     patcher = mock.patch('h.api.search.query.nipsa', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def groups(request):
-    patcher = mock.patch('h.api.search.query.groups', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 

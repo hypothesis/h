@@ -1,7 +1,31 @@
 # -*- coding: utf-8 -*-
 from h.api import uri
 from h.api import nipsa
-from h.api import groups
+
+
+def auth_filter(effective_principals):
+    """Return an Elasticsearch filter for authorized annotations.
+
+    Only annotations that the given effective_principals are authorized to
+    read will pass through this filter.
+
+    """
+    return {
+        'terms': {
+            'permissions.read':
+                # We always want annotations with 'group:__world__' in
+                # their read permissions to show up in the search results.
+                # 'group:__world__' is never in effective_principals.
+                # We could add it to effective_principals for authenticated
+                # requests but not for unauthenticed ones (since Pyramid
+                # doesn't call our effective_principals() function for
+                # unauthenticed requests).
+                # So instead we always have to insert it here.
+                # FIXME: If public annotations used 'system.Everyone'
+                # instead of 'group:__world__' we wouldn't have to do this.
+                ['group:__world__'] + effective_principals
+            }
+    }
 
 
 def build(request_params, effective_principals, userid=None,
@@ -53,7 +77,7 @@ def build(request_params, effective_principals, userid=None,
         }
     }]
 
-    filters = []
+    filters = [auth_filter(effective_principals)]
     matches = []
 
     uri_param = request_params.pop("uri", None)
@@ -79,8 +103,6 @@ def build(request_params, effective_principals, userid=None,
 
     # Add a filter for "not in public site areas" considerations
     filters.append(nipsa.nipsa_filter(userid=userid))
-
-    filters.append(groups.group_filter(effective_principals))
 
     query = {"match_all": {}}
 
