@@ -6,9 +6,6 @@ if (g.wgxpath) {
   g.wgxpath.install();
 }
 
-var nodeIteratorShim = require('node-iterator-shim');
-nodeIteratorShim();
-
 // Applications
 Annotator.Guest = require('./guest');
 Annotator.Host = require('./host');
