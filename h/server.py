@@ -4,7 +4,7 @@ from ws4py.server.geventserver import WSGIServer, WebSocketWSGIHandler
 
 class WSGIHandler(PyWSGIHandler, WebSocketWSGIHandler):
     def finalize_headers(self):
-        if self.environ.get('HTTP_UPGRADE') == 'websocket':
+        if self.environ.get('HTTP_UPGRADE', '').lower() == 'websocket':
             # Middleware, like Raven, may yield from the empty upgrade response,
             # confusing this method into sending "Transfer-Encoding: chunked"
             # and, in turn, this confuses some strict WebSocket clients.
