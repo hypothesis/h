@@ -405,7 +405,7 @@ module.exports = class Guest extends Annotator
     event.preventDefault?()
     event.stopPropagation?()
     @adder.hide()
-    switch event.target.dataset.action
+    switch $(event.target).data('action')
       when 'highlight'
         this.setVisibleHighlights true
         this.createHighlight()
