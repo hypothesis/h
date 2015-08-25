@@ -17,6 +17,7 @@ deps:
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
+	rm -rf h/static/webassets-external
 	rm -f h/static/scripts/vendor/*.min.js
 	rm -f h/static/scripts/account.*js
 	rm -f h/static/scripts/app.*js
