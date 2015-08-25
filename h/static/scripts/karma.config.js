@@ -18,8 +18,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      // Core polyfill
-      '../../../node_modules/core-js/client/core.js',
+      // Polyfills for PhantomJS
+      '../../../node_modules/js-polyfills/polyfill.js',
 
       // Application external deps
       '../../../node_modules/jquery/dist/jquery.js',
@@ -31,9 +31,6 @@ module.exports = function(config) {
       '../../../node_modules/ng-tags-input/build/ng-tags-input.min.js',
       'vendor/angular-bootstrap.js',
       'vendor/katex.js',
-
-      // These are needed until PhantomJS 2.0
-      'vendor/url.js',
 
       // Test deps
       '../../../node_modules/angular-mocks/angular-mocks.js',

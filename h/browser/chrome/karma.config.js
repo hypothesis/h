@@ -15,8 +15,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      // Core polyfill
-      '../../../node_modules/core-js/client/core.js',
+      // Polyfills for PhantomJS
+      '../../../node_modules/js-polyfills/polyfill.js',
 
       'lib/errors.js',
       'lib/tab-store.js',
