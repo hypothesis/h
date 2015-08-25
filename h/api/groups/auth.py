@@ -76,4 +76,5 @@ def group_principals(user, hashids):
     :rtype: list of strings
 
     """
-    return ['group:' + group.hashid(hashids) for group in user.groups]
+    return ['group:__none__'] + [
+        'group:' + group.hashid(hashids) for group in user.groups]

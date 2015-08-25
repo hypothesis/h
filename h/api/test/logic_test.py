@@ -61,31 +61,6 @@ def test_create_annotation_calls_set_group_if_reply(Annotation, groups):
 
 
 @create_annotation_fixtures
-def test_create_annotation_calls_authorized_to_write_group(Annotation, groups):
-    annotation_data = {
-        'group': 'test-group', 'user': 'user', 'consumer': 'consumer'}
-    annotation = mock.MagicMock()
-    annotation.__getitem__.side_effect = annotation_data.__getitem__
-    annotation.get.side_effect = annotation_data.get
-    Annotation.return_value = annotation
-
-    logic.create_annotation(
-        {}, mock.Mock(), mock.sentinel.effective_principals)
-
-    groups.authorized_to_write_group.assert_called_once_with(
-        mock.sentinel.effective_principals, 'test-group')
-
-
-@create_annotation_fixtures
-def test_create_annotation_raises_if_user_is_not_group_member(groups):
-    """It should raise if authorized_to_write_group() returns False."""
-    groups.authorized_to_write_group.return_value = False
-
-    with pytest.raises(RuntimeError):
-        logic.create_annotation({}, mock.Mock(), [])
-
-
-@create_annotation_fixtures
 def test_create_annotation_sets_user(Annotation):
     """It should set the annotation's 'user' field to the user's id."""
     user = mock.Mock()

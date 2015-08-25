@@ -73,13 +73,14 @@ def test_authorized_to_read_returns_False_for_group_private_annotation():
 def test_group_principals_with_no_groups():
     user = mock.Mock(groups=[])
 
-    assert auth.group_principals(user, mock.Mock()) == []
+    assert auth.group_principals(user, mock.Mock()) == ['group:__none__']
 
 
 def test_group_principals_with_one_group():
     user = mock.Mock(groups=[_mock_group('hashid1')])
 
-    assert auth.group_principals(user, mock.Mock()) == ['group:hashid1']
+    assert auth.group_principals(user, mock.Mock()) == [
+        'group:__none__', 'group:hashid1']
 
 
 def test_group_principals_with_three_groups():
@@ -90,6 +91,7 @@ def test_group_principals_with_three_groups():
     ])
 
     assert auth.group_principals(user, mock.Mock()) == [
+        'group:__none__',
         'group:hashid1',
         'group:hashid2',
         'group:hashid3'

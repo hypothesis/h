@@ -36,10 +36,6 @@ def create_annotation(fields, user, effective_principals):
     groups.set_group_if_reply(annotation)
     groups.set_permissions(annotation)
 
-    if not groups.authorized_to_write_group(
-            effective_principals, annotation.get('group')):
-        raise RuntimeError(_('Not authorized to write to group.'), 401)
-
 
     # Save it in the database
     search_lib.prepare(annotation)
