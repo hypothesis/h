@@ -15,32 +15,17 @@ def set_permissions(annotation):
         # that don't belong to a group.
         return
 
+    group_principal = 'group:' + group
+
     # If the annotation belongs to a group, we make it so that only users who
     # are members of that group can read the annotation.
-    annotation['permissions']['read'] = ['group:' + group]
+    annotation['permissions']['read'] = [group_principal]
 
-
-def _authorized_for_group(effective_principals, group_hashid):
-    if group_hashid == '__none__':
-        return True
-    elif group_hashid:
-        required_principal = 'group:' + group_hashid
-        return required_principal in effective_principals
-    else:
-        return True
-
-
-def authorized_to_write_group(effective_principals, group_hashid):
-    """Return True if effective_principals authorize writing to group.
-
-    Return True if the given effective_principals authorize the request that
-    owns them to write to the group identified by the given hashid. False
-    otherwise.
-
-    If group_hashid is falsy then always return True.
-
-    """
-    return _authorized_for_group(effective_principals, group_hashid)
+    # If the annotation belongs to a group, we make it so that you have to be
+    # both the user who created the annotation and a member of the annotation's
+    # group to update the annotation.
+    annotation['permissions']['update'] = [
+        annotation['user'] + '~' + group_principal]
 
 
 def authorized_to_read(effective_principals, annotation):
@@ -61,7 +46,7 @@ def authorized_to_read(effective_principals, annotation):
     return False
 
 
-def group_principals(user, hashids):
+def group_principals(user, userid, hashids):
     """Return any 'group:<hashid>' principals for the given user.
 
     Return a list of 'group:<hashid>' principals for the groups that the given
@@ -76,5 +61,14 @@ def group_principals(user, hashids):
     :rtype: list of strings
 
     """
-    return ['group:__none__'] + [
-        'group:' + group.hashid(hashids) for group in user.groups]
+    principals = ['group:__none__']
+
+    def group_principal(group):
+        return 'group:' + group.hashid(hashids)
+
+    principals.extend([group_principal(group) for group in user.groups])
+
+    principals.extend([
+        userid + '~' + group_principal(group) for group in user.groups])
+
+    return principals

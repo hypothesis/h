@@ -228,55 +228,6 @@ def test_update_annotation_user_cannot_change_group():
 
 
 @update_annotation_fixtures
-def test_update_annotation_calls_authorized_to_write_group(groups):
-    annotation = _mock_annotation(group='test-group')
-    effective_principals = mock.sentinel.effective_principals
-
-    logic.update_annotation(annotation, {}, False, effective_principals)
-
-    groups.authorized_to_write_group.assert_called_once_with(
-        effective_principals, 'test-group')
-
-
-@update_annotation_fixtures
-def test_update_annotation_raises_if_user_is_not_a_member_of_old_group(groups):
-    # Request is authorized to write to group 'new', but not to 'old'.
-    def side_effect(effective_principals, group_hashid):
-        if group_hashid == 'old':
-            return False
-        else:
-            return True
-    groups.authorized_to_write_group.side_effect = side_effect
-
-    # Moving the annotation from group 'old' to 'new'.
-    annotation = _mock_annotation(group='old')
-    fields = {'group': 'new'}
-
-    with pytest.raises(RuntimeError):
-        logic.update_annotation(
-            annotation, fields, False, ['group:old'])
-
-
-@update_annotation_fixtures
-def test_update_annotation_raises_if_user_is_not_a_member_of_new_group(groups):
-    # Request is authorized to write to group 'old', but not to 'new'.
-    def side_effect(effective_principals, group_hashid):
-        if group_hashid == 'new':
-            return False
-        else:
-            return True
-    groups.authorized_to_write_group.side_effect = side_effect
-
-    # Moving the annotation from group 'old' to 'new'.
-    annotation = _mock_annotation(group='old')
-    fields = {'group': 'new'}
-
-    with pytest.raises(RuntimeError):
-        logic.update_annotation(
-            annotation, fields, False, ['group:old'])
-
-
-@update_annotation_fixtures
 def test_update_annotation_removes_userid_from_permissions_if_deleted():
     user = 'acct:fred@hypothes.is'
     annotation = _mock_annotation(
@@ -404,28 +355,6 @@ def test_update_annotation_does_not_crash_if_annotations_parent_has_no_group(
 
 # The fixtures required to mock all of delete_annotation()'s dependencies.
 delete_annotation_fixtures = pytest.mark.usefixtures('groups')
-
-
-@delete_annotation_fixtures
-def test_delete_annotation_calls_authorized_to_write_group(groups):
-    annotation = mock.MagicMock()
-    annotation_data = {'group': 'test-group'}
-    annotation.get.side_effect = annotation_data.get
-    annotation.__getitem__.side_effect = annotation_data.__getitem__
-    effective_principals = mock.sentinel.effective_principals
-
-    logic.delete_annotation(annotation, effective_principals)
-
-    groups.authorized_to_write_group.assert_called_once_with(
-        effective_principals, 'test-group')
-
-
-@delete_annotation_fixtures
-def test_delete_annotation_raises_if_user_is_not_authed_for_group(groups):
-    groups.authorized_to_write_group.return_value = False
-
-    with pytest.raises(RuntimeError):
-        logic.delete_annotation({'group': 'test-group'}, [])
 
 
 @delete_annotation_fixtures

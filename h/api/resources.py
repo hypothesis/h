@@ -31,13 +31,14 @@ class Annotations(object):
         self.request = request
 
     def __acl__(self):
-        group = self.request.json_body.get('group')
-        if not group:
-            group = '__none__'
-        return [
-            (Allow, 'group:' + group, 'create'),
-            (Deny, Everyone, 'create'),
-        ]
+        aces = []
+        try:
+            group = self.request.json_body.get('group') or '__none__'
+        except ValueError:
+            pass
+        else:
+            aces.append((Allow, 'group:' + group, 'create'))
+        return aces + [(Deny, Everyone, 'create')]
 
     def __getitem__(self, key):
         instance = Annotation.fetch(key)

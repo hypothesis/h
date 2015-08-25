@@ -231,7 +231,7 @@ def test_effective_principals_calls_group_principals(models, groups):
     auth.effective_principals("jiji", request)
 
     groups.group_principals.assert_called_once_with(
-        models.User.get_by_userid.return_value, request.hashids)
+        models.User.get_by_userid.return_value, "jiji", request.hashids)
 
 
 @effective_principals_fixtures

@@ -90,10 +90,6 @@ def update_annotation(annotation, fields, has_admin_permission,
         raise RuntimeError(
             _("You can't move annotations between groups."), 401)
 
-    if not groups.authorized_to_write_group(
-            effective_principals, annotation.get('group')):
-        raise RuntimeError(_('Not authorized to write to group.'), 401)
-
     # Update the annotation with the new data
     annotation.update(fields)
 
@@ -110,7 +106,4 @@ def update_annotation(annotation, fields, has_admin_permission,
 
 
 def delete_annotation(annotation, effective_principals):
-    if not groups.authorized_to_write_group(
-            effective_principals, annotation.get('group')):
-        raise RuntimeError(_('Not authorized to write to group.'), 401)
     annotation.delete()

@@ -30,7 +30,7 @@ def render(annotation):
     Receives data direct from the search index and reformats it for rendering
     or display in the public API.
     """
-    data = copy.deepcopy(annotation)
+    data = copy.deepcopy(dict(annotation))
 
     _filter_target_normalized_uris(data)
 
