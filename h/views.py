@@ -98,7 +98,8 @@ def help_page(context, request):
     }
 
 
-@view_config(accept='application/json', context=Application, renderer='json')
+@view_config(accept='application/json', context=Application, http_cache=0,
+             renderer='json')
 def session_view(request):
     flash = session.pop_flash(request)
     model = session.model(request)
