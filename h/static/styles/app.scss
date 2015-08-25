@@ -11,8 +11,8 @@ body {
   @extend .noise;
   font-family: $sans-font-family;
   font-weight: 300;
-  margin-top: 30px;
   padding: .72rem;
+  padding-top: calc(.72em + 30px);
 
   @include respond-to(tablets desktops) {
     padding-bottom: 4rem;
