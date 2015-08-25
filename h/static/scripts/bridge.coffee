@@ -1,3 +1,4 @@
+Promise = require('core-js/library/es6/promise')
 extend = require('extend')
 RPC = require('frame-rpc')
 

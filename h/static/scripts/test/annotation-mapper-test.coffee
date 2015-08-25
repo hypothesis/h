@@ -98,28 +98,30 @@ describe 'annotationMapper', ->
       annotationMapper.deleteAnnotation(ann)
       assert.called(ann.$delete)
 
-    it 'triggers the "annotationDeleted" event on success', ->
+    it 'triggers the "annotationDeleted" event on success', (done) ->
       sandbox.stub($rootScope, '$emit')
       p = Promise.resolve()
       ann  = {$delete: sandbox.stub().returns(p)}
-      annotationMapper.deleteAnnotation(ann)
-
-      p.then ->
+      annotationMapper.deleteAnnotation(ann).then ->
         assert.called($rootScope.$emit)
         assert.calledWith($rootScope.$emit, 'annotationDeleted', ann)
+        done()
+      $rootScope.$apply()
 
-    it 'does nothing on error', ->
+    it 'does nothing on error', (done) ->
       sandbox.stub($rootScope, '$emit')
       p = Promise.reject()
       ann  = {$delete: sandbox.stub().returns(p)}
-      annotationMapper.deleteAnnotation(ann)
-
-      p.catch ->
+      annotationMapper.deleteAnnotation(ann).catch ->
         assert.notCalled($rootScope.$emit)
+        done()
+      $rootScope.$apply()
 
-    it 'return a promise that resolves to the deleted annotation', ->
+    it 'return a promise that resolves to the deleted annotation', (done) ->
       p = Promise.resolve()
       ann  = {$delete: sandbox.stub().returns(p)}
-      return annotationMapper.deleteAnnotation(ann).then((value) ->
+      annotationMapper.deleteAnnotation(ann).then((value) ->
         assert.equal(value, ann)
+        done()
       )
+      $rootScope.$apply()

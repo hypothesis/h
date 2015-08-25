@@ -401,29 +401,30 @@ describe 'annotation', ->
       fakeAnnotationMapper.deleteAnnotation = sandbox.stub()
       fakeFlash.error = sandbox.stub()
 
-    it "calls annotationMapper.delete() if the delete is confirmed", ->
+    it "calls annotationMapper.delete() if the delete is confirmed", (done) ->
       window.confirm.returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns(Promise.resolve())
-      controller.delete().then(->
+
+      controller.delete().then ->
         assert fakeAnnotationMapper.deleteAnnotation.calledWith(annotation)
-      )
+        done()
       $timeout.flush()
 
     it "doesn't call annotationMapper.delete() if the delete is cancelled", ->
       window.confirm.returns(false)
       assert fakeAnnotationMapper.deleteAnnotation.notCalled
 
-    it "flashes a generic error if the server cannot be reached", ->
+    it "flashes a generic error if the server cannot be reached", (done) ->
       window.confirm.returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns(Promise.reject({status: 0}))
 
-      controller.delete().then(->
+      controller.delete().then ->
         assert fakeFlash.error.calledWith(
-          "Service unreachable.", "Saving annotation failed")
-      )
+          "Service unreachable.", "Deleting annotation failed")
+        done()
       $timeout.flush()
 
-    it "flashes an error if the delete fails on the server", ->
+    it "flashes an error if the delete fails on the server", (done) ->
       window.confirm.returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns(Promise.reject({
           status: 500,
@@ -431,18 +432,20 @@ describe 'annotation', ->
           data: {}
         })
       )
-      controller.delete().then(->
+
+      controller.delete().then ->
         assert fakeFlash.error.calledWith(
           "500 Server Error", "Deleting annotation failed")
-      )
+        done()
       $timeout.flush()
 
-    it "doesn't flash an error if the delete succeeds", ->
+    it "doesn't flash an error if the delete succeeds", (done) ->
       window.confirm.returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns(Promise.resolve())
-      controller.delete().then(->
+
+      controller.delete().then ->
         assert fakeFlash.error.notCalled
-      )
+        done()
       $timeout.flush()
 
   describe "creating a new annotation", ->
@@ -452,38 +455,38 @@ describe 'annotation', ->
       controller.action = 'create'
       annotation.$create = sandbox.stub()
 
-    it "emits annotationCreated when saving an annotation succeeds", ->
+    it "emits annotationCreated when saving an annotation succeeds", (done) ->
       sandbox.spy($rootScope, '$emit')
       annotation.$create.returns(Promise.resolve())
-      controller.save().then(->
+      controller.save().then ->
         assert $rootScope.$emit.calledWith("annotationCreated")
-      )
+        done()
 
-    it "flashes a generic error if the server cannot be reached", ->
+    it "flashes a generic error if the server cannot be reached", (done) ->
       annotation.$create.returns(Promise.reject({status: 0}))
 
-      controller.save().then(->
+      controller.save().then ->
         assert fakeFlash.error.calledWith(
           "Service unreachable.", "Saving annotation failed")
-      )
+        done()
+      $timeout.flush()
 
-    it "flashes an error if saving the annotation fails on the server", ->
+    it "flashes an error if saving the annotation fails on the server", (done) ->
       annotation.$create.returns(Promise.reject({
           status: 500,
           statusText: "Server Error",
           data: {}
         })
       )
-      controller.save().then(->
+      controller.save().then ->
         assert fakeFlash.error.calledWith(
           "500 Server Error", "Saving annotation failed")
-      )
+        done()
 
     it "doesn't flash an error when saving an annotation succeeds", ->
       annotation.$create.returns(Promise.resolve())
-      controller.save().then(->
-        assert fakeFlash.error.notCalled
-      )
+      controller.save()
+      assert fakeFlash.error.notCalled
 
   describe "editing an annotation", ->
 
@@ -493,15 +496,15 @@ describe 'annotation', ->
       controller.action = 'edit'
       annotation.$update = sandbox.stub()
 
-    it "flashes a generic error if the server cannot be reached", ->
+    it "flashes a generic error if the server cannot be reached", (done) ->
       annotation.$update.returns(Promise.reject({status: 0}))
 
-      controller.save().then(->
+      controller.save().then ->
         assert fakeFlash.error.calledWith(
           "Service unreachable.", "Saving annotation failed")
-      )
+        done()
 
-    it "flashes an error if saving the annotation fails on the server", ->
+    it "flashes an error if saving the annotation fails on the server", (done) ->
       annotation.$update.returns(Promise.reject({
           status: 500,
           statusText: "Server Error",
@@ -509,17 +512,17 @@ describe 'annotation', ->
         })
       )
 
-      controller.save().then(->
+      controller.save().then ->
         assert fakeFlash.error.calledWith(
           "500 Server Error", "Saving annotation failed")
-      )
+        done()
 
     it "doesn't flash an error if saving the annotation succeeds", ->
       annotation.$update.returns(Promise.resolve())
 
-      controller.save().then(->
-        assert fakeFlash.error.notCalled
-      )
+      controller.save()
+
+      assert fakeFlash.error.notCalled
 
 describe("AnnotationController", ->
 
@@ -659,15 +662,15 @@ describe("AnnotationController", ->
 
     # Simulate the user hitting the Save button and wait for the
     # (unsuccessful) response from the server.
-    controller.save().then(->
-      # At this point the annotation editor controls are still open, and the
-      # annotation's text is still the modified (unsaved) text.
-      assert controller.annotation.text == "changed by test code"
+    controller.save()
 
-      # Simulate the user clicking the Cancel button.
-      controller.revert()
+    # At this point the annotation editor controls are still open, and the
+    # annotation's text is still the modified (unsaved) text.
+    assert controller.annotation.text == "changed by test code"
 
-      # Now the original text should be restored.
-      assert controller.annotation.text == original_text
-    )
+    # Simulate the user clicking the Cancel button.
+    controller.revert()
+
+    # Now the original text should be restored.
+    assert controller.annotation.text == original_text
 )

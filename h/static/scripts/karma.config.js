@@ -18,6 +18,9 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      // Core polyfill
+      '../../../node_modules/core-js/client/core.js',
+
       // Application external deps
       '../../../node_modules/jquery/dist/jquery.js',
       '../../../node_modules/angular/angular.js',
@@ -30,8 +33,6 @@ module.exports = function(config) {
       'vendor/katex.js',
 
       // These are needed until PhantomJS 2.0
-      '../../../node_modules/es6-promise/dist/es6-promise.js',
-      'vendor/bind.js',
       'vendor/raf.js',
       'vendor/url.js',
 

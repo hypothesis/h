@@ -1,3 +1,4 @@
+Promise = require('core-js/library/es6/promise')
 seek = require('dom-seek')
 
 Annotator = require('annotator')

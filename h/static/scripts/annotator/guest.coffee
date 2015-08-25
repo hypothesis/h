@@ -1,3 +1,4 @@
+Promise = require('core-js/library/es6/promise')
 baseURI = require('base-url')()
 scrollIntoView = require('scroll-into-view')
 

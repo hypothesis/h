@@ -286,9 +286,7 @@ describe 'Guest', ->
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       sandbox.stub(highlighter, 'highlightRange').returns(highlights)
       target = [{selector: []}]
-      promise = guest.anchor({target: [target]})
-      assert.instanceOf(promise, Promise)
-      promise.then (anchors) ->
+      guest.anchor({target: [target]}).then (anchors) ->
         assert.equal(anchors.length, 1)
         done()
 
@@ -314,8 +312,11 @@ describe 'Guest', ->
       guest = createGuest()
       guest.anchors = [{annotation, target, highlights}]
       removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
+      sandbox.stub(global, 'requestAnimationFrame').yields()
+
       guest.anchor(annotation).then ->
         assert.equal(guest.anchors.length, 0)
+        assert.calledOnce(removeHighlights, highlights)
         assert.calledWith(removeHighlights, highlights)
         done()
 
@@ -329,30 +330,30 @@ describe 'Guest', ->
           assert.calledOnce(stub)
           done()
 
-  describe 'deleteAnnotation()', ->
-    it 'removes the anchors from the "anchors" instance variable', (done) ->
+  describe 'detach()', ->
+    it 'removes the anchors from the "anchors" instance variable', ->
       guest = createGuest()
       annotation = {}
       guest.anchors.push({annotation})
-      guest.deleteAnnotation(annotation)
-      new Promise(requestAnimationFrame).then ->
-        assert.equal(guest.anchors.length, 0)
-        done()
+      guest.detach(annotation)
+      assert.equal(guest.anchors.length, 0)
 
-    it 'updates the bucket bar plugin', (done) ->
+    it 'updates the bucket bar plugin', ->
       guest = createGuest()
       guest.plugins.BucketBar = update: sinon.stub()
       annotation = {}
+      sandbox.stub(global, 'requestAnimationFrame').yields()
+
       guest.anchors.push({annotation})
-      guest.deleteAnnotation(annotation)
-      new Promise(requestAnimationFrame).then ->
-        assert.calledOnce(guest.plugins.BucketBar.update)
-        done()
+      guest.detach(annotation)
+      assert.calledOnce(guest.plugins.BucketBar.update)
 
     it 'publishes the "annotationDeleted" event', (done) ->
       guest = createGuest()
       annotation = {}
       publish = sandbox.stub(guest, 'publish')
+      sandbox.stub(global, 'requestAnimationFrame').yields()
+
       guest.deleteAnnotation(annotation)
       new Promise(requestAnimationFrame).then ->
         assert.calledOnce(publish)
@@ -364,6 +365,8 @@ describe 'Guest', ->
       annotation = {}
       highlights = [document.createElement('span')]
       removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
+      sandbox.stub(global, 'requestAnimationFrame').yields()
+
       guest.anchors.push({annotation, highlights})
       guest.deleteAnnotation(annotation)
       new Promise(requestAnimationFrame).then ->
