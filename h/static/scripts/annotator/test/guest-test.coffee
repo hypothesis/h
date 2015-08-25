@@ -4,6 +4,9 @@ anchoring = {}
 CrossFrame = sinon.stub()
 CrossFrame['@noCallThru'] = true
 
+raf = sinon.stub().yields()
+raf['@noCallThru'] = true
+
 scrollIntoView = sinon.stub()
 scrollIntoView['@noCallThru'] = true
 
@@ -12,6 +15,7 @@ Guest = proxyquire('../guest', {
   './highlighter': highlighter,
   './anchoring/html': anchoring,
   './plugin/cross-frame': CrossFrame,
+  'raf': raf
   'scroll-into-view': scrollIntoView,
 })
 
@@ -312,7 +316,6 @@ describe 'Guest', ->
       guest = createGuest()
       guest.anchors = [{annotation, target, highlights}]
       removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
-      sandbox.stub(global, 'requestAnimationFrame').yields()
 
       guest.anchor(annotation).then ->
         assert.equal(guest.anchors.length, 0)
@@ -342,34 +345,29 @@ describe 'Guest', ->
       guest = createGuest()
       guest.plugins.BucketBar = update: sinon.stub()
       annotation = {}
-      sandbox.stub(global, 'requestAnimationFrame').yields()
 
       guest.anchors.push({annotation})
       guest.detach(annotation)
       assert.calledOnce(guest.plugins.BucketBar.update)
 
-    it 'publishes the "annotationDeleted" event', (done) ->
+    it 'publishes the "annotationDeleted" event', ->
       guest = createGuest()
       annotation = {}
       publish = sandbox.stub(guest, 'publish')
-      sandbox.stub(global, 'requestAnimationFrame').yields()
 
       guest.deleteAnnotation(annotation)
-      new Promise(requestAnimationFrame).then ->
-        assert.calledOnce(publish)
-        assert.calledWith(publish, 'annotationDeleted', [annotation])
-        done()
 
-    it 'removes any highlights associated with the annotation', (done) ->
+      assert.calledOnce(publish)
+      assert.calledWith(publish, 'annotationDeleted', [annotation])
+
+    it 'removes any highlights associated with the annotation', ->
       guest = createGuest()
       annotation = {}
       highlights = [document.createElement('span')]
       removeHighlights = sandbox.stub(highlighter, 'removeHighlights')
-      sandbox.stub(global, 'requestAnimationFrame').yields()
 
       guest.anchors.push({annotation, highlights})
       guest.deleteAnnotation(annotation)
-      new Promise(requestAnimationFrame).then ->
-        assert.calledOnce(removeHighlights)
-        assert.calledWith(removeHighlights, highlights)
-        done()
+
+      assert.calledOnce(removeHighlights)
+      assert.calledWith(removeHighlights, highlights)

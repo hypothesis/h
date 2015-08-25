@@ -1,3 +1,5 @@
+raf = require('raf')
+
 Annotator = require('annotator')
 $ = Annotator.$
 
@@ -97,7 +99,7 @@ class BucketBar extends Annotator.Plugin
   # Update sometime soon
   update: =>
     return if @_updatePending?
-    @_updatePending = requestAnimationFrame =>
+    @_updatePending = raf =>
       delete @_updatePending
       @_update()
 

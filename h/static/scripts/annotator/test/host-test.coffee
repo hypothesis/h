@@ -1,5 +1,14 @@
-Annotator = require('annotator')
-Host = require('../host')
+raf = sinon.stub().yields()
+raf['@noCallThru'] = true
+
+CrossFrame = sinon.stub()
+CrossFrame['@noCallThru'] = true
+
+proxyquire = require('proxyquire')
+Host = proxyquire('../host', {
+  './plugin/cross-frame': CrossFrame,
+  'raf': raf
+})
 
 describe 'Host', ->
   sandbox = sinon.sandbox.create()
@@ -18,7 +27,8 @@ describe 'Host', ->
     fakeCrossFrame.on = sandbox.stub().returns(fakeCrossFrame)
     fakeCrossFrame.call = sandbox.spy()
 
-    Annotator.Plugin.CrossFrame = -> fakeCrossFrame
+    CrossFrame.reset()
+    CrossFrame.returns(fakeCrossFrame)
 
   afterEach -> sandbox.restore()
 
@@ -103,9 +113,6 @@ describe 'Host', ->
         assert.calledOnce(hideFrame)
 
     describe 'panleft and panright events', ->
-      beforeEach ->
-        sandbox.stub(window, 'requestAnimationFrame')
-
       it 'shrinks or grows the widget to match the delta', ->
         host.gestureState = {initial: -100}
 

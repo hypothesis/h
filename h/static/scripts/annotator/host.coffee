@@ -1,3 +1,5 @@
+raf = require('raf')
+
 Annotator = require('annotator')
 $ = Annotator.$
 
@@ -160,7 +162,7 @@ module.exports = class Host extends Guest
     return if @renderFrame
 
     # Schedule a frame
-    @renderFrame = window.requestAnimationFrame =>
+    @renderFrame = raf =>
       @renderFrame = null  # Clear the schedule
 
       # Process the resize gesture
