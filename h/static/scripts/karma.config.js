@@ -33,7 +33,6 @@ module.exports = function(config) {
       'vendor/katex.js',
 
       // These are needed until PhantomJS 2.0
-      'vendor/raf.js',
       'vendor/url.js',
 
       // Test deps

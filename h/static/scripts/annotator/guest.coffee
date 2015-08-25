@@ -1,5 +1,6 @@
 Promise = require('core-js/library/es6/promise')
 baseURI = require('base-url')()
+raf = require('raf')
 scrollIntoView = require('scroll-into-view')
 
 Annotator = require('annotator')
@@ -12,7 +13,7 @@ highlighter = require('./highlighter')
 
 animationPromise = (fn) ->
   return new Promise (resolve, reject) ->
-    requestAnimationFrame ->
+    raf ->
       try
         resolve(fn())
       catch error
@@ -234,7 +235,7 @@ module.exports = class Guest extends Annotator
         self.anchors.push(anchor)
 
     # Remove all the highlights that have no corresponding target anymore.
-    requestAnimationFrame -> highlighter.removeHighlights(deadHighlights)
+    raf -> highlighter.removeHighlights(deadHighlights)
 
     # Anchor any targets of this annotation that are not anchored already.
     for target in annotation.target when target not in anchoredTargets
@@ -257,7 +258,7 @@ module.exports = class Guest extends Annotator
     this.anchors = anchors
 
     unhighlight = Array::concat(unhighlight...)
-    requestAnimationFrame =>
+    raf =>
       highlighter.removeHighlights(unhighlight)
       this.plugins.BucketBar?.update()
 
