@@ -24,7 +24,6 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from .api.auth import get_user  # FIXME: should not import from .api
 from h.api import nipsa
 from h.api import uri
-from h.api import groups
 from h.api import search
 from .models import Annotation
 
@@ -570,6 +569,24 @@ def broadcast_from_queue(queue, sockets):
                 socket.send(data_out)
 
 
+def _authorized_to_read(effective_principals, annotation):
+    """Return True if effective_principals authorize reading annotation.
+
+    Return True if the given effective_principals authorize the request that
+    owns them to read the given annotation. False otherwise.
+
+    If the annotation belongs to a private group, this will return False if the
+    authenticated user isn't a member of that group.
+
+    """
+    if 'group:__world__' in annotation['permissions']['read']:
+        return True
+    for principal in effective_principals:
+        if principal in annotation['permissions']['read']:
+            return True
+    return False
+
+
 def should_send_event(socket, annotation, event_data):
     """
     Inspects the passed annotation and action and decides whether or not
@@ -592,7 +609,7 @@ def should_send_event(socket, annotation, event_data):
             socket.request.authenticated_userid != annotation.get('user', '')):
         return False
 
-    if not groups.authorized_to_read(
+    if not _authorized_to_read(
             socket.request.effective_principals, annotation):
         return False
 

@@ -16,7 +16,6 @@ from h.api.resources import Root
 from h.api.resources import Annotations
 from h.api import search as search_lib
 from h.api import logic
-from h.api import groups
 
 
 log = logging.getLogger(__name__)
@@ -175,9 +174,6 @@ def create(request):
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     annotation = context
-
-    if not groups.authorized_to_read(request.effective_principals, annotation):
-        raise httpexceptions.HTTPNotFound()
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'read')

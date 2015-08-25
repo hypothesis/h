@@ -28,24 +28,6 @@ def set_permissions(annotation):
         annotation['user'] + '~' + group_principal]
 
 
-def authorized_to_read(effective_principals, annotation):
-    """Return True if effective_principals authorize reading annotation.
-
-    Return True if the given effective_principals authorize the request that
-    owns them to read the given annotation. False otherwise.
-
-    If the annotation belongs to a private group, this will return False if the
-    authenticated user isn't a member of that group.
-
-    """
-    if 'group:__world__' in annotation['permissions']['read']:
-        return True
-    for principal in effective_principals:
-        if principal in annotation['permissions']['read']:
-            return True
-    return False
-
-
 def group_principals(user, userid, hashids):
     """Return any 'group:<hashid>' principals for the given user.
 

@@ -381,26 +381,7 @@ def test_create_returns_render(search_lib):
 
 
 # The fixtures required to mock all of read()'s dependencies.
-read_fixtures = pytest.mark.usefixtures(
-    'search_lib', 'AnnotationEvent', 'groups')
-
-
-@read_fixtures
-def test_read_calls_authorized_to_read_group(groups):
-    annotation = {'group': 'foo'}
-    request = mock.Mock()
-
-    views.read(annotation, request)
-
-    groups.authorized_to_read.assert_called_once_with(
-        request.effective_principals, annotation)
-
-@read_fixtures
-def test_read_404s_if_user_is_not_authed_to_read_group(groups):
-    groups.authorized_to_read.return_value = False
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.read({'group': 'foo'}, mock.Mock())
+read_fixtures = pytest.mark.usefixtures('search_lib', 'AnnotationEvent')
 
 
 @read_fixtures
@@ -656,12 +637,5 @@ def _publish_annotation_event(request):
 @pytest.fixture
 def access_token(request):
     patcher = mock.patch('h.api.views.access_token', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def groups(request):
-    patcher = mock.patch('h.api.views.groups', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
