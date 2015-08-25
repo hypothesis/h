@@ -1,28 +1,21 @@
 (function(h) {
-
-  /*
-  Copyright 2012 Mozilla Foundation
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  */
-
   /* globals chrome */
 
   'use strict';
 
+  // records PDF URLs as keys (value is `true`)
+  var urls = {};
   var state;
-
   var VIEWER_URL = chrome.extension.getURL('content/web/viewer.html');
+
+  /**
+   * State machine for PDF Urls as well as utility functions for redirecting
+   * to the PDF.js Viewer + Hypothesis
+   * @constructor
+   **/
+  function PdfHandler(stateObj) {
+    state = stateObj;
+  };
 
   function getViewerURL(pdfUrl) {
     return VIEWER_URL + '?file=' + encodeURIComponent(pdfUrl);
@@ -69,12 +62,22 @@
    * @return {boolean} True if the resource is a PDF file.
    */
   function isPdfFile(details) {
-    var header = getHeaderFromHeaders(details.responseHeaders, 'content-type');
-    if (header) {
-      var headerValue = header.value.toLowerCase().split(';', 1)[0].trim();
-      return (headerValue === 'application/pdf' ||
-              headerValue === 'application/octet-stream' &&
-              details.url.toLowerCase().indexOf('.pdf') > 0);
+    var url = details.url;
+    if (url in urls) {
+      return true;
+    } else {
+      var header = getHeaderFromHeaders(details.responseHeaders,
+          'content-type');
+      if (header) {
+        var headerValue = header.value.toLowerCase().split(';', 1)[0].trim();
+        var isPdf = (headerValue === 'application/pdf' ||
+                headerValue === 'application/octet-stream' &&
+                details.url.toLowerCase().indexOf('.pdf') > 0);
+        if (isPdf) {
+          urls[url] = true;
+        }
+        return isPdf;
+      }
     }
   }
 
@@ -179,7 +182,48 @@
     },
     ['blocking']);
 
-  h.PdfHandler = function(stateObj) {
-    state = stateObj;
+  /**
+   * Redirects the tab (specified with `tabId`) to `url`
+   *
+   * @returns Promise
+   **/
+  function updateTab(tabId, url) {
+    return new Promise(function (resolve) {
+      chrome.tabs.update(tabId, {url: url}, resolve);
+    });
+  }
+
+  /**
+   * Redirects tab to the PDF viewer
+   * @param {Object} tab Chrome tabs.Tab object
+   * @returns Promise
+   **/
+  PdfHandler.prototype.redirectToViewer = function(tab) {
+    return updateTab(tab.id, getViewerURL(tab.url));
   };
+
+  /**
+   * Redirects tab to PDF (from viewer)
+   * @param {Object} tab Chrome tabs.Tab object
+   * @returns Promise
+   **/
+  PdfHandler.prototype.redirectToPdf = function(tab) {
+    // TODO: could be smarter / safer
+    // ...using code injection doesn't work because we'd need
+    var pdf_url = decodeURIComponent(tab.url.split('?file=')[1]);
+    return updateTab(tab.id, pdf_url);
+  };
+
+  /**
+   * Check current browser session's list of known PDF URLs.
+   * These are collected even if the annotate button is inactive--which allows
+   * us to enable the PDF.js Viewer on an already loaded PDF.
+   * @param {String} url
+   * @return {Boolean}
+   **/
+  PdfHandler.prototype.isKnownPDF = function(url) {
+    return (url in urls);
+  };
+
+  h.PdfHandler = PdfHandler;
 })(window.h || (window.h = {}));

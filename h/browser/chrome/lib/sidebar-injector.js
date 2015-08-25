@@ -13,7 +13,7 @@
    *   extensionURL: A function that receives a path and returns an absolute
    *   url. See: https://developer.chrome.com/extensions/extension#method-getURL
    */
-  function SidebarInjector(chromeTabs, dependencies) {
+  function SidebarInjector(chromeTabs, pdfHandler, dependencies) {
     dependencies = dependencies || {};
 
     var isAllowedFileSchemeAccess = dependencies.isAllowedFileSchemeAccess;
@@ -56,12 +56,14 @@
               "Hypothesis doesn't work on this site yet."));
         }
 
-        if (isPDFURL(tab.url)) {
-          return reloadPDF(tab);
-        } else if (isFileURL(tab.url)) {
-          return injectIntoLocalDocument(tab);
-        } else if (!isPDFViewerURL(tab.url)) {
-          return injectIntoHTML(tab);
+        if (pdfHandler.isKnownPDF(tab.url)) {
+          pdfHandler.redirectToViewer(tab);
+        } else {
+          if (isFileURL(tab.url)) {
+            return injectIntoLocalDocument(tab);
+          } else if (!isPDFViewerURL(tab.url)) {
+            return injectIntoHTML(tab);
+          }
         }
       });
     };
@@ -75,7 +77,7 @@
      */
     this.removeFromTab = function (tab) {
       if (isPDFViewerURL(tab.url)) {
-        return removePDFViewer(tab);
+        return pdfHandler.redirectToPdf(tab);
       } else {
         return removeFromHTML(tab);
       }
@@ -113,10 +115,11 @@
       return Promise.reject(new h.LocalFileError('Local non-PDF files are not supported'));
     }
 
-    function reloadPDF(tab) {
-      // reload PDF so the PDF.js Viewer can take over
+    function switchToPDFViewer(tab) {
+      // load PDF.js Viewer
       return new Promise(function (resolve) {
-        chromeTabs.update(tab.id, {url: tab.url}, resolve);
+        var viewerUrl = getPDFViewerURL(tab.url);
+        chromeTabs.update(tab.id, {url: viewerUrl}, resolve);
       });
     }
 
@@ -139,16 +142,6 @@
           return resolve();
         }
         injectScript(tab.id, '/public/destroy.js').then(resolve);
-      });
-    }
-
-    function removePDFViewer(tab) {
-      // TODO: probablly should be more careful about this file name extraction
-      // ...using code injection doesn't work because we'd need
-      // chrome-extension:// perms...
-      var pdf_url = decodeURIComponent(tab.url.split('?file=')[1]);
-      return new Promise(function (resolve) {
-        chromeTabs.update(tab.id, {url: pdf_url}, resolve);
       });
     }
 
