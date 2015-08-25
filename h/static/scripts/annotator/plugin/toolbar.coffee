@@ -56,7 +56,8 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
         "click": (event) =>
           event.preventDefault()
           event.stopPropagation()
-          @annotator.onAdderClick target: dataset: action: "comment"
+          @annotator.createAnnotation()
+          @annotator.showFrame()
     ]
     @buttons = $(makeButton(item) for item in items)
 
