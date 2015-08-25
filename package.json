@@ -84,7 +84,6 @@
   "browser": {
     "annotator": "./h/static/scripts/vendor/annotator.js",
     "angular": "./node_modules/angular/angular.js",
-    "es6-promise": "./node_modules/es6-promise/dist/es6-promise.js",
     "hammerjs": "./node_modules/hammerjs/hammer.js",
     "jquery": "./node_modules/jquery/dist/jquery.js",
     "moment": "./node_modules/moment/min/moment-with-locales.js"
@@ -102,7 +101,6 @@
         "jquery"
       ]
     },
-    "es6-promise": "ES6Promise",
     "hammerjs": "Hammer",
     "jquery": "$"
   }
