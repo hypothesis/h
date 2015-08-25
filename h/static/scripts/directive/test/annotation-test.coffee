@@ -260,7 +260,7 @@ describe 'annotation', ->
         assert.isTrue(controller.hasDiff)
         assert.isTrue(controller.showDiff)
 
-    describe 'when thre are only upper case/lower case difference between the text in the single target, and what was saved in a selector', ->
+    describe 'when there are only upper case/lower case difference between the text in the single target, and what was saved in a selector', ->
       targets = null
 
       beforeEach ->
