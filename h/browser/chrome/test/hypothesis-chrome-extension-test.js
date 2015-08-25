@@ -253,8 +253,8 @@ describe('HypothesisChromeExtension', function () {
       });
 
       describe('when a tab has an local-file error', function () {
-        it('puts the tab into an errored state', function () {
-          var tab = {id: 1, url: 'file://foo.html'};
+        it('puts the tab into an errored state', function (done) {
+          var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
           fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.LocalFileError('msg')));
@@ -263,7 +263,7 @@ describe('HypothesisChromeExtension', function () {
           onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
             assert.called(fakeTabState.errorTab);
             assert.calledWith(fakeTabState.errorTab, 1);
-            resolve();
+            done();
           });
         });
 
@@ -280,8 +280,8 @@ describe('HypothesisChromeExtension', function () {
       });
 
       describe('when a tab has an file-access error', function () {
-        it('puts the tab into an errored state', function () {
-          var tab = {id: 1, url: 'file://foo.html'};
+        it('puts the tab into an errored state', function (done) {
+          var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
           fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.NoFileAccessError('msg')));
@@ -290,6 +290,7 @@ describe('HypothesisChromeExtension', function () {
           onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
             assert.called(fakeTabState.errorTab);
             assert.calledWith(fakeTabState.errorTab, 1);
+            done();
           });
         });
 
@@ -306,8 +307,8 @@ describe('HypothesisChromeExtension', function () {
       });
 
       describe('when a tab has an chrome error', function () {
-        it('puts the tab into an errored state', function () {
-          var tab = {id: 1, url: 'file://foo.html'};
+        it('puts the tab into an errored state', function (done) {
+          var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
           fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.RestrictedProtocolError('msg')));
@@ -316,6 +317,7 @@ describe('HypothesisChromeExtension', function () {
           onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
             assert.called(fakeTabState.errorTab);
             assert.calledWith(fakeTabState.errorTab, 1);
+            done();
           });
         });
 

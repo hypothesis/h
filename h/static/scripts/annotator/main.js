@@ -6,8 +6,6 @@ if (g.wgxpath) {
   g.wgxpath.install();
 }
 
-require('es6-promise');
-
 var nodeIteratorShim = require('node-iterator-shim');
 nodeIteratorShim();
 
