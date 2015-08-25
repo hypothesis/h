@@ -50,6 +50,9 @@ EXPOSE 5000
 # Persist the static directory.
 VOLUME ["/var/lib/hypothesis/h/static"]
 
+# Set the Python IO encoding to UTF-8.
+ENV PYTHONIOENCODING utf_8
+
 # Use honcho and start all the daemons by default.
 ENTRYPOINT ["honcho"]
 CMD ["start", "-c", "all=1,assets=0,initdb=0"]
