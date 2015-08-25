@@ -176,8 +176,7 @@ def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     annotation = context
 
-    if not groups.authorized_to_read_group(
-            request.effective_principals, annotation.get('group')):
+    if not groups.authorized_to_read(request.effective_principals, annotation):
         raise httpexceptions.HTTPNotFound()
 
     # Notify any subscribers

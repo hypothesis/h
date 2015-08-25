@@ -392,13 +392,12 @@ def test_read_calls_authorized_to_read_group(groups):
 
     views.read(annotation, request)
 
-    groups.authorized_to_read_group.assert_called_once_with(
-        request.effective_principals, 'foo')
-
+    groups.authorized_to_read.assert_called_once_with(
+        request.effective_principals, annotation)
 
 @read_fixtures
 def test_read_404s_if_user_is_not_authed_to_read_group(groups):
-    groups.authorized_to_read_group.return_value = False
+    groups.authorized_to_read.return_value = False
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         views.read({'group': 'foo'}, mock.Mock())

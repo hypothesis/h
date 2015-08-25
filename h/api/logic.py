@@ -30,14 +30,15 @@ def create_annotation(fields, user, effective_principals):
     # Create Annotation instance
     annotation = Annotation(fields)
 
+    annotation['user'] = user.id
+    annotation['consumer'] = user.consumer.key
+
     groups.set_group_if_reply(annotation)
+    groups.set_permissions(annotation)
 
     if not groups.authorized_to_write_group(
             effective_principals, annotation.get('group')):
         raise RuntimeError(_('Not authorized to write to group.'), 401)
-
-    annotation['user'] = user.id
-    annotation['consumer'] = user.consumer.key
 
 
     # Save it in the database
@@ -101,6 +102,7 @@ def update_annotation(annotation, fields, has_admin_permission,
     annotation.update(fields)
 
     groups.set_group_if_reply(annotation)
+    groups.set_permissions(annotation)
 
     # If the annotation is flagged as deleted, remove mentions of the user
     if annotation.get('deleted', False):
