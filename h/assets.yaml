@@ -76,7 +76,7 @@ wgxpath:
 url:
   filters: uglifyjs
   output: scripts/vendor/url.min.js
-  contents: h:static/scripts/vendor/url.js
+  contents: ../../node_modules/js-polyfills/url.js
 
 
 # Admin areas
@@ -178,6 +178,7 @@ inject:
 
 inject_js:
   contents:
+  - url
   - output: scripts/hypothesis.min.js
     filters: uglifyjs
     contents:
