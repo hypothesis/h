@@ -7,9 +7,9 @@ var sessionWithThreeGroups = function() {
   return {
     state: {
       groups: [
-        {name: 'Group 1', hashid: 'id1'},
-        {name: 'Group 2', hashid: 'id2'},
-        {name: 'Group 3', hashid: 'id3'},
+        {name: 'Group 1', id: 'id1'},
+        {name: 'Group 2', id: 'id2'},
+        {name: 'Group 3', id: 'id3'},
       ]
     }
   };
@@ -53,9 +53,9 @@ describe('groups', function() {
 
       assert.equal(groups.length, 3);
       assert.deepEqual(groups, [
-        {name: 'Group 1', hashid: 'id1'},
-        {name: 'Group 2', hashid: 'id2'},
-        {name: 'Group 3', hashid: 'id3'}
+        {name: 'Group 1', id: 'id1'},
+        {name: 'Group 2', id: 'id2'},
+        {name: 'Group 3', id: 'id3'}
       ]);
     });
   });
@@ -64,7 +64,7 @@ describe('groups', function() {
     it('returns the requested group', function() {
       var group = service().get('id2');
 
-      assert.equal(group.hashid, 'id2');
+      assert.equal(group.id, 'id2');
     });
 
     it("returns undefined if the group doesn't exist", function() {
@@ -79,20 +79,20 @@ describe('groups', function() {
       var s = service();
       s.focus('id2');
 
-      assert.equal(s.focused().hashid, 'id2');
+      assert.equal(s.focused().id, 'id2');
     });
 
     it('returns the first group initially', function() {
       var s = service();
 
-      assert.equal(s.focused().hashid, 'id1');
+      assert.equal(s.focused().id, 'id1');
     });
 
     it('returns the group selected in localStorage if available', function() {
       fakeLocalStorage.getItem.returns('id3');
       var s = service();
 
-      assert.equal(s.focused().hashid, 'id3');
+      assert.equal(s.focused().id, 'id3');
     });
   });
 
@@ -101,17 +101,17 @@ describe('groups', function() {
       var s = service();
       s.focus('id2');
 
-      assert.equal(s.focused().hashid, 'id2');
+      assert.equal(s.focused().id, 'id2');
     });
 
     it("does nothing if the named group isn't recognised", function() {
       var s = service();
       s.focus('foobar');
 
-      assert.equal(s.focused().hashid, 'id1');
+      assert.equal(s.focused().id, 'id1');
     });
 
-    it("stores the focused group hashid in localStorage", function() {
+    it("stores the focused group id in localStorage", function() {
       var s = service();
       s.focus('id3');
 

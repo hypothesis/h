@@ -25,7 +25,7 @@ def _current_groups(request):
 
     """
     groups = [
-        {'name': 'Public', 'hashid': '__world__', 'public': True},
+        {'name': 'Public', 'id': '__world__', 'public': True},
     ]
     userid = request.authenticated_userid
     if userid is None:
@@ -36,7 +36,7 @@ def _current_groups(request):
     for group in user.groups:
         groups.append({
             'name': group.name,
-            'hashid': group.hashid,
+            'id': group.hashid,
             'url': request.route_url('group_read',
                                      hashid=group.hashid,
                                      slug=group.slug),

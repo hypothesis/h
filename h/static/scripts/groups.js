@@ -21,11 +21,11 @@ function groups(localStorage, session) {
     return session.state.groups || [];
   };
 
-  // Return the full object for the group with the given hashid.
-  var get = function get(hashid) {
+  // Return the full object for the group with the given id.
+  var get = function get(id) {
     var gs = all();
     for (var i = 0, max = gs.length; i < max; i++) {
-      if (gs[i].hashid === hashid) {
+      if (gs[i].id === id) {
         return gs[i];
       }
     }
@@ -50,12 +50,12 @@ function groups(localStorage, session) {
       return all()[0];
     },
 
-    // Set the group with the passed hashid as the currently focused group.
-    focus: function(hashid) {
-      var g = get(hashid);
+    // Set the group with the passed id as the currently focused group.
+    focus: function(id) {
+      var g = get(id);
       if (typeof g !== 'undefined') {
         focused = g;
-        localStorage.setItem(STORAGE_KEY, g.hashid);
+        localStorage.setItem(STORAGE_KEY, g.id);
       }
     }
   };
