@@ -5,7 +5,6 @@ import os
 
 from pyramid.config import Configurator
 
-from h.api.middleware import permit_cors
 from h.config import settings_from_environment
 from h.security import derive_key
 
@@ -36,17 +35,7 @@ def create_app(global_config, **settings):
 
     config.include(__name__)
 
-    app = config.make_wsgi_app()
-    app = permit_cors(app,
-                      allow_headers=(
-                          'Authorization',
-                          'Content-Type',
-                          'X-Annotator-Auth-Token',
-                          'X-Client-Id',
-                      ),
-                      allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
-
-    return app
+    return config.make_wsgi_app()
 
 
 def includeme(config):

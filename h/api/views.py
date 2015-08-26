@@ -6,6 +6,7 @@ import logging
 
 from pyramid.view import view_config
 
+from h.api import cors
 from h.api.auth import get_user
 from h.api.events import AnnotationEvent
 from h.api.models import Annotation
@@ -18,10 +19,21 @@ from h.api import logic
 log = logging.getLogger(__name__)
 
 
+cors_policy = cors.policy(
+    allow_headers=(
+        'Authorization',
+        'Content-Type',
+        'X-Annotator-Auth-Token',
+        'X-Client-Id',
+    ),
+    allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+
+
 def api_config(**kwargs):
     """Extend Pyramid's @view_config decorator with modified defaults."""
     config = {
         'accept': 'application/json',
+        'decorator': cors_policy,
         'renderer': 'json',
     }
     config.update(kwargs)
