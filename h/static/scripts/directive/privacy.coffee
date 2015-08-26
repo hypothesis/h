@@ -14,9 +14,13 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
         {
            name: VISIBILITY_PUBLIC,
            text: scope.group().name,
-           isGroup: scope.group().id != '__world__'
+           isPublic: scope.group().public
         }
-        {name: VISIBILITY_PRIVATE, text: 'Only Me'}
+        {
+          name: VISIBILITY_PRIVATE,
+          text:'Only Me',
+          isPrivate: true
+        }
       ]
 
     getLevel = (name) ->

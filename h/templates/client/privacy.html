@@ -4,9 +4,9 @@
         class="dropdown-toggle"
         data-toggle="dropdown">
         <i class="small"
-           ng-class="{'h-icon-public': isPublic(level.name) && !level.isGroup,
-                      'h-icon-group': isPublic(level.name) && level.isGroup,
-                      'h-icon-lock': !isPublic(level.name)}"></i>
+           ng-class="{'h-icon-public': level.isPublic,
+                      'h-icon-group': !level.isPrivate && !level.isPublic,
+                      'h-icon-lock': level.isPrivate}"></i>
         <span ng-bind="level.text"></span>
         <i class="h-icon-arrow-drop-down"></i>
   </span>
@@ -14,9 +14,9 @@
     <li ng-repeat="level in levels" ng-click="setLevel(level)">
       <a href="">
         <i class="small"
-           ng-class="{'h-icon-public': isPublic(level.name) && !level.isGroup,
-                      'h-icon-group': isPublic(level.name) && level.isGroup,
-                      'h-icon-lock': !isPublic(level.name)}"></i>
+           ng-class="{'h-icon-public': level.isPublic,
+                      'h-icon-group': !level.isPrivate && !level.isPublic,
+                      'h-icon-lock': level.isPrivate}"></i>
         <span ng-bind="level.text"></span>
       </a>
     </li>
