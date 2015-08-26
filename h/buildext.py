@@ -52,7 +52,7 @@ def build_extension_common(env, bundle_app=False):
         if bundle_app:
             app_uri = request.webassets_env.url + '/app.html'
         else:
-            app_uri = request.resource_url(request.root, 'app.html')
+            app_uri = request.route_url('widget')
         value = {'app_uri': app_uri}
         data = render('h:templates/embed.js.jinja2', value, request=request)
         fp.write(data)

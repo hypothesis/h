@@ -4,19 +4,18 @@
 import mock
 import pytest
 from pyramid import testing
-from pyramid import httpexceptions
 
-from h import api
 from h.api import views
 
 
 def _mock_annotation(**kwargs):
-    """Return a mock h.api.models.Annotation object."""
+    """Return a mock h.api.resources.Annotation object."""
     annotation = mock.MagicMock()
-    annotation.__getitem__.side_effect = kwargs.__getitem__
-    annotation.__setitem__.side_effect = kwargs.__setitem__
-    annotation.get.side_effect = kwargs.get
-    annotation.__contains__.side_effect = kwargs.__contains__
+    annotation.model = model = mock.MagicMock()
+    model.__getitem__.side_effect = kwargs.__getitem__
+    model.__setitem__.side_effect = kwargs.__setitem__
+    model.get.side_effect = kwargs.get
+    model.__contains__.side_effect = kwargs.__contains__
     return annotation
 
 
@@ -313,7 +312,7 @@ def test_read_event(AnnotationEvent):
 
     views.read(annotation, request)
 
-    AnnotationEvent.assert_called_once_with(request, annotation, 'read')
+    AnnotationEvent.assert_called_once_with(request, annotation.model, 'read')
     request.registry.notify.assert_called_once_with(event)
 
 
@@ -324,7 +323,7 @@ def test_read_calls_render(search_lib):
     views.read(context=annotation,
                request=mock.Mock(effective_principals=[]))
 
-    search_lib.render.assert_called_once_with(annotation)
+    search_lib.render.assert_called_once_with(annotation.model)
 
 
 @read_fixtures
@@ -382,7 +381,7 @@ def test_update_passes_annotation_to_update_annotation(logic):
 
     views.update(annotation, mock.Mock())
 
-    assert logic.update_annotation.call_args[0][0] == annotation
+    assert logic.update_annotation.call_args[0][0] == annotation.model
 
 
 @update_fixtures
@@ -419,7 +418,8 @@ def test_update_event(AnnotationEvent):
     annotation = mock.Mock()
     event = AnnotationEvent.return_value
     views.update(annotation, request)
-    AnnotationEvent.assert_called_once_with(request, annotation, 'update')
+    AnnotationEvent.assert_called_once_with(request, annotation.model,
+                                            'update')
     request.registry.notify.assert_called_once_with(event)
 
 
@@ -429,7 +429,7 @@ def test_update_calls_render(search_lib):
 
     views.update(annotation, mock.Mock())
 
-    search_lib.render.assert_called_once_with(annotation)
+    search_lib.render.assert_called_once_with(annotation.model)
 
 
 @update_fixtures
@@ -449,7 +449,7 @@ def test_delete_calls_delete_annotation(logic):
 
     views.delete(annotation, request)
 
-    logic.delete_annotation.assert_called_once_with(annotation)
+    logic.delete_annotation.assert_called_once_with(annotation.model)
 
 
 @delete_fixtures
@@ -460,7 +460,7 @@ def test_delete_event(AnnotationEvent):
 
     views.delete(annotation, request)
 
-    AnnotationEvent.assert_called_once_with(request, annotation, 'delete')
+    AnnotationEvent.assert_called_once_with(request, annotation.model, 'delete')
     request.registry.notify.assert_called_once_with(event)
 
 
@@ -471,7 +471,7 @@ def test_delete_returns_id():
     response_data = views.delete(
         annotation, mock.Mock(effective_principals=['group:test-group']))
 
-    assert response_data['id'] == annotation['id']
+    assert response_data['id'] == annotation.model['id']
 
 
 @delete_fixtures

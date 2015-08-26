@@ -2,45 +2,12 @@
 from __future__ import unicode_literals
 
 import cgi
-from pyramid import security
 from dateutil import parser
-
 from annotator import annotation
 from annotator import document
 
 
 class Annotation(annotation.Annotation):
-    def __acl__(self):
-        acl = []
-        # Convert annotator-store roles to pyramid principals
-        for action, roles in self.get('permissions', {}).items():
-            for role in roles:
-                if role.startswith('system.'):
-                    raise ValueError('{} is a reserved role.'.format(role))
-                elif role.startswith('group:'):
-                    if role == 'group:__world__':
-                        principal = security.Everyone
-                    elif role == 'group:__authenticated__':
-                        principal = security.Authenticated
-                    elif role == 'group:__consumer__':
-                        raise NotImplementedError("API consumer groups")
-                    else:
-                        principal = role
-                else:
-                    principal = role
-
-                # Append the converted rule tuple to the ACL
-                rule = (security.Allow, principal, action)
-                acl.append(rule)
-
-        if acl:
-            return acl
-        else:
-            # If there is no acl, it's an admin party!
-            return [(security.Allow,
-                     security.Everyone,
-                     security.ALL_PERMISSIONS)]
-
     __mapping__ = {
         'annotator_schema_version': {'type': 'string'},
         'created': {'type': 'date'},

@@ -4,12 +4,12 @@ import json
 
 import deform
 from pyramid import httpexceptions
+from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
 from pyramid.security import forget, remember
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
-from h.resources import Application
 from h.notification.models import Subscriptions
 from h import i18n
 from h.accounts.models import User
@@ -21,6 +21,7 @@ from h.accounts.events import LoginEvent
 from h.accounts.events import RegistrationEvent
 from h.accounts import schemas
 from h import session
+from h.views import json_view
 
 _ = i18n.TranslationString
 
@@ -51,14 +52,13 @@ def validate_form(form, data):
         return None, appstruct
 
 
-def view_auth_defaults(fn, *args, **kwargs):
-    kwargs.setdefault('accept', 'text/html')
-    kwargs.setdefault('renderer', 'h:templates/auth.html.jinja2')
-    return view_defaults(*args, **kwargs)(fn)
+def auth_view(**settings):
+    settings.setdefault('accept', 'text/html')
+    settings.setdefault('renderer', 'h:templates/auth.html.jinja2')
+    return view_config(**settings)
 
 
-@view_config(accept='application/json', renderer='json',
-             context='pyramid.exceptions.BadCSRFToken')
+@json_view(context=BadCSRFToken)
 def bad_csrf_token(context, request):
     request.response.status_code = 403
     reason = _('Session is invalid. Please try again.')
@@ -100,9 +100,8 @@ class AjaxFormViewMapper(object):
         return wrapper
 
 
-@view_auth_defaults
-@view_config(attr='login', route_name='login')
-@view_config(attr='logout', route_name='logout')
+@auth_view(attr='login', route_name='login')
+@auth_view(attr='logout', route_name='logout')
 class AuthController(object):
     def __init__(self, request):
         self.request = request
@@ -140,26 +139,25 @@ class AuthController(object):
                                         headers=headers)
 
 
-@view_defaults(accept='application/json', context=Application, renderer='json')
-@view_config(attr='login', request_param='__formid__=login')
-@view_config(attr='logout', request_param='__formid__=logout')
+@view_defaults(route_name='session')
+@json_view(attr='login', request_param='__formid__=login')
+@json_view(attr='logout', request_param='__formid__=logout')
 class AjaxAuthController(AuthController):
     __view_mapper__ = AjaxFormViewMapper
 
 
-@view_auth_defaults
-@view_config(attr='forgot_password',
-             route_name='forgot_password',
-             request_method='POST')
-@view_config(attr='forgot_password_form',
-             route_name='forgot_password',
-             request_method='GET')
-@view_config(attr='reset_password',
-             route_name='reset_password',
-             request_method='POST')
-@view_config(attr='reset_password_form',
-             route_name='reset_password',
-             request_method='GET')
+@auth_view(attr='forgot_password',
+           route_name='forgot_password',
+           request_method='POST')
+@auth_view(attr='forgot_password_form',
+           route_name='forgot_password',
+           request_method='GET')
+@auth_view(attr='reset_password',
+           route_name='reset_password',
+           request_method='POST')
+@auth_view(attr='reset_password_form',
+           route_name='reset_password',
+           request_method='GET')
 class ForgotPasswordController(object):
 
     """Controller for handling password reset forms."""
@@ -275,15 +273,9 @@ class ForgotPasswordController(object):
         return {}
 
 
-@view_defaults(accept='application/json', context=Application, renderer='json')
-@view_config(
-    attr='forgot_password',
-    request_param='__formid__=forgot_password'
-)
-@view_config(
-    attr='reset_password',
-    request_param='__formid__=reset_password'
-)
+@view_defaults(route_name='session', renderer='json')
+@json_view(attr='forgot_password', request_param='__formid__=forgot_password')
+@json_view(attr='reset_password', request_param='__formid__=reset_password')
 class AjaxForgotPasswordController(ForgotPasswordController):
     __view_mapper__ = AjaxFormViewMapper
 
@@ -293,10 +285,9 @@ class AjaxForgotPasswordController(ForgotPasswordController):
         return super(AjaxForgotPasswordController, self).reset_password()
 
 
-@view_auth_defaults
-@view_config(attr='register', route_name='register', request_method='POST')
-@view_config(attr='register_form', route_name='register', request_method='GET')
-@view_config(attr='activate', route_name='activate', request_method='GET')
+@auth_view(attr='register', route_name='register', request_method='POST')
+@auth_view(attr='register_form', route_name='register', request_method='GET')
+@auth_view(attr='activate', route_name='activate', request_method='GET')
 class RegisterController(object):
     def __init__(self, request):
         self.request = request
@@ -392,17 +383,16 @@ class RegisterController(object):
             location=self.request.route_url('index'))
 
 
-@view_defaults(accept='application/json', context=Application, renderer='json')
-@view_config(attr='register', request_param='__formid__=register')
-@view_config(attr='activate', request_param='__formid__=activate')
+@view_defaults(route_name='session')
+@json_view(attr='register', request_param='__formid__=register')
+@json_view(attr='activate', request_param='__formid__=activate')
 class AjaxRegisterController(RegisterController):
     __view_mapper__ = AjaxFormViewMapper
 
 
-@view_auth_defaults
-@view_config(attr='edit_profile', route_name='edit_profile')
-@view_config(attr='disable_user', route_name='disable_user')
-@view_config(attr='profile', route_name='profile')
+@auth_view(attr='edit_profile', route_name='edit_profile')
+@auth_view(attr='disable_user', route_name='disable_user')
+@auth_view(attr='profile', route_name='profile')
 class ProfileController(object):
     def __init__(self, request):
         self.request = request
@@ -509,11 +499,11 @@ class ProfileController(object):
         return {}
 
 
-@view_defaults(accept='application/json', context=Application, renderer='json')
-@view_config(attr='edit_profile', request_param='__formid__=edit_profile')
-@view_config(attr='disable_user', request_param='__formid__=disable_user')
-@view_config(attr='profile', request_param='__formid__=profile')
-@view_config(attr='unsubscribe', request_param='__formid__=unsubscribe')
+@view_defaults(route_name='session')
+@json_view(attr='edit_profile', request_param='__formid__=edit_profile')
+@json_view(attr='disable_user', request_param='__formid__=disable_user')
+@json_view(attr='profile', request_param='__formid__=profile')
+@json_view(attr='unsubscribe', request_param='__formid__=unsubscribe')
 class AjaxProfileController(ProfileController):
     __view_mapper__ = AjaxFormViewMapper
 

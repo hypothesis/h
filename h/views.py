@@ -8,10 +8,10 @@ from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 from pyramid import i18n
 
-from . import session
-from .models import Annotation
-from .resources import Application, Stream
-from . import util
+from h import session
+from h.api.views import json_view
+from h.resources import Annotation
+from h.resources import Stream
 
 
 log = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ def error(context, request):
     return {}
 
 
-@view_config(context=Exception, accept='application/json', renderer='json')
+@json_view(context=Exception)
 def json_error(context, request):
     """"Return a JSON-formatted error message."""
     log.exception('%s: %s', type(context).__name__, str(context))
@@ -47,16 +47,18 @@ def json_error(context, request):
     renderer='h:templates/app.html.jinja2',
 )
 def annotation(context, request):
-    if 'title' in context.get('document', {}):
+    annotation = context.model
+
+    if 'title' in annotation.get('document', {}):
         title = 'Annotation by {user} on {title}'.format(
-            user=context['user'].replace('acct:', ''),
-            title=context['document']['title'])
+            user=annotation['user'].replace('acct:', ''),
+            title=annotation['document']['title'])
     else:
         title = 'Annotation by {user}'.format(
-            user=context['user'].replace('acct:', ''))
+            user=annotation['user'].replace('acct:', ''))
 
     alternate = request.resource_url(request.root, 'api', 'annotations',
-                                     context['id'])
+                                     annotation['id'])
 
     return {
         'meta_attrs': (
@@ -73,15 +75,15 @@ def annotation(context, request):
     }
 
 
-@view_config(name='embed.js', renderer='h:templates/embed.js.jinja2')
-def js(context, request):
+@view_config(route_name='embed', renderer='h:templates/embed.js.jinja2')
+def embed(context, request):
     request.response.content_type = b'text/javascript'
     return {
         'blocklist': json.dumps(request.registry.settings['h.blocklist'])
     }
 
 
-@view_config(name='app.html', renderer='h:templates/app.html.jinja2')
+@view_config(route_name='widget', renderer='h:templates/app.html.jinja2')
 def widget(context, request):
     return {}
 
@@ -98,45 +100,29 @@ def help_page(context, request):
     }
 
 
-@view_config(accept='application/json', context=Application, http_cache=0,
-             renderer='json')
+@json_view(route_name='session', http_cache=0)
 def session_view(request):
     flash = session.pop_flash(request)
     model = session.model(request)
     return dict(status='okay', flash=flash, model=model)
 
 
-@view_config(context=Stream, renderer='h:templates/app.html.jinja2')
+@view_config(context=Stream)
+def stream_redirect(context, request):
+    location = request.route_url('stream', _query=context['query'])
+    raise httpexceptions.HTTPFound(location=location)
+
+
 @view_config(route_name='stream', renderer='h:templates/app.html.jinja2')
 def stream(context, request):
-    stream_type = context.get('stream_type')
-    stream_key = context.get('stream_key')
-    query = None
-
-    if stream_type == 'user':
-        parts = util.split_user(stream_key)
-        if parts is not None and parts[1] == request.domain:
-            query = {'q': 'user:{}'.format(parts[0])}
-        else:
-            query = {'q': 'user:{}'.format(stream_key)}
-    elif stream_type == 'tag':
-        query = {'q': 'tag:{}'.format(stream_key)}
-
-    if query is not None:
-        location = request.resource_url(context, 'stream', query=query)
-        return httpexceptions.HTTPFound(location=location)
-    else:
-        context["link_tags"] = [
-            {
-                "rel": "alternate", "href": request.route_url("stream_atom"),
-                "type": "application/atom+xml"
-            },
-            {
-                "rel": "alternate", "href": request.route_url("stream_rss"),
-                "type": "application/rss+xml"
-            }
+    atom = request.route_url('stream_atom')
+    rss = request.route_url('stream_rss')
+    return {
+        'link_tags': [
+            {'rel': 'alternate', 'href': atom, 'type': 'application/atom+xml'},
+            {'rel': 'alternate', 'href': rss, 'type': 'application/rss+xml'},
         ]
-        return context
+    }
 
 
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
@@ -176,8 +162,14 @@ def includeme(config):
     config.include('h.assets')
 
     config.add_route('index', '/')
+
+    config.add_route('embed', '/embed.js')
+    config.add_route('widget', '/app.html')
+
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome')
+
+    config.add_route('session', '/app')
     config.add_route('stream', '/stream')
 
     _validate_blocklist(config)
