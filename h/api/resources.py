@@ -33,7 +33,7 @@ class Annotations(object):
     def __acl__(self):
         aces = []
         try:
-            group = self.request.json_body.get('group') or '__none__'
+            group = self.request.json_body.get('group') or '__world__'
         except ValueError:
             pass
         else:

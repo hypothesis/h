@@ -12,7 +12,7 @@ def test_group_principals_with_no_groups():
     user = mock.Mock(groups=[])
 
     assert auth.group_principals(
-        user, 'acct:nils@hypothes.is', mock.Mock()) == ['group:__none__']
+        user, 'acct:nils@hypothes.is', mock.Mock()) == ['group:__world__']
 
 
 def test_group_principals_with_one_group():
@@ -20,7 +20,7 @@ def test_group_principals_with_one_group():
 
     assert auth.group_principals(
         user, 'acct:nils@hypothes.is', mock.Mock()) == [
-            'group:__none__', 'group:hashid1',
+            'group:__world__', 'group:hashid1',
             'acct:nils@hypothes.is~group:hashid1']
 
 
@@ -33,7 +33,7 @@ def test_group_principals_with_three_groups():
 
     assert auth.group_principals(
         user, 'acct:nils@hypothes.is', mock.Mock()) == [
-            'group:__none__', 'group:hashid1', 'group:hashid2',
+            'group:__world__', 'group:hashid1', 'group:hashid2',
             'group:hashid3', 'acct:nils@hypothes.is~group:hashid1',
             'acct:nils@hypothes.is~group:hashid2',
             'acct:nils@hypothes.is~group:hashid3']

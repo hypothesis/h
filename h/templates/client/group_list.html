@@ -1,8 +1,8 @@
 <div ng-controller="GroupListController as ctrl" class="pull-right dropdown">
   <span role="button" class="dropdown-toggle" data-toggle="dropdown">
-    <i ng-if="ctrl.focusedGroup().hashid == '__none__'"
+    <i ng-if="ctrl.focusedGroup().hashid == '__world__'"
        class="h-icon-public"></i>
-    <i ng-if="ctrl.focusedGroup().hashid != '__none__'"
+    <i ng-if="ctrl.focusedGroup().hashid != '__world__'"
        class="h-icon-group"></i>
     {{ctrl.focusedGroup().name}}
     <i class="h-icon-arrow-drop-down"></i>
@@ -11,8 +11,8 @@
     <li ng-repeat="group in ctrl.groups()"
         ng-class="group.hashid == ctrl.focusedGroup().hashid? 'selected' : ''">
       <a class="group-name"  ng-click="ctrl.focusGroup(group.hashid)">
-        <i ng-if="group.hashid == '__none__'" class="h-icon-public"></i>
-        <i ng-if="group.hashid != '__none__'" class="h-icon-group"></i>
+        <i ng-if="group.hashid == '__world__'" class="h-icon-public"></i>
+        <i ng-if="group.hashid != '__world__'" class="h-icon-group"></i>
         {{group.name}}
       </a>
       <a ng-href="{{group.url}}" ng-if="group.url"

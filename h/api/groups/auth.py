@@ -11,7 +11,7 @@ def set_permissions(annotation):
         return
 
     group = annotation.get('group')
-    if (not group) or (group == '__none__'):
+    if (not group) or (group == '__world__'):
         # The groups feature doesn't change the permissions for annotations
         # that don't belong to a group.
         return
@@ -44,7 +44,7 @@ def group_principals(user, userid, hashids):
     :rtype: list of strings
 
     """
-    principals = ['group:__none__']
+    principals = ['group:__world__']
 
     def group_principal(group):
         return 'group:' + group.hashid(hashids)

@@ -35,7 +35,7 @@ def render(annotation):
     _filter_target_normalized_uris(data)
 
     if 'group' not in data:
-        data['group'] = '__none__'
+        data['group'] = '__world__'
 
     return data
 
