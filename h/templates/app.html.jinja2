@@ -13,7 +13,7 @@
 
 {% block content %}
   <!-- Toolbar -->
-  <div class="ng-cloak topbar" ng-class="frame.visible && 'shown'">
+  <div class="topbar" ng-class="frame.visible && 'shown'" ng-cloak>
     <div class="inner content">
       <button class="btn btn-clean"
               ng-click="shareDialog.visible = !shareDialog.visible"
@@ -58,7 +58,7 @@
   </div>
   <!-- / Toolbar -->
 
-  <div class="content">
+  <div class="content" ng-cloak>
     <!-- Account Dialog -->
     <div class="sheet" ng-if="accountDialog.visible">
       <i class="close h-icon-close"
