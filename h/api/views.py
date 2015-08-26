@@ -4,6 +4,7 @@
 
 import logging
 
+from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
 from h.api import cors
@@ -223,6 +224,12 @@ def delete(context, request):
         'id': id_,
         'deleted': True,
     }
+
+
+@forbidden_view_config(containment=Root, renderer='json')
+@notfound_view_config(containment=Root, renderer='json')
+def notfound(context, request):
+    return {'status': 'failure', 'reason': 'not_found'}
 
 
 def _publish_annotation_event(request, annotation, action):
