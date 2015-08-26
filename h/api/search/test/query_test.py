@@ -8,8 +8,81 @@ from pyramid import testing
 from h.api.search import query
 
 
+def test_auth_filter_with_not_logged_in():
+    effective_principals = ['system.Everyone']
+    assert query.auth_filter(effective_principals) == {
+            'terms': {
+                'permissions.read': ['group:__world__', 'system.Everyone']}}
+
+
+def test_auth_filter_when_user_is_not_a_member_of_any_groups():
+    effective_principals = [
+        'group:__world__',
+        'consumer:nosuchid',
+        'acct:nobu@hypothesis.is',
+        'system.Authenticated',
+        'system.Everyone',
+    ]
+    assert query.auth_filter(effective_principals) == {
+        'terms': {'permissions.read': effective_principals}}
+
+
+def test_auth_filter_when_user_is_admin():
+    effective_principals = [
+        'group:__world__',
+        'consumer:nosuchid',
+        'group:__admin__',
+        'acct:nobu@hypothesis.is',
+        'system.Authenticated',
+        'system.Everyone',
+    ]
+    assert query.auth_filter(effective_principals) == {
+        'terms': {'permissions.read': effective_principals}}
+
+
+def test_auth_filter_when_user_is_staff_member():
+    effective_principals = [
+        'group:__world__',
+        'consumer:nosuchid',
+        'group:__staff__',
+        'acct:nobu@hypothesis.is',
+        'system.Authenticated',
+        'system.Everyone',
+    ]
+    assert query.auth_filter(effective_principals) == {
+        'terms': {'permissions.read': effective_principals}}
+
+
+def test_auth_filter_when_user_is_group_member():
+    effective_principals = [
+        'group:__world__',
+        'consumer:nosuchid',
+        'acct:nobu@hypothesis.is',
+        'group:xyzabc',
+        'system.Authenticated',
+        'system.Everyone',
+    ]
+    assert query.auth_filter(effective_principals) == {
+        'terms': {'permissions.read': effective_principals}}
+
+
+def test_auth_filter_when_user_is_member_of_multiple_groups():
+    effective_principals = [
+        'group:__world__',
+        'consumer:nosuchid',
+        'acct:nobu@hypothesis.is',
+        'group:xyzabc',
+        'group:hdychs',
+        'group:qwlkjr',
+        'system.Authenticated',
+        'system.Everyone',
+    ]
+    assert query.auth_filter(effective_principals) == {
+        'terms': {'permissions.read': effective_principals}}
+
+
 # The fixtures required to mock all of build()'s dependencies.
-build_fixtures = pytest.mark.usefixtures('nipsa', 'uri')
+build_fixtures = pytest.mark.usefixtures('nipsa', 'uri', 'auth_filter')
 
 
 @build_fixtures
@@ -401,16 +474,6 @@ def test_build_with_evil_arguments():
 
 
 @build_fixtures
-def test_build_returns_nipsa_filter(nipsa):
-    """_build() returns a nipsa-filtered query."""
-    nipsa.nipsa_filter.return_value = "foobar!"
-
-    q = query.build(multidict.NestedMultiDict(), [])
-
-    assert "foobar!" in q["query"]["filtered"]["filter"]["and"]
-
-
-@build_fixtures
 def test_build_does_not_pass_userid_to_nipsa_filter(nipsa):
     query.build(multidict.NestedMultiDict(), [])
     assert nipsa.nipsa_filter.call_args[1]["userid"] is None
@@ -420,6 +483,15 @@ def test_build_does_not_pass_userid_to_nipsa_filter(nipsa):
 def test_build_does_pass_userid_to_nipsa_filter(nipsa):
     query.build(multidict.NestedMultiDict(), [], userid='fred')
     assert nipsa.nipsa_filter.call_args[1]["userid"] == "fred"
+
+
+@build_fixtures
+def test_build_nipsa_filter_is_included(nipsa):
+    request = mock.Mock(authenticated_userid='fred', effective_principals=[])
+    q = query.build(multidict.NestedMultiDict(), [])
+
+    assert nipsa.nipsa_filter.return_value in (
+        q["query"]["filtered"]["filter"]["and"])
 
 
 @build_fixtures
@@ -447,12 +519,22 @@ def test_build_with_arbitrary_params():
 
 
 @build_fixtures
-def test_build_nipsa_filter_is_included(nipsa):
-    request = mock.Mock(authenticated_userid='fred', effective_principals=[])
+def test_build_calls_auth_filter(auth_filter):
+    query.build(
+        multidict.NestedMultiDict(), mock.sentinel.effective_principals)
+
+    auth_filter.assert_called_once_with(
+        mock.sentinel.effective_principals)
+
+
+@build_fixtures
+def test_build_returns_auth_filter(auth_filter):
+    auth_filter.return_value = mock.sentinel.auth_filter
+
     q = query.build(multidict.NestedMultiDict(), [])
 
-    assert nipsa.nipsa_filter.return_value in (
-        q["query"]["filtered"]["filter"]["and"])
+    assert q['query']['filtered']['filter']['and'][0] == (
+        mock.sentinel.auth_filter)
 
 
 @pytest.fixture
@@ -465,5 +547,12 @@ def nipsa(request):
 @pytest.fixture
 def uri(request):
     patcher = mock.patch('h.api.search.query.uri', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def auth_filter(request):
+    patcher = mock.patch('h.api.search.query.auth_filter', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

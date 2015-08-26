@@ -10,22 +10,18 @@ def auth_filter(effective_principals):
     read will pass through this filter.
 
     """
-    return {
-        'terms': {
-            'permissions.read':
-                # We always want annotations with 'group:__world__' in
-                # their read permissions to show up in the search results.
-                # 'group:__world__' is never in effective_principals.
-                # We could add it to effective_principals for authenticated
-                # requests but not for unauthenticed ones (since Pyramid
-                # doesn't call our effective_principals() function for
-                # unauthenticed requests).
-                # So instead we always have to insert it here.
-                # FIXME: If public annotations used 'system.Everyone'
-                # instead of 'group:__world__' we wouldn't have to do this.
-                ['group:__world__'] + effective_principals
-            }
-    }
+    groups = list(effective_principals)
+
+    # We always want annotations with 'group:__world__' in
+    # their read permissions to show up in the search results,
+    # but 'group:__world__' is not in effective_principals for unauthenticed
+    # requests.
+    # FIXME: If public annotations used 'system.Everyone'
+    # instead of 'group:__world__' we wouldn't have to do this.
+    if 'group:__world__' not in groups:
+        groups.insert(0, 'group:__world__')
+
+    return {'terms': {'permissions.read': groups}}
 
 
 def build(request_params, effective_principals, userid=None,

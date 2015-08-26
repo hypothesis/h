@@ -61,6 +61,15 @@ def test_create_annotation_calls_set_group_if_reply(Annotation, groups):
 
 
 @create_annotation_fixtures
+def test_create_annotation_calls_set_permissions(Annotation, groups):
+    annotation = Annotation.return_value = _mock_annotation()
+
+    logic.create_annotation(mock.MagicMock(), mock.Mock(), [])
+
+    groups.set_permissions.assert_called_once_with(annotation)
+
+
+@create_annotation_fixtures
 def test_create_annotation_sets_user(Annotation):
     """It should set the annotation's 'user' field to the user's id."""
     user = mock.Mock()
@@ -215,6 +224,15 @@ def test_update_annotation_calls_set_group_if_reply(groups):
     logic.update_annotation(annotation, {}, False, [])
 
     groups.set_group_if_reply.assert_called_once_with(annotation)
+
+
+@update_annotation_fixtures
+def test_update_annotation_calls_set_permissions(groups):
+    annotation = _mock_annotation()
+
+    logic.update_annotation(annotation, {}, False, [])
+
+    groups.set_permissions.assert_called_once_with(annotation)
 
 
 @update_annotation_fixtures
