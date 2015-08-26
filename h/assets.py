@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import re
 
-from deform.field import Field
 from webassets.filter import ExternalTool, register_filter
 import pyramid
 
@@ -76,30 +74,6 @@ class CleanCSS(ExternalTool):
 register_filter(CleanCSS)
 
 
-class WebassetsResourceRegistry(object):
-
-    def __init__(self, env):
-        self.env = env
-
-    def __call__(self, requirements):
-        result = {'js': [], 'css': []}
-
-        urls = []
-        for name, _ in requirements:
-            if name in self.env:
-                bundle = self.env[name]
-                urls.extend(bundle.urls())
-
-        for source in urls:
-            # check asset type (js or css), modulo cache-busting qs
-            for thing in ('js', 'css'):
-                if re.search(r'\.%s(\??[^/]+)?$' % thing, source):
-                    if source not in result[thing]:
-                        result[thing].append(source)
-
-        return result
-
-
 class AssetRequest(object):
     """A subscriber predicate that checks whether a route is a static asset.
 
@@ -143,7 +117,3 @@ def includeme(config):
         pyramid.events.NewResponse,
         asset_request=True
     )
-
-    resource_registry = WebassetsResourceRegistry(config.get_webassets_env())
-    Field.set_default_resource_registry(resource_registry)
-    config.registry.resources = resource_registry
