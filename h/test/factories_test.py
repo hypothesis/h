@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 """Unit tests for h/test/factories.py."""
 import datetime

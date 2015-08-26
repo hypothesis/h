@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import mock
 
 from h.groups import logic

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # pylint: disable=protected-access
 """Unit tests for h/atom_feed.py."""
 import datetime

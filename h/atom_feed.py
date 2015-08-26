@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Functions for generating Atom feeds."""
 import urlparse
 import cgi

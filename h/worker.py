@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The worker runner is used to run worker processes outside of the web
 application. A worker is simply a callable python object which accepts a single

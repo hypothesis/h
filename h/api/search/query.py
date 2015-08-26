@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from h.api import uri
 from h.api import nipsa
 

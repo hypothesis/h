@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.settings import aslist
 import gnsq
 

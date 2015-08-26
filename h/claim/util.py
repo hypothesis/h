@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def generate_claim_token(request, userid):
     return request.registry.claim_serializer.dumps({'userid': userid})
 

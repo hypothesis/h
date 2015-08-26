@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Some shared utility functions."""
 import re
 

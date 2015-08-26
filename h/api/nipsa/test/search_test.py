@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import copy
 
 from h.api.nipsa import search

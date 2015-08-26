@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid import session
 from pyramid import view
 from pyramid import httpexceptions

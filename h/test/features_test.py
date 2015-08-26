@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import mock
 from pyramid.testing import DummyRequest
 import pytest

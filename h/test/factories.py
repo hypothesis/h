@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Factory classes for easily generating test objects."""
 import random
 import datetime

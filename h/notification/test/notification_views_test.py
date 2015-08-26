@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mock import patch, Mock
 from pytest import raises
 from pyramid.testing import DummyRequest as _DummyRequest

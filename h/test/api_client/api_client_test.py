@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Unit tests for h/api_client/api_client.py."""
 import mock
 import pytest

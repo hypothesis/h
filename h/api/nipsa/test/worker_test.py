@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import mock
 
 from h.api.nipsa import worker

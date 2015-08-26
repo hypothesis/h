@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from h.groups import models
 from h.test import factories
 
