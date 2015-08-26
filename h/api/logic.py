@@ -5,7 +5,6 @@ from h import i18n
 
 from h.api.models import Annotation
 from h.api import search as search_lib
-from h.api import groups
 
 
 _ = i18n.TranslationString
@@ -32,9 +31,6 @@ def create_annotation(fields, user, effective_principals):
 
     annotation['user'] = user.id
     annotation['consumer'] = user.consumer.key
-
-    groups.set_group_if_reply(annotation)
-    groups.set_permissions(annotation)
 
 
     # Save it in the database
@@ -92,9 +88,6 @@ def update_annotation(annotation, fields, has_admin_permission,
 
     # Update the annotation with the new data
     annotation.update(fields)
-
-    groups.set_group_if_reply(annotation)
-    groups.set_permissions(annotation)
 
     # If the annotation is flagged as deleted, remove mentions of the user
     if annotation.get('deleted', False):

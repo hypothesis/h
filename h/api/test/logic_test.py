@@ -20,7 +20,7 @@ def _mock_annotation(**kwargs):
 
 # The fixtures required to mock all of create_annotation()'s dependencies.
 create_annotation_fixtures = pytest.mark.usefixtures(
-    'Annotation', 'search_lib', 'groups')
+    'Annotation', 'search_lib')
 
 
 @create_annotation_fixtures
@@ -49,24 +49,6 @@ def test_create_annotation_calls_Annotation(Annotation):
     logic.create_annotation(fields, mock.Mock(), [])
 
     Annotation.assert_called_once_with(fields)
-
-
-@create_annotation_fixtures
-def test_create_annotation_calls_set_group_if_reply(Annotation, groups):
-    annotation = Annotation.return_value = _mock_annotation()
-
-    logic.create_annotation(mock.MagicMock(), mock.Mock(), [])
-
-    groups.set_group_if_reply.assert_called_once_with(annotation)
-
-
-@create_annotation_fixtures
-def test_create_annotation_calls_set_permissions(Annotation, groups):
-    annotation = Annotation.return_value = _mock_annotation()
-
-    logic.create_annotation(mock.MagicMock(), mock.Mock(), [])
-
-    groups.set_permissions.assert_called_once_with(annotation)
 
 
 @create_annotation_fixtures
@@ -148,7 +130,7 @@ def test_create_annotation_does_not_crash_if_annotations_parent_has_no_group(
 
 
 # The fixtures required to mock all of update_annotation()'s dependencies.
-update_annotation_fixtures = pytest.mark.usefixtures('search_lib', 'groups')
+update_annotation_fixtures = pytest.mark.usefixtures('search_lib')
 
 
 @update_annotation_fixtures
@@ -215,24 +197,6 @@ def test_update_annotation_calls_update():
     logic.update_annotation(annotation, fields, False, ['group:test-group'])
 
     annotation.update.assert_called_once_with(fields)
-
-
-@update_annotation_fixtures
-def test_update_annotation_calls_set_group_if_reply(groups):
-    annotation = _mock_annotation()
-
-    logic.update_annotation(annotation, {}, False, [])
-
-    groups.set_group_if_reply.assert_called_once_with(annotation)
-
-
-@update_annotation_fixtures
-def test_update_annotation_calls_set_permissions(groups):
-    annotation = _mock_annotation()
-
-    logic.update_annotation(annotation, {}, False, [])
-
-    groups.set_permissions.assert_called_once_with(annotation)
 
 
 @update_annotation_fixtures
@@ -372,7 +336,7 @@ def test_update_annotation_does_not_crash_if_annotations_parent_has_no_group(
 
 
 # The fixtures required to mock all of delete_annotation()'s dependencies.
-delete_annotation_fixtures = pytest.mark.usefixtures('groups')
+delete_annotation_fixtures = pytest.mark.usefixtures()
 
 
 @delete_annotation_fixtures
@@ -404,12 +368,5 @@ def Annotation(request):
 @pytest.fixture
 def search_lib(request):
     patcher = mock.patch('h.api.logic.search_lib', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def groups(request):
-    patcher = mock.patch('h.api.logic.groups', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
