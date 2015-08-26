@@ -11,17 +11,14 @@ def _mock_group(hashid):
 def test_group_principals_with_no_groups():
     user = mock.Mock(groups=[])
 
-    assert auth.group_principals(
-        user, 'acct:nils@hypothes.is', mock.Mock()) == ['group:__world__']
+    assert auth.group_principals(user, mock.Mock()) == ['group:__world__']
 
 
 def test_group_principals_with_one_group():
     user = mock.Mock(groups=[_mock_group('hashid1')])
 
-    assert auth.group_principals(
-        user, 'acct:nils@hypothes.is', mock.Mock()) == [
-            'group:__world__', 'group:hashid1',
-            'acct:nils@hypothes.is~group:hashid1']
+    assert auth.group_principals(user, mock.Mock()) == [
+        'group:__world__', 'group:hashid1']
 
 
 def test_group_principals_with_three_groups():
@@ -31,9 +28,5 @@ def test_group_principals_with_three_groups():
         _mock_group('hashid3'),
     ])
 
-    assert auth.group_principals(
-        user, 'acct:nils@hypothes.is', mock.Mock()) == [
-            'group:__world__', 'group:hashid1', 'group:hashid2',
-            'group:hashid3', 'acct:nils@hypothes.is~group:hashid1',
-            'acct:nils@hypothes.is~group:hashid2',
-            'acct:nils@hypothes.is~group:hashid3']
+    assert auth.group_principals(user, mock.Mock()) == [
+        'group:__world__', 'group:hashid1', 'group:hashid2', 'group:hashid3']

@@ -93,8 +93,6 @@ module.exports = ['session', (session) ->
     acl = _acl context
 
     for ace in acl
-      if user and ace.principal.substring(0, user.length) == user
-        return true
       if ace.principal not in [user, GROUP_WORLD]
         continue
       if ace.action not in [action, ALL_PERMISSIONS]

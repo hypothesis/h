@@ -151,8 +151,7 @@ def effective_principals(userid, request):
             additional_principals.append('group:__staff__')
 
         additional_principals.extend(
-            groups.group_principals(
-                primary_user, userid, request.hashids))
+            groups.group_principals(primary_user, request.hashids))
 
     return additional_principals
 

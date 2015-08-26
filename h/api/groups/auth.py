@@ -22,14 +22,8 @@ def set_permissions(annotation):
     # are members of that group can read the annotation.
     annotation['permissions']['read'] = [group_principal]
 
-    # If the annotation belongs to a group, we make it so that you have to be
-    # both the user who created the annotation and a member of the annotation's
-    # group to update the annotation.
-    annotation['permissions']['update'] = [
-        annotation['user'] + '~' + group_principal]
 
-
-def group_principals(user, userid, hashids):
+def group_principals(user, hashids):
     """Return any 'group:<hashid>' principals for the given user.
 
     Return a list of 'group:<hashid>' principals for the groups that the given
@@ -46,12 +40,7 @@ def group_principals(user, userid, hashids):
     """
     principals = ['group:__world__']
 
-    def group_principal(group):
-        return 'group:' + group.hashid(hashids)
-
-    principals.extend([group_principal(group) for group in user.groups])
-
-    principals.extend([
-        userid + '~' + group_principal(group) for group in user.groups])
+    principals.extend(['group:{hashid}'.format(hashid=group.hashid(hashids))
+                       for group in user.groups])
 
     return principals
