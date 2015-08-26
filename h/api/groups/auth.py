@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def set_permissions(annotation):
     """Set the given annotation's permissions according to its group."""
     # For private annotations (visible only to the user who created them) the
