@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sqlalchemy
 from sqlalchemy.orm import exc
 

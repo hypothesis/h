@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import annotator.reindexer
 
 from h.models import Annotation, Document

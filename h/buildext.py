@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 :mod:`h.buildext` is a utility to build the Hypothesis browser extensions. It
 is exposed as the command-line utility hypothesis-buildext.

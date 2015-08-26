@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def nipsa_filter(userid=None):
     """Return an Elasticsearch filter for filtering out NIPSA'd annotations.
 

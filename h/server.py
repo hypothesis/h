@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from gunicorn.workers.ggevent import GeventPyWSGIWorker, PyWSGIHandler
 from ws4py.server.geventserver import WSGIServer, WebSocketWSGIHandler
 

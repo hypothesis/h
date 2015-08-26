@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Worker functions for the NIPSA feature."""
 import json
 

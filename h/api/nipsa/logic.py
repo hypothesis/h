@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 
 from h.api.nipsa import models

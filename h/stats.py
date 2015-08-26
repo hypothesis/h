@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import statsd
 
 __all__ = ('get_client',)

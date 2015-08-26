@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 
 from pyramid_mailer import get_mailer

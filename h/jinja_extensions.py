@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from functools import wraps
 
 from jinja2 import Markup

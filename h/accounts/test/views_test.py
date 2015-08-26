@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 from collections import namedtuple
 
