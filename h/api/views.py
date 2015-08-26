@@ -6,7 +6,6 @@ import logging
 
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
-from pyramid import httpexceptions
 
 from h.api import cors
 from h.api.auth import get_user
