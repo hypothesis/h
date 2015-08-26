@@ -19,7 +19,7 @@ def _mock_annotation(**kwargs):
 
 # The fixtures required to mock all of create_annotation()'s dependencies.
 create_annotation_fixtures = pytest.mark.usefixtures(
-    'Annotation', 'nipsa', 'search_lib',)
+    'Annotation', 'search_lib')
 
 
 @create_annotation_fixtures
@@ -68,39 +68,6 @@ def test_create_annotation_sets_consumer(Annotation):
     annotation = logic.create_annotation({}, user)
 
     assert annotation['consumer'] == user.consumer.key
-
-
-@create_annotation_fixtures
-def test_create_annotation_calls_nipsa(nipsa):
-    """It should call has_nipsa() once with the user's id."""
-    user = mock.Mock()
-
-    logic.create_annotation({}, user)
-
-    nipsa.has_nipsa.assert_called_once_with(user.id)
-
-
-@create_annotation_fixtures
-def test_create_annotation_sets_nipsa_if_user_is_nipsad(Annotation, nipsa):
-    Annotation.return_value = _mock_annotation()
-    # The user is nipsa'd.
-    nipsa.has_nipsa.return_value = True
-
-    annotation = logic.create_annotation({}, mock.Mock())
-
-    assert annotation['nipsa'] is True
-
-
-@create_annotation_fixtures
-def test_create_annotation_does_not_set_nipsa_if_user_is_not_nipsad(
-        Annotation, nipsa):
-    Annotation.return_value = _mock_annotation()
-    # The user is not nipsa'd.
-    nipsa.has_nipsa.return_value = False
-
-    annotation = logic.create_annotation({}, mock.Mock())
-
-    assert 'nipsa' not in annotation
 
 
 @create_annotation_fixtures
@@ -290,13 +257,6 @@ def test_update_annotation_calls_save():
 @pytest.fixture
 def Annotation(request):
     patcher = mock.patch('h.api.logic.Annotation', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def nipsa(request):
-    patcher = mock.patch('h.api.logic.nipsa', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 

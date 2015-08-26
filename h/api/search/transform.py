@@ -4,6 +4,7 @@
 
 import copy
 
+from h.api import nipsa
 from h.api import uri
 
 
@@ -17,6 +18,9 @@ def prepare(annotation):
     # FIXME: When this becomes simply part of a search indexing operation, this
     # should probably not mutate its argument.
     _normalize_annotation_target_uris(annotation)
+
+    if 'user' in annotation and nipsa.has_nipsa(annotation['user']):
+        annotation['nipsa'] = True
 
 
 def render(annotation):
