@@ -91,5 +91,5 @@ def update_annotation(annotation, fields, has_admin_permission):
     annotation.save()
 
 
-def delete_annotation(annotation, effective_principals):
+def delete_annotation(annotation):
     annotation.delete()

@@ -516,17 +516,7 @@ def test_delete_calls_delete_annotation(logic):
 
     views.delete(annotation, request)
 
-    logic.delete_annotation.assert_called_once_with(
-        annotation, request.effective_principals)
-
-
-@delete_fixtures
-def test_delete_returns_error_if_delete_annotation_raises(logic):
-    logic.delete_annotation.side_effect = RuntimeError("Ouch", 401)
-
-    response_data = views.delete(mock.Mock(), mock.Mock())
-
-    assert response_data['status'] == 'failure'
+    logic.delete_annotation.assert_called_once_with(annotation)
 
 
 @delete_fixtures

@@ -155,10 +155,7 @@ def create(request):
     user = get_user(request)
 
     # Create the annotation
-    try:
-        annotation = logic.create_annotation(fields=fields, user=user)
-    except RuntimeError as err:
-        return _api_error(request, err.args[0], status_code=err.args[1])
+    annotation = logic.create_annotation(fields=fields, user=user)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
@@ -218,10 +215,7 @@ def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context
 
-    try:
-        logic.delete_annotation(annotation, request.effective_principals)
-    except RuntimeError as err:
-        return _api_error(request, err.args[0], status_code=err.args[1])
+    logic.delete_annotation(annotation)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'delete')

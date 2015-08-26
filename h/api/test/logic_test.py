@@ -76,7 +76,7 @@ def test_create_annotation_sets_consumer(Annotation):
 @create_annotation_fixtures
 def test_create_annotation_calls_prepare(Annotation, search_lib):
     """It should call prepare() once with the annotation."""
-    logic.create_annotation({}, mock.Mock(), [])
+    logic.create_annotation({}, mock.Mock())
 
     search_lib.prepare.assert_called_once_with(Annotation.return_value)
 
@@ -342,14 +342,14 @@ def test_delete_does_not_crash_if_annotation_has_no_group():
     annotation.get.side_effect = annotation_data.get
     annotation.__getitem__.side_effect = annotation_data.__getitem__
 
-    logic.delete_annotation(annotation, [])
+    logic.delete_annotation(annotation)
 
 
 @delete_annotation_fixtures
 def test_delete_annotation_calls_delete():
     annotation = mock.MagicMock(group='test-group')
 
-    logic.delete_annotation(annotation, [])
+    logic.delete_annotation(annotation)
 
     annotation.delete.assert_called_once_with()
 
