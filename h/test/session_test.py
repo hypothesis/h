@@ -14,7 +14,7 @@ def _mock_group():
     group = mock.Mock()
     group.as_dict.return_value = {
         'name': group.name,
-        'hashid': group.hashid.return_value
+        'id': group.hashid.return_value
     }
     return group
 
@@ -24,7 +24,7 @@ def test_model_returns_no_groups_if_no_user():
     request = mock.Mock(authenticated_userid=None)
 
     assert session.model(request)['groups'] == [
-        {'name': 'Public', 'hashid': '__world__'},
+        {'name': 'Public', 'id': '__world__'},
     ]
 
 
@@ -34,7 +34,7 @@ def test_model_returns_no_groups_if_user_not_found(models):
     models.User.get_by_userid.return_value = None
 
     assert session.model(request)['groups'] == [
-        {'name': 'Public', 'hashid': '__world__'},
+        {'name': 'Public', 'id': '__world__'},
     ]
 
 
@@ -44,7 +44,7 @@ def test_model_returns_no_groups_if_user_has_no_groups(models):
     models.User.get_by_userid.return_value.groups = []
 
     assert session.model(request)['groups'] == [
-        {'name': 'Public', 'hashid': '__world__'},
+        {'name': 'Public', 'id': '__world__'},
     ]
 
 
@@ -77,7 +77,7 @@ def test_model_returns_the_group_dicts_from_as_dict(models, groups):
     model = session.model(mock.Mock())
 
     assert model['groups'] == [
-        {'name': 'Public', 'hashid': '__world__'},
+        {'name': 'Public', 'id': '__world__'},
         'dict_1', 'dict_2', 'dict_3'
     ]
 

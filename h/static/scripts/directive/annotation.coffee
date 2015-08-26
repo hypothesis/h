@@ -61,7 +61,7 @@ AnnotationController = [
 
     model = $scope.annotationGet()
     if not model.group
-      model.group = group.focusedGroup().hashid
+      model.group = group.focusedGroup().id
 
     highlight = model.$highlight
     original = null

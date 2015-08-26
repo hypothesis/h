@@ -630,7 +630,7 @@ describe("AnnotationController", ->
   )
 
   describe("save", ->
-    it("Passes group:<hashid> to the server when saving a new annotation", ->
+    it("Passes group:<id> to the server when saving a new annotation", ->
       annotation = {
         # The annotation needs to have a user or the controller will refuse to
         # save it.
@@ -641,11 +641,11 @@ describe("AnnotationController", ->
       # Stub $create so we can spy on what gets sent to the server.
       annotation.$create = sinon.stub().returns(Promise.resolve())
 
-      group = {hashid: "test-hashid"}
+      group = {id: "test-id"}
 
       {controller} = createAnnotationDirective({
         annotation: annotation
-        # Mock the group service, pretend that there's a group with hashid
+        # Mock the group service, pretend that there's a group with id
         # "test-group" focused.
         group: {
           focusedGroup: -> group
@@ -655,7 +655,7 @@ describe("AnnotationController", ->
       controller.action = 'create'
 
       controller.save().then(->
-        assert annotation.$create.lastCall.thisValue.group == "test-hashid"
+        assert annotation.$create.lastCall.thisValue.group == "test-id"
       )
     )
   )

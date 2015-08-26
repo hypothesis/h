@@ -14,7 +14,7 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
         {
            name: VISIBILITY_PUBLIC,
            text: scope.group().name,
-           isGroup: scope.group().hashid != '__world__'
+           isGroup: scope.group().id != '__world__'
         }
         {name: VISIBILITY_PRIVATE, text: 'Only Me'}
       ]

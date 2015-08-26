@@ -20,11 +20,11 @@ function group(session) {
     return session.state.groups || [];
   };
 
-  // Return the full object for the group with the given hashid.
-  var getGroup = function(hashid) {
+  // Return the full object for the group with the given id.
+  var getGroup = function(id) {
     for (var i = 0; i < groups().length; i++) {
       var group = groups()[i];
-      if (group.hashid === hashid) {
+      if (group.id === id) {
         return group;
       }
     }
@@ -40,8 +40,8 @@ function group(session) {
     },
 
     // Set the named group as the currently focused group.
-    focusGroup: function(hashid) {
-      var group_ = getGroup(hashid);
+    focusGroup: function(id) {
+      var group_ = getGroup(id);
       if (group_ !== undefined) {
         focusedGroup = group_;
       }

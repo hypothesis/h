@@ -10,9 +10,9 @@ var sessionWithThreeGroups = function() {
   return {
     state: {
       groups: [
-        {name: 'Group 1', hashid: 'hashid1'},
-        {name: 'Group 2', hashid: 'hashid2'},
-        {name: 'Group 3', hashid: 'hashid3'},
+        {name: 'Group 1', id: 'id1'},
+        {name: 'Group 2', id: 'id2'},
+        {name: 'Group 3', id: 'id3'},
       ]
     }
   };
@@ -38,11 +38,11 @@ describe('GroupService', function() {
 
         assert(groups.length === 3);
         assert(groups[0].name === 'Group 1');
-        assert(groups[0].hashid === 'hashid1');
+        assert(groups[0].id === 'id1');
         assert(groups[1].name === 'Group 2');
-        assert(groups[1].hashid === 'hashid2');
+        assert(groups[1].id === 'id2');
         assert(groups[2].name === 'Group 3');
-        assert(groups[2].hashid === 'hashid3');
+        assert(groups[2].id === 'id3');
       });
     });
   });
@@ -51,9 +51,9 @@ describe('GroupService', function() {
     it('returns the requested group', function() {
       var groupService = getGroupService(sessionWithThreeGroups());
 
-      var group = groupService.getGroup('hashid2');
+      var group = groupService.getGroup('id2');
 
-      assert(group.hashid === 'hashid2');
+      assert(group.id === 'id2');
     });
 
     it("returns undefined if the group doesn't exist", function() {
@@ -66,15 +66,15 @@ describe('GroupService', function() {
   describe('.focusedGroup() method', function() {
     it('returns the focused group', function() {
       var groupService = getGroupService(sessionWithThreeGroups());
-      groupService.focusGroup('hashid2');
+      groupService.focusGroup('id2');
 
-      assert(groupService.focusedGroup().hashid === 'hashid2');
+      assert(groupService.focusedGroup().id === 'id2');
     });
 
     it('returns the first group initially', function() {
       var groupService = getGroupService(sessionWithThreeGroups());
 
-      assert(groupService.focusedGroup().hashid === 'hashid1');
+      assert(groupService.focusedGroup().id === 'id1');
     });
   });
 
@@ -82,9 +82,9 @@ describe('GroupService', function() {
     it('sets .focusedGroup() to the named group', function() {
       var groupService = getGroupService(sessionWithThreeGroups());
 
-      groupService.focusGroup('hashid2');
+      groupService.focusGroup('id2');
 
-      assert(groupService.focusedGroup().hashid === 'hashid2');
+      assert(groupService.focusedGroup().id === 'id2');
     });
 
     it("does nothing if the named group isn't recognised", function() {
@@ -92,7 +92,7 @@ describe('GroupService', function() {
 
       groupService.focusGroup('foobar');
 
-      assert(groupService.focusedGroup().hashid === 'hashid1');
+      assert(groupService.focusedGroup().id === 'id1');
     });
   });
 });

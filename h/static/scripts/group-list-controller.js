@@ -12,7 +12,7 @@ module.exports = function GroupListController(group) {
     return group.focusedGroup();
   };
 
-  this.focusGroup = function(hashid) {
-    return group.focusGroup(hashid);
+  this.focusGroup = function(id) {
+    return group.focusGroup(id);
   };
 };

@@ -76,17 +76,17 @@ describe('GroupListController', function() {
 
   describe('focusGroup', function() {
 
-    it('calls group.focusGroup() with the hashid', function() {
+    it('calls group.focusGroup() with the id', function() {
       var mockGroupService = {
         focusGroup: sinon.spy()
       };
       var ctrl = createExampleController(mockGroupService).ctrl;
 
-      ctrl.focusGroup('test-hashid');
+      ctrl.focusGroup('test-id');
 
       assert(mockGroupService.focusGroup.calledOnce);
       assert(mockGroupService.focusGroup.firstCall.args.length === 1);
-      assert(mockGroupService.focusGroup.firstCall.args[0] === 'test-hashid');
+      assert(mockGroupService.focusGroup.firstCall.args[0] === 'test-id');
     });
 
     it('returns group.focusGroup()', function() {
