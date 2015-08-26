@@ -156,9 +156,7 @@ def create(request):
 
     # Create the annotation
     try:
-        annotation = logic.create_annotation(
-            fields=fields, user=user,
-            effective_principals=request.effective_principals)
+        annotation = logic.create_annotation(fields=fields, user=user)
     except RuntimeError as err:
         return _api_error(request, err.args[0], status_code=err.args[1])
 
@@ -200,8 +198,7 @@ def update(context, request):
 
     # Update and store the annotation
     try:
-        logic.update_annotation(annotation, fields, has_admin_permission,
-                                request.effective_principals)
+        logic.update_annotation(annotation, fields, has_admin_permission)
     except RuntimeError as err:
         return _api_error(
             request,

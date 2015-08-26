@@ -15,13 +15,8 @@ log = logging.getLogger(__name__)
 PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 
 
-def create_annotation(fields, user, effective_principals):
-    """Create and store an annotation.
-
-    :raises RuntimeError: If the request isn't authorized to write to the
-        annotation's group.
-
-    """
+def create_annotation(fields, user):
+    """Create and store an annotation."""
     # Some fields are not to be set by the user, ignore them
     for field in PROTECTED_FIELDS:
         fields.pop(field, None)
@@ -59,14 +54,12 @@ def _anonymize_deletes(annotation):
         annotation['permissions'][action] = filtered
 
 
-def update_annotation(annotation, fields, has_admin_permission,
-                      effective_principals):
+def update_annotation(annotation, fields, has_admin_permission):
     """Update the given annotation with the given new fields.
 
     :raises RuntimeError: if the fields attempt to change the annotation's
-       permissions and has_admin_permission is False, or if
-       effective_principals aren't authorized to write to the annotation's
-       group
+       permissions and has_admin_permission is False, or if the fields attempt
+       to change the annotation's group.
 
     """
     # Some fields are not to be set by the user, ignore them

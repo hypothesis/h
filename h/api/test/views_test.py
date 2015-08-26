@@ -303,8 +303,7 @@ def test_create_calls_logic(logic, get_user):
     views.create(request)
 
     logic.create_annotation.assert_called_once_with(
-        fields=request.json_body, user=get_user.return_value,
-        effective_principals=request.effective_principals)
+        fields=request.json_body, user=get_user.return_value)
 
 
 @create_fixtures
@@ -334,17 +333,6 @@ def test_create_passes_user_to_create_annotation(get_user, logic):
 
     assert logic.create_annotation.call_args[1]['user'] == (
         get_user.return_value)
-
-
-@create_fixtures
-def test_create_passes_effective_principals_to__create_annotation(logic):
-    """It should pass request.effective_principals to create_annotation()."""
-    request = mock.Mock()
-
-    views.create(request)
-
-    assert logic.create_annotation.call_args[1]['effective_principals'] == (
-        request.effective_principals)
 
 
 @create_fixtures
