@@ -3,7 +3,6 @@ from datetime import datetime
 from datetime import timedelta
 import hashlib
 import random
-import re
 import string
 
 import cryptacular.bcrypt
