@@ -61,6 +61,11 @@ module.exports = class Host extends Guest
     super
 
   showFrame: (options={transition: true}) ->
+    # Emit event for integrators to be able to react to sidebar.
+    try
+      showFrameEvent = new Event('hypothesisSidebarOpen')
+      window.dispatchEvent(showFrameEvent)
+
     if options.transition
       @frame.removeClass 'annotator-no-transition'
     else
@@ -74,6 +79,11 @@ module.exports = class Host extends Guest
       .addClass('h-icon-chevron-right')
 
   hideFrame: ->
+    # Emit event for integrators to be able to react to sidebar.
+    try
+      hideFrameEvent = new Event('hypothesisSidebarClosed')
+      window.dispatchEvent(hideFrameEvent)
+
     @frame.css 'margin-left': ''
     @frame.removeClass 'annotator-no-transition'
     @frame.addClass 'annotator-collapsed'
