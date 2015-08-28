@@ -99,7 +99,7 @@ def test_update_account_redirects_to_index(user_model):
     res = update_account(request)
 
     assert isinstance(res, HTTPFound)
-    assert res.location == 'http://example.com/'
+    assert res.location == 'http://example.com/welcome'
 
 
 def test_update_account_rerenders_form_on_validation_error(form, user_model):
@@ -204,7 +204,7 @@ def _post_request(post=None):
 @pytest.fixture(autouse=True)
 def routes(config):
     """Add routes used by claim package"""
-    config.add_route('index', '/')
+    config.add_route('onboarding', '/welcome')
     config.add_route('stream', '/dummy/stream')
 
 
