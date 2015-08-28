@@ -138,7 +138,8 @@
       </div>
     </div>
 
-    <div class="annotation-section annotation-license" ng-if="vm.editing">
+    <div class="annotation-section annotation-license"
+         ng-show="vm.privacyLevel.name != 'private' && vm.editing">
       <a href="http://creativecommons.org/publicdomain/zero/1.0/"
          title="View more information about the Creative Commons Public Domain license"
          target="_blank">
