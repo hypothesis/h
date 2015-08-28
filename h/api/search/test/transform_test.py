@@ -34,6 +34,20 @@ def test_prepare_adds_source_normalized_field(ann_in, ann_out, uri_normalize):
     assert ann_in == ann_out
 
 
+@pytest.mark.parametrize("ann,nipsa", [
+    ({"user": "george"}, True),
+    ({"user": "georgia"}, False),
+    ({}, False),
+])
+def test_prepare_sets_nipsa_field(ann, nipsa, has_nipsa):
+    has_nipsa.return_value = nipsa
+    transform.prepare(ann)
+    if nipsa:
+        assert ann["nipsa"] is True
+    else:
+        assert "nipsa" not in ann
+
+
 @pytest.mark.parametrize("ann_in,ann_out", [
     # Preserves the basics
     ({}, {}),
@@ -59,6 +73,13 @@ def test_render_noop_when_nothing_to_remove(ann_in, ann_out):
 ])
 def test_render_removes_source_normalized_field(ann_in, ann_out):
     assert transform.render(ann_in) == ann_out
+
+
+@pytest.fixture
+def has_nipsa(request):
+    patcher = mock.patch('h.api.nipsa.has_nipsa', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
 
 
 @pytest.fixture
