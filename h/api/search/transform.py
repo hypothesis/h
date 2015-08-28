@@ -6,6 +6,7 @@ import copy
 
 from h.api import nipsa
 from h.api import uri
+from h.api import models
 
 
 def prepare(annotation):
@@ -38,11 +39,22 @@ def render(annotation):
 
 
 def _normalize_annotation_target_uris(annotation):
-    if 'target' not in annotation:
+    targets = None
+
+    if 'references' in annotation:
+        # This annotation is a reply, use the target from its parent instead
+        # of any a target that may already have been denormalized into the
+        # reply itself.
+        parent = models.Annotation.fetch(annotation['references'][0])
+        targets = parent.get('target')
+    else:
+        # This annotation is an original.
+        targets = annotation.get('target')
+
+    if not isinstance(targets, list):
         return
-    if not isinstance(annotation['target'], list):
-        return
-    for target in annotation['target']:
+
+    for target in targets:
         if not isinstance(target, dict):
             continue
         if 'source' not in target:
@@ -50,6 +62,11 @@ def _normalize_annotation_target_uris(annotation):
         if not isinstance(target['source'], basestring):
             continue
         target['source_normalized'] = uri.normalize(target['source'])
+
+    if 'references' in annotation:
+        # Denormalize the parent's target into the reply, overwriting any
+        # existing target that was previously denormalized into the reply.
+        annotation['target'] = targets
 
 
 def _filter_target_normalized_uris(data):
