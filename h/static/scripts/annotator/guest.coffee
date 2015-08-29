@@ -33,10 +33,11 @@ module.exports = class Guest extends Annotator
     ".annotator-hl mouseout":            "onHighlightMouseout"
     "setVisibleHighlights": "setVisibleHighlights"
 
-  # Plugin configuration
+  # Plugin / Options configuration
   options:
     TextHighlights: {}
     TextSelection: {}
+    clickToClose: true
 
   # Anchoring module
   anchoring: require('./anchoring/html')
@@ -130,10 +131,11 @@ module.exports = class Guest extends Annotator
 
   _setupWrapper: ->
     @wrapper = @element
-    .on 'click', (event) =>
-      if !@selectedTargets?.length
-        this.hideFrame()
-    this
+    if @options.clickToClose
+      @wrapper.on 'click', (event) =>
+        if !@selectedTargets?.length
+          this.hideFrame()
+    return this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
   _setupDynamicStyle: -> this
