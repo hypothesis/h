@@ -45,7 +45,7 @@ def update_account(request):
     request.session.flash(msg, 'success')
 
     request.registry.notify(LoginEvent(request, user))
-    return exc.HTTPFound(location=request.route_url('index'))
+    return exc.HTTPFound(location=request.route_url('onboarding'))
 
 
 def _validate_request(request):
