@@ -67,7 +67,7 @@ class Group(Base):
         """Return a JSON-serializable dict representation of this group."""
         return {
             'name': self.name,
-            'id': self.hashid(hashids),
+            'id': 'group:{}'.format(self.hashid(hashids)),
         }
 
 

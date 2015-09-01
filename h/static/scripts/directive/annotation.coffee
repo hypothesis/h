@@ -60,9 +60,6 @@ AnnotationController = [
     @timestamp = null
 
     model = $scope.annotationGet()
-    if not model.group
-      model.group = group.focusedGroup().id
-
     highlight = model.$highlight
     original = null
     vm = this
@@ -99,7 +96,7 @@ AnnotationController = [
     # @returns {boolean} True if the annotation is private to the current user.
     ###
     this.isPrivate = ->
-      permissions.isPrivate model.permissions, model.user
+      permissions.isPrivate model.permissions
 
     ###*
     # @ngdoc method
@@ -167,7 +164,8 @@ AnnotationController = [
         this.view()
 
     this.group = ->
-      group.getGroup(model.group)
+      principal = model.permissions?.read?[0]
+      return group.getGroup(principal) ? group.focusedGroup()
 
     # Calculates the visual diff flags from the targets
     #
@@ -245,10 +243,11 @@ AnnotationController = [
       reply = annotationMapper.createAnnotation({references, uri})
 
       if session.state.userid
-        if permissions.isPublic model.permissions
-          reply.permissions = permissions.public()
-        else
+        if this.isPrivate()
           reply.permissions = permissions.private()
+        else
+          reply.permissions = permissions.public()
+          reply.permissions.read = [this.group()]
 
     ###*
     # @ngdoc method

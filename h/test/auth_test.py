@@ -154,12 +154,12 @@ def test_get_client_bad_secret(config):
 
 
 # The fixtures required to mock all of effective_principals()'s dependencies.
-effective_principals_fixtures = pytest.mark.usefixtures('models', 'groups')
+effective_principals_fixtures = pytest.mark.usefixtures('models')
 
 
 @effective_principals_fixtures
-def test_effective_principals_returns_no_principals(models):
-    """It should return only [] by default.
+def test_effective_principals_returns_world(models):
+    """It should return only ['group:__world__'] by default.
 
     If the request has no client and the user is not an admin or staff member
     nor a member of any group, it should return no additional principals.
@@ -169,7 +169,7 @@ def test_effective_principals_returns_no_principals(models):
     models.User.get_by_userid.return_value = MagicMock(
         admin=False, staff=False)
 
-    assert auth.effective_principals("jiji", request) == []
+    assert auth.effective_principals("jiji", request) == ['group:__world__']
 
 
 @effective_principals_fixtures
@@ -225,18 +225,10 @@ def test_effective_principals_client_id_and_admin_and_staff(models):
 
 
 @effective_principals_fixtures
-def test_effective_principals_calls_group_principals(models, groups):
-    request = Mock()
-
-    auth.effective_principals("jiji", request)
-
-    groups.group_principals.assert_called_once_with(
-        models.User.get_by_userid.return_value, request.hashids)
-
-
-@effective_principals_fixtures
-def test_effective_principals_with_one_group(groups):
-    groups.group_principals.return_value = ['group:group-1']
+def test_effective_principals_with_one_group(models):
+    models.User.get_by_userid.return_value.groups = [
+        Mock(hashid=Mock(return_value='group-1')),
+    ]
 
     additional_principals = auth.effective_principals("jiji", Mock())
 
@@ -244,11 +236,11 @@ def test_effective_principals_with_one_group(groups):
 
 
 @effective_principals_fixtures
-def test_effective_principals_with_three_groups(groups):
-    groups.group_principals.return_value = [
-        'group:group-1',
-        'group:group-2',
-        'group:group-3'
+def test_effective_principals_with_three_groups(models):
+    models.User.get_by_userid.return_value.groups = [
+        Mock(hashid=Mock(return_value='group-1')),
+        Mock(hashid=Mock(return_value='group-2')),
+        Mock(hashid=Mock(return_value='group-3')),
     ]
 
     additional_principals = auth.effective_principals("jiji", Mock())
@@ -261,12 +253,5 @@ def test_effective_principals_with_three_groups(groups):
 @pytest.fixture
 def models(request):
     patcher = patch('h.auth.models', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def groups(request):
-    patcher = patch('h.auth.groups', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

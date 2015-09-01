@@ -13,7 +13,7 @@
          target="_blank"
          ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
          >{{vm.annotation.user | persona}}</a>
-      <span class="small" ng-if="vm.group() && vm.group().url">
+      <span class="small" ng-if="!vm.isPrivate() && vm.group() && vm.group().url">
         to
         <a target="_blank" href="{{vm.group().url}}">
           <i class="h-icon-group" title="{{vm.group.name}}"></i>
@@ -123,20 +123,19 @@
 
   <footer class="annotation-footer">
     <div class="small" ng-if="vm.editing">
-      <p ng-show="vm.privacyLevel.name == 'private'">
+      <span ng-if="vm.privacyLevel.isPrivate">
         <i class="h-icon-lock"></i>
         This annotation will be visible only to you.
-      </p>
-      <p ng-show="vm.privacyLevel.name == 'public'">
-        <span ng-if="vm.privacyLevel.isGroup">
-          <i class="h-icon-group"></i>
-          This annotation will be visible to everyone in the
-          <strong>{{vm.group().name}}</strong> group.
-        </span>
-        <span ng-if="!vm.privacyLevel.isGroup">
-          <i class="h-icon-public"></i>
-          This annotation will be visible to everyone.
-        </span>
+      </span>
+      <span ng-if="!(vm.privacyLevel.isPublic || vm.privacyLevel.isPrivate)">
+        <i class="h-icon-group"></i>
+        This annotation will be visible to everyone in the
+        <strong>{{vm.group().name}}</strong> group.
+      </span>
+      <span ng-if="vm.privacyLevel.isPublic">
+        <i class="h-icon-public"></i>
+        This annotation will be visible to everyone.
+      </span>
       </p>
     </div>
 

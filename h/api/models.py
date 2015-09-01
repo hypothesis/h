@@ -10,6 +10,7 @@ from annotator import document
 class Annotation(annotation.Annotation):
     def __acl__(self):
         acl = []
+
         # Convert annotator-store roles to pyramid principals
         for action, roles in self.get('permissions', {}).items():
             for role in roles:
@@ -122,9 +123,6 @@ class Annotation(annotation.Annotation):
         'thread': {
             'type': 'string',
             'analyzer': 'thread'
-        },
-        'group': {
-            'type': 'string',
         }
     }
     __analysis__ = {

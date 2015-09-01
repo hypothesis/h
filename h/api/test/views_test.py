@@ -40,17 +40,17 @@ def test_index():
 
 
 # The fixtures required to mock all of search()'s dependencies.
-search_fixtures = pytest.mark.usefixtures('get_user', 'search_lib')
+search_fixtures = pytest.mark.usefixtures('auth', 'search_lib')
 
 
 @search_fixtures
-def test_search_calls_get_user(get_user):
+def test_search_calls_get_user(auth):
     """It should call get_user() once passing the request."""
     request = mock.Mock()
 
     views.search(request)
 
-    get_user.assert_called_once_with(request)
+    auth.get_user.assert_called_once_with(request)
 
 
 @search_fixtures
@@ -82,11 +82,11 @@ def test_search_passes_params_to_search(search_lib):
 
 
 @search_fixtures
-def test_search_passes_user_to_search(get_user, search_lib):
+def test_search_passes_user_to_search(auth, search_lib):
     """It should pass the user from get_user() to search_lib.search()."""
     views.search(mock.Mock())
 
-    assert search_lib.search.call_args[1]['user'] == get_user.return_value
+    assert search_lib.search.call_args[1]['user'] == auth.get_user.return_value
 
 
 @search_fixtures
@@ -190,17 +190,17 @@ def test_annotator_token_gets_access_token_from_response_json(access_token):
 
 
 # The fixtures required to mock all of annotations_index()'s dependencies.
-annotations_index_fixtures = pytest.mark.usefixtures('get_user', 'search_lib')
+annotations_index_fixtures = pytest.mark.usefixtures('auth', 'search_lib')
 
 
 @annotations_index_fixtures
-def test_annotations_index_calls_get_user(get_user):
+def test_annotations_index_calls_get_user(auth):
     """It should call get_user() once passing the request."""
     request = mock.Mock()
 
     views.annotations_index(request)
 
-    get_user.assert_called_once_with(request)
+    auth.get_user.assert_called_once_with(request)
 
 
 @annotations_index_fixtures
@@ -212,11 +212,11 @@ def test_annotations_index_calls_index(search_lib):
 
 
 @annotations_index_fixtures
-def test_annotations_index_passes_user_to_index(get_user, search_lib):
+def test_annotations_index_passes_user_to_index(auth, search_lib):
     """It should pass the user from get_user() to search_lib.index()."""
     views.annotations_index(mock.Mock())
 
-    assert search_lib.index.call_args[1]['user'] == get_user.return_value
+    assert search_lib.index.call_args[1]['user'] == auth.get_user.return_value
 
 
 @annotations_index_fixtures
@@ -280,7 +280,7 @@ def test_annotations_index_returns_rendered_annotations(search_lib):
 
 # The fixtures required to mock all of create()'s dependencies.
 create_fixtures = pytest.mark.usefixtures(
-    'get_user', 'logic', 'AnnotationEvent', 'search_lib')
+    'auth', 'logic', 'AnnotationEvent', 'search_lib')
 
 
 @create_fixtures
@@ -296,14 +296,14 @@ def test_create_returns_error_if_parsing_json_fails():
 
 
 @create_fixtures
-def test_create_calls_logic(logic, get_user):
+def test_create_calls_logic(logic, auth):
     """It should call logic.create_annotation() appropriately."""
     request = mock.Mock()
 
     views.create(request)
 
     logic.create_annotation.assert_called_once_with(
-        fields=request.json_body, user=get_user.return_value)
+        fields=request.json_body, user=auth.get_user.return_value)
 
 
 @create_fixtures
@@ -327,12 +327,12 @@ def test_create_passes_json_to_create_annotation(logic):
 
 
 @create_fixtures
-def test_create_passes_user_to_create_annotation(get_user, logic):
+def test_create_passes_user_to_create_annotation(auth, logic):
     """It should pass the user from get_user() to logic.create_annotation()."""
     views.create(mock.Mock())
 
     assert logic.create_annotation.call_args[1]['user'] == (
-        get_user.return_value)
+        auth.get_user.return_value)
 
 
 @create_fixtures
@@ -403,16 +403,9 @@ def test_read_returns_rendered_annotation(search_lib):
     assert response_data == search_lib.render.return_value
 
 
-@read_fixtures
-def test_read_does_not_crash_if_annotation_has_no_group():
-    annotation = _mock_annotation()
-    assert 'group' not in annotation
-
-    views.read(annotation, mock.Mock(effective_principals=[]))
-
-
 # The fixtures required to mock all of update()'s dependencies.
-update_fixtures = pytest.mark.usefixtures('logic', 'Annotation', 'search_lib')
+update_fixtures = pytest.mark.usefixtures(
+    'auth', 'logic', 'Annotation', 'search_lib')
 
 
 @update_fixtures
@@ -424,16 +417,6 @@ def test_update_returns_error_if_json_parsing_fails():
     error = views.update(mock.Mock(), request)
 
     assert error['status'] == 'failure'
-
-
-@update_fixtures
-def test_update_calls_has_permission():
-    annotation = mock.Mock()
-    request = mock.Mock()
-
-    views.update(annotation, request)
-
-    request.has_permission.assert_called_once_with('admin', annotation)
 
 
 @update_fixtures
@@ -459,25 +442,6 @@ def test_update_passes_fields_to_update_annotation(logic):
     views.update(mock.Mock(), request)
 
     assert logic.update_annotation.call_args[0][1] == request.json_body
-
-
-@update_fixtures
-def test_update_passes_has_admin_permission_to_update_annotation(logic):
-    request = mock.Mock()
-
-    views.update(mock.Mock(), request)
-
-    assert logic.update_annotation.call_args[0][2] == (
-        request.has_permission.return_value)
-
-
-@update_fixtures
-def test_update_returns_error_if_update_annotation_raises(logic):
-    logic.update_annotation.side_effect = RuntimeError("Nope", 401)
-
-    error = views.update(mock.Mock(), mock.Mock())
-
-    assert error['status'] == 'failure'
 
 
 @update_fixtures
@@ -521,8 +485,8 @@ def test_delete_calls_delete_annotation(logic):
 
 @delete_fixtures
 def test_delete_event(AnnotationEvent):
-    annotation = _mock_annotation(id='foo', group='test-group')
-    request = mock.Mock(effective_principals=['group:test-group'])
+    annotation = _mock_annotation(id='foo')
+    request = mock.Mock()
     event = AnnotationEvent.return_value
 
     views.delete(annotation, request)
@@ -533,31 +497,22 @@ def test_delete_event(AnnotationEvent):
 
 @delete_fixtures
 def test_delete_returns_id():
-    annotation = _mock_annotation(id='foo', group='test-group')
+    annotation = _mock_annotation(id='foo')
+    request = mock.Mock()
 
-    response_data = views.delete(
-        annotation, mock.Mock(effective_principals=['group:test-group']))
+    response_data = views.delete(annotation, request)
 
     assert response_data['id'] == annotation['id']
 
 
 @delete_fixtures
 def test_delete_returns_deleted():
-    response_data = views.delete(
-        _mock_annotation(id='foo', group='test-group'),
-        mock.Mock(effective_principals=['group:test-group']))
+    annotation = _mock_annotation(id='foo')
+    request = mock.Mock()
+
+    response_data = views.delete(annotation, request)
 
     assert response_data['deleted'] is True
-
-
-@delete_fixtures
-def test_delete_does_not_crash_if_annotation_has_no_group():
-    annotation = _mock_annotation(id='foo')
-    assert 'group' not in annotation
-
-    views.delete(
-        annotation,
-        mock.Mock(effective_principals=['group:test-group']))
 
 
 @pytest.fixture
@@ -591,8 +546,8 @@ def Annotation(request):
 
 
 @pytest.fixture
-def get_user(request):
-    patcher = mock.patch('h.api.views.get_user', autospec=True)
+def auth(request):
+    patcher = mock.patch('h.api.views.auth', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 

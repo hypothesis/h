@@ -26,7 +26,7 @@ def _current_groups(request):
 
     """
     current_groups = [
-        {'name': 'Public', 'id': '__world__', 'public': True},  # No 'url'.
+        {'name': 'Public', 'id': 'group:__world__', 'public': True},
     ]
     userid = request.authenticated_userid
     if userid is None:

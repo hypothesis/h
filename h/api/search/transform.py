@@ -6,7 +6,6 @@ import copy
 
 from h.api import nipsa
 from h.api import uri
-from h.api import groups
 
 
 def prepare(annotation):
@@ -16,9 +15,6 @@ def prepare(annotation):
     Scan the passed annotation for any target URIs or document metadata URIs
     and add normalized versions of these to the document.
     """
-    groups.set_group_if_reply(annotation)
-    groups.set_permissions(annotation)
-
     # FIXME: When this becomes simply part of a search indexing operation, this
     # should probably not mutate its argument.
     _normalize_annotation_target_uris(annotation)
@@ -37,9 +33,6 @@ def render(annotation):
     data = copy.deepcopy(dict(annotation))
 
     _filter_target_normalized_uris(data)
-
-    if 'group' not in data:
-        data['group'] = '__world__'
 
     return data
 

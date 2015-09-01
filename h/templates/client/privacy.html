@@ -15,7 +15,7 @@
       <a href="">
         <i class="small"
            ng-class="{'h-icon-public': level.isPublic,
-                      'h-icon-group': !level.isPrivate && !level.isPublic,
+                      'h-icon-group': !(level.isPrivate || level.isPublic),
                       'h-icon-lock': level.isPrivate}"></i>
         <span ng-bind="level.text"></span>
       </a>

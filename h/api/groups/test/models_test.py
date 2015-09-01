@@ -117,5 +117,5 @@ def test_as_dict(db_session):
 
     assert group.as_dict(hashids) == {
         'name': 'My Hypothesis Group',
-        'id': group.hashid(hashids)
+        'id': 'group:{}'.format(group.hashid(hashids))
     }

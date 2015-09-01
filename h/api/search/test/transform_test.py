@@ -5,25 +5,6 @@ import pytest
 from h.api.search import transform
 
 
-@mock.patch('h.api.search.transform.groups')
-def test_prepare_calls_set_group_if_reply(groups):
-    annotation = {'permissions': {'read': []}}
-
-    transform.prepare(annotation)
-
-    groups.set_group_if_reply.assert_called_once_with(annotation)
-
-
-@mock.patch('h.api.search.transform.groups')
-def test_prepare_calls_set_permissions(groups):
-    annotation = {'permissions': {'read': []}}
-
-    transform.prepare(annotation)
-
-    groups.set_permissions.assert_called_once_with(annotation)
-
-
-@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     # Preserves the basics
     ({}, {}),
@@ -36,12 +17,11 @@ def test_prepare_calls_set_permissions(groups):
     ({"target": [{"foo": "bar"}, {"baz": "qux"}]},
      {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
 ])
-def test_prepare_noop_when_nothing_to_normalize(_, ann_in, ann_out):
+def test_prepare_noop_when_nothing_to_normalize(ann_in, ann_out):
     transform.prepare(ann_in)
     assert ann_in == ann_out
 
 
-@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     ({"target": [{"source": "giraffe"}]},
      {"target": [{"source": "giraffe", "source_normalized": "*giraffe*"}]}),
@@ -49,18 +29,17 @@ def test_prepare_noop_when_nothing_to_normalize(_, ann_in, ann_out):
      {"target": [{"source": "giraffe", "source_normalized": "*giraffe*"},
                  "foo"]}),
 ])
-def test_prepare_adds_source_normalized_field(_, ann_in, ann_out, uri_normalize):
+def test_prepare_adds_source_normalized_field(ann_in, ann_out, uri_normalize):
     transform.prepare(ann_in)
     assert ann_in == ann_out
 
 
-@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann,nipsa", [
     ({"user": "george"}, True),
     ({"user": "georgia"}, False),
     ({}, False),
 ])
-def test_prepare_sets_nipsa_field(_, ann, nipsa, has_nipsa):
+def test_prepare_sets_nipsa_field(ann, nipsa, has_nipsa):
     has_nipsa.return_value = nipsa
     transform.prepare(ann)
     if nipsa:
@@ -69,7 +48,6 @@ def test_prepare_sets_nipsa_field(_, ann, nipsa, has_nipsa):
         assert "nipsa" not in ann
 
 
-@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     # Preserves the basics
     ({}, {}),
@@ -82,12 +60,10 @@ def test_prepare_sets_nipsa_field(_, ann, nipsa, has_nipsa):
     ({"target": [{"foo": "bar"}, {"baz": "qux"}]},
      {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
 ])
-def test_render_noop_when_nothing_to_remove(_, ann_in, ann_out):
-    ann_out['group'] = '__world__'
+def test_render_noop_when_nothing_to_remove(ann_in, ann_out):
     assert transform.render(ann_in) == ann_out
 
 
-@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     ({"target": [{"source": "giraffe", "source_normalized": "*giraffe*"}]},
      {"target": [{"source": "giraffe"}]}),
@@ -95,8 +71,7 @@ def test_render_noop_when_nothing_to_remove(_, ann_in, ann_out):
                  "foo"]},
      {"target": [{"source": "giraffe"}, "foo"]}),
 ])
-def test_render_removes_source_normalized_field(_, ann_in, ann_out):
-    ann_out['group'] = '__world__'
+def test_render_removes_source_normalized_field(ann_in, ann_out):
     assert transform.render(ann_in) == ann_out
 
 
