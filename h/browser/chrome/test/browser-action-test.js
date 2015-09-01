@@ -10,7 +10,10 @@ describe('BrowserAction', function () {
     fakeChromeBrowserAction = {
       setIcon: sinon.spy(),
       setTitle: sinon.spy(),
-      setBadgeText: sinon.spy(),
+      getBadgeText: function(args, func) {
+        func('');
+      },
+      setBadgeText: sinon.spy()
     };
     action = new BrowserAction(fakeChromeBrowserAction);
   });
@@ -92,6 +95,158 @@ describe('BrowserAction', function () {
         tabId: 1,
         path: BrowserAction.icons[TabState.states.ACTIVE],
       });
+    });
+  });
+
+  describe('.updateBadge()', function() {
+    var server;
+
+    beforeEach(function() {
+      server = sinon.fakeServer.create({
+        autoRespond: true,
+        respondImmediately: true
+      });
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 1}']
+      );
+      sinon.stub(console, 'error');
+    });
+
+    afterEach(function() {
+      server.restore();
+      console.error.restore();
+    });
+
+    it('sends the correct XMLHttpRequest to the server', function() {
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(server.requests.length === 1);
+      var request = server.requests[0];
+      assert(request.method === "GET");
+      assert(request.url === "http://example.com/search?limit=0&uri=tabUrl");
+    });
+
+    it("doesn't set the badge if the server's JSON is invalid", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, 'this is not valid json']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setBadgeText.notCalled);
+      assert(fakeChromeBrowserAction.setTitle.notCalled);
+    });
+
+    it("logs an error if the server's JSON is invalid", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, 'this is not valid json']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(console.error.called);
+    });
+
+    it("doesn't set the badge if the server's total is invalid", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": "not a valid number"}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setBadgeText.notCalled);
+      assert(fakeChromeBrowserAction.setTitle.notCalled);
+    });
+
+    it("logs an error if the server's total is invalid", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": "not a valid number"}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(console.error.called);
+    });
+
+    it("doesn't set the badge if server response has no total", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"rows": []}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setBadgeText.notCalled);
+      assert(fakeChromeBrowserAction.setTitle.notCalled);
+    });
+
+    it("logs an error if the server response has no total", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"rows": []}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(console.error.called);
+    });
+
+    it("sets the browserAction's badge text", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 23}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setBadgeText.calledOnce);
+      assert(fakeChromeBrowserAction.setBadgeText.calledWithExactly(
+        {tabId: "tabId", text: "23"}));
+    });
+
+    it("does not set the badge text if there are 0 annotations", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 0}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setBadgeText.notCalled);
+    });
+
+    it("truncates numbers greater than 999 to '999+'", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 1001}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setBadgeText.calledOnce);
+      assert(fakeChromeBrowserAction.setBadgeText.calledWithExactly(
+        {tabId: "tabId", text: "999+"}));
+    });
+
+    it("does not set the badge text if there is existing text", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 23}']
+      );
+      var originalGetBadgeTextFunc = fakeChromeBrowserAction.getBadgeText;
+
+      fakeChromeBrowserAction.getBadgeText = function(args, func) {
+        func('some badge text that is already showing');
+      };
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+      fakeChromeBrowserAction.getBadgeText = originalGetBadgeTextFunc;
+
+      assert(fakeChromeBrowserAction.setBadgeText.notCalled);
     });
   });
 });

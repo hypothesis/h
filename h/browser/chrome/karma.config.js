@@ -18,6 +18,12 @@ module.exports = function(config) {
       // Polyfills for PhantomJS
       '../../../node_modules/js-polyfills/polyfill.js',
 
+      {
+        pattern: 'test/settings.json',
+        included: false,
+      },
+
+      'lib/settings.js',
       'lib/errors.js',
       'lib/tab-store.js',
       'lib/tab-state.js',
@@ -32,6 +38,9 @@ module.exports = function(config) {
       '../../static/scripts/blocklist.js'
     ],
 
+    proxies: {
+      "/settings.json": "/base/test/settings.json"
+    },
 
     // list of files to exclude
     exclude: [
@@ -51,7 +60,7 @@ module.exports = function(config) {
 
 
     // web server port
-    port: 9876,
+    port: 9877,
 
 
     // enable / disable colors in the output (reporters and logs)

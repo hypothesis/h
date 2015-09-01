@@ -54,6 +54,57 @@
       chromeBrowserAction.setTitle({tabId: tabId, title: _('Hypothesis has failed to load')});
       chromeBrowserAction.setBadgeText({tabId: tabId, text: '!'});
     };
+
+    /**
+     * Show the number of annotations of the current page in the badge.
+     *
+     * @method
+     * @param {integer} tabId The id of the current tab.
+     * @param {string} tabUrl The URL of the current tab.
+     * @param {string} serviceUrl The URL of the Hypothesis API.
+     */
+    this.updateBadge = function(tabId, tabUrl, serviceUrl) {
+      // Fetch the number of annotations of the current page from the server,
+      // and display it as a badge on the browser action button.
+      var xhr = new XMLHttpRequest();
+      xhr.onload = function() {
+        var total;
+
+        try {
+          total = JSON.parse(this.response).total;
+        } catch (e) {
+          console.error(
+            'updateBadge() received invalid JSON from the server: ' + e);
+          return;
+        }
+
+        if (typeof total !== 'number') {
+          console.error(
+            'updateBadge() received invalid total from the server: ' + total);
+          return;
+        }
+
+        if (total > 0) {
+          var totalString = total.toString();
+          if (total > 999) {
+            totalString = '999+';
+          }
+          chromeBrowserAction.getBadgeText({tabId: tabId}, function(text) {
+            // The num. annotations badge is low priority - we only set it if
+            // there's no other badge currently showing.
+            if (!text) {
+              chromeBrowserAction.setBadgeText({
+                tabId: tabId,
+                text: totalString
+              });
+            }
+          });
+        }
+      };
+
+      xhr.open('GET', serviceUrl + '/search?limit=0&uri=' + tabUrl);
+      xhr.send();
+    };
   }
 
   BrowserAction.icons = icons;

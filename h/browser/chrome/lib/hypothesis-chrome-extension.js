@@ -137,6 +137,10 @@
         browserAction.deactivate(tabId);
       }
 
+      h.settings.then(function(settings) {
+        browserAction.updateBadge(tabId, tab.url, settings.serviceUrl);
+      });
+
       return updateTabDocument(tab);
     }
 
