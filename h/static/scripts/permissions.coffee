@@ -75,7 +75,8 @@ module.exports = ['session', (session) ->
   #
   # @returns {boolean} True if the annotation is private to the user.
   ###
-  isPrivate: (permissions, user) ->
+  isPrivate: (permissions) ->
+    user = session.state.userid
     user and angular.equals(permissions?.read or [], [user])
 
   ###*

@@ -82,20 +82,25 @@ ol {
 
 /* The groups dropdown list. */
 
-.group-list {
-  margin-right: 0.5em;
-}
-
 $group-list-width: 225px;
+
+.group-list .dropdown {
+  white-space: nowrap;
+}
 
 .group-list .dropdown-menu {
   width: $group-list-width;
 }
 
+.group-list .dropdown-menu li {
+  @include pie-clearfix;
+}
+
 .group-list .dropdown-menu .group-name {
-  max-width: $group-list-width - 45px;
+  float: left;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: $group-list-width - 30px;
 }
 
 .user-picker {

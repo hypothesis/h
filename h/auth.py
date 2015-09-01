@@ -42,6 +42,7 @@ from pyramid.util import action_method
 from .interfaces import IClientFactory
 from .oauth import JWT_BEARER
 from h.accounts import models
+from h.api import groups
 
 LEEWAY = 240  # allowance for clock skew in verification
 
@@ -133,22 +134,26 @@ def effective_principals(userid, request):
     inserted by Pyramid).
 
     """
-    additional_principals = []
+    principals = ['group:__world__']
 
     if getattr(request, 'client', None) is not None:
         consumer_group = 'consumer:{}'.format(request.client.client_id)
-        additional_principals.append(consumer_group)
+        principals.append(consumer_group)
 
-    primary_user = models.User.get_by_userid(request.domain, userid)
+    user = models.User.get_by_userid(request.domain, userid)
 
-    if primary_user is not None:
-        if primary_user.admin:
-            additional_principals.append('group:admin')
+    if user is not None:
+        if user.admin:
+            principals.append('group:__admin__')
 
-        if primary_user.staff:
-            additional_principals.append('group:staff')
+        if user.staff:
+            principals.append('group:__staff__')
 
-    return additional_principals
+        if request.feature('groups'):
+            group_principals = groups.group_principals(request, user)
+            principals.extend(group_principals)
+
+    return principals
 
 
 def generate_signed_token(request):

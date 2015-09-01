@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.security import Allow, Authenticated
+from pyramid.security import Allow, Deny, Authenticated, Everyone
 
 from .models import Annotation
 
@@ -37,13 +37,14 @@ class Annotations(object):
 
 
 class Root(Resource):
-    __acl__ = [
-        (Allow, Authenticated, 'create'),
-        (Allow, 'group:admin', 'admin'),
-    ]
+    def __acl__(self):
+        return [
+            (Allow, Authenticated, 'create'),
+            (Allow, Everyone, 'search'),
+        ]
 
 
-def create_root(_):
+def create_root(request):
     """
     Returns a new traversal tree root.
     """

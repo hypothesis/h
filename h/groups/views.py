@@ -6,10 +6,9 @@ from pyramid.view import view_config
 from pyramid import renderers
 
 from h.groups import schemas
-from h.groups import models
+from h.api.groups import models
 from h.groups import logic
 from h.accounts import models as accounts_models
-from h import hashids
 from h import i18n
 
 
@@ -91,7 +90,7 @@ def _join(request, group):
     visits the group's URL.
 
     """
-    hashid = hashids.encode(request, 'h.groups', number=group.id)
+    hashid = group.hashid(request.hashids)
     join_url = request.route_url('group_read', hashid=hashid, slug=group.slug)
     template_data = {'group': group, 'join_url': join_url}
     return renderers.render_to_response(
@@ -108,9 +107,8 @@ def read(request):
 
     hashid = request.matchdict["hashid"]
     slug = request.matchdict.get("slug")
-    group_id = hashids.decode(request, 'h.groups', hashid)
 
-    group = models.Group.get_by_id(group_id)
+    group = models.Group.get_by_hashid(request.hashids, hashid)
     if group is None:
         raise exc.HTTPNotFound()
 
@@ -138,8 +136,7 @@ def join(request):
         raise exc.HTTPNotFound()
 
     hashid = request.matchdict["hashid"]
-    group_id = hashids.decode(request, "h.groups", hashid)
-    group = models.Group.get_by_id(group_id)
+    group = models.Group.get_by_hashid(request.hashids, hashid)
 
     if group is None:
         raise exc.HTTPNotFound()
@@ -157,8 +154,6 @@ def join(request):
 
 
 def includeme(config):
-    assert config.registry.settings.get("h.hashids.salt"), (
-        "There needs to be a h.hashids.salt config setting")
     config.add_route('group_create', '/groups/new')
     # Match "/groups/<hashid>/": we redirect to the version with the slug.
     config.add_route('group_read', '/groups/{hashid}/{slug:[^/]*}')

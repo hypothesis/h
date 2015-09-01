@@ -36,14 +36,6 @@ class Group(Base):
         self.creator = creator
         self.members.append(creator)
 
-    @property
-    def slug(self):
-        """A version of this group's name suitable for use in a URL."""
-        return slugify.slugify(self.name)
-
-    def __repr__(self):
-        return '<Group: %s>' % self.slug
-
     @classmethod
     def get_by_id(cls, id_):
         """Return the group with the given id, or None."""
@@ -52,6 +44,31 @@ class Group(Base):
                 cls.id == id_).one()
         except exc.NoResultFound:
             return None
+
+    @classmethod
+    def get_by_hashid(cls, hashids, hashid):
+        """Return the group with the given hashid, or None."""
+        id_ = hashids.decode('h.groups', hashid)
+        return cls.get_by_id(id_)
+
+    @property
+    def slug(self):
+        """A version of this group's name suitable for use in a URL."""
+        return slugify.slugify(self.name)
+
+    def __repr__(self):
+        return '<Group: %s>' % self.slug
+
+    def hashid(self, hashids):
+        """Return a public hashid that uniquely identifies this group."""
+        return hashids.encode('h.groups', self.id)
+
+    def as_dict(self, hashids):
+        """Return a JSON-serializable dict representation of this group."""
+        return {
+            'name': self.name,
+            'id': 'group:{}'.format(self.hashid(hashids)),
+        }
 
 
 USER_GROUP_TABLE = sa.Table(

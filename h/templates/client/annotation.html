@@ -13,6 +13,13 @@
          target="_blank"
          ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
          >{{vm.annotation.user | persona}}</a>
+      <span class="small" ng-if="!vm.isPrivate() && vm.group() && vm.group().url">
+        to
+        <a target="_blank" href="{{vm.group().url}}">
+          <i class="h-icon-group" title="{{vm.group.name}}"></i>
+          {{vm.group().name}}
+        </a>
+      </span>
       <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
       <span ng-show="vm.isPrivate() && !vm.editing"
             title="This annotation is visible only to you.">
@@ -34,6 +41,7 @@
                  ng-model="vm.annotation.permissions"
                  level="vm.privacyLevel"
                  user="{{vm.annotation.user}}"
+                 group="vm.group()"
                  class="dropdown privacy pull-right"
                  name="privacy" />
       </aside>
@@ -115,10 +123,20 @@
 
   <footer class="annotation-footer">
     <div class="small" ng-if="vm.editing">
-      <p ng-show="vm.privacyLevel.text == 'Only Me'">
-        <i class="h-icon-lock"></i> This annotation is visible only to you.</p>
-      <p ng-show="vm.privacyLevel.text == 'Public'">
-        <i class="h-icon-public"></i> This annotation is visible to everyone.</p>
+      <span ng-if="vm.privacyLevel.isPrivate">
+        <i class="h-icon-lock"></i>
+        This annotation will be visible only to you.
+      </span>
+      <span ng-if="!(vm.privacyLevel.isPublic || vm.privacyLevel.isPrivate)">
+        <i class="h-icon-group"></i>
+        This annotation will be visible to everyone in the
+        <strong>{{vm.group().name}}</strong> group.
+      </span>
+      <span ng-if="vm.privacyLevel.isPublic">
+        <i class="h-icon-public"></i>
+        This annotation will be visible to everyone.
+      </span>
+      </p>
     </div>
 
     <div class="form-actions" ng-if="vm.editing" ng-switch="vm.action">

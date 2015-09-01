@@ -29,10 +29,8 @@
            on-clear="search.clear()"></div>
       <!-- / Searchbar -->
 
-      <div class="dropdown group-list"
-           ng-if="auth.user && feature('groups')"
-           group-list=""
-           groups="session.state.groups">
+      <div class="group-list" ng-if="auth.user && feature('groups')">
+        {{ include_raw("h:templates/client/group_list.html") }}
       </div>
 
       <div ng-switch="auth.user">
@@ -96,9 +94,6 @@
 {% block templates %}
   <script type="text/ng-template" id="annotation.html">
     {{ include_raw("h:templates/client/annotation.html") }}
-  </script>
-  <script type="text/ng-template" id="group_list.html">
-    {{ include_raw("h:templates/client/group_list.html") }}
   </script>
   <script type="text/ng-template" id="markdown.html">
     {{ include_raw("h:templates/client/markdown.html") }}

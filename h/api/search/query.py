@@ -3,7 +3,29 @@ from h.api import uri
 from h.api import nipsa
 
 
-def build(request_params, userid=None, search_normalized_uris=False):
+def auth_filter(effective_principals):
+    """Return an Elasticsearch filter for authorized annotations.
+
+    Only annotations that the given effective_principals are authorized to
+    read will pass through this filter.
+
+    """
+    groups = list(effective_principals)
+
+    # We always want annotations with 'group:__world__' in
+    # their read permissions to show up in the search results,
+    # but 'group:__world__' is not in effective_principals for unauthenticed
+    # requests.
+    # FIXME: If public annotations used 'system.Everyone'
+    # instead of 'group:__world__' we wouldn't have to do this.
+    if 'group:__world__' not in groups:
+        groups.insert(0, 'group:__world__')
+
+    return {'terms': {'permissions.read': groups}}
+
+
+def build(request_params, effective_principals, userid=None,
+          search_normalized_uris=False):
     """
     Return an Elasticsearch query dict for the given h search API params.
 
@@ -14,8 +36,9 @@ def build(request_params, userid=None, search_normalized_uris=False):
         h search API
     :type request_params: webob.multidict.NestedMultiDict
 
-    :param userid: the ID of the authorized user (optional, default: None),
-    :type userid: unicode or None
+    :param effective_principals: request.effective_principals
+
+    :param userid: request.authenticated_userid
 
     :param search_normalized_uris: Whether or not to use the "uri" param to
         search against pre-normalized URI fields.
@@ -50,7 +73,7 @@ def build(request_params, userid=None, search_normalized_uris=False):
         }
     }]
 
-    filters = []
+    filters = [auth_filter(effective_principals)]
     matches = []
 
     uri_param = request_params.pop("uri", None)

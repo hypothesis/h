@@ -7,8 +7,8 @@ import logging
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
+from h.api import auth
 from h.api import cors
-from h.api.auth import get_user
 from h.api.events import AnnotationEvent
 from h.api.models import Annotation
 from h.api.resources import Root
@@ -16,9 +16,7 @@ from h.api.resources import Annotations
 from h.api import search as search_lib
 from h.api import logic
 
-
 log = logging.getLogger(__name__)
-
 
 cors_policy = cors.policy(
     allow_headers=(
@@ -82,16 +80,17 @@ def index(context, request):
     }
 
 
-@api_config(context=Root, name='search')
+@api_config(context=Root, name='search', permission='search')
 def search(request):
     """Search the database for annotations matching with the given query."""
     search_normalized_uris = request.feature('search_normalized')
 
     # The search results are filtered for the authenticated user
-    user = get_user(request)
-    results = search_lib.search(request_params=request.params,
-                                user=user,
-                                search_normalized_uris=search_normalized_uris)
+    user = auth.get_user(request)
+    results = search_lib.search(
+        request_params=request.params,
+        effective_principals=request.effective_principals, user=user,
+        search_normalized_uris=search_normalized_uris)
 
     return {
         'total': results['total'],
@@ -129,8 +128,8 @@ def annotations_index(request):
     """
     search_normalized_uris = request.feature('search_normalized')
 
-    user = get_user(request)
-    results = search_lib.index(user=user,
+    user = auth.get_user(request)
+    results = search_lib.index(request.effective_principals, user=user,
                                search_normalized_uris=search_normalized_uris)
 
     return {
@@ -150,10 +149,13 @@ def create(request):
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
 
-    user = get_user(request)
+    user = auth.get_user(request)
+
+    # Validate that the permissions are provided and allowed.
+    auth.validate_permissions(request, fields.get('permissions', {}))
 
     # Create the annotation
-    annotation = logic.create_annotation(fields, user)
+    annotation = logic.create_annotation(fields=fields, user=user)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
@@ -188,17 +190,11 @@ def update(context, request):
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
 
-    # Check user's permissions
-    has_admin_permission = request.has_permission('admin', annotation)
+    # Validate that the permissions are provided and allowed.
+    auth.validate_permissions(request, fields.get('permissions', {}))
 
     # Update and store the annotation
-    try:
-        logic.update_annotation(annotation, fields, has_admin_permission)
-    except RuntimeError as err:
-        return _api_error(
-            request,
-            err.args[0],
-            status_code=err.args[1])
+    logic.update_annotation(annotation, fields)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'update')
@@ -212,16 +208,16 @@ def update(context, request):
 def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context
-    id_ = annotation['id']
-    # Delete the annotation from the database.
-    annotation.delete()
+
+    # Delete the annotation
+    logic.delete_annotation(annotation)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'delete')
 
     # Return a confirmation
     return {
-        'id': id_,
+        'id': annotation['id'],
         'deleted': True,
     }
 

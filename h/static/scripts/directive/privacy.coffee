@@ -3,35 +3,43 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
   VISIBILITY_PUBLIC = 'public'
   VISIBILITY_PRIVATE = 'private'
 
-  levels = [
-    {name: VISIBILITY_PUBLIC, text: 'Public'}
-    {name: VISIBILITY_PRIVATE, text: 'Only Me'}
-  ]
-
-  getLevel = (name) ->
-    for level in levels
-      if level.name == name
-        return level
-    undefined
-
-  isPublic  = (level) -> level == VISIBILITY_PUBLIC
-
   link: (scope, elem, attrs, controller) ->
     return unless controller?
+
+    getLevels = ->
+      [
+        {
+           name: VISIBILITY_PUBLIC,
+           text: scope.group.name,
+           isPublic: scope.group.public,
+        }
+        {
+          name: VISIBILITY_PRIVATE,
+          text: 'Only Me',
+          isPrivate: true,
+        }
+      ]
+
+    getLevel = (name) ->
+      for level in getLevels()
+        if level.name == name
+          return level
+      undefined
 
     controller.$formatters.push (selectedPermissions) ->
       return unless selectedPermissions?
 
-      if permissions.isPublic(selectedPermissions)
-        getLevel(VISIBILITY_PUBLIC)
-      else
+      if permissions.isPrivate(selectedPermissions)
         getLevel(VISIBILITY_PRIVATE)
+      else
+        getLevel(VISIBILITY_PUBLIC)
 
     controller.$parsers.push (privacy) ->
       return unless privacy?
 
-      if isPublic(privacy.name)
+      if privacy.name is VISIBILITY_PUBLIC
         newPermissions = permissions.public()
+        newPermissions.read = [scope.group.id]
       else
         newPermissions = permissions.private()
 
@@ -51,16 +59,21 @@ module.exports = ['localStorage', 'permissions', (localStorage, permissions) ->
 
       scope.level = controller.$viewValue
 
-    scope.levels = levels
     scope.setLevel = (level) ->
       localStorage.setItem VISIBILITY_KEY, level.name
       controller.$setViewValue level
       controller.$render()
-    scope.isPublic = isPublic
+
+    scope.$watch 'group', ->
+      scope.levels = getLevels()
+      level = getLevel(controller.$viewValue.name)
+      controller.$setViewValue(level)
+      controller.$render()
 
   require: '?ngModel'
   restrict: 'E'
   scope:
     level: '='
+    group: '='
   templateUrl: 'privacy.html'
 ]

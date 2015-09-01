@@ -58,7 +58,7 @@ def test_flag_enabled_false_when_admins_true_normal_request(feature_model):
 
 def test_flag_enabled_true_when_admins_true_admin_request(authn_policy,
                                                           feature_model):
-    authn_policy.effective_principals.return_value = ['group:admin']
+    authn_policy.effective_principals.return_value = ['group:__admin__']
     feature_model.get_by_name.return_value.admins = True
     request = DummyRequest()
 
@@ -85,7 +85,7 @@ def test_flag_enabled_false_when_staff_true_normal_request(feature_model):
 def test_flag_enabled_true_when_staff_true_staff_request(authn_policy,
                                                          feature_model):
     # The authorized user is a staff member.
-    authn_policy.effective_principals.return_value = ['group:staff']
+    authn_policy.effective_principals.return_value = ['group:__staff__']
 
     # The feature is enabled for staff.
     feature_model.get_by_name.return_value.staff = True

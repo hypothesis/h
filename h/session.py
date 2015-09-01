@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from pyramid.session import SignedCookieSessionFactory
 
-from h import hashids
 from h import models
 from h.security import derive_key
+from h import groups
 
 
 def model(request):
@@ -25,21 +25,18 @@ def _current_groups(request):
     This list is meant to be returned to the client in the "session" model.
 
     """
-    groups = []
+    current_groups = [
+        {'name': 'Public', 'id': 'group:__world__', 'public': True},
+    ]
     userid = request.authenticated_userid
     if userid is None:
-        return groups
+        return current_groups
     user = models.User.get_by_userid(request.domain, userid)
     if user is None:
-        return groups
+        return current_groups
     for group in user.groups:
-        hid = hashids.encode(request, 'h.groups', group.id)
-        groups.append({
-            'name': group.name,
-            'url': request.route_url(
-                'group_read', hashid=hid, slug=group.slug),
-        })
-    return groups
+        current_groups.append(groups.as_dict(request, group))
+    return current_groups
 
 
 def includeme(config):
