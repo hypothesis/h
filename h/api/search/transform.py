@@ -6,6 +6,7 @@ import copy
 
 from h.api import nipsa
 from h.api import uri
+from h.api import models
 
 
 def prepare(annotation):
@@ -19,6 +20,8 @@ def prepare(annotation):
     # should probably not mutate its argument.
     _normalize_annotation_target_uris(annotation)
 
+    _copy_parent_scopes_into_replies(annotation)
+
     if 'user' in annotation and nipsa.has_nipsa(annotation['user']):
         annotation['nipsa'] = True
 
@@ -31,9 +34,6 @@ def render(annotation):
     or display in the public API.
     """
     data = copy.deepcopy(annotation)
-
-    _filter_target_normalized_uris(data)
-
     return data
 
 
@@ -49,18 +49,26 @@ def _normalize_annotation_target_uris(annotation):
             continue
         if not isinstance(target['source'], basestring):
             continue
-        target['source_normalized'] = uri.normalize(target['source'])
+        target['scope'] = [uri.normalize(target['source'])]
 
 
-def _filter_target_normalized_uris(data):
-    """Remove 'source_normalized' keys from targets, where present."""
-    if 'target' not in data:
+def _copy_parent_scopes_into_replies(annotation):
+    """If this annotation is a reply then copy its parents scopes into it.
+
+    If the given annotation is a reply then we find the reply's parent
+    annotation and copy the parents' targets into the reply, _but_ we only
+    copy the 'scope' key from each target not the rest of the dict.
+
+    """
+    references = annotation.get('references')
+
+    if not references:
+        return  # This annotation is not a reply.
+
+    parent = models.Annotation.fetch(references[0])
+    targets = parent.get('target', [])
+    if not isinstance(targets, list):
         return
-    if not isinstance(data['target'], list):
-        return
-    for target in data['target']:
-        if not isinstance(data, dict):
-            continue
-        if 'source_normalized' not in target:
-            continue
-        del target['source_normalized']
+    # Deliberately overwrite any existing target in the reply annotation.
+    annotation['target'] = [{'scope': target['scope']} for target in targets
+                            if isinstance(target, dict) and 'scope' in target]
