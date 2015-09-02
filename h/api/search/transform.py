@@ -31,9 +31,6 @@ def render(annotation):
     or display in the public API.
     """
     data = copy.deepcopy(annotation)
-
-    _filter_target_normalized_uris(data)
-
     return data
 
 
@@ -49,18 +46,4 @@ def _normalize_annotation_target_uris(annotation):
             continue
         if not isinstance(target['source'], basestring):
             continue
-        target['source_normalized'] = uri.normalize(target['source'])
-
-
-def _filter_target_normalized_uris(data):
-    """Remove 'source_normalized' keys from targets, where present."""
-    if 'target' not in data:
-        return
-    if not isinstance(data['target'], list):
-        return
-    for target in data['target']:
-        if not isinstance(data, dict):
-            continue
-        if 'source_normalized' not in target:
-            continue
-        del target['source_normalized']
+        target['scope'] = [uri.normalize(target['source'])]

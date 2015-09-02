@@ -285,11 +285,11 @@ def test_build_for_uri_with_multiple_representations(uri):
 @mock.patch("h.api.search.query.uri")
 def test_build_for_uri_normalized(uri):
     """
-    Uses a term filter against target.source_normalized to filter for URI.
+    Uses a term filter against target.scope to filter for URI.
 
     When querying for a URI with search_normalized_uris set to true, build
     should use a term filter against the normalized version of the target
-    source field.
+    source field, which we store in target.scope.
 
     It should expand the input URI before searching, and normalize the results
     of the expansion.
@@ -308,8 +308,8 @@ def test_build_for_uri_normalized(uri):
     uri.expand.assert_called_with("http://example.com/")
 
     expected_filter = {"or": [
-        {"term": {"target.source_normalized": "http://giraffes.com"}},
-        {"term": {"target.source_normalized": "https://elephants.com"}},
+        {"term": {"target.scope": "http://giraffes.com"}},
+        {"term": {"target.scope": "https://elephants.com"}},
     ]}
     assert expected_filter in q["query"]["filtered"]["filter"]["and"]
 
