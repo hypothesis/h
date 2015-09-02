@@ -116,7 +116,7 @@ def _match_clause_for_uri(uristr):
 def _term_clause_for_uri(uristr):
     """Return an Elasticsearch term clause for the given URI."""
     uristrs = uri.expand(uristr)
-    filters = [{"term": {"target.source_normalized": uri.normalize(u)}}
+    filters = [{"term": {"target.scope": uri.normalize(u)}}
                for u in uristrs]
 
     if len(filters) == 1:
