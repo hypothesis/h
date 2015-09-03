@@ -55,10 +55,9 @@ def _normalize_annotation_target_uris(annotation):
 def _copy_parent_scopes_into_replies(annotation):
     """If this annotation is a reply then copy its parents scopes into it.
 
-    If the given annotation is a reply then we find the reply's parent
-    annotation and copy the parents' targets into the reply, _but_ we only
-    copy the 'scope' key from each target not the rest of the dict.
-
+    If the given annotation is a reply then we find the thread root
+    annotation and copy its targets into the reply, _but_ we only
+    copy the 'scope' key from each target and not the rest of the dict.
     """
     references = annotation.get('references')
 
@@ -66,9 +65,14 @@ def _copy_parent_scopes_into_replies(annotation):
         return  # This annotation is not a reply.
 
     parent = models.Annotation.fetch(references[0])
+
+    if not parent:
+        return  # Nothing can be done.
+
     targets = parent.get('target', [])
     if not isinstance(targets, list):
         return
+
     # Deliberately overwrite any existing target in the reply annotation.
     annotation['target'] = [{'scope': target['scope']} for target in targets
                             if isinstance(target, dict) and 'scope' in target]
