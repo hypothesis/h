@@ -93,6 +93,20 @@ describe 'StreamController', ->
     assert.isObject(fakeThreading.root)
     assert.strictEqual(fakeThreading.root, $scope.threadRoot)
 
+  it 'passes the annotations and replies from search to loadAnnotations()', ->
+    fakeStore.SearchResource.get = (query, func) ->
+      func({
+        'rows': ['annotation_1', 'annotation_2']
+        'replies': ['reply_1', 'reply_2', 'reply_3']
+      })
+
+    createController()
+
+    assert fakeAnnotationMapper.loadAnnotations.calledOnce
+    assert fakeAnnotationMapper.loadAnnotations.calledWith(
+      ['annotation_1', 'annotation_2', 'reply_1', 'reply_2', 'reply_3']
+    )
+
   describe 'on $routeChangeSuccess', ->
 
     it 'disables page search', ->

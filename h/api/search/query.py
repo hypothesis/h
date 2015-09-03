@@ -10,6 +10,9 @@ def build(request_params, userid=None, search_normalized_uris=False):
     Translates the HTTP request params accepted by the h search API into an
     Elasticsearch query dict.
 
+    Always inserts a filter so that only top-level annotations will be returned
+    by Elasticsearch, never reply annotations.
+
     :param request_params: the HTTP request params that were posted to the
         h search API
     :type request_params: webob.multidict.NestedMultiDict
@@ -24,6 +27,7 @@ def build(request_params, userid=None, search_normalized_uris=False):
     :returns: an Elasticsearch query dict corresponding to the given h search
         API params
     :rtype: dict
+
     """
     # NestedMultiDict objects are read-only, so we need to copy to make it
     # modifiable.
@@ -50,7 +54,7 @@ def build(request_params, userid=None, search_normalized_uris=False):
         }
     }]
 
-    filters = []
+    filters = [{'missing': {'field': 'references'}}]
     matches = []
 
     uri_param = request_params.pop("uri", None)

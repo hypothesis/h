@@ -25,11 +25,15 @@ describe "AnnotationViewerController", ->
     locals = {
       $location: $location or {}
       $routeParams: $routeParams or {id: "test_annotation_id"}
-      $scope: $scope or {search: {}}
+      $scope: $scope or {
+        search: {}
+        threading: {
+          getContainer: ->
+        }
+      }
       streamer: streamer or {send: ->}
       store: store or {
-        AnnotationResource: {read: sinon.spy()},
-        SearchResource: {get: ->}}
+        SearchResource: {get: sinon.spy()}}
       streamFilter: streamFilter or {
         setMatchPolicyIncludeAny: -> {addClause: -> {addClause: ->}}
         getFilter: ->
@@ -40,6 +44,31 @@ describe "AnnotationViewerController", ->
       "AnnotationViewerController", locals)
     return locals
 
-  it "calls the annotation API to get the annotation", ->
+  it "calls the search API to get the annotation and its replies", ->
     {store} = createAnnotationViewerController({})
-    assert store.AnnotationResource.read.args[0][0].id == "test_annotation_id"
+    assert store.SearchResource.get.calledOnce
+    assert store.SearchResource.get.calledWith(
+      {_id: "test_annotation_id"})
+
+  it "passes the annotations and replies from search into loadAnnotations", ->
+    {annotationMapper} = createAnnotationViewerController({
+      store: {
+        SearchResource: {
+          # SearchResource.get(id, func) takes an annotation id and a function
+          # that it should call with the search result. Our mock .get() here
+          # just immediately calls the function with some fake results.
+          get: (id, func) ->
+            func(
+              {
+                # In production these would be annotation objects, not strings.
+                rows: ['annotation_1', 'annotation_2']
+                replies: ['reply_1', 'reply_2', 'reply_3']
+              }
+            )
+        }
+      }
+    })
+
+    assert annotationMapper.loadAnnotations.calledWith(
+        ['annotation_1', 'annotation_2', 'reply_1', 'reply_2', 'reply_3']
+    ), "It should pass all the annotations and replies to loadAnnotations()"

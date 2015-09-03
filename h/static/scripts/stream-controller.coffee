@@ -21,9 +21,9 @@ module.exports = class StreamController
       query = angular.extend(options, searchParams)
       store.SearchResource.get(query, load)
 
-    load = ({rows}) ->
+    load = ({rows, replies}) ->
         offset += rows.length
-        annotationMapper.loadAnnotations(rows)
+        annotationMapper.loadAnnotations(rows.concat(replies))
 
     # Disable the thread filter (client-side search)
     $scope.$on '$routeChangeSuccess', ->

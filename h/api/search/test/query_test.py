@@ -378,13 +378,23 @@ def test_build_with_evil_arguments():
 
 
 @mock.patch("h.api.nipsa.nipsa_filter")
+def test_build_returns_replies_filter(_):
+    """The query should inclue a filter for top-level annotations only."""
+    q = query.build(multidict.NestedMultiDict())
+
+    assert q["query"]["filtered"]["filter"]["and"][0] == {
+        'missing': {'field': 'references'}
+    }
+
+
+@mock.patch("h.api.nipsa.nipsa_filter")
 def test_build_returns_nipsa_filter(nipsa_filter):
     """_build() returns a nipsa-filtered query."""
     nipsa_filter.return_value = "foobar!"
 
     q = query.build(multidict.NestedMultiDict())
 
-    assert q["query"]["filtered"]["filter"] == {"and": ["foobar!"]}
+    assert "foobar!" in q["query"]["filtered"]["filter"]["and"]
 
 
 @mock.patch("h.api.nipsa.nipsa_filter")

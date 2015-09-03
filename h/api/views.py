@@ -96,6 +96,7 @@ def search(request):
     return {
         'total': results['total'],
         'rows': [search_lib.render(a) for a in results['rows']],
+        'replies': [search_lib.render(a) for a in results['replies']],
     }
 
 
