@@ -157,5 +157,3 @@ module.exports = angular.module('h', [
 .run(setupCrossFrame)
 .run(setupStreamer)
 .run(setupHost)
-
-require('./group-list-controller')
