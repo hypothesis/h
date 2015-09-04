@@ -64,13 +64,13 @@ describe 'h:permissions', ->
         assert.isFalse(permissions.isPublic(permission))
 
     describe 'isPrivate', ->
-      it 'returns true if the given user is in the permissions', ->
-        user = 'acct:angry@birds.com'
+      it 'returns true if only the current user is in the permissions', ->
+        user = 'acct:flash@gordon'
         permission = {read: [user]}
         assert.isTrue(permissions.isPrivate(permission, user))
 
       it 'returns false if another user is in the permissions', ->
-        users = ['acct:angry@birds.com', 'acct:angry@joe.com']
+        users = ['acct:flash@gordon', 'acct:angry@joe.com']
         permission = {read: users}
         assert.isFalse(permissions.isPrivate(permission, 'acct:angry@birds.com'))
 

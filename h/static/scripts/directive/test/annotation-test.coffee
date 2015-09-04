@@ -14,6 +14,7 @@ describe 'annotation', ->
   fakeAnnotationUI = null
   fakeDrafts = null
   fakeFlash = null
+  fakeGroupService = null
   fakeMomentFilter = null
   fakePermissions = null
   fakePersonaFilter = null
@@ -81,7 +82,7 @@ describe 'annotation', ->
 
     fakeGroupService = {
       focusedGroup: -> {}
-      getGroup: ->
+      getGroup: sinon.stub()
     }
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
@@ -160,15 +161,17 @@ describe 'annotation', ->
 
     it 'makes the annotation public if the parent is public', ->
       reply = {}
+      annotation.permissions.read = ['everybody']
       fakeAnnotationMapper.createAnnotation.returns(reply)
-      fakePermissions.isPublic.returns(true)
+      fakePermissions.isPrivate.returns(false)
+      fakeGroupService.getGroup.withArgs('everybody').returns('everybody')
       controller.reply()
       assert.deepEqual(reply.permissions, {read: ['everybody']})
 
     it 'does not add the world readable principal if the parent is private', ->
       reply = {}
       fakeAnnotationMapper.createAnnotation.returns(reply)
-      fakePermissions.isPublic.returns(false)
+      fakePermissions.isPrivate.returns(true)
       controller.reply()
       assert.deepEqual(reply.permissions, {read: ['justme']})
 
@@ -626,37 +629,6 @@ describe("AnnotationController", ->
   describe("createAnnotationDirective", ->
     it("creates the directive without crashing", ->
       createAnnotationDirective({})
-    )
-  )
-
-  describe("save", ->
-    it("Passes group:<id> to the server when saving a new annotation", ->
-      annotation = {
-        # The annotation needs to have a user or the controller will refuse to
-        # save it.
-        user: 'acct:fred@hypothes.is'
-        # The annotation needs to have some text or it won't validate.
-        text: 'foo'
-      }
-      # Stub $create so we can spy on what gets sent to the server.
-      annotation.$create = sinon.stub().returns(Promise.resolve())
-
-      group = {id: "test-id"}
-
-      {controller} = createAnnotationDirective({
-        annotation: annotation
-        # Mock the group service, pretend that there's a group with id
-        # "test-group" focused.
-        group: {
-          focusedGroup: -> group
-          getGroup: ->
-        }
-      })
-      controller.action = 'create'
-
-      controller.save().then(->
-        assert annotation.$create.lastCall.thisValue.group == "test-id"
-      )
     )
   )
 
