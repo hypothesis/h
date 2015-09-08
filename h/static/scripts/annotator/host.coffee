@@ -68,6 +68,11 @@ module.exports = class Host extends Guest
     @frame.css 'margin-left': "#{-1 * @frame.width()}px"
     @frame.removeClass 'annotator-collapsed'
 
+    if typeof @options.showFrameCallback == 'function'
+      # Only callback once.
+      if not @toolbar.find('[name=sidebar-toggle]').hasClass('h-icon-chevron-right')
+        @options.showFrameCallback()
+
     if @toolbar?
       @toolbar.find('[name=sidebar-toggle]')
       .removeClass('h-icon-chevron-left')
@@ -77,6 +82,11 @@ module.exports = class Host extends Guest
     @frame.css 'margin-left': ''
     @frame.removeClass 'annotator-no-transition'
     @frame.addClass 'annotator-collapsed'
+
+    if typeof @options.hideFrameCallback == 'function'
+      # Only callback once.
+      if not @toolbar.find('[name=sidebar-toggle]').hasClass('h-icon-chevron-left')
+        @options.hideFrameCallback()
 
     if @toolbar?
       @toolbar.find('[name=sidebar-toggle]')
