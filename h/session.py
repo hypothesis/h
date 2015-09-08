@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from pyramid.session import SignedCookieSessionFactory
 
-from h import hashids
 from h import models
 from h.security import derive_key
 
@@ -33,11 +32,11 @@ def _current_groups(request):
     if user is None:
         return groups
     for group in user.groups:
-        hid = hashids.encode(request, 'h.groups', group.id)
         groups.append({
             'name': group.name,
-            'url': request.route_url(
-                'group_read', hashid=hid, slug=group.slug),
+            'url': request.route_url('group_read',
+                                     hashid=group.hashid,
+                                     slug=group.slug),
         })
     return groups
 

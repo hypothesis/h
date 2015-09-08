@@ -7,9 +7,7 @@ from pyramid import renderers
 
 from h.groups import schemas
 from h.groups import models
-from h.groups import logic
 from h.accounts import models as accounts_models
-from h import hashids
 from h import i18n
 
 
@@ -54,7 +52,8 @@ def create(request):
     # We need to flush the db session here so that group.id will be generated.
     request.db.flush()
 
-    return exc.HTTPSeeOther(logic.url_for_group(request, group))
+    url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
+    return exc.HTTPSeeOther(url)
 
 
 def _login_to_join(request, group):
@@ -77,8 +76,8 @@ def _read_group(request, group):
     group visits the group's URL.
 
     """
-    template_data = {
-        'group': group, 'group_url': logic.url_for_group(request, group)}
+    url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
+    template_data = {'group': group, 'group_url': url}
     return renderers.render_to_response(
         renderer_name='h:groups/templates/read.html.jinja2',
         value=template_data, request=request)
@@ -91,9 +90,8 @@ def _join(request, group):
     visits the group's URL.
 
     """
-    hashid = hashids.encode(request, 'h.groups', number=group.id)
-    join_url = request.route_url('group_read', hashid=hashid, slug=group.slug)
-    template_data = {'group': group, 'join_url': join_url}
+    url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
+    template_data = {'group': group, 'join_url': url}
     return renderers.render_to_response(
         renderer_name='h:groups/templates/join.html.jinja2',
         value=template_data, request=request)
@@ -108,15 +106,16 @@ def read(request):
 
     hashid = request.matchdict["hashid"]
     slug = request.matchdict.get("slug")
-    group_id = hashids.decode(request, 'h.groups', hashid)
 
-    group = models.Group.get_by_id(group_id)
+    group = models.Group.get_by_hashid(hashid)
     if group is None:
         raise exc.HTTPNotFound()
 
     if slug is None or slug != group.slug:
-        return exc.HTTPMovedPermanently(
-            location=logic.url_for_group(request, group))
+        url = request.route_url('group_read',
+                                hashid=group.hashid,
+                                slug=group.slug)
+        return exc.HTTPMovedPermanently(url)
 
     if not request.authenticated_userid:
         return _login_to_join(request, group)
@@ -138,8 +137,7 @@ def join(request):
         raise exc.HTTPNotFound()
 
     hashid = request.matchdict["hashid"]
-    group_id = hashids.decode(request, "h.groups", hashid)
-    group = models.Group.get_by_id(group_id)
+    group = models.Group.get_by_hashid(hashid)
 
     if group is None:
         raise exc.HTTPNotFound()
@@ -153,12 +151,11 @@ def join(request):
         "You've joined the {name} group.").format(name=group.name),
         'success')
 
-    return exc.HTTPSeeOther(logic.url_for_group(request, group))
+    url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
+    return exc.HTTPSeeOther(url)
 
 
 def includeme(config):
-    assert config.registry.settings.get("h.hashids.salt"), (
-        "There needs to be a h.hashids.salt config setting")
     config.add_route('group_create', '/groups/new')
     # Match "/groups/<hashid>/": we redirect to the version with the slug.
     config.add_route('group_read', '/groups/{hashid}/{slug:[^/]*}')
