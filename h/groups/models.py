@@ -4,6 +4,7 @@ from sqlalchemy.orm import exc
 import slugify
 
 from h.db import Base
+from h import hashids
 
 
 class Group(Base):
@@ -37,12 +38,22 @@ class Group(Base):
         self.members.append(creator)
 
     @property
+    def hashid(self):
+        """A mildly obfuscated identifier for this group"""
+        return hashids.encode('h.groups', self.id)
+
+    @property
     def slug(self):
         """A version of this group's name suitable for use in a URL."""
         return slugify.slugify(self.name)
 
     def __repr__(self):
         return '<Group: %s>' % self.slug
+
+    @classmethod
+    def get_by_hashid(cls, hashid):
+        """Return the group with the given hashid, or None."""
+        return cls.get_by_id(hashids.decode_one('h.groups', hashid))
 
     @classmethod
     def get_by_id(cls, id_):
