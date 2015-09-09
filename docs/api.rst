@@ -84,6 +84,11 @@ search
 
    **Example response**:
 
+   Top-level annotations (but not replies) that match the search query are
+   returned in the "rows" field. The "total" field counts the number of these
+   top-level annotations. The "replies" field always contains all of the reply
+   annotations to the top-level annotations in "rows".
+
    .. sourcecode:: http
 
       HTTP/1.1 200 OK
@@ -104,25 +109,28 @@ search
                   "user": "acct:gluejar@hypothes.is"
               }
           ],
-          "total": 1
+          "total": 1,
+          "replies": [
+              {...}
+          ]
       }
 
-   :query limit: The maximum number of annotations to return, for example:
-       ``/api/search?limit=30``. (Default: 20)
+   :query limit: The maximum number of top-level annotations to return in
+       "rows", for example: ``/api/search?limit=30``. (Default: 20)
 
-   :query offset: The minimum number of initial annotations to skip. This is
-       used for pagination. For example if there are 65 annotations matching
-       our search query and we're retrieving up to 30 annotations at a time,
-       then to retrieve the last 5 do: ``/api/search?limit=30&offset=60``.
-       (Default: 0)
+   :query offset: The minimum number of initial top-level annotations to skip.
+       This is used for pagination. For example if there are 65 annotations
+       matching our search query and we're retrieving up to 30 annotations at a
+       time, then to retrieve the last 5 do:
+       ``/api/search?limit=30&offset=60``.  (Default: 0)
 
-   :query sort: Specify which field the annotations should be sorted by. For
-       example to sort annotations by the name of the user that created them,
-       do: ``/api/search?sort=user`` (default: updated)
+   :query sort: Specify which field the top-level annotations should be sorted
+       by. For example to sort annotations by the name of the user that created
+       them, do: ``/api/search?sort=user`` (default: updated)
 
-   :query order: Specify which order (ascending or descending) the annotations
-       should be sorted in. For example to sort annotations in ascending
-       order of created time (i.e. oldest annotations first) do:
+   :query order: Specify which order (ascending or descending) the top-level
+       annotations should be sorted in. For example to sort annotations in
+       ascending order of created time (i.e. oldest annotations first) do:
        ``/api/search?sort=created&order=asc``. (Default: desc)
 
    :query uri: Search for annotations of a particular URI, for example

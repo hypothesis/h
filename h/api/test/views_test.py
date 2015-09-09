@@ -102,7 +102,8 @@ def test_search_returns_total(search_lib):
     search_lib.search.return_value = {
         'total': 3,
         # In production these would be annotation dicts, not strings.
-        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+        'rows': ['annotation_1', 'annotation_2', 'annotation_3'],
+        'replies': []
     }
 
     response_data = views.search(mock.Mock())
@@ -121,7 +122,8 @@ def test_search_returns_rendered_annotations(search_lib):
     search_lib.search.return_value = {
         'total': 3,
         # In production these would be annotation dicts, not strings.
-        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+        'rows': ['annotation_1', 'annotation_2', 'annotation_3'],
+        'replies': []
     }
     # Our mock render function just appends '_rendered' onto our mock
     # annotation strings.
@@ -132,6 +134,30 @@ def test_search_returns_rendered_annotations(search_lib):
     assert response_data['rows'] == [
         'annotation_1_rendered', 'annotation_2_rendered',
         'annotation_3_rendered']
+
+
+@search_fixtures
+def test_search_returns_rendered_replies(search_lib):
+    """It should return the rendered reply annotations.
+
+    It should pass the reply annotations from search_lib.search() through
+    search_lib.render() and return the results.
+
+    """
+    search_lib.search.return_value = {
+        'total': 3,
+        # In production these would be annotation dicts, not strings.
+        'rows': [],
+        'replies': ['reply_1', 'reply_2', 'reply_3']
+    }
+    # Our mock render function just appends '_rendered' onto our mock
+    # annotation strings.
+    search_lib.render.side_effect = lambda annotation: annotation + '_rendered'
+
+    response_data = views.search(mock.Mock())
+
+    assert response_data['replies'] == [
+        'reply_1_rendered', 'reply_2_rendered', 'reply_3_rendered']
 
 
 def test_access_token_returns_create_token_response():

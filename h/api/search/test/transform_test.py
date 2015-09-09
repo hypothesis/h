@@ -35,37 +35,6 @@ def test_prepare_adds_scope_field(ann_in, ann_out, uri_normalize):
 
 
 @mock.patch('h.api.search.transform.models')
-def test_prepare_copies_parents_scopes_into_replies(models):
-    parent_annotation = {
-        'id': 'parent_annotation_id',
-        'target': [{'scope': 'https://example.com/annotated_article'}]
-    }
-    reply = {'references': [parent_annotation['id'], 'some other id']}
-    models.Annotation.fetch.return_value = parent_annotation
-
-    transform.prepare(reply)
-
-    assert reply['target'] == parent_annotation['target']
-
-
-@mock.patch('h.api.search.transform.models')
-def test_prepare_overwrites_existing_targets_in_replies(models):
-    parent_annotation = {
-        'id': 'parent_annotation_id',
-        'target': [{'scope': 'https://example.com/annotated_article'}]
-    }
-    reply = {
-        'references': [parent_annotation['id'], 'some other id'],
-        'target': ['this should be overwritten']
-    }
-    models.Annotation.fetch.return_value = parent_annotation
-
-    transform.prepare(reply)
-
-    assert reply['target'] == parent_annotation['target']
-
-
-@mock.patch('h.api.search.transform.models')
 def test_prepare_does_nothing_if_parents_target_is_not_a_list(models):
     """It should do nothing to replies if the parent's target isn't a list.
 
@@ -86,65 +55,6 @@ def test_prepare_does_nothing_if_parents_target_is_not_a_list(models):
     transform.prepare(reply)
 
     assert reply['target'] == mock.sentinel.target
-
-
-@mock.patch('h.api.search.transform.models')
-def test_prepare_does_not_copy_other_keys_from_targets(models):
-    """Only the parent's scope should be copied into replies.
-
-    Not any other keys that the parent's target might have.
-
-    """
-    parent_annotation = {
-        'id': 'parent_annotation_id',
-        'target': [{
-            'scope': 'https://example.com/annotated_article',
-            'foo': 'bar',
-            'selector': {}
-        }]
-    }
-    reply = {'references': [parent_annotation['id'], 'some other id']}
-    models.Annotation.fetch.return_value = parent_annotation
-
-    transform.prepare(reply)
-
-    assert 'foo' not in reply['target']
-    assert 'selector' not in reply['target']
-
-
-@mock.patch('h.api.search.transform.models')
-def test_prepare_does_not_copy_targets_that_are_not_dicts(models):
-    """Parent's targets that aren't dicts shouldn't be copied into replies."""
-    parent_annotation = {
-        'id': 'parent_annotation_id',
-        'target': ['not a dict', None, ['not', 'a', 'dict']]
-    }
-    reply = {'references': [parent_annotation['id'], 'some other id']}
-    models.Annotation.fetch.return_value = parent_annotation
-
-    transform.prepare(reply)
-
-    assert reply['target'] == []
-
-
-@mock.patch('h.api.search.transform.models')
-def test_prepare_does_not_copy_targets_with_no_scope(models):
-    """Parent's targets with no 'scope' should not be copied into replies."""
-    parent_annotation = {
-        'id': 'parent_annotation_id',
-        # Target has no 'scope' key.
-        'target': [{
-            'foo': 'bar',
-            'selector': {}
-        }]
-    }
-    reply = {'references': [parent_annotation['id'], 'some other id']}
-    models.Annotation.fetch.return_value = parent_annotation
-
-    transform.prepare(reply)
-
-    assert reply['target'] == []
-
 
 
 @pytest.mark.parametrize("ann,nipsa", [

@@ -29,7 +29,7 @@ module.exports = class WidgetController
         if offset < total
           _loadAnnotationsFrom query, offset
 
-        annotationMapper.loadAnnotations(results.rows)
+        annotationMapper.loadAnnotations(results.rows.concat(results.replies))
 
     loadAnnotations = (frames) ->
       for f in frames

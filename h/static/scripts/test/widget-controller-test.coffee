@@ -37,6 +37,7 @@ describe 'WidgetController', ->
           result =
             total: 100
             rows: [offset..offset+limit-1]
+            replies: []
 
           callback result
     }
@@ -80,3 +81,17 @@ describe 'WidgetController', ->
       assert.calledWith(loadSpy, [40..59])
       assert.calledWith(loadSpy, [60..79])
       assert.calledWith(loadSpy, [80..99])
+
+    it 'passes annotations and replies from search to loadAnnotations()', ->
+      fakeStore.SearchResource.get = (query, callback) ->
+        callback({
+          rows: ['annotation_1', 'annotation_2']
+          replies: ['reply_1', 'reply_2', 'reply_3']
+        })
+      fakeCrossFrame.frames.push({uri: 'http://example.com'})
+      $scope.$digest()
+
+      assert fakeAnnotationMapper.loadAnnotations.calledOnce
+      assert fakeAnnotationMapper.loadAnnotations.calledWith(
+        ['annotation_1', 'annotation_2', 'reply_1', 'reply_2', 'reply_3']
+      )

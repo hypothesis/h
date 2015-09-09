@@ -25,9 +25,15 @@ def search(request_params, user=None, search_normalized_uris=False):
         search against pre-normalized URI fields.
     :type search_normalized_uris: bool
 
-    :returns: a dict with keys "rows" (the list of matching annotations, as
-        dicts) and "total" (the number of matching annotations, an int)
+    :returns: a dict with keys:
+        - "rows": The list of matching annotations, as dicts.
+                  Note: only top-level annotations are returned here, not
+                  reply annotations.
+        - "total": The number of matching top-level annotations, an int.
+        - "replies": The list of all reply annotations to the matching
+                     top-level annotations, as dicts.
     :rtype: dict
+
     """
     userid = user.id if user else None
     log.debug("Searching with user=%s, for uri=%s",
@@ -38,11 +44,27 @@ def search(request_params, user=None, search_normalized_uris=False):
                        search_normalized_uris=search_normalized_uris)
     results = models.Annotation.search_raw(body, user=user, raw_result=True)
 
-    total = results['hits']['total']
-    docs = results['hits']['hits']
-    rows = [models.Annotation(d['_source'], id=d['_id']) for d in docs]
+    ids = [h['_id'] for h in results['hits']['hits']]
+    replies = models.Annotation.search_raw(
+        {
+            'query': {
+                'terms': {'references': ids}
+            },
+            'size': 10000,
+        }, user=user, raw_result=True)
 
-    return {"rows": rows, "total": total}
+    if len(replies['hits']['hits']) < replies['hits']['total']:
+        log.warn("The number of reply annotations exceeded the page size of "
+                 "the Elasticsearch query. We currently don't handle this, "
+                 "our search API doesn't support pagination of the reply set.")
+
+    total = results['hits']['total']
+    rows = [models.Annotation(hit['_source'], id=hit['_id'])
+            for hit in results['hits']['hits']]
+    replies = [models.Annotation(hit['_source'], id=hit['_id'])
+               for hit in replies['hits']['hits']]
+
+    return {"rows": rows, "total": total, "replies": replies}
 
 
 def index(user=None, search_normalized_uris=False):
