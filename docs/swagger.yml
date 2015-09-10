@@ -23,14 +23,25 @@ paths:
           description: Describes the API
           schema:
             type: object
-            required:
-              - message
-              - links
             properties:
               message:
                 type: string
               links:
                 type: object
+                properties:
+                  search:
+                    $ref: '#/definitions/Endpoint'
+                  annotation:
+                    type: object
+                    properties:
+                      read:
+                        $ref: '#/definitions/Endpoint'
+                      create:
+                        $ref: '#/definitions/Endpoint'
+                      update:
+                        $ref: '#/definitions/Endpoint'
+                      delete:
+                        $ref: '#/definitions/Endpoint'
   /search:
     get:
       summary: Basic search API
@@ -58,12 +69,27 @@ paths:
                 items:
                   $ref: '#/definitions/Annotation'
 definitions:
+  Endpoint:
+    type: object
+    required:
+     - url
+     - method
+    properties:
+      url:
+        type: string
+        description: URL of API endpoint
+      method:
+        type: string
+        description: HTTP Method name
+      desc:
+        type: string
+        description: Description of this endpoint's purpose.
   Annotation:
+    type: object
     required:
      - id
-     - uri
-     - target
      - user
+     - url
     properties:
       id:
         type: string
