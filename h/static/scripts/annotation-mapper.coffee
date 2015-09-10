@@ -4,7 +4,26 @@ module.exports = [
   ($rootScope, threading, store) ->
     setupAnnotation: (ann) -> ann
 
-    loadAnnotations: (annotations) ->
+    ###*
+    # @ngdoc function
+    #
+    # @name annotationMapper.loadAnnotations
+    #
+    # @description Load some annotations and replies into the current page
+    #   context.
+    #
+    # @param {array} annotations The array of annotation objects to load.
+    # @param {array} replies An array of all replies to the given annotations.
+    #
+    # @returns nothing
+    #
+    ###
+    loadAnnotations: (annotations, replies=[]) ->
+      # Pass both the annotations and all of the replies to those annotations
+      # into the threading code as one concatenated list. The threading code
+      # will arrange these into nested threads for display.
+      annotations = annotations.concat(replies)
+
       annotations = for annotation in annotations
         container = threading.idTable[annotation.id]
         if container?.message
