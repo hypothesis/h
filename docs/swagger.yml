@@ -60,14 +60,30 @@ paths:
         200:
           description: An array of annotations
           schema:
-            type: object
-            properties:
-              total:
-                type: number
-              rows:
-                type: array
-                items:
-                  $ref: '#/definitions/Annotation'
+            $ref: '#/definitions/AnnotationList'
+  /annotations:
+    get:
+      summary: Latest Annotations
+      tags:
+       - Annotations
+      responses:
+        200:
+          description: An array of annotations
+          schema:
+            $ref: '#/definitions/AnnotationList'
+    post:
+      summary: Create a new annotation
+      tags:
+       - Annotations
+      parameters:
+       - name: annotation
+         in: 'body'
+         required: true
+         schema:
+           $ref: '#/definitions/Annotation'
+      responses:
+        201:
+          description: An annotation has been created.
 definitions:
   Endpoint:
     type: object
@@ -89,7 +105,7 @@ definitions:
     required:
      - id
      - user
-     - url
+     - uri
     properties:
       id:
         type: string
@@ -129,3 +145,12 @@ definitions:
         type: string
       updated:
         type: string
+  AnnotationList:
+    type: object
+    properties:
+      total:
+        type: number
+      rows:
+        type: array
+        items:
+          $ref: '#/definitions/Annotation'
