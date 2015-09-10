@@ -43,16 +43,9 @@ configureRoutes = ['$routeProvider', ($routeProvider) ->
 
 
 configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
-  # Configure CSP for templates
-  # XXX: IE workaround for the lack of document.baseURI property
-  baseURI = document.baseURI
-  if not baseURI
-    baseTags = document.getElementsByTagName "base"
-    baseURI = if baseTags.length then baseTags[0].href else document.URL
-
   # Explicitly whitelist '.html' paths adjacent to application base URI
   # TODO: move all front-end templates into their own directory for safety
-  basePattern = baseURI.replace /\/[^\/]*$/, '/**.html'
+  basePattern = new URL('**.html', baseURI).href
   $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
 ]
 
