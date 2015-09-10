@@ -1,0 +1,156 @@
+# this is an example of the Uber API
+# as a demonstration of an API spec in YAML
+swagger: '2.0'
+info:
+  title: Hypothes.is API
+  description: Annotation storage for the Hypothes.is service
+  version: "0.7.2"
+# the domain of the service
+host: hypothes.is
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+paths:
+  /:
+    get:
+      summary: API Description
+      responses:
+        200:
+          description: Describes the API
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              links:
+                type: object
+                properties:
+                  search:
+                    $ref: '#/definitions/Endpoint'
+                  annotation:
+                    type: object
+                    properties:
+                      read:
+                        $ref: '#/definitions/Endpoint'
+                      create:
+                        $ref: '#/definitions/Endpoint'
+                      update:
+                        $ref: '#/definitions/Endpoint'
+                      delete:
+                        $ref: '#/definitions/Endpoint'
+  /search:
+    get:
+      summary: Basic search API
+      description: |
+        search for stuff
+      parameters:
+        - name: Query
+          in: query
+          description: Search for strings
+          required: true
+          type: string
+      tags:
+        - Search
+        - Annotations
+      responses:
+        200:
+          description: An array of annotations
+          schema:
+            $ref: '#/definitions/AnnotationList'
+  /annotations:
+    get:
+      summary: Latest Annotations
+      tags:
+       - Annotations
+      responses:
+        200:
+          description: An array of annotations
+          schema:
+            $ref: '#/definitions/AnnotationList'
+    post:
+      summary: Create a new annotation
+      tags:
+       - Annotations
+      parameters:
+       - name: annotation
+         in: 'body'
+         required: true
+         schema:
+           $ref: '#/definitions/Annotation'
+      responses:
+        201:
+          description: An annotation has been created.
+definitions:
+  Endpoint:
+    type: object
+    required:
+     - url
+     - method
+    properties:
+      url:
+        type: string
+        description: URL of API endpoint
+      method:
+        type: string
+        description: HTTP Method name
+      desc:
+        type: string
+        description: Description of this endpoint's purpose.
+  Annotation:
+    type: object
+    required:
+     - id
+     - user
+     - uri
+    properties:
+      id:
+        type: string
+        description: Unique ID for this Annotation.
+      uri:
+        type: string
+        description: URI which is the target of this Annotation.
+      target:
+        type: array
+        items:
+         - type: object
+           properties:
+            scope:
+              type: array
+              items:
+                - type: string
+            selector:
+              type: array
+              items:
+                - type: object
+                  properties:
+                    type:
+                      description: Type of Selector--see Web Annotation Data Model.
+                      type: string
+            source:
+              type: string
+      user:
+        type: string
+        description: User URI in the form of an `acct` prefixed URI.
+      document:
+        type: object
+        description: Target document metadata
+      permissions:
+        type: object
+        description: Permissions for this Annotation.
+      created:
+        type: string
+      updated:
+        type: string
+  AnnotationList:
+    type: object
+    properties:
+      total:
+        type: number
+      rows:
+        type: array
+        items:
+          $ref: '#/definitions/Annotation'
