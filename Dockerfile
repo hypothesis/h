@@ -47,14 +47,14 @@ USER hypothesis
 # Expose the default port.
 EXPOSE 5000
 
-# Persist the static directory.
-VOLUME ["/var/lib/hypothesis/h/static"]
-
 # Set the Python IO encoding to UTF-8.
 ENV PYTHONIOENCODING utf_8
 
 # Build the assets
 RUN hypothesis assets conf/production.ini
+
+# Persist the static directory.
+VOLUME ["/var/lib/hypothesis/h/static"]
 
 # Use honcho and start all the daemons by default.
 ENTRYPOINT ["honcho"]
