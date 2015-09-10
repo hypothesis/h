@@ -84,11 +84,12 @@ admin_css:
   contents:
     - bootstrap_css
     - output: styles/admin.min.css
-      filters:
-      - compass
-      - cleancss
+      filters: cleancss
       contents:
-        - h:static/styles/admin.scss
+        - output: h:static/styles/admin.css
+          filters: compass
+          contents:
+            - h:static/styles/admin.scss
 admin_js:
   contents:
     - jquery
@@ -125,25 +126,25 @@ app_js:
     - katex
     - url
     - output: scripts/app.min.js
-      filters:
-        - browserify
-        - uglifyjs
-      contents: h:static/scripts/app.coffee
-      depends:
-        - h:static/scripts/*.coffee
-        - h:static/scripts/auth.js
-        - h:static/scripts/features.js
-        - h:static/scripts/session.js
-        - h:static/scripts/service-url.js
-        - h:static/scripts/directive/*.coffee
-        - h:static/scripts/directive/*.js
-        - h:static/scripts/filter/*.js
+      filters: uglifyjs
+      contents:
+        - output: h:static/scripts/app.js
+          filters: browserify
+          contents: h:static/scripts/app.coffee
+          depends:
+            - h:static/scripts/*.coffee
+            - h:static/scripts/auth.js
+            - h:static/scripts/features.js
+            - h:static/scripts/session.js
+            - h:static/scripts/service-url.js
+            - h:static/scripts/directive/*.coffee
+            - h:static/scripts/directive/*.js
+            - h:static/scripts/filter/*.js
     - config
 
 app_css:
   output: styles/app.min.css
-  filters:
-    - cleancss
+  filters: cleancss
   contents:
     - h:static/styles/vendor/angular-csp.css
     - h:static/styles/vendor/angular-toastr.css
@@ -196,8 +197,7 @@ inject_js:
 
 inject_css:
   output: styles/hypothesis.min.css
-  filters:
-    - cleancss
+  filters: cleancss
   contents:
     - h:static/styles/vendor/icomoon.css
     - output: styles/hypothesis.css
@@ -216,8 +216,7 @@ inject_css:
 # Help page
 help_page_css:
   output: styles/help-page.min.css
-  filters:
-    - cleancss
+  filters: cleancss
   contents:
     - h:static/styles/vendor/icomoon.css
     - output: styles/help-page.css
