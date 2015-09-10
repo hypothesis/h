@@ -58,7 +58,7 @@ paths:
         - Annotations
       responses:
         200:
-          description: An array of annotations
+          description: List of annotations.
           schema:
             $ref: '#/definitions/AnnotationList'
   /annotations:
@@ -82,8 +82,45 @@ paths:
          schema:
            $ref: '#/definitions/Annotation'
       responses:
-        201:
-          description: An annotation has been created.
+        200:
+          description: The store Annotation.
+          schema:
+            $ref: '#/definitions/Annotation'
+  /annotations/{id}:
+    put:
+      summary: Update an annotation.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: annotation
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/Annotation'
+      responses:
+        200:
+          description: The stored Annotation.
+          schema:
+            $ref: '#/definitions/Annotation'
+    delete:
+      summary: Delete an annotation.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Success message.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              deleted:
+                type: boolean
 definitions:
   Endpoint:
     type: object
@@ -103,7 +140,6 @@ definitions:
   Annotation:
     type: object
     required:
-     - id
      - user
      - uri
     properties:
@@ -143,8 +179,10 @@ definitions:
         description: Permissions for this Annotation.
       created:
         type: string
+        format: date-time
       updated:
         type: string
+        format: date-time
   AnnotationList:
     type: object
     properties:
