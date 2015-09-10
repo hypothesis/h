@@ -1,5 +1,5 @@
 require('autofill-event')
-baseURI = require('base-url')()
+baseURI = require('document-base-uri')
 angular = require('angular')
 require('angular-jwt')
 
