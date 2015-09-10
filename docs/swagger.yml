@@ -174,6 +174,8 @@ definitions:
       document:
         type: object
         description: Target document metadata
+        schema:
+          $ref: '#/definitions/DocumentMetadata'
       permissions:
         type: object
         description: Permissions for this Annotation.
@@ -192,3 +194,75 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Annotation'
+  DocumentMetadata:
+    type: object
+    properties:
+      eprints:
+        type: object
+      title:
+        type: string
+      twitter:
+        type: object
+        properties:
+          image:src:
+            type: array
+            items:
+              type: string
+          title:
+            type: array
+            items:
+              type: string
+          description:
+            type: array
+            items:
+              type: string
+          card:
+            type: array
+            items:
+              type: string
+          site:
+            type: array
+            items:
+              type: string
+      dc:
+        type: object
+      favicon:
+        type: string
+      prism:
+        type: object
+      highwire:
+        type: object
+      link:
+        type: array
+        items:
+          type: object
+          properties:
+            href:
+              type: string
+      facebook:
+        type: object
+        properties:
+          site_name:
+            type: array
+            items:
+              type: string
+          description:
+            type: array
+            items:
+              type: string
+          title:
+            type: array
+            items:
+              type: string
+          url:
+            type: array
+            items:
+              type: string
+          image:
+            type: array
+            items:
+              type: string
+          type:
+            type: array
+            items:
+              type: string
