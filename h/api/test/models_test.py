@@ -116,3 +116,37 @@ def captures(patterns, text):
 
 def groups(pattern, text):
     return re.search(pattern, text).groups() or []
+
+
+def test_title_with_a_document_that_has_a_title():
+    annotation = models.Annotation(document={'title': 'document title'})
+    assert annotation.title == 'document title'
+
+
+def test_title_with_a_document_that_has_no_title():
+    annotation = models.Annotation(document={})
+    assert annotation.title == ''
+
+
+def test_title_annotation_that_has_no_document():
+    assert models.Annotation().title == ''
+
+
+def test_description():
+    annotation = models.Annotation(
+        target=[{'selector': [{'exact': 'selected text'}]}],
+        text='entered text'
+    )
+
+    assert annotation.description == (
+        "&lt;blockquote&gt;selected text&lt;/blockquote&gt;entered text")
+
+
+def test_created_day_string_from_annotation():
+    annotation = models.Annotation(created='2015-09-04T17:37:49.517852+00:00')
+    assert annotation.created_day_string == '2015-09-04'
+
+
+def test_target_links_from_annotation():
+    annotation = models.Annotation(target=[{'source': 'target link'}])
+    assert annotation.target_links == ['target link']

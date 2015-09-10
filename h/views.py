@@ -11,8 +11,8 @@ from pyramid import i18n
 from . import session
 from .models import Annotation
 from .resources import Application, Stream
-from . import api_client
 from . import util
+
 
 log = logging.getLogger(__name__)
 
@@ -126,46 +126,17 @@ def stream(context, request):
         location = request.resource_url(context, 'stream', query=query)
         return httpexceptions.HTTPFound(location=location)
     else:
-        context["link_tags"] = [{
-            "rel": "alternate", "href": request.route_url("stream_atom"),
-            "type": "application/atom+xml"}]
+        context["link_tags"] = [
+            {
+                "rel": "alternate", "href": request.route_url("stream_atom"),
+                "type": "application/atom+xml"
+            },
+            {
+                "rel": "alternate", "href": request.route_url("stream_rss"),
+                "type": "application/rss+xml"
+            }
+        ]
         return context
-
-
-@view_config(renderer='annotations_atom', route_name='stream_atom')
-def stream_atom(request):
-    params = dict(request.params)
-
-    # The maximum value that this function allows the limit param.
-    default_limit = 100
-    max_limit = 500
-
-    try:
-        params["limit"] = int(params.get("limit", default_limit))
-    except (ValueError, TypeError):
-        params["limit"] = default_limit
-
-    if params["limit"] < 0:
-        params["limit"] = default_limit
-    if params["limit"] > max_limit:
-        params["limit"] = max_limit
-
-    try:
-        annotations = request.api_client.get(
-            "/search", params=params)["rows"]
-    except api_client.ConnectionError as err:
-        raise httpexceptions.HTTPServiceUnavailable(err)
-    except api_client.Timeout as err:
-        raise httpexceptions.HTTPGatewayTimeout(err)
-    except api_client.APIError as err:
-        raise httpexceptions.HTTPBadGateway(err)
-
-    return dict(
-        annotations=annotations,
-        atom_url=request.route_url("stream_atom"),
-        html_url=request.route_url("stream"),
-        title=request.registry.settings.get("h.feed.title"),
-        subtitle=request.registry.settings.get("h.feed.subtitle"))
 
 
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
@@ -208,7 +179,6 @@ def includeme(config):
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome')
     config.add_route('stream', '/stream')
-    config.add_route('stream_atom', '/stream.atom')
 
     _validate_blocklist(config)
 

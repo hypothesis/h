@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import cgi
 from pyramid import security
+from dateutil import parser
 
 from annotator import annotation
 from annotator import document
@@ -184,6 +186,80 @@ class Annotation(annotation.Annotation):
     @classmethod
     def get_analysis(cls):
         return cls.__analysis__
+
+    @property
+    def title(self):
+        """A title for this annotation."""
+        document_ = self.get("document")
+        if document_:
+            return document_.get("title", "")
+        else:
+            return ""
+
+    @property
+    def description(self):
+        """An HTML-formatted description of this annotation.
+
+        The description contains the target text that the user selected to
+        annotate, as a <blockquote>, and the body text of the annotation
+        itself.
+
+        """
+        def get_selection():
+            targets = self.get("target")
+            if not isinstance(targets, list):
+                return
+            for target in targets:
+                if not isinstance(target, dict):
+                    continue
+                selectors = target.get("selector")
+                if not isinstance(selectors, list):
+                    continue
+                for selector in selectors:
+                    if not isinstance(selector, dict):
+                        continue
+                    if "exact" in selector:
+                        return selector["exact"]
+
+        description = ""
+
+        selection = get_selection()
+        if selection:
+            selection = cgi.escape(selection)
+            description += u"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
+                selection=selection)
+
+        text = self.get("text")
+        if text:
+            text = cgi.escape(text)
+            description += u"{text}".format(text=text)
+
+        return description
+
+    @property
+    def created_day_string(self):
+        """A simple created day string for this annotation.
+
+        Returns a day string like '2015-03-11' from the annotation's 'created'
+        date.
+
+        """
+        return parser.parse(self["created"]).strftime("%Y-%m-%d")
+
+    @property
+    def target_links(self):
+        """A list of the URLs to this annotation's targets."""
+        links = []
+        targets = self.get("target")
+        if isinstance(targets, list):
+            for target in targets:
+                if not isinstance(target, dict):
+                    continue
+                source = target.get("source")
+                if source is None:
+                    continue
+                links.append(source)
+        return links
 
 
 class Document(document.Document):

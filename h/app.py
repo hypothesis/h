@@ -46,8 +46,7 @@ def includeme(config):
     config.include('h.hashids')
     config.include('h.models')
     config.include('h.views')
-    config.include('h.renderers')
-    config.include('h.api_client')
+    config.include('h.feeds')
 
     config.include('pyramid_jinja2')
     config.add_jinja2_extension('h.jinja_extensions.IncludeRawExtension')
