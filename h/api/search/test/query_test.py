@@ -3,7 +3,6 @@
 import pytest
 import mock
 from webob import multidict
-from pyramid import testing
 
 from h.api.search import query
 
