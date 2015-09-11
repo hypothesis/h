@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-__all__ = ('index', 'create_root', 'includeme')
+__all__ = ('search_annotations', 'create_root', 'includeme')
 from h.api.resources import create_root
-from h.api.views import index
 from h.api.logic import search_annotations
 
 
