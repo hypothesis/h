@@ -548,8 +548,6 @@ def reset_password_email(user, reset_code, reset_link):
                  "Alternatively, you can reset your password by "
                  "clicking on this link:\n\n"
                  "{link}\n\n"
-                 "If you don't want to change your password, please "
-                 "ignore this email message.\n\n"
                  "Regards,\n"
                  "The Hypothesis Team\n")
     body = emailtext.format(code=reset_code,
