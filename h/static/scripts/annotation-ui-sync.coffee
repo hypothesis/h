@@ -27,9 +27,10 @@ module.exports = class AnnotationUISync
       toggleAnnotationSelection: (tags=[]) ->
         annotations = getAnnotationsByTags(tags)
         annotationUI.xorSelectedAnnotations(annotations)
-      setVisibleHighlights: (state) ->
-        annotationUI.visibleHighlights = Boolean(state)
-        bridge.call('setVisibleHighlights', state)
+      setVisibleHighlights: (state=true) ->
+        if annotationUI.visibleHighlights != state
+          annotationUI.visibleHighlights = state
+          bridge.call('setVisibleHighlights', state)
 
     # Because the channel events are all outside of the angular framework we
     # need to inform Angular that it needs to re-check it's state and re-draw
@@ -43,8 +44,11 @@ module.exports = class AnnotationUISync
       bridge.on(channel, ensureDigest(listener))
 
     onConnect = (channel, source) ->
-      # Allow the host to define its own state
-      unless source is $window.parent
+      if source is $window.parent
+        # The host initializes its own state
+        return
+      else
+        # Synchronize the state of guests
         channel.call('setVisibleHighlights', annotationUI.visibleHighlights)
 
     bridge.onConnect(onConnect)

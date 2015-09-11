@@ -31,7 +31,6 @@ module.exports = class Guest extends Annotator
     ".annotator-hl click":               "onHighlightClick"
     ".annotator-hl mouseover":           "onHighlightMouseover"
     ".annotator-hl mouseout":            "onHighlightMouseout"
-    "setVisibleHighlights": "setVisibleHighlights"
 
   # Plugin / Options configuration
   options:
@@ -127,7 +126,7 @@ module.exports = class Guest extends Annotator
       .catch((reason) -> cb(reason))
 
     crossframe.on 'setVisibleHighlights', (state) =>
-      this.publish 'setVisibleHighlights', state
+      this.setVisibleHighlights(state)
 
   _setupWrapper: ->
     @wrapper = @element
@@ -377,9 +376,9 @@ module.exports = class Guest extends Annotator
 
   # Pass true to show the highlights in the frame or false to disable.
   setVisibleHighlights: (shouldShowHighlights) ->
-    return if @visibleHighlights == shouldShowHighlights
     @crossframe?.call('setVisibleHighlights', shouldShowHighlights)
     this.toggleHighlightClass(shouldShowHighlights)
+    this.publish 'setVisibleHighlights', shouldShowHighlights
 
   toggleHighlightClass: (shouldShowHighlights) ->
     if shouldShowHighlights

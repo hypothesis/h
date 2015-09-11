@@ -42,10 +42,7 @@ module.exports = class Host extends Guest
 
     # Host frame dictates the toolbar options.
     this.on 'panelReady', =>
-      # Guest is designed to respond to events rather than direct method
-      # calls. If we call set directly the other plugins will never recieve
-      # these events and the UI will be out of sync.
-      this.publish('setVisibleHighlights', !!options.showHighlights)
+      this.setVisibleHighlights(!!options.showHighlights)
 
       # Time to actually show the UI
       @frame.css('display', '')
