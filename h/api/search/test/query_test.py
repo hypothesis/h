@@ -10,8 +10,8 @@ from h.api.search import query
 def test_auth_filter_with_not_logged_in():
     effective_principals = ['system.Everyone']
     assert query.auth_filter(effective_principals) == {
-            'terms': {
-                'permissions.read': ['group:__world__', 'system.Everyone']}}
+        'terms': {
+            'permissions.read': ['group:__world__', 'system.Everyone']}}
 
 
 def test_auth_filter_when_user_is_not_a_member_of_any_groups():
