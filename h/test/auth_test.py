@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from mock import ANY, MagicMock, patch
+import pytest
+
+from mock import ANY, MagicMock, patch, Mock
 from pyramid import testing
 import unittest
 
@@ -151,62 +153,120 @@ def test_get_client_bad_secret(config):
     mock_factory.assert_called_with(request, '9876')
 
 
-@patch("h.auth.models.User.get_by_userid")
-def test_effective_principals_returns_no_principals(get_by_userid):
-    """It should return no principals if no client, admin or staff.
+# The fixtures required to mock all of effective_principals()'s dependencies.
+effective_principals_fixtures = pytest.mark.usefixtures('models', 'groups')
 
-    If the request has no client and the user is not an admin or staff member,
-    then it should return no principals.
+
+@effective_principals_fixtures
+def test_effective_principals_returns_no_principals(models):
+    """It should return only [] by default.
+
+    If the request has no client and the user is not an admin or staff member
+    nor a member of any group, it should return no additional principals.
 
     """
     request = MagicMock(client=None)
-    get_by_userid.return_value = MagicMock(admin=False, staff=False)
+    models.User.get_by_userid.return_value = MagicMock(
+        admin=False, staff=False)
 
     assert auth.effective_principals("jiji", request) == []
 
 
-@patch("h.auth.models.User.get_by_userid")
-def test_effective_principals_returns_client_id_as_consumer(get_by_userid):
+@effective_principals_fixtures
+def test_effective_principals_returns_client_id_as_consumer(models):
     """
     If the request has a client ID it's returned as a "consumer:" principal.
     """
     request = MagicMock(client=MagicMock(client_id="test_id"))
-    get_by_userid.return_value = MagicMock(admin=False, staff=False)
+    models.User.get_by_userid.return_value = MagicMock(
+        admin=False, staff=False)
 
-    assert auth.effective_principals("jiji", request) == ["consumer:test_id"]
+    assert "consumer:test_id" in auth.effective_principals("jiji", request)
 
 
-@patch("h.auth.models.User.get_by_userid")
-def test_effective_principals_with_admin_user(get_by_userid):
-    """If the user is an admin it should return a "group:admin" principal."""
+@effective_principals_fixtures
+def test_effective_principals_with_admin_user(models):
+    """If the user is an admin it should return "group:__admin__"."""
     request = MagicMock(client=None)
-    get_by_userid.return_value = MagicMock(admin=True, staff=False)
+    models.User.get_by_userid.return_value = MagicMock(admin=True, staff=False)
 
-    assert auth.effective_principals("jiji", request) == ["group:admin"]
+    assert "group:__admin__" in auth.effective_principals("jiji", request)
 
 
-@patch("h.auth.models.User.get_by_userid")
-def test_effective_principals_client_id_and_admin_together(get_by_userid):
+@effective_principals_fixtures
+def test_effective_principals_client_id_and_admin_together(models):
     request = MagicMock(client=MagicMock(client_id="test_id"))
-    get_by_userid.return_value = MagicMock(admin=True, staff=False)
+    models.User.get_by_userid.return_value = MagicMock(admin=True, staff=False)
 
-    assert auth.effective_principals("jiji", request) == [
-        "consumer:test_id", "group:admin"]
+    principals = auth.effective_principals("jiji", request)
+    assert "consumer:test_id" in principals
+    assert "group:__admin__" in principals
 
 
-@patch("h.auth.models.User.get_by_userid")
-def test_effective_principals_with_staff_user(get_by_userid):
-    """If the user is staff it should return a "group:staff" principal."""
+@effective_principals_fixtures
+def test_effective_principals_with_staff_user(models):
+    """If the user is staff it should return a "group:__staff__" principal."""
     request = MagicMock(client=None)
-    get_by_userid.return_value = MagicMock(admin=False, staff=True)
+    models.User.get_by_userid.return_value = MagicMock(admin=False, staff=True)
 
-    assert auth.effective_principals("jiji", request) == ["group:staff"]
+    assert "group:__staff__" in auth.effective_principals("jiji", request)
 
 
-@patch("h.auth.models.User.get_by_userid")
-def test_effective_principals_client_id_and_admin_and_staff(get_by_userid):
+@effective_principals_fixtures
+def test_effective_principals_client_id_and_admin_and_staff(models):
     request = MagicMock(client=MagicMock(client_id="test_id"))
-    get_by_userid.return_value = MagicMock(admin=True, staff=True)
+    models.User.get_by_userid.return_value = MagicMock(admin=True, staff=True)
 
-    assert auth.effective_principals("jiji", request) == [
-        "consumer:test_id", "group:admin", "group:staff"]
+    principals = auth.effective_principals("jiji", request)
+
+    assert "consumer:test_id" in principals
+    assert "group:__admin__" in principals
+    assert "group:__staff__" in principals
+
+
+@effective_principals_fixtures
+def test_effective_principals_calls_group_principals(models, groups):
+    request = Mock()
+
+    auth.effective_principals("jiji", request)
+
+    groups.group_principals.assert_called_once_with(
+        models.User.get_by_userid.return_value)
+
+
+@effective_principals_fixtures
+def test_effective_principals_with_one_group(groups):
+    groups.group_principals.return_value = ['group:group-1']
+
+    additional_principals = auth.effective_principals("jiji", Mock())
+
+    assert 'group:group-1' in additional_principals
+
+
+@effective_principals_fixtures
+def test_effective_principals_with_three_groups(groups):
+    groups.group_principals.return_value = [
+        'group:group-1',
+        'group:group-2',
+        'group:group-3'
+    ]
+
+    additional_principals = auth.effective_principals("jiji", Mock())
+
+    assert 'group:group-1' in additional_principals
+    assert 'group:group-2' in additional_principals
+    assert 'group:group-3' in additional_principals
+
+
+@pytest.fixture
+def models(request):
+    patcher = patch('h.auth.models', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def groups(request):
+    patcher = patch('h.auth.groups', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()

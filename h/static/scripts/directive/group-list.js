@@ -6,12 +6,15 @@
  * @restrict AE
  * @description Displays a list of groups of which the user is a member.
  */
-module.exports = function () {
+
+// @ngInject
+module.exports = function (groups) {
   return {
-    restrict: 'AE',
-    scope: {
-      groups: '='
+    link: function (scope, elem, attrs) {
+      scope.groups = groups;
     },
+    restrict: 'AE',
+    scope: {},
     templateUrl: 'group_list.html'
   };
 };

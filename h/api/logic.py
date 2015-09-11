@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from h import i18n
+
 from h.api.models import Annotation
 from h.api import search as search_lib
 
 
+_ = i18n.TranslationString
 log = logging.getLogger(__name__)
 
 
@@ -12,8 +15,9 @@ log = logging.getLogger(__name__)
 PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 
 
-def search_annotations(params, user=None, search_normalized_uris=False):
-    results = search_lib.search(request_params=params,
+def search_annotations(params, effective_principals, user=None,
+                       search_normalized_uris=False):
+    results = search_lib.search(params, effective_principals,
                                 user=user,
                                 search_normalized_uris=search_normalized_uris)
 
@@ -63,6 +67,13 @@ def _anonymize_deletes(annotation):
 
 
 def update_annotation(annotation, fields, has_admin_permission):
+    """Update the given annotation with the given new fields.
+
+    :raises RuntimeError: if the fields attempt to change the annotation's
+        permissions and has_admin_permission is False, or if they are attempting
+        to move the annotation between groups.
+
+    """
     # Some fields are not to be set by the user, ignore them
     for field in PROTECTED_FIELDS:
         fields.pop(field, None)
@@ -73,8 +84,12 @@ def update_annotation(annotation, fields, has_admin_permission):
         fields['permissions'] != annotation.get('permissions', {})
     )
     if changing_permissions and not has_admin_permission:
-        raise RuntimeError("Not authorized to change annotation permissions.",
-                           401)  # Unauthorized
+        raise RuntimeError(
+            _('Not authorized to change annotation permissions.'), 401)
+
+    if 'group' in fields and fields['group'] != annotation.get('group'):
+        raise RuntimeError(
+            _("You can't move annotations between groups."), 401)
 
     # Update the annotation with the new data
     annotation.update(fields)
@@ -86,3 +101,7 @@ def update_annotation(annotation, fields, has_admin_permission):
     # Save the annotation in the database, overwriting the old version.
     search_lib.prepare(annotation)
     annotation.save()
+
+
+def delete_annotation(annotation):
+    annotation.delete()

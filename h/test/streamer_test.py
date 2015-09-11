@@ -305,7 +305,10 @@ class TestShouldSendEvent(unittest.TestCase):
 
     def test_non_sending_socket_receives_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_giraffe, {}, data)
+        assert should_send_event(
+            self.sock_giraffe,
+            {'permissions': {'read': ['group:__world__']}},
+            data)
 
     def test_sending_socket_does_not_receive_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
@@ -318,7 +321,10 @@ class TestShouldSendEvent(unittest.TestCase):
     def test_should_send_event_no_filter(self):
         self.sock_giraffe.filter = None
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_giraffe, {}, data) is False
+        assert should_send_event(
+            self.sock_giraffe,
+            {'permissions': {'read': ['group:__world__']}},
+            data) is False
 
     def test_should_send_event_doesnt_send_reads(self):
         data = {'action': 'read', 'src_client_id': 'pigeon'}
@@ -327,7 +333,10 @@ class TestShouldSendEvent(unittest.TestCase):
     def test_should_send_event_filtered(self):
         self.sock_pigeon.filter.match.return_value = False
         data = {'action': 'update', 'src_client_id': 'giraffe'}
-        assert should_send_event(self.sock_pigeon, {}, data) is False
+        assert should_send_event(
+            self.sock_pigeon,
+            {'permissions': {'read': ['group:__world__']}},
+            data) is False
 
     def test_should_send_event_check_permissions(self):
         self.sock_giraffe.request.has_permission.return_value = False
@@ -355,3 +364,43 @@ class TestShouldSendEvent(unittest.TestCase):
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
         assert should_send_event(socket, annotation, event_data)
+
+    def test_should_send_event_does_not_send_group_annotations(self):
+        """Users shouldn't see annotations in groups they aren't members of."""
+        annotation = {
+            'user': 'fred',
+            'permissions': {'read': ['group:private-group']}
+        }
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.effective_principals = []  # No 'group:private-group'.
+        socket.request.has_permission.return_value = True
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        assert not should_send_event(socket, annotation, event_data)
+
+    def test_should_send_event_does_send_nipsad_annotations(self):
+        """Users should see annotations from groups they are members of."""
+        annotation = {
+            'user': 'fred',
+            'group': 'private-group',
+            'permissions': {'read': ['group:private-group']}
+        }
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.has_permission.return_value = True
+        socket.request.effective_principals = ['group:private-group']
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        assert should_send_event(socket, annotation, event_data)
+
+    def test_should_send_event_does_not_crash_if_no_group(self):
+        """Users should see annotations from groups they are members of."""
+        annotation = {
+            'user': 'fred',
+            'permissions': {'read': ['group:__world__']}
+        }
+        socket = Mock(terminated=False, client_id='foo')
+        socket.request.has_permission.return_value = True
+        socket.request.effective_principals = ['group:private-group']
+        event_data = {'action': 'create', 'src_client_id': 'bar'}
+
+        should_send_event(socket, annotation, event_data)

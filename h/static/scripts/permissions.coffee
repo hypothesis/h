@@ -44,27 +44,40 @@ module.exports = ['session', (session) ->
 
   ###*
   # @ngdoc method
-  # @name permissions#private
+  # @name permissions#public
+  #
+  # @param {String} [group] Group to make annotation public in.
   #
   # Sets permissions for a public annotation
   # Typical use: annotation.permissions = permissions.public()
   ###
-  public: ->
-    read: [GROUP_WORLD]
-    update: [session.state.userid]
-    delete: [session.state.userid]
-    admin: [session.state.userid]
+  public: (group) ->
+    if group?
+      group = 'group:' + group
+    else
+      group = GROUP_WORLD
+    return {
+      read: [group]
+      update: [session.state.userid]
+      delete: [session.state.userid]
+      admin: [session.state.userid]
+    }
 
   ###*
   # @ngdoc method
   # @name permissions#isPublic
   #
   # @param {Object} permissions
+  # @param {String} [group]
   #
   # This function determines whether the permissions allow public visibility
   ###
-  isPublic: (permissions) ->
-    GROUP_WORLD in (permissions?.read or [])
+  isPublic: (permissions, group) ->
+    if group?
+      group = 'group:' + group
+    else
+      group = GROUP_WORLD
+    group in (permissions?.read or [])
 
   ###*
   # @ngdoc method

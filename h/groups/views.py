@@ -6,9 +6,8 @@ from pyramid.view import view_config
 from pyramid import renderers
 
 from h.groups import schemas
-from h.groups import models
-from h.accounts import models as accounts_models
 from h import i18n
+from h import models
 
 
 _ = i18n.TranslationString
@@ -44,8 +43,8 @@ def create(request):
     except deform.ValidationFailure:
         return {'form': form, 'data': request.params}
 
-    user = accounts_models.User.get_by_userid(
-        request.domain, request.authenticated_userid)
+    user = models.User.get_by_userid(request.domain,
+                                     request.authenticated_userid)
     group = models.Group(name=appstruct["name"], creator=user)
     request.db.add(group)
 
@@ -120,8 +119,8 @@ def read(request):
     if not request.authenticated_userid:
         return _login_to_join(request, group)
     else:
-        user = accounts_models.User.get_by_userid(
-            request.domain, request.authenticated_userid)
+        user = models.User.get_by_userid(request.domain,
+                                         request.authenticated_userid)
         if group in user.groups:
             return _read_group(request, group)
         else:
@@ -142,8 +141,8 @@ def join(request):
     if group is None:
         raise exc.HTTPNotFound()
 
-    user = accounts_models.User.get_by_userid(
-        request.domain, request.authenticated_userid)
+    user = models.User.get_by_userid(request.domain,
+                                     request.authenticated_userid)
 
     group.members.append(user)
 

@@ -87,6 +87,7 @@ def search(request):
     """Search the database for annotations matching with the given query."""
     return logic.search_annotations(
         request.params,
+        request.effective_principals,
         get_user(request),
         request.feature('search_normalized')
     )
@@ -123,7 +124,7 @@ def annotations_index(request):
     search_normalized_uris = request.feature('search_normalized')
 
     user = get_user(request)
-    results = search_lib.index(user=user,
+    results = search_lib.index(request.effective_principals, user=user,
                                search_normalized_uris=search_normalized_uris)
 
     return {
@@ -146,7 +147,7 @@ def create(request):
     user = get_user(request)
 
     # Create the annotation
-    annotation = logic.create_annotation(fields, user)
+    annotation = logic.create_annotation(fields=fields, user=user)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
@@ -205,16 +206,15 @@ def update(context, request):
 def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context
-    id_ = annotation['id']
-    # Delete the annotation from the database.
-    annotation.delete()
+
+    logic.delete_annotation(annotation)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'delete')
 
     # Return a confirmation
     return {
-        'id': id_,
+        'id': annotation['id'],
         'deleted': True,
     }
 

@@ -5,6 +5,25 @@ import pytest
 from h.api.search import transform
 
 
+@mock.patch('h.api.search.transform.groups')
+def test_prepare_calls_set_group_if_reply(groups):
+    annotation = {'permissions': {'read': []}}
+
+    transform.prepare(annotation)
+
+    groups.set_group_if_reply.assert_called_once_with(annotation)
+
+
+@mock.patch('h.api.search.transform.groups')
+def test_prepare_calls_set_permissions(groups):
+    annotation = {'permissions': {'read': []}}
+
+    transform.prepare(annotation)
+
+    groups.set_permissions.assert_called_once_with(annotation)
+
+
+@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     # Preserves the basics
     ({}, {}),
@@ -17,11 +36,12 @@ from h.api.search import transform
     ({"target": [{"foo": "bar"}, {"baz": "qux"}]},
      {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
 ])
-def test_prepare_noop_when_nothing_to_normalize(ann_in, ann_out):
+def test_prepare_noop_when_nothing_to_normalize(_, ann_in, ann_out):
     transform.prepare(ann_in)
     assert ann_in == ann_out
 
 
+@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     ({"target": [{"source": "giraffe"}]},
      {"target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
@@ -29,13 +49,14 @@ def test_prepare_noop_when_nothing_to_normalize(ann_in, ann_out):
      {"target": [{"source": "giraffe", "scope": ["*giraffe*"]},
                  "foo"]}),
 ])
-def test_prepare_adds_scope_field(ann_in, ann_out, uri_normalize):
+def test_prepare_adds_scope_field(_, ann_in, ann_out, uri_normalize):
     transform.prepare(ann_in)
     assert ann_in == ann_out
 
 
 @mock.patch('h.api.search.transform.models')
-def test_prepare_copies_parents_scopes_into_replies(models):
+@mock.patch('h.api.search.transform.groups')
+def test_prepare_copies_parents_scopes_into_replies(_, models):
     parent_annotation = {
         'id': 'parent_annotation_id',
         'target': [{'scope': 'https://example.com/annotated_article'}]
@@ -49,7 +70,8 @@ def test_prepare_copies_parents_scopes_into_replies(models):
 
 
 @mock.patch('h.api.search.transform.models')
-def test_prepare_overwrites_existing_targets_in_replies(models):
+@mock.patch('h.api.search.transform.groups')
+def test_prepare_overwrites_existing_targets_in_replies(_, models):
     parent_annotation = {
         'id': 'parent_annotation_id',
         'target': [{'scope': 'https://example.com/annotated_article'}]
@@ -66,7 +88,8 @@ def test_prepare_overwrites_existing_targets_in_replies(models):
 
 
 @mock.patch('h.api.search.transform.models')
-def test_prepare_does_nothing_if_parents_target_is_not_a_list(models):
+@mock.patch('h.api.search.transform.groups')
+def test_prepare_does_nothing_if_parents_target_is_not_a_list(_, models):
     """It should do nothing to replies if the parent's target isn't a list.
 
     If the annotation is a reply and its parent's 'target' is not a list then
@@ -89,7 +112,8 @@ def test_prepare_does_nothing_if_parents_target_is_not_a_list(models):
 
 
 @mock.patch('h.api.search.transform.models')
-def test_prepare_does_not_copy_other_keys_from_targets(models):
+@mock.patch('h.api.search.transform.groups')
+def test_prepare_does_not_copy_other_keys_from_targets(_, models):
     """Only the parent's scope should be copied into replies.
 
     Not any other keys that the parent's target might have.
@@ -113,7 +137,8 @@ def test_prepare_does_not_copy_other_keys_from_targets(models):
 
 
 @mock.patch('h.api.search.transform.models')
-def test_prepare_does_not_copy_targets_that_are_not_dicts(models):
+@mock.patch('h.api.search.transform.groups')
+def test_prepare_does_not_copy_targets_that_are_not_dicts(_, models):
     """Parent's targets that aren't dicts shouldn't be copied into replies."""
     parent_annotation = {
         'id': 'parent_annotation_id',
@@ -128,7 +153,8 @@ def test_prepare_does_not_copy_targets_that_are_not_dicts(models):
 
 
 @mock.patch('h.api.search.transform.models')
-def test_prepare_does_not_copy_targets_with_no_scope(models):
+@mock.patch('h.api.search.transform.groups')
+def test_prepare_does_not_copy_targets_with_no_scope(_, models):
     """Parent's targets with no 'scope' should not be copied into replies."""
     parent_annotation = {
         'id': 'parent_annotation_id',
@@ -147,12 +173,13 @@ def test_prepare_does_not_copy_targets_with_no_scope(models):
 
 
 
+@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann,nipsa", [
     ({"user": "george"}, True),
     ({"user": "georgia"}, False),
     ({}, False),
 ])
-def test_prepare_sets_nipsa_field(ann, nipsa, has_nipsa):
+def test_prepare_sets_nipsa_field(_, ann, nipsa, has_nipsa):
     has_nipsa.return_value = nipsa
     transform.prepare(ann)
     if nipsa:
@@ -161,6 +188,7 @@ def test_prepare_sets_nipsa_field(ann, nipsa, has_nipsa):
         assert "nipsa" not in ann
 
 
+@mock.patch('h.api.search.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     # Preserves the basics
     ({}, {}),
@@ -173,7 +201,8 @@ def test_prepare_sets_nipsa_field(ann, nipsa, has_nipsa):
     ({"target": [{"foo": "bar"}, {"baz": "qux"}]},
      {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
 ])
-def test_render_noop_when_nothing_to_remove(ann_in, ann_out):
+def test_render_noop_when_nothing_to_remove(_, ann_in, ann_out):
+    ann_out['group'] = '__world__'
     assert transform.render(ann_in) == ann_out
 
 

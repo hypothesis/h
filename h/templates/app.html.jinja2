@@ -29,10 +29,9 @@
            on-clear="search.clear()"></div>
       <!-- / Searchbar -->
 
-      <div class="dropdown group-list"
-           ng-if="auth.user && feature('groups')"
-           group-list=""
-           groups="session.state.groups">
+      <div class="group-list"
+           ng-if="auth.user && feature('groups')",
+           group-list="">
       </div>
 
       <div ng-switch="auth.user">

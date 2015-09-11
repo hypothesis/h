@@ -45,6 +45,13 @@ describe 'h:permissions', ->
       assert.equal(perms.delete[0], 'acct:flash@gordon')
       assert.equal(perms.admin[0], 'acct:flash@gordon')
 
+    it 'public call fills the read property with group:foo if passed "foo"', ->
+      perms = permissions.public("foo")
+      assert.equal(perms.read[0], 'group:foo')
+      assert.equal(perms.update[0], 'acct:flash@gordon')
+      assert.equal(perms.delete[0], 'acct:flash@gordon')
+      assert.equal(perms.admin[0], 'acct:flash@gordon')
+
     describe 'isPublic', ->
       it 'isPublic() true if the read permission has group:__world__ in it', ->
         permission = {

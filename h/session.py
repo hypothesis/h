@@ -24,7 +24,9 @@ def _current_groups(request):
     This list is meant to be returned to the client in the "session" model.
 
     """
-    groups = []
+    groups = [
+        {'name': 'Public', 'id': '__world__', 'public': True},
+    ]
     userid = request.authenticated_userid
     if userid is None:
         return groups
@@ -34,6 +36,7 @@ def _current_groups(request):
     for group in user.groups:
         groups.append({
             'name': group.name,
+            'id': group.hashid,
             'url': request.route_url('group_read',
                                      hashid=group.hashid,
                                      slug=group.slug),

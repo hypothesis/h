@@ -43,10 +43,10 @@ errorMessage = (reason) ->
 AnnotationController = [
   '$scope', '$timeout', '$q', '$rootScope', '$document',
   'drafts', 'flash', 'permissions', 'tags', 'time',
-  'annotationUI', 'annotationMapper', 'session'
+  'annotationUI', 'annotationMapper', 'session', 'groups'
   ($scope,   $timeout,   $q,   $rootScope,   $document,
    drafts,   flash,   permissions,   tags,   time,
-   annotationUI,   annotationMapper,   session) ->
+   annotationUI,   annotationMapper,   session,   groups) ->
 
     @annotation = {}
     @action = 'view'
@@ -56,13 +56,23 @@ AnnotationController = [
     @embedded = false
     @hasDiff = false
     @showDiff = undefined
-    @privacyLevel = null
     @timestamp = null
 
     model = $scope.annotationGet()
+    if not model.group
+      model.group = groups.focused().id
+
     highlight = model.$highlight
     original = null
     vm = this
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#group.
+    # @returns {Object} The full group object associated with the annotation.
+    ###
+    this.group = ->
+      groups.get(model.group)
 
     ###*
     # @ngdoc method
@@ -97,6 +107,33 @@ AnnotationController = [
     ###
     this.isPrivate = ->
       permissions.isPrivate model.permissions, model.user
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#setPrivate
+    #
+    # Set permissions on this annotation to private.
+    ###
+    this.setPrivate = ->
+      model.permissions = permissions.private()
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#isShared
+    # @returns {boolean} True if the annotation is shared (either with the
+    # current group or with everyone).
+    ###
+    this.isShared = ->
+      permissions.isPublic model.permissions, model.group
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotationController#setShared
+    #
+    # Set permissions on this annotation to share with the current group.
+    ###
+    this.setShared = ->
+      model.permissions = permissions.public(model.group)
 
     ###*
     # @ngdoc method
