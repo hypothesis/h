@@ -54,6 +54,7 @@
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sinon": "^1.0.4",
     "mocha": "^1.20.1",
+    "phantom-ownpropertynames": "^1.0.0",
     "phantomjs": "^1.9.7",
     "proxyquire": "^1.6.0",
     "proxyquire-universal": "^1.0.8",

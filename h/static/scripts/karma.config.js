@@ -66,7 +66,8 @@ module.exports = function(config) {
       configure: function (bundle) {
         bundle
           .transform('coffeeify')
-          .plugin('proxyquire-universal');
+          .plugin('proxyquire-universal')
+          .require('phantom-ownpropertynames/implement', {entry: true});
       }
     },
 
