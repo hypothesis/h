@@ -299,19 +299,19 @@ module.exports = class Guest extends Annotator
   createHighlight: ->
     return this.createAnnotation({$highlight: true})
 
-  showAnnotations: (annotations) =>
+  showAnnotations: (annotations) ->
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('showAnnotations', tags)
 
-  toggleAnnotationSelection: (annotations) =>
+  toggleAnnotationSelection: (annotations) ->
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('toggleAnnotationSelection', tags)
 
-  updateAnnotations: (annotations) =>
+  updateAnnotations: (annotations) ->
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('updateAnnotations', tags)
 
-  focusAnnotations: (annotations) =>
+  focusAnnotations: (annotations) ->
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('focusAnnotations', tags)
 
@@ -339,8 +339,7 @@ module.exports = class Guest extends Annotator
     @adder.hide()
     @selectedRanges = []
 
-  selectAnnotations: (annotations, toggle) =>
-    this.showFrame()
+  selectAnnotations: (annotations, toggle) ->
     if toggle
       this.toggleAnnotationSelection annotations
     else
@@ -363,7 +362,7 @@ module.exports = class Guest extends Annotator
     return unless @visibleHighlights
     this.focusAnnotations []
 
-  onHighlightClick: (event) =>
+  onHighlightClick: (event) ->
     return unless @visibleHighlights
     annotation = $(event.currentTarget).data('annotation')
     annotations = event.annotations ?= []
@@ -402,7 +401,7 @@ module.exports = class Guest extends Annotator
 
   onAdderMousedown: ->
 
-  onAdderClick: (event) =>
+  onAdderClick: (event) ->
     event.preventDefault?()
     event.stopPropagation?()
     @adder.hide()
