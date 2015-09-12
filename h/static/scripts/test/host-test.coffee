@@ -53,14 +53,14 @@ describe 'host', ->
     describe 'showSidebar()', ->
       it 'sends the "showFrame" message to the host only', ->
         host.showSidebar()
-        assert.calledWith(fakeBridge.links[0].channel.call, 'showFrame')
+        assert.calledWith(fakeBridge.links[0].channel.call, 'show')
         assert.notCalled(fakeBridge.links[1].channel.call)
         assert.notCalled(fakeBridge.links[2].channel.call)
 
     describe 'hideSidebar()', ->
       it 'sends the "hideFrame" message to the host only', ->
         host.hideSidebar()
-        assert.calledWith(fakeBridge.links[0].channel.call, 'hideFrame')
+        assert.calledWith(fakeBridge.links[0].channel.call, 'hide')
         assert.notCalled(fakeBridge.links[1].channel.call)
         assert.notCalled(fakeBridge.links[2].channel.call)
 

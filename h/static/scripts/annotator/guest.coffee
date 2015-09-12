@@ -5,8 +5,6 @@ raf = require('raf')
 scrollIntoView = require('scroll-into-view')
 
 Annotator = require('annotator')
-Annotator.Plugin.BucketBar = BucketBar = require('./plugin/bucket-bar')
-Annotator.Plugin.CrossFrame = CrossFrame = require('./plugin/cross-frame')
 $ = Annotator.$
 
 highlighter = require('./highlighter')
@@ -33,11 +31,9 @@ module.exports = class Guest extends Annotator
     ".annotator-hl mouseover":           "onHighlightMouseover"
     ".annotator-hl mouseout":            "onHighlightMouseout"
 
-  # Plugin / Options configuration
   options:
-    TextHighlights: {}
+    Document: {}
     TextSelection: {}
-    clickToClose: true
 
   # Anchoring module
   anchoring: require('./anchoring/html')
@@ -131,24 +127,20 @@ module.exports = class Guest extends Annotator
 
   _setupWrapper: ->
     @wrapper = @element
-    if @options.clickToClose
-      @wrapper.on 'click', (event) =>
-        if !@selectedTargets?.length
-          this.hideFrame()
-    return this
+    this
 
   # These methods aren't used in the iframe-hosted configuration of Annotator.
-  _setupDynamicStyle: -> this
   _setupViewer: -> this
   _setupEditor: -> this
   _setupDocumentEvents: -> this
+  _setupDynamicStyle: -> this
 
   destroy: ->
     $('#annotator-dynamic-style').remove()
 
     @adder.remove()
 
-    @wrapper.find('.annotator-hl').each ->
+    @element.find('.annotator-hl').each ->
       $(this).contents().insertBefore(this)
       $(this).remove()
 
@@ -331,7 +323,7 @@ module.exports = class Guest extends Annotator
     else
       # Show the adder button
       @adder
-        .css(Annotator.Util.mousePosition(event, @wrapper[0]))
+        .css(Annotator.Util.mousePosition(event, @element[0]))
         .show()
 
     true
@@ -388,14 +380,6 @@ module.exports = class Guest extends Annotator
 
     @visibleHighlights = shouldShowHighlights
 
-  # Open the sidebar
-  showFrame: ->
-    @crossframe?.call('open')
-
-  # Close the sidebar
-  hideFrame: ->
-    @crossframe?.call('back')
-
   onAdderMouseup: (event) ->
     event.preventDefault()
     event.stopPropagation()
@@ -412,5 +396,4 @@ module.exports = class Guest extends Annotator
         this.createHighlight()
       when 'comment'
         this.createAnnotation()
-        this.showFrame()
     Annotator.Util.getGlobal().getSelection().removeAllRanges()

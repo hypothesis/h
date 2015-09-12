@@ -42,7 +42,7 @@ scrollToClosest = (anchors, direction) ->
   scrollIntoView(next.highlights[0])
 
 
-class BucketBar extends Annotator.Plugin
+module.exports = class BucketBar extends Annotator.Plugin
   # svg skeleton
   html: """
         <div class="annotator-bucket-bar">
@@ -57,7 +57,7 @@ class BucketBar extends Annotator.Plugin
     gapSize: 60
 
     # Selectors for the scrollable elements on the page
-    scrollables: null
+    scrollables: ['body']
 
   # buckets of annotations that overlap
   buckets: []
@@ -293,6 +293,3 @@ class BucketBar extends Annotator.Plugin
 BucketBar.BUCKET_SIZE = BUCKET_SIZE
 BucketBar.BUCKET_NAV_SIZE = BUCKET_NAV_SIZE
 BucketBar.BUCKET_TOP_THRESHOLD = BUCKET_TOP_THRESHOLD
-
-# Export as a module
-module.exports = BucketBar

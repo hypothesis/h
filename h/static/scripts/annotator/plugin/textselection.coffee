@@ -3,7 +3,7 @@ $ = Annotator.$
 
 
 # This plugin implements the UI code for creating text annotations
-class Annotator.Plugin.TextSelection extends Annotator.Plugin
+module.exports = class TextSelection extends Annotator.Plugin
 
   pluginInit: ->
     # Register the event handlers required for creating a selection

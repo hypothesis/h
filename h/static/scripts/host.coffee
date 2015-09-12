@@ -11,8 +11,8 @@ module.exports = [
   '$window', 'bridge'
   ($window,   bridge) ->
     host =
-      showSidebar: -> callHost('showFrame')
-      hideSidebar: -> callHost('hideFrame')
+      showSidebar: -> callHost('show')
+      hideSidebar: -> callHost('hide')
 
     # Sends a message to the host frame
     callHost = (method) ->
