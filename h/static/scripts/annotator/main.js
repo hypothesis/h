@@ -1,3 +1,4 @@
+var extend = require('extend');
 var Annotator = require('annotator');
 
 // Polyfills
@@ -44,7 +45,7 @@ if (window.PDFViewerApplication) {
 
 if (window.hasOwnProperty('hypothesisConfig')) {
   if (typeof window.hypothesisConfig === 'function') {
-    options = jQuery.extend(options, window.hypothesisConfig());
+    extend(options, window.hypothesisConfig());
   } else {
     throw new TypeError('hypothesisConfig must be a function, see: ' + docs);
   }

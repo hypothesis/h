@@ -1,5 +1,6 @@
 Promise = require('core-js/library/es6/promise')
 baseURI = require('document-base-uri')
+extend = require('extend')
 raf = require('raf')
 scrollIntoView = require('scroll-into-view')
 
@@ -45,7 +46,7 @@ module.exports = class Guest extends Annotator
   anchors: null
   visibleHighlights: false
 
-  html: jQuery.extend {}, Annotator::html,
+  html: extend {}, Annotator::html,
     adder: '''
       <div class="annotator-adder">
         <button class="h-icon-insert-comment" data-action="comment" title="New Note"></button>
