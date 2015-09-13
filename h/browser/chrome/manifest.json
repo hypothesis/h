@@ -18,9 +18,11 @@
   "offline_enabled": false,
   "permissions": [
     "<all_urls>",
-
     "contentSettings",
-    "tabs"
+    "fileBrowserHandler",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking"
   ],
   "content_security_policy":
     "script-src 'self' 'unsafe-eval' {{ src }} https://cdn.mathjax.org; object-src 'self'; font-src 'self' data:;",
@@ -28,6 +30,7 @@
   "background": {
     "persistent": true,
     "scripts": [
+      "lib/pdf-handler.js",
       "lib/tab-store.js",
       "lib/tab-state.js",
       "lib/tab-error-cache.js",

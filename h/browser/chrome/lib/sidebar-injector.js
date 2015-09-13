@@ -13,7 +13,7 @@
    *   extensionURL: A function that receives a path and returns an absolute
    *   url. See: https://developer.chrome.com/extensions/extension#method-getURL
    */
-  function SidebarInjector(chromeTabs, dependencies) {
+  function SidebarInjector(chromeTabs, pdfHandler, dependencies) {
     dependencies = dependencies || {};
 
     var isAllowedFileSchemeAccess = dependencies.isAllowedFileSchemeAccess;
@@ -56,10 +56,14 @@
               "Hypothesis doesn't work on this site yet."));
         }
 
-        if (isFileURL(tab.url)) {
-          return injectIntoLocalDocument(tab);
+        if (pdfHandler.isKnownPDF(tab.url)) {
+          pdfHandler.redirectToViewer(tab);
         } else {
-          return injectIntoRemoteDocument(tab);
+          if (isFileURL(tab.url)) {
+            return injectIntoLocalDocument(tab);
+          } else if (!isPDFViewerURL(tab.url)) {
+            return injectIntoHTML(tab);
+          }
         }
       });
     };
@@ -73,7 +77,7 @@
      */
     this.removeFromTab = function (tab) {
       if (isPDFViewerURL(tab.url)) {
-        return removeFromPDF(tab);
+        return pdfHandler.redirectToPdf(tab);
       } else {
         return removeFromHTML(tab);
       }
@@ -85,7 +89,11 @@
     }
 
     function isPDFURL(url) {
-      return url.toLowerCase().indexOf('.pdf') > 0;
+      if (!isPDFViewerURL(url)) {
+        return url.toLowerCase().indexOf('.pdf') > 0;
+      } else {
+        return false;
+      }
     }
 
     function isPDFViewerURL(url) {
@@ -103,39 +111,15 @@
       });
     }
 
-    function injectIntoLocalDocument(tab) {
-      if (isPDFURL(tab.url)) {
-        return injectIntoLocalPDF(tab);
-      } else {
-        return Promise.reject(new h.LocalFileError('Local non-PDF files are not supported'));
-      }
+     function injectIntoLocalDocument(tab) {
+      return Promise.reject(new h.LocalFileError('Local non-PDF files are not supported'));
     }
 
-    function injectIntoRemoteDocument(tab) {
-      return isPDFURL(tab.url) ? injectIntoPDF(tab) : injectIntoHTML(tab);
-    }
-
-    function injectIntoPDF(tab) {
-      return new Promise(function (resolve, reject) {
-        if (!isPDFViewerURL(tab.url)) {
-          chromeTabs.update(tab.id, {url: getPDFViewerURL(tab.url)}, function () {
-            resolve();
-          });
-        } else {
-          resolve();
-        }
-      });
-    }
-
-    function injectIntoLocalPDF(tab) {
-      return new Promise(function (resolve, reject) {
-        isAllowedFileSchemeAccess(function (isAllowed) {
-          if (isAllowed) {
-            resolve(injectIntoPDF(tab));
-          } else {
-            reject(new h.NoFileAccessError('Local file scheme access denied'));
-          }
-        });
+    function switchToPDFViewer(tab) {
+      // load PDF.js Viewer
+      return new Promise(function (resolve) {
+        var viewerUrl = getPDFViewerURL(tab.url);
+        chromeTabs.update(tab.id, {url: viewerUrl}, resolve);
       });
     }
 
@@ -149,15 +133,6 @@
         return injectScript(tab.id, '/public/config.js').then(function () {
           injectScript(tab.id, '/public/embed.js').then(resolve);
         });
-      });
-    }
-
-    function removeFromPDF(tab) {
-      return new Promise(function (resolve) {
-        var url = tab.url.slice(getPDFViewerURL('').length).split('#')[0];
-        chromeTabs.update(tab.id, {
-          url: decodeURIComponent(url)
-        }, resolve);
       });
     }
 
