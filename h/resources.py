@@ -8,14 +8,14 @@ from h.api.resources import Resource
 class UserStreamFactory(Resource):
     def __getitem__(self, key):
         query = {'q': 'user:{}'.format(key)}
-        return Search(query=query)
+        return Stream(query=query)
 
 
 
 class TagStreamFactory(Resource):
     def __getitem__(self, key):
         query = {'q': 'tag:{}'.format(key)}
-        return Search(query=query)
+        return Stream(query=query)
 
 
 class Annotation(api.Annotation):
