@@ -2,7 +2,7 @@ extend = require('extend')
 Annotator = require('annotator')
 
 
-class PDF extends Annotator.Plugin
+module.exports = class Pdf extends Annotator.Plugin
   documentLoaded: null
   observer: null
   pdfViewer: null
@@ -105,7 +105,3 @@ class PDF extends Annotator.Plugin
 
     for annotation in refreshAnnotations
       annotator.anchor(annotation)
-
-Annotator.Plugin.PDF = PDF
-
-module.exports = PDF

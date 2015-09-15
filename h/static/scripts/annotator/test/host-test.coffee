@@ -1,17 +1,13 @@
-raf = sinon.stub().yields()
-raf['@noCallThru'] = true
-
-CrossFrame = sinon.stub()
-CrossFrame['@noCallThru'] = true
+Annotator = require('annotator')
 
 proxyquire = require('proxyquire')
 Host = proxyquire('../host', {
-  './plugin/cross-frame': CrossFrame,
-  'raf': raf
+  'annotator': Annotator,
 })
 
 describe 'Host', ->
   sandbox = sinon.sandbox.create()
+  CrossFrame = null
   fakeCrossFrame = null
 
   createHost = (options={}) ->
@@ -27,10 +23,13 @@ describe 'Host', ->
     fakeCrossFrame.on = sandbox.stub().returns(fakeCrossFrame)
     fakeCrossFrame.call = sandbox.spy()
 
-    CrossFrame.reset()
+    CrossFrame = sandbox.stub()
     CrossFrame.returns(fakeCrossFrame)
+    Annotator.Plugin.CrossFrame = CrossFrame
 
-  afterEach -> sandbox.restore()
+  afterEach ->
+    sandbox.restore()
+    delete Annotator.Plugin.CrossFrame
 
   describe 'widget visibility', ->
     it 'starts hidden', ->
@@ -56,84 +55,3 @@ describe 'Host', ->
         assert.isFalse(host.visibleHighlights)
         done()
       host.publish('panelReady')
-
-  describe 'crossframe listeners', ->
-    emitHostEvent = (event, args...) ->
-      fn(args...) for [evt, fn] in fakeCrossFrame.on.args when event == evt
-
-    describe 'on "showFrame" event', ->
-      it 'shows the frame', ->
-        target = sandbox.stub(Host.prototype, 'showFrame')
-        host = createHost()
-        emitHostEvent('showFrame')
-        assert.called(target)
-
-    describe 'on "hideFrame" event', ->
-      it 'hides the frame', ->
-        target = sandbox.stub(Host.prototype, 'hideFrame')
-        host = createHost()
-        emitHostEvent('hideFrame')
-        assert.called(target)
-
-  describe 'pan gestures', ->
-    host = null
-
-    beforeEach ->
-      host = createHost({})
-
-    describe 'panstart event', ->
-      beforeEach ->
-        sandbox.stub(window, 'getComputedStyle').returns({marginLeft: '100px'})
-        host.onPan({type: 'panstart'})
-
-      it 'disables pointer events and transitions on the widget', ->
-        assert.isTrue(host.frame.hasClass('annotator-no-transition'))
-        assert.equal(host.frame.css('pointer-events'), 'none')
-
-      it 'captures the left margin as the gesture initial state', ->
-        assert.equal(host.gestureState.initial, '100')
-
-    describe 'panend event', ->
-      it 'enables pointer events and transitions on the widget', ->
-        host.gestureState = {final: 0}
-        host.onPan({type: 'panend'})
-        assert.isFalse(host.frame.hasClass('annotator-no-transition'))
-        assert.equal(host.frame.css('pointer-events'), '')
-
-      it 'calls `showFrame` if the widget is fully visible', ->
-        host.gestureState = {final: -500}
-        showFrame = sandbox.stub(host, 'showFrame')
-        host.onPan({type: 'panend'})
-        assert.calledOnce(showFrame)
-
-      it 'calls `hideFrame` if the widget is not fully visible', ->
-        host.gestureState = {final: -100}
-        hideFrame = sandbox.stub(host, 'hideFrame')
-        host.onPan({type: 'panend'})
-        assert.calledOnce(hideFrame)
-
-    describe 'panleft and panright events', ->
-      it 'shrinks or grows the widget to match the delta', ->
-        host.gestureState = {initial: -100}
-
-        host.onPan({type: 'panleft', deltaX: -50})
-        assert.equal(host.gestureState.final, -150)
-
-        host.onPan({type: 'panright', deltaX: 100})
-        assert.equal(host.gestureState.final, 0)
-
-  describe 'swipe gestures', ->
-    host = null
-
-    beforeEach ->
-      host = createHost({})
-
-    it 'opens the sidebar on swipeleft', ->
-      showFrame = sandbox.stub(host, 'showFrame')
-      host.onSwipe({type: 'swipeleft'})
-      assert.calledOnce(showFrame)
-
-    it 'closes the sidebar on swiperight', ->
-      hideFrame = sandbox.stub(host, 'hideFrame')
-      host.onSwipe({type: 'swiperight'})
-      assert.calledOnce(hideFrame)

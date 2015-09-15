@@ -1,8 +1,8 @@
+Annotator = require('annotator')
+$ = Annotator.$
+
 highlighter = {}
 anchoring = {}
-
-CrossFrame = sinon.stub()
-CrossFrame['@noCallThru'] = true
 
 raf = sinon.stub().yields()
 raf['@noCallThru'] = true
@@ -14,15 +14,14 @@ proxyquire = require('proxyquire')
 Guest = proxyquire('../guest', {
   './highlighter': highlighter,
   './anchoring/html': anchoring,
-  './plugin/cross-frame': CrossFrame,
-  'raf': raf
+  'annotator': Annotator,
+  'raf': raf,
   'scroll-into-view': scrollIntoView,
 })
 
-$ = require('jquery')
-
 describe 'Guest', ->
-  sandbox = null
+  sandbox = sinon.sandbox.create()
+  CrossFrame = null
   fakeCrossFrame = null
 
   createGuest = (options) ->
@@ -30,18 +29,19 @@ describe 'Guest', ->
     return new Guest(element, options || {})
 
   beforeEach ->
-    sandbox = sinon.sandbox.create()
     fakeCrossFrame = {
       onConnect: sinon.stub()
       on: sinon.stub()
       sync: sinon.stub()
     }
 
-    CrossFrame.reset()
+    CrossFrame = sandbox.stub()
     CrossFrame.returns(fakeCrossFrame)
+    Annotator.Plugin.CrossFrame = CrossFrame
 
   afterEach ->
     sandbox.restore()
+    delete Annotator.Plugin.CrossFrame
 
   describe 'cross frame', ->
 

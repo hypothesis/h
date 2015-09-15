@@ -10,38 +10,30 @@ if (g.wgxpath) {
 // Applications
 Annotator.Guest = require('./guest');
 Annotator.Host = require('./host');
+Annotator.Sidebar = require('./sidebar');
+Annotator.PdfSidebar = require('./pdf-sidebar');
+
+// UI plugins
+Annotator.Plugin.BucketBar = require('./plugin/bucket-bar');
+Annotator.Plugin.Toolbar = require('./plugin/toolbar');
+
+// Document type plugins
+Annotator.Plugin.Pdf = require('./plugin/pdf');
+require('../vendor/annotator.document');  // Does not export the plugin :(
+
+// Selection plugins
+Annotator.Plugin.TextSelection = require('./plugin/textselection');
 
 // Cross-frame communication
 Annotator.Plugin.CrossFrame = require('./plugin/cross-frame');
-Annotator.Plugin.CrossFrame.Bridge = require('../bridge');
 Annotator.Plugin.CrossFrame.AnnotationSync = require('../annotation-sync');
+Annotator.Plugin.CrossFrame.Bridge = require('../bridge');
 Annotator.Plugin.CrossFrame.Discovery = require('../discovery');
-
-// Bucket bar
-require('./plugin/bucket-bar');
-
-// Toolbar
-require('./plugin/toolbar');
-
-// Creating selections
-require('./plugin/textselection');
 
 var docs = 'https://h.readthedocs.org/en/latest/hacking/customized-embedding.html';
 var options = {
-  app: jQuery('link[type="application/annotator+html"]').attr('href'),
-  BucketBar: {container: '.annotator-frame', scrollables: ['body']},
-  Toolbar: {container: '.annotator-frame'}
+  app: jQuery('link[type="application/annotator+html"]').attr('href')
 };
-
-// Document metadata plugins
-if (window.PDFViewerApplication) {
-  require('./plugin/pdf');
-  options.BucketBar.scrollables = ['#viewerContainer'];
-  options.PDF = {};
-} else {
-  require('../vendor/annotator.document');
-  options.Document = {};
-}
 
 if (window.hasOwnProperty('hypothesisConfig')) {
   if (typeof window.hypothesisConfig === 'function') {
@@ -53,7 +45,9 @@ if (window.hasOwnProperty('hypothesisConfig')) {
 
 Annotator.noConflict().$.noConflict(true)(function() {
   'use strict';
-  var Klass = Annotator.Host;
+  var Klass = window.PDFViewerApplication ?
+      Annotator.PdfSidebar :
+      Annotator.Sidebar;
   if (options.hasOwnProperty('constructor')) {
     Klass = options.constructor;
     delete options.constructor;

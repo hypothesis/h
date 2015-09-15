@@ -1,3 +1,4 @@
+Annotator = require('annotator')
 $ = Annotator.$
 
 makeButton = (item) ->
@@ -10,7 +11,7 @@ makeButton = (item) ->
   button = $('<li></li>').append(anchor)
   return button[0]
 
-class Annotator.Plugin.Toolbar extends Annotator.Plugin
+module.exports = class Toolbar extends Annotator.Plugin
   HIDE_CLASS = 'annotator-hide'
 
   events:
@@ -35,9 +36,9 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           event.stopPropagation()
           collapsed = @annotator.frame.hasClass('annotator-collapsed')
           if collapsed
-            @annotator.showFrame()
+            @annotator.show()
           else
-            @annotator.hideFrame()
+            @annotator.hide()
     ,
       "title": "Hide Highlights"
       "class": "h-icon-visibility"
@@ -57,7 +58,7 @@ class Annotator.Plugin.Toolbar extends Annotator.Plugin
           event.preventDefault()
           event.stopPropagation()
           @annotator.createAnnotation()
-          @annotator.showFrame()
+          @annotator.show()
     ]
     @buttons = $(makeButton(item) for item in items)
 
