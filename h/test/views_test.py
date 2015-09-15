@@ -6,19 +6,18 @@ import json
 import unittest
 import mock
 
-import pyramid
 from pyramid import testing
 import pytest
 
 from h import views
-from . import factories
 
 
 class TestAnnotationView(unittest.TestCase):
 
     def test_og_document(self):
-        context = {'id': '123', 'user': 'foo'}
-        context['document'] = {'title': 'WikiHow — How to Make a  ☆Starmap☆'}
+        annotation = {'id': '123', 'user': 'foo'}
+        annotation['document'] = {'title': 'WikiHow — How to Make a  ☆Starmap☆'}
+        context = mock.MagicMock(model=annotation)
         request = testing.DummyRequest()
         result = views.annotation(context, request)
         assert isinstance(result, dict)
@@ -26,7 +25,8 @@ class TestAnnotationView(unittest.TestCase):
         assert any(test(d) for d in result['meta_attrs'])
 
     def test_og_no_document(self):
-        context = {'id': '123', 'user': 'foo'}
+        annotation = {'id': '123', 'user': 'foo'}
+        context = mock.MagicMock(model=annotation)
         request = testing.DummyRequest()
         result = views.annotation(context, request)
         assert isinstance(result, dict)
@@ -43,7 +43,7 @@ class TestJS(object):
         blocklist = {"foo": "bar"}
         request.registry.settings = {'h.blocklist': blocklist}
 
-        data = views.js({}, request)
+        data = views.embed({}, request)
 
         assert data['blocklist'] == json.dumps(blocklist)
 

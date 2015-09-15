@@ -1,50 +1,30 @@
 # -*- coding: utf-8 -*-
-from pyramid import security
+from pyramid.security import Allow
 
-from .api import create_root as create_api
-from .models import Annotation
-
-
-class Resource(dict):
-    """
-    Resource is an entry in the traversal tree.
-    """
-    __name__ = None
-    __parent__ = None
-
-    def add(self, name, obj):
-        """
-        Adds obj as a child resource with the given name. Automatically sets
-        the __name__ and __parent__ properties of the child resource object.
-        """
-        obj.__name__ = name
-        obj.__parent__ = self
-        self[name] = obj
+from h.api import resources as api
+from h.api.resources import Resource
 
 
 class UserStreamFactory(Resource):
     def __getitem__(self, key):
-        return Stream(stream_type='user', stream_key=key)
+        query = {'q': 'user:{}'.format(key)}
+        return Search(query=query)
+
 
 
 class TagStreamFactory(Resource):
     def __getitem__(self, key):
-        return Stream(stream_type='tag', stream_key=key)
+        query = {'q': 'tag:{}'.format(key)}
+        return Search(query=query)
 
 
-class AnnotationFactory(Resource):
-    def __getitem__(self, key):
-        annotation = Annotation.fetch(key)
-        if annotation is None:
-            raise KeyError(key)
-        annotation.__name__ = key
-        annotation.__parent__ = self
-
-        return annotation
-
-
-class Application(Resource):
+class Annotation(api.Annotation):
     pass
+
+
+class Annotations(api.Annotations):
+    def factory(self, key):
+        return Annotation(id=key)
 
 
 class Stream(Resource):
@@ -52,10 +32,7 @@ class Stream(Resource):
 
 
 class Root(Resource):
-    __acl__ = [
-        (security.Allow, security.Authenticated, 'authenticated'),
-        (security.Allow, 'group:__admin__', 'admin'),
-    ]
+    __acl__ = [(Allow, 'group:__admin__', 'admin')]
 
 
 def create_root(request):
@@ -63,10 +40,8 @@ def create_root(request):
     Returns a new traversal tree root.
     """
     r = Root()
-    r.add('api', create_api(request))
-    r.add('app', Application())
-    r.add('stream', Stream())
-    r.add('a', AnnotationFactory())
+    r.add('api', api.create_root(request))
+    r.add('a', Annotations(request))
     r.add('t', TagStreamFactory())
     r.add('u', UserStreamFactory())
     return r

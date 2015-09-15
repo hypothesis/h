@@ -10,11 +10,11 @@ from pyramid.view import view_config
 from h.api import cors
 from h.api.auth import get_user
 from h.api.events import AnnotationEvent
-from h.api.models import Annotation
-from h.api.resources import Root
-from h.api.resources import Annotations
 from h.api import search as search_lib
 from h.api import logic
+from h.api.resources import Annotation
+from h.api.resources import Annotations
+from h.api.resources import Root
 
 
 log = logging.getLogger(__name__)
@@ -30,15 +30,21 @@ cors_policy = cors.policy(
     allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
 
 
-def api_config(**kwargs):
-    """Extend Pyramid's @view_config decorator with modified defaults."""
-    config = {
-        'accept': 'application/json',
-        'decorator': cors_policy,
-        'renderer': 'json',
-    }
-    config.update(kwargs)
-    return view_config(**config)
+def api_config(**settings):
+    """
+    A view configuration decorator with defaults.
+
+    JSON in and out. CORS with tokens and client id but no cookie.
+    """
+    settings.setdefault('decorator', cors_policy)
+    return json_view(**settings)
+
+
+def json_view(**settings):
+    """A view configuration decorator with JSON defaults."""
+    settings.setdefault('accept', 'application/json')
+    settings.setdefault('renderer', 'json')
+    return view_config(**settings)
 
 
 @api_config(context=Root)
@@ -93,7 +99,7 @@ def search(request):
     )
 
 
-@api_config(context=Root, name='access_token')
+@api_config(route_name='access_token')
 def access_token(request):
     """The OAuth 2 access token view."""
     return request.create_token_response()
@@ -106,7 +112,7 @@ def access_token(request):
 # currently accessible off-origin. Given that this method of authenticating to
 # the API is not intended to remain, this seems like a limitation we do not
 # need to lift any time soon.
-@api_config(context=Root, name='token', renderer='string')
+@api_config(route_name='token', renderer='string')
 def annotator_token(request):
     """The Annotator Auth token view."""
     request.grant_type = 'client_credentials'
@@ -156,11 +162,10 @@ def create(request):
     return search_lib.render(annotation)
 
 
-@api_config(containment=Root, context=Annotation,
-            request_method='GET', permission='read')
+@api_config(context=Annotation, request_method='GET', permission='read')
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
-    annotation = context
+    annotation = context.model
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'read')
@@ -168,11 +173,10 @@ def read(context, request):
     return search_lib.render(annotation)
 
 
-@api_config(containment=Root, context=Annotation,
-            request_method='PUT', permission='update')
+@api_config(context=Annotation, request_method='PUT', permission='update')
 def update(context, request):
     """Update the fields we received and store the updated version."""
-    annotation = context
+    annotation = context.model
 
     # Read the new fields for the annotation
     try:
@@ -183,7 +187,7 @@ def update(context, request):
                           status_code=400)  # Client Error: Bad Request
 
     # Check user's permissions
-    has_admin_permission = request.has_permission('admin', annotation)
+    has_admin_permission = request.has_permission('admin', context)
 
     # Update and store the annotation
     try:
@@ -201,11 +205,10 @@ def update(context, request):
     return search_lib.render(annotation)
 
 
-@api_config(containment=Root, context=Annotation,
-            request_method='DELETE', permission='delete')
+@api_config(context=Annotation, request_method='DELETE', permission='delete')
 def delete(context, request):
     """Delete the annotation permanently."""
-    annotation = context
+    annotation = context.model
 
     logic.delete_annotation(annotation)
 
