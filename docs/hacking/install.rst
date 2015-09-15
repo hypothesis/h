@@ -211,23 +211,6 @@ dependencies into the ``h/node_modules`` directory:
 
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
 
-
-Add Node modules to your PATH
------------------------------
-
-If you don't have your ``h/node_modules/.bin`` directory on your ``PATH`` then
-you'll get errors because the Node modules you've installed can't be found
-(for example: ``Program file not found: uglifyjs``).
-To add the Node modules to your ``PATH``:
-
-.. code-block:: bash
-
-    export PATH=./node_modules/.bin:$PATH
-
-If you add the above line to your ``~/.bashrc`` file then you won't have to
-enter it every time you start a new terminal.
-
-
 Running h
 ---------
 
