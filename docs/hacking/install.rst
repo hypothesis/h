@@ -128,9 +128,13 @@ installed.
 2.  Install the ICU Analysis plugin using the `instructions provided`_. **NB:**
     ensure you install the correct version of the plugin for your version of
     ElasticSearch.
+3.  (Re-)start the ElasticSearch daemon following the steps on the ElasticSearch
+    `installation page`_. Note that the daemon needs to be restarted after installing
+    the ICU plugin.
 
 .. _installing the package on your platform: https://www.elastic.co/downloads/elasticsearch
 .. _instructions provided: https://github.com/elastic/elasticsearch-analysis-icu#icu-analysis-for-elasticsearch
+.. _installation page: https://www.elastic.co/downloads/elasticsearch
 
 
 ElasticSearch Troubleshooting
