@@ -3,7 +3,6 @@
 import pytest
 import mock
 from webob import multidict
-from pyramid import testing
 
 from h.api.search import query
 
@@ -11,8 +10,8 @@ from h.api.search import query
 def test_auth_filter_with_not_logged_in():
     effective_principals = ['system.Everyone']
     assert query.auth_filter(effective_principals) == {
-            'terms': {
-                'permissions.read': ['group:__world__', 'system.Everyone']}}
+        'terms': {
+            'permissions.read': ['group:__world__', 'system.Everyone']}}
 
 
 def test_auth_filter_when_user_is_not_a_member_of_any_groups():
@@ -213,7 +212,7 @@ def test_build_for_user():
     q = query.build(multidict.NestedMultiDict({"user": "bob"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"user": "bob"}}]}}
+        "bool": {"should": [{"match": {"user": "bob"}}]}}
 
 
 @build_fixtures
@@ -227,7 +226,7 @@ def test_build_for_multiple_users():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"user": "fred"}},
                 {"match": {"user": "bob"}}
             ]
@@ -241,7 +240,7 @@ def test_build_for_tag():
     q = query.build(multidict.NestedMultiDict({"tags": "foo"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"tags": "foo"}}]}}
+        "bool": {"should": [{"match": {"tags": "foo"}}]}}
 
 
 @build_fixtures
@@ -255,7 +254,7 @@ def test_build_for_multiple_tags():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"tags": "foo"}},
                 {"match": {"tags": "bar"}}
             ]
@@ -270,7 +269,7 @@ def test_build_with_combined_user_and_tag_query():
         multidict.NestedMultiDict({"user": "bob", "tags": "foo"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [
+        "bool": {"should": [
             {"match": {"user": "bob"}},
             {"match": {"tags": "foo"}},
         ]}}
@@ -278,7 +277,7 @@ def test_build_with_combined_user_and_tag_query():
 
 @build_fixtures
 def test_build_with_keyword():
-    """Keywords are returned in the query dict in a "multi_match" clause."""
+    """Keywords are returned in a "simple_query_string" clause."""
     params = multidict.MultiDict()
     params.add("any", "howdy")
 
@@ -286,13 +285,12 @@ def test_build_with_keyword():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {
-                    "multi_match": {
+                    "simple_query_string": {
                         "fields": ["quote", "tags", "text", "uri.parts",
                                    "user"],
-                        "query": ["howdy"],
-                        "type": "cross_fields"
+                        "query": "howdy",
                     }
                 }
             ]
@@ -310,16 +308,15 @@ def test_build_with_multiple_keywords():
     q = query.build(params, [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"multi_match": {
+        "bool": {"should": [{"simple_query_string": {
             "fields": ["quote", "tags", "text", "uri.parts", "user"],
-            "query": ["howdy", "there"],
-            "type": "cross_fields"
+            "query": "howdy there",
         }}]}
     }
 
 
 @build_fixtures
-def test_build_for_uri(uri):
+def test_build_for_uri(auth_filter, nipsa, uri):
     """'uri' args are returned in the query dict in a "match" clause.
 
     This is what happens when you open the sidebar on a page and it loads
@@ -334,14 +331,20 @@ def test_build_for_uri(uri):
     q2 = query.build(
         multidict.NestedMultiDict({"uri": "http://whitehouse.gov/"}), [])
 
-    assert q1["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
-    assert q2["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"uri": "http://whitehouse.gov/"}}]}}
+    assert q1["query"]["filtered"]["filter"]["and"] == [
+        auth_filter.return_value,
+        nipsa.nipsa_filter.return_value,
+        {"query": {"match": {"uri": "http://example.com/"}}},
+    ]
+    assert q2["query"]["filtered"]["filter"]["and"] == [
+        auth_filter.return_value,
+        nipsa.nipsa_filter.return_value,
+        {"query": {"match": {"uri": "http://whitehouse.gov/"}}},
+    ]
 
 
 @build_fixtures
-def test_build_for_uri_with_multiple_representations(uri):
+def test_build_for_uri_with_multiple_representations(auth_filter, nipsa, uri):
     """It should expand the search to all URIs.
 
     If h.api.uri.expand returns multiple documents for the URI then
@@ -358,26 +361,25 @@ def test_build_for_uri_with_multiple_representations(uri):
     q = query.build(
         multidict.NestedMultiDict({"uri": "http://example.com/"}), [])
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {
-            "must": [
-                {
-                    "bool": {
-                        "minimum_should_match": 1,
-                        "should": [
-                            {"match": {"uri": "http://example.com/"}},
-                            {"match": {"uri": "http://example2.com/"}},
-                            {"match": {"uri": "http://example3.com/"}}
-                        ]
-                    }
+    assert q["query"]["filtered"]["filter"]["and"] == [
+        auth_filter.return_value,
+        nipsa.nipsa_filter.return_value,
+        {
+            "query": {
+                "bool": {
+                    "should": [
+                        {"match": {"uri": "http://example.com/"}},
+                        {"match": {"uri": "http://example2.com/"}},
+                        {"match": {"uri": "http://example3.com/"}}
+                    ]
                 }
-            ]
-        }
-    }
+            }
+        },
+    ]
 
 
-@mock.patch("h.api.search.query.uri")
-def test_build_for_uri_normalized(uri):
+@build_fixtures
+def test_build_for_uri_normalized(auth_filter, nipsa, uri):
     """
     Uses a term filter against target.scope to filter for URI.
 
@@ -400,11 +402,20 @@ def test_build_for_uri_normalized(uri):
 
     uri.expand.assert_called_with("http://example.com/")
 
-    expected_filter = {"or": [
-        {"term": {"target.scope": "http://giraffes.com"}},
-        {"term": {"target.scope": "https://elephants.com"}},
-    ]}
-    assert expected_filter in q["query"]["filtered"]["filter"]["and"]
+    terms_filter = {
+        "terms": {
+            "target.scope": [
+                "http://giraffes.com",
+                "https://elephants.com",
+            ]
+        }
+    }
+
+    assert q["query"]["filtered"]["filter"]["and"] == [
+        auth_filter.return_value,
+        nipsa.nipsa_filter.return_value,
+        terms_filter,
+    ]
 
 
 @build_fixtures
@@ -413,7 +424,7 @@ def test_build_with_single_text_param():
     q = query.build(multidict.NestedMultiDict({"text": "foobar"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"text": "foobar"}}]}}
+        "bool": {"should": [{"match": {"text": "foobar"}}]}}
 
 
 @build_fixtures
@@ -426,7 +437,7 @@ def test_build_with_multiple_text_params():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"text": "foo"}},
                 {"match": {"text": "bar"}}
             ]
@@ -440,7 +451,7 @@ def test_build_with_single_quote_param():
     q = query.build(multidict.NestedMultiDict({"quote": "foobar"}), [])
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"quote": "foobar"}}]}}
+        "bool": {"should": [{"match": {"quote": "foobar"}}]}}
 
 
 @build_fixtures
@@ -453,7 +464,7 @@ def test_build_with_multiple_quote_params():
 
     assert q["query"]["filtered"]["query"] == {
         "bool": {
-            "must": [
+            "should": [
                 {"match": {"quote": "foo"}},
                 {"match": {"quote": "bar"}}
             ]
@@ -509,7 +520,7 @@ def test_build_with_arbitrary_params():
 
     assert q["query"]["filtered"]["query"] == {
         'bool': {
-            'must': [
+            'should': [
                 {
                     'match': {'foo.bar': 'arbitrary'}
                 }
