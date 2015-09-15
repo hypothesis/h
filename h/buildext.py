@@ -4,6 +4,7 @@
 is exposed as the command-line utility hypothesis-buildext.
 """
 import argparse
+import codecs
 import logging
 import os
 import os.path
@@ -17,7 +18,6 @@ from pyramid import paster
 from pyramid.path import AssetResolver
 from pyramid.request import Request
 from pyramid.renderers import render
-from pyramid.view import render_view
 
 import h
 
@@ -48,7 +48,7 @@ def build_extension_common(env, bundle_app=False):
                     content_dir + '/config.js')
 
     # Render the embed code.
-    with open(content_dir + '/embed.js', 'w') as fp:
+    with codecs.open(content_dir + '/embed.js', 'w', 'utf-8') as fp:
         if bundle_app:
             app_uri = request.webassets_env.url + '/app.html'
         else:
@@ -92,7 +92,7 @@ def chrome_manifest(request):
         version = h.__version__
         version_name = 'Official Build'
 
-    manifest_file = open('h/browser/chrome/manifest.json')
+    manifest_file = codecs.open('h/browser/chrome/manifest.json', 'r', 'utf-8')
     manifest_tpl = Template(manifest_file.read())
     src = request.resource_url(request.context)
 
@@ -110,7 +110,7 @@ def chrome_manifest(request):
 
 def firefox_manifest(request):
     version = h.__version__
-    manifest_file = open('h/browser/firefox/package.json')
+    manifest_file = codecs.open('h/browser/firefox/package.json', 'r', 'utf-8')
     manifest_tpl = Template(manifest_file.read())
     return manifest_tpl.render(version=version)
 
@@ -185,19 +185,19 @@ def build_chrome(args):
     # Render the sidebar html.
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(env, bundle_app=True)
-        with open(content_dir + '/app.html', 'w') as fp:
-            data = render_view(env['root'], env['request'], 'app.html')
+        with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
+            data = render('h:templates/app.html.jinja2', {}, env['request'])
             fp.write(data)
     else:
         build_extension_common(env)
 
     # Render the manifest.
-    with open('build/chrome/manifest.json', 'w') as fp:
+    with codecs.open('build/chrome/manifest.json', 'w', 'utf-8') as fp:
         data = chrome_manifest(env['request'])
         fp.write(data)
 
     # Render the blocklist as a JSON file.
-    with open('build/chrome/blocklist.json', 'w') as fp:
+    with codecs.open('build/chrome/blocklist.json', 'w', 'utf-8') as fp:
         fp.write(json.dumps(env['registry'].settings['h.blocklist']))
 
 
@@ -256,7 +256,7 @@ def build_firefox(args):
     build_extension_common(env)
 
     # Render the manifest.
-    with open('build/firefox/package.json', 'w') as fp:
+    with codecs.open('build/firefox/package.json', 'w', 'utf-8') as fp:
         data = firefox_manifest(env['request'])
         fp.write(data)
 
