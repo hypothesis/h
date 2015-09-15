@@ -24,7 +24,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from .api.auth import get_user  # FIXME: should not import from .api
 from h.api import nipsa
 from h.api import uri
-from h.api import search
+from h.api.search import query
 from .models import Annotation
 
 
@@ -117,9 +117,8 @@ class FilterToElasticFilter(object):
                 "filter": {
                     "bool": {
                         "must": [
-                            search.auth_filter(request.effective_principals),
-                            nipsa.nipsa_filter(
-                                userid=request.authenticated_userid),
+                            query.AuthFilter(request)({}),
+                            nipsa.nipsa_filter(request.authenticated_userid),
                         ]
                     }
                 },
