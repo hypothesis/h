@@ -15,18 +15,6 @@ log = logging.getLogger(__name__)
 PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
 
 
-def search_annotations(params, effective_principals, user=None,
-                       search_normalized_uris=False):
-    results = search_lib.search(params, effective_principals,
-                                user=user,
-                                search_normalized_uris=search_normalized_uris)
-
-    return {
-        'total': results['total'],
-        'rows': [search_lib.render(a) for a in results['rows']],
-    }
-
-
 def create_annotation(fields, user):
     """Create and store an annotation."""
     # Some fields are not to be set by the user, ignore them

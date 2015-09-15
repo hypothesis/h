@@ -39,46 +39,28 @@ def test_index():
     assert links['search']['url'] == host + '/search'
 
 
-# The fixtures required to mock all of search()'s dependencies.
-search_fixtures = pytest.mark.usefixtures('logic', 'get_user')
-
-
-@search_fixtures
-def test_search_calls_get_user(logic, get_user):
-    """It should call get_user() once with the right args."""
-    request = mock.Mock()
+def test_search_searches(search_lib):
+    request = testing.DummyRequest()
 
     views.search(request)
 
-    get_user.assert_called_once_with(request)
+    search_lib.search.assert_called_once_with(request, request.params)
 
 
-@search_fixtures
-def test_search_calls_feature(logic, get_user):
-    """It should call request.feature() once with the right args."""
-    request = mock.Mock()
+def test_search_renders_results(search_lib):
+    request = testing.DummyRequest()
+    search_lib.search.return_value = {
+        'total': 3,
+        'rows': ['a', 'b', 'c'],
+    }
+    search_lib.render.side_effect = lambda x: x.upper()
 
-    views.search(request)
+    result = views.search(request)
 
-    request.feature.assert_called_once_with('search_normalized')
-
-
-@search_fixtures
-def test_search_calls_search_annotations(logic, get_user):
-    """It should call search_annotations() once with the right args."""
-    request = mock.Mock()
-
-    views.search(request)
-
-    logic.search_annotations.assert_called_once_with(
-        request.params, request.effective_principals,
-        get_user.return_value, request.feature.return_value)
-
-
-@search_fixtures
-def test_search_returns_search_annotations(logic, get_user):
-    """It should return what search_annotations() returns."""
-    assert views.search(mock.Mock()) == logic.search_annotations.return_value
+    assert result == {
+        'total': 3,
+        'rows': ['A', 'B', 'C'],
+    }
 
 
 def test_access_token_returns_create_token_response():
@@ -122,93 +104,28 @@ def test_annotator_token_gets_access_token_from_response_json(access_token):
     response.json_body.get.assert_called_once_with('access_token', response)
 
 
-# The fixtures required to mock all of annotations_index()'s dependencies.
-annotations_index_fixtures = pytest.mark.usefixtures('get_user', 'search_lib')
-
-
-@annotations_index_fixtures
-def test_annotations_index_calls_get_user(get_user):
-    """It should call get_user() once passing the request."""
-    request = mock.Mock()
+def test_annotations_index_searches(search_lib):
+    request = testing.DummyRequest()
 
     views.annotations_index(request)
 
-    get_user.assert_called_once_with(request)
+    search_lib.search.assert_called_once_with(request, {"limit": 20})
 
 
-@annotations_index_fixtures
-def test_annotations_index_calls_index(search_lib):
-    """It should call search_lib.index() once."""
-    views.annotations_index(mock.Mock())
-
-    assert search_lib.index.call_count == 1
-
-
-@annotations_index_fixtures
-def test_annotations_index_passes_user_to_index(get_user, search_lib):
-    """It should pass the user from get_user() to search_lib.index()."""
-    views.annotations_index(mock.Mock())
-
-    assert search_lib.index.call_args[1]['user'] == get_user.return_value
-
-
-@annotations_index_fixtures
-def test_annotations_index_calls_feature():
-    """It should call request.feature() once, passing 'search_normalized'."""
-    request = mock.Mock()
-
-    views.annotations_index(request)
-
-    request.feature.assert_called_once_with('search_normalized')
-
-
-@annotations_index_fixtures
-def test_annotations_index_passes_search_normalized_uris(search_lib):
-    """It should pass search_normalized from request.feature() to index()."""
-    request = mock.Mock()
-
-    views.annotations_index(request)
-
-    assert search_lib.index.call_args[1]['search_normalized_uris'] == (
-        request.feature.return_value)
-
-
-@annotations_index_fixtures
-def test_annotations_index_returns_total(search_lib):
-    """It should return the total from search_lib.index()."""
-    search_lib.index.return_value = {
+def test_annotations_index_renders_results(search_lib):
+    request = testing.DummyRequest()
+    search_lib.search.return_value = {
         'total': 3,
-        # In production these would be annotation dicts, not strings.
-        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+        'rows': ['a', 'b', 'c'],
     }
+    search_lib.render.side_effect = lambda x: x.upper()
 
-    response_data = views.annotations_index(mock.Mock())
+    result = views.annotations_index(request)
 
-    assert response_data['total'] == 3
-
-
-@annotations_index_fixtures
-def test_annotations_index_returns_rendered_annotations(search_lib):
-    """It should return the rendered annotations.
-
-    It should pass the annotations from search_lib.index() through
-    search_lib.render() and return the results.
-
-    """
-    search_lib.index.return_value = {
+    assert result == {
         'total': 3,
-        # In production these would be annotation dicts, not strings.
-        'rows': ['annotation_1', 'annotation_2', 'annotation_3']
+        'rows': ['A', 'B', 'C'],
     }
-    # Our mock render function just appends '_rendered' onto our mock
-    # annotation strings.
-    search_lib.render.side_effect = lambda annotation: annotation + '_rendered'
-
-    response_data = views.annotations_index(mock.Mock())
-
-    assert response_data['rows'] == [
-        'annotation_1_rendered', 'annotation_2_rendered',
-        'annotation_3_rendered']
 
 
 # The fixtures required to mock all of create()'s dependencies.

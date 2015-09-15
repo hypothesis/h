@@ -7,224 +7,157 @@ from webob import multidict
 from h.api.search import query
 
 
-def test_auth_filter_with_not_logged_in():
-    effective_principals = ['system.Everyone']
-    assert query.auth_filter(effective_principals) == {
-        'terms': {
-            'permissions.read': ['group:__world__', 'system.Everyone']}}
-
-
-def test_auth_filter_when_user_is_not_a_member_of_any_groups():
-    effective_principals = [
-        'group:__world__',
-        'consumer:nosuchid',
-        'acct:nobu@hypothesis.is',
-        'system.Authenticated',
-        'system.Everyone',
-    ]
-    assert query.auth_filter(effective_principals) == {
-        'terms': {'permissions.read': effective_principals}}
-
-
-def test_auth_filter_when_user_is_admin():
-    effective_principals = [
-        'group:__world__',
-        'consumer:nosuchid',
-        'group:__admin__',
-        'acct:nobu@hypothesis.is',
-        'system.Authenticated',
-        'system.Everyone',
-    ]
-    assert query.auth_filter(effective_principals) == {
-        'terms': {'permissions.read': effective_principals}}
-
-
-def test_auth_filter_when_user_is_staff_member():
-    effective_principals = [
-        'group:__world__',
-        'consumer:nosuchid',
-        'group:__staff__',
-        'acct:nobu@hypothesis.is',
-        'system.Authenticated',
-        'system.Everyone',
-    ]
-    assert query.auth_filter(effective_principals) == {
-        'terms': {'permissions.read': effective_principals}}
-
-
-def test_auth_filter_when_user_is_group_member():
-    effective_principals = [
-        'group:__world__',
-        'consumer:nosuchid',
-        'acct:nobu@hypothesis.is',
-        'group:xyzabc',
-        'system.Authenticated',
-        'system.Everyone',
-    ]
-    assert query.auth_filter(effective_principals) == {
-        'terms': {'permissions.read': effective_principals}}
-
-
-def test_auth_filter_when_user_is_member_of_multiple_groups():
-    effective_principals = [
-        'group:__world__',
-        'consumer:nosuchid',
-        'acct:nobu@hypothesis.is',
-        'group:xyzabc',
-        'group:hdychs',
-        'group:qwlkjr',
-        'system.Authenticated',
-        'system.Everyone',
-    ]
-    assert query.auth_filter(effective_principals) == {
-        'terms': {'permissions.read': effective_principals}}
-
-
-# The fixtures required to mock all of build()'s dependencies.
-build_fixtures = pytest.mark.usefixtures('nipsa', 'uri', 'auth_filter')
-
-
-@build_fixtures
-def test_build_offset_defaults_to_0():
+def test_builder_offset_defaults_to_0():
     """If no offset is given then "from": 0 is used in the query by default."""
-    q = query.build(multidict.NestedMultiDict(), [])
+    builder = query.Builder()
+
+    q = builder.build({})
 
     assert q["from"] == 0
 
 
-@build_fixtures
-def test_build_custom_offsets_are_passed_in():
+def test_builder_custom_offsets_are_passed_in():
     """If an offset is given it's returned in the query dict."""
-    q = query.build(multidict.NestedMultiDict({"offset": 7}), [])
+    builder = query.Builder()
+
+    q = builder.build({"offset": 7})
 
     assert q["from"] == 7
 
 
-@build_fixtures
-def test_build_offset_string_is_converted_to_int():
+def test_builder_offset_string_is_converted_to_int():
     """'offset' arguments should be converted from strings to ints."""
-    q = query.build(multidict.NestedMultiDict({"offset": "23"}), [])
+    builder = query.Builder()
+
+    q = builder.build({"offset": "23"})
 
     assert q["from"] == 23
 
 
-@build_fixtures
-def test_build_with_invalid_offset():
+def test_builder_with_invalid_offset():
     """Invalid 'offset' params should be ignored."""
     for invalid_offset in ("foo", '', '   ', "-23", "32.7"):
-        q = query.build(multidict.NestedMultiDict({"offset": invalid_offset}),
-                        [])
+        builder = query.Builder()
+
+        q = builder.build({"offset": invalid_offset})
 
         assert q["from"] == 0
 
 
-@build_fixtures
-def test_build_limit_defaults_to_20():
+def test_builder_limit_defaults_to_20():
     """If no limit is given "size": 20 is used in the query by default."""
-    q = query.build(multidict.NestedMultiDict(), [])
+    builder = query.Builder()
+
+    q = builder.build({})
 
     assert q["size"] == 20
 
 
-@build_fixtures
-def test_build_custom_limits_are_passed_in():
+def test_builder_custom_limits_are_passed_in():
     """If a limit is given it's returned in the query dict as "size"."""
-    q = query.build(multidict.NestedMultiDict({"limit": 7}), [])
+    builder = query.Builder()
+
+    q = builder.build({"limit": 7})
 
     assert q["size"] == 7
 
 
-@build_fixtures
-def test_build_limit_strings_are_converted_to_ints():
+def test_builder_limit_strings_are_converted_to_ints():
     """String values for limit should be converted to ints."""
-    q = query.build(multidict.NestedMultiDict({"limit": "17"}), [])
+    builder = query.Builder()
+
+    q = builder.build({"limit": "17"})
 
     assert q["size"] == 17
 
 
-@build_fixtures
-def test_build_with_invalid_limit():
+def test_builder_with_invalid_limit():
     """Invalid 'limit' params should be ignored."""
     for invalid_limit in ("foo", '', '   ', "-23", "32.7"):
-        q = query.build(
-            multidict.NestedMultiDict({"limit": invalid_limit}), [])
+        builder = query.Builder()
+
+        q = builder.build({"limit": invalid_limit})
 
         assert q["size"] == 20  # (20 is the default value.)
 
 
-@build_fixtures
-def test_build_defaults_to_match_all():
-    """If no query params are given a "match_all": {} query is returned."""
-    q = query.build(multidict.NestedMultiDict(), [])
-
-    assert q["query"]["filtered"]["query"] == {"match_all": {}}
-
-
-@build_fixtures
-def test_build_sort_is_by_updated():
+def test_builder_sort_is_by_updated():
     """Sort defaults to "updated"."""
-    q = query.build(multidict.NestedMultiDict(), [])
+    builder = query.Builder()
+
+    q = builder.build({})
 
     sort = q["sort"]
     assert len(sort) == 1
     assert sort[0].keys() == ["updated"]
 
 
-@build_fixtures
-def test_build_sort_includes_ignore_unmapped():
+def test_builder_sort_includes_ignore_unmapped():
     """'ignore_unmapped': True is used in the sort clause."""
-    q = query.build(multidict.NestedMultiDict(), [])
+    builder = query.Builder()
 
-    sort = q["sort"]
-    assert sort[0]["updated"]["ignore_unmapped"] == True
+    q = builder.build({})
+
+    assert q["sort"][0]["updated"]["ignore_unmapped"] == True
 
 
-@build_fixtures
-def test_build_with_custom_sort():
+def test_builder_with_custom_sort():
     """Custom sorts are returned in the query dict."""
-    q = query.build(multidict.NestedMultiDict({"sort": "title"}), [])
+    builder = query.Builder()
 
-    sort = q["sort"]
-    assert sort == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
+    q = builder.build({"sort": "title"})
+
+    assert q["sort"] == [{'title': {'ignore_unmapped': True, 'order': 'desc'}}]
 
 
-@build_fixtures
-def test_build_order_defaults_to_desc():
+def test_builder_order_defaults_to_desc():
     """'order': "desc" is returned in the q dict by default."""
-    q = query.build(multidict.NestedMultiDict(), [])
+    builder = query.Builder()
+
+    q = builder.build({})
 
     sort = q["sort"]
     assert sort[0]["updated"]["order"] == "desc"
 
 
-@build_fixtures
 def test_build_with_custom_order():
     """'order' params are returned in the query dict if given."""
-    q = query.build(multidict.NestedMultiDict({"order": "asc"}), [])
+    builder = query.Builder()
+
+    q = builder.build({"order": "asc"})
 
     sort = q["sort"]
     assert sort[0]["updated"]["order"] == "asc"
 
 
-@build_fixtures
-def test_build_for_user():
-    """'user' params returned in the query dict in "match" clauses."""
-    q = query.build(multidict.NestedMultiDict({"user": "bob"}), [])
+def test_builder_defaults_to_match_all():
+    """If no query params are given a "match_all": {} query is returned."""
+    builder = query.Builder()
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {"should": [{"match": {"user": "bob"}}]}}
+    q = builder.build({})
+
+    assert q["query"] == {"match_all": {}}
 
 
-@build_fixtures
-def test_build_for_multiple_users():
-    """Multiple "user" params go into multiple "match" dicts."""
+def test_builder_default_param_action():
+    """Other params are added as "match" clauses."""
+    builder = query.Builder()
+
+    q = builder.build({"foo": "bar"})
+
+    assert q["query"] == {"bool": {"should": [{"match": {"foo": "bar"}}]}}
+
+
+def test_builder_default_params_multidict():
+    """Multiple params go into multiple "match" dicts."""
+    builder = query.Builder()
     params = multidict.MultiDict()
     params.add("user", "fred")
     params.add("user", "bob")
 
-    q = query.build(params, [])
+    q = builder.build(params)
 
-    assert q["query"]["filtered"]["query"] == {
+    assert q["query"] == {
         "bool": {
             "should": [
                 {"match": {"user": "fred"}},
@@ -234,336 +167,217 @@ def test_build_for_multiple_users():
     }
 
 
-@build_fixtures
-def test_build_for_tag():
-    """'tags' params are returned in the query dict in "match" clauses."""
-    q = query.build(multidict.NestedMultiDict({"tags": "foo"}), [])
+def test_builder_with_evil_arguments():
+    builder = query.Builder()
+    params = {
+        "offset": "3foo",
+        "limit": '\' drop table annotations'
+    }
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {"should": [{"match": {"tags": "foo"}}]}}
+    q = builder.build(params)
+
+    assert q["from"] == 0
+    assert q["size"] == 20
+    assert q["query"] == {'match_all': {}}
 
 
-@build_fixtures
-def test_build_for_multiple_tags():
-    """Multiple "tags" params go into multiple "match" dicts."""
-    params = multidict.MultiDict()
-    params.add("tags", "foo")
-    params.add("tags", "bar")
+def test_builder_passes_params_to_filters():
+    testfilter = mock.Mock()
+    builder = query.Builder()
+    builder.append_filter(testfilter)
 
-    q = query.build(params, [])
+    builder.build({"foo": "bar"})
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {
-            "should": [
-                {"match": {"tags": "foo"}},
-                {"match": {"tags": "bar"}}
-            ]
-        }
+    testfilter.assert_called_with({"foo": "bar"})
+
+
+def test_builder_ignores_filters_returning_none():
+    testfilter = mock.Mock()
+    testfilter.return_value = None
+    builder = query.Builder()
+    builder.append_filter(testfilter)
+
+    q = builder.build({})
+
+    assert q["query"] == {"match_all": {}}
+
+
+def test_builder_filters_query_by_filter_results():
+    testfilter = mock.Mock()
+    testfilter.return_value = {"term": {"giraffe": "nose"}}
+    builder = query.Builder()
+    builder.append_filter(testfilter)
+
+    q = builder.build({})
+
+    assert q["query"] == {
+        "filtered": {
+            "filter": {"and": [{"term": {"giraffe": "nose"}}]},
+            "query": {"match_all": {}},
+        },
     }
 
 
-@build_fixtures
-def test_build_with_combined_user_and_tag_query():
-    """A 'user' and a 'param' at the same time are handled correctly."""
-    q = query.build(
-        multidict.NestedMultiDict({"user": "bob", "tags": "foo"}), [])
+def test_builder_passes_params_to_matchers():
+    testmatcher = mock.Mock()
+    builder = query.Builder()
+    builder.append_matcher(testmatcher)
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {"should": [
-            {"match": {"user": "bob"}},
-            {"match": {"tags": "foo"}},
-        ]}}
+    builder.build({"foo": "bar"})
+
+    testmatcher.assert_called_with({"foo": "bar"})
 
 
-@build_fixtures
-def test_build_with_keyword():
-    """Keywords are returned in a "simple_query_string" clause."""
-    params = multidict.MultiDict()
-    params.add("any", "howdy")
+def test_builder_adds_matchers_to_query():
+    testmatcher = mock.Mock()
+    testmatcher.return_value = {"match": {"giraffe": "nose"}}
+    builder = query.Builder()
+    builder.append_matcher(testmatcher)
 
-    q = query.build(params, [])
+    q = builder.build({})
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {
-            "should": [
-                {
-                    "simple_query_string": {
-                        "fields": ["quote", "tags", "text", "uri.parts",
-                                   "user"],
-                        "query": "howdy",
-                    }
-                }
-            ]
-        }
+    assert q["query"] == {
+        "bool": {"should": [{"match": {"giraffe": "nose"}}]},
     }
 
 
-@build_fixtures
-def test_build_with_multiple_keywords():
-    """Multiple keywords at once are handled correctly."""
-    params = multidict.MultiDict()
-    params.add("any", "howdy")
-    params.add("any", "there")
+def test_authfilter_world_not_in_principals():
+    request = mock.Mock(effective_principals=['foo'])
+    authfilter = query.AuthFilter(request)
 
-    q = query.build(params, [])
-
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {"should": [{"simple_query_string": {
-            "fields": ["quote", "tags", "text", "uri.parts", "user"],
-            "query": "howdy there",
-        }}]}
+    assert authfilter({}) == {
+        'terms': {'permissions.read': ['group:__world__', 'foo']}
     }
 
 
-@build_fixtures
-def test_build_for_uri(auth_filter, nipsa, uri):
-    """'uri' args are returned in the query dict in a "match" clause.
+def test_authfilter_world_in_principals():
+    request = mock.Mock(effective_principals=['group:__world__', 'foo'])
+    authfilter = query.AuthFilter(request)
 
-    This is what happens when you open the sidebar on a page and it loads
-    all the annotations of that page.
+    assert authfilter({}) == {
+        'terms': {'permissions.read': ['group:__world__', 'foo']}
+    }
 
+
+@pytest.mark.usefixtures('uri')
+def test_urifilter_inactive_when_no_uri_param():
     """
-    uri.expand.side_effect = lambda x: [x]
-    uri.normalize.side_effect = lambda x: x
-
-    q1 = query.build(
-        multidict.NestedMultiDict({"uri": "http://example.com/"}), [])
-    q2 = query.build(
-        multidict.NestedMultiDict({"uri": "http://whitehouse.gov/"}), [])
-
-    assert q1["query"]["filtered"]["filter"]["and"] == [
-        auth_filter.return_value,
-        nipsa.nipsa_filter.return_value,
-        {"query": {"match": {"uri": "http://example.com/"}}},
-    ]
-    assert q2["query"]["filtered"]["filter"]["and"] == [
-        auth_filter.return_value,
-        nipsa.nipsa_filter.return_value,
-        {"query": {"match": {"uri": "http://whitehouse.gov/"}}},
-    ]
-
-
-@build_fixtures
-def test_build_for_uri_with_multiple_representations(auth_filter, nipsa, uri):
-    """It should expand the search to all URIs.
-
-    If h.api.uri.expand returns multiple documents for the URI then
-    build() should return a query that finds annotations that match one
-    or more of these documents' URIs.
-
+    When there's no `uri` parameter, return None.
     """
+    request = mock.Mock()
+    urifilter = query.UriFilter(request)
+
+    assert urifilter({"foo": "bar"}) is None
+
+
+@pytest.mark.usefixtures('uri')
+def test_urifilter_when_search_normalized_is_off():
+    request = mock.Mock()
+    request.feature.return_value = False
+    urifilter = query.UriFilter(request)
+
+    r1 = urifilter({"uri": "http://example.com/"})
+    r2 = urifilter({"uri": "http://whitehouse.gov/"})
+
+    assert r1 == {"query": {"match": {"uri": "http://example.com/"}}}
+    assert r2  == {"query": {"match": {"uri": "http://whitehouse.gov/"}}}
+
+
+def test_urifilter_expands_to_all_uris_when_search_normalized_is_off(uri):
+    """
+    It should expand the search to all URIs.
+
+    If h.api.uri.expand returns multiple documents for the URI then return a
+    matcher that finds annotations that match one or more of these documents'
+    URIs.
+    """
+    request = mock.Mock()
+    request.feature.return_value = False
     results = ["http://example.com/",
                "http://example2.com/",
                "http://example3.com/"]
     uri.expand.side_effect = lambda x: results
-    uri.normalize.side_effect = lambda x: x
+    urifilter = query.UriFilter(request)
 
-    q = query.build(
-        multidict.NestedMultiDict({"uri": "http://example.com/"}), [])
+    result = urifilter({"uri": "http://example.com"})
 
-    assert q["query"]["filtered"]["filter"]["and"] == [
-        auth_filter.return_value,
-        nipsa.nipsa_filter.return_value,
-        {
-            "query": {
-                "bool": {
-                    "should": [
-                        {"match": {"uri": "http://example.com/"}},
-                        {"match": {"uri": "http://example2.com/"}},
-                        {"match": {"uri": "http://example3.com/"}}
-                    ]
-                }
-            }
+    assert result == {
+        "query": {
+            "bool": {
+                "should": [
+                    {"match": {"uri": "http://example.com/"}},
+                    {"match": {"uri": "http://example2.com/"}},
+                    {"match": {"uri": "http://example3.com/"}}
+                ],
+            },
         },
-    ]
+    }
 
 
-@build_fixtures
-def test_build_for_uri_normalized(auth_filter, nipsa, uri):
+def test_urifilter_when_search_normalized_is_on(uri):
     """
-    Uses a term filter against target.scope to filter for URI.
+    Uses a `terms` filter against target.scope to filter for URI.
 
-    When querying for a URI with search_normalized_uris set to true, build
-    should use a term filter against the normalized version of the target
-    source field, which we store in target.scope.
+    When querying for a URI with the search_normalized feature flag enabled,
+    UriFilter should use a `terms` filter against the normalized version of the
+    target source field, which we store in `target.scope`.
 
     It should expand the input URI before searching, and normalize the results
     of the expansion.
     """
+    request = mock.Mock()
+    request.feature.return_value = True
     uri.expand.side_effect = lambda x: [
         "http://giraffes.com/",
         "https://elephants.com/",
     ]
     uri.normalize.side_effect = lambda x: x[:-1]  # Strip the trailing slash
+    urifilter = query.UriFilter(request)
 
-    params = multidict.NestedMultiDict({"uri": "http://example.com/"})
-
-    q = query.build(params, [], search_normalized_uris=True)
+    result = urifilter({"uri": "http://example.com/"})
 
     uri.expand.assert_called_with("http://example.com/")
 
-    terms_filter = {
-        "terms": {
-            "target.scope": [
-                "http://giraffes.com",
-                "https://elephants.com",
-            ]
+    assert result == {"terms":
+        {"target.scope": ["http://giraffes.com", "https://elephants.com"]}
+    }
+
+
+def test_anymatcher():
+    anymatcher = query.AnyMatcher()
+
+    result = anymatcher({"any": "foo"})
+
+    assert result == {
+        "simple_query_string": {
+            "fields": ["quote", "tags", "text", "uri.parts", "user"],
+            "query": "foo",
         }
     }
 
-    assert q["query"]["filtered"]["filter"]["and"] == [
-        auth_filter.return_value,
-        nipsa.nipsa_filter.return_value,
-        terms_filter,
-    ]
 
-
-@build_fixtures
-def test_build_with_single_text_param():
-    """'text' params are returned in the query dict in "match" clauses."""
-    q = query.build(multidict.NestedMultiDict({"text": "foobar"}), [])
-
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {"should": [{"match": {"text": "foobar"}}]}}
-
-
-@build_fixtures
-def test_build_with_multiple_text_params():
-    """Multiple "test" request params produce multiple "match" clauses."""
+def test_anymatcher_multiple_params():
+    """Multiple keywords at once are handled correctly."""
+    anymatcher = query.AnyMatcher()
     params = multidict.MultiDict()
-    params.add("text", "foo")
-    params.add("text", "bar")
-    q = query.build(params, [])
+    params.add("any", "howdy")
+    params.add("any", "there")
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {
-            "should": [
-                {"match": {"text": "foo"}},
-                {"match": {"text": "bar"}}
-            ]
+    result = anymatcher(params)
+
+    assert result == {
+        "simple_query_string": {
+            "fields": ["quote", "tags", "text", "uri.parts", "user"],
+            "query": "howdy there",
         }
     }
-
-
-@build_fixtures
-def test_build_with_single_quote_param():
-    """'quote' params are returned in the query dict in "match" clauses."""
-    q = query.build(multidict.NestedMultiDict({"quote": "foobar"}), [])
-
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {"should": [{"match": {"quote": "foobar"}}]}}
-
-
-@build_fixtures
-def test_build_with_multiple_quote_params():
-    """Multiple "quote" request params produce multiple "match" clauses."""
-    params = multidict.MultiDict()
-    params.add("quote", "foo")
-    params.add("quote", "bar")
-    q = query.build(params, [])
-
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {
-            "should": [
-                {"match": {"quote": "foo"}},
-                {"match": {"quote": "bar"}}
-            ]
-        }
-    }
-
-
-@build_fixtures
-def test_build_with_evil_arguments():
-    params = multidict.NestedMultiDict({
-        "offset": "3foo",
-        "limit": '\' drop table annotations'
-    })
-
-    q = query.build(params, [])
-
-    assert q["query"]["filtered"]["query"] == {'match_all': {}}
-
-
-@build_fixtures
-def test_build_does_not_pass_userid_to_nipsa_filter(nipsa):
-    query.build(multidict.NestedMultiDict(), [])
-    assert nipsa.nipsa_filter.call_args[1]["userid"] is None
-
-
-@build_fixtures
-def test_build_does_pass_userid_to_nipsa_filter(nipsa):
-    query.build(multidict.NestedMultiDict(), [], userid='fred')
-    assert nipsa.nipsa_filter.call_args[1]["userid"] == "fred"
-
-
-@build_fixtures
-def test_build_nipsa_filter_is_included(nipsa):
-    request = mock.Mock(authenticated_userid='fred', effective_principals=[])
-    q = query.build(multidict.NestedMultiDict(), [])
-
-    assert nipsa.nipsa_filter.return_value in (
-        q["query"]["filtered"]["filter"]["and"])
-
-
-@build_fixtures
-def test_build_with_arbitrary_params():
-    """You can pass any ?foo=bar param to the search API.
-
-    Arbitrary parameters that aren't handled specially are simply passed to
-    Elasticsearch as match clauses. This way search queries can match against
-    any fields in the Elasticsearch object.
-
-    """
-    params = multidict.NestedMultiDict({"foo.bar": "arbitrary"})
-
-    q = query.build(params, [])
-
-    assert q["query"]["filtered"]["query"] == {
-        'bool': {
-            'should': [
-                {
-                    'match': {'foo.bar': 'arbitrary'}
-                }
-            ]
-        }
-    }
-
-
-@build_fixtures
-def test_build_calls_auth_filter(auth_filter):
-    query.build(
-        multidict.NestedMultiDict(), mock.sentinel.effective_principals)
-
-    auth_filter.assert_called_once_with(
-        mock.sentinel.effective_principals)
-
-
-@build_fixtures
-def test_build_returns_auth_filter(auth_filter):
-    auth_filter.return_value = mock.sentinel.auth_filter
-
-    q = query.build(multidict.NestedMultiDict(), [])
-
-    assert q['query']['filtered']['filter']['and'][0] == (
-        mock.sentinel.auth_filter)
-
-
-@pytest.fixture
-def nipsa(request):
-    patcher = mock.patch('h.api.search.query.nipsa', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
 
 
 @pytest.fixture
 def uri(request):
     patcher = mock.patch('h.api.search.query.uri', autospec=True)
+    uri = patcher.start()
+    uri.expand.side_effect = lambda x: [x]
+    uri.normalize.side_effect = lambda x: x
     request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def auth_filter(request):
-    patcher = mock.patch('h.api.search.query.auth_filter', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+    return uri
