@@ -128,9 +128,13 @@ installed.
 2.  Install the ICU Analysis plugin using the `instructions provided`_. **NB:**
     ensure you install the correct version of the plugin for your version of
     ElasticSearch.
+3.  (Re-)start the ElasticSearch daemon following the steps on the ElasticSearch
+    `installation page`_. Note that the daemon needs to be restarted after installing
+    the ICU plugin.
 
 .. _installing the package on your platform: https://www.elastic.co/downloads/elasticsearch
 .. _instructions provided: https://github.com/elastic/elasticsearch-analysis-icu#icu-analysis-for-elasticsearch
+.. _installation page: https://www.elastic.co/downloads/elasticsearch
 
 
 ElasticSearch Troubleshooting
@@ -211,23 +215,6 @@ dependencies into the ``h/node_modules`` directory:
 
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
 
-
-Add Node modules to your PATH
------------------------------
-
-If you don't have your ``h/node_modules/.bin`` directory on your ``PATH`` then
-you'll get errors because the Node modules you've installed can't be found
-(for example: ``Program file not found: uglifyjs``).
-To add the Node modules to your ``PATH``:
-
-.. code-block:: bash
-
-    export PATH=./node_modules/.bin:$PATH
-
-If you add the above line to your ``~/.bashrc`` file then you won't have to
-enter it every time you start a new terminal.
-
-
 Running h
 ---------
 
@@ -294,7 +281,13 @@ Feature Flags
 -------------
 
 Features flags allow admins to enable or disable features for certain groups
-of users. You can enable or disable them from the administration dashboard.
-Please consult the :doc:`administration` documentation for more information
-on accessing the admin dashboard.
+of users. You can enable or disable them from the Administration Dashboard.
+
+To access the Administration Dashboard, you will need to first create a
+user account in your local instance of H and then give that account
+admin access rights using H's command-line tools.
+
+See the :doc:`../administration` documentation for information
+on how to give the initial user admin rights and access the Administration
+Dashboard.
 
