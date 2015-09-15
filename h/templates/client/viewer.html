@@ -38,6 +38,7 @@
       ng-class="{'js-hover': hasFocus(child.message)}"
       deep-count="count"
       thread="child" thread-filter
+      ng-if="child.message"
       ng-include="'thread.html'"
       ng-mouseenter="focus(child.message)"
       ng-click="scrollTo(child.message)"
