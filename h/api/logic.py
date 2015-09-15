@@ -27,7 +27,6 @@ def create_annotation(fields, user):
     annotation['user'] = user.id
     annotation['consumer'] = user.consumer.key
 
-
     # Save it in the database
     search_lib.prepare(annotation)
     annotation.save()
@@ -58,8 +57,8 @@ def update_annotation(annotation, fields, has_admin_permission):
     """Update the given annotation with the given new fields.
 
     :raises RuntimeError: if the fields attempt to change the annotation's
-        permissions and has_admin_permission is False, or if they are attempting
-        to move the annotation between groups.
+        permissions and has_admin_permission is False, or if they are
+        attempting to move the annotation between groups.
 
     """
     # Some fields are not to be set by the user, ignore them
