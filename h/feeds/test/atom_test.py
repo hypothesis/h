@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=protected-access
 """Unit tests for h/atom.py."""
-import datetime
-
 import mock
 
 from h.feeds import atom

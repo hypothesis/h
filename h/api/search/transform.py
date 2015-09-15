@@ -20,7 +20,6 @@ def prepare(annotation):
     groups.set_group_if_reply(annotation)
     groups.set_permissions(annotation)
 
-
     # FIXME: When this becomes simply part of a search indexing operation, this
     # should probably not mutate its argument.
     _normalize_annotation_target_uris(annotation)

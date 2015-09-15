@@ -5,6 +5,7 @@ import mock
 from h.test import factories
 from h.feeds import rss
 
+
 def _annotation_url():
     """Return a mock annotation_url() function.
 
