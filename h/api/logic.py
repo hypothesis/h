@@ -74,9 +74,10 @@ def update_annotation(annotation, fields, has_admin_permission):
         raise RuntimeError(
             _('Not authorized to change annotation permissions.'), 401)
 
-    if 'group' in fields and fields['group'] != annotation.get('group'):
-        raise RuntimeError(
-            _("You can't move annotations between groups."), 401)
+    if 'group' in fields and 'group' in annotation:
+        if fields['group'] != annotation.get('group'):
+            raise RuntimeError(
+                _("You can't move annotations between groups."), 401)
 
     # Update the annotation with the new data
     annotation.update(fields)
