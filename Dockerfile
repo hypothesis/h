@@ -2,9 +2,7 @@ FROM gliderlabs/alpine:3.2
 MAINTAINER Hypothes.is Project and contributors
 
 # Update the base image and install runtime dependencies.
-RUN apk update \
-  && apk upgrade \
-  && apk add ca-certificates libffi libpq python nodejs ruby
+RUN apk-install ca-certificates libffi libpq py-pip nodejs ruby
 
 # Create the hypothesis user, group, home directory and package directory.
 RUN addgroup -S hypothesis \
@@ -19,21 +17,20 @@ COPY package.json setup.* requirements.txt versioneer.py ./
 RUN touch CHANGES.txt README.rst
 
 # Install build dependencies, build, then clean up.
-RUN apk add --virtual build-deps \
+RUN apk-install --virtual build-deps \
     libffi-dev \
     g++ \
     make \
     postgresql-dev \
     python-dev \
     ruby-dev \
-  && apk add py-pip \
   && gem install --no-ri compass \
   && npm install --production \
   && pip install --no-cache-dir -U pip \
   && pip install --no-cache-dir -r requirements.txt \
   && apk del build-deps postgresql-dev \
   && npm cache clean \
-  && rm -rf /tmp/* /var/cache/apk/*
+  && rm -rf /tmp/*
 
 # Copy the rest of the application files
 COPY Procfile gunicorn.conf.py ./
