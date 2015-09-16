@@ -171,6 +171,20 @@ def staff_remove(request):
         location=request.route_url('admin_staff'))
 
 
+@view.view_config(route_name='admin_users',
+                  request_method='GET',
+                  renderer='h:templates/admin/users.html.jinja2',
+                  permission='admin')
+def users_index(request):
+    user = None
+    username = request.params.get('username')
+
+    if username is not None:
+        user = models.User.get_by_username(username)
+
+    return {'username': username, 'user': user}
+
+
 def includeme(config):
     config.add_route('admin_index', '/admin')
     config.add_route('admin_features', '/admin/features')
@@ -180,4 +194,5 @@ def includeme(config):
     config.add_route('admin_admins_remove', '/admin/admins/remove')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_staff_remove', '/admin/staff/remove')
+    config.add_route('admin_users', '/admin/users')
     config.scan(__name__)

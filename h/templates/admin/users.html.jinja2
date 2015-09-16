@@ -1,0 +1,46 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'users' %}
+{% set page_title = 'Users' %}
+
+{% block content %}
+  <p>
+    On this page you can look up users by username and see their details.
+  </p>
+
+  <form method="GET" class="form-inline">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" class="form-control" name="username">
+      <input type="submit" class="btn btn-default" value="Find">
+    </div>
+  </form>
+  {% if username %}
+  <hr>
+    {% if user %}
+      <table class="table table-auto table-striped">
+        <tbody>
+          <tr><th>Username</th><td>{{ user.username }}</td></tr>
+          <tr><th>UID</th><td>{{ user.uid }}</td></tr>
+          <tr><th>Email</th><td>{{ user.email }}</td></tr>
+          <tr><th>Registered</th><td>{{ user.registered_date }}</td></tr>
+          <tr><th>Last login</th><td>{{ user.last_login_date }}</td></tr>
+          <tr>
+            <th>Is activated?</th>
+            <td>{% if user.is_activated %}&#x2714;{% else %}&#x2718;{% endif %}</td>
+          </tr>
+          <tr>
+            <th>Is admin?</th>
+            <td>{% if user.admin %}&#x2714;{% else %}&#x2718;{% endif %}</td>
+          </tr>
+          <tr>
+            <th>Is staff?</th>
+            <td>{% if user.staff %}&#x2714;{% else %}&#x2718;{% endif %}</td>
+          </tr>
+        </tbody>
+      </table>
+    {% else %}
+      <p>No user found with username <em>{{ username }}</em>!</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}
