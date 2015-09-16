@@ -97,6 +97,15 @@
                 tabId: tabId,
                 text: totalString
               });
+
+              var title;
+              if (total === 1) {
+                title = _("There's 1 annotation on this page");
+              } else {
+                title = _("There are " + totalString + " annotations on " +
+                          "this page");
+              }
+              chromeBrowserAction.setTitle({tabId: tabId, title: title});
             }
           });
         }

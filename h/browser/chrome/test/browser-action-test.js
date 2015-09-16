@@ -209,6 +209,34 @@ describe('BrowserAction', function () {
         {tabId: "tabId", text: "23"}));
     });
 
+    it("sets the browserAction's title badge text when there's 1 annotation",
+        function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 1}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setTitle.calledOnce);
+      assert(fakeChromeBrowserAction.setTitle.calledWithExactly(
+        {tabId: "tabId", title: "There's 1 annotation on this page"}));
+    });
+
+    it("sets the browserAction's title badge text when there's >1 annotation",
+        function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 23}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setTitle.calledOnce);
+      assert(fakeChromeBrowserAction.setTitle.calledWithExactly(
+        {tabId: "tabId", title: "There are 23 annotations on this page"}));
+    });
+
     it("does not set the badge text if there are 0 annotations", function() {
       server.respondWith(
         "GET", "http://example.com/search?limit=0&uri=tabUrl",
@@ -218,6 +246,17 @@ describe('BrowserAction', function () {
       action.updateBadge("tabId", "tabUrl", "http://example.com");
 
       assert(fakeChromeBrowserAction.setBadgeText.notCalled);
+    });
+
+    it("does not set the badge title if there are 0 annotations", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 0}']
+      );
+
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+
+      assert(fakeChromeBrowserAction.setTitle.notCalled);
     });
 
     it("truncates numbers greater than 999 to '999+'", function() {
@@ -231,6 +270,8 @@ describe('BrowserAction', function () {
       assert(fakeChromeBrowserAction.setBadgeText.calledOnce);
       assert(fakeChromeBrowserAction.setBadgeText.calledWithExactly(
         {tabId: "tabId", text: "999+"}));
+      assert(fakeChromeBrowserAction.setTitle.calledWithExactly(
+        {tabId: "tabId", title: "There are 999+ annotations on this page"}));
     });
 
     it("does not set the badge text if there is existing text", function() {
@@ -247,6 +288,22 @@ describe('BrowserAction', function () {
       fakeChromeBrowserAction.getBadgeText = originalGetBadgeTextFunc;
 
       assert(fakeChromeBrowserAction.setBadgeText.notCalled);
+    });
+
+    it("does not set the badge title if there is existing text", function() {
+      server.respondWith(
+        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        [200, {}, '{"total": 23}']
+      );
+      var originalGetBadgeTextFunc = fakeChromeBrowserAction.getBadgeText;
+
+      fakeChromeBrowserAction.getBadgeText = function(args, func) {
+        func('some badge text that is already showing');
+      };
+      action.updateBadge("tabId", "tabUrl", "http://example.com");
+      fakeChromeBrowserAction.getBadgeText = originalGetBadgeTextFunc;
+
+      assert(fakeChromeBrowserAction.setTitle.notCalled);
     });
   });
 });
