@@ -36,23 +36,35 @@
       }
     };
 
+    function setTitleIfNoBadge(tabId, title) {
+      chromeBrowserAction.getBadgeText({tabId: tabId}, function(text) {
+        if (!text) {
+          chromeBrowserAction.setTitle({tabId: tabId, title: title});
+        }
+      });
+    }
+
+    function setTitleAndBadgeText(tabId, title, badgeText) {
+      chromeBrowserAction.setTitle({tabId: tabId, title: title});
+      chromeBrowserAction.setBadgeText({tabId: tabId, text: badgeText});
+    }
+
     /* Sets the active browser action appearance for the provided tab id. */
-    this.activate = function (tabId) {
+    this.activate = function(tabId) {
       chromeBrowserAction.setIcon({tabId: tabId, path: icons[states.ACTIVE]});
-      chromeBrowserAction.setTitle({tabId: tabId, title: _('Hypothesis is active')});
+      setTitleIfNoBadge(tabId, _('Hypothesis is active'));
     };
 
     /* Sets the inactive browser action appearance for the provided tab id. */
-    this.deactivate = function (tabId) {
+    this.deactivate = function(tabId) {
       chromeBrowserAction.setIcon({tabId: tabId, path: icons[states.INACTIVE]});
-      chromeBrowserAction.setTitle({tabId: tabId, title: _('Hypothesis is inactive')});
+      setTitleIfNoBadge(tabId, _('Hypothesis is inactive'));
     };
 
     /* Sets the errored browser action appearance for the provided tab id. */
-    this.error = function (tabId) {
+    this.error = function(tabId) {
       chromeBrowserAction.setIcon({tabId: tabId, path: icons[states.INACTIVE]});
-      chromeBrowserAction.setTitle({tabId: tabId, title: _('Hypothesis has failed to load')});
-      chromeBrowserAction.setBadgeText({tabId: tabId, text: '!'});
+      setTitleAndBadgeText(tabId,  _('Hypothesis has failed to load'), '!');
     };
 
     /**
@@ -93,19 +105,14 @@
             // The num. annotations badge is low priority - we only set it if
             // there's no other badge currently showing.
             if (!text) {
-              chromeBrowserAction.setBadgeText({
-                tabId: tabId,
-                text: totalString
-              });
-
               var title;
               if (total === 1) {
                 title = _("There's 1 annotation on this page");
               } else {
-                title = _("There are " + totalString + " annotations on " +
-                          "this page");
+                title = _('There are ' + totalString + ' annotations on ' +
+                          'this page');
               }
-              chromeBrowserAction.setTitle({tabId: tabId, title: title});
+              setTitleAndBadgeText(tabId, title, totalString);
             }
           });
         }

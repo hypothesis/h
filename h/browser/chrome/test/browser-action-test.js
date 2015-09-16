@@ -36,6 +36,18 @@ describe('BrowserAction', function () {
         title: 'Hypothesis is active'
       });
     });
+
+    it('does not set the title if there is badge text showing', function () {
+      var originalGetBadgeTextFunc = fakeChromeBrowserAction.getBadgeText;
+      fakeChromeBrowserAction.getBadgeText = function(args, func) {
+        func('9');  // The number of annotations is showing on the badge.
+      };
+
+      action.activate(1);
+
+      assert.notCalled(fakeChromeBrowserAction.setTitle);
+      fakeChromeBrowserAction.getBadgeText = originalGetBadgeTextFunc;
+    });
   });
 
   describe('.deactivate', function () {
@@ -56,6 +68,18 @@ describe('BrowserAction', function () {
         title: 'Hypothesis is inactive'
       });
     });
+
+    it('does not set the title if there is badge text showing', function () {
+      var originalGetBadgeTextFunc = fakeChromeBrowserAction.getBadgeText;
+      fakeChromeBrowserAction.getBadgeText = function(args, func) {
+        func('9');  // The number of annotations is showing on the badge.
+      };
+
+      action.deactivate(1);
+
+      assert.notCalled(fakeChromeBrowserAction.setTitle);
+      fakeChromeBrowserAction.getBadgeText = originalGetBadgeTextFunc;
+    });
   });
 
   describe('.error', function () {
@@ -75,6 +99,21 @@ describe('BrowserAction', function () {
         tabId: 1,
         title: 'Hypothesis has failed to load'
       });
+    });
+
+    it('still sets the title even there is badge text showing', function () {
+      var originalGetBadgeTextFunc = fakeChromeBrowserAction.getBadgeText;
+      fakeChromeBrowserAction.getBadgeText = function(args, func) {
+        func('9');  // The number of annotations is showing on the badge.
+      };
+
+      action.error(1);
+
+      assert.calledWith(fakeChromeBrowserAction.setTitle, {
+        tabId: 1,
+        title: 'Hypothesis has failed to load'
+      });
+      fakeChromeBrowserAction.getBadgeText = originalGetBadgeTextFunc;
     });
 
     it('shows a badge', function () {
