@@ -1,5 +1,10 @@
+/**
+ * A wrapper for the settings.json file that ships with the Chrome extension.
+ * @module
+ */
+'use strict';
+
 (function(h) {
-  'use strict';
 
   /**
    * Validate and normalize the given settings data.
@@ -30,6 +35,7 @@
 
   /**
    * A Promise whose value is the contents of the settings.json file.
+   *
    * @example
    * h.settings.then(function(settings) {
    *   // Do something with the settings object.

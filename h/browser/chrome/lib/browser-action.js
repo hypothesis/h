@@ -36,6 +36,12 @@
       }
     };
 
+    /**
+     * Set the "title" (tooltip) of the browser action _if_ no badge is
+     * currently displayed on the browser action.
+     * @param {integer} tabId The id of the tab to set the badge title for.
+     * @param {string} title The value to set the title to.
+     */
     function setTitleIfNoBadge(tabId, title) {
       chromeBrowserAction.getBadgeText({tabId: tabId}, function(text) {
         if (!text) {
@@ -44,6 +50,12 @@
       });
     }
 
+    /**
+     * Set the "title" (tooltip) and badge text of the browser action.
+     * @param {integer} tabId The id of the tab to set the badge title for.
+     * @param {string} title The text to show in the tooltip.
+     * @param {string} badgeText The text to show on the badge.
+     */
     function setTitleAndBadgeText(tabId, title, badgeText) {
       chromeBrowserAction.setTitle({tabId: tabId, title: title});
       chromeBrowserAction.setBadgeText({tabId: tabId, text: badgeText});
