@@ -4,6 +4,7 @@
 
 import logging
 
+from pyramid import httpexceptions
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
@@ -221,6 +222,7 @@ def delete(context, request):
 @forbidden_view_config(containment=Root, renderer='json')
 @notfound_view_config(containment=Root, renderer='json')
 def notfound(context, request):
+    request.response.status_int = httpexceptions.HTTPNotFound.code
     return {'status': 'failure', 'reason': 'not_found'}
 
 
