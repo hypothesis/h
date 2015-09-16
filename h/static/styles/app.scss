@@ -103,6 +103,10 @@ $group-list-width: 225px;
   width: $group-list-width - 30px;
 }
 
+.group-list .dropdown-menu .new-group-btn {
+  background-color: $gray-lightest;
+}
+
 .user-picker {
   .avatar {
     border-radius: 2px;
