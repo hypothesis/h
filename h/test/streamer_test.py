@@ -338,19 +338,10 @@ class TestShouldSendEvent(unittest.TestCase):
             {'permissions': {'read': ['group:__world__']}},
             data) is False
 
-    def test_should_send_event_check_permissions(self):
-        self.sock_giraffe.request.has_permission.return_value = False
-        anno = object()
-        data = {'action': 'update', 'src_client_id': 'pigeon'}
-        sock = self.sock_giraffe
-        assert should_send_event(sock, anno, data) is False
-        assert sock.request.has_permission.called_with('read', anno)
-
     def test_should_send_event_does_not_send_nipsad_annotations(self):
         """Users should not see annotations from NIPSA'd users."""
         annotation = {'user': 'fred', 'nipsa': True}
         socket = Mock(terminated=False, client_id='foo')
-        socket.request.has_permission.return_value = True
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
         assert not should_send_event(socket, annotation, event_data)
@@ -359,7 +350,6 @@ class TestShouldSendEvent(unittest.TestCase):
         """NIPSA'd users should see their own annotations."""
         annotation = {'user': 'fred', 'nipsa': True}
         socket = Mock(terminated=False, client_id='foo')
-        socket.request.has_permission.return_value = True
         socket.request.authenticated_userid = 'fred'  # The annotation creator.
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
@@ -373,7 +363,6 @@ class TestShouldSendEvent(unittest.TestCase):
         }
         socket = Mock(terminated=False, client_id='foo')
         socket.request.effective_principals = []  # No 'group:private-group'.
-        socket.request.has_permission.return_value = True
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
         assert not should_send_event(socket, annotation, event_data)
@@ -386,7 +375,6 @@ class TestShouldSendEvent(unittest.TestCase):
             'permissions': {'read': ['group:private-group']}
         }
         socket = Mock(terminated=False, client_id='foo')
-        socket.request.has_permission.return_value = True
         socket.request.effective_principals = ['group:private-group']
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
@@ -399,8 +387,7 @@ class TestShouldSendEvent(unittest.TestCase):
             'permissions': {'read': ['group:__world__']}
         }
         socket = Mock(terminated=False, client_id='foo')
-        socket.request.has_permission.return_value = True
         socket.request.effective_principals = ['group:private-group']
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        should_send_event(socket, annotation, event_data)
+        assert should_send_event(socket, annotation, event_data)
