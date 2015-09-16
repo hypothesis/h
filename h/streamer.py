@@ -601,9 +601,6 @@ def should_send_event(socket, annotation, event_data):
     if event_data['src_client_id'] == socket.client_id:
         return False
 
-    if not socket.request.has_permission('read', annotation):
-        return False
-
     if annotation.get('nipsa') and (
             socket.request.authenticated_userid != annotation.get('user', '')):
         return False
