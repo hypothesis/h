@@ -15,11 +15,13 @@ _ = i18n.TranslationString
 
 @view_config(route_name='group_create',
              request_method='GET',
-             renderer='h:groups/templates/create.html.jinja2',
-             permission="authenticated")
+             renderer='h:groups/templates/create.html.jinja2')
 def create_form(request):
     """Render the form for creating a new group."""
     if not request.feature('groups'):
+        raise exc.HTTPNotFound()
+
+    if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
     schema = schemas.GroupSchema().bind(request=request)
@@ -30,11 +32,13 @@ def create_form(request):
 
 @view_config(route_name='group_create',
              request_method='POST',
-             renderer='h:groups/templates/create.html.jinja2',
-             permission="authenticated")
+             renderer='h:groups/templates/create.html.jinja2')
 def create(request):
     """Respond to a submission of the create group form."""
     if not request.feature('groups'):
+        raise exc.HTTPNotFound()
+
+    if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
     form = deform.Form(schemas.GroupSchema().bind(request=request))
@@ -129,10 +133,12 @@ def read(request):
 
 @view_config(route_name='group_read',
              request_method='POST',
-             renderer='h:groups/templates/read.html.jinja2',
-             permission='authenticated')
+             renderer='h:groups/templates/read.html.jinja2')
 def join(request):
     if not request.feature('groups'):
+        raise exc.HTTPNotFound()
+
+    if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
     hashid = request.matchdict["hashid"]
