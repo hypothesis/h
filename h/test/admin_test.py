@@ -454,6 +454,47 @@ def test_staff_remove_404s_if_no_remove_param():
         admin.staff_remove(DummyRequest())
 
 
+users_index_fixtures = pytest.mark.usefixtures('User')
+
+
+@users_index_fixtures
+def test_users_index():
+    request = DummyRequest()
+
+    result = admin.users_index(request)
+
+    assert result == {"username": None, "user": None}
+
+
+@users_index_fixtures
+def test_users_index_looks_up_users_by_username(User):
+    request = DummyRequest(params={"username": "bob"})
+
+    result = admin.users_index(request)
+
+    User.get_by_username.assert_called_with("bob")
+
+
+@users_index_fixtures
+def test_users_index_no_user_found(User):
+    request = DummyRequest(params={"username": "bob"})
+    User.get_by_username.return_value = None
+
+    result = admin.users_index(request)
+
+    assert result == {"username": "bob", "user": None}
+
+
+@users_index_fixtures
+def test_users_index_user_found(User):
+    request = DummyRequest(params={"username": "bob"})
+
+    result = admin.users_index(request)
+
+    assert result == {"username": "bob",
+                      "user": User.get_by_username.return_value}
+
+
 @pytest.fixture
 def Feature(request):
     patcher = patch('h.models.Feature', autospec=True)
