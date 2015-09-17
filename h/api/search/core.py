@@ -26,6 +26,7 @@ def search(request, params):
         nipsa.nipsa_filter(request.authenticated_userid))
 
     builder.append_matcher(query.AnyMatcher())
+    builder.append_matcher(query.TagsMatcher())
 
     body = builder.build(params)
     results = models.Annotation.search_raw(body,

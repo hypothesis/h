@@ -120,7 +120,7 @@ def test_builder_order_defaults_to_desc():
     assert sort[0]["updated"]["order"] == "desc"
 
 
-def test_build_with_custom_order():
+def test_builder_with_custom_order():
     """'order' params are returned in the query dict if given."""
     builder = query.Builder()
 
@@ -371,6 +371,32 @@ def test_anymatcher_multiple_params():
             "query": "howdy there",
         }
     }
+
+
+def test_tagsmatcher_aliases_tag_to_tags():
+    """'tag' params should be transformed into 'tags' queries.
+
+    'tag' is aliased to 'tags' because users often type tag instead of tags.
+
+    """
+    params = multidict.MultiDict()
+    params.add('tag', 'foo')
+    params.add('tag', 'bar')
+
+    result = query.TagsMatcher()(params)
+
+    assert result == {'terms': {'tags': ['foo', 'bar']}}
+
+
+def test_tagsmatcher_with_both_tag_and_tags():
+    """If both 'tag' and 'tags' params are used they should all become tags."""
+    params = multidict.MultiDict()
+    params.add('tag', 'foo')
+    params.add('tags', 'bar')
+
+    result = query.TagsMatcher()(params)
+
+    assert result == {'terms': {'tags': ['foo', 'bar']}}
 
 
 @pytest.fixture
