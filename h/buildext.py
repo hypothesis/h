@@ -198,9 +198,13 @@ def build_chrome(args):
         data = chrome_manifest(env['request'])
         fp.write(data)
 
-    # Render the blocklist as a JSON file.
-    with codecs.open('build/chrome/blocklist.json', 'w', 'utf-8') as fp:
-        fp.write(json.dumps(env['registry'].settings['h.blocklist']))
+    # Render some settings to a JSON file in the Chrome extension.
+    settings = {
+        'blocklist': env['registry'].settings['h.blocklist'],
+        'serviceUrl': env['request'].route_url('api')
+    }
+    with codecs.open('build/chrome/settings.json', 'w', 'utf-8') as fp:
+        fp.write(json.dumps(settings))
 
 
 def build_firefox(args):

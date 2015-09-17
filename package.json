@@ -59,7 +59,7 @@
     "proxyquire": "^1.6.0",
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.0.0",
-    "sinon": "^1.15.4"
+    "sinon": "1.16.1"
   },
   "engines": {
     "node": "0.10.x"

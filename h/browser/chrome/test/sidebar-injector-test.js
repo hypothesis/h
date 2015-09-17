@@ -34,31 +34,18 @@ describe('SidebarInjector', function () {
       fakeChromeTabs.executeScript.yields([]);
     });
 
-    beforeEach(function() {
-      this.server = sinon.fakeServer.create();
-      this.server.respondWith("GET", "/blocklist.json",
-        [200, {"Content-Type": "application/json"},
-          '{"twitter.com": {}, "finance.yahoo.com": {}, "*.google.com": {}}']);
-    });
-
-    afterEach(function() {
-      this.server.restore();
-    });
-
     var protocols = ['chrome:', 'chrome-devtools:', 'chrome-extension'];
     protocols.forEach(function (protocol) {
       it('bails early when trying to load an unsupported ' + protocol + ' url', function () {
         var spy = fakeChromeTabs.executeScript;
         var url = protocol + '//foo/';
 
-        var promise = injector.injectIntoTab({id: 1, url: url}).then(
+        return injector.injectIntoTab({id: 1, url: url}).then(
           assertReject, function (err) {
             assert.instanceOf(err, h.RestrictedProtocolError);
             assert.notCalled(spy);
           }
         );
-        this.server.respond();
-        return promise;
       });
     });
 
@@ -67,9 +54,7 @@ describe('SidebarInjector', function () {
         var spy = fakeChromeTabs.update.yields({tab: 1});
         var url = 'http://example.com/foo.pdf';
 
-        var promise = injector.injectIntoTab({id: 1, url: url});
-        this.server.respond();
-        return promise.then(function () {
+        return injector.injectIntoTab({id: 1, url: url}).then(function() {
           assert.calledWith(spy, 1, {
             url: 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent(url)
           });
@@ -82,9 +67,7 @@ describe('SidebarInjector', function () {
         var spy = fakeChromeTabs.executeScript;
         var url = 'http://example.com/foo.html';
 
-        var promise = injector.injectIntoTab({id: 1, url: url});
-        this.server.respond();
-        return promise.then(function () {
+        return injector.injectIntoTab({id: 1, url: url}).then(function() {
           assert.callCount(spy, 2);
           assert.calledWith(spy, 1, {
             code: sinon.match('/public/config.js')
@@ -102,7 +85,7 @@ describe('SidebarInjector', function () {
           var spy = fakeChromeTabs.update.yields([]);
           var url = 'file://foo.pdf';
 
-          var promise = injector.injectIntoTab({id: 1, url: url}).then(
+          return injector.injectIntoTab({id: 1, url: url}).then(
             function () {
               assert.called(spy);
               assert.calledWith(spy, 1, {
@@ -110,8 +93,6 @@ describe('SidebarInjector', function () {
               });
             }
           );
-          this.server.respond();
-          return promise;
         });
       });
 
@@ -123,31 +104,28 @@ describe('SidebarInjector', function () {
         it('returns an error', function () {
           var url = 'file://foo.pdf';
 
-          var promise = injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
+          var promise = injector.injectIntoTab({id: 1, url: url});
+          return promise.then(assertReject, function (err) {
             assert.instanceOf(err, h.NoFileAccessError);
           });
-          this.server.respond();
-          return promise;
         });
       });
 
     describe('when viewing a local HTML file', function () {
       it('returns an error', function () {
         var url = 'file://foo.html';
-        var promise = injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
+        var promise = injector.injectIntoTab({id: 1, url: url});
+        return promise.then(assertReject, function (err) {
           assert.instanceOf(err, h.LocalFileError);
         });
-        this.server.respond();
-        return promise;
       });
 
       it('retuns an error before loading the config', function () {
         var url = 'file://foo.html';
-        var promise = injector.injectIntoTab({id: 1, url: url}).then(assertReject, function (err) {
+        var promise = injector.injectIntoTab({id: 1, url: url});
+        return promise.then(assertReject, function (err) {
           assert.notCalled(fakeChromeTabs.executeScript);
         });
-        this.server.respond();
-        return promise;
       });
     });
   });
@@ -156,7 +134,6 @@ describe('SidebarInjector', function () {
     it("still injects the scripts on unblocked sites", function() {
       var promise = injector.injectIntoTab(
         {id: 1, url: "http://notblocked.com"});
-      this.server.respond();
       return promise.then(
         function onFulfill() {
           assert.called(fakeChromeTabs.executeScript);
@@ -169,7 +146,6 @@ describe('SidebarInjector', function () {
     it("still injects scripts on subdomains of blocked domains", function() {
       var promise = injector.injectIntoTab(
         {id: 1, url: "http://subdomain.twitter.com"});
-      this.server.respond();
       return promise.then(
         function onFulfill() {
           assert.called(fakeChromeTabs.executeScript);
@@ -181,7 +157,6 @@ describe('SidebarInjector', function () {
 
     it("doesn't inject any scripts on blocked sites", function() {
       var promise = injector.injectIntoTab({id: 1, url: "http://twitter.com"});
-      this.server.respond();
       return promise.then(
         function onFulfill() {
           assert(false, "The promise should not be fulfilled");
@@ -194,7 +169,6 @@ describe('SidebarInjector', function () {
     it("doesn't inject scripts on sub pages of blocked sites", function() {
       var promise = injector.injectIntoTab(
         {id: 1, url: "http://twitter.com/sub/page.html"});
-      this.server.respond();
       return promise.then(
         function onFulfill() {
           assert(false, "The promise should not be fulfilled");
@@ -207,7 +181,6 @@ describe('SidebarInjector', function () {
     it("doesn't inject scripts on blocked sites with queries", function() {
       var promise = injector.injectIntoTab(
         {id: 1, url: "http://twitter.com?tag=foo&user=bar"});
-      this.server.respond();
       return promise.then(
         function onFulfill() {
           assert(false, "The promise should not be fulfilled");
@@ -220,7 +193,6 @@ describe('SidebarInjector', function () {
     it("doesn't inject scripts on blocked sites with anchors", function() {
       var promise = injector.injectIntoTab(
         {id: 1, url: "http://twitter.com#foo"});
-      this.server.respond();
       return promise.then(
         function onFulfill() {
           assert(false, "The promise should not be fulfilled");
@@ -233,7 +205,6 @@ describe('SidebarInjector', function () {
     it("doesn't inject scripts on blocked sites with ports", function() {
       var promise = injector.injectIntoTab(
         {id: 1, url: "http://twitter.com:1234"});
-      this.server.respond();
       return promise.then(
         function onFulfill() {
           assert(false, "The promise should not be fulfilled");
@@ -246,7 +217,6 @@ describe('SidebarInjector', function () {
     it("doesn't inject on wildcard-blocked subdomains", function() {
       var promise = injector.injectIntoTab(
         {id: 1, url: "http://drive.google.com"});
-      this.server.respond();
       return promise.then(
         function onFulfill() {
           assert(false, "The promise should not be fulfilled");
