@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 __all__ = ('create_root', 'includeme')
+from h.api.renderers import events_renderer_factory
 from h.api.resources import create_root
 
 
 def includeme(config):
+    config.add_renderer('events', events_renderer_factory)
+
     config.add_route('api', '/', factory=create_root)
     config.add_route('access_token', '/access_token')
 
