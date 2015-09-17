@@ -41,7 +41,7 @@ INSTALL_REQUIRES = [
     'cryptography>=0.7',
     'deform>=0.9,<1.0',
     'elasticsearch>=1.1.0',
-    'gevent>=1.0.2,<1.1.0',
+    'gevent>=1.1.0b1,<1.2.0',
     'gnsq>=0.3.0,<0.4.0',
     'gunicorn>=19.2,<20',
     'hashids==1.1.0',  # hashid format may change with updated hashid package,
