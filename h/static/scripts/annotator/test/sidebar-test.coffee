@@ -78,7 +78,7 @@ describe 'Sidebar', ->
         assert.calledOnce(show)
 
       it 'calls `hide` if the widget is not fully visible', ->
-        sidebar.gestureState = {final: -100}
+        sidebar.gestureState = {final: -50}
         hide = sandbox.stub(sidebar, 'hide')
         sidebar.onPan({type: 'panend'})
         assert.calledOnce(hide)
