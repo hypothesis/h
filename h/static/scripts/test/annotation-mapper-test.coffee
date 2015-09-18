@@ -71,6 +71,29 @@ describe 'annotationMapper', ->
       assert.called($rootScope.$emit)
       assert.calledWith($rootScope.$emit, 'annotationsLoaded', [])
 
+  describe '.unloadAnnotations()', ->
+    it 'triggers the annotationDeleted event', ->
+      sandbox.stub($rootScope, '$emit')
+      annotations = [{id: 1}, {id: 2}, {id: 3}]
+      annotationMapper.unloadAnnotations(annotations)
+      assert.called($rootScope.$emit)
+      assert.calledWith($rootScope.$emit, 'annotationDeleted', annotations[0])
+      assert.calledWith($rootScope.$emit, 'annotationDeleted', annotations[1])
+      assert.calledWith($rootScope.$emit, 'annotationDeleted', annotations[2])
+
+    it 'replaces the properties on the cached annotation with those from the deleted one', ->
+      sandbox.stub($rootScope, '$emit')
+      annotations = [{id: 1, url: 'http://example.com'}]
+      cached = {message: {id: 1, $$tag: 'tag1'}}
+      fakeThreading.idTable[1] = cached
+
+      annotationMapper.unloadAnnotations(annotations)
+      assert.called($rootScope.$emit)
+      assert.calledWith($rootScope.$emit, 'annotationDeleted', {
+        id: 1
+        url: 'http://example.com'
+      })
+
   describe '.createAnnotation()', ->
     it 'creates a new annotaton resource', ->
       ann = {}
