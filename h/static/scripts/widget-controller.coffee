@@ -4,11 +4,11 @@ angular = require('angular')
 module.exports = class WidgetController
   this.$inject = [
     '$scope', 'annotationUI', 'crossframe', 'annotationMapper',
-    'streamer', 'streamFilter', 'store', 'threading'
+    'streamer', 'store', 'threading'
   ]
   constructor:   (
      $scope,   annotationUI, crossframe, annotationMapper,
-     streamer,   streamFilter,   store,   threading
+     streamer,   store,   threading
   ) ->
     $scope.isStream = true
     $scope.sort = name: 'Location'
@@ -39,10 +39,6 @@ module.exports = class WidgetController
           continue
         loaded.push(f.uri)
         _loadAnnotationsFrom({uri: f.uri}, 0)
-
-      if loaded.length > 0
-        streamFilter.resetFilter().addClause('/uri', 'one_of', loaded)
-        streamer.send({filter: streamFilter.getFilter()})
 
     $scope.$watchCollection (-> crossframe.frames), loadAnnotations
 

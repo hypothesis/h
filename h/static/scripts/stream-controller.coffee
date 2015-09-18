@@ -1,35 +1,28 @@
 angular = require('angular')
-mail = require('./vendor/jwz')
+
+parseQuery = require('./parse-query')
 
 
 module.exports = class StreamController
   this.inject = [
     '$scope', '$route', '$rootScope', '$routeParams',
-    'queryParser', 'searchFilter', 'store',
-    'streamer', 'streamFilter', 'threading', 'annotationMapper'
+    'store', 'streamer', 'threading', 'annotationMapper'
   ]
   constructor: (
      $scope,   $route,   $rootScope,   $routeParams
-     queryParser,   searchFilter,   store,
-     streamer,   streamFilter,   threading,   annotationMapper
+     store,   streamer,   threading,   annotationMapper
   ) ->
     offset = 0
 
     fetch = (limit) ->
       options = {offset, limit}
-      searchParams = searchFilter.toObject($routeParams.q)
-      query = angular.extend(options, searchParams)
+      query = parseQuery($routeParams.q)
+      query = angular.extend(options, query)
       store.SearchResource.get(query, load)
 
     load = ({rows}) ->
         offset += rows.length
         annotationMapper.loadAnnotations(rows)
-
-    # Disable the thread filter (client-side search)
-    $scope.$on '$routeChangeSuccess', ->
-      if $scope.threadFilter?
-        $scope.threadFilter.active(false)
-        $scope.threadFilter.freeze(true)
 
     # Reload on query change (ignore hash change)
     lastQuery = $routeParams.q
@@ -37,23 +30,11 @@ module.exports = class StreamController
       if $routeParams.q isnt lastQuery
         $route.reload()
 
-    # Initialize the base filter
-    streamFilter
-      .resetFilter()
-      .setMatchPolicyIncludeAll()
-
-    # Apply query clauses
-    terms = searchFilter.generateFacetedFilter $routeParams.q
-    queryParser.populateFilter streamFilter, terms
-    streamer.send({filter: streamFilter.getFilter()})
-
     # Perform the initial search
     fetch(20)
 
     $scope.isStream = true
     $scope.sort = name: 'Newest'
     $scope.threadRoot = threading.root
-
     $scope.shouldShowThread = (container) -> true
-
     $scope.loadMore = fetch

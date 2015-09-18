@@ -1,16 +1,8 @@
 <!-- Thread view -->
 <ul class="stream-list"
     deep-count="count"
-    thread-filter="search.query"
     window-scroll="loadMore(20)">
-  <li ng-show="threadFilter.active()"
-      ><span ng-pluralize
-             count="count('match')"
-             when="{'0': 'No results for “{{search.query}}”.',
-                    'one': 'Found one result.',
-                    'other': 'Found {} results.'}"></span>
-      <a href="" ng-click="clearSelection()">Clear search</a>.</li>
-  <li ng-show="!threadFilter.active() && selectedAnnotations"
+  <li ng-show="selectedAnnotations"
       ><span ng-pluralize
              count="selectedAnnotationsCount"
              when="{'0': 'No annotations selected.',
@@ -37,14 +29,14 @@
       class="paper thread"
       ng-class="{'js-hover': hasFocus(child.message)}"
       deep-count="count"
-      thread="child" thread-filter
+      thread="child"
       ng-if="child.message"
       ng-include="'thread.html'"
       ng-mouseenter="focus(child.message)"
       ng-click="scrollTo(child.message)"
       ng-mouseleave="focus()"
       ng-repeat="child in threadRoot.children | filter:notOrphan | orderBy : sort.predicate"
-      ng-show="shouldShowThread(child) && (count('edit') || count('match') || !threadFilter.active()) || vm.isNew()">
+      ng-show="shouldShowThread(child) || count('edit') || vm.isNew()">
   </li>
 </ul>
 <!-- / Thread view -->

@@ -5,11 +5,9 @@ describe 'StreamController', ->
   $scope = null
   fakeAnnotationMapper = null
   fakeParams = null
-  fakeQueryParser = null
   fakeRoute = null
   fakeStore = null
   fakeStreamer = null
-  fakeStreamFilter = null
   fakeThreading = null
 
   sandbox = null
@@ -32,17 +30,8 @@ describe 'StreamController', ->
 
     fakeParams = {id: 'test'}
 
-    fakeQueryParser = {
-      populateFilter: sandbox.spy()
-    }
-
     fakeRoute = {
       reload: sandbox.spy()
-    }
-
-    fakeSearchFilter = {
-      generateFacetedFilter: sandbox.stub()
-      toObject: sandbox.stub().returns({})
     }
 
     fakeStore = {
@@ -57,12 +46,6 @@ describe 'StreamController', ->
       send: sandbox.spy()
     }
 
-    fakeStreamFilter = {
-      resetFilter: sandbox.stub().returnsThis()
-      setMatchPolicyIncludeAll: sandbox.stub().returnsThis()
-      getFilter: sandbox.stub()
-    }
-
     fakeThreading = {
       root: {}
     }
@@ -70,11 +53,8 @@ describe 'StreamController', ->
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value '$route', fakeRoute
     $provide.value '$routeParams', fakeParams
-    $provide.value 'queryParser', fakeQueryParser
-    $provide.value 'searchFilter', fakeSearchFilter
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
-    $provide.value 'streamFilter', fakeStreamFilter
     $provide.value 'threading', fakeThreading
     return
 
@@ -85,17 +65,6 @@ describe 'StreamController', ->
 
   afterEach ->
     sandbox.restore()
-
-  describe 'on $routeChangeSuccess', ->
-
-    it 'disables page search', ->
-      createController()
-      $scope.threadFilter = {active: sinon.stub(), freeze: sinon.stub()}
-      $scope.$broadcast('$routeChangeSuccess')
-      assert.calledOnce($scope.threadFilter.active)
-      assert.calledWith($scope.threadFilter.active, false)
-      assert.calledOnce($scope.threadFilter.freeze)
-      assert.calledWith($scope.threadFilter.freeze, true)
 
   describe 'on $routeUpdate', ->
 
