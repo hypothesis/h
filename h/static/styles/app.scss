@@ -84,29 +84,32 @@ ol {
 
 $group-list-width: 225px;
 
-.group-list .dropdown {
-  white-space: nowrap;
+.group-list {
+  .dropdown {
+    white-space: nowrap;
+  }
+
+  .dropdown-menu {
+    width: $group-list-width;
+
+    li {
+      @include pie-clearfix;
+    }
+
+    .group-name {
+      float: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: $group-list-width - 30px;
+    }
+
+    .new-group-btn {
+      background-color: $gray-lightest;
+    }
+  }
 }
 
-.group-list .dropdown-menu {
-  width: $group-list-width;
-}
-
-.group-list .dropdown-menu li {
-  @include pie-clearfix;
-}
-
-.group-list .dropdown-menu .group-name {
-  float: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: $group-list-width - 30px;
-}
-
-.group-list .dropdown-menu .new-group-btn {
-  background-color: $gray-lightest;
-}
-
+/* The user account dropdown menu */
 .user-picker {
   .avatar {
     border-radius: 2px;
