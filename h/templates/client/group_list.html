@@ -2,28 +2,53 @@
   <span class="dropdown-toggle"
         data-toggle="dropdown"
         role="button"
-        ng-switch on="groups.focused().public">
+        ng-switch on="groups.focused().public"
+        ng-click="toggleShareLink(undefined)">
     <i class="h-icon-public" ng-switch-when="true"></i>
     <i class="h-icon-group" ng-switch-default></i>
     {{groups.focused().name}}
     <i class="h-icon-arrow-drop-down"></i>
   </span>
   <ul class="dropdown-menu pull-right" role="menu">
-    <li ng-repeat="group in groups.all()"
-        ng-class="group.id == groups.focused().id? 'selected' : ''">
-      <a class="group-name"
-         href=""
-         ng-click="groups.focus(group.id)"
-         ng-switch on="group.public">
-        <i class="h-icon-public" ng-switch-when="true"></i>
-        <i class="h-icon-group" ng-switch-default></i>
-        {{group.name}}
-      </a>
-      <a ng-href="{{group.url}}" ng-if="group.url"
-         target="_blank" class="h-icon-link" title="Share this group"></a>
+    <li ng-repeat="group in groups.all()">
+      <div ng-class="{'group-item': true, selected: group.id == groups.focused().id}"
+           ng-click="groups.focus(group.id)">
+        <!-- the group icon !-->
+        <div class="group-icon-container" ng-switch on="group.public">
+          <i class="h-icon-public" ng-switch-when="true"></i>
+          <i class="h-icon-group" ng-switch-default></i>
+        </div>
+        <!-- the group name and share link !-->
+        <div class="group-details">
+          <div class="group-name-container">
+            <a class="group-name-link"
+               href=""
+               title="{{ group.public ? 'Show public annotations' : 'Show and create annotations in ' + group.name }}">
+               {{group.name}}
+            </a>
+          </div>
+          <div class="share-link-container" ng-click="stopClickPropagation($event)" ng-show="!group.public">
+            <div>
+              <a class="share-link-toggle"
+                 href=""
+                 ng-click="toggleShareLink(group.id)"
+                 title="Invite others to join this group">
+                Invite others to join this group
+              </a>
+            </div>
+            <div class="share-link-expander" ng-show="shouldShowShareLink(group.id)">
+              <input class="share-link-field" data-group-id="{{group.id}}" ng-value="linkForGroup(group.id)">
+              <p>
+                You can invite other people to join this group
+                by sending them this link
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </li>
     <li class="new-group-btn">
-      <a href="/groups/new" target="_blank"><i class="h-icon-add"></i>
+      <a href="/groups/new" target="_blank" title="Create a new group to share annotations"><i class="h-icon-add"></i>
       New Group</a>
     </li>
   </ul>

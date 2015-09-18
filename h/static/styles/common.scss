@@ -180,24 +180,17 @@ html {
   li:not(.ng-hide) {
     text-align: left;
 
-    a {
+    & > a {
       display: block;
       line-height: 1;
       padding: 1em;
       white-space: nowrap;
-    }
 
-    &:hover {
-      color: $brand-color;
-    }
-
-    &.selected {
-      font-weight: 600;
-      line-height: 1;
-      &:before {
-        font-size: .7em;
+      :hover {
+        color: $brand-color;
       }
     }
+
     &.inactive {
       font-weight: 400;
       color: $gray-lighter;

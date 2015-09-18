@@ -29,10 +29,8 @@
            on-clear="search.clear()"></div>
       <!-- / Searchbar -->
 
-      <div class="group-list"
-           ng-if="auth.user && feature('groups')",
-           group-list="">
-      </div>
+      <group-list class="group-list" ng-if="auth.user && feature('groups')">
+      </group-list>
 
       <div ng-switch="auth.user">
         <span ng-switch-when="undefined">⋯</span>

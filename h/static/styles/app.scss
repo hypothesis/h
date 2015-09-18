@@ -82,7 +82,7 @@ ol {
 
 /* The groups dropdown list. */
 
-$group-list-width: 225px;
+$group-list-width: 270px;
 
 .group-list {
   .dropdown {
@@ -92,20 +92,68 @@ $group-list-width: 225px;
   .dropdown-menu {
     width: $group-list-width;
 
-    li {
-      @include pie-clearfix;
-    }
-
     .group-name {
-      float: left;
       overflow: hidden;
       text-overflow: ellipsis;
       width: $group-list-width - 30px;
     }
+  }
 
-    .new-group-btn {
-      background-color: $gray-lightest;
+  .group-item {
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    cursor: pointer;
+
+    &:hover {
+      .share-link-toggle {
+        color: inherit;
+      }
+      .group-name-link {
+        color: $brand-color;
+      }
     }
+
+    &.selected {
+      .group-name-link {
+        font-weight: 600;
+      }
+    }
+  }
+
+  .group-icon-container {
+    margin-right: 10px;
+  }
+
+  .group-details {
+    margin-right: 20px;
+  }
+
+  .share-link-container {
+    font-size: $body1-font-size;
+    margin-top: 10px;
+    white-space: normal;
+  }
+
+  .share-link-toggle {
+    color: $gray-light;
+  }
+
+  .share-link-toggle:hover {
+    text-decoration: underline;
+    color: $gray-dark;
+  }
+
+  .share-link-field {
+    padding: 3px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    border: 1px solid $gray-lighter;
+    width: 100%;
+  }
+
+  .new-group-btn {
+    background-color: $gray-lightest;
   }
 }
 
