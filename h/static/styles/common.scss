@@ -188,11 +188,10 @@ html {
     }
 
     &:hover {
-      color: black;
+      color: $brand-color;
     }
 
     &.selected {
-      color: black;
       font-weight: 600;
       line-height: 1;
       &:before {
