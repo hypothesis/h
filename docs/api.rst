@@ -167,14 +167,16 @@ search
 
        /api/search?tags=climatefeedback
 
-   or to search for all annotations that user ``seanh@hypothes.is`` has
+   ``tag`` also works the same as tags.
+
+   To search for all annotations that user ``seanh@hypothes.is`` has
    permission to delete do::
 
        /api/search?permissions.delete=acct:seanh@hypothes.is
 
    You can give any query parameter multiple times. For example
-   ``/api/search?tags=climate&tags=feedback`` will only find annotations that
-   have both the tags "climate" *and* "feedback".
+   ``/api/search?tags=climate&tags=feedback`` will find all annotations that
+   have *either* tag "climate" *or* "feedback".
 
    :reqheader Accept: desired response content type
    :resheader Content-Type: response content type
