@@ -630,22 +630,19 @@ def websocket(request):
     # scripts on other sites from using this socket, ensure that the Origin
     # header (if present) matches the request host URL or is whitelisted.
     origin = request.headers.get('Origin')
-    allowed = getattr(request.registry, 'websocket_origins', [])
+    allowed = aslist(request.registry.settings.get('origins', ''))
     if origin is not None:
         if origin != request.host_url and origin not in allowed:
             return HTTPForbidden()
-    return request.get_response(request.registry.websocket)
+    app = WebSocketWSGIApplication(handler_cls=WebSocket)
+    return request.get_response(app)
 
 
 def bad_handshake(exc, request):
-    log.error("streamer websocket handshake error: %s", exc)
     return HTTPBadRequest()
 
 
 def includeme(config):
-    origins = aslist(config.registry.settings.get('origins', ''))
-    config.registry.websocket = WebSocketWSGIApplication(handler_cls=WebSocket)
-    config.registry.websocket_origins = origins
     config.add_route('ws', 'ws')
     config.add_view(websocket, route_name='ws')
     config.add_view(bad_handshake, context=HandshakeError)
