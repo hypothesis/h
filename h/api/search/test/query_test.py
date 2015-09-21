@@ -390,9 +390,7 @@ def test_tagsmatcher_aliases_tag_to_tags():
 
 def test_tagsmatcher_with_both_tag_and_tags():
     """If both 'tag' and 'tags' params are used they should all become tags."""
-    params = multidict.MultiDict()
-    params.add('tag', 'foo')
-    params.add('tags', 'bar')
+    params = {'tag': 'foo', 'tags': 'bar'}
 
     result = query.TagsMatcher()(params)
 

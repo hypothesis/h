@@ -170,7 +170,7 @@ class TagsMatcher(object):
     """Matches the tags field against 'tag' or 'tags' parameters."""
 
     def __call__(self, params):
-        tags = set(params.getall('tag') + params.getall('tags'))
+        tags = set(v for k, v in params.items() if k in ['tag', 'tags'])
         try:
             del params['tag']
             del params['tags']
