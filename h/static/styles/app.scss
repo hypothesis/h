@@ -131,7 +131,8 @@ $group-list-width: 270px;
 
   .share-link-container {
     font-size: $body1-font-size;
-    margin-top: 10px;
+    line-height: $body1-line-height;
+    margin-top: 1px;
     white-space: normal;
   }
 
@@ -146,6 +147,8 @@ $group-list-width: 270px;
 
   .share-link-field {
     padding: 3px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     margin-top: 12px;
     margin-bottom: 8px;
     border: 1px solid $gray-lighter;
@@ -154,6 +157,15 @@ $group-list-width: 270px;
 
   .new-group-btn {
     background-color: $gray-lightest;
+
+    .group-item {
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    .h-icon-add {
+      font-weight: bold;
+    }
   }
 }
 

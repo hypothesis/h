@@ -37,7 +37,7 @@
               </a>
             </div>
             <div class="share-link-expander" ng-show="shouldShowShareLink(group.id)">
-              <input class="share-link-field" data-group-id="{{group.id}}" ng-value="linkForGroup(group.id)">
+              <input class="share-link-field" data-group-id="{{group.id}}" ng-value="group.url">
               <p>
                 You can invite other people to join this group
                 by sending them this link
@@ -48,8 +48,14 @@
       </div>
     </li>
     <li class="new-group-btn">
-      <a href="/groups/new" target="_blank" title="Create a new group to share annotations"><i class="h-icon-add"></i>
-      New Group</a>
+      <div class="group-item" ng-click="createNewGroup()">
+        <div class="group-icon-container"><i class="h-icon-add"></i></div>
+        <div class="group-details">
+          <a href="" title="Create a new group to share annotations">
+            New group
+          </a>
+        </div>
+      </div>
     </li>
   </ul>
 </div>
