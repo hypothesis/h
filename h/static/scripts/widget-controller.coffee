@@ -11,7 +11,6 @@ module.exports = class WidgetController
      streamer,   streamFilter,   store,   threading
   ) ->
     $scope.isStream = true
-    $scope.sort = name: 'Location'
     $scope.threadRoot = threading.root
 
     @chunkSize = 200

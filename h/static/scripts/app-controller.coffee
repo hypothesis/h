@@ -33,6 +33,9 @@ module.exports = class AppController
     # Check to see if we are on the stream page so we can hide share button.
     $scope.isEmbedded = $window.top isnt $window
 
+    # Default sort
+    $scope.sort = name: 'Location'
+
     identity.watch({
       onlogin: (identity) -> $scope.auth.user = auth.userid(identity)
       onlogout: -> $scope.auth.user = null
