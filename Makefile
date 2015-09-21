@@ -1,5 +1,6 @@
 SHELL := bash
 PATH := bin:${PATH}
+NPM_BIN = "$$(npm bin)"
 
 # Unless the user has specified otherwise in their environment, it's probably a
 # good idea to refuse to install unless we're in an activated virtualenv.
@@ -29,10 +30,15 @@ clean:
 dev:
 	@gunicorn --reload --paste conf/development.ini
 
-test:
+test: client-test
 	@python setup.py test
-	@"$$(npm bin)"/karma start h/static/scripts/karma.config.js --single-run
-	@"$$(npm bin)"/karma start h/browser/chrome/karma.config.js --single-run
+
+client-test:
+	@$(NPM_BIN)/karma start h/static/scripts/karma.config.js --single-run
+	@$(NPM_BIN)/karma start h/browser/chrome/karma.config.js --single-run
+
+client-test-watch:
+	@$(NPM_BIN)/karma start h/static/scripts/karma.config.js
 
 cover:
 	@python setup.py test --cov

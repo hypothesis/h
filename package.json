@@ -45,7 +45,7 @@
   "devDependencies": {
     "chai": "^3.2.0",
     "jscs": "^1.13.1",
-    "karma": "^0.12.17",
+    "karma": "^0.13.10",
     "karma-browserify": "^3.0.3",
     "karma-chai": "^0.1.0",
     "karma-cli": "0.0.4",
