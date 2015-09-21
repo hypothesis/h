@@ -226,7 +226,8 @@ create
 
 .. http:post:: /api/annotations
 
-   Create a new annotation. Requires a valid authentication token.
+   Create a new annotation.
+   Requires a valid authentication token, see :ref:`Authentication`.
 
    **Example request**:
 
@@ -236,7 +237,7 @@ create
       Host: hypothes.is
       Accept: application/json
       Content-Type: application/json;charset=UTF-8
-      X-Annotator-Auth-Token: eyJhbGc[...]mbl_YBM
+      Authorization: Bearer eyJhbGc[...]mbl_YBM
 
       {
           "uri": "http://example.com/",
@@ -270,7 +271,7 @@ create
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
    :reqheader Content-Type: request body content type
-   :reqheader X-Annotator-Auth-Token: JWT authentication token
+   :reqheader Authorization: JWT authentication token
    :resheader Content-Type: response content type
    :>json string id: unique id of new annotation
    :>json datetime created: created date of new annotation
@@ -286,8 +287,8 @@ update
 
 .. http:put:: /api/annotations/(string:id)
 
-   Update the annotation with the given `id`. Requires a valid authentication
-   token.
+   Update the annotation with the given `id`.
+   Requires a valid authentication token, see :ref:`Authentication`.
 
    **Example request**:
 
@@ -297,7 +298,7 @@ update
       Host: hypothes.is
       Accept: application/json
       Content-Type: application/json;charset=UTF-8
-      X-Annotator-Auth-Token: eyJhbGc[...]mbl_YBM
+      Authorization: Bearer eyJhbGc[...]mbl_YBM
 
       {
           "uri": "http://example.com/foo",
@@ -321,7 +322,7 @@ update
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
    :reqheader Content-Type: request body content type
-   :reqheader X-Annotator-Auth-Token: JWT authentication token
+   :reqheader Authorization: JWT authentication token
    :resheader Content-Type: response content type
    :>json datetime updated: updated date of annotation
    :statuscode 200: no error
@@ -338,8 +339,8 @@ delete
 
 .. http:delete:: /api/annotations/(string:id)
 
-   Delete the annotation with the given `id`. Requires a valid authentication
-   token.
+   Delete the annotation with the given `id`.
+   Requires a valid authentication token, see :ref:`Authentication`.
 
    **Example request**:
 
@@ -348,7 +349,7 @@ delete
       DELETE /api/annotations/AUxWM-HasREW1YKAwhil
       Host: hypothes.is
       Accept: application/json
-      X-Annotator-Auth-Token: eyJhbGc[...]mbl_YBM
+      Authorization: Bearer eyJhbGc[...]mbl_YBM
 
    **Example response**:
 
@@ -364,7 +365,7 @@ delete
 
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
-   :reqheader X-Annotator-Auth-Token: JWT authentication token
+   :reqheader Authorization: JWT authentication token
    :resheader Content-Type: response content type
    :>json boolean deleted: whether the annotation was deleted
    :>json string id: the unique `id` of the deleted annotation
@@ -374,3 +375,180 @@ delete
       auth token provided does not convey "update" permissions for the
       annotation with the given `id`
    :statuscode 404: annotation with the given `id` was not found
+
+.. _authentication:
+
+Authentication
+--------------
+
+Some of the API endpoints above require a valid authentication token as the
+value of an ``Authorization`` header in the request (for example: to create a
+new annotation). To get this authentication token you need to make three
+requests to Hypothesis:
+
+1. A GET request to ``/app``. The response to this request will contain two
+   cookies: ``XSRF-TOKEN`` and ``session`` (an unauthenticated session token).
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      GET /app HTTP/1.1
+
+   **Example response**:
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
+      Set-Cookie: XSRF-TOKEN=928[...]b11; Path=/
+      Set-Cookie: session=80w[...]BC4; Path=/; HttpOnly
+
+
+2. A JSON POST request to ``/app?__formid__=login`` with the
+   unauthenticated session token from step 1 above in a cookie named
+   ``session``, the XSRF token from step 1 above in an ``X-CSRF-TOKEN`` header,
+   and a username and password in a JSON-formatted body.
+
+   The response to this request will contain a cookie named ``session``:
+   an authenticated session token for the user whose username and password were
+   given, and a JSON body containing the full user ID associated with the given
+   username (among other data).
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      POST /app?__formid__=login HTTP/1.1
+      X-CSRF-Token: 928[...]b11
+      Content-Type: application/json;charset=UTF-8
+      Cookie: session=80w[...]BC4
+
+      {"username": "fred", "password": "pass"}
+
+   **Example response**:
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
+      Set-Cookie: session=nFt[...]QYu; Path=/; HttpOnly
+      Content-Type: application/json; charset=UTF-8
+
+      {"model": {"userid": "acct:fred@hypothes.is"}}
+
+
+3. Finally, make a GET request to
+   ``/api/token?assertion=<xsrf_token>``,
+   where ``xsrf_token`` is the XSRF token from step 1 above. This request must
+   contain the authenticated session token from step 2 above in a
+   ``session`` cookie.
+
+   The body of the response to this request will be an API token.
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      GET /api/token?assertion=928[...]b11 HTTP/1.1
+      Cookie: session=nFt[...]QYu
+
+   **Example response**:
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
+      Content-Type: text/plain; charset=UTF-8
+
+      eyJ[...]k5s
+
+4. Include the API token from step 3 above in any subsequent requests to the
+   API, in an ``Authorization`` header following the string ``Bearer``.
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      POST /api/annotations HTTP/1.1
+      Content-Type: application/json;charset=UTF-8
+      Authorization: Bearer eyJ[...]k5s
+
+      {"uri": "http://example.com/"}
+
+Below is a minimal example Python script that authenticates to the Hypothesis
+API and creates an annotation. It uses the
+`Requests <http://www.python-requests.org/en/latest/>`_ library.
+
+.. sourcecode:: python
+
+    #!/usr/bin/env python2.7
+    import json
+
+    import requests
+
+
+    def login(username, password, url='https://hypothes.is'):
+        """Login to a Hypothesis site and return the user ID and API token.
+
+        The API token can be used in Authorization headers in subsequent requests
+        to the API like so:
+
+            Authorization: Bearer <api_token>
+
+        :returns: A 2-tuple (userid, api_token)
+
+        """
+        # Get an XSRF-TOKEN and an unauthenticated session token from /app.
+        # We need these to post the login form.
+        response = requests.get(url + "/app")
+        xsrf_token = response.cookies["XSRF-TOKEN"]
+        unauthenticated_session_token = response.cookies["session"]
+
+        # Login, getting an authenticated session token.
+        response = requests.post(
+            url + "/app?__formid__=login",
+            data=json.dumps({"username": username, "password": password}),
+            cookies={"session": unauthenticated_session_token},
+            headers={"X-CSRF-TOKEN": xsrf_token})
+        authenticated_session_token = response.cookies["session"]
+        userid = response.json()['model']['userid']
+
+        # Exchange our authenticated session token for an API token.
+        response = requests.get(
+            url + "/api/token?assertion=" + xsrf_token,
+            cookies={"session": authenticated_session_token},
+        )
+        api_token = response.text
+
+        return (userid, api_token)
+
+
+    def create_annotation(username, password, url):
+        """Create a new annotation using the Hypothesis API and return it."""
+        userid, api_token = login(username, password, url)
+
+        response = requests.post(
+            url + "/api/annotations",
+            data=json.dumps({
+                "uri": "http://example.com/",
+                "document": {
+                    "title": "Example document"
+                },
+                "text": "Example annotation",
+                "tags": ["examples"],
+                "permissions": {
+                    "read": ["group:__world__"],
+                    "write": [userid],
+                }
+
+            }),
+            headers={"Authorization": "Bearer " + api_token})
+
+        return response.json()
+
+
+    def main():
+        """Create a new annotation using the Hypothesis API and print it out."""
+        print create_annotation("seanh", "pass", "http://127.0.0.1:5000")
+
+
+    if __name__ == "__main__":
+        main()
