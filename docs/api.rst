@@ -17,7 +17,7 @@ root
 
    .. sourcecode:: http
 
-      GET /api
+      GET /api HTTP/1.1
       Host: hypothes.is
       Accept: application/json
 
@@ -78,7 +78,7 @@ search
 
    .. sourcecode:: http
 
-      GET /api/search?limit=1000&user=gluejar@hypothes.is
+      GET /api/search?limit=1000&user=gluejar@hypothes.is HTTP/1.1
       Host: hypothes.is
       Accept: application/json
 
@@ -95,7 +95,7 @@ search
                   "consumer": "00000000-0000-0000-0000-000000000000",
                   "created": "2014-01-12T18:36:15.697572+00:00",
                   "id": "LGVKq4E4SKKro1dBBEMwsA",
-                  "permissions": { ... },
+                  "permissions": { },
                   "references": ["6lkzoOubSOOymDNDIgazqw"],
                   "target": [],
                   "text": "Peut-etre",
@@ -187,7 +187,7 @@ read
 
    .. sourcecode:: http
 
-     GET /api/annotations/utalbWjUaZK5ifydnohjmA
+     GET /api/annotations/utalbWjUaZK5ifydnohjmA HTTP/1.1
      Host: hypothes.is
      Accept: application/json
 
@@ -201,9 +201,9 @@ read
       {
           "consumer": "00000000-0000-0000-0000-000000000000",
           "created": "2013-08-26T13:31:49.339078+00:00",
-          "document": { ... },
+          "document": { },
           "id": "utalbWjUQZK5ifydnohjmA",
-          "permissions": { ... },
+          "permissions": { },
           "references": [
               "ZkDZ8ZRXQkiEeG_3r7s1IA",
               "4uUTPORmTN-0y-puAXe_sw"
@@ -233,7 +233,7 @@ create
 
    .. sourcecode:: http
 
-      POST /api/annotations
+      POST /api/annotations HTTP/1.1
       Host: hypothes.is
       Accept: application/json
       Content-Type: application/json;charset=UTF-8
@@ -248,8 +248,8 @@ create
               "delete": ["acct:joebloggs@example.org"],
               "admin": ["acct:joebloggs@example.org"],
           },
-          "document": { ... },
-          "target": [ ... ],
+          "document": { },
+          "target": [ ],
           "tags": [],
           "text": "This is an annotation I made."
       }
@@ -264,8 +264,7 @@ create
       {
           "id": "AUxWM-HasREW1YKAwhil",
           "uri": "http://example.com/",
-          "user": "acct:joebloggs@example.org",
-          ...
+          "user": "acct:joebloggs@example.org"
       }
 
    :param id: annotation's unique id
@@ -294,7 +293,7 @@ update
 
    .. sourcecode:: http
 
-      PUT /api/annotations/AUxWM-HasREW1YKAwhil
+      PUT /api/annotations/AUxWM-HasREW1YKAwhil HTTP/1.1
       Host: hypothes.is
       Accept: application/json
       Content-Type: application/json;charset=UTF-8
@@ -315,8 +314,7 @@ update
           "id": "AUxWM-HasREW1YKAwhil",
           "updated": "2015-03-26T13:09:42.646509+00:00"
           "uri": "http://example.com/",
-          "user": "acct:joebloggs@example.org",
-          ...
+          "user": "acct:joebloggs@example.org"
       }
 
    :param id: annotation's unique id
@@ -346,7 +344,7 @@ delete
 
    .. sourcecode:: http
 
-      DELETE /api/annotations/AUxWM-HasREW1YKAwhil
+      DELETE /api/annotations/AUxWM-HasREW1YKAwhil HTTP/1.1
       Host: hypothes.is
       Accept: application/json
       Authorization: Bearer eyJhbGc[...]mbl_YBM
