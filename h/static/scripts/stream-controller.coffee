@@ -37,10 +37,6 @@ module.exports = class StreamController
       if $routeParams.q isnt lastQuery
         $route.reload()
 
-    # XXX: Reset the threading service
-    threading.createIdTable([])
-    $scope.threadRoot = threading.root = mail.messageContainer()
-
     # Initialize the base filter
     streamFilter
       .resetFilter()
@@ -55,8 +51,8 @@ module.exports = class StreamController
     fetch(20)
 
     $scope.isStream = true
-
-    $scope.sort.name = 'Newest'
+    $scope.sort = name: 'Newest'
+    $scope.threadRoot = threading.root
 
     $scope.shouldShowThread = (container) -> true
 

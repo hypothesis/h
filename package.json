@@ -11,6 +11,7 @@
     "angular-resource": "1.2.28",
     "angular-route": "1.2.28",
     "angular-sanitize": "1.2.28",
+    "angular-websocket": "^1.0.13",
     "angulartics": "0.17.2",
     "autofill-event": "0.0.1",
     "babelify": "^6.1.3",

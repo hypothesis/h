@@ -64,7 +64,7 @@ describe 'StreamController', ->
     }
 
     fakeThreading = {
-      createIdTable: sandbox.spy()
+      root: {}
     }
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
@@ -85,13 +85,6 @@ describe 'StreamController', ->
 
   afterEach ->
     sandbox.restore()
-
-  it 'resets the threading service', ->
-    createController()
-    assert.calledOnce(fakeThreading.createIdTable)
-    assert.calledWith(fakeThreading.createIdTable, [])
-    assert.isObject(fakeThreading.root)
-    assert.strictEqual(fakeThreading.root, $scope.threadRoot)
 
   describe 'on $routeChangeSuccess', ->
 
