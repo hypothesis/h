@@ -12,6 +12,10 @@ from h.api import uri
     # Should leave URNs as they are
     ("urn:doi:10.0001/12345", "urn:doi:10.0001/12345"),
 
+    # Should leave http(s) URLs with no hostname as they are
+    ("http:///path/to/page", "http:///path/to/page"),
+    ("https:///path/to/page", "https:///path/to/page"),
+
     # Should treat messed up urlencoded strings as opaque and return them as
     # is. This is not valid urlencoding and trying to deal with it is going to
     # cause more problems than solutions (for example: is "%2F" in the path
