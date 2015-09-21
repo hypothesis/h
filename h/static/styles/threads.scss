@@ -71,3 +71,11 @@ $thread-padding: 1em;
 .thread-load-more {
   clear: both;
 }
+
+.thread-anchor-notice {
+  // XXX: negative margins here make me sad; maybe refactor container
+  background-color: lighten($gray-light, 38%);
+  border-top: solid 1px $gray-lighter;
+  margin: 0 -1em -1em -1em;
+  padding: 1em;
+}
