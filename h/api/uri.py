@@ -123,6 +123,10 @@ def normalize(uristr):
     if uri.scheme.lower() not in URL_SCHEMES:
         return uristr
 
+    # Don't perform normalization on URLs with no hostname.
+    if uri.hostname is None:
+        return uristr
+
     scheme = uri.scheme
     netloc = _normalize_netloc(uri)
     path = _normalize_path(uri)
