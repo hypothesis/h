@@ -163,3 +163,17 @@ class AnyMatcher(object):
         }
         del params["any"]
         return result
+
+
+class TagsMatcher(object):
+
+    """Matches the tags field against 'tag' or 'tags' parameters."""
+
+    def __call__(self, params):
+        tags = set(params.getall('tag') + params.getall('tags'))
+        try:
+            del params['tag']
+            del params['tags']
+        except KeyError:
+            pass
+        return {'terms': {'tags': [tag for tag in tags]}} if tags else None

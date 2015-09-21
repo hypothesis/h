@@ -135,14 +135,6 @@ search
        equivalence that are supported include rel="alternate" links, DOIs,
        PDF file IDs, and more.
 
-   :query uri.parts: Search for annotations where any part(s) of the annotated
-       URI match some text. For example ``/api/search?uri=example`` won't
-       match any annotations because the ``uri`` field has to be the full
-       URI ``www.example.com``, but ``/api/search?uri.parts=example``
-       (or ``/api/search?uri.parts=example.com``) will find any annotations
-       of ``www.example.com`` (or of any sub-pages like
-       ``www.example.com/foo.html``).
-
    :query user: Search for annotations by a particular user. For example
        ``/api/search?user=tim``  will find all annotations by users named
        ``tim`` at any provider, ``/api/search?user=tim@hypothes.is`` will only
@@ -167,14 +159,16 @@ search
 
        /api/search?tags=climatefeedback
 
-   or to search for all annotations that user ``seanh@hypothes.is`` has
+   ``tag`` also works the same as tags.
+
+   To search for all annotations that user ``seanh@hypothes.is`` has
    permission to delete do::
 
        /api/search?permissions.delete=acct:seanh@hypothes.is
 
    You can give any query parameter multiple times. For example
-   ``/api/search?tags=climate&tags=feedback`` will only find annotations that
-   have both the tags "climate" *and* "feedback".
+   ``/api/search?tags=climate&tags=feedback`` will find all annotations that
+   have *either* tag "climate" *or* "feedback".
 
    :reqheader Accept: desired response content type
    :resheader Content-Type: response content type
