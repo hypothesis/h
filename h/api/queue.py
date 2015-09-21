@@ -15,13 +15,23 @@ def annotation(event):
     if not request.feature('queue'):
         return
 
+    client_id = request.headers.get('X-Client-Id')
     queue = request.get_queue_writer()
     data = {
         'action': action,
         'annotation': annotation,
-        'src_client_id': request.headers.get('X-Client-Id'),
+        'src_client_id': client_id,
     }
     queue.publish('annotations', json.dumps(data))
+
+    percolate = annotation.percolate()
+    for percolator_id in percolate['matches']:
+        # Don't echo events back to their producer.
+        if percolator_id is client_id:
+            continue
+        topic_id = 'percolator-{}#ephemeral'.format(percolator_id)
+        message = json.dumps({'event': action, 'data': annotation})
+        queue.publish(topic_id, message)
 
 
 def includeme(config):

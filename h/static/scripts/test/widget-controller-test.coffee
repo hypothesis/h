@@ -8,7 +8,7 @@ describe 'WidgetController', ->
   fakeCrossFrame = null
   fakeStore = null
   fakeStreamer = null
-  fakeStreamFilter = null
+  fakeThreading = null
   sandbox = null
   viewer = null
 
@@ -47,10 +47,8 @@ describe 'WidgetController', ->
       send: sandbox.spy()
     }
 
-    fakeStreamFilter = {
-      resetFilter: sandbox.stub().returnsThis()
-      addClause: sandbox.stub().returnsThis()
-      getFilter: sandbox.stub().returns({})
+    fakeThreading = {
+      root: {}
     }
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
@@ -58,7 +56,7 @@ describe 'WidgetController', ->
     $provide.value 'crossframe', fakeCrossFrame
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
-    $provide.value 'streamFilter', fakeStreamFilter
+    $provide.value 'threading', fakeThreading
     return
 
   beforeEach inject ($controller, $rootScope) ->

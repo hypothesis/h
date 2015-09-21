@@ -11,6 +11,7 @@ from sqlalchemy.ext import declarative
 
 from .models import Annotation
 from .models import Document
+from .models import Percolator
 
 
 log = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ def create_db():
     # Check for required plugin(s)
     _ensure_es_plugins(es.conn)
 
-    models = [Annotation, Document]
+    models = [Annotation, Document, Percolator]
     mappings = {}
     analysis = {}
 
@@ -127,6 +128,7 @@ def delete_db():
     """Delete the Annotation and Document databases."""
     Annotation.drop_all()
     Document.drop_all()
+    Percolator.drop_all()
 
 
 def use_session(session, base=Base):

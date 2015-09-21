@@ -408,7 +408,7 @@ AnnotationController = [
 module.exports = [
   '$document',
   ($document) ->
-    linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
+    linkFn = (scope, elem, attrs, [ctrl, thread, counter]) ->
       # Observe the embedded attribute
       attrs.$observe 'annotationEmbedded', (value) ->
         ctrl.embedded = value? and value != 'false'
@@ -442,13 +442,8 @@ module.exports = [
         scope.$watch (-> ctrl.editing), (editing, old) ->
           if editing
             counter.count 'edit', 1
-            # Disable the filter and freeze it to always match while editing.
-            if thread? and threadFilter?
-              threadFilter.active(false)
-              threadFilter.freeze(true)
           else if old
             counter.count 'edit', -1
-            threadFilter?.freeze(false)
 
         # Clean up when the thread is destroyed
         scope.$on '$destroy', ->
@@ -457,7 +452,7 @@ module.exports = [
     controller: AnnotationController
     controllerAs: 'vm'
     link: linkFn
-    require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
+    require: ['annotation', '?^thread', '?^deepCount']
     scope:
       annotationGet: '&annotation'
       replyCount: '@annotationReplyCount'

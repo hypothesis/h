@@ -1,12 +1,62 @@
 require('autofill-event')
 baseURI = require('document-base-uri')
 angular = require('angular')
+require('angular-websocket')
 require('angular-jwt')
 
 uuid = require('node-uuid')
+clientId = uuid.v4()
+
+socket = null
 
 resolve =
   store: ['store', (store) -> store.$promise]
+  streamer: [
+    '$websocket', 'annotationMapper'
+    ($websocket,   annotationMapper) ->
+      # Get the socket URL
+      url = new URL('/ws', baseURI)
+      url.protocol = url.protocol.replace('http', 'ws')
+
+      # Close any existing socket
+      socket?.close()
+
+      # Open the socket
+      socket = $websocket(url.href, [], {reconnectIfNotNormalClose: true})
+      socket.send(messageType: 'client_id', value: clientId)
+
+      # Listen for updates
+      socket.onMessage (event) ->
+        message = JSON.parse(event.data)
+        return if !message or message.type != 'annotation-notification'
+        action = message.options.action
+        annotations = message.payload
+        return unless annotations?.length
+        switch action
+          when 'create', 'update', 'past'
+            annotationMapper.loadAnnotations annotations
+          when 'delete'
+            annotationMapper.unloadAnnotations annotations
+
+      return socket
+  ]
+  threading: [
+    'annotationMapper', 'drafts', 'threading'
+    (annotationMapper,   drafts,   threading) ->
+      # Unload all the annotations
+      idTable = threading.idTable
+      annotations = (message for id, {message} of idTable when message)
+      annotationMapper.unloadAnnotations(annotations)
+
+      # Reset the threading root
+      threading.createIdTable([])
+      threading.root = mail.messageContainer()
+
+      # Thread all the drafts
+      threading.thread(drafts.all())
+
+      return threading
+  ]
 
 
 configureDocument = ['$provide', ($provide) ->
@@ -52,15 +102,11 @@ configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
 
 setupCrossFrame = ['crossframe', (crossframe) -> crossframe.connect()]
 
-setupHost = ['host', (host) -> ]
-
-setupStreamer = [
-  '$http', '$window', 'streamer'
-  ($http,   $window,   streamer) ->
-    clientId = uuid.v4()
-    streamer.clientId = clientId
-    $http.defaults.headers.common['X-Client-Id'] = clientId
+setupHttp = ['$http', ($http) ->
+  $http.defaults.headers.common['X-Client-Id'] = clientId
 ]
+
+setupHost = ['host', (host) -> ]
 
 setupFeatures = ['features', (features) -> features.fetch()]
 
@@ -74,6 +120,7 @@ module.exports = angular.module('h', [
   'ngRoute'
   'ngSanitize'
   'ngTagsInput'
+  'ngWebSocket'
   'toastr'
 ])
 
@@ -93,7 +140,6 @@ module.exports = angular.module('h', [
 .directive('simpleSearch', require('./directive/simple-search'))
 .directive('statusButton', require('./directive/status-button'))
 .directive('thread', require('./directive/thread'))
-.directive('threadFilter', require('./directive/thread-filter'))
 .directive('match', require('./directive/match'))
 .directive('spinner', require('./directive/spinner'))
 .directive('tabbable', require('./directive/tabbable'))
@@ -122,18 +168,13 @@ module.exports = angular.module('h', [
 .service('localStorage', require('./local-storage'))
 .service('permissions', require('./permissions'))
 .service('pulse', require('./pulse'))
-.service('queryParser', require('./query-parser'))
 .service('render', require('./render'))
-.service('searchFilter', require('./search-filter'))
 .service('session', require('./session'))
 .service('store', require('./store'))
-.service('streamFilter', require('./stream-filter'))
-.service('streamer', require('./streamer'))
 .service('tags', require('./tags'))
 .service('time', require('./time'))
 .service('threading', require('./threading'))
 .service('unicode', require('./unicode'))
-.service('viewFilter', require('./view-filter'))
 
 .factory('serviceUrl', require('./service-url'))
 
@@ -148,5 +189,5 @@ module.exports = angular.module('h', [
 
 .run(setupFeatures)
 .run(setupCrossFrame)
-.run(setupStreamer)
+.run(setupHttp)
 .run(setupHost)

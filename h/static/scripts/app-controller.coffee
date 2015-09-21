@@ -4,15 +4,11 @@ angular = require('angular')
 module.exports = class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$route', '$scope', '$window',
-    'auth', 'drafts', 'features', 'identity',
-    'session', 'streamer', 'annotationUI',
-    'annotationMapper', 'threading'
+    'annotationUI', 'auth', 'drafts', 'features', 'identity', 'session'
   ]
   constructor: (
      $controller,   $document,   $location,   $route,   $scope,   $window,
-     auth,   drafts,   features,   identity,
-     session,   streamer,   annotationUI,
-     annotationMapper, threading
+     annotationUI,   auth,   drafts,   features,   identity,  session
   ) ->
     $controller('AnnotationUIController', {$scope})
 
@@ -30,43 +26,12 @@ module.exports = class AppController
 
     isFirstRun = $location.search().hasOwnProperty('firstrun')
 
-    streamerUrl = new URL('/ws', $document.prop('baseURI'))
-    streamerUrl.protocol = streamerUrl.protocol.replace('http', 'ws')
-    streamerUrl = streamerUrl.href
-
-    applyUpdates = (action, data) ->
-      # Update the application with new data from the websocket.
-      return unless data?.length
-      switch action
-        when 'create', 'update', 'past'
-          annotationMapper.loadAnnotations data
-        when 'delete'
-          for annotation in data
-            if a = threading.idTable[annotation.id]?.message
-              $scope.$emit('annotationDeleted', a)
-
-    streamer.onmessage = (data) ->
-      return if !data or data.type != 'annotation-notification'
-      action = data.options.action
-      payload = data.payload
-      applyUpdates(action, payload)
-      $scope.$digest()
-
     # App dialogs
     $scope.accountDialog = visible: false
     $scope.shareDialog = visible: false
 
     # Check to see if we are on the stream page so we can hide share button.
     $scope.isEmbedded = $window.top isnt $window
-
-    cleanupAnnotations = ->
-      # Clean up all the annotations
-      for id, container of $scope.threading.idTable when container.message
-        # Keep drafts. When logging out, drafts are already discarded.
-        if drafts.contains(container.message)
-          continue
-        else
-          $scope.$emit('annotationDeleted', container.message)
 
     identity.watch({
       onlogin: (identity) -> $scope.auth.user = auth.userid(identity)
@@ -95,13 +60,6 @@ module.exports = class AppController
         $scope.login()
       else
         $scope.accountDialog.visible = false
-
-      # Reopen the streamer.
-      streamer.close()
-      streamer.open($window.WebSocket, streamerUrl)
-
-      # Clean up annotations that should be removed.
-      cleanupAnnotations()
 
       # Reload the view if this is not the initial load.
       if oldVal isnt undefined
@@ -132,7 +90,3 @@ module.exports = class AppController
         unless angular.equals $location.search()['q'], query
           $location.search('q', query or null)
           annotationUI.clearSelectedAnnotations()
-
-    $scope.sort = name: 'Location'
-    $scope.threading = threading
-    $scope.threadRoot = $scope.threading?.root

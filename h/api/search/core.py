@@ -38,3 +38,17 @@ def search(request, params):
     rows = [models.Annotation(d['_source'], id=d['_id']) for d in docs]
 
     return {"rows": rows, "total": total}
+
+
+def percolator(request, params):
+    builder = query.Builder()
+
+    builder.append_filter(query.AuthFilter(request))
+    builder.append_filter(query.UriFilter(request))
+    builder.append_filter(
+        lambda _: nipsa.nipsa_filter(request.authenticated_userid))
+
+    builder.append_matcher(query.AnyMatcher())
+
+    body = builder.build(params)
+    return models.Percolator(body)

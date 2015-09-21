@@ -17,6 +17,14 @@ module.exports = [
       annotations = (new store.AnnotationResource(a) for a in annotations)
       $rootScope.$emit('annotationsLoaded', annotations)
 
+    unloadAnnotations: (annotations) ->
+      for annotation in annotations
+        container = threading.idTable[annotation.id]
+        if container?.message
+          if annotation isnt container.message
+            annotation = angular.copy(annotation, container.message)
+        $rootScope.$emit('annotationDeleted', annotation)
+
     createAnnotation: (annotation) ->
       annotation = new store.AnnotationResource(annotation)
       $rootScope.$emit('beforeAnnotationCreated', annotation)

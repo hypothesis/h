@@ -15,30 +15,16 @@
          name="annotation"
          annotation="vm.container.message"
          annotation-embedded="{{isEmbedded}}"
-         annotation-show-reply-count="{{vm.shouldShowNumReplies()}}"
          annotation-reply-count="{{vm.numReplies()}}"
          annotation-reply-count-click="vm.toggleCollapsed()"
-         ng-if="vm.container.message"
-         ng-show="vm.matchesFilter()">
+         ng-if="vm.container.message">
 </article>
-
-<div class="thread-load-more" ng-show="vm.shouldShowLoadMore()">
-  <a class="load-more small"
-     href=""
-     ng-click="vm.loadMore()"
-     ng-pluralize
-     count="vm.numLoadMore()"
-     when="{'0': '',
-           one: 'View one more in conversation',
-           other: 'View {} more in conversation'}"
-     ></a>
-</div>
 
 <!-- Replies -->
 <ul class="thread-replies">
   <li class="thread"
       deep-count="count"
-      thread="child" thread-filter
+      thread="child"
       ng-include="'thread.html'"
       ng-repeat="child in vm.container.children
                  | orderBy : 'message.updated' : true"
