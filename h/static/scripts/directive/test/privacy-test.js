@@ -1,6 +1,6 @@
 'use strict';
 
-var PrivacyController = require('../privacy').PrivacyController;
+var PrivacyController = require('../privacy')._Controller;
 
 describe('PrivacyController', function () {
   var fakeScope;

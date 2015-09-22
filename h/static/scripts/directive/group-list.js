@@ -32,7 +32,7 @@ function GroupsListController($scope) {
  * @description Displays a list of groups of which the user is a member.
  */
 // @ngInject
-module.exports = function (groups, $window) {
+function GroupsListDirective(groups, $window) {
   return {
     controller: GroupsListController,
     link: function ($scope, elem, attrs) {
@@ -58,4 +58,9 @@ module.exports = function (groups, $window) {
     scope: {},
     templateUrl: 'group_list.html'
   };
+};
+
+module.exports = {
+  directive: GroupsListDirective,
+  _Controller: GroupsListController
 };
