@@ -2,7 +2,7 @@ extend = require('extend')
 Annotator = require('annotator')
 
 
-module.exports = class Pdf extends Annotator.Plugin
+module.exports = class PDF extends Annotator.Plugin
   documentLoaded: null
   observer: null
   pdfViewer: null

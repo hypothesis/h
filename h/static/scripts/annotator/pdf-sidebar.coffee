@@ -4,7 +4,7 @@ Sidebar = require('./sidebar')
 module.exports = class PdfSidebar extends Sidebar
   options:
     TextSelection: {}
-    Pdf: {}
+    PDF: {}
     BucketBar:
       container: '.annotator-frame'
       scrollables: ['#viewerContainer']

@@ -18,7 +18,7 @@ Annotator.Plugin.BucketBar = require('./plugin/bucket-bar');
 Annotator.Plugin.Toolbar = require('./plugin/toolbar');
 
 // Document type plugins
-Annotator.Plugin.Pdf = require('./plugin/pdf');
+Annotator.Plugin.PDF = require('./plugin/pdf');
 require('../vendor/annotator.document');  // Does not export the plugin :(
 
 // Selection plugins
