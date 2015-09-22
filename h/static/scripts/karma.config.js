@@ -38,8 +38,12 @@ module.exports = function(config) {
       'test/bootstrap.js',
 
       // Tests
-      '**/*-test.coffee',
-      '**/*-test.js'
+      //
+      // Karma watching is disabled for these files because they are
+      // bundled with karma-browserify which handles watching itself via
+      // watchify
+      { pattern: '**/*-test.coffee', watched: false, included: true, served: true },
+      { pattern: '**/*-test.js', watched: false, included: true, served: true }
     ],
 
     // list of files to exclude
