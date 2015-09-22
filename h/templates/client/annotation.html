@@ -25,15 +25,16 @@
             title="This annotation is visible only to you.">
         <i class="h-icon-lock"></i> Only Me
       </span>
+
       <span class="annotation-citation"
-            ng-if="!vm.embedded"
-            ng-show="vm.document.title">
-        on &ldquo;<a href="{{vm.document.uri}}" target="_blank"
-                     >{{vm.document.title}}</a>&rdquo;
-        <span class="annotation-citation-domain"
-              ng-show="vm.document.domain != vm.document.title"
-              >({{vm.document.domain}})</span>
+            ng-bind-html="vm.document | documentTitle"
+            ng-if="!vm.embedded">
       </span>
+      <span class="annotation-citation-domain"
+            ng-bind-html="vm.document | documentDomain"
+            ng-if="!vm.embedded">
+      </span>
+
       <!-- Editing controls -->
       <aside class="pull-right" ng-if="vm.editing">
         <privacy ng-click="$event.stopPropagation()"

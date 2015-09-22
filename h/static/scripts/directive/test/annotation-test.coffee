@@ -18,6 +18,8 @@ describe 'annotation', ->
   fakeMomentFilter = null
   fakePermissions = null
   fakePersonaFilter = null
+  fakeDocumentTitleFilter = null
+  fakeDocumentDomainFilter = null
   fakeSession = null
   fakeStore = null
   fakeTags = null
@@ -65,6 +67,8 @@ describe 'annotation', ->
       private: sandbox.stub().returns({read: ['justme']})
     }
     fakePersonaFilter = sandbox.stub().returnsArg(0)
+    fakeDocumentTitleFilter = (arg) -> ''
+    fakeDocumentDomainFilter = (arg) -> ''
 
     fakeSession =
       state:
@@ -92,6 +96,8 @@ describe 'annotation', ->
     $provide.value 'momentFilter', fakeMomentFilter
     $provide.value 'permissions', fakePermissions
     $provide.value 'personaFilter', fakePersonaFilter
+    $provide.value('documentTitleFilter', fakeDocumentTitleFilter)
+    $provide.value('documentDomainFilter', fakeDocumentDomainFilter)
     $provide.value 'session', fakeSession
     $provide.value 'store', fakeStore
     $provide.value 'tags', fakeTags
@@ -564,7 +570,8 @@ describe("AnnotationController", ->
   createAnnotationDirective = ({annotation, personaFilter, momentFilter,
                                 urlencodeFilter, drafts, flash,
                                 permissions, session, tags, time, annotationUI,
-                                annotationMapper, groups}) ->
+                                annotationMapper, groups,
+                                documentTitleFilter, documentDomainFilter}) ->
     locals = {
       personaFilter: personaFilter or ->
       momentFilter: momentFilter or {}
@@ -594,6 +601,8 @@ describe("AnnotationController", ->
         get: ->
         focused: -> {}
       }
+      documentTitleFilter: documentTitleFilter or -> ''
+      documentDomainFilter: documentDomainFilter or -> ''
     }
     module(($provide) ->
       $provide.value("personaFilter", locals.personaFilter)
@@ -608,6 +617,8 @@ describe("AnnotationController", ->
       $provide.value("annotationUI", locals.annotationUI)
       $provide.value("annotationMapper", locals.annotationMapper)
       $provide.value("groups", locals.groups)
+      $provide.value("documentTitleFilter", locals.documentTitleFilter)
+      $provide.value("documentDomainFilter", locals.documentDomainFilter)
       return
     )
 
