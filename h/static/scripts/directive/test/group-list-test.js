@@ -33,14 +33,82 @@ describe('GroupsListController', function () {
   });
 });
 
+// returns true if a jQuery-like element has
+// been hidden directly via an ng-show directive.
+//
+// This does not check whether the element is a descendant
+// of a hidden element
+function isElementHidden(element) {
+  return element.hasClass('ng-hide');
+}
 
-// <groups-list> directive
-// - check that it renders all visible groups
-// - check that share links visible for non-public groups
-// - check that share link is focused after toggling share link
+describe('GroupsListDirective', function () {
+  var $compile;
+  var $scope;
 
-// TODO
-// - read Angular unit testing guide
-// - read Angular E2E testing guides
-// - grok an existing directive test
-// - get a trivial <groups-list> directive test failing, then make it work
+  var GROUP_LINK = 'https://hypothes.is/groups/hdevs';
+
+  var groups = [{
+    id: 'public',
+    public: true
+  },{
+    id: 'h-devs',
+    name: 'Hypothesis Developers',
+    url: GROUP_LINK
+  }];
+
+  before(function() {
+    angular.module('app', [])
+      .directive('groupList', groupsList.directive)
+      .factory('groups', function () {
+        return {
+          all: function () {
+            return groups;
+          }
+        };
+      });
+  });
+
+  beforeEach(function () {
+    angular.mock.module('app');
+    angular.mock.module('h.templates');
+  });
+
+  beforeEach(angular.mock.inject(function (_$compile_, _$rootScope_) {
+    $compile = _$compile_;
+    $scope = _$rootScope_.$new();
+  }));
+
+  function createGroupsList() {
+    var element = $compile('<group-list></group-list>')($scope);
+    $scope.$digest();
+    return element;
+  }
+
+  it('should render groups', function () {
+    var element = createGroupsList();
+    var groupItems = element.find('.group-item');
+    assert.equal(groupItems.length, groups.length + 1);
+  });
+
+  it('should render share links', function () {
+    var element = createGroupsList();
+    var shareLinks = element.find('.share-link-container');
+    assert.equal(shareLinks.length, 1);
+
+    var linkField = element.find('.share-link-field');
+    assert.equal(linkField.length, 1);
+    assert.equal(linkField[0].value, GROUP_LINK);
+  });
+
+  it('should toggle share link on click', function () {
+    var element = createGroupsList();
+    var toggleLink = element.find('.share-link-toggle');
+    var expander = element.find('.share-link-expander');
+    assert.ok(isElementHidden(expander));
+    toggleLink.click();
+    assert.ok(!isElementHidden(expander));
+    toggleLink.click();
+    assert.ok(isElementHidden(expander));
+  });
+});
