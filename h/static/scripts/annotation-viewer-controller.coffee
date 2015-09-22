@@ -26,7 +26,7 @@ module.exports = class AnnotationViewerController
 
     store.AnnotationResource.read id: id, (annotation) ->
       annotationMapper.loadAnnotations([annotation])
-      $scope.threadRoot = {children: threading.idTable[id]}
+      $scope.threadRoot = {children: [threading.idTable[id]]}
     store.SearchResource.get references: id, ({rows}) ->
       annotationMapper.loadAnnotations(rows)
 
