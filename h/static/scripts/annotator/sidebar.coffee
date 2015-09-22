@@ -5,7 +5,7 @@ Hammer = require('hammerjs')
 Host = require('./host')
 
 # Minimum width to which the frame can be resized.
-MIN_RESIZE = 280
+MIN_RESIZE = 80
 
 
 module.exports = class Sidebar extends Host
