@@ -127,5 +127,5 @@ var directive = function () {
 
 module.exports = {
   directive: directive,
-  _Controller: PrivacyController
+  Controller: PrivacyController
 };

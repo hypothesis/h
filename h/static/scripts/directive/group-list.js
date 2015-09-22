@@ -1,14 +1,8 @@
 'use strict';
 
 // @ngInject
-function GroupsListController($scope) {
+function GroupListController($scope) {
   $scope.expandedGroupId = undefined;
-
-  // used to keep the dropdown from closing when the user
-  // interacts with the inline link share pane within the groups list
-  $scope.stopClickPropagation = function($event) {
-    $event.stopPropagation();
-  }
 
   // show the share link for the specified group or clear it if
   // null
@@ -41,9 +35,9 @@ function GroupsListController($scope) {
  * @description Displays a list of groups of which the user is a member.
  */
 // @ngInject
-function groupsList(groups, $window) {
+function groupList(groups, $window) {
   return {
-    controller: GroupsListController,
+    controller: GroupListController,
     link: function ($scope, elem, attrs) {
       $scope.groups = groups;
 
@@ -70,6 +64,6 @@ function groupsList(groups, $window) {
 };
 
 module.exports = {
-  directive: groupsList,
-  _Controller: GroupsListController
+  directive: groupList,
+  Controller: GroupListController
 };

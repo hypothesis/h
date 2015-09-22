@@ -27,7 +27,7 @@
                {{group.name}}
             </a>
           </div>
-          <div class="share-link-container" ng-click="stopClickPropagation($event)" ng-if="!group.public">
+          <div class="share-link-container" ng-click="$event.stopPropagation()" ng-if="!group.public">
             <div>
               <a class="share-link-toggle"
                  href=""

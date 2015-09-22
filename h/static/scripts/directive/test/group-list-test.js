@@ -1,14 +1,14 @@
 'use strict';
 
-var groupsList = require('../group-list');
+var groupList = require('../group-list');
 
-describe('GroupsListController', function () {
+describe('GroupListController', function () {
   var controller;
   var $scope;
 
   beforeEach(function () {
     $scope = {};
-    controller = new groupsList._Controller($scope);
+    controller = new groupList.Controller($scope);
   });
 
   it('toggles share links', function () {
@@ -63,7 +63,7 @@ function isElementHidden(element) {
   return element.hasClass('ng-hide');
 }
 
-describe('GroupsListDirective', function () {
+describe('groupList', function () {
   var $compile;
   var $scope;
 
@@ -80,7 +80,7 @@ describe('GroupsListDirective', function () {
 
   before(function() {
     angular.module('app', [])
-      .directive('groupList', groupsList.directive)
+      .directive('groupList', groupList.directive)
       .factory('groups', function () {
         return {
           all: function () {
@@ -100,20 +100,20 @@ describe('GroupsListDirective', function () {
     $scope = _$rootScope_.$new();
   }));
 
-  function createGroupsList() {
+  function createGroupList() {
     var element = $compile('<group-list></group-list>')($scope);
     $scope.$digest();
     return element;
   }
 
   it('should render groups', function () {
-    var element = createGroupsList();
+    var element = createGroupList();
     var groupItems = element.find('.group-item');
     assert.equal(groupItems.length, groups.length + 1);
   });
 
   it('should render share links', function () {
-    var element = createGroupsList();
+    var element = createGroupList();
     var shareLinks = element.find('.share-link-container');
     assert.equal(shareLinks.length, 1);
 
@@ -123,7 +123,7 @@ describe('GroupsListDirective', function () {
   });
 
   it('should toggle share link on click', function () {
-    var element = createGroupsList();
+    var element = createGroupList();
     var toggleLink = element.find('.share-link-toggle');
     var expander = element.find('.share-link-expander');
     assert.ok(isElementHidden(expander));
