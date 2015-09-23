@@ -29,7 +29,6 @@ class Annotation(annotation.Annotation):
             },
         },
         'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
-        'consumer': {'type': 'string'},
         'target': {
             'properties': {
                 'source': {

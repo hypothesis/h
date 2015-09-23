@@ -28,10 +28,6 @@ def store_from_settings(settings):
     if 'es.compatibility' in settings:
         es.compatibility_mode = settings['es.compatibility']
 
-    # We want search results to be filtered according to their
-    # read-permissions, which is done in the store itself.
-    es.authorization_enabled = True
-
     return es
 
 

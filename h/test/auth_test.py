@@ -166,61 +166,38 @@ def test_groupfinder_returns_no_principals(models):
     nor a member of any group, it should return no additional principals.
 
     """
-    request = MagicMock(client=None)
-    models.User.get_by_userid.return_value = MagicMock(
-        admin=False, staff=False)
+    request = MagicMock()
+    models.User.get_by_userid.return_value = MagicMock(admin=False,
+                                                       staff=False)
 
     assert auth.groupfinder("jiji", request) == []
 
 
 @groupfinder_fixtures
-def test_groupfinder_returns_client_id_as_consumer(models):
-    """
-    If the request has a client ID it's returned as a "consumer:" principal.
-    """
-    request = MagicMock(client=MagicMock(client_id="test_id"))
-    models.User.get_by_userid.return_value = MagicMock(
-        admin=False, staff=False)
-
-    assert "consumer:test_id" in auth.groupfinder("jiji", request)
-
-
-@groupfinder_fixtures
 def test_groupfinder_with_admin_user(models):
     """If the user is an admin it should return "group:__admin__"."""
-    request = MagicMock(client=None)
+    request = MagicMock()
     models.User.get_by_userid.return_value = MagicMock(admin=True, staff=False)
 
     assert "group:__admin__" in auth.groupfinder("jiji", request)
 
 
 @groupfinder_fixtures
-def test_groupfinder_client_id_and_admin_together(models):
-    request = MagicMock(client=MagicMock(client_id="test_id"))
-    models.User.get_by_userid.return_value = MagicMock(admin=True, staff=False)
-
-    principals = auth.groupfinder("jiji", request)
-    assert "consumer:test_id" in principals
-    assert "group:__admin__" in principals
-
-
-@groupfinder_fixtures
 def test_groupfinder_with_staff_user(models):
     """If the user is staff it should return a "group:__staff__" principal."""
-    request = MagicMock(client=None)
+    request = MagicMock()
     models.User.get_by_userid.return_value = MagicMock(admin=False, staff=True)
 
     assert "group:__staff__" in auth.groupfinder("jiji", request)
 
 
 @groupfinder_fixtures
-def test_groupfinder_client_id_and_admin_and_staff(models):
-    request = MagicMock(client=MagicMock(client_id="test_id"))
+def test_groupfinder_admin_and_staff(models):
+    request = MagicMock()
     models.User.get_by_userid.return_value = MagicMock(admin=True, staff=True)
 
     principals = auth.groupfinder("jiji", request)
 
-    assert "consumer:test_id" in principals
     assert "group:__admin__" in principals
     assert "group:__staff__" in principals
 

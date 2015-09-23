@@ -69,7 +69,6 @@ class Annotation(factory.Factory):
     text = factory.Sequence(lambda n: "Test annotation {n}".format(n=n + 1))
     user = factory.LazyAttribute(
         lambda n: u"acct:{username}@127.0.0.1".format(username=n.username))
-    consumer = "nosuchid"
 
     @factory.LazyAttribute
     def created(stub):

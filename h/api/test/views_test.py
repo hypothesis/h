@@ -129,7 +129,7 @@ def test_annotations_index_renders_results(search_lib):
 
 # The fixtures required to mock all of create()'s dependencies.
 create_fixtures = pytest.mark.usefixtures(
-    'get_user', 'logic', 'AnnotationEvent', 'search_lib')
+    'logic', 'AnnotationEvent', 'search_lib')
 
 
 @create_fixtures
@@ -145,43 +145,15 @@ def test_create_returns_error_if_parsing_json_fails():
 
 
 @create_fixtures
-def test_create_calls_logic(logic, get_user):
+def test_create_calls_create_annotation(logic):
     """It should call logic.create_annotation() appropriately."""
     request = mock.Mock()
 
     views.create(request)
 
     logic.create_annotation.assert_called_once_with(
-        fields=request.json_body, user=get_user.return_value)
-
-
-@create_fixtures
-def test_create_calls_create_annotation_once(logic):
-    """It should call logic.create_annotation() exactly once."""
-    request = mock.Mock()
-
-    views.create(request)
-
-    assert logic.create_annotation.call_count == 1
-
-
-@create_fixtures
-def test_create_passes_json_to_create_annotation(logic):
-    """It should pass the JSON from the request to create_annotation()."""
-    request = mock.Mock()
-
-    views.create(request)
-
-    assert logic.create_annotation.call_args[1]['fields'] == request.json_body
-
-
-@create_fixtures
-def test_create_passes_user_to_create_annotation(get_user, logic):
-    """It should pass the user from get_user() to logic.create_annotation()."""
-    views.create(mock.Mock())
-
-    assert logic.create_annotation.call_args[1]['user'] == (
-        get_user.return_value)
+        request.json_body,
+        userid=request.authenticated_userid)
 
 
 @create_fixtures
@@ -276,48 +248,16 @@ def test_update_returns_error_if_json_parsing_fails():
 
 
 @update_fixtures
-def test_update_calls_has_permission():
-    annotation = mock.Mock()
+def test_update_calls_update_annotation(logic):
+    context = mock.Mock()
     request = mock.Mock()
 
-    views.update(annotation, request)
+    views.update(context, request)
 
-    request.has_permission.assert_called_once_with('admin', annotation)
-
-
-@update_fixtures
-def test_update_calls_update_annotation_once(logic):
-    views.update(mock.Mock(), mock.Mock())
-
-    assert logic.update_annotation.call_count == 1
-
-
-@update_fixtures
-def test_update_passes_annotation_to_update_annotation(logic):
-    annotation = mock.Mock()
-
-    views.update(annotation, mock.Mock())
-
-    assert logic.update_annotation.call_args[0][0] == annotation.model
-
-
-@update_fixtures
-def test_update_passes_fields_to_update_annotation(logic):
-    request = mock.Mock()
-
-    views.update(mock.Mock(), request)
-
-    assert logic.update_annotation.call_args[0][1] == request.json_body
-
-
-@update_fixtures
-def test_update_passes_has_admin_permission_to_update_annotation(logic):
-    request = mock.Mock()
-
-    views.update(mock.Mock(), request)
-
-    assert logic.update_annotation.call_args[0][2] == (
-        request.has_permission.return_value)
+    logic.update_annotation.assert_called_once_with(
+        context.model,
+        request.json_body,
+        request.authenticated_userid)
 
 
 @update_fixtures
@@ -436,13 +376,6 @@ def AnnotationEvent(request):
 @pytest.fixture
 def Annotation(request):
     patcher = mock.patch('h.api.views.Annotation', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def get_user(request):
-    patcher = mock.patch('h.api.views.get_user', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
