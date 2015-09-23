@@ -236,7 +236,7 @@ create
       Host: hypothes.is
       Accept: application/json
       Content-Type: application/json;charset=UTF-8
-      X-Annotator-Auth-Token: eyJhbGc[...]mbl_YBM
+      Authorization: Bearer eyJhbGc[...]mbl_YBM
 
       {
           "uri": "http://example.com/",
@@ -270,7 +270,7 @@ create
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
    :reqheader Content-Type: request body content type
-   :reqheader X-Annotator-Auth-Token: JWT authentication token
+   :reqheader Authorization: JWT authentication token
    :resheader Content-Type: response content type
    :>json string id: unique id of new annotation
    :>json datetime created: created date of new annotation
@@ -297,7 +297,7 @@ update
       Host: hypothes.is
       Accept: application/json
       Content-Type: application/json;charset=UTF-8
-      X-Annotator-Auth-Token: eyJhbGc[...]mbl_YBM
+      Authorization: Bearer eyJhbGc[...]mbl_YBM
 
       {
           "uri": "http://example.com/foo",
@@ -321,7 +321,7 @@ update
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
    :reqheader Content-Type: request body content type
-   :reqheader X-Annotator-Auth-Token: JWT authentication token
+   :reqheader Authorization: JWT authentication token
    :resheader Content-Type: response content type
    :>json datetime updated: updated date of annotation
    :statuscode 200: no error
@@ -348,7 +348,7 @@ delete
       DELETE /api/annotations/AUxWM-HasREW1YKAwhil
       Host: hypothes.is
       Accept: application/json
-      X-Annotator-Auth-Token: eyJhbGc[...]mbl_YBM
+      Authorization: Bearer eyJhbGc[...]mbl_YBM
 
    **Example response**:
 
@@ -364,7 +364,7 @@ delete
 
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
-   :reqheader X-Annotator-Auth-Token: JWT authentication token
+   :reqheader Authorization: JWT authentication token
    :resheader Content-Type: response content type
    :>json boolean deleted: whether the annotation was deleted
    :>json string id: the unique `id` of the deleted annotation
