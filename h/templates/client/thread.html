@@ -47,6 +47,6 @@
 </ul>
 
 <footer class="thread-anchor-notice"
-        ng-if="feature('show_unanchored_annotations') && !vm.container.message.$anchored">
+        ng-if="feature('show_unanchored_annotations') && isSidebar && !vm.container.message.$anchored">
   <em>We can't find the exact position of this annotation.</em>
 </footer>
