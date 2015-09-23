@@ -125,6 +125,7 @@ var directive = function () {
   };
 };
 
-
-exports.PrivacyController = PrivacyController;
-exports.directive = directive;
+module.exports = {
+  directive: directive,
+  Controller: PrivacyController
+};
