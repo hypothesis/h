@@ -11,6 +11,7 @@ module.exports = class WidgetController
      streamer,   streamFilter,   store,   threading
   ) ->
     $scope.isStream = true
+    $scope.isSidebar = true
     $scope.threadRoot = threading.root
 
     @chunkSize = 200
