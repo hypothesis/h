@@ -8,17 +8,17 @@ from pyramid import httpexceptions
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
+from h import i18n
 from h.api import cors
 from h.api.events import AnnotationEvent
 from h.api import search as search_lib
-from h.api import logic
 from h.api.resources import Annotation
 from h.api.resources import Annotations
 from h.api.resources import Root
 
 
+_ = i18n.TranslationString
 log = logging.getLogger(__name__)
-
 
 cors_policy = cors.policy(
     allow_headers=(
@@ -28,6 +28,9 @@ cors_policy = cors.policy(
         'X-Client-Id',
     ),
     allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+
+# These annotation fields are not to be set by the user.
+PROTECTED_FIELDS = ['created', 'updated', 'user', 'id']
 
 
 def api_config(**settings):
@@ -138,17 +141,19 @@ def annotations_index(request):
 @api_config(context=Annotations, request_method='POST', permission='create')
 def create(request):
     """Read the POSTed JSON-encoded annotation and persist it."""
-    # Read the annotation from the request payload
-    try:
-        fields = request.json_body
-    except ValueError:
-        return _api_error(request,
-                          'No JSON payload sent. Annotation not created.',
-                          status_code=400)  # Client Error: Bad Request
+    context = Annotation()
+    annotation = context.model
 
-    # Create the annotation
-    user = request.authenticated_userid
-    annotation = logic.create_annotation(fields, user)
+    # Read the annotation from the request payload
+    fields = _sanitized_fields(request)
+
+    # Update model
+    annotation.update(fields)
+    annotation['user'] = request.authenticated_userid
+
+    # Save it in the database
+    search_lib.prepare(annotation)
+    annotation.save()
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
@@ -170,27 +175,38 @@ def read(context, request):
 
 @api_config(context=Annotation, request_method='PUT', permission='update')
 def update(context, request):
-    """Update the fields we received and store the updated version."""
+    """Update the fields we received and store the updated version.
+
+    :raises RuntimeError: if the fields attempt to change the annotation's
+        permissions and has_admin_permission is False, or if they are
+        attempting to move the annotation between groups.
+    """
     annotation = context.model
 
     # Read the new fields for the annotation
-    try:
-        fields = request.json_body
-    except ValueError:
-        return _api_error(request,
-                          'No JSON payload sent. Annotation not created.',
-                          status_code=400)  # Client Error: Bad Request
+    fields = _sanitized_fields(request)
 
-    # Update and store the annotation
-    user = request.authenticated_userid
+    # If the user is changing access permissions, check if it's allowed.
+    acl_changed = fields.get('permissions') != annotation.get('permissions')
+    if acl_changed and not request.has_permission('admin', context):
+        reason = 'Not authorized to change annotation permissions.'
+        raise httpexceptions.HTTPUnauthorized(reason)
 
-    try:
-        logic.update_annotation(annotation, fields, user)
-    except RuntimeError as err:
-        return _api_error(
-            request,
-            err.args[0],
-            status_code=err.args[1])
+    if 'group' in fields and 'group' in annotation:
+        if fields['group'] != annotation.get('group'):
+            reason = 'You can\'t move annotations between groups.'
+            raise httpexceptions.HTTPUnauthorized(reason)
+
+    # If the annotation is flagged as deleted, remove mentions of the user
+    if annotation.get('deleted', False):
+        _anonymize_deletes(annotation)
+
+    # Update the annotation with the new data
+    annotation.update(fields)
+
+    # Save the annotation in the database, overwriting the old version.
+    search_lib.prepare(annotation)
+    annotation.save()
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'update')
@@ -204,7 +220,7 @@ def delete(context, request):
     """Delete the annotation permanently."""
     annotation = context.model
 
-    logic.delete_annotation(annotation)
+    annotation.delete()
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'delete')
@@ -221,6 +237,35 @@ def delete(context, request):
 def notfound(context, request):
     request.response.status_int = httpexceptions.HTTPNotFound.code
     return {'status': 'failure', 'reason': 'not_found'}
+
+
+def _anonymize_deletes(annotation):
+    """Clear the author and remove the user from the annotation permissions."""
+    # Delete the annotation author, if present
+    user = annotation.pop('user')
+
+    # Remove the user from the permissions, but keep any others in place.
+    permissions = annotation.get('permissions', {})
+    for action in permissions.keys():
+        filtered = [
+            role
+            for role in annotation['permissions'][action]
+            if role != user
+        ]
+        annotation['permissions'][action] = filtered
+
+
+def _sanitized_fields(request):
+    try:
+        fields = request.json_body
+    except ValueError as exc:
+        raise httpexceptions.HTTPBadRequest(exc.message)
+
+    # Some fields are not to be set by the user, ignore them
+    for field in PROTECTED_FIELDS:
+        fields.pop(field, None)
+
+    return fields
 
 
 def _publish_annotation_event(request, annotation, action):
