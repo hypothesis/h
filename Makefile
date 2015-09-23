@@ -11,9 +11,15 @@ export PIP_REQUIRE_VIRTUALENV
 
 default: deps
 
-deps:
+deps: .eggs/.uptodate node_modules/.uptodate
+
+.eggs/.uptodate: setup.py requirements.txt
 	pip install --use-wheel -e .[dev,testing,YAML]
+	touch $@
+
+node_modules/.uptodate: package.json
 	npm install
+	touch $@
 
 clean:
 	find . -type f -name "*.py[co]" -delete
@@ -26,8 +32,9 @@ clean:
 	rm -f h/static/scripts/hypothesis.*js
 	rm -f h/static/styles/*.css
 	rm -f .coverage
+	rm -f node_modules/.uptodate .eggs/.uptodate
 
-dev:
+dev: deps
 	@gunicorn --reload --paste conf/development.ini
 
 test: client-test

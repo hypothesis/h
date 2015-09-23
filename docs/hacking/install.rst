@@ -178,7 +178,7 @@ the h application with:
 
 .. code-block:: bash
 
-    mkvirtualenv h  
+    mkvirtualenv h
 
 You will notice that the your shell prompt changes to include a (h) symbol. That
 means that you now have your virtual environment activated. This is required for
@@ -197,21 +197,6 @@ dependencies into the ``h/node_modules`` directory:
 
     cd h
     make deps
-
-.. note::
-
-   If ``make deps`` fails for any reason re-running it may not install all the
-   dependencies because it sees the ``h.egg_info`` and ``node_modules``
-   directories that it created before it failed and assumes that because they
-   exist its work is done. You may see ``make: Nothing to be done for `deps'``
-   or you may get no output, or you may see it doing some work (e.g. installing
-   Python dependencies) but it may not do *all* the work (e.g. not installing
-   missing Node dependencies).
-
-   So to reinstall all the dependencies after a failure or crash do::
-
-       rm -rf h.egg_info node_modules
-       make deps
 
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
 
