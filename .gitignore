@@ -15,3 +15,15 @@ node_modules/
 *.pyo
 
 *.log
+
+h/static/.webassets-cache/
+h/static/webassets-external/
+
+h/static/scripts/**/*.min.js
+h/static/scripts/account.*js
+h/static/scripts/app.*js
+h/static/scripts/config.*js
+h/static/scripts/hypothesis.*js
+
+h/static/styles/*.css
+h/static/styles/vendor/bootstrap.min.css
