@@ -13,18 +13,14 @@ root
 
    API root. Returns hypermedia links to the rest of the API.
 
-   **Example request**:
-
-   .. sourcecode:: http
+   **Example request**::
 
       GET /api
       Host: hypothes.is
       Accept: application/json
 
 
-   **Example response**:
-
-   .. sourcecode:: http
+   **Example response**::
 
       HTTP/1.1 200 OK
       Content-Type: application/json; charset=UTF-8
@@ -74,17 +70,13 @@ search
 
    Search for annotations.
 
-   **Example request**:
-
-   .. sourcecode:: http
+   **Example request**::
 
       GET /api/search?limit=1000&user=gluejar@hypothes.is
       Host: hypothes.is
       Accept: application/json
 
-   **Example response**:
-
-   .. sourcecode:: http
+   **Example response**::
 
       HTTP/1.1 200 OK
       Content-Type: application/json; charset=UTF-8
@@ -183,17 +175,13 @@ read
 
    Retrieve a single annotation.
 
-   **Example request**:
-
-   .. sourcecode:: http
+   **Example request**::
 
      GET /api/annotations/utalbWjUaZK5ifydnohjmA
      Host: hypothes.is
      Accept: application/json
 
-   **Example response**:
-
-   .. sourcecode:: http
+   **Example response**::
 
       HTTP/1.1 200 OK
       Content-Type: application/json; charset=UTF-8
@@ -228,9 +216,7 @@ create
 
    Create a new annotation. Requires a valid authentication token.
 
-   **Example request**:
-
-   .. sourcecode:: http
+   **Example request**::
 
       POST /api/annotations
       Host: hypothes.is
@@ -253,9 +239,7 @@ create
           "text": "This is an annotation I made."
       }
 
-   **Example response**:
-
-   .. sourcecode:: http
+   **Example response**::
 
       HTTP/1.1 200 OK
       Content-Type: application/json; charset=UTF-8
@@ -289,9 +273,7 @@ update
    Update the annotation with the given `id`. Requires a valid authentication
    token.
 
-   **Example request**:
-
-   .. sourcecode:: http
+   **Example request**::
 
       PUT /api/annotations/AUxWM-HasREW1YKAwhil
       Host: hypothes.is
@@ -303,9 +285,7 @@ update
           "uri": "http://example.com/foo",
       }
 
-   **Example response**:
-
-   .. sourcecode:: http
+   **Example response**::
 
       HTTP/1.1 200 OK
       Content-Type: application/json; charset=UTF-8
@@ -341,18 +321,14 @@ delete
    Delete the annotation with the given `id`. Requires a valid authentication
    token.
 
-   **Example request**:
-
-   .. sourcecode:: http
+   **Example request**::
 
       DELETE /api/annotations/AUxWM-HasREW1YKAwhil
       Host: hypothes.is
       Accept: application/json
       Authorization: Bearer eyJhbGc[...]mbl_YBM
 
-   **Example response**:
-
-   .. sourcecode:: http
+   **Example response**::
 
       HTTP/1.1 200 OK
       Content-Type: application/json; charset=UTF-8
