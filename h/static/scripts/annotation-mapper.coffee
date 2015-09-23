@@ -2,8 +2,6 @@
 module.exports = [
   '$rootScope', 'threading', 'store',
   ($rootScope, threading, store) ->
-    setupAnnotation: (ann) -> ann
-
     loadAnnotations: (annotations) ->
       annotations = for annotation in annotations
         container = threading.idTable[annotation.id]
