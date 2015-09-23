@@ -1,4 +1,3 @@
-@import 'compass/css3/box-sizing';
 @import 'compass/reset';
 
 /*
@@ -6,12 +5,13 @@
   adopted from http://necolas.github.com/normalize.css/
   */
 
-* { @include box-sizing(border-box); }
+* {
+  box-sizing: border-box;
+}
 
 html {
   height: 100%;
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body { min-height: 100%; font-size: 100%; }

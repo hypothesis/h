@@ -73,6 +73,26 @@ class CleanCSS(ExternalTool):
 
 register_filter(CleanCSS)
 
+class PostCSS(ExternalTool):
+    """ Add vendor prefixes using postcss and autoprefixer.
+
+        webassets does ship with an 'autoprefixer' filter but
+        it does not support the current version of autoprefixer
+        which ships as a postcss plugin rather than standalone
+        tool.
+
+        Using postcss directly from JS will also enable transitioning
+        to a single JS-based tool for all CSS processing.
+    """
+
+    name = 'postcss'
+    max_debug_level = None
+
+    def output(self, _in, out, **kw):
+        args = ['node', 'scripts/postcss-filter.js']
+        self.subprocess(args, out, _in)
+
+register_filter(PostCSS)
 
 class AssetRequest(object):
     """A subscriber predicate that checks whether a route is a static asset.

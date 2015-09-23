@@ -29,9 +29,7 @@ body {
 }
 
 p {
-  -webkit-hyphens: auto;
-     -moz-hyphens: auto;
-          hyphens: auto;
+  hyphens: auto;
 
   & + p {
     margin: 1em 0 0;

@@ -2,7 +2,6 @@
 // http://mbenford.github.io/ngTagsInput/gettingstarted
 
 @import "mixins/forms";
-@import "compass/css3/user-interface";
 @import "variables";
 
 tags-input {
@@ -56,7 +55,7 @@ tags-input {
     }
 
     .remove-button {
-      @include user-select(none);
+      user-select: none;
       display: block;
       position: absolute;
       top: 0;
@@ -110,8 +109,6 @@ tags-input .autocomplete {
   width: 100%;
   background-color: white;
   border: thin solid rgba(0, 0, 0, 0.2);
-  -webkit-box-shadow: 0 .3em .6em rgba(0, 0, 0, 0.2);
-  -moz-box-shadow: 0 .3em .6em rgba(0, 0, 0, 0.2);
   box-shadow: 0 .3em .6em rgba(0, 0, 0, 0.2);
 
   .suggestion-list {
