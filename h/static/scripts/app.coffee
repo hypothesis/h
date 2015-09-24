@@ -152,6 +152,8 @@ module.exports = angular.module('h', [
 .filter('moment', require('./filter/moment'))
 .filter('persona', require('./filter/persona'))
 .filter('urlencode', require('./filter/urlencode'))
+.filter('documentTitle', require('./filter/document-title'))
+.filter('documentDomain', require('./filter/document-domain'))
 
 .provider('identity', require('./identity'))
 

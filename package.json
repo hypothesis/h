@@ -29,6 +29,7 @@
     "dom-anchor-text-position": "^2.0.0",
     "dom-anchor-text-quote": "^2.0.0",
     "dom-seek": "^1.0.1",
+    "escape-html": "^1.0.3",
     "extend": "^2.0.0",
     "frame-rpc": "^1.3.1",
     "hammerjs": "^2.0.4",
