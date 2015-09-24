@@ -1,5 +1,4 @@
 @import 'compass';
-@import 'compass/css3/flexbox';
 
 $base-font-size: 12px;
 $base-line-height: 20px;
@@ -101,12 +100,8 @@ $group-list-width: 270px;
   }
 
   .group-item {
-    @include display-flex;
-    @include flex-direction(row);
-
-    // IE 10 support
-    display: -ms-flexbox;
-    -ms-flex-direction: row;
+    display: flex;
+    flex-direction: row;
 
     padding: 10px;
     cursor: pointer;
@@ -133,6 +128,7 @@ $group-list-width: 270px;
 
   .group-details {
     margin-right: 20px;
+    flex-shrink: 1;
   }
 
   .share-link-container {

@@ -87,7 +87,7 @@ admin_css:
       filters: cleancss
       contents:
         - output: h:static/styles/admin.css
-          filters: compass
+          filters: compass,postcss
           contents:
             - h:static/styles/admin.scss
 admin_js:
@@ -152,7 +152,7 @@ app_css:
     - h:static/styles/vendor/icomoon.css
     - h:static/styles/vendor/katex.min.css
     - output: styles/app.css
-      filters: compass
+      filters: compass,postcss
       contents:
         - h:static/styles/app.scss
       depends:
@@ -202,7 +202,7 @@ inject_css:
   contents:
     - h:static/styles/vendor/icomoon.css
     - output: styles/hypothesis.css
-      filters: compass
+      filters: compass,postcss
       contents:
         - h:static/styles/annotator/inject.scss
         - h:static/styles/annotator/pdfjs-overrides.scss
@@ -221,7 +221,7 @@ help_page_css:
   contents:
     - h:static/styles/vendor/icomoon.css
     - output: styles/help-page.css
-      filters: compass
+      filters: compass,postcss
       contents:
         - h:static/styles/help-page.scss
       depends:

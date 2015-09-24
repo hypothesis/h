@@ -1,15 +1,9 @@
-@import 'compass/css3/flexbox';
-
 @import "base.scss";
 @import "mixins/icons";
 
 .simple-search-form {
-  @include display-flex;
-  @include flex-flow(row nowrap);
-
-    /* IE10 support */
-  display: -ms-flexbox;
-  -ms-flex-flow: row nowrap;
+  display: flex;
+  flex-flow: row nowrap;
 
   position: relative;
   color: $gray-dark;
@@ -24,12 +18,8 @@
 }
 
 input.simple-search-input {
-  @include flex-grow(1);
-  @include order(1);
-
-  /* IE10 support */
-  -ms-flex: 1;
-  -ms-flex-order: 1;
+  flex-grow: 1;
+  order: 1;
 
   color: $text-color;
   border: none;

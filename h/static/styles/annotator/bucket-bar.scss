@@ -10,7 +10,7 @@
 }
 
 .annotator-bucket-indicator {
-  @include box-sizing(border-box);
+  box-sizing: border-box;
   background: $white;
   border: solid 1px $gray-lighter;
   border-radius: 2px 4px 4px 2px;
