@@ -133,6 +133,7 @@ app_js:
           contents: h:static/scripts/app.coffee
           depends:
             - h:static/scripts/*.coffee
+            - h:static/scripts/annotation-mapper.js
             - h:static/scripts/auth.js
             - h:static/scripts/features.js
             - h:static/scripts/groups.js
