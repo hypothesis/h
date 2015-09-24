@@ -147,6 +147,7 @@ module.exports = angular.module('h', [
 .directive('tabReveal', require('./directive/tab-reveal'))
 .directive('shareDialog', require('./directive/share-dialog'))
 .directive('windowScroll', require('./directive/window-scroll'))
+.directive('primaryActionBtn', require('./directive/primary-action-btn'))
 
 .filter('converter', require('./filter/converter'))
 .filter('moment', require('./filter/moment'))

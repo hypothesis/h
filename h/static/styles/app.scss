@@ -6,6 +6,8 @@ $base-line-height: 20px;
 @import 'reset';
 @import 'common';
 
+// components
+@import 'primary-action-btn';
 
 body {
   @extend .noise;
