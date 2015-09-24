@@ -58,27 +58,14 @@ module.exports = class WidgetController
         crossframe.call('scrollToAnnotation', annotation.$$tag)
 
     $scope.shouldShowThread = (container) ->
-      # Show stubs
-      if not container?.message?
-        return true
-
-      # Show replies
-      if container.message.references?.length
-        return true
-
-      # Show selected threads
-      if annotationUI.hasSelectedAnnotations()
-        return annotationUI.isAnnotationSelected(container.message.id)
-
-      # Show regardless of $anchored if that feature is turned on
+      # Show regardless of $orphan if that feature is turned on
       if $scope.feature('show_unanchored_annotations')
         return true
 
-      # Show anchored threads
-      if container.message.$anchored
-        return true
+      if container?.message?.$orphan == true
+        return false
 
-      return false
+      return true
 
     $scope.hasFocus = (annotation) ->
       !!($scope.focusedAnnotations ? {})[annotation?.$$tag]

@@ -249,27 +249,27 @@ describe 'Guest', ->
     afterEach ->
       document.body.removeChild(el)
 
-    it "declares annotations without targets as anchored", (done) ->
+    it "doesn't declare annotations without targets as orphans", (done) ->
       guest = createGuest()
       annotation = target: []
       guest.anchor(annotation).then ->
-        assert.isTrue(annotation.$anchored)
+        assert.isFalse(annotation.$orphan)
       .then(done, done)
 
-    it "declares annotations with a working target anchored", (done) ->
+    it "doesn't declare annotations with a working target orphans", (done) ->
       guest = createGuest()
       annotation = target: [{selector: "test"}]
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       guest.anchor(annotation).then ->
-        assert.isTrue(annotation.$anchored)
+        assert.isFalse(annotation.$orphan)
       .then(done, done)
 
-    it "declares annotations with broken targets not anchored", (done) ->
+    it "declares annotations with broken targets as orphans", (done) ->
       guest = createGuest()
       annotation = target: [{selector: 'broken selector'}]
       sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
       guest.anchor(annotation).then ->
-        assert.isFalse(annotation.$anchored)
+        assert.isTrue(annotation.$orphan)
       .then(done, done)
 
     it 'updates the cross frame and bucket bar plugins', (done) ->

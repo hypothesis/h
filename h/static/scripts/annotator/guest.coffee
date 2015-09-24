@@ -197,10 +197,10 @@ module.exports = class Guest extends Annotator
 
     sync = (anchors) ->
       # Store the results of anchoring.
-      annotation.$anchored = anchors.length is 0
+      annotation.$orphan = anchors.length > 0
       for anchor in anchors
         if anchor.range?
-          annotation.$anchored = true
+          annotation.$orphan = false
           break
 
       # Add the anchors for this annotation to instance storage.
