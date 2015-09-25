@@ -135,6 +135,15 @@ AnnotationController = [
 
     ###*
     # @ngdoc method
+    # @name annotation.AnnotaitonController#hasContent
+    # @returns {boolean} True if the currently edited annotation has
+    #          content (ie. is not just a highlight)
+    ###
+    this.hasContent = ->
+      @annotation.text?.length > 0 || @annotation.tags?.length > 0
+
+    ###*
+    # @ngdoc method
     # @name annotation.AnnotationController#authorize
     # @param {string} action The action to authorize.
     # @returns {boolean} True if the action is authorized for the current user.

@@ -116,6 +116,7 @@
               class="dropdown-menu-btn"><i class="h-icon-check btn-icon"></i> Delete</button>
       <publish-annotation-btn
         group="vm.group()"
+        can-post="vm.hasContent()"
         is-new="vm.action == 'create'"
         is-shared="vm.isShared()"
         on-save="vm.save()"
