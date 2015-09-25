@@ -7,14 +7,14 @@
     dropdown-menu-label="Change annotation sharing setting">
   </dropdown-menu-btn>
   <ul class="dropdown-menu pull-right publish-annotation-btn__dropdown-menu" role="menu">
-    <li ng-click="vm.setShared()">
+    <li ng-click="vm.setPrivacy('shared')">
       <a href="">
         <i class="small"
            ng-class="'h-icon-' + vm.group.type"></i>
         <span ng-bind="vm.group.name"></span>
       </a>
     </li>
-    <li ng-click="vm.setPrivate()">
+    <li ng-click="vm.setPrivacy('private')">
       <a href="">
         <i class="small h-icon-lock"></i>
         <span ng-bind="vm.privateLabel"></span>

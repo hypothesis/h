@@ -1,6 +1,11 @@
+'use strict';
+
+var STORAGE_KEY = 'hypothesis.privacy';
+
 // @ngInject
-function PublishAnnotationBtnController($scope) {
+function PublishAnnotationBtnController($scope, localStorage) {
   var vm = this;
+
   vm.group = {
     name: $scope.group.name,
     type: $scope.group.public ? 'public' : 'group'
@@ -14,12 +19,25 @@ function PublishAnnotationBtnController($scope) {
     $scope.onSave();
   };
 
-  this.setShared = function () {
-    $scope.onSetPrivacy({level: 'shared'});
+  this.setPrivacy = function (level) {
+    localStorage.setItem(STORAGE_KEY, level);
+    $scope.onSetPrivacy({level: level});
   }
 
-  this.setPrivate = function () {
-    $scope.onSetPrivacy({level: 'private'});
+  $scope.$watch('isShared', function () {
+    updatePublishActionLabel();
+  });
+
+  if ($scope.isNew) {
+    // set the privacy level for new annotations.
+    // FIXME - This should be done at the time the annotation is created,
+    // not by this control
+    var defaultLevel = localStorage.getItem(STORAGE_KEY);
+    if (defaultLevel !== 'private' &&
+        defaultLevel !== 'shared') {
+      defaultLevel = 'shared';
+    }
+    this.setPrivacy(defaultLevel);
   }
 
   function updatePublishActionLabel() {
@@ -29,11 +47,15 @@ function PublishAnnotationBtnController($scope) {
       vm.publishDestination = vm.privateLabel;
     }
   }
-  $scope.$watch('isShared', function () {
-    updatePublishActionLabel();
-  });
 }
 
+/**
+ * @ngdoc directive
+ * @name publishAnnotationBtn
+ * @description Displays a combined privacy/selection post button to post
+ *              a new annotation
+ */
+// @ngInject
 module.exports = function () {
   return {
     controller: PublishAnnotationBtnController,
@@ -42,6 +64,7 @@ module.exports = function () {
     scope: {
       group: '=',
       isShared: '=',
+      isNew: '=',
       onSave: '&',
       onSetPrivacy: '&'
     },
