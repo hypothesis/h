@@ -35,10 +35,9 @@
       <div ng-switch="auth.user">
         <span ng-switch-when="undefined">⋯</span>
         <a href="" ng-click="login()" ng-switch-when="null">Sign in</a>
-        <div class="dropdown pull-right user-picker">
+        <div class="pull-right user-picker" dropdown>
           <span role="button"
-                class="dropdown-toggle"
-                data-toggle="dropdown">{% raw %}{{ auth.user|persona }}{% endraw %}<!--
+                data-toggle="dropdown" dropdown-toggle>{% raw %}{{ auth.user|persona }}{% endraw %}<!--
             --><span class="provider" ng-show="auth.user">/{% raw %}{{ auth.user|persona:'provider' }}{% endraw %}</span><!--
             --><i class="h-icon-arrow-drop-down"></i></span>
           <ul class="dropdown-menu pull-right" role="menu">
