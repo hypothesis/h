@@ -127,6 +127,12 @@ AnnotationController = [
     this.setShared = ->
       model.permissions = permissions.public(model.group)
 
+    this.setPrivacy = (privacy) ->
+      if privacy == 'private'
+        this.setPrivate()
+      else if privacy == 'shared'
+        this.setShared()
+
     ###*
     # @ngdoc method
     # @name annotation.AnnotationController#authorize

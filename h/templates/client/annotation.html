@@ -34,14 +34,6 @@
             ng-bind-html="vm.document | documentDomain"
             ng-if="!vm.embedded">
       </span>
-
-      <!-- Editing controls -->
-      <aside class="pull-right" ng-if="vm.editing">
-        <privacy ng-click="$event.stopPropagation()"
-                 ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
-                 model="annotation">
-      </aside>
-      <!-- / Editing controls -->
     </span>
 
 
@@ -118,6 +110,20 @@
   <!-- / Tags -->
 
   <footer class="annotation-footer">
+    <div class="annotation-form-actions" ng-if="vm.editing" ng-switch="vm.action">
+      <button ng-switch-when="delete"
+              ng-click="vm.save()"
+              class="primary-action-btn"><i class="h-icon-check btn-icon"></i> Delete</button>
+      <publish-annotation-btn
+        group="vm.group()"
+        is-shared="vm.isShared()"
+        on-save="vm.save()"
+        on-set-privacy="vm.setPrivacy(level)"></publish-annotation-btn>
+      <button class="btn btn-clean"
+              ng-click="vm.revert()"
+              ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
+    </div>
+
     <div class="small" ng-if="vm.editing">
       <p ng-if="vm.isPrivate()">
         <i class="h-icon-lock"></i>
@@ -131,23 +137,6 @@
         <i class="h-icon-group"></i>
         This annotation will be visible to everyone in <strong ng-bind="vm.group().name"></strong>.
       </p>
-    </div>
-
-    <div class="form-actions" ng-if="vm.editing" ng-switch="vm.action">
-      <div class="form-actions-buttons form-actions-left">
-        <button ng-switch-when="edit"
-                ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
-        <button ng-switch-when="delete"
-                ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i> Delete</button>
-        <button ng-switch-default
-                ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
-        <button class="btn btn-clean"
-                ng-click="vm.revert()"
-                ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
-      </div>
     </div>
 
     <div class="annotation-section annotation-license"

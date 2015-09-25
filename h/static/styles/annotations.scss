@@ -192,3 +192,11 @@ privacy {
     }
   }
 }
+
+// the actions for publishing annotations and reverting changes
+// at the bottom of an annotation card
+.annotation-form-actions {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+}
