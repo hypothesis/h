@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import mock
 
 from h.api.groups import auth
@@ -16,7 +17,7 @@ def test_set_permissions_does_not_modify_private_annotations():
             'read': ['acct:jack@hypothes.is']
         }
     }
-    annotation_to_be_modified = original_annotation.copy()
+    annotation_to_be_modified = copy.deepcopy(original_annotation)
 
 
     auth.set_permissions(annotation_to_be_modified)
@@ -29,12 +30,12 @@ def test_set_permissions_does_not_modify_non_group_annotations():
         original_annotation = {
             'user': 'acct:jack@hypothes.is',
             'permissions': {
-                'read': ['acct:jack@hypothes.is']
+                'read': ['acct:jill@hypothes.is']
             }
         }
         if group != 'missing':
             original_annotation['group'] = group
-        annotation_to_be_modified = original_annotation.copy()
+        annotation_to_be_modified = copy.deepcopy(original_annotation)
 
         auth.set_permissions(annotation_to_be_modified)
 
