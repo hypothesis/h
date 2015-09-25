@@ -47,6 +47,15 @@ def test_set_group_if_reply_calls_fetch_if_reply(models):
 
 
 @set_group_if_reply_fixtures
+def test_set_group_if_reply_does_nothing_if_parent_not_found(models):
+    annotation = _mock_annotation(references=['parent_id'])
+
+    models.Annotation.fetch.return_value = None
+
+    logic.set_group_if_reply(annotation)
+
+
+@set_group_if_reply_fixtures
 def test_set_group_if_reply_adds_group_to_replies(models):
     """If a reply has no group it gets the group of its parent annotation."""
     annotation = _mock_annotation(references=['parent_id'])
