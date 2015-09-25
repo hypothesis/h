@@ -269,6 +269,7 @@ module.exports = class Guest extends Annotator
         cache: self.anchoringCache
         ignoreSelector: '[class^="annotator-"]'
       }
+      # Returns an array of selectors for the passed range.
       return self.anchoring.describe(root, range, options)
 
     setDocumentInfo = (info) ->
@@ -276,6 +277,8 @@ module.exports = class Guest extends Annotator
       annotation.uri = info.uri
 
     setTargets = ([info, selectors]) ->
+      # `selectors` is an array of arrays: each item is an array of selectors
+      # identifying a distinct target.
       source = info.uri
       annotation.target = ({source, selector} for selector in selectors)
 
