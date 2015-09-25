@@ -1,3 +1,30 @@
+0.7.4 (2015-09-25)
+==================
+
+Bug fixes
+---------
+
+- Support retrieving comments ("page notes") through search when using new
+  normalized URI search (feature flagged: groups) (#2549).
+
+- Fix standalone annotation pages failing to display their annotation (92010c1).
+
+- Fix unanchored annotation warnings displaying in the wrong places (feature
+  flagged: show_unanchored_annotations) (#2542).
+
+- Fix a bug where newly created annotations would sometimes disappear from the
+  sidebar for a few moments (#2542).
+
+- Fix display of page titles on some annotation cards (#2533).
+
+- Fix a couple of crashes when annotations were created without expected fields
+  (#2545, #2546).
+
+Features
+--------
+
+- Improved group selection menu (feature flagged: groups) (#2514).
+
 0.7.3 (2015-09-22)
 ==================
 
