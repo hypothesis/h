@@ -14,6 +14,7 @@
     "angular-websocket": "^1.0.13",
     "angulartics": "0.17.2",
     "autofill-event": "0.0.1",
+    "autoprefixer": "^6.0.3",
     "babelify": "^6.1.3",
     "bootstrap": "3.3.5",
     "browserify": "^9.0.3",
@@ -39,6 +40,7 @@
     "moment": "^2.10.6",
     "ng-tags-input": "2.2.0",
     "node-uuid": "^1.4.3",
+    "postcss": "^5.0.6",
     "raf": "^3.1.0",
     "scroll-into-view": "^1.3.1",
     "showdown": "^1.2.1",
@@ -46,7 +48,6 @@
     "unorm": "^1.3.3"
   },
   "devDependencies": {
-    "autoprefixer": "^6.0.3",
     "chai": "^3.2.0",
     "jscs": "^1.13.1",
     "karma": "^0.13.10",
@@ -60,7 +61,6 @@
     "mocha": "^1.20.1",
     "phantom-ownpropertynames": "^1.0.0",
     "phantomjs": "^1.9.7",
-    "postcss": "^5.0.6",
     "proxyquire": "^1.6.0",
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.0.0",
