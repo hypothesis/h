@@ -116,4 +116,20 @@ describe('publishAnnotationBtn', function () {
     assert.equal(privacyChangedSpy.callCount, 2);
   });
 
+  it('should disable post buttons when posting is not possible', function () {
+    var element = util.createDirective(document, 'publishAnnotationBtn', {
+      group: {
+        name: 'Research Lab',
+        type: 'group'
+      },
+      canPost: false,
+      isShared: true,
+      isNew: false,
+      onSave: function () {},
+      onSetPrivacy: function () {}
+    });
+    var disabledBtns = element.find('button[disabled]');
+    assert.equal(disabledBtns.length, 2);
+  });
+
 });

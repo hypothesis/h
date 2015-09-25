@@ -1,13 +1,10 @@
-<!--
-  Uses a <div> rather than a <button> so that hover states for child elements work
-  in Firefox. See https://bugzilla.mozilla.org/show_bug.cgi?id=843003
-!-->
-<div aria-role="button" tabindex="0" class="dropdown-menu-btn">
-  <button class="dropdown-menu-btn__label" ng-bind="label"></button>
+<div class="dropdown-menu-btn">
+  <button class="dropdown-menu-btn__label" ng-bind="label" ng-disabled="isDisabled"></button>
   <button
     class="dropdown-menu-btn__dropdown-arrow"
     title="{{dropdownMenuLabel}}"
-    ng-click="vm.toggleDropdown($event)">
+    ng-click="vm.toggleDropdown($event)"
+    ng-disabled="isDisabled">
     <div class="dropdown-menu-btn__dropdown-arrow-separator"></div>
     <div class="dropdown-menu-btn__dropdown-arrow-indicator">
       <div>▼</div>

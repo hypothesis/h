@@ -4,7 +4,8 @@
     ng-click="vm.save()"
     on-toggle-dropdown="vm.showDropdown = !vm.showDropdown"
     title="Publish this annotation to {{vm.publishDestination}}"
-    dropdown-menu-label="Change annotation sharing setting">
+    dropdown-menu-label="Change annotation sharing setting"
+    is-disabled="!canPost">
   </dropdown-menu-btn>
   <ul class="dropdown-menu pull-right publish-annotation-btn__dropdown-menu" role="menu">
     <li ng-click="vm.setPrivacy('shared')">

@@ -63,6 +63,7 @@ module.exports = function () {
     restrict: 'E',
     scope: {
       group: '=',
+      canPost: '=',
       isShared: '=',
       isNew: '=',
       onSave: '&',

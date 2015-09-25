@@ -1,7 +1,7 @@
 'use strict';
 
 // @ngInject
-function PrimaryActionBtnController($scope, $timeout) {
+function DropdownMenuBtnController($scope, $timeout) {
   this.toggleDropdown = function($event) {
     $event.stopPropagation();
     $timeout(function () {
@@ -12,10 +12,11 @@ function PrimaryActionBtnController($scope, $timeout) {
 
 module.exports = function () {
   return {
-    controller: PrimaryActionBtnController,
+    controller: DropdownMenuBtnController,
     controllerAs: 'vm',
     restrict: 'E',
     scope: {
+      isDisabled: '=',
       label: '=',
       dropdownMenuLabel: '@',
       onToggleDropdown: '&',
