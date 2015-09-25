@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import mock
 
 from h.api.groups import auth
@@ -6,6 +7,22 @@ from h.api.groups import auth
 
 def _mock_group(hashid):
     return mock.Mock(hashid=hashid)
+
+
+def test_set_permissions_does_not_modify_annotations_with_no_permissions():
+    annotations = [{
+        'user': 'acct:jack@hypothes.is',
+    },
+    {
+        'user': 'acct:jack@hypothes.is',
+        'group': 'xyzabc',
+    }]
+
+    for ann in annotations:
+        before = copy.deepcopy(ann)
+        auth.set_permissions(ann)
+
+        assert ann == before
 
 
 def test_set_permissions_does_not_modify_private_annotations():
@@ -16,7 +33,7 @@ def test_set_permissions_does_not_modify_private_annotations():
             'read': ['acct:jack@hypothes.is']
         }
     }
-    annotation_to_be_modified = original_annotation.copy()
+    annotation_to_be_modified = copy.deepcopy(original_annotation)
 
 
     auth.set_permissions(annotation_to_be_modified)
@@ -29,12 +46,12 @@ def test_set_permissions_does_not_modify_non_group_annotations():
         original_annotation = {
             'user': 'acct:jack@hypothes.is',
             'permissions': {
-                'read': ['acct:jack@hypothes.is']
+                'read': ['acct:jill@hypothes.is']
             }
         }
         if group != 'missing':
             original_annotation['group'] = group
-        annotation_to_be_modified = original_annotation.copy()
+        annotation_to_be_modified = copy.deepcopy(original_annotation)
 
         auth.set_permissions(annotation_to_be_modified)
 

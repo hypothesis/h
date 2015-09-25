@@ -3,9 +3,15 @@
 
 def set_permissions(annotation):
     """Set the given annotation's permissions according to its group."""
+    # If this annotation doesn't have a permissions field, we don't know how to
+    # handle it and should bail.
+    permissions = annotation.get('permissions')
+    if permissions is None:
+        return
+
     # For private annotations (visible only to the user who created them) the
     # client sends just the user's ID in the read permissions.
-    is_private = (annotation['permissions']['read'] == [annotation['user']])
+    is_private = (permissions.get('read') == [annotation['user']])
 
     if is_private:
         # The groups feature doesn't change the permissions for private
@@ -13,7 +19,7 @@ def set_permissions(annotation):
         return
 
     group = annotation.get('group')
-    if group is None or group == '__world__':
+    if group in (None, '', '__world__'):
         # The groups feature doesn't change the permissions for annotations
         # that don't belong to a group.
         return
