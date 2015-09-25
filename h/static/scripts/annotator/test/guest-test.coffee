@@ -19,6 +19,10 @@ Guest = proxyquire('../guest', {
   'scroll-into-view': scrollIntoView,
 })
 
+# A little helper which returns a promise that resolves after a timeout
+timeoutPromise = (millis = 0) ->
+  new Promise((resolve) -> setTimeout(resolve, millis))
+
 describe 'Guest', ->
   sandbox = sinon.sandbox.create()
   CrossFrame = null
@@ -215,18 +219,20 @@ describe 'Guest', ->
       assert.isTrue(event.isPropagationStopped())
 
   describe 'createAnnotation()', ->
-    it 'adds metadata to the annotation object', (done) ->
+    it 'adds metadata to the annotation object', ->
       guest = createGuest()
       sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
         metadata: {title: 'hello'}
         uri: 'http://example.com/'
       }))
       annotation = {}
+
       guest.createAnnotation(annotation)
-      setTimeout ->
+
+      timeoutPromise()
+      .then ->
         assert.equal(annotation.uri, 'http://example.com/')
         assert.deepEqual(annotation.document, {title: 'hello'})
-        done()
 
     it 'treats an argument as the annotation object', ->
       guest = createGuest()
