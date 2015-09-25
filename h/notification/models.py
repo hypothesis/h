@@ -10,7 +10,7 @@ class Subscriptions(Base):
     __table_args__ = sa.Index('subs_uri_idx_subscriptions', 'uri'),
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-    uri = sa.Column(sa.Unicode(256), nullable=False)
+    uri = sa.Column(sa.UnicodeText(), nullable=False)
     type = sa.Column(sa.VARCHAR(64), nullable=False)
     active = sa.Column(sa.Boolean, default=True, nullable=False)
 

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-from datetime import timedelta
 import hashlib
 import random
 import string
@@ -16,6 +14,10 @@ from h import util
 from h.db import Base
 
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
+USERNAME_MIN_LENGTH = 3
+USERNAME_MAX_LENGTH = 30
+EMAIL_MAX_LENGTH = 100
+PASSWORD_MIN_LENGTH = 2
 
 
 def _generate_random_string(length=12):
@@ -42,20 +44,10 @@ class Activation(Base):
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
     # A random hash that is valid only once.
-    code = sa.Column(sa.Unicode(30),
+    code = sa.Column(sa.UnicodeText(),
                      nullable=False,
                      unique=True,
                      default=_generate_random_string)
-
-    # FIXME: remove these unused columns
-    created_by = sa.orm.deferred(sa.Column(sa.Unicode(30),
-                                           nullable=True,
-                                           server_default=sa.FetchedValue(),
-                                           server_onupdate=sa.FetchedValue()))
-    valid_until = sa.orm.deferred(sa.Column(sa.DateTime,
-                                            nullable=True,
-                                            server_default=sa.FetchedValue(),
-                                            server_onupdate=sa.FetchedValue()))
 
     @classmethod
     def get_by_code(cls, code):
@@ -69,10 +61,10 @@ class User(Base):
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
     # Normalised user identifier
-    uid = sa.Column(sa.Unicode(30), nullable=False, unique=True)
+    uid = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
     # Username as chosen by the user on registration
     _username = sa.Column('username',
-                          sa.Unicode(30),
+                          sa.UnicodeText(),
                           nullable=False,
                           unique=True)
 
@@ -91,6 +83,11 @@ class User(Base):
         return self._username
 
     def _set_username(self, value):
+        if not USERNAME_MIN_LENGTH <= len(value) <= USERNAME_MAX_LENGTH:
+            raise ValueError('username must be between {min} and {max} '
+                             'characters long'.format(
+                                 min=USERNAME_MIN_LENGTH,
+                                 max=USERNAME_MAX_LENGTH))
         self._username = value
         self.uid = _username_to_uid(value)
 
@@ -100,7 +97,7 @@ class User(Base):
                               descriptor=property(self._get_username,
                                                   self._set_username))
 
-    email = sa.Column(sa.Unicode(100), nullable=False, unique=True)
+    email = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
     status = sa.Column(sa.Integer())
 
     last_login_date = sa.Column(sa.TIMESTAMP(timezone=False),
@@ -116,6 +113,13 @@ class User(Base):
     activation_id = sa.Column(sa.Integer, sa.ForeignKey(Activation.id))
     activation = sa.orm.relationship('Activation', backref='user')
 
+    @sa.orm.validates('email')
+    def validate_email(self, key, email):
+        if len(email) > EMAIL_MAX_LENGTH:
+            raise ValueError('email must be less than {max} characters '
+                             'long'.format(max=EMAIL_MAX_LENGTH))
+        return email
+
     @property
     def is_activated(self):
         if self.activation_id is None:
@@ -124,9 +128,9 @@ class User(Base):
         return False
 
     # Hashed password
-    _password = sa.Column('password', sa.Unicode(256), nullable=False)
+    _password = sa.Column('password', sa.UnicodeText(), nullable=False)
     # Password salt
-    salt = sa.Column(sa.Unicode(256), nullable=False)
+    salt = sa.Column(sa.UnicodeText(), nullable=False)
 
     @hybrid_property
     def password(self):
@@ -140,6 +144,9 @@ class User(Base):
         return self._password
 
     def _set_password(self, raw_password):
+        if len(raw_password) < PASSWORD_MIN_LENGTH:
+            raise ValueError('password must be more than {min} characters '
+                             'long'.format(min=PASSWORD_MIN_LENGTH))
         self._password = self._hash_password(raw_password)
 
     def _hash_password(self, password):

@@ -118,6 +118,64 @@ def test_matching_emails_with_matched_emails():
     assert schemas.matching_emails(form, value) is None
 
 
+def test_ProfileSchema_with_email_too_long(user_model):
+    email = "bob@b" + "o" * 100 + "b.com"
+    data = {"email": email, "emailAgain": email}
+    schema = schemas.ProfileSchema().bind(request=DummyRequest())
+
+    with pytest.raises(colander.Invalid) as err:
+        schema.deserialize(data)
+    assert 'email' in err.value.asdict()
+
+
+def test_ProfileSchema_with_password_too_short(user_model):
+    schema = schemas.ProfileSchema().bind(request=DummyRequest())
+
+    with pytest.raises(colander.Invalid) as err:
+        schema.deserialize({"password": "a"})
+    assert "password" in err.value.asdict()
+
+
+def test_RegisterSchema_with_password_too_short(user_model):
+    schema = schemas.RegisterSchema().bind(request=DummyRequest())
+
+    with pytest.raises(colander.Invalid) as err:
+        schema.deserialize({"password": "a"})
+    assert "password" in err.value.asdict()
+
+
+def test_RegisterSchema_with_username_too_short(user_model):
+    schema = schemas.RegisterSchema().bind(request=DummyRequest())
+
+    with pytest.raises(colander.Invalid) as err:
+        schema.deserialize({"username": "a"})
+    assert "username" in err.value.asdict()
+
+
+def test_RegisterSchema_with_username_too_long(user_model):
+    schema = schemas.RegisterSchema().bind(request=DummyRequest())
+
+    with pytest.raises(colander.Invalid) as err:
+        schema.deserialize({"username": "a" * 500})
+    assert "username" in err.value.asdict()
+
+
+def test_ResetPasswordSchema_with_password_too_short(config, user_model):
+    schema = schemas.ResetPasswordSchema().bind(request=csrf_request(config))
+
+    with pytest.raises(colander.Invalid) as err:
+        schema.deserialize({"password": "a"})
+    assert "password" in err.value.asdict()
+
+
+def test_ActivateSchema_with_password_too_short(user_model):
+    schema = schemas.ActivateSchema().bind(request=DummyRequest())
+
+    with pytest.raises(colander.Invalid) as err:
+        schema.deserialize({"password": "a"})
+    assert "password" in err.value.asdict()
+
+
 def test_login_bad_csrf(config, user_model):
     request = DummyRequest()
     schema = schemas.LoginSchema().bind(request=request)
@@ -203,6 +261,6 @@ def test_login_inactive(config, user_model):
 
 @pytest.fixture
 def user_model(config, request):
-    patcher = patch('h.accounts.schemas.User', autospec=True)
+    patcher = patch('h.accounts.schemas.models.User', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
