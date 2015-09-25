@@ -3,11 +3,12 @@
 $base-font-size: 12px;
 $base-line-height: 20px;
 
-@import 'reset';
-@import 'common';
+@import './reset';
+@import './common';
 
 // components
-@import 'primary-action-btn';
+@import './primary-action-btn';
+@import './publish-annotation-btn';
 
 body {
   @extend .noise;

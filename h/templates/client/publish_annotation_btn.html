@@ -1,0 +1,24 @@
+<div dropdown="" class="publish-annotation-btn__btn" is-open="vm.showDropdown">
+  <primary-action-btn
+    label="'Post to ' + vm.publishDestination"
+    ng-click="vm.save()"
+    on-toggle-dropdown="vm.showDropdown = !vm.showDropdown"
+    title="Publish this annotation to {{vm.publishDestination}}"
+    dropdown-menu-label="Change annotation sharing setting">
+  </primary-action-btn>
+  <ul class="dropdown-menu pull-right publish-annotation-btn__dropdown-menu" role="menu">
+    <li ng-click="vm.setShared()">
+      <a href="">
+        <i class="small"
+           ng-class="'h-icon-' + vm.group.type"></i>
+        <span ng-bind="vm.group.name"></span>
+      </a>
+    </li>
+    <li ng-click="vm.setPrivate()">
+      <a href="">
+        <i class="small h-icon-lock"></i>
+        <span ng-bind="vm.privateLabel"></span>
+      </a>
+    </li>
+  </ul>
+</div>
