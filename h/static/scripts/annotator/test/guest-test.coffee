@@ -295,28 +295,60 @@ describe 'Guest', ->
     afterEach ->
       document.body.removeChild(el)
 
-    it "doesn't declare annotations without targets as orphans", (done) ->
+    it "doesn't mark an annotation lacking targets as an orphan", ->
       guest = createGuest()
       annotation = target: []
+
       guest.anchor(annotation).then ->
         assert.isFalse(annotation.$orphan)
-      .then(done, done)
 
-    it "doesn't declare annotations with a working target orphans", (done) ->
+    it "doesn't mark an annotation with a selectorless target as an orphan", ->
       guest = createGuest()
-      annotation = target: [{selector: "test"}]
+      annotation = {target: [{source: 'wibble'}]}
+
+      guest.anchor(annotation).then ->
+        assert.isFalse(annotation.$orphan)
+
+    it "doesn't mark an annotation with only selectorless targets as an orphan", ->
+      guest = createGuest()
+      annotation = {target: [{source: 'foo'}, {source: 'bar'}]}
+
+      guest.anchor(annotation).then ->
+        assert.isFalse(annotation.$orphan)
+
+    it "doesn't mark an annotation in which the target anchors as an orphan", ->
+      guest = createGuest()
+      annotation = {target: [{selector: []}]}
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
+
       guest.anchor(annotation).then ->
         assert.isFalse(annotation.$orphan)
-      .then(done, done)
 
-    it "declares annotations with broken targets as orphans", (done) ->
+    it "doesn't mark an annotation in which at least one target anchors as an orphan", ->
       guest = createGuest()
-      annotation = target: [{selector: 'broken selector'}]
+      annotation = {target: [{selector: []}, {selector: []}]}
+      sandbox.stub(anchoring, 'anchor')
+        .onFirstCall().returns(Promise.reject())
+        .onSecondCall().returns(Promise.resolve(range))
+
+      guest.anchor(annotation).then ->
+        assert.isFalse(annotation.$orphan)
+
+    it "marks an annotation in which the target fails to anchor as an orphan", ->
+      guest = createGuest()
+      annotation = target: [{selector: []}]
       sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
+
       guest.anchor(annotation).then ->
         assert.isTrue(annotation.$orphan)
-      .then(done, done)
+
+    it "marks an annotation in which all (suitable) targets fail to anchor as an orphan", ->
+      guest = createGuest()
+      annotation = target: [{selector: []}, {selector: []}]
+      sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
+
+      guest.anchor(annotation).then ->
+        assert.isTrue(annotation.$orphan)
 
     it 'updates the cross frame and bucket bar plugins', (done) ->
       guest = createGuest()

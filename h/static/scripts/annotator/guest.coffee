@@ -197,11 +197,19 @@ module.exports = class Guest extends Annotator
 
     sync = (anchors) ->
       # Store the results of anchoring.
-      annotation.$orphan = anchors.length > 0
+
+      # An annotation is considered to be an orphan if it has at least one
+      # target with selectors, and all targets with selectors failed to anchor
+      # (i.e. we didn't find it in the page and thus it has no range).
+      hasAnchorableTargets = false
+      hasAnchoredTargets = false
       for anchor in anchors
-        if anchor.range?
-          annotation.$orphan = false
-          break
+        if anchor.target.selector?
+          hasAnchorableTargets = true
+          if anchor.range?
+            hasAnchoredTargets = true
+            break
+      annotation.$orphan = hasAnchorableTargets and not hasAnchoredTargets
 
       # Add the anchors for this annotation to instance storage.
       self.anchors = self.anchors.concat(anchors)
