@@ -240,6 +240,46 @@ describe 'Guest', ->
       annotation = guest.createAnnotation(annotation)
       assert.equal(annotation.foo, 'bar')
 
+    it 'triggers a beforeAnnotationCreated event', (done) ->
+      guest = createGuest()
+      guest.subscribe('beforeAnnotationCreated', -> done())
+
+      guest.createAnnotation()
+
+  describe 'createComment()', ->
+    it 'adds metadata to the annotation object', ->
+      guest = createGuest()
+      sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
+        metadata: {title: 'hello'}
+        uri: 'http://example.com/'
+      }))
+
+      annotation = guest.createComment()
+
+      timeoutPromise()
+      .then ->
+        assert.equal(annotation.uri, 'http://example.com/')
+        assert.deepEqual(annotation.document, {title: 'hello'})
+
+    it 'adds a single target with a source property', ->
+      guest = createGuest()
+      sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
+        metadata: {title: 'hello'}
+        uri: 'http://example.com/'
+      }))
+
+      annotation = guest.createComment()
+
+      timeoutPromise()
+      .then ->
+        assert.deepEqual(annotation.target, [{source: 'http://example.com/'}])
+
+    it 'triggers a beforeAnnotationCreated event', (done) ->
+      guest = createGuest()
+      guest.subscribe('beforeAnnotationCreated', -> done())
+
+      guest.createComment()
+
   describe 'anchor()', ->
     el = null
     range = null

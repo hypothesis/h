@@ -296,6 +296,22 @@ module.exports = class Guest extends Annotator
   createHighlight: ->
     return this.createAnnotation({$highlight: true})
 
+  # Create a blank comment (AKA "page note")
+  createComment: () ->
+    annotation = {}
+    self = this
+
+    prepare = (info) ->
+      annotation.document = info.metadata
+      annotation.uri = info.uri
+      annotation.target = [{source: info.uri}]
+
+    this.getDocumentInfo()
+      .then(prepare)
+      .then(-> self.publish('beforeAnnotationCreated', [annotation]))
+
+    annotation
+
   showAnnotations: (annotations) ->
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('showAnnotations', tags)
