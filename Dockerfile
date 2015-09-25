@@ -36,6 +36,7 @@ RUN apk-install --virtual build-deps \
 COPY Procfile gunicorn.conf.py ./
 COPY conf ./conf/
 COPY h ./h/
+COPY scripts ./scripts/
 
 # Change ownership of all the files and switch to the hypothesis user.
 RUN chown -R hypothesis:hypothesis .
