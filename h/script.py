@@ -104,31 +104,34 @@ def annotool(args):
                                   index=request.es.index,
                                   doc_type='annotation')
 
-    total = 0
     chunksize = 1000
-    pending = []
+    state = {'total': 0, 'pending': []}
 
-    for annotation in annotations:
-        func = ANNOTOOL_OPERATIONS[args.operation].load()
-        func(annotation['_source'])
-
-        pending.append(annotation)
-
-        if len(pending) < chunksize:
-            continue
-
+    def _flush():
         bodies = [{
             '_index': request.es.index,
             '_type': 'annotation',
             '_op_type': 'update',
             '_id': x['_id'],
             'doc': x['_source'],
-        } for x in pending]
+        } for x in state['pending']]
         es_helpers.bulk(request.es.conn, bodies)
 
-        total += len(pending)
-        log.info("processed %d annotations", total)
-        pending = []
+        state['total'] += len(state['pending'])
+        log.info("processed %d annotations", state['total'])
+        state['pending'] = []
+
+    for annotation in annotations:
+        func = ANNOTOOL_OPERATIONS[args.operation].load()
+        func(annotation['_source'])
+
+        state['pending'].append(annotation)
+
+        if len(state['pending']) >= chunksize:
+            _flush()
+
+    if state['pending']:
+        _flush()
 
 parser_annotool = subparsers.add_parser('annotool', help=annotool.__doc__)
 _add_common_args(parser_annotool)

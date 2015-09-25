@@ -197,11 +197,19 @@ module.exports = class Guest extends Annotator
 
     sync = (anchors) ->
       # Store the results of anchoring.
-      annotation.$orphan = anchors.length > 0
+
+      # An annotation is considered to be an orphan if it has at least one
+      # target with selectors, and all targets with selectors failed to anchor
+      # (i.e. we didn't find it in the page and thus it has no range).
+      hasAnchorableTargets = false
+      hasAnchoredTargets = false
       for anchor in anchors
-        if anchor.range?
-          annotation.$orphan = false
-          break
+        if anchor.target.selector?
+          hasAnchorableTargets = true
+          if anchor.range?
+            hasAnchoredTargets = true
+            break
+      annotation.$orphan = hasAnchorableTargets and not hasAnchoredTargets
 
       # Add the anchors for this annotation to instance storage.
       self.anchors = self.anchors.concat(anchors)
@@ -269,6 +277,7 @@ module.exports = class Guest extends Annotator
         cache: self.anchoringCache
         ignoreSelector: '[class^="annotator-"]'
       }
+      # Returns an array of selectors for the passed range.
       return self.anchoring.describe(root, range, options)
 
     setDocumentInfo = (info) ->
@@ -276,6 +285,8 @@ module.exports = class Guest extends Annotator
       annotation.uri = info.uri
 
     setTargets = ([info, selectors]) ->
+      # `selectors` is an array of arrays: each item is an array of selectors
+      # identifying a distinct target.
       source = info.uri
       annotation.target = ({source, selector} for selector in selectors)
 
@@ -292,6 +303,22 @@ module.exports = class Guest extends Annotator
 
   createHighlight: ->
     return this.createAnnotation({$highlight: true})
+
+  # Create a blank comment (AKA "page note")
+  createComment: () ->
+    annotation = {}
+    self = this
+
+    prepare = (info) ->
+      annotation.document = info.metadata
+      annotation.uri = info.uri
+      annotation.target = [{source: info.uri}]
+
+    this.getDocumentInfo()
+      .then(prepare)
+      .then(-> self.publish('beforeAnnotationCreated', [annotation]))
+
+    annotation
 
   showAnnotations: (annotations) ->
     tags = (a.$$tag for a in annotations)

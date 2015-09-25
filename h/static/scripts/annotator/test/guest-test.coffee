@@ -19,6 +19,10 @@ Guest = proxyquire('../guest', {
   'scroll-into-view': scrollIntoView,
 })
 
+# A little helper which returns a promise that resolves after a timeout
+timeoutPromise = (millis = 0) ->
+  new Promise((resolve) -> setTimeout(resolve, millis))
+
 describe 'Guest', ->
   sandbox = sinon.sandbox.create()
   CrossFrame = null
@@ -215,24 +219,66 @@ describe 'Guest', ->
       assert.isTrue(event.isPropagationStopped())
 
   describe 'createAnnotation()', ->
-    it 'adds metadata to the annotation object', (done) ->
+    it 'adds metadata to the annotation object', ->
       guest = createGuest()
       sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
         metadata: {title: 'hello'}
         uri: 'http://example.com/'
       }))
       annotation = {}
+
       guest.createAnnotation(annotation)
-      setTimeout ->
+
+      timeoutPromise()
+      .then ->
         assert.equal(annotation.uri, 'http://example.com/')
         assert.deepEqual(annotation.document, {title: 'hello'})
-        done()
 
     it 'treats an argument as the annotation object', ->
       guest = createGuest()
       annotation = {foo: 'bar'}
       annotation = guest.createAnnotation(annotation)
       assert.equal(annotation.foo, 'bar')
+
+    it 'triggers a beforeAnnotationCreated event', (done) ->
+      guest = createGuest()
+      guest.subscribe('beforeAnnotationCreated', -> done())
+
+      guest.createAnnotation()
+
+  describe 'createComment()', ->
+    it 'adds metadata to the annotation object', ->
+      guest = createGuest()
+      sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
+        metadata: {title: 'hello'}
+        uri: 'http://example.com/'
+      }))
+
+      annotation = guest.createComment()
+
+      timeoutPromise()
+      .then ->
+        assert.equal(annotation.uri, 'http://example.com/')
+        assert.deepEqual(annotation.document, {title: 'hello'})
+
+    it 'adds a single target with a source property', ->
+      guest = createGuest()
+      sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
+        metadata: {title: 'hello'}
+        uri: 'http://example.com/'
+      }))
+
+      annotation = guest.createComment()
+
+      timeoutPromise()
+      .then ->
+        assert.deepEqual(annotation.target, [{source: 'http://example.com/'}])
+
+    it 'triggers a beforeAnnotationCreated event', (done) ->
+      guest = createGuest()
+      guest.subscribe('beforeAnnotationCreated', -> done())
+
+      guest.createComment()
 
   describe 'anchor()', ->
     el = null
@@ -249,28 +295,60 @@ describe 'Guest', ->
     afterEach ->
       document.body.removeChild(el)
 
-    it "doesn't declare annotations without targets as orphans", (done) ->
+    it "doesn't mark an annotation lacking targets as an orphan", ->
       guest = createGuest()
       annotation = target: []
+
       guest.anchor(annotation).then ->
         assert.isFalse(annotation.$orphan)
-      .then(done, done)
 
-    it "doesn't declare annotations with a working target orphans", (done) ->
+    it "doesn't mark an annotation with a selectorless target as an orphan", ->
       guest = createGuest()
-      annotation = target: [{selector: "test"}]
+      annotation = {target: [{source: 'wibble'}]}
+
+      guest.anchor(annotation).then ->
+        assert.isFalse(annotation.$orphan)
+
+    it "doesn't mark an annotation with only selectorless targets as an orphan", ->
+      guest = createGuest()
+      annotation = {target: [{source: 'foo'}, {source: 'bar'}]}
+
+      guest.anchor(annotation).then ->
+        assert.isFalse(annotation.$orphan)
+
+    it "doesn't mark an annotation in which the target anchors as an orphan", ->
+      guest = createGuest()
+      annotation = {target: [{selector: []}]}
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
+
       guest.anchor(annotation).then ->
         assert.isFalse(annotation.$orphan)
-      .then(done, done)
 
-    it "declares annotations with broken targets as orphans", (done) ->
+    it "doesn't mark an annotation in which at least one target anchors as an orphan", ->
       guest = createGuest()
-      annotation = target: [{selector: 'broken selector'}]
+      annotation = {target: [{selector: []}, {selector: []}]}
+      sandbox.stub(anchoring, 'anchor')
+        .onFirstCall().returns(Promise.reject())
+        .onSecondCall().returns(Promise.resolve(range))
+
+      guest.anchor(annotation).then ->
+        assert.isFalse(annotation.$orphan)
+
+    it "marks an annotation in which the target fails to anchor as an orphan", ->
+      guest = createGuest()
+      annotation = target: [{selector: []}]
       sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
+
       guest.anchor(annotation).then ->
         assert.isTrue(annotation.$orphan)
-      .then(done, done)
+
+    it "marks an annotation in which all (suitable) targets fail to anchor as an orphan", ->
+      guest = createGuest()
+      annotation = target: [{selector: []}, {selector: []}]
+      sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
+
+      guest.anchor(annotation).then ->
+        assert.isTrue(annotation.$orphan)
 
     it 'updates the cross frame and bucket bar plugins', (done) ->
       guest = createGuest()

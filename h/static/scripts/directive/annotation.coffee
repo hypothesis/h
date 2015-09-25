@@ -85,14 +85,6 @@ AnnotationController = [
 
     ###*
     # @ngdoc method
-    # @name annotation.AnnotationController#isComment.
-    # @returns {boolean} True if the annotation is a comment.
-    ###
-    this.isComment = ->
-      not (model.target?.length or model.references?.length)
-
-    ###*
-    # @ngdoc method
     # @name annotation.AnnotationController#isHighlight.
     # @returns {boolean} True if the annotation is a highlight.
     ###
