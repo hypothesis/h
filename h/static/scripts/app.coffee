@@ -137,7 +137,6 @@ module.exports = angular.module('h', [
 .directive('formValidate', require('./directive/form-validate'))
 .directive('groupList', require('./directive/group-list').directive)
 .directive('markdown', require('./directive/markdown'))
-.directive('privacy', require('./directive/privacy').directive)
 .directive('simpleSearch', require('./directive/simple-search'))
 .directive('statusButton', require('./directive/status-button'))
 .directive('thread', require('./directive/thread'))
