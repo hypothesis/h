@@ -3,8 +3,8 @@
   in Firefox. See https://bugzilla.mozilla.org/show_bug.cgi?id=843003
 !-->
 <div aria-role="button" tabindex="0" class="dropdown-menu-btn">
-  <div class="dropdown-menu-btn__label" ng-bind="label"></div>
-  <div
+  <button class="dropdown-menu-btn__label" ng-bind="label"></button>
+  <button
     class="dropdown-menu-btn__dropdown-arrow"
     title="{{dropdownMenuLabel}}"
     ng-click="vm.toggleDropdown($event)">
@@ -12,5 +12,5 @@
     <div class="dropdown-menu-btn__dropdown-arrow-indicator">
       <div>▼</div>
     </div>
-  </div>
+  </button>
 </div>
