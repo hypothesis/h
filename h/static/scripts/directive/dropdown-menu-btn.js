@@ -20,6 +20,6 @@ module.exports = function () {
       dropdownMenuLabel: '@',
       onToggleDropdown: '&',
     },
-    templateUrl: 'primary_action_btn.html'
+    templateUrl: 'dropdown_menu_btn.html'
   };
 };
