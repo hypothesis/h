@@ -9,6 +9,22 @@ def _mock_group(hashid):
     return mock.Mock(hashid=hashid)
 
 
+def test_set_permissions_does_not_modify_annotations_with_no_permissions():
+    annotations = [{
+        'user': 'acct:jack@hypothes.is',
+    },
+    {
+        'user': 'acct:jack@hypothes.is',
+        'group': 'xyzabc',
+    }]
+
+    for ann in annotations:
+        before = copy.deepcopy(ann)
+        auth.set_permissions(ann)
+
+        assert ann == before
+
+
 def test_set_permissions_does_not_modify_private_annotations():
     original_annotation = {
         'user': 'acct:jack@hypothes.is',
