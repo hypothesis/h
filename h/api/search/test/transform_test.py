@@ -56,6 +56,40 @@ def test_prepare_adds_scope_field(_, ann_in, ann_out, uri_normalize):
 
 @mock.patch('h.api.search.transform.models')
 @mock.patch('h.api.search.transform.groups')
+@pytest.mark.usefixtures("uri_normalize")
+@pytest.mark.parametrize("ann_in,ann_out", [
+    ({"uri": "giraffe"},
+     {"uri": "giraffe",
+      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+    ({"uri": "giraffe", "target": []},
+     {"uri": "giraffe",
+      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+    ({"uri": "giraffe", "references": []},
+     {"uri": "giraffe",
+      "references": [],
+      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+    ({"uri": "giraffe", "references": [], "target": []},
+     {"uri": "giraffe",
+      "references": [],
+      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+
+    # Does nothing if either references or target is non-empty
+    ({"uri": "giraffe", "references": ['hello'], "target": []},
+     {"uri": "giraffe", "references": ['hello'], "target": []}),
+    ({"uri": "giraffe", "references": [], "target": [{'foo': 'bar'}]},
+     {"uri": "giraffe", "references": [], "target": [{'foo': 'bar'}]}),
+
+    # Does nothing when lacking a uri
+    ({"references": [], "target": []},
+     {"references": [], "target": []}),
+])
+def test_prepare_transforms_old_style_comments(models, groups, ann_in, ann_out):
+    transform.prepare(ann_in)
+    assert ann_in == ann_out
+
+
+@mock.patch('h.api.search.transform.models')
+@mock.patch('h.api.search.transform.groups')
 def test_prepare_copies_parents_scopes_into_replies(_, models):
     parent_annotation = {
         'id': 'parent_annotation_id',
