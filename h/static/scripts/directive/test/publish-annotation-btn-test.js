@@ -130,6 +130,11 @@ describe('publishAnnotationBtn', function () {
     });
     var disabledBtns = element.find('button[disabled]');
     assert.equal(disabledBtns.length, 2);
+
+    // check that buttons are enabled when posting is possible
+    element = element.link({canPost: true});
+    disabledBtns = element.find('button[disabled]');
+    assert.equal(disabledBtns.length, 0);
   });
 
 });

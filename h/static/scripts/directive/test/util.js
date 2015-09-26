@@ -22,9 +22,6 @@ function hyphenate(name) {
  *
  *  { attrA: 'initial-value', scopeProperty: scopeValue }
  *
- * Attribute values are converted to scope properties of the same
- * name as the attribute and t
- *
  * @param {Document} document - The DOM Document to create the element in
  * @param {string} name - The name of the directive to instantiate
  * @param {Object} attrs - A map of attribute names (in camelCase) to initial values.
@@ -32,6 +29,8 @@ function hyphenate(name) {
  *                                scope when the element is linked
  *
  * @return {DOMElement} The Angular jqLite-wrapped DOM element for the component.
+ *                      The returned object has a link(scope) method which will
+ *                      re-link the component with new properties.
  */
 function createDirective(document, name, attrs, initialScope) {
   attrs = attrs || {};
@@ -56,18 +55,28 @@ function createDirective(document, name, attrs, initialScope) {
   });
 
   // setup initial scope
-  Object.keys(initialScope).forEach(function (key) {
-    $scope[key] = initialScope[key];
-  });
   Object.keys(attrs).forEach(function (key) {
     $scope[key] = attrs[key];
   });
 
-  // instantiate component
-  var element = $compile(templateElement)($scope);
-  element.scope = $scope;
-  $scope.$digest();
-  return element;
+  // compile the template
+  var linkFn = $compile(templateElement);
+
+  // link the component, passing in the initial
+  // scope values. The caller can then re-render/link
+  // the template passing in different properties
+  // and verify the output
+  var linkDirective = function(props) {
+    var childScope = $scope.$new();
+    angular.extend(childScope, props);
+    var element = linkFn(childScope);
+    element.link = linkDirective;
+    element.scope = childScope;
+    childScope.$digest();
+    return element;
+  }
+
+  return linkDirective(initialScope);
 }
 
 module.exports = {
