@@ -22,54 +22,50 @@ describe('publishAnnotationBtn', function () {
       });
   });
 
+  var element;
+
   beforeEach(function () {
     angular.mock.module('app');
     angular.mock.module('h.templates');
+
+    // create a new instance of the directive with default
+    // attributes
+    element = util.createDirective(document, 'publishAnnotationBtn', {
+     group: {
+       name: 'Public',
+       type: 'public'
+     },
+     canPost: true,
+     isShared: false,
+     isNew: false,
+     onSave: function () {},
+     onSetPrivacy: function (level) {},
+   });
   });
 
   it('should display "Post to Only Me"', function () {
-    var saveCount = 0;
-    var element = util.createDirective(document, 'publishAnnotationBtn', {
-      group: {
-        name: 'Public',
-        type: 'public'
-      },
-      isShared: false,
-      isNew: false,
-      onSave: function () {},
-      onSetPrivacy: function (level) {}
-    });
     var buttons = element.find('button');
     assert.equal(buttons.length, 2);
     assert.equal(buttons[0].innerHTML, 'Post to Only Me');
   });
 
   it('should display "Post to Research Lab"', function () {
-    var element = util.createDirective(document, 'publishAnnotationBtn', {
+    element.link({
       group: {
         name: 'Research Lab',
         type: 'group'
       },
-      isShared: true,
       isNew: false,
-      onSave: function () {},
-      onSetPrivacy: function (level) {}
-    });
+      isShared: true
+    })
     var buttons = element.find('button');
     assert.equal(buttons[0].innerHTML, 'Post to Research Lab');
   });
 
   it('should default to "shared" as the privacy level for new annotations', function () {
     fakeStorage = {};
-    var element = util.createDirective(document, 'publishAnnotationBtn', {
-      group: {
-        name: 'Research Lab',
-        type: 'group'
-      },
-      isShared: true,
-      isNew: true,
-      onSave: function () {},
-      onSetPrivacy: function (level) {}
+    element.link({
+      isNew: true
     });
     assert.deepEqual(fakeStorage, {
       'hypothesis.privacy': 'shared'
@@ -78,15 +74,8 @@ describe('publishAnnotationBtn', function () {
 
   it('should save when "Post..." is clicked', function () {
     var savedSpy = sinon.spy();
-    var element = util.createDirective(document, 'publishAnnotationBtn', {
-      group: {
-        name: 'Research Lab',
-        type: 'group'
-      },
-      isShared: true,
-      isNew: true,
-      onSave: savedSpy,
-      onSetPrivacy: function (level) {}
+    element.link({
+      onSave: savedSpy
     });
     assert.ok(!savedSpy.called);
     angular.element(element.find('button')[0]).click();
@@ -95,18 +84,13 @@ describe('publishAnnotationBtn', function () {
 
   it('should change privacy when privacy option selected', function () {
     var privacyChangedSpy = sinon.spy();
-    var element = util.createDirective(document, 'publishAnnotationBtn', {
-      group: {
-        name: 'Research Lab',
-        type: 'group'
-      },
-      isShared: true,
+    element.link({
       // for existing annotations, the privacy should not be changed
       // unless the user makes a choice from the list
       isNew: false,
-      onSave: function () {},
       onSetPrivacy: privacyChangedSpy
     });
+
     assert.ok(!privacyChangedSpy.called);
     var privateOption = element.find('li')[1];
     var sharedOption = element.find('li')[0];
@@ -117,22 +101,16 @@ describe('publishAnnotationBtn', function () {
   });
 
   it('should disable post buttons when posting is not possible', function () {
-    var element = util.createDirective(document, 'publishAnnotationBtn', {
-      group: {
-        name: 'Research Lab',
-        type: 'group'
-      },
-      canPost: false,
-      isShared: true,
-      isNew: false,
-      onSave: function () {},
-      onSetPrivacy: function () {}
+    element.link({
+      canPost: false
     });
     var disabledBtns = element.find('button[disabled]');
     assert.equal(disabledBtns.length, 2);
 
     // check that buttons are enabled when posting is possible
-    element = element.link({canPost: true});
+    element.link({
+      canPost: true
+    });
     disabledBtns = element.find('button[disabled]');
     assert.equal(disabledBtns.length, 0);
   });
