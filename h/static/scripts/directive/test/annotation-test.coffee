@@ -179,6 +179,34 @@ describe 'annotation', ->
       controller.reply()
       assert.deepEqual(reply.permissions, {read: ['justme']})
 
+  describe '#setPrivacy', ->
+    beforeEach ->
+      createDirective()
+
+    it 'makes the annotation private when level is "private"', ->
+      controller.setPrivacy('private')
+      assert.deepEqual(annotation.permissions, {read: ['justme']})
+
+    it 'makes the annotation shared when level is "shared"', ->
+      controller.setPrivacy('shared')
+      assert.deepEqual(annotation.permissions, {read: ['everybody']});
+
+  describe '#hasContent', ->
+    beforeEach ->
+      createDirective()
+
+    it 'returns false if the annotation has no tags or text', ->
+      controller.annotation.text = ''
+      controller.annotation.tags = [];
+      assert.ok(!controller.hasContent())
+
+    it 'returns true if the annotation has tags or text', ->
+      controller.annotation.text = 'bar'
+      assert.ok(controller.hasContent())
+      controller.annotation.text = ''
+      controller.annotation.tags = [{text: 'foo'}]
+      assert.ok(controller.hasContent())
+
   describe '#render', ->
 
     beforeEach ->

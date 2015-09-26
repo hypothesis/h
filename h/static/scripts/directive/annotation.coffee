@@ -102,15 +102,6 @@ AnnotationController = [
 
     ###*
     # @ngdoc method
-    # @name annotation.AnnotationController#setPrivate
-    #
-    # Set permissions on this annotation to private.
-    ###
-    this.setPrivate = ->
-      model.permissions = permissions.private()
-
-    ###*
-    # @ngdoc method
     # @name annotation.AnnotationController#isShared
     # @returns {boolean} True if the annotation is shared (either with the
     # current group or with everyone).
@@ -120,18 +111,18 @@ AnnotationController = [
 
     ###*
     # @ngdoc method
-    # @name annotation.AnnotationController#setShared
+    # @name annotation.AnnotationController#setPrivacy
     #
-    # Set permissions on this annotation to share with the current group.
+    # Set the privacy settings on the annotation to a predefined
+    # level. The supported levels are 'private' which makes the annotation
+    # visible only to its creator and 'shared' which makes the annotation
+    # visible to everyone in the group.
     ###
-    this.setShared = ->
-      model.permissions = permissions.public(model.group)
-
     this.setPrivacy = (privacy) ->
       if privacy == 'private'
-        this.setPrivate()
+        model.permissions = permissions.private()
       else if privacy == 'shared'
-        this.setShared()
+        model.permissions = permissions.public(model.group)
 
     ###*
     # @ngdoc method
