@@ -18,11 +18,15 @@ function getContainer(threading, annotation) {
 
 // Wraps the annotation store to trigger events for the CRUD actions
 // @ngInject
-function annotationMapper($rootScope, threading, store) {
+function annotationMapper($rootScope, threading, store, groups) {
   function loadAnnotations(annotations) {
     var loaded = [];
 
     annotations.forEach(function (annotation) {
+      if (annotation.group !== groups.focused().id) {
+        return;
+      }
+
       var container = getContainer(threading, annotation);
       if (container !== null) {
         angular.copy(annotation, container.message);
