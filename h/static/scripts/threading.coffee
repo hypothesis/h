@@ -94,10 +94,11 @@ module.exports = class Threading
         parent = this.idTable[parentRef]
       else
         parent = @root
-      for child in parent.children when child.message is annotation
-        child.message = null
-        this.pruneEmpties(@root)
-        break
+      if parent
+        for child in parent.children when child.message is annotation
+          child.message = null
+          this.pruneEmpties(@root)
+          break
 
   annotationsLoaded: (event, annotations) =>
     messages = (@root.flattenChildren() or []).concat(annotations)
