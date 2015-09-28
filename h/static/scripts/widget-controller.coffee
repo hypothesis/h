@@ -4,15 +4,15 @@ angular = require('angular')
 module.exports = class WidgetController
   this.$inject = [
     '$scope', 'annotationUI', 'crossframe', 'annotationMapper',
-    'streamer', 'streamFilter', 'store', 'threading'
+    'streamer', 'streamFilter', 'store'
   ]
   constructor:   (
      $scope,   annotationUI, crossframe, annotationMapper,
-     streamer,   streamFilter,   store,   threading
+     streamer,   streamFilter,   store
   ) ->
     $scope.isStream = true
     $scope.isSidebar = true
-    $scope.threadRoot = threading.root
+    $scope.threads = annotationMapper.threads
 
     @chunkSize = 200
     loaded = []

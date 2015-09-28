@@ -66,7 +66,13 @@ function annotationMapper($rootScope, threading, store) {
     loadAnnotations: loadAnnotations,
     unloadAnnotations: unloadAnnotations,
     createAnnotation: createAnnotation,
-    deleteAnnotation: deleteAnnotation
+    deleteAnnotation: deleteAnnotation,
+    threads: function() {
+      return threading.root.children;
+    },
+    thread: function(id) {
+      return threading.idTable[id];
+    }
   };
 }
 

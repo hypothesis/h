@@ -4,11 +4,11 @@ angular = require('angular')
 module.exports = class AnnotationViewerController
   this.$inject = [
     '$location', '$routeParams', '$scope',
-    'streamer', 'store', 'streamFilter', 'annotationMapper', 'threading'
+    'streamer', 'store', 'streamFilter', 'annotationMapper'
   ]
   constructor: (
      $location,   $routeParams,   $scope,
-     streamer,   store,   streamFilter,   annotationMapper,   threading
+     streamer,   store,   streamFilter,   annotationMapper
   ) ->
     id = $routeParams.id
 
@@ -26,7 +26,7 @@ module.exports = class AnnotationViewerController
 
     store.AnnotationResource.read id: id, (annotation) ->
       annotationMapper.loadAnnotations([annotation])
-      $scope.threadRoot = {children: [threading.idTable[id]]}
+      $scope.threads = -> [annotationMapper.thread(id)]
     store.SearchResource.get references: id, ({rows}) ->
       annotationMapper.loadAnnotations(rows)
 
