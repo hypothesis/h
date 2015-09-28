@@ -1,9 +1,27 @@
 .publish-annotation-btn {
+  display: flex;
+  margin-right: 5px;
+
   &__btn {
     width: 250px;
   }
 
   &__dropdown-menu {
     width: 100%;
+  }
+}
+
+.publish-annotation-cancel-btn {
+  $color: #bbb;
+
+  color: $color;
+  font-weight: normal;
+
+  &__icon {
+    margin-right: 3px;
+  }
+
+  &:hover {
+    color: darken($color, 15%);
   }
 }

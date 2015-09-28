@@ -115,15 +115,14 @@
               ng-click="vm.save()"
               class="dropdown-menu-btn"><i class="h-icon-check btn-icon"></i> Delete</button>
       <publish-annotation-btn
+        class="publish-annotation-btn"
         group="vm.group()"
         can-post="vm.hasContent()"
         is-new="vm.action == 'create'"
         is-shared="vm.isShared()"
+        on-cancel="vm.revert()"
         on-save="vm.save()"
         on-set-privacy="vm.setPrivacy(level)"></publish-annotation-btn>
-      <button class="btn btn-clean"
-              ng-click="vm.revert()"
-              ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
     </div>
 
     <div class="annotation-section annotation-license"

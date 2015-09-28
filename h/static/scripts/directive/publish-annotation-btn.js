@@ -19,6 +19,10 @@ function PublishAnnotationBtnController($scope, localStorage) {
     $scope.onSave();
   };
 
+  this.cancel = function () {
+    $scope.onCancel();
+  }
+
   this.setPrivacy = function (level) {
     localStorage.setItem(STORAGE_KEY, level);
     $scope.onSetPrivacy({level: level});
@@ -66,6 +70,7 @@ module.exports = function () {
       canPost: '=',
       isShared: '=',
       isNew: '=',
+      onCancel: '&',
       onSave: '&',
       onSetPrivacy: '&'
     },

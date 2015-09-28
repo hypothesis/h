@@ -40,12 +40,13 @@ describe('publishAnnotationBtn', function () {
      isNew: false,
      onSave: function () {},
      onSetPrivacy: function (level) {},
+     onCancel: function () {}
    });
   });
 
   it('should display "Post to Only Me"', function () {
     var buttons = element.find('button');
-    assert.equal(buttons.length, 2);
+    assert.equal(buttons.length, 3);
     assert.equal(buttons[0].innerHTML, 'Post to Only Me');
   });
 
@@ -113,6 +114,17 @@ describe('publishAnnotationBtn', function () {
     });
     disabledBtns = element.find('button[disabled]');
     assert.equal(disabledBtns.length, 0);
+  });
+
+  it('should revert changes when cancel is clicked', function () {
+    var cancelSpy = sinon.spy();
+    element.link({
+      onCancel: cancelSpy
+    });
+    var cancelBtn = element.find('.publish-annotation-cancel-btn');
+    assert.equal(cancelBtn.length, 1);
+    angular.element(cancelBtn).click();
+    assert.equal(cancelSpy.callCount, 1);
   });
 
 });
