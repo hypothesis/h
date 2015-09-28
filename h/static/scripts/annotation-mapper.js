@@ -19,11 +19,25 @@ function getContainer(threading, annotation) {
 // Wraps the annotation store to trigger events for the CRUD actions
 // @ngInject
 function annotationMapper($rootScope, threading, store, groups) {
-  function loadAnnotations(annotations) {
-    var loaded = [];
 
-    annotations.forEach(function (annotation) {
-      if (annotation.group !== groups.focused().id) {
+  // All of the annotations that annotationMapper has received from calls to
+  // its loadAnnotations() method.
+  var received = [];
+
+  // The annotations that are currently loaded into the page context.
+  var loaded = [];
+
+  function loadAnnotations(annotations) {
+    received = received.concat(annotations);
+    loadAnnotationsFromGroup(annotations, groups.focused().id);
+  }
+
+  function loadAnnotationsFromGroup(annotations, groupId) {
+    // The annotations that we've added to the page.
+    var newlyLoaded = [];
+
+    annotations.forEach(function(annotation) {
+      if (annotation.group !== groupId) {
         return;
       }
 
@@ -34,20 +48,31 @@ function annotationMapper($rootScope, threading, store, groups) {
         return;
       }
 
-      loaded.push(new store.AnnotationResource(annotation));
+      newlyLoaded.push(new store.AnnotationResource(annotation));
     });
 
-    $rootScope.$emit('annotationsLoaded', loaded);
+    $rootScope.$emit('annotationsLoaded', newlyLoaded);
+    loaded = loaded.concat(newlyLoaded);
   }
 
+  // When the focused group changes, change what annotations are shown.
+  $rootScope.$on('groupFocused', function() {
+    unloadAnnotations(loaded);
+    loadAnnotationsFromGroup(received, groups.focused().id);
+  });
+
   function unloadAnnotations(annotations) {
-    annotations.forEach(function (annotation) {
+    annotations.forEach(function(annotation) {
       var container = getContainer(threading, annotation);
       if (container !== null && annotation !== container.message) {
         annotation = angular.copy(annotation, container.message);
       }
 
       $rootScope.$emit('annotationDeleted', annotation);
+    });
+
+    annotations.slice().forEach(function(annotation) {
+      loaded.splice(loaded.indexOf(annotation, 1));
     });
   }
 
