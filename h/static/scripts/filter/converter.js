@@ -8,6 +8,10 @@ function targetBlank(converter) {
 }
 
 module.exports = function () {
-  var converter = new showdown.Converter({extensions: [targetBlank]});
+  // see https://github.com/showdownjs/showdown#valid-options
+  var converter = new showdown.Converter({
+    extensions: [targetBlank],
+    simplifiedAutoLink: true
+  });
   return converter.makeHtml.bind(converter);
 };
