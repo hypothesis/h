@@ -126,21 +126,6 @@
               ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
     </div>
 
-    <div class="small" ng-if="vm.editing">
-      <p ng-if="vm.isPrivate()">
-        <i class="h-icon-lock"></i>
-        This annotation will be visible only to you.
-      </p>
-      <p ng-if="vm.isShared() && vm.group().public">
-        <i class="h-icon-public"></i>
-        This annotation will be visible to everyone.
-      </p>
-      <p ng-if="vm.isShared() && !vm.group().public">
-        <i class="h-icon-group"></i>
-        This annotation will be visible to everyone in <strong ng-bind="vm.group().name"></strong>.
-      </p>
-    </div>
-
     <div class="annotation-section annotation-license"
          ng-show="vm.isShared() && vm.editing">
       <a href="http://creativecommons.org/publicdomain/zero/1.0/"
