@@ -58,8 +58,6 @@ class Annotation(Resource):
                         principal = Everyone
                     elif role == 'group:__authenticated__':
                         principal = Authenticated
-                    elif role == 'group:__consumer__':
-                        raise NotImplementedError("API consumer groups")
                     else:
                         principal = role
                 else:

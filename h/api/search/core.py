@@ -29,9 +29,7 @@ def search(request, params):
     builder.append_matcher(query.TagsMatcher())
 
     body = builder.build(params)
-    results = models.Annotation.search_raw(body,
-                                           raw_result=True,
-                                           authorization_enabled=False)
+    results = models.Annotation.search_raw(body, raw_result=True)
 
     total = results['hits']['total']
     docs = results['hits']['hits']

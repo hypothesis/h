@@ -137,10 +137,6 @@ def effective_principals(userid, request):
     """
     additional_principals = []
 
-    if getattr(request, 'client', None) is not None:
-        consumer_group = 'consumer:{}'.format(request.client.client_id)
-        additional_principals.append(consumer_group)
-
     primary_user = models.User.get_by_userid(request.domain, userid)
 
     if primary_user is not None:
@@ -174,14 +170,6 @@ def generate_signed_token(request):
         'exp': now + ttl,
         'iat': now,
     }
-
-    # bw compat for the Annotator Auth plugin
-    claims.update({
-        'consumerKey': request.client.client_id,
-        'issuedAt': now.isoformat(),
-        'ttl': int(ttl.total_seconds()),
-        'userId': request.user,
-    })
 
     claims.update(request.extra_credentials or {})
     return jwt.encode(claims, request.client.client_secret)

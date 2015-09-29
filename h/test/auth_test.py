@@ -173,18 +173,6 @@ def test_effective_principals_returns_no_principals(models):
 
 
 @effective_principals_fixtures
-def test_effective_principals_returns_client_id_as_consumer(models):
-    """
-    If the request has a client ID it's returned as a "consumer:" principal.
-    """
-    request = MagicMock(client=MagicMock(client_id="test_id"))
-    models.User.get_by_userid.return_value = MagicMock(
-        admin=False, staff=False)
-
-    assert "consumer:test_id" in auth.effective_principals("jiji", request)
-
-
-@effective_principals_fixtures
 def test_effective_principals_with_admin_user(models):
     """If the user is an admin it should return "group:__admin__"."""
     request = MagicMock(client=None)
@@ -199,7 +187,6 @@ def test_effective_principals_client_id_and_admin_together(models):
     models.User.get_by_userid.return_value = MagicMock(admin=True, staff=False)
 
     principals = auth.effective_principals("jiji", request)
-    assert "consumer:test_id" in principals
     assert "group:__admin__" in principals
 
 
@@ -219,7 +206,6 @@ def test_effective_principals_client_id_and_admin_and_staff(models):
 
     principals = auth.effective_principals("jiji", request)
 
-    assert "consumer:test_id" in principals
     assert "group:__admin__" in principals
     assert "group:__staff__" in principals
 
