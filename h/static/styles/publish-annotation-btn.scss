@@ -1,6 +1,5 @@
 .publish-annotation-btn {
   display: flex;
-  margin-right: 5px;
 
   &__btn {
     width: 250px;
@@ -13,6 +12,7 @@
 
 .publish-annotation-cancel-btn {
   $color: #bbb;
+  margin-left: 5px;
 
   color: $color;
   font-weight: normal;
