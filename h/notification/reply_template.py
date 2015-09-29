@@ -4,9 +4,10 @@ import re
 from datetime import datetime
 
 from pyramid.events import subscriber
-from pyramid.security import Everyone, principals_allowed_by_permission
 from pyramid.renderers import render
 
+from h import auth
+from h.api.auth import translate_annotation_principals
 from h.notification.notifier import TemplateRenderException
 from h.notification import types
 from h.notification.models import Subscriptions
@@ -109,16 +110,21 @@ def generate_notifications(request, annotation, action):
     if action != 'create':
         return
 
-    # If the annotation doesn't have a parent, or we can't find its parent,
-    # then we can't send a notification email.
+    # If the annotation doesn't have a parent, we can't find its parent, or we
+    # have no idea who the author of the parent is, then we can't send a
+    # notification email.
     parent = annotation.parent
-    if parent is None:
+    if parent is None or 'user' not in parent:
         return
 
-    # Check for authorization. Send notification only for public annotation
-    # XXX: This will be changed and fine grained when
-    # user groups will be introduced
-    if Everyone not in principals_allowed_by_permission(annotation, 'read'):
+    # We don't send replies to the author of the parent unless they're going to
+    # be able to read it. That means there must be some overlap between the set
+    # of effective principals of the parent's author, and the read permissions
+    # of the reply.
+    child_read_permissions = annotation.get('permissions', {}).get('read', [])
+    parent_principals = auth.effective_principals(parent['user'], request)
+    read_principals = translate_annotation_principals(child_read_permissions)
+    if not set(parent_principals).intersection(read_principals):
         return
 
     # Store the parent values as additional data

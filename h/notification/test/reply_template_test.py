@@ -4,6 +4,7 @@ from mock import patch, Mock, MagicMock
 
 import pytest
 from pyramid.testing import DummyRequest
+from pyramid import security
 
 from h.models import Annotation
 from h.notification.gateway import user_name, user_profile_url, standalone_url
@@ -27,6 +28,7 @@ store_fake_data = [
         'created': '2013-10-27T19:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in two by two, hurrah! hurrah!',
+        'permissions': {'read': ['group:__world__']},
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:elephant@nomouse.pls'
     },
@@ -36,6 +38,7 @@ store_fake_data = [
         'created': '2014-10-27T19:50:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in three by three, hurrah! hurrah',
+        'permissions': {'read': ['group:__world__']},
         'references': [0],
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:wasp@stinger.rulz'
@@ -46,6 +49,7 @@ store_fake_data = [
         'created': '2014-10-27T19:55:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in four by four, hurrah! hurrah',
+        'permissions': {'read': ['group:__world__']},
         'references': [0, 1],
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:hippopotamus@stucked.sos'
@@ -56,22 +60,50 @@ store_fake_data = [
         'created': '2014-10-27T20:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in two by two, hurrah! hurrah!',
+        'permissions': {'read': ['group:__world__']},
         'references': [0],
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:elephant@nomouse.pls'
     },
     {
         # Reply to the root with the same user
-        'id': '3',
+        'id': '4',
         'created': '2014-10-27T20:40:53.245691+00:00',
         'document': {'title': ''},
         'text': 'The animals went in two by two, hurrah! hurrah!',
+        'permissions': {'read': ['group:__world__']},
         'references': [0],
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:elephant@nomouse.pls'
     },
-
+    {
+        # A thread root for testing permissions
+        'id': '5',
+        'user': 'acct:amrit@example.org'
+    },
+    {
+        # A reply for testing permissions
+        'id': '6',
+        'permissions': {'read': ['acct:jane@example.com']},
+        'references': [5],
+        'user': 'acct:jane@example.com'
+    },
+    {
+        # A reply for testing permissions
+        'id': '7',
+        'permissions': {'read': ['acct:jane@example.com', 'group:wibble']},
+        'references': [5],
+        'user': 'acct:jane@example.com'
+    },
 ]
+
+
+class MockSubscription(Mock):
+    def __json__(self, request):
+        return {
+            'id': self.id or '',
+            'uri': self.uri or ''
+        }
 
 
 def fake_fetch(id):
@@ -304,7 +336,10 @@ def test_good_conditions():
         send = rt.check_conditions(annotation, data)
         assert send is True
 
+generate_notifications_fixtures = pytest.mark.usefixtures('effective_principals',
+                                                          'fetch')
 
+@generate_notifications_fixtures
 def test_generate_notifications_empty_if_action_not_create():
     """If the action is not 'create', no notifications should be generated."""
     annotation = Annotation()
@@ -315,7 +350,7 @@ def test_generate_notifications_empty_if_action_not_create():
     assert list(notifications) == []
 
 
-@pytest.mark.usefixtures('fetch')
+@generate_notifications_fixtures
 def test_generate_notifications_empty_if_annotation_has_no_parent():
     """If the annotation has no parent no notifications should be generated."""
     annotation = Annotation.fetch(0)
@@ -326,7 +361,43 @@ def test_generate_notifications_empty_if_annotation_has_no_parent():
     assert list(notifications) == []
 
 
-@pytest.mark.usefixtures('fetch')
+@generate_notifications_fixtures
+@patch('h.notification.reply_template.render_reply_notification')
+@patch('h.notification.reply_template.Subscriptions')
+def test_generate_notifications_only_if_author_can_read_reply(Subscriptions,
+                                                              render_reply_notification,
+                                                              effective_principals):
+    """
+    If the annotation is not readable by the parent author, no notifications
+    should be generated.
+    """
+    private_annotation = Annotation.fetch(6)
+    shared_annotation = Annotation.fetch(7)
+    request = _create_request()
+    effective_principals.return_value = [
+        security.Everyone,
+        security.Authenticated,
+        'acct:amrit@example.org',
+        'group:wibble',
+    ]
+    Subscriptions.get_active_subscriptions_for_a_type.return_value = [
+        MockSubscription(id=1, uri='acct:amrit@example.org')
+    ]
+    render_reply_notification.return_value = (
+        'Dummy subject',
+        'Dummy text',
+        'Dummy HTML',
+        ['dummy@example.com']
+    )
+
+    notifications = rt.generate_notifications(request, private_annotation, 'create')
+    assert list(notifications) == []
+
+    notifications = rt.generate_notifications(request, shared_annotation, 'create')
+    assert list(notifications) != []
+
+
+@generate_notifications_fixtures
 @patch('h.notification.reply_template.Subscriptions')
 def test_generate_notifications_checks_subscriptions(Subscriptions):
     """If the annotation has a parent, then proceed to check subscriptions."""
@@ -343,15 +414,7 @@ def test_generate_notifications_checks_subscriptions(Subscriptions):
         REPLY_TYPE)
 
 
-class MockSubscription(Mock):
-    def __json__(self, request):
-        return {
-            'id': self.id or '',
-            'uri': self.uri or ''
-        }
-
-
-@pytest.mark.usefixtures('fetch')
+@generate_notifications_fixtures
 def test_check_conditions_false_stops_sending():
     """If the check conditions() returns False, no notifications are generated"""
     request = _create_request()
@@ -368,7 +431,7 @@ def test_check_conditions_false_stops_sending():
                 msgs.next()
 
 
-@pytest.mark.usefixtures('fetch')
+@generate_notifications_fixtures
 def test_send_if_everything_is_okay():
     """Test whether we generate notifications if every condition is okay"""
     request = _create_request()
@@ -391,9 +454,18 @@ def test_send_if_everything_is_okay():
 
 
 @pytest.fixture
+def effective_principals(request):
+    patcher = patch('h.auth.effective_principals')
+    func = patcher.start()
+    func.return_value = [security.Everyone]
+    request.addfinalizer(patcher.stop)
+    return func
+
+
+@pytest.fixture
 def fetch(request):
     patcher = patch.object(Annotation, 'fetch')
     func = patcher.start()
-    func.side_effect = lambda x: Annotation(**store_fake_data[x])
+    func.side_effect = lambda x: Annotation(**store_fake_data[int(x)])
     request.addfinalizer(patcher.stop)
     return func
