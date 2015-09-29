@@ -719,4 +719,19 @@ describe("AnnotationController", ->
 
     # Now the original text should be restored.
     assert controller.annotation.text == original_text
+
+    # test that editing reverting changes to an annotation with
+    # no text resets the text to be empty
+    it "clears the text when reverting changes to a highlight", ->
+      {controller} = createAnnotationDirective({
+          annotation: {
+            id: "test-annotation-id",
+            user: "acct:bill@localhost"
+          }
+      })
+      controller.edit()
+      assert.equal controller.action, 'edit'
+      controller.annotation.text = "this should be reverted"
+      controller.revert()
+      assert.equal controller.annotation.text, undefined
 )
