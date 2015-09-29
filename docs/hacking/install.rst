@@ -226,24 +226,31 @@ Running the tests
 
 There are test suites for both the frontend and backend code.
 
-To run the Python suite, invoke the tests in the standard fashion:
-
-.. code-block:: bash
-
-    python setup.py test
-
-To run the JavaScript suite, run:
-
-.. code-block:: bash
-
-    $(npm bin)/karma start h/static/scripts/karma.config.js --single-run
-
-As a convenience, there is a make target which will do all of the above:
+To run the complete set of tests, run:
 
 .. code-block:: bash
 
     make test
 
+To run the frontend test suite only, run:
+
+.. code-block:: bash
+
+    make client-test
+
+When working on the front-end code, you can run the Karma test runner in auto-watch
+mode which will re-run the tests whenever a change is made to the source code.
+To start the test runner in auto-watch mode, run:
+
+.. code-block:: bash
+
+    make client-test-watch
+
+You can further speed up the testing cycle for front-end code by using
+mocha's `.only()`_ to only run a particular suite of tests or even just
+a single test.
+
+.. _.only(): http://jaketrent.com/post/run-single-mocha-test/
 
 Debugging h
 -----------
