@@ -17,5 +17,4 @@ and how to contribute code or documentation to the project.
    documentation
    customized-embedding
    ssl
-   administration
    making-changes-to-model-code
