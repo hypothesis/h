@@ -4,6 +4,7 @@ from pyramid.decorator import reify
 from pyramid.security import Allow, Deny
 from pyramid.security import Authenticated, Everyone
 
+from h.api import auth
 from h.api import models
 
 
@@ -50,21 +51,9 @@ class Annotation(Resource):
 
         # Convert annotator-store roles to pyramid principals
         for action, roles in model.get('permissions', {}).items():
-            for role in roles:
-                if role.startswith('system.'):
-                    raise ValueError('{} is a reserved role.'.format(role))
-                elif role.startswith('group:'):
-                    if role == 'group:__world__':
-                        principal = Everyone
-                    elif role == 'group:__authenticated__':
-                        principal = Authenticated
-                    elif role == 'group:__consumer__':
-                        raise NotImplementedError("API consumer groups")
-                    else:
-                        principal = role
-                else:
-                    principal = role
+            principals = auth.translate_annotation_principals(roles)
 
+            for principal in principals:
                 # Append the converted rule tuple to the ACL
                 rule = (Allow, principal, action)
                 acl.append(rule)
