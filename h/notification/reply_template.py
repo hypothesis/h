@@ -4,9 +4,10 @@ import re
 from datetime import datetime
 
 from pyramid.events import subscriber
-from pyramid.security import Everyone, principals_allowed_by_permission
 from pyramid.renderers import render
 
+from h import auth
+from h.api.auth import translate_annotation_principals
 from h.notification.notifier import TemplateRenderException
 from h.notification import types
 from h.notification.models import Subscriptions
@@ -31,32 +32,31 @@ def parent_values(annotation):
         return {}
 
 
-def create_template_map(request, reply, data):
+def create_template_map(request, reply, parent):
     document_title = ''
     if 'document' in reply:
         document_title = reply['document'].get('title', '')
 
     if document_title is '':
-        document_title = data['parent']['uri']
+        document_title = parent['uri']
 
-    parent_user = user_name(data['parent']['user'])
+    parent_user = user_name(parent['user'])
     reply_user = user_name(reply['user'])
 
     token = request.registry.notification_serializer.dumps({
         'type': REPLY_TYPE,
-        'uri': data['parent']['user'],
+        'uri': parent['user'],
     })
     unsubscribe = request.route_url('unsubscribe', token=token)
 
     return {
         'document_title': document_title,
-        'document_path': data['parent']['uri'],
-        'parent_text': data['parent']['text'],
+        'document_path': parent['uri'],
+        'parent_text': parent['text'],
         'parent_user': parent_user,
-        'parent_timestamp': format_timestamp(data['parent']['created']),
-        'parent_user_profile': user_profile_url(
-            request, data['parent']['user']),
-        'parent_path': standalone_url(request, data['parent']['id']),
+        'parent_timestamp': format_timestamp(parent['created']),
+        'parent_user_profile': user_profile_url(request, parent['user']),
+        'parent_path': standalone_url(request, parent['id']),
         'reply_text': reply['text'],
         'reply_user': reply_user,
         'reply_timestamp': format_timestamp(reply['created']),
@@ -81,8 +81,8 @@ def format_timestamp(timestamp):
     return parsed.strftime(template_format)
 
 
-def get_recipients(request, data):
-    username = user_name(data['parent']['user'])
+def get_recipients(request, parent):
+    username = user_name(parent['user'])
     user_obj = get_user_by_name(request, username)
     if not user_obj:
         raise TemplateRenderException('User not found')
@@ -106,19 +106,30 @@ def check_conditions(annotation, data):
 
 
 def generate_notifications(request, annotation, action):
-    # And for them we need only the creation action
+    # Only send notifications when new annotations are created
     if action != 'create':
         return
 
-    # Check for authorization. Send notification only for public annotation
-    # XXX: This will be changed and fine grained when
-    # user groups will be introduced
-    if Everyone not in principals_allowed_by_permission(annotation, 'read'):
+    # If the annotation doesn't have a parent, we can't find its parent, or we
+    # have no idea who the author of the parent is, then we can't send a
+    # notification email.
+    parent = annotation.parent
+    if parent is None or 'user' not in parent:
+        return
+
+    # We don't send replies to the author of the parent unless they're going to
+    # be able to read it. That means there must be some overlap between the set
+    # of effective principals of the parent's author, and the read permissions
+    # of the reply.
+    child_read_permissions = annotation.get('permissions', {}).get('read', [])
+    parent_principals = auth.effective_principals(parent['user'], request)
+    read_principals = translate_annotation_principals(child_read_permissions)
+    if not set(parent_principals).intersection(read_principals):
         return
 
     # Store the parent values as additional data
     data = {
-        'parent': parent_values(annotation)
+        'parent': parent
     }
 
     subscriptions = Subscriptions.get_active_subscriptions_for_a_type(
@@ -129,12 +140,10 @@ def generate_notifications(request, annotation, action):
         # Validate annotation
         if check_conditions(annotation, data):
             try:
-                # Render e-mail parts
-                tmap = create_template_map(request, annotation, data)
-                text = render(TXT_TEMPLATE, tmap, request).strip()
-                html = render(HTML_TEMPLATE, tmap, request).strip()
-                subject = render(SUBJECT_TEMPLATE, tmap, request).strip()
-                recipients = get_recipients(request, data)
+                subject, text, html, recipients = render_reply_notification(
+                    request,
+                    annotation,
+                    parent)
                 yield subject, text, html, recipients
             # ToDo: proper exception handling here
             except TemplateRenderException:
@@ -143,6 +152,16 @@ def generate_notifications(request, annotation, action):
             except:
                 log.exception('Unknown error when trying to render'
                               ' subscription template %s', subscription)
+
+
+def render_reply_notification(request, annotation, parent):
+    # Render e-mail parts
+    tmap = create_template_map(request, annotation, parent)
+    text = render(TXT_TEMPLATE, tmap, request).strip()
+    html = render(HTML_TEMPLATE, tmap, request).strip()
+    subject = render(SUBJECT_TEMPLATE, tmap, request).strip()
+    recipients = get_recipients(request, parent)
+    return subject, text, html, recipients
 
 
 # Create a reply template for a uri

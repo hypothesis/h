@@ -25,8 +25,9 @@ class TestAnnotationPermissions(object):
         annotation['permissions'] = {
             'read': [security.Everyone],
         }
-        with raises(ValueError):
-            resource.__acl__()
+        actual = resource.__acl__()
+        expect = []
+        assert actual == expect
 
     def test_group(self):
         resource = resources.Annotation()

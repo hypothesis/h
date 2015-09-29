@@ -217,6 +217,19 @@ class Annotation(annotation.Annotation):
         return parser.parse(self["created"]).strftime("%Y-%m-%d")
 
     @property
+    def parent(self):
+        """
+        Return the thread parent of this annotation, if it exists.
+        """
+        if 'references' not in self:
+            return None
+        if not isinstance(self['references'], list):
+            return None
+        if not self['references']:
+            return None
+        return Annotation.fetch(self['references'][-1])
+
+    @property
     def target_links(self):
         """A list of the URLs to this annotation's targets."""
         links = []

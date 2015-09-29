@@ -2,9 +2,11 @@
 """Defines unit tests for h.notifier."""
 from mock import patch, Mock, MagicMock
 
-from pytest import raises
+import pytest
 from pyramid.testing import DummyRequest
+from pyramid import security
 
+from h.models import Annotation
 from h.notification.gateway import user_name, user_profile_url, standalone_url
 from h.notification import reply_template as rt
 from h.notification.types import REPLY_TYPE
@@ -26,6 +28,7 @@ store_fake_data = [
         'created': '2013-10-27T19:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in two by two, hurrah! hurrah!',
+        'permissions': {'read': ['group:__world__']},
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:elephant@nomouse.pls'
     },
@@ -35,6 +38,7 @@ store_fake_data = [
         'created': '2014-10-27T19:50:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in three by three, hurrah! hurrah',
+        'permissions': {'read': ['group:__world__']},
         'references': [0],
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:wasp@stinger.rulz'
@@ -45,6 +49,7 @@ store_fake_data = [
         'created': '2014-10-27T19:55:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in four by four, hurrah! hurrah',
+        'permissions': {'read': ['group:__world__']},
         'references': [0, 1],
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:hippopotamus@stucked.sos'
@@ -55,22 +60,50 @@ store_fake_data = [
         'created': '2014-10-27T20:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
         'text': 'The animals went in two by two, hurrah! hurrah!',
+        'permissions': {'read': ['group:__world__']},
         'references': [0],
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:elephant@nomouse.pls'
     },
     {
         # Reply to the root with the same user
-        'id': '3',
+        'id': '4',
         'created': '2014-10-27T20:40:53.245691+00:00',
         'document': {'title': ''},
         'text': 'The animals went in two by two, hurrah! hurrah!',
+        'permissions': {'read': ['group:__world__']},
         'references': [0],
         'uri': 'www.howtoreachtheark.now',
         'user': 'acct:elephant@nomouse.pls'
     },
-
+    {
+        # A thread root for testing permissions
+        'id': '5',
+        'user': 'acct:amrit@example.org'
+    },
+    {
+        # A reply for testing permissions
+        'id': '6',
+        'permissions': {'read': ['acct:jane@example.com']},
+        'references': [5],
+        'user': 'acct:jane@example.com'
+    },
+    {
+        # A reply for testing permissions
+        'id': '7',
+        'permissions': {'read': ['acct:jane@example.com', 'group:wibble']},
+        'references': [5],
+        'user': 'acct:jane@example.com'
+    },
 ]
+
+
+class MockSubscription(Mock):
+    def __json__(self, request):
+        return {
+            'id': self.id or '',
+            'uri': self.uri or ''
+        }
 
 
 def fake_fetch(id):
@@ -106,11 +139,8 @@ def test_all_keys_are_there():
         request = _create_request()
         annotation = store_fake_data[1]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        tmap = rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        tmap = rt.create_template_map(request, annotation, parent)
 
         assert 'document_title' in tmap
         assert 'document_path' in tmap
@@ -134,11 +164,8 @@ def test_template_map_key_values():
         request = _create_request()
         annotation = store_fake_data[1]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        tmap = rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        tmap = rt.create_template_map(request, annotation, parent)
 
         parent = store_fake_data[0]
 
@@ -171,11 +198,8 @@ def test_fallback_title():
         request = _create_request()
         annotation = store_fake_data[4]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        tmap = rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        tmap = rt.create_template_map(request, annotation, parent)
         assert tmap['document_title'] == annotation['uri']
 
 
@@ -186,16 +210,13 @@ def test_unsubscribe_token_generation():
         request = _create_request()
         annotation = store_fake_data[4]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        rt.create_template_map(request, annotation, parent)
 
         notification_serializer = request.registry.notification_serializer
         notification_serializer.dumps.assert_called_with({
             'type': REPLY_TYPE,
-            'uri': data['parent']['user'],
+            'uri': parent['user'],
         })
 
 
@@ -206,11 +227,8 @@ def test_unsubscribe_url_generation():
         request = _create_request()
         annotation = store_fake_data[4]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        rt.create_template_map(request, annotation, parent)
 
         request.route_url.assert_called_with('unsubscribe', token='TOKEN')
 
@@ -226,12 +244,9 @@ def test_get_email():
             request = _create_request()
 
             annotation = store_fake_data[1]
-            data = {
-                'parent': rt.parent_values(annotation),
-                'subscription': {'id': 1}
-            }
+            parent = rt.parent_values(annotation)
 
-            email = rt.get_recipients(request, data)
+            email = rt.get_recipients(request, parent)
             assert email[0] == user.email
 
 
@@ -244,14 +259,11 @@ def test_no_email():
             request = _create_request()
 
             annotation = store_fake_data[1]
-            data = {
-                'parent': rt.parent_values(annotation),
-                'subscription': {'id': 1}
-            }
+            parent = rt.parent_values(annotation)
 
             exc = False
             try:
-                rt.get_recipients(request, data)
+                rt.get_recipients(request, parent)
             except:
                 exc = True
             assert exc
@@ -324,78 +336,136 @@ def test_good_conditions():
         send = rt.check_conditions(annotation, data)
         assert send is True
 
+generate_notifications_fixtures = pytest.mark.usefixtures('effective_principals',
+                                                          'fetch')
 
-# Tests for the generate_notifications function
-def test_action_update():
-    """It action is not create, it should immediately return"""
-    annotation = {}
+@generate_notifications_fixtures
+def test_generate_notifications_empty_if_action_not_create():
+    """If the action is not 'create', no notifications should be generated."""
+    annotation = Annotation()
     request = DummyRequest()
-    with patch('h.notification.reply_template.parent_values') as mock_parent:
-        msgs = rt.generate_notifications(request, annotation, 'update')
-        with raises(StopIteration):
-            msgs.next()
-        assert mock_parent.call_count == 0
+
+    notifications = rt.generate_notifications(request, annotation, 'update')
+
+    assert list(notifications) == []
 
 
-def test_action_create():
-    """If the action is create, it'll try to get the subscriptions"""
-    with patch('h.notification.reply_template.Annotation') as mock_annotation:
-        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = _create_request()
+@generate_notifications_fixtures
+def test_generate_notifications_empty_if_annotation_has_no_parent():
+    """If the annotation has no parent no notifications should be generated."""
+    annotation = Annotation.fetch(0)
+    request = DummyRequest()
 
-        annotation = store_fake_data[1]
-        with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_type.return_value = []
-            msgs = rt.generate_notifications(request, annotation, 'create')
-            with raises(StopIteration):
-                msgs.next()
-            assert mock_subs.get_active_subscriptions_for_a_type.called
+    notifications = rt.generate_notifications(request, annotation, 'create')
+
+    assert list(notifications) == []
 
 
-class MockSubscription(Mock):
-    def __json__(self, request):
-        return {
-            'id': self.id or '',
-            'uri': self.uri or ''
-        }
+@generate_notifications_fixtures
+@patch('h.notification.reply_template.render_reply_notification')
+@patch('h.notification.reply_template.Subscriptions')
+def test_generate_notifications_only_if_author_can_read_reply(Subscriptions,
+                                                              render_reply_notification,
+                                                              effective_principals):
+    """
+    If the annotation is not readable by the parent author, no notifications
+    should be generated.
+    """
+    private_annotation = Annotation.fetch(6)
+    shared_annotation = Annotation.fetch(7)
+    request = _create_request()
+    effective_principals.return_value = [
+        security.Everyone,
+        security.Authenticated,
+        'acct:amrit@example.org',
+        'group:wibble',
+    ]
+    Subscriptions.get_active_subscriptions_for_a_type.return_value = [
+        MockSubscription(id=1, uri='acct:amrit@example.org')
+    ]
+    render_reply_notification.return_value = (
+        'Dummy subject',
+        'Dummy text',
+        'Dummy HTML',
+        ['dummy@example.com']
+    )
+
+    notifications = rt.generate_notifications(request, private_annotation, 'create')
+    assert list(notifications) == []
+
+    notifications = rt.generate_notifications(request, shared_annotation, 'create')
+    assert list(notifications) != []
 
 
+@generate_notifications_fixtures
+@patch('h.notification.reply_template.Subscriptions')
+def test_generate_notifications_checks_subscriptions(Subscriptions):
+    """If the annotation has a parent, then proceed to check subscriptions."""
+    request = _create_request()
+    annotation = Annotation.fetch(1)
+    Subscriptions.get_active_subscriptions_for_a_type.return_value = []
+
+    notifications = rt.generate_notifications(request, annotation, 'create')
+
+    # Read the generator
+    list(notifications)
+
+    Subscriptions.get_active_subscriptions_for_a_type.assert_called_with(
+        REPLY_TYPE)
+
+
+@generate_notifications_fixtures
 def test_check_conditions_false_stops_sending():
     """If the check conditions() returns False, no notifications are generated"""
-    with patch('h.notification.reply_template.Annotation') as mock_annotation:
-        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = _create_request()
+    request = _create_request()
 
-        annotation = store_fake_data[1]
-        with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_type.return_value = [
-                MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
-            ]
-            with patch('h.notification.reply_template.check_conditions') as mock_conditions:
-                mock_conditions.return_value = False
-                with raises(StopIteration):
+    annotation = Annotation.fetch(1)
+    with patch('h.notification.reply_template.Subscriptions') as mock_subs:
+        mock_subs.get_active_subscriptions_for_a_type.return_value = [
+            MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
+        ]
+        with patch('h.notification.reply_template.check_conditions') as mock_conditions:
+            mock_conditions.return_value = False
+            with pytest.raises(StopIteration):
+                msgs = rt.generate_notifications(request, annotation, 'create')
+                msgs.next()
+
+
+@generate_notifications_fixtures
+def test_send_if_everything_is_okay():
+    """Test whether we generate notifications if every condition is okay"""
+    request = _create_request()
+
+    annotation = Annotation.fetch(1)
+    with patch('h.notification.reply_template.Subscriptions') as mock_subs:
+        mock_subs.get_active_subscriptions_for_a_type.return_value = [
+            MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
+        ]
+        with patch('h.notification.reply_template.check_conditions') as mock_conditions:
+            mock_conditions.return_value = True
+            with patch('h.notification.reply_template.render') as mock_render:
+                mock_render.return_value = ''
+                with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
+                    user = Mock()
+                    user.email = 'testmail@test.com'
+                    mock_user_db.return_value = user
                     msgs = rt.generate_notifications(request, annotation, 'create')
                     msgs.next()
 
 
-def test_send_if_everything_is_okay():
-    """Test whether we generate notifications if every condition is okay"""
-    with patch('h.notification.reply_template.Annotation') as mock_annotation:
-        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = _create_request()
+@pytest.fixture
+def effective_principals(request):
+    patcher = patch('h.auth.effective_principals')
+    func = patcher.start()
+    func.return_value = [security.Everyone]
+    request.addfinalizer(patcher.stop)
+    return func
 
-        annotation = store_fake_data[1]
-        with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_type.return_value = [
-                MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
-            ]
-            with patch('h.notification.reply_template.check_conditions') as mock_conditions:
-                mock_conditions.return_value = True
-                with patch('h.notification.reply_template.render') as mock_render:
-                    mock_render.return_value = ''
-                    with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
-                        user = Mock()
-                        user.email = 'testmail@test.com'
-                        mock_user_db.return_value = user
-                        msgs = rt.generate_notifications(request, annotation, 'create')
-                        msgs.next()
+
+@pytest.fixture
+def fetch(request):
+    patcher = patch.object(Annotation, 'fetch')
+    func = patcher.start()
+    func.side_effect = lambda x: Annotation(**store_fake_data[int(x)])
+    request.addfinalizer(patcher.stop)
+    return func
