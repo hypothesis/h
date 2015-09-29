@@ -21,7 +21,6 @@ from ws4py.exc import HandshakeError
 from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
-from .api.auth import get_user  # FIXME: should not import from .api
 from h.api import nipsa
 from h.api import uri
 from h.api.search import query
@@ -481,15 +480,12 @@ class WebSocket(_WebSocket):
         if self.request.feature('streamer'):
             self.start_reader(self.request)
 
-        # Store the user
-        self.user = get_user(self.request)
-
         # Release the database transaction
         self.request.tm.commit()
 
     def send_annotations(self):
         user = self.user
-        annotations = Annotation.search_raw(query=self.query.query, user=user)
+        annotations = Annotation.search_raw(query=self.query.query)
         packet = _annotation_packet(annotations, 'past')
         data = json.dumps(packet)
         self.send(data)

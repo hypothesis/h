@@ -31,12 +31,11 @@ def test_create_annotation_pops_protected_fields(Annotation):
             'created': 'foo',
             'updated': 'foo',
             'user': 'foo',
-            'consumer': 'foo',
             'id': 'foo'
         },
         user=mock.Mock())
 
-    for field in ('created', 'updated', 'user', 'consumer', 'id'):
+    for field in ('created', 'updated', 'user', 'id'):
         assert field not in Annotation.call_args[0][0]
 
 
@@ -56,18 +55,7 @@ def test_create_annotation_sets_user(Annotation):
 
     annotation = logic.create_annotation({}, user)
 
-    assert annotation['user'] == user.id
-
-
-@create_annotation_fixtures
-def test_create_annotation_sets_consumer(Annotation):
-    """It should set the annotation's 'consumer' field to the consumer key."""
-    user = mock.Mock()
-    Annotation.return_value = _mock_annotation()
-
-    annotation = logic.create_annotation({}, user)
-
-    assert annotation['consumer'] == user.consumer.key
+    assert annotation['user'] == user
 
 
 @create_annotation_fixtures
@@ -135,12 +123,11 @@ def test_update_annotation_does_not_pass_protected_fields_to_update():
             'created': 'foo',
             'updated': 'foo',
             'user': 'foo',
-            'consumer': 'foo',
             'id': 'foo'
         },
-        has_admin_permission=False)
+        user='foo')
 
-    for field in ('created', 'updated', 'user', 'consumer', 'id'):
+    for field in ('created', 'updated', 'user', 'id'):
         assert field not in annotation.update.call_args[0][0]
 
 
@@ -148,31 +135,39 @@ def test_update_annotation_does_not_pass_protected_fields_to_update():
 def test_update_annotation_raises_if_non_admin_changes_perms():
     with pytest.raises(RuntimeError):
         logic.update_annotation(
-            _mock_annotation(),
-            fields={'permissions': 'changed'},
-            has_admin_permission=False)
+            _mock_annotation(permissions={}),
+            fields={'permissions': {'read': ['someone']}},
+            user='alice')
 
 
 @update_annotation_fixtures
 def test_update_annotation_admins_can_change_permissions():
-    annotation = _mock_annotation(permissions='foo')
+    annotation = _mock_annotation(
+        permissions={'admin': ['alice']},
+        user='alice')
 
     logic.update_annotation(
         annotation,
         fields={'permissions': 'changed'},
-        has_admin_permission=True)
+        user='alice')
 
     assert annotation['permissions'] == 'changed'
 
 
 @update_annotation_fixtures
 def test_update_annotation_non_admins_can_make_non_permissions_changes():
-    annotation = _mock_annotation(foo='bar')
+    annotation = _mock_annotation(
+        foo='bar',
+        permissions={'admin': ['alice']},
+        user='alice')
 
     logic.update_annotation(
         annotation,
-        fields={'foo': 'changed'},
-        has_admin_permission=False)
+        fields={
+            'foo': 'changed',
+            'permissions': {'admin': ['alice']},
+        },
+        user='bob')
 
     assert annotation['foo'] == 'changed'
 
@@ -182,7 +177,7 @@ def test_update_annotation_calls_update():
     annotation = _mock_annotation()
     fields = {'foo': 'bar'}
 
-    logic.update_annotation(annotation, fields, False)
+    logic.update_annotation(annotation, fields, 'foo')
 
     annotation.update.assert_called_once_with(fields)
 
@@ -193,7 +188,7 @@ def test_update_annotation_user_cannot_change_group():
     fields = {'group': 'new'}
 
     with pytest.raises(RuntimeError):
-        logic.update_annotation(annotation, fields, False)
+        logic.update_annotation(annotation, fields, 'foo')
 
 
 @update_annotation_fixtures
@@ -216,7 +211,7 @@ def test_update_annotation_removes_userid_from_permissions_if_deleted():
         }
     }
 
-    logic.update_annotation(annotation, fields, True)
+    logic.update_annotation(annotation, fields, user)
 
     for action in annotation['permissions']:
         assert user not in annotation['permissions'][action]
@@ -242,7 +237,7 @@ def test_update_annotation_does_not_remove_userid_if_not_deleted():
         }
     }
 
-    logic.update_annotation(annotation, fields, True)
+    logic.update_annotation(annotation, fields, user)
 
     for action in annotation['permissions']:
         assert user in annotation['permissions'][action]
@@ -268,7 +263,7 @@ def test_update_annotation_if_deleted_does_not_remove_other_principals():
         }
     }
 
-    logic.update_annotation(annotation, fields, True)
+    logic.update_annotation(annotation, fields, user)
 
     for action in annotation['permissions']:
         assert 'someone else' in annotation['permissions'][action]
@@ -278,7 +273,7 @@ def test_update_annotation_if_deleted_does_not_remove_other_principals():
 def test_update_annotation_calls_prepare(search_lib):
     annotation = _mock_annotation()
 
-    logic.update_annotation(annotation, {}, False)
+    logic.update_annotation(annotation, {}, 'foo')
 
     search_lib.prepare.assert_called_once_with(annotation)
 
@@ -297,7 +292,7 @@ def test_update_annotation_does_not_crash_if_annotation_has_no_group():
     annotation = _mock_annotation()
     assert 'group' not in annotation
 
-    logic.update_annotation(annotation, {}, False)
+    logic.update_annotation(annotation, {}, 'foo')
 
 
 @update_annotation_fixtures
@@ -316,7 +311,7 @@ def test_update_annotation_does_not_crash_if_annotations_parent_has_no_group(
     # And no group in the parent annotation either.
     Annotation.fetch.return_value = {}
 
-    logic.update_annotation(annotation, {}, False)
+    logic.update_annotation(annotation, {}, 'foo')
 
 
 # The fixtures required to mock all of delete_annotation()'s dependencies.

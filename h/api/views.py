@@ -9,7 +9,6 @@ from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
 from h.api import cors
-from h.api.auth import get_user
 from h.api.events import AnnotationEvent
 from h.api import search as search_lib
 from h.api import logic
@@ -147,10 +146,9 @@ def create(request):
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
 
-    user = get_user(request)
-
     # Create the annotation
-    annotation = logic.create_annotation(fields=fields, user=user)
+    user = request.authenticated_userid
+    annotation = logic.create_annotation(fields, user)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
@@ -183,12 +181,11 @@ def update(context, request):
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
 
-    # Check user's permissions
-    has_admin_permission = request.has_permission('admin', context)
-
     # Update and store the annotation
+    user = request.authenticated_userid
+
     try:
-        logic.update_annotation(annotation, fields, has_admin_permission)
+        logic.update_annotation(annotation, fields, user)
     except RuntimeError as err:
         return _api_error(
             request,

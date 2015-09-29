@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 
 # These annotation fields are not to be set by the user.
-PROTECTED_FIELDS = ['created', 'updated', 'user', 'consumer', 'id']
+PROTECTED_FIELDS = ['created', 'updated', 'user', 'id']
 
 
 def create_annotation(fields, user):
@@ -23,16 +23,13 @@ def create_annotation(fields, user):
 
     # Create Annotation instance
     annotation = Annotation(fields)
-
-    annotation['user'] = user.id
-    annotation['consumer'] = user.consumer.key
+    annotation['user'] = user
 
     # Save it in the database
     search_lib.prepare(annotation)
     annotation.save()
 
-    log.debug('Created annotation; user: %s, consumer key: %s',
-              annotation['user'], annotation['consumer'])
+    log.debug('Created annotation; user: %s', annotation['user'])
 
     return annotation
 
@@ -53,7 +50,7 @@ def _anonymize_deletes(annotation):
         annotation['permissions'][action] = filtered
 
 
-def update_annotation(annotation, fields, has_admin_permission):
+def update_annotation(annotation, fields, user):
     """Update the given annotation with the given new fields.
 
     :raises RuntimeError: if the fields attempt to change the annotation's
@@ -66,13 +63,11 @@ def update_annotation(annotation, fields, has_admin_permission):
         fields.pop(field, None)
 
     # If the user is changing access permissions, check if it's allowed.
-    changing_permissions = (
-        'permissions' in fields and
-        fields['permissions'] != annotation.get('permissions', {})
-    )
-    if changing_permissions and not has_admin_permission:
-        raise RuntimeError(
-            _('Not authorized to change annotation permissions.'), 401)
+    permissions = annotation.get('permissions', {})
+    if fields.get('permissions', {}) != permissions:
+        if user not in permissions.get('admin', []):
+            raise RuntimeError(
+                _('Not authorized to change annotation permissions.'), 401)
 
     if 'group' in fields and 'group' in annotation:
         if fields['group'] != annotation.get('group'):
