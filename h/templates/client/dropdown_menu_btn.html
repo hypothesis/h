@@ -1,5 +1,10 @@
 <div class="dropdown-menu-btn">
-  <button class="dropdown-menu-btn__label" ng-bind="label" ng-disabled="isDisabled"></button>
+  <button
+    class="dropdown-menu-btn__label"
+    ng-bind="label"
+    ng-click="vm.onClick($event)"
+    ng-disabled="isDisabled">
+  </button>
   <button
     class="dropdown-menu-btn__dropdown-arrow"
     title="{{dropdownMenuLabel}}"

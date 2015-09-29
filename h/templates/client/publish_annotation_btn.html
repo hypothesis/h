@@ -1,7 +1,7 @@
 <div dropdown="" class="publish-annotation-btn__btn" is-open="vm.showDropdown" keyboard-nav>
   <dropdown-menu-btn
     label="'Post to ' + vm.publishDestination"
-    ng-click="vm.save()"
+    on-click="vm.save()"
     on-toggle-dropdown="vm.showDropdown = !vm.showDropdown"
     title="Publish this annotation to {{vm.publishDestination}}"
     dropdown-menu-label="Change annotation sharing setting"

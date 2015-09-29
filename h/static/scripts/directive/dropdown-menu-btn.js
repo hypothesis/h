@@ -2,6 +2,10 @@
 
 // @ngInject
 function DropdownMenuBtnController($scope, $timeout) {
+  this.onClick = function($event) {
+    $scope.onClick();
+  };
+
   this.toggleDropdown = function($event) {
     $event.stopPropagation();
     $timeout(function () {
@@ -19,6 +23,7 @@ module.exports = function () {
       isDisabled: '=',
       label: '=',
       dropdownMenuLabel: '@',
+      onClick: '&',
       onToggleDropdown: '&',
     },
     templateUrl: 'dropdown_menu_btn.html'
