@@ -326,30 +326,42 @@ def test_good_conditions():
         assert send is True
 
 
-# Tests for the generate_notifications function
-def test_action_update():
-    """It action is not create, it should immediately return"""
-    annotation = {}
+def test_generate_notifications_empty_if_action_not_create():
+    """If the action is not 'create', no notifications should be generated."""
+    annotation = Annotation()
     request = DummyRequest()
-    with patch('h.notification.reply_template.parent_values') as mock_parent:
-        msgs = rt.generate_notifications(request, annotation, 'update')
-        with pytest.raises(StopIteration):
-            msgs.next()
-        assert mock_parent.call_count == 0
+
+    notifications = rt.generate_notifications(request, annotation, 'update')
+
+    assert list(notifications) == []
 
 
 @pytest.mark.usefixtures('fetch')
-def test_action_create():
-    """If the action is create, it'll try to get the subscriptions"""
+def test_generate_notifications_empty_if_annotation_has_no_parent():
+    """If the annotation has no parent no notifications should be generated."""
+    annotation = Annotation.fetch(0)
+    request = DummyRequest()
+
+    notifications = rt.generate_notifications(request, annotation, 'create')
+
+    assert list(notifications) == []
+
+
+@pytest.mark.usefixtures('fetch')
+@patch('h.notification.reply_template.Subscriptions')
+def test_generate_notifications_checks_subscriptions(Subscriptions):
+    """If the annotation has a parent, then proceed to check subscriptions."""
     request = _create_request()
     annotation = Annotation.fetch(1)
+    Subscriptions.get_active_subscriptions_for_a_type.return_value = []
 
-    with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-        mock_subs.get_active_subscriptions_for_a_type.return_value = []
-        msgs = rt.generate_notifications(request, annotation, 'create')
-        with pytest.raises(StopIteration):
-            msgs.next()
-        assert mock_subs.get_active_subscriptions_for_a_type.called
+    notifications = rt.generate_notifications(request, annotation, 'create')
+
+    # Read the generator
+    list(notifications)
+
+    Subscriptions.get_active_subscriptions_for_a_type.assert_called_with(
+        REPLY_TYPE)
 
 
 class MockSubscription(Mock):
