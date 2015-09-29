@@ -5,6 +5,8 @@ import re
 import unittest
 import urllib
 
+from mock import patch
+
 from h.api import models
 
 analysis = models.Annotation.__analysis__
@@ -94,3 +96,32 @@ def test_created_day_string_from_annotation():
 def test_target_links_from_annotation():
     annotation = models.Annotation(target=[{'source': 'target link'}])
     assert annotation.target_links == ['target link']
+
+
+def test_parent_returns_none_if_no_references():
+    annotation = models.Annotation()
+    assert annotation.parent is None
+
+
+def test_parent_returns_none_if_empty_references():
+    annotation = models.Annotation(references=[])
+    assert annotation.parent is None
+
+
+def test_parent_returns_none_if_references_not_list():
+    annotation = models.Annotation(references={'foo': 'bar'})
+    assert annotation.parent is None
+
+
+@patch.object(models.Annotation, 'fetch', spec=True)
+def test_parent_fetches_thread_parent(fetch):
+    annotation = models.Annotation(references=['abc123', 'def456'])
+    annotation.parent
+    fetch.assert_called_with('def456')
+
+
+@patch.object(models.Annotation, 'fetch', spec=True)
+def test_parent_returns_thread_parent(fetch):
+    annotation = models.Annotation(references=['abc123', 'def456'])
+    parent = annotation.parent
+    assert parent == fetch.return_value
