@@ -106,8 +106,14 @@ def check_conditions(annotation, data):
 
 
 def generate_notifications(request, annotation, action):
-    # And for them we need only the creation action
+    # Only send notifications when new annotations are created
     if action != 'create':
+        return
+
+    # If the annotation doesn't have a parent, or we can't find its parent,
+    # then we can't send a notification email.
+    parent = annotation.parent
+    if parent is None:
         return
 
     # Check for authorization. Send notification only for public annotation
@@ -118,7 +124,7 @@ def generate_notifications(request, annotation, action):
 
     # Store the parent values as additional data
     data = {
-        'parent': parent_values(annotation)
+        'parent': parent
     }
 
     subscriptions = Subscriptions.get_active_subscriptions_for_a_type(

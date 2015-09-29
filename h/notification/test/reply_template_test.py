@@ -2,9 +2,10 @@
 """Defines unit tests for h.notifier."""
 from mock import patch, Mock, MagicMock
 
-from pytest import raises
+import pytest
 from pyramid.testing import DummyRequest
 
+from h.models import Annotation
 from h.notification.gateway import user_name, user_profile_url, standalone_url
 from h.notification import reply_template as rt
 from h.notification.types import REPLY_TYPE
@@ -332,24 +333,23 @@ def test_action_update():
     request = DummyRequest()
     with patch('h.notification.reply_template.parent_values') as mock_parent:
         msgs = rt.generate_notifications(request, annotation, 'update')
-        with raises(StopIteration):
+        with pytest.raises(StopIteration):
             msgs.next()
         assert mock_parent.call_count == 0
 
 
+@pytest.mark.usefixtures('fetch')
 def test_action_create():
     """If the action is create, it'll try to get the subscriptions"""
-    with patch('h.notification.reply_template.Annotation') as mock_annotation:
-        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = _create_request()
+    request = _create_request()
+    annotation = Annotation.fetch(1)
 
-        annotation = store_fake_data[1]
-        with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_type.return_value = []
-            msgs = rt.generate_notifications(request, annotation, 'create')
-            with raises(StopIteration):
-                msgs.next()
-            assert mock_subs.get_active_subscriptions_for_a_type.called
+    with patch('h.notification.reply_template.Subscriptions') as mock_subs:
+        mock_subs.get_active_subscriptions_for_a_type.return_value = []
+        msgs = rt.generate_notifications(request, annotation, 'create')
+        with pytest.raises(StopIteration):
+            msgs.next()
+        assert mock_subs.get_active_subscriptions_for_a_type.called
 
 
 class MockSubscription(Mock):
@@ -360,42 +360,49 @@ class MockSubscription(Mock):
         }
 
 
+@pytest.mark.usefixtures('fetch')
 def test_check_conditions_false_stops_sending():
     """If the check conditions() returns False, no notifications are generated"""
-    with patch('h.notification.reply_template.Annotation') as mock_annotation:
-        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = _create_request()
+    request = _create_request()
 
-        annotation = store_fake_data[1]
-        with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_type.return_value = [
-                MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
-            ]
-            with patch('h.notification.reply_template.check_conditions') as mock_conditions:
-                mock_conditions.return_value = False
-                with raises(StopIteration):
+    annotation = Annotation.fetch(1)
+    with patch('h.notification.reply_template.Subscriptions') as mock_subs:
+        mock_subs.get_active_subscriptions_for_a_type.return_value = [
+            MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
+        ]
+        with patch('h.notification.reply_template.check_conditions') as mock_conditions:
+            mock_conditions.return_value = False
+            with pytest.raises(StopIteration):
+                msgs = rt.generate_notifications(request, annotation, 'create')
+                msgs.next()
+
+
+@pytest.mark.usefixtures('fetch')
+def test_send_if_everything_is_okay():
+    """Test whether we generate notifications if every condition is okay"""
+    request = _create_request()
+
+    annotation = Annotation.fetch(1)
+    with patch('h.notification.reply_template.Subscriptions') as mock_subs:
+        mock_subs.get_active_subscriptions_for_a_type.return_value = [
+            MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
+        ]
+        with patch('h.notification.reply_template.check_conditions') as mock_conditions:
+            mock_conditions.return_value = True
+            with patch('h.notification.reply_template.render') as mock_render:
+                mock_render.return_value = ''
+                with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
+                    user = Mock()
+                    user.email = 'testmail@test.com'
+                    mock_user_db.return_value = user
                     msgs = rt.generate_notifications(request, annotation, 'create')
                     msgs.next()
 
 
-def test_send_if_everything_is_okay():
-    """Test whether we generate notifications if every condition is okay"""
-    with patch('h.notification.reply_template.Annotation') as mock_annotation:
-        mock_annotation.fetch = MagicMock(side_effect=fake_fetch)
-        request = _create_request()
-
-        annotation = store_fake_data[1]
-        with patch('h.notification.reply_template.Subscriptions') as mock_subs:
-            mock_subs.get_active_subscriptions_for_a_type.return_value = [
-                MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
-            ]
-            with patch('h.notification.reply_template.check_conditions') as mock_conditions:
-                mock_conditions.return_value = True
-                with patch('h.notification.reply_template.render') as mock_render:
-                    mock_render.return_value = ''
-                    with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
-                        user = Mock()
-                        user.email = 'testmail@test.com'
-                        mock_user_db.return_value = user
-                        msgs = rt.generate_notifications(request, annotation, 'create')
-                        msgs.next()
+@pytest.fixture
+def fetch(request):
+    patcher = patch.object(Annotation, 'fetch')
+    func = patcher.start()
+    func.side_effect = lambda x: Annotation(**store_fake_data[x])
+    request.addfinalizer(patcher.stop)
+    return func
