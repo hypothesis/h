@@ -35,6 +35,7 @@ from jwt.compat import constant_time_compare
 from oauthlib.common import generate_client_id
 from oauthlib.oauth2 import RequestValidator as _RequestValidator
 from pyramid.exceptions import BadCSRFToken
+from pyramid import security
 from pyramid import session
 
 from pyramid.util import action_method
@@ -126,33 +127,51 @@ class RequestValidator(_RequestValidator):
         return scopes is None
 
 
-def effective_principals(userid, request):
-    """Return the list of additional effective principals for this request.
-
-    Return the list of additional effective principals for the given userid and
-    request (in addition to pyramid.security.Everyone,
-    pyramid.security.Authenticated, and the user's ID which are automatically
-    inserted by Pyramid).
-
+def groupfinder(userid, request):
     """
-    additional_principals = []
+    Return the list of additional groups of which userid is a member.
+
+    Returns a list of group principals of which the passed userid is a member,
+    or None if the userid is not known by this application.
+    """
+    principals = set()
 
     if getattr(request, 'client', None) is not None:
         consumer_group = 'consumer:{}'.format(request.client.client_id)
-        additional_principals.append(consumer_group)
+        principals.add(consumer_group)
 
-    primary_user = models.User.get_by_userid(request.domain, userid)
+    user = models.User.get_by_userid(request.domain, userid)
+    if user is None:
+        return
+    if user.admin:
+        principals.add('group:__admin__')
+    if user.staff:
+        principals.add('group:__staff__')
+    principals.update(groups.group_principals(user))
 
-    if primary_user is not None:
-        if primary_user.admin:
-            additional_principals.append('group:__admin__')
+    return list(principals)
 
-        if primary_user.staff:
-            additional_principals.append('group:__staff__')
 
-        additional_principals.extend(groups.group_principals(primary_user))
+def effective_principals(userid, request, groupfinder=groupfinder):
+    """
+    Return the list of effective principals for the passed userid.
 
-    return additional_principals
+    Usually, we can leave the computation of the full set of effective
+    principals to the pyramid authentication policy. Sometimes, however, it can
+    be useful to discover the full set of effective principals for a userid
+    other than the current authenticated userid. This function replicates the
+    normal behaviour of a pyramid authentication policy and can be used for
+    that purpose.
+    """
+    principals = set([security.Everyone])
+
+    groups = groupfinder(userid, request)
+    if groups is not None:
+        principals.add(security.Authenticated)
+        principals.add(userid)
+        principals.update(groups)
+
+    return list(principals)
 
 
 def generate_signed_token(request):
