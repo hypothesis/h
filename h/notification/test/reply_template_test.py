@@ -107,11 +107,8 @@ def test_all_keys_are_there():
         request = _create_request()
         annotation = store_fake_data[1]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        tmap = rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        tmap = rt.create_template_map(request, annotation, parent)
 
         assert 'document_title' in tmap
         assert 'document_path' in tmap
@@ -135,11 +132,8 @@ def test_template_map_key_values():
         request = _create_request()
         annotation = store_fake_data[1]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        tmap = rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        tmap = rt.create_template_map(request, annotation, parent)
 
         parent = store_fake_data[0]
 
@@ -172,11 +166,8 @@ def test_fallback_title():
         request = _create_request()
         annotation = store_fake_data[4]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        tmap = rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        tmap = rt.create_template_map(request, annotation, parent)
         assert tmap['document_title'] == annotation['uri']
 
 
@@ -187,16 +178,13 @@ def test_unsubscribe_token_generation():
         request = _create_request()
         annotation = store_fake_data[4]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        rt.create_template_map(request, annotation, parent)
 
         notification_serializer = request.registry.notification_serializer
         notification_serializer.dumps.assert_called_with({
             'type': REPLY_TYPE,
-            'uri': data['parent']['user'],
+            'uri': parent['user'],
         })
 
 
@@ -207,11 +195,8 @@ def test_unsubscribe_url_generation():
         request = _create_request()
         annotation = store_fake_data[4]
 
-        data = {
-            'parent': rt.parent_values(annotation),
-            'subscription': {'id': 1}
-        }
-        rt.create_template_map(request, annotation, data)
+        parent = rt.parent_values(annotation)
+        rt.create_template_map(request, annotation, parent)
 
         request.route_url.assert_called_with('unsubscribe', token='TOKEN')
 
@@ -227,12 +212,9 @@ def test_get_email():
             request = _create_request()
 
             annotation = store_fake_data[1]
-            data = {
-                'parent': rt.parent_values(annotation),
-                'subscription': {'id': 1}
-            }
+            parent = rt.parent_values(annotation)
 
-            email = rt.get_recipients(request, data)
+            email = rt.get_recipients(request, parent)
             assert email[0] == user.email
 
 
@@ -245,14 +227,11 @@ def test_no_email():
             request = _create_request()
 
             annotation = store_fake_data[1]
-            data = {
-                'parent': rt.parent_values(annotation),
-                'subscription': {'id': 1}
-            }
+            parent = rt.parent_values(annotation)
 
             exc = False
             try:
-                rt.get_recipients(request, data)
+                rt.get_recipients(request, parent)
             except:
                 exc = True
             assert exc
