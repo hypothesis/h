@@ -71,7 +71,7 @@ INSTALL_REQUIRES = [
 
 DEV_EXTRAS = ['pyramid_debugtoolbar>=2.1', 'prospector[with_pyroma]', 'pep257',
               'pyramid_multiauth', 'sphinxcontrib-httpdomain']
-TESTING_EXTRAS = ['mock', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
+TESTING_EXTRAS = ['mock>=1.3.0', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
 CLAIM_EXTRAS = ['mandrill']
 YAML_EXTRAS = ['PyYAML']
 
