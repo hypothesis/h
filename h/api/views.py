@@ -12,6 +12,7 @@ from h.api import cors
 from h.api.events import AnnotationEvent
 from h.api import search as search_lib
 from h.api import logic
+from h.api import validators
 from h.api.resources import Annotation
 from h.api.resources import Annotations
 from h.api.resources import Root
@@ -146,7 +147,11 @@ def create(request):
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
 
-    # Create the annotation
+    try:
+        validators.Annotation().validate(fields)
+    except validators.Error as err:
+        return _api_error(request, err.message, status_code=400)
+
     annotation = logic.create_annotation(fields,
                                          userid=request.authenticated_userid)
 
@@ -180,6 +185,11 @@ def update(context, request):
         return _api_error(request,
                           'No JSON payload sent. Annotation not created.',
                           status_code=400)  # Client Error: Bad Request
+
+    try:
+        validators.Annotation().validate(fields)
+    except validators.Error as err:
+        return _api_error(request, err.message, status_code=400)
 
     # Update and store the annotation
     try:

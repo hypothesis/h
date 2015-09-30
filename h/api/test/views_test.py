@@ -3,6 +3,7 @@
 
 import mock
 import pytest
+
 from pyramid import testing
 
 from h.api import views
@@ -129,7 +130,7 @@ def test_annotations_index_renders_results(search_lib):
 
 # The fixtures required to mock all of create()'s dependencies.
 create_fixtures = pytest.mark.usefixtures(
-    'logic', 'AnnotationEvent', 'search_lib')
+    'logic', 'AnnotationEvent', 'search_lib', 'validators')
 
 
 @create_fixtures
@@ -154,6 +155,30 @@ def test_create_calls_create_annotation(logic):
     logic.create_annotation.assert_called_once_with(
         request.json_body,
         userid=request.authenticated_userid)
+
+
+@create_fixtures
+def test_create_calls_validator(validators):
+    request = mock.Mock()
+
+    views.create(request)
+
+    validators.Annotation.return_value.validate.assert_called_once_with(
+        request.json_body)
+
+
+@create_fixtures
+def test_create_returns_api_error_for_validation_error(validators):
+    class Error(Exception):
+        pass
+    validators.Error = Error
+    validators.Annotation.return_value.validate.side_effect = (
+        validators.Error(mock.sentinel.reason))
+
+    response = views.create(mock.Mock())
+
+    assert response['status'] == 'failure'
+    assert response['reason'] == mock.sentinel.reason
 
 
 @create_fixtures
@@ -233,7 +258,8 @@ def test_read_does_not_crash_if_annotation_has_no_group():
 
 
 # The fixtures required to mock all of update()'s dependencies.
-update_fixtures = pytest.mark.usefixtures('logic', 'Annotation', 'search_lib')
+update_fixtures = pytest.mark.usefixtures(
+    'logic', 'Annotation', 'search_lib', 'validators')
 
 
 @update_fixtures
@@ -245,6 +271,30 @@ def test_update_returns_error_if_json_parsing_fails():
     error = views.update(mock.Mock(), request)
 
     assert error['status'] == 'failure'
+
+
+@update_fixtures
+def test_update_calls_validator(validators):
+    request = mock.Mock()
+
+    views.update(mock.Mock(), request)
+
+    validators.Annotation.return_value.validate.assert_called_once_with(
+        request.json_body)
+
+
+@update_fixtures
+def test_update_returns_api_error_for_validation_error(validators):
+    class Error(Exception):
+        pass
+    validators.Error = Error
+    validators.Annotation.return_value.validate.side_effect = (
+        validators.Error(mock.sentinel.reason))
+
+    response = views.update(mock.Mock(), mock.Mock())
+
+    assert response['status'] == 'failure'
+    assert response['reason'] == mock.sentinel.reason
 
 
 @update_fixtures
@@ -398,5 +448,12 @@ def _publish_annotation_event(request):
 @pytest.fixture
 def access_token(request):
     patcher = mock.patch('h.api.views.access_token', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def validators(request):
+    patcher = mock.patch('h.api.views.validators', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
