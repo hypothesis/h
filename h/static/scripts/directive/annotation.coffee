@@ -281,7 +281,7 @@ AnnotationController = [
     this.render = ->
       # Extend the view model with a copy of the domain model.
       # Note that copy is used so that deep properties aren't shared.
-      angular.extend @annotation, angular.copy model
+      @annotation = angular.extend {}, angular.copy model
 
       # Set the URI
       @annotationURI = new URL("/a/#{@annotation.id}", this.baseURI).href
