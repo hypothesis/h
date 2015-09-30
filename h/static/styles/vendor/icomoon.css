@@ -1,6 +1,6 @@
 @font-face {
 	font-family: 'h';
-	src:url('fonts/h.woff?5qkgen') format('woff');
+	src: url('fonts/h.woff?e944zd') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -19,6 +19,33 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.h-icon-group:before {
+	content: "\e61e";
+}
+.h-icon-cancel-outline:before {
+	content: "\e619";
+}
+.h-icon-google-plus:before {
+	content: "\ea88";
+}
+.h-icon-facebook:before {
+	content: "\ea8d";
+}
+.h-icon-twitter:before {
+	content: "\ea91";
+}
+.h-icon-cc-by:before {
+	content: "\e61f";
+}
+.h-icon-cc-logo:before {
+	content: "\e620";
+}
+.h-icon-cc-zero:before {
+	content: "\e621";
+}
+.h-icon-markdown:before {
+	content: "\e60b";
+}
 .h-icon-arrow-right:before {
 	content: "\e61d";
 }
@@ -129,28 +156,4 @@
 }
 .h-icon-mail:before {
 	content: "\e62a";
-}
-.h-icon-cancel-outline:before {
-	content: "\e619";
-}
-.h-icon-google-plus:before {
-	content: "\ea88";
-}
-.h-icon-facebook:before {
-	content: "\ea8d";
-}
-.h-icon-twitter:before {
-	content: "\ea91";
-}
-.h-icon-cc-by:before {
-	content: "\e61f";
-}
-.h-icon-cc-logo:before {
-	content: "\e620";
-}
-.h-icon-cc-zero:before {
-	content: "\e621";
-}
-.h-icon-markdown:before {
-	content: "\e60b";
 }
