@@ -35,7 +35,14 @@ describe 'Bridge', ->
       assert.equal(channel.dst, fakeWindow)
       assert.equal(channel.origin, 'http://example.com')
 
+
     it 'adds the channel to the .links property', ->
+      # extended timeout to assist debugging a flakey test,
+      # in combination with the 'reportSlowerThan' config option
+      # in karma.conf.js.
+      # See https://travis-ci.org/hypothesis/h/builds/82894887
+      this.timeout 30000
+
       channel = createChannel()
       assert.include(bridge.links, {channel: channel, window: fakeWindow})
 
