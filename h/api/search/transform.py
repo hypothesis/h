@@ -72,9 +72,13 @@ def _transform_old_style_comments(annotation):
     an "old-style" comment or "page note". Detect this for old clients and
     rewrite the annotation target property.
     """
+    def isempty(container, field):
+        val = container.get(field)
+        return val is None or val == []
+
     has_uri = annotation.get('uri') is not None
-    has_no_targets = annotation.get('target', []) == []
-    has_no_references = annotation.get('references', []) == []
+    has_no_targets = isempty(annotation, 'target')
+    has_no_references = isempty(annotation, 'references')
 
     if has_uri and has_no_targets and has_no_references:
         annotation['target'] = [{'source': annotation.get('uri')}]
