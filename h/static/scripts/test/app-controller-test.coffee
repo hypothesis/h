@@ -11,6 +11,7 @@ describe 'AppController', ->
   fakeLocation = null
   fakeParams = null
   fakeSession = null
+  fakeGroups = null
 
   sandbox = null
 
@@ -62,12 +63,15 @@ describe 'AppController', ->
 
     fakeSession = {}
 
+    fakeGroups = {focus: ->}
+
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'auth', fakeAuth
     $provide.value 'drafts', fakeDrafts
     $provide.value 'features', fakeFeatures
     $provide.value 'identity', fakeIdentity
     $provide.value 'session', fakeSession
+    $provide.value 'groups', fakeGroups
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams
     return

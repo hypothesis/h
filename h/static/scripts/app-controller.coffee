@@ -4,11 +4,13 @@ angular = require('angular')
 module.exports = class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$route', '$scope', '$window',
-    'annotationUI', 'auth', 'drafts', 'features', 'identity', 'session'
+    'annotationUI', 'auth', 'drafts', 'features', 'groups', 'identity',
+    'session'
   ]
   constructor: (
      $controller,   $document,   $location,   $route,   $scope,   $window,
-     annotationUI,   auth,   drafts,   features,   identity,  session
+     annotationUI,   auth,   drafts,   features,   groups,   identity,
+     session
   ) ->
     $controller('AnnotationUIController', {$scope})
 
@@ -42,7 +44,14 @@ module.exports = class AppController
 
     identity.watch({
       onlogin: (identity) -> $scope.auth.user = auth.userid(identity)
-      onlogout: -> $scope.auth.user = null
+      onlogout: ->
+        $scope.auth.user = null
+
+        # Currently all groups are private so when the user logs out they can
+        # no longer see the annotations from any group they may have had
+        # focused. Focus the public group instead, so that they see any public
+        # annotations in the sidebar.
+        groups.focus('__world__')
       onready: -> $scope.auth.user ?= null
     })
 
