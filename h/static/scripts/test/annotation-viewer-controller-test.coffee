@@ -21,7 +21,7 @@ describe "AnnotationViewerController", ->
   # Return a new AnnotationViewerController instance.
   createAnnotationViewerController = ({$location, $routeParams, $scope,
                                        streamer, store, streamFilter,
-                                       annotationMapper, threading}) ->
+                                       annotationMapper}) ->
     locals = {
       $location: $location or {}
       $routeParams: $routeParams or {id: "test_annotation_id"}
@@ -34,7 +34,6 @@ describe "AnnotationViewerController", ->
         setMatchPolicyIncludeAny: -> {addClause: -> {addClause: ->}}
         getFilter: ->
       }
-      threading: sinon.stub()
       annotationMapper: annotationMapper or {loadAnnotations: sinon.spy()}
     }
     locals["ctrl"] = getControllerService()(

@@ -10,7 +10,6 @@ describe 'StreamController', ->
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
-  fakeThreading = null
 
   sandbox = null
 
@@ -63,10 +62,6 @@ describe 'StreamController', ->
       getFilter: sandbox.stub()
     }
 
-    fakeThreading = {
-      root: {}
-    }
-
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value '$route', fakeRoute
     $provide.value '$routeParams', fakeParams
@@ -75,7 +70,6 @@ describe 'StreamController', ->
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamFilter', fakeStreamFilter
-    $provide.value 'threading', fakeThreading
     return
 
   beforeEach inject (_$controller_, $rootScope) ->

@@ -6,12 +6,12 @@ module.exports = class StreamController
   this.inject = [
     '$scope', '$route', '$rootScope', '$routeParams',
     'queryParser', 'searchFilter', 'store',
-    'streamer', 'streamFilter', 'threading', 'annotationMapper'
+    'streamer', 'streamFilter', 'annotationMapper'
   ]
   constructor: (
      $scope,   $route,   $rootScope,   $routeParams
      queryParser,   searchFilter,   store,
-     streamer,   streamFilter,   threading,   annotationMapper
+     streamer,   streamFilter,   annotationMapper
   ) ->
     offset = 0
 
@@ -52,7 +52,7 @@ module.exports = class StreamController
 
     $scope.isStream = true
     $scope.sort.name = 'Newest'
-    $scope.threadRoot = threading.root
+    $scope.threads = annotationMapper.threads
 
     $scope.shouldShowThread = (container) -> true
 

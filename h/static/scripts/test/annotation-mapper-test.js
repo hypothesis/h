@@ -5,6 +5,7 @@ describe('annotationMapper', function() {
   var $rootScope;
   var fakeStore;
   var fakeThreading;
+  var fakeGroups;
   var annotationMapper;
 
   before(function () {
@@ -20,9 +21,13 @@ describe('annotationMapper', function() {
     fakeThreading = {
       idTable: {}
     };
+    fakeGroups = {
+      focused: function() {return {id: 'foo'};}
+    };
 
     $provide.value('store', fakeStore);
     $provide.value('threading', fakeThreading);
+    $provide.value('groups', fakeGroups);
   }));
 
   beforeEach(angular.mock.inject(function (_annotationMapper_, _$rootScope_) {
@@ -37,7 +42,10 @@ describe('annotationMapper', function() {
   describe('.loadAnnotations()', function () {
     it('triggers the annotationLoaded event', function () {
       sandbox.stub($rootScope, '$emit');
-      var annotations = [{id: 1}, {id: 2}, {id: 3}];
+      var annotations = [
+        {id: 1, group: 'foo'},
+        {id: 2, group: 'foo'},
+        {id: 3, group: 'foo'}];
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
       assert.calledWith($rootScope.$emit, 'annotationsLoaded', [{}, {}, {}]);
@@ -45,7 +53,10 @@ describe('annotationMapper', function() {
 
     it('triggers the annotationUpdated event for each annotation in the threading cache', function () {
       sandbox.stub($rootScope, '$emit');
-      var annotations = [{id: 1}, {id: 2}, {id: 3}];
+      var annotations = [
+        {id: 1, group: 'foo'},
+        {id: 2, group: 'foo'},
+        {id: 3, group: 'foo'}];
       var cached = {message: {id: 1, $$tag: 'tag1'}};
       fakeThreading.idTable[1] = cached;
 
@@ -56,7 +67,7 @@ describe('annotationMapper', function() {
 
     it('replaces the properties on the cached annotation with those from the loaded one', function () {
       sandbox.stub($rootScope, '$emit');
-      var annotations = [{id: 1, url: 'http://example.com'}];
+      var annotations = [{id: 1, group: 'foo', url: 'http://example.com'}];
       var cached = {message: {id: 1, $$tag: 'tag1'}};
       fakeThreading.idTable[1] = cached;
 
@@ -64,6 +75,7 @@ describe('annotationMapper', function() {
       assert.called($rootScope.$emit);
       assert.calledWith($rootScope.$emit, 'annotationUpdated', {
         id: 1,
+        group: 'foo',
         url: 'http://example.com'
       });
     });
