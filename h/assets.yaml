@@ -9,8 +9,8 @@ angular_animate:
   contents: ../../node_modules/angular-animate/angular-animate.js
 angular_bootstrap:
   filters: uglifyjs
-  output: scripts/vendor/angular-bootstrap.min.js
-  contents: h:static/scripts/vendor/angular-bootstrap.js
+  output: scripts/vendor/angular-bootstrap-tabbable.min.js
+  contents: h:static/scripts/vendor/angular-bootstrap-tabbable.js
 angular_resource:
   filters: uglifyjs
   output: scripts/vendor/angular-resource.min.js

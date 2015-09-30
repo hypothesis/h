@@ -5,22 +5,12 @@
  * Version: 0.13.4 - 2015-09-03
  * License: MIT
  */
-
-module.exports = 'ui.bootstrap';
-
-angular.module("ui.bootstrap", ["ui.bootstrap.dropdown","ui.bootstrap.position"]);
+angular.module("ui.bootstrap", ["ui.bootstrap.tpls","ui.bootstrap.dropdown","ui.bootstrap.position"]);
+angular.module("ui.bootstrap.tpls", []);
 angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
 
 .constant('dropdownConfig', {
   openClass: 'open'
-})
-
-// H - stub implementation for $templateRequest for
-// Angular 1.2 compatibility
-.factory('$templateRequest', function() {
-  return function() {
-    throw new Error('$templateRequest service is not implemented');
-  }
 })
 
 .service('dropdownService', ['$document', '$rootScope', function($document, $rootScope) {
@@ -207,11 +197,11 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
 
     var openContainer = appendToBody ? body : self.$element;
 
-    $animate[isOpen ? 'addClass' : 'removeClass'](openContainer, openClass); /*.then(function() {
+    $animate[isOpen ? 'addClass' : 'removeClass'](openContainer, openClass).then(function() {
       if (angular.isDefined(isOpen) && isOpen !== wasOpen) {
         toggleInvoker($scope, { open: !!isOpen });
       }
-    });*/
+    });
 
     if (isOpen) {
       if (self.dropdownMenuTemplateUrl) {
@@ -514,3 +504,4 @@ angular.module('ui.bootstrap.position', [])
       }
     };
   }]);
+

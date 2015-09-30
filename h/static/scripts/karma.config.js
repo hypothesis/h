@@ -29,7 +29,7 @@ module.exports = function(config) {
       '../../../node_modules/angular-route/angular-route.js',
       '../../../node_modules/angular-sanitize/angular-sanitize.js',
       '../../../node_modules/ng-tags-input/build/ng-tags-input.min.js',
-      'vendor/angular-bootstrap.js',
+      'vendor/angular-bootstrap-tabbable.js',
       'vendor/katex.js',
 
       // Test deps

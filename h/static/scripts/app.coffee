@@ -122,7 +122,7 @@ module.exports = angular.module('h', [
   'ngTagsInput'
   'ngWebSocket'
   'toastr'
-  require('./vendor/ui-bootstrap-custom-0.13.4')
+  require('./ui-bootstrap-custom')
 ])
 
 .controller('AppController', require('./app-controller'))
