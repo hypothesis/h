@@ -24,6 +24,7 @@ h/static/scripts/account.*js
 h/static/scripts/app.*js
 h/static/scripts/config.*js
 h/static/scripts/hypothesis.*js
+h/static/scripts/*-bundle.js
 
 h/static/styles/*.css
 h/static/styles/vendor/bootstrap.min.css

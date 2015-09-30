@@ -1,0 +1,118 @@
+// The group-form block implements the styles used by the forms for
+// creating, joining and sharing groups
+
+@at-root {
+  @mixin flex-center-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  $border-color: $gray-lighter;
+  $border: 1px solid $border-color;
+
+  .is-hidden {
+    display: none;
+  }
+
+  .group-form {
+    @include flex-center-column();
+
+    min-height: 280px;
+    background-color: $white;
+    border: $border;
+    color: $color-dove-gray;
+    padding-bottom: 45px;
+    margin-top: 75px;
+
+    &__form {
+      @include flex-center-column();
+    }
+
+    &__heading-icon {
+      margin-top: 40px;
+      font-size: 24px;
+    }
+
+    &__invite-icon {
+      margin-top: 40px;
+      margin-bottom: 35px;
+      width: 85px;
+      height: 65px;
+    }
+
+    &__heading {
+      font-size: $title-font-size;
+      font-weight: $title-font-weight;
+      margin-bottom: 40px;
+    }
+
+    .form-field {
+      @include flex-center-column();
+    }
+
+    &__name-label {
+      font-size: 18px;
+    }
+
+    &__name-input {
+      font-size: 28px;
+      font-weight: bold;
+      border: none;
+      text-align: center;
+      margin-bottom: 40px;
+      width: 350px;
+
+      // TODO - Cyan cursor color
+
+      &:placeholder {
+        color: $color-alto;
+      }
+    }
+  }
+
+  .group-form-footer {
+    @include flex-center-column();
+
+    justify-content: center;
+    border: $border;
+    border-top: none;
+    color: $color-dove-gray;
+    font-size: $body2-font-size;
+    line-height: $body2-line-height;
+
+    min-height: 43px;
+    background-color: $color-wild-sand;
+    padding-left: 18px;
+    padding-right: 18px;
+
+    &__explain-link {
+      color: $color-silver-chalice;
+    }
+
+    &__explain-text {
+      padding-bottom: 22px;
+    }
+
+    &__heading {
+      font-weight: bold;
+      margin-top: 22px;
+      margin-bottom: 4px;
+    }
+
+    &__list {
+      padding-left: 18px;
+    }
+  }
+
+  .group-form-footer-link {
+    @include flex-center-column();
+    color: $gray-light;
+    justify-content: center;
+    height: 35px;
+
+    a {
+      color: inherit;
+    }
+  }
+}

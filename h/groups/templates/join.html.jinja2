@@ -3,19 +3,39 @@
 {% block page_title %}{{ group.name }}{% endblock page_title %}
 
 {% block styles %}
-  {% assets "app_css" %}
+  {% assets "site_css" %}
     <link rel="stylesheet" href="{{ ASSET_URL }}">
   {% endassets %}
 {% endblock %}
 
 {% block content %}
-  <div class="content paper">
-    {% include "h:templates/includes/header.html.jinja2" %}
-    This is group {{ group.name }}.
-    <form method="POST">
-      <button type="submit">
-        Join this group
-      </button>
-    </form>
+  <div class="content content--narrow">
+    <div class="group-form">
+      <img class="group-form__invite-icon" src="/assets/images/icons/group-invite.svg">
+      <div class="group-form__name-label">You have been invited to annotate with the group</div>
+      <div class="group-form__name-input">{{ group.name }}</div>
+      {% if is_logged_in %}
+        <form method="POST">
+          <button class="primary-action-btn" type="submit">
+            Join {{ group.name }}
+          </button>
+        </form>
+      {% else %}
+      <form method="GET" action="/login" target="_blank">
+        <button class="primary-action-btn" type="submit">
+          Sign in to join {{ group.name }}
+        </button>
+      </form>
+      {% endif %}
+    </div>
+    <div class="group-form-footer-link">
+      <span>What is Hypothes.is? <a href="https://hypothes.is/about">Learn more</a>.</span>
+    </div>
   </div>
 {% endblock content %}
+
+{% block scripts %}
+{% assets "site_js" %}
+  <script src="{{ ASSET_URL }}"></script>
+{% endassets %}
+{% endblock scripts %}

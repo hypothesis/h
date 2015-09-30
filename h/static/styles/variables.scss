@@ -1,3 +1,6 @@
+// Colors and shades of gray
+// Names courtesy of http://chir.ag/projects/name-that-color
+
 $white: #fff !default;
 $black: #000 !default;
 
@@ -9,7 +12,14 @@ $gray-light: #969696 !default;
 $gray-lighter: #d3d3d3 !default;
 $gray-lightest: #f9f9f9 !default;
 
-//COLORS
+$color-mine-shaft: #3A3A3A;
+$color-dove-gray: #626262;
+$color-silver-chalice: #a6a6a6;
+$color-alto: #dedede;
+$color-seashell: #f1f1f1;
+$color-wild-sand: #f5f5f5;
+
+// COLORS
 $brand-color: #bd1c2b !default;
 
 $button-text-color: $gray-dark !default;
@@ -69,6 +79,12 @@ $headings-color:          inherit !default;
 
 $body1-font-size:         12px;
 $body1-line-height:       1.4em;
+
+$body2-font-size:         14px;
+$body2-line-height:       1.4em;
+
+$title-font-size:         20px;
+$title-font-weight:       bold;
 
 //STANCE COLORS
 $positive: #3aab39;

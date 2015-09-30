@@ -1,6 +1,5 @@
 angular = require('angular')
 
-
 module.exports = class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$route', '$scope', '$window',

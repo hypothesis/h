@@ -4,11 +4,13 @@ $base-font-size: 12px;
 $base-line-height: 20px;
 
 @import './reset';
+@import './elements';
 @import './common';
 
 // components
 @import './dropdown-menu-btn';
 @import './publish-annotation-btn';
+@import './share-link';
 
 body {
   @extend .noise;
@@ -27,13 +29,6 @@ body {
   margin: 0;
 }
 
-svg { -webkit-tap-highlight-color: rgba(255, 255, 255, 0); }
-
-ol {
-  list-style-type: decimal;
-  padding-left: 3em;
-}
-
 .content {
   margin-left: auto;
   margin-right: auto;
@@ -45,7 +40,6 @@ ol {
     padding-right: 4rem;
   }
 }
-
 
 .sheet {
   border: solid 1px $gray-lighter;
@@ -132,32 +126,6 @@ $group-list-width: 270px;
   .group-details {
     margin-right: 20px;
     flex-shrink: 1;
-  }
-
-  .share-link-container {
-    font-size: $body1-font-size;
-    line-height: $body1-line-height;
-    margin-top: 1px;
-    white-space: normal;
-  }
-
-  .share-link-toggle {
-    color: $gray-light;
-  }
-
-  .share-link-toggle:hover {
-    text-decoration: underline;
-    color: $gray-dark;
-  }
-
-  .share-link-field {
-    padding: 3px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    margin-top: 12px;
-    margin-bottom: 8px;
-    border: 1px solid $gray-lighter;
-    width: 100%;
   }
 
   .new-group-btn {

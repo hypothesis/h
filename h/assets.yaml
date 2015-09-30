@@ -109,7 +109,7 @@ config:
         - h:static/scripts/config/*.js
 
 
-# Application
+# the H client application
 app_js:
   contents:
     - jquery
@@ -214,6 +214,26 @@ inject_css:
         - h:static/styles/variables.scss
         - h:static/styles/mixins/icons.scss
 
+# the H website
+site_js:
+  output: scripts/site-bundle.js
+  filters: browserify
+  contents:
+    - h:static/scripts/site.js
+  depends:
+    - h:static/scripts/*.js
+
+site_css:
+  output: styles/site.min.css
+  filters: cleancss
+  contents:
+    - h:static/styles/vendor/icomoon.css
+    - output: h:static/styles/site.css
+      filters: compass,postcss
+      contents:
+        - h:static/styles/site.scss
+      depends:
+        - h:static/styles/*.scss
 
 # Help page
 help_page_css:

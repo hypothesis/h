@@ -68,7 +68,7 @@ def _login_to_join(request, group):
     """
     template_data = {'group': group}
     return renderers.render_to_response(
-        renderer_name='h:groups/templates/login_to_join.html.jinja2',
+        renderer_name='h:groups/templates/join.html.jinja2',
         value=template_data, request=request)
 
 
@@ -82,7 +82,7 @@ def _read_group(request, group):
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
     template_data = {'group': group, 'group_url': url}
     return renderers.render_to_response(
-        renderer_name='h:groups/templates/read.html.jinja2',
+        renderer_name='h:groups/templates/share.html.jinja2',
         value=template_data, request=request)
 
 
@@ -94,7 +94,7 @@ def _join(request, group):
 
     """
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
-    template_data = {'group': group, 'join_url': url}
+    template_data = {'group': group, 'join_url': url, 'is_logged_in': True}
     return renderers.render_to_response(
         renderer_name='h:groups/templates/join.html.jinja2',
         value=template_data, request=request)

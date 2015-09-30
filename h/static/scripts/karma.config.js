@@ -35,6 +35,7 @@ module.exports = function(config) {
       // Test deps
       '../../../node_modules/angular-mocks/angular-mocks.js',
       '../../templates/client/*.html',
+      { pattern: '../../groups/templates/*.html.jinja2', included: false },
       'test/bootstrap.js',
 
       // Tests

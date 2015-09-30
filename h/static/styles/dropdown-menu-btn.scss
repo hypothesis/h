@@ -23,7 +23,6 @@
   &__label {
     // the label occupies the entire space of the button and
     // shows a darker state on hover
-
     width: 100%;
     height: 100%;
 
@@ -43,7 +42,7 @@
     }
 
     &:disabled {
-      color: #929292;
+      color: $gray-light;
     }
   }
 
