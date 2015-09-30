@@ -19,6 +19,7 @@ var sessionWithThreeGroups = function() {
 describe('groups', function() {
   var fakeSession;
   var fakeLocalStorage;
+  var fakeRootScope;
   var sandbox;
 
   beforeEach(function () {
@@ -29,6 +30,9 @@ describe('groups', function() {
       getItem: sandbox.stub(),
       setItem: sandbox.stub()
     };
+    fakeRootScope = {
+      $broadcast: sandbox.stub()
+    }
   });
 
   afterEach(function () {
@@ -36,7 +40,7 @@ describe('groups', function() {
   });
 
   function service() {
-    return groups(fakeLocalStorage, fakeSession);
+    return groups(fakeLocalStorage, fakeSession, fakeRootScope);
   }
 
   describe('.all()', function() {

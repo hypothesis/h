@@ -36,6 +36,10 @@ module.exports = class AppController
     # Default sort
     $scope.sort = name: 'Location'
 
+    $scope.$on('groupFocused', (event) ->
+      $route.reload()
+    )
+
     identity.watch({
       onlogin: (identity) -> $scope.auth.user = auth.userid(identity)
       onlogout: -> $scope.auth.user = null

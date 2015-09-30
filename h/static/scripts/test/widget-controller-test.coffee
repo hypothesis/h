@@ -10,6 +10,7 @@ describe 'WidgetController', ->
   fakeStreamer = null
   fakeStreamFilter = null
   fakeThreading = null
+  fakeGroups = null
   sandbox = null
   viewer = null
 
@@ -58,6 +59,10 @@ describe 'WidgetController', ->
       root: {}
     }
 
+    fakeGroups = {
+      focused: -> {id: 'foo'}
+    }
+
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'crossframe', fakeCrossFrame
@@ -65,6 +70,7 @@ describe 'WidgetController', ->
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamFilter', fakeStreamFilter
     $provide.value 'threading', fakeThreading
+    $provide.value 'groups', fakeGroups
     return
 
   beforeEach inject ($controller, $rootScope) ->
