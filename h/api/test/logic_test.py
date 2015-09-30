@@ -166,7 +166,6 @@ def test_update_annotation_non_admins_can_make_non_permissions_changes():
         annotation,
         fields={
             'foo': 'changed',
-            'permissions': {'admin': ['alice']},
         },
         userid='bob')
 

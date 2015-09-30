@@ -64,10 +64,13 @@ def update_annotation(annotation, fields, userid):
 
     # If the user is changing access permissions, check if it's allowed.
     permissions = annotation.get('permissions', {})
-    if fields.get('permissions', {}) != permissions:
-        if userid not in permissions.get('admin', []):
-            raise RuntimeError(
-                _('Not authorized to change annotation permissions.'), 401)
+    changing_permissions = (
+        'permissions' in fields and
+        fields['permissions'] != permissions
+    )
+    if changing_permissions and userid not in permissions.get('admin', []):
+        raise RuntimeError(
+            _('Not authorized to change annotation permissions.'), 401)
 
     if 'group' in fields and 'group' in annotation:
         if fields['group'] != annotation.get('group'):
