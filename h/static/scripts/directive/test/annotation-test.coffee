@@ -184,12 +184,26 @@ describe 'annotation', ->
       createDirective()
 
     it 'makes the annotation private when level is "private"', ->
+      annotation.$update = sinon.stub().returns(Promise.resolve())
+      controller.edit();
       controller.setPrivacy('private')
-      assert.deepEqual(annotation.permissions, {read: ['justme']})
+      # verify that permissions are not updated until the annotation
+      # is saved
+      assert.deepEqual(annotation.permissions, {})
+      controller.save().then(->
+        # verify that the permissions are updated once the annotation
+        # is saved
+        assert.deepEqual(annotation.permissions, {read: ['justme']})
+      )
 
     it 'makes the annotation shared when level is "shared"', ->
+      annotation.$update = sinon.stub().returns(Promise.resolve())
+      controller.edit();
       controller.setPrivacy('shared')
-      assert.deepEqual(annotation.permissions, {read: ['everybody']});
+      assert.deepEqual(annotation.permissions, {})
+      controller.save().then(->
+        assert.deepEqual(annotation.permissions, {read: ['everybody']})
+      )
 
   describe '#hasContent', ->
     beforeEach ->

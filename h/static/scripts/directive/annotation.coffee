@@ -98,7 +98,7 @@ AnnotationController = [
     # @returns {boolean} True if the annotation is private to the current user.
     ###
     this.isPrivate = ->
-      permissions.isPrivate model.permissions, model.user
+      permissions.isPrivate @annotation.permissions, model.user
 
     ###*
     # @ngdoc method
@@ -107,7 +107,7 @@ AnnotationController = [
     # current group or with everyone).
     ###
     this.isShared = ->
-      permissions.isPublic model.permissions, model.group
+      permissions.isPublic @annotation.permissions, model.group
 
     ###*
     # @ngdoc method
@@ -117,12 +117,14 @@ AnnotationController = [
     # level. The supported levels are 'private' which makes the annotation
     # visible only to its creator and 'shared' which makes the annotation
     # visible to everyone in the group.
+    #
+    # The changes take effect when the annotation is saved
     ###
     this.setPrivacy = (privacy) ->
       if privacy == 'private'
-        model.permissions = permissions.private()
+        @annotation.permissions = permissions.private()
       else if privacy == 'shared'
-        model.permissions = permissions.public(model.group)
+        @annotation.permissions = permissions.public(model.group)
 
     ###*
     # @ngdoc method
@@ -352,7 +354,8 @@ AnnotationController = [
       updateTimestamp = angular.noop
       drafts.remove model
 
-    # Watch the model.
+    # watch for changes to the domain model and recreate the view model
+    # when it changes
     # XXX: TODO: don't clobber the view when collaborating
     $scope.$watch (-> model), (model, old) =>
       if model.updated != old.updated
