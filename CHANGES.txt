@@ -1,3 +1,24 @@
+0.7.5 (2015-10-01)
+==================
+
+Bug fixes
+---------
+
+- Fix a bug where cancelling a change to an annotation did not reset changes to
+  the annotation text (#2562).
+
+- Fix the broken email notification system (#2558).
+
+- Fix a crash caused by submitting an annotation with null document "link"
+  fields (#2520).
+
+Features
+--------
+
+- Removed support for old-style Annotator front-end auth (11135fd).
+
+- URLs in annotation text are now automatically converted to links (#2552).
+
 0.7.4 (2015-09-25)
 ==================
 
