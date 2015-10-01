@@ -13,8 +13,17 @@ module.exports = function() {
    *
    */
   function documentDomainFilter(document) {
+    var uri = escapeHtml(document.uri || '');
     var domain = escapeHtml(document.domain || '');
     var title = escapeHtml(document.title || '');
+
+    if (uri.startsWith('file://') && title) {
+      var parts = uri.split('/');
+      var filename = parts[parts.length - 1];
+      if (filename) {
+        return '(' + filename + ')';
+      }
+    }
 
     if (domain && domain !== title) {
       return '(' + domain + ')';
