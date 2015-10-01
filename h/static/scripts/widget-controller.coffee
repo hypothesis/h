@@ -57,15 +57,5 @@ module.exports = class WidgetController
       if angular.isObject annotation
         crossframe.call('scrollToAnnotation', annotation.$$tag)
 
-    $scope.shouldShowThread = (container) ->
-      # Show regardless of $orphan if that feature is turned on
-      if $scope.feature('show_unanchored_annotations')
-        return true
-
-      if container?.message?.$orphan == true
-        return false
-
-      return true
-
     $scope.hasFocus = (annotation) ->
       !!($scope.focusedAnnotations ? {})[annotation?.$$tag]

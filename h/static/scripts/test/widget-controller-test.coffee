@@ -86,34 +86,3 @@ describe 'WidgetController', ->
       assert.calledWith(loadSpy, [40..59])
       assert.calledWith(loadSpy, [60..79])
       assert.calledWith(loadSpy, [80..99])
-
-  describe 'shouldShowThread()', ->
-    it 'returns false for orphan annotations', ->
-      # Turn the 'show_unanchored_annotations' feature off.
-      $scope.feature = -> false
-
-      container =
-        message:
-          $orphan: true
-
-      assert($scope.shouldShowThread(container) is false)
-
-    it 'returns true for non-orphan annotations', ->
-      # Turn the 'show_unanchored_annotations' feature off.
-      $scope.feature = -> false
-
-      container =
-        message:
-          $orphan: false
-
-      assert($scope.shouldShowThread(container) is true)
-
-    it 'returns true for orphan annotations if show_unanchored_annotations is on', ->
-      # Turn the 'show_unanchored_annotations' feature on.
-      $scope.feature = -> true
-
-      container =
-        message:
-          $orphan: true
-
-      assert($scope.shouldShowThread(container) is true)
