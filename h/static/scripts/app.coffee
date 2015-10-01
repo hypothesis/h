@@ -122,6 +122,7 @@ module.exports = angular.module('h', [
   'ngTagsInput'
   'ngWebSocket'
   'toastr'
+  require('./ui-bootstrap-custom')
 ])
 
 .controller('AppController', require('./app-controller'))
@@ -136,7 +137,6 @@ module.exports = angular.module('h', [
 .directive('formValidate', require('./directive/form-validate'))
 .directive('groupList', require('./directive/group-list').directive)
 .directive('markdown', require('./directive/markdown'))
-.directive('privacy', require('./directive/privacy').directive)
 .directive('simpleSearch', require('./directive/simple-search'))
 .directive('statusButton', require('./directive/status-button'))
 .directive('thread', require('./directive/thread'))
@@ -147,6 +147,8 @@ module.exports = angular.module('h', [
 .directive('tabReveal', require('./directive/tab-reveal'))
 .directive('shareDialog', require('./directive/share-dialog'))
 .directive('windowScroll', require('./directive/window-scroll'))
+.directive('dropdownMenuBtn', require('./directive/dropdown-menu-btn'))
+.directive('publishAnnotationBtn', require('./directive/publish-annotation-btn'))
 
 .filter('converter', require('./filter/converter'))
 .filter('moment', require('./filter/moment'))

@@ -98,16 +98,7 @@ AnnotationController = [
     # @returns {boolean} True if the annotation is private to the current user.
     ###
     this.isPrivate = ->
-      permissions.isPrivate model.permissions, model.user
-
-    ###*
-    # @ngdoc method
-    # @name annotation.AnnotationController#setPrivate
-    #
-    # Set permissions on this annotation to private.
-    ###
-    this.setPrivate = ->
-      model.permissions = permissions.private()
+      permissions.isPrivate @annotation.permissions, model.user
 
     ###*
     # @ngdoc method
@@ -116,16 +107,33 @@ AnnotationController = [
     # current group or with everyone).
     ###
     this.isShared = ->
-      permissions.isPublic model.permissions, model.group
+      permissions.isPublic @annotation.permissions, model.group
 
     ###*
     # @ngdoc method
-    # @name annotation.AnnotationController#setShared
+    # @name annotation.AnnotationController#setPrivacy
     #
-    # Set permissions on this annotation to share with the current group.
+    # Set the privacy settings on the annotation to a predefined
+    # level. The supported levels are 'private' which makes the annotation
+    # visible only to its creator and 'shared' which makes the annotation
+    # visible to everyone in the group.
+    #
+    # The changes take effect when the annotation is saved
     ###
-    this.setShared = ->
-      model.permissions = permissions.public(model.group)
+    this.setPrivacy = (privacy) ->
+      if privacy == 'private'
+        @annotation.permissions = permissions.private()
+      else if privacy == 'shared'
+        @annotation.permissions = permissions.public(model.group)
+
+    ###*
+    # @ngdoc method
+    # @name annotation.AnnotaitonController#hasContent
+    # @returns {boolean} True if the currently edited annotation has
+    #          content (ie. is not just a highlight)
+    ###
+    this.hasContent = ->
+      @annotation.text?.length > 0 || @annotation.tags?.length > 0
 
     ###*
     # @ngdoc method
@@ -346,7 +354,8 @@ AnnotationController = [
       updateTimestamp = angular.noop
       drafts.remove model
 
-    # Watch the model.
+    # watch for changes to the domain model and recreate the view model
+    # when it changes
     # XXX: TODO: don't clobber the view when collaborating
     $scope.$watch (-> model), (model, old) =>
       if model.updated != old.updated

@@ -34,14 +34,6 @@
             ng-bind-html="vm.document | documentDomain"
             ng-if="!vm.embedded">
       </span>
-
-      <!-- Editing controls -->
-      <aside class="pull-right" ng-if="vm.editing">
-        <privacy ng-click="$event.stopPropagation()"
-                 ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
-                 model="annotation">
-      </aside>
-      <!-- / Editing controls -->
     </span>
 
 
@@ -118,37 +110,19 @@
   <!-- / Tags -->
 
   <footer class="annotation-footer">
-    <div class="small" ng-if="vm.editing">
-      <p ng-show="vm.isPrivate()">
-        <i class="h-icon-lock"></i>
-        This annotation will be visible only to you.
-      </p>
-      <p ng-show="vm.isShared() && vm.group().public">
-        <i class="h-icon-public"></i>
-        This annotation will be visible to everyone.
-      </p>
-      <p ng-show="vm.isShared() && !vm.group().public">
-        <i class="h-icon-group"></i>
-        This annotation will be visible to everyone in the
-        <strong ng-bind="vm.group().name"></strong> group.
-      </p>
-    </div>
-
-    <div class="form-actions" ng-if="vm.editing" ng-switch="vm.action">
-      <div class="form-actions-buttons form-actions-left">
-        <button ng-switch-when="edit"
-                ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
-        <button ng-switch-when="delete"
-                ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i> Delete</button>
-        <button ng-switch-default
-                ng-click="vm.save()"
-                class="btn"><i class="h-icon-check btn-icon"></i> Save</button>
-        <button class="btn btn-clean"
-                ng-click="vm.revert()"
-                ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
-      </div>
+    <div class="annotation-form-actions" ng-if="vm.editing" ng-switch="vm.action">
+      <button ng-switch-when="delete"
+              ng-click="vm.save()"
+              class="dropdown-menu-btn"><i class="h-icon-check btn-icon"></i> Delete</button>
+      <publish-annotation-btn
+        class="publish-annotation-btn"
+        group="vm.group()"
+        can-post="vm.hasContent()"
+        is-new="vm.action == 'create'"
+        is-shared="vm.isShared()"
+        on-cancel="vm.revert()"
+        on-save="vm.save()"
+        on-set-privacy="vm.setPrivacy(level)"></publish-annotation-btn>
     </div>
 
     <div class="annotation-section annotation-license"

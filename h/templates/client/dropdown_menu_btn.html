@@ -1,0 +1,18 @@
+<div class="dropdown-menu-btn">
+  <button
+    class="dropdown-menu-btn__label"
+    ng-bind="label"
+    ng-click="vm.onClick($event)"
+    ng-disabled="isDisabled">
+  </button>
+  <button
+    class="dropdown-menu-btn__dropdown-arrow"
+    title="{{dropdownMenuLabel}}"
+    ng-click="vm.toggleDropdown($event)"
+    ng-disabled="isDisabled">
+    <div class="dropdown-menu-btn__dropdown-arrow-separator"></div>
+    <div class="dropdown-menu-btn__dropdown-arrow-indicator">
+      <div>▼</div>
+    </div>
+  </button>
+</div>

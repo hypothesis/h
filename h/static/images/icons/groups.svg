@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="120px"
+   height="120px"
+   viewBox="0 0 120 120"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="groups.svg">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1080"
+     inkscape:window-height="607"
+     id="namedview16"
+     showgrid="false"
+     inkscape:zoom="1.9666667"
+     inkscape:cx="46.892284"
+     inkscape:cy="60"
+     inkscape:window-x="520"
+     inkscape:window-y="123"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
+  <title
+     id="title4">Artboard 1</title>
+  <desc
+     id="desc6">Created with Sketch.</desc>
+  <defs
+     id="defs8" />
+  <g
+     id="Page-1"
+     sketch:type="MSPage"
+     transform="translate(0.50847458,7.627119)"
+     style="fill:none;fill-rule:evenodd;stroke:none;stroke-width:1">
+    <g
+       id="Artboard-1"
+       sketch:type="MSArtboardGroup"
+       style="fill:#000000">
+      <circle
+         id="Oval-1"
+         sketch:type="MSShapeGroup"
+         cx="36"
+         cy="41"
+         r="18" />
+      <circle
+         id="Oval-1-Copy"
+         sketch:type="MSShapeGroup"
+         cx="84"
+         cy="41"
+         r="18" />
+      <path
+         d="m 72,97.041748 44,0 L 116,85 c 0,0 0,-19 -32,-19 -9.06502,0 -15.561747,1.524724 -20.217828,3.710318 1.214568,0.986788 2.306029,2.05955 3.277473,3.213139 2.135429,2.535822 3.518643,5.273433 4.291509,8.026767 0.276063,0.983477 0.45577,1.908217 0.557712,2.755611 C 71.975452,84.259334 72,84.696591 72,85 l 0,12.041748 z"
+         id="Path-1-Copy-2"
+         sketch:type="MSShapeGroup"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 4,97.041748 64,0 L 68,85 C 68,85 68,66 36,66 4,66 4.0041989,85 4.0041989,85 L 4,97.041748 Z"
+         id="Path-1"
+         sketch:type="MSShapeGroup"
+         inkscape:connector-curvature="0" />
+    </g>
+  </g>
+</svg>
