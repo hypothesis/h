@@ -100,6 +100,52 @@ describe 'thread', ->
         controller.toggleCollapsed()
         assert.isTrue(controller.collapsed)
 
+    describe '#shouldShow()', ->
+      count = null
+
+      beforeEach ->
+        createDirective()
+        count = sinon.stub().returns(0)
+        controller.counter = {count: count}
+
+      it 'is true by default', ->
+        assert.isTrue(controller.shouldShow())
+
+      describe 'when the thread root is an orphan', ->
+        beforeEach ->
+          $scope.feature = -> false
+          controller.container =
+            message:
+              $orphan: true
+
+        it 'returns false', ->
+          assert.isFalse(controller.shouldShow())
+
+        it 'returns true if show_unanchored_annotations is on', ->
+          $scope.feature = -> true
+          assert.isTrue(controller.shouldShow())
+
+      describe 'when the thread filter is active', ->
+        beforeEach ->
+          controller.filter = {active: -> true}
+
+        it 'is false when there are no matches in the thread', ->
+          assert.isFalse(controller.shouldShow())
+
+        it 'is true when there are matches in the thread', ->
+          count.withArgs('match').returns(1)
+          assert.isTrue(controller.shouldShow())
+
+        it 'is true when there are edits in the thread', ->
+          count.withArgs('edit').returns(1)
+          assert.isTrue(controller.shouldShow())
+
+        it 'is true when the thread is new', ->
+          controller.container =
+            # message exists but there is no id field
+            message: {}
+          assert.isTrue(controller.shouldShow())
+
     describe '#shouldShowAsReply', ->
       count = null
 

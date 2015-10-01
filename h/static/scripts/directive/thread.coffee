@@ -13,7 +13,8 @@ uuid = require('node-uuid')
 # the collapsing behavior.
 ###
 ThreadController = [
-  ->
+  '$scope',
+  ($scope) ->
     @container = null
     @collapsed = true
     @parent = null
@@ -34,6 +35,26 @@ ThreadController = [
                else
                  not @collapsed
       @collapsed = newval
+
+    ###*
+    # @ngdoc method
+    # @name thread.ThreadController#shouldShow
+    # @description
+    # Return a boolean indicating whether this thread should be shown given the
+    # current system state.
+    ###
+    this.shouldShow = ->
+      if this.container?.message?.$orphan == true
+        # Hide unless show_unanchored_annotations is turned on
+        if not $scope.feature('show_unanchored_annotations')
+          return false
+
+      editing = this._count('edit') > 0
+      matching = this._count('match') > 0
+      if this._isFilterActive() and not (this.isNew() or editing or matching)
+        return false
+
+      return true
 
     ###*
     # @ngdoc method
