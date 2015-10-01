@@ -32,8 +32,9 @@ module.exports = class AppController
     $scope.accountDialog = visible: false
     $scope.shareDialog = visible: false
 
-    # Check to see if we are on the stream page so we can hide share button.
-    $scope.isEmbedded = $window.top isnt $window
+    # Check to see if we're in the sidebar, or on a standalone page such as
+    # the stream page or an individual annotation page.
+    $scope.isSidebar = $window.top isnt $window
 
     # Default sort
     $scope.sort = name: 'Location'
