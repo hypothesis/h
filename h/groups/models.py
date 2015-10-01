@@ -7,11 +7,15 @@ from h.db import Base
 from h import hashids
 
 
+GROUP_NAME_MIN_LENGTH = 4
+GROUP_NAME_MAX_LENGTH = 25
+
+
 class Group(Base):
     __tablename__ = 'group'
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-    name = sa.Column(sa.Unicode(100), nullable=False)
+    name = sa.Column(sa.UnicodeText(), nullable=False)
     created = sa.Column(sa.DateTime,
                         server_default=sa.func.now(),
                         nullable=False)
@@ -36,6 +40,14 @@ class Group(Base):
         self.name = name
         self.creator = creator
         self.members.append(creator)
+
+    @sa.orm.validates('name')
+    def validate_name(self, key, name):
+        if not GROUP_NAME_MIN_LENGTH <= len(name) <= GROUP_NAME_MAX_LENGTH:
+            raise ValueError('name must be between {min} and {max} characters '
+                             'long'.format(min=GROUP_NAME_MIN_LENGTH,
+                                           max=GROUP_NAME_MAX_LENGTH))
+        return name
 
     @property
     def hashid(self):

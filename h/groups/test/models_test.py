@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import pytest
+
 from h.groups import models
 from h.test import factories
 
@@ -18,6 +20,19 @@ def test_init(db_session):
     assert group.creator == user
     assert group.creator_id == user.id
     assert group.members == [user]
+
+
+def test_with_short_name(db_session):
+    """Should raise ValueError if name shorter than 4 characters."""
+    with pytest.raises(ValueError):
+        models.Group(name="abc", creator=factories.User())
+
+
+def test_with_long_name(db_session):
+    """Should raise ValueError if name longer than 25 characters."""
+    with pytest.raises(ValueError):
+        models.Group(name="abcdefghijklmnopqrstuvwxyz",
+                     creator=factories.User())
 
 
 def test_slug(db_session):

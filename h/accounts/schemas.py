@@ -6,7 +6,7 @@ import deform
 from pyramid.session import check_csrf_token
 
 from h import i18n
-from h.accounts.models import User
+from h.accounts import models
 
 _ = i18n.TranslationString
 
@@ -31,7 +31,7 @@ def get_blacklist():
 
 def email_exists(node, value):
     '''Colander validator that ensures a user with this email exists.'''
-    user = User.get_by_email(value)
+    user = models.User.get_by_email(value)
     if not user:
         msg = _('We have no user with the email address "{}". Try correcting '
                 'this address or try another.').format(value)
@@ -40,7 +40,7 @@ def email_exists(node, value):
 
 def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
-    user = User.get_by_email(value)
+    user = models.User.get_by_email(value)
     if user:
         msg = _("Sorry, an account with this email address already exists. "
                 "Try logging in instead.")
@@ -49,11 +49,23 @@ def unique_email(node, value):
 
 def unique_username(node, value):
     '''Colander validator that ensures the username does not exist.'''
-    user = User.get_by_username(value)
+    user = models.User.get_by_username(value)
     if user:
         msg = _("Sorry, an account with this username already exists. "
                 "Please enter another one.")
         raise colander.Invalid(node, msg)
+
+
+def email_node(**kwargs):
+    """Return a Colander schema node for a new user email."""
+    return colander.SchemaNode(
+        colander.String(),
+        validator=colander.All(
+            colander.Length(max=models.EMAIL_MAX_LENGTH),
+            colander.Email(),
+            unique_email,
+        ),
+        **kwargs)
 
 
 def unblacklisted_username(node, value, blacklist=None):
@@ -74,6 +86,15 @@ def matching_emails(node, value):
         exc = colander.Invalid(node)
         exc["emailAgain"] = _("The emails must match")
         raise exc
+
+
+def password_node(**kwargs):
+    """Return a Colander schema node for a user password."""
+    return colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(min=models.PASSWORD_MIN_LENGTH),
+        widget=deform.widget.PasswordWidget(),
+        **kwargs)
 
 
 class CSRFSchema(colander.Schema):
@@ -107,16 +128,16 @@ class LoginSchema(CSRFSchema):
         username = value.get('username')
         password = value.get('password')
 
-        user = User.get_by_username(username)
+        user = models.User.get_by_username(username)
         if user is None:
-            user = User.get_by_email(username)
+            user = models.User.get_by_email(username)
 
         if user is None:
             err = colander.Invalid(node)
             err['username'] = _('User does not exist.')
             raise err
 
-        if not User.validate_user(user, password):
+        if not models.User.validate_user(user, password):
             err = colander.Invalid(node)
             err['password'] = _('Incorrect password. Please try again.')
             raise err
@@ -139,24 +160,16 @@ class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
         validator=colander.All(
-            colander.Length(min=3, max=15),
+            colander.Length(
+                min=models.USERNAME_MIN_LENGTH,
+                max=models.USERNAME_MAX_LENGTH),
             colander.Regex('(?i)^[A-Z0-9._]+$'),
             unique_username,
             unblacklisted_username,
         ),
     )
-    email = colander.SchemaNode(
-        colander.String(),
-        validator=colander.All(
-            colander.Email(),
-            unique_email,
-        ),
-    )
-    password = colander.SchemaNode(
-        colander.String(),
-        validator=colander.Length(min=2),
-        widget=deform.widget.PasswordWidget()
-    )
+    email = email_node()
+    password = password_node()
 
 
 class ResetPasswordSchema(CSRFSchema):
@@ -165,11 +178,7 @@ class ResetPasswordSchema(CSRFSchema):
         widget=deform.widget.TextInputWidget(template='readonly/textinput'),
         missing=colander.null,
     )
-    password = colander.SchemaNode(
-        colander.String(),
-        validator=colander.Length(min=2),
-        widget=deform.widget.PasswordWidget()
-    )
+    password = password_node()
 
 
 class ActivateSchema(CSRFSchema):
@@ -177,12 +186,7 @@ class ActivateSchema(CSRFSchema):
         colander.String(),
         title=_("Security Code")
     )
-    password = colander.SchemaNode(
-        colander.String(),
-        title=_('New Password'),
-        validator=colander.Length(min=2),
-        widget=deform.widget.PasswordWidget()
-    )
+    password = password_node(title=_('New Password'))
 
 
 class ProfileSchema(CSRFSchema):
@@ -199,24 +203,14 @@ class ProfileSchema(CSRFSchema):
         default='',
         missing=colander.null
     )
-    email = colander.SchemaNode(
-        colander.String(),
-        validator=colander.All(colander.Email(), unique_email),
-        default='',
-        missing=colander.null
-    )
+    email = email_node(default='', missing=colander.null)
     emailAgain = colander.SchemaNode(
         colander.String(),
         default='',
         missing=colander.null,
     )
-    password = colander.SchemaNode(
-        colander.String(),
-        title=_('Password'),
-        widget=deform.widget.PasswordWidget(),
-        default='',
-        missing=colander.null
-    )
+    password = password_node(
+        title=_('Password'), default='', missing=colander.null)
     subscriptions = colander.SchemaNode(
         colander.String(),
         missing=colander.null,

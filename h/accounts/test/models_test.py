@@ -103,6 +103,26 @@ def test_cannot_create_case_variant_of_user(db_session):
         db_session.flush()
 
 
+def test_cannot_create_user_with_too_short_username(db_session):
+    with pytest.raises(ValueError):
+        models.User(username='aa')
+
+
+def test_cannot_create_user_with_too_long_username(db_session):
+    with pytest.raises(ValueError):
+        models.User(username='1234567890123456789012345678901')
+
+
+def test_cannot_create_user_with_too_long_email(db_session):
+    with pytest.raises(ValueError):
+        models.User(email='bob@b' + 'o'*100 +'b.com')
+
+
+def test_cannot_create_user_with_too_short_password(db_session):
+    with pytest.raises(ValueError):
+        models.User(password='a')
+
+
 def test_admins_when_no_admins():
     assert models.User.admins() == []
 

@@ -124,7 +124,7 @@ class AuthController(object):
 
         self.request.registry.notify(LoginEvent(self.request, user))
 
-        userid = 'acct:{}@{}'.format(user.username, self.request.domain)
+        userid = u'acct:{}@{}'.format(user.username, self.request.domain)
         headers = remember(self.request, userid)
 
         return httpexceptions.HTTPFound(location=self.login_redirect,

@@ -28,7 +28,7 @@ class Feature(Base):
     __tablename__ = 'feature'
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-    name = sa.Column(sa.String(50), nullable=False, unique=True)
+    name = sa.Column(sa.Text(), nullable=False, unique=True)
 
     # Is the feature enabled for everyone?
     everyone = sa.Column(sa.Boolean,
