@@ -10,7 +10,7 @@
 var STORAGE_KEY = 'hypothesis.groups.focus';
 
 // @ngInject
-function groups(localStorage, session, $rootScope) {
+function groups(localStorage, session, $rootScope, features) {
   // The currently focused group. This is the group that's shown as selected in
   // the groups dropdown, the annotations displayed are filtered to only ones
   // that belong to this group, and any new annotations that the user creates
@@ -41,11 +41,12 @@ function groups(localStorage, session, $rootScope) {
     focused: function() {
       if (focused) {
         return focused;
-      }
-      var fromStorage = get(localStorage.getItem(STORAGE_KEY));
-      if (typeof fromStorage !== 'undefined') {
-        focused = fromStorage;
-        return focused;
+      } else if (features.flagEnabled('groups')) {
+        var fromStorage = get(localStorage.getItem(STORAGE_KEY));
+        if (typeof fromStorage !== 'undefined') {
+          focused = fromStorage;
+          return focused;
+        }
       }
       return all()[0];
     },
