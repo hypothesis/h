@@ -48,8 +48,14 @@ class Activation(Base):
                      default=_generate_random_string)
 
     # FIXME: remove these unused columns
-    created_by = sa.Column(sa.Unicode(30), nullable=True)
-    valid_until = sa.Column(sa.DateTime, nullable=True)
+    created_by = sa.orm.deferred(sa.Column(sa.Unicode(30),
+                                           nullable=True,
+                                           server_default=sa.FetchedValue(),
+                                           server_onupdate=sa.FetchedValue()))
+    valid_until = sa.orm.deferred(sa.Column(sa.DateTime,
+                                            nullable=True,
+                                            server_default=sa.FetchedValue(),
+                                            server_onupdate=sa.FetchedValue()))
 
     @classmethod
     def get_by_code(cls, code):
