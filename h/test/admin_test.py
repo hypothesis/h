@@ -495,6 +495,89 @@ def test_users_index_user_found(User):
                       "user": User.get_by_username.return_value}
 
 
+badge_index_fixtures = pytest.mark.usefixtures('models')
+
+
+@badge_index_fixtures
+def test_badge_index_returns_all_blocklisted_urls(models):
+    assert admin.badge_index(Mock()) == {
+        "uris": models.BadgeBlocklist.all.return_value}
+
+
+badge_add_fixtures = pytest.mark.usefixtures('models', 'badge_index')
+
+
+@badge_add_fixtures
+def test_badge_add_adds_uri_to_model(models):
+    request = Mock(params={'add': 'test_uri'})
+
+    admin.badge_add(request)
+
+    models.BadgeBlocklist.assert_called_once_with(uri='test_uri')
+    request.db.add.assert_called_once_with(models.BadgeBlocklist.return_value)
+
+
+@badge_add_fixtures
+def test_badge_add_returns_index(badge_index):
+    request = Mock(params={'add': 'test_uri'})
+
+    assert admin.badge_add(request) == badge_index.return_value
+
+
+@badge_add_fixtures
+def test_badge_add_flashes_error_if_uri_already_blocked(models):
+    request = Mock(params={'add': 'test_uri'})
+    models.BadgeBlocklist.side_effect = ValueError("test_error_message")
+
+    admin.badge_add(request)
+
+    assert not request.db.add.called
+    request.session.flash.assert_called_once_with(
+        "test_error_message", "error")
+
+
+@badge_add_fixtures
+def test_badge_add_returns_index_if_uri_already_blocked(models, badge_index):
+    request = Mock(params={'add': 'test_uri'})
+    models.BadgeBlocklist.side_effect = ValueError("test_error_message")
+
+    assert admin.badge_add(request) == badge_index.return_value
+
+
+badge_remove_fixtures = pytest.mark.usefixtures('models', 'badge_index')
+
+
+@badge_remove_fixtures
+def test_badge_remove_deletes_model(models):
+    request = Mock(params={'remove': 'test_uri'})
+
+    admin.badge_remove(request)
+
+    models.BadgeBlocklist.get_by_uri.assert_called_once_with('test_uri')
+    request.db.delete.assert_called_once_with(
+        models.BadgeBlocklist.get_by_uri.return_value)
+
+
+@badge_remove_fixtures
+def test_badge_remove_returns_index(badge_index):
+    assert admin.badge_remove(Mock(params={'remove': 'test_uri'})) == (
+        badge_index.return_value)
+
+
+@pytest.fixture
+def models(request):
+    patcher = patch('h.admin.models', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def badge_index(request):
+    patcher = patch('h.admin.badge_index', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
 @pytest.fixture
 def Feature(request):
     patcher = patch('h.models.Feature', autospec=True)

@@ -130,7 +130,7 @@
         }
       };
 
-      xhr.open('GET', serviceUrl + '/search?limit=0&uri=' + tabUrl);
+      xhr.open('GET', serviceUrl + '/badge?uri=' + tabUrl);
       xhr.send();
     };
   }

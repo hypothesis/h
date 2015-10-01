@@ -146,7 +146,7 @@ describe('BrowserAction', function () {
         respondImmediately: true
       });
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 1}']
       );
       sinon.stub(console, 'error');
@@ -163,12 +163,12 @@ describe('BrowserAction', function () {
       assert(server.requests.length === 1);
       var request = server.requests[0];
       assert(request.method === "GET");
-      assert(request.url === "http://example.com/search?limit=0&uri=tabUrl");
+      assert(request.url === "http://example.com/badge?uri=tabUrl");
     });
 
     it("doesn't set the badge if the server's JSON is invalid", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, 'this is not valid json']
       );
 
@@ -180,7 +180,7 @@ describe('BrowserAction', function () {
 
     it("logs an error if the server's JSON is invalid", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, 'this is not valid json']
       );
 
@@ -191,7 +191,7 @@ describe('BrowserAction', function () {
 
     it("doesn't set the badge if the server's total is invalid", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": "not a valid number"}']
       );
 
@@ -203,7 +203,7 @@ describe('BrowserAction', function () {
 
     it("logs an error if the server's total is invalid", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": "not a valid number"}']
       );
 
@@ -214,7 +214,7 @@ describe('BrowserAction', function () {
 
     it("doesn't set the badge if server response has no total", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"rows": []}']
       );
 
@@ -226,7 +226,7 @@ describe('BrowserAction', function () {
 
     it("logs an error if the server response has no total", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"rows": []}']
       );
 
@@ -237,7 +237,7 @@ describe('BrowserAction', function () {
 
     it("sets the browserAction's badge text", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 23}']
       );
 
@@ -251,7 +251,7 @@ describe('BrowserAction', function () {
     it("sets the browserAction's title badge text when there's 1 annotation",
         function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 1}']
       );
 
@@ -265,7 +265,7 @@ describe('BrowserAction', function () {
     it("sets the browserAction's title badge text when there's >1 annotation",
         function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 23}']
       );
 
@@ -278,7 +278,7 @@ describe('BrowserAction', function () {
 
     it("does not set the badge text if there are 0 annotations", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 0}']
       );
 
@@ -289,7 +289,7 @@ describe('BrowserAction', function () {
 
     it("does not set the badge title if there are 0 annotations", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 0}']
       );
 
@@ -300,7 +300,7 @@ describe('BrowserAction', function () {
 
     it("truncates numbers greater than 999 to '999+'", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 1001}']
       );
 
@@ -315,7 +315,7 @@ describe('BrowserAction', function () {
 
     it("does not set the badge text if there is existing text", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 23}']
       );
       var originalGetBadgeTextFunc = fakeChromeBrowserAction.getBadgeText;
@@ -331,7 +331,7 @@ describe('BrowserAction', function () {
 
     it("does not set the badge title if there is existing text", function() {
       server.respondWith(
-        "GET", "http://example.com/search?limit=0&uri=tabUrl",
+        "GET", "http://example.com/badge?uri=tabUrl",
         [200, {}, '{"total": 23}']
       );
       var originalGetBadgeTextFunc = fakeChromeBrowserAction.getBadgeText;

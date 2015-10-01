@@ -1,0 +1,64 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'badge' %}
+{% set page_title = 'Chrome extension badge' %}
+
+{% block content %}
+  <p>
+    This page lets you edit the list of URIs on which the Chrome extension will
+    never show a number on its browser button badge.
+  </p>
+
+  <p>
+    The URIs that you enter here are
+    <a href="https://docs.python.org/2/library/fnmatch.html">UNIX filename
+    patterns</a>. For example to block all pages on
+    <code>http://example.com/</code> use <code>*//example.com*</code>.
+    If a URI that you want to block contains one of the fnmatch special
+    characters, say <code>?</code>, you can escape it in your pattern by
+    wrapping it in brackets: <code>[?]</code>.
+  </p>
+
+  </ul>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Add a URI</h3>
+    </div>
+    <div class="panel-body">
+      <form method="POST" class="form-inline">
+        <div class="form-group">
+          <label for="add">URI</label>
+          <input type="text" class="form-control" name="add">
+          <input type="submit" class="btn btn-default" value="Add">
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Remove a URI</h3>
+    </div>
+    <div class="panel-body">
+      {% if uris %}
+      <form
+        method="POST"
+        action="{{ request.route_url('admin_badge') }}">
+        <ul>
+          {% for uri in uris %}
+            <li>
+              {{ uri }}
+              <button type="submit" class="btn btn-link btn-sm"
+                      name="remove" value="{{ uri }}">
+                Remove
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      </form>
+      {% else %}
+        <p><em>No URIs are currently blocked&hellip;</em></p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

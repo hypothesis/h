@@ -185,6 +185,38 @@ def users_index(request):
     return {'username': username, 'user': user}
 
 
+@view.view_config(route_name='admin_badge',
+                  request_method='GET',
+                  renderer='h:templates/admin/badge.html.jinja2',
+                  permission='admin')
+def badge_index(_):
+    return {"uris": models.BadgeBlocklist.all()}
+
+
+@view.view_config(route_name='admin_badge',
+                  request_method='POST',
+                  request_param='add',
+                  renderer='h:templates/admin/badge.html.jinja2',
+                  permission='admin')
+def badge_add(request):
+    try:
+        request.db.add(models.BadgeBlocklist(uri=request.params['add']))
+    except ValueError as err:
+        request.session.flash(err.message, 'error')
+    return badge_index(request)
+
+
+@view.view_config(route_name='admin_badge',
+                  request_method='POST',
+                  request_param='remove',
+                  renderer='h:templates/admin/badge.html.jinja2',
+                  permission='admin')
+def badge_remove(request):
+    uri = request.params['remove']
+    request.db.delete(models.BadgeBlocklist.get_by_uri(uri))
+    return badge_index(request)
+
+
 def includeme(config):
     config.add_route('admin_index', '/admin')
     config.add_route('admin_features', '/admin/features')
@@ -195,4 +227,5 @@ def includeme(config):
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_staff_remove', '/admin/staff/remove')
     config.add_route('admin_users', '/admin/users')
+    config.add_route('admin_badge', '/admin/badge')
     config.scan(__name__)
