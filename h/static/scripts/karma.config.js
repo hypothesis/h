@@ -19,7 +19,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       // Polyfills for PhantomJS
-      '../../../node_modules/js-polyfills/polyfill.js',
+      './karma-phantomjs-polyfill.js',
 
       // Application external deps
       '../../../node_modules/jquery/dist/jquery.js',
@@ -59,6 +59,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      './karma-phantomjs-polyfill.js': ['browserify'],
       '**/*-test.js': ['browserify'],
       '**/*-test.coffee': ['browserify'],
       '../../templates/client/*.html': ['ng-html2js'],

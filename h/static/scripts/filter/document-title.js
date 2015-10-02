@@ -15,7 +15,7 @@ module.exports = function() {
     var title = escapeHtml(document.title || '');
     var uri = escapeHtml(document.uri || '');
 
-    if (uri && !(uri.startsWith('http://') || uri.startsWith('https://'))) {
+    if (uri && !(uri.indexOf('http://') === 0 || uri.indexOf('https://') === 0)) {
       // We only link to http(s) URLs.
       uri = null;
     }
