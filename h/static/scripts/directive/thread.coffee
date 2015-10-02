@@ -13,8 +13,8 @@ uuid = require('node-uuid')
 # the collapsing behavior.
 ###
 ThreadController = [
-  '$scope', 'groups',
-  ($scope,   groups) ->
+  '$scope', 'groups', 'annotationUI'
+  ($scope,   groups,   annotationUI) ->
     @container = null
     @collapsed = true
     @parent = null
@@ -50,6 +50,12 @@ ThreadController = [
       # here.
       group = this.container?.message?.group
       if this.isNew() and group and group != groups.focused().id
+        return false
+
+      # when there is a selection, hide unselected annotations
+      annotationID = this.container?.message?.id
+      if annotationUI.hasSelectedAnnotations() &&
+         !annotationUI.isAnnotationSelected(annotationID)
         return false
 
       if this.container?.message?.$orphan == true

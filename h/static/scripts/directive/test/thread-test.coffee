@@ -8,7 +8,9 @@ describe 'thread', ->
   fakeGroups = null
   fakePulse = null
   fakeRender = null
+  fakeAnnotationUI = null
   sandbox = null
+  selectedAnnotations = []
 
   createDirective = ->
     $element = angular.element('<div thread>')
@@ -29,9 +31,16 @@ describe 'thread', ->
     }
     fakePulse = sandbox.spy()
     fakeRender = sandbox.spy()
+    fakeAnnotationUI = {
+      hasSelectedAnnotations: ->
+        selectedAnnotations.length > 0
+      isAnnotationSelected: (id) ->
+        selectedAnnotations.indexOf(id) != -1
+    }
     $provide.value 'groups', fakeGroups
     $provide.value 'pulse', fakePulse
     $provide.value 'render', fakeRender
+    $provide.value 'annotationUI', fakeAnnotationUI
     return
 
   beforeEach inject (_$compile_, $rootScope) ->
@@ -170,6 +179,25 @@ describe 'thread', ->
 
         it 'is true when the focused group does match', ->
           fakeGroups.focused.returns({id: 'wibble'})
+          assert.isTrue(controller.shouldShow())
+
+      describe 'filters messages based on the selection', ->
+        messageID = 456
+
+        beforeEach ->
+          controller.container =
+            message:
+              id: messageID
+
+        it 'shows all annotations when there is no selection', ->
+          assert.isTrue(controller.shouldShow())
+
+        it 'hides annotations that are not selected', ->
+          selectedAnnotations = ['some-other-message-id']
+          assert.isFalse(controller.shouldShow())
+
+        it 'shows annotations that are selected', ->
+          selectedAnnotations = [messageID]
           assert.isTrue(controller.shouldShow())
 
     describe '#shouldShowAsReply', ->
