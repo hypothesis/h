@@ -1,6 +1,13 @@
 @font-face {
 	font-family: 'h';
-	src: url('fonts/h.woff?e944zd') format('woff');
+	/* WARNING - the URL below was modified from the generated URL
+	 * to use an absolute instead of relative URL
+	 * because the CSS asset pipeline is not correctly rebasing
+	 * URLs when concatenating files together.
+	 *
+	 * See issue #2571
+	 */
+	src: url('/assets/styles/vendor/fonts/h.woff?e944zd') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
