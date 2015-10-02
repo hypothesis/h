@@ -17,7 +17,7 @@ module.exports = function() {
     var domain = escapeHtml(document.domain || '');
     var title = escapeHtml(document.title || '');
 
-    if (uri.startsWith('file://') && title) {
+    if (uri.indexOf('file://') === 0 && title) {
       var parts = uri.split('/');
       var filename = parts[parts.length - 1];
       if (filename) {
