@@ -1,0 +1,36 @@
+{%- if not field.widget.hidden -%}
+<div class="form-group form-field{% if field.error %} form-field-error{% endif %}"
+     {%- if field.description -%}
+     title="{{ _(field.description) }}"
+     {% endif %}
+     id="item-{{ field.oid }}">
+{% endif -%}
+
+{%- if not (field.widget.hidden or field.widget.category == 'structural') -%}
+  <label class="form-label"
+         {%- if field.description -%}
+         title="{{ _(field.description) }}"
+         {% endif %}
+         for="{{ field.oid }}">
+    {{ _(field.title) }}:
+    {%- if field.schema.hint -%}
+      <span class="form-hint" id="hint-{{ field.oid }}">({{ field.schema.hint }})</span>
+    {% endif -%}
+  </label>
+{% endif -%}
+
+{{ field.serialize(cstruct) }}
+
+{%- if field.error and not field.widget.hidden -%}
+  <ul class="form-error-list">
+  {% for msg in field.error.messages() -%}
+    {%- set errstr = 'error-%s' % field.oid -%}
+    {%- set pid = (loop.index0==0 and errstr) or ('%s-%s' % (errstr, loop.index0)) -%}
+    <li class="form-error" id="{{ pid }}">{{ _(msg) }}</li>
+  {% endfor -%}
+  </ul>
+{% endif -%}
+
+{%- if not field.widget.hidden -%}
+</div>
+{% endif -%}
