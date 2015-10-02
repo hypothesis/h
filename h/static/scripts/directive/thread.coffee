@@ -13,8 +13,8 @@ uuid = require('node-uuid')
 # the collapsing behavior.
 ###
 ThreadController = [
-  '$scope',
-  ($scope) ->
+  '$scope', 'groups',
+  ($scope,   groups) ->
     @container = null
     @collapsed = true
     @parent = null
@@ -44,6 +44,14 @@ ThreadController = [
     # current system state.
     ###
     this.shouldShow = ->
+      # Hide "draft" annotations (new annotations that haven't been saved to
+      # the server yet) that don't belong to the focused group. These draft
+      # annotations persist across route reloads so they have to be hidden
+      # here.
+      group = this.container?.message?.group
+      if this.isNew() and group and group != groups.focused().id
+        return false
+
       if this.container?.message?.$orphan == true
         # Hide unless show_unanchored_annotations is turned on
         if not $scope.feature('show_unanchored_annotations')

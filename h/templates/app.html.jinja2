@@ -17,7 +17,7 @@
     <div class="inner content">
       <button class="btn btn-clean"
               ng-click="shareDialog.visible = !shareDialog.visible"
-              ng-if="isEmbedded"
+              ng-if="isSidebar"
               title="Share this page">
         <i class="h-icon-share btn-icon"></i>
       </button>
@@ -29,7 +29,7 @@
            on-clear="search.clear()"></div>
       <!-- / Searchbar -->
 
-      <group-list class="group-list" ng-if="auth.user && feature('groups')">
+      <group-list class="group-list" ng-if="auth.user && feature('groups') && isSidebar">
       </group-list>
 
       <div ng-switch="auth.user">

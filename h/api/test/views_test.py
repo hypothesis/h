@@ -5,6 +5,7 @@ import mock
 import pytest
 
 from pyramid import testing
+from pyramid import httpexceptions
 
 from h.api import views
 
@@ -216,6 +217,16 @@ def test_create_returns_render(search_lib):
 
 # The fixtures required to mock all of read()'s dependencies.
 read_fixtures = pytest.mark.usefixtures('search_lib', 'AnnotationEvent')
+
+
+@ read_fixtures
+def test_read_404s_for_group_annotations_if_groups_feature_is_off():
+    context = mock.Mock(model={'group': 'foo'})
+    request = mock.Mock()
+    request.feature.return_value = False
+
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        views.read(context, request)
 
 
 @read_fixtures

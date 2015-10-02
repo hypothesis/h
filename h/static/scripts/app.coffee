@@ -12,8 +12,8 @@ socket = null
 resolve =
   store: ['store', (store) -> store.$promise]
   streamer: [
-    '$websocket', 'annotationMapper'
-    ($websocket,   annotationMapper) ->
+    '$websocket', 'annotationMapper', 'groups'
+    ($websocket,   annotationMapper,   groups) ->
       # Get the socket URL
       url = new URL('/ws', baseURI)
       url.protocol = url.protocol.replace('http', 'ws')
@@ -32,6 +32,14 @@ resolve =
         action = message.options.action
         annotations = message.payload
         return unless annotations?.length
+
+        # Discard annotations that aren't from the currently focused group.
+        # FIXME: Have the server only send us annotations from the focused
+        # group in the first place.
+        annotations = annotations.filter((ann) ->
+          return ann.group == groups.focused().id
+        )
+
         switch action
           when 'create', 'update', 'past'
             annotationMapper.loadAnnotations annotations

@@ -11,6 +11,8 @@ describe 'AppController', ->
   fakeLocation = null
   fakeParams = null
   fakeSession = null
+  fakeGroups = null
+  fakeRoute = null
 
   sandbox = null
 
@@ -19,7 +21,7 @@ describe 'AppController', ->
     $controller('AppController', locals)
 
   before ->
-    angular.module('h', ['ngRoute'])
+    angular.module('h')
     .controller('AppController', require('../app-controller'))
     .controller('AnnotationUIController', angular.noop)
 
@@ -62,12 +64,18 @@ describe 'AppController', ->
 
     fakeSession = {}
 
+    fakeGroups = {focus: sandbox.spy()}
+
+    fakeRoute = {reload: sandbox.spy()}
+
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'auth', fakeAuth
     $provide.value 'drafts', fakeDrafts
     $provide.value 'features', fakeFeatures
     $provide.value 'identity', fakeIdentity
     $provide.value 'session', fakeSession
+    $provide.value 'groups', fakeGroups
+    $provide.value '$route', fakeRoute
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams
     return
@@ -79,18 +87,18 @@ describe 'AppController', ->
   afterEach ->
     sandbox.restore()
 
-  describe 'isEmbedded property', ->
+  describe 'isSidebar property', ->
 
     it 'is false if the window is the top window', ->
       $window = {}
       $window.top = $window
       createController({$window})
-      assert.isFalse($scope.isEmbedded)
+      assert.isFalse($scope.isSidebar)
 
     it 'is true if the window is not the top window', ->
       $window = {top: {}}
       createController({$window})
-      assert.isTrue($scope.isEmbedded)
+      assert.isTrue($scope.isSidebar)
 
   it 'watches the identity service for identity change events', ->
     createController()
@@ -115,6 +123,12 @@ describe 'AppController', ->
     onlogout()
     assert.strictEqual($scope.auth.user, null)
 
+  it 'focuses the default group in logout', ->
+    createController()
+    {onlogout} = fakeIdentity.watch.args[0][0]
+    onlogout()
+    assert.calledWith(fakeGroups.focus, '__world__')
+
   it 'does not show login form for logged in users', ->
     createController()
     assert.isFalse($scope.accountDialog.visible)
@@ -122,3 +136,8 @@ describe 'AppController', ->
   it 'does not show the share dialog at start', ->
     createController()
     assert.isFalse($scope.shareDialog.visible)
+
+  it 'calls $route.reload() when the focused group changes', ->
+    createController()
+    $scope.$broadcast('groupFocused')
+    assert.calledOnce(fakeRoute.reload)

@@ -28,11 +28,11 @@
 
       <span class="annotation-citation"
             ng-bind-html="vm.document | documentTitle"
-            ng-if="!vm.embedded">
+            ng-if="!vm.isSidebar">
       </span>
       <span class="annotation-citation-domain"
             ng-bind-html="vm.document | documentDomain"
-            ng-if="!vm.embedded">
+            ng-if="!vm.isSidebar">
       </span>
     </span>
 

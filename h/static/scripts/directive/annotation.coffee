@@ -32,7 +32,8 @@ errorMessage = (reason) ->
 # @property {string} action One of 'view', 'edit', 'create' or 'delete'.
 # @property {string} preview If previewing an edit then 'yes', else 'no'.
 # @property {boolean} editing True if editing components are shown.
-# @property {boolean} embedded True if the annotation is an embedded widget.
+# @property {boolean} isSidebar True if we are in the sidebar (not on the
+#                               stream page or an individual annotation page)
 #
 # @description
 #
@@ -53,7 +54,7 @@ AnnotationController = [
     @document = null
     @preview = 'no'
     @editing = false
-    @embedded = false
+    @isSidebar = false
     @hasDiff = false
     @showDiff = undefined
     @timestamp = null
@@ -402,17 +403,14 @@ AnnotationController = [
 # Directive that instantiates
 # {@link annotation.AnnotationController AnnotationController}.
 #
-# If the `annotation-embbedded` attribute is specified, its interpolated
-# value is used to signal whether the annotation is being displayed inside
-# an embedded widget.
 ###
 module.exports = [
   '$document',
   ($document) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
-      # Observe the embedded attribute
-      attrs.$observe 'annotationEmbedded', (value) ->
-        ctrl.embedded = value? and value != 'false'
+      # Observe the isSidebar attribute
+      attrs.$observe 'isSidebar', (value) ->
+        ctrl.isSidebar = value? and value != 'false'
 
       # Save on Meta + Enter or Ctrl + Enter.
       elem.on 'keydown', (event) ->

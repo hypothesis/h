@@ -3,15 +3,14 @@ angular = require('angular')
 
 module.exports = class WidgetController
   this.$inject = [
-    '$scope', 'annotationUI', 'crossframe', 'annotationMapper',
+    '$scope', 'annotationUI', 'crossframe', 'annotationMapper', 'groups',
     'streamer', 'streamFilter', 'store', 'threading'
   ]
   constructor:   (
-     $scope,   annotationUI, crossframe, annotationMapper,
+     $scope,   annotationUI,   crossframe,   annotationMapper,   groups,
      streamer,   streamFilter,   store,   threading
   ) ->
     $scope.isStream = true
-    $scope.isSidebar = true
     $scope.threadRoot = threading.root
 
     @chunkSize = 200
@@ -23,6 +22,7 @@ module.exports = class WidgetController
         offset: offset
         sort: 'created'
         order: 'asc'
+        group: groups.focused().id
       q = angular.extend(queryCore, query)
 
       store.SearchResource.get q, (results) ->

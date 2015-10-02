@@ -27,7 +27,7 @@
       </span>
       <ul class="dropdown-menu pull-right" role="menu">
         <li ng-click="sort.name = option"
-            ng-hide="option == 'Location' && !isEmbedded"
+            ng-hide="option == 'Location' && !isSidebar"
             ng-repeat="option in ['Newest', 'Oldest', 'Location']"
             ><a href="">{{option}}</a></li>
       </ul>

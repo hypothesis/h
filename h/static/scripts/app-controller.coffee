@@ -4,11 +4,13 @@ angular = require('angular')
 module.exports = class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$route', '$scope', '$window',
-    'annotationUI', 'auth', 'drafts', 'features', 'identity', 'session'
+    'annotationUI', 'auth', 'drafts', 'features', 'groups', 'identity',
+    'session'
   ]
   constructor: (
      $controller,   $document,   $location,   $route,   $scope,   $window,
-     annotationUI,   auth,   drafts,   features,   identity,  session
+     annotationUI,   auth,   drafts,   features,   groups,   identity,
+     session
   ) ->
     $controller('AnnotationUIController', {$scope})
 
@@ -30,15 +32,27 @@ module.exports = class AppController
     $scope.accountDialog = visible: false
     $scope.shareDialog = visible: false
 
-    # Check to see if we are on the stream page so we can hide share button.
-    $scope.isEmbedded = $window.top isnt $window
+    # Check to see if we're in the sidebar, or on a standalone page such as
+    # the stream page or an individual annotation page.
+    $scope.isSidebar = $window.top isnt $window
 
     # Default sort
     $scope.sort = name: 'Location'
 
+    $scope.$on('groupFocused', (event) ->
+      $route.reload()
+    )
+
     identity.watch({
       onlogin: (identity) -> $scope.auth.user = auth.userid(identity)
-      onlogout: -> $scope.auth.user = null
+      onlogout: ->
+        $scope.auth.user = null
+
+        # Currently all groups are private so when the user logs out they can
+        # no longer see the annotations from any group they may have had
+        # focused. Focus the public group instead, so that they see any public
+        # annotations in the sidebar.
+        groups.focus('__world__')
       onready: -> $scope.auth.user ?= null
     })
 

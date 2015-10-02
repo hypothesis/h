@@ -5,6 +5,7 @@ describe 'thread', ->
   $element = null
   $scope = null
   controller = null
+  fakeGroups = null
   fakePulse = null
   fakeRender = null
   sandbox = null
@@ -23,8 +24,12 @@ describe 'thread', ->
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
+    fakeGroups = {
+      focused: sandbox.stub().returns({id: '__world__'})
+    }
     fakePulse = sandbox.spy()
     fakeRender = sandbox.spy()
+    $provide.value 'groups', fakeGroups
     $provide.value 'pulse', fakePulse
     $provide.value 'render', fakeRender
     return
@@ -144,6 +149,27 @@ describe 'thread', ->
           controller.container =
             # message exists but there is no id field
             message: {}
+          assert.isTrue(controller.shouldShow())
+
+      describe 'when the thread root has a group', ->
+        beforeEach ->
+          controller.container =
+            message:
+              id: 123
+              group: 'wibble'
+
+        it 'is false for draft annotations not from the focused group', ->
+          # Set the focused group to one other than the annotation's group.
+          fakeGroups.focused.returns({id: 'foo'})
+
+          # Make the annotation into a "draft" annotation (make isNew() return
+          # true).
+          delete controller.container.message.id
+
+          assert.isFalse(controller.shouldShow())
+
+        it 'is true when the focused group does match', ->
+          fakeGroups.focused.returns({id: 'wibble'})
           assert.isTrue(controller.shouldShow())
 
     describe '#shouldShowAsReply', ->

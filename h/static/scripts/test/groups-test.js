@@ -19,15 +19,23 @@ var sessionWithThreeGroups = function() {
 describe('groups', function() {
   var fakeSession;
   var fakeLocalStorage;
+  var fakeRootScope;
+  var fakeFeatures;
   var sandbox;
 
-  beforeEach(function () {
+  beforeEach(function() {
     sandbox = sinon.sandbox.create();
 
     fakeSession = sessionWithThreeGroups();
     fakeLocalStorage = {
       getItem: sandbox.stub(),
       setItem: sandbox.stub()
+    };
+    fakeRootScope = {
+      $broadcast: sandbox.stub()
+    };
+    fakeFeatures = {
+      flagEnabled: function() {return true;}
     };
   });
 
@@ -36,7 +44,7 @@ describe('groups', function() {
   });
 
   function service() {
-    return groups(fakeLocalStorage, fakeSession);
+    return groups(fakeLocalStorage, fakeSession, fakeRootScope, fakeFeatures);
   }
 
   describe('.all()', function() {
