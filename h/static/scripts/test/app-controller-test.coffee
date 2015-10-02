@@ -64,7 +64,7 @@ describe 'AppController', ->
 
     fakeSession = {}
 
-    fakeGroups = {focus: ->}
+    fakeGroups = {focus: sandbox.spy()}
 
     fakeRoute = {reload: sandbox.spy()}
 
@@ -123,6 +123,12 @@ describe 'AppController', ->
     onlogout()
     assert.strictEqual($scope.auth.user, null)
 
+  it 'focuses the default group in logout', ->
+    createController()
+    {onlogout} = fakeIdentity.watch.args[0][0]
+    onlogout()
+    assert.calledWith(fakeGroups.focus, '__world__')
+
   it 'does not show login form for logged in users', ->
     createController()
     assert.isFalse($scope.accountDialog.visible)
@@ -131,7 +137,7 @@ describe 'AppController', ->
     createController()
     assert.isFalse($scope.shareDialog.visible)
 
-  it 'Calls $route.reload() when the focused group changes', ->
+  it 'calls $route.reload() when the focused group changes', ->
     createController()
     $scope.$broadcast('groupFocused')
     assert.calledOnce(fakeRoute.reload)
