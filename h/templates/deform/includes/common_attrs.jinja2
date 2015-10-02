@@ -1,6 +1,9 @@
 {% if field.schema.hint -%}
 aria-describedby="hint-{{ field.oid }}"
 {% endif -%}
+{%- if field.error %}
+aria-invalid="true"
+{% endif -%}
 {%- if field.widget.autofocus -%}
 autofocus onfocus="this.select()"
 {% endif -%}
