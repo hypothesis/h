@@ -12,6 +12,7 @@ describe 'AppController', ->
   fakeParams = null
   fakeSession = null
   fakeGroups = null
+  fakeRoute = null
 
   sandbox = null
 
@@ -20,7 +21,7 @@ describe 'AppController', ->
     $controller('AppController', locals)
 
   before ->
-    angular.module('h', ['ngRoute'])
+    angular.module('h')
     .controller('AppController', require('../app-controller'))
     .controller('AnnotationUIController', angular.noop)
 
@@ -65,6 +66,8 @@ describe 'AppController', ->
 
     fakeGroups = {focus: ->}
 
+    fakeRoute = {reload: sandbox.spy()}
+
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'auth', fakeAuth
     $provide.value 'drafts', fakeDrafts
@@ -72,6 +75,7 @@ describe 'AppController', ->
     $provide.value 'identity', fakeIdentity
     $provide.value 'session', fakeSession
     $provide.value 'groups', fakeGroups
+    $provide.value '$route', fakeRoute
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams
     return
@@ -126,3 +130,8 @@ describe 'AppController', ->
   it 'does not show the share dialog at start', ->
     createController()
     assert.isFalse($scope.shareDialog.visible)
+
+  it 'Calls $route.reload() when the focused group changes', ->
+    createController()
+    $scope.$broadcast('groupFocused')
+    assert.calledOnce(fakeRoute.reload)
