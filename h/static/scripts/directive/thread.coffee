@@ -44,11 +44,12 @@ ThreadController = [
     # current system state.
     ###
     this.shouldShow = ->
-      # If the annotation has a group set, then hide it if it doesn't belong to
-      # the focused group. This is mainly important for drafts, which are
-      # persisted across route reloads.
+      # Hide "draft" annotations (new annotations that haven't been saved to
+      # the server yet) that don't belong to the focused group. These draft
+      # annotations persist across route reloads so they have to be hidden
+      # here.
       group = this.container?.message?.group
-      if group and group != groups.focused().id
+      if this.isNew() and group and group != groups.focused().id
         return false
 
       if this.container?.message?.$orphan == true

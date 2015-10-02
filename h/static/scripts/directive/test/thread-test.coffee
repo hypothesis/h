@@ -158,8 +158,14 @@ describe 'thread', ->
               id: 123
               group: 'wibble'
 
-        it 'is false when the focused group does not match', ->
+        it 'is false for draft annotations not from the focused group', ->
+          # Set the focused group to one other than the annotation's group.
           fakeGroups.focused.returns({id: 'foo'})
+
+          # Make the annotation into a "draft" annotation (make isNew() return
+          # true).
+          delete controller.container.message.id
+
           assert.isFalse(controller.shouldShow())
 
         it 'is true when the focused group does match', ->
