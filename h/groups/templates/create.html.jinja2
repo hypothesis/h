@@ -13,25 +13,7 @@
     <div class="group-form">
       <i class="h-icon-group group-form__heading-icon"></i>
       <div class="group-form__heading">Create a new group</div>
-      <form class="group-form__form" action="{{ form.action }}" method="{{ form.method }}" novalidate>
-        {{ form['csrf_token'].render() | safe }}
-        <div class="form-field{% if form['name'].error %} form-field-error{% endif %}">
-          <label class="group-form__name-label" for="group-form__name-input">
-            What do you want to call the group?
-          </label>
-          <input class="group-form__name-input js-group-name-input" id="group-form__name-input"
-                 type="text" name="name" placeholder="Group Name" value="{{ data.name }}"
-                 autofocus required maxlength="25" />
-          {% if form['name'].error %}
-            <ul class="form-error-list">
-              {% for err in form['name'].error.asdict().values() %}
-                <li class="form-error">{{ err }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        </div>
-        <button class="primary-action-btn group-form__submit-btn js-create-group-create-btn" type="submit">Create new group</button>
-      </form>
+      {{ form | safe }}
     </div>
     <div class="group-form-footer">
       <a href="" class="group-form-footer__explain-link js-group-info-link">Tell me more about groups</a>

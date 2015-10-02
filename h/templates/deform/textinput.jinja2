@@ -2,13 +2,8 @@
        name="{{ field.name }}"
        value="{{ cstruct }}"
        {%- if field.widget.size %}
-       size="{{field.widget.size}}"
-       {% endif -%}
-       {%- if field.schema.hint %}
-       aria-describedby="hint-{{ field.oid }}"
-       {% endif -%}
-       {%- if field.required %}
-       required
-       {% endif -%}
+       size="{{ field.widget.size }}"
+       {% endif %}
+       {% include "includes/common_attrs.jinja2" -%}
        class="form-input{% if field.widget.css_class %} {{ field.widget.css_class }}{% endif %}"
        id="{{ field.oid }}"/>

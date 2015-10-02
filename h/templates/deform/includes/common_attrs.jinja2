@@ -1,0 +1,12 @@
+{% if field.schema.hint -%}
+aria-describedby="hint-{{ field.oid }}"
+{% endif -%}
+{%- if field.widget.max_length -%}
+maxlength="{{ field.widget.max_length }}"
+{% endif -%}
+{%- if field.widget.placeholder -%}
+placeholder="{{ field.widget.placeholder }}"
+{% endif -%}
+{%- if field.required -%}
+required
+{% endif %}

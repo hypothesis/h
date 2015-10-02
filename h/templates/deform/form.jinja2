@@ -18,7 +18,7 @@
         <button id="{{ field.formid + button.name }}"
                 name="{{ button.name }}"
                 type="{{ button.type }}"
-                class="btn"
+                class="btn{% if button.css_class %} {{ button.css_class }}{% endif %}"
                 value="{{ _(button.value) }}"
                 {%- if button.disabled -%}
                 disabled="disabled"

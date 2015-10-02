@@ -24,11 +24,9 @@ def create_form(request):
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
-    schema = schemas.GroupSchema().bind(request=request)
-    form = deform.Form(schema)
+    form = _group_form(request)
 
-    return {'form': form, 'data': {}}
-
+    return {'form': form.render()}
 
 @view_config(route_name='group_create',
              request_method='POST',
@@ -41,11 +39,11 @@ def create(request):
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
-    form = deform.Form(schemas.GroupSchema().bind(request=request))
+    form = _group_form(request)
     try:
         appstruct = form.validate(request.POST.items())
     except deform.ValidationFailure:
-        return {'form': form, 'data': request.params}
+        return {'form': form.render()}
 
     user = models.User.get_by_userid(request.domain,
                                      request.authenticated_userid)
@@ -158,6 +156,18 @@ def join(request):
 
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
     return exc.HTTPSeeOther(url)
+
+
+def _group_form(request):
+    schema = schemas.GroupSchema().bind(request=request)
+    submit = deform.Button(title=_('Create a new group'),
+                           css_class='primary-action-btn '
+                                     'group-form__submit-btn '
+                                     'js-create-group-create-btn')
+    form = deform.Form(schema,
+                       css_class='group-form__form',
+                       buttons=(submit,))
+    return form
 
 
 def includeme(config):

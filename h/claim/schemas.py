@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
-from ..accounts.schemas import ResetPasswordSchema
+
+from h import i18n
+from h.accounts.schemas import CSRFSchema
+from h.accounts.schemas import password_node
 
 
-class UpdateAccountSchema(ResetPasswordSchema):
-    pass
+_ = i18n.TranslationString
+
+
+class UpdateAccountSchema(CSRFSchema):
+    password = password_node(title=_('New password'),
+                             hint=_('at least two characters'))

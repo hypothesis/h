@@ -48,7 +48,7 @@ def test_create_form_creates_form_with_GroupSchema(GroupSchema, Form):
 
     views.create_form(request=_mock_request())
 
-    Form.assert_called_once_with(test_schema)
+    assert Form.call_args[0][0] == test_schema
 
 
 @create_form_fixtures
@@ -56,19 +56,9 @@ def test_create_form_returns_form(Form):
     test_form = mock.Mock()
     Form.return_value = test_form
 
-    template_data = views.create_form(request=_mock_request())
+    result = views.create_form(request=_mock_request())
 
-    assert template_data["form"] == test_form
-
-
-@create_form_fixtures
-def test_create_form_returns_empty_form_data(Form):
-    test_form = mock.Mock()
-    Form.return_value = test_form
-
-    template_data = views.create_form(request=_mock_request())
-
-    assert template_data["data"] == {}
+    assert result["form"] == test_form.render.return_value
 
 
 # The fixtures required to mock all of create()'s dependencies.
@@ -89,7 +79,7 @@ def test_create_inits_form_with_schema(GroupSchema, Form):
 
     views.create(request=_mock_request())
 
-    Form.assert_called_once_with(schema)
+    assert Form.call_args[0][0] == schema
 
 
 @create_fixtures
@@ -107,12 +97,10 @@ def test_create_validates_form(Form):
 def test_create_rerenders_form_on_validation_failure(Form):
     Form.return_value = form = mock.Mock()
     form.validate.side_effect = deform.ValidationFailure(None, None, None)
-    params = {"foo": "bar"}
 
-    template_data = views.create(_mock_request())
+    result = views.create(_mock_request())
 
-    assert template_data['form'] == form
-    assert template_data['data'] == params
+    assert result['form'] == form.render.return_value
 
 
 @create_fixtures

@@ -22,7 +22,7 @@ def claim_account(request):
     _validate_request(request)
 
     form = _form_for_update_account(request)
-    return {'form': form}
+    return {'form': form.render()}
 
 
 @view_config(route_name='claim_account',
@@ -35,7 +35,7 @@ def update_account(request):
     try:
         appstruct = form.validate(request.POST.items())
     except deform.ValidationFailure:
-        return {'form': form}
+        return {'form': form.render()}
 
     # The token is valid and the form validates, so we can go ahead and claim
     # the account:
@@ -86,7 +86,8 @@ def _validate_request(request):
 
 def _form_for_update_account(request):
     schema = schemas.UpdateAccountSchema().bind(request=request)
-    return deform.Form(schema)
+    form = deform.Form(schema, buttons=(_('Claim account'),))
+    return form
 
 
 def _perform_already_claimed_redirect(request):
