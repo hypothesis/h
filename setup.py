@@ -40,6 +40,7 @@ INSTALL_REQUIRES = [
     'cryptacular>=1.4,<1.5',
     'cryptography>=0.7',
     'deform>=0.9,<1.0',
+    'deform-jinja2>=0.5,<0.6',
     'elasticsearch>=1.1.0',
     'gevent>=1.0.2,<1.1.0',
     'gnsq>=0.3.0,<0.4.0',
