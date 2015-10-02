@@ -23,6 +23,7 @@ class GroupSchema(CSRFSchema):
             min=GROUP_NAME_MIN_LENGTH,
             max=GROUP_NAME_MAX_LENGTH),
         widget=deform.widget.TextInputWidget(
+            autofocus=True,
             css_class="group-form__name-input js-group-name-input",
             label_css_class="group-form__name-label",
             max_length=GROUP_NAME_MAX_LENGTH,
