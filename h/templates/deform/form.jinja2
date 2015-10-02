@@ -13,6 +13,11 @@
   {% endfor -%}
 
   <div class="form-actions">
+    <div class="form-actions-message">
+      {%- for title, href in field.extra_actions -%}
+        <a href="{{ href }}">{{ title }}</a>
+      {% endfor -%}
+    </div>
     <div class="form-actions-buttons">
       {%- for button in field.buttons -%}
         <button id="{{ field.formid + button.name }}"
