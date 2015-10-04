@@ -13,7 +13,7 @@
          {% endif %}
          for="{{ field.oid }}">
     {{ _(field.title) }}
-    {%- if field.schema.hint -%}
+    {%- if field.schema.hint %}
       <span class="form-hint" id="hint-{{ field.oid }}">({{ field.schema.hint }})</span>
     {% endif -%}
   </label>
