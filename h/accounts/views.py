@@ -122,13 +122,16 @@ class AjaxFormViewMapper(object):
 @view_config(route_name='logout', attr='logout', request_method='GET')
 class AuthController(object):
     def __init__(self, request):
+        form_footer = ('<a href="{path}">'.format(
+                           path=request.route_path('forgot_password')) +
+                       _('Forgot your password?') +
+                       '</a>')
+
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
-        self.form = deform.Form(
-            self.schema,
-            buttons=(_('Sign in'),),
-            extra_actions=[(_('Forgot your password?'),
-                            request.route_path('forgot_password'))])
+        self.form = deform.Form(self.schema,
+                                buttons=(_('Sign in'),),
+                                footer=form_footer)
 
         self.login_redirect = self.request.route_url('stream')
         self.logout_redirect = self.request.route_url('index')
