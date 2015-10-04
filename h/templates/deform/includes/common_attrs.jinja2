@@ -1,4 +1,11 @@
-{% if field.schema.hint -%}
+name="{{ field.name }}"
+value="{{ cstruct }}"
+id="{{ field.oid }}"
+class="form-input{% if field.widget.css_class %} {{ field.widget.css_class }}{% endif %}"
+{%- if field.widget.size -%}
+size="{{ field.widget.size }}"
+{% endif -%}
+{%- if field.schema.hint -%}
 aria-describedby="hint-{{ field.oid }}"
 {% endif -%}
 {%- if field.error %}
