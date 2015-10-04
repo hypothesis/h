@@ -18,15 +18,15 @@ installed:
 
 You'll also need to run, at a minimum, these external services:
 
--  ElasticSearch_ v1.0+, with the `ElasticSearch ICU Analysis`_ plugin
+-  Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
    installed
 -  NSQ_ v0.3+
 
 .. _Python: http://python.org/
 .. _Node: http://nodejs.org/
 .. _Compass: http://compass-style.org/
-.. _ElasticSearch: http://www.elasticsearch.org/
-.. _ElasticSearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
+.. _Elasticsearch: http://www.elasticsearch.org/
+.. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
 .. _NSQ: http://nsq.io/
 .. _PostgreSQL: http://www.postgresql.org/
 
@@ -120,7 +120,7 @@ Install compass:
 Installing the services
 -----------------------
 
-h requires ElasticSearch_ 1.0+ with the `ElasticSearch ICU Analysis`_ plugin,
+h requires Elasticsearch_ 1.0+ with the `Elasticsearch ICU Analysis`_ plugin,
 `NSQ`_ 0.3+ and `PostgreSQL`_ 9.4+. You can install these services however you
 want, but the easiest way is by using Docker. This should work on any operating
 system that Docker can be installed on:

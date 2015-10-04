@@ -13,15 +13,15 @@ itself) the instructions for configuring and deploying h are identical.
 In addition to the Docker container, h depends on the following services:
 
 -  An SQL database. We only officially support PostgreSQL_.
--  ElasticSearch_ v1.0+, with the `ElasticSearch ICU Analysis`_ plugin
+-  Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
    installed. Used for storing annotation data.
 -  NSQ_, a distributed message queue. Used for interprocess communication.
 -  Redis_, a fast key-value store. Used for persistent session storage.
 
 .. _Docker: https://www.docker.com/
 .. _PostgreSQL: http://www.postgresql.org/
-.. _ElasticSearch: https://www.elastic.co/products/elasticsearch
-.. _ElasticSearch ICU Analysis: https://github.com/elastic/elasticsearch-analysis-icu
+.. _Elasticsearch: https://www.elastic.co/products/elasticsearch
+.. _Elasticsearch ICU Analysis: https://github.com/elastic/elasticsearch-analysis-icu
 .. _NSQ: http://nsq.io/
 .. _Redis: http://redis.io/
 
@@ -54,7 +54,7 @@ Configuring container dependencies
 At a minimum, you will need:
 
 -  a PostgreSQL database
--  an ElasticSearch server with the ICU analysis plugin enabled
+-  an Elasticsearch server with the ICU analysis plugin enabled
 -  an nsqd server
 -  a Redis server
 -  a mailer
@@ -62,7 +62,7 @@ At a minimum, you will need:
 One option is to containerise these services, although you should investigate
 for yourself if this is a sensible approach for your environment.
 
-For example, we choose to run ElasticSearch, nsqd, and Redis in containers. We
+For example, we choose to run Elasticsearch, nsqd, and Redis in containers. We
 also use an `ambassador container`_ to point to our mailserver::
 
     $ docker run -d --name elasticsearch nickstenning/elasticsearch-icu
@@ -130,7 +130,7 @@ options:
 - ``ALLOWED_ORIGINS`` origins allowed to connect over the WebSocket protocol
 - ``CLIENT_ID`` a unique API key for authentication
 - ``CLIENT_SECRET`` a unique API secret for signing authentication requests
-- ``ELASTICSEARCH_INDEX`` the ElasticSearch index name for annotation storage
+- ``ELASTICSEARCH_INDEX`` the Elasticsearch index name for annotation storage
 - ``MAIL_DEFAULT_SENDER`` a sender address for outbound mail
 - ``WEBASSETS_BASE_DIR`` the base directory for static assets
 - ``WEBASSETS_BASE_URL`` the base URL for static asset routes
