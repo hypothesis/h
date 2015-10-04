@@ -271,10 +271,6 @@ class ForgotPasswordController(object):
         mailer = get_mailer(self.request)
         mailer.send(message)
 
-        self.request.session.flash(_("Please check your email to finish "
-                                     "resetting your password."),
-                                   "success")
-
 
 @view_defaults(route_name='reset_password',
                renderer='h:templates/accounts/reset_password.html.jinja2')
@@ -317,6 +313,7 @@ class ResetPasswordController(object):
 
     def reset_password_form(self):
         """Render the reset password form."""
+        code = None
         try:
             code = self.request.matchdict['code']
         except KeyError:
@@ -327,7 +324,7 @@ class ResetPasswordController(object):
             self.form.set_appstruct({'code': code})
             self.form.set_widgets({'code': deform.widget.HiddenWidget()})
 
-        return {'form': self.form.render()}
+        return {'form': self.form.render(), 'has_code': code is not None}
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:

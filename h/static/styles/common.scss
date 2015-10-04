@@ -125,6 +125,13 @@ html {
 .form-inline .control-group { margin-bottom: 0; }
 
 .form-vertical {
+  legend {
+    font-size: $body1-font-size;
+    line-height: $body1-line-height;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+  }
+
   select, textarea, input, button {
     display: block;
     // margin-top: .75em;
