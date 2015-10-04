@@ -28,10 +28,11 @@ You'll also need to run, at a minimum, these external services:
 .. _ElasticSearch: http://www.elasticsearch.org/
 .. _ElasticSearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
 .. _NSQ: http://nsq.io/
+.. _PostgreSQL: http://www.postgresql.org/
+
 
 The following sections will explain how to install these system dependencies
 and services.
-
 
 Installing the system dependencies
 ----------------------------------
@@ -116,43 +117,79 @@ Install compass:
     gem install compass
 
 
-Installing ElasticSearch
-------------------------
+Installing the services
+-----------------------
 
-The h project uses ElasticSearch_ (v1.0 or later) as its principal data store
-for annotation data, and requires the `ElasticSearch ICU Analysis`_ plugin to be
-installed.
+h requires ElasticSearch_ 1.0+ with the `ElasticSearch ICU Analysis`_ plugin,
+`NSQ`_ 0.3+ and `PostgreSQL`_ 9.4+. You can install these services however you
+want, but the easiest way is by using Docker. This should work on any operating
+system that Docker can be installed on:
 
-1.  Install ElasticSearch. It is best to follow the instructions provided by the
-    ElasticSearch project for `installing the package on your platform`_.
-2.  Install the ICU Analysis plugin using the `instructions provided`_. **NB:**
-    ensure you install the correct version of the plugin for your version of
-    ElasticSearch.
-3.  (Re-)start the ElasticSearch daemon following the steps on the ElasticSearch
-    `installation page`_. Note that the daemon needs to be restarted after installing
-    the ICU plugin.
+1. Install Docker by following the instructions on the
+   `Docker website`_.
 
-.. _installing the package on your platform: https://www.elastic.co/downloads/elasticsearch
-.. _instructions provided: https://github.com/elastic/elasticsearch-analysis-icu#icu-analysis-for-elasticsearch
-.. _installation page: https://www.elastic.co/downloads/elasticsearch
+2. Download and run the
+   `official NSQ image <https://hub.docker.com/r/nsqio/nsq/>`_,
+   the `official PostgreSQL image <https://hub.docker.com/_/postgres/>`_,
+   and our custom
+   `Elasticsearch with ICU image <https://hub.docker.com/r/nickstenning/elasticsearch-icu/>`_:
+
+   .. code-block:: bash
+
+      docker run -d --name nsqd -p 4150:4150 -p 4151:4151 nsqio/nsq /nsqd
+      docker run -d --name postgres -p 5432:5432 postgres
+      docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
+
+   You'll now have three Docker containers named ``nsqd``, ``postgres`` and
+   ``elasticsearch`` running and exposing the nsqd service on ports 4150 and
+   4151, Elasticsearch on 9200 and 9300, and PostgreSQL on 5432. You should be
+   able to see them by running ``docker ps``.
+
+   .. note::
+
+      You only need to run the above ``docker run`` commands once. If you need
+      to start the containers again (for example after restarting your
+      computer), you can just run:
+
+      .. code-block:: bash
+
+         docker start postgres elasticsearch nsqd
+
+3. Create the `htest` database in the ``postgres`` container. This is needed
+   to run the h tests:
+
+   .. code-block:: bash
+
+      docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres -c "CREATE DATABASE htest;"'
 
 
-ElasticSearch Troubleshooting
-`````````````````````````````
+.. tip::
 
-By default, ElasticSearch may try to join other nodes on the network resulting
-in ``IndexAlreadyExists`` errors at startup. See the documentation for how to
-turn off discovery.
+   To connect to the PostgreSQL database with psql do:
+
+   .. code-block:: bash
+
+      docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
+
+   This runs psql in a fourth Docker container (from the same official
+   PostgreSQL image, which also contains psql) and links it to your named
+   ``postgres`` container using Docker's container linking system.
+   The psql container is automatically removed (``--rm``) when you exit the
+   psql shell.
+
+.. tip::
+
+   Use the ``docker logs`` command to see what's going on inside your
+   Docker containers, for example:
+
+   .. code-block:: bash
+
+      docker logs nsqd
+
+   For more on how to use Docker see the `Docker website`_.
 
 
-Installing NSQ
---------------
-
-The NSQ homepage has `instructions on installing NSQ`_. Once installed,
-running ``nsqd`` in its default configuration should suffice for integration
-with h in a development environment.
-
-.. _instructions on installing NSQ: http://nsq.io/deployment/installing.html
+.. _Docker website: https://www.docker.com/
 
 
 Get the h source code from GitHub

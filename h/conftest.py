@@ -89,6 +89,7 @@ def authn_policy(config):
 @pytest.fixture()
 def db_session(request, settings):
     """SQLAlchemy session."""
+    transaction.commit()  # Close any open connections from previous tests.
     engine = db.make_engine(settings)
     db.bind_engine(engine, should_create=True, should_drop=True)
 

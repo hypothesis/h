@@ -1,5 +1,7 @@
 # use Travis container build infrastructure
 sudo: false
+addons:
+  postgresql: "9.4"
 language:
   - python
 python:
@@ -10,6 +12,8 @@ install:
   - pip install coveralls pyramid_redis_sessions
   - npm install
   - make
+before_script:
+  - createdb htest
 script:
   # Run all tests, with coverage if possible
   - make cover
