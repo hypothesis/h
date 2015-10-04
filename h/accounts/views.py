@@ -67,12 +67,6 @@ def validate_form(form, data):
         return None, appstruct
 
 
-def auth_view(**settings):
-    settings.setdefault('accept', 'text/html')
-    settings.setdefault('renderer', 'h:templates/auth.html.jinja2')
-    return view_config(**settings)
-
-
 @json_view(context=BadCSRFToken)
 def bad_csrf_token(context, request):
     request.response.status_code = 403
@@ -464,9 +458,6 @@ class RegisterController(object):
         self.request.registry.notify(RegistrationEvent(self.request, user))
 
 
-@auth_view(attr='edit_profile', route_name='edit_profile')
-@auth_view(attr='disable_user', route_name='disable_user')
-@auth_view(attr='profile', route_name='profile')
 class ProfileController(object):
     def __init__(self, request):
         self.request = request
@@ -662,10 +653,7 @@ def includeme(config):
     config.add_route('logout', '/logout')
     config.add_route('register', '/register')
     config.add_route('activate', '/activate/{id}/{code}')
-    config.add_route('profile', '/profile')
-    config.add_route('edit_profile', '/profile/edit')
     config.add_route('forgot_password', '/forgot_password')
     config.add_route('reset_password', '/reset_password')
     config.add_route('reset_password_with_code', '/reset_password/{code}')
-    config.add_route('disable_user', '/account/disable')
     config.scan(__name__)
