@@ -56,6 +56,7 @@ def email_node(**kwargs):
             colander.Email(),
             unique_email,
         ),
+        widget=deform.widget.TextInputWidget(template='emailinput'),
         **kwargs)
 
 
@@ -149,6 +150,9 @@ class ForgotPasswordSchema(CSRFSchema):
     email = colander.SchemaNode(
         colander.String(),
         validator=colander.All(colander.Email()),
+        title=_('Please enter your email address:'),
+        widget=deform.widget.TextInputWidget(template='emailinput',
+                                             autofocus=True),
     )
 
     def validator(self, node, value):
@@ -178,18 +182,42 @@ class RegisterSchema(CSRFSchema):
             unique_username,
             unblacklisted_username,
         ),
+        title=_('Username:'),
+        hint=_('between {min} and {max} characters').format(
+            min=models.USERNAME_MIN_LENGTH,
+            max=models.USERNAME_MAX_LENGTH
+        ),
+        widget=deform.widget.TextInputWidget(autofocus=True),
     )
-    email = email_node()
-    password = password_node()
+    email = email_node(title=_('Email address:'))
+    password = password_node(title=_('Password:'),
+                             hint=_('at least two characters'))
 
 
 class ResetPasswordSchema(CSRFSchema):
-    username = colander.SchemaNode(
+    code = colander.SchemaNode(
         colander.String(),
-        widget=deform.widget.TextInputWidget(template='readonly/textinput'),
-        missing=colander.null,
+        title=_('Your reset code:'),
+        hint=_('this will be emailed to you'),
     )
-    password = password_node()
+    password = password_node(title=_('New password:'),
+                             hint=_('at least two characters'))
+
+    def validator(self, node, value):
+        super(ResetPasswordSchema, self).validator(node, value)
+
+        code = value.get('code')
+
+        activation = models.Activation.get_by_code(code)
+        if activation is not None:
+            user = models.User.get_by_activation(activation)
+
+        if activation is None or user is None:
+            err = colander.Invalid(node)
+            err['code'] = _('Your reset code is not valid')
+            raise err
+
+        value['user'] = user
 
 
 class ProfileSchema(CSRFSchema):

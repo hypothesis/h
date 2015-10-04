@@ -244,6 +244,60 @@ def test_forgot_password_adds_user_to_appstruct(config, user_model):
     assert appstruct['user'] == user
 
 
+@pytest.mark.usefixtures('user_model')
+def test_reset_password_no_activation(config, activation_model):
+    request = csrf_request(config)
+    schema = schemas.ResetPasswordSchema().bind(request=request)
+    activation_model.get_by_code.return_value = None
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({
+            'code': 'abc123',
+            'password': 'secret',
+        })
+
+    assert 'code' in exc.value.asdict()
+    assert 'reset code is not valid' in exc.value.asdict()['code']
+
+
+@pytest.mark.usefixtures('activation_model')
+def test_reset_password_no_user_for_activation(config, user_model):
+    request = csrf_request(config)
+    schema = schemas.ResetPasswordSchema().bind(request=request)
+    user_model.get_by_activation.return_value = None
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({
+            'code': 'abc123',
+            'password': 'secret',
+        })
+
+    assert 'code' in exc.value.asdict()
+    assert 'reset code is not valid' in exc.value.asdict()['code']
+
+
+def test_reset_password_adds_user_to_appstruct(config,
+                                               activation_model,
+                                               user_model):
+    request = csrf_request(config)
+    schema = schemas.ResetPasswordSchema().bind(request=request)
+    user = user_model.get_by_activation.return_value
+
+    appstruct = schema.deserialize({
+        'code': 'abc123',
+        'password': 'secret',
+    })
+
+    assert appstruct['user'] == user
+
+
+@pytest.fixture
+def activation_model(config, request):
+    patcher = patch('h.accounts.schemas.models.Activation', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
 @pytest.fixture
 def user_model(config, request):
     patcher = patch('h.accounts.schemas.models.User', autospec=True)

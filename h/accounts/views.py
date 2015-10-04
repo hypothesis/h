@@ -214,26 +214,18 @@ class AjaxAuthController(AuthController):
         return ajax_payload(self.request, {'status': 'okay'})
 
 
-@auth_view(attr='forgot_password',
-           route_name='forgot_password',
-           request_method='POST')
-@auth_view(attr='forgot_password_form',
-           route_name='forgot_password',
-           request_method='GET')
-@auth_view(attr='reset_password',
-           route_name='reset_password',
-           request_method='POST')
-@auth_view(attr='reset_password_form',
-           route_name='reset_password',
-           request_method='GET')
+@view_defaults(route_name='forgot_password',
+               renderer='h:templates/accounts/forgot_password.html.jinja2')
+@view_config(attr='forgot_password_form', request_method='GET')
+@view_config(attr='forgot_password', request_method='POST')
 class ForgotPasswordController(object):
 
-    """Controller for handling password reset forms."""
+    """Controller for handling forgotten password forms."""
 
     def __init__(self, request):
         self.request = request
-        self.forgot_password_redirect = self.request.route_url('index')
-        self.reset_password_redirect = self.request.route_url('index')
+        self.schema = schemas.ForgotPasswordSchema().bind(request=self.request)
+        self.form = deform.Form(self.schema, buttons=(_('Request reset'),))
 
     def forgot_password(self):
         """
@@ -244,20 +236,30 @@ class ForgotPasswordController(object):
         password" email which contains a token and/or link to the reset
         password form.
         """
-        schema = schemas.ForgotPasswordSchema().bind(request=self.request)
-        form = deform.Form(schema)
+        self._redirect_if_logged_in()
 
-        # Nothing to do here for logged-in users
-        if self.request.authenticated_userid is not None:
-            return httpexceptions.HTTPFound(
-                location=self.forgot_password_redirect)
-
-        err, appstruct = validate_form(form, self.request.POST.items())
-        if err is not None:
-            return err
+        try:
+            appstruct = self.form.validate(self.request.POST.items())
+        except deform.ValidationFailure:
+            return {'form': self.form.render()}
 
         user = appstruct['user']
+        self._send_forgot_password_email(user)
 
+        return httpexceptions.HTTPFound(
+            self.request.route_path('reset_password'))
+
+    def forgot_password_form(self):
+        """Render the forgot password form."""
+        self._redirect_if_logged_in()
+
+        return {'form': self.form.render()}
+
+    def _redirect_if_logged_in(self):
+        if self.request.authenticated_userid is not None:
+            raise httpexceptions.HTTPFound(self.request.route_path('index'))
+
+    def _send_forgot_password_email(self, user):
         # Create a new activation for this user. Any previous activation will
         # get overwritten.
         activation = Activation()
@@ -279,17 +281,24 @@ class ForgotPasswordController(object):
                                      "resetting your password."),
                                    "success")
 
-        return httpexceptions.HTTPFound(location=self.reset_password_redirect)
 
-    # FIXME: generate a form here and progressively enhance it rather than
-    # relying entirely on Angular.
-    def forgot_password_form(self):
-        """Render the forgot password form."""
-        if self.request.authenticated_userid is not None:
-            return httpexceptions.HTTPFound(
-                location=self.forgot_password_redirect)
+@view_defaults(route_name='reset_password',
+               renderer='h:templates/accounts/reset_password.html.jinja2')
+@view_config(attr='reset_password_form', request_method='GET')
+@view_config(route_name='reset_password_with_code',
+             attr='reset_password_form', request_method='GET')
+@view_config(attr='reset_password', request_method='POST')
+class ResetPasswordController(object):
 
-        return {}
+    """Controller for handling password reset forms."""
+
+    def __init__(self, request):
+        self.request = request
+        self.schema = schemas.ResetPasswordSchema().bind(request=self.request)
+        self.form = deform.Form(
+            schema=self.schema,
+            action=self.request.route_path('reset_password'),
+            buttons=(_('Save'),))
 
     def reset_password(self):
         """
@@ -299,64 +308,64 @@ class ForgotPasswordController(object):
         provided by the form is valid, retrieves the user associated with the
         activation code, and resets their password.
         """
-        schema = schemas.ResetPasswordSchema().bind(request=self.request)
-        form = deform.Form(schema)
+        try:
+            appstruct = self.form.validate(self.request.POST.items())
+        except deform.ValidationFailure:
+            # If the code is valid, hide the field.
+            if not self.form['code'].error:
+                self.form.set_widgets({'code': deform.widget.HiddenWidget()})
+            return {'form': self.form.render()}
 
-        code = self.request.matchdict.get('code')
-        if code is None:
-            return httpexceptions.HTTPNotFound()
+        self._reset_password(appstruct['user'], appstruct['password'])
 
-        activation = Activation.get_by_code(code)
-        if activation is None:
-            return httpexceptions.HTTPNotFound()
+        return httpexceptions.HTTPFound(
+            location=self.request.route_path('index'))
 
-        user = User.get_by_activation(activation)
-        if user is None:
-            return httpexceptions.HTTPNotFound()
+    def reset_password_form(self):
+        """Render the reset password form."""
+        try:
+            code = self.request.matchdict['code']
+        except KeyError:
+            pass
+        else:
+            # If the code was in the URL, then we inject it into the form as a
+            # hidden field.
+            self.form.set_appstruct({'code': code})
+            self.form.set_widgets({'code': deform.widget.HiddenWidget()})
 
-        if self.request.method != 'POST':
-            return httpexceptions.HTTPMethodNotAllowed()
+        return {'form': self.form.render()}
 
-        err, appstruct = validate_form(form, self.request.POST.items())
-        if err is not None:
-            return err
+    def _redirect_if_logged_in(self):
+        if self.request.authenticated_userid is not None:
+            raise httpexceptions.HTTPFound(self.request.route_path('index'))
 
-        user.password = appstruct['password']
-        self.request.db.delete(activation)
+    def _reset_password(self, user, password):
+        user.password = password
+        self.request.db.delete(user.activation)
 
         self.request.session.flash(_('Your password has been reset!'),
                                    'success')
         self.request.registry.notify(PasswordResetEvent(self.request, user))
 
-        return httpexceptions.HTTPFound(location=self.reset_password_redirect)
 
-    # FIXME: generate a form here and progressively enhance it rather than
-    # relying entirely on Angular.
-    def reset_password_form(self):
-        """Render the reset password form."""
-        return {}
-
-
-@view_defaults(route_name='session', renderer='json')
-@json_view(attr='forgot_password', request_param='__formid__=forgot_password')
-@json_view(attr='reset_password', request_param='__formid__=reset_password')
-class AjaxForgotPasswordController(ForgotPasswordController):
-    __view_mapper__ = AjaxFormViewMapper
-
-    def reset_password(self):
-        request = self.request
-        request.matchdict = request.POST
-        return super(AjaxForgotPasswordController, self).reset_password()
-
-
-@auth_view(attr='register', route_name='register', request_method='POST')
-@auth_view(attr='register_form', route_name='register', request_method='GET')
-@auth_view(attr='activate', route_name='activate', request_method='GET')
+@view_config(route_name='register', attr='register_form', request_method='GET',
+             renderer='h:templates/accounts/register.html.jinja2')
+@view_config(route_name='register', attr='register', request_method='POST',
+             renderer='h:templates/accounts/register.html.jinja2')
+@view_config(attr='activate', route_name='activate', request_method='GET')
 class RegisterController(object):
     def __init__(self, request):
+        tos_link = ('<a href="/terms-of-service">' +
+                    _('Terms of Service') +
+                    '</a>')
+        form_footer = _('You are agreeing to be bound by '
+                        'our {tos_link}.').format(tos_link=tos_link)
+
         self.request = request
         self.schema = schemas.RegisterSchema().bind(request=self.request)
-        self.form = deform.Form(self.schema)
+        self.form = deform.Form(self.schema,
+                                buttons=(_('Sign up'),),
+                                footer=form_footer)
 
     def register(self):
         """
@@ -365,48 +374,27 @@ class RegisterController(object):
         Validates the form data, creates a new activation for the user, sends
         the activation mail, and then redirects the user to the index.
         """
-        err, appstruct = validate_form(self.form, self.request.POST.items())
-        if err is not None:
-            return err
+        self._redirect_if_logged_in()
 
-        # Create the new user from selected form fields
-        props = {k: appstruct[k] for k in ['username', 'email', 'password']}
-        user = User(**props)
-        self.request.db.add(user)
+        try:
+            appstruct = self.form.validate(self.request.POST.items())
+        except deform.ValidationFailure:
+            return {'form': self.form.render()}
 
-        # Create a new activation for the user
-        activation = Activation()
-        self.request.db.add(activation)
-        user.activation = activation
-
-        # Flush the session to ensure that the user can be created and the
-        # activation is successfully wired up
-        self.request.db.flush()
-
-        # Send the activation email
-        message = activation_email(self.request, user)
-        mailer = get_mailer(self.request)
-        mailer.send(message)
-
-        self.request.session.flash(_("Thank you for registering! Please check "
-                                     "your e-mail now. You can continue by "
-                                     "clicking the activation link we have "
-                                     "sent you."),
-                                   'success')
-        self.request.registry.notify(RegistrationEvent(self.request, user))
+        self._register(username=appstruct['username'],
+                       email=appstruct['email'],
+                       password=appstruct['password'])
 
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
 
-    # FIXME: generate a form here and progressively enhance it rather than
-    # relying entirely on Angular.
     def register_form(self):
-        """Render the registration form."""
-        # Logged in users shouldn't be able to register...
-        if self.request.authenticated_userid is not None:
-            return httpexceptions.HTTPFound(self.request.route_url('stream'))
+        """
+        Render the empty registration form.
+        """
+        self._redirect_if_logged_in()
 
-        return {}
+        return {'form': self.form.render()}
 
     def activate(self):
         """
@@ -446,12 +434,34 @@ class RegisterController(object):
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
 
+    def _redirect_if_logged_in(self):
+        if self.request.authenticated_userid is not None:
+            raise httpexceptions.HTTPFound(self.request.route_url('stream'))
 
-@view_defaults(route_name='session')
-@json_view(attr='register', request_param='__formid__=register')
-@json_view(attr='activate', request_param='__formid__=activate')
-class AjaxRegisterController(RegisterController):
-    __view_mapper__ = AjaxFormViewMapper
+    def _register(self, username, email, password):
+        user = User(username=username, email=email, password=password)
+        self.request.db.add(user)
+
+        # Create a new activation for the user
+        activation = Activation()
+        self.request.db.add(activation)
+        user.activation = activation
+
+        # Flush the session to ensure that the user can be created and the
+        # activation is successfully wired up
+        self.request.db.flush()
+
+        # Send the activation email
+        message = activation_email(self.request, user)
+        mailer = get_mailer(self.request)
+        mailer.send(message)
+
+        self.request.session.flash(_("Thank you for registering! Please check "
+                                     "your e-mail now. You can continue by "
+                                     "clicking the activation link we have "
+                                     "sent you."),
+                                   'success')
+        self.request.registry.notify(RegistrationEvent(self.request, user))
 
 
 @auth_view(attr='edit_profile', route_name='edit_profile')
@@ -615,7 +625,7 @@ def reset_password_email(user, reset_code, reset_link):
 
 def reset_password_link(request, reset_code):
     """Transform an activation code into a password reset link."""
-    return request.route_url('reset_password', code=reset_code)
+    return request.route_url('reset_password_with_code', code=reset_code)
 
 
 def _update_subscription_data(request, subscription):
@@ -655,6 +665,7 @@ def includeme(config):
     config.add_route('profile', '/profile')
     config.add_route('edit_profile', '/profile/edit')
     config.add_route('forgot_password', '/forgot_password')
-    config.add_route('reset_password', '/reset_password/{code}')
+    config.add_route('reset_password', '/reset_password')
+    config.add_route('reset_password_with_code', '/reset_password/{code}')
     config.add_route('disable_user', '/account/disable')
     config.scan(__name__)
