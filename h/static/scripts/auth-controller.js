@@ -7,19 +7,6 @@ function AuthController($scope, $timeout, flash, session, formRespond) {
       $scope.$emit('auth', null, data);
     }
 
-    $scope.account.tab = (function() {
-      switch ($scope.account.tab) {
-      case 'register':
-        return 'login';
-      case 'forgot_password':
-        return 'reset_password';
-      case 'reset_password':
-        return 'login';
-      default:
-        return $scope.account.tab;
-      }
-    })();
-
     angular.copy({}, $scope.model);
 
     if ($scope.form != null) {
@@ -78,12 +65,6 @@ function AuthController($scope, $timeout, flash, session, formRespond) {
     });
   };
 
-  if ($scope.account == null) {
-    $scope.account = {
-      tab: 'login'
-    };
-  }
-
   if ($scope.model == null) {
     $scope.model = {};
   }
@@ -106,4 +87,4 @@ function AuthController($scope, $timeout, flash, session, formRespond) {
   });
 }
 
-angular.module('h').controller('AuthController', AuthController);
+module.exports = AuthController;

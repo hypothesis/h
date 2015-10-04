@@ -27,7 +27,7 @@ describe 'h:AuthController', ->
 
   before ->
     angular.module('h', [])
-    require('../auth-controller')
+    .controller('AuthController', require('../auth-controller'))
 
   beforeEach module('h')
   beforeEach module('h.templates')

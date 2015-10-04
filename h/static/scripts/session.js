@@ -8,9 +8,6 @@ var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 var ACCOUNT_ACTIONS = [
   ['login', 'POST'],
   ['logout', 'POST'],
-  ['register', 'POST'],
-  ['forgot_password', 'POST'],
-  ['reset_password', 'POST'],
   ['profile', 'GET'],
   ['edit_profile', 'POST'],
   ['disable_user', 'POST']

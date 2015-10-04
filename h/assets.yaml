@@ -161,15 +161,6 @@ app_css:
         - h:static/styles/mixins/*.scss
 
 
-account_js:
-  output: scripts/account.min.js
-  filters: uglifyjs
-  contents:
-    - output: scripts/account.js
-      filters: browserify
-      contents: h:static/scripts/account/account.js
-      depends: h:static/scripts/account/*
-
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
 # between frames participating in annotation by using the annotator bridge

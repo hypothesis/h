@@ -15,7 +15,7 @@ describe 'h:AccountController', ->
 
   before ->
     angular.module('h', [])
-    require('../account-controller')
+    .controller('AccountController', require('../account-controller'))
 
   beforeEach module('h')
 
@@ -241,7 +241,7 @@ describe "h:AccountController", ->
       # The h module hasn't been defined yet, so we need to define it
       # (this happens when it.only() is used in this describe()).
       angular.module("h", [])
-    require("../account-controller")
+      .controller('AccountController', require('../account-controller'))
   )
 
   beforeEach module('h')
@@ -379,7 +379,7 @@ describe "h:AccountController", ->
       }
 
       {$scope} = createAccountController(
-        formRespond: require("../../form-respond")()
+        formRespond: require("../form-respond")()
         session: getStubSession(
           edit_profile: -> {$promise: Promise.reject(server_response)}
         )
@@ -451,7 +451,7 @@ describe "h:AccountController", ->
       }
 
       {$scope} = createAccountController(
-        formRespond: require("../../form-respond")()
+        formRespond: require("../form-respond")()
         session: getStubSession(
           edit_profile: -> {$promise: Promise.reject(server_response)}
         )
