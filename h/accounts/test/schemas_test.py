@@ -41,35 +41,6 @@ def test_unblacklisted_username(config):
                   blacklist)
 
 
-def test_email_exists_looks_up_user_by_email(user_model):
-    node = DummyNode()
-
-    try:
-        schemas.email_exists(node, "foo@bar.com")
-    except:
-        pass
-
-    user_model.get_by_email.assert_called_with("foo@bar.com")
-
-
-def test_email_exists_valid_when_user_exists(user_model):
-    node = DummyNode()
-
-    result = schemas.email_exists(node, "foo@bar.com")
-
-    assert result is None
-
-
-def test_email_exists_invalid_when_user_does_not_exist(user_model):
-    node = DummyNode()
-    user_model.get_by_email.return_value = None
-
-    pytest.raises(colander.Invalid,
-                  schemas.email_exists,
-                  node,
-                  "foo@bar.com")
-
-
 def test_unique_email_looks_up_user_by_email(user_model):
     node = DummyNode()
 
@@ -249,6 +220,28 @@ def test_login_inactive(config, user_model):
         })
 
     assert 'not active' in exc.value.msg
+
+
+def test_forgot_password_invalid_with_no_user(config, user_model):
+    request = csrf_request(config)
+    schema = schemas.ForgotPasswordSchema().bind(request=request)
+    user_model.get_by_email.return_value = None
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({'email': 'rapha@example.com'})
+
+    assert 'email' in exc.value.asdict()
+    assert 'no user with the email address' in exc.value.asdict()['email']
+
+
+def test_forgot_password_adds_user_to_appstruct(config, user_model):
+    request = csrf_request(config)
+    schema = schemas.ForgotPasswordSchema().bind(request=request)
+    user = user_model.get_by_email.return_value
+
+    appstruct = schema.deserialize({'email': 'rapha@example.com'})
+
+    assert appstruct['user'] == user
 
 
 @pytest.fixture

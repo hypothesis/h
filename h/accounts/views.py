@@ -256,11 +256,7 @@ class ForgotPasswordController(object):
         if err is not None:
             return err
 
-        # If the validation passes, we assume the user exists.
-        #
-        # TODO: fix this latent race condition by returning a user object in
-        # the appstruct.
-        user = User.get_by_email(appstruct['email'])
+        user = appstruct['user']
 
         # Create a new activation for this user. Any previous activation will
         # get overwritten.

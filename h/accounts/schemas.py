@@ -29,15 +29,6 @@ def get_blacklist():
     return USERNAME_BLACKLIST
 
 
-def email_exists(node, value):
-    '''Colander validator that ensures a user with this email exists.'''
-    user = models.User.get_by_email(value)
-    if not user:
-        msg = _('We have no user with the email address "{}". Try correcting '
-                'this address or try another.').format(value)
-        raise colander.Invalid(node, msg)
-
-
 def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
     user = models.User.get_by_email(value)
@@ -157,8 +148,23 @@ class LoginSchema(CSRFSchema):
 class ForgotPasswordSchema(CSRFSchema):
     email = colander.SchemaNode(
         colander.String(),
-        validator=colander.All(colander.Email(), email_exists)
+        validator=colander.All(colander.Email()),
     )
+
+    def validator(self, node, value):
+        super(ForgotPasswordSchema, self).validator(node, value)
+
+        email = value.get('email')
+        user = models.User.get_by_email(email)
+
+        if user is None:
+            err = colander.Invalid(node)
+            err['email'] = _('We have no user with the email address '
+                             '"{email}". Try correcting this address or try '
+                             'another.').format(email=email)
+            raise err
+
+        value['user'] = user
 
 
 class RegisterSchema(CSRFSchema):
