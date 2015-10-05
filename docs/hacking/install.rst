@@ -143,7 +143,11 @@ system that Docker can be installed on:
    You'll now have three Docker containers named ``nsqd``, ``postgres`` and
    ``elasticsearch`` running and exposing the nsqd service on ports 4150 and
    4151, Elasticsearch on 9200 and 9300, and PostgreSQL on 5432. You should be
-   able to see them by running ``docker ps``.
+   able to see them by running ``docker ps``. You should also be able to visit
+   your Elasticsearch service by opening http://127.0.0.1:9200/ in a browser,
+   and connect to your PostgreSQL by running
+   ``psql postgresql://postgres@localhost/postgres`` (if you have psql
+   installed).
 
    .. note::
 
@@ -165,7 +169,9 @@ system that Docker can be installed on:
 
 .. tip::
 
-   To connect to the PostgreSQL database with psql do:
+   You can use the PostgreSQL Docker image to open a psql shell to your
+   Dockerized database without having to install psql on your host machine.
+   Do:
 
    .. code-block:: bash
 
