@@ -2,6 +2,7 @@
 
 var baseURI = require('document-base-uri');
 
+var events = require('../events');
 var groups = require('../groups');
 
 // Return a mock session service containing three groups.
@@ -16,7 +17,6 @@ var sessionWithThreeGroups = function() {
     }
   };
 };
-
 
 describe('groups', function() {
   var fakeSession;
@@ -35,7 +35,15 @@ describe('groups', function() {
       setItem: sandbox.stub()
     };
     fakeRootScope = {
-      $broadcast: sandbox.stub()
+      eventCallbacks: [],
+
+      $broadcast: sandbox.stub(),
+
+      $on: function(event, callback) {
+        if (event === events.SESSION_CHANGED) {
+          this.eventCallbacks.push(callback);
+        }
+      }
     };
     fakeFeatures = {
       flagEnabled: function() {return true;}
@@ -106,6 +114,26 @@ describe('groups', function() {
       var s = service();
 
       assert.equal(s.focused().id, 'id3');
+    });
+
+    it('should update if the user leaves the focused group', function () {
+      var s = service();
+      s.focus('id2');
+
+      var leaveGroup = function(id) {
+        fakeSession.state.groups =
+          fakeSession.state.groups.slice().filter(function (group) {
+            return group.id !== id;
+          });
+          fakeRootScope.eventCallbacks.forEach(function (callback) {
+            callback();
+          });
+      };
+
+      leaveGroup('id3');
+      assert.equal(s.focused().id, 'id2');
+      leaveGroup('id2');
+      assert.notEqual(s.focused().id, 'id2');
     });
   });
 

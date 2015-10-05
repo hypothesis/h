@@ -13,7 +13,7 @@ from pyramid.testing import DummyRequest
 
 from h.streamer import FilterToElasticFilter
 from h.streamer import WebSocket
-from h.streamer import should_send_event
+from h.streamer import should_send_annotation_event
 from h.streamer import broadcast_from_queue
 from h.streamer import websocket
 
@@ -274,7 +274,7 @@ class TestBroadcast(unittest.TestCase):
         self.queue = MagicMock()
         self.queue.__iter__.return_value = self.messages
 
-        self.should_patcher = patch('h.streamer.should_send_event')
+        self.should_patcher = patch('h.streamer.should_send_annotation_event')
         self.should = self.should_patcher.start()
 
     def tearDown(self):
@@ -305,57 +305,57 @@ class TestShouldSendEvent(unittest.TestCase):
 
     def test_non_sending_socket_receives_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(
+        assert should_send_annotation_event(
             self.sock_giraffe,
             {'permissions': {'read': ['group:__world__']}},
             data)
 
     def test_sending_socket_does_not_receive_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_pigeon, {}, data) is False
+        assert should_send_annotation_event(self.sock_pigeon, {}, data) is False
 
     def test_terminated_socket_does_not_recieve_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_roadkill, {}, data) is False
+        assert should_send_annotation_event(self.sock_roadkill, {}, data) is False
 
-    def test_should_send_event_no_filter(self):
+    def test_should_send_annotation_event_no_filter(self):
         self.sock_giraffe.filter = None
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(
+        assert should_send_annotation_event(
             self.sock_giraffe,
             {'permissions': {'read': ['group:__world__']}},
             data) is False
 
-    def test_should_send_event_doesnt_send_reads(self):
+    def test_should_send_annotation_event_doesnt_send_reads(self):
         data = {'action': 'read', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_giraffe, {}, data) is False
+        assert should_send_annotation_event(self.sock_giraffe, {}, data) is False
 
-    def test_should_send_event_filtered(self):
+    def test_should_send_annotation_event_filtered(self):
         self.sock_pigeon.filter.match.return_value = False
         data = {'action': 'update', 'src_client_id': 'giraffe'}
-        assert should_send_event(
+        assert should_send_annotation_event(
             self.sock_pigeon,
             {'permissions': {'read': ['group:__world__']}},
             data) is False
 
-    def test_should_send_event_does_not_send_nipsad_annotations(self):
+    def test_should_send_annotation_event_does_not_send_nipsad_annotations(self):
         """Users should not see annotations from NIPSA'd users."""
         annotation = {'user': 'fred', 'nipsa': True}
         socket = Mock(terminated=False, client_id='foo')
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert not should_send_event(socket, annotation, event_data)
+        assert not should_send_annotation_event(socket, annotation, event_data)
 
-    def test_should_send_event_does_send_nipsad_annotations(self):
+    def test_should_send_annotation_event_does_send_nipsad_annotations(self):
         """NIPSA'd users should see their own annotations."""
         annotation = {'user': 'fred', 'nipsa': True}
         socket = Mock(terminated=False, client_id='foo')
         socket.request.authenticated_userid = 'fred'  # The annotation creator.
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert should_send_event(socket, annotation, event_data)
+        assert should_send_annotation_event(socket, annotation, event_data)
 
-    def test_should_send_event_does_not_send_group_annotations(self):
+    def test_should_send_annotation_event_does_not_send_group_annotations(self):
         """Users shouldn't see annotations in groups they aren't members of."""
         annotation = {
             'user': 'fred',
@@ -365,9 +365,9 @@ class TestShouldSendEvent(unittest.TestCase):
         socket.request.effective_principals = []  # No 'group:private-group'.
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert not should_send_event(socket, annotation, event_data)
+        assert not should_send_annotation_event(socket, annotation, event_data)
 
-    def test_should_send_event_does_send_nipsad_annotations(self):
+    def test_should_send_annotation_event_does_send_nipsad_annotations(self):
         """Users should see annotations from groups they are members of."""
         annotation = {
             'user': 'fred',
@@ -378,9 +378,9 @@ class TestShouldSendEvent(unittest.TestCase):
         socket.request.effective_principals = ['group:private-group']
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert should_send_event(socket, annotation, event_data)
+        assert should_send_annotation_event(socket, annotation, event_data)
 
-    def test_should_send_event_does_not_crash_if_no_group(self):
+    def test_should_send_annotation_event_does_not_crash_if_no_group(self):
         """Users should see annotations from groups they are members of."""
         annotation = {
             'user': 'fred',
@@ -390,4 +390,4 @@ class TestShouldSendEvent(unittest.TestCase):
         socket.request.effective_principals = ['group:private-group']
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert should_send_event(socket, annotation, event_data)
+        assert should_send_annotation_event(socket, annotation, event_data)

@@ -33,6 +33,7 @@ function fakeSocketConstructor(url) {
 describe('streamer', function () {
   var fakeAnnotationMapper;
   var fakeGroups;
+  var fakeSession;
   var socket;
 
   beforeEach(function () {
@@ -47,10 +48,15 @@ describe('streamer', function () {
       },
     };
 
+    fakeSession = {
+      update: sinon.stub(),
+    };
+
     socket = streamer.connect(
       fakeSocketConstructor,
       fakeAnnotationMapper,
-      fakeGroups
+      fakeGroups,
+      fakeSession
     );
   });
 
@@ -95,6 +101,21 @@ describe('streamer', function () {
         }]
       });
       assert.ok(fakeAnnotationMapper.unloadAnnotations.calledOnce);
+    });
+  });
+
+  describe('session change notifications', function () {
+    it('updates the session when a notification is received', function () {
+      var model = {
+        groups: [{
+          id: 'new-group'
+        }]
+      };
+      socket.notify({
+        type: 'session-change',
+        model: model,
+      });
+      assert.ok(fakeSession.update.calledWith(model));
     });
   });
 });

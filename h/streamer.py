@@ -12,6 +12,7 @@ import weakref
 
 import gevent
 import gevent.queue
+from functools import partial
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.config import aslist
@@ -25,7 +26,8 @@ from h.api import nipsa
 from h.api import uri
 from h.api.search import query
 from .models import Annotation
-
+from h.groups.models import Group
+import h.session
 
 log = logging.getLogger(__name__)
 
@@ -439,6 +441,8 @@ class FilterHandler(object):
 class WebSocket(_WebSocket):
     # Class attributes
     event_queue = None
+    """ Tuples of (topic, message) pulled from the message queue """
+
     instances = weakref.WeakSet()
     origins = []
 
@@ -464,15 +468,23 @@ class WebSocket(_WebSocket):
             return
         cls.event_queue = gevent.queue.Queue()
         reader_id = 'stream-{}#ephemeral'.format(_random_id())
-        reader = request.get_queue_reader('annotations', reader_id)
-        reader.on_message.connect(cls.on_queue_message)
-        reader.start(block=False)
+
+        for topic in ['annotations', 'user']:
+            reader = request.get_queue_reader(topic, reader_id)
+            reader.on_message.connect(
+                receiver=partial(cls.on_queue_message, topic),
+                # hold a reference to the per-topic callable returned by
+                # partial()
+                weak=False
+            )
+            reader.start(block=False)
+
         gevent.spawn(broadcast_from_queue, cls.event_queue, cls.instances)
 
     @classmethod
-    def on_queue_message(cls, reader, message=None):
+    def on_queue_message(cls, topic, reader, message=None):
         if message is not None:
-            cls.event_queue.put(message)
+            cls.event_queue.put((topic, message))
 
     def opened(self):
         self.start_reader(self.request)
@@ -550,16 +562,57 @@ def broadcast_from_queue(queue, sockets):
     Pulls messages from a passed queue object, and handles dispatching them to
     appropriate active sessions.
     """
-    for message in queue:
-        data_in = json.loads(message.body)
-        action = data_in['action']
-        annotation = Annotation(**data_in['annotation'])
-        payload = _annotation_packet([annotation], action)
-        data_out = json.dumps(payload)
-        for socket in list(sockets):
-            if should_send_event(socket, annotation, data_in):
-                socket.send(data_out)
+    for (topic, message) in queue:
+        if topic == 'annotation':
+            broadcast_annotation_message(message, sockets)
+        elif topic == 'user':
+            broadcast_session_change_message(message, sockets)
 
+def broadcast_annotation_message(message, sockets):
+    """
+    Broadcast an annotation message to all appropriate active sessions.
+    """
+    data_in = json.loads(message.body)
+    action = data_in['action']
+    annotation = Annotation(**data_in['annotation'])
+    payload = _annotation_packet([annotation], action)
+    data_out = json.dumps(payload)
+    for socket in list(sockets):
+        if should_send_annotation_event(socket, annotation, data_in):
+            socket.send(data_out)
+
+def _get_group_json(hash_id):
+    # FIXME - There is an issue (race condition?) here where
+    # get_by_hashid() sometimes returns None, though the hash_id appears
+    # to be valid.
+    group = Group.get_by_hashid(hash_id)
+    return {
+        'name': group.name,
+        'id': group.hashid,
+        # TODO - Generate group URL correctly
+        'url': 'https://dummy/%s/%s' % (hash_id, group.slug)
+        #'url': request.route_url('group_read',
+        #    hashid=group.hashid,
+        #    slug=group.slug)
+    }
+
+def broadcast_session_change_message(message, sockets):
+    """ Broadcast a session change to all appropriate active sessions. """
+    data_in = json.loads(message.body)
+
+    for socket in list(sockets):
+        # TODO - This logic is duplicated in should_send_annotation_event()
+        if socket.terminated:
+            continue
+
+        if socket.request.authenticated_userid == data_in['userid']:
+            # for session state change events, the full session model is included
+            # so that clients can update themselves without further API requests
+            socket.send(json.dumps({
+                'type': 'session-change',
+                'action': data_in['type'],
+                'model': h.session.model(socket.request)
+            }))
 
 def _authorized_to_read(effective_principals, annotation):
     """Return True if effective_principals authorize reading annotation.
@@ -579,7 +632,7 @@ def _authorized_to_read(effective_principals, annotation):
     return False
 
 
-def should_send_event(socket, annotation, event_data):
+def should_send_annotation_event(socket, annotation, event_data):
     """
     Inspects the passed annotation and action and decides whether or not
     the underlying session should receive the event. If it should, the

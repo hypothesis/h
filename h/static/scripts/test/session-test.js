@@ -2,8 +2,12 @@
 
 var mock = angular.mock;
 
+var events = require('../events');
+
 describe('h:session', function () {
   var $httpBackend;
+  var $rootScope;
+
   var fakeFlash;
   var fakeXsrf;
   var sandbox;
@@ -30,9 +34,10 @@ describe('h:session', function () {
   }));
 
 
-  beforeEach(mock.inject(function (_$httpBackend_, _session_) {
+  beforeEach(mock.inject(function (_$httpBackend_, _session_, _$rootScope_) {
     $httpBackend = _$httpBackend_;
     session = _session_;
+    $rootScope = _$rootScope_;
   }));
 
   afterEach(function () {
@@ -149,6 +154,19 @@ describe('h:session', function () {
       $httpBackend.expectGET(url).respond({});
       session.load();
       $httpBackend.flush();
+    });
+  });
+
+  describe('#update()', function () {
+    it('broadcasts an event when the session is updated', function () {
+      var sessionChangeCallback = sinon.stub();
+      $rootScope.$on(events.SESSION_CHANGED, sessionChangeCallback);
+      session.update({
+        groups: [{
+          id: 'groupid'
+        }]
+      });
+      assert.calledOnce(sessionChangeCallback);
     });
   });
 });

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 import deform
 from pyramid import httpexceptions as exc
 from pyramid.view import view_config
@@ -28,6 +30,14 @@ def create_form(request):
 
     return {'form': form.render()}
 
+def _send_group_notification(request, type, hashid):
+    queue = request.get_queue_writer()
+    data = {
+      'type': type,
+      'userid': request.authenticated_userid,
+      'group': hashid,
+    }
+    queue.publish('user', json.dumps(data))
 
 @view_config(route_name='group_create',
              request_method='POST',
@@ -53,6 +63,8 @@ def create(request):
 
     # We need to flush the db session here so that group.id will be generated.
     request.db.flush()
+
+    _send_group_notification(request, 'group-joined', group.hashid)
 
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
     return exc.HTTPSeeOther(url)
@@ -150,10 +162,7 @@ def join(request):
                                      request.authenticated_userid)
 
     group.members.append(user)
-
-    request.session.flash(_(
-        "You've joined the {name} group.").format(name=group.name),
-        'success')
+    _send_group_notification(request, 'group-joined', group.hashid)
 
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
     return exc.HTTPSeeOther(url)
@@ -188,7 +197,10 @@ def leave(request):
     user = models.User.get_by_userid(request.domain,
                                      request.authenticated_userid)
 
+    # FIXME - This should raise an error if the user is not
+    # a member of the group
     group.members.remove(user)
+    _send_group_notification(request, 'group-left', group.hashid)
 
     return exc.HTTPNoContent()
 
