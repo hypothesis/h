@@ -91,6 +91,13 @@ module.exports = function(config) {
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
 
+    // warn about tests that take a long time to execute,
+    // in combination with per-test timeouts this can also be used
+    // to discover whether tests that intermittently timeout are merely slow,
+    // in which case they will trigger a warning,
+    // or failing to complete at all within the extended timeout
+    reportSlowerThan: 500,
+
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: true,
 
