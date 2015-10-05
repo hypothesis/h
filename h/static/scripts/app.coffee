@@ -4,51 +4,11 @@ angular = require('angular')
 require('angular-websocket')
 require('angular-jwt')
 
-uuid = require('node-uuid')
-
-clientId = uuid.v4()
-
-socket = null
+streamer = require('./streamer')
 
 resolve =
   store: ['store', (store) -> store.$promise]
-  streamer: [
-    '$websocket', 'annotationMapper', 'groups'
-    ($websocket,   annotationMapper,   groups) ->
-      # Get the socket URL
-      url = new URL('/ws', baseURI)
-      url.protocol = url.protocol.replace('http', 'ws')
-
-      # Close any existing socket
-      socket?.close()
-
-      # Open the socket
-      socket = $websocket(url.href, [], {reconnectIfNotNormalClose: true})
-      socket.send(messageType: 'client_id', value: clientId)
-
-      # Listen for updates
-      socket.onMessage (event) ->
-        message = JSON.parse(event.data)
-        return if !message or message.type != 'annotation-notification'
-        action = message.options.action
-        annotations = message.payload
-        return unless annotations?.length
-
-        # Discard annotations that aren't from the currently focused group.
-        # FIXME: Have the server only send us annotations from the focused
-        # group in the first place.
-        annotations = annotations.filter((ann) ->
-          return ann.group == groups.focused().id
-        )
-
-        switch action
-          when 'create', 'update', 'past'
-            annotationMapper.loadAnnotations annotations
-          when 'delete'
-            annotationMapper.unloadAnnotations annotations
-
-      return socket
-  ]
+  streamer: streamer.connect
   threading: [
     'annotationMapper', 'drafts', 'threading'
     (annotationMapper,   drafts,   threading) ->
@@ -112,7 +72,7 @@ configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
 setupCrossFrame = ['crossframe', (crossframe) -> crossframe.connect()]
 
 setupHttp = ['$http', ($http) ->
-  $http.defaults.headers.common['X-Client-Id'] = clientId
+  $http.defaults.headers.common['X-Client-Id'] = streamer.clientId
 ]
 
 setupHost = ['host', (host) -> ]
