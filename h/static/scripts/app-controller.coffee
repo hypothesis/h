@@ -38,9 +38,14 @@ module.exports = class AppController
     # Default sort
     $scope.sort = name: 'Location'
 
-    $scope.$on('groupFocused', (event) ->
-      $route.reload()
-    )
+    # Reload the view when the focused group changes or the user
+    # joins or leaves a group
+    groupChangeEvents = ['groupJoined', 'groupLeft', 'groupFocused'];
+    groupChangeEvents.forEach((eventName) ->
+      $scope.$on(eventName, (event) ->
+        $route.reload()
+      )
+    );
 
     identity.watch({
       onlogin: (identity) -> $scope.auth.user = auth.userid(identity)

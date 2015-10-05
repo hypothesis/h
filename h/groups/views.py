@@ -5,6 +5,7 @@ from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 from pyramid import renderers
 
+from h.api.events import UserStatusEvent
 from h.groups import schemas
 from h import i18n
 from h import models
@@ -29,6 +30,14 @@ def create_form(request):
 
     return {'form': form, 'data': {}}
 
+def _send_group_join_notification(request, hashid):
+    event = UserStatusEvent(
+      request=request,
+      user_id=request.authenticated_userid,
+      type='group-joined',
+      group_id=hashid,
+    )
+    request.registry.notify(event)
 
 @view_config(route_name='group_create',
              request_method='POST',
@@ -54,6 +63,8 @@ def create(request):
 
     # We need to flush the db session here so that group.id will be generated.
     request.db.flush()
+
+    _send_group_join_notification(request, group.hashid)
 
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
     return exc.HTTPSeeOther(url)
@@ -151,10 +162,7 @@ def join(request):
                                      request.authenticated_userid)
 
     group.members.append(user)
-
-    request.session.flash(_(
-        "You've joined the {name} group.").format(name=group.name),
-        'success')
+    _send_group_join_notification(request, group.hashid)
 
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
     return exc.HTTPSeeOther(url)
