@@ -190,7 +190,7 @@ def users_index(request):
                   renderer='h:templates/admin/badge.html.jinja2',
                   permission='admin')
 def badge_index(_):
-    return {"uris": models.BadgeBlocklist.all()}
+    return {"uris": models.Blocklist.all()}
 
 
 @view.view_config(route_name='admin_badge',
@@ -200,7 +200,7 @@ def badge_index(_):
                   permission='admin')
 def badge_add(request):
     try:
-        request.db.add(models.BadgeBlocklist(uri=request.params['add']))
+        request.db.add(models.Blocklist(uri=request.params['add']))
     except ValueError as err:
         request.session.flash(err.message, 'error')
     return badge_index(request)
@@ -213,7 +213,7 @@ def badge_add(request):
                   permission='admin')
 def badge_remove(request):
     uri = request.params['remove']
-    request.db.delete(models.BadgeBlocklist.get_by_uri(uri))
+    request.db.delete(models.Blocklist.get_by_uri(uri))
     return badge_index(request)
 
 

@@ -1,4 +1,4 @@
-"""Add the badge_blocklist table.
+"""Add the blocklist table.
 
 Revision ID: 571394188821
 Revises: 2337185eae43
@@ -15,10 +15,10 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    badge_blocklist_table = op.create_table('badge_blocklist',
+    blocklist_table = op.create_table('blocklist',
         sa.Column('id', sa.Integer(), autoincrement=True, primary_key=True),
         sa.Column('uri', sa.UnicodeText(), nullable=False, unique=True))
 
 
 def downgrade():
-    op.drop_table('badge_blocklist')
+    op.drop_table('blocklist')

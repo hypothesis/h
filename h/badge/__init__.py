@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from h.badge.models import BadgeBlocklist
+from h.badge.models import Blocklist
 
 
 def includeme(config):

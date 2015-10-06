@@ -501,7 +501,7 @@ badge_index_fixtures = pytest.mark.usefixtures('models')
 @badge_index_fixtures
 def test_badge_index_returns_all_blocklisted_urls(models):
     assert admin.badge_index(Mock()) == {
-        "uris": models.BadgeBlocklist.all.return_value}
+        "uris": models.Blocklist.all.return_value}
 
 
 badge_add_fixtures = pytest.mark.usefixtures('models', 'badge_index')
@@ -513,8 +513,8 @@ def test_badge_add_adds_uri_to_model(models):
 
     admin.badge_add(request)
 
-    models.BadgeBlocklist.assert_called_once_with(uri='test_uri')
-    request.db.add.assert_called_once_with(models.BadgeBlocklist.return_value)
+    models.Blocklist.assert_called_once_with(uri='test_uri')
+    request.db.add.assert_called_once_with(models.Blocklist.return_value)
 
 
 @badge_add_fixtures
@@ -527,7 +527,7 @@ def test_badge_add_returns_index(badge_index):
 @badge_add_fixtures
 def test_badge_add_flashes_error_if_uri_already_blocked(models):
     request = Mock(params={'add': 'test_uri'})
-    models.BadgeBlocklist.side_effect = ValueError("test_error_message")
+    models.Blocklist.side_effect = ValueError("test_error_message")
 
     admin.badge_add(request)
 
@@ -539,7 +539,7 @@ def test_badge_add_flashes_error_if_uri_already_blocked(models):
 @badge_add_fixtures
 def test_badge_add_returns_index_if_uri_already_blocked(models, badge_index):
     request = Mock(params={'add': 'test_uri'})
-    models.BadgeBlocklist.side_effect = ValueError("test_error_message")
+    models.Blocklist.side_effect = ValueError("test_error_message")
 
     assert admin.badge_add(request) == badge_index.return_value
 
@@ -553,9 +553,9 @@ def test_badge_remove_deletes_model(models):
 
     admin.badge_remove(request)
 
-    models.BadgeBlocklist.get_by_uri.assert_called_once_with('test_uri')
+    models.Blocklist.get_by_uri.assert_called_once_with('test_uri')
     request.db.delete.assert_called_once_with(
-        models.BadgeBlocklist.get_by_uri.return_value)
+        models.Blocklist.get_by_uri.return_value)
 
 
 @badge_remove_fixtures

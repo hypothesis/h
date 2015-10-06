@@ -7,7 +7,7 @@ from h.db import Base
 from h.i18n import TranslationString as _
 
 
-class BadgeBlocklist(Base):
+class Blocklist(Base):
 
     """A list of URIs for which the badge API will always return 0.
 
@@ -16,7 +16,7 @@ class BadgeBlocklist(Base):
 
     """
 
-    __tablename__ = 'badge_blocklist'
+    __tablename__ = 'blocklist'
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     uri = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
@@ -34,7 +34,7 @@ class BadgeBlocklist(Base):
     @classmethod
     def get_by_uri(cls, uri):
         try:
-            return cls.query.filter(BadgeBlocklist.uri == uri).one()
+            return cls.query.filter(Blocklist.uri == uri).one()
         except exc.NoResultFound:
             return None
 

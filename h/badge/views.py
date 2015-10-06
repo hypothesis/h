@@ -12,7 +12,7 @@ def badge(request):
 
     This is for the number that's displayed on the Chrome extension's badge.
 
-    Certain pages are blacklisted so that the badge never shows a number on
+    Certain pages are blocklisted so that the badge never shows a number on
     those pages. The Chrome extension is oblivious to this, we just tell it
     that there are 0 annotations.
 
@@ -22,7 +22,7 @@ def badge(request):
     if not uri:
         raise httpexceptions.HTTPBadRequest()
 
-    if models.BadgeBlocklist.is_blocked(uri):
+    if models.Blocklist.is_blocked(uri):
         return {'total': 0}
 
     return {
