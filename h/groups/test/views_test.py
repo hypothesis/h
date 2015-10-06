@@ -390,6 +390,21 @@ def test_join_redirects_to_group_page(Group):
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
 
+leave_fixtures = pytest.mark.usefixtures('User', 'Group')
+
+
+@leave_fixtures
+def test_leave_removes_user_from_group_members(Group, User):
+    group = mock.Mock()
+    Group.get_by_hashid.return_value = group
+    User.get_by_userid.return_value = mock.sentinel.user
+
+    request = _mock_request(matchdict=_matchdict())
+    result = views.leave(request)
+
+    group.members.remove.assert_called_once_with(mock.sentinel.user)
+
+
 @pytest.fixture
 def Form(request):
     patcher = mock.patch('h.groups.views.deform.Form', autospec=True)
