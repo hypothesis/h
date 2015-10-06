@@ -1,1 +1,3 @@
 h/_version.py export-subst
+h/browser/chrome/content/build/* linguist-vendored
+h/browser/chrome/content/web/* linguist-vendored
