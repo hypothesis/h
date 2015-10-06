@@ -21,7 +21,7 @@ describe 'AppController', ->
     $controller('AppController', locals)
 
   before ->
-    angular.module('h')
+    angular.module('h', [])
     .controller('AppController', require('../app-controller'))
     .controller('AnnotationUIController', angular.noop)
 
@@ -137,7 +137,11 @@ describe 'AppController', ->
     createController()
     assert.isFalse($scope.shareDialog.visible)
 
-  it 'calls $route.reload() when the focused group changes', ->
+  it 'calls $route.reload() when the groups state changes', ->
     createController()
-    $scope.$broadcast('groupFocused')
-    assert.calledOnce(fakeRoute.reload)
+    groupEvents = ['groupFocused', 'groupJoined', 'groupLeft'];
+    groupEvents.forEach((event) ->
+      fakeRoute.reload = sinon.spy()
+      $scope.$broadcast(event)
+      assert.calledOnce(fakeRoute.reload)
+    )

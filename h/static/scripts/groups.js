@@ -19,7 +19,7 @@ function groups(localStorage, session, $rootScope, features) {
   // the groups dropdown, the annotations displayed are filtered to only ones
   // that belong to this group, and any new annotations that the user creates
   // will be created in this group.
-  var focused;
+  var focusedGroup;
 
   function all() {
     return session.state.groups || [];
@@ -51,8 +51,8 @@ function groups(localStorage, session, $rootScope, features) {
     });
     session.state.groups = otherGroups;
 
-    if (focused.id === group.id) {
-      focused = null;
+    if (focusedGroup && focusedGroup.id === group.id) {
+      focusedGroup = null;
     }
 
     $rootScope.$broadcast('groupLeft', group.id);
@@ -63,13 +63,13 @@ function groups(localStorage, session, $rootScope, features) {
    * a previous session. Lastly, we fall back to the first group available.
    */
   function focused() {
-    if (focused) {
-     return focused;
+    if (focusedGroup) {
+     return focusedGroup;
     } else if (features.flagEnabled('groups')) {
      var fromStorage = get(localStorage.getItem(STORAGE_KEY));
      if (typeof fromStorage !== 'undefined') {
-       focused = fromStorage;
-       return focused;
+       focusedGroup = fromStorage;
+       return focusedGroup;
      }
     }
     return all()[0];
@@ -79,7 +79,7 @@ function groups(localStorage, session, $rootScope, features) {
   function focus(id) {
    var g = get(id);
    if (typeof g !== 'undefined') {
-     focused = g;
+     focusedGroup = g;
      localStorage.setItem(STORAGE_KEY, g.id);
      $rootScope.$broadcast('groupFocused', g.id);
    }
