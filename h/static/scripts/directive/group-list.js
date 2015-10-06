@@ -1,7 +1,7 @@
 'use strict';
 
 // @ngInject
-function GroupListController($scope) {
+function GroupListController($scope, $window) {
   $scope.expandedGroupId = undefined;
 
   // show the share link for the specified group or clear it if
@@ -25,6 +25,15 @@ function GroupListController($scope) {
       }
       return a.name.localeCompare(b.name);
     });
+  }
+
+  $scope.leaveGroup = function (groupId) {
+    var groupName = $scope.groups.get(groupId).name;
+    var message = 'Are you sure you want to leave the group "' +
+      groupName + '"?';
+    if ($window.confirm(message)) {
+      $scope.groups.leave(groupId);
+    }
   }
 }
 

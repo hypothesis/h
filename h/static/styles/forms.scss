@@ -285,6 +285,14 @@
   padding: 2px;
 }
 
+// a light grey cancel/remove button which darkens on hover
+.btn--cancel {
+  color: $color-silver;
+  &:hover {
+    color: darken($color-silver, 15%);
+  }
+}
+
 // Handles state transitions from "default" -> "loading" -> "success"
 [status-button-state] .btn-message {
   top: -999em;

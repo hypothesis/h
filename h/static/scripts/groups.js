@@ -7,10 +7,12 @@
  */
 'use strict';
 
+var baseURI = require('document-base-uri');
+
 var STORAGE_KEY = 'hypothesis.groups.focus';
 
 // @ngInject
-function groups(localStorage, session, $rootScope, features) {
+function groups(localStorage, session, $rootScope, features, $http) {
   // The currently focused group. This is the group that's shown as selected in
   // the groups dropdown, the annotations displayed are filtered to only ones
   // that belong to this group, and any new annotations that the user creates
@@ -31,9 +33,27 @@ function groups(localStorage, session, $rootScope, features) {
     }
   };
 
+  /** Leave the group with the given ID.
+   * Returns a promise which resolves when the action completes.
+   */
+  function leave(id) {
+    var response = $http({
+      method: 'POST',
+      url: baseURI + 'groups/' + id + '/leave',
+    });
+
+    // TODO - Optimistically call remove() to
+    // remove the group locally when
+    // https://github.com/hypothesis/h/pull/2587 has been merged
+
+    return response;
+  };
+
   return {
     all: all,
     get: get,
+
+    leave: leave,
 
     // Return the currently focused group. If no group is explicitly focused we
     // will check localStorage to see if we have persisted a focused group from
