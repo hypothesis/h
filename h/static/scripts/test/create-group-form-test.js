@@ -1,5 +1,4 @@
-var fetch = require('isomorphic-fetch');
-var swig = require('swig');
+"use strict";
 
 var CreateGroupFormController = require('../create-group-form');
 
@@ -16,41 +15,20 @@ function sendEvent(element, eventType) {
   element.dispatchEvent(event);
 }
 
-// fetch the text for Karma resource which matches the given regex.
-// The resource must have been included in the list of files for the test
-// specified in the karma.config.js file
-function fetchTemplate(pathRegex) {
-  var templateUrl = Object.keys(window.__karma__.files).filter(function (path) {
-    return path.match(pathRegex);
-  })[0];
-  return fetch(templateUrl).then(function (response) {
-    return response.text();
-  });
-}
-
 describe('CreateGroupFormController', function () {
   var element;
   var template;
 
   before(function () {
-    return fetchTemplate(/create\.html\.jinja2$/).then(function (text) {
-      // extract the 'content' block from the template
-      var contentBlock = text.match(/{% block content %}([^]*){% endblock content %}/)[1];
-      template = swig.compile(contentBlock);
-    });
+    template = '<input type="text" class="js-group-name-input">' +
+               '<input type="submit" class="js-create-group-create-btn">' +
+               '<a href="" class="js-group-info-link">Tell me more!</a>' +
+               '<div class="js-group-info-text is-hidden">More!</div>';
   });
 
   beforeEach(function () {
-    var context = {
-      form: {
-        csrf_token: {
-          render: function() {}
-        },
-        name: ''
-      }
-    };
     element = document.createElement('div');
-    element.innerHTML = template(context);
+    element.innerHTML = template;
   });
 
   it('should enable submission if form is valid', function () {

@@ -35,7 +35,6 @@
     "extend": "^2.0.0",
     "frame-rpc": "^1.3.1",
     "hammerjs": "^2.0.4",
-    "isomorphic-fetch": "^2.1.1",
     "jquery": "1.11.1",
     "js-polyfills": "^0.1.11",
     "moment": "^2.10.6",
@@ -65,8 +64,7 @@
     "proxyquire": "^1.6.0",
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.0.0",
-    "sinon": "1.16.1",
-    "swig": "^1.4.2"
+    "sinon": "1.16.1"
   },
   "engines": {
     "node": "0.10.x"
