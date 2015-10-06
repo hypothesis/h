@@ -12,30 +12,7 @@
   <div id="claim" class="content paper">
     {% include "h:templates/includes/header.html.jinja2" %}
     <div class="form-vertical">
-      <form class="form" action="{{ form.action }}" method="{{ form.method }}">
-        {{ form['csrf_token'].render() | safe }}
-        <div class="form-field{% if form['password'].error %} form-field-error{% endif %}">
-          <label class="form-label" for="field-activate-password">
-            New password:
-            <span class="form-hint">(at least two characters)</span>
-          </label>
-          <input class="form-input" id="field-activate-password"
-                 autofocus onfocus="this.select()"
-                 type="password" name="password" value="" required />
-          {% if form['password'].error %}
-            <ul class="form-error-list">
-              {% for err in form['password'].error.asdict().values() %}
-                <li class="form-error">{{ err }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        </div>
-        <div class="form-actions">
-          <div class="form-actions-buttons">
-            <button class="btn" type="submit">Claim account</button>
-          </div>
-        </div>
-      </form>
+      {{ form | safe }}
     </div>
   </div>
 {% endblock content %}

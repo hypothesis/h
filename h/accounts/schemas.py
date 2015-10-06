@@ -90,10 +90,10 @@ def matching_emails(node, value):
 
 def password_node(**kwargs):
     """Return a Colander schema node for a user password."""
+    kwargs.setdefault('widget', deform.widget.PasswordWidget())
     return colander.SchemaNode(
         colander.String(),
         validator=colander.Length(min=models.PASSWORD_MIN_LENGTH),
-        widget=deform.widget.PasswordWidget(),
         **kwargs)
 
 

@@ -1,0 +1,38 @@
+<form id="{{ field.formid }}"
+      action="{{ field.action }}"
+      method="{{ field.method }}"
+      enctype="multipart/form-data"
+      accept-charset="utf-8"
+      {% if field.css_class -%}
+      class="{{ field.css_class }}"
+      {%- endif -%}>
+  <input type="hidden" name="__formid__" value="{{ field.formid }}" />
+
+  {%- for f in field.children -%}
+    {{ field.renderer(field.widget.item_template, field=f, cstruct=cstruct.get(f.name, null)) }}
+  {% endfor -%}
+
+  <div class="form-actions">
+    <div class="form-actions-buttons">
+      {%- for button in field.buttons -%}
+        <button id="{{ field.formid + button.name }}"
+                name="{{ button.name }}"
+                type="{{ button.type }}"
+                class="btn{% if button.css_class %} {{ button.css_class }}{% endif %}"
+                value="{{ _(button.value) }}"
+                {%- if button.disabled -%}
+                disabled="disabled"
+                {% endif -%}
+                >
+        <span>{{ _(button.title) }}</span>
+        </button>
+      {% endfor -%}
+    </div>
+  </div>
+
+  {#
+    The default deform templates are ajax capable. I've removed that code here
+    for the sake of clarity. If we need to put it back it can be found in
+    deform_jinja2:bootstrap_templates/form.jinja2.
+  #}
+</form>

@@ -43,6 +43,7 @@ def includeme(config):
     config.include('h.features')
 
     config.include('h.db')
+    config.include('h.form')
     config.include('h.hashids')
     config.include('h.models')
     config.include('h.views')
