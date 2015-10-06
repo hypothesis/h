@@ -38,7 +38,7 @@ def _ensure_es_plugins(es_conn):
     # pylint: disable=unexpected-keyword-arg
     names = [x.strip() for x in es_conn.cat.plugins(h='component').split('\n')]
     if 'analysis-icu' not in names:
-        message = ("ICU Analysis plugin is not installed for ElasticSearch\n"
+        message = ("ICU Analysis plugin is not installed for Elasticsearch\n"
                    "  See the installation instructions for more details:\n"
                    "  https://github.com/hypothesis/h/blob/master/"
                    "INSTALL.rst#installing")
@@ -46,7 +46,7 @@ def _ensure_es_plugins(es_conn):
 
 
 def create_db():
-    """Create the ElasticSearch index for Annotations and Documents."""
+    """Create the Elasticsearch index for Annotations and Documents."""
     # Check for required plugin(s)
     _ensure_es_plugins(es.conn)
 
@@ -76,7 +76,7 @@ def create_db():
             'settings': {'analysis': analysis},
         })
     except elasticsearch_exceptions.ConnectionError as e:
-        msg = ('Can not access ElasticSearch at {0}! '
+        msg = ('Can not access Elasticsearch at {0}! '
                'Check to ensure it is running.').format(es.host)
         raise elasticsearch_exceptions.ConnectionError('N/A', msg, e)
 
@@ -140,11 +140,11 @@ def bind_engine(engine, base=Base, should_create=False, should_drop=False):
 
 
 def includeme(config):
-    """Configure and possibly initialize ElasticSearch and its models."""
+    """Configure and possibly initialize Elasticsearch and its models."""
     registry = config.registry
     settings = registry.settings
 
-    # Configure ElasticSearch
+    # Configure Elasticsearch
     es = store_from_settings(settings)
 
     # Add a property to all requests for easy access to the elasticsearch

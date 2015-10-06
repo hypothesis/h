@@ -89,16 +89,13 @@ def authn_policy(config):
 @pytest.fixture()
 def db_session(request, settings):
     """SQLAlchemy session."""
+    transaction.commit()
+    db.Session.remove()
+
     engine = db.make_engine(settings)
     db.bind_engine(engine, should_create=True, should_drop=True)
 
     api_db.use_session(db.Session)
-
-    def destroy():
-        transaction.commit()
-        db.Session.remove()
-
-    request.addfinalizer(destroy)
 
     return db.Session
 

@@ -62,6 +62,7 @@ def bind_engine(engine,
     session.configure(bind=engine)
     base.metadata.bind = engine
     if should_drop:
+        base.metadata.reflect(engine)
         base.metadata.drop_all(engine)
     if should_create:
         base.metadata.create_all(engine)
