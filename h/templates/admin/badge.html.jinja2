@@ -11,12 +11,12 @@
 
   <p>
     The URIs that you enter here are
-    <a href="https://docs.python.org/2/library/fnmatch.html">UNIX filename
-    patterns</a>. For example to block all pages on
-    <code>http://example.com/</code> use <code>*//example.com*</code>.
-    If a URI that you want to block contains one of the fnmatch special
-    characters, say <code>?</code>, you can escape it in your pattern by
-    wrapping it in brackets: <code>[?]</code>.
+    <a href="http://www.postgresql.org/docs/9.4/static/functions-matching.html">
+    PostgreSQL <code>LIKE</code> patterns</a>. For example to block all pages
+    on <code>http://example.com/</code> use <code>%//example.com%</code>.
+    If a URI that you want to block contains one of the <code>LIKE</code>
+    special characters (<code>%</code> or <code>_</code>), say <code>_</code>,
+    you can backslash-escape it in your pattern: <code>\_</code>.
   </p>
 
   </ul>

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import fnmatch
-
 import sqlalchemy as sa
 from sqlalchemy.orm import exc
+from sqlalchemy.sql import expression
 
 from h.db import Base
 from h.i18n import TranslationString as _
@@ -46,7 +45,8 @@ class BadgeBlocklist(Base):
     @classmethod
     def is_blocked(cls, uri):
         """Return True if the given URI is blocked."""
-        for pattern in cls.all():
-            if fnmatch.fnmatch(uri, unicode(pattern)):
-                return True
-        return False
+
+        if cls.query.filter(expression.literal(uri).like(cls.uri)).all():
+            return True
+        else:
+            return False

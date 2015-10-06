@@ -42,19 +42,20 @@ def test_all(db_session):
     assert models.BadgeBlocklist.all() == uris
 
 
-@mock.patch('h.badge.models.BadgeBlocklist.all')
-def test_is_blocked(all):
-    all.return_value = ["http://example.com", "http://example.com/bar"]
+def test_is_blocked(db_session):
+    db_session.add(models.BadgeBlocklist(uri=u"http://example.com"))
+    db_session.add(models.BadgeBlocklist(uri=u"http://example.com/bar"))
+    db_session.flush()
 
-    assert models.BadgeBlocklist.is_blocked("http://example.com")
-    assert models.BadgeBlocklist.is_blocked("http://example.com/bar")
-    assert not models.BadgeBlocklist.is_blocked("http://example.com/foo")
+    assert models.BadgeBlocklist.is_blocked(u"http://example.com")
+    assert models.BadgeBlocklist.is_blocked(u"http://example.com/bar")
+    assert not models.BadgeBlocklist.is_blocked(u"http://example.com/foo")
 
 
-@mock.patch('h.badge.models.BadgeBlocklist.all')
-def test_is_blocked(all):
-    all.return_value = ["*//example.com*"]
+def test_is_blocked_with_wildcards(db_session):
+    db_session.add(models.BadgeBlocklist(uri="%//example.com%"))
+    db_session.flush()
 
-    assert models.BadgeBlocklist.is_blocked("http://example.com")
+    assert models.BadgeBlocklist.is_blocked("http://example.com/")
     assert models.BadgeBlocklist.is_blocked("http://example.com/bar")
     assert models.BadgeBlocklist.is_blocked("http://example.com/foo")
