@@ -49,7 +49,7 @@ INSTALL_REQUIRES = [
     'jsonpointer==1.0',
     'jsonschema==1.3.0',
     'oauthlib==0.6.3',
-    'pyramid>=1.5',
+    'pyramid>=1.5,<1.6',
     'pyramid_mailer>=0.13',
     'pyramid-oauthlib>=0.2.0,<0.3.0',
     'pyramid_tm>=0.7',
