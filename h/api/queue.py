@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
-"""Publish annotations events into the distributed message queue."""
+"""Publish events into the distributed message queue."""
 import json
 
-from h.api.events import AnnotationEvent
+from h.api.events import Event, AnnotationEvent, UserStatusEvent
 
+def publish_event(event):
+    # We only publish these events to NSQ if the 'queue' feature is enabled.
+    if not event.request.feature('queue'):
+        return
 
-def annotation(event):
+    if isinstance(event, AnnotationEvent):
+        publish_annotation_event(event)
+    elif isinstance(event, UserStatusEvent):
+        publish_user_event(event)
+
+def publish_annotation_event(event):
     """Publish an annotation event in NSQ."""
     request = event.request
     annotation = event.annotation
     action = event.action
-
-    # We only publish these events to NSQ if the 'queue' feature is enabled.
-    if not request.feature('queue'):
-        return
 
     queue = request.get_queue_writer()
     data = {
@@ -23,7 +28,16 @@ def annotation(event):
     }
     queue.publish('annotations', json.dumps(data))
 
+def publish_user_event(event):
+    """Publish a user status event in NSQ."""
+    queue = event.request.get_queue_writer()
+    data = {
+        'user_id': event.user_id,
+        'type': event.type,
+        'group_id': event.group_id
+    }
+    queue.publish('user', json.dumps(data))
 
 def includeme(config):
     config.include('h.queue')
-    config.add_subscriber(annotation, AnnotationEvent)
+    config.add_subscriber(publish_event, Event)

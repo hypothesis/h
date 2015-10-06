@@ -39,12 +39,7 @@ function connect($websocket, annotationMapper, groups) {
     value: clientId
   })
 
-  // Listen for updates
-  socket.onMessage(function (event) {
-    message = JSON.parse(event.data)
-    if (!message || message.type !== 'annotation-notification') {
-      return;
-    }
+  function handleAnnotationNotification(message) {
     action = message.options.action
     annotations = message.payload
 
@@ -68,6 +63,32 @@ function connect($websocket, annotationMapper, groups) {
       case 'delete':
         annotationMapper.unloadAnnotations(annotations);
         break;
+    }
+  }
+
+  function handleUserStatusNotification(message) {
+    if (message.action === 'group-joined') {
+      groups.add(message.group);
+    } else if (message.action === 'group-left') {
+      groups.remove(message.group);
+    } else {
+      console.warn('Unknown user status notification %s', message.action);
+    }
+  }
+
+  // Listen for updates
+  socket.onMessage(function (event) {
+    message = JSON.parse(event.data)
+    if (!message) {
+      return;
+    }
+
+    if (message.type === 'annotation-notification') {
+      handleAnnotationNotification(message)
+    } else if (message.type === 'user-status-notification') {
+      handleUserStatusNotification(message)
+    } else {
+      console.warn('received unsupported notification', message.type)
     }
   });
 

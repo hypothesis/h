@@ -15,7 +15,6 @@ var sessionWithThreeGroups = function() {
   };
 };
 
-
 describe('groups', function() {
   var fakeSession;
   var fakeLocalStorage;
@@ -124,6 +123,44 @@ describe('groups', function() {
       s.focus('id3');
 
       assert.calledWithMatch(fakeLocalStorage.setItem, sinon.match.any, 'id3');
+    });
+  });
+
+  describe('add()', function () {
+    it('updates the group list when add() is called', function () {
+      var s = service();
+      var prevCount = s.all().length;
+      s.add({ id: 'new-group' });
+      assert.equal(s.all().length, prevCount + 1);
+    });
+
+    it('emits a "groupJoined" notification when a group is added', function () {
+      var s = service();
+      s.add({ id: 'new-group' });
+      assert.calledWithMatch(fakeRootScope.$broadcast, 'groupJoined');
+    });
+  });
+
+  describe('remove()', function () {
+    it('updates the group list when remove() is called', function () {
+      var s = service();
+      var GROUP_ID = 'a-group';
+      s.add({ id: GROUP_ID });
+      s.focus(GROUP_ID);
+
+      var prevCount = s.all().length;
+      s.remove({ id: GROUP_ID });
+      assert.equal(s.all().length, prevCount - 1);
+
+      // the selected group should be reset if the currently focused
+      // group is removed
+      assert.notEqual(s.focused().id, GROUP_ID);
+    });
+
+    it('emits a "groupLeft" notification when a group is removed', function () {
+      var s = service();
+      s.remove({ id: 'a-group' });
+      assert.calledWithMatch(fakeRootScope.$broadcast, 'groupLeft');
     });
   });
 });

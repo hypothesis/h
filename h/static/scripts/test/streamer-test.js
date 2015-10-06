@@ -45,6 +45,8 @@ describe('streamer', function () {
       focused: function () {
         return 'public';
       },
+      add: sinon.stub(),
+      remove: sinon.stub(),
     };
 
     socket = streamer.connect(
@@ -95,6 +97,30 @@ describe('streamer', function () {
         }]
       });
       assert.ok(fakeAnnotationMapper.unloadAnnotations.calledOnce);
+    });
+  });
+
+  describe('user status notifications', function () {
+    it('adds a group on "group-joined" notifications', function () {
+      socket.notify({
+        type: 'user-status-notification',
+        action: 'group-joined',
+        group: {
+          id: 'new-group'
+        }
+      });
+      assert.ok(fakeGroups.add.calledOnce);
+    });
+
+    it('removes a group on "group-removed" notifications', function () {
+      socket.notify({
+        type: 'user-status-notification',
+        action: 'group-left',
+        group: {
+          id: 'a-group'
+        }
+      });
+      assert.ok(fakeGroups.remove.calledOnce);
     });
   });
 });
