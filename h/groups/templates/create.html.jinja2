@@ -3,24 +3,25 @@
 {% block page_title %}Create a new group{% endblock page_title %}
 
 {% block styles %}
-  {% assets "app_css" %}
+  {% assets "site_css" %}
     <link rel="stylesheet" href="{{ ASSET_URL }}">
   {% endassets %}
 {% endblock %}
 
 {% block content %}
-  <div class="content paper">
-    {% include "h:templates/includes/header.html.jinja2" %}
-    <div class="form-vertical">
-      <form class="form" action="{{ form.action }}" method="{{ form.method }}" novalidate>
+  <div class="content content--narrow">
+    <div class="group-form">
+      <i class="h-icon-group group-form__heading-icon"></i>
+      <div class="group-form__heading">Create a new group</div>
+      <form class="group-form__form" action="{{ form.action }}" method="{{ form.method }}" novalidate>
         {{ form['csrf_token'].render() | safe }}
         <div class="form-field{% if form['name'].error %} form-field-error{% endif %}">
-          <label class="form-label" for="field-group-name">
-            Group name:
-            <span class="form-hint">(a human-readable name for your group)</span>
+          <label class="group-form__name-label" for="group-form__name-input">
+            What do you want to call the group?
           </label>
-          <input class="form-input" id="field-group-name"
-                 type="text" name="name" value="{{ data.name }}" required />
+          <input class="group-form__name-input js-group-name-input" id="group-form__name-input"
+                 type="text" name="name" placeholder="Group Name" value="{{ data.name }}"
+                 autofocus required maxlength="25" />
           {% if form['name'].error %}
             <ul class="form-error-list">
               {% for err in form['name'].error.asdict().values() %}
@@ -29,12 +30,29 @@
             </ul>
           {% endif %}
         </div>
-        <div class="form-actions">
-          <div class="form-actions-buttons">
-            <button class="btn" type="submit">Create group</button>
-          </div>
-        </div>
+        <button class="primary-action-btn group-form__submit-btn js-create-group-create-btn" type="submit">Create new group</button>
       </form>
+    </div>
+    <div class="group-form-footer">
+      <a href="" class="group-form-footer__explain-link js-group-info-link">Tell me more about groups</a>
+      <div class="group-form-footer__explain-text js-group-info-text is-hidden">
+        <p class="group-form-footer__heading">About Groups</p>
+        <p>Groups let you annotate and discuss content on the web privately.</p>
+        <p class="group-form-footer__heading">How to use groups</p>
+        <ol class="group-form-footer__list">
+          <li>Choose a name for your group</li>
+          <li>We'll give you a link which you can copy and paste</li>
+          <li>Send this link to the people you want to annotate with.
+              They will be able to create a Hypothes.is account and will
+              be able to publish and read annotations in this group.</li>
+        </ol>
+      </div>
     </div>
   </div>
 {% endblock content %}
+
+{% block scripts %}
+{% assets "site_js" %}
+  <script src="{{ ASSET_URL }}"></script>
+{% endassets %}
+{% endblock scripts %}

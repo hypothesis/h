@@ -1,0 +1,47 @@
+// form for sharing links
+
+.share-link-container {
+  font-size: $body1-font-size;
+  line-height: $body1-line-height;
+  margin-top: 1px;
+  white-space: normal;
+}
+
+.share-link-toggle {
+  color: $gray-light;
+}
+
+.share-link-toggle:hover {
+  text-decoration: underline;
+  color: $gray-dark;
+}
+
+.share-link-field {
+  padding: 3px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  border: 1px solid $gray-lighter;
+  border-radius: 2px;
+  width: 100%;
+}
+
+.share-link-icons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.share-link-icon {
+  color: $color-dove-gray;
+  display: inline-block;
+  font-size: 24px;
+  text-decoration: none;
+  margin-left: 5px;
+  margin-right: 5px;
+
+  &:hover {
+    color: $brand-color;
+  }
+}

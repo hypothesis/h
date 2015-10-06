@@ -1,0 +1,22 @@
+// A dark grey button used for the primary action
+// in a form
+.primary-action-btn {
+  // note that there is currently some duplication here between
+  // the styling for this element and <dropdown-menu-btn>
+  color: $color-seashell;
+  background-color: $color-dove-gray;
+  height: 35px;
+  border: none;
+  border-radius: 2px;
+
+  font-weight: bold;
+  font-size: $body1-font-size;
+
+  &:disabled {
+    color: $gray-light;
+  }
+
+  &:hover:enabled {
+    background-color: $color-mine-shaft;
+  }
+}

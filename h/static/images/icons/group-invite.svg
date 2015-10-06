@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="80px" height="61px" viewBox="0 0 80 61" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
+    <title>Untitled</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <rect id="Rectangle-21" stroke="#979797" stroke-width="2" fill="#FFFFFF" sketch:type="MSShapeGroup" x="2" y="1" width="76" height="50" rx="3"></rect>
+        <rect id="Rectangle-22" opacity="0.2" fill="#585858" sketch:type="MSShapeGroup" x="10" y="9" width="16" height="2"></rect>
+        <rect id="Rectangle-22-Copy" opacity="0.2" fill="#585858" sketch:type="MSShapeGroup" x="10" y="15" width="60" height="2"></rect>
+        <rect id="Rectangle-22-Copy-2" opacity="0.2" fill="#585858" sketch:type="MSShapeGroup" x="10" y="21" width="60" height="2"></rect>
+        <rect id="Rectangle-22-Copy-3" opacity="0.2" fill="#585858" sketch:type="MSShapeGroup" x="10" y="27" width="60" height="2"></rect>
+        <rect id="Rectangle-22-Copy-4" opacity="0.2" fill="#585858" sketch:type="MSShapeGroup" x="10" y="33" width="60" height="2"></rect>
+        <path d="M77.3153812,22.3423094 C78.7980552,21.6009724 80,22.3423094 80,24.0065012 L80,57.9934988 C80,59.6539436 78.6616553,61 77.0099126,61 L2.99008742,61 C1.33870774,61 1.19297385,60.4035131 2.68461881,59.6576906 L77.3153812,22.3423094 Z" id="Rectangle-19" fill="#4F4F4F" sketch:type="MSShapeGroup"></path>
+        <path d="M0,24.0065012 C0,22.3460564 1.19297385,21.5964869 2.68461881,22.3423094 L77.3153812,59.6576906 C78.7980552,60.3990276 78.6616553,61 77.0099126,61 L2.99008742,61 C1.33870774,61 0,59.6576906 0,57.9934988 L0,24.0065012 Z" id="Rectangle-19-Copy" fill="#585858" sketch:type="MSShapeGroup"></path>
+    </g>
+</svg>

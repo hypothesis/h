@@ -5,6 +5,7 @@ require('angular-websocket')
 require('angular-jwt')
 
 uuid = require('node-uuid')
+
 clientId = uuid.v4()
 
 socket = null
