@@ -37,7 +37,9 @@ clean:
 dev: deps
 	@gunicorn --reload --paste conf/development.ini
 
-test: client-test
+test: backend-test client-test
+
+backend-test:
 	@python setup.py test
 
 client-test:
