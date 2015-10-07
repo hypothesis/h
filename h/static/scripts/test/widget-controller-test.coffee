@@ -1,5 +1,7 @@
 {module, inject} = angular.mock
 
+Promise = require('core-js/library/es6/promise')
+
 describe 'WidgetController', ->
   $scope = null
   fakeAnnotationMapper = null
@@ -60,7 +62,8 @@ describe 'WidgetController', ->
     }
 
     fakeGroups = {
-      focused: -> {id: 'foo'}
+      focused: -> {id: 'foo'},
+      ready: -> Promise.resolve(),
     }
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
@@ -92,3 +95,16 @@ describe 'WidgetController', ->
       assert.calledWith(loadSpy, [40..59])
       assert.calledWith(loadSpy, [60..79])
       assert.calledWith(loadSpy, [80..99])
+
+    it.only 'should defer loading annotations until groups service is ready', ->
+      ready = null
+      groupsReady = new Promise((resolve) -> ready = resolve)
+      fakeGroups.ready = -> groupsReady
+
+      fakeCrossFrame.frames.push({uri: 'http://example.com'})
+      $scope.$digest()
+      assert.callCount(fakeAnnotationMapper.loadAnnotations, 0)
+      ready()
+      groupsReady.then(->
+        assert.callCount(fakeAnnotationMapper.loadAnnotations, 1)
+      )

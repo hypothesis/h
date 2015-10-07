@@ -31,7 +31,15 @@ function groups(localStorage, session, $rootScope, features) {
     }
   };
 
+  /** Returns a promise which resolves once the list of groups
+   * has been loaded.
+   */
+  function ready() {
+    return session.load().$promise;
+  }
+
   return {
+    ready: ready,
     all: all,
     get: get,
 
