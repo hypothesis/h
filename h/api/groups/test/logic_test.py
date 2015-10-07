@@ -98,6 +98,30 @@ def test_set_group_if_reply_clears_group_if_parent_has_no_group(models):
     assert 'group' not in annotation
 
 
+def test_insert_group_if_none_inserts_group():
+    annotation = {}
+
+    logic.insert_group_if_none(annotation)
+
+    assert annotation == {'group': '__world__'}
+
+
+def test_insert_group_if_none_does_not_overwrite_group():
+    annotation = {'group': 'foo'}
+
+    logic.insert_group_if_none(annotation)
+
+    assert annotation == {'group': 'foo'}
+
+
+def test_insert_group_if_none_does_nothing_if_already_group_world():
+    annotation = {'group': '__world__'}
+
+    logic.insert_group_if_none(annotation)
+
+    assert annotation == {'group': '__world__'}
+
+
 @pytest.fixture
 def models(request):
     patcher = mock.patch('h.api.groups.logic.models', autospec=True)

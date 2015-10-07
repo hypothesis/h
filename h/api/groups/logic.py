@@ -37,3 +37,8 @@ def set_group_if_reply(annotation):
     else:
         if 'group' in annotation:
             del annotation['group']
+
+
+def insert_group_if_none(annotation):
+    if not annotation.get('group'):
+        annotation['group'] = '__world__'
