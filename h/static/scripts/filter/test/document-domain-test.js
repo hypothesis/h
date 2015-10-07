@@ -38,6 +38,15 @@ describe('documentDomain', function() {
     assert(domain === '(MyFile.pdf)');
   });
 
+  it('replaces %20 with " "', function() {
+    var domain = documentDomainFilterProvider()({
+      title: 'example.com',
+      uri: 'file:///home/seanh/My%20File.pdf'
+    });
+
+    assert(domain === '(My File.pdf)');
+  });
+
   it('escapes HTML in the document domain', function() {
     var spamLink = '<a href="http://example.com/rubies">Buy rubies!!!</a>';
 

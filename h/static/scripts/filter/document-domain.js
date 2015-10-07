@@ -21,12 +21,12 @@ module.exports = function() {
       var parts = uri.split('/');
       var filename = parts[parts.length - 1];
       if (filename) {
-        return '(' + filename + ')';
+        return '(' + decodeURIComponent(filename) + ')';
       }
     }
 
     if (domain && domain !== title) {
-      return '(' + domain + ')';
+      return '(' + decodeURIComponent(domain) + ')';
     } else {
       return '';
     }
