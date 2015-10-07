@@ -5,6 +5,7 @@
     ('admins', 'Administrators', request.route_url('admin_admins')),
     ('staff', 'Staff', request.route_url('admin_staff')),
     ('users', 'Users', request.route_url('admin_users')),
+    ('badge', 'Badge', request.route_url('admin_badge')),
 ] -%}
 
 {%- set page_id = page_id|default('home') -%}

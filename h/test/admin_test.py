@@ -189,13 +189,6 @@ admins_add_fixtures = pytest.mark.usefixtures('make_admin', 'admins_index')
 
 
 @admins_add_fixtures
-def test_admins_add_when_no_add_param():
-    """It should 404 if the request has no "add" param."""
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        admin.admins_add(DummyRequest())
-
-
-@admins_add_fixtures
 def test_admins_add_calls_make_admin(make_admin):
     request = DummyRequest(params={"add": "seanh"})
 
@@ -282,16 +275,6 @@ def test_admins_remove_returns_redirect_on_success(User):
 
 
 @admins_remove_fixtures
-def test_admins_remove_404s_if_no_remove_param(User):
-    User.admins.return_value = [Mock(username="fred"),
-                                Mock(username="bob"),
-                                Mock(username="frank")]
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        admin.admins_remove(DummyRequest())
-
-
-@admins_remove_fixtures
 def test_admins_remove_returns_redirect_when_too_few_admins(User):
     User.admins.return_value = [Mock(username="fred")]
     request = DummyRequest(params={"remove": "fred"})
@@ -353,13 +336,6 @@ def test_staff_index_when_multiple_staff(User):
 
 # The fixtures required to mock all of staff_add()'s dependencies.
 staff_add_fixtures = pytest.mark.usefixtures('make_staff', 'staff_index')
-
-
-@staff_add_fixtures
-def test_staff_add_when_no_add_param():
-    """It should 404 if the request has no "add" param."""
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        admin.staff_add(DummyRequest())
 
 
 @staff_add_fixtures
@@ -448,12 +424,6 @@ def test_staff_remove_returns_redirect_on_success(User):
     assert isinstance(response, httpexceptions.HTTPSeeOther)
 
 
-@staff_remove_fixtures
-def test_staff_remove_404s_if_no_remove_param():
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        admin.staff_remove(DummyRequest())
-
-
 users_index_fixtures = pytest.mark.usefixtures('User')
 
 
@@ -493,6 +463,89 @@ def test_users_index_user_found(User):
 
     assert result == {"username": "bob",
                       "user": User.get_by_username.return_value}
+
+
+badge_index_fixtures = pytest.mark.usefixtures('models')
+
+
+@badge_index_fixtures
+def test_badge_index_returns_all_blocklisted_urls(models):
+    assert admin.badge_index(Mock()) == {
+        "uris": models.Blocklist.all.return_value}
+
+
+badge_add_fixtures = pytest.mark.usefixtures('models', 'badge_index')
+
+
+@badge_add_fixtures
+def test_badge_add_adds_uri_to_model(models):
+    request = Mock(params={'add': 'test_uri'})
+
+    admin.badge_add(request)
+
+    models.Blocklist.assert_called_once_with(uri='test_uri')
+    request.db.add.assert_called_once_with(models.Blocklist.return_value)
+
+
+@badge_add_fixtures
+def test_badge_add_returns_index(badge_index):
+    request = Mock(params={'add': 'test_uri'})
+
+    assert admin.badge_add(request) == badge_index.return_value
+
+
+@badge_add_fixtures
+def test_badge_add_flashes_error_if_uri_already_blocked(models):
+    request = Mock(params={'add': 'test_uri'})
+    models.Blocklist.side_effect = ValueError("test_error_message")
+
+    admin.badge_add(request)
+
+    assert not request.db.add.called
+    request.session.flash.assert_called_once_with(
+        "test_error_message", "error")
+
+
+@badge_add_fixtures
+def test_badge_add_returns_index_if_uri_already_blocked(models, badge_index):
+    request = Mock(params={'add': 'test_uri'})
+    models.Blocklist.side_effect = ValueError("test_error_message")
+
+    assert admin.badge_add(request) == badge_index.return_value
+
+
+badge_remove_fixtures = pytest.mark.usefixtures('models', 'badge_index')
+
+
+@badge_remove_fixtures
+def test_badge_remove_deletes_model(models):
+    request = Mock(params={'remove': 'test_uri'})
+
+    admin.badge_remove(request)
+
+    models.Blocklist.get_by_uri.assert_called_once_with('test_uri')
+    request.db.delete.assert_called_once_with(
+        models.Blocklist.get_by_uri.return_value)
+
+
+@badge_remove_fixtures
+def test_badge_remove_returns_index(badge_index):
+    assert admin.badge_remove(Mock(params={'remove': 'test_uri'})) == (
+        badge_index.return_value)
+
+
+@pytest.fixture
+def models(request):
+    patcher = patch('h.admin.models', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def badge_index(request):
+    patcher = patch('h.admin.badge_index', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
 
 
 @pytest.fixture

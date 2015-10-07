@@ -59,6 +59,7 @@ def includeme(config):
     config.include('h.accounts')
     config.include('h.admin')
     config.include('h.auth')
+    config.include('h.badge')
     config.include('h.claim')
     config.include('h.groups')
     config.include('h.notification')
