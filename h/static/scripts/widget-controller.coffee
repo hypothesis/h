@@ -17,21 +17,25 @@ module.exports = class WidgetController
     loaded = []
 
     _loadAnnotationsFrom = (query, offset) =>
-      queryCore =
-        limit: @chunkSize
-        offset: offset
-        sort: 'created'
-        order: 'asc'
-        group: groups.focused().id
-      q = angular.extend(queryCore, query)
+      groups.ready().then( ->
+        queryCore =
+          limit: @chunkSize
+          offset: offset
+          sort: 'created'
+          order: 'asc'
+          group: groups.focused().id
+        q = angular.extend(queryCore, query)
 
-      store.SearchResource.get q, (results) ->
-        total = results.total
-        offset += results.rows.length
-        if offset < total
-          _loadAnnotationsFrom query, offset
+        store.SearchResource.get q, (results) ->
+          total = results.total
+          offset += results.rows.length
+          if offset < total
+            _loadAnnotationsFrom query, offset
 
-        annotationMapper.loadAnnotations(results.rows)
+          annotationMapper.loadAnnotations(results.rows)
+      ).catch((e) ->
+        throw e
+      )
 
     loadAnnotations = (frames) ->
       for f in frames
