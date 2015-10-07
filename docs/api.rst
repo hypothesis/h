@@ -162,11 +162,22 @@ search
    ``/api/search?tags=climate&tags=feedback`` will find all annotations that
    have *either* tag "climate" *or* "feedback".
 
+   .. warning:: The ``id`` field isn't usable in searches.
+
+      Searching for an individual annotation by ID::
+
+          /api/search?id=AVAqBdTCiSJM1mYBTinl
+
+      won't return any results. To retrieve a single annotation by ID use
+      the :ref:`read API <read API>` instead.
+
    :reqheader Accept: desired response content type
    :resheader Content-Type: response content type
    :statuscode 200: no error
    :statuscode 400: errors parsing your query
 
+
+.. _read API:
 
 read
 ----
