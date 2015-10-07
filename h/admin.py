@@ -53,6 +53,7 @@ def nipsa_index(_):
 
 @view.view_config(route_name='admin_nipsa',
                   request_method='POST',
+                  request_param='add',
                   renderer='h:templates/admin/nipsa.html.jinja2',
                   permission='admin')
 def nipsa_add(request):
@@ -66,8 +67,9 @@ def nipsa_add(request):
     return nipsa_index(request)
 
 
-@view.view_config(route_name='admin_nipsa_remove',
+@view.view_config(route_name='admin_nipsa',
                   request_method='POST',
+                  request_param='remove',
                   renderer='h:templates/admin/nipsa.html.jinja2',
                   permission='admin')
 def nipsa_remove(request):
@@ -89,15 +91,12 @@ def admins_index(_):
 
 @view.view_config(route_name='admin_admins',
                   request_method='POST',
+                  request_param='add',
                   renderer='h:templates/admin/admins.html.jinja2',
                   permission='admin')
 def admins_add(request):
     """Make a given user an admin."""
-    try:
-        username = request.params['add']
-    except KeyError:
-        raise httpexceptions.HTTPNotFound()
-
+    username = request.params['add']
     try:
         accounts.make_admin(username)
     except accounts.NoSuchUserError:
@@ -107,18 +106,15 @@ def admins_add(request):
     return admins_index(request)
 
 
-@view.view_config(route_name='admin_admins_remove',
+@view.view_config(route_name='admin_admins',
                   request_method='POST',
+                  request_param='remove',
                   renderer='h:templates/admin/admins.html.jinja2',
                   permission='admin')
 def admins_remove(request):
     """Remove a user from the admins."""
     if len(models.User.admins()) > 1:
-        try:
-            username = request.params['remove']
-        except KeyError:
-            raise httpexceptions.HTTPNotFound()
-
+        username = request.params['remove']
         user = models.User.get_by_username(username)
         user.admin = False
     return httpexceptions.HTTPSeeOther(
@@ -136,15 +132,12 @@ def staff_index(_):
 
 @view.view_config(route_name='admin_staff',
                   request_method='POST',
+                  request_param='add',
                   renderer='h:templates/admin/staff.html.jinja2',
                   permission='admin')
 def staff_add(request):
     """Make a given user a staff member."""
-    try:
-        username = request.params['add']
-    except KeyError:
-        raise httpexceptions.HTTPNotFound()
-
+    username = request.params['add']
     try:
         accounts.make_staff(username)
     except accounts.NoSuchUserError:
@@ -154,17 +147,14 @@ def staff_add(request):
     return staff_index(request)
 
 
-@view.view_config(route_name='admin_staff_remove',
+@view.view_config(route_name='admin_staff',
                   request_method='POST',
+                  request_param='remove',
                   renderer='h:templates/admin/staff.html.jinja2',
                   permission='admin')
 def staff_remove(request):
     """Remove a user from the staff."""
-    try:
-        username = request.params['remove']
-    except KeyError:
-        raise httpexceptions.HTTPNotFound()
-
+    username = request.params['remove']
     user = models.User.get_by_username(username)
     user.staff = False
     return httpexceptions.HTTPSeeOther(
@@ -221,11 +211,8 @@ def includeme(config):
     config.add_route('admin_index', '/admin')
     config.add_route('admin_features', '/admin/features')
     config.add_route('admin_nipsa', '/admin/nipsa')
-    config.add_route('admin_nipsa_remove', '/admin/nipsa/remove')
     config.add_route('admin_admins', '/admin/admins')
-    config.add_route('admin_admins_remove', '/admin/admins/remove')
     config.add_route('admin_staff', '/admin/staff')
-    config.add_route('admin_staff_remove', '/admin/staff/remove')
     config.add_route('admin_users', '/admin/users')
     config.add_route('admin_badge', '/admin/badge')
     config.scan(__name__)

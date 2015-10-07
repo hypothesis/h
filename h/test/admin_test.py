@@ -189,13 +189,6 @@ admins_add_fixtures = pytest.mark.usefixtures('make_admin', 'admins_index')
 
 
 @admins_add_fixtures
-def test_admins_add_when_no_add_param():
-    """It should 404 if the request has no "add" param."""
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        admin.admins_add(DummyRequest())
-
-
-@admins_add_fixtures
 def test_admins_add_calls_make_admin(make_admin):
     request = DummyRequest(params={"add": "seanh"})
 
@@ -282,16 +275,6 @@ def test_admins_remove_returns_redirect_on_success(User):
 
 
 @admins_remove_fixtures
-def test_admins_remove_404s_if_no_remove_param(User):
-    User.admins.return_value = [Mock(username="fred"),
-                                Mock(username="bob"),
-                                Mock(username="frank")]
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        admin.admins_remove(DummyRequest())
-
-
-@admins_remove_fixtures
 def test_admins_remove_returns_redirect_when_too_few_admins(User):
     User.admins.return_value = [Mock(username="fred")]
     request = DummyRequest(params={"remove": "fred"})
@@ -353,13 +336,6 @@ def test_staff_index_when_multiple_staff(User):
 
 # The fixtures required to mock all of staff_add()'s dependencies.
 staff_add_fixtures = pytest.mark.usefixtures('make_staff', 'staff_index')
-
-
-@staff_add_fixtures
-def test_staff_add_when_no_add_param():
-    """It should 404 if the request has no "add" param."""
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        admin.staff_add(DummyRequest())
 
 
 @staff_add_fixtures
@@ -446,12 +422,6 @@ def test_staff_remove_returns_redirect_on_success(User):
     response = admin.admins_remove(request)
 
     assert isinstance(response, httpexceptions.HTTPSeeOther)
-
-
-@staff_remove_fixtures
-def test_staff_remove_404s_if_no_remove_param():
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        admin.staff_remove(DummyRequest())
 
 
 users_index_fixtures = pytest.mark.usefixtures('User')
