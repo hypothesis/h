@@ -21,4 +21,5 @@ add the relevant icons and then use the app's _Generate Font_ facility.
   * Extract `fonts/h.woff` -> `./fonts/h.woff`
   * Extract `style.css` -> `./icomoon.css`.
   * Edit `icomoon.css` to keep only the _WOFF_ format font as that is [supported](http://caniuse.com/#feat=woff) by our target browsers (IE >= 10).
+    The WOFF URL needs to be an inlined data URL until #2571 is resolved.
  6. Commit the updated `selection.json`, `fonts/h.woff` and `icomoon.css` files to the repository.
