@@ -15,6 +15,15 @@ def test_prepare_calls_set_group_if_reply(groups):
 
 
 @mock.patch('h.api.search.transform.groups')
+def test_prepare_calls_insert_group(groups):
+    annotation = {'permissions': {'read': []}}
+
+    transform.prepare(annotation)
+
+    groups.insert_group_if_none.assert_called_once_with(annotation)
+
+
+@mock.patch('h.api.search.transform.groups')
 def test_prepare_calls_set_permissions(groups):
     annotation = {'permissions': {'read': []}}
 
@@ -243,7 +252,6 @@ def test_prepare_sets_nipsa_field(_, ann, nipsa, has_nipsa):
      {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
 ])
 def test_render_noop_when_nothing_to_remove(_, ann_in, ann_out):
-    ann_out['group'] = '__world__'
     assert transform.render(ann_in) == ann_out
 
 

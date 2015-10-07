@@ -18,6 +18,7 @@ def prepare(annotation):
     and add normalized versions of these to the document.
     """
     groups.set_group_if_reply(annotation)
+    groups.insert_group_if_none(annotation)
     groups.set_permissions(annotation)
 
     # FIXME: Remove this in a month or so, when all our clients have been
@@ -42,10 +43,6 @@ def render(annotation):
     or display in the public API.
     """
     data = copy.deepcopy(dict(annotation))
-
-    if 'group' not in data:
-        data['group'] = '__world__'
-
     return data
 
 
