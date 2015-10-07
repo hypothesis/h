@@ -112,5 +112,43 @@ describe('h:session', function () {
       $httpBackend.flush();
       assert.deepEqual(session.state, response.model);
     });
+
+    it('an immediately-following call to #load() should not trigger a new request', function () {
+      $httpBackend.expectPOST(url).respond({});
+      session.login();
+      $httpBackend.flush();
+
+      session.load();
+    });
+  });
+
+  describe('#load()', function () {
+    var url = 'http://foo.com/app';
+
+    it('should fetch the session data', function () {
+      $httpBackend.expectGET(url).respond({});
+      session.load();
+      $httpBackend.flush();
+    });
+
+    it('should cache the session data', function () {
+      $httpBackend.expectGET(url).respond({});
+      session.load();
+      session.load();
+      $httpBackend.flush();
+    });
+
+    it('should eventually expire the cache', function () {
+      var clock = sandbox.useFakeTimers();
+      $httpBackend.expectGET(url).respond({});
+      session.load();
+      $httpBackend.flush();
+
+      clock.tick(301 * 1000);
+
+      $httpBackend.expectGET(url).respond({});
+      session.load();
+      $httpBackend.flush();
+    });
   });
 });

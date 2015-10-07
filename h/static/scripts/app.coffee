@@ -7,6 +7,9 @@ require('angular-jwt')
 streamer = require('./streamer')
 
 resolve =
+  # Ensure that we have available a) the current authenticated userid, and b)
+  # the list of user groups.
+  sessionState: ['session', (session) -> session.load().$promise]
   store: ['store', (store) -> store.$promise]
   streamer: streamer.connect
   threading: [
