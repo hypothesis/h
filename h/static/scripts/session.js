@@ -1,6 +1,9 @@
 'use strict';
 
+var Promise = require('core-js/library/es6/promise');
 var angular = require('angular');
+
+var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 var ACCOUNT_ACTIONS = [
   ['login', 'POST'],
@@ -29,7 +32,7 @@ function sessionActions(options) {
   }
 
   // Finally, add a simple method for getting the current session state
-  actions.load = {method: 'GET'};
+  actions._load = {method: 'GET'};
 
   if (typeof options !== 'undefined') {
     for (var act in actions) {
@@ -68,8 +71,37 @@ function session($document, $http, $resource, flash) {
   var endpoint = new URL('/app', base).href;
   var resource = $resource(endpoint, {}, actions);
 
-  // Blank inital model state
+  // Blank initial model state
   resource.state = {};
+
+  // Cache the result of _load()
+  var lastLoad;
+  var lastLoadTime;
+
+  /**
+   * @name session.load()
+   * @description
+   * Fetches the session data from the server. This function returns an object
+   * with a $promise property which resolves to the session data.
+   *
+   * N.B. The data is cached for CACHE_TTL across all actions of the session
+   * service: that is, a call to login() will update the session data and a call
+   * within CACHE_TTL milliseconds to load() will return that data rather than
+   * triggering a new request.
+   */
+  resource.load = function () {
+    if (!lastLoadTime || (Date.now() - lastLoadTime) > CACHE_TTL) {
+      lastLoad = resource._load();
+      lastLoadTime = Date.now();
+      // If the load fails, we need to clear out lastLoadTime so another load
+      // attempt will succeed.
+      lastLoad.$promise.catch(function () {
+        lastLoadTime = null;
+      });
+    }
+
+    return lastLoad;
+  };
 
   function prepare(data, headersGetter) {
     var csrfTok = resource.state.csrf;
@@ -104,6 +136,10 @@ function session($document, $http, $resource, flash) {
 
     // Copy the model data (including the CSRF token) into `resource.state`.
     angular.copy(model, resource.state);
+
+    // Replace lastLoad with the latest data, and update lastLoadTime.
+    lastLoad = {$promise: Promise.resolve(model), $resolved: true};
+    lastLoadTime = Date.now();
 
     // Return the model
     return model;
