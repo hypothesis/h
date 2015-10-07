@@ -35,6 +35,7 @@
     "extend": "^2.0.0",
     "frame-rpc": "^1.3.1",
     "hammerjs": "^2.0.4",
+    "is-equal-shallow": "^0.1.3",
     "jquery": "1.11.1",
     "js-polyfills": "^0.1.11",
     "moment": "^2.10.6",

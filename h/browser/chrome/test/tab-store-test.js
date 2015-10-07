@@ -17,13 +17,15 @@ describe('TabStore', function () {
 
   describe('.get', function () {
     beforeEach(function () {
-      fakeLocalStorage.data.state = JSON.stringify({1: 'active'});
+      fakeLocalStorage.data.state = JSON.stringify({
+        1: {state: 'active'}
+      });
       store.reload();
     });
 
     it('retrieves a key from the cache', function () {
       var value = store.get(1);
-      assert.equal(value, 'active');
+      assert.equal(value.state, 'active');
     });
 
     it('raises an error if the key cannot be found', function () {
@@ -31,26 +33,41 @@ describe('TabStore', function () {
         store.get(100);
       });
     });
+
+    it('converts state-string keys to objects', function () {
+      fakeLocalStorage.data.state = JSON.stringify({
+        1: 'active'
+      });
+      store.reload();
+      assert.deepEqual(store.get(1), { state: 'active' });
+    });
   });
 
   describe('.set', function () {
     it('inserts a JSON string into the store for the tab id', function () {
-      var expected = JSON.stringify({1: 'active'});
-      store.set(1, 'active');
+      var expected = JSON.stringify({
+        1: { state: 'active' }
+      });
+      store.set(1, { state: 'active' });
       assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
     });
 
     it('adds new properties to the serialized object with each new call', function () {
-      var expected = JSON.stringify({1: 'active', 2: 'inactive'});
-      store.set(1, 'active');
-      store.set(2, 'inactive');
+      var expected = JSON.stringify({
+        1: { state: 'active' },
+        2: { state: 'inactive'},
+      });
+      store.set(1, { state: 'active' });
+      store.set(2, { state: 'inactive' });
       assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
     });
 
     it('overrides existing properties on the serialized object', function () {
-      var expected = JSON.stringify({1: 'inactive'});
-      store.set(1, 'active');
-      store.set(1, 'inactive');
+      var expected = JSON.stringify({
+        1: {state: 'inactive'}
+      });
+      store.set(1, { state: 'active' });
+      store.set(1, { state: 'inactive' });
       assert.calledWith(fakeLocalStorage.setItem, 'state', expected);
     });
   });
@@ -69,13 +86,13 @@ describe('TabStore', function () {
 
   describe('.all', function () {
     beforeEach(function () {
-      fakeLocalStorage.data.state = JSON.stringify({1: 'active'});
+      fakeLocalStorage.data.state = JSON.stringify({1: { state: 'active' }});
       store.reload();
     });
 
     it('returns all items as an Object', function () {
       var all = store.all();
-      assert.deepEqual(all, {1: 'active'});
+      assert.deepEqual(all, {1: { state: 'active' }});
     });
   });
 });
