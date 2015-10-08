@@ -19,7 +19,7 @@ def set_permissions(annotation):
         return
 
     group = annotation.get('group')
-    if group in (None, '', '__world__'):
+    if group == '__world__':
         # The groups feature doesn't change the permissions for annotations
         # that don't belong to a group.
         return

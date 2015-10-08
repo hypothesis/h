@@ -42,20 +42,18 @@ def test_set_permissions_does_not_modify_private_annotations():
 
 
 def test_set_permissions_does_not_modify_non_group_annotations():
-    for group in ('missing', None, '', '__world__'):
-        original_annotation = {
-            'user': 'acct:jack@hypothes.is',
-            'permissions': {
-                'read': ['acct:jill@hypothes.is']
-            }
-        }
-        if group != 'missing':
-            original_annotation['group'] = group
-        annotation_to_be_modified = copy.deepcopy(original_annotation)
+    original_annotation = {
+        'user': 'acct:jack@hypothes.is',
+        'permissions': {
+            'read': ['acct:jill@hypothes.is']
+        },
+        'group': '__world__'
+    }
+    annotation_to_be_modified = copy.deepcopy(original_annotation)
 
-        auth.set_permissions(annotation_to_be_modified)
+    auth.set_permissions(annotation_to_be_modified)
 
-        assert annotation_to_be_modified == original_annotation
+    assert annotation_to_be_modified == original_annotation
 
 
 def test_set_permissions_sets_read_permissions_for_group_annotations():

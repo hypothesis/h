@@ -269,11 +269,7 @@ def test_groupfilter_restricts_to_public_annotations_when_feature_off():
     groupfilter = query.GroupFilter(request)
 
     assert groupfilter({}) == groupfilter({"group": "foo"}) == {
-        "or": [
-            {"term": {"group": "__world__"}},
-            {"missing": {"field": "group"}},
-        ]
-    }
+        "term": {"group": "__world__"}}
 
 
 def test_groupfilter_strips_param_when_feature_off():
