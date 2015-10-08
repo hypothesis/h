@@ -46,6 +46,13 @@
             </div>
           </div>
         </div>
+        <!-- the 'Leave group' icon !-->
+        <div class="group-cancel-icon-container">
+          <i class="h-icon-cancel-outline btn--cancel"
+             ng-if="!group.public"
+             ng-click="leaveGroup(group.id)"
+             title="Leave '{{group.name}}'"></i>
+        </div>
       </div>
     </li>
     <li class="new-group-btn">

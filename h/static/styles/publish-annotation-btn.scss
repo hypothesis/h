@@ -11,17 +11,12 @@
 }
 
 .publish-annotation-cancel-btn {
-  $color: #bbb;
-  margin-left: 5px;
+  @extend .btn--cancel;
 
-  color: $color;
+  margin-left: 5px;
   font-weight: normal;
 
   &__icon {
     margin-right: 3px;
-  }
-
-  &:hover {
-    color: darken($color, 15%);
   }
 }

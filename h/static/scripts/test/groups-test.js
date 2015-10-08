@@ -1,5 +1,7 @@
 'use strict';
 
+var baseURI = require('document-base-uri');
+
 var groups = require('../groups');
 
 // Return a mock session service containing three groups.
@@ -21,6 +23,7 @@ describe('groups', function() {
   var fakeLocalStorage;
   var fakeRootScope;
   var fakeFeatures;
+  var fakeHttp;
   var sandbox;
 
   beforeEach(function() {
@@ -37,6 +40,7 @@ describe('groups', function() {
     fakeFeatures = {
       flagEnabled: function() {return true;}
     };
+    fakeHttp = sandbox.stub()
   });
 
   afterEach(function () {
@@ -44,7 +48,8 @@ describe('groups', function() {
   });
 
   function service() {
-    return groups(fakeLocalStorage, fakeSession, fakeRootScope, fakeFeatures);
+    return groups(fakeLocalStorage, fakeSession, fakeRootScope,
+                  fakeFeatures, fakeHttp);
   }
 
   describe('.all()', function() {
@@ -124,6 +129,17 @@ describe('groups', function() {
       s.focus('id3');
 
       assert.calledWithMatch(fakeLocalStorage.setItem, sinon.match.any, 'id3');
+    });
+  });
+
+  describe('.leave()', function () {
+    it('should call the /groups/<id>/leave service', function () {
+      var s = service();
+      s.leave('id2');
+      assert.calledWithMatch(fakeHttp, {
+        url: baseURI + 'groups/id2/leave',
+        method: 'POST'
+      });
     });
   });
 });

@@ -123,8 +123,17 @@ $group-list-width: 270px;
     margin-right: 10px;
   }
 
+  .group-cancel-icon-container {
+    // the 'Leave group' icon is shifted down slightly
+    // so that it lines up vertically with the 'chat heads' icon on the
+    // left-hand side of the groups list
+    padding-top: 3px;
+    margin-right: 2px;
+  }
+
   .group-details {
     margin-right: 20px;
+    flex-grow: 1;
     flex-shrink: 1;
   }
 

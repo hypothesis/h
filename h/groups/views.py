@@ -28,6 +28,7 @@ def create_form(request):
 
     return {'form': form.render()}
 
+
 @view_config(route_name='group_create',
              request_method='POST',
              renderer='h:groups/templates/create.html.jinja2')
@@ -170,8 +171,32 @@ def _group_form(request):
     return form
 
 
+@view_config(route_name='group_leave',
+             request_method='POST')
+def leave(request):
+    if not request.feature('groups'):
+        raise exc.HTTPNotFound()
+    if request.authenticated_userid is None:
+        raise exc.HTTPNotFound()
+
+    hashid = request.matchdict["hashid"]
+    group = models.Group.get_by_hashid(hashid)
+
+    if group is None:
+        raise exc.HTTPNotFound()
+
+    user = models.User.get_by_userid(request.domain,
+                                     request.authenticated_userid)
+
+    group.members.remove(user)
+
+    return exc.HTTPNoContent()
+
+
 def includeme(config):
     config.add_route('group_create', '/groups/new')
+    config.add_route('group_leave', '/groups/{hashid}/leave')
+
     # Match "/groups/<hashid>/": we redirect to the version with the slug.
     config.add_route('group_read', '/groups/{hashid}/{slug:[^/]*}')
     config.add_route('group_read_noslug', '/groups/{hashid}')

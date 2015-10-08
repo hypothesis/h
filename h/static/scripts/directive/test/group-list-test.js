@@ -44,7 +44,7 @@ describe('GroupListController', function () {
         },{
           public: true
         }];
-      }
+      },
     };
 
     var sorted = $scope.sortedGroups();
@@ -66,6 +66,7 @@ function isElementHidden(element) {
 describe('groupList', function () {
   var $compile;
   var $scope;
+  var $window;
 
   var GROUP_LINK = 'https://hypothes.is/groups/hdevs';
 
@@ -78,15 +79,26 @@ describe('groupList', function () {
     url: GROUP_LINK
   }];
 
+  var fakeGroups = {
+    all: function () {
+      return groups;
+    },
+
+    get: function (id) {
+      var match = this.all().filter(function (group) {
+        return group.id === id;
+      });
+      return match.length > 0 ? match[0] : undefined;
+    },
+
+    leave: sinon.stub(),
+  };
+
   before(function() {
     angular.module('app', [])
       .directive('groupList', groupList.directive)
       .factory('groups', function () {
-        return {
-          all: function () {
-            return groups;
-          }
-        };
+        return fakeGroups;
       });
   });
 
@@ -95,9 +107,10 @@ describe('groupList', function () {
     angular.mock.module('h.templates');
   });
 
-  beforeEach(angular.mock.inject(function (_$compile_, _$rootScope_) {
+  beforeEach(angular.mock.inject(function (_$compile_, _$rootScope_, _$window_) {
     $compile = _$compile_;
     $scope = _$rootScope_.$new();
+    $window = _$window_;
   }));
 
   function createGroupList() {
@@ -131,5 +144,17 @@ describe('groupList', function () {
     assert.ok(!isElementHidden(expander));
     toggleLink.click();
     assert.ok(isElementHidden(expander));
+  });
+
+  it('should leave group when the leave icon is clicked', function () {
+    var element = createGroupList();
+    var leaveLink = element.find('.h-icon-cancel-outline');
+
+    // accept prompt to leave group
+    $window.confirm = function () {
+      return true;
+    };
+    leaveLink.click();
+    assert.ok(fakeGroups.leave.calledWith('h-devs'));
   });
 });
