@@ -1,3 +1,33 @@
+0.7.6 (2015-10-08)
+==================
+
+Bug fixes
+---------
+
+- Fix a bug where the URL of the annotated page didn't appear on annotation
+  cards in Safari/IE (#2574).
+
+- Fix the ability to "select" one or more annotations in the sidebar by clicking
+  on a highlight in the page (#2576).
+
+
+Features
+--------
+
+- Introduce a new, clearer "save" button for annotation editing (#2550).
+
+- Add the ability to focus the current view on annotations from a specific group
+  (feature flagged: groups) (#2566).
+
+- Show the filenames of locally annotated files on annotation cards (#2570).
+
+- Improve the appearance of the user flow when joining a group (#2577).
+
+Miscellanea
+-----------
+
+- Deprecate the use of SQLite in development environments (#2579).
+
 0.7.5 (2015-10-01)
 ==================
 
