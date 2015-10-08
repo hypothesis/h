@@ -14,6 +14,7 @@ from h.conftest import DummySession
 
 from h.accounts.views import ajax_form
 from h.accounts.views import validate_form
+from h.accounts.views import AjaxAuthController
 from h.accounts.views import AuthController
 from h.accounts.views import ForgotPasswordController
 from h.accounts.views import RegisterController
@@ -45,6 +46,23 @@ class FakeInvalid(object):
 
     def asdict(self):
         return self.errors
+
+
+def form_validating_to(appstruct):
+    form = Mock()
+    form.validate.return_value = appstruct
+    form.render.return_value = 'valid form'
+    return form
+
+
+def invalid_form(errors=None):
+    if errors is None:
+        errors = {}
+    invalid = FakeInvalid(errors)
+    form = Mock()
+    form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
+    form.render.return_value = 'invalid form'
+    return form
 
 
 def test_ajax_form_handles_http_redirect_as_success():
@@ -158,47 +176,46 @@ def test_login_redirects_when_logged_in(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
-    result = AuthController(request).login()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
+    with pytest.raises(httpexceptions.HTTPFound):
+        AuthController(request).login()
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_login_returns_error_when_validation_fails(authn_policy,
-                                                   form_validator):
+def test_login_returns_form_when_validation_fails(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    form_validator.return_value = ({"errors": "KABOOM!"}, None)
+    controller = AuthController(request)
+    controller.form = invalid_form()
 
-    result = AuthController(request).login()
+    result = controller.login()
 
-    assert result == {"errors": "KABOOM!"}
+    assert result == {'form': 'invalid form'}
 
 
 @pytest.mark.usefixtures('routes_mapper')
 @patch('h.accounts.views.LoginEvent', autospec=True)
 def test_login_no_event_when_validation_fails(loginevent,
                                               authn_policy,
-                                              form_validator,
                                               notify):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    form_validator.return_value = ({"errors": "KABOOM!"}, None)
+    controller = AuthController(request)
+    controller.form = invalid_form()
 
-    AuthController(request).login()
+    controller.login()
 
     assert not loginevent.called
     assert not notify.called
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_login_redirects_when_validation_succeeds(authn_policy,
-                                                  form_validator):
+def test_login_redirects_when_validation_succeeds(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    form_validator.return_value = (None, {"user": FakeUser(username='cara')})
+    controller = AuthController(request)
+    controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
-    result = AuthController(request).login()
+    result = controller.login()
 
     assert isinstance(result, httpexceptions.HTTPFound)
 
@@ -207,14 +224,14 @@ def test_login_redirects_when_validation_succeeds(authn_policy,
 @patch('h.accounts.views.LoginEvent', autospec=True)
 def test_login_event_when_validation_succeeds(loginevent,
                                               authn_policy,
-                                              form_validator,
                                               notify):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
     elephant = FakeUser(username='avocado')
-    form_validator.return_value = (None, {"user": elephant})
+    controller = AuthController(request)
+    controller.form = form_validating_to({"user": elephant})
 
-    AuthController(request).login()
+    controller.login()
 
     loginevent.assert_called_with(request, elephant)
     notify.assert_called_with(loginevent.return_value)
@@ -222,8 +239,9 @@ def test_login_event_when_validation_succeeds(loginevent,
 
 @pytest.mark.usefixtures('routes_mapper')
 @patch('h.accounts.views.LogoutEvent', autospec=True)
-def test_logout_event(logoutevent, notify):
+def test_logout_event(logoutevent, authn_policy, notify):
     request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     result = AuthController(request).logout()
 
@@ -232,9 +250,10 @@ def test_logout_event(logoutevent, notify):
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_logout_invalidates_session():
+def test_logout_invalidates_session(authn_policy):
     request = DummyRequest()
     request.session["foo"] = "bar"
+    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     result = AuthController(request).logout()
 
@@ -267,6 +286,38 @@ def test_logout_response_has_forget_headers(authn_policy):
     result = AuthController(request).logout()
 
     assert result.headers['x-erase-fingerprints'] == 'on the hob'
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_ajax_returns_status_okay_when_validation_succeeds():
+    request = DummyRequest(json_body={})
+    controller = AjaxAuthController(request)
+    controller.form = form_validating_to({'user': FakeUser(username='bob')})
+
+    result = controller.login()
+
+    assert result['status'] == 'okay'
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_ajax_returns_status_failure_on_validation_failure():
+    request = DummyRequest(json_body={})
+    controller = AjaxAuthController(request)
+    controller.form = invalid_form({'password': 'too short'})
+
+    result = controller.login()
+
+    assert result['status'] == 'failure'
+    assert result['errors'] == {'password': 'too short'}
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_logout_ajax_returns_status_okay():
+    request = DummyRequest()
+
+    result = AjaxAuthController(request).logout()
+
+    assert result['status'] == 'okay'
 
 
 forgot_password_fixtures = pytest.mark.usefixtures('activation_model',

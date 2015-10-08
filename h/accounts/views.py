@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+# FIXME: complete the removal of AjaxFormViewMapper and its friends. See the
+# AuthController/AjaxAuthController for an example of an
+# AjaxFormViewMapper-less controller.
+
 import datetime
 import json
 
@@ -10,8 +15,10 @@ from pyramid.security import forget, remember
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
-from h.notification.models import Subscriptions
 from h import i18n
+from h import session
+from h import util
+from h.accounts import schemas
 from h.accounts.models import User
 from h.accounts.models import Activation
 from h.accounts.events import ActivationEvent
@@ -19,8 +26,7 @@ from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
 from h.accounts.events import RegistrationEvent
-from h.accounts import schemas
-from h import session
+from h.notification.models import Subscriptions
 from h.views import json_view
 
 _ = i18n.TranslationString
@@ -40,6 +46,15 @@ def ajax_form(request, result):
     result['flash'] = session.pop_flash(request)
 
     return result
+
+
+# A little helper to ensure that session data is returned in every ajax
+# response payload.
+def ajax_payload(request, data):
+    payload = {'flash': session.pop_flash(request),
+               'model': session.model(request)}
+    payload.update(data)
+    return payload
 
 
 def validate_form(form, data):
@@ -100,50 +115,100 @@ class AjaxFormViewMapper(object):
         return wrapper
 
 
-@auth_view(attr='login', route_name='login')
-@auth_view(attr='logout', route_name='logout')
+@view_config(route_name='login', attr='login', request_method='POST',
+             renderer='h:templates/accounts/login.html.jinja2')
+@view_config(route_name='login', attr='login_form', request_method='GET',
+             renderer='h:templates/accounts/login.html.jinja2')
+@view_config(route_name='logout', attr='logout', request_method='GET')
 class AuthController(object):
     def __init__(self, request):
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
-        self.form = deform.Form(self.schema)
+        self.form = deform.Form(
+            self.schema,
+            buttons=(_('Sign in'),),
+            extra_actions=[(_('Forgot your password?'),
+                            request.route_path('forgot_password'))])
 
         self.login_redirect = self.request.route_url('stream')
         self.logout_redirect = self.request.route_url('index')
 
     def login(self):
-        if self.request.authenticated_userid is not None:
-            return httpexceptions.HTTPFound(location=self.login_redirect)
+        """
+        Check the submitted credentials and log the user in if appropriate.
+        """
+        self._redirect_if_logged_in()
 
-        err, appstruct = validate_form(self.form, self.request.POST.items())
-        if err is not None:
-            return err
+        try:
+            appstruct = self.form.validate(self.request.POST.items())
+        except deform.ValidationFailure:
+            return {'form': self.form.render()}
 
         user = appstruct['user']
-        user.last_login_date = datetime.datetime.utcnow()
-
-        self.request.registry.notify(LoginEvent(self.request, user))
-
-        userid = u'acct:{}@{}'.format(user.username, self.request.domain)
-        headers = remember(self.request, userid)
-
+        headers = self._login(user)
         return httpexceptions.HTTPFound(location=self.login_redirect,
                                         headers=headers)
 
+    def login_form(self):
+        """
+        Render the empty login form.
+        """
+        self._redirect_if_logged_in()
+
+        return {'form': self.form.render()}
+
     def logout(self):
-        self.request.registry.notify(LogoutEvent(self.request))
-        self.request.session.invalidate()
-        self.request.session.flash(_('You have logged out.'), 'success')
-        headers = forget(self.request)
+        """
+        Unconditionally log the user out.
+        """
+        headers = self._logout()
         return httpexceptions.HTTPFound(location=self.logout_redirect,
                                         headers=headers)
 
+    def _redirect_if_logged_in(self):
+        if self.request.authenticated_userid is not None:
+            raise httpexceptions.HTTPFound(location=self.login_redirect)
 
-@view_defaults(route_name='session')
-@json_view(attr='login', request_param='__formid__=login')
-@json_view(attr='logout', request_param='__formid__=logout')
+    def _login(self, user):
+        user.last_login_date = datetime.datetime.utcnow()
+        self.request.registry.notify(LoginEvent(self.request, user))
+        userid = util.userid_from_username(user.username, self.request)
+        headers = remember(self.request, userid)
+        return headers
+
+    def _logout(self):
+        if self.request.authenticated_userid is not None:
+            self.request.registry.notify(LogoutEvent(self.request))
+            self.request.session.invalidate()
+            self.request.session.flash(_('You have logged out.'), 'success')
+        headers = forget(self.request)
+        return headers
+
+
+@view_defaults(route_name='session',
+               accept='application/json',
+               renderer='json')
+@view_config(attr='login', request_param='__formid__=login')
+@view_config(attr='logout', request_param='__formid__=logout')
 class AjaxAuthController(AuthController):
-    __view_mapper__ = AjaxFormViewMapper
+    def login(self):
+        try:
+            appstruct = self.form.validate(self.request.json_body.items())
+        except deform.ValidationFailure as err:
+            self.request.response.status_code = 400
+            return ajax_payload(self.request, {'status': 'failure',
+                                               'errors': err.error.asdict()})
+
+        user = appstruct['user']
+        headers = self._login(user)
+        self.request.response.headers.extend(headers)
+
+        return ajax_payload(self.request, {'status': 'okay'})
+
+    def logout(self):
+        headers = self._logout()
+        self.request.response.headers.extend(headers)
+        return ajax_payload(self.request, {'status': 'okay'})
 
 
 @auth_view(attr='forgot_password',
