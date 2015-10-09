@@ -1,49 +1,26 @@
 // the primary action button for a form
 .dropdown-menu-btn {
-  $text-color: #f1f1f1;
-  $default-background-color: #626262;
-  $hover-background-color: #3A3A3A;
+  $text-color: $color-seashell;
+  $default-background-color: $color-dove-gray;
+  $hover-background-color: $color-mine-shaft;
   $h-padding: 9px;
   $height: 35px;
   $border-radius: 2px;
   $arrow-indicator-width: 26px;
 
-  background-color: $default-background-color;
-
-  border: 0px;
-  border-radius: $border-radius;
-
-  font-size: $body1-font-size;
-  font-weight: bold;
   height: $height;
   position: relative;
 
-  user-select: none;
+  &__btn {
+    @extend .primary-action-btn;
 
-  &__label {
     // the label occupies the entire space of the button and
     // shows a darker state on hover
     width: 100%;
     height: 100%;
-
-    color: $text-color;
-    background-color: transparent;
-    border-radius: $border-radius;
-    border: none;
-    line-height: $height;
+    text-align: left;
     padding-left: $h-padding;
     padding-right: $arrow-indicator-width + 8px;
-
-    text-align: left;
-    vertical-align: middle;
-
-    &:hover:not(:disabled) {
-      background-color: $hover-background-color;
-    }
-
-    &:disabled {
-      color: $gray-light;
-    }
   }
 
   // dropdown arrow which reveals the button's associated menu
@@ -65,7 +42,7 @@
     border-bottom-right-radius: $border-radius;
 
     &:hover {
-      background-color: #3A3A3A;
+      background-color: $hover-background-color;
     }
 
     &:hover &-separator {
@@ -85,7 +62,7 @@
       width: 1px;
       height: 15px;
 
-      background-color: #818181;
+      background-color: $color-gray;
     }
 
     // the ▼ arrow which reveals the dropdown menu when clicked
