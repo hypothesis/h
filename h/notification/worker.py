@@ -24,11 +24,6 @@ def run(request):
             send_notifications(message)
 
     def send_notifications(message):
-        # We start the reader regardless, otherwise messages will pile up in
-        # the notification channel, but we only actually handle them and try
-        # and mail them if the 'notification' feature is toggled on.
-        if not request.feature('notification'):
-            return
         data = json.loads(message.body)
         action = data['action']
         annotation = Annotation(**data['annotation'])

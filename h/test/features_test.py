@@ -6,6 +6,15 @@ import pytest
 from h import features
 
 
+@pytest.fixture(scope='module', autouse=True)
+def features_override(request):
+    patcher = mock.patch.dict('h.features.FEATURES', {
+        'notification': "A test flag for testing with."
+    })
+    patcher.start()
+    request.addfinalizer(patcher.stop)
+
+
 def test_flag_enabled_raises_for_undocumented_feature():
     request = DummyRequest()
 
