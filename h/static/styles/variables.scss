@@ -32,6 +32,9 @@ $button-background-gradient: top, $button-background-start, $button-background-e
 $error-color: #f0480c !default;
 $success-color: #1cbd41 !default;
 
+$mask-start-color: rgba($white, 0) !default;
+$mask-end-color: $white !default;
+
 @function color-weight($c, $n: 500) {
   @if $n == 50 {
     @return tint($c, 85%);

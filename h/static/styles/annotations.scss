@@ -37,6 +37,27 @@
 .annotation-header { margin-top: 0 }
 .annotation-footer { margin-bottom: 0 }
 
+.annotation-section {
+  .excerpt { max-height: 4.8em; }
+  .excerpt-control a {
+    font-style: italic;
+    font-family: $serif-font-family;
+    font-weight: normal;
+  }
+  .excerpt--collapsed:after {
+    height: $base-line-height;
+    @include background(linear-gradient(
+      to right,
+      $mask-start-color,
+      $mask-end-color
+    ));
+  }
+}
+
+.annotation-body {
+  .excerpt { max-height: 16.2em; }
+}
+
 .annotation-user {
   color: $text-color;
   font-weight: bold;

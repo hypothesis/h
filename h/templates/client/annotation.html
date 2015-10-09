@@ -56,12 +56,14 @@
   <!-- Excerpts -->
   <section class="annotation-section"
            ng-repeat="target in vm.annotation.target track by $index">
-    <blockquote class="annotation-quote"
-                ng-hide="target.diffHTML && vm.showDiff"
-                ng-bind-html="selector.exact"
-                ng-repeat="selector in target.selector
-                           | filter : {'type': 'TextQuoteSelector'}
-                           track by $index"></blockquote>
+    <excerpt enabled="feature('truncate_annotations')">
+      <blockquote class="annotation-quote"
+                  ng-hide="target.diffHTML && vm.showDiff"
+                  ng-bind-html="selector.exact"
+                  ng-repeat="selector in target.selector
+                             | filter : {'type': 'TextQuoteSelector'}
+                             track by $index"></blockquote>
+    </excerpt>
     <blockquote class="annotation-quote"
                 ng-bind-html="target.diffHTML"
                 ng-show="target.diffHTML && vm.showDiff"></blockquote>
@@ -76,11 +78,12 @@
   <!-- / Excerpts -- >
 
   <!-- Body -->
-  <section name="text"
-           class="annotation-body"
-           ng-model="vm.annotation.text"
+  <section name="text" class="annotation-body">
+    <excerpt enabled="feature('truncate_annotations') && !vm.editing">
+      <div ng-model="vm.annotation.text"
            ng-readonly="!vm.editing"
            markdown>
+    </excerpt>
   </section>
   <!-- / Body -->
 

@@ -1,0 +1,12 @@
+<div ng-transclude ng-if="!vm.enabled()"></div>
+<div ng-if="vm.enabled()">
+  <div class="excerpt"
+       ng-class="{'excerpt--uncollapsed': vm.uncollapsed(),
+                  'excerpt--collapsed': vm.collapsed()}"
+       ng-transclude></div>
+
+  <div class="excerpt-control">
+    <a ng-if="vm.collapsed()" ng-click="vm.toggle()">More</a>
+    <a ng-if="vm.uncollapsed()" ng-click="vm.toggle()">Less</a>
+  </div>
+</div>

@@ -405,8 +405,8 @@ AnnotationController = [
 #
 ###
 module.exports = [
-  '$document',
-  ($document) ->
+  '$document', 'features'
+  ($document,   features) ->
     linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
       # Observe the isSidebar attribute
       attrs.$observe 'isSidebar', (value) ->
@@ -418,6 +418,9 @@ module.exports = [
           event.preventDefault()
           scope.$evalAsync ->
             ctrl.save()
+
+      # Give template access to feature flags
+      scope.feature = features.flagEnabled
 
       scope.share = (event) ->
         $container = angular.element(event.currentTarget).parent()
