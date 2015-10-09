@@ -10,11 +10,12 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai', 'sinon'],
+    frameworks: ['mocha', 'chai', 'sinon', 'sinon-chrome'],
 
 
     // list of files / patterns to load in the browser
     files: [
+      'lib/pdf-handler.js',
       'lib/errors.js',
       'lib/tab-store.js',
       'lib/tab-state.js',
@@ -25,6 +26,7 @@ module.exports = function(config) {
       'lib/hypothesis-chrome-extension.js',
       'test/bootstrap.js',
 
+      'node_modules/sinon-chrome/src/phantom-tweaks.js',
       // These are needed until PhantomJS 2.0
       '../../../node_modules/es6-promise/dist/es6-promise.js',
       '../../static/scripts/vendor/bind.js',

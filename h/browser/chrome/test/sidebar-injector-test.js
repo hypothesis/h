@@ -1,10 +1,12 @@
 describe('SidebarInjector', function () {
   'use strict';
 
+  var PdfHandler = h.PdfHandler;
   var SidebarInjector = h.SidebarInjector;
   var injector;
   var fakeChromeTabs;
   var fakeFileAccess;
+  var fakeTabState;
 
   beforeEach(function () {
     fakeChromeTabs = {
@@ -12,8 +14,13 @@ describe('SidebarInjector', function () {
       executeScript: sinon.stub()
     };
     fakeFileAccess = sinon.stub().yields(true);
+    fakeTabState = {
+      isTabActive: sinon.stub().yields(false);
+    };
 
-    injector = new SidebarInjector(fakeChromeTabs, {
+    var pdfHandler = new PdfHandler(fakeTabState);
+
+    injector = new SidebarInjector(fakeChromeTabs, pdfHandler, {
       isAllowedFileSchemeAccess: fakeFileAccess,
       extensionURL: sinon.spy(function (path) {
         return 'CRX_PATH' + path;

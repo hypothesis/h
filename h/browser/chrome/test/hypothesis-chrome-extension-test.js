@@ -11,6 +11,7 @@ describe('HypothesisChromeExtension', function () {
   var fakeTabState;
   var fakeTabErrorCache;
   var fakeBrowserAction;
+  var fakePdfHandler;
   var fakeSidebarInjector;
 
   function createExt() {
@@ -52,6 +53,11 @@ describe('HypothesisChromeExtension', function () {
       activate: sandbox.spy(),
       deactivate: sandbox.spy(),
     };
+    fakePdfHandler = {
+      redirectToViewer: sandbox.spy(),
+      redirectToPdf: sandbox.spy(),
+      isKnownPDF: sandbox.spy(),
+    };
     fakeSidebarInjector = {
       injectIntoTab: sandbox.stub().returns(Promise.resolve()),
       removeFromTab: sandbox.stub().returns(Promise.resolve()),
@@ -62,6 +68,7 @@ describe('HypothesisChromeExtension', function () {
     sandbox.stub(h, 'TabState').returns(fakeTabState);
     sandbox.stub(h, 'TabErrorCache').returns(fakeTabErrorCache);
     sandbox.stub(h, 'BrowserAction').returns(fakeBrowserAction);
+    sandbox.stub(h, 'PdfHandler').returns(fakePdfHandler);
     sandbox.stub(h, 'SidebarInjector').returns(fakeSidebarInjector);
 
     ext = createExt();
