@@ -475,10 +475,7 @@ class WebSocket(_WebSocket):
             cls.event_queue.put(message)
 
     def opened(self):
-        # The websocket server runs regardless, but we don't attempt to connect
-        # to NSQ unless 'streamer' is toggled on.
-        if self.request.feature('streamer'):
-            self.start_reader(self.request)
+        self.start_reader(self.request)
 
         # Release the database transaction
         self.request.tm.commit()
