@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 
 def add_renderer_globals(event):
     request = event['request']
@@ -15,6 +17,17 @@ def add_renderer_globals(event):
             event['ga_create_options'] = "'none'"
         else:
             event['ga_create_options'] = "'auto'"
+
+
+def publish_annotation_event(event):
+    """Publish an annotation event to the message queue."""
+    queue = event.request.get_queue_writer()
+    data = {
+        'action': event.action,
+        'annotation': event.annotation,
+        'src_client_id': event.request.headers.get('X-Client-Id'),
+    }
+    queue.publish('annotations', json.dumps(data))
 
 
 def set_user_from_oauth(event):

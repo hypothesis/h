@@ -27,6 +27,8 @@ def create_app(global_config, **settings):
 
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
+    config.add_subscriber('h.subscribers.publish_annotation_event',
+                          'h.api.events.AnnotationEvent')
     config.add_subscriber('h.subscribers.set_user_from_oauth',
                           'pyramid.events.NewRequest')
 

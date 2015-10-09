@@ -12,5 +12,4 @@ def includeme(config):
 
     config.include('h.features')
     config.include('h.api.db')
-    config.include('h.api.queue')
     config.include('h.api.views')
