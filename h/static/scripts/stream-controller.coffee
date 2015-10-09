@@ -53,7 +53,4 @@ module.exports = class StreamController
     $scope.isStream = true
     $scope.sort.name = 'Newest'
     $scope.threadRoot = threading.root
-
-    $scope.shouldShowThread = (container) -> true
-
     $scope.loadMore = fetch

@@ -19,8 +19,6 @@ module.exports = class AnnotationViewerController
     # to annotations loaded into the stream.
     $scope.focus = angular.noop
 
-    $scope.shouldShowThread = -> true
-
     $scope.search.update = (query) ->
       $location.path('/stream').search('q', query)
 
