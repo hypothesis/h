@@ -37,7 +37,7 @@
     text-align: left;
     vertical-align: middle;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: $hover-background-color;
     }
 

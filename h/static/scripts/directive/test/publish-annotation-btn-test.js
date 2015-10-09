@@ -106,7 +106,7 @@ describe('publishAnnotationBtn', function () {
       canPost: false
     });
     var disabledBtns = element.find('button[disabled]');
-    assert.equal(disabledBtns.length, 2);
+    assert.equal(disabledBtns.length, 1);
 
     // check that buttons are enabled when posting is possible
     element.link({
