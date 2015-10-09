@@ -168,14 +168,6 @@ def test_ResetPasswordSchema_with_password_too_short(config, user_model):
     assert "password" in err.value.asdict()
 
 
-def test_ActivateSchema_with_password_too_short(user_model):
-    schema = schemas.ActivateSchema().bind(request=DummyRequest())
-
-    with pytest.raises(colander.Invalid) as err:
-        schema.deserialize({"password": "a"})
-    assert "password" in err.value.asdict()
-
-
 def test_login_bad_csrf(config, user_model):
     request = DummyRequest()
     schema = schemas.LoginSchema().bind(request=request)

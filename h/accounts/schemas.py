@@ -186,14 +186,6 @@ class ResetPasswordSchema(CSRFSchema):
     password = password_node()
 
 
-class ActivateSchema(CSRFSchema):
-    code = colander.SchemaNode(
-        colander.String(),
-        title=_("Security Code")
-    )
-    password = password_node(title=_('New Password'))
-
-
 class ProfileSchema(CSRFSchema):
 
     """
