@@ -21,7 +21,7 @@ def search(request, params):
     builder = query.Builder()
 
     builder.append_filter(query.AuthFilter(request))
-    builder.append_filter(query.UriFilter(request))
+    builder.append_filter(query.UriFilter())
     builder.append_filter(lambda _: \
         nipsa.nipsa_filter(request.authenticated_userid))
     builder.append_filter(query.GroupFilter(request))
