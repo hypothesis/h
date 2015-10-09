@@ -24,7 +24,6 @@ def settings_from_environment():
     _setup_statsd(settings)
     _setup_webassets(settings)
     _setup_websocket(settings)
-    _setup_blocklist(settings)
 
     return settings
 
@@ -174,8 +173,3 @@ def _setup_webassets(settings):
 def _setup_websocket(settings):
     if 'ALLOWED_ORIGINS' in os.environ:
         settings['origins'] = os.environ['ALLOWED_ORIGINS']
-
-
-def _setup_blocklist(settings):
-    if 'BLOCKLIST' in os.environ:
-        settings['h.blocklist'] = os.environ['BLOCKLIST']

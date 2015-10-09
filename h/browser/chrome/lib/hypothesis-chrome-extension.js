@@ -3,10 +3,11 @@
 var TabState = require('./tab-state');
 var BrowserAction = require('./browser-action');
 var HelpPage = require('./help-page');
-var settings = require('./settings');
 var SidebarInjector = require('./sidebar-injector');
 var TabErrorCache = require('./tab-error-cache');
 var TabStore = require('./tab-store');
+var blocklist = require('./blocklist');
+var errors = require('./errors');
 
 var TAB_STATUS_COMPLETE = 'complete';
 
@@ -49,6 +50,7 @@ function HypothesisChromeExtension(dependencies) {
     isAllowedFileSchemeAccess: dependencies.isAllowedFileSchemeAccess,
   });
   var tabErrors = new TabErrorCache();
+  var _blocklist;
 
   /* Sets up the extension and binds event listeners. Requires a window
    * object to be passed so that it can listen for localStorage events.
@@ -131,7 +133,7 @@ function HypothesisChromeExtension(dependencies) {
     // This function will be called multiple times as the tab reloads.
     // https://developer.chrome.com/extensions/tabs#event-onUpdated
     if (changeInfo.status !== TAB_STATUS_COMPLETE) {
-      return;
+      return Promise.resolve();
     }
 
     if (state.isTabErrored(tabId)) {
@@ -147,10 +149,10 @@ function HypothesisChromeExtension(dependencies) {
       browserAction.deactivate(tabId);
     }
 
-    settings.then(function(settings) {
-      browserAction.updateBadge(tabId, tab.url, settings.apiUrl);
+    _blocklist = blocklist(tab.url);
+    _blocklist.then(function(blocklist) {
+      browserAction.updateBadge(blocklist.total, tab.id);
     });
-
     return updateTabDocument(tab);
   }
 
@@ -169,15 +171,35 @@ function HypothesisChromeExtension(dependencies) {
       return Promise.resolve();
     }
 
-    if (state.isTabActive(tab.id)) {
-      return sidebar.injectIntoTab(tab).catch(function (err) {
+    function inject() {
+      sidebar.injectIntoTab(tab).catch(function (err) {
         tabErrors.setTabError(tab.id, err);
         state.errorTab(tab.id);
       });
     }
-    else if (state.isTabInactive(tab.id)) {
+
+    if (state.isTabActive(tab.id)) {
+      return _blocklist.then(
+        function onFulfilled(blocklist) {
+          if (blocklist.blocked) {
+              tabErrors.setTabError(
+                tab.id, new errors.BlockedSiteError(
+                  "Hypothesis doesn't work on this site yet."));
+              state.errorTab(tab.id);
+          } else {
+            inject();
+          }
+        },
+        function onRejected() {
+          // If the request to the server to get the blocklist times out or
+          // fails for any reason, then we just assume that the URI isn't
+          // blocked and go ahead and inject the sidebar.
+          inject();
+        });
+    } else if (state.isTabInactive(tab.id)) {
       return sidebar.removeFromTab(tab);
     }
+    return Promise.resolve();
   }
 }
 

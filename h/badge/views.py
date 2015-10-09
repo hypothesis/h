@@ -23,10 +23,10 @@ def badge(request):
         raise httpexceptions.HTTPBadRequest()
 
     if models.Blocklist.is_blocked(uri):
-        return {'total': 0}
+        return {'total': 0, 'blocked': True}
 
-    return {
-        'total': search_lib.search(request, {'uri': uri, 'limit': 0})['total']}
+    total = search_lib.search(request, {'uri': uri, 'limit': 0})['total']
+    return {'total': total, 'blocked': False}
 
 
 def includeme(config):

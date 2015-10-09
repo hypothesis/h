@@ -19,7 +19,9 @@ def test_badge_returns_number_from_search_lib(models, search_lib):
 
     search_lib.search.assert_called_once_with(
         request, {'uri': 'test_uri', 'limit': 0})
-    assert result == {'total': search_lib.search.return_value['total']}
+    assert result == {
+        'total': search_lib.search.return_value['total'],
+        'blocked': False}
 
 
 @badge_fixtures
@@ -31,7 +33,7 @@ def test_badge_returns_0_if_blocked(models, search_lib):
     result = views.badge(request)
 
     assert not search_lib.search.called
-    assert result == {'total': 0}
+    assert result == {'total': 0, 'blocked': True}
 
 
 @badge_fixtures

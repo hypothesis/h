@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import logging
-import json
 
 from pyramid import httpexceptions
 from pyramid.view import forbidden_view_config, notfound_view_config
@@ -78,9 +77,7 @@ def annotation(context, request):
 @view_config(route_name='embed', renderer='h:templates/embed.js.jinja2')
 def embed(context, request):
     request.response.content_type = b'text/javascript'
-    return {
-        'blocklist': json.dumps(request.registry.settings['h.blocklist'])
-    }
+    return {}
 
 
 @view_config(route_name='widget', renderer='h:templates/app.html.jinja2')
@@ -132,32 +129,6 @@ def notfound(context, request):
     return {}
 
 
-def _validate_blocklist(config):
-    """Validate the "h.blocklist" config file setting.
-
-    h.blocklist in the config file should be a JSON object as a string, for
-    example:
-
-        h.blocklist = {
-          "www.quirksmode.org": {},
-          "finance.yahoo.com": {}
-        }
-
-    This function replaces the string value on registry.settings with a dict.
-    It inserts a default value ({}) if there's nothing in the config file.
-
-    :raises RuntimeError: if the value in the config file is invalid
-
-    """
-    try:
-        config.registry.settings['h.blocklist'] = json.loads(
-            config.registry.settings.get('h.blocklist', '{}'))
-    except ValueError as err:
-        raise ValueError(
-            "The h.blocklist setting in the config file is invalid: " +
-            str(err))
-
-
 def includeme(config):
     config.include('h.assets')
 
@@ -171,7 +142,5 @@ def includeme(config):
 
     config.add_route('session', '/app')
     config.add_route('stream', '/stream')
-
-    _validate_blocklist(config)
 
     config.scan(__name__)
