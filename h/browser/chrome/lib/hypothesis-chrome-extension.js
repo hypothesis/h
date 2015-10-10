@@ -1,4 +1,4 @@
-window.h = window.h || {};
+var h = {};
 
 require('core-js/modules/es6.object.assign');
 
@@ -187,3 +187,5 @@ h.TabStore = require('./tab-store');
 
   h.HypothesisChromeExtension = HypothesisChromeExtension;
 })(h);
+
+window.h = h;

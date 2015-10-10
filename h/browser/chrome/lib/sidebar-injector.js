@@ -1,5 +1,9 @@
 'use strict';
 
+var blocklist = require('../../../static/scripts/blocklist');
+var errors = require('./errors');
+var settings = require('./settings');
+
 /* The SidebarInjector is used to deploy and remove the Hypothesis sidebar
  * from tabs. It also deals with loading PDF documents into the PDF.js viewer
  * when applicable.
@@ -34,9 +38,9 @@ function SidebarInjector(chromeTabs, dependencies) {
    * otherwise it will be rejected with an error.
    */
   this.injectIntoTab = function(tab) {
-    return h.settings.then(function(settings) {
-      if (h.blocklist.isBlocked(tab.url, settings.blocklist)) {
-        return Promise.reject(new h.BlockedSiteError(
+    return settings.then(function(settings) {
+      if (blocklist.isBlocked(tab.url, settings.blocklist)) {
+        return Promise.reject(new errors.BlockedSiteError(
           "Hypothesis doesn't work on this site yet."));
       }
 
@@ -91,7 +95,7 @@ function SidebarInjector(chromeTabs, dependencies) {
     if (isPDFURL(tab.url)) {
       return injectIntoLocalPDF(tab);
     } else {
-      return Promise.reject(new h.LocalFileError('Local non-PDF files are not supported'));
+      return Promise.reject(new errors.LocalFileError('Local non-PDF files are not supported'));
     }
   }
 
@@ -117,7 +121,7 @@ function SidebarInjector(chromeTabs, dependencies) {
         if (isAllowed) {
           resolve(injectIntoPDF(tab));
         } else {
-          reject(new h.NoFileAccessError('Local file scheme access denied'));
+          reject(new errors.NoFileAccessError('Local file scheme access denied'));
         }
       });
     });
@@ -127,7 +131,7 @@ function SidebarInjector(chromeTabs, dependencies) {
     return new Promise(function (resolve, reject) {
       if (!isSupportedURL(tab.url)) {
         var protocol = tab.url.split(':')[0];
-        return reject(new h.RestrictedProtocolError('Cannot load Hypothesis into ' + protocol + ' pages'));
+        return reject(new errors.RestrictedProtocolError('Cannot load Hypothesis into ' + protocol + ' pages'));
       }
 
       return injectScript(tab.id, '/public/config.js').then(function () {

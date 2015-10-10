@@ -1,7 +1,9 @@
 'use strict';
 
+var TabState = require('./tab-state');
+
 // Cache the tab state constants.
-var states = h.TabState.states;
+var states = TabState.states;
 
 // Each button state has two icons one for normal resolution (19) and one
 // for hi-res screens (38).

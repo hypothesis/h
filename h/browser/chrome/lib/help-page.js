@@ -1,5 +1,7 @@
 'use strict';
 
+var errors = require('./errors');
+
 /* A controller for displaying help pages. These are bound to extension
  * specific errors (found in errors.js) but can also be triggered manually.
  *
@@ -19,16 +21,16 @@ function HelpPage(chromeTabs, extensionURL) {
    * Returns nothing.
    */
   this.showHelpForError = function (tab, error) {
-    if (error instanceof h.LocalFileError) {
+    if (error instanceof errors.LocalFileError) {
       return this.showLocalFileHelpPage(tab);
     }
-    else if (error instanceof h.NoFileAccessError) {
+    else if (error instanceof errors.NoFileAccessError) {
       return this.showNoFileAccessHelpPage(tab);
     }
-    else if (error instanceof h.RestrictedProtocolError) {
+    else if (error instanceof errors.RestrictedProtocolError) {
       return this.showRestrictedProtocolPage(tab);
     }
-    else if (error instanceof h.BlockedSiteError) {
+    else if (error instanceof errors.BlockedSiteError) {
       return this.showBlockedSitePage(tab);
     }
 
