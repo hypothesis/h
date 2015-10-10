@@ -10,32 +10,26 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai', 'sinon'],
+    frameworks: [
+      'browserify',
+      'mocha',
+      'chai',
+      'sinon'
+    ],
 
 
     // list of files / patterns to load in the browser
     files: [
       // Polyfills for PhantomJS
-      '../../../node_modules/js-polyfills/polyfill.js',
+      '../../static/scripts/karma-phantomjs-polyfill.js',
 
       {
         pattern: 'test/settings.json',
         included: false,
       },
 
-      'lib/settings.js',
-      'lib/errors.js',
-      'lib/tab-store.js',
-      'lib/tab-state.js',
-      'lib/tab-error-cache.js',
-      'lib/sidebar-injector.js',
-      'lib/browser-action.js',
-      'lib/help-page.js',
-      'lib/hypothesis-chrome-extension.js',
-      'test/bootstrap.js',
-
-      'test/*-test.js',
-      '../../static/scripts/blocklist.js'
+      './lib/hypothesis-chrome-extension.js',
+      './test/*.js',
     ],
 
     proxies: {
@@ -46,12 +40,16 @@ module.exports = function(config) {
     exclude: [
     ],
 
-
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      '../../static/scripts/karma-phantomjs-polyfill.js': ['browserify'],
+      './lib/hypothesis-chrome-extension.js': ['browserify'],
     },
 
+    browserify: {
+      debug: true,
+    },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'

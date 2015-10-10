@@ -1,3 +1,13 @@
+require('./tab-state');
+require('./browser-action');
+require('./errors');
+require('./help-page');
+require('./settings');
+require('../../../static/scripts/blocklist');
+require('./sidebar-injector');
+require('./tab-error-cache');
+require('./tab-store');
+
 (function (h) {
   'use strict';
 
