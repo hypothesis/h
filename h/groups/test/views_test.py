@@ -155,6 +155,20 @@ def test_create_with_non_ascii_name():
     views.create(_mock_request(params={"name": u"☆ ßüper Gröup ☆"}))
 
 
+@create_fixtures
+def test_create_broadcasts_join_event(Group):
+    group = mock.Mock(hashid=mock.sentinel.hashid)
+    Group.return_value = group
+    request = _mock_request()
+
+    views.create(request)
+
+    request.get_queue_writer().publish.assert_called_once_with('user', {
+        'type': 'group-joined',
+        'userid': request.authenticated_userid,
+        'group': group.hashid,
+    })
+
 # The fixtures required to mock all of read()'s dependencies.
 read_fixtures = pytest.mark.usefixtures('Group', 'User', 'renderers')
 
@@ -389,6 +403,19 @@ def test_join_redirects_to_group_page(Group):
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
+@join_fixtures
+def test_join_broadcasts_join_event(Group):
+    group = mock.Mock(hashid = mock.sentinel.hashid)
+    Group.get_by_hashid.return_value = group
+    request = _mock_request(matchdict=_matchdict())
+
+    views.join(request)
+
+    request.get_queue_writer().publish.assert_called_once_with('user', {
+        'type': 'group-joined',
+        'userid': request.authenticated_userid,
+        'group': mock.sentinel.hashid,
+    })
 
 leave_fixtures = pytest.mark.usefixtures('User', 'Group')
 
@@ -404,6 +431,20 @@ def test_leave_removes_user_from_group_members(Group, User):
 
     group.members.remove.assert_called_once_with(mock.sentinel.user)
 
+
+@leave_fixtures
+def test_leave_broadcasts_leave_event(Group, User):
+    group = mock.Mock(hashid = mock.sentinel.hashid)
+    Group.get_by_hashid.return_value = group
+    User.get_by_userid.return_value = mock.sentinel.user
+
+    request = _mock_request(matchdict=_matchdict())
+    views.leave(request)
+    request.get_queue_writer().publish.assert_called_once_with('user', {
+        'type': 'group-left',
+        'userid': request.authenticated_userid,
+        'group': mock.sentinel.hashid,
+    })
 
 @pytest.fixture
 def Form(request):

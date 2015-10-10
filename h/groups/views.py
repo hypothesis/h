@@ -37,7 +37,7 @@ def _send_group_notification(request, type, hashid):
       'userid': request.authenticated_userid,
       'group': hashid,
     }
-    queue.publish('user', json.dumps(data))
+    queue.publish('user', data)
 
 @view_config(route_name='group_create',
              request_method='POST',

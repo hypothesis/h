@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from pyramid.settings import aslist
+
+import json
 import gnsq
 
 
@@ -11,6 +13,8 @@ class NamespacedNsqd(object):
     def publish(self, topic, data):
         if self.namespace is not None:
             topic = '{0}-{1}'.format(self.namespace, topic)
+        if not isinstance(data, str):
+            data = json.dumps(data)
         return self.client.publish(topic, data)
 
 

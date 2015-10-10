@@ -224,7 +224,8 @@ class TestWebSocket(unittest.TestCase):
 
     def test_opened_starts_reader(self):
         self.s.opened()
-        self.s.request.get_queue_reader.assert_called_once_with('annotations', ANY)
+        for topic in ['annotations', 'user']:
+            self.s.request.get_queue_reader.assert_any_call(topic, ANY)
 
     def test_filter_message_with_uri_gets_expanded(self):
         filter_message = json.dumps({
@@ -256,7 +257,7 @@ class TestWebSocket(unittest.TestCase):
             assert 'http://example.com/print' in uri_values
 
 
-class TestBroadcast(unittest.TestCase):
+class TestBroadcastAnnotationEvent(unittest.TestCase):
     def setUp(self):
         self.message_data = [
             {'annotation': {'id': 1},
@@ -269,7 +270,8 @@ class TestBroadcast(unittest.TestCase):
              'action': 'delete',
              'src_client_id': 'cat'},
         ]
-        self.messages = [FakeMessage(json.dumps(m)) for m in self.message_data]
+        self.messages = [('annotation', FakeMessage(json.dumps(m)))
+            for m in self.message_data]
 
         self.queue = MagicMock()
         self.queue.__iter__.return_value = self.messages
@@ -291,6 +293,32 @@ class TestBroadcast(unittest.TestCase):
         sock = FakeSocket('pidgeon')
         broadcast_from_queue(self.queue, [sock])
         assert sock.send.called is False
+
+
+class TestBroadcastSessionChangeEvent(unittest.TestCase):
+    def test_should_send_session_change_when_joining_or_leaving_group(self):
+        session_model_patcher = patch('h.session.model')
+        session_model = session_model_patcher.start()
+        session_model.return_value = {'groups': [{'id': 'someid'}]}
+
+        queue = MagicMock()
+        queue.__iter__.return_value = [('user', FakeMessage(json.dumps({
+            'type': 'group-joined',
+            'userid': 'amy',
+            'group': 'groupid',
+        })))]
+
+        sock = FakeSocket('clientid')
+        sock.request.authenticated_userid = 'amy'
+
+        broadcast_from_queue(queue, [sock])
+        sock.send.assert_called_with(json.dumps({
+            'type': 'session-change',
+            'action': 'group-joined',
+            'model': session_model.return_value,
+        }))
+
+        session_model_patcher.stop()
 
 
 class TestShouldSendEvent(unittest.TestCase):
