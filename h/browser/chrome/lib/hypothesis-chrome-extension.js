@@ -1,12 +1,16 @@
-require('./tab-state');
-require('./browser-action');
-require('./errors');
-require('./help-page');
-require('./settings');
+window.h = window.h || {};
+
+require('core-js/modules/es6.object.assign');
+
+h.TabState = require('./tab-state');
+h.BrowserAction = require('./browser-action');
+Object.assign(h, require('./errors'));
+h.HelpPage = require('./help-page');
+h.settings = require('./settings');
 require('../../../static/scripts/blocklist');
-require('./sidebar-injector');
-require('./tab-error-cache');
-require('./tab-store');
+h.SidebarInjector = require('./sidebar-injector');
+h.TabErrorCache = require('./tab-error-cache');
+h.TabStore = require('./tab-store');
 
 (function (h) {
   'use strict';
@@ -182,4 +186,4 @@ require('./tab-store');
   }
 
   h.HypothesisChromeExtension = HypothesisChromeExtension;
-})(window.h || (window.h = {}));
+})(h);
