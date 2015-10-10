@@ -45,10 +45,14 @@ module.exports = function(config) {
     preprocessors: {
       '../../static/scripts/karma-phantomjs-polyfill.js': ['browserify'],
       './lib/hypothesis-chrome-extension.js': ['browserify'],
+      './test/*.js': ['browserify'],
     },
 
     browserify: {
       debug: true,
+      configure: function(bundle) {
+        bundle.plugin('proxyquire-universal');
+      },
     },
 
     // test results reporter to use

@@ -2,7 +2,7 @@ var h = {};
 
 require('core-js/modules/es6.object.assign');
 
-h.TabState = require('./tab-state');
+var TabState = require('./tab-state');
 h.BrowserAction = require('./browser-action');
 Object.assign(h, require('./errors'));
 h.HelpPage = require('./help-page');
@@ -49,7 +49,7 @@ h.TabStore = require('./tab-store');
     var chromeBrowserAction = dependencies.chromeBrowserAction;
     var help  = new h.HelpPage(chromeTabs, dependencies.extensionURL);
     var store = new h.TabStore(localStorage);
-    var state = new h.TabState(store.all(), onTabStateChange);
+    var state = new TabState(store.all(), onTabStateChange);
     var browserAction = new h.BrowserAction(chromeBrowserAction);
     var sidebar = new h.SidebarInjector(chromeTabs, {
       extensionURL: dependencies.extensionURL,
@@ -117,6 +117,9 @@ h.TabStore = require('./tab-store');
         tabErrors.unsetTabError(tabId);
       }
     }
+
+    // exposed for use by tests
+    this._onTabStateChange = onTabStateChange;
 
     function onBrowserActionClicked(tab) {
       var tabError = tabErrors.getTabError(tab.id);
@@ -188,4 +191,4 @@ h.TabStore = require('./tab-store');
   h.HypothesisChromeExtension = HypothesisChromeExtension;
 })(h);
 
-window.h = h;
+module.exports = h.HypothesisChromeExtension;

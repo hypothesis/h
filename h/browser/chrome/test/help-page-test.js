@@ -1,5 +1,6 @@
 describe('HelpPage', function () {
-  var HelpPage = h.HelpPage;
+  var errors = require('../lib/errors');
+  var HelpPage = require('../lib/help-page');
   var fakeChromeTabs;
   var help;
 
@@ -12,7 +13,7 @@ describe('HelpPage', function () {
 
   describe('.showHelpForError', function () {
     it('renders the "local-file" page when passed a LocalFileError', function () {
-      help.showHelpForError({id: 1, index: 1}, new h.LocalFileError('msg'));
+      help.showHelpForError({id: 1, index: 1}, new errors.LocalFileError('msg'));
       assert.called(fakeChromeTabs.create);
       assert.calledWith(fakeChromeTabs.create, {
         index: 2,
@@ -22,7 +23,7 @@ describe('HelpPage', function () {
     });
 
     it('renders the "no-file-access" page when passed a NoFileAccessError', function () {
-      help.showHelpForError({id: 1, index: 1}, new h.NoFileAccessError('msg'));
+      help.showHelpForError({id: 1, index: 1}, new errors.NoFileAccessError('msg'));
       assert.called(fakeChromeTabs.create);
       assert.calledWith(fakeChromeTabs.create, {
         index: 2,
@@ -32,7 +33,7 @@ describe('HelpPage', function () {
     });
 
     it('renders the "no-file-access" page when passed a RestrictedProtocolError', function () {
-      help.showHelpForError({id: 1, index: 1}, new h.RestrictedProtocolError('msg'));
+      help.showHelpForError({id: 1, index: 1}, new errors.RestrictedProtocolError('msg'));
       assert.called(fakeChromeTabs.create);
       assert.calledWith(fakeChromeTabs.create, {
         index: 2,
@@ -42,7 +43,7 @@ describe('HelpPage', function () {
     });
 
     it('renders the "blocked-site" page when passed a BlockedSiteError', function () {
-      help.showHelpForError({id: 1, index: 1}, new h.BlockedSiteError('msg'));
+      help.showHelpForError({id: 1, index: 1}, new errors.BlockedSiteError('msg'));
       assert.called(fakeChromeTabs.create);
       assert.calledWith(fakeChromeTabs.create, {
         index: 2,

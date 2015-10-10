@@ -1,8 +1,8 @@
 describe('BrowserAction', function () {
   'use strict';
 
-  var BrowserAction = h.BrowserAction;
-  var TabState = h.TabState;
+  var BrowserAction = require('../lib/browser-action');
+  var TabState = require('../lib/tab-state');
   var action;
   var fakeChromeBrowserAction;
 
