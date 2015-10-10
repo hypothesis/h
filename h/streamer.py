@@ -581,20 +581,6 @@ def broadcast_annotation_message(message, sockets):
         if should_send_annotation_event(socket, annotation, data_in):
             socket.send(data_out)
 
-def _get_group_json(hash_id):
-    # FIXME - There is an issue (race condition?) here where
-    # get_by_hashid() sometimes returns None, though the hash_id appears
-    # to be valid.
-    group = Group.get_by_hashid(hash_id)
-    return {
-        'name': group.name,
-        'id': group.hashid,
-        # TODO - Generate group URL correctly
-        'url': 'https://dummy/%s/%s' % (hash_id, group.slug)
-        #'url': request.route_url('group_read',
-        #    hashid=group.hashid,
-        #    slug=group.slug)
-    }
 
 def broadcast_session_change_message(message, sockets):
     """ Broadcast a session change to all appropriate active sessions. """
