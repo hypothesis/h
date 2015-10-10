@@ -422,19 +422,34 @@ leave_fixtures = pytest.mark.usefixtures('User', 'Group')
 
 @leave_fixtures
 def test_leave_removes_user_from_group_members(Group, User):
+    user = mock.sentinel.user
     group = mock.Mock()
+    group.members = [user]
     Group.get_by_hashid.return_value = group
-    User.get_by_userid.return_value = mock.sentinel.user
+    User.get_by_userid.return_value = user
 
     request = _mock_request(matchdict=_matchdict())
     result = views.leave(request)
 
-    group.members.remove.assert_called_once_with(mock.sentinel.user)
+    assert(group.members == [])
+
+
+@leave_fixtures
+def test_leave_returns_not_found_if_user_not_in_group(Group, User):
+    group = mock.Mock(members=[])
+    Group.get_by_hashid.return_value = group
+    User.get_by_userid.return_value = mock.sentinel.user
+
+    request = _mock_request(matchdict=_matchdict())
+
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        result = views.leave(request)
 
 
 @leave_fixtures
 def test_leave_broadcasts_leave_event(Group, User):
-    group = mock.Mock(hashid = mock.sentinel.hashid)
+    group = mock.Mock(hashid=mock.sentinel.hashid,
+                      members=[mock.sentinel.user])
     Group.get_by_hashid.return_value = group
     User.get_by_userid.return_value = mock.sentinel.user
 

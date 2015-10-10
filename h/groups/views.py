@@ -197,8 +197,9 @@ def leave(request):
     user = models.User.get_by_userid(request.domain,
                                      request.authenticated_userid)
 
-    # FIXME - This should raise an error if the user is not
-    # a member of the group
+    if user not in group.members:
+        raise exc.HTTPNotFound()
+
     group.members.remove(user)
     _send_group_notification(request, 'group-left', group.hashid)
 
