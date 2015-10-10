@@ -53,6 +53,7 @@
 
     &__name-label {
       font-size: 18px;
+      margin-bottom: 10px;
     }
 
     &__name-input {
@@ -62,6 +63,7 @@
       text-align: center;
       margin-bottom: 40px;
       width: 350px;
+      outline: none;
 
       // TODO - Cyan cursor color
 
