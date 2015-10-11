@@ -73,6 +73,8 @@ module.exports = function(config) {
         bundle
           .transform('coffeeify')
           .plugin('proxyquire-universal')
+          // fix for Proxyquire in PhantomJS 1.x.
+          // See https://github.com/bitwit/proxyquireify-phantom-menace
           .require('phantom-ownpropertynames/implement', {entry: true});
       }
     },

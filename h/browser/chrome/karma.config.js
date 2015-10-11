@@ -51,7 +51,9 @@ module.exports = function(config) {
     browserify: {
       debug: true,
       configure: function(bundle) {
-        bundle.plugin('proxyquire-universal');
+        bundle
+          .plugin('proxyquire-universal')
+          .require('phantom-ownpropertynames/implement', {entry: true});
       },
     },
 
