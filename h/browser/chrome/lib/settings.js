@@ -35,7 +35,7 @@ function getSettings() {
  * A Promise whose value is the contents of the settings.json file.
  *
  * @example
- * h.settings.then(function(settings) {
+ * settings.then(function(settings) {
  *   // Do something with the settings object.
  * });
  */

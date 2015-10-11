@@ -11,11 +11,11 @@ var errors = require('./errors');
  *   https://developer.chrome.com/extensions/extension#method-getURL
  */
 function HelpPage(chromeTabs, extensionURL) {
-  /* Accepts an instance of h.ExtensionError and displays an appropriate
+  /* Accepts an instance of errors.ExtensionError and displays an appropriate
    * help page if one exists.
    *
    * tab   - The tab to display the error message in.
-   * error - An instance of h.ExtensionError.
+   * error - An instance of errors.ExtensionError.
    *
    * Throws an error if no page is available for the action.
    * Returns nothing.
