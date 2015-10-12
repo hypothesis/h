@@ -1,0 +1,16 @@
+<li ng-show="filterActive">
+  <span ng-pluralize
+           count="filterMatchCount"
+           when="{'0': 'No results for “{{searchQuery}}”.',
+                  'one': 'Found one result.',
+                  'other': 'Found {} results.'}"></span>
+  <a href="" ng-click="onClearSelection()">Clear search</a>.
+</li>
+<li ng-show="!filterActive && selectionCount > 0">
+  <span ng-pluralize
+           count="selectionCount"
+           when="{'0': 'No annotations selected.',
+                  'one': 'Showing 1 selected annotation.',
+                  'other': 'Showing {} selected annotations.'}"></span>
+  <a href="" ng-click="onClearSelection()">Clear selection</a>.
+</li>

@@ -3,20 +3,13 @@
     deep-count="count"
     thread-filter="search.query"
     window-scroll="loadMore(20)">
-  <li ng-show="threadFilter.active()"
-      ><span ng-pluralize
-             count="count('match')"
-             when="{'0': 'No results for “{{search.query}}”.',
-                    'one': 'Found one result.',
-                    'other': 'Found {} results.'}"></span>
-      <a href="" ng-click="clearSelection()">Clear search</a>.</li>
-  <li ng-show="!threadFilter.active() && selectedAnnotations"
-      ><span ng-pluralize
-             count="selectedAnnotationsCount"
-             when="{'0': 'No annotations selected.',
-                    'one': 'Showing 1 selected annotation.',
-                    'other': 'Showing {} selected annotations.'}"></span>
-      <a href="" ng-click="clearSelection()">Clear selection</a>.</li>
+  <search-status-bar
+    filter-active="threadFilter.active()"
+    filter-match-count="count('match')"
+    search-query="search ? search.query : ''"
+    selection-count="selectedAnnotationsCount"
+    on-clear-selection="clearSelection()">
+  </search-status-bar>
   <li ng-show="isStream">
     <span class="ng-cloak" dropdown keyboard-nav>
       <span role="button"
