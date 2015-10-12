@@ -143,29 +143,13 @@ class UriFilter(object):
     A filter that selects only annotations where the 'uri' parameter matches.
     """
 
-    def __init__(self, request):
-        self.request = request
-
     def __call__(self, params):
         uristr = params.pop('uri', None)
         if uristr is None:
             return None
 
-        if self.request.feature('search_normalized'):
-            return self.term_filter(uristr)
-        return self.match_filter(uristr)
-
-    def term_filter(self, uristr):
         scopes = [uri.normalize(u) for u in uri.expand(uristr)]
         return {"terms": {"target.scope": scopes}}
-
-    def match_filter(self, uristr):
-        uristrs = uri.expand(uristr)
-        clauses = [{"match": {"uri": u}} for u in uristrs]
-
-        if len(clauses) == 1:
-            return {"query": clauses[0]}
-        return {"query": {"bool": {"should": clauses}}}
 
 
 class AnyMatcher(object):

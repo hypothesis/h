@@ -316,75 +316,27 @@ def test_urifilter_inactive_when_no_uri_param():
     """
     When there's no `uri` parameter, return None.
     """
-    request = mock.Mock()
-    urifilter = query.UriFilter(request)
+    urifilter = query.UriFilter()
 
     assert urifilter({"foo": "bar"}) is None
 
 
-@pytest.mark.usefixtures('uri')
-def test_urifilter_when_search_normalized_is_off():
-    request = mock.Mock()
-    request.feature.return_value = False
-    urifilter = query.UriFilter(request)
-
-    r1 = urifilter({"uri": "http://example.com/"})
-    r2 = urifilter({"uri": "http://whitehouse.gov/"})
-
-    assert r1 == {"query": {"match": {"uri": "http://example.com/"}}}
-    assert r2  == {"query": {"match": {"uri": "http://whitehouse.gov/"}}}
-
-
-def test_urifilter_expands_to_all_uris_when_search_normalized_is_off(uri):
-    """
-    It should expand the search to all URIs.
-
-    If h.api.uri.expand returns multiple documents for the URI then return a
-    matcher that finds annotations that match one or more of these documents'
-    URIs.
-    """
-    request = mock.Mock()
-    request.feature.return_value = False
-    results = ["http://example.com/",
-               "http://example2.com/",
-               "http://example3.com/"]
-    uri.expand.side_effect = lambda x: results
-    urifilter = query.UriFilter(request)
-
-    result = urifilter({"uri": "http://example.com"})
-
-    assert result == {
-        "query": {
-            "bool": {
-                "should": [
-                    {"match": {"uri": "http://example.com/"}},
-                    {"match": {"uri": "http://example2.com/"}},
-                    {"match": {"uri": "http://example3.com/"}}
-                ],
-            },
-        },
-    }
-
-
-def test_urifilter_when_search_normalized_is_on(uri):
+def test_urifilter_expands_and_normalizes_into_terms_filter(uri):
     """
     Uses a `terms` filter against target.scope to filter for URI.
 
-    When querying for a URI with the search_normalized feature flag enabled,
     UriFilter should use a `terms` filter against the normalized version of the
     target source field, which we store in `target.scope`.
 
     It should expand the input URI before searching, and normalize the results
     of the expansion.
     """
-    request = mock.Mock()
-    request.feature.return_value = True
     uri.expand.side_effect = lambda x: [
         "http://giraffes.com/",
         "https://elephants.com/",
     ]
     uri.normalize.side_effect = lambda x: x[:-1]  # Strip the trailing slash
-    urifilter = query.UriFilter(request)
+    urifilter = query.UriFilter()
 
     result = urifilter({"uri": "http://example.com/"})
 
