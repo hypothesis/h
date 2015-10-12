@@ -572,7 +572,7 @@ def broadcast_annotation_message(message, sockets):
     data_out = json.dumps(payload)
     for socket in list(sockets):
         if should_send_annotation_event(socket, annotation, data_in):
-            socket.send(data_out)
+            _send_if_open(socket, data_out)
 
 
 def broadcast_session_change_message(message, sockets):
@@ -580,18 +580,24 @@ def broadcast_session_change_message(message, sockets):
     data_in = json.loads(message.body)
 
     for socket in list(sockets):
-        # TODO - This logic is duplicated in should_send_annotation_event()
-        if socket.terminated:
-            continue
-
         if socket.request.authenticated_userid == data_in['userid']:
             # for session state change events, the full session model is included
             # so that clients can update themselves without further API requests
-            socket.send(json.dumps({
+            _send_if_open(socket, json.dumps({
                 'type': 'session-change',
                 'action': data_in['type'],
                 'model': h.session.model(socket.request)
             }))
+
+
+def _send_if_open(socket, data):
+    # Avoid trying to call socket.send() on a terminated socket.
+    #
+    # Sockets may be closed during a gevent-blocking call to another function
+    # in the broadcast_() functions, so we defer checking for a closed socket
+    # until just before sending a message to the client
+    if not socket.terminated:
+        socket.send(data)
 
 def _authorized_to_read(effective_principals, annotation):
     """Return True if effective_principals authorize reading annotation.
@@ -617,9 +623,6 @@ def should_send_annotation_event(socket, annotation, event_data):
     the underlying session should receive the event. If it should, the
     action is wrapped up in a websocket packet and sent to the client.
     """
-    if socket.terminated:
-        return False
-
     if event_data['action'] == 'read':
         return False
 

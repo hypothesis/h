@@ -294,6 +294,13 @@ class TestBroadcastAnnotationEvent(unittest.TestCase):
         broadcast_from_queue(self.queue, [sock])
         assert sock.send.called is False
 
+    def test_terminated_socket_does_not_recieve_event(self):
+        self.should.return_value = True
+        sock = FakeSocket('giraffe')
+        sock.terminated = True
+        broadcast_from_queue(self.queue, [sock])
+        assert sock.send.called is False
+
 
 class TestBroadcastSessionChangeEvent(unittest.TestCase):
     def test_should_send_session_change_when_joining_or_leaving_group(self):
@@ -342,9 +349,6 @@ class TestShouldSendEvent(unittest.TestCase):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
         assert should_send_annotation_event(self.sock_pigeon, {}, data) is False
 
-    def test_terminated_socket_does_not_recieve_event(self):
-        data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_annotation_event(self.sock_roadkill, {}, data) is False
 
     def test_should_send_annotation_event_no_filter(self):
         self.sock_giraffe.filter = None
