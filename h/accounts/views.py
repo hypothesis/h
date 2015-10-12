@@ -547,7 +547,6 @@ class ProfileController(object):
         model = {}
         if userid:
             model["email"] = User.get_by_userid(request.domain, userid).email
-        if request.feature('notification'):
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 userid)
         return {'model': model}

@@ -1,20 +1,8 @@
 # -*- coding: utf-8 -*-
 from mock import patch, Mock
 from pytest import raises
-from pyramid.testing import DummyRequest as _DummyRequest
+from pyramid.testing import DummyRequest
 from webob.cookies import SignedSerializer
-
-from h.conftest import DummyFeature
-
-
-class DummyRequest(_DummyRequest):
-    def __init__(self, *args, **kwargs):
-        params = {
-            # Add a dummy feature flag querier to the request
-            'feature': DummyFeature(),
-        }
-        params.update(kwargs)
-        super(DummyRequest, self).__init__(*args, **params)
 
 
 def configure(config):
