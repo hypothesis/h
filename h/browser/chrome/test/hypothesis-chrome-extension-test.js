@@ -69,6 +69,7 @@ describe('HypothesisChromeExtension', function () {
       setState: sandbox.spy(),
       activate: sandbox.spy(),
       deactivate: sandbox.spy(),
+      updateBadge: sandbox.spy(),
     };
     fakeSidebarInjector = {
       injectIntoTab: sandbox.stub().returns(Promise.resolve()),

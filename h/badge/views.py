@@ -6,15 +6,12 @@ from h.api.resources import Root
 from h.api import search as search_lib
 
 
-@api_config(context=Root, name='badge')
-def badge(request):
-    """Return the number of public annotations on a given page.
+@api_config(context=Root, name='blocklist')
+def blocklist(request):
+    """Return whether or not the given URI is blocklisted.
 
-    This is for the number that's displayed on the Chrome extension's badge.
-
-    Certain pages are blocklisted so that the badge never shows a number on
-    those pages. The Chrome extension is oblivious to this, we just tell it
-    that there are 0 annotations.
+    And also the number of annotations of the URI (that the authorized user
+    can read).
 
     """
     uri = request.params.get('uri')
@@ -22,11 +19,10 @@ def badge(request):
     if not uri:
         raise httpexceptions.HTTPBadRequest()
 
-    if models.Blocklist.is_blocked(uri):
-        return {'total': 0, 'blocked': True}
-
-    total = search_lib.search(request, {'uri': uri, 'limit': 0})['total']
-    return {'total': total, 'blocked': False}
+    return {
+        'total': search_lib.search(request, {'uri': uri, 'limit': 0})['total'],
+        'blocked': models.Blocklist.is_blocked(uri)
+    }
 
 
 def includeme(config):

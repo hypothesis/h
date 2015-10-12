@@ -151,7 +151,9 @@ function HypothesisChromeExtension(dependencies) {
 
     _blocklist = blocklist(tab.url);
     _blocklist.then(function(blocklist) {
-      browserAction.updateBadge(blocklist.total, tab.id);
+      if (!blocklist.blocked) {
+        browserAction.updateBadge(blocklist.total, tab.id);
+      }
     });
     return updateTabDocument(tab);
   }
