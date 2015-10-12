@@ -252,12 +252,12 @@ def test_reset_password_no_activation(config, activation_model):
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({
-            'code': 'abc123',
+            'user': 'abc123',
             'password': 'secret',
         })
 
-    assert 'code' in exc.value.asdict()
-    assert 'reset code is not valid' in exc.value.asdict()['code']
+    assert 'user' in exc.value.asdict()
+    assert 'reset code is not valid' in exc.value.asdict()['user']
 
 
 @pytest.mark.usefixtures('activation_model')
@@ -268,12 +268,12 @@ def test_reset_password_no_user_for_activation(config, user_model):
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({
-            'code': 'abc123',
+            'user': 'abc123',
             'password': 'secret',
         })
 
-    assert 'code' in exc.value.asdict()
-    assert 'reset code is not valid' in exc.value.asdict()['code']
+    assert 'user' in exc.value.asdict()
+    assert 'reset code is not valid' in exc.value.asdict()['user']
 
 
 def test_reset_password_adds_user_to_appstruct(config,
@@ -284,7 +284,7 @@ def test_reset_password_adds_user_to_appstruct(config,
     user = user_model.get_by_activation.return_value
 
     appstruct = schema.deserialize({
-        'code': 'abc123',
+        'user': 'abc123',
         'password': 'secret',
     })
 

@@ -194,30 +194,38 @@ class RegisterSchema(CSRFSchema):
                              hint=_('at least two characters'))
 
 
-class ResetPasswordSchema(CSRFSchema):
-    code = colander.SchemaNode(
-        colander.String(),
-        title=_('Your reset code:'),
-        hint=_('this will be emailed to you'),
-    )
-    password = password_node(title=_('New password:'),
-                             hint=_('at least two characters'))
+class ResetCode(colander.SchemaType):
 
-    def validator(self, node, value):
-        super(ResetPasswordSchema, self).validator(node, value)
+    """Schema type transforming a reset code to a user and back."""
 
-        code = value.get('code')
+    def serialize(self, node, appstruct):
+        if appstruct is colander.null:
+            return colander.null
+        if not isinstance(appstruct, models.User):
+            raise colander.Invalid(node, '%r is not a User' % appstruct)
+        if not isinstance(appstruct.activation, models.Activation):
+            raise colander.Invalid(node, '%r has no Activation' % appstruct)
+        return appstruct.activation.code
 
-        activation = models.Activation.get_by_code(code)
+    def deserialize(self, node, cstruct):
+        if cstruct is colander.null:
+            return colander.null
+        activation = models.Activation.get_by_code(cstruct)
         if activation is not None:
             user = models.User.get_by_activation(activation)
-
         if activation is None or user is None:
-            err = colander.Invalid(node)
-            err['code'] = _('Your reset code is not valid')
-            raise err
+            raise colander.Invalid(node, _('Your reset code is not valid'))
+        return user
 
-        value['user'] = user
+
+class ResetPasswordSchema(CSRFSchema):
+    # N.B. this is the field into which the user puts their reset code, but we
+    # call it `user` because when validated, it will return a `User` object.
+    user = colander.SchemaNode(ResetCode(),
+                               title=_('Your reset code:'),
+                               hint=_('this will be emailed to you'))
+    password = password_node(title=_('New password:'),
+                             hint=_('at least two characters'))
 
 
 class ProfileSchema(CSRFSchema):

@@ -7,6 +7,7 @@
 import datetime
 import json
 
+import colander
 import deform
 from pyramid import httpexceptions
 from pyramid.exceptions import BadCSRFToken
@@ -276,7 +277,7 @@ class ForgotPasswordController(object):
                renderer='h:templates/accounts/reset_password.html.jinja2')
 @view_config(attr='reset_password_form', request_method='GET')
 @view_config(route_name='reset_password_with_code',
-             attr='reset_password_form', request_method='GET')
+             attr='reset_password_with_code_form', request_method='GET')
 @view_config(attr='reset_password', request_method='POST')
 class ResetPasswordController(object):
 
@@ -302,8 +303,8 @@ class ResetPasswordController(object):
             appstruct = self.form.validate(self.request.POST.items())
         except deform.ValidationFailure:
             # If the code is valid, hide the field.
-            if not self.form['code'].error:
-                self.form.set_widgets({'code': deform.widget.HiddenWidget()})
+            if not self.form['user'].error:
+                self.form.set_widgets({'user': deform.widget.HiddenWidget()})
             return {'form': self.form.render()}
 
         self._reset_password(appstruct['user'], appstruct['password'])
@@ -313,18 +314,25 @@ class ResetPasswordController(object):
 
     def reset_password_form(self):
         """Render the reset password form."""
-        code = None
-        try:
-            code = self.request.matchdict['code']
-        except KeyError:
-            pass
-        else:
-            # If the code was in the URL, then we inject it into the form as a
-            # hidden field.
-            self.form.set_appstruct({'code': code})
-            self.form.set_widgets({'code': deform.widget.HiddenWidget()})
+        return {'form': self.form.render(), 'has_code': False}
 
-        return {'form': self.form.render(), 'has_code': code is not None}
+    def reset_password_with_code_form(self):
+        """Render the reset password form with a prefilled code."""
+        code = self.request.matchdict['code']
+
+        # If valid, we inject the supplied it into the form as a hidden field.
+        # Otherwise, we 404.
+        try:
+            user = schemas.ResetCode().deserialize(None, code)
+        except colander.Invalid:
+            raise httpexceptions.HTTPNotFound()
+        else:
+            # N.B. the form field for the reset code is called 'user'. See the
+            # comment in `schemas.ResetPasswordSchema` for details.
+            self.form.set_appstruct({'user': user})
+            self.form.set_widgets({'user': deform.widget.HiddenWidget()})
+
+        return {'form': self.form.render(), 'has_code': True}
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
