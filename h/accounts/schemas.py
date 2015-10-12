@@ -221,11 +221,15 @@ class ResetCode(colander.SchemaType):
 class ResetPasswordSchema(CSRFSchema):
     # N.B. this is the field into which the user puts their reset code, but we
     # call it `user` because when validated, it will return a `User` object.
-    user = colander.SchemaNode(ResetCode(),
-                               title=_('Your reset code:'),
-                               hint=_('this will be emailed to you'))
-    password = password_node(title=_('New password:'),
-                             hint=_('at least two characters'))
+    user = colander.SchemaNode(
+        ResetCode(),
+        title=_('Your reset code:'),
+        hint=_('this will be emailed to you'),
+        widget=deform.widget.TextInputWidget(disable_autocomplete=True))
+    password = password_node(
+        title=_('New password:'),
+        hint=_('at least two characters'),
+        widget=deform.widget.PasswordWidget(disable_autocomplete=True))
 
 
 class ProfileSchema(CSRFSchema):

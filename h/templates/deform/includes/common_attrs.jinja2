@@ -14,6 +14,9 @@ aria-invalid="true"
 {%- if field.widget.autofocus -%}
 autofocus onfocus="this.select()"
 {% endif -%}
+{%- if field.widget.disable_autocomplete -%}
+autocomplete="off"
+{% endif -%}
 {%- if field.widget.max_length -%}
 maxlength="{{ field.widget.max_length }}"
 {% endif -%}
