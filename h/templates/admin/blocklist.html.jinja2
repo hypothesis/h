@@ -1,12 +1,11 @@
 {% extends "h:templates/layouts/admin.html.jinja2" %}
 
-{% set page_id = 'badge' %}
-{% set page_title = 'Chrome extension badge' %}
+{% set page_id = 'blocklist' %}
+{% set page_title = 'Chrome extension blocklist' %}
 
 {% block content %}
   <p>
-    This page lets you edit the list of URIs on which the Chrome extension will
-    never show a number on its browser button badge.
+    This page lets you edit the list of URIs on which h will not launch.
   </p>
 
   <p>
@@ -43,7 +42,7 @@
       {% if uris %}
       <form
         method="POST"
-        action="{{ request.route_url('admin_badge') }}">
+        action="{{ request.route_url('admin_blocklist') }}">
         <ul>
           {% for uri in uris %}
             <li>
