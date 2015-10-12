@@ -153,6 +153,12 @@ $group-list-width: 270px;
   }
 }
 
+// the name of a group in the groups drop-down list
+// and 'Post to <Group>' button for saving annotations
+.group-name-link {
+  white-space: nowrap;
+}
+
 /* The user account dropdown menu */
 .user-picker {
   .avatar {

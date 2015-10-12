@@ -164,14 +164,12 @@ html {
 }
 
 .dropdown-menu {
-  @include rotateX(90deg);
+  visibility: hidden;
   background: $white;
   border: solid 1px $gray-lighter;
   margin-top: .8em;
   top: 100%;
   float: left;
-  opacity: 0;
-  pointer-events: none;
   position: absolute;
   z-index: 2;
 
@@ -248,14 +246,22 @@ html {
       right: 0;
     }
   }
+
+  // Aligns the dropdown menu's '▲' indicator to the center,
+  // the menu itself has to be aligned by the user
+  &.pull-center {
+    // Align the tail
+    &:before, &:after {
+      left: auto;
+      right: 50%;
+    }
+  }
 }
 
 .open {
   & > .dropdown-menu {
     @include smallshadow;
-    @include rotateX(0);
-    opacity: 1;
-    pointer-events: auto;
+    visibility: visible;
   }
 }
 

@@ -2,12 +2,30 @@
   display: flex;
 
   &__btn {
-    width: 250px;
+    position: relative;
   }
 
-  &__dropdown-menu {
-    width: 100%;
+  // a container which wraps the dropdown menu
+  // in order to allow it to be positioned
+  // relative to its own width
+  &__dropdown-container {
+    position: absolute;
+    left: 100%;
   }
+
+  // the content of the dropdown menu
+  &__dropdown-menu {
+    // align the ▼ arrow in the dropdown button
+    // with the ▲ arrow in the dropdown menu
+    position: relative;
+    left: calc(-50% - 6px);
+  }
+}
+
+// .dropdown-menu initially hides the dropdown via
+// `visibility`. Show it when the dropdown is open
+.open .publish-annotation-btn__dropdown-menu {
+  visibility: visible;
 }
 
 .publish-annotation-cancel-btn {
