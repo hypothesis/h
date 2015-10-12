@@ -34,7 +34,7 @@ describe('h:session', function () {
   }));
 
 
-  beforeEach(mock.inject(function (_$httpBackend_, _session_, _$rootScope_) {
+  beforeEach(mock.inject(function (_$httpBackend_, _$rootScope_, _session_) {
     $httpBackend = _$httpBackend_;
     session = _session_;
     $rootScope = _$rootScope_;

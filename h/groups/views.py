@@ -64,7 +64,7 @@ def create(request):
     # We need to flush the db session here so that group.id will be generated.
     request.db.flush()
 
-    _send_group_notification(request, 'group-joined', group.hashid)
+    _send_group_notification(request, 'group-join', group.hashid)
 
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
     return exc.HTTPSeeOther(url)
@@ -162,7 +162,7 @@ def join(request):
                                      request.authenticated_userid)
 
     group.members.append(user)
-    _send_group_notification(request, 'group-joined', group.hashid)
+    _send_group_notification(request, 'group-join', group.hashid)
 
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
     return exc.HTTPSeeOther(url)
@@ -201,7 +201,7 @@ def leave(request):
         raise exc.HTTPNotFound()
 
     group.members.remove(user)
-    _send_group_notification(request, 'group-left', group.hashid)
+    _send_group_notification(request, 'group-leave', group.hashid)
 
     return exc.HTTPNoContent()
 

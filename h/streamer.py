@@ -12,7 +12,6 @@ import weakref
 
 import gevent
 import gevent.queue
-from functools import partial
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.config import aslist
@@ -25,8 +24,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from h.api import nipsa
 from h.api import uri
 from h.api.search import query
-from .models import Annotation
-from h.groups.models import Group
+from .models import Annotation, Group
 import h.session
 
 log = logging.getLogger(__name__)
@@ -471,20 +469,15 @@ class WebSocket(_WebSocket):
 
         for topic in ['annotations', 'user']:
             reader = request.get_queue_reader(topic, reader_id)
-            reader.on_message.connect(
-                receiver=partial(cls.on_queue_message, topic),
-                # hold a reference to the per-topic callable returned by
-                # partial()
-                weak=False
-            )
+            reader.on_message.connect(receiver=cls.on_queue_message)
             reader.start(block=False)
 
         gevent.spawn(broadcast_from_queue, cls.event_queue, cls.instances)
 
     @classmethod
-    def on_queue_message(cls, topic, reader, message=None):
+    def on_queue_message(cls, reader, message=None):
         if message is not None:
-            cls.event_queue.put((topic, message))
+            cls.event_queue.put((reader.topic, message))
 
     def opened(self):
         self.start_reader(self.request)

@@ -156,7 +156,7 @@ def test_create_with_non_ascii_name():
 
 
 @create_fixtures
-def test_create_broadcasts_join_event(Group):
+def test_create_publishes_join_event(Group):
     group = mock.Mock(hashid=mock.sentinel.hashid)
     Group.return_value = group
     request = _mock_request()
@@ -164,7 +164,7 @@ def test_create_broadcasts_join_event(Group):
     views.create(request)
 
     request.get_queue_writer().publish.assert_called_once_with('user', {
-        'type': 'group-joined',
+        'type': 'group-join',
         'userid': request.authenticated_userid,
         'group': group.hashid,
     })
@@ -404,7 +404,7 @@ def test_join_redirects_to_group_page(Group):
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
 @join_fixtures
-def test_join_broadcasts_join_event(Group):
+def test_join_publishes_join_event(Group):
     group = mock.Mock(hashid = mock.sentinel.hashid)
     Group.get_by_hashid.return_value = group
     request = _mock_request(matchdict=_matchdict())
@@ -412,7 +412,7 @@ def test_join_broadcasts_join_event(Group):
     views.join(request)
 
     request.get_queue_writer().publish.assert_called_once_with('user', {
-        'type': 'group-joined',
+        'type': 'group-join',
         'userid': request.authenticated_userid,
         'group': mock.sentinel.hashid,
     })
@@ -447,7 +447,7 @@ def test_leave_returns_not_found_if_user_not_in_group(Group, User):
 
 
 @leave_fixtures
-def test_leave_broadcasts_leave_event(Group, User):
+def test_leave_publishes_leave_event(Group, User):
     group = mock.Mock(hashid=mock.sentinel.hashid,
                       members=[mock.sentinel.user])
     Group.get_by_hashid.return_value = group
@@ -456,7 +456,7 @@ def test_leave_broadcasts_leave_event(Group, User):
     request = _mock_request(matchdict=_matchdict())
     views.leave(request)
     request.get_queue_writer().publish.assert_called_once_with('user', {
-        'type': 'group-left',
+        'type': 'group-leave',
         'userid': request.authenticated_userid,
         'group': mock.sentinel.hashid,
     })

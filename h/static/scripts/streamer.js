@@ -16,6 +16,7 @@ var socket;
  * @param $websocket - angular-websocket constructor
  * @param annotationMapper - The local annotation store
  * @param groups - The local groups store
+ * @param session - Provides access to read and update the session state
  *
  * @return An angular-websocket wrapper around the socket.
  */

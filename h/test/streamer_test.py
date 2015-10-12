@@ -303,7 +303,7 @@ class TestBroadcastSessionChangeEvent(unittest.TestCase):
 
         queue = MagicMock()
         queue.__iter__.return_value = [('user', FakeMessage(json.dumps({
-            'type': 'group-joined',
+            'type': 'group-join',
             'userid': 'amy',
             'group': 'groupid',
         })))]
@@ -314,7 +314,7 @@ class TestBroadcastSessionChangeEvent(unittest.TestCase):
         broadcast_from_queue(queue, [sock])
         sock.send.assert_called_with(json.dumps({
             'type': 'session-change',
-            'action': 'group-joined',
+            'action': 'group-join',
             'model': session_model.return_value,
         }))
 

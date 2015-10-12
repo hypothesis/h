@@ -61,7 +61,7 @@ function sessionActions(options) {
  *
  * @ngInject
  */
-function session($document, $http, $resource, flash, $rootScope) {
+function session($document, $http, $resource, $rootScope, flash) {
  // TODO: Move accounts data management (e.g. profile, edit_profile,
  // disable_user, etc) into another module with another route.
   var actions = sessionActions({
