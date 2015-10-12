@@ -154,6 +154,9 @@ function HypothesisChromeExtension(dependencies) {
       if (!blocklist.blocked) {
         browserAction.updateBadge(blocklist.total, tab.id);
       }
+    }).
+    catch(function(reason) {
+      // Silence console error message about uncaught exception here.
     });
     return updateTabDocument(tab);
   }

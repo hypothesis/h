@@ -20,6 +20,8 @@ var settings = require('./settings');
 function getBlocklist(uri) {
   return new Promise(function(resolve, reject) {
     var request = new XMLHttpRequest();
+    request.timeout = 1000;
+
     request.onload = function() {
       var blocklist;
       var total;
