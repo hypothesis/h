@@ -10,7 +10,6 @@ FEATURES = {
     'claim': "Enable 'claim your username' web views?",
     'groups': "Enable private annotation groups?",
     'notification': "Send email notifications?",
-    'queue': "Enable dispatch of annotation events to NSQ?",
     'show_unanchored_annotations': "Show annotations that fail to anchor?",
     'truncate_annotations': "Truncate long quotes and bodies in annotations?",
 }
