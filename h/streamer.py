@@ -436,6 +436,12 @@ class FilterHandler(object):
             return False
 
 
+# NSQ message topics that the WebSocket server
+# processes messages from
+ANNOTATIONS_TOPIC = 'annotations'
+USER_TOPIC = 'user'
+
+
 class WebSocket(_WebSocket):
     # Class attributes
     event_queue = None
@@ -467,7 +473,7 @@ class WebSocket(_WebSocket):
         cls.event_queue = gevent.queue.Queue()
         reader_id = 'stream-{}#ephemeral'.format(_random_id())
 
-        for topic in ['annotations', 'user']:
+        for topic in [ANNOTATIONS_TOPIC, USER_TOPIC]:
             reader = request.get_queue_reader(topic, reader_id)
             reader.on_message.connect(receiver=cls.on_queue_message)
             reader.start(block=False)
@@ -556,10 +562,11 @@ def broadcast_from_queue(queue, sockets):
     appropriate active sessions.
     """
     for (topic, message) in queue:
-        if topic == 'annotation':
+        if topic == ANNOTATIONS_TOPIC:
             broadcast_annotation_message(message, sockets)
-        elif topic == 'user':
+        elif topic == USER_TOPIC:
             broadcast_session_change_message(message, sockets)
+
 
 def broadcast_annotation_message(message, sockets):
     """

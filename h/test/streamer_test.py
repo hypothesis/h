@@ -16,6 +16,7 @@ from h.streamer import WebSocket
 from h.streamer import should_send_annotation_event
 from h.streamer import broadcast_from_queue
 from h.streamer import websocket
+from h.streamer import ANNOTATIONS_TOPIC
 
 
 FakeMessage = namedtuple('FakeMessage', 'body')
@@ -270,7 +271,7 @@ class TestBroadcastAnnotationEvent(unittest.TestCase):
              'action': 'delete',
              'src_client_id': 'cat'},
         ]
-        self.messages = [('annotation', FakeMessage(json.dumps(m)))
+        self.messages = [(ANNOTATIONS_TOPIC, FakeMessage(json.dumps(m)))
             for m in self.message_data]
 
         self.queue = MagicMock()
