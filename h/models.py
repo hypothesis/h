@@ -6,7 +6,7 @@ from h.api import models as api_models
 from h.api.nipsa import models as nipsa_models
 from h.groups import models as groups_models
 from h.notification import models as notification_models
-from h.badge import models as badge_models
+from h.blocklist import models as blocklist_models
 
 __all__ = (
     'Activation',
@@ -24,7 +24,7 @@ __all__ = (
 
 Activation = accounts_models.Activation
 Annotation = api_models.Annotation
-Blocklist = badge_models.Blocklist
+Blocklist = blocklist_models.Blocklist
 Document = api_models.Document
 Feature = features.Feature
 Group = groups_models.Group

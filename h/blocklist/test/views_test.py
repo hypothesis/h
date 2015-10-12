@@ -3,7 +3,7 @@ import mock
 
 from pyramid import httpexceptions
 
-from h.badge import views
+from h.blocklist import views
 
 
 blocklist_fixtures = pytest.mark.usefixtures('models', 'search_lib')
@@ -39,13 +39,13 @@ def test_blocklist_raises_if_no_uri():
 
 @pytest.fixture
 def models(config, request):  # pylint:disable=unused-argument
-    patcher = mock.patch('h.badge.views.models', autospec=True)
+    patcher = mock.patch('h.blocklist.views.models', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
 
 @pytest.fixture
 def search_lib(config, request):  # pylint:disable=unused-argument
-    patcher = mock.patch('h.badge.views.search_lib', autospec=True)
+    patcher = mock.patch('h.blocklist.views.search_lib', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

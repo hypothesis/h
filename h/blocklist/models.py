@@ -9,12 +9,7 @@ from h.i18n import TranslationString as _
 
 class Blocklist(Base):
 
-    """A list of URIs for which the badge API will always return 0.
-
-    This means that the Chrome extension will never show a number of
-    annotations on its badge for these URIs.
-
-    """
+    """A list of URIs on which h will not launch."""
 
     __tablename__ = 'blocklist'
 

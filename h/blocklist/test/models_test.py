@@ -2,7 +2,7 @@
 import pytest
 import mock
 
-from h.badge import models
+from h.blocklist import models
 
 
 def test_cannot_add_same_uri_twice(db_session):
