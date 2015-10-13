@@ -25,6 +25,7 @@ class GroupSchema(CSRFSchema):
         widget=deform.widget.TextInputWidget(
             autofocus=True,
             css_class="group-form__name-input js-group-name-input",
+            disable_autocomplete=True,
             label_css_class="group-form__name-label",
             max_length=GROUP_NAME_MAX_LENGTH,
             placeholder=_("Group Name")))
