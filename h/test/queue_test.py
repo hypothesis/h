@@ -77,3 +77,16 @@ def test_get_writer_namespace(fake_nsqd):
 
     writer.publish('sometopic', 'somedata')
     fake_client.publish.assert_called_with('abc123-sometopic', 'somedata')
+
+@patch('gnsq.Nsqd')
+def test_writer_serializes_dict(fake_nsqd):
+    fake_client = fake_nsqd.return_value
+    req = testing.DummyRequest()
+    req.registry.settings.update({
+        'nsq.namespace': 'abc',
+    })
+    writer = queue.get_writer(req)
+    writer.publish('sometopic', {
+        'key': 'value',
+    })
+    fake_client.publish.assert_called_with('abc-sometopic', '{"key": "value"}')

@@ -13,9 +13,10 @@ from pyramid.testing import DummyRequest
 
 from h.streamer import FilterToElasticFilter
 from h.streamer import WebSocket
-from h.streamer import should_send_event
+from h.streamer import should_send_annotation_event
 from h.streamer import broadcast_from_queue
 from h.streamer import websocket
+from h.streamer import ANNOTATIONS_TOPIC
 
 
 FakeMessage = namedtuple('FakeMessage', 'body')
@@ -224,7 +225,8 @@ class TestWebSocket(unittest.TestCase):
 
     def test_opened_starts_reader(self):
         self.s.opened()
-        self.s.request.get_queue_reader.assert_called_once_with('annotations', ANY)
+        for topic in ['annotations', 'user']:
+            self.s.request.get_queue_reader.assert_any_call(topic, ANY)
 
     def test_filter_message_with_uri_gets_expanded(self):
         filter_message = json.dumps({
@@ -256,7 +258,7 @@ class TestWebSocket(unittest.TestCase):
             assert 'http://example.com/print' in uri_values
 
 
-class TestBroadcast(unittest.TestCase):
+class TestBroadcastAnnotationEvent(unittest.TestCase):
     def setUp(self):
         self.message_data = [
             {'annotation': {'id': 1},
@@ -269,12 +271,13 @@ class TestBroadcast(unittest.TestCase):
              'action': 'delete',
              'src_client_id': 'cat'},
         ]
-        self.messages = [FakeMessage(json.dumps(m)) for m in self.message_data]
+        self.messages = [(ANNOTATIONS_TOPIC, FakeMessage(json.dumps(m)))
+            for m in self.message_data]
 
         self.queue = MagicMock()
         self.queue.__iter__.return_value = self.messages
 
-        self.should_patcher = patch('h.streamer.should_send_event')
+        self.should_patcher = patch('h.streamer.should_send_annotation_event')
         self.should = self.should_patcher.start()
 
     def tearDown(self):
@@ -292,6 +295,39 @@ class TestBroadcast(unittest.TestCase):
         broadcast_from_queue(self.queue, [sock])
         assert sock.send.called is False
 
+    def test_terminated_socket_does_not_recieve_event(self):
+        self.should.return_value = True
+        sock = FakeSocket('giraffe')
+        sock.terminated = True
+        broadcast_from_queue(self.queue, [sock])
+        assert sock.send.called is False
+
+
+class TestBroadcastSessionChangeEvent(unittest.TestCase):
+    def test_should_send_session_change_when_joining_or_leaving_group(self):
+        session_model_patcher = patch('h.session.model')
+        session_model = session_model_patcher.start()
+        session_model.return_value = {'groups': [{'id': 'someid'}]}
+
+        queue = MagicMock()
+        queue.__iter__.return_value = [('user', FakeMessage(json.dumps({
+            'type': 'group-join',
+            'userid': 'amy',
+            'group': 'groupid',
+        })))]
+
+        sock = FakeSocket('clientid')
+        sock.request.authenticated_userid = 'amy'
+
+        broadcast_from_queue(queue, [sock])
+        sock.send.assert_called_with(json.dumps({
+            'type': 'session-change',
+            'action': 'group-join',
+            'model': session_model.return_value,
+        }))
+
+        session_model_patcher.stop()
+
 
 class TestShouldSendEvent(unittest.TestCase):
     def setUp(self):
@@ -305,57 +341,54 @@ class TestShouldSendEvent(unittest.TestCase):
 
     def test_non_sending_socket_receives_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(
+        assert should_send_annotation_event(
             self.sock_giraffe,
             {'permissions': {'read': ['group:__world__']}},
             data)
 
     def test_sending_socket_does_not_receive_event(self):
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_pigeon, {}, data) is False
+        assert should_send_annotation_event(self.sock_pigeon, {}, data) is False
 
-    def test_terminated_socket_does_not_recieve_event(self):
-        data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_roadkill, {}, data) is False
 
-    def test_should_send_event_no_filter(self):
+    def test_should_send_annotation_event_no_filter(self):
         self.sock_giraffe.filter = None
         data = {'action': 'update', 'src_client_id': 'pigeon'}
-        assert should_send_event(
+        assert should_send_annotation_event(
             self.sock_giraffe,
             {'permissions': {'read': ['group:__world__']}},
             data) is False
 
-    def test_should_send_event_doesnt_send_reads(self):
+    def test_should_send_annotation_event_doesnt_send_reads(self):
         data = {'action': 'read', 'src_client_id': 'pigeon'}
-        assert should_send_event(self.sock_giraffe, {}, data) is False
+        assert should_send_annotation_event(self.sock_giraffe, {}, data) is False
 
-    def test_should_send_event_filtered(self):
+    def test_should_send_annotation_event_filtered(self):
         self.sock_pigeon.filter.match.return_value = False
         data = {'action': 'update', 'src_client_id': 'giraffe'}
-        assert should_send_event(
+        assert should_send_annotation_event(
             self.sock_pigeon,
             {'permissions': {'read': ['group:__world__']}},
             data) is False
 
-    def test_should_send_event_does_not_send_nipsad_annotations(self):
+    def test_should_send_annotation_event_does_not_send_nipsad_annotations(self):
         """Users should not see annotations from NIPSA'd users."""
         annotation = {'user': 'fred', 'nipsa': True}
         socket = Mock(terminated=False, client_id='foo')
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert not should_send_event(socket, annotation, event_data)
+        assert not should_send_annotation_event(socket, annotation, event_data)
 
-    def test_should_send_event_does_send_nipsad_annotations(self):
+    def test_should_send_annotation_event_does_send_nipsad_annotations(self):
         """NIPSA'd users should see their own annotations."""
         annotation = {'user': 'fred', 'nipsa': True}
         socket = Mock(terminated=False, client_id='foo')
         socket.request.authenticated_userid = 'fred'  # The annotation creator.
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert should_send_event(socket, annotation, event_data)
+        assert should_send_annotation_event(socket, annotation, event_data)
 
-    def test_should_send_event_does_not_send_group_annotations(self):
+    def test_should_send_annotation_event_does_not_send_group_annotations(self):
         """Users shouldn't see annotations in groups they aren't members of."""
         annotation = {
             'user': 'fred',
@@ -365,9 +398,9 @@ class TestShouldSendEvent(unittest.TestCase):
         socket.request.effective_principals = []  # No 'group:private-group'.
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert not should_send_event(socket, annotation, event_data)
+        assert not should_send_annotation_event(socket, annotation, event_data)
 
-    def test_should_send_event_does_send_nipsad_annotations(self):
+    def test_should_send_annotation_event_does_send_nipsad_annotations(self):
         """Users should see annotations from groups they are members of."""
         annotation = {
             'user': 'fred',
@@ -378,9 +411,9 @@ class TestShouldSendEvent(unittest.TestCase):
         socket.request.effective_principals = ['group:private-group']
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert should_send_event(socket, annotation, event_data)
+        assert should_send_annotation_event(socket, annotation, event_data)
 
-    def test_should_send_event_does_not_crash_if_no_group(self):
+    def test_should_send_annotation_event_does_not_crash_if_no_group(self):
         """Users should see annotations from groups they are members of."""
         annotation = {
             'user': 'fred',
@@ -390,4 +423,4 @@ class TestShouldSendEvent(unittest.TestCase):
         socket.request.effective_principals = ['group:private-group']
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
-        assert should_send_event(socket, annotation, event_data)
+        assert should_send_annotation_event(socket, annotation, event_data)

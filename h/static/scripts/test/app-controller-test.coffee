@@ -1,4 +1,5 @@
 {module, inject} = angular.mock
+events = require('../events')
 
 describe 'AppController', ->
   $controller = null
@@ -21,7 +22,7 @@ describe 'AppController', ->
     $controller('AppController', locals)
 
   before ->
-    angular.module('h')
+    angular.module('h', [])
     .controller('AppController', require('../app-controller'))
     .controller('AnnotationUIController', angular.noop)
 
@@ -123,12 +124,6 @@ describe 'AppController', ->
     onlogout()
     assert.strictEqual($scope.auth.user, null)
 
-  it 'focuses the default group in logout', ->
-    createController()
-    {onlogout} = fakeIdentity.watch.args[0][0]
-    onlogout()
-    assert.calledWith(fakeGroups.focus, '__world__')
-
   it 'does not show login form for logged in users', ->
     createController()
     assert.isFalse($scope.accountDialog.visible)
@@ -137,7 +132,14 @@ describe 'AppController', ->
     createController()
     assert.isFalse($scope.shareDialog.visible)
 
-  it 'calls $route.reload() when the focused group changes', ->
+  it 'reloads the view when the focused group changes', ->
     createController()
-    $scope.$broadcast('groupFocused')
+    fakeRoute.reload = sinon.spy()
+    $scope.$broadcast(events.GROUP_FOCUSED)
+    assert.calledOnce(fakeRoute.reload)
+
+  it 'reloads the view when the session state changes', ->
+    createController()
+    fakeRoute.reload = sinon.spy()
+    $scope.$broadcast(events.SESSION_CHANGED)
     assert.calledOnce(fakeRoute.reload)

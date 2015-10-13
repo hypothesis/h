@@ -3,6 +3,8 @@
 var Promise = require('core-js/library/es6/promise');
 var angular = require('angular');
 
+var events = require('./events');
+
 var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 var ACCOUNT_ACTIONS = [
@@ -56,7 +58,7 @@ function sessionActions(options) {
  *
  * @ngInject
  */
-function session($document, $http, $resource, flash) {
+function session($document, $http, $resource, $rootScope, flash) {
  // TODO: Move accounts data management (e.g. profile, edit_profile,
  // disable_user, etc) into another module with another route.
   var actions = sessionActions({
@@ -100,6 +102,33 @@ function session($document, $http, $resource, flash) {
     return lastLoad;
   };
 
+  /**
+   * @name session.update()
+   *
+   * @description Update the session state using the provided data.
+   *              This is a counterpart to load(). Whereas load() makes
+   *              a call to the server and then updates itself from
+   *              the response, update() can be used to update the client
+   *              when new state has been pushed to it by the server.
+   */
+  resource.update = function (model) {
+    var isInitialLoad = !resource.state.csrf;
+
+    // Copy the model data (including the CSRF token) into `resource.state`.
+    angular.copy(model, resource.state);
+
+    // Replace lastLoad with the latest data, and update lastLoadTime.
+    lastLoad = {$promise: Promise.resolve(model), $resolved: true};
+    lastLoadTime = Date.now();
+
+    if (!isInitialLoad) {
+      $rootScope.$broadcast(events.SESSION_CHANGED);
+    }
+
+    // Return the model
+    return model;
+  };
+
   function prepare(data, headersGetter) {
     var csrfTok = resource.state.csrf;
     if (typeof csrfTok !== 'undefined') {
@@ -131,15 +160,7 @@ function session($document, $http, $resource, flash) {
       }
     }
 
-    // Copy the model data (including the CSRF token) into `resource.state`.
-    angular.copy(model, resource.state);
-
-    // Replace lastLoad with the latest data, and update lastLoadTime.
-    lastLoad = {$promise: Promise.resolve(model), $resolved: true};
-    lastLoadTime = Date.now();
-
-    // Return the model
-    return model;
+    return resource.update(model);
   }
 
   return resource;

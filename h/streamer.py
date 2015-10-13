@@ -24,8 +24,8 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from h.api import nipsa
 from h.api import uri
 from h.api.search import query
-from .models import Annotation
-
+from .models import Annotation, Group
+import h.session
 
 log = logging.getLogger(__name__)
 
@@ -436,9 +436,18 @@ class FilterHandler(object):
             return False
 
 
+# NSQ message topics that the WebSocket server
+# processes messages from
+ANNOTATIONS_TOPIC = 'annotations'
+USER_TOPIC = 'user'
+
+
 class WebSocket(_WebSocket):
     # Class attributes
+
+    # Tuples of (topic, message) pulled from the message queue
     event_queue = None
+
     instances = weakref.WeakSet()
     origins = []
 
@@ -464,15 +473,18 @@ class WebSocket(_WebSocket):
             return
         cls.event_queue = gevent.queue.Queue()
         reader_id = 'stream-{}#ephemeral'.format(_random_id())
-        reader = request.get_queue_reader('annotations', reader_id)
-        reader.on_message.connect(cls.on_queue_message)
-        reader.start(block=False)
+
+        for topic in [ANNOTATIONS_TOPIC, USER_TOPIC]:
+            reader = request.get_queue_reader(topic, reader_id)
+            reader.on_message.connect(receiver=cls.on_queue_message)
+            reader.start(block=False)
+
         gevent.spawn(broadcast_from_queue, cls.event_queue, cls.instances)
 
     @classmethod
     def on_queue_message(cls, reader, message=None):
         if message is not None:
-            cls.event_queue.put(message)
+            cls.event_queue.put((reader.topic, message))
 
     def opened(self):
         self.start_reader(self.request)
@@ -550,15 +562,49 @@ def broadcast_from_queue(queue, sockets):
     Pulls messages from a passed queue object, and handles dispatching them to
     appropriate active sessions.
     """
-    for message in queue:
-        data_in = json.loads(message.body)
-        action = data_in['action']
-        annotation = Annotation(**data_in['annotation'])
-        payload = _annotation_packet([annotation], action)
-        data_out = json.dumps(payload)
-        for socket in list(sockets):
-            if should_send_event(socket, annotation, data_in):
-                socket.send(data_out)
+    for (topic, message) in queue:
+        if topic == ANNOTATIONS_TOPIC:
+            broadcast_annotation_message(message, sockets)
+        elif topic == USER_TOPIC:
+            broadcast_session_change_message(message, sockets)
+
+
+def broadcast_annotation_message(message, sockets):
+    """Broadcast an annotation message to all appropriate active sessions."""
+    data_in = json.loads(message.body)
+    action = data_in['action']
+    annotation = Annotation(**data_in['annotation'])
+    payload = _annotation_packet([annotation], action)
+    data_out = json.dumps(payload)
+    for socket in list(sockets):
+        if should_send_annotation_event(socket, annotation, data_in):
+            _send_if_open(socket, data_out)
+
+
+def broadcast_session_change_message(message, sockets):
+    """Broadcast a session change to all appropriate active sessions."""
+    data_in = json.loads(message.body)
+
+    for socket in list(sockets):
+        if socket.request.authenticated_userid == data_in['userid']:
+            # for session state change events, the full session model
+            # is included so that clients can update themselves without
+            # further API requests
+            _send_if_open(socket, json.dumps({
+                'type': 'session-change',
+                'action': data_in['type'],
+                'model': h.session.model(socket.request)
+            }))
+
+
+def _send_if_open(socket, data):
+    # Avoid trying to call socket.send() on a terminated socket.
+    #
+    # Sockets may be closed during a gevent-blocking call to another function
+    # in the broadcast_() functions, so we defer checking for a closed socket
+    # until just before sending a message to the client
+    if not socket.terminated:
+        socket.send(data)
 
 
 def _authorized_to_read(effective_principals, annotation):
@@ -579,15 +625,12 @@ def _authorized_to_read(effective_principals, annotation):
     return False
 
 
-def should_send_event(socket, annotation, event_data):
+def should_send_annotation_event(socket, annotation, event_data):
     """
     Inspects the passed annotation and action and decides whether or not
     the underlying session should receive the event. If it should, the
     action is wrapped up in a websocket packet and sent to the client.
     """
-    if socket.terminated:
-        return False
-
     if event_data['action'] == 'read':
         return False
 

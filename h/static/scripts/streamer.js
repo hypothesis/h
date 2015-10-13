@@ -16,11 +16,12 @@ var socket;
  * @param $websocket - angular-websocket constructor
  * @param annotationMapper - The local annotation store
  * @param groups - The local groups store
+ * @param session - Provides access to read and update the session state
  *
  * @return An angular-websocket wrapper around the socket.
  */
 // @ngInject
-function connect($websocket, annotationMapper, groups) {
+function connect($websocket, annotationMapper, groups, session) {
   // Get the socket URL
   var url = new URL('/ws', baseURI);
   url.protocol = url.protocol.replace('http', 'ws');
@@ -39,12 +40,7 @@ function connect($websocket, annotationMapper, groups) {
     value: clientId
   })
 
-  // Listen for updates
-  socket.onMessage(function (event) {
-    message = JSON.parse(event.data)
-    if (!message || message.type !== 'annotation-notification') {
-      return;
-    }
+  function handleAnnotationNotification(message) {
     action = message.options.action
     annotations = message.payload
 
@@ -68,6 +64,26 @@ function connect($websocket, annotationMapper, groups) {
       case 'delete':
         annotationMapper.unloadAnnotations(annotations);
         break;
+    }
+  }
+
+  function handleSessionChangeNotification(message) {
+    session.update(message.model);
+  }
+
+  // Listen for updates
+  socket.onMessage(function (event) {
+    message = JSON.parse(event.data);
+    if (!message) {
+      return;
+    }
+
+    if (message.type === 'annotation-notification') {
+      handleAnnotationNotification(message)
+    } else if (message.type === 'session-change') {
+      handleSessionChangeNotification(message)
+    } else {
+      console.warn('received unsupported notification', message.type)
     }
   });
 
