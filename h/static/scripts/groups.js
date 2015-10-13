@@ -48,9 +48,10 @@ function groups(localStorage, session, $rootScope, features, $http) {
       url: baseURI + 'groups/' + id + '/leave',
     });
 
-    // TODO - Optimistically call remove() to
-    // remove the group locally when
-    // https://github.com/hypothesis/h/pull/2587 has been merged
+    // the groups list will be updated in response to a session state
+    // change notification from the server. We could improve the UX here
+    // by optimistically updating the session state
+
     return response;
   };
 
@@ -65,12 +66,7 @@ function groups(localStorage, session, $rootScope, features, $http) {
     } else if (features.flagEnabled('groups')) {
      var fromStorage = get(localStorage.getItem(STORAGE_KEY));
      if (fromStorage) {
-       var matches = all().filter(function (group) {
-         return group.id === fromStorage.id;
-       });
-       if (matches.length > 0) {
-         focusedGroup = matches[0];
-       }
+       focusedGroup = fromStorage;
        return focusedGroup;
      }
     }
@@ -80,7 +76,7 @@ function groups(localStorage, session, $rootScope, features, $http) {
   /** Set the group with the passed id as the currently focused group. */
   function focus(id) {
    var g = get(id);
-   if (typeof g !== 'undefined') {
+   if (g) {
      focusedGroup = g;
      localStorage.setItem(STORAGE_KEY, g.id);
      $rootScope.$broadcast(events.GROUP_FOCUSED, g.id);
@@ -90,11 +86,8 @@ function groups(localStorage, session, $rootScope, features, $http) {
   // reset the focused group if the user leaves it
   $rootScope.$on(events.SESSION_CHANGED, function () {
     if (focusedGroup) {
-      var match = session.state.groups.filter(function (group) {
-        return group.id === focusedGroup.id;
-      });
-      if (match.length === 0) {
-        focusedGroup = null;
+      focusedGroup = get(focusedGroup.id);
+      if (!focusedGroup) {
         $rootScope.$broadcast(events.GROUP_FOCUSED, focused());
       }
     }
