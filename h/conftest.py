@@ -4,6 +4,9 @@
 The `conftest` module is automatically loaded by py.test and serves as a place
 to put fixture functions that are useful application-wide.
 """
+
+import os
+
 import pytest
 
 from pyramid import testing
@@ -12,6 +15,7 @@ import transaction
 
 from h import db
 from h.api import db as api_db
+from h.config import normalize_database_url
 
 
 class DummyFeature(object):
@@ -55,7 +59,13 @@ class DummySession(object):
 @pytest.fixture(scope='session', autouse=True)
 def settings():
     """Default app settings (conf/test.ini)."""
-    return get_appsettings('conf/test.ini')
+    settings = get_appsettings('conf/test.ini')
+
+    if 'TEST_DATABASE_URL' in os.environ:
+        settings['sqlalchemy.url'] = normalize_database_url(
+            os.environ['TEST_DATABASE_URL'])
+
+    return settings
 
 
 @pytest.fixture(autouse=True)
