@@ -1,7 +1,7 @@
 describe('TabState', function () {
   'use strict';
 
-  var TabState = h.TabState;
+  var TabState = require('../lib/tab-state');
   var state;
   var onChange;
 

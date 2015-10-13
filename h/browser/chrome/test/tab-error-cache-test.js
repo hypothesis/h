@@ -1,8 +1,10 @@
+var TabErrorCache = require('../lib/tab-error-cache');
+
 describe('TabErrorCache', function () {
  var cache;
 
  beforeEach(function () {
-   cache = new h.TabErrorCache();
+   cache = new TabErrorCache();
  });
 
  it('allows items to be set an retrieved', function () {

@@ -1,7 +1,8 @@
 describe('SidebarInjector', function () {
   'use strict';
 
-  var SidebarInjector = h.SidebarInjector;
+  var errors = require('../lib/errors');
+  var SidebarInjector = require('../lib/sidebar-injector');
   var injector;
   var fakeChromeTabs;
   var fakeFileAccess;
@@ -42,7 +43,7 @@ describe('SidebarInjector', function () {
 
         return injector.injectIntoTab({id: 1, url: url}).then(
           assertReject, function (err) {
-            assert.instanceOf(err, h.RestrictedProtocolError);
+            assert.instanceOf(err, errors.RestrictedProtocolError);
             assert.notCalled(spy);
           }
         );
@@ -106,7 +107,7 @@ describe('SidebarInjector', function () {
 
           var promise = injector.injectIntoTab({id: 1, url: url});
           return promise.then(assertReject, function (err) {
-            assert.instanceOf(err, h.NoFileAccessError);
+            assert.instanceOf(err, errors.NoFileAccessError);
           });
         });
       });
@@ -116,7 +117,7 @@ describe('SidebarInjector', function () {
         var url = 'file://foo.html';
         var promise = injector.injectIntoTab({id: 1, url: url});
         return promise.then(assertReject, function (err) {
-          assert.instanceOf(err, h.LocalFileError);
+          assert.instanceOf(err, errors.LocalFileError);
         });
       });
 

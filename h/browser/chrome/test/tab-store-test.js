@@ -1,7 +1,7 @@
 describe('TabStore', function () {
   'use strict';
 
-  var TabStore = h.TabStore;
+  var TabStore = require('../lib/tab-store');
   var store;
   var fakeLocalStorage;
 

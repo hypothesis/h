@@ -42,8 +42,12 @@ test: backend-test client-test
 backend-test:
 	@python setup.py test
 
-client-test:
+client-test: client-app-test client-extension-test
+
+client-app-test:
 	@$(NPM_BIN)/karma start h/static/scripts/karma.config.js --single-run
+
+client-extension-test:
 	@$(NPM_BIN)/karma start h/browser/chrome/karma.config.js --single-run
 
 client-test-watch:

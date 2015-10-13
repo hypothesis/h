@@ -9,6 +9,7 @@ import logging
 import os
 import os.path
 import shutil
+import subprocess
 import textwrap
 import urlparse
 import json
@@ -179,10 +180,12 @@ def build_chrome(args):
     copytree('h/browser/chrome/content', 'build/chrome/content')
     copytree('h/browser/chrome/help', 'build/chrome/help')
     copytree('h/browser/chrome/images', 'build/chrome/images')
-    copytree('h/browser/chrome/lib', 'build/chrome/lib')
     copytree('h/static/images', 'build/chrome/public/images')
-    shutil.copyfile(
-        'h/static/scripts/blocklist.js', 'build/chrome/lib/blocklist.js')
+
+    os.makedirs('build/chrome/lib')
+    subprocess.call(['node_modules/.bin/browserify',
+      'h/browser/chrome/lib/extension.js',
+      '--outfile', 'build/chrome/lib/extension-bundle.js'])
 
     # Render the sidebar html.
     if webassets_env.url.startswith('chrome-extension:'):

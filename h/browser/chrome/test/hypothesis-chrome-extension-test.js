@@ -1,8 +1,23 @@
-describe('HypothesisChromeExtension', function () {
-  'use strict';
+'use strict';
 
+var proxyquire = require('proxyquire');
+
+var errors = require('../lib/errors');
+
+// Creates a constructor function which takes no arguments
+// and has a given prototype.
+//
+// Used to mock the extension modules
+function createConstructor(prototype) {
+  function Constructor() {
+  }
+  Constructor.prototype = Object.create(prototype);
+  return Constructor;
+}
+
+describe('HypothesisChromeExtension', function () {
   var sandbox = sinon.sandbox.create();
-  var HypothesisChromeExtension = h.HypothesisChromeExtension;
+  var HypothesisChromeExtension;
   var ext;
   var fakeChromeTabs;
   var fakeChromeBrowserAction;
@@ -42,6 +57,7 @@ describe('HypothesisChromeExtension', function () {
       isTabInactive: sandbox.stub().returns(false),
       isTabErrored: sandbox.stub().returns(false),
     };
+    fakeTabState.deactivateTab = sinon.spy();
     fakeTabErrorCache = {
       getTabError: sandbox.stub(),
       setTabError: sandbox.stub(),
@@ -57,12 +73,14 @@ describe('HypothesisChromeExtension', function () {
       removeFromTab: sandbox.stub().returns(Promise.resolve()),
     };
 
-    sandbox.stub(h, 'HelpPage').returns(fakeHelpPage);
-    sandbox.stub(h, 'TabStore').returns(fakeTabStore);
-    sandbox.stub(h, 'TabState').returns(fakeTabState);
-    sandbox.stub(h, 'TabErrorCache').returns(fakeTabErrorCache);
-    sandbox.stub(h, 'BrowserAction').returns(fakeBrowserAction);
-    sandbox.stub(h, 'SidebarInjector').returns(fakeSidebarInjector);
+    HypothesisChromeExtension = proxyquire('../lib/hypothesis-chrome-extension', {
+      './tab-state': createConstructor(fakeTabState),
+      './tab-store': createConstructor(fakeTabStore),
+      './help-page': createConstructor(fakeHelpPage),
+      './tab-error-cache': createConstructor(fakeTabErrorCache),
+      './browser-action': createConstructor(fakeBrowserAction),
+      './sidebar-injector': createConstructor(fakeSidebarInjector),
+    });
 
     ext = createExt();
   });
@@ -78,7 +96,7 @@ describe('HypothesisChromeExtension', function () {
       tabs = [];
       fakeChromeTabs.query = sandbox.stub().yields(tabs);
 
-      fakeTabState.isTabActive = sandbox.stub().returns(false);
+      fakeTabState.isTabActive.returns(false);
       fakeTabState.activateTab = sandbox.spy();
       fakeTabState.deactivateTab = sandbox.spy();
     });
@@ -257,7 +275,7 @@ describe('HypothesisChromeExtension', function () {
           var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
-          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.LocalFileError('msg')));
+          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new errors.LocalFileError('msg')));
 
           // Trigger failed render.
           onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
@@ -270,12 +288,12 @@ describe('HypothesisChromeExtension', function () {
         it('shows the local file help page', function () {
           var tab = {id: 1, url: 'file://foo.html'};
 
-          fakeTabErrorCache.getTabError.returns(new h.LocalFileError('msg'));
+          fakeTabErrorCache.getTabError.returns(new errors.LocalFileError('msg'));
           fakeTabState.isTabErrored.withArgs(1).returns(true);
           onClickedHandler(tab);
 
           assert.called(fakeHelpPage.showHelpForError);
-          assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(h.LocalFileError));
+          assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(errors.LocalFileError));
         });
       });
 
@@ -284,7 +302,7 @@ describe('HypothesisChromeExtension', function () {
           var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
-          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.NoFileAccessError('msg')));
+          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new errors.NoFileAccessError('msg')));
 
           // Trigger failed render.
           onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
@@ -297,12 +315,12 @@ describe('HypothesisChromeExtension', function () {
         it('shows the local file help page', function () {
           var tab = {id: 1, url: 'file://foo.html'};
 
-          fakeTabErrorCache.getTabError.returns(new h.NoFileAccessError('msg'));
+          fakeTabErrorCache.getTabError.returns(new errors.NoFileAccessError('msg'));
           fakeTabState.isTabErrored.withArgs(1).returns(true);
           onClickedHandler(tab);
 
           assert.called(fakeHelpPage.showHelpForError);
-          assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(h.NoFileAccessError));
+          assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(errors.NoFileAccessError));
         });
       });
 
@@ -311,7 +329,7 @@ describe('HypothesisChromeExtension', function () {
           var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
 
           fakeTabState.isTabActive.withArgs(1).returns(true);
-          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new h.RestrictedProtocolError('msg')));
+          fakeSidebarInjector.injectIntoTab.returns(Promise.reject(new errors.RestrictedProtocolError('msg')));
 
           // Trigger failed render.
           onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(function () {
@@ -324,12 +342,12 @@ describe('HypothesisChromeExtension', function () {
         it('shows the local file help page', function () {
           var tab = {id: 1, url: 'file://foo.html'};
 
-          fakeTabErrorCache.getTabError.returns(new h.RestrictedProtocolError('msg'));
+          fakeTabErrorCache.getTabError.returns(new errors.RestrictedProtocolError('msg'));
           fakeTabState.isTabErrored.withArgs(1).returns(true);
           onClickedHandler(tab);
 
           assert.called(fakeHelpPage.showHelpForError);
-          assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(h.RestrictedProtocolError));
+          assert.calledWith(fakeHelpPage.showHelpForError, tab, sinon.match.instanceOf(errors.RestrictedProtocolError));
         });
       });
 
@@ -343,7 +361,7 @@ describe('HypothesisChromeExtension', function () {
     beforeEach(function () {
       tab = {id: 1, status: 'complete'};
       fakeChromeTabs.get = sandbox.stub().yields(tab);
-      onChangeHandler = h.TabState.lastCall.args[1];
+      onChangeHandler = ext._onTabStateChange
     });
 
     it('updates the browser icon', function () {
