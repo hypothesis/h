@@ -2,6 +2,7 @@
 # pylint: disable=no-self-use
 from collections import namedtuple
 
+import mock
 from mock import patch, Mock, MagicMock
 import pytest
 
@@ -17,6 +18,7 @@ from h.accounts.views import validate_form
 from h.accounts.views import AjaxAuthController
 from h.accounts.views import AuthController
 from h.accounts.views import ForgotPasswordController
+from h.accounts.views import ResetPasswordController
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
 
@@ -35,6 +37,7 @@ class DummyRequest(_DummyRequest):
 
 class FakeUser(object):
     def __init__(self, **kwargs):
+        self.activation = None
         for k in kwargs:
             setattr(self, k, kwargs[k])
 
@@ -49,7 +52,7 @@ class FakeInvalid(object):
 
 
 def form_validating_to(appstruct):
-    form = Mock()
+    form = MagicMock()
     form.validate.return_value = appstruct
     form.render.return_value = 'valid form'
     return form
@@ -59,7 +62,7 @@ def invalid_form(errors=None):
     if errors is None:
         errors = {}
     invalid = FakeInvalid(errors)
-    form = Mock()
+    form = MagicMock()
     form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
     form.render.return_value = 'invalid form'
     return form
@@ -322,51 +325,46 @@ def test_logout_ajax_returns_status_okay():
 
 forgot_password_fixtures = pytest.mark.usefixtures('activation_model',
                                                    'authn_policy',
-                                                   'form_validator',
                                                    'mailer',
-                                                   'routes_mapper',
-                                                   'user_model')
+                                                   'routes_mapper')
 
 
 @forgot_password_fixtures
-def test_forgot_password_returns_error_when_validation_fails(authn_policy,
-                                                             form_validator):
+def test_forgot_password_returns_form_when_validation_fails(authn_policy):
     request = DummyRequest(method='POST')
     authn_policy.authenticated_userid.return_value = None
-    form_validator.return_value = ({"errors": "KABOOM!"}, None)
+    controller = ForgotPasswordController(request)
+    controller.form = invalid_form()
 
-    result = ForgotPasswordController(request).forgot_password()
+    result = controller.forgot_password()
 
-    assert result == {"errors": "KABOOM!"}
+    assert result == {'form': 'invalid form'}
 
 
 @forgot_password_fixtures
-def test_forgot_password_fetches_user_by_form_email(authn_policy,
-                                                    form_validator,
-                                                    user_model):
+def test_forgot_password_creates_no_activations_when_validation_fails(activation_model,
+                                                                      authn_policy):
     request = DummyRequest(method='POST')
     authn_policy.authenticated_userid.return_value = None
-    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+    controller = ForgotPasswordController(request)
+    controller.form = invalid_form()
 
-    ForgotPasswordController(request).forgot_password()
+    controller.forgot_password()
 
-    user_model.get_by_email.assert_called_with("giraffe@thezoo.org")
+    assert activation_model.call_count == 0
 
 
 @forgot_password_fixtures
 def test_forgot_password_creates_activation_for_user(activation_model,
-                                                     authn_policy,
-                                                     form_validator,
-                                                     user_model):
+                                                     authn_policy):
     request = DummyRequest(method='POST')
     authn_policy.authenticated_userid.return_value = None
-    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
-
-    ForgotPasswordController(request).forgot_password()
-
-
-    user = user_model.get_by_email.return_value
     activation = activation_model.return_value
+    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+    controller = ForgotPasswordController(request)
+    controller.form = form_validating_to({"user": user})
+
+    controller.forgot_password()
 
     activation_model.assert_called_with()
     assert activation in request.db.added
@@ -377,14 +375,15 @@ def test_forgot_password_creates_activation_for_user(activation_model,
 @forgot_password_fixtures
 def test_forgot_password_generates_reset_link_from_activation(reset_link,
                                                               activation_model,
-                                                              authn_policy,
-                                                              form_validator):
+                                                              authn_policy):
     request = DummyRequest(method='POST')
     authn_policy.authenticated_userid.return_value = None
-    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+    controller = ForgotPasswordController(request)
+    controller.form = form_validating_to({"user": user})
     activation_model.return_value.code = "abcde12345"
 
-    ForgotPasswordController(request).forgot_password()
+    controller.forgot_password()
 
     reset_link.assert_called_with(request, "abcde12345")
 
@@ -395,46 +394,44 @@ def test_forgot_password_generates_reset_link_from_activation(reset_link,
 def test_forgot_password_generates_mail(reset_link,
                                         reset_mail,
                                         activation_model,
-                                        authn_policy,
-                                        form_validator,
-                                        user_model):
+                                        authn_policy):
     request = DummyRequest(method='POST')
     authn_policy.authenticated_userid.return_value = None
-    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+    controller = ForgotPasswordController(request)
+    controller.form = form_validating_to({"user": user})
     activation_model.return_value.code = "abcde12345"
     reset_link.return_value = "http://example.com"
-    giraffe = FakeUser()
-    user_model.get_by_email.return_value = giraffe
 
-    ForgotPasswordController(request).forgot_password()
+    controller.forgot_password()
 
-    reset_mail.assert_called_with(giraffe, "abcde12345", "http://example.com")
+    reset_mail.assert_called_with(user, "abcde12345", "http://example.com")
 
 
 @patch('h.accounts.views.reset_password_email')
 @forgot_password_fixtures
-def test_forgot_password_sends_mail(reset_mail,
-                                    authn_policy,
-                                    mailer,
-                                    form_validator):
+def test_forgot_password_sends_mail(reset_mail, authn_policy, mailer):
     request = DummyRequest(method='POST')
     authn_policy.authenticated_userid.return_value = None
-    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+    controller = ForgotPasswordController(request)
+    controller.form = form_validating_to({"user": user})
     message = reset_mail.return_value
 
-    ForgotPasswordController(request).forgot_password()
+    controller.forgot_password()
 
     assert message in mailer.outbox
 
 
 @forgot_password_fixtures
-def test_forgot_password_redirects_on_success(authn_policy,
-                                              form_validator):
+def test_forgot_password_redirects_on_success(authn_policy):
     request = DummyRequest(method='POST')
     authn_policy.authenticated_userid.return_value = None
-    form_validator.return_value = (None, {"email": "giraffe@thezoo.org"})
+    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+    controller = ForgotPasswordController(request)
+    controller.form = form_validating_to({"user": user})
 
-    result = ForgotPasswordController(request).forgot_password()
+    result = controller.forgot_password()
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
@@ -444,132 +441,75 @@ def test_forgot_password_form_redirects_when_logged_in(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
-    result = ForgotPasswordController(request).forgot_password_form()
+    with pytest.raises(httpexceptions.HTTPFound):
+        ForgotPasswordController(request).forgot_password_form()
 
-    assert isinstance(result, httpexceptions.HTTPFound)
 
-
-reset_password_fixtures = pytest.mark.usefixtures('activation_model',
-                                                  'notify',
-                                                  'routes_mapper',
-                                                  'user_model')
+reset_password_fixtures = pytest.mark.usefixtures('routes_mapper')
 
 
 @reset_password_fixtures
-def test_reset_password_not_found_if_code_missing():
+def test_reset_password_returns_form_when_validation_fails():
     request = DummyRequest(method='POST')
+    controller = ResetPasswordController(request)
+    controller.form = invalid_form()
 
-    result = ForgotPasswordController(request).reset_password()
+    result = controller.reset_password()
 
-    assert isinstance(result, httpexceptions.HTTPNotFound)
-
-
-@reset_password_fixtures
-def test_reset_password_looks_up_code_in_database(activation_model):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
-    activation_model.get_by_code.return_value = None
-
-    result = ForgotPasswordController(request).reset_password()
-
-    activation_model.get_by_code.assert_called_with('abc123')
+    assert result == {'form': 'invalid form'}
 
 
 @reset_password_fixtures
-def test_reset_password_not_found_if_code_not_found(activation_model):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
-    activation_model.get_by_code.return_value = None
-
-    result = ForgotPasswordController(request).reset_password()
-
-    assert isinstance(result, httpexceptions.HTTPNotFound)
-
-
-@reset_password_fixtures
-def test_reset_password_looks_up_user_by_activation(activation_model,
-                                                    user_model):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
-    activation = activation_model.get_by_code.return_value
-    user_model.get_by_activation.return_value = None
-
-    result = ForgotPasswordController(request).reset_password()
-
-    user_model.get_by_activation.assert_called_with(activation)
-
-
-@reset_password_fixtures
-def test_reset_password_not_found_if_user_not_found(user_model):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
-    user_model.get_by_activation.return_value = None
-
-    result = ForgotPasswordController(request).reset_password()
-
-    assert isinstance(result, httpexceptions.HTTPNotFound)
-
-
-@reset_password_fixtures
-def test_reset_password_forbids_GET():
-    request = DummyRequest(matchdict={'code': 'abc123'})
-
-    result = ForgotPasswordController(request).reset_password()
-
-    assert isinstance(result, httpexceptions.HTTPMethodNotAllowed)
-
-
-@reset_password_fixtures
-def test_reset_password_returns_error_on_error(form_validator):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
-    form_validator.return_value = ({"errors": "KABOOM!"}, None)
-
-    result = ForgotPasswordController(request).reset_password()
-
-    assert result == {"errors": "KABOOM!"}
-
-
-@reset_password_fixtures
-def test_reset_password_sets_user_password_from_form(form_validator,
-                                                     user_model):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
-    form_validator.return_value = (None, {"password": "s3cure!"})
+def test_reset_password_sets_user_password_from_form():
+    request = DummyRequest(method='POST')
     elephant = FakeUser(password='password1')
-    user_model.get_by_activation.return_value = elephant
+    controller = ResetPasswordController(request)
+    controller.form = form_validating_to({'user': elephant,
+                                          'password': 's3cure!'})
 
-    ForgotPasswordController(request).reset_password()
+    controller.reset_password()
 
     assert elephant.password == 's3cure!'
 
 
 @reset_password_fixtures
-def test_reset_password_deletes_activation(activation_model, form_validator):
-    request = DummyRequest(method='POST',
-                           matchdict={'code': 'abc123'})
-    form_validator.return_value = (None, {"password": "s3cure!"})
-    activation = activation_model.get_by_code.return_value
+def test_reset_password_deletes_activation():
+    request = DummyRequest(method='POST')
+    user = FakeUser(password='password1')
+    user.activation = mock.sentinel.activation
+    controller = ResetPasswordController(request)
+    controller.form = form_validating_to({'user': user,
+                                          'password': 's3cure!'})
 
-    ForgotPasswordController(request).reset_password()
+    controller.reset_password()
 
-    assert activation in request.db.deleted
+    assert mock.sentinel.activation in request.db.deleted
 
 
 @patch('h.accounts.views.PasswordResetEvent', autospec=True)
 @reset_password_fixtures
-def test_reset_password_emits_event(event, form_validator, notify, user_model):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
-    form_validator.return_value = (None, {"password": "s3cure!"})
-    elephant = FakeUser(password='password1')
-    user_model.get_by_activation.return_value = elephant
+def test_reset_password_emits_event(event, notify):
+    request = DummyRequest(method='POST')
+    user = FakeUser(password='password1')
+    controller = ResetPasswordController(request)
+    controller.form = form_validating_to({'user': user,
+                                          'password': 's3cure!'})
 
-    ForgotPasswordController(request).reset_password()
+    controller.reset_password()
 
-    event.assert_called_with(request, elephant)
+    event.assert_called_with(request, user)
     notify.assert_called_with(event.return_value)
 
 
 @reset_password_fixtures
-def test_reset_password_redirects_on_success(form_validator):
-    request = DummyRequest(method='POST', matchdict={'code': 'abc123'})
-    form_validator.return_value = (None, {"password": "s3cure!"})
+def test_reset_password_redirects_on_success():
+    request = DummyRequest(method='POST')
+    user = FakeUser(password='password1')
+    controller = ResetPasswordController(request)
+    controller.form = form_validating_to({'user': user,
+                                          'password': 's3cure!'})
 
-    result = ForgotPasswordController(request).reset_password()
+    result = controller.reset_password()
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
@@ -584,24 +524,26 @@ register_fixtures = pytest.mark.usefixtures('activation_model',
 @register_fixtures
 def test_register_returns_errors_when_validation_fails(form_validator):
     request = DummyRequest(method='POST')
-    form_validator.return_value = ({"errors": "BANG!"}, None)
+    controller = RegisterController(request)
+    controller.form = invalid_form()
 
-    result = RegisterController(request).register()
+    result = controller.register()
 
-    assert result == {"errors": "BANG!"}
+    assert result == {"form": "invalid form"}
 
 
 @register_fixtures
-def test_register_creates_user_from_form_data(form_validator, user_model):
+def test_register_creates_user_from_form_data(user_model):
     request = DummyRequest(method='POST')
-    form_validator.return_value = (None, {
+    controller = RegisterController(request)
+    controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
         "password": "s3crets",
         "random_other_field": "something else",
     })
 
-    RegisterController(request).register()
+    controller.register()
 
     user_model.assert_called_with(username="bob",
                                   email="bob@example.com",
@@ -609,32 +551,33 @@ def test_register_creates_user_from_form_data(form_validator, user_model):
 
 
 @register_fixtures
-def test_register_adds_new_user_to_session(form_validator, user_model):
+def test_register_adds_new_user_to_session(user_model):
     request = DummyRequest(method='POST')
-    form_validator.return_value = (None, {
+    controller = RegisterController(request)
+    controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
         "password": "s3crets",
     })
 
-    RegisterController(request).register()
+    controller.register()
 
     assert user_model.return_value in request.db.added
 
 
 @register_fixtures
 def test_register_creates_new_activation(activation_model,
-                                         form_validator,
                                          user_model):
     request = DummyRequest(method='POST')
-    form_validator.return_value = (None, {
+    controller = RegisterController(request)
+    controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
         "password": "s3crets",
     })
     new_user = user_model.return_value
 
-    RegisterController(request).register()
+    controller.register()
 
     assert new_user.activation == activation_model.return_value
 
@@ -642,17 +585,17 @@ def test_register_creates_new_activation(activation_model,
 @patch('h.accounts.views.activation_email')
 @register_fixtures
 def test_register_generates_activation_email_from_user(activation_email,
-                                                       form_validator,
                                                        user_model):
     request = DummyRequest(method='POST')
-    form_validator.return_value = (None, {
+    controller = RegisterController(request)
+    controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
         "password": "s3crets",
     })
     new_user = user_model.return_value
 
-    RegisterController(request).register()
+    controller.register()
 
     activation_email.assert_called_with(request, new_user)
 
@@ -660,29 +603,28 @@ def test_register_generates_activation_email_from_user(activation_email,
 @patch('h.accounts.views.activation_email')
 @register_fixtures
 def test_register_sends_activation_email(activation_email,
-                                         form_validator,
                                          mailer):
     request = DummyRequest(method='POST')
-    form_validator.return_value = (None, {
+    controller = RegisterController(request)
+    controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
         "password": "s3crets",
     })
 
-    RegisterController(request).register()
+    controller.register()
 
     assert activation_email.return_value in mailer.outbox
 
 
 @patch('h.accounts.views.RegistrationEvent')
 @register_fixtures
-def test_register_no_event_when_validation_fails(event,
-                                                 form_validator,
-                                                 notify):
+def test_register_no_event_when_validation_fails(event, notify):
     request = DummyRequest(method='POST')
-    form_validator.return_value = ({"errors": "Kablooey!"}, None)
+    controller = RegisterController(request)
+    controller.form = invalid_form()
 
-    RegisterController(request).register()
+    controller.register()
 
     assert not event.called
     assert not notify.called
@@ -690,19 +632,17 @@ def test_register_no_event_when_validation_fails(event,
 
 @patch('h.accounts.views.RegistrationEvent')
 @register_fixtures
-def test_register_event_when_validation_succeeds(event,
-                                                 form_validator,
-                                                 notify,
-                                                 user_model):
+def test_register_event_when_validation_succeeds(event, notify, user_model):
     request = DummyRequest(method='POST')
-    form_validator.return_value = (None, {
+    controller = RegisterController(request)
+    controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
         "password": "s3crets",
     })
     new_user = user_model.return_value
 
-    RegisterController(request).register()
+    controller.register()
 
     event.assert_called_with(request, new_user)
     notify.assert_called_with(event.return_value)
@@ -711,13 +651,14 @@ def test_register_event_when_validation_succeeds(event,
 @register_fixtures
 def test_register_event_redirects_on_success(form_validator):
     request = DummyRequest(method='POST')
-    form_validator.return_value = (None, {
+    controller = RegisterController(request)
+    controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
         "password": "s3crets",
     })
 
-    result = RegisterController(request).register()
+    result = controller.register()
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
@@ -726,10 +667,11 @@ def test_register_event_redirects_on_success(form_validator):
 def test_register_form_redirects_when_logged_in(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+    controller = RegisterController(request)
 
-    result = RegisterController(request).register_form()
 
-    assert isinstance(result, httpexceptions.HTTPRedirection)
+    with pytest.raises(httpexceptions.HTTPRedirection):
+        controller.register_form()
 
 
 activate_fixtures = pytest.mark.usefixtures('activation_model',

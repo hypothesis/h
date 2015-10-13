@@ -144,4 +144,4 @@ function AccountController($scope, $filter, auth, flash, formRespond, identity,
   };
 }
 
-angular.module('h').controller('AccountController', AccountController);
+module.exports = AccountController;

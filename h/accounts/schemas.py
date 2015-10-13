@@ -29,15 +29,6 @@ def get_blacklist():
     return USERNAME_BLACKLIST
 
 
-def email_exists(node, value):
-    '''Colander validator that ensures a user with this email exists.'''
-    user = models.User.get_by_email(value)
-    if not user:
-        msg = _('We have no user with the email address "{}". Try correcting '
-                'this address or try another.').format(value)
-        raise colander.Invalid(node, msg)
-
-
 def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
     user = models.User.get_by_email(value)
@@ -65,6 +56,7 @@ def email_node(**kwargs):
             colander.Email(),
             unique_email,
         ),
+        widget=deform.widget.TextInputWidget(template='emailinput'),
         **kwargs)
 
 
@@ -157,8 +149,26 @@ class LoginSchema(CSRFSchema):
 class ForgotPasswordSchema(CSRFSchema):
     email = colander.SchemaNode(
         colander.String(),
-        validator=colander.All(colander.Email(), email_exists)
+        validator=colander.All(colander.Email()),
+        title=_('Please enter your email address:'),
+        widget=deform.widget.TextInputWidget(template='emailinput',
+                                             autofocus=True),
     )
+
+    def validator(self, node, value):
+        super(ForgotPasswordSchema, self).validator(node, value)
+
+        email = value.get('email')
+        user = models.User.get_by_email(email)
+
+        if user is None:
+            err = colander.Invalid(node)
+            err['email'] = _('We have no user with the email address '
+                             '"{email}". Try correcting this address or try '
+                             'another.').format(email=email)
+            raise err
+
+        value['user'] = user
 
 
 class RegisterSchema(CSRFSchema):
@@ -172,18 +182,54 @@ class RegisterSchema(CSRFSchema):
             unique_username,
             unblacklisted_username,
         ),
+        title=_('Username:'),
+        hint=_('between {min} and {max} characters').format(
+            min=models.USERNAME_MIN_LENGTH,
+            max=models.USERNAME_MAX_LENGTH
+        ),
+        widget=deform.widget.TextInputWidget(autofocus=True),
     )
-    email = email_node()
-    password = password_node()
+    email = email_node(title=_('Email address:'))
+    password = password_node(title=_('Password:'),
+                             hint=_('at least two characters'))
+
+
+class ResetCode(colander.SchemaType):
+
+    """Schema type transforming a reset code to a user and back."""
+
+    def serialize(self, node, appstruct):
+        if appstruct is colander.null:
+            return colander.null
+        if not isinstance(appstruct, models.User):
+            raise colander.Invalid(node, '%r is not a User' % appstruct)
+        if not isinstance(appstruct.activation, models.Activation):
+            raise colander.Invalid(node, '%r has no Activation' % appstruct)
+        return appstruct.activation.code
+
+    def deserialize(self, node, cstruct):
+        if cstruct is colander.null:
+            return colander.null
+        activation = models.Activation.get_by_code(cstruct)
+        if activation is not None:
+            user = models.User.get_by_activation(activation)
+        if activation is None or user is None:
+            raise colander.Invalid(node, _('Your reset code is not valid'))
+        return user
 
 
 class ResetPasswordSchema(CSRFSchema):
-    username = colander.SchemaNode(
-        colander.String(),
-        widget=deform.widget.TextInputWidget(template='readonly/textinput'),
-        missing=colander.null,
-    )
-    password = password_node()
+    # N.B. this is the field into which the user puts their reset code, but we
+    # call it `user` because when validated, it will return a `User` object.
+    user = colander.SchemaNode(
+        ResetCode(),
+        title=_('Your reset code:'),
+        hint=_('this will be emailed to you'),
+        widget=deform.widget.TextInputWidget(disable_autocomplete=True))
+    password = password_node(
+        title=_('New password:'),
+        hint=_('at least two characters'),
+        widget=deform.widget.PasswordWidget(disable_autocomplete=True))
 
 
 class ProfileSchema(CSRFSchema):

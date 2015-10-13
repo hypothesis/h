@@ -1,0 +1,22 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}Create an account{% endblock %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles  %}
+
+{% block content %}
+  <div class="content paper">
+    {% include "h:templates/includes/header.html.jinja2" %}
+    <div class="form-vertical">
+      <ul class="nav nav-tabs">
+        <li><a href="{{ request.route_path('login') }}">Sign in</a></li>{#
+        #}<li class="active"><a href="{{ request.route_path('register') }}">Create an account</a></li>
+      </ul>
+      {{ form | safe }}
+    </div>
+  </div>
+{% endblock content %}
