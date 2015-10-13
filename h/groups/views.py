@@ -30,14 +30,17 @@ def create_form(request):
 
     return {'form': form.render()}
 
-def _send_group_notification(request, type, hashid):
+
+def _send_group_notification(request, event_type, hashid):
+    """Publishes a group join/leave notification on the NSQ event queue"""
     queue = request.get_queue_writer()
     data = {
-      'type': type,
+      'type': event_type,
       'userid': request.authenticated_userid,
       'group': hashid,
     }
     queue.publish('user', data)
+
 
 @view_config(route_name='group_create',
              request_method='POST',

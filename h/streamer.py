@@ -444,8 +444,9 @@ USER_TOPIC = 'user'
 
 class WebSocket(_WebSocket):
     # Class attributes
+
+    # Tuples of (topic, message) pulled from the message queue
     event_queue = None
-    """ Tuples of (topic, message) pulled from the message queue """
 
     instances = weakref.WeakSet()
     origins = []
@@ -569,9 +570,7 @@ def broadcast_from_queue(queue, sockets):
 
 
 def broadcast_annotation_message(message, sockets):
-    """
-    Broadcast an annotation message to all appropriate active sessions.
-    """
+    """Broadcast an annotation message to all appropriate active sessions."""
     data_in = json.loads(message.body)
     action = data_in['action']
     annotation = Annotation(**data_in['annotation'])
@@ -583,13 +582,14 @@ def broadcast_annotation_message(message, sockets):
 
 
 def broadcast_session_change_message(message, sockets):
-    """ Broadcast a session change to all appropriate active sessions. """
+    """Broadcast a session change to all appropriate active sessions."""
     data_in = json.loads(message.body)
 
     for socket in list(sockets):
         if socket.request.authenticated_userid == data_in['userid']:
-            # for session state change events, the full session model is included
-            # so that clients can update themselves without further API requests
+            # for session state change events, the full session model
+            # is included so that clients can update themselves without
+            # further API requests
             _send_if_open(socket, json.dumps({
                 'type': 'session-change',
                 'action': data_in['type'],
@@ -605,6 +605,7 @@ def _send_if_open(socket, data):
     # until just before sending a message to the client
     if not socket.terminated:
         socket.send(data)
+
 
 def _authorized_to_read(effective_principals, annotation):
     """Return True if effective_principals authorize reading annotation.
