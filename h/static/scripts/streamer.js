@@ -73,7 +73,7 @@ function connect($websocket, annotationMapper, groups, session) {
 
   // Listen for updates
   socket.onMessage(function (event) {
-    message = JSON.parse(event.data)
+    message = JSON.parse(event.data);
     if (!message) {
       return;
     }

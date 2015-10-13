@@ -42,8 +42,8 @@ module.exports = class AppController
 
     # Reload the view when the focused group changes or the
     # list of groups that the user is a member of changes
-    groupChangeEvents = [events.SESSION_CHANGED, events.GROUP_FOCUSED];
-    groupChangeEvents.forEach((eventName) ->
+    reloadEvents = [events.SESSION_CHANGED, events.GROUP_FOCUSED];
+    reloadEvents.forEach((eventName) ->
       $scope.$on(eventName, (event) ->
         $route.reload()
       )
@@ -51,14 +51,7 @@ module.exports = class AppController
 
     identity.watch({
       onlogin: (identity) -> $scope.auth.user = auth.userid(identity)
-      onlogout: ->
-        $scope.auth.user = null
-
-        # Currently all groups are private so when the user logs out they can
-        # no longer see the annotations from any group they may have had
-        # focused. Focus the public group instead, so that they see any public
-        # annotations in the sidebar.
-        groups.focus('__world__')
+      onlogout: -> $scope.auth.user = null
       onready: -> $scope.auth.user ?= null
     })
 
@@ -83,10 +76,6 @@ module.exports = class AppController
         $scope.login()
       else
         $scope.accountDialog.visible = false
-
-      # Reload the view if this is not the initial load.
-      if oldVal isnt undefined
-        $route.reload()
 
     $scope.login = ->
       $scope.accountDialog.visible = true

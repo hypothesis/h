@@ -160,11 +160,23 @@ describe('h:session', function () {
   describe('#update()', function () {
     it('broadcasts an event when the session is updated', function () {
       var sessionChangeCallback = sinon.stub();
+
+      // the initial load should not trigger a SESSION_CHANGED event
       $rootScope.$on(events.SESSION_CHANGED, sessionChangeCallback);
       session.update({
         groups: [{
           id: 'groupid'
-        }]
+        }],
+        csrf: 'dummytoken',
+      });
+
+      // subsequent loads should trigger a SESSION_CHANGED event
+      assert.isFalse(sessionChangeCallback.called);
+      session.update({
+        groups: [{
+          id: 'groupid2'
+        }],
+        csrf: 'dummytoken'
       });
       assert.calledOnce(sessionChangeCallback);
     });

@@ -115,6 +115,8 @@ function session($document, $http, $resource, $rootScope, flash) {
    *              when new state has been pushed to it by the server.
    */
   resource.update = function (model) {
+    var isInitialLoad = !resource.state.csrf;
+
     // Copy the model data (including the CSRF token) into `resource.state`.
     angular.copy(model, resource.state);
 
@@ -122,7 +124,9 @@ function session($document, $http, $resource, $rootScope, flash) {
     lastLoad = {$promise: Promise.resolve(model), $resolved: true};
     lastLoadTime = Date.now();
 
-    $rootScope.$broadcast(events.SESSION_CHANGED);
+    if (!isInitialLoad) {
+      $rootScope.$broadcast(events.SESSION_CHANGED);
+    }
 
     // Return the model
     return model;
