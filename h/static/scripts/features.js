@@ -21,28 +21,38 @@
  */
 'use strict';
 
+var retry = require('retry');
+
 var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function features ($document, $http, $log) {
   var cache = null;
-  var pending = false;
+  var operation = null;
   var featuresUrl = new URL('/app/features', $document.prop('baseURI')).href;
 
   function fetch() {
     // Short-circuit if a fetch is already in progress...
-    if (pending) {
+    if (operation) {
       return;
     }
-    pending = true;
-    $http.get(featuresUrl)
-    .success(function(data) {
+    operation = retry.operation({retries: 10, randomize: true});
+
+    function success(data) {
       cache = [Date.now(), data];
-    })
-    .error(function() {
-      $log.warn('features service: failed to load features data');
-    })
-    .finally(function() {
-      pending = false;
+      operation = null;
+    }
+
+    function failure(data, status) {
+      if (!operation.retry('failed to load - remote status was ' + status)) {
+        // All retries have failed, and we will now stop polling the endpoint.
+        $log.error('features service:', operation.mainError());
+      }
+    }
+
+    operation.attempt(function () {
+      $http.get(featuresUrl)
+        .success(success)
+        .error(failure);
     });
   }
 
