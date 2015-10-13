@@ -132,11 +132,14 @@ describe 'AppController', ->
     createController()
     assert.isFalse($scope.shareDialog.visible)
 
-  it 'calls $route.reload() when the session state changes', ->
+  it 'reloads the view when the focused group changes', ->
     createController()
-    groupEvents = [events.SESSION_CHANGED, events.GROUP_FOCUSED];
-    groupEvents.forEach((event) ->
-      fakeRoute.reload = sinon.spy()
-      $scope.$broadcast(event)
-      assert.calledOnce(fakeRoute.reload)
-    )
+    fakeRoute.reload = sinon.spy()
+    $scope.$broadcast(events.GROUP_FOCUSED)
+    assert.calledOnce(fakeRoute.reload)
+
+  it 'reloads the view when the session state changes', ->
+    createController()
+    fakeRoute.reload = sinon.spy()
+    $scope.$broadcast(events.SESSION_CHANGED)
+    assert.calledOnce(fakeRoute.reload)
