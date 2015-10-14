@@ -50,7 +50,6 @@ function HypothesisChromeExtension(dependencies) {
     isAllowedFileSchemeAccess: dependencies.isAllowedFileSchemeAccess,
   });
   var tabErrors = new TabErrorCache();
-  var _blocklist;
 
   /* Sets up the extension and binds event listeners. Requires a window
    * object to be passed so that it can listen for localStorage events.
@@ -149,13 +148,18 @@ function HypothesisChromeExtension(dependencies) {
       browserAction.deactivate(tabId);
     }
 
-    _blocklist = blocklist(tab.url);
-    _blocklist.then(function(blocklist) {
-      if (!blocklist.blocked) {
-        browserAction.updateBadge(blocklist.total, tab.id);
+    // Here we're calling blocklist() for two reasons:
+    // 1. Because we want to call updateBadge() in the then() function.
+    // 2. Because we want to fetch the blocklist for the new URL asap, when we
+    //    call blocklist() again later (when the user clicks on the browser
+    //    button to activate the sidebar) it will return the already-resolved
+    //    Promise.
+    blocklist(tab.url).then(function(blocklist_) {
+      if (!blocklist_.blocked) {
+        browserAction.updateBadge(blocklist_.total, tab.id);
       }
     }).
-    catch(function(reason) {
+    catch(function() {
       // Silence console error message about uncaught exception here.
     });
     return updateTabDocument(tab);
@@ -176,7 +180,7 @@ function HypothesisChromeExtension(dependencies) {
       return Promise.resolve();
     }
 
-    function inject() {
+    function inject(tab) {
       sidebar.injectIntoTab(tab).catch(function (err) {
         tabErrors.setTabError(tab.id, err);
         state.errorTab(tab.id);
@@ -184,22 +188,22 @@ function HypothesisChromeExtension(dependencies) {
     }
 
     if (state.isTabActive(tab.id)) {
-      return _blocklist.then(
-        function onFulfilled(blocklist) {
-          if (blocklist.blocked) {
+      return blocklist(tab.url).then(
+        function onFulfilled(blocklist_) {
+          if (blocklist_.blocked) {
               tabErrors.setTabError(
                 tab.id, new errors.BlockedSiteError(
                   "Hypothesis doesn't work on this site yet."));
               state.errorTab(tab.id);
           } else {
-            inject();
+            inject(tab);
           }
         },
         function onRejected() {
           // If the request to the server to get the blocklist times out or
           // fails for any reason, then we just assume that the URI isn't
           // blocked and go ahead and inject the sidebar.
-          inject();
+          inject(tab);
         });
     } else if (state.isTabInactive(tab.id)) {
       return sidebar.removeFromTab(tab);

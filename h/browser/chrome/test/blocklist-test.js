@@ -2,7 +2,7 @@
 
 var proxyquire = require('proxyquire');
 
-describe('h.getBlocklist', function() {
+describe('blocklist', function() {
   var server;
   var uri = 'http://example.com/example';
   var blocklist;
@@ -56,8 +56,8 @@ describe('h.getBlocklist', function() {
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
-      function onRejected(reason) {
-        assert(reason.indexOf('Received invalid JSON') === 0);
+      function onRejected(error) {
+        assert(error.reason.indexOf('Received invalid JSON') === 0);
       }
     );
   });
@@ -87,8 +87,8 @@ describe('h.getBlocklist', function() {
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
-      function onRejected(reason) {
-        assert(reason.indexOf('Received invalid total') === 0);
+      function onRejected(error) {
+        assert(error.reason.indexOf('Received invalid total') === 0);
       }
     );
   });
@@ -118,8 +118,8 @@ describe('h.getBlocklist', function() {
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
-      function onRejected(reason) {
-        assert(reason.indexOf('Received invalid total') === 0);
+      function onRejected(error) {
+        assert(error.reason.indexOf('Received invalid total') === 0);
       }
     );
   });
@@ -149,8 +149,8 @@ describe('h.getBlocklist', function() {
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
-      function onRejected(reason) {
-        assert(reason.indexOf('Received invalid blocked') === 0);
+      function onRejected(error) {
+        assert(error.reason.indexOf('Received invalid blocked') === 0);
       }
     );
   });
@@ -180,8 +180,8 @@ describe('h.getBlocklist', function() {
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
-      function onRejected(reason) {
-        assert(reason.indexOf('Received invalid blocked') === 0);
+      function onRejected(error) {
+        assert(error.reason.indexOf('Received invalid blocked') === 0);
       }
     );
   });
@@ -211,8 +211,8 @@ describe('h.getBlocklist', function() {
       function onFulfilled() {
         assert(false, 'The promise should not be resolved');
       },
-      function onRejected(reason) {
-        assert(reason.indexOf('Received invalid JSON') === 0);
+      function onRejected(error) {
+        assert(error.reason.indexOf('Received invalid JSON') === 0);
       });
   });
 
@@ -229,5 +229,33 @@ describe('h.getBlocklist', function() {
       function onRejected() {
         assert(console.error.called);
       });
+  });
+
+  it("doesn't send consecutive requests for the same url", function() {
+    blocklist(uri);
+    blocklist(uri);
+    assert(server.requests.length === 1);
+  });
+
+  it("does send consecutive requests for different urls", function() {
+    return Promise.all([
+      blocklist('http://example.com/example1'),
+      blocklist('http://example.com/example2'),
+      blocklist('http://example.com/example1'),
+      blocklist('http://example.com/example2')
+    ])
+    .then(
+      function onFulfilled() {
+        assert(false, 'The Promise should not be fulfilled');
+      },
+      function onRejected() {
+        assert(server.requests.length === 4);
+      }
+    );
+  });
+
+  it("doesn't send requests if url is undefined", function() {
+    blocklist(undefined);
+    assert(server.requests.length === 0);
   });
 });

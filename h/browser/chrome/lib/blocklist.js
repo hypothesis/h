@@ -5,20 +5,22 @@
 'use strict';
 
 var settings = require('./settings');
+var blocklistPromise;
 
 /**
-  * Return a Promise that resolves to whether the URI is blocked and how many
-  * annotations it has.
+  * Make an HTTP request to the /blocklist endpoint and return a Promise that
+  * resolves to the value of the response.
   *
-  * @function
-  * @param {String} uri The URI to be checked
-  * @returns {Promise} A Promise that resolves to an object with two
-  *   properties, `total`: the number of annotations there are of this URI
-  *   (number); and `blocked`: whether or not this URI is blocklisted
-  *   (boolean). The Promise may also be rejected.
+  * This is a helper function for getBlocklistIfUriHasChanged() below, see
+  * that function's docstring for more details.
+  *
   */
 function getBlocklist(uri) {
-  return new Promise(function(resolve, reject) {
+  if (!uri) {
+    return Promise.reject({reason: 'uri was undefined'});
+  }
+
+  var p = new Promise(function(resolve, reject) {
     var request = new XMLHttpRequest();
     request.timeout = 1000;
 
@@ -36,7 +38,7 @@ function getBlocklist(uri) {
         errorMsg = 'Received invalid JSON from the /blocklist endpoint: ';
         errorMsg = errorMsg + this.responseText;
         console.error(errorMsg);
-        reject(errorMsg);
+        reject({reason: errorMsg});
         return;
       }
 
@@ -44,7 +46,7 @@ function getBlocklist(uri) {
         errorMsg = 'Received invalid total from the /blocklist endpoint: ';
         errorMsg = errorMsg + total;
         console.error(errorMsg);
-        reject(errorMsg);
+        reject({reason: errorMsg});
         return;
       }
 
@@ -52,7 +54,7 @@ function getBlocklist(uri) {
         errorMsg = 'Received invalid blocked from the /blocklist endpoint: ';
         errorMsg = errorMsg + total;
         console.error(errorMsg);
-        reject(errorMsg);
+        reject({reason: errorMsg});
         return;
       }
 
@@ -60,7 +62,7 @@ function getBlocklist(uri) {
     };
 
     request.ontimeout = function() {
-      reject('the blocklist HTTP request timed out');
+      reject({reason: 'the blocklist HTTP request timed out'});
     };
 
     settings.then(function(settings) {
@@ -68,6 +70,40 @@ function getBlocklist(uri) {
       request.send(null);
     });
   });
+
+  p.uri = uri;
+  return p;
 }
 
-module.exports = getBlocklist;
+/**
+  * Make an HTTP request to the /blocklist endpoint and return a Promise that
+  * resolves to the value of the response.
+  *
+  * This function can be called with the same uri multiple times consecutively
+  * and it'll just keep returning the same Promise - won't make multiple HTTP
+  * requests.
+  *
+  * But if you call the function with a different uri, then call it with the
+  * first uri again, then it _will_ make another request for the first uri.
+  *
+  * Return a rejected Promise if the HTTP request times out, fails or is
+  * invalid for any reason.
+  *
+  * Return a rejected Promise is the given uri is undefined.
+  *
+  * @param {String} uri The URI to be checked
+  * @returns {Promise} A Promise that resolves to an object with three
+  *   properties:
+  *
+  *   1. total: the number of annotations there are of this URI (Number)
+  *   2. blocked: whether or not this URI is blocklisted (Boolean)
+  *
+  */
+function getBlocklistIfUriHasChanged(uri) {
+  if (!(blocklistPromise && blocklistPromise.uri === uri)) {
+    blocklistPromise = getBlocklist(uri);
+  }
+  return blocklistPromise;
+}
+
+module.exports = getBlocklistIfUriHasChanged;
