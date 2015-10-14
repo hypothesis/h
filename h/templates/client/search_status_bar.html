@@ -1,0 +1,26 @@
+<div class="search-status-bar" ng-show="filterActive">
+  <button class="primary-action-btn primary-action-btn--short"
+          ng-click="onClearSelection()"
+          title="Clear the search filter and show all annotations"
+  >
+    <i class="primary-action-btn__icon h-icon-close"></i> Clear search
+  </button>
+  <span ng-pluralize
+           count="filterMatchCount"
+           when="{'0': 'No results for “{{searchQuery}}”',
+                  'one': '1 search result',
+                  'other': '{} search results'}"></span>
+</div>
+<div class="search-status-bar" ng-show="!filterActive && selectionCount > 0">
+  <button class="primary-action-btn primary-action-btn--short"
+          ng-click="onClearSelection()"
+          title="Clear the selection and show all annotations"
+  >
+    <i class="primary-action-btn__icon h-icon-close"></i> Clear selection
+  </button>
+  <span ng-pluralize
+           count="selectionCount"
+           when="{'0': 'No annotations selected',
+                  'one': '1 selected annotation',
+                  'other': '{} selected annotations'}"></span>
+</div>

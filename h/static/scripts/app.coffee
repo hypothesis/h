@@ -124,6 +124,7 @@ module.exports = angular.module('h', [
 .directive('windowScroll', require('./directive/window-scroll'))
 .directive('dropdownMenuBtn', require('./directive/dropdown-menu-btn'))
 .directive('publishAnnotationBtn', require('./directive/publish-annotation-btn'))
+.directive('searchStatusBar', require('./directive/search-status-bar'))
 
 .filter('converter', require('./filter/converter'))
 .filter('moment', require('./filter/moment'))
