@@ -1,3 +1,37 @@
+0.7.7 (2015-10-14)
+==================
+
+Bug fixes
+---------
+
+- Clean up annotated document filenames before display (so "my%20doc.pdf"
+  becomes "my doc.pdf") (#2597).
+
+- Annotators are now able to select the privacy of their annotations before they
+  are able to save them (#2601).
+
+- The component that fetches feature flag data for the frontend will no longer
+  busy-poll the ajax endpoint if it receives an error (#2612).
+
+Features
+--------
+
+- Add the ability to leave a group (feature flagged: groups) (#2588).
+
+- Notify the frontend in real time, using the websocket, when groups are
+  joined/left (feature flagged: groups) (#2591).
+
+- Truncate long annotation quotes and bodies (feature flagged:
+  truncate_annotations) (#2451).
+
+Miscellanea
+-----------
+
+- The Chrome extension is now built using browserify (#2609).
+
+- Accounts forms (login/register/forgot password) are now rendered by the server
+  (#2582).
+
 0.7.6 (2015-10-08)
 ==================
 
@@ -9,7 +43,6 @@ Bug fixes
 
 - Fix the ability to "select" one or more annotations in the sidebar by clicking
   on a highlight in the page (#2576).
-
 
 Features
 --------
