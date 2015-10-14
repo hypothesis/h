@@ -25,7 +25,7 @@ module.exports = ['$http', '$parse', ($http, $parse) ->
       else
         scope.onClear?()
 
-  restrict: 'C'
+  restrict: 'E'
   scope:
     query: '='
     onSearch: '&'

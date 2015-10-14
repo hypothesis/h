@@ -22,12 +22,10 @@
         <i class="h-icon-share btn-icon"></i>
       </button>
 
-      <!-- Searchbar -->
-      <div class="simple-search"
+      <simple-search class="simple-search"
            query="search.query"
            on-search="search.update(query)"
-           on-clear="search.clear()"></div>
-      <!-- / Searchbar -->
+           on-clear="search.clear()"></simple-search>
 
       <group-list class="group-list" ng-if="auth.user && feature('groups') && isSidebar">
       </group-list>
@@ -80,7 +78,7 @@
     <!-- / Account Dialog -->
 
     <!-- Share View Dialog -->
-    <div share-dialog="" ng-show="shareDialog.visible"></div>
+    <share-dialog ng-show="shareDialog.visible"></share-dialog>
     <!-- / Share View Dialog -->
 
     <!-- Angular view -->
