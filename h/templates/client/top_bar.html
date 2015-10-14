@@ -1,0 +1,37 @@
+<div class="topbar" ng-class="frame.visible && 'shown'" ng-cloak>
+  <div class="inner content">
+    <button class="btn btn-clean"
+            ng-click="shareDialog.visible = !shareDialog.visible"
+            ng-if="isSidebar"
+            title="Share this page">
+      <i class="h-icon-share btn-icon"></i>
+    </button>
+
+    <simple-search class="simple-search"
+         query="searchController.query"
+         on-search="searchController.update(query)"
+         on-clear="searchController.clear()"></simple-search>
+
+    <group-list class="group-list" ng-if="groupsEnabled">
+    </group-list>
+
+    <div ng-switch="authUser">
+      <span ng-switch-when="undefined">⋯</span>
+      <a href="" ng-click="onLogin()" ng-switch-when="null">Sign in</a>
+      <div class="pull-right user-picker" dropdown keyboard-nav>
+        <span role="button"
+              data-toggle="dropdown" dropdown-toggle>
+          {{account.username}}<span class="provider" ng-show="authUser">/{{account.provider}}</span><i class="h-icon-arrow-drop-down"></i>
+        </span>
+        <ul class="dropdown-menu pull-right" role="menu">
+          <li ng-show="authUser"><a href="" ng-click="accountDialog.visible = true">Account</a></li>
+          <li><a href="mailto:support@hypothes.is">Feedback</a></li>
+          <li><a href="/docs/help" target="_blank">Help</a></li>
+          <li ng-show="authUser"><a href="/stream?q=user:{{account.username}}"
+                                     target="_blank">My Annotations</a></li>
+          <li ng-show="authUser"><a href="" ng-click="onLogout()">Sign out</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
