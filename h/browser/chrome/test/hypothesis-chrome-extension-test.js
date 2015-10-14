@@ -28,7 +28,7 @@ describe('HypothesisChromeExtension', function () {
   var fakeTabErrorCache;
   var fakeBrowserAction;
   var fakeSidebarInjector;
-  var fakeBlocklist;
+  var fakeGetBlocklist;
 
   function createExt() {
     return new HypothesisChromeExtension({
@@ -75,7 +75,10 @@ describe('HypothesisChromeExtension', function () {
       injectIntoTab: sandbox.stub().returns(Promise.resolve()),
       removeFromTab: sandbox.stub().returns(Promise.resolve()),
     };
-    fakeBlocklist = Promise.resolve({total: 3, blocked: false});
+    fakeGetBlocklist = sandbox.stub().returns(
+        Promise.resolve({total: 3, blocked: false}));
+    // Fix a proxyquire crash due to a PhantomJS bug.
+    fakeGetBlocklist['@noCallThru'] = true;
 
     HypothesisChromeExtension = proxyquire('../lib/hypothesis-chrome-extension', {
       './tab-state': createConstructor(fakeTabState),
@@ -84,7 +87,7 @@ describe('HypothesisChromeExtension', function () {
       './tab-error-cache': createConstructor(fakeTabErrorCache),
       './browser-action': createConstructor(fakeBrowserAction),
       './sidebar-injector': createConstructor(fakeSidebarInjector),
-      './blocklist': function() {return fakeBlocklist;}
+      './blocklist': fakeGetBlocklist
     });
     ext = createExt();
   });
@@ -480,7 +483,7 @@ describe('HypothesisChromeExtension', function () {
       });
 
       it('does not call the injector if the tab is not active', function() {
-        fakeBlocklist = Promise.resolve({total: 3, blocked: false});
+        fakeGetBlocklist.returns(Promise.resolve({total: 3, blocked: false}));
         ext.listen({addEventListener: sandbox.stub()});
         fakeTabState.isTabActive = function() {return false;};
         fakeTabState.clearTab = function() {};
@@ -498,11 +501,11 @@ describe('HypothesisChromeExtension', function () {
         );
       });
 
-      /*it.only('calls getBlocklist() with the URI', function() {
-        fakeBlocklist = Promise.resolve({total: 3, blocked: false});
+      it('calls getBlocklist() with the URI', function() {
+        fakeGetBlocklist.returns(Promise.resolve({total: 3, blocked: false}));
         ext.listen({addEventListener: sandbox.stub()});
 
-        return ext._onTabUpdated(
+        return onTabUpdated(
           1, {'status': 'complete'},
           {'status': 'complete', 'url': 'http://example.com/example'})
         .then(
@@ -513,10 +516,10 @@ describe('HypothesisChromeExtension', function () {
             assert(false, "The promise should not be rejected");
           }
         );
-      });*/
+      });
 
       it('does call the injector on not-blocked sites', function() {
-        fakeBlocklist = Promise.resolve({total: 3, blocked: false});
+        fakeGetBlocklist.returns(Promise.resolve({total: 3, blocked: false}));
         ext.listen({addEventListener: sandbox.stub()});
 
         return onTabUpdated(
@@ -533,7 +536,7 @@ describe('HypothesisChromeExtension', function () {
       });
 
       it('does not call the injector on blocked sites', function() {
-        fakeBlocklist = Promise.resolve({total: 3, blocked: true});
+        fakeGetBlocklist.returns(Promise.resolve({total: 3, blocked: true}));
         ext.listen({addEventListener: sandbox.stub()});
 
         return onTabUpdated(
@@ -550,7 +553,7 @@ describe('HypothesisChromeExtension', function () {
       });
 
       it('does call the injector if the blocklist request fails', function() {
-        fakeBlocklist = Promise.reject('the blocklist request timed out');
+        fakeGetBlocklist(Promise.reject('the blocklist request timed out'));
         ext.listen({addEventListener: sandbox.stub()});
 
         return onTabUpdated(
@@ -568,7 +571,7 @@ describe('HypothesisChromeExtension', function () {
       });
 
       it('does call updateBadge when URI is not blocked', function() {
-        fakeBlocklist = Promise.resolve({total: 3, blocked: false});
+        fakeGetBlocklist.returns(Promise.resolve({total: 3, blocked: false}));
         ext.listen({addEventListener: sandbox.stub()});
 
         return onTabUpdated(
@@ -585,7 +588,7 @@ describe('HypothesisChromeExtension', function () {
       });
 
       it('does not call updateBadge when URI is blocked', function() {
-        fakeBlocklist = Promise.resolve({total: 3, blocked: true});
+        fakeGetBlocklist.returns(Promise.resolve({total: 3, blocked: true}));
         ext.listen({addEventListener: sandbox.stub()});
 
         return onTabUpdated(
@@ -602,7 +605,7 @@ describe('HypothesisChromeExtension', function () {
       });
 
       it('sets an error when uri is blocked', function() {
-        fakeBlocklist = Promise.resolve({total: 3, blocked: true});
+        fakeGetBlocklist.returns(Promise.resolve({total: 3, blocked: true}));
         ext.listen({addEventListener: sandbox.stub()});
 
         return onTabUpdated(
