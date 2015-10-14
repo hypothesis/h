@@ -36,11 +36,8 @@ var settings = require('./settings');
 var uriInfoPromise;
 
 /**
-  * Make an HTTP request to the /blocklist endpoint and return a Promise that
+  * Make an HTTP request to the uriinfo endpoint and return a Promise that
   * resolves to the value of the response.
-  *
-  * This is a helper function for getBlocklistIfUriHasChanged() below, see
-  * that function's docstring for more details.
   *
   */
 function getUriInfo(uri) {
@@ -63,7 +60,7 @@ function getUriInfo(uri) {
         total = info.total;
         blocked = info.blocked;
       } catch (e) {
-        errorMsg = 'Received invalid JSON from the /blocklist endpoint: ';
+        errorMsg = 'Received invalid JSON from the server: ';
         errorMsg = errorMsg + this.responseText;
         console.error(errorMsg);
         reject({reason: errorMsg});
@@ -71,7 +68,7 @@ function getUriInfo(uri) {
       }
 
       if (typeof total !== 'number') {
-        errorMsg = 'Received invalid total from the /blocklist endpoint: ';
+        errorMsg = 'Received invalid total from the server: ';
         errorMsg = errorMsg + total;
         console.error(errorMsg);
         reject({reason: errorMsg});
@@ -79,7 +76,7 @@ function getUriInfo(uri) {
       }
 
       if (typeof blocked !== 'boolean') {
-        errorMsg = 'Received invalid blocked from the /blocklist endpoint: ';
+        errorMsg = 'Received invalid blocked from the server: ';
         errorMsg = errorMsg + total;
         console.error(errorMsg);
         reject({reason: errorMsg});
@@ -90,7 +87,7 @@ function getUriInfo(uri) {
     };
 
     request.ontimeout = function() {
-      reject({reason: 'the blocklist HTTP request timed out'});
+      reject({reason: 'the uriinfo HTTP request timed out'});
     };
 
     settings.then(function(settings) {
