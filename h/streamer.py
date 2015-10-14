@@ -11,16 +11,18 @@ import unicodedata
 import weakref
 
 import gevent
-import gevent.queue
 from jsonpointer import resolve_pointer
 from jsonschema import validate
 from pyramid.config import aslist
+from pyramid.events import ApplicationCreated
+from pyramid.events import subscriber
 from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
 from pyramid.threadlocal import get_current_request
 from ws4py.exc import HandshakeError
 from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
+from h import queue
 from h.api import nipsa
 from h.api import uri
 from h.api.search import query
@@ -443,11 +445,7 @@ USER_TOPIC = 'user'
 
 
 class WebSocket(_WebSocket):
-    # Class attributes
-
-    # Tuples of (topic, message) pulled from the message queue
-    event_queue = None
-
+    # All instances of WebSocket, allowing us to iterate over open websockets
     instances = weakref.WeakSet()
     origins = []
 
@@ -467,28 +465,7 @@ class WebSocket(_WebSocket):
         cls.instances.add(instance)
         return instance
 
-    @classmethod
-    def start_reader(cls, request):
-        if cls.event_queue is not None:
-            return
-        cls.event_queue = gevent.queue.Queue()
-        reader_id = 'stream-{}#ephemeral'.format(_random_id())
-
-        for topic in [ANNOTATIONS_TOPIC, USER_TOPIC]:
-            reader = request.get_queue_reader(topic, reader_id)
-            reader.on_message.connect(receiver=cls.on_queue_message)
-            reader.start(block=False)
-
-        gevent.spawn(broadcast_from_queue, cls.event_queue, cls.instances)
-
-    @classmethod
-    def on_queue_message(cls, reader, message=None):
-        if message is not None:
-            cls.event_queue.put((reader.topic, message))
-
     def opened(self):
-        self.start_reader(self.request)
-
         # Release the database transaction
         self.request.tm.commit()
 
@@ -555,18 +532,6 @@ def _annotation_packet(annotations, action):
         'type': 'annotation-notification',
         'options': {'action': action},
     }
-
-
-def broadcast_from_queue(queue, sockets):
-    """
-    Pulls messages from a passed queue object, and handles dispatching them to
-    appropriate active sessions.
-    """
-    for (topic, message) in queue:
-        if topic == ANNOTATIONS_TOPIC:
-            broadcast_annotation_message(message, sockets)
-        elif topic == USER_TOPIC:
-            broadcast_session_change_message(message, sockets)
 
 
 def broadcast_annotation_message(message, sockets):
@@ -655,10 +620,80 @@ def should_send_annotation_event(socket, annotation, event_data):
     return True
 
 
+def process_message(reader, message):
+    """
+    Process a message from the queue.
+
+    Deserializes and distributes messages from the queue to the appropriate
+    handler functions.
+    """
+    if reader.topic == ANNOTATIONS_TOPIC:
+        broadcast_annotation_message(message, WebSocket.instances)
+    elif reader.topic == USER_TOPIC:
+        broadcast_session_change_message(message, WebSocket.instances)
+
+
+def process_queue(settings, topics):
+    """
+    Configure, start, and monitor the queue readers.
+
+    This sets up all the passed readers to route their messages to
+    `process_message`, starts them, and then enters a loop that checks that the
+    reader threads never join. If they do, this fact is logged and all readers
+    are killed.
+    """
+    channel = 'stream-{}#ephemeral'.format(_random_id())
+    readers = [queue.get_reader(settings, topic, channel)
+               for topic in topics]
+
+    # Start all the readers
+    for reader in readers:
+        reader.on_message.connect(receiver=process_message)
+        reader.start(block=False)
+
+    _wait_for_readers(readers)
+
+    # We should never get here. If we do, it's because a reader thread has
+    # prematurely quit.
+    log.error("queue reader exited: killing readers and starting again")
+    for reader in readers:
+        reader.close()
+
+
 def _random_id():
     """Generate a short random string"""
     data = struct.pack('Q', random.getrandbits(64))
     return base64.urlsafe_b64encode(data).strip(b'=')
+
+
+def _wait_for_readers(readers):
+    """Wait for one or more of the readers to exit."""
+    while 1:
+        for reader in readers:
+            reader.join(timeout=1)
+            if not reader.is_running:
+                return
+
+
+def _process_queue_loop(settings, topics):
+    while 1:
+        process_queue(settings, topics)
+
+
+@subscriber(ApplicationCreated)
+def start_queue_processing(event):
+    """
+    Start a greenlet to process the incoming data from NSQ.
+
+    This subscriber is called when the application is booted, and kicks off a
+    greenlet running `process_queue`. The function does not block.
+    """
+    settings = event.app.registry.settings
+    topics = [
+        ANNOTATIONS_TOPIC,
+        USER_TOPIC,
+    ]
+    gevent.spawn(_process_queue_loop, settings, topics)
 
 
 def websocket(request):
