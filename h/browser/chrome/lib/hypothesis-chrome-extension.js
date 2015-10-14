@@ -6,7 +6,7 @@ var HelpPage = require('./help-page');
 var SidebarInjector = require('./sidebar-injector');
 var TabErrorCache = require('./tab-error-cache');
 var TabStore = require('./tab-store');
-var blocklist = require('./blocklist');
+var uriInfo = require('./uri-info');
 var errors = require('./errors');
 
 var TAB_STATUS_COMPLETE = 'complete';
@@ -148,15 +148,15 @@ function HypothesisChromeExtension(dependencies) {
       browserAction.deactivate(tabId);
     }
 
-    // Here we're calling blocklist() for two reasons:
+    // Here we're calling uriInfo.get() for two reasons:
     // 1. Because we want to call updateBadge() in the then() function.
-    // 2. Because we want to fetch the blocklist for the new URL asap, when we
-    //    call blocklist() again later (when the user clicks on the browser
+    // 2. Because we want to fetch the info for the new URL asap, when we
+    //    call uriInfo.get() again later (when the user clicks on the browser
     //    button to activate the sidebar) it will return the already-resolved
     //    Promise.
-    blocklist(tab.url).then(function(blocklist_) {
-      if (!blocklist_.blocked) {
-        browserAction.updateBadge(blocklist_.total, tab.id);
+    uriInfo(tab.url).then(function(info) {
+      if (!info.blocked) {
+        browserAction.updateBadge(info.total, tab.id);
       }
     }).
     catch(function() {
@@ -188,9 +188,9 @@ function HypothesisChromeExtension(dependencies) {
     }
 
     if (state.isTabActive(tab.id)) {
-      return blocklist(tab.url).then(
-        function onFulfilled(blocklist_) {
-          if (blocklist_.blocked) {
+      return uriInfo(tab.url).then(
+        function onFulfilled(info) {
+          if (info.blocked) {
               tabErrors.setTabError(
                 tab.id, new errors.BlockedSiteError(
                   "Hypothesis doesn't work on this site yet."));
@@ -200,7 +200,7 @@ function HypothesisChromeExtension(dependencies) {
           }
         },
         function onRejected() {
-          // If the request to the server to get the blocklist times out or
+          // If the request to the server to get the uriinfo times out or
           // fails for any reason, then we just assume that the URI isn't
           // blocked and go ahead and inject the sidebar.
           inject(tab);

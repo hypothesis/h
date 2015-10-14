@@ -469,7 +469,7 @@ blocklist_index_fixtures = pytest.mark.usefixtures('models')
 
 
 @blocklist_index_fixtures
-def test_blocklist_index_returns_all_blocklisted_urls(models):
+def test_blocklist_index_returns_all_blocklisted_uris(models):
     assert admin.blocklist_index(Mock()) == {
         "uris": models.Blocklist.all.return_value}
 

@@ -1,17 +1,23 @@
 from pyramid import httpexceptions
+from pyramid.view import view_config
 
 from h import models
-from h.api.views import api_config
-from h.api.resources import Root
 from h.api import search as search_lib
 
 
-@api_config(context=Root, name='blocklist')
-def blocklist(request):
-    """Return whether or not the given URI is blocklisted.
+@view_config(route_name='uriinfo',
+             request_method='GET',
+             accept='application/json',
+             renderer='json',
+             )
+def uriinfo(request):
+    """Return some info about the given URI.
 
-    And also the number of annotations of the URI (that the authorized user
-    can read).
+    Currently returns:
+
+      total:   the total number of annotations of this URI (that the authorized
+               user can see)
+      blocked: whether or not this URI is blocklisted
 
     """
     uri = request.params.get('uri')
@@ -26,4 +32,5 @@ def blocklist(request):
 
 
 def includeme(config):
+    config.add_route('uriinfo', '/app/uriinfo')
     config.scan(__name__)
