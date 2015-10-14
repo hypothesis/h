@@ -18,6 +18,15 @@ def pop_flash(request):
             for k in ['error', 'info', 'warning', 'success']}
 
 
+def _group_sort_key(group):
+    """Sort private groups for the session model list"""
+
+    # groups are sorted first by name but also by ID
+    # so that multiple groups with the same name are displayed
+    # in a consistent order in clients
+    return (group.name.lower(), group.hashid)
+
+
 def _current_groups(request):
     """Return a list of the groups the current user is a member of.
 
@@ -33,7 +42,7 @@ def _current_groups(request):
     user = models.User.get_by_userid(request.domain, userid)
     if user is None:
         return groups
-    for group in user.groups:
+    for group in sorted(user.groups, key=_group_sort_key):
         groups.append({
             'name': group.name,
             'id': group.hashid,

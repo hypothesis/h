@@ -31,27 +31,6 @@ describe('GroupListController', function () {
     assert.equal($scope.shouldShowShareLink('group-a'), false);
     assert.equal($scope.shouldShowShareLink('group-b'), true);
   });
-
-  it('sorts groups', function () {
-    $scope.groups = {
-      all: function () {
-        return [{
-          id: 'c',
-          name: 'Zebrafish Study Group'
-        },{
-          id: 'a',
-          name: 'Antimatter Research'
-        },{
-          public: true
-        }];
-      },
-    };
-
-    var sorted = $scope.sortedGroups();
-    assert.ok(sorted[0].public);
-    assert.equal(sorted[1].name, 'Antimatter Research');
-    assert.equal(sorted[2].name, 'Zebrafish Study Group');
-  });
 });
 
 // returns true if a jQuery-like element has

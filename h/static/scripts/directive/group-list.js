@@ -16,16 +16,7 @@ function GroupListController($scope, $window) {
 
   $scope.shouldShowShareLink = function (groupId) {
     return $scope.expandedGroupId === groupId;
-  }
-
-  $scope.sortedGroups = function () {
-    return $scope.groups.all().concat().sort(function (a, b) {
-      if (a.public !== b.public) {
-        return a.public ? -1 : 1;
-      }
-      return a.name.localeCompare(b.name);
-    });
-  }
+  };
 
   $scope.leaveGroup = function (groupId) {
     var groupName = $scope.groups.get(groupId).name;
