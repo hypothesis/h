@@ -13,13 +13,13 @@ describe('h.getBlocklist', function() {
       autoRespond: true,
       respondImmediately: true
     });
+
     sinon.stub(console, 'error');
+
+    var settingsPromise = Promise.resolve({serviceUrl: serviceUrl});
+    settingsPromise['@noCallThru'] = true;
     blocklist = proxyquire(
-      '../lib/blocklist',
-      {
-        './settings': Promise.resolve({serviceUrl: serviceUrl})
-      }
-    );
+      '../lib/blocklist', {'./settings': settingsPromise});
   });
 
   afterEach(function() {
