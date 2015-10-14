@@ -12,6 +12,9 @@
   font-weight: bold;
   font-size: $body1-font-size;
 
+  padding-left: 12px;
+  padding-right: 12px;
+
   &:disabled {
     color: $gray-light;
   }
@@ -19,4 +22,17 @@
   &:hover:enabled {
     background-color: $color-mine-shaft;
   }
+}
+
+.primary-action-btn--short {
+  height: 30px;
+}
+
+.primary-action-btn__icon {
+  color: $color-silver-chalice;
+  display: inline-block;
+  font-weight: bold;
+  margin-left: -3px;
+  margin-right: 3px;
+  transform: translateY(1px);
 }
