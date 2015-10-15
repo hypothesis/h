@@ -33,7 +33,7 @@ describe('uriInfo', function() {
       [200, {}, '{"total": 3, "blocked": false}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onResolved() {
         assert(server.requests.length === 1);
         var request = server.requests[0];
@@ -52,12 +52,13 @@ describe('uriInfo', function() {
       [200, {}, 'this is not valid json']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
       function onRejected(error) {
-        assert(error.reason.indexOf('Received invalid JSON') === 0);
+        assert(error instanceof uriInfo.UriInfoError);
+        assert(error.message.indexOf('Received invalid JSON') === 0);
       }
     );
   });
@@ -68,7 +69,7 @@ describe('uriInfo', function() {
       [200, {}, 'this is not valid json']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onFulfilled() {
         assert(false, 'The promise should not be resolved');
       },
@@ -83,12 +84,13 @@ describe('uriInfo', function() {
       [200, {}, '{"total": "not a valid number"}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
       function onRejected(error) {
-        assert(error.reason.indexOf('Received invalid total') === 0);
+        assert(error instanceof uriInfo.UriInfoError);
+        assert(error.message.indexOf('Received invalid total') === 0);
       }
     );
   });
@@ -99,7 +101,7 @@ describe('uriInfo', function() {
       [200, {}, '{"total": "not a valid number"}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onFulfilled() {
         assert(false, 'The promise should not be resolved');
       },
@@ -114,12 +116,13 @@ describe('uriInfo', function() {
       [200, {}, '{"foo": "bar"}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
       function onRejected(error) {
-        assert(error.reason.indexOf('Received invalid total') === 0);
+        assert(error instanceof uriInfo.UriInfoError);
+        assert(error.message.indexOf('Received invalid total') === 0);
       }
     );
   });
@@ -130,7 +133,7 @@ describe('uriInfo', function() {
       [200, {}, '{"foo": "bar"}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onFulfilled() {
         assert(false, 'The promise should not be resolved');
       },
@@ -145,12 +148,13 @@ describe('uriInfo', function() {
       [200, {}, '{"total": 3, "blocked": "foo"}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
       function onRejected(error) {
-        assert(error.reason.indexOf('Received invalid blocked') === 0);
+        assert(error instanceof uriInfo.UriInfoError);
+        assert(error.message.indexOf('Received invalid blocked') === 0);
       }
     );
   });
@@ -161,7 +165,7 @@ describe('uriInfo', function() {
       [200, {}, '{"total": 3, "blocked": "foo"}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onFulfilled() {
         assert(false, 'The promise should not be resolved');
       },
@@ -176,12 +180,13 @@ describe('uriInfo', function() {
       [200, {}, '{"total": 3}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onResolved() {
         assert(false, 'The promise should not be resolved');
       },
       function onRejected(error) {
-        assert(error.reason.indexOf('Received invalid blocked') === 0);
+        assert(error instanceof uriInfo.UriInfoError);
+        assert(error.message.indexOf('Received invalid blocked') === 0);
       }
     );
   });
@@ -192,7 +197,7 @@ describe('uriInfo', function() {
       [200, {}, '{"total": 3}']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onFulfilled() {
         assert(false, 'The promise should not be resolved');
       },
@@ -207,12 +212,13 @@ describe('uriInfo', function() {
       [500, {}, '']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onFulfilled() {
         assert(false, 'The promise should not be resolved');
       },
       function onRejected(error) {
-        assert(error.reason.indexOf('Received invalid JSON') === 0);
+        assert(error instanceof uriInfo.UriInfoError);
+        assert(error.message.indexOf('Received invalid JSON') === 0);
       });
   });
 
@@ -222,7 +228,7 @@ describe('uriInfo', function() {
       [500, {}, '']
     );
 
-    return uriInfo(uri).then(
+    return uriInfo.get(uri).then(
       function onFulfilled() {
         assert(false, 'The promise should not be resolved');
       },
@@ -232,17 +238,17 @@ describe('uriInfo', function() {
   });
 
   it("doesn't send consecutive requests for the same uri", function() {
-    uriInfo(uri);
-    uriInfo(uri);
+    uriInfo.get(uri);
+    uriInfo.get(uri);
     assert(server.requests.length === 1);
   });
 
   it("does send consecutive requests for different uris", function() {
     return Promise.all([
-      uriInfo('http://example.com/example1'),
-      uriInfo('http://example.com/example2'),
-      uriInfo('http://example.com/example1'),
-      uriInfo('http://example.com/example2')
+      uriInfo.get('http://example.com/example1'),
+      uriInfo.get('http://example.com/example2'),
+      uriInfo.get('http://example.com/example1'),
+      uriInfo.get('http://example.com/example2')
     ])
     .then(
       function onFulfilled() {
@@ -255,7 +261,7 @@ describe('uriInfo', function() {
   });
 
   it("doesn't send requests if uri is undefined", function() {
-    uriInfo(undefined);
+    uriInfo.get(undefined);
     assert(server.requests.length === 0);
   });
 });

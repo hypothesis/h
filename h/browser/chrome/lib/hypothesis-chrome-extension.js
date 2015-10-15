@@ -154,13 +154,16 @@ function HypothesisChromeExtension(dependencies) {
     //    call uriInfo.get() again later (when the user clicks on the browser
     //    button to activate the sidebar) it will return the already-resolved
     //    Promise.
-    uriInfo(tab.url).then(function(info) {
+    uriInfo.get(tab.url).then(function(info) {
       if (!info.blocked) {
         browserAction.updateBadge(info.total, tab.id);
       }
-    }).
-    catch(function() {
-      // Silence console error message about uncaught exception here.
+    }).catch(function(error) {
+      if (error instanceof uriInfo.UriInfoError) {
+        // Silence console error message about uncaught exception here.
+      } else {
+        throw error;
+      }
     });
     return updateTabDocument(tab);
   }
@@ -188,7 +191,7 @@ function HypothesisChromeExtension(dependencies) {
     }
 
     if (state.isTabActive(tab.id)) {
-      return uriInfo(tab.url).then(
+      return uriInfo.get(tab.url).then(
         function onFulfilled(info) {
           if (info.blocked) {
               tabErrors.setTabError(
@@ -199,11 +202,15 @@ function HypothesisChromeExtension(dependencies) {
             inject(tab);
           }
         },
-        function onRejected() {
-          // If the request to the server to get the uriinfo times out or
-          // fails for any reason, then we just assume that the URI isn't
-          // blocked and go ahead and inject the sidebar.
-          inject(tab);
+        function onRejected(error) {
+          if (error instanceof uriInfo.UriInfoError) {
+            // If the request to the server to get the uriInfo times out or
+            // fails for any reason, then we just assume that the URI isn't
+            // blocked and go ahead and inject the sidebar.
+            inject(tab);
+          } else {
+            throw error;
+          }
         });
     } else if (state.isTabInactive(tab.id)) {
       return sidebar.removeFromTab(tab);

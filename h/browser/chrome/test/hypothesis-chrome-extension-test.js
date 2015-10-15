@@ -75,10 +75,10 @@ describe('HypothesisChromeExtension', function () {
       injectIntoTab: sandbox.stub().returns(Promise.resolve()),
       removeFromTab: sandbox.stub().returns(Promise.resolve()),
     };
-    fakeUriInfo = sandbox.stub().returns(
-        Promise.resolve({total: 3, blocked: false}));
-    // Fix a proxyquire crash due to a PhantomJS bug.
-    fakeUriInfo['@noCallThru'] = true;
+    fakeUriInfo = {
+      get: sandbox.stub().returns(Promise.resolve({total: 3, blocked: false})),
+      UriInfoError: function(error) {this.error = error}
+    }
 
     HypothesisChromeExtension = proxyquire('../lib/hypothesis-chrome-extension', {
       './tab-state': createConstructor(fakeTabState),
@@ -481,7 +481,7 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('does not call the injector if the tab is not active', function() {
-      fakeUriInfo.returns(Promise.resolve({total: 3, blocked: false}));
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: false}));
       ext.listen({addEventListener: sandbox.stub()});
       fakeTabState.isTabActive = function() {return false;};
       fakeTabState.clearTab = function() {};
@@ -500,7 +500,7 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('calls uriInfo() with the URI', function() {
-      fakeUriInfo.returns(Promise.resolve({total: 3, blocked: false}));
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: false}));
       ext.listen({addEventListener: sandbox.stub()});
 
       return onTabUpdated(
@@ -508,7 +508,7 @@ describe('HypothesisChromeExtension', function () {
         {'status': 'complete', 'url': 'http://example.com/example'})
       .then(
         function onFulfilled() {
-          assert.calledWith(fakeUriInfo, 'http://example.com/example');
+          assert.calledWith(fakeUriInfo.get, 'http://example.com/example');
         },
         function onRejected() {
           assert(false, "The promise should not be rejected");
@@ -517,7 +517,7 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('does call the injector on not-blocked sites', function() {
-      fakeUriInfo.returns(Promise.resolve({total: 3, blocked: false}));
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: false}));
       ext.listen({addEventListener: sandbox.stub()});
 
       return onTabUpdated(
@@ -534,7 +534,7 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('does not call the injector on blocked sites', function() {
-      fakeUriInfo.returns(Promise.resolve({total: 3, blocked: true}));
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: true}));
       ext.listen({addEventListener: sandbox.stub()});
 
       return onTabUpdated(
@@ -550,8 +550,9 @@ describe('HypothesisChromeExtension', function () {
       );
     });
 
-    it('does call the injector if the uriinfo request fails', function() {
-      fakeUriInfo(Promise.reject('the uriinfo request timed out'));
+    it('does call the injector if the uriInfo request fails', function() {
+      fakeUriInfo.get.returns(Promise.reject(
+          new fakeUriInfo.UriInfoError('the uriInfo request timed out')));
       ext.listen({addEventListener: sandbox.stub()});
 
       return onTabUpdated(
@@ -567,8 +568,26 @@ describe('HypothesisChromeExtension', function () {
       );
     });
 
+    it('re-throws unknown errors from uriInfo', function() {
+      var unknownError = {foo: "bar"};
+      fakeUriInfo.get.returns(Promise.reject(unknownError));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        1, {'status': 'complete'},
+        {'status': 'complete', 'url': 'http://notblocked.com'})
+      .then(
+        function onFulfilled() {
+          assert(false, "The promise should not be fulfilled");
+        },
+        function onRejected(error) {
+          assert(error === unknownError);
+        }
+      );
+    });
+
     it('does call updateBadge when URI is not blocked', function() {
-      fakeUriInfo.returns(Promise.resolve({total: 3, blocked: false}));
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: false}));
       ext.listen({addEventListener: sandbox.stub()});
 
       return onTabUpdated(
@@ -585,7 +604,7 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('does not call updateBadge when URI is blocked', function() {
-      fakeUriInfo.returns(Promise.resolve({total: 3, blocked: true}));
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: true}));
       ext.listen({addEventListener: sandbox.stub()});
 
       return onTabUpdated(
@@ -602,7 +621,7 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('sets an error when uri is blocked', function() {
-      fakeUriInfo.returns(Promise.resolve({total: 3, blocked: true}));
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: true}));
       ext.listen({addEventListener: sandbox.stub()});
 
       return onTabUpdated(

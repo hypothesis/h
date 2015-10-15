@@ -1,33 +1,6 @@
 /**
  * A wrapper for the server's uriinfo endpoint.
  *
- * Exports a function that makes an HTTP request to the server's uriinfo
- * endpoint and returns a Promise that resolves to the response. Usage:
- *
- *     var uriInfo = require('uri-info');
- *     uriInfo(uri).then(function(info) {
- *       ...
- *     });
- *
- * This function can be called with the same uri multiple times consecutively
- * and it'll just keep returning the same Promise - won't make multiple HTTP
- * requests.
- *
- * But if you call the function with a different uri, then call it with the
- * first uri again, then it _will_ make another request for the first uri.
- *
- * Returns a rejected Promise if the HTTP request times out, fails or is
- * invalid for any reason.
- *
- * Returns a rejected Promise is the given uri is undefined.
- *
- * @param {String} uri The URI to be checked
- *
- * @returns {Promise} A Promise that resolves to an object with two properties:
- *   1. total:   the number of annotations there are of this URI (Number)
- *   2. blocked: whether or not this URI is blocklisted (Boolean)
- *
- *
  * @module
  */
 'use strict';
@@ -35,14 +8,29 @@
 var settings = require('./settings');
 var uriInfoPromise;
 
+
+/**
+ * Returns a new UriInfoError object, these errors are thrown if the uriinfo
+ * HTTP request fails for any reason.
+ *
+ * @class
+ */
+function UriInfoError(message) {
+  this.message = message;
+}
+
+
 /**
   * Make an HTTP request to the uriinfo endpoint and return a Promise that
   * resolves to the value of the response.
   *
+  * This is a helper function for get() below, see that function's docstring
+  * for details.
+  *
   */
 function getUriInfo(uri) {
-  if (uri === undefined) {
-    return Promise.reject({reason: 'uri was undefined'});
+  if (!uri) {
+    return Promise.reject(new UriInfoError('uri was undefined'));
   }
 
   var p = new Promise(function(resolve, reject) {
@@ -63,7 +51,7 @@ function getUriInfo(uri) {
         errorMsg = 'Received invalid JSON from the server: ';
         errorMsg = errorMsg + this.responseText;
         console.error(errorMsg);
-        reject({reason: errorMsg});
+        reject(new UriInfoError(errorMsg));
         return;
       }
 
@@ -71,7 +59,7 @@ function getUriInfo(uri) {
         errorMsg = 'Received invalid total from the server: ';
         errorMsg = errorMsg + total;
         console.error(errorMsg);
-        reject({reason: errorMsg});
+        reject(new UriInfoError(errorMsg));
         return;
       }
 
@@ -79,7 +67,7 @@ function getUriInfo(uri) {
         errorMsg = 'Received invalid blocked from the server: ';
         errorMsg = errorMsg + total;
         console.error(errorMsg);
-        reject({reason: errorMsg});
+        reject(new UriInfoError(errorMsg));
         return;
       }
 
@@ -87,7 +75,7 @@ function getUriInfo(uri) {
     };
 
     request.ontimeout = function() {
-      reject({reason: 'the uriinfo HTTP request timed out'});
+      reject(new UriInfoError('the uriinfo HTTP request timed out'));
     };
 
     settings.then(function(settings) {
@@ -101,20 +89,43 @@ function getUriInfo(uri) {
 }
 
 /**
-  * Return getUriInfo(uri) only if:
-  *
-  * - this is the first time we're calling getUriInfo() with any uri, or
-  * - the previous time we called getUriInfo() it was with a different uri
-  *
-  * otherwise just return the result from the previous time we called
-  * getUriInfo(uri), which was with the same uri.
-  *
-  */
-function getUriInfoIfUriHasChanged(uri) {
+ * Make an HTTP request to the server's uriinfo endpoint and return a Promise
+ * that resolves to the response. Usage:
+ *
+ *     var uriInfo = require('uri-info');
+ *
+ *     uriInfo.get(uri).then(function(info) {
+ *       ...
+ *     });
+ *
+ * This function can be called with the same uri multiple times consecutively
+ * and it'll just keep returning the same Promise - won't make multiple HTTP
+ * requests.
+ *
+ * But if you call the function with a different uri, then call it with the
+ * first uri again, then it _will_ make another request for the first uri.
+ *
+ * Returns a rejected Promise with a UriInfoError as its reason if the HTTP
+ * request times out, fails or is invalid for any reason.
+ *
+ * Returns a rejected Promise with a UriInfoError as its reason if the given
+ * uri is undefined.
+ *
+ * @param {String} uri The URI to be checked
+ *
+ * @returns {Promise} A Promise that resolves to an object with two properties:
+ *   1. total:   the number of annotations there are of this URI (Number)
+ *   2. blocked: whether or not this URI is blocklisted (Boolean)
+ *
+ */
+function get(uri) {
   if (!(uriInfoPromise && uriInfoPromise.uri === uri)) {
     uriInfoPromise = getUriInfo(uri);
   }
   return uriInfoPromise;
 }
 
-module.exports = getUriInfoIfUriHasChanged;
+module.exports = {
+  get: get,
+  UriInfoError: UriInfoError
+};
