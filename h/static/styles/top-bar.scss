@@ -21,7 +21,7 @@
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
 
   padding-left: $h-padding;
   padding-right: $h-padding;
@@ -29,14 +29,14 @@
   height: 28px;
 }
 
-.top-bar__inner .simple-search {
-  flex-grow: 1;
-  margin-right: .75em;
-  overflow: hidden;
-}
-
 .top-bar__inner .group-list {
   margin-right: .75em;
+}
+
+// an expander which adds spacing between the groups list
+// and the toolbar icons (in the new top-bar design)
+.top-bar__expander {
+  flex-grow: 1;
 }
 
 .top-bar__btn {

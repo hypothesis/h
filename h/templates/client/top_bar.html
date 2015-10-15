@@ -11,7 +11,10 @@
     <simple-search class="simple-search"
          query="searchController.query"
          on-search="searchController.update(query)"
-         on-clear="searchController.clear()"></simple-search>
+         on-clear="searchController.clear()"
+         always-expanded="true"></simple-search>
+
+    <div class="top-bar__expander"></div>
 
     <group-list class="group-list" ng-if="groupsEnabled">
     </group-list>
@@ -41,6 +44,7 @@
   <div class="top-bar__inner content" ng-if="groupsEnabled">
     <group-list class="group-list">
     </group-list>
+    <div class="top-bar__expander"></div>
     <simple-search class="simple-search"
          query="searchController.query"
          on-search="searchController.update(query)"
