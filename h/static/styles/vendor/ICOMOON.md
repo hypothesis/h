@@ -17,9 +17,5 @@ add the relevant icons and then use the app's _Generate Font_ facility.
     `h-icon-<name>` class name.
  4. Ensure all icons in the 'h' set are selected, then go to the 'Generate Font' tab in icomoon
     and click the 'Download' button which appears _within_ the tab.
- 5. From the downloaded archive:
-  * Extract `fonts/h.woff` -> `./fonts/h.woff`
-  * Extract `style.css` -> `./icomoon.css`.
-  * Edit `icomoon.css` to keep only the _WOFF_ format font as that is [supported](http://caniuse.com/#feat=woff) by our target browsers (IE >= 10).
-    The WOFF URL needs to be an inlined data URL until #2571 is resolved.
- 6. Commit the updated `selection.json`, `fonts/h.woff` and `icomoon.css` files to the repository.
+ 5. Run `scripts/update-icon-font.py <icomoon zip archive>` to update the icon font
+ 6. Commit the updated files to the repository.
