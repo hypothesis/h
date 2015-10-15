@@ -1,10 +1,12 @@
 @import 'base';
 @import 'mixins/responsive';
 
+$top-bar-height: 40px;
+
 .top-bar {
   background: $white;
   border-bottom: solid 1px $gray-lighter;
-  height: 30px;
+  height: $top-bar-height;
   font-size: 15px;
   position: fixed;
   left: 0;

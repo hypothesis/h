@@ -202,6 +202,10 @@ $base-font-size: 14px;
     padding-right: 6px;
     width: 36px;
     margin-bottom: 10px;
+
+    // the height of the sidebar toggle is set
+    // to match the height of the top bar
+    height: 40px;
   }
 }
 
