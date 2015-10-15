@@ -38,14 +38,14 @@ def test_uriinfo_raises_if_no_uri():
 
 
 @pytest.fixture
-def models(config, request):  # pylint:disable=unused-argument
+def models(request):
     patcher = mock.patch('h.blocklist.views.models', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
 
 @pytest.fixture
-def search(config, request):  # pylint:disable=unused-argument
+def search(request):
     patcher = mock.patch('h.blocklist.views.search', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
