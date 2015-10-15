@@ -2,7 +2,7 @@ from pyramid import httpexceptions
 from pyramid.view import view_config
 
 from h import models
-from h.api import search as search_lib
+from h.api import search
 
 
 @view_config(route_name='uriinfo',
@@ -25,7 +25,7 @@ def uriinfo(request):
         raise httpexceptions.HTTPBadRequest()
 
     return {
-        'total': search_lib.search(request, {'uri': uri, 'limit': 0})['total'],
+        'total': search.search(request, {'uri': uri, 'limit': 0})['total'],
         'blocked': models.Blocklist.is_blocked(uri)
     }
 
