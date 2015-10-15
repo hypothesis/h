@@ -5,6 +5,18 @@ from jinja2 import Markup
 from jinja2.ext import Extension
 
 
+class Filters(Extension):
+
+    """
+    Set up filters for Jinja2.
+    """
+
+    def __init__(self, environment):
+        super(Filters, self).__init__(environment)
+
+        environment.filters['websocketize'] = websocketize
+
+
 class IncludeRawExtension(Extension):
     """
     An extension which provides a simple include_raw function to include the
@@ -15,6 +27,13 @@ class IncludeRawExtension(Extension):
         super(IncludeRawExtension, self).__init__(environment)
 
         environment.globals['include_raw'] = _get_includer(environment)
+
+
+def websocketize(value):
+    """Convert a HTTP(S) URL into a WS(S) URL."""
+    if not (value.startswith('http://') or value.startswith('https://')):
+        raise ValueError('cannot websocketize non-HTTP URL')
+    return 'ws' + value[len('http'):]
 
 
 def _get_includer(environment):

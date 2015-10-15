@@ -104,6 +104,7 @@
     window.hypothesis = window.hypothesis || {};
     window.hypothesis.settings = {
       apiUrl: "{{ request.route_url('api') }}",
+      websocketUrl: "{{ request.route_url('ws') | websocketize }}",
     };
   </script>
   {% assets "app_js" %}

@@ -1,4 +1,3 @@
-var baseURI = require('document-base-uri')
 var uuid = require('node-uuid')
 
 // the randomly generated session UUID
@@ -17,14 +16,14 @@ var socket;
  * @param annotationMapper - The local annotation store
  * @param groups - The local groups store
  * @param session - Provides access to read and update the session state
+ * @param settings - Application settings
  *
  * @return An angular-websocket wrapper around the socket.
  */
 // @ngInject
-function connect($websocket, annotationMapper, groups, session) {
+function connect($websocket, annotationMapper, groups, session, settings) {
   // Get the socket URL
-  var url = new URL('/ws', baseURI);
-  url.protocol = url.protocol.replace('http', 'ws');
+  var url = settings.websocketUrl;
 
   // Close any existing socket
   if (socket) {
@@ -32,7 +31,7 @@ function connect($websocket, annotationMapper, groups, session) {
   }
 
   // Open the socket
-  socket = $websocket(url.href, [], {
+  socket = $websocket(url, [], {
     reconnectIfNotNormalClose: true
   });
   socket.send({
