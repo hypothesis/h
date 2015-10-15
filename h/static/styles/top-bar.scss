@@ -26,7 +26,7 @@
   padding-left: $h-padding;
   padding-right: $h-padding;
 
-  height: 28px;
+  height: 100%;
 }
 
 .top-bar__inner .group-list {
@@ -58,12 +58,12 @@
   border: 0;
   padding: 0;
 
-  &:active, .js-active {
+  &:active {
     @include single-transition(background-color, .25s);
     background-color: $gray-light;
   }
 
-  &:focus, .js-focus, &:hover, .js-hover {
+  &:focus, &:hover {
     color: $gray-dark;
   }
 }

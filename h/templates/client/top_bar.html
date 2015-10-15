@@ -1,6 +1,6 @@
 <div class="top-bar" ng-class="frame.visible && 'shown'" ng-cloak>
   <!-- Legacy design for top bar !-->
-  <div class="top-bar__inner content" ng-if="!groupsEnabled">
+  <div class="top-bar__inner" ng-if="!groupsEnabled">
     <button class="btn btn-clean"
             ng-click="shareDialog.visible = !shareDialog.visible"
             ng-if="isSidebar"
