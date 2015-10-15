@@ -93,11 +93,11 @@ $base-font-size: 14px;
   // live on the page could be isolated from the host page's CSS/JS via
   // transparent same-origin iframes
   @import '../reset';
-  @import './bucket-bar';
   @include nested-reset;
   @include reset-box-model;
 
   // frame styles
+  @import './bucket-bar';
   @include user-select(none);
   @extend .noise;
   direction: ltr;

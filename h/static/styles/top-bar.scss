@@ -39,6 +39,17 @@
   margin-right: .75em;
 }
 
+.top-bar__btn {
+  color: $gray-light;
+  display: inline-block;
+  min-width: 28px;
+  cursor: pointer;
+
+  &:focus, .js-focus, &:hover, .js-hover {
+    color: $gray-dark;
+  }
+}
+
 .top-bar .btn {
   color: $gray-light;
   min-width: 28px;

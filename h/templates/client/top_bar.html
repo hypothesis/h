@@ -45,20 +45,21 @@
          query="searchController.query"
          on-search="searchController.update(query)"
          on-clear="searchController.clear()"></simple-search>
-    <button class="btn btn-clean"
+    <a class="top-bar__btn"
             ng-click="shareDialog.visible = !shareDialog.visible"
             ng-if="isSidebar"
             title="Share this page">
-      <i class="h-icon-share btn-icon"></i>
-    </button>
+      <i class="h-icon-share"></i>
+    </a>
     <div ng-switch="authUser">
       <span ng-switch-when="undefined">⋯</span>
       <a href="" ng-click="onLogin()" ng-switch-when="null">Sign in</a>
       <div class="pull-right user-picker" dropdown keyboard-nav>
-        <span role="button"
-              data-toggle="dropdown" dropdown-toggle>
+        <a role="button"
+           class="top-bar__btn"
+           data-toggle="dropdown" dropdown-toggle>
           <i class="h-icon-account"></i><i class="h-icon-arrow-drop-down"></i>
-        </span>
+        </a>
         <ul class="dropdown-menu pull-right" role="menu">
           <li ng-show="authUser"><a href="" ng-click="accountDialog.visible = true">Account</a></li>
           <li><a href="mailto:support@hypothes.is">Feedback</a></li>
