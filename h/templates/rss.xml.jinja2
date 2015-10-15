@@ -6,7 +6,9 @@ render the feed to RSS XML.
 
 -#}
 <?xml version="1.0"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>{{ feed.title }}</title>
     <link>{{ feed.html_url }}</link>
@@ -22,6 +24,7 @@ render the feed to RSS XML.
        <pubDate>{{ item.pubDate }}</pubDate>
        <guid isPermaLink="true">{{ item.guid }}</guid>
        <link>{{ item.link }}</link>
+       <dc:creator><![CDATA[{{ item.author.name }}]]></dc:creator>
     </item>
     {% endfor %}
   </channel>

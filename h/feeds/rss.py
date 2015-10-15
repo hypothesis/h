@@ -33,7 +33,13 @@ def _feed_item_from_annotation(annotation, annotation_url):
     :rtype: dict
 
     """
+    parts = util.split_user(annotation["user"])
+    if parts is None:
+        name = annotation["user"]
+    else:
+        name = parts[0]
     return {
+        "author": {"name": name},
         "title": annotation.title,
         "description": annotation.description,
         "pubDate": _pubDate_string_from_annotation(annotation),
