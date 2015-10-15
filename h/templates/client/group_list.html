@@ -10,7 +10,8 @@
     {{groups.focused().name}}
     <i class="h-icon-arrow-drop-down"></i>
   </span>
-  <ul class="dropdown-menu pull-left" role="menu">
+  <div class="dropdown-menu__top-arrow"></div>
+  <ul class="dropdown-menu pull-none" role="menu">
     <li ng-repeat="group in groups.all()">
       <div ng-class="{'group-item': true, selected: group.id == groups.focused().id}"
            ng-click="groups.focus(group.id)">
