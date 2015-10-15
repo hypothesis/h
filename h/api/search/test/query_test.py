@@ -145,7 +145,7 @@ def test_builder_default_param_action():
 
     q = builder.build({"foo": "bar"})
 
-    assert q["query"] == {"bool": {"should": [{"match": {"foo": "bar"}}]}}
+    assert q["query"] == {"bool": {"must": [{"match": {"foo": "bar"}}]}}
 
 
 def test_builder_default_params_multidict():
@@ -159,7 +159,7 @@ def test_builder_default_params_multidict():
 
     assert q["query"] == {
         "bool": {
-            "should": [
+            "must": [
                 {"match": {"user": "fred"}},
                 {"match": {"user": "bob"}}
             ]
@@ -237,7 +237,7 @@ def test_builder_adds_matchers_to_query():
     q = builder.build({})
 
     assert q["query"] == {
-        "bool": {"should": [{"match": {"giraffe": "nose"}}]},
+        "bool": {"must": [{"match": {"giraffe": "nose"}}]},
     }
 
 
