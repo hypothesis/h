@@ -18,11 +18,13 @@ $base-line-height: 20px;
 @import './top-bar';
 
 body {
+  $sidebar-h-padding: 9px;
+
   @extend .noise;
   font-family: $sans-font-family;
   font-weight: 300;
-  padding: .72rem;
-  padding-top: calc(.72em + 30px);
+  padding: $sidebar-h-padding;
+  padding-top: calc($sidebar-h-padding + 30px);
   -webkit-overflow-scrolling: touch;
 
   @include respond-to(tablets desktops) {

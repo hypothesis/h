@@ -1,7 +1,7 @@
 @import 'base';
 @import 'mixins/responsive';
 
-.topbar {
+.top-bar {
   background: $white;
   border: solid 1px $gray-lighter;
   border-style: solid none;
@@ -14,26 +14,33 @@
   z-index: 5;
 }
 
-.topbar .inner {
+.top-bar__inner {
+  // the edges of the top-bar's contents should be aligned
+  // with the edges of annotation cards displayed below
+  $h-padding: 9px;
+
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
   justify-content: space-between;
 
+  padding-left: $h-padding;
+  padding-right: $h-padding;
+
   height: 28px;
 }
 
-.topbar .inner .simple-search {
+.top-bar__inner .simple-search {
   flex-grow: 1;
   margin-right: .75em;
   overflow: hidden;
 }
 
-.topbar .inner .group-list {
+.top-bar__inner .group-list {
   margin-right: .75em;
 }
 
-.topbar .btn {
+.top-bar .btn {
   color: $gray-light;
   min-width: 28px;
   height: 28px;
