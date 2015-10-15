@@ -162,7 +162,7 @@ module.exports = angular.module('h', [
 .service('unicode', require('./unicode'))
 .service('viewFilter', require('./view-filter'))
 
-.factory('serviceUrl', require('./service-url'))
+.factory('settings', require('./settings'))
 
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))

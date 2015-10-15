@@ -6,7 +6,6 @@ import json
 def add_renderer_globals(event):
     request = event['request']
     event['base_url'] = request.route_url('index')
-    event['service_url'] = request.route_url('api')
     event['feature'] = request.feature
 
     # Add Google Analytics

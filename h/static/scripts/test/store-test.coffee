@@ -13,7 +13,7 @@ describe 'store', ->
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
-    $provide.value 'serviceUrl', 'http://example.com/api'
+    $provide.value 'settings', {apiUrl: 'http://example.com/api'}
     return
 
   afterEach ->

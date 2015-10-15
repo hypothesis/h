@@ -10,16 +10,15 @@
 # store.SearchResource().
 ###
 module.exports = [
-  '$http', '$resource', 'serviceUrl'
-  ($http,   $resource,   serviceUrl) ->
+  '$http', '$resource', 'settings'
+  ($http,   $resource,   settings) ->
     camelize = (string) ->
       string.replace /(?:^|_)([a-z])/g, (_, char) -> char.toUpperCase()
 
     store =
       $resolved: false
-      # We call the service_url and the backend api gives back
-      # the actions and urls it provides.
-      $promise: $http.get(serviceUrl)
+      # We call the API root and it gives back the actions it provides.
+      $promise: $http.get(settings.apiUrl)
         .finally -> store.$resolved = true
         .then (response) ->
           for name, actions of response.data.links
@@ -27,6 +26,6 @@ module.exports = [
             # For the search resource, one URL is given for all actions.
             # For the annotations, each action has its own URL.
             prop = "#{camelize(name)}Resource"
-            store[prop] = $resource(actions.url or serviceUrl, {}, actions)
+            store[prop] = $resource(actions.url or settings.apiUrl, {}, actions)
           store
 ]
