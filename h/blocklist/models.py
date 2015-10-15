@@ -40,7 +40,6 @@ class Blocklist(Base):
     @classmethod
     def is_blocked(cls, uri):
         """Return True if the given URI is blocked."""
-
         if cls.query.filter(expression.literal(uri).like(cls.uri)).all():
             return True
         else:
