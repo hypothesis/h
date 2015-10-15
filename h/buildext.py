@@ -204,7 +204,7 @@ def build_chrome(args):
     # Render some settings to a JSON file in the Chrome extension.
     settings = {
         'blocklist': env['registry'].settings['h.blocklist'],
-        'serviceUrl': env['request'].route_url('api')
+        'apiUrl': env['request'].route_url('api')
     }
     with codecs.open('build/chrome/settings.json', 'w', 'utf-8') as fp:
         fp.write(json.dumps(settings))

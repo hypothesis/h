@@ -148,7 +148,7 @@ function HypothesisChromeExtension(dependencies) {
     }
 
     settings.then(function(settings) {
-      browserAction.updateBadge(tabId, tab.url, settings.serviceUrl);
+      browserAction.updateBadge(tabId, tab.url, settings.apiUrl);
     });
 
     return updateTabDocument(tab);
