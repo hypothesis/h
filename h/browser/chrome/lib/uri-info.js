@@ -105,6 +105,9 @@ function getUriInfo(uri) {
  * But if you call the function with a different uri, then call it with the
  * first uri again, then it _will_ make another request for the first uri.
  *
+ * Also if the forceRefresh argument is true then it will always make a new
+ * request.
+ *
  * Returns a rejected Promise with a UriInfoError as its reason if the HTTP
  * request times out, fails or is invalid for any reason.
  *
@@ -112,14 +115,18 @@ function getUriInfo(uri) {
  * uri is undefined.
  *
  * @param {String} uri The URI to be checked
+ * @param {Boolean} forceRefresh Make a new HTTP request, even if the
+ *   previously made request was for the same uri (optional, default: false)
  *
  * @returns {Promise} A Promise that resolves to an object with two properties:
  *   1. total:   the number of annotations there are of this URI (Number)
  *   2. blocked: whether or not this URI is blocklisted (Boolean)
  *
- */
-function get(uri) {
-  if (!(uriInfoPromise && uriInfoPromise.uri === uri)) {
+*/
+function get(uri, forceRefresh) {
+  forceRefresh = forceRefresh || false;
+
+  if (forceRefresh || !(uriInfoPromise && uriInfoPromise.uri === uri)) {
     uriInfoPromise = getUriInfo(uri);
   }
   return uriInfoPromise;

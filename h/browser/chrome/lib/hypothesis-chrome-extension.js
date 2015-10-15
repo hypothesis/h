@@ -154,7 +154,7 @@ function HypothesisChromeExtension(dependencies) {
     //    call uriInfo.get() again later (when the user clicks on the browser
     //    button to activate the sidebar) it will return the already-resolved
     //    Promise.
-    uriInfo.get(tab.url).then(function(info) {
+    uriInfo.get(tab.url, true).then(function(info) {
       if (!info.blocked) {
         browserAction.updateBadge(info.total, tab.id);
       }

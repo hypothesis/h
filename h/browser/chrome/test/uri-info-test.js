@@ -260,6 +260,21 @@ describe('uriInfo', function() {
     );
   });
 
+  it("does send consecutive requests if forceRefresh is true", function() {
+    return Promise.all([
+      uriInfo.get('http://example.com/example1'),
+      uriInfo.get('http://example.com/example1', true),
+    ])
+    .then(
+      function onFulfilled() {
+        assert(false, 'The Promise should not be fulfilled');
+      },
+      function onRejected() {
+        assert.equal(server.requests.length, 2);
+      }
+    );
+  });
+
   it("doesn't send requests if uri is undefined", function() {
     uriInfo.get(undefined);
     assert.equal(server.requests.length, 0);
