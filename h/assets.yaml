@@ -138,7 +138,7 @@ app_js:
             - h:static/scripts/features.js
             - h:static/scripts/groups.js
             - h:static/scripts/session.js
-            - h:static/scripts/service-url.js
+            - h:static/scripts/settings.js
             - h:static/scripts/directive/*.coffee
             - h:static/scripts/directive/*.js
             - h:static/scripts/filter/*.js

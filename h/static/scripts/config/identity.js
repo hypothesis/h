@@ -7,8 +7,8 @@ var currentToken = null;
 
 
 // @ngInject
-function fetchToken($http, $q, jwtHelper, serviceUrl, session) {
-  var tokenUrl = new URL('token', serviceUrl).href;
+function fetchToken($http, $q, jwtHelper, session, settings) {
+  var tokenUrl = new URL('token', settings.apiUrl).href;
 
   if (currentToken === null || jwtHelper.isTokenExpired(currentToken)) {
     if (tokenPromise === null) {
@@ -47,13 +47,13 @@ function fetchToken($http, $q, jwtHelper, serviceUrl, session) {
 
 
 // @ngInject
-function tokenGetter($injector, config, serviceUrl) {
+function tokenGetter($injector, config, settings) {
   var requestUrl = config.url;
 
   // Only send the token on requests to the annotation storage service
   // and only if it is not the token request itself.
-  if (requestUrl !== serviceUrl) {
-    if (requestUrl.slice(0, serviceUrl.length) === serviceUrl) {
+  if (requestUrl !== settings.apiUrl) {
+    if (requestUrl.slice(0, settings.apiUrl.length) === settings.apiUrl) {
       return authPromise
         .then(function () {
           return $injector.invoke(fetchToken);

@@ -27,9 +27,6 @@
     {% for attrs in link_attrs -%}
       <link {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}
-    {% if service_url %}
-      <link rel="service" type="application/annotatorsvc+json" href="{{ service_url }}" />
-    {% endif %}
     {% block styles %}{% endblock %}
 
     {% if ga_tracking_id %}

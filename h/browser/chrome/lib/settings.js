@@ -11,9 +11,9 @@
  */
 function normalizeSettings(settings) {
 
-  // Make sure that serviceUrl does not end with a /.
-  if (settings.serviceUrl.charAt(settings.serviceUrl.length - 1) === '/') {
-    settings.serviceUrl = settings.serviceUrl.slice(0, -1);
+  // Make sure that apiUrl does not end with a /.
+  if (settings.apiUrl.charAt(settings.apiUrl.length - 1) === '/') {
+    settings.apiUrl = settings.apiUrl.slice(0, -1);
   }
 
 }

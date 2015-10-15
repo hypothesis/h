@@ -86,9 +86,9 @@ function BrowserAction(chromeBrowserAction) {
    * @method
    * @param {integer} tabId The id of the current tab.
    * @param {string} tabUrl The URL of the current tab.
-   * @param {string} serviceUrl The URL of the Hypothesis API.
+   * @param {string} apiUrl The URL of the Hypothesis API.
    */
-  this.updateBadge = function(tabId, tabUrl, serviceUrl) {
+  this.updateBadge = function(tabId, tabUrl, apiUrl) {
     // Fetch the number of annotations of the current page from the server,
     // and display it as a badge on the browser action button.
     var xhr = new XMLHttpRequest();
@@ -131,7 +131,7 @@ function BrowserAction(chromeBrowserAction) {
       }
     };
 
-    xhr.open('GET', serviceUrl + '/badge?uri=' + tabUrl);
+    xhr.open('GET', apiUrl + '/badge?uri=' + tabUrl);
     xhr.send();
   };
 }

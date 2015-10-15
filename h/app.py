@@ -52,6 +52,7 @@ def includeme(config):
     config.include('h.feeds')
 
     config.include('pyramid_jinja2')
+    config.add_jinja2_extension('h.jinja_extensions.Filters')
     config.add_jinja2_extension('h.jinja_extensions.IncludeRawExtension')
     config.add_jinja2_extension('webassets.ext.jinja2.AssetsExtension')
     # Register a deferred action to bind the webassets environment to the

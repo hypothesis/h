@@ -34,6 +34,7 @@ describe('streamer', function () {
   var fakeAnnotationMapper;
   var fakeGroups;
   var fakeSession;
+  var fakeSettings;
   var socket;
 
   beforeEach(function () {
@@ -52,11 +53,16 @@ describe('streamer', function () {
       update: sinon.stub(),
     };
 
+    fakeSettings = {
+      websocketUrl: 'ws://example.com/ws',
+    };
+
     socket = streamer.connect(
       fakeSocketConstructor,
       fakeAnnotationMapper,
       fakeGroups,
-      fakeSession
+      fakeSession,
+      fakeSettings
     );
   });
 
@@ -70,7 +76,9 @@ describe('streamer', function () {
     var oldSocket = socket;
     var newSocket = streamer.connect(fakeSocketConstructor,
       fakeAnnotationMapper,
-      fakeGroups
+      fakeGroups,
+      fakeSession,
+      fakeSettings
     );
     assert.ok(oldSocket.didClose);
     assert.ok(!newSocket.didClose);
