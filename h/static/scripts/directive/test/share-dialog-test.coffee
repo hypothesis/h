@@ -23,14 +23,14 @@ describe 'share-dialog', ->
     $scope = _$rootScope_.$new()
 
   it 'generates new via link', ->
-    $element = $compile('<div share-dialog="">')($scope)
+    $element = $compile('<share-dialog></share-dialog>')($scope)
     fakeCrossFrame.frames.push({uri: 'http://example.com'})
     $scope.$digest()
     assert.equal($scope.viaPageLink,
                  'https://via.hypothes.is/http://example.com')
 
   it 'does not generate new via link if already on via', ->
-    $element = $compile('<div share-dialog="">')($scope)
+    $element = $compile('<share-dialog></share-dialog>>')($scope)
     fakeCrossFrame.frames.push({uri: ['https://via.hypothes.is/http://example.com']})
     $scope.$digest()
     assert.equal($scope.viaPageLink,

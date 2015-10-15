@@ -27,11 +27,11 @@ describe 'simple-search', ->
     $scope.clear = sinon.spy()
 
     template= '''
-    <div class="simple-search"
+    <simple-search
           query="query"
           on-search="update(query)"
           on-clear="clear()">
-    </div>
+    </simple-search>
     '''
 
     $element = $compile(angular.element(template))($scope)

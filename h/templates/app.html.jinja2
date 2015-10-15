@@ -12,47 +12,17 @@
 {% endblock %}
 
 {% block content %}
-  <!-- Toolbar -->
-  <div class="topbar" ng-class="frame.visible && 'shown'" ng-cloak>
-    <div class="inner content">
-      <button class="btn btn-clean"
-              ng-click="shareDialog.visible = !shareDialog.visible"
-              ng-if="isSidebar"
-              title="Share this page">
-        <i class="h-icon-share btn-icon"></i>
-      </button>
-
-      <!-- Searchbar -->
-      <div class="simple-search"
-           query="search.query"
-           on-search="search.update(query)"
-           on-clear="search.clear()"></div>
-      <!-- / Searchbar -->
-
-      <group-list class="group-list" ng-if="auth.user && feature('groups') && isSidebar">
-      </group-list>
-
-      <div ng-switch="auth.user">
-        <span ng-switch-when="undefined">⋯</span>
-        <a href="" ng-click="login()" ng-switch-when="null">Sign in</a>
-        <div class="pull-right user-picker" dropdown keyboard-nav>
-          <span role="button"
-                data-toggle="dropdown" dropdown-toggle>{% raw %}{{ auth.user|persona }}{% endraw %}<!--
-            --><span class="provider" ng-show="auth.user">/{% raw %}{{ auth.user|persona:'provider' }}{% endraw %}</span><!--
-            --><i class="h-icon-arrow-drop-down"></i></span>
-          <ul class="dropdown-menu pull-right" role="menu">
-            <li ng-show="auth.user"><a href="" ng-click="accountDialog.visible='true'">Account</a></li>
-            <li><a href="mailto:support@hypothes.is">Feedback</a></li>
-            <li><a href="/docs/help" target="_blank">Help</a></li>
-            <li ng-show="auth.user"><a href="/stream?q=user:{% raw %}{{ auth.user|persona }}{% endraw %}"
-                                       target="_blank">My Annotations</a></li>
-            <li ng-show="auth.user"><a href="" ng-click="logout()">Sign out</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- / Toolbar -->
+  <top-bar
+    auth-user="auth.user"
+    on-login="login()"
+    on-logout="logout()"
+    account-dialog="accountDialog"
+    share-dialog="shareDialog"
+    is-sidebar="isSidebar"
+    search-controller="search"
+    groups-enabled="auth.user && feature('groups') && isSidebar"
+  />
+  </top-bar>
 
   <div class="content" ng-cloak>
     <!-- Account Dialog -->
@@ -80,7 +50,7 @@
     <!-- / Account Dialog -->
 
     <!-- Share View Dialog -->
-    <div share-dialog="" ng-show="shareDialog.visible"></div>
+    <share-dialog ng-show="shareDialog.visible"></share-dialog>
     <!-- / Share View Dialog -->
 
     <!-- Angular view -->
@@ -119,6 +89,9 @@
   </script>
   <script type="text/ng-template" id="search_status_bar.html">
     {{ include_raw("h:templates/client/search_status_bar.html") }}
+  </script>
+  <script type="text/ng-template" id="top_bar.html">
+    {{ include_raw("h:templates/client/top_bar.html") }}
   </script>
 {% endblock %}
 

@@ -25,6 +25,6 @@ module.exports = ['crossframe', (crossframe) ->
       else
         scope.viaPageLink = 'https://via.hypothes.is/' + frames[0].uri
 
-  restrict: 'A'
+  restrict: 'E'
   templateUrl: 'share_dialog.html'
 ]

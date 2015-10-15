@@ -125,10 +125,11 @@ module.exports = angular.module('h', [
 .directive('dropdownMenuBtn', require('./directive/dropdown-menu-btn'))
 .directive('publishAnnotationBtn', require('./directive/publish-annotation-btn'))
 .directive('searchStatusBar', require('./directive/search-status-bar'))
+.directive('topBar', require('./directive/top-bar'))
 
 .filter('converter', require('./filter/converter'))
 .filter('moment', require('./filter/moment'))
-.filter('persona', require('./filter/persona'))
+.filter('persona', require('./filter/persona').filter)
 .filter('urlencode', require('./filter/urlencode'))
 .filter('documentTitle', require('./filter/document-title'))
 .filter('documentDomain', require('./filter/document-domain'))
