@@ -35,10 +35,10 @@ describe('uriInfo', function() {
 
     return uriInfo.get(uri).then(
       function onResolved() {
-        assert(server.requests.length === 1);
+        assert.equal(server.requests.length, 1);
         var request = server.requests[0];
-        assert(request.method === 'GET');
-        assert(request.url === serviceUrl + '/app/uriinfo?uri=' + uri);
+        assert.equal(request.method, 'GET');
+        assert.equal(request.url, serviceUrl + '/app/uriinfo?uri=' + uri);
       },
       function onRejected() {
         assert(false, 'The promise should not be rejected');
@@ -58,7 +58,7 @@ describe('uriInfo', function() {
       },
       function onRejected(error) {
         assert(error instanceof uriInfo.UriInfoError);
-        assert(error.message.indexOf('Received invalid JSON') === 0);
+        assert.equal(error.message.indexOf('Received invalid JSON'), 0);
       }
     );
   });
@@ -90,7 +90,7 @@ describe('uriInfo', function() {
       },
       function onRejected(error) {
         assert(error instanceof uriInfo.UriInfoError);
-        assert(error.message.indexOf('Received invalid total') === 0);
+        assert.equal(error.message.indexOf('Received invalid total'), 0);
       }
     );
   });
@@ -122,7 +122,7 @@ describe('uriInfo', function() {
       },
       function onRejected(error) {
         assert(error instanceof uriInfo.UriInfoError);
-        assert(error.message.indexOf('Received invalid total') === 0);
+        assert.equal(error.message.indexOf('Received invalid total'), 0);
       }
     );
   });
@@ -154,7 +154,7 @@ describe('uriInfo', function() {
       },
       function onRejected(error) {
         assert(error instanceof uriInfo.UriInfoError);
-        assert(error.message.indexOf('Received invalid blocked') === 0);
+        assert.equal(error.message.indexOf('Received invalid blocked'), 0);
       }
     );
   });
@@ -186,7 +186,7 @@ describe('uriInfo', function() {
       },
       function onRejected(error) {
         assert(error instanceof uriInfo.UriInfoError);
-        assert(error.message.indexOf('Received invalid blocked') === 0);
+        assert.equal(error.message.indexOf('Received invalid blocked'), 0);
       }
     );
   });
@@ -218,7 +218,7 @@ describe('uriInfo', function() {
       },
       function onRejected(error) {
         assert(error instanceof uriInfo.UriInfoError);
-        assert(error.message.indexOf('Received invalid JSON') === 0);
+        assert.equal(error.message.indexOf('Received invalid JSON'), 0);
       });
   });
 
@@ -240,7 +240,7 @@ describe('uriInfo', function() {
   it("doesn't send consecutive requests for the same uri", function() {
     uriInfo.get(uri);
     uriInfo.get(uri);
-    assert(server.requests.length === 1);
+    assert.equal(server.requests.length, 1);
   });
 
   it("does send consecutive requests for different uris", function() {
@@ -255,13 +255,13 @@ describe('uriInfo', function() {
         assert(false, 'The Promise should not be fulfilled');
       },
       function onRejected() {
-        assert(server.requests.length === 4);
+        assert.equal(server.requests.length, 4);
       }
     );
   });
 
   it("doesn't send requests if uri is undefined", function() {
     uriInfo.get(undefined);
-    assert(server.requests.length === 0);
+    assert.equal(server.requests.length, 0);
   });
 });

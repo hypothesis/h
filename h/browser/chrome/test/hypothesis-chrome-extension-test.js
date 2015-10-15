@@ -581,7 +581,7 @@ describe('HypothesisChromeExtension', function () {
           assert(false, "The promise should not be fulfilled");
         },
         function onRejected(error) {
-          assert(error === unknownError);
+          assert.equal(error, unknownError);
         }
       );
     });
