@@ -8,8 +8,7 @@ from h.api import search as search_lib
 @view_config(route_name='uriinfo',
              request_method='GET',
              accept='application/json',
-             renderer='json',
-             )
+             renderer='json')
 def uriinfo(request):
     """Return some info about the given URI.
 
