@@ -6,15 +6,16 @@ import unittest
 from collections import namedtuple
 import json
 
+import pytest
 from mock import ANY
-from mock import MagicMock, Mock
+from mock import MagicMock, Mock, PropertyMock
 from mock import patch
 from pyramid.testing import DummyRequest
 
+from h import streamer
 from h.streamer import FilterToElasticFilter
 from h.streamer import WebSocket
 from h.streamer import should_send_annotation_event
-from h.streamer import broadcast_from_queue
 from h.streamer import websocket
 from h.streamer import ANNOTATIONS_TOPIC
 
@@ -223,11 +224,6 @@ class TestWebSocket(unittest.TestCase):
         self.s = WebSocket(fake_socket)
         self.s.request = fake_request
 
-    def test_opened_starts_reader(self):
-        self.s.opened()
-        for topic in ['annotations', 'user']:
-            self.s.request.get_queue_reader.assert_any_call(topic, ANY)
-
     def test_filter_message_with_uri_gets_expanded(self):
         filter_message = json.dumps({
             'filter': {
@@ -260,22 +256,11 @@ class TestWebSocket(unittest.TestCase):
 
 class TestBroadcastAnnotationEvent(unittest.TestCase):
     def setUp(self):
-        self.message_data = [
-            {'annotation': {'id': 1},
-             'action': 'delete',
-             'src_client_id': 'pigeon'},
-            {'annotation': {'id': 2},
-             'action': 'update',
-             'src_client_id': 'pigeon'},
-            {'annotation': {'id': 3},
-             'action': 'delete',
-             'src_client_id': 'cat'},
-        ]
-        self.messages = [(ANNOTATIONS_TOPIC, FakeMessage(json.dumps(m)))
-            for m in self.message_data]
-
-        self.queue = MagicMock()
-        self.queue.__iter__.return_value = self.messages
+        self.message = FakeMessage(json.dumps({
+            'annotation': {'id': 1},
+            'action': 'delete',
+            'src_client_id': 'pigeon',
+        }))
 
         self.should_patcher = patch('h.streamer.should_send_annotation_event')
         self.should = self.should_patcher.start()
@@ -286,20 +271,20 @@ class TestBroadcastAnnotationEvent(unittest.TestCase):
     def test_send_when_socket_should_receive_event(self):
         self.should.return_value = True
         sock = FakeSocket('giraffe')
-        broadcast_from_queue(self.queue, [sock])
+        streamer.broadcast_annotation_message(self.message, [sock])
         assert sock.send.called
 
     def test_no_send_when_socket_should_not_receive_event(self):
         self.should.return_value = False
-        sock = FakeSocket('pidgeon')
-        broadcast_from_queue(self.queue, [sock])
+        sock = FakeSocket('pigeon')
+        streamer.broadcast_annotation_message(self.message, [sock])
         assert sock.send.called is False
 
-    def test_terminated_socket_does_not_recieve_event(self):
+    def test_terminated_socket_does_not_receive_event(self):
         self.should.return_value = True
         sock = FakeSocket('giraffe')
         sock.terminated = True
-        broadcast_from_queue(self.queue, [sock])
+        streamer.broadcast_annotation_message(self.message, [sock])
         assert sock.send.called is False
 
 
@@ -309,17 +294,16 @@ class TestBroadcastSessionChangeEvent(unittest.TestCase):
         session_model = session_model_patcher.start()
         session_model.return_value = {'groups': [{'id': 'someid'}]}
 
-        queue = MagicMock()
-        queue.__iter__.return_value = [('user', FakeMessage(json.dumps({
+        message = FakeMessage(json.dumps({
             'type': 'group-join',
             'userid': 'amy',
             'group': 'groupid',
-        })))]
+        }))
 
         sock = FakeSocket('clientid')
         sock.request.authenticated_userid = 'amy'
 
-        broadcast_from_queue(queue, [sock])
+        streamer.broadcast_session_change_message(message, [sock])
         sock.send.assert_called_with(json.dumps({
             'type': 'session-change',
             'action': 'group-join',
@@ -424,3 +408,88 @@ class TestShouldSendEvent(unittest.TestCase):
         event_data = {'action': 'create', 'src_client_id': 'bar'}
 
         assert should_send_annotation_event(socket, annotation, event_data)
+
+
+@patch('h.streamer.broadcast_annotation_message')
+def test_process_message_sends_messages_from_annotations_topic_to_annotation_handler(handler):
+    reader = Mock(topic='annotations')
+
+    streamer.process_message(reader, '{"name": "bob"}')
+
+    handler.assert_called_once_with('{"name": "bob"}',
+                                    streamer.WebSocket.instances)
+
+
+@patch('h.streamer.broadcast_session_change_message')
+def test_process_message_sends_messages_from_user_topic_to_session_change_handler(handler):
+    reader = Mock(topic='user')
+
+    streamer.process_message(reader, '{"name": "bob"}')
+
+    handler.assert_called_once_with('{"name": "bob"}',
+                                    streamer.WebSocket.instances)
+
+
+def test_process_message_ignores_messages_from_other_topics():
+    reader = Mock(topic='wibble')
+
+    streamer.process_message(reader, '{"name": "bob"}')
+
+
+def test_process_queue_creates_readers_for_each_topic(get_reader):
+    settings = {'foo': 'bar'}
+    get_reader.return_value.is_running = False  # Allow the function to exit
+
+    streamer.process_queue(settings, ['donkeys', 'gorillas'])
+
+    get_reader.assert_any_call(settings, 'donkeys', ANY)
+    get_reader.assert_any_call(settings, 'gorillas', ANY)
+
+
+def test_process_queue_connects_reader_on_message_to_process_message(get_reader):
+    settings = {'foo': 'bar'}
+    reader = get_reader.return_value
+    reader.is_running = False  # Allow the function to exit
+
+    streamer.process_queue(settings, ['donkeys'])
+
+    reader.on_message.connect.assert_called_once_with(
+        receiver=streamer.process_message)
+
+
+def test_process_queue_starts_readers(get_reader):
+    settings = {'foo': 'bar'}
+    reader = get_reader.return_value
+    reader.is_running = False  # Allow the function to exit
+
+    streamer.process_queue(settings, ['donkeys'])
+
+    reader.start.assert_called_once_with(block=False)
+
+
+def test_process_queue_waits_for_reader_join(get_reader):
+    settings = {'foo': 'bar'}
+    reader = get_reader.return_value
+    reader.is_running = False  # Allow the function to exit
+
+    streamer.process_queue(settings, ['donkeys'])
+
+    reader.join.assert_called_once_with(timeout=1)
+
+
+def test_process_queue_closes_all_readers_if_one_stops(get_reader):
+    settings = {'foo': 'bar'}
+    reader = get_reader.return_value
+    type(reader).is_running = PropertyMock(side_effect=[True, False])
+
+    streamer.process_queue(settings, ['donkeys', 'gorillas'])
+
+    assert reader.close.call_count == 2
+
+
+@pytest.fixture
+def get_reader(request):
+    patcher = patch('h.queue.get_reader')
+    mock = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return mock

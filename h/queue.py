@@ -18,7 +18,7 @@ class NamespacedNsqd(object):
         return self.client.publish(topic, data)
 
 
-def get_reader(request, topic, channel):
+def get_reader(settings, topic, channel):
     """
     Get a :py:class:`gnsq.Reader` instance configured to connect to the
     nsqd reader addresses specified in settings. The reader will read from
@@ -27,29 +27,31 @@ def get_reader(request, topic, channel):
     The caller is responsible for adding appropriate `on_message` hooks and
     starting the reader.
     """
-    ns = request.registry.settings.get('nsq.namespace')
-    addrs = aslist(request.registry.settings.get('nsq.reader.addresses',
-                                                 'localhost:4150'))
+    ns = settings.get('nsq.namespace')
+    addrs = aslist(settings.get('nsq.reader.addresses', 'localhost:4150'))
     if ns is not None:
         topic = '{0}-{1}'.format(ns, topic)
     reader = gnsq.Reader(topic, channel, nsqd_tcp_addresses=addrs)
     return reader
 
 
-def get_writer(request):
+def get_writer(settings):
     """
     Get a :py:class:`gnsq.Nsqd` instance configured to connect to the nsqd
     writer address configured in settings. The writer communicates over the
     nsq HTTP API and does not hold a connection open to the nsq instance.
     """
-    ns = request.registry.settings.get('nsq.namespace')
-    addr = request.registry.settings.get('nsq.writer.address',
-                                         'localhost:4151')
+    ns = settings.get('nsq.namespace')
+    addr = settings.get('nsq.writer.address', 'localhost:4151')
     hostname, port = addr.split(':', 1)
     nsqd = NamespacedNsqd(ns, hostname, http_port=port)
     return nsqd
 
 
 def includeme(config):
-    config.add_request_method(get_reader, name='get_queue_reader')
-    config.add_request_method(get_writer, name='get_queue_writer')
+    config.add_request_method(
+        lambda req, t, c: get_reader(req.registry.settings, t, c),
+        name='get_queue_reader')
+    config.add_request_method(
+        lambda req: get_writer(req.registry.settings),
+        name='get_queue_writer')

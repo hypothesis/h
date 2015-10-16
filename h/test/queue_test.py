@@ -9,8 +9,8 @@ from h import queue
 
 @patch('gnsq.Reader')
 def test_get_reader_default(fake_reader):
-    req = testing.DummyRequest()
-    queue.get_reader(req, 'ethics-in-games-journalism', 'channel4')
+    settings = {}
+    queue.get_reader(settings, 'ethics-in-games-journalism', 'channel4')
     fake_reader.assert_called_with('ethics-in-games-journalism',
                                    'channel4',
                                    nsqd_tcp_addresses=['localhost:4150'])
@@ -18,11 +18,10 @@ def test_get_reader_default(fake_reader):
 
 @patch('gnsq.Reader')
 def test_get_reader(fake_reader):
-    req = testing.DummyRequest()
-    req.registry.settings.update({
+    settings = {
         'nsq.reader.addresses': "foo:1234\nbar:4567"
-    })
-    queue.get_reader(req, 'ethics-in-games-journalism', 'channel4')
+    }
+    queue.get_reader(settings, 'ethics-in-games-journalism', 'channel4')
     fake_reader.assert_called_with('ethics-in-games-journalism',
                                    'channel4',
                                    nsqd_tcp_addresses=['foo:1234',
@@ -35,11 +34,10 @@ def test_get_reader_namespace(fake_reader):
     a reader that automatically prefixes the namespace onto the name of the
     topic being read.
     """
-    req = testing.DummyRequest()
-    req.registry.settings.update({
+    settings = {
         'nsq.namespace': "abc123"
-    })
-    queue.get_reader(req, 'safari', 'elephants')
+    }
+    queue.get_reader(settings, 'safari', 'elephants')
     fake_reader.assert_called_with('abc123-safari',
                                    'elephants',
                                    nsqd_tcp_addresses=['localhost:4150'])
@@ -47,16 +45,15 @@ def test_get_reader_namespace(fake_reader):
 
 @patch('gnsq.Nsqd')
 def test_get_writer_default(fake_nsqd):
-    req = testing.DummyRequest()
-    queue.get_writer(req)
+    settings = {}
+    queue.get_writer(settings)
     fake_nsqd.assert_called_with('localhost', http_port='4151')
 
 
 @patch('gnsq.Nsqd')
 def test_get_writer(fake_nsqd):
-    req = testing.DummyRequest()
-    req.registry.settings.update({'nsq.writer.address': 'philae:2014'})
-    queue.get_writer(req)
+    settings = {'nsq.writer.address': 'philae:2014'}
+    queue.get_writer(settings)
     fake_nsqd.assert_called_with('philae', http_port='2014')
 
 
@@ -68,12 +65,11 @@ def test_get_writer_namespace(fake_nsqd):
     given to :method:`gnsq.Nsqd.publish` or :method:`gnsq.Nsqd.mpublish`.
     """
     fake_client = fake_nsqd.return_value
-    req = testing.DummyRequest()
-    req.registry.settings.update({
+    settings = {
         'nsq.namespace': "abc123"
-    })
+    }
 
-    writer = queue.get_writer(req)
+    writer = queue.get_writer(settings)
 
     writer.publish('sometopic', 'somedata')
     fake_client.publish.assert_called_with('abc123-sometopic', 'somedata')
@@ -81,11 +77,10 @@ def test_get_writer_namespace(fake_nsqd):
 @patch('gnsq.Nsqd')
 def test_writer_serializes_dict(fake_nsqd):
     fake_client = fake_nsqd.return_value
-    req = testing.DummyRequest()
-    req.registry.settings.update({
+    settings = {
         'nsq.namespace': 'abc',
-    })
-    writer = queue.get_writer(req)
+    }
+    writer = queue.get_writer(settings)
     writer.publish('sometopic', {
         'key': 'value',
     })
