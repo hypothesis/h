@@ -158,6 +158,25 @@ $group-list-width: 270px;
   }
 }
 
+// the icon indicating the type of group currently selected at
+// the top of the groups list
+.group-list-label__icon {
+  color: $color-gray;
+  display: inline-block;
+  margin-right: 4px;
+  vertical-align: baseline;
+
+  // align the base of the chat-heads icon for groups
+  // with the baseline of the group name label
+  transform: translateY(1px);
+}
+
+// the label showing the currently selected group which opens
+// the drop-down list when clicked
+.group-list-label__label {
+  font-weight:bold;
+}
+
 // the name of a group in the groups drop-down list
 // and 'Post to <Group>' button for saving annotations
 .group-name-link {

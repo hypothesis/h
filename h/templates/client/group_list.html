@@ -5,10 +5,10 @@
         role="button"
         ng-switch on="groups.focused().public"
         ng-click="toggleShareLink(undefined)">
-    <i class="h-icon-public" ng-switch-when="true"></i>
-    <i class="h-icon-group" ng-switch-default></i>
-    {{groups.focused().name}}
-    <i class="h-icon-arrow-drop-down"></i>
+    <i class="group-list-label__icon h-icon-public" ng-switch-when="true"></i><!-- nospace
+    !--><i class="group-list-label__icon h-icon-group" ng-switch-default></i>
+    <span class="group-list-label__label">{{groups.focused().name}}</span><!-- nospace
+    !--><i class="h-icon-arrow-drop-down"></i>
   </span>
   <div class="dropdown-menu__top-arrow"></div>
   <ul class="dropdown-menu pull-none" role="menu">
