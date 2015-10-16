@@ -48,7 +48,8 @@
     <simple-search class="simple-search"
          query="searchController.query"
          on-search="searchController.update(query)"
-         on-clear="searchController.clear()"></simple-search>
+         on-clear="searchController.clear()"
+         title="Filter the annotation list"></simple-search>
     <a class="top-bar__btn"
             ng-click="shareDialog.visible = !shareDialog.visible"
             ng-if="isSidebar"
