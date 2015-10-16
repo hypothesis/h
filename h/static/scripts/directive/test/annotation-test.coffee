@@ -4,6 +4,7 @@ describe 'annotation', ->
   $compile = null
   $document = null
   $element = null
+  $q = null
   $rootScope = null
   $scope = null
   $timeout = null
@@ -111,9 +112,10 @@ describe 'annotation', ->
     $provide.value 'groups', fakeGroups
     return
 
-  beforeEach inject (_$compile_, _$document_, _$rootScope_, _$timeout_) ->
+  beforeEach inject (_$compile_, _$document_, _$q_, _$rootScope_, _$timeout_) ->
     $compile = _$compile_
     $document = _$document_
+    $q = _$q_
     $timeout = _$timeout_
     $rootScope = _$rootScope_
     $scope = $rootScope.$new()
@@ -463,7 +465,7 @@ describe 'annotation', ->
 
     it "calls annotationMapper.delete() if the delete is confirmed", (done) ->
       window.confirm.returns(true)
-      fakeAnnotationMapper.deleteAnnotation.returns(Promise.resolve())
+      fakeAnnotationMapper.deleteAnnotation.returns($q.resolve())
 
       controller.delete().then ->
         assert fakeAnnotationMapper.deleteAnnotation.calledWith(annotation)
@@ -476,7 +478,7 @@ describe 'annotation', ->
 
     it "flashes a generic error if the server cannot be reached", (done) ->
       window.confirm.returns(true)
-      fakeAnnotationMapper.deleteAnnotation.returns(Promise.reject({status: 0}))
+      fakeAnnotationMapper.deleteAnnotation.returns($q.reject({status: 0}))
 
       controller.delete().then ->
         assert fakeFlash.error.calledWith(
@@ -486,7 +488,7 @@ describe 'annotation', ->
 
     it "flashes an error if the delete fails on the server", (done) ->
       window.confirm.returns(true)
-      fakeAnnotationMapper.deleteAnnotation.returns(Promise.reject({
+      fakeAnnotationMapper.deleteAnnotation.returns($q.reject({
           status: 500,
           statusText: "Server Error",
           data: {}
@@ -501,7 +503,7 @@ describe 'annotation', ->
 
     it "doesn't flash an error if the delete succeeds", (done) ->
       window.confirm.returns(true)
-      fakeAnnotationMapper.deleteAnnotation.returns(Promise.resolve())
+      fakeAnnotationMapper.deleteAnnotation.returns($q.resolve())
 
       controller.delete().then ->
         assert fakeFlash.error.notCalled
