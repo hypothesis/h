@@ -1,6 +1,8 @@
+<!-- top bar for the sidebar and the stream.
+!-->
 <div class="top-bar" ng-class="frame.visible && 'shown'" ng-cloak>
   <!-- Legacy design for top bar !-->
-  <div class="top-bar__inner" ng-if="!groupsEnabled">
+  <div class="top-bar__inner content" ng-if="!groupsEnabled">
     <button class="top-bar__btn"
             ng-click="shareDialog.visible = !shareDialog.visible"
             ng-if="isSidebar"
@@ -40,6 +42,9 @@
   </div>
   <!-- New design for the top bar.
        This is part of the groups roll-out
+
+       The inner div is styled with 'content' to center it in
+       the stream view.
   !-->
   <div class="top-bar__inner content" ng-if="groupsEnabled">
     <group-list class="group-list">
