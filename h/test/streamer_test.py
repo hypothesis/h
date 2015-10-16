@@ -256,11 +256,11 @@ class TestWebSocket(unittest.TestCase):
 
 class TestBroadcastAnnotationEvent(unittest.TestCase):
     def setUp(self):
-        self.message = FakeMessage(json.dumps({
+        self.message = {
             'annotation': {'id': 1},
             'action': 'delete',
             'src_client_id': 'pigeon',
-        }))
+        }
 
         self.should_patcher = patch('h.streamer.should_send_annotation_event')
         self.should = self.should_patcher.start()
@@ -294,11 +294,11 @@ class TestBroadcastSessionChangeEvent(unittest.TestCase):
         session_model = session_model_patcher.start()
         session_model.return_value = {'groups': [{'id': 'someid'}]}
 
-        message = FakeMessage(json.dumps({
+        message = {
             'type': 'group-join',
             'userid': 'amy',
             'group': 'groupid',
-        }))
+        }
 
         sock = FakeSocket('clientid')
         sock.request.authenticated_userid = 'amy'
@@ -412,11 +412,20 @@ class TestShouldSendEvent(unittest.TestCase):
 
 def test_process_message_calls_handler_with_sockets():
     handler = Mock()
-    message = '{"foo": "bar"}'
+    message = FakeMessage('{"foo": "bar"}')
 
     streamer.process_message(handler, Mock(), message)
 
-    handler.assert_called_once_with(message, WebSocket.instances)
+    handler.assert_called_once_with(ANY, WebSocket.instances)
+
+
+def test_process_message_deserializes_messages():
+    handler = Mock()
+    message = FakeMessage('{"foo": "bar"}')
+
+    streamer.process_message(handler, Mock(), message)
+
+    handler.assert_called_once_with({'foo': 'bar'}, ANY)
 
 
 def test_process_queue_creates_reader_for_topic(get_reader):

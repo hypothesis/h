@@ -537,28 +537,25 @@ def _annotation_packet(annotations, action):
 
 def broadcast_annotation_message(message, sockets):
     """Broadcast an annotation message to all appropriate active sessions."""
-    data_in = json.loads(message.body)
-    action = data_in['action']
-    annotation = Annotation(**data_in['annotation'])
+    action = message['action']
+    annotation = Annotation(**message['annotation'])
     payload = _annotation_packet([annotation], action)
     data_out = json.dumps(payload)
     for socket in list(sockets):
-        if should_send_annotation_event(socket, annotation, data_in):
+        if should_send_annotation_event(socket, annotation, message):
             _send_if_open(socket, data_out)
 
 
 def broadcast_session_change_message(message, sockets):
     """Broadcast a session change to all appropriate active sessions."""
-    data_in = json.loads(message.body)
-
     for socket in list(sockets):
-        if socket.request.authenticated_userid == data_in['userid']:
+        if socket.request.authenticated_userid == message['userid']:
             # for session state change events, the full session model
             # is included so that clients can update themselves without
             # further API requests
             _send_if_open(socket, json.dumps({
                 'type': 'session-change',
-                'action': data_in['type'],
+                'action': message['type'],
                 'model': h.session.model(socket.request)
             }))
 
@@ -623,9 +620,15 @@ def should_send_annotation_event(socket, annotation, event_data):
 
 def process_message(handler, reader, message):
     """
-    Preprocess a message from the reader and pass it to handler.
+    Deserialize and preprocess a message from the reader and pass it to
+    `handler`.
+
+    Any exceptions thrown by this function or by `handler` will be caught by
+    :py:class:`gnsq.Reader` and the message will be retried as a result.
     """
-    return handler(message, WebSocket.instances)
+    data = json.loads(message.body)
+
+    return handler(data, WebSocket.instances)
 
 
 def process_queue(settings, topic, handler):
