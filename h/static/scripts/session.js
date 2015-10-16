@@ -59,10 +59,12 @@ function sessionActions(options) {
  * @ngInject
  */
 function session($document, $http, $resource, $rootScope, flash) {
- // TODO: Move accounts data management (e.g. profile, edit_profile,
- // disable_user, etc) into another module with another route.
+  // Headers sent by every request made by the session service.
+  var headers = {};
+  // TODO: Move accounts data management (e.g. profile, edit_profile,
+  // disable_user, etc) into another module with another route.
   var actions = sessionActions({
-    transformRequest: prepare,
+    headers: headers,
     transformResponse: process,
     withCredentials: true
   });
@@ -117,6 +119,11 @@ function session($document, $http, $resource, $rootScope, flash) {
     // Copy the model data (including the CSRF token) into `resource.state`.
     angular.copy(model, resource.state);
 
+    // Set up subsequent requests to send the CSRF token in the headers.
+    if (resource.state.csrf) {
+      headers[$http.defaults.xsrfHeaderName] = resource.state.csrf;
+    }
+
     // Replace lastLoad with the latest data, and update lastLoadTime.
     lastLoad = {$promise: Promise.resolve(model), $resolved: true};
     lastLoadTime = Date.now();
@@ -128,14 +135,6 @@ function session($document, $http, $resource, $rootScope, flash) {
     // Return the model
     return model;
   };
-
-  function prepare(data, headersGetter) {
-    var csrfTok = resource.state.csrf;
-    if (typeof csrfTok !== 'undefined') {
-      headersGetter()[$http.defaults.xsrfHeaderName] = csrfTok;
-    }
-    return angular.toJson(data);
-  }
 
   function process(data, headersGetter) {
     // Parse as json
