@@ -3,7 +3,7 @@ mail = require('./vendor/jwz')
 
 
 module.exports = class StreamController
-  this.inject = [
+  this.$inject = [
     '$scope', '$route', '$rootScope', '$routeParams',
     'queryParser', 'searchFilter', 'store',
     'streamer', 'streamFilter', 'threading', 'annotationMapper'

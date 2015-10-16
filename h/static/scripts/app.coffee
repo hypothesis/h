@@ -32,8 +32,9 @@ resolve =
 
 
 configureDocument = ['$provide', ($provide) ->
-  $provide.decorator '$document', ($delegate) ->
+  $provide.decorator '$document', ['$delegate', ($delegate) ->
     $delegate.prop('baseURI', baseURI)
+  ]
 ]
 
 
