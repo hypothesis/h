@@ -41,8 +41,8 @@ module.exports = ['$http', '$parse', ($http, $parse) ->
                      placeholder="{{loading && 'Loading' || 'Search'}}…"
                      ng-disabled="loading"
                      ng-class="(alwaysExpanded || searchtext.length > 0) ? 'is-expanded' : ''"/>
-              <button class="simple-search-icon btn btn-clean" ng-hide="loading">
-                <i class="h-icon-search btn-icon"></i>
+              <button class="simple-search-icon top-bar__btn" ng-hide="loading">
+                <i class="h-icon-search"></i>
               </button>
               <button class="simple-search-icon btn btn-clean" ng-show="loading" disabled>
                 <span class="btn-icon"><span class="spinner"></span></span>

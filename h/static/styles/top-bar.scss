@@ -41,31 +41,24 @@ $top-bar-height: 40px;
   flex-grow: 1;
 }
 
-.top-bar__btn {
-  color: $gray-light;
-  display: inline-block;
-  min-width: 28px;
-  cursor: pointer;
-
-  &:focus, .js-focus, &:hover, .js-hover {
-    color: $gray-dark;
-  }
+// Removes the native styling from a <button> element
+@mixin reset-native-btn-styles {
+  padding: 0px;
+  margin: 0px;
+  background-color: transparent;
+  border-style: none;
+  outline: none;
 }
 
-.top-bar .btn {
+.top-bar__btn {
+  @include reset-native-btn-styles;
+
   color: $gray-light;
-  min-width: 28px;
-  height: 28px;
+  display: inline-block;
+  cursor: pointer;
+  padding-left: 6px;
 
-  border: 0;
-  padding: 0;
-
-  &:active {
-    @include single-transition(background-color, .25s);
-    background-color: $gray-light;
-  }
-
-  &:focus, &:hover {
+  &:hover {
     color: $gray-dark;
   }
 }
