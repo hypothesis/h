@@ -22,7 +22,7 @@ module.exports = class AnnotationViewerController
     $scope.search.update = (query) ->
       $location.path('/stream').search('q', query)
 
-    store.AnnotationResource.read id: id, (annotation) ->
+    store.AnnotationResource.get id: id, (annotation) ->
       annotationMapper.loadAnnotations([annotation])
       $scope.threadRoot = {children: [threading.idTable[id]]}
     store.SearchResource.get references: id, ({rows}) ->
