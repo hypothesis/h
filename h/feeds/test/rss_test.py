@@ -16,6 +16,16 @@ def _annotation_url():
     return mock.Mock(return_value='https://hypothes.is/a/id')
 
 
+def test_feed_from_annotations_item_author():
+    """Feed items should include the annotation's author."""
+    annotation = factories.Annotation(username="janebloggs")
+
+    feed = rss.feed_from_annotations(
+        [annotation], _annotation_url(), mock.Mock(), '', '', '')
+
+    assert feed['entries'][0]['author'] == {'name': 'janebloggs'}
+
+
 def test_feed_from_annotations_pubDate():
     """It should render the pubDates of annotations correctly."""
     annotation = factories.Annotation(
