@@ -1,11 +1,11 @@
 <div class="top-bar" ng-class="frame.visible && 'shown'" ng-cloak>
   <!-- Legacy design for top bar !-->
   <div class="top-bar__inner" ng-if="!groupsEnabled">
-    <button class="btn btn-clean"
+    <button class="top-bar__btn"
             ng-click="shareDialog.visible = !shareDialog.visible"
             ng-if="isSidebar"
             title="Share this page">
-      <i class="h-icon-share btn-icon"></i>
+      <i class="h-icon-share"></i>
     </button>
 
     <simple-search class="simple-search"
@@ -62,7 +62,8 @@
       <div class="pull-right user-picker" dropdown keyboard-nav>
         <a role="button"
            class="top-bar__btn"
-           data-toggle="dropdown" dropdown-toggle>
+           data-toggle="dropdown" dropdown-toggle
+           title="{{account.username}}">
           <i class="h-icon-account"></i><!-- nospace
           !--><i class="h-icon-arrow-drop-down top-bar__dropdown-arrow"></i>
         </a>

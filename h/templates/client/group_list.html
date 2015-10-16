@@ -4,7 +4,8 @@
         data-toggle="dropdown"
         role="button"
         ng-switch on="groups.focused().public"
-        ng-click="toggleShareLink(undefined)">
+        ng-click="toggleShareLink(undefined)"
+        title="Change the selected group">
     <i class="group-list-label__icon h-icon-public" ng-switch-when="true"></i><!-- nospace
     !--><i class="group-list-label__icon h-icon-group" ng-switch-default></i>
     <span class="group-list-label__label">{{groups.focused().name}}</span><!-- nospace
