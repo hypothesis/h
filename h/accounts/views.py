@@ -128,7 +128,9 @@ class AuthController(object):
                                 buttons=(_('Sign in'),),
                                 footer=form_footer)
 
-        self.login_redirect = self.request.route_url('stream')
+        self.login_redirect = self.request.params.get(
+            'next',
+            self.request.route_url('stream'))
         self.logout_redirect = self.request.route_url('index')
 
     def login(self):
