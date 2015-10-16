@@ -263,7 +263,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
 
     scope.preview = false
     scope.togglePreview = ->
-      if !scope.readonly
+      if !scope.readOnly
         scope.preview = !scope.preview
         if scope.preview
           output.style.height = input.style.height
@@ -330,7 +330,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
 
     # Re-render the markdown when the view needs updating.
     ctrl.$render = ->
-      if !scope.readonly and !scope.preview
+      if !scope.readOnly and !scope.preview
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
       rendered = renderMathAndMarkdown value
@@ -345,16 +345,16 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
     # Reset height of output div incase it has been changed.
     # Re-render when it becomes uneditable.
     # Auto-focus the input box when the widget becomes editable.
-    scope.$watch 'readonly', (readonly) ->
+    scope.$watch 'readOnly', (readOnly) ->
       scope.preview = false
       output.style.height = ""
       ctrl.$render()
-      unless readonly then $timeout -> inputEl.focus()
+      unless readOnly then $timeout -> inputEl.focus()
 
   require: '?ngModel'
-  restrict: 'A'
+  restrict: 'E'
   scope:
-    readonly: '@'
+    readOnly: '='
     required: '@'
   templateUrl: 'markdown.html'
 ]

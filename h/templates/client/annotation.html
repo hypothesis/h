@@ -80,9 +80,9 @@
   <!-- Body -->
   <section name="text" class="annotation-body">
     <excerpt enabled="feature('truncate_annotations') && !vm.editing">
-      <div ng-model="vm.annotation.text"
-           ng-readonly="!vm.editing"
-           markdown>
+      <markdown ng-model="vm.annotation.text"
+           read-only="!vm.editing"
+           ></markdown>
     </excerpt>
   </section>
   <!-- / Body -->
