@@ -523,51 +523,68 @@ class WebSocket(_WebSocket):
             raise
 
 
-def _annotation_packet(annotations, action):
+def handle_annotation_event(message, socket):
     """
-    Generate a packet suitable for sending down the websocket that represents
-    the specified action applied to the passed annotations.
+    Get message about annotation event `message` to be sent to `socket`.
+
+    Inspects the embedded annotation event and decides whether or not the
+    passed socket should receive notification of the event.
+
+    Returns None if the socket should not receive any message about this
+    annotation event, otherwise a dict containing information about the event.
     """
+    action = message['action']
+    annotation = Annotation(**message['annotation'])
+
+    if action == 'read':
+        return None
+
+    if message['src_client_id'] == socket.client_id:
+        return None
+
+    if annotation.get('nipsa') and (
+            socket.request.authenticated_userid != annotation.get('user', '')):
+        return None
+
+    if not _authorized_to_read(
+            socket.request.effective_principals, annotation):
+        return None
+
+    # We don't send anything until we have received a filter from the client
+    if socket.filter is None:
+        return None
+
+    if not socket.filter.match(annotation, action):
+        return None
+
     return {
-        'payload': annotations,
+        'payload': [annotation],
         'type': 'annotation-notification',
         'options': {'action': action},
     }
 
 
-def broadcast_annotation_message(message, sockets):
-    """Broadcast an annotation message to all appropriate active sessions."""
-    action = message['action']
-    annotation = Annotation(**message['annotation'])
-    payload = _annotation_packet([annotation], action)
-    data_out = json.dumps(payload)
-    for socket in list(sockets):
-        if should_send_annotation_event(socket, annotation, message):
-            _send_if_open(socket, data_out)
+def handle_user_event(message, socket):
+    """
+    Get message about user event `message` to be sent to `socket`.
 
+    Inspects the embedded user event and decides whether or not the passed
+    socket should receive notification of the event.
 
-def broadcast_session_change_message(message, sockets):
-    """Broadcast a session change to all appropriate active sessions."""
-    for socket in list(sockets):
-        if socket.request.authenticated_userid == message['userid']:
-            # for session state change events, the full session model
-            # is included so that clients can update themselves without
-            # further API requests
-            _send_if_open(socket, json.dumps({
-                'type': 'session-change',
-                'action': message['type'],
-                'model': h.session.model(socket.request)
-            }))
+    Returns None if the socket should not receive any message about this user
+    event, otherwise a dict containing information about the event.
+    """
+    if socket.request.authenticated_userid != message['userid']:
+        return None
 
-
-def _send_if_open(socket, data):
-    # Avoid trying to call socket.send() on a terminated socket.
-    #
-    # Sockets may be closed during a gevent-blocking call to another function
-    # in the broadcast_() functions, so we defer checking for a closed socket
-    # until just before sending a message to the client
-    if not socket.terminated:
-        socket.send(data)
+    # for session state change events, the full session model
+    # is included so that clients can update themselves without
+    # further API requests
+    return {
+        'type': 'session-change',
+        'action': message['type'],
+        'model': h.session.model(socket.request)
+    }
 
 
 def _authorized_to_read(effective_principals, annotation):
@@ -588,47 +605,28 @@ def _authorized_to_read(effective_principals, annotation):
     return False
 
 
-def should_send_annotation_event(socket, annotation, event_data):
-    """
-    Inspects the passed annotation and action and decides whether or not
-    the underlying session should receive the event. If it should, the
-    action is wrapped up in a websocket packet and sent to the client.
-    """
-    if event_data['action'] == 'read':
-        return False
-
-    if event_data['src_client_id'] == socket.client_id:
-        return False
-
-    if annotation.get('nipsa') and (
-            socket.request.authenticated_userid != annotation.get('user', '')):
-        return False
-
-    if not _authorized_to_read(
-            socket.request.effective_principals, annotation):
-        return False
-
-    # We don't send anything until we have received a filter from the client
-    if socket.filter is None:
-        return False
-
-    if not socket.filter.match(annotation, event_data['action']):
-        return False
-
-    return True
-
-
 def process_message(handler, reader, message):
     """
-    Deserialize and preprocess a message from the reader and pass it to
-    `handler`.
+    Deserialize and process a message from the reader.
+
+    For each message, `handler` is called with the deserialized message and a
+    single :py:class:`h.streamer.WebSocket` instance, and should return the
+    message to be sent to the client on that socket. The handler can return
+    `None`, to signify that no message should be sent, or a JSON-serializable
+    object. It is assumed that there is a 1:1 request-reply mapping between
+    incoming messages and messages to be sent out over the websockets.
 
     Any exceptions thrown by this function or by `handler` will be caught by
-    :py:class:`gnsq.Reader` and the message will be retried as a result.
+    :py:class:`gnsq.Reader` and the message will be requeued as a result.
     """
     data = json.loads(message.body)
 
-    return handler(data, WebSocket.instances)
+    for socket in WebSocket.instances:
+        reply = handler(data, socket)
+        if reply is None:
+            continue
+        if not socket.terminated:
+            socket.send(json.dumps(reply))
 
 
 def process_queue(settings, topic, handler):
@@ -671,10 +669,8 @@ def start_queue_processing(event):
             process_queue(settings, topic, handler)
 
     settings = event.app.registry.settings
-    gevent.spawn(_loop, settings, ANNOTATIONS_TOPIC,
-                 broadcast_annotation_message)
-    gevent.spawn(_loop, settings, USER_TOPIC,
-                 broadcast_session_change_message)
+    gevent.spawn(_loop, settings, ANNOTATIONS_TOPIC, handle_annotation_event)
+    gevent.spawn(_loop, settings, USER_TOPIC, handle_user_event)
 
 
 def websocket(request):
