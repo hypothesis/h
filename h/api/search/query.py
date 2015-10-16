@@ -38,7 +38,7 @@ class Builder(object):
         query = {"match_all": {}}
 
         if matchers:
-            query = {"bool": {"should": matchers}}
+            query = {"bool": {"must": matchers}}
 
         if filters:
             query = {
