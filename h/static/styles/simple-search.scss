@@ -30,7 +30,7 @@
     padding: 0;
 
     max-width: 0px;
-    transition: max-width .3s ease-out;
+    transition: max-width .3s ease-out, padding-left .3s ease-out;
 
     &:disabled {
       background: none;
@@ -39,6 +39,7 @@
 
     &:focus,&.is-expanded {
       max-width: $expanded-max-width;
+      padding-left: 6px;
     }
   }
 }
