@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 import copy
+import functools
 import json
 import logging
 import operator
@@ -620,46 +621,31 @@ def should_send_annotation_event(socket, annotation, event_data):
     return True
 
 
-def process_message(reader, message):
+def process_message(handler, reader, message):
     """
-    Process a message from the queue.
-
-    Distributes messages from the queue to the appropriate handler functions.
+    Preprocess a message from the reader and pass it to handler.
     """
-    if reader.topic == ANNOTATIONS_TOPIC:
-        broadcast_annotation_message(message, WebSocket.instances)
-    elif reader.topic == USER_TOPIC:
-        broadcast_session_change_message(message, WebSocket.instances)
-    else:
-        log.warn("streamer: don't know how to handle message from topic '%s'",
-                 reader.topic)
+    return handler(message, WebSocket.instances)
 
 
-def process_queue(settings, topics):
+def process_queue(settings, topic, handler):
     """
-    Configure, start, and monitor the queue readers.
+    Configure, start, and monitor a queue reader for the specified topic.
 
-    This sets up all the passed readers to route their messages to
-    `process_message`, starts them, and then enters a loop that checks that the
-    reader threads never join. If they do, this fact is logged and all readers
-    are killed.
+    This sets up a :py:class:`gnsq.Reader` to route messages from `topic` to
+    `handler`, and starts it. The reader should never return. If it does, this
+    fact is logged and the function returns.
     """
     channel = 'stream-{}#ephemeral'.format(_random_id())
-    readers = [queue.get_reader(settings, topic, channel)
-               for topic in topics]
-
-    # Start all the readers
-    for reader in readers:
-        reader.on_message.connect(receiver=process_message)
-        reader.start(block=False)
-
-    _wait_for_readers(readers)
+    receiver = functools.partial(process_message, handler)
+    reader = queue.get_reader(settings, topic, channel)
+    reader.on_message.connect(receiver=receiver, weak=False)
+    reader.start(block=True)
 
     # We should never get here. If we do, it's because a reader thread has
     # prematurely quit.
-    log.error("queue reader exited: killing readers and starting again")
-    for reader in readers:
-        reader.close()
+    log.error("queue reader for topic '%s' exited: killing reader", topic)
+    reader.close()
 
 
 def _random_id():
@@ -668,34 +654,24 @@ def _random_id():
     return base64.urlsafe_b64encode(data).strip(b'=')
 
 
-def _wait_for_readers(readers):
-    """Wait for one or more of the readers to exit."""
-    while True:
-        for reader in readers:
-            reader.join(timeout=1)
-            if not reader.is_running:
-                return
-
-
-def _process_queue_loop(settings, topics):
-    while True:
-        process_queue(settings, topics)
-
-
 @subscriber(ApplicationCreated)
 def start_queue_processing(event):
     """
-    Start a greenlet to process the incoming data from NSQ.
+    Start some greenlets to process the incoming data from NSQ.
 
-    This subscriber is called when the application is booted, and kicks off a
-    greenlet running `process_queue`. The function does not block.
+    This subscriber is called when the application is booted, and kicks off
+    greenlets running `process_queue` for each NSQ topic we subscribe to. The
+    function does not block.
     """
+    def _loop(settings, topic, handler):
+        while True:
+            process_queue(settings, topic, handler)
+
     settings = event.app.registry.settings
-    topics = [
-        ANNOTATIONS_TOPIC,
-        USER_TOPIC,
-    ]
-    gevent.spawn(_process_queue_loop, settings, topics)
+    gevent.spawn(_loop, settings, ANNOTATIONS_TOPIC,
+                 broadcast_annotation_message)
+    gevent.spawn(_loop, settings, USER_TOPIC,
+                 broadcast_session_change_message)
 
 
 def websocket(request):

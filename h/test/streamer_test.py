@@ -8,7 +8,7 @@ import json
 
 import pytest
 from mock import ANY
-from mock import MagicMock, Mock, PropertyMock
+from mock import MagicMock, Mock
 from mock import patch
 from pyramid.testing import DummyRequest
 
@@ -410,81 +410,52 @@ class TestShouldSendEvent(unittest.TestCase):
         assert should_send_annotation_event(socket, annotation, event_data)
 
 
-@patch('h.streamer.broadcast_annotation_message')
-def test_process_message_sends_messages_from_annotations_topic_to_annotation_handler(handler):
-    reader = Mock(topic='annotations')
+def test_process_message_calls_handler_with_sockets():
+    handler = Mock()
+    message = '{"foo": "bar"}'
 
-    streamer.process_message(reader, '{"name": "bob"}')
+    streamer.process_message(handler, Mock(), message)
 
-    handler.assert_called_once_with('{"name": "bob"}',
-                                    streamer.WebSocket.instances)
-
-
-@patch('h.streamer.broadcast_session_change_message')
-def test_process_message_sends_messages_from_user_topic_to_session_change_handler(handler):
-    reader = Mock(topic='user')
-
-    streamer.process_message(reader, '{"name": "bob"}')
-
-    handler.assert_called_once_with('{"name": "bob"}',
-                                    streamer.WebSocket.instances)
+    handler.assert_called_once_with(message, WebSocket.instances)
 
 
-def test_process_message_ignores_messages_from_other_topics():
-    reader = Mock(topic='wibble')
-
-    streamer.process_message(reader, '{"name": "bob"}')
-
-
-def test_process_queue_creates_readers_for_each_topic(get_reader):
+def test_process_queue_creates_reader_for_topic(get_reader):
     settings = {'foo': 'bar'}
-    get_reader.return_value.is_running = False  # Allow the function to exit
 
-    streamer.process_queue(settings, ['donkeys', 'gorillas'])
+    streamer.process_queue(settings, 'donkeys', lambda m, s: None)
 
     get_reader.assert_any_call(settings, 'donkeys', ANY)
-    get_reader.assert_any_call(settings, 'gorillas', ANY)
 
 
-def test_process_queue_connects_reader_on_message_to_process_message(get_reader):
+@patch('h.streamer.process_message')
+def test_process_queue_connects_reader_on_message_to_process_message(process_message, get_reader):
+    settings = {'foo': 'bar'}
+    handler = Mock()
+    reader = get_reader.return_value
+
+    streamer.process_queue(settings, 'donkeys', handler)
+    message_handler = reader.on_message.connect.call_args[1]['receiver']
+    message_handler(reader, 'message')
+
+    process_message.assert_called_once_with(handler, reader, 'message')
+
+
+def test_process_queue_starts_reader(get_reader):
     settings = {'foo': 'bar'}
     reader = get_reader.return_value
-    reader.is_running = False  # Allow the function to exit
 
-    streamer.process_queue(settings, ['donkeys'])
+    streamer.process_queue(settings, 'donkeys', lambda m, s: None)
 
-    reader.on_message.connect.assert_called_once_with(
-        receiver=streamer.process_message)
+    reader.start.assert_called_once_with(block=True)
 
 
-def test_process_queue_starts_readers(get_reader):
+def test_process_queue_close_readers_explicitly_if_it_stops(get_reader):
     settings = {'foo': 'bar'}
     reader = get_reader.return_value
-    reader.is_running = False  # Allow the function to exit
 
-    streamer.process_queue(settings, ['donkeys'])
+    streamer.process_queue(settings, 'gorillas', lambda m, s: None)
 
-    reader.start.assert_called_once_with(block=False)
-
-
-def test_process_queue_waits_for_reader_join(get_reader):
-    settings = {'foo': 'bar'}
-    reader = get_reader.return_value
-    reader.is_running = False  # Allow the function to exit
-
-    streamer.process_queue(settings, ['donkeys'])
-
-    reader.join.assert_called_once_with(timeout=1)
-
-
-def test_process_queue_closes_all_readers_if_one_stops(get_reader):
-    settings = {'foo': 'bar'}
-    reader = get_reader.return_value
-    type(reader).is_running = PropertyMock(side_effect=[True, False])
-
-    streamer.process_queue(settings, ['donkeys', 'gorillas'])
-
-    assert reader.close.call_count == 2
+    reader.close.assert_called_once_with()
 
 
 @pytest.fixture
