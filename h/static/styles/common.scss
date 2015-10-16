@@ -181,17 +181,6 @@ html {
   li:not(.ng-hide) {
     text-align: left;
 
-    & > a {
-      display: block;
-      line-height: 1;
-      padding: 1em;
-      white-space: nowrap;
-
-      :hover {
-        color: $brand-color;
-      }
-    }
-
     &.inactive {
       font-weight: 400;
       color: $gray-lighter;
@@ -209,8 +198,21 @@ html {
     }
   }
 
-  a {
+  &__link {
     color: inherit;
+
+    display: block;
+    line-height: 1;
+    padding: 1em;
+    white-space: nowrap;
+
+    &:hover {
+      color: $brand-color;
+    }
+  }
+
+  &__link--subtle {
+    color: $color-gray;
   }
 
   // These psuedo-elements add the speech bubble tail / triangle.
