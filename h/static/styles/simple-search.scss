@@ -25,9 +25,12 @@
     order: 1;
 
     color: $text-color;
+
+    // disable the default browser styling for the input
     border: none;
     outline: none;
-    padding: 0;
+    padding: 0px;
+    width: 100%;
 
     max-width: 0px;
     transition: max-width .3s ease-out, padding-left .3s ease-out;
