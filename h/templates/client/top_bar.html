@@ -63,7 +63,8 @@
         <a role="button"
            class="top-bar__btn"
            data-toggle="dropdown" dropdown-toggle>
-          <i class="h-icon-account"></i><i class="h-icon-arrow-drop-down"></i>
+          <i class="h-icon-account"></i><!-- nospace
+          !--><i class="h-icon-arrow-drop-down top-bar__dropdown-arrow"></i>
         </a>
         <ul class="dropdown-menu pull-right" role="menu">
           <li ng-show="authUser"><a href="/stream?q=user:{{account.username}}"
