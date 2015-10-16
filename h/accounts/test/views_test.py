@@ -184,6 +184,17 @@ def test_login_redirects_when_logged_in(authn_policy):
 
 
 @pytest.mark.usefixtures('routes_mapper')
+def test_login_redirects_to_next_param_when_logged_in(authn_policy):
+    request = DummyRequest(params={'next': '/foo/bar'})
+    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+
+    with pytest.raises(httpexceptions.HTTPFound) as e:
+        AuthController(request).login()
+
+    assert e.value.location == '/foo/bar'
+
+
+@pytest.mark.usefixtures('routes_mapper')
 def test_login_returns_form_when_validation_fails(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
@@ -221,6 +232,19 @@ def test_login_redirects_when_validation_succeeds(authn_policy):
     result = controller.login()
 
     assert isinstance(result, httpexceptions.HTTPFound)
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_redirects_to_next_param_when_validation_succeeds(authn_policy):
+    request = DummyRequest(params={'next': '/foo/bar'})
+    authn_policy.authenticated_userid.return_value = None  # Logged out
+    controller = AuthController(request)
+    controller.form = form_validating_to({"user": FakeUser(username='cara')})
+
+    result = controller.login()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+    assert result.location == '/foo/bar'
 
 
 @pytest.mark.usefixtures('routes_mapper')
