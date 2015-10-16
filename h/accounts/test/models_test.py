@@ -20,7 +20,7 @@ def test_get_by_userid_calls_split_user(util):
     """It should call split_user() once with the given userid."""
     util.split_user.return_value = ('fred', 'hypothes.is')
 
-    models.User.get_by_userid('hypothes.is', 'acct:fred@hypothes.is')
+    models.User.get_by_userid('acct:fred@hypothes.is')
 
     util.split_user.assert_called_once_with('acct:fred@hypothes.is')
 
@@ -30,20 +30,9 @@ def test_get_by_userid_returns_None_for_TypeError(util):
     """If split_user() raises TypeError it should return None."""
     util.split_user.side_effect = TypeError
 
-    user = models.User.get_by_userid('hypothes.is', 'acct:fred@hypothes.is')
+    user = models.User.get_by_userid('acct:fred@hypothes.is')
 
     assert user is None
-
-
-@get_by_userid_fixtures
-def test_get_by_userid_returns_None_if_domain_does_not_match(util):
-    util.split_user.return_value = ('fred', 'bizarrohypothes.is')
-
-    result = models.User.get_by_userid(
-        'hypothes.is',  # Request domain doesn't match the userid domain.
-        'acct:fred@bizarrohypothes.is')
-
-    assert result is None
 
 
 @get_by_userid_fixtures
@@ -51,7 +40,7 @@ def test_get_by_userid_calls_get_by_username(util, get_by_username):
     """It should call get_by_username() once with the username."""
     util.split_user.return_value = ('username', 'domain')
 
-    models.User.get_by_userid('domain', 'acct:username@domain')
+    models.User.get_by_userid('acct:username@domain')
 
     get_by_username.assert_called_once_with('username')
 
@@ -61,7 +50,7 @@ def test_get_by_userid_returns_user(util, get_by_username):
     """It should return the result from get_by_username()."""
     util.split_user.return_value = ('username', 'domain')
 
-    user = models.User.get_by_userid('domain', 'acct:username@domain')
+    user = models.User.get_by_userid('acct:username@domain')
 
     assert user == get_by_username.return_value
 

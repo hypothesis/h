@@ -200,14 +200,8 @@ class User(Base):
         return valid
 
     @classmethod
-    def get_by_userid(cls, domain, userid):
+    def get_by_userid(cls, userid):
         """Return the user with the given ID, or None.
-
-        :param domain: The domain for the current request, for example:
-            u'hypothes.is'. This must match the domain part of the userid
-            argument - you can't retrieve users who don't belong to the given
-            domain.
-        :type domain: unicode
 
         :param userid: A userid unicode string, for example:
             u'acct:kim@hypothes.is'
@@ -221,9 +215,6 @@ class User(Base):
             username, userdomain = util.split_user(userid)
         except TypeError:
             # userid didn't match the pattern that split_user() expects.
-            return None
-
-        if userdomain != domain:
             return None
 
         return cls.get_by_username(username)

@@ -25,6 +25,7 @@ def settings_from_environment():
     _setup_webassets(settings)
     _setup_websocket(settings)
     _setup_blocklist(settings)
+    _setup_userid_domain(settings)
 
     return settings
 
@@ -179,3 +180,8 @@ def _setup_websocket(settings):
 def _setup_blocklist(settings):
     if 'BLOCKLIST' in os.environ:
         settings['h.blocklist'] = os.environ['BLOCKLIST']
+
+
+def _setup_userid_domain(settings):
+    if 'USERID_DOMAIN' in os.environ:
+        settings['h.userid_domain'] = os.environ['USERID_DOMAIN']

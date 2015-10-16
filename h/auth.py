@@ -136,7 +136,7 @@ def groupfinder(userid, request):
     """
     principals = set()
 
-    user = models.User.get_by_userid(request.domain, userid)
+    user = models.User.get_by_userid(userid)
     if user is None:
         return
     if user.admin:

@@ -14,6 +14,7 @@ from pyramid import paster
 from pyramid.request import Request
 import transaction
 
+from h import util
 from h.accounts import models
 from h.claim.util import generate_claim_url
 
@@ -73,7 +74,7 @@ def get_users(session, limit=None):
 
 def get_merge_vars(request, users):
     for user in users:
-        userid = 'acct:{}@{}'.format(user.username, request.domain)
+        userid = util.userid_from_username(user.username, requeat)
         claim = generate_claim_url(request, userid)
         recipient = user.email
         merge_vars = [

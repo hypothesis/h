@@ -841,7 +841,7 @@ def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
 
     ProfileController(request).profile()
 
-    user_model.get_by_userid.assert_called_with(request.domain, "acct:foo@bar.com")
+    user_model.get_by_userid.assert_called_with("acct:foo@bar.com")
 
 
 @pytest.mark.usefixtures('user_model')
