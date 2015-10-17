@@ -13,7 +13,7 @@
   position: relative;
   text-transform: uppercase;
   font-weight: bold;
-  margin-top: 0;
+  margin-top: 1.5em;
   margin-bottom: 1.5em;
 
   span {
@@ -51,6 +51,10 @@
   cursor: pointer;
   font-weight: bold;
   margin-bottom: .4em;
+}
+
+.form-label--light {
+  font-weight: normal;
 }
 
 .form-hint {

@@ -6,7 +6,7 @@
      id="item-{{ field.oid }}">
 {% endif -%}
 
-{%- if not (field.widget.hidden or field.widget.category == 'structural') -%}
+{%- if not (field.widget.hidden or field.widget.omit_label or field.widget.category == 'structural') -%}
   <label class="form-label{% if field.widget.label_css_class %} {{ field.widget.label_css_class }}{% endif %}"
          {%- if field.description -%}
          title="{{ _(field.description) }}"

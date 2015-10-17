@@ -1,0 +1,50 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}Profile{% endblock %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles  %}
+
+{% block content %}
+  <div class="content paper">
+    {% include "h:templates/includes/header.html.jinja2" %}
+    <ul class="nav nav-tabs">
+      <li class="active">
+        <a href="{{ request.route_path('profile') }}">{% trans %}Profile{% endtrans %}</a>
+      </li>
+      <li>
+        <a href="{{ request.route_path('profile_notifications') }}">{% trans %}Notifications{% endtrans %}</a>
+      </li>
+    </ul>
+
+    <div class="form-vertical">
+      <h2 class="form-heading">
+        <span>{% trans %}Change your email address{% endtrans %}</span>
+      </h2>
+      <legend>
+        {% trans %}Your current email address is:{% endtrans %}
+        <strong>{{ email }}</strong>.
+      </legend>
+      {{ email_form | safe }}
+
+      <h2 class="form-heading">
+        <span>{% trans %}Change your password{% endtrans %}</span>
+      </h2>
+      {{ password_form | safe }}
+
+      <h2 class="form-heading">
+        <span>{% trans %}Delete account{% endtrans %}</span>
+      </h2>
+      <legend>
+        {% trans %}
+        If you would like to delete your account, please email us at <a
+        href="mailto:support@hypothes.is">support@hypothes.is</a> from your
+        registered email address, and we'll take it from there.
+        {% endtrans %}
+      </legend>
+    </div>
+  </div>
+{% endblock content %}

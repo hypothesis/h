@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# FIXME: complete the removal of AjaxFormViewMapper and its friends. See the
-# AuthController/AjaxAuthController for an example of an
-# AjaxFormViewMapper-less controller.
-
 import datetime
 import json
 
@@ -17,6 +13,7 @@ from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
 from h import i18n
+from h import models
 from h import session
 from h import util
 from h.accounts import schemas
@@ -27,26 +24,9 @@ from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
 from h.accounts.events import RegistrationEvent
-from h.notification.models import Subscriptions
 from h.views import json_view
 
 _ = i18n.TranslationString
-
-
-def ajax_form(request, result):
-    if isinstance(result, httpexceptions.HTTPRedirection):
-        request.response.headers.extend(result.headers)
-        result = {'status': 'okay'}
-    elif isinstance(result, httpexceptions.HTTPError):
-        request.response.status_code = result.code
-        result = {'status': 'failure', 'reason': str(result)}
-    elif 'errors' in result:
-        request.response.status_code = result.pop('code', 400)
-        result['status'] = 'failure'
-
-    result['flash'] = session.pop_flash(request)
-
-    return result
 
 
 # A little helper to ensure that session data is returned in every ajax
@@ -58,16 +38,6 @@ def ajax_payload(request, data):
     return payload
 
 
-def validate_form(form, data):
-    """Validate POST payload data for a form."""
-    try:
-        appstruct = form.validate(data)
-    except deform.ValidationFailure as err:
-        return {'errors': err.error.asdict()}, None
-    else:
-        return None, appstruct
-
-
 @json_view(context=BadCSRFToken)
 def bad_csrf_token(context, request):
     request.response.status_code = 403
@@ -77,37 +47,6 @@ def bad_csrf_token(context, request):
         'reason': reason,
         'model': session.model(request),
     }
-
-
-class AjaxFormViewMapper(object):
-    def __init__(self, **kw):
-        self.attr = kw['attr']
-
-    def __call__(self, view):
-        def wrapper(context, request):
-            if request.method == 'POST':
-                data = request.json_body
-                data.update(request.params)
-                request.content_type = 'application/x-www-form-urlencoded'
-                request.POST.clear()
-                request.POST.update(data)
-
-            inst = view(request)
-            meth = getattr(inst, self.attr)
-            result = meth()
-
-            if isinstance(result, httpexceptions.HTTPRedirection):
-                result.location = request.path_url
-                return result
-
-            result = ajax_form(request, result)
-
-            model = result.setdefault('model', {})
-            model.update(session.model(request))
-
-            return result
-
-        return wrapper
 
 
 @view_config(route_name='login', attr='login', request_method='POST',
@@ -465,116 +404,109 @@ class RegisterController(object):
         self.request.registry.notify(RegistrationEvent(self.request, user))
 
 
+@view_defaults(route_name='profile',
+               renderer='h:templates/accounts/profile.html.jinja2')
+@view_config(attr='profile_form', request_method='GET')
+@view_config(attr='profile', request_method='POST')
 class ProfileController(object):
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.ProfileSchema().bind(request=self.request)
-        self.form = deform.Form(self.schema)
 
-    def edit_profile(self):
-        """Handle POST payload from profile update form."""
-        if self.request.method != 'POST':
-            return httpexceptions.HTTPMethodNotAllowed()
+        email_schema = schemas.EmailChangeSchema().bind(request=request)
+        password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
-        # Nothing to do here for non logged-in users
-        if self.request.authenticated_userid is None:
-            return httpexceptions.HTTPUnauthorized()
+        self.forms = {
+            'email': deform.Form(email_schema,
+                                 buttons=(_('Change email address'),),
+                                 formid='email'),
+            'password': deform.Form(password_schema,
+                                    buttons=(_('Change password'),),
+                                    formid='password'),
+        }
 
-        err, appstruct = validate_form(self.form, self.request.POST.items())
-        if err is not None:
-            return err
+    def profile_form(self):
+        """Show the user's profile."""
+        if self.request.authenticated_user is None:
+            raise httpexceptions.HTTPNotFound()
 
-        user = self.request.authenticated_user
-        response = {'model': {'email': user.email}}
-
-        # We allow updating subscriptions without validating a password
-        subscriptions = appstruct.get('subscriptions')
-        if subscriptions:
-            data = json.loads(subscriptions)
-            err = _update_subscription_data(self.request, data)
-            if err is not None:
-                return err
-            return response
-
-        # Any updates to fields below this point require password validation.
-        #
-        #   `pwd` is the current password
-        #   `password` (used below) is optional, and is the new password
-        #
-        if not User.validate_user(user, appstruct.get('pwd')):
-            return {'errors': {'pwd': _('Invalid password')}, 'code': 401}
-
-        email = appstruct.get('email')
-        if email:
-            email_user = User.get_by_email(email)
-
-            if email_user:
-                if email_user.id != user.id:
-                    return {
-                        'errors': {'pwd': _('That email is already used')},
-                    }
-
-            response['model']['email'] = user.email = email
-
-        password = appstruct.get('password')
-        if password:
-            user.password = password
-
-        return response
-
-    def disable_user(self):
-        """Disable the user by setting a random password."""
-        if self.request.authenticated_userid is None:
-            return httpexceptions.HTTPUnauthorized()
-
-        err, appstruct = validate_form(self.form, self.request.POST.items())
-        if err is not None:
-            return err
-
-        user = self.request.authenticated_user
-
-        if User.validate_user(user, appstruct['pwd']):  # Password check.
-            # TODO: maybe have an explicit disabled flag in the status
-            user.password = User.generate_random_password()
-            self.request.session.flash(_('Account disabled.'), 'success')
-            return {}
-        else:
-            return dict(errors={'pwd': _('Invalid password')}, code=401)
+        return {'email': self.request.authenticated_user.email,
+                'email_form': self.forms['email'].render(),
+                'password_form': self.forms['password'].render()}
 
     def profile(self):
-        """
-        Return a serialisation of the user's profile.
+        """Handle POST payload from profile update form."""
+        if self.request.authenticated_user is None:
+            raise httpexceptions.HTTPNotFound()
 
-        For use by the frontend. Includes current email and subscriptions data.
-        """
-        request = self.request
-        userid = request.authenticated_userid
-        model = {}
-        if userid:
-            model["email"] = self.request.authenticated_user.email
-            model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
-                userid)
-        return {'model': model}
+        formid = self.request.POST.get('__formid__')
+        if formid is None or formid not in self.forms:
+            raise httpexceptions.HTTPBadRequest()
 
-    def unsubscribe(self):
-        request = self.request
-        subscription_id = request.GET['subscription_id']
-        subscription = Subscriptions.get_by_id(subscription_id)
-        if subscription:
-            if request.authenticated_userid != subscription.uri:
-                raise httpexceptions.HTTPUnauthorized()
-            subscription.active = False
-            return {}
-        return {}
+        try:
+            if formid == 'email':
+                self._handle_email_form()
+            elif formid == 'password':
+                self._handle_password_form()
+        except deform.ValidationFailure:
+            return {'email': self.request.authenticated_user.email,
+                    'email_form': self.forms['email'].render(),
+                    'password_form': self.forms['password'].render()}
+
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url('profile'))
+
+    def _handle_email_form(self):
+        appstruct = self.forms['email'].validate(self.request.POST.items())
+        self.request.authenticated_user.email = appstruct['email']
+
+    def _handle_password_form(self):
+        appstruct = self.forms['password'].validate(self.request.POST.items())
+        self.request.authenticated_user.password = appstruct['new_password']
 
 
-@view_defaults(route_name='session')
-@json_view(attr='edit_profile', request_param='__formid__=edit_profile')
-@json_view(attr='disable_user', request_param='__formid__=disable_user')
-@json_view(attr='profile', request_param='__formid__=profile')
-@json_view(attr='unsubscribe', request_param='__formid__=unsubscribe')
-class AjaxProfileController(ProfileController):
-    __view_mapper__ = AjaxFormViewMapper
+@view_defaults(route_name='profile_notifications',
+               renderer='h:templates/accounts/notifications.html.jinja2')
+@view_config(attr='notifications_form', request_method='GET')
+@view_config(attr='notifications', request_method='POST')
+class NotificationsController(object):
+    def __init__(self, request):
+        self.request = request
+        self.schema = schemas.NotificationsSchema().bind(request=self.request)
+        self.form = deform.Form(self.schema,
+                                buttons=(_('Save changes'),))
+
+    def notifications_form(self):
+        """Render the notifications form."""
+        if self.request.authenticated_userid is None:
+            raise httpexceptions.HTTPNotFound()
+
+        self.form.set_appstruct({
+            'notifications': set(n.type
+                                 for n in self._user_notifications()
+                                 if n.active)
+        })
+        return {'form': self.form.render()}
+
+    def notifications(self):
+        """Process notifications POST data."""
+        if self.request.authenticated_userid is None:
+            raise httpexceptions.HTTPNotFound()
+
+        try:
+            appstruct = self.form.validate(self.request.POST.items())
+        except deform.ValidationFailure:
+            return {'form': self.form.render()}
+
+        for n in self._user_notifications():
+            n.active = n.type in appstruct['notifications']
+
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url('profile_notifications'))
+
+    def _user_notifications(self):
+        """Fetch the notifications/subscriptions for the logged-in user."""
+        return models.Subscriptions.get_subscriptions_for_uri(
+            self.request.authenticated_userid)
 
 
 def activation_email(request, user):
@@ -623,35 +555,6 @@ def reset_password_link(request, reset_code):
     return request.route_url('reset_password_with_code', code=reset_code)
 
 
-def _update_subscription_data(request, subscription):
-    """
-    Update the subscriptions in the database from form data.
-
-    Using data from the passed subscription struct, find a subscription in the
-    database, and update it (if it belongs to the current logged-in user).
-    """
-    sub = Subscriptions.get_by_id(subscription['id'])
-    if sub is None:
-        return {
-            'errors': {'subscriptions': _('Subscription not found')},
-        }
-
-    # If we're trying to update a subscription for anyone other than
-    # the currently logged-in user, bail fast.
-    #
-    # The error message is deliberately identical to the one above, so
-    # as not to leak any information about who which subscription ids
-    # belong to.
-    if sub.uri != request.authenticated_userid:
-        return {
-            'errors': {'subscriptions': _('Subscription not found')},
-        }
-
-    sub.active = subscription.get('active', True)
-
-    request.session.flash(_('Changes saved!'), 'success')
-
-
 def includeme(config):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
@@ -660,4 +563,6 @@ def includeme(config):
     config.add_route('forgot_password', '/forgot_password')
     config.add_route('reset_password', '/reset_password')
     config.add_route('reset_password_with_code', '/reset_password/{code}')
+    config.add_route('profile', '/profile')
+    config.add_route('profile_notifications', '/profile/notifications')
     config.scan(__name__)
