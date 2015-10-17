@@ -7,10 +7,6 @@ angular_animate:
   filters: uglifyjs
   output: scripts/vendor/angular-animate.min.js
   contents: ../../node_modules/angular-animate/angular-animate.js
-angular_bootstrap:
-  filters: uglifyjs
-  output: scripts/vendor/angular-bootstrap-tabbable.min.js
-  contents: h:static/scripts/vendor/angular-bootstrap-tabbable.js
 angular_resource:
   filters: uglifyjs
   output: scripts/vendor/angular-resource.min.js
@@ -115,7 +111,6 @@ app_js:
     - jquery
     - angular
     - angular_animate
-    - angular_bootstrap
     - angular_resource
     - angular_route
     - angular_sanitize

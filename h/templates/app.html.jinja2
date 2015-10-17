@@ -31,16 +31,6 @@
          role="button"
          title="Close"
          ng-click="accountDialog.visible = false"></i>
-      <div ng-if="auth.user">
-        {% block settings %}
-        <div class="tabbable"
-             ng-controller="AccountController"
-             ng-model="tab">
-          {{ include_raw("h:templates/client/settings/account.html") }}
-          {{ include_raw("h:templates/client/settings/notifications.html") }}
-        </div>
-        {% endblock %}
-      </div>
       <div ng-if="!auth.user">
         {% block auth %}
         {{ include_raw("h:templates/client/auth.html") }}

@@ -30,7 +30,7 @@
           {{account.username}}<span class="provider" ng-show="authUser">/{{account.provider}}</span><i class="h-icon-arrow-drop-down"></i>
         </span>
         <ul class="dropdown-menu pull-right" role="menu">
-          <li ng-show="authUser"><a class="dropdown-menu__link" href="" ng-click="accountDialog.visible = true">Account</a></li>
+          <li ng-show="authUser"><a class="dropdown-menu__link" href="/profile" target="_blank">Account</a></li>
           <li><a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a></li>
           <li><a class="dropdown-menu__link" href="/docs/help" target="_blank">Help</a></li>
           <li ng-show="authUser"><a class="dropdown-menu__link" href="/stream?q=user:{{account.username}}"
@@ -77,9 +77,9 @@
                                     class="dropdown-menu__link"
                                     title="View all your annotations"
                                      target="_blank">{{account.username}}</a></li>
-          <li ng-show="authUser"><a href=""
-                                    class="dropdown-menu__link"
-                                    ng-click="accountDialog.visible = true"><!-- nospace
+          <li ng-show="authUser"><a href="/profile"
+                                    target="_blank"
+                                    class="dropdown-menu__link"><!-- nospace
             !-->Account settings</a></li>
           <li><a class="dropdown-menu__link" href="/docs/help" target="_blank">Help</a></li>
           <li><a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a></li>
