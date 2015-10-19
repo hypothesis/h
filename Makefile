@@ -39,18 +39,18 @@ dev: deps
 
 test: backend-test client-test
 
-backend-test:
+backend-test: deps
 	@python setup.py test
 
 client-test: client-app-test client-extension-test
 
-client-app-test:
+client-app-test: deps
 	@$(NPM_BIN)/karma start h/static/scripts/karma.config.js --single-run
 
-client-extension-test:
+client-extension-test: deps
 	@$(NPM_BIN)/karma start h/browser/chrome/karma.config.js --single-run
 
-client-test-watch:
+client-test-watch: deps
 	@$(NPM_BIN)/karma start h/static/scripts/karma.config.js
 
 cover:
