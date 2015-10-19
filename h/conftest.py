@@ -14,6 +14,7 @@ from pyramid.paster import get_appsettings
 import transaction
 
 from h import db
+from h import form
 from h.api import db as api_db
 from h.config import normalize_database_url
 
@@ -80,6 +81,12 @@ def config(request, settings):
     request.addfinalizer(destroy)
 
     return config
+
+
+@pytest.fixture(scope='session', autouse=True)
+def deform():
+    """Allow tests that use deform to find our custom templates."""
+    form.init()
 
 
 @pytest.fixture()

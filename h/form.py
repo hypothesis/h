@@ -15,7 +15,7 @@ SEARCH_PATHS = (
 )
 
 
-def includeme(_):
+def init():
     from deform import Form
     from deform_jinja2 import jinja2_renderer_factory
     from deform_jinja2.translator import PyramidTranslator
@@ -24,3 +24,7 @@ def includeme(_):
                                        translator=PyramidTranslator())
 
     Form.set_default_renderer(renderer)
+
+
+def includeme(_):
+    init()
