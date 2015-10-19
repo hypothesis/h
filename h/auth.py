@@ -42,6 +42,7 @@ from pyramid.util import action_method
 
 from .interfaces import IClientFactory
 from .oauth import JWT_BEARER
+from h import util
 from h.accounts import models
 from h.api import groups
 
@@ -136,9 +137,14 @@ def groupfinder(userid, request):
     """
     principals = set()
 
-    user = models.User.get_by_userid(userid)
+    username, _ = util.split_user(userid)
+    if username is None:
+        return
+
+    user = models.User.get_by_username(username)
     if user is None:
         return
+
     if user.admin:
         principals.add('group:__admin__')
     if user.staff:

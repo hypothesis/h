@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from h import util
 from h.accounts import models
 
 
@@ -34,8 +35,25 @@ def make_staff(username):
         raise NoSuchUserError
 
 
+def authenticated_user(request):
+    """Return the authenticated user or None.
+
+    :rtype: h.accounts.models.User or None
+
+    """
+    if not request.authenticated_userid:
+        return None
+
+    # pylint: disable=unpacking-non-sequence
+    username, _ = util.split_user(request.authenticated_userid)
+    return models.User.get_by_username(username)
+
+
 def includeme(config):
     """A local identity provider."""
+    config.add_request_method(
+        authenticated_user, name='authenticated_user', reify=True)
+
     config.include('.schemas')
     config.include('.subscribers')
     config.include('.views')

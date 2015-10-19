@@ -4,55 +4,10 @@ from __future__ import unicode_literals
 import re
 
 import pytest
-import mock
 from sqlalchemy import exc
 
 from h.accounts import models
 from h.test import factories
-
-
-# The fixtures required to mock all of get_by_userid()'s dependencies.
-get_by_userid_fixtures = pytest.mark.usefixtures('util', 'get_by_username')
-
-
-@get_by_userid_fixtures
-def test_get_by_userid_calls_split_user(util):
-    """It should call split_user() once with the given userid."""
-    util.split_user.return_value = ('fred', 'hypothes.is')
-
-    models.User.get_by_userid('acct:fred@hypothes.is')
-
-    util.split_user.assert_called_once_with('acct:fred@hypothes.is')
-
-
-@get_by_userid_fixtures
-def test_get_by_userid_returns_None_for_TypeError(util):
-    """If split_user() raises TypeError it should return None."""
-    util.split_user.side_effect = TypeError
-
-    user = models.User.get_by_userid('acct:fred@hypothes.is')
-
-    assert user is None
-
-
-@get_by_userid_fixtures
-def test_get_by_userid_calls_get_by_username(util, get_by_username):
-    """It should call get_by_username() once with the username."""
-    util.split_user.return_value = ('username', 'domain')
-
-    models.User.get_by_userid('acct:username@domain')
-
-    get_by_username.assert_called_once_with('username')
-
-
-@get_by_userid_fixtures
-def test_get_by_userid_returns_user(util, get_by_username):
-    """It should return the result from get_by_username()."""
-    util.split_user.return_value = ('username', 'domain')
-
-    user = models.User.get_by_userid('acct:username@domain')
-
-    assert user == get_by_username.return_value
 
 
 def test_activation_has_asciinumeric_code(db_session):
@@ -176,17 +131,3 @@ def test_staff_members_does_not_return_non_staff_users(db_session):
 
     for non_staff in non_staff:
         assert non_staff not in staff
-
-
-@pytest.fixture
-def util(request):
-    patcher = mock.patch('h.accounts.models.util')
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def get_by_username(request):
-    patcher = mock.patch('h.accounts.models.User.get_by_username')
-    request.addfinalizer(patcher.stop)
-    return patcher.start()

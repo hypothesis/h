@@ -10,7 +10,6 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import expression
 
-from h import util
 from h.db import Base
 
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
@@ -198,26 +197,6 @@ class User(Base):
             valid = CRYPT.check(user.password, password + user.salt)
 
         return valid
-
-    @classmethod
-    def get_by_userid(cls, userid):
-        """Return the user with the given ID, or None.
-
-        :param userid: A userid unicode string, for example:
-            u'acct:kim@hypothes.is'
-        :type userid: unicode
-
-        :rtype: h.accounts.models.User or None
-
-        """
-        try:
-            # pylint: disable=unpacking-non-sequence
-            username, userdomain = util.split_user(userid)
-        except TypeError:
-            # userid didn't match the pattern that split_user() expects.
-            return None
-
-        return cls.get_by_username(username)
 
     @classmethod
     def get_by_username(cls, username):

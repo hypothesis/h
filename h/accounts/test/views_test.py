@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
-from collections import namedtuple
 
 import mock
 from mock import patch, Mock, MagicMock
@@ -830,30 +829,28 @@ def test_activate_event_when_validation_succeeds(event,
 
 
 @pytest.mark.usefixtures('subscriptions_model')
-def test_profile_looks_up_by_logged_in_user(authn_policy, user_model):
-    """
-    When fetching the profile, look up email for the logged in user.
+def test_profile_looks_up_by_logged_in_user():
+    """When fetching the profile, look up email for the logged in user.
 
     (And don't, for example, use a 'username' passed to us in params.)
+
     """
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
+    request = Mock(authenticated_userid="acct:foo@bar.com")
+    type(request).authenticated_user = user_property = mock.PropertyMock()
 
     ProfileController(request).profile()
 
-    user_model.get_by_userid.assert_called_with("acct:foo@bar.com")
+    user_property.assert_called_once_with()
 
 
 @pytest.mark.usefixtures('user_model')
-def test_profile_looks_up_subs_by_logged_in_user(authn_policy,
-                                                 subscriptions_model):
+def test_profile_looks_up_subs_by_logged_in_user(subscriptions_model):
     """
     When fetching the profile, look up subscriptions for the logged in user.
 
     (And don't, for example, use a 'username' passed to us in params.)
     """
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
+    request = Mock(authenticated_userid="acct:foo@bar.com")
 
     ProfileController(request).profile()
 
@@ -862,11 +859,11 @@ def test_profile_looks_up_subs_by_logged_in_user(authn_policy,
 
 
 @pytest.mark.usefixtures('subscriptions_model')
-def test_profile_returns_email(authn_policy, user_model):
+def test_profile_returns_email(authn_policy):
     """The profile should include the user's email."""
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
-    user_model.get_by_userid.return_value = FakeUser(email="foo@bar.com")
+    request.authenticated_user = FakeUser(email="foo@bar.com")
 
     result = ProfileController(request).profile()
 
@@ -874,10 +871,9 @@ def test_profile_returns_email(authn_policy, user_model):
 
 
 @pytest.mark.usefixtures('user_model')
-def test_profile_returns_subscriptions(authn_policy, subscriptions_model):
+def test_profile_returns_subscriptions(subscriptions_model):
     """The profile should include the user's subscriptions."""
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
+    request = Mock(authenticated_userid="acct:foo@bar.com")
     subscriptions_model.get_subscriptions_for_uri.return_value = \
         {"some": "data"}
 
@@ -886,9 +882,10 @@ def test_profile_returns_subscriptions(authn_policy, subscriptions_model):
     assert result["model"]["subscriptions"] == {"some": "data"}
 
 
-def test_edit_profile_invalid_password(authn_policy, form_validator, user_model):
+def test_edit_profile_invalid_password(form_validator, user_model):
     """Make sure our edit_profile call validates the user password."""
-    authn_policy.authenticated_userid.return_value = "johndoe"
+    request = Mock(authenticated_userid="johndoe", method="POST")
+    type(request).user = mock.PropertyMock()
     form_validator.return_value = (None, {
         "username": "john",
         "pwd": "blah",
@@ -898,7 +895,6 @@ def test_edit_profile_invalid_password(authn_policy, form_validator, user_model)
     # Mock an invalid password
     user_model.validate_user.return_value = False
 
-    request = DummyRequest(method='POST')
     profile = ProfileController(request)
     result = profile.edit_profile()
 
@@ -927,9 +923,9 @@ def test_edit_profile_successfully(authn_policy, form_validator, user_model):
         "subscriptions": "",
     })
     user_model.validate_user.return_value = True
-    user_model.get_by_userid.return_value = FakeUser(email="john@doe.com")
-
     request = DummyRequest(method='POST')
+    request.authenticated_user = FakeUser(email="john@doe.com")
+
     profile = ProfileController(request)
     result = profile.edit_profile()
 
@@ -937,7 +933,7 @@ def test_edit_profile_successfully(authn_policy, form_validator, user_model):
 
 
 def test_subscription_update(authn_policy, form_validator,
-                             subscriptions_model, user_model):
+                             subscriptions_model):
     """Make sure that the new status is written into the DB."""
     authn_policy.authenticated_userid.return_value = "acct:john@doe"
     form_validator.return_value = (None, {
@@ -947,9 +943,9 @@ def test_subscription_update(authn_policy, form_validator,
     })
     mock_sub = Mock(active=False, uri="acct:john@doe")
     subscriptions_model.get_by_id.return_value = mock_sub
-    user_model.get_by_userid.return_value = FakeUser(email="john@doe")
-
     request = DummyRequest(method='POST')
+    request.authenticated_user = FakeUser(email="john@doe")
+
     profile = ProfileController(request)
     result = profile.edit_profile()
 
@@ -979,8 +975,7 @@ def test_disable_user_sets_random_password(form_validator, user_model):
     request = Mock(method='POST', authenticated_userid='john')
     form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
 
-    user = FakeUser(password='abc')
-    user_model.get_by_userid.return_value = user
+    user = request.authenticated_user = FakeUser(password='abc')
 
     profile = ProfileController(request)
     profile.disable_user()

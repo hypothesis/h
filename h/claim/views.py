@@ -6,6 +6,7 @@ from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 
 from h import i18n
+from h import util
 from h.accounts.models import User
 from h.accounts.events import LoginEvent
 from h.claim import schemas
@@ -72,7 +73,7 @@ def _validate_request(request):
     if payload is None:
         raise exc.HTTPNotFound()
 
-    user = User.get_by_userid(payload['userid'])
+    user = User.get_by_username(util.split_user(payload['userid'])[0])
     if user is None:
         log.warn('got claim token with invalid userid=%r', payload['userid'])
         raise exc.HTTPNotFound()

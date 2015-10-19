@@ -484,7 +484,7 @@ class ProfileController(object):
         if err is not None:
             return err
 
-        user = User.get_by_userid(self.request.authenticated_userid)
+        user = self.request.authenticated_user
         response = {'model': {'email': user.email}}
 
         # We allow updating subscriptions without validating a password
@@ -531,7 +531,7 @@ class ProfileController(object):
         if err is not None:
             return err
 
-        user = User.get_by_userid(self.request.authenticated_userid)
+        user = self.request.authenticated_user
 
         if User.validate_user(user, appstruct['pwd']):  # Password check.
             # TODO: maybe have an explicit disabled flag in the status
@@ -551,7 +551,7 @@ class ProfileController(object):
         userid = request.authenticated_userid
         model = {}
         if userid:
-            model["email"] = User.get_by_userid(userid).email
+            model["email"] = self.request.authenticated_user.email
             model['subscriptions'] = Subscriptions.get_subscriptions_for_uri(
                 userid)
         return {'model': model}

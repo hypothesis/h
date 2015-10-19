@@ -166,37 +166,38 @@ def test_groupfinder_returns_no_principals(models):
     nor a member of any group, it should return no additional principals.
 
     """
-    request = MagicMock()
-    models.User.get_by_userid.return_value = MagicMock(admin=False,
-                                                       staff=False)
+    models.User.get_by_username.return_value = MagicMock(
+        admin=False, staff=False)
 
-    assert auth.groupfinder("jiji", request) == []
+    assert auth.groupfinder("acct:jiji@hypothes.is", Mock()) == []
 
 
 @groupfinder_fixtures
 def test_groupfinder_with_admin_user(models):
     """If the user is an admin it should return "group:__admin__"."""
-    request = MagicMock()
-    models.User.get_by_userid.return_value = MagicMock(admin=True, staff=False)
+    models.User.get_by_username.return_value = MagicMock(
+        admin=True, staff=False)
 
-    assert "group:__admin__" in auth.groupfinder("jiji", request)
+    assert "group:__admin__" in auth.groupfinder(
+        "acct:jiji@hypothes.is", Mock())
 
 
 @groupfinder_fixtures
 def test_groupfinder_with_staff_user(models):
     """If the user is staff it should return a "group:__staff__" principal."""
-    request = MagicMock()
-    models.User.get_by_userid.return_value = MagicMock(admin=False, staff=True)
+    models.User.get_by_username.return_value = MagicMock(
+        admin=False, staff=True)
 
-    assert "group:__staff__" in auth.groupfinder("jiji", request)
+    assert "group:__staff__" in auth.groupfinder(
+        "acct:jiji@hypothes.is", Mock())
 
 
 @groupfinder_fixtures
 def test_groupfinder_admin_and_staff(models):
-    request = MagicMock()
-    models.User.get_by_userid.return_value = MagicMock(admin=True, staff=True)
+    models.User.get_by_username.return_value = MagicMock(
+        admin=True, staff=True)
 
-    principals = auth.groupfinder("jiji", request)
+    principals = auth.groupfinder("acct:jiji@hypothes.is", Mock())
 
     assert "group:__admin__" in principals
     assert "group:__staff__" in principals
@@ -204,19 +205,17 @@ def test_groupfinder_admin_and_staff(models):
 
 @groupfinder_fixtures
 def test_groupfinder_calls_group_principals(models, groups):
-    request = Mock()
-
-    auth.groupfinder("jiji", request)
+    auth.groupfinder("acct:jiji@hypothes.is", Mock())
 
     groups.group_principals.assert_called_once_with(
-        models.User.get_by_userid.return_value)
+        models.User.get_by_username.return_value)
 
 
 @groupfinder_fixtures
 def test_groupfinder_with_one_group(groups):
     groups.group_principals.return_value = ['group:group-1']
 
-    additional_principals = auth.groupfinder("jiji", Mock())
+    additional_principals = auth.groupfinder("acct:jiji@hypothes.is", Mock())
 
     assert 'group:group-1' in additional_principals
 
@@ -229,7 +228,7 @@ def test_groupfinder_with_three_groups(groups):
         'group:group-3'
     ]
 
-    additional_principals = auth.groupfinder("jiji", Mock())
+    additional_principals = auth.groupfinder("acct:jiji@Hypothes.is", Mock())
 
     assert 'group:group-1' in additional_principals
     assert 'group:group-2' in additional_principals

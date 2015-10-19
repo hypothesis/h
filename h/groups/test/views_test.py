@@ -62,8 +62,7 @@ def test_create_form_returns_form(Form):
 
 
 # The fixtures required to mock all of create()'s dependencies.
-create_fixtures = pytest.mark.usefixtures(
-    'GroupSchema', 'Form', 'Group', 'User')
+create_fixtures = pytest.mark.usefixtures('GroupSchema', 'Form', 'Group')
 
 
 @create_fixtures
@@ -104,23 +103,25 @@ def test_create_rerenders_form_on_validation_failure(Form):
 
 
 @create_fixtures
-def test_create_gets_user_with_authenticated_id(Form, User):
+def test_create_gets_user_with_authenticated_id(Form):
     """It uses the "name" from the validated data to create a new group."""
     Form.return_value = mock.Mock(validate=lambda data: {"name": "test-group"})
     request = _mock_request()
+    type(request).authenticated_user = user_property = mock.PropertyMock()
 
     views.create(request)
 
-    User.get_by_userid.assert_called_once_with(request.authenticated_userid)
+    user_property.assert_called_once_with()
 
 
 @create_fixtures
-def test_create_uses_name_from_validated_data(Form, User, Group):
+def test_create_uses_name_from_validated_data(Form, Group):
     """It uses the "name" from the validated data to create a new group."""
     Form.return_value = mock.Mock(validate=lambda data: {"name": "test-group"})
-    User.get_by_userid.return_value = user = mock.Mock()
+    request = _mock_request()
+    request.authenticated_user = user = mock.Mock()
 
-    views.create(_mock_request())
+    views.create(request)
 
     Group.assert_called_once_with(name="test-group", creator=user)
 
@@ -169,7 +170,7 @@ def test_create_publishes_join_event(Group):
     })
 
 # The fixtures required to mock all of read()'s dependencies.
-read_fixtures = pytest.mark.usefixtures('Group', 'User', 'renderers')
+read_fixtures = pytest.mark.usefixtures('Group', 'renderers')
 
 
 @read_fixtures
@@ -254,11 +255,11 @@ def test_read_if_not_logged_in_returns_response(
 
 
 @read_fixtures
-def test_read_if_not_a_member_renders_template(Group, User, renderers):
+def test_read_if_not_a_member_renders_template(Group, renderers):
     """It should render the "Join this group" template."""
     request = _mock_request(matchdict=_matchdict())
     Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = User.get_by_userid.return_value = mock.Mock()
+    user = request.authenticated_user = mock.Mock()
     user.groups = []  # The user isn't a member of the group.
 
     views.read(request)
@@ -268,12 +269,11 @@ def test_read_if_not_a_member_renders_template(Group, User, renderers):
 
 
 @read_fixtures
-def test_read_if_not_a_member_passes_group_to_template(
-        Group, User, renderers):
+def test_read_if_not_a_member_passes_group_to_template(Group, renderers):
     """It should get the join URL and pass it to the template."""
     request = _mock_request(matchdict=_matchdict())
     g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = User.get_by_userid.return_value = mock.Mock()
+    user = request.authenticated_user = mock.Mock()
     user.groups = []  # The user isn't a member of the group.
 
     views.read(request)
@@ -282,13 +282,12 @@ def test_read_if_not_a_member_passes_group_to_template(
 
 
 @read_fixtures
-def test_read_if_not_a_member_passes_join_url_to_template(
-        Group, User, renderers):
+def test_read_if_not_a_member_passes_join_url_to_template(Group, renderers):
     """It should get the join URL and pass it to the template."""
     request = _mock_request(matchdict=_matchdict())
     request.route_url.return_value = mock.sentinel.join_url
     Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = User.get_by_userid.return_value = mock.Mock()
+    user = request.authenticated_user = mock.Mock()
     user.groups = []  # The user isn't a member of the group.
 
     views.read(request)
@@ -298,11 +297,11 @@ def test_read_if_not_a_member_passes_join_url_to_template(
 
 
 @read_fixtures
-def test_read_if_not_a_member_returns_response(Group, User, renderers):
+def test_read_if_not_a_member_returns_response(Group, renderers):
     """It should return the response from render_to_response()."""
     request = _mock_request(matchdict=_matchdict())
     Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = User.get_by_userid.return_value = mock.Mock()
+    user = request.authenticated_user = mock.Mock()
     user.groups = []  # The user isn't a member of the group.
     renderers.render_to_response.return_value = mock.sentinel.response
 
@@ -310,11 +309,11 @@ def test_read_if_not_a_member_returns_response(Group, User, renderers):
 
 
 @read_fixtures
-def test_read_if_already_a_member_renders_template(Group, User, renderers):
+def test_read_if_already_a_member_renders_template(Group, renderers):
     """It should render the "Share this group" template."""
     request = _mock_request(matchdict=_matchdict())
     g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = User.get_by_userid.return_value = mock.Mock()
+    user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
 
     views.read(request)
@@ -323,11 +322,11 @@ def test_read_if_already_a_member_renders_template(Group, User, renderers):
 
 
 @read_fixtures
-def test_read_if_already_a_member_passes_group(Group, User, renderers):
+def test_read_if_already_a_member_passes_group(Group, renderers):
     """It passes the group to the template."""
     request = _mock_request(matchdict=_matchdict())
     g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = User.get_by_userid.return_value = mock.Mock()
+    user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
 
     views.read(request)
@@ -336,11 +335,11 @@ def test_read_if_already_a_member_passes_group(Group, User, renderers):
 
 
 @read_fixtures
-def test_read_if_already_a_member_returns_response(Group, User, renderers):
+def test_read_if_already_a_member_returns_response(Group, renderers):
     """It should return the response from render_to_response()."""
     request = _mock_request(matchdict=_matchdict())
     g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = User.get_by_userid.return_value = mock.Mock()
+    user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
     renderers.render_to_response.return_value = mock.sentinel.response
 
@@ -348,7 +347,7 @@ def test_read_if_already_a_member_returns_response(Group, User, renderers):
 
 
 # The fixtures required to mock all of join()'s dependencies.
-join_fixtures = pytest.mark.usefixtures('User', 'Group')
+join_fixtures = pytest.mark.usefixtures('Group')
 
 
 @join_fixtures
@@ -373,20 +372,22 @@ def test_join_404s_if_group_not_found(Group):
 
 
 @join_fixtures
-def test_join_gets_user_with_authenticated_userid(User):
+def test_join_gets_user():
     request = _mock_request(matchdict=_matchdict())
+    type(request).authenticated_user = user_property = mock.PropertyMock()
 
     views.join(request)
 
-    User.get_by_userid.assert_called_once_with(request.authenticated_userid)
+    user_property.assert_called_once_with()
 
 
 @join_fixtures
-def test_join_adds_user_to_group_members(Group, User):
+def test_join_adds_user_to_group_members(Group):
     Group.get_by_hashid.return_value = group = mock.Mock()
-    User.get_by_userid.return_value = mock.sentinel.user
+    request = _mock_request(
+        matchdict=_matchdict(), authenticated_user=mock.sentinel.user)
 
-    views.join(_mock_request(matchdict=_matchdict()))
+    views.join(request)
 
     group.members.append.assert_called_once_with(mock.sentinel.user)
 
@@ -415,44 +416,43 @@ def test_join_publishes_join_event(Group):
         'group': mock.sentinel.hashid,
     })
 
-leave_fixtures = pytest.mark.usefixtures('User', 'Group')
+leave_fixtures = pytest.mark.usefixtures('Group')
 
 
 @leave_fixtures
-def test_leave_removes_user_from_group_members(Group, User):
+def test_leave_removes_user_from_group_members(Group):
     user = mock.sentinel.user
     group = mock.Mock()
     group.members = [user]
     Group.get_by_hashid.return_value = group
-    User.get_by_userid.return_value = user
+    request = _mock_request(
+        matchdict=_matchdict(), authenticated_user=user)
 
-    request = _mock_request(matchdict=_matchdict())
     result = views.leave(request)
 
     assert(group.members == [])
 
 
 @leave_fixtures
-def test_leave_returns_not_found_if_user_not_in_group(Group, User):
+def test_leave_returns_not_found_if_user_not_in_group(Group):
     group = mock.Mock(members=[])
     Group.get_by_hashid.return_value = group
-    User.get_by_userid.return_value = mock.sentinel.user
-
-    request = _mock_request(matchdict=_matchdict())
+    request = _mock_request(matchdict=_matchdict(), user=mock.sentinel.user)
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         result = views.leave(request)
 
 
 @leave_fixtures
-def test_leave_publishes_leave_event(Group, User):
+def test_leave_publishes_leave_event(Group):
     group = mock.Mock(hashid=mock.sentinel.hashid,
                       members=[mock.sentinel.user])
     Group.get_by_hashid.return_value = group
-    User.get_by_userid.return_value = mock.sentinel.user
+    request = _mock_request(
+        matchdict=_matchdict(), authenticated_user=mock.sentinel.user)
 
-    request = _mock_request(matchdict=_matchdict())
     views.leave(request)
+
     request.get_queue_writer().publish.assert_called_once_with('user', {
         'type': 'group-leave',
         'userid': request.authenticated_userid,
@@ -476,13 +476,6 @@ def GroupSchema(request):
 @pytest.fixture
 def Group(request):
     patcher = mock.patch('h.groups.views.models.Group', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def User(request):
-    patcher = mock.patch('h.groups.views.models.User', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
