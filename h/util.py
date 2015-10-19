@@ -25,4 +25,6 @@ def userid_from_username(username, request):
 
     """
     return u"acct:{username}@{domain}".format(
-        username=username, domain=request.domain)
+        username=username,
+        domain=request.registry.settings.get(
+            'h.userid_domain', request.domain))

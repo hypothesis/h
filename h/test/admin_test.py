@@ -128,7 +128,11 @@ nipsa_remove_fixtures = pytest.mark.usefixtures('nipsa')
 
 @nipsa_remove_fixtures
 def test_nipsa_remove_calls_nipsa_api_with_userid(nipsa):
-    request = Mock(params={"remove": "kiki"}, domain="hypothes.is")
+    request = Mock(
+        params={"remove": "kiki"},
+        domain="hypothes.is",
+        registry=Mock(settings={})
+    )
 
     admin.nipsa_remove(request)
 
