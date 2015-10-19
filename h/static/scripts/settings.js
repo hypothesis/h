@@ -7,18 +7,20 @@ var angular = require('angular');
  * @name  settings
  *
  * @description
- * The 'settings' factory exposes shared application settings, read from the
- * global variable 'hypothesis.settings' in the app page.
+ * The 'settings' factory exposes shared application settings, read from a
+ * script tag with type "application/json" and id "hypothesis-settings" in the
+ * app page.
  */
 // @ngInject
-function settings($window) {
-  var data = {};
+function settings($document) {
+  var settingsElement = $document[0].querySelector(
+    'script[type="application/json"]#hypothesis-settings');
 
-  if ($window.hypothesis && $window.hypothesis.settings) {
-    angular.copy($window.hypothesis.settings, data);
+  if (settingsElement) {
+    return angular.fromJson(settingsElement.textContent);
   }
 
-  return data;
+  return {};
 }
 
 module.exports = settings;
