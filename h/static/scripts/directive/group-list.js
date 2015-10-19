@@ -50,7 +50,9 @@ function groupList(groups, $window) {
           // wait for the share link field to be revealed and then select
           // the link's text
           setTimeout(function() {
-            var activeShareLinkField = elem[0].querySelector('.share-link-field[data-group-id=' + activeGroupId + ']');
+            var shareLinkSelector = '.share-link-field[data-group-id="' +
+                                    activeGroupId + '"]';
+            var activeShareLinkField = elem[0].querySelector(shareLinkSelector);
             activeShareLinkField.focus();
             activeShareLinkField.select();
           }, 0);
