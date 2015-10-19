@@ -1,11 +1,12 @@
 @import 'base';
 @import 'mixins/responsive';
 
-.topbar {
+$top-bar-height: 40px;
+
+.top-bar {
   background: $white;
-  border: solid 1px $gray-lighter;
-  border-style: solid none;
-  height: 30px;
+  border-bottom: solid 1px $gray-lighter;
+  height: $top-bar-height;
   font-size: 15px;
   position: fixed;
   left: 0;
@@ -14,39 +15,54 @@
   z-index: 5;
 }
 
-.topbar .inner {
+.top-bar__inner {
+  // the edges of the top-bar's contents should be aligned
+  // with the edges of annotation cards displayed below
+  $h-padding: 9px;
+
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
 
-  height: 28px;
+  padding-left: $h-padding;
+  padding-right: $h-padding;
+
+  height: 100%;
 }
 
-.topbar .inner .simple-search {
+.top-bar__inner .group-list {
+  margin-right: .75em;
+}
+
+// an expander which adds spacing between the groups list
+// and the toolbar icons (in the new top-bar design)
+.top-bar__expander {
   flex-grow: 1;
-  margin-right: .75em;
-  overflow: hidden;
 }
 
-.topbar .inner .group-list {
-  margin-right: .75em;
+// Removes the native styling from a <button> element
+@mixin reset-native-btn-styles {
+  padding: 0px;
+  margin: 0px;
+  background-color: transparent;
+  border-style: none;
+  outline: none;
 }
 
-.topbar .btn {
+.top-bar__btn {
+  @include reset-native-btn-styles;
+
   color: $gray-light;
-  min-width: 28px;
-  height: 28px;
+  display: inline-block;
+  cursor: pointer;
+  padding-left: 6px;
 
-  border: 0;
-  padding: 0;
-
-  &:active, .js-active {
-    @include single-transition(background-color, .25s);
-    background-color: $gray-light;
-  }
-
-  &:focus, .js-focus, &:hover, .js-hover {
+  &:hover {
     color: $gray-dark;
   }
+}
+
+.top-bar__dropdown-arrow {
+  color: $color-dove-gray;
 }

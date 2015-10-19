@@ -17,17 +17,32 @@
   color: $gray-light;
 }
 
-input.simple-search-input {
-  flex-grow: 1;
-  order: 1;
+@at-root {
+  $expanded-max-width: 150px;
 
-  color: $text-color;
-  border: none;
-  outline: none;
-  padding: 0;
+  .simple-search-input {
+    flex-grow: 1;
+    order: 1;
 
-  &:disabled {
-    background: none;
-    color: $gray-light;
+    color: $text-color;
+
+    // disable the default browser styling for the input
+    border: none;
+    outline: none;
+    padding: 0px;
+    width: 100%;
+
+    max-width: 0px;
+    transition: max-width .3s ease-out, padding-left .3s ease-out;
+
+    &:disabled {
+      background: none;
+      color: $gray-light;
+    }
+
+    &:focus,&.is-expanded {
+      max-width: $expanded-max-width;
+      padding-left: 6px;
+    }
   }
 }

@@ -27,6 +27,11 @@ module.exports = ['$http', '$parse', ($http, $parse) ->
 
   restrict: 'E'
   scope:
+    # Specifies whether the search input field should always be expanded,
+    # regardless of whether the it is focused or has an active query.
+    #
+    # If false, it is only expanded when focused or when 'query' is non-empty
+    alwaysExpanded: '='
     query: '='
     onSearch: '&'
     onClear: '&'
@@ -34,9 +39,10 @@ module.exports = ['$http', '$parse', ($http, $parse) ->
             <form class="simple-search-form" ng-class="!searchtext && 'simple-search-inactive'" name="searchBox" ng-submit="search($event)">
               <input class="simple-search-input" type="text" ng-model="searchtext" name="searchText"
                      placeholder="{{loading && 'Loading' || 'Search'}}…"
-                     ng-disabled="loading" />
-              <button class="simple-search-icon btn btn-clean" ng-hide="loading">
-                <i class="h-icon-search btn-icon"></i>
+                     ng-disabled="loading"
+                     ng-class="(alwaysExpanded || searchtext.length > 0) ? 'is-expanded' : ''"/>
+              <button class="simple-search-icon top-bar__btn" ng-hide="loading">
+                <i class="h-icon-search"></i>
               </button>
               <button class="simple-search-icon btn btn-clean" ng-show="loading" disabled>
                 <span class="btn-icon"><span class="spinner"></span></span>

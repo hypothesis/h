@@ -7,6 +7,7 @@ makeButton = (item) ->
   .attr('title', item.title)
   .attr('name', item.name)
   .on(item.on)
+  .addClass('annotator-frame-button')
   .addClass(item.class)
   button = $('<li></li>').append(anchor)
   return button[0]
@@ -28,7 +29,7 @@ module.exports = class Toolbar extends Annotator.Plugin
 
     items = [
       "title": "Toggle Sidebar"
-      "class": "h-icon-chevron-left"
+      "class": "annotator-frame-button--sidebar_toggle h-icon-chevron-left"
       "name": "sidebar-toggle"
       "on":
         "click": (event) =>

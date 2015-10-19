@@ -172,7 +172,7 @@ html {
   visibility: hidden;
   background: $white;
   border: solid 1px $gray-lighter;
-  margin-top: .8em;
+  margin-top: 6px;
   top: 100%;
   float: left;
   position: absolute;
@@ -180,17 +180,6 @@ html {
 
   li:not(.ng-hide) {
     text-align: left;
-
-    & > a {
-      display: block;
-      line-height: 1;
-      padding: 1em;
-      white-space: nowrap;
-
-      :hover {
-        color: $brand-color;
-      }
-    }
 
     &.inactive {
       font-weight: 400;
@@ -209,8 +198,21 @@ html {
     }
   }
 
-  a {
+  &__link {
     color: inherit;
+
+    display: block;
+    line-height: 1;
+    padding: 1em;
+    white-space: nowrap;
+
+    &:hover {
+      color: $brand-color;
+    }
+  }
+
+  &__link--subtle {
+    color: $color-gray;
   }
 
   // These psuedo-elements add the speech bubble tail / triangle.
@@ -261,6 +263,15 @@ html {
       right: 50%;
     }
   }
+
+  // Hides the dropdown menu's default ▲ indicator.
+  // This is used for cases where a separate element is used
+  // as the indicator
+  &.pull-none {
+    &:before, &:after {
+      display: none;
+    }
+  }
 }
 
 .open {
@@ -268,6 +279,53 @@ html {
     @include smallshadow;
     visibility: visible;
   }
+}
+
+// A 'standalone' arrow for the top of a dropdown menu.
+// .dropdown-menu has a "built-in" arrow using CSS :before,:after.
+//
+// The standalone arrow is used when the dropdown menu arrow needs
+// to be positioned relative to the item which opens the menu rather
+// than relative to the dropdown menu content.
+//
+// When using the standalone arrow, the built-in arrow is hidden using
+// the .pull-none class
+.dropdown-menu__top-arrow {
+  // the element itself forms the outer border of the arrow
+  $arrow-size: 7px;
+  $bottom-offset: $arrow-size - 1px;
+  visibility: hidden;
+
+  width: 0px;
+  height: 0px;
+  border-top: none;
+  border-left: $arrow-size solid transparent;
+  border-right: $arrow-size solid transparent;
+  border-bottom: $arrow-size solid $gray-lighter;
+  position: absolute;
+  right: 0px;
+  bottom: - $bottom-offset;
+
+  z-index: 3;
+
+  // :after is used to create another arrow of the same size at a 1px
+  // vertical offset, forming the fill and base of the arrow
+  &:after {
+    width: 0px;
+    height: 0px;
+    border-top: none;
+    border-left: $arrow-size solid transparent;
+    border-right: $arrow-size solid transparent;
+    border-bottom: $arrow-size solid white;
+    content: "";
+    position: absolute;
+    left: 0 - $arrow-size;
+    top: 1px;
+  }
+}
+
+.open > .dropdown-menu__top-arrow {
+  visibility: visible;
 }
 
 .masthead {
