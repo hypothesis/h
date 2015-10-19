@@ -12,6 +12,7 @@ def settings_from_environment():
     settings = {}
 
     _setup_analytics(settings)
+    _setup_auth_domain(settings)
     _setup_heroku(settings)
     _setup_db(settings)
     _setup_elasticsearch(settings)
@@ -25,7 +26,6 @@ def settings_from_environment():
     _setup_webassets(settings)
     _setup_websocket(settings)
     _setup_blocklist(settings)
-    _setup_userid_domain(settings)
 
     return settings
 
@@ -42,6 +42,11 @@ def normalize_database_url(url):
 def _setup_analytics(settings):
     if 'GOOGLE_ANALYTICS_TRACKING_ID' in os.environ:
         settings['ga_tracking_id'] = os.environ['GOOGLE_ANALYTICS_TRACKING_ID']
+
+
+def _setup_auth_domain(settings):
+    if 'AUTH_DOMAIN' in os.environ:
+        settings['h.auth_domain'] = os.environ['AUTH_DOMAIN']
 
 
 def _setup_heroku(settings):
@@ -180,8 +185,3 @@ def _setup_websocket(settings):
 def _setup_blocklist(settings):
     if 'BLOCKLIST' in os.environ:
         settings['h.blocklist'] = os.environ['BLOCKLIST']
-
-
-def _setup_userid_domain(settings):
-    if 'USERID_DOMAIN' in os.environ:
-        settings['h.userid_domain'] = os.environ['USERID_DOMAIN']
