@@ -35,8 +35,16 @@ describe 'simple-search', ->
     '''
 
     $element = $compile(angular.element(template))($scope)
+
+    # add element to document so that it becomes focusable
+    # and we get default form behaviors
+    document.body.appendChild($element[0])
+
     $scope.$digest()
     isolate = $element.isolateScope()
+
+  afterEach ->
+    document.body.removeChild($element[0])
 
   it 'updates the search-bar', ->
     $scope.query = "Test query"
@@ -75,3 +83,26 @@ describe 'simple-search', ->
     fakeHttp.pendingRequests = ['bogus']
     isolate.$digest()
     assert.isTrue(isolate.loading)
+
+  it 'expands the search field when the input is non-empty', ->
+    input = $element.find('.simple-search-input')
+    assert.isFalse(input.hasClass('is-expanded'))
+    input.val('query')
+    input.trigger('change')
+    isolate.$digest()
+    assert.isTrue(input.hasClass('is-expanded'))
+
+  it 'focuses the search field when clicking the search button', ->
+    input = $element.find('.simple-search-input')
+    searchBtn = $element.find('button')
+    assert.ok(document.activeElement != input[0])
+    searchBtn.click()
+    assert.ok(document.activeElement == input[0])
+
+  it 'does not update the search when clicking the search button', ->
+    searchBtn = $element.find('button')
+    input = $element.find('.simple-search-input')
+    input.val('query')
+    input.trigger('change')
+    searchBtn.click()
+    assert.notCalled($scope.update)
