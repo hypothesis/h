@@ -15,6 +15,7 @@ function createConstructor(prototype) {
   return Constructor;
 }
 
+
 describe('HypothesisChromeExtension', function () {
   var sandbox = sinon.sandbox.create();
   var HypothesisChromeExtension;
@@ -27,6 +28,7 @@ describe('HypothesisChromeExtension', function () {
   var fakeTabErrorCache;
   var fakeBrowserAction;
   var fakeSidebarInjector;
+  var fakeUriInfo;
 
   function createExt() {
     return new HypothesisChromeExtension({
@@ -67,11 +69,16 @@ describe('HypothesisChromeExtension', function () {
       setState: sandbox.spy(),
       activate: sandbox.spy(),
       deactivate: sandbox.spy(),
+      updateBadge: sandbox.spy(),
     };
     fakeSidebarInjector = {
       injectIntoTab: sandbox.stub().returns(Promise.resolve()),
       removeFromTab: sandbox.stub().returns(Promise.resolve()),
     };
+    fakeUriInfo = {
+      get: sandbox.stub().returns(Promise.resolve({total: 3, blocked: false})),
+      UriInfoError: function(error) {this.error = error}
+    }
 
     HypothesisChromeExtension = proxyquire('../lib/hypothesis-chrome-extension', {
       './tab-state': createConstructor(fakeTabState),
@@ -80,8 +87,8 @@ describe('HypothesisChromeExtension', function () {
       './tab-error-cache': createConstructor(fakeTabErrorCache),
       './browser-action': createConstructor(fakeBrowserAction),
       './sidebar-injector': createConstructor(fakeSidebarInjector),
+      './uri-info': fakeUriInfo
     });
-
     ext = createExt();
   });
 
@@ -198,44 +205,74 @@ describe('HypothesisChromeExtension', function () {
       it('injects the sidebar if the tab is active', function () {
         var tab = createTab();
         fakeTabState.isTabActive.withArgs(1).returns(true);
-        onUpdatedHandler(tab.id, {status: 'complete'}, tab);
-        assert.calledWith(fakeSidebarInjector.injectIntoTab, tab);
+        return onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(
+          function onFulfilled() {
+            assert.calledWith(fakeSidebarInjector.injectIntoTab, tab);
+          },
+          function onRejected() {
+            assert(false, "The promise should not be rejected");
+          });
       });
 
       it('clears the tab state if the sidebar is not active', function () {
         var tab = {id: 1, url: 'http://example.com/foo.html', status: 'complete'};
         fakeTabState.isTabActive.withArgs(1).returns(false);
-        onUpdatedHandler(tab.id, {status: 'complete'}, tab);
-        assert.calledWith(fakeTabState.clearTab, tab.id);
+        return onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(
+          function onFulfilled() {
+            assert.calledWith(fakeTabState.clearTab, tab.id);
+          },
+          function onRejected() {
+            assert(false, "The promise should not be rejected");
+          });
       });
 
       it('updates the browser action to the active state when active', function () {
         var tab = createTab();
         fakeTabState.isTabActive.withArgs(1).returns(true);
-        onUpdatedHandler(tab.id, {status: 'complete'}, tab);
-        assert.called(fakeBrowserAction.activate);
-        assert.calledWith(fakeBrowserAction.activate, tab.id);
+        return onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(
+          function onFulfilled() {
+            assert.called(fakeBrowserAction.activate);
+            assert.calledWith(fakeBrowserAction.activate, tab.id);
+          },
+          function onRejected() {
+            assert(false, "The promise should not be rejected");
+          });
       });
 
       it('updates the browser action to the inactive state when inactive', function () {
         var tab = createTab();
         fakeTabState.isTabActive.withArgs(1).returns(false);
-        onUpdatedHandler(tab.id, {status: 'complete'}, tab);
-        assert.calledWith(fakeBrowserAction.deactivate, tab.id);
+        return onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(
+          function onFulfilled() {
+            assert.calledWith(fakeBrowserAction.deactivate, tab.id);
+          },
+          function onRejected() {
+            assert(false, "The promise should not be rejected");
+          });
       });
 
       it('restores the tab state if errored', function () {
         var tab = createTab();
         fakeTabState.isTabErrored.returns(true);
-        onUpdatedHandler(tab.id, {status: 'complete'}, tab);
-        assert.calledWith(fakeTabState.restorePreviousState, 1);
+        return onUpdatedHandler(tab.id, {status: 'complete'}, tab).then(
+          function onFulfilled() {
+            assert.calledWith(fakeTabState.restorePreviousState, 1);
+          },
+          function onRejected() {
+            assert(false, "The promise should not be rejected");
+          });
       });
 
       it('does nothing until the tab status is complete', function () {
         var tab = createTab();
         fakeTabState.isTabActive.withArgs(1).returns(true);
-        onUpdatedHandler(tab.id, {status: 'loading'}, tab);
-        assert.notCalled(fakeSidebarInjector.injectIntoTab);
+        return onUpdatedHandler(tab.id, {status: 'loading'}, tab).then(
+          function onFulfilled() {
+            assert.notCalled(fakeSidebarInjector.injectIntoTab);
+          },
+          function onRejected() {
+            assert(false, "The promise should not be rejected");
+          });
       });
     });
 
@@ -380,12 +417,6 @@ describe('HypothesisChromeExtension', function () {
       assert.notCalled(fakeTabStore.set);
     });
 
-    it('injects the sidebar if the tab has been activated', function () {
-      fakeTabState.isTabActive.returns(true);
-      onChangeHandler(1, 'active', 'inactive');
-      assert.calledWith(fakeSidebarInjector.injectIntoTab, tab);
-    });
-
     it('removes the sidebar if the tab has been deactivated', function () {
       fakeTabState.isTabInactive.returns(true);
       onChangeHandler(1, 'inactive', 'active');
@@ -425,6 +456,186 @@ describe('HypothesisChromeExtension', function () {
         assert.called(fakeTabErrorCache.unsetTabError);
         assert.calledWith(fakeTabErrorCache.unsetTabError, 1);
       });
+    });
+  });
+
+  describe('onTabUpdated', function() {
+    var onTabUpdated;
+
+    beforeEach(function() {
+      fakeChromeBrowserAction.onClicked = {
+        addListener: function() {}
+      };
+      fakeChromeTabs.onCreated = {
+        addListener: function() {}
+      };
+      fakeChromeTabs.onUpdated = {
+        addListener: sandbox.spy(function (fn) {
+          onTabUpdated = fn;
+        })
+      };
+      fakeChromeTabs.onRemoved = {
+        addListener: function() {}
+      };
+      fakeTabState.isTabActive = function() {return true;};
+    });
+
+    it('does not call the injector if the tab is not active', function() {
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: false}));
+      ext.listen({addEventListener: sandbox.stub()});
+      fakeTabState.isTabActive = function() {return false;};
+      fakeTabState.clearTab = function() {};
+
+      return onTabUpdated(
+        1, {'status': 'complete'},
+        {'status': 'complete', 'url': 'http://notblocked.com'})
+      .then(
+        function onFulfilled() {
+          assert.notCalled(fakeSidebarInjector.injectIntoTab);
+        },
+        function onRejected() {
+          assert(false, "The promise should not be rejected");
+        }
+      );
+    });
+
+    it('calls uriInfo() with the URI', function() {
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: false}));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        1, {'status': 'complete'},
+        {'status': 'complete', 'url': 'http://example.com/example'})
+      .then(
+        function onFulfilled() {
+          assert.calledWith(fakeUriInfo.get, 'http://example.com/example');
+        },
+        function onRejected() {
+          assert(false, "The promise should not be rejected");
+        }
+      );
+    });
+
+    it('does call the injector on not-blocked sites', function() {
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: false}));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        1, {'status': 'complete'},
+        {'status': 'complete', 'url': 'http://notblocked.com'})
+      .then(
+        function onFulfilled() {
+          assert.called(fakeSidebarInjector.injectIntoTab);
+        },
+        function onRejected() {
+          assert(false, "The promise should not be rejected");
+        }
+      );
+    });
+
+    it('does not call the injector on blocked sites', function() {
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: true}));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        1, {'status': 'complete'},
+        {'status': 'complete', 'url': 'http://notblocked.com'})
+      .then(
+        function onFulfilled() {
+          assert.notCalled(fakeSidebarInjector.injectIntoTab);
+        },
+        function onRejected() {
+          assert(false, "The promise should not be rejected");
+        }
+      );
+    });
+
+    it('does call the injector if the uriInfo request fails', function() {
+      fakeUriInfo.get.returns(Promise.reject(
+          new fakeUriInfo.UriInfoError('the uriInfo request timed out')));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        1, {'status': 'complete'},
+        {'status': 'complete', 'url': 'http://notblocked.com'})
+      .then(
+        function onFulfilled() {
+          assert.called(fakeSidebarInjector.injectIntoTab);
+        },
+        function onRejected() {
+          assert(false, "The promise should not be rejected");
+        }
+      );
+    });
+
+    it('re-throws unknown errors from uriInfo', function() {
+      var unknownError = {foo: "bar"};
+      fakeUriInfo.get.returns(Promise.reject(unknownError));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        1, {'status': 'complete'},
+        {'status': 'complete', 'url': 'http://notblocked.com'})
+      .then(
+        function onFulfilled() {
+          assert(false, "The promise should not be fulfilled");
+        },
+        function onRejected(error) {
+          assert.equal(error, unknownError);
+        }
+      );
+    });
+
+    it('does call updateBadge when URI is not blocked', function() {
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: false}));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        'tabId', {'status': 'complete'},
+        {status: 'complete', uri: 'http://notblocked.com', id: 'tabId'})
+      .then(
+        function onFulfilled() {
+          assert.calledWith(fakeBrowserAction.updateBadge, 3, 'tabId');
+        },
+        function onRejected() {
+          assert(false, "The promise should not be rejected");
+        }
+      );
+    });
+
+    it('does not call updateBadge when URI is blocked', function() {
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: true}));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        'tabId', {'status': 'complete'},
+        {status: 'complete', uri: 'http://notblocked.com', id: 'tabId'})
+      .then(
+        function onFulfilled() {
+          assert.notCalled(fakeBrowserAction.updateBadge);
+        },
+        function onRejected() {
+          assert(false, "The promise should not be rejected");
+        }
+      );
+    });
+
+    it('sets an error when uri is blocked', function() {
+      fakeUriInfo.get.returns(Promise.resolve({total: 3, blocked: true}));
+      ext.listen({addEventListener: sandbox.stub()});
+
+      return onTabUpdated(
+        'tabId', {'status': 'complete'},
+        {status: 'complete', uri: 'http://notblocked.com', id: 'tabId'})
+      .then(
+        function onFulfilled() {
+          assert.called(fakeTabErrorCache.setTabError);
+          assert.called(fakeTabState.errorTab);
+        },
+        function onRejected() {
+          assert(false, "The promise should not be rejected");
+        }
+      );
     });
   });
 });

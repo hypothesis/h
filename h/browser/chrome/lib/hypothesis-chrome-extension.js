@@ -3,10 +3,11 @@
 var TabState = require('./tab-state');
 var BrowserAction = require('./browser-action');
 var HelpPage = require('./help-page');
-var settings = require('./settings');
 var SidebarInjector = require('./sidebar-injector');
 var TabErrorCache = require('./tab-error-cache');
 var TabStore = require('./tab-store');
+var uriInfo = require('./uri-info');
+var errors = require('./errors');
 
 var TAB_STATUS_COMPLETE = 'complete';
 
@@ -131,7 +132,7 @@ function HypothesisChromeExtension(dependencies) {
     // This function will be called multiple times as the tab reloads.
     // https://developer.chrome.com/extensions/tabs#event-onUpdated
     if (changeInfo.status !== TAB_STATUS_COMPLETE) {
-      return;
+      return Promise.resolve();
     }
 
     if (state.isTabErrored(tabId)) {
@@ -147,10 +148,23 @@ function HypothesisChromeExtension(dependencies) {
       browserAction.deactivate(tabId);
     }
 
-    settings.then(function(settings) {
-      browserAction.updateBadge(tabId, tab.url, settings.apiUrl);
+    // Here we're calling uriInfo.get() for two reasons:
+    // 1. Because we want to call updateBadge() in the then() function.
+    // 2. Because we want to fetch the info for the new URL asap, when we
+    //    call uriInfo.get() again later (when the user clicks on the browser
+    //    button to activate the sidebar) it will return the already-resolved
+    //    Promise.
+    uriInfo.get(tab.url, true).then(function(info) {
+      if (!info.blocked) {
+        browserAction.updateBadge(info.total, tab.id);
+      }
+    }).catch(function(error) {
+      if (error instanceof uriInfo.UriInfoError) {
+        // Silence console error message about uncaught exception here.
+      } else {
+        throw error;
+      }
     });
-
     return updateTabDocument(tab);
   }
 
@@ -169,15 +183,39 @@ function HypothesisChromeExtension(dependencies) {
       return Promise.resolve();
     }
 
-    if (state.isTabActive(tab.id)) {
-      return sidebar.injectIntoTab(tab).catch(function (err) {
+    function inject(tab) {
+      sidebar.injectIntoTab(tab).catch(function (err) {
         tabErrors.setTabError(tab.id, err);
         state.errorTab(tab.id);
       });
     }
-    else if (state.isTabInactive(tab.id)) {
+
+    if (state.isTabActive(tab.id)) {
+      return uriInfo.get(tab.url).then(
+        function onFulfilled(info) {
+          if (info.blocked) {
+              tabErrors.setTabError(
+                tab.id, new errors.BlockedSiteError(
+                  "Hypothesis doesn't work on this site yet."));
+              state.errorTab(tab.id);
+          } else {
+            inject(tab);
+          }
+        },
+        function onRejected(error) {
+          if (error instanceof uriInfo.UriInfoError) {
+            // If the request to the server to get the uriInfo times out or
+            // fails for any reason, then we just assume that the URI isn't
+            // blocked and go ahead and inject the sidebar.
+            inject(tab);
+          } else {
+            throw error;
+          }
+        });
+    } else if (state.isTabInactive(tab.id)) {
       return sidebar.removeFromTab(tab);
     }
+    return Promise.resolve();
   }
 }
 

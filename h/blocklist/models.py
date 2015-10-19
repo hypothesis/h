@@ -9,12 +9,7 @@ from h.i18n import TranslationString as _
 
 class Blocklist(Base):
 
-    """A list of URIs for which the badge API will always return 0.
-
-    This means that the Chrome extension will never show a number of
-    annotations on its badge for these URIs.
-
-    """
+    """A list of URIs on which h will not launch."""
 
     __tablename__ = 'blocklist'
 
@@ -45,7 +40,6 @@ class Blocklist(Base):
     @classmethod
     def is_blocked(cls, uri):
         """Return True if the given URI is blocked."""
-
         if cls.query.filter(expression.literal(uri).like(cls.uri)).all():
             return True
         else:

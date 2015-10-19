@@ -175,36 +175,36 @@ def users_index(request):
     return {'username': username, 'user': user}
 
 
-@view.view_config(route_name='admin_badge',
+@view.view_config(route_name='admin_blocklist',
                   request_method='GET',
-                  renderer='h:templates/admin/badge.html.jinja2',
+                  renderer='h:templates/admin/blocklist.html.jinja2',
                   permission='admin')
-def badge_index(_):
+def blocklist_index(_):
     return {"uris": models.Blocklist.all()}
 
 
-@view.view_config(route_name='admin_badge',
+@view.view_config(route_name='admin_blocklist',
                   request_method='POST',
                   request_param='add',
-                  renderer='h:templates/admin/badge.html.jinja2',
+                  renderer='h:templates/admin/blocklist.html.jinja2',
                   permission='admin')
-def badge_add(request):
+def blocklist_add(request):
     try:
         request.db.add(models.Blocklist(uri=request.params['add']))
     except ValueError as err:
         request.session.flash(err.message, 'error')
-    return badge_index(request)
+    return blocklist_index(request)
 
 
-@view.view_config(route_name='admin_badge',
+@view.view_config(route_name='admin_blocklist',
                   request_method='POST',
                   request_param='remove',
-                  renderer='h:templates/admin/badge.html.jinja2',
+                  renderer='h:templates/admin/blocklist.html.jinja2',
                   permission='admin')
-def badge_remove(request):
+def blocklist_remove(request):
     uri = request.params['remove']
     request.db.delete(models.Blocklist.get_by_uri(uri))
-    return badge_index(request)
+    return blocklist_index(request)
 
 
 def includeme(config):
@@ -214,5 +214,5 @@ def includeme(config):
     config.add_route('admin_admins', '/admin/admins')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
-    config.add_route('admin_badge', '/admin/badge')
+    config.add_route('admin_blocklist', '/admin/blocklist')
     config.scan(__name__)

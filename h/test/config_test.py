@@ -207,15 +207,6 @@ def test_session_secret_environment():  # bw compat
     assert actual_config == expected_config
 
 
-def test_blocklist():
-    blocklist = '{"seanh.cc": {}, "twitter.com": {}, "finance.yahoo.com": {}'
-    os.environ['BLOCKLIST'] = blocklist
-
-    actual_config = settings_from_environment()
-
-    assert actual_config == {'h.blocklist': blocklist}
-
-
 @pytest.fixture(autouse=True)
 def environ(request):
     """Clear the environment and later restore it to its original state."""
