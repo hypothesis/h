@@ -48,3 +48,8 @@ class Subscriptions(Base):
                 'uri': self.uri,
                 'type': self.type,
                 'active': self.active}
+
+    def __repr__(self):
+        return '<Subscription uri=%s type=%s active=%s>' % (self.uri,
+                                                            self.type,
+                                                            self.active)
