@@ -1,110 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="16px"
-   height="16px"
-   viewBox="0 0 16 16"
-   version="1.1"
-   id="svg4212"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="filter.svg">
-  <metadata
-     id="metadata4230">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1535"
-     inkscape:window-height="876"
-     id="namedview4228"
-     showgrid="false"
-     inkscape:zoom="46.1875"
-     inkscape:cx="8"
-     inkscape:cy="8"
-     inkscape:window-x="65"
-     inkscape:window-y="24"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="Artboard-1-Copy-3" />
-  <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
-  <title
-     id="title4214">Artboard 1 Copy 3</title>
-  <desc
-     id="desc4216">Created with Sketch.</desc>
-  <defs
-     id="defs4218" />
-  <g
-     id="Page-1"
-     stroke="none"
-     stroke-width="1"
-     fill="none"
-     fill-rule="evenodd"
-     sketch:type="MSPage">
-    <g
-       id="Artboard-1-Copy-3"
-       sketch:type="MSArtboardGroup">
-      <rect
-         id="Rectangle-2"
-         fill="#000000"
-         sketch:type="MSShapeGroup"
-         x="0"
-         y="3"
-         width="4"
-         height="2" />
-      <path
-         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-         d="M 6,-1 C 3.2504209,-1 1,1.2504209 1,4 1,6.7495791 3.2504209,9 6,9 8.7495791,9 11,6.7495791 11,4 11,1.2504209 8.7495791,-1 6,-1 Z M 6,1 C 7.6686989,1 9,2.3313011 9,4 9,5.6686989 7.6686989,7 6,7 4.3313011,7 3,5.6686989 3,4 3,2.3313011 4.3313011,1 6,1 Z"
-         id="Oval-3"
-         inkscape:connector-curvature="0" />
-      <rect
-         id="Rectangle-2-Copy"
-         fill="#000000"
-         sketch:type="MSShapeGroup"
-         x="12"
-         y="11"
-         width="4"
-         height="2" />
-      <path
-         style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;white-space:normal;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-         d="m 10,7 c -2.7495791,0 -5,2.2504209 -5,5 0,2.749579 2.2504209,5 5,5 2.749579,0 5,-2.250421 5,-5 0,-2.7495791 -2.250421,-5 -5,-5 z m 0,2 c 1.668699,0 3,1.331301 3,3 0,1.668699 -1.331301,3 -3,3 C 8.3313011,15 7,13.668699 7,12 7,10.331301 8.3313011,9 10,9 Z"
-         id="Oval-3-Copy"
-         inkscape:connector-curvature="0" />
-      <rect
-         id="Rectangle-2-Copy-2"
-         fill="#000000"
-         sketch:type="MSShapeGroup"
-         x="9"
-         y="3"
-         width="7"
-         height="2" />
-      <rect
-         id="Rectangle-2-Copy-3"
-         fill="#000000"
-         sketch:type="MSShapeGroup"
-         x="0"
-         y="11"
-         width="7"
-         height="2" />
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
+    <title>Artboard 1 Copy 3</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Artboard-1-Copy-3" sketch:type="MSArtboardGroup" fill="#000000">
+            <rect id="Rectangle-2" sketch:type="MSShapeGroup" x="0" y="3" width="4" height="2"></rect>
+            <path d="M6,6 L6,6 C7.1045695,6 8,5.1045695 8,4 C8,2.8954305 7.1045695,2 6,2 C4.8954305,2 4,2.8954305 4,4 C4,5.1045695 4.8954305,6 6,6 L6,6 Z M6,8 L6,8 C3.790861,8 2,6.209139 2,4 C2,1.790861 3.790861,0 6,0 C8.209139,0 10,1.790861 10,4 C10,6.209139 8.209139,8 6,8 L6,8 Z" id="Shape" sketch:type="MSShapeGroup"></path>
+            <rect id="Rectangle-2-Copy" sketch:type="MSShapeGroup" x="12" y="11" width="4" height="2"></rect>
+            <path d="M10,14 L10,14 C11.1045695,14 12,13.1045695 12,12 C12,10.8954305 11.1045695,10 10,10 C8.8954305,10 8,10.8954305 8,12 C8,13.1045695 8.8954305,14 10,14 L10,14 Z M10,16 L10,16 C7.790861,16 6,14.209139 6,12 C6,9.790861 7.790861,8 10,8 C12.209139,8 14,9.790861 14,12 C14,14.209139 12.209139,16 10,16 L10,16 Z" id="Shape" sketch:type="MSShapeGroup"></path>
+            <rect id="Rectangle-2-Copy-2" sketch:type="MSShapeGroup" x="9" y="3" width="7" height="2"></rect>
+            <rect id="Rectangle-2-Copy-3" sketch:type="MSShapeGroup" x="0" y="11" width="7" height="2"></rect>
+        </g>
     </g>
-  </g>
 </svg>
