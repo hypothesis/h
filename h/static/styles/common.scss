@@ -184,6 +184,7 @@ html {
     display: block;
     line-height: 1;
     white-space: nowrap;
+    font-size: $body2-font-size;
 
     &:hover {
       color: $brand-color;
