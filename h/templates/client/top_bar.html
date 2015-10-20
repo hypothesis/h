@@ -55,6 +55,12 @@
          on-search="searchController.update(query)"
          on-clear="searchController.clear()"
          title="Filter the annotation list"></simple-search>
+    <sort-dropdown
+      sort-options="sortOptions"
+      sort-by="sortBy"
+      show-as-icon="true"
+      on-change-sort-by="onChangeSortBy({sortBy: sortBy})">
+    </sort-dropdown>
     <a class="top-bar__btn"
             ng-click="shareDialog.visible = !shareDialog.visible"
             ng-if="isSidebar"

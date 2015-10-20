@@ -4,6 +4,7 @@ module.exports = function () {
     scope: {
       sortBy: '=',
       sortOptions: '=',
+      showAsIcon: '=',
       onChangeSortBy: '&',
     },
     templateUrl: 'sort_dropdown.html',
