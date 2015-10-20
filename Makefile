@@ -47,11 +47,14 @@ client-test: client-app-test client-extension-test
 client-app-test: deps
 	@$(NPM_BIN)/karma start h/static/scripts/karma.config.js --single-run
 
+client-app-test-watch: deps
+	@$(NPM_BIN)/karma start h/static/scripts/karma.config.js
+
 client-extension-test: deps
 	@$(NPM_BIN)/karma start h/browser/chrome/karma.config.js --single-run
 
-client-test-watch: deps
-	@$(NPM_BIN)/karma start h/static/scripts/karma.config.js
+client-extension-test-watch: deps
+	@$(NPM_BIN)/karma start h/browser/chrome/karma.config.js
 
 cover:
 	@python setup.py test --cov

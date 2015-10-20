@@ -98,7 +98,7 @@ function HypothesisChromeExtension(dependencies) {
 
   function onTabStateChange(tabId, current, previous) {
     if (current) {
-      browserAction.setState(tabId, current);
+      browserAction.update(tabId, current);
 
       if (!state.isTabErrored(tabId)) {
         store.set(tabId, current);
@@ -138,17 +138,16 @@ function HypothesisChromeExtension(dependencies) {
       state.restorePreviousState(tabId);
     }
 
-    if (state.isTabActive(tabId)) {
-      browserAction.activate(tabId);
-    } else {
+    if (!state.isTabActive(tabId)) {
       // Clear the state to express that the user has no preference.
       // This allows the publisher embed to persist without us destroying it.
       state.clearTab(tabId);
-      browserAction.deactivate(tabId);
     }
 
+    browserAction.update(tabId, state.getState(tabId));
+
     settings.then(function(settings) {
-      browserAction.updateBadge(tabId, tab.url, settings.apiUrl);
+      state.updateAnnotationCount(tabId, tab.url, settings.apiUrl);
     });
 
     return updateTabDocument(tab);

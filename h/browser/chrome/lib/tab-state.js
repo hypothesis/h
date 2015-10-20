@@ -1,5 +1,8 @@
 'use strict';
 
+var assign = require('core-js/modules/$.assign');
+var isShallowEqual = require('is-equal-shallow');
+
 var states = {
   ACTIVE:   'active',
   INACTIVE: 'inactive',
@@ -37,54 +40,123 @@ function TabState(initialState, onchange) {
   };
 
   this.activateTab = function (tabId, options) {
-    transition(tabId, states.ACTIVE, options);
+    this.setState(tabId, {state: states.ACTIVE}, options);
   };
 
   this.deactivateTab = function (tabId, options) {
-    transition(tabId, states.INACTIVE, options);
+    this.setState(tabId, {state: states.INACTIVE}, options);
   };
 
   this.errorTab = function (tabId, options) {
-    transition(tabId, states.ERRORED, options);
+    this.setState(tabId, {state: states.ERRORED}, options);
   };
 
   this.clearTab = function (tabId) {
-    transition(tabId, null);
+    this.setState(tabId, null);
   };
 
   this.restorePreviousState = function (tabId) {
-    transition(tabId, previousState[tabId], this.onchange);
+    this.setState(tabId, previousState[tabId], this.onchange);
   };
 
+  function getState(tabId) {
+    if (!currentState[tabId]) {
+      return {
+        state: states.INACTIVE,
+        annotationCount: 0,
+      };
+    }
+    return currentState[tabId];
+  }
+
+  this.getState = getState;
+
+  this.annotationCount = function(tabId) {
+    return getState(tabId).annotationCount;
+  }
+
   this.isTabActive = function (tabId) {
-    return currentState[tabId] === states.ACTIVE;
+    return getState(tabId).state === states.ACTIVE;
   };
 
   this.isTabInactive = function (tabId) {
-    return currentState[tabId] === states.INACTIVE;
+    return getState(tabId).state === states.INACTIVE;
   };
 
   this.isTabErrored = function (tabId) {
-    return currentState[tabId] === states.ERRORED;
+    return getState(tabId).state === states.ERRORED;
   };
 
-  // options.force allows the caller to re-trigger an onchange event for
-  // the current state without modifying the previous state. This is useful
-  // for restoring tab state after the extension is reloaded.
-  function transition (tabId, state, options) {
+  /**
+   * Updates the H state for a tab.
+   *
+   * @param tabId - The ID of the tab being updated
+   * @param stateUpdate - A dictionary of {key:value} properties for
+   *                      state properties to update.
+   * @param options - The 'force' option allows the caller to re-trigger
+   *                  an onchange event for the current state without modifying
+   *                  the previous state. This is useful for restoring tab state
+   *                  after the extension is reloaded.
+   */
+  this.setState = function (tabId, stateUpdate, options) {
+    var newState;
+    if (stateUpdate) {
+      newState = assign({
+        // default state
+        state: states.INACTIVE,
+      }, currentState[tabId], stateUpdate);
+    }
+
     var isForced = !!options && options.force === true;
-    var hasChanged = state !== currentState[tabId];
+    var hasChanged = !isShallowEqual(newState, currentState[tabId]);
     if (!isForced && !hasChanged) { return; }
 
     if (!isForced || hasChanged) {
       previousState[tabId] = currentState[tabId];
-      currentState[tabId] = state;
+      currentState[tabId] = newState;
     }
 
     if (typeof _this.onchange === 'function') {
-      _this.onchange(tabId, state, previousState[tabId] || null);
+      _this.onchange(tabId, newState, previousState[tabId] || null);
     }
   }
+
+  /**
+   * Query the server for the annotation count for a URL
+   * and update the annotation count for the tab accordingly.
+   *
+   * @method
+   * @param {integer} tabId The id of the tab.
+   * @param {string} tabUrl The URL of the tab.
+   * @param {string} apiUrl The URL of the Hypothesis API.
+   */
+  this.updateAnnotationCount = function(tabId, tabUrl, apiUrl) {
+    // Fetch the number of annotations of the current page from the server,
+    // and display it as a badge on the browser action button.
+    var self = this;
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+      var total;
+
+      try {
+        total = JSON.parse(this.response).total;
+      } catch (e) {
+        console.error(
+          'updateAnnotationCount() received invalid JSON from the server: ' + e);
+        return;
+      }
+
+      if (typeof total !== 'number') {
+        console.error('annotation count is not a number');
+        return;
+      }
+
+      self.setState(tabId, {annotationCount: total});
+    };
+
+    xhr.open('GET', apiUrl + '/badge?uri=' + tabUrl);
+    xhr.send();
+  };
 
   this.load(initialState || {});
 }

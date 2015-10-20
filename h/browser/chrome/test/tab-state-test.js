@@ -2,12 +2,16 @@ describe('TabState', function () {
   'use strict';
 
   var TabState = require('../lib/tab-state');
+  var states = TabState.states;
+
   var state;
   var onChange;
 
   beforeEach(function () {
     onChange = sinon.spy();
-    state = new TabState({1: 'active'}, onChange);
+    state = new TabState({
+      1: {state: states.ACTIVE}
+    }, onChange);
   });
 
   it('can be initialized without any default state', function () {
@@ -26,7 +30,7 @@ describe('TabState', function () {
 
   describe('.load', function () {
     it('replaces the current tab states with a new object', function () {
-      state.load({2: 'inactive'});
+      state.load({2: {state: states.INACTIVE}});
       assert.equal(state.isTabActive(1), false);
       assert.equal(state.isTabInactive(2), true);
     });
@@ -40,13 +44,13 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.activateTab(2);
-      assert.calledWith(onChange, 2, TabState.states.ACTIVE, null);
+      assert.calledWith(onChange, 2, {state: states.ACTIVE}, null);
     });
 
     it('options.force can be used to re-trigger the current state', function () {
       state.activateTab(2);
       state.activateTab(2, {force: true});
-      assert.calledWith(onChange, 2, TabState.states.ACTIVE, null);
+      assert.calledWith(onChange, 2, {state: states.ACTIVE}, null);
       assert.calledTwice(onChange);
     });
   });
@@ -59,13 +63,13 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.deactivateTab(2);
-      assert.calledWith(onChange, 2, TabState.states.INACTIVE, null);
+      assert.calledWith(onChange, 2, {state: states.INACTIVE}, null);
     });
 
     it('options.force can be used to re-trigger the current state', function () {
       state.deactivateTab(2);
       state.deactivateTab(2, {force: true});
-      assert.calledWith(onChange, 2, TabState.states.INACTIVE, null);
+      assert.calledWith(onChange, 2, {state: states.INACTIVE}, null);
       assert.calledTwice(onChange);
     });
   });
@@ -78,13 +82,13 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.errorTab(2);
-      assert.calledWith(onChange, 2, TabState.states.ERRORED, null);
+      assert.calledWith(onChange, 2, {state: states.ERRORED}, null);
     });
 
     it('options.force can be used to re-trigger the current state', function () {
       state.errorTab(2);
       state.errorTab(2, {force: true});
-      assert.calledWith(onChange, 2, TabState.states.ERRORED, null);
+      assert.calledWith(onChange, 2, {state: states.ERRORED}, null);
       assert.calledTwice(onChange);
     });
   });
@@ -93,13 +97,13 @@ describe('TabState', function () {
     it('removes the state for the tab id provided', function () {
       state.clearTab(1);
       assert.equal(state.isTabActive(1), false), 'expected isTabActive to return false';
-      assert.equal(state.isTabInactive(1), false, 'expected isTabInactive to return false');
+      assert.equal(state.isTabInactive(1), true, 'expected isTabInactive to return true');
       assert.equal(state.isTabErrored(1), false, 'expected isTabInactive to return false');
     });
 
     it('triggers an onchange handler', function () {
       state.clearTab(1);
-      assert.calledWith(onChange, 1, null);
+      assert.calledWith(onChange, 1, undefined);
     });
   });
 
@@ -123,7 +127,7 @@ describe('TabState', function () {
       state.errorTab(1);
       state.deactivateTab(1);
       state.deactivateTab(1, {force: true});
-      assert.calledWith(onChange, 1, TabState.states.INACTIVE, TabState.states.ERRORED);
+      assert.calledWith(onChange, 1, {state: states.INACTIVE}, {state: states.ERRORED});
     });
   });
 
@@ -152,7 +156,98 @@ describe('TabState', function () {
     it('provides the previous value to the handler', function () {
       state.errorTab(1);
       state.deactivateTab(1);
-      assert.calledWith(onChange, 1, TabState.states.INACTIVE, TabState.states.ERRORED);
+      assert.calledWith(onChange, 1, {state: states.INACTIVE},
+        {state: states.ERRORED});
+    });
+  });
+
+  describe('.updateAnnotationCount()', function() {
+    var server;
+
+    beforeEach(function() {
+      server = sinon.fakeServer.create({
+        autoRespond: true,
+        respondImmediately: true
+      });
+      server.respondWith(
+        "GET", "http://example.com/badge?uri=tabUrl",
+        [200, {}, '{"total": 1}']
+      );
+      sinon.stub(console, 'error');
+    });
+
+    afterEach(function() {
+      server.restore();
+      console.error.restore();
+    });
+
+    it('sends the correct XMLHttpRequest to the server', function() {
+      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
+
+      assert.equal(server.requests.length, 1);
+      var request = server.requests[0];
+      assert.equal(request.method, "GET");
+      assert.equal(request.url, "http://example.com/badge?uri=tabUrl");
+    });
+
+    it("doesn't set the annotation count if the server's JSON is invalid", function() {
+      server.respondWith(
+        "GET", "http://example.com/badge?uri=tabUrl",
+        [200, {}, 'this is not valid json']
+      );
+
+      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
+      assert.equal(state.annotationCount("tabId"), 0);
+    });
+
+    it("logs an error if the server's JSON is invalid", function() {
+      server.respondWith(
+        "GET", "http://example.com/badge?uri=tabUrl",
+        [200, {}, 'this is not valid json']
+      );
+
+      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
+      assert(console.error.called);
+    });
+
+    it("doesn't set the annotation count if the server's total is invalid", function() {
+      server.respondWith(
+        "GET", "http://example.com/badge?uri=tabUrl",
+        [200, {}, '{"total": "not a valid number"}']
+      );
+
+      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
+      assert.equal(state.annotationCount("tabId"), 0);
+    });
+
+    it("logs an error if the server's total is invalid", function() {
+      server.respondWith(
+        "GET", "http://example.com/badge?uri=tabUrl",
+        [200, {}, '{"total": "not a valid number"}']
+      );
+
+      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
+      assert(console.error.called);
+    });
+
+    it("doesn't set the annotation count if the server response has no total", function() {
+      server.respondWith(
+        "GET", "http://example.com/badge?uri=tabUrl",
+        [200, {}, '{"rows": []}']
+      );
+
+      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
+      assert.equal(state.annotationCount("tabId"), 0);
+    });
+
+    it("logs an error if the server response has no total", function() {
+      server.respondWith(
+        "GET", "http://example.com/badge?uri=tabUrl",
+        [200, {}, '{"rows": []}']
+      );
+
+      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
+      assert(console.error.called);
     });
   });
 });
