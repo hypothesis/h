@@ -223,7 +223,7 @@ def test_login_no_event_when_validation_fails(loginevent,
 
 @pytest.mark.usefixtures('routes_mapper')
 def test_login_redirects_when_validation_succeeds(authn_policy):
-    request = DummyRequest()
+    request = DummyRequest(auth_domain='hypothes.is')
     authn_policy.authenticated_userid.return_value = None  # Logged out
     controller = AuthController(request)
     controller.form = form_validating_to({"user": FakeUser(username='cara')})
@@ -235,7 +235,8 @@ def test_login_redirects_when_validation_succeeds(authn_policy):
 
 @pytest.mark.usefixtures('routes_mapper')
 def test_login_redirects_to_next_param_when_validation_succeeds(authn_policy):
-    request = DummyRequest(params={'next': '/foo/bar'})
+    request = DummyRequest(
+        params={'next': '/foo/bar'}, auth_domain='hypothes.is')
     authn_policy.authenticated_userid.return_value = None  # Logged out
     controller = AuthController(request)
     controller.form = form_validating_to({"user": FakeUser(username='cara')})
@@ -251,7 +252,7 @@ def test_login_redirects_to_next_param_when_validation_succeeds(authn_policy):
 def test_login_event_when_validation_succeeds(loginevent,
                                               authn_policy,
                                               notify):
-    request = DummyRequest()
+    request = DummyRequest(auth_domain='hypothes.is')
     authn_policy.authenticated_userid.return_value = None  # Logged out
     elephant = FakeUser(username='avocado')
     controller = AuthController(request)
@@ -316,7 +317,7 @@ def test_logout_response_has_forget_headers(authn_policy):
 
 @pytest.mark.usefixtures('routes_mapper')
 def test_login_ajax_returns_status_okay_when_validation_succeeds():
-    request = DummyRequest(json_body={})
+    request = DummyRequest(json_body={}, auth_domain='hypothes.is')
     controller = AjaxAuthController(request)
     controller.form = form_validating_to({'user': FakeUser(username='bob')})
 

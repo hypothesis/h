@@ -118,9 +118,7 @@ def test_authenticated_user_returns_None_if_split_user_raises_ValueError(util):
 
 @authenticated_user_fixtures
 def test_authenticated_user_returns_None_if_domain_does_not_match(util):
-    request = mock.Mock(
-        registry=mock.Mock(settings={'h.auth_domain': 'hypothes.is'})
-    )
+    request = mock.Mock(auth_domain='hypothes.is')
     util.split_user.return_value = {
         'username': 'username', 'domain': 'other'}
 
@@ -130,9 +128,7 @@ def test_authenticated_user_returns_None_if_domain_does_not_match(util):
 @authenticated_user_fixtures
 def test_authenticated_user_calls_get_by_username(util, get_by_username):
     """It should call get_by_username() once with the username."""
-    request = mock.Mock(
-        registry=mock.Mock(settings={'h.auth_domain': 'hypothes.is'})
-    )
+    request = mock.Mock(auth_domain='hypothes.is')
     util.split_user.return_value = {
         'username': 'username', 'domain': 'hypothes.is'}
 
@@ -144,9 +140,7 @@ def test_authenticated_user_calls_get_by_username(util, get_by_username):
 @authenticated_user_fixtures
 def test_authenticated_user_returns_user(util, get_by_username):
     """It should return the result from get_by_username()."""
-    request = mock.Mock(
-        registry=mock.Mock(settings={'h.auth_domain': 'hypothes.is'})
-    )
+    request = mock.Mock(auth_domain='hypothes.is')
     util.split_user.return_value = {
         'username': 'username', 'domain': 'hypothes.is'}
 

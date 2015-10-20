@@ -28,7 +28,5 @@ def userid_from_username(username, request):
     (if we're at domain "hypothes.is").
 
     """
-    auth_domain = request.registry.settings.get('h.auth_domain',
-                                                request.domain)
     return u"acct:{username}@{domain}".format(username=username,
-                                              domain=auth_domain)
+                                              domain=request.auth_domain)

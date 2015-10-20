@@ -106,7 +106,7 @@ nipsa_add_fixtures = pytest.mark.usefixtures('nipsa', 'nipsa_index')
 
 @nipsa_add_fixtures
 def test_nipsa_add_calls_nipsa_api_with_userid(nipsa):
-    request = DummyRequest(params={"add": "kiki"})
+    request = DummyRequest(params={"add": "kiki"}, auth_domain='example.com')
 
     admin.nipsa_add(request)
 
@@ -116,7 +116,7 @@ def test_nipsa_add_calls_nipsa_api_with_userid(nipsa):
 
 @nipsa_add_fixtures
 def test_nipsa_add_returns_index(nipsa_index):
-    request = DummyRequest(params={"add": "kiki"})
+    request = DummyRequest(params={"add": "kiki"}, auth_domain='example.com')
     nipsa_index.return_value = "Keine Bange!"
 
     assert admin.nipsa_add(request) == "Keine Bange!"
@@ -130,7 +130,7 @@ nipsa_remove_fixtures = pytest.mark.usefixtures('nipsa')
 def test_nipsa_remove_calls_nipsa_api_with_userid(nipsa):
     request = Mock(
         params={"remove": "kiki"},
-        domain="hypothes.is",
+        auth_domain="hypothes.is",
         registry=Mock(settings={})
     )
 
