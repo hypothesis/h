@@ -14,7 +14,9 @@
     title="Sort by {{sortBy}}">
     <i class="h-icon-sort"></i>
   </button>
-  <ul class="dropdown-menu pull-right" role="menu">
+  <div class="dropdown-menu__top-arrow"></div>
+  <ul class="dropdown-menu"
+      ng-class="showAsIcon ? 'pull-right' : 'pull-none'" role="menu">
     <li class="dropdown-menu__row"
         ng-repeat="sortOption in sortOptions"
         ng-click="onChangeSortBy({sortBy: sortOption})"
