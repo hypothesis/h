@@ -11,20 +11,11 @@
     on-clear-selection="clearSelection()">
   </search-status-bar>
   <li ng-show="isStream">
-    <span class="ng-cloak" dropdown keyboard-nav>
-      <span role="button"
-            data-toggle="dropdown"
-            dropdown-toggle>
-        Sorted by {{sort.name | lowercase}}
-        <i class="h-icon-arrow-drop-down"></i>
-      </span>
-      <ul class="dropdown-menu pull-right" role="menu">
-        <li ng-click="sort.name = option"
-            ng-hide="option == 'Location' && !isSidebar"
-            ng-repeat="option in ['Newest', 'Oldest', 'Location']"
-            ><a class="dropdown-menu__link" href="">{{option}}</a></li>
-      </ul>
-    </span>
+    <sort-dropdown
+      sort-by="sort.name"
+      sort-options="sortOptions"
+      on-change-sort-by="sort.name = sortBy">
+    </sort-dropdown>
   </li>
   <li id="{{vm.id}}"
       class="paper thread"

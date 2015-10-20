@@ -125,6 +125,7 @@ module.exports = angular.module('h', [
 .directive('dropdownMenuBtn', require('./directive/dropdown-menu-btn'))
 .directive('publishAnnotationBtn', require('./directive/publish-annotation-btn'))
 .directive('searchStatusBar', require('./directive/search-status-bar'))
+.directive('sortDropdown', require('./directive/sort-dropdown'))
 .directive('topBar', require('./directive/top-bar'))
 
 .filter('converter', require('./filter/converter'))

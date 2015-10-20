@@ -23,6 +23,26 @@ function hyphenate(name) {
  *
  *  { attrA: 'initial-value', scopeProperty: scopeValue }
  *
+ * The initial value may be a callback function to invoke. eg:
+ *
+ * var domElement = createDirective('myComponent', {
+ *  onEvent: function () {
+ *    console.log('event triggered');
+ *  }
+ * });
+ *
+ * If the callback accepts named arguments, these need to be specified
+ * via an object with 'args' and 'callback' properties:
+ *
+ * var domElement = createDirective('myComponent', {
+ *   onEvent: {
+ *     args: ['arg1'],
+ *     callback: function (arg1) {
+ *       console.log('callback called with arg', arg1);
+ *     }
+ *   }
+ * });
+ *
  * @param {Document} document - The DOM Document to create the element in
  * @param {string} name - The name of the directive to instantiate
  * @param {Object} [attrs] - A map of attribute names (in camelCase) to initial
@@ -55,6 +75,8 @@ function createDirective(document, name, attrs, initialScope, initialHtml) {
     var attrKey = key;
     if (typeof attrs[key] === 'function') {
       attrKey += '()';
+    } else if (attrs[key].callback) {
+      attrKey += '(' + attrs[key].args.join(',') + ')';
     }
     templateElement.setAttribute(attrName, attrKey);
   });
@@ -62,7 +84,11 @@ function createDirective(document, name, attrs, initialScope, initialHtml) {
 
   // setup initial scope
   Object.keys(attrs).forEach(function (key) {
-    $scope[key] = attrs[key];
+    if (attrs[key].callback) {
+      $scope[key] = attrs[key].callback;
+    } else {
+      $scope[key] = attrs[key];
+    }
   });
 
   // compile the template

@@ -51,6 +51,7 @@ module.exports = class StreamController
     fetch(20)
 
     $scope.isStream = true
+    $scope.sortOptions = ['Newest', 'Oldest']
     $scope.sort.name = 'Newest'
     $scope.threadRoot = threading.root
     $scope.loadMore = fetch
