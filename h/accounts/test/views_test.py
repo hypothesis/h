@@ -828,21 +828,6 @@ def test_activate_event_when_validation_succeeds(event,
     notify.assert_called_with(event.return_value)
 
 
-@pytest.mark.usefixtures('subscriptions_model')
-def test_profile_looks_up_by_logged_in_user():
-    """When fetching the profile, look up email for the logged in user.
-
-    (And don't, for example, use a 'username' passed to us in params.)
-
-    """
-    request = Mock(authenticated_userid="acct:foo@bar.com")
-    type(request).authenticated_user = user_property = mock.PropertyMock()
-
-    ProfileController(request).profile()
-
-    user_property.assert_called_once_with()
-
-
 @pytest.mark.usefixtures('user_model')
 def test_profile_looks_up_subs_by_logged_in_user(subscriptions_model):
     """
