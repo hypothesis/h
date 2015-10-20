@@ -106,6 +106,7 @@ $group-list-width: 270px;
   .group-item {
     display: flex;
     flex-direction: row;
+    flex-grow: 1;
 
     padding: 10px;
     cursor: pointer;

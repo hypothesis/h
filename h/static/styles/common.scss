@@ -178,26 +178,6 @@ html {
   position: absolute;
   z-index: 2;
 
-  li:not(.ng-hide) {
-    text-align: left;
-
-    &.inactive {
-      font-weight: 400;
-      color: $gray-lighter;
-      cursor: default;
-      &:hover {
-        color: $gray-lighter;
-      }
-      & * {
-        cursor: default;
-      }
-    }
-
-    & + li {
-      border-top: dotted 1px $gray-lighter;
-    }
-  }
-
   &__link {
     color: inherit;
 
@@ -332,10 +312,20 @@ html {
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: 40px;
   padding-left: 8px;
   padding-right: 16px;
+
+  min-height: 40px;
   min-width: 120px;
+
+  &:not(:first-child) {
+    border-top: dotted 1px $gray-lighter;
+  }
+}
+
+.dropdown-menu__row--unpadded {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 // Radio button in a dropdown menu

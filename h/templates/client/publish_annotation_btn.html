@@ -9,7 +9,7 @@
   </dropdown-menu-btn>
   <div class="publish-annotation-btn__dropdown-container">
     <ul class="dropdown-menu pull-center group-list publish-annotation-btn__dropdown-menu" role="menu">
-      <li ng-click="vm.setPrivacy('shared')">
+      <li class="dropdown-menu__row" ng-click="vm.setPrivacy('shared')">
         <div class="group-item">
           <div class="group-icon-container">
             <i class="small" ng-class="'h-icon-' + vm.group.type"></i>
@@ -21,7 +21,7 @@
           </div>
         </div>
       </li>
-      <li ng-click="vm.setPrivacy('private')">
+      <li class="dropdown-menu__row" ng-click="vm.setPrivacy('private')">
         <div class="group-item">
           <div class="group-icon-container">
             <i class="small h-icon-lock"></i>

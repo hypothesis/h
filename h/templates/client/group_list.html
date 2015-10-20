@@ -13,7 +13,8 @@
   </span>
   <div class="dropdown-menu__top-arrow"></div>
   <ul class="dropdown-menu pull-none" role="menu">
-    <li ng-repeat="group in groups.all()">
+    <li class="dropdown-menu__row dropdown-menu__row--unpadded "
+        ng-repeat="group in groups.all()">
       <div ng-class="{'group-item': true, selected: group.id == groups.focused().id}"
            ng-click="groups.focus(group.id)">
         <!-- the group icon !-->
@@ -57,7 +58,7 @@
         </div>
       </div>
     </li>
-    <li class="new-group-btn">
+    <li class="dropdown-menu__row dropdown-menu__row--unpadded new-group-btn">
       <div class="group-item" ng-click="createNewGroup()">
         <div class="group-icon-container"><i class="h-icon-add"></i></div>
         <div class="group-details">
