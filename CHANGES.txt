@@ -1,3 +1,33 @@
+0.7.8 (2015-10-20)
+==================
+
+Bug fixes
+---------
+
+- Fix a problem where the realtime updates feature would silently stop
+  processing messages on exceptions (#2617).
+
+- Groups in the groups dropdown are always focused, even if their identifier
+  starts with a number (feature flagged: groups) (#2627).
+
+Features
+--------
+
+- Improved appearance and behaviour of the controls to clear a selection or a
+  search (#2615).
+
+- Improved appearance and behaviour of the sidebar "top bar" (partially feature
+  flagged: groups) (#2616).
+
+- RSS feed contains authorship information (usernames) (#2621).
+
+Miscellanea
+-----------
+
+- Search query filters revert to default AND behaviour (#2620).
+
+- Joining a group from a signed out state is now easier (#2625).
+
 0.7.7 (2015-10-14)
 ==================
 
