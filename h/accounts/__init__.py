@@ -45,11 +45,17 @@ def authenticated_user(request):
         return None
 
     try:
-        username = util.split_user(request.authenticated_userid)['username']
+        parts = util.split_user(request.authenticated_userid)
     except ValueError:
         return None
 
-    return models.User.get_by_username(username)
+    auth_domain = request.registry.settings.get(
+        'h.auth_domain', request.domain)
+
+    if parts['domain'] != auth_domain:
+        return None
+
+    return models.User.get_by_username(parts['username'])
 
 
 def includeme(config):

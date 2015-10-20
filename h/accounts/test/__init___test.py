@@ -88,10 +88,16 @@ def test_make_staff_raises_if_user_does_not_exist(get_by_username):
 
 
 # The fixtures required to mock all of user()'s dependencies.
-user_fixtures = pytest.mark.usefixtures('util', 'get_by_username')
+authenticated_user_fixtures = pytest.mark.usefixtures('util', 'get_by_username')
 
 
-@user_fixtures
+@authenticated_user_fixtures
+def test_authenticated_user_returns_None_if_authenticated_userid_is_None():
+    request = mock.Mock(authenticated_userid=None)
+    assert accounts.authenticated_user(request) is None
+
+
+@authenticated_user_fixtures
 def test_authenticated_user_calls_split_user(util):
     """It should call split_user() once with the given userid."""
     util.split_user.return_value = {
@@ -103,28 +109,48 @@ def test_authenticated_user_calls_split_user(util):
     util.split_user.assert_called_once_with('acct:fred@hypothes.is')
 
 
-@user_fixtures
+@authenticated_user_fixtures
+def test_authenticated_user_returns_None_if_split_user_raises_ValueError(util):
+    util.split_user.side_effect = ValueError
+
+    assert accounts.authenticated_user(mock.Mock()) is None
+
+
+@authenticated_user_fixtures
+def test_authenticated_user_returns_None_if_domain_does_not_match(util):
+    request = mock.Mock(
+        registry=mock.Mock(settings={'h.auth_domain': 'hypothes.is'})
+    )
+    util.split_user.return_value = {
+        'username': 'username', 'domain': 'other'}
+
+    assert accounts.authenticated_user(request) is None
+
+
+@authenticated_user_fixtures
 def test_authenticated_user_calls_get_by_username(util, get_by_username):
     """It should call get_by_username() once with the username."""
+    request = mock.Mock(
+        registry=mock.Mock(settings={'h.auth_domain': 'hypothes.is'})
+    )
     util.split_user.return_value = {
-        'username': 'username', 'domain': 'domain'}
+        'username': 'username', 'domain': 'hypothes.is'}
 
-    accounts.authenticated_user(
-        mock.Mock(authenticated_userid='acct:username@domain'))
+    accounts.authenticated_user(request)
 
     get_by_username.assert_called_once_with('username')
 
 
-@user_fixtures
+@authenticated_user_fixtures
 def test_authenticated_user_returns_user(util, get_by_username):
     """It should return the result from get_by_username()."""
+    request = mock.Mock(
+        registry=mock.Mock(settings={'h.auth_domain': 'hypothes.is'})
+    )
     util.split_user.return_value = {
-        'username': 'username', 'domain': 'domain'}
+        'username': 'username', 'domain': 'hypothes.is'}
 
-    user = accounts.authenticated_user(
-        mock.Mock(authenticated_userid='acct:username@domain'))
-
-    assert user == get_by_username.return_value
+    assert accounts.authenticated_user(request) == get_by_username.return_value
 
 
 @pytest.fixture
