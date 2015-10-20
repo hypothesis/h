@@ -203,7 +203,6 @@ html {
 
     display: block;
     line-height: 1;
-    padding: 1em;
     white-space: nowrap;
 
     &:hover {
@@ -328,12 +327,18 @@ html {
   visibility: visible;
 }
 
+// Row in a dropdown menu
 .dropdown-menu__row {
   display: flex;
   flex-direction: row;
   align-items: center;
+  height: 40px;
+  padding-left: 8px;
+  padding-right: 16px;
+  min-width: 120px;
 }
 
+// Radio button in a dropdown menu
 .dropdown-menu-radio {
   display: inline-block;
   width: 12px;
