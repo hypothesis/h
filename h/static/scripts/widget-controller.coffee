@@ -12,6 +12,7 @@ module.exports = class WidgetController
   ) ->
     $scope.isStream = true
     $scope.threadRoot = threading.root
+    $scope.sortOptions = ['Newest', 'Oldest', 'Location']
 
     @chunkSize = 200
     loaded = []
