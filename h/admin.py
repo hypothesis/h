@@ -48,7 +48,8 @@ def features_save(request):
                   renderer='h:templates/admin/nipsa.html.jinja2',
                   permission='admin')
 def nipsa_index(_):
-    return {"userids": [util.split_user(u)[0] for u in nipsa.index()]}
+    return {"usernames": [util.split_user(u)["username"]
+                          for u in nipsa.index()]}
 
 
 @view.view_config(route_name='admin_nipsa',

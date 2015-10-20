@@ -80,14 +80,14 @@ nipsa_index_fixtures = pytest.mark.usefixtures('nipsa')
 def test_nipsa_index_with_no_nipsad_users(nipsa):
     nipsa.index.return_value = []
 
-    assert admin.nipsa_index(DummyRequest()) == {"userids": []}
+    assert admin.nipsa_index(DummyRequest()) == {"usernames": []}
 
 
 @nipsa_index_fixtures
 def test_nipsa_index_with_one_nipsad_users(nipsa):
     nipsa.index.return_value = ["acct:kiki@hypothes.is"]
 
-    assert admin.nipsa_index(DummyRequest()) == {"userids": ["kiki"]}
+    assert admin.nipsa_index(DummyRequest()) == {"usernames": ["kiki"]}
 
 
 @nipsa_index_fixtures
@@ -97,7 +97,7 @@ def test_nipsa_index_with_multiple_nipsad_users(nipsa):
         "acct:osono@hypothes.is"]
 
     assert admin.nipsa_index(DummyRequest()) == {
-        "userids": ["kiki", "ursula", "osono"]}
+        "usernames": ["kiki", "ursula", "osono"]}
 
 
 # The fixtures required to mock all of nipsa_add()'s dependencies.

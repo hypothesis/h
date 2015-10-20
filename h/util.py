@@ -4,17 +4,21 @@ import re
 
 
 def split_user(userid):
-    """Return the user and domain parts from the given user id.
+    """Return the user and domain parts from the given user id as a dict.
 
     For example if userid is u'acct:seanh@hypothes.is' then return
-    (u'seanh', u'hypothes.is').
+    {'username': u'seanh', 'domain': u'hypothes.is'}'
+
+    :raises ValueError: if the given userid isn't a valid userid
 
     """
     match = re.match(r'^acct:([^@]+)@(.*)$', userid)
     if match:
-        return match.groups()
-    # Passed username didn't match
-    return None
+        return {
+            'username': match.groups()[0],
+            'domain': match.groups()[1]
+        }
+    raise ValueError("{userid} isn't a valid userid".format(userid=userid))
 
 
 def userid_from_username(username, request):

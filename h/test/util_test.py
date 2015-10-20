@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pytest
 import mock
 
 from h import util
@@ -6,12 +7,12 @@ from h import util
 
 def test_split_user():
     parts = util.split_user("acct:seanh@hypothes.is")
-    assert parts == ('seanh', 'hypothes.is')
+    assert parts == {'username': 'seanh', 'domain': 'hypothes.is'}
 
 
 def test_split_user_no_match():
-    parts = util.split_user("donkeys")
-    assert parts is None
+    with pytest.raises(ValueError):
+        parts = util.split_user("donkeys")
 
 
 def test_userid_from_username_uses_auth_domain_setting():

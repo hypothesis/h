@@ -94,7 +94,8 @@ user_fixtures = pytest.mark.usefixtures('util', 'get_by_username')
 @user_fixtures
 def test_authenticated_user_calls_split_user(util):
     """It should call split_user() once with the given userid."""
-    util.split_user.return_value = ('fred', 'hypothes.is')
+    util.split_user.return_value = {
+        'username': 'fred', 'domain': 'hypothes.is'}
 
     accounts.authenticated_user(
         mock.Mock(authenticated_userid='acct:fred@hypothes.is'))
@@ -105,7 +106,8 @@ def test_authenticated_user_calls_split_user(util):
 @user_fixtures
 def test_authenticated_user_calls_get_by_username(util, get_by_username):
     """It should call get_by_username() once with the username."""
-    util.split_user.return_value = ('username', 'domain')
+    util.split_user.return_value = {
+        'username': 'username', 'domain': 'domain'}
 
     accounts.authenticated_user(
         mock.Mock(authenticated_userid='acct:username@domain'))
@@ -116,7 +118,8 @@ def test_authenticated_user_calls_get_by_username(util, get_by_username):
 @user_fixtures
 def test_authenticated_user_returns_user(util, get_by_username):
     """It should return the result from get_by_username()."""
-    util.split_user.return_value = ('username', 'domain')
+    util.split_user.return_value = {
+        'username': 'username', 'domain': 'domain'}
 
     user = accounts.authenticated_user(
         mock.Mock(authenticated_userid='acct:username@domain'))

@@ -44,8 +44,11 @@ def authenticated_user(request):
     if not request.authenticated_userid:
         return None
 
-    # pylint: disable=unpacking-non-sequence
-    username, _ = util.split_user(request.authenticated_userid)
+    try:
+        username = util.split_user(request.authenticated_userid)['username']
+    except ValueError:
+        return None
+
     return models.User.get_by_username(username)
 
 

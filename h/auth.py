@@ -137,8 +137,9 @@ def groupfinder(userid, request):
     """
     principals = set()
 
-    username, _ = util.split_user(userid)
-    if username is None:
+    try:
+        username = util.split_user(userid)['username']
+    except ValueError:
         return
 
     user = models.User.get_by_username(username)
