@@ -44,24 +44,35 @@ def auth_domain(request):
     return request.registry.settings.get('h.auth_domain', request.domain)
 
 
+def get_user(userid, request):
+    """Return the User object for the given userid, or None.
+
+    This will also return None if the given userid is None, if it isn't a valid
+    userid, if its domain doesn't match the site's domain, or if there's just
+    no user with that userid.
+
+    """
+    if userid is None:
+        return None
+
+    try:
+        parts = util.split_user(userid)
+    except ValueError:
+        return
+
+    if parts['domain'] != request.auth_domain:
+        return None
+
+    return models.User.get_by_username(parts['username'])
+
+
 def authenticated_user(request):
     """Return the authenticated user or None.
 
     :rtype: h.accounts.models.User or None
 
     """
-    if not request.authenticated_userid:
-        return None
-
-    try:
-        parts = util.split_user(request.authenticated_userid)
-    except ValueError:
-        return None
-
-    if parts['domain'] != request.auth_domain:
-        return None
-
-    return models.User.get_by_username(parts['username'])
+    return get_user(request.authenticated_userid, request)
 
 
 def includeme(config):
