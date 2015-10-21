@@ -20,6 +20,14 @@
       </li>
     </ul>
 
+    {% if request.session.peek_flash('success') -%}
+    <div class="form-flash">
+      {% for message in request.session.pop_flash('success') %}
+        <p>{{ message }}</p>
+      {%- endfor %}
+    </div>
+    {%- endif %}
+
     <div class="form-vertical">
       <h2 class="form-heading">
         <span>{% trans %}Change your email address{% endtrans %}</span>

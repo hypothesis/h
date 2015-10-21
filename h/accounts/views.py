@@ -452,6 +452,8 @@ class ProfileController(object):
                     'email_form': self.forms['email'].render(),
                     'password_form': self.forms['password'].render()}
 
+        self.request.session.flash(_("Success. We've saved your changes."),
+                                   'success')
         return httpexceptions.HTTPFound(
             location=self.request.route_url('profile'))
 
@@ -500,6 +502,8 @@ class NotificationsController(object):
         for n in self._user_notifications():
             n.active = n.type in appstruct['notifications']
 
+        self.request.session.flash(_("Success. We've saved your changes."),
+                                   'success')
         return httpexceptions.HTTPFound(
             location=self.request.route_url('profile_notifications'))
 

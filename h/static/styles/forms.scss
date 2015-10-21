@@ -41,6 +41,18 @@
   margin-bottom: 1em;
 }
 
+.form-flash {
+  background: $color-dove-gray;
+  color: $white;
+  width: 100%;
+  font-weight: bold;
+  margin: 1em 0 0 0;
+  padding: 0;
+  display: inline-block; // disable container margin collapse
+
+  p { margin: 1em; }
+}
+
 .form-input,
 .form-label {
   width: 100%;
