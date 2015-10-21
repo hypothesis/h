@@ -65,10 +65,10 @@ describe 'annotation', ->
 
     fakeMomentFilter = sandbox.stub().returns('ages ago')
     fakePermissions = {
-      isPublic: sandbox.stub().returns(true)
+      isShared: sandbox.stub().returns(true)
       isPrivate: sandbox.stub().returns(false)
       permits: sandbox.stub().returns(true)
-      public: sandbox.stub().returns({read: ['everybody']})
+      shared: sandbox.stub().returns({read: ['everybody']})
       private: sandbox.stub().returns({read: ['justme']})
     }
     fakePersonaFilter = sandbox.stub().returnsArg(0)
@@ -176,10 +176,10 @@ describe 'annotation', ->
       match = sinon.match {references: [annotation.id], uri: annotation.uri}
       assert.calledWith(fakeAnnotationMapper.createAnnotation, match)
 
-    it 'makes the annotation public if the parent is public', ->
+    it 'makes the annotation shared if the parent is shared', ->
       reply = {}
       fakeAnnotationMapper.createAnnotation.returns(reply)
-      fakePermissions.isPublic.returns(true)
+      fakePermissions.isShared.returns(true)
       controller.reply()
       assert.deepEqual(reply.permissions, {read: ['everybody']})
 
@@ -188,9 +188,9 @@ describe 'annotation', ->
       $scope.annotation.permissions = {read: ["my group"]}
       reply = {}
       fakeAnnotationMapper.createAnnotation.returns(reply)
-      fakePermissions.isPublic = (permissions, group) ->
+      fakePermissions.isShared = (permissions, group) ->
         return group in permissions.read
-      fakePermissions.public = (group) ->
+      fakePermissions.shared = (group) ->
         return {read: [group]}
 
       controller.reply()
@@ -200,7 +200,7 @@ describe 'annotation', ->
     it 'does not add the world readable principal if the parent is private', ->
       reply = {}
       fakeAnnotationMapper.createAnnotation.returns(reply)
-      fakePermissions.isPublic.returns(false)
+      fakePermissions.isShared.returns(false)
       controller.reply()
       assert.deepEqual(reply.permissions, {read: ['justme']})
 
@@ -686,12 +686,12 @@ describe("AnnotationController", ->
         error: ->
       }
       permissions: permissions or {
-        isPublic: (permissions, group) ->
+        isShared: (permissions, group) ->
           return group in permissions.read
         isPrivate: (permissions, user) ->
           return user in permissions.read
         permits: -> true
-        public: (group) -> {"read": [group]}
+        shared: (group) -> {"read": [group]}
         private: -> {"read": [session.state.userid]}
       }
       session: session

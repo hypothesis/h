@@ -44,14 +44,14 @@ module.exports = ['session', (session) ->
 
   ###*
   # @ngdoc method
-  # @name permissions#public
+  # @name permissions#shared
   #
-  # @param {String} [group] Group to make annotation public in.
+  # @param {String} [group] Group to make annotation shared in.
   #
-  # Sets permissions for a public annotation
-  # Typical use: annotation.permissions = permissions.public()
+  # Sets permissions for a shared annotation
+  # Typical use: annotation.permissions = permissions.shared(group)
   ###
-  public: (group) ->
+  shared: (group) ->
     if group?
       group = 'group:' + group
     else
@@ -65,14 +65,14 @@ module.exports = ['session', (session) ->
 
   ###*
   # @ngdoc method
-  # @name permissions#isPublic
+  # @name permissions#isShared
   #
   # @param {Object} permissions
   # @param {String} [group]
   #
-  # This function determines whether the permissions allow public visibility
+  # This function determines whether the permissions allow shared visibility
   ###
-  isPublic: (permissions, group) ->
+  isShared: (permissions, group) ->
     if group?
       group = 'group:' + group
     else

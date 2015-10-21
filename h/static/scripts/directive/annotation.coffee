@@ -75,7 +75,7 @@ AnnotationController = [
       if defaultLevel == 'private'
         model.permissions = permissions.private()
       else
-        model.permissions = permissions.public(model.group)
+        model.permissions = permissions.shared(model.group)
 
     highlight = model.$highlight
     original = null
@@ -122,7 +122,7 @@ AnnotationController = [
     # current group or with everyone).
     ###
     this.isShared = ->
-      permissions.isPublic @annotation.permissions, model.group
+      permissions.isShared @annotation.permissions, model.group
 
     ###*
     # @ngdoc method
@@ -147,7 +147,7 @@ AnnotationController = [
       if privacy == 'private'
         @annotation.permissions = permissions.private()
       else if privacy == 'shared'
-        @annotation.permissions = permissions.public(model.group)
+        @annotation.permissions = permissions.shared(model.group)
 
     ###*
     # @ngdoc method
@@ -301,8 +301,8 @@ AnnotationController = [
       reply.group = model.group
 
       if session.state.userid
-        if permissions.isPublic(model.permissions, model.group)
-          reply.permissions = permissions.public(reply.group)
+        if permissions.isShared(model.permissions, model.group)
+          reply.permissions = permissions.shared(reply.group)
         else
           reply.permissions = permissions.private()
 
