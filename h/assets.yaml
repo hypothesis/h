@@ -7,6 +7,10 @@ angular_animate:
   filters: uglifyjs
   output: scripts/vendor/angular-animate.min.js
   contents: ../../node_modules/angular-animate/angular-animate.js
+angular_bootstrap:
+  filters: uglifyjs
+  output: scripts/vendor/angular-bootstrap.min.js
+  contents: h:static/scripts/vendor/ui-bootstrap-custom-tpls-0.13.4.js
 angular_resource:
   filters: uglifyjs
   output: scripts/vendor/angular-resource.min.js
@@ -25,7 +29,7 @@ angular_tags_input:
 angular_toastr:
   filters: uglifyjs
   output: scripts/vendor/angular-toastr.min.js
-  contents: h:static/scripts/vendor/angular-toastr.js
+  contents: ../../node_modules/angular-toastr/dist/angular-toastr.tpls.js
 
 
 # Analytics
@@ -111,6 +115,7 @@ app_js:
     - jquery
     - angular
     - angular_animate
+    - angular_bootstrap
     - angular_resource
     - angular_route
     - angular_sanitize
@@ -134,6 +139,7 @@ app_js:
             - h:static/scripts/groups.js
             - h:static/scripts/session.js
             - h:static/scripts/settings.js
+            - h:static/scripts/store.js
             - h:static/scripts/directive/*.coffee
             - h:static/scripts/directive/*.js
             - h:static/scripts/filter/*.js
@@ -144,7 +150,7 @@ app_css:
   filters: cleancss
   contents:
     - h:static/styles/vendor/angular-csp.css
-    - h:static/styles/vendor/angular-toastr.css
+    - ../../node_modules/angular-toastr/dist/angular-toastr.css
     - h:static/styles/vendor/icomoon.css
     - h:static/styles/vendor/katex.min.css
     - output: styles/app.css

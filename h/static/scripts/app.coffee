@@ -32,8 +32,9 @@ resolve =
 
 
 configureDocument = ['$provide', ($provide) ->
-  $provide.decorator '$document', ($delegate) ->
+  $provide.decorator '$document', ['$delegate', ($delegate) ->
     $delegate.prop('baseURI', baseURI)
+  ]
 ]
 
 
@@ -93,7 +94,7 @@ module.exports = angular.module('h', [
   'ngTagsInput'
   'ngWebSocket'
   'toastr'
-  require('./ui-bootstrap-custom')
+  'ui.bootstrap'
 ])
 
 .controller('AppController', require('./app-controller'))
@@ -150,7 +151,6 @@ module.exports = angular.module('h', [
 .service('render', require('./render'))
 .service('searchFilter', require('./search-filter'))
 .service('session', require('./session'))
-.service('store', require('./store'))
 .service('streamFilter', require('./stream-filter'))
 .service('tags', require('./tags'))
 .service('time', require('./time'))
@@ -159,6 +159,7 @@ module.exports = angular.module('h', [
 .service('viewFilter', require('./view-filter'))
 
 .factory('settings', require('./settings'))
+.factory('store', require('./store'))
 
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))

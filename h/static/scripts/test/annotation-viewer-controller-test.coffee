@@ -28,7 +28,7 @@ describe "AnnotationViewerController", ->
       $scope: $scope or {search: {}}
       streamer: streamer or {send: ->}
       store: store or {
-        AnnotationResource: {read: sinon.spy()},
+        AnnotationResource: {get: sinon.spy()},
         SearchResource: {get: ->}}
       streamFilter: streamFilter or {
         setMatchPolicyIncludeAny: -> {addClause: -> {addClause: ->}}
@@ -43,4 +43,4 @@ describe "AnnotationViewerController", ->
 
   it "calls the annotation API to get the annotation", ->
     {store} = createAnnotationViewerController({})
-    assert store.AnnotationResource.read.args[0][0].id == "test_annotation_id"
+    assert store.AnnotationResource.get.args[0][0].id == "test_annotation_id"

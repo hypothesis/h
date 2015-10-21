@@ -1,6 +1,6 @@
 # Instantiates all objects used for cross frame discovery and communication.
 module.exports = class CrossFrame
-  this.inject = [
+  this.$inject = [
     '$rootScope', '$document', '$window', 'store', 'annotationUI'
     'Discovery', 'bridge',
     'AnnotationSync', 'AnnotationUISync'
