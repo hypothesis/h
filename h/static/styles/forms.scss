@@ -46,11 +46,12 @@
   color: $white;
   width: 100%;
   font-weight: bold;
+  text-align: center;
   margin: 1em 0 0 0;
   padding: 0;
   display: inline-block; // disable container margin collapse
 
-  p { margin: 1em; }
+  p { margin: 0.75em; }
 }
 
 .form-input,
