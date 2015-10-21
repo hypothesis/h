@@ -2,6 +2,7 @@
 import colander
 import deform
 import pytest
+from mock import Mock
 from mock import patch
 from pyramid.exceptions import BadCSRFToken
 from pyramid.testing import DummyRequest
@@ -13,8 +14,8 @@ class DummyNode(object):
     pass
 
 
-def csrf_request(config):
-    request = DummyRequest(registry=config.registry)
+def csrf_request(config, **kwargs):
+    request = DummyRequest(registry=config.registry, **kwargs)
     request.headers['X-CSRF-Token'] = request.session.get_csrf_token()
     return request
 
@@ -68,43 +69,6 @@ def test_unique_email_invalid_when_user_does_not_exist(user_model):
     result = schemas.unique_email(node, "foo@bar.com")
 
     assert result is None
-
-
-def test_matching_emails_with_mismatched_emails():
-    form = deform.Form(schemas.ProfileSchema())
-    value = {
-        "email": "foo",
-        "emailAgain": "bar"
-    }
-    with pytest.raises(colander.Invalid):
-        schemas.matching_emails(form, value)
-
-
-def test_matching_emails_with_matched_emails():
-    form = deform.Form(schemas.ProfileSchema())
-    value = {
-        "email": "foo",
-        "emailAgain": "foo"
-    }
-    assert schemas.matching_emails(form, value) is None
-
-
-def test_ProfileSchema_with_email_too_long(user_model):
-    email = "bob@b" + "o" * 100 + "b.com"
-    data = {"email": email, "emailAgain": email}
-    schema = schemas.ProfileSchema().bind(request=DummyRequest())
-
-    with pytest.raises(colander.Invalid) as err:
-        schema.deserialize(data)
-    assert 'email' in err.value.asdict()
-
-
-def test_ProfileSchema_with_password_too_short(user_model):
-    schema = schemas.ProfileSchema().bind(request=DummyRequest())
-
-    with pytest.raises(colander.Invalid) as err:
-        schema.deserialize({"password": "a"})
-    assert "password" in err.value.asdict()
 
 
 def test_RegisterSchema_with_password_too_short(user_model):
@@ -289,6 +253,68 @@ def test_reset_password_adds_user_to_appstruct(config,
     })
 
     assert appstruct['user'] == user
+
+
+def test_emailchangeschema_rejects_non_matching_emails(config, user_model):
+    user = Mock()
+    request = csrf_request(config, authenticated_user=user)
+    schema = schemas.EmailChangeSchema().bind(request=request)
+    # The email isn't taken
+    user_model.get_by_email.return_value = None
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({'email': 'foo@bar.com',
+                            'email_confirm': 'foo@baz.com',
+                            'password': 'flibble'})
+
+    assert 'email_confirm' in exc.value.asdict()
+
+
+def test_emailchangeschema_rejects_wrong_password(config, user_model):
+    user = Mock()
+    request = csrf_request(config, authenticated_user=user)
+    schema = schemas.EmailChangeSchema().bind(request=request)
+    # The email isn't taken
+    user_model.get_by_email.return_value = None
+    # The password does not check out
+    user_model.validate_user.return_value = False
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({'email': 'foo@bar.com',
+                            'email_confirm': 'foo@bar.com',
+                            'password': 'flibble'})
+
+    user_model.validate_user.assert_called_once_with(user, 'flibble')
+    assert 'password' in exc.value.asdict()
+
+
+def test_passwordchangeschema_rejects_non_matching_passwords(config, user_model):
+    user = Mock()
+    request = csrf_request(config, authenticated_user=user)
+    schema = schemas.PasswordChangeSchema().bind(request=request)
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({'new_password': 'wibble',
+                            'new_password_confirm': 'wibble!',
+                            'password': 'flibble'})
+
+    assert 'new_password_confirm' in exc.value.asdict()
+
+
+def test_passwordchangeschema_rejects_wrong_password(config, user_model):
+    user = Mock()
+    request = csrf_request(config, authenticated_user=user)
+    schema = schemas.PasswordChangeSchema().bind(request=request)
+    # The password does not check out
+    user_model.validate_user.return_value = False
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({'new_password': 'wibble',
+                            'new_password_confirm': 'wibble!',
+                            'password': 'flibble'})
+
+    user_model.validate_user.assert_called_once_with(user, 'flibble')
+    assert 'password' in exc.value.asdict()
 
 
 @pytest.fixture

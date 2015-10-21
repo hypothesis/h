@@ -1,0 +1,22 @@
+<input type="hidden" name="__start__" value="{{ field.name }}:sequence">
+<div class="form-checkbox-list">
+  {% for value, title in field.widget.values %}
+  <div class="form-checkbox-item">
+    <input type="checkbox"
+           name="checkbox"
+           value="{{ value }}"
+           id="{{ field.oid }}-{{ loop.index0 }}"
+           {%- if field.widget.css_class -%}
+           class="{{ field.widget.css_class }}"
+           {% endif -%}
+           {%- if field.error -%}
+           aria-invalid="true"
+           {% endif -%}
+           {% if value in cstruct %}
+           checked="True"
+           {% endif %}>
+    <label for="{{ field.oid }}-{{ loop.index0 }}">{{ title }}</label>
+  </div>
+  {% endfor %}
+</div>
+<input type="hidden" name="__end__" value="{{ field.name }}:sequence">

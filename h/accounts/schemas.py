@@ -33,8 +33,7 @@ def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
     user = models.User.get_by_email(value)
     if user:
-        msg = _("Sorry, an account with this email address already exists. "
-                "Try logging in instead.")
+        msg = _("Sorry, an account with this email address already exists.")
         raise colander.Invalid(node, msg)
 
 
@@ -70,14 +69,6 @@ def unblacklisted_username(node, value, blacklist=None):
         msg = _("Sorry, an account with this username already exists. "
                 "Please enter another one.")
         raise colander.Invalid(node, msg)
-
-
-def matching_emails(node, value):
-    """Colander validator that ensures email and emailAgain fields match."""
-    if value.get("email") != value.get("emailAgain"):
-        exc = colander.Invalid(node)
-        exc["emailAgain"] = _("The emails must match")
-        raise exc
 
 
 def password_node(**kwargs):
@@ -232,39 +223,67 @@ class ResetPasswordSchema(CSRFSchema):
         widget=deform.widget.PasswordWidget(disable_autocomplete=True))
 
 
-class ProfileSchema(CSRFSchema):
-
-    """
-    Validates a user profile form.
-
-    This form is broken into multiple parts, for updating the email address,
-    password, and subscriptions, so multiple fields are nullable.
-    """
-    pwd = colander.SchemaNode(
+class EmailChangeSchema(CSRFSchema):
+    email = email_node(title=_('New email address'))
+    # No validators: all validation is done on the email field and we merely
+    # assert that the confirmation field is the same.
+    email_confirm = colander.SchemaNode(
         colander.String(),
-        widget=deform.widget.PasswordWidget(),
-        default='',
-        missing=colander.null
-    )
-    email = email_node(default='', missing=colander.null)
-    emailAgain = colander.SchemaNode(
-        colander.String(),
-        default='',
-        missing=colander.null,
-    )
-    password = password_node(
-        title=_('Password'), default='', missing=colander.null)
-    subscriptions = colander.SchemaNode(
-        colander.String(),
-        missing=colander.null,
-        default=''
-    )
+        title=_('Confirm new email address'),
+        widget=deform.widget.TextInputWidget(template='emailinput'))
+    password = password_node(title=_('Current password'))
 
     def validator(self, node, value):
-        super(ProfileSchema, self).validator(node, value)
+        super(EmailChangeSchema, self).validator(node, value)
+        exc = colander.Invalid(node)
+        request = node.bindings['request']
+        user = request.authenticated_user
 
-        # Check that emails match
-        matching_emails(node, value)
+        if value.get('email') != value.get('email_confirm'):
+            exc['email_confirm'] = _('The emails must match')
+
+        if not models.User.validate_user(user, value.get('password')):
+            exc['password'] = _('Incorrect password. Please try again.')
+
+        if exc.children:
+            raise exc
+
+
+class PasswordChangeSchema(CSRFSchema):
+    password = password_node(title=_('Current password'))
+    new_password = password_node(title=_('New password'))
+    # No validators: all validation is done on the new_password field and we
+    # merely assert that the confirmation field is the same.
+    new_password_confirm = colander.SchemaNode(
+        colander.String(),
+        title=_('Confirm new password'),
+        widget=deform.widget.PasswordWidget())
+
+    def validator(self, node, value):
+        super(PasswordChangeSchema, self).validator(node, value)
+        exc = colander.Invalid(node)
+        request = node.bindings['request']
+        user = request.authenticated_user
+
+        if value.get('new_password') != value.get('new_password_confirm'):
+            exc['new_password_confirm'] = _('The passwords must match')
+
+        if not models.User.validate_user(user, value.get('password')):
+            exc['password'] = _('Incorrect password. Please try again.')
+
+        if exc.children:
+            raise exc
+
+
+class NotificationsSchema(CSRFSchema):
+    types = (('reply', _('Email me when someone replies to one of my annotations.'),),)
+
+    notifications = colander.SchemaNode(
+        colander.Set(),
+        widget=deform.widget.CheckboxChoiceWidget(
+            omit_label=True,
+            values=types),
+    )
 
 
 def includeme(config):

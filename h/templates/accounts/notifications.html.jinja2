@@ -1,0 +1,38 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}Notifications{% endblock %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles  %}
+
+{% block content %}
+  <div class="content paper">
+    {% include "h:templates/includes/header.html.jinja2" %}
+    <ul class="nav nav-tabs">
+      <li>
+        <a href="{{ request.route_path('profile') }}">{% trans %}Profile{% endtrans %}</a>
+      </li>
+      <li class="active">
+        <a href="{{ request.route_path('profile_notifications') }}">{% trans %}Notifications{% endtrans %}</a>
+      </li>
+    </ul>
+
+    {% if request.session.peek_flash('success') -%}
+    <div class="form-flash">
+      {% for message in request.session.pop_flash('success') %}
+        <p>{{ message }}</p>
+      {%- endfor %}
+    </div>
+    {%- endif %}
+
+    <div class="form-vertical">
+      <h2 class="form-heading">
+        <span>{% trans %}Update your notification settings{% endtrans %}</span>
+      </h2>
+      {{ form | safe }}
+    </div>
+  </div>
+{% endblock content %}

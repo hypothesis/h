@@ -86,7 +86,6 @@ module.exports = angular.module('h', [
   'angulartics'
   'angulartics.google.analytics'
   'angular-jwt'
-  'bootstrap'
   'ngAnimate'
   'ngResource'
   'ngRoute'
@@ -98,7 +97,6 @@ module.exports = angular.module('h', [
 ])
 
 .controller('AppController', require('./app-controller'))
-.controller('AccountController', require('./account-controller'))
 .controller('AnnotationUIController', require('./annotation-ui-controller'))
 .controller('AnnotationViewerController', require('./annotation-viewer-controller'))
 .controller('AuthController', require('./auth-controller'))
@@ -116,10 +114,7 @@ module.exports = angular.module('h', [
 .directive('statusButton', require('./directive/status-button'))
 .directive('thread', require('./directive/thread'))
 .directive('threadFilter', require('./directive/thread-filter'))
-.directive('match', require('./directive/match'))
 .directive('spinner', require('./directive/spinner'))
-.directive('tabbable', require('./directive/tabbable'))
-.directive('tabReveal', require('./directive/tab-reveal'))
 .directive('shareDialog', require('./directive/share-dialog'))
 .directive('windowScroll', require('./directive/window-scroll'))
 .directive('dropdownMenuBtn', require('./directive/dropdown-menu-btn'))

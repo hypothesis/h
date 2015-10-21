@@ -3,31 +3,34 @@
      role="button"
      title="Close"
      ng-click="shareDialog.visible = false"></i>
-  <div class="form-vertical tabbable">
-  <div class="form tab-pane" data-title="Share">
-    <p>Share the link below to show anyone these annotations and invite them to contribute their own.</p>
-    <p><input id="via"
-        class="form-input"
-        type="text"
-        ng-value="viaPageLink"
-        readonly /></p>
-    <p class="share-link-icons">
-    <a href="//twitter.com/intent/tweet?url={{viaPageLink}}"
-       target="_blank"
-       title="Tweet link"
-       class="share-link-icon h-icon-twitter"></a>
-    <a href="//www.facebook.com/sharer/sharer.php?u={{viaPageLink}}"
-       target="_blank"
-       title="Share on Facebook"
-       class="share-link-icon h-icon-facebook"></a>
-    <a href="//plus.google.com/share?url={{viaPageLink}}"
-       target="_blank"
-       title="Post on Google Plus"
-       class="share-link-icon h-icon-google-plus"></a>
-    <a href="mailto:?subject=Let's%20Annotate&amp;body={{viaPageLink}}"
-       title="Share via email"
-       class="share-link-icon h-icon-mail"></a>
-    </p>
-  </div>
+  <div class="form-vertical">
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="">Share</a></li>
+    </ul>
+    <div class="tab-content">
+      <p>Share the link below to show anyone these annotations and invite them to contribute their own.</p>
+      <p><input id="via"
+          class="form-input"
+          type="text"
+          ng-value="viaPageLink"
+          readonly /></p>
+      <p class="share-link-icons">
+      <a href="//twitter.com/intent/tweet?url={{viaPageLink}}"
+         target="_blank"
+         title="Tweet link"
+         class="share-link-icon h-icon-twitter"></a>
+      <a href="//www.facebook.com/sharer/sharer.php?u={{viaPageLink}}"
+         target="_blank"
+         title="Share on Facebook"
+         class="share-link-icon h-icon-facebook"></a>
+      <a href="//plus.google.com/share?url={{viaPageLink}}"
+         target="_blank"
+         title="Post on Google Plus"
+         class="share-link-icon h-icon-google-plus"></a>
+      <a href="mailto:?subject=Let's%20Annotate&amp;body={{viaPageLink}}"
+         title="Share via email"
+         class="share-link-icon h-icon-mail"></a>
+      </p>
+    </div>
   </div>
 </div>

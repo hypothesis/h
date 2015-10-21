@@ -155,11 +155,6 @@ class User(Base):
         return unicode(CRYPT.encode(password + self.salt))
 
     @classmethod
-    def generate_random_password(cls, chars=12):
-        """Generate a random string of fixed length."""
-        return _generate_random_string(chars)
-
-    @classmethod
     def get_by_email(cls, email):
         """Fetch a user by email address."""
         return cls.query.filter(

@@ -12,14 +12,13 @@ from pyramid.testing import DummyRequest as _DummyRequest
 from h.conftest import DummyFeature
 from h.conftest import DummySession
 
-from h.accounts.views import ajax_form
-from h.accounts.views import validate_form
 from h.accounts.views import AjaxAuthController
 from h.accounts.views import AuthController
 from h.accounts.views import ForgotPasswordController
 from h.accounts.views import ResetPasswordController
 from h.accounts.views import RegisterController
 from h.accounts.views import ProfileController
+from h.accounts.views import NotificationsController
 
 
 class DummyRequest(_DummyRequest):
@@ -34,6 +33,12 @@ class DummyRequest(_DummyRequest):
         super(DummyRequest, self).__init__(*args, **params)
 
 
+class FakeSubscription(object):
+    def __init__(self, type, active):
+        self.type = type
+        self.active = active
+
+
 class FakeUser(object):
     def __init__(self, **kwargs):
         self.activation = None
@@ -41,7 +46,7 @@ class FakeUser(object):
             setattr(self, k, kwargs[k])
 
 
-# A fake version of colander.Invalid for use when testing validate_form
+# A fake version of colander.Invalid
 class FakeInvalid(object):
     def __init__(self, errors):
         self.errors = errors
@@ -65,112 +70,6 @@ def invalid_form(errors=None):
     form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
     form.render.return_value = 'invalid form'
     return form
-
-
-def test_ajax_form_handles_http_redirect_as_success():
-    request = DummyRequest()
-    result = ajax_form(request, httpexceptions.HTTPFound())
-
-    assert result['status'] == 'okay'
-    assert request.response.status_code == 200
-
-
-def test_ajax_form_handles_http_error_as_error():
-    request = DummyRequest()
-    result = ajax_form(request, httpexceptions.HTTPInsufficientStorage())
-
-    assert result['status'] == 'failure'
-    assert result['reason'] == \
-        'There was not enough space to save the resource'
-    assert request.response.status_code == 507
-
-
-def test_ajax_form_sets_failure_status_on_errors():
-    request = DummyRequest()
-    result = ajax_form(request, {'errors': {}})
-
-    assert result['status'] == 'failure'
-
-
-def test_ajax_form_sets_status_code_400_on_errors():
-    request = DummyRequest()
-    _ = ajax_form(request, {'errors': {}})
-
-    assert request.response.status_code == 400
-
-
-def test_ajax_form_sets_status_code_from_input_on_errors():
-    request = DummyRequest()
-    _ = ajax_form(request, {'errors': {}, 'code': 418})
-
-    assert request.response.status_code == 418
-
-
-def test_ajax_form_passes_errors_through_on_errors():
-    request = DummyRequest()
-    errors = {
-        '': 'Top level error',
-        'name': 'Name is too weird',
-        'email': 'Email must be @hotmail.com',
-    }
-    result = ajax_form(request, {'errors': errors})
-
-    assert result['errors'] == {'': 'Top level error',
-                                'name': 'Name is too weird',
-                                'email': 'Email must be @hotmail.com'}
-
-
-def test_ajax_form_passes_data_through_on_success():
-    request = DummyRequest()
-    result = ajax_form(request, {'some': 'data', 'no': 'errors'})
-
-    assert result['some'] == 'data'
-    assert result['no'] == 'errors'
-    assert request.response.status_code == 200
-
-
-def test_ajax_form_ignores_status_code_from_input_on_success():
-    request = DummyRequest()
-    result = ajax_form(request, {'some': 'data', 'code': 418})
-
-    assert request.response.status_code == 200
-
-
-def test_ajax_form_includes_flash_data(pop_flash):
-    request = DummyRequest()
-    pop_flash.return_value = {'success': ['Well done!']}
-    result = ajax_form(request, {'some': 'data'})
-
-    assert result['flash'] == {'success': ['Well done!']}
-
-
-def test_validate_form_passes_data_to_validate():
-    form = MagicMock()
-
-    _, _ = validate_form(form, {})
-
-    form.validate.assert_called_with({})
-
-
-def test_validate_form_failure():
-    invalid = FakeInvalid({'': 'Asplode!', 'email': 'No @ sign!'})
-    form = MagicMock()
-    form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
-
-    err, data = validate_form(form, {})
-
-    assert err == {'errors': {'': 'Asplode!', 'email': 'No @ sign!'}}
-    assert data is None
-
-
-def test_validate_form_ok():
-    form = MagicMock()
-    form.validate.return_value = {'foo': 'bar'}
-
-    err, data = validate_form(form, {})
-
-    assert err is None
-    assert data == {'foo': 'bar'}
 
 
 @pytest.mark.usefixtures('routes_mapper')
@@ -539,14 +438,13 @@ def test_reset_password_redirects_on_success():
 
 
 register_fixtures = pytest.mark.usefixtures('activation_model',
-                                            'form_validator',
                                             'mailer',
                                             'notify',
                                             'routes_mapper',
                                             'user_model')
 
 @register_fixtures
-def test_register_returns_errors_when_validation_fails(form_validator):
+def test_register_returns_errors_when_validation_fails():
     request = DummyRequest(method='POST')
     controller = RegisterController(request)
     controller.form = invalid_form()
@@ -673,7 +571,7 @@ def test_register_event_when_validation_succeeds(event, notify, user_model):
 
 
 @register_fixtures
-def test_register_event_redirects_on_success(form_validator):
+def test_register_event_redirects_on_success():
     request = DummyRequest(method='POST')
     controller = RegisterController(request)
     controller.form = form_validating_to({
@@ -829,213 +727,263 @@ def test_activate_event_when_validation_succeeds(event,
     notify.assert_called_with(event.return_value)
 
 
-@pytest.mark.usefixtures('user_model')
-def test_profile_looks_up_subs_by_logged_in_user(subscriptions_model):
-    """
-    When fetching the profile, look up subscriptions for the logged in user.
-
-    (And don't, for example, use a 'username' passed to us in params.)
-    """
-    request = Mock(authenticated_userid="acct:foo@bar.com")
-
-    ProfileController(request).profile()
-
-    subscriptions_model.get_subscriptions_for_uri.assert_called_with(
-        "acct:foo@bar.com")
+profile_fixtures = pytest.mark.usefixtures('routes_mapper')
 
 
-@pytest.mark.usefixtures('subscriptions_model')
-def test_profile_returns_email(authn_policy):
-    """The profile should include the user's email."""
+@profile_fixtures
+def test_profile_form_404s_if_not_logged_in():
+    request = DummyRequest(authenticated_user=None)
+
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        ProfileController(request).profile_form()
+
+
+@profile_fixtures
+def test_profile_404s_if_not_logged_in():
+    request = DummyRequest(authenticated_user=None)
+
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        ProfileController(request).profile()
+
+
+@profile_fixtures
+def test_profile_400s_with_no_formid():
+    user = FakeUser()
+    request = DummyRequest(post={}, authenticated_user=user)
+
+    with pytest.raises(httpexceptions.HTTPBadRequest):
+        ProfileController(request).profile()
+
+
+@profile_fixtures
+def test_profile_400s_with_bogus_formid():
+    user = FakeUser()
+    request = DummyRequest(post={'__formid__': 'hax0rs'},
+                           authenticated_user=user)
+
+    with pytest.raises(httpexceptions.HTTPBadRequest):
+        ProfileController(request).profile()
+
+
+@profile_fixtures
+def test_profile_changing_email_with_valid_data_updates_email():
+    user = FakeUser(email=None, password=None)
+    request = DummyRequest(post={'__formid__': 'email'},
+                           authenticated_user=user)
+    controller = ProfileController(request)
+    controller.forms['email'] = form_validating_to({'email': 'amrit@example.com'})
+
+    controller.profile()
+
+    assert user.email == 'amrit@example.com'
+
+
+@profile_fixtures
+def test_profile_changing_email_with_valid_data_redirects():
+    user = FakeUser(email=None, password=None)
+    request = DummyRequest(post={'__formid__': 'email'},
+                           authenticated_user=user)
+    controller = ProfileController(request)
+    controller.forms['email'] = form_validating_to({'email': 'amrit@example.com'})
+
+    result = controller.profile()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+
+
+@profile_fixtures
+def test_profile_changing_email_with_invalid_data_returns_form():
+    user = FakeUser(email=None, password=None)
+    request = DummyRequest(post={'__formid__': 'email'},
+                           authenticated_user=user)
+    controller = ProfileController(request)
+    controller.forms['email'] = invalid_form()
+
+    result = controller.profile()
+
+    assert 'email_form' in result
+
+
+@profile_fixtures
+def test_profile_changing_email_with_invalid_data_does_not_update_email():
+    user = FakeUser(email=None, password=None)
+    request = DummyRequest(post={'__formid__': 'email'},
+                           authenticated_user=user)
+    controller = ProfileController(request)
+    controller.forms['email'] = invalid_form()
+
+    controller.profile()
+
+    assert user.email is None
+
+
+@profile_fixtures
+def test_profile_changing_password_with_valid_data_updates_password():
+    user = FakeUser(email=None, password=None)
+    request = DummyRequest(post={'__formid__': 'password'},
+                           authenticated_user=user)
+    controller = ProfileController(request)
+    controller.forms['password'] = form_validating_to({'new_password': 'secrets!'})
+
+    controller.profile()
+
+    assert user.password == 'secrets!'
+
+
+@profile_fixtures
+def test_profile_changing_password_with_valid_data_redirects():
+    user = FakeUser(email=None, password=None)
+    request = DummyRequest(post={'__formid__': 'password'},
+                           authenticated_user=user)
+    controller = ProfileController(request)
+    controller.forms['password'] = form_validating_to({'new_password': 'secrets!'})
+
+    result = controller.profile()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+
+
+@profile_fixtures
+def test_profile_changing_password_with_invalid_data_returns_form():
+    user = FakeUser(email=None, password=None)
+    request = DummyRequest(post={'__formid__': 'password'},
+                           authenticated_user=user)
+    controller = ProfileController(request)
+    controller.forms['password'] = invalid_form()
+
+    result = controller.profile()
+
+    assert 'password_form' in result
+
+
+@profile_fixtures
+def test_profile_changing_password_with_invalid_data_does_not_update_password():
+    user = FakeUser(email=None, password=None)
+    request = DummyRequest(post={'__formid__': 'password'},
+                           authenticated_user=user)
+    controller = ProfileController(request)
+    controller.forms['password'] = invalid_form()
+
+    controller.profile()
+
+    assert user.password is None
+
+
+notifications_fixtures = pytest.mark.usefixtures('authn_policy',
+                                                 'routes_mapper',
+                                                 'subscriptions_model')
+
+
+@notifications_fixtures
+def test_notifications_form_404s_if_not_logged_in(authn_policy):
     request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = "acct:foo@bar.com"
-    request.authenticated_user = FakeUser(email="foo@bar.com")
+    authn_policy.authenticated_userid.return_value = None
 
-    result = ProfileController(request).profile()
-
-    assert result["model"]["email"] == "foo@bar.com"
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        NotificationsController(request).notifications_form()
 
 
-@pytest.mark.usefixtures('user_model')
-def test_profile_returns_subscriptions(subscriptions_model):
-    """The profile should include the user's subscriptions."""
-    request = Mock(authenticated_userid="acct:foo@bar.com")
-    subscriptions_model.get_subscriptions_for_uri.return_value = \
-        {"some": "data"}
+@notifications_fixtures
+def test_notifications_form_sets_subscriptions_data_in_form(authn_policy,
+                                                            subscriptions_model):
+    request = DummyRequest()
+    authn_policy.authenticated_userid.return_value = 'fiona'
+    subscriptions_model.get_subscriptions_for_uri.return_value = [
+        FakeSubscription('reply', True),
+        FakeSubscription('foo', False),
+    ]
+    controller = NotificationsController(request)
+    controller.form = form_validating_to({})
 
-    result = ProfileController(request).profile()
+    controller.notifications_form()
 
-    assert result["model"]["subscriptions"] == {"some": "data"}
-
-
-def test_edit_profile_invalid_password(form_validator, user_model):
-    """Make sure our edit_profile call validates the user password."""
-    request = Mock(authenticated_userid="johndoe", method="POST")
-    type(request).user = mock.PropertyMock()
-    form_validator.return_value = (None, {
-        "username": "john",
-        "pwd": "blah",
-        "subscriptions": "",
+    controller.form.set_appstruct.assert_called_once_with({
+        'notifications': set(['reply']),
     })
 
-    # Mock an invalid password
-    user_model.validate_user.return_value = False
 
-    profile = ProfileController(request)
-    result = profile.edit_profile()
+@notifications_fixtures
+def test_notifications_404s_if_not_logged_in(authn_policy):
+    request = DummyRequest(post={})
+    authn_policy.authenticated_userid.return_value = None
 
-    assert result['code'] == 401
-    assert any('pwd' in err for err in result['errors'])
-
-
-def test_edit_profile_with_validation_failure(authn_policy, form_validator):
-    """If form validation fails, return the error object."""
-    authn_policy.authenticated_userid.return_value = "johndoe"
-    form_validator.return_value = ({"errors": "BOOM!"}, None)
-
-    request = DummyRequest(method='POST')
-    profile = ProfileController(request)
-    result = profile.edit_profile()
-
-    assert result == {"errors": "BOOM!"}
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        NotificationsController(request).notifications()
 
 
-def test_edit_profile_successfully(authn_policy, form_validator, user_model):
-    """edit_profile() returns a dict with key "form" when successful."""
-    authn_policy.authenticated_userid.return_value = "johndoe"
-    form_validator.return_value = (None, {
-        "username": "johndoe",
-        "pwd": "password",
-        "subscriptions": "",
+@notifications_fixtures
+def test_notifications_with_invalid_data_returns_form():
+    request = DummyRequest(post={})
+    controller = NotificationsController(request)
+    controller.form = invalid_form()
+
+    result = controller.notifications()
+
+    assert 'form' in result
+
+
+@notifications_fixtures
+def test_notifications_form_with_valid_data_updates_subscriptions(authn_policy,
+                                                                  subscriptions_model):
+    request = DummyRequest(post={})
+    authn_policy.authenticated_userid.return_value = 'fiona'
+    subs = [
+        FakeSubscription('reply', True),
+        FakeSubscription('foo', False),
+    ]
+    subscriptions_model.get_subscriptions_for_uri.return_value = subs
+    controller = NotificationsController(request)
+    controller.form = form_validating_to({
+        'notifications': set(['foo'])
     })
-    user_model.validate_user.return_value = True
-    request = DummyRequest(method='POST')
-    request.authenticated_user = FakeUser(email="john@doe.com")
 
-    profile = ProfileController(request)
-    result = profile.edit_profile()
+    controller.notifications()
 
-    assert result == {"model": {"email": "john@doe.com"}}
+    assert subs[0].active == False
+    assert subs[1].active == True
 
 
-def test_subscription_update(authn_policy, form_validator,
-                             subscriptions_model):
-    """Make sure that the new status is written into the DB."""
-    authn_policy.authenticated_userid.return_value = "acct:john@doe"
-    form_validator.return_value = (None, {
-        "username": "acct:john@doe",
-        "pwd": "smith",
-        "subscriptions": '{"active":true,"uri":"acct:john@doe","id":1}',
-    })
-    mock_sub = Mock(active=False, uri="acct:john@doe")
-    subscriptions_model.get_by_id.return_value = mock_sub
-    request = DummyRequest(method='POST')
-    request.authenticated_user = FakeUser(email="john@doe")
+@notifications_fixtures
+def test_notifications_form_with_valid_data_redirects(authn_policy,
+                                                      subscriptions_model):
+    request = DummyRequest(post={})
+    authn_policy.authenticated_userid.return_value = 'fiona'
+    subscriptions_model.get_subscriptions_for_uri.return_value = []
+    controller = NotificationsController(request)
+    controller.form = form_validating_to({})
 
-    profile = ProfileController(request)
-    result = profile.edit_profile()
+    result = controller.notifications()
 
-    assert mock_sub.active is True
-    assert result == {"model": {"email": "john@doe"}}
-
-
-@pytest.mark.usefixtures('activation_model')
-def test_disable_user_with_invalid_password(form_validator, user_model):
-    """Make sure our disable_user call validates the user password."""
-    request = Mock(method='POST', authenticated_userid='john')
-    form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
-
-    # With an invalid password, validate_user() returns False.
-    user_model.validate_user.return_value = False
-
-    profile = ProfileController(request)
-    result = profile.disable_user()
-
-    assert result['code'] == 401
-    assert any('pwd' in err for err in result['errors'])
-
-
-@pytest.mark.usefixtures('activation_model')
-def test_disable_user_sets_random_password(form_validator, user_model):
-    """Check if the user is disabled."""
-    request = Mock(method='POST', authenticated_userid='john')
-    form_validator.return_value = (None, {"username": "john", "pwd": "doe"})
-
-    user = request.authenticated_user = FakeUser(password='abc')
-
-    profile = ProfileController(request)
-    profile.disable_user()
-
-    assert user.password == user_model.generate_random_password.return_value
-
-
-def test_disable_user_with_no_authenticated_user():
-    exc = ProfileController(Mock(authenticated_userid=None)).disable_user()
-
-    assert isinstance(exc, httpexceptions.HTTPUnauthorized)
-
-
-@patch('h.accounts.views.Subscriptions')
-def test_unsubscribe_sets_active_to_False(Subscriptions):
-    """It sets the active field of the subscription to False."""
-    Subscriptions.get_by_id.return_value = Mock(
-        uri='acct:bob@hypothes.is', active=True)
-    request = MagicMock(
-        authenticated_userid='acct:bob@hypothes.is',
-        GET={'subscription_id': 'subscription_id'}
-    )
-
-    ProfileController(request).unsubscribe()
-
-    assert Subscriptions.get_by_id.return_value.active is False
-
-
-@patch('h.accounts.views.Subscriptions')
-def test_unsubscribe_not_authorized(Subscriptions):
-    """If you try to unsubscribe someone else's subscription you get a 401."""
-    Subscriptions.get_by_id.return_value = Mock(
-        uri='acct:bob@hypothes.is', active=True)
-    request = MagicMock(
-        authenticated_userid='acct:fred@hypothes.is',
-        GET={'subscription_id': 'subscription_id'}
-    )
-
-    with pytest.raises(httpexceptions.HTTPUnauthorized):
-        ProfileController(request).unsubscribe()
-
-    assert Subscriptions.get_by_id.return_value.active is True
+    assert isinstance(result, httpexceptions.HTTPFound)
 
 
 @pytest.fixture
 def pop_flash(request):
     patcher = patch('h.accounts.views.session.pop_flash', autospec=True)
+    func = patcher.start()
     request.addfinalizer(patcher.stop)
-    return patcher.start()
+    return func
 
 
 @pytest.fixture
 def subscriptions_model(request):
-    patcher = patch('h.accounts.views.Subscriptions', autospec=True)
+    patcher = patch('h.models.Subscriptions', autospec=True)
+    model = patcher.start()
     request.addfinalizer(patcher.stop)
-    return patcher.start()
+    return model
 
 
 @pytest.fixture
 def user_model(config, request):
     patcher = patch('h.accounts.views.User', autospec=True)
+    model = patcher.start()
     request.addfinalizer(patcher.stop)
-    return patcher.start()
+    return model
 
 
 @pytest.fixture
 def activation_model(config, request):
     patcher = patch('h.accounts.views.Activation', autospec=True)
+    model = patcher.start()
     request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def form_validator(request):
-    patcher = patch('h.accounts.views.validate_form', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+    return model
