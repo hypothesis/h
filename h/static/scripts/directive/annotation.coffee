@@ -1,5 +1,7 @@
 ### global -validate ###
 
+STORAGE_KEY = 'hypothesis.privacy'
+
 # Validate an annotation.
 # Annotations must be attributed to a user or marked as deleted.
 # A public annotation is valid only if they have a body.
@@ -44,10 +46,10 @@ errorMessage = (reason) ->
 AnnotationController = [
   '$scope', '$timeout', '$q', '$rootScope', '$document',
   'drafts', 'flash', 'permissions', 'tags', 'time',
-  'annotationUI', 'annotationMapper', 'session', 'groups'
+  'annotationUI', 'annotationMapper', 'session', 'groups', 'localStorage'
   ($scope,   $timeout,   $q,   $rootScope,   $document,
    drafts,   flash,   permissions,   tags,   time,
-   annotationUI,   annotationMapper,   session,   groups) ->
+   annotationUI,   annotationMapper,   session,   groups,   localStorage) ->
 
     @annotation = {}
     @action = 'view'
@@ -60,8 +62,20 @@ AnnotationController = [
     @timestamp = null
 
     model = $scope.annotationGet()
+
+    # Set the group of new annotations.
     if not model.group
       model.group = groups.focused().id
+
+    # Set the permissions of new annotations.
+    if not model.permissions
+      defaultLevel = localStorage.getItem(STORAGE_KEY);
+      if (defaultLevel != 'private') and (defaultLevel != 'shared')
+        defaultLevel = 'shared';
+      if defaultLevel == 'private'
+        model.permissions = permissions.private()
+      else
+        model.permissions = permissions.public(model.group)
 
     highlight = model.$highlight
     original = null
@@ -122,6 +136,14 @@ AnnotationController = [
     # The changes take effect when the annotation is saved
     ###
     this.setPrivacy = (privacy) ->
+
+      # When the user changes the privacy level of an annotation they're
+      # creating or editing, we cache that and use the same privacy level the
+      # next time they create an annotation.
+      # But _don't_ cache it when they change the privacy level of a reply.
+      if not model.references  # If the annotation is not a reply.
+        localStorage.setItem(STORAGE_KEY, privacy);
+
       if privacy == 'private'
         @annotation.permissions = permissions.private()
       else if privacy == 'shared'
@@ -276,9 +298,11 @@ AnnotationController = [
 
       reply = annotationMapper.createAnnotation({references, uri})
 
+      reply.group = model.group
+
       if session.state.userid
-        if permissions.isPublic model.permissions
-          reply.permissions = permissions.public()
+        if permissions.isPublic(model.permissions, model.group)
+          reply.permissions = permissions.public(reply.group)
         else
           reply.permissions = permissions.private()
 

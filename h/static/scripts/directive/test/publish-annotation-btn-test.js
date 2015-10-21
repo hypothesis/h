@@ -63,16 +63,6 @@ describe('publishAnnotationBtn', function () {
     assert.equal(buttons[0].innerHTML, 'Post to Research Lab');
   });
 
-  it('should default to "shared" as the privacy level for new annotations', function () {
-    fakeStorage = {};
-    element.link({
-      isNew: true
-    });
-    assert.deepEqual(fakeStorage, {
-      'hypothesis.privacy': 'shared'
-    });
-  });
-
   it('should save when "Post..." is clicked', function () {
     var savedSpy = sinon.spy();
     element.link({

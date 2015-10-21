@@ -1,9 +1,7 @@
 'use strict';
 
-var STORAGE_KEY = 'hypothesis.privacy';
-
 // @ngInject
-function PublishAnnotationBtnController($scope, localStorage) {
+function PublishAnnotationBtnController($scope) {
   var vm = this;
 
   vm.group = {
@@ -24,25 +22,12 @@ function PublishAnnotationBtnController($scope, localStorage) {
   }
 
   this.setPrivacy = function (level) {
-    localStorage.setItem(STORAGE_KEY, level);
     $scope.onSetPrivacy({level: level});
   }
 
   $scope.$watch('isShared', function () {
     updatePublishActionLabel();
   });
-
-  if ($scope.isNew) {
-    // set the privacy level for new annotations.
-    // FIXME - This should be done at the time the annotation is created,
-    // not by this control
-    var defaultLevel = localStorage.getItem(STORAGE_KEY);
-    if (defaultLevel !== 'private' &&
-        defaultLevel !== 'shared') {
-      defaultLevel = 'shared';
-    }
-    this.setPrivacy(defaultLevel);
-  }
 
   function updatePublishActionLabel() {
     if ($scope.isShared) {

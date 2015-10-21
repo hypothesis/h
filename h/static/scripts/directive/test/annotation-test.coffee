@@ -26,6 +26,7 @@ describe 'annotation', ->
   fakeTags = null
   fakeTime = null
   fakeUrlEncodeFilter = null
+  fakeLocalStorage = null
   sandbox = null
 
   createDirective = ->
@@ -87,6 +88,10 @@ describe 'annotation', ->
       nextFuzzyUpdate: sandbox.stub().returns(30)
     }
     fakeUrlEncodeFilter = (v) -> encodeURIComponent(v)
+    fakeLocalStorage = {
+      setItem: sandbox.stub()
+      getItem: sandbox.stub()
+    }
 
     fakeGroups = {
       focused: -> {}
@@ -108,6 +113,7 @@ describe 'annotation', ->
     $provide.value 'tags', fakeTags
     $provide.value 'time', fakeTime
     $provide.value 'urlencodeFilter', fakeUrlEncodeFilter
+    $provide.value 'localStorage', fakeLocalStorage
     $provide.value 'groups', fakeGroups
     return
 
@@ -177,12 +183,33 @@ describe 'annotation', ->
       controller.reply()
       assert.deepEqual(reply.permissions, {read: ['everybody']})
 
+    it 'makes the annotation shared if the parent is shared', ->
+      $scope.annotation.group = "my group"
+      $scope.annotation.permissions = {read: ["my group"]}
+      reply = {}
+      fakeAnnotationMapper.createAnnotation.returns(reply)
+      fakePermissions.isPublic = (permissions, group) ->
+        return group in permissions.read
+      fakePermissions.public = (group) ->
+        return {read: [group]}
+
+      controller.reply()
+
+      assert "my group" in reply.permissions.read
+
     it 'does not add the world readable principal if the parent is private', ->
       reply = {}
       fakeAnnotationMapper.createAnnotation.returns(reply)
       fakePermissions.isPublic.returns(false)
       controller.reply()
       assert.deepEqual(reply.permissions, {read: ['justme']})
+
+    it "sets the reply's group to be the same as its parent's", ->
+      $scope.annotation.group = "my group"
+      reply = {}
+      fakeAnnotationMapper.createAnnotation.returns(reply)
+      controller.reply()
+      assert.equal(reply.group, $scope.annotation.group)
 
   describe '#setPrivacy', ->
     beforeEach ->
@@ -192,9 +219,6 @@ describe 'annotation', ->
       annotation.$update = sinon.stub().returns(Promise.resolve())
       controller.edit();
       controller.setPrivacy('private')
-      # verify that permissions are not updated until the annotation
-      # is saved
-      assert.deepEqual(annotation.permissions, {})
       controller.save().then(->
         # verify that the permissions are updated once the annotation
         # is saved
@@ -205,9 +229,35 @@ describe 'annotation', ->
       annotation.$update = sinon.stub().returns(Promise.resolve())
       controller.edit();
       controller.setPrivacy('shared')
-      assert.deepEqual(annotation.permissions, {})
       controller.save().then(->
         assert.deepEqual(annotation.permissions, {read: ['everybody']})
+      )
+
+    it 'saves the "shared" visibility level to localStorage', ->
+      annotation.$update = sinon.stub().returns(Promise.resolve())
+      controller.edit();
+      controller.setPrivacy('shared')
+      controller.save().then(->
+        assert(fakeLocalStorage.setItem.calledWithExactly(
+          'hypothesis.privacy', 'shared'))
+      )
+
+    it 'saves the "private" visibility level to localStorage', ->
+      annotation.$update = sinon.stub().returns(Promise.resolve())
+      controller.edit();
+      controller.setPrivacy('private')
+      controller.save().then(->
+        assert(fakeLocalStorage.setItem.calledWithExactly(
+          'hypothesis.privacy', 'private'))
+      )
+
+    it "doesn't save the visibility if the annotation is a reply", ->
+      annotation.$update = sinon.stub().returns(Promise.resolve())
+      annotation.references = ["parent id"]
+      controller.edit();
+      controller.setPrivacy('private')
+      controller.save().then(->
+        assert(not fakeLocalStorage.setItem.called)
       )
 
   describe '#hasContent', ->
@@ -508,7 +558,7 @@ describe 'annotation', ->
         done()
       $timeout.flush()
 
-  describe "creating a new annotation", ->
+  describe "saving a new annotation", ->
     beforeEach ->
       createDirective()
       fakeFlash.error = sandbox.stub()
@@ -548,7 +598,7 @@ describe 'annotation', ->
       controller.save()
       assert fakeFlash.error.notCalled
 
-  describe "editing an annotation", ->
+  describe "saving an edited an annotation", ->
 
     beforeEach ->
       createDirective()
@@ -617,8 +667,9 @@ describe("AnnotationController", ->
   createAnnotationDirective = ({annotation, personaFilter, momentFilter,
                                 urlencodeFilter, drafts, features, flash,
                                 permissions, session, tags, time, annotationUI,
-                                annotationMapper, groups,
-                                documentTitleFilter, documentDomainFilter}) ->
+                                annotationMapper, groups, documentTitleFilter,
+                                documentDomainFilter, localStorage}) ->
+    session = session or {state: {userid: "acct:fred@hypothes.is"}}
     locals = {
       personaFilter: personaFilter or ->
       momentFilter: momentFilter or {}
@@ -635,11 +686,15 @@ describe("AnnotationController", ->
         error: ->
       }
       permissions: permissions or {
-        isPublic: -> false
-        isPrivate: -> false
+        isPublic: (permissions, group) ->
+          return group in permissions.read
+        isPrivate: (permissions, user) ->
+          return user in permissions.read
         permits: -> true
+        public: (group) -> {"read": [group]}
+        private: -> {"read": [session.state.userid]}
       }
-      session: session or {state: {}}
+      session: session
       tags: tags or {store: ->}
       time: time or {
         toFuzzyString: ->
@@ -653,6 +708,10 @@ describe("AnnotationController", ->
       }
       documentTitleFilter: documentTitleFilter or -> ''
       documentDomainFilter: documentDomainFilter or -> ''
+      localStorage: localStorage or {
+        setItem: ->
+        getItem: ->
+      }
     }
     module(($provide) ->
       $provide.value("personaFilter", locals.personaFilter)
@@ -670,6 +729,7 @@ describe("AnnotationController", ->
       $provide.value("groups", locals.groups)
       $provide.value("documentTitleFilter", locals.documentTitleFilter)
       $provide.value("documentDomainFilter", locals.documentDomainFilter)
+      $provide.value("localStorage", locals.localStorage)
       return
     )
 
@@ -690,6 +750,44 @@ describe("AnnotationController", ->
   describe("createAnnotationDirective", ->
     it("creates the directive without crashing", ->
       createAnnotationDirective({})
+    )
+
+    it("sets the permissions of new annotations from local storage", ->
+      {controller} = createAnnotationDirective({
+        localStorage: {
+          setItem: ->
+          getItem: (key) ->
+            if key == 'hypothesis.privacy'
+              return 'shared'
+            else
+              assert(false, "Wrong key requested from localStorage")
+        }
+      })
+      assert(controller.isShared())
+    )
+
+    it("sets the permissions of new annotations from local storage to private", ->
+      {controller} = createAnnotationDirective({
+        localStorage: {
+          setItem: ->
+          getItem: (key) ->
+            if key == 'hypothesis.privacy'
+              return 'private'
+            else
+              assert(false, "Wrong key requested from localStorage")
+        }
+      })
+      assert(controller.isPrivate())
+    )
+
+    it("defaults to shared if no locally cached visibility", ->
+      {controller} = createAnnotationDirective({
+        localStorage: {
+          setItem: ->
+          getItem: ->
+        }
+      })
+      assert(controller.isShared())
     )
   )
 
