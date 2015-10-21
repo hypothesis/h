@@ -9,16 +9,36 @@ var states = {
   ERRORED:  'errored',
 };
 
-/* Manages the state of the browser action button to ensure that it displays
- * correctly for the currently active tab. An onchange callback will be
- * called when the extension changes state. This will be provided
- * with the tabId, the current and previous states.
+/** The default H state for a new browser tab */
+var DEFAULT_STATE = {
+  /** Whether or not H is active on the page */
+  state: states.INACTIVE,
+  /** The count of annotations on the page visible to the user,
+   * as returned by the badge API
+   */
+  annotationCount: 0,
+  /** Whether or not the H sidebar has been installed onto the page by
+   * the extension
+   */
+  extensionSidebarInstalled: false,
+};
+
+/** TabState stores the H state for a tab. This state includes:
  *
- * Each state has a method to enable it such as activateTab() and a method
- * to query the current state such as isTabActive().
+ * - Whether the extension has been activated on a tab
+ * - Whether the sidebar is currently installed on a tab
+ * - The count of annotations visible to the user on the URL currently
+ *   displayed in the tab.
+ *
+ * The H state for a tab is updated via the setState() method and
+ * retrieved via getState().
+ *
+ * When the H state for a tab changes, the `onchange()` callback will
+ * be triggered with the tab ID and current and previous states.
  *
  * initialState - An Object of tabId/state keys. Used when loading state
- *   from a persisted store such as localStorage.
+ *   from a persisted store such as localStorage. This will be merged with
+ *   the default state for a tab.
  * onchange     - A function that recieves onchange(tabId, current, prev).
  */
 function TabState(initialState, onchange) {
@@ -28,27 +48,33 @@ function TabState(initialState, onchange) {
 
   this.onchange = onchange || null;
 
-  /* Replaces the entire state of the object with a new one.
+  /** Replaces the H state for all tabs with the state data
+   * from `newState`.
    *
-   * newState - An object of tabId/state pairs.
-   *
-   * Returns nothing.
+   * @param newState - A dictionary mapping tab ID to tab state objects.
+   *                   The provided state will be merged with the default
+   *                   state for a tab.
    */
   this.load = function (newState) {
     previousState = currentState || {};
-    currentState = newState;
+
+    var newCurrentState = {};
+    Object.keys(newState).forEach(function (tabId) {
+      newCurrentState[tabId] = assign({}, DEFAULT_STATE, newState[tabId]);
+    });
+    currentState = newCurrentState;
   };
 
-  this.activateTab = function (tabId, options) {
-    this.setState(tabId, {state: states.ACTIVE}, options);
+  this.activateTab = function (tabId) {
+    this.setState(tabId, {state: states.ACTIVE});
   };
 
-  this.deactivateTab = function (tabId, options) {
-    this.setState(tabId, {state: states.INACTIVE}, options);
+  this.deactivateTab = function (tabId) {
+    this.setState(tabId, {state: states.INACTIVE});
   };
 
-  this.errorTab = function (tabId, options) {
-    this.setState(tabId, {state: states.ERRORED}, options);
+  this.errorTab = function (tabId) {
+    this.setState(tabId, {state: states.ERRORED});
   };
 
   this.clearTab = function (tabId) {
@@ -59,32 +85,27 @@ function TabState(initialState, onchange) {
     this.setState(tabId, previousState[tabId], this.onchange);
   };
 
-  function getState(tabId) {
+  this.getState = function (tabId) {
     if (!currentState[tabId]) {
-      return {
-        state: states.INACTIVE,
-        annotationCount: 0,
-      };
+      return DEFAULT_STATE;
     }
     return currentState[tabId];
-  }
-
-  this.getState = getState;
+  };
 
   this.annotationCount = function(tabId) {
-    return getState(tabId).annotationCount;
+    return this.getState(tabId).annotationCount;
   }
 
   this.isTabActive = function (tabId) {
-    return getState(tabId).state === states.ACTIVE;
+    return this.getState(tabId).state === states.ACTIVE;
   };
 
   this.isTabInactive = function (tabId) {
-    return getState(tabId).state === states.INACTIVE;
+    return this.getState(tabId).state === states.INACTIVE;
   };
 
   this.isTabErrored = function (tabId) {
-    return getState(tabId).state === states.ERRORED;
+    return this.getState(tabId).state === states.ERRORED;
   };
 
   /**
@@ -92,31 +113,25 @@ function TabState(initialState, onchange) {
    *
    * @param tabId - The ID of the tab being updated
    * @param stateUpdate - A dictionary of {key:value} properties for
-   *                      state properties to update.
-   * @param options - The 'force' option allows the caller to re-trigger
-   *                  an onchange event for the current state without modifying
-   *                  the previous state. This is useful for restoring tab state
-   *                  after the extension is reloaded.
+   *                      state properties to update or null if the
+   *                      state should be removed.
    */
-  this.setState = function (tabId, stateUpdate, options) {
+  this.setState = function (tabId, stateUpdate) {
     var newState;
     if (stateUpdate) {
-      newState = assign({
-        // default state
-        state: states.INACTIVE,
-      }, currentState[tabId], stateUpdate);
+      newState = assign({}, this.getState(tabId), stateUpdate);
     }
 
-    var isForced = !!options && options.force === true;
-    var hasChanged = !isShallowEqual(newState, currentState[tabId]);
-    if (!isForced && !hasChanged) { return; }
-
-    if (!isForced || hasChanged) {
-      previousState[tabId] = currentState[tabId];
-      currentState[tabId] = newState;
+    if (isShallowEqual(newState, currentState[tabId])) {
+      return;
     }
 
-    if (typeof _this.onchange === 'function') {
+    console.log('h:dev TabState.setState', tabId, 'current', currentState[tabId], 'new', newState);
+
+    previousState[tabId] = currentState[tabId];
+    currentState[tabId] = newState;
+
+    if (_this.onchange) {
       _this.onchange(tabId, newState, previousState[tabId] || null);
     }
   }

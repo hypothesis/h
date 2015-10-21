@@ -81,9 +81,9 @@ function HypothesisChromeExtension(dependencies) {
     chromeTabs.query({}, function (tabs) {
       tabs.forEach(function (tab) {
         if (state.isTabActive(tab.id)) {
-          state.activateTab(tab.id, {force: true});
+          state.activateTab(tab.id);
         } else {
-          state.deactivateTab(tab.id, {force: true});
+          state.deactivateTab(tab.id);
         }
       });
     });
@@ -134,23 +134,22 @@ function HypothesisChromeExtension(dependencies) {
       return;
     }
 
-    if (state.isTabErrored(tabId)) {
-      state.restorePreviousState(tabId);
+    // when a new URL is loaded in a tab, reset the flags indicating
+    // whether an error occurred whilst loading the sidebar in the tab
+    // and whether the sidebar is currently installed in the tab
+    var activeState = state.getState(tabId).state;
+    if (activeState === TabState.states.ERRORED) {
+      activeState = TabState.states.ACTIVE;
     }
-
-    if (!state.isTabActive(tabId)) {
-      // Clear the state to express that the user has no preference.
-      // This allows the publisher embed to persist without us destroying it.
-      state.clearTab(tabId);
-    }
-
-    browserAction.update(tabId, state.getState(tabId));
+    state.setState(tabId, {
+      state: activeState,
+      annotationCount: 0,
+      extensionSidebarInstalled: false,
+    });
 
     settings.then(function(settings) {
       state.updateAnnotationCount(tabId, tab.url, settings.apiUrl);
     });
-
-    return updateTabDocument(tab);
   }
 
   function onTabCreated(tab) {
@@ -168,14 +167,25 @@ function HypothesisChromeExtension(dependencies) {
       return Promise.resolve();
     }
 
-    if (state.isTabActive(tab.id)) {
-      return sidebar.injectIntoTab(tab).catch(function (err) {
-        tabErrors.setTabError(tab.id, err);
-        state.errorTab(tab.id);
-      });
+    var isInstalled = state.getState(tab.id).extensionSidebarInstalled;
+    if (state.isTabActive(tab.id) && !isInstalled) {
+      return sidebar.injectIntoTab(tab)
+        .then(function () {
+          state.setState(tab.id, {
+            extensionSidebarInstalled: true,
+          });
+        })
+        .catch(function (err) {
+          tabErrors.setTabError(tab.id, err);
+          state.errorTab(tab.id);
+        });
     }
-    else if (state.isTabInactive(tab.id)) {
-      return sidebar.removeFromTab(tab);
+    else if (state.isTabInactive(tab.id) && isInstalled) {
+      return sidebar.removeFromTab(tab).then(function () {
+        state.setState(tab.id, {
+          extensionSidebarInstalled: false,
+        });
+      });
     }
   }
 }

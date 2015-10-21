@@ -21,7 +21,12 @@ function TabStore(storage) {
   };
 
   this.set = function (tabId, value) {
-    local[tabId] = value;
+    // copy across only the parts of the tab state that should
+    // be preserved
+    local[tabId] = {
+      state: value.state,
+      annotationCount: value.annotationCount,
+    };
     storage.setItem(key, JSON.stringify(local));
   };
 
