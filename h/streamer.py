@@ -621,7 +621,11 @@ def process_message(handler, reader, message):
     """
     data = json.loads(message.body)
 
-    for socket in WebSocket.instances:
+    # N.B. We iterate over a non-weak list of instances because there's nothing
+    # to stop connections being added or dropped during iteration, and if that
+    # happens Python will throw a "Set changed size during iteration" error.
+    sockets = list(WebSocket.instances)
+    for socket in sockets:
         reply = handler(data, socket)
         if reply is None:
             continue
