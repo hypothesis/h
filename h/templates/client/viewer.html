@@ -10,7 +10,7 @@
     selection-count="selectedAnnotationsCount"
     on-clear-selection="clearSelection()">
   </search-status-bar>
-  <li ng-show="isStream">
+  <li ng-if="!feature('groups') && isStream">
     <sort-dropdown
       sort-by="sort.name"
       sort-options="sortOptions"

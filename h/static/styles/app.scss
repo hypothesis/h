@@ -106,6 +106,7 @@ $group-list-width: 270px;
   .group-item {
     display: flex;
     flex-direction: row;
+    flex-grow: 1;
 
     padding: 10px;
     cursor: pointer;
@@ -121,6 +122,7 @@ $group-list-width: 270px;
 
     &.selected {
       .group-name-link {
+        font-size: $body2-font-size;
         font-weight: 600;
       }
     }
@@ -174,6 +176,7 @@ $group-list-width: 270px;
 // the label showing the currently selected group which opens
 // the drop-down list when clicked
 .group-list-label__label {
+  font-size: $body2-font-size;
   font-weight:bold;
 }
 

@@ -178,33 +178,13 @@ html {
   position: absolute;
   z-index: 2;
 
-  li:not(.ng-hide) {
-    text-align: left;
-
-    &.inactive {
-      font-weight: 400;
-      color: $gray-lighter;
-      cursor: default;
-      &:hover {
-        color: $gray-lighter;
-      }
-      & * {
-        cursor: default;
-      }
-    }
-
-    & + li {
-      border-top: dotted 1px $gray-lighter;
-    }
-  }
-
   &__link {
     color: inherit;
 
     display: block;
     line-height: 1;
-    padding: 1em;
     white-space: nowrap;
+    font-size: $body2-font-size;
 
     &:hover {
       color: $brand-color;
@@ -326,6 +306,43 @@ html {
 
 .open > .dropdown-menu__top-arrow {
   visibility: visible;
+}
+
+// Row in a dropdown menu
+.dropdown-menu__row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 8px;
+  padding-right: 16px;
+
+  min-height: 40px;
+  min-width: 120px;
+
+  &:not(:first-child) {
+    border-top: dotted 1px $gray-lighter;
+  }
+}
+
+.dropdown-menu__row--unpadded {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+// Radio button in a dropdown menu
+.dropdown-menu-radio {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 8px;
+  margin-right: 8px;
+
+  border: 1px solid $color-silver;
+}
+
+.dropdown-menu-radio.is-selected {
+  border: 4px solid $color-dove-gray;
 }
 
 .masthead {

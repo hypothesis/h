@@ -38,7 +38,10 @@ module.exports = class AppController
     $scope.isSidebar = $window.top isnt $window
 
     # Default sort
-    $scope.sort = name: 'Location'
+    $scope.sort = {
+      name: 'Location'
+      options: ['Newest', 'Oldest', 'Location']
+    }
 
     # Reload the view when the focused group changes or the
     # list of groups that the user is a member of changes
@@ -67,7 +70,11 @@ module.exports = class AppController
                 if selector.type is 'TextPositionSelector'
                   return selector.start
           return Number.POSITIVE_INFINITY
-      $scope.sort = {name, predicate}
+      $scope.sort = {
+        name,
+        predicate,
+        options: $scope.sort.options,
+      }
 
     $scope.$watch 'auth.user', (newVal, oldVal) ->
       return if newVal is oldVal

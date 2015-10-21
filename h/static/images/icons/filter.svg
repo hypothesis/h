@@ -5,13 +5,13 @@
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-        <g id="Artboard-1-Copy-3" sketch:type="MSArtboardGroup">
-            <rect id="Rectangle-2" fill="#000000" sketch:type="MSShapeGroup" x="0" y="3" width="4" height="2"></rect>
-            <circle id="Oval-3" stroke="#000000" stroke-width="2" sketch:type="MSShapeGroup" cx="6" cy="4" r="4"></circle>
-            <rect id="Rectangle-2-Copy" fill="#000000" sketch:type="MSShapeGroup" x="12" y="11" width="4" height="2"></rect>
-            <circle id="Oval-3-Copy" stroke="#000000" stroke-width="2" sketch:type="MSShapeGroup" cx="10" cy="12" r="4"></circle>
-            <rect id="Rectangle-2-Copy-2" fill="#000000" sketch:type="MSShapeGroup" x="9" y="3" width="7" height="2"></rect>
-            <rect id="Rectangle-2-Copy-3" fill="#000000" sketch:type="MSShapeGroup" x="0" y="11" width="7" height="2"></rect>
+        <g id="Artboard-1-Copy-3" sketch:type="MSArtboardGroup" fill="#000000">
+            <rect id="Rectangle-2" sketch:type="MSShapeGroup" x="0" y="3" width="4" height="2"></rect>
+            <path d="M6,6 L6,6 C7.1045695,6 8,5.1045695 8,4 C8,2.8954305 7.1045695,2 6,2 C4.8954305,2 4,2.8954305 4,4 C4,5.1045695 4.8954305,6 6,6 L6,6 Z M6,8 L6,8 C3.790861,8 2,6.209139 2,4 C2,1.790861 3.790861,0 6,0 C8.209139,0 10,1.790861 10,4 C10,6.209139 8.209139,8 6,8 L6,8 Z" id="Shape" sketch:type="MSShapeGroup"></path>
+            <rect id="Rectangle-2-Copy" sketch:type="MSShapeGroup" x="12" y="11" width="4" height="2"></rect>
+            <path d="M10,14 L10,14 C11.1045695,14 12,13.1045695 12,12 C12,10.8954305 11.1045695,10 10,10 C8.8954305,10 8,10.8954305 8,12 C8,13.1045695 8.8954305,14 10,14 L10,14 Z M10,16 L10,16 C7.790861,16 6,14.209139 6,12 C6,9.790861 7.790861,8 10,8 C12.209139,8 14,9.790861 14,12 C14,14.209139 12.209139,16 10,16 L10,16 Z" id="Shape" sketch:type="MSShapeGroup"></path>
+            <rect id="Rectangle-2-Copy-2" sketch:type="MSShapeGroup" x="9" y="3" width="7" height="2"></rect>
+            <rect id="Rectangle-2-Copy-3" sketch:type="MSShapeGroup" x="0" y="11" width="7" height="2"></rect>
         </g>
     </g>
 </svg>

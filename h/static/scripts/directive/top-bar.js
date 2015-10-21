@@ -17,6 +17,9 @@ module.exports = function () {
       searchController: '=',
       accountDialog: '=',
       shareDialog: '=',
+      sortBy: '=',
+      sortOptions: '=',
+      onChangeSortBy: '&',
     },
     templateUrl: 'top_bar.html',
   };
