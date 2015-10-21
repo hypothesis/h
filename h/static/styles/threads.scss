@@ -1,4 +1,4 @@
-$thread-padding: 1em;
+$thread-padding: $annotation-card-left-padding;
 
 .stream-list {
   & > * {
@@ -24,14 +24,16 @@ $thread-padding: 1em;
   position: relative;
 
   & > ul {
-    padding-left: $thread-padding + .15em;
+    padding-left: $thread-padding + 3px;
     margin-left: -$thread-padding;
   }
 
+  // nested threads for annotation replies
   .thread {
     border-left: 1px dotted $gray-light;
     padding: 0;
     padding-left: $thread-padding;
+    margin-top: 10px;
   }
 
   .threadexp {
@@ -49,11 +51,6 @@ $thread-padding: 1em;
       text-align: center;
     }
   }
-}
-
-.thread-message,
-.thread-deleted {
-  margin: .5em 0;
 }
 
 .thread-load-more {

@@ -278,6 +278,22 @@ describe 'annotation', ->
       controller.annotation.tags = [{text: 'foo'}]
       assert.ok(controller.hasContent())
 
+  describe '#hasQuotes', ->
+    beforeEach ->
+      createDirective()
+
+    it 'returns false if the annotation has no quotes', ->
+      controller.annotation.target = [{}]
+      assert.isFalse(controller.hasQuotes())
+
+    it 'returns true if the annotation has quotes', ->
+      controller.annotation.target = [{
+        selector: [{
+          type: 'TextQuoteSelector'
+        }]
+      }]
+      assert.isTrue(controller.hasQuotes())
+
   describe '#render', ->
 
     beforeEach ->
