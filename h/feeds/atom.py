@@ -18,11 +18,10 @@ def _feed_entry_from_annotation(
     :rtype: dict
 
     """
-    parts = util.split_user(annotation["user"])
-    if parts is None:
+    try:
+        name = util.split_user(annotation["user"])["username"]
+    except ValueError:
         name = annotation["user"]
-    else:
-        name = parts[0]
     entry = {
         "id": h.feeds.util.tag_uri_for_annotation(annotation, annotation_url),
         "author": {"name": name},

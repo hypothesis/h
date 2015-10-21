@@ -85,3 +85,81 @@ def test_make_staff_raises_if_user_does_not_exist(get_by_username):
 
     with pytest.raises(accounts.NoSuchUserError):
         accounts.make_staff("fred")
+
+
+# The fixtures required to mock all of get_user()'s dependencies.
+get_user_fixtures = pytest.mark.usefixtures('util', 'get_by_username')
+
+
+@get_user_fixtures
+def test_get_user_calls_split_user(util):
+    """It should call split_user() once with the given userid."""
+    util.split_user.return_value = {
+        'username': 'fred', 'domain': 'hypothes.is'}
+
+    accounts.get_user('acct:fred@hypothes.is', mock.Mock())
+
+    util.split_user.assert_called_once_with('acct:fred@hypothes.is')
+
+
+@get_user_fixtures
+def test_get_user_returns_None_if_split_user_raises_ValueError(util):
+    util.split_user.side_effect = ValueError
+
+    assert accounts.get_user('userid', mock.Mock()) is None
+
+
+@get_user_fixtures
+def test_get_user_returns_None_if_domain_does_not_match(util):
+    request = mock.Mock(auth_domain='hypothes.is')
+    util.split_user.return_value = {
+        'username': 'username', 'domain': 'other'}
+
+    assert accounts.get_user('userid', request) is None
+
+
+@get_user_fixtures
+def test_get_user_calls_get_by_username(util, get_by_username):
+    """It should call get_by_username() once with the username."""
+    request = mock.Mock(auth_domain='hypothes.is')
+    util.split_user.return_value = {
+        'username': 'username', 'domain': 'hypothes.is'}
+
+    accounts.get_user('acct:username@hypothes.is', request)
+
+    get_by_username.assert_called_once_with('username')
+
+
+@get_user_fixtures
+def test_get_user_returns_user(util, get_by_username):
+    """It should return the result from get_by_username()."""
+    request = mock.Mock(auth_domain='hypothes.is')
+    util.split_user.return_value = {
+        'username': 'username', 'domain': 'hypothes.is'}
+
+    assert accounts.get_user('acct:username@hypothes.is', request) == (
+        get_by_username.return_value)
+
+
+@mock.patch("h.accounts.get_user")
+def test_authenticated_user_calls_get_user(get_user):
+    """It should call get_user() with request.authenticated_userid."""
+    request=mock.Mock(authenticated_userid="userid")
+
+    accounts.authenticated_user(request)
+
+    get_user.assert_called_once_with("userid", request)
+
+
+@pytest.fixture
+def util(request):
+    patcher = mock.patch('h.accounts.util')
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def get_by_username(request):
+    patcher = mock.patch('h.accounts.models.User.get_by_username')
+    request.addfinalizer(patcher.stop)
+    return patcher.start()

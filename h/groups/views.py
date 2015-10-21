@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
-
 import deform
 from pyramid import httpexceptions as exc
 from pyramid.view import view_config
@@ -59,8 +57,8 @@ def create(request):
     except deform.ValidationFailure:
         return {'form': form.render()}
 
-    user = models.User.get_by_userid(request.authenticated_userid)
-    group = models.Group(name=appstruct["name"], creator=user)
+    group = models.Group(
+        name=appstruct["name"], creator=request.authenticated_user)
     request.db.add(group)
 
     # We need to flush the db session here so that group.id will be generated.
@@ -136,8 +134,7 @@ def read(request):
     if not request.authenticated_userid:
         return _login_to_join(request, group)
     else:
-        user = models.User.get_by_userid(request.authenticated_userid)
-        if group in user.groups:
+        if group in request.authenticated_user.groups:
             return _read_group(request, group)
         else:
             return _join(request, group)
@@ -159,9 +156,7 @@ def join(request):
     if group is None:
         raise exc.HTTPNotFound()
 
-    user = models.User.get_by_userid(request.authenticated_userid)
-
-    group.members.append(user)
+    group.members.append(request.authenticated_user)
     _send_group_notification(request, 'group-join', group.hashid)
 
     url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
@@ -194,12 +189,10 @@ def leave(request):
     if group is None:
         raise exc.HTTPNotFound()
 
-    user = models.User.get_by_userid(request.authenticated_userid)
-
-    if user not in group.members:
+    if request.authenticated_user not in group.members:
         raise exc.HTTPNotFound()
 
-    group.members.remove(user)
+    group.members.remove(request.authenticated_user)
     _send_group_notification(request, 'group-leave', group.hashid)
 
     return exc.HTTPNoContent()

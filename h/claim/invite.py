@@ -74,7 +74,7 @@ def get_users(session, limit=None):
 
 def get_merge_vars(request, users):
     for user in users:
-        userid = util.userid_from_username(user.username, requeat)
+        userid = util.userid_from_username(user.username, request)
         claim = generate_claim_url(request, userid)
         recipient = user.email
         merge_vars = [

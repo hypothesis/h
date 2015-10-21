@@ -21,8 +21,7 @@ def test_sorts_groups(User):
         FakeGroup('b', 'Group B'),
         FakeGroup('a', 'Group B'),
     ]
-    User.get_by_userid.return_value = fake_user
-    request = Mock()
+    request = Mock(authenticated_user=fake_user)
     session_model = model(request)
 
     ids = [group['id'] for group in session_model['groups']]
