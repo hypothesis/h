@@ -148,6 +148,21 @@ def test_expand_no_document(document_model):
     assert uri.expand("http://example.com/") == ["http://example.com/"]
 
 
+def test_expand_document_doesnt_expand_canonical_uris(document_model):
+    document = document_model.get_by_uri.return_value
+    document.get.return_value = [
+        {"href": "http://foo.com/"},
+        {"href": "http://bar.com/"},
+        {"href": "http://example.com/", "rel": "canonical"},
+    ]
+    document.uris.return_value = [
+        "http://foo.com/",
+        "http://bar.com/",
+        "http://example.com/",
+    ]
+    assert uri.expand("http://example.com/") == ["http://example.com/"]
+
+
 def test_expand_document_uris(document_model):
     document_model.get_by_uri.return_value.uris.return_value = [
         "http://foo.com/",
