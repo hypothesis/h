@@ -117,6 +117,27 @@ def firefox_manifest(request):
            {'version': h.__version__},
            request=request)
 
+def build_type_from_api_url(api_url):
+    """
+    Returns the default build type ('production', 'staging' or 'dev')
+    when building an extension that communicates with the given service
+    """
+    host = urlparse.urlparse(api_url).netloc
+    if host == 'hypothes.is':
+        return 'production'
+    elif host == 'stage.hypothes.is':
+        return 'staging'
+    else:
+        return 'dev'
+
+def settings_dict(env):
+    """ Returns a dictionary of settings to be bundled with the extension """
+    api_url = env['request'].route_url('api')
+    return {
+        'blocklist': env['registry'].settings['h.blocklist'],
+        'buildType': build_type_from_api_url(api_url),
+        'apiUrl': api_url,
+    }
 
 def get_env(config_uri, base_url):
     """
@@ -201,13 +222,9 @@ def build_chrome(args):
         data = chrome_manifest(env['request'])
         fp.write(data)
 
-    # Render some settings to a JSON file in the Chrome extension.
-    settings = {
-        'blocklist': env['registry'].settings['h.blocklist'],
-        'apiUrl': env['request'].route_url('api')
-    }
+    # Write build settings to a JSON file
     with codecs.open('build/chrome/settings.json', 'w', 'utf-8') as fp:
-        fp.write(json.dumps(settings))
+        fp.write(json.dumps(settings_dict(env)))
 
 
 def build_firefox(args):

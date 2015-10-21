@@ -18,6 +18,26 @@ icons[states.INACTIVE] = {
   38: 'images/browser-icon-inactive@2x.png'
 };
 
+var buildType = '';
+settings.then(function (settings) {
+  buildType = settings.buildType;
+}).catch(function (err) {
+  console.error(err);
+});
+
+// themes to apply to the toolbar icon badge depending on the type of
+// build. Production builds use the default color and no text
+var badgeThemes = {
+  'dev': {
+    defaultText: 'DEV',
+    color: '#5BCF59', // Emerald green
+  },
+  'staging': {
+    defaultText: 'STG',
+    color: '#EDA061', // Porche orange-pink
+  }
+};
+
 // Fake localization function.
 function _(str) {
   return str;
@@ -54,6 +74,7 @@ function BrowserAction(chromeBrowserAction) {
       throw new Error('Unknown tab state');
     }
 
+    // display the annotation count on the badge
     if (state.state !== states.ERRORED && state.annotationCount) {
       var countLabel;
       var totalString = state.annotationCount.toString();
@@ -68,6 +89,18 @@ function BrowserAction(chromeBrowserAction) {
       }
       title = countLabel;
       badgeText = totalString;
+    }
+
+    // update the badge style to reflect the build type
+    var badgeTheme = badgeThemes[buildType];
+    if (badgeTheme) {
+      chromeBrowserAction.setBadgeBackgroundColor({
+        tabId: tabId,
+        color: badgeTheme.color,
+      });
+      if (!badgeText) {
+        badgeText = badgeTheme.defaultText;
+      }
     }
 
     chromeBrowserAction.setBadgeText({tabId: tabId, text: badgeText});

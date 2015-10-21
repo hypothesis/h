@@ -1,4 +1,5 @@
 var assign = require('core-js/modules/$.assign');
+var proxyquire = require('proxyquire');
 
 describe('BrowserAction', function () {
   'use strict';
@@ -13,6 +14,7 @@ describe('BrowserAction', function () {
       annotationCount: 0,
       title: '',
       badgeText: '',
+      badgeColor: '',
 
       setIcon: function (options) {
         this.icon = options.path;
@@ -23,6 +25,9 @@ describe('BrowserAction', function () {
       setBadgeText: function (options) {
         this.badgeText = options.text;
       },
+      setBadgeBackgroundColor: function (options) {
+        this.badgeColor = options.color;
+      }
     };
     action = new BrowserAction(fakeChromeBrowserAction);
   });
@@ -138,6 +143,44 @@ describe('BrowserAction', function () {
       assert.equal(fakeChromeBrowserAction.badgeText, '999+');
       assert.equal(fakeChromeBrowserAction.title,
         'There are 999+ annotations on this page');
+    });
+  });
+
+  describe('build type', function () {
+    beforeEach(function () {
+      var fakeSettings = Promise.resolve({
+        buildType: 'staging',
+        '@noCallThru': true,
+      });
+      var BrowserAction = proxyquire('../lib/browser-action', {
+        './settings': fakeSettings,
+      });
+      action = new BrowserAction(fakeChromeBrowserAction);
+      return fakeSettings;
+    });
+
+    it('sets the text to STG when there are no annotations', function () {
+      action.update(1, {
+        state: TabState.states.INACTIVE,
+        annotationCount: 0,
+      });
+      assert.equal(fakeChromeBrowserAction.badgeText, 'STG');
+    });
+
+    it('shows the annotation count when there are annotations', function () {
+      action.update(1, {
+        state: TabState.states.INACTIVE,
+        annotationCount: 3,
+      });
+      assert.equal(fakeChromeBrowserAction.badgeText, '3');
+    });
+
+    it('sets the background color', function () {
+      action.update(1, {
+        state: TabState.states.INACTIVE,
+        annotationCount: 0,
+      });
+      assert.equal(fakeChromeBrowserAction.badgeColor, '#EDA061');
     });
   });
 });
