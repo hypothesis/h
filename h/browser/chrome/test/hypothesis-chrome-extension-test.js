@@ -51,6 +51,8 @@ describe('HypothesisChromeExtension', function () {
       onUpdated: new FakeListener(),
       onReplaced: new FakeListener(),
       onRemoved: new FakeListener(),
+      query: sandbox.spy(),
+      get: sandbox.spy(),
     };
     fakeChromeBrowserAction = {
       onClicked: new FakeListener(),
@@ -62,6 +64,7 @@ describe('HypothesisChromeExtension', function () {
       all: sandbox.spy(),
       set: sandbox.spy(),
       unset: sandbox.spy(),
+      reload: sandbox.spy(),
     };
     fakeTabState = {
       activateTab: sandbox.spy(),
@@ -74,6 +77,7 @@ describe('HypothesisChromeExtension', function () {
       getState: sandbox.spy(),
       setState: sandbox.spy(),
       clearTab: sandbox.spy(),
+      load: sandbox.spy(),
     };
     fakeTabState.deactivateTab = sinon.spy();
     fakeTabErrorCache = {
@@ -112,27 +116,30 @@ describe('HypothesisChromeExtension', function () {
 
   describe('.install', function () {
     var tabs;
+    var savedState;
 
     beforeEach(function () {
       tabs = [];
+      savedState =  {
+        1: {
+          state: TabState.states.ACTIVE,
+        }
+      };
+      tabs.push({id: 1, url: 'http://example.com'});
       fakeChromeTabs.query = sandbox.stub().yields(tabs);
-
-      fakeTabState.isTabActive.returns(false);
-      fakeTabState.activateTab = sandbox.spy();
-      fakeTabState.deactivateTab = sandbox.spy();
+      fakeTabStore.all = sandbox.stub().returns(savedState);
     });
 
-    it('sets up the state for tabs', function () {
-      tabs.push({id: 1, url: 'http://example.com'});
+    it('restores the saved tab states', function () {
       ext.install();
-      assert.calledWith(fakeTabState.deactivateTab, 1);
+      assert.called(fakeTabStore.reload);
+      assert.calledWith(fakeTabState.load, savedState);
     });
 
-    it('sets up the state for existing tabs', function () {
-      fakeTabState.isTabActive.returns(true);
-      tabs.push({id: 1, url: 'http://example.com'});
+    it('applies the saved state to open tabs', function () {
+      fakeTabState.getState = sandbox.stub().returns(savedState[1]);
       ext.install();
-      assert.calledWith(fakeTabState.activateTab, 1);
+      assert.calledWith(fakeBrowserAction.update, 1, savedState[1]);
     });
   });
 

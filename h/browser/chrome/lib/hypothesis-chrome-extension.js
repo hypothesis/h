@@ -51,6 +51,8 @@ function HypothesisChromeExtension(dependencies) {
   });
   var tabErrors = new TabErrorCache();
 
+  restoreSavedTabState();
+
   /* Sets up the extension and binds event listeners. Requires a window
    * object to be passed so that it can listen for localStorage events.
    */
@@ -69,35 +71,13 @@ function HypothesisChromeExtension(dependencies) {
     chromeTabs.onReplaced.addListener(onTabReplaced);
 
     chromeTabs.onRemoved.addListener(onTabRemoved);
-
-    // FIXME: Find out why we used to reload the data on every get.
-    window.addEventListener('storage', function (event) {
-      var key = 'state';
-      var isState = event.key === key;
-      var isUpdate = event.newValue !== null;
-
-      // Check the event is for the store and check that something has
-      // actually changed externally by validating the new value.
-      if (isState && isUpdate && event.newValue !== JSON.stringify(store.all())) {
-        store.reload();
-        state.load(store.all());
-      }
-    });
   };
 
   /* A method that can be used to setup the extension on existing tabs
-   * when the extension is installed.
+   * when the extension is re-installed.
    */
   this.install = function () {
-    chromeTabs.query({}, function (tabs) {
-      tabs.forEach(function (tab) {
-        if (state.isTabActive(tab.id)) {
-          state.activateTab(tab.id);
-        } else {
-          state.deactivateTab(tab.id);
-        }
-      });
-    });
+    restoreSavedTabState();
   };
 
   /* Opens the onboarding page */
@@ -106,6 +86,16 @@ function HypothesisChromeExtension(dependencies) {
       state.activateTab(tab.id);
     });
   };
+
+  function restoreSavedTabState() {
+    store.reload();
+    state.load(store.all());
+    chromeTabs.query({}, function (tabs) {
+      tabs.forEach(function (tab) {
+        onTabStateChange(tab.id, state.getState(tab.id));
+      });
+    });
+  }
 
   function onTabStateChange(tabId, current) {
     if (current) {
