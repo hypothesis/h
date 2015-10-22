@@ -191,7 +191,7 @@ function HypothesisChromeExtension(dependencies) {
   // state for a tab changes
   function updateTabDocument(tab) {
     // If the tab has not yet finished loading then just quietly return.
-    if (tab.status !== TAB_STATUS_COMPLETE) {
+    if (!state.getState(tab.id).ready) {
       return Promise.resolve();
     }
 

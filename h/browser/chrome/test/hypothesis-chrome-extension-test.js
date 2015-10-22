@@ -395,6 +395,7 @@ describe('HypothesisChromeExtension', function () {
     it('injects the sidebar if the tab has been activated', function () {
       fakeTabState.getState = sandbox.stub().returns({
         state: tabStates.ACTIVE,
+        ready: true,
       });
       fakeTabState.isTabActive.returns(true);
       onTabStateChange(tabStates.ACTIVE, tabStates.INACTIVE);
@@ -405,6 +406,7 @@ describe('HypothesisChromeExtension', function () {
       fakeTabState.getState = sandbox.stub().returns({
         state: tabStates.ACTIVE,
         extensionSidebarInstalled: true,
+        ready: true,
       });
       fakeTabState.isTabActive.returns(true);
       onTabStateChange(tabStates.ACTIVE, tabStates.ACTIVE);
@@ -415,6 +417,7 @@ describe('HypothesisChromeExtension', function () {
       fakeTabState.getState = sandbox.stub().returns({
         state: tabStates.INACTIVE,
         extensionSidebarInstalled: true,
+        ready: true,
       });
       fakeTabState.isTabInactive.returns(true);
       fakeChromeTabs.get = sandbox.stub().yields({
@@ -429,6 +432,7 @@ describe('HypothesisChromeExtension', function () {
       fakeTabState.getState = sandbox.stub().returns({
         state: tabStates.INACTIVE,
         extensionSidebarInstalled: false,
+        ready: true,
       });
       fakeTabState.isTabInactive.returns(true);
       fakeChromeTabs.get = sandbox.stub().yields({id: 1, status: 'complete'});
@@ -444,7 +448,11 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('does nothing if the tab is still loading', function () {
-      fakeChromeTabs.get = sandbox.stub().yields({id: 1, status: 'loading'});
+      fakeTabState.getState = sandbox.stub().returns({
+        state: tabStates.ACTIVE,
+        extensionSidebarInstalled: false,
+        ready: false,
+      });
       onTabStateChange(tabStates.ACTIVE, tabStates.INACTIVE);
       assert.notCalled(fakeSidebarInjector.injectIntoTab);
     });
@@ -460,6 +468,7 @@ describe('HypothesisChromeExtension', function () {
         fakeTabState.getState = sandbox.stub().returns({
           state: tabStates.ERRORED,
           extensionSidebarInstalled: false,
+          ready: true,
         });
       });
 
