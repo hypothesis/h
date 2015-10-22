@@ -20,7 +20,6 @@ def settings_from_environment():
     _setup_nsqd(settings)
     _setup_redis(settings)
     _setup_secrets(settings)
-    _setup_hashid_salt(settings)
     _setup_client(settings)
     _setup_statsd(settings)
     _setup_webassets(settings)
@@ -156,11 +155,6 @@ def _setup_secrets(settings):
         log.warn('Found deprecated SESSION_SECRET environment variable. '
                  'Please use SECRET_KEY instead!')
         settings['secret_key'] = os.environ['SESSION_SECRET']
-
-
-def _setup_hashid_salt(settings):
-    if 'HASHIDS_SALT' in os.environ:
-        settings['h.hashids.salt'] = os.environ['HASHIDS_SALT']
 
 
 def _setup_statsd(settings):

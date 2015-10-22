@@ -24,7 +24,7 @@ def _group_sort_key(group):
     # groups are sorted first by name but also by ID
     # so that multiple groups with the same name are displayed
     # in a consistent order in clients
-    return (group.name.lower(), group.hashid)
+    return (group.name.lower(), group.pubid)
 
 
 def _current_groups(request):
@@ -45,9 +45,9 @@ def _current_groups(request):
     for group in sorted(user.groups, key=_group_sort_key):
         groups.append({
             'name': group.name,
-            'id': group.hashid,
+            'id': group.pubid,
             'url': request.route_url('group_read',
-                                     hashid=group.hashid,
+                                     pubid=group.pubid,
                                      slug=group.slug),
         })
     return groups

@@ -27,7 +27,7 @@ def _mock_request(feature=None, settings=None, params=None,
 
 def _matchdict():
     """Return a matchdict like the one the group_read route receives."""
-    return {"hashid": mock.sentinel.hashid, "slug": mock.sentinel.slug}
+    return {"pubid": mock.sentinel.pubid, "slug": mock.sentinel.slug}
 
 
 # The fixtures required to mock all of create_form()'s dependencies.
@@ -157,7 +157,7 @@ def test_create_with_non_ascii_name():
 
 @create_fixtures
 def test_create_publishes_join_event(Group):
-    group = mock.Mock(hashid=mock.sentinel.hashid)
+    group = mock.Mock(pubid=mock.sentinel.pubid)
     Group.return_value = group
     request = _mock_request()
 
@@ -166,7 +166,7 @@ def test_create_publishes_join_event(Group):
     request.get_queue_writer().publish.assert_called_once_with('user', {
         'type': 'group-join',
         'userid': request.authenticated_userid,
-        'group': group.hashid,
+        'group': group.pubid,
     })
 
 # The fixtures required to mock all of read()'s dependencies.
@@ -180,15 +180,15 @@ def test_read_404s_if_groups_feature_is_off():
 
 
 @read_fixtures
-def test_read_gets_group_by_hashid(Group):
-    views.read(_mock_request(matchdict={'hashid': 'abc', 'slug': 'snail'}))
+def test_read_gets_group_by_pubid(Group):
+    views.read(_mock_request(matchdict={'pubid': 'abc', 'slug': 'snail'}))
 
-    Group.get_by_hashid.assert_called_once_with('abc')
+    Group.get_by_pubid.assert_called_once_with('abc')
 
 
 @read_fixtures
 def test_read_404s_when_group_does_not_exist(Group):
-    Group.get_by_hashid.return_value = None
+    Group.get_by_pubid.return_value = None
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         views.read(_mock_request(matchdict=_matchdict()))
@@ -196,9 +196,9 @@ def test_read_404s_when_group_does_not_exist(Group):
 
 @read_fixtures
 def test_read_without_slug_redirects(Group):
-    """/groups/<hashid> should redirect to /groups/<hashid>/<slug>."""
-    group = Group.get_by_hashid.return_value = mock.Mock()
-    matchdict = {"hashid": "1"}  # No slug.
+    """/groups/<pubid> should redirect to /groups/<pubid>/<slug>."""
+    group = Group.get_by_pubid.return_value = mock.Mock()
+    matchdict = {"pubid": "1"}  # No slug.
     request = _mock_request(matchdict=matchdict)
 
     result = views.read(request)
@@ -208,9 +208,9 @@ def test_read_without_slug_redirects(Group):
 
 @read_fixtures
 def test_read_with_wrong_slug_redirects(Group):
-    """/groups/<hashid>/<wrong> should redirect to /groups/<hashid>/<slug>."""
-    group = Group.get_by_hashid.return_value = mock.Mock(slug="my-group")
-    matchdict = {"hashid": "1", "slug": "my-gro"}  # Wrong slug.
+    """/groups/<pubid>/<wrong> should redirect to /groups/<pubid>/<slug>."""
+    group = Group.get_by_pubid.return_value = mock.Mock(slug="my-group")
+    matchdict = {"pubid": "1", "slug": "my-gro"}  # Wrong slug.
     request = _mock_request(matchdict=matchdict)
 
     result = views.read(request)
@@ -221,7 +221,7 @@ def test_read_with_wrong_slug_redirects(Group):
 @read_fixtures
 def test_read_if_not_logged_in_renders_share_group_page(Group, renderers):
     """If not logged in should render the "Login to join this group" page."""
-    Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     request = _mock_request(authenticated_userid=None, matchdict=_matchdict())
 
     views.read(request)
@@ -233,7 +233,7 @@ def test_read_if_not_logged_in_renders_share_group_page(Group, renderers):
 @read_fixtures
 def test_read_if_not_logged_in_passes_group(Group, renderers):
     """It should pass the group to the template."""
-    g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     request = _mock_request(authenticated_userid=None, matchdict=_matchdict())
 
     views.read(request)
@@ -245,7 +245,7 @@ def test_read_if_not_logged_in_passes_group(Group, renderers):
 def test_read_if_not_logged_in_returns_response(
         Group, renderers):
     """It should return the response from render_to_response()."""
-    Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     request = _mock_request(authenticated_userid=None, matchdict=_matchdict())
     renderers.render_to_response.return_value = mock.sentinel.response
 
@@ -258,7 +258,7 @@ def test_read_if_not_logged_in_returns_response(
 def test_read_if_not_a_member_renders_template(Group, renderers):
     """It should render the "Join this group" template."""
     request = _mock_request(matchdict=_matchdict())
-    Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = []  # The user isn't a member of the group.
 
@@ -272,7 +272,7 @@ def test_read_if_not_a_member_renders_template(Group, renderers):
 def test_read_if_not_a_member_passes_group_to_template(Group, renderers):
     """It should get the join URL and pass it to the template."""
     request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = []  # The user isn't a member of the group.
 
@@ -286,7 +286,7 @@ def test_read_if_not_a_member_passes_join_url_to_template(Group, renderers):
     """It should get the join URL and pass it to the template."""
     request = _mock_request(matchdict=_matchdict())
     request.route_url.return_value = mock.sentinel.join_url
-    Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = []  # The user isn't a member of the group.
 
@@ -300,7 +300,7 @@ def test_read_if_not_a_member_passes_join_url_to_template(Group, renderers):
 def test_read_if_not_a_member_returns_response(Group, renderers):
     """It should return the response from render_to_response()."""
     request = _mock_request(matchdict=_matchdict())
-    Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = []  # The user isn't a member of the group.
     renderers.render_to_response.return_value = mock.sentinel.response
@@ -312,7 +312,7 @@ def test_read_if_not_a_member_returns_response(Group, renderers):
 def test_read_if_already_a_member_renders_template(Group, renderers):
     """It should render the "Share this group" template."""
     request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
 
@@ -325,7 +325,7 @@ def test_read_if_already_a_member_renders_template(Group, renderers):
 def test_read_if_already_a_member_passes_group(Group, renderers):
     """It passes the group to the template."""
     request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
 
@@ -338,7 +338,7 @@ def test_read_if_already_a_member_passes_group(Group, renderers):
 def test_read_if_already_a_member_returns_response(Group, renderers):
     """It should return the response from render_to_response()."""
     request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_hashid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
     renderers.render_to_response.return_value = mock.sentinel.response
@@ -357,15 +357,15 @@ def test_join_404s_if_groups_feature_is_off():
 
 
 @join_fixtures
-def test_join_gets_group_by_hashid(Group):
-    views.join(_mock_request(matchdict={'hashid': 'twibble', 'slug': 'snail'}))
+def test_join_gets_group_by_pubid(Group):
+    views.join(_mock_request(matchdict={'pubid': 'twibble', 'slug': 'snail'}))
 
-    Group.get_by_hashid.assert_called_once_with("twibble")
+    Group.get_by_pubid.assert_called_once_with("twibble")
 
 
 @join_fixtures
 def test_join_404s_if_group_not_found(Group):
-    Group.get_by_hashid.return_value = None
+    Group.get_by_pubid.return_value = None
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         views.join(_mock_request(matchdict=_matchdict()))
@@ -383,7 +383,7 @@ def test_join_gets_user():
 
 @join_fixtures
 def test_join_adds_user_to_group_members(Group):
-    Group.get_by_hashid.return_value = group = mock.Mock()
+    Group.get_by_pubid.return_value = group = mock.Mock()
     request = _mock_request(
         matchdict=_matchdict(), authenticated_user=mock.sentinel.user)
 
@@ -395,7 +395,7 @@ def test_join_adds_user_to_group_members(Group):
 @join_fixtures
 def test_join_redirects_to_group_page(Group):
     slug = "test-slug"
-    group = Group.get_by_hashid.return_value = mock.Mock(slug=slug)
+    group = Group.get_by_pubid.return_value = mock.Mock(slug=slug)
     request = _mock_request(matchdict=_matchdict())
 
     result = views.join(request)
@@ -404,8 +404,8 @@ def test_join_redirects_to_group_page(Group):
 
 @join_fixtures
 def test_join_publishes_join_event(Group):
-    group = mock.Mock(hashid = mock.sentinel.hashid)
-    Group.get_by_hashid.return_value = group
+    group = mock.Mock(pubid = mock.sentinel.pubid)
+    Group.get_by_pubid.return_value = group
     request = _mock_request(matchdict=_matchdict())
 
     views.join(request)
@@ -413,7 +413,7 @@ def test_join_publishes_join_event(Group):
     request.get_queue_writer().publish.assert_called_once_with('user', {
         'type': 'group-join',
         'userid': request.authenticated_userid,
-        'group': mock.sentinel.hashid,
+        'group': mock.sentinel.pubid,
     })
 
 leave_fixtures = pytest.mark.usefixtures('Group')
@@ -424,7 +424,7 @@ def test_leave_removes_user_from_group_members(Group):
     user = mock.sentinel.user
     group = mock.Mock()
     group.members = [user]
-    Group.get_by_hashid.return_value = group
+    Group.get_by_pubid.return_value = group
     request = _mock_request(
         matchdict=_matchdict(), authenticated_user=user)
 
@@ -436,7 +436,7 @@ def test_leave_removes_user_from_group_members(Group):
 @leave_fixtures
 def test_leave_returns_not_found_if_user_not_in_group(Group):
     group = mock.Mock(members=[])
-    Group.get_by_hashid.return_value = group
+    Group.get_by_pubid.return_value = group
     request = _mock_request(matchdict=_matchdict(), user=mock.sentinel.user)
 
     with pytest.raises(httpexceptions.HTTPNotFound):
@@ -445,9 +445,9 @@ def test_leave_returns_not_found_if_user_not_in_group(Group):
 
 @leave_fixtures
 def test_leave_publishes_leave_event(Group):
-    group = mock.Mock(hashid=mock.sentinel.hashid,
+    group = mock.Mock(pubid=mock.sentinel.pubid,
                       members=[mock.sentinel.user])
-    Group.get_by_hashid.return_value = group
+    Group.get_by_pubid.return_value = group
     request = _mock_request(
         matchdict=_matchdict(), authenticated_user=mock.sentinel.user)
 
@@ -456,7 +456,7 @@ def test_leave_publishes_leave_event(Group):
     request.get_queue_writer().publish.assert_called_once_with('user', {
         'type': 'group-leave',
         'userid': request.authenticated_userid,
-        'group': mock.sentinel.hashid,
+        'group': mock.sentinel.pubid,
     })
 
 @pytest.fixture
