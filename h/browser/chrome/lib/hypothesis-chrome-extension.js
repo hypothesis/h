@@ -8,6 +8,7 @@ var SidebarInjector = require('./sidebar-injector');
 var TabErrorCache = require('./tab-error-cache');
 var TabStore = require('./tab-store');
 
+var TAB_STATUS_LOADING = 'loading';
 var TAB_STATUS_COMPLETE = 'complete';
 
 /* The main extension application. This wires together all the smaller
@@ -19,7 +20,7 @@ var TAB_STATUS_COMPLETE = 'complete';
  *
  * The SidebarInjector handles the insertion of the Hypothesis code. If it
  * runs into errors the tab is put into an errored state and when the
- * browser aciton is clicked again the HelpPage module displays more
+ * browser action is clicked again the HelpPage module displays more
  * information to the user.
  *
  * Lastly the TabStore listens to changes to the TabState module and persists
@@ -56,7 +57,17 @@ function HypothesisChromeExtension(dependencies) {
   this.listen = function (window) {
     chromeBrowserAction.onClicked.addListener(onBrowserActionClicked);
     chromeTabs.onCreated.addListener(onTabCreated);
+
+    // when a user navigates within an existing tab,
+    // onUpdated is fired in most cases
     chromeTabs.onUpdated.addListener(onTabUpdated);
+
+    // ... but when a user navigates to a page that is loaded
+    // via prerendering or instant results, onTabReplaced is
+    // fired instead. See https://developer.chrome.com/extensions/tabs#event-onReplaced
+    // and https://code.google.com/p/chromium/issues/detail?id=109557
+    chromeTabs.onReplaced.addListener(onTabReplaced);
+
     chromeTabs.onRemoved.addListener(onTabRemoved);
 
     // FIXME: Find out why we used to reload the data on every get.
@@ -127,28 +138,53 @@ function HypothesisChromeExtension(dependencies) {
     }
   }
 
-  function onTabUpdated(tabId, changeInfo, tab) {
-    // This function will be called multiple times as the tab reloads.
-    // https://developer.chrome.com/extensions/tabs#event-onUpdated
-    if (changeInfo.status !== TAB_STATUS_COMPLETE) {
-      return;
-    }
-
-    // when a new URL is loaded in a tab, reset the flags indicating
-    // whether an error occurred whilst loading the sidebar in the tab
-    // and whether the sidebar is currently installed in the tab
+  function resetTabState(tabId, url) {
     var activeState = state.getState(tabId).state;
     if (activeState === TabState.states.ERRORED) {
       activeState = TabState.states.ACTIVE;
     }
+
     state.setState(tabId, {
       state: activeState,
+      ready: false,
       annotationCount: 0,
       extensionSidebarInstalled: false,
     });
 
     settings.then(function(settings) {
-      state.updateAnnotationCount(tabId, tab.url, settings.apiUrl);
+      state.updateAnnotationCount(tabId, url, settings.apiUrl);
+    });
+  }
+
+  // This function will be called multiple times as the tab reloads.
+  // https://developer.chrome.com/extensions/tabs#event-onUpdated
+  //
+  // 'changeInfo' contains details of what changed about the tab's status.
+  // Two important events are when the tab's `status` changes to `loading`
+  // when the user begins a new navigation and when the tab's status changes
+  // to `complete` after the user completes a navigation
+  function onTabUpdated(tabId, changeInfo, tab) {
+    if (changeInfo.status === TAB_STATUS_LOADING) {
+      resetTabState(tabId, tab.url);
+    } else if (changeInfo.status === TAB_STATUS_COMPLETE) {
+      state.setState(tabId, {
+        ready: true,
+      });
+    }
+  }
+
+  function onTabReplaced(addedTabId, removedTabId) {
+    var activeState = state.getState(removedTabId).state;
+    state.clearTab(removedTabId);
+    state.setState(addedTabId, {
+      state: activeState,
+      ready: true,
+    });
+
+    settings.then(function (settings) {
+      chromeTabs.get(addedTabId, function (tab) {
+        state.updateAnnotationCount(addedTabId, tab.url, settings.apiUrl);
+      });
     });
   }
 
@@ -169,12 +205,12 @@ function HypothesisChromeExtension(dependencies) {
 
     var isInstalled = state.getState(tab.id).extensionSidebarInstalled;
     if (state.isTabActive(tab.id) && !isInstalled) {
+      // optimistically set the state flag indicating that the sidebar
+      // has been installed
+      state.setState(tab.id, {
+        extensionSidebarInstalled: true,
+      });
       return sidebar.injectIntoTab(tab)
-        .then(function () {
-          state.setState(tab.id, {
-            extensionSidebarInstalled: true,
-          });
-        })
         .catch(function (err) {
           tabErrors.setTabError(tab.id, err);
           state.errorTab(tab.id);

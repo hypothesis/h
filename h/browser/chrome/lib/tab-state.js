@@ -21,6 +21,8 @@ var DEFAULT_STATE = {
    * the extension
    */
   extensionSidebarInstalled: false,
+  /** Whether the tab is loaded and ready for the sidebar to be installed. */
+  ready: false,
 };
 
 /** TabState stores the H state for a tab. This state includes:
