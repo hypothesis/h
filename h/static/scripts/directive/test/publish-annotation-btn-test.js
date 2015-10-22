@@ -37,7 +37,6 @@ describe('publishAnnotationBtn', function () {
      },
      canPost: true,
      isShared: false,
-     isNew: false,
      onSave: function () {},
      onSetPrivacy: function (level) {},
      onCancel: function () {}
@@ -56,21 +55,10 @@ describe('publishAnnotationBtn', function () {
         name: 'Research Lab',
         type: 'group'
       },
-      isNew: false,
       isShared: true
     })
     var buttons = element.find('button');
     assert.equal(buttons[0].innerHTML, 'Post to Research Lab');
-  });
-
-  it('should default to "shared" as the privacy level for new annotations', function () {
-    fakeStorage = {};
-    element.link({
-      isNew: true
-    });
-    assert.deepEqual(fakeStorage, {
-      'hypothesis.privacy': 'shared'
-    });
   });
 
   it('should save when "Post..." is clicked', function () {
@@ -88,7 +76,6 @@ describe('publishAnnotationBtn', function () {
     element.link({
       // for existing annotations, the privacy should not be changed
       // unless the user makes a choice from the list
-      isNew: false,
       onSetPrivacy: privacyChangedSpy
     });
 

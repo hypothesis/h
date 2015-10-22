@@ -39,14 +39,14 @@ describe 'h:permissions', ->
       assert.equal(perms.admin[0], 'acct:flash@gordon')
 
     it 'public call fills the read property with group:__world__', ->
-      perms = permissions.public()
+      perms = permissions.shared()
       assert.equal(perms.read[0], 'group:__world__')
       assert.equal(perms.update[0], 'acct:flash@gordon')
       assert.equal(perms.delete[0], 'acct:flash@gordon')
       assert.equal(perms.admin[0], 'acct:flash@gordon')
 
     it 'public call fills the read property with group:foo if passed "foo"', ->
-      perms = permissions.public("foo")
+      perms = permissions.shared("foo")
       assert.equal(perms.read[0], 'group:foo')
       assert.equal(perms.update[0], 'acct:flash@gordon')
       assert.equal(perms.delete[0], 'acct:flash@gordon')
@@ -57,18 +57,18 @@ describe 'h:permissions', ->
         permission = {
             read: ['group:__world__', 'acct:angry@birds.com']
         }
-        assert.isTrue(permissions.isPublic(permission))
+        assert.isTrue(permissions.isShared(permission))
 
       it 'isPublic() false otherwise', ->
         permission = {
             read: ['acct:angry@birds.com']
         }
 
-        assert.isFalse(permissions.isPublic(permission))
+        assert.isFalse(permissions.isShared(permission))
         permission.read = []
-        assert.isFalse(permissions.isPublic(permission))
+        assert.isFalse(permissions.isShared(permission))
         permission.read = ['one', 'two', 'three']
-        assert.isFalse(permissions.isPublic(permission))
+        assert.isFalse(permissions.isShared(permission))
 
     describe 'isPrivate', ->
       it 'returns true if the given user is in the permissions', ->
@@ -97,7 +97,7 @@ describe 'h:permissions', ->
         assert.isFalse(permissions.permits(action, annotation, null))
 
       it 'returns true if user different, but permissions has group:__world__', ->
-        annotation = {permissions: permissions.public()}
+        annotation = {permissions: permissions.shared()}
         annotation.permissions.read.push 'acct:darthsidious@deathstar.emp'
         user = 'acct:darthvader@deathstar.emp'
         assert.isTrue(permissions.permits('read', annotation, user))
