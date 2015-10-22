@@ -5,6 +5,7 @@ import slugify
 
 from h.db import Base
 from h import hashids
+from h import pubid
 
 
 GROUP_NAME_MIN_LENGTH = 4
@@ -15,6 +16,12 @@ class Group(Base):
     __tablename__ = 'group'
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    # We don't expose the integer PK to the world, so we generate a short
+    # random string to use as the publicly visible ID.
+    pubid = sa.Column(sa.Text(),
+                      default=pubid.generate,
+                      unique=True,
+                      nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False)
     created = sa.Column(sa.DateTime,
                         server_default=sa.func.now(),
