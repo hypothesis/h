@@ -73,6 +73,7 @@ describe('HypothesisChromeExtension', function () {
       isTabErrored: sandbox.stub().returns(false),
       getState: sandbox.spy(),
       setState: sandbox.spy(),
+      clearTab: sandbox.spy(),
     };
     fakeTabState.deactivateTab = sinon.spy();
     fakeTabErrorCache = {
@@ -162,6 +163,7 @@ describe('HypothesisChromeExtension', function () {
       assert.ok(fakeChromeTabs.onCreated.listener);
       assert.ok(fakeChromeTabs.onUpdated.listener);
       assert.ok(fakeChromeTabs.onRemoved.listener);
+      assert.ok(fakeChromeTabs.onReplaced.listener);
     });
 
     describe('when a tab is created', function () {
@@ -227,6 +229,24 @@ describe('HypothesisChromeExtension', function () {
         var tab = createTab({state: TabState.states.ERRORED});
         fakeChromeTabs.onUpdated.listener(tab.id, {status: 'loading'}, tab);
         assert.equal(tabState[tab.id].state, TabState.states.ACTIVE);
+      });
+    });
+
+    describe('when a tab is replaced', function () {
+      beforeEach(function () {
+        ext.listen({addEventListener: sandbox.stub()});
+      });
+
+      it('preserves the active state of the previous tab', function () {
+        fakeTabState.getState = sandbox.stub().returns({
+          state: TabState.states.ACTIVE,
+        });
+        fakeChromeTabs.onReplaced.listener(1, 2);
+        assert.calledWith(fakeTabState.clearTab, 2);
+        assert.calledWith(fakeTabState.setState, 1, {
+          state: TabState.states.ACTIVE,
+          ready: true,
+        });
       });
     });
 
@@ -375,6 +395,16 @@ describe('HypothesisChromeExtension', function () {
       assert.calledWith(fakeSidebarInjector.injectIntoTab, tab);
     });
 
+    it('does not inject the sidebar if already installed', function () {
+      fakeTabState.getState = sandbox.stub().returns({
+        state: tabStates.ACTIVE,
+        extensionSidebarInstalled: true,
+      });
+      fakeTabState.isTabActive.returns(true);
+      onTabStateChange(tabStates.ACTIVE, tabStates.ACTIVE);
+      assert.notCalled(fakeSidebarInjector.injectIntoTab);
+    });
+
     it('removes the sidebar if the tab has been deactivated', function () {
       fakeTabState.getState = sandbox.stub().returns({
         state: tabStates.INACTIVE,
@@ -387,6 +417,17 @@ describe('HypothesisChromeExtension', function () {
       })
       onTabStateChange(tabStates.INACTIVE, tabStates.ACTIVE);
       assert.calledWith(fakeSidebarInjector.removeFromTab, tab);
+    });
+
+    it('does not remove the sidebar if not installed', function () {
+      fakeTabState.getState = sandbox.stub().returns({
+        state: tabStates.INACTIVE,
+        extensionSidebarInstalled: false,
+      });
+      fakeTabState.isTabInactive.returns(true);
+      fakeChromeTabs.get = sandbox.stub().yields({id: 1, status: 'complete'});
+      onTabStateChange(tabStates.INACTIVE, tabStates.ACTIVE);
+      assert.notCalled(fakeSidebarInjector.removeFromTab);
     });
 
     it('does nothing with the sidebar if the tab is errored', function () {
