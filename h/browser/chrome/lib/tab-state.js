@@ -41,12 +41,11 @@ var DEFAULT_STATE = {
  * initialState - An Object of tabId/state keys. Used when loading state
  *   from a persisted store such as localStorage. This will be merged with
  *   the default state for a tab.
- * onchange     - A function that recieves onchange(tabId, current, prev).
+ * onchange     - A function that recieves onchange(tabId, current).
  */
 function TabState(initialState, onchange) {
   var _this = this;
   var currentState;
-  var previousState;
 
   this.onchange = onchange || null;
 
@@ -58,8 +57,6 @@ function TabState(initialState, onchange) {
    *                   state for a tab.
    */
   this.load = function (newState) {
-    previousState = currentState || {};
-
     var newCurrentState = {};
     Object.keys(newState).forEach(function (tabId) {
       newCurrentState[tabId] = assign({}, DEFAULT_STATE, newState[tabId]);
@@ -81,10 +78,6 @@ function TabState(initialState, onchange) {
 
   this.clearTab = function (tabId) {
     this.setState(tabId, null);
-  };
-
-  this.restorePreviousState = function (tabId) {
-    this.setState(tabId, previousState[tabId], this.onchange);
   };
 
   this.getState = function (tabId) {
@@ -128,11 +121,10 @@ function TabState(initialState, onchange) {
       return;
     }
 
-    previousState[tabId] = currentState[tabId];
     currentState[tabId] = newState;
 
     if (_this.onchange) {
-      _this.onchange(tabId, newState, previousState[tabId] || null);
+      _this.onchange(tabId, newState);
     }
   }
 

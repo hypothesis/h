@@ -199,7 +199,6 @@ describe('HypothesisChromeExtension', function () {
 
       beforeEach(function () {
         fakeTabState.clearTab = sandbox.spy()
-        fakeTabState.restorePreviousState = sandbox.spy();
         fakeTabState.isTabActive = function (tabId) {
           return tabState[tabId].state === TabState.states.ACTIVE;
         };
