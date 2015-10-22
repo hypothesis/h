@@ -16,6 +16,7 @@ module.
 """
 
 from pyramid.settings import asbool
+from sqlalchemy import MetaData
 from sqlalchemy import engine_from_config
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -45,12 +46,25 @@ __all__ = (
 #
 Session = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 
+# Create a default metadata object with naming conventions for indexes and
+# constraints. This makes changing such constraints and indexes with alembic
+# after creation much easier. See:
+#
+#   http://docs.sqlalchemy.org/en/latest/core/constraints.html#configuring-constraint-naming-conventions
+#
+metadata = MetaData(naming_convention={
+    "ix": "ix__%(column_0_label)s",
+    "uq": "uq__%(table_name)s__%(column_0_name)s",
+    "ck": "ck__%(table_name)s__%(constraint_name)s",
+    "fk": "fk__%(table_name)s__%(column_0_name)s__%(referred_table_name)s",
+    "pk": "pk__%(table_name)s"
+})
 
 # Provide a very simple base class with a dynamic query property.
 class _Base(object):
     query = Session.query_property()
 
-Base = declarative_base(cls=_Base)
+Base = declarative_base(cls=_Base, metadata=metadata)
 
 
 def bind_engine(engine,
