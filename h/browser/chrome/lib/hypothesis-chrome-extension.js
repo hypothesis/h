@@ -107,7 +107,7 @@ function HypothesisChromeExtension(dependencies) {
     });
   };
 
-  function onTabStateChange(tabId, current, previous) {
+  function onTabStateChange(tabId, current) {
     if (current) {
       browserAction.update(tabId, current);
 
@@ -197,6 +197,8 @@ function HypothesisChromeExtension(dependencies) {
     state.clearTab(tabId);
   }
 
+  // installs or uninstalls the sidebar from a tab when the H
+  // state for a tab changes
   function updateTabDocument(tab) {
     // If the tab has not yet finished loading then just quietly return.
     if (tab.status !== TAB_STATUS_COMPLETE) {

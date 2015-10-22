@@ -128,8 +128,6 @@ function TabState(initialState, onchange) {
       return;
     }
 
-    console.log('h:dev TabState.setState', tabId, 'current', currentState[tabId], 'new', newState);
-
     previousState[tabId] = currentState[tabId];
     currentState[tabId] = newState;
 
