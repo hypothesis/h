@@ -54,7 +54,6 @@ module.exports = function () {
       group: '=',
       canPost: '=',
       isShared: '=',
-      isNew: '=',
       onCancel: '&',
       onSave: '&',
       onSetPrivacy: '&'
