@@ -29,13 +29,13 @@ def create_form(request):
     return {'form': form.render()}
 
 
-def _send_group_notification(request, event_type, hashid):
+def _send_group_notification(request, event_type, pubid):
     """Publishes a group join/leave notification on the NSQ event queue"""
     queue = request.get_queue_writer()
     data = {
       'type': event_type,
       'userid': request.authenticated_userid,
-      'group': hashid,
+      'group': pubid,
     }
     queue.publish('user', data)
 
@@ -64,9 +64,9 @@ def create(request):
     # We need to flush the db session here so that group.id will be generated.
     request.db.flush()
 
-    _send_group_notification(request, 'group-join', group.hashid)
+    _send_group_notification(request, 'group-join', group.pubid)
 
-    url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
+    url = request.route_url('group_read', pubid=group.pubid, slug=group.slug)
     return exc.HTTPSeeOther(url)
 
 
@@ -90,7 +90,7 @@ def _read_group(request, group):
     group visits the group's URL.
 
     """
-    url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
+    url = request.route_url('group_read', pubid=group.pubid, slug=group.slug)
     template_data = {'group': group, 'group_url': url}
     return renderers.render_to_response(
         renderer_name='h:groups/templates/share.html.jinja2',
@@ -104,7 +104,7 @@ def _join(request, group):
     visits the group's URL.
 
     """
-    url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
+    url = request.route_url('group_read', pubid=group.pubid, slug=group.slug)
     template_data = {'group': group, 'join_url': url, 'is_logged_in': True}
     return renderers.render_to_response(
         renderer_name='h:groups/templates/join.html.jinja2',
@@ -118,16 +118,16 @@ def read(request):
     if not request.feature('groups'):
         raise exc.HTTPNotFound()
 
-    hashid = request.matchdict["hashid"]
+    pubid = request.matchdict["pubid"]
     slug = request.matchdict.get("slug")
 
-    group = models.Group.get_by_hashid(hashid)
+    group = models.Group.get_by_pubid(pubid)
     if group is None:
         raise exc.HTTPNotFound()
 
     if slug is None or slug != group.slug:
         url = request.route_url('group_read',
-                                hashid=group.hashid,
+                                pubid=group.pubid,
                                 slug=group.slug)
         return exc.HTTPMovedPermanently(url)
 
@@ -150,16 +150,16 @@ def join(request):
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
-    hashid = request.matchdict["hashid"]
-    group = models.Group.get_by_hashid(hashid)
+    pubid = request.matchdict["pubid"]
+    group = models.Group.get_by_pubid(pubid)
 
     if group is None:
         raise exc.HTTPNotFound()
 
     group.members.append(request.authenticated_user)
-    _send_group_notification(request, 'group-join', group.hashid)
+    _send_group_notification(request, 'group-join', group.pubid)
 
-    url = request.route_url('group_read', hashid=group.hashid, slug=group.slug)
+    url = request.route_url('group_read', pubid=group.pubid, slug=group.slug)
     return exc.HTTPSeeOther(url)
 
 
@@ -183,8 +183,8 @@ def leave(request):
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
-    hashid = request.matchdict["hashid"]
-    group = models.Group.get_by_hashid(hashid)
+    pubid = request.matchdict["pubid"]
+    group = models.Group.get_by_pubid(pubid)
 
     if group is None:
         raise exc.HTTPNotFound()
@@ -193,16 +193,16 @@ def leave(request):
         raise exc.HTTPNotFound()
 
     group.members.remove(request.authenticated_user)
-    _send_group_notification(request, 'group-leave', group.hashid)
+    _send_group_notification(request, 'group-leave', group.pubid)
 
     return exc.HTTPNoContent()
 
 
 def includeme(config):
     config.add_route('group_create', '/groups/new')
-    config.add_route('group_leave', '/groups/{hashid}/leave')
+    config.add_route('group_leave', '/groups/{pubid}/leave')
 
-    # Match "/groups/<hashid>/": we redirect to the version with the slug.
-    config.add_route('group_read', '/groups/{hashid}/{slug:[^/]*}')
-    config.add_route('group_read_noslug', '/groups/{hashid}')
+    # Match "/groups/<pubid>/": we redirect to the version with the slug.
+    config.add_route('group_read', '/groups/{pubid}/{slug:[^/]*}')
+    config.add_route('group_read_noslug', '/groups/{pubid}')
     config.scan(__name__)

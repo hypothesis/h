@@ -46,7 +46,6 @@ def includeme(config):
 
     config.include('h.db')
     config.include('h.form')
-    config.include('h.hashids')
     config.include('h.models')
     config.include('h.views')
     config.include('h.feeds')
@@ -112,12 +111,5 @@ def missing_secrets(settings):
         if secret is None:
             secret = missing['secret_key']
         missing['redis.sessions.secret'] = derive_key(secret, 'h.session')
-
-    if 'h.hashids.salt' not in settings:
-        log.warn('No salt provided for hashids: using transient value. This '
-                 'will result in URLs that are unstable across application '
-                 'restarts! Configure the h.hashids.salt setting or the '
-                 'HASHIDS_SALT environment variable!')
-        missing['h.hashids.salt'] = os.urandom(64)
 
     return missing

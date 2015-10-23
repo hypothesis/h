@@ -7,10 +7,10 @@ from h.session import model
 
 
 class FakeGroup():
-    def __init__(self, hashid, name):
-        self.hashid = hashid
+    def __init__(self, pubid, name):
+        self.pubid = pubid
         self.name = name
-        self.slug = hashid
+        self.slug = pubid
 
 
 @patch('h.models.User')

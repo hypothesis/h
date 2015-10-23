@@ -4,7 +4,7 @@ from sqlalchemy.orm import exc
 import slugify
 
 from h.db import Base
-from h import hashids
+from h import pubid
 
 
 GROUP_NAME_MIN_LENGTH = 4
@@ -15,6 +15,12 @@ class Group(Base):
     __tablename__ = 'group'
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    # We don't expose the integer PK to the world, so we generate a short
+    # random string to use as the publicly visible ID.
+    pubid = sa.Column(sa.Text(),
+                      default=pubid.generate,
+                      unique=True,
+                      nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False)
     created = sa.Column(sa.DateTime,
                         server_default=sa.func.now(),
@@ -50,11 +56,6 @@ class Group(Base):
         return name
 
     @property
-    def hashid(self):
-        """A mildly obfuscated identifier for this group"""
-        return hashids.encode('h.groups', self.id)
-
-    @property
     def slug(self):
         """A version of this group's name suitable for use in a URL."""
         return slugify.slugify(self.name)
@@ -63,9 +64,9 @@ class Group(Base):
         return '<Group: %s>' % self.slug
 
     @classmethod
-    def get_by_hashid(cls, hashid):
-        """Return the group with the given hashid, or None."""
-        return cls.get_by_id(hashids.decode_one('h.groups', hashid))
+    def get_by_pubid(cls, pubid):
+        """Return the group with the given pubid, or None."""
+        return cls.query.filter(cls.pubid == pubid).first()
 
     @classmethod
     def get_by_id(cls, id_):

@@ -32,9 +32,9 @@ def set_permissions(annotation):
 
 
 def group_principals(user):
-    """Return any 'group:<hashid>' principals for the given user.
+    """Return any 'group:<pubid>' principals for the given user.
 
-    Return a list of 'group:<hashid>' principals for the groups that the given
+    Return a list of 'group:<pubid>' principals for the groups that the given
     user is a member of.
 
     :param user: the authorized user, as a User object
@@ -45,7 +45,7 @@ def group_principals(user):
     """
     principals = ['group:__world__']
 
-    principals.extend(['group:{hashid}'.format(hashid=group.hashid)
+    principals.extend(['group:{pubid}'.format(pubid=group.pubid)
                        for group in user.groups])
 
     return principals
