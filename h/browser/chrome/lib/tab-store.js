@@ -1,12 +1,11 @@
 'use strict';
 
-/* The tab store ensures that the current state of the browser action
- * is persisted between browser sessions. To do this it uses an external
- * storage object that conforms to the localStorage API.
+/** TabStore is used to persist the state of H browser tabs when
+ * the extension is re-installed or updated.
  *
- * Examples
- *
- *   var store = new TabStore(window.localStorage);
+ * Note: This could also be used to persist the state across browser sessions,
+ * for that to work however the storage key would need to be changed.
+ * The tab ID is currently used but this is valid only for a browser session.
  */
 function TabStore(storage) {
   var key = 'state';
@@ -21,7 +20,12 @@ function TabStore(storage) {
   };
 
   this.set = function (tabId, value) {
-    local[tabId] = value;
+    // copy across only the parts of the tab state that should
+    // be preserved
+    local[tabId] = {
+      state: value.state,
+      annotationCount: value.annotationCount,
+    };
     storage.setItem(key, JSON.stringify(local));
   };
 

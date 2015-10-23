@@ -8,6 +8,7 @@ var SidebarInjector = require('./sidebar-injector');
 var TabErrorCache = require('./tab-error-cache');
 var TabStore = require('./tab-store');
 
+var TAB_STATUS_LOADING = 'loading';
 var TAB_STATUS_COMPLETE = 'complete';
 
 /* The main extension application. This wires together all the smaller
@@ -19,7 +20,7 @@ var TAB_STATUS_COMPLETE = 'complete';
  *
  * The SidebarInjector handles the insertion of the Hypothesis code. If it
  * runs into errors the tab is put into an errored state and when the
- * browser aciton is clicked again the HelpPage module displays more
+ * browser action is clicked again the HelpPage module displays more
  * information to the user.
  *
  * Lastly the TabStore listens to changes to the TabState module and persists
@@ -50,43 +51,33 @@ function HypothesisChromeExtension(dependencies) {
   });
   var tabErrors = new TabErrorCache();
 
+  restoreSavedTabState();
+
   /* Sets up the extension and binds event listeners. Requires a window
    * object to be passed so that it can listen for localStorage events.
    */
   this.listen = function (window) {
     chromeBrowserAction.onClicked.addListener(onBrowserActionClicked);
     chromeTabs.onCreated.addListener(onTabCreated);
+
+    // when a user navigates within an existing tab,
+    // onUpdated is fired in most cases
     chromeTabs.onUpdated.addListener(onTabUpdated);
+
+    // ... but when a user navigates to a page that is loaded
+    // via prerendering or instant results, onTabReplaced is
+    // fired instead. See https://developer.chrome.com/extensions/tabs#event-onReplaced
+    // and https://code.google.com/p/chromium/issues/detail?id=109557
+    chromeTabs.onReplaced.addListener(onTabReplaced);
+
     chromeTabs.onRemoved.addListener(onTabRemoved);
-
-    // FIXME: Find out why we used to reload the data on every get.
-    window.addEventListener('storage', function (event) {
-      var key = 'state';
-      var isState = event.key === key;
-      var isUpdate = event.newValue !== null;
-
-      // Check the event is for the store and check that something has
-      // actually changed externally by validating the new value.
-      if (isState && isUpdate && event.newValue !== JSON.stringify(store.all())) {
-        store.reload();
-        state.load(store.all());
-      }
-    });
   };
 
   /* A method that can be used to setup the extension on existing tabs
-   * when the extension is installed.
+   * when the extension is re-installed.
    */
   this.install = function () {
-    chromeTabs.query({}, function (tabs) {
-      tabs.forEach(function (tab) {
-        if (state.isTabActive(tab.id)) {
-          state.activateTab(tab.id, {force: true});
-        } else {
-          state.deactivateTab(tab.id, {force: true});
-        }
-      });
-    });
+    restoreSavedTabState();
   };
 
   /* Opens the onboarding page */
@@ -96,7 +87,17 @@ function HypothesisChromeExtension(dependencies) {
     });
   };
 
-  function onTabStateChange(tabId, current, previous) {
+  function restoreSavedTabState() {
+    store.reload();
+    state.load(store.all());
+    chromeTabs.query({}, function (tabs) {
+      tabs.forEach(function (tab) {
+        onTabStateChange(tab.id, state.getState(tab.id));
+      });
+    });
+  }
+
+  function onTabStateChange(tabId, current) {
     if (current) {
       browserAction.update(tabId, current);
 
@@ -127,30 +128,54 @@ function HypothesisChromeExtension(dependencies) {
     }
   }
 
-  function onTabUpdated(tabId, changeInfo, tab) {
-    // This function will be called multiple times as the tab reloads.
-    // https://developer.chrome.com/extensions/tabs#event-onUpdated
-    if (changeInfo.status !== TAB_STATUS_COMPLETE) {
-      return;
+  function resetTabState(tabId, url) {
+    var activeState = state.getState(tabId).state;
+    if (activeState === TabState.states.ERRORED) {
+      activeState = TabState.states.ACTIVE;
     }
 
-    if (state.isTabErrored(tabId)) {
-      state.restorePreviousState(tabId);
-    }
-
-    if (!state.isTabActive(tabId)) {
-      // Clear the state to express that the user has no preference.
-      // This allows the publisher embed to persist without us destroying it.
-      state.clearTab(tabId);
-    }
-
-    browserAction.update(tabId, state.getState(tabId));
-
-    settings.then(function(settings) {
-      state.updateAnnotationCount(tabId, tab.url, settings.apiUrl);
+    state.setState(tabId, {
+      state: activeState,
+      ready: false,
+      annotationCount: 0,
+      extensionSidebarInstalled: false,
     });
 
-    return updateTabDocument(tab);
+    settings.then(function(settings) {
+      state.updateAnnotationCount(tabId, url, settings.apiUrl);
+    });
+  }
+
+  // This function will be called multiple times as the tab reloads.
+  // https://developer.chrome.com/extensions/tabs#event-onUpdated
+  //
+  // 'changeInfo' contains details of what changed about the tab's status.
+  // Two important events are when the tab's `status` changes to `loading`
+  // when the user begins a new navigation and when the tab's status changes
+  // to `complete` after the user completes a navigation
+  function onTabUpdated(tabId, changeInfo, tab) {
+    if (changeInfo.status === TAB_STATUS_LOADING) {
+      resetTabState(tabId, tab.url);
+    } else if (changeInfo.status === TAB_STATUS_COMPLETE) {
+      state.setState(tabId, {
+        ready: true,
+      });
+    }
+  }
+
+  function onTabReplaced(addedTabId, removedTabId) {
+    var activeState = state.getState(removedTabId).state;
+    state.clearTab(removedTabId);
+    state.setState(addedTabId, {
+      state: activeState,
+      ready: true,
+    });
+
+    settings.then(function (settings) {
+      chromeTabs.get(addedTabId, function (tab) {
+        state.updateAnnotationCount(addedTabId, tab.url, settings.apiUrl);
+      });
+    });
   }
 
   function onTabCreated(tab) {
@@ -162,20 +187,33 @@ function HypothesisChromeExtension(dependencies) {
     state.clearTab(tabId);
   }
 
+  // installs or uninstalls the sidebar from a tab when the H
+  // state for a tab changes
   function updateTabDocument(tab) {
     // If the tab has not yet finished loading then just quietly return.
-    if (tab.status !== TAB_STATUS_COMPLETE) {
+    if (!state.getState(tab.id).ready) {
       return Promise.resolve();
     }
 
-    if (state.isTabActive(tab.id)) {
-      return sidebar.injectIntoTab(tab).catch(function (err) {
-        tabErrors.setTabError(tab.id, err);
-        state.errorTab(tab.id);
+    var isInstalled = state.getState(tab.id).extensionSidebarInstalled;
+    if (state.isTabActive(tab.id) && !isInstalled) {
+      // optimistically set the state flag indicating that the sidebar
+      // has been installed
+      state.setState(tab.id, {
+        extensionSidebarInstalled: true,
       });
+      return sidebar.injectIntoTab(tab)
+        .catch(function (err) {
+          tabErrors.setTabError(tab.id, err);
+          state.errorTab(tab.id);
+        });
     }
-    else if (state.isTabInactive(tab.id)) {
-      return sidebar.removeFromTab(tab);
+    else if (state.isTabInactive(tab.id) && isInstalled) {
+      return sidebar.removeFromTab(tab).then(function () {
+        state.setState(tab.id, {
+          extensionSidebarInstalled: false,
+        });
+      });
     }
   }
 }

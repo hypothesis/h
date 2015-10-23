@@ -44,14 +44,7 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.activateTab(2);
-      assert.calledWith(onChange, 2, {state: states.ACTIVE}, null);
-    });
-
-    it('options.force can be used to re-trigger the current state', function () {
-      state.activateTab(2);
-      state.activateTab(2, {force: true});
-      assert.calledWith(onChange, 2, {state: states.ACTIVE}, null);
-      assert.calledTwice(onChange);
+      assert.calledWith(onChange, 2, sinon.match({state: states.ACTIVE}));
     });
   });
 
@@ -63,14 +56,7 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.deactivateTab(2);
-      assert.calledWith(onChange, 2, {state: states.INACTIVE}, null);
-    });
-
-    it('options.force can be used to re-trigger the current state', function () {
-      state.deactivateTab(2);
-      state.deactivateTab(2, {force: true});
-      assert.calledWith(onChange, 2, {state: states.INACTIVE}, null);
-      assert.calledTwice(onChange);
+      assert.calledWith(onChange, 2, sinon.match({state: states.INACTIVE}));
     });
   });
 
@@ -82,14 +68,7 @@ describe('TabState', function () {
 
     it('triggers an onchange handler', function () {
       state.errorTab(2);
-      assert.calledWith(onChange, 2, {state: states.ERRORED}, null);
-    });
-
-    it('options.force can be used to re-trigger the current state', function () {
-      state.errorTab(2);
-      state.errorTab(2, {force: true});
-      assert.calledWith(onChange, 2, {state: states.ERRORED}, null);
-      assert.calledTwice(onChange);
+      assert.calledWith(onChange, 2, sinon.match({state: states.ERRORED}));
     });
   });
 
@@ -104,30 +83,6 @@ describe('TabState', function () {
     it('triggers an onchange handler', function () {
       state.clearTab(1);
       assert.calledWith(onChange, 1, undefined);
-    });
-  });
-
-  describe('.restorePreviousState', function () {
-    it('restores the state for the tab id provided', function () {
-      state.errorTab(1);
-      state.restorePreviousState(1);
-      assert.equal(state.isTabErrored(1), false);
-      assert.equal(state.isTabActive(1), true);
-    });
-
-    it('is not possible for the previous state to be the same as the current state', function () {
-      state.errorTab(1);
-      state.errorTab(1);
-      state.restorePreviousState(1);
-      assert.equal(state.isTabErrored(1), false, 'Expected isTabErrored to return false');
-      assert.equal(state.isTabActive(1), true, 'Expected isTabActive to return true');
-    });
-
-    it('if options.force is used to set the same value it ignores the value', function () {
-      state.errorTab(1);
-      state.deactivateTab(1);
-      state.deactivateTab(1, {force: true});
-      assert.calledWith(onChange, 1, {state: states.INACTIVE}, {state: states.ERRORED});
     });
   });
 
@@ -149,15 +104,6 @@ describe('TabState', function () {
     it('returns true if the tab is errored', function () {
       state.errorTab(1);
       assert.equal(state.isTabErrored(1), true);
-    });
-  });
-
-  describe('.onchange', function () {
-    it('provides the previous value to the handler', function () {
-      state.errorTab(1);
-      state.deactivateTab(1);
-      assert.calledWith(onChange, 1, {state: states.INACTIVE},
-        {state: states.ERRORED});
     });
   });
 
