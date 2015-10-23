@@ -18,9 +18,6 @@
 
     <div class="top-bar__expander"></div>
 
-    <group-list class="group-list" ng-if="groupsEnabled">
-    </group-list>
-
     <div ng-switch="authUser">
       <span ng-switch-when="undefined">⋯</span>
       <a href="" ng-click="onLogin()" ng-switch-when="null">Sign in</a>
