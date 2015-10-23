@@ -5,6 +5,7 @@ import re
 import unittest
 import urllib
 
+import pytest
 from mock import patch
 
 from h.api import models
@@ -76,6 +77,57 @@ def test_title_with_a_document_that_has_no_title():
 
 def test_title_annotation_that_has_no_document():
     assert models.Annotation().title == ''
+
+
+@pytest.mark.parametrize("input_,expected", [
+    # If the annotation has both a uri and a document title it should return
+    # the title linked to the uri.
+    (('http://example.com/example.html', 'title'),
+     '<a href="http://example.com/example.html">title</a>'),
+
+    # If the annotation an https uri and a document title it should return the
+    # title linked to the uri.
+    (('https://example.com/example.html', 'title'),
+     '<a href="https://example.com/example.html">title</a>'),
+
+    # If the annotation has a document title but no uri it should just return
+    # the title, not linked.
+    ((None, 'title'),
+     'title'),
+
+    # If the annotation has a document title and a non-http(s) uri it should
+    # just return the title, not linked.
+    (('file:///home/bob/Documents/example.pdf', 'title'),
+     'title'),
+
+    # If the annotation has an http(s) uri but no document title it should
+    # return the uri linked to the uri.
+    (('http://example.com/example.html', None),
+     '<a href="http://example.com/example.html">http://example.com/example.html</a>'),
+])
+def test_document_link(input_, expected):
+    annotation = models.Annotation(
+        uri=input_[0], document={'title': input_[1]})
+
+    assert annotation.document_link == expected
+
+
+def test_document_link_escapes_HTML_in_the_document_title():
+    spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
+    annotation = models.Annotation(
+        uri='http://example.com/example.html',
+        document={'title': '</a>' + spam_link})
+
+    assert spam_link not in annotation.document_link
+
+
+def test_document_link_escapes_HTML_in_the_document_URI():
+    spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
+    annotation = models.Annotation(
+        uri='http://</a>' + spam_link,
+        document={'title': 'title'})
+
+    assert spam_link not in annotation.document_link
 
 
 def test_description():

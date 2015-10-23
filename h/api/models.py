@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import cgi
+
+import jinja2
 from dateutil import parser
 from annotator import annotation
 from annotator import document
@@ -164,6 +166,45 @@ class Annotation(annotation.Annotation):
             return document_.get("title", "")
         else:
             return ""
+
+    @property
+    def document_link(self):
+        """Return a link to this annotation's document.
+
+        Returns an HTML string like '<a href="{uri}">{title}</a>'.
+
+        The uri and title are HTML-escaped, the string is safe raw rendering.
+
+        Lots of edge-cases are handled, including annotations with no document
+        title, no uri, a non-http(s) uri (which we don't want to link to), etc.
+
+        In some cases a non-hyperlinked string or even an empty string may
+        be returned.
+
+        """
+        uri = self.uri
+        if uri:
+            if not (uri.startswith('http://') or uri.startswith('https://')):
+                # We only link to http(s) URLs.
+                uri = ''
+
+        title = jinja2.Markup(jinja2.escape(self.title or ""))
+        uri = jinja2.Markup(jinja2.escape(uri or ""))
+
+        if len(title) and len(uri):
+            return '<a href="{uri}">{title}</a>'.format(uri=uri, title=title)
+        elif len(title):
+            return '{title}'.format(title=title)
+        elif len(uri):
+            return '<a href="{uri}">{uri}</a>'.format(uri=uri)
+        else:
+            return ''
+
+
+    @property
+    def uri(self):
+        """This annotation's URI or an empty string."""
+        return self.get("uri", "")
 
     @property
     def description(self):
