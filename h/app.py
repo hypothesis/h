@@ -4,6 +4,7 @@ import logging
 import os
 
 from pyramid.config import Configurator
+from pyramid.tweens import EXCVIEW
 
 from h.config import settings_from_environment
 from h.security import derive_key
@@ -32,6 +33,7 @@ def create_app(global_config, **settings):
     config.add_subscriber('h.subscribers.set_user_from_oauth',
                           'pyramid.events.NewRequest')
 
+    config.add_tween('h.tweens.conditional_http_tween_factory', under=EXCVIEW)
     config.add_tween('h.tweens.csrf_tween_factory')
     config.add_tween('h.tweens.auth_token')
 
