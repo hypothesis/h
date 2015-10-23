@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import collections
+
 import deform
 from pyramid import httpexceptions as exc
 from pyramid.view import view_config
@@ -8,6 +10,8 @@ from pyramid import renderers
 from h.groups import schemas
 from h import i18n
 from h import models
+from h.api import search
+from h.api import uri
 
 import h.session
 
@@ -101,7 +105,28 @@ def _read_group(request, group):
 
     """
     url = request.route_url('group_read', pubid=group.pubid, slug=group.slug)
-    template_data = {'group': group, 'group_url': url}
+
+    result = search.search(request, private=False, params={
+        "group": group.pubid, "limit": 1000})
+    annotations = result['rows']
+
+    # Group the annotations by URI.
+    # Create a dict mapping the (normalized) URIs of the annotated documents
+    # to the most recent annotation of each document.
+    annotations_by_uri = collections.OrderedDict()
+    for annotation in annotations:
+        normalized_uri = uri.normalize(annotation.uri)
+        if normalized_uri not in annotations_by_uri:
+            annotations_by_uri[normalized_uri] = annotation
+            if len(annotations_by_uri) >= 25:
+                break
+
+    document_links = [annotation.document_link
+                      for annotation in annotations_by_uri.values()]
+
+    template_data = {
+        'group': group, 'group_url': url, 'document_links': document_links}
+
     return renderers.render_to_response(
         renderer_name='h:groups/templates/share.html.jinja2',
         value=template_data, request=request)

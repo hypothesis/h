@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import cgi
+import urllib2
+import urlparse
 
 import jinja2
 from dateutil import parser
@@ -168,38 +170,105 @@ class Annotation(annotation.Annotation):
             return ""
 
     @property
+    def filename(self):
+        if self.uri and self.uri.startswith("file://"):
+            return self.uri.split("/")[-1] or ""
+        else:
+            return ""
+
+    @property
     def document_link(self):
         """Return a link to this annotation's document.
 
-        Returns an HTML string like '<a href="{uri}">{title}</a>'.
+        Returns HTML strings like:
 
-        The uri and title are HTML-escaped, the string is safe raw rendering.
+          <a href="{href}" title="{title}">{link_text}</a> ({domain})
 
-        Lots of edge-cases are handled, including annotations with no document
-        title, no uri, a non-http(s) uri (which we don't want to link to), etc.
+        where:
 
-        In some cases a non-hyperlinked string or even an empty string may
-        be returned.
+        - {href} is the uri of the annotated document,
+          if it has an http(s):// uri
+        - {title} is the title of the document.
+          If the document has no title then its uri will be used instead.
+          If it's a local file:// uri then only the filename part is used,
+          not the full path.
+        - {link_text} is the same as {title}, but truncated with &hellip; if
+          it's too long
+        - {domain} is the domain name of the document's uri without
+          the scheme (http(s)://) and www parts, e.g. "example.com".
+          If it's a local file:// uri then the filename is used as the domain.
+          If the domain is too long it is truncated with &hellip;.
+
+        The ({domain}) part will be missing if it wouldn't be any different
+        from the {link_text} part.
+
+        The href="{href}" will be missing if there's no http(s) uri to link to
+        for this annotation's document.
+
+        User-supplied values are escaped so the string is safe for raw
+        rendering (the returned string is actually a jinja2.Markup object and
+        won't be escaped by Jinja2 when rendering).
 
         """
-        uri = self.uri
-        if uri:
-            if not (uri.startswith('http://') or uri.startswith('https://')):
-                # We only link to http(s) URLs.
-                uri = ''
+        uri = jinja2.escape(self.uri) or ""
 
-        title = jinja2.Markup(jinja2.escape(self.title or ""))
-        uri = jinja2.Markup(jinja2.escape(uri or ""))
-
-        if len(title) and len(uri):
-            return '<a href="{uri}">{title}</a>'.format(uri=uri, title=title)
-        elif len(title):
-            return '{title}'.format(title=title)
-        elif len(uri):
-            return '<a href="{uri}">{uri}</a>'.format(uri=uri)
+        if uri.startswith("http://") or uri.startswith("https://"):
+            href = uri
         else:
-            return ''
+            href = ""
 
+        if self.title:
+            title = jinja2.escape(self.title)
+            link_text = title
+            if uri.startswith("file://"):
+                domain = jinja2.escape(self.filename)
+            else:
+                domain = urlparse.urlparse(uri).hostname
+        else:
+            if uri.startswith("file://"):
+                title = urllib2.unquote(jinja2.escape(self.filename))
+                link_text = title
+                domain = ""
+            else:
+                title = urllib2.unquote(uri)
+                parts = urlparse.urlparse(uri)
+                link_text = urllib2.unquote(parts.netloc + parts.path)
+                domain = ""
+        if domain == title:
+            domain = ""
+
+        def truncate(content, length=50):
+            """Truncate the given string to at most length chars."""
+            if len(content) <= length:
+                return content
+            else:
+                return content[:length] + jinja2.Markup("&hellip;")
+
+        if link_text:
+            link_text = truncate(link_text)
+
+        if domain:
+            domain = truncate(domain)
+
+        assert title, "The title should never be empty"
+        assert link_text, "The link text should never be empty"
+        if href and domain:
+            link = ('<a href="{href}" title="{title}">{link_text}</a> '
+                    '({domain})'.format(href=href, title=title,
+                                        link_text=link_text, domain=domain))
+        elif domain and not href:
+            link = ('<a title="{title}">{link_text}</a> ({domain})'.format(
+                title=title, link_text=link_text, domain=domain))
+        elif href and not domain:
+            link = '<a href="{href}" title="{title}">{link_text}</a>'.format(
+                href=href, title=title, link_text=link_text)
+        elif (not href) and (not domain):
+            link = '<a title="{title}">{link_text}</a>'.format(
+                title=title, link_text=link_text)
+        else:
+            assert False, "We should never get here"
+
+        return jinja2.Markup(link)
 
     @property
     def uri(self):

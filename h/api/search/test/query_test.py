@@ -259,6 +259,19 @@ def test_authfilter_world_in_principals():
     }
 
 
+def test_authfilter_with_private_removed_authenticated_userid_principal():
+    request = mock.Mock(
+        effective_principals=[
+            'group:__world__', 'group:foo', 'acct:thom@hypothes.is'],
+        authenticated_userid='acct:thom@hypothes.is'
+    )
+    authfilter = query.AuthFilter(request, private=False)
+
+    assert authfilter({}) == {
+        'terms': {'permissions.read': ['group:__world__', 'group:foo']}
+    }
+
+
 def test_groupfilter_restricts_to_public_annotations_when_feature_off():
     """
     When the groups feature flag is off, the filter should ensure that only

@@ -4,7 +4,7 @@ from h.api import nipsa
 from h.api.search import query
 
 
-def search(request, params):
+def search(request, params, private=True):
     """
     Search with the given params and return the matching annotations.
 
@@ -14,13 +14,17 @@ def search(request, params):
     :param params: the search parameters
     :type params: dict-like
 
+    :param private: whether or not to include private annotations in the search
+        results
+    :type private: bool
+
     :returns: a dict with keys "rows" (the list of matching annotations, as
         dicts) and "total" (the number of matching annotations, an int)
     :rtype: dict
     """
     builder = query.Builder()
 
-    builder.append_filter(query.AuthFilter(request))
+    builder.append_filter(query.AuthFilter(request, private=private))
     builder.append_filter(query.UriFilter())
     builder.append_filter(lambda _: \
         nipsa.nipsa_filter(request.authenticated_userid))

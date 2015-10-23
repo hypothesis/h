@@ -96,8 +96,18 @@ class AuthFilter(object):
     user's effective principals will pass through this filter.
     """
 
-    def __init__(self, request):
+    def __init__(self, request, private=True):
+        """Initialize a new AuthFilter.
+
+        :param request: the pyramid.request object
+
+        :param private: whether or not to include private annotations in the
+            search results
+        :type private: bool
+
+        """
         self.request = request
+        self.private = private
 
     def __call__(self, params):
         groups = list(self.request.effective_principals)
@@ -110,6 +120,10 @@ class AuthFilter(object):
         # instead of 'group:__world__' we wouldn't have to do this.
         if 'group:__world__' not in groups:
             groups.insert(0, 'group:__world__')
+
+        if not self.private:
+            groups = [g for g in groups
+                      if not g == self.request.authenticated_userid]
 
         return {'terms': {'permissions.read': groups}}
 
