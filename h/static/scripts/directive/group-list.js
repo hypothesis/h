@@ -59,7 +59,7 @@ function groupList(groups, $window) {
         }
       });
     },
-    restrict: 'AE',
+    restrict: 'E',
     scope: {},
     templateUrl: 'group_list.html'
   };
