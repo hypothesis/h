@@ -9,6 +9,8 @@ from h.groups import schemas
 from h import i18n
 from h import models
 
+import h.session
+
 
 _ = i18n.TranslationString
 
@@ -32,8 +34,16 @@ def create_form(request):
 def _send_group_notification(request, event_type, pubid):
     """Publishes a group join/leave notification on the NSQ event queue"""
     queue = request.get_queue_writer()
+
+    # messages to the 'user' topic include the full session state
+    # so that the receiver can publish notifications to clients which are
+    # up to date wrt. changes made by the caller of _send_group_notification()
+    #
+    # the alternative would be to commit the DB transaction
+    # prior to dispatching the notification
     data = {
       'type': event_type,
+      'session_model': h.session.model(request),
       'userid': request.authenticated_userid,
       'group': pubid,
     }

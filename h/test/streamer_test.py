@@ -384,12 +384,13 @@ def test_handle_annotation_event_sends_if_in_group():
     assert streamer.handle_annotation_event(message, socket) is not None
 
 
-@patch('h.session.model')
-def test_handle_user_event_sends_session_change_when_joining_or_leaving_group(session_model):
+def test_handle_user_event_sends_session_change_when_joining_or_leaving_group():
+    session_model = Mock()
     message = {
         'type': 'group-join',
         'userid': 'amy',
         'group': 'groupid',
+        'session_model': session_model,
     }
 
     sock = FakeSocket('clientid')
@@ -398,7 +399,7 @@ def test_handle_user_event_sends_session_change_when_joining_or_leaving_group(se
     assert streamer.handle_user_event(message, sock) == {
         'type': 'session-change',
         'action': 'group-join',
-        'model': session_model.return_value,
+        'model': session_model,
     }
 
 

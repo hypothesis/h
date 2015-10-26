@@ -62,7 +62,8 @@ def test_create_form_returns_form(Form):
 
 
 # The fixtures required to mock all of create()'s dependencies.
-create_fixtures = pytest.mark.usefixtures('GroupSchema', 'Form', 'Group')
+create_fixtures = pytest.mark.usefixtures('GroupSchema', 'Form', 'Group',
+                                          'session_model')
 
 
 @create_fixtures
@@ -156,7 +157,7 @@ def test_create_with_non_ascii_name():
 
 
 @create_fixtures
-def test_create_publishes_join_event(Group):
+def test_create_publishes_join_event(Group, session_model):
     group = mock.Mock(pubid=mock.sentinel.pubid)
     Group.return_value = group
     request = _mock_request()
@@ -167,7 +168,9 @@ def test_create_publishes_join_event(Group):
         'type': 'group-join',
         'userid': request.authenticated_userid,
         'group': group.pubid,
+        'session_model': session_model(),
     })
+
 
 # The fixtures required to mock all of read()'s dependencies.
 read_fixtures = pytest.mark.usefixtures('Group', 'renderers')
@@ -347,7 +350,7 @@ def test_read_if_already_a_member_returns_response(Group, renderers):
 
 
 # The fixtures required to mock all of join()'s dependencies.
-join_fixtures = pytest.mark.usefixtures('Group')
+join_fixtures = pytest.mark.usefixtures('Group', 'session_model')
 
 
 @join_fixtures
@@ -402,8 +405,9 @@ def test_join_redirects_to_group_page(Group):
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
+
 @join_fixtures
-def test_join_publishes_join_event(Group):
+def test_join_publishes_join_event(Group, session_model):
     group = mock.Mock(pubid = mock.sentinel.pubid)
     Group.get_by_pubid.return_value = group
     request = _mock_request(matchdict=_matchdict())
@@ -414,9 +418,11 @@ def test_join_publishes_join_event(Group):
         'type': 'group-join',
         'userid': request.authenticated_userid,
         'group': mock.sentinel.pubid,
+        'session_model': session_model(),
     })
 
-leave_fixtures = pytest.mark.usefixtures('Group')
+
+leave_fixtures = pytest.mark.usefixtures('Group', 'session_model')
 
 
 @leave_fixtures
@@ -444,7 +450,7 @@ def test_leave_returns_not_found_if_user_not_in_group(Group):
 
 
 @leave_fixtures
-def test_leave_publishes_leave_event(Group):
+def test_leave_publishes_leave_event(Group, session_model):
     group = mock.Mock(pubid=mock.sentinel.pubid,
                       members=[mock.sentinel.user])
     Group.get_by_pubid.return_value = group
@@ -457,7 +463,9 @@ def test_leave_publishes_leave_event(Group):
         'type': 'group-leave',
         'userid': request.authenticated_userid,
         'group': mock.sentinel.pubid,
+        'session_model': session_model(),
     })
+
 
 @pytest.fixture
 def Form(request):
@@ -479,6 +487,12 @@ def Group(request):
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
+
+@pytest.fixture
+def session_model(request):
+    patcher = mock.patch('h.session.model')
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
 
 @pytest.fixture
 def renderers(request):

@@ -583,7 +583,7 @@ def handle_user_event(message, socket):
     return {
         'type': 'session-change',
         'action': message['type'],
-        'model': h.session.model(socket.request)
+        'model': message['session_model']
     }
 
 
