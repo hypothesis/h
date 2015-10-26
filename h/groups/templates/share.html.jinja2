@@ -11,45 +11,48 @@
 {% block content %}
   <div class="content content--narrow">
     <div class="group-form is-member-of-group">
-      <img class="group-form__invite-icon" src="/assets/images/icons/group-invite.svg">
-      <div class="group-form__name-label">
-        Success! Invite others to annotate with the group
-      </div>
-      <div class="group-form__name-input">
-        {{ group.name }}
-      </div>
+      <i class="h-icon-group group-form__heading-icon"></i>
+      <div class="group-form__heading">{{ group.name }}</div>
 
       {% if document_links %}
-      Recently annotated documents:
-      <ul>
-        {% for document_link in document_links %}
-          <li>{{ document_link }}</li>
-        {% endfor %}
-      </ul>
+        Recently annotated documents:
+        <ul class="group-form-document-list">
+          {% for document_link in document_links %}
+            <li>{{ document_link }}</li>
+          {% endfor %}
+        </ul>
       {% else %}
-        <p>This group hasn't shared any annotations yet.</p>
+        <p>This group has not shared any annotations yet.</p>
       {% endif %}
 
-      <!-- TODO - Potentially extract this out into a separate template !-->
-      <div class="share-link-form">
+    </div>
+    <div class="group-form-footer">
+      <div class="group-form-footer__explain-text">
+        {% include "about-groups.html" %}
+
+        <p class="group-form-footer__heading">You can</p>
+        <ol class="group-form-footer__list">
+          <li>Annotate any web resource privately within the group.</li>
+          <li>Restrict the annotations shown for a web resource to only those
+              belonging to the group.</li>
+          <li>Invite anyone to join the group using the link below:</li>
+        </ol>
         <input class="share-link-field js-share-link" value="{{ group_url }}">
-        <p class="share-link-icons">
-          <a href="//twitter.com/intent/tweet?url={{ group_url }}"
-             target="_blank"
-             title="Tweet link"
-             class="share-link-icon h-icon-twitter"></a>
-          <a href="//www.facebook.com/sharer/sharer.php?u={{ group_url }}"
-             target="_blank"
-             title="Share on Facebook"
-             class="share-link-icon h-icon-facebook"></a>
-          <a href="//plus.google.com/share?url={{ group_url }}"
-             target="_blank"
-             title="Post on Google Plus"
-             class="share-link-icon h-icon-google-plus"></a>
-          <a href="mailto:?subject=Invite to join the annotation group {{group.name}}&amp;body={{ group_url }}"
-             title="Share via email"
-             class="share-link-icon h-icon-mail"></a>
-        </p>
+        <a href="//twitter.com/intent/tweet?url={{ group_url }}"
+           target="_blank"
+           title="Tweet link"
+           class="share-link-icon h-icon-twitter"></a>
+        <a href="//www.facebook.com/sharer/sharer.php?u={{ group_url }}"
+           target="_blank"
+           title="Share on Facebook"
+           class="share-link-icon h-icon-facebook"></a>
+        <a href="//plus.google.com/share?url={{ group_url }}"
+           target="_blank"
+           title="Post on Google Plus"
+           class="share-link-icon h-icon-google-plus"></a>
+        <a href="mailto:?subject=Invite to join the annotation group {{group.name}}&amp;body={{ group_url }}"
+           title="Share via email"
+            class="share-link-icon h-icon-mail"></a>
       </div>
     </div>
   </div>

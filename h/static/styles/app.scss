@@ -3,6 +3,7 @@
 $base-font-size: 12px;
 $base-line-height: 20px;
 
+@import './variables';
 @import './reset';
 @import './elements';
 @import './common';

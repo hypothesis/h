@@ -14,12 +14,6 @@
 @import 'page';
 
 //ELEMENT STYLES////////////////////////////////
-a {
-  color: $link-color;
-  &:hover { color: $link-color-hover; }
-  text-decoration: none;
-}
-
 body {
   position: relative;
   background-color: $body-background;
