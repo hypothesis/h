@@ -105,24 +105,37 @@ describe 'AppController', ->
     createController()
     assert.calledOnce(fakeIdentity.watch)
 
-  it 'sets the user to null when the identity has been checked', ->
+  it 'auth.status is "unknown" on startup', ->
+    createController()
+    assert.equal($scope.auth.status, 'unknown')
+
+  it 'sets auth.status to "signed-out" when the identity has been checked but the user is not authenticated', ->
     createController()
     {onready} = fakeIdentity.watch.args[0][0]
     onready()
-    assert.isNull($scope.auth.user)
+    assert.equal($scope.auth.status, 'signed-out')
 
-  it 'sets auth.user to the authorized user at login', ->
+  it 'sets auth.status to "signed-in" when the identity has been checked and the user is authenticated', ->
     createController()
     fakeAuth.userid.withArgs('test-assertion').returns('acct:hey@joe')
     {onlogin} = fakeIdentity.watch.args[0][0]
     onlogin('test-assertion')
-    assert.equal($scope.auth.user, 'acct:hey@joe')
+    assert.equal($scope.auth.status, 'signed-in')
 
-  it 'sets auth.user to null at logout', ->
+  it 'sets userid, username, and provider properties at login', ->
+    createController()
+    fakeAuth.userid.withArgs('test-assertion').returns('acct:hey@joe')
+    {onlogin} = fakeIdentity.watch.args[0][0]
+    onlogin('test-assertion')
+    assert.equal($scope.auth.userid, 'acct:hey@joe')
+    assert.equal($scope.auth.username, 'hey')
+    assert.equal($scope.auth.provider, 'joe')
+
+  it 'sets auth.status to "signed-out" at logout', ->
     createController()
     {onlogout} = fakeIdentity.watch.args[0][0]
     onlogout()
-    assert.strictEqual($scope.auth.user, null)
+    assert.equal($scope.auth.status, "signed-out")
 
   it 'does not show login form for logged in users', ->
     createController()
