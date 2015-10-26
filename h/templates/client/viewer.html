@@ -1,5 +1,9 @@
-<!-- Thread view -->
-<ul class="stream-list"
+<!-- Annotation thread view
+
+(See gh2642 for rationale for 'ng-show="true"')
+ -->
+<ul class="stream-list ng-hide"
+    ng-show="true"
     deep-count="count"
     thread-filter="search.query"
     window-scroll="loadMore(20)">
