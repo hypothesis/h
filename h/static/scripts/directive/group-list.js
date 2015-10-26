@@ -60,7 +60,9 @@ function groupList(groups, $window) {
       });
     },
     restrict: 'E',
-    scope: {},
+    scope: {
+      auth: '='
+    },
     templateUrl: 'group_list.html'
   };
 };

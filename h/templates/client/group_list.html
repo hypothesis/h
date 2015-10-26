@@ -1,4 +1,14 @@
-<div class="pull-right" dropdown keyboard-nav>
+<span ng-if="auth.status === 'signed-out'"
+      ng-switch on="groups.focused().public">
+  <i class="group-list-label__icon h-icon-public" ng-switch-when="true"></i><!-- nospace
+  !--><i class="group-list-label__icon h-icon-group" ng-switch-default></i>
+  <span class="group-list-label__label">{{groups.focused().name}}</span>
+</span>
+
+<div class="pull-right"
+     ng-if="auth.status === 'signed-in'"
+     dropdown
+     keyboard-nav>
   <span class="dropdown-toggle"
         dropdown-toggle
         data-toggle="dropdown"

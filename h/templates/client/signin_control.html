@@ -1,12 +1,10 @@
-<!-- If we don't yet know the authenticated user -->
-<span ng-if="auth.status === 'unknown'">⋯</span>
-
-<!-- If the user is signed out -->
-<span><a href=""
-         ng-click="onLogin()"
-         ng-if="auth.status === 'signed-out'">Sign in</a><span>
-
 <!-- New controls -->
+<span class="signin-text"
+      ng-if="newStyle && auth.status === 'unknown'">⋯</span>
+<span class="signin-text"
+      ng-if="newStyle && auth.status === 'signed-out'">
+  <a href="" ng-click="onLogin()">Sign in</a>
+</span>
 <div ng-if="newStyle"
      class="pull-right user-picker"
      dropdown
@@ -16,10 +14,10 @@
      data-toggle="dropdown"
      dropdown-toggle
      title="{{auth.username}}">
-    <i class="h-icon-account"></i><!--
+    <i class="h-icon-account" ng-if="auth.status === 'signed-in'"></i><!--
     !--><i class="h-icon-arrow-drop-down top-bar__dropdown-arrow"></i>
   </a>
-  <ul class="dropdown-menu pull-right" role="menu" ng-if="newStyle">
+  <ul class="dropdown-menu pull-right" role="menu">
     <li class="dropdown-menu__row" ng-show="auth.status === 'signed-in'">
       <a href="/stream?q=user:{{auth.username}}"
          class="dropdown-menu__link"
@@ -43,6 +41,10 @@
 </div>
 
 <!-- Old controls -->
+<span ng-if="!newStyle && auth.status === 'unknown'">⋯</span>
+<span ng-if="!newStyle && auth.status === 'signed-out'">
+  <a href="" ng-click="onLogin()">Sign in</a>
+</span>
 <div ng-if="!newStyle"
      class="pull-right user-picker"
      dropdown

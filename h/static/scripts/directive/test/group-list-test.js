@@ -91,7 +91,11 @@ describe('groupList', function () {
   }));
 
   function createGroupList() {
-    return util.createDirective(document, 'groupList');
+    return util.createDirective(document, 'groupList', {
+      auth: {
+        status: 'signed-in',
+      },
+    });
   }
 
   it('should render groups', function () {
