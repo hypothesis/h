@@ -1,5 +1,6 @@
 'use strict';
 
+var events = require('../../events');
 var groupList = require('../group-list');
 var util = require('./util');
 
@@ -8,8 +9,15 @@ describe('GroupListController', function () {
   var $scope;
 
   beforeEach(function () {
-    $scope = {};
-    controller = new groupList.Controller($scope);
+    $scope = {
+      $on: sinon.stub(),
+    };
+    var fakeWindow = {};
+    var fakeGroups = {
+      all: sinon.stub(),
+      focused: sinon.stub(),
+    };
+    controller = new groupList.Controller($scope, fakeWindow, fakeGroups);
   });
 
   it('toggles share links', function () {
@@ -44,19 +52,12 @@ function isElementHidden(element) {
 }
 
 describe('groupList', function () {
+  var $rootScope;
   var $window;
 
   var GROUP_LINK = 'https://hypothes.is/groups/hdevs';
 
-  var groups = [{
-    id: 'public',
-    public: true
-  },{
-    id: 'h-devs',
-    name: 'Hypothesis Developers',
-    url: GROUP_LINK
-  }];
-
+  var groups;
   var fakeGroups;
 
   before(function() {
@@ -72,8 +73,18 @@ describe('groupList', function () {
     angular.mock.module('h.templates');
   });
 
-  beforeEach(angular.mock.inject(function (_$window_) {
+  beforeEach(angular.mock.inject(function (_$rootScope_, _$window_) {
+    $rootScope = _$rootScope_;
     $window = _$window_;
+
+    groups = [{
+       id: 'public',
+       public: true
+    },{
+       id: 'h-devs',
+       name: 'Hypothesis Developers',
+       url: GROUP_LINK
+    }];
 
     fakeGroups = {
       all: function () {
@@ -87,6 +98,7 @@ describe('groupList', function () {
       },
       leave: sinon.stub(),
       focus: sinon.stub(),
+      focused: sinon.stub(),
     };
   }));
 
@@ -151,5 +163,21 @@ describe('groupList', function () {
     var element = createGroupList();
     clickLeaveIcon(element, true);
     assert.notCalled(fakeGroups.focus);
+  });
+
+  it('should update when a GROUPS_CHANGED event is received', function () {
+    var element = createGroupList();
+    var groupItems = element.find('.group-item');
+    assert.equal(groupItems.length, groups.length + 1);
+
+    groups.push({
+      id: 'new-group',
+      name: 'New Group',
+      url: GROUP_LINK
+    });
+    $rootScope.$broadcast(events.GROUPS_CHANGED);
+    element.scope.$digest();
+    groupItems = element.find('.group-item');
+    assert.equal(groupItems.length, groups.length + 1);
   });
 });

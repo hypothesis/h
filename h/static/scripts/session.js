@@ -116,6 +116,9 @@ function session($document, $http, $resource, $rootScope, flash) {
   resource.update = function (model) {
     var isInitialLoad = !resource.state.csrf;
 
+    var userChanged = model.userid !== resource.state.userid;
+    var groupsChanged = !angular.equals(model.groups, resource.state.groups);
+
     // Copy the model data (including the CSRF token) into `resource.state`.
     angular.copy(model, resource.state);
 
@@ -130,6 +133,12 @@ function session($document, $http, $resource, $rootScope, flash) {
 
     if (!isInitialLoad) {
       $rootScope.$broadcast(events.SESSION_CHANGED);
+      if (userChanged) {
+        $rootScope.$broadcast(events.USER_CHANGED);
+      }
+      if (groupsChanged) {
+        $rootScope.$broadcast(events.GROUPS_CHANGED);
+      }
     }
 
     // Return the model
