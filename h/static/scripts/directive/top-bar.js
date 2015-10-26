@@ -1,15 +1,10 @@
-var parseAccountID = require('../filter/persona').parseAccountID;
+'use strict';
 
 module.exports = function () {
   return {
-    link: function (scope) {
-      scope.$watch('authUser', function () {
-        scope.account = parseAccountID(scope.authUser);
-      });
-    },
     restrict: 'E',
     scope: {
-      authUser: '=',
+      auth: '=',
       groupsEnabled: '=',
       isSidebar: '=',
       onLogin: '&',
@@ -23,4 +18,4 @@ module.exports = function () {
     },
     templateUrl: 'top_bar.html',
   };
-}
+};

@@ -9,43 +9,20 @@
             title="Share this page">
       <i class="h-icon-share"></i>
     </button>
-
-    <simple-search class="simple-search"
-         query="searchController.query"
-         on-search="searchController.update(query)"
-         on-clear="searchController.clear()"
-         always-expanded="true"></simple-search>
-
+    <simple-search
+      class="simple-search"
+      query="searchController.query"
+      on-search="searchController.update(query)"
+      on-clear="searchController.clear()"
+      always-expanded="true">
+    </simple-search>
     <div class="top-bar__expander"></div>
-
-    <div ng-switch="authUser">
-      <span ng-switch-when="undefined">⋯</span>
-      <a href="" ng-click="onLogin()" ng-switch-when="null">Sign in</a>
-      <div class="pull-right user-picker" dropdown keyboard-nav>
-        <span role="button"
-              data-toggle="dropdown" dropdown-toggle>
-          {{account.username}}<span class="provider" ng-show="authUser">/{{account.provider}}</span><i class="h-icon-arrow-drop-down"></i>
-        </span>
-        <ul class="dropdown-menu pull-right" role="menu">
-          <li class="dropdown-menu__row" ng-show="authUser">
-            <a class="dropdown-menu__link" href="/profile" target="_blank">Account</a>
-          </li>
-          <li class="dropdown-menu__row" >
-            <a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a>
-          </li>
-          <li class="dropdown-menu__row" >
-            <a class="dropdown-menu__link" href="/docs/help" target="_blank">Help</a>
-          </li>
-          <li class="dropdown-menu__row" ng-show="authUser">
-            <a class="dropdown-menu__link" href="/stream?q=user:{{account.username}}"
-               target="_blank">My Annotations</a>
-          </li>
-          <li class="dropdown-menu__row" ng-show="authUser">
-            <a class="dropdown-menu__link" href="" ng-click="onLogout()">Sign out</a>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <signin-control
+      auth="auth"
+      new-style="false"
+      on-login="onLogin()"
+      on-logout="onLogout()">
+    </signin-control>
   </div>
   <!-- New design for the top bar.
        This is part of the groups roll-out
@@ -54,14 +31,15 @@
        the stream view.
   !-->
   <div class="top-bar__inner content" ng-if="groupsEnabled">
-    <group-list class="group-list">
-    </group-list>
+    <group-list class="group-list"></group-list>
     <div class="top-bar__expander"></div>
-    <simple-search class="simple-search"
-         query="searchController.query"
-         on-search="searchController.update(query)"
-         on-clear="searchController.clear()"
-         title="Filter the annotation list"></simple-search>
+    <simple-search
+      class="simple-search"
+      query="searchController.query"
+      on-search="searchController.update(query)"
+      on-clear="searchController.clear()"
+      title="Filter the annotation list">
+    </simple-search>
     <sort-dropdown
       sort-options="sortOptions"
       sort-by="sortBy"
@@ -69,44 +47,16 @@
       on-change-sort-by="onChangeSortBy({sortBy: sortBy})">
     </sort-dropdown>
     <a class="top-bar__btn"
-            ng-click="shareDialog.visible = !shareDialog.visible"
-            ng-if="isSidebar"
-            title="Share this page">
+       ng-click="shareDialog.visible = !shareDialog.visible"
+       ng-if="isSidebar"
+       title="Share this page">
       <i class="h-icon-share"></i>
     </a>
-    <div ng-switch="authUser">
-      <span ng-switch-when="undefined">⋯</span>
-      <a href="" ng-click="onLogin()" ng-switch-when="null">Sign in</a>
-      <div class="pull-right user-picker" dropdown keyboard-nav>
-        <a role="button"
-           class="top-bar__btn"
-           data-toggle="dropdown" dropdown-toggle
-           title="{{account.username}}">
-          <i class="h-icon-account"></i><!-- nospace
-          !--><i class="h-icon-arrow-drop-down top-bar__dropdown-arrow"></i>
-        </a>
-        <ul class="dropdown-menu pull-right" role="menu">
-          <li class="dropdown-menu__row" ng-show="authUser">
-            <a href="/stream?q=user:{{account.username}}"
-               class="dropdown-menu__link"
-               title="View all your annotations"
-               target="_blank">{{account.username}}</a>
-          </li>
-          <li class="dropdown-menu__row" ng-show="authUser">
-            <a class="dropdown-menu__link" href="/profile" target="_blank">Account settings</a>
-          </li>
-          <li class="dropdown-menu__row">
-            <a class="dropdown-menu__link" href="/docs/help" target="_blank">Help</a>
-          </li>
-          <li class="dropdown-menu__row">
-            <a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a>
-          </li>
-          <li class="dropdown-menu__row" ng-show="authUser">
-            <a class="dropdown-menu__link dropdown-menu__link--subtle"
-               href="" ng-click="onLogout()">Sign out</a>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <signin-control
+      auth="auth"
+      new-style="true"
+      on-login="onLogin()"
+      on-logout="onLogout()">
+    </signin-control>
   </div>
 </div>

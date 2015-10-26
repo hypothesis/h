@@ -13,14 +13,14 @@
 
 {% block content %}
   <top-bar
-    auth-user="auth.user"
+    auth="auth"
     on-login="login()"
     on-logout="logout()"
     account-dialog="accountDialog"
     share-dialog="shareDialog"
     is-sidebar="isSidebar"
     search-controller="search"
-    groups-enabled="auth.user && feature('groups') && isSidebar"
+    groups-enabled="auth.userid && feature('groups') && isSidebar"
     sort-by="sort.name"
     sort-options="sort.options"
     on-change-sort-by="sort.name = sortBy"
@@ -34,11 +34,7 @@
          role="button"
          title="Close"
          ng-click="accountDialog.visible = false"></i>
-      <div ng-if="!auth.user">
-        {% block auth %}
-        {{ include_raw("h:templates/client/auth.html") }}
-        {% endblock %}
-      </div>
+      {{ include_raw("h:templates/client/auth.html") }}
     </div>
     <!-- / Account Dialog -->
 
@@ -82,6 +78,9 @@
   </script>
   <script type="text/ng-template" id="search_status_bar.html">
     {{ include_raw("h:templates/client/search_status_bar.html") }}
+  </script>
+  <script type="text/ng-template" id="signin_control.html">
+    {{ include_raw("h:templates/client/signin_control.html") }}
   </script>
   <script type="text/ng-template" id="sort_dropdown.html">
     {{ include_raw("h:templates/client/sort_dropdown.html") }}

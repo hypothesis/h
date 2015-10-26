@@ -1,0 +1,74 @@
+<!-- If we don't yet know the authenticated user -->
+<span ng-if="auth.status === 'unknown'">⋯</span>
+
+<!-- If the user is signed out -->
+<span><a href=""
+         ng-click="onLogin()"
+         ng-if="auth.status === 'signed-out'">Sign in</a><span>
+
+<!-- New controls -->
+<div ng-if="newStyle"
+     class="pull-right user-picker"
+     dropdown
+     keyboard-nav>
+  <a role="button"
+     class="top-bar__btn"
+     data-toggle="dropdown"
+     dropdown-toggle
+     title="{{auth.username}}">
+    <i class="h-icon-account"></i><!--
+    !--><i class="h-icon-arrow-drop-down top-bar__dropdown-arrow"></i>
+  </a>
+  <ul class="dropdown-menu pull-right" role="menu" ng-if="newStyle">
+    <li class="dropdown-menu__row" ng-show="auth.status === 'signed-in'">
+      <a href="/stream?q=user:{{auth.username}}"
+         class="dropdown-menu__link"
+         title="View all your annotations"
+         target="_blank">{{auth.username}}</a>
+    </li>
+    <li class="dropdown-menu__row" ng-show="auth.status === 'signed-in'">
+      <a class="dropdown-menu__link" href="/profile" target="_blank">Account settings</a>
+    </li>
+    <li class="dropdown-menu__row">
+      <a class="dropdown-menu__link" href="/docs/help" target="_blank">Help</a>
+    </li>
+    <li class="dropdown-menu__row">
+      <a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a>
+    </li>
+    <li class="dropdown-menu__row" ng-show="auth.status === 'signed-in'">
+      <a class="dropdown-menu__link dropdown-menu__link--subtle"
+         href="" ng-click="onLogout()">Sign out</a>
+    </li>
+  </ul>
+</div>
+
+<!-- Old controls -->
+<div ng-if="!newStyle"
+     class="pull-right user-picker"
+     dropdown
+     keyboard-nav>
+  <span role="button" data-toggle="dropdown" dropdown-toggle>
+    {{auth.username}}<!--
+    --><span class="provider"
+             ng-if="auth.provider">/{{auth.provider}}</span><!--
+    --><i class="h-icon-arrow-drop-down"></i>
+  </span>
+  <ul class="dropdown-menu pull-right" role="menu">
+    <li class="dropdown-menu__row" ng-show="auth.status === 'signed-in'">
+      <a class="dropdown-menu__link" href="/profile" target="_blank">Account</a>
+    </li>
+    <li class="dropdown-menu__row" >
+      <a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a>
+    </li>
+    <li class="dropdown-menu__row" >
+      <a class="dropdown-menu__link" href="/docs/help" target="_blank">Help</a>
+    </li>
+    <li class="dropdown-menu__row" ng-show="auth.status === 'signed-in'">
+      <a class="dropdown-menu__link" href="/stream?q=user:{{auth.username}}"
+         target="_blank">My Annotations</a>
+    </li>
+    <li class="dropdown-menu__row" ng-show="auth.status === 'signed-in'">
+      <a class="dropdown-menu__link" href="" ng-click="onLogout()">Sign out</a>
+    </li>
+  </ul>
+</div>
