@@ -161,7 +161,8 @@ describe('h:session', function () {
     it('broadcasts an event when the session is updated', function () {
       var sessionChangeCallback = sinon.stub();
 
-      // the initial load should not trigger a SESSION_CHANGED event
+      // the initial load should trigger a SESSION_CHANGED event
+      // with initialLoad set
       $rootScope.$on(events.SESSION_CHANGED, sessionChangeCallback);
       session.update({
         groups: [{
@@ -169,16 +170,19 @@ describe('h:session', function () {
         }],
         csrf: 'dummytoken',
       });
+      assert.calledWith(sessionChangeCallback, sinon.match({}),
+        {initialLoad: true});
 
       // subsequent loads should trigger a SESSION_CHANGED event
-      assert.isFalse(sessionChangeCallback.called);
+      sessionChangeCallback.reset();
       session.update({
         groups: [{
           id: 'groupid2'
         }],
         csrf: 'dummytoken'
       });
-      assert.calledOnce(sessionChangeCallback);
+      assert.calledWith(sessionChangeCallback, sinon.match({}),
+        {initialLoad: false});
     });
   });
 });

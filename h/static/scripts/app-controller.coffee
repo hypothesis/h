@@ -50,8 +50,9 @@ module.exports = class AppController
     # list of groups that the user is a member of changes
     reloadEvents = [events.USER_CHANGED, events.GROUP_FOCUSED];
     reloadEvents.forEach((eventName) ->
-      $scope.$on(eventName, (event) ->
-        $route.reload()
+      $scope.$on(eventName, (event, data) ->
+        if !data || !data.initialLoad
+          $route.reload()
       )
     );
 

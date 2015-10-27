@@ -131,14 +131,19 @@ function session($document, $http, $resource, $rootScope, flash) {
     lastLoad = {$promise: Promise.resolve(model), $resolved: true};
     lastLoadTime = Date.now();
 
-    if (!isInitialLoad) {
-      $rootScope.$broadcast(events.SESSION_CHANGED);
-      if (userChanged) {
-        $rootScope.$broadcast(events.USER_CHANGED);
-      }
-      if (groupsChanged) {
-        $rootScope.$broadcast(events.GROUPS_CHANGED);
-      }
+    $rootScope.$broadcast(events.SESSION_CHANGED, {
+      initialLoad: isInitialLoad,
+    });
+
+    if (userChanged) {
+      $rootScope.$broadcast(events.USER_CHANGED, {
+        initialLoad: isInitialLoad,
+      });
+    }
+    if (groupsChanged) {
+      $rootScope.$broadcast(events.GROUPS_CHANGED, {
+        initialLoad: isInitialLoad,
+      });
     }
 
     // Return the model

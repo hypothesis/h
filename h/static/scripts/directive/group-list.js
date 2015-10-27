@@ -35,6 +35,7 @@ function GroupListController($scope, $window, groups) {
 
   $scope.allGroups = groups.all();
   $scope.$on(events.GROUPS_CHANGED, function () {
+    $scope.focusedGroup = groups.focused();
     $scope.allGroups = groups.all();
   });
 

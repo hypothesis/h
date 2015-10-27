@@ -151,8 +151,14 @@ describe 'AppController', ->
     $scope.$broadcast(events.GROUP_FOCUSED)
     assert.calledOnce(fakeRoute.reload)
 
-  it 'reloads the view when the logged-in user changes', ->
+  it 'does not reload the view when the logged-in user changes on first load', ->
     createController()
     fakeRoute.reload = sinon.spy()
-    $scope.$broadcast(events.USER_CHANGED)
+    $scope.$broadcast(events.USER_CHANGED, {initialLoad: true})
+    assert.notCalled(fakeRoute.reload)
+
+  it 'reloads the view when the logged-in user changes after first load', ->
+    createController()
+    fakeRoute.reload = sinon.spy()
+    $scope.$broadcast(events.USER_CHANGED, {initialLoad: false})
     assert.calledOnce(fakeRoute.reload)
