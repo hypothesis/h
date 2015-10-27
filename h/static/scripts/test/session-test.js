@@ -158,7 +158,7 @@ describe('h:session', function () {
   });
 
   describe('#update()', function () {
-    it('broadcasts an event when the session is updated', function () {
+    it('broadcasts SESION_CHANGED when the session changes', function () {
       var sessionChangeCallback = sinon.stub();
 
       // the initial load should trigger a SESSION_CHANGED event
@@ -183,6 +183,28 @@ describe('h:session', function () {
       });
       assert.calledWith(sessionChangeCallback, sinon.match({}),
         {initialLoad: false});
+    });
+
+    it('broadcasts GROUPS_CHANGED when the groups change', function () {
+      var groupChangeCallback = sinon.stub();
+      $rootScope.$on(events.GROUPS_CHANGED, groupChangeCallback);
+      session.update({
+        groups: [{
+          id: 'groupid'
+        }],
+        csrf: 'dummytoken'
+      });
+      assert.calledOnce(groupChangeCallback);
+    });
+
+    it('broadcasts USER_CHANGED when the user changes', function () {
+      var userChangeCallback = sinon.stub();
+      $rootScope.$on(events.USER_CHANGED, userChangeCallback);
+      session.update({
+        userid: 'fred',
+        csrf: 'dummytoken'
+      });
+      assert.calledOnce(userChangeCallback);
     });
   });
 });
