@@ -28,14 +28,6 @@ $thread-padding: 1em;
     margin-left: -$thread-padding;
   }
 
-  @keyframes pulse {
-    10% { background-color: #ffc; }
-  }
-
-  &.pulse {
-    animation: pulse 1200ms ease-in-out;
-  }
-
   .thread {
     border-left: 1px dotted $gray-light;
     padding: 0;

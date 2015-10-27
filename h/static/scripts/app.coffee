@@ -147,7 +147,6 @@ module.exports = angular.module('h', [
 .service('host', require('./host'))
 .service('localStorage', require('./local-storage'))
 .service('permissions', require('./permissions'))
-.service('pulse', require('./pulse'))
 .service('queryParser', require('./query-parser'))
 .service('render', require('./render'))
 .service('searchFilter', require('./search-filter'))
