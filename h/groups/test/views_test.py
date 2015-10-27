@@ -432,7 +432,7 @@ def test_read_duplicate_documents_are_removed(Group, search, renderers, uri):
     search.search.return_value = {"rows": annotations}
 
     def normalize(uri):
-        # All three annotations' URIs normalize to the same URI.
+        # All annotations' URIs normalize to the same URI.
         return "normalized"
     uri.normalize.side_effect = normalize
 
