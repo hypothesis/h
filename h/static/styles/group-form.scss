@@ -18,6 +18,7 @@
   .group-form {
     @include flex-center-column();
 
+    font-size: $body2-font-size;
     min-height: 280px;
     background-color: $white;
     border: $border;
@@ -71,6 +72,14 @@
         color: $color-alto;
       }
     }
+  }
+
+  .group-form-document-list {
+    text-align:center;
+  }
+
+  .group-form-document-list li {
+    margin-top: .5em;
   }
 
   .group-form-footer {

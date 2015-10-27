@@ -1,4 +1,10 @@
 // basic standard styling for elements
+a {
+  color: $link-color;
+  &:hover { color: $link-color-hover; }
+  text-decoration: none;
+}
+
 ol {
   list-style-type: decimal;
   padding-left: 3em;

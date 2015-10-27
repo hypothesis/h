@@ -43,17 +43,6 @@ describe('documentTitle', function() {
     assert(title === 'on &ldquo;title&rdquo;');
   });
 
-  it('returns the title linked if the document has title and uri', function() {
-    var title = documentTitleFilterProvider()({
-      title: 'title',
-      uri: 'http://example.com/example.html'
-    });
-
-    assert(title === 'on &ldquo;<a target="_blank" ' +
-                     'href="http://example.com/example.html">' +
-                     'title</a>&rdquo;');
-  });
-
   it('returns an empty string if the document has no title', function() {
     var title = documentTitleFilterProvider()({
       uri: 'http://example.com/example.html'

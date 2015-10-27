@@ -5,6 +5,7 @@ import re
 import unittest
 import urllib
 
+import pytest
 from mock import patch
 
 from h.api import models
@@ -76,6 +77,108 @@ def test_title_with_a_document_that_has_no_title():
 
 def test_title_annotation_that_has_no_document():
     assert models.Annotation().title == ''
+
+
+@pytest.mark.parametrize("in_,out", [
+    (None, ""),
+    ("", ""),
+    ("http://example.com/example.html", ""),
+    ("file:///home/seanh/MyFile.pdf", "MyFile.pdf"),
+    ("file:///home/seanh/Documents/", ""),
+    ("FILE:///home/seanh/MyFile.pdf", "MyFile.pdf"),
+    ("FILE:///home/seanh/Documents/", ""),
+])
+def test_filename(in_, out):
+    assert models.Annotation(uri=in_).filename == out
+
+
+@pytest.mark.parametrize("in_,out", [
+    (('http://example.com/example.html', 'title'),
+     '<a href="http://example.com/example.html" title="title">title</a> (example.com)'),
+
+    (('https://example.com/example.html', 'title'),
+     '<a href="https://example.com/example.html" title="title">title</a> (example.com)'),
+
+    # It should be case-insensitive and allow HTTP:// uris not just http://.
+    (('HTTP://example.com/example.html', 'title'),
+     '<a href="HTTP://example.com/example.html" title="title">title</a> (example.com)'),
+
+    # If the domain name part would be the same as the link text it shouldn't
+    # show it.
+    (('http://example.com/example.html', 'example.com'),
+     '<a href="http://example.com/example.html" title="example.com">example.com</a>'),
+
+    # If the domain name part would be part of the link text it shouldn't show
+    # it.
+    (('http://example.com/example.html', None),
+        '<a href="http://example.com/example.html" title="http://example.com/example.html">example.com/example.html</a>'),
+
+    # If there's no uri it should just return a link with a title but no href.
+    ((None, 'title'),
+     '<a title="title">title</a>'),
+
+    # If the annotation has a document title and a non-http(s) uri it should
+    # just return the title with the filename after it.
+    (('file:///home/bob/Documents/example.pdf', 'title'),
+     '<a title="title">title</a> (example.pdf)'),
+
+    # file:// uris should be detected case-insensitively.
+    (('FILE:///home/bob/Documents/example.pdf', 'title'),
+     '<a title="title">title</a> (example.pdf)'),
+
+    # If the filename is the same as the title it shouldn't show it.
+    (('file:///home/bob/Documents/example.pdf', 'example.pdf'),
+     '<a title="example.pdf">example.pdf</a>'),
+
+    # If the annotation has an http(s) uri but no document title it should
+    # return the uri linked to the uri.
+    (('http://example.com/example.html', None),
+     '<a href="http://example.com/example.html" title="http://example.com/example.html">example.com/example.html</a>'),
+
+    # It should truncate long titles.
+    (('http://example.com/example.html', 'a' * 60),
+     '<a href="http://example.com/example.html" title="' + 'a' * 60 + '">' + 'a' * 50 + '&hellip;</a> (example.com)'),
+
+    # It should truncate long filenames.
+    (('file:///home/bob/Documents/' + 'a' * 60 + '.pdf', 'title'),
+     '<a title="title">title</a> (' + 'a' * 50 + '&hellip;)'),
+
+    # It should truncate long uris, but only in the link text not in the title
+    # or href attributes.
+    (('http://example.com/' + 'a' * 60, None),
+     '<a href="http://example.com/' + 'a' * 60 + '" title="http://example.com/' + 'a' * 60 + '">example.com/' + 'a' * 38 + '&hellip;</a>'),
+])
+def test_document_link(in_, out):
+    annotation = models.Annotation(
+        uri=in_[0], document={'title': in_[1]})
+
+    assert annotation.document_link == out
+
+
+def test_document_link_escapes_HTML_in_the_document_title():
+    spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
+    annotation = models.Annotation(
+        uri='http://example.com/example.html',
+        document={'title': '</a>' + spam_link})
+
+    assert spam_link not in annotation.document_link
+
+
+def test_document_link_escapes_HTML_in_the_document_URI():
+    spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
+    annotation = models.Annotation(
+        uri='http://</a>' + spam_link,
+        document={'title': 'title'})
+
+    assert spam_link not in annotation.document_link
+
+
+def test_uri():
+    assert models.Annotation(uri="http://foo.com").uri == "http://foo.com"
+
+
+def test_uri_with_no_uri():
+    assert models.Annotation().uri == ""
 
 
 def test_description():

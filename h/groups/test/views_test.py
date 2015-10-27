@@ -173,7 +173,7 @@ def test_create_publishes_join_event(Group, session_model):
 
 
 # The fixtures required to mock all of read()'s dependencies.
-read_fixtures = pytest.mark.usefixtures('Group', 'renderers')
+read_fixtures = pytest.mark.usefixtures('search', 'Group', 'renderers', 'uri')
 
 
 @read_fixtures
@@ -349,6 +349,125 @@ def test_read_if_already_a_member_returns_response(Group, renderers):
     assert views.read(request) == mock.sentinel.response
 
 
+@read_fixtures
+def test_read_calls_search(Group, search, renderers):
+    """It should call search() to get the annotations."""
+    request = _mock_request(matchdict=_matchdict())
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    user = request.authenticated_user = mock.Mock()
+    user.groups = [g]  # The user is a member of the group.
+    renderers.render_to_response.return_value = mock.sentinel.response
+
+    views.read(request)
+
+    search.search.assert_called_once_with(
+            request, private=False, params={"group": g.pubid, "limit": 1000})
+
+
+@read_fixtures
+def test_read_calls_normalize(Group, search, renderers, uri):
+    """It shold call normalize() with each of the URIs from search()."""
+    request = _mock_request(matchdict=_matchdict())
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    user = request.authenticated_user = mock.Mock()
+    user.groups = [g]  # The user is a member of the group.
+    renderers.render_to_response.return_value = mock.sentinel.response
+    search.search.return_value = {
+        "rows": [
+            mock.Mock(uri="uri_1"),
+            mock.Mock(uri="uri_2"),
+            mock.Mock(uri="uri_3"),
+        ]
+    }
+
+    views.read(request)
+
+    assert uri.normalize.call_args_list == [
+        mock.call("uri_1"), mock.call("uri_2"), mock.call("uri_3")]
+
+
+@read_fixtures
+def test_read_returns_document_links(Group, search, renderers, uri):
+    """It should return the list of document links."""
+    request = mock.Mock(matchdict=_matchdict())
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    user = request.authenticated_user = mock.Mock()
+    user.groups = [g]  # The user is a member of the group.
+    annotations = [
+        mock.Mock(uri="uri_1", document_link="document_link_1"),
+        mock.Mock(uri="uri_2", document_link="document_link_2"),
+        mock.Mock(uri="uri_3", document_link="document_link_3")
+    ]
+    search.search.return_value = {"rows": annotations}
+
+    def normalize(uri):
+        return uri + "_normalized"
+    uri.normalize.side_effect = normalize
+
+    views.read(request)
+
+    assert (
+        renderers.render_to_response.call_args[1]['value']['document_links']
+        == ["document_link_1", "document_link_2", "document_link_3"])
+
+
+@read_fixtures
+def test_read_duplicate_documents_are_removed(Group, search, renderers, uri):
+    """
+
+    If the group has multiple annotations whose uris all normalize to the same
+    uri, only the document_link of the first one of these annotations should be
+    sent to the template.
+
+    """
+    request = mock.Mock(matchdict=_matchdict())
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    user = request.authenticated_user = mock.Mock()
+    user.groups = [g]  # The user is a member of the group.
+    annotations = [
+        mock.Mock(uri="uri_1", document_link="document_link_1"),
+        mock.Mock(uri="uri_2", document_link="document_link_2"),
+        mock.Mock(uri="uri_3", document_link="document_link_3")
+    ]
+    search.search.return_value = {"rows": annotations}
+
+    def normalize(uri):
+        # All three annotations' URIs normalize to the same URI.
+        return "normalized"
+    uri.normalize.side_effect = normalize
+
+    views.read(request)
+
+    assert (
+        renderers.render_to_response.call_args[1]['value']['document_links']
+        == ["document_link_1"])
+
+
+@read_fixtures
+def test_read_documents_are_truncated(Group, search, renderers, uri):
+    """It should send at most 25 document links to the template."""
+    request = mock.Mock(matchdict=_matchdict())
+    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
+    user = request.authenticated_user = mock.Mock()
+    user.groups = [g]  # The user is a member of the group.
+    annotations = [
+        mock.Mock(uri="uri_{n}".format(n=n),
+                  document_link="document_link_{n}".format(n=n))
+        for n in range(0, 50)
+    ]
+    search.search.return_value = {"rows": annotations}
+
+    def normalize(uri):
+        # All three annotations' URIs normalize to the same URI.
+        return uri + "_normalized"
+    uri.normalize.side_effect = normalize
+
+    views.read(request)
+
+    assert (len(
+        renderers.render_to_response.call_args[1]['value']['document_links'])
+        == 25)
+
 # The fixtures required to mock all of join()'s dependencies.
 join_fixtures = pytest.mark.usefixtures('Group', 'session_model')
 
@@ -497,5 +616,19 @@ def session_model(request):
 @pytest.fixture
 def renderers(request):
     patcher = mock.patch('h.groups.views.renderers', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def search(request):
+    patcher = mock.patch('h.groups.views.search', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def uri(request):
+    patcher = mock.patch('h.groups.views.uri', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
