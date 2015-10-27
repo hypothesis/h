@@ -61,6 +61,11 @@ module.exports = class Threading
     this.pruneEmpties(@root)
     @root
 
+  # Returns a flat list of every annotation that is currently loaded
+  # in the thread
+  annotationList: ->
+    (message for id, {message} of @idTable when message)
+
   pruneEmpties: (parent) ->
     for container in parent.children
       this.pruneEmpties(container)

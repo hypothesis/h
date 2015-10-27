@@ -1,16 +1,20 @@
 {module, inject} = angular.mock
 
+events = require('../events')
+
 describe 'WidgetController', ->
   $scope = null
   fakeAnnotationMapper = null
   fakeAnnotationUI = null
   fakeAuth = null
   fakeCrossFrame = null
+  fakeDrafts = null
   fakeStore = null
   fakeStreamer = null
   fakeStreamFilter = null
   fakeThreading = null
   fakeGroups = null
+  lastSearchResult = null
   sandbox = null
   viewer = null
 
@@ -23,13 +27,22 @@ describe 'WidgetController', ->
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
 
-    fakeAnnotationMapper = {loadAnnotations: sandbox.spy()}
+    fakeAnnotationMapper = {
+      loadAnnotations: sandbox.spy()
+      unloadAnnotations: sandbox.spy()
+    }
+
     fakeAnnotationUI = {
       tool: 'comment'
       clearSelectedAnnotations: sandbox.spy()
     }
     fakeAuth = {user: null}
     fakeCrossFrame = {frames: []}
+    fakeDrafts = {
+      all: sandbox.stub()
+    }
+
+    lastSearchResult = null
 
     fakeStore = {
       SearchResource:
@@ -39,7 +52,7 @@ describe 'WidgetController', ->
           result =
             total: 100
             rows: [offset..offset+limit-1]
-
+          lastSearchResult = result
           callback result
     }
 
@@ -56,7 +69,8 @@ describe 'WidgetController', ->
     }
 
     fakeThreading = {
-      root: {}
+      root: {},
+      thread: sandbox.stub()
     }
 
     fakeGroups = {
@@ -66,6 +80,7 @@ describe 'WidgetController', ->
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'crossframe', fakeCrossFrame
+    $provide.value 'drafts', fakeDrafts
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamFilter', fakeStreamFilter
@@ -92,3 +107,16 @@ describe 'WidgetController', ->
       assert.calledWith(loadSpy, [40..59])
       assert.calledWith(loadSpy, [60..79])
       assert.calledWith(loadSpy, [80..99])
+
+  describe 'when the focused group changes', ->
+    it 'should load annotations for the new group', ->
+      fakeThreading.annotationList = sandbox.stub().returns([{id: '1'}])
+      fakeCrossFrame.frames.push({uri: 'http://example.com'})
+      $scope.$broadcast(events.GROUP_FOCUSED)
+
+      assert.calledWith(fakeAnnotationMapper.unloadAnnotations,
+        [{id: '1'}])
+      $scope.$digest();
+      assert.calledWith(fakeAnnotationMapper.loadAnnotations,
+        lastSearchResult.rows)
+      assert.calledWith(fakeThreading.thread, fakeDrafts.all())

@@ -48,7 +48,7 @@ module.exports = class AppController
 
     # Reload the view when the focused group changes or the
     # list of groups that the user is a member of changes
-    reloadEvents = [events.USER_CHANGED, events.GROUP_FOCUSED];
+    reloadEvents = [events.USER_CHANGED];
     reloadEvents.forEach((eventName) ->
       $scope.$on(eventName, (event, data) ->
         if !data || !data.initialLoad
