@@ -57,8 +57,6 @@ AnnotationController = [
     @preview = 'no'
     @editing = false
     @isSidebar = false
-    @hasDiff = false
-    @showDiff = undefined
     @timestamp = null
 
     model = $scope.annotationGet()
@@ -223,19 +221,6 @@ AnnotationController = [
         this.render()
         this.view()
 
-    # Calculates the visual diff flags from the targets
-    #
-    # hasDiff is set to true is there are any targets with a difference
-    # shouldShowDiff is set to true if there are some meaningful differences
-    #  - that is, more than just uppercase / lowercase
-    diffFromTargets = (targets = []) ->
-      hasDiff = targets.some (t) ->
-        t.diffHTML?
-      shouldShowDiff = hasDiff and targets.some (t) ->
-        t.diffHTML? and not t.diffCaseOnly
-
-      {hasDiff, shouldShowDiff}
-
     # Update the given annotation domain model object with the data from the
     # given annotation view model object.
     updateDomainModel = (domainModel, viewModel) ->
@@ -349,17 +334,6 @@ AnnotationController = [
 
       # Form the tags for ngTagsInput.
       @annotation.tags = ({text} for text in (model.tags or []))
-
-      # Calculate the visual diff flags
-      diffFlags = diffFromTargets(@annotation.target)
-      @hasDiff = diffFlags.hasDiff
-      if @hasDiff
-        # We don't want to override the showDiff value manually changed
-        # by the user, that's why we use a conditional assignment here,
-        # instead of directly setting showDiff to the calculated value
-        @showDiff ?= diffFlags.shouldShowDiff
-      else
-        @showDiff = undefined
 
     updateTimestamp = (repeat=false) =>
       @timestamp = time.toFuzzyString model.updated

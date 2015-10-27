@@ -58,21 +58,11 @@
            ng-repeat="target in vm.annotation.target track by $index">
     <excerpt enabled="feature('truncate_annotations')">
       <blockquote class="annotation-quote"
-                  ng-hide="target.diffHTML && vm.showDiff"
                   ng-bind-html="selector.exact"
                   ng-repeat="selector in target.selector
                              | filter : {'type': 'TextQuoteSelector'}
                              track by $index"></blockquote>
     </excerpt>
-    <blockquote class="annotation-quote"
-                ng-bind-html="target.diffHTML"
-                ng-show="target.diffHTML && vm.showDiff"></blockquote>
-    <div class="small show-differences"
-         ng-show="vm.hasDiff">
-      <input type="checkbox"
-             ng-model="vm.showDiff"
-             ng-click="$event.stopPropagation()"> Show differences</input>
-    </div>
   </section>
 
   <!-- / Excerpts -- >
