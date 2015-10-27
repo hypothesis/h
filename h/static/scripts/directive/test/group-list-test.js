@@ -1,6 +1,7 @@
 'use strict';
 
 var groupList = require('../group-list');
+var util = require('./util');
 
 describe('GroupListController', function () {
   var controller;
@@ -43,8 +44,6 @@ function isElementHidden(element) {
 }
 
 describe('groupList', function () {
-  var $compile;
-  var $scope;
   var $window;
 
   var GROUP_LINK = 'https://hypothes.is/groups/hdevs';
@@ -58,20 +57,7 @@ describe('groupList', function () {
     url: GROUP_LINK
   }];
 
-  var fakeGroups = {
-    all: function () {
-      return groups;
-    },
-
-    get: function (id) {
-      var match = this.all().filter(function (group) {
-        return group.id === id;
-      });
-      return match.length > 0 ? match[0] : undefined;
-    },
-
-    leave: sinon.stub(),
-  };
+  var fakeGroups;
 
   before(function() {
     angular.module('app', [])
@@ -86,16 +72,26 @@ describe('groupList', function () {
     angular.mock.module('h.templates');
   });
 
-  beforeEach(angular.mock.inject(function (_$compile_, _$rootScope_, _$window_) {
-    $compile = _$compile_;
-    $scope = _$rootScope_.$new();
+  beforeEach(angular.mock.inject(function (_$window_) {
     $window = _$window_;
+
+    fakeGroups = {
+      all: function () {
+        return groups;
+      },
+      get: function (id) {
+        var match = this.all().filter(function (group) {
+          return group.id === id;
+        });
+        return match.length > 0 ? match[0] : undefined;
+      },
+      leave: sinon.stub(),
+      focus: sinon.stub(),
+    };
   }));
 
   function createGroupList() {
-    var element = $compile('<group-list></group-list>')($scope);
-    $scope.$digest();
-    return element;
+    return util.createDirective(document, 'groupList');
   }
 
   it('should render groups', function () {
@@ -125,15 +121,31 @@ describe('groupList', function () {
     assert.ok(isElementHidden(expander));
   });
 
-  it('should leave group when the leave icon is clicked', function () {
-    var element = createGroupList();
+  function clickLeaveIcon(element, acceptPrompt) {
     var leaveLink = element.find('.h-icon-cancel-outline');
 
     // accept prompt to leave group
     $window.confirm = function () {
-      return true;
+      return acceptPrompt;
     };
     leaveLink.click();
+  }
+
+  it('should leave group when the leave icon is clicked', function () {
+    var element = createGroupList();
+    clickLeaveIcon(element, true);
     assert.ok(fakeGroups.leave.calledWith('h-devs'));
+  });
+
+  it('should not leave group when confirmation is dismissed', function () {
+    var element = createGroupList();
+    clickLeaveIcon(element, false);
+    assert.notCalled(fakeGroups.leave);
+  });
+
+  it('should not change the focused group when leaving', function () {
+    var element = createGroupList();
+    clickLeaveIcon(element, true);
+    assert.notCalled(fakeGroups.focus);
   });
 });

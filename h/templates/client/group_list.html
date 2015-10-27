@@ -50,7 +50,7 @@
           </div>
         </div>
         <!-- the 'Leave group' icon !-->
-        <div class="group-cancel-icon-container">
+        <div class="group-cancel-icon-container" ng-click="$event.stopPropagation()">
           <i class="h-icon-cancel-outline btn--cancel"
              ng-if="!group.public"
              ng-click="leaveGroup(group.id)"
