@@ -56,7 +56,7 @@ $top-bar-height: 40px;
   color: $gray-light;
   display: inline-block;
   cursor: pointer;
-  padding-left: 6px;
+  padding: 0 3px;
 
   &:hover {
     color: $gray-dark;
