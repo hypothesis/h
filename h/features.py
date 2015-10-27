@@ -100,7 +100,8 @@ def flag_enabled(request, name):
 @view_config(route_name='features_status',
              request_method='GET',
              accept='application/json',
-             renderer='json')
+             renderer='json',
+             http_cache=0)
 def features_status(request):
     """Report current feature flag values."""
     return {k: flag_enabled(request, k) for k in FEATURES.keys()}
