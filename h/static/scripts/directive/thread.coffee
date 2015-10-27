@@ -219,8 +219,8 @@ isHiddenThread = (elem) ->
 # Directive that instantiates {@link thread.ThreadController ThreadController}.
 ###
 module.exports = [
-  '$parse', '$window', '$location', '$anchorScroll', 'pulse', 'render',
-  ($parse,   $window,   $location,   $anchorScroll,   pulse,   render) ->
+  '$parse', '$window', '$location', '$anchorScroll', 'render',
+  ($parse,   $window,   $location,   $anchorScroll,   render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter, filter]) ->
 
       # We would ideally use require for this, but searching parents only for a
@@ -238,15 +238,6 @@ module.exports = [
       if counter?
         counter.count 'message', 1
         scope.$on '$destroy', -> counter.count 'message', -1
-
-      # Flash the thread when any child annotations are updated.
-      scope.$on 'annotationUpdate', (event) ->
-        # If we're hidden, we let the event propagate up to the parent thread.
-        if isHiddenThread(elem)
-          return
-        # Otherwise, stop the event from bubbling, and pulse this thread.
-        event.stopPropagation()
-        pulse(elem)
 
       # The watch is necessary because the computed value of the attribute
       # expression may change. This won't happen when we use the thread

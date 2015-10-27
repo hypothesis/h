@@ -361,11 +361,6 @@ AnnotationController = [
         # Discard saved drafts
         drafts.remove model
 
-        # Propagate an update event up the thread (to pulse changing threads),
-        # but only if this is someone else's annotation.
-        if model.user != session.state.userid
-          $scope.$emit('annotationUpdate')
-
       # Save highlights once logged in.
       if this.isHighlight() and highlight
         if model.user and not model.id

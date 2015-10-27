@@ -6,7 +6,6 @@ describe 'thread', ->
   $scope = null
   controller = null
   fakeGroups = null
-  fakePulse = null
   fakeRender = null
   fakeAnnotationUI = null
   sandbox = null
@@ -29,7 +28,6 @@ describe 'thread', ->
     fakeGroups = {
       focused: sandbox.stub().returns({id: '__world__'})
     }
-    fakePulse = sandbox.spy()
     fakeRender = sandbox.spy()
     fakeAnnotationUI = {
       hasSelectedAnnotations: ->
@@ -38,7 +36,6 @@ describe 'thread', ->
         selectedAnnotations.indexOf(id) != -1
     }
     $provide.value 'groups', fakeGroups
-    $provide.value 'pulse', fakePulse
     $provide.value 'render', fakeRender
     $provide.value 'annotationUI', fakeAnnotationUI
     return
@@ -351,31 +348,3 @@ describe 'thread', ->
         controller.container = {}
         assert.isFalse(controller.matchesFilter())
         assert.calledWith(check, controller.container)
-
-  describe 'directive', ->
-    beforeEach ->
-      createDirective()
-
-    it 'pulses the current thread on an annotationUpdated event', ->
-      $element.scope().$emit('annotationUpdate')
-      assert.called(fakePulse)
-
-    it 'does not pulse the thread if it is hidden (parent collapsed)', ->
-      fakeParent = {
-        controller: -> {collapsed: true}
-      }
-      sandbox.stub(angular.element.prototype, 'parent').returns(fakeParent)
-      $element.scope().$emit('annotationUpdate')
-      assert.notCalled(fakePulse)
-
-    it 'does not pulse the thread if it is hidden (grandparent collapsed)', ->
-      fakeGrandParent = {
-        controller: -> {collapsed: true}
-      }
-      fakeParent = {
-        controller: -> {collapsed: false}
-        parent: -> fakeGrandParent
-      }
-      sandbox.stub(angular.element.prototype, 'parent').returns(fakeParent)
-      $element.scope().$emit('annotationUpdate')
-      assert.notCalled(fakePulse)

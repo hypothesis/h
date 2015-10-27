@@ -382,24 +382,6 @@ describe 'annotation', ->
         $document.click()
         assert.notOk(dialog.hasClass('open'))
 
-  describe 'annotationUpdate event', ->
-    beforeEach ->
-      createDirective()
-      sandbox.spy(isolateScope, '$emit')
-      annotation.updated = '123'
-      $scope.$digest()
-
-    it "does not fire when this user's annotations are updated", ->
-      annotation.updated = '456'
-      $scope.$digest()
-      assert.notCalled(isolateScope.$emit)
-
-    it "fires when another user's annotation is updated", ->
-      fakeSession.state.userid = 'acct:jane@localhost'
-      annotation.updated = '456'
-      $scope.$digest()
-      assert.calledWith(isolateScope.$emit, 'annotationUpdate')
-
   describe "deleteAnnotation() method", ->
     before ->
       sinon.stub(window, "confirm")
