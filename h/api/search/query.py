@@ -110,7 +110,7 @@ class AuthFilter(object):
         self.private = private
 
     def __call__(self, params):
-        groups = list(self.request.effective_principals)
+        principals = list(self.request.effective_principals)
 
         # We always want annotations with 'group:__world__' in their read
         # permissions to show up in the search results, but 'group:__world__'
@@ -118,14 +118,14 @@ class AuthFilter(object):
         #
         # FIXME: If public annotations used 'system.Everyone'
         # instead of 'group:__world__' we wouldn't have to do this.
-        if 'group:__world__' not in groups:
-            groups.insert(0, 'group:__world__')
+        if 'group:__world__' not in principals:
+            principals.insert(0, 'group:__world__')
 
         if not self.private:
-            groups = [g for g in groups
-                      if not g == self.request.authenticated_userid]
+            principals = [p for p in principals
+                          if not p == self.request.authenticated_userid]
 
-        return {'terms': {'permissions.read': groups}}
+        return {'terms': {'permissions.read': principals}}
 
 
 class GroupFilter(object):
