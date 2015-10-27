@@ -11,6 +11,11 @@ from annotator import annotation
 from annotator import document
 
 
+def is_file(uri):
+    """Return True if the given uri is a local file uri."""
+    return uri and uri.lower().startswith("file:///")
+
+
 class Annotation(annotation.Annotation):
     __mapping__ = {
         'annotator_schema_version': {'type': 'string'},
@@ -171,7 +176,7 @@ class Annotation(annotation.Annotation):
 
     @property
     def filename(self):
-        if self.uri and self.uri.startswith("file://"):
+        if is_file(self.uri):
             return self.uri.split("/")[-1] or ""
         else:
             return ""
@@ -212,7 +217,8 @@ class Annotation(annotation.Annotation):
         """
         uri = jinja2.escape(self.uri) or ""
 
-        if uri.startswith("http://") or uri.startswith("https://"):
+        if (uri.lower().startswith("http://") or
+                uri.lower().startswith("https://")):
             href = uri
         else:
             href = ""
@@ -220,12 +226,12 @@ class Annotation(annotation.Annotation):
         if self.title:
             title = jinja2.escape(self.title)
             link_text = title
-            if uri.startswith("file://"):
+            if is_file(uri):
                 domain = jinja2.escape(self.filename)
             else:
                 domain = urlparse.urlparse(uri).hostname
         else:
-            if uri.startswith("file://"):
+            if is_file(uri):
                 title = urllib2.unquote(jinja2.escape(self.filename))
                 link_text = title
                 domain = ""

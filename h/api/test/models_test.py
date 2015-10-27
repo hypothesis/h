@@ -85,6 +85,8 @@ def test_title_annotation_that_has_no_document():
     ("http://example.com/example.html", ""),
     ("file:///home/seanh/MyFile.pdf", "MyFile.pdf"),
     ("file:///home/seanh/Documents/", ""),
+    ("FILE:///home/seanh/MyFile.pdf", "MyFile.pdf"),
+    ("FILE:///home/seanh/Documents/", ""),
 ])
 def test_filename(in_, out):
     assert models.Annotation(uri=in_).filename == out
@@ -96,6 +98,10 @@ def test_filename(in_, out):
 
     (('https://example.com/example.html', 'title'),
      '<a href="https://example.com/example.html" title="title">title</a> (example.com)'),
+
+    # It should be case-insensitive and allow HTTP:// uris not just http://.
+    (('HTTP://example.com/example.html', 'title'),
+     '<a href="HTTP://example.com/example.html" title="title">title</a> (example.com)'),
 
     # If the domain name part would be the same as the link text it shouldn't
     # show it.
@@ -114,6 +120,10 @@ def test_filename(in_, out):
     # If the annotation has a document title and a non-http(s) uri it should
     # just return the title with the filename after it.
     (('file:///home/bob/Documents/example.pdf', 'title'),
+     '<a title="title">title</a> (example.pdf)'),
+
+    # file:// uris should be detected case-insensitively.
+    (('FILE:///home/bob/Documents/example.pdf', 'title'),
      '<a title="title">title</a> (example.pdf)'),
 
     # If the filename is the same as the title it shouldn't show it.
