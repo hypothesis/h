@@ -350,8 +350,8 @@ def test_read_if_already_a_member_returns_response(Group, renderers):
 
 
 @read_fixtures
-def test_read_calls_search(Group, search, renderers):
-    """It should call search() to get the annotations."""
+def test_read_calls_search_correctly(Group, search, renderers):
+    """It should call search() with the right args to get the annotations."""
     request = _mock_request(matchdict=_matchdict())
     g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
