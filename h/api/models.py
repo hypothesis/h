@@ -212,6 +212,12 @@ class Annotation(annotation.Annotation):
         """
         uri_ = self.get("uri")
         if uri_:
+
+            # Convert non-string URIs into strings.
+            # If the URI is already a unicode string this will do nothing.
+            # We're assuming that URI cannot be a byte string.
+            uri_ = unicode(uri_)
+
             return jinja2.escape(uri_)
         else:
             return ""
@@ -232,7 +238,7 @@ class Annotation(annotation.Annotation):
         if self.uri.lower().startswith("file:///"):
             # self.uri is already escaped so we don't need to escape it again
             # here.
-            return self.uri.split("/")[-1] or ""
+            return self.uri.split("/")[-1]
         else:
             return ""
 
@@ -252,9 +258,18 @@ class Annotation(annotation.Annotation):
         """
         document_ = self.get("document")
         if document_:
-            title = jinja2.escape(document_.get("title") or "")
+            try:
+                title = document_["title"]
+            except (KeyError, TypeError):
+                # Sometimes document_ has no "title" key or isn't a dict at
+                # all.
+                title = ""
             if title:
-                return title
+                # Convert non-string titles into strings.
+                # We're assuming that title cannot be a byte string.
+                title = unicode(title)
+
+                return jinja2.escape(title)
 
         if self.filename:
             # self.filename is already escaped so we don't need to escape
@@ -287,7 +302,12 @@ class Annotation(annotation.Annotation):
             return self.filename
         else:
             # self.uri is already escaped, doesn't need to be escaped again.
-            return urlparse.urlparse(self.uri).hostname
+            hostname = urlparse.urlparse(self.uri).hostname
+
+            # urlparse()'s .hostname is sometimes None.
+            hostname = hostname or ""
+
+            return hostname
 
     @property
     def href(self):

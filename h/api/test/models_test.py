@@ -90,11 +90,9 @@ def test_uri_returns_Markup():
         models.Annotation(uri="http://foo.com").uri, jinja2.Markup)
 
 
-@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
-def test_filename_with_no_uri(uri):
-    uri.return_value = ""
-
-    assert models.Annotation().filename == ""
+def test_uri_when_uri_is_not_a_string():
+    for uri in (True, None, 23, 23.7, {"foo": False}, [1, 2, 3]):
+        assert isinstance(models.Annotation(uri=uri).uri, unicode)
 
 
 @patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
@@ -132,6 +130,22 @@ def test_filename_with_folder(uri):
     assert models.Annotation().filename == ""
 
 
+@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
+def test_filename_with_no_uri(uri):
+    # self.uri should always be unicode, the worst is should ever be is an
+    # empty string.
+    uri.return_value = u""
+
+    assert models.Annotation().filename == ""
+
+
+@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
+def test_filename_with_nonsense_uri(uri):
+    uri.return_value = u"foobar"
+
+    assert models.Annotation().filename == ""
+
+
 title_fixtures = pytest.mark.usefixtures('uri', 'filename')
 
 
@@ -157,26 +171,6 @@ def test_title_escapes_html_in_document_titles():
 
 
 @title_fixtures
-def test_title_when_document_has_None_for_title(uri, filename):
-    """If the document has None for its title it should use the uri instead."""
-    uri.return_value = "http://example.com/example.html"
-    filename.return_value = ""  # This is not a file:// URI.
-    annotation = models.Annotation(document={'title': None})
-
-    assert annotation.title == "http://example.com/example.html"
-
-
-@title_fixtures
-def test_title_when_document_has_empty_string_for_title(uri, filename):
-    """If the document has "" for its title it should use the uri instead."""
-    uri.return_value = "http://example.com/example.html"
-    filename.return_value = ""  # This is not a file:// URI.
-    annotation = models.Annotation(document={'title': ""})
-
-    assert annotation.title == "http://example.com/example.html"
-
-
-@title_fixtures
 def test_title_with_file_uri(filename):
     """If the document has no title and the annotation has a file:// uri then
     it should return the filename part only."""
@@ -192,6 +186,55 @@ def test_title_returns_Markup_when_filename_returns_Markup(filename):
     annotation = models.Annotation(document={})
 
     assert isinstance(annotation.title, jinja2.Markup)
+
+
+@title_fixtures
+def test_title_unquotes_uris(uri, filename):
+    filename.return_value = ""  # This is not a file:// URI.
+    uri.return_value = "http://example.com/example%201.html"
+    annotation = models.Annotation()
+
+    assert annotation.title == "http://example.com/example 1.html"
+
+
+@title_fixtures
+def test_title_returns_Markup_when_uri_returns_Markup(uri, filename):
+    filename.return_value = ""  # This is not a file:// URI.
+    uri.return_value = jinja2.Markup("http://example.com/example.html")
+    annotation = models.Annotation()
+
+    assert isinstance(annotation.title, jinja2.Markup)
+
+
+@title_fixtures
+def test_title_when_document_has_None_for_title(uri, filename):
+    """If the document has None for its title it should use the uri instead."""
+    uri.return_value = "http://example.com/example.html"
+    filename.return_value = ""  # This is not a file:// URI.
+    annotation = models.Annotation(document={'title': None})
+
+    assert annotation.title == "http://example.com/example.html"
+
+
+@title_fixtures
+def test_title_when_document_title_is_not_a_string(uri, filename):
+    """If the document has None for its title it should use the uri instead."""
+    uri.return_value = u"http://example.com/example.html"
+    filename.return_value = ""  # This is not a file:// URI.
+
+    for title in (23, 23.7, False, {"foo": "bar"}, [1, 2, 3]):
+        annotation = models.Annotation(document={'title': title})
+        assert isinstance(annotation.title, unicode)
+
+
+@title_fixtures
+def test_title_when_document_has_empty_string_for_title(uri, filename):
+    """If the document has "" for its title it should use the uri instead."""
+    uri.return_value = "http://example.com/example.html"
+    filename.return_value = ""  # This is not a file:// URI.
+    annotation = models.Annotation(document={'title': ""})
+
+    assert annotation.title == "http://example.com/example.html"
 
 
 @title_fixtures
@@ -214,21 +257,13 @@ def test_title_when_annotation_has_no_document_at_all(uri, filename):
 
 
 @title_fixtures
-def test_title_unquotes_uris(uri, filename):
+def test_title_when_annotations_document_is_not_a_dict(uri, filename):
+    uri.return_value = "http://www.example.com/example.html"
     filename.return_value = ""  # This is not a file:// URI.
-    uri.return_value = "http://example.com/example%201.html"
-    annotation = models.Annotation()
 
-    assert annotation.title == "http://example.com/example 1.html"
-
-
-@title_fixtures
-def test_title_returns_Markup_when_uri_returns_Markup(uri, filename):
-    filename.return_value = ""  # This is not a file:// URI.
-    uri.return_value = jinja2.Markup("http://example.com/example.html")
-    annotation = models.Annotation()
-
-    assert isinstance(annotation.title, jinja2.Markup)
+    for document in (False, 23, 12.7, None, [], [1, 2, 3], "foo", u"bar"):
+        annotation = models.Annotation(document=document)
+        assert annotation.title == uri.return_value
 
 
 hostname_or_filename_fixtures = pytest.mark.usefixtures('uri', 'filename')
@@ -266,6 +301,28 @@ def test_hostname_or_filename_returns_Markup_when_uri_does(uri, filename):
     annotation = models.Annotation()
 
     assert isinstance(annotation.hostname_or_filename, jinja2.Markup)
+
+
+@hostname_or_filename_fixtures
+def test_hostname_or_filename_with_empty_string_for_uri(uri, filename):
+    filename.return_value = ""
+    uri.return_value = u""
+    annotation = models.Annotation()
+
+    assert isinstance(annotation.hostname_or_filename, unicode)
+
+
+@hostname_or_filename_fixtures
+def test_hostname_or_filename_with_nonsense_uri(uri, filename):
+    filename.return_value = ""
+
+    # urlparse.urlparse(u"foobar").hostname is None, make sure this doesn't
+    # trip up .hostname_or_filename.
+    uri.return_value = u"foobar"
+
+    annotation = models.Annotation()
+
+    assert isinstance(annotation.hostname_or_filename, unicode)
 
 
 href_fixtures = pytest.mark.usefixtures('uri')
