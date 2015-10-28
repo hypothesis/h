@@ -1,3 +1,52 @@
+0.7.9 (2015-10-28)
+==================
+
+Bug fixes
+---------
+
+- Fix a problem where activating the Chrome extension would obliterate a version
+  of Hypothesis embedded on the page (#2657).
+
+- Fix a visual issue causing the "Clear selection" and "Clear search" buttons to
+  be briefly visible when they shouldn't have been (#2668).
+
+- Fix a crash triggered when the set of connected WebSocket clients changed
+  while handling a message (#2647).
+
+- Fix a bug where cancelling leaving a group nonetheless resulted in group focus
+  changing (#2669).
+
+Features
+--------
+
+- Improved appearance and behaviour of the sort control for annotations (feature
+  flagged: groups) (#2643).
+
+- Replies now inherit the publication scope of their parents. That is: replies
+  to group annotations will go to the same group (#2650).
+
+- Support HTTP conditional responses (ETag/If-None-Match and
+  Last-Modified/If-Modified-Since) under appropriate conditions (#2664).
+
+- Groups landing pages now show a list of recently annotated pages (feature
+  flagged: groups) (#2667).
+
+Miscellanea
+-----------
+
+- Upgrade to Angular 1.4.7 (#2629).
+
+- Account settings and profile forms are now rendered by the server (#2636).
+
+- The Chrome extension can now be built in a way that allows distinguishing
+  between development versions of the extension and production ones (#2639).
+
+- No longer perform the URI expansion step when searching for annotations on
+  URLs which have been marked "canonical". This hopefully reduces the number of
+  false-positive annotations we load on pages with appropriate metadata (#2652).
+
+- Replace group public IDs (hashids) with randomly generated IDs (#2662).
+
 0.7.8 (2015-10-20)
 ==================
 
