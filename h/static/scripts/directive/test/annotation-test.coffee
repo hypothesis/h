@@ -587,8 +587,16 @@ describe("AnnotationController", ->
         isPrivate: (permissions, user) ->
           return user in permissions.read
         permits: -> true
-        shared: (group) -> {"read": [group]}
-        private: -> {"read": [session.state.userid]}
+        shared: (group) ->
+          if not session?.state?.userid
+            return null
+          else
+            {"read": [group]}
+        private: ->
+          if not session?.state?.userid
+            return null
+          else
+            {"read": [session.state.userid]}
       }
       session: session
       tags: tags or {store: ->}
@@ -647,44 +655,63 @@ describe("AnnotationController", ->
     it("creates the directive without crashing", ->
       createAnnotationDirective({})
     )
+  )
 
-    it("sets the permissions of new annotations from local storage", ->
-      {controller} = createAnnotationDirective({
-        localStorage: {
-          setItem: ->
-          getItem: (key) ->
-            if key == 'hypothesis.privacy'
-              return 'shared'
-            else
-              assert(false, "Wrong key requested from localStorage")
-        }
-      })
-      assert(controller.isShared())
-    )
+  it("sets the permissions of new annotations from local storage", ->
+    {controller} = createAnnotationDirective({
+      localStorage: {
+        setItem: ->
+        getItem: (key) ->
+          if key == 'hypothesis.privacy'
+            return 'shared'
+          else
+            assert(false, "Wrong key requested from localStorage")
+      }
+    })
+    assert(controller.isShared())
+  )
 
-    it("sets the permissions of new annotations from local storage to private", ->
-      {controller} = createAnnotationDirective({
-        localStorage: {
-          setItem: ->
-          getItem: (key) ->
-            if key == 'hypothesis.privacy'
-              return 'private'
-            else
-              assert(false, "Wrong key requested from localStorage")
-        }
-      })
-      assert(controller.isPrivate())
-    )
+  it("sets the permissions of new annotations from local storage to private", ->
+    {controller} = createAnnotationDirective({
+      localStorage: {
+        setItem: ->
+        getItem: (key) ->
+          if key == 'hypothesis.privacy'
+            return 'private'
+          else
+            assert(false, "Wrong key requested from localStorage")
+      }
+    })
+    assert(controller.isPrivate())
+  )
 
-    it("defaults to shared if no locally cached visibility", ->
-      {controller} = createAnnotationDirective({
-        localStorage: {
-          setItem: ->
-          getItem: ->
-        }
-      })
-      assert(controller.isShared())
-    )
+  it("defaults to shared if no locally cached visibility", ->
+    {controller} = createAnnotationDirective({
+      localStorage: {
+        setItem: ->
+        getItem: ->
+      }
+    })
+    assert(controller.isShared())
+  )
+
+  it("doesn't overwrite permissions if the annotation already has them", ->
+    # The annotation will already have some permissions, before it's
+    # passed to AnnotationController.
+    annotation = {
+      permissions: {
+        read: ["foo"]
+        update: ["bar"]
+        delete: ["gar"]
+        admin: ["har"]
+      }
+    }
+    # Save the original permissions for asserting against later.
+    original_permissions = JSON.parse(JSON.stringify(annotation.permissions))
+
+    createAnnotationDirective({annotation: annotation})
+
+    assert.deepEqual(annotation.permissions, original_permissions)
   )
 
   describe("save", ->
@@ -715,6 +742,20 @@ describe("AnnotationController", ->
       controller.save().then(->
         assert annotation.$create.lastCall.thisValue.group == "test-id"
       )
+    )
+  )
+
+  describe("when the user signs in", ->
+    it("sets the permissions of unsaved annotations", ->
+      annotation = {group: "__world__"}
+      session = {state: {userid: null}}  # Not signed in.
+
+      {$rootScope} = createAnnotationDirective(
+        {annotation: annotation, session:session})
+
+      session.state.userid = "acct:fred@hypothes.is"  # The user signs in.
+      $rootScope.$digest()  # Trigger the $scope.$watch().
+      assert.deepEqual(annotation.permissions, {read: ["__world__"]})
     )
   )
 

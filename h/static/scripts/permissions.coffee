@@ -37,10 +37,15 @@ module.exports = ['session', (session) ->
   # Typical use: annotation.permissions = permissions.private()
   ###
   private: ->
-    read: [session.state.userid]
-    update: [session.state.userid]
-    delete: [session.state.userid]
-    admin: [session.state.userid]
+    if not session?.state?.userid
+      return null
+    else
+      return {
+        read: [session.state.userid]
+        update: [session.state.userid]
+        delete: [session.state.userid]
+        admin: [session.state.userid]
+      }
 
   ###*
   # @ngdoc method
@@ -52,6 +57,8 @@ module.exports = ['session', (session) ->
   # Typical use: annotation.permissions = permissions.shared(group)
   ###
   shared: (group) ->
+    if not session?.state?.userid
+      return null
     if group?
       group = 'group:' + group
     else

@@ -31,26 +31,38 @@ describe 'h:permissions', ->
     beforeEach inject (_permissions_) ->
       permissions = _permissions_
 
-    it 'private call fills all permissions with auth.user', ->
-      perms = permissions.private()
-      assert.equal(perms.read[0], 'acct:flash@gordon')
-      assert.equal(perms.update[0], 'acct:flash@gordon')
-      assert.equal(perms.delete[0], 'acct:flash@gordon')
-      assert.equal(perms.admin[0], 'acct:flash@gordon')
+    describe 'private()', ->
 
-    it 'public call fills the read property with group:__world__', ->
-      perms = permissions.shared()
-      assert.equal(perms.read[0], 'group:__world__')
-      assert.equal(perms.update[0], 'acct:flash@gordon')
-      assert.equal(perms.delete[0], 'acct:flash@gordon')
-      assert.equal(perms.admin[0], 'acct:flash@gordon')
+      it 'fills all permissions with auth.user', ->
+        perms = permissions.private()
+        assert.equal(perms.read[0], 'acct:flash@gordon')
+        assert.equal(perms.update[0], 'acct:flash@gordon')
+        assert.equal(perms.delete[0], 'acct:flash@gordon')
+        assert.equal(perms.admin[0], 'acct:flash@gordon')
 
-    it 'public call fills the read property with group:foo if passed "foo"', ->
-      perms = permissions.shared("foo")
-      assert.equal(perms.read[0], 'group:foo')
-      assert.equal(perms.update[0], 'acct:flash@gordon')
-      assert.equal(perms.delete[0], 'acct:flash@gordon')
-      assert.equal(perms.admin[0], 'acct:flash@gordon')
+      it 'returns null if session.state.userid is falsey', ->
+        delete fakeSession.state.userid
+        assert.equal(permissions.private(), null)
+
+    describe 'shared()', ->
+
+      it 'fills the read property with group:__world__', ->
+        perms = permissions.shared()
+        assert.equal(perms.read[0], 'group:__world__')
+        assert.equal(perms.update[0], 'acct:flash@gordon')
+        assert.equal(perms.delete[0], 'acct:flash@gordon')
+        assert.equal(perms.admin[0], 'acct:flash@gordon')
+
+      it 'fills the read property with group:foo if passed "foo"', ->
+        perms = permissions.shared("foo")
+        assert.equal(perms.read[0], 'group:foo')
+        assert.equal(perms.update[0], 'acct:flash@gordon')
+        assert.equal(perms.delete[0], 'acct:flash@gordon')
+        assert.equal(perms.admin[0], 'acct:flash@gordon')
+
+      it 'returns null if session.state.userid is falsey', ->
+        delete fakeSession.state.userid
+        assert.equal(permissions.shared("foo"), null)
 
     describe 'isPublic', ->
       it 'isPublic() true if the read permission has group:__world__ in it', ->

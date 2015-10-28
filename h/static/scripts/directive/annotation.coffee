@@ -61,19 +61,24 @@ AnnotationController = [
 
     model = $scope.annotationGet()
 
+    # Set model.permissions to the default permissions for new annotations,
+    # _if_ model.permissions isn't already set.
+    setDefaultPermissions = ->
+      if not model.permissions?.read
+        defaultLevel = localStorage.getItem(STORAGE_KEY);
+        if (defaultLevel != 'private') and (defaultLevel != 'shared')
+          defaultLevel = 'shared';
+        if defaultLevel == 'private'
+          model.permissions = permissions.private()
+        else
+          model.permissions = permissions.shared(model.group)
+
     # Set the group of new annotations.
     if not model.group
       model.group = groups.focused().id
 
     # Set the permissions of new annotations.
-    if not model.permissions
-      defaultLevel = localStorage.getItem(STORAGE_KEY);
-      if (defaultLevel != 'private') and (defaultLevel != 'shared')
-        defaultLevel = 'shared';
-      if defaultLevel == 'private'
-        model.permissions = permissions.private()
-      else
-        model.permissions = permissions.shared(model.group)
+    setDefaultPermissions()
 
     highlight = model.$highlight
     original = null
@@ -378,6 +383,8 @@ AnnotationController = [
           highlight = false # Prevents double highlight creation.
         else
           drafts.add model, => this.revert()
+
+      setDefaultPermissions()
 
       updateTimestamp(model is old)  # repeat on first run
       this.render()
