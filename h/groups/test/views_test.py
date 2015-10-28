@@ -365,28 +365,6 @@ def test_read_calls_search_correctly(Group, search, renderers):
 
 
 @read_fixtures
-def test_read_calls_normalize(Group, search, renderers, uri):
-    """It shold call normalize() with each of the URIs from search()."""
-    request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
-    renderers.render_to_response.return_value = mock.sentinel.response
-    search.search.return_value = {
-        "rows": [
-            mock.Mock(uri="uri_1"),
-            mock.Mock(uri="uri_2"),
-            mock.Mock(uri="uri_3"),
-        ]
-    }
-
-    views.read(request)
-
-    assert uri.normalize.call_args_list == [
-        mock.call("uri_1"), mock.call("uri_2"), mock.call("uri_3")]
-
-
-@read_fixtures
 def test_read_returns_document_links(Group, search, renderers, uri):
     """It should return the list of document links."""
     request = mock.Mock(matchdict=_matchdict())
