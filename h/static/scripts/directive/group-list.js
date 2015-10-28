@@ -1,7 +1,9 @@
 'use strict';
 
+var events = require('../events');
+
 // @ngInject
-function GroupListController($scope, $window) {
+function GroupListController($scope, $window, groups) {
   $scope.expandedGroupId = undefined;
 
   // show the share link for the specified group or clear it if
@@ -19,13 +21,20 @@ function GroupListController($scope, $window) {
   };
 
   $scope.leaveGroup = function (groupId) {
-    var groupName = $scope.groups.get(groupId).name;
+    var groupName = groups.get(groupId).name;
     var message = 'Are you sure you want to leave the group "' +
       groupName + '"?';
     if ($window.confirm(message)) {
-      $scope.groups.leave(groupId);
+      groups.leave(groupId);
     }
   }
+
+  $scope.focusGroup = function (groupId) {
+    groups.focus(groupId);
+  }
+
+  $scope.$on(events.GROUPS_CHANGED, $scope.$apply.bind($scope));
+  $scope.$on(events.GROUP_FOCUSED, $scope.$apply.bind($scope));
 }
 
 /**

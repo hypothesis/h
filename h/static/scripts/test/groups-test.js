@@ -40,7 +40,7 @@ describe('groups', function() {
       $broadcast: sandbox.stub(),
 
       $on: function(event, callback) {
-        if (event === events.SESSION_CHANGED) {
+        if (event === events.GROUPS_CHANGED) {
           this.eventCallbacks.push(callback);
         }
       }

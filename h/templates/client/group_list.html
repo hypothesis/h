@@ -26,7 +26,7 @@
     <li class="dropdown-menu__row dropdown-menu__row--unpadded "
         ng-repeat="group in groups.all()">
       <div ng-class="{'group-item': true, selected: group.id == groups.focused().id}"
-           ng-click="groups.focus(group.id)">
+           ng-click="focusGroup(group.id)">
         <!-- the group icon !-->
         <div class="group-icon-container" ng-switch on="group.public">
           <i class="h-icon-public" ng-switch-when="true"></i>

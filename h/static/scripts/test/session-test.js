@@ -158,10 +158,11 @@ describe('h:session', function () {
   });
 
   describe('#update()', function () {
-    it('broadcasts an event when the session is updated', function () {
+    it('broadcasts SESSION_CHANGED when the session changes', function () {
       var sessionChangeCallback = sinon.stub();
 
-      // the initial load should not trigger a SESSION_CHANGED event
+      // the initial load should trigger a SESSION_CHANGED event
+      // with initialLoad set
       $rootScope.$on(events.SESSION_CHANGED, sessionChangeCallback);
       session.update({
         groups: [{
@@ -169,16 +170,41 @@ describe('h:session', function () {
         }],
         csrf: 'dummytoken',
       });
+      assert.calledWith(sessionChangeCallback, sinon.match({}),
+        {initialLoad: true});
 
       // subsequent loads should trigger a SESSION_CHANGED event
-      assert.isFalse(sessionChangeCallback.called);
+      sessionChangeCallback.reset();
       session.update({
         groups: [{
           id: 'groupid2'
         }],
         csrf: 'dummytoken'
       });
-      assert.calledOnce(sessionChangeCallback);
+      assert.calledWith(sessionChangeCallback, sinon.match({}),
+        {initialLoad: false});
+    });
+
+    it('broadcasts GROUPS_CHANGED when the groups change', function () {
+      var groupChangeCallback = sinon.stub();
+      $rootScope.$on(events.GROUPS_CHANGED, groupChangeCallback);
+      session.update({
+        groups: [{
+          id: 'groupid'
+        }],
+        csrf: 'dummytoken'
+      });
+      assert.calledOnce(groupChangeCallback);
+    });
+
+    it('broadcasts USER_CHANGED when the user changes', function () {
+      var userChangeCallback = sinon.stub();
+      $rootScope.$on(events.USER_CHANGED, userChangeCallback);
+      session.update({
+        userid: 'fred',
+        csrf: 'dummytoken'
+      });
+      assert.calledOnce(userChangeCallback);
     });
   });
 });
