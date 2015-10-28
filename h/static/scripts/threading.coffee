@@ -1,7 +1,20 @@
 angular = require('angular')
 mail = require('./vendor/jwz')
 
-
+# The threading service provides the model for the currently loaded
+# set of annotations, structured as a tree of annotations and replies.
+#
+# The service listens for events when annotations are loaded, unloaded,
+# created or deleted and updates the tree model in response.
+#
+# The conversion of a flat list of incoming messages into a tree structure
+# with replies nested under their parents
+# uses an implementation of the `jwz` message threading algorithm
+# (see https://www.jwz.org/doc/threading.html and the JS port
+#  at https://github.com/maxogden/conversationThreading-js).
+#
+# The 'Threading' service "inherits" from 'mail.messageThread'
+#
 module.exports = class Threading
   root: null
 
