@@ -42,7 +42,7 @@ describe('store', function () {
            update: {},
          },
          search: {
-           url: 'http://0.0.0.0:5000/api/search',
+           url: 'http://example.com/api/search',
          },
       },
     });
@@ -81,6 +81,15 @@ describe('store', function () {
       allowed: 123
     })
     .respond(function () { return {id: 'test'}; });
+    $httpBackend.flush();
+  });
+
+  // Our backend service interprets semicolons as query param delimiters, so we
+  // must ensure to encode them in the query string.
+  it('encodes semicolons in query parameters', function () {
+    store.SearchResource.get({'uri': 'http://example.com/?foo=bar;baz=qux'});
+    $httpBackend.expectGET('http://example.com/api/search?uri=http%3A%2F%2Fexample.com%2F%3Ffoo%3Dbar%3Bbaz%3Dqux')
+    .respond(function () { return [200, {}, {}]; });
     $httpBackend.flush();
   });
 });
