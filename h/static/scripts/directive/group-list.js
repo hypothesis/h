@@ -33,16 +33,8 @@ function GroupListController($scope, $window, groups) {
     groups.focus(groupId);
   }
 
-  $scope.allGroups = groups.all();
-  $scope.$on(events.GROUPS_CHANGED, function () {
-    $scope.focusedGroup = groups.focused();
-    $scope.allGroups = groups.all();
-  });
-
-  $scope.focusedGroup = groups.focused();
-  $scope.$on(events.GROUP_FOCUSED, function () {
-    $scope.focusedGroup = groups.focused();
-  });
+  $scope.$on(events.GROUPS_CHANGED, $scope.$apply.bind($scope));
+  $scope.$on(events.GROUP_FOCUSED, $scope.$apply.bind($scope));
 }
 
 /**
@@ -56,6 +48,8 @@ function groupList(groups, $window) {
   return {
     controller: GroupListController,
     link: function ($scope, elem, attrs) {
+      $scope.groups = groups;
+
       $scope.createNewGroup = function() {
         $window.open('/groups/new', '_blank');
       }

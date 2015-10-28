@@ -11,6 +11,7 @@ describe('GroupListController', function () {
   beforeEach(function () {
     $scope = {
       $on: sinon.stub(),
+      $apply: sinon.stub(),
     };
     var fakeWindow = {};
     var fakeGroups = {

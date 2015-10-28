@@ -1,8 +1,8 @@
 <span ng-if="auth.status === 'signed-out'"
-      ng-switch on="focusedGroup.public">
+      ng-switch on="groups.focused().public">
   <i class="group-list-label__icon h-icon-public" ng-switch-when="true"></i><!-- nospace
   !--><i class="group-list-label__icon h-icon-group" ng-switch-default></i>
-  <span class="group-list-label__label">{{focusedGroup.name}}</span>
+  <span class="group-list-label__label">{{groups.focused().name}}</span>
 </span>
 
 <div class="pull-right"
@@ -13,19 +13,19 @@
         dropdown-toggle
         data-toggle="dropdown"
         role="button"
-        ng-switch on="focusedGroup.public"
+        ng-switch on="groups.focused().public"
         ng-click="toggleShareLink(undefined)"
         title="Change the selected group">
     <i class="group-list-label__icon h-icon-public" ng-switch-when="true"></i><!-- nospace
     !--><i class="group-list-label__icon h-icon-group" ng-switch-default></i>
-    <span class="group-list-label__label">{{focusedGroup.name}}</span><!-- nospace
+    <span class="group-list-label__label">{{groups.focused().name}}</span><!-- nospace
     !--><i class="h-icon-arrow-drop-down"></i>
   </span>
   <div class="dropdown-menu__top-arrow"></div>
   <ul class="dropdown-menu pull-none" role="menu">
     <li class="dropdown-menu__row dropdown-menu__row--unpadded "
-        ng-repeat="group in allGroups">
-      <div ng-class="{'group-item': true, selected: group.id == focusedGroup.id}"
+        ng-repeat="group in groups.all()">
+      <div ng-class="{'group-item': true, selected: group.id == groups.focused().id}"
            ng-click="focusGroup(group.id)">
         <!-- the group icon !-->
         <div class="group-icon-container" ng-switch on="group.public">
