@@ -158,7 +158,7 @@ describe('h:session', function () {
   });
 
   describe('#update()', function () {
-    it('broadcasts SESION_CHANGED when the session changes', function () {
+    it('broadcasts SESSION_CHANGED when the session changes', function () {
       var sessionChangeCallback = sinon.stub();
 
       // the initial load should trigger a SESSION_CHANGED event
