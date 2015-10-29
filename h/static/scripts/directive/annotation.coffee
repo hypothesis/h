@@ -157,6 +157,14 @@ AnnotationController = [
       @annotation.text?.length > 0 || @annotation.tags?.length > 0
 
     ###*
+    # @returns {boolean} True if this annotation has quotes
+    ###
+    this.hasQuotes = ->
+      @annotation.target.some (target) ->
+        target.selector && target.selector.some (selector) ->
+          selector.type == 'TextQuoteSelector'
+
+    ###*
     # @ngdoc method
     # @name annotation.AnnotationController#authorize
     # @param {string} action The action to authorize.
@@ -455,6 +463,8 @@ module.exports = [
     require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
     scope:
       annotationGet: '&annotation'
+      # indicates whether this is the last reply in a thread
+      isLastReply: '='
       replyCount: '@annotationReplyCount'
       replyCountClick: '&annotationReplyCountClick'
       showReplyCount: '@annotationShowReplyCount'

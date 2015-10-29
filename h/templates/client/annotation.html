@@ -5,37 +5,39 @@
 <div ng-if="vm.annotation.user">
   <header class="annotation-header">
     <!-- Deletion notice -->
-    <span ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</span>
+    <div ng-if="!vm.editing && vm.annotation.deleted">Annotation deleted.</div>
 
     <!-- User -->
     <span ng-if="vm.annotation.user">
-      <a class="annotation-user"
-         target="_blank"
-         ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
-         >{{vm.annotation.user | persona}}</a>
-      <span class="small" ng-if="vm.group() && vm.group().url">
-        to
-        <a target="_blank" href="{{vm.group().url}}">
-          <i class="h-icon-group" title="{{vm.group.name}}"></i>
-          {{vm.group().name}}
+      <span>
+        <a class="annotation-user"
+           target="_blank"
+           ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
+           >{{vm.annotation.user | persona}}</a>
+      </span>
+      <br>
+      <span class="annotation-header__share-info">
+        <a class="annotation-header__group"
+           target="_blank" ng-if="vm.group() && vm.group().url" href="{{vm.group().url}}">
+          <i class="h-icon-group"></i><span class="annotation-header__group-name">{{vm.group().name}}</span>
         </a>
-      </span>
-      <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
-      <span ng-show="vm.isPrivate()"
-            title="This annotation is visible only to you.">
-        <i class="h-icon-lock"></i> Only Me
-      </span>
-
-      <span class="annotation-citation"
-            ng-bind-html="vm.document | documentTitle"
-            ng-if="!vm.isSidebar">
-      </span>
-      <span class="annotation-citation-domain"
-            ng-bind-html="vm.document | documentDomain"
-            ng-if="!vm.isSidebar">
+        <span ng-show="vm.isPrivate()"
+              title="This annotation is visible only to you.">
+          <i class="h-icon-lock"></i><span class="annotation-header__group-name" ng-show="!vm.group().url">Only me</span>
+        </span>
+        <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
+        <span class="annotation-citation"
+              ng-bind-html="vm.document | documentTitle"
+              ng-if="!vm.isSidebar">
+        </span>
+        <span class="annotation-citation-domain"
+              ng-bind-html="vm.document | documentDomain"
+              ng-if="!vm.isSidebar">
+        </span>
       </span>
     </span>
 
+    <span class="u-flex-spacer"></span>
 
     <span class="annotation-collapsed-replies">
       <a class="reply-count small" href=""
@@ -54,8 +56,9 @@
   </header>
 
   <!-- Excerpts -->
-  <section class="annotation-section"
-           ng-repeat="target in vm.annotation.target track by $index">
+  <section class="annotation-quote-list"
+           ng-repeat="target in vm.annotation.target track by $index"
+           ng-if="vm.hasQuotes()">
     <excerpt enabled="feature('truncate_annotations')">
       <blockquote class="annotation-quote"
                   ng-bind-html="selector.exact"

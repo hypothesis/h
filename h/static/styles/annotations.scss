@@ -1,7 +1,21 @@
 @import "mixins/icons";
 
-//ANNOTATION////////////////////////////////
-//This is for everything that is formatted as an annotation.
+//ANNOTATION CARD////////////////////////////////
+
+// the padding at the left-edge of the annotation card
+// and its container
+$annotation-card-left-padding: 10px;
+
+.annotation-card {
+  background-color: white;
+  border-radius: 2px;
+  border: 1px solid $color-mercury;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 12px;
+  padding-bottom: 15px;
+}
+
 .annotation {
   font-family: $sans-font-family;
   font-weight: 300;
@@ -18,26 +32,53 @@
 }
 
 .annotation-timestamp {
-  float: right;
-  font-size: .8em;
-  line-height: 1;
-  margin-top: (1 / (1 - .8)) * .1em;  // scale up .1em offset to align baseline
-  color: $text-color;
+  font-size: $body1-font-size;
+  color: $color-gray;
   &:hover { color: $link-color-hover; }
   &:focus { outline: 0; }
 }
 
-.annotation-section,
+.annotation-quote-list,
 .annotation-header,
 .annotation-footer {
   @include pie-clearfix;
-  margin: .8em 0;
 }
 
-.annotation-header { margin-top: 0 }
-.annotation-footer { margin-bottom: 0 }
+.annotation-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-bottom: 5px;
+}
 
-.annotation-section {
+.annotation-header__share-info {
+  color: $color-gray;
+}
+
+.annotation-header__group {
+  color: $color-gray;
+  font-size: $body1-font-size;
+}
+
+.annotation-header__group-name {
+  display: inline-block;
+  margin-left: 5px;
+}
+
+// the footer at the bottom of an annotation displaying
+// the annotation actions and reply counts
+.annotation-footer {
+  margin-bottom: 0;
+}
+
+.u-flex-spacer {
+  flex-grow: 1;
+}
+
+.annotation-quote-list {
+  margin-top: 14px;
+  margin-bottom: 14px;
+
   .excerpt { max-height: 4.8em; }
   .excerpt-control a {
     font-style: italic;
@@ -61,7 +102,7 @@
 .annotation-user {
   color: $text-color;
   font-weight: bold;
-  font-size: 1.1em;
+  font-size: $body1-font-size;
   &:hover {
     color: $link-color-hover;
     cursor: pointer;
@@ -101,7 +142,7 @@
 
 .annotation-citation-domain {
   color: $gray-light;
-  font-size: .923em;
+  font-size: $body1-font-size;
 }
 
 .annotation-license {
