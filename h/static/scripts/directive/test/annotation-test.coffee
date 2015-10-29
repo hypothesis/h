@@ -528,6 +528,61 @@ describe 'annotation', ->
 
       assert fakeFlash.error.notCalled
 
+  describe "drafts", ->
+
+    it "creates a draft when editing an annotation", ->
+      createDirective()
+      controller.edit()
+      assert.calledWith(fakeDrafts.update, annotation, {
+        text: annotation.text,
+        tags: annotation.tags,
+      })
+
+    it "starts editing immediately if there is a draft", ->
+      fakeDrafts.get.returns({
+        tags: [{text: 'unsaved'}]
+        text: 'unsaved-text'
+      })
+      createDirective()
+      assert.isTrue(controller.editing)
+
+    it "uses the text and tags from the draft if present", ->
+      fakeDrafts.get.returns({
+        tags: ['unsaved-tag']
+        text: 'unsaved-text'
+      })
+      createDirective()
+      assert.deepEqual(controller.annotation.tags, [{text: 'unsaved-tag'}])
+      assert.equal(controller.annotation.text, 'unsaved-text')
+
+    it "removes the draft when changes are discarded", ->
+      createDirective()
+      controller.edit()
+      controller.revert()
+      assert.calledWith(fakeDrafts.remove, annotation)
+
+  describe "when the focused group changes", ->
+
+    it "updates the current draft", ->
+      createDirective()
+      controller.edit()
+      controller.annotation.text = 'unsaved-text'
+      controller.annotation.tags = []
+      fakeDrafts.update = sinon.stub()
+      $rootScope.$broadcast(events.GROUP_FOCUSED)
+      assert.calledWith(fakeDrafts.update, annotation, {
+        text: 'unsaved-text',
+        tags: []
+      })
+
+    it "moves new annotations to the focused group", ->
+      annotation.id = null
+      createDirective()
+      fakeGroups.focused = sinon.stub().returns({id: 'new-group'})
+      $rootScope.$broadcast(events.GROUP_FOCUSED)
+      assert.equal(annotation.group, 'new-group')
+
+
 describe("AnnotationController", ->
 
   before(->
