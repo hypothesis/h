@@ -350,8 +350,8 @@ def test_read_if_already_a_member_returns_response(Group, renderers):
 
 
 @read_fixtures
-def test_read_calls_search(Group, search, renderers):
-    """It should call search() to get the annotations."""
+def test_read_calls_search_correctly(Group, search, renderers):
+    """It should call search() with the right args to get the annotations."""
     request = _mock_request(matchdict=_matchdict())
     g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
@@ -362,28 +362,6 @@ def test_read_calls_search(Group, search, renderers):
 
     search.search.assert_called_once_with(
             request, private=False, params={"group": g.pubid, "limit": 1000})
-
-
-@read_fixtures
-def test_read_calls_normalize(Group, search, renderers, uri):
-    """It shold call normalize() with each of the URIs from search()."""
-    request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
-    renderers.render_to_response.return_value = mock.sentinel.response
-    search.search.return_value = {
-        "rows": [
-            mock.Mock(uri="uri_1"),
-            mock.Mock(uri="uri_2"),
-            mock.Mock(uri="uri_3"),
-        ]
-    }
-
-    views.read(request)
-
-    assert uri.normalize.call_args_list == [
-        mock.call("uri_1"), mock.call("uri_2"), mock.call("uri_3")]
 
 
 @read_fixtures
@@ -432,7 +410,7 @@ def test_read_duplicate_documents_are_removed(Group, search, renderers, uri):
     search.search.return_value = {"rows": annotations}
 
     def normalize(uri):
-        # All three annotations' URIs normalize to the same URI.
+        # All annotations' URIs normalize to the same URI.
         return "normalized"
     uri.normalize.side_effect = normalize
 
