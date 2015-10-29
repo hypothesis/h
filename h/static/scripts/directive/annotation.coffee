@@ -51,6 +51,7 @@ AnnotationController = [
    drafts,   flash,   permissions,   tags,   time,
    annotationUI,   annotationMapper,   session,   groups) ->
 
+    # @annotation is the view model, containing the unsaved annotation changes
     @annotation = {}
     @action = 'view'
     @document = null
@@ -59,6 +60,8 @@ AnnotationController = [
     @isSidebar = false
     @timestamp = null
 
+    # 'model' is the domain model, containing the currently saved version
+    # of the annotation
     model = $scope.annotationGet()
 
     model.user ?= session.state.userid
@@ -196,7 +199,8 @@ AnnotationController = [
     # @description Switches the view to an editor.
     ###
     this.edit = ->
-      drafts.add model, => this.revert()
+      if !drafts.get(model)
+        updateDraft(model)
       @action = if model.id? then 'edit' else 'create'
       @editing = true
       @preview = 'no'
@@ -230,6 +234,16 @@ AnnotationController = [
         angular.extend(
           domainModel, viewModel,
           {tags: (tag.text for tag in viewModel.tags)})
+
+    # Create or update the existing draft for this annotation using
+    # the text and tags from the domain model in 'draft'
+    updateDraft = (draft) ->
+      # drafts only preserve the text and tags for the
+      # annotation, changes to other properties are not preserved
+      drafts.update(model, {
+        text: draft.text
+        tags: draft.tags
+      })
 
     ###*
     # @ngdoc method
@@ -302,7 +316,13 @@ AnnotationController = [
     this.render = ->
       # Extend the view model with a copy of the domain model.
       # Note that copy is used so that deep properties aren't shared.
-      @annotation = angular.extend {}, angular.copy model
+      @annotation = angular.extend {}, angular.copy(model)
+
+      # if we have unsaved changes to this annotation, apply them
+      # to the view model
+      draft = drafts.get(model)
+      if draft
+        angular.extend @annotation, angular.copy(draft)
 
       # Set the URI
       @annotationURI = new URL("/a/#{@annotation.id}", this.baseURI).href
@@ -336,7 +356,7 @@ AnnotationController = [
         @document.title = @document.title[0..29] + '…'
 
       # Form the tags for ngTagsInput.
-      @annotation.tags = ({text} for text in (model.tags or []))
+      @annotation.tags = ({text} for text in (@annotation.tags or []))
 
     updateTimestamp = (repeat=false) =>
       @timestamp = time.toFuzzyString model.updated
@@ -351,10 +371,8 @@ AnnotationController = [
     # Export the baseURI for the share link
     this.baseURI = $document.prop('baseURI')
 
-    # Discard the draft if the scope goes away.
     $scope.$on '$destroy', ->
       updateTimestamp = angular.noop
-      drafts.remove model
 
     # watch for changes to the domain model and recreate the view model
     # when it changes
@@ -372,7 +390,7 @@ AnnotationController = [
             $rootScope.$emit('annotationCreated', model)
           highlight = false # Prevents double highlight creation.
         else
-          drafts.add model, => this.revert()
+          updateDraft(model)
 
       updateTimestamp(model is old)  # repeat on first run
       this.render()
@@ -388,8 +406,27 @@ AnnotationController = [
       model.permissions = model.permissions or permissions.default(model.group)
     )
 
-    # Start editing brand new annotations immediately
-    unless model.id? or (this.isHighlight() and highlight) then this.edit()
+    # if this is a new annotation or we have unsaved changes,
+    # then start editing immediately
+    isNewAnnotation = !(model.id || (this.isHighlight() && highlight));
+    if isNewAnnotation || drafts.get(model)
+      this.edit()
+
+    # when the current group changes, persist any unsaved changes using
+    # the drafts service. They will be restored when this annotation is
+    # next loaded.
+    $scope.$on events.GROUP_FOCUSED, ->
+      if !vm.editing
+        return
+
+      draftDomainModel = {}
+      updateDomainModel(draftDomainModel, vm.annotation)
+      updateDraft(draftDomainModel)
+
+      # move any new annotations to the currently focused group when
+      # switching groups. See GH #2689 for context
+      if !model.id
+        model.group = groups.focused().id
 
     this
 ]

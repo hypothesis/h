@@ -57,8 +57,9 @@ describe 'annotation', ->
       deleteAnnotation: sandbox.stub()
     fakeAnnotationUI = {}
     fakeDrafts = {
-      add: sandbox.stub()
+      update: sandbox.stub()
       remove: sandbox.stub()
+      get: sandbox.stub()
     }
     fakeFeatures = {
       flagEnabled: sandbox.stub().returns(true)
@@ -568,8 +569,9 @@ describe("AnnotationController", ->
       momentFilter: momentFilter or {}
       urlencodeFilter: urlencodeFilter or {}
       drafts: drafts or {
-        add: ->
+        update: ->
         remove: ->
+        get: ->
       }
       features: features or {
         flagEnabled: -> true

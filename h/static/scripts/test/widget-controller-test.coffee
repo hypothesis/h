@@ -77,6 +77,10 @@ describe 'WidgetController', ->
       focused: -> {id: 'foo'}
     }
 
+    fakeDrafts = {
+      unsaved: []
+    }
+
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'crossframe', fakeCrossFrame
