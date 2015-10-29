@@ -71,6 +71,11 @@ from h.api import models
 URL_SCHEMES = set(['http', 'https'])
 
 BLACKLISTED_QUERY_PARAMS = set([
+    # Google AdWords tracking identifier. Reference:
+    #
+    #    https://support.google.com/analytics/answer/2938246?hl=en
+    #
+    'gclid',
     # Google Analytics campaigns. Reference:
     #
     #     https://support.google.com/analytics/answer/1033867?hl=en
