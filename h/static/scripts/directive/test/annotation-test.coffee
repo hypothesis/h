@@ -561,6 +561,20 @@ describe 'annotation', ->
       controller.revert()
       assert.calledWith(fakeDrafts.remove, annotation)
 
+    it "removes the draft when changes are saved", ->
+      annotation.$update = sandbox.stub().returns(Promise.resolve())
+      createDirective()
+      controller.edit()
+      controller.save()
+
+      # the controller currently removes the draft whenever an annotation
+      # update is committed on the server. This can happen either when saving
+      # locally or when an update is committed in another instance of H
+      # which is then pushed to the current instance
+      annotation.updated = (new Date()).toISOString()
+      $scope.$digest()
+      assert.calledWith(fakeDrafts.remove, annotation)
+
   describe "when the focused group changes", ->
 
     it "updates the current draft", ->
