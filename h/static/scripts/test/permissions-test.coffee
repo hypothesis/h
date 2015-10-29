@@ -3,6 +3,7 @@
 describe 'h:permissions', ->
   sandbox = null
   fakeSession = null
+  fakeLocalStorage = null
 
   before ->
     angular.module('h', [])
@@ -17,8 +18,12 @@ describe 'h:permissions', ->
         userid: 'acct:flash@gordon'
       }
     }
+    fakeLocalStorage = {
+      getItem: -> undefined
+    }
 
     $provide.value 'session', fakeSession
+    $provide.value 'localStorage', fakeLocalStorage
     return
 
   afterEach ->
@@ -63,6 +68,38 @@ describe 'h:permissions', ->
       it 'returns null if session.state.userid is falsey', ->
         delete fakeSession.state.userid
         assert.equal(permissions.shared("foo"), null)
+
+    describe 'default()', ->
+
+      it 'returns shared permissions if localStorage contains "shared"', ->
+        fakeLocalStorage.getItem = -> 'shared'
+        assert(permissions.isShared(permissions.default()))
+
+      it 'returns private permissions if localStorage contains "private"', ->
+        fakeLocalStorage.getItem = -> 'private'
+        assert(permissions.isPrivate(
+          permissions.default(), fakeSession.state.userid))
+
+      it 'returns shared permissions if localStorage is empty', ->
+        fakeLocalStorage.getItem = -> undefined
+        assert(permissions.isShared(permissions.default()))
+
+    describe 'setDefault()', ->
+
+      it 'sets the default permissions that default() will return', ->
+        stored = {}
+        fakeLocalStorage.setItem = (key, value) ->
+          stored[key] = value
+        fakeLocalStorage.getItem = (key) ->
+          return stored[key]
+
+        permissions.setDefault('private')
+        assert(permissions.isPrivate(
+          permissions.default(), fakeSession.state.userid))
+
+        permissions.setDefault('shared')
+        assert(permissions.isShared(
+          permissions.default('foo'), 'foo'))
 
     describe 'isPublic', ->
       it 'isPublic() true if the read permission has group:__world__ in it', ->

@@ -1,7 +1,5 @@
 ### global -validate ###
 
-STORAGE_KEY = 'hypothesis.privacy'
-
 # Validate an annotation.
 # Annotations must be attributed to a user or marked as deleted.
 # A public annotation is valid only if they have a body.
@@ -46,10 +44,10 @@ errorMessage = (reason) ->
 AnnotationController = [
   '$scope', '$timeout', '$q', '$rootScope', '$document',
   'drafts', 'flash', 'permissions', 'tags', 'time',
-  'annotationUI', 'annotationMapper', 'session', 'groups', 'localStorage'
+  'annotationUI', 'annotationMapper', 'session', 'groups',
   ($scope,   $timeout,   $q,   $rootScope,   $document,
    drafts,   flash,   permissions,   tags,   time,
-   annotationUI,   annotationMapper,   session,   groups,   localStorage) ->
+   annotationUI,   annotationMapper,   session,   groups) ->
 
     @annotation = {}
     @action = 'view'
@@ -61,24 +59,12 @@ AnnotationController = [
 
     model = $scope.annotationGet()
 
-    # Set model.permissions to the default permissions for new annotations,
-    # _if_ model.permissions isn't already set.
-    setDefaultPermissions = ->
-      if not model.permissions?.read
-        defaultLevel = localStorage.getItem(STORAGE_KEY);
-        if (defaultLevel != 'private') and (defaultLevel != 'shared')
-          defaultLevel = 'shared';
-        if defaultLevel == 'private'
-          model.permissions = permissions.private()
-        else
-          model.permissions = permissions.shared(model.group)
-
     # Set the group of new annotations.
     if not model.group
       model.group = groups.focused().id
 
     # Set the permissions of new annotations.
-    setDefaultPermissions()
+    model.permissions = model.permissions or permissions.default(model.group)
 
     highlight = model.$highlight
     original = null
@@ -145,7 +131,7 @@ AnnotationController = [
       # next time they create an annotation.
       # But _don't_ cache it when they change the privacy level of a reply.
       if not model.references  # If the annotation is not a reply.
-        localStorage.setItem(STORAGE_KEY, privacy);
+        permissions.setDefault(privacy)
 
       if privacy == 'private'
         @annotation.permissions = permissions.private()
@@ -384,8 +370,6 @@ AnnotationController = [
         else
           drafts.add model, => this.revert()
 
-      setDefaultPermissions()
-
       updateTimestamp(model is old)  # repeat on first run
       this.render()
     , true
@@ -393,8 +377,14 @@ AnnotationController = [
     # Watch the current user
     # TODO: fire events instead since watchers are not free and auth is rare
     $scope.$watch (-> session.state.userid), (userid) ->
-      model.permissions ?= {}
       model.user ?= userid
+
+      # Set model.permissions on sign in, if it isn't already set.
+      # This is because you can create annotations when signed out and they
+      # will have model.permissions = null, then when you sign in we set the
+      # permissions correctly here.
+      model.permissions = model.permissions or permissions.default(model.group)
+
 
     # Start editing brand new annotations immediately
     unless model.id? or (this.isHighlight() and highlight) then this.edit()

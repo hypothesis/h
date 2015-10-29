@@ -1,3 +1,5 @@
+STORAGE_KEY = 'hypothesis.privacy'
+
 ###*
 # @ngdoc service
 # @name  Permissions
@@ -6,7 +8,7 @@
 # This service can set default permissions to annotations properly and
 # offers some utility functions regarding those.
 ###
-module.exports = ['session', (session) ->
+module.exports = ['session', 'localStorage', (session, localStorage) ->
   ALL_PERMISSIONS = {}
   GROUP_WORLD = 'group:__world__'
   ADMIN_PARTY = [{
@@ -37,7 +39,7 @@ module.exports = ['session', (session) ->
   # Typical use: annotation.permissions = permissions.private()
   ###
   private: ->
-    if not session?.state?.userid
+    if not session.state.userid
       return null
     else
       return {
@@ -57,7 +59,7 @@ module.exports = ['session', (session) ->
   # Typical use: annotation.permissions = permissions.shared(group)
   ###
   shared: (group) ->
-    if not session?.state?.userid
+    if not session.state.userid
       return null
     if group?
       group = 'group:' + group
@@ -69,6 +71,25 @@ module.exports = ['session', (session) ->
       delete: [session.state.userid]
       admin: [session.state.userid]
     }
+
+  # Return the initial permissions for a new annotation in the given group.
+  default: (group) ->
+    defaultLevel = localStorage.getItem(STORAGE_KEY);
+    if (defaultLevel != 'private') and (defaultLevel != 'shared')
+      defaultLevel = 'shared';
+    if defaultLevel == 'private'
+      return this.private()
+    else
+      return this.shared(group)
+
+  # Set the default initial permissions for new annotations (that will be
+  # returned by default() above) to "private" or "shared" permissions.
+  #
+  # @param {string} private_or_shared "private" to make default() return the
+  #   necessary permissions for private annotations, "shared" to make it
+  #   return those for shared annotations.
+  setDefault: (private_or_shared) ->
+    localStorage.setItem(STORAGE_KEY, private_or_shared);
 
   ###*
   # @ngdoc method

@@ -27,7 +27,6 @@ describe 'annotation', ->
   fakeTags = null
   fakeTime = null
   fakeUrlEncodeFilter = null
-  fakeLocalStorage = null
   sandbox = null
 
   createDirective = ->
@@ -71,6 +70,8 @@ describe 'annotation', ->
       permits: sandbox.stub().returns(true)
       shared: sandbox.stub().returns({read: ['everybody']})
       private: sandbox.stub().returns({read: ['justme']})
+      default: sandbox.stub().returns({read: ['default']})
+      setDefault: sandbox.stub()
     }
     fakePersonaFilter = sandbox.stub().returnsArg(0)
     fakeDocumentTitleFilter = (arg) -> ''
@@ -89,10 +90,6 @@ describe 'annotation', ->
       nextFuzzyUpdate: sandbox.stub().returns(30)
     }
     fakeUrlEncodeFilter = (v) -> encodeURIComponent(v)
-    fakeLocalStorage = {
-      setItem: sandbox.stub()
-      getItem: sandbox.stub()
-    }
 
     fakeGroups = {
       focused: -> {}
@@ -114,7 +111,6 @@ describe 'annotation', ->
     $provide.value 'tags', fakeTags
     $provide.value 'time', fakeTime
     $provide.value 'urlencodeFilter', fakeUrlEncodeFilter
-    $provide.value 'localStorage', fakeLocalStorage
     $provide.value 'groups', fakeGroups
     return
 
@@ -240,8 +236,7 @@ describe 'annotation', ->
       controller.edit();
       controller.setPrivacy('shared')
       controller.save().then(->
-        assert(fakeLocalStorage.setItem.calledWithExactly(
-          'hypothesis.privacy', 'shared'))
+        assert(fakePermissions.setDefault.calledWithExactly('shared'))
       )
 
     it 'saves the "private" visibility level to localStorage', ->
@@ -249,8 +244,7 @@ describe 'annotation', ->
       controller.edit();
       controller.setPrivacy('private')
       controller.save().then(->
-        assert(fakeLocalStorage.setItem.calledWithExactly(
-          'hypothesis.privacy', 'private'))
+        assert(fakePermissions.setDefault.calledWithExactly('private'))
       )
 
     it "doesn't save the visibility if the annotation is a reply", ->
@@ -259,7 +253,7 @@ describe 'annotation', ->
       controller.edit();
       controller.setPrivacy('private')
       controller.save().then(->
-        assert(not fakeLocalStorage.setItem.called)
+        assert(not fakePermissions.setDefault.called)
       )
 
   describe '#hasContent', ->
@@ -587,16 +581,10 @@ describe("AnnotationController", ->
         isPrivate: (permissions, user) ->
           return user in permissions.read
         permits: -> true
-        shared: (group) ->
-          if not session?.state?.userid
-            return null
-          else
-            {"read": [group]}
-        private: ->
-          if not session?.state?.userid
-            return null
-          else
-            {"read": [session.state.userid]}
+        shared: -> {}
+        private: -> {}
+        default: -> {}
+        setDefault: ->
       }
       session: session
       tags: tags or {store: ->}
@@ -657,42 +645,22 @@ describe("AnnotationController", ->
     )
   )
 
-  it("sets the permissions of new annotations from local storage", ->
-    {controller} = createAnnotationDirective({
-      localStorage: {
-        setItem: ->
-        getItem: (key) ->
-          if key == 'hypothesis.privacy'
-            return 'shared'
-          else
-            assert(false, "Wrong key requested from localStorage")
-      }
-    })
-    assert(controller.isShared())
-  )
+  it("sets the permissions of new annotations", ->
+    # This is a new annotation, doesn't have any permissions yet.
+    annotation = {group: "test-group"}
+    permissions = {
+      default: sinon.stub().returns("default permissions")
+      isShared: ->
+      isPrivate: ->
+    }
 
-  it("sets the permissions of new annotations from local storage to private", ->
-    {controller} = createAnnotationDirective({
-      localStorage: {
-        setItem: ->
-        getItem: (key) ->
-          if key == 'hypothesis.privacy'
-            return 'private'
-          else
-            assert(false, "Wrong key requested from localStorage")
-      }
-    })
-    assert(controller.isPrivate())
-  )
+    createAnnotationDirective({
+      annotation: annotation, permissions: permissions})
 
-  it("defaults to shared if no locally cached visibility", ->
-    {controller} = createAnnotationDirective({
-      localStorage: {
-        setItem: ->
-        getItem: ->
-      }
-    })
-    assert(controller.isShared())
+    assert(permissions.default.calledWithExactly("test-group"))
+    assert.equal(annotation.permissions, "default permissions",
+      "It should set a new annotation's permissions to what
+      permissions.default() returns")
   )
 
   it("doesn't overwrite permissions if the annotation already has them", ->
@@ -708,8 +676,14 @@ describe("AnnotationController", ->
     }
     # Save the original permissions for asserting against later.
     original_permissions = JSON.parse(JSON.stringify(annotation.permissions))
+    permissions = {
+      default: sinon.stub().returns("new permissions")
+      isShared: ->
+      isPrivate: ->
+    }
 
-    createAnnotationDirective({annotation: annotation})
+    createAnnotationDirective(
+      {annotation: annotation, permissions: permissions})
 
     assert.deepEqual(annotation.permissions, original_permissions)
   )
@@ -747,15 +721,37 @@ describe("AnnotationController", ->
 
   describe("when the user signs in", ->
     it("sets the permissions of unsaved annotations", ->
+      # This annotation has no permissions yet, because that's what happens
+      # when you create a new annotation while not signed in.
       annotation = {group: "__world__"}
       session = {state: {userid: null}}  # Not signed in.
+      permissions = {
+        # permissions.default() would return null, because the user isn't
+        # signed in.
+        default: -> null
+        # We just need to mock these two functions so that it doesn't crash.
+        isShared: ->
+        isPrivate: ->
+      }
 
       {$rootScope} = createAnnotationDirective(
-        {annotation: annotation, session:session})
+        {annotation: annotation, session:session, permissions: permissions})
 
-      session.state.userid = "acct:fred@hypothes.is"  # The user signs in.
+      # At this point we would not expect the permissions to have been set,
+      # even though the annotation has been created, because the user isn't
+      # signed in.
+      assert(!annotation.permissions)
+
+      # Sign the user in.
+      session.state.userid = "acct:fred@hypothes.is"
+
+      # permissions.default() would now return permissions, because the user
+      # is signed in.
+      permissions.default = -> "__default_permissions__"
+
       $rootScope.$digest()  # Trigger the $scope.$watch().
-      assert.deepEqual(annotation.permissions, {read: ["__world__"]})
+
+      assert.equal(annotation.permissions, "__default_permissions__")
     )
   )
 
