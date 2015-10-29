@@ -1,5 +1,7 @@
 {module, inject} = angular.mock
 
+events = require('../../events')
+
 describe 'annotation', ->
   $compile = null
   $document = null
@@ -148,6 +150,7 @@ describe 'annotation', ->
       $scope.$digest()
       assert.notCalled annotation.$create
       fakeSession.state.userid = 'acct:ted@wyldstallyns.com'
+      $scope.$broadcast(events.USER_CHANGED, {})
       $scope.$digest()
       assert.calledOnce annotation.$create
 
@@ -645,6 +648,14 @@ describe("AnnotationController", ->
     )
   )
 
+  it("sets the user of new annotations", ->
+    annotation = {}
+
+    {session} = createAnnotationDirective({annotation: annotation})
+
+    assert.equal(annotation.user, session.state.userid)
+  )
+
   it("sets the permissions of new annotations", ->
     # This is a new annotation, doesn't have any permissions yet.
     annotation = {group: "test-group"}
@@ -720,6 +731,29 @@ describe("AnnotationController", ->
   )
 
   describe("when the user signs in", ->
+    it("sets the user of unsaved annotations", ->
+      # This annotation has no user yet, because that's what happens
+      # when you create a new annotation while not signed in.
+      annotation = {}
+      session = {state: {userid: null}}  # Not signed in.
+
+      {$rootScope} = createAnnotationDirective(
+        {annotation: annotation, session:session})
+
+      # At this point we would not expect the user to have been set,
+      # even though the annotation has been created, because the user isn't
+      # signed in.
+      assert(!annotation.user)
+
+      # Sign the user in.
+      session.state.userid = "acct:fred@hypothes.is"
+
+      # The session service would broadcast USER_CHANGED after sign in.
+      $rootScope.$broadcast(events.USER_CHANGED, {})
+
+      assert.equal(annotation.user, session.state.userid)
+    )
+
     it("sets the permissions of unsaved annotations", ->
       # This annotation has no permissions yet, because that's what happens
       # when you create a new annotation while not signed in.
@@ -749,7 +783,8 @@ describe("AnnotationController", ->
       # is signed in.
       permissions.default = -> "__default_permissions__"
 
-      $rootScope.$digest()  # Trigger the $scope.$watch().
+      # The session service would broadcast USER_CHANGED after sign in.
+      $rootScope.$broadcast(events.USER_CHANGED, {})
 
       assert.equal(annotation.permissions, "__default_permissions__")
     )

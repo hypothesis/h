@@ -1,5 +1,7 @@
 ### global -validate ###
 
+events = require('../events')
+
 # Validate an annotation.
 # Annotations must be attributed to a user or marked as deleted.
 # A public annotation is valid only if they have a body.
@@ -58,6 +60,8 @@ AnnotationController = [
     @timestamp = null
 
     model = $scope.annotationGet()
+
+    model.user ?= session.state.userid
 
     # Set the group of new annotations.
     if not model.group
@@ -374,17 +378,15 @@ AnnotationController = [
       this.render()
     , true
 
-    # Watch the current user
-    # TODO: fire events instead since watchers are not free and auth is rare
-    $scope.$watch (-> session.state.userid), (userid) ->
-      model.user ?= userid
+    $scope.$on(events.USER_CHANGED, ->
+      model.user ?= session.state.userid
 
       # Set model.permissions on sign in, if it isn't already set.
       # This is because you can create annotations when signed out and they
       # will have model.permissions = null, then when you sign in we set the
       # permissions correctly here.
       model.permissions = model.permissions or permissions.default(model.group)
-
+    )
 
     # Start editing brand new annotations immediately
     unless model.id? or (this.isHighlight() and highlight) then this.edit()
