@@ -32,9 +32,6 @@ function GroupListController($scope, $window, groups) {
   $scope.focusGroup = function (groupId) {
     groups.focus(groupId);
   }
-
-  $scope.$on(events.GROUPS_CHANGED, $scope.$apply.bind($scope));
-  $scope.$on(events.GROUP_FOCUSED, $scope.$apply.bind($scope));
 }
 
 /**
