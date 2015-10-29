@@ -165,20 +165,4 @@ describe('groupList', function () {
     clickLeaveIcon(element, true);
     assert.notCalled(fakeGroups.focus);
   });
-
-  it('should update when a GROUPS_CHANGED event is received', function () {
-    var element = createGroupList();
-    var groupItems = element.find('.group-item');
-    assert.equal(groupItems.length, groups.length + 1);
-
-    groups.push({
-      id: 'new-group',
-      name: 'New Group',
-      url: GROUP_LINK
-    });
-    $rootScope.$broadcast(events.GROUPS_CHANGED);
-    element.scope.$digest();
-    groupItems = element.find('.group-item');
-    assert.equal(groupItems.length, groups.length + 1);
-  });
 });
