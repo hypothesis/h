@@ -1,9 +1,12 @@
-"use strict";
+'use strict';
 
 var mock = angular.mock;
 
+var events = require('../events');
+
 describe('h:features', function () {
   var $httpBackend;
+  var $rootScope;
   var features;
   var sandbox;
 
@@ -26,6 +29,7 @@ describe('h:features', function () {
 
   beforeEach(mock.inject(function ($injector) {
     $httpBackend = $injector.get('$httpBackend');
+    $rootScope = $injector.get('$rootScope');
     features = $injector.get('features');
   }));
 
@@ -41,71 +45,101 @@ describe('h:features', function () {
     return handler;
   }
 
-  it('fetch should retrieve features data', function () {
-    defaultHandler();
-    features.fetch();
-    $httpBackend.flush();
+  describe('fetch', function() {
+    it('should retrieve features data', function () {
+      defaultHandler();
+      features.fetch();
+      $httpBackend.flush();
+      assert.equal(features.flagEnabled('foo'), true);
+    });
+
+    it('should return a promise', function () {
+      defaultHandler();
+      features.fetch().then(function () {
+        assert.equal(features.flagEnabled('foo'), true);
+      });
+      $httpBackend.flush();
+    });
+
+    it('should not explode for errors fetching features data', function () {
+      defaultHandler().respond(500, "ASPLODE!");
+      var handler = sinon.stub();
+      features.fetch().then(handler);
+      $httpBackend.flush();
+      assert.calledOnce(handler);
+    });
+
+    it('should only send one request at a time', function () {
+      defaultHandler();
+      features.fetch();
+      features.fetch();
+      $httpBackend.flush();
+    });
   });
 
-  it('fetch should not explode for errors fetching features data', function () {
-    defaultHandler().respond(500, "ASPLODE!");
-    features.fetch();
-    $httpBackend.flush();
-  });
+  describe('flagEnabled', function () {
+    it('should retrieve features data', function () {
+      defaultHandler();
+      features.flagEnabled('foo');
+      $httpBackend.flush();
+    });
 
-  it('fetch should only send one request at a time', function () {
-    defaultHandler();
-    features.fetch();
-    features.fetch();
-    $httpBackend.flush();
-  });
+    it('should return false initially', function () {
+      defaultHandler();
+      var result = features.flagEnabled('foo');
+      $httpBackend.flush();
 
-  it('flagEnabled should retrieve features data', function () {
-    defaultHandler();
-    features.flagEnabled('foo');
-    $httpBackend.flush();
-  });
+      assert.isFalse(result);
+    });
 
-  it('flagEnabled should return false initially', function () {
-    defaultHandler();
-    var result = features.flagEnabled('foo');
-    $httpBackend.flush();
+    it('should return flag values when data is loaded', function () {
+      defaultHandler();
+      features.fetch();
+      $httpBackend.flush();
 
-    assert.isFalse(result);
-  });
+      var foo = features.flagEnabled('foo');
+      assert.isTrue(foo);
 
-  it('flagEnabled should return flag values when data is loaded', function () {
-    defaultHandler();
-    features.fetch();
-    $httpBackend.flush();
+      var bar = features.flagEnabled('bar');
+      assert.isFalse(bar);
+    });
 
-    var foo = features.flagEnabled('foo');
-    assert.isTrue(foo);
+    it('should return false for unknown flags', function () {
+      defaultHandler();
+      features.fetch();
+      $httpBackend.flush();
 
-    var bar = features.flagEnabled('bar');
-    assert.isFalse(bar);
-  });
+      var baz = features.flagEnabled('baz');
+      assert.isFalse(baz);
+    });
 
-  it('flagEnabled should return false for unknown flags', function () {
-    defaultHandler();
-    features.fetch();
-    $httpBackend.flush();
+    it('should trigger a new fetch after cache expiry', function () {
+      var clock = sandbox.useFakeTimers();
 
-    var baz = features.flagEnabled('baz');
-    assert.isFalse(baz);
-  });
+      defaultHandler();
+      features.flagEnabled('foo');
+      $httpBackend.flush();
 
-  it('flagEnabled should trigger a new fetch after cache expiry', function () {
-    var clock = sandbox.useFakeTimers();
+      clock.tick(301 * 1000);
 
-    defaultHandler();
-    features.flagEnabled('foo');
-    $httpBackend.flush();
+      defaultHandler();
+      features.flagEnabled('foo');
+      $httpBackend.flush();
+    });
 
-    clock.tick(301 * 1000);
+    it('should clear the features data when the user changes', function () {
+      // fetch features and check that the flag is set
+      defaultHandler();
+      features.fetch();
+      $httpBackend.flush();
+      assert.isTrue(features.flagEnabled('foo'));
 
-    defaultHandler();
-    features.flagEnabled('foo');
-    $httpBackend.flush();
+      // simulate a change of logged-in user which should clear
+      // the features cache
+      $rootScope.$broadcast(events.USER_CHANGED, {});
+      defaultHandler();
+      assert.isFalse(features.flagEnabled('foo'));
+      $httpBackend.flush();
+    });
   });
 });

@@ -7,6 +7,9 @@ require('angular-jwt')
 streamer = require('./streamer')
 
 resolve =
+  # Ensure that we have feature flags available before we load the main
+  # view as features such as groups affect which annotations are loaded
+  featuresLoaded: ['features', (features) -> features.fetch()]
   # Ensure that we have available a) the current authenticated userid, and b)
   # the list of user groups.
   sessionState: ['session', (session) -> session.load().$promise]

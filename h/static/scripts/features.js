@@ -21,58 +21,66 @@
  */
 'use strict';
 
-var retry = require('retry');
+var assign = require('core-js/modules/$.assign');
+
+var events = require('./events');
 
 var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-function features ($document, $http, $log) {
+// @ngInject
+function features ($document, $http, $log, $rootScope) {
   var cache = null;
-  var operation = null;
   var featuresUrl = new URL('/app/features', $document.prop('baseURI')).href;
+  var fetchOperation;
+
+  $rootScope.$on(events.USER_CHANGED, function () {
+    cache = null;
+  });
 
   function fetch() {
-    // Short-circuit if a fetch is already in progress...
-    if (operation) {
-      return;
-    }
-    operation = retry.operation({retries: 10, randomize: true});
-
-    function success(data) {
-      cache = [Date.now(), data];
-      operation = null;
+    if (fetchOperation) {
+      // fetch already in progress
+      return fetchOperation;
     }
 
-    function failure(data, status) {
-      if (!operation.retry('failed to load - remote status was ' + status)) {
-        // All retries have failed, and we will now stop polling the endpoint.
-        $log.error('features service:', operation.mainError());
-      }
-    }
-
-    operation.attempt(function () {
-      $http.get(featuresUrl)
-        .success(success)
-        .error(failure);
+    fetchOperation = $http.get(featuresUrl).then(function (response) {
+      cache = {
+        updated: Date.now(),
+        flags: response.data,
+      };
+    }).catch(function (err) {
+      // if for any reason fetching features fails, we behave as
+      // if all flags are turned off
+      $log.warn('failed to fetch feature data', err);
+      cache = assign({}, cache, {
+        updated: Date.now(),
+      });
+    }).finally(function () {
+      fetchOperation = null;
     });
+
+    return fetchOperation;
   }
 
   function flagEnabled(name) {
     // Trigger a fetch if the cache is more than CACHE_TTL milliseconds old.
     // We don't wait for the fetch to complete, so it's not this call that
     // will see new data.
-    if (cache === null || (Date.now() - cache[0]) > CACHE_TTL) {
+    if (!cache || (Date.now() - cache.updated) > CACHE_TTL) {
       fetch();
     }
 
-    if (cache === null) {
+    if (!cache || !cache.flags) {
+      // a fetch is either in progress or fetching the feature flags
+      // failed
       return false;
     }
-    var flags = cache[1];
-    if (!flags.hasOwnProperty(name)) {
+
+    if (!cache.flags.hasOwnProperty(name)) {
       $log.warn('features service: looked up unknown feature:', name);
       return false;
     }
-    return flags[name];
+    return cache.flags[name];
   }
 
   return {
@@ -81,4 +89,4 @@ function features ($document, $http, $log) {
   };
 }
 
-module.exports = ['$document', '$http', '$log', features];
+module.exports = features;
