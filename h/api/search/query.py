@@ -197,4 +197,6 @@ class TagsMatcher(object):
             del params['tags']
         except KeyError:
             pass
-        return {'terms': {'tags': [tag for tag in tags]}} if tags else None
+        matchers = [{'match': {'tags': {'query': t, 'operator': 'and'}}}
+                    for t in tags]
+        return {'bool': {'must': matchers}} if matchers else None

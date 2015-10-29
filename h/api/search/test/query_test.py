@@ -402,7 +402,10 @@ def test_tagsmatcher_aliases_tag_to_tags():
 
     result = query.TagsMatcher()(params)
 
-    assert result == {'terms': {'tags': ['foo', 'bar']}}
+    assert result == {'bool': {'must': [
+        {'match': {'tags': {'query': 'foo', 'operator': 'and'}}},
+        {'match': {'tags': {'query': 'bar', 'operator': 'and'}}},
+    ]}}
 
 
 def test_tagsmatcher_with_both_tag_and_tags():
@@ -411,7 +414,10 @@ def test_tagsmatcher_with_both_tag_and_tags():
 
     result = query.TagsMatcher()(params)
 
-    assert result == {'terms': {'tags': ['foo', 'bar']}}
+    assert result == {'bool': {'must': [
+        {'match': {'tags': {'query': 'foo', 'operator': 'and'}}},
+        {'match': {'tags': {'query': 'bar', 'operator': 'and'}}},
+    ]}}
 
 
 @pytest.fixture
