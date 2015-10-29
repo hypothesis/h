@@ -419,9 +419,12 @@ AnnotationController = [
       if !vm.editing
         return
 
-      draftDomainModel = {}
-      updateDomainModel(draftDomainModel, vm.annotation)
-      updateDraft(draftDomainModel)
+      # if we have a draft, update it, otherwise (eg. when the user signs out)
+      # do not create a new one
+      if drafts.get(model)
+        draftDomainModel = {}
+        updateDomainModel(draftDomainModel, vm.annotation)
+        updateDraft(draftDomainModel)
 
       # move any new annotations to the currently focused group when
       # switching groups. See GH #2689 for context

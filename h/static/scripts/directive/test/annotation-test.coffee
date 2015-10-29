@@ -582,12 +582,21 @@ describe 'annotation', ->
       controller.edit()
       controller.annotation.text = 'unsaved-text'
       controller.annotation.tags = []
+      fakeDrafts.get = sinon.stub().returns({text: 'old-draft'})
       fakeDrafts.update = sinon.stub()
       $rootScope.$broadcast(events.GROUP_FOCUSED)
       assert.calledWith(fakeDrafts.update, annotation, {
         text: 'unsaved-text',
         tags: []
       })
+
+    it "should not create a new draft", ->
+      createDirective()
+      controller.edit()
+      fakeDrafts.update = sinon.stub()
+      fakeDrafts.get = sinon.stub().returns(null)
+      $rootScope.$broadcast(events.GROUP_FOCUSED)
+      assert.notCalled(fakeDrafts.update)
 
     it "moves new annotations to the focused group", ->
       annotation.id = null
