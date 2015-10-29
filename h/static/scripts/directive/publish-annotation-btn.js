@@ -1,43 +1,5 @@
 'use strict';
 
-// @ngInject
-function PublishAnnotationBtnController($scope) {
-  var vm = this;
-
-  vm.group = {
-    name: $scope.group.name,
-    type: $scope.group.public ? 'public' : 'group'
-  };
-  vm.showDropdown = false;
-  vm.privateLabel = 'Only Me';
-
-  updatePublishActionLabel();
-
-  this.save = function () {
-    $scope.onSave();
-  };
-
-  this.cancel = function () {
-    $scope.onCancel();
-  }
-
-  this.setPrivacy = function (level) {
-    $scope.onSetPrivacy({level: level});
-  }
-
-  $scope.$watch('isShared', function () {
-    updatePublishActionLabel();
-  });
-
-  function updatePublishActionLabel() {
-    if ($scope.isShared) {
-      vm.publishDestination = vm.group.name;
-    } else {
-      vm.publishDestination = vm.privateLabel;
-    }
-  }
-}
-
 /**
  * @ngdoc directive
  * @name publishAnnotationBtn
@@ -47,7 +9,23 @@ function PublishAnnotationBtnController($scope) {
 // @ngInject
 module.exports = function () {
   return {
-    controller: PublishAnnotationBtnController,
+    bindToController: true,
+    controller: function () {
+      this.showDropdown = false;
+      this.privateLabel = 'Only Me';
+
+      this.publishDestination = function () {
+        return this.isShared ? this.group.name : this.privateLabel;
+      }
+
+      this.groupType = function () {
+        return this.group.public ? 'public' : 'group';
+      }
+
+      this.setPrivacy = function (level) {
+        this.onSetPrivacy({level: level});
+      }
+    },
     controllerAs: 'vm',
     restrict: 'E',
     scope: {
