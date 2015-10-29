@@ -33,10 +33,7 @@ function features ($document, $http, $log, $rootScope) {
   var featuresUrl = new URL('/app/features', $document.prop('baseURI')).href;
   var fetchOperation;
 
-  // FIXME - This should be changed to clear the feature flag cache
-  // only in response to the USER_CHANGED event once
-  // https://github.com/hypothesis/h/pull/2674 lands
-  $rootScope.$on(events.SESSION_CHANGED, function () {
+  $rootScope.$on(events.USER_CHANGED, function () {
     cache = null;
   });
 

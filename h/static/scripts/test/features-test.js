@@ -1,9 +1,12 @@
-"use strict";
+'use strict';
 
 var mock = angular.mock;
 
+var events = require('../events');
+
 describe('h:features', function () {
   var $httpBackend;
+  var $rootScope;
   var features;
   var sandbox;
 
@@ -26,6 +29,7 @@ describe('h:features', function () {
 
   beforeEach(mock.inject(function ($injector) {
     $httpBackend = $injector.get('$httpBackend');
+    $rootScope = $injector.get('$rootScope');
     features = $injector.get('features');
   }));
 
@@ -120,6 +124,21 @@ describe('h:features', function () {
 
       defaultHandler();
       features.flagEnabled('foo');
+      $httpBackend.flush();
+    });
+
+    it('should clear the features data when the user changes', function () {
+      // fetch features and check that the flag is set
+      defaultHandler();
+      features.fetch();
+      $httpBackend.flush();
+      assert.isTrue(features.flagEnabled('foo'));
+
+      // simulate a change of logged-in user which should clear
+      // the features cache
+      $rootScope.$broadcast(events.USER_CHANGED, {});
+      defaultHandler();
+      assert.isFalse(features.flagEnabled('foo'));
       $httpBackend.flush();
     });
   });
