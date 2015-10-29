@@ -46,8 +46,7 @@ module.exports = class AppController
       options: ['Newest', 'Oldest', 'Location']
     }
 
-    # Reload the view when the focused group changes or the
-    # list of groups that the user is a member of changes
+    # Reload the view when the user switches accounts
     reloadEvents = [events.USER_CHANGED];
     reloadEvents.forEach((eventName) ->
       $scope.$on(eventName, (event, data) ->
