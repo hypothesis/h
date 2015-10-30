@@ -19,20 +19,27 @@ log = logging.getLogger(__name__)
 _ = i18n.TranslationStringFactory(__package__)
 
 
+def _handle_exc(request):
+    request.response.status_int = 500
+    request.sentry.captureException()
+    # In debug mode we should just reraise, so that the exception is caught by
+    # the debug toolbar.
+    if request.debug:
+        raise
+
+
 @view_config(context=Exception, accept='text/html',
              renderer='h:templates/5xx.html.jinja2')
 def error(context, request):
     """Display an error message."""
-    request.sentry.captureException()
-    request.response.status_int = 500
+    _handle_exc(request)
     return {}
 
 
 @json_view(context=Exception)
 def json_error(context, request):
     """"Return a JSON-formatted error message."""
-    request.sentry.captureException()
-    request.response.status_int = 500
+    _handle_exc(request)
     return {"reason": _(
         "Uh-oh, something went wrong! We're very sorry, our "
         "application wasn't able to load this page. The team has been "

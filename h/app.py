@@ -5,6 +5,7 @@ import os
 
 from pyramid.config import Configurator
 from pyramid.tweens import EXCVIEW
+from pyramid.settings import asbool
 
 from h.config import settings_from_environment
 from h.security import derive_key
@@ -16,6 +17,10 @@ def configure_jinja2_assets(config):
     assets_env = config.get_webassets_env()
     jinja2_env = config.get_jinja2_environment()
     jinja2_env.assets_environment = assets_env
+
+
+def in_debug_mode(request):
+    return asbool(request.registry.settings['pyramid.debug_all'])
 
 
 def create_app(global_config, **settings):
@@ -43,6 +48,7 @@ def create_app(global_config, **settings):
 
 
 def includeme(config):
+    config.add_request_method(in_debug_mode, 'debug', reify=True)
 
     config.include('h.features')
 
