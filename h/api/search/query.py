@@ -123,7 +123,7 @@ class AuthFilter(object):
 
         if not self.private:
             principals = [p for p in principals
-                          if not p == self.request.authenticated_userid]
+                          if p != self.request.authenticated_userid]
 
         return {'terms': {'permissions.read': principals}}
 
