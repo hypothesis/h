@@ -98,7 +98,7 @@ def test_entry_author():
 
 def test_entry_title():
     """The titles of feed entries should come from annotation.title."""
-    with mock.patch("h.test.factories.api_models.Annotation.title",
+    with mock.patch("h.feeds.atom.presenters.AnnotationHTMLPresenter.title",
                     new_callable=mock.PropertyMock) as mock_title:
         annotation = factories.Annotation()
 
@@ -131,8 +131,9 @@ def test_entry_published():
 
 def test_entry_content():
     """The contents of entries come from annotation.description."""
-    with mock.patch("h.test.factories.api_models.Annotation.description",
-                    new_callable=mock.PropertyMock) as mock_description:
+    with mock.patch(
+            "h.feeds.atom.presenters.AnnotationHTMLPresenter.description",
+            new_callable=mock.PropertyMock) as mock_description:
         annotation = factories.Annotation()
 
         feed = atom.feed_from_annotations(

@@ -2,6 +2,7 @@
 """Functions for generating Atom feeds."""
 from pyramid import i18n
 
+from h import presenters
 from h import util
 import h.feeds.util
 
@@ -23,7 +24,8 @@ def _feed_entry_from_annotation(
     except ValueError:
         name = annotation["user"]
     entry = {
-        "id": h.feeds.util.tag_uri_for_annotation(annotation, annotation_url),
+        "id": h.feeds.util.tag_uri_for_annotation(
+            annotation.annotation, annotation_url),
         "author": {"name": name},
         "title": annotation.title,
         "updated": annotation["updated"],
@@ -31,13 +33,13 @@ def _feed_entry_from_annotation(
         "content": annotation.description,
         "links": [
             {"rel": "alternate", "type": "text/html",
-             "href": annotation_url(annotation)},
+             "href": annotation_url(annotation.annotation)},
         ]
     }
     if annotation_api_url:
         entry["links"].append(
             {"rel": "alternate", "type": "application/json",
-             "href": annotation_api_url(annotation)}
+             "href": annotation_api_url(annotation.annotation)}
         )
     entry["links"].extend(
         [{"rel": "related", "href": link} for link in annotation.target_links])
@@ -56,6 +58,8 @@ def feed_from_annotations(
     :rtype: dict
 
     """
+    annotations = [presenters.AnnotationHTMLPresenter(a) for a in annotations]
+
     links = [{"rel": "self", "type": "application/atom+xml", "href": atom_url}]
 
     if html_url:

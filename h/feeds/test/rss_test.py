@@ -61,8 +61,9 @@ def test_feed_from_annotations_item_titles():
 
 def test_feed_from_annotations_item_descriptions():
     """Feed items should include a description of the annotation."""
-    with mock.patch("h.test.factories.api_models.Annotation.description",
-                    new_callable=mock.PropertyMock) as description:
+    with mock.patch(
+            "h.feeds.rss.presenters.AnnotationHTMLPresenter.description",
+            new_callable=mock.PropertyMock) as description:
         feed = rss.feed_from_annotations(
             [factories.Annotation()], _annotation_url(), mock.Mock(), '', '', '')
 

@@ -2,6 +2,7 @@
 from pyramid import i18n
 from dateutil import parser
 
+from h import presenters
 from h import util
 import h.feeds.util
 
@@ -58,6 +59,8 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
     :rtype: dict
 
     """
+    annotations = [presenters.AnnotationHTMLPresenter(a) for a in annotations]
+
     feed = {
         'title': title,
         'rss_url': rss_url,
