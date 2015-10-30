@@ -32,7 +32,13 @@
     padding: 0px;
     width: 100%;
 
-    max-width: 0px;
+    // the search box expands when focused, via a change in the
+    // `max-width` property. In Safari, the <input> will not accept
+    // focus if `max-width` is set to 0px so we set it to
+    // a near-zero positive value instead.
+    // See GH #2654
+    max-width: 0.1px;
+
     transition: max-width .3s ease-out, padding-left .3s ease-out;
 
     &:disabled {
@@ -40,6 +46,8 @@
       color: $gray-light;
     }
 
+    // expand the search input when focused (triggered by clicking
+    // on the search icon) or when `is-expanded` is applied
     &:focus,&.is-expanded {
       max-width: $expanded-max-width;
       padding-left: 6px;
