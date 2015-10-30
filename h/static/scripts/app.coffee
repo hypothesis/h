@@ -19,15 +19,13 @@ resolve =
     'annotationMapper', 'drafts', 'threading'
     (annotationMapper,   drafts,   threading) ->
       # Unload all the annotations
-      idTable = threading.idTable
-      annotations = (message for id, {message} of idTable when message)
-      annotationMapper.unloadAnnotations(annotations)
+      annotationMapper.unloadAnnotations(threading.annotationList())
 
       # Reset the threading root
       threading.createIdTable([])
       threading.root = mail.messageContainer()
 
-      # Thread all the drafts
+      # Reload all unsaved annotations
       threading.thread(drafts.all())
 
       return threading

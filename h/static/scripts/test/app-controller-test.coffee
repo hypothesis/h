@@ -145,12 +145,6 @@ describe 'AppController', ->
     createController()
     assert.isFalse($scope.shareDialog.visible)
 
-  it 'reloads the view when the focused group changes', ->
-    createController()
-    fakeRoute.reload = sinon.spy()
-    $scope.$broadcast(events.GROUP_FOCUSED)
-    assert.calledOnce(fakeRoute.reload)
-
   it 'does not reload the view when the logged-in user changes on first load', ->
     createController()
     fakeRoute.reload = sinon.spy()

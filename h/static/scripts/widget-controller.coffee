@@ -1,13 +1,14 @@
 angular = require('angular')
 
+events = require('./events')
 
 module.exports = class WidgetController
   this.$inject = [
-    '$scope', 'annotationUI', 'crossframe', 'annotationMapper', 'groups',
+    '$scope', 'annotationUI', 'crossframe', 'annotationMapper', 'drafts', 'groups',
     'streamer', 'streamFilter', 'store', 'threading'
   ]
   constructor:   (
-     $scope,   annotationUI,   crossframe,   annotationMapper,   groups,
+     $scope,   annotationUI,   crossframe,   annotationMapper,  drafts,    groups,
      streamer,   streamFilter,   store,   threading
   ) ->
     $scope.isStream = true
@@ -16,6 +17,12 @@ module.exports = class WidgetController
 
     @chunkSize = 200
     loaded = []
+
+    _resetAnnotations = ->
+      # Unload all the annotations
+      annotationMapper.unloadAnnotations(threading.annotationList())
+      # Reload all the drafts
+      threading.thread(drafts.all())
 
     _loadAnnotationsFrom = (query, offset) =>
       queryCore =
@@ -44,6 +51,11 @@ module.exports = class WidgetController
       if loaded.length > 0
         streamFilter.resetFilter().addClause('/uri', 'one_of', loaded)
         streamer.send({filter: streamFilter.getFilter()})
+
+    $scope.$on events.GROUP_FOCUSED, ->
+      _resetAnnotations(annotationMapper, drafts, threading)
+      loaded = []
+      loadAnnotations crossframe.frames
 
     $scope.$watchCollection (-> crossframe.frames), loadAnnotations
 
