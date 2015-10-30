@@ -25,8 +25,8 @@ resolve =
       threading.createIdTable([])
       threading.root = mail.messageContainer()
 
-      # Reload all unsaved annotations
-      threading.thread(drafts.all())
+      # Reload all new, unsaved annotations
+      threading.thread(drafts.unsaved())
 
       return threading
   ]

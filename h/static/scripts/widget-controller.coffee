@@ -22,7 +22,7 @@ module.exports = class WidgetController
       # Unload all the annotations
       annotationMapper.unloadAnnotations(threading.annotationList())
       # Reload all the drafts
-      threading.thread(drafts.all())
+      threading.thread(drafts.unsaved())
 
     _loadAnnotationsFrom = (query, offset) =>
       queryCore =

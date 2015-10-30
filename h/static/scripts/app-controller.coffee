@@ -47,12 +47,9 @@ module.exports = class AppController
     }
 
     # Reload the view when the user switches accounts
-    reloadEvents = [events.USER_CHANGED];
-    reloadEvents.forEach((eventName) ->
-      $scope.$on(eventName, (event, data) ->
-        if !data || !data.initialLoad
-          $route.reload()
-      )
+    $scope.$on(events.USER_CHANGED, (event, data) ->
+      if !data || !data.initialLoad
+        $route.reload()
     );
 
     identity.watch({
