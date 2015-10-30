@@ -39,7 +39,7 @@ describe 'WidgetController', ->
     fakeAuth = {user: null}
     fakeCrossFrame = {frames: []}
     fakeDrafts = {
-      all: sandbox.stub()
+      unsaved: sandbox.stub()
     }
 
     lastSearchResult = null
@@ -75,10 +75,6 @@ describe 'WidgetController', ->
 
     fakeGroups = {
       focused: -> {id: 'foo'}
-    }
-
-    fakeDrafts = {
-      unsaved: []
     }
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
@@ -123,4 +119,4 @@ describe 'WidgetController', ->
       $scope.$digest();
       assert.calledWith(fakeAnnotationMapper.loadAnnotations,
         lastSearchResult.rows)
-      assert.calledWith(fakeThreading.thread, fakeDrafts.all())
+      assert.calledWith(fakeThreading.thread, fakeDrafts.unsaved())
