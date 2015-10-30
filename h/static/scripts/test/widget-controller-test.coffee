@@ -42,8 +42,6 @@ describe 'WidgetController', ->
       unsaved: sandbox.stub()
     }
 
-    lastSearchResult = null
-
     fakeStore = {
       SearchResource:
         get: (query, callback) ->
@@ -52,7 +50,6 @@ describe 'WidgetController', ->
           result =
             total: 100
             rows: [offset..offset+limit-1]
-          lastSearchResult = result
           callback result
     }
 
@@ -112,11 +109,15 @@ describe 'WidgetController', ->
     it 'should load annotations for the new group', ->
       fakeThreading.annotationList = sandbox.stub().returns([{id: '1'}])
       fakeCrossFrame.frames.push({uri: 'http://example.com'})
+      searchResult = {total: 10, rows: [0..10]}
+      fakeStore.SearchResource.get = (query, callback) ->
+        callback(searchResult)
+
       $scope.$broadcast(events.GROUP_FOCUSED)
 
       assert.calledWith(fakeAnnotationMapper.unloadAnnotations,
         [{id: '1'}])
       $scope.$digest();
       assert.calledWith(fakeAnnotationMapper.loadAnnotations,
-        lastSearchResult.rows)
+        searchResult.rows)
       assert.calledWith(fakeThreading.thread, fakeDrafts.unsaved())
