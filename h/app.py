@@ -51,6 +51,7 @@ def includeme(config):
     config.include('h.models')
     config.include('h.views')
     config.include('h.feeds')
+    config.include('h.sentry')
 
     config.include('pyramid_jinja2')
     config.add_jinja2_extension('h.jinja_extensions.Filters')

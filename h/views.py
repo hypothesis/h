@@ -23,7 +23,7 @@ _ = i18n.TranslationStringFactory(__package__)
              renderer='h:templates/5xx.html.jinja2')
 def error(context, request):
     """Display an error message."""
-    log.exception('%s: %s', type(context).__name__, str(context))
+    request.sentry.captureException()
     request.response.status_int = 500
     return {}
 
@@ -31,7 +31,7 @@ def error(context, request):
 @json_view(context=Exception)
 def json_error(context, request):
     """"Return a JSON-formatted error message."""
-    log.exception('%s: %s', type(context).__name__, str(context))
+    request.sentry.captureException()
     request.response.status_int = 500
     return {"reason": _(
         "Uh-oh, something went wrong! We're very sorry, our "
@@ -128,6 +128,7 @@ def stream(context, request):
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
 @notfound_view_config(renderer='h:templates/notfound.html.jinja2')
 def notfound(context, request):
+    request.sentry.captureMessage('404: %s' % request.path, level='info')
     request.response.status_int = 404
     return {}
 
