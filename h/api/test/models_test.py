@@ -95,54 +95,42 @@ def test_uri_when_uri_is_not_a_string():
         assert isinstance(models.Annotation(uri=uri).uri, unicode)
 
 
-@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
-def test_filename_with_http_uri(uri):
-    uri.return_value = "http://example.com/example.html"
-
+@patch.object(models.Annotation, 'uri', "http://example.com/example.html")
+def test_filename_with_http_uri():
     assert models.Annotation().filename == ""
 
 
-@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
-def test_filename_with_file_uri(uri):
-    uri.return_value = "file:///home/seanh/MyFile.pdf"
-
+@patch.object(models.Annotation, "uri", "file:///home/seanh/MyFile.pdf")
+def test_filename_with_file_uri():
     assert models.Annotation().filename == "MyFile.pdf"
 
 
-@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
-def test_filename_returns_Markup(uri):
-    uri.return_value = jinja2.Markup("file:///home/seanh/MyFile.pdf")
-
+@patch.object(
+    models.Annotation, "uri", jinja2.Markup("file:///home/seanh/MyFile.pdf"))
+def test_filename_returns_Markup():
     assert isinstance(models.Annotation().filename, jinja2.Markup)
 
 
-@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
-def test_filename_with_FILE_uri(uri):
-    uri.return_value = "FILE:///home/seanh/MyFile.pdf"
-
+@patch.object(models.Annotation, "uri", "FILE:///home/seanh/MyFile.pdf")
+def test_filename_with_FILE_uri():
     assert models.Annotation().filename == "MyFile.pdf"
 
 
-@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
-def test_filename_with_folder(uri):
-    uri.return_value = "file:///home/seanh/My%20Documents/"
-
+@patch.object(models.Annotation, "uri", "file:///home/seanh/My%20Documents/")
+def test_filename_with_folder():
     assert models.Annotation().filename == ""
 
 
-@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
-def test_filename_with_no_uri(uri):
-    # self.uri should always be unicode, the worst is should ever be is an
-    # empty string.
-    uri.return_value = u""
-
+@patch.object(models.Annotation, "uri",
+              # self.uri should always be unicode, the worst is should ever be
+              # is an empty string.
+              u"")
+def test_filename_with_no_uri():
     assert models.Annotation().filename == ""
 
 
-@patch("h.api.models.Annotation.uri", new_callable=PropertyMock)
-def test_filename_with_nonsense_uri(uri):
-    uri.return_value = u"foobar"
-
+@patch.object(models.Annotation, "uri", u"foobar")
+def test_filename_with_nonsense_uri():
     assert models.Annotation().filename == ""
 
 

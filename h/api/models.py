@@ -35,18 +35,19 @@ def _format_document_link(href, title, link_text, hostname):
     link_text = truncate(link_text)
 
     if href and hostname:
-        link = ('<a href="{href}" title="{title}">{link_text}</a> '
-                '({hostname})'.format(href=href, title=title,
-                                      link_text=link_text, hostname=hostname))
-    elif hostname and not href:
-        link = ('<a title="{title}">{link_text}</a> ({hostname})'.format(
-            title=title, link_text=link_text, hostname=hostname))
-    elif href and not hostname:
-        link = '<a href="{href}" title="{title}">{link_text}</a>'.format(
-            href=href, title=title, link_text=link_text)
+        link = '<a href="{href}" title="{title}">{link_text}</a> ({hostname})'
+    elif hostname:
+        link = '<a title="{title}">{link_text}</a> ({hostname})'
+    elif href:
+        link = '<a href="{href}" title="{title}">{link_text}</a>'
     else:
-        link = '<a title="{title}">{link_text}</a>'.format(
-            title=title, link_text=link_text)
+        link = '<a title="{title}">{link_text}</a>'
+
+    link = link.format(
+        href=jinja2.escape(href),
+        title=jinja2.escape(title),
+        link_text=jinja2.escape(link_text),
+        hostname=jinja2.escape(hostname))
 
     return jinja2.Markup(link)
 
