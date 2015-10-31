@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import urlparse
+from h._compat import urlparse
 
 # Smart detect heroku stack and assume a trusted proxy.
 # This is a convenience that should hopefully not be too surprising.

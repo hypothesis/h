@@ -11,7 +11,6 @@ import os.path
 import shutil
 import subprocess
 import textwrap
-import urlparse
 import json
 
 from pyramid import paster
@@ -20,6 +19,7 @@ from pyramid.request import Request
 from pyramid.renderers import render
 
 import h
+from h._compat import urlparse
 
 log = logging.getLogger('h.buildext')
 
