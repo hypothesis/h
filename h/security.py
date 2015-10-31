@@ -11,5 +11,5 @@ def derive_key(key_material, info, algorithm=None, length=None):
         algorithm = hashes.SHA512()
     if length is None:
         length = algorithm.digest_size
-    hkdf = HKDF(algorithm, length, 'h.security', info, backend)
+    hkdf = HKDF(algorithm, length, b'h.security', info, backend)
     return hkdf.derive(key_material)

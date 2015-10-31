@@ -35,7 +35,7 @@ def includeme(config):
     config.include('.views')
 
     secret = config.registry.settings['secret_key']
-    derived = derive_key(secret, 'h.notification')
+    derived = derive_key(secret, b'h.notification')
 
     old_serializer = SignedSerializer(secret, 'h.notification')
     new_serializer = SignedSerializer(derived, None)
