@@ -16,6 +16,7 @@ from pyramid.request import Request
 from h import __version__
 from h import reindexer
 from h import accounts
+from h._compat import PY2, text_type
 
 ANNOTOOL_OPERATIONS = {e.name: e for e in iter_entry_points('h.annotool')}
 
@@ -77,13 +78,14 @@ _add_common_args(parser_initdb)
 def admin(args):
     """Make a user an admin."""
     request = bootstrap(args)
-    accounts.make_admin(unicode(args.username, sys.getfilesystemencoding()))
+    accounts.make_admin(args.username)
     request.tm.commit()
 
 parser_admin = subparsers.add_parser('admin', help=admin.__doc__)
 _add_common_args(parser_admin)
 parser_admin.add_argument(
     'username',
+    type=lambda s: text_type(s, sys.getfilesystemencoding()) if PY2 else text_type,
     help="the name of the user to make into an admin, e.g. 'fred'")
 
 

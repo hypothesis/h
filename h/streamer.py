@@ -24,6 +24,7 @@ from ws4py.websocket import WebSocket as _WebSocket
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from h import queue
+from h._compat import text_type
 from h.api import nipsa
 from h.api import uri
 from h.api.search import query
@@ -34,12 +35,12 @@ log = logging.getLogger(__name__)
 
 
 def uni_fold(text):
-    # Convert str to unicode
-    if isinstance(text, str):
-        text = unicode(text, "utf-8")
+    # Convert bytes to text
+    if isinstance(text, bytes):
+        text = text_type(text, "utf-8")
 
     # Do not touch other types
-    if not isinstance(text, unicode):
+    if not isinstance(text, text_type):
         return text
 
     text = text.lower()
