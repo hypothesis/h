@@ -136,6 +136,15 @@ describe('TabState', function () {
       assert.equal(request.url, "http://example.com/badge?uri=tabUrl");
     });
 
+    it('urlencodes the tabUrl appropriately', function() {
+      state.updateAnnotationCount("tabId", "http://foo.com?bar=baz qüx", "http://example.com");
+
+      assert.equal(server.requests.length, 1);
+      var request = server.requests[0];
+      assert.equal(request.method, "GET");
+      assert.equal(request.url, "http://example.com/badge?uri=http%3A%2F%2Ffoo.com%3Fbar%3Dbaz+q%C3%BCx");
+    });
+
     it("doesn't set the annotation count if the server's JSON is invalid", function() {
       server.respondWith(
         "GET", "http://example.com/badge?uri=tabUrl",
