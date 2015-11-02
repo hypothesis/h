@@ -25,6 +25,11 @@ var DEFAULT_STATE = {
   ready: false,
 };
 
+/** encodeUriQuery encodes a string for use in a query parameter */
+function encodeUriQuery(val) {
+  return encodeURIComponent(val).replace(/%20/g, '+');
+}
+
 /** TabState stores the H state for a tab. This state includes:
  *
  * - Whether the extension has been activated on a tab
@@ -161,7 +166,7 @@ function TabState(initialState, onchange) {
       self.setState(tabId, {annotationCount: total});
     };
 
-    xhr.open('GET', apiUrl + '/badge?uri=' + tabUrl);
+    xhr.open('GET', apiUrl + '/badge?uri=' + encodeUriQuery(tabUrl));
     xhr.send();
   };
 
