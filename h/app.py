@@ -20,7 +20,7 @@ def configure_jinja2_assets(config):
 
 
 def in_debug_mode(request):
-    return asbool(request.registry.settings['pyramid.debug_all'])
+    return asbool(request.registry.settings.get('pyramid.debug_all'))
 
 
 def create_app(global_config, **settings):
