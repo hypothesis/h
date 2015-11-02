@@ -4,6 +4,7 @@ events = require('../events')
 describe 'AppController', ->
   $controller = null
   $scope = null
+  $rootScope = null
   fakeAnnotationUI = null
   fakeAuth = null
   fakeDrafts = null
@@ -14,6 +15,7 @@ describe 'AppController', ->
   fakeSession = null
   fakeGroups = null
   fakeRoute = null
+  fakeWindow = null
 
   sandbox = null
 
@@ -45,6 +47,8 @@ describe 'AppController', ->
       remove: sandbox.spy()
       all: sandbox.stub().returns([])
       discard: sandbox.spy()
+      count: sandbox.stub().returns(0)
+      unsaved: sandbox.stub().returns([])
     }
 
     fakeFeatures = {
@@ -55,6 +59,7 @@ describe 'AppController', ->
     fakeIdentity = {
       watch: sandbox.spy()
       request: sandbox.spy()
+      logout: sandbox.stub()
     }
 
     fakeLocation = {
@@ -69,6 +74,11 @@ describe 'AppController', ->
 
     fakeRoute = {reload: sandbox.spy()}
 
+    fakeWindow = {
+      top: {}
+      confirm: sandbox.stub()
+    }
+
     $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value 'auth', fakeAuth
     $provide.value 'drafts', fakeDrafts
@@ -79,10 +89,12 @@ describe 'AppController', ->
     $provide.value '$route', fakeRoute
     $provide.value '$location', fakeLocation
     $provide.value '$routeParams', fakeParams
+    $provide.value '$window', fakeWindow
     return
 
-  beforeEach inject (_$controller_, $rootScope) ->
+  beforeEach inject (_$controller_, _$rootScope_) ->
     $controller = _$controller_
+    $rootScope = _$rootScope_
     $scope = $rootScope.$new()
 
   afterEach ->
@@ -91,14 +103,13 @@ describe 'AppController', ->
   describe 'isSidebar property', ->
 
     it 'is false if the window is the top window', ->
-      $window = {}
-      $window.top = $window
-      createController({$window})
+      fakeWindow.top =  fakeWindow
+      createController()
       assert.isFalse($scope.isSidebar)
 
     it 'is true if the window is not the top window', ->
-      $window = {top: {}}
-      createController({$window})
+      fakeWindow.top = {}
+      createController()
       assert.isTrue($scope.isSidebar)
 
   it 'watches the identity service for identity change events', ->
@@ -156,3 +167,63 @@ describe 'AppController', ->
     fakeRoute.reload = sinon.spy()
     $scope.$broadcast(events.USER_CHANGED, {initialLoad: false})
     assert.calledOnce(fakeRoute.reload)
+
+  describe 'logout()', ->
+    it 'prompts the user if there are drafts', ->
+      fakeDrafts.count.returns(1)
+      createController()
+
+      $scope.logout()
+
+      assert.equal(fakeWindow.confirm.callCount, 1)
+
+    it 'emits "annotationDeleted" for each unsaved draft annotation', ->
+      fakeDrafts.unsaved = sandbox.stub().returns(
+        ["draftOne", "draftTwo", "draftThree"]
+      )
+      createController()
+      $rootScope.$emit = sandbox.stub()
+
+      $scope.logout()
+
+      assert($rootScope.$emit.calledThrice)
+      assert.deepEqual(
+        $rootScope.$emit.firstCall.args, ["annotationDeleted", "draftOne"])
+      assert.deepEqual(
+        $rootScope.$emit.secondCall.args, ["annotationDeleted", "draftTwo"])
+      assert.deepEqual(
+        $rootScope.$emit.thirdCall.args, ["annotationDeleted", "draftThree"])
+
+    it 'discards draft annotations', ->
+      createController()
+
+      $scope.logout()
+
+      assert(fakeDrafts.discard.calledOnce)
+
+    it 'does not emit "annotationDeleted" if the user cancels the prompt', ->
+      createController()
+      fakeDrafts.count.returns(1)
+      $rootScope.$emit = sandbox.stub()
+      fakeWindow.confirm.returns(false)
+
+      $scope.logout()
+
+      assert($rootScope.$emit.notCalled)
+
+    it 'does not discard drafts if the user cancels the prompt', ->
+      createController()
+      fakeDrafts.count.returns(1)
+      fakeWindow.confirm.returns(false)
+
+      $scope.logout()
+
+      assert(fakeDrafts.discard.notCalled)
+
+    it 'does not prompt if there are no drafts', ->
+      createController()
+      fakeDrafts.count.returns(0)
+
+      $scope.logout()
+
+      assert.equal(fakeWindow.confirm.callCount, 0)
