@@ -407,7 +407,7 @@ def test_document_link_happy_path(hostname_or_filename, href, title,
 
     assert models.Annotation().document_link == (
         '<a href="http://www.example.com/example.html" '
-        'title="Example Document">Example Document</a> (www.example.com)')
+        'title="Example Document">Example Document</a><br>(www.example.com)')
 
 
 @document_link_fixtures
@@ -462,13 +462,13 @@ def test_document_link_truncates_hostname(hostname_or_filename, href, title,
     link_text.return_value = "www.example.com/example.html"
 
     # .hostname_or_filename is too long.
-    hostname_or_filename.return_value = "a" * 60
+    hostname_or_filename.return_value = "a" * 70
 
-    expected_hostname = "a" * 50 + "&hellip;"
+    expected_hostname = "a" * 60 + "&hellip;"
     expected_result = (
         '<a href="http://www.example.com/example.html" '
         'title="www.example.com/example.html">'
-        'www.example.com/example.html</a> ({hostname})'.format(
+        'www.example.com/example.html</a><br>({hostname})'.format(
             hostname=expected_hostname))
     assert models.Annotation().document_link == expected_result
 
@@ -481,12 +481,12 @@ def test_document_link_truncates_link_text(hostname_or_filename, href, title,
     title.return_value = "www.example.com/example.html"
 
     # .link_text is too long.
-    link_text.return_value = "a" * 60
+    link_text.return_value = "a" * 70
 
-    expected_link_text = "a" * 50 + "&hellip;"
+    expected_link_text = "a" * 60 + "&hellip;"
     expected_result = (
         '<a href="http://www.example.com/example.html" '
-        'title="www.example.com/example.html">{link_text}</a> '
+        'title="www.example.com/example.html">{link_text}</a><br>'
         '(www.example.com)'.format(link_text=expected_link_text))
     assert models.Annotation().document_link == expected_result
 
@@ -502,7 +502,8 @@ def test_document_link_hostname_but_no_href(hostname_or_filename, href, title,
     href.return_value = ""
 
     assert models.Annotation().document_link == (
-        '<a title="Example Document">Example Document</a> (www.example.com)')
+        '<a title="Example Document">Example Document</a><br>'
+        '(www.example.com)')
 
 
 @document_link_fixtures
