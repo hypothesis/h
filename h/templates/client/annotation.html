@@ -15,6 +15,14 @@
            ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
            >{{vm.annotation.user | persona}}</a>
       </span>
+
+      <span class="annotation-collapsed-replies">
+        <a class="reply-count small" href=""
+          ng-click="replyCountClick()"
+          ng-pluralize count="replyCount"
+          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
+      </span>
+
       <br>
       <span class="annotation-header__share-info">
         <a class="annotation-header__group"
@@ -38,13 +46,6 @@
     </span>
 
     <span class="u-flex-spacer"></span>
-
-    <span class="annotation-collapsed-replies">
-      <a class="reply-count small" href=""
-         ng-click="replyCountClick()"
-         ng-pluralize count="replyCount"
-         when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
-    </span>
 
     <!-- Timestamp -->
     <a class="annotation-timestamp"
