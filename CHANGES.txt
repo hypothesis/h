@@ -1,5 +1,41 @@
-0.7.19 (2015-10-28)
-==================
+0.7.11 (2015-11-02)
+===================
+
+Bug fixes
+---------
+
+- Fix a problem where occasionally the set of public annotations would be loaded
+  into the initial view rather than the set of annotations for the focused group
+  (feature flagged: groups) (#2684).
+
+- Fix a bug where creating an annotation when signed out (and subsequently
+  signing in and saving it) could result in invalid permissions fields (#2687).
+
+- Fix a problem in Safari where the search box didn't expand when you clicked on
+  it (#2699).
+
+- Fix improper case-sensitivity for tag searches (e.g. searches for "Tag123" now
+  correctly return annotations tagged with "tag123") (#2690).
+
+Features
+--------
+
+- Ignore the "gclid" query parameter (a Google AdWords click-tracking param)
+  when normalising URLs (72f0509).
+
+- Draft annotations are now preserved when switching from group to group in the
+  sidebar (#2689).
+
+Miscellanea
+-----------
+
+- Improvements to Sentry logging (the current URL, headers, and userid are now
+  recorded with exceptions) (#2697).
+
+- Show the werkzeug debugger on exceptions in development (#2698).
+
+0.7.10 (2015-10-28)
+===================
 
 Bug fixes
 ---------
