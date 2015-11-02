@@ -24,7 +24,7 @@ def _format_document_link(href, title, link_text, hostname):
     if hostname and hostname in link_text:
         hostname = ""
 
-    def truncate(content, length=50):
+    def truncate(content, length=60):
         """Truncate the given string to at most length chars."""
         if len(content) <= length:
             return content
@@ -35,9 +35,10 @@ def _format_document_link(href, title, link_text, hostname):
     link_text = truncate(link_text)
 
     if href and hostname:
-        link = '<a href="{href}" title="{title}">{link_text}</a> ({hostname})'
+        link = ('<a href="{href}" title="{title}">{link_text}</a><br>'
+               '({hostname})')
     elif hostname:
-        link = '<a title="{title}">{link_text}</a> ({hostname})'
+        link = '<a title="{title}">{link_text}</a><br>({hostname})'
     elif href:
         link = '<a href="{href}" title="{title}">{link_text}</a>'
     else:
