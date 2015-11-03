@@ -21,26 +21,6 @@ describe('GroupListController', function () {
     controller = new groupList.Controller($scope, fakeWindow, fakeGroups);
   });
 
-  it('toggles share links', function () {
-    $scope.toggleShareLink('group-a');
-    assert.equal($scope.expandedGroupId, 'group-a');
-    $scope.toggleShareLink('group-a');
-    assert.equal($scope.expandedGroupId, undefined);
-
-    $scope.toggleShareLink('group-b');
-    assert.equal($scope.expandedGroupId, 'group-b');
-    $scope.toggleShareLink('group-c');
-    assert.equal($scope.expandedGroupId, 'group-c');
-  });
-
-  it('shows share link for selected group', function () {
-    assert.equal($scope.shouldShowShareLink('group-a'), false);
-    $scope.toggleShareLink('group-a');
-    assert.equal($scope.shouldShowShareLink('group-a'), true);
-    $scope.toggleShareLink('group-b');
-    assert.equal($scope.shouldShowShareLink('group-a'), false);
-    assert.equal($scope.shouldShowShareLink('group-b'), true);
-  });
 });
 
 // returns true if a jQuery-like element has
@@ -122,20 +102,9 @@ describe('groupList', function () {
     var shareLinks = element.find('.share-link-container');
     assert.equal(shareLinks.length, 1);
 
-    var linkField = element.find('.share-link-field');
-    assert.equal(linkField.length, 1);
-    assert.equal(linkField[0].value, GROUP_LINK);
-  });
-
-  it('should toggle share link on click', function () {
-    var element = createGroupList();
-    var toggleLink = element.find('.share-link-toggle');
-    var expander = element.find('.share-link-expander');
-    assert.ok(isElementHidden(expander));
-    toggleLink.click();
-    assert.ok(!isElementHidden(expander));
-    toggleLink.click();
-    assert.ok(isElementHidden(expander));
+    var link = element.find('.share-link');
+    assert.equal(link.length, 1);
+    assert.equal(link[0].href, GROUP_LINK);
   });
 
   function clickLeaveIcon(element, acceptPrompt) {

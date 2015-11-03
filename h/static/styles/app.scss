@@ -114,9 +114,6 @@ $group-list-width: 270px;
     cursor: pointer;
 
     &:hover {
-      .share-link-toggle {
-        color: inherit;
-      }
       .group-name-link {
         color: $brand-color;
       }
@@ -143,7 +140,6 @@ $group-list-width: 270px;
   }
 
   .group-details {
-    margin-right: 20px;
     flex-grow: 1;
     flex-shrink: 1;
   }
