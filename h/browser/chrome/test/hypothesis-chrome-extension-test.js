@@ -1,6 +1,6 @@
 'use strict';
 
-var assign = require('core-js/modules/$.assign');
+var assign = require('core-js/modules/$.object-assign');
 var proxyquire = require('proxyquire');
 
 var errors = require('../lib/errors');

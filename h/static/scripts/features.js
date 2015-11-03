@@ -21,7 +21,7 @@
  */
 'use strict';
 
-var assign = require('core-js/modules/$.assign');
+var assign = require('core-js/modules/$.object-assign');
 
 var events = require('./events');
 

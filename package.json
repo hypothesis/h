@@ -24,7 +24,7 @@
     "clean-css": "3.3.9",
     "coffee-script": "1.7.1",
     "coffeeify": "^1.0.0",
-    "core-js": "^1.1.1",
+    "core-js": "^1.2.5",
     "diff-match-patch": "^1.0.0",
     "document-base-uri": "^1.0.0",
     "dom-anchor-fragment": "^1.0.1",

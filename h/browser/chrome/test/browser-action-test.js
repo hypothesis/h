@@ -1,4 +1,4 @@
-var assign = require('core-js/modules/$.assign');
+var assign = require('core-js/modules/$.object-assign');
 var proxyquire = require('proxyquire');
 
 describe('BrowserAction', function () {
