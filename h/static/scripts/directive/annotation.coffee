@@ -238,11 +238,13 @@ AnnotationController = [
     # Create or update the existing draft for this annotation using
     # the text and tags from the domain model in 'draft'
     updateDraft = (draft) ->
-      # drafts only preserve the text and tags for the
-      # annotation, changes to other properties are not preserved
+      # Drafts only preserve the text, tags and permissions of the annotation
+      # (i.e. only the bits that the user can edit), changes to other
+      # properties are not preserved.
       drafts.update(model, {
         text: draft.text
         tags: draft.tags
+        permissions: draft.permissions
       })
 
     ###*
