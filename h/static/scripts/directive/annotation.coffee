@@ -44,12 +44,12 @@ errorMessage = (reason) ->
 # {@link annotationMapper AnnotationMapper service} for persistence.
 ###
 AnnotationController = [
-  '$scope', '$timeout', '$q', '$rootScope', '$document',
-  'drafts', 'flash', 'permissions', 'tags', 'time',
-  'annotationUI', 'annotationMapper', 'session', 'groups',
-  ($scope,   $timeout,   $q,   $rootScope,   $document,
-   drafts,   flash,   permissions,   tags,   time,
-   annotationUI,   annotationMapper,   session,   groups) ->
+  '$document', '$q', '$rootScope', '$scope', '$timeout', '$window',
+  'annotationUI', 'annotationMapper', 'drafts', 'flash', 'groups',
+  'permissions', 'session', 'tags', 'time'
+  ($document,   $q,   $rootScope,   $scope,   $timeout,   $window,
+   annotationUI,   annotationMapper,   drafts,   flash,   groups,
+   permissions,   session,   tags,   time) ->
 
     # @annotation is the view model, containing the unsaved annotation changes
     @annotation = {}
@@ -186,7 +186,7 @@ AnnotationController = [
     ###
     this.delete = ->
       $timeout ->  # Don't use confirm inside the digest cycle
-        if confirm "Are you sure you want to delete this annotation?"
+        if $window.confirm "Are you sure you want to delete this annotation?"
           onRejected = (reason) =>
             flash.error(errorMessage(reason), "Deleting annotation failed")
           $scope.$apply ->

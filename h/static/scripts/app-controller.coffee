@@ -7,7 +7,7 @@ module.exports = class AppController
   this.$inject = [
     '$controller', '$document', '$location', '$rootScope', '$route', '$scope',
     '$window', 'annotationUI', 'auth', 'drafts', 'features', 'groups',
-    'identity', 'session',
+    'identity', 'session'
   ]
   constructor: (
      $controller,   $document,   $location,   $rootScope,   $route,   $scope,

@@ -10,6 +10,7 @@ describe 'annotation', ->
   $rootScope = null
   $scope = null
   $timeout = null
+  $window = null
   annotation = null
   controller = null
   isolateScope = null
@@ -117,9 +118,11 @@ describe 'annotation', ->
     $provide.value 'groups', fakeGroups
     return
 
-  beforeEach inject (_$compile_, _$document_, _$q_, _$rootScope_, _$timeout_) ->
+  beforeEach inject (_$compile_, _$document_, _$q_, _$rootScope_, _$timeout_,
+                     _$window_) ->
     $compile = _$compile_
     $document = _$document_
+    $window = _$window_
     $q = _$q_
     $timeout = _$timeout_
     $rootScope = _$rootScope_
@@ -397,16 +400,13 @@ describe 'annotation', ->
         assert.notOk(dialog.hasClass('open'))
 
   describe "deleteAnnotation() method", ->
-    before ->
-      sinon.stub(window, "confirm")
-
     beforeEach ->
       createDirective()
       fakeAnnotationMapper.deleteAnnotation = sandbox.stub()
       fakeFlash.error = sandbox.stub()
 
     it "calls annotationMapper.delete() if the delete is confirmed", (done) ->
-      window.confirm.returns(true)
+      sandbox.stub($window, 'confirm').returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns($q.resolve())
 
       controller.delete().then ->
@@ -415,11 +415,11 @@ describe 'annotation', ->
       $timeout.flush()
 
     it "doesn't call annotationMapper.delete() if the delete is cancelled", ->
-      window.confirm.returns(false)
+      sandbox.stub($window, 'confirm').returns(false)
       assert fakeAnnotationMapper.deleteAnnotation.notCalled
 
     it "flashes a generic error if the server cannot be reached", (done) ->
-      window.confirm.returns(true)
+      sandbox.stub($window, 'confirm').returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns($q.reject({status: 0}))
 
       controller.delete().then ->
@@ -429,7 +429,7 @@ describe 'annotation', ->
       $timeout.flush()
 
     it "flashes an error if the delete fails on the server", (done) ->
-      window.confirm.returns(true)
+      sandbox.stub($window, 'confirm').returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns($q.reject({
           status: 500,
           statusText: "Server Error",
@@ -444,7 +444,7 @@ describe 'annotation', ->
       $timeout.flush()
 
     it "doesn't flash an error if the delete succeeds", (done) ->
-      window.confirm.returns(true)
+      sandbox.stub($window, 'confirm').returns(true)
       fakeAnnotationMapper.deleteAnnotation.returns($q.resolve())
 
       controller.delete().then ->
