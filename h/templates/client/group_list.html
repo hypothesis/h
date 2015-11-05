@@ -14,7 +14,6 @@
         data-toggle="dropdown"
         role="button"
         ng-switch on="groups.focused().public"
-        ng-click="toggleShareLink(undefined)"
         title="Change the selected group">
     <i class="group-list-label__icon h-icon-public" ng-switch-when="true"></i><!-- nospace
     !--><i class="group-list-label__icon h-icon-group" ng-switch-default></i>
@@ -42,21 +41,9 @@
             </a>
           </div>
           <div class="share-link-container" ng-click="$event.stopPropagation()" ng-if="!group.public">
-            <div>
-              <a class="share-link-toggle"
-                 href=""
-                 ng-click="toggleShareLink(group.id)"
-                 title="Invite others to join this group">
-                Invite others to join this group
-              </a>
-            </div>
-            <div class="share-link-expander" ng-show="shouldShowShareLink(group.id)">
-              <input class="share-link-field" data-group-id="{{group.id}}" ng-value="group.url">
-              <p>
-                You can invite other people to join this group
-                by sending them this link
-              </p>
-            </div>
+            <a class="share-link" href="{{group.url}}" target="_blank">
+              View group activity and invite others
+            </a>
           </div>
         </div>
         <!-- the 'Leave group' icon !-->
