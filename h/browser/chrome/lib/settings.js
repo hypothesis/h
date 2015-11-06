@@ -16,4 +16,4 @@ function normalizeSettings(settings) {
 /**
  * Returns the configuration object for the Chrome extension
  */
-module.exports = normalizeSettings(window.extensionConfig);
+module.exports = normalizeSettings(window.EXTENSION_CONFIG);

@@ -62,7 +62,7 @@ function sessionActions(options) {
  *
  * @ngInject
  */
-function session($document, $http, $resource, $rootScope, flash) {
+function session($document, $http, $resource, $rootScope, flash, raven) {
   // Headers sent by every request made by the session service.
   var headers = {};
   // TODO: Move accounts data management (e.g. profile, edit_profile,
@@ -143,7 +143,17 @@ function session($document, $http, $resource, $rootScope, flash) {
       $rootScope.$broadcast(events.USER_CHANGED, {
         initialLoad: isInitialLoad,
       });
+
+      // associate error reports with the current user in Sentry
+      if (resource.state.userid) {
+        raven.setUserInfo({
+          id: resource.state.userid,
+        })
+      } else {
+        raven.setUserInfo(undefined);
+      }
     }
+
     if (groupsChanged) {
       $rootScope.$broadcast(events.GROUPS_CHANGED, {
         initialLoad: isInitialLoad,

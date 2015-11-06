@@ -1,3 +1,9 @@
+# initialize Raven. This is required at the top of this file
+# so that it happens early in the app's startup flow
+if window.RAVEN_CONFIG
+  require('./raven').init(window.RAVEN_CONFIG)
+
+
 require('autofill-event')
 baseURI = require('document-base-uri')
 angular = require('angular')
@@ -79,6 +85,7 @@ setupHttp = ['$http', ($http) ->
 setupHost = ['host', (host) -> ]
 
 module.exports = angular.module('h', [
+  require('./raven').angularModule().name
   'angulartics'
   'angulartics.google.analytics'
   'angular-jwt'
@@ -159,6 +166,7 @@ module.exports = angular.module('h', [
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))
 .value('Discovery', require('./discovery'))
+.value('raven', require('./raven'))
 
 .config(configureDocument)
 .config(configureLocation)

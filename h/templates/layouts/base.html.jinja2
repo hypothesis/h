@@ -55,6 +55,15 @@
       <!-- End Google Analytics -->
     {% endif %}
 
+    {% if request.sentry.get_public_dsn() %}
+      <script>
+        var RAVEN_CONFIG = {
+          dsn: "{{ request.sentry.get_public_dsn('https') }}",
+          release: "{{ h_version }}"
+        };
+      </script>
+    {% endif %}
+
     {% block base_tag %}{% endblock %}
   </head>
   {% block body_tag %}<body class="body--default">{% endblock %}

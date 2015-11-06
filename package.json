@@ -42,6 +42,7 @@
     "node-uuid": "^1.4.3",
     "postcss": "^5.0.6",
     "raf": "^3.1.0",
+    "raven-js": "^2.0.2",
     "retry": "^0.8.0",
     "scroll-into-view": "^1.3.1",
     "showdown": "^1.2.1",

@@ -116,10 +116,7 @@
 
 {% block scripts %}
   <script id="hypothesis-settings" type="application/json">
-    {
-      "apiUrl": "{{ request.route_url('api') }}",
-      "websocketUrl": "{{ request.route_url('ws') | websocketize }}"
-    }
+  {{ app_config | to_json }}
   </script>
   {% assets "app_js" %}
     <script src="{{ ASSET_URL }}"></script>
