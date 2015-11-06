@@ -59,6 +59,7 @@ function Socket(url) {
           }
         }
         socket = null;
+        self.emit('close', event);
       };
 
       socket.onerror = function (event) {
@@ -85,9 +86,13 @@ function Socket(url) {
    */
   this.send = function (message) {
     messageQueue.push(message);
-    if (socket && socket.readyState === WebSocket.OPEN) {
+    if (socket && this.isConnected()) {
       sendMessages();
     }
+  };
+
+  this.isConnected = function () {
+    return socket.readyState === WebSocket.OPEN;
   };
 
   // establish the initial connection

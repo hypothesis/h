@@ -9,6 +9,8 @@ function FakeSocket(url) {
   this.messages = [];
   this.didClose = false;
 
+  this.isConnected = sinon.stub().returns(true);
+
   this.send = function (message) {
     this.messages.push(message);
   };
@@ -71,9 +73,10 @@ describe('streamer', function () {
   });
 
   it('should send a client ID', function () {
-    assert.equal(socket.messages.length, 1);
-    assert.equal(socket.messages[0].messageType, 'client_id');
-    assert.equal(socket.messages[0].value, streamer.clientId);
+    var fakeWebSocket = socket._socket;
+    assert.equal(fakeWebSocket.messages.length, 1);
+    assert.equal(fakeWebSocket.messages[0].messageType, 'client_id');
+    assert.equal(fakeWebSocket.messages[0].value, streamer.clientId);
   });
 
   it('should close any existing socket', function () {
@@ -85,13 +88,13 @@ describe('streamer', function () {
       fakeSession,
       fakeSettings
     );
-    assert.ok(oldSocket.didClose);
-    assert.ok(!newSocket.didClose);
+    assert.ok(oldSocket._socket.didClose);
+    assert.ok(!newSocket._socket.didClose);
   });
 
   describe('annotation notifications', function () {
     it('should load new annotations', function () {
-      socket.notify({
+      socket._socket.notify({
         type: 'annotation-notification',
         options: {
           action: 'create',
@@ -104,7 +107,7 @@ describe('streamer', function () {
     });
 
     it('should unload deleted annotations', function () {
-      socket.notify({
+      socket._socket.notify({
         type: 'annotation-notification',
         options: {
           action: 'delete',
@@ -124,11 +127,21 @@ describe('streamer', function () {
           id: 'new-group'
         }]
       };
-      socket.notify({
+      socket._socket.notify({
         type: 'session-change',
         model: model,
       });
       assert.ok(fakeSession.update.calledWith(model));
+    });
+  });
+
+  describe('reconnections', function () {
+    it('resends configuration messages when a reconnection occurs', function () {
+      var fakeWebSocket = socket._socket;
+      fakeWebSocket.messages = [];
+      fakeWebSocket.emit('open');
+      assert.equal(fakeWebSocket.messages.length, 1);
+      assert.equal(fakeWebSocket.messages[0].messageType, 'client_id');
     });
   });
 });

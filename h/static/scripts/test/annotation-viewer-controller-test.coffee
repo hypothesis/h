@@ -26,7 +26,7 @@ describe "AnnotationViewerController", ->
       $location: $location or {}
       $routeParams: $routeParams or {id: "test_annotation_id"}
       $scope: $scope or {search: {}}
-      streamer: streamer or {send: ->}
+      streamer: streamer or {setConfig: ->}
       store: store or {
         AnnotationResource: {get: sinon.spy()},
         SearchResource: {get: ->}}

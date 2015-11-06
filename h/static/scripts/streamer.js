@@ -14,13 +14,15 @@ var socket;
  * Only one websocket connection may exist at a time, any existing socket is
  * closed.
  *
- * @param $rootScope
+ * @param $rootScope - Scope used to $apply() app state changes
+ *                     resulting from WebSocket messages, in order to update
+ *                     appropriate watchers.
  * @param annotationMapper - The local annotation store
  * @param groups - The local groups store
  * @param session - Provides access to read and update the session state
  * @param settings - Application settings
  *
- * @return An angular-websocket wrapper around the socket.
+ * @return The push notification service client.
  */
 // @ngInject
 function connect($rootScope, annotationMapper, groups, session, settings) {
@@ -32,12 +34,14 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     socket.close();
   }
 
+  var configMessages = {};
+
   // Open the socket
   socket = new Socket(url);
-  socket.send({
+  setConfig('client-id', {
     messageType: 'client_id',
     value: clientId
-  })
+  });
 
   function handleAnnotationNotification(message) {
     action = message.options.action
@@ -70,6 +74,18 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     session.update(message.model);
   }
 
+  function sendClientConfig () {
+    Object.keys(configMessages).forEach(function (key) {
+      if (configMessages[key]) {
+        socket.send(configMessages[key]);
+      }
+    });
+  }
+
+  socket.on('open', function () {
+    sendClientConfig();
+  });
+
   socket.on('error', function (error) {
     console.warn('Error connecting to H push notification service:', error);
   });
@@ -94,7 +110,22 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     });
   });
 
-  return socket
+  /**
+   * Send a configuration message to the push notification service.
+   * Each message is associated with a key, which is used to re-send
+   * configuration data to the server in the event of a reconnection.
+   */
+  function setConfig(key, configMessage) {
+    configMessages[key] = configMessage;
+    if (socket.isConnected()) {
+      socket.send(configMessage);
+    }
+  }
+
+  return {
+    setConfig: setConfig,
+    _socket: socket,
+  };
 }
 
 module.exports = {
