@@ -1,34 +1,27 @@
 'use strict';
 
-var streamer = require('../streamer');
+var EventEmitter = require('events');
+var util = require('util');
 
-function fakeSocketConstructor(url) {
-  return {
-    messages: [],
-    onMessageCallbacks: [],
-    didClose: false,
+var proxyquire = require('proxyquire');
 
-    send: function (message) {
-      this.messages.push(message);
-    },
+function FakeSocket(url) {
+  this.messages = [];
+  this.didClose = false;
 
-    onMessage: function (callback) {
-      this.onMessageCallbacks.push(callback);
-    },
+  this.send = function (message) {
+    this.messages.push(message);
+  };
 
-    notify: function (message) {
-      this.onMessageCallbacks.forEach(function (callback) {
-        callback({
-          data: JSON.stringify(message)
-        });
-      });
-    },
+  this.notify = function (message) {
+    this.emit('message', {data: JSON.stringify(message)});
+  };
 
-    close: function () {
-      this.didClose = true
-    }
+  this.close = function () {
+    this.didClose = true
   };
 }
+util.inherits(FakeSocket, EventEmitter);
 
 describe('streamer', function () {
   var fakeAnnotationMapper;
@@ -36,8 +29,15 @@ describe('streamer', function () {
   var fakeSession;
   var fakeSettings;
   var socket;
+  var streamer;
 
   beforeEach(function () {
+    fakeRootScope = {
+      $apply: function (callback) {
+        callback();
+      }
+    };
+
     fakeAnnotationMapper = {
       loadAnnotations: sinon.stub(),
       unloadAnnotations: sinon.stub(),
@@ -57,8 +57,12 @@ describe('streamer', function () {
       websocketUrl: 'ws://example.com/ws',
     };
 
+    streamer = proxyquire('../streamer', {
+      './websocket': FakeSocket,
+    });
+
     socket = streamer.connect(
-      fakeSocketConstructor,
+      fakeRootScope,
       fakeAnnotationMapper,
       fakeGroups,
       fakeSession,
@@ -74,7 +78,8 @@ describe('streamer', function () {
 
   it('should close any existing socket', function () {
     var oldSocket = socket;
-    var newSocket = streamer.connect(fakeSocketConstructor,
+    var newSocket = streamer.connect(
+      fakeRootScope,
       fakeAnnotationMapper,
       fakeGroups,
       fakeSession,

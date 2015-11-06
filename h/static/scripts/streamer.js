@@ -1,5 +1,7 @@
 var uuid = require('node-uuid')
 
+var Socket = require('./websocket');
+
 // the randomly generated session UUID
 var clientId = uuid.v4();
 
@@ -12,7 +14,7 @@ var socket;
  * Only one websocket connection may exist at a time, any existing socket is
  * closed.
  *
- * @param $websocket - angular-websocket constructor
+ * @param $rootScope
  * @param annotationMapper - The local annotation store
  * @param groups - The local groups store
  * @param session - Provides access to read and update the session state
@@ -21,7 +23,7 @@ var socket;
  * @return An angular-websocket wrapper around the socket.
  */
 // @ngInject
-function connect($websocket, annotationMapper, groups, session, settings) {
+function connect($rootScope, annotationMapper, groups, session, settings) {
   // Get the socket URL
   var url = settings.websocketUrl;
 
@@ -31,9 +33,7 @@ function connect($websocket, annotationMapper, groups, session, settings) {
   }
 
   // Open the socket
-  socket = $websocket(url, [], {
-    reconnectIfNotNormalClose: true
-  });
+  socket = new Socket(url);
   socket.send({
     messageType: 'client_id',
     value: clientId
@@ -70,20 +70,28 @@ function connect($websocket, annotationMapper, groups, session, settings) {
     session.update(message.model);
   }
 
-  // Listen for updates
-  socket.onMessage(function (event) {
-    message = JSON.parse(event.data);
-    if (!message) {
-      return;
-    }
+  socket.on('error', function (error) {
+    console.warn('Error connecting to H push notification service:', error);
+  });
 
-    if (message.type === 'annotation-notification') {
-      handleAnnotationNotification(message)
-    } else if (message.type === 'session-change') {
-      handleSessionChangeNotification(message)
-    } else {
-      console.warn('received unsupported notification', message.type)
-    }
+  socket.on('message', function (event) {
+    // wrap message dispatches in $rootScope.$apply() so that
+    // scope watches on app state affected by the received message
+    // are updated
+    $rootScope.$apply(function () {
+      message = JSON.parse(event.data);
+      if (!message) {
+        return;
+      }
+
+      if (message.type === 'annotation-notification') {
+        handleAnnotationNotification(message)
+      } else if (message.type === 'session-change') {
+        handleSessionChangeNotification(message)
+      } else {
+        console.warn('received unsupported notification', message.type)
+      }
+    });
   });
 
   return socket

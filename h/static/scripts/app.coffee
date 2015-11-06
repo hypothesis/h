@@ -1,7 +1,6 @@
 require('autofill-event')
 baseURI = require('document-base-uri')
 angular = require('angular')
-require('angular-websocket')
 require('angular-jwt')
 
 streamer = require('./streamer')
@@ -93,7 +92,6 @@ module.exports = angular.module('h', [
   'ngRoute'
   'ngSanitize'
   'ngTagsInput'
-  'ngWebSocket'
   'toastr'
   'ui.bootstrap'
 ])
