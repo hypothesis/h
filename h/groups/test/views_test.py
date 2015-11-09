@@ -173,7 +173,8 @@ def test_create_publishes_join_event(Group, session_model):
 
 
 # The fixtures required to mock all of read()'s dependencies.
-read_fixtures = pytest.mark.usefixtures('search', 'Group', 'renderers', 'uri')
+read_fixtures = pytest.mark.usefixtures(
+    'search', 'Group', 'renderers', 'uri', 'presenters')
 
 
 @read_fixtures
@@ -364,33 +365,43 @@ def test_read_calls_search_correctly(Group, search, renderers):
             request, private=False, params={"group": g.pubid, "limit": 1000})
 
 
+class MockAnnotationHTMLPresenter(object):
+
+    def __init__(self, annotation):
+        self.annotation = annotation
+
+    def __getattr__(self, attr):
+        return getattr(self.annotation, attr)
+
+    @property
+    def document_link(self):
+        return "document_link_" + self.annotation.uri[-1]
+
+
 @read_fixtures
-def test_read_returns_document_links(Group, search, renderers, uri):
+def test_read_returns_document_links(Group, search, renderers, uri,
+                                     presenters):
     """It should return the list of document links."""
+    presenters.AnnotationHTMLPresenter = MockAnnotationHTMLPresenter
     request = mock.Mock(matchdict=_matchdict())
     g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
     annotations = [
-        mock.Mock(uri="uri_1", document_link="document_link_1"),
-        mock.Mock(uri="uri_2", document_link="document_link_2"),
-        mock.Mock(uri="uri_3", document_link="document_link_3")
-    ]
+        mock.Mock(uri="uri_1"), mock.Mock(uri="uri_2"), mock.Mock(uri="uri_3")]
     search.search.return_value = {"rows": annotations}
-
     def normalize(uri):
         return uri + "_normalized"
     uri.normalize.side_effect = normalize
 
     views.read(request)
-
-    assert (
-        renderers.render_to_response.call_args[1]['value']['document_links']
+    assert (renderers.render_to_response.call_args[1]['value']['document_links']
         == ["document_link_1", "document_link_2", "document_link_3"])
 
 
 @read_fixtures
-def test_read_duplicate_documents_are_removed(Group, search, renderers, uri):
+def test_read_duplicate_documents_are_removed(Group, search, renderers, uri,
+                                              presenters):
     """
 
     If the group has multiple annotations whose uris all normalize to the same
@@ -398,6 +409,7 @@ def test_read_duplicate_documents_are_removed(Group, search, renderers, uri):
     sent to the template.
 
     """
+    presenters.AnnotationHTMLPresenter = MockAnnotationHTMLPresenter
     request = mock.Mock(matchdict=_matchdict())
     g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
@@ -422,8 +434,10 @@ def test_read_duplicate_documents_are_removed(Group, search, renderers, uri):
 
 
 @read_fixtures
-def test_read_documents_are_truncated(Group, search, renderers, uri):
+def test_read_documents_are_truncated(Group, search, renderers, uri,
+                                      presenters):
     """It should send at most 25 document links to the template."""
+    presenters.AnnotationHTMLPresenter = MockAnnotationHTMLPresenter
     request = mock.Mock(matchdict=_matchdict())
     g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
@@ -436,7 +450,6 @@ def test_read_documents_are_truncated(Group, search, renderers, uri):
     search.search.return_value = {"rows": annotations}
 
     def normalize(uri):
-        # All three annotations' URIs normalize to the same URI.
         return uri + "_normalized"
     uri.normalize.side_effect = normalize
 
@@ -608,5 +621,12 @@ def search(request):
 @pytest.fixture
 def uri(request):
     patcher = mock.patch('h.groups.views.uri', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def presenters(request):
+    patcher = mock.patch('h.groups.views.presenters', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

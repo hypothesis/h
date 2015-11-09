@@ -7,11 +7,13 @@ from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 from pyramid import renderers
 
-from h.groups import schemas
+
 from h import i18n
 from h import models
+from h import presenters
 from h.api import search
 from h.api import uri
+from h.groups import schemas
 
 import h.session
 
@@ -108,7 +110,8 @@ def _read_group(request, group):
 
     result = search.search(request, private=False, params={
         "group": group.pubid, "limit": 1000})
-    annotations = result['rows']
+    annotations = [presenters.AnnotationHTMLPresenter(a)
+                   for a in result['rows']]
 
     # Group the annotations by URI.
     # Create a dict mapping the (normalized) URIs of the annotated documents
