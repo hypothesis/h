@@ -5,14 +5,14 @@ parseAccountID = require('./filter/persona').parseAccountID
 
 module.exports = class AppController
   this.$inject = [
-    '$controller', '$document', '$location', '$route', '$scope', '$window',
-    'annotationUI', 'auth', 'drafts', 'features', 'groups', 'identity',
-    'session'
+    '$controller', '$document', '$location', '$rootScope', '$route', '$scope',
+    '$window', 'annotationUI', 'auth', 'drafts', 'features', 'groups',
+    'identity', 'session'
   ]
   constructor: (
-     $controller,   $document,   $location,   $route,   $scope,   $window,
-     annotationUI,   auth,   drafts,   features,   groups,   identity,
-     session
+     $controller,   $document,   $location,   $rootScope,   $route,   $scope,
+     $window,   annotationUI,   auth,   drafts,   features,   groups,
+     identity,   session
   ) ->
     $controller('AnnotationUIController', {$scope})
 
@@ -101,11 +101,25 @@ module.exports = class AppController
         oncancel: -> $scope.accountDialog.visible = false
       })
 
+    # Prompt to discard any unsaved drafts.
+    promptToLogout = ->
+      # TODO - Replace this with a UI which doesn't look terrible.
+      if drafts.count() == 1
+        text = 'You have an unsaved annotation.\n
+                Do you really want to discard this draft?'
+      else if drafts.count() > 1
+        text = 'You have ' + drafts.count() + ' unsaved annotations.\n
+                Do you really want to discard these drafts?'
+      return (drafts.count() == 0 or $window.confirm(text))
+
     # Log the user out.
     $scope.logout = ->
-      return unless drafts.discard()
-      $scope.accountDialog.visible = false
-      identity.logout()
+      if promptToLogout()
+        for draft in drafts.unsaved()
+          $rootScope.$emit("annotationDeleted", draft)
+        drafts.discard()
+        $scope.accountDialog.visible = false
+        identity.logout()
 
     $scope.clearSelection = ->
       $scope.search.query = ''

@@ -19,6 +19,14 @@ function DraftStore() {
   }
 
   /**
+   * Returns the number of drafts - both unsaved new annotations, and unsaved
+   * edits to saved annotations - currently stored.
+   */
+  this.count = function count() {
+    return this._drafts.length;
+  };
+
+  /**
    * Returns a list of all new annotations (those with no ID) for which
    * unsaved drafts exist.
    */
@@ -59,23 +67,8 @@ function DraftStore() {
     });
   }
 
-  /** Prompt to discard any unsaved drafts. */
   this.discard = function discard() {
-    // TODO - Replace this with a UI which doesn't look terrible
-    var text;
-    if (this._drafts.length === 1) {
-      text = 'You have an unsaved reply.\n\n' +
-             'Do you really want to discard this draft?';
-    } else if (this._drafts.length > 1) {
-      text = 'You have ' + this._drafts.length + ' unsaved replies.\n\n'
-             'Do you really want to discard these drafts?';
-    }
-    if (this._drafts.length === 0 || window.confirm(text)) {
-      this._drafts = [];
-      return true;
-    } else {
-      return false;
-    }
+    this._drafts = [];
   }
 }
 
