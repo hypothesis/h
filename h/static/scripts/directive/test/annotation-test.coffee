@@ -536,6 +536,7 @@ describe 'annotation', ->
       assert.calledWith(fakeDrafts.update, annotation, {
         text: annotation.text,
         tags: annotation.tags,
+        permissions: annotation.permissions
       })
 
     it "starts editing immediately if there is a draft", ->
@@ -582,12 +583,14 @@ describe 'annotation', ->
       controller.edit()
       controller.annotation.text = 'unsaved-text'
       controller.annotation.tags = []
+      controller.annotation.permissions = 'new permissions'
       fakeDrafts.get = sinon.stub().returns({text: 'old-draft'})
       fakeDrafts.update = sinon.stub()
       $rootScope.$broadcast(events.GROUP_FOCUSED)
       assert.calledWith(fakeDrafts.update, annotation, {
         text: 'unsaved-text',
         tags: []
+        permissions: 'new permissions'
       })
 
     it "should not create a new draft", ->
