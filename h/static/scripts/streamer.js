@@ -7,6 +7,8 @@ var clientId = uuid.v4();
 // be open at a time
 var socket;
 
+var logger = require('./logger').getLogger('websocket');
+
 /**
  * Open a new WebSocket connection to the Hypothesis push notification service.
  * Only one websocket connection may exist at a time, any existing socket is
@@ -74,15 +76,17 @@ function connect($websocket, annotationMapper, groups, session, settings) {
   socket.onMessage(function (event) {
     message = JSON.parse(event.data);
     if (!message) {
+      logger.warn('failed to parse message', event.data);
       return;
     }
+    logger.debug('received message', message);
 
     if (message.type === 'annotation-notification') {
       handleAnnotationNotification(message)
     } else if (message.type === 'session-change') {
       handleSessionChangeNotification(message)
     } else {
-      console.warn('received unsupported notification', message.type)
+      logger.warn('received unsupported notification', message.type)
     }
   });
 
