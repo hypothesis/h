@@ -62,9 +62,8 @@ This package is responsible for defining URI normalization and expansion
 routines for use elsewhere in the Hypothesis application.
 """
 
-import urllib
-import urlparse
-
+from h._compat import urlparse
+from h._compat import url_quote, url_quote_plus, url_unquote, url_unquote_plus
 from h.api import models
 
 
@@ -219,7 +218,7 @@ def _normalize_path(uri):
 
 
 def _normalize_pathsegment(segment):
-    return urllib.quote(urllib.unquote(segment), safe=UNRESERVED_PATHSEGMENT)
+    return url_quote(url_unquote(segment), safe=UNRESERVED_PATHSEGMENT)
 
 
 def _normalize_query(uri):
@@ -251,10 +250,8 @@ def _normalize_queryitems(items):
 
 
 def _normalize_queryname(name):
-    return urllib.quote_plus(urllib.unquote_plus(name),
-                             safe=UNRESERVED_QUERY_NAME)
+    return url_quote_plus(url_unquote_plus(name), safe=UNRESERVED_QUERY_NAME)
 
 
 def _normalize_queryvalue(value):
-    return urllib.quote_plus(urllib.unquote_plus(value),
-                             safe=UNRESERVED_QUERY_VALUE)
+    return url_quote_plus(url_unquote_plus(value), safe=UNRESERVED_QUERY_VALUE)

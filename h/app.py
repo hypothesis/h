@@ -100,6 +100,11 @@ def get_settings(global_config, **settings):
     result.update(settings)
     result.update(settings_from_environment())
     result.update(global_config)
+
+    if 'secret_key' in result and not isinstance(result['secret_key'],
+                                                 bytes):
+        result['secret_key'] = result['secret_key'].encode('utf-8')
+
     result.update(missing_secrets(result))
     return result
 
@@ -119,6 +124,6 @@ def missing_secrets(settings):
         secret = settings.get('secret_key')
         if secret is None:
             secret = missing['secret_key']
-        missing['redis.sessions.secret'] = derive_key(secret, 'h.session')
+        missing['redis.sessions.secret'] = derive_key(secret, b'h.session')
 
     return missing

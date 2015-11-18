@@ -4,6 +4,8 @@ import os
 from webassets.filter import ExternalTool, register_filter
 import pyramid
 
+from h._compat import string_types
+
 
 class Browserify(ExternalTool):
     """
@@ -26,7 +28,7 @@ class Browserify(ExternalTool):
             args.append('-d')
 
         if self.extra_args is not None:
-            if isinstance(self.extra_args, basestring):
+            if isinstance(self.extra_args, string_types):
                 self.extra_args = self.extra_args.split()
             args.extend(self.extra_args)
 
@@ -57,7 +59,7 @@ class CleanCSS(ExternalTool):
     def output(self, _in, out, **kw):
         args = [self.binary or 'cleancss']
         if self.extra_args:
-            if isinstance(self.extra_args, basestring):
+            if isinstance(self.extra_args, string_types):
                 self.extra_args = self.extra_args.split()
             args.extend(self.extra_args)
         self.subprocess(args, out, _in)
@@ -66,7 +68,7 @@ class CleanCSS(ExternalTool):
         args = [self.binary or 'cleancss', '--root',
                 os.path.dirname(kw['source_path'])]
         if self.extra_args:
-            if isinstance(self.extra_args, basestring):
+            if isinstance(self.extra_args, string_types):
                 self.extra_args = self.extra_args.split()
             args.extend(self.extra_args)
         self.subprocess(args, out, _in)

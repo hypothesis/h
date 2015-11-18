@@ -57,7 +57,7 @@ def includeme(config):
     registry = config.registry
     settings = registry.settings
 
-    session_secret = derive_key(settings['secret_key'], 'h.session')
+    session_secret = derive_key(settings['secret_key'], b'h.session')
     session_factory = SignedCookieSessionFactory(session_secret, httponly=True)
 
     config.set_session_factory(session_factory)

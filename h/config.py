@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 import logging
-import urlparse
 
 from pyramid.settings import asbool
+
+from h._compat import urlparse
 
 log = logging.getLogger(__name__)
 

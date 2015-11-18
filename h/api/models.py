@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from annotator import annotation
 from annotator import document
 
+from h._compat import text_type
+
 
 class Annotation(annotation.Annotation):
     __mapping__ = {
@@ -168,9 +170,9 @@ class Annotation(annotation.Annotation):
             # Convert non-string URIs into strings.
             # If the URI is already a unicode string this will do nothing.
             # We're assuming that URI cannot be a byte string.
-            return unicode(uri_)
+            return text_type(uri_)
         else:
-            return u""
+            return ""
 
     @property
     def parent(self):

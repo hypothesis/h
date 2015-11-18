@@ -1,9 +1,12 @@
 """A class that wraps h.api.models.Annotation and adds some HTML properties."""
+from __future__ import unicode_literals
 import urlparse
 import urllib2
 from dateutil import parser
 
 import jinja2
+
+from h._compat import text_type
 
 
 def _format_document_link(href, title, link_text, hostname):
@@ -17,26 +20,26 @@ def _format_document_link(href, title, link_text, hostname):
 
     """
     if hostname and hostname in link_text:
-        hostname = u""
+        hostname = ""
 
     def truncate(content, length=60):
         """Truncate the given string to at most length chars."""
         if len(content) <= length:
             return content
         else:
-            return content[:length] + jinja2.Markup(u"&hellip;")
+            return content[:length] + jinja2.Markup("&hellip;")
 
     hostname = truncate(hostname)
     link_text = truncate(link_text)
 
     if href and hostname:
-        link = u'<a href="{href}" title="{title}">{link_text}</a><br>({hostname})'
+        link = '<a href="{href}" title="{title}">{link_text}</a><br>({hostname})'
     elif hostname:
-        link = u'<a title="{title}">{link_text}</a><br>({hostname})'
+        link = '<a title="{title}">{link_text}</a><br>({hostname})'
     elif href:
-        link = u'<a href="{href}" title="{title}">{link_text}</a>'
+        link = '<a href="{href}" title="{title}">{link_text}</a>'
     else:
-        link = u'<a title="{title}">{link_text}</a>'
+        link = '<a title="{title}">{link_text}</a>'
 
     link = link.format(
         href=jinja2.escape(href),
@@ -80,7 +83,7 @@ class AnnotationHTMLPresenter(object):
         if self.uri.lower().startswith("file:///"):
             return jinja2.escape(self.uri.split("/")[-1])
         else:
-            return u""
+            return ""
 
     @property
     def hostname_or_filename(self):
@@ -104,7 +107,7 @@ class AnnotationHTMLPresenter(object):
             hostname = urlparse.urlparse(self.uri).hostname
 
             # urlparse()'s .hostname is sometimes None.
-            hostname = hostname or u""
+            hostname = hostname or ""
 
             return jinja2.escape(hostname)
 
@@ -129,11 +132,11 @@ class AnnotationHTMLPresenter(object):
             except (KeyError, TypeError):
                 # Sometimes document_ has no "title" key or isn't a dict at
                 # all.
-                title = u""
+                title = ""
             if title:
                 # Convert non-string titles into strings.
                 # We're assuming that title cannot be a byte string.
-                title = unicode(title)
+                title = text_type(title)
 
                 return jinja2.escape(title)
 
@@ -163,7 +166,7 @@ class AnnotationHTMLPresenter(object):
                 uri.lower().startswith("https://")):
             return jinja2.escape(uri)
         else:
-            return u""
+            return ""
 
     @property
     def link_text(self):
@@ -262,13 +265,13 @@ class AnnotationHTMLPresenter(object):
         selection = get_selection()
         if selection:
             selection = jinja2.escape(selection)
-            description += u"&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
+            description += "&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
                 selection=selection)
 
         text = self.annotation.get("text")
         if text:
             text = jinja2.escape(text)
-            description += u"{text}".format(text=text)
+            description += "{text}".format(text=text)
 
         return description
 

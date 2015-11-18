@@ -4,6 +4,7 @@
 
 import copy
 
+from h._compat import string_types
 from h.api import nipsa
 from h.api import uri
 from h.api import groups
@@ -56,7 +57,7 @@ def _normalize_annotation_target_uris(annotation):
             continue
         if 'source' not in target:
             continue
-        if not isinstance(target['source'], basestring):
+        if not isinstance(target['source'], string_types):
             continue
         target['scope'] = [uri.normalize(target['source'])]
 
