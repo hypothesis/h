@@ -4,13 +4,13 @@ import random
 import string
 
 import cryptacular.bcrypt
-from pyramid.compat import text_type
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import expression
 
 from h.db import Base
+from h._compat import text_type
 
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
 USERNAME_MIN_LENGTH = 3
