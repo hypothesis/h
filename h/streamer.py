@@ -6,7 +6,6 @@ import json
 import logging
 import operator
 import random
-import re
 import struct
 import unicodedata
 import weakref
@@ -26,8 +25,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from h import queue
 from h._compat import text_type
 from h.api import uri
-from .models import Annotation, Group
-import h.session
+from h.models import Annotation
 
 log = logging.getLogger(__name__)
 
