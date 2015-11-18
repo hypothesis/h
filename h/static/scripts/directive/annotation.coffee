@@ -361,6 +361,10 @@ AnnotationController = [
       @annotation.tags = ({text} for text in (@annotation.tags or []))
 
     updateTimestamp = (repeat=false) =>
+      if not model.updated
+        # New (not yet saved to the server) annotations don't have any .updated
+        # yet, so we can't update their timestamp.
+        return
       @timestamp = time.toFuzzyString model.updated
       fuzzyUpdate = time.nextFuzzyUpdate model.updated
       nextUpdate = (1000 * fuzzyUpdate) + 500
