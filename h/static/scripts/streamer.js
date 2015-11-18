@@ -124,7 +124,6 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
 
   return {
     setConfig: setConfig,
-    _socket: socket,
   };
 }
 

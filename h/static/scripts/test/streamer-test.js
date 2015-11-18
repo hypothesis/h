@@ -1,11 +1,16 @@
 'use strict';
 
-var EventEmitter = require('events');
-var util = require('util');
+var inherits = require('inherits');
+var EventEmitter = require('tiny-emitter');
 
 var proxyquire = require('proxyquire');
 
+// the most recently created FakeSocket instance
+var fakeWebSocket;
+
 function FakeSocket(url) {
+  fakeWebSocket = this;
+
   this.messages = [];
   this.didClose = false;
 
@@ -23,15 +28,14 @@ function FakeSocket(url) {
     this.didClose = true
   };
 }
-util.inherits(FakeSocket, EventEmitter);
+inherits(FakeSocket, EventEmitter);
 
 describe('streamer', function () {
   var fakeAnnotationMapper;
   var fakeGroups;
   var fakeSession;
   var fakeSettings;
-  var socket;
-  var streamer;
+  var activeStreamer;
 
   beforeEach(function () {
     fakeRootScope = {
@@ -63,7 +67,7 @@ describe('streamer', function () {
       './websocket': FakeSocket,
     });
 
-    socket = streamer.connect(
+    activeStreamer = streamer.connect(
       fakeRootScope,
       fakeAnnotationMapper,
       fakeGroups,
@@ -73,28 +77,28 @@ describe('streamer', function () {
   });
 
   it('should send a client ID', function () {
-    var fakeWebSocket = socket._socket;
     assert.equal(fakeWebSocket.messages.length, 1);
     assert.equal(fakeWebSocket.messages[0].messageType, 'client_id');
     assert.equal(fakeWebSocket.messages[0].value, streamer.clientId);
   });
 
   it('should close any existing socket', function () {
-    var oldSocket = socket;
-    var newSocket = streamer.connect(
+    var oldStreamer = activeStreamer;
+    var oldWebSocket = fakeWebSocket;
+    var newStreamer = streamer.connect(
       fakeRootScope,
       fakeAnnotationMapper,
       fakeGroups,
       fakeSession,
       fakeSettings
     );
-    assert.ok(oldSocket._socket.didClose);
-    assert.ok(!newSocket._socket.didClose);
+    assert.ok(oldWebSocket.didClose);
+    assert.ok(!fakeWebSocket.didClose);
   });
 
   describe('annotation notifications', function () {
     it('should load new annotations', function () {
-      socket._socket.notify({
+      fakeWebSocket.notify({
         type: 'annotation-notification',
         options: {
           action: 'create',
@@ -107,7 +111,7 @@ describe('streamer', function () {
     });
 
     it('should unload deleted annotations', function () {
-      socket._socket.notify({
+      fakeWebSocket.notify({
         type: 'annotation-notification',
         options: {
           action: 'delete',
@@ -127,7 +131,7 @@ describe('streamer', function () {
           id: 'new-group'
         }]
       };
-      socket._socket.notify({
+      fakeWebSocket.notify({
         type: 'session-change',
         model: model,
       });
@@ -137,7 +141,6 @@ describe('streamer', function () {
 
   describe('reconnections', function () {
     it('resends configuration messages when a reconnection occurs', function () {
-      var fakeWebSocket = socket._socket;
       fakeWebSocket.messages = [];
       fakeWebSocket.emit('open');
       assert.equal(fakeWebSocket.messages.length, 1);
