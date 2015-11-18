@@ -6,6 +6,8 @@ from dateutil import parser
 
 import jinja2
 
+from h._compat import text_type
+
 
 def _format_document_link(href, title, link_text, hostname):
     """Return a document link for the given components.
@@ -134,7 +136,7 @@ class AnnotationHTMLPresenter(object):
             if title:
                 # Convert non-string titles into strings.
                 # We're assuming that title cannot be a byte string.
-                title = unicode(title)
+                title = text_type(title)
 
                 return jinja2.escape(title)
 
