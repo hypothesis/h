@@ -368,15 +368,22 @@ describe 'annotation', ->
       afterEach ->
         clock.restore()
 
+      it 'is not updated for unsaved annotations', ->
+        # Unsaved annotations don't have an updated time yet so a timestamp
+        # string can't be computed for them.
+        annotation.updated = null
+        $scope.$digest()
+        assert.equal(controller.timestamp, null)
+
       it 'is updated on first digest', ->
         $scope.$digest()
         assert.equal(controller.timestamp, 'a while ago')
 
       it 'is updated after a timeout', ->
         fakeTime.nextFuzzyUpdate.returns(10)
+        fakeTime.toFuzzyString.returns('ages ago')
         $scope.$digest()
         clock.tick(11000)
-        fakeTime.toFuzzyString.returns('ages ago')
         $timeout.flush()
         assert.equal(controller.timestamp, 'ages ago')
 
