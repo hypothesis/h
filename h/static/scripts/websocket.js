@@ -1,8 +1,8 @@
 'use strict';
 
 var retry = require('retry');
-var util = require('util');
-var EventEmitter = require('events');
+var EventEmitter = require('tiny-emitter');
+var inherits = require('inherits');
 
 // see https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
 var CLOSE_NORMAL = 1000;
@@ -99,6 +99,6 @@ function Socket(url) {
   reconnect();
 }
 
-util.inherits(Socket, EventEmitter);
+inherits(Socket, EventEmitter);
 
 module.exports = Socket;
