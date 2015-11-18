@@ -152,7 +152,7 @@ class User(Base):
         if not self.salt:
             self.salt = _generate_random_string(24)
 
-        return unicode(CRYPT.encode(password + self.salt))
+        return text_type(CRYPT.encode(password + self.salt))
 
     @classmethod
     def get_by_email(cls, email):
