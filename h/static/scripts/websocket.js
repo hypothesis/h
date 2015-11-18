@@ -72,6 +72,7 @@ function Socket(url) {
     });
   };
 
+  /** Close the underlying WebSocket connection */
   this.close = function () {
     if (!socket) {
       console.error('Socket.close() called before socket was connected');
@@ -86,13 +87,14 @@ function Socket(url) {
    */
   this.send = function (message) {
     messageQueue.push(message);
-    if (socket && this.isConnected()) {
+    if (this.isConnected()) {
       sendMessages();
     }
   };
 
+  /** Returns true if the WebSocket is currently connected. */
   this.isConnected = function () {
-    return socket.readyState === WebSocket.OPEN;
+    return socket && socket.readyState === WebSocket.OPEN;
   };
 
   // establish the initial connection
