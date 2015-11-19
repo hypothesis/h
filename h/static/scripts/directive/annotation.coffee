@@ -425,17 +425,22 @@ AnnotationController = [
       if !vm.editing
         return
 
+      # move any new annotations to the currently focused group when
+      # switching groups. See GH #2689 for context
+      if !model.id
+        newGroup = groups.focused().id
+        if permissions.isShared(vm.annotation.permissions, vm.annotation.group)
+          model.permissions = permissions.shared(newGroup)
+          vm.annotation.permissions = model.permissions
+        model.group = newGroup
+        vm.annotation.group = model.group
+
       # if we have a draft, update it, otherwise (eg. when the user signs out)
       # do not create a new one
       if drafts.get(model)
         draftDomainModel = {}
         updateDomainModel(draftDomainModel, vm.annotation)
         updateDraft(draftDomainModel)
-
-      # move any new annotations to the currently focused group when
-      # switching groups. See GH #2689 for context
-      if !model.id
-        model.group = groups.focused().id
 
     this
 ]
