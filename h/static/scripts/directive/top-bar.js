@@ -5,7 +5,6 @@ module.exports = function () {
     restrict: 'E',
     scope: {
       auth: '=',
-      groupsEnabled: '=',
       isSidebar: '=',
       onLogin: '&',
       onLogout: '&',

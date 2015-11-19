@@ -219,16 +219,6 @@ def test_create_returns_render(search_lib):
 read_fixtures = pytest.mark.usefixtures('search_lib', 'AnnotationEvent')
 
 
-@ read_fixtures
-def test_read_404s_for_group_annotations_if_groups_feature_is_off():
-    context = mock.Mock(model={'group': 'foo'})
-    request = mock.Mock()
-    request.feature.return_value = False
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.read(context, request)
-
-
 @read_fixtures
 def test_read_event(AnnotationEvent):
     annotation = _mock_annotation()

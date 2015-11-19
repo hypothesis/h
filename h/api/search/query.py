@@ -132,20 +132,11 @@ class GroupFilter(object):
 
     """
     Matches only those annotations belonging to the specified group.
-
-    When the groups feature flag is off, this ensures that only annotations
-    from the public group are returned.
     """
-
-    def __init__(self, request):
-        self.request = request
 
     def __call__(self, params):
         # Remove parameter if passed, preventing fall-through to default query
         group = params.pop("group", None)
-
-        if not self.request.feature('groups'):
-            return {"term": {"group": "__world__"}}
 
         if group is not None:
             return {"term": {"group": group}}

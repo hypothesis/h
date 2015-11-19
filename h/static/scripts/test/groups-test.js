@@ -22,7 +22,6 @@ describe('groups', function() {
   var fakeSession;
   var fakeLocalStorage;
   var fakeRootScope;
-  var fakeFeatures;
   var fakeHttp;
   var sandbox;
 
@@ -45,9 +44,6 @@ describe('groups', function() {
         }
       }
     };
-    fakeFeatures = {
-      flagEnabled: function() {return true;}
-    };
     fakeHttp = sandbox.stub()
   });
 
@@ -56,8 +52,7 @@ describe('groups', function() {
   });
 
   function service() {
-    return groups(fakeLocalStorage, fakeSession, fakeRootScope,
-                  fakeFeatures, fakeHttp);
+    return groups(fakeLocalStorage, fakeSession, fakeRootScope, fakeHttp);
   }
 
   describe('.all()', function() {

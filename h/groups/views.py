@@ -26,9 +26,6 @@ _ = i18n.TranslationString
              renderer='h:groups/templates/create.html.jinja2')
 def create_form(request):
     """Render the form for creating a new group."""
-    if not request.feature('groups'):
-        raise exc.HTTPNotFound()
-
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
@@ -61,9 +58,6 @@ def _send_group_notification(request, event_type, pubid):
              renderer='h:groups/templates/create.html.jinja2')
 def create(request):
     """Respond to a submission of the create group form."""
-    if not request.feature('groups'):
-        raise exc.HTTPNotFound()
-
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
@@ -153,9 +147,6 @@ def _join(request, group):
 @view_config(route_name='group_read_noslug', request_method='GET')
 def read(request):
     """Render the page for a group."""
-    if not request.feature('groups'):
-        raise exc.HTTPNotFound()
-
     pubid = request.matchdict["pubid"]
     slug = request.matchdict.get("slug")
 
@@ -182,9 +173,6 @@ def read(request):
              request_method='POST',
              renderer='h:groups/templates/read.html.jinja2')
 def join(request):
-    if not request.feature('groups'):
-        raise exc.HTTPNotFound()
-
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 
@@ -216,8 +204,6 @@ def _group_form(request):
 @view_config(route_name='group_leave',
              request_method='POST')
 def leave(request):
-    if not request.feature('groups'):
-        raise exc.HTTPNotFound()
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
 

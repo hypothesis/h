@@ -272,44 +272,14 @@ def test_authfilter_with_private_removed_authenticated_userid_principal():
     }
 
 
-def test_groupfilter_restricts_to_public_annotations_when_feature_off():
-    """
-    When the groups feature flag is off, the filter should ensure that only
-    public annotations are returned, regardless of the parameter value.
-    """
-    request = mock.Mock()
-    request.feature.return_value = False
-    groupfilter = query.GroupFilter(request)
-
-    assert groupfilter({}) == groupfilter({"group": "foo"}) == {
-        "term": {"group": "__world__"}}
-
-
-def test_groupfilter_strips_param_when_feature_off():
-    """
-    When the groups feature flag is off, the filter should strip the group
-    parameter.
-    """
-    request = mock.Mock()
-    request.feature.return_value = False
-    groupfilter = query.GroupFilter(request)
-    params = {"group": "wibble"}
-
-    groupfilter(params)
-
-    assert params == {}
-
-
 def test_groupfilter_term_filters_for_group():
-    request = mock.Mock()
-    groupfilter = query.GroupFilter(request)
+    groupfilter = query.GroupFilter()
 
     assert groupfilter({"group": "wibble"}) == {"term": {"group": "wibble"}}
 
 
 def test_groupfilter_strips_param():
-    request = mock.Mock()
-    groupfilter = query.GroupFilter(request)
+    groupfilter = query.GroupFilter()
     params = {"group": "wibble"}
 
     groupfilter(params)
@@ -318,8 +288,7 @@ def test_groupfilter_strips_param():
 
 
 def test_groupfilter_returns_none_when_no_param():
-    request = mock.Mock()
-    groupfilter = query.GroupFilter(request)
+    groupfilter = query.GroupFilter()
 
     assert groupfilter({}) is None
 

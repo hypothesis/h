@@ -167,15 +167,6 @@ def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
     annotation = context.model
 
-    # Don't show group annotations for users who don't have the groups feature
-    # enabled, even if they are members of the group (this can happen if a user
-    # joins a group and then the groups feature is later disabled for that
-    # user).
-    if not request.feature('groups'):
-        if annotation.get('group') not in (None, '__world__'):
-            raise httpexceptions.HTTPNotFound()
-
-
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'read')
 
