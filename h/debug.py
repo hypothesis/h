@@ -30,7 +30,7 @@ class DebugMailer(object):
         _print("DEBUG: sending email...\n")
 
         for key, val in sorted(mail_message.items()):
-            self._print("    %s: %s" % (key, val))
+            _print("    %s: %s" % (key, val))
         _print("")
 
         for part in mail_message.walk():
