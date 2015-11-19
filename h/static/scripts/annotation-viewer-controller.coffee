@@ -33,4 +33,4 @@ module.exports = class AnnotationViewerController
       .addClause('/references', 'first_of', id, true)
       .addClause('/id', 'equals', id, true)
 
-    streamer.send({filter: streamFilter.getFilter()})
+    streamer.setConfig('filter', {filter: streamFilter.getFilter()})

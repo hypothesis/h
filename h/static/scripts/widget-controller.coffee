@@ -50,7 +50,7 @@ module.exports = class WidgetController
 
       if loaded.length > 0
         streamFilter.resetFilter().addClause('/uri', 'one_of', loaded)
-        streamer.send({filter: streamFilter.getFilter()})
+        streamer.setConfig('filter', {filter: streamFilter.getFilter()})
 
     $scope.$on events.GROUP_FOCUSED, ->
       _resetAnnotations(annotationMapper, drafts, threading)

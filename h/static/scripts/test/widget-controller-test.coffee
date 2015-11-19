@@ -54,9 +54,7 @@ describe 'WidgetController', ->
     }
 
     fakeStreamer = {
-      open: sandbox.spy()
-      close: sandbox.spy()
-      send: sandbox.spy()
+      setConfig: sandbox.spy()
     }
 
     fakeStreamFilter = {

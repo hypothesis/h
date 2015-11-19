@@ -1,43 +1,49 @@
 'use strict';
 
-var streamer = require('../streamer');
+var inherits = require('inherits');
+var EventEmitter = require('tiny-emitter');
 
-function fakeSocketConstructor(url) {
-  return {
-    messages: [],
-    onMessageCallbacks: [],
-    didClose: false,
+var proxyquire = require('proxyquire');
 
-    send: function (message) {
-      this.messages.push(message);
-    },
+// the most recently created FakeSocket instance
+var fakeWebSocket;
 
-    onMessage: function (callback) {
-      this.onMessageCallbacks.push(callback);
-    },
+function FakeSocket(url) {
+  fakeWebSocket = this;
 
-    notify: function (message) {
-      this.onMessageCallbacks.forEach(function (callback) {
-        callback({
-          data: JSON.stringify(message)
-        });
-      });
-    },
+  this.messages = [];
+  this.didClose = false;
 
-    close: function () {
-      this.didClose = true
-    }
+  this.isConnected = sinon.stub().returns(true);
+
+  this.send = function (message) {
+    this.messages.push(message);
+  };
+
+  this.notify = function (message) {
+    this.emit('message', {data: JSON.stringify(message)});
+  };
+
+  this.close = function () {
+    this.didClose = true
   };
 }
+inherits(FakeSocket, EventEmitter);
 
 describe('streamer', function () {
   var fakeAnnotationMapper;
   var fakeGroups;
   var fakeSession;
   var fakeSettings;
-  var socket;
+  var activeStreamer;
 
   beforeEach(function () {
+    fakeRootScope = {
+      $apply: function (callback) {
+        callback();
+      }
+    };
+
     fakeAnnotationMapper = {
       loadAnnotations: sinon.stub(),
       unloadAnnotations: sinon.stub(),
@@ -57,8 +63,12 @@ describe('streamer', function () {
       websocketUrl: 'ws://example.com/ws',
     };
 
-    socket = streamer.connect(
-      fakeSocketConstructor,
+    streamer = proxyquire('../streamer', {
+      './websocket': FakeSocket,
+    });
+
+    activeStreamer = streamer.connect(
+      fakeRootScope,
       fakeAnnotationMapper,
       fakeGroups,
       fakeSession,
@@ -67,26 +77,28 @@ describe('streamer', function () {
   });
 
   it('should send a client ID', function () {
-    assert.equal(socket.messages.length, 1);
-    assert.equal(socket.messages[0].messageType, 'client_id');
-    assert.equal(socket.messages[0].value, streamer.clientId);
+    assert.equal(fakeWebSocket.messages.length, 1);
+    assert.equal(fakeWebSocket.messages[0].messageType, 'client_id');
+    assert.equal(fakeWebSocket.messages[0].value, streamer.clientId);
   });
 
   it('should close any existing socket', function () {
-    var oldSocket = socket;
-    var newSocket = streamer.connect(fakeSocketConstructor,
+    var oldStreamer = activeStreamer;
+    var oldWebSocket = fakeWebSocket;
+    var newStreamer = streamer.connect(
+      fakeRootScope,
       fakeAnnotationMapper,
       fakeGroups,
       fakeSession,
       fakeSettings
     );
-    assert.ok(oldSocket.didClose);
-    assert.ok(!newSocket.didClose);
+    assert.ok(oldWebSocket.didClose);
+    assert.ok(!fakeWebSocket.didClose);
   });
 
   describe('annotation notifications', function () {
     it('should load new annotations', function () {
-      socket.notify({
+      fakeWebSocket.notify({
         type: 'annotation-notification',
         options: {
           action: 'create',
@@ -99,7 +111,7 @@ describe('streamer', function () {
     });
 
     it('should unload deleted annotations', function () {
-      socket.notify({
+      fakeWebSocket.notify({
         type: 'annotation-notification',
         options: {
           action: 'delete',
@@ -119,11 +131,20 @@ describe('streamer', function () {
           id: 'new-group'
         }]
       };
-      socket.notify({
+      fakeWebSocket.notify({
         type: 'session-change',
         model: model,
       });
       assert.ok(fakeSession.update.calledWith(model));
+    });
+  });
+
+  describe('reconnections', function () {
+    it('resends configuration messages when a reconnection occurs', function () {
+      fakeWebSocket.messages = [];
+      fakeWebSocket.emit('open');
+      assert.equal(fakeWebSocket.messages.length, 1);
+      assert.equal(fakeWebSocket.messages[0].messageType, 'client_id');
     });
   });
 });
