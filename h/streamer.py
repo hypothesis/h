@@ -6,7 +6,6 @@ import json
 import logging
 import operator
 import random
-import re
 import struct
 import unicodedata
 import weakref
@@ -25,11 +24,8 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from h import queue
 from h._compat import text_type
-from h.api import nipsa
 from h.api import uri
-from h.api.search import query
-from .models import Annotation, Group
-import h.session
+from h.models import Annotation
 
 log = logging.getLogger(__name__)
 
@@ -86,201 +82,6 @@ len_operators = {
     "lenl": "<",
     "lenle": "<="
 }
-
-
-class FilterToElasticFilter(object):
-    def __init__(self, filter_json, request):
-        self.request = request
-        self.filter = filter_json
-        self.query = {
-            "sort": [
-                {"updated": {"order": "desc"}}
-            ],
-            "query": {
-                "bool": {
-                    "minimum_number_should_match": 1}}}
-        self.filter_scripts_to_add = []
-
-        if len(self.filter['clauses']):
-            clauses = self.convert_clauses(self.filter['clauses'])
-            # apply match policy
-            policy = getattr(self, self.filter['match_policy'])
-            policy(self.query['query']['bool'], clauses)
-        else:
-            self.query['query'] = {"match_all": {}}
-
-        if len(self.filter_scripts_to_add):
-            if 'filter' not in self.query:
-                self.query['filter'] = {}
-            scripts = ' AND '.join(self.filter_scripts_to_add)
-            self.query['filter']['script'] = '"script": ' + scripts
-
-        self.query["query"] = {
-            "filtered": {
-                "filter": {
-                    "bool": {
-                        "must": [
-                            query.AuthFilter(request)({}),
-                            nipsa.nipsa_filter(request.authenticated_userid),
-                        ]
-                    }
-                },
-                "query": self.query["query"]
-            }
-        }
-
-    @staticmethod
-    def equals(field, value):
-        if isinstance(value, list):
-            return {"terms": {field: value}}
-        else:
-            return {"term": {field: value}}
-
-    @staticmethod
-    def one_of(field, value):
-        if isinstance(value, list):
-            return {"terms": {field: value}}
-        else:
-            return {"term": {field: value}}
-
-    @staticmethod
-    def first_of(field, value):
-        if isinstance(value, list):
-            return {"terms": {field: value}}
-        else:
-            return {"term": {field: value}}
-
-    @staticmethod
-    def match_of(field, value):
-        if isinstance(value, list):
-            return {"terms": {field: value}}
-        else:
-            return {"term": {field: value}}
-
-    @staticmethod
-    def matches(field, value):
-        if isinstance(value, list):
-            return {"terms": {field: value}}
-        else:
-            return {"term": {field: value}}
-
-    @staticmethod
-    def lt(field, value):
-        return {"range": {field: {"lt": value}}}
-
-    @staticmethod
-    def le(field, value):
-        return {"range": {field: {"lte": value}}}
-
-    @staticmethod
-    def gt(field, value):
-        return {"range": {field: {"gt": value}}}
-
-    @staticmethod
-    def ge(field, value):
-        return {"range": {field: {"gte": value}}}
-
-    @staticmethod
-    def _query_string_query(field, value):
-        # Generate query_string query
-        escaped_value = re.escape(value)
-        return {
-            "query_string": {
-                "query": "*" + escaped_value + "*",
-                "fields": [field]
-            }
-        }
-
-    @staticmethod
-    def _match_query(es, field, value):
-        cutoff_freq = None
-        and_or = 'and'
-        if es:
-            if 'cutoff_frequency' in es:
-                cutoff_freq = es['cutoff_frequency']
-            if 'and_or' in es:
-                and_or = es['and_or']
-        message = {
-            "query": value,
-            "operator": and_or
-        }
-        if cutoff_freq:
-            message['cutoff_frequency'] = cutoff_freq
-        return {"match": {field: message}}
-
-    @staticmethod
-    def _multi_match_query(es, value):
-        and_or = es['and_or'] if 'and_or' in es else 'and'
-        match_type = None
-        if 'match_type' in es:
-            match_type = es['match_type']
-        message = {
-            "query": value,
-            "operator": and_or,
-            "type": match_type,
-            "fields": es['fields']
-        }
-        return {"multi_match": message}
-
-    def convert_clauses(self, clauses):
-        new_clauses = []
-        for clause in clauses:
-            if isinstance(clause['field'], list):
-                field = []
-                for f in clause['field']:
-                    field.append(f[1:].replace('/', '.'))
-            else:
-                field = clause['field'][1:].replace('/', '.')
-
-            options = clause.get('options', {})
-            es = options.get('es')
-            if es:
-                query_type = es.get('query_type', 'simple')
-            else:
-                query_type = 'match'
-
-            if isinstance(clause['value'], list):
-                value = [x.lower() for x in clause['value']]
-            else:
-                value = clause['value'].lower()
-
-            if query_type == 'query_string':
-                new_clause = self._query_string_query(field, value)
-            elif query_type == 'match':
-                new_clause = self._match_query(es, field, value)
-            elif query_type == 'multi_match':
-                new_clause = self._multi_match_query(es, value)
-            elif clause['operator'][0:2] == 'len':
-                script = "doc['%s'].values.length %s %s" % (
-                    field,
-                    len_operators[clause['operator']],
-                    clause[value]
-                )
-                self.filter_scripts_to_add.append(script)
-            else:
-                new_clause = getattr(self, clause['operator'])(field, value)
-
-            new_clauses.append(new_clause)
-        return new_clauses
-
-    @staticmethod
-    def _policy(oper, target, clauses):
-        target[oper] = []
-        for clause in clauses:
-            target[oper].append(clause)
-
-    def include_any(self, target, clauses):
-        self._policy('should', target, clauses)
-
-    def include_all(self, target, clauses):
-        self._policy('must', target, clauses)
-
-    def exclude_any(self, target, clauses):
-        self._policy('must_not', target, clauses)
-
-    def exclude_all(self, target, clauses):
-        target['must_not'] = {"bool": {}}
-        self._policy('must', target['must_not']['bool'], clauses)
 
 
 def first_of(a, b):
@@ -471,13 +272,6 @@ class WebSocket(_WebSocket):
         # Release the database transaction
         self.request.tm.commit()
 
-    def send_annotations(self):
-        user = self.user
-        annotations = Annotation.search_raw(query=self.query.query)
-        packet = _annotation_packet(annotations, 'past')
-        data = json.dumps(packet)
-        self.send(data)
-
     def _expand_clauses(self, payload):
         for clause in payload['clauses']:
             if clause['field'] == '/uri':
@@ -514,7 +308,6 @@ class WebSocket(_WebSocket):
                 self._expand_clauses(payload)
 
                 self.filter = FilterHandler(payload)
-                self.query = FilterToElasticFilter(payload, self.request)
             elif msg_type == 'client_id':
                 self.client_id = data.get('value')
         except:
