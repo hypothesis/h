@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
+
 from pyramid.view import view_config
 import sqlalchemy as sa
+import transaction
 
 from h.db import Base
+
+log = logging.getLogger(__name__)
 
 FEATURES = {
     'claim': "Enable 'claim your username' web views?",
@@ -66,6 +71,9 @@ class Feature(Base):
         """Fetch a flag by name."""
         return cls.query.filter(cls.name == name).first()
 
+    def __repr__(self):
+        return '<Feature {f.name} everyone={f.everyone}>'.format(f=self)
+
 
 def flag_enabled(request, name):
     """
@@ -97,6 +105,26 @@ def flag_enabled(request, name):
     return False
 
 
+def remove_old_flags():
+    """
+    Remove old/unknown data from the feature table.
+
+    When a feature flag is removed from the codebase, it will remain in the
+    database. This could potentially cause very surprising issues in the event
+    that a feature flag with the same name (but a different meaning) is added
+    at some point in the future.
+
+    This function removes unknown feature flags from the database, and is run
+    once at application startup.
+    """
+    unknown_flags = Feature.query.filter(
+        sa.not_(Feature.name.in_(FEATURES.keys())))
+    count = unknown_flags.delete(synchronize_session=False)
+    if count > 0:
+        log.info('removed %d old/unknown feature flags from database', count)
+    transaction.commit()
+
+
 @view_config(route_name='features_status',
              request_method='GET',
              accept='application/json',
@@ -108,8 +136,8 @@ def features_status(request):
 
 
 def includeme(config):
+    # Remove old feature flags from the database on startup
+    config.action(None, remove_old_flags, order=90)
     config.add_request_method(flag_enabled, name='feature')
-
     config.add_route('features_status', '/app/features')
-
     config.scan(__name__)
