@@ -72,6 +72,11 @@ def _setup_db(settings):
     if 'MODEL_DROP_ALL' in os.environ:
         settings['h.db.should_drop_all'] = asbool(
             os.environ['MODEL_DROP_ALL'])
+    if 'DEBUG_QUERY' in os.environ:
+        level = logging.INFO
+        if os.environ.get('DEBUG_QUERY') == 'trace':
+            level = logging.DEBUG
+        logging.getLogger('sqlalchemy.engine').setLevel(level)
 
 
 def _setup_elasticsearch(settings):

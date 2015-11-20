@@ -311,6 +311,10 @@ use and configure it.
 .. _pyramid_debugtoolbar: https://github.com/Pylons/pyramid_debugtoolbar
 .. _pyramid_debugtoolbar documentation: http://docs.pylonsproject.org/projects/pyramid-debugtoolbar/en/latest/
 
+You can turn on SQL query logging by setting the :envvar:`DEBUG_QUERY`
+environment variable (to any value). Set it to the special value ``trace`` to
+turn on result set logging as well.
+
 
 Feature Flags
 -------------
