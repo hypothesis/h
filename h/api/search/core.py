@@ -28,7 +28,7 @@ def search(request, params, private=True):
     builder.append_filter(query.UriFilter())
     builder.append_filter(lambda _: \
         nipsa.nipsa_filter(request.authenticated_userid))
-    builder.append_filter(query.GroupFilter(request))
+    builder.append_filter(query.GroupFilter())
 
     builder.append_matcher(query.AnyMatcher())
     builder.append_matcher(query.TagsMatcher())

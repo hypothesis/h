@@ -35,12 +35,6 @@ create_form_fixtures = pytest.mark.usefixtures('GroupSchema', 'Form')
 
 
 @create_form_fixtures
-def test_create_form_404s_if_groups_feature_is_off():
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.create_form(_mock_request(feature=lambda feature: False))
-
-
-@create_form_fixtures
 def test_create_form_creates_form_with_GroupSchema(GroupSchema, Form):
     test_schema = mock.Mock()
     GroupSchema.return_value = mock.Mock(
@@ -64,12 +58,6 @@ def test_create_form_returns_form(Form):
 # The fixtures required to mock all of create()'s dependencies.
 create_fixtures = pytest.mark.usefixtures('GroupSchema', 'Form', 'Group',
                                           'session_model')
-
-
-@create_fixtures
-def test_create_404s_if_groups_feature_is_off():
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.create(_mock_request(feature=lambda feature: False))
 
 
 @create_fixtures
@@ -175,12 +163,6 @@ def test_create_publishes_join_event(Group, session_model):
 # The fixtures required to mock all of read()'s dependencies.
 read_fixtures = pytest.mark.usefixtures(
     'search', 'Group', 'renderers', 'uri', 'presenters')
-
-
-@read_fixtures
-def test_read_404s_if_groups_feature_is_off():
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.read(_mock_request(feature=lambda feature: False))
 
 
 @read_fixtures
@@ -461,12 +443,6 @@ def test_read_documents_are_truncated(Group, search, renderers, uri,
 
 # The fixtures required to mock all of join()'s dependencies.
 join_fixtures = pytest.mark.usefixtures('Group', 'session_model')
-
-
-@join_fixtures
-def test_join_404s_if_groups_feature_is_off():
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.join(_mock_request(feature=lambda feature: False))
 
 
 @join_fixtures
