@@ -6,10 +6,10 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{html,js,scss}]
+[*.{html,js,json,scss}]
 indent_size = 2
 
-[*.{js,py}]
+[*.{js,json,py}]
 charset = utf-8
 
 [*.py]
@@ -18,5 +18,5 @@ indent_size = 4
 [Makefile]
 indent_style = tab
 
-[{package.json,.travis.yml}]
+[{.travis.yml}]
 indent_size = 2

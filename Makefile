@@ -59,6 +59,15 @@ client-extension-test: deps
 client-extension-test-watch: deps
 	@$(NPM_BIN)/karma start h/browser/chrome/karma.config.js
 
+client-assets: deps
+	@NODE_ENV=production $(NPM_BIN)/gulp build
+
+client-assets-dev: deps
+	@$(NPM_BIN)/gulp build
+
+client-assets-watch: deps
+	@$(NPM_BIN)/gulp watch
+
 cover:
 	@python setup.py test --cov
 	@"$$(npm bin)"/karma start h/static/scripts/karma.config.js --single-run

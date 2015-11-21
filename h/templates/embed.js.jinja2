@@ -68,7 +68,7 @@ window.hypothesisInstall = function (inject) {
   }
 
   if (typeof window.Annotator === 'undefined') {
-    {%- for url in inject_js_urls %}
+    {%- for url in inject_resource_urls %}
     resources.push('{{ url | safe }}');
     {%- endfor %}
   }

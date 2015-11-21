@@ -3,7 +3,7 @@ var Annotator = require('annotator');
 
 // Polyfills
 var g = Annotator.Util.getGlobal();
-if (g.wgxpath) {
+if (g.wgxpath && !g.document.evaluate) {
   g.wgxpath.install();
 }
 

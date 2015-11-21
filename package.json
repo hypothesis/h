@@ -53,6 +53,16 @@
   },
   "devDependencies": {
     "chai": "^3.2.0",
+    "compass-mixins": "^0.12.7",
+    "exorcist": "^0.4.0",
+    "gulp": "^3.9.1",
+    "gulp-changed": "^1.3.0",
+    "gulp-cli": "^1.2.1",
+    "gulp-if": "^2.0.0",
+    "gulp-postcss": "^6.1.0",
+    "gulp-sass": "^2.2.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-util": "^3.0.7",
     "jscs": "^1.13.1",
     "karma": "^0.13.10",
     "karma-browserify": "^3.0.3",
@@ -62,6 +72,7 @@
     "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sinon": "^1.0.4",
+    "mkdirp": "^0.5.1",
     "mocha": "^1.20.1",
     "phantom-ownpropertynames": "^1.0.0",
     "phantomjs": "^1.9.7",
@@ -69,6 +80,8 @@
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.0.0",
     "sinon": "1.16.1",
+    "uglifyify": "^3.0.1",
+    "watchify": "^3.7.0",
     "whatwg-fetch": "^0.10.1"
   },
   "engines": {
@@ -94,21 +107,25 @@
   },
   "browser": {
     "annotator": "./h/static/scripts/vendor/annotator.js",
-    "angular": "./node_modules/angular/angular.js",
     "hammerjs": "./node_modules/hammerjs/hammer.js",
-    "jquery": "./node_modules/jquery/dist/jquery.js"
+    "katex": "./h/static/scripts/vendor/katex.js",
+    "bootstrap-lite": "./h/static/styles/vendor/bootstrap/bootstrap.js"
   },
   "browserify-shim": {
     "annotator": {
       "exports": "Annotator",
       "depends": [
-        "jquery"
+        "jquery:jQuery"
       ]
     },
     "angular": {
-      "exports": "global:angular",
       "depends": [
         "jquery"
+      ]
+    },
+    "bootstrap-lite": {
+      "depends": [
+        "jquery:jQuery"
       ]
     },
     "hammerjs": "Hammer",

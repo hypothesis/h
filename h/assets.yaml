@@ -1,264 +1,93 @@
-# Angular
-angular:
-  filters: uglifyjs
-  output: scripts/vendor/angular.min.js
-  contents: ../../node_modules/angular/angular.js
-angular_animate:
-  filters: uglifyjs
-  output: scripts/vendor/angular-animate.min.js
-  contents: ../../node_modules/angular-animate/angular-animate.js
-angular_bootstrap:
-  filters: uglifyjs
-  output: scripts/vendor/angular-bootstrap.min.js
-  contents: h:static/scripts/vendor/ui-bootstrap-custom-tpls-0.13.4.js
-angular_resource:
-  filters: uglifyjs
-  output: scripts/vendor/angular-resource.min.js
-  contents: ../../node_modules/angular-resource/angular-resource.js
-angular_route:
-  filters: uglifyjs
-  output: scripts/vendor/angular-route.min.js
-  contents: ../../node_modules/angular-route/angular-route.js
-angular_sanitize:
-  filters: uglifyjs
-  output: scripts/vendor/angular-sanitize.min.js
-  contents: ../../node_modules/angular-sanitize/angular-sanitize.js
-angular_tags_input:
-  output: scripts/vendor/angular-tags-input.min.js
-  contents: ../../node_modules/ng-tags-input/build/ng-tags-input.min.js
-angular_toastr:
-  filters: uglifyjs
-  output: scripts/vendor/angular-toastr.min.js
-  contents: ../../node_modules/angular-toastr/dist/angular-toastr.tpls.js
-
-
-# Analytics
-angulartics:
-  filters: uglifyjs
-  output: scripts/vendor/angulartics.min.js
-  contents: ../../node_modules/angulartics/src/angulartics.js
-angulartics_ga:
-  filters: uglifyjs
-  output: scripts/vendor/angulartics-ga.min.js
-  contents: ../../node_modules/angulartics/src/angulartics-ga.js
-
-
 # the full version of bootstrap, used
 # by admin pages.
 #
-# The site uses a minimal version that only has the
+# The new website uses a minimal version that only has the
 # features we need
 bootstrap_full_js:
-  filters: uglifyjs
-  output: scripts/vendor/bootstrap.min.js
-  contents: ../../node_modules/bootstrap/dist/js/bootstrap.js
+  contents:
+    - scripts/jquery.bundle.js
+    - scripts/bootstrap.bundle.js
 bootstrap_full_css:
-  filters: cleancss
-  output: styles/vendor/bootstrap.min.css
-  contents: ../../node_modules/bootstrap/dist/css/bootstrap.css
-
-
-# jQuery
-jquery:
-  filters: uglifyjs
-  output: scripts/vendor/jquery.min.js
-  contents: ../../node_modules/jquery/dist/jquery.js
-
-
-# TeX rendering
-katex:
-  filters: uglifyjs
-  output: scripts/vendor/katex.min.js
-  contents: h:static/scripts/vendor/katex.js
-
-
-# Polyfills
-wgxpath:
-  filters: uglifyjs
-  output: scripts/vendor/wgxpath.install.min.js
-  contents: h:static/scripts/vendor/wgxpath.install.js
-url:
-  filters: uglifyjs
-  output: scripts/vendor/url.min.js
-  contents: ../../node_modules/js-polyfills/url.js
+  contents: styles/bootstrap.css
 
 
 # Admin areas
 admin_css:
   contents:
     - bootstrap_full_css
-    - output: styles/admin.min.css
-      filters: cleancss
-      contents:
-        - output: styles/admin.css
-          filters: compass,postcss
-          contents:
-            - h:static/styles/admin.scss
+    - styles/admin.css
+
 admin_js:
   contents:
     - jquery
     - bootstrap_full_js
 
 
-# Configuration
-config:
-  output: scripts/config.min.js
-  filters: uglifyjs
-  contents:
-    - output: scripts/config.js
-      filters: browserify
-      contents:
-        - h:static/scripts/config/module.js
-      depends:
-        - h:static/scripts/config/*.js
-
-
 # the H client application
 app_js:
   contents:
-    - jquery
-    - angular
-    - angular_animate
-    - angular_bootstrap
-    - angular_resource
-    - angular_route
-    - angular_sanitize
-    - angular_tags_input
-    - angular_toastr
-    - angulartics
-    - angulartics_ga
-    - katex
-    - url
-    - output: scripts/app.min.js
-      filters: uglifyjs
-      contents:
-        - output: scripts/app.js
-          filters: browserify
-          contents: h:static/scripts/app.coffee
-          depends:
-            - h:static/scripts/*.coffee
-            - h:static/scripts/annotation-mapper.js
-            - h:static/scripts/auth.js
-            - h:static/scripts/features.js
-            - h:static/scripts/groups.js
-            - h:static/scripts/session.js
-            - h:static/scripts/settings.js
-            - h:static/scripts/store.js
-            - h:static/scripts/directive/*.coffee
-            - h:static/scripts/directive/*.js
-            - h:static/scripts/filter/*.js
-    - config
+    - scripts/raven.bundle.js
+    - scripts/angular.bundle.js
+    - scripts/katex.bundle.js
+    - scripts/showdown.bundle.js
+    - scripts/polyfills.bundle.js
+    - scripts/unorm.bundle.js
+    - scripts/app.bundle.js
 
 app_css:
-  output: styles/app.min.css
-  filters: cleancss
   contents:
-    - h:static/styles/vendor/angular-csp.css
-    - ../../node_modules/angular-toastr/dist/angular-toastr.css
-    - h:static/styles/vendor/icomoon.css
-    - h:static/styles/vendor/katex.min.css
-    - output: styles/app.css
-      filters: compass,postcss
-      contents:
-        - h:static/styles/app.scss
-      depends:
-        - h:static/styles/*.scss
-        - h:static/styles/mixins/*.scss
+    - styles/angular-csp.css
+    - styles/angular-toastr.css
+    - styles/icomoon.css
+    - styles/katex.min.css
+    - styles/app.css
 
 
 # The inject bundle is intended to be loaded into pages for bootstrapping
 # the application. It sets up RPC channels for cross-domain communication
 # between frames participating in annotation by using the annotator bridge
 # plugin.
-inject:
-  contents:
-    - inject_css
-    - inject_js
-
 inject_js:
   contents:
-  - url
-  - output: scripts/hypothesis.min.js
-    filters: uglifyjs
-    contents:
-      - output: scripts/hypothesis.js
-        filters: browserify
-        contents: h:static/scripts/annotator/main.js
-        depends:
-          - h:static/scripts/annotation-sync.coffee
-          - h:static/scripts/bridge.coffee
-          - h:static/scripts/discovery.coffee
-          - h:static/scripts/annotator/*.coffee
-          - h:static/scripts/annotator/*.js
-          - h:static/scripts/annotator/anchoring/*.coffee
-          - h:static/scripts/annotator/plugin/*.coffee
+  - scripts/polyfills.bundle.js
+  - scripts/jquery.bundle.js
+  - scripts/injector.bundle.js
+
 
 inject_css:
-  output: styles/hypothesis.min.css
-  filters: cleancss
   contents:
-    - h:static/styles/vendor/icomoon.css
-    - output: styles/hypothesis.css
-      filters: compass,postcss
-      contents:
-        - h:static/styles/annotator/inject.scss
-        - h:static/styles/annotator/pdfjs-overrides.scss
-      depends:
-        - h:static/styles/annotator/*.scss
-        - h:static/styles/base.scss
-        - h:static/styles/reset.scss
-        - h:static/styles/variables.scss
-        - h:static/styles/mixins/icons.scss
+    - styles/icomoon.css
+    - styles/inject.css
+    - styles/pdfjs-overrides.css
+
 
 # the H website
 site_js:
-  output: scripts/site-bundle.js
-  filters: browserify
   contents:
-    - h:static/scripts/site.js
-  depends:
-    - h:static/scripts/*.js
+    - scripts/jquery.bundle.js
+    - scripts/raven.bundle.js
+    - scripts/site.bundle.js
 
 site_css:
-  output: styles/site.min.css
-  filters: cleancss
   contents:
-    - h:static/styles/vendor/icomoon.css
-    - output: styles/site.css
-      filters: compass,postcss
-      contents:
-        - h:static/styles/site.scss
-      depends:
-        - h:static/styles/*.scss
+    - styles/site.css
+    - styles/icomoon.css
+
 
 # Assets needed for the legacy H website front page only.
 # This will be removed once the new homepage design is live
 # (see https://trello.com/c/h6kQMQG8/187-new-homepage-design)
 front_page_js:
-  contents:
-    - jquery
-    - bootstrap_full_js
+  contents: bootstrap_full_js
 
 front_page_css:
-  output: styles/front-page.min.css
   contents:
-    - h:static/styles/front-page/main.css
-    - output: styles/front-page.css
-      filters: cleancss
-      contents:
-      - h:static/styles/vendor/icomoon.css
+    - styles/main.css
+    - styles/icomoon.css
 
 
 # Help page
 help_page_css:
-  output: styles/help-page.min.css
-  filters: cleancss
   contents:
-    - h:static/styles/vendor/icomoon.css
-    - output: styles/help-page.css
-      filters: compass,postcss
-      contents:
-        - h:static/styles/help-page.scss
-      depends:
-        - h:static/styles/*.scss
-        - h:static/styles/mixins/*.scss
+    - styles/icomoon.css
+    - styles/help-page.css

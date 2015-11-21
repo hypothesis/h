@@ -1,3 +1,4 @@
+katex = require('katex')
 mediaEmbedder = require('../media-embedder')
 angular = require('angular')
 

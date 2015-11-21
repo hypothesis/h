@@ -1,82 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 
-from webassets.filter import ExternalTool, register_filter
 import pyramid
 
 from h._compat import string_types
-
-
-def _locate_npm_bin(name):
-    return './node_modules/.bin/{}'.format(name)
-
-
-class Browserify(ExternalTool):
-    """
-    An input filter for webassets that bundles CoffeeScript or JavaScript
-    using Browserify.
-    """
-    name = 'browserify'
-    max_debug_level = None
-    extra_args = None
-
-    def input(self, in_, out, **kw):
-        args = [_locate_npm_bin('browserify'), '--extension=.coffee',
-                '--transform', 'coffeeify']
-        if self.get_config('debug'):
-            args.append('-d')
-        args.append(kw['source_path'])
-        self.subprocess(args, out)
-
-register_filter(Browserify)
-
-
-# The release versions of webassets upstream don't support extra arguments yet.
-class CleanCSS(ExternalTool):
-    """
-    Minify CSS using `Clean-css <https://github.com/GoalSmashers/clean-css/>`_.
-    """
-
-    name = 'cleancss'
-    options = {
-        'binary': _locate_npm_bin('cleancss'),
-        'extra_args': '--skip-advanced --skip-rebase',
-    }
-
-    def run(self, _in, out, extra_args):
-        args = [_locate_npm_bin('cleancss')] + extra_args
-        self.subprocess(args, out, _in)
-
-    def output(self, _in, out, **kw):
-        self.run(_in, out, [])
-
-    def input(self, _in, out, **kw):
-        extra_args = ['--root', os.path.dirname(kw['source_path'])]
-        self.run(_in, out, extra_args)
-
-register_filter(CleanCSS)
-
-
-class PostCSS(ExternalTool):
-    """ Add vendor prefixes using postcss and autoprefixer.
-
-        webassets does ship with an 'autoprefixer' filter but
-        it does not support the current version of autoprefixer
-        which ships as a postcss plugin rather than standalone
-        tool.
-
-        Using postcss directly from JS will also enable transitioning
-        to a single JS-based tool for all CSS processing.
-    """
-
-    name = 'postcss'
-    max_debug_level = None
-
-    def output(self, _in, out, **kw):
-        args = ['node', 'scripts/postcss-filter.js']
-        self.subprocess(args, out, _in)
-
-register_filter(PostCSS)
 
 
 class AssetRequest(object):
@@ -112,7 +39,14 @@ def asset_response_subscriber(event):
 
 
 def includeme(config):
-    config.registry.settings.setdefault('webassets.bundles', 'h:assets.yaml')
+    WEBASSETS_DEFAULTS = {
+        'webassets.bundles': 'h:assets.yaml',
+        'webassets.base_dir': 'h:../build',
+        'webassets.base_url': '/assets',
+    }
+    for key, value in WEBASSETS_DEFAULTS.iteritems():
+        config.registry.settings.setdefault(key, value)
+
     config.include('pyramid_webassets')
 
     # Set up a predicate and subscriber to set CORS headers on asset responses
