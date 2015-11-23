@@ -104,6 +104,18 @@ def test_flag_enabled_true_when_staff_true_staff_request(authn_policy,
     assert features.flag_enabled(request, 'notification') is True
 
 
+def test_remove_old_flag_removes_old_flags(db_session):
+    new_feature = features.Feature(name='notification')
+    old_feature = features.Feature(name='somethingelse')
+    db_session.add(new_feature, old_feature)
+    db_session.flush()
+
+    features.remove_old_flags()
+
+    remaining = [f.name for f in features.Feature.query.all()]
+    assert remaining == ['notification']
+
+
 @pytest.fixture
 def feature_model(request):
     patcher = mock.patch('h.features.Feature', autospec=True)

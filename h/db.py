@@ -106,6 +106,6 @@ def includeme(config):
     config.action(None, bind_engine, (engine,), {
         'should_create': should_create,
         'should_drop': should_drop
-    })
+    }, order=10)
 
     api_db.use_session(Session)
