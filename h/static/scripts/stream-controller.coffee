@@ -23,7 +23,7 @@ module.exports = class StreamController
 
     load = ({rows, replies}) ->
         offset += rows.length
-        annotationMapper.loadAnnotations(rows.concat(replies))
+        annotationMapper.loadAnnotations(rows, replies)
 
     # Disable the thread filter (client-side search)
     $scope.$on '$routeChangeSuccess', ->

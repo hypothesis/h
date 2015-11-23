@@ -23,7 +23,7 @@ module.exports = class AnnotationViewerController
       $location.path('/stream').search('q', query)
 
     store.SearchResource.get _id: id, ({rows, replies}) ->
-      annotationMapper.loadAnnotations(rows.concat(replies))
+      annotationMapper.loadAnnotations(rows, replies)
       $scope.threadRoot = {children: [threading.idTable[id]]}
 
     streamFilter

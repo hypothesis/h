@@ -71,5 +71,5 @@ describe "AnnotationViewerController", ->
     })
 
     assert annotationMapper.loadAnnotations.calledWith(
-        ['annotation_1', 'annotation_2', 'reply_1', 'reply_2', 'reply_3']
+        ['annotation_1', 'annotation_2'], ['reply_1', 'reply_2', 'reply_3']
     ), "It should pass all the annotations and replies to loadAnnotations()"

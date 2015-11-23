@@ -97,7 +97,7 @@ describe 'StreamController', ->
 
     assert fakeAnnotationMapper.loadAnnotations.calledOnce
     assert fakeAnnotationMapper.loadAnnotations.calledWith(
-      ['annotation_1', 'annotation_2', 'reply_1', 'reply_2', 'reply_3']
+      ['annotation_1', 'annotation_2'], ['reply_1', 'reply_2', 'reply_3']
     )
 
 
