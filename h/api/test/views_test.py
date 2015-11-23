@@ -45,7 +45,8 @@ def test_search_searches(search_lib):
 
     views.search(request)
 
-    search_lib.search.assert_called_once_with(request, request.params)
+    search_lib.search.assert_called_once_with(
+        request, request.params, separate_replies=False)
 
 
 def test_search_renders_results(search_lib):
@@ -61,7 +62,6 @@ def test_search_renders_results(search_lib):
     assert result == {
         'total': 3,
         'rows': ['A', 'B', 'C'],
-        'replies': []
     }
 
 

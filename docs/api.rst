@@ -70,10 +70,6 @@ search
 
    Search for annotations.
 
-   Top-level annotations (but not replies) that match the search query are
-   returned in the "rows" field. The "total" field counts the number of these
-   top-level annotations.
-
    **Example request**::
 
       GET /api/search?limit=1000&user=gluejar@hypothes.is

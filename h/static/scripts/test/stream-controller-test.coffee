@@ -86,6 +86,11 @@ describe 'StreamController', ->
   afterEach ->
     sandbox.restore()
 
+  it 'calls the search API with _separate_replies: true', ->
+    createController()
+    assert.equal(
+      fakeStore.SearchResource.get.firstCall.args[0]._separate_replies, true)
+
   it 'passes the annotations and replies from search to loadAnnotations()', ->
     fakeStore.SearchResource.get = (query, func) ->
       func({

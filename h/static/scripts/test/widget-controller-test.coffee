@@ -104,6 +104,15 @@ describe 'WidgetController', ->
       assert.calledWith(loadSpy, [60..79])
       assert.calledWith(loadSpy, [80..99])
 
+    it 'passes _separate_replies: true to the search API', ->
+      fakeStore.SearchResource.get = sandbox.stub()
+      fakeCrossFrame.frames.push({uri: 'http://example.com'})
+
+      $scope.$digest()
+
+      assert.equal(
+        fakeStore.SearchResource.get.firstCall.args[0]._separate_replies, true)
+
     it 'passes annotations and replies from search to loadAnnotations()', ->
       fakeStore.SearchResource.get = (query, callback) ->
         callback({

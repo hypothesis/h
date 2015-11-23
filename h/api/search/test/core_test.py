@@ -13,8 +13,19 @@ def test_search_passes_private_to_AuthFilter(query):
 
     core.search(request, mock.Mock(), private=True)
 
-    assert query.AuthFilter.call_args_list == [
-        mock.call(request, private=True), mock.call(request, private=True)]
+    query.AuthFilter.assert_called_once_with(request, private=True)
+
+
+@search_fixtures
+def test_search_does_not_exclude_replies(query):
+    result = core.search(mock.Mock(), mock.Mock())
+
+    assert not query.TopLevelAnnotationsFilter.called, (
+        "Replies should not be filtered out of the 'rows' list if "
+        "separate_replies=True is not given")
+    assert 'replies' not in result, (
+        "The separate 'replies' list should not be included in the result if "
+        "separate_replies=True is not given")
 
 
 @search_fixtures
@@ -55,7 +66,7 @@ def test_search_queries_for_replies(query, models):
         },
     ]
 
-    core.search(mock.Mock(), mock.Mock())
+    core.search(mock.Mock(), mock.Mock(), separate_replies=True)
 
     # It should construct a RepliesMatcher for replies to the annotations from
     # the first search.
@@ -108,7 +119,7 @@ def test_search_returns_replies(models):
         mock.sentinel.reply_annotation_object_3,
     ]
 
-    result = core.search(mock.Mock(), mock.Mock())
+    result = core.search(mock.Mock(), mock.Mock(), separate_replies=True)
 
     assert result['replies'] == [
         mock.sentinel.reply_annotation_object_1,
@@ -141,7 +152,7 @@ def test_search_logs_a_warning_if_there_are_too_many_replies(models, log):
         },
     ]
 
-    core.search(mock.Mock(), mock.Mock())
+    core.search(mock.Mock(), mock.Mock(), separate_replies=True)
 
     assert log.warn.call_count == 1
 
@@ -171,7 +182,7 @@ def test_search_does_not_log_a_warning_if_there_are_not_too_many_replies(
         },
     ]
 
-    core.search(mock.Mock(), mock.Mock())
+    core.search(mock.Mock(), mock.Mock(), separate_replies=True)
 
     assert not log.warn.called
 

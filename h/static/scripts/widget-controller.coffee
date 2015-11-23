@@ -32,6 +32,7 @@ module.exports = class WidgetController
         order: 'asc'
         group: groups.focused().id
       q = angular.extend(queryCore, query)
+      q._separate_replies = true
 
       store.SearchResource.get q, (results) ->
         total = results.total

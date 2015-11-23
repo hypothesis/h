@@ -49,7 +49,7 @@ describe "AnnotationViewerController", ->
     {store} = createAnnotationViewerController({})
     assert store.SearchResource.get.calledOnce
     assert store.SearchResource.get.calledWith(
-      {_id: "test_annotation_id"})
+      {_id: "test_annotation_id", _separate_replies: true})
 
   it "passes the annotations and replies from search into loadAnnotations", ->
     {annotationMapper} = createAnnotationViewerController({

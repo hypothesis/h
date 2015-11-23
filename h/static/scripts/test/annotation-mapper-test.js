@@ -43,6 +43,15 @@ describe('annotationMapper', function() {
       assert.calledWith($rootScope.$emit, 'annotationsLoaded', [{}, {}, {}]);
     });
 
+    it('also includes replies in the annotationLoaded event', function () {
+      sandbox.stub($rootScope, '$emit');
+      var annotations = [{id: 1}]
+      var replies = [{id: 2}, {id: 3}];
+      annotationMapper.loadAnnotations(annotations, replies);
+      assert.called($rootScope.$emit);
+      assert.calledWith($rootScope.$emit, 'annotationsLoaded', [{}, {}, {}]);
+    });
+
     it('triggers the annotationUpdated event for each annotation in the threading cache', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1}, {id: 2}, {id: 3}];
@@ -52,6 +61,17 @@ describe('annotationMapper', function() {
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
       assert.calledWith($rootScope.$emit, 'annotationUpdated', cached.message);
+    });
+
+    it('also triggers annotationUpdated for cached replies', function () {
+      sandbox.stub($rootScope, '$emit');
+      var annotations = [{id: 1}];
+      var replies = [{id: 2}, {id: 3}, {id: 4}];
+      var cached = {message: {id: 3, $$tag: 'tag3'}};
+      fakeThreading.idTable[3] = cached;
+
+      annotationMapper.loadAnnotations(annotations, replies);
+      assert($rootScope.$emit.calledWith("annotationUpdated", {id: 3}))
     });
 
     it('replaces the properties on the cached annotation with those from the loaded one', function () {
