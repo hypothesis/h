@@ -69,6 +69,32 @@ def settings():
     return settings
 
 
+@pytest.fixture(scope='session', autouse=True)
+def setup_database(settings):
+    """Set up the database connection and create tables."""
+    engine = db.make_engine(settings)
+    db.bind_engine(engine, should_create=True, should_drop=True)
+    api_db.use_session(db.Session)
+
+
+@pytest.fixture(autouse=True)
+def database_session(request, monkeypatch):
+    """
+    Prepare the SQLAlchemy session object.
+
+    We enable fast repeatable database tests by setting up the database only
+    once per session (see :func:`setup_database`) and then wrapping each test
+    function in a SAVEPOINT/ROLLBACK TO SAVEPOINT within the transaction.
+    """
+    savepoint = transaction.savepoint()
+    request.addfinalizer(savepoint.rollback)
+
+    # Prevent the session from committing (redirect to flush() instead):
+    monkeypatch.setattr(db.Session, 'commit', db.Session.flush)
+    # Prevent the session from closing (make it a no-op):
+    monkeypatch.setattr(db.Session, 'remove', lambda: None)
+
+
 @pytest.fixture(autouse=True)
 def config(request, settings):
     """Pyramid configurator object."""
@@ -101,20 +127,6 @@ def authn_policy(config):
     policy = MagicMock()
     config.set_authentication_policy(policy)
     return policy
-
-
-@pytest.fixture()
-def db_session(request, settings):
-    """SQLAlchemy session."""
-    transaction.commit()
-    db.Session.remove()
-
-    engine = db.make_engine(settings)
-    db.bind_engine(engine, should_create=True, should_drop=True)
-
-    api_db.use_session(db.Session)
-
-    return db.Session
 
 
 @pytest.fixture()
