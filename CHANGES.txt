@@ -1,3 +1,36 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Fix a bug where unsaved drafts persisted on logout (#2708).
+
+- Fix a bug where annotation permissions/post intent was not preserved when
+  changing between groups (#2717).
+
+- Don't attempt to update the timestamps of unsaved annotations far too
+  frequently (#2725).
+
+- Fix a bug where a websocket reconnection wouldn't retransmit its search filter
+  state (#2719).
+
+- Ensure that the permissions (shared/public) of new annotations is correctly
+  preserved when switching between groups (#2713).
+
+Features
+--------
+
+- Annotations can now be made and shared in private groups (#2729).
+
+Miscellanea
+-----------
+
+- First steps towards Python 3 compatibility (#2706).
+
+- Old and unused feature flag data is now purged from the database on
+  application startup (#2733).
+
 0.7.13 (2015-11-03)
 ===================
 
