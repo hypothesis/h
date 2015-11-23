@@ -135,7 +135,6 @@ def stream(context, request):
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
 @notfound_view_config(renderer='h:templates/notfound.html.jinja2')
 def notfound(context, request):
-    request.sentry.captureMessage('404: %s' % request.path, level='info')
     request.response.status_int = 404
     return {}
 
