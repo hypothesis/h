@@ -90,6 +90,7 @@ def database_session(request, monkeypatch):
     request.addfinalizer(savepoint.rollback)
 
     # Prevent the session from committing (redirect to flush() instead):
+    monkeypatch.setattr(transaction, 'commit', db.Session.flush)
     monkeypatch.setattr(db.Session, 'commit', db.Session.flush)
     # Prevent the session from closing (make it a no-op):
     monkeypatch.setattr(db.Session, 'remove', lambda: None)
