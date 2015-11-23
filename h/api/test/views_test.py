@@ -52,7 +52,7 @@ def test_search_renders_results(search_lib):
     request = testing.DummyRequest()
     search_lib.search.return_value = {
         'total': 3,
-        'rows': ['a', 'b', 'c'],
+        'rows': ['a', 'b', 'c']
     }
     search_lib.render.side_effect = lambda x: x.upper()
 
@@ -61,7 +61,21 @@ def test_search_renders_results(search_lib):
     assert result == {
         'total': 3,
         'rows': ['A', 'B', 'C'],
+        'replies': []
     }
+
+
+def test_search_renders_replies(search_lib):
+    search_lib.search.return_value = {
+        'total': 3,
+        'rows': ['parent_annotation'],
+        'replies': ['a', 'b', 'c']
+    }
+    search_lib.render.side_effect = lambda x: x.upper()
+
+    result = views.search(mock.Mock())
+
+    assert result['replies'] == ['A', 'B', 'C']
 
 
 def test_access_token_returns_create_token_response():

@@ -87,6 +87,14 @@ def extract_sort(params):
     }]
 
 
+class TopLevelAnnotationsFilter(object):
+
+    """Matches top-level annotations only, filters out replies."""
+
+    def __call__(self, _):
+        return {'missing': {'field': 'references'}}
+
+
 class AuthFilter(object):
 
     """
@@ -191,3 +199,16 @@ class TagsMatcher(object):
         matchers = [{'match': {'tags': {'query': t, 'operator': 'and'}}}
                     for t in tags]
         return {'bool': {'must': matchers}} if matchers else None
+
+
+class RepliesMatcher(object):
+
+    """Matches any replies to any of the given annotation ids."""
+
+    def __init__(self, ids):
+        self.annotation_ids = ids
+
+    def __call__(self, _):
+        return {
+            'terms': {'references': self.annotation_ids}
+        }
