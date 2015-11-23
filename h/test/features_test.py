@@ -3,6 +3,7 @@ import mock
 from pyramid.testing import DummyRequest
 import pytest
 
+from h import db
 from h import features
 
 
@@ -104,11 +105,11 @@ def test_flag_enabled_true_when_staff_true_staff_request(authn_policy,
     assert features.flag_enabled(request, 'notification') is True
 
 
-def test_remove_old_flag_removes_old_flags(db_session):
+def test_remove_old_flag_removes_old_flags():
     new_feature = features.Feature(name='notification')
     old_feature = features.Feature(name='somethingelse')
-    db_session.add(new_feature, old_feature)
-    db_session.flush()
+    db.Session.add(new_feature, old_feature)
+    db.Session.flush()
 
     features.remove_old_flags()
 
