@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 import os
 
+from pyramid import events
 from pyramid.view import view_config
 import sqlalchemy as sa
 import transaction
@@ -117,17 +118,23 @@ def remove_old_flags():
     This function removes unknown feature flags from the database, and is run
     once at application startup.
     """
-    # Skip this if we're only in buildext, not actual app startup. See the
-    # comment in h.buildext:main for an explanation.
-    if 'H_BUILDEXT' in os.environ:
-        return
-
     unknown_flags = Feature.query.filter(
         sa.not_(Feature.name.in_(FEATURES.keys())))
     count = unknown_flags.delete(synchronize_session=False)
     if count > 0:
         log.info('removed %d old/unknown feature flags from database', count)
     transaction.commit()
+
+
+@events.subscriber(events.ApplicationCreated)
+def remove_old_flags_on_boot(event):
+    """Remove old feature flags from the database on startup."""
+    # Skip this if we're in a script, not actual app startup. See the comment
+    # in h.script:main for an explanation.
+    if 'H_SCRIPT' in os.environ:
+        return
+
+    remove_old_flags()
 
 
 @view_config(route_name='features_status',
@@ -141,8 +148,6 @@ def features_status(request):
 
 
 def includeme(config):
-    # Remove old feature flags from the database on startup
-    config.action(None, remove_old_flags, order=90)
     config.add_request_method(flag_enabled, name='feature')
     config.add_route('features_status', '/app/features')
     config.scan(__name__)

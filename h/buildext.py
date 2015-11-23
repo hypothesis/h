@@ -333,11 +333,12 @@ BROWSERS = {
 
 def main():
     # Set a flag in the environment that other code can use to detect if it's
-    # running under buildext.
+    # running in a script rather than a full web application. See also
+    # h/script.py.
     #
     # FIXME: This is a nasty hack and should go when we no longer need to spin
     # up an entire application to build the extensions.
-    os.environ['H_BUILDEXT'] = 'true'
+    os.environ['H_SCRIPT'] = 'true'
 
     args = parser.parse_args()
     BROWSERS[args.browser](args)

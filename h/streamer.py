@@ -5,6 +5,7 @@ import functools
 import json
 import logging
 import operator
+import os
 import random
 import struct
 import unicodedata
@@ -462,6 +463,10 @@ def start_queue_processing(event):
     greenlets running `process_queue` for each NSQ topic we subscribe to. The
     function does not block.
     """
+    # Skip this if we're in a script, not actual app startup. See the comment
+    # in h.script:main for an explanation.
+    if 'H_SCRIPT' in os.environ:
+        return
     def _loop(settings, topic, handler):
         while True:
             process_queue(settings, topic, handler)
