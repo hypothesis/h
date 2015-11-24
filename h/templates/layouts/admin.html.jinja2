@@ -1,11 +1,11 @@
 {%- set nav_pages = [
-    ('index', 'Home', request.route_url('admin_index')),
-    ('features', 'Feature flags', request.route_url('admin_features')),
-    ('nipsa', 'NIPSA', request.route_url('admin_nipsa')),
-    ('admins', 'Administrators', request.route_url('admin_admins')),
-    ('staff', 'Staff', request.route_url('admin_staff')),
-    ('users', 'Users', request.route_url('admin_users')),
-    ('badge', 'Badge', request.route_url('admin_badge')),
+    ('index', 'admin_index', 'Home'),
+    ('features', 'admin_features', 'Feature flags'),
+    ('nipsa', 'admin_nipsa', 'NIPSA'),
+    ('admins', 'admin_admins', 'Administrators'),
+    ('staff', 'admin_staff', 'Staff'),
+    ('users', 'admin_users', 'Users'),
+    ('badge', 'admin_badge', 'Badge'),
 ] -%}
 
 {%- set page_id = page_id|default('home') -%}
@@ -42,10 +42,12 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            {% for id, title, href in nav_pages %}
-            <li{% if id == page_id %} class="active"{% endif %}>
-              <a href="{{ href }}">{{ title }}</a>
-            </li>
+            {% for id, permission, title in nav_pages %}
+              {% if request.has_permission(permission) %}
+                <li{% if id == page_id %} class="active"{% endif %}>
+                  <a href="{{ request.route_url(permission) }}">{{ title }}</a>
+                </li>
+              {% endif %}
             {% endfor %}
           </ul>
         </div>
