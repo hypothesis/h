@@ -4,6 +4,5 @@ function hypothesisConfig() {
   var hypothesisIntent = document.querySelector('[name="hypothesis-intent"]');
   return {
     firstRun: hypothesisIntent && hypothesisIntent.content === 'first-run',
-    showHighlights: true
   };
 }

@@ -26,7 +26,10 @@ module.exports = class Host extends Guest
 
     this.on 'panelReady', =>
       # Initialize tool state.
-      this.setVisibleHighlights(!!options.showHighlights)
+      if options.showHighlights == undefined
+        # Highlights are on by default.
+        options.showHighlights = true
+      this.setVisibleHighlights(options.showHighlights)
 
       # Show the UI
       @frame.css('display', '')

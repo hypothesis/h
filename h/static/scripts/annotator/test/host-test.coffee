@@ -42,16 +42,16 @@ describe 'Host', ->
       assert.equal(host.frame.css('display'), '')
 
   describe 'options', ->
-    it 'enables highlighting when showHighlights option is provided', (done) ->
-      host = createHost(showHighlights: true)
+    it 'disables highlighting if showHighlights: false is given', (done) ->
+      host = createHost(showHighlights: false)
       host.on 'panelReady', ->
-        assert.isTrue(host.visibleHighlights)
+        assert.isFalse(host.visibleHighlights)
         done()
       host.publish('panelReady')
 
-    it 'does not enable highlighting when no showHighlights option is provided', (done) ->
+    it 'enables highlighting when no showHighlights option is given', (done) ->
       host = createHost({})
       host.on 'panelReady', ->
-        assert.isFalse(host.visibleHighlights)
+        assert.isTrue(host.visibleHighlights)
         done()
       host.publish('panelReady')
