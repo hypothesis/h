@@ -32,7 +32,17 @@ class Stream(Resource):
 
 
 class Root(Resource):
-    __acl__ = [(Allow, 'group:__admin__', 'admin')]
+    __acl__ = [
+        (Allow, 'group:__admin__', 'admin_index'),
+        (Allow, 'group:__staff__', 'admin_index'),
+        (Allow, 'group:__admin__', 'admin_features'),
+        (Allow, 'group:__admin__', 'admin_nipsa'),
+        (Allow, 'group:__admin__', 'admin_admins'),
+        (Allow, 'group:__admin__', 'admin_staff'),
+        (Allow, 'group:__admin__', 'admin_users'),
+        (Allow, 'group:__staff__', 'admin_users'),
+        (Allow, 'group:__admin__', 'admin_badge'),
+    ]
 
 
 def create_root(request):

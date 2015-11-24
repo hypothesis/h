@@ -13,7 +13,7 @@ from h import util
 @view.view_config(route_name='admin_index',
                   request_method='GET',
                   renderer='h:templates/admin/index.html.jinja2',
-                  permission='admin')
+                  permission='admin_index')
 def index(_):
     return {}
 
@@ -21,14 +21,14 @@ def index(_):
 @view.view_config(route_name='admin_features',
                   request_method='GET',
                   renderer='h:templates/admin/features.html.jinja2',
-                  permission='admin')
+                  permission='admin_features')
 def features_index(_):
     return {"features": models.Feature.all()}
 
 
 @view.view_config(route_name='admin_features',
                   request_method='POST',
-                  permission='admin')
+                  permission='admin_features')
 def features_save(request):
     session.check_csrf_token(request)
     for feat in models.Feature.all():
@@ -46,7 +46,7 @@ def features_save(request):
 @view.view_config(route_name='admin_nipsa',
                   request_method='GET',
                   renderer='h:templates/admin/nipsa.html.jinja2',
-                  permission='admin')
+                  permission='admin_nipsa')
 def nipsa_index(_):
     return {"usernames": [util.split_user(u)["username"]
                           for u in nipsa.index()]}
@@ -56,7 +56,7 @@ def nipsa_index(_):
                   request_method='POST',
                   request_param='add',
                   renderer='h:templates/admin/nipsa.html.jinja2',
-                  permission='admin')
+                  permission='admin_nipsa')
 def nipsa_add(request):
     username = request.params["add"]
 
@@ -72,7 +72,7 @@ def nipsa_add(request):
                   request_method='POST',
                   request_param='remove',
                   renderer='h:templates/admin/nipsa.html.jinja2',
-                  permission='admin')
+                  permission='admin_nipsa')
 def nipsa_remove(request):
     username = request.params["remove"]
     userid = util.userid_from_username(username, request)
@@ -84,7 +84,7 @@ def nipsa_remove(request):
 @view.view_config(route_name='admin_admins',
                   request_method='GET',
                   renderer='h:templates/admin/admins.html.jinja2',
-                  permission='admin')
+                  permission='admin_admins')
 def admins_index(_):
     """A list of all the admin users as an HTML page."""
     return {"admin_users": [u.username for u in models.User.admins()]}
@@ -94,7 +94,7 @@ def admins_index(_):
                   request_method='POST',
                   request_param='add',
                   renderer='h:templates/admin/admins.html.jinja2',
-                  permission='admin')
+                  permission='admin_admins')
 def admins_add(request):
     """Make a given user an admin."""
     username = request.params['add']
@@ -111,7 +111,7 @@ def admins_add(request):
                   request_method='POST',
                   request_param='remove',
                   renderer='h:templates/admin/admins.html.jinja2',
-                  permission='admin')
+                  permission='admin_admins')
 def admins_remove(request):
     """Remove a user from the admins."""
     if len(models.User.admins()) > 1:
@@ -125,7 +125,7 @@ def admins_remove(request):
 @view.view_config(route_name='admin_staff',
                   request_method='GET',
                   renderer='h:templates/admin/staff.html.jinja2',
-                  permission='admin')
+                  permission='admin_staff')
 def staff_index(_):
     """A list of all the staff members as an HTML page."""
     return {"staff": [u.username for u in models.User.staff_members()]}
@@ -135,7 +135,7 @@ def staff_index(_):
                   request_method='POST',
                   request_param='add',
                   renderer='h:templates/admin/staff.html.jinja2',
-                  permission='admin')
+                  permission='admin_staff')
 def staff_add(request):
     """Make a given user a staff member."""
     username = request.params['add']
@@ -152,7 +152,7 @@ def staff_add(request):
                   request_method='POST',
                   request_param='remove',
                   renderer='h:templates/admin/staff.html.jinja2',
-                  permission='admin')
+                  permission='admin_staff')
 def staff_remove(request):
     """Remove a user from the staff."""
     username = request.params['remove']
@@ -165,7 +165,7 @@ def staff_remove(request):
 @view.view_config(route_name='admin_users',
                   request_method='GET',
                   renderer='h:templates/admin/users.html.jinja2',
-                  permission='admin')
+                  permission='admin_users')
 def users_index(request):
     user = None
     username = request.params.get('username')
@@ -179,7 +179,7 @@ def users_index(request):
 @view.view_config(route_name='admin_badge',
                   request_method='GET',
                   renderer='h:templates/admin/badge.html.jinja2',
-                  permission='admin')
+                  permission='admin_badge')
 def badge_index(_):
     return {"uris": models.Blocklist.all()}
 
@@ -188,7 +188,7 @@ def badge_index(_):
                   request_method='POST',
                   request_param='add',
                   renderer='h:templates/admin/badge.html.jinja2',
-                  permission='admin')
+                  permission='admin_badge')
 def badge_add(request):
     try:
         request.db.add(models.Blocklist(uri=request.params['add']))
@@ -201,7 +201,7 @@ def badge_add(request):
                   request_method='POST',
                   request_param='remove',
                   renderer='h:templates/admin/badge.html.jinja2',
-                  permission='admin')
+                  permission='admin_badge')
 def badge_remove(request):
     uri = request.params['remove']
     request.db.delete(models.Blocklist.get_by_uri(uri))
