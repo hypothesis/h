@@ -228,11 +228,14 @@ site_css:
         - h:static/styles/*.scss
 
 # the H website front page (separate assets from the rest of the site for now)
-front_css:
-  output: styles/front.min.css
-  filters: cleancss
+front_page_css:
+  output: styles/front-page.min.css
   contents:
-    - h:static/styles/vendor/css/font-awesome.css
+    - h:static/styles/front-page/main.css
+    - output: h:static/styles/front-page.css
+      filters: cleancss
+      contents:
+      - h:static/styles/vendor/css/font-awesome.css
 
 # Help page
 help_page_css:
