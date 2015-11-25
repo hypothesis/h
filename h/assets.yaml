@@ -227,6 +227,13 @@ site_css:
       depends:
         - h:static/styles/*.scss
 
+# the H website front page (separate assets from the rest of the site for now)
+front_css:
+  output: styles/front.min.css
+  filters: cleancss
+  contents:
+    - h:static/styles/vendor/css/font-awesome.css
+
 # Help page
 help_page_css:
   output: styles/help-page.min.css
