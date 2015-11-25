@@ -1,3 +1,17 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Fix a series of bugs relating to the incorrect handling of replies on the
+  stream pages (#2737).
+
+Features
+--------
+
+- Enable highlights by default, everywhere (#2739).
+
 0.8.0 (2015-11-24)
 ==================
 
