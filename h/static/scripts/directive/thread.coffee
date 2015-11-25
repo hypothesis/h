@@ -59,9 +59,7 @@ ThreadController = [
         return false
 
       if this.container?.message?.$orphan == true
-        # Hide unless show_unanchored_annotations is turned on
-        if not $scope.feature('show_unanchored_annotations')
-          return false
+        return false
 
       editing = this._count('edit') > 0
       matching = this._count('match') > 0

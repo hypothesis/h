@@ -132,10 +132,6 @@ describe 'thread', ->
         it 'returns false', ->
           assert.isFalse(controller.shouldShow())
 
-        it 'returns true if show_unanchored_annotations is on', ->
-          $scope.feature = -> true
-          assert.isTrue(controller.shouldShow())
-
       describe 'when the thread filter is active', ->
         beforeEach ->
           controller.filter = {active: -> true}
