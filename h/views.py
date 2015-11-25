@@ -95,13 +95,11 @@ def widget(context, request):
     return {}
 
 
-@view_config(renderer='h:templates/help.html.jinja2', route_name='index')
 @view_config(renderer='h:templates/help.html.jinja2', route_name='help')
 @view_config(renderer='h:templates/help.html.jinja2', route_name='onboarding')
 def help_page(context, request):
     current_route = request.matched_route.name
     return {
-        'is_index': current_route == 'index',
         'is_help': current_route == 'help',
         'is_onboarding': current_route == 'onboarding',
     }
@@ -167,8 +165,6 @@ def _validate_blocklist(config):
 
 def includeme(config):
     config.include('h.assets')
-
-    config.add_route('index', '/')
 
     config.add_route('embed', '/embed.js')
     config.add_route('widget', '/app.html')
