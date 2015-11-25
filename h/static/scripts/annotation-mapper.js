@@ -19,7 +19,9 @@ function getContainer(threading, annotation) {
 // Wraps the annotation store to trigger events for the CRUD actions
 // @ngInject
 function annotationMapper($rootScope, threading, store) {
-  function loadAnnotations(annotations) {
+  function loadAnnotations(annotations, replies) {
+    annotations = annotations.concat(replies || []);
+
     var loaded = [];
 
     annotations.forEach(function (annotation) {

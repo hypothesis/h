@@ -19,11 +19,12 @@ module.exports = class StreamController
       options = {offset, limit}
       searchParams = searchFilter.toObject($routeParams.q)
       query = angular.extend(options, searchParams)
+      query._separate_replies = true
       store.SearchResource.get(query, load)
 
-    load = ({rows}) ->
+    load = ({rows, replies}) ->
         offset += rows.length
-        annotationMapper.loadAnnotations(rows)
+        annotationMapper.loadAnnotations(rows, replies)
 
     # Disable the thread filter (client-side search)
     $scope.$on '$routeChangeSuccess', ->

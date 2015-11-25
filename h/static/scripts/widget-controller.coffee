@@ -32,6 +32,7 @@ module.exports = class WidgetController
         order: 'asc'
         group: groups.focused().id
       q = angular.extend(queryCore, query)
+      q._separate_replies = true
 
       store.SearchResource.get q, (results) ->
         total = results.total
@@ -39,7 +40,7 @@ module.exports = class WidgetController
         if offset < total
           _loadAnnotationsFrom query, offset
 
-        annotationMapper.loadAnnotations(results.rows)
+        annotationMapper.loadAnnotations(results.rows, results.replies)
 
     loadAnnotations = (frames) ->
       for f in frames

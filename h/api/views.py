@@ -92,12 +92,22 @@ def index(context, request):
 @api_config(context=Root, name='search')
 def search(request):
     """Search the database for annotations matching with the given query."""
-    results = search_lib.search(request, request.params)
+    params = request.params.copy()
 
-    return {
+    separate_replies = params.pop('_separate_replies', False)
+    results = search_lib.search(request, params,
+                                separate_replies=separate_replies)
+
+    return_value = {
         'total': results['total'],
-        'rows': [search_lib.render(a) for a in results['rows']],
+        'rows': [search_lib.render(a) for a in results['rows']]
     }
+
+    if separate_replies:
+        return_value['replies'] = [
+            search_lib.render(a) for a in results['replies']]
+
+    return return_value
 
 
 @api_config(route_name='access_token')

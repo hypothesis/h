@@ -50,6 +50,7 @@ describe 'WidgetController', ->
           result =
             total: 100
             rows: [offset..offset+limit-1]
+            replies: []
           callback result
     }
 
@@ -103,11 +104,34 @@ describe 'WidgetController', ->
       assert.calledWith(loadSpy, [60..79])
       assert.calledWith(loadSpy, [80..99])
 
+    it 'passes _separate_replies: true to the search API', ->
+      fakeStore.SearchResource.get = sandbox.stub()
+      fakeCrossFrame.frames.push({uri: 'http://example.com'})
+
+      $scope.$digest()
+
+      assert.equal(
+        fakeStore.SearchResource.get.firstCall.args[0]._separate_replies, true)
+
+    it 'passes annotations and replies from search to loadAnnotations()', ->
+      fakeStore.SearchResource.get = (query, callback) ->
+        callback({
+          rows: ['annotation_1', 'annotation_2']
+          replies: ['reply_1', 'reply_2', 'reply_3']
+        })
+      fakeCrossFrame.frames.push({uri: 'http://example.com'})
+      $scope.$digest()
+
+      assert fakeAnnotationMapper.loadAnnotations.calledOnce
+      assert fakeAnnotationMapper.loadAnnotations.calledWith(
+        ['annotation_1', 'annotation_2'], ['reply_1', 'reply_2', 'reply_3']
+      )
+
   describe 'when the focused group changes', ->
     it 'should load annotations for the new group', ->
       fakeThreading.annotationList = sandbox.stub().returns([{id: '1'}])
       fakeCrossFrame.frames.push({uri: 'http://example.com'})
-      searchResult = {total: 10, rows: [0..10]}
+      searchResult = {total: 10, rows: [0..10], replies: []}
       fakeStore.SearchResource.get = (query, callback) ->
         callback(searchResult)
 
