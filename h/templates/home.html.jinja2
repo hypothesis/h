@@ -11,7 +11,7 @@
       <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
 
-    <link rel='canonical' href='https://hypothes.is/'>
+    <link rel='canonical' href='{{ base_url }}'>
 
     <link rel="apple-touch-icon" sizes="57x57"
           href="/wp-content/uploads/fbrfg/apple-touch-icon-57x57.png">
@@ -48,7 +48,7 @@
       <div class="container">
         <span>
           We're hiring
-          <a href="https://hypothes.is/jobs/#developer">developers</a>.
+          <a href="{{ base_url }}jobs/#developer">developers</a>.
         </span>
       </div>
     </header>
@@ -63,7 +63,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="https://hypothes.is/">
+          <a class="navbar-brand" href="{{ base_url }}">
             Hypothes<span class="red">.</span>is
           </a>
         </div>
@@ -72,29 +72,29 @@
             <ul id="menu-main-menu" class="nav navbar-nav">
               <li id="menu-item-3607"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3607">
-                <a href="https://hypothes.is/about/">About</a>
+                <a href="{{ base_url }}about/">About</a>
               </li>
               <li id="menu-item-3609"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3609">
-                <a href="https://hypothes.is/blog/">Blog</a>
+                <a href="{{ base_url }}blog/">Blog</a>
               </li>
               <li id="menu-item-3608"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3608">
-                <a href="https://hypothes.is/contribute/">Contribute</a>
+                <a href="{{ base_url }}contribute/">Contribute</a>
               </li>
               <li id="menu-item-4372"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4372">
-                <a href="https://hypothes.is/education/">Education</a>
+                <a href="{{ base_url }}education/">Education</a>
               </li>
               <li id="menu-item-3615"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3615">
-                <a href="https://hypothes.is/jobs/">Jobs</a>
+                <a href="{{ base_url }}jobs/">Jobs</a>
               </li>
             </ul>
           </div>
           <ul class="nav navbar-nav pull-right login">
-            <li><a href="https://hypothes.is/login">Login</a></li>
-            <li><a href="https://hypothes.is/register">Sign up</a></li>
+            <li><a href="{{ base_url }}login">Login</a></li>
+            <li><a href="{{ base_url }}register">Sign up</a></li>
           </ul>
         </nav>
       </div>
@@ -118,7 +118,7 @@
 
                 <h2>Annotate with anyone, anywhere</h2>
                 <p>
-                  <a href="https://hypothes.is/about/">Our mission</a> is to
+                  <a href="{{ base_url }}about/">Our mission</a> is to
                   bring a new layer to the web. Use Hypothesis to discuss,
                   collaborate, organize your research, or take personal notes.
                 </p>
@@ -206,7 +206,7 @@
                           <a title="Drag me to the bookmarks bar"
                              data-bookmarklet-button=""
                              class="btn btn-primary btn-lg installer__button--draggable"
-                             href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','https://hypothes.is/app/embed.js');d.body.appendChild(s)})();"
+                             href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ base_url }}app/embed.js');d.body.appendChild(s)})();"
                              onclick="alert('Drag me to the bookmarks bar');return false;">Launch Hypothesis
                           </a>
                           <p><i class="fa fa-arrows"></i> Drag the button into
@@ -278,7 +278,7 @@
             <a href="https://twitter.com/hypothes_is">
               <i class="fa fa-twitter"></i>
             </a>
-            <a href="http://hypothes.is/feed/">
+            <a href="{{ base_url }}feed/">
               <i class="fa fa-rss"></i>
             </a>
           </div>
@@ -286,33 +286,33 @@
             <ul id="menu-footer" class="nav navbar-nav">
               <li id="menu-item-3613"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3613">
-                <a href="https://hypothes.is/contact/">Contact</a>
+                <a href="{{ base_url }}contact/">Contact</a>
               </li>
               <li id="menu-item-3623"
                   class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3623">
-                <a href="https://hypothes.is/fund/">Grant opportunities</a>
+                <a href="{{ base_url }}fund/">Grant opportunities</a>
               </li>
               <li id="menu-item-3611"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3611">
-                <a href="https://hypothes.is/roadmap/">Roadmap</a>
+                <a href="{{ base_url }}roadmap/">Roadmap</a>
               </li>
               <li id="menu-item-3614"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3614">
-                <a href="https://hypothes.is/press/">Press</a>
+                <a href="{{ base_url }}press/">Press</a>
               </li>
               <li id="menu-item-3610"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3610">
-                <a href="https://hypothes.is/team/">Our team</a>
+                <a href="{{ base_url }}team/">Our team</a>
               </li>
               <li id="menu-item-3612"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3612">
-                <a href="https://hypothes.is/terms-of-service/">
+                <a href="{{ base_url }}terms-of-service/">
                   Terms of Service
                 </a>
               </li>
               <li id="menu-item-4123"
                   class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4123">
-                <a href="https://hypothes.is/for-publishers/">
+                <a href="{{ base_url }}for-publishers/">
                   For Publishers
                 </a>
               </li>
