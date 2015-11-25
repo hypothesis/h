@@ -11,15 +11,6 @@
       <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
 
-    {# jquery script links. Replace these with app-provided copies, and not in
-       the head! #}
-    <script type='text/javascript'
-            src='https://hypothes.is/wp-includes/js/jquery/jquery.js?ver=1.11.3'>
-    </script>
-    <script type='text/javascript'
-            src='https://hypothes.is/wp-includes/js/jquery/jquery-migrate.min.js?ver=1.2.1'>
-    </script>
-
     <link rel='canonical' href='https://hypothes.is/'>
 
     <link rel="apple-touch-icon" sizes="57x57"
@@ -331,6 +322,9 @@
       </div>
     </footer>
 
+    {% assets "front_page_js" %}
+      <script src="{{ ASSET_URL }}"></script>
+    {% endassets %}
     <script type='text/javascript'
             src='https://hypothes.is/wp-content/themes/hypo-theme/dist/scripts/modernizr.js'>
     </script>

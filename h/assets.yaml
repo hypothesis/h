@@ -228,6 +228,10 @@ site_css:
         - h:static/styles/*.scss
 
 # the H website front page (separate assets from the rest of the site for now)
+front_page_js:
+  contents:
+    - jquery
+
 front_page_css:
   output: styles/front-page.min.css
   contents:
