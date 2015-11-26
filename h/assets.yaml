@@ -227,7 +227,7 @@ site_css:
       depends:
         - h:static/styles/*.scss
 
-# the H website front page (separate assets from the rest of the site for now)
+# Assets needed for the H website front page only.
 front_page_js:
   contents:
     - jquery

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns#">
+<html lang="en" prefix="og: http://ogp.me/ns#">
   <head>
     {% block meta %}
       <meta charset="UTF-8" />
@@ -28,6 +28,19 @@
       <link {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}
     {% block styles %}{% endblock %}
+
+    <link rel="apple-touch-icon" sizes="152x152"
+          href="{{ base_url }}assets/images/apple-touch-icon-152x152.png">
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="{{ base_url }}assets/images/favicons/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="{{ base_url }}assets/images/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96"
+          href="{{ base_url }}assets/images/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="192x192"
+          href="{{ base_url }}assets/images/favicons/android-chrome-192x192.png">
+    <link rel="shortcut icon"
+          href="{{ base_url }}assets/images/favicons/favicon.ico">
 
     {% if ga_tracking_id %}
       <!-- Google Analytics -->
