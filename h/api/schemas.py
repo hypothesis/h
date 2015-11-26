@@ -6,6 +6,10 @@ import jsonschema
 from jsonschema.exceptions import best_match
 
 
+# These annotation fields are not to be set by the user.
+PROTECTED_FIELDS = ['created', 'updated', 'user', 'id']
+
+
 class ValidationError(Exception):
     pass
 
@@ -59,6 +63,15 @@ class AnnotationSchema(JSONSchema):
             },
         },
     }
+
+    def validate(self, data):
+        appstruct = super(AnnotationSchema, self).validate(data)
+
+        # Some fields are not to be set by the user, ignore them
+        for field in PROTECTED_FIELDS:
+            appstruct.pop(field, None)
+
+        return appstruct
 
 
 def _format_jsonschema_error(error):

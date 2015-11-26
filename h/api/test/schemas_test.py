@@ -32,3 +32,18 @@ def test_jsonschema_sets_appropriate_error_message_when_data_invalid():
 
     message = e.value.message
     assert message.startswith("123 is not of type 'string'")
+
+
+@pytest.mark.parametrize('field', [
+    'created',
+    'updated',
+    'user',
+    'id',
+])
+def test_annotationschema_removes_protected_fields(field):
+    data = {}
+    data[field] = 'something forbidden'
+
+    result = schemas.AnnotationSchema().validate(data)
+
+    assert field not in result

@@ -23,23 +23,6 @@ create_annotation_fixtures = pytest.mark.usefixtures(
 
 
 @create_annotation_fixtures
-def test_create_annotation_pops_protected_fields(Annotation):
-    """It should remove any protected fields before calling Annotation."""
-    logic.create_annotation(
-        fields={
-            'foo': 'bar',
-            'created': 'foo',
-            'updated': 'foo',
-            'user': 'foo',
-            'id': 'foo'
-        },
-        userid='acct:annamaria@example.com')
-
-    for field in ('created', 'updated', 'user', 'id'):
-        assert field not in Annotation.call_args[0][0]
-
-
-@create_annotation_fixtures
 def test_create_annotation_calls_Annotation(Annotation):
     fields = mock.MagicMock()
     logic.create_annotation(fields, userid='acct:joe@example.org')
@@ -111,25 +94,6 @@ def test_create_annotation_does_not_crash_if_annotations_parent_has_no_group(
 
 # The fixtures required to mock all of update_annotation()'s dependencies.
 update_annotation_fixtures = pytest.mark.usefixtures('search_lib')
-
-
-@update_annotation_fixtures
-def test_update_annotation_does_not_pass_protected_fields_to_update():
-    annotation = _mock_annotation()
-
-    logic.update_annotation(
-        annotation,
-        fields={
-            'foo': 'bar',
-            'created': 'foo',
-            'updated': 'foo',
-            'user': 'foo',
-            'id': 'foo'
-        },
-        userid='foo')
-
-    for field in ('created', 'updated', 'user', 'id'):
-        assert field not in annotation.update.call_args[0][0]
 
 
 @update_annotation_fixtures
