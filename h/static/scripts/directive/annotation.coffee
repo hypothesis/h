@@ -3,7 +3,7 @@
 events = require('../events')
 
 # Validate an annotation.
-# Annotations must be attributed to a user or marked as deleted.
+# Annotations must be attributed to a user.
 # A public annotation is valid only if they have a body.
 # A non-public annotation requires only a target (e.g. a highlight).
 validate = (value) ->
@@ -101,7 +101,7 @@ AnnotationController = [
     ###
     this.isHighlight = ->
       model.target?.length and not model.references?.length and
-      not (model.text or model.deleted or model.tags?.length)
+      not (model.text or model.tags?.length)
 
     ###*
     # @ngdoc method
@@ -253,7 +253,7 @@ AnnotationController = [
     # @description Saves any edits and returns to the viewer.
     ###
     this.save = ->
-      unless model.user or model.deleted
+      unless model.user
         return flash.info('Please sign in to save your annotations.')
       unless validate(@annotation)
         return flash.info('Please add text or a tag before publishing.')
