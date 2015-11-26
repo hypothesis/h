@@ -9,7 +9,6 @@ Contents:
    INSTALL
    administration
    hacking/index
-   internals
    api
    CHANGES
 
