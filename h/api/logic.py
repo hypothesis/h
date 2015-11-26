@@ -34,22 +34,6 @@ def create_annotation(fields, userid):
     return annotation
 
 
-def _anonymize_deletes(annotation):
-    """Clear the author and remove the user from the annotation permissions."""
-    # Delete the annotation author, if present
-    user = annotation.pop('user')
-
-    # Remove the user from the permissions, but keep any others in place.
-    permissions = annotation.get('permissions', {})
-    for action in permissions.keys():
-        filtered = [
-            role
-            for role in annotation['permissions'][action]
-            if role != user
-        ]
-        annotation['permissions'][action] = filtered
-
-
 def update_annotation(annotation, fields, userid):
     """Update the given annotation with the given new fields.
 
@@ -79,10 +63,6 @@ def update_annotation(annotation, fields, userid):
 
     # Update the annotation with the new data
     annotation.update(fields)
-
-    # If the annotation is flagged as deleted, remove mentions of the user
-    if annotation.get('deleted', False):
-        _anonymize_deletes(annotation)
 
     # Save the annotation in the database, overwriting the old version.
     search_lib.prepare(annotation)
