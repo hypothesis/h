@@ -161,14 +161,15 @@ def test_create_returns_error_if_parsing_json_fails():
 
 
 @create_fixtures
-def test_create_calls_create_annotation(logic):
+def test_create_calls_create_annotation(logic, schemas):
     """It should call logic.create_annotation() appropriately."""
     request = mock.Mock()
+    schemas.AnnotationSchema.return_value.validate.return_value = {'foo': 123}
 
     views.create(request)
 
     logic.create_annotation.assert_called_once_with(
-        request.json_body,
+        {'foo': 123},
         userid=request.authenticated_userid)
 
 
@@ -178,7 +179,7 @@ def test_create_calls_validator(schemas):
 
     views.create(request)
 
-    schemas.Annotation.return_value.validate.assert_called_once_with(
+    schemas.AnnotationSchema.return_value.validate.assert_called_once_with(
         request.json_body)
 
 
@@ -187,7 +188,7 @@ def test_create_returns_api_error_for_validation_error(schemas):
     class ValidationError(Exception):
         pass
     schemas.ValidationError = ValidationError
-    schemas.Annotation.return_value.validate.side_effect = (
+    schemas.AnnotationSchema.return_value.validate.side_effect = (
         schemas.ValidationError(mock.sentinel.reason))
 
     response = views.create(mock.Mock())
@@ -294,7 +295,7 @@ def test_update_calls_validator(schemas):
 
     views.update(mock.Mock(), request)
 
-    schemas.Annotation.return_value.validate.assert_called_once_with(
+    schemas.AnnotationSchema.return_value.validate.assert_called_once_with(
         request.json_body)
 
 
@@ -303,7 +304,7 @@ def test_update_returns_api_error_for_validation_error(schemas):
     class ValidationError(Exception):
         pass
     schemas.ValidationError = ValidationError
-    schemas.Annotation.return_value.validate.side_effect = (
+    schemas.AnnotationSchema.return_value.validate.side_effect = (
         schemas.ValidationError(mock.sentinel.reason))
 
     response = views.update(mock.Mock(), mock.Mock())
@@ -313,15 +314,16 @@ def test_update_returns_api_error_for_validation_error(schemas):
 
 
 @update_fixtures
-def test_update_calls_update_annotation(logic):
+def test_update_calls_update_annotation(logic, schemas):
     context = mock.Mock()
     request = mock.Mock()
+    schemas.AnnotationSchema.return_value.validate.return_value = {'foo': 123}
 
     views.update(context, request)
 
     logic.update_annotation.assert_called_once_with(
         context.model,
-        request.json_body,
+        {'foo': 123},
         request.authenticated_userid)
 
 

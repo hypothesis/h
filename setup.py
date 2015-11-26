@@ -46,7 +46,7 @@ INSTALL_REQUIRES = [
     'gnsq>=0.3.0,<0.4.0',
     'gunicorn>=19.2,<20',
     'jsonpointer==1.0',
-    'jsonschema==1.3.0',
+    'jsonschema>=2.5.1,<2.6',
     'oauthlib==0.6.3',
     'pyramid>=1.5,<1.6',
     'psycogreen>=1.0',

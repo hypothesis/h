@@ -158,11 +158,11 @@ def create(request):
                           status_code=400)  # Client Error: Bad Request
 
     try:
-        schemas.Annotation().validate(fields)
+        appstruct = schemas.AnnotationSchema().validate(fields)
     except schemas.ValidationError as err:
         return _api_error(request, err.message, status_code=400)
 
-    annotation = logic.create_annotation(fields,
+    annotation = logic.create_annotation(appstruct,
                                          userid=request.authenticated_userid)
 
     # Notify any subscribers
@@ -197,14 +197,14 @@ def update(context, request):
                           status_code=400)  # Client Error: Bad Request
 
     try:
-        schemas.Annotation().validate(fields)
+        appstruct = schemas.AnnotationSchema().validate(fields)
     except schemas.ValidationError as err:
         return _api_error(request, err.message, status_code=400)
 
     # Update and store the annotation
     try:
         logic.update_annotation(annotation,
-                                fields,
+                                appstruct,
                                 userid=request.authenticated_userid)
     except RuntimeError as err:
         return _api_error(

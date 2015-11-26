@@ -4,14 +4,31 @@ import pytest
 from h.api import schemas
 
 
-def test_Annotation_returns_None_for_valid_data():
-    data = {"document": {"link": ["http://example.com/example"]}}
+class ExampleSchema(schemas.JSONSchema):
+    schema = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'type': 'string',
+    }
 
-    assert schemas.Annotation().validate(data) is None
+
+def test_jsonschema_returns_data_when_valid():
+    data = "a string"
+
+    assert ExampleSchema().validate(data) == data
 
 
-def test_Annotation_raises_if_document_link_is_None():
-    data = {"document": {"link": None}}  # Invalid link.
+def test_jsonschema_raises_when_data_invalid():
+    data = 123  # not a string
 
     with pytest.raises(schemas.ValidationError):
-        schemas.Annotation().validate(data)
+        ExampleSchema().validate(data)
+
+
+def test_jsonschema_sets_appropriate_error_message_when_data_invalid():
+    data = 123  # not a string
+
+    with pytest.raises(schemas.ValidationError) as e:
+        ExampleSchema().validate(data)
+
+    message = e.value.message
+    assert message.startswith("123 is not of type 'string'")
