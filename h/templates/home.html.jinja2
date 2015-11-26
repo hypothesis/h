@@ -1,7 +1,7 @@
 {% set rss_feed_url = base_url + "feed/" %}
 
 <!doctype html>
-<html lang="en_US">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -47,7 +47,7 @@
 
   <body class="home page page-id-238 page-template-default">
 
-    <header class="banner hiring" role="banner">
+    <header class="banner hiring">
       <div class="container">
         <span>
           We're hiring
@@ -70,7 +70,7 @@
             Hypothes<span class="red">.</span>is
           </a>
         </div>
-        <nav class="collapse navbar-collapse" role="navigation">
+        <nav class="collapse navbar-collapse">
           <div class="menu-main-menu-container">
             <ul id="menu-main-menu" class="nav navbar-nav">
               <li id="menu-item-3607"
@@ -110,14 +110,13 @@
 
     <div class="wrap container" role="document">
       <div class="content row">
-        <main class="main" role="main">
+        <main class="main">
           <div class="jumbotron">
             <div class="row">
               <div class="col-sm-6">
                 <div id="video"
                      class="embed-responsive embed-responsive-16by9">
-                  <iframe frameborder="0" allowfullscreen
-                          class="embed-responsive-item"
+                  <iframe allowfullscreen class="embed-responsive-item"
                           src="https://www.youtube.com/embed/QCkm0lL-6lc?showinfo=0&autohide=1">
                   </iframe>
                 </div>
@@ -156,7 +155,6 @@
                           title="Insert a URL to annotate that page.">
                       <input id="search" class="form-control" type="text"
                              name="search" placeholder="Paste a link...">
-                      </input>
                       <span class="input-group-btn" data-via-button="">
                         <button class="btn btn-primary" type="submit">
                           Annotate!
@@ -200,8 +198,7 @@
                 </script>
 
                 <div class="modal fade" id="bookmarklet" tabindex="-1"
-                     role="dialog" aria-labelledby="myModalLabel"
-                     aria-hidden="true">
+                     role="dialog" aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -235,8 +232,7 @@
               </div>
 
               <div class="modal fade" id="addtoyoursite" tabindex="-1"
-                   role="dialog" aria-labelledby="myModalLabel"
-                   aria-hidden="true">
+                   role="dialog" aria-hidden="true">
                 <div class="modal-dialog">
                   <div class="modal-content">
                     <div class="modal-header">
@@ -251,7 +247,6 @@
                         <p>
                           <input class="form-control" type="text"
                                  value='&lt;script async defer src="//hypothes.is/embed.js"&gt;&lt;/script&gt;'>
-                          </input>
                         </p>
                         <p>Add the above script tag to your web site's HTML to load
                         the Hypothesis sidebar on your site.</p>
@@ -260,7 +255,6 @@
                         <p>
                           <input class="form-control" type="text"
                                  value='&lt;script&gt;window.hypothesisConfig=function(){return{showHighlights:true};&lt;/script&gt;'>
-                          </input>
                         </p>
 
                         <p>Alternatively, if you use WordPress, checkout the
@@ -278,9 +272,9 @@
       </div>
     </div>
 
-    <footer class="content-info" role="contentinfo">
+    <footer class="content-info">
       <div class="container">
-        <nav class="navbar navbar-default" role="navigation">
+        <nav class="navbar navbar-default">
           <div class="nav navbar-nav social-media pull-right">
             <a href="https://github.com/hypothesis">
               <i class="fa fa-github"></i>
