@@ -183,7 +183,7 @@
                         <a title="Drag me to the bookmarks bar"
                             data-bookmarklet-button=""
                             class="btn btn-primary btn-lg installer__button--draggable"
-                            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ base_url }}app/embed.js');d.body.appendChild(s)})();"
+                            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();"
                             onclick="alert('Drag me to the bookmarks bar');return false;">Launch Hypothesis
                         </a>
                         <p><i class="fa fa-arrows"></i> Drag the button into
