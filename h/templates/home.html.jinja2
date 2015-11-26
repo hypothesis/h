@@ -1,3 +1,5 @@
+{% set rss_feed_url = base_url + "feed/" %}
+
 <!doctype html>
 <html lang="en_US">
   <head>
@@ -26,6 +28,8 @@
           href="{{ base_url }}assets/images/favicons/android-chrome-192x192.png">
     <link rel="shortcut icon"
           href="{{ base_url }}assets/images/favicons/favicon.ico">
+
+   <link href="{{ rss_feed_url }}" rel="alternate" type="application/rss+xml">
   </head>
 
   <body class="home page page-id-238 page-template-default">
@@ -266,9 +270,7 @@
             <a href="https://twitter.com/hypothes_is">
               <i class="fa fa-twitter"></i>
             </a>
-            <a href="{{ base_url }}feed/">
-              <i class="fa fa-rss"></i>
-            </a>
+            <a href="{{ rss_feed_url }}"><i class="fa fa-rss"></i></a>
           </div>
           <div class="menu-footer-container">
             <ul id="menu-footer" class="nav navbar-nav">
