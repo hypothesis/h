@@ -83,8 +83,13 @@
             </ul>
           </div>
           <ul class="nav navbar-nav pull-right login">
-            <li><a href="{{ base_url }}login">Login</a></li>
-            <li><a href="{{ base_url }}register">Sign up</a></li>
+            {% if username %}
+              <li><a href="{{ user_profile_link }}">{{ username }}</a></li>
+              <li><a href="{{ request.route_url("logout") }}">Sign out</a></li>
+            {% else %}
+              <li><a href="{{ base_url }}login">Sign in</a></li>
+              <li><a href="{{ base_url }}register">Create an account</a></li>
+            {% endif %}
           </ul>
         </nav>
       </div>
