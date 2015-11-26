@@ -30,6 +30,19 @@
           href="{{ base_url }}assets/images/favicons/favicon.ico">
 
    <link href="{{ rss_feed_url }}" rel="alternate" type="application/rss+xml">
+
+    {% if ga_tracking_id %}
+      <!-- Google Analytics -->
+      <script async src='//www.google-analytics.com/analytics.js'></script>
+      <script>
+       window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+       ga('create', 'UA-{{ga_tracking_id}}', {{ga_create_options|safe}});
+       {% block ga_pageview %}
+       ga('send', 'pageview');
+       {% endblock %}
+      </script>
+      <!-- End Google Analytics -->
+    {% endif %}
   </head>
 
   <body class="home page page-id-238 page-template-default">
