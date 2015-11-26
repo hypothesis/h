@@ -43,7 +43,7 @@ angulartics_ga:
   contents: ../../node_modules/angulartics/src/angulartics-ga.js
 
 
-# Bootstrap (for admin areas only)
+# Bootstrap
 bootstrap:
   filters: uglifyjs
   output: scripts/vendor/bootstrap.min.js
