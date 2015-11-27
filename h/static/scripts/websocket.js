@@ -22,7 +22,7 @@ function Socket(url) {
   // queue of JSON objects which have not yet been submitted
   var messageQueue = [];
 
-  // the current WebSocket instance or null if disconnected
+  // the current WebSocket instance
   var socket;
 
   function sendMessages() {
@@ -58,7 +58,6 @@ function Socket(url) {
             connectOperation.retry(new Error(event.reason));
           }
         }
-        socket = null;
         self.emit('close', event);
       };
 
@@ -74,10 +73,6 @@ function Socket(url) {
 
   /** Close the underlying WebSocket connection */
   this.close = function () {
-    if (!socket) {
-      console.error('Socket.close() called before socket was connected');
-      return;
-    }
     socket.close();
   };
 
@@ -94,7 +89,7 @@ function Socket(url) {
 
   /** Returns true if the WebSocket is currently connected. */
   this.isConnected = function () {
-    return socket && socket.readyState === WebSocket.OPEN;
+    return socket.readyState === WebSocket.OPEN;
   };
 
   // establish the initial connection

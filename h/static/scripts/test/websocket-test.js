@@ -33,6 +33,20 @@ describe('websocket wrapper', function () {
     assert.notEqual(fakeSocket, initialSocket);
   });
 
+  it('should send queued messages after a reconnect', function () {
+    // simulate WebSocket setup and initial connection
+    var socket = new Socket('ws://test:1234');
+    fakeSocket.onopen({});
+
+    // simulate abnormal disconnection
+    fakeSocket.onclose({code: 1006});
+
+    // enqueue a message and check that it is sent after the WS reconnects
+    socket.send({aKey: 'aValue'});
+    fakeSocket.onopen({});
+    assert.calledWith(fakeSocket.send, '{"aKey":"aValue"}');
+  });
+
   it('should not reconnect after a normal disconnection', function () {
     var socket = new Socket('ws://test:1234');
     socket.close();
