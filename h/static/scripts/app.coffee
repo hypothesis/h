@@ -109,6 +109,7 @@ module.exports = angular.module('h', [
 .directive('formInput', require('./directive/form-input'))
 .directive('formValidate', require('./directive/form-validate'))
 .directive('groupList', require('./directive/group-list').directive)
+.directive('hAutofocus', require('./directive/h-autofocus'))
 .directive('markdown', require('./directive/markdown'))
 .directive('simpleSearch', require('./directive/simple-search'))
 .directive('statusButton', require('./directive/status-button'))
