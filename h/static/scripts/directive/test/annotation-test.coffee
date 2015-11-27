@@ -41,7 +41,7 @@ describe 'annotation', ->
 
   before ->
     angular.module('h', [])
-    .directive('annotation', require('../annotation'))
+    .directive('annotation', require('../annotation').directive)
 
   beforeEach module('h')
   beforeEach module('h.templates')
@@ -695,7 +695,7 @@ describe("AnnotationController", ->
 
   before(->
     angular.module("h", [])
-    .directive("annotation", require("../annotation"))
+    .directive("annotation", require("../annotation").directive)
   )
 
   beforeEach(module("h"))
@@ -1016,4 +1016,109 @@ describe("AnnotationController", ->
       controller.annotation.text = "this should be reverted"
       controller.revert()
       assert.equal controller.annotation.text, undefined
+)
+
+describe("validate()", ->
+  validate = require('../annotation').validate
+
+  it("returns undefined if value is not an object", ->
+    for value in [2, "foo", true, null]
+      assert.equal(validate(value), undefined)
+  )
+
+  it("returns the length if the value contains a non-empty tags array", ->
+    assert.equal(
+      validate({
+        tags: ["foo", "bar"],
+        permissions: {
+          read: ["group:__world__"]
+        },
+        target: [1, 2, 3]
+      }),
+      2)
+  )
+
+  it("returns the length if the value contains a non-empty text string", ->
+    assert.equal(
+      validate({
+        text: "foobar",
+        permissions: {
+          read: ["group:__world__"]
+        },
+        target: [1, 2, 3]
+      }),
+      6)
+  )
+
+  it("returns true for private highlights", ->
+    # A "highlight" is an annotation with a target but no text or tags.
+    # These are allowed as long as they're not public.
+    assert.equal(
+      validate({
+        permissions: {
+          read: ["acct:seanh@hypothes.is"]
+        },
+        target: [1, 2, 3]
+      }),
+      true
+    )
+  )
+
+  it("returns true for group highlights", ->
+    # A "highlight" is an annotation with a target but no text or tags.
+    # This validate() function allows these in groups.
+    # FIXME: This client behavior is wrong - the API does not allow shared
+    # highlights.
+    assert.equal(
+      validate({
+        permissions: {
+          read: ["group:foo"]
+        },
+        target: [1, 2, 3]
+      }),
+      true
+    )
+  )
+
+  it("returns false for public highlights", ->
+    # A "highlight" is an annotation with a target but no text or tags.
+    # Public highlights aren't allowed.
+    assert.equal(
+      validate({
+        text: undefined,
+        tags: undefined,
+        permissions: {
+          read: ["group:__world__"]
+        },
+        target: [1, 2, 3]
+      }),
+      false
+    )
+  )
+
+  it("handles values with no permissions", ->
+    # A "highlight" is an annotation with a target but no text or tags.
+    # These are allowed as long as they're not public.
+    assert.equal(
+      validate({
+        permissions: undefined,
+        target: [1, 2, 3]
+      }),
+      true
+    )
+  )
+
+  it("handles permissions objects with no read", ->
+    # A "highlight" is an annotation with a target but no text or tags.
+    # These are allowed as long as they're not public.
+    assert.equal(
+      validate({
+        permissions: {
+          read: undefined
+        },
+        target: [1, 2, 3]
+      }),
+      true
+    )
+  )
 )

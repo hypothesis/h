@@ -458,68 +458,71 @@ AnnotationController = [
 # {@link annotation.AnnotationController AnnotationController}.
 #
 ###
-module.exports = [
-  '$document', 'features'
-  ($document,   features) ->
-    linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
-      # Observe the isSidebar attribute
-      attrs.$observe 'isSidebar', (value) ->
-        ctrl.isSidebar = value? and value != 'false'
+module.exports = {
+  validate: validate,
+  directive: [
+    '$document', 'features'
+    ($document,   features) ->
+      linkFn = (scope, elem, attrs, [ctrl, thread, threadFilter, counter]) ->
+        # Observe the isSidebar attribute
+        attrs.$observe 'isSidebar', (value) ->
+          ctrl.isSidebar = value? and value != 'false'
 
-      # Save on Meta + Enter or Ctrl + Enter.
-      elem.on 'keydown', (event) ->
-        if event.keyCode == 13 and (event.metaKey or event.ctrlKey)
-          event.preventDefault()
-          scope.$evalAsync ->
-            ctrl.save()
+        # Save on Meta + Enter or Ctrl + Enter.
+        elem.on 'keydown', (event) ->
+          if event.keyCode == 13 and (event.metaKey or event.ctrlKey)
+            event.preventDefault()
+            scope.$evalAsync ->
+              ctrl.save()
 
-      # Give template access to feature flags
-      scope.feature = features.flagEnabled
+        # Give template access to feature flags
+        scope.feature = features.flagEnabled
 
-      scope.share = (event) ->
-        $container = angular.element(event.currentTarget).parent()
-        $container.addClass('open').find('input').focus().select()
+        scope.share = (event) ->
+          $container = angular.element(event.currentTarget).parent()
+          $container.addClass('open').find('input').focus().select()
 
-        # We have to stop propagation here otherwise this click event will
-        # re-close the share dialog immediately.
-        event.stopPropagation()
+          # We have to stop propagation here otherwise this click event will
+          # re-close the share dialog immediately.
+          event.stopPropagation()
 
-        $document.one('click', (event) -> $container.removeClass('open'))
-        return
+          $document.one('click', (event) -> $container.removeClass('open'))
+          return
 
-      # Keep track of edits going on in the thread.
-      if counter?
-        # Expand the thread if descendants are editing.
-        scope.$watch (-> counter.count 'edit'), (count) ->
-          if count and not ctrl.editing and thread.collapsed
-            thread.toggleCollapsed()
+        # Keep track of edits going on in the thread.
+        if counter?
+          # Expand the thread if descendants are editing.
+          scope.$watch (-> counter.count 'edit'), (count) ->
+            if count and not ctrl.editing and thread.collapsed
+              thread.toggleCollapsed()
 
-        # Propagate changes through the counters.
-        scope.$watch (-> ctrl.editing), (editing, old) ->
-          if editing
-            counter.count 'edit', 1
-            # Disable the filter and freeze it to always match while editing.
-            if thread? and threadFilter?
-              threadFilter.active(false)
-              threadFilter.freeze(true)
-          else if old
-            counter.count 'edit', -1
-            threadFilter?.freeze(false)
+          # Propagate changes through the counters.
+          scope.$watch (-> ctrl.editing), (editing, old) ->
+            if editing
+              counter.count 'edit', 1
+              # Disable the filter and freeze it to always match while editing.
+              if thread? and threadFilter?
+                threadFilter.active(false)
+                threadFilter.freeze(true)
+            else if old
+              counter.count 'edit', -1
+              threadFilter?.freeze(false)
 
-        # Clean up when the thread is destroyed
-        scope.$on '$destroy', ->
-          if ctrl.editing then counter?.count 'edit', -1
+          # Clean up when the thread is destroyed
+          scope.$on '$destroy', ->
+            if ctrl.editing then counter?.count 'edit', -1
 
-    controller: AnnotationController
-    controllerAs: 'vm'
-    link: linkFn
-    require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
-    scope:
-      annotationGet: '&annotation'
-      # indicates whether this is the last reply in a thread
-      isLastReply: '='
-      replyCount: '@annotationReplyCount'
-      replyCountClick: '&annotationReplyCountClick'
-      showReplyCount: '@annotationShowReplyCount'
-    templateUrl: 'annotation.html'
-]
+      controller: AnnotationController
+      controllerAs: 'vm'
+      link: linkFn
+      require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount']
+      scope:
+        annotationGet: '&annotation'
+        # indicates whether this is the last reply in a thread
+        isLastReply: '='
+        replyCount: '@annotationReplyCount'
+        replyCountClick: '&annotationReplyCountClick'
+        showReplyCount: '@annotationShowReplyCount'
+      templateUrl: 'annotation.html'
+    ]
+}
