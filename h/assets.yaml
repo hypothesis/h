@@ -43,7 +43,7 @@ angulartics_ga:
   contents: ../../node_modules/angulartics/src/angulartics-ga.js
 
 
-# Bootstrap (for admin areas only)
+# Bootstrap
 bootstrap:
   filters: uglifyjs
   output: scripts/vendor/bootstrap.min.js
@@ -226,6 +226,20 @@ site_css:
         - h:static/styles/site.scss
       depends:
         - h:static/styles/*.scss
+
+# Assets needed for the H website front page only.
+front_page_js:
+  contents:
+    - jquery
+
+front_page_css:
+  output: styles/front-page.min.css
+  contents:
+    - h:static/styles/front-page/main.css
+    - output: h:static/styles/front-page.css
+      filters: cleancss
+      contents:
+      - h:static/styles/vendor/css/font-awesome.css
 
 # Help page
 help_page_css:

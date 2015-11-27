@@ -119,7 +119,6 @@ class AuthController(object):
         if self.request.authenticated_userid is not None:
             self.request.registry.notify(LogoutEvent(self.request))
             self.request.session.invalidate()
-            self.request.session.flash(_('You have logged out.'), 'success')
         headers = forget(self.request)
         return headers
 

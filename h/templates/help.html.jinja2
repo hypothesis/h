@@ -49,16 +49,6 @@
           </div>
         </section>
       {% endif %}
-      {% if is_index %}
-        <section class="help-page-section">
-          <h2 id="getting-started" class="help-page-heading">Getting started</h2>
-          <p class="help-page-lede">Great, you've got the server up and running, you're now ready to start kicking the tires.</p>
-          <div class="numbered-list grid">
-            <div class="column-desktop-1-2"><div class="numbered-list-item">Create an account using the sidebar on the right of the screen.</div></div>
-            <div class="column-desktop-1-2"><div class="numbered-list-item">Annotate this page or use this bookmarklet: {% include "includes/bookmarklet.html.jinja2" %}</div></div>
-          </div>
-        </section>
-      {% endif %}
       <section class="help-page-section">
         <h2 id="key-features" class="help-page-heading">Annotation Types</h2>
         <p class="help-page-lede">There are a few types of annotations that can be created
@@ -131,40 +121,6 @@
           </ul>
         </div>
       </section>
-      {% if is_index %}
-        <section class="help-page-section">
-          <h2 id="contributing" class="help-page-heading">Contributing</h2>
-          <div class="styled-text">
-            <p>Hypothesis is an open source effort licensed under a 2-Clause <a
-                href="https://en.wikipedia.org/wiki/BSD_licenses">BSD License</a>,
-              sometimes referred to as the "Simplified BSD License" or the "FreeBSD
-              License".</p>
-            <p>Development is coordinated through <a
-                href="https://github.com/hypothesis">our Github repository</a> utilizing
-              the issue tracking and wiki tools provided there. Additionally, we manage a
-              mailing list which you can subscribe to by sending an email to <a
-                href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#58;&#100;&#101;&#x76;&#x2b;&#x73;&#x75;&#x62;&#115;&#99;&#114;&#105;&#98;&#x65;&#x40;&#x6c;&#x69;&#x73;&#116;&#46;&#104;&#121;&#112;&#x6f;&#x74;&#x68;&#x65;&#x73;&#46;&#105;&#115;">&#100;&#101;&#x76;&#x2b;&#x73;&#x75;&#x62;&#115;&#99;&#114;&#105;&#98;&#x65;&#x40;&#x6c;&#x69;&#x73;&#116;&#46;&#104;&#121;&#112;&#x6f;&#x74;&#x68;&#x65;&#x73;&#46;&#105;&#115;</a>
-              (<a href="https://groups.google.com/a/list.hypothes.is/forum/#!forum/dev">archive</a>).</p>
-            <p>Note the <a href="https://github.com/hypothesis/h/wiki">project
-                wiki</a>, including a <a
-                href="https://hypothes.is/roadmap/">roadmap</a>, detailed <a
-                href="https://github.com/hypothesis/h/wiki/_pages">descriptions</a> and <a
-                href="https://github.com/hypothesis/h/wiki/Mockup-index">mockups</a> of
-              upcoming features, and <a href="https://github.com/hypothesis/h/issues">current
-                issues</a> needing development attention. Additionally, our <a
-                href="https://groups.google.com/forum/#!forum/hypothesis-forum"
-                target="_blank">forum</a> is a great place to get answers and offer feedback.</p>
-              <p>After you're done familiarizing yourself with the project landscape we
-              recommend reading our <a
-                href="https://github.com/hypothesis/h/blob/develop/CONTRIBUTING.rst">contributor
-                guide</a> which details our work-flow, conventions and licensing administrivia.
-              Additionally, please feel free to join us in <a
-                href="http://webchat.freenode.net/?channels=hypothes.is">#hypothes.is</a> on <a
-                href="http://freenode.net/">freenode</a> and subscribe to our mailing list.</p>
-              <p>Finally, we also have grant opportunities for projects related to web annotation. You can find out more about them on our <a href="http://anno.fund/">Open Annotation Grant Opportunities page</a>.</p>
-          </div>
-        </section>
-      {% endif %}
     </article>
     <div class="help-page-sidebar">
       <div id="help-1">

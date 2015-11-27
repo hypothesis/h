@@ -73,6 +73,7 @@ def includeme(config):
     config.include('h.badge')
     config.include('h.claim')
     config.include('h.groups')
+    config.include('h.home')
     config.include('h.notification')
     config.include('h.queue')
     config.include('h.streamer')
