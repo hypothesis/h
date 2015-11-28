@@ -5,6 +5,7 @@ import json
 
 import colander
 import deform
+import jinja2
 from pyramid import httpexceptions
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
@@ -282,8 +283,11 @@ class ResetPasswordController(object):
         user.password = password
         self.request.db.delete(user.activation)
 
-        self.request.session.flash(_('Your password has been reset!'),
-                                   'success')
+        self.request.session.flash(jinja2.Markup(_(
+            'Your password has been reset! '
+            'You can now <a href="{url}">login</a> using the new password you '
+            'provided.').format(url=self.request.route_url('login'))),
+            'success')
         self.request.registry.notify(PasswordResetEvent(self.request, user))
 
 
@@ -365,9 +369,11 @@ class RegisterController(object):
         # Activate the user (by deleting the activation)
         self.request.db.delete(activation)
 
-        self.request.session.flash(_("Your e-mail address has been verified. "
-                                     "Thank you!"),
-                                   'success')
+        self.request.session.flash(jinja2.Markup(_(
+            'Your account has been activated! '
+            'You can now <a href="{url}">login</a> using the password you '
+            'provided.').format(url=self.request.route_url('login'))),
+            'success')
         self.request.registry.notify(ActivationEvent(self.request, user))
 
         return httpexceptions.HTTPFound(
@@ -395,11 +401,11 @@ class RegisterController(object):
         mailer = get_mailer(self.request)
         mailer.send(message)
 
-        self.request.session.flash(_("Thank you for registering! Please check "
-                                     "your e-mail now. You can continue by "
-                                     "clicking the activation link we have "
-                                     "sent you."),
-                                   'success')
+        self.request.session.flash(jinja2.Markup(_(
+            'Thank you for creating an account! '
+            "We've sent you an email with an activation link, "
+            'before you can sign in <strong>please check your email and open '
+            'the link to activate your account</strong>.')), 'success')
         self.request.registry.notify(RegistrationEvent(self.request, user))
 
 
