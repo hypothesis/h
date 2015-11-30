@@ -246,14 +246,23 @@
   <footer class="content-info">
     <div class="container">
       <nav class="navbar navbar-default">
+        <style>
+         /* FIXME: Remove the '!important' hack below and move
+            This to the correct stylesheet in the new homepage.
+          */
+         .social-media-link {
+           font-size: 16px !important;
+           text-decoration: none !important;
+         }
+        </style>
         <div class="nav navbar-nav social-media pull-right">
-          <a href="https://github.com/hypothesis">
+          <a class="social-media-link" href="https://github.com/hypothesis">
             <i class="h-icon-github"></i>
           </a>
-          <a href="https://twitter.com/hypothes_is">
+          <a class="social-media-link" href="https://twitter.com/hypothes_is">
             <i class="h-icon-twitter"></i>
           </a>
-          <a href="{{ rss_feed_url }}"><i class="h-icon-feed"></i></a>
+          <a class="social-media-link" href="{{ rss_feed_url }}"><i class="h-icon-feed"></i></a>
         </div>
         <div class="menu-footer-container">
           <ul id="menu-footer" class="nav navbar-nav">
