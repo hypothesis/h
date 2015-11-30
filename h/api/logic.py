@@ -11,16 +11,8 @@ _ = i18n.TranslationString
 log = logging.getLogger(__name__)
 
 
-# These annotation fields are not to be set by the user.
-PROTECTED_FIELDS = ['created', 'updated', 'user', 'id']
-
-
 def create_annotation(fields, userid):
     """Create and store an annotation."""
-    # Some fields are not to be set by the user, ignore them
-    for field in PROTECTED_FIELDS:
-        fields.pop(field, None)
-
     # Create Annotation instance
     annotation = Annotation(fields)
     annotation['user'] = userid
@@ -42,10 +34,6 @@ def update_annotation(annotation, fields, userid):
         attempting to move the annotation between groups.
 
     """
-    # Some fields are not to be set by the user, ignore them
-    for field in PROTECTED_FIELDS:
-        fields.pop(field, None)
-
     # If the user is changing access permissions, check if it's allowed.
     permissions = annotation.get('permissions', {})
     changing_permissions = (

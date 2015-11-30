@@ -145,7 +145,7 @@ def test_annotations_index_renders_results(search_lib):
 
 # The fixtures required to mock all of create()'s dependencies.
 create_fixtures = pytest.mark.usefixtures(
-    'logic', 'AnnotationEvent', 'search_lib', 'validators')
+    'logic', 'AnnotationEvent', 'search_lib', 'schemas')
 
 
 @create_fixtures
@@ -161,34 +161,35 @@ def test_create_returns_error_if_parsing_json_fails():
 
 
 @create_fixtures
-def test_create_calls_create_annotation(logic):
+def test_create_calls_create_annotation(logic, schemas):
     """It should call logic.create_annotation() appropriately."""
     request = mock.Mock()
+    schemas.AnnotationSchema.return_value.validate.return_value = {'foo': 123}
 
     views.create(request)
 
     logic.create_annotation.assert_called_once_with(
-        request.json_body,
+        {'foo': 123},
         userid=request.authenticated_userid)
 
 
 @create_fixtures
-def test_create_calls_validator(validators):
+def test_create_calls_validator(schemas):
     request = mock.Mock()
 
     views.create(request)
 
-    validators.Annotation.return_value.validate.assert_called_once_with(
+    schemas.AnnotationSchema.return_value.validate.assert_called_once_with(
         request.json_body)
 
 
 @create_fixtures
-def test_create_returns_api_error_for_validation_error(validators):
-    class Error(Exception):
+def test_create_returns_api_error_for_validation_error(schemas):
+    class ValidationError(Exception):
         pass
-    validators.Error = Error
-    validators.Annotation.return_value.validate.side_effect = (
-        validators.Error(mock.sentinel.reason))
+    schemas.ValidationError = ValidationError
+    schemas.AnnotationSchema.return_value.validate.side_effect = (
+        schemas.ValidationError(mock.sentinel.reason))
 
     response = views.create(mock.Mock())
 
@@ -274,7 +275,7 @@ def test_read_does_not_crash_if_annotation_has_no_group():
 
 # The fixtures required to mock all of update()'s dependencies.
 update_fixtures = pytest.mark.usefixtures(
-    'logic', 'Annotation', 'search_lib', 'validators')
+    'logic', 'Annotation', 'search_lib', 'schemas')
 
 
 @update_fixtures
@@ -289,22 +290,22 @@ def test_update_returns_error_if_json_parsing_fails():
 
 
 @update_fixtures
-def test_update_calls_validator(validators):
+def test_update_calls_validator(schemas):
     request = mock.Mock()
 
     views.update(mock.Mock(), request)
 
-    validators.Annotation.return_value.validate.assert_called_once_with(
+    schemas.AnnotationSchema.return_value.validate.assert_called_once_with(
         request.json_body)
 
 
 @update_fixtures
-def test_update_returns_api_error_for_validation_error(validators):
-    class Error(Exception):
+def test_update_returns_api_error_for_validation_error(schemas):
+    class ValidationError(Exception):
         pass
-    validators.Error = Error
-    validators.Annotation.return_value.validate.side_effect = (
-        validators.Error(mock.sentinel.reason))
+    schemas.ValidationError = ValidationError
+    schemas.AnnotationSchema.return_value.validate.side_effect = (
+        schemas.ValidationError(mock.sentinel.reason))
 
     response = views.update(mock.Mock(), mock.Mock())
 
@@ -313,15 +314,16 @@ def test_update_returns_api_error_for_validation_error(validators):
 
 
 @update_fixtures
-def test_update_calls_update_annotation(logic):
+def test_update_calls_update_annotation(logic, schemas):
     context = mock.Mock()
     request = mock.Mock()
+    schemas.AnnotationSchema.return_value.validate.return_value = {'foo': 123}
 
     views.update(context, request)
 
     logic.update_annotation.assert_called_once_with(
         context.model,
-        request.json_body,
+        {'foo': 123},
         request.authenticated_userid)
 
 
@@ -468,7 +470,7 @@ def access_token(request):
 
 
 @pytest.fixture
-def validators(request):
-    patcher = mock.patch('h.api.views.validators', autospec=True)
+def schemas(request):
+    patcher = mock.patch('h.api.views.schemas', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

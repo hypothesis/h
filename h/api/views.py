@@ -12,7 +12,7 @@ from h.api import cors
 from h.api.events import AnnotationEvent
 from h.api import search as search_lib
 from h.api import logic
-from h.api import validators
+from h.api import schemas
 from h.api.resources import Annotation
 from h.api.resources import Annotations
 from h.api.resources import Root
@@ -158,11 +158,11 @@ def create(request):
                           status_code=400)  # Client Error: Bad Request
 
     try:
-        validators.Annotation().validate(fields)
-    except validators.Error as err:
+        appstruct = schemas.AnnotationSchema().validate(fields)
+    except schemas.ValidationError as err:
         return _api_error(request, err.message, status_code=400)
 
-    annotation = logic.create_annotation(fields,
+    annotation = logic.create_annotation(appstruct,
                                          userid=request.authenticated_userid)
 
     # Notify any subscribers
@@ -197,14 +197,14 @@ def update(context, request):
                           status_code=400)  # Client Error: Bad Request
 
     try:
-        validators.Annotation().validate(fields)
-    except validators.Error as err:
+        appstruct = schemas.AnnotationSchema().validate(fields)
+    except schemas.ValidationError as err:
         return _api_error(request, err.message, status_code=400)
 
     # Update and store the annotation
     try:
         logic.update_annotation(annotation,
-                                fields,
+                                appstruct,
                                 userid=request.authenticated_userid)
     except RuntimeError as err:
         return _api_error(
