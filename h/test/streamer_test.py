@@ -32,6 +32,7 @@ class FakeSocket(object):
         self.terminated = False
         self.filter = MagicMock()
         self.request = MagicMock()
+        self.request.effective_principals = ['group:__world__']
         self.send = MagicMock()
 
 

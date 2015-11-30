@@ -341,8 +341,7 @@ def handle_annotation_event(message, socket):
             socket.request.authenticated_userid != annotation.get('user', '')):
         return None
 
-    if not _authorized_to_read(
-            socket.request.effective_principals, annotation):
+    if not _authorized_to_read(socket.request, annotation):
         return None
 
     # We don't send anything until we have received a filter from the client
@@ -382,21 +381,26 @@ def handle_user_event(message, socket):
     }
 
 
-def _authorized_to_read(effective_principals, annotation):
-    """Return True if effective_principals authorize reading annotation.
-
-    Return True if the given effective_principals authorize the request that
-    owns them to read the given annotation. False otherwise.
+def _authorized_to_read(request, annotation):
+    """Return True if the passed request is authorized to read the annotation.
 
     If the annotation belongs to a private group, this will return False if the
     authenticated user isn't a member of that group.
-
     """
-    if 'group:__world__' in annotation['permissions']['read']:
+    # TODO: remove this when we've diagnosed this issue
+    if ('permissions' not in annotation or
+            'read' not in annotation['permissions']):
+        request.sentry.captureMessage(
+            'streamer received annotation lacking valid permissions',
+            level='warn',
+            extra={
+                'id': annotation['id'],
+                'permissions': json.dumps(annotation.get('permissions')),
+            })
+
+    read_permissions = annotation.get('permissions', {}).get('read', [])
+    if set(read_permissions).intersection(request.effective_principals):
         return True
-    for principal in effective_principals:
-        if principal in annotation['permissions']['read']:
-            return True
     return False
 
 
