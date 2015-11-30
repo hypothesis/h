@@ -1,3 +1,24 @@
+0.8.2 (2015-11-30)
+==================
+
+Bug fixes
+---------
+
+- Fix a problem where messages that were supposed to be sent over the WebSocket
+  on reconnect weren't (#2746).
+
+- Fix a bug where an old sort control was shown in the sidebar (#2751).
+
+- Fix a bug where creating an annotation before login could result in invalid
+  data being sent to the server (#2754).
+
+Miscellanea
+-----------
+
+- The Hypothesis home page is now served by this application (#2740).
+
+- Annotation data is now validated using JSON Schema (#2745).
+
 0.8.1 (2015-11-26)
 ==================
 
