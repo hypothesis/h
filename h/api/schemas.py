@@ -61,6 +61,20 @@ class AnnotationSchema(JSONSchema):
                     },
                 },
             },
+            'permissions': {
+                'title': 'Permissions',
+                'description': 'Annotation action access control list',
+                'type': 'object',
+                'patternProperties': {
+                    '^(admin|delete|read|update)$': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string',
+                            'pattern': '^(acct:|group:).+$',
+                        },
+                    }
+                },
+            },
         },
     }
 
