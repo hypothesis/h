@@ -11,7 +11,6 @@ module.exports = class WidgetController
      $scope,   annotationUI,   crossframe,   annotationMapper,  drafts,    groups,
      streamer,   streamFilter,   store,   threading
   ) ->
-    $scope.isStream = true
     $scope.threadRoot = threading.root
     $scope.sortOptions = ['Newest', 'Oldest', 'Location']
 

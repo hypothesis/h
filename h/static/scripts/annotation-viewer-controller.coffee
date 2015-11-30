@@ -12,9 +12,6 @@ module.exports = class AnnotationViewerController
   ) ->
     id = $routeParams.id
 
-    # Set up the viewer
-    $scope.isStream = false
-
     # Provide no-ops until these methods are moved elsewere. They only apply
     # to annotations loaded into the stream.
     $scope.focus = angular.noop
