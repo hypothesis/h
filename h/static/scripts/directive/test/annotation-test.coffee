@@ -540,11 +540,21 @@ describe 'annotation', ->
     it "creates a draft when editing an annotation", ->
       createDirective()
       controller.edit()
-      assert.calledWith(fakeDrafts.update, annotation, {
-        text: annotation.text,
-        tags: annotation.tags,
-        permissions: annotation.permissions
-      })
+      assert.calledWith(fakeDrafts.update, annotation)
+
+    it "creates a draft with only editable fields which are non-null", ->
+      # When a draft is saved, we shouldn't save any fields to the draft
+      # "changes" object that aren't actually set on the annotation. In this
+      # case, both permissions and tags are null so shouldn't be saved in the
+      # draft.
+      createDirective()
+      annotation.permissions = null
+      annotation.text = 'Hello!'
+      annotation.tags = null
+
+      controller.edit()
+
+      assert.calledWith(fakeDrafts.update, annotation, {text: 'Hello!'})
 
     it "starts editing immediately if there is a draft", ->
       fakeDrafts.get.returns({

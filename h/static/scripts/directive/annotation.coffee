@@ -241,11 +241,14 @@ AnnotationController = [
       # Drafts only preserve the text, tags and permissions of the annotation
       # (i.e. only the bits that the user can edit), changes to other
       # properties are not preserved.
-      drafts.update(model, {
-        text: draft.text
-        tags: draft.tags
-        permissions: draft.permissions
-      })
+      changes = {}
+      if draft.text?
+        changes.text = draft.text
+      if draft.tags?
+        changes.tags = draft.tags
+      if draft.permissions?
+        changes.permissions = draft.permissions
+      drafts.update(model, changes)
 
     ###*
     # @ngdoc method
