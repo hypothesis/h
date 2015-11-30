@@ -305,6 +305,8 @@ describe('annotation', function() {
       controller.edit();
       controller.setPrivacy('private');
       return controller.save().then(function() {
+        // Verify that the permissions are updated once the annotation
+        // is saved.
         assert.deepEqual(annotation.permissions, {
           read: ['justme']
         });
@@ -494,6 +496,8 @@ describe('annotation', function() {
       });
 
       it('is not updated for unsaved annotations', function() {
+        // Unsaved annotations don't have an updated time yet so a timestamp
+        // string can't be computed for them.
         annotation.updated = null;
         $scope.$digest();
         assert.equal(controller.timestamp, null);
@@ -767,6 +771,11 @@ describe('annotation', function() {
       createDirective();
       controller.edit();
       controller.save();
+
+      // The controller currently removes the draft whenever an annotation
+      // update is committed on the server. This can happen either when saving
+      // locally or when an update is committed in another instance of H
+      // which is then pushed to the current instance.
       annotation.updated = (new Date()).toISOString();
       $scope.$digest();
       assert.calledWith(fakeDrafts.remove, annotation);
@@ -815,13 +824,17 @@ describe('annotation', function() {
   it(
     'updates perms when moving new annotations to the focused group',
     function() {
+      // id must be null so that AnnotationController considers this a new
+      // annotation.
       annotation.id = null;
       annotation.group = 'old-group';
       annotation.permissions = {
         read: [annotation.group]
       };
+      // This is a shared annotation.
       fakePermissions.isShared.returns(true);
       createDirective();
+      // Make permissions.shared() behave like we expect it to.
       fakePermissions.shared = function(groupId) {
         return {
           read: [groupId]
@@ -836,19 +849,26 @@ describe('annotation', function() {
   );
 
   it('saves shared permissions for the new group to drafts', function() {
+    // id must be null so that AnnotationController considers this a new
+    // annotation.
     annotation.id = null;
     annotation.group = 'old-group';
     annotation.permissions = {
       read: [annotation.group]
     };
+    // This is a shared annotation.
     fakePermissions.isShared.returns(true);
     createDirective();
+    // drafts.get() needs to return something truthy, otherwise
+    // AnnotationController won't try to update the draft for the annotation.
     fakeDrafts.get.returns(true);
+    // Make permissions.shared() behave like we expect it to.
     fakePermissions.shared = function(groupId) {
       return {
         read: [groupId]
       };
     };
+    // Change the focused group.
     fakeGroups.focused = sinon.stub().returns({
       id: 'new-group'
     });
@@ -860,12 +880,15 @@ describe('annotation', function() {
   });
 
   it('does not change perms when moving new private annotations', function() {
+    // id must be null so that AnnotationController considers this a new
+    // annotation.
     annotation.id = null;
     annotation.group = 'old-group';
     annotation.permissions = {
       read: ['acct:bill@localhost']
     };
     createDirective();
+    // This is a private annotation.
     fakePermissions.isShared.returns(false);
     fakeGroups.focused = sinon.stub().returns({
       id: 'new-group'
@@ -891,6 +914,7 @@ describe('AnnotationController', function() {
 
   beforeEach(module('h.templates'));
 
+  /** Return Angular's $compile service. */
   getCompileService = function() {
     var $compile;
     $compile = null;
@@ -900,6 +924,7 @@ describe('AnnotationController', function() {
     return $compile;
   };
 
+  /** Return Angular's $rootScope. */
   getRootScope = function() {
     var $rootScope;
     $rootScope = null;
@@ -1038,6 +1063,7 @@ describe('AnnotationController', function() {
   });
 
   it('sets the permissions of new annotations', function() {
+    // This is a new annotation, doesn't have any permissions yet.
     var annotation = {
       group: 'test-group'
     };
@@ -1114,32 +1140,43 @@ describe('AnnotationController', function() {
 
   describe('when the user signs in', function() {
     it('sets the user of unsaved annotations', function() {
+      // This annotation has no user yet, because that's what happens
+      // when you create a new annotation while not signed in.
       var annotation = {};
       var session = {
         state: {
-          userid: null
+          userid: null  // Not signed in.
         }
       };
       var $rootScope = createAnnotationDirective({
         annotation: annotation,
         session: session
       }).$rootScope;
+      // At this point we would not expect the user to have been set,
+      // even though the annotation has been created, because the user isn't
+      // signed in.
       assert(!annotation.user);
+      // Sign the user in.
       session.state.userid = 'acct:fred@hypothes.is';
+      // The session service would broadcast USER_CHANGED after sign in.
       $rootScope.$broadcast(events.USER_CHANGED, {});
       assert.equal(annotation.user, session.state.userid);
     });
 
     it('sets the permissions of unsaved annotations', function() {
+      // This annotation has no permissions yet, because that's what happens
+      // when you create a new annotation while not signed in.
       var annotation = {
         group: '__world__'
       };
       var session = {
         state: {
-          userid: null
+          userid: null  // Not signed in.
         }
       };
       var permissions = {
+        // permissions.default() would return null, because the user isn't
+        // signed in.
         'default': function() {
           return null;
         },
@@ -1151,11 +1188,18 @@ describe('AnnotationController', function() {
         session: session,
         permissions: permissions
       }).$rootScope;
+      // At this point we would not expect the permissions to have been set,
+      // even though the annotation has been created, because the user isn't
+      // signed in.
       assert(!annotation.permissions);
+      // Sign the user in.
       session.state.userid = 'acct:fred@hypothes.is';
+      // permissions.default() would now return permissions, because the user
+      // is signed in.
       permissions['default'] = function() {
         return '__default_permissions__';
       };
+      // The session service would broadcast USER_CHANGED after sign in.
       $rootScope.$broadcast(events.USER_CHANGED, {});
       assert.equal(annotation.permissions, '__default_permissions__');
     });
@@ -1173,9 +1217,11 @@ describe('AnnotationController', function() {
         id: 'test-annotation-id',
         user: 'acct:bill@localhost',
         text: 'Initial annotation body text',
+        // Allow the initial save of the annotation to succeed.
         $create: function() {
           return Promise.resolve();
         },
+        // Simulate saving the edit of the annotation to the server failing.
         $update: function() {
           return Promise.reject({
             status: 500,
@@ -1186,14 +1232,23 @@ describe('AnnotationController', function() {
       }
     }).controller;
     var originalText = controller.annotation.text;
+    // Simulate the user clicking the Edit button on the annotation.
     controller.edit();
+    // Simulate the user typing some text into the annotation editor textarea.
     controller.annotation.text = 'changed by test code';
+    // Simulate the user hitting the Save button and wait for the
+    // (unsuccessful) response from the server.
     controller.save();
+    // At this point the annotation editor controls are still open, and the
+    // annotation's text is still the modified (unsaved) text.
     assert(controller.annotation.text === 'changed by test code');
+    // Simulate the user clicking the Cancel button.
     controller.revert();
     assert(controller.annotation.text === originalText);
   });
 
+  // test that editing reverting changes to an annotation with
+  // no text resets the text to be empty.
   it('clears the text when reverting changes to a highlight', function() {
     var controller = createAnnotationDirective({
       annotation: {
