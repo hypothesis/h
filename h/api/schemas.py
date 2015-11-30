@@ -61,6 +61,20 @@ class AnnotationSchema(JSONSchema):
                     },
                 },
             },
+            'permissions': {
+                'title': 'Permissions',
+                'description': 'Annotation action access control list',
+                'type': 'object',
+                'patternProperties': {
+                    '^(admin|delete|read|update)$': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string',
+                            'pattern': '^(acct:|group:).+$',
+                        },
+                    }
+                },
+            },
         },
     }
 
@@ -77,7 +91,7 @@ class AnnotationSchema(JSONSchema):
 def _format_jsonschema_error(error):
     """Format a :py:class:`jsonschema.ValidationError` as a string."""
     if error.path:
-        dotted_path = '.'.join(error.path)
+        dotted_path = '.'.join([str(c) for c in error.path])
         return '{path}: {message}'.format(path=dotted_path,
                                           message=error.message)
     return error.message
