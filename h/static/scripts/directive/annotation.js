@@ -2,26 +2,38 @@
 
 var events = require('../events');
 
-function validate(value) {
+/** Return truthy if the given annotation is valid, falsy otherwise.
+ *
+* A public annotation has to have some text and/or some tags to be valid,
+* public annotations with no text or tags (i.e. public highlights) are not
+* valid.
+*
+* Non-public annotations just need to have a target to be valid, non-public
+* highlights are valid.
+*
+* @param {object} annotation The annotation to be validated
+*
+*/
+function validate(annotation) {
   var permissions;
   var readPermissions;
   var worldReadable = false;
   var targets;
 
-  if (!angular.isObject(value)) {
+  if (!angular.isObject(annotation)) {
     return;
   }
 
-  permissions = value.permissions || {};
+  permissions = annotation.permissions || {};
   readPermissions = permissions.read || [];
-  targets = value.target || [];
+  targets = annotation.target || [];
 
-  if (value.tags && value.tags.length) {
-    return value.tags.length;
+  if (annotation.tags && annotation.tags.length) {
+    return annotation.tags.length;
   }
 
-  if (value.text && value.text.length) {
-    return value.text.length;
+  if (annotation.text && annotation.text.length) {
+    return annotation.text.length;
   }
 
   if (readPermissions.indexOf('group:__world__') !== -1) {
@@ -31,6 +43,14 @@ function validate(value) {
   return (targets.length && !worldReadable);
 }
 
+/** Return a human-readable error message for the given server error.
+ *
+ * @param {object} reason The error object from the server. Should have
+ * `status` and, if `status` is not `0`, `statusText` and (optionally)
+ * `data.reason` properties.
+ *
+ * @returns {string}
+ */
 function errorMessage(reason) {
   var message;
   if (reason.status === 0) {
@@ -44,7 +64,6 @@ function errorMessage(reason) {
   return message;
 }
 
-// @ngInject
 /**
   * @ngdoc type
   * @name annotation.AnnotationController
@@ -63,6 +82,7 @@ function errorMessage(reason) {
   * manages the interaction between the domain and view models and uses the
   * {@link annotationMapper AnnotationMapper service} for persistence.
   */
+// @ngInject
 function AnnotationController(
   $document, $q, $rootScope, $scope, $timeout, $window, annotationUI,
   annotationMapper, drafts, flash, groups, permissions, session, tags, time) {
@@ -71,12 +91,19 @@ function AnnotationController(
 
   var highlight;
   var isNewAnnotation;
+
+  /** The domain model, contains the currently saved version of the annotation
+   * from the server. */
   var model;
+
   var updateDomainModel;
   var updateDraft;
   var updateTimestamp;
 
+  /** The view model, contains user changes to the annotation that haven't
+   * been saved to the server yet. */
   vm.annotation = {};
+
   vm.action = 'view';
   vm.document = null;
   vm.editing = false;
@@ -88,10 +115,15 @@ function AnnotationController(
   if (model.user === undefined) {
     model.user = session.state.userid;
   }
+
+  // Set the group of new annotations.
   if (!model.group) {
     model.group = groups.focused().id;
   }
+
+  // Set the permissions of new annotations.
   model.permissions = model.permissions || permissions['default'](model.group);
+
   highlight = model.$highlight;
 
   /**
@@ -156,7 +188,11 @@ function AnnotationController(
     * The changes take effect when the annotation is saved
     */
   vm.setPrivacy = function(privacy) {
-    if (!model.references) {
+    // When the user changes the privacy level of an annotation they're
+    // creating or editing, we cache that and use the same privacy level the
+    // next time they create an annotation.
+    // But _don't_ cache it when they change the privacy level of a reply.
+    if (!model.references) {  // If the annotation is not a reply.
       permissions.setDefault(privacy);
     }
     if (privacy === 'private') {
@@ -201,6 +237,11 @@ function AnnotationController(
     if (model === null) {
       return false;
     }
+    // TODO: this should use auth instead of permissions but we might need
+    // an auth cache or the JWT -> userid decoding might start to be a
+    // performance bottleneck and we would need to get the id token into the
+    // session, which we should probably do anyway (and move to opaque bearer
+    // tokens for the access token).
     return permissions.permits(action, model, session.state.userid);
   };
 
@@ -210,7 +251,7 @@ function AnnotationController(
     * @description Deletes the annotation.
     */
   vm['delete'] = function() {
-    return $timeout(function() {
+    return $timeout(function() {  // Don't use confirm inside the digest cycle.
       var onRejected;
       var msg = 'Are you sure you want to delete this annotation?';
       if ($window.confirm(msg)) {
@@ -266,6 +307,10 @@ function AnnotationController(
     }
   };
 
+  /**
+  * Update the given annotation domain model object with the data from the
+  * given annotation view model object.
+  */
   updateDomainModel = function(domainModel, viewModel) {
     var i;
     var tagTexts = [];
@@ -275,6 +320,10 @@ function AnnotationController(
     angular.extend(domainModel, viewModel, {tag: tagTexts});
   };
 
+  /**
+   * Create or update the existing draft for this annotation using
+   * the text and tags from the domain model in `draft`.
+   */
   updateDraft = function(draft) {
     // Drafts only preserve the text, tags and permissions of the annotation
     // (i.e. only the bits that the user can edit), changes to other
@@ -305,6 +354,7 @@ function AnnotationController(
       return flash.info('Please add text or a tag before publishing.');
     }
 
+    // Update stored tags with the new tags of this annotation.
     newTags = vm.annotation.tags.filter(function(tag) {
       var tags = model.tags || [];
       return (tags.indexOf(tag.text) === -1);
@@ -389,8 +439,12 @@ function AnnotationController(
     var tagsAsObjects;
     var uri = model.uri;
 
+    // Extend the view model with a copy of the domain model.
+    // Note that copy is used so that deep properties aren't shared.
     vm.annotation = angular.extend({}, angular.copy(model));
 
+    // If we have unsaved changes to this annotation, apply them
+    // to the view model.
     if (draft) {
       angular.extend(vm.annotation, angular.copy(draft));
     }
@@ -398,8 +452,8 @@ function AnnotationController(
     vm.annotationURI = new URL(
       '/a/' + vm.annotation.id, vm.baseURI).href;
 
+    // Extract the document metadata.
     domain = new URL(uri).hostname;
-
     if (model.document) {
       if (uri.indexOf('urn') === 0) {
         for (i = 0; i < model.document.link.length; i++) {
@@ -432,6 +486,7 @@ function AnnotationController(
       vm.document.title = vm.document.title.slice(0, 30) + '…';
     }
 
+    // Form the tags for ngTagsInput.
     tagsAsObjects = [];
     for (i = 0; i < (vm.annotation.tags || []).length; i++) {
       tagsAsObjects[tagsAsObjects.length] = {text: vm.annotation.tags[i]};
@@ -445,6 +500,8 @@ function AnnotationController(
 
     repeat = repeat || false;
 
+    // New (not yet saved to the server) annotations don't have any .updated
+    // yet, so we can't update their timestamp.
     if (!model.updated) {
       return;
     }
@@ -464,30 +521,36 @@ function AnnotationController(
     }, nextUpdate, false);
   };
 
+  // Export the baseURI for the share link.
   vm.baseURI = $document.prop('baseURI');
 
   $scope.$on('$destroy', function() {
     updateTimestamp = angular.noop;
   });
 
+  // Watch for changes to the domain model and recreate the view model when it
+  // changes.
+  // XXX: TODO: don't clobber the view when collaborating.
   $scope.$watch((function() {return model;}), function(model, old) {
     if (model.updated !== old.updated) {
+      // Discard saved drafts.
       drafts.remove(model);
     }
 
+    // Save highlights once logged in.
     if (vm.isHighlight() && highlight) {
       if (model.user && !model.id) {
         model.permissions = permissions.private();
         model.$create().then(function() {
           $rootScope.$emit('annotationCreated', model);
         });
-        highlight = false;
+        highlight = false;  // Prevents double highlight creation.
       } else {
         updateDraft(model);
       }
     }
 
-    updateTimestamp(model === old);
+    updateTimestamp(model === old);  // Repeat on first run.
     vm.render();
   }, true);
 
@@ -495,16 +558,26 @@ function AnnotationController(
     if (model.user === null) {
       model.user = session.state.userid;
     }
+
+    // Set model.permissions on sign in, if it isn't already set.
+    // This is because you can create annotations when signed out and they
+    // will have model.permissions = null, then when you sign in we set the
+    // permissions correctly here.
     if (!model.permissions) {
       model.permissions = permissions['default'](model.group);
     }
   });
 
+  // If this is a new annotation or we have unsaved changes,
+  // then start editing immediately.
   isNewAnnotation = !(model.id || (vm.isHighlight() && highlight));
   if (isNewAnnotation || drafts.get(model)) {
     vm.edit();
   }
 
+  // When the current group changes, persist any unsaved changes using
+  // the drafts service. They will be restored when this annotation is
+  // next loaded.
   $scope.$on(events.GROUP_FOCUSED, function() {
     var draftDomainModel;
     var isShared;
@@ -514,6 +587,8 @@ function AnnotationController(
       return;
     }
 
+    // Move any new annotations to the currently focused group when
+    // switching groups. See GH #2689 for context.
     if (!model.id) {
       newGroup = groups.focused().id;
       isShared = permissions.isShared(
@@ -526,6 +601,8 @@ function AnnotationController(
       vm.annotation.group = model.group;
     }
 
+    // if we have a draft, update it, otherwise (eg. when the user signs out)
+    // do not create a new one.
     if (drafts.get(model)) {
       draftDomainModel = {};
       updateDomainModel(draftDomainModel, vm.annotation);
@@ -561,6 +638,7 @@ function annotation($document, features) {
       }
     });
 
+    // Save on Meta + Enter or Ctrl + Enter.
     elem.on('keydown', function(event) {
       if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
@@ -570,19 +648,26 @@ function annotation($document, features) {
       }
     });
 
+    // Give template access to feature flags.
     scope.feature = features.flagEnabled;
 
     scope.share = function(event) {
       var $container;
       $container = angular.element(event.currentTarget).parent();
       $container.addClass('open').find('input').focus().select();
+
+      // We have to stop propagation here otherwise this click event will
+      // re-close the share dialog immediately.
       event.stopPropagation();
+
       $document.one('click', function() {
         $container.removeClass('open');
       });
     };
 
+    // Keep track of edits going on in the thread.
     if (counter !== null) {
+      // Expand the thread if descendants are editing.
       scope.$watch((function() {
         counter.count('edit');
       }), function(count) {
@@ -591,9 +676,11 @@ function annotation($document, features) {
         }
       });
 
+      // Propagate changes through the counters.
       scope.$watch((function() {return ctrl.editing;}), function(editing, old) {
         if (editing) {
           counter.count('edit', 1);
+          // Disable the filter and freeze it to always match while editing.
           if ((thread !== null) && (threadFilter !== null)) {
             threadFilter.active(false);
             threadFilter.freeze(true);
@@ -604,6 +691,7 @@ function annotation($document, features) {
         }
       });
 
+      // Clean up when the thread is destroyed.
       scope.$on('$destroy', function() {
         if (ctrl.editing) {
           counter !== null ? counter.count('edit', -1) : void 0;
@@ -619,6 +707,7 @@ function annotation($document, features) {
     require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount'],
     scope: {
       annotationGet: '&annotation',
+      // Indicates whether this is the last reply in a thread.
       isLastReply: '=',
       replyCount: '@annotationReplyCount',
       replyCountClick: '&annotationReplyCountClick',
