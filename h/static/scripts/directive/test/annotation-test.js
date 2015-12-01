@@ -643,7 +643,6 @@ describe('annotation', function() {
             'Service unreachable.', 'Saving annotation failed'));
           done();
         });
-        $timeout.flush();
       }
     );
 
