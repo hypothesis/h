@@ -263,6 +263,19 @@ function AnnotationController(
     }
   };
 
+  vm.share = function(event) {
+    var $container = angular.element(event.currentTarget).parent();
+    $container.addClass('open').find('input').focus().select();
+
+    // We have to stop propagation here otherwise this click event will
+    // re-close the share dialog immediately.
+    event.stopPropagation();
+
+    $document.one('click', function() {
+      $container.removeClass('open');
+    });
+  };
+
   /**
     * @ngdoc method
     * @name annotation.AnnotaitonController#hasContent
@@ -644,19 +657,6 @@ function annotation($document, features) {
 
     // Give template access to feature flags.
     scope.feature = features.flagEnabled;
-
-    scope.share = function(event) {
-      var $container = angular.element(event.currentTarget).parent();
-      $container.addClass('open').find('input').focus().select();
-
-      // We have to stop propagation here otherwise this click event will
-      // re-close the share dialog immediately.
-      event.stopPropagation();
-
-      $document.one('click', function() {
-        $container.removeClass('open');
-      });
-    };
 
     // Keep track of edits going on in the thread.
     if (counter !== null) {
