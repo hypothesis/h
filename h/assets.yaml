@@ -239,7 +239,7 @@ front_page_css:
     - output: h:static/styles/front-page.css
       filters: cleancss
       contents:
-      - h:static/styles/vendor/css/font-awesome.css
+      - h:static/styles/vendor/icomoon.css
 
 # Help page
 help_page_css:
