@@ -112,7 +112,7 @@ function AnnotationController(
   vm.timestamp = null;
 
   model = $scope.annotationGet();
-  if (model.user === undefined) {
+  if (!model.user) {
     model.user = session.state.userid;
   }
 
@@ -276,7 +276,7 @@ function AnnotationController(
     if (!drafts.get(model)) {
       updateDraft(model);
     }
-    vm.action = model.id !== null ? 'edit' : 'create';
+    vm.action = model.id ? 'edit' : 'create';
     vm.editing = true;
     vm.preview = 'no';
   };
@@ -561,7 +561,7 @@ function AnnotationController(
   }, true);
 
   $scope.$on(events.USER_CHANGED, function() {
-    if (model.user === null) {
+    if (!model.user) {
       model.user = session.state.userid;
     }
 
