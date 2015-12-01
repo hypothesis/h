@@ -660,14 +660,16 @@ function annotation($document, features) {
           }
         } else if (old) {
           counter.count('edit', -1);
-          threadFilter !== null ? threadFilter.freeze(false) : void 0;
+          if (threadFilter) {
+            threadFilter.freeze(false);
+          }
         }
       });
 
       // Clean up when the thread is destroyed.
       scope.$on('$destroy', function() {
-        if (ctrl.editing) {
-          counter !== null ? counter.count('edit', -1) : void 0;
+        if (ctrl.editing && counter) {
+          counter.count('edit', -1);
         }
       });
     }
