@@ -607,7 +607,7 @@ function annotation($document, features) {
     var counter = controllers[3];
 
     attrs.$observe('isSidebar', function(value) {
-      if (value) {
+      if (value && value !== 'false') {
         ctrl.isSidebar = true;
       } else {
         ctrl.isSidebar = false;
