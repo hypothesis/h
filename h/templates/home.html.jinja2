@@ -17,6 +17,29 @@
 {% endblock %}
 
 {% block content %}
+  <style>
+    .press-release-banner {
+      background-color: #f7f7f7;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .press-release-banner > p {
+      font-size: 21px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* FIXME: Remove the '!important' hack below and move
+       This to the correct stylesheet in the new homepage.
+     */
+    .social-media-link {
+      font-size: 16px !important;
+      text-decoration: none !important;
+    }
+  </style>
+
   <header class="banner hiring">
     <div class="container">
       <span>
@@ -239,6 +262,9 @@
 
           </div>
         </div>
+        <div class="press-release-banner">
+            <p>Hypothesis announces a coalition of over 40 scholarly organizations bringing annotation to all knowledge. <a href="https://hypothes.is/annotating-all-knowledge/"><b>Learn more</b></a></p>
+        </div>
       </main>
     </div>
   </div>
@@ -246,15 +272,6 @@
   <footer class="content-info">
     <div class="container">
       <nav class="navbar navbar-default">
-        <style>
-         /* FIXME: Remove the '!important' hack below and move
-            This to the correct stylesheet in the new homepage.
-          */
-         .social-media-link {
-           font-size: 16px !important;
-           text-decoration: none !important;
-         }
-        </style>
         <div class="nav navbar-nav social-media pull-right">
           <a class="social-media-link" href="https://github.com/hypothesis">
             <i class="h-icon-github"></i>
