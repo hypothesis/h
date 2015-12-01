@@ -57,7 +57,7 @@
   <section class="annotation-quote-list"
            ng-repeat="target in vm.annotation.target track by $index"
            ng-if="vm.hasQuotes()">
-    <excerpt enabled="feature('truncate_annotations')">
+    <excerpt enabled="vm.feature('truncate_annotations')">
       <blockquote class="annotation-quote"
                   ng-bind-html="selector.exact"
                   ng-repeat="selector in target.selector
@@ -70,7 +70,7 @@
 
   <!-- Body -->
   <section name="text" class="annotation-body">
-    <excerpt enabled="feature('truncate_annotations') && !vm.editing()">
+    <excerpt enabled="vm.feature('truncate_annotations') && !vm.editing()">
       <markdown ng-model="vm.annotation.text"
            read-only="!vm.editing()"
            ></markdown>

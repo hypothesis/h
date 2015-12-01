@@ -152,7 +152,8 @@ function errorMessage(reason) {
 // @ngInject
 function AnnotationController(
   $document, $q, $rootScope, $scope, $timeout, $window, annotationUI,
-  annotationMapper, drafts, flash, groups, permissions, session, tags, time) {
+  annotationMapper, drafts, flash, features, groups, permissions, session,
+  tags, time) {
 
   var vm = this;
 
@@ -162,6 +163,8 @@ function AnnotationController(
 
   vm.action = 'view';
   vm.document = null;
+  // Give the template access to the feature flags.
+  vm.feature = features.flagEnabled;
   // Copy isSidebar from $scope onto vm for consistency (we want this
   // directive's templates to always access variables from vm rather than
   // directly from scope).
@@ -652,7 +655,7 @@ function AnnotationController(
   *
   */
 // @ngInject
-function annotation($document, features) {
+function annotation($document) {
   function linkFn(scope, elem, attrs, controllers) {
     var ctrl = controllers[0];
     var thread = controllers[1];
@@ -660,9 +663,6 @@ function annotation($document, features) {
     var counter = controllers[3];
 
     elem.on('keydown', ctrl.onKeydown);
-
-    // Give template access to feature flags.
-    scope.feature = features.flagEnabled;
 
     // FIXME: Replace this counting code with something more sane, and
     // something that doesn't involve so much untested logic in the link
