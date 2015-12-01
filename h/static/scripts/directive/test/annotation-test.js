@@ -218,8 +218,6 @@ describe('annotation', function() {
   });
 
   describe('#reply', function() {
-    var container;
-
     beforeEach(function() {
       createDirective();
       annotation.permissions = {
@@ -231,9 +229,8 @@ describe('annotation', function() {
     });
 
     it('creates a new reply with the proper uri and references', function() {
-      var match;
       controller.reply();
-      match = sinon.match({
+      var match = sinon.match({
         references: [annotation.id],
         uri: annotation.uri
       });
@@ -241,8 +238,7 @@ describe('annotation', function() {
     });
 
     it('makes the annotation shared if the parent is shared', function() {
-      var reply;
-      reply = {};
+      var reply = {};
       fakeAnnotationMapper.createAnnotation.returns(reply);
       fakePermissions.isShared.returns(true);
       controller.reply();
@@ -252,12 +248,11 @@ describe('annotation', function() {
     });
 
     it('makes the annotation shared if the parent is shared', function() {
-      var reply;
       $scope.annotation.group = 'my group';
       $scope.annotation.permissions = {
         read: ['my group']
       };
-      reply = {};
+      var reply = {};
       fakeAnnotationMapper.createAnnotation.returns(reply);
       fakePermissions.isShared = function(permissions, group) {
         return permissions.read.indexOf(group) !== -1;
@@ -274,8 +269,7 @@ describe('annotation', function() {
     it(
       'does not add the world readable principal if the parent is private',
       function() {
-        var reply;
-        reply = {};
+        var reply = {};
         fakeAnnotationMapper.createAnnotation.returns(reply);
         fakePermissions.isShared.returns(false);
         controller.reply();
@@ -286,9 +280,8 @@ describe('annotation', function() {
     );
 
     it('sets the reply\'s group to be the same as its parent\'s', function() {
-      var reply;
       $scope.annotation.group = 'my group';
-      reply = {};
+      var reply = {};
       fakeAnnotationMapper.createAnnotation.returns(reply);
       controller.reply();
       assert.equal(reply.group, $scope.annotation.group);
@@ -914,10 +907,6 @@ describe('annotation', function() {
 });
 
 describe('AnnotationController', function() {
-  var createAnnotationDirective;
-  var getCompileService;
-  var getRootScope;
-
   before(function() {
     angular.module('h', [])
       .directive('annotation', require('../annotation').directive);
@@ -928,30 +917,27 @@ describe('AnnotationController', function() {
   beforeEach(module('h.templates'));
 
   /** Return Angular's $compile service. */
-  getCompileService = function() {
+  function getCompileService() {
     var $compile;
-    $compile = null;
     inject(function(_$compile_) {
       $compile = _$compile_;
     });
     return $compile;
-  };
+  }
 
   /** Return Angular's $rootScope. */
-  getRootScope = function() {
+  function getRootScope() {
     var $rootScope;
-    $rootScope = null;
     inject(function(_$rootScope_) {
       $rootScope = _$rootScope_;
     });
     return $rootScope;
-  };
+  }
 
   /**
   Return an annotation directive instance and stub services etc.
   */
-  createAnnotationDirective = function(args) {
-    var compiledElement;
+  function createAnnotationDirective(args) {
     var session = args.session || {
       state: {
         userid: 'acct:fred@hypothes.is'
@@ -1050,7 +1036,7 @@ describe('AnnotationController', function() {
       $provide.value('localStorage', locals.localStorage);
     });
     locals.element = angular.element('<div annotation="annotation">');
-    compiledElement = getCompileService()(locals.element);
+    var compiledElement = getCompileService()(locals.element);
     locals.$rootScope = getRootScope();
     locals.parentScope = locals.$rootScope.$new();
     locals.parentScope.annotation = args.annotation || {};
@@ -1059,7 +1045,7 @@ describe('AnnotationController', function() {
     locals.controller = locals.element.controller('annotation');
     locals.isolateScope = locals.element.isolateScope();
     return locals;
-  };
+  }
 
   describe('createAnnotationDirective', function() {
     it('creates the directive without crashing', function() {
@@ -1281,7 +1267,6 @@ describe('validate()', function() {
   var validate = require('../annotation').validate;
 
   it('returns undefined if value is not an object', function() {
-    var value;
     var i;
     var values = [2, 'foo', true, null];
     for (i = 0; i < values.length; i++) {

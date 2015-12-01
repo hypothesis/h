@@ -16,18 +16,13 @@ var events = require('../events');
 *
 */
 function validate(annotation) {
-  var permissions;
-  var readPermissions;
-  var worldReadable = false;
-  var targets;
-
   if (!angular.isObject(annotation)) {
     return;
   }
 
-  permissions = annotation.permissions || {};
-  readPermissions = permissions.read || [];
-  targets = annotation.target || [];
+  var permissions = annotation.permissions || {};
+  var readPermissions = permissions.read || [];
+  var targets = annotation.target || [];
 
   if (annotation.tags && annotation.tags.length) {
     return annotation.tags.length;
@@ -37,6 +32,7 @@ function validate(annotation) {
     return annotation.text.length;
   }
 
+  var worldReadable = false;
   if (readPermissions.indexOf('group:__world__') !== -1) {
     worldReadable = true;
   }
@@ -90,17 +86,6 @@ function AnnotationController(
 
   var vm = this;
 
-  var highlight;
-  var isNewAnnotation;
-
-  /** The domain model, contains the currently saved version of the annotation
-   * from the server. */
-  var model;
-
-  var updateDomainModel;
-  var updateDraft;
-  var updateTimestamp;
-
   /** The view model, contains user changes to the annotation that haven't
    * been saved to the server yet. */
   vm.annotation = {};
@@ -112,7 +97,9 @@ function AnnotationController(
   vm.preview = 'no';
   vm.timestamp = null;
 
-  model = $scope.annotationGet();
+  /** The domain model, contains the currently saved version of the annotation
+   * from the server. */
+  var model = $scope.annotationGet();
   if (!model.user) {
     model.user = session.state.userid;
   }
@@ -125,7 +112,7 @@ function AnnotationController(
   // Set the permissions of new annotations.
   model.permissions = model.permissions || permissions['default'](model.group);
 
-  highlight = model.$highlight;
+  var highlight = model.$highlight;
 
   /**
     * @ngdoc method
@@ -253,10 +240,9 @@ function AnnotationController(
     */
   vm['delete'] = function() {
     return $timeout(function() {  // Don't use confirm inside the digest cycle.
-      var onRejected;
       var msg = 'Are you sure you want to delete this annotation?';
       if ($window.confirm(msg)) {
-        onRejected = function(reason) {
+        var onRejected = function(reason) {
           flash.error(
             errorMessage(reason), 'Deleting annotation failed');
         };
@@ -312,20 +298,20 @@ function AnnotationController(
   * Update the given annotation domain model object with the data from the
   * given annotation view model object.
   */
-  updateDomainModel = function(domainModel, viewModel) {
+  function updateDomainModel(domainModel, viewModel) {
     var i;
     var tagTexts = [];
     for (i = 0; i < viewModel.tags.length; i++) {
       tagTexts[tagTexts.length] = viewModel.tags[i].text;
     }
     angular.extend(domainModel, viewModel, {tags: tagTexts});
-  };
+  }
 
   /**
    * Create or update the existing draft for this annotation using
    * the text and tags from the domain model in `draft`.
    */
-  updateDraft = function(draft) {
+  function updateDraft(draft) {
     // Drafts only preserve the text, tags and permissions of the annotation
     // (i.e. only the bits that the user can edit), changes to other
     // properties are not preserved.
@@ -340,7 +326,7 @@ function AnnotationController(
       changes.permissions = draft.permissions;
     }
     drafts.update(model, changes);
-  };
+  }
 
   /**
     * @ngdoc method
@@ -348,11 +334,6 @@ function AnnotationController(
     * @description Saves any edits and returns to the viewer.
     */
   vm.save = function() {
-    var newTags;
-    var onFulfilled;
-    var onRejected;
-    var updatedModel;
-
     if (!model.user) {
       return flash.info('Please sign in to save your annotations.');
     }
@@ -362,7 +343,7 @@ function AnnotationController(
     }
 
     // Update stored tags with the new tags of this annotation.
-    newTags = vm.annotation.tags.filter(function(tag) {
+    var newTags = vm.annotation.tags.filter(function(tag) {
       var tags = model.tags || [];
       return (tags.indexOf(tag.text) === -1);
     });
@@ -371,18 +352,18 @@ function AnnotationController(
     switch (vm.action) {
       case 'create':
         updateDomainModel(model, vm.annotation);
-        onFulfilled = function() {
+        var onFulfilled = function() {
           $rootScope.$emit('annotationCreated', model);
           vm.view();
         };
-        onRejected = function(reason) {
+        var onRejected = function(reason) {
           flash.error(
             errorMessage(reason), 'Saving annotation failed');
         };
         return model.$create().then(onFulfilled, onRejected);
 
       case 'edit':
-        updatedModel = angular.copy(model);
+        var updatedModel = angular.copy(model);
         updateDomainModel(updatedModel, vm.annotation);
         onFulfilled = function() {
           angular.copy(updatedModel, model);
@@ -408,8 +389,6 @@ function AnnotationController(
   vm.reply = function() {
     var id = model.id;
     var references = model.references || [];
-    var reply;
-    var uri = model.uri;
 
     if (typeof references === 'string') {
       references = [references];
@@ -417,9 +396,9 @@ function AnnotationController(
 
     references = references.concat(id);
 
-    reply = annotationMapper.createAnnotation({
+    var reply = annotationMapper.createAnnotation({
       references: references,
-      uri: uri
+      uri: model.uri
     });
     reply.group = model.group;
 
@@ -438,13 +417,7 @@ function AnnotationController(
     * @description Called to update the view when the model changes.
     */
   vm.render = function() {
-    var documentTitle;
-    var domain;
     var draft = drafts.get(model);
-    var i;
-    var link;
-    var tagsAsObjects;
-    var uri = model.uri;
 
     // Extend the view model with a copy of the domain model.
     // Note that copy is used so that deep properties aren't shared.
@@ -460,11 +433,13 @@ function AnnotationController(
       '/a/' + vm.annotation.id, vm.baseURI).href;
 
     // Extract the document metadata.
-    domain = new URL(uri).hostname;
+    var uri = model.uri;
+    var domain = new URL(uri).hostname;
     if (model.document) {
       if (uri.indexOf('urn') === 0) {
+        var i;
         for (i = 0; i < model.document.link.length; i++) {
-          link = model.document.link[i];
+          var link = model.document.link[i];
           if (!(link.href.indexOf('urn'))) {
             continue;
           }
@@ -473,7 +448,7 @@ function AnnotationController(
         }
       }
 
-      documentTitle = Array.isArray(
+      var documentTitle = Array.isArray(
         model.document.title) ? model.document.title[0] : model.document.title;
 
       vm.document = {
@@ -499,10 +474,9 @@ function AnnotationController(
     });
   };
 
-  updateTimestamp = function(repeat) {
-    var fuzzyUpdate;
-    var nextUpdate;
-
+  // We use `var foo = function() {...}` here instead of `function foo() {...}`
+  // because updateTimestamp gets redefined later on.
+  var updateTimestamp = function(repeat) {
     repeat = repeat || false;
 
     // New (not yet saved to the server) annotations don't have any .updated
@@ -517,8 +491,8 @@ function AnnotationController(
       return;
     }
 
-    fuzzyUpdate = time.nextFuzzyUpdate(model.updated);
-    nextUpdate = (1000 * fuzzyUpdate) + 500;
+    var fuzzyUpdate = time.nextFuzzyUpdate(model.updated);
+    var nextUpdate = (1000 * fuzzyUpdate) + 500;
 
     $timeout(function() {
       updateTimestamp(true);
@@ -574,7 +548,7 @@ function AnnotationController(
 
   // If this is a new annotation or we have unsaved changes,
   // then start editing immediately.
-  isNewAnnotation = !(model.id || (vm.isHighlight() && highlight));
+  var isNewAnnotation = !(model.id || (vm.isHighlight() && highlight));
   if (isNewAnnotation || drafts.get(model)) {
     vm.edit();
   }
@@ -583,10 +557,6 @@ function AnnotationController(
   // the drafts service. They will be restored when this annotation is
   // next loaded.
   $scope.$on(events.GROUP_FOCUSED, function() {
-    var draftDomainModel;
-    var isShared;
-    var newGroup;
-
     if (!vm.editing) {
       return;
     }
@@ -594,8 +564,8 @@ function AnnotationController(
     // Move any new annotations to the currently focused group when
     // switching groups. See GH #2689 for context.
     if (!model.id) {
-      newGroup = groups.focused().id;
-      isShared = permissions.isShared(
+      var newGroup = groups.focused().id;
+      var isShared = permissions.isShared(
         vm.annotation.permissions, vm.annotation.group);
       if (isShared) {
         model.permissions = permissions.shared(newGroup);
@@ -608,7 +578,7 @@ function AnnotationController(
     // if we have a draft, update it, otherwise (eg. when the user signs out)
     // do not create a new one.
     if (drafts.get(model)) {
-      draftDomainModel = {};
+      var draftDomainModel = {};
       updateDomainModel(draftDomainModel, vm.annotation);
       updateDraft(draftDomainModel);
     }
@@ -656,8 +626,7 @@ function annotation($document, features) {
     scope.feature = features.flagEnabled;
 
     scope.share = function(event) {
-      var $container;
-      $container = angular.element(event.currentTarget).parent();
+      var $container = angular.element(event.currentTarget).parent();
       $container.addClass('open').find('input').focus().select();
 
       // We have to stop propagation here otherwise this click event will
