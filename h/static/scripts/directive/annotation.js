@@ -493,11 +493,9 @@ function AnnotationController(
     }
 
     // Form the tags for ngTagsInput.
-    tagsAsObjects = [];
-    for (i = 0; i < (vm.annotation.tags || []).length; i++) {
-      tagsAsObjects[tagsAsObjects.length] = {text: vm.annotation.tags[i]};
-    }
-    vm.annotation.tags = tagsAsObjects;
+    vm.annotation.tags = (vm.annotation.tags || []).map(function(tag) {
+      return {text: tag};
+    });
   };
 
   updateTimestamp = function(repeat) {
