@@ -616,7 +616,6 @@ function AnnotationController(
   return vm;
 }
 
-// @ngInject
 /**
   * @ngdoc directive
   * @name annotation
@@ -626,6 +625,7 @@ function AnnotationController(
   * {@link annotation.AnnotationController AnnotationController}.
   *
   */
+// @ngInject
 function annotation($document, features) {
   function linkFn(scope, elem, attrs, controllers) {
     var ctrl = controllers[0];
