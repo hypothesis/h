@@ -390,6 +390,8 @@ function AnnotationController(
     var id = model.id;
     var references = model.references || [];
 
+    // TODO: Remove this check once we have server-side code to ensure that
+    // references is always an array of strings.
     if (typeof references === 'string') {
       references = [references];
     }
