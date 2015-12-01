@@ -163,7 +163,10 @@ function AnnotationController(
   vm.action = 'view';
   vm.document = null;
   vm.editing = false;
-  vm.isSidebar = false;
+  // Copy isSidebar from $scope onto vm for consistency (we want this
+  // directive's templates to always access variables from vm rather than
+  // directly from scope).
+  vm.isSidebar = $scope.isSidebar;
   vm.preview = 'no';
   vm.timestamp = null;
 
@@ -629,14 +632,6 @@ function annotation($document, features) {
     var threadFilter = controllers[2];
     var counter = controllers[3];
 
-    attrs.$observe('isSidebar', function(value) {
-      if (value && value !== 'false') {
-        ctrl.isSidebar = true;
-      } else {
-        ctrl.isSidebar = false;
-      }
-    });
-
     // Save on Meta + Enter or Ctrl + Enter.
     elem.on('keydown', function(event) {
       if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
@@ -711,7 +706,8 @@ function annotation($document, features) {
       isLastReply: '=',
       replyCount: '@annotationReplyCount',
       replyCountClick: '&annotationReplyCountClick',
-      showReplyCount: '@annotationShowReplyCount'
+      showReplyCount: '@annotationShowReplyCount',
+      isSidebar: '='
     },
     templateUrl: 'annotation.html'
   };
