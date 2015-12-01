@@ -534,7 +534,6 @@ function AnnotationController(
 
   // Watch for changes to the domain model and recreate the view model when it
   // changes.
-  // XXX: TODO: don't clobber the view when collaborating.
   $scope.$watch((function() {return model;}), function(model, old) {
     if (model.updated !== old.updated) {
       // Discard saved drafts.
