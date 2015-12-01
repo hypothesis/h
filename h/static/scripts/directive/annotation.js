@@ -315,9 +315,9 @@ function AnnotationController(
     var i;
     var tagTexts = [];
     for (i = 0; i < viewModel.tags.length; i++) {
-      tagTexts.concat(viewModel.tags[i].text);
+      tagTexts[tagTexts.length] = viewModel.tags[i].text;
     }
-    angular.extend(domainModel, viewModel, {tag: tagTexts});
+    angular.extend(domainModel, viewModel, {tags: tagTexts});
   };
 
   /**
