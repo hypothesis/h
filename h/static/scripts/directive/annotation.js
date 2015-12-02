@@ -166,7 +166,6 @@ function AnnotationController(
   // directive's templates to always access variables from vm rather than
   // directly from scope).
   vm.isSidebar = $scope.isSidebar;
-  vm.preview = 'no';
   vm.timestamp = null;
 
   /** The domain model, contains the currently saved version of the annotation
@@ -363,7 +362,6 @@ function AnnotationController(
       updateDraft(model);
     }
     vm.action = model.id ? 'edit' : 'create';
-    vm.preview = 'no';
   };
 
   /**
