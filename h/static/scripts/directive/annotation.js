@@ -667,6 +667,10 @@ function annotation($document, features) {
     // Give template access to feature flags.
     scope.feature = features.flagEnabled;
 
+    // FIXME: Replace this counting code with something more sane, and
+    // something that doesn't involve so much untested logic in the link
+    // function (as opposed to unit-tested methods on the AnnotationController,
+    // for example).
     // Keep track of edits going on in the thread.
     if (counter !== null) {
       // Expand the thread if descendants are editing.
