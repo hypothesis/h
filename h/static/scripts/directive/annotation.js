@@ -354,7 +354,7 @@ function AnnotationController(
     // Update stored tags with the new tags of this annotation.
     var newTags = vm.annotation.tags.filter(function(tag) {
       var tags = model.tags || [];
-      return (tags.indexOf(tag.text) === -1);
+      return tags.indexOf(tag.text) === -1;
     });
     tags.store(newTags);
 
