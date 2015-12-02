@@ -301,8 +301,12 @@ class RegisterController(object):
         tos_link = ('<a href="/terms-of-service">' +
                     _('Terms of Service') +
                     '</a>')
+        cg_link = ('<a href="/community-guidelines">' +
+                   _('Community Guidelines') +
+                   '</a>')
         form_footer = _('You are agreeing to be bound by '
-                        'our {tos_link}.').format(tos_link=tos_link)
+                        'our {tos_link} and {cg_link}.').format(tos_link=tos_link,
+                                                                cg_link=cg_link)
 
         self.request = request
         self.schema = schemas.RegisterSchema().bind(request=self.request)
