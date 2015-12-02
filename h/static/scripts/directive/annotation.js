@@ -18,12 +18,10 @@ var events = require('../events');
 *
 */
 function updateDomainModel(domainModel, viewModel) {
-  var i;
-  var tagTexts = [];
-  for (i = 0; i < viewModel.tags.length; i++) {
-    tagTexts[tagTexts.length] = viewModel.tags[i].text;
-  }
-  angular.extend(domainModel, viewModel, {tags: tagTexts});
+  angular.extend(domainModel, viewModel);
+  domainModel.tags = viewModel.tags.map(function(tag) {
+    return tag.text;
+  });
 }
 
 
