@@ -328,9 +328,6 @@ function AnnotationController(
     * the annotation.
     */
   vm.authorize = function(action) {
-    if (model === null) {
-      return false;
-    }
     // TODO: this should use auth instead of permissions but we might need
     // an auth cache or the JWT -> userid decoding might start to be a
     // performance bottleneck and we would need to get the id token into the
