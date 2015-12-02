@@ -3,6 +3,54 @@
 
 var events = require('../events');
 
+/** Extract a URI, domain and title from the given domain model object.
+ *
+ * @param {object} model An annotation domain model object as received from the
+ *   server-side API.
+ * @returns {object} An object with three properties extracted from the model:
+ *   uri, domain and title.
+ *
+ */
+function extractDocumentMetadata(model) {
+  var document_;
+  var uri = model.uri;
+  var domain = new URL(uri).hostname;
+  if (model.document) {
+    if (uri.indexOf('urn') === 0) {
+      var i;
+      for (i = 0; i < model.document.link.length; i++) {
+        var link = model.document.link[i];
+        if (!(link.href.indexOf('urn'))) {
+          continue;
+        }
+        uri = link.href;
+        break;
+      }
+    }
+
+    var documentTitle = Array.isArray(
+      model.document.title) ? model.document.title[0] : model.document.title;
+
+    document_ = {
+      uri: uri,
+      domain: domain,
+      title: documentTitle || domain
+    };
+  } else {
+    document_ = {
+      uri: uri,
+      domain: domain,
+      title: domain
+    };
+  }
+
+  if (document_.title.length > 30) {
+    document_.title = document_.title.slice(0, 30) + '…';
+  }
+
+  return document_;
+}
+
 /** Copy properties from viewModel into domainModel.
 *
 * All top-level properties in viewModel will be copied into domainModel,
@@ -443,41 +491,7 @@ function AnnotationController(
     vm.annotationURI = new URL(
       '/a/' + vm.annotation.id, vm.baseURI).href;
 
-    // Extract the document metadata.
-    var uri = model.uri;
-    var domain = new URL(uri).hostname;
-    if (model.document) {
-      if (uri.indexOf('urn') === 0) {
-        var i;
-        for (i = 0; i < model.document.link.length; i++) {
-          var link = model.document.link[i];
-          if (!(link.href.indexOf('urn'))) {
-            continue;
-          }
-          uri = link.href;
-          break;
-        }
-      }
-
-      var documentTitle = Array.isArray(
-        model.document.title) ? model.document.title[0] : model.document.title;
-
-      vm.document = {
-        uri: uri,
-        domain: domain,
-        title: documentTitle || domain
-      };
-    } else {
-      vm.document = {
-        uri: uri,
-        domain: domain,
-        title: domain
-      };
-    }
-
-    if (vm.document.title.length > 30) {
-      vm.document.title = vm.document.title.slice(0, 30) + '…';
-    }
+    vm.document = extractDocumentMetadata(model);
 
     // Form the tags for ngTagsInput.
     vm.annotation.tags = (vm.annotation.tags || []).map(function(tag) {
@@ -709,8 +723,9 @@ module.exports = {
   // to be unit tested.
   // FIXME: The code should be refactored to enable unit testing without having
   // to do this.
-  validate: validate,
+  extractDocumentMetadata: extractDocumentMetadata,
   updateDomainModel: updateDomainModel,
+  validate: validate,
 
   // These are meant to be the public API of this module.
   directive: annotation,
