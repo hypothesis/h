@@ -358,6 +358,23 @@ describe('annotation', function() {
     });
   });
 
+  describe('AnnotationController.editing()', function() {
+    it('returns true if action is "create"', function() {
+      controller.action = 'create';
+      assert(controller.editing());
+    });
+
+    it('returns true if action is "edit"', function() {
+      controller.action = 'edit';
+      assert(controller.editing());
+    });
+
+    it('returns false if action is "view"', function() {
+      controller.action = 'view';
+      assert(!controller.editing());
+    });
+  });
+
   describe('when the annotation is a highlight', function() {
     beforeEach(function() {
       annotation.$highlight = true;
@@ -922,7 +939,7 @@ describe('annotation', function() {
         text: 'unsaved-text'
       });
       createDirective();
-      assert.isTrue(controller.editing);
+      assert.isTrue(controller.editing());
     });
 
     it('uses the text and tags from the draft if present', function() {

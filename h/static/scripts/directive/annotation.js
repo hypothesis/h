@@ -162,7 +162,6 @@ function AnnotationController(
 
   vm.action = 'view';
   vm.document = null;
-  vm.editing = false;
   // Copy isSidebar from $scope onto vm for consistency (we want this
   // directive's templates to always access variables from vm rather than
   // directly from scope).
@@ -186,6 +185,20 @@ function AnnotationController(
   model.permissions = model.permissions || permissions['default'](model.group);
 
   var highlight = model.$highlight;
+
+  /**
+   * @ngdoc method
+   * @name annotation.AnnotationController#editing.
+   * @returns {boolean} `true` if this annotation is currently being edited
+   *   (i.e. the annotation editor form should be open), `false` otherwise.
+   */
+  vm.editing = function() {
+    if (vm.action === 'create' || vm.action === 'edit') {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   /**
     * @ngdoc method
@@ -350,7 +363,6 @@ function AnnotationController(
       updateDraft(model);
     }
     vm.action = model.id ? 'edit' : 'create';
-    vm.editing = true;
     vm.preview = 'no';
   };
 
@@ -361,7 +373,6 @@ function AnnotationController(
     *              if they are open.
     */
   vm.view = function() {
-    vm.editing = false;
     vm.action = 'view';
   };
 
@@ -598,7 +609,7 @@ function AnnotationController(
   // the drafts service. They will be restored when this annotation is
   // next loaded.
   $scope.$on(events.GROUP_FOCUSED, function() {
-    if (!vm.editing) {
+    if (!vm.editing()) {
       return;
     }
 
