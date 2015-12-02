@@ -20,7 +20,7 @@ function extractDocumentMetadata(model) {
       var i;
       for (i = 0; i < model.document.link.length; i++) {
         var link = model.document.link[i];
-        if (!(link.href.indexOf('urn'))) {
+        if (link.href.indexOf('urn') === 0) {
           continue;
         }
         uri = link.href;
