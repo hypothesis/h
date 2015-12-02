@@ -3,6 +3,30 @@
 
 var events = require('../events');
 
+/** Copy properties from viewModel into domainModel.
+*
+* All top-level properties in viewModel will be copied into domainModel,
+* overwriting any existing properties with the same keys in domainModel.
+*
+* Additionally, the `tags` property of viewModel - an array of objects
+* each with a `text` string - will become a simple array of strings in
+* domainModel.
+*
+* @param {object} domainModel The object to copy properties to
+* @param {object} viewModel The object to copy properties from
+* @returns undefined
+*
+*/
+function updateDomainModel(domainModel, viewModel) {
+  var i;
+  var tagTexts = [];
+  for (i = 0; i < viewModel.tags.length; i++) {
+    tagTexts[tagTexts.length] = viewModel.tags[i].text;
+  }
+  angular.extend(domainModel, viewModel, {tags: tagTexts});
+}
+
+
 /** Return truthy if the given annotation is valid, falsy otherwise.
  *
 * A public annotation has to have some text and/or some tags to be valid,
@@ -293,19 +317,6 @@ function AnnotationController(
       vm.view();
     }
   };
-
-  /**
-  * Update the given annotation domain model object with the data from the
-  * given annotation view model object.
-  */
-  function updateDomainModel(domainModel, viewModel) {
-    var i;
-    var tagTexts = [];
-    for (i = 0; i < viewModel.tags.length; i++) {
-      tagTexts[tagTexts.length] = viewModel.tags[i].text;
-    }
-    angular.extend(domainModel, viewModel, {tags: tagTexts});
-  }
 
   /**
    * Create or update the existing draft for this annotation using
@@ -695,7 +706,15 @@ function annotation($document, features) {
 }
 
 module.exports = {
+  // These private helper functions aren't meant to be part of the public
+  // interface of this module. They've been exported temporarily to enable them
+  // to be unit tested.
+  // FIXME: The code should be refactored to enable unit testing without having
+  // to do this.
   validate: validate,
+  updateDomainModel: updateDomainModel,
+
+  // These are meant to be the public API of this module.
   directive: annotation,
   Controller: AnnotationController
 };

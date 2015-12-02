@@ -184,6 +184,57 @@ describe('annotation', function() {
     sandbox.restore();
   });
 
+  describe('updateDomainModel()', function() {
+    var updateDomainModel = require('../annotation').updateDomainModel;
+
+    it('copies top-level keys form viewModel into domainModel', function() {
+      var domainModel = {};
+      var viewModel = {foo: 'bar', tags: []};
+
+      updateDomainModel(domainModel, viewModel);
+
+      assert.equal(domainModel.foo, viewModel.foo);
+    });
+
+    it('overwrites existing keys in domainModel', function() {
+      var domainModel = {foo: 'foo'};
+      var viewModel = {foo: 'bar', tags: []};
+
+      updateDomainModel(domainModel, viewModel);
+
+      assert.equal(domainModel.foo, viewModel.foo);
+    });
+
+    it('doesn\'t touch other properties in domainModel', function() {
+      var domainModel = {foo: 'foo', bar: 'bar'};
+      var viewModel = {foo: 'FOO', tags: []};
+
+      updateDomainModel(domainModel, viewModel);
+
+      assert.equal(
+        domainModel.bar, 'bar',
+        'updateDomainModel() should not touch properties of domainModel' +
+        'that don\'t exist in viewModel');
+    });
+
+    it('copies tag texts from viewModel into domainModel', function() {
+      var domainModel = {};
+      var viewModel = {
+        tags: [
+          {text: 'foo'},
+          {text: 'bar'}
+        ]
+      };
+
+      updateDomainModel(domainModel, viewModel);
+
+      assert.deepEqual(
+        domainModel.tags, ['foo', 'bar'],
+        'The array of {tag: "text"} objects in  viewModel becomes an array ' +
+        'of "text" strings in domainModel');
+    });
+  });
+
   describe('when the annotation is a highlight', function() {
     beforeEach(function() {
       annotation.$highlight = true;
