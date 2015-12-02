@@ -208,6 +208,14 @@ function AnnotationController(
     return groups.get(model.group);
   };
 
+  // Save on Meta + Enter or Ctrl + Enter.
+  vm.onKeydown = function(event) {
+    if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      vm.save();
+    }
+  };
+
   /**
     * @ngdoc method
     * @name annotation.AnnotationController#tagsAutoComplete.
@@ -654,15 +662,7 @@ function annotation($document, features) {
     var threadFilter = controllers[2];
     var counter = controllers[3];
 
-    // Save on Meta + Enter or Ctrl + Enter.
-    elem.on('keydown', function(event) {
-      if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        scope.$evalAsync(function() {
-          ctrl.save();
-        });
-      }
-    });
+    elem.on('keydown', ctrl.onKeydown);
 
     // Give template access to feature flags.
     scope.feature = features.flagEnabled;
