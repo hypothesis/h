@@ -364,8 +364,8 @@ function AnnotationController(
   /**
     * @ngdoc method
     * @name annotation.AnnotaitonController#hasContent
-    * @returns {boolean} True if the currently edited annotation has
-    *          content (ie. is not just a highlight)
+    * @returns {boolean} `true` if this annotation has content, `false`
+    *   otherwise.
     */
   vm.hasContent = function() {
     var textLength = (vm.annotation.text || '').length;
