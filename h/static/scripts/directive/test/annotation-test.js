@@ -321,7 +321,6 @@ describe('annotation.js', function() {
     var fakeTags;
     var fakeTime;
     var fakeUrlEncodeFilter;
-    var isolateScope;
     var sandbox;
 
     createDirective = function() {
@@ -329,10 +328,11 @@ describe('annotation.js', function() {
       compileService()(element)($scope);
       $scope.$digest();
       var controller = element.controller('annotation');
-      isolateScope = element.isolateScope();
+      var scope = element.isolateScope();
       return {
         controller: controller,
-        element: element
+        element: element,
+        scope: scope
       }
     };
 
@@ -843,9 +843,10 @@ describe('annotation.js', function() {
           var components = createDirective();
           var controller = components.controller;
           var element = components.element;
+          var scope = components.scope;
           var dialog = element.find('.share-dialog-wrapper');
           dialog.find('button').click();
-          isolateScope.$digest();
+          scope.$digest();
           assert.ok(dialog.hasClass('open'));
           documentService().click();
           assert.notOk(dialog.hasClass('open'));
