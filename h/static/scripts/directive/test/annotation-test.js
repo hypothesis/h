@@ -566,6 +566,79 @@ describe('annotation.js', function() {
 
         assert.notCalled(annotation.$create);
       });
+
+      it('edits new annotations on initialization', function() {
+        // When the user creates a new annotation and we create a new
+        // AnnotationController instance, we automatically open the
+        // annotation's editor.
+
+        // A new annotation will have no id or $highlight.
+        annotation.id = annotation.$highlight = undefined;
+
+        // A new annotation won't have any text or tags yet.
+        annotation.text = '';
+        annotation.tags = [];
+
+        // A new annotation won't have any saved drafts yet.
+        fakeDrafts.get.returns(null);
+
+        var controller = createDirective().controller;
+
+        assert.isTrue(controller.editing());
+      });
+
+      it('edits annotations with drafts on initialization', function() {
+        // This is not a new annotation.
+        annotation.id = 'annotation_id';
+        // This is not a highlight.
+        annotation.$highlight = undefined;
+        annotation.text = 'Annotation text';
+        annotation.tags = ['tag_1', 'tag_2'];
+        // The drafts service has some draft changes for this annotation.
+        fakeDrafts.get.returns('foo');
+
+        var controller = createDirective().controller;
+
+        assert.isTrue(controller.editing());
+      });
+
+      it('does not edit new highlights on initialization', function() {
+        // This is a new annotation.
+        annotation.id = undefined;
+        fakeDrafts.get.returns(null);
+        // This is a highlight.
+        annotation.$highlight = true;
+        annotation.text = '';
+        annotation.tags = [];
+        // We have to set annotation.$create() because it'll try to call it.
+        annotation.$create = sandbox.stub().returns({
+          then: function() {}
+        });
+
+        var controller = createDirective().controller;
+
+        assert.isFalse(controller.editing());
+      });
+
+      it('edits highlights with drafts on initialization', function() {
+        // You can edit a highlight, enter some text or tags, and save it (the
+        // highlight then becomes an annotation). You can also edit a highlight
+        // and then change focus to another group and back without saving the
+        // highlight, in which case the highlight will have draft edits.
+        //
+        // This is not a new highlight.
+        annotation.id = 'annotation_id';
+        annotation.$highlight = undefined;
+        // This is a highlight.
+        annotation.text = '';
+        annotation.tags = [];
+        // This highlight has draft edits.
+        fakeDrafts.get.returns('foo');
+
+        var controller = createDirective().controller;
+
+        assert.isTrue(controller.editing());
+      });
     });
 
     describe('AnnotationController.editing()', function() {
