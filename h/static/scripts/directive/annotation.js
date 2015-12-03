@@ -218,9 +218,7 @@ function AnnotationController(
       // has no text or tags.
       var isPageNote = (model.target || []).length === 0;
       var isReply = (model.references || []).length !== 0;
-      var hasText = (model.text || '').length !== 0;
-      var hasTags = (model.tags || []).length !== 0;
-      return (!isPageNote && !isReply && !hasText && !hasTags);
+      return (!isPageNote && !isReply && !vm.hasContent());
     }
   };
 
