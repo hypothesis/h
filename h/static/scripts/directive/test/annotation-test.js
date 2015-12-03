@@ -8,7 +8,278 @@ var inject = angular.mock.inject;
 
 describe('annotation.js', function() {
 
-  describe('annotation', function() {
+  describe('extractDocumentMetadata()', function() {
+    var extractDocumentMetadata = require('../annotation')
+                                    .extractDocumentMetadata;
+
+    context('when the model has a document property', function() {
+      it('returns the hostname from model.uri as the domain', function() {
+        var model = {
+          document: {},
+          uri: 'http://example.com/'
+        };
+
+        assert.equal(extractDocumentMetadata(model).domain, 'example.com');
+      });
+
+      context('when model.uri starts with "urn"', function() {
+        it(
+          'uses the first document.link uri that doesn\'t start with "urn"',
+          function() {
+            var model = {
+              uri: 'urn:isbn:0451450523',
+              document: {
+                link: [
+                  {href: 'urn:isan:0000-0000-9E59-0000-O-0000-0000-2'},
+                  {href: 'http://example.com/'}
+                ]
+              }
+            };
+
+            assert.equal(
+              extractDocumentMetadata(model).uri, 'http://example.com/');
+          }
+        );
+      });
+
+      context('when model.uri does not start with "urn"', function() {
+        it('uses model.uri as the uri', function() {
+          var model = {
+            document: {},
+            uri: 'http://example.com/'
+          };
+
+          assert.equal(
+            extractDocumentMetadata(model).uri, 'http://example.com/');
+        });
+      });
+
+      context('when document.title is a string', function() {
+        it('returns document.title as title', function() {
+          var model = {
+            uri: 'http://example.com/',
+            document: {
+              title: 'My Document'
+            }
+          };
+
+          assert.equal(
+            extractDocumentMetadata(model).title, model.document.title);
+        });
+      });
+
+      context('when document.title is an array', function() {
+        it('returns document.title[0] as title', function() {
+          var model = {
+            uri: 'http://example.com/',
+            document: {
+              title: ['My Document', 'My Other Document']
+            }
+          };
+
+          assert.equal(
+            extractDocumentMetadata(model).title, model.document.title[0]);
+        });
+      });
+
+      context('when there is no document.title', function() {
+        it('returns the domain as the title', function() {
+          var model = {
+            document: {},
+            uri: 'http://example.com/',
+          };
+
+          assert.equal(extractDocumentMetadata(model).title, 'example.com');
+        });
+      });
+    });
+
+    context('when the model does not have a document property', function() {
+      it('returns model.uri for the uri', function() {
+        var model = {uri: 'http://example.com/'};
+
+        assert.equal(extractDocumentMetadata(model).uri, model.uri);
+      });
+
+      it('returns the hostname of model.uri for the domain', function() {
+        var model = {uri: 'http://example.com/'};
+
+        assert.equal(extractDocumentMetadata(model).domain, 'example.com');
+      });
+
+      it('returns the hostname of model.uri for the title', function() {
+        var model = {uri: 'http://example.com/'};
+
+        assert.equal(extractDocumentMetadata(model).title, 'example.com');
+      });
+    });
+
+    context('when the title is longer than 30 characters', function() {
+      it('truncates the title with "…"', function() {
+        var model = {
+          uri: 'http://example.com/',
+          document: {
+            title: 'My Really Really Long Document Title'
+          }
+        };
+
+        assert.equal(
+          extractDocumentMetadata(model).title,
+          'My Really Really Long Document…'
+        );
+      });
+    });
+  });
+
+  describe('updateDomainModel()', function() {
+    var updateDomainModel = require('../annotation').updateDomainModel;
+
+    it('copies top-level keys form viewModel into domainModel', function() {
+      var domainModel = {};
+      var viewModel = {foo: 'bar', tags: []};
+
+      updateDomainModel(domainModel, viewModel);
+
+      assert.equal(domainModel.foo, viewModel.foo);
+    });
+
+    it('overwrites existing keys in domainModel', function() {
+      var domainModel = {foo: 'foo'};
+      var viewModel = {foo: 'bar', tags: []};
+
+      updateDomainModel(domainModel, viewModel);
+
+      assert.equal(domainModel.foo, viewModel.foo);
+    });
+
+    it('doesn\'t touch other properties in domainModel', function() {
+      var domainModel = {foo: 'foo', bar: 'bar'};
+      var viewModel = {foo: 'FOO', tags: []};
+
+      updateDomainModel(domainModel, viewModel);
+
+      assert.equal(
+        domainModel.bar, 'bar',
+        'updateDomainModel() should not touch properties of domainModel' +
+        'that don\'t exist in viewModel');
+    });
+
+    it('copies tag texts from viewModel into domainModel', function() {
+      var domainModel = {};
+      var viewModel = {
+        tags: [
+          {text: 'foo'},
+          {text: 'bar'}
+        ]
+      };
+
+      updateDomainModel(domainModel, viewModel);
+
+      assert.deepEqual(
+        domainModel.tags, ['foo', 'bar'],
+        'The array of {tag: "text"} objects in  viewModel becomes an array ' +
+        'of "text" strings in domainModel');
+    });
+  });
+
+  describe('validate()', function() {
+    var validate = require('../annotation').validate;
+
+    it('returns undefined if value is not an object', function() {
+      var i;
+      var values = [2, 'foo', true, null];
+      for (i = 0; i < values.length; i++) {
+        assert.equal(validate(values[i]), undefined);
+      }
+    });
+
+    it(
+      'returns the length if the value contains a non-empty tags array',
+      function() {
+        assert.equal(
+          validate({
+            tags: ['foo', 'bar'],
+            permissions: {
+              read: ['group:__world__']
+            },
+            target: [1, 2, 3]
+          }),
+          2);
+      }
+    );
+
+    it(
+      'returns the length if the value contains a non-empty text string',
+      function() {
+        assert.equal(
+          validate({
+            text: 'foobar',
+            permissions: {
+              read: ['group:__world__']
+            },
+            target: [1, 2, 3]
+          }),
+          6);
+      }
+    );
+
+    it('returns true for private highlights', function() {
+      assert.equal(
+        validate({
+          permissions: {
+            read: ['acct:seanh@hypothes.is']
+          },
+          target: [1, 2, 3]
+        }),
+        true);
+    });
+
+    it('returns true for group highlights', function() {
+      assert.equal(
+        validate({
+          permissions: {
+            read: ['group:foo']
+          },
+          target: [1, 2, 3]
+        }),
+        true);
+    });
+
+    it('returns false for public highlights', function() {
+      assert.equal(
+        validate({
+          text: void 0,
+          tags: void 0,
+          permissions: {
+            read: ['group:__world__']
+          },
+          target: [1, 2, 3]
+        }),
+        false);
+    });
+
+    it('handles values with no permissions', function() {
+      assert.equal(
+        validate({
+          permissions: void 0,
+          target: [1, 2, 3]
+        }),
+        true);
+    });
+
+    it('handles permissions objects with no read', function() {
+      assert.equal(
+        validate({
+          permissions: {
+            read: void 0
+          },
+          target: [1, 2, 3]
+        }),
+        true);
+    });
+  });
+
+  describe('AnnotationController', function() {
     var $compile;
     var $document;
     var $element;
@@ -184,180 +455,6 @@ describe('annotation.js', function() {
 
     afterEach(function() {
       sandbox.restore();
-    });
-
-    describe('extractDocumentMetadata()', function() {
-      var extractDocumentMetadata = require('../annotation')
-                                      .extractDocumentMetadata;
-
-      context('when the model has a document property', function() {
-        it('returns the hostname from model.uri as the domain', function() {
-          var model = {
-            document: {},
-            uri: 'http://example.com/'
-          };
-
-          assert.equal(extractDocumentMetadata(model).domain, 'example.com');
-        });
-
-        context('when model.uri starts with "urn"', function() {
-          it(
-            'uses the first document.link uri that doesn\'t start with "urn"',
-            function() {
-              var model = {
-                uri: 'urn:isbn:0451450523',
-                document: {
-                  link: [
-                    {href: 'urn:isan:0000-0000-9E59-0000-O-0000-0000-2'},
-                    {href: 'http://example.com/'}
-                  ]
-                }
-              };
-
-              assert.equal(
-                extractDocumentMetadata(model).uri, 'http://example.com/');
-            }
-          );
-        });
-
-        context('when model.uri does not start with "urn"', function() {
-          it('uses model.uri as the uri', function() {
-            var model = {
-              document: {},
-              uri: 'http://example.com/'
-            };
-
-            assert.equal(
-              extractDocumentMetadata(model).uri, 'http://example.com/');
-          });
-        });
-
-        context('when document.title is a string', function() {
-          it('returns document.title as title', function() {
-            var model = {
-              uri: 'http://example.com/',
-              document: {
-                title: 'My Document'
-              }
-            };
-
-            assert.equal(
-              extractDocumentMetadata(model).title, model.document.title);
-          });
-        });
-
-        context('when document.title is an array', function() {
-          it('returns document.title[0] as title', function() {
-            var model = {
-              uri: 'http://example.com/',
-              document: {
-                title: ['My Document', 'My Other Document']
-              }
-            };
-
-            assert.equal(
-              extractDocumentMetadata(model).title, model.document.title[0]);
-          });
-        });
-
-        context('when there is no document.title', function() {
-          it('returns the domain as the title', function() {
-            var model = {
-              document: {},
-              uri: 'http://example.com/',
-            };
-
-            assert.equal(extractDocumentMetadata(model).title, 'example.com');
-          });
-        });
-      });
-
-      context('when the model does not have a document property', function() {
-        it('returns model.uri for the uri', function() {
-          var model = {uri: 'http://example.com/'};
-
-          assert.equal(extractDocumentMetadata(model).uri, model.uri);
-        });
-
-        it('returns the hostname of model.uri for the domain', function() {
-          var model = {uri: 'http://example.com/'};
-
-          assert.equal(extractDocumentMetadata(model).domain, 'example.com');
-        });
-
-        it('returns the hostname of model.uri for the title', function() {
-          var model = {uri: 'http://example.com/'};
-
-          assert.equal(extractDocumentMetadata(model).title, 'example.com');
-        });
-      });
-
-      context('when the title is longer than 30 characters', function() {
-        it('truncates the title with "…"', function() {
-          var model = {
-            uri: 'http://example.com/',
-            document: {
-              title: 'My Really Really Long Document Title'
-            }
-          };
-
-          assert.equal(
-            extractDocumentMetadata(model).title,
-            'My Really Really Long Document…'
-          );
-        });
-      });
-    });
-
-    describe('updateDomainModel()', function() {
-      var updateDomainModel = require('../annotation').updateDomainModel;
-
-      it('copies top-level keys form viewModel into domainModel', function() {
-        var domainModel = {};
-        var viewModel = {foo: 'bar', tags: []};
-
-        updateDomainModel(domainModel, viewModel);
-
-        assert.equal(domainModel.foo, viewModel.foo);
-      });
-
-      it('overwrites existing keys in domainModel', function() {
-        var domainModel = {foo: 'foo'};
-        var viewModel = {foo: 'bar', tags: []};
-
-        updateDomainModel(domainModel, viewModel);
-
-        assert.equal(domainModel.foo, viewModel.foo);
-      });
-
-      it('doesn\'t touch other properties in domainModel', function() {
-        var domainModel = {foo: 'foo', bar: 'bar'};
-        var viewModel = {foo: 'FOO', tags: []};
-
-        updateDomainModel(domainModel, viewModel);
-
-        assert.equal(
-          domainModel.bar, 'bar',
-          'updateDomainModel() should not touch properties of domainModel' +
-          'that don\'t exist in viewModel');
-      });
-
-      it('copies tag texts from viewModel into domainModel', function() {
-        var domainModel = {};
-        var viewModel = {
-          tags: [
-            {text: 'foo'},
-            {text: 'bar'}
-          ]
-        };
-
-        updateDomainModel(domainModel, viewModel);
-
-        assert.deepEqual(
-          domainModel.tags, ['foo', 'bar'],
-          'The array of {tag: "text"} objects in  viewModel becomes an array ' +
-          'of "text" strings in domainModel');
-      });
     });
 
     describe('AnnotationController.editing()', function() {
@@ -1453,103 +1550,6 @@ describe('annotation.js', function() {
       controller.annotation.text = 'this should be reverted';
       controller.revert();
       assert.equal(controller.annotation.text, void 0);
-    });
-  });
-
-  describe('validate()', function() {
-    var validate = require('../annotation').validate;
-
-    it('returns undefined if value is not an object', function() {
-      var i;
-      var values = [2, 'foo', true, null];
-      for (i = 0; i < values.length; i++) {
-        assert.equal(validate(values[i]), undefined);
-      }
-    });
-
-    it(
-      'returns the length if the value contains a non-empty tags array',
-      function() {
-        assert.equal(
-          validate({
-            tags: ['foo', 'bar'],
-            permissions: {
-              read: ['group:__world__']
-            },
-            target: [1, 2, 3]
-          }),
-          2);
-      }
-    );
-
-    it(
-      'returns the length if the value contains a non-empty text string',
-      function() {
-        assert.equal(
-          validate({
-            text: 'foobar',
-            permissions: {
-              read: ['group:__world__']
-            },
-            target: [1, 2, 3]
-          }),
-          6);
-      }
-    );
-
-    it('returns true for private highlights', function() {
-      assert.equal(
-        validate({
-          permissions: {
-            read: ['acct:seanh@hypothes.is']
-          },
-          target: [1, 2, 3]
-        }),
-        true);
-    });
-
-    it('returns true for group highlights', function() {
-      assert.equal(
-        validate({
-          permissions: {
-            read: ['group:foo']
-          },
-          target: [1, 2, 3]
-        }),
-        true);
-    });
-
-    it('returns false for public highlights', function() {
-      assert.equal(
-        validate({
-          text: void 0,
-          tags: void 0,
-          permissions: {
-            read: ['group:__world__']
-          },
-          target: [1, 2, 3]
-        }),
-        false);
-    });
-
-    it('handles values with no permissions', function() {
-      assert.equal(
-        validate({
-          permissions: void 0,
-          target: [1, 2, 3]
-        }),
-        true);
-    });
-
-    it('handles permissions objects with no read', function() {
-      assert.equal(
-        validate({
-          permissions: {
-            read: void 0
-          },
-          target: [1, 2, 3]
-        }),
-        true);
     });
   });
 });
