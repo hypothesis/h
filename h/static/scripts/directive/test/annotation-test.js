@@ -6,6 +6,15 @@ var events = require('../../events');
 var module = angular.mock.module;
 var inject = angular.mock.inject;
 
+/** Return Angular's $compile service. */
+function compileService() {
+  var $compile;
+  inject(function(_$compile_) {
+    $compile = _$compile_;
+  });
+  return $compile;
+}
+
 describe('annotation.js', function() {
 
   describe('extractDocumentMetadata()', function() {
@@ -280,7 +289,6 @@ describe('annotation.js', function() {
   });
 
   describe('AnnotationController', function() {
-    var $compile;
     var $document;
     var $element;
     var $q;
@@ -311,7 +319,7 @@ describe('annotation.js', function() {
 
     createDirective = function() {
       $element = angular.element('<div annotation="annotation">');
-      $compile($element)($scope);
+      compileService()($element)($scope);
       $scope.$digest();
       var controller = $element.controller('annotation');
       isolateScope = $element.isolateScope();
@@ -431,9 +439,8 @@ describe('annotation.js', function() {
 
     beforeEach(
       inject(
-        function(_$compile_, _$document_, _$q_, _$rootScope_, _$timeout_,
+        function(_$document_, _$q_, _$rootScope_, _$timeout_,
                 _$window_) {
-          $compile = _$compile_;
           $document = _$document_;
           $window = _$window_;
           $q = _$q_;
@@ -1235,15 +1242,6 @@ describe('annotation.js', function() {
 
     beforeEach(module('h.templates'));
 
-    /** Return Angular's $compile service. */
-    function getCompileService() {
-      var $compile;
-      inject(function(_$compile_) {
-        $compile = _$compile_;
-      });
-      return $compile;
-    }
-
     /** Return Angular's $rootScope. */
     function getRootScope() {
       var $rootScope;
@@ -1355,7 +1353,7 @@ describe('annotation.js', function() {
         $provide.value('localStorage', locals.localStorage);
       });
       locals.element = angular.element('<div annotation="annotation">');
-      var compiledElement = getCompileService()(locals.element);
+      var compiledElement = compileService()(locals.element);
       locals.$rootScope = getRootScope();
       locals.parentScope = locals.$rootScope.$new();
       locals.parentScope.annotation = args.annotation || {};
