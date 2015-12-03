@@ -1,0 +1,37 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'groups' %}
+{% set page_title = 'Groups' %}
+
+{% block content %}
+
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>URL</th>
+          <th>Created by</th>
+          <th>Email</th>
+          <th>Members</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for group in groups %}
+          <tr>
+            <td>{{ group.name }}</td>
+            <td>
+              <a href="{{ request.route_url('group_read', pubid=group.pubid, slug=group.slug) }}">
+                {{ request.route_url('group_read', pubid=group.pubid, slug=group.slug) }}
+              </a>
+            </td>
+            <td>{{ group.creator.username }}</td>
+            <td>{{ group.creator.email }}</td>
+            <td>{{ group.members|length }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}
