@@ -15,6 +15,15 @@ function compileService() {
   return $compile;
 }
 
+/** Return Angular's $document service. */
+function documentService() {
+  var $document;
+  inject(function(_$document_) {
+    $document = _$document_;
+  });
+  return $document;
+}
+
 describe('annotation.js', function() {
 
   describe('extractDocumentMetadata()', function() {
@@ -289,7 +298,6 @@ describe('annotation.js', function() {
   });
 
   describe('AnnotationController', function() {
-    var $document;
     var $element;
     var $q;
     var $rootScope;
@@ -439,9 +447,8 @@ describe('annotation.js', function() {
 
     beforeEach(
       inject(
-        function(_$document_, _$q_, _$rootScope_, _$timeout_,
+        function(_$q_, _$rootScope_, _$timeout_,
                 _$window_) {
-          $document = _$document_;
           $window = _$window_;
           $q = _$q_;
           $timeout = _$timeout_;
@@ -836,7 +843,7 @@ describe('annotation.js', function() {
           dialog.find('button').click();
           isolateScope.$digest();
           assert.ok(dialog.hasClass('open'));
-          $document.click();
+          documentService().click();
           assert.notOk(dialog.hasClass('open'));
         });
       });
