@@ -661,6 +661,106 @@ describe('annotation.js', function() {
       });
     });
 
+    describe('AnnotationController.isHighlight()', function() {
+      it('returns true for new highlights', function() {
+        // New highlights have no id and have $highlight: true.
+        annotation.id = undefined;
+        annotation.$highlight = true;
+        // We need to define $create because it'll try to call it.
+        annotation.$create = function() {return {then: function() {}}};
+
+        var vm = createDirective().controller;
+
+        assert.isTrue(vm.isHighlight());
+      });
+
+      it('returns false for new annotations', function() {
+        // New annotations have no id and no $highlight.
+        annotation.id = annotation.$highlight = undefined;
+
+        var vm = createDirective().controller;
+
+        assert.isFalse(vm.isHighlight());
+      });
+
+      it('returns 0 for page notes', function() {
+        annotation.$highlight = undefined;
+        // Page notes have no targets.
+        annotation.target = [];
+        // This is not a reply.
+        annotation.references = [];
+        // The annotation has no text or tags. If it weren't a page note, it'd
+        // be a highlight.
+        annotation.text = ''
+        annotation.tags = []
+
+        var vm = createDirective().controller;
+
+        assert.equal(vm.isHighlight(), 0);
+      });
+
+      it('returns false for replies', function() {
+        annotation.$highlight = undefined;
+        // This is not a page note.
+        annotation.target = ['foo'];
+        // Replies have references.
+        annotation.references = ['parent_annotation_id'];
+        // The annotation has no text or tags. If it weren't a reply, it'd
+        // be a highlight.
+        annotation.text = ''
+        annotation.tags = []
+
+        var vm = createDirective().controller;
+
+        assert.isFalse(vm.isHighlight());
+      });
+
+      it('returns false for annotations with text', function() {
+        // Not a highlight, reply or page note.
+        annotation.$highlight = undefined;
+        annotation.target = ['foo'];
+        annotation.references = ['parent_annotation_id'];
+
+        // Has some text but no tags.
+        annotation.text = 'This is my annotation';
+        annotation.tags = []
+
+        var vm = createDirective().controller;
+
+        assert.isFalse(vm.isHighlight());
+      });
+
+      it('returns false for annotations with tags', function() {
+        // Not a highlight, reply or page note.
+        annotation.$highlight = undefined;
+        annotation.target = ['foo'];
+        annotation.references = ['parent_annotation_id'];
+
+        // Has some tags but no text.
+        annotation.text = '';
+        annotation.tags = ['foo']
+
+        var vm = createDirective().controller;
+
+        assert.isFalse(vm.isHighlight());
+      });
+
+      it('returns true for annotations with no text or tags', function() {
+        // Not a new highlight, reply or page note.
+        annotation.$highlight = undefined;
+        annotation.target = ['foo'];
+        annotation.references = [];
+
+        // Has no tags or text, i.e. it's a highlight.
+        annotation.text = '';
+        annotation.tags = []
+
+        var vm = createDirective().controller;
+
+        assert.isTrue(vm.isHighlight());
+      });
+    });
+
     describe('when the annotation is a highlight', function() {
       beforeEach(function() {
         annotation.$highlight = true;
