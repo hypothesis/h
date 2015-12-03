@@ -298,7 +298,6 @@ describe('annotation.js', function() {
   });
 
   describe('AnnotationController', function() {
-    var $element;
     var $q;
     var $rootScope;
     var $scope;
@@ -326,12 +325,15 @@ describe('annotation.js', function() {
     var sandbox;
 
     createDirective = function() {
-      $element = angular.element('<div annotation="annotation">');
-      compileService()($element)($scope);
+      var element = angular.element('<div annotation="annotation">');
+      compileService()(element)($scope);
       $scope.$digest();
-      var controller = $element.controller('annotation');
-      isolateScope = $element.isolateScope();
-      return controller;
+      var controller = element.controller('annotation');
+      isolateScope = element.isolateScope();
+      return {
+        controller: controller,
+        element: element
+      }
     };
 
     before(function() {
@@ -473,19 +475,19 @@ describe('annotation.js', function() {
 
     describe('AnnotationController.editing()', function() {
       it('returns true if action is "create"', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.action = 'create';
         assert(controller.editing());
       });
 
       it('returns true if action is "edit"', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.action = 'edit';
         assert(controller.editing());
       });
 
       it('returns false if action is "view"', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.action = 'view';
         assert(!controller.editing());
       });
@@ -535,7 +537,7 @@ describe('annotation.js', function() {
       });
 
       it('creates a new reply with the proper uri and references', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.reply();
         var match = sinon.match({
           references: [annotation.id],
@@ -545,7 +547,7 @@ describe('annotation.js', function() {
       });
 
       it('makes the annotation shared if the parent is shared', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         var reply = {};
         fakeAnnotationMapper.createAnnotation.returns(reply);
         fakePermissions.isShared.returns(true);
@@ -556,7 +558,7 @@ describe('annotation.js', function() {
       });
 
       it('makes the annotation shared if the parent is shared', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         $scope.annotation.group = 'my group';
         $scope.annotation.permissions = {
           read: ['my group']
@@ -578,7 +580,7 @@ describe('annotation.js', function() {
       it(
         'does not add the world readable principal if the parent is private',
         function() {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           var reply = {};
           fakeAnnotationMapper.createAnnotation.returns(reply);
           fakePermissions.isShared.returns(false);
@@ -590,7 +592,7 @@ describe('annotation.js', function() {
       );
 
       it('sets the reply\'s group to be the same as its parent\'s', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         $scope.annotation.group = 'my group';
         var reply = {};
         fakeAnnotationMapper.createAnnotation.returns(reply);
@@ -601,7 +603,7 @@ describe('annotation.js', function() {
 
     describe('#setPrivacy', function() {
       it('makes the annotation private when level is "private"', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         annotation.$update = sinon.stub().returns(Promise.resolve());
         controller.edit();
         controller.setPrivacy('private');
@@ -615,7 +617,7 @@ describe('annotation.js', function() {
       });
 
       it('makes the annotation shared when level is "shared"', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         annotation.$update = sinon.stub().returns(Promise.resolve());
         controller.edit();
         controller.setPrivacy('shared');
@@ -627,7 +629,7 @@ describe('annotation.js', function() {
       });
 
       it('saves the "shared" visibility level to localStorage', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         annotation.$update = sinon.stub().returns(Promise.resolve());
         controller.edit();
         controller.setPrivacy('shared');
@@ -637,7 +639,7 @@ describe('annotation.js', function() {
       });
 
       it('saves the "private" visibility level to localStorage', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         annotation.$update = sinon.stub().returns(Promise.resolve());
         controller.edit();
         controller.setPrivacy('private');
@@ -647,7 +649,7 @@ describe('annotation.js', function() {
       });
 
       it('doesn\'t save the visibility if the annotation is a reply', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         annotation.$update = sinon.stub().returns(Promise.resolve());
         annotation.references = ['parent id'];
         controller.edit();
@@ -660,14 +662,14 @@ describe('annotation.js', function() {
 
     describe('#hasContent', function() {
       it('returns false if the annotation has no tags or text', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.annotation.text = '';
         controller.annotation.tags = [];
         assert.ok(!controller.hasContent());
       });
 
       it('returns true if the annotation has tags or text', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.annotation.text = 'bar';
         assert.ok(controller.hasContent());
         controller.annotation.text = '';
@@ -682,13 +684,13 @@ describe('annotation.js', function() {
 
     describe('#hasQuotes', function() {
       it('returns false if the annotation has no quotes', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.annotation.target = [{}];
         assert.isFalse(controller.hasQuotes());
       });
 
       it('returns true if the annotation has quotes', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.annotation.target = [
           {
             selector: [
@@ -708,7 +710,7 @@ describe('annotation.js', function() {
       });
 
       it('is called exactly once on model changes', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         sandbox.spy(controller, 'render');
         assert.notCalled(controller.render);
         annotation['delete'] = true;
@@ -720,20 +722,20 @@ describe('annotation.js', function() {
       });
 
       it('provides a document title', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.render();
         assert.equal(controller.document.title, 'A special document');
       });
 
       it('uses the first title when there are more than one', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         annotation.document.title = ['first title', 'second title'];
         controller.render();
         assert.equal(controller.document.title, 'first title');
       });
 
       it('truncates long titles', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         annotation.document.title = 'A very very very long title that really\nshouldn\'t be found on a page on the internet.';
         controller.render();
         assert.equal(
@@ -741,19 +743,19 @@ describe('annotation.js', function() {
       });
 
       it('provides a document uri', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.render();
         assert.equal(controller.document.uri, 'http://example.com');
       });
 
       it('provides an extracted domain from the uri', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.render();
         assert.equal(controller.document.domain, 'example.com');
       });
 
       it('uses the domain for the title if the title is not present', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         delete annotation.document.title;
         controller.render();
         assert.equal(controller.document.title, 'example.com');
@@ -762,7 +764,7 @@ describe('annotation.js', function() {
       it(
         'still sets the uri correctly if the annotation has no document',
         function() {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           delete annotation.document;
           controller.render();
           assert(controller.document.uri === $scope.annotation.uri);
@@ -772,7 +774,7 @@ describe('annotation.js', function() {
       it(
         'still sets the domain correctly if the annotation has no document',
         function() {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           delete annotation.document;
           controller.render();
           assert(controller.document.domain === 'example.com');
@@ -782,7 +784,7 @@ describe('annotation.js', function() {
       it(
         'uses the domain for the title when the annotation has no document',
         function() {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           delete annotation.document;
           controller.render();
           assert(controller.document.title === 'example.com');
@@ -804,7 +806,7 @@ describe('annotation.js', function() {
 
         it('is not updated for unsaved annotations', function() {
           annotation.updated = null;
-          var controller = createDirective();
+          var controller = createDirective().controller;
           // Unsaved annotations don't have an updated time yet so a timestamp
           // string can't be computed for them.
           $scope.$digest();
@@ -812,13 +814,13 @@ describe('annotation.js', function() {
         });
 
         it('is updated on first digest', function() {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           $scope.$digest();
           assert.equal(controller.timestamp, 'a while ago');
         });
 
         it('is updated after a timeout', function() {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           fakeTime.nextFuzzyUpdate.returns(10);
           fakeTime.toFuzzyString.returns('ages ago');
           $scope.$digest();
@@ -828,7 +830,7 @@ describe('annotation.js', function() {
         });
 
         it('is no longer updated after the scope is destroyed', function() {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           $scope.$digest();
           $scope.$destroy();
           $timeout.flush();
@@ -838,8 +840,10 @@ describe('annotation.js', function() {
 
       describe('share', function() {
         it('sets and unsets the open class on the share wrapper', function() {
-          var controller = createDirective();
-          var dialog = $element.find('.share-dialog-wrapper');
+          var components = createDirective();
+          var controller = components.controller;
+          var element = components.element;
+          var dialog = element.find('.share-dialog-wrapper');
           dialog.find('button').click();
           isolateScope.$digest();
           assert.ok(dialog.hasClass('open'));
@@ -858,7 +862,7 @@ describe('annotation.js', function() {
       it(
         'calls annotationMapper.delete() if the delete is confirmed',
         function(done) {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           sandbox.stub($window, 'confirm').returns(true);
           fakeAnnotationMapper.deleteAnnotation.returns($q.resolve());
           controller['delete']().then(function() {
@@ -872,7 +876,7 @@ describe('annotation.js', function() {
       it(
         'doesn\'t call annotationMapper.delete() if the delete is cancelled',
         function() {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           sandbox.stub($window, 'confirm').returns(false);
           assert(fakeAnnotationMapper.deleteAnnotation.notCalled);
         }
@@ -881,7 +885,7 @@ describe('annotation.js', function() {
       it(
         'flashes a generic error if the server cannot be reached',
         function(done) {
-          var controller = createDirective();
+          var controller = createDirective().controller;
           sandbox.stub($window, 'confirm').returns(true);
           fakeAnnotationMapper.deleteAnnotation.returns($q.reject({
             status: 0
@@ -896,7 +900,7 @@ describe('annotation.js', function() {
       );
 
       it('flashes an error if the delete fails on the server', function(done) {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         sandbox.stub($window, 'confirm').returns(true);
         fakeAnnotationMapper.deleteAnnotation.returns($q.reject({
           status: 500,
@@ -912,7 +916,7 @@ describe('annotation.js', function() {
       });
 
       it('doesn\'t flash an error if the delete succeeds', function(done) {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         sandbox.stub($window, 'confirm').returns(true);
         fakeAnnotationMapper.deleteAnnotation.returns($q.resolve());
         controller['delete']().then(function() {
@@ -930,7 +934,7 @@ describe('annotation.js', function() {
       });
 
       function controllerWithActionCreate() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.action = 'create';
         return controller;
       }
@@ -998,7 +1002,7 @@ describe('annotation.js', function() {
       });
 
       function controllerWithActionEdit() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.action = 'edit';
         return controller;
       }
@@ -1048,7 +1052,7 @@ describe('annotation.js', function() {
 
     describe('drafts', function() {
       it('creates a draft when editing an annotation', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.edit();
         assert.calledWith(fakeDrafts.update, annotation);
       });
@@ -1060,7 +1064,7 @@ describe('annotation.js', function() {
           // "changes" object that aren't actually set on the annotation. In this
           // case, both permissions and tags are null so shouldn't be saved in
           // the draft.
-          var controller = createDirective();
+          var controller = createDirective().controller;
           annotation.permissions = null;
           annotation.text = 'Hello!';
           annotation.tags = null;
@@ -1080,7 +1084,7 @@ describe('annotation.js', function() {
           ],
           text: 'unsaved-text'
         });
-        var controller = createDirective();
+        var controller = createDirective().controller;
         assert.isTrue(controller.editing());
       });
 
@@ -1089,7 +1093,7 @@ describe('annotation.js', function() {
           tags: ['unsaved-tag'],
           text: 'unsaved-text'
         });
-        var controller = createDirective();
+        var controller = createDirective().controller;
         assert.deepEqual(controller.annotation.tags, [
           {
             text: 'unsaved-tag'
@@ -1099,7 +1103,7 @@ describe('annotation.js', function() {
       });
 
       it('removes the draft when changes are discarded', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.edit();
         controller.revert();
         assert.calledWith(fakeDrafts.remove, annotation);
@@ -1107,7 +1111,7 @@ describe('annotation.js', function() {
 
       it('removes the draft when changes are saved', function() {
         annotation.$update = sandbox.stub().returns(Promise.resolve());
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.edit();
         controller.save();
 
@@ -1123,7 +1127,7 @@ describe('annotation.js', function() {
 
     describe('when the focused group changes', function() {
       it('updates the current draft', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.edit();
         controller.annotation.text = 'unsaved-text';
         controller.annotation.tags = [];
@@ -1141,7 +1145,7 @@ describe('annotation.js', function() {
       });
 
       it('should not create a new draft', function() {
-        var controller = createDirective();
+        var controller = createDirective().controller;
         controller.edit();
         fakeDrafts.update = sinon.stub();
         fakeDrafts.get = sinon.stub().returns(null);
