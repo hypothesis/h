@@ -667,7 +667,7 @@ describe('annotation.js', function() {
         annotation.id = undefined;
         annotation.$highlight = true;
         // We need to define $create because it'll try to call it.
-        annotation.$create = function() {return {then: function() {}}};
+        annotation.$create = function() {return {then: function() {}};};
 
         var vm = createDirective().controller;
 
@@ -691,8 +691,8 @@ describe('annotation.js', function() {
         annotation.references = [];
         // The annotation has no text or tags. If it weren't a page note, it'd
         // be a highlight.
-        annotation.text = ''
-        annotation.tags = []
+        annotation.text = '';
+        annotation.tags = [];
 
         var vm = createDirective().controller;
 
@@ -707,8 +707,8 @@ describe('annotation.js', function() {
         annotation.references = ['parent_annotation_id'];
         // The annotation has no text or tags. If it weren't a reply, it'd
         // be a highlight.
-        annotation.text = ''
-        annotation.tags = []
+        annotation.text = '';
+        annotation.tags = [];
 
         var vm = createDirective().controller;
 
@@ -723,7 +723,7 @@ describe('annotation.js', function() {
 
         // Has some text but no tags.
         annotation.text = 'This is my annotation';
-        annotation.tags = []
+        annotation.tags = [];
 
         var vm = createDirective().controller;
 
@@ -738,7 +738,7 @@ describe('annotation.js', function() {
 
         // Has some tags but no text.
         annotation.text = '';
-        annotation.tags = ['foo']
+        annotation.tags = ['foo'];
 
         var vm = createDirective().controller;
 
@@ -753,7 +753,7 @@ describe('annotation.js', function() {
 
         // Has no tags or text, i.e. it's a highlight.
         annotation.text = '';
-        annotation.tags = []
+        annotation.tags = [];
 
         var vm = createDirective().controller;
 
