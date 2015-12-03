@@ -216,10 +216,11 @@ function AnnotationController(
       // example there's no model.highlight: true.  Instead a highlight is
       // defined as an annotation that isn't a page note or a reply and that
       // has no text or tags.
-      var targetLength = (model.target || []).length;
-      var referencesLength = (model.references || []).length;
-      var tagsLength = (model.tags || []).length;
-      return (targetLength && !referencesLength && !(model.text || tagsLength));
+      var isPageNote = (model.target || []).length === 0;
+      var isReply = (model.references || []).length !== 0;
+      var hasText = (model.text || '').length !== 0;
+      var hasTags = (model.tags || []).length !== 0;
+      return (!isPageNote && !isReply && !hasText && !hasTags);
     }
   };
 

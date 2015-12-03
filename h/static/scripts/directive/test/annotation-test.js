@@ -683,7 +683,7 @@ describe('annotation.js', function() {
         assert.isFalse(vm.isHighlight());
       });
 
-      it('returns 0 for page notes', function() {
+      it('returns false for page notes', function() {
         annotation.$highlight = undefined;
         // Page notes have no targets.
         annotation.target = [];
@@ -696,7 +696,7 @@ describe('annotation.js', function() {
 
         var vm = createDirective().controller;
 
-        assert.equal(vm.isHighlight(), 0);
+        assert.isFalse(vm.isHighlight());
       });
 
       it('returns false for replies', function() {
