@@ -304,7 +304,6 @@ describe('annotation.js', function() {
     var $timeout;
     var $window;
     var annotation;
-    var createDirective;
     var fakeAnnotationMapper;
     var fakeAnnotationUI;
     var fakeDocumentDomainFilter;
@@ -323,7 +322,7 @@ describe('annotation.js', function() {
     var fakeUrlEncodeFilter;
     var sandbox;
 
-    createDirective = function() {
+    function createDirective() {
       var element = angular.element('<div annotation="annotation">');
       compileService()(element)($scope);
       $scope.$digest();
