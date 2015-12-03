@@ -316,7 +316,6 @@ describe('annotation.js', function() {
     var fakePermissions;
     var fakePersonaFilter;
     var fakeSession;
-    var fakeStore;
     var fakeTags;
     var fakeTime;
     var fakeUrlEncodeFilter;
@@ -332,8 +331,8 @@ describe('annotation.js', function() {
         controller: controller,
         element: element,
         scope: scope
-      }
-    };
+      };
+    }
 
     before(function() {
       angular.module('h', [])
@@ -439,7 +438,6 @@ describe('annotation.js', function() {
       $provide.value('documentTitleFilter', fakeDocumentTitleFilter);
       $provide.value('documentDomainFilter', fakeDocumentDomainFilter);
       $provide.value('session', fakeSession);
-      $provide.value('store', fakeStore);
       $provide.value('tags', fakeTags);
       $provide.value('time', fakeTime);
       $provide.value('urlencodeFilter', fakeUrlEncodeFilter);
