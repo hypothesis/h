@@ -470,6 +470,104 @@ describe('annotation.js', function() {
       sandbox.restore();
     });
 
+    describe('AnnotationController() initialization', function() {
+      it('saves new highlights to the server on initialization', function() {
+        // New highlights have no id and have $highlight: true.
+        annotation.id = null;
+        annotation.$highlight = true;
+
+        // The user is logged-in.
+        annotation.user = fakeSession.state.userid = 'acct:bill@localhost';
+
+        annotation.$create = sandbox.stub().returns({
+          then: function() {}
+        });
+
+        createDirective();
+
+        assert.called(annotation.$create);
+      });
+
+      it('saves new highlights to drafts if not logged in', function() {
+        // New highlights have no id and have $highlight: true.
+        annotation.id = null;
+        annotation.$highlight = true;
+
+        // The user is not logged-in.
+        annotation.user = fakeSession.state.userid = undefined;
+
+        annotation.$create = sandbox.stub().returns({
+          then: function() {}
+        });
+
+        createDirective();
+
+        assert.notCalled(annotation.$create);
+        assert.called(fakeDrafts.update);
+      });
+
+      it('does not save new annotations on initialization', function() {
+        // New annotations have no id and no $highlight.
+        annotation.id = null;
+        annotation.$highlight = undefined;
+
+        annotation.$create = sandbox.stub().returns({
+          then: function() {}
+        });
+
+        createDirective();
+
+        assert.notCalled(annotation.$create);
+      });
+
+      it('does not save old highlights on initialization', function() {
+        // Old highlights (ones that the client has received from the server,
+        // rather than created locally itself) have an id and do not have any
+        // $highlight.
+        annotation.id = 'annotation_id';
+        annotation.$highlight = undefined;
+
+        // If it's a highlight, then the annotation will have a target but
+        // no references, text or tags.
+        annotation.target = ['foo', 'bar'];
+        annotation.references = [];
+        annotation.text = '';
+        annotation.tags = [];
+
+        annotation.$create = sandbox.stub().returns({
+          then: function() {}
+        });
+
+        createDirective();
+
+        assert.notCalled(annotation.$create);
+      });
+
+      it('does not save old annotations on initialization', function() {
+        // Old annotations (ones that the client has received from the server,
+        // rather than created locally itself) have an id and do not have any
+        // $highlight.
+        annotation.id = 'annotation_id';
+        annotation.$highlight = undefined;
+
+        // If it's an annotation (rather than a highlight, reply or page note)
+        // then the annotation will have a target, no references and some
+        // text or tags.
+        annotation.target = ['foo', 'bar'];
+        annotation.references = [];
+        annotation.text = 'This is my annotation';
+        annotation.tags = ['tag_1', 'tag_2'];
+
+        annotation.$create = sandbox.stub().returns({
+          then: function() {}
+        });
+
+        createDirective();
+
+        assert.notCalled(annotation.$create);
+      });
+    });
+
     describe('AnnotationController.editing()', function() {
       it('returns true if action is "create"', function() {
         var controller = createDirective().controller;
@@ -498,19 +596,6 @@ describe('annotation.js', function() {
           'catch': angular.noop,
           'finally': angular.noop
         });
-      });
-
-      it('persists upon login', function() {
-        delete annotation.id;
-        delete annotation.user;
-        fakeSession.state.userid = null;
-        createDirective();
-        $scope.$digest();
-        assert.notCalled(annotation.$create);
-        fakeSession.state.userid = 'acct:ted@wyldstallyns.com';
-        $scope.$broadcast(events.USER_CHANGED, {});
-        $scope.$digest();
-        assert.calledOnce(annotation.$create);
       });
 
       it('is private', function() {
