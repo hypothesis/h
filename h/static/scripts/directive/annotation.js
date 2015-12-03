@@ -152,7 +152,8 @@ function errorMessage(reason) {
 // @ngInject
 function AnnotationController(
   $document, $q, $rootScope, $scope, $timeout, $window, annotationUI,
-  annotationMapper, drafts, flash, groups, permissions, session, tags, time) {
+  annotationMapper, drafts, flash, features, groups, permissions, session,
+  tags, time) {
 
   var vm = this;
 
@@ -162,9 +163,12 @@ function AnnotationController(
 
   vm.action = 'view';
   vm.document = null;
-  vm.editing = false;
-  vm.isSidebar = false;
-  vm.preview = 'no';
+  // Give the template access to the feature flags.
+  vm.feature = features.flagEnabled;
+  // Copy isSidebar from $scope onto vm for consistency (we want this
+  // directive's templates to always access variables from vm rather than
+  // directly from scope).
+  vm.isSidebar = $scope.isSidebar;
   vm.timestamp = null;
 
   /** The domain model, contains the currently saved version of the annotation
@@ -185,12 +189,34 @@ function AnnotationController(
   var highlight = model.$highlight;
 
   /**
+   * @ngdoc method
+   * @name annotation.AnnotationController#editing.
+   * @returns {boolean} `true` if this annotation is currently being edited
+   *   (i.e. the annotation editor form should be open), `false` otherwise.
+   */
+  vm.editing = function() {
+    if (vm.action === 'create' || vm.action === 'edit') {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  /**
     * @ngdoc method
     * @name annotation.AnnotationController#group.
     * @returns {Object} The full group object associated with the annotation.
     */
   vm.group = function() {
     return groups.get(model.group);
+  };
+
+  // Save on Meta + Enter or Ctrl + Enter.
+  vm.onKeydown = function(event) {
+    if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      vm.save();
+    }
   };
 
   /**
@@ -260,6 +286,19 @@ function AnnotationController(
     }
   };
 
+  vm.share = function(event) {
+    var $container = angular.element(event.currentTarget).parent();
+    $container.addClass('open').find('input').focus().select();
+
+    // We have to stop propagation here otherwise this click event will
+    // re-close the share dialog immediately.
+    event.stopPropagation();
+
+    $document.one('click', function() {
+      $container.removeClass('open');
+    });
+  };
+
   /**
     * @ngdoc method
     * @name annotation.AnnotaitonController#hasContent
@@ -292,9 +331,6 @@ function AnnotationController(
     * the annotation.
     */
   vm.authorize = function(action) {
-    if (model === null) {
-      return false;
-    }
     // TODO: this should use auth instead of permissions but we might need
     // an auth cache or the JWT -> userid decoding might start to be a
     // performance bottleneck and we would need to get the id token into the
@@ -334,8 +370,6 @@ function AnnotationController(
       updateDraft(model);
     }
     vm.action = model.id ? 'edit' : 'create';
-    vm.editing = true;
-    vm.preview = 'no';
   };
 
   /**
@@ -345,7 +379,6 @@ function AnnotationController(
     *              if they are open.
     */
   vm.view = function() {
-    vm.editing = false;
     vm.action = 'view';
   };
 
@@ -582,7 +615,7 @@ function AnnotationController(
   // the drafts service. They will be restored when this annotation is
   // next loaded.
   $scope.$on(events.GROUP_FOCUSED, function() {
-    if (!vm.editing) {
+    if (!vm.editing()) {
       return;
     }
 
@@ -622,47 +655,19 @@ function AnnotationController(
   *
   */
 // @ngInject
-function annotation($document, features) {
+function annotation($document) {
   function linkFn(scope, elem, attrs, controllers) {
     var ctrl = controllers[0];
     var thread = controllers[1];
     var threadFilter = controllers[2];
     var counter = controllers[3];
 
-    attrs.$observe('isSidebar', function(value) {
-      if (value && value !== 'false') {
-        ctrl.isSidebar = true;
-      } else {
-        ctrl.isSidebar = false;
-      }
-    });
+    elem.on('keydown', ctrl.onKeydown);
 
-    // Save on Meta + Enter or Ctrl + Enter.
-    elem.on('keydown', function(event) {
-      if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        scope.$evalAsync(function() {
-          ctrl.save();
-        });
-      }
-    });
-
-    // Give template access to feature flags.
-    scope.feature = features.flagEnabled;
-
-    scope.share = function(event) {
-      var $container = angular.element(event.currentTarget).parent();
-      $container.addClass('open').find('input').focus().select();
-
-      // We have to stop propagation here otherwise this click event will
-      // re-close the share dialog immediately.
-      event.stopPropagation();
-
-      $document.one('click', function() {
-        $container.removeClass('open');
-      });
-    };
-
+    // FIXME: Replace this counting code with something more sane, and
+    // something that doesn't involve so much untested logic in the link
+    // function (as opposed to unit-tested methods on the AnnotationController,
+    // for example).
     // Keep track of edits going on in the thread.
     if (counter !== null) {
       // Expand the thread if descendants are editing.
@@ -711,7 +716,8 @@ function annotation($document, features) {
       isLastReply: '=',
       replyCount: '@annotationReplyCount',
       replyCountClick: '&annotationReplyCountClick',
-      showReplyCount: '@annotationShowReplyCount'
+      showReplyCount: '@annotationShowReplyCount',
+      isSidebar: '='
     },
     templateUrl: 'annotation.html'
   };

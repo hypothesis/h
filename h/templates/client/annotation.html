@@ -30,7 +30,7 @@
               title="This annotation is visible only to you.">
           <i class="h-icon-lock"></i><span class="annotation-header__group-name" ng-show="!vm.group().url">Only me</span>
         </span>
-        <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
+        <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing()" title="This is a highlight. Click 'edit' to add a note or tag."></i>
         <span class="annotation-citation"
               ng-bind-html="vm.document | documentTitle"
               ng-if="!vm.isSidebar">
@@ -48,7 +48,7 @@
     <a class="annotation-timestamp"
        target="_blank"
        title="{{vm.annotation.updated | moment:'LLLL'}}"
-       ng-if="!vm.editing && vm.annotation.updated"
+       ng-if="!vm.editing() && vm.annotation.updated"
        ng-href="{{vm.baseURI}}a/{{vm.annotation.id}}"
        >{{vm.timestamp}}</a>
   </header>
@@ -57,7 +57,7 @@
   <section class="annotation-quote-list"
            ng-repeat="target in vm.annotation.target track by $index"
            ng-if="vm.hasQuotes()">
-    <excerpt enabled="feature('truncate_annotations')">
+    <excerpt enabled="vm.feature('truncate_annotations')">
       <blockquote class="annotation-quote"
                   ng-bind-html="selector.exact"
                   ng-repeat="selector in target.selector
@@ -70,16 +70,16 @@
 
   <!-- Body -->
   <section name="text" class="annotation-body">
-    <excerpt enabled="feature('truncate_annotations') && !vm.editing">
+    <excerpt enabled="vm.feature('truncate_annotations') && !vm.editing()">
       <markdown ng-model="vm.annotation.text"
-           read-only="!vm.editing"
+           read-only="!vm.editing()"
            ></markdown>
     </excerpt>
   </section>
   <!-- / Body -->
 
   <!-- Tags -->
-  <div class="annotation-body form-field" ng-if="vm.editing">
+  <div class="annotation-body form-field" ng-if="vm.editing()">
     <tags-input ng-model="vm.annotation.tags"
                 name="tags"
                 class="tags"
@@ -94,7 +94,7 @@
   </div>
 
   <div class="annotation-body tags tags-read-only"
-       ng-if="vm.annotation.tags.length && !vm.editing">
+       ng-if="vm.annotation.tags.length && !vm.editing()">
     <ul class="tag-list">
       <li class="tag-item" ng-repeat="tag in vm.annotation.tags">
         <a href="/stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
@@ -104,7 +104,7 @@
   <!-- / Tags -->
 
   <footer class="annotation-footer">
-    <div class="annotation-form-actions" ng-if="vm.editing" ng-switch="vm.action">
+    <div class="annotation-form-actions" ng-if="vm.editing()" ng-switch="vm.action">
       <button ng-switch-when="delete"
               ng-click="vm.save()"
               class="dropdown-menu-btn"><i class="h-icon-check btn-icon"></i> Delete</button>
@@ -119,7 +119,7 @@
     </div>
 
     <div class="annotation-section annotation-license"
-         ng-show="vm.isShared() && vm.editing">
+         ng-show="vm.isShared() && vm.editing()">
       <a href="http://creativecommons.org/publicdomain/zero/1.0/"
          title="View more information about the Creative Commons Public Domain license"
          target="_blank">
@@ -135,13 +135,13 @@
          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
     </div>
 
-    <div class="annotation-actions" ng-if="!vm.editing && vm.annotation.id">
+    <div class="annotation-actions" ng-if="!vm.editing() && vm.annotation.id">
       <button class="small btn btn-clean"
               ng-click="vm.reply()"
               ><i class="h-icon-reply btn-icon"></i> Reply</button>
       <span class="share-dialog-wrapper">
         <button class="small btn btn-clean"
-                ng-click="share($event)"
+                ng-click="vm.share($event)"
                 ><i class="h-icon-link btn-icon"></i> Link</button>
         <span class="share-dialog" ng-click="$event.stopPropagation()">
           <a target="_blank"
