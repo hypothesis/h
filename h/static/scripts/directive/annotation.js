@@ -172,32 +172,38 @@ function AnnotationController(
     * can call the methods.
     */
   function init() {
+    /** The currently active action - 'view', 'create' or 'edit'. */
+    vm.action = 'view';
+
     /** The view model, contains user changes to the annotation that haven't
       * been saved to the server yet. */
     vm.annotation = {};
 
-    vm.action = 'view';
+    /** The baseURI for the website, e.g. 'https://hypothes.is/'. */
+    vm.baseURI = $document.prop('baseURI');
+
+    /** An object that will contain some metadata about the annotated document.
+     */
     vm.document = null;
-    // Give the template access to the feature flags.
+
+    /** Give the template access to the feature flags. */
     vm.feature = features.flagEnabled;
-    // Copy isSidebar from $scope onto vm for consistency (we want this
-    // directive's templates to always access variables from vm rather than
-    // directly from scope).
+
+    /** Copy isSidebar from $scope onto vm for consistency (we want this
+      * directive's templates to always access variables from vm rather than
+      * directly from scope). */
     vm.isSidebar = $scope.isSidebar;
+
+    /** A "fuzzy string" representation of the annotation's last updated time.
+     */
     vm.timestamp = null;
 
     /** The domain model, contains the currently saved version of the
-     * annotation from the server. */
+      * annotation from the server (or in the case of new annotations that
+      * haven't been saved yet - the data that will be saved to the server when
+      * they are saved).
+      */
     model = $scope.annotationGet();
-
-    // Set the user of new annotations that don't have a user yet.
-    model.user = model.user || session.state.userid;
-
-    // Set the group of new annotations that don't have a group yet.
-    model.group = model.group || groups.focused().id;
-
-    // Set the permissions of new annotations.
-    model.permissions = model.permissions || permissions['default'](model.group);
 
     /**
       * `true` if this AnnotationController instance was created as a result of
@@ -208,25 +214,6 @@ function AnnotationController(
       * new client-side).
       */
     newlyCreatedByHighlightButton = model.$highlight || false;
-
-    // Automatically save new highlights to the server when they're created.
-    // Note that this line also gets called when the user logs in (since
-    // AnnotationController instances are re-created on login) so serves to
-    // automatically save highlights that were created while logged out when you
-    // log in.
-    saveNewHighlight();
-
-    // Export the baseURI for the share link.
-    vm.baseURI = $document.prop('baseURI');
-
-    // If this annotation is not a highlight and if it's new (has just been
-    // created by the annotate button) or it has edits not yet saved to the
-    // server - then open the editor on AnnotationController instantiation.
-    if (!newlyCreatedByHighlightButton) {
-      if (!model.id || drafts.get(model)) {
-        vm.edit();
-      }
-    }
 
     $scope.$on('$destroy', function() {
       updateTimestamp = angular.noop;
@@ -274,6 +261,28 @@ function AnnotationController(
         updateDraft(draftDomainModel);
       }
     });
+
+    // New annotations (just created locally by the client, rather then
+    // received from the server) have some fields missing. Add them.
+    model.user = model.user || session.state.userid;
+    model.group = model.group || groups.focused().id;
+    model.permissions = model.permissions || permissions['default'](model.group);
+
+    // Automatically save new highlights to the server when they're created.
+    // Note that this line also gets called when the user logs in (since
+    // AnnotationController instances are re-created on login) so serves to
+    // automatically save highlights that were created while logged out when you
+    // log in.
+    saveNewHighlight();
+
+    // If this annotation is not a highlight and if it's new (has just been
+    // created by the annotate button) or it has edits not yet saved to the
+    // server - then open the editor on AnnotationController instantiation.
+    if (!newlyCreatedByHighlightButton) {
+      if (!model.id || drafts.get(model)) {
+        vm.edit();
+      }
+    }
   }
 
   /**
