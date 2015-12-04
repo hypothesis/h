@@ -3,6 +3,27 @@
 
 var events = require('../events');
 
+/** Return a human-readable error message for the given server error.
+ *
+ * @param {object} reason The error object from the server. Should have
+ * `status` and, if `status` is not `0`, `statusText` and (optionally)
+ * `data.reason` properties.
+ *
+ * @returns {string}
+ */
+function errorMessage(reason) {
+  var message;
+  if (reason.status === 0) {
+    message = 'Service unreachable.';
+  } else {
+    message = reason.status + ' ' + reason.statusText;
+    if (reason.data.reason) {
+      message = message + ': ' + reason.data.reason;
+    }
+  }
+  return message;
+}
+
 /** Extract a URI, domain and title from the given domain model object.
  *
  * @param {object} model An annotation domain model object as received from the
@@ -132,27 +153,6 @@ function validate(annotation) {
   }
 
   return (targets.length && !worldReadable);
-}
-
-/** Return a human-readable error message for the given server error.
- *
- * @param {object} reason The error object from the server. Should have
- * `status` and, if `status` is not `0`, `statusText` and (optionally)
- * `data.reason` properties.
- *
- * @returns {string}
- */
-function errorMessage(reason) {
-  var message;
-  if (reason.status === 0) {
-    message = 'Service unreachable.';
-  } else {
-    message = reason.status + ' ' + reason.statusText;
-    if (reason.data.reason) {
-      message = message + ': ' + reason.data.reason;
-    }
-  }
-  return message;
 }
 
 /**
