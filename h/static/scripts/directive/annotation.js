@@ -186,7 +186,81 @@ function AnnotationController(
   // Set the permissions of new annotations.
   model.permissions = model.permissions || permissions['default'](model.group);
 
-  var highlight = model.$highlight;
+  /**
+   * `true` if this AnnotationController instance was created as a result of
+   * the highlight button being clicked.
+   *
+   * `false` if the annotation button was clicked, or if this is a highlight or
+   * annotation that was fetched from the server (as opposed to created new
+   * client-side).
+   */
+  var newlyCreatedByHighlightButton = model.$highlight || false;
+
+  /**
+    * @ngdoc method
+    * @name annotation.AnnotationController#isHighlight.
+    * @returns {boolean} true if the annotation is a highlight, false otherwise
+    */
+  vm.isHighlight = function() {
+    if (newlyCreatedByHighlightButton) {
+      return true;
+    } else if (!model.id) {
+      // If an annotation has no model.id (i.e. it has not been saved to the
+      // server yet) and newlyCreatedByHighlightButton is false, then it must
+      // be an annotation not a highlight (even though it may not have any
+      // text or tags yet).
+      return false;
+    } else {
+      // Once an annotation has been saved to the server there's no longer a
+      // simple property that says whether it's a highlight or not.  For
+      // example there's no model.highlight: true.  Instead a highlight is
+      // defined as an annotation that isn't a page note or a reply and that
+      // has no text or tags.
+      var isPageNote = (model.target || []).length === 0;
+      var isReply = (model.references || []).length !== 0;
+      return (!isPageNote && !isReply && !vm.hasContent());
+    }
+  };
+
+  /** Save this annotation if it's a new highlight.
+   *
+   * The highlight will be saved to the server if the user is logged in,
+   * saved to drafts if they aren't.
+   *
+   * If the annotation is not new (it has already been saved to the server) or
+   * is not a highlight then nothing will happen.
+   *
+   */
+  function saveNewHighlight() {
+    if (model.id) {
+      // Already saved.
+      return;
+    }
+
+    if (!vm.isHighlight()) {
+      // Not a highlight,
+      return;
+    }
+
+    if (model.user) {
+      // User is logged in, save to server.
+      // Highlights are always private.
+      model.permissions = permissions.private();
+      model.$create().then(function() {
+        $rootScope.$emit('annotationCreated', model);
+      });
+    } else {
+      // User isn't logged in, save to drafts.
+      updateDraft(model);
+    }
+  }
+
+  // Automatically save new highlights to the server when they're created.
+  // Note that this line also gets called when the user logs in (since
+  // AnnotationController instances are re-created on login) so serves to
+  // automatically save highlights that were created while logged out when you
+  // log in.
+  saveNewHighlight();
 
   /**
    * @ngdoc method
@@ -227,18 +301,6 @@ function AnnotationController(
     */
   vm.tagsAutoComplete = function(query) {
     return $q.when(tags.filter(query));
-  };
-
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#isHighlight.
-    * @returns {boolean} True if the annotation is a highlight.
-    */
-  vm.isHighlight = function() {
-    var targetLength = (model.target || []).length;
-    var referencesLength = (model.references || []).length;
-    var tagsLength = (model.tags || []).length;
-    return (targetLength && !referencesLength && !(model.text || tagsLength));
   };
 
   /**
@@ -302,8 +364,8 @@ function AnnotationController(
   /**
     * @ngdoc method
     * @name annotation.AnnotaitonController#hasContent
-    * @returns {boolean} True if the currently edited annotation has
-    *          content (ie. is not just a highlight)
+    * @returns {boolean} `true` if this annotation has content, `false`
+    *   otherwise.
     */
   vm.hasContent = function() {
     var textLength = (vm.annotation.text || '').length;
@@ -573,19 +635,6 @@ function AnnotationController(
       drafts.remove(model);
     }
 
-    // Save highlights once logged in.
-    if (vm.isHighlight() && highlight) {
-      if (model.user && !model.id) {
-        model.permissions = permissions.private();
-        model.$create().then(function() {
-          $rootScope.$emit('annotationCreated', model);
-        });
-        highlight = false;  // Prevents double highlight creation.
-      } else {
-        updateDraft(model);
-      }
-    }
-
     updateTimestamp(model === old);  // Repeat on first run.
     vm.render();
   }, true);
@@ -604,11 +653,13 @@ function AnnotationController(
     }
   });
 
-  // If this is a new annotation or we have unsaved changes,
-  // then start editing immediately.
-  var isNewAnnotation = !(model.id || (vm.isHighlight() && highlight));
-  if (isNewAnnotation || drafts.get(model)) {
-    vm.edit();
+  // If this annotation is not a highlight and if it's new (has just been
+  // created by the annotate button) or it has edits not yet saved to the
+  // server - then open the editor on AnnotationController instantiation.
+  if (!newlyCreatedByHighlightButton) {
+    if (!model.id || drafts.get(model)) {
+      vm.edit();
+    }
   }
 
   // When the current group changes, persist any unsaved changes using
