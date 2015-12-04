@@ -363,7 +363,7 @@ function AnnotationController(
 
   // We use `var foo = function() {...}` here instead of `function foo() {...}`
   // because updateTimestamp gets redefined later on.
-  function updateTimestamp(repeat) {
+  var updateTimestamp = function(repeat) {
     repeat = repeat || false;
 
     // New (not yet saved to the server) annotations don't have any .updated
