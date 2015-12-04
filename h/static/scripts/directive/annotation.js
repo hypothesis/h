@@ -215,52 +215,14 @@ function AnnotationController(
       */
     newlyCreatedByHighlightButton = model.$highlight || false;
 
-    $scope.$on('$destroy', function() {
-      updateTimestamp = angular.noop;
-    });
+    // Call `onDestroy()` when this AnnotationController's scope is removed.
+    $scope.$on('$destroy', onDestroy);
 
-    // Watch for changes to the domain model and recreate the view model when it
-    // changes.
-    $scope.$watch((function() {return model;}), function(model, old) {
-      if (model.updated !== old.updated) {
-        // Discard saved drafts.
-        drafts.remove(model);
-      }
+    // Call `onModelChange()` whenever `model` changes.
+    $scope.$watch((function() {return model;}), onModelChange, true);
 
-      updateTimestamp(model === old);  // Repeat on first run.
-      vm.render();
-    }, true);
-
-    // When the current group changes, persist any unsaved changes using
-    // the drafts service. They will be restored when this annotation is
-    // next loaded.
-    $scope.$on(events.GROUP_FOCUSED, function() {
-      if (!vm.editing()) {
-        return;
-      }
-
-      // Move any new annotations to the currently focused group when
-      // switching groups. See GH #2689 for context.
-      if (!model.id) {
-        var newGroup = groups.focused().id;
-        var isShared = permissions.isShared(
-          vm.annotation.permissions, vm.annotation.group);
-        if (isShared) {
-          model.permissions = permissions.shared(newGroup);
-          vm.annotation.permissions = model.permissions;
-        }
-        model.group = newGroup;
-        vm.annotation.group = model.group;
-      }
-
-      // if we have a draft, update it, otherwise (eg. when the user signs out)
-      // do not create a new one.
-      if (drafts.get(model)) {
-        var draftDomainModel = {};
-        updateDomainModel(draftDomainModel, vm.annotation);
-        updateDraft(draftDomainModel);
-      }
-    });
+    // Call `onGroupFocused()` whenever the currently-focused group changes.
+    $scope.$on(events.GROUP_FOCUSED, onGroupFocused);
 
     // New annotations (just created locally by the client, rather then
     // received from the server) have some fields missing. Add them.
@@ -283,6 +245,49 @@ function AnnotationController(
         vm.edit();
       }
     }
+  }
+
+  /** Called when this AnnotationController instance's scope is removed. */
+  function onDestroy() {
+    updateTimestamp = angular.noop;
+  }
+
+  /** Called whenever the currently-focused group changes. */
+  function onGroupFocused() {
+    if (!vm.editing()) {
+      return;
+    }
+
+    // Move any new annotations to the currently focused group when
+    // switching groups. See GH #2689 for context.
+    if (!model.id) {
+      var newGroup = groups.focused().id;
+      var isShared = permissions.isShared(
+        vm.annotation.permissions, vm.annotation.group);
+      if (isShared) {
+        model.permissions = permissions.shared(newGroup);
+        vm.annotation.permissions = model.permissions;
+      }
+      model.group = newGroup;
+      vm.annotation.group = model.group;
+    }
+
+    if (drafts.get(model)) {
+      var draftDomainModel = {};
+      updateDomainModel(draftDomainModel, vm.annotation);
+      updateDraft(draftDomainModel);
+    }
+  }
+
+  /** Called whenever `model` changes. */
+  function onModelChange(model, old) {
+    if (model.updated !== old.updated) {
+      // Discard saved drafts.
+      drafts.remove(model);
+    }
+
+    updateTimestamp(model === old);  // Repeat on first run.
+    vm.render();
   }
 
   /**
