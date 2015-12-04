@@ -320,6 +320,22 @@ describe('annotation.js', function() {
     var fakeUrlEncodeFilter;
     var sandbox;
 
+    function createDirective(annotation) {
+      annotation = annotation || defaultAnnotation();
+      $scope.annotation = annotation;
+      var element = angular.element('<div annotation="annotation">');
+      compileService()(element)($scope);
+      $scope.$digest();
+      var controller = element.controller('annotation');
+      var scope = element.isolateScope();
+      return {
+        annotation: annotation,
+        controller: controller,
+        element: element,
+        scope: scope
+      };
+    }
+
     /** Return the default domain model object that createDirective() uses if
      *  no custom one is passed to it. */
     function defaultAnnotation() {
@@ -334,19 +350,85 @@ describe('annotation.js', function() {
       };
     }
 
-    function createDirective(annotation) {
-      annotation = annotation || defaultAnnotation();
-      $scope.annotation = annotation;
-      var element = angular.element('<div annotation="annotation">');
-      compileService()(element)($scope);
-      $scope.$digest();
-      var controller = element.controller('annotation');
-      var scope = element.isolateScope();
+    /** Return an annotation domain model object for a new annotation
+     * (newly-created client-side, not yet saved to the server).
+     */
+    function newAnnotation() {
+      // A new annotation won't have any saved drafts yet.
+      fakeDrafts.get.returns(null);
       return {
-        annotation: annotation,
-        controller: controller,
-        element: element,
-        scope: scope
+        id: undefined,
+        $highlight: undefined,
+        target: ['foo', 'bar'],
+        references: [],
+        text: 'Annotation text',
+        tags: ['tag_1', 'tag_2']
+      };
+    }
+
+    /** Return an annotation domain model object for a new highlight
+     * (newly-created client-side, not yet saved to the server).
+     */
+    function newHighlight() {
+      // A new highlight won't have any saved drafts yet.
+      fakeDrafts.get.returns(null);
+      return {
+        id: undefined,
+        $highlight: true
+      };
+    }
+
+    /** Return an annotation domain model object for an existing annotation
+     *  received from the server.
+     */
+    function oldAnnotation() {
+      return {
+        id: 'annotation_id',
+        $highlight: undefined,
+        target: ['foo', 'bar'],
+        references: [],
+        text: 'This is my annotation',
+        tags: ['tag_1', 'tag_2']
+      };
+    }
+
+    /** Return an annotation domain model object for an existing highlight
+     *  received from the server.
+     */
+    function oldHighlight() {
+      return {
+        id: 'annotation_id',
+        $highlight: undefined,
+        target: ['foo', 'bar'],
+        references: [],
+        text: '',
+        tags: []
+      };
+    }
+
+    /** Return an annotation domain model object for an existing page note
+     *  received from the server.
+     */
+    function oldPageNote() {
+      return {
+        highlight: undefined,
+        target: [],
+        references: [],
+        text: '',
+        tags: []
+      };
+    }
+
+    /** Return an annotation domain model object for an existing reply
+     *  received from the server.
+     */
+    function oldReply() {
+      return {
+        highlight: undefined,
+        target: ['foo'],
+        references: ['parent_annotation_id'],
+        text: '',
+        tags: []
       };
     }
 
@@ -479,14 +561,9 @@ describe('annotation.js', function() {
 
     describe('AnnotationController() initialization', function() {
       it('saves new highlights to the server on initialization', function() {
-        var annotation = defaultAnnotation();
-        // New highlights have no id and have $highlight: true.
-        annotation.id = null;
-        annotation.$highlight = true;
-
+        var annotation = newHighlight();
         // The user is logged-in.
         annotation.user = fakeSession.state.userid = 'acct:bill@localhost';
-
         annotation.$create = sandbox.stub().returns({
           then: function() {}
         });
@@ -497,14 +574,9 @@ describe('annotation.js', function() {
       });
 
       it('saves new highlights to drafts if not logged in', function() {
-        var annotation = defaultAnnotation();
-        // New highlights have no id and have $highlight: true.
-        annotation.id = null;
-        annotation.$highlight = true;
-
+        var annotation = newHighlight();
         // The user is not logged-in.
         annotation.user = fakeSession.state.userid = undefined;
-
         annotation.$create = sandbox.stub().returns({
           then: function() {}
         });
@@ -516,11 +588,7 @@ describe('annotation.js', function() {
       });
 
       it('does not save new annotations on initialization', function() {
-        var annotation = defaultAnnotation();
-        // New annotations have no id and no $highlight.
-        annotation.id = null;
-        annotation.$highlight = undefined;
-
+        var annotation = newAnnotation();
         annotation.$create = sandbox.stub().returns({
           then: function() {}
         });
@@ -531,20 +599,7 @@ describe('annotation.js', function() {
       });
 
       it('does not save old highlights on initialization', function() {
-        var annotation = defaultAnnotation();
-        // Old highlights (ones that the client has received from the server,
-        // rather than created locally itself) have an id and do not have any
-        // $highlight.
-        annotation.id = 'annotation_id';
-        annotation.$highlight = undefined;
-
-        // If it's a highlight, then the annotation will have a target but
-        // no references, text or tags.
-        annotation.target = ['foo', 'bar'];
-        annotation.references = [];
-        annotation.text = '';
-        annotation.tags = [];
-
+        var annotation = oldHighlight();
         annotation.$create = sandbox.stub().returns({
           then: function() {}
         });
@@ -555,21 +610,7 @@ describe('annotation.js', function() {
       });
 
       it('does not save old annotations on initialization', function() {
-        var annotation = defaultAnnotation();
-        // Old annotations (ones that the client has received from the server,
-        // rather than created locally itself) have an id and do not have any
-        // $highlight.
-        annotation.id = 'annotation_id';
-        annotation.$highlight = undefined;
-
-        // If it's an annotation (rather than a highlight, reply or page note)
-        // then the annotation will have a target, no references and some
-        // text or tags.
-        annotation.target = ['foo', 'bar'];
-        annotation.references = [];
-        annotation.text = 'This is my annotation';
-        annotation.tags = ['tag_1', 'tag_2'];
-
+        var annotation = oldAnnotation();
         annotation.$create = sandbox.stub().returns({
           then: function() {}
         });
@@ -580,20 +621,7 @@ describe('annotation.js', function() {
       });
 
       it('edits new annotations on initialization', function() {
-        var annotation = defaultAnnotation();
-        // When the user creates a new annotation and we create a new
-        // AnnotationController instance, we automatically open the
-        // annotation's editor.
-
-        // A new annotation will have no id or $highlight.
-        annotation.id = annotation.$highlight = undefined;
-
-        // A new annotation won't have any text or tags yet.
-        annotation.text = '';
-        annotation.tags = [];
-
-        // A new annotation won't have any saved drafts yet.
-        fakeDrafts.get.returns(null);
+        var annotation = newAnnotation();
 
         var controller = createDirective(annotation).controller;
 
@@ -601,13 +629,7 @@ describe('annotation.js', function() {
       });
 
       it('edits annotations with drafts on initialization', function() {
-        var annotation = defaultAnnotation();
-        // This is not a new annotation.
-        annotation.id = 'annotation_id';
-        // This is not a highlight.
-        annotation.$highlight = undefined;
-        annotation.text = 'Annotation text';
-        annotation.tags = ['tag_1', 'tag_2'];
+        var annotation = oldAnnotation();
         // The drafts service has some draft changes for this annotation.
         fakeDrafts.get.returns('foo');
 
@@ -617,14 +639,7 @@ describe('annotation.js', function() {
       });
 
       it('does not edit new highlights on initialization', function() {
-        var annotation = defaultAnnotation();
-        // This is a new annotation.
-        annotation.id = undefined;
-        fakeDrafts.get.returns(null);
-        // This is a highlight.
-        annotation.$highlight = true;
-        annotation.text = '';
-        annotation.tags = [];
+        var annotation = newHighlight();
         // We have to set annotation.$create() because it'll try to call it.
         annotation.$create = sandbox.stub().returns({
           then: function() {}
@@ -636,18 +651,11 @@ describe('annotation.js', function() {
       });
 
       it('edits highlights with drafts on initialization', function() {
-        var annotation = defaultAnnotation();
+        var annotation = oldHighlight();
         // You can edit a highlight, enter some text or tags, and save it (the
         // highlight then becomes an annotation). You can also edit a highlight
         // and then change focus to another group and back without saving the
         // highlight, in which case the highlight will have draft edits.
-        //
-        // This is not a new highlight.
-        annotation.id = 'annotation_id';
-        annotation.$highlight = undefined;
-        // This is a highlight.
-        annotation.text = '';
-        annotation.tags = [];
         // This highlight has draft edits.
         fakeDrafts.get.returns('foo');
 
@@ -679,10 +687,7 @@ describe('annotation.js', function() {
 
     describe('AnnotationController.isHighlight()', function() {
       it('returns true for new highlights', function() {
-        var annotation = defaultAnnotation();
-        // New highlights have no id and have $highlight: true.
-        annotation.id = undefined;
-        annotation.$highlight = true;
+        var annotation = newHighlight();
         // We need to define $create because it'll try to call it.
         annotation.$create = function() {return {then: function() {}};};
 
@@ -692,9 +697,7 @@ describe('annotation.js', function() {
       });
 
       it('returns false for new annotations', function() {
-        var annotation = defaultAnnotation();
-        // New annotations have no id and no $highlight.
-        annotation.id = annotation.$highlight = undefined;
+        var annotation = newAnnotation();
 
         var vm = createDirective(annotation).controller;
 
@@ -702,16 +705,7 @@ describe('annotation.js', function() {
       });
 
       it('returns false for page notes', function() {
-        var annotation = defaultAnnotation();
-        annotation.$highlight = undefined;
-        // Page notes have no targets.
-        annotation.target = [];
-        // This is not a reply.
-        annotation.references = [];
-        // The annotation has no text or tags. If it weren't a page note, it'd
-        // be a highlight.
-        annotation.text = '';
-        annotation.tags = [];
+        var annotation = oldPageNote();
 
         var vm = createDirective(annotation).controller;
 
@@ -719,30 +713,15 @@ describe('annotation.js', function() {
       });
 
       it('returns false for replies', function() {
-        var annotation = defaultAnnotation();
-        annotation.$highlight = undefined;
-        // This is not a page note.
-        annotation.target = ['foo'];
-        // Replies have references.
-        annotation.references = ['parent_annotation_id'];
-        // The annotation has no text or tags. If it weren't a reply, it'd
-        // be a highlight.
-        annotation.text = '';
-        annotation.tags = [];
+        var annotation = oldReply();
 
         var vm = createDirective(annotation).controller;
 
         assert.isFalse(vm.isHighlight());
       });
 
-      it('returns false for annotations with text', function() {
-        var annotation = defaultAnnotation();
-        // Not a highlight, reply or page note.
-        annotation.$highlight = undefined;
-        annotation.target = ['foo'];
-        annotation.references = ['parent_annotation_id'];
-
-        // Has some text but no tags.
+      it('returns false for annotations with text but no tags', function() {
+        var annotation = oldAnnotation();
         annotation.text = 'This is my annotation';
         annotation.tags = [];
 
@@ -751,14 +730,8 @@ describe('annotation.js', function() {
         assert.isFalse(vm.isHighlight());
       });
 
-      it('returns false for annotations with tags', function() {
-        var annotation = defaultAnnotation();
-        // Not a highlight, reply or page note.
-        annotation.$highlight = undefined;
-        annotation.target = ['foo'];
-        annotation.references = ['parent_annotation_id'];
-
-        // Has some tags but no text.
+      it('returns false for annotations with tags but no text', function() {
+        var annotation = oldAnnotation();
         annotation.text = '';
         annotation.tags = ['foo'];
 
@@ -768,13 +741,7 @@ describe('annotation.js', function() {
       });
 
       it('returns true for annotations with no text or tags', function() {
-        var annotation = defaultAnnotation();
-        // Not a new highlight, reply or page note.
-        annotation.$highlight = undefined;
-        annotation.target = ['foo'];
-        annotation.references = [];
-
-        // Has no tags or text, i.e. it's a highlight.
+        var annotation = oldAnnotation();
         annotation.text = '';
         annotation.tags = [];
 
