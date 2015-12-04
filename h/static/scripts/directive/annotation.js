@@ -396,6 +396,14 @@ function AnnotationController(
     }, nextUpdate, false);
   }
 
+  /** Switches the view to a viewer, closing the editor controls if they're
+   *  open.
+    * @name annotation.AnnotationController#view
+    */
+  function view() {
+    vm.action = 'view';
+  }
+
   /**
     * @ngdoc method
     * @name annotation.AnnotationController#authorize
@@ -589,7 +597,7 @@ function AnnotationController(
       $rootScope.$emit('annotationDeleted', model);
     } else {
       updateViewModel(drafts, model, vm);
-      vm.view();
+      view();
     }
   };
 
@@ -619,7 +627,7 @@ function AnnotationController(
         updateDomainModel(model, vm.annotation);
         var onFulfilled = function() {
           $rootScope.$emit('annotationCreated', model);
-          vm.view();
+          view();
         };
         var onRejected = function(reason) {
           flash.error(
@@ -633,7 +641,7 @@ function AnnotationController(
         onFulfilled = function() {
           angular.copy(updatedModel, model);
           $rootScope.$emit('annotationUpdated', model);
-          vm.view();
+          view();
         };
         onRejected = function(reason) {
           flash.error(
@@ -692,16 +700,6 @@ function AnnotationController(
     */
   vm.tagsAutoComplete = function(query) {
     return $q.when(tags.filter(query));
-  };
-
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#view
-    * @description Switches the view to a viewer, closing the editor controls
-    *              if they are open.
-    */
-  vm.view = function() {
-    vm.action = 'view';
   };
 
   init();
