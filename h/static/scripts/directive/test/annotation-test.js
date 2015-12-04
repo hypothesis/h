@@ -149,6 +149,148 @@ describe('annotation.js', function() {
     });
   });
 
+  describe('updateViewModel()', function() {
+    var updateViewModel = require('../annotation').updateViewModel;
+    var sandbox;
+
+    beforeEach(function() {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(function() {
+      sandbox.restore();
+    });
+
+    /** Return a mock of the `drafts` service. */
+    function mockDrafts() {
+      return {
+        get: function() {}
+      };
+    }
+
+    it('copies model.document.title to vm.document.title', function() {
+      var vm = {};
+      var model = {
+        uri: 'http://example.com/example.html',
+        document: {
+          title: 'A special document'
+        }
+      };
+
+      updateViewModel(mockDrafts(), model, vm);
+
+      assert.equal(vm.document.title, 'A special document');
+    });
+
+    it('uses the first title when there are more than one', function() {
+      var vm = {};
+      var model = {
+        uri: 'http://example.com/example.html',
+        document: {
+          title: ['first title', 'second title']
+        }
+      };
+
+      updateViewModel(mockDrafts(), model, vm);
+
+      assert.equal(vm.document.title, 'first title');
+    });
+
+    it('truncates long titles', function() {
+      var vm = {};
+      var model = {
+        uri: 'http://example.com/example.html',
+        document: {
+          title: 'A very very very long title that really\nshouldn\'t be found on a page on the internet.'
+        }
+      };
+
+      updateViewModel(mockDrafts(), model, vm);
+
+      assert.equal(
+        vm.document.title, 'A very very very long title th…');
+    });
+
+    it('copies model.uri to vm.document.uri', function() {
+      var vm = {};
+      var model = {
+        uri: 'http://example.com/example.html',
+      };
+
+      updateViewModel(mockDrafts(), model, vm);
+
+      assert.equal(vm.document.uri, 'http://example.com/example.html');
+    });
+
+    it('copies the hostname from model.uri to vm.document.domain', function() {
+      var vm = {};
+      var model = {
+        uri: 'http://example.com/example.html',
+      };
+
+      updateViewModel(mockDrafts(), model, vm);
+
+      assert.equal(vm.document.domain, 'example.com');
+    });
+
+    it('uses the domain for the title if the title is not present', function() {
+      var vm = {};
+      var model = {
+        uri: 'http://example.com',
+        document: {}
+      };
+
+      updateViewModel(mockDrafts(), model, vm);
+
+      assert.equal(vm.document.title, 'example.com');
+    });
+
+    it(
+      'still sets the uri correctly if the annotation has no document',
+      function() {
+        var vm = {};
+        var model = {
+          uri: 'http://example.com',
+          document: undefined
+        };
+
+        updateViewModel(mockDrafts(), model, vm);
+
+        assert(vm.document.uri === 'http://example.com');
+      }
+    );
+
+    it(
+      'still sets the domain correctly if the annotation has no document',
+      function() {
+        var vm = {};
+        var model = {
+          uri: 'http://example.com',
+          document: undefined
+        };
+
+        updateViewModel(mockDrafts(), model, vm);
+
+        assert(vm.document.domain === 'example.com');
+      }
+    );
+
+    it(
+      'uses the domain for the title when the annotation has no document',
+      function() {
+        var vm = {};
+        var model = {
+          uri: 'http://example.com',
+          document: undefined
+        };
+
+        updateViewModel(mockDrafts(), model, vm);
+
+        assert(vm.document.title === 'example.com');
+      }
+    );
+  });
+
   describe('updateDomainModel()', function() {
     var updateDomainModel = require('../annotation').updateDomainModel;
 
@@ -987,152 +1129,64 @@ describe('annotation.js', function() {
       });
     });
 
-    describe('#render', function() {
+    describe('timestamp', function() {
+      var annotation;
+      var clock;
+
+      beforeEach(function() {
+        clock = sinon.useFakeTimers();
+        annotation = defaultAnnotation();
+        annotation.created = (new Date()).toString();
+        annotation.updated = (new Date()).toString();
+      });
+
       afterEach(function() {
-        sandbox.restore();
+        clock.restore();
       });
 
-      it('is called exactly once on model changes', function() {
-        var parts = createDirective();
-        sandbox.spy(parts.controller, 'render');
-        assert.notCalled(parts.controller.render);
-        parts.annotation['delete'] = true;
+      it('is not updated for unsaved annotations', function() {
+        annotation.updated = null;
+        var controller = createDirective(annotation).controller;
+        // Unsaved annotations don't have an updated time yet so a timestamp
+        // string can't be computed for them.
         $scope.$digest();
-        assert.calledOnce(parts.controller.render);
-        parts.annotation.booz = 'baz';
+        assert.equal(controller.timestamp, null);
+      });
+
+      it('is updated on first digest', function() {
+        var controller = createDirective(annotation).controller;
         $scope.$digest();
-        assert.calledTwice(parts.controller.render);
+        assert.equal(controller.timestamp, 'a while ago');
       });
 
-      it('provides a document title', function() {
-        var controller = createDirective().controller;
-        controller.render();
-        assert.equal(controller.document.title, 'A special document');
+      it('is updated after a timeout', function() {
+        var controller = createDirective(annotation).controller;
+        fakeTime.nextFuzzyUpdate.returns(10);
+        fakeTime.toFuzzyString.returns('ages ago');
+        $scope.$digest();
+        clock.tick(11000);
+        $timeout.flush();
+        assert.equal(controller.timestamp, 'ages ago');
       });
 
-      it('uses the first title when there are more than one', function() {
+      it('is no longer updated after the scope is destroyed', function() {
+        var controller = createDirective(annotation).controller;
+        $scope.$digest();
+        $scope.$destroy();
+        $timeout.flush();
+        $timeout.verifyNoPendingTasks();
+      });
+    });
+
+    describe('share', function() {
+      it('sets and unsets the open class on the share wrapper', function() {
         var parts = createDirective();
-        parts.annotation.document.title = ['first title', 'second title'];
-        parts.controller.render();
-        assert.equal(parts.controller.document.title, 'first title');
-      });
-
-      it('truncates long titles', function() {
-        var parts = createDirective();
-        parts.annotation.document.title = 'A very very very long title that really\nshouldn\'t be found on a page on the internet.';
-        parts.controller.render();
-        assert.equal(
-          parts.controller.document.title, 'A very very very long title th…');
-      });
-
-      it('provides a document uri', function() {
-        var controller = createDirective().controller;
-        controller.render();
-        assert.equal(controller.document.uri, 'http://example.com');
-      });
-
-      it('provides an extracted domain from the uri', function() {
-        var controller = createDirective().controller;
-        controller.render();
-        assert.equal(controller.document.domain, 'example.com');
-      });
-
-      it('uses the domain for the title if the title is not present', function() {
-        var parts = createDirective();
-        delete parts.annotation.document.title;
-        parts.controller.render();
-        assert.equal(parts.controller.document.title, 'example.com');
-      });
-
-      it(
-        'still sets the uri correctly if the annotation has no document',
-        function() {
-          var parts = createDirective();
-          delete parts.annotation.document;
-          parts.controller.render();
-          assert(parts.controller.document.uri === $scope.annotation.uri);
-        }
-      );
-
-      it(
-        'still sets the domain correctly if the annotation has no document',
-        function() {
-          var parts = createDirective();
-          delete parts.annotation.document;
-          parts.controller.render();
-          assert(parts.controller.document.domain === 'example.com');
-        }
-      );
-
-      it(
-        'uses the domain for the title when the annotation has no document',
-        function() {
-          var parts = createDirective();
-          delete parts.annotation.document;
-          parts.controller.render();
-          assert(parts.controller.document.title === 'example.com');
-        }
-      );
-
-      describe('timestamp', function() {
-        var annotation;
-        var clock;
-
-        beforeEach(function() {
-          clock = sinon.useFakeTimers();
-          annotation = defaultAnnotation();
-          annotation.created = (new Date()).toString();
-          annotation.updated = (new Date()).toString();
-        });
-
-        afterEach(function() {
-          clock.restore();
-        });
-
-        it('is not updated for unsaved annotations', function() {
-          annotation.updated = null;
-          var controller = createDirective(annotation).controller;
-          // Unsaved annotations don't have an updated time yet so a timestamp
-          // string can't be computed for them.
-          $scope.$digest();
-          assert.equal(controller.timestamp, null);
-        });
-
-        it('is updated on first digest', function() {
-          var controller = createDirective(annotation).controller;
-          $scope.$digest();
-          assert.equal(controller.timestamp, 'a while ago');
-        });
-
-        it('is updated after a timeout', function() {
-          var controller = createDirective(annotation).controller;
-          fakeTime.nextFuzzyUpdate.returns(10);
-          fakeTime.toFuzzyString.returns('ages ago');
-          $scope.$digest();
-          clock.tick(11000);
-          $timeout.flush();
-          assert.equal(controller.timestamp, 'ages ago');
-        });
-
-        it('is no longer updated after the scope is destroyed', function() {
-          var controller = createDirective(annotation).controller;
-          $scope.$digest();
-          $scope.$destroy();
-          $timeout.flush();
-          $timeout.verifyNoPendingTasks();
-        });
-      });
-
-      describe('share', function() {
-        it('sets and unsets the open class on the share wrapper', function() {
-          var parts = createDirective();
-          var dialog = parts.element.find('.share-dialog-wrapper');
-          dialog.find('button').click();
-          parts.scope.$digest();
-          assert.ok(dialog.hasClass('open'));
-          documentService().click();
-          assert.notOk(dialog.hasClass('open'));
-        });
+        var dialog = parts.element.find('.share-dialog-wrapper');
+        dialog.find('button').click();
+        parts.scope.$digest();
+        assert.ok(dialog.hasClass('open'));
+        documentService().click();
+        assert.notOk(dialog.hasClass('open'));
       });
     });
 

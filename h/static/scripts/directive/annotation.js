@@ -72,6 +72,30 @@ function updateDomainModel(domainModel, viewModel) {
   });
 }
 
+/** Update the view model from the domain model changes. */
+function updateViewModel(drafts, model, vm) {
+  var draft = drafts.get(model);
+
+  // Extend the view model with a copy of the domain model.
+  // Note that copy is used so that deep properties aren't shared.
+  vm.annotation = angular.extend({}, angular.copy(model));
+
+  // If we have unsaved changes to this annotation, apply them
+  // to the view model.
+  if (draft) {
+    angular.extend(vm.annotation, angular.copy(draft));
+  }
+
+  vm.annotationURI = new URL(
+    '/a/' + vm.annotation.id, vm.baseURI).href;
+
+  vm.document = extractDocumentMetadata(model);
+
+  // Form the tags for ngTagsInput.
+  vm.annotation.tags = (vm.annotation.tags || []).map(function(tag) {
+    return {text: tag};
+  });
+}
 
 /** Return truthy if the given annotation is valid, falsy otherwise.
  *
@@ -287,8 +311,10 @@ function AnnotationController(
     }
 
     updateTimestamp(model === old);  // Repeat on first run.
-    vm.render();
+    updateViewModel(drafts, model, vm);
   }
+
+
 
   /** Save this annotation if it's a new highlight.
    *
@@ -521,35 +547,6 @@ function AnnotationController(
 
   /**
     * @ngdoc method
-    * @name annotation.AnnotationController#render
-    * @description Called to update the view when the model changes.
-    */
-  vm.render = function() {
-    var draft = drafts.get(model);
-
-    // Extend the view model with a copy of the domain model.
-    // Note that copy is used so that deep properties aren't shared.
-    vm.annotation = angular.extend({}, angular.copy(model));
-
-    // If we have unsaved changes to this annotation, apply them
-    // to the view model.
-    if (draft) {
-      angular.extend(vm.annotation, angular.copy(draft));
-    }
-
-    vm.annotationURI = new URL(
-      '/a/' + vm.annotation.id, vm.baseURI).href;
-
-    vm.document = extractDocumentMetadata(model);
-
-    // Form the tags for ngTagsInput.
-    vm.annotation.tags = (vm.annotation.tags || []).map(function(tag) {
-      return {text: tag};
-    });
-  };
-
-  /**
-    * @ngdoc method
     * @name annotation.AnnotationController#reply
     * @description
     * Creates a new message in reply to this annotation.
@@ -591,7 +588,7 @@ function AnnotationController(
     if (vm.action === 'create') {
       $rootScope.$emit('annotationDeleted', model);
     } else {
-      vm.render();
+      updateViewModel(drafts, model, vm);
       vm.view();
     }
   };
@@ -795,6 +792,7 @@ module.exports = {
   // FIXME: The code should be refactored to enable unit testing without having
   // to do this.
   extractDocumentMetadata: extractDocumentMetadata,
+  updateViewModel: updateViewModel,
   updateDomainModel: updateDomainModel,
   validate: validate,
 
