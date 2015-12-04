@@ -21,8 +21,9 @@
           <tr>
             <td>{{ group.name }}</td>
             <td>
-              <a href="{{ request.route_url('group_read', pubid=group.pubid, slug=group.slug) }}">
-                {{ request.route_url('group_read', pubid=group.pubid, slug=group.slug) }}
+              {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
+              <a href="{{ group_url }}">
+                {{ group_url }}
               </a>
             </td>
             <td>{{ group.creator.username }}</td>
