@@ -212,7 +212,7 @@ def badge_remove(request):
                   renderer='h:templates/admin/groups.html.jinja2',
                   permission='admin_groups')
 def groups_index(request):
-    return {"groups": models.Group.all(), "request": request}
+    return {"groups": models.Group.all()}
 
 def includeme(config):
     config.add_route('admin_index', '/admin')
