@@ -156,22 +156,13 @@ function validate(annotation) {
 }
 
 /**
-  * @ngdoc type
-  * @name annotation.AnnotationController
-  *
-  * @property {Object} annotation The annotation view model.
-  * @property {Object} document The document metadata view model.
-  * @property {string} action One of 'view', 'edit', 'create' or 'delete'.
-  * @property {string} preview If previewing an edit then 'yes', else 'no'.
-  * @property {boolean} editing True if editing components are shown.
-  * @property {boolean} isSidebar True if we are in the sidebar (not on the
-  *                               stream page or an individual annotation page)
-  *
-  * @description
-  *
   * `AnnotationController` provides an API for the annotation directive. It
   * manages the interaction between the domain and view models and uses the
   * {@link annotationMapper AnnotationMapper service} for persistence.
+  *
+  * @ngdoc type
+  * @name annotation.AnnotationController
+  *
   */
 // @ngInject
 function AnnotationController(
