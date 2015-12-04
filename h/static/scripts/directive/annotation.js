@@ -156,43 +156,125 @@ function AnnotationController(
   tags, time) {
 
   var vm = this;
-
-  /** The view model, contains user changes to the annotation that haven't
-   * been saved to the server yet. */
-  vm.annotation = {};
-
-  vm.action = 'view';
-  vm.document = null;
-  // Give the template access to the feature flags.
-  vm.feature = features.flagEnabled;
-  // Copy isSidebar from $scope onto vm for consistency (we want this
-  // directive's templates to always access variables from vm rather than
-  // directly from scope).
-  vm.isSidebar = $scope.isSidebar;
-  vm.timestamp = null;
-
-  /** The domain model, contains the currently saved version of the annotation
-   * from the server. */
-  var model = $scope.annotationGet();
-
-  // Set the user of new annotations that don't have a user yet.
-  model.user = model.user || session.state.userid;
-
-  // Set the group of new annotations that don't have a group yet.
-  model.group = model.group || groups.focused().id;
-
-  // Set the permissions of new annotations.
-  model.permissions = model.permissions || permissions['default'](model.group);
+  var model;
+  var newlyCreatedByHighlightButton;
 
   /**
-   * `true` if this AnnotationController instance was created as a result of
-   * the highlight button being clicked.
-   *
-   * `false` if the annotation button was clicked, or if this is a highlight or
-   * annotation that was fetched from the server (as opposed to created new
-   * client-side).
-   */
-  var newlyCreatedByHighlightButton = model.$highlight || false;
+    * Initialize this AnnotationController instance.
+    *
+    * Initialize the `vm` object and any other variables that it needs,
+    * register event listeners, etc.
+    *
+    * All initialization code intended to run when a new AnnotationController
+    * instance is instantiated should go into this function, except defining
+    * methods on `vm`. This function is called on AnnotationController
+    * instantiation after all of the methods have been defined on `vm`, so it
+    * can call the methods.
+    */
+  function init() {
+    /** The view model, contains user changes to the annotation that haven't
+      * been saved to the server yet. */
+    vm.annotation = {};
+
+    vm.action = 'view';
+    vm.document = null;
+    // Give the template access to the feature flags.
+    vm.feature = features.flagEnabled;
+    // Copy isSidebar from $scope onto vm for consistency (we want this
+    // directive's templates to always access variables from vm rather than
+    // directly from scope).
+    vm.isSidebar = $scope.isSidebar;
+    vm.timestamp = null;
+
+    /** The domain model, contains the currently saved version of the
+     * annotation from the server. */
+    model = $scope.annotationGet();
+
+    // Set the user of new annotations that don't have a user yet.
+    model.user = model.user || session.state.userid;
+
+    // Set the group of new annotations that don't have a group yet.
+    model.group = model.group || groups.focused().id;
+
+    // Set the permissions of new annotations.
+    model.permissions = model.permissions || permissions['default'](model.group);
+
+    /**
+      * `true` if this AnnotationController instance was created as a result of
+      * the highlight button being clicked.
+      *
+      * `false` if the annotation button was clicked, or if this is a highlight
+      * or annotation that was fetched from the server (as opposed to created
+      * new client-side).
+      */
+    newlyCreatedByHighlightButton = model.$highlight || false;
+
+    // Automatically save new highlights to the server when they're created.
+    // Note that this line also gets called when the user logs in (since
+    // AnnotationController instances are re-created on login) so serves to
+    // automatically save highlights that were created while logged out when you
+    // log in.
+    saveNewHighlight();
+
+    // Export the baseURI for the share link.
+    vm.baseURI = $document.prop('baseURI');
+
+    // If this annotation is not a highlight and if it's new (has just been
+    // created by the annotate button) or it has edits not yet saved to the
+    // server - then open the editor on AnnotationController instantiation.
+    if (!newlyCreatedByHighlightButton) {
+      if (!model.id || drafts.get(model)) {
+        vm.edit();
+      }
+    }
+
+    $scope.$on('$destroy', function() {
+      updateTimestamp = angular.noop;
+    });
+
+    // Watch for changes to the domain model and recreate the view model when it
+    // changes.
+    $scope.$watch((function() {return model;}), function(model, old) {
+      if (model.updated !== old.updated) {
+        // Discard saved drafts.
+        drafts.remove(model);
+      }
+
+      updateTimestamp(model === old);  // Repeat on first run.
+      vm.render();
+    }, true);
+
+    // When the current group changes, persist any unsaved changes using
+    // the drafts service. They will be restored when this annotation is
+    // next loaded.
+    $scope.$on(events.GROUP_FOCUSED, function() {
+      if (!vm.editing()) {
+        return;
+      }
+
+      // Move any new annotations to the currently focused group when
+      // switching groups. See GH #2689 for context.
+      if (!model.id) {
+        var newGroup = groups.focused().id;
+        var isShared = permissions.isShared(
+          vm.annotation.permissions, vm.annotation.group);
+        if (isShared) {
+          model.permissions = permissions.shared(newGroup);
+          vm.annotation.permissions = model.permissions;
+        }
+        model.group = newGroup;
+        vm.annotation.group = model.group;
+      }
+
+      // if we have a draft, update it, otherwise (eg. when the user signs out)
+      // do not create a new one.
+      if (drafts.get(model)) {
+        var draftDomainModel = {};
+        updateDomainModel(draftDomainModel, vm.annotation);
+        updateDraft(draftDomainModel);
+      }
+    });
+  }
 
   /**
     * @ngdoc method
@@ -252,13 +334,6 @@ function AnnotationController(
       updateDraft(model);
     }
   }
-
-  // Automatically save new highlights to the server when they're created.
-  // Note that this line also gets called when the user logs in (since
-  // AnnotationController instances are re-created on login) so serves to
-  // automatically save highlights that were created while logged out when you
-  // log in.
-  saveNewHighlight();
 
   /**
    * @ngdoc method
@@ -618,65 +693,7 @@ function AnnotationController(
     }, nextUpdate, false);
   };
 
-  // Export the baseURI for the share link.
-  vm.baseURI = $document.prop('baseURI');
-
-  $scope.$on('$destroy', function() {
-    updateTimestamp = angular.noop;
-  });
-
-  // Watch for changes to the domain model and recreate the view model when it
-  // changes.
-  $scope.$watch((function() {return model;}), function(model, old) {
-    if (model.updated !== old.updated) {
-      // Discard saved drafts.
-      drafts.remove(model);
-    }
-
-    updateTimestamp(model === old);  // Repeat on first run.
-    vm.render();
-  }, true);
-
-  // If this annotation is not a highlight and if it's new (has just been
-  // created by the annotate button) or it has edits not yet saved to the
-  // server - then open the editor on AnnotationController instantiation.
-  if (!newlyCreatedByHighlightButton) {
-    if (!model.id || drafts.get(model)) {
-      vm.edit();
-    }
-  }
-
-  // When the current group changes, persist any unsaved changes using
-  // the drafts service. They will be restored when this annotation is
-  // next loaded.
-  $scope.$on(events.GROUP_FOCUSED, function() {
-    if (!vm.editing()) {
-      return;
-    }
-
-    // Move any new annotations to the currently focused group when
-    // switching groups. See GH #2689 for context.
-    if (!model.id) {
-      var newGroup = groups.focused().id;
-      var isShared = permissions.isShared(
-        vm.annotation.permissions, vm.annotation.group);
-      if (isShared) {
-        model.permissions = permissions.shared(newGroup);
-        vm.annotation.permissions = model.permissions;
-      }
-      model.group = newGroup;
-      vm.annotation.group = model.group;
-    }
-
-    // if we have a draft, update it, otherwise (eg. when the user signs out)
-    // do not create a new one.
-    if (drafts.get(model)) {
-      var draftDomainModel = {};
-      updateDomainModel(draftDomainModel, vm.annotation);
-      updateDraft(draftDomainModel);
-    }
-  });
-
+  init();
   return vm;
 }
 
