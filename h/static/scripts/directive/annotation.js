@@ -290,32 +290,6 @@ function AnnotationController(
     vm.render();
   }
 
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#isHighlight.
-    * @returns {boolean} true if the annotation is a highlight, false otherwise
-    */
-  vm.isHighlight = function() {
-    if (newlyCreatedByHighlightButton) {
-      return true;
-    } else if (!model.id) {
-      // If an annotation has no model.id (i.e. it has not been saved to the
-      // server yet) and newlyCreatedByHighlightButton is false, then it must
-      // be an annotation not a highlight (even though it may not have any
-      // text or tags yet).
-      return false;
-    } else {
-      // Once an annotation has been saved to the server there's no longer a
-      // simple property that says whether it's a highlight or not.  For
-      // example there's no model.highlight: true.  Instead a highlight is
-      // defined as an annotation that isn't a page note or a reply and that
-      // has no text or tags.
-      var isPageNote = (model.target || []).length === 0;
-      var isReply = (model.references || []).length !== 0;
-      return (!isPageNote && !isReply && !vm.hasContent());
-    }
-  };
-
   /** Save this annotation if it's a new highlight.
    *
    * The highlight will be saved to the server if the user is logged in,
@@ -350,126 +324,51 @@ function AnnotationController(
   }
 
   /**
-   * @ngdoc method
-   * @name annotation.AnnotationController#editing.
-   * @returns {boolean} `true` if this annotation is currently being edited
-   *   (i.e. the annotation editor form should be open), `false` otherwise.
+   * Create or update the existing draft for this annotation using
+   * the text and tags from the domain model in `draft`.
    */
-  vm.editing = function() {
-    if (vm.action === 'create' || vm.action === 'edit') {
-      return true;
-    } else {
-      return false;
+  function updateDraft(draft) {
+    // Drafts only preserve the text, tags and permissions of the annotation
+    // (i.e. only the bits that the user can edit), changes to other
+    // properties are not preserved.
+    var changes = {};
+    if (draft.text) {
+      changes.text = draft.text;
     }
-  };
-
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#group.
-    * @returns {Object} The full group object associated with the annotation.
-    */
-  vm.group = function() {
-    return groups.get(model.group);
-  };
-
-  // Save on Meta + Enter or Ctrl + Enter.
-  vm.onKeydown = function(event) {
-    if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      vm.save();
+    if (draft.tags) {
+      changes.tags = draft.tags;
     }
-  };
-
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#tagsAutoComplete.
-    * @returns {Promise} immediately resolved to {string[]} -
-    * the tags to show in autocomplete.
-    */
-  vm.tagsAutoComplete = function(query) {
-    return $q.when(tags.filter(query));
-  };
-
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#isPrivate
-    * @returns {boolean} True if the annotation is private to the current user.
-    */
-  vm.isPrivate = function() {
-    return permissions.isPrivate(vm.annotation.permissions, model.user);
-  };
-
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#isShared
-    * @returns {boolean} True if the annotation is shared (either with the
-    * current group or with everyone).
-    */
-  vm.isShared = function() {
-    return permissions.isShared(vm.annotation.permissions, model.group);
-  };
-
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#setPrivacy
-    *
-    * Set the privacy settings on the annotation to a predefined
-    * level. The supported levels are 'private' which makes the annotation
-    * visible only to its creator and 'shared' which makes the annotation
-    * visible to everyone in the group.
-    *
-    * The changes take effect when the annotation is saved
-    */
-  vm.setPrivacy = function(privacy) {
-    // When the user changes the privacy level of an annotation they're
-    // creating or editing, we cache that and use the same privacy level the
-    // next time they create an annotation.
-    // But _don't_ cache it when they change the privacy level of a reply.
-    if (!model.references) {  // If the annotation is not a reply.
-      permissions.setDefault(privacy);
+    if (draft.permissions) {
+      changes.permissions = draft.permissions;
     }
-    if (privacy === 'private') {
-      vm.annotation.permissions = permissions.private();
-    } else if (privacy === 'shared') {
-      vm.annotation.permissions = permissions.shared(model.group);
+    drafts.update(model, changes);
+  }
+
+  // We use `var foo = function() {...}` here instead of `function foo() {...}`
+  // because updateTimestamp gets redefined later on.
+  function updateTimestamp(repeat) {
+    repeat = repeat || false;
+
+    // New (not yet saved to the server) annotations don't have any .updated
+    // yet, so we can't update their timestamp.
+    if (!model.updated) {
+      return;
     }
-  };
 
-  vm.share = function(event) {
-    var $container = angular.element(event.currentTarget).parent();
-    $container.addClass('open').find('input').focus().select();
+    vm.timestamp = time.toFuzzyString(model.updated);
 
-    // We have to stop propagation here otherwise this click event will
-    // re-close the share dialog immediately.
-    event.stopPropagation();
+    if (!repeat) {
+      return;
+    }
 
-    $document.one('click', function() {
-      $container.removeClass('open');
-    });
-  };
+    var fuzzyUpdate = time.nextFuzzyUpdate(model.updated);
+    var nextUpdate = (1000 * fuzzyUpdate) + 500;
 
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotaitonController#hasContent
-    * @returns {boolean} `true` if this annotation has content, `false`
-    *   otherwise.
-    */
-  vm.hasContent = function() {
-    var textLength = (vm.annotation.text || '').length;
-    var tagsLength = (vm.annotation.tags || []).length;
-    return (textLength > 0 || tagsLength > 0);
-  };
-
-  /**
-    * @returns {boolean} True if this annotation has quotes
-    */
-  vm.hasQuotes = function() {
-    return vm.annotation.target.some(function(target) {
-      return target.selector && target.selector.some(function(selector) {
-        return selector.type === 'TextQuoteSelector';
-      });
-    });
-  };
+    $timeout(function() {
+      updateTimestamp(true);
+      $scope.$digest();
+    }, nextUpdate, false);
+  }
 
   /**
     * @ngdoc method
@@ -522,13 +421,164 @@ function AnnotationController(
   };
 
   /**
+   * @ngdoc method
+   * @name annotation.AnnotationController#editing.
+   * @returns {boolean} `true` if this annotation is currently being edited
+   *   (i.e. the annotation editor form should be open), `false` otherwise.
+   */
+  vm.editing = function() {
+    if (vm.action === 'create' || vm.action === 'edit') {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  /**
     * @ngdoc method
-    * @name annotation.AnnotationController#view
-    * @description Switches the view to a viewer, closing the editor controls
-    *              if they are open.
+    * @name annotation.AnnotationController#group.
+    * @returns {Object} The full group object associated with the annotation.
     */
-  vm.view = function() {
-    vm.action = 'view';
+  vm.group = function() {
+    return groups.get(model.group);
+  };
+
+  /**
+    * @ngdoc method
+    * @name annotation.AnnotaitonController#hasContent
+    * @returns {boolean} `true` if this annotation has content, `false`
+    *   otherwise.
+    */
+  vm.hasContent = function() {
+    var textLength = (vm.annotation.text || '').length;
+    var tagsLength = (vm.annotation.tags || []).length;
+    return (textLength > 0 || tagsLength > 0);
+  };
+
+  /**
+    * @returns {boolean} True if this annotation has quotes
+    */
+  vm.hasQuotes = function() {
+    return vm.annotation.target.some(function(target) {
+      return target.selector && target.selector.some(function(selector) {
+        return selector.type === 'TextQuoteSelector';
+      });
+    });
+  };
+
+  /**
+    * @ngdoc method
+    * @name annotation.AnnotationController#isHighlight.
+    * @returns {boolean} true if the annotation is a highlight, false otherwise
+    */
+  vm.isHighlight = function() {
+    if (newlyCreatedByHighlightButton) {
+      return true;
+    } else if (!model.id) {
+      // If an annotation has no model.id (i.e. it has not been saved to the
+      // server yet) and newlyCreatedByHighlightButton is false, then it must
+      // be an annotation not a highlight (even though it may not have any
+      // text or tags yet).
+      return false;
+    } else {
+      // Once an annotation has been saved to the server there's no longer a
+      // simple property that says whether it's a highlight or not.  For
+      // example there's no model.highlight: true.  Instead a highlight is
+      // defined as an annotation that isn't a page note or a reply and that
+      // has no text or tags.
+      var isPageNote = (model.target || []).length === 0;
+      var isReply = (model.references || []).length !== 0;
+      return (!isPageNote && !isReply && !vm.hasContent());
+    }
+  };
+
+  /**
+    * @ngdoc method
+    * @name annotation.AnnotationController#isPrivate
+    * @returns {boolean} True if the annotation is private to the current user.
+    */
+  vm.isPrivate = function() {
+    return permissions.isPrivate(vm.annotation.permissions, model.user);
+  };
+
+  /**
+    * @ngdoc method
+    * @name annotation.AnnotationController#isShared
+    * @returns {boolean} True if the annotation is shared (either with the
+    * current group or with everyone).
+    */
+  vm.isShared = function() {
+    return permissions.isShared(vm.annotation.permissions, model.group);
+  };
+
+  // Save on Meta + Enter or Ctrl + Enter.
+  vm.onKeydown = function(event) {
+    if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      vm.save();
+    }
+  };
+
+  /**
+    * @ngdoc method
+    * @name annotation.AnnotationController#render
+    * @description Called to update the view when the model changes.
+    */
+  vm.render = function() {
+    var draft = drafts.get(model);
+
+    // Extend the view model with a copy of the domain model.
+    // Note that copy is used so that deep properties aren't shared.
+    vm.annotation = angular.extend({}, angular.copy(model));
+
+    // If we have unsaved changes to this annotation, apply them
+    // to the view model.
+    if (draft) {
+      angular.extend(vm.annotation, angular.copy(draft));
+    }
+
+    vm.annotationURI = new URL(
+      '/a/' + vm.annotation.id, vm.baseURI).href;
+
+    vm.document = extractDocumentMetadata(model);
+
+    // Form the tags for ngTagsInput.
+    vm.annotation.tags = (vm.annotation.tags || []).map(function(tag) {
+      return {text: tag};
+    });
+  };
+
+  /**
+    * @ngdoc method
+    * @name annotation.AnnotationController#reply
+    * @description
+    * Creates a new message in reply to this annotation.
+    */
+  vm.reply = function() {
+    var id = model.id;
+    var references = model.references || [];
+
+    // TODO: Remove this check once we have server-side code to ensure that
+    // references is always an array of strings.
+    if (typeof references === 'string') {
+      references = [references];
+    }
+
+    references = references.concat(id);
+
+    var reply = annotationMapper.createAnnotation({
+      references: references,
+      uri: model.uri
+    });
+    reply.group = model.group;
+
+    if (session.state.userid) {
+      if (permissions.isShared(model.permissions, model.group)) {
+        reply.permissions = permissions.shared(reply.group);
+      } else {
+        reply.permissions = permissions.private();
+      }
+    }
   };
 
   /**
@@ -545,27 +595,6 @@ function AnnotationController(
       vm.view();
     }
   };
-
-  /**
-   * Create or update the existing draft for this annotation using
-   * the text and tags from the domain model in `draft`.
-   */
-  function updateDraft(draft) {
-    // Drafts only preserve the text, tags and permissions of the annotation
-    // (i.e. only the bits that the user can edit), changes to other
-    // properties are not preserved.
-    var changes = {};
-    if (draft.text) {
-      changes.text = draft.text;
-    }
-    if (draft.tags) {
-      changes.tags = draft.tags;
-    }
-    if (draft.permissions) {
-      changes.permissions = draft.permissions;
-    }
-    drafts.update(model, changes);
-  }
 
   /**
     * @ngdoc method
@@ -621,90 +650,61 @@ function AnnotationController(
 
   /**
     * @ngdoc method
-    * @name annotation.AnnotationController#reply
-    * @description
-    * Creates a new message in reply to this annotation.
+    * @name annotation.AnnotationController#setPrivacy
+    *
+    * Set the privacy settings on the annotation to a predefined
+    * level. The supported levels are 'private' which makes the annotation
+    * visible only to its creator and 'shared' which makes the annotation
+    * visible to everyone in the group.
+    *
+    * The changes take effect when the annotation is saved
     */
-  vm.reply = function() {
-    var id = model.id;
-    var references = model.references || [];
-
-    // TODO: Remove this check once we have server-side code to ensure that
-    // references is always an array of strings.
-    if (typeof references === 'string') {
-      references = [references];
+  vm.setPrivacy = function(privacy) {
+    // When the user changes the privacy level of an annotation they're
+    // creating or editing, we cache that and use the same privacy level the
+    // next time they create an annotation.
+    // But _don't_ cache it when they change the privacy level of a reply.
+    if (!model.references) {  // If the annotation is not a reply.
+      permissions.setDefault(privacy);
     }
+    if (privacy === 'private') {
+      vm.annotation.permissions = permissions.private();
+    } else if (privacy === 'shared') {
+      vm.annotation.permissions = permissions.shared(model.group);
+    }
+  };
 
-    references = references.concat(id);
+  vm.share = function(event) {
+    var $container = angular.element(event.currentTarget).parent();
+    $container.addClass('open').find('input').focus().select();
 
-    var reply = annotationMapper.createAnnotation({
-      references: references,
-      uri: model.uri
+    // We have to stop propagation here otherwise this click event will
+    // re-close the share dialog immediately.
+    event.stopPropagation();
+
+    $document.one('click', function() {
+      $container.removeClass('open');
     });
-    reply.group = model.group;
-
-    if (session.state.userid) {
-      if (permissions.isShared(model.permissions, model.group)) {
-        reply.permissions = permissions.shared(reply.group);
-      } else {
-        reply.permissions = permissions.private();
-      }
-    }
   };
 
   /**
     * @ngdoc method
-    * @name annotation.AnnotationController#render
-    * @description Called to update the view when the model changes.
+    * @name annotation.AnnotationController#tagsAutoComplete.
+    * @returns {Promise} immediately resolved to {string[]} -
+    * the tags to show in autocomplete.
     */
-  vm.render = function() {
-    var draft = drafts.get(model);
-
-    // Extend the view model with a copy of the domain model.
-    // Note that copy is used so that deep properties aren't shared.
-    vm.annotation = angular.extend({}, angular.copy(model));
-
-    // If we have unsaved changes to this annotation, apply them
-    // to the view model.
-    if (draft) {
-      angular.extend(vm.annotation, angular.copy(draft));
-    }
-
-    vm.annotationURI = new URL(
-      '/a/' + vm.annotation.id, vm.baseURI).href;
-
-    vm.document = extractDocumentMetadata(model);
-
-    // Form the tags for ngTagsInput.
-    vm.annotation.tags = (vm.annotation.tags || []).map(function(tag) {
-      return {text: tag};
-    });
+  vm.tagsAutoComplete = function(query) {
+    return $q.when(tags.filter(query));
   };
 
-  // We use `var foo = function() {...}` here instead of `function foo() {...}`
-  // because updateTimestamp gets redefined later on.
-  var updateTimestamp = function(repeat) {
-    repeat = repeat || false;
-
-    // New (not yet saved to the server) annotations don't have any .updated
-    // yet, so we can't update their timestamp.
-    if (!model.updated) {
-      return;
-    }
-
-    vm.timestamp = time.toFuzzyString(model.updated);
-
-    if (!repeat) {
-      return;
-    }
-
-    var fuzzyUpdate = time.nextFuzzyUpdate(model.updated);
-    var nextUpdate = (1000 * fuzzyUpdate) + 500;
-
-    $timeout(function() {
-      updateTimestamp(true);
-      $scope.$digest();
-    }, nextUpdate, false);
+  /**
+    * @ngdoc method
+    * @name annotation.AnnotationController#view
+    * @description Switches the view to a viewer, closing the editor controls
+    *              if they are open.
+    */
+  vm.view = function() {
+    vm.action = 'view';
   };
 
   init();
