@@ -1,0 +1,195 @@
+@at-root {
+  $nav-h-padding: 15px;
+
+  // desktop
+  .top-nav {
+    display: flex;
+    flex-direction: row;
+    font-family: $font-family-site-sans;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+    max-width: 1130px;
+    align-items: center;
+    padding-left: $nav-h-padding;
+    padding-right: $nav-h-padding;
+  }
+
+  .top-nav-controls {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+  }
+
+  .top-nav-logo {
+    display: flex;
+    flex-direction: row;
+    font-size: $font-size-heading1;
+    font-weight: bold;
+    color: $color-mine-shaft;
+    align-items: center;
+    letter-spacing: -0.2;
+  }
+
+  .top-nav-logo__dot {
+    color: $color-cardinal;
+  }
+
+  .hiring-banner {
+    font-size: $font-size-body2;
+    border: 1px solid $color-alto;
+    border-radius: 2px;
+    margin-left: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    position: relative;
+  }
+
+  .hiring-banner__arrow-svg {
+    position: absolute;
+    left: -5px;
+    width: 5px;
+    height: 20px;
+  }
+
+  .hiring-banner__arrow {
+    fill: white;
+    stroke: $color-alto;
+  }
+
+  .nav-bar-toggle {
+    display: none;
+  }
+
+  .nav-bar {
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+
+  .nav-bar__item {
+    font-size: $font-size-body2;
+    margin-left: 12px;
+    margin-right: 12px;
+    color: $color-mine-shaft;
+  }
+
+  .nav-bar-menu__indicator::after {
+    color: $color-silver-chalice;
+    content: "\2304"; // 'Down Arrowhead'
+
+    // align the cheveron for the drop-down menu
+    // indicator with the middle of the adjacent
+    // menu item text
+    position: relative;
+    top: -3px;
+  }
+
+  .nav-bar-menu {
+    background-color: white;
+    border: 1px solid $color-alto;
+    border-radius: 2px;
+    display: none;
+    margin-top: 3px;
+    position: absolute;
+    list-style-type: none;
+
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    z-index: 1;
+  }
+
+  .nav-bar-menu.is-open {
+    display: block;
+    font-size: $font-size-body2;
+  }
+
+  .nav-bar-menu__item {
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+  .nav-bar-menu__separator {
+    border-bottom: 1px solid $color-gallery;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
+
+  .nav-bar__item--login {
+    color: $color-silver-chalice;
+
+    & > a {
+      color: $color-cardinal;
+    }
+  }
+
+  // phones and small tablets
+  @media only screen and (max-width: 700px) {
+    .top-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .nav-bar-container {
+      overflow: hidden;
+      margin-top: 10px;
+      max-height: 0px;
+      transition: max-height .3s ease-in;
+    }
+
+    .nav-bar-container.is-open {
+      max-height: 800px;
+    }
+
+    .nav-bar {
+      display: flex;
+      flex-direction: column;
+      background-color: $color-gallery;
+      padding-left: 3px;
+      padding-right: 3px;
+      padding-top: 15px;
+      padding-bottom: 15px;
+
+      position: relative;
+      top: -400px;
+      transition: top .3s ease-in;
+    }
+
+    .is-open > .nav-bar {
+      top: 0px;
+    }
+
+    .nav-bar-toggle {
+      display: initial;
+      color: $color-mine-shaft;
+      font-size: $font-size-heading1;
+    }
+
+    .nav-bar__item {
+      margin-top: 3px;
+      margin-bottom: 3px;
+
+      font-size: $font-size-heading1;
+    }
+
+    .nav-bar-menu {
+      background-color: transparent;
+      position: relative;
+
+      border: none;
+      padding-left: 0px;
+      padding-bottom: 10px;
+    }
+
+    .nav-bar-menu__item {
+      font-size: $font-size-heading1;
+    }
+  }
+}

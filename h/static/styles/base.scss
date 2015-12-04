@@ -2,6 +2,7 @@
 @import 'compass/reset/utilities';
 
 @import "./variables";
+@import "./util";
 
 /* Style input placeholders */
 @mixin placeholder {

@@ -4,7 +4,9 @@
 $white: #fff !default;
 $black: #000 !default;
 
-// GRAYS
+
+// Grays
+// ---------------------
 $gray: #777 !default;
 $gray-darker: #333;
 $gray-dark: #585858;
@@ -19,10 +21,14 @@ $color-silver-chalice: #a6a6a6;
 $color-silver: #bbb;
 $color-alto: #dedede;
 $color-mercury: #e2e2e2;
+$color-gallery: #ececec;
 $color-seashell: #f1f1f1;
 $color-wild-sand: #f5f5f5;
 
-//COLORS
+
+// Colors
+// ---------------------
+$color-cardinal: #bd1c2b;
 $brand-color: #bd1c2b !default;
 
 $button-text-color: $gray-dark !default;
@@ -60,14 +66,18 @@ $mask-end-color: $white !default;
   }
 }
 
+
 // Scaffolding
 // -------------------------
 $body-background:        $white !default;
 $text-color:             $gray-dark !default;
 
-//LINKS
+
+// Links
+// -------------------------
 $link-color:             $brand-color !default;
 $link-color-hover:       color-weight($brand-color, 700) !default;
+
 
 // Typography
 // -------------------------
@@ -92,12 +102,27 @@ $body2-line-height:       1.4em;
 $title-font-size:         20px;
 $title-font-weight:       bold;
 
-//STANCE COLORS
+
+// Front page typography
+// -------------------------
+// These are part of the new design at https://trello.com/c/h6kQMQG8/187-new-homepage-design)
+// and the styles/sizes across the sidebar, site, frontpage and blog need to be
+// made consistent
+$font-size-body1: 13px;
+$font-size-body2: 15px;
+$font-size-heading1: 19px;
+$font-family-site-sans: "Source Sans Pro", sans-serif;
+
+
+// Stance Colors
+// -------------------------
 $positive: #3aab39;
 $negative: #d11c2b;
 $neutral: #0171ba;
 
-//OTHER VARIABLES
+
+// Other Variables
+// -------------------------
 $bucket-bar-width: 22px;
 $highlight-color: rgba(255, 255, 60, 0.3);
 $highlight-color-second: rgba(206, 206, 60, 0.4);

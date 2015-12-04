@@ -1,5 +1,5 @@
-// groups forms
 var CreateGroupFormController = require('./create-group-form');
+var DropdownMenuController = require('./dropdown-menu');
 var ShareGroupFormController = require('./share-group-form');
 
 function setupGroupsController(path) {
@@ -14,4 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
   if (document.location.pathname.indexOf('/groups') === 0) {
     setupGroupsController(document.location.pathname);
   }
+
+  new DropdownMenuController(document);
 });

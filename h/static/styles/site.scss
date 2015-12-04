@@ -8,7 +8,10 @@
 @import './share-link';
 
 // website-specific components
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,700);
+
 @import './group-form';
+@import './nav-bar';
 
 body {
   @extend .noise;

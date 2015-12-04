@@ -40,64 +40,9 @@
     }
   </style>
 
-  <header class="banner hiring">
+  <header>
+    {% include "h:templates/includes/nav-bar.html.jinja2" %}
     <div class="container">
-      <span>
-        We're hiring
-        <a href="{{ base_url }}jobs/#developer">developers</a>.
-      </span>
-    </div>
-  </header>
-
-  <header class="navbar navbar-default navbar-static-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed"
-                data-toggle="collapse" data-target=".navbar-collapse">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="{{ base_url }}">
-          Hypothes<span class="red">.</span>is
-        </a>
-      </div>
-      <nav class="collapse navbar-collapse">
-        <div class="menu-main-menu-container">
-          <ul id="menu-main-menu" class="nav navbar-nav">
-            <li id="menu-item-3607"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3607">
-              <a href="{{ base_url }}about/">About</a>
-            </li>
-            <li id="menu-item-3609"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3609">
-              <a href="{{ base_url }}blog/">Blog</a>
-            </li>
-            <li id="menu-item-3608"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3608">
-              <a href="{{ base_url }}contribute/">Contribute</a>
-            </li>
-            <li id="menu-item-4372"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4372">
-              <a href="{{ base_url }}education/">Education</a>
-            </li>
-            <li id="menu-item-3615"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3615">
-              <a href="{{ base_url }}jobs/">Jobs</a>
-            </li>
-          </ul>
-        </div>
-        <ul class="nav navbar-nav pull-right login">
-          {% if username %}
-            <li><a href="{{ user_profile_link }}">{{ username }}</a></li>
-            <li><a href="{{ request.route_url("logout") }}">Sign out</a></li>
-          {% else %}
-            <li><a href="{{ base_url }}login">Sign in</a></li>
-            <li><a href="{{ base_url }}register">Create an account</a></li>
-          {% endif %}
-        </ul>
-      </nav>
       {% include "h:templates/includes/flashbar.html.jinja2" %}
     </div>
   </header>
@@ -281,49 +226,13 @@
           </a>
           <a class="social-media-link" href="{{ rss_feed_url }}"><i class="h-icon-feed"></i></a>
         </div>
-        <div class="menu-footer-container">
-          <ul id="menu-footer" class="nav navbar-nav">
-            <li id="menu-item-3613"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3613">
-              <a href="{{ base_url }}contact/">Contact</a>
-            </li>
-            <li id="menu-item-3623"
-                class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3623">
-              <a href="{{ base_url }}fund/">Grant opportunities</a>
-            </li>
-            <li id="menu-item-3611"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3611">
-              <a href="{{ base_url }}roadmap/">Roadmap</a>
-            </li>
-            <li id="menu-item-3614"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3614">
-              <a href="{{ base_url }}press/">Press</a>
-            </li>
-            <li id="menu-item-3610"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3610">
-              <a href="{{ base_url }}team/">Our team</a>
-            </li>
-            <li id="menu-item-3612"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-3612">
-              <a href="{{ base_url }}terms-of-service/">
-                Terms of Service
-              </a>
-            </li>
-            <li id="menu-item-4123"
-                class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4123">
-              <a href="{{ base_url }}for-publishers/">
-                For Publishers
-              </a>
-            </li>
-          </ul>
-        </div>
       </nav>
     </div>
   </footer>
 {% endblock %}
 
 {% block scripts %}
-  {% assets "front_page_js" %}
+  {% assets "site_js" %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
   {% assets "bootstrap" %}

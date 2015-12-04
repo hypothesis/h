@@ -231,10 +231,12 @@ site_css:
 front_page_js:
   contents:
     - jquery
+    - site_js
 
 front_page_css:
   output: styles/front-page.min.css
   contents:
+    - site_css
     - h:static/styles/front-page/main.css
     - output: h:static/styles/front-page.css
       filters: cleancss
