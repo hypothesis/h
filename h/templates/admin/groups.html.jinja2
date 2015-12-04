@@ -15,7 +15,6 @@
           <th>Name</th>
           <th>URL</th>
           <th>Created by</th>
-          <th>Email</th>
           <th>Members</th>
         </tr>
       </thead>
@@ -29,8 +28,11 @@
                 {{ group_url }}
               </a>
             </td>
-            <td>{{ group.creator.username }}</td>
-            <td>{{ group.creator.email }}</td>
+            <td>
+              <a href="/admin/users?username={{ group.creator.username }}">
+                {{ group.creator.username }}
+              </a>
+            </td>
             <td>{{ group.members|length }}</td>
           </tr>
         {% endfor %}
