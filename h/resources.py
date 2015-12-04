@@ -42,6 +42,8 @@ class Root(Resource):
         (Allow, 'group:__admin__', 'admin_users'),
         (Allow, 'group:__staff__', 'admin_users'),
         (Allow, 'group:__admin__', 'admin_badge'),
+        (Allow, 'group:__admin__', 'admin_groups'),
+        (Allow, 'group:__staff__', 'admin_groups'),
     ]
 
 

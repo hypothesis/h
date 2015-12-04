@@ -207,6 +207,12 @@ def badge_remove(request):
     request.db.delete(models.Blocklist.get_by_uri(uri))
     return badge_index(request)
 
+@view.view_config(route_name='admin_groups',
+                  request_method='GET',
+                  renderer='h:templates/admin/groups.html.jinja2',
+                  permission='admin_groups')
+def groups_index(request):
+    return {"groups": models.Group.all()}
 
 def includeme(config):
     config.add_route('admin_index', '/admin')
@@ -215,5 +221,6 @@ def includeme(config):
     config.add_route('admin_admins', '/admin/admins')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
+    config.add_route('admin_groups', '/admin/groups')
     config.add_route('admin_badge', '/admin/badge')
     config.scan(__name__)

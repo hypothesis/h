@@ -1,0 +1,43 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'groups' %}
+{% set page_title = 'Groups' %}
+
+{% block content %}
+  <p>
+    On this page you can see a list of all the groups and their details.
+  </p>
+
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>URL</th>
+          <th>Created by</th>
+          <th>Members</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for group in groups %}
+          <tr>
+            <td>{{ group.name }}</td>
+            <td>
+              {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
+              <a href="{{ group_url }}">
+                {{ group_url }}
+              </a>
+            </td>
+            <td>
+              <a href="/admin/users?username={{ group.creator.username }}">
+                {{ group.creator.username }}
+              </a>
+            </td>
+            <td>{{ group.members|length }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}
