@@ -694,7 +694,6 @@ function AnnotationController(
   };
 
   init();
-  return vm;
 }
 
 /**
