@@ -2,8 +2,10 @@ var CreateGroupFormController = require('./create-group-form');
 var DropdownMenuController = require('./dropdown-menu');
 var ShareGroupFormController = require('./share-group-form');
 
+var envTest = require('./browser-env-test');
+
 // load our customized version of Bootstrap which
-// provides a few basic UI components
+// provides a few basic UI components (eg. modal dialogs)
 require('./vendor/bootstrap');
 
 function setupGroupsController(path) {
@@ -19,5 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
     setupGroupsController(document.location.pathname);
   }
 
+  // setup components
   new DropdownMenuController(document);
+
+  // show/hide elements depending on the environment
+  envTest.showSupportedElements(document);
 });

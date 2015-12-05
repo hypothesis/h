@@ -2,7 +2,7 @@
 
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
-{% block page_title %}Hypothesis | The Internet, peer reviewed.{% endblock %}
+{% block page_title %}Annotate with anyone, anywhere{% endblock %}
 
 {% block meta %}
   {{ super() }}
@@ -29,7 +29,7 @@
     </p>
 
     <div class="home__section installer">
-      <a class="installer__install-btn js-browser-is-chrome"
+      <a class="installer__install-btn is-hidden js-env-browser-is-chrome"
           href="{{chrome_ext_link}}"
           onclick="chrome.webstore.install();return false;"
           data-chromeext-button="">
@@ -37,12 +37,13 @@
               src="{{ base_url }}assets/images/browser-chrome-64x64.png">
         Install Chrome extension
       </a>
-      <a class="installer__install-btn is-hidden js-browser-is-other" href="#"
+      <a class="installer__install-btn is-hidden js-env-browser-is-other js-env-installer-available"
+          href="#"
           data-toggle="modal" data-target="#bookmarklet">
         Get Bookmarklet
       </a>
 
-      <em class="installer__alt">or</em>
+      <em class="installer__alt is-hidden js-env-installer-available">or</em>
       <form
         class="installer__proxy-form"
         onsubmit="url = document.getElementById('search').value; if (url != '') { window.location.href = 'https://via.hypothes.is/h/' + url; } return false;">
@@ -98,9 +99,6 @@
 {% endblock %}
 
 {% block scripts %}
-  <script>
-    {% include "h:static/scripts/browser-test.js" %}
-  </script>
   {% assets "jquery" %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
