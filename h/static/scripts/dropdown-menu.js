@@ -27,7 +27,7 @@ function DropdownMenuController(rootElement) {
       var isOpen = dropdown.classList.toggle('is-open');
       if (isOpen) {
         document.addEventListener('click', function listener(event) {
-          if (event.target === menuToggle || dropdown.contains(event.target)) {
+          if (menuToggle.contains(event.target) || dropdown.contains(event.target)) {
             return;
           }
           dropdown.classList.remove('is-open');

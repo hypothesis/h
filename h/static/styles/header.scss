@@ -98,6 +98,12 @@
     // menu item text
     position: relative;
     top: -3px;
+
+    display: inline-block;
+    font-size: 17px;
+    line-height: 0px;
+    margin-left: -3px;
+    margin-right: -3px;
   }
 
   .nav-bar-menu {
@@ -105,12 +111,10 @@
     border: 1px solid $color-alto;
     border-radius: 2px;
     display: none;
-    margin-top: 3px;
+    margin-top: 8px;
     position: absolute;
     list-style-type: none;
 
-    padding-left: 12px;
-    padding-right: 12px;
     padding-top: 2px;
     padding-bottom: 2px;
 
@@ -122,9 +126,14 @@
     font-size: $font-size-body2;
   }
 
-  .nav-bar-menu__item {
-    padding-top: 3px;
-    padding-bottom: 3px;
+  .nav-bar-menu__item > a {
+    // expand the link to take up the full width of the menu
+    // item in order to make the hit target larger
+    display: inline-block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .nav-bar-menu__separator {
