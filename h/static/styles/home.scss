@@ -19,9 +19,11 @@
   }
 
   .home__section {
-    max-width: 590px;
+    max-width: 590px + $layout-h-margin * 2;
     margin-left: auto;
     margin-right: auto;
+    padding-left: $layout-h-margin;
+    padding-right: $layout-h-margin;
   }
 
   .home__heading {
@@ -221,5 +223,11 @@
 
   .news-more-link:not(:hover) {
     color: inherit;
+  }
+
+  @media only screen and (max-width: $break-tablet) {
+    .home__intro-laptop {
+      display: none;
+    }
   }
 }

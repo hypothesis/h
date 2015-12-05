@@ -17,4 +17,22 @@
   .social-media-link:not(:hover) {
     color: $color-gray;
   }
+
+  // TODO - Use Modernizr-style CSS classes to adjust hit targets
+  // for touch devices rather than relying on screen size.
+  // See http://stackoverflow.com/questions/11387805/
+  @media only screen and (max-width: $break-tablet) {
+    .footer {
+      // margins at the bottom of the document collapse on mobile,
+      // so use padding to give enough space between the bottom of the screen
+      // and the footer links
+      padding-bottom: 20px;
+    }
+
+    .social-media-link {
+      padding-left: 12px;
+      padding-right: 0px;
+      font-size: 30px;
+    }
+  }
 }
