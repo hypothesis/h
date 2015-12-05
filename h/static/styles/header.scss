@@ -132,8 +132,6 @@
     display: inline-block;
     padding-top: 5px;
     padding-bottom: 5px;
-    padding-left: 12px;
-    padding-right: 12px;
   }
 
   .nav-bar-menu__separator {
@@ -147,6 +145,18 @@
 
     & > a {
       color: $color-cardinal;
+    }
+  }
+
+  // desktop
+  @media only screen and (min-width: $break-tablet) {
+    // on desktop, add a margin between the left edge of dropdown
+    // menus in the nav and menu item text.
+    //
+    // On mobile, only the top-level nav has a left margin
+    .nav-bar-menu__item > a {
+      padding-left: 12px;
+      padding-right: 12px;
     }
   }
 
