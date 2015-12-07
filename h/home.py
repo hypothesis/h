@@ -1,76 +1,57 @@
 """The home/front page of the //hypothes.is/ site."""
 from pyramid import view
 
-from datetime import datetime
-import email.utils
-import requests
-import xml.etree.ElementTree as ElementTree
+
+def trim_snippet(snippet):
+    MAX_SNIPPET_LENGTH = 190
+    return snippet[0:MAX_SNIPPET_LENGTH] + u"\u2026"
 
 
-# in-memory cache of the most recently fetched N
-# Hypothesis blog posts
-news_items = []
-news_item_last_fetch = None
-
-
-# maximum age of the RSS feed cache in seconds
-MAX_FEED_CACHE_AGE = 60 * 10
-
-
-# TODO - Move this to a sensible location, add tests
-def fetch_recent_blog_items(max_items):
-    """ Fetches the most recent :max_items: from the Hypothesis blog.
-
-    :returns: A dictionary containing the title, formatted date and snippet
-              for the most recent items.
-    """
-    rss = requests.get('https://hypothes.is/feed')
-    rss_xml = rss.text.encode('utf-8')
-    recent_items = ElementTree.fromstring(rss_xml).findall('*/item')
-    parsed_items = []
-    for item in recent_items[0:max_items]:
-        # parse date in RFC 822 format and convert to
-        # <Month> DD YYYY
-        # (note this relies on support for dashes in format specifiers to avoid
-        #  zero-padding the day, see http://stackoverflow.com/questions/28894172/)
-        date = email.utils.parsedate(item.find('pubDate').text)
-        formatted_date = datetime(*date[0:3]).strftime('%B %-d, %Y')
-
-        parsed_items.append({
-            "title": item.find('title').text,
-            "link": item.find('link').text,
-            "date": formatted_date,
-            "snippet": item.find('description').text,
-        })
-
-    return parsed_items
-
-
-def refresh_news_item_cache():
-    global news_item_last_fetch
-    global news_items
-
-    if len(news_items) == 0 or \
-       (datetime.now() - news_item_last_fetch).seconds > MAX_FEED_CACHE_AGE:
-
-        try:
-            news_items = fetch_recent_blog_items(max_items=3)
-            news_item_last_fetch = datetime.now()
-        except Exception as ex:
-            # TODO - Log an error and leave the existing items unchanged
-            pass
+# recent blog posts on the H blog from 7/12/15 for the initial
+# implementation of the new homepage design. This will be followed
+# up by a proper system for fetching posts and caching them.
+RECENT_NEWS_ITEMS = [{
+    "title": "A Coalition of over 40 Scholarly Publishers",
+    "link": "https://hypothes.is/blog/a-coalition-of-over-40-scholarly-publishers/",
+    "date": "December 1, 2015",
+    "snippet": trim_snippet("""
+Today we're announcing a coalition of over 40 scholarly publishers, platforms,
+libraries and technology partners that share the goal of building an open
+conversation layer over all knowledge. Over the next several years this coalition
+will be working together to define, design and implement a common framework for
+scholarly collaboration from peer-review through post-publication discussion
+""")
+},{
+    "title": "Undergrad Shannon Griffiths on Using Hypothesis in the Classroom",
+    "link": "https://hypothes.is/blog/undergrad-shannon-griffiths-on-using-hypothesis-in-the-classroom/",
+    "date": "November 30, 2015",
+    "snippet": trim_snippet("""
+This blog was written and published by Shannon Griffiths, an English major at
+Plymouth State University. Her professor, Robin DeRosa, is using Hypothesis in
+several of her classes this term. Check out her Open Anthology of
+Earlier American Literature, hosted on PressBooks and
+annotated using Hypothesis by her undergraduates.""")
+},{
+    "title": "Hypothes.is at Society for Neuroscience",
+    "link": "https://hypothes.is/blog/hypothes-is-at-society-for-neuroscience/",
+    "date": "November 19, 2015",
+    "snippet": trim_snippet("""
+At long last, I'm able to sit down and summarize my thoughts and experiences on
+Hypothes.is at the Society for Neuroscience meeting in Chicago, Oct 17-21st.
+First of all, a hearty, gigantic thank you to my colleagues at the
+Neuroscience Information Framework, a Hypothes.is partner
+""")
+}]
 
 
 @view.view_config(route_name='index',
                   request_method='GET',
                   renderer='h:templates/home.html.jinja2')
 def index(context, request):
-    refresh_news_item_cache()
-
     config = {
         "chrome_ext_link": "https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek",
         "rss_feed_url": "https://hypothes.is/feed",
-        "news_items": news_items,
+        "news_items": RECENT_NEWS_ITEMS,
     }
 
     if request.authenticated_user:
