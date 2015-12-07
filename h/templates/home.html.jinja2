@@ -75,15 +75,15 @@
     <!-- news !-->
     <div class="home__section home__section--news">
       <h2 class="home__heading home__heading--news">Latest news</h2>
+      {% for news_item in news_items %}
       <div class="news-item">
-        <div class="news-item__date">November 3, 2015</div>
-        <div class="news-item__title">Introducing Groups</div>
+        <div class="news-item__date">{{ news_item.date }}</div>
+        <a class="news-item__title" href="{{ news_item.link }}">{{ news_item.title }}</a>
         <p class="news-item__snippet">
-          Our mission here at Hypothesis is to enable a conversation over the world’s knowledge.
-          So far that’s been a public conversation. But some conversations need to flourish in private spaces.
-          You’ve always been…
+          {{ news_item.snippet | safe }}
         </p>
       </div>
+      {% endfor %}
       <a class="news-more-link" href="/blog">See all updates…</a>
     </div>
   </div>

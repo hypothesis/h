@@ -174,9 +174,14 @@
   }
 
   .news-item__title {
+    display: block;
     font-size: $font-size-heading2;
     font-weight: bold;
     margin-bottom: 15px;
+  }
+
+  .news-item__title:not(:hover) {
+    color: inherit;
   }
 
   .news-item__snippet {
@@ -188,6 +193,7 @@
     font-size: $font-size-heading2;
     font-weight: bold;
   }
+
   .news-more-link:not(:hover) {
     color: inherit;
   }
