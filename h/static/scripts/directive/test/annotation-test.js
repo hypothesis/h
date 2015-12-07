@@ -294,22 +294,22 @@ describe('annotation.js', function() {
   describe('updateDomainModel()', function() {
     var updateDomainModel = require('../annotation').updateDomainModel;
 
-    it('copies top-level keys form viewModel into domainModel', function() {
+    it('copies text from viewModel into domainModel', function() {
       var domainModel = {};
-      var viewModel = {foo: 'bar', tags: []};
+      var viewModel = {text: 'bar', tags: []};
 
       updateDomainModel(domainModel, viewModel);
 
-      assert.equal(domainModel.foo, viewModel.foo);
+      assert.equal(domainModel.text, viewModel.text);
     });
 
-    it('overwrites existing keys in domainModel', function() {
-      var domainModel = {foo: 'foo'};
-      var viewModel = {foo: 'bar', tags: []};
+    it('overwrites text in domainModel', function() {
+      var domainModel = {text: 'foo'};
+      var viewModel = {text: 'bar', tags: []};
 
       updateDomainModel(domainModel, viewModel);
 
-      assert.equal(domainModel.foo, viewModel.foo);
+      assert.equal(domainModel.text, viewModel.text);
     });
 
     it('doesn\'t touch other properties in domainModel', function() {
