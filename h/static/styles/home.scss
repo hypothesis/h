@@ -39,6 +39,14 @@
     text-align: center;
   }
 
+  .home__intro-laptop {
+    position: relative;
+    width: 800px;
+    height: 424px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .home__intro-image {
     width: 800px;
     height: 424px;
@@ -49,12 +57,29 @@
     margin-bottom: 40px;
   }
 
+  .home__intro-screenshot {
+    position: absolute;
+    border-radius: 2px;
+
+    // screenshot size and positioning chosen to
+    // fit in the screen area of the laptop image
+    width: 620px;
+    height: 365px;
+    top: 29px;
+    left: 90px;
+  }
+
   .home__intro {
     font-size: $font-size-heading2;
     line-height: $line-height-tall;
     margin-top: 14px;
     margin-bottom: 14px;
   }
+
+  .home__intro-text {
+    margin-top: 45px;
+  }
+
 
   .installer {
     display: flex;
