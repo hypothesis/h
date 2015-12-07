@@ -1,37 +1,48 @@
-@at-root {
-  $nav-h-padding: 15px;
+@mixin header-or-footer {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+  max-width: 1130px;
 
+  a {
+    color: $color-mine-shaft;
+  }
+  a:hover {
+    color: $color-cardinal;
+  }
+}
+
+@at-root {
   // desktop
-  .top-nav {
+  .header {
+    @include header-or-footer;
+
     display: flex;
     flex-direction: row;
     font-family: $font-family-site-sans;
-    margin-left: auto;
-    margin-right: auto;
     margin-top: 25px;
-    max-width: 1130px;
+    margin-bottom: 25px;
     align-items: center;
-    padding-left: $nav-h-padding;
-    padding-right: $nav-h-padding;
   }
 
-  .top-nav-controls {
+  .header-controls {
     display: flex;
     flex-direction: row;
     flex-grow: 1;
   }
 
-  .top-nav-logo {
+  .header-logo {
     display: flex;
     flex-direction: row;
-    font-size: $font-size-heading1;
+    font-size: $font-size-heading2;
     font-weight: bold;
     color: $color-mine-shaft;
     align-items: center;
     letter-spacing: -0.2;
   }
 
-  .top-nav-logo__dot {
+  .header-logo__dot {
     color: $color-cardinal;
   }
 
@@ -42,8 +53,8 @@
     margin-left: 10px;
     padding-left: 8px;
     padding-right: 8px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 7px;
+    padding-bottom: 7px;
     position: relative;
   }
 
@@ -132,7 +143,7 @@
 
   // phones and small tablets
   @media only screen and (max-width: 700px) {
-    .top-nav {
+    .header {
       flex-direction: column;
       align-items: stretch;
     }
@@ -169,14 +180,14 @@
     .nav-bar-toggle {
       display: initial;
       color: $color-mine-shaft;
-      font-size: $font-size-heading1;
+      font-size: $font-size-heading2;
     }
 
     .nav-bar__item {
       margin-top: 3px;
       margin-bottom: 3px;
 
-      font-size: $font-size-heading1;
+      font-size: $font-size-heading2;
     }
 
     .nav-bar-menu {
@@ -189,7 +200,7 @@
     }
 
     .nav-bar-menu__item {
-      font-size: $font-size-heading1;
+      font-size: $font-size-heading2;
     }
   }
 }

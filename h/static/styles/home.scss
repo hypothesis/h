@@ -1,0 +1,153 @@
+@at-root {
+  .press-release-banner {
+    background-color: #f7f7f7;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .press-release-banner > p {
+    font-size: 21px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .home__content {
+    font-family: $font-family-site-sans;
+    margin-top: 95px;
+  }
+
+  .home__section {
+    max-width: 590px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .home__heading {
+    text-align: center;
+    font-size: $font-size-heading1;
+    line-height: $line-height-tall;
+    font-weight: bold;
+  }
+
+  // tagline explaining what H is
+  .home__tagline {
+    font-size: $font-size-heading1;
+    font-weight: $font-weight-light;
+    line-height: $line-height-tall;
+    text-align: center;
+  }
+
+  .home__intro-image {
+    width: 800px;
+    height: 424px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 135px;
+    margin-bottom: 40px;
+  }
+
+  .home__intro {
+    font-size: $font-size-heading2;
+    line-height: $line-height-tall;
+    margin-top: 14px;
+    margin-bottom: 14px;
+  }
+
+  .installer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+    height: 33px;
+  }
+
+  .installer__browser-logo {
+    width: 22px;
+    height: 22px;
+    margin-right: 5px;
+  }
+
+  .installer__install-btn {
+    background-color: $color-cardinal;
+    border-radius: 3px;
+    color: white;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-weight: bold;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .installer__install-btn.is-hidden {
+    display: none;
+  }
+
+  .installer__install-btn:hover {
+    color: white;
+  }
+
+  .installer__alt {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  $proxy-border: 2px solid $color-alto;
+
+  .installer__proxy-form {
+    display: flex;
+  }
+
+  .installer__proxy-link-field {
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-left: $proxy-border;
+    border-top: $proxy-border;
+    border-bottom: $proxy-border;
+    border-right: none;
+    padding-left: 10px;
+  }
+
+  .installer__proxy-btn {
+    font-weight: bold;
+    background-color: $color-gallery;
+    border: 2px solid $color-alto;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+  }
+
+  .home__intro-container {
+    width: 100%;
+    background-color: $color-gallery;
+    border-top: 1px solid $color-alto;
+    border-bottom: 1px solid $color-alto;
+    padding-bottom: 65px;
+  }
+
+  .home__section--news {
+    margin-top: 70px;
+    margin-bottom: 130px;
+  }
+
+  .news-headline {
+  }
+
+  .news-item {
+  }
+
+  .news-item__date {
+  }
+
+  .news-item__heading {
+  }
+
+  .news-item__snippet {
+  }
+}

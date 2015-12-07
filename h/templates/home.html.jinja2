@@ -11,224 +11,99 @@
 {% endblock %}
 
 {% block styles %}
-  {% assets "front_page_css" %}
+  {% assets "site_css" %}
       <link rel="stylesheet" href="{{ ASSET_URL }}">
   {% endassets %}
 {% endblock %}
 
 {% block content %}
-  <style>
-    .press-release-banner {
-      background-color: #f7f7f7;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
+  {% include "h:templates/includes/header.html.jinja2" %}
+  {% include "h:templates/includes/flashbar.html.jinja2" %}
 
-    .press-release-banner > p {
-      font-size: 21px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
+  <div class="home__content">
+    <h2 class="home__heading">Annotate with anyone, anywhere</h2>
+    <p class="home__section home__tagline">
+      We are building a conversation layer over the world's
+      knowledge. Use Hypothesis to discuss, collaborate,
+      organize your research, or take personal notes.
+    </p>
 
-    /* FIXME: Remove the '!important' hack below and move
-       This to the correct stylesheet in the new homepage.
-     */
-    .social-media-link {
-      font-size: 16px !important;
-      text-decoration: none !important;
-    }
-  </style>
+    <div class="home__section installer">
+      <a class="installer__install-btn"
+          href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek"
+          onclick="chrome.webstore.install();return false;"
+          data-chromeext-button="">
+        <img alt="" class="installer__browser-logo"
+              src="{{ base_url }}assets/images/browser-chrome-64x64.png">
+        Install Chrome extension
+      </a>
+      <a class="installer__install-btn is-hidden" href="#"
+          data-toggle="modal" data-target="#bookmarklet">
+        Get Bookmarklet
+      </a>
 
-  <header>
-    {% include "h:templates/includes/nav-bar.html.jinja2" %}
-    <div class="container">
-      {% include "h:templates/includes/flashbar.html.jinja2" %}
+      <em class="installer__alt">or</em>
+      <form
+        class="installer__proxy-form"
+        onsubmit="url = document.getElementById('search').value; if (url != '') { window.location.href = 'https://via.hypothes.is/h/' + url; } return false;">
+        <input id="search" class="installer__proxy-link-field" type="text"
+                name="search" placeholder="Paste a link to annotate">
+        <button class="installer__proxy-btn" type="submit"
+         title="Annotate this page with Hypothesis"
+        >
+          Annotate
+        </button>
+      </form>
     </div>
-  </header>
 
-  <div class="wrap container" role="document">
-    <div class="content row">
-      <main class="main">
-        <div class="jumbotron">
-          <div class="row">
-            <div class="col-sm-6">
-              <div id="video"
-                    class="embed-responsive embed-responsive-16by9">
-                <iframe allowfullscreen class="embed-responsive-item"
-                        src="https://www.youtube.com/embed/QCkm0lL-6lc?showinfo=0&autohide=1">
-                </iframe>
-              </div>
-            </div>
-            <div class="col-sm-6 call-to-action">
+    <!-- TODO: Incorporate these links into the text below the laptop image
+    <p class="hide-in-chrome installer__section--bookmarklet">
+      There's also a
+      <a href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek">
+        Chrome extension
+      </a>
+      or you can
+      <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
+        add it to your website</a>.
+    </p>
+    <p class="hidden unhide-in-chrome installer__section--bookmarklet">
+      There's also a
+      <a href="#" class="" data-toggle="modal" data-target="#bookmarklet">
+        bookmarklet
+      </a>
+      or you can
+      <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
+        add it to your website</a>.
+    </p> !-->
 
-              <h2>Annotate with anyone, anywhere</h2>
-              <p>
-                <a href="{{ base_url }}about/">Our mission</a> is to
-                bring a new layer to the web. Use Hypothesis to discuss,
-                collaborate, organize your research, or take personal notes.
-              </p>
+    <script>
+      {% include "h:static/scripts/browser-test.js" %}
+    </script>
 
-              <section class="installer">
+    <div class="home__intro-container">
+      <img class="home__intro-image" src="/assets/images/laptop.png">
 
-                <span class="hidden unhide-in-chrome">
-                  <a class="btn btn-primary hidden-xs"
-                      href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek"
-                      onclick="chrome.webstore.install();return false;"
-                      data-chromeext-button="">
-                    <img alt="" class="installer__browser-logo--chrome"
-                          src="{{ base_url }}assets/images/browser-chrome-64x64.png">
-                    Install
-                  </a>
-                </span>
-                <span class="hide-in-chrome">
-                  <a class="btn btn-primary hidden-xs" href="#"
-                      data-toggle="modal" data-target="#bookmarklet">
-                    Get Bookmarklet
-                  </a>
-                </span>
+      <p class="home__section home__intro">
+        With Hypothesis you can create annotations on top of any document on
+        the web. Your annotations can be either made public, private only for you,
+        or shared to groups of people that you can control.
+      </p>
+      <p class="home__section home__intro">
+        Get started by either installing our <a href="#">Chrome extension</a>,
+        grabbing our <a href="#">bookmarklet</a>, installing it <a href="#">on your website</a>,
+        or by <a href="#">creating a link</a> to a document with our tool installed.
+      </p>
+    </div>
 
-                <em class="or hidden-xs">Or...</em>
-                <form class="via" onsubmit="url = document.getElementById('search').value; if (url != '') { window.location.href = 'https://via.hypothes.is/h/' + url; } return false;">
-                  <span class="input-group"
-                        title="Insert a URL to annotate that page.">
-                    <input id="search" class="form-control" type="text"
-                            name="search" placeholder="Paste a link...">
-                    <span class="input-group-btn" data-via-button="">
-                      <button class="btn btn-primary" type="submit">
-                        Annotate!
-                      </button>
-                    </span>
-                  </span>
-                </form>
-              </section>
-
-              <p class="hide-in-chrome installer__section--bookmarklet">
-                There's also a
-                <a href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek">
-                  Chrome extension
-                </a>
-                or you can
-                <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
-                  add it to your website</a>.
-              </p>
-              <p class="hidden unhide-in-chrome installer__section--bookmarklet">
-                There's also a
-                <a href="#" class="" data-toggle="modal" data-target="#bookmarklet">
-                  bookmarklet
-                </a>
-                or you can
-                <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
-                  add it to your website</a>.
-              </p>
-              <script>
-                if (window.chrome !== undefined) {
-                  var elements = document.getElementsByClassName(
-                      "unhide-in-chrome");
-                  for (var i=0; i<elements.length; i++) {
-                    elements[i].classList.remove("hidden");
-                  }
-                  elements = document.getElementsByClassName(
-                      "hide-in-chrome");
-                  for (var i=0; i<elements.length; i++) {
-                    elements[i].classList.add("hidden");
-                  }
-                }
-              </script>
-
-              <div class="modal fade" id="bookmarklet" tabindex="-1"
-                    role="dialog" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close"
-                              data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                      <h4 class="modal-title">Bookmarklet</h4>
-                    </div>
-                    <div class="modal-body">
-                      <div>
-                        <a title="Drag me to the bookmarks bar"
-                            data-bookmarklet-button=""
-                            class="btn btn-primary btn-lg installer__button--draggable"
-                            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();"
-                            onclick="alert('Drag me to the bookmarks bar');return false;">Launch Hypothesis
-                        </a>
-                        <p><i class="h-icon-move"></i> Drag the button into
-                        your bookmarks bar then click it to launch the
-                        Hypothesis application.</p>
-                        <p>Alternatively, right click and select
-                        "bookmark this link." To load Hypothesis on a webpage
-                        or PDF, simply click on the bookmarklet in your
-                        bookmarks.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="modal fade" id="addtoyoursite" tabindex="-1"
-                  role="dialog" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"
-                            aria-label="Close">
-                      <span aria-hidden="true">×</span>
-                    </button>
-                    <h4 class="modal-title">Add Hypothesis to a web site</h4>
-                  </div>
-                  <div class="modal-body">
-                    <div class="installer__section--addtosite">
-                      <p>
-                        <input class="form-control" type="text"
-                                value='&lt;script async defer src="//hypothes.is/embed.js"&gt;&lt;/script&gt;'>
-                      </p>
-                      <p>Add the above script tag to your web site's HTML to load
-                      the Hypothesis sidebar on your site.</p>
-
-                      <p>To show highlights by default, also add:</p>
-                      <p>
-                        <input class="form-control" type="text"
-                                value='&lt;script&gt;window.hypothesisConfig=function(){return{showHighlights:true};&lt;/script&gt;'>
-                      </p>
-
-                      <p>Alternatively, if you use WordPress, checkout the
-                      <a href="https://wordpress.org/plugins/hypothesis/">
-                          Hypothesis WordPress plugin</a>.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <div class="press-release-banner">
-            <p>Hypothesis announces a coalition of over 40 scholarly organizations bringing annotation to all knowledge. <a href="https://hypothes.is/annotating-all-knowledge/"><b>Learn more</b></a></p>
-        </div>
-      </main>
+    <!-- news !-->
+    <div class="home__section home__section--news">
+      <h2 class="home__heading">Latest news</h2>
+      <a href="#">See all updates...</a>
     </div>
   </div>
 
-  <footer class="content-info">
-    <div class="container">
-      <nav class="navbar navbar-default">
-        <div class="nav navbar-nav social-media pull-right">
-          <a class="social-media-link" href="https://github.com/hypothesis">
-            <i class="h-icon-github"></i>
-          </a>
-          <a class="social-media-link" href="https://twitter.com/hypothes_is">
-            <i class="h-icon-twitter"></i>
-          </a>
-          <a class="social-media-link" href="{{ rss_feed_url }}"><i class="h-icon-feed"></i></a>
-        </div>
-      </nav>
-    </div>
-  </footer>
+ {% include "h:templates/includes/footer.html.jinja2" %}
+
 {% endblock %}
 
 {% block scripts %}

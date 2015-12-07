@@ -1,5 +1,59 @@
-<header class="masthead">
-  <hgroup>
-	<a href="https://hypothes.is" class="masthead-heading">Hypothes<span class="red">.</span>is</a>
-  </hgroup>
+<svg style="display:none">
+    <symbol class="border-with-left-arrow" id="border-with-left-arrow">
+        <rect class="background-rect" stroke="none" x="0" y="0" width="10" height="20"/>
+        <!-- ensure a sharp outline !-->
+        <polyline
+          class="arrow"
+          points="5,0 5,7 1,10 5,13 5,20"
+          shape-rendering="crispEdges"
+          stroke-width="1.1px"
+        />
+    </symbol>
+</svg>
+<header class="header">
+  <div class="header-controls">
+      <div class="header-logo" title="Hypothesis Logo">
+          hypothes<span class="header-logo__dot">.</span>is
+      </div>
+      <div class="hiring-banner">
+          <svg class="hiring-banner__arrow-svg">
+              <use class="hiring-banner__arrow" xlink:href="#border-with-left-arrow"/>
+          </svg>
+          <a href="/jobs">We're hiring!</a>
+      </div>
+      <div class="u-stretch"></div>
+      <a class="nav-bar-toggle js-menu-toggle" data-menu-target=".nav-bar-container" href="#">Menu</a>
+  </div>
+  <div class="nav-bar-container">
+      <ul class="nav-bar">
+          <li class="nav-bar__item">
+              <a href="/about" class="js-menu-toggle">About</a>
+              <span class="nav-bar-menu__indicator"></span>
+              <ul class="nav-bar-menu js-menu">
+                  <li class="nav-bar-menu__item"><a href="/about">About us</a></li>
+                  <li class="nav-bar-menu__item"><a href="/team">Our Team</a></li>
+                  <li class="nav-bar-menu__item"><a href="/roadmap">Roadmap</a></li>
+                  <li class="nav-bar-menu__item"><a href="/press">Press</a></li>
+              </ul>
+          </li>
+          <li class="nav-bar__item">
+              <a href="/contribute" class="js-menu-toggle">Get Involved</a>
+              <span class="nav-bar-menu__indicator"></span>
+              <ul class="nav-bar-menu js-menu">
+                  <li class="nav-bar-menu__item"><a href="/contribute">Contribute</a></li>
+                  <li class="nav-bar-menu__item"><a href="/fund">Grant opportunities</a></li>
+                  <li class="nav-bar-menu__item"><a href="/for-publishers">For Publishers</a></li>
+                  <li class="nav-bar-menu__separator"></li>
+                  <li class="nav-bar-menu__item"><a href="/code-of-conduct">Code of conduct</a></li>
+                  <li class="nav-bar-menu__item"><a href="/terms-of-service">Terms of Service</a></li>
+              </ul>
+          </li>
+          <li class="nav-bar__item"><a href="/education">Education</a></li>
+          <li class="nav-bar__item"><a href="/blog">Blog</a></li>
+          <li class="nav-bar__item"><a href="/contact">Contact</a></li>
+          <li class="nav-bar__item nav-bar__item--login">
+              <a href="/login" title="Sign in to Hypothesis">Login</a> / <a href="/register" title="Create a new Hypothesis account">Sign up</a>
+          </li>
+      </ul>
+  </div>
 </header>

@@ -11,10 +11,14 @@
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,700);
 
 @import './group-form';
-@import './nav-bar';
+@import './header';
+@import './footer';
+
+// pages
+@import './home';
 
 body {
-  @extend .noise;
+  background-color: white;
   font-family: $sans-font-family;
 }
 
