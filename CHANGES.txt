@@ -1,6 +1,12 @@
 Unreleased
 ==========
 
+Bug fixes
+---------
+
+- Fix a crash that meant that reply notification emails would not be sent if
+  the annotation replied to had no text (#2771).
+
 Features
 --------
 
