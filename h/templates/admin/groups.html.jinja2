@@ -29,7 +29,7 @@
               </a>
             </td>
             <td>
-              <a href="/admin/users?username={{ group.creator.username }}">
+              <a href="{{ request.route_url('admin_users', _query={'username': group.creator.username}) }}">
                 {{ group.creator.username }}
               </a>
             </td>
