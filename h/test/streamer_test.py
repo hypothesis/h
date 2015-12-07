@@ -11,6 +11,7 @@ import mock
 from mock import ANY
 from mock import MagicMock, Mock
 from mock import patch
+from pyramid import security
 from pyramid.testing import DummyRequest
 
 from h import streamer
@@ -32,7 +33,7 @@ class FakeSocket(object):
         self.terminated = False
         self.filter = MagicMock()
         self.request = MagicMock()
-        self.request.effective_principals = ['group:__world__']
+        self.request.effective_principals = [security.Everyone]
         self.send = MagicMock()
 
 
@@ -195,6 +196,30 @@ def test_handle_annotation_event_sends_nipsad_annotations_to_owners():
     }
     socket = FakeSocket('giraffe')
     socket.request.authenticated_userid = 'fred'
+
+    assert streamer.handle_annotation_event(message, socket) is not None
+
+
+def test_handle_annotation_event_sends_if_annotation_public():
+    """
+    Everyone should see annotations which are public.
+
+    When logged-out, effective principals contains only
+    `pyramid.security.Everyone`. This test ensures that the system
+    principal is correctly equated with the annotation principal
+    'group:__world__', ensuring that everyone (including logged-out users)
+    receives all public annotations.
+    """
+    message = {
+        'annotation': {
+            'user': 'fred',
+            'permissions': {'read': ['group:__world__']}
+        },
+        'action': 'update',
+        'src_client_id': 'pigeon'
+    }
+    socket = FakeSocket('giraffe')
+    socket.request.effective_principals = [security.Everyone]
 
     assert streamer.handle_annotation_event(message, socket) is not None
 
