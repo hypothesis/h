@@ -1478,12 +1478,14 @@ describe('annotation.js', function() {
         parts.controller.edit();
         parts.controller.annotation.text = 'unsaved-text';
         parts.controller.annotation.tags = [];
-        parts.controller.annotation.permissions = 'new permissions';
+        parts.annotation.permissions = 'new permissions';
         fakeDrafts.get = sinon.stub().returns({
           text: 'old-draft'
         });
         fakeDrafts.update = sinon.stub();
+
         $rootScope.$broadcast(events.GROUP_FOCUSED);
+
         assert.calledWith(fakeDrafts.update, parts.annotation, {
           text: 'unsaved-text',
           tags: [],
@@ -1534,7 +1536,7 @@ describe('annotation.js', function() {
         annotation.permissions = {read: [annotation.group]};
         // This is a shared annotation.
         fakePermissions.isShared.returns(true);
-        var controller = createDirective(annotation).controller;
+        createDirective(annotation);
         // Make permissions.shared() behave like we expect it to.
         fakePermissions.shared = function(groupId) {
           return {
@@ -1546,11 +1548,7 @@ describe('annotation.js', function() {
         fakeGroups.focused = sinon.stub().returns({id: 'new-group'});
         $rootScope.$broadcast(events.GROUP_FOCUSED);
 
-        assert.deepEqual(
-          controller.annotation.permissions.read,
-          ['new-group'],
-          'It should update the read permissions in the view model when ' +
-          'the focused group changes');
+        assert.deepEqual(annotation.permissions.read, ['new-group']);
       }
     );
 
@@ -1570,16 +1568,12 @@ describe('annotation.js', function() {
       // AnnotationController won't try to update the draft for the annotation.
       fakeDrafts.get.returns(true);
       // Make permissions.shared() behave like we expect it to.
-      fakePermissions.shared = function(groupId) {
-        return {
-          read: [groupId]
-        };
-      };
+      fakePermissions.shared = function(groupId) {return {read: [groupId]};};
+
       // Change the focused group.
-      fakeGroups.focused = sinon.stub().returns({
-        id: 'new-group'
-      });
+      fakeGroups.focused = sinon.stub().returns({id: 'new-group'});
       $rootScope.$broadcast(events.GROUP_FOCUSED);
+
       assert.deepEqual(
         fakeDrafts.update.lastCall.args[1].permissions.read,
         ['new-group'],

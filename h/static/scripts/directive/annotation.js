@@ -103,7 +103,9 @@ function isNew(annotation) {
 *
 */
 function updateDomainModel(domainModel, vm) {
+  var permissions = domainModel.permissions;
   angular.extend(domainModel, vm);
+  domainModel.permissions = permissions;
   domainModel.tags = vm.tags.map(function(tag) {
     return tag.text;
   });
@@ -297,9 +299,9 @@ function AnnotationController(
     if (isNew(domainModel)) {
       var newGroup = groups.focused().id;
       var isShared = permissions.isShared(
-        vm.annotation.permissions, domainModel.group);
+        domainModel.permissions, domainModel.group);
       if (isShared) {
-        vm.annotation.permissions = permissions.shared(newGroup);
+        domainModel.permissions = permissions.shared(newGroup);
       }
       domainModel.group = newGroup;
     }
@@ -307,6 +309,7 @@ function AnnotationController(
     if (drafts.get(domainModel)) {
       var draftDomainModel = {};
       updateDomainModel(draftDomainModel, vm.annotation);
+      draftDomainModel.permissions = domainModel.permissions;
       updateDraft(draftDomainModel);
     }
   }
@@ -536,7 +539,7 @@ function AnnotationController(
     * @returns {boolean} True if the annotation is private to the current user.
     */
   vm.isPrivate = function() {
-    return permissions.isPrivate(vm.annotation.permissions, domainModel.user);
+    return permissions.isPrivate(domainModel.permissions, domainModel.user);
   };
 
   /**
@@ -546,8 +549,7 @@ function AnnotationController(
     * current group or with everyone).
     */
   vm.isShared = function() {
-    return permissions.isShared(
-      vm.annotation.permissions, domainModel.group);
+    return permissions.isShared(domainModel.permissions, domainModel.group);
   };
 
   // Save on Meta + Enter or Ctrl + Enter.
@@ -677,9 +679,9 @@ function AnnotationController(
       permissions.setDefault(privacy);
     }
     if (privacy === 'private') {
-      vm.annotation.permissions = permissions.private();
+      domainModel.permissions = permissions.private();
     } else if (privacy === 'shared') {
-      vm.annotation.permissions = permissions.shared(domainModel.group);
+      domainModel.permissions = permissions.shared(domainModel.group);
     }
   };
 
