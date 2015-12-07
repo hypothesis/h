@@ -72,6 +72,19 @@ function extractDocumentMetadata(model) {
   return document_;
 }
 
+/** Return `true` if the given annotation is new, `false` otherwise.
+ *
+ * "New" means this annotation has been newly created client-side and not
+ * saved to the server yet.
+ */
+function isNew(annotation) {
+  if (annotation.id) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 /** Copy properties from viewModel into domainModel.
 *
 * All top-level properties in viewModel will be copied into domainModel,
@@ -256,7 +269,7 @@ function AnnotationController(
     // created by the annotate button) or it has edits not yet saved to the
     // server - then open the editor on AnnotationController instantiation.
     if (!newlyCreatedByHighlightButton) {
-      if (!model.id || drafts.get(model)) {
+      if (isNew(model) || drafts.get(model)) {
         vm.edit();
       }
     }
@@ -275,7 +288,7 @@ function AnnotationController(
 
     // Move any new annotations to the currently focused group when
     // switching groups. See GH #2689 for context.
-    if (!model.id) {
+    if (isNew(model)) {
       var newGroup = groups.focused().id;
       var isShared = permissions.isShared(
         vm.annotation.permissions, vm.annotation.group);
@@ -315,7 +328,7 @@ function AnnotationController(
    *
    */
   function saveNewHighlight() {
-    if (model.id) {
+    if (!isNew(model)) {
       // Already saved.
       return;
     }
@@ -440,7 +453,7 @@ function AnnotationController(
     if (!drafts.get(model)) {
       updateDraft(model);
     }
-    vm.action = model.id ? 'edit' : 'create';
+    vm.action = isNew(model) ? 'create' : 'edit';
   };
 
   /**
@@ -497,11 +510,7 @@ function AnnotationController(
   vm.isHighlight = function() {
     if (newlyCreatedByHighlightButton) {
       return true;
-    } else if (!model.id) {
-      // If an annotation has no model.id (i.e. it has not been saved to the
-      // server yet) and newlyCreatedByHighlightButton is false, then it must
-      // be an annotation not a highlight (even though it may not have any
-      // text or tags yet).
+    } else if (isNew(model)) {
       return false;
     } else {
       // Once an annotation has been saved to the server there's no longer a
@@ -550,7 +559,6 @@ function AnnotationController(
     * Creates a new message in reply to this annotation.
     */
   vm.reply = function() {
-    var id = model.id;
     var references = model.references || [];
 
     // TODO: Remove this check once we have server-side code to ensure that
@@ -559,7 +567,7 @@ function AnnotationController(
       references = [references];
     }
 
-    references = references.concat(id);
+    references = references.concat(model.id);
 
     var reply = annotationMapper.createAnnotation({
       references: references,
