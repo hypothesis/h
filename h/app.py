@@ -42,6 +42,8 @@ def create_app(global_config, **settings):
     config.add_tween('h.tweens.csrf_tween_factory')
     config.add_tween('h.tweens.auth_token')
 
+    config.add_renderer('csv', 'h.renderers.CSV')
+
     config.include(__name__)
 
     return config.make_wsgi_app()
