@@ -1,3 +1,22 @@
+Unreleased
+==========
+
+Features
+--------
+
+- A report on groups is now available in the admin dashboard (#2764).
+
+Miscellanea
+-----------
+
+- Banner added to the homepage (#2758).
+
+- The community guidelines are now linked from the signup form (#2760).
+
+- The frontend code that controls the annotation card widget has been translated
+  to JavaScript, and numerous aspects of it have been refactored or simplified
+  (#2756, #2761, #2762, #2763).
+
 0.8.2 (2015-11-30)
 ==================
 
