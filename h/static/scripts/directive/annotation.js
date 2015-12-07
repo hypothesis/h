@@ -280,11 +280,9 @@ function AnnotationController(
       var isShared = permissions.isShared(
         vm.annotation.permissions, vm.annotation.group);
       if (isShared) {
-        model.permissions = permissions.shared(newGroup);
-        vm.annotation.permissions = model.permissions;
+        vm.annotation.permissions = permissions.shared(newGroup);
       }
-      model.group = newGroup;
-      vm.annotation.group = model.group;
+      vm.annotation.group = newGroup;
     }
 
     if (drafts.get(model)) {
@@ -385,7 +383,7 @@ function AnnotationController(
       updateTimestamp(true);
       $scope.$digest();
     }, nextUpdate, false);
-  }
+  };
 
   /** Switches the view to a viewer, closing the editor controls if they're
    *  open.
@@ -465,7 +463,7 @@ function AnnotationController(
     * @returns {Object} The full group object associated with the annotation.
     */
   vm.group = function() {
-    return groups.get(model.group);
+    return groups.get(vm.annotation.group);
   };
 
   /**
@@ -533,7 +531,8 @@ function AnnotationController(
     * current group or with everyone).
     */
   vm.isShared = function() {
-    return permissions.isShared(vm.annotation.permissions, model.group);
+    return permissions.isShared(
+      vm.annotation.permissions, vm.annotation.group);
   };
 
   // Save on Meta + Enter or Ctrl + Enter.
@@ -666,7 +665,7 @@ function AnnotationController(
     if (privacy === 'private') {
       vm.annotation.permissions = permissions.private();
     } else if (privacy === 'shared') {
-      vm.annotation.permissions = permissions.shared(model.group);
+      vm.annotation.permissions = permissions.shared(vm.annotation.group);
     }
   };
 

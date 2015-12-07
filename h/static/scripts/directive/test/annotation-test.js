@@ -1502,41 +1502,51 @@ describe('annotation.js', function() {
 
       it('moves new annotations to the focused group', function() {
         var annotation = defaultAnnotation();
+        // id must be null so that AnnotationController considers this a new
+        // annotation.
         annotation.id = null;
-        createDirective(annotation);
-        fakeGroups.focused = sinon.stub().returns({
-          id: 'new-group'
-        });
+        var controller = createDirective(annotation).controller;
+
+        // Change the currently focused group.
+        fakeGroups.focused = sinon.stub().returns({id: 'new-group'});
         $rootScope.$broadcast(events.GROUP_FOCUSED);
-        assert.equal(annotation.group, 'new-group');
+
+        assert.equal(
+          controller.annotation.group,
+          'new-group',
+          'It should update the group ID in the view model when the focused ' +
+          'group changes.');
       });
     });
 
     it(
       'updates perms when moving new annotations to the focused group',
       function() {
+        var annotation = defaultAnnotation();
         // id must be null so that AnnotationController considers this a new
         // annotation.
-        var annotation = defaultAnnotation();
         annotation.id = null;
         annotation.group = 'old-group';
-        annotation.permissions = {
-          read: [annotation.group]
-        };
+        annotation.permissions = {read: [annotation.group]};
         // This is a shared annotation.
         fakePermissions.isShared.returns(true);
-        createDirective(annotation);
+        var controller = createDirective(annotation).controller;
         // Make permissions.shared() behave like we expect it to.
         fakePermissions.shared = function(groupId) {
           return {
             read: [groupId]
           };
         };
-        fakeGroups.focused = sinon.stub().returns({
-          id: 'new-group'
-        });
+
+        // Change the currently focused group.
+        fakeGroups.focused = sinon.stub().returns({id: 'new-group'});
         $rootScope.$broadcast(events.GROUP_FOCUSED);
-        assert.deepEqual(annotation.permissions.read, ['new-group']);
+
+        assert.deepEqual(
+          controller.annotation.permissions.read,
+          ['new-group'],
+          'It should update the read permissions in the view model when ' +
+          'the focused group changes');
       }
     );
 
