@@ -1506,14 +1506,18 @@ describe('annotation.js', function() {
         // annotation.
         annotation.id = null;
         var controller = createDirective(annotation).controller;
+        fakeGroups.get = sandbox.stub().returns({id: 'new-group'});
 
         // Change the currently focused group.
         fakeGroups.focused = sinon.stub().returns({id: 'new-group'});
         $rootScope.$broadcast(events.GROUP_FOCUSED);
 
+        var group = controller.group().id;
+
+        assert.isTrue(fakeGroups.get.calledOnce);
+        assert.isTrue(fakeGroups.get.calledWithExactly('new-group'));
         assert.equal(
-          controller.annotation.group,
-          'new-group',
+          group, 'new-group',
           'It should update the group ID in the view model when the focused ' +
           'group changes.');
       });

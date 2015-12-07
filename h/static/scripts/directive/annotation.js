@@ -297,11 +297,11 @@ function AnnotationController(
     if (isNew(domainModel)) {
       var newGroup = groups.focused().id;
       var isShared = permissions.isShared(
-        vm.annotation.permissions, vm.annotation.group);
+        vm.annotation.permissions, domainModel.group);
       if (isShared) {
         vm.annotation.permissions = permissions.shared(newGroup);
       }
-      vm.annotation.group = newGroup;
+      domainModel.group = newGroup;
     }
 
     if (drafts.get(domainModel)) {
@@ -482,7 +482,7 @@ function AnnotationController(
     * @returns {Object} The full group object associated with the annotation.
     */
   vm.group = function() {
-    return groups.get(vm.annotation.group);
+    return groups.get(domainModel.group);
   };
 
   /**
@@ -547,7 +547,7 @@ function AnnotationController(
     */
   vm.isShared = function() {
     return permissions.isShared(
-      vm.annotation.permissions, vm.annotation.group);
+      vm.annotation.permissions, domainModel.group);
   };
 
   // Save on Meta + Enter or Ctrl + Enter.
@@ -679,7 +679,7 @@ function AnnotationController(
     if (privacy === 'private') {
       vm.annotation.permissions = permissions.private();
     } else if (privacy === 'shared') {
-      vm.annotation.permissions = permissions.shared(vm.annotation.group);
+      vm.annotation.permissions = permissions.shared(domainModel.group);
     }
   };
 
