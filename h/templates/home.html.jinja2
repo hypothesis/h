@@ -29,7 +29,7 @@
     </p>
 
     <div class="home__section installer">
-      <a class="installer__install-btn"
+      <a class="installer__install-btn js-browser-is-chrome"
           href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek"
           onclick="chrome.webstore.install();return false;"
           data-chromeext-button="">
@@ -37,7 +37,7 @@
               src="{{ base_url }}assets/images/browser-chrome-64x64.png">
         Install Chrome extension
       </a>
-      <a class="installer__install-btn is-hidden" href="#"
+      <a class="installer__install-btn is-hidden js-browser-is-other" href="#"
           data-toggle="modal" data-target="#bookmarklet">
         Get Bookmarklet
       </a>
@@ -47,7 +47,7 @@
         class="installer__proxy-form"
         onsubmit="url = document.getElementById('search').value; if (url != '') { window.location.href = 'https://via.hypothes.is/h/' + url; } return false;">
         <input id="search" class="installer__proxy-link-field" type="text"
-                name="search" placeholder="Paste a link to annotate">
+                name="search" placeholder="Paste a link to annotate…">
         <button class="installer__proxy-btn" type="submit"
          title="Annotate this page with Hypothesis"
         >

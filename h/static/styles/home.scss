@@ -100,28 +100,30 @@
     margin-right: 10px;
   }
 
-  $proxy-border: 2px solid $color-alto;
+  $proxy-border: 1px solid $color-alto;
+  $proxy-border-radius: 4px;
 
   .installer__proxy-form {
     display: flex;
   }
 
   .installer__proxy-link-field {
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
+    border-top-left-radius: $proxy-border-radius;
+    border-bottom-left-radius: $proxy-border-radius;
     border-left: $proxy-border;
     border-top: $proxy-border;
     border-bottom: $proxy-border;
     border-right: none;
     padding-left: 10px;
+    min-width: 200px;
   }
 
   .installer__proxy-btn {
     font-weight: bold;
     background-color: $color-gallery;
-    border: 2px solid $color-alto;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
+    border: $proxy-border;
+    border-top-right-radius: $proxy-border-radius;
+    border-bottom-right-radius: $proxy-border-radius;
   }
 
   .home__intro-container {

@@ -8,9 +8,13 @@
 
   .social-media-link {
     display: inline-block;
-    padding-left: 3px;
-    padding-right: 3px;
+    padding-left: 6px;
+    padding-right: 6px;
     font-size: 16px;
     text-decoration: none;
+  }
+
+  .social-media-link:not(:hover) {
+    color: $color-gray;
   }
 }
