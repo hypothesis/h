@@ -73,16 +73,13 @@ def test_set_permissions_sets_read_permissions_for_group_annotations():
 def test_group_principals_with_no_groups():
     user = mock.Mock(groups=[])
 
-    assert auth.group_principals(user) == ['group:__world__']
+    assert auth.group_principals(user) == []
 
 
 def test_group_principals_with_one_group():
     user = mock.Mock(groups=[_mock_group('pubid1')])
 
-    assert auth.group_principals(user) == [
-        'group:__world__',
-        'group:pubid1',
-    ]
+    assert auth.group_principals(user) == ['group:pubid1']
 
 
 def test_group_principals_with_three_groups():
@@ -93,7 +90,6 @@ def test_group_principals_with_three_groups():
     ])
 
     assert auth.group_principals(user) == [
-        'group:__world__',
         'group:pubid1',
         'group:pubid2',
         'group:pubid3',

@@ -43,9 +43,4 @@ def group_principals(user):
     :rtype: list of strings
 
     """
-    principals = ['group:__world__']
-
-    principals.extend(['group:{pubid}'.format(pubid=group.pubid)
-                       for group in user.groups])
-
-    return principals
+    return ['group:{group.pubid}'.format(group=group) for group in user.groups]
