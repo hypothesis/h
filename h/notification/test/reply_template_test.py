@@ -191,6 +191,28 @@ def test_template_map_key_values():
         assert tmap['unsubscribe'] == 'UNSUBSCRIBE_URL'
 
 
+def test_create_template_map_when_parent_has_no_text():
+    """It shouldn't crash if the parent annotation has no 'text' item."""
+    rt.create_template_map(
+            Mock(application_url='https://hypothes.is'),
+        reply={
+            'document': {
+                'title': 'Document Title'
+            },
+            'user': 'acct:bob@hypothes.is',
+            'text': "This is Bob's annotation",
+            'created': '2013-10-27T19:40:53.245691+00:00',
+            'id': '0'
+        },
+        # parent dict has no 'text' item.
+        parent={
+            'uri': 'http://example.com/example.html',
+            'user': 'acct:fred@hypothes.is',
+            'created': '2013-10-27T19:40:53.245691+00:00',
+            'id': '1'
+        })
+
+
 def test_fallback_title():
     """Checks that the title falls back to using the url"""
     with patch('h.notification.reply_template.Annotation') as mock_annotation:
