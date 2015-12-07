@@ -1,17 +1,4 @@
 @at-root {
-  .press-release-banner {
-    background-color: #f7f7f7;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  .press-release-banner > p {
-    font-size: 21px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-
   .home__content {
     font-family: $font-family-site-sans;
     color: $gray-darker;
@@ -50,7 +37,7 @@
   $laptop-screenshot-left-offset: 90px;
   $laptop-screenshot-top-offset: 29px;
 
-  .home__intro-laptop {
+  .computer {
     position: relative;
     width: $laptop-image-width;
     height: $laptop-image-height;
@@ -58,7 +45,7 @@
     margin-right: auto;
   }
 
-  .home__intro-image {
+  .computer__device-img {
     width: 100%;
     height: 100%;
     display: block;
@@ -68,7 +55,7 @@
     margin-bottom: 40px;
   }
 
-  .home__intro-screenshot {
+  .computer__screen-img {
     position: absolute;
     border-radius: 2px;
 
@@ -91,7 +78,6 @@
     margin-top: 45px;
   }
 
-
   .installer {
     display: flex;
     flex-direction: row;
@@ -100,13 +86,13 @@
     height: 33px;
   }
 
-  .installer__browser-logo {
+  .install-btn__icon {
     width: 22px;
     height: 22px;
     margin-right: 5px;
   }
 
-  .installer__install-btn {
+  .install-btn {
     background-color: $color-cardinal;
     border-radius: 3px;
     color: white;
@@ -121,15 +107,15 @@
     padding-bottom: 5px;
   }
 
-  .installer__install-btn.is-hidden {
+  .install-btn.is-hidden {
     display: none;
   }
 
-  .installer__install-btn:hover {
+  .install-btn:hover {
     color: white;
   }
 
-  .installer__install-btn--dragme {
+  .install-btn--dragme {
     cursor: grabbing;
     max-width: 200px;
     min-height: 40px;
@@ -152,11 +138,11 @@
   $proxy-border: 1px solid $color-alto;
   $proxy-border-radius: 4px;
 
-  .installer__proxy-form {
+  .proxy-link-form {
     display: flex;
   }
 
-  .installer__proxy-link-field {
+  .proxy-link-form__field {
     border-top-left-radius: $proxy-border-radius;
     border-bottom-left-radius: $proxy-border-radius;
     border-left: $proxy-border;
@@ -167,7 +153,7 @@
     min-width: 200px;
   }
 
-  .installer__proxy-btn {
+  .proxy-link-form__submit-btn {
     font-weight: bold;
     background-color: $color-gallery;
     border: $proxy-border;
@@ -247,12 +233,12 @@
       margin-top: 180px;
     }
 
-    .home__intro-laptop {
+    .computer {
       width: $laptop-image-width / 3;
       height: $laptop-image-height / 3;
     }
 
-    .home__intro-screenshot {
+    .computer__screen-img {
       width: $laptop-screenshot-width / 3;
       height: $laptop-screenshot-height / 3;
       left: $laptop-screenshot-left-offset / 3;

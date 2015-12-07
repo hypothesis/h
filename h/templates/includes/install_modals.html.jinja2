@@ -8,7 +8,7 @@
       <div class="modal-body">
         <a title="Drag me to the bookmarks bar"
             data-bookmarklet-button=""
-            class="installer__install-btn installer__install-btn--dragme"
+            class="install-btn install-btn--dragme"
             href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();"
             onclick="alert('Drag me to the bookmarks bar');return false;">Launch Hypothesis
         </a>
