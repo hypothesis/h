@@ -10,7 +10,8 @@ Bug fixes
 Features
 --------
 
-- A report on groups is now available in the admin dashboard (#2764).
+- A report on groups is now available in the admin dashboard, which can be
+  downloaded in CSV format (#2764, #2772).
 
 Miscellanea
 -----------
