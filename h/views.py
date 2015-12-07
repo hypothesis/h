@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import logging
+
 import json
+import logging
+import pkg_resources
 
 from pyramid import httpexceptions
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 from pyramid import i18n
+from pyramid import response
 
 from h import session
 from h.api.views import json_view
@@ -105,6 +108,14 @@ def help_page(context, request):
     }
 
 
+@view_config(route_name='robots', http_cache=(86400, {'public': True}))
+def robots(context, request):
+    fp = pkg_resources.resource_stream(__package__, 'static/robots.txt')
+    request.response.content_type = 'text/plain'
+    request.response.app_iter = response.FileIter(fp)
+    return request.response
+
+
 @json_view(route_name='session', http_cache=0)
 def session_view(request):
     flash = session.pop_flash(request)
@@ -171,6 +182,7 @@ def includeme(config):
 
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome')
+    config.add_route('robots', '/robots.txt')
 
     config.add_route('session', '/app')
     config.add_route('stream', '/stream')
