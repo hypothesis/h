@@ -52,7 +52,13 @@
           <li class="nav-bar__item"><a href="/blog">Blog</a></li>
           <li class="nav-bar__item"><a href="/contact">Contact</a></li>
           <li class="nav-bar__item nav-bar__item--login">
-              <a href="/login" title="Sign in to Hypothesis">Login</a> / <a href="/register" title="Create a new Hypothesis account">Sign up</a>
+            {% if username %}
+              <a href="{{ user_profile_link }}">{{ username }}</a>
+            / <a href="{{ request.route_url("logout") }}">Sign out</a>
+            {% else %}
+               <a href="/login" title="Sign in to Hypothesis">Login</a>
+            / <a href="/register" title="Create a new Hypothesis account">Sign up</a>
+            {% endif %}
           </li>
       </ul>
   </div>
