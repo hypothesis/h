@@ -25,6 +25,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from h import queue
 from h._compat import text_type
+from h.api import auth
 from h.api import uri
 from h.models import Annotation
 
@@ -399,7 +400,8 @@ def _authorized_to_read(request, annotation):
             })
 
     read_permissions = annotation.get('permissions', {}).get('read', [])
-    if set(read_permissions).intersection(request.effective_principals):
+    read_principals = auth.translate_annotation_principals(read_permissions)
+    if set(read_principals).intersection(request.effective_principals):
         return True
     return False
 
