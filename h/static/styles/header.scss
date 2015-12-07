@@ -167,15 +167,21 @@
       align-items: stretch;
     }
 
+    $anim-duration-normal: .3s;
+
     .nav-bar-container {
       overflow: hidden;
       margin-top: 10px;
       max-height: 0px;
-      transition: max-height .3s ease-in;
+      transition: max-height $anim-duration-normal ease-in;
     }
 
     .nav-bar-container.is-open {
-      max-height: 800px;
+      // set to a value which is taller than the menu will ever
+      // actually grow to when open, but not too much taller so that
+      // the container grows in height at roughly the same speed as the
+      // menu content slides down
+      max-height: 400px;
     }
 
     .nav-bar {
@@ -188,12 +194,12 @@
       padding-bottom: 15px;
 
       position: relative;
-      top: -400px;
-      transition: top .3s ease-in;
+      transform: translateY(-100%);
+      transition: transform $anim-duration-normal ease-in;
     }
 
     .is-open > .nav-bar {
-      top: 0px;
+      transform: translateY(0%);
     }
 
     .nav-bar-toggle {
