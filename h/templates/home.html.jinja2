@@ -12,7 +12,7 @@
 
 {% block styles %}
   {% assets "site_css" %}
-      <link rel="stylesheet" href="{{ ASSET_URL }}">
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
   {% endassets %}
 {% endblock %}
 
@@ -56,30 +56,6 @@
       </form>
     </div>
 
-    <!-- TODO: Incorporate these links into the text below the laptop image
-    <p class="hide-in-chrome installer__section--bookmarklet">
-      There's also a
-      <a href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek">
-        Chrome extension
-      </a>
-      or you can
-      <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
-        add it to your website</a>.
-    </p>
-    <p class="hidden unhide-in-chrome installer__section--bookmarklet">
-      There's also a
-      <a href="#" class="" data-toggle="modal" data-target="#bookmarklet">
-        bookmarklet
-      </a>
-      or you can
-      <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
-        add it to your website</a>.
-    </p> !-->
-
-    <script>
-      {% include "h:static/scripts/browser-test.js" %}
-    </script>
-
     <div class="home__intro-container">
       <img class="home__intro-image" src="/assets/images/laptop.png">
 
@@ -89,9 +65,10 @@
         or shared to groups of people that you can control.
       </p>
       <p class="home__section home__intro">
-        Get started by either installing our <a href="#">Chrome extension</a>,
-        grabbing our <a href="#">bookmarklet</a>, installing it <a href="#">on your website</a>,
-        or by <a href="#">creating a link</a> to a document with our tool installed.
+        Get started by either installing our <a href="{{ chrome_ext_link }}">Chrome extension</a>,
+        grabbing our <a href="#" data-toggle="modal" data-target="#bookmarklet">bookmarklet</a>,
+        installing it <a href="#"  data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">on your website</a>,
+        or by <a href="https://via.hypothes.is">creating a link</a> to a document with our tool installed.
       </p>
     </div>
 
@@ -107,19 +84,23 @@
           You’ve always been…
         </p>
       </div>
-      <a class="news-more-link" href="#">See all updates…</a>
+      <a class="news-more-link" href="/blog">See all updates…</a>
     </div>
   </div>
 
+ {% include "h:templates/includes/install_modals.html.jinja2" %}
  {% include "h:templates/includes/footer.html.jinja2" %}
 
 {% endblock %}
 
 {% block scripts %}
-  {% assets "site_js" %}
+  <script>
+    {% include "h:static/scripts/browser-test.js" %}
+  </script>
+  {% assets "jquery" %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
-  {% assets "bootstrap" %}
+  {% assets "site_js" %}
     <script src="{{ ASSET_URL }}"></script>
   {% endassets %}
 {% endblock %}

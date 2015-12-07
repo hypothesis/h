@@ -2,6 +2,10 @@ var CreateGroupFormController = require('./create-group-form');
 var DropdownMenuController = require('./dropdown-menu');
 var ShareGroupFormController = require('./share-group-form');
 
+// load our customized version of Bootstrap which
+// provides a few basic UI components
+require('./vendor/bootstrap');
+
 function setupGroupsController(path) {
   if (path === '/groups/new') {
     new CreateGroupFormController(document.body);

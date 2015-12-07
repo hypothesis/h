@@ -1,0 +1,11 @@
+{
+  "__comment__": "Configuration file for a minimial version of Bootstrap",
+  "vars": {},
+  "css": [
+    "modals.less"
+  ],
+  "js": [
+    "modal.js"
+  ],
+  "customizerUrl": "http://getbootstrap.com/customize/?id=60ee00f3201977e61456"
+}

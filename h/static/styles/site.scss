@@ -1,3 +1,6 @@
+// minimal bootstrap CSS
+@import './vendor/bootstrap';
+
 // shared styling used by both the app and the website
 @import './base';
 @import './reset';

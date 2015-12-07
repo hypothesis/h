@@ -43,12 +43,16 @@ angulartics_ga:
   contents: ../../node_modules/angulartics/src/angulartics-ga.js
 
 
-# Bootstrap
-bootstrap:
+# the full version of bootstrap, used
+# by admin pages.
+#
+# The site uses a minimal version that only has the
+# features we need
+bootstrap_full_js:
   filters: uglifyjs
   output: scripts/vendor/bootstrap.min.js
   contents: ../../node_modules/bootstrap/dist/js/bootstrap.js
-bootstrap_css:
+bootstrap_full_css:
   filters: cleancss
   output: styles/vendor/bootstrap.min.css
   contents: ../../node_modules/bootstrap/dist/css/bootstrap.css
@@ -82,7 +86,7 @@ url:
 # Admin areas
 admin_css:
   contents:
-    - bootstrap_css
+    - bootstrap_full_css
     - output: styles/admin.min.css
       filters: cleancss
       contents:
@@ -93,7 +97,7 @@ admin_css:
 admin_js:
   contents:
     - jquery
-    - bootstrap
+    - bootstrap_js
 
 
 # Configuration
