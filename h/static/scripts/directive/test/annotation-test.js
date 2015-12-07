@@ -560,6 +560,38 @@ describe('annotation.js', function() {
     });
 
     describe('AnnotationController() initialization', function() {
+      it('sets the user of annotations that don\'t have one', function() {
+        // You can create annotations while logged out and then login.
+        // When you login a new AnnotationController instance is created for
+        // each of your annotations, and on initialization it will set the
+        // annotation's user to your username from the session.
+        var annotation = newAnnotation();
+        annotation.user = undefined;
+        fakeSession.state.userid = 'acct:bill@localhost';
+
+        createDirective(annotation);
+
+        assert.equal(annotation.user, 'acct:bill@localhost');
+      });
+
+      it(
+        'sets the permissions of annotations that don\'t have any',
+        function() {
+          // You can create annotations while logged out and then login.
+          // When you login a new AnnotationController instance is created for
+          // each of your annotations, and on initialization it will set the
+          // annotation's permissions using your username from the session.
+          var annotation = newAnnotation();
+          annotation.user = annotation.permissions = undefined;
+          fakeSession.state.userid = 'acct:bill@localhost';
+          fakePermissions.default.returns('default permissions');
+
+          createDirective(annotation);
+
+          assert.equal(annotation.permissions, 'default permissions');
+        }
+      );
+
       it('saves new highlights to the server on initialization', function() {
         var annotation = newHighlight();
         // The user is logged-in.
@@ -1728,73 +1760,6 @@ describe('annotation.js', function() {
           });
         }
       );
-    });
-
-    describe('when the user signs in', function() {
-      it('sets the user of unsaved annotations', function() {
-        // This annotation has no user yet, because that's what happens
-        // when you create a new annotation while not signed in.
-        var annotation = {};
-        var session = {
-          state: {
-            userid: null  // Not signed in.
-          }
-        };
-        var $rootScope = createAnnotationDirective({
-          annotation: annotation,
-          session: session
-        }).$rootScope;
-        // At this point we would not expect the user to have been set,
-        // even though the annotation has been created, because the user isn't
-        // signed in.
-        assert(!annotation.user);
-        // Sign the user in.
-        session.state.userid = 'acct:fred@hypothes.is';
-        // The session service would broadcast USER_CHANGED after sign in.
-        $rootScope.$broadcast(events.USER_CHANGED, {});
-        assert.equal(annotation.user, session.state.userid);
-      });
-
-      it('sets the permissions of unsaved annotations', function() {
-        // This annotation has no permissions yet, because that's what happens
-        // when you create a new annotation while not signed in.
-        var annotation = {
-          group: '__world__'
-        };
-        var session = {
-          state: {
-            userid: null  // Not signed in.
-          }
-        };
-        var permissions = {
-          // permissions.default() would return null, because the user isn't
-          // signed in.
-          'default': function() {
-            return null;
-          },
-          isShared: function() {},
-          isPrivate: function() {}
-        };
-        var $rootScope = createAnnotationDirective({
-          annotation: annotation,
-          session: session,
-          permissions: permissions
-        }).$rootScope;
-        // At this point we would not expect the permissions to have been set,
-        // even though the annotation has been created, because the user isn't
-        // signed in.
-        assert(!annotation.permissions);
-        // Sign the user in.
-        session.state.userid = 'acct:fred@hypothes.is';
-        // permissions.default() would now return permissions, because the user
-        // is signed in.
-        permissions['default'] = function() {
-          return '__default_permissions__';
-        };
-        // The session service would broadcast USER_CHANGED after sign in.
-        $rootScope.$broadcast(events.USER_CHANGED, {});
-        assert.equal(annotation.permissions, '__default_permissions__');
-      });
     });
 
     /*

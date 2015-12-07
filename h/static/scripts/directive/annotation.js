@@ -174,14 +174,12 @@ function AnnotationController(
   /** The domain model, contains the currently saved version of the annotation
    * from the server. */
   var model = $scope.annotationGet();
-  if (!model.user) {
-    model.user = session.state.userid;
-  }
 
-  // Set the group of new annotations.
-  if (!model.group) {
-    model.group = groups.focused().id;
-  }
+  // Set the user of new annotations that don't have a user yet.
+  model.user = model.user || session.state.userid;
+
+  // Set the group of new annotations that don't have a group yet.
+  model.group = model.group || groups.focused().id;
 
   // Set the permissions of new annotations.
   model.permissions = model.permissions || permissions['default'](model.group);
@@ -638,20 +636,6 @@ function AnnotationController(
     updateTimestamp(model === old);  // Repeat on first run.
     vm.render();
   }, true);
-
-  $scope.$on(events.USER_CHANGED, function() {
-    if (!model.user) {
-      model.user = session.state.userid;
-    }
-
-    // Set model.permissions on sign in, if it isn't already set.
-    // This is because you can create annotations when signed out and they
-    // will have model.permissions = null, then when you sign in we set the
-    // permissions correctly here.
-    if (!model.permissions) {
-      model.permissions = permissions['default'](model.group);
-    }
-  });
 
   // If this annotation is not a highlight and if it's new (has just been
   // created by the annotate button) or it has edits not yet saved to the
