@@ -52,7 +52,7 @@ def create_template_map(request, reply, parent):
     return {
         'document_title': document_title,
         'document_path': parent['uri'],
-        'parent_text': parent['text'],
+        'parent_text': parent.get('text', ''),
         'parent_user': parent_user,
         'parent_timestamp': format_timestamp(parent['created']),
         'parent_user_profile': user_profile_url(request, parent['user']),
