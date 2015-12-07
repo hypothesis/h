@@ -85,23 +85,22 @@ function isNew(annotation) {
   }
 }
 
-/** Copy properties from viewModel into domainModel.
+/** Copy properties from vm into domainModel.
 *
-* All top-level properties in viewModel will be copied into domainModel,
-* overwriting any existing properties with the same keys in domainModel.
+* All top-level properties in vm will be copied into domainModel, overwriting
+* any existing properties with the same keys in domainModel.
 *
-* Additionally, the `tags` property of viewModel - an array of objects
-* each with a `text` string - will become a simple array of strings in
-* domainModel.
+* Additionally, the `tags` property of vm - an array of objects each with a
+* `text` string - will become a simple array of strings in domainModel.
 *
 * @param {object} domainModel The object to copy properties to
-* @param {object} viewModel The object to copy properties from
+* @param {object} vm The object to copy properties from
 * @returns undefined
 *
 */
-function updateDomainModel(domainModel, viewModel) {
-  angular.extend(domainModel, viewModel);
-  domainModel.tags = viewModel.tags.map(function(tag) {
+function updateDomainModel(domainModel, vm) {
+  angular.extend(domainModel, vm);
+  domainModel.tags = vm.tags.map(function(tag) {
     return tag.text;
   });
 }
