@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /groups
+Allow: /groups/new
