@@ -12,6 +12,5 @@ _ = i18n.TranslationString
 
 class UpdateAccountSchema(CSRFSchema):
     password = password_node(title=_('New password'),
-                             hint=_('at least two characters'),
                              widget=deform.widget.PasswordWidget(
                                  autofocus=True))

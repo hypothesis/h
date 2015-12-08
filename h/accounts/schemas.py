@@ -181,8 +181,7 @@ class RegisterSchema(CSRFSchema):
         widget=deform.widget.TextInputWidget(autofocus=True),
     )
     email = email_node(title=_('Email address:'))
-    password = password_node(title=_('Password:'),
-                             hint=_('at least two characters'))
+    password = password_node(title=_('Password:'))
 
 
 class ResetCode(colander.SchemaType):
@@ -219,7 +218,6 @@ class ResetPasswordSchema(CSRFSchema):
         widget=deform.widget.TextInputWidget(disable_autocomplete=True))
     password = password_node(
         title=_('New password:'),
-        hint=_('at least two characters'),
         widget=deform.widget.PasswordWidget(disable_autocomplete=True))
 
 
