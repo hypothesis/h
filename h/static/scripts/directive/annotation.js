@@ -88,13 +88,22 @@ function extractDocumentMetadata(domainModel) {
   return document_;
 }
 
+/** Return `true` if the given annotation is a reply, `false` otherwise. */
+function isReply(domainModel) {
+  if ((domainModel.references || []).length > 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 /** Return `true` if the given annotation is new, `false` otherwise.
  *
  * "New" means this annotation has been newly created client-side and not
  * saved to the server yet.
  */
-function isNew(annotation) {
-  if (annotation.id) {
+function isNew(domainModel) {
+  if (domainModel.id) {
     return false;
   } else {
     return true;
@@ -558,8 +567,7 @@ function AnnotationController(
       // defined as an annotation that isn't a page note or a reply and that
       // has no text or tags.
       var isPageNote = (domainModel.target || []).length === 0;
-      var isReply = (domainModel.references || []).length !== 0;
-      return (!isPageNote && !isReply && !vm.hasContent());
+      return (!isPageNote && !isReply(domainModel) && !vm.hasContent());
     }
   };
 
@@ -712,7 +720,7 @@ function AnnotationController(
     // creating or editing, we cache that and use the same privacy level the
     // next time they create an annotation.
     // But _don't_ cache it when they change the privacy level of a reply.
-    if (!domainModel.references) {  // If the annotation is not a reply.
+    if (!isReply(domainModel)) {
       permissions.setDefault(privacy);
     }
     if (privacy === 'private') {
