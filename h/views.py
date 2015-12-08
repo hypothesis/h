@@ -111,7 +111,7 @@ def help_page(context, request):
 @view_config(route_name='robots', http_cache=(86400, {'public': True}))
 def robots(context, request):
     fp = pkg_resources.resource_stream(__package__, 'static/robots.txt')
-    request.response.content_type = 'text/plain'
+    request.response.content_type = b'text/plain'
     request.response.app_iter = response.FileIter(fp)
     return request.response
 
