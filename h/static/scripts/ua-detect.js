@@ -4,5 +4,6 @@ module.exports = {
 
   // we test for the existence of window.chrome here because Microsoft Edge
   // (and possibly others) serve
-  isChrome: typeof window.chrome !== 'undefined',
+  isChrome: typeof window.chrome !== 'undefined' &&
+            typeof window.chrome.webstore !== 'undefined',
 };
