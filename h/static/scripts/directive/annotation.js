@@ -5,8 +5,9 @@ var events = require('../events');
 
 /** Return a domainModel tags array from the given vm tags array.
  *
- * domainModel.tags and vm.tags use different formats.  This function returns a
- * domainModel.tags-formatted copy of the given vm.tags-formatted array.
+ * domainModel.tags and vm.annotation.tags use different formats.  This
+ * function returns a domainModel.tags-formatted copy of the given
+ * vm.annotation.tags-formatted array.
  *
  */
 function domainModelTagsFromViewModelTags(viewModelTags) {
@@ -145,8 +146,8 @@ function restoreFromDrafts(drafts, permissions, domainModel, vm) {
   */
 function saveToDrafts(drafts, domainModel, vm) {
   drafts.update(
-    domainModel, vm.isPrivate(), domainModelTagsFromViewModelTags(vm.tags),
-    vm.annotation.text);
+    domainModel, vm.isPrivate(),
+    domainModelTagsFromViewModelTags(vm.annotation.tags), vm.annotation.text);
 }
 
 /** Update domainModel from vm.
@@ -163,8 +164,8 @@ function saveToDrafts(drafts, domainModel, vm) {
  *
  */
 function updateDomainModel(domainModel, vm) {
-  domainModel.text = vm.text;
-  domainModel.tags = domainModelTagsFromViewModelTags(vm.tags);
+  domainModel.text = vm.annotation.text;
+  domainModel.tags = domainModelTagsFromViewModelTags(vm.annotation.tags);
 }
 
 /** Update the view model from the domain model changes. */
@@ -221,8 +222,9 @@ function validate(domainModel) {
 
 /** Return a vm tags array from the given domainModel tags array.
  *
- * domainModel.tags and vm.tags use different formats.  This function returns a
- * vm.tags-formatted copy of the given domainModel.tags-formatted array.
+ * domainModel.tags and vm.annotation.tags use different formats.  This
+ * function returns a vm.annotation.tags-formatted copy of the given
+ * domainModel.tags-formatted array.
  *
  */
 function viewModelTagsFromDomainModelTags(domainModelTags) {
@@ -651,7 +653,7 @@ function AnnotationController(
 
     switch (vm.action) {
       case 'create':
-        updateDomainModel(domainModel, vm.annotation);
+        updateDomainModel(domainModel, vm);
 
         if (!validate(domainModel)) {
           return flash.info('Please add text or a tag before publishing.');
@@ -670,7 +672,7 @@ function AnnotationController(
 
       case 'edit':
         var updatedModel = angular.copy(domainModel);
-        updateDomainModel(updatedModel, vm.annotation);
+        updateDomainModel(updatedModel, vm);
 
         if (!validate(updatedModel)) {
           return flash.info('Please add text or a tag before publishing.');

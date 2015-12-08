@@ -289,25 +289,25 @@ describe('annotation.js', function() {
 
     it('copies text from viewModel into domainModel', function() {
       var domainModel = {};
-      var viewModel = {text: 'bar', tags: []};
+      var viewModel = {annotation: {text: 'bar', tags: []}};
 
       updateDomainModel(domainModel, viewModel);
 
-      assert.equal(domainModel.text, viewModel.text);
+      assert.equal(domainModel.text, viewModel.annotation.text);
     });
 
     it('overwrites text in domainModel', function() {
       var domainModel = {text: 'foo'};
-      var viewModel = {text: 'bar', tags: []};
+      var viewModel = {annotation: {text: 'bar', tags: []}};
 
       updateDomainModel(domainModel, viewModel);
 
-      assert.equal(domainModel.text, viewModel.text);
+      assert.equal(domainModel.text, viewModel.annotation.text);
     });
 
     it('doesn\'t touch other properties in domainModel', function() {
       var domainModel = {foo: 'foo', bar: 'bar'};
-      var viewModel = {foo: 'FOO', tags: []};
+      var viewModel = {annotation: {foo: 'FOO', tags: []}};
 
       updateDomainModel(domainModel, viewModel);
 
@@ -320,10 +320,12 @@ describe('annotation.js', function() {
     it('copies tag texts from viewModel into domainModel', function() {
       var domainModel = {};
       var viewModel = {
-        tags: [
-          {text: 'foo'},
-          {text: 'bar'}
-        ]
+        annotation: {
+          tags: [
+            {text: 'foo'},
+            {text: 'bar'}
+          ]
+        }
       };
 
       updateDomainModel(domainModel, viewModel);
