@@ -1,6 +1,11 @@
 @at-root {
   .home__content {
+    // use new Sans Serif font on the homepage and larger line-spacing.
+    // We'll likely want to move this up to <body> in future once
+    // other pages on the site have been updated to a new design
     font-family: $font-family-site-sans;
+    line-height: $line-height-tall;
+
     color: $gray-darker;
     margin-top: 95px;
   }
@@ -87,8 +92,8 @@
   }
 
   .install-btn__icon {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     margin-right: 5px;
   }
 
@@ -105,6 +110,7 @@
     padding-right: 7px;
     padding-top: 5px;
     padding-bottom: 5px;
+    font-size: $font-size-body2;
   }
 
   .install-btn.is-hidden {
@@ -140,6 +146,7 @@
 
   .proxy-link-form {
     display: flex;
+    font-size: $font-size-body2;
   }
 
   .proxy-link-form__field {
@@ -212,7 +219,7 @@
 
   .news-item__snippet {
     font-size: $font-size-heading2;
-    font-weight: $font-weight-light;
+    line-height: $line-height-tall;
   }
 
   .news-more-link {
