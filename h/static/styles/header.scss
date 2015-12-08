@@ -89,21 +89,11 @@
     color: $color-mine-shaft;
   }
 
-  .nav-bar-menu__indicator::after {
-    color: $color-silver-chalice;
-    content: "\2304"; // 'Down Arrowhead'
-
-    // align the cheveron for the drop-down menu
-    // indicator with the middle of the adjacent
-    // menu item text
-    position: relative;
-    top: -3px;
-
-    display: inline-block;
-    font-size: 17px;
-    line-height: 0px;
-    margin-left: -3px;
-    margin-right: -3px;
+  .nav-bar-menu__indicator {
+    stroke: $color-gray;
+    margin-left: 3px;
+    width: 8px;
+    height: 8px;
   }
 
   .nav-bar-menu {

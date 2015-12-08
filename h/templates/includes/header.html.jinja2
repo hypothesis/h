@@ -9,6 +9,13 @@
           stroke-width="1.1px"
         />
     </symbol>
+    <symbol class="dropdown-arrow" id="dropdown-arrow">
+      <polyline
+        class="dropdown-arrow"
+        points="1,1 4,5 8,1"
+        stroke-width="1.1px"
+        fill="none">
+    </symbol>
 </svg>
 <header class="header">
   <div class="header-controls">
@@ -32,7 +39,7 @@
           <li class="nav-bar__item">
               <a href="/about" class="js-menu-toggle">
                 About
-                <span class="nav-bar-menu__indicator"></span>
+                <svg class="nav-bar-menu__indicator"><use xlink:href="#dropdown-arrow" /></svg>
               </a>
               <ul class="nav-bar-menu js-menu">
                   <li class="nav-bar-menu__item"><a href="/about">About us</a></li>
@@ -44,7 +51,7 @@
           <li class="nav-bar__item">
               <a href="/contribute" class="js-menu-toggle">
                 Get Involved
-                <span class="nav-bar-menu__indicator"></span>
+                <svg class="nav-bar-menu__indicator"><use xlink:href="#dropdown-arrow" /></svg>
               </a>
               <ul class="nav-bar-menu js-menu">
                   <li class="nav-bar-menu__item"><a href="/contribute">Contribute</a></li>
