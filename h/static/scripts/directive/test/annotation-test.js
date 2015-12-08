@@ -289,25 +289,25 @@ describe('annotation.js', function() {
 
     it('copies text from viewModel into domainModel', function() {
       var domainModel = {};
-      var viewModel = {annotation: {text: 'bar', tags: []}};
+      var viewModel = {form: {text: 'bar', tags: []}};
 
       updateDomainModel(domainModel, viewModel);
 
-      assert.equal(domainModel.text, viewModel.annotation.text);
+      assert.equal(domainModel.text, viewModel.form.text);
     });
 
     it('overwrites text in domainModel', function() {
       var domainModel = {text: 'foo'};
-      var viewModel = {annotation: {text: 'bar', tags: []}};
+      var viewModel = {form: {text: 'bar', tags: []}};
 
       updateDomainModel(domainModel, viewModel);
 
-      assert.equal(domainModel.text, viewModel.annotation.text);
+      assert.equal(domainModel.text, viewModel.form.text);
     });
 
     it('doesn\'t touch other properties in domainModel', function() {
       var domainModel = {foo: 'foo', bar: 'bar'};
-      var viewModel = {annotation: {foo: 'FOO', tags: []}};
+      var viewModel = {form: {foo: 'FOO', tags: []}};
 
       updateDomainModel(domainModel, viewModel);
 
@@ -320,7 +320,7 @@ describe('annotation.js', function() {
     it('copies tag texts from viewModel into domainModel', function() {
       var domainModel = {};
       var viewModel = {
-        annotation: {
+        form: {
           tags: [
             {text: 'foo'},
             {text: 'bar'}
@@ -1079,17 +1079,17 @@ describe('annotation.js', function() {
     describe('#hasContent', function() {
       it('returns false if the annotation has no tags or text', function() {
         var controller = createDirective().controller;
-        controller.annotation.text = '';
-        controller.annotation.tags = [];
+        controller.form.text = '';
+        controller.form.tags = [];
         assert.ok(!controller.hasContent());
       });
 
       it('returns true if the annotation has tags or text', function() {
         var controller = createDirective().controller;
-        controller.annotation.text = 'bar';
+        controller.form.text = 'bar';
         assert.ok(controller.hasContent());
-        controller.annotation.text = '';
-        controller.annotation.tags = [
+        controller.form.text = '';
+        controller.form.tags = [
           {
             text: 'foo'
           }
@@ -1100,8 +1100,10 @@ describe('annotation.js', function() {
 
     describe('#hasQuotes', function() {
       it('returns false if the annotation has no quotes', function() {
-        var controller = createDirective().controller;
-        controller.annotation.target = [{}];
+        var annotation = defaultAnnotation();
+        annotation.target = [{}];
+        var controller = createDirective(annotation).controller;
+
         assert.isFalse(controller.hasQuotes());
       });
 
@@ -1414,12 +1416,12 @@ describe('annotation.js', function() {
           text: 'unsaved-text'
         });
         var controller = createDirective().controller;
-        assert.deepEqual(controller.annotation.tags, [
+        assert.deepEqual(controller.form.tags, [
           {
             text: 'unsaved-tag'
           }
         ]);
-        assert.equal(controller.annotation.text, 'unsaved-text');
+        assert.equal(controller.form.text, 'unsaved-text');
       });
 
       it('removes the draft when changes are discarded', function() {
@@ -1444,8 +1446,8 @@ describe('annotation.js', function() {
       it('updates the current draft', function() {
         var parts = createDirective();
         parts.controller.edit();
-        parts.controller.annotation.text = 'unsaved-text';
-        parts.controller.annotation.tags = [];
+        parts.controller.form.text = 'unsaved-text';
+        parts.controller.form.tags = [];
         fakeDrafts.get = sinon.stub().returns({
           text: 'old-draft'
         });
@@ -1788,20 +1790,20 @@ describe('annotation.js', function() {
           }
         }
       }).controller;
-      var originalText = controller.annotation.text;
+      var originalText = controller.form.text;
       // Simulate the user clicking the Edit button on the annotation.
       controller.edit();
       // Simulate the user typing some text into the annotation editor textarea.
-      controller.annotation.text = 'changed by test code';
+      controller.form.text = 'changed by test code';
       // Simulate the user hitting the Save button and wait for the
       // (unsuccessful) response from the server.
       controller.save();
       // At this point the annotation editor controls are still open, and the
       // annotation's text is still the modified (unsaved) text.
-      assert(controller.annotation.text === 'changed by test code');
+      assert(controller.form.text === 'changed by test code');
       // Simulate the user clicking the Cancel button.
       controller.revert();
-      assert(controller.annotation.text === originalText);
+      assert(controller.form.text === originalText);
     });
 
     // test that editing reverting changes to an annotation with
@@ -1815,9 +1817,9 @@ describe('annotation.js', function() {
       }).controller;
       controller.edit();
       assert.equal(controller.action, 'edit');
-      controller.annotation.text = 'this should be reverted';
+      controller.form.text = 'this should be reverted';
       controller.revert();
-      assert.equal(controller.annotation.text, void 0);
+      assert.equal(controller.form.text, void 0);
     });
   });
 });

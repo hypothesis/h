@@ -5,9 +5,9 @@ var events = require('../events');
 
 /** Return a domainModel tags array from the given vm tags array.
  *
- * domainModel.tags and vm.annotation.tags use different formats.  This
+ * domainModel.tags and vm.form.tags use different formats.  This
  * function returns a domainModel.tags-formatted copy of the given
- * vm.annotation.tags-formatted array.
+ * vm.form.tags-formatted array.
  *
  */
 function domainModelTagsFromViewModelTags(viewModelTags) {
@@ -124,8 +124,8 @@ function restoreFromDrafts(drafts, permissions, domainModel, vm) {
     } else {
       domainModel.permissions = permissions.shared(domainModel.group);
     }
-    vm.annotation.tags = viewModelTagsFromDomainModelTags(draft.tags);
-    vm.annotation.text = draft.text;
+    vm.form.tags = viewModelTagsFromDomainModelTags(draft.tags);
+    vm.form.text = draft.text;
   }
 }
 
@@ -147,7 +147,7 @@ function restoreFromDrafts(drafts, permissions, domainModel, vm) {
 function saveToDrafts(drafts, domainModel, vm) {
   drafts.update(
     domainModel, vm.isPrivate(),
-    domainModelTagsFromViewModelTags(vm.annotation.tags), vm.annotation.text);
+    domainModelTagsFromViewModelTags(vm.form.tags), vm.form.text);
 }
 
 /** Update domainModel from vm.
@@ -164,21 +164,21 @@ function saveToDrafts(drafts, domainModel, vm) {
  *
  */
 function updateDomainModel(domainModel, vm) {
-  domainModel.text = vm.annotation.text;
-  domainModel.tags = domainModelTagsFromViewModelTags(vm.annotation.tags);
+  domainModel.text = vm.form.text;
+  domainModel.tags = domainModelTagsFromViewModelTags(vm.form.tags);
 }
 
 /** Update the view model from the domain model changes. */
 function updateViewModel(domainModel, vm, permissions) {
   // Extend the view model with a copy of the domain model.
   // Note that copy is used so that deep properties aren't shared.
-  vm.annotation = {
+  vm.form = {
     text: domainModel.text,
     tags: viewModelTagsFromDomainModelTags(domainModel.tags),
   };
 
   vm.annotationURI = new URL(
-    '/a/' + vm.annotation.id, vm.baseURI).href;
+    '/a/' + domainModel.id, vm.baseURI).href;
 
   vm.document = extractDocumentMetadata(domainModel);
 }
@@ -222,8 +222,8 @@ function validate(domainModel) {
 
 /** Return a vm tags array from the given domainModel tags array.
  *
- * domainModel.tags and vm.annotation.tags use different formats.  This
- * function returns a vm.annotation.tags-formatted copy of the given
+ * domainModel.tags and vm.form.tags use different formats.  This
+ * function returns a vm.form.tags-formatted copy of the given
  * domainModel.tags-formatted array.
  *
  */
@@ -268,9 +268,12 @@ function AnnotationController(
     /** The currently active action - 'view', 'create' or 'edit'. */
     vm.action = 'view';
 
-    /** The view model, contains user changes to the annotation that haven't
-      * been saved to the server yet. */
-    vm.annotation = {};
+    /** vm.form is the read-write part of vm for the templates: it contains
+     *  the variables that the templates will write changes to via ng-model. */
+    vm.form = {};
+
+    // The remaining properties on vm are read-only properties for the
+    // templates.
 
     /** The baseURI for the website, e.g. 'https://hypothes.is/'. */
     vm.baseURI = $document.prop('baseURI');
@@ -518,8 +521,8 @@ function AnnotationController(
     *   otherwise.
     */
   vm.hasContent = function() {
-    var textLength = (vm.annotation.text || '').length;
-    var tagsLength = (vm.annotation.tags || []).length;
+    var textLength = (vm.form.text || '').length;
+    var tagsLength = (vm.form.tags || []).length;
     return (textLength > 0 || tagsLength > 0);
   };
 
@@ -645,7 +648,7 @@ function AnnotationController(
     }
 
     // Update stored tags with the new tags of this annotation.
-    var newTags = vm.annotation.tags.filter(function(tag) {
+    var newTags = vm.form.tags.filter(function(tag) {
       var tags = domainModel.tags || [];
       return tags.indexOf(tag.text) === -1;
     });
