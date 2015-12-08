@@ -191,21 +191,21 @@ function updateViewModel(domainModel, vm, permissions) {
 * @param {object} annotation The annotation to be validated
 *
 */
-function validate(annotation, permissions) {
-  if (!angular.isObject(annotation)) {
+function validate(domainModel) {
+  if (!angular.isObject(domainModel)) {
     return;
   }
 
-  permissions = permissions || {};
+  var permissions = domainModel.permissions || {};
   var readPermissions = permissions.read || [];
-  var targets = annotation.target || [];
+  var targets = domainModel.target || [];
 
-  if (annotation.tags && annotation.tags.length) {
-    return annotation.tags.length;
+  if (domainModel.tags && domainModel.tags.length) {
+    return domainModel.tags.length;
   }
 
-  if (annotation.text && annotation.text.length) {
-    return annotation.text.length;
+  if (domainModel.text && domainModel.text.length) {
+    return domainModel.text.length;
   }
 
   var worldReadable = false;
@@ -650,10 +650,6 @@ function AnnotationController(
       return flash.info('Please sign in to save your annotations.');
     }
 
-    if (!validate(vm.annotation, domainModel.permissions)) {
-      return flash.info('Please add text or a tag before publishing.');
-    }
-
     // Update stored tags with the new tags of this annotation.
     var newTags = vm.annotation.tags.filter(function(tag) {
       var tags = domainModel.tags || [];
@@ -664,6 +660,11 @@ function AnnotationController(
     switch (vm.action) {
       case 'create':
         updateDomainModel(domainModel, vm.annotation);
+
+        if (!validate(domainModel)) {
+          return flash.info('Please add text or a tag before publishing.');
+        }
+
         var onFulfilled = function() {
           $rootScope.$emit('annotationCreated', domainModel);
           view();
@@ -677,6 +678,11 @@ function AnnotationController(
       case 'edit':
         var updatedModel = angular.copy(domainModel);
         updateDomainModel(updatedModel, vm.annotation);
+
+        if (!validate(updatedModel)) {
+          return flash.info('Please add text or a tag before publishing.');
+        }
+
         onFulfilled = function() {
           angular.copy(updatedModel, domainModel);
           $rootScope.$emit('annotationUpdated', domainModel);

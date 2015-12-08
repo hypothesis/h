@@ -342,7 +342,7 @@ describe('annotation.js', function() {
       var i;
       var values = [2, 'foo', true, null];
       for (i = 0; i < values.length; i++) {
-        assert.equal(validate(values[i]), undefined);
+        assert.equal(validate(values[i]));
       }
     });
 
@@ -401,8 +401,8 @@ describe('annotation.js', function() {
     it('returns false for public highlights', function() {
       assert.equal(
         validate(
-          {text: undefined, tags: undefined, target: [1, 2, 3]},
-          {read: ['group:__world__']}
+          {text: undefined, tags: undefined, target: [1, 2, 3],
+           permissions: {read: ['group:__world__']}}
         ),
         false);
     });
