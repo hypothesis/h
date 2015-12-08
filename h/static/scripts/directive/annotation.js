@@ -146,12 +146,12 @@ function updateViewModel(drafts, domainModel, vm) {
 * @param {object} annotation The annotation to be validated
 *
 */
-function validate(annotation) {
+function validate(annotation, permissions) {
   if (!angular.isObject(annotation)) {
     return;
   }
 
-  var permissions = annotation.permissions || {};
+  permissions = permissions || {};
   var readPermissions = permissions.read || [];
   var targets = annotation.target || [];
 
@@ -615,7 +615,7 @@ function AnnotationController(
       return flash.info('Please sign in to save your annotations.');
     }
 
-    if (!validate(vm.annotation)) {
+    if (!validate(vm.annotation, domainModel.permissions)) {
       return flash.info('Please add text or a tag before publishing.');
     }
 

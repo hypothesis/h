@@ -407,14 +407,10 @@ describe('annotation.js', function() {
 
     it('returns false for public highlights', function() {
       assert.equal(
-        validate({
-          text: void 0,
-          tags: void 0,
-          permissions: {
-            read: ['group:__world__']
-          },
-          target: [1, 2, 3]
-        }),
+        validate(
+          {text: undefined, tags: undefined, target: [1, 2, 3]},
+          {read: ['group:__world__']}
+        ),
         false);
     });
 
