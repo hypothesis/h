@@ -1432,15 +1432,9 @@ describe('annotation.js', function() {
         annotation.$update = sandbox.stub().returns(Promise.resolve());
         var controller = createDirective(annotation).controller;
         controller.edit();
-        controller.save();
-
-        // The controller currently removes the draft whenever an annotation
-        // update is committed on the server. This can happen either when saving
-        // locally or when an update is committed in another instance of H
-        // which is then pushed to the current instance.
-        annotation.updated = (new Date()).toISOString();
-        $scope.$digest();
-        assert.calledWith(fakeDrafts.remove, annotation);
+        return controller.save().then(function() {
+          assert.calledWith(fakeDrafts.remove, annotation);
+        });
       });
     });
 

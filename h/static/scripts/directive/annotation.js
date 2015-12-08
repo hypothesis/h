@@ -309,10 +309,6 @@ function AnnotationController(
     // Call `onDestroy()` when this AnnotationController's scope is removed.
     $scope.$on('$destroy', onDestroy);
 
-    // Call `onDomainModelChange()` whenever `domainModel` changes.
-    $scope.$watch(
-      function() {return domainModel;}, onDomainModelChange, true);
-
     // Call `onGroupFocused()` whenever the currently-focused group changes.
     $scope.$on(events.GROUP_FOCUSED, onGroupFocused);
 
@@ -339,6 +335,10 @@ function AnnotationController(
         vm.edit();
       }
     }
+
+    updateTimestamp(true);
+    updateViewModel(domainModel, vm, permissions);
+    restoreFromDrafts(drafts, permissions, domainModel, vm);
   }
 
   /** Called when this AnnotationController instance's scope is removed. */
@@ -368,20 +368,6 @@ function AnnotationController(
       saveToDrafts(drafts, domainModel, vm);
     }
   }
-
-  /** Called whenever `domainModel` changes. */
-  function onDomainModelChange(domainModel, old) {
-    if (domainModel.updated !== old.updated) {
-      // Discard saved drafts.
-      drafts.remove(domainModel);
-    }
-
-    updateTimestamp(domainModel === old);  // Repeat on first run.
-    updateViewModel(domainModel, vm, permissions);
-    restoreFromDrafts(drafts, permissions, domainModel, vm);
-  }
-
-
 
   /** Save this annotation if it's a new highlight.
    *
@@ -674,6 +660,7 @@ function AnnotationController(
         var onFulfilled = function() {
           $rootScope.$emit('annotationCreated', domainModel);
           view();
+          drafts.remove(domainModel);
         };
         var onRejected = function(reason) {
           flash.error(
@@ -693,6 +680,7 @@ function AnnotationController(
           angular.copy(updatedModel, domainModel);
           $rootScope.$emit('annotationUpdated', domainModel);
           view();
+          drafts.remove(domainModel);
         };
         onRejected = function(reason) {
           flash.error(
