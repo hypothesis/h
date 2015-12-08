@@ -39,12 +39,12 @@ function DraftStore() {
    * unsaved drafts exist.
    */
   this.unsaved = function unsaved() {
-    return this._drafts.filter(function (draft) {
+    return this._drafts.filter(function(draft) {
       return !draft.model.id;
-    }).map(function (draft) {
+    }).map(function(draft) {
       return draft.model;
     });
-  }
+  };
 
   /** Retrieve the draft changes for an annotation. */
   this.get = function get(model) {
@@ -72,20 +72,20 @@ function DraftStore() {
     };
     this.remove(model);
     this._drafts.push(newDraft);
-  }
+  };
 
   /** Remove the draft version of an annotation. */
   this.remove = function remove(model) {
-    this._drafts = this._drafts.filter(function (draft) {
+    this._drafts = this._drafts.filter(function(draft) {
       return !match(draft, model);
     });
-  }
+  };
 
   this.discard = function discard() {
     this._drafts = [];
-  }
+  };
 }
 
-module.exports = function () {
+module.exports = function() {
   return new DraftStore();
 };
