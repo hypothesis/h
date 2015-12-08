@@ -115,7 +115,16 @@ function updateViewModel(drafts, domainModel, vm) {
 
   // Extend the view model with a copy of the domain model.
   // Note that copy is used so that deep properties aren't shared.
-  vm.annotation = angular.extend({}, angular.copy(domainModel));
+  vm.annotation = {
+    text: domainModel.text,
+    tags: domainModel.tags,
+    // FIXME: These and other vm.annotation.* variables that the templates are
+    // using need to move out of vm.annotation and onto vm.
+    id: domainModel.id,
+    target: domainModel.target,
+    updated: domainModel.updated,
+    user: domainModel.user
+  };
 
   // If we have unsaved changes to this annotation, apply them
   // to the view model.
