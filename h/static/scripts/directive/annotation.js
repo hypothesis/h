@@ -3,6 +3,18 @@
 
 var events = require('../events');
 
+/** Return a domainModel tags array from the given vm tags array.
+ *
+ * domainModel.tags and vm.tags use different formats.  This function returns a
+ * domainModel.tags-formatted copy of the given vm.tags-formatted array.
+ *
+ */
+function domainModelTagsFromViewModelTags(viewModelTags) {
+  return (viewModelTags || []).map(function(tag) {
+    return tag.text;
+  });
+}
+
 /** Return a human-readable error message for the given server error.
  *
  * @param {object} reason The error object from the server. Should have
@@ -104,20 +116,16 @@ function isNew(annotation) {
  */
 function updateDomainModel(domainModel, vm) {
   domainModel.text = vm.text;
-  domainModel.tags = vm.tags.map(function(tag) {
-    return tag.text;
-  });
+  domainModel.tags = domainModelTagsFromViewModelTags(vm.tags);
 }
 
 /** Update the view model from the domain model changes. */
 function updateViewModel(drafts, domainModel, vm) {
-  var draft = drafts.get(domainModel);
-
   // Extend the view model with a copy of the domain model.
   // Note that copy is used so that deep properties aren't shared.
   vm.annotation = {
     text: domainModel.text,
-    tags: domainModel.tags,
+    tags: viewModelTagsFromDomainModelTags(domainModel.tags),
     // FIXME: These and other vm.annotation.* variables that the templates are
     // using need to move out of vm.annotation and onto vm.
     id: domainModel.id,
@@ -128,19 +136,16 @@ function updateViewModel(drafts, domainModel, vm) {
 
   // If we have unsaved changes to this annotation, apply them
   // to the view model.
+  var draft = drafts.get(domainModel);
   if (draft) {
     angular.extend(vm.annotation, angular.copy(draft));
+    vm.annotation.tags = viewModelTagsFromDomainModelTags(draft.tags);
   }
 
   vm.annotationURI = new URL(
     '/a/' + vm.annotation.id, vm.baseURI).href;
 
   vm.document = extractDocumentMetadata(domainModel);
-
-  // Form the tags for ngTagsInput.
-  vm.annotation.tags = (vm.annotation.tags || []).map(function(tag) {
-    return {text: tag};
-  });
 }
 
 /** Return truthy if the given annotation is valid, falsy otherwise.
@@ -178,6 +183,18 @@ function validate(annotation, permissions) {
   }
 
   return (targets.length && !worldReadable);
+}
+
+/** Return a vm tags array from the given domainModel tags array.
+ *
+ * domainModel.tags and vm.tags use different formats.  This function returns a
+ * vm.tags-formatted copy of the given domainModel.tags-formatted array.
+ *
+ */
+function viewModelTagsFromDomainModelTags(domainModelTags) {
+  return (domainModelTags || []).map(function(tag) {
+    return {text: tag};
+  });
 }
 
 /**
