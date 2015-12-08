@@ -1,10 +1,18 @@
 /**
- * The drafts service provides temporary storage for unsaved edits
- * to new or existing annotations.
+ * The drafts service provides temporary storage for unsaved edits to new or
+ * existing annotations.
  *
- * A draft consists of a 'model' which is the original annotation
- * which the draft is associated with and `changes' which is
- * a set of edits to the original annotation.
+ * A draft consists of:
+ *
+ * 1. `model` which is the original annotation domain model object which the
+ *    draft is associated with. Domain model objects are never returned from
+ *    the drafts service, they're only used to identify the correct draft to
+ *    return.
+ *
+ * 2. `private` (boolean), `tags` (array of strings) and `text` (string) which
+ *    are the user's draft changes to the annotation. These are returned from
+ *    the drafts service by `drafts.get()`.
+ *
  */
 function DraftStore() {
   this._drafts = [];
@@ -40,21 +48,27 @@ function DraftStore() {
 
   /** Retrieve the draft changes for an annotation. */
   this.get = function get(model) {
-    for (var i=0; i < this._drafts.length; i++) {
+    for (var i = 0; i < this._drafts.length; i++) {
       if (match(this._drafts[i], model)) {
-        return this._drafts[i].changes;
+        return {
+          private: this._drafts[i].private,
+          tags: this._drafts[i].tags,
+          text: this._drafts[i].text
+        };
       }
     }
-  }
+  };
 
   /**
    * Update the draft version for a given annotation, replacing any
    * existing draft.
    */
-  this.update = function update(model, changes) {
+  this.update = function update(model, private, tags, text) {
     var newDraft = {
       model: model,
-      changes: changes,
+      private: private,
+      tags: tags,
+      text: text
     };
     this.remove(model);
     this._drafts.push(newDraft);

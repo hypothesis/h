@@ -1398,25 +1398,6 @@ describe('annotation.js', function() {
         assert.calledWith(fakeDrafts.update, parts.annotation);
       });
 
-      it(
-        'creates a draft with only editable fields which are non-null',
-        function() {
-          // When a draft is saved, we shouldn't save any fields to the draft
-          // "changes" object that aren't actually set on the annotation. In this
-          // case, both permissions and tags are null so shouldn't be saved in
-          // the draft.
-          var parts = createDirective();
-          parts.annotation.permissions = null;
-          parts.annotation.text = 'Hello!';
-          parts.annotation.tags = null;
-
-          parts.controller.edit();
-
-          assert.calledWith(
-            fakeDrafts.update, parts.annotation, {text: 'Hello!'});
-        }
-      );
-
       it('starts editing immediately if there is a draft', function() {
         fakeDrafts.get.returns({
           tags: [
@@ -1474,19 +1455,17 @@ describe('annotation.js', function() {
         parts.controller.edit();
         parts.controller.annotation.text = 'unsaved-text';
         parts.controller.annotation.tags = [];
-        parts.annotation.permissions = 'new permissions';
         fakeDrafts.get = sinon.stub().returns({
           text: 'old-draft'
         });
         fakeDrafts.update = sinon.stub();
+        fakePermissions.isPrivate.returns(true);
 
         $rootScope.$broadcast(events.GROUP_FOCUSED);
 
-        assert.calledWith(fakeDrafts.update, parts.annotation, {
-          text: 'unsaved-text',
-          tags: [],
-          permissions: 'new permissions'
-        });
+        assert.calledWith(
+          fakeDrafts.update,
+          parts.annotation, true, [], 'unsaved-text');
       });
 
       it('should not create a new draft', function() {
@@ -1547,34 +1526,6 @@ describe('annotation.js', function() {
         assert.deepEqual(annotation.permissions.read, ['new-group']);
       }
     );
-
-    it('saves shared permissions for the new group to drafts', function() {
-      // id must be null so that AnnotationController considers this a new
-      // annotation.
-      var annotation = defaultAnnotation();
-      annotation.id = null;
-      annotation.group = 'old-group';
-      annotation.permissions = {
-        read: [annotation.group]
-      };
-      // This is a shared annotation.
-      fakePermissions.isShared.returns(true);
-      createDirective(annotation);
-      // drafts.get() needs to return something truthy, otherwise
-      // AnnotationController won't try to update the draft for the annotation.
-      fakeDrafts.get.returns(true);
-      // Make permissions.shared() behave like we expect it to.
-      fakePermissions.shared = function(groupId) {return {read: [groupId]};};
-
-      // Change the focused group.
-      fakeGroups.focused = sinon.stub().returns({id: 'new-group'});
-      $rootScope.$broadcast(events.GROUP_FOCUSED);
-
-      assert.deepEqual(
-        fakeDrafts.update.lastCall.args[1].permissions.read,
-        ['new-group'],
-        'Shared permissions for the new group should be saved to drafts');
-    });
 
     it('does not change perms when moving new private annotations', function() {
       // id must be null so that AnnotationController considers this a new

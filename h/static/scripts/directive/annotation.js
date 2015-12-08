@@ -101,6 +101,27 @@ function isNew(annotation) {
   }
 }
 
+/**
+  * Save the given annotation to the drafts service.
+  *
+  * Any existing drafts for this annotation will be overwritten.
+  *
+  * @param {object} domainModel - The full domainModel object of the
+  *   annotation to be saved. This full domainModel model is not retrieved
+  *   again from drafts, it's only used to identify the annotation's draft in
+  *   order to retrieve the fields below.
+  * @param {boolean} private - Whether or not the annotation is currently
+  *   private.
+  * @param {array} tags - The annotation's current tags.
+  * @param {string} text - The annotation's current text.
+  *
+  */
+function saveToDrafts(drafts, domainModel, vm) {
+  drafts.update(
+    domainModel, vm.isPrivate(), domainModelTagsFromViewModelTags(vm.tags),
+    vm.annotation.text);
+}
+
 /** Update domainModel from vm.
  *
  * Copy any properties from vm that might have been modified by the user into
@@ -120,7 +141,7 @@ function updateDomainModel(domainModel, vm) {
 }
 
 /** Update the view model from the domain model changes. */
-function updateViewModel(drafts, domainModel, vm) {
+function updateViewModel(drafts, domainModel, vm, permissions) {
   // Extend the view model with a copy of the domain model.
   // Note that copy is used so that deep properties aren't shared.
   vm.annotation = {
@@ -138,8 +159,13 @@ function updateViewModel(drafts, domainModel, vm) {
   // to the view model.
   var draft = drafts.get(domainModel);
   if (draft) {
-    angular.extend(vm.annotation, angular.copy(draft));
+    if (draft.private) {
+      domainModel.permissions = permissions.private();
+    } else {
+      domainModel.permissions = permissions.shared(domainModel.group);
+    }
     vm.annotation.tags = viewModelTagsFromDomainModelTags(draft.tags);
+    vm.annotation.text = draft.text;
   }
 
   vm.annotationURI = new URL(
@@ -331,10 +357,7 @@ function AnnotationController(
     }
 
     if (drafts.get(domainModel)) {
-      var draftDomainModel = {};
-      updateDomainModel(draftDomainModel, vm.annotation);
-      draftDomainModel.permissions = domainModel.permissions;
-      updateDraft(draftDomainModel);
+      saveToDrafts(drafts, domainModel, vm);
     }
   }
 
@@ -346,7 +369,7 @@ function AnnotationController(
     }
 
     updateTimestamp(domainModel === old);  // Repeat on first run.
-    updateViewModel(drafts, domainModel, vm);
+    updateViewModel(drafts, domainModel, vm, permissions);
   }
 
 
@@ -380,29 +403,8 @@ function AnnotationController(
       });
     } else {
       // User isn't logged in, save to drafts.
-      updateDraft(domainModel);
+      saveToDrafts(drafts, domainModel, vm);
     }
-  }
-
-  /**
-   * Create or update the existing draft for this annotation using
-   * the text and tags from the domain model in `draft`.
-   */
-  function updateDraft(draft) {
-    // Drafts only preserve the text, tags and permissions of the annotation
-    // (i.e. only the bits that the user can edit), changes to other
-    // properties are not preserved.
-    var changes = {};
-    if (draft.text) {
-      changes.text = draft.text;
-    }
-    if (draft.tags) {
-      changes.tags = draft.tags;
-    }
-    if (draft.permissions) {
-      changes.permissions = draft.permissions;
-    }
-    drafts.update(domainModel, changes);
   }
 
   // We use `var foo = function() {...}` here instead of `function foo() {...}`
@@ -484,7 +486,7 @@ function AnnotationController(
     */
   vm.edit = function() {
     if (!drafts.get(domainModel)) {
-      updateDraft(domainModel);
+      saveToDrafts(drafts, domainModel, vm);
     }
     vm.action = isNew(domainModel) ? 'create' : 'edit';
   };
@@ -626,7 +628,7 @@ function AnnotationController(
     if (vm.action === 'create') {
       $rootScope.$emit('annotationDeleted', domainModel);
     } else {
-      updateViewModel(drafts, domainModel, vm);
+      updateViewModel(drafts, domainModel, vm, permissions);
       view();
     }
   };
