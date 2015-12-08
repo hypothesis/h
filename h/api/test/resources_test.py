@@ -80,7 +80,7 @@ class TestAnnotationsPermissions(object):
         annotations = resources.Annotations(request)
 
         assert annotations.__acl__() == [
-            (security.Allow, 'group:__world__', 'create'),
+            (security.Allow, security.Authenticated, 'create'),
             (security.Deny, security.Everyone, 'create')]
 
     def test_when_request_has_a_group(self):
@@ -90,4 +90,13 @@ class TestAnnotationsPermissions(object):
 
         assert annotations.__acl__() == [
             (security.Allow, 'group:xyzabc', 'create'),
+            (security.Deny, security.Everyone, 'create')]
+
+    def test_when_request_has_group_world(self):
+        request = mock.Mock()
+        request.json_body = {'group': '__world__'}
+        annotations = resources.Annotations(request)
+
+        assert annotations.__acl__() == [
+            (security.Allow, security.Authenticated, 'create'),
             (security.Deny, security.Everyone, 'create')]

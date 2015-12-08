@@ -79,14 +79,17 @@ class Annotations(Collection):
         self.request = request
 
     def __acl__(self):
-        aces = []
+        deny = (Deny, Everyone, 'create')
         try:
-            group = self.request.json_body.get('group') or '__world__'
+            payload = self.request.json_body
         except ValueError:
-            pass
-        else:
-            aces.append((Allow, 'group:' + group, 'create'))
-        return aces + [(Deny, Everyone, 'create')]
+            return [deny]
+
+        group = payload.get('group', '__world__')
+        if group == '__world__':
+            return [(Allow, Authenticated, 'create'), deny]
+
+        return [(Allow, 'group:' + group, 'create'), deny]
 
     def factory(self, key):
         return Annotation(id=key)
