@@ -1104,8 +1104,8 @@ describe('annotation.js', function() {
       });
 
       it('returns true if the annotation has quotes', function() {
-        var controller = createDirective().controller;
-        controller.annotation.target = [
+        var annotation = defaultAnnotation();
+        annotation.target = [
           {
             selector: [
               {
@@ -1114,6 +1114,8 @@ describe('annotation.js', function() {
             ]
           }
         ];
+        var controller = createDirective(annotation).controller;
+
         assert.isTrue(controller.hasQuotes());
       });
     });

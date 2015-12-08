@@ -1,16 +1,16 @@
-<header class="annotation-header" ng-if="!vm.annotation.user">
+<header class="annotation-header" ng-if="!vm.user()">
   <strong>You must be signed in to create annotations.</strong>
 </header>
 
-<div ng-if="vm.annotation.user">
+<div ng-if="vm.user()">
   <header class="annotation-header">
     <!-- User -->
-    <span ng-if="vm.annotation.user">
+    <span ng-if="vm.user()">
       <span>
         <a class="annotation-user"
            target="_blank"
-           ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
-           >{{vm.annotation.user | persona}}</a>
+           ng-href="{{vm.baseURI}}u/{{vm.user()}}"
+           >{{vm.user() | persona}}</a>
       </span>
 
       <span class="annotation-collapsed-replies">
@@ -47,15 +47,15 @@
     <!-- Timestamp -->
     <a class="annotation-timestamp"
        target="_blank"
-       title="{{vm.annotation.updated | moment:'LLLL'}}"
-       ng-if="!vm.editing() && vm.annotation.updated"
-       ng-href="{{vm.baseURI}}a/{{vm.annotation.id}}"
+       title="{{vm.updated() | moment:'LLLL'}}"
+       ng-if="!vm.editing() && vm.updated()"
+       ng-href="{{vm.baseURI}}a/{{vm.id()}}"
        >{{vm.timestamp}}</a>
   </header>
 
   <!-- Excerpts -->
   <section class="annotation-quote-list"
-           ng-repeat="target in vm.annotation.target track by $index"
+           ng-repeat="target in vm.target() track by $index"
            ng-if="vm.hasQuotes()">
     <excerpt enabled="vm.feature('truncate_annotations')">
       <blockquote class="annotation-quote"
@@ -135,7 +135,7 @@
          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
     </div>
 
-    <div class="annotation-actions" ng-if="!vm.editing() && vm.annotation.id">
+    <div class="annotation-actions" ng-if="!vm.editing() && vm.id()">
       <button class="small btn btn-clean"
               ng-click="vm.reply()"
               ><i class="h-icon-reply btn-icon"></i> Reply</button>

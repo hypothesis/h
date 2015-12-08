@@ -165,12 +165,6 @@ function updateViewModel(domainModel, vm, permissions) {
   vm.annotation = {
     text: domainModel.text,
     tags: viewModelTagsFromDomainModelTags(domainModel.tags),
-    // FIXME: These and other vm.annotation.* variables that the templates are
-    // using need to move out of vm.annotation and onto vm.
-    id: domainModel.id,
-    target: domainModel.target,
-    updated: domainModel.updated,
-    user: domainModel.user
   };
 
   vm.annotationURI = new URL(
@@ -536,11 +530,15 @@ function AnnotationController(
     * @returns {boolean} True if this annotation has quotes
     */
   vm.hasQuotes = function() {
-    return vm.annotation.target.some(function(target) {
+    return domainModel.target.some(function(target) {
       return target.selector && target.selector.some(function(selector) {
         return selector.type === 'TextQuoteSelector';
       });
     });
+  };
+
+  vm.id = function() {
+    return domainModel.id;
   };
 
   /**
@@ -745,6 +743,18 @@ function AnnotationController(
     */
   vm.tagsAutoComplete = function(query) {
     return $q.when(tags.filter(query));
+  };
+
+  vm.target = function() {
+    return domainModel.target;
+  };
+
+  vm.updated = function() {
+    return domainModel.updated;
+  };
+
+  vm.user = function() {
+    return domainModel.user;
   };
 
   init();
