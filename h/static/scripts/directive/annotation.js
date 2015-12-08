@@ -101,6 +101,24 @@ function isNew(annotation) {
   }
 }
 
+/** Restore unsaved changes to this annotation from the drafts service.
+ *
+ * If there are no draft changes to this annotation, does nothing.
+ *
+ */
+function restoreFromDrafts(drafts, permissions, domainModel, vm) {
+  var draft = drafts.get(domainModel);
+  if (draft) {
+    if (draft.private) {
+      domainModel.permissions = permissions.private();
+    } else {
+      domainModel.permissions = permissions.shared(domainModel.group);
+    }
+    vm.annotation.tags = viewModelTagsFromDomainModelTags(draft.tags);
+    vm.annotation.text = draft.text;
+  }
+}
+
 /**
   * Save the given annotation to the drafts service.
   *
@@ -141,7 +159,7 @@ function updateDomainModel(domainModel, vm) {
 }
 
 /** Update the view model from the domain model changes. */
-function updateViewModel(drafts, domainModel, vm, permissions) {
+function updateViewModel(domainModel, vm, permissions) {
   // Extend the view model with a copy of the domain model.
   // Note that copy is used so that deep properties aren't shared.
   vm.annotation = {
@@ -154,19 +172,6 @@ function updateViewModel(drafts, domainModel, vm, permissions) {
     updated: domainModel.updated,
     user: domainModel.user
   };
-
-  // If we have unsaved changes to this annotation, apply them
-  // to the view model.
-  var draft = drafts.get(domainModel);
-  if (draft) {
-    if (draft.private) {
-      domainModel.permissions = permissions.private();
-    } else {
-      domainModel.permissions = permissions.shared(domainModel.group);
-    }
-    vm.annotation.tags = viewModelTagsFromDomainModelTags(draft.tags);
-    vm.annotation.text = draft.text;
-  }
 
   vm.annotationURI = new URL(
     '/a/' + vm.annotation.id, vm.baseURI).href;
@@ -369,7 +374,8 @@ function AnnotationController(
     }
 
     updateTimestamp(domainModel === old);  // Repeat on first run.
-    updateViewModel(drafts, domainModel, vm, permissions);
+    updateViewModel(domainModel, vm, permissions);
+    restoreFromDrafts(drafts, permissions, domainModel, vm);
   }
 
 
@@ -628,7 +634,8 @@ function AnnotationController(
     if (vm.action === 'create') {
       $rootScope.$emit('annotationDeleted', domainModel);
     } else {
-      updateViewModel(drafts, domainModel, vm, permissions);
+      updateViewModel(domainModel, vm, permissions);
+      restoreFromDrafts(drafts, permissions, domainModel, vm);
       view();
     }
   };

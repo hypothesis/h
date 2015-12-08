@@ -161,13 +161,6 @@ describe('annotation.js', function() {
       sandbox.restore();
     });
 
-    /** Return a mock of the `drafts` service. */
-    function mockDrafts() {
-      return {
-        get: function() {}
-      };
-    }
-
     it('copies model.document.title to vm.document.title', function() {
       var vm = {};
       var model = {
@@ -177,7 +170,7 @@ describe('annotation.js', function() {
         }
       };
 
-      updateViewModel(mockDrafts(), model, vm);
+      updateViewModel(model, vm);
 
       assert.equal(vm.document.title, 'A special document');
     });
@@ -191,7 +184,7 @@ describe('annotation.js', function() {
         }
       };
 
-      updateViewModel(mockDrafts(), model, vm);
+      updateViewModel(model, vm);
 
       assert.equal(vm.document.title, 'first title');
     });
@@ -205,7 +198,7 @@ describe('annotation.js', function() {
         }
       };
 
-      updateViewModel(mockDrafts(), model, vm);
+      updateViewModel(model, vm);
 
       assert.equal(
         vm.document.title, 'A very very very long title th…');
@@ -217,7 +210,7 @@ describe('annotation.js', function() {
         uri: 'http://example.com/example.html',
       };
 
-      updateViewModel(mockDrafts(), model, vm);
+      updateViewModel(model, vm);
 
       assert.equal(vm.document.uri, 'http://example.com/example.html');
     });
@@ -228,7 +221,7 @@ describe('annotation.js', function() {
         uri: 'http://example.com/example.html',
       };
 
-      updateViewModel(mockDrafts(), model, vm);
+      updateViewModel(model, vm);
 
       assert.equal(vm.document.domain, 'example.com');
     });
@@ -240,7 +233,7 @@ describe('annotation.js', function() {
         document: {}
       };
 
-      updateViewModel(mockDrafts(), model, vm);
+      updateViewModel(model, vm);
 
       assert.equal(vm.document.title, 'example.com');
     });
@@ -254,7 +247,7 @@ describe('annotation.js', function() {
           document: undefined
         };
 
-        updateViewModel(mockDrafts(), model, vm);
+        updateViewModel(model, vm);
 
         assert(vm.document.uri === 'http://example.com');
       }
@@ -269,7 +262,7 @@ describe('annotation.js', function() {
           document: undefined
         };
 
-        updateViewModel(mockDrafts(), model, vm);
+        updateViewModel(model, vm);
 
         assert(vm.document.domain === 'example.com');
       }
@@ -284,7 +277,7 @@ describe('annotation.js', function() {
           document: undefined
         };
 
-        updateViewModel(mockDrafts(), model, vm);
+        updateViewModel(model, vm);
 
         assert(vm.document.title === 'example.com');
       }
