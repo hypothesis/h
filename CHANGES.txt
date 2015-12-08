@@ -1,11 +1,14 @@
-Unreleased
-==========
+0.8.3 (2015-12-08)
+==================
 
 Bug fixes
 ---------
 
 - Fix a crash that meant that reply notification emails would not be sent if
   the annotation replied to had no text (#2771).
+
+- Fix a bug where realtime annotation updates weren't being sent to logged-out
+  clients (#2776).
 
 Features
 --------
@@ -23,6 +26,8 @@ Miscellanea
 - The frontend code that controls the annotation card widget has been translated
   to JavaScript, and numerous aspects of it have been refactored or simplified
   (#2756, #2761, #2762, #2763).
+
+- The site now serves a robots.txt file (#2778).
 
 0.8.2 (2015-11-30)
 ==================
