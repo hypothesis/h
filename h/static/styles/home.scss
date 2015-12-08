@@ -33,19 +33,19 @@
     text-align: center;
   }
 
-  $laptop-image-width: 800px;
-  $laptop-image-height: 424px;
+  $computer-width: 800px;
+  $computer-height: 424px;
 
-  $laptop-screenshot-width: 620px;
-  $laptop-screenshot-height: 365px;
+  $computer-screen-width: 620px;
+  $computer-screen-height: 365px;
 
-  $laptop-screenshot-left-offset: 90px;
-  $laptop-screenshot-top-offset: 29px;
+  $computer-screen-left-offset: 90px;
+  $computer-screen-top-offset: 29px;
 
   .computer {
     position: relative;
-    width: $laptop-image-width;
-    height: $laptop-image-height;
+    width: $computer-width;
+    height: $computer-height;
     margin-left: auto;
     margin-right: auto;
   }
@@ -66,10 +66,10 @@
 
     // screenshot size and positioning chosen to
     // fit in the screen area of the laptop image
-    max-width: $laptop-screenshot-width;
-    height: $laptop-screenshot-height;
-    top: $laptop-screenshot-top-offset;
-    left: $laptop-screenshot-left-offset;
+    max-width: $computer-screen-width;
+    height: $computer-screen-height;
+    top: $computer-screen-top-offset;
+    left: $computer-screen-left-offset;
   }
 
   .home__intro {
@@ -241,15 +241,15 @@
     }
 
     .computer {
-      width: $laptop-image-width / 3;
-      height: $laptop-image-height / 3;
+      width: $computer-width / 3;
+      height: $computer-height / 3;
     }
 
     .computer__screen-img {
-      width: $laptop-screenshot-width / 3;
-      height: $laptop-screenshot-height / 3;
-      left: $laptop-screenshot-left-offset / 3;
-      top: $laptop-screenshot-top-offset / 3;
+      width: $computer-screen-width / 3;
+      height: $computer-screen-height / 3;
+      left: $computer-screen-left-offset / 3;
+      top: $computer-screen-top-offset / 3;
     }
   }
 }
