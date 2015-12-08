@@ -5,7 +5,6 @@ import mock
 import pytest
 
 from pyramid import testing
-from pyramid import httpexceptions
 
 from h.api import views
 
@@ -19,6 +18,58 @@ def _mock_annotation(**kwargs):
     model.get.side_effect = kwargs.get
     model.__contains__.side_effect = kwargs.__contains__
     return annotation
+
+
+def test_error_not_found_sets_status_code():
+    request = testing.DummyRequest()
+
+    views.error_not_found(context=None, request=request)
+
+    assert request.response.status_code == 404
+
+
+def test_error_not_found_returns_status_object():
+    request = testing.DummyRequest()
+
+    result = views.error_not_found(context=None, request=request)
+
+    assert result == {'status': 'failure', 'reason': 'not_found'}
+
+
+def test_error_api_sets_status_code_from_error():
+    request = testing.DummyRequest()
+    exc = views.APIError("it exploded", status_code=429)
+
+    views.error_api(exc, request)
+
+    assert request.response.status_code == 429
+
+
+def test_error_api_returns_status_object():
+    request = testing.DummyRequest()
+    exc = views.APIError("it exploded", status_code=429)
+
+    result = views.error_api(exc, request)
+
+    assert result == {'status': 'failure', 'reason': 'it exploded'}
+
+
+def test_error_validation_sets_bad_request_status_code():
+    request = testing.DummyRequest()
+    exc = mock.Mock(message="it exploded")
+
+    views.error_validation(exc, request)
+
+    assert request.response.status_code == 400
+
+
+def test_error_validation_returns_status_object():
+    request = testing.DummyRequest()
+    exc = mock.Mock(message="it exploded")
+
+    result = views.error_validation(exc, request)
+
+    assert result == {'status': 'failure', 'reason': 'it exploded'}
 
 
 def test_index():
@@ -149,15 +200,15 @@ create_fixtures = pytest.mark.usefixtures(
 
 
 @create_fixtures
-def test_create_returns_error_if_parsing_json_fails():
-    """It should return an error if JSON parsing of the request body fails."""
+def test_create_raises_if_json_parsing_fails():
+    """The view raises PayloadError if parsing of the request body fails."""
     request = mock.Mock()
+
     # Make accessing the request.json_body property raise ValueError.
     type(request).json_body = mock.PropertyMock(side_effect=ValueError)
 
-    error = views.create(request)
-
-    assert error['status'] == 'failure'
+    with pytest.raises(views.PayloadError):
+        views.update(mock.Mock(), request)
 
 
 @create_fixtures
@@ -181,20 +232,6 @@ def test_create_calls_validator(schemas):
 
     schemas.AnnotationSchema.return_value.validate.assert_called_once_with(
         request.json_body)
-
-
-@create_fixtures
-def test_create_returns_api_error_for_validation_error(schemas):
-    class ValidationError(Exception):
-        pass
-    schemas.ValidationError = ValidationError
-    schemas.AnnotationSchema.return_value.validate.side_effect = (
-        schemas.ValidationError(mock.sentinel.reason))
-
-    response = views.create(mock.Mock())
-
-    assert response['status'] == 'failure'
-    assert response['reason'] == mock.sentinel.reason
 
 
 @create_fixtures
@@ -279,14 +316,15 @@ update_fixtures = pytest.mark.usefixtures(
 
 
 @update_fixtures
-def test_update_returns_error_if_json_parsing_fails():
+def test_update_raises_if_json_parsing_fails():
+    """The view raises PayloadError if parsing of the request body fails."""
     request = mock.Mock()
+
     # Make accessing the request.json_body property raise ValueError.
     type(request).json_body = mock.PropertyMock(side_effect=ValueError)
 
-    error = views.update(mock.Mock(), request)
-
-    assert error['status'] == 'failure'
+    with pytest.raises(views.PayloadError):
+        views.update(mock.Mock(), request)
 
 
 @update_fixtures
@@ -297,20 +335,6 @@ def test_update_calls_validator(schemas):
 
     schemas.AnnotationSchema.return_value.validate.assert_called_once_with(
         request.json_body)
-
-
-@update_fixtures
-def test_update_returns_api_error_for_validation_error(schemas):
-    class ValidationError(Exception):
-        pass
-    schemas.ValidationError = ValidationError
-    schemas.AnnotationSchema.return_value.validate.side_effect = (
-        schemas.ValidationError(mock.sentinel.reason))
-
-    response = views.update(mock.Mock(), mock.Mock())
-
-    assert response['status'] == 'failure'
-    assert response['reason'] == mock.sentinel.reason
 
 
 @update_fixtures
@@ -331,9 +355,11 @@ def test_update_calls_update_annotation(logic, schemas):
 def test_update_returns_error_if_update_annotation_raises(logic):
     logic.update_annotation.side_effect = RuntimeError("Nope", 401)
 
-    error = views.update(mock.Mock(), mock.Mock())
+    with pytest.raises(views.APIError) as exc:
+        views.update(mock.Mock(), mock.Mock())
 
-    assert error['status'] == 'failure'
+    assert exc.value.message == "Nope"
+    assert exc.value.status_code == 401
 
 
 @update_fixtures
