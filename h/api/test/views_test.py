@@ -215,23 +215,22 @@ def test_create_raises_if_json_parsing_fails():
 def test_create_calls_create_annotation(logic, schemas):
     """It should call logic.create_annotation() appropriately."""
     request = mock.Mock()
-    schemas.AnnotationSchema.return_value.validate.return_value = {'foo': 123}
+    schema = schemas.CreateAnnotationSchema.return_value
+    schema.validate.return_value = {'foo': 123}
 
     views.create(request)
 
-    logic.create_annotation.assert_called_once_with(
-        {'foo': 123},
-        userid=request.authenticated_userid)
+    logic.create_annotation.assert_called_once_with({'foo': 123})
 
 
 @create_fixtures
 def test_create_calls_validator(schemas):
     request = mock.Mock()
+    schema = schemas.CreateAnnotationSchema.return_value
 
     views.create(request)
 
-    schemas.AnnotationSchema.return_value.validate.assert_called_once_with(
-        request.json_body)
+    schema.validate.assert_called_once_with(request.json_body)
 
 
 @create_fixtures
@@ -330,36 +329,24 @@ def test_update_raises_if_json_parsing_fails():
 @update_fixtures
 def test_update_calls_validator(schemas):
     request = mock.Mock()
+    schema = schemas.UpdateAnnotationSchema.return_value
 
     views.update(mock.Mock(), request)
 
-    schemas.AnnotationSchema.return_value.validate.assert_called_once_with(
-        request.json_body)
+    schema.validate.assert_called_once_with(request.json_body)
 
 
 @update_fixtures
 def test_update_calls_update_annotation(logic, schemas):
     context = mock.Mock()
     request = mock.Mock()
-    schemas.AnnotationSchema.return_value.validate.return_value = {'foo': 123}
+    schema = schemas.UpdateAnnotationSchema.return_value
+    schema.validate.return_value = {'foo': 123}
 
     views.update(context, request)
 
-    logic.update_annotation.assert_called_once_with(
-        context.model,
-        {'foo': 123},
-        request.authenticated_userid)
-
-
-@update_fixtures
-def test_update_returns_error_if_update_annotation_raises(logic):
-    logic.update_annotation.side_effect = RuntimeError("Nope", 401)
-
-    with pytest.raises(views.APIError) as exc:
-        views.update(mock.Mock(), mock.Mock())
-
-    assert exc.value.message == "Nope"
-    assert exc.value.status_code == 401
+    logic.update_annotation.assert_called_once_with(context.model,
+                                                    {'foo': 123})
 
 
 @update_fixtures

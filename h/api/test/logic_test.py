@@ -25,26 +25,15 @@ create_annotation_fixtures = pytest.mark.usefixtures(
 @create_annotation_fixtures
 def test_create_annotation_calls_Annotation(Annotation):
     fields = mock.MagicMock()
-    logic.create_annotation(fields, userid='acct:joe@example.org')
+    logic.create_annotation(fields)
 
     Annotation.assert_called_once_with(fields)
 
 
 @create_annotation_fixtures
-def test_create_annotation_sets_user(Annotation):
-    """It should set the annotation's 'user' field to the userid."""
-    userid = 'acct:sofia@example.net'
-    Annotation.return_value = _mock_annotation()
-
-    annotation = logic.create_annotation({}, userid)
-
-    assert annotation['user'] == userid
-
-
-@create_annotation_fixtures
 def test_create_annotation_calls_prepare(Annotation, search_lib):
     """It should call prepare() once with the annotation."""
-    logic.create_annotation({}, userid='acct:gustave@example.com')
+    logic.create_annotation({})
 
     search_lib.prepare.assert_called_once_with(Annotation.return_value)
 
@@ -52,44 +41,15 @@ def test_create_annotation_calls_prepare(Annotation, search_lib):
 @create_annotation_fixtures
 def test_create_annotation_calls_save(Annotation):
     """It should call save() once."""
-    logic.create_annotation({}, userid='acct:francois@example.com')
+    logic.create_annotation({})
 
     Annotation.return_value.save.assert_called_once_with()
 
 
 @create_annotation_fixtures
 def test_create_annotation_returns_the_annotation(Annotation):
-    result = logic.create_annotation({}, userid='acct:satyarupa@example.org')
+    result = logic.create_annotation({})
     assert result == Annotation.return_value
-
-
-@create_annotation_fixtures
-def test_create_annotation_does_not_crash_if_annotation_has_no_group(
-        Annotation):
-    assert 'group' not in Annotation.return_value
-    fields = {}  # No group here either.
-
-    logic.create_annotation(fields, userid='acct:maya@example.net')
-
-
-@create_annotation_fixtures
-def test_create_annotation_does_not_crash_if_annotations_parent_has_no_group(
-        Annotation):
-    """It shouldn't crash if the parent annotation has no group.
-
-    It shouldn't crash if the annotation is a reply and its parent annotation
-    has no 'group' field.
-
-    """
-    # No group in the original annotation/reply itself.
-    Annotation.return_value = _mock_annotation()
-    assert 'group' not in Annotation.return_value
-    fields = {}  # No group here either.
-
-    # And no group in the parent annotation either.
-    Annotation.fetch.return_value = {}
-
-    logic.create_annotation(fields, userid='acct:filip@example.com')
 
 
 # The fixtures required to mock all of update_annotation()'s dependencies.
@@ -97,69 +57,20 @@ update_annotation_fixtures = pytest.mark.usefixtures('search_lib')
 
 
 @update_annotation_fixtures
-def test_update_annotation_raises_if_non_admin_changes_perms():
-    with pytest.raises(RuntimeError):
-        logic.update_annotation(
-            _mock_annotation(permissions={}),
-            fields={'permissions': {'read': ['someone']}},
-            userid='alice')
-
-
-@update_annotation_fixtures
-def test_update_annotation_admins_can_change_permissions():
-    annotation = _mock_annotation(
-        permissions={'admin': ['alice']},
-        user='alice')
-
-    logic.update_annotation(
-        annotation,
-        fields={'permissions': 'changed'},
-        userid='alice')
-
-    assert annotation['permissions'] == 'changed'
-
-
-@update_annotation_fixtures
-def test_update_annotation_non_admins_can_make_non_permissions_changes():
-    annotation = _mock_annotation(
-        foo='bar',
-        permissions={'admin': ['alice']},
-        user='alice')
-
-    logic.update_annotation(
-        annotation,
-        fields={
-            'foo': 'changed',
-        },
-        userid='bob')
-
-    assert annotation['foo'] == 'changed'
-
-
-@update_annotation_fixtures
 def test_update_annotation_calls_update():
     annotation = _mock_annotation()
     fields = {'foo': 'bar'}
 
-    logic.update_annotation(annotation, fields, 'foo')
+    logic.update_annotation(annotation, fields)
 
     annotation.update.assert_called_once_with(fields)
-
-
-@update_annotation_fixtures
-def test_update_annotation_user_cannot_change_group():
-    annotation = _mock_annotation(group='old')
-    fields = {'group': 'new'}
-
-    with pytest.raises(RuntimeError):
-        logic.update_annotation(annotation, fields, 'foo')
 
 
 @update_annotation_fixtures
 def test_update_annotation_calls_prepare(search_lib):
     annotation = _mock_annotation()
 
-    logic.update_annotation(annotation, {}, 'foo')
+    logic.update_annotation(annotation, {})
 
     search_lib.prepare.assert_called_once_with(annotation)
 
@@ -168,50 +79,13 @@ def test_update_annotation_calls_prepare(search_lib):
 def test_update_annotation_calls_save():
     annotation = _mock_annotation()
 
-    logic.update_annotation(annotation, {}, 'foo')
+    logic.update_annotation(annotation, {})
 
     annotation.save.assert_called_once_with()
 
 
-@update_annotation_fixtures
-def test_update_annotation_does_not_crash_if_annotation_has_no_group():
-    annotation = _mock_annotation()
-    assert 'group' not in annotation
-
-    logic.update_annotation(annotation, {}, 'foo')
-
-
-@update_annotation_fixtures
-def test_update_annotation_does_not_crash_if_annotations_parent_has_no_group(
-        Annotation):
-    """It shouldn't crash if the parent annotation has no group.
-
-    It shouldn't crash if the annotation is a reply and its parent annotation
-    has no 'group' field.
-
-    """
-    # No group in the original annotation/reply itself.
-    annotation = _mock_annotation()
-    assert 'group' not in annotation
-
-    # And no group in the parent annotation either.
-    Annotation.fetch.return_value = {}
-
-    logic.update_annotation(annotation, {}, 'foo')
-
-
 # The fixtures required to mock all of delete_annotation()'s dependencies.
 delete_annotation_fixtures = pytest.mark.usefixtures()
-
-
-@delete_annotation_fixtures
-def test_delete_does_not_crash_if_annotation_has_no_group():
-    annotation = mock.MagicMock()
-    annotation_data = {}  # No 'group' key.
-    annotation.get.side_effect = annotation_data.get
-    annotation.__getitem__.side_effect = annotation_data.__getitem__
-
-    logic.delete_annotation(annotation)
 
 
 @delete_annotation_fixtures
