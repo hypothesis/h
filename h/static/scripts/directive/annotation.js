@@ -100,11 +100,7 @@ function isReply(domainModel) {
  * saved to the server yet.
  */
 function isNew(domainModel) {
-  if (domainModel.id) {
-    return false;
-  } else {
-    return true;
-  }
+  return !domainModel.id;
 }
 
 /** Restore unsaved changes to this annotation from the drafts service.
