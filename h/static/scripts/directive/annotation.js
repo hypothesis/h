@@ -111,7 +111,7 @@ function isNew(domainModel) {
 function restoreFromDrafts(drafts, permissions, domainModel, vm) {
   var draft = drafts.get(domainModel);
   if (draft) {
-    if (draft.private) {
+    if (draft.isPrivate) {
       domainModel.permissions = permissions.private();
     } else {
       domainModel.permissions = permissions.shared(domainModel.group);

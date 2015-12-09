@@ -14,7 +14,7 @@ describe('drafts', function () {
       drafts.update(model, true, ['foo'], 'edit');
       assert.deepEqual(
         drafts.get(model),
-        {private: true, tags: ['foo'], text: 'edit'});
+        {isPrivate: true, tags: ['foo'], text: 'edit'});
     });
 
     it('should replace existing drafts', function () {

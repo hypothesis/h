@@ -9,9 +9,9 @@
  *    the drafts service, they're only used to identify the correct draft to
  *    return.
  *
- * 2. `private` (boolean), `tags` (array of strings) and `text` (string) which
- *    are the user's draft changes to the annotation. These are returned from
- *    the drafts service by `drafts.get()`.
+ * 2. `isPrivate` (boolean), `tags` (array of strings) and `text` (string)
+ *    which are the user's draft changes to the annotation. These are returned
+ *    from the drafts service by `drafts.get()`.
  *
  */
 function DraftStore() {
@@ -51,7 +51,7 @@ function DraftStore() {
     for (var i = 0; i < this._drafts.length; i++) {
       if (match(this._drafts[i], model)) {
         return {
-          private: this._drafts[i].private,
+          isPrivate: this._drafts[i].isPrivate,
           tags: this._drafts[i].tags,
           text: this._drafts[i].text
         };
@@ -63,10 +63,10 @@ function DraftStore() {
    * Update the draft version for a given annotation, replacing any
    * existing draft.
    */
-  this.update = function update(model, private, tags, text) {
+  this.update = function update(model, isPrivate, tags, text) {
     var newDraft = {
       model: model,
-      private: private,
+      isPrivate: isPrivate,
       tags: tags,
       text: text
     };
