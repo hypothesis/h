@@ -126,14 +126,13 @@ function restoreFromDrafts(drafts, permissions, domainModel, vm) {
   *
   * Any existing drafts for this annotation will be overwritten.
   *
+  * @param {object} drafts - The drafts service
   * @param {object} domainModel - The full domainModel object of the
   *   annotation to be saved. This full domainModel model is not retrieved
   *   again from drafts, it's only used to identify the annotation's draft in
   *   order to retrieve the fields below.
-  * @param {boolean} private - Whether or not the annotation is currently
-  *   private.
-  * @param {array} tags - The annotation's current tags.
-  * @param {string} text - The annotation's current text.
+  * @param {object} vm - The view model object containing the user's unsaved
+  *   changes to the annotation.
   *
   */
 function saveToDrafts(drafts, domainModel, vm) {
