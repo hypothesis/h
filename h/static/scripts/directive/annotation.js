@@ -234,10 +234,6 @@ function viewModelTagsFromDomainModelTags(domainModelTags) {
 }
 
 /**
-  * `AnnotationController` provides an API for the annotation directive. It
-  * manages the interaction between the domain and view models and uses the
-  * {@link annotationMapper AnnotationMapper service} for persistence.
-  *
   * @ngdoc type
   * @name annotation.AnnotationController
   *
