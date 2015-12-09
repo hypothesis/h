@@ -53,7 +53,7 @@ function DraftStore() {
         return {
           isPrivate: this._drafts[i].isPrivate,
           tags: this._drafts[i].tags,
-          text: this._drafts[i].text
+          text: this._drafts[i].text,
         };
       }
     }
