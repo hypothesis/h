@@ -91,11 +91,7 @@ function extractDocumentMetadata(domainModel) {
 
 /** Return `true` if the given annotation is a reply, `false` otherwise. */
 function isReply(domainModel) {
-  if ((domainModel.references || []).length > 0) {
-    return true;
-  } else {
-    return false;
-  }
+  return (domainModel.references || []).length > 0;
 }
 
 /** Return `true` if the given annotation is new, `false` otherwise.
