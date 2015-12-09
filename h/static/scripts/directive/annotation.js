@@ -39,8 +39,8 @@ function errorMessage(reason) {
 
 /** Extract a URI, domain and title from the given domain model object.
  *
- * @param {object} domainModel An annotation domain model object as received from the
- *   server-side API.
+ * @param {object} domainModel An annotation domain model object as received
+ *   from the server-side API.
  * @returns {object} An object with three properties extracted from the model:
  *   uri, domain and title.
  *
@@ -179,8 +179,6 @@ function updateViewModel(domainModel, vm, permissions) {
 
   vm.annotationURI = new URL(
     '/a/' + domainModel.id, vm.baseURI).href;
-
-  vm.document = extractDocumentMetadata(domainModel);
 }
 
 /** Return truthy if the given annotation is valid, falsy otherwise.
@@ -273,10 +271,6 @@ function AnnotationController(
 
     /** The baseURI for the website, e.g. 'https://hypothes.is/'. */
     vm.baseURI = $document.prop('baseURI');
-
-    /** An object that will contain some metadata about the annotated document.
-     */
-    vm.document = null;
 
     /** Give the template access to the feature flags. */
     vm.feature = features.flagEnabled;
@@ -473,6 +467,11 @@ function AnnotationController(
         });
       }
     }, true);
+  };
+
+  /** Return some metadata extracted from the annotated document. */
+  vm.document = function() {
+    return extractDocumentMetadata(domainModel);
   };
 
   /**
@@ -842,7 +841,6 @@ module.exports = {
   // FIXME: The code should be refactored to enable unit testing without having
   // to do this.
   extractDocumentMetadata: extractDocumentMetadata,
-  updateViewModel: updateViewModel,
   updateDomainModel: updateDomainModel,
   validate: validate,
 
