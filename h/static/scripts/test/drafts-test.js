@@ -11,7 +11,7 @@ describe('drafts', function () {
     it('should save changes', function () {
       var model = {id: 'foo'};
       assert.notOk(drafts.get(model));
-      drafts.update(model, true, ['foo'], 'edit');
+      drafts.update(model, {isPrivate:true, tags:['foo'], text:'edit'});
       assert.deepEqual(
         drafts.get(model),
         {isPrivate: true, tags: ['foo'], text: 'edit'});
@@ -19,16 +19,16 @@ describe('drafts', function () {
 
     it('should replace existing drafts', function () {
       var model = {id: 'foo'};
-      drafts.update(model, true, ['foo'], 'foo');
-      drafts.update(model, true, ['foo'], 'bar');
+      drafts.update(model, {isPrivate:true, tags:['foo'], text:'foo'});
+      drafts.update(model, {isPrivate:true, tags:['foo'], text:'bar'});
       assert.equal(drafts.get(model).text, 'bar');
     });
 
     it('should replace existing drafts with the same ID', function () {
       var modelA = {id: 'foo'};
       var modelB = {id: 'foo'};
-      drafts.update(modelA, true, ['foo'], 'foo');
-      drafts.update(modelB, true, ['foo'], 'bar');
+      drafts.update(modelA, {isPrivate:true, tags:['foo'], text:'foo'});
+      drafts.update(modelB, {isPrivate:true, tags:['foo'], text:'bar'});
       assert.equal(drafts.get(modelA).text, 'bar');
     });
   });

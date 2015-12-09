@@ -1323,7 +1323,7 @@ describe('annotation.js', function() {
 
         assert.calledWith(
           fakeDrafts.update,
-          parts.annotation, true, [], 'unsaved-text');
+          parts.annotation, {isPrivate:true, tags:[], text:'unsaved-text'});
       });
 
       it('should not create a new draft', function() {

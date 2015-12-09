@@ -63,12 +63,12 @@ function DraftStore() {
    * Update the draft version for a given annotation, replacing any
    * existing draft.
    */
-  this.update = function update(model, isPrivate, tags, text) {
+  this.update = function update(model, changes) {
     var newDraft = {
       model: model,
-      isPrivate: isPrivate,
-      tags: tags,
-      text: text
+      isPrivate: changes.isPrivate,
+      tags: changes.tags,
+      text: changes.text
     };
     this.remove(model);
     this._drafts.push(newDraft);

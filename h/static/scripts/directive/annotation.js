@@ -137,8 +137,12 @@ function restoreFromDrafts(drafts, permissions, domainModel, vm) {
   */
 function saveToDrafts(drafts, domainModel, vm) {
   drafts.update(
-    domainModel, vm.isPrivate(),
-    domainModelTagsFromViewModelTags(vm.form.tags), vm.form.text);
+    domainModel,
+    {
+      isPrivate:vm.isPrivate(),
+      tags:domainModelTagsFromViewModelTags(vm.form.tags),
+      text:vm.form.text,
+    });
 }
 
 /** Update domainModel from vm.
