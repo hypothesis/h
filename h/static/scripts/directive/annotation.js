@@ -108,14 +108,10 @@ function isNew(domainModel) {
  * If there are no draft changes to this annotation, does nothing.
  *
  */
-function restoreFromDrafts(drafts, permissions, domainModel, vm) {
+function restoreFromDrafts(drafts, domainModel, vm) {
   var draft = drafts.get(domainModel);
   if (draft) {
-    if (draft.isPrivate) {
-      domainModel.permissions = permissions.private();
-    } else {
-      domainModel.permissions = permissions.shared(domainModel.group);
-    }
+    vm.isPrivate = draft.isPrivate;
     vm.form.tags = draft.tags;
     vm.form.text = draft.text;
   }
@@ -139,7 +135,7 @@ function saveToDrafts(drafts, domainModel, vm) {
   drafts.update(
     domainModel,
     {
-      isPrivate: vm.isPrivate(),
+      isPrivate: vm.isPrivate,
       tags: vm.form.tags,
       text: vm.form.text,
     });
@@ -158,9 +154,14 @@ function saveToDrafts(drafts, domainModel, vm) {
  * @returns undefined
  *
  */
-function updateDomainModel(domainModel, vm) {
+function updateDomainModel(domainModel, vm, permissions) {
   domainModel.text = vm.form.text;
   domainModel.tags = domainModelTagsFromViewModelTags(vm.form.tags);
+  if (vm.isPrivate) {
+    domainModel.permissions = permissions.private();
+  } else {
+    domainModel.permissions = permissions.shared(domainModel.group);
+  }
 }
 
 /** Update the view model from the domain model changes. */
@@ -171,9 +172,9 @@ function updateViewModel(domainModel, vm, permissions) {
     text: domainModel.text,
     tags: viewModelTagsFromDomainModelTags(domainModel.tags),
   };
-
-  vm.annotationURI = new URL(
-    '/a/' + domainModel.id, vm.baseURI).href;
+  vm.annotationURI = new URL('/a/' + domainModel.id, vm.baseURI).href;
+  vm.isPrivate = permissions.isPrivate(
+    domainModel.permissions, domainModel.user);
 }
 
 /** Return truthy if the given annotation is valid, falsy otherwise.
@@ -270,6 +271,9 @@ function AnnotationController(
     /** Give the template access to the feature flags. */
     vm.feature = features.flagEnabled;
 
+    /** Whether or not this annotation is private. */
+    vm.isPrivate = false;
+
     /** Copy isSidebar from $scope onto vm for consistency (we want this
       * directive's templates to always access variables from vm rather than
       * directly from scope). */
@@ -328,7 +332,7 @@ function AnnotationController(
 
     updateTimestamp(true);
     updateViewModel(domainModel, vm, permissions);
-    restoreFromDrafts(drafts, permissions, domainModel, vm);
+    restoreFromDrafts(drafts, domainModel, vm);
   }
 
   /** Called when this AnnotationController instance's scope is removed. */
@@ -345,13 +349,7 @@ function AnnotationController(
     // Move any new annotations to the currently focused group when
     // switching groups. See GH #2689 for context.
     if (isNew(domainModel)) {
-      var newGroup = groups.focused().id;
-      var isShared = permissions.isShared(
-        domainModel.permissions, domainModel.group);
-      if (isShared) {
-        domainModel.permissions = permissions.shared(newGroup);
-      }
-      domainModel.group = newGroup;
+      domainModel.group = groups.focused().id;
     }
 
     if (drafts.get(domainModel)) {
@@ -554,21 +552,12 @@ function AnnotationController(
 
   /**
     * @ngdoc method
-    * @name annotation.AnnotationController#isPrivate
-    * @returns {boolean} True if the annotation is private to the current user.
-    */
-  vm.isPrivate = function() {
-    return permissions.isPrivate(domainModel.permissions, domainModel.user);
-  };
-
-  /**
-    * @ngdoc method
     * @name annotation.AnnotationController#isShared
     * @returns {boolean} True if the annotation is shared (either with the
     * current group or with everyone).
     */
   vm.isShared = function() {
-    return permissions.isShared(domainModel.permissions, domainModel.group);
+    return !vm.isPrivate;
   };
 
   // Save on Meta + Enter or Ctrl + Enter.
@@ -603,10 +592,10 @@ function AnnotationController(
     reply.group = domainModel.group;
 
     if (session.state.userid) {
-      if (permissions.isShared(domainModel.permissions, domainModel.group)) {
-        reply.permissions = permissions.shared(reply.group);
-      } else {
+      if (vm.isPrivate) {
         reply.permissions = permissions.private();
+      } else {
+        reply.permissions = permissions.shared(reply.group);
       }
     }
   };
@@ -622,7 +611,7 @@ function AnnotationController(
       $rootScope.$emit('annotationDeleted', domainModel);
     } else {
       updateViewModel(domainModel, vm, permissions);
-      restoreFromDrafts(drafts, permissions, domainModel, vm);
+      restoreFromDrafts(drafts, domainModel, vm);
       view();
     }
   };
@@ -646,7 +635,7 @@ function AnnotationController(
 
     switch (vm.action) {
       case 'create':
-        updateDomainModel(domainModel, vm);
+        updateDomainModel(domainModel, vm, permissions);
 
         if (!validate(domainModel)) {
           return flash.info('Please add text or a tag before publishing.');
@@ -665,7 +654,7 @@ function AnnotationController(
 
       case 'edit':
         var updatedModel = angular.copy(domainModel);
-        updateDomainModel(updatedModel, vm);
+        updateDomainModel(updatedModel, vm, permissions);
 
         if (!validate(updatedModel)) {
           return flash.info('Please add text or a tag before publishing.');
@@ -706,11 +695,7 @@ function AnnotationController(
     if (!isReply(domainModel)) {
       permissions.setDefault(privacy);
     }
-    if (privacy === 'private') {
-      domainModel.permissions = permissions.private();
-    } else if (privacy === 'shared') {
-      domainModel.permissions = permissions.shared(domainModel.group);
-    }
+    vm.isPrivate = (privacy === 'private');
   };
 
   vm.share = function(event) {

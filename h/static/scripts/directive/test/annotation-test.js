@@ -152,11 +152,18 @@ describe('annotation.js', function() {
   describe('updateDomainModel()', function() {
     var updateDomainModel = require('../annotation').updateDomainModel;
 
+    function fakePermissions() {
+      return {
+        shared: function() {},
+        private: function() {},
+      };
+    }
+
     it('copies text from viewModel into domainModel', function() {
       var domainModel = {};
       var viewModel = {form: {text: 'bar', tags: []}};
 
-      updateDomainModel(domainModel, viewModel);
+      updateDomainModel(domainModel, viewModel, fakePermissions());
 
       assert.equal(domainModel.text, viewModel.form.text);
     });
@@ -165,7 +172,7 @@ describe('annotation.js', function() {
       var domainModel = {text: 'foo'};
       var viewModel = {form: {text: 'bar', tags: []}};
 
-      updateDomainModel(domainModel, viewModel);
+      updateDomainModel(domainModel, viewModel, fakePermissions());
 
       assert.equal(domainModel.text, viewModel.form.text);
     });
@@ -174,7 +181,7 @@ describe('annotation.js', function() {
       var domainModel = {foo: 'foo', bar: 'bar'};
       var viewModel = {form: {foo: 'FOO', tags: []}};
 
-      updateDomainModel(domainModel, viewModel);
+      updateDomainModel(domainModel, viewModel, fakePermissions());
 
       assert.equal(
         domainModel.bar, 'bar',
@@ -193,12 +200,44 @@ describe('annotation.js', function() {
         }
       };
 
-      updateDomainModel(domainModel, viewModel);
+      updateDomainModel(domainModel, viewModel, fakePermissions());
 
       assert.deepEqual(
         domainModel.tags, ['foo', 'bar'],
         'The array of {tag: "text"} objects in  viewModel becomes an array ' +
         'of "text" strings in domainModel');
+    });
+
+    it('sets domainModel.permissions to private if vm.isPrivate', function() {
+      var domainModel = {};
+      var viewModel = {
+        isPrivate: true,
+        form: {
+          text: 'foo',
+        },
+      };
+      var permissions = fakePermissions();
+      permissions.private = sinon.stub().returns('private permissions');
+
+      updateDomainModel(domainModel, viewModel, permissions);
+
+      assert.equal(domainModel.permissions, 'private permissions');
+    });
+
+    it('sets domainModel.permissions to shared if !vm.isPrivate', function() {
+      var domainModel = {};
+      var viewModel = {
+        isPrivate: false,
+        form: {
+          text: 'foo',
+        },
+      };
+      var permissions = fakePermissions();
+      permissions.shared = sinon.stub().returns('shared permissions');
+
+      updateDomainModel(domainModel, viewModel, permissions);
+
+      assert.equal(domainModel.permissions, 'shared permissions');
     });
   });
 
@@ -862,9 +901,9 @@ describe('annotation.js', function() {
         'does not add the world readable principal if the parent is private',
         function() {
           var controller = createDirective(annotation).controller;
+          controller.isPrivate = true;
           var reply = {};
           fakeAnnotationMapper.createAnnotation.returns(reply);
-          fakePermissions.isShared.returns(false);
           controller.reply();
           assert.deepEqual(reply.permissions, {
             read: ['justme']
@@ -885,27 +924,25 @@ describe('annotation.js', function() {
     describe('#setPrivacy', function() {
       it('makes the annotation private when level is "private"', function() {
         var parts = createDirective();
+        parts.controller.isPrivate = false;
         parts.annotation.$update = sinon.stub().returns(Promise.resolve());
         parts.controller.edit();
         parts.controller.setPrivacy('private');
         return parts.controller.save().then(function() {
           // Verify that the permissions are updated once the annotation
           // is saved.
-          assert.deepEqual(parts.annotation.permissions, {
-            read: ['justme']
-          });
+          assert.equal(parts.controller.isPrivate, true);
         });
       });
 
       it('makes the annotation shared when level is "shared"', function() {
         var parts = createDirective();
+        parts.controller.isPrivate = true;
         parts.annotation.$update = sinon.stub().returns(Promise.resolve());
         parts.controller.edit();
         parts.controller.setPrivacy('shared');
         return parts.controller.save().then(function() {
-          assert.deepEqual(parts.annotation.permissions, {
-            read: ['everybody']
-          });
+          assert.equal(parts.controller.isPrivate, false);
         });
       });
 
@@ -1310,6 +1347,7 @@ describe('annotation.js', function() {
     describe('when the focused group changes', function() {
       it('updates the current draft', function() {
         var parts = createDirective();
+        parts.controller.isPrivate = true;
         parts.controller.edit();
         parts.controller.form.text = 'unsaved-text';
         parts.controller.form.tags = [];
@@ -1317,7 +1355,6 @@ describe('annotation.js', function() {
           text: 'old-draft'
         });
         fakeDrafts.update = sinon.stub();
-        fakePermissions.isPrivate.returns(true);
 
         $rootScope.$broadcast(events.GROUP_FOCUSED);
 
@@ -1357,33 +1394,6 @@ describe('annotation.js', function() {
           'group changes.');
       });
     });
-
-    it(
-      'updates perms when moving new annotations to the focused group',
-      function() {
-        var annotation = defaultAnnotation();
-        // id must be null so that AnnotationController considers this a new
-        // annotation.
-        annotation.id = null;
-        annotation.group = 'old-group';
-        annotation.permissions = {read: [annotation.group]};
-        // This is a shared annotation.
-        fakePermissions.isShared.returns(true);
-        createDirective(annotation);
-        // Make permissions.shared() behave like we expect it to.
-        fakePermissions.shared = function(groupId) {
-          return {
-            read: [groupId]
-          };
-        };
-
-        // Change the currently focused group.
-        fakeGroups.focused = sinon.stub().returns({id: 'new-group'});
-        $rootScope.$broadcast(events.GROUP_FOCUSED);
-
-        assert.deepEqual(annotation.permissions.read, ['new-group']);
-      }
-    );
 
     it('does not change perms when moving new private annotations', function() {
       // id must be null so that AnnotationController considers this a new

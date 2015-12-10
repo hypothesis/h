@@ -26,7 +26,7 @@
            target="_blank" ng-if="vm.group() && vm.group().url" href="{{vm.group().url}}">
           <i class="h-icon-group"></i><span class="annotation-header__group-name">{{vm.group().name}}</span>
         </a>
-        <span ng-show="vm.isPrivate()"
+        <span ng-show="vm.isPrivate"
               title="This annotation is visible only to you.">
           <i class="h-icon-lock"></i><span class="annotation-header__group-name" ng-show="!vm.group().url">Only me</span>
         </span>
