@@ -630,6 +630,7 @@ function AnnotationController(
 
         var onFulfilled = function() {
           $rootScope.$emit('annotationCreated', domainModel);
+          updateViewModel(domainModel, vm, permissions);
           view();
           drafts.remove(domainModel);
         };
