@@ -139,9 +139,9 @@ function saveToDrafts(drafts, domainModel, vm) {
   drafts.update(
     domainModel,
     {
-      isPrivate:vm.isPrivate(),
-      tags:domainModelTagsFromViewModelTags(vm.form.tags),
-      text:vm.form.text,
+      isPrivate: vm.isPrivate(),
+      tags: domainModelTagsFromViewModelTags(vm.form.tags),
+      text: vm.form.text,
     });
 }
 
