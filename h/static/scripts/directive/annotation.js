@@ -154,7 +154,7 @@ function saveToDrafts(drafts, domainModel, vm) {
  * @returns undefined
  *
  */
-function updateDomainModel(domainModel, vm, permissions) {
+function updateDomainModel(domainModel, vm, permissions, groups) {
   domainModel.text = vm.form.text;
   domainModel.tags = domainModelTagsFromViewModelTags(vm.form.tags);
   if (vm.isPrivate) {
@@ -162,6 +162,7 @@ function updateDomainModel(domainModel, vm, permissions) {
   } else {
     domainModel.permissions = permissions.shared(domainModel.group);
   }
+  domainModel.group = groups.focused().id;
 }
 
 /** Update the view model from the domain model changes. */
@@ -346,12 +347,6 @@ function AnnotationController(
       return;
     }
 
-    // Move any new annotations to the currently focused group when
-    // switching groups. See GH #2689 for context.
-    if (isNew(domainModel)) {
-      domainModel.group = groups.focused().id;
-    }
-
     if (drafts.get(domainModel)) {
       saveToDrafts(drafts, domainModel, vm);
     }
@@ -499,7 +494,7 @@ function AnnotationController(
     * @returns {Object} The full group object associated with the annotation.
     */
   vm.group = function() {
-    return groups.get(domainModel.group);
+    return groups.focused();
   };
 
   /**
@@ -635,7 +630,7 @@ function AnnotationController(
 
     switch (vm.action) {
       case 'create':
-        updateDomainModel(domainModel, vm, permissions);
+        updateDomainModel(domainModel, vm, permissions, groups);
 
         if (!validate(domainModel)) {
           return flash.info('Please add text or a tag before publishing.');
@@ -654,7 +649,7 @@ function AnnotationController(
 
       case 'edit':
         var updatedModel = angular.copy(domainModel);
-        updateDomainModel(updatedModel, vm, permissions);
+        updateDomainModel(updatedModel, vm, permissions, groups);
 
         if (!validate(updatedModel)) {
           return flash.info('Please add text or a tag before publishing.');

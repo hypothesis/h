@@ -159,11 +159,18 @@ describe('annotation.js', function() {
       };
     }
 
+    function fakeGroups() {
+      return {
+        focused: function() {return {};},
+      };
+    }
+
     it('copies text from viewModel into domainModel', function() {
       var domainModel = {};
       var viewModel = {form: {text: 'bar', tags: []}};
 
-      updateDomainModel(domainModel, viewModel, fakePermissions());
+      updateDomainModel(domainModel, viewModel, fakePermissions(),
+                        fakeGroups());
 
       assert.equal(domainModel.text, viewModel.form.text);
     });
@@ -172,7 +179,8 @@ describe('annotation.js', function() {
       var domainModel = {text: 'foo'};
       var viewModel = {form: {text: 'bar', tags: []}};
 
-      updateDomainModel(domainModel, viewModel, fakePermissions());
+      updateDomainModel(domainModel, viewModel, fakePermissions(),
+                        fakeGroups());
 
       assert.equal(domainModel.text, viewModel.form.text);
     });
@@ -181,7 +189,8 @@ describe('annotation.js', function() {
       var domainModel = {foo: 'foo', bar: 'bar'};
       var viewModel = {form: {foo: 'FOO', tags: []}};
 
-      updateDomainModel(domainModel, viewModel, fakePermissions());
+      updateDomainModel(domainModel, viewModel, fakePermissions(),
+                        fakeGroups());
 
       assert.equal(
         domainModel.bar, 'bar',
@@ -200,7 +209,8 @@ describe('annotation.js', function() {
         }
       };
 
-      updateDomainModel(domainModel, viewModel, fakePermissions());
+      updateDomainModel(domainModel, viewModel, fakePermissions(),
+                        fakeGroups());
 
       assert.deepEqual(
         domainModel.tags, ['foo', 'bar'],
@@ -219,7 +229,7 @@ describe('annotation.js', function() {
       var permissions = fakePermissions();
       permissions.private = sinon.stub().returns('private permissions');
 
-      updateDomainModel(domainModel, viewModel, permissions);
+      updateDomainModel(domainModel, viewModel, permissions, fakeGroups());
 
       assert.equal(domainModel.permissions, 'private permissions');
     });
@@ -235,9 +245,20 @@ describe('annotation.js', function() {
       var permissions = fakePermissions();
       permissions.shared = sinon.stub().returns('shared permissions');
 
-      updateDomainModel(domainModel, viewModel, permissions);
+      updateDomainModel(domainModel, viewModel, permissions, fakeGroups());
 
       assert.equal(domainModel.permissions, 'shared permissions');
+    });
+
+    it('sets domainModel.group according to groups.focused()', function() {
+      var domainModel = {};
+      var viewModel = {form: {text: 'foo',}};
+      var groups = fakeGroups();
+      groups.focused = function() {return {id: 'focused_group_id'};};
+
+      updateDomainModel(domainModel, viewModel, fakePermissions(), groups);
+
+      assert.equal(domainModel.group, 'focused_group_id');
     });
   });
 
@@ -1370,28 +1391,6 @@ describe('annotation.js', function() {
         fakeDrafts.get = sinon.stub().returns(null);
         $rootScope.$broadcast(events.GROUP_FOCUSED);
         assert.notCalled(fakeDrafts.update);
-      });
-
-      it('moves new annotations to the focused group', function() {
-        var annotation = defaultAnnotation();
-        // id must be null so that AnnotationController considers this a new
-        // annotation.
-        annotation.id = null;
-        var controller = createDirective(annotation).controller;
-        fakeGroups.get = sandbox.stub().returns({id: 'new-group'});
-
-        // Change the currently focused group.
-        fakeGroups.focused = sinon.stub().returns({id: 'new-group'});
-        $rootScope.$broadcast(events.GROUP_FOCUSED);
-
-        var group = controller.group().id;
-
-        assert.isTrue(fakeGroups.get.calledOnce);
-        assert.isTrue(fakeGroups.get.calledWithExactly('new-group'));
-        assert.equal(
-          group, 'new-group',
-          'It should update the group ID in the view model when the focused ' +
-          'group changes.');
       });
     });
 
