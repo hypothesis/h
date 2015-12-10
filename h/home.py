@@ -2,6 +2,27 @@
 from pyramid import view
 
 
+def user_info(request):
+    if request.authenticated_user:
+        username = request.authenticated_user.username
+        user_profile_link = (
+            request.route_url("stream")
+            + "?q=user:{username}".format(username=username))
+        return {
+            "username": username,
+            "user_profile_link": user_profile_link,
+        }
+    else:
+        return {}
+
+
+@view.view_config(route_name='index',
+                  request_method='GET',
+                  renderer='h:templates/old-home.html.jinja2')
+def index(context, request):
+    return user_info(request)
+
+
 def trim_snippet(snippet):
     MAX_SNIPPET_LENGTH = 190
     return snippet[0:MAX_SNIPPET_LENGTH] + u"\u2026"
@@ -44,29 +65,20 @@ Neuroscience Information Framework, a Hypothes.is partner
 }]
 
 
-@view.view_config(route_name='index',
+@view.view_config(route_name='new_index',
                   request_method='GET',
                   renderer='h:templates/home.html.jinja2')
-def index(context, request):
+def new_index(context, request):
     config = {
         "chrome_ext_link": "https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek",
         "rss_feed_url": "https://hypothes.is/feed",
         "news_items": RECENT_NEWS_ITEMS,
     }
-
-    if request.authenticated_user:
-        username = request.authenticated_user.username
-        user_profile_link = (
-            request.route_url("stream")
-            + "?q=user:{username}".format(username=username))
-        config.update({
-            "username": username,
-            "user_profile_link": user_profile_link,
-        })
-
+    config.update(user_info(request))
     return config
 
 
 def includeme(config):
     config.add_route('index', '/')
+    config.add_route('new_index', '/new-homepage')
     config.scan(__name__)

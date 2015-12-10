@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // setup route
   var route = document.location.pathname;
-  if (route.match('^/$')) {
+  if (route.match('^/(new-homepage)?$')) {
     installerController.showSupportedInstallers(document);
   } else if (route.match('^/groups') === 0) {
     setupGroupsController(route);

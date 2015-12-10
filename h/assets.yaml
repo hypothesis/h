@@ -231,6 +231,23 @@ site_css:
       depends:
         - h:static/styles/*.scss
 
+# Assets needed for the legacy H website front page only.
+# This will be removed once the new homepage design is live
+# (see https://trello.com/c/h6kQMQG8/187-new-homepage-design)
+front_page_js:
+  contents:
+    - jquery
+    - bootstrap_full_js
+
+front_page_css:
+  output: styles/front-page.min.css
+  contents:
+    - h:static/styles/front-page/main.css
+    - output: h:static/styles/front-page.css
+      filters: cleancss
+      contents:
+      - h:static/styles/vendor/icomoon.css
+
 
 # Help page
 help_page_css:
