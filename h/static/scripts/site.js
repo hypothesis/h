@@ -6,7 +6,7 @@ var installerController = require('./installer-controller');
 
 // load our customized version of Bootstrap which
 // provides a few basic UI components (eg. modal dialogs)
-require('./vendor/bootstrap');
+require('../styles/vendor/bootstrap/bootstrap');
 
 function setupGroupsController(path) {
   if (path === '/groups/new') {
