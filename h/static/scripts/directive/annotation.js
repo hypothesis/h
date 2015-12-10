@@ -322,6 +322,9 @@ function AnnotationController(
     // log in.
     saveNewHighlight();
 
+    updateTimestamp(true);
+    updateViewModel(domainModel, vm, permissions);
+
     // If this annotation is not a highlight and if it's new (has just been
     // created by the annotate button) or it has edits not yet saved to the
     // server - then open the editor on AnnotationController instantiation.
@@ -330,10 +333,6 @@ function AnnotationController(
         vm.edit();
       }
     }
-
-    updateTimestamp(true);
-    updateViewModel(domainModel, vm, permissions);
-    restoreFromDrafts(drafts, domainModel, vm);
   }
 
   /** Called when this AnnotationController instance's scope is removed. */
@@ -343,11 +342,7 @@ function AnnotationController(
 
   /** Called whenever the currently-focused group changes. */
   function onGroupFocused() {
-    if (!vm.editing()) {
-      return;
-    }
-
-    if (drafts.get(domainModel)) {
+    if (vm.editing()) {
       saveToDrafts(drafts, domainModel, vm);
     }
   }
@@ -468,9 +463,7 @@ function AnnotationController(
     * @description Switches the view to an editor.
     */
   vm.edit = function() {
-    if (!drafts.get(domainModel)) {
-      saveToDrafts(drafts, domainModel, vm);
-    }
+    restoreFromDrafts(drafts, domainModel, vm);
     vm.action = isNew(domainModel) ? 'create' : 'edit';
   };
 
@@ -606,7 +599,6 @@ function AnnotationController(
       $rootScope.$emit('annotationDeleted', domainModel);
     } else {
       updateViewModel(domainModel, vm, permissions);
-      restoreFromDrafts(drafts, domainModel, vm);
       view();
     }
   };

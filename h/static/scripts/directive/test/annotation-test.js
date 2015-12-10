@@ -252,7 +252,7 @@ describe('annotation.js', function() {
 
     it('sets domainModel.group according to groups.focused()', function() {
       var domainModel = {};
-      var viewModel = {form: {text: 'foo',}};
+      var viewModel = {form: {text: 'foo'}};
       var groups = fakeGroups();
       groups.focused = function() {return {id: 'focused_group_id'};};
 
@@ -1314,12 +1314,6 @@ describe('annotation.js', function() {
     });
 
     describe('drafts', function() {
-      it('creates a draft when editing an annotation', function() {
-        var parts = createDirective();
-        parts.controller.edit();
-        assert.calledWith(fakeDrafts.update, parts.annotation);
-      });
-
       it('starts editing immediately if there is a draft', function() {
         fakeDrafts.get.returns({
           tags: [
@@ -1365,8 +1359,8 @@ describe('annotation.js', function() {
       });
     });
 
-    describe('when the focused group changes', function() {
-      it('updates the current draft', function() {
+    describe('onGroupFocused()', function() {
+      it('if the annotation is being edited it updates drafts', function() {
         var parts = createDirective();
         parts.controller.isPrivate = true;
         parts.controller.edit();
@@ -1384,35 +1378,17 @@ describe('annotation.js', function() {
           parts.annotation, {isPrivate:true, tags:[], text:'unsaved-text'});
       });
 
-      it('should not create a new draft', function() {
-        var controller = createDirective().controller;
-        controller.edit();
-        fakeDrafts.update = sinon.stub();
-        fakeDrafts.get = sinon.stub().returns(null);
-        $rootScope.$broadcast(events.GROUP_FOCUSED);
-        assert.notCalled(fakeDrafts.update);
-      });
-    });
+      it('if the annotation isn\'t being edited it doesn\'t update drafts',
+         function() {
+           var parts = createDirective();
+           parts.controller.isPrivate = true;
+           fakeDrafts.update = sinon.stub();
 
-    it('does not change perms when moving new private annotations', function() {
-      // id must be null so that AnnotationController considers this a new
-      // annotation.
-      var annotation = defaultAnnotation();
-      annotation.id = null;
-      annotation.group = 'old-group';
-      annotation.permissions = {
-        read: ['acct:bill@localhost']
-      };
-      createDirective(annotation);
-      // This is a private annotation.
-      fakePermissions.isShared.returns(false);
-      fakeGroups.focused = sinon.stub().returns({
-        id: 'new-group'
-      });
-      $rootScope.$broadcast(events.GROUP_FOCUSED);
-      assert.deepEqual(
-        annotation.permissions.read, ['acct:bill@localhost'],
-        'The annotation should still be private');
+           $rootScope.$broadcast(events.GROUP_FOCUSED);
+
+           assert.notCalled(fakeDrafts.update);
+         }
+      );
     });
   });
 
