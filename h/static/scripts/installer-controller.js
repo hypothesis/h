@@ -15,13 +15,18 @@ function showSupportedInstallers(rootElement) {
     }
   }
 
-  var canInstallChromeExt = uaDetect.isChrome && !uaDetect.isMobile;
-  var canInstallBookmarklet = !uaDetect.isChrome && !uaDetect.isMobile &&
-                              !uaDetect.isMicrosoftEdge;
+  // check for Chrome extension support. We also check here for !mobile
+  // so that the page is correct when testing in Chrome dev tools with
+  // mobile device simulation enabled
+  var offerChromeInstall = uaDetect.chromeExtensionsSupported &&
+                           !uaDetect.isMobile;
+  var offerBookmarkletInstall = !offerChromeInstall &&
+                                !uaDetect.isMobile &&
+                                !uaDetect.isMicrosoftEdge;
 
-  showIf('.js-install-chrome', canInstallChromeExt);
-  showIf('.js-install-bookmarklet', canInstallBookmarklet);
-  showIf('.js-install-any', canInstallChromeExt || canInstallBookmarklet);
+  showIf('.js-install-chrome', offerChromeInstall);
+  showIf('.js-install-bookmarklet', offerBookmarkletInstall);
+  showIf('.js-install-any', offerChromeInstall || offerBookmarkletInstall);
 }
 
 module.exports = {

@@ -35,19 +35,21 @@ describe('installer page', function () {
   }
 
   it('shows the chrome extension to desktop Chrome users', function () {
-    var controller = createController({isChrome: true});
+    var controller = createController({chromeExtensionsSupported: true});
     assert.isFalse(isHidden(extensionBtn));
     assert.isTrue(isHidden(bookmarkletBtn));
   });
 
   it('shows the bookmarklet on desktop browsers', function () {
-    var controller = createController({isChrome: true, isMobile: false});
-    assert.isFalse(isHidden(extensionBtn));
-    assert.isTrue(isHidden(bookmarkletBtn));
+    var controller = createController({chromeExtensionsSupported: false,
+                                       isMobile: false});
+    assert.isTrue(isHidden(extensionBtn));
+    assert.isFalse(isHidden(bookmarkletBtn));
   });
 
   it('shows only the Via link to mobile browsers', function () {
-    var controller = createController({isChrome: true, isMobile: true});
+    var controller = createController({chromeExtensionsSupported: false,
+                                       isMobile: true});
     assert.isTrue(isHidden(extensionBtn));
     assert.isTrue(isHidden(bookmarkletBtn));
   });
