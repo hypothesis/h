@@ -33,7 +33,9 @@ describe "AnnotationViewerController", ->
       }
       streamer: streamer or {setConfig: ->}
       store: store or {
-        SearchResource: {get: sinon.spy()}}
+        AnnotationResource: {get: sinon.spy()}
+        SearchResource: {get: sinon.spy()}
+      }
       streamFilter: streamFilter or {
         setMatchPolicyIncludeAny: -> {addClause: -> {addClause: ->}}
         getFilter: ->
@@ -45,31 +47,29 @@ describe "AnnotationViewerController", ->
       "AnnotationViewerController", locals)
     return locals
 
-  it "calls the search API to get the annotation and its replies", ->
+  it "fetches the top-level annotation", ->
     {store} = createAnnotationViewerController({})
-    assert store.SearchResource.get.calledOnce
-    assert store.SearchResource.get.calledWith(
-      {_id: "test_annotation_id", _separate_replies: true})
+    assert.calledOnce(store.AnnotationResource.get)
+    assert.calledWith(store.AnnotationResource.get, {id: "test_annotation_id"})
+
+  it "fetches any replies referencing the top-level annotation", ->
+    {store} = createAnnotationViewerController({})
+    assert.calledOnce(store.SearchResource.get)
+    assert.calledWith(store.SearchResource.get, {references: "test_annotation_id"})
+
+  it "loads the top-level annotation and replies into annotationMapper", ->
+    {annotationMapper} = createAnnotationViewerController({})
 
   it "passes the annotations and replies from search into loadAnnotations", ->
+    getAnnotation = sinon.stub().callsArgWith(1, {id: 'foo'})
+    getReferences = sinon.stub().callsArgWith(1, {rows: [{id: 'bar'}, {id: 'baz'}]})
+
     {annotationMapper} = createAnnotationViewerController({
       store: {
-        SearchResource: {
-          # SearchResource.get(id, func) takes an annotation id and a function
-          # that it should call with the search result. Our mock .get() here
-          # just immediately calls the function with some fake results.
-          get: (id, func) ->
-            func(
-              {
-                # In production these would be annotation objects, not strings.
-                rows: ['annotation_1', 'annotation_2']
-                replies: ['reply_1', 'reply_2', 'reply_3']
-              }
-            )
-        }
+        AnnotationResource: {get: getAnnotation}
+        SearchResource: {get: getReferences}
       }
     })
 
-    assert annotationMapper.loadAnnotations.calledWith(
-        ['annotation_1', 'annotation_2'], ['reply_1', 'reply_2', 'reply_3']
-    ), "It should pass all the annotations and replies to loadAnnotations()"
+    assert.calledWith(annotationMapper.loadAnnotations, [{id: 'foo'}])
+    assert.calledWith(annotationMapper.loadAnnotations, [{id: 'bar'}, {id: 'baz'}])

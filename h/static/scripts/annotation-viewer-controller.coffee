@@ -19,13 +19,12 @@ module.exports = class AnnotationViewerController
     $scope.search.update = (query) ->
       $location.path('/stream').search('q', query)
 
-    search_params = {
-      _id: id,
-      _separate_replies: true
-    }
-    store.SearchResource.get(search_params, ({rows, replies}) ->
-      annotationMapper.loadAnnotations(rows, replies)
+    store.AnnotationResource.get({id: id}, (annotation) ->
+      annotationMapper.loadAnnotations([annotation])
       $scope.threadRoot = {children: [threading.idTable[id]]}
+    )
+    store.SearchResource.get({references: id}, ({rows}) ->
+      annotationMapper.loadAnnotations(rows)
     )
 
     streamFilter
