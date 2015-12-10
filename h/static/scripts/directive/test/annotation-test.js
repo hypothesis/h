@@ -1277,7 +1277,7 @@ describe('annotation.js', function() {
 
       it('uses the text and tags from the draft if present', function() {
         fakeDrafts.get.returns({
-          tags: ['unsaved-tag'],
+          tags: [{text: 'unsaved-tag'}],
           text: 'unsaved-text'
         });
         var controller = createDirective().controller;

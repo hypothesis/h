@@ -9,7 +9,7 @@
  *    the drafts service, they're only used to identify the correct draft to
  *    return.
  *
- * 2. `isPrivate` (boolean), `tags` (array of strings) and `text` (string)
+ * 2. `isPrivate` (boolean), `tags` (array of objects) and `text` (string)
  *    which are the user's draft changes to the annotation. These are returned
  *    from the drafts service by `drafts.get()`.
  *

@@ -116,7 +116,7 @@ function restoreFromDrafts(drafts, permissions, domainModel, vm) {
     } else {
       domainModel.permissions = permissions.shared(domainModel.group);
     }
-    vm.form.tags = viewModelTagsFromDomainModelTags(draft.tags);
+    vm.form.tags = draft.tags;
     vm.form.text = draft.text;
   }
 }
@@ -140,7 +140,7 @@ function saveToDrafts(drafts, domainModel, vm) {
     domainModel,
     {
       isPrivate: vm.isPrivate(),
-      tags: domainModelTagsFromViewModelTags(vm.form.tags),
+      tags: vm.form.tags,
       text: vm.form.text,
     });
 }
