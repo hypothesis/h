@@ -213,7 +213,7 @@ def test_read_if_not_logged_in_renders_share_group_page(Group, renderers):
     views.read(request)
 
     assert renderers.render_to_response.call_args[1]['renderer_name'] == (
-        'h:groups/templates/join.html.jinja2')
+        'h:templates/groups/join.html.jinja2')
 
 
 @read_fixtures
@@ -251,7 +251,7 @@ def test_read_if_not_a_member_renders_template(Group, renderers):
     views.read(request)
 
     assert renderers.render_to_response.call_args[1]['renderer_name'] == (
-        'h:groups/templates/join.html.jinja2')
+        'h:templates/groups/join.html.jinja2')
 
 
 @read_fixtures
@@ -304,7 +304,7 @@ def test_read_if_already_a_member_renders_template(Group, renderers):
 
     views.read(request)
     assert renderers.render_to_response.call_args[1]['renderer_name'] == (
-        'h:groups/templates/share.html.jinja2')
+        'h:templates/groups/share.html.jinja2')
 
 
 @read_fixtures

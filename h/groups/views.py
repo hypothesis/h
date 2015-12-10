@@ -23,7 +23,7 @@ _ = i18n.TranslationString
 
 @view_config(route_name='group_create',
              request_method='GET',
-             renderer='h:groups/templates/create.html.jinja2')
+             renderer='h:templates/groups/create.html.jinja2')
 def create_form(request):
     """Render the form for creating a new group."""
     if request.authenticated_userid is None:
@@ -55,7 +55,7 @@ def _send_group_notification(request, event_type, pubid):
 
 @view_config(route_name='group_create',
              request_method='POST',
-             renderer='h:groups/templates/create.html.jinja2')
+             renderer='h:templates/groups/create.html.jinja2')
 def create(request):
     """Respond to a submission of the create group form."""
     if request.authenticated_userid is None:
@@ -89,7 +89,7 @@ def _login_to_join(request, group):
     """
     template_data = {'group': group}
     return renderers.render_to_response(
-        renderer_name='h:groups/templates/join.html.jinja2',
+        renderer_name='h:templates/groups/join.html.jinja2',
         value=template_data, request=request)
 
 
@@ -125,7 +125,7 @@ def _read_group(request, group):
         'group': group, 'group_url': url, 'document_links': document_links}
 
     return renderers.render_to_response(
-        renderer_name='h:groups/templates/share.html.jinja2',
+        renderer_name='h:templates/groups/share.html.jinja2',
         value=template_data, request=request)
 
 
@@ -139,7 +139,7 @@ def _join(request, group):
     url = request.route_url('group_read', pubid=group.pubid, slug=group.slug)
     template_data = {'group': group, 'join_url': url, 'is_logged_in': True}
     return renderers.render_to_response(
-        renderer_name='h:groups/templates/join.html.jinja2',
+        renderer_name='h:templates/groups/join.html.jinja2',
         value=template_data, request=request)
 
 
@@ -171,7 +171,7 @@ def read(request):
 
 @view_config(route_name='group_read',
              request_method='POST',
-             renderer='h:groups/templates/read.html.jinja2')
+             renderer='h:templates/groups/read.html.jinja2')
 def join(request):
     if request.authenticated_userid is None:
         raise exc.HTTPNotFound()
