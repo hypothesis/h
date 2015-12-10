@@ -189,11 +189,11 @@ def annotations_index(request):
 @api_config(context=Annotations, request_method='POST', permission='create')
 def create(request):
     """Read the POSTed JSON-encoded annotation and persist it."""
-    schema = schemas.AnnotationSchema()
+    schema = schemas.CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
 
-    annotation = logic.create_annotation(appstruct,
-                                         userid=request.authenticated_userid)
+    annotation = logic.create_annotation(appstruct)
+
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
 
@@ -216,16 +216,11 @@ def read(context, request):
 def update(context, request):
     """Update the fields we received and store the updated version."""
     annotation = context.model
-    schema = schemas.AnnotationSchema()
+    schema = schemas.UpdateAnnotationSchema(request, annotation)
     appstruct = schema.validate(_json_payload(request))
 
     # Update and store the annotation
-    try:
-        logic.update_annotation(annotation,
-                                appstruct,
-                                userid=request.authenticated_userid)
-    except RuntimeError as err:
-        raise APIError(err.args[0], status_code=err.args[1])
+    logic.update_annotation(annotation, appstruct)
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'update')

@@ -4,7 +4,9 @@
 import copy
 import jsonschema
 from jsonschema.exceptions import best_match
+from pyramid import i18n
 
+_ = i18n.TranslationStringFactory(__package__)
 
 # These annotation fields are not to be set by the user.
 PROTECTED_FIELDS = ['created', 'updated', 'user', 'id']
@@ -78,12 +80,68 @@ class AnnotationSchema(JSONSchema):
         },
     }
 
-    def validate(self, data):
-        appstruct = super(AnnotationSchema, self).validate(data)
 
-        # Some fields are not to be set by the user, ignore them
+class CreateAnnotationSchema(object):
+
+    """
+    Validate the payload from a user when creating an annotation.
+    """
+
+    def __init__(self, request):
+        self.request = request
+        self.structure = AnnotationSchema()
+
+    def validate(self, data):
+        appstruct = self.structure.validate(data)
+
+        # Some fields are not to be set by the user, ignore them.
         for field in PROTECTED_FIELDS:
             appstruct.pop(field, None)
+
+        # Set the annotation user field to the request user.
+        appstruct['user'] = self.request.authenticated_userid
+
+        return appstruct
+
+
+class UpdateAnnotationSchema(object):
+
+    """
+    Validate the payload from a user when updating an annotation.
+    """
+
+    def __init__(self, request, annotation):
+        self.request = request
+        self.annotation = annotation
+        self.structure = AnnotationSchema()
+
+    def validate(self, data):
+        appstruct = self.structure.validate(data)
+
+        # Some fields are not to be set by the user, ignore them.
+        for field in PROTECTED_FIELDS:
+            appstruct.pop(field, None)
+
+        # The user may not change the permissions of an annotation on which
+        # they are lacking 'admin' rights.
+        userid = self.request.authenticated_userid
+        permissions = self.annotation.get('permissions', {})
+        changing_permissions = (
+            'permissions' in appstruct and
+            appstruct['permissions'] != permissions
+        )
+        if changing_permissions and userid not in permissions.get('admin', []):
+            raise ValidationError('permissions: ' +
+                                  _('You may not change the permissions on '
+                                    'an annotation unless you have the '
+                                    '"admin" permission on that annotation!'))
+
+        # Annotations may not be moved between groups.
+        if 'group' in appstruct and 'group' in self.annotation:
+            if appstruct['group'] != self.annotation['group']:
+                raise ValidationError('group: ' +
+                                      _('You may not move annotations between '
+                                        'groups!'))
 
         return appstruct
 
