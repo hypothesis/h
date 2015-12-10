@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='claim_account',
              request_method='GET',
-             renderer='h:claim/templates/claim_account.html.jinja2')
+             renderer='h:templates/claim/claim_account.html.jinja2')
 def claim_account(request):
     _validate_request(request)
 
@@ -28,7 +28,7 @@ def claim_account(request):
 
 @view_config(route_name='claim_account',
              request_method='POST',
-             renderer='h:claim/templates/claim_account.html.jinja2')
+             renderer='h:templates/claim/claim_account.html.jinja2')
 def update_account(request):
     user = _validate_request(request)
 
