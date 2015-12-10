@@ -5,6 +5,7 @@
 import logging
 
 from pyramid import httpexceptions
+from pyramid import i18n
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
@@ -17,9 +18,9 @@ from h.api.resources import Annotation
 from h.api.resources import Annotations
 from h.api.resources import Root
 
+_ = i18n.TranslationStringFactory(__package__)
 
 log = logging.getLogger(__name__)
-
 
 cors_policy = cors.policy(
     allow_headers=(
@@ -29,6 +30,33 @@ cors_policy = cors.policy(
         'X-Client-Id',
     ),
     allow_methods=('HEAD', 'GET', 'POST', 'PUT', 'DELETE'))
+
+
+class APIError(Exception):
+
+    """Base exception for problems handling API requests."""
+
+    def __init__(self, message, status_code=500):
+        self.status_code = status_code
+        super(APIError, self).__init__(message)
+
+
+class PayloadError(APIError):
+
+    """Exception raised for API requests made with missing/invalid payloads."""
+
+    def __init__(self):
+        super(PayloadError, self).__init__(
+            _('Expected a valid JSON payload, but none was found!'),
+            status_code=400
+        )
+
+
+def json_view(**settings):
+    """A view configuration decorator with JSON defaults."""
+    settings.setdefault('accept', 'application/json')
+    settings.setdefault('renderer', 'json')
+    return view_config(**settings)
 
 
 def api_config(**settings):
@@ -41,11 +69,23 @@ def api_config(**settings):
     return json_view(**settings)
 
 
-def json_view(**settings):
-    """A view configuration decorator with JSON defaults."""
-    settings.setdefault('accept', 'application/json')
-    settings.setdefault('renderer', 'json')
-    return view_config(**settings)
+@forbidden_view_config(containment=Root, renderer='json')
+@notfound_view_config(containment=Root, renderer='json')
+def error_not_found(context, request):
+    request.response.status_code = httpexceptions.HTTPNotFound.code
+    return {'status': 'failure', 'reason': 'not_found'}
+
+
+@api_config(context=APIError)
+def error_api(context, request):
+    request.response.status_code = context.status_code
+    return {'status': 'failure', 'reason': context.message}
+
+
+@api_config(context=schemas.ValidationError)
+def error_validation(context, request):
+    request.response.status_code = 400
+    return {'status': 'failure', 'reason': context.message}
 
 
 @api_config(context=Root)
@@ -149,22 +189,11 @@ def annotations_index(request):
 @api_config(context=Annotations, request_method='POST', permission='create')
 def create(request):
     """Read the POSTed JSON-encoded annotation and persist it."""
-    # Read the annotation from the request payload
-    try:
-        fields = request.json_body
-    except ValueError:
-        return _api_error(request,
-                          'No JSON payload sent. Annotation not created.',
-                          status_code=400)  # Client Error: Bad Request
-
-    try:
-        appstruct = schemas.AnnotationSchema().validate(fields)
-    except schemas.ValidationError as err:
-        return _api_error(request, err.message, status_code=400)
+    schema = schemas.AnnotationSchema()
+    appstruct = schema.validate(_json_payload(request))
 
     annotation = logic.create_annotation(appstruct,
                                          userid=request.authenticated_userid)
-
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
 
@@ -187,19 +216,8 @@ def read(context, request):
 def update(context, request):
     """Update the fields we received and store the updated version."""
     annotation = context.model
-
-    # Read the new fields for the annotation
-    try:
-        fields = request.json_body
-    except ValueError:
-        return _api_error(request,
-                          'No JSON payload sent. Annotation not created.',
-                          status_code=400)  # Client Error: Bad Request
-
-    try:
-        appstruct = schemas.AnnotationSchema().validate(fields)
-    except schemas.ValidationError as err:
-        return _api_error(request, err.message, status_code=400)
+    schema = schemas.AnnotationSchema()
+    appstruct = schema.validate(_json_payload(request))
 
     # Update and store the annotation
     try:
@@ -207,10 +225,7 @@ def update(context, request):
                                 appstruct,
                                 userid=request.authenticated_userid)
     except RuntimeError as err:
-        return _api_error(
-            request,
-            err.args[0],
-            status_code=err.args[1])
+        raise APIError(err.args[0], status_code=err.args[1])
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'update')
@@ -236,26 +251,22 @@ def delete(context, request):
     }
 
 
-@forbidden_view_config(containment=Root, renderer='json')
-@notfound_view_config(containment=Root, renderer='json')
-def notfound(context, request):
-    request.response.status_int = httpexceptions.HTTPNotFound.code
-    return {'status': 'failure', 'reason': 'not_found'}
+def _json_payload(request):
+    """
+    Return a parsed JSON payload for the request.
+
+    :raises PayloadError: if the body has no valid JSON body
+    """
+    try:
+        return request.json_body
+    except ValueError:
+        raise PayloadError()
 
 
 def _publish_annotation_event(request, annotation, action):
     """Publish an event to the annotations queue for this annotation action"""
     event = AnnotationEvent(request, annotation, action)
     request.registry.notify(event)
-
-
-def _api_error(request, reason, status_code):
-    request.response.status_code = status_code
-    response_info = {
-        'status': 'failure',
-        'reason': reason,
-    }
-    return response_info
 
 
 def includeme(config):
