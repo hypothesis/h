@@ -22,9 +22,18 @@
 // pages
 @import './home';
 
-body {
-  background-color: white;
+// body with grey noise background and Lato font used
+// in the sidebar and groups pages
+.body--default {
+  @extend .noise;
   font-family: $sans-font-family;
+}
+
+// body with white background and Source Sans Pro
+// font used in the new homepage design
+.body--white {
+  background-color: white;
+  font-family: $font-family-site-sans;
 }
 
 .content {

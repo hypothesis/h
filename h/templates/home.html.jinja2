@@ -16,6 +16,10 @@
   {% endassets %}
 {% endblock %}
 
+{% block body_tag %}
+<body class="body--white">
+{% endblock %}
+
 {% block content %}
   {% include "h:templates/includes/header.html.jinja2" %}
   {% include "h:templates/includes/flashbar.html.jinja2" %}

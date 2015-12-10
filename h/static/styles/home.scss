@@ -1,11 +1,6 @@
 @at-root {
   .home__content {
-    // use new Sans Serif font on the homepage and larger line-spacing.
-    // We'll likely want to move this up to <body> in future once
-    // other pages on the site have been updated to a new design
-    font-family: $font-family-site-sans;
     line-height: $line-height-tall;
-
     color: $gray-darker;
     margin-top: 95px;
   }
