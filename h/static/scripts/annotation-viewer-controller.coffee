@@ -30,7 +30,7 @@ module.exports = class AnnotationViewerController
 
     streamFilter
       .setMatchPolicyIncludeAny()
-      .addClause('/references', 'first_of', id, true)
+      .addClause('/references', 'one_of', id, true)
       .addClause('/id', 'equals', id, true)
 
     streamer.setConfig('filter', {filter: streamFilter.getFilter()})
