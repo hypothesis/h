@@ -80,12 +80,18 @@ class Annotations(Collection):
 
     def __acl__(self):
         deny = (Deny, Everyone, 'create')
+        group = '__world__'  # Unless we find otherwise, assume public.
+        payload = None
+
+        # Ignore invalid JSON. It will get rejected by validation later.
         try:
             payload = self.request.json_body
         except ValueError:
-            return [deny]
+            pass
 
-        group = payload.get('group', '__world__')
+        if isinstance(payload, dict) and 'group' in payload:
+            group = payload['group']
+
         if group == '__world__':
             return [(Allow, Authenticated, 'create'), deny]
 

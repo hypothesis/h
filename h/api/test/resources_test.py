@@ -72,6 +72,16 @@ class TestAnnotationsPermissions(object):
         annotations = resources.Annotations(request)
 
         assert annotations.__acl__() == [
+            (security.Allow, security.Authenticated, 'create'),
+            (security.Deny, security.Everyone, 'create')]
+
+    def test_when_request_has_non_object_body(self):
+        request = mock.Mock()
+        request.json_body = "flibble"
+        annotations = resources.Annotations(request)
+
+        assert annotations.__acl__() == [
+            (security.Allow, security.Authenticated, 'create'),
             (security.Deny, security.Everyone, 'create')]
 
     def test_when_request_contains_no_group(self):
