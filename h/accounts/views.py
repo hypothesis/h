@@ -17,6 +17,7 @@ from h import i18n
 from h import models
 from h import session
 from h import util
+from h import accounts
 from h.accounts import schemas
 from h.accounts.models import User
 from h.accounts.models import Activation
@@ -47,6 +48,15 @@ def bad_csrf_token(context, request):
         'status': 'failure',
         'reason': reason,
         'model': session.model(request),
+    }
+
+
+@json_view(context=accounts.JSONError)
+def error_json(error, request):
+    request.response.status_code = 400
+    return {
+        'status': 'failure',
+        'reason': error.message
     }
 
 
@@ -132,7 +142,23 @@ class AuthController(object):
 class AjaxAuthController(AuthController):
     def login(self):
         try:
-            appstruct = self.form.validate(self.request.json_body.items())
+            json_body = self.request.json_body
+        except ValueError as err:
+            raise accounts.JSONError(
+                _('Could not parse request body as JSON: {message}'.format(
+                    message=err.message)))
+
+        if not isinstance(json_body, dict):
+            raise accounts.JSONError(
+                _('Request JSON body must have a top-level object'))
+
+        # Transform non-string usernames and password into strings.
+        # Deform crashes otherwise.
+        json_body['username'] = unicode(json_body.get('username') or '')
+        json_body['password'] = unicode(json_body.get('password') or '')
+
+        try:
+            appstruct = self.form.validate(json_body.items())
         except deform.ValidationFailure as err:
             self.request.response.status_code = 400
             return ajax_payload(self.request, {'status': 'failure',

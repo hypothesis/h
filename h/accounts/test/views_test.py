@@ -12,6 +12,7 @@ from pyramid.testing import DummyRequest as _DummyRequest
 from h.conftest import DummyFeature
 from h.conftest import DummySession
 
+from h import accounts
 from h.accounts.views import AjaxAuthController
 from h.accounts.views import AuthController
 from h.accounts.views import ForgotPasswordController
@@ -235,6 +236,87 @@ def test_login_ajax_returns_status_failure_on_validation_failure():
 
     assert result['status'] == 'failure'
     assert result['errors'] == {'password': 'too short'}
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_ajax_raises_JSONError_on_non_json_body():
+    request = mock.Mock(authenticated_user=mock.Mock(groups=[]))
+    type(request).json_body = mock.PropertyMock(side_effect=ValueError)
+
+    controller = AjaxAuthController(request)
+
+    with pytest.raises(accounts.JSONError) as exc_info:
+        controller.login()
+        assert exc_info.value.message.startswith(
+            'Could not parse request body as JSON: ')
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_ajax_raises_JSONError_on_non_object_json():
+    request = mock.Mock(
+        authenticated_user=mock.Mock(groups=[]), json_body='foo')
+
+    controller = AjaxAuthController(request)
+
+    with pytest.raises(accounts.JSONError) as exc_info:
+        controller.login()
+        assert (
+            exc_info.value.message == 'Request JSON body must have a ' +
+                                      'top-level object')
+
+
+@pytest.mark.usefixtures('routes_mapper')
+@mock.patch('h.accounts.schemas.check_csrf_token')
+def test_login_ajax_returns_status_failure_on_non_string_username(_):
+    for username in (None, 23, True):
+        request = DummyRequest(
+            json_body={'username': username, 'password': 'pass'})
+
+        controller = AjaxAuthController(request)
+
+        result = controller.login()
+
+        assert result['status'] == 'failure'
+        assert result['errors']
+
+
+@pytest.mark.usefixtures('routes_mapper')
+@mock.patch('h.accounts.schemas.check_csrf_token')
+def test_login_ajax_returns_status_failure_on_non_string_password(_):
+    for password in (None, 23, True):
+        request = DummyRequest(json_body={
+            'username': 'user', 'password': password})
+
+        controller = AjaxAuthController(request)
+
+        result = controller.login()
+
+        assert result['status'] == 'failure'
+        assert result['errors']
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_ajax_returns_status_failure_on_no_username():
+    request = DummyRequest(json_body={'password': 'pass'})
+
+    controller = AjaxAuthController(request)
+
+    result = controller.login()
+
+    assert result['status'] == 'failure'
+    assert result['errors']['username']
+
+
+@pytest.mark.usefixtures('routes_mapper')
+def test_login_ajax_returns_status_failure_on_no_password():
+    request = DummyRequest(json_body={'username': 'user'})
+
+    controller = AjaxAuthController(request)
+
+    result = controller.login()
+
+    assert result['status'] == 'failure'
+    assert result['errors']['password']
 
 
 @pytest.mark.usefixtures('routes_mapper')
