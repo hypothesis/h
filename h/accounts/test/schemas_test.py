@@ -14,6 +14,14 @@ class DummyNode(object):
     pass
 
 
+class FakeSerializer(object):
+    def dumps(self, obj):
+        return 'faketoken'
+
+    def loads(self, token, max_age=0):
+        return {'username': 'foo@bar.com'}
+
+
 def csrf_request(config, **kwargs):
     request = DummyRequest(registry=config.registry, **kwargs)
     request.headers['X-CSRF-Token'] = request.session.get_csrf_token()
@@ -211,6 +219,7 @@ def test_forgot_password_adds_user_to_appstruct(config, user_model):
 @pytest.mark.usefixtures('user_model')
 def test_reset_password_no_activation(config, activation_model):
     request = csrf_request(config)
+    request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
     activation_model.get_by_code.return_value = None
 
@@ -227,6 +236,7 @@ def test_reset_password_no_activation(config, activation_model):
 @pytest.mark.usefixtures('activation_model')
 def test_reset_password_no_user_for_activation(config, user_model):
     request = csrf_request(config)
+    request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
     user_model.get_by_activation.return_value = None
 
@@ -244,6 +254,7 @@ def test_reset_password_adds_user_to_appstruct(config,
                                                activation_model,
                                                user_model):
     request = csrf_request(config)
+    request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
     user = user_model.get_by_activation.return_value
 

@@ -225,18 +225,9 @@ class ForgotPasswordController(object):
             raise httpexceptions.HTTPFound(self.request.route_path('index'))
 
     def _send_forgot_password_email(self, user):
-        # Create a new activation for this user. Any previous activation will
-        # get overwritten.
-        activation = Activation()
-        self.request.db.add(activation)
-        user.activation = activation
+        serializer = self.request.registry.password_reset_serializer
+        code = serializer.dumps(user.username)
 
-        # Write the new activation to the database in order to set up the
-        # foreign key field and generate the code.
-        self.request.db.flush()
-
-        # Send the reset password email
-        code = user.activation.code
         link = reset_password_link(self.request, code)
         message = reset_password_email(user, code, link)
         mailer = get_mailer(self.request)
@@ -310,7 +301,6 @@ class ResetPasswordController(object):
 
     def _reset_password(self, user, password):
         user.password = password
-        self.request.db.delete(user.activation)
 
         self.request.session.flash(jinja2.Markup(_(
             'Your password has been reset! '

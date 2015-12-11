@@ -200,10 +200,12 @@ class ResetCode(colander.SchemaType):
     def deserialize(self, node, cstruct):
         if cstruct is colander.null:
             return colander.null
-        activation = models.Activation.get_by_code(cstruct)
-        if activation is not None:
-            user = models.User.get_by_activation(activation)
-        if activation is None or user is None:
+
+        request = node.bindings['request']
+        serializer = request.registry.password_reset_serializer
+        username = serializer.loads(cstruct, max_age=72*3600)
+        user = models.User.get_by_username(username)
+        if user is None:
             raise colander.Invalid(node, _('Your reset code is not valid'))
         return user
 
