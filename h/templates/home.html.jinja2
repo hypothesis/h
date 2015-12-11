@@ -33,7 +33,7 @@
 
     <div class="home__section installer">
       <a class="install-btn is-hidden js-install-chrome"
-          href="{{chrome_ext_link}}"
+          href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek"
           onclick="chrome.webstore.install();return false;"
           data-chromeext-button="">
         <img alt="" class="install-btn__icon"
@@ -84,15 +84,39 @@
     <!-- news !-->
     <div class="home__section home__section--news">
       <h2 class="home__heading home__heading--news">Latest news</h2>
-      {% for news_item in news_items %}
       <div class="news-item">
-        <div class="news-item__date">{{ news_item.date }}</div>
-        <a class="news-item__title" href="{{ news_item.link }}">{{ news_item.title }}</a>
+        <div class="news-item__date">December 9, 2015</div>
+        <a class="news-item__title" href="/blog/the-lit-anthology-in-the-age-of-web-annotation/">
+          The Literary Anthology in the Age of Web Annotation
+        </a>
         <p class="news-item__snippet">
-          {{ news_item.snippet | safe }}
+          Next Monday (December 14th at 1 PM EST), we will be hosting the first
+          in a series of webinars focused on the pedagogy of web annotation.
+          There will be a live stream (viewable below at this…
         </p>
       </div>
-      {% endfor %}
+      <div class="news-item">
+        <div class="news-item__date">December 1, 2015</div>
+        <a class="news-item__title" href="/blog/a-coalition-of-over-40-scholarly-publishers/">
+          A Coalition of over 40 Scholarly Publishers
+        </a>
+        <p class="news-item__snippet">
+          Today we're announcing a coalition of over 40 scholarly publishers,
+          platforms, libraries and technology partners that share the goal of
+          building an open conversation layer over all knowledge…
+        </p>
+      </div>
+      <div class="news-item">
+        <div class="news-item__date">November 30, 2015</div>
+        <a class="news-item__title" href="/blog/undergrad-shannon-griffiths-on-using-hypothesis-in-the-classroom/">
+          Undergrad Shannon Griffiths on Using Hypothesis in the Classroom
+        </a>
+        <p class="news-item__snippet">
+          This blog was written and published by Shannon Griffiths, an English
+          major at Plymouth State University. Her professor, Robin DeRosa, is
+          using Hypothesis in several of her classes this term…
+        </p>
+      </div>
       <a class="news-more-link" href="/blog">See all updates…</a>
     </div>
   </div>
