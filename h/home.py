@@ -1,5 +1,14 @@
 """The home/front page of the //hypothes.is/ site."""
 from pyramid import view
+from pyramid import httpexceptions
+
+
+@view.view_config(route_name='via_redirect',
+                  request_method='GET')
+def via_redirect(context, request):
+    url = request.params['url']
+    via_link = 'https://via.hypothes.is/{}'.format(url)
+    return httpexceptions.HTTPFound(location=via_link)
 
 
 @view.view_config(route_name='index',
@@ -24,4 +33,5 @@ def index(context, request):
 
 def includeme(config):
     config.add_route('index', '/')
+    config.add_route('via_redirect', '/via')
     config.scan(__name__)

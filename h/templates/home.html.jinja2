@@ -50,9 +50,9 @@
 
       <form
         class="proxy-link-form"
-        onsubmit="url = document.getElementById('search').value; if (url != '') { window.location.href = 'https://via.hypothes.is/h/' + url; } return false;">
+        action="/via">
         <input id="search" class="proxy-link-form__field" type="text"
-                name="search" placeholder="Paste a link to annotate…">
+                name="url" placeholder="Paste a link to annotate…">
         <button class="proxy-link-form__submit-btn" type="submit"
          title="Annotate this page with Hypothesis"
         >
