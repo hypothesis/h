@@ -12,6 +12,7 @@ from pyramid.view import view_config, view_defaults
 from pyramid.security import forget, remember
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
+from itsdangerous import BadSignature
 
 from h import i18n
 from h import models
@@ -284,8 +285,10 @@ class ResetPasswordController(object):
         # If valid, we inject the supplied it into the form as a hidden field.
         # Otherwise, we 404.
         try:
-            user = schemas.ResetCode().deserialize(None, code)
+            user = schemas.ResetCode().deserialize(self.schema, code)
         except colander.Invalid:
+            raise httpexceptions.HTTPNotFound()
+        except BadSignature:
             raise httpexceptions.HTTPNotFound()
         else:
             # N.B. the form field for the reset code is called 'user'. See the
