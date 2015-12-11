@@ -97,7 +97,7 @@ admin_css:
 admin_js:
   contents:
     - jquery
-    - bootstrap_js
+    - bootstrap_full_js
 
 
 # Configuration
