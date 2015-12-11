@@ -1,10 +1,15 @@
-Unreleased
-==========
+0.8.6 (2015-12-11)
+==================
 
 Bug fixes
 ---------
 
 - Fix broken standalone annotation pages for replies (#2786).
+
+- Fix a bug where realtime updates weren't delivered to standalone annotation
+  pages for replies if the thread root on that page was also a reply (#2787).
+
+- A number of other small fixes and clean-ups.
 
 0.8.5 (2015-12-08)
 ==================
