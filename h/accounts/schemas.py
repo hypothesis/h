@@ -193,9 +193,9 @@ class ResetCode(colander.SchemaType):
             return colander.null
         if not isinstance(appstruct, models.User):
             raise colander.Invalid(node, '%r is not a User' % appstruct)
-        if not isinstance(appstruct.activation, models.Activation):
-            raise colander.Invalid(node, '%r has no Activation' % appstruct)
-        return appstruct.activation.code
+        request = node.bindings['request']
+        serializer = request.registry.password_reset_serializer
+        return serializer.dumps(appstruct.username)
 
     def deserialize(self, node, cstruct):
         if cstruct is colander.null:
