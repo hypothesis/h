@@ -43,12 +43,16 @@ angulartics_ga:
   contents: ../../node_modules/angulartics/src/angulartics-ga.js
 
 
-# Bootstrap
-bootstrap:
+# the full version of bootstrap, used
+# by admin pages.
+#
+# The site uses a minimal version that only has the
+# features we need
+bootstrap_full_js:
   filters: uglifyjs
   output: scripts/vendor/bootstrap.min.js
   contents: ../../node_modules/bootstrap/dist/js/bootstrap.js
-bootstrap_css:
+bootstrap_full_css:
   filters: cleancss
   output: styles/vendor/bootstrap.min.css
   contents: ../../node_modules/bootstrap/dist/css/bootstrap.css
@@ -82,7 +86,7 @@ url:
 # Admin areas
 admin_css:
   contents:
-    - bootstrap_css
+    - bootstrap_full_css
     - output: styles/admin.min.css
       filters: cleancss
       contents:
@@ -93,7 +97,7 @@ admin_css:
 admin_js:
   contents:
     - jquery
-    - bootstrap
+    - bootstrap_full_js
 
 
 # Configuration
@@ -227,10 +231,13 @@ site_css:
       depends:
         - h:static/styles/*.scss
 
-# Assets needed for the H website front page only.
+# Assets needed for the legacy H website front page only.
+# This will be removed once the new homepage design is live
+# (see https://trello.com/c/h6kQMQG8/187-new-homepage-design)
 front_page_js:
   contents:
     - jquery
+    - bootstrap_full_js
 
 front_page_css:
   output: styles/front-page.min.css
@@ -240,6 +247,7 @@ front_page_css:
       filters: cleancss
       contents:
       - h:static/styles/vendor/icomoon.css
+
 
 # Help page
 help_page_css:

@@ -1,0 +1,15 @@
+// Utility classes for layout
+.u-stretch {
+  flex-grow: 1;
+}
+
+.u-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.u-align-right {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}

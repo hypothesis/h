@@ -1,0 +1,18 @@
+@at-root {
+  .modal {
+    font-family: $font-family-site-sans;
+  }
+
+  .modal-title {
+    font-size: $font-size-heading1;
+  }
+
+  .modal-body {
+    font-size: $font-size-heading2;
+  }
+
+  .modal-body p {
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+}

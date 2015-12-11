@@ -1,0 +1,250 @@
+@at-root {
+  .home__content {
+    line-height: $line-height-tall;
+    color: $gray-darker;
+    margin-top: 95px;
+  }
+
+  .home__section {
+    max-width: 590px + $layout-h-margin * 2;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: $layout-h-margin;
+    padding-right: $layout-h-margin;
+  }
+
+  .home__heading {
+    text-align: center;
+    font-size: $font-size-heading1;
+    line-height: $line-height-tall;
+    font-weight: bold;
+  }
+
+  // tagline explaining what H is
+  .home__tagline {
+    font-size: $font-size-heading1;
+    font-weight: $font-weight-light;
+    line-height: $line-height-tall;
+    text-align: center;
+  }
+
+  $computer-width: 800px;
+  $computer-height: 424px;
+
+  $computer-screen-width: 620px;
+  $computer-screen-height: 365px;
+
+  $computer-screen-left-offset: 90px;
+  $computer-screen-top-offset: 29px;
+
+  .computer {
+    position: relative;
+    width: $computer-width;
+    height: $computer-height;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .computer__device-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -115px;
+    margin-bottom: 40px;
+  }
+
+  .computer__screen-img {
+    position: absolute;
+    border-radius: 2px;
+
+    // screenshot size and positioning chosen to
+    // fit in the screen area of the laptop image
+    max-width: $computer-screen-width;
+    height: $computer-screen-height;
+    top: $computer-screen-top-offset;
+    left: $computer-screen-left-offset;
+  }
+
+  .home__intro {
+    font-size: $font-size-heading2;
+    line-height: $line-height-tall;
+    margin-top: 14px;
+    margin-bottom: 14px;
+  }
+
+  .home__intro-text {
+    margin-top: 45px;
+  }
+
+  .installer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+    height: 33px;
+  }
+
+  .install-btn__icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+  }
+
+  .install-btn {
+    background-color: $color-cardinal;
+    border-radius: 3px;
+    color: white;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: $font-size-body2;
+  }
+
+  .install-btn.is-hidden {
+    display: none;
+  }
+
+  .install-btn:hover, .install-btn:focus {
+    color: white;
+  }
+
+  .install-btn--dragme {
+    cursor: grabbing;
+    max-width: 200px;
+    min-height: 40px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .installer__alt {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .installer__alt.is-hidden {
+    display: none;
+  }
+
+  $proxy-border: 1px solid $color-alto;
+  $proxy-border-radius: 4px;
+
+  .proxy-link-form {
+    display: flex;
+    font-size: $font-size-body2;
+  }
+
+  .proxy-link-form__field {
+    border-top-left-radius: $proxy-border-radius;
+    border-bottom-left-radius: $proxy-border-radius;
+    border-left: $proxy-border;
+    border-top: $proxy-border;
+    border-bottom: $proxy-border;
+    border-right: none;
+    padding-left: 10px;
+    min-width: 200px;
+  }
+
+  .proxy-link-form__submit-btn {
+    font-weight: bold;
+    background-color: $color-gallery;
+    border: $proxy-border;
+    border-top-right-radius: $proxy-border-radius;
+    border-bottom-right-radius: $proxy-border-radius;
+  }
+
+  .installer__embed-script {
+    width: 100%;
+    background-color: $color-gallery;
+    border: 1px solid $color-alto;
+    padding: 10px;
+  }
+
+  .home__intro-container {
+    width: 100%;
+    background-color: $color-gallery;
+    border-top: 1px solid $color-alto;
+    border-bottom: 1px solid $color-alto;
+    padding-bottom: 65px;
+    margin-top: 260px;
+  }
+
+  .home__section--news {
+    margin-top: 70px;
+    margin-bottom: 130px;
+  }
+
+  .home__heading--news {
+    margin-bottom: 70px;
+  }
+
+  .news-headline {
+  }
+
+  .news-item {
+    margin-bottom: 50px;
+  }
+
+  .news-item__date {
+    color: $color-gray;
+    font-size: $font-size-body1;
+    margin-bottom: 5px;
+  }
+
+  .news-item__title {
+    display: block;
+    font-size: $font-size-heading2;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+
+  .news-item__title:not(:hover) {
+    color: inherit;
+  }
+
+  .news-item__snippet {
+    font-size: $font-size-heading2;
+    line-height: $line-height-tall;
+  }
+
+  .news-more-link {
+    font-size: $font-size-heading2;
+    font-weight: bold;
+  }
+
+  .news-more-link:not(:hover) {
+    color: inherit;
+  }
+
+  @media only screen and (max-width: $break-tablet) {
+    .home__content {
+      margin-top: 40px;
+    }
+
+    .home__intro-container {
+      margin-top: 180px;
+    }
+
+    .computer {
+      width: $computer-width / 3;
+      height: $computer-height / 3;
+    }
+
+    .computer__screen-img {
+      width: $computer-screen-width / 3;
+      height: $computer-screen-height / 3;
+      left: $computer-screen-left-offset / 3;
+      top: $computer-screen-top-offset / 3;
+    }
+  }
+}

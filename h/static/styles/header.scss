@@ -1,0 +1,228 @@
+@mixin header-or-footer {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: $layout-h-margin;
+  padding-right: $layout-h-margin;
+  max-width: 1130px;
+
+  a {
+    color: $color-mine-shaft;
+  }
+  a:hover {
+    color: $color-cardinal;
+  }
+}
+
+@at-root {
+  // desktop
+  .header {
+    @include header-or-footer;
+
+    display: flex;
+    flex-direction: row;
+    font-family: $font-family-site-sans;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    align-items: center;
+  }
+
+  .header-controls {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+  }
+
+  .header-logo {
+    display: flex;
+    flex-direction: row;
+    font-size: $font-size-heading2;
+    font-weight: bold;
+    color: $color-mine-shaft;
+    align-items: center;
+    letter-spacing: -0.2;
+  }
+
+  .header-logo__dot {
+    color: $color-cardinal;
+  }
+
+  .hiring-banner {
+    font-size: $font-size-body2;
+    border: 1px solid $color-alto;
+    border-radius: 2px;
+    margin-left: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    position: relative;
+  }
+
+  .hiring-banner__arrow-svg {
+    position: absolute;
+    left: -5px;
+    width: 5px;
+    height: 20px;
+  }
+
+  .hiring-banner__arrow {
+    fill: white;
+    stroke: $color-alto;
+  }
+
+  .nav-bar-toggle {
+    display: none;
+  }
+
+  .nav-bar {
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+
+  .nav-bar__item {
+    font-size: $font-size-body2;
+    margin-left: 12px;
+    margin-right: 12px;
+    color: $color-mine-shaft;
+  }
+
+  .nav-bar-menu__indicator {
+    stroke: $color-gray;
+    margin-left: 3px;
+    width: 8px;
+    height: 8px;
+  }
+
+  .nav-bar-menu {
+    background-color: white;
+    border: 1px solid $color-alto;
+    border-radius: 2px;
+    display: none;
+    margin-top: 8px;
+    position: absolute;
+    list-style-type: none;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    z-index: 1;
+  }
+
+  .nav-bar-menu.is-open {
+    display: block;
+    font-size: $font-size-body2;
+  }
+
+  .nav-bar-menu__item > a {
+    // expand the link to take up the full width of the menu
+    // item in order to make the hit target larger
+    display: inline-block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .nav-bar-menu__separator {
+    border-bottom: 1px solid $color-gallery;
+    margin-bottom: 10px;
+    margin-top: 10px;
+  }
+
+  .nav-bar__item--login {
+    color: $color-silver-chalice;
+
+    & > a {
+      color: $color-cardinal;
+    }
+  }
+
+  // desktop
+  @media only screen and (min-width: $break-tablet) {
+    // on desktop, add a margin between the left edge of dropdown
+    // menus in the nav and menu item text.
+    //
+    // On mobile, only the top-level nav has a left margin
+    .nav-bar-menu__item > a {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+  }
+
+  // phones and small tablets
+  @media only screen and (max-width: $break-tablet) {
+    .header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    $anim-duration-normal: .3s;
+
+    .nav-bar-container {
+      overflow: hidden;
+      margin-top: 10px;
+      max-height: 0px;
+      transition: max-height $anim-duration-normal ease-in;
+
+      // make the nav bar occupy the full width of the page when
+      // opened
+      margin-left: - $layout-h-margin;
+      margin-right: - $layout-h-margin;
+    }
+
+    .nav-bar-container.is-open {
+      // set to a value which is taller than the menu will ever
+      // actually grow to when open, but not too much taller so that
+      // the container grows in height at roughly the same speed as the
+      // menu content slides down
+      max-height: 400px;
+      border-top: 1px solid $color-alto;
+      border-bottom: 1px solid $color-alto;
+    }
+
+    .nav-bar {
+      display: flex;
+      flex-direction: column;
+      background-color: $color-gallery;
+      padding-left: 3px;
+      padding-right: 3px;
+      padding-top: 15px;
+      padding-bottom: 15px;
+
+      position: relative;
+      transform: translateY(-100%);
+      transition: transform $anim-duration-normal ease-in;
+    }
+
+    .is-open > .nav-bar {
+      transform: translateY(0%);
+    }
+
+    .nav-bar-toggle {
+      display: initial;
+      color: $color-mine-shaft;
+      font-size: $font-size-heading2;
+    }
+
+    .nav-bar__item {
+      margin-top: 3px;
+      margin-bottom: 3px;
+
+      font-size: $font-size-heading2;
+    }
+
+    .nav-bar-menu {
+      background-color: transparent;
+      position: relative;
+
+      border: none;
+      padding-left: 40px;
+      padding-bottom: 10px;
+    }
+
+    .nav-bar-menu__item {
+      font-size: $font-size-heading2;
+    }
+  }
+}

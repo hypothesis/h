@@ -1,8 +1,16 @@
 // basic standard styling for elements
 a {
   color: $link-color;
-  &:hover { color: $link-color-hover; }
   text-decoration: none;
+}
+
+a:active, a:focus {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+  color: $link-color-hover;
 }
 
 ol {

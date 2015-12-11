@@ -55,11 +55,9 @@
       <!-- End Google Analytics -->
     {% endif %}
 
-    {% if base_url %}
-      <base target="_top" href="{{ base_url }}" />
-    {% endif %}
+    {% block base_tag %}{% endblock %}
   </head>
-  {% block body_tag %}<body>{% endblock %}
+  {% block body_tag %}<body class="body--default">{% endblock %}
     {% block content %}{% endblock %}
     {% block templates %}{% endblock %}
     {% block scripts %}{% endblock %}

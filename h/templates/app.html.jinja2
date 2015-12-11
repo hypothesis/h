@@ -1,5 +1,12 @@
 {% extends "layouts/base.html.jinja2" %}
 
+{% block base_tag %}
+  {# several parts of the app rely on document.baseURI returning the root
+     URL. They should be fixed to use a different source.
+  #}
+  <base target="_top" href="{{ base_url }}" />
+{% endblock %}
+
 {% block styles %}
   {% assets "app_css" %}
     <link rel="stylesheet" href="{{ ASSET_URL }}">

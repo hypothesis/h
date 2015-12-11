@@ -1,0 +1,49 @@
+<div class="modal fade" id="bookmarklet" tabindex="-1"
+      role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Get the Bookmarklet</h4>
+      </div>
+      <div class="modal-body">
+        <a title="Drag me to the bookmarks bar"
+            data-bookmarklet-button=""
+            class="install-btn install-btn--dragme"
+            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();"
+            onclick="alert('Drag me to the bookmarks bar');return false;">Launch Hypothesis
+        </a>
+        <p><i class="h-icon-move"></i> Drag the button into
+        your bookmarks bar then click it to launch the
+        Hypothesis application.</p>
+        <p>Alternatively, right click and select
+        "bookmark this link." To load Hypothesis on a webpage
+        or PDF, simply click on the bookmarklet in your
+        bookmarks.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="addtoyoursite" tabindex="-1"
+      role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Add Hypothesis to a web site</h4>
+      </div>
+      <div class="modal-body">
+        <div class="installer__section--addtosite">
+          <p>
+            <input class="installer__embed-script" type="text"
+                    value='&lt;script async defer src="//hypothes.is/embed.js"&gt;&lt;/script&gt;'>
+          </p>
+          <p>Add the above script tag to your web site's HTML to load
+          the Hypothesis sidebar on your site.</p>
+
+          <p>Alternatively, if you use WordPress, checkout the
+          <a href="https://wordpress.org/plugins/hypothesis/">
+              Hypothesis WordPress plugin</a>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

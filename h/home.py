@@ -4,19 +4,22 @@ from pyramid import view
 
 @view.view_config(route_name='index',
                   request_method='GET',
-                  renderer='h:templates/home.html.jinja2')
+                  renderer='h:templates/old-home.html.jinja2')
 def index(context, request):
+    context = {}
+
     if request.authenticated_user:
         username = request.authenticated_user.username
-        user_profile_link = (
-            request.route_url("stream")
-            + "?q=user:{username}".format(username=username))
-        return {
-            "username": username,
-            "user_profile_link": user_profile_link
-        }
-    else:
-        return {}
+        context['username'] = username
+        context['user_profile_link'] = (
+            request.route_url("stream") +
+            "?q=user:{username}".format(username=username)
+        )
+
+    if request.feature('new_homepage'):
+        request.override_renderer = 'h:templates/home.html.jinja2'
+
+    return context
 
 
 def includeme(config):

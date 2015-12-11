@@ -1,18 +1,40 @@
+// minimal bootstrap CSS
+@import './vendor/bootstrap/bootstrap';
+
 // shared styling used by both the app and the website
 @import './base';
 @import './reset';
 @import './elements';
+@import './mixins/responsive';
 
 // shared components
 @import './primary-action-btn';
 @import './share-link';
 
 // website-specific components
-@import './group-form';
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,700);
 
-body {
+@import './group-form';
+@import './header';
+@import './flashbar';
+@import './footer';
+@import './modal';
+
+// pages
+@import './home';
+
+// body with grey noise background and Lato font used
+// in the sidebar and groups pages
+.body--default {
   @extend .noise;
   font-family: $sans-font-family;
+}
+
+// body with white background and Source Sans Pro
+// font used in the new homepage design
+.body--white {
+  background-color: white;
+  font-family: $font-family-site-sans;
 }
 
 .content {

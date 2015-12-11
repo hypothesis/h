@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 
 FEATURES = {
     'claim': "Enable 'claim your username' web views?",
+    'new_homepage': "Show the new homepage design?",
     'truncate_annotations': "Truncate long quotes and bodies in annotations?",
 }
 
