@@ -5,7 +5,6 @@ describe 'thread', ->
   $element = null
   $scope = null
   controller = null
-  fakeGroups = null
   fakeRender = null
   fakeAnnotationUI = null
   sandbox = null
@@ -25,9 +24,6 @@ describe 'thread', ->
 
   beforeEach module ($provide) ->
     sandbox = sinon.sandbox.create()
-    fakeGroups = {
-      focused: sandbox.stub().returns({id: '__world__'})
-    }
     fakeRender = sandbox.spy()
     fakeAnnotationUI = {
       hasSelectedAnnotations: ->
@@ -35,7 +31,6 @@ describe 'thread', ->
       isAnnotationSelected: (id) ->
         selectedAnnotations.indexOf(id) != -1
     }
-    $provide.value 'groups', fakeGroups
     $provide.value 'render', fakeRender
     $provide.value 'annotationUI', fakeAnnotationUI
     return
@@ -159,20 +154,6 @@ describe 'thread', ->
             message:
               id: 123
               group: 'wibble'
-
-        it 'is false for draft annotations not from the focused group', ->
-          # Set the focused group to one other than the annotation's group.
-          fakeGroups.focused.returns({id: 'foo'})
-
-          # Make the annotation into a "draft" annotation (make isNew() return
-          # true).
-          delete controller.container.message.id
-
-          assert.isFalse(controller.shouldShow())
-
-        it 'is true when the focused group does match', ->
-          fakeGroups.focused.returns({id: 'wibble'})
-          assert.isTrue(controller.shouldShow())
 
       describe 'filters messages based on the selection', ->
         messageID = 456

@@ -149,174 +149,48 @@ describe('annotation.js', function() {
     });
   });
 
-  describe('updateViewModel()', function() {
-    var updateViewModel = require('../annotation').updateViewModel;
-    var sandbox;
-
-    beforeEach(function() {
-      sandbox = sinon.sandbox.create();
-    });
-
-    afterEach(function() {
-      sandbox.restore();
-    });
-
-    /** Return a mock of the `drafts` service. */
-    function mockDrafts() {
-      return {
-        get: function() {}
-      };
-    }
-
-    it('copies model.document.title to vm.document.title', function() {
-      var vm = {};
-      var model = {
-        uri: 'http://example.com/example.html',
-        document: {
-          title: 'A special document'
-        }
-      };
-
-      updateViewModel(mockDrafts(), model, vm);
-
-      assert.equal(vm.document.title, 'A special document');
-    });
-
-    it('uses the first title when there are more than one', function() {
-      var vm = {};
-      var model = {
-        uri: 'http://example.com/example.html',
-        document: {
-          title: ['first title', 'second title']
-        }
-      };
-
-      updateViewModel(mockDrafts(), model, vm);
-
-      assert.equal(vm.document.title, 'first title');
-    });
-
-    it('truncates long titles', function() {
-      var vm = {};
-      var model = {
-        uri: 'http://example.com/example.html',
-        document: {
-          title: 'A very very very long title that really\nshouldn\'t be found on a page on the internet.'
-        }
-      };
-
-      updateViewModel(mockDrafts(), model, vm);
-
-      assert.equal(
-        vm.document.title, 'A very very very long title th…');
-    });
-
-    it('copies model.uri to vm.document.uri', function() {
-      var vm = {};
-      var model = {
-        uri: 'http://example.com/example.html',
-      };
-
-      updateViewModel(mockDrafts(), model, vm);
-
-      assert.equal(vm.document.uri, 'http://example.com/example.html');
-    });
-
-    it('copies the hostname from model.uri to vm.document.domain', function() {
-      var vm = {};
-      var model = {
-        uri: 'http://example.com/example.html',
-      };
-
-      updateViewModel(mockDrafts(), model, vm);
-
-      assert.equal(vm.document.domain, 'example.com');
-    });
-
-    it('uses the domain for the title if the title is not present', function() {
-      var vm = {};
-      var model = {
-        uri: 'http://example.com',
-        document: {}
-      };
-
-      updateViewModel(mockDrafts(), model, vm);
-
-      assert.equal(vm.document.title, 'example.com');
-    });
-
-    it(
-      'still sets the uri correctly if the annotation has no document',
-      function() {
-        var vm = {};
-        var model = {
-          uri: 'http://example.com',
-          document: undefined
-        };
-
-        updateViewModel(mockDrafts(), model, vm);
-
-        assert(vm.document.uri === 'http://example.com');
-      }
-    );
-
-    it(
-      'still sets the domain correctly if the annotation has no document',
-      function() {
-        var vm = {};
-        var model = {
-          uri: 'http://example.com',
-          document: undefined
-        };
-
-        updateViewModel(mockDrafts(), model, vm);
-
-        assert(vm.document.domain === 'example.com');
-      }
-    );
-
-    it(
-      'uses the domain for the title when the annotation has no document',
-      function() {
-        var vm = {};
-        var model = {
-          uri: 'http://example.com',
-          document: undefined
-        };
-
-        updateViewModel(mockDrafts(), model, vm);
-
-        assert(vm.document.title === 'example.com');
-      }
-    );
-  });
-
   describe('updateDomainModel()', function() {
     var updateDomainModel = require('../annotation').updateDomainModel;
 
-    it('copies top-level keys form viewModel into domainModel', function() {
+    function fakePermissions() {
+      return {
+        shared: function() {},
+        private: function() {},
+      };
+    }
+
+    function fakeGroups() {
+      return {
+        focused: function() {return {};},
+      };
+    }
+
+    it('copies text from viewModel into domainModel', function() {
       var domainModel = {};
-      var viewModel = {foo: 'bar', tags: []};
+      var viewModel = {form: {text: 'bar', tags: []}};
 
-      updateDomainModel(domainModel, viewModel);
+      updateDomainModel(domainModel, viewModel, fakePermissions(),
+                        fakeGroups());
 
-      assert.equal(domainModel.foo, viewModel.foo);
+      assert.equal(domainModel.text, viewModel.form.text);
     });
 
-    it('overwrites existing keys in domainModel', function() {
-      var domainModel = {foo: 'foo'};
-      var viewModel = {foo: 'bar', tags: []};
+    it('overwrites text in domainModel', function() {
+      var domainModel = {text: 'foo'};
+      var viewModel = {form: {text: 'bar', tags: []}};
 
-      updateDomainModel(domainModel, viewModel);
+      updateDomainModel(domainModel, viewModel, fakePermissions(),
+                        fakeGroups());
 
-      assert.equal(domainModel.foo, viewModel.foo);
+      assert.equal(domainModel.text, viewModel.form.text);
     });
 
     it('doesn\'t touch other properties in domainModel', function() {
       var domainModel = {foo: 'foo', bar: 'bar'};
-      var viewModel = {foo: 'FOO', tags: []};
+      var viewModel = {form: {foo: 'FOO', tags: []}};
 
-      updateDomainModel(domainModel, viewModel);
+      updateDomainModel(domainModel, viewModel, fakePermissions(),
+                        fakeGroups());
 
       assert.equal(
         domainModel.bar, 'bar',
@@ -327,18 +201,64 @@ describe('annotation.js', function() {
     it('copies tag texts from viewModel into domainModel', function() {
       var domainModel = {};
       var viewModel = {
-        tags: [
-          {text: 'foo'},
-          {text: 'bar'}
-        ]
+        form: {
+          tags: [
+            {text: 'foo'},
+            {text: 'bar'}
+          ]
+        }
       };
 
-      updateDomainModel(domainModel, viewModel);
+      updateDomainModel(domainModel, viewModel, fakePermissions(),
+                        fakeGroups());
 
       assert.deepEqual(
         domainModel.tags, ['foo', 'bar'],
         'The array of {tag: "text"} objects in  viewModel becomes an array ' +
         'of "text" strings in domainModel');
+    });
+
+    it('sets domainModel.permissions to private if vm.isPrivate', function() {
+      var domainModel = {};
+      var viewModel = {
+        isPrivate: true,
+        form: {
+          text: 'foo',
+        },
+      };
+      var permissions = fakePermissions();
+      permissions.private = sinon.stub().returns('private permissions');
+
+      updateDomainModel(domainModel, viewModel, permissions, fakeGroups());
+
+      assert.equal(domainModel.permissions, 'private permissions');
+    });
+
+    it('sets domainModel.permissions to shared if !vm.isPrivate', function() {
+      var domainModel = {};
+      var viewModel = {
+        isPrivate: false,
+        form: {
+          text: 'foo',
+        },
+      };
+      var permissions = fakePermissions();
+      permissions.shared = sinon.stub().returns('shared permissions');
+
+      updateDomainModel(domainModel, viewModel, permissions, fakeGroups());
+
+      assert.equal(domainModel.permissions, 'shared permissions');
+    });
+
+    it('sets domainModel.group according to groups.focused()', function() {
+      var domainModel = {};
+      var viewModel = {form: {text: 'foo'}};
+      var groups = fakeGroups();
+      groups.focused = function() {return {id: 'focused_group_id'};};
+
+      updateDomainModel(domainModel, viewModel, fakePermissions(), groups);
+
+      assert.equal(domainModel.group, 'focused_group_id');
     });
   });
 
@@ -349,7 +269,7 @@ describe('annotation.js', function() {
       var i;
       var values = [2, 'foo', true, null];
       for (i = 0; i < values.length; i++) {
-        assert.equal(validate(values[i]), undefined);
+        assert.equal(validate(values[i]));
       }
     });
 
@@ -407,14 +327,10 @@ describe('annotation.js', function() {
 
     it('returns false for public highlights', function() {
       assert.equal(
-        validate({
-          text: void 0,
-          tags: void 0,
-          permissions: {
-            read: ['group:__world__']
-          },
-          target: [1, 2, 3]
-        }),
+        validate(
+          {text: undefined, tags: undefined, target: [1, 2, 3],
+           permissions: {read: ['group:__world__']}}
+        ),
         false);
     });
 
@@ -1006,9 +922,9 @@ describe('annotation.js', function() {
         'does not add the world readable principal if the parent is private',
         function() {
           var controller = createDirective(annotation).controller;
+          controller.isPrivate = true;
           var reply = {};
           fakeAnnotationMapper.createAnnotation.returns(reply);
-          fakePermissions.isShared.returns(false);
           controller.reply();
           assert.deepEqual(reply.permissions, {
             read: ['justme']
@@ -1029,27 +945,33 @@ describe('annotation.js', function() {
     describe('#setPrivacy', function() {
       it('makes the annotation private when level is "private"', function() {
         var parts = createDirective();
+
+        // Make this annotation shared.
+        parts.controller.isPrivate = false;
+        fakePermissions.isPrivate.returns(false);
+
         parts.annotation.$update = sinon.stub().returns(Promise.resolve());
+
+        // Edit the annotation and make it private.
         parts.controller.edit();
         parts.controller.setPrivacy('private');
+        fakePermissions.isPrivate.returns(true);
+
         return parts.controller.save().then(function() {
           // Verify that the permissions are updated once the annotation
           // is saved.
-          assert.deepEqual(parts.annotation.permissions, {
-            read: ['justme']
-          });
+          assert.equal(parts.controller.isPrivate, true);
         });
       });
 
       it('makes the annotation shared when level is "shared"', function() {
         var parts = createDirective();
+        parts.controller.isPrivate = true;
         parts.annotation.$update = sinon.stub().returns(Promise.resolve());
         parts.controller.edit();
         parts.controller.setPrivacy('shared');
         return parts.controller.save().then(function() {
-          assert.deepEqual(parts.annotation.permissions, {
-            read: ['everybody']
-          });
+          assert.equal(parts.controller.isPrivate, false);
         });
       });
 
@@ -1088,17 +1010,17 @@ describe('annotation.js', function() {
     describe('#hasContent', function() {
       it('returns false if the annotation has no tags or text', function() {
         var controller = createDirective().controller;
-        controller.annotation.text = '';
-        controller.annotation.tags = [];
+        controller.form.text = '';
+        controller.form.tags = [];
         assert.ok(!controller.hasContent());
       });
 
       it('returns true if the annotation has tags or text', function() {
         var controller = createDirective().controller;
-        controller.annotation.text = 'bar';
+        controller.form.text = 'bar';
         assert.ok(controller.hasContent());
-        controller.annotation.text = '';
-        controller.annotation.tags = [
+        controller.form.text = '';
+        controller.form.tags = [
           {
             text: 'foo'
           }
@@ -1109,14 +1031,16 @@ describe('annotation.js', function() {
 
     describe('#hasQuotes', function() {
       it('returns false if the annotation has no quotes', function() {
-        var controller = createDirective().controller;
-        controller.annotation.target = [{}];
+        var annotation = defaultAnnotation();
+        annotation.target = [{}];
+        var controller = createDirective(annotation).controller;
+
         assert.isFalse(controller.hasQuotes());
       });
 
       it('returns true if the annotation has quotes', function() {
-        var controller = createDirective().controller;
-        controller.annotation.target = [
+        var annotation = defaultAnnotation();
+        annotation.target = [
           {
             selector: [
               {
@@ -1125,6 +1049,8 @@ describe('annotation.js', function() {
             ]
           }
         ];
+        var controller = createDirective(annotation).controller;
+
         assert.isTrue(controller.hasQuotes());
       });
     });
@@ -1396,31 +1322,6 @@ describe('annotation.js', function() {
     });
 
     describe('drafts', function() {
-      it('creates a draft when editing an annotation', function() {
-        var parts = createDirective();
-        parts.controller.edit();
-        assert.calledWith(fakeDrafts.update, parts.annotation);
-      });
-
-      it(
-        'creates a draft with only editable fields which are non-null',
-        function() {
-          // When a draft is saved, we shouldn't save any fields to the draft
-          // "changes" object that aren't actually set on the annotation. In this
-          // case, both permissions and tags are null so shouldn't be saved in
-          // the draft.
-          var parts = createDirective();
-          parts.annotation.permissions = null;
-          parts.annotation.text = 'Hello!';
-          parts.annotation.tags = null;
-
-          parts.controller.edit();
-
-          assert.calledWith(
-            fakeDrafts.update, parts.annotation, {text: 'Hello!'});
-        }
-      );
-
       it('starts editing immediately if there is a draft', function() {
         fakeDrafts.get.returns({
           tags: [
@@ -1436,16 +1337,16 @@ describe('annotation.js', function() {
 
       it('uses the text and tags from the draft if present', function() {
         fakeDrafts.get.returns({
-          tags: ['unsaved-tag'],
+          tags: [{text: 'unsaved-tag'}],
           text: 'unsaved-text'
         });
         var controller = createDirective().controller;
-        assert.deepEqual(controller.annotation.tags, [
+        assert.deepEqual(controller.form.tags, [
           {
             text: 'unsaved-tag'
           }
         ]);
-        assert.equal(controller.annotation.text, 'unsaved-text');
+        assert.equal(controller.form.text, 'unsaved-text');
       });
 
       it('removes the draft when changes are discarded', function() {
@@ -1460,137 +1361,42 @@ describe('annotation.js', function() {
         annotation.$update = sandbox.stub().returns(Promise.resolve());
         var controller = createDirective(annotation).controller;
         controller.edit();
-        controller.save();
-
-        // The controller currently removes the draft whenever an annotation
-        // update is committed on the server. This can happen either when saving
-        // locally or when an update is committed in another instance of H
-        // which is then pushed to the current instance.
-        annotation.updated = (new Date()).toISOString();
-        $scope.$digest();
-        assert.calledWith(fakeDrafts.remove, annotation);
+        return controller.save().then(function() {
+          assert.calledWith(fakeDrafts.remove, annotation);
+        });
       });
     });
 
-    describe('when the focused group changes', function() {
-      it('updates the current draft', function() {
+    describe('onGroupFocused()', function() {
+      it('if the annotation is being edited it updates drafts', function() {
         var parts = createDirective();
+        parts.controller.isPrivate = true;
         parts.controller.edit();
-        parts.controller.annotation.text = 'unsaved-text';
-        parts.controller.annotation.tags = [];
-        parts.controller.annotation.permissions = 'new permissions';
+        parts.controller.form.text = 'unsaved-text';
+        parts.controller.form.tags = [];
         fakeDrafts.get = sinon.stub().returns({
           text: 'old-draft'
         });
         fakeDrafts.update = sinon.stub();
+
         $rootScope.$broadcast(events.GROUP_FOCUSED);
-        assert.calledWith(fakeDrafts.update, parts.annotation, {
-          text: 'unsaved-text',
-          tags: [],
-          permissions: 'new permissions'
-        });
+
+        assert.calledWith(
+          fakeDrafts.update,
+          parts.annotation, {isPrivate:true, tags:[], text:'unsaved-text'});
       });
 
-      it('should not create a new draft', function() {
-        var controller = createDirective().controller;
-        controller.edit();
-        fakeDrafts.update = sinon.stub();
-        fakeDrafts.get = sinon.stub().returns(null);
-        $rootScope.$broadcast(events.GROUP_FOCUSED);
-        assert.notCalled(fakeDrafts.update);
-      });
+      it('if the annotation isn\'t being edited it doesn\'t update drafts',
+         function() {
+           var parts = createDirective();
+           parts.controller.isPrivate = true;
+           fakeDrafts.update = sinon.stub();
 
-      it('moves new annotations to the focused group', function() {
-        var annotation = defaultAnnotation();
-        annotation.id = null;
-        createDirective(annotation);
-        fakeGroups.focused = sinon.stub().returns({
-          id: 'new-group'
-        });
-        $rootScope.$broadcast(events.GROUP_FOCUSED);
-        assert.equal(annotation.group, 'new-group');
-      });
-    });
+           $rootScope.$broadcast(events.GROUP_FOCUSED);
 
-    it(
-      'updates perms when moving new annotations to the focused group',
-      function() {
-        // id must be null so that AnnotationController considers this a new
-        // annotation.
-        var annotation = defaultAnnotation();
-        annotation.id = null;
-        annotation.group = 'old-group';
-        annotation.permissions = {
-          read: [annotation.group]
-        };
-        // This is a shared annotation.
-        fakePermissions.isShared.returns(true);
-        createDirective(annotation);
-        // Make permissions.shared() behave like we expect it to.
-        fakePermissions.shared = function(groupId) {
-          return {
-            read: [groupId]
-          };
-        };
-        fakeGroups.focused = sinon.stub().returns({
-          id: 'new-group'
-        });
-        $rootScope.$broadcast(events.GROUP_FOCUSED);
-        assert.deepEqual(annotation.permissions.read, ['new-group']);
-      }
-    );
-
-    it('saves shared permissions for the new group to drafts', function() {
-      // id must be null so that AnnotationController considers this a new
-      // annotation.
-      var annotation = defaultAnnotation();
-      annotation.id = null;
-      annotation.group = 'old-group';
-      annotation.permissions = {
-        read: [annotation.group]
-      };
-      // This is a shared annotation.
-      fakePermissions.isShared.returns(true);
-      createDirective(annotation);
-      // drafts.get() needs to return something truthy, otherwise
-      // AnnotationController won't try to update the draft for the annotation.
-      fakeDrafts.get.returns(true);
-      // Make permissions.shared() behave like we expect it to.
-      fakePermissions.shared = function(groupId) {
-        return {
-          read: [groupId]
-        };
-      };
-      // Change the focused group.
-      fakeGroups.focused = sinon.stub().returns({
-        id: 'new-group'
-      });
-      $rootScope.$broadcast(events.GROUP_FOCUSED);
-      assert.deepEqual(
-        fakeDrafts.update.lastCall.args[1].permissions.read,
-        ['new-group'],
-        'Shared permissions for the new group should be saved to drafts');
-    });
-
-    it('does not change perms when moving new private annotations', function() {
-      // id must be null so that AnnotationController considers this a new
-      // annotation.
-      var annotation = defaultAnnotation();
-      annotation.id = null;
-      annotation.group = 'old-group';
-      annotation.permissions = {
-        read: ['acct:bill@localhost']
-      };
-      createDirective(annotation);
-      // This is a private annotation.
-      fakePermissions.isShared.returns(false);
-      fakeGroups.focused = sinon.stub().returns({
-        id: 'new-group'
-      });
-      $rootScope.$broadcast(events.GROUP_FOCUSED);
-      assert.deepEqual(
-        annotation.permissions.read, ['acct:bill@localhost'],
-        'The annotation should still be private');
+           assert.notCalled(fakeDrafts.update);
+         }
+      );
     });
   });
 
@@ -1842,20 +1648,20 @@ describe('annotation.js', function() {
           }
         }
       }).controller;
-      var originalText = controller.annotation.text;
+      var originalText = controller.form.text;
       // Simulate the user clicking the Edit button on the annotation.
       controller.edit();
       // Simulate the user typing some text into the annotation editor textarea.
-      controller.annotation.text = 'changed by test code';
+      controller.form.text = 'changed by test code';
       // Simulate the user hitting the Save button and wait for the
       // (unsuccessful) response from the server.
       controller.save();
       // At this point the annotation editor controls are still open, and the
       // annotation's text is still the modified (unsaved) text.
-      assert(controller.annotation.text === 'changed by test code');
+      assert(controller.form.text === 'changed by test code');
       // Simulate the user clicking the Cancel button.
       controller.revert();
-      assert(controller.annotation.text === originalText);
+      assert(controller.form.text === originalText);
     });
 
     // test that editing reverting changes to an annotation with
@@ -1869,9 +1675,9 @@ describe('annotation.js', function() {
       }).controller;
       controller.edit();
       assert.equal(controller.action, 'edit');
-      controller.annotation.text = 'this should be reverted';
+      controller.form.text = 'this should be reverted';
       controller.revert();
-      assert.equal(controller.annotation.text, void 0);
+      assert.equal(controller.form.text, void 0);
     });
   });
 });

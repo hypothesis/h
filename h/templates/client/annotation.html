@@ -1,16 +1,16 @@
-<header class="annotation-header" ng-if="!vm.annotation.user">
+<header class="annotation-header" ng-if="!vm.user()">
   <strong>You must be signed in to create annotations.</strong>
 </header>
 
-<div ng-if="vm.annotation.user">
+<div ng-if="vm.user()">
   <header class="annotation-header">
     <!-- User -->
-    <span ng-if="vm.annotation.user">
+    <span ng-if="vm.user()">
       <span>
         <a class="annotation-user"
            target="_blank"
-           ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
-           >{{vm.annotation.user | persona}}</a>
+           ng-href="{{vm.baseURI}}u/{{vm.user()}}"
+           >{{vm.user() | persona}}</a>
       </span>
 
       <span class="annotation-collapsed-replies">
@@ -26,17 +26,17 @@
            target="_blank" ng-if="vm.group() && vm.group().url" href="{{vm.group().url}}">
           <i class="h-icon-group"></i><span class="annotation-header__group-name">{{vm.group().name}}</span>
         </a>
-        <span ng-show="vm.isPrivate()"
+        <span ng-show="vm.isPrivate"
               title="This annotation is visible only to you.">
           <i class="h-icon-lock"></i><span class="annotation-header__group-name" ng-show="!vm.group().url">Only me</span>
         </span>
         <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing()" title="This is a highlight. Click 'edit' to add a note or tag."></i>
         <span class="annotation-citation"
-              ng-bind-html="vm.document | documentTitle"
+              ng-bind-html="vm.document() | documentTitle"
               ng-if="!vm.isSidebar">
         </span>
         <span class="annotation-citation-domain"
-              ng-bind-html="vm.document | documentDomain"
+              ng-bind-html="vm.document() | documentDomain"
               ng-if="!vm.isSidebar">
         </span>
       </span>
@@ -47,15 +47,15 @@
     <!-- Timestamp -->
     <a class="annotation-timestamp"
        target="_blank"
-       title="{{vm.annotation.updated | moment:'LLLL'}}"
-       ng-if="!vm.editing() && vm.annotation.updated"
-       ng-href="{{vm.baseURI}}a/{{vm.annotation.id}}"
+       title="{{vm.updated() | moment:'LLLL'}}"
+       ng-if="!vm.editing() && vm.updated()"
+       ng-href="{{vm.baseURI}}a/{{vm.id()}}"
        >{{vm.timestamp}}</a>
   </header>
 
   <!-- Excerpts -->
   <section class="annotation-quote-list"
-           ng-repeat="target in vm.annotation.target track by $index"
+           ng-repeat="target in vm.target() track by $index"
            ng-if="vm.hasQuotes()">
     <excerpt enabled="vm.feature('truncate_annotations')">
       <blockquote class="annotation-quote"
@@ -71,7 +71,7 @@
   <!-- Body -->
   <section name="text" class="annotation-body">
     <excerpt enabled="vm.feature('truncate_annotations') && !vm.editing()">
-      <markdown ng-model="vm.annotation.text"
+      <markdown ng-model="vm.form.text"
            read-only="!vm.editing()"
            ></markdown>
     </excerpt>
@@ -80,7 +80,7 @@
 
   <!-- Tags -->
   <div class="annotation-body form-field" ng-if="vm.editing()">
-    <tags-input ng-model="vm.annotation.tags"
+    <tags-input ng-model="vm.form.tags"
                 name="tags"
                 class="tags"
                 placeholder="Add tags…"
@@ -94,9 +94,9 @@
   </div>
 
   <div class="annotation-body tags tags-read-only"
-       ng-if="vm.annotation.tags.length && !vm.editing()">
+       ng-if="vm.form.tags.length && !vm.editing()">
     <ul class="tag-list">
-      <li class="tag-item" ng-repeat="tag in vm.annotation.tags">
+      <li class="tag-item" ng-repeat="tag in vm.form.tags">
         <a href="/stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
       </li>
     </ul>
@@ -135,7 +135,7 @@
          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
     </div>
 
-    <div class="annotation-actions" ng-if="!vm.editing() && vm.annotation.id">
+    <div class="annotation-actions" ng-if="!vm.editing() && vm.id()">
       <button class="small btn btn-clean"
               ng-click="vm.reply()"
               ><i class="h-icon-reply btn-icon"></i> Reply</button>
