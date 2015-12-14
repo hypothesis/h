@@ -151,7 +151,6 @@ function saveToDrafts(drafts, domainModel, vm) {
  *
  * @param {object} domainModel The object to copy properties to
  * @param {object} vm The object to copy properties from
- * @returns undefined
  *
  */
 function updateDomainModel(domainModel, vm, permissions, groups) {
