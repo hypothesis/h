@@ -166,8 +166,6 @@ function updateDomainModel(domainModel, vm, permissions, groups) {
 
 /** Update the view model from the domain model changes. */
 function updateViewModel(domainModel, vm, permissions) {
-  // Extend the view model with a copy of the domain model.
-  // Note that copy is used so that deep properties aren't shared.
   vm.form = {
     text: domainModel.text,
     tags: viewModelTagsFromDomainModelTags(domainModel.tags),
