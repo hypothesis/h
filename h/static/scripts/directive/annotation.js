@@ -343,7 +343,9 @@ function AnnotationController(
   }
 
   function onAnnotationUpdated(event, updatedDomainModel) {
-    updateViewModel(updatedDomainModel, vm, permissions);
+    if (updatedDomainModel.id === domainModel.id) {
+      updateViewModel(updatedDomainModel, vm, permissions);
+    }
   }
 
   function onDestroy() {

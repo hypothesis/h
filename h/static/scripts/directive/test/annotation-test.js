@@ -1367,6 +1367,33 @@ describe('annotation.js', function() {
       });
     });
 
+    describe('onAnnotationUpdated()', function() {
+      it('updates vm.form.text', function() {
+        var parts = createDirective();
+        var updatedModel = {
+          id: parts.annotation.id,
+          text: 'new text',
+        };
+
+        $rootScope.$emit('annotationUpdated', updatedModel);
+
+        assert.equal(parts.controller.form.text, 'new text');
+      });
+
+      it('doesn\'t update if a different annotation was updated', function() {
+        var parts = createDirective();
+        parts.controller.form.text = 'original text';
+        var updatedModel = {
+          id: 'different annotation id',
+          text: 'new text',
+        };
+
+        $rootScope.$emit('annotationUpdated', updatedModel);
+
+        assert.equal(parts.controller.form.text, 'original text');
+      });
+    });
+
     describe('onGroupFocused()', function() {
       it('if the annotation is being edited it updates drafts', function() {
         var parts = createDirective();
