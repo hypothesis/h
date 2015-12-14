@@ -346,12 +346,10 @@ function AnnotationController(
     updateViewModel(updatedDomainModel, vm, permissions);
   }
 
-  /** Called when this AnnotationController instance's scope is removed. */
   function onDestroy() {
     updateTimestamp = angular.noop;
   }
 
-  /** Called whenever the currently-focused group changes. */
   function onGroupFocused() {
     if (vm.editing()) {
       saveToDrafts(drafts, domainModel, vm);
