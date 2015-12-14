@@ -301,6 +301,13 @@ function AnnotationController(
       */
     newlyCreatedByHighlightButton = domainModel.$highlight || false;
 
+    // Call `onAnnotationUpdated()` whenever the "annotationUpdated" event is
+    // emitted. This event is emitted after changes to the annotation are
+    // successfully saved to the server, and also when changes to the
+    // annotation made by another client are received by this client from the
+    // server.
+    $rootScope.$on('annotationUpdated', onAnnotationUpdated);
+
     // Call `onDestroy()` when this AnnotationController's scope is removed.
     $scope.$on('$destroy', onDestroy);
 
@@ -333,6 +340,10 @@ function AnnotationController(
         vm.edit();
       }
     }
+  }
+
+  function onAnnotationUpdated(event, updatedDomainModel) {
+    updateViewModel(updatedDomainModel, vm, permissions);
   }
 
   /** Called when this AnnotationController instance's scope is removed. */
@@ -649,8 +660,7 @@ function AnnotationController(
         }
 
         onFulfilled = function() {
-          angular.copy(updatedModel, domainModel);
-          $rootScope.$emit('annotationUpdated', domainModel);
+          $rootScope.$emit('annotationUpdated', updatedModel);
           view();
           drafts.remove(domainModel);
         };

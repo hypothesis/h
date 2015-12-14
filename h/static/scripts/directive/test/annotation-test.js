@@ -945,10 +945,18 @@ describe('annotation.js', function() {
     describe('#setPrivacy', function() {
       it('makes the annotation private when level is "private"', function() {
         var parts = createDirective();
+
+        // Make this annotation shared.
         parts.controller.isPrivate = false;
+        fakePermissions.isPrivate.returns(false);
+
         parts.annotation.$update = sinon.stub().returns(Promise.resolve());
+
+        // Edit the annotation and make it private.
         parts.controller.edit();
         parts.controller.setPrivacy('private');
+        fakePermissions.isPrivate.returns(true);
+
         return parts.controller.save().then(function() {
           // Verify that the permissions are updated once the annotation
           // is saved.
