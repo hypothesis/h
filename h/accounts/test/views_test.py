@@ -227,18 +227,6 @@ def test_login_ajax_returns_status_okay_when_validation_succeeds():
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_login_ajax_returns_status_failure_on_validation_failure():
-    request = DummyRequest(json_body={})
-    controller = AjaxAuthController(request)
-    controller.form = invalid_form({'password': 'too short'})
-
-    result = controller.login()
-
-    assert result['status'] == 'failure'
-    assert result['errors'] == {'password': 'too short'}
-
-
-@pytest.mark.usefixtures('routes_mapper')
 def test_login_ajax_raises_JSONError_on_non_json_body():
     request = mock.Mock(authenticated_user=mock.Mock(groups=[]))
     type(request).json_body = mock.PropertyMock(side_effect=ValueError)
@@ -267,56 +255,47 @@ def test_login_ajax_raises_JSONError_on_non_object_json():
 
 @pytest.mark.usefixtures('routes_mapper')
 @mock.patch('h.accounts.schemas.check_csrf_token')
-def test_login_ajax_returns_status_failure_on_non_string_username(_):
-    for username in (None, 23, True):
+def test_login_ajax_converts_non_string_usernames_to_strings(_):
+    for input_, expected_output in ((None, ''), (23, '23'), (True, 'True')):
         request = DummyRequest(
-            json_body={'username': username, 'password': 'pass'})
-
+            json_body={'username': input_, 'password': 'pass'},
+            auth_domain='hypothes.is')
         controller = AjaxAuthController(request)
+        controller.form.validate = mock.Mock(
+            return_value={'user': mock.Mock()})
 
-        result = controller.login()
+        controller.login()
 
-        assert result['status'] == 'failure'
-        assert result['errors']
+        controller.form.validate.assert_called_once_with(
+            [('username', expected_output), ('password', 'pass')])
 
 
 @pytest.mark.usefixtures('routes_mapper')
 @mock.patch('h.accounts.schemas.check_csrf_token')
-def test_login_ajax_returns_status_failure_on_non_string_password(_):
-    for password in (None, 23, True):
-        request = DummyRequest(json_body={
-            'username': 'user', 'password': password})
-
+def test_login_ajax_converts_non_string_passwords_to_strings(_):
+    for input_, expected_output in ((None, ''), (23, '23'), (True, 'True')):
+        request = DummyRequest(
+            json_body={'username': 'user', 'password': input_},
+            auth_domain='hypothes.is')
         controller = AjaxAuthController(request)
+        controller.form.validate = mock.Mock(
+            return_value={'user': mock.Mock()})
 
-        result = controller.login()
+        controller.login()
 
-        assert result['status'] == 'failure'
-        assert result['errors']
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_login_ajax_returns_status_failure_on_no_username():
-    request = DummyRequest(json_body={'password': 'pass'})
-
-    controller = AjaxAuthController(request)
-
-    result = controller.login()
-
-    assert result['status'] == 'failure'
-    assert result['errors']['username']
+        controller.form.validate.assert_called_once_with(
+            [('username', 'user'), ('password', expected_output)])
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_login_ajax_returns_status_failure_on_no_password():
-    request = DummyRequest(json_body={'username': 'user'})
+def test_login_ajax_raises_ValidationFailure_on_ValidationFailure():
+    controller = AjaxAuthController(DummyRequest(json_body={}))
+    controller.form = invalid_form({'password': 'too short'})
 
-    controller = AjaxAuthController(request)
+    with pytest.raises(deform.ValidationFailure) as exc_info:
+        controller.login()
 
-    result = controller.login()
-
-    assert result['status'] == 'failure'
-    assert result['errors']['password']
+    assert exc_info.value.error.asdict() == {'password': 'too short'}
 
 
 @pytest.mark.usefixtures('routes_mapper')

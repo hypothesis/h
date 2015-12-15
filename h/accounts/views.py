@@ -60,6 +60,14 @@ def error_json(error, request):
     }
 
 
+@json_view(context=deform.ValidationFailure)
+def error_validation(error, request):
+    request.response.status_code = 400
+    return ajax_payload(
+        request,
+        {'status': 'failure', 'errors': error.error.asdict()})
+
+
 @view_config(route_name='login', attr='login', request_method='POST',
              renderer='h:templates/accounts/login.html.jinja2')
 @view_config(route_name='login', attr='login_form', request_method='GET',
@@ -157,12 +165,7 @@ class AjaxAuthController(AuthController):
         json_body['username'] = unicode(json_body.get('username') or '')
         json_body['password'] = unicode(json_body.get('password') or '')
 
-        try:
-            appstruct = self.form.validate(json_body.items())
-        except deform.ValidationFailure as err:
-            self.request.response.status_code = 400
-            return ajax_payload(self.request, {'status': 'failure',
-                                               'errors': err.error.asdict()})
+        appstruct = self.form.validate(json_body.items())
 
         user = appstruct['user']
         headers = self._login(user)
