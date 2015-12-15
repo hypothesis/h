@@ -4,6 +4,7 @@ from pkg_resources import resource_stream
 import colander
 import deform
 from pyramid.session import check_csrf_token
+from itsdangerous import BadData
 
 from h import i18n
 from h.accounts import models
@@ -203,9 +204,15 @@ class ResetCode(colander.SchemaType):
 
         request = node.bindings['request']
         serializer = request.registry.password_reset_serializer
-        username = serializer.loads(cstruct, max_age=72*3600)
+        try:
+            (username, timestamp) = serializer.loads(cstruct,
+                                                     max_age=72*3600,
+                                                     return_timestamp=True)
+        except BadData:
+            raise colander.Invalid
+
         user = models.User.get_by_username(username)
-        if user is None:
+        if user is None or timestamp < user.last_password_update:
             raise colander.Invalid(node, _('Your reset code is not valid'))
         return user
 

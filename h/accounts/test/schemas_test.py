@@ -251,12 +251,11 @@ def test_reset_password_no_user_for_activation(config, user_model):
 
 
 def test_reset_password_adds_user_to_appstruct(config,
-                                               activation_model,
                                                user_model):
     request = csrf_request(config)
     request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
-    user = user_model.get_by_activation.return_value
+    user = user_model.get_by_username.return_value
 
     appstruct = schema.deserialize({
         'user': 'abc123',
