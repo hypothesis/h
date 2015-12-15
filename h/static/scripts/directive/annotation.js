@@ -301,6 +301,14 @@ function AnnotationController(
     /** A callback for resetting the automatic refresh of vm.timestamp */
     vm.cancelTimestampRefresh = undefined;
 
+    /** Determines whether controls to expand/collapse the annotation body
+     * are displayed adjacent to the tags field.
+     */
+    vm.canCollapseBody = true;
+
+    /** Determines whether the annotation body should be collapsed. */
+    vm.collapseBody = true;
+
     /** The domain model, contains the currently saved version of the
       * annotation from the server (or in the case of new annotations that
       * haven't been saved yet - the data that will be saved to the server when
@@ -749,6 +757,14 @@ function AnnotationController(
 
   vm.user = function() {
     return domainModel.user;
+  }
+
+  /** Sets whether or not the controls for
+   * expanding/collapsing the body of lengthy annotations
+   * should be shown.
+   */
+  vm.setBodyCollapsible = function(canCollapse) {
+    vm.canCollapseBody = canCollapse;
   };
 
   init();

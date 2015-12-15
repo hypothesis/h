@@ -1,87 +1,101 @@
 'use strict';
 
 function ExcerptController() {
-  var collapsed = true;
+  this.collapse = true;
 
-  // Enabled is a test seam: overwritten in link function.
-  this.enabled = function () { return true; };
-
-  // Overflowing is a test seam: overwritten in link function.
-  this.overflowing = function () { return false; };
-
-  // Is the excerpt collapsed? True if no-one has toggled the excerpt open
-  // and the element is overflowing.
-  this.collapsed = function () {
-    if (!collapsed) {
-      return false;
-    }
-    return this.overflowing();
+  this.enabled = this.enabled || function () {
+    return true;
   };
 
-  this.uncollapsed = function () {
-    return !collapsed;
+  // Test seam. Overwritten in the link function
+  this.overflowing = function () {
+    return false;
+  };
+
+  this.isExpandable = function () {
+    return this.collapse && this.overflowing();
+  };
+
+  this.isCollapsible = function () {
+    return !this.collapse;
   };
 
   this.toggle = function () {
-    collapsed = !collapsed;
+    this.collapse = !this.collapse;
   };
 
-  return this;
+  this.showInlineControls = function () {
+    return this.inlineControls && (this.isExpandable() || this.isCollapsible())
+  }
+}
+
+function toPx(val) {
+  return val.toString() + 'px';
 }
 
 /**
  * @ngdoc directive
  * @name excerpt
  * @restrict E
- * @description This directive truncates its contents to a height specified in
- *              CSS, and provides controls for expanding and collapsing the
- *              resulting truncated element. For example, with the following
- *              template HTML:
- *
- *                  <article class="post">
- *                    <excerpt>
- *                      <div class="body" ng-model="post.body"></div>
- *                    </excerpt>
- *                  </article>
- *
- *              You would need to define the allowable height of the excerpt in
- *              CSS:
- *
- *                  article.post .excerpt {
- *                    max-height: 10em;
- *                  }
- *
- *              And the excerpt directive will take care of the rest.
- *
- *              You can selectively disable truncation by providing a boolean
- *              expression to the `enabled` parameter, e.g.:
- *
- *                  <excerpt enabled="!post.inFull">...</excerpt>
+ * @description This directive truncates the height of its contents to a
+ *              specified number of lines and provides controls for expanding
+ *              and collapsing the resulting truncated element.
  */
-function excerpt() {
+// @ngInject
+function excerpt($timeout) {
   return {
+    bindToController: true,
     controller: ExcerptController,
     controllerAs: 'vm',
     link: function (scope, elem, attrs, ctrl) {
-      // Test if the transcluded element is overflowing its container. We use
-      // clientHeight rather than offsetHeight because we assume you'll be using
-      // this with "overflow: hidden;" (i.e. no scrollbars) and it's usually
-      // much faster to calculate than offsetHeight (which includes scrollbars).
+      if (!ctrl.enabled()) {
+        return;
+      }
+
+      var contentElem;
       ctrl.overflowing = function overflowing() {
-        var excerpt = elem[0].querySelector('.excerpt');
-        if (!excerpt) {
+        if (!contentElem) {
           return false;
         }
-        return (excerpt.scrollHeight > excerpt.clientHeight);
+        return contentElem.scrollHeight > ctrl.collapsedHeight;
       };
 
-      // If the `enabled` attr was provided, we override the enabled function.
-      if (attrs.enabled) {
-        ctrl.enabled = scope.enabled;
-      }
+      scope.$evalAsync(function () {
+        contentElem = elem[0].querySelector('.excerpt');
+
+        // update max height
+        scope.$watch('vm.collapse', function (isCollapsed) {
+          if (isCollapsed) {
+            contentElem.style.maxHeight = toPx(ctrl.collapsedHeight);
+          } else {
+            contentElem.style.maxHeight = toPx(contentElem.scrollHeight);
+          }
+        });
+
+        if (ctrl.onCollapsibleChanged) {
+          ctrl.onCollapsibleChanged({collapsible: ctrl.overflowing()});
+        }
+      });
     },
     scope: {
+      /** Whether or not truncation should be enabled */
       enabled: '&?',
+      /**
+       * Specifies whether controls to expand and collapse
+       * the excerpt should be shown inside the <excerpt> component.
+       * If false, external controls can expand/collapse the excerpt by
+       * setting the 'collapse' property.
+       */
+      inlineControls: '=',
+      /** Sets whether or not the excerpt is collapsed. */
+      collapse: '=',
+      /** Called when the collapsibility of the excerpt (that is, whether or
+       * not the content height exceeds the collapsed height), changes.
+       */
+      onCollapsibleChanged: '&',
+      /** The height of this container in pixels when collapsed.
+       */
+      collapsedHeight: '=',
     },
     restrict: 'E',
     transclude: true,

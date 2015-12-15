@@ -1,31 +1,42 @@
-@import "compass/css3/images";
-
 .excerpt {
+  transition: max-height .3s ease-in;
   position: relative;
   overflow: hidden;
 }
 
-.excerpt--collapsed:after {
-  position: absolute;
-  bottom: 0;
-  height: $base-line-height * 2; // This controls the apparent height of the gradient.
-  width: 100%;
-  content: "";
-  pointer-events: none;
-  @include background(linear-gradient(
-    to bottom,
-    $mask-start-color,
-    $mask-end-color
-  ));
-}
-
-.excerpt--uncollapsed {
-  max-height: 100% !important;
-}
-
-.excerpt-control a {
+.excerpt__inline-controls {
   display: block;
-  text-align: right;
-  font-weight: bold;
-  width: 100%;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.excerpt__toggle-link {
+  pointer-events: auto;
+  padding-left: 15px;
+  background-image: linear-gradient(to right, transparent 0px, white 12px);
+}
+
+.excerpt__toggle-link > a {
+  color: $text-color;
+  font-style: italic;
+  font-weight: normal;
+}
+
+// a shadow displayed at the bottom of an <excerpt>s with inline controls
+// disabled, which provides a hint that the excerpt is collapsed
+.excerpt__shadow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 20px;
+  background-image: linear-gradient(to bottom,
+    transparent 0%, rgba(0,0,0,0.10) 90%, rgba(0,0,0,0.15) 100%);
+  transition: opacity .3s linear;
+}
+
+.excerpt__shadow.is-hidden {
+  opacity: 0;
 }

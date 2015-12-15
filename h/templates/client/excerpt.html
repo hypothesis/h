@@ -1,12 +1,18 @@
 <div ng-transclude ng-if="!vm.enabled()"></div>
-<div ng-if="vm.enabled()">
-  <div class="excerpt"
-       ng-class="{'excerpt--uncollapsed': vm.uncollapsed(),
-                  'excerpt--collapsed': vm.collapsed()}"
-       ng-transclude></div>
-
-  <div class="excerpt-control">
-    <a ng-if="vm.collapsed()" ng-click="vm.toggle()">More</a>
-    <a ng-if="vm.uncollapsed()" ng-click="vm.toggle()">Less</a>
+<div class="excerpt" ng-if="vm.enabled()">
+  <div ng-transclude></div>
+  <div class="excerpt__inline-controls"
+       ng-show="vm.showInlineControls()">
+    <span class="excerpt__toggle-link" ng-show="vm.isExpandable()">
+      … <a ng-click="vm.toggle()"
+          title="Show the full excerpt">More</a>
+    </span>
+    <span class="excerpt__toggle-link" ng-show="vm.isCollapsible()">
+      <a ng-click="vm.toggle()"
+          title="Show the first few lines only">Less</a>
+    </span>
   </div>
+  <div class="excerpt__shadow"
+       ng-class="{'is-hidden' : !vm.isExpandable()}"
+       ng-if="!vm.inlineControls"></div>
 </div>
