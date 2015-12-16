@@ -1,3 +1,12 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Change YouTube and Vimeo links into video embeds
+  (feature flagged: embed_media) (#2805).
+
 0.8.6 (2015-12-11)
 ==================
 

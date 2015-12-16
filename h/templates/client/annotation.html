@@ -72,8 +72,9 @@
   <section name="text" class="annotation-body">
     <excerpt enabled="vm.feature('truncate_annotations') && !vm.editing()">
       <markdown ng-model="vm.form.text"
-           read-only="!vm.editing()"
-           ></markdown>
+                read-only="!vm.editing()"
+                embeds-enabled="vm.feature('embed_media')">
+      </markdown>
     </excerpt>
   </section>
   <!-- / Body -->

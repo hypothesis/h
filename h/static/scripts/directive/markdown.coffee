@@ -1,3 +1,5 @@
+mediaEmbedder = require('../media-embedder')
+
 loadMathJax = ->
   if !MathJax?
     $.ajax {
@@ -297,7 +299,16 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
           startMath = index + 2
           $sanitize convert renderInlineMath textToCheck.substring(endMath, index)
 
-      return parts.join('')
+      htmlString = parts.join('')
+
+      # Transform the HTML string into a DOM element.
+      domElement = document.createElement('div')
+      domElement.innerHTML = htmlString
+
+      if scope.embedsEnabled
+        mediaEmbedder.replaceLinksWithEmbeds(domElement)
+
+      return domElement.innerHTML
 
     renderInlineMath = (textToCheck) ->
       re = /\\?\\\(|\\?\\\)/g
@@ -333,8 +344,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
       if !scope.readOnly and !scope.preview
         inputEl.val (ctrl.$viewValue or '')
       value = ctrl.$viewValue or ''
-      rendered = renderMathAndMarkdown value
-      scope.rendered = $sce.trustAsHtml rendered
+      output.innerHTML = renderMathAndMarkdown(value)
       if mathJaxFallback
         $timeout (-> MathJax?.Hub.Queue ['Typeset', MathJax.Hub, output]), 0, false
 
@@ -356,5 +366,6 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
   scope:
     readOnly: '='
     required: '@'
+    embedsEnabled: '='
   templateUrl: 'markdown.html'
 ]
