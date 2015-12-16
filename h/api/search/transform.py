@@ -6,7 +6,6 @@ from h._compat import string_types
 from h.api import nipsa
 from h.api import uri
 from h.api import groups
-from h.api import models
 
 
 def prepare(annotation):

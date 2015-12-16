@@ -63,7 +63,6 @@ def test_prepare_adds_scope_field(_, ann_in, ann_out, uri_normalize):
     assert ann_in == ann_out
 
 
-@mock.patch('h.api.search.transform.models')
 @mock.patch('h.api.search.transform.groups')
 @pytest.mark.usefixtures("uri_normalize")
 @pytest.mark.parametrize("ann_in,ann_out", [
@@ -99,33 +98,9 @@ def test_prepare_adds_scope_field(_, ann_in, ann_out, uri_normalize):
     ({"references": [], "target": []},
      {"references": [], "target": []}),
 ])
-def test_prepare_transforms_old_style_comments(models, groups, ann_in, ann_out):
+def test_prepare_transforms_old_style_comments(groups, ann_in, ann_out):
     transform.prepare(ann_in)
     assert ann_in == ann_out
-
-
-@mock.patch('h.api.search.transform.models')
-@mock.patch('h.api.search.transform.groups')
-def test_prepare_does_nothing_if_parents_target_is_not_a_list(_, models):
-    """It should do nothing to replies if the parent's target isn't a list.
-
-    If the annotation is a reply and its parent's 'target' is not a list then
-    it should not modify the reply's 'target' at all.
-
-    """
-    parent_annotation = {
-        'id': 'parent_annotation_id',
-        'target': 'not a list'
-    }
-    reply = {
-        'references': [parent_annotation['id'], 'some other id'],
-        'target': mock.sentinel.target
-    }
-    models.Annotation.fetch.return_value = parent_annotation
-
-    transform.prepare(reply)
-
-    assert reply['target'] == mock.sentinel.target
 
 
 @mock.patch('h.api.search.transform.groups')
