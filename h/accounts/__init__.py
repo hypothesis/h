@@ -17,6 +17,18 @@ class NoSuchUserError(Error):
     pass
 
 
+class JSONError(Error):
+
+    """Exception raised when there's a problem with a request's JSON body.
+
+    This is for pre-validation problems such as no JSON body, body cannot
+    be parsed as JSON, or top-level keys missing from the JSON.
+
+    """
+
+    pass
+
+
 def make_admin(username):
     """Make the given user an admin."""
     user = models.User.get_by_username(username)
