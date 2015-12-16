@@ -6,6 +6,7 @@ from mock import Mock
 from mock import patch
 from pyramid.exceptions import BadCSRFToken
 from pyramid.testing import DummyRequest
+from itsdangerous import BadData, SignatureExpired
 
 from h.accounts import schemas
 
@@ -18,9 +19,21 @@ class FakeSerializer(object):
     def dumps(self, obj):
         return 'faketoken'
 
-    def loads(self, token, max_age=0):
-        return {'username': 'foo@bar.com'}
+    def loads(self, token, max_age=0, return_timestamp=False):
+        payload = {'username': 'foo@bar.com'}
+        if return_timestamp:
+            return payload, 1
+        return payload
 
+
+class FakeExpiredSerializer(FakeSerializer):
+    def loads(self, token, max_age=0, return_timestamp=False):
+        raise SignatureExpired("Token has expired")
+
+
+class FakeInvalidSerializer(FakeSerializer):
+    def loads(self, token, max_age=0, return_timestamp=False):
+        raise BadData("Invalid token")
 
 def csrf_request(config, **kwargs):
     request = DummyRequest(registry=config.registry, **kwargs)
@@ -216,46 +229,61 @@ def test_forgot_password_adds_user_to_appstruct(config, user_model):
     assert appstruct['user'] == user
 
 
+def test_reset_password_with_invalid_user_token(config, user_model):
+    request = csrf_request(config)
+    request.registry.password_reset_serializer = FakeInvalidSerializer()
+    schema = schemas.ResetPasswordSchema().bind(request=request)
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({
+            'user': 'abc123',
+            'password': 'secret',
+        })
+
+    assert 'user' in exc.value.asdict()
+    assert 'reset code is not valid' in exc.value.asdict()['user']
+
+
+def test_reset_password_with_expired_token(config, user_model):
+    request = csrf_request(config)
+    request.registry.password_reset_serializer = FakeExpiredSerializer()
+    schema = schemas.ResetPasswordSchema().bind(request=request)
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({
+            'user': 'abc123',
+            'password': 'secret',
+        })
+
+    assert 'user' in exc.value.asdict()
+    assert 'reset code has expired' in exc.value.asdict()['user']
+
+
 @pytest.mark.usefixtures('user_model')
-def test_reset_password_no_activation(config, activation_model):
-    request = csrf_request(config)
-    request.registry.password_reset_serializer = FakeSerializer()
-    schema = schemas.ResetPasswordSchema().bind(request=request)
-    activation_model.get_by_code.return_value = None
-
-    with pytest.raises(colander.Invalid) as exc:
-        schema.deserialize({
-            'user': 'abc123',
-            'password': 'secret',
-        })
-
-    assert 'user' in exc.value.asdict()
-    assert 'reset code is not valid' in exc.value.asdict()['user']
-
-
-@pytest.mark.usefixtures('activation_model')
-def test_reset_password_no_user_for_activation(config, user_model):
-    request = csrf_request(config)
-    request.registry.password_reset_serializer = FakeSerializer()
-    schema = schemas.ResetPasswordSchema().bind(request=request)
-    user_model.get_by_activation.return_value = None
-
-    with pytest.raises(colander.Invalid) as exc:
-        schema.deserialize({
-            'user': 'abc123',
-            'password': 'secret',
-        })
-
-    assert 'user' in exc.value.asdict()
-    assert 'reset code is not valid' in exc.value.asdict()['user']
-
-
-def test_reset_password_adds_user_to_appstruct(config,
-                                               user_model):
+def test_reset_password_user_has_already_reset_their_password(config, user_model):
     request = csrf_request(config)
     request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
     user = user_model.get_by_username.return_value
+    user.last_password_update = 2
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({
+            'user': 'abc123',
+            'password': 'secret',
+        })
+
+    assert 'user' in exc.value.asdict()
+    assert 'already reset your password' in exc.value.asdict()['user']
+
+
+@pytest.mark.usefixtures('user_model')
+def test_reset_password_adds_user_to_appstruct(config, user_model):
+    request = csrf_request(config)
+    request.registry.password_reset_serializer = FakeSerializer()
+    schema = schemas.ResetPasswordSchema().bind(request=request)
+    user = user_model.get_by_username.return_value
+    user.last_password_update = 0
 
     appstruct = schema.deserialize({
         'user': 'abc123',
