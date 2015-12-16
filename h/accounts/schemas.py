@@ -4,7 +4,7 @@ from pkg_resources import resource_stream
 import colander
 import deform
 from pyramid.session import check_csrf_token
-from itsdangerous import BadData
+from itsdangerous import BadData, SignatureExpired
 
 from h import i18n
 from h.accounts import models
@@ -204,16 +204,22 @@ class ResetCode(colander.SchemaType):
 
         request = node.bindings['request']
         serializer = request.registry.password_reset_serializer
+
         try:
             (username, timestamp) = serializer.loads(cstruct,
                                                      max_age=72*3600,
                                                      return_timestamp=True)
+        except SignatureExpired:
+            raise colander.Invalid(node, _('Your reset code has expired'))
         except BadData:
-            raise colander.Invalid
+            raise colander.Invalid(node, _('Your reset code is not valid'))
 
         user = models.User.get_by_username(username)
-        if user is None or timestamp < user.last_password_update:
+        if user is None:
             raise colander.Invalid(node, _('Your reset code is not valid'))
+        if timestamp < user.last_password_update:
+            raise colander.Invalid(node,
+                                   _('You have already reset your password'))
         return user
 
 
