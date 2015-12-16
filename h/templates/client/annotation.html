@@ -110,6 +110,7 @@
     <div class="u-stretch"></div>
     <a class="u-strong" ng-show="vm.canCollapseBody"
        ng-click="vm.collapseBody = !vm.collapseBody"
+       ng-title="vm.collapseBody ? 'Show the full annotation text' : 'Show the first few lines only'"
        ng-bind="vm.collapseBody ? 'More' : 'Less'"></a>
   </div>
   <!-- / Tags -->

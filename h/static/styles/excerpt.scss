@@ -1,42 +1,66 @@
-.excerpt {
-  transition: max-height .3s ease-in;
-  position: relative;
-  overflow: hidden;
-}
+@at-root {
+  $expand-duration: .15s;
 
-.excerpt__inline-controls {
-  display: block;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-}
+  // the truncated body of the <excerpt>
+  .excerpt {
+    transition: max-height $expand-duration ease-in;
+    overflow: hidden;
+  }
 
-.excerpt__toggle-link {
-  pointer-events: auto;
-  padding-left: 15px;
-  background-image: linear-gradient(to right, transparent 0px, white 12px);
-}
+  // a container which wraps the <excerpt> and contains the excerpt
+  // itself plus the shadow at the bottom that can be clicked to expand or
+  // collapse it
+  .excerpt__container {
+    position: relative;
+  }
 
-.excerpt__toggle-link > a {
-  color: $text-color;
-  font-style: italic;
-  font-weight: normal;
-}
+  // inline controls for expanding and collapsing
+  // the <excerpt>
+  // -------------
+  .excerpt__inline-controls {
+    display: block;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+  }
 
-// a shadow displayed at the bottom of an <excerpt>s with inline controls
-// disabled, which provides a hint that the excerpt is collapsed
-.excerpt__shadow {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 20px;
-  background-image: linear-gradient(to bottom,
-    transparent 0%, rgba(0,0,0,0.10) 90%, rgba(0,0,0,0.15) 100%);
-  transition: opacity .3s linear;
-}
+  .excerpt__toggle-link {
+    pointer-events: auto;
+    padding-left: 15px;
+    background-image: linear-gradient(to right, transparent 0px, white 12px);
+  }
 
-.excerpt__shadow.is-hidden {
-  opacity: 0;
+  .excerpt__toggle-link > a {
+    color: $text-color;
+    font-style: italic;
+    font-weight: normal;
+  }
+
+
+  // a shadow displayed at the bottom of an <excerpt>s with inline controls
+  // disabled, which provides a hint that the excerpt is collapsed
+  // -------------
+
+  // the distance by which the shadow indicating a collapsed
+  // annotation expands beyond the left/right edges of the card.
+  // This value is chosen such that the shadow expands to the full width of
+  // the card
+  $shadow-h-offset: -12px;
+
+  .excerpt__shadow {
+    position: absolute;
+    left: $shadow-h-offset;
+    right: $shadow-h-offset;
+    bottom: 0;
+    height: 40px;
+    background-image: linear-gradient(to bottom,
+      transparent 50%, rgba(0,0,0,0.08) 95%, rgba(0,0,0,0.13) 100%);
+    transition: opacity $expand-duration linear;
+  }
+
+  .excerpt__shadow.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
