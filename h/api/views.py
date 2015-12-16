@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 
-"""HTTP/REST API for interacting with the annotation store."""
+"""
+HTTP/REST API for storage and retrieval of annotation data.
+
+This module contains the views which implement our REST API, mounted by default
+at ``/api``. Currently, the endpoints are limited to:
+
+- basic CRUD (create, read, update, delete) operations on annotations
+- annotation search
+- a handful of authentication related endpoints
+
+It is worth noting up front that in general, authorization for requests made to
+each endpoint is handled outside of the body of the view functions. In
+particular, requests to the CRUD API endpoints are protected by the Pyramid
+authorization system. You can find the mapping between annotation "permissions"
+objects and Pyramid ACLs in :mod:`h.api.resources`.
+"""
 
 import logging
 
@@ -12,8 +27,8 @@ from pyramid.view import view_config
 from h.api import cors
 from h.api.events import AnnotationEvent
 from h.api import search as search_lib
-from h.api import logic
 from h.api import schemas
+from h.api import storage
 from h.api.resources import Annotation
 from h.api.resources import Annotations
 from h.api.resources import Root
@@ -173,13 +188,11 @@ def annotations_index(request):
 
 @api_config(context=Annotations, request_method='POST', permission='create')
 def create(request):
-    """Read the POSTed JSON-encoded annotation and persist it."""
+    """Create an annotation from the POST payload."""
     schema = schemas.CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
+    annotation = storage.create_annotation(appstruct)
 
-    annotation = logic.create_annotation(appstruct)
-
-    # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
     return annotation
 
@@ -187,44 +200,27 @@ def create(request):
 @api_config(context=Annotation, request_method='GET', permission='read')
 def read(context, request):
     """Return the annotation (simply how it was stored in the database)."""
-    annotation = context.model
-
-    # Notify any subscribers
-    _publish_annotation_event(request, annotation, 'read')
-
-    return annotation
+    return context.model
 
 
 @api_config(context=Annotation, request_method='PUT', permission='update')
 def update(context, request):
-    """Update the fields we received and store the updated version."""
-    annotation = context.model
-    schema = schemas.UpdateAnnotationSchema(request, annotation)
+    """Update the specified annotation with data from the PUT payload."""
+    schema = schemas.UpdateAnnotationSchema(request, annotation=context.model)
     appstruct = schema.validate(_json_payload(request))
+    annotation = storage.update_annotation(context.id, appstruct)
 
-    # Update and store the annotation
-    logic.update_annotation(annotation, appstruct)
-
-    # Notify any subscribers
     _publish_annotation_event(request, annotation, 'update')
     return annotation
 
 
 @api_config(context=Annotation, request_method='DELETE', permission='delete')
 def delete(context, request):
-    """Delete the annotation permanently."""
-    annotation = context.model
+    """Delete the specified annotation."""
+    storage.delete_annotation(context.id)
 
-    logic.delete_annotation(annotation)
-
-    # Notify any subscribers
-    _publish_annotation_event(request, annotation, 'delete')
-
-    # Return a confirmation
-    return {
-        'id': annotation['id'],
-        'deleted': True,
-    }
+    _publish_annotation_event(request, {'id': context.id}, 'delete')
+    return {'id': context.id, 'deleted': True}
 
 
 def _json_payload(request):

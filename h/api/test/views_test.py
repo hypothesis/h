@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-"""Defines unit tests for h.api.views."""
 
 import mock
 import pytest
@@ -7,17 +6,6 @@ import pytest
 from pyramid import testing
 
 from h.api import views
-
-
-def _mock_annotation(**kwargs):
-    """Return a mock h.api.resources.Annotation object."""
-    annotation = mock.MagicMock()
-    annotation.model = model = mock.MagicMock()
-    model.__getitem__.side_effect = kwargs.__getitem__
-    model.__setitem__.side_effect = kwargs.__setitem__
-    model.get.side_effect = kwargs.get
-    model.__contains__.side_effect = kwargs.__contains__
-    return annotation
 
 
 def test_error_not_found_sets_status_code():
@@ -119,7 +107,6 @@ def test_access_token_returns_create_token_response():
     assert response_data == request.create_token_response.return_value
 
 
-# The fixtures required to mock all of annotator_token()'s dependencies.
 annotator_token_fixtures = pytest.mark.usefixtures('access_token')
 
 
@@ -166,9 +153,9 @@ def test_annotations_index_returns_search_results(search_lib):
     assert result == search_lib.search.return_value
 
 
-# The fixtures required to mock all of create()'s dependencies.
-create_fixtures = pytest.mark.usefixtures(
-    'logic', 'AnnotationEvent', 'schemas')
+create_fixtures = pytest.mark.usefixtures('AnnotationEvent',
+                                          'schemas',
+                                          'storage')
 
 
 @create_fixtures
@@ -184,15 +171,15 @@ def test_create_raises_if_json_parsing_fails():
 
 
 @create_fixtures
-def test_create_calls_create_annotation(logic, schemas):
-    """It should call logic.create_annotation() appropriately."""
+def test_create_calls_create_annotation(storage, schemas):
+    """It should call storage.create_annotation() appropriately."""
     request = mock.Mock()
     schema = schemas.CreateAnnotationSchema.return_value
     schema.validate.return_value = {'foo': 123}
 
     views.create(request)
 
-    logic.create_annotation.assert_called_once_with({'foo': 123})
+    storage.create_annotation.assert_called_once_with({'foo': 123})
 
 
 @create_fixtures
@@ -206,43 +193,38 @@ def test_create_calls_validator(schemas):
 
 
 @create_fixtures
-def test_create_inits_AnnotationEvent_once(AnnotationEvent):
-    views.create(mock.Mock())
-
-    assert AnnotationEvent.call_count == 1
-
-
-@create_fixtures
-def test_create_event(AnnotationEvent, logic):
+def test_create_event(AnnotationEvent, storage):
     request = mock.Mock()
-    annotation = logic.create_annotation.return_value
+    annotation = storage.create_annotation.return_value
     event = AnnotationEvent.return_value
 
     views.create(request)
 
-    AnnotationEvent.assert_called_once_with == (request, annotation, 'create')
+    AnnotationEvent.assert_called_once_with(request, annotation, 'create')
     request.registry.notify.assert_called_once_with(event)
 
 
 @create_fixtures
-def test_create_returns_annotation(logic):
+def test_create_returns_annotation(storage):
     request = mock.Mock()
+
     result = views.create(request)
 
-    assert result == logic.create_annotation.return_value
+    assert result == storage.create_annotation.return_value
 
 
 def test_read_returns_annotation():
     context = mock.Mock()
     request = mock.Mock()
+
     result = views.read(context, request)
 
     assert result == context.model
 
 
-# The fixtures required to mock all of update()'s dependencies.
-update_fixtures = pytest.mark.usefixtures(
-    'logic', 'Annotation', 'schemas')
+update_fixtures = pytest.mark.usefixtures('AnnotationEvent',
+                                          'schemas',
+                                          'storage')
 
 
 @update_fixtures
@@ -259,16 +241,17 @@ def test_update_raises_if_json_parsing_fails():
 
 @update_fixtures
 def test_update_calls_validator(schemas):
+    context = mock.Mock()
     request = mock.Mock()
     schema = schemas.UpdateAnnotationSchema.return_value
 
-    views.update(mock.Mock(), request)
+    views.update(context, request)
 
     schema.validate.assert_called_once_with(request.json_body)
 
 
 @update_fixtures
-def test_update_calls_update_annotation(logic, schemas):
+def test_update_calls_update_annotation(storage, schemas):
     context = mock.Mock()
     request = mock.Mock()
     schema = schemas.UpdateAnnotationSchema.return_value
@@ -276,117 +259,72 @@ def test_update_calls_update_annotation(logic, schemas):
 
     views.update(context, request)
 
-    logic.update_annotation.assert_called_once_with(context.model,
-                                                    {'foo': 123})
+    storage.update_annotation.assert_called_once_with(context.id, {'foo': 123})
 
 
 @update_fixtures
-def test_update_event(AnnotationEvent):
+def test_update_returns_annotation(storage):
+    context = mock.Mock()
     request = mock.Mock()
-    annotation = mock.Mock()
+
+    result = views.update(context, request)
+
+    assert result == storage.update_annotation.return_value
+
+
+@update_fixtures
+def test_update_event(AnnotationEvent, storage):
+    context = mock.Mock()
+    request = mock.Mock()
     event = AnnotationEvent.return_value
-    views.update(annotation, request)
-    AnnotationEvent.assert_called_once_with(request, annotation.model,
-                                            'update')
+    annotation = storage.update_annotation.return_value
+
+    views.update(context, request)
+
+    AnnotationEvent.assert_called_once_with(request, annotation, 'update')
     request.registry.notify.assert_called_once_with(event)
 
 
-@update_fixtures
-def test_update_returns_annotation():
-    context = mock.Mock()
-    request = mock.Mock()
-    result = views.update(context, request)
-
-    assert result == context.model
-
-
-# The fixtures required to mock all of delete()'s dependencies.
-delete_fixtures = pytest.mark.usefixtures('AnnotationEvent', 'logic')
+delete_fixtures = pytest.mark.usefixtures('AnnotationEvent', 'storage')
 
 
 @delete_fixtures
-def test_delete_calls_delete_annotation(logic):
-    annotation = mock.MagicMock()
+def test_delete_calls_delete_annotation(storage):
+    context = mock.Mock()
     request = mock.Mock()
 
-    views.delete(annotation, request)
+    views.delete(context, request)
 
-    logic.delete_annotation.assert_called_once_with(annotation.model)
+    storage.delete_annotation.assert_called_once_with(context.id)
 
 
 @delete_fixtures
 def test_delete_event(AnnotationEvent):
-    annotation = _mock_annotation(id='foo', group='test-group')
-    request = mock.Mock(effective_principals=['group:test-group'])
+    context = mock.Mock()
+    request = mock.Mock()
     event = AnnotationEvent.return_value
 
-    views.delete(annotation, request)
+    views.delete(context, request)
 
-    AnnotationEvent.assert_called_once_with(request, annotation.model, 'delete')
+    AnnotationEvent.assert_called_once_with(request,
+                                            {'id': context.id},
+                                            'delete')
     request.registry.notify.assert_called_once_with(event)
 
 
 @delete_fixtures
-def test_delete_returns_id():
-    annotation = _mock_annotation(id='foo', group='test-group')
+def test_delete_returns_object():
+    context = mock.Mock()
+    request = mock.Mock()
 
-    response_data = views.delete(
-        annotation, mock.Mock(effective_principals=['group:test-group']))
+    result = views.delete(context, request)
 
-    assert response_data['id'] == annotation.model['id']
-
-
-@delete_fixtures
-def test_delete_returns_deleted():
-    response_data = views.delete(
-        _mock_annotation(id='foo', group='test-group'),
-        mock.Mock(effective_principals=['group:test-group']))
-
-    assert response_data['deleted'] is True
-
-
-@delete_fixtures
-def test_delete_does_not_crash_if_annotation_has_no_group():
-    annotation = _mock_annotation(id='foo')
-    assert 'group' not in annotation
-
-    views.delete(
-        annotation,
-        mock.Mock(effective_principals=['group:test-group']))
-
-
-@pytest.fixture
-def search_lib(request):
-    patcher = mock.patch('h.api.views.search_lib', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+    assert result == {'id': context.id, 'deleted': True}
 
 
 @pytest.fixture
 def AnnotationEvent(request):
     patcher = mock.patch('h.api.views.AnnotationEvent', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def Annotation(request):
-    patcher = mock.patch('h.api.views.Annotation', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def logic(request):
-    patcher = mock.patch('h.api.views.logic', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
-@pytest.fixture
-def _publish_annotation_event(request):
-    patcher = mock.patch('h.api.views._publish_annotation_event',
-                         autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
@@ -401,5 +339,27 @@ def access_token(request):
 @pytest.fixture
 def schemas(request):
     patcher = mock.patch('h.api.views.schemas', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def search_lib(request):
+    patcher = mock.patch('h.api.views.search_lib', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def storage(request):
+    patcher = mock.patch('h.api.views.storage', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
+
+
+@pytest.fixture
+def _publish_annotation_event(request):
+    patcher = mock.patch('h.api.views._publish_annotation_event',
+                         autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
