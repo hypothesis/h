@@ -135,19 +135,9 @@ def search(request):
     params = request.params.copy()
 
     separate_replies = params.pop('_separate_replies', False)
-    results = search_lib.search(request, params,
-                                separate_replies=separate_replies)
-
-    return_value = {
-        'total': results['total'],
-        'rows': [search_lib.render(a) for a in results['rows']]
-    }
-
-    if separate_replies:
-        return_value['replies'] = [
-            search_lib.render(a) for a in results['replies']]
-
-    return return_value
+    return search_lib.search(request,
+                             params,
+                             separate_replies=separate_replies)
 
 
 @api_config(route_name='access_token')
@@ -178,12 +168,7 @@ def annotations_index(request):
     This will use the default limit, 20 at time of writing, and results
     are ordered most recent first.
     """
-    results = search_lib.search(request, {"limit": 20})
-
-    return {
-        'total': results['total'],
-        'rows': [search_lib.render(a) for a in results['rows']],
-    }
+    return search_lib.search(request, {"limit": 20})
 
 
 @api_config(context=Annotations, request_method='POST', permission='create')
@@ -196,9 +181,7 @@ def create(request):
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'create')
-
-    # Return it so the client gets to know its ID and such
-    return search_lib.render(annotation)
+    return annotation
 
 
 @api_config(context=Annotation, request_method='GET', permission='read')
@@ -209,7 +192,7 @@ def read(context, request):
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'read')
 
-    return search_lib.render(annotation)
+    return annotation
 
 
 @api_config(context=Annotation, request_method='PUT', permission='update')
@@ -224,9 +207,7 @@ def update(context, request):
 
     # Notify any subscribers
     _publish_annotation_event(request, annotation, 'update')
-
-    # Return the updated version that was just stored.
-    return search_lib.render(annotation)
+    return annotation
 
 
 @api_config(context=Annotation, request_method='DELETE', permission='delete')

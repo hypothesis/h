@@ -143,23 +143,6 @@ def test_prepare_sets_nipsa_field(_, ann, nipsa, has_nipsa):
         assert "nipsa" not in ann
 
 
-@mock.patch('h.api.search.transform.groups')
-@pytest.mark.parametrize("ann_in,ann_out", [
-    # Preserves the basics
-    ({}, {}),
-    ({"other": "keys", "left": "alone"}, {"other": "keys", "left": "alone"}),
-
-    # Target field
-    ({"target": "hello"}, {"target": "hello"}),
-    ({"target": []}, {"target": []}),
-    ({"target": ["foo", "bar"]}, {"target": ["foo", "bar"]}),
-    ({"target": [{"foo": "bar"}, {"baz": "qux"}]},
-     {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
-])
-def test_render_noop_when_nothing_to_remove(_, ann_in, ann_out):
-    assert transform.render(ann_in) == ann_out
-
-
 @pytest.fixture
 def has_nipsa(request):
     patcher = mock.patch('h.api.nipsa.has_nipsa', autospec=True)

@@ -2,8 +2,6 @@
 
 """Functions for transforming data for or from the search index."""
 
-import copy
-
 from h._compat import string_types
 from h.api import nipsa
 from h.api import uri
@@ -32,17 +30,6 @@ def prepare(annotation):
 
     if 'user' in annotation and nipsa.has_nipsa(annotation['user']):
         annotation['nipsa'] = True
-
-
-def render(annotation):
-    """
-    Render an annotation retrieved from search for public display.
-
-    Receives data direct from the search index and reformats it for rendering
-    or display in the public API.
-    """
-    data = copy.deepcopy(dict(annotation))
-    return data
 
 
 def _normalize_annotation_target_uris(annotation):

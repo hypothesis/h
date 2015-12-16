@@ -96,37 +96,17 @@ def test_search_searches(search_lib):
 
     views.search(request)
 
-    search_lib.search.assert_called_once_with(
-        request, request.params, separate_replies=False)
+    search_lib.search.assert_called_once_with(request,
+                                              request.params,
+                                              separate_replies=False)
 
 
-def test_search_renders_results(search_lib):
+def test_search_returns_search_results(search_lib):
     request = testing.DummyRequest()
-    search_lib.search.return_value = {
-        'total': 3,
-        'rows': ['a', 'b', 'c']
-    }
-    search_lib.render.side_effect = lambda x: x.upper()
 
     result = views.search(request)
 
-    assert result == {
-        'total': 3,
-        'rows': ['A', 'B', 'C'],
-    }
-
-
-def test_search_renders_replies(search_lib):
-    search_lib.search.return_value = {
-        'total': 3,
-        'rows': ['parent_annotation'],
-        'replies': ['a', 'b', 'c']
-    }
-    search_lib.render.side_effect = lambda x: x.upper()
-
-    result = views.search(mock.Mock())
-
-    assert result['replies'] == ['A', 'B', 'C']
+    assert result == search_lib.search.return_value
 
 
 def test_access_token_returns_create_token_response():
@@ -178,25 +158,17 @@ def test_annotations_index_searches(search_lib):
     search_lib.search.assert_called_once_with(request, {"limit": 20})
 
 
-def test_annotations_index_renders_results(search_lib):
+def test_annotations_index_returns_search_results(search_lib):
     request = testing.DummyRequest()
-    search_lib.search.return_value = {
-        'total': 3,
-        'rows': ['a', 'b', 'c'],
-    }
-    search_lib.render.side_effect = lambda x: x.upper()
 
     result = views.annotations_index(request)
 
-    assert result == {
-        'total': 3,
-        'rows': ['A', 'B', 'C'],
-    }
+    assert result == search_lib.search.return_value
 
 
 # The fixtures required to mock all of create()'s dependencies.
 create_fixtures = pytest.mark.usefixtures(
-    'logic', 'AnnotationEvent', 'search_lib', 'schemas')
+    'logic', 'AnnotationEvent', 'schemas')
 
 
 @create_fixtures
@@ -253,65 +225,24 @@ def test_create_event(AnnotationEvent, logic):
 
 
 @create_fixtures
-def test_create_passes_annotation_to_render(logic, search_lib):
-    views.create(mock.Mock())
+def test_create_returns_annotation(logic):
+    request = mock.Mock()
+    result = views.create(request)
 
-    search_lib.render.assert_called_once_with(
-        logic.create_annotation.return_value)
-
-
-@create_fixtures
-def test_create_returns_render(search_lib):
-    """It should return what render() returns."""
-    assert views.create(mock.Mock()) == search_lib.render.return_value
+    assert result == logic.create_annotation.return_value
 
 
-# The fixtures required to mock all of read()'s dependencies.
-read_fixtures = pytest.mark.usefixtures('search_lib', 'AnnotationEvent')
+def test_read_returns_annotation():
+    context = mock.Mock()
+    request = mock.Mock()
+    result = views.read(context, request)
 
-
-@read_fixtures
-def test_read_event(AnnotationEvent):
-    annotation = _mock_annotation()
-    request = mock.Mock(effective_principals=[])
-    event = AnnotationEvent.return_value
-
-    views.read(annotation, request)
-
-    AnnotationEvent.assert_called_once_with(request, annotation.model, 'read')
-    request.registry.notify.assert_called_once_with(event)
-
-
-@read_fixtures
-def test_read_calls_render(search_lib):
-    annotation = _mock_annotation()
-
-    views.read(context=annotation,
-               request=mock.Mock(effective_principals=[]))
-
-    search_lib.render.assert_called_once_with(annotation.model)
-
-
-@read_fixtures
-def test_read_returns_rendered_annotation(search_lib):
-    response_data = views.read(
-        _mock_annotation(),
-        mock.Mock(effective_principals=[]))
-
-    assert response_data == search_lib.render.return_value
-
-
-@read_fixtures
-def test_read_does_not_crash_if_annotation_has_no_group():
-    annotation = _mock_annotation()
-    assert 'group' not in annotation
-
-    views.read(annotation, mock.Mock(effective_principals=[]))
+    assert result == context.model
 
 
 # The fixtures required to mock all of update()'s dependencies.
 update_fixtures = pytest.mark.usefixtures(
-    'logic', 'Annotation', 'search_lib', 'schemas')
+    'logic', 'Annotation', 'schemas')
 
 
 @update_fixtures
@@ -361,18 +292,12 @@ def test_update_event(AnnotationEvent):
 
 
 @update_fixtures
-def test_update_calls_render(search_lib):
-    annotation = mock.Mock()
+def test_update_returns_annotation():
+    context = mock.Mock()
+    request = mock.Mock()
+    result = views.update(context, request)
 
-    views.update(annotation, mock.Mock())
-
-    search_lib.render.assert_called_once_with(annotation.model)
-
-
-@update_fixtures
-def test_update_returns_rendered_annotation(search_lib):
-    assert views.update(mock.Mock(), mock.Mock()) == (
-        search_lib.render.return_value)
+    assert result == context.model
 
 
 # The fixtures required to mock all of delete()'s dependencies.
@@ -428,15 +353,6 @@ def test_delete_does_not_crash_if_annotation_has_no_group():
     views.delete(
         annotation,
         mock.Mock(effective_principals=['group:test-group']))
-
-
-@pytest.fixture
-def search_render(request):
-    patcher = mock.patch('h.api.search.render', autospec=True)
-    func = patcher.start()
-    request.addfinalizer(patcher.stop)
-    func.side_effect = lambda x: x
-    return func
 
 
 @pytest.fixture
