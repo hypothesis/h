@@ -22,11 +22,9 @@
     position: absolute;
     right: 0;
     bottom: 0;
-    pointer-events: none;
   }
 
   .excerpt__toggle-link {
-    pointer-events: auto;
     padding-left: 15px;
     background-image: linear-gradient(to right, transparent 0px, white 12px);
   }
