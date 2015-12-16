@@ -69,38 +69,36 @@ function excerpt($timeout) {
         return contentElem.scrollHeight > ctrl.collapsedHeight;
       };
 
-      scope.$evalAsync(function () {
-        scope.$watch('vm.enabled()', function (isEnabled) {
-          if (isEnabled) {
-            contentElem = elem[0].querySelector('.excerpt');
+      scope.$watch('vm.enabled()', function (isEnabled) {
+        if (isEnabled) {
+          contentElem = elem[0].querySelector('.excerpt');
 
-            // trigger a recalculation of ctrl.overflowing() and properties
-            // which depend upon it when embedded media loads.
-            //
-            // In future we might wish to trigger checking for other events
-            // outside of Angular's knowledge as well, eg. loading of embedded
-            // media
-            contentElem.addEventListener('load', checkForOverflowChange,
-              true /* capture. 'load' events do not bubble */);
+          // trigger a recalculation of ctrl.overflowing() and properties
+          // which depend upon it when embedded media loads.
+          //
+          // In future we might wish to trigger checking for other events
+          // outside of Angular's knowledge as well, eg. loading of embedded
+          // media
+          contentElem.addEventListener('load', checkForOverflowChange,
+            true /* capture. 'load' events do not bubble */);
 
-            updateContentMaxHeight();
-          } else {
-            contentElem = undefined;
-          }
-        });
-
-        scope.$watch('vm.collapse', function (isCollapsed) {
-          if (!contentElem) {
-            return;
-          }
           updateContentMaxHeight();
-        });
+        } else {
+          contentElem = undefined;
+        }
+      });
 
-        scope.$watch('vm.overflowing()', function () {
-          if (ctrl.onCollapsibleChanged) {
-            ctrl.onCollapsibleChanged({collapsible: ctrl.overflowing()});
-          }
-        });
+      scope.$watch('vm.collapse', function (isCollapsed) {
+        if (!contentElem) {
+          return;
+        }
+        updateContentMaxHeight();
+      });
+
+      scope.$watch('vm.overflowing()', function () {
+        if (ctrl.onCollapsibleChanged) {
+          ctrl.onCollapsibleChanged({collapsible: ctrl.overflowing()});
+        }
       });
     },
     scope: {
