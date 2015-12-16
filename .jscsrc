@@ -6,5 +6,19 @@
     "node_modules/**",
     "h/static/scripts/vendor"
   ],
-  "maxErrors": 10
+  "maxErrors": 10,
+  "disallowSpacesInAnonymousFunctionExpression": null,
+  "disallowSpacesInFunctionDeclaration": {
+    "beforeOpeningRoundBrace": true
+  },
+  "disallowSpacesInFunctionExpression": null,
+  "disallowSpacesInNamedFunctionExpression": {
+    "beforeOpeningRoundBrace": true
+  },
+  "requireSpacesInFunctionDeclaration": null,
+  "requireSpacesInFunctionExpression": null,
+  "requireSpacesInAnonymousFunctionExpression": {
+    "beforeOpeningRoundBrace": true,
+    "beforeOpeningCurlyBrace": true
+  }
 }
