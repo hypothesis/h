@@ -48,11 +48,20 @@ function excerpt($timeout) {
     controller: ExcerptController,
     controllerAs: 'vm',
     link: function (scope, elem, attrs, ctrl) {
-      if (!ctrl.enabled()) {
-        return;
+      var contentElem;
+
+      function checkForOverflowChange() {
+        scope.$digest();
       }
 
-      var contentElem;
+      function updateContentMaxHeight() {
+        if (ctrl.collapse) {
+          contentElem.style.maxHeight = toPx(ctrl.collapsedHeight);
+        } else {
+          contentElem.style.maxHeight = toPx(contentElem.scrollHeight);
+        }
+      }
+
       ctrl.overflowing = function overflowing() {
         if (!contentElem) {
           return false;
@@ -61,15 +70,30 @@ function excerpt($timeout) {
       };
 
       scope.$evalAsync(function () {
-        contentElem = elem[0].querySelector('.excerpt');
+        scope.$watch('vm.enabled()', function (isEnabled) {
+          if (isEnabled) {
+            contentElem = elem[0].querySelector('.excerpt');
 
-        // update max height
-        scope.$watch('vm.collapse', function (isCollapsed) {
-          if (isCollapsed) {
-            contentElem.style.maxHeight = toPx(ctrl.collapsedHeight);
+            // trigger a recalculation of ctrl.overflowing() and properties
+            // which depend upon it when embedded media loads.
+            //
+            // In future we might wish to trigger checking for other events
+            // outside of Angular's knowledge as well, eg. loading of embedded
+            // media
+            contentElem.addEventListener('load', checkForOverflowChange,
+              true /* capture. 'load' events do not bubble */);
+
+            updateContentMaxHeight();
           } else {
-            contentElem.style.maxHeight = toPx(contentElem.scrollHeight);
+            contentElem = undefined;
           }
+        });
+
+        scope.$watch('vm.collapse', function (isCollapsed) {
+          if (!contentElem) {
+            return;
+          }
+          updateContentMaxHeight();
         });
 
         scope.$watch('vm.overflowing()', function () {
@@ -77,19 +101,6 @@ function excerpt($timeout) {
             ctrl.onCollapsibleChanged({collapsible: ctrl.overflowing()});
           }
         });
-
-        function checkForOverflowChange() {
-          scope.$digest();
-        }
-
-        // trigger a recalculation of ctrl.overflowing() and properties
-        // which depend upon it when embedded media loads.
-        //
-        // In future we might wish to trigger checking for other events
-        // outside of Angular's knowledge as well, eg. loading of embedded
-        // media
-        contentElem.addEventListener('load', checkForOverflowChange,
-          true /* capture. 'load' events do not bubble */);
       });
     },
     scope: {
@@ -107,7 +118,7 @@ function excerpt($timeout) {
       /** Called when the collapsibility of the excerpt (that is, whether or
        * not the content height exceeds the collapsed height), changes.
        */
-      onCollapsibleChanged: '&',
+      onCollapsibleChanged: '&?',
       /** The height of this container in pixels when collapsed.
        */
       collapsedHeight: '=',

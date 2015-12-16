@@ -304,7 +304,7 @@ function AnnotationController(
     /** Determines whether controls to expand/collapse the annotation body
      * are displayed adjacent to the tags field.
      */
-    vm.canCollapseBody = true;
+    vm.canCollapseBody = false;
 
     /** Determines whether the annotation body should be collapsed. */
     vm.collapseBody = true;
