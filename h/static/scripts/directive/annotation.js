@@ -739,6 +739,14 @@ function AnnotationController(
     return domainModel.updated;
   };
 
+  vm.updatedString = function () {
+    if (!domainModel.updated) {
+      return '';
+    }
+    var date = new Date(domainModel.updated);
+    return date.toDateString() + ', ' + date.toLocaleTimeString();
+  }
+
   vm.user = function() {
     return domainModel.user;
   };
