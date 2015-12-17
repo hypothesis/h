@@ -9,7 +9,7 @@
       <span>
         <a class="annotation-user"
            target="_blank"
-           ng-href="{{vm.baseURI}}u/{{vm.user()}}"
+           ng-href="{{::vm.baseURI}}u/{{vm.user()}}"
            >{{vm.user() | persona}}</a>
       </span>
 
@@ -33,11 +33,11 @@
         <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing()" title="This is a highlight. Click 'edit' to add a note or tag."></i>
         <span class="annotation-citation"
               ng-bind-html="vm.document() | documentTitle"
-              ng-if="!vm.isSidebar">
+              ng-if="::!vm.isSidebar">
         </span>
         <span class="annotation-citation-domain"
               ng-bind-html="vm.document() | documentDomain"
-              ng-if="!vm.isSidebar">
+              ng-if="::!vm.isSidebar">
         </span>
       </span>
     </span>
@@ -49,7 +49,7 @@
        target="_blank"
        title="{{vm.updated() | moment:'LLLL'}}"
        ng-if="!vm.editing() && vm.updated()"
-       ng-href="{{vm.baseURI}}a/{{vm.id()}}"
+       ng-href="{{::vm.baseURI}}a/{{vm.id()}}"
        >{{vm.timestamp}}</a>
   </header>
 
