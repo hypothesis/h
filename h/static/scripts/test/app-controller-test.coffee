@@ -168,6 +168,30 @@ describe 'AppController', ->
     $scope.$broadcast(events.USER_CHANGED, {initialLoad: false})
     assert.calledOnce(fakeRoute.reload)
 
+  describe 'on "beforeAnnotationCreated"', ->
+
+    ###*
+    #  It should clear any selection that exists in the sidebar before
+    #  creating a new annotation. Otherwise the new annotation with its
+    #  form open for the user to type in won't be visible because it's
+    #  not part of the selection.
+    ###
+    it 'calls $scope.clearSelection()', ->
+      createController()
+      sandbox.spy($scope, 'clearSelection')
+
+      $rootScope.$emit('beforeAnnotationCreated', {})
+
+      assert.called($scope.clearSelection)
+
+    it 'doesn\'t call $scope.clearSelection() when a highlight is created', ->
+      createController()
+      sandbox.spy($scope, 'clearSelection')
+
+      $rootScope.$emit('beforeAnnotationCreated', {$highlight: true})
+
+      assert.notCalled($scope.clearSelection)
+
   describe 'logout()', ->
     it 'prompts the user if there are drafts', ->
       fakeDrafts.count.returns(1)

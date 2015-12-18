@@ -1,3 +1,15 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Clear any selection that exists in the sidebar before creating a new
+  annotation. Fixes a usability issue that the new annotation with its form
+  open for the user to type in wouldn't be visible because it wasn't part of
+  the selection. (#2817)
+
+
 0.8.7 (2015-12-18)
 ==================
 
