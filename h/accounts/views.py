@@ -12,7 +12,6 @@ from pyramid.view import view_config, view_defaults
 from pyramid.security import forget, remember
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
-from itsdangerous import BadSignature
 
 from h import i18n
 from h import models
