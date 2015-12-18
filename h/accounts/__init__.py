@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from itsdangerous import URLSafeTimedSerializer
 
-from ..security import derive_key
+from h.security import derive_key
 
 from h import util
 from h.accounts import models
