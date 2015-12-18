@@ -288,8 +288,6 @@ class ResetPasswordController(object):
             user = schemas.ResetCode().deserialize(self.schema, code)
         except colander.Invalid:
             raise httpexceptions.HTTPNotFound()
-        except BadSignature:
-            raise httpexceptions.HTTPNotFound()
         else:
             # N.B. the form field for the reset code is called 'user'. See the
             # comment in `schemas.ResetPasswordSchema` for details.
