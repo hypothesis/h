@@ -1,8 +1,17 @@
-Unreleased
-==========
+0.8.7 (2015-12-18)
+==================
+
+Bug fixes
+---------
+
+- Links containing underscores within annotations are no longer mangled (#2801).
+
+- Fix a crash when invalid data is sent to the login endpoint (#2793).
 
 Features
 --------
+
+- New homepage design (feature flagged: new_homepage) (#2770).
 
 - Change YouTube and Vimeo links into video embeds
   (feature flagged: embed_media) (#2805).
