@@ -12,6 +12,8 @@ module.exports = class Host extends Guest
     # Create the iframe
     app = $('<iframe></iframe>')
     .attr('name', 'hyp_sidebar_frame')
+    # enable media in annotations to be shown fullscreen
+    .attr('allowfullscreen', '')
     .attr('seamless', '')
     .attr('src', options.app)
 

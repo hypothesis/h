@@ -8,6 +8,7 @@ function iframe(src) {
   iframe_.src = src;
   iframe_.classList.add('annotation-media-embed');
   iframe_.setAttribute('frameborder', '0');
+  iframe_.setAttribute('allowfullscreen', '');
   return iframe_;
 }
 
