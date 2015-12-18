@@ -131,10 +131,10 @@ class User(Base):
     # Password salt
     salt = sa.Column(sa.UnicodeText(), nullable=False)
     # Last password update
-    last_password_update = sa.Column(sa.DateTime(timezone=False),
+    last_password_update = sa.Column(sa.DateTime(),
                                      default=sa.sql.func.now(),
                                      server_default=sa.func.now(),
-                                     nullable=True)
+                                     nullable=False)
 
     @hybrid_property
     def password(self):
