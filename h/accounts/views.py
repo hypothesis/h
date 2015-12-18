@@ -285,7 +285,7 @@ class ResetPasswordController(object):
         # If valid, we inject the supplied it into the form as a hidden field.
         # Otherwise, we 404.
         try:
-            user = schemas.ResetCode().deserialize(self.schema, code)
+            user = schemas.ResetCode().deserialize(None, code)
         except colander.Invalid:
             raise httpexceptions.HTTPNotFound()
         else:
