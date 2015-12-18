@@ -1,6 +1,7 @@
 /* jshint node: true */
 'use strict';
 
+var dateUtil = require('../date-util');
 var events = require('../events');
 
 /** Return a domainModel tags array from the given vm tags array.
@@ -738,6 +739,14 @@ function AnnotationController(
   vm.updated = function() {
     return domainModel.updated;
   };
+
+  vm.updatedString = function () {
+    if (!domainModel.updated) {
+      return '';
+    }
+    var date = new Date(domainModel.updated);
+    return dateUtil.format(date);
+  }
 
   vm.user = function() {
     return domainModel.user;
