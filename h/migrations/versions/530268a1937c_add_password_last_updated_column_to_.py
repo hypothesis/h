@@ -15,10 +15,10 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('user', sa.Column('last_password_update',
+    op.add_column('user', sa.Column('password_updated',
                                     sa.DateTime(),
                                     nullable=True))
 
 
 def downgrade():
-    op.drop_column('user', 'last_password_update')
+    op.drop_column('user', 'password_updated')

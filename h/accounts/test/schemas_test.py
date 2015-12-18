@@ -265,7 +265,7 @@ def test_reset_password_user_has_already_reset_their_password(config, user_model
     request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
     user = user_model.get_by_username.return_value
-    user.last_password_update = 2
+    user.password_updated = 2
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({
@@ -283,7 +283,7 @@ def test_reset_password_adds_user_to_appstruct(config, user_model):
     request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
     user = user_model.get_by_username.return_value
-    user.last_password_update = 0
+    user.password_updated = 0
 
     appstruct = schema.deserialize({
         'user': 'abc123',

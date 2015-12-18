@@ -217,7 +217,7 @@ class ResetCode(colander.SchemaType):
         user = models.User.get_by_username(username)
         if user is None:
             raise colander.Invalid(node, _('Your reset code is not valid'))
-        if timestamp < user.last_password_update:
+        if timestamp < user.password_updated:
             raise colander.Invalid(node,
                                    _('You have already reset your password'))
         return user
