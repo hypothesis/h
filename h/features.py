@@ -138,14 +138,25 @@ def remove_old_flags_on_boot(event):
     remove_old_flags()
 
 
+def all(request):
+    """
+    Returns a dict mapping feature flag names to enabled states
+    for the user associated with a given request.
+    """
+    return {k: flag_enabled(request, k) for k in FEATURES.keys()}
+
+
+# Deprecated dedicated endpoint for feature flag data,
+# kept for compatibility with older clients (<= 0.8.6).
+# Newer clients get feature flag data as part of the session data
+# from the /app endpoint.
 @view_config(route_name='features_status',
              request_method='GET',
              accept='application/json',
              renderer='json',
              http_cache=(0, {'no_store': False}))
 def features_status(request):
-    """Report current feature flag values."""
-    return {k: flag_enabled(request, k) for k in FEATURES.keys()}
+    return all(request)
 
 
 def includeme(config):

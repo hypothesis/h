@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pyramid.session import SignedCookieSessionFactory
 
+from h import features
 from h import models
 from h.security import derive_key
 
@@ -10,6 +11,7 @@ def model(request):
     session['csrf'] = request.session.get_csrf_token()
     session['userid'] = request.authenticated_userid
     session['groups'] = _current_groups(request)
+    session['features'] = features.all(request)
     return session
 
 
