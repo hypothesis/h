@@ -45,6 +45,7 @@ INSTALL_REQUIRES = [
     'gevent>=1.0.2,<1.1.0',
     'gnsq>=0.3.0,<0.4.0',
     'gunicorn>=19.2,<20',
+    'itsdangerous>=0.24',
     'jsonpointer==1.0',
     'jsonschema>=2.5.1,<2.6',
     'oauthlib==0.6.3',
@@ -64,7 +65,6 @@ INSTALL_REQUIRES = [
     'requests>=2.7.0',
     'ws4py>=0.3,<0.4',
     'zope.sqlalchemy>=0.7.6,<0.8.0',
-    'itsdangerous>=0.24',
 
     # Version pin for known bug
     # https://github.com/repoze/repoze.sendmail/issues/31
