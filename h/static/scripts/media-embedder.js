@@ -107,16 +107,28 @@ function embedForLink(link) {
 
 /** Replace the given link element with an embed.
  *
- * If the given link element is a link to an embeddable media then it will be
- * replaced in the DOM with an embed (e.g. an <iframe>) of the same media.
+ * If the given link element is a link to an embeddable media and if its link
+ * text is the same as its href then it will be replaced in the DOM with an
+ * embed (e.g. an <iframe>) of the same media.
  *
- * If it's not an embeddable link the link will be left untouched.
+ * If the link text is different from the href, then the link will be left
+ * untouched. We want to convert links like these from the Markdown source into
+ * embeds:
+ *
+ *     https://vimeo.com/channels/staffpicks/148845534
+ *     <https://vimeo.com/channels/staffpicks/148845534>
+ *
+ * But we don't want to convert links like this:
+ *
+ *     [Custom link text](https://vimeo.com/channels/staffpicks/148845534)
+ *
+ * because doing so would destroy the user's custom link text, and leave users
+ * with no way to just insert a media link without it being embedded.
+ *
+ * If the link is not a link to an embeddable media it will be left untouched.
  *
  */
 function replaceLinkWithEmbed(link) {
-
-  // If the user gives a custom link text then we don't replace the link with
-  // an embed.
   if (link.href !== link.innerText) {
     return;
   }
