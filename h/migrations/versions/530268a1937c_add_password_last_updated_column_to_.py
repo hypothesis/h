@@ -16,9 +16,7 @@ import sqlalchemy as sa
 
 def upgrade():
     op.add_column('user', sa.Column('last_password_update',
-                                    sa.DateTime(timezone=False),
-                                    default=sa.sql.func.now(),
-                                    server_default=sa.func.now(),
+                                    sa.DateTime(),
                                     nullable=True))
 
 
