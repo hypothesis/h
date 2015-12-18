@@ -2,7 +2,7 @@
 !-->
 <div class="top-bar" ng-class="frame.visible && 'shown'" ng-cloak>
   <!-- Legacy design for top bar, as used in the stream !-->
-  <div class="top-bar__inner content" ng-if="!isSidebar">
+  <div class="top-bar__inner content" ng-if="::!isSidebar">
     <simple-search
       class="simple-search"
       query="searchController.query"
@@ -23,7 +23,7 @@
        The inner div is styled with 'content' to center it in
        the stream view.
   !-->
-  <div class="top-bar__inner content" ng-if="isSidebar">
+  <div class="top-bar__inner content" ng-if="::isSidebar">
     <group-list class="group-list" auth="auth"></group-list>
     <div class="top-bar__expander"></div>
     <simple-search
