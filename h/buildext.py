@@ -204,9 +204,13 @@ def build_chrome(args):
     copytree('h/static/images', 'build/chrome/public/images')
 
     os.makedirs('build/chrome/lib')
-    subprocess.call(['node_modules/.bin/browserify',
-      'h/browser/chrome/lib/extension.js',
-      '--outfile', 'build/chrome/lib/extension-bundle.js'])
+
+    subprocess_args = ['node_modules/.bin/browserify',
+                       'h/browser/chrome/lib/extension.js',
+                       '--outfile', 'build/chrome/lib/extension-bundle.js']
+    if args.debug:
+        subprocess_args.append('--debug')
+    subprocess.call(subprocess_args)
 
     # Render the sidebar html.
     if webassets_env.url.startswith('chrome-extension:'):
@@ -288,8 +292,12 @@ def build_firefox(args):
 
 
 parser = argparse.ArgumentParser('hypothesis-buildext')
+
 parser.add_argument('config_uri',
                     help='paster configuration URI')
+
+parser.add_argument('--debug', action='store_true', default=False,
+                    help='create source maps to enable debugging in browser')
 
 subparsers = parser.add_subparsers(title='browser', dest='browser')
 subparsers.required = True

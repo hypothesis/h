@@ -20,7 +20,7 @@ To build and install a local development instance of the Chrome extension:
 
    .. code-block:: bash
 
-      hypothesis-buildext conf/development.ini chrome --base 'http://127.0.0.1:5000'
+      hypothesis-buildext --debug conf/development.ini chrome --base 'http://127.0.0.1:5000'
 
    .. note::
 
@@ -75,7 +75,7 @@ extension's assets over ``https``:
 
    .. code-block:: bash
 
-      hypothesis-buildext conf/development.ini chrome --base 'https://127.0.0.1:5000'
+      hypothesis-buildext --debug conf/development.ini chrome --base 'https://127.0.0.1:5000'
 
 3. Follow steps 3-6 from `Building the Chrome extension for development`_
    above to install the extension in Chrome. (If you've already installed the
