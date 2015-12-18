@@ -130,7 +130,7 @@ function embedForLink(link) {
  *
  */
 function replaceLinkWithEmbed(link) {
-  if (link.href !== link.innerText) {
+  if (link.href !== link.textContent) {
     return;
   }
 
