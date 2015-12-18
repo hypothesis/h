@@ -346,21 +346,6 @@ def test_forgot_password_creates_no_activations_when_validation_fails(activation
     assert activation_model.call_count == 0
 
 
-@forgot_password_fixtures
-def test_forgot_password_create_no_activation_for_user(activation_model,
-                                                       authn_policy):
-    request = DummyRequest(method='POST')
-    request.registry.password_reset_serializer = FakeSerializer()
-    authn_policy.authenticated_userid.return_value = None
-    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = ForgotPasswordController(request)
-    controller.form = form_validating_to({"user": user})
-
-    controller.forgot_password()
-
-    assert activation_model.call_count == 0
-
-
 @patch('h.accounts.views.reset_password_link')
 @forgot_password_fixtures
 def test_forgot_password_generates_reset_link(reset_link, authn_policy):
