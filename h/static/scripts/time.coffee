@@ -36,8 +36,40 @@ getBreakpoint = (date) ->
   delta: delta
   breakpoint: arrayFind(BREAKPOINTS, (x) -> x[0] > delta)
 
+nextFuzzyUpdate = (date) ->
+  return null if not date
+  {_, breakpoint} = getBreakpoint(date)
+  return null unless breakpoint
+  secs = breakpoint[2]
+
+  # We don't want to refresh anything more often than 5 seconds
+  secs = Math.max secs, 5
+
+  # setTimeout limit is MAX_INT32=(2^31-1) (in ms),
+  # which is about 24.8 days. So we don't set up any timeouts
+  # longer than 24 days, that is, 2073600 seconds.
+  secs = Math.min secs, 2073600
 
 module.exports = ->
+  # Starts an interval whose frequency decays depending on the relative
+  # age of 'date'. This can be used to refresh parts of a UI whose
+  # update frequency depends on the age of a timestamp.
+  #
+  # Returns a function that cancels the automatic refresh.
+  decayingInterval: (date, callback) ->
+    timer = undefined
+    update = ->
+      fuzzyUpdate = nextFuzzyUpdate(date)
+      nextUpdate = (1000 * fuzzyUpdate) + 500
+      timer = setTimeout(->
+        callback(date)
+        update()
+      , nextUpdate)
+    update()
+
+    return ->
+      clearTimeout(timer)
+
   toFuzzyString: (date) ->
     return '' unless date
     {delta, breakpoint} = getBreakpoint(date)
@@ -46,16 +78,4 @@ module.exports = ->
     resolution = breakpoint[2]
     return template.replace('{}', String(Math.floor(delta / resolution)))
 
-  nextFuzzyUpdate: (date) ->
-    return null if not date
-    {_, breakpoint} = getBreakpoint(date)
-    return null unless breakpoint
-    secs = breakpoint[2]
-
-    # We don't want to refresh anything more often than 5 seconds
-    secs = Math.max secs, 5
-
-    # setTimeout limit is MAX_INT32=(2^31-1) (in ms),
-    # which is about 24.8 days. So we don't set up any timeouts
-    # longer than 24 days, that is, 2073600 seconds.
-    secs = Math.min secs, 2073600
+  nextFuzzyUpdate: nextFuzzyUpdate
