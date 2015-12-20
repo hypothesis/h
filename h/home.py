@@ -6,7 +6,12 @@ from pyramid import httpexceptions
 @view.view_config(route_name='via_redirect',
                   request_method='GET')
 def via_redirect(context, request):
-    url = request.params['url']
+    url = request.params.get('url')
+
+    if not url:
+        raise httpexceptions.HTTPBadRequest('"url" parameter missing')
+
+
     via_link = 'https://via.hypothes.is/{}'.format(url)
     return httpexceptions.HTTPFound(location=via_link)
 
