@@ -28,6 +28,14 @@ function ExcerptController() {
   this.showInlineControls = function () {
     return this.overflowing() && this.inlineControls;
   }
+
+  this.bottomShadowStyles = function () {
+    return {
+      'excerpt__shadow': true,
+      'excerpt__shadow--transparent': this.inlineControls,
+      'is-hidden': !this.isExpandable(),
+    };
+  }
 }
 
 function toPx(val) {

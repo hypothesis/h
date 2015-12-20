@@ -14,9 +14,7 @@
       </span>
     </div>
   </div>
-  <div class="excerpt__shadow"
-       ng-click="vm.toggle()"
-       ng-class="{'is-hidden' : !vm.isExpandable()}"
-       ng-if="!vm.inlineControls"
+  <div ng-click="vm.toggle()"
+       ng-class="vm.bottomShadowStyles()"
        title="Show the full excerpt"></div>
 </div>

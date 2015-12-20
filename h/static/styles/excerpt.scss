@@ -57,6 +57,10 @@
     transition: opacity $expand-duration linear;
   }
 
+  .excerpt__shadow--transparent {
+    background-image: none;
+  }
+
   .excerpt__shadow.is-hidden {
     opacity: 0;
     pointer-events: none;
