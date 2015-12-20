@@ -14,7 +14,7 @@
       </span>
 
       <span class="annotation-collapsed-replies">
-        <a class="reply-count small" href=""
+        <a class="annotation-link" href=""
           ng-click="replyCountClick()"
           ng-pluralize count="replyCount"
           when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
@@ -45,7 +45,7 @@
     <span class="u-flex-spacer"></span>
 
     <!-- Timestamp -->
-    <a class="annotation-timestamp"
+    <a class="annotation-link"
        target="_blank"
        title="{{vm.updatedString()}}"
        ng-if="!vm.editing() && vm.updated()"
@@ -108,7 +108,7 @@
       </li>
     </ul>
     <div class="u-stretch"></div>
-    <a class="u-strong" ng-show="vm.canCollapseBody"
+    <a class="annotation-link u-strong" ng-show="vm.canCollapseBody"
        ng-click="vm.collapseBody = !vm.collapseBody"
        ng-title="vm.collapseBody ? 'Show the full annotation text' : 'Show the first few lines only'"
        ng-bind="vm.collapseBody ? 'More' : 'Less'"></a>
@@ -141,7 +141,7 @@
     </div>
 
     <div class="annotation-replies" ng-if="replyCount > 0">
-      <a class="reply-count small" href=""
+      <a class="annotation-link" href=""
          ng-click="replyCountClick()"
          ng-pluralize count="replyCount"
          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
