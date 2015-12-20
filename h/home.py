@@ -8,7 +8,7 @@ from pyramid import httpexceptions
 def via_redirect(context, request):
     url = request.params.get('url')
 
-    if not url:
+    if url is None:
         raise httpexceptions.HTTPBadRequest('"url" parameter missing')
 
 
