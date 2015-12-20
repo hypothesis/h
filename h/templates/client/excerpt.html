@@ -1,6 +1,6 @@
 <div ng-transclude ng-if="!vm.enabled()"></div>
 <div class="excerpt__container" ng-if="vm.enabled()">
-  <div class="excerpt">
+  <div class="excerpt" ng-style="vm.contentStyle()">
     <div ng-transclude></div>
     <div class="excerpt__inline-controls"
          ng-show="vm.showInlineControls()">

@@ -13,17 +13,12 @@ function ExcerptController() {
     return true;
   };
 
-  // Test seam. Overwritten in the link function
-  this.overflowing = function () {
-    return false;
-  };
-
   this.isExpandable = function () {
-    return this.collapse && this.overflowing();
+    return this.overflowing() && this.collapse;
   };
 
   this.isCollapsible = function () {
-    return !this.collapse;
+    return this.overflowing() && !this.collapse;
   };
 
   this.toggle = function () {
@@ -31,7 +26,7 @@ function ExcerptController() {
   };
 
   this.showInlineControls = function () {
-    return this.inlineControls && (this.isExpandable() || this.isCollapsible())
+    return this.overflowing() && this.inlineControls;
   }
 }
 
@@ -56,18 +51,26 @@ function excerpt() {
     link: function (scope, elem, attrs, ctrl) {
       var contentElem;
 
-      function checkForOverflowChange() {
-        scope.$digest();
-        updateContentMaxHeight();
-      }
-
-      function updateContentMaxHeight() {
-        if (ctrl.collapse) {
-          contentElem.style.maxHeight = toPx(ctrl.collapsedHeight);
-        } else {
-          contentElem.style.maxHeight =
-            ctrl.animate ? toPx(contentElem.scrollHeight) : '';
+      ctrl.contentStyle = function contentStyle() {
+        if (!contentElem) {
+          return {};
         }
+
+        var maxHeight;
+        if (ctrl.collapse) {
+          maxHeight = toPx(ctrl.collapsedHeight);
+        } else if (ctrl.animate) {
+          // animating the height change requires that the final
+          // height be specified exactly, rather than relying on
+          // auto height
+          maxHeight = toPx(contentElem.scrollHeight);
+        } else {
+          maxHeight = '';
+        }
+
+        return {
+          'max-height': maxHeight,
+        };
       }
 
       ctrl.overflowing = function overflowing() {
@@ -77,46 +80,26 @@ function excerpt() {
         return contentElem.scrollHeight > ctrl.collapsedHeight;
       };
 
-      // init function which sets up watches that perform the initial
-      // call to updateContentMaxHeight() to collapse the <excerpt> and
-      // alter the state if the <excerpt> is expanded/collapsed in future
-      function init() {
-        scope.$watch('vm.enabled()', function (isEnabled) {
-          if (isEnabled) {
-            contentElem = elem[0].querySelector('.excerpt');
+      scope.$watch('vm.enabled()', function (isEnabled) {
+        if (isEnabled) {
+          contentElem = elem[0].querySelector('.excerpt');
 
-            // trigger a recalculation of ctrl.overflowing() and properties
-            // which depend upon it when embedded media loads.
-            //
-            // In future we might wish to trigger checking for other events
-            // outside of Angular's knowledge as well, eg. loading of embedded
-            // media
-            contentElem.addEventListener('load', checkForOverflowChange,
-              true /* capture. 'load' events do not bubble */);
-          } else {
-            contentElem = undefined;
-          }
-        });
+          // trigger an update of the excerpt when events happen
+          // outside of Angular's knowledge that might affect the content
+          // size. For now, the only event we handle is loading of
+          // embedded media or frames
+          contentElem.addEventListener('load', scope.$digest.bind(scope),
+            true /* capture. 'load' events do not bubble */);
+        } else {
+          contentElem = undefined;
+        }
+      });
 
-        scope.$watch('vm.collapse', function (isCollapsed) {
-          if (!contentElem) {
-            return;
-          }
-          updateContentMaxHeight();
-        });
-
-        scope.$watch('vm.overflowing()', function () {
-          if (ctrl.onCollapsibleChanged) {
-            ctrl.onCollapsibleChanged({collapsible: ctrl.overflowing()});
-          }
-        });
-      }
-
-      // run the init() function asynchronously so that any
-      // directives in the transcluded content of the DOM have been
-      // processed by the time the first call to updateContentMaxHeight()
-      // happens.
-      scope.$evalAsync(init);
+      scope.$watch('vm.overflowing()', function () {
+        if (ctrl.onCollapsibleChanged) {
+          ctrl.onCollapsibleChanged({collapsible: ctrl.overflowing()});
+        }
+      });
     },
     scope: {
       /** Whether or not expansion should be animated. Defaults to true. */

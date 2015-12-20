@@ -21,6 +21,10 @@ describe('excerpt directive', function () {
     return util.createDirective(document, 'excerpt', attrs, {}, content);
   }
 
+  function height(el) {
+    return el.querySelector('.excerpt').offsetHeight;
+  }
+
   before(function () {
     angular.module('app', [])
       .directive('excerpt', excerpt.directive);
@@ -49,6 +53,13 @@ describe('excerpt directive', function () {
 
       assert.equal(element.find('.excerpt #foo').length, 0);
       assert.equal(element.find('#foo').length, 1);
+    });
+
+    it('truncates long contents when enabled', function () {
+      var element = excerptDirective({enabled: false}, TALL_DIV);
+      element.scope.enabled = true;
+      element.scope.$digest();
+      assert.isBelow(height(element[0]), 100);
     });
   });
 
@@ -100,10 +111,6 @@ describe('excerpt directive', function () {
   });
 
   describe('.collapse', function () {
-    function height(el) {
-      return el.querySelector('.excerpt').offsetHeight;
-    }
-
     it('collapses the body if collapse is true', function () {
       var element = excerptDirective({collapse: true}, TALL_DIV);
       assert.isBelow(height(element[0]), 100);
