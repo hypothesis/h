@@ -1152,14 +1152,14 @@ describe('annotation', function() {
       });
     });
 
-    describe('#updatedString()', function () {
+    describe('#updatedString', function () {
       it('returns the current time', function () {
         var annotation = defaultAnnotation();
         var controller = createDirective(annotation).controller;
         var expectedDate = new Date(annotation.updated);
         // the exact format of the result will depend on the current locale,
         // but check that at least the current year and time are present
-        assert.match(controller.updatedString(), new RegExp('.*2015.*' +
+        assert.match(controller.updatedString, new RegExp('.*2015.*' +
           expectedDate.toLocaleTimeString()));
       });
     });
