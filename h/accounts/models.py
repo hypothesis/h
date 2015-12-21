@@ -79,6 +79,11 @@ class User(Base):
                       default=False,
                       server_default=sa.sql.expression.false())
 
+    sidebar_tutorial_dismissed = sa.Column(sa.Boolean,
+                                           default=False,
+                                           server_default=(
+                                                sa.sql.expression.false()))
+
     def _get_username(self):
         return self._username
 

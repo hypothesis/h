@@ -587,6 +587,16 @@ def reset_password_link(request, reset_code):
     return request.route_url('reset_password_with_code', code=reset_code)
 
 
+@view_config(route_name='dismiss_sidebar_tutorial', request_method='POST',
+             renderer='json')
+def dismiss_sidebar_tutorial(request):
+    if request.authenticated_userid is None:
+        raise accounts.JSONError()
+    else:
+        request.authenticated_user.sidebar_tutorial_dismissed = True
+        return ajax_payload(request, {'status': 'okay'})
+
+
 def includeme(config):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
@@ -597,4 +607,6 @@ def includeme(config):
     config.add_route('reset_password_with_code', '/reset_password/{code}')
     config.add_route('profile', '/profile')
     config.add_route('profile_notifications', '/profile/notifications')
+    config.add_route('dismiss_sidebar_tutorial',
+                     '/app/dismiss_sidebar_tutorial')
     config.scan(__name__)
