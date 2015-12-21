@@ -1080,6 +1080,22 @@ describe('annotation.js', function() {
         assert.equal(controller.timestamp, null);
       });
 
+      it('is updated when a new annotation is saved', function () {
+        // fake clocks are not required for this test
+        clock.restore();
+
+        annotation.updated = null;
+        annotation.$create = function () {
+          annotation.updated = (new Date).toString();
+          return Promise.resolve(annotation);
+        };
+        var controller = createDirective(annotation).controller;
+        controller.action = 'create';
+        return controller.save().then(function () {
+          assert.equal(controller.timestamp, 'a while ago');
+        });
+      });
+
       it('is updated on first digest', function() {
         var controller = createDirective(annotation).controller;
         $scope.$digest();

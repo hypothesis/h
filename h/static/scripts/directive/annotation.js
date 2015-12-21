@@ -240,6 +240,7 @@ function AnnotationController(
   var vm = this;
   var domainModel;
   var newlyCreatedByHighlightButton;
+  var timestampUpdateScheduled = false;
 
   /**
     * Initialize this AnnotationController instance.
@@ -281,6 +282,10 @@ function AnnotationController(
     /** A "fuzzy string" representation of the annotation's last updated time.
      */
     vm.timestamp = null;
+
+    // keeps track of whether the timer that periodically refreshes
+    // vm.timestamp is active
+    timestampUpdateScheduled = false;
 
     /** The domain model, contains the currently saved version of the
       * annotation from the server (or in the case of new annotations that
@@ -330,7 +335,7 @@ function AnnotationController(
     // log in.
     saveNewHighlight();
 
-    updateTimestamp(true);
+    updateTimestamp();
     updateViewModel(domainModel, vm, permissions);
 
     // If this annotation is not a highlight and if it's new (has just been
@@ -406,9 +411,7 @@ function AnnotationController(
 
   // We use `var foo = function() {...}` here instead of `function foo() {...}`
   // because updateTimestamp gets redefined later on.
-  var updateTimestamp = function(repeat) {
-    repeat = repeat || false;
-
+  var updateTimestamp = function() {
     // New (not yet saved to the server) annotations don't have any .updated
     // yet, so we can't update their timestamp.
     if (!domainModel.updated) {
@@ -417,7 +420,7 @@ function AnnotationController(
 
     vm.timestamp = time.toFuzzyString(domainModel.updated);
 
-    if (!repeat) {
+    if (timestampUpdateScheduled) {
       return;
     }
 
@@ -425,9 +428,12 @@ function AnnotationController(
     var nextUpdate = (1000 * fuzzyUpdate) + 500;
 
     $timeout(function() {
-      updateTimestamp(true);
+      timestampUpdateScheduled = false;
+      updateTimestamp();
       $scope.$digest();
     }, nextUpdate, false);
+
+    timestampUpdateScheduled = true;
   };
 
   /** Switches the view to a viewer, closing the editor controls if they're
@@ -436,6 +442,10 @@ function AnnotationController(
     */
   function view() {
     vm.action = 'view';
+
+    // trigger an immediate update of the timestamp when switching
+    // back to the view mode just after creating or updating an annotation
+    updateTimestamp();
   }
 
   /**
