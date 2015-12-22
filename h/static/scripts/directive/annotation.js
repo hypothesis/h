@@ -417,6 +417,7 @@ function AnnotationController(
       domainModel.permissions = permissions.private();
       domainModel.$create().then(function() {
         $rootScope.$emit('annotationCreated', domainModel);
+        updateViewModel($scope, time, domainModel, vm, permissions);
       });
     } else {
       // User isn't logged in, save to drafts.
