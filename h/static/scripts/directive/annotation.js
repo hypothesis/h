@@ -349,7 +349,7 @@ function AnnotationController(
     // log in.
     saveNewHighlight();
 
-    updateViewModel($scope, time, domainModel, vm, permissions);
+    updateView(domainModel);
 
     // If this annotation is not a highlight and if it's new (has just been
     // created by the annotate button) or it has edits not yet saved to the
@@ -361,9 +361,13 @@ function AnnotationController(
     }
   }
 
+  function updateView(domainModel) {
+    updateViewModel($scope, time, domainModel, vm, permissions);
+  }
+
   function onAnnotationUpdated(event, updatedDomainModel) {
     if (updatedDomainModel.id === domainModel.id) {
-      updateViewModel($scope, time, updatedDomainModel, vm, permissions);
+      updateView(updatedDomainModel);
     }
   }
 
@@ -417,7 +421,7 @@ function AnnotationController(
       domainModel.permissions = permissions.private();
       domainModel.$create().then(function() {
         $rootScope.$emit('annotationCreated', domainModel);
-        updateViewModel($scope, time, domainModel, vm, permissions);
+        updateView(domainModel);
       });
     } else {
       // User isn't logged in, save to drafts.
@@ -617,7 +621,7 @@ function AnnotationController(
     if (vm.action === 'create') {
       $rootScope.$emit('annotationDeleted', domainModel);
     } else {
-      updateViewModel($scope, time, domainModel, vm, permissions);
+      updateView(domainModel);
       view();
     }
   };
@@ -649,7 +653,7 @@ function AnnotationController(
 
         var onFulfilled = function() {
           $rootScope.$emit('annotationCreated', domainModel);
-          updateViewModel($scope, time, domainModel, vm, permissions);
+          updateView(domainModel);
           view();
           drafts.remove(domainModel);
         };
