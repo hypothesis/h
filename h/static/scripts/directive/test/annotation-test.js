@@ -24,7 +24,7 @@ function documentService() {
   return $document;
 }
 
-describe('annotation.js', function() {
+describe('annotation', function() {
 
   describe('extractDocumentMetadata()', function() {
     var extractDocumentMetadata = require('../annotation')
@@ -570,7 +570,7 @@ describe('annotation.js', function() {
 
       fakeTime = {
         toFuzzyString: sandbox.stub().returns('a while ago'),
-        nextFuzzyUpdate: sandbox.stub().returns(30)
+        decayingInterval: function () {},
       };
 
       fakeUrlEncodeFilter = function(v) {
@@ -1080,6 +1080,52 @@ describe('annotation.js', function() {
         assert.equal(controller.timestamp, null);
       });
 
+      it('is updated when a new annotation is saved', function () {
+        fakeTime.decayingInterval = function (date, callback) {
+          callback();
+        };
+
+        // fake clocks are not required for this test
+        clock.restore();
+
+        annotation.updated = null;
+        annotation.$create = function () {
+          annotation.updated = (new Date).toString();
+          return Promise.resolve(annotation);
+        };
+        var controller = createDirective(annotation).controller;
+        controller.action = 'create';
+        return controller.save().then(function () {
+          assert.equal(controller.timestamp, 'a while ago');
+        });
+      });
+
+      it('is updated when a change to an existing annotation is saved',
+       function () {
+        fakeTime.toFuzzyString = function(date) {
+          var ONE_MINUTE = 60 * 1000;
+          if (Date.now() - new Date(date) < ONE_MINUTE) {
+            return 'just now';
+          } else {
+            return 'ages ago';
+          }
+        };
+
+        clock.tick(10 * 60 * 1000);
+
+        annotation.$update = function () {
+          this.updated = (new Date).toString();
+          return Promise.resolve(this);
+        }
+        var controller = createDirective(annotation).controller;
+        assert.equal(controller.timestamp, 'ages ago');
+        controller.edit();
+        clock.restore();
+        return controller.save().then(function () {
+          assert.equal(controller.timestamp, 'just now');
+        });
+      });
+
       it('is updated on first digest', function() {
         var controller = createDirective(annotation).controller;
         $scope.$digest();
@@ -1087,12 +1133,13 @@ describe('annotation.js', function() {
       });
 
       it('is updated after a timeout', function() {
+        fakeTime.decayingInterval = function (date, callback) {
+          setTimeout(callback, 10);
+        };
         var controller = createDirective(annotation).controller;
-        fakeTime.nextFuzzyUpdate.returns(10);
         fakeTime.toFuzzyString.returns('ages ago');
         $scope.$digest();
         clock.tick(11000);
-        $timeout.flush();
         assert.equal(controller.timestamp, 'ages ago');
       });
 
@@ -1521,7 +1568,7 @@ describe('annotation.js', function() {
         },
         time: args.time || {
           toFuzzyString: function() {},
-          nextFuzzyUpdate: function() {}
+          decayingInterval: function() {}
         },
         annotationUI: args.annotationUI || {},
         annotationMapper: args.annotationMapper || {},

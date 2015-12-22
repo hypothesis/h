@@ -166,7 +166,8 @@ function updateDomainModel(domainModel, vm, permissions, groups) {
 }
 
 /** Update the view model from the domain model changes. */
-function updateViewModel(domainModel, vm, permissions) {
+function updateViewModel($scope, time, domainModel, vm, permissions) {
+
   vm.form = {
     text: domainModel.text,
     tags: viewModelTagsFromDomainModelTags(domainModel.tags),
@@ -174,6 +175,21 @@ function updateViewModel(domainModel, vm, permissions) {
   vm.annotationURI = new URL('/a/' + domainModel.id, vm.baseURI).href;
   vm.isPrivate = permissions.isPrivate(
     domainModel.permissions, domainModel.user);
+
+  function updateTimestamp() {
+    vm.timestamp = time.toFuzzyString(domainModel.updated);
+  }
+
+  if (domainModel.updated) {
+    if (vm.cancelTimestampRefresh) {
+      vm.cancelTimestampRefresh();
+    }
+    vm.cancelTimestampRefresh =
+     time.decayingInterval(domainModel.updated, function () {
+       $scope.$apply(updateTimestamp);
+     });
+    updateTimestamp();
+  }
 }
 
 /** Return truthy if the given annotation is valid, falsy otherwise.
@@ -282,6 +298,9 @@ function AnnotationController(
      */
     vm.timestamp = null;
 
+    /** A callback for resetting the automatic refresh of vm.timestamp */
+    vm.cancelTimestampRefresh = undefined;
+
     /** The domain model, contains the currently saved version of the
       * annotation from the server (or in the case of new annotations that
       * haven't been saved yet - the data that will be saved to the server when
@@ -330,8 +349,7 @@ function AnnotationController(
     // log in.
     saveNewHighlight();
 
-    updateTimestamp(true);
-    updateViewModel(domainModel, vm, permissions);
+    updateView(domainModel);
 
     // If this annotation is not a highlight and if it's new (has just been
     // created by the annotate button) or it has edits not yet saved to the
@@ -343,14 +361,20 @@ function AnnotationController(
     }
   }
 
+  function updateView(domainModel) {
+    updateViewModel($scope, time, domainModel, vm, permissions);
+  }
+
   function onAnnotationUpdated(event, updatedDomainModel) {
     if (updatedDomainModel.id === domainModel.id) {
-      updateViewModel(updatedDomainModel, vm, permissions);
+      updateView(updatedDomainModel);
     }
   }
 
   function onDestroy() {
-    updateTimestamp = angular.noop;
+    if (vm.cancelTimestampRefresh) {
+      vm.cancelTimestampRefresh();
+    }
   }
 
   function onGroupFocused() {
@@ -397,38 +421,13 @@ function AnnotationController(
       domainModel.permissions = permissions.private();
       domainModel.$create().then(function() {
         $rootScope.$emit('annotationCreated', domainModel);
+        updateView(domainModel);
       });
     } else {
       // User isn't logged in, save to drafts.
       saveToDrafts(drafts, domainModel, vm);
     }
   }
-
-  // We use `var foo = function() {...}` here instead of `function foo() {...}`
-  // because updateTimestamp gets redefined later on.
-  var updateTimestamp = function(repeat) {
-    repeat = repeat || false;
-
-    // New (not yet saved to the server) annotations don't have any .updated
-    // yet, so we can't update their timestamp.
-    if (!domainModel.updated) {
-      return;
-    }
-
-    vm.timestamp = time.toFuzzyString(domainModel.updated);
-
-    if (!repeat) {
-      return;
-    }
-
-    var fuzzyUpdate = time.nextFuzzyUpdate(domainModel.updated);
-    var nextUpdate = (1000 * fuzzyUpdate) + 500;
-
-    $timeout(function() {
-      updateTimestamp(true);
-      $scope.$digest();
-    }, nextUpdate, false);
-  };
 
   /** Switches the view to a viewer, closing the editor controls if they're
    *  open.
@@ -622,7 +621,7 @@ function AnnotationController(
     if (vm.action === 'create') {
       $rootScope.$emit('annotationDeleted', domainModel);
     } else {
-      updateViewModel(domainModel, vm, permissions);
+      updateView(domainModel);
       view();
     }
   };
@@ -654,7 +653,7 @@ function AnnotationController(
 
         var onFulfilled = function() {
           $rootScope.$emit('annotationCreated', domainModel);
-          updateViewModel(domainModel, vm, permissions);
+          updateView(domainModel);
           view();
           drafts.remove(domainModel);
         };

@@ -6,7 +6,6 @@ day = hour * 24
 month = day * 30
 year = day * 365
 
-
 FIXTURES_TO_FUZZY_STRING = [
   [10, 'moments ago']
   [29, 'moments ago']
@@ -67,6 +66,37 @@ describe 'time', ->
 
     for f, i in FIXTURES_TO_FUZZY_STRING
       it "creates correct fuzzy string for fixture #{i}", testFixture(f)
+
+  describe '.decayingInterval', ->
+    it 'invokes the callback quickly for recent timestamps', ->
+      date = new Date()
+      callback = sandbox.stub()
+      time.decayingInterval(date, callback)
+      sandbox.clock.tick(6 * 1000)
+      assert.calledWith(callback, date)
+      sandbox.clock.tick(6 * 1000)
+      assert.calledTwice(callback)
+
+    it 'invokes the callback after a longer delay for older timestamps', ->
+      date = new Date();
+      ONE_MINUTE = minute * 1000
+      sandbox.clock.tick(10 * ONE_MINUTE)
+      callback = sandbox.stub()
+      time.decayingInterval(date, callback)
+      sandbox.clock.tick(ONE_MINUTE / 2)
+      assert.notCalled(callback)
+      sandbox.clock.tick(ONE_MINUTE)
+      assert.calledWith(callback, date)
+      sandbox.clock.tick(ONE_MINUTE)
+      assert.calledTwice(callback)
+
+    it 'returned function cancels the timer', ->
+      date = new Date()
+      callback = sandbox.stub()
+      cancel = time.decayingInterval(date, callback)
+      cancel()
+      sandbox.clock.tick(minute * 1000)
+      assert.notCalled(callback)
 
   describe '.nextFuzzyUpdate', ->
     it 'Handles empty dates', ->
