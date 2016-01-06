@@ -7,6 +7,8 @@
 {% block meta %}
   {{ super() }}
   <link rel='canonical' href='{{ base_url }}'>
+  <link rel="chrome-webstore-item"
+        href="{{ chrome_extension_link }}">
   <link href="{{ rss_feed_url }}" rel="alternate" type="application/rss+xml">
 {% endblock %}
 
@@ -33,7 +35,7 @@
 
     <div class="home__section installer">
       <a class="install-btn is-hidden js-install-chrome"
-          href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek"
+          href="{{ chrome_extension_link }}"
           onclick="chrome.webstore.install();return false;"
           data-chromeext-button="">
         <img alt="" class="install-btn__icon"
