@@ -11,7 +11,8 @@ describe('installer page', function () {
     rootElement.innerHTML =
       '<button class="extension js-install-chrome is-hidden"></button>' +
       '<button class="bookmarklet js-install-bookmarklet is-hidden"></button>' +
-      '<input class="link">';
+      '<input class="link">' +
+      '<form class="js-proxy-form"><input name="url"></form>'
     extensionBtn = rootElement.querySelector('.extension');
     bookmarkletBtn = rootElement.querySelector('.bookmarklet');
     linkField = rootElement.querySelector('.link');
@@ -23,11 +24,10 @@ describe('installer page', function () {
   });
 
   function createController(userAgentInfo) {
-    var controller = proxyquire('../installer-controller', {
+    var Controller = proxyquire('../installer-controller', {
       './ua-detect': userAgentInfo
     });
-    controller.showSupportedInstallers(rootElement);
-    return controller;
+    return new Controller(rootElement);
   }
 
   function isHidden(el) {

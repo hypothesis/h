@@ -29,6 +29,16 @@ function showSupportedInstallers(rootElement) {
   showIf('.js-install-any', offerChromeInstall || offerBookmarkletInstall);
 }
 
-module.exports = {
-  showSupportedInstallers: showSupportedInstallers,
-};
+function InstallerController(element) {
+  showSupportedInstallers(element);
+
+  // setup Via link form
+  var proxyForm = document.querySelector('.js-proxy-form');
+  proxyForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var url = proxyForm.elements['url'].value;
+    window.location.href = 'https://via.hypothes.is/' + url;
+  });
+}
+
+module.exports = InstallerController;
