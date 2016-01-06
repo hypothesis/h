@@ -24,5 +24,20 @@
     "browserify": true,
     "mocha": true,
     "phantom": true,
-    "jquery": true
+    "jquery": true,
+    "predef": [
+      "angular",
+      "assert",
+      "after",
+      "afterEach",
+      "before",
+      "beforeEach",
+      "context",
+      "describe",
+      "it",
+      "require",
+      "sinon",
+      "Promise",
+      "URL"
+    ]
 }
