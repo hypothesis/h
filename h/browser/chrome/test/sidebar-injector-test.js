@@ -7,10 +7,30 @@ describe('SidebarInjector', function () {
   var fakeChromeTabs;
   var fakeFileAccess;
 
+  // the content type that the detection script injected into
+  // the page should report ('HTML' or 'PDF')
+  var contentType;
+  // the return value from the content script which checks whether
+  // the sidebar has already been injected into the page
+  var isAlreadyInjected;
+
   beforeEach(function () {
+    contentType = 'HTML';
+    isAlreadyInjected = false;
+
+    var executeScriptSpy = sinon.spy(function (tabId, details, callback) {
+      if (details.code.match(/window.annotator/)) {
+        callback([isAlreadyInjected]);
+      } else if (details.code.match(/detectContentType/)) {
+        callback([{type: contentType}]);
+      } else {
+        callback([false]);
+      }
+    });
+
     fakeChromeTabs = {
       update: sinon.stub(),
-      executeScript: sinon.stub()
+      executeScript: executeScriptSpy,
     };
     fakeFileAccess = sinon.stub().yields(true);
 
@@ -29,13 +49,7 @@ describe('SidebarInjector', function () {
   }
 
   describe('.injectIntoTab', function () {
-    beforeEach(function () {
-      // Handle loading the config.
-      fakeChromeTabs.executeScript.withArgs(1, {code: 'window.annotator'}).yields([false]);
-      fakeChromeTabs.executeScript.yields([]);
-    });
-
-    var protocols = ['chrome:', 'chrome-devtools:', 'chrome-extension'];
+    var protocols = ['chrome:', 'chrome-devtools:', 'chrome-extension:'];
     protocols.forEach(function (protocol) {
       it('bails early when trying to load an unsupported ' + protocol + ' url', function () {
         var spy = fakeChromeTabs.executeScript;
@@ -52,6 +66,7 @@ describe('SidebarInjector', function () {
 
     describe('when viewing a remote PDF', function () {
       it('injects hypothesis into the page', function () {
+        contentType = 'PDF';
         var spy = fakeChromeTabs.update.yields({tab: 1});
         var url = 'http://example.com/foo.pdf';
 
@@ -69,7 +84,6 @@ describe('SidebarInjector', function () {
         var url = 'http://example.com/foo.html';
 
         return injector.injectIntoTab({id: 1, url: url}).then(function() {
-          assert.callCount(spy, 2);
           assert.calledWith(spy, 1, {
             code: sinon.match('/public/config.js')
           });
@@ -85,6 +99,7 @@ describe('SidebarInjector', function () {
         it('loads the PDFjs viewer', function () {
           var spy = fakeChromeTabs.update.yields([]);
           var url = 'file://foo.pdf';
+          contentType = 'PDF';
 
           return injector.injectIntoTab({id: 1, url: url}).then(
             function () {
@@ -100,6 +115,7 @@ describe('SidebarInjector', function () {
       describe('when file access is disabled', function () {
         beforeEach(function () {
           fakeFileAccess.yields(false);
+          contentType = 'PDF';
         });
 
         it('returns an error', function () {
@@ -125,7 +141,9 @@ describe('SidebarInjector', function () {
         var url = 'file://foo.html';
         var promise = injector.injectIntoTab({id: 1, url: url});
         return promise.then(assertReject, function (err) {
-          assert.notCalled(fakeChromeTabs.executeScript);
+          assert.isFalse(fakeChromeTabs.executeScript.calledWith(1, {
+            code: sinon.match(/config\.js/),
+          }));
         });
       });
     });
@@ -239,7 +257,7 @@ describe('SidebarInjector', function () {
       });
     });
 
-    var protocols = ['chrome:', 'chrome-devtools:', 'chrome-extension'];
+    var protocols = ['chrome:', 'chrome-devtools:', 'chrome-extension:'];
     protocols.forEach(function (protocol) {
       it('bails early when trying to unload an unsupported ' + protocol + ' url', function () {
         var spy = fakeChromeTabs.executeScript;
@@ -266,9 +284,9 @@ describe('SidebarInjector', function () {
 
     describe('when viewing an HTML page', function () {
       it('injects a destroy script into the page', function () {
-        var stub = fakeChromeTabs.executeScript.yields([true]);
+        isAlreadyInjected = true;
         return injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'}).then(function () {
-          assert.calledWith(stub, 1, {
+          assert.calledWith(fakeChromeTabs.executeScript, 1, {
             code: sinon.match('/public/destroy.js')
           });
         });
