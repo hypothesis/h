@@ -1,0 +1,17 @@
+{
+  "name": "decaf",
+  "version": "1.0.0",
+  "description": "Utility for converting CoffeeScript to JavaScript",
+  "main": "decaf.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babylon": "^6.7.0",
+    "decaffeinate": "^1.44.13",
+    "jscs": "^2.11.0",
+    "typescript-formatter": "^1.2.0"
+  }
+}
