@@ -10,9 +10,12 @@ var CONTENT_TYPE_PDF = 'PDF';
 
 // a function which is executed as a content script
 // to determine the type of content being displayed in a tab
-function detectContentType() {
+function detectContentType(element) {
   // check if this is the Chrome PDF viewer
-  if (document.querySelector('embed[type="application/pdf"]')) {
+  var element = element || document;
+  var chromePDFPluginSelector =
+    'embed[type="application/pdf"][name="plugin"][id="plugin"]';
+  if (document.querySelector(chromePDFPluginSelector)) {
     return {
       type: 'PDF',
     };
@@ -91,6 +94,11 @@ function SidebarInjector(chromeTabs, dependencies) {
       return removeFromHTML(tab);
     }
   };
+
+  /**
+   * Returns the type of content in a DOM element or document
+   */
+  this.detectContentType = detectContentType;
 
   function getPDFViewerURL(url) {
     var PDF_VIEWER_URL = extensionURL('/content/web/viewer.html');

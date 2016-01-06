@@ -294,4 +294,27 @@ describe('SidebarInjector', function () {
       });
     });
   });
+
+  describe('.detectContentType', function () {
+    var el;
+    beforeEach(function () {
+      el = document.createElement('div');
+      document.body.appendChild(el);
+    });
+
+    afterEach(function () {
+      el.parentElement.removeChild(el);
+    });
+
+    it('matches the Chrome PDF viewer', function () {
+      el.innerHTML =
+       '<embed name="plugin" id="plugin" type="application/pdf"></embed>';
+      assert.deepEqual(injector.detectContentType(el), { type: 'PDF' });
+    });
+
+    it('reports HTML by default', function () {
+      el.innerHTML = '<div></div>';
+      assert.deepEqual(injector.detectContentType(el), { type: 'HTML' } );
+    });
+  });
 });
