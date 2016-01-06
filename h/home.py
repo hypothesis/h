@@ -6,7 +6,10 @@ from pyramid import view
                   request_method='GET',
                   renderer='h:templates/old-home.html.jinja2')
 def index(context, request):
-    context = {}
+    context = {
+      "chrome_extension_link": ("https://chrome.google.com/webstore/detail/"
+                                "bjfhmglciegochdpefhhlphglcehbmek")
+    }
 
     if request.authenticated_user:
         username = request.authenticated_user.username

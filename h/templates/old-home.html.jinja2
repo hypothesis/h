@@ -7,6 +7,8 @@
 {% block meta %}
   {{ super() }}
   <link rel='canonical' href='{{ base_url }}'>
+  <link rel="chrome-webstore-item"
+        href="{{ chrome_extension_link }}">
   <link href="{{ rss_feed_url }}" rel="alternate" type="application/rss+xml">
 {% endblock %}
 
@@ -128,7 +130,7 @@
 
                 <span class="hidden unhide-in-chrome">
                   <a class="btn btn-primary hidden-xs"
-                      href="https://chrome.google.com/webstore/detail/bjfhmglciegochdpefhhlphglcehbmek"
+                      href="{{ chrome_extension_link }}"
                       onclick="chrome.webstore.install();return false;"
                       data-chromeext-button="">
                     <img alt="" class="installer__browser-logo--chrome"
