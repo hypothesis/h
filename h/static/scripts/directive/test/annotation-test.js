@@ -1056,7 +1056,7 @@ describe('annotation', function() {
       });
     });
 
-    describe('timestamp', function() {
+    describe('relativeTimestamp', function() {
       var annotation;
       var clock;
 
@@ -1077,7 +1077,7 @@ describe('annotation', function() {
         // Unsaved annotations don't have an updated time yet so a timestamp
         // string can't be computed for them.
         $scope.$digest();
-        assert.equal(controller.timestamp, null);
+        assert.equal(controller.relativeTimestamp, null);
       });
 
       it('is updated when a new annotation is saved', function () {
@@ -1096,7 +1096,7 @@ describe('annotation', function() {
         var controller = createDirective(annotation).controller;
         controller.action = 'create';
         return controller.save().then(function () {
-          assert.equal(controller.timestamp, 'a while ago');
+          assert.equal(controller.relativeTimestamp, 'a while ago');
         });
       });
 
@@ -1118,18 +1118,18 @@ describe('annotation', function() {
           return Promise.resolve(this);
         }
         var controller = createDirective(annotation).controller;
-        assert.equal(controller.timestamp, 'ages ago');
+        assert.equal(controller.relativeTimestamp, 'ages ago');
         controller.edit();
         clock.restore();
         return controller.save().then(function () {
-          assert.equal(controller.timestamp, 'just now');
+          assert.equal(controller.relativeTimestamp, 'just now');
         });
       });
 
       it('is updated on first digest', function() {
         var controller = createDirective(annotation).controller;
         $scope.$digest();
-        assert.equal(controller.timestamp, 'a while ago');
+        assert.equal(controller.relativeTimestamp, 'a while ago');
       });
 
       it('is updated after a timeout', function() {
@@ -1140,7 +1140,7 @@ describe('annotation', function() {
         fakeTime.toFuzzyString.returns('ages ago');
         $scope.$digest();
         clock.tick(11000);
-        assert.equal(controller.timestamp, 'ages ago');
+        assert.equal(controller.relativeTimestamp, 'ages ago');
       });
 
       it('is no longer updated after the scope is destroyed', function() {
@@ -1152,14 +1152,14 @@ describe('annotation', function() {
       });
     });
 
-    describe('#updatedString()', function () {
+    describe('absoluteTimestamp', function () {
       it('returns the current time', function () {
         var annotation = defaultAnnotation();
         var controller = createDirective(annotation).controller;
         var expectedDate = new Date(annotation.updated);
         // the exact format of the result will depend on the current locale,
         // but check that at least the current year and time are present
-        assert.match(controller.updatedString(), new RegExp('.*2015.*' +
+        assert.match(controller.absoluteTimestamp, new RegExp('.*2015.*' +
           expectedDate.toLocaleTimeString()));
       });
     });

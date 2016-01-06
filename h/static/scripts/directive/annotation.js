@@ -177,7 +177,8 @@ function updateViewModel($scope, time, domainModel, vm, permissions) {
     domainModel.permissions, domainModel.user);
 
   function updateTimestamp() {
-    vm.timestamp = time.toFuzzyString(domainModel.updated);
+    vm.relativeTimestamp = time.toFuzzyString(domainModel.updated);
+    vm.absoluteTimestamp = dateUtil.format(new Date(domainModel.updated));
   }
 
   if (domainModel.updated) {
@@ -294,11 +295,19 @@ function AnnotationController(
       * directly from scope). */
     vm.isSidebar = $scope.isSidebar;
 
-    /** A "fuzzy string" representation of the annotation's last updated time.
+    /** A fuzzy, relative (eg. '6 days ago') format of the annotation's
+     * last update timestamp
      */
-    vm.timestamp = null;
+    vm.relativeTimestamp = null;
 
-    /** A callback for resetting the automatic refresh of vm.timestamp */
+    /** A formatted version of the annotation's last update timestamp
+     * (eg. 'Tue 22nd Dec 2015, 16:00')
+     */
+    vm.absoluteTimestamp = '';
+
+    /** A callback for resetting the automatic refresh of
+     * vm.relativeTimestamp and vm.absoluteTimestamp
+     */
     vm.cancelTimestampRefresh = undefined;
 
     /** The domain model, contains the currently saved version of the
@@ -738,14 +747,6 @@ function AnnotationController(
   vm.updated = function() {
     return domainModel.updated;
   };
-
-  vm.updatedString = function () {
-    if (!domainModel.updated) {
-      return '';
-    }
-    var date = new Date(domainModel.updated);
-    return dateUtil.format(date);
-  }
 
   vm.user = function() {
     return domainModel.user;

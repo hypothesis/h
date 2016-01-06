@@ -47,10 +47,10 @@
     <!-- Timestamp -->
     <a class="annotation-timestamp"
        target="_blank"
-       title="{{vm.updatedString()}}"
+       title="{{vm.absoluteTimestamp}}"
        ng-if="!vm.editing() && vm.updated()"
        ng-href="{{::vm.baseURI}}a/{{vm.id()}}"
-       >{{vm.timestamp}}</a>
+       >{{vm.relativeTimestamp}}</a>
   </header>
 
   <!-- Excerpts -->
