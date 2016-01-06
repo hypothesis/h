@@ -587,6 +587,11 @@ function AnnotationController(
     }
   };
 
+  vm.toggleCollapseBody = function(event) {
+    event.stopPropagation();
+    vm.collapseBody = !vm.collapseBody;
+  };
+
   /**
     * @ngdoc method
     * @name annotation.AnnotationController#reply

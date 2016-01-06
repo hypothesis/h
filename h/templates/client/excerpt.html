@@ -9,12 +9,12 @@
             title="Show the full excerpt">More</a>
       </span>
       <span class="excerpt__toggle-link" ng-show="vm.isCollapsible()">
-        <a ng-click="vm.toggle()"
+        <a ng-click="vm.toggle($event)"
             title="Show the first few lines only">Less</a>
       </span>
     </div>
   </div>
-  <div ng-click="vm.toggle()"
+  <div ng-click="vm.toggle($event)"
        ng-class="vm.bottomShadowStyles()"
        title="Show the full excerpt"></div>
 </div>

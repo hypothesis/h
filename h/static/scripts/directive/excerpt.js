@@ -21,7 +21,8 @@ function ExcerptController() {
     return this.overflowing() && !this.collapse;
   };
 
-  this.toggle = function () {
+  this.toggle = function (event) {
+    event.stopPropagation();
     this.collapse = !this.collapse;
   };
 
