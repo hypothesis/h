@@ -124,6 +124,7 @@ describe('SidebarInjector', function () {
           var promise = injector.injectIntoTab({id: 1, url: url});
           return promise.then(assertReject, function (err) {
             assert.instanceOf(err, errors.NoFileAccessError);
+            assert.notCalled(fakeChromeTabs.executeScript);
           });
         });
       });

@@ -97,20 +97,42 @@ function SidebarInjector(chromeTabs, dependencies) {
     return PDF_VIEWER_URL + '?file=' + encodeURIComponent(url);
   }
 
+  // returns true if the extension is permitted to inject
+  // a content script into a tab with a given URL.
+  function canInjectScript(url) {
+    var canInject;
+    if (isSupportedURL(url)) {
+      canInject = Promise.resolve(true);
+    } else if (isFileURL(url)) {
+      canInject = util.promisify(isAllowedFileSchemeAccess)();
+    } else {
+      canInject = Promise.resolve(false);
+    }
+    return canInject;
+  }
+
   function detectTabContentType(tab) {
     if (isPDFViewerURL(tab.url)) {
       return Promise.resolve(CONTENT_TYPE_PDF);
     }
 
-    if (!isSupportedURL(tab.url)) {
-      return Promise.resolve(CONTENT_TYPE_HTML);
-    }
-
-    return executeScriptFn(tab.id, {
-        code: toIIFEString(detectContentType)
-      }).then(function (frameResults) {
-        return frameResults[0].type;
-      });
+    return canInjectScript(tab.url).then(function (canInject) {
+      if (canInject) {
+        return executeScriptFn(tab.id, {
+            code: toIIFEString(detectContentType)
+          }).then(function (frameResults) {
+            return frameResults[0].type;
+          });
+      } else {
+        // we cannot inject a content script in order to determine the
+        // file type, so fall back to a URL-based mechanism
+        if (tab.url.indexOf('.pdf') !== -1) {
+          return Promise.resolve(CONTENT_TYPE_PDF);
+        } else {
+          return Promise.resolve(CONTENT_TYPE_HTML);
+        }
+      }
+    });
   }
 
   function isPDFViewerURL(url) {
@@ -125,7 +147,7 @@ function SidebarInjector(chromeTabs, dependencies) {
     // Injection of content scripts is limited to a small number of protocols,
     // see https://developer.chrome.com/extensions/match_patterns
     var parsedURL = new URL(url);
-    var SUPPORTED_PROTOCOLS = ['http:', 'https:', 'ftp:', 'file:'];
+    var SUPPORTED_PROTOCOLS = ['http:', 'https:', 'ftp:'];
     return SUPPORTED_PROTOCOLS.some(function (protocol) {
       return parsedURL.protocol === protocol;
     });
