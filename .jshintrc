@@ -6,7 +6,7 @@
     "freeze": true,
     "latedef": "nofunc",
     "maxcomplexity": 10,
-    "strict": true,
+    "strict": "global",
     "undef": true,
     "unused": true,
     "globals": {
