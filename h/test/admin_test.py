@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from mock import ANY
+from mock import MagicMock
 from mock import Mock
 from mock import patch
 import pytest
 
-from pyramid.testing import DummyRequest
+from pyramid.testing import DummyRequest as _DummyRequest
 from pyramid import httpexceptions
 
 from h import accounts
@@ -16,6 +18,12 @@ class DummyFeature(object):
         self.everyone = False
         self.admins = False
         self.staff = False
+
+
+class DummyRequest(_DummyRequest):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('auth_domain', 'example.com')
+        super(DummyRequest, self).__init__(*args, **kwargs)
 
 
 features_save_fixtures = pytest.mark.usefixtures('Feature',
@@ -106,7 +114,7 @@ nipsa_add_fixtures = pytest.mark.usefixtures('nipsa', 'nipsa_index')
 
 @nipsa_add_fixtures
 def test_nipsa_add_calls_nipsa_api_with_userid(nipsa):
-    request = DummyRequest(params={"add": "kiki"}, auth_domain='example.com')
+    request = DummyRequest(params={"add": "kiki"})
 
     admin.nipsa_add(request)
 
@@ -116,40 +124,33 @@ def test_nipsa_add_calls_nipsa_api_with_userid(nipsa):
 
 @nipsa_add_fixtures
 def test_nipsa_add_returns_index(nipsa_index):
-    request = DummyRequest(params={"add": "kiki"}, auth_domain='example.com')
+    request = DummyRequest(params={"add": "kiki"})
     nipsa_index.return_value = "Keine Bange!"
 
     assert admin.nipsa_add(request) == "Keine Bange!"
 
 
 # The fixtures required to mock all of nipsa_remove()'s dependencies.
-nipsa_remove_fixtures = pytest.mark.usefixtures('nipsa')
+nipsa_remove_fixtures = pytest.mark.usefixtures('nipsa', 'routes_mapper')
 
 
 @nipsa_remove_fixtures
 def test_nipsa_remove_calls_nipsa_api_with_userid(nipsa):
-    request = Mock(
-        params={"remove": "kiki"},
-        auth_domain="hypothes.is",
-        registry=Mock(settings={})
-    )
+    request = DummyRequest(params={"remove": "kiki"})
 
     admin.nipsa_remove(request)
 
     nipsa.remove_nipsa.assert_called_once_with(
-        request, "acct:kiki@hypothes.is")
+        request, "acct:kiki@example.com")
 
 
 @nipsa_remove_fixtures
 def test_nipsa_remove_redirects_to_index():
-    request = Mock(params={"remove": "kiki"},
-                   domain="hypothes.is",
-                   route_url=Mock(return_value="/nipsa"))
+    request = DummyRequest(params={"remove": "kiki"})
 
     response = admin.nipsa_remove(request)
 
     assert isinstance(response, httpexceptions.HTTPSeeOther)
-    assert response.location == "/nipsa"
 
 
 # The fixtures required to mock all of admins_index()'s dependencies.
@@ -437,36 +438,59 @@ def test_users_index():
 
     result = admin.users_index(request)
 
-    assert result == {"username": None, "user": None}
+    assert result == {'username': None, 'user': None, 'user_meta': {}}
 
 
 @users_index_fixtures
 def test_users_index_looks_up_users_by_username(User):
-    request = DummyRequest(params={"username": "bob"})
+    es = MagicMock()
+    request = DummyRequest(params={"username": "bob"},
+                           es=es)
 
-    result = admin.users_index(request)
+    admin.users_index(request)
 
     User.get_by_username.assert_called_with("bob")
 
 
 @users_index_fixtures
+def test_users_index_queries_annotation_count(User):
+    es = MagicMock()
+    request = DummyRequest(params={"username": "bob"},
+                           es=es)
+
+    admin.users_index(request)
+
+    es.conn.count.assert_called_with(index=es.index,
+                                     doc_type='annotation',
+                                     body=ANY)
+
+
+@users_index_fixtures
 def test_users_index_no_user_found(User):
-    request = DummyRequest(params={"username": "bob"})
+    es = MagicMock()
+    request = DummyRequest(params={"username": "bob"},
+                           es=es)
     User.get_by_username.return_value = None
 
     result = admin.users_index(request)
 
-    assert result == {"username": "bob", "user": None}
+    assert result == {'username': "bob", 'user': None, 'user_meta': {}}
 
 
 @users_index_fixtures
 def test_users_index_user_found(User):
-    request = DummyRequest(params={"username": "bob"})
+    es = MagicMock()
+    request = DummyRequest(params={"username": "bob"},
+                           es=es)
+    es.conn.count.return_value = {'count': 43}
 
     result = admin.users_index(request)
 
-    assert result == {"username": "bob",
-                      "user": User.get_by_username.return_value}
+    assert result == {
+        'username': "bob",
+        'user': User.get_by_username.return_value,
+        'user_meta': {'annotations_count': 43},
+    }
 
 
 badge_index_fixtures = pytest.mark.usefixtures('models')

@@ -168,12 +168,22 @@ def staff_remove(request):
                   permission='admin_users')
 def users_index(request):
     user = None
+    user_meta = {}
     username = request.params.get('username')
 
     if username is not None:
         user = models.User.get_by_username(username)
 
-    return {'username': username, 'user': user}
+    if user is not None:
+        # Fetch information on how many annotations the user has created
+        userid = util.userid_from_username(username, request)
+        query = _all_user_annotations_query(userid)
+        result = request.es.conn.count(index=request.es.index,
+                                       doc_type='annotation',
+                                       body={'query': query})
+        user_meta['annotations_count'] = result['count']
+
+    return {'username': username, 'user': user, 'user_meta': user_meta}
 
 
 @view.view_config(route_name='admin_badge',
@@ -237,6 +247,16 @@ def groups_index_csv(request):
     request.response.content_disposition = 'attachment;filename=' + filename
 
     return {'header': header, 'rows': rows}
+
+
+def _all_user_annotations_query(userid):
+    """Query matching all annotations (shared and private) owned by userid."""
+    return {
+        'filtered': {
+            'filter': {'term': {'user': userid}},
+            'query': {'match_all': {}}
+        }
+    }
 
 
 def includeme(config):
