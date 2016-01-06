@@ -19,6 +19,9 @@ Features
 
 - PDF documents can now be detected regardless of file extension (#2834).
 
+- Add a tutorial for new users to the sidebar
+  (feature flagged: sidebar_tutorial). (#2824)
+
 Miscellanea
 -----------
 
