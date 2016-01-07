@@ -102,8 +102,17 @@ describe('TabState', function () {
 
   describe('.isTabErrored', function () {
     it('returns true if the tab is errored', function () {
-      state.errorTab(1);
+      state.errorTab(1, new Error('Some error'));
       assert.equal(state.isTabErrored(1), true);
+    });
+  });
+
+  describe('.setState', function () {
+    it('clears the error when not errored', function () {
+      state.errorTab(1, new Error('Some error'));
+      assert.ok(state.getState(1).error instanceof Error);
+      state.setState(1, {state: states.INACTIVE});
+      assert.notOk(state.getState(1).error);
     });
   });
 

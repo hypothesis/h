@@ -5,7 +5,6 @@ var BrowserAction = require('./browser-action');
 var HelpPage = require('./help-page');
 var settings = require('./settings');
 var SidebarInjector = require('./sidebar-injector');
-var TabErrorCache = require('./tab-error-cache');
 var TabStore = require('./tab-store');
 
 var TAB_STATUS_LOADING = 'loading';
@@ -49,7 +48,6 @@ function HypothesisChromeExtension(dependencies) {
     extensionURL: dependencies.extensionURL,
     isAllowedFileSchemeAccess: dependencies.isAllowedFileSchemeAccess,
   });
-  var tabErrors = new TabErrorCache();
 
   restoreSavedTabState();
 
@@ -100,15 +98,13 @@ function HypothesisChromeExtension(dependencies) {
   function onTabStateChange(tabId, current) {
     if (current) {
       browserAction.update(tabId, current);
+      chromeTabs.get(tabId, updateTabDocument);
 
       if (!state.isTabErrored(tabId)) {
         store.set(tabId, current);
-        tabErrors.unsetTabError(tabId);
-        chromeTabs.get(tabId, updateTabDocument);
       }
     } else {
       store.unset(tabId);
-      tabErrors.unsetTabError(tabId);
     }
   }
 
@@ -116,8 +112,8 @@ function HypothesisChromeExtension(dependencies) {
   this._onTabStateChange = onTabStateChange;
 
   function onBrowserActionClicked(tab) {
-    var tabError = tabErrors.getTabError(tab.id);
-    if (state.isTabErrored(tab.id) && tabError) {
+    var tabError = state.getState(tab.id).error;
+    if (tabError) {
       help.showHelpForError(tab, tabError);
     }
     else if (state.isTabActive(tab.id)) {
@@ -204,8 +200,7 @@ function HypothesisChromeExtension(dependencies) {
       });
       return sidebar.injectIntoTab(tab)
         .catch(function (err) {
-          tabErrors.setTabError(tab.id, err);
-          state.errorTab(tab.id);
+          state.errorTab(tab.id, err);
         });
     }
     else if (state.isTabInactive(tab.id) && isInstalled) {
