@@ -5,7 +5,7 @@
     <div class="excerpt__inline-controls"
          ng-show="vm.showInlineControls()">
       <span class="excerpt__toggle-link" ng-show="vm.isExpandable()">
-        … <a ng-click="vm.toggle()"
+        … <a ng-click="vm.toggle($event)"
             title="Show the full excerpt">More</a>
       </span>
       <span class="excerpt__toggle-link" ng-show="vm.isCollapsible()">
