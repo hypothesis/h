@@ -1,10 +1,10 @@
 from __future__ import with_statement
 
+import logging
 import os
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from logging.config import fileConfig
 
 from h.config import normalize_database_url
 
@@ -12,15 +12,24 @@ from h.config import normalize_database_url
 # access to the values within the .ini file in use.
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-fileConfig(config.config_file_name)
-
 # Import all model modules here in order to populate the metadata
 from h import db
 from h import models
 
 target_metadata = db.Base.metadata
+
+
+def configure_logging():
+    logging.basicConfig(format='%(asctime)s %(process)d %(name)s [%(levelname)s] '
+                               '%(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.INFO)
+
+    if 'DEBUG_QUERY' in os.environ:
+        level = logging.INFO
+        if os.environ.get('DEBUG_QUERY') == 'trace':
+            level = logging.DEBUG
+        logging.getLogger('sqlalchemy.engine').setLevel(level)
 
 
 def get_database_url():
@@ -74,6 +83,8 @@ def run_migrations_online():
             context.run_migrations()
     finally:
         connection.close()
+
+configure_logging()
 
 if context.is_offline_mode():
     run_migrations_offline()
