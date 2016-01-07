@@ -133,7 +133,7 @@ class User(Base):
     # Last password update
     password_updated = sa.Column(sa.DateTime(),
                                  default=sa.sql.func.now(),
-                                 server_default=sa.func.now(),
+                                 server_default=sa.sql.func.now(),
                                  nullable=False)
 
     @hybrid_property
