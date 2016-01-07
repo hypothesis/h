@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from h.api import storage
 from h.api import uri
 
 
@@ -161,7 +162,7 @@ class UriFilter(object):
         if uristr is None:
             return None
 
-        scopes = [uri.normalize(u) for u in uri.expand(uristr)]
+        scopes = [uri.normalize(u) for u in storage.expand_uri(uristr)]
         return {"terms": {"target.scope": scopes}}
 
 

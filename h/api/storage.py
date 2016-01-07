@@ -77,3 +77,31 @@ def delete_annotation(id):
     """
     annotation = models.Annotation.fetch(id)
     annotation.delete()
+
+
+def expand_uri(uri):
+    """
+    Return all URIs which refer to the same underlying document as `uri`.
+
+    This function determines whether we already have "document" records for the
+    passed URI, and if so returns the set of all URIs which we currently
+    believe refer to the same document.
+
+    :param uri: a URI associated with the document
+    :type id: str
+
+    :returns: a list of equivalent URIs
+    :rtype: list
+    """
+    doc = models.Document.get_by_uri(uri)
+    if doc is None:
+        return [uri]
+
+    # We check if the match was a "canonical" link. If so, all annotations
+    # created on that page are guaranteed to have that as their target.source
+    # field, so we don't need to expand to other URIs and risk false positives.
+    for link in doc.get('link', []):
+        if link.get('href') == uri and link.get('rel') == 'canonical':
+            return [uri]
+
+    return doc.uris()

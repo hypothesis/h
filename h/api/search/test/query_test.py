@@ -303,7 +303,7 @@ def test_urifilter_inactive_when_no_uri_param():
     assert urifilter({"foo": "bar"}) is None
 
 
-def test_urifilter_expands_and_normalizes_into_terms_filter(uri):
+def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
     """
     Uses a `terms` filter against target.scope to filter for URI.
 
@@ -313,7 +313,7 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(uri):
     It should expand the input URI before searching, and normalize the results
     of the expansion.
     """
-    uri.expand.side_effect = lambda x: [
+    storage.expand_uri.side_effect = lambda x: [
         "http://giraffes.com/",
         "https://elephants.com/",
     ]
@@ -322,7 +322,7 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(uri):
 
     result = urifilter({"uri": "http://example.com/"})
 
-    uri.expand.assert_called_with("http://example.com/")
+    storage.expand_uri.assert_called_with("http://example.com/")
 
     assert result == {"terms":
         {"target.scope": ["http://giraffes.com", "https://elephants.com"]}
@@ -390,10 +390,18 @@ def test_tagsmatcher_with_both_tag_and_tags():
 
 
 @pytest.fixture
+def storage(request):
+    patcher = mock.patch('h.api.search.query.storage', autospec=True)
+    storage = patcher.start()
+    storage.expand_uri.side_effect = lambda x: [x]
+    request.addfinalizer(patcher.stop)
+    return storage
+
+
+@pytest.fixture
 def uri(request):
     patcher = mock.patch('h.api.search.query.uri', autospec=True)
     uri = patcher.start()
-    uri.expand.side_effect = lambda x: [x]
     uri.normalize.side_effect = lambda x: x
     request.addfinalizer(patcher.stop)
     return uri
