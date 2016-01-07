@@ -248,6 +248,17 @@ describe('HypothesisChromeExtension', function () {
           ready: true,
         });
       });
+
+      it('reactivates errored tabs', function () {
+        fakeTabState.getState = sandbox.stub().returns({
+          state: TabState.states.ERRORED,
+        });
+        fakeChromeTabs.onReplaced.listener(1, 2);
+        assert.calledWith(fakeTabState.setState, 1, {
+          state: TabState.states.ACTIVE,
+          ready: true,
+        });
+      });
     });
 
     describe('when a tab is removed', function () {

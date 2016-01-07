@@ -124,14 +124,23 @@ function HypothesisChromeExtension(dependencies) {
     }
   }
 
-  function resetTabState(tabId, url) {
+  /**
+   * Returns the active state for a tab
+   * which has just been navigated to.
+   */
+  function activeStateForNavigatedTab(tabId) {
     var activeState = state.getState(tabId).state;
     if (activeState === TabState.states.ERRORED) {
+      // user had tried to activate H on the previous page but it failed,
+      // retry on the new page
       activeState = TabState.states.ACTIVE;
     }
+    return activeState;
+  }
 
+  function resetTabState(tabId, url) {
     state.setState(tabId, {
-      state: activeState,
+      state: activeStateForNavigatedTab(tabId),
       ready: false,
       annotationCount: 0,
       extensionSidebarInstalled: false,
@@ -160,12 +169,11 @@ function HypothesisChromeExtension(dependencies) {
   }
 
   function onTabReplaced(addedTabId, removedTabId) {
-    var activeState = state.getState(removedTabId).state;
-    state.clearTab(removedTabId);
     state.setState(addedTabId, {
-      state: activeState,
+      state: activeStateForNavigatedTab(removedTabId),
       ready: true,
     });
+    state.clearTab(removedTabId);
 
     settings.then(function (settings) {
       chromeTabs.get(addedTabId, function (tab) {
