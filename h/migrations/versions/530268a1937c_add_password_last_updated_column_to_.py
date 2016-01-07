@@ -17,8 +17,8 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('user', sa.Column('password_updated',
                                     sa.DateTime(),
-                                    server_default=sa.func.now(),
                                     nullable=True))
+    op.alter_column('user', 'password_updated', server_default=sa.func.now())
 
 
 def downgrade():
