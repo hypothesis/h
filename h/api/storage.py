@@ -8,7 +8,7 @@ assumed to be validated.
 """
 
 from h.api import models
-from h.api.search import transform
+from h.api import transform
 
 
 def fetch_annotation(id):
