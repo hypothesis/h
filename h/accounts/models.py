@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import hashlib
 import random
 import string
@@ -100,11 +101,11 @@ class User(Base):
     status = sa.Column(sa.Integer())
 
     last_login_date = sa.Column(sa.TIMESTAMP(timezone=False),
-                                default=sa.func.now(),
+                                default=datetime.datetime.utcnow,
                                 server_default=sa.func.now(),
                                 nullable=False)
     registered_date = sa.Column(sa.TIMESTAMP(timezone=False),
-                                default=sa.func.now(),
+                                default=datetime.datetime.utcnow,
                                 server_default=sa.func.now(),
                                 nullable=False)
 
@@ -132,7 +133,7 @@ class User(Base):
     salt = sa.Column(sa.UnicodeText(), nullable=False)
     # Last password update
     password_updated = sa.Column(sa.DateTime(),
-                                 default=sa.func.now(),
+                                 default=datetime.datetime.utcnow,
                                  server_default=sa.func.now(),
                                  nullable=False)
 
@@ -152,7 +153,7 @@ class User(Base):
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
         self._password = self._hash_password(raw_password)
-        self.password_updated = sa.func.now()
+        self.password_updated = datetime.datetime.utcnow()
 
     def _hash_password(self, password):
         if not self.salt:
