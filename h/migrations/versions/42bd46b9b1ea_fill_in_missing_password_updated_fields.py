@@ -10,6 +10,8 @@ Create Date: 2016-01-07 14:20:44.094611
 revision = '42bd46b9b1ea'
 down_revision = '530268a1937c'
 
+import datetime
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
@@ -31,7 +33,7 @@ def upgrade():
         op.execute(user.update().
                    where(user.c.id == id_).
                    where(user.c.password_updated == None).
-                   values(password_updated=sa.func.now()))
+                   values(password_updated=datetime.datetime.utcnow()))
 
 
 def downgrade():

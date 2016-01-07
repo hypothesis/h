@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 import sqlalchemy as sa
 from sqlalchemy.orm import exc
 import slugify
@@ -23,11 +25,13 @@ class Group(Base):
                       nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False)
     created = sa.Column(sa.DateTime,
+                        default=datetime.datetime.utcnow,
                         server_default=sa.func.now(),
                         nullable=False)
     updated = sa.Column(sa.DateTime,
                         server_default=sa.func.now(),
-                        onupdate=sa.func.now(),
+                        default=datetime.datetime.utcnow,
+                        onupdate=datetime.datetime.utcnow,
                         nullable=False)
 
     # We store information about who created the group -- we don't use this
