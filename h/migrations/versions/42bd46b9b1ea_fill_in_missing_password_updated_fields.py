@@ -14,13 +14,11 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
-from h import pubid
-
 Session = sessionmaker()
 
-group = sa.table('user',
-                 sa.column('id', sa.Integer),
-                 sa.column('password_updated', sa.DateTime))
+user = sa.table('user',
+                sa.column('id', sa.Integer),
+                sa.column('password_updated', sa.DateTime))
 
 
 def upgrade():
@@ -29,10 +27,10 @@ def upgrade():
 
     # Add the password_updated field to each row lacking one.
     # This is O(N) but does not lock the whole table.
-    for id_, _ in session.query(group).all():
-        op.execute(group.update().
-                   where(group.c.id == id_).
-                   where(group.c.password_updated == None).
+    for id_, _ in session.query(user).all():
+        op.execute(user.update().
+                   where(user.c.id == id_).
+                   where(user.c.password_updated == None).
                    values(password_updated=sa.func.now()))
 
 
