@@ -104,7 +104,7 @@ class User(Base):
                                 server_default=sa.func.now(),
                                 nullable=False)
     registered_date = sa.Column(sa.TIMESTAMP(timezone=False),
-                                default=sa.sql.func.now(),
+                                default=sa.func.now(),
                                 server_default=sa.func.now(),
                                 nullable=False)
 
@@ -132,8 +132,8 @@ class User(Base):
     salt = sa.Column(sa.UnicodeText(), nullable=False)
     # Last password update
     password_updated = sa.Column(sa.DateTime(),
-                                 default=sa.sql.func.now(),
-                                 server_default=sa.sql.func.now(),
+                                 default=sa.func.now(),
+                                 server_default=sa.func.now(),
                                  nullable=False)
 
     @hybrid_property
@@ -152,7 +152,7 @@ class User(Base):
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
         self._password = self._hash_password(raw_password)
-        self.password_updated = sa.sql.func.now()
+        self.password_updated = sa.func.now()
 
     def _hash_password(self, password):
         if not self.salt:
