@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.decorator import reify
 from pyramid.security import Allow, Deny
 from pyramid.security import Authenticated, Everyone
 
 from h.api import auth
-from h.api import models
+from h.api import storage
 
 
 class Resource(dict):
@@ -25,32 +24,19 @@ class Resource(dict):
         self[name] = obj
 
 
-class Collection(Resource):
-    """
-    A collection of other resources.
-    """
-
-    def __getitem__(self, key):
-        if key not in self and callable(self.factory):
-            self.add(key, self.factory(key))
-        return super(Collection, self).__getitem__(key)
-
-    def factory(self, key):
-        raise NotImplementedError
-
-
 class Annotation(Resource):
     """
     A Resource representing an annotation.
     """
+    def __init__(self, id, model):
+        self.id = id
+        self.model = model
 
     def __acl__(self):
         acl = []
 
-        model = self.model
-
         # Convert annotator-store roles to pyramid principals
-        for action, roles in model.get('permissions', {}).items():
+        for action, roles in self.model.get('permissions', {}).items():
             principals = auth.translate_annotation_principals(roles)
 
             for principal in principals:
@@ -60,16 +46,8 @@ class Annotation(Resource):
 
         return acl
 
-    @reify
-    def model(self):
-        if 'id' in self:
-            instance = models.Annotation.fetch(self['id'])
-            return instance or models.Annotation(id=self['id'])
-        else:
-            return models.Annotation()
 
-
-class Annotations(Collection):
+class Annotations(Resource):
     """
     A collection of Annotation resources.
     """
@@ -97,8 +75,20 @@ class Annotations(Collection):
 
         return [(Allow, 'group:' + group, 'create'), deny]
 
-    def factory(self, key):
-        return Annotation(id=key)
+    def __getitem__(self, id):
+        """
+        Fetch Annotation subresource, if it exists.
+        """
+        model = storage.fetch_annotation(id)
+        if model is None:
+            raise KeyError()
+        resource = self.factory(id, model)
+        resource.__parent__ = self
+        resource.__name__ = id
+        return resource
+
+    def factory(self, id, model):
+        return Annotation(id, model)
 
 
 class Root(Resource):

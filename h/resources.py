@@ -23,8 +23,8 @@ class Annotation(api.Annotation):
 
 
 class Annotations(api.Annotations):
-    def factory(self, key):
-        return Annotation(id=key)
+    def factory(self, id, model):
+        return Annotation(id, model)
 
 
 class Stream(Resource):

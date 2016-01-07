@@ -58,13 +58,13 @@ possible if we can answer two questions:
        urn:x-pdf:c83fa94bd1d522276a32f81682a43d29
        urn:doi:10.1000/12345
 
-This package is responsible for defining URI normalization and expansion
-routines for use elsewhere in the Hypothesis application.
+This package is responsible for defining URI normalization routines for use
+elsewhere in the Hypothesis application. URI expansion is handled by
+:py:function:`h.api.storage.expand_uri`.
 """
 
 from h._compat import urlparse
 from h._compat import url_quote, url_quote_plus, url_unquote, url_unquote_plus
-from h.api import models
 
 
 URL_SCHEMES = set(['http', 'https'])
@@ -140,28 +140,6 @@ def normalize(uristr):
     uri = urlparse.SplitResult(scheme, netloc, path, query, fragment)
 
     return uri.geturl()
-
-
-def expand(uri):
-    """
-    Return all URIs which refer to the same underlying document as `uri`.
-
-    This function determines whether we already have "document" records for the
-    passed URI, and if so returns the set of all URIs which we currently
-    believe refer to the same document.
-    """
-    doc = models.Document.get_by_uri(uri)
-    if doc is None:
-        return [uri]
-
-    # We check if the match was a "canonical" link. If so, all annotations
-    # created on that page are guaranteed to have that as their target.source
-    # field, so we don't need to expand to other URIs and risk false positives.
-    for link in doc.get('link', []):
-        if link.get('href') == uri and link.get('rel') == 'canonical':
-            return [uri]
-
-    return doc.uris()
 
 
 def _normalize_netloc(uri):

@@ -2,10 +2,10 @@
 import mock
 import pytest
 
-from h.api.search import transform
+from h.api import transform
 
 
-@mock.patch('h.api.search.transform.groups')
+@mock.patch('h.api.transform.groups')
 def test_prepare_calls_set_group_if_reply(groups):
     annotation = {'permissions': {'read': []}}
 
@@ -14,7 +14,7 @@ def test_prepare_calls_set_group_if_reply(groups):
     groups.set_group_if_reply.assert_called_once_with(annotation)
 
 
-@mock.patch('h.api.search.transform.groups')
+@mock.patch('h.api.transform.groups')
 def test_prepare_calls_insert_group(groups):
     annotation = {'permissions': {'read': []}}
 
@@ -23,7 +23,7 @@ def test_prepare_calls_insert_group(groups):
     groups.insert_group_if_none.assert_called_once_with(annotation)
 
 
-@mock.patch('h.api.search.transform.groups')
+@mock.patch('h.api.transform.groups')
 def test_prepare_calls_set_permissions(groups):
     annotation = {'permissions': {'read': []}}
 
@@ -32,7 +32,7 @@ def test_prepare_calls_set_permissions(groups):
     groups.set_permissions.assert_called_once_with(annotation)
 
 
-@mock.patch('h.api.search.transform.groups')
+@mock.patch('h.api.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     # Preserves the basics
     ({}, {}),
@@ -50,7 +50,7 @@ def test_prepare_noop_when_nothing_to_normalize(_, ann_in, ann_out):
     assert ann_in == ann_out
 
 
-@mock.patch('h.api.search.transform.groups')
+@mock.patch('h.api.transform.groups')
 @pytest.mark.parametrize("ann_in,ann_out", [
     ({"target": [{"source": "giraffe"}]},
      {"target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
@@ -63,8 +63,7 @@ def test_prepare_adds_scope_field(_, ann_in, ann_out, uri_normalize):
     assert ann_in == ann_out
 
 
-@mock.patch('h.api.search.transform.models')
-@mock.patch('h.api.search.transform.groups')
+@mock.patch('h.api.transform.groups')
 @pytest.mark.usefixtures("uri_normalize")
 @pytest.mark.parametrize("ann_in,ann_out", [
     ({"uri": "giraffe"},
@@ -99,36 +98,12 @@ def test_prepare_adds_scope_field(_, ann_in, ann_out, uri_normalize):
     ({"references": [], "target": []},
      {"references": [], "target": []}),
 ])
-def test_prepare_transforms_old_style_comments(models, groups, ann_in, ann_out):
+def test_prepare_transforms_old_style_comments(groups, ann_in, ann_out):
     transform.prepare(ann_in)
     assert ann_in == ann_out
 
 
-@mock.patch('h.api.search.transform.models')
-@mock.patch('h.api.search.transform.groups')
-def test_prepare_does_nothing_if_parents_target_is_not_a_list(_, models):
-    """It should do nothing to replies if the parent's target isn't a list.
-
-    If the annotation is a reply and its parent's 'target' is not a list then
-    it should not modify the reply's 'target' at all.
-
-    """
-    parent_annotation = {
-        'id': 'parent_annotation_id',
-        'target': 'not a list'
-    }
-    reply = {
-        'references': [parent_annotation['id'], 'some other id'],
-        'target': mock.sentinel.target
-    }
-    models.Annotation.fetch.return_value = parent_annotation
-
-    transform.prepare(reply)
-
-    assert reply['target'] == mock.sentinel.target
-
-
-@mock.patch('h.api.search.transform.groups')
+@mock.patch('h.api.transform.groups')
 @pytest.mark.parametrize("ann,nipsa", [
     ({"user": "george"}, True),
     ({"user": "georgia"}, False),
@@ -141,23 +116,6 @@ def test_prepare_sets_nipsa_field(_, ann, nipsa, has_nipsa):
         assert ann["nipsa"] is True
     else:
         assert "nipsa" not in ann
-
-
-@mock.patch('h.api.search.transform.groups')
-@pytest.mark.parametrize("ann_in,ann_out", [
-    # Preserves the basics
-    ({}, {}),
-    ({"other": "keys", "left": "alone"}, {"other": "keys", "left": "alone"}),
-
-    # Target field
-    ({"target": "hello"}, {"target": "hello"}),
-    ({"target": []}, {"target": []}),
-    ({"target": ["foo", "bar"]}, {"target": ["foo", "bar"]}),
-    ({"target": [{"foo": "bar"}, {"baz": "qux"}]},
-     {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
-])
-def test_render_noop_when_nothing_to_remove(_, ann_in, ann_out):
-    assert transform.render(ann_in) == ann_out
 
 
 @pytest.fixture

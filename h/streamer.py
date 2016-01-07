@@ -26,7 +26,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from h import queue
 from h._compat import text_type
 from h.api import auth
-from h.api import uri
+from h.api import storage
 from h.models import Annotation
 
 log = logging.getLogger(__name__)
@@ -287,7 +287,7 @@ class WebSocket(_WebSocket):
             uris = [uris]
 
         for item in uris:
-            expanded.update(uri.expand(item))
+            expanded.update(storage.expand_uri(item))
 
         clause['value'] = list(expanded)
 

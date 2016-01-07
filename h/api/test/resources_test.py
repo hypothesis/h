@@ -8,56 +8,51 @@ from h.api import resources
 class TestAnnotationPermissions(object):
 
     def test_principal(self):
-        resource = resources.Annotation()
-        resource.__name__ = 'foo'
-        annotation = resource.model
-        annotation['permissions'] = {
-            'read': ['saoirse'],
-        }
+        resource = resources.Annotation('foo', {
+            'permissions': {
+                'read': ['saoirse'],
+            }
+        })
         actual = resource.__acl__()
         expect = [(security.Allow, 'saoirse', 'read')]
         assert actual == expect
 
     def test_deny_system_role(self):
-        resource = resources.Annotation()
-        resource.__name__ = 'foo'
-        annotation = resource.model
-        annotation['permissions'] = {
-            'read': [security.Everyone],
-        }
+        resource = resources.Annotation('foo', {
+            'permissions': {
+                'read': [security.Everyone],
+            }
+        })
         actual = resource.__acl__()
         expect = []
         assert actual == expect
 
     def test_group(self):
-        resource = resources.Annotation()
-        resource.__name__ = 'foo'
-        annotation = resource.model
-        annotation['permissions'] = {
-            'read': ['group:lulapalooza'],
-        }
+        resource = resources.Annotation('foo', {
+            'permissions': {
+                'read': ['group:lulapalooza'],
+            }
+        })
         actual = resource.__acl__()
         expect = [(security.Allow, 'group:lulapalooza', 'read')]
         assert actual == expect
 
     def test_group_world(self):
-        resource = resources.Annotation()
-        resource.__name__ = 'foo'
-        annotation = resource.model
-        annotation['permissions'] = {
-            'read': ['group:__world__'],
-        }
+        resource = resources.Annotation('foo', {
+            'permissions': {
+                'read': ['group:__world__'],
+            }
+        })
         actual = resource.__acl__()
         expect = [(security.Allow, security.Everyone, 'read')]
         assert actual == expect
 
     def test_group_authenticated(self):
-        resource = resources.Annotation()
-        resource.__name__ = 'foo'
-        annotation = resource.model
-        annotation['permissions'] = {
-            'read': ['group:__authenticated__'],
-        }
+        resource = resources.Annotation('foo', {
+            'permissions': {
+                'read': ['group:__authenticated__'],
+            }
+        })
         actual = resource.__acl__()
         expect = [(security.Allow, security.Authenticated, 'read')]
         assert actual == expect

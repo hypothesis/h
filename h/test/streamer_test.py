@@ -84,10 +84,10 @@ class TestWebSocket(unittest.TestCase):
             }
         })
 
-        with patch('h.api.uri.expand') as expand:
-            expand.return_value = ['http://example.com',
-                                   'http://example.com/alter',
-                                   'http://example.com/print']
+        with patch('h.api.storage.expand_uri') as expand_uri:
+            expand_uri.return_value = ['http://example.com',
+                                       'http://example.com/alter',
+                                       'http://example.com/print']
             msg = MagicMock()
             msg.data = filter_message
 
