@@ -23,6 +23,8 @@ var DEFAULT_STATE = {
   extensionSidebarInstalled: false,
   /** Whether the tab is loaded and ready for the sidebar to be installed. */
   ready: false,
+  /** The error for the current tab. */
+  error: undefined,
 };
 
 /** encodeUriQuery encodes a string for use in a query parameter */
@@ -77,8 +79,11 @@ function TabState(initialState, onchange) {
     this.setState(tabId, {state: states.INACTIVE});
   };
 
-  this.errorTab = function (tabId) {
-    this.setState(tabId, {state: states.ERRORED});
+  this.errorTab = function (tabId, error) {
+    this.setState(tabId, {
+      state: states.ERRORED,
+      error: error,
+    });
   };
 
   this.clearTab = function (tabId) {
@@ -120,6 +125,9 @@ function TabState(initialState, onchange) {
     var newState;
     if (stateUpdate) {
       newState = assign({}, this.getState(tabId), stateUpdate);
+      if (newState.state !== states.ERRORED) {
+        newState.error = undefined;
+      }
     }
 
     if (isShallowEqual(newState, currentState[tabId])) {

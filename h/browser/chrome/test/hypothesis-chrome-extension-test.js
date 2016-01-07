@@ -74,17 +74,12 @@ describe('HypothesisChromeExtension', function () {
       isTabActive: sandbox.stub().returns(false),
       isTabInactive: sandbox.stub().returns(false),
       isTabErrored: sandbox.stub().returns(false),
-      getState: sandbox.spy(),
+      getState: sandbox.stub().returns({}),
       setState: sandbox.spy(),
       clearTab: sandbox.spy(),
       load: sandbox.spy(),
     };
     fakeTabState.deactivateTab = sinon.spy();
-    fakeTabErrorCache = {
-      getTabError: sandbox.stub(),
-      setTabError: sandbox.stub(),
-      unsetTabError: sandbox.stub(),
-    };
     fakeBrowserAction = {
       update: sandbox.spy(),
     };
@@ -102,7 +97,6 @@ describe('HypothesisChromeExtension', function () {
       './tab-state': FakeTabState,
       './tab-store': createConstructor(fakeTabStore),
       './help-page': createConstructor(fakeHelpPage),
-      './tab-error-cache': createConstructor(fakeTabErrorCache),
       './browser-action': createConstructor(fakeBrowserAction),
       './sidebar-injector': createConstructor(fakeSidebarInjector),
     });
@@ -254,6 +248,17 @@ describe('HypothesisChromeExtension', function () {
           ready: true,
         });
       });
+
+      it('reactivates errored tabs', function () {
+        fakeTabState.getState = sandbox.stub().returns({
+          state: TabState.states.ERRORED,
+        });
+        fakeChromeTabs.onReplaced.listener(1, 2);
+        assert.calledWith(fakeTabState.setState, 1, {
+          state: TabState.states.ACTIVE,
+          ready: true,
+        });
+      });
     });
 
     describe('when a tab is removed', function () {
@@ -333,7 +338,10 @@ describe('HypothesisChromeExtension', function () {
         it('shows the help page for ' + ErrorType.name, function () {
           var tab = {id: 1, url: 'file://foo.html'};
 
-          fakeTabErrorCache.getTabError.returns(new ErrorType('msg'));
+          fakeTabState.getState.returns({
+            state: TabState.states.ERRORED,
+            error: new ErrorType('msg'),
+          });
           fakeTabState.isTabErrored.withArgs(1).returns(true);
           fakeChromeBrowserAction.onClicked.listener(tab);
 
@@ -461,30 +469,6 @@ describe('HypothesisChromeExtension', function () {
       onTabStateChange(null, tabStates.INACTIVE);
       assert.called(fakeTabStore.unset);
       assert.calledWith(fakeTabStore.unset);
-    });
-
-    describe('when a tab with an error is updated', function () {
-      beforeEach(function () {
-        fakeTabState.getState = sandbox.stub().returns({
-          state: tabStates.ERRORED,
-          extensionSidebarInstalled: false,
-          ready: true,
-        });
-      });
-
-      it('resets the tab error state when no longer errored', function () {
-        var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
-        onTabStateChange(tabStates.ACTIVE, tabStates.ERRORED);
-        assert.called(fakeTabErrorCache.unsetTabError);
-        assert.calledWith(fakeTabErrorCache.unsetTabError, 1);
-      });
-
-      it('resets the tab error state when the tab is closed', function () {
-        var tab = {id: 1, url: 'file://foo.html', status: 'complete'};
-        onTabStateChange(null, tabStates.ERRORED);
-        assert.called(fakeTabErrorCache.unsetTabError);
-        assert.calledWith(fakeTabErrorCache.unsetTabError, 1);
-      });
     });
   });
 });
