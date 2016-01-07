@@ -4,6 +4,7 @@ from pkg_resources import resource_stream
 import colander
 import deform
 from pyramid.session import check_csrf_token
+from itsdangerous import BadData, SignatureExpired
 
 from h import i18n
 from h.accounts import models
@@ -193,18 +194,32 @@ class ResetCode(colander.SchemaType):
             return colander.null
         if not isinstance(appstruct, models.User):
             raise colander.Invalid(node, '%r is not a User' % appstruct)
-        if not isinstance(appstruct.activation, models.Activation):
-            raise colander.Invalid(node, '%r has no Activation' % appstruct)
-        return appstruct.activation.code
+        request = node.bindings['request']
+        serializer = request.registry.password_reset_serializer
+        return serializer.dumps(appstruct.username)
 
     def deserialize(self, node, cstruct):
         if cstruct is colander.null:
             return colander.null
-        activation = models.Activation.get_by_code(cstruct)
-        if activation is not None:
-            user = models.User.get_by_activation(activation)
-        if activation is None or user is None:
+
+        request = node.bindings['request']
+        serializer = request.registry.password_reset_serializer
+
+        try:
+            (username, timestamp) = serializer.loads(cstruct,
+                                                     max_age=72*3600,
+                                                     return_timestamp=True)
+        except SignatureExpired:
+            raise colander.Invalid(node, _('Your reset code has expired'))
+        except BadData:
             raise colander.Invalid(node, _('Your reset code is not valid'))
+
+        user = models.User.get_by_username(username)
+        if user is None:
+            raise colander.Invalid(node, _('Your reset code is not valid'))
+        if user.password_updated is not None and timestamp < user.password_updated:
+            raise colander.Invalid(node,
+                                   _('You have already reset your password'))
         return user
 
 

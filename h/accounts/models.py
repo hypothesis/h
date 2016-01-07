@@ -32,7 +32,7 @@ def _generate_random_string(length=12):
 class Activation(Base):
 
     """
-    Handles activations/password reset items for users.
+    Handles activations for users.
 
     The code should be a random hash that is valid only once.
     After the hash is used to access the site, it'll be removed.
@@ -130,6 +130,11 @@ class User(Base):
     _password = sa.Column('password', sa.UnicodeText(), nullable=False)
     # Password salt
     salt = sa.Column(sa.UnicodeText(), nullable=False)
+    # Last password update
+    password_updated = sa.Column(sa.DateTime(),
+                                 default=sa.sql.func.now(),
+                                 server_default=sa.sql.func.now(),
+                                 nullable=False)
 
     @hybrid_property
     def password(self):
@@ -147,6 +152,7 @@ class User(Base):
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
         self._password = self._hash_password(raw_password)
+        self.password_updated = sa.sql.func.now()
 
     def _hash_password(self, password):
         if not self.salt:

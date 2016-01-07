@@ -47,6 +47,14 @@ class FakeUser(object):
             setattr(self, k, kwargs[k])
 
 
+class FakeSerializer(object):
+    def dumps(self, obj):
+        return 'faketoken'
+
+    def loads(self, token):
+        return {'username': 'foo@bar.com'}
+
+
 # A fake version of colander.Invalid
 class FakeInvalid(object):
     def __init__(self, errors):
@@ -338,38 +346,19 @@ def test_forgot_password_creates_no_activations_when_validation_fails(activation
     assert activation_model.call_count == 0
 
 
-@forgot_password_fixtures
-def test_forgot_password_creates_activation_for_user(activation_model,
-                                                     authn_policy):
-    request = DummyRequest(method='POST')
-    authn_policy.authenticated_userid.return_value = None
-    activation = activation_model.return_value
-    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = ForgotPasswordController(request)
-    controller.form = form_validating_to({"user": user})
-
-    controller.forgot_password()
-
-    activation_model.assert_called_with()
-    assert activation in request.db.added
-    assert user.activation == activation
-
-
 @patch('h.accounts.views.reset_password_link')
 @forgot_password_fixtures
-def test_forgot_password_generates_reset_link_from_activation(reset_link,
-                                                              activation_model,
-                                                              authn_policy):
+def test_forgot_password_generates_reset_link(reset_link, authn_policy):
     request = DummyRequest(method='POST')
+    request.registry.password_reset_serializer = FakeSerializer()
     authn_policy.authenticated_userid.return_value = None
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
-    activation_model.return_value.code = "abcde12345"
 
     controller.forgot_password()
 
-    reset_link.assert_called_with(request, "abcde12345")
+    reset_link.assert_called_with(request, "faketoken")
 
 
 @patch('h.accounts.views.reset_password_email')
@@ -380,22 +369,23 @@ def test_forgot_password_generates_mail(reset_link,
                                         activation_model,
                                         authn_policy):
     request = DummyRequest(method='POST')
+    request.registry.password_reset_serializer = FakeSerializer()
     authn_policy.authenticated_userid.return_value = None
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
-    activation_model.return_value.code = "abcde12345"
     reset_link.return_value = "http://example.com"
 
     controller.forgot_password()
 
-    reset_mail.assert_called_with(user, "abcde12345", "http://example.com")
+    reset_mail.assert_called_with(user, "faketoken", "http://example.com")
 
 
 @patch('h.accounts.views.reset_password_email')
 @forgot_password_fixtures
 def test_forgot_password_sends_mail(reset_mail, authn_policy, mailer):
     request = DummyRequest(method='POST')
+    request.registry.password_reset_serializer = FakeSerializer()
     authn_policy.authenticated_userid.return_value = None
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = ForgotPasswordController(request)
@@ -410,6 +400,7 @@ def test_forgot_password_sends_mail(reset_mail, authn_policy, mailer):
 @forgot_password_fixtures
 def test_forgot_password_redirects_on_success(authn_policy):
     request = DummyRequest(method='POST')
+    request.registry.password_reset_serializer = FakeSerializer()
     authn_policy.authenticated_userid.return_value = None
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = ForgotPasswordController(request)
@@ -454,20 +445,6 @@ def test_reset_password_sets_user_password_from_form():
     controller.reset_password()
 
     assert elephant.password == 's3cure!'
-
-
-@reset_password_fixtures
-def test_reset_password_deletes_activation():
-    request = DummyRequest(method='POST')
-    user = FakeUser(password='password1')
-    user.activation = mock.sentinel.activation
-    controller = ResetPasswordController(request)
-    controller.form = form_validating_to({'user': user,
-                                          'password': 's3cure!'})
-
-    controller.reset_password()
-
-    assert mock.sentinel.activation in request.db.deleted
 
 
 @patch('h.accounts.views.PasswordResetEvent', autospec=True)
