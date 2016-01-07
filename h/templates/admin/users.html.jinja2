@@ -37,6 +37,10 @@
             <th>Is staff?</th>
             <td>{% if user.staff %}&#x2714;{% else %}&#x2718;{% endif %}</td>
           </tr>
+          <tr>
+            <th>Annotations</th>
+            <td>{{ user_meta['annotations_count'] }}</td>
+          </tr>
         </tbody>
       </table>
     {% else %}
