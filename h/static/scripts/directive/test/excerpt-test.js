@@ -1,58 +1,28 @@
 'use strict';
 
+var assign = require('core-js/modules/$.object-assign');
 var util = require('./util');
 var excerpt = require('../excerpt');
 
+describe('excerpt directive', function () {
+  var SHORT_DIV = '<div id="foo" style="height:5px;"></div>';
+  var TALL_DIV =  '<div id="foo" style="height:200px;">foo bar</div>';
 
-describe('excerpt.Controller', function () {
-  var ctrl;
-
-  beforeEach(function() {
-    ctrl = new excerpt.Controller();
-    ctrl.overflowing = function () { return false; };
-  });
-
-  it('starts collapsed if the element is overflowing', function () {
-    ctrl.overflowing = function () { return true; };
-
-    assert.isTrue(ctrl.collapsed());
-  });
-
-  it('does not start collapsed if the element is not overflowing', function () {
-    assert.isFalse(ctrl.collapsed());
-  });
-
-  it('is not initially uncollapsed if the element is overflowing', function () {
-    assert.isFalse(ctrl.uncollapsed());
-  });
-
-  it('is not initially uncollapsed if the element is not overflowing', function () {
-    assert.isFalse(ctrl.uncollapsed());
-  });
-
-  describe('.toggle()', function () {
-    beforeEach(function () {
-      ctrl.overflowing = function () { return true; };
-    });
-
-    it('toggles the collapsed state', function () {
-      var a = ctrl.collapsed();
-      ctrl.toggle();
-      var b = ctrl.collapsed();
-      ctrl.toggle();
-      var c = ctrl.collapsed();
-
-      assert.notEqual(a, b);
-      assert.notEqual(b, c);
-      assert.equal(a, c);
-    });
-  });
-});
-
-
-describe('excerpt.excerpt', function () {
   function excerptDirective(attrs, content) {
+    var defaultAttrs = {
+      // disable animation so that expansion/collapse happens immediately
+      // when the controls are toggled in tests
+      animate: false,
+      enabled: true,
+      collapsedHeight: 40,
+      inlineControls: false,
+    };
+    attrs = assign(defaultAttrs, attrs);
     return util.createDirective(document, 'excerpt', attrs, {}, content);
+  }
+
+  function height(el) {
+    return el.querySelector('.excerpt').offsetHeight;
   }
 
   before(function () {
@@ -65,22 +35,114 @@ describe('excerpt.excerpt', function () {
     angular.mock.module('h.templates');
   });
 
-  it('renders its contents in a .excerpt element by default', function () {
-    var element = excerptDirective({}, '<span id="foo"></span>');
+  describe('enabled state', function () {
+    it('renders its contents in a .excerpt element by default', function () {
+      var element = excerptDirective({}, '<span id="foo"></span>');
 
-    assert.equal(element.find('.excerpt #foo').length, 1);
+      assert.equal(element.find('.excerpt #foo').length, 1);
+    });
+
+    it('when enabled, renders its contents in a .excerpt element', function () {
+      var element = excerptDirective({enabled: true}, '<span id="foo"></span>');
+
+      assert.equal(element.find('.excerpt #foo').length, 1);
+    });
+
+    it('when disabled, renders its contents but not in a .excerpt element', function () {
+      var element = excerptDirective({enabled: false}, '<span id="foo"></span>');
+
+      assert.equal(element.find('.excerpt #foo').length, 0);
+      assert.equal(element.find('#foo').length, 1);
+    });
+
+    it('truncates long contents when enabled', function () {
+      var element = excerptDirective({enabled: false}, TALL_DIV);
+      element.scope.enabled = true;
+      element.scope.$digest();
+      assert.isBelow(height(element[0]), 100);
+    });
   });
 
-  it('when enabled, renders its contents in a .excerpt element', function () {
-    var element = excerptDirective({enabled: true}, '<span id="foo"></span>');
+  function isHidden(el) {
+    return !el.offsetParent || el.classList.contains('ng-hide');
+  }
 
-    assert.equal(element.find('.excerpt #foo').length, 1);
+  function findVisible(el, selector) {
+    var elements = el.querySelectorAll(selector);
+    for (var i=0; i < elements.length; i++) {
+      if (!isHidden(elements[i])) {
+        return elements[i];
+      }
+    }
+    return undefined;
+  }
+
+  describe('inline controls', function () {
+    function findInlineControl(el) {
+      return findVisible(el, '.excerpt__toggle-link');
+    }
+
+    it('displays inline controls if collapsed', function () {
+      var element = excerptDirective({inlineControls: true},
+        TALL_DIV);
+      element.scope.$digest();
+      var expandLink = findInlineControl(element[0]);
+      assert.ok(expandLink);
+      assert.equal(expandLink.querySelector('a').textContent, 'More');
+    });
+
+    it('does not display inline controls if not collapsed', function () {
+      var element = excerptDirective({inlineControls: true},
+        SHORT_DIV);
+      var expandLink = findInlineControl(element[0]);
+      assert.notOk(expandLink);
+    });
+
+    it('toggles the expanded state when clicked', function () {
+      var element = excerptDirective({inlineControls: true},
+        TALL_DIV);
+      element.scope.$digest();
+      var expandLink = findInlineControl(element[0]);
+      angular.element(expandLink.querySelector('a')).click();
+      element.scope.$digest();
+      var collapseLink = findInlineControl(element[0]);
+      assert.equal(collapseLink.querySelector('a').textContent, 'Less');
+    });
   });
 
-  it('when disabled, renders its contents but not in a .excerpt element', function () {
-    var element = excerptDirective({enabled: false}, '<span id="foo"></span>');
+  describe('.collapse', function () {
+    it('collapses the body if collapse is true', function () {
+      var element = excerptDirective({collapse: true}, TALL_DIV);
+      assert.isBelow(height(element[0]), 100);
+    });
 
-    assert.equal(element.find('.excerpt #foo').length, 0);
-    assert.equal(element.find('#foo').length, 1);
+    it('does not collapse the body if collapse is false', function () {
+      var element = excerptDirective({collapse: false}, TALL_DIV);
+      assert.isAbove(height(element[0]), 100);
+    });
+  });
+
+  describe('.onCollapsibleChanged', function () {
+    it('reports true if excerpt is tall', function () {
+      var callback = sinon.stub();
+      var element = excerptDirective({
+        onCollapsibleChanged: {
+          args: ['collapsible'],
+          callback: callback,
+        }
+      }, TALL_DIV);
+      assert.calledWith(callback, true);
+    });
+
+    it('reports false if excerpt is short', function () {
+      var callback = sinon.stub();
+      var element = excerptDirective({
+        onCollapsibleChanged: {
+          args: ['collapsible'],
+          callback: callback,
+        }
+      }, SHORT_DIV);
+      assert.calledWith(callback, false);
+    });
   });
 });

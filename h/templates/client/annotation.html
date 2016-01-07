@@ -14,7 +14,7 @@
       </span>
 
       <span class="annotation-collapsed-replies">
-        <a class="reply-count small" href=""
+        <a class="annotation-link" href=""
           ng-click="replyCountClick()"
           ng-pluralize count="replyCount"
           when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
@@ -45,7 +45,7 @@
     <span class="u-flex-spacer"></span>
 
     <!-- Timestamp -->
-    <a class="annotation-timestamp"
+    <a class="annotation-link"
        target="_blank"
        title="{{vm.absoluteTimestamp}}"
        ng-if="!vm.editing() && vm.updated()"
@@ -57,7 +57,9 @@
   <section class="annotation-quote-list"
            ng-repeat="target in vm.target() track by $index"
            ng-if="vm.hasQuotes()">
-    <excerpt enabled="vm.feature('truncate_annotations')">
+    <excerpt enabled="vm.feature('truncate_annotations')"
+             collapsed-height="40"
+             inline-controls="true">
       <blockquote class="annotation-quote"
                   ng-bind-html="selector.exact"
                   ng-repeat="selector in target.selector
@@ -70,7 +72,11 @@
 
   <!-- Body -->
   <section name="text" class="annotation-body">
-    <excerpt enabled="vm.feature('truncate_annotations') && !vm.editing()">
+    <excerpt enabled="vm.feature('truncate_annotations') && !vm.editing()"
+             inline-controls="false"
+             on-collapsible-changed="vm.setBodyCollapsible(collapsible)"
+             collapse="vm.collapseBody"
+             collapsed-height="200">
       <markdown ng-model="vm.form.text"
                 read-only="!vm.editing()"
                 embeds-enabled="vm.feature('embed_media')">
@@ -94,13 +100,18 @@
     </tags-input>
   </div>
 
-  <div class="annotation-body tags tags-read-only"
-       ng-if="vm.form.tags.length && !vm.editing()">
+  <div class="annotation-body u-layout-row tags tags-read-only"
+       ng-if="(vm.canCollapseBody || vm.form.tags.length) && !vm.editing()">
     <ul class="tag-list">
       <li class="tag-item" ng-repeat="tag in vm.form.tags">
         <a href="/stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
       </li>
     </ul>
+    <div class="u-stretch"></div>
+    <a class="annotation-link u-strong" ng-show="vm.canCollapseBody"
+       ng-click="vm.toggleCollapseBody($event)"
+       ng-title="vm.collapseBody ? 'Show the full annotation text' : 'Show the first few lines only'"
+       ng-bind="vm.collapseBody ? 'More' : 'Less'"></a>
   </div>
   <!-- / Tags -->
 
@@ -130,7 +141,7 @@
     </div>
 
     <div class="annotation-replies" ng-if="replyCount > 0">
-      <a class="reply-count small" href=""
+      <a class="annotation-link" href=""
          ng-click="replyCountClick()"
          ng-pluralize count="replyCount"
          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>

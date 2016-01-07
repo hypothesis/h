@@ -51,15 +51,21 @@ function hyphenate(name) {
  *                                  scope when the element is linked
  * @param {string} [initialHtml] - Initial inner HTML content for the directive
  *                                 element.
+ * @param {Object} [opts] - Object specifying options for creating the
+ *                          directive:
+ *                          'parentElement' - The parent element for the new
+ *                                            directive. Defaults to document.body
  *
  * @return {DOMElement} The Angular jqLite-wrapped DOM element for the component.
  *                      The returned object has a link(scope) method which will
  *                      re-link the component with new properties.
  */
-function createDirective(document, name, attrs, initialScope, initialHtml) {
+function createDirective(document, name, attrs, initialScope, initialHtml, opts) {
   attrs = attrs || {};
   initialScope = initialScope || {};
   initialHtml = initialHtml || '';
+  opts = opts || {};
+  opts.parentElement = opts.parentElement || document.body;
 
   // create a template consisting of a single element, the directive
   // we want to create and compile it
@@ -81,6 +87,11 @@ function createDirective(document, name, attrs, initialScope, initialHtml) {
     templateElement.setAttribute(attrName, attrKey);
   });
   templateElement.innerHTML = initialHtml;
+
+  // add the element to the document's body so that
+  // it responds to events, becomes visible, reports correct
+  // values for its dimensions etc.
+  opts.parentElement.appendChild(templateElement);
 
   // setup initial scope
   Object.keys(attrs).forEach(function (key) {
@@ -105,6 +116,7 @@ function createDirective(document, name, attrs, initialScope, initialHtml) {
     element.link = linkDirective;
     element.scope = childScope;
     childScope.$digest();
+    element.ctrl = element.controller(name);
     return element;
   }
 

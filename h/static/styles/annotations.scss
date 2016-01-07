@@ -20,22 +20,16 @@ $annotation-card-left-padding: 10px;
   font-family: $sans-font-family;
   font-weight: 300;
   position: relative;
-
-  .reply-count {
-    color: $gray-light;
-    &:focus { outline: 0; }
-  }
-
-  &:hover .annotation-timestamp, &:hover .reply-count  {
-    color: $link-color;
-  }
 }
 
-.annotation-timestamp {
+.annotation-link {
   font-size: $body1-font-size;
   color: $color-gray;
-  &:hover { color: $link-color-hover; }
   &:focus { outline: 0; }
+
+  .annotation:hover & {
+    color: $link-color;
+  }
 }
 
 .annotation-quote-list,
@@ -78,25 +72,6 @@ $annotation-card-left-padding: 10px;
 .annotation-quote-list {
   margin-top: 14px;
   margin-bottom: 14px;
-
-  .excerpt { max-height: 4.8em; }
-  .excerpt-control a {
-    font-style: italic;
-    font-family: $serif-font-family;
-    font-weight: normal;
-  }
-  .excerpt--collapsed:after {
-    height: $base-line-height;
-    @include background(linear-gradient(
-      to right,
-      $mask-start-color,
-      $mask-end-color
-    ));
-  }
-}
-
-.annotation-body {
-  .excerpt { max-height: 16.2em; }
 }
 
 .annotation-media-embed {
@@ -167,7 +142,6 @@ $annotation-card-left-padding: 10px;
     margin-right: 1px;
   }
 }
-
 
 //PRIVACY CONTROL////////////////////////////
 privacy {
