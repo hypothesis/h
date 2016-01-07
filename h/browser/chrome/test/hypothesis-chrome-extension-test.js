@@ -78,6 +78,7 @@ describe('HypothesisChromeExtension', function () {
       setState: sandbox.spy(),
       clearTab: sandbox.spy(),
       load: sandbox.spy(),
+      updateAnnotationCount: sandbox.spy(),
     };
     fakeTabState.deactivateTab = sinon.spy();
     fakeBrowserAction = {

@@ -3,6 +3,8 @@
 var assign = require('core-js/modules/$.object-assign');
 var isShallowEqual = require('is-equal-shallow');
 
+var uriInfo = require('./uri-info');
+
 var states = {
   ACTIVE:   'active',
   INACTIVE: 'inactive',
@@ -26,11 +28,6 @@ var DEFAULT_STATE = {
   /** The error for the current tab. */
   error: undefined,
 };
-
-/** encodeUriQuery encodes a string for use in a query parameter */
-function encodeUriQuery(val) {
-  return encodeURIComponent(val).replace(/%20/g, '+');
-}
 
 /** TabState stores the H state for a tab. This state includes:
  *
@@ -151,31 +148,13 @@ function TabState(initialState, onchange) {
    * @param {string} apiUrl The URL of the Hypothesis API.
    */
   this.updateAnnotationCount = function(tabId, tabUrl, apiUrl) {
-    // Fetch the number of annotations of the current page from the server,
-    // and display it as a badge on the browser action button.
     var self = this;
-    var xhr = new XMLHttpRequest();
-    xhr.onload = function() {
-      var total;
-
-      try {
-        total = JSON.parse(this.response).total;
-      } catch (e) {
-        console.error(
-          'updateAnnotationCount() received invalid JSON from the server: ' + e);
-        return;
-      }
-
-      if (typeof total !== 'number') {
-        console.error('annotation count is not a number');
-        return;
-      }
-
-      self.setState(tabId, {annotationCount: total});
-    };
-
-    xhr.open('GET', apiUrl + '/badge?uri=' + encodeUriQuery(tabUrl));
-    xhr.send();
+    return uriInfo.query(tabUrl).then(function (result) {
+      self.setState(tabId, { annotationCount: result.total });
+    }).catch(function (err) {
+      self.setState(tabId, { annotationCount: 0 });
+      console.error('Failed to fetch annotation count for %s: %s', tabUrl, err)
+    });
   };
 
   this.load(initialState || {});
