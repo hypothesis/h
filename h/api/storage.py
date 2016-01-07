@@ -8,7 +8,7 @@ assumed to be validated.
 """
 
 from h.api import models
-from h.api import search
+from h.api.search import transform
 
 
 def fetch_annotation(id):
@@ -37,7 +37,7 @@ def create_annotation(data):
     annotation = models.Annotation(data)
 
     # FIXME: this should happen when indexing, not storing.
-    search.prepare(annotation)
+    transform.prepare(annotation)
 
     annotation.save()
     return annotation
@@ -62,7 +62,7 @@ def update_annotation(id, data):
     annotation.update(data)
 
     # FIXME: this should happen when indexing, not storing.
-    search.prepare(annotation)
+    transform.prepare(annotation)
 
     annotation.save()
     return annotation
