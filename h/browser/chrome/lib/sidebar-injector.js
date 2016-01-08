@@ -1,8 +1,17 @@
 'use strict';
 
 var blocklist = require('../../../static/scripts/blocklist');
+var detectContentType = require('./detect-content-type');
 var errors = require('./errors');
 var settings = require('./settings');
+var util = require('./util');
+
+var CONTENT_TYPE_HTML = 'HTML';
+var CONTENT_TYPE_PDF = 'PDF';
+
+function toIIFEString(fn) {
+  return '(' + fn.toString() + ')()';
+}
 
 /* The SidebarInjector is used to deploy and remove the Hypothesis sidebar
  * from tabs. It also deals with loading PDF documents into the PDF.js viewer
@@ -21,6 +30,8 @@ function SidebarInjector(chromeTabs, dependencies) {
 
   var isAllowedFileSchemeAccess = dependencies.isAllowedFileSchemeAccess;
   var extensionURL = dependencies.extensionURL;
+
+  var executeScriptFn = util.promisify(chromeTabs.executeScript);
 
   if (typeof extensionURL !== 'function') {
     throw new TypeError('extensionURL must be a function');
@@ -72,10 +83,48 @@ function SidebarInjector(chromeTabs, dependencies) {
     return PDF_VIEWER_URL + '?file=' + encodeURIComponent(url);
   }
 
-  function isPDFURL(url) {
-    return url.toLowerCase().indexOf('.pdf') > 0;
+  // returns true if the extension is permitted to inject
+  // a content script into a tab with a given URL.
+  function canInjectScript(url) {
+    var canInject;
+    if (isSupportedURL(url)) {
+      canInject = Promise.resolve(true);
+    } else if (isFileURL(url)) {
+      canInject = util.promisify(isAllowedFileSchemeAccess)();
+    } else {
+      canInject = Promise.resolve(false);
+    }
+    return canInject;
   }
 
+  function detectTabContentType(tab) {
+    if (isPDFViewerURL(tab.url)) {
+      return Promise.resolve(CONTENT_TYPE_PDF);
+    }
+
+    return canInjectScript(tab.url).then(function (canInject) {
+      if (canInject) {
+        return executeScriptFn(tab.id, {
+            code: toIIFEString(detectContentType)
+          }).then(function (frameResults) {
+            return frameResults[0].type;
+          });
+      } else {
+        // we cannot inject a content script in order to determine the
+        // file type, so fall back to a URL-based mechanism
+        if (tab.url.indexOf('.pdf') !== -1) {
+          return Promise.resolve(CONTENT_TYPE_PDF);
+        } else {
+          return Promise.resolve(CONTENT_TYPE_HTML);
+        }
+      }
+    });
+  }
+
+  /**
+   * Returns true if a tab is displaying a PDF using the PDF.js-based
+   * viewer bundled with the extension.
+   */
   function isPDFViewerURL(url) {
     return url.indexOf(getPDFViewerURL('')) === 0;
   }
@@ -85,22 +134,33 @@ function SidebarInjector(chromeTabs, dependencies) {
   }
 
   function isSupportedURL(url) {
+    // Injection of content scripts is limited to a small number of protocols,
+    // see https://developer.chrome.com/extensions/match_patterns
+    var parsedURL = new URL(url);
     var SUPPORTED_PROTOCOLS = ['http:', 'https:', 'ftp:'];
     return SUPPORTED_PROTOCOLS.some(function (protocol) {
-      return url.indexOf(protocol) === 0;
+      return parsedURL.protocol === protocol;
     });
   }
 
   function injectIntoLocalDocument(tab) {
-    if (isPDFURL(tab.url)) {
-      return injectIntoLocalPDF(tab);
-    } else {
-      return Promise.reject(new errors.LocalFileError('Local non-PDF files are not supported'));
-    }
+    return detectTabContentType(tab).then(function (type) {
+      if (type === CONTENT_TYPE_PDF) {
+        return injectIntoLocalPDF(tab);
+      } else {
+        return Promise.reject(new errors.LocalFileError('Local non-PDF files are not supported'));
+      }
+    });
   }
 
   function injectIntoRemoteDocument(tab) {
-    return isPDFURL(tab.url) ? injectIntoPDF(tab) : injectIntoHTML(tab);
+    return detectTabContentType(tab).then(function (type) {
+      if (type === CONTENT_TYPE_PDF) {
+        return injectIntoPDF(tab);
+      } else {
+        return injectIntoHTML(tab);
+      }
+    });
   }
 
   function injectIntoPDF(tab) {
