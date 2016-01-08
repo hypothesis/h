@@ -1,14 +1,32 @@
 Unreleased
 ==========
 
+Bug fixes
+---------
+
+- Fix a bug where embedded videos were not always shown (#2828, #2807).
+
+- Fix numerous usability issues and a potential denial-of-service attack
+  associated with password resets (#2803).
+
+- Fix a bug which prevented Hypothesis from being correctly re-activated on a
+  Chrome tab after it navigated (#2838).
+
 Features
 --------
 
-- Clear any selection that exists in the sidebar before creating a new
-  annotation. Fixes a usability issue that the new annotation with its form
-  open for the user to type in wouldn't be visible because it wasn't part of
-  the selection. (#2817)
+- Embedded videos can now be shown fullscreen (#2814, #2816).
 
+- PDF documents can now be detected regardless of file extension (#2834).
+
+Miscellanea
+-----------
+
+- We now clear any "selection" of annotations when a new annotation is created,
+  so the editor is always visible (#2817).
+
+- Various improvements to the appearance of truncated annotations (feature
+  flagged: truncate_annotations) (#2802).
 
 0.8.7 (2015-12-18)
 ==================
