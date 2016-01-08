@@ -121,6 +121,10 @@ function SidebarInjector(chromeTabs, dependencies) {
     });
   }
 
+  /**
+   * Returns true if a tab is displaying a PDF using the PDF.js-based
+   * viewer bundled with the extension.
+   */
   function isPDFViewerURL(url) {
     return url.indexOf(getPDFViewerURL('')) === 0;
   }
