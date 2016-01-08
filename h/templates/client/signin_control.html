@@ -3,7 +3,8 @@
       ng-if="newStyle && auth.status === 'unknown'">⋯</span>
 <span class="signin-text"
       ng-if="newStyle && auth.status === 'signed-out'">
-  <a href="" ng-click="onLogin()">Sign in</a>
+  <a href="/register" target="_blank">Sign up</a>
+  / <a href="" ng-click="onLogin()">Sign in</a>
 </span>
 <div ng-if="newStyle"
      class="pull-right user-picker"
