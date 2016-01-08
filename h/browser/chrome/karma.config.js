@@ -28,7 +28,7 @@ module.exports = function(config) {
         included: false,
       },
 
-      './lib/hypothesis-chrome-extension.js',
+      './lib/polyfills.js',
       './test/*.js',
     ],
 
@@ -44,7 +44,7 @@ module.exports = function(config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       '../../static/scripts/karma-phantomjs-polyfill.js': ['browserify'],
-      './lib/hypothesis-chrome-extension.js': ['browserify'],
+      './lib/*.js': ['browserify'],
       './test/*.js': ['browserify'],
     },
 

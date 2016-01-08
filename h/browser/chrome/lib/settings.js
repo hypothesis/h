@@ -4,8 +4,6 @@
  */
 'use strict';
 
-var fetchJSON = require('./fetch');
-
 /**
  * Validate and normalize the given settings data.
  *
@@ -20,7 +18,9 @@ function normalizeSettings(settings) {
 }
 
 function getSettings() {
-  return fetchJSON('/settings.json').then(function (settings) {
+  return fetch('/settings.json').then(function (res) {
+    return res.json();
+  }).then(function (settings) {
     return normalizeSettings(settings);
   });
 }
