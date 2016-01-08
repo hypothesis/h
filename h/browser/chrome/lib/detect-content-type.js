@@ -13,7 +13,7 @@
 function detectContentType() {
   // check if this is the Chrome PDF viewer
   var chromePDFPluginSelector =
-    'embed[type="application/pdf"][name="plugin"][id="plugin"]';
+    'embed[type="application/pdf"][name="plugin"]';
   if (document.querySelector(chromePDFPluginSelector)) {
     return {
       type: 'PDF',
