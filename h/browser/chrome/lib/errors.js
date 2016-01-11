@@ -28,10 +28,24 @@ function BlockedSiteError(message) {
 }
 BlockedSiteError.prototype = Object.create(ExtensionError);
 
+/**
+ * Report an error.
+ *
+ * This currently simply logs the error with console.error().
+ * In future we can use this as a place to insert Sentry logging etc.
+ *
+ * @param {string} context - Describes the context in which the error occurred
+ * @param {Error} error - The error which happened.
+ */
+function report(context, error) {
+  console.error(context, error);
+}
+
 module.exports = {
   ExtensionError: ExtensionError,
   LocalFileError: LocalFileError,
   NoFileAccessError: NoFileAccessError,
   RestrictedProtocolError: RestrictedProtocolError,
   BlockedSiteError: BlockedSiteError,
+  report: report,
 };

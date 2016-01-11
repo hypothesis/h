@@ -16,11 +16,16 @@ describe('websocket wrapper', function () {
   beforeEach(function () {
     global.WebSocket = FakeWebSocket;
     clock = sinon.useFakeTimers();
+
+    // suppress warnings of WebSocket issues in tests for handling
+    // of abnormal disconnections
+    sinon.stub(console, 'warn');
   });
 
   afterEach(function () {
     global.WebSocket = WebSocket;
     clock.restore();
+    console.warn.restore();
   });
 
   it('should reconnect after an abnormal disconnection', function () {
