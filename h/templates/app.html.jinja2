@@ -44,6 +44,9 @@
     </div>
     <!-- / Account Dialog -->
 
+    <!-- Sidebar tutorial -->
+    <sidebar-tutorial ng-if="isSidebar"></sidebar-tutorial>
+
     <!-- Share View Dialog -->
     <share-dialog ng-show="shareDialog.visible"></share-dialog>
     <!-- / Share View Dialog -->
@@ -84,6 +87,9 @@
   </script>
   <script type="text/ng-template" id="search_status_bar.html">
     {{ include_raw("h:templates/client/search_status_bar.html") }}
+  </script>
+  <script type="text/ng-template" id="sidebar_tutorial.html">
+    {{ include_raw("h:templates/client/sidebar_tutorial.html") }}
   </script>
   <script type="text/ng-template" id="signin_control.html">
     {{ include_raw("h:templates/client/signin_control.html") }}

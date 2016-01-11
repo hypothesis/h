@@ -32,6 +32,10 @@ function sessionActions(options) {
 
   // Finally, add a simple method for getting the current session state
   actions._load = {method: 'GET'};
+  actions.dismiss_sidebar_tutorial = {
+    method: 'POST',
+    url: '/app/dismiss_sidebar_tutorial'
+  };
 
   if (typeof options !== 'undefined') {
     for (var act in actions) {

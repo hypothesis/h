@@ -1,0 +1,50 @@
+.sidebar-tutorial__header {
+  color: $color-cardinal;
+  font-weight: $title-font-weight;
+}
+
+/* We want an ordered list in which the numbers are aligned with the text
+   above (not indented or dedented), and wrapped lines in list items are
+   aligned with the first character of the list item (not the number, i.e
+   they're indented):
+
+       This is a list:
+
+       1. This is a list item.
+       2. This is a long list item
+          that wraps.
+       3. This is another list item.
+
+   What's more, we want the numbers to be a different color to the text of the
+   list items, which means we need to use ::before content for them.
+
+   This appears to be much harder than you'd think.
+
+   The code below comes from this Stack Overflow answer:
+   http://stackoverflow.com/questions/10428720/how-to-keep-indent-for-second-line-in-ordered-lists-via-css/17515230#17515230
+*/
+.sidebar-tutorial__list {
+  counter-reset: sidebar-tutorial__list;
+  display: table;
+  padding: 0;
+}
+.sidebar-tutorial__list-item {
+  list-style: none;
+  counter-increment: sidebar-tutorial__list;
+  display: table-row;
+}
+.sidebar-tutorial__list-item::before {
+  content: counter(sidebar-tutorial__list) ".";
+  display: table-cell; /* aha! */
+  text-align: right;
+  padding-right: .3em;
+  color: $gray-light;
+}
+
+.sidebar-tutorial__list-item-content {
+  margin-top: 1em; /* Put vertical space in-between list items, equal to the
+                      space between normal paragraphs.
+                      Note: This also puts the same amount of space above the
+                      first list item (i.e. between the list and whatever's
+                      above it). */
+}

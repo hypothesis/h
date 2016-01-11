@@ -223,7 +223,7 @@ def test_logout_response_has_forget_headers(authn_policy):
     assert result.headers['x-erase-fingerprints'] == 'on the hob'
 
 
-@pytest.mark.usefixtures('routes_mapper')
+@pytest.mark.usefixtures('routes_mapper', 'session')
 def test_login_ajax_returns_status_okay_when_validation_succeeds():
     request = DummyRequest(json_body={}, auth_domain='hypothes.is')
     controller = AjaxAuthController(request)
@@ -261,7 +261,7 @@ def test_login_ajax_raises_JSONError_on_non_object_json():
                                       'top-level object')
 
 
-@pytest.mark.usefixtures('routes_mapper')
+@pytest.mark.usefixtures('routes_mapper', 'session')
 @mock.patch('h.accounts.schemas.check_csrf_token')
 def test_login_ajax_converts_non_string_usernames_to_strings(_):
     for input_, expected_output in ((None, ''), (23, '23'), (True, 'True')):
@@ -278,7 +278,7 @@ def test_login_ajax_converts_non_string_usernames_to_strings(_):
             [('username', expected_output), ('password', 'pass')])
 
 
-@pytest.mark.usefixtures('routes_mapper')
+@pytest.mark.usefixtures('routes_mapper', 'session')
 @mock.patch('h.accounts.schemas.check_csrf_token')
 def test_login_ajax_converts_non_string_passwords_to_strings(_):
     for input_, expected_output in ((None, ''), (23, '23'), (True, 'True')):
@@ -306,7 +306,7 @@ def test_login_ajax_raises_ValidationFailure_on_ValidationFailure():
     assert exc_info.value.error.asdict() == {'password': 'too short'}
 
 
-@pytest.mark.usefixtures('routes_mapper')
+@pytest.mark.usefixtures('routes_mapper', 'session')
 def test_logout_ajax_returns_status_okay():
     request = DummyRequest()
 
@@ -1001,6 +1001,14 @@ def pop_flash(request):
     func = patcher.start()
     request.addfinalizer(patcher.stop)
     return func
+
+
+@pytest.fixture
+def session(request):
+    patcher = patch('h.accounts.views.session', autospec=True)
+    session = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return session
 
 
 @pytest.fixture
