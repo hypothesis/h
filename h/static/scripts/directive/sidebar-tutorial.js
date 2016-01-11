@@ -1,12 +1,17 @@
 'use strict';
 
 // @ngInject
-function controller(session) {
+function SidebarTutorialController(session) {
   /*jshint validthis:true */
   var vm = this;
 
   vm.showSidebarTutorial = function () {
-    return session.state.preferences.show_sidebar_tutorial;
+    if (session.state.preferences) {
+      if (session.state.preferences.show_sidebar_tutorial) {
+        return true;
+      }
+    }
+    return false;
   };
 
   vm.dismiss = function () {
@@ -20,13 +25,16 @@ function controller(session) {
  * @description Displays a short tutorial in the sidebar.
  */
 // @ngInject
-module.exports = function () {
-  return {
-    bindToController: true,
-    controller: controller,
-    controllerAs: 'vm',
-    restrict: 'E',
-    scope: {},
-    templateUrl: 'sidebar_tutorial.html'
-  };
+module.exports = {
+  directive: function () {
+    return {
+      bindToController: true,
+      controller: SidebarTutorialController,
+      controllerAs: 'vm',
+      restrict: 'E',
+      scope: {},
+      templateUrl: 'sidebar_tutorial.html'
+    };
+  },
+  Controller: SidebarTutorialController
 };
