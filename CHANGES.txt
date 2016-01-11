@@ -1,3 +1,18 @@
+0.8.9 (2016-01-11)
+==================
+
+Bug fixes
+---------
+
+- Fix a bug where annotation deletions were not correctly processed by the
+  "real-time" streamer (7daa709)
+
+Features
+--------
+
+- Add a tutorial for new users to the sidebar (feature flagged:
+  sidebar_tutorial). (#2824)
+
 0.8.8 (2016-01-11)
 ==================
 
@@ -18,9 +33,6 @@ Features
 - Embedded videos can now be shown fullscreen (#2814, #2816).
 
 - PDF documents can now be detected regardless of file extension (#2834).
-
-- Add a tutorial for new users to the sidebar
-  (feature flagged: sidebar_tutorial). (#2824)
 
 Miscellanea
 -----------
