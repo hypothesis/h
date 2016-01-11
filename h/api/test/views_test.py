@@ -306,9 +306,7 @@ def test_delete_event(AnnotationEvent):
 
     views.delete(context, request)
 
-    AnnotationEvent.assert_called_once_with(request,
-                                            {'id': context.id},
-                                            'delete')
+    AnnotationEvent.assert_called_once_with(request, context.model, 'delete')
     request.registry.notify.assert_called_once_with(event)
 
 

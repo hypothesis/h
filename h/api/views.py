@@ -219,7 +219,13 @@ def delete(context, request):
     """Delete the specified annotation."""
     storage.delete_annotation(context.id)
 
-    _publish_annotation_event(request, {'id': context.id}, 'delete')
+    # N.B. We publish the original model (including all the original annotation
+    # fields) so that queue subscribers have context needed to decide how to
+    # process the delete event. For example, the streamer needs to know the
+    # target URLs of the deleted annotation in order to know which clients to
+    # forward the delete event to.
+    _publish_annotation_event(request, context.model, 'delete')
+
     return {'id': context.id, 'deleted': True}
 
 
