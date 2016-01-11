@@ -25,8 +25,6 @@
  * upstream license above.
  */
 
-var has = require('has');
-
 var VERSION = '1.0.0';
 
 module.exports = RPC;
@@ -92,8 +90,8 @@ RPC.prototype.apply = function (method, args) {
 RPC.prototype._handle = function (msg) {
     var self = this;
     if (self._destroyed) return;
-    if (has(msg, 'method')) {
-        if (!has(this._methods, msg.method)) return;
+    if (msg.hasOwnProperty('method')) {
+        if (!this._methods.hasOwnProperty(msg.method)) return;
         var args = msg.arguments.concat(function () {
             self.dst.postMessage({
                 protocol: 'frame-rpc',
@@ -104,7 +102,7 @@ RPC.prototype._handle = function (msg) {
         });
         this._methods[msg.method].apply(this._methods, args);
     }
-    else if (has(msg, 'response')) {
+    else if (msg.hasOwnProperty('response')) {
         var cb = this._callbacks[msg.response];
         delete this._callbacks[msg.response];
         if (cb) cb.apply(null, msg.arguments);
