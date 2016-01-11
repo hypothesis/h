@@ -1,5 +1,5 @@
 {module, inject} = angular.mock
-RPC = require('frame-rpc')
+RPC = require('../frame-rpc')
 
 describe 'Bridge', ->
   sandbox = sinon.sandbox.create()

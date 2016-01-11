@@ -1,6 +1,6 @@
 Promise = require('core-js/library/es6/promise')
 extend = require('extend')
-RPC = require('frame-rpc')
+RPC = require('./frame-rpc')
 
 # The Bridge service sets up a channel between frames
 # and provides an events API on top of it.
