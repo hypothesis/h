@@ -29,12 +29,9 @@ module.exports = function(config) {
       },
 
       './lib/polyfills.js',
+      './test/bootstrap.js',
       './test/*.js',
     ],
-
-    proxies: {
-      "/settings.json": "/base/test/settings.json"
-    },
 
     // list of files to exclude
     exclude: [

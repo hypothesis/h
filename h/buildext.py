@@ -117,6 +117,7 @@ def firefox_manifest(request):
            {'version': h.__version__},
            request=request)
 
+
 def build_type_from_api_url(api_url):
     """
     Returns the default build type ('production', 'staging' or 'dev')
@@ -227,8 +228,8 @@ def build_chrome(args):
         fp.write(data)
 
     # Write build settings to a JSON file
-    with codecs.open('build/chrome/settings.json', 'w', 'utf-8') as fp:
-        fp.write(json.dumps(settings_dict(env)))
+    with codecs.open('build/chrome/settings-data.js', 'w', 'utf-8') as fp:
+        fp.write('window.extensionConfig = ' + json.dumps(settings_dict(env)))
 
 
 def build_firefox(args):

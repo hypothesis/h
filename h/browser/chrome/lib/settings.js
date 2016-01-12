@@ -1,7 +1,3 @@
-/**
- * A wrapper for the settings.json file that ships with the Chrome extension.
- * @module
- */
 'use strict';
 
 /**
@@ -17,20 +13,7 @@ function normalizeSettings(settings) {
   return settings;
 }
 
-function getSettings() {
-  return fetch('/settings.json').then(function (res) {
-    return res.json();
-  }).then(function (settings) {
-    return normalizeSettings(settings);
-  });
-}
-
 /**
- * A Promise whose value is the contents of the settings.json file.
- *
- * @example
- * settings.then(function(settings) {
- *   // Do something with the settings object.
- * });
+ * Returns the configuration object for the Chrome extension
  */
-module.exports = getSettings();
+module.exports = normalizeSettings(window.extensionConfig);
