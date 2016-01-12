@@ -9,7 +9,7 @@
      ng-if="auth.status === 'signed-in'"
      dropdown
      keyboard-nav>
-  <span class="dropdown-toggle"
+  <div class="dropdown-toggle"
         dropdown-toggle
         data-toggle="dropdown"
         role="button"
@@ -19,7 +19,7 @@
     !--><i class="group-list-label__icon h-icon-group" ng-switch-default></i>
     <span class="group-list-label__label">{{groups.focused().name}}</span><!-- nospace
     !--><i class="h-icon-arrow-drop-down"></i>
-  </span>
+  </div>
   <div class="dropdown-menu__top-arrow"></div>
   <ul class="dropdown-menu pull-none" role="menu">
     <li class="dropdown-menu__row dropdown-menu__row--unpadded "
