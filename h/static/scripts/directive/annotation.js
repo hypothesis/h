@@ -806,15 +806,6 @@ function annotation($document) {
     // for example).
     // Keep track of edits going on in the thread.
     if (counter !== null) {
-      // Expand the thread if descendants are editing.
-      scope.$watch((function() {
-        counter.count('edit');
-      }), function(count) {
-        if (count && !ctrl.editing() && thread.collapsed) {
-          thread.toggleCollapsed();
-        }
-      });
-
       // Propagate changes through the counters.
       scope.$watch((function() {return ctrl.editing();}), function(editing, old) {
         if (editing) {
