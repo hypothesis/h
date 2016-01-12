@@ -51,7 +51,7 @@ function RPC (src, dst, origin, methods) {
         if (self.origin !== '*' && ev.origin !== self.origin) return;
         if (!ev.data || typeof ev.data !== 'object') return;
         if (ev.data.protocol !== 'frame-rpc') return;
-        if (!angular.isArray(ev.data.arguments)) return;
+        if (!Array.isArray(ev.data.arguments)) return;
         self._handle(ev.data);
     };
     this.src.addEventListener('message', this._onmessage);
