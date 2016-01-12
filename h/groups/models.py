@@ -68,10 +68,6 @@ class Group(Base):
         return '<Group: %s>' % self.slug
 
     @classmethod
-    def all(cls):
-        return cls.query.all()
-
-    @classmethod
     def get_by_pubid(cls, pubid):
         """Return the group with the given pubid, or None."""
         return cls.query.filter(cls.pubid == pubid).first()
