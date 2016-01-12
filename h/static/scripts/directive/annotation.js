@@ -810,13 +810,13 @@ function annotation($document) {
       scope.$watch((function() {
         counter.count('edit');
       }), function(count) {
-        if (count && !ctrl.editing && thread.collapsed) {
+        if (count && !ctrl.editing() && thread.collapsed) {
           thread.toggleCollapsed();
         }
       });
 
       // Propagate changes through the counters.
-      scope.$watch((function() {return ctrl.editing;}), function(editing, old) {
+      scope.$watch((function() {return ctrl.editing();}), function(editing, old) {
         if (editing) {
           counter.count('edit', 1);
           // Disable the filter and freeze it to always match while editing.
@@ -834,7 +834,7 @@ function annotation($document) {
 
       // Clean up when the thread is destroyed.
       scope.$on('$destroy', function() {
-        if (ctrl.editing && counter) {
+        if (ctrl.editing() && counter) {
           counter.count('edit', -1);
         }
       });
