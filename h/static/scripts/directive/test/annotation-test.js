@@ -1484,6 +1484,30 @@ describe('annotation', function() {
            assert.notCalled(fakeDrafts.update);
          }
       );
+
+      it('updates domainModel.group if the annotation is new', function () {
+        var annotation = newAnnotation();
+        annotation.group = 'old-group-id';
+        createDirective(annotation);
+        fakeGroups.focused = sandbox.stub().returns({id: 'new-group-id'});
+
+        $rootScope.$broadcast(events.GROUP_FOCUSED);
+
+        assert.equal(annotation.group, 'new-group-id');
+      });
+
+      it('does not update domainModel.group if the annotation is not new',
+        function () {
+          var annotation = oldAnnotation();
+          annotation.group = 'old-group-id';
+          createDirective(annotation);
+          fakeGroups.focused = sandbox.stub().returns({id: 'new-group-id'});
+
+          $rootScope.$broadcast(events.GROUP_FOCUSED);
+
+          assert.equal(annotation.group, 'old-group-id');
+        }
+      );
     });
   });
 

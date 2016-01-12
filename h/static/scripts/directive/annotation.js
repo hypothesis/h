@@ -398,6 +398,11 @@ function AnnotationController(
     if (vm.editing()) {
       saveToDrafts(drafts, domainModel, vm);
     }
+
+    // New annotations move to the new group, when a new group is focused.
+    if (isNew(domainModel)) {
+      domainModel.group = groups.focused().id;
+    }
   }
 
   function onUserChanged(event, args) {
@@ -527,7 +532,7 @@ function AnnotationController(
     * @returns {Object} The full group object associated with the annotation.
     */
   vm.group = function() {
-    return groups.focused();
+    return groups.get(domainModel.group);
   };
 
   /**
