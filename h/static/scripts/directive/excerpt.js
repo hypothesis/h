@@ -65,16 +65,16 @@ function excerpt() {
           return {};
         }
 
-        var maxHeight;
-        if (ctrl.collapse) {
-          maxHeight = toPx(ctrl.collapsedHeight);
-        } else if (ctrl.animate) {
-          // animating the height change requires that the final
-          // height be specified exactly, rather than relying on
-          // auto height
-          maxHeight = toPx(contentElem.scrollHeight);
-        } else {
-          maxHeight = '';
+        var maxHeight = '';
+        if (ctrl.overflowing()) {
+          if (ctrl.collapse) {
+            maxHeight = toPx(ctrl.collapsedHeight);
+          } else if (ctrl.animate) {
+            // animating the height change requires that the final
+            // height be specified exactly, rather than relying on
+            // auto height
+            maxHeight = toPx(contentElem.scrollHeight);
+          }
         }
 
         return {
@@ -86,7 +86,10 @@ function excerpt() {
         if (!contentElem) {
           return false;
         }
-        return contentElem.scrollHeight > ctrl.collapsedHeight;
+
+        var hysteresisPx = ctrl.overflowHysteresis | 0;
+        return contentElem.scrollHeight >
+               (ctrl.collapsedHeight + hysteresisPx);
       };
 
       scope.$watch('vm.enabled()', function (isEnabled) {
@@ -131,6 +134,14 @@ function excerpt() {
       /** The height of this container in pixels when collapsed.
        */
       collapsedHeight: '=',
+      /**
+       * The number of pixels by which the height of the excerpt's content
+       * must extend beyond the collapsed height in order for truncation to
+       * be activated. This prevents the 'More' link from being shown to expand
+       * the excerpt if it has only been truncated by a very small amount, such
+       * that expanding the excerpt would reveal no extra lines of text.
+       */
+      overflowHysteresis: '=?',
     },
     restrict: 'E',
     transclude: true,

@@ -4,6 +4,9 @@ Unreleased
 Bug fixes
 ---------
 
+- Avoid truncating annotation cards that exceed the collapsed height
+  by only a small amount (feature flagged: truncate_annotations)
+
 - Fix a bug where threads were being shown uncollapsed instead of collapsed
   initially, and the collapse/uncollapse buttons didn't work (#2855)
 
