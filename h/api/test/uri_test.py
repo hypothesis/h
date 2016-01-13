@@ -144,6 +144,12 @@ from h.api import uri
     ("http://example.com?utm_source=abcde&utm_medium=wibble", "http://example.com"),
     ("http://example.com?a=1&utm_term=foo", "http://example.com?a=1"),
     ("http://example.com?a=1&utm_term=foo&b=2", "http://example.com?a=1&b=2"),
+    ("http://example.com?WT.mc_id=TWT_NatureNews", "http://example.com"),
+    ("http://example.com?WT.foo=bar", "http://example.com"),
+    # but don't be over-eager and remove close matches
+    ("http://example.com?gclid_foo=abcde", "http://example.com?gclid_foo=abcde"),
+    ("http://example.com?bar_gclid=abcde", "http://example.com?bar_gclid=abcde"),
+    ("http://example.com?WT=abcde", "http://example.com?WT=abcde"),
 ])
 def test_normalize(url_in, url_out):
     assert uri.normalize(url_in) == url_out

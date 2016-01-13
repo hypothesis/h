@@ -62,6 +62,7 @@ This package is responsible for defining URI normalization routines for use
 elsewhere in the Hypothesis application. URI expansion is handled by
 :py:function:`h.api.storage.expand_uri`.
 """
+import re
 
 from h._compat import urlparse
 from h._compat import url_quote, url_quote_plus, url_unquote, url_unquote_plus
@@ -69,22 +70,25 @@ from h._compat import url_quote, url_quote_plus, url_unquote, url_unquote_plus
 
 URL_SCHEMES = set(['http', 'https'])
 
-BLACKLISTED_QUERY_PARAMS = set([
+# List of regular expressions matching the names of query parameters that we
+# strip from URLs as part of normalization.
+BLACKLISTED_QUERY_PARAMS = [re.compile(regex) for regex in set([
     # Google AdWords tracking identifier. Reference:
     #
     #    https://support.google.com/analytics/answer/2938246?hl=en
     #
-    'gclid',
+    r'^gclid$',
     # Google Analytics campaigns. Reference:
     #
     #     https://support.google.com/analytics/answer/1033867?hl=en
     #
-    'utm_campaign',
-    'utm_content',
-    'utm_medium',
-    'utm_source',
-    'utm_term',
-])
+    r'^utm_(campaign|content|medium|source|term)$',
+    # WebTrends Analytics query params. Reference:
+    #
+    #     http://help.webtrends.com/en/analytics10/#qpr_about.html
+    #
+    r'^WT\..+$',
+])]
 
 # From RFC3986. The ABNF for path segments is
 #
@@ -224,7 +228,7 @@ def _normalize_query(uri):
     items = sorted(items, key=lambda x: x[0])
 
     # Remove query params that are blacklisted
-    items = [i for i in items if i[0] not in BLACKLISTED_QUERY_PARAMS]
+    items = [i for i in items if not _blacklisted_query_param(i[0])]
 
     # Normalise percent-encoding for query items
     query = _normalize_queryitems(items)
@@ -244,3 +248,8 @@ def _normalize_queryname(name):
 
 def _normalize_queryvalue(value):
     return url_quote_plus(url_unquote_plus(value), safe=UNRESERVED_QUERY_VALUE)
+
+
+def _blacklisted_query_param(s):
+    """Return True if the given string matches any BLACKLISTED_QUERY_PARAMS."""
+    return any(re.match(patt, s) for patt in BLACKLISTED_QUERY_PARAMS)

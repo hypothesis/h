@@ -1,3 +1,11 @@
+Unreleased
+==========
+
+Miscellanea
+-----------
+
+- Strip WebTrends "WT.*" query parameters as part of URI normalization (#2862).
+
 0.8.11 (2016-01-14)
 ===================
 
