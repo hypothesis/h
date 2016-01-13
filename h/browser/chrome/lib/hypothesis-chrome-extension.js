@@ -4,7 +4,6 @@ var errors = require('./errors');
 var TabState = require('./tab-state');
 var BrowserAction = require('./browser-action');
 var HelpPage = require('./help-page');
-var settings = require('./settings');
 var SidebarInjector = require('./sidebar-injector');
 var TabStore = require('./tab-store');
 
@@ -146,10 +145,7 @@ function HypothesisChromeExtension(dependencies) {
       annotationCount: 0,
       extensionSidebarInstalled: false,
     });
-
-    settings.then(function(settings) {
-      state.updateAnnotationCount(tabId, url, settings.apiUrl);
-    });
+    state.updateAnnotationCount(tabId, url);
   }
 
   // This function will be called multiple times as the tab reloads.
@@ -176,10 +172,8 @@ function HypothesisChromeExtension(dependencies) {
     });
     state.clearTab(removedTabId);
 
-    settings.then(function (settings) {
-      chromeTabs.get(addedTabId, function (tab) {
-        state.updateAnnotationCount(addedTabId, tab.url, settings.apiUrl);
-      });
+    chromeTabs.get(addedTabId, function (tab) {
+      state.updateAnnotationCount(addedTabId, tab.url);
     });
   }
 

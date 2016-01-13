@@ -1,7 +1,10 @@
-describe('TabState', function () {
-  'use strict';
+'use strict';
 
-  var TabState = require('../lib/tab-state');
+var proxyquire = require('proxyquire');
+
+var TabState = require('../lib/tab-state');
+
+describe('TabState', function () {
   var states = TabState.states;
 
   var state;
@@ -116,102 +119,47 @@ describe('TabState', function () {
     });
   });
 
-  describe('.updateAnnotationCount()', function() {
-    var server;
-
-    beforeEach(function() {
-      server = sinon.fakeServer.create({
-        autoRespond: true,
-        respondImmediately: true
-      });
-      server.respondWith(
-        "GET", "http://example.com/badge?uri=tabUrl",
-        [200, {}, '{"total": 1}']
-      );
+  describe('.updateAnnotationCount', function () {
+    beforeEach(function () {
       sinon.stub(console, 'error');
     });
 
-    afterEach(function() {
-      server.restore();
+    afterEach(function () {
       console.error.restore();
     });
 
-    it('sends the correct XMLHttpRequest to the server', function() {
-      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
-
-      assert.equal(server.requests.length, 1);
-      var request = server.requests[0];
-      assert.equal(request.method, "GET");
-      assert.equal(request.url, "http://example.com/badge?uri=tabUrl");
+    it('queries the service and sets the annotation count', function () {
+      var queryStub = sinon.stub().returns(Promise.resolve({total: 42}));
+      var TabState = proxyquire('../lib/tab-state', {
+        './uri-info': {
+          query: queryStub,
+        }
+      });
+      var tabState = new TabState({1: {state: states.ACTIVE}});
+      return tabState.updateAnnotationCount(1, 'foobar.com')
+        .then(function () {
+          assert.called(queryStub);
+          assert.equal(tabState.getState(1).annotationCount, 42);
+        });
     });
 
-    it('urlencodes the tabUrl appropriately', function() {
-      state.updateAnnotationCount("tabId", "http://foo.com?bar=baz qüx", "http://example.com");
-
-      assert.equal(server.requests.length, 1);
-      var request = server.requests[0];
-      assert.equal(request.method, "GET");
-      assert.equal(request.url, "http://example.com/badge?uri=http%3A%2F%2Ffoo.com%3Fbar%3Dbaz+q%C3%BCx");
-    });
-
-    it("doesn't set the annotation count if the server's JSON is invalid", function() {
-      server.respondWith(
-        "GET", "http://example.com/badge?uri=tabUrl",
-        [200, {}, 'this is not valid json']
-      );
-
-      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
-      assert.equal(state.annotationCount("tabId"), 0);
-    });
-
-    it("logs an error if the server's JSON is invalid", function() {
-      server.respondWith(
-        "GET", "http://example.com/badge?uri=tabUrl",
-        [200, {}, 'this is not valid json']
-      );
-
-      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
-      assert(console.error.called);
-    });
-
-    it("doesn't set the annotation count if the server's total is invalid", function() {
-      server.respondWith(
-        "GET", "http://example.com/badge?uri=tabUrl",
-        [200, {}, '{"total": "not a valid number"}']
-      );
-
-      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
-      assert.equal(state.annotationCount("tabId"), 0);
-    });
-
-    it("logs an error if the server's total is invalid", function() {
-      server.respondWith(
-        "GET", "http://example.com/badge?uri=tabUrl",
-        [200, {}, '{"total": "not a valid number"}']
-      );
-
-      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
-      assert(console.error.called);
-    });
-
-    it("doesn't set the annotation count if the server response has no total", function() {
-      server.respondWith(
-        "GET", "http://example.com/badge?uri=tabUrl",
-        [200, {}, '{"rows": []}']
-      );
-
-      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
-      assert.equal(state.annotationCount("tabId"), 0);
-    });
-
-    it("logs an error if the server response has no total", function() {
-      server.respondWith(
-        "GET", "http://example.com/badge?uri=tabUrl",
-        [200, {}, '{"rows": []}']
-      );
-
-      state.updateAnnotationCount("tabId", "tabUrl", "http://example.com");
-      assert(console.error.called);
+    it('resets the count if an error occurred', function () {
+      var queryStub = sinon.stub().returns(Promise.reject(new Error('err')));
+      var TabState = proxyquire('../lib/tab-state', {
+        './uri-info': {
+          query: queryStub,
+        }
+      });
+      var tabState = new TabState({1: {
+        state: states.ACTIVE,
+        annotationCount: 42,
+      }});
+      return tabState.updateAnnotationCount(1, 'foobar.com')
+        .then(function () {
+          assert.called(queryStub);
+          assert.called(console.error);
+          assert.equal(tabState.getState(1).annotationCount, 0);
+        });
     });
   });
 });
