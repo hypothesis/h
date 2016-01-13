@@ -145,9 +145,8 @@ function TabState(initialState, onchange) {
    * @method
    * @param {integer} tabId The id of the tab.
    * @param {string} tabUrl The URL of the tab.
-   * @param {string} apiUrl The URL of the Hypothesis API.
    */
-  this.updateAnnotationCount = function(tabId, tabUrl, apiUrl) {
+  this.updateAnnotationCount = function(tabId, tabUrl) {
     var self = this;
     return uriInfo.query(tabUrl).then(function (result) {
       self.setState(tabId, { annotationCount: result.total });
