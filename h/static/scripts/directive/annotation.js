@@ -789,22 +789,26 @@ function link(scope, elem, attrs, controllers) {
 
   elem.on('keydown', ctrl.onKeydown);
 
-  // FIXME: Replace this counting code with something more sane, and
-  // something that doesn't involve so much untested logic in the link
-  // function (as opposed to unit-tested methods on the AnnotationController,
-  // for example).
-  // Keep track of edits going on in the thread.
+  // FIXME: Replace this counting code with something more sane.
   if (counter !== null) {
-    // Propagate changes through the counters.
     scope.$watch((function() {return ctrl.editing();}), function(editing, old) {
-      if (editing) {
+      if (editing) {  // The user has just started editing this annotation.
+
+        // Keep track of edits going on in the thread.
+        // This 'edit' count is for example to uncollapse a thread if one of
+        // the replies in the thread is currently being edited when the
+        // annotations are first rendered (this can happen when switching
+        // focus to a different group then back again, for example).
         counter.count('edit', 1);
-        // Disable the filter and freeze it to always match while editing.
+
+        // Always show an annotation if it is being edited, even if there's an
+        // active search filter that does not match the annotation.
         if ((thread !== null) && (threadFilter !== null)) {
           threadFilter.active(false);
           threadFilter.freeze(true);
         }
-      } else if (old) {
+
+      } else if (old) {  // The user has just finished editing this annotation.
         counter.count('edit', -1);
         if (threadFilter) {
           threadFilter.freeze(false);
@@ -812,7 +816,6 @@ function link(scope, elem, attrs, controllers) {
       }
     });
 
-    // Clean up when the thread is destroyed.
     scope.$on('$destroy', function() {
       if (ctrl.editing() && counter) {
         counter.count('edit', -1);
