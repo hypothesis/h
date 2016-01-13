@@ -781,6 +781,49 @@ function AnnotationController(
   init();
 }
 
+function link(scope, elem, attrs, controllers) {
+  var ctrl = controllers[0];
+  var thread = controllers[1];
+  var threadFilter = controllers[2];
+  var counter = controllers[3];
+
+  elem.on('keydown', ctrl.onKeydown);
+
+  // FIXME: Replace this counting code with something more sane.
+  if (counter !== null) {
+    scope.$watch((function() {return ctrl.editing();}), function(editing, old) {
+      if (editing) {  // The user has just started editing this annotation.
+
+        // Keep track of edits going on in the thread.
+        // This 'edit' count is for example to uncollapse a thread if one of
+        // the replies in the thread is currently being edited when the
+        // annotations are first rendered (this can happen when switching
+        // focus to a different group then back again, for example).
+        counter.count('edit', 1);
+
+        // Always show an annotation if it is being edited, even if there's an
+        // active search filter that does not match the annotation.
+        if ((thread !== null) && (threadFilter !== null)) {
+          threadFilter.active(false);
+          threadFilter.freeze(true);
+        }
+
+      } else if (old) {  // The user has just finished editing this annotation.
+        counter.count('edit', -1);
+        if (threadFilter) {
+          threadFilter.freeze(false);
+        }
+      }
+    });
+
+    scope.$on('$destroy', function() {
+      if (ctrl.editing() && counter) {
+        counter.count('edit', -1);
+      }
+    });
+  }
+}
+
 /**
   * @ngdoc directive
   * @name annotation
@@ -792,59 +835,10 @@ function AnnotationController(
   */
 // @ngInject
 function annotation($document) {
-  function linkFn(scope, elem, attrs, controllers) {
-    var ctrl = controllers[0];
-    var thread = controllers[1];
-    var threadFilter = controllers[2];
-    var counter = controllers[3];
-
-    elem.on('keydown', ctrl.onKeydown);
-
-    // FIXME: Replace this counting code with something more sane, and
-    // something that doesn't involve so much untested logic in the link
-    // function (as opposed to unit-tested methods on the AnnotationController,
-    // for example).
-    // Keep track of edits going on in the thread.
-    if (counter !== null) {
-      // Expand the thread if descendants are editing.
-      scope.$watch((function() {
-        counter.count('edit');
-      }), function(count) {
-        if (count && !ctrl.editing && thread.collapsed) {
-          thread.toggleCollapsed();
-        }
-      });
-
-      // Propagate changes through the counters.
-      scope.$watch((function() {return ctrl.editing;}), function(editing, old) {
-        if (editing) {
-          counter.count('edit', 1);
-          // Disable the filter and freeze it to always match while editing.
-          if ((thread !== null) && (threadFilter !== null)) {
-            threadFilter.active(false);
-            threadFilter.freeze(true);
-          }
-        } else if (old) {
-          counter.count('edit', -1);
-          if (threadFilter) {
-            threadFilter.freeze(false);
-          }
-        }
-      });
-
-      // Clean up when the thread is destroyed.
-      scope.$on('$destroy', function() {
-        if (ctrl.editing && counter) {
-          counter.count('edit', -1);
-        }
-      });
-    }
-  }
-
   return {
     controller: AnnotationController,
     controllerAs: 'vm',
-    link: linkFn,
+    link: link,
     require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount'],
     scope: {
       annotationGet: '&annotation',
@@ -866,6 +860,7 @@ module.exports = {
   // FIXME: The code should be refactored to enable unit testing without having
   // to do this.
   extractDocumentMetadata: extractDocumentMetadata,
+  link: link,
   updateDomainModel: updateDomainModel,
   validate: validate,
 

@@ -355,6 +355,150 @@ describe('annotation', function() {
     });
   });
 
+  describe('link', function () {
+    var link = require('../annotation').link;
+
+    /** Return Angular's $rootScope. */
+    function getRootScope() {
+      var $rootScope;
+      inject(function(_$rootScope_) {
+        $rootScope = _$rootScope_;
+      });
+      return $rootScope;
+    }
+
+    var scope;
+    var mockElement;
+    var mockAttributes;
+    var mockAnnotationController;
+    var mockThreadController;
+    var mockThreadFilterController;
+    var mockDeepCountController;
+    var mockControllers;
+
+    beforeEach(function () {
+      scope = getRootScope().$new();
+      mockElement = {on: sinon.stub()};
+      mockAttributes = undefined;  // Left undefined because link() doesn't use
+                                   // it.
+      mockAnnotationController = {
+        editing: sinon.stub().returns(false),
+        onKeydown: "annotationController.onKeydown"  // Sentinel value.
+      };
+      mockThreadController = {
+        collapsed: true,
+        toggleCollapsed: sinon.stub()
+      };
+      mockThreadFilterController = {
+        active: sinon.stub(),
+        freeze: sinon.stub()
+      };
+      mockDeepCountController = {
+        count: sinon.stub()
+      };
+      mockControllers = [
+        mockAnnotationController, mockThreadController,
+        mockThreadFilterController, mockDeepCountController];
+    });
+
+    it('binds AnnotationController.onKeydown to "keydown"', function () {
+      link(scope, mockElement, mockAttributes, mockControllers);
+
+      assert.equal(1, mockElement.on.callCount);
+      assert.equal(
+        true,
+        mockElement.on.calledWithExactly(
+          'keydown', mockAnnotationController.onKeydown)
+      );
+    });
+
+    it('increments the "edit" count when editing() becomes true', function () {
+      link(scope, mockElement, mockAttributes, mockControllers);
+
+      mockAnnotationController.editing.returns(true);
+      scope.$digest();
+
+      assert.equal(true, mockDeepCountController.count.calledOnce);
+      assert.equal(
+        true, mockDeepCountController.count.calledWithExactly('edit', 1)
+      );
+    });
+
+    it('decrements the "edit" count when editing() turns false', function () {
+      mockAnnotationController.editing.returns(true);
+      link(scope, mockElement, mockAttributes, mockControllers);
+      scope.$digest();
+
+      mockAnnotationController.editing.returns(false);
+      scope.$digest();
+
+      assert.equal(
+        true,
+        mockDeepCountController.count.lastCall.calledWithExactly('edit', -1)
+      );
+    });
+
+    it('decrements the edit count when destroyed while editing', function () {
+      mockAnnotationController.editing.returns(true);
+      link(scope, mockElement, mockAttributes, mockControllers);
+
+      scope.$destroy();
+
+      assert.equal(1, mockDeepCountController.count.callCount);
+      assert.equal(
+        true, mockDeepCountController.count.calledWithExactly('edit', -1)
+      );
+    });
+
+    it('does not decrement the edit count when destroyed while not editing',
+      function () {
+        mockAnnotationController.editing.returns(false);
+        link(scope, mockElement, mockAttributes, mockControllers);
+
+        scope.$destroy();
+
+        assert.equal(0, mockDeepCountController.count.callCount);
+      }
+    );
+
+    it('deactivates the thread filter when editing() turns true', function () {
+      mockAnnotationController.editing.returns(false);
+      link(scope, mockElement, mockAttributes, mockControllers);
+
+      mockAnnotationController.editing.returns(true);
+      scope.$digest();
+
+      assert.equal(1, mockThreadFilterController.active.callCount);
+      assert.equal(
+        true, mockThreadFilterController.active.calledWithExactly(false));
+    });
+
+    it('freezes the thread filter when editing', function () {
+      mockAnnotationController.editing.returns(false);
+      link(scope, mockElement, mockAttributes, mockControllers);
+
+      mockAnnotationController.editing.returns(true);
+      scope.$digest();
+
+      assert.equal(1, mockThreadFilterController.freeze.callCount);
+      assert.equal(
+        true, mockThreadFilterController.freeze.calledWithExactly(true));
+    });
+
+    it('unfreezes the thread filter when editing becomes false', function () {
+      mockAnnotationController.editing.returns(true);
+      link(scope, mockElement, mockAttributes, mockControllers);
+      scope.$digest();
+
+      mockAnnotationController.editing.returns(false);
+      scope.$digest();
+
+      assert.equal(
+        true,
+        mockThreadFilterController.freeze.lastCall.calledWithExactly(false));
+    });
+  });
+
   describe('AnnotationController', function() {
     var $q;
     var $rootScope;

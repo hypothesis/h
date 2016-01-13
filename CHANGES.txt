@@ -1,3 +1,12 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Fix a bug where threads were being shown uncollapsed instead of collapsed
+  initially, and the collapse/uncollapse buttons didn't work (#2855)
+
 0.8.9 (2016-01-11)
 ==================
 
