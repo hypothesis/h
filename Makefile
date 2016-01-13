@@ -2,6 +2,9 @@ SHELL := bash
 PATH := bin:${PATH}
 NPM_BIN = "$$(npm bin)"
 
+ISODATE := $(shell TZ=UTC date '+%Y%m%d')
+BUILD_ID := $(shell python -c 'import h; print(h.__version__)')
+
 # Unless the user has specified otherwise in their environment, it's probably a
 # good idea to refuse to install unless we're in an activated virtualenv.
 ifndef PIP_REQUIRE_VIRTUALENV
@@ -64,4 +67,21 @@ cover:
 lint:
 	@prospector
 
-.PHONY: clean cover deps dev lint test
+extensions: build/$(ISODATE)-$(BUILD_ID)-chrome-stage.zip
+extensions: build/$(ISODATE)-$(BUILD_ID)-chrome-prod.zip
+
+build/%-chrome-stage.zip:
+	@rm -rf build/chrome $@
+	hypothesis-buildext conf/production.ini chrome \
+		--base 'https://stage.hypothes.is' \
+		--assets 'chrome-extension://iahhmhdkmkifclacffbofcnmgkpalpoj/public'
+	@zip -r $@ build/chrome
+
+build/%-chrome-prod.zip:
+	@rm -rf build/chrome $@
+	hypothesis-buildext conf/production.ini chrome \
+		--base 'https://hypothes.is' \
+		--assets 'chrome-extension://bjfhmglciegochdpefhhlphglcehbmek/public'
+	@zip -r $@ build/chrome
+
+.PHONY: clean cover deps dev extensions lint test
