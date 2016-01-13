@@ -145,4 +145,26 @@ describe('excerpt directive', function () {
       assert.calledWith(callback, false);
     });
   });
+
+  describe('overflowHysteresis', function () {
+    it('does not collapse if overflow is less than hysteresis', function () {
+      var slightlyOverflowingDiv = '<div class="foo" style="height:45px;"></div>';
+      var element = excerptDirective({
+        collapsedHeight: 40,
+        overflowHysteresis: 10,
+      }, slightlyOverflowingDiv);
+      element.scope.$digest();
+      assert.isAbove(height(element[0]), 44);
+    });
+
+    it('does collapse if overflow exceeds hysteresis', function () {
+      var overflowingDiv = '<div style="height:60px;"></div>';
+      var element = excerptDirective({
+        collapsedHeight: 40,
+        overflowHysteresis: 10,
+      }, overflowingDiv);
+      element.scope.$digest();
+      assert.isBelow(height(element[0]), 50);
+    });
+  });
 });
