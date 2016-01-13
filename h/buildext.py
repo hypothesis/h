@@ -140,11 +140,12 @@ def settings_dict(env):
     request = env['request']
     config = app_config(request)
     api_url = config['apiUrl']
+    sentry_dsn = request.sentry.get_public_dsn('https')
 
-    if request.sentry.get_public_dsn():
+    if sentry_dsn:
         config.update({
             'raven': {
-              'dsn': request.sentry.get_public_dsn(),
+              'dsn': sentry_dsn,
               'release': h.__version__,
             },
         })
