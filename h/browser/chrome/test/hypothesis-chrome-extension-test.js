@@ -87,6 +87,9 @@ describe('HypothesisChromeExtension', function () {
       injectIntoTab: sandbox.stub().returns(Promise.resolve()),
       removeFromTab: sandbox.stub().returns(Promise.resolve()),
     };
+    fakeErrors = {
+      report: sandbox.spy(),
+    };
 
     function FakeTabState(initialState, onchange) {
       fakeTabState.onChangeHandler = onchange
@@ -99,6 +102,7 @@ describe('HypothesisChromeExtension', function () {
       './help-page': createConstructor(fakeHelpPage),
       './browser-action': createConstructor(fakeBrowserAction),
       './sidebar-injector': createConstructor(fakeSidebarInjector),
+      './errors': fakeErrors
     });
 
     ext = createExt();
@@ -348,6 +352,17 @@ describe('HypothesisChromeExtension', function () {
           assert.called(fakeHelpPage.showHelpForError);
           assert.calledWith(fakeHelpPage.showHelpForError, tab,
             sinon.match.instanceOf(ErrorType));
+        });
+
+        it('logs an error', function () {
+          var injectError = Promise.reject(new ErrorType('msg'));
+          fakeSidebarInjector.injectIntoTab.returns(injectError);
+
+          triggerInstall();
+
+          injectError.catch(function () {
+            assert.called(fakeErrors.report);
+          });
         });
       });
     });

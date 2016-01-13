@@ -14,3 +14,13 @@ window.URL = require('js-polyfills/url').URL;
 // Be careful here that any added polyfills are consistent
 // with what is used in builds of the app itself.
 require('es6-promise');
+
+// disallow console output during tests
+['debug', 'log', 'warn', 'error'].forEach(function (method) {
+  var realFn = window.console[method];
+  window.console[method] = function () {
+    var args = [].slice.apply(arguments);
+    realFn.apply(console, args);
+    throw new Error('Tests must not log console warnings');
+  };
+});

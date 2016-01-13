@@ -1,5 +1,6 @@
 'use strict';
 
+var errors = require('./errors');
 var TabState = require('./tab-state');
 var BrowserAction = require('./browser-action');
 var HelpPage = require('./help-page');
@@ -208,7 +209,7 @@ function HypothesisChromeExtension(dependencies) {
       });
       return sidebar.injectIntoTab(tab)
         .catch(function (err) {
-          console.error('Failed to inject Hypothesis Sidebar:', err);
+          errors.report('Failed to inject Hypothesis Sidebar:', err);
           state.errorTab(tab.id, err);
         });
     }
