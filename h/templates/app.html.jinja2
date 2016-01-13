@@ -33,6 +33,14 @@
   />
   </top-bar>
 
+  <div class="create-account-banner" ng-if="auth.status === 'signed-out'">
+    To annotate this document
+    <a href="{{ request.route_path('register') }}" target="_blank">
+      create a free account
+    </a>
+    or <a href="" ng-click="login()">sign in</a>
+  </div>
+
   <div class="content" ng-cloak>
     <!-- Account Dialog -->
     <div class="sheet" ng-if="accountDialog.visible">

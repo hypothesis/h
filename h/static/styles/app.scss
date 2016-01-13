@@ -51,6 +51,24 @@ body {
   }
 }
 
+.create-account-banner {
+  background-color: $gray-dark;
+  border-radius: 2px;
+  color: $color-silver-chalice;
+  font-weight: bold;
+  height: 34px;
+  line-height: 34px;
+  margin-bottom: .72em;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  width: 100%;
+}
+
+.create-account-banner a {
+  color: $white;
+}
+
 .sheet {
   border: solid 1px $gray-lighter;
   border-radius: 2px;
