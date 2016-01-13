@@ -7,6 +7,7 @@ from h.api import nipsa
 from h.i18n import TranslationString as _
 from h import accounts
 from h import models
+from h import paginator
 from h import util
 
 
@@ -222,8 +223,9 @@ def badge_remove(request):
                   request_method='GET',
                   renderer='h:templates/admin/groups.html.jinja2',
                   permission='admin_groups')
-def groups_index(request):
-    return {"groups": models.Group.all()}
+@paginator.paginate
+def groups_index(context, request):
+    return models.Group.query.order_by(models.Group.created.desc())
 
 
 @view.view_config(route_name='admin_groups_csv',
@@ -231,7 +233,7 @@ def groups_index(request):
                   renderer='csv',
                   permission='admin_groups')
 def groups_index_csv(request):
-    groups = models.Group.all()
+    groups = models.Group.query
 
     header = ['Group name', 'Group URL', 'Creator username',
               'Creator email', 'Number of members']
