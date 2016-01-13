@@ -50,7 +50,7 @@ ENV PYTHONIOENCODING utf_8
 # Build the assets
 RUN hypothesis assets conf/production.ini
 
-# Change ownership of webassets directory and switch to the hypothesis user.
+# Allow the application to modify the webassets directory
 RUN chown -R hypothesis:hypothesis h/static/.webassets-cache/
 
 # Persist the static directory.
