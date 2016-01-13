@@ -115,10 +115,21 @@ UNRESERVED_PATHSEGMENT = "-._~:@!$&'()*+,;="
 UNRESERVED_QUERY_NAME = "-._~:@!$'()*,"
 UNRESERVED_QUERY_VALUE = "-._~:@!$'()*,="
 
+# The string that gets prefixed onto a URI if you paste the URI into our Via
+# form. For example pasting https://example.com would
+# redirect your browser to https://via.hypothes.is/https://example.com.
+VIA_PREFIX = "https://via.hypothes.is/"
+
 
 def normalize(uristr):
     """Translate the given URI into a normalized form."""
     uristr = uristr.encode('utf-8')
+
+    # Strip proxy prefix for proxied URLs
+    for scheme in URL_SCHEMES:
+        if uristr.startswith(VIA_PREFIX + scheme + ':'):
+            uristr = uristr[len(VIA_PREFIX):]
+            break
 
     # Try to extract the scheme
     uri = urlparse.urlsplit(uristr)

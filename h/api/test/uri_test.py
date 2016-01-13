@@ -8,6 +8,13 @@ from h.api import uri
 
 
 @pytest.mark.parametrize("url_in,url_out", [
+    # Should strip https://via.hypothes.is/ from the start of URIs
+    ("https://via.hypothes.is/https://example.com", "https://example.com"),
+    ("https://via.hypothes.is/http://foo.com/bar/", "http://foo.com/bar"),
+    # but not when the URI isn't a proxied one
+    ("https://via.hypothes.is", "https://via.hypothes.is"),
+    ("https://via.hypothes.is/sample", "https://via.hypothes.is/sample"),
+
     # Should leave URNs as they are
     ("urn:doi:10.0001/12345", "urn:doi:10.0001/12345"),
 
