@@ -19,6 +19,7 @@ function init(config) {
     release: config.release,
   }).install();
   enabled = true;
+  installUnhandledPromiseErrorHandler();
 }
 
 function setUserInfo(info) {
@@ -59,6 +60,28 @@ function report(context, error) {
     extra: {
       context: context,
     },
+  });
+}
+
+/**
+ * Installs a handler to catch unhandled rejected promises.
+ *
+ * For this to work, the browser or the Promise polyfill must support
+ * the unhandled promise rejection event (Chrome >= 49). On other browsers,
+ * the rejections will simply go unnoticed. Therefore, app code _should_
+ * always provide a .catch() handler on the top-most promise chain.
+ *
+ * See https://github.com/getsentry/raven-js/issues/424
+ * and https://www.chromestatus.com/feature/4805872211460096
+ *
+ * It is possible that future versions of Raven JS may handle these events
+ * automatically, in which case this code can simply be removed.
+ */
+function installUnhandledPromiseErrorHandler() {
+  window.addEventListener('unhandledrejection', function (event) {
+    if (event.reason) {
+      report('Unhandled Promise rejection', event.reason);
+    }
   });
 }
 
