@@ -59,7 +59,8 @@
            ng-if="vm.hasQuotes()">
     <excerpt enabled="vm.feature('truncate_annotations')"
              collapsed-height="40"
-             inline-controls="true">
+             inline-controls="true"
+             overflow-hysteresis="20">
       <blockquote class="annotation-quote"
                   ng-bind-html="selector.exact"
                   ng-repeat="selector in target.selector
