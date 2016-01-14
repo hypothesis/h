@@ -1,17 +1,30 @@
-Unreleased
-==========
+0.8.10 (2016-01-14)
+===================
 
 Bug fixes
 ---------
 
-- Avoid truncating annotation cards that exceed the collapsed height
-  by only a small amount (feature flagged: truncate_annotations)
+- Fix a bug that prevented Hypothesis from working on GitHub (#2847).
+
+- Fix a couple of crashing bugs in the Chrome extension (#2849, #2851).
+
+- Fix a bug that caused the wrong group name to display on annotations in the
+  stream (#2854).
 
 - Fix a bug where threads were being shown uncollapsed instead of collapsed
-  initially, and the collapse/uncollapse buttons didn't work (#2855)
+  initially, and the collapse/uncollapse buttons didn't work (#2855).
 
 - Strip the proxy prefixes from URLs we know to be proxied (through our "via"
   service) when normalising (#2861).
+
+Miscellanea
+-----------
+
+- Add a clear "call to action" banner in the sidebar for signed-out users
+  (#2843).
+
+- Avoid truncating annotation cards that exceed the collapsed height
+  by only a small amount (feature flagged: truncate_annotations) (#2859).
 
 0.8.9 (2016-01-11)
 ==================
