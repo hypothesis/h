@@ -1,3 +1,12 @@
+0.8.11 (2016-01-14)
+===================
+
+Bug fixes
+---------
+
+- Fix a bug that prevented the Docker container from correctly starting up
+  (614e6b9).
+
 0.8.10 (2016-01-14)
 ===================
 
