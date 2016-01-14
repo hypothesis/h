@@ -47,8 +47,24 @@ function angularModule() {
   return angular.module('ngRaven');
 }
 
+/**
+ * Report an error to Sentry.
+ *
+ * @param {string} context - A string describing the context in which
+ *                           the error occurred.
+ * @param {Error} error - An error object describing what went wrong
+ */
+function report(context, error) {
+  Raven.captureException(error, {
+    extra: {
+      context: context,
+    },
+  });
+}
+
 module.exports = {
   init: init,
   angularModule: angularModule,
   setUserInfo: setUserInfo,
+  report: report,
 };
