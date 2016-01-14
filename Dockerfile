@@ -51,7 +51,7 @@ ENV PYTHONIOENCODING utf_8
 RUN hypothesis assets conf/production.ini
 
 # Allow the application to modify the webassets directory
-RUN chown -R hypothesis:hypothesis h/static/.webassets-cache/
+RUN chown -R hypothesis:hypothesis h/static/
 
 # Persist the static directory.
 VOLUME ["/var/lib/hypothesis/h/static"]
