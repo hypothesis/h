@@ -104,7 +104,7 @@ def annotool(args):
     annotations = es_helpers.scan(request.es.conn,
                                   query={'query': {'match_all': {}}},
                                   index=request.es.index,
-                                  doc_type='annotation')
+                                  doc_type=request.es.t.annotation)
 
     chunksize = 1000
     state = {'total': 0, 'pending': []}
@@ -112,7 +112,7 @@ def annotool(args):
     def _flush():
         bodies = [{
             '_index': request.es.index,
-            '_type': 'annotation',
+            '_type': request.es.t.annotation,
             '_op_type': 'update',
             '_id': x['_id'],
             'doc': x['_source'],
