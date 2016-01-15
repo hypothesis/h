@@ -128,7 +128,7 @@ setup(
             'nipsa=h.api.nipsa.worker:worker',
         ],
         'h.annotool': [
-            'prepare=h.api.search:prepare',
+            'prepare=h.api.transform:prepare',
         ]
     },
 )
