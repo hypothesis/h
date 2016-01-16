@@ -5,7 +5,7 @@ import datetime
 
 import factory
 
-from h.api import models as api_models
+from h.api import storage
 from h.accounts import models as accounts_models
 
 
@@ -55,7 +55,7 @@ class Annotation(factory.Factory):
     """
 
     class Meta:
-        model = api_models.Annotation
+        model = storage.annotation_from_dict({}).__class__
         exclude = ["username", "random_number", "num_tags", "exact_text",
                    "document_title"]
 

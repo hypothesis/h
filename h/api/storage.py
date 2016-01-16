@@ -7,8 +7,21 @@ for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
 
-from h.api import models
+from h.api.models import elastic as models
 from h.api import transform
+
+
+def annotation_from_dict(data):
+    """
+    Create an annotation model object from the passed dict, without saving.
+
+    :param data: a dictionary of annotation properties
+    :type data: dict
+
+    :returns: the created annotation
+    :rtype: dict
+    """
+    return models.Annotation(data)
 
 
 def fetch_annotation(id):

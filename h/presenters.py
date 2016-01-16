@@ -1,4 +1,4 @@
-"""A class that wraps h.api.models.Annotation and adds some HTML properties."""
+"""A class that wraps Annotation model objects and adds some HTML properties."""
 from __future__ import unicode_literals
 import urlparse
 import urllib2
@@ -52,7 +52,7 @@ def _format_document_link(href, title, link_text, hostname):
 
 class AnnotationHTMLPresenter(object):
 
-    """Wraps h.api.models.Annotation and adds some HTML properties."""
+    """Wraps Annotation model objects and adds some HTML properties."""
 
     def __init__(self, annotation):
         self.annotation = annotation
