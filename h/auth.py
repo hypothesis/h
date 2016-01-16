@@ -10,7 +10,6 @@ from zope import interface
 
 from h import accounts
 from h.api import auth
-from h.api import groups
 
 
 log = logging.getLogger(__name__)
@@ -81,13 +80,28 @@ def effective_principals(userid, request):
     if user.staff:
         principals.add('group:__staff__')
 
-    principals.update(groups.group_principals(user))
+    principals.update(group_principals(user))
 
     principals.add(security.Authenticated)
 
     principals.add(userid)
 
     return list(principals)
+
+
+def group_principals(user):
+    """Return any 'group:<pubid>' principals for the given user.
+
+    Return a list of 'group:<pubid>' principals for the groups that the given
+    user is a member of.
+
+    :param user: the authorized user, as a User object
+    :type user: h.accounts.models.User
+
+    :rtype: list of strings
+
+    """
+    return ['group:{group.pubid}'.format(group=group) for group in user.groups]
 
 
 def is_api_request(request):
