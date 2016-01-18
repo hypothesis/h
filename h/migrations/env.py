@@ -4,6 +4,7 @@ import logging
 import os
 
 from alembic import context
+from sqlalchemy import MetaData
 from sqlalchemy import engine_from_config, pool
 
 from h.config import normalize_database_url
@@ -12,11 +13,20 @@ from h.config import normalize_database_url
 # access to the values within the .ini file in use.
 config = context.config
 
-# Import all model modules here in order to populate the metadata
 from h import db
-from h import models
+from h.api import db as api_db
 
-target_metadata = db.Base.metadata
+# Import all model modules here in order to populate the metadata
+from h import models  # noqa
+from h.api.models import annotation  # noqa
+
+# Since we have multiple MetaData objects (one from the app and one from the
+# API), we need to merge them all for alembic autogenerate to work correctly.
+target_metadata = MetaData(naming_convention=db.Base.metadata.naming_convention)
+
+for metadata in [db.Base.metadata, api_db.Base.metadata]:
+    for t in metadata.tables.values():
+        t.tometadata(target_metadata)
 
 
 def configure_logging():

@@ -18,6 +18,9 @@ def bind_engine(engine, base=Base, should_create=False, should_drop=False):
     if should_drop:
         base.metadata.drop_all(engine)
     if should_create:
+        # In order to be able to generate UUIDs, we load the uuid-ossp
+        # extension.
+        engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         base.metadata.create_all(engine)
 
 
