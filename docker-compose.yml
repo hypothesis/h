@@ -1,0 +1,46 @@
+hypthosis:
+  build: .
+  ports:
+   - "5000:5000"
+  command: "hypothesis start"
+  environment:
+    #DATABASE_URL: "postgresql://scott:tiger@dbserver/mydatabase"
+    #APP_URL: http://127.0.0.1  #Replace with IP or DNS Name
+    SECRET_KEY: TCtkLQ3k5kNkezsFiPDvq04yG4olCwU6QF7XT6gktGDaEiBZAnxkDJXYCLMfF96W1j+A1PMO+vyfQUgMboEnoQ
+    #ALLOWED_ORIGINS: "*" #origins allowed to connect over the WebSocket protocol
+    #CLIENT_ID:        #a unique API key for authentication
+    #CLIENT_SECRET: #a unique API secret for signing authentication requests
+    #ELASTICSEARCH_INDEX: #the Elasticsearch index name for annotation storage
+    #MAIL_DEFAULT_SENDER: #a sender address for outbound mail
+    #WEBASSETS_BASE_DIR: #the base directory for static assets
+    #WEBASSETS_BASE_URL: #the base URL for static asset routes
+  restart: "always"
+  log_driver: "json-file"
+  command: hypothesis start
+  links:
+   - redis
+   - postgres
+   - elasticsearch
+   - mail
+   - nsqd
+redis:
+  image: redis
+nsqd:
+  image: nsqio/nsq
+  ports:
+    - "4150:4150"
+    - "4151:4150"
+elasticsearch:
+  image: nickstenning/elasticsearch-icu
+  ports:
+    - "9300:9300"
+    - "9200:9200"
+mail:
+  image: nginx
+  ports:
+    - "8888:443"
+    - "9999:80"
+postgres:
+  image: postgres
+  ports:
+    - "5432:5432"
