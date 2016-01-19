@@ -15,7 +15,7 @@ from h import session
 from h.api.views import json_view
 from h.resources import Annotation
 from h.resources import Stream
-from h.sidebar_app_config import app_config
+from h.sidebar import app_config
 
 
 log = logging.getLogger(__name__)

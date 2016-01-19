@@ -5,23 +5,23 @@ is exposed as the command-line utility hypothesis-buildext.
 """
 import argparse
 import codecs
+import json
 import logging
 import os
 import os.path
 import shutil
 import subprocess
 import textwrap
-import json
-import raven
 
 from pyramid import paster
 from pyramid.path import AssetResolver
-from pyramid.request import Request
 from pyramid.renderers import render
+from pyramid.request import Request
+import raven
 
 import h
 from h._compat import urlparse
-from h.sidebar_app_config import app_config
+from h.sidebar import app_config
 
 
 log = logging.getLogger('h.buildext')
@@ -236,11 +236,11 @@ def build_chrome(args):
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(env, bundle_app=True)
         request = env['request']
-        app_dict = {
+        context = {
           'app_config': app_config(request)
         }
         with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
-            data = render('h:templates/app.html.jinja2', app_dict, request)
+            data = render('h:templates/app.html.jinja2', context, request)
             fp.write(data)
     else:
         build_extension_common(env)

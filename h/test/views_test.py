@@ -13,10 +13,9 @@ import pytest
 from h import views
 
 
-@patch('h.views.app_config', autospec=True)
 class TestAnnotationView(unittest.TestCase):
 
-    def test_og_document(self, app_config):
+    def test_og_document(self):
         annotation = {'id': '123', 'user': 'foo'}
         annotation['document'] = {'title': 'WikiHow — How to Make a  ☆Starmap☆'}
         context = mock.MagicMock(model=annotation)
@@ -26,7 +25,7 @@ class TestAnnotationView(unittest.TestCase):
         test = lambda d: 'foo' in d['content'] and 'Starmap' in d['content']
         assert any(test(d) for d in result['meta_attrs'])
 
-    def test_og_no_document(self, app_config):
+    def test_og_no_document(self):
         annotation = {'id': '123', 'user': 'foo'}
         context = mock.MagicMock(model=annotation)
         request = testing.DummyRequest()
@@ -36,11 +35,10 @@ class TestAnnotationView(unittest.TestCase):
         assert any(test(d) for d in result['meta_attrs'])
 
 
-@patch('h.views.app_config')
 class TestJS(object):
     """Unit tests for the js() view callable."""
 
-    def test_blocklist(self, app_config):
+    def test_blocklist(self):
         """It should pass the blocklist as a string to embed.js."""
         request = mock.MagicMock()
         blocklist = {"foo": "bar"}
@@ -51,11 +49,10 @@ class TestJS(object):
         assert data['blocklist'] == json.dumps(blocklist)
 
 
-@patch('h.views.app_config')
 class TestValidateBlocklist(object):
     """Unit tests for the _validate_blocklist() function."""
 
-    def test_valid(self, app_config):
+    def test_valid(self):
         """It should load the setting into a dict."""
         blocklist = {
             "seanh.cc": {},
@@ -71,7 +68,7 @@ class TestValidateBlocklist(object):
             "_validate_blocklist() should parse the JSON and turn it into a "
             "dict")
 
-    def test_invalid_json(self, app_config):
+    def test_invalid_json(self):
         """It should raise ValueError if the setting is invalid."""
         config = mock.MagicMock()
         config.registry.settings = {"h.blocklist": "invalid"}
@@ -79,7 +76,7 @@ class TestValidateBlocklist(object):
         with pytest.raises(ValueError):
             views._validate_blocklist(config)
 
-    def test_default_value(self, app_config):
+    def test_default_value(self):
         """It should insert an empty dict if there's no setting."""
         config = mock.MagicMock()
         config.registry.settings = {}
@@ -87,3 +84,10 @@ class TestValidateBlocklist(object):
         views._validate_blocklist(config)
 
         assert config.registry.settings["h.blocklist"] == {}
+
+
+@pytest.fixture(autouse=True)
+def app_config(request):
+    patcher = mock.patch('h.views.app_config', autospec=True)
+    patcher.start()
+    request.addfinalizer(patcher.stop)
