@@ -147,11 +147,6 @@ def includeme(config):
     # Configure Elasticsearch
     es = store_from_settings(settings)
 
-    # Add a property to all requests for easy access to the elasticsearch
-    # client. This can be used for direct or bulk access without having to
-    # reread the settings.
-    config.add_request_method(lambda req: es, name='es', reify=True)
-
     # Maybe initialize the models
     if asbool(settings.get('h.db.should_drop_all', False)):
         delete_db()

@@ -50,10 +50,11 @@ def search(request, params, private=True, separate_replies=False):
     builder = make_builder()
     if separate_replies:
         builder.append_filter(query.TopLevelAnnotationsFilter())
-    results = models.Annotation.search_raw(builder.build(params),
-                                           raw_result=True,
-                                           authorization_enabled=False)
 
+    es = request.es
+    results = es.conn.search(index=es.index,
+                             doc_type=es.t.annotation,
+                             body=builder.build(params))
     total = results['hits']['total']
     docs = results['hits']['hits']
     rows = [models.Annotation(d['_source'], id=d['_id']) for d in docs]
@@ -65,9 +66,9 @@ def search(request, params, private=True, separate_replies=False):
         builder = make_builder()
         builder.append_matcher(query.RepliesMatcher(
             [h['_id'] for h in results['hits']['hits']]))
-        reply_results = models.Annotation.search_raw(
-            builder.build({'limit': 100}), raw_result=True,
-            authorization_enabled=False)
+        reply_results = es.conn.search(index=es.index,
+                                       doc_type=es.t.annotation,
+                                       body=builder.build({'limit': 100}))
 
         if len(reply_results['hits']['hits']) < reply_results['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "

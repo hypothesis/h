@@ -180,7 +180,7 @@ def users_index(request):
         userid = util.userid_from_username(username, request)
         query = _all_user_annotations_query(userid)
         result = request.es.conn.count(index=request.es.index,
-                                       doc_type='annotation',
+                                       doc_type=request.es.t.annotation,
                                        body={'query': query})
         user_meta['annotations_count'] = result['count']
 

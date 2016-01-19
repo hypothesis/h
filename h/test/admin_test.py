@@ -461,7 +461,7 @@ def test_users_index_queries_annotation_count(User):
     admin.users_index(request)
 
     es.conn.count.assert_called_with(index=es.index,
-                                     doc_type='annotation',
+                                     doc_type=es.t.annotation,
                                      body=ANY)
 
 
