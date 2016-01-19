@@ -102,9 +102,10 @@ def _read_group(request, group):
     """
     url = request.route_url('group_read', pubid=group.pubid, slug=group.slug)
 
-    result = search.search(request, private=False, params={
-        "group": group.pubid, "limit": 1000})
-    annotations = [presenters.AnnotationHTMLPresenter(a)
+    result = search.search(request,
+                           private=False,
+                           params={"group": group.pubid, "limit": 1000})
+    annotations = [presenters.AnnotationHTMLPresenter(models.Annotation(a))
                    for a in result['rows']]
 
     # Group the annotations by URI.

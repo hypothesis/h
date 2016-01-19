@@ -369,9 +369,8 @@ def test_read_returns_document_links(Group, search, renderers, uri,
     g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
-    annotations = [
-        mock.Mock(uri="uri_1"), mock.Mock(uri="uri_2"), mock.Mock(uri="uri_3")]
-    search.search.return_value = {"rows": annotations}
+    annotations = [{'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
+    search.search.return_value = {'rows': annotations, 'total': 3}
     def normalize(uri):
         return uri + "_normalized"
     uri.normalize.side_effect = normalize
@@ -396,12 +395,8 @@ def test_read_duplicate_documents_are_removed(Group, search, renderers, uri,
     g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
-    annotations = [
-        mock.Mock(uri="uri_1", document_link="document_link_1"),
-        mock.Mock(uri="uri_2", document_link="document_link_2"),
-        mock.Mock(uri="uri_3", document_link="document_link_3")
-    ]
-    search.search.return_value = {"rows": annotations}
+    annotations = [{'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
+    search.search.return_value = {'rows': annotations, 'total': 3}
 
     def normalize(uri):
         # All annotations' URIs normalize to the same URI.
@@ -424,12 +419,8 @@ def test_read_documents_are_truncated(Group, search, renderers, uri,
     g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
     user = request.authenticated_user = mock.Mock()
     user.groups = [g]  # The user is a member of the group.
-    annotations = [
-        mock.Mock(uri="uri_{n}".format(n=n),
-                  document_link="document_link_{n}".format(n=n))
-        for n in range(0, 50)
-    ]
-    search.search.return_value = {"rows": annotations}
+    annotations = [{'uri': 'uri_{n}'.format(n=n)} for n in range(50)]
+    search.search.return_value = {'rows': annotations, 'total': 50}
 
     def normalize(uri):
         return uri + "_normalized"
@@ -580,6 +571,7 @@ def session_model(request):
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
+
 @pytest.fixture
 def renderers(request):
     patcher = mock.patch('h.groups.views.renderers', autospec=True)
@@ -590,8 +582,10 @@ def renderers(request):
 @pytest.fixture
 def search(request):
     patcher = mock.patch('h.groups.views.search', autospec=True)
+    search = patcher.start()
+    search.search.return_value = {'rows': [], 'total': 0}
     request.addfinalizer(patcher.stop)
-    return patcher.start()
+    return search
 
 
 @pytest.fixture

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from h.api import models
 from h.api import nipsa
 from h.api.search import query
 
@@ -57,7 +56,7 @@ def search(request, params, private=True, separate_replies=False):
                              body=builder.build(params))
     total = results['hits']['total']
     docs = results['hits']['hits']
-    rows = [models.Annotation(d['_source'], id=d['_id']) for d in docs]
+    rows = [dict(d['_source'], id=d['_id']) for d in docs]
     return_value = {"rows": rows, "total": total}
 
     if separate_replies:
@@ -77,8 +76,7 @@ def search(request, params, private=True, separate_replies=False):
                      "reply set.")
 
         reply_docs = reply_results['hits']['hits']
-        reply_rows = [models.Annotation(d['_source'], id=d['_id'])
-                      for d in reply_docs]
+        reply_rows = [dict(d['_source'], id=d['_id']) for d in reply_docs]
 
         return_value["replies"] = reply_rows
 
