@@ -6,6 +6,7 @@ if (typeof(window.annotator) === 'undefined') {
     return;
 }
 
+
 // Injects the hypothesis dependencies. These can be either js or css, the
 // file extension is used to determine the loading method. This file is
 // pre-processed in order to insert the wgxpath, url and inject scripts.
@@ -50,15 +51,13 @@ window.hypothesisInstall = function (inject) {
   };
 
   if (!window.document.evaluate) {
-    {%- assets "wgxpath" %}
-    resources.push('{{ ASSET_URL | safe }}');
-    {%- endassets %}
+    resources.push('{{ wgxpath_url | safe }}');
   }
 
   if (typeof window.Annotator === 'undefined') {
-    {%- assets "inject" %}
-    resources.push('{{ ASSET_URL | safe }}');
-    {%- endassets %}
+    {%- for url in inject_js_urls %}
+    resources.push('{{ url | safe }}');
+    {%- endfor %}
   }
 
   (function next(err) {
@@ -75,7 +74,7 @@ window.hypothesisInstall = function (inject) {
 
 var baseUrl = document.createElement('link');
 baseUrl.rel = 'sidebar';
-baseUrl.href = '{{ app_uri or request.resource_url(context, 'app.html') }}';
+baseUrl.href = '{{ app_html_url }}';
 baseUrl.type = 'application/annotator+html';
 document.head.appendChild(baseUrl);
 
