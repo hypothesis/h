@@ -20,7 +20,7 @@ To build and install a local development instance of the Chrome extension:
 
    .. code-block:: bash
 
-      hypothesis-buildext --debug conf/development.ini chrome --base 'http://127.0.0.1:5000'
+      hypothesis-buildext --debug chrome --base 'http://127.0.0.1:5000'
 
    .. note::
 
@@ -75,7 +75,7 @@ extension's assets over ``https``:
 
    .. code-block:: bash
 
-      hypothesis-buildext --debug conf/development.ini chrome --base 'https://127.0.0.1:5000'
+      hypothesis-buildext --debug chrome --base 'https://127.0.0.1:5000'
 
 3. Follow steps 3-6 from `Building the Chrome extension for development`_
    above to install the extension in Chrome. (If you've already installed the
@@ -113,12 +113,11 @@ Security Policy you should follow these steps:
    Chrome generates this ID the first time you install the extension and will
    reuse it each time your rebuild or reinstall the extension.
 
-4. Rebuild the Chrome extension with packed assets, an ``https`` base URL, and
-   using ``production.ini`` instead of ``development.ini``:
+4. Rebuild the Chrome extension with packed assets, an ``https`` base URL
 
    .. code-block:: bash
 
-      hypothesis-buildext conf/production.ini chrome
+      hypothesis-buildext chrome
           --base   'https://127.0.0.1:5000'
           --assets 'chrome-extension://<id>/public'
 
@@ -180,11 +179,3 @@ but you're running h on ``http``. Either run h on ``https`` (see
 or rebuild the extension  with ``--base http://...``.
 
 
-File Not Found errors in the console
-====================================
-
-The extension fails to load and you see ``net::ERR_FILE_NOT_FOUND`` errors in
-the console. This can happen if you build the extension with
-``conf/development.ini`` and ``--assets 'chrome-extension://<id>/public'``.
-Packing assets is not supported with ``development.ini``, use
-``conf/production.ini`` instead.

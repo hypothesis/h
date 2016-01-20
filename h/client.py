@@ -57,6 +57,13 @@ def asset_urls(webassets_env, name):
     return webassets_env[name].urls()
 
 
+def url_with_path(url):
+    if urlparse(url).path == '':
+        return '{}/'.format(url)
+    else:
+        return url
+
+
 def _app_html_context(webassets_env, api_url, base_url, ga_tracking_id,
                       sentry_dsn, websocket_url):
     """
@@ -70,8 +77,7 @@ def _app_html_context(webassets_env, api_url, base_url, ga_tracking_id,
         ga_cookie_domain = 'auto'
 
     # the serviceUrl parameter must contain a path element
-    if urlparse(base_url).path == '':
-        base_url += '/'
+    base_url = url_with_path(base_url)
 
     app_config = {
         'apiUrl': api_url,
