@@ -33,7 +33,7 @@
   />
   </top-bar>
 
-  <div class="create-account-banner" ng-if="auth.status === 'signed-out'">
+  <div class="create-account-banner" ng-if="isSidebar && auth.status === 'signed-out'">
     To annotate this document
     <a href="{{ request.route_path('register') }}" target="_blank">
       create a free account
