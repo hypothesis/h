@@ -115,12 +115,6 @@ def chrome_manifest(request):
                   request=request)
 
 
-def firefox_manifest(request):
-    return render('h:browser/firefox/package.json.jinja2',
-           {'version': h.__version__},
-           request=request)
-
-
 def build_type_from_api_url(api_url):
     """
     Returns the default build type ('production', 'staging' or 'dev')
@@ -255,66 +249,6 @@ def build_chrome(args):
         fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings_dict(env)))
 
 
-def build_firefox(args):
-    """
-    Build the Firefox extension. You must supply the base URL of an h
-    installation with which this extension will communicate, such as
-    "http://localhost:5000" (the default) when developing locally or
-    "https://hypothes.is" to talk to the production Hypothesis application.
-
-    By default, the extension will load static assets (JavaScript/CSS/etc.)
-    from the application you specify. This can be useful when developing, but
-    when building a production extension (such as for deployment to Mozilla
-    Add-ons) you will need to specify an assets URL that links to the built
-    assets within the extension, such as:
-
-        resource://<extensionkey>/hypothesis/data
-    """
-    paster.setup_logging(args.config_uri)
-
-    os.environ['WEBASSETS_BASE_DIR'] = os.path.abspath('./build/firefox/data')
-    if args.assets is not None:
-        os.environ['WEBASSETS_BASE_URL'] = args.assets
-
-    env = get_env(args.config_uri, args.base)
-
-    # Prepare a fresh build.
-    clean('build/firefox')
-    os.makedirs('build/firefox')
-    copytree('h/browser/firefox', 'build/firefox')
-
-    # Bundle the extension assets.
-    webassets_env = env['request'].webassets_env
-    content_dir = webassets_env.directory
-
-    # Don't minify vendor libs per Mozilla policy.
-    # This is a bit hacky.
-    if webassets_env.debug is False:
-        webassets_env.debug = True
-        os.makedirs(content_dir + '/styles/vendor')
-        os.makedirs(content_dir + '/scripts/vendor')
-        os.makedirs(content_dir + '/scripts/vendor/katex')
-        os.makedirs(content_dir + '/scripts/vendor/polyfills')
-        for bundle in webassets_env:
-            if bundle.output is None:
-                continue
-            if 'vendor' in bundle.output:
-                for _, src in bundle.resolve_contents():
-                    dst = os.path.join(content_dir, bundle.output)
-                    dst = dst.replace('.min.js', '.js')
-                    shutil.copyfile(src, dst)
-            else:
-                bundle.debug = False
-
-    # Build the common components.
-    build_extension_common(env)
-
-    # Render the manifest.
-    with codecs.open('build/firefox/package.json', 'w', 'utf-8') as fp:
-        data = firefox_manifest(env['request'])
-        fp.write(data)
-
-
 parser = argparse.ArgumentParser('hypothesis-buildext')
 
 parser.add_argument('config_uri',
@@ -341,25 +275,9 @@ parser_chrome.add_argument('--assets',
                            default=None,
                            metavar='PATH/URL')
 
-parser_firefox = subparsers.add_parser(
-    'firefox',
-    help="build the Mozilla Firefox extension",
-    description=textwrap.dedent(build_firefox.__doc__),
-    formatter_class=argparse.RawDescriptionHelpFormatter)
-parser_firefox.add_argument('--base',
-                            help='Base URL',
-                            default='http://localhost:5000',
-                            metavar='URL')
-parser_firefox.add_argument('--assets',
-                            help='A path (relative to base) or URL from which '
-                                 'to load the static assets',
-                            default=None,
-                            metavar='PATH/URL')
-
 
 BROWSERS = {
     'chrome': build_chrome,
-    'firefox': build_firefox,
 }
 
 
