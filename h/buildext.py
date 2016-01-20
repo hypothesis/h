@@ -13,9 +13,9 @@ import shutil
 import subprocess
 import textwrap
 
+from jinja2 import Environment, PackageLoader
 from pyramid import paster
 from pyramid.path import AssetResolver
-from pyramid.renderers import render
 from pyramid.request import Request
 import raven
 
@@ -23,6 +23,7 @@ import h
 from h import client
 from h._compat import urlparse
 
+jinja_env = Environment(loader=PackageLoader(__package__, ''))
 log = logging.getLogger('h.buildext')
 
 # Teach urlparse about extension schemes
@@ -82,7 +83,7 @@ def copytree(src, dst):
             shutil.copyfile(s, d)
 
 
-def chrome_manifest(request):
+def chrome_manifest(script_host_url):
     # Chrome is strict about the format of the version string
     if '+' in h.__version__:
         tag, detail = h.__version__.split('+')
@@ -93,21 +94,14 @@ def chrome_manifest(request):
         version = h.__version__
         version_name = 'Official Build'
 
-    src = request.resource_url(request.context)
+    context = {
+        'script_src': script_host_url,
+        'version': version,
+        'version_name': version_name
+    }
 
-    # We need to use only the host and port for the CSP script-src when
-    # developing. If we provide a path such as /assets the CSP check fails.
-    # See:
-    #
-    #   https://developer.chrome.com/extensions/contentSecurityPolicy#relaxing-remote-script
-    if urlparse.urlparse(src).hostname not in ('localhost', '127.0.0.1'):
-        src = urlparse.urljoin(src, request.webassets_env.url)
-
-    value = {'src': src, 'version': version, 'version_name': version_name}
-
-    return render('h:browser/chrome/manifest.json.jinja2',
-                  value,
-                  request=request)
+    template = jinja_env.get_template('browser/chrome/manifest.json.jinja2')
+    return template.render(context)
 
 
 def build_type_from_api_url(api_url):
@@ -246,7 +240,10 @@ def build_chrome(args):
 
     # Render the manifest.
     with codecs.open('build/chrome/manifest.json', 'w', 'utf-8') as fp:
-        data = chrome_manifest(env['request'])
+        script_url = urlparse.urlparse(webassets_env.url)
+        script_host_url = '{}://{}'.format(script_url.scheme,
+                                           script_url.netloc)
+        data = chrome_manifest(script_host_url)
         fp.write(data)
 
     # Write build settings to a JSON file
