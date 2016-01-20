@@ -9,7 +9,7 @@
       <span>
         <a class="annotation-user"
            target="_blank"
-           ng-href="{{::vm.baseURI}}u/{{vm.user()}}"
+           ng-href="{{::vm.serviceUrl}}u/{{vm.user()}}"
            >{{vm.user() | persona}}</a>
       </span>
 
@@ -49,7 +49,7 @@
        target="_blank"
        title="{{vm.absoluteTimestamp}}"
        ng-if="!vm.editing() && vm.updated()"
-       ng-href="{{::vm.baseURI}}a/{{vm.id()}}"
+       ng-href="{{::vm.serviceUrl}}a/{{vm.id()}}"
        >{{vm.relativeTimestamp}}</a>
   </header>
 

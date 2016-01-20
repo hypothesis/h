@@ -23,17 +23,14 @@ describe('h:session', function () {
 
   beforeEach(mock.module(function ($provide) {
     sandbox = sinon.sandbox.create();
-
-    var fakeDocument = {
-      prop: sandbox.stub()
-    };
-    fakeDocument.prop.withArgs('baseURI').returns('http://foo.com/');
     fakeFlash = {error: sandbox.spy()};
     fakeRaven = {
       setUserInfo: sandbox.spy(),
     };
 
-    $provide.value('$document', fakeDocument);
+    $provide.value('settings', {
+      serviceUrl: 'https://test.hypothes.is',
+    });
     $provide.value('flash', fakeFlash);
     $provide.value('raven', fakeRaven);
   }));
@@ -54,7 +51,7 @@ describe('h:session', function () {
   // There's little point testing every single route here, as they're
   // declarative and ultimately we'd be testing ngResource.
   describe('.login()', function () {
-    var url = 'http://foo.com/app?__formid__=login';
+    var url = 'https://test.hypothes.is/app?__formid__=login';
 
     it('should send an HTTP POST to the action', function () {
       $httpBackend.expectPOST(url, {code: 123}).respond({});
@@ -133,7 +130,7 @@ describe('h:session', function () {
   });
 
   describe('.load()', function () {
-    var url = 'http://foo.com/app';
+    var url = 'https://test.hypothes.is/app';
 
     it('should fetch the session data', function () {
       $httpBackend.expectGET(url).respond({});

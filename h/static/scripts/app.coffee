@@ -5,7 +5,6 @@ if window.RAVEN_CONFIG
 
 
 require('autofill-event')
-baseURI = require('document-base-uri')
 angular = require('angular')
 require('angular-jwt')
 
@@ -34,13 +33,6 @@ resolve =
   ]
 
 
-configureDocument = ['$provide', ($provide) ->
-  $provide.decorator '$document', ['$delegate', ($delegate) ->
-    $delegate.prop('baseURI', baseURI)
-  ]
-]
-
-
 configureLocation = ['$locationProvider', ($locationProvider) ->
   # Use HTML5 history
   $locationProvider.html5Mode(true)
@@ -66,15 +58,6 @@ configureRoutes = ['$routeProvider', ($routeProvider) ->
   $routeProvider.otherwise
     redirectTo: '/viewer'
 ]
-
-
-configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
-  # Explicitly whitelist '.html' paths adjacent to application base URI
-  # TODO: move all front-end templates into their own directory for safety
-  basePattern = new URL('**.html', baseURI).href
-  $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
-]
-
 
 setupCrossFrame = ['crossframe', (crossframe) -> crossframe.connect()]
 
@@ -168,10 +151,8 @@ module.exports = angular.module('h', [
 .value('Discovery', require('./discovery'))
 .value('raven', require('./raven'))
 
-.config(configureDocument)
 .config(configureLocation)
 .config(configureRoutes)
-.config(configureTemplates)
 
 .run(setupCrossFrame)
 .run(setupHttp)
