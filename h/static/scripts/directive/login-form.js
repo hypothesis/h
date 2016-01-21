@@ -1,7 +1,7 @@
 'use strict';
 
 // @ngInject
-function Controller($scope, $timeout, flash, session, formRespond) {
+function Controller($scope, $timeout, flash, session, formRespond, settings) {
   var pendingTimeout = null;
 
   function success(data) {
@@ -49,6 +49,7 @@ function Controller($scope, $timeout, flash, session, formRespond) {
     pendingTimeout = null;
   }
 
+  this.serviceUrl = settings.serviceUrl;
 
   this.submit = function submit(form) {
     formRespond(form);
