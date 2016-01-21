@@ -75,13 +75,13 @@ build/%-chrome-stage.zip:
 	hypothesis-buildext conf/production.ini chrome \
 		--base 'https://stage.hypothes.is' \
 		--assets 'chrome-extension://iahhmhdkmkifclacffbofcnmgkpalpoj/public'
-	@zip -r $@ build/chrome
+	@zip -qr $@ build/chrome
 
 build/%-chrome-prod.zip:
 	@rm -rf build/chrome $@
 	hypothesis-buildext conf/production.ini chrome \
 		--base 'https://hypothes.is' \
 		--assets 'chrome-extension://bjfhmglciegochdpefhhlphglcehbmek/public'
-	@zip -r $@ build/chrome
+	@zip -qr $@ build/chrome
 
 .PHONY: clean cover deps dev extensions lint test
