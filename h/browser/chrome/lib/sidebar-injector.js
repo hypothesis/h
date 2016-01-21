@@ -1,6 +1,5 @@
 'use strict';
 
-var blocklist = require('../../../static/scripts/blocklist');
 var detectContentType = require('./detect-content-type');
 var errors = require('./errors');
 var settings = require('./settings');
@@ -49,11 +48,6 @@ function SidebarInjector(chromeTabs, dependencies) {
    * otherwise it will be rejected with an error.
    */
   this.injectIntoTab = function(tab) {
-    if (blocklist.isBlocked(tab.url, settings.blocklist)) {
-      return Promise.reject(new errors.BlockedSiteError(
-        "Hypothesis doesn't work on this site yet."));
-    }
-
     if (isFileURL(tab.url)) {
       return injectIntoLocalDocument(tab);
     } else {

@@ -145,7 +145,6 @@ def settings_dict(env):
         })
 
     config.update({
-        'blocklist': env['registry'].settings['h.blocklist'],
         'buildType': build_type_from_api_url(api_url),
     })
     return config
