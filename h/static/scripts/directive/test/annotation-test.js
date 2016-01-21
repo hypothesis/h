@@ -1925,7 +1925,7 @@ describe('annotation', function() {
       var controller = createAnnotationDirective({
         annotation: {
           id: 'test-annotation-id',
-          user: 'acct:bill@localhost'
+          user: 'acct:bill@localhost',
         }
       }).controller;
       controller.edit();
@@ -1933,6 +1933,34 @@ describe('annotation', function() {
       controller.form.text = 'this should be reverted';
       controller.revert();
       assert.equal(controller.form.text, void 0);
+    });
+
+    it('reverts to the most recently saved version when canceling changes',
+      function () {
+
+      var controller = createAnnotationDirective({
+        annotation: {
+          user: 'acct:bill@localhost',
+          $create: function () {
+            this.id = 'new-annotation-id';
+            return Promise.resolve();
+          },
+          $update: function () {
+            return Promise.resolve(this);
+          },
+        },
+      }).controller;
+      controller.edit();
+      controller.form.text = 'New annotation text';
+      return controller.save().then(function () {
+        controller.edit();
+        controller.form.text = 'Updated annotation text';
+        return controller.save();
+      }).then(function () {
+        controller.edit();
+        controller.revert();
+        assert.equal(controller.form.text, 'Updated annotation text');
+      });
     });
   });
 });

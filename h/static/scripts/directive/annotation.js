@@ -384,6 +384,7 @@ function AnnotationController(
 
   function onAnnotationUpdated(event, updatedDomainModel) {
     if (updatedDomainModel.id === domainModel.id) {
+      domainModel = updatedDomainModel;
       updateView(updatedDomainModel);
     }
   }
@@ -699,9 +700,9 @@ function AnnotationController(
         }
 
         onFulfilled = function() {
+          drafts.remove(domainModel);
           $rootScope.$emit('annotationUpdated', updatedModel);
           view();
-          drafts.remove(domainModel);
         };
         onRejected = function(reason) {
           flash.error(
