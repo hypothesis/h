@@ -5,21 +5,24 @@ is exposed as the command-line utility hypothesis-buildext.
 """
 import argparse
 import codecs
+import json
 import logging
 import os
 import os.path
 import shutil
 import subprocess
 import textwrap
-import json
 
 from pyramid import paster
 from pyramid.path import AssetResolver
-from pyramid.request import Request
 from pyramid.renderers import render
+from pyramid.request import Request
+import raven
 
 import h
 from h._compat import urlparse
+from h.sidebar import app_config
+
 
 log = logging.getLogger('h.buildext')
 
@@ -117,6 +120,7 @@ def firefox_manifest(request):
            {'version': h.__version__},
            request=request)
 
+
 def build_type_from_api_url(api_url):
     """
     Returns the default build type ('production', 'staging' or 'dev')
@@ -130,14 +134,28 @@ def build_type_from_api_url(api_url):
     else:
         return 'dev'
 
+
 def settings_dict(env):
     """ Returns a dictionary of settings to be bundled with the extension """
-    api_url = env['request'].route_url('api')
-    return {
+    request = env['request']
+    config = app_config(request)
+    api_url = config['apiUrl']
+    sentry_dsn = request.sentry.get_public_dsn('https')
+
+    if sentry_dsn:
+        config.update({
+            'raven': {
+              'dsn': sentry_dsn,
+              'release': h.__version__,
+            },
+        })
+
+    config.update({
         'blocklist': env['registry'].settings['h.blocklist'],
         'buildType': build_type_from_api_url(api_url),
-        'apiUrl': api_url,
-    }
+    })
+    return config
+
 
 def get_env(config_uri, base_url):
     """
@@ -148,6 +166,8 @@ def get_env(config_uri, base_url):
     request = Request.blank('', base_url=base_url)
     env = paster.bootstrap(config_uri, request)
     request.root = env['root']
+
+    request.sentry = raven.Client(release=raven.fetch_package_version('h'))
 
     # Ensure that the webassets URL is absolute
     request.webassets_env.url = urlparse.urljoin(base_url,
@@ -215,8 +235,12 @@ def build_chrome(args):
     # Render the sidebar html.
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(env, bundle_app=True)
+        request = env['request']
+        context = {
+          'app_config': app_config(request)
+        }
         with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
-            data = render('h:templates/app.html.jinja2', {}, env['request'])
+            data = render('h:templates/app.html.jinja2', context, request)
             fp.write(data)
     else:
         build_extension_common(env)
@@ -227,8 +251,8 @@ def build_chrome(args):
         fp.write(data)
 
     # Write build settings to a JSON file
-    with codecs.open('build/chrome/settings.json', 'w', 'utf-8') as fp:
-        fp.write(json.dumps(settings_dict(env)))
+    with codecs.open('build/chrome/settings-data.js', 'w', 'utf-8') as fp:
+        fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings_dict(env)))
 
 
 def build_firefox(args):

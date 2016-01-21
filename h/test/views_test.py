@@ -5,6 +5,7 @@ import json
 
 import unittest
 import mock
+from mock import patch
 
 from pyramid import testing
 import pytest
@@ -83,3 +84,10 @@ class TestValidateBlocklist(object):
         views._validate_blocklist(config)
 
         assert config.registry.settings["h.blocklist"] == {}
+
+
+@pytest.fixture(autouse=True)
+def app_config(request):
+    patcher = mock.patch('h.views.app_config', autospec=True)
+    patcher.start()
+    request.addfinalizer(patcher.stop)

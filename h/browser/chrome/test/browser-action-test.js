@@ -148,10 +148,10 @@ describe('BrowserAction', function () {
 
   describe('build type', function () {
     beforeEach(function () {
-      var fakeSettings = Promise.resolve({
+      var fakeSettings = {
         buildType: 'staging',
         '@noCallThru': true,
-      });
+      };
       var BrowserAction = proxyquire('../lib/browser-action', {
         './settings': fakeSettings,
       });

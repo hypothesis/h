@@ -1,7 +1,5 @@
 'use strict';
 
-var angular = require('angular');
-
 /**
  * @ngdoc factory
  * @name  settings
@@ -17,7 +15,7 @@ function settings($document) {
     'script[type="application/json"]#hypothesis-settings');
 
   if (settingsElement) {
-    return angular.fromJson(settingsElement.textContent);
+    return JSON.parse(settingsElement.textContent);
   }
 
   return {};

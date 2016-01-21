@@ -9,6 +9,7 @@ describe('h:session', function () {
   var $rootScope;
 
   var fakeFlash;
+  var fakeRaven;
   var fakeXsrf;
   var sandbox;
   var session;
@@ -28,9 +29,13 @@ describe('h:session', function () {
     };
     fakeDocument.prop.withArgs('baseURI').returns('http://foo.com/');
     fakeFlash = {error: sandbox.spy()};
+    fakeRaven = {
+      setUserInfo: sandbox.spy(),
+    };
 
     $provide.value('$document', fakeDocument);
     $provide.value('flash', fakeFlash);
+    $provide.value('raven', fakeRaven);
   }));
 
 
@@ -48,7 +53,7 @@ describe('h:session', function () {
 
   // There's little point testing every single route here, as they're
   // declarative and ultimately we'd be testing ngResource.
-  describe('#login()', function () {
+  describe('.login()', function () {
     var url = 'http://foo.com/app?__formid__=login';
 
     it('should send an HTTP POST to the action', function () {
@@ -127,7 +132,7 @@ describe('h:session', function () {
     });
   });
 
-  describe('#load()', function () {
+  describe('.load()', function () {
     var url = 'http://foo.com/app';
 
     it('should fetch the session data', function () {
@@ -157,7 +162,7 @@ describe('h:session', function () {
     });
   });
 
-  describe('#update()', function () {
+  describe('.update()', function () {
     it('broadcasts SESSION_CHANGED when the session changes', function () {
       var sessionChangeCallback = sinon.stub();
 
@@ -205,6 +210,16 @@ describe('h:session', function () {
         csrf: 'dummytoken'
       });
       assert.calledOnce(userChangeCallback);
+    });
+
+    it('updates the user ID for Sentry error reports', function () {
+      session.update({
+        userid: 'anne',
+        csrf: 'dummytoken',
+      });
+      assert.calledWith(fakeRaven.setUserInfo, {
+        id: 'anne',
+      });
     });
   });
 });

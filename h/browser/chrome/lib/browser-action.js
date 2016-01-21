@@ -18,12 +18,7 @@ icons[states.INACTIVE] = {
   38: 'images/browser-icon-inactive@2x.png'
 };
 
-var buildType = '';
-settings.then(function (settings) {
-  buildType = settings.buildType;
-}).catch(function (err) {
-  console.error(err);
-});
+var buildType = settings.buildType;
 
 // themes to apply to the toolbar icon badge depending on the type of
 // build. Production builds use the default color and no text

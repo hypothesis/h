@@ -15,6 +15,7 @@ from h import session
 from h.api.views import json_view
 from h.resources import Annotation
 from h.resources import Stream
+from h.sidebar import app_config
 
 
 log = logging.getLogger(__name__)
@@ -71,6 +72,7 @@ def annotation(context, request):
                                      annotation['id'])
 
     return {
+        'app_config': app_config(request),
         'meta_attrs': (
             {'property': 'og:title', 'content': title},
             {'property': 'og:description', 'content': ''},
@@ -89,13 +91,16 @@ def annotation(context, request):
 def embed(context, request):
     request.response.content_type = b'text/javascript'
     return {
+        'app_config': app_config(request),
         'blocklist': json.dumps(request.registry.settings['h.blocklist'])
     }
 
 
 @view_config(route_name='widget', renderer='h:templates/app.html.jinja2')
 def widget(context, request):
-    return {}
+    return {
+        'app_config': app_config(request)
+    }
 
 
 @view_config(renderer='h:templates/help.html.jinja2', route_name='help')
@@ -134,6 +139,7 @@ def stream(context, request):
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')
     return {
+        'app_config': app_config(request),
         'link_tags': [
             {'rel': 'alternate', 'href': atom, 'type': 'application/atom+xml'},
             {'rel': 'alternate', 'href': rss, 'type': 'application/rss+xml'},
