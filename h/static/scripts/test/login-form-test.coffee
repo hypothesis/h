@@ -18,7 +18,7 @@ class MockSession
 mockFlash = info: sandbox.spy()
 mockFormRespond = sandbox.spy()
 
-describe 'h:AuthController', ->
+describe 'loginForm.Controller', ->
   $scope = null
   $timeout = null
   auth = null
@@ -27,7 +27,7 @@ describe 'h:AuthController', ->
 
   before ->
     angular.module('h', [])
-    .controller('AuthController', require('../auth-controller'))
+    .controller('loginFormController', require('../directive/login-form').Controller)
 
   beforeEach module('h')
   beforeEach module('h.templates')
@@ -43,7 +43,7 @@ describe 'h:AuthController', ->
     $scope = $rootScope.$new()
     $timeout = _$timeout_
     $controller = _$controller_
-    auth = $controller 'AuthController', {$scope}
+    auth = $controller 'loginFormController', {$scope}
     session = _session_
     sandbox.spy session, 'login'
 
@@ -95,7 +95,7 @@ describe 'h:AuthController', ->
 
       # Get an AuthController object with our mock session.
       authCtrl = $controller(
-        'AuthController', {$scope:$scope, session:myMockSession})
+        'loginFormController', {$scope:$scope, session:myMockSession})
 
       form = {$name: 'register', $valid: true}
 
@@ -113,7 +113,7 @@ describe 'h:AuthController', ->
         $promise: {finally: sandbox.stub()}
 
       authCtrl = $controller(
-        'AuthController', {$scope:$scope, session:myMockSession})
+        'loginFormController', {$scope:$scope, session:myMockSession})
 
       form = {$name: 'register', $valid: true}
 
