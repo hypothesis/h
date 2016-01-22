@@ -12,7 +12,7 @@ tree and install it in Chrome.
 Building the Chrome extension for development
 ---------------------------------------------
 
-To build and install a local development instance of the Chrome extension:
+To build and install the Chrome extension:
 
 1. Do an :doc:`h development install </hacking/install>`.
 
@@ -20,33 +20,20 @@ To build and install a local development instance of the Chrome extension:
 
    .. code-block:: bash
 
-      hypothesis-buildext --debug chrome --service 'http://127.0.0.1:5000'
+      hypothesis-buildext chrome --debug --service 'http://127.0.0.1:5000'
 
    .. note::
 
-      When you run the ``hypothesis-buildext`` command without a ``--assets``
-      argument (as in the command above) it builds a Chrome extension
-      configured to load its assets (JavaScript, CSS, ...) from the ``--service``
-      URL (in the command above: your local development instance of the
-      Hypothesis web app running at http://127.0.0.1:5000). That is: the web
-      app serves these JavaScript, CSS and other files and the Chrome extension
-      is configured to request them from the web app.
+      The ``--service`` URL specifies the Hypothesis service which the extension
+      should communicate with. This can either point to your local H instance,
+      if you have one set up, or the public instance at 'https://hypothes.is'.
 
-      This is the most convenient way to build the extension for development
-      because you can make changes to these source files and have your changes
-      take effect without having to re-run the ``hypothesis-buildext`` command.
+      If you want to test the extension on pages served via HTTPS, you will
+      need to configure the extension to communicate with a Hypothesis service
+      that is **also served over HTTPS**. See :doc:`Serving h over SSL </hacking/ssl>`
+      for instructions on serving a local instance of H via SSL.
 
-      But there are some issues with building the extension this way that you
-      should be aware of:
 
-      1. The extension will fail to load on ``https://`` pages and you'll see a
-         *mixed content* warning in the console. To test the extension on
-         ``https`` sites see
-         `Building an https version of the Chrome extension`_.
-
-      2. The extension will fail to load on some sites that use
-         `Content Security Policy`_. To test the extension on these sites see
-         `Building the Chrome extension for production`_.
 
 3. Go to ``chrome://extensions/`` in Chrome.
 
@@ -57,76 +44,48 @@ To build and install a local development instance of the Chrome extension:
 6. Browse to the ``h/build/chrome/`` directory where the extension was built
    and select it.
 
-Your extension should be working now! Remember that it communicates with your
-local h instance, so you need to have h running to use the extension.
+Your extension should be working now! Remember that if you set ``--service``
+to the URL of your local H instance, you need to have H running
+in order to use the extension.
 
 .. _Content Security Policy: http://en.wikipedia.org/wiki/Content_Security_Policy
 
--------------------------------------------------
-Building an https version of the Chrome extension
--------------------------------------------------
-
-To use the Chrome extension on ``https`` sites you need to serve the
-extension's assets over ``https``:
-
-1. :doc:`Run your local h instance using https </hacking/ssl>`.
-
-2. Build the extension with an ``https`` base URL:
-
-   .. code-block:: bash
-
-      hypothesis-buildext --debug chrome --service 'https://127.0.0.1:5000'
-
-3. Follow steps 3-6 from `Building the Chrome extension for development`_
-   above to install the extension in Chrome. (If you've already installed the
-   extension and you just rebuilt it for ``https`` then you don't need to do
-   anything.)
-
-Your extension should now work on ``https`` sites.
-
-
---------------------------------------------
+---------------------------------------------
 Building the Chrome extension for production
---------------------------------------------
+---------------------------------------------
 
-The production Chrome extension doesn't load its assets from a website. Instead
-we pack the asset files into the extension itself and it loads them from
-``chrome-extension://`` URLs. This makes the extension faster and means that it
-works on sites whose `Content Security Policy`_ would prevent assets from being
-loaded from another site.
+For production builds of the Chrome extension, omit the ``--debug`` flag
+and point it to a service which is served via `HTTPS`. You may also
+wish to enable client error reporting by setting the ``--sentry-public-dsn``
+argument.
 
-This method usually isn't convenient for development because you have to re-run
-the ``hypothesis-buildext`` command after changing the source files for any of
-the assets, but if you want to test the extension on a site that uses Content
-Security Policy you should follow these steps:
+.. code-block:: bash
 
-1. Install some additional dependencies needed to build a production extension:
+   hypothesis-buildext chrome --service 'https://hypothes.is'
 
-   .. code-block:: bash
+----------------------------------------------
+Serving the sidebar from your local H instance
+----------------------------------------------
 
-      pip install -r requirements.txt
+In development, you may find it convenient to configure the extension
+to load the sidebar app from the URL specified with ``--service`` instead
+of bundling it into the extension. Building the extension this way
+allows you to test changes to the sidebar code without having to re-run
+the ``hypothesis-buildext`` command.
 
-2. Follow  `Building an https version of the Chrome extension`_ above to build
-   and install an ``https`` development extension.
+To do this, run ``hypothesis-buildext`` with the ``--no-bundle-sidebar``
+flag.
 
-3. Copy your extension's ID from the ``chrome://extensions`` page.
-   Chrome generates this ID the first time you install the extension and will
-   reuse it each time your rebuild or reinstall the extension.
+There are issues with building the extension this way that you
+should be aware of:
 
-4. Rebuild the Chrome extension with packed assets, an ``https`` base URL
+1. The extension will fail to load on ``https://`` pages unless
+   the Hypothesis service specified with ``--service`` also
+   uses an `https` URL.
 
-   .. code-block:: bash
-
-      hypothesis-buildext chrome
-          --service 'https://127.0.0.1:5000'
-          --assets 'chrome-extension://<id>/public'
-
-   Replace ``<id>`` with the ID of your extension from the
-   ``chrome://extensions`` page.
-
-Your extension should now work on sites with ``https`` and Content Security
-Policy.
-
+2. The extension will fail to load on some sites that use
+   `Content Security Policy`_. To test the extension on these sites
+   you'll need to build without the ``--no-bundle-sidebar`` option.
 
 ---------------
 Troubleshooting
@@ -136,7 +95,8 @@ Mixed Content errors in the console
 ===================================
 
 The extension fails to load and you see *Mixed Content* errors in the console.
-See `Building an https version of the Chrome extension`_.
+When using the Chrome extension on sites served over HTTPS, the extension
+must be configured to use an HTTPS ``--service`` URL.
 
 
 Insecure Response errors in the console
@@ -173,9 +133,7 @@ Connection Refused errors in the console
 
 The extension fails to load and you see
 ``GET https://127.0.0.1:5000/... net::ERR_CONNECTION_REFUSED`` errors in the
-console. This happens if you built the extension with an ``https`` base URL
+console. This happens if you built the extension with an ``https`` service URL
 but you're running h on ``http``. Either run h on ``https`` (see
 :doc:`Run your local h instance using https </hacking/ssl>`)
 or rebuild the extension  with ``--service http://...``.
-
-
