@@ -78,8 +78,8 @@ def build_extension_common(webassets_env, base_url, bundle_app=False):
         else:
             app_html_url = '{}/app.html'.format(base_url)
 
-        data = client_assets.render_embed_js(webassets_env=webassets_env,
-                                             app_html_url=app_html_url)
+        data = client.render_embed_js(webassets_env=webassets_env,
+                                      app_html_url=app_html_url)
         fp.write(data)
 
 
@@ -198,7 +198,7 @@ def build_chrome(args):
 
         chrome-extension://<extensionid>/public
     """
-    base_url = args.base
+    base_url = args.service_url
     if base_url.endswith('/'):
         base_url = base_url[:-1]
 
@@ -231,7 +231,6 @@ def build_chrome(args):
     # Render the sidebar html
     api_url = '{}/api'.format(base_url)
     websocket_url = websocketize('{}/ws'.format(base_url))
-    register_url = '{}/register'.format(base_url)
     sentry_dsn = None
 
     if args.sentry_dsn:
@@ -245,14 +244,13 @@ def build_chrome(args):
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(webassets_env, base_url, bundle_app=True)
         with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
-            data = client_assets.render_app_html(
+            data = client.render_app_html(
                 api_url=api_url,
                 base_url=url_with_path(base_url),
 
                 # Google Analytics tracking is currently not enabled
                 # for the extension
                 ga_tracking_id=None,
-                register_url=register_url,
                 webassets_env=webassets_env,
                 websocket_url=websocket_url,
                 sentry_dsn=sentry_dsn)
@@ -283,10 +281,13 @@ parser.add_argument('--sentry-dsn',
                     default='',
                     help='Specify the Sentry DSN for crash reporting',
                     metavar='SENTRY_DSN')
-parser.add_argument('--base',
-                    help='Base URL',
-                    default='http://localhost:5000',
-                    metavar='URL')
+parser.add_argument(
+    '--service',
+    help="""The URL of the Hypothesis service which the extension
+                            should connect to""",
+    default='http://localhost:5000',
+    dest='service_url',
+    metavar='URL')
 parser.add_argument('--assets',
                     help='A path (relative to base) or URL from which '
                     'to load the static assets',

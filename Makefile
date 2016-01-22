@@ -73,7 +73,7 @@ extensions: build/$(ISODATE)-$(BUILD_ID)-chrome-prod.zip
 build/%-chrome-stage.zip:
 	@rm -rf build/chrome $@
 	hypothesis-buildext chrome \
-		--base 'https://stage.hypothes.is' \
+		--service 'https://stage.hypothes.is' \
 		--sentry-dsn $(SENTRY_DSN_STAGE) \
 		--assets 'chrome-extension://iahhmhdkmkifclacffbofcnmgkpalpoj/public'
 	@zip -qr $@ build/chrome
@@ -81,7 +81,7 @@ build/%-chrome-stage.zip:
 build/%-chrome-prod.zip:
 	@rm -rf build/chrome $@
 	hypothesis-buildext chrome \
-		--base 'https://hypothes.is' \
+		--service 'https://hypothes.is' \
 		--sentry-dsn $(SENTRY_DSN_PROD) \
 		--assets 'chrome-extension://bjfhmglciegochdpefhhlphglcehbmek/public'
 	@zip -qr $@ build/chrome
