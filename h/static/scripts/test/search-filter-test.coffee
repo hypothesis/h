@@ -26,12 +26,13 @@ describe 'searchFilter', ->
       assert.equal(result.any[0], query)
 
     it 'uses the filters as keys in the result object', ->
-      query = 'user:john text:foo quote:bar other'
+      query = 'user:john text:foo quote:bar group:agroup other'
       result = searchFilter.toObject(query)
       assert.equal(result.any[0], 'other')
       assert.equal(result.user[0], 'john')
       assert.equal(result.text[0], 'foo')
       assert.equal(result.quote[0], 'bar')
+      assert.equal(result.group[0], 'agroup')
 
     it 'collects the same filters into a list', ->
       query = 'user:john text:foo quote:bar other user:doe text:fuu text:fii'

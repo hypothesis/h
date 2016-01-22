@@ -12,7 +12,8 @@ module.exports = class SearchFilter
       # The whole term is data
       return [null, term]
 
-    if filter in ['quote', 'result', 'since', 'tag', 'text', 'uri', 'user']
+    if filter in ['group', 'quote', 'result', 'since',
+                  'tag', 'text', 'uri', 'user']
       data = term[filter.length+1..]
       return [filter, data]
     else
