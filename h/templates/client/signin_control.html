@@ -1,12 +1,12 @@
 <!-- New controls -->
 <span class="signin-text"
-      ng-if="newStyle && auth.status === 'unknown'">⋯</span>
+      ng-if="vm.newStyle && vm.auth.status === 'unknown'">⋯</span>
 <span class="signin-text"
-      ng-if="newStyle && auth.status === 'signed-out'">
-  <a href="/register" target="_blank">Sign up</a>
-  / <a href="" ng-click="onLogin()">Sign in</a>
+      ng-if="vm.newStyle && vm.auth.status === 'signed-out'">
+  <a href="{{vm.serviceUrl}}register" target="_blank">Sign up</a>
+  / <a href="" ng-click="vm.onLogin()">Sign in</a>
 </span>
-<div ng-if="newStyle"
+<div ng-if="vm.newStyle"
      class="pull-right user-picker"
      dropdown
      keyboard-nav>
@@ -14,64 +14,64 @@
      class="top-bar__btn"
      data-toggle="dropdown"
      dropdown-toggle
-     title="{{auth.username}}">
-    <i class="h-icon-account" ng-if="auth.status === 'signed-in'"></i><!--
+     title="{{vm.auth.username}}">
+    <i class="h-icon-account" ng-if="vm.auth.status === 'signed-in'"></i><!--
     !--><i class="h-icon-arrow-drop-down top-bar__dropdown-arrow"></i>
   </a>
   <ul class="dropdown-menu pull-right" role="menu">
-    <li class="dropdown-menu__row" ng-if="auth.status === 'signed-in'">
-      <a href="/stream?q=user:{{auth.username}}"
+    <li class="dropdown-menu__row" ng-if="vm.auth.status === 'signed-in'">
+      <a href="{{vm.serviceUrl}}stream?q=user:{{vm.auth.username}}"
          class="dropdown-menu__link"
          title="View all your annotations"
-         target="_blank">{{auth.username}}</a>
+         target="_blank">{{vm.auth.username}}</a>
     </li>
-    <li class="dropdown-menu__row" ng-if="auth.status === 'signed-in'">
-      <a class="dropdown-menu__link" href="/profile" target="_blank">Account settings</a>
+    <li class="dropdown-menu__row" ng-if="vm.auth.status === 'signed-in'">
+      <a class="dropdown-menu__link" href="{{vm.serviceUrl}}profile" target="_blank">Account settings</a>
     </li>
     <li class="dropdown-menu__row">
-      <a class="dropdown-menu__link" href="/docs/help" target="_blank">Help</a>
+      <a class="dropdown-menu__link" href="{{vm.serviceUrl}}docs/help" target="_blank">Help</a>
     </li>
     <li class="dropdown-menu__row">
       <a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a>
     </li>
-    <li class="dropdown-menu__row" ng-if="auth.status === 'signed-in'">
+    <li class="dropdown-menu__row" ng-if="vm.auth.status === 'signed-in'">
       <a class="dropdown-menu__link dropdown-menu__link--subtle"
-         href="" ng-click="onLogout()">Sign out</a>
+         href="" ng-click="vm.onLogout()">Sign out</a>
     </li>
   </ul>
 </div>
 
 <!-- Old controls -->
-<span ng-if="!newStyle && auth.status === 'unknown'">⋯</span>
-<span ng-if="!newStyle && auth.status === 'signed-out'">
-  <a href="" ng-click="onLogin()">Sign in</a>
+<span ng-if="!vm.newStyle && vm.auth.status === 'unknown'">⋯</span>
+<span ng-if="!vm.newStyle && vm.auth.status === 'signed-out'">
+  <a href="" ng-click="vm.onLogin()">Sign in</a>
 </span>
-<div ng-if="!newStyle"
+<div ng-if="!vm.newStyle"
      class="pull-right user-picker"
      dropdown
      keyboard-nav>
   <span role="button" data-toggle="dropdown" dropdown-toggle>
-    {{auth.username}}<!--
+    {{vm.auth.username}}<!--
     --><span class="provider"
-             ng-if="auth.provider">/{{auth.provider}}</span><!--
+             ng-if="vm.auth.provider">/{{vm.auth.provider}}</span><!--
     --><i class="h-icon-arrow-drop-down"></i>
   </span>
   <ul class="dropdown-menu pull-right" role="menu">
-    <li class="dropdown-menu__row" ng-if="auth.status === 'signed-in'">
-      <a class="dropdown-menu__link" href="/profile" target="_blank">Account</a>
+    <li class="dropdown-menu__row" ng-if="vm.auth.status === 'signed-in'">
+      <a class="dropdown-menu__link" href="{{vm.serviceUrl}}profile" target="_blank">Account</a>
     </li>
     <li class="dropdown-menu__row" >
       <a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a>
     </li>
     <li class="dropdown-menu__row" >
-      <a class="dropdown-menu__link" href="/docs/help" target="_blank">Help</a>
+      <a class="dropdown-menu__link" href="{{vm.serviceUrl}}docs/help" target="_blank">Help</a>
     </li>
-    <li class="dropdown-menu__row" ng-if="auth.status === 'signed-in'">
-      <a class="dropdown-menu__link" href="/stream?q=user:{{auth.username}}"
+    <li class="dropdown-menu__row" ng-if="vm.auth.status === 'signed-in'">
+      <a class="dropdown-menu__link" href="{{vm.serviceUrl}}stream?q=user:{{vm.auth.username}}"
          target="_blank">My Annotations</a>
     </li>
-    <li class="dropdown-menu__row" ng-if="auth.status === 'signed-in'">
-      <a class="dropdown-menu__link" href="" ng-click="onLogout()">Sign out</a>
+    <li class="dropdown-menu__row" ng-if="vm.auth.status === 'signed-in'">
+      <a class="dropdown-menu__link" href="" ng-click="vm.onLogout()">Sign out</a>
     </li>
   </ul>
 </div>

@@ -62,7 +62,7 @@ function sessionActions(options) {
  *
  * @ngInject
  */
-function session($document, $http, $resource, $rootScope, flash, raven) {
+function session($http, $resource, $rootScope, flash, raven, settings) {
   // Headers sent by every request made by the session service.
   var headers = {};
   // TODO: Move accounts data management (e.g. profile, edit_profile,
@@ -72,8 +72,7 @@ function session($document, $http, $resource, $rootScope, flash, raven) {
     transformResponse: process,
     withCredentials: true
   });
-  var base = $document.prop('baseURI');
-  var endpoint = new URL('/app', base).href;
+  var endpoint = new URL('/app', settings.serviceUrl).href;
   var resource = $resource(endpoint, {}, actions);
 
   // Blank initial model state

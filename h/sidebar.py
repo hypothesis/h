@@ -11,5 +11,6 @@ def app_config(request):
     """
     return {
         'apiUrl': request.route_url('api'),
+        'serviceUrl': request.route_url('index'),
         'websocketUrl': _websocketize(request.route_url('ws')),
     }

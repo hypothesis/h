@@ -517,6 +517,7 @@ describe('annotation', function() {
     var fakePermissions;
     var fakePersonaFilter;
     var fakeSession;
+    var fakeSettings;
     var fakeTags;
     var fakeTime;
     var fakeUrlEncodeFilter;
@@ -707,6 +708,10 @@ describe('annotation', function() {
         }
       };
 
+      fakeSettings = {
+        serviceUrl: 'https://test.hypothes.is/',
+      };
+
       fakeTags = {
         filter: sandbox.stub().returns('a while ago'),
         store: sandbox.stub()
@@ -739,6 +744,7 @@ describe('annotation', function() {
       $provide.value('documentTitleFilter', fakeDocumentTitleFilter);
       $provide.value('documentDomainFilter', fakeDocumentDomainFilter);
       $provide.value('session', fakeSession);
+      $provide.value('settings', fakeSettings);
       $provide.value('tags', fakeTags);
       $provide.value('time', fakeTime);
       $provide.value('urlencodeFilter', fakeUrlEncodeFilter);
@@ -1731,6 +1737,9 @@ describe('annotation', function() {
           setDefault: function() {}
         },
         session: session,
+        settings: {
+          serviceUrl: 'https://test.hypothes.is/'
+        },
         tags: args.tags || {
           store: function() {}
         },
@@ -1766,6 +1775,7 @@ describe('annotation', function() {
         $provide.value('flash', locals.flash);
         $provide.value('permissions', locals.permissions);
         $provide.value('session', locals.session);
+        $provide.value('settings', locals.settings);
         $provide.value('tags', locals.tags);
         $provide.value('time', locals.time);
         $provide.value('annotationUI', locals.annotationUI);

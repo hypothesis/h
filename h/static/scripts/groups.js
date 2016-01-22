@@ -11,14 +11,12 @@
  */
 'use strict';
 
-var baseURI = require('document-base-uri');
-
 var STORAGE_KEY = 'hypothesis.groups.focus';
 
 var events = require('./events');
 
 // @ngInject
-function groups(localStorage, session, $rootScope, $http) {
+function groups(localStorage, session, settings, $rootScope, $http) {
   // The currently focused group. This is the group that's shown as selected in
   // the groups dropdown, the annotations displayed are filtered to only ones
   // that belong to this group, and any new annotations that the user creates
@@ -45,7 +43,7 @@ function groups(localStorage, session, $rootScope, $http) {
   function leave(id) {
     var response = $http({
       method: 'POST',
-      url: baseURI + 'groups/' + id + '/leave',
+      url: settings.serviceUrl + 'groups/' + id + '/leave',
     });
 
     // the groups list will be updated in response to a session state

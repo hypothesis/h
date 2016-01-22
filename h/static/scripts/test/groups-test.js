@@ -1,7 +1,5 @@
 'use strict';
 
-var baseURI = require('document-base-uri');
-
 var events = require('../events');
 var groups = require('../groups');
 
@@ -23,6 +21,9 @@ describe('groups', function() {
   var fakeLocalStorage;
   var fakeRootScope;
   var fakeHttp;
+  var fakeSettings = {
+    serviceUrl: 'https://test.hypothes.is/'
+  };
   var sandbox;
 
   beforeEach(function() {
@@ -52,7 +53,8 @@ describe('groups', function() {
   });
 
   function service() {
-    return groups(fakeLocalStorage, fakeSession, fakeRootScope, fakeHttp);
+    return groups(fakeLocalStorage, fakeSession,
+                  fakeSettings, fakeRootScope, fakeHttp);
   }
 
   describe('.all()', function() {
@@ -160,7 +162,7 @@ describe('groups', function() {
       var s = service();
       s.leave('id2');
       assert.calledWithMatch(fakeHttp, {
-        url: baseURI + 'groups/id2/leave',
+        url: fakeSettings.serviceUrl + 'groups/id2/leave',
         method: 'POST'
       });
     });
