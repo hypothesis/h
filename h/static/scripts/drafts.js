@@ -17,10 +17,13 @@
 function DraftStore() {
   this._drafts = [];
 
-  // returns true if 'draft' is a draft for a given
-  // annotation. Annotations are matched by ID
-  // and annotation instance (for unsaved annotations
-  // which have no ID)
+  /**
+   * Returns true if 'draft' is a draft for a given
+   * annotation.
+   *
+   * Annotations are matched by ID and annotation instance (for unsaved
+   * annotations which have no ID)
+   */
   function match(draft, model) {
     return draft.model === model ||
            (draft.model.id && model.id === draft.model.id);
@@ -49,11 +52,12 @@ function DraftStore() {
   /** Retrieve the draft changes for an annotation. */
   this.get = function get(model) {
     for (var i = 0; i < this._drafts.length; i++) {
-      if (match(this._drafts[i], model)) {
+      var draft = this._drafts[i];
+      if (match(draft, model)) {
         return {
-          isPrivate: this._drafts[i].isPrivate,
-          tags: this._drafts[i].tags,
-          text: this._drafts[i].text,
+          isPrivate: draft.isPrivate,
+          tags: draft.tags,
+          text: draft.text,
         };
       }
     }
@@ -81,6 +85,7 @@ function DraftStore() {
     });
   };
 
+  /** Remove all drafts. */
   this.discard = function discard() {
     this._drafts = [];
   };
