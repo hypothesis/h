@@ -149,7 +149,12 @@
          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
     </div>
 
-    <div class="annotation-actions" ng-if="!vm.editing() && vm.id()">
+    <div class="annotation-actions" ng-if="vm.isSaving">
+      Saving...
+    </div>
+
+    <div class="annotation-actions" ng-if="!vm.isSaving && !vm.editing() && vm.id()">
+      <div ng-show="vm.isSaving">Saving…</div>
       <button class="small btn btn-clean"
               ng-click="vm.reply()"
               ><i class="h-icon-reply btn-icon"></i> Reply</button>
@@ -166,7 +171,7 @@
         </span>
       </span>
       <button class="small btn btn-clean"
-              ng-show="vm.authorize('update')"
+              ng-show="vm.authorize('update') && !vm.isSaving"
               ng-click="vm.edit()"
               ><i class="h-icon-edit btn-icon"></i> Edit</button>
       <button class="small btn btn-clean"

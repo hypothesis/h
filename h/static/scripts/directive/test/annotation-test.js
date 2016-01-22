@@ -262,99 +262,6 @@ describe('annotation', function() {
     });
   });
 
-  describe('validate()', function() {
-    var validate = require('../annotation').validate;
-
-    it('returns undefined if value is not an object', function() {
-      var i;
-      var values = [2, 'foo', true, null];
-      for (i = 0; i < values.length; i++) {
-        assert.equal(validate(values[i]));
-      }
-    });
-
-    it(
-      'returns the length if the value contains a non-empty tags array',
-      function() {
-        assert.equal(
-          validate({
-            tags: ['foo', 'bar'],
-            permissions: {
-              read: ['group:__world__']
-            },
-            target: [1, 2, 3]
-          }),
-          2);
-      }
-    );
-
-    it(
-      'returns the length if the value contains a non-empty text string',
-      function() {
-        assert.equal(
-          validate({
-            text: 'foobar',
-            permissions: {
-              read: ['group:__world__']
-            },
-            target: [1, 2, 3]
-          }),
-          6);
-      }
-    );
-
-    it('returns true for private highlights', function() {
-      assert.equal(
-        validate({
-          permissions: {
-            read: ['acct:seanh@hypothes.is']
-          },
-          target: [1, 2, 3]
-        }),
-        true);
-    });
-
-    it('returns true for group highlights', function() {
-      assert.equal(
-        validate({
-          permissions: {
-            read: ['group:foo']
-          },
-          target: [1, 2, 3]
-        }),
-        true);
-    });
-
-    it('returns false for public highlights', function() {
-      assert.equal(
-        validate(
-          {text: undefined, tags: undefined, target: [1, 2, 3],
-           permissions: {read: ['group:__world__']}}
-        ),
-        false);
-    });
-
-    it('handles values with no permissions', function() {
-      assert.equal(
-        validate({
-          permissions: void 0,
-          target: [1, 2, 3]
-        }),
-        true);
-    });
-
-    it('handles permissions objects with no read', function() {
-      assert.equal(
-        validate({
-          permissions: {
-            read: void 0
-          },
-          target: [1, 2, 3]
-        }),
-        true);
-    });
-  });
-
   describe('link', function () {
     var link = require('../annotation').link;
 
@@ -1120,6 +1027,7 @@ describe('annotation', function() {
         parts.controller.isPrivate = true;
         parts.annotation.$update = sinon.stub().returns(Promise.resolve());
         parts.controller.edit();
+        parts.controller.form.text = 'test';
         parts.controller.setPrivacy('shared');
         return parts.controller.save().then(function() {
           assert.equal(parts.controller.isPrivate, false);
@@ -1131,6 +1039,7 @@ describe('annotation', function() {
         parts.annotation.$update = sinon.stub().returns(Promise.resolve());
         parts.controller.edit();
         parts.controller.setPrivacy('shared');
+        parts.controller.form.text = 'test';
         return parts.controller.save().then(function() {
           assert(fakePermissions.setDefault.calledWithExactly('shared'));
         });
@@ -1245,6 +1154,7 @@ describe('annotation', function() {
         };
         var controller = createDirective(annotation).controller;
         controller.action = 'create';
+        controller.form.text = 'test';
         return controller.save().then(function () {
           assert.equal(controller.relativeTimestamp, 'a while ago');
         });
@@ -1270,6 +1180,7 @@ describe('annotation', function() {
         var controller = createDirective(annotation).controller;
         assert.equal(controller.relativeTimestamp, 'ages ago');
         controller.edit();
+        controller.form.text = 'test';
         clock.restore();
         return controller.save().then(function () {
           assert.equal(controller.relativeTimestamp, 'just now');
@@ -1414,6 +1325,7 @@ describe('annotation', function() {
       function controllerWithActionCreate() {
         var controller = createDirective(annotation).controller;
         controller.action = 'create';
+        controller.form.text = 'new annotation';
         return controller;
       }
 
@@ -1471,6 +1383,36 @@ describe('annotation', function() {
           assert(fakeFlash.error.notCalled);
         }
       );
+
+      it('shows a saving indicator when saving an annotation', function() {
+        var controller = controllerWithActionCreate();
+        var create;
+        annotation.$create.returns(new Promise(function (resolve) {
+          create = resolve;
+        }));
+        var saved = controller.save();
+        assert.equal(controller.isSaving, true);
+        assert.equal(controller.action, 'view');
+        create();
+        return saved.then(function () {
+          assert.equal(controller.isSaving, false);
+        });
+      });
+
+      it('reverts to edit mode if saving fails', function () {
+        var controller = controllerWithActionCreate();
+        var failCreation;
+        annotation.$create.returns(new Promise(function (resolve, reject) {
+          failCreation = reject;
+        }));
+        var saved = controller.save();
+        assert.equal(controller.isSaving, true);
+        failCreation({status: -1});
+        return saved.then(function () {
+          assert.equal(controller.isSaving, false);
+          assert.ok(controller.editing());
+        });
+      });
     });
 
     describe('saving an edited an annotation', function() {
@@ -1485,37 +1427,36 @@ describe('annotation', function() {
       function controllerWithActionEdit() {
         var controller = createDirective(annotation).controller;
         controller.action = 'edit';
+        controller.form.text = 'updated text';
         return controller;
       }
 
       it(
         'flashes a generic error if the server cannot be reached',
-        function(done) {
+        function() {
           var controller = controllerWithActionEdit();
           annotation.$update.returns(Promise.reject({
-            status: 0
+            status: -1
           }));
-          controller.save().then(function() {
+          return controller.save().then(function() {
             assert(fakeFlash.error.calledWith(
               'Service unreachable.', 'Saving annotation failed'));
-            done();
           });
         }
       );
 
       it(
         'flashes an error if saving the annotation fails on the server',
-        function(done) {
+        function() {
           var controller = controllerWithActionEdit();
           annotation.$update.returns(Promise.reject({
             status: 500,
             statusText: 'Server Error',
             data: {}
           }));
-          controller.save().then(function() {
+          return controller.save().then(function() {
             assert(fakeFlash.error.calledWith(
               '500 Server Error', 'Saving annotation failed'));
-            done();
           });
         }
       );
@@ -1525,6 +1466,7 @@ describe('annotation', function() {
         function() {
           var controller = controllerWithActionEdit();
           annotation.$update.returns(Promise.resolve());
+          controller.form.text = 'updated text';
           controller.save();
           assert(fakeFlash.error.notCalled);
         }
@@ -1571,6 +1513,7 @@ describe('annotation', function() {
         annotation.$update = sandbox.stub().returns(Promise.resolve());
         var controller = createDirective(annotation).controller;
         controller.edit();
+        controller.form.text = 'test annotation';
         return controller.save().then(function() {
           assert.calledWith(fakeDrafts.remove, annotation);
         });
