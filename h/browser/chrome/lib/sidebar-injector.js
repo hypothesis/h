@@ -12,6 +12,13 @@ function toIIFEString(fn) {
   return '(' + fn.toString() + ')()';
 }
 
+function addMetaTagFn(name, content) {
+  var metaTag = document.createElement('meta');
+  metaTag.name = name;
+  metaTag.content = content;
+  document.head.appendChild(metaTag);
+}
+
 /* The SidebarInjector is used to deploy and remove the Hypothesis sidebar
  * from tabs. It also deals with loading PDF documents into the PDF.js viewer
  * when applicable.
@@ -187,7 +194,9 @@ function SidebarInjector(chromeTabs, dependencies) {
       }
 
       return injectScript(tab.id, '/public/config.js').then(function () {
-        injectScript(tab.id, '/public/embed.js').then(resolve);
+        injectScript(tab.id, '/public/embed.js', {
+          'hypothesis-resource-root': extensionURL('/').slice(0,-1),
+        }).then(resolve);
       });
     });
   }
@@ -210,10 +219,40 @@ function SidebarInjector(chromeTabs, dependencies) {
     });
   }
 
-  function injectScript(tabId, path) {
+  /**
+   * Generates code to add a set of <meta> tags to
+   * the page which expose keys and values from an @p env object.
+   *
+   * ie. Given '{ foo : "bar" }', this function will return
+   * script code to add '<meta name="foo" content="bar">' to the
+   * <head> element of the page.
+   */
+  function generateMetaTagCode(env) {
+    var envSetupCode = '';
+    if (env) {
+      var addMetaTagFnStr = addMetaTagFn.toString();
+      Object.keys(env).forEach(function (key) {
+        var content = JSON.stringify(env[key].toString());
+        envSetupCode += '(' + addMetaTagFnStr + ')' +
+          '("' + key + '",' + content + ');';
+      });
+    }
+    return envSetupCode;
+  }
+
+  /**
+   * Inject the script from the source file at @p path into the
+   * page currently loaded in the tab at the given ID.
+   *
+   * @param env An optional map of keys and values to expose to the
+   *            injected script via the 'window.HYPOTHESIS_ENV' object.
+   */
+  function injectScript(tabId, path, env) {
     return new Promise(function (resolve) {
       var src  = extensionURL(path);
-      var code = 'var script = document.createElement("script");' +
+
+      var code = generateMetaTagCode(env) +
+        'var script = document.createElement("script");' +
         'script.src = "{}";' +
         'document.body.appendChild(script);';
       var code = code.replace('{}', src);
