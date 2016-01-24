@@ -3,6 +3,7 @@ from pyramid import i18n
 
 from h.api import search
 from h import feeds
+from h import models
 
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -10,7 +11,8 @@ _ = i18n.TranslationStringFactory(__package__)
 
 def _annotations(request):
     """Return the annotations from the search API."""
-    return search.search(request, request.params)['rows']
+    rows = search.search(request, request.params)['rows']
+    return [models.Annotation(a) for a in rows]
 
 
 @view_config(route_name='stream_atom')

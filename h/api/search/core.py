@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from h.api import models
 from h.api import nipsa
 from h.api.search import query
 
@@ -50,13 +49,14 @@ def search(request, params, private=True, separate_replies=False):
     builder = make_builder()
     if separate_replies:
         builder.append_filter(query.TopLevelAnnotationsFilter())
-    results = models.Annotation.search_raw(builder.build(params),
-                                           raw_result=True,
-                                           authorization_enabled=False)
 
+    es = request.es
+    results = es.conn.search(index=es.index,
+                             doc_type=es.t.annotation,
+                             body=builder.build(params))
     total = results['hits']['total']
     docs = results['hits']['hits']
-    rows = [models.Annotation(d['_source'], id=d['_id']) for d in docs]
+    rows = [dict(d['_source'], id=d['_id']) for d in docs]
     return_value = {"rows": rows, "total": total}
 
     if separate_replies:
@@ -65,9 +65,9 @@ def search(request, params, private=True, separate_replies=False):
         builder = make_builder()
         builder.append_matcher(query.RepliesMatcher(
             [h['_id'] for h in results['hits']['hits']]))
-        reply_results = models.Annotation.search_raw(
-            builder.build({'limit': 100}), raw_result=True,
-            authorization_enabled=False)
+        reply_results = es.conn.search(index=es.index,
+                                       doc_type=es.t.annotation,
+                                       body=builder.build({'limit': 100}))
 
         if len(reply_results['hits']['hits']) < reply_results['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "
@@ -76,8 +76,7 @@ def search(request, params, private=True, separate_replies=False):
                      "reply set.")
 
         reply_docs = reply_results['hits']['hits']
-        reply_rows = [models.Annotation(d['_source'], id=d['_id'])
-                      for d in reply_docs]
+        reply_rows = [dict(d['_source'], id=d['_id']) for d in reply_docs]
 
         return_value["replies"] = reply_rows
 

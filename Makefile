@@ -72,16 +72,20 @@ extensions: build/$(ISODATE)-$(BUILD_ID)-chrome-prod.zip
 
 build/%-chrome-stage.zip:
 	@rm -rf build/chrome $@
-	hypothesis-buildext conf/production.ini chrome \
+	SENTRY_DSN=$(SENTRY_DSN_STAGE) hypothesis-buildext \
+		conf/production.ini \
+		chrome \
 		--base 'https://stage.hypothes.is' \
 		--assets 'chrome-extension://iahhmhdkmkifclacffbofcnmgkpalpoj/public'
-	@zip -r $@ build/chrome
+	@zip -qr $@ build/chrome
 
 build/%-chrome-prod.zip:
 	@rm -rf build/chrome $@
-	hypothesis-buildext conf/production.ini chrome \
+	SENTRY_DSN=$(SENTRY_DSN_PROD) hypothesis-buildext \
+		conf/production.ini \
+		chrome \
 		--base 'https://hypothes.is' \
 		--assets 'chrome-extension://bjfhmglciegochdpefhhlphglcehbmek/public'
-	@zip -r $@ build/chrome
+	@zip -qr $@ build/chrome
 
 .PHONY: clean cover deps dev extensions lint test

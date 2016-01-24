@@ -5,6 +5,7 @@ import json
 
 import unittest
 import mock
+from mock import patch
 
 from pyramid import testing
 import pytest
@@ -34,52 +35,8 @@ class TestAnnotationView(unittest.TestCase):
         assert any(test(d) for d in result['meta_attrs'])
 
 
-class TestJS(object):
-    """Unit tests for the js() view callable."""
-
-    def test_blocklist(self):
-        """It should pass the blocklist as a string to embed.js."""
-        request = mock.MagicMock()
-        blocklist = {"foo": "bar"}
-        request.registry.settings = {'h.blocklist': blocklist}
-
-        data = views.embed({}, request)
-
-        assert data['blocklist'] == json.dumps(blocklist)
-
-
-class TestValidateBlocklist(object):
-    """Unit tests for the _validate_blocklist() function."""
-
-    def test_valid(self):
-        """It should load the setting into a dict."""
-        blocklist = {
-            "seanh.cc": {},
-            "finance.yahoo.com": {},
-            "twitter.com": {}
-        }
-        config = mock.MagicMock()
-        config.registry.settings = {"h.blocklist": json.dumps(blocklist)}
-
-        views._validate_blocklist(config)
-
-        assert config.registry.settings["h.blocklist"] == blocklist, (
-            "_validate_blocklist() should parse the JSON and turn it into a "
-            "dict")
-
-    def test_invalid_json(self):
-        """It should raise ValueError if the setting is invalid."""
-        config = mock.MagicMock()
-        config.registry.settings = {"h.blocklist": "invalid"}
-
-        with pytest.raises(ValueError):
-            views._validate_blocklist(config)
-
-    def test_default_value(self):
-        """It should insert an empty dict if there's no setting."""
-        config = mock.MagicMock()
-        config.registry.settings = {}
-
-        views._validate_blocklist(config)
-
-        assert config.registry.settings["h.blocklist"] == {}
+@pytest.fixture(autouse=True)
+def app_config(request):
+    patcher = mock.patch('h.views.app_config', autospec=True)
+    patcher.start()
+    request.addfinalizer(patcher.stop)

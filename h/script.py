@@ -14,8 +14,8 @@ from pyramid import paster
 from pyramid.request import Request
 
 from h import __version__
-from h import reindexer
 from h import accounts
+from h.api.search import config as search_config
 from h._compat import PY2, text_type
 
 ANNOTOOL_OPERATIONS = {e.name: e for e in iter_entry_points('h.annotool')}
@@ -104,7 +104,7 @@ def annotool(args):
     annotations = es_helpers.scan(request.es.conn,
                                   query={'query': {'match_all': {}}},
                                   index=request.es.index,
-                                  doc_type='annotation')
+                                  doc_type=request.es.t.annotation)
 
     chunksize = 1000
     state = {'total': 0, 'pending': []}
@@ -112,7 +112,7 @@ def annotool(args):
     def _flush():
         bodies = [{
             '_index': request.es.index,
-            '_type': 'annotation',
+            '_type': request.es.t.annotation,
             '_op_type': 'update',
             '_id': x['_id'],
             'doc': x['_source'],
@@ -154,23 +154,32 @@ _add_common_args(parser_assets)
 
 
 def reindex(args):
-    """Reindex the annotations into a new Elasticsearch index."""
+    """Reindex the annotations into a new ElasticSearch index."""
     request = bootstrap(args)
 
-    r = reindexer.Reindexer(request.es.conn, interactive=True)
+    # Configure the new index
+    search_config.configure_index(request.es, args.target)
 
-    r.reindex(args.old_index, args.new_index)
+    # Reindex the annotations
+    es_helpers.reindex(client=request.es.conn,
+                       source_index=request.es.index,
+                       target_index=args.target)
 
-    if args.alias is not None:
-        r.alias(args.new_index, args.alias)
+    if args.update_alias:
+        request.es.conn.indices.update_aliases(body={'actions': [
+            # Remove all existing aliases
+            {"remove": {"index": "*", "alias": request.es.index}},
+            # Alias current index name to new target
+            {"add": {"index": args.target, "alias": request.es.index}},
+        ]})
 
 parser_reindex = subparsers.add_parser('reindex', help=reindex.__doc__)
 _add_common_args(parser_reindex)
-parser_reindex.add_argument('old_index', help='The index to read from')
-parser_reindex.add_argument('new_index', help='The index to write to')
-parser_reindex.add_argument('alias', nargs='?',
-                            help='Alias to repoint to new_index when '
-                                 'reindexing is complete')
+parser_reindex.add_argument('-u', '--update-alias',
+                            action='store_true',
+                            help='Whether to assume the current index is an '
+                                 'alias and update it on reindex completion')
+parser_reindex.add_argument('target', help='The name of the target index')
 
 
 def token(args):

@@ -1,10 +1,11 @@
 {% extends "layouts/base.html.jinja2" %}
 
 {% block base_tag %}
-  {# several parts of the app rely on document.baseURI returning the root
-     URL. They should be fixed to use a different source.
-  #}
-  <base target="_top" href="{{ base_url }}" />
+  {# the <base> tag is required by Angular JS when HTML 5 history is
+     enabled. We shouldn't really need this because a given instance of the app
+     only ever displays a single route.
+   #}
+  <base target="_top" href="/" />
 {% endblock %}
 
 {% block styles %}
@@ -33,35 +34,20 @@
   />
   </top-bar>
 
-  <div class="create-account-banner" ng-if="auth.status === 'signed-out'">
+  <div class="create-account-banner" ng-if="isSidebar && auth.status === 'signed-out'">
     To annotate this document
-    <a href="{{ request.route_path('register') }}" target="_blank">
+    <a href="{{ request.route_url('register') }}" target="_blank">
       create a free account
     </a>
     or <a href="" ng-click="login()">sign in</a>
   </div>
 
   <div class="content" ng-cloak>
-    <!-- Account Dialog -->
-    <div class="sheet" ng-if="accountDialog.visible">
-      <i class="close h-icon-close"
-         role="button"
-         title="Close"
-         ng-click="accountDialog.visible = false"></i>
-      {{ include_raw("h:templates/client/auth.html") }}
-    </div>
-    <!-- / Account Dialog -->
-
-    <!-- Sidebar tutorial -->
+    <login-form ng-if="accountDialog.visible"
+                on-close="accountDialog.visible=false"></login-form>
     <sidebar-tutorial ng-if="isSidebar"></sidebar-tutorial>
-
-    <!-- Share View Dialog -->
     <share-dialog ng-show="shareDialog.visible"></share-dialog>
-    <!-- / Share View Dialog -->
-
-    <!-- Angular view -->
     <main ng-view=""></main>
-    <!-- / Angular view -->
   </div>
 {% endblock %}
 
@@ -74,6 +60,9 @@
   </script>
   <script type="text/ng-template" id="group_list.html">
     {{ include_raw("h:templates/client/group_list.html") }}
+  </script>
+  <script type="text/ng-template" id="login_form.html">
+    {{ include_raw("h:templates/client/login_form.html") }}
   </script>
   <script type="text/ng-template" id="markdown.html">
     {{ include_raw("h:templates/client/markdown.html") }}
@@ -116,10 +105,7 @@
 
 {% block scripts %}
   <script id="hypothesis-settings" type="application/json">
-    {
-      "apiUrl": "{{ request.route_url('api') }}",
-      "websocketUrl": "{{ request.route_url('ws') | websocketize }}"
-    }
+  {{ app_config | to_json }}
   </script>
   {% assets "app_js" %}
     <script src="{{ ASSET_URL }}"></script>

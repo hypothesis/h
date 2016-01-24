@@ -4,25 +4,6 @@ var events = require('../../events');
 var groupList = require('../group-list');
 var util = require('./util');
 
-describe('GroupListController', function () {
-  var controller;
-  var $scope;
-
-  beforeEach(function () {
-    $scope = {
-      $on: sinon.stub(),
-      $apply: sinon.stub(),
-    };
-    var fakeWindow = {};
-    var fakeGroups = {
-      all: sinon.stub(),
-      focused: sinon.stub(),
-    };
-    controller = new groupList.Controller($scope, fakeWindow, fakeGroups);
-  });
-
-});
-
 // returns true if a jQuery-like element has
 // been hidden directly via an ng-show directive.
 //
@@ -40,12 +21,18 @@ describe('groupList', function () {
 
   var groups;
   var fakeGroups;
+  var fakeSettings = {
+    serviceUrl: 'https://test.hypothes.is/',
+  };
 
   before(function() {
     angular.module('app', [])
       .directive('groupList', groupList.directive)
       .factory('groups', function () {
         return fakeGroups;
+      })
+      .factory('settings', function () {
+        return fakeSettings;
       });
   });
 
@@ -133,5 +120,15 @@ describe('groupList', function () {
     var element = createGroupList();
     clickLeaveIcon(element, true);
     assert.notCalled(fakeGroups.focus);
+  });
+
+  it('should open a window when "New Group" is clicked', function () {
+    var element = createGroupList();
+    $window.open = sinon.stub();
+    var newGroupLink =
+      element[0].querySelector('.new-group-btn a');
+    angular.element(newGroupLink).click();
+    assert.calledWith($window.open, fakeSettings.serviceUrl + 'groups/new',
+      '_blank');
   });
 });

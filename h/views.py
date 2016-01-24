@@ -15,6 +15,7 @@ from h import session
 from h.api.views import json_view
 from h.resources import Annotation
 from h.resources import Stream
+from h.sidebar import app_config
 
 
 log = logging.getLogger(__name__)
@@ -71,6 +72,7 @@ def annotation(context, request):
                                      annotation['id'])
 
     return {
+        'app_config': app_config(request),
         'meta_attrs': (
             {'property': 'og:title', 'content': title},
             {'property': 'og:description', 'content': ''},
@@ -89,13 +91,15 @@ def annotation(context, request):
 def embed(context, request):
     request.response.content_type = b'text/javascript'
     return {
-        'blocklist': json.dumps(request.registry.settings['h.blocklist'])
+        'app_config': app_config(request),
     }
 
 
 @view_config(route_name='widget', renderer='h:templates/app.html.jinja2')
 def widget(context, request):
-    return {}
+    return {
+        'app_config': app_config(request)
+    }
 
 
 @view_config(renderer='h:templates/help.html.jinja2', route_name='help')
@@ -134,6 +138,7 @@ def stream(context, request):
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')
     return {
+        'app_config': app_config(request),
         'link_tags': [
             {'rel': 'alternate', 'href': atom, 'type': 'application/atom+xml'},
             {'rel': 'alternate', 'href': rss, 'type': 'application/rss+xml'},
@@ -148,32 +153,6 @@ def notfound(context, request):
     return {}
 
 
-def _validate_blocklist(config):
-    """Validate the "h.blocklist" config file setting.
-
-    h.blocklist in the config file should be a JSON object as a string, for
-    example:
-
-        h.blocklist = {
-          "www.quirksmode.org": {},
-          "finance.yahoo.com": {}
-        }
-
-    This function replaces the string value on registry.settings with a dict.
-    It inserts a default value ({}) if there's nothing in the config file.
-
-    :raises RuntimeError: if the value in the config file is invalid
-
-    """
-    try:
-        config.registry.settings['h.blocklist'] = json.loads(
-            config.registry.settings.get('h.blocklist', '{}'))
-    except ValueError as err:
-        raise ValueError(
-            "The h.blocklist setting in the config file is invalid: " +
-            str(err))
-
-
 def includeme(config):
     config.include('h.assets')
 
@@ -186,7 +165,5 @@ def includeme(config):
 
     config.add_route('session', '/app')
     config.add_route('stream', '/stream')
-
-    _validate_blocklist(config)
 
     config.scan(__name__)

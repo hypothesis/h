@@ -9,7 +9,7 @@
       <span>
         <a class="annotation-user"
            target="_blank"
-           ng-href="{{::vm.baseURI}}u/{{vm.user()}}"
+           ng-href="{{::vm.serviceUrl}}u/{{vm.user()}}"
            >{{vm.user() | persona}}</a>
       </span>
 
@@ -49,7 +49,7 @@
        target="_blank"
        title="{{vm.absoluteTimestamp}}"
        ng-if="!vm.editing() && vm.updated()"
-       ng-href="{{::vm.baseURI}}a/{{vm.id()}}"
+       ng-href="{{::vm.serviceUrl}}a/{{vm.id()}}"
        >{{vm.relativeTimestamp}}</a>
   </header>
 
@@ -106,7 +106,7 @@
        ng-if="(vm.canCollapseBody || vm.form.tags.length) && !vm.editing()">
     <ul class="tag-list">
       <li class="tag-item" ng-repeat="tag in vm.form.tags">
-        <a href="/stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
+        <a href="{{::vm.serviceUrl}}stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
       </li>
     </ul>
     <div class="u-stretch"></div>

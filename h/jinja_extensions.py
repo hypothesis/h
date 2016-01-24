@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from functools import wraps
 
+import json
+
 from jinja2 import Markup
 from jinja2.ext import Extension
 
@@ -14,7 +16,7 @@ class Filters(Extension):
     def __init__(self, environment):
         super(Filters, self).__init__(environment)
 
-        environment.filters['websocketize'] = websocketize
+        environment.filters['to_json'] = to_json
 
 
 class IncludeRawExtension(Extension):
@@ -29,11 +31,9 @@ class IncludeRawExtension(Extension):
         environment.globals['include_raw'] = _get_includer(environment)
 
 
-def websocketize(value):
-    """Convert a HTTP(S) URL into a WS(S) URL."""
-    if not (value.startswith('http://') or value.startswith('https://')):
-        raise ValueError('cannot websocketize non-HTTP URL')
-    return 'ws' + value[len('http'):]
+def to_json(value):
+    """Convert a dict into a JSON string"""
+    return Markup(json.dumps(value))
 
 
 def _get_includer(environment):

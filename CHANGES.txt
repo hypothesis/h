@@ -1,3 +1,19 @@
+Unreleased
+===================
+
+Miscellanea
+-----------
+
+- Removed the incomplete Firefox extension code which had fallen
+  a long way behind Chrome, with the intention of replacing it with
+  one based on WebExtensions in the near future.
+
+- Removed the option to configure a static blocklist of URLs on which
+  the Hypothesis client would refuse to load.
+
+- Strip WebTrends "WT.*" query parameters as part of URI normalization (#2862).
+
+
 0.8.11 (2016-01-14)
 ===================
 

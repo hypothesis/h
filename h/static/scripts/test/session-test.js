@@ -9,6 +9,7 @@ describe('h:session', function () {
   var $rootScope;
 
   var fakeFlash;
+  var fakeRaven;
   var fakeXsrf;
   var sandbox;
   var session;
@@ -22,15 +23,16 @@ describe('h:session', function () {
 
   beforeEach(mock.module(function ($provide) {
     sandbox = sinon.sandbox.create();
-
-    var fakeDocument = {
-      prop: sandbox.stub()
-    };
-    fakeDocument.prop.withArgs('baseURI').returns('http://foo.com/');
     fakeFlash = {error: sandbox.spy()};
+    fakeRaven = {
+      setUserInfo: sandbox.spy(),
+    };
 
-    $provide.value('$document', fakeDocument);
+    $provide.value('settings', {
+      serviceUrl: 'https://test.hypothes.is',
+    });
     $provide.value('flash', fakeFlash);
+    $provide.value('raven', fakeRaven);
   }));
 
 
@@ -48,8 +50,8 @@ describe('h:session', function () {
 
   // There's little point testing every single route here, as they're
   // declarative and ultimately we'd be testing ngResource.
-  describe('#login()', function () {
-    var url = 'http://foo.com/app?__formid__=login';
+  describe('.login()', function () {
+    var url = 'https://test.hypothes.is/app?__formid__=login';
 
     it('should send an HTTP POST to the action', function () {
       $httpBackend.expectPOST(url, {code: 123}).respond({});
@@ -127,8 +129,8 @@ describe('h:session', function () {
     });
   });
 
-  describe('#load()', function () {
-    var url = 'http://foo.com/app';
+  describe('.load()', function () {
+    var url = 'https://test.hypothes.is/app';
 
     it('should fetch the session data', function () {
       $httpBackend.expectGET(url).respond({});
@@ -157,7 +159,7 @@ describe('h:session', function () {
     });
   });
 
-  describe('#update()', function () {
+  describe('.update()', function () {
     it('broadcasts SESSION_CHANGED when the session changes', function () {
       var sessionChangeCallback = sinon.stub();
 
@@ -205,6 +207,16 @@ describe('h:session', function () {
         csrf: 'dummytoken'
       });
       assert.calledOnce(userChangeCallback);
+    });
+
+    it('updates the user ID for Sentry error reports', function () {
+      session.update({
+        userid: 'anne',
+        csrf: 'dummytoken',
+      });
+      assert.calledWith(fakeRaven.setUserInfo, {
+        id: 'anne',
+      });
     });
   });
 });

@@ -5,21 +5,24 @@ is exposed as the command-line utility hypothesis-buildext.
 """
 import argparse
 import codecs
+import json
 import logging
 import os
 import os.path
 import shutil
 import subprocess
 import textwrap
-import json
 
 from pyramid import paster
 from pyramid.path import AssetResolver
-from pyramid.request import Request
 from pyramid.renderers import render
+from pyramid.request import Request
+import raven
 
 import h
 from h._compat import urlparse
+from h.sidebar import app_config
+
 
 log = logging.getLogger('h.buildext')
 
@@ -112,11 +115,6 @@ def chrome_manifest(request):
                   request=request)
 
 
-def firefox_manifest(request):
-    return render('h:browser/firefox/package.json.jinja2',
-           {'version': h.__version__},
-           request=request)
-
 def build_type_from_api_url(api_url):
     """
     Returns the default build type ('production', 'staging' or 'dev')
@@ -130,14 +128,27 @@ def build_type_from_api_url(api_url):
     else:
         return 'dev'
 
+
 def settings_dict(env):
     """ Returns a dictionary of settings to be bundled with the extension """
-    api_url = env['request'].route_url('api')
-    return {
-        'blocklist': env['registry'].settings['h.blocklist'],
+    request = env['request']
+    config = app_config(request)
+    api_url = config['apiUrl']
+    sentry_dsn = request.sentry.get_public_dsn('https')
+
+    if sentry_dsn:
+        config.update({
+            'raven': {
+              'dsn': sentry_dsn,
+              'release': h.__version__,
+            },
+        })
+
+    config.update({
         'buildType': build_type_from_api_url(api_url),
-        'apiUrl': api_url,
-    }
+    })
+    return config
+
 
 def get_env(config_uri, base_url):
     """
@@ -148,6 +159,8 @@ def get_env(config_uri, base_url):
     request = Request.blank('', base_url=base_url)
     env = paster.bootstrap(config_uri, request)
     request.root = env['root']
+
+    request.sentry = raven.Client(release=raven.fetch_package_version('h'))
 
     # Ensure that the webassets URL is absolute
     request.webassets_env.url = urlparse.urljoin(base_url,
@@ -215,8 +228,12 @@ def build_chrome(args):
     # Render the sidebar html.
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(env, bundle_app=True)
+        request = env['request']
+        context = {
+          'app_config': app_config(request)
+        }
         with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
-            data = render('h:templates/app.html.jinja2', {}, env['request'])
+            data = render('h:templates/app.html.jinja2', context, request)
             fp.write(data)
     else:
         build_extension_common(env)
@@ -227,68 +244,8 @@ def build_chrome(args):
         fp.write(data)
 
     # Write build settings to a JSON file
-    with codecs.open('build/chrome/settings.json', 'w', 'utf-8') as fp:
-        fp.write(json.dumps(settings_dict(env)))
-
-
-def build_firefox(args):
-    """
-    Build the Firefox extension. You must supply the base URL of an h
-    installation with which this extension will communicate, such as
-    "http://localhost:5000" (the default) when developing locally or
-    "https://hypothes.is" to talk to the production Hypothesis application.
-
-    By default, the extension will load static assets (JavaScript/CSS/etc.)
-    from the application you specify. This can be useful when developing, but
-    when building a production extension (such as for deployment to Mozilla
-    Add-ons) you will need to specify an assets URL that links to the built
-    assets within the extension, such as:
-
-        resource://<extensionkey>/hypothesis/data
-    """
-    paster.setup_logging(args.config_uri)
-
-    os.environ['WEBASSETS_BASE_DIR'] = os.path.abspath('./build/firefox/data')
-    if args.assets is not None:
-        os.environ['WEBASSETS_BASE_URL'] = args.assets
-
-    env = get_env(args.config_uri, args.base)
-
-    # Prepare a fresh build.
-    clean('build/firefox')
-    os.makedirs('build/firefox')
-    copytree('h/browser/firefox', 'build/firefox')
-
-    # Bundle the extension assets.
-    webassets_env = env['request'].webassets_env
-    content_dir = webassets_env.directory
-
-    # Don't minify vendor libs per Mozilla policy.
-    # This is a bit hacky.
-    if webassets_env.debug is False:
-        webassets_env.debug = True
-        os.makedirs(content_dir + '/styles/vendor')
-        os.makedirs(content_dir + '/scripts/vendor')
-        os.makedirs(content_dir + '/scripts/vendor/katex')
-        os.makedirs(content_dir + '/scripts/vendor/polyfills')
-        for bundle in webassets_env:
-            if bundle.output is None:
-                continue
-            if 'vendor' in bundle.output:
-                for _, src in bundle.resolve_contents():
-                    dst = os.path.join(content_dir, bundle.output)
-                    dst = dst.replace('.min.js', '.js')
-                    shutil.copyfile(src, dst)
-            else:
-                bundle.debug = False
-
-    # Build the common components.
-    build_extension_common(env)
-
-    # Render the manifest.
-    with codecs.open('build/firefox/package.json', 'w', 'utf-8') as fp:
-        data = firefox_manifest(env['request'])
-        fp.write(data)
+    with codecs.open('build/chrome/settings-data.js', 'w', 'utf-8') as fp:
+        fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings_dict(env)))
 
 
 parser = argparse.ArgumentParser('hypothesis-buildext')
@@ -317,25 +274,9 @@ parser_chrome.add_argument('--assets',
                            default=None,
                            metavar='PATH/URL')
 
-parser_firefox = subparsers.add_parser(
-    'firefox',
-    help="build the Mozilla Firefox extension",
-    description=textwrap.dedent(build_firefox.__doc__),
-    formatter_class=argparse.RawDescriptionHelpFormatter)
-parser_firefox.add_argument('--base',
-                            help='Base URL',
-                            default='http://localhost:5000',
-                            metavar='URL')
-parser_firefox.add_argument('--assets',
-                            help='A path (relative to base) or URL from which '
-                                 'to load the static assets',
-                            default=None,
-                            metavar='PATH/URL')
-
 
 BROWSERS = {
     'chrome': build_chrome,
-    'firefox': build_firefox,
 }
 
 

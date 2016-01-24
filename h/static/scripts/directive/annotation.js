@@ -172,7 +172,7 @@ function updateViewModel($scope, time, domainModel, vm, permissions) {
     text: domainModel.text,
     tags: viewModelTagsFromDomainModelTags(domainModel.tags),
   };
-  vm.annotationURI = new URL('/a/' + domainModel.id, vm.baseURI).href;
+  vm.annotationURI = new URL('/a/' + domainModel.id, vm.serviceUrl).href;
   vm.isPrivate = permissions.isPrivate(
     domainModel.permissions, domainModel.user);
 
@@ -252,7 +252,7 @@ function viewModelTagsFromDomainModelTags(domainModelTags) {
 function AnnotationController(
   $document, $q, $rootScope, $scope, $timeout, $window, annotationUI,
   annotationMapper, drafts, flash, features, groups, permissions, session,
-  tags, time) {
+  settings, tags, time) {
 
   var vm = this;
   var domainModel;
@@ -281,8 +281,8 @@ function AnnotationController(
     // The remaining properties on vm are read-only properties for the
     // templates.
 
-    /** The baseURI for the website, e.g. 'https://hypothes.is/'. */
-    vm.baseURI = $document.prop('baseURI');
+    /** The URL for the Hypothesis service, e.g. 'https://hypothes.is/'. */
+    vm.serviceUrl = settings.serviceUrl;
 
     /** Give the template access to the feature flags. */
     vm.feature = features.flagEnabled;
@@ -384,6 +384,7 @@ function AnnotationController(
 
   function onAnnotationUpdated(event, updatedDomainModel) {
     if (updatedDomainModel.id === domainModel.id) {
+      domainModel = updatedDomainModel;
       updateView(updatedDomainModel);
     }
   }
@@ -699,9 +700,9 @@ function AnnotationController(
         }
 
         onFulfilled = function() {
+          drafts.remove(domainModel);
           $rootScope.$emit('annotationUpdated', updatedModel);
           view();
-          drafts.remove(domainModel);
         };
         onRejected = function(reason) {
           flash.error(

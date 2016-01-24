@@ -25,7 +25,6 @@ def settings_from_environment():
     _setup_statsd(settings)
     _setup_webassets(settings)
     _setup_websocket(settings)
-    _setup_blocklist(settings)
 
     return settings
 
@@ -82,6 +81,9 @@ def _setup_db(settings):
 def _setup_elasticsearch(settings):
     if 'ELASTICSEARCH_INDEX' in os.environ:
         settings['es.index'] = os.environ['ELASTICSEARCH_INDEX']
+
+    if 'ELASTICSEARCH_HOST' in os.environ:
+        settings['es.host'] = os.environ['ELASTICSEARCH_HOST']
 
     # ELASTICSEARCH_PORT and MAIL_PORT match Docker container links
     if 'ELASTICSEARCH_PORT' in os.environ:
@@ -180,8 +182,3 @@ def _setup_webassets(settings):
 def _setup_websocket(settings):
     if 'ALLOWED_ORIGINS' in os.environ:
         settings['origins'] = os.environ['ALLOWED_ORIGINS']
-
-
-def _setup_blocklist(settings):
-    if 'BLOCKLIST' in os.environ:
-        settings['h.blocklist'] = os.environ['BLOCKLIST']

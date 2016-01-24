@@ -1,24 +1,50 @@
 import mock
 import pytest
 
+from pyramid.testing import DummyRequest
+
 from h.api.search import core
 
 
-search_fixtures = pytest.mark.usefixtures('query', 'nipsa', 'models', 'log')
+def dummy_search_results(start=1, count=0, name='annotation'):
+    """Generate some dummy search results."""
+    out = {'hits': {'total': 0, 'hits': []}}
+
+    for i in range(start, start + count):
+        out['hits']['total'] += 1
+        out['hits']['hits'].append({
+            '_id': 'id_{}'.format(i),
+            '_source': {'name': '{}_{}'.format(name, i)},
+        })
+
+    return out
+
+
+def dummy_request():
+    """Return a mock request with a faked out ElasticSearch connection."""
+    es = mock.Mock(spec_set=['conn', 'index', 't'])
+    es.conn.search.return_value = dummy_search_results(0)
+
+    return DummyRequest(es=es)
+
+
+search_fixtures = pytest.mark.usefixtures('query', 'nipsa', 'log')
 
 
 @search_fixtures
 def test_search_passes_private_to_AuthFilter(query):
-    request = mock.Mock()
+    request = dummy_request()
 
-    core.search(request, mock.Mock(), private=True)
+    core.search(request, {}, private=True)
 
     query.AuthFilter.assert_called_once_with(request, private=True)
 
 
 @search_fixtures
 def test_search_does_not_exclude_replies(query):
-    result = core.search(mock.Mock(), mock.Mock())
+    request = dummy_request()
+
+    result = core.search(request, {})
 
     assert not query.TopLevelAnnotationsFilter.called, (
         "Replies should not be filtered out of the 'rows' list if "
@@ -29,8 +55,10 @@ def test_search_does_not_exclude_replies(query):
 
 
 @search_fixtures
-def test_search_queries_for_replies(query, models):
+def test_search_queries_for_replies(query):
     """It should do a second query for replies to the results of the first."""
+    request = dummy_request()
+
     # Mock the Builder objects that Builder() returns.
     builder = mock.Mock()
     query.Builder.side_effect = [
@@ -38,151 +66,80 @@ def test_search_queries_for_replies(query, models):
         builder
     ]
 
-    # Mock the search results that search_raw() returns.
-    models.Annotation.search_raw.side_effect = [
-        # The first time search_raw() is called it returns the result of
-        # querying for the top-level annotations only.
-        {
-            'hits': {
-                'total': 3,
-                'hits': [
-                    {'_id': 'annotation_1', '_source': 'source'},
-                    {'_id': 'annotation_2', '_source': 'source'},
-                    {'_id': 'annotation_3', '_source': 'source'}
-                ]
-            }
-        },
+    # Mock the search results.
+    request.es.conn.search.side_effect = [
+        # The first time search() is called it returns the result of querying
+        # for the top-level annotations only.
+        dummy_search_results(count=3),
         # The second call returns the result of querying for all the replies to
         # those annotations
-        {
-            'hits': {
-                'total': 3,
-                'hits': [
-                    {'_id': 'reply_1', '_source': 'source'},
-                    {'_id': 'reply_2', '_source': 'source'},
-                    {'_id': 'reply_3', '_source': 'source'}
-                ]
-            }
-        },
+        dummy_search_results(start=4, count=3, name='reply'),
     ]
 
-    core.search(mock.Mock(), mock.Mock(), separate_replies=True)
+    core.search(request, {}, separate_replies=True)
 
     # It should construct a RepliesMatcher for replies to the annotations from
     # the first search.
-    query.RepliesMatcher.assert_called_once_with(
-        ['annotation_1', 'annotation_2', 'annotation_3'])
+    query.RepliesMatcher.assert_called_once_with(['id_1', 'id_2', 'id_3'])
 
     # It should append the RepliesMatcher to the query builder.
-    assert builder.append_matcher.call_args_list[-1] == mock.call(
-        query.RepliesMatcher.return_value)
+    builder.append_matcher.assert_called_with(query.RepliesMatcher.return_value)
 
-    # It should call search_raw() a second time with the body from the
+    # It should call search() a second time with the body from the
     # query builder.
-    assert models.Annotation.search_raw.call_count == 2
-    last_call = models.Annotation.search_raw.call_args_list[-1]
-    first_arg = last_call[0][0]
-    assert first_arg == builder.build.return_value
+    assert request.es.conn.search.call_count == 2
+    _, last_call_kwargs = request.es.conn.search.call_args_list[-1]
+    assert last_call_kwargs['body'] == builder.build.return_value
 
 
 @search_fixtures
-def test_search_returns_replies(models):
-    """It should return an Annotation for each reply from search_raw()."""
-    models.Annotation.search_raw.side_effect = [
-        # The first time search_raw() is called it returns the result of
-        # querying for the top-level annotations only.
-        {
-            'hits': {
-                'total': 1,
-                'hits': [{'_id': 'parent_annotation_id', '_source': 'source'}]
-            }
-        },
+def test_search_returns_replies():
+    """It should return an annotation dict for each reply from search()."""
+    request = dummy_request()
+    request.es.conn.search.side_effect = [
+        # The first time search() is called it returns the result of querying
+        # for the top-level annotations only.
+        dummy_search_results(count=1),
         # The second call returns the result of querying for all the replies to
         # those annotations
-        {
-            'hits': {
-                'total': 3,
-                'hits': [
-                    {'_id': 'reply_1', '_source': 'source'},
-                    {'_id': 'reply_2', '_source': 'source'},
-                    {'_id': 'reply_3', '_source': 'source'}
-                ]
-            }
-        },
-    ]
-    # It should call Annotation() four times: first for the parent annotation
-    # and then once for each reply.
-    models.Annotation.side_effect = [
-        mock.sentinel.parent_annotation_object,
-        mock.sentinel.reply_annotation_object_1,
-        mock.sentinel.reply_annotation_object_2,
-        mock.sentinel.reply_annotation_object_3,
+        dummy_search_results(start=2, count=3, name='reply'),
     ]
 
-    result = core.search(mock.Mock(), mock.Mock(), separate_replies=True)
+    result = core.search(request, {}, separate_replies=True)
 
     assert result['replies'] == [
-        mock.sentinel.reply_annotation_object_1,
-        mock.sentinel.reply_annotation_object_2,
-        mock.sentinel.reply_annotation_object_3
+        {'name': 'reply_2', 'id': 'id_2'},
+        {'name': 'reply_3', 'id': 'id_3'},
+        {'name': 'reply_4', 'id': 'id_4'},
     ]
 
 
 @search_fixtures
-def test_search_logs_a_warning_if_there_are_too_many_replies(models, log):
+def test_search_logs_a_warning_if_there_are_too_many_replies(log):
     """It should log a warning if there's more than one page of replies."""
-    models.Annotation.search_raw.side_effect = [
-        {
-            'hits': {
-                'total': 3,
-                'hits': [
-                    {'_id': 'annotation_{n}'.format(n=n), '_source': 'source'}
-                    for n in range(0, 3)]
-            }
-        },
-        # The second call to search_raw() returns 'total': 11000 but only
-        # returns the first 100 of 11000 hits.
-        {
-            'hits': {
-                'total': 11000,
-                'hits': [
-                    {'_id': 'reply_{n}'.format(n=n), '_source': 'source'}
-                    for n in range(0, 100)]
-            }
-        },
-    ]
+    request = dummy_request()
+    parent_results = dummy_search_results(count=3)
+    replies_results = dummy_search_results(count=100, name='reply')
+    # The second call to search() returns 'total': 11000 but only returns
+    # the first 100 of 11000 hits.
+    replies_results['hits']['total'] = 11000
+    request.es.conn.search.side_effect = [parent_results, replies_results]
 
-    core.search(mock.Mock(), mock.Mock(), separate_replies=True)
+    core.search(request, {}, separate_replies=True)
 
     assert log.warn.call_count == 1
 
 
 @search_fixtures
-def test_search_does_not_log_a_warning_if_there_are_not_too_many_replies(
-        models, log):
+def test_search_does_not_log_a_warning_if_there_are_not_too_many_replies(log):
     """It should not log a warning if there's less than one page of replies."""
-    models.Annotation.search_raw.side_effect = [
-        {
-            'hits': {
-                'total': 3,
-                'hits': [
-                    {'_id': 'annotation_{n}'.format(n=n), '_source': 'source'}
-                    for n in range(0, 3)]
-            }
-        },
-        # The second call to search_raw() returns 'total': 100 and returns all
-        # 100 hits in the first page pf results.
-        {
-            'hits': {
-                'total': 100,
-                'hits': [
-                    {'_id': 'reply_{n}'.format(n=n), '_source': 'source'}
-                    for n in range(0, 100)]
-            }
-        },
+    request = dummy_request()
+    request.es.conn.search.side_effect = [
+        dummy_search_results(count=3),
+        dummy_search_results(count=100, start=4, name='reply'),
     ]
 
-    core.search(mock.Mock(), mock.Mock(), separate_replies=True)
+    core.search(request, {}, separate_replies=True)
 
     assert not log.warn.called
 
@@ -198,14 +155,6 @@ def query(request):
 @pytest.fixture
 def nipsa(request):
     patcher = mock.patch('h.api.search.core.nipsa', autospec=True)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
-
-
-@pytest.fixture
-def models(request):
-    patcher = mock.patch('h.api.search.core.models', autospec=True)
     result = patcher.start()
     request.addfinalizer(patcher.stop)
     return result

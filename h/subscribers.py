@@ -2,9 +2,13 @@
 
 import json
 
+from h import __version__
+
 
 def add_renderer_globals(event):
     request = event['request']
+
+    event['h_version'] = __version__
     event['base_url'] = request.route_url('index')
     event['feature'] = request.feature
 

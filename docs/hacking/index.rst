@@ -11,7 +11,6 @@ and how to contribute code or documentation to the project.
    cla
    install
    chrome-extension
-   firefox-extension
    submitting-a-pr
    code-style
    documentation

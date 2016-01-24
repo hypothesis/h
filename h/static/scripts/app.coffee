@@ -1,5 +1,10 @@
+# initialize Raven. This is required at the top of this file
+# so that it happens early in the app's startup flow
+if window.RAVEN_CONFIG
+  require('./raven').init(window.RAVEN_CONFIG)
+
+
 require('autofill-event')
-baseURI = require('document-base-uri')
 angular = require('angular')
 require('angular-jwt')
 
@@ -28,13 +33,6 @@ resolve =
   ]
 
 
-configureDocument = ['$provide', ($provide) ->
-  $provide.decorator '$document', ['$delegate', ($delegate) ->
-    $delegate.prop('baseURI', baseURI)
-  ]
-]
-
-
 configureLocation = ['$locationProvider', ($locationProvider) ->
   # Use HTML5 history
   $locationProvider.html5Mode(true)
@@ -61,15 +59,6 @@ configureRoutes = ['$routeProvider', ($routeProvider) ->
     redirectTo: '/viewer'
 ]
 
-
-configureTemplates = ['$sceDelegateProvider', ($sceDelegateProvider) ->
-  # Explicitly whitelist '.html' paths adjacent to application base URI
-  # TODO: move all front-end templates into their own directory for safety
-  basePattern = new URL('**.html', baseURI).href
-  $sceDelegateProvider.resourceUrlWhitelist ['self', basePattern]
-]
-
-
 setupCrossFrame = ['crossframe', (crossframe) -> crossframe.connect()]
 
 setupHttp = ['$http', ($http) ->
@@ -79,6 +68,7 @@ setupHttp = ['$http', ($http) ->
 setupHost = ['host', (host) -> ]
 
 module.exports = angular.module('h', [
+  require('./raven').angularModule().name
   'angulartics'
   'angulartics.google.analytics'
   'angular-jwt'
@@ -94,7 +84,6 @@ module.exports = angular.module('h', [
 .controller('AppController', require('./app-controller'))
 .controller('AnnotationUIController', require('./annotation-ui-controller'))
 .controller('AnnotationViewerController', require('./annotation-viewer-controller'))
-.controller('AuthController', require('./auth-controller'))
 .controller('StreamController', require('./stream-controller'))
 .controller('WidgetController', require('./widget-controller'))
 
@@ -105,6 +94,7 @@ module.exports = angular.module('h', [
 .directive('formValidate', require('./directive/form-validate'))
 .directive('groupList', require('./directive/group-list').directive)
 .directive('hAutofocus', require('./directive/h-autofocus'))
+.directive('loginForm', require('./directive/login-form').directive)
 .directive('markdown', require('./directive/markdown'))
 .directive('simpleSearch', require('./directive/simple-search'))
 .directive('statusButton', require('./directive/status-button'))
@@ -159,11 +149,10 @@ module.exports = angular.module('h', [
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))
 .value('Discovery', require('./discovery'))
+.value('raven', require('./raven'))
 
-.config(configureDocument)
 .config(configureLocation)
 .config(configureRoutes)
-.config(configureTemplates)
 
 .run(setupCrossFrame)
 .run(setupHttp)

@@ -1,5 +1,7 @@
+'use strict';
+
 // @ngInject
-function AuthController($scope, $timeout, flash, session, formRespond) {
+function Controller($scope, $timeout, flash, session, formRespond, settings) {
   var pendingTimeout = null;
 
   function success(data) {
@@ -47,6 +49,7 @@ function AuthController($scope, $timeout, flash, session, formRespond) {
     pendingTimeout = null;
   }
 
+  this.serviceUrl = settings.serviceUrl;
 
   this.submit = function submit(form) {
     formRespond(form);
@@ -87,4 +90,18 @@ function AuthController($scope, $timeout, flash, session, formRespond) {
   });
 }
 
-module.exports = AuthController;
+module.exports = {
+  directive: function () {
+    return {
+      bindToController: true,
+      controller: Controller,
+      controllerAs: 'vm',
+      restrict: 'E',
+      scope: {
+        onClose: '&',
+      },
+      templateUrl: 'login_form.html',
+    };
+  },
+  Controller: Controller,
+};
