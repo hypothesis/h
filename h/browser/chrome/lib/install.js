@@ -21,7 +21,7 @@ chrome.runtime.requestUpdateCheck(function (status) {
 
 function onInstalled(installDetails) {
   if (installDetails.reason === 'install') {
-    browserExtension.firstRun();
+    browserExtension.firstRun(installDetails);
   }
 
   // We need this so that 3rd party cookie blocking does not kill us.

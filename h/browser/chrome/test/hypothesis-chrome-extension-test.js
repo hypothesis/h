@@ -148,7 +148,7 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('opens a new tab pointing to the welcome page', function () {
-      ext.firstRun();
+      ext.firstRun({});
       assert.called(fakeChromeTabs.create);
       assert.calledWith(fakeChromeTabs.create, {
         url: 'https://hypothes.is/welcome'
@@ -156,9 +156,15 @@ describe('HypothesisChromeExtension', function () {
     });
 
     it('sets the browser state to active', function () {
-      ext.firstRun();
+      ext.firstRun({});
       assert.called(fakeTabState.activateTab);
       assert.calledWith(fakeTabState.activateTab, 1);
+    });
+
+    it('does not open a new tab for administrative installs', function () {
+      ext.firstRun({installType: 'admin'});
+      assert.notCalled(fakeChromeTabs.create);
+      assert.notCalled(fakeTabState.activateTab);
     });
   });
 

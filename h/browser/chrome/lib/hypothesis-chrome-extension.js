@@ -79,7 +79,17 @@ function HypothesisChromeExtension(dependencies) {
   };
 
   /* Opens the onboarding page */
-  this.firstRun = function () {
+  this.firstRun = function (installDetails) {
+    // If we've been installed because of an administrative policy, then don't
+    // open the welcome page in a new tab.
+    //
+    // It's safe to assume that if an admin policy is responsible for installing
+    // the extension, opening the welcome page is going to do more harm than
+    // good, as it will appear that a tab opened without user action.
+    if (installDetails.installType === 'admin') {
+      return;
+    }
+
     chromeTabs.create({url: 'https://hypothes.is/welcome'}, function (tab) {
       state.activateTab(tab.id);
     });
