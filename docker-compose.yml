@@ -2,9 +2,8 @@ hypthosis:
   build: .
   ports:
    - "5000:5000"
-  command: "hypothesis start"
   environment:
-    #DATABASE_URL: "postgresql://scott:tiger@dbserver/mydatabase"
+    DATABASE_URL: "postgresql://hypothesis:mysecretpassword@localhost:5432/hypothesis" #username:password@host:port/database
     #APP_URL: http://127.0.0.1  #Replace with IP or DNS Name
     SECRET_KEY: TCtkLQ3k5kNkezsFiPDvq04yG4olCwU6QF7XT6gktGDaEiBZAnxkDJXYCLMfF96W1j+A1PMO+vyfQUgMboEnoQ
     #ALLOWED_ORIGINS: "*" #origins allowed to connect over the WebSocket protocol
@@ -14,19 +13,16 @@ hypthosis:
     #MAIL_DEFAULT_SENDER: #a sender address for outbound mail
     #WEBASSETS_BASE_DIR: #the base directory for static assets
     #WEBASSETS_BASE_URL: #the base URL for static asset routes
-  restart: "always"
-  log_driver: "json-file"
-  command: hypothesis start
   links:
    - redis
    - postgres
    - elasticsearch
-   - mail
-   - nsqd
+  command: python -m smtpd -n -c DebuggingServer localhost:25
 redis:
   image: redis
 nsqd:
   image: nsqio/nsq
+  command: /nsqd
   ports:
     - "4150:4150"
     - "4151:4150"
@@ -36,11 +32,13 @@ elasticsearch:
     - "9300:9300"
     - "9200:9200"
 mail:
-  image: nginx
+  image: svendowideit/ambassador
   ports:
-    - "8888:443"
-    - "9999:80"
+    - "25:25"
 postgres:
-  image: postgres
-  ports:
-    - "5432:5432"
+  image: postgres:9.3
+  environment:
+    POSTGRES_USER: hypothesis
+    POSTGRES_PASSWORD: mysecretpassword
+    PGDATA: /var/lib/postgresql/data
+    POSTGRES_DB: hypothesis
