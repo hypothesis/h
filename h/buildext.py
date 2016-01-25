@@ -20,9 +20,8 @@ from pyramid.request import Request
 import raven
 
 import h
+from h import client
 from h._compat import urlparse
-from h.sidebar import app_config
-
 
 log = logging.getLogger('h.buildext')
 
@@ -47,17 +46,16 @@ def build_extension_common(env, bundle_app=False):
     # Copy over the config and destroy scripts
     shutil.copyfile('h/static/extension/destroy.js',
                     content_dir + '/destroy.js')
-    shutil.copyfile('h/static/extension/config.js',
-                    content_dir + '/config.js')
+    shutil.copyfile('h/static/extension/config.js', content_dir + '/config.js')
 
     # Render the embed code.
     with codecs.open(content_dir + '/embed.js', 'w', 'utf-8') as fp:
         if bundle_app:
-            app_uri = request.webassets_env.url + '/app.html'
+            app_html_url = request.webassets_env.url + '/app.html'
         else:
-            app_uri = request.route_url('widget')
-        value = {'app_uri': app_uri}
-        data = render('h:templates/embed.js.jinja2', value, request=request)
+            app_html_url = request.route_url('widget')
+        data = client.render_embed_js(webassets_env=request.webassets_env,
+                                      app_html_url=app_html_url, )
         fp.write(data)
 
 
@@ -105,13 +103,10 @@ def chrome_manifest(request):
     if urlparse.urlparse(src).hostname not in ('localhost', '127.0.0.1'):
         src = urlparse.urljoin(src, request.webassets_env.url)
 
-    value = {
-        'src': src,
-        'version': version,
-        'version_name': version_name
-    }
+    value = {'src': src, 'version': version, 'version_name': version_name}
 
-    return render('h:browser/chrome/manifest.json.jinja2', value,
+    return render('h:browser/chrome/manifest.json.jinja2',
+                  value,
                   request=request)
 
 
@@ -129,24 +124,22 @@ def build_type_from_api_url(api_url):
         return 'dev'
 
 
-def settings_dict(env):
+def settings_dict(base_url, api_url, sentry_dsn):
     """ Returns a dictionary of settings to be bundled with the extension """
-    request = env['request']
-    config = app_config(request)
-    api_url = config['apiUrl']
-    sentry_dsn = request.sentry.get_public_dsn('https')
+    config = {
+        'apiUrl': api_url,
+        'buildType': build_type_from_api_url(api_url),
+        'serviceUrl': base_url,
+    }
 
     if sentry_dsn:
         config.update({
             'raven': {
-              'dsn': sentry_dsn,
-              'release': h.__version__,
+                'dsn': sentry_dsn,
+                'release': h.__version__,
             },
         })
 
-    config.update({
-        'buildType': build_type_from_api_url(api_url),
-    })
     return config
 
 
@@ -174,8 +167,8 @@ def get_env(config_uri, base_url):
     # When building extensions, we change base_dir so as to build assets
     # directly into the extension directories. As a result, we have to add
     # back the correct search path.
-    request.webassets_env.append_path(resolve('h:static').abspath(),
-                                      request.webassets_env.url)
+    request.webassets_env.append_path(
+        resolve('h:static').abspath(), request.webassets_env.url)
 
     return env
 
@@ -219,21 +212,34 @@ def build_chrome(args):
     os.makedirs('build/chrome/lib')
 
     subprocess_args = ['node_modules/.bin/browserify',
-                       'h/browser/chrome/lib/extension.js',
-                       '--outfile', 'build/chrome/lib/extension-bundle.js']
+                       'h/browser/chrome/lib/extension.js', '--outfile',
+                       'build/chrome/lib/extension-bundle.js']
     if args.debug:
         subprocess_args.append('--debug')
     subprocess.call(subprocess_args)
 
-    # Render the sidebar html.
+    # Render the sidebar html
+    base_url = env['request'].route_url('index')
+    api_url = env['request'].route_url('api')
+    websocket_url = client.websocketize(env['request'].route_url('ws'))
+    sentry_dsn = env['request'].sentry.get_public_dsn('https')
+    settings = settings_dict(base_url=base_url,
+                             api_url=api_url,
+                             sentry_dsn=sentry_dsn)
+
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(env, bundle_app=True)
-        request = env['request']
-        context = {
-          'app_config': app_config(request)
-        }
         with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
-            data = render('h:templates/app.html.jinja2', context, request)
+            data = client.render_app_html(
+                api_url=api_url,
+                base_url=base_url,
+
+                # Google Analytics tracking is currently not enabled
+                # for the extension
+                ga_tracking_id=None,
+                sentry_dsn=sentry_dsn,
+                webassets_env=webassets_env,
+                websocket_url=websocket_url)
             fp.write(data)
     else:
         build_extension_common(env)
@@ -245,15 +251,16 @@ def build_chrome(args):
 
     # Write build settings to a JSON file
     with codecs.open('build/chrome/settings-data.js', 'w', 'utf-8') as fp:
-        fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings_dict(env)))
+        fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings))
 
 
 parser = argparse.ArgumentParser('hypothesis-buildext')
 
-parser.add_argument('config_uri',
-                    help='paster configuration URI')
+parser.add_argument('config_uri', help='paster configuration URI')
 
-parser.add_argument('--debug', action='store_true', default=False,
+parser.add_argument('--debug',
+                    action='store_true',
+                    default=False,
                     help='create source maps to enable debugging in browser')
 
 subparsers = parser.add_subparsers(title='browser', dest='browser')
@@ -270,14 +277,11 @@ parser_chrome.add_argument('--base',
                            metavar='URL')
 parser_chrome.add_argument('--assets',
                            help='A path (relative to base) or URL from which '
-                                'to load the static assets',
+                           'to load the static assets',
                            default=None,
                            metavar='PATH/URL')
 
-
-BROWSERS = {
-    'chrome': build_chrome,
-}
+BROWSERS = {'chrome': build_chrome}
 
 
 def main():

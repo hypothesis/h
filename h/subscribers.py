@@ -17,9 +17,9 @@ def add_renderer_globals(event):
     if ga_tracking_id is not None:
         event['ga_tracking_id'] = ga_tracking_id
         if 'localhost' in request.host:
-            event['ga_create_options'] = "'none'"
+            event['ga_cookie_domain'] = "none"
         else:
-            event['ga_create_options'] = "'auto'"
+            event['ga_cookie_domain'] = "auto"
 
 
 def publish_annotation_event(event):

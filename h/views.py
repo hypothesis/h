@@ -11,11 +11,11 @@ from pyramid.view import view_config
 from pyramid import i18n
 from pyramid import response
 
+from h import client
 from h import session
 from h.api.views import json_view
 from h.resources import Annotation
 from h.resources import Stream
-from h.sidebar import app_config
 
 
 log = logging.getLogger(__name__)
@@ -30,6 +30,18 @@ def _handle_exc(request):
     # the debug toolbar.
     if request.debug:
         raise
+
+
+def _render_app(request, extra={}):
+    request.response.text = client.render_app_html(
+        api_url=request.route_url('api'),
+        base_url=request.route_url('index'),
+        extra=extra,
+        ga_tracking_id=request.registry.settings.get('ga_tracking_id'),
+        sentry_dsn=request.sentry.get_public_dsn(),
+        webassets_env=request.webassets_env,
+        websocket_url=client.websocketize(request.route_url('ws')), )
+    return request.response
 
 
 @view_config(context=Exception, accept='text/html',
@@ -55,7 +67,6 @@ def json_error(context, request):
 @view_config(
     context=Annotation,
     permission='read',
-    renderer='h:templates/app.html.jinja2',
 )
 def annotation(context, request):
     annotation = context.model
@@ -71,8 +82,7 @@ def annotation(context, request):
     alternate = request.resource_url(request.root, 'api', 'annotations',
                                      annotation['id'])
 
-    return {
-        'app_config': app_config(request),
+    return _render_app(request, {
         'meta_attrs': (
             {'property': 'og:title', 'content': title},
             {'property': 'og:description', 'content': ''},
@@ -84,22 +94,21 @@ def annotation(context, request):
             {'rel': 'alternate', 'href': alternate,
                 'type': 'application/json'},
         ),
-    }
+    })
 
 
-@view_config(route_name='embed', renderer='h:templates/embed.js.jinja2')
+@view_config(route_name='embed')
 def embed(context, request):
     request.response.content_type = b'text/javascript'
-    return {
-        'app_config': app_config(request),
-    }
+    request.response.text = client.render_embed_js(
+        webassets_env=request.webassets_env,
+        app_html_url=request.resource_url(context, 'app.html'))
+    return request.response
 
 
-@view_config(route_name='widget', renderer='h:templates/app.html.jinja2')
+@view_config(route_name='widget')
 def widget(context, request):
-    return {
-        'app_config': app_config(request)
-    }
+    return _render_app(request)
 
 
 @view_config(renderer='h:templates/help.html.jinja2', route_name='help')
@@ -133,17 +142,16 @@ def stream_redirect(context, request):
     raise httpexceptions.HTTPFound(location=location)
 
 
-@view_config(route_name='stream', renderer='h:templates/app.html.jinja2')
+@view_config(route_name='stream')
 def stream(context, request):
     atom = request.route_url('stream_atom')
     rss = request.route_url('stream_rss')
-    return {
-        'app_config': app_config(request),
+    return _render_app(request, {
         'link_tags': [
             {'rel': 'alternate', 'href': atom, 'type': 'application/atom+xml'},
             {'rel': 'alternate', 'href': rss, 'type': 'application/rss+xml'},
         ]
-    }
+    })
 
 
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
