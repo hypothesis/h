@@ -23,10 +23,15 @@ via the ``lint`` make command::
 Python
 ------
 Strict PEP8_. The project also adheres closely to the
-`Google Python Style Guide`_.
+`Google Python Style Guide`_. To reformat code in PEP8_ style,
+you can use the YAPF_ tool::
+
+    $ pip install yapf
+    $ yapf -i <Python source file>
 
 .. _PEP8: http://www.python.org/dev/peps/pep-0008/
 .. _Google Python Style Guide: https://google-styleguide.googlecode.com/svn/trunk/pyguide.html
+.. _YAPF: https://github.com/google/yapf
 
 JavaScript
 ----------
