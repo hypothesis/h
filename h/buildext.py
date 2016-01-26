@@ -65,7 +65,7 @@ class Resolver(webassets.env.Resolver):
             return resolve(item).abspath()
 
 
-def build_extension_common(webassets_env, base_url, bundle_app=False):
+def build_extension_common(webassets_env, service_url, bundle_app=False):
     """
     Copy the contents of src to dest, including some generic extension scripts.
     """
@@ -82,7 +82,7 @@ def build_extension_common(webassets_env, base_url, bundle_app=False):
         if bundle_app:
             app_html_url = webassets_env.url + '/app.html'
         else:
-            app_html_url = '{}/app.html'.format(base_url)
+            app_html_url = '{}app.html'.format(service_url)
 
         data = client.render_embed_js(webassets_env=webassets_env,
                                       app_html_url=app_html_url)
@@ -147,12 +147,12 @@ def build_type_from_api_url(api_url):
         return 'dev'
 
 
-def settings_dict(base_url, api_url, sentry_public_dsn):
+def settings_dict(service_url, api_url, sentry_public_dsn):
     """ Returns a dictionary of settings to be bundled with the extension """
     config = {
         'apiUrl': api_url,
         'buildType': build_type_from_api_url(api_url),
-        'serviceUrl': url_with_path(base_url),
+        'serviceUrl': service_url,
     }
 
     if sentry_public_dsn:
@@ -166,10 +166,10 @@ def settings_dict(base_url, api_url, sentry_public_dsn):
     return config
 
 
-def get_webassets_env(base_dir, base_url, assets_url, debug=False):
+def get_webassets_env(base_dir, service_url, assets_url, debug=False):
     webassets_env = webassets.Environment(
         directory=os.path.abspath('./build/chrome/public'),
-        url=assets_url or '{}/assets'.format(base_url))
+        url=assets_url or '{}assets'.format(service_url))
 
     # Disable webassets caching and manifest generation
     webassets_env.cache = False
@@ -204,12 +204,12 @@ def build_chrome(args):
 
         chrome-extension://<extensionid>/public
     """
-    base_url = args.service_url
-    if base_url.endswith('/'):
-        base_url = base_url[:-1]
+    service_url = args.service_url
+    if not service_url.endswith('/'):
+        service_url = '{}/'.format(service_url)
 
     webassets_env = get_webassets_env(base_dir='./build/chrome/public',
-                                      base_url=base_url,
+                                      service_url=service_url,
                                       assets_url=args.assets,
                                       debug=args.debug)
 
@@ -235,15 +235,15 @@ def build_chrome(args):
     subprocess.call(subprocess_args)
 
     # Render the sidebar html
-    api_url = '{}/api'.format(base_url)
-    websocket_url = websocketize('{}/ws'.format(base_url))
+    api_url = '{}api/'.format(service_url)
+    websocket_url = websocketize('{}ws'.format(service_url))
 
     if webassets_env.url.startswith('chrome-extension:'):
-        build_extension_common(webassets_env, base_url, bundle_app=True)
+        build_extension_common(webassets_env, service_url, bundle_app=True)
         with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
             data = client.render_app_html(
                 api_url=api_url,
-                base_url=url_with_path(base_url),
+                service_url=service_url,
 
                 # Google Analytics tracking is currently not enabled
                 # for the extension
@@ -253,7 +253,7 @@ def build_chrome(args):
                 sentry_public_dsn=args.sentry_public_dsn)
             fp.write(data)
     else:
-        build_extension_common(webassets_env, base_url)
+        build_extension_common(webassets_env, service_url)
 
     # Render the manifest.
     with codecs.open('build/chrome/manifest.json', 'w', 'utf-8') as fp:
@@ -265,7 +265,7 @@ def build_chrome(args):
 
     # Write build settings to a JSON file
     with codecs.open('build/chrome/settings-data.js', 'w', 'utf-8') as fp:
-        settings = settings_dict(base_url, api_url, args.sentry_public_dsn)
+        settings = settings_dict(service_url, api_url, args.sentry_public_dsn)
         fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings))
 
 
@@ -287,13 +287,12 @@ parser.add_argument('--sentry-public-dsn',
                     help='Specify the public Sentry DSN for crash reporting',
                     metavar='DSN',
                     type=check_sentry_dsn_is_public)
-parser.add_argument(
-    '--service',
-    help="""The URL of the Hypothesis service which the extension
-                            should connect to""",
-    default='http://localhost:5000',
-    dest='service_url',
-    metavar='URL')
+parser.add_argument('--service',
+                    help='The URL of the Hypothesis service which the '
+                    'extension should connect to',
+                    default='http://localhost:5000/',
+                    dest='service_url',
+                    metavar='URL')
 parser.add_argument('--assets',
                     help='A path (relative to base) or URL from which '
                     'to load the static assets',
