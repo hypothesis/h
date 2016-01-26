@@ -35,12 +35,12 @@ def _handle_exc(request):
 def _render_app(request, extra={}):
     request.response.text = client.render_app_html(
         api_url=request.route_url('api'),
-        base_url=request.route_url('index'),
+        service_url=request.route_url('index'),
         extra=extra,
         ga_tracking_id=request.registry.settings.get('ga_tracking_id'),
-        sentry_dsn=request.sentry.get_public_dsn(),
+        sentry_public_dsn=request.sentry.get_public_dsn(),
         webassets_env=request.webassets_env,
-        websocket_url=client.websocketize(request.route_url('ws')), )
+        websocket_url=client.websocketize(request.route_url('ws')))
     return request.response
 
 

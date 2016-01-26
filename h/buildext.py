@@ -13,16 +13,19 @@ import shutil
 import subprocess
 import textwrap
 
-from pyramid import paster
+from jinja2 import Environment, PackageLoader
 from pyramid.path import AssetResolver
-from pyramid.renderers import render
-from pyramid.request import Request
-import raven
+import webassets
+from webassets.loaders import YAMLLoader
 
 import h
+# h.assets provides webassets filters for JS and CSS compilation
+import h.assets
 from h import client
+from h.client import url_with_path, websocketize
 from h._compat import urlparse
 
+jinja_env = Environment(loader=PackageLoader(__package__, ''))
 log = logging.getLogger('h.buildext')
 
 # Teach urlparse about extension schemes
@@ -35,13 +38,39 @@ urlparse.uses_relative.append('resource')
 resolve = AssetResolver().resolve
 
 
-def build_extension_common(env, bundle_app=False):
+class Resolver(webassets.env.Resolver):
+    """
+    Asset path resolver for webassets which can resolve package-relative paths.
+
+    This resolver supports the <package>:<path> path specifiers
+    (eg. 'h:path/to/asset.css') which are used in assets.yaml.
+    """
+
+    def search_for_source(self, ctx, item):
+        if item.startswith('../'):
+            # When building assets outside of the root 'h/static' directory,
+            # webassets puts the results in
+            # `h/static/webassets-external/[MD5_HASH_OF_PATH]_filename` where
+            # MD5_HASH_OF_PATH is a hash of the absolute, non-canonicalized
+            # path (ie. still containing any '../../' from the item path
+            # in assets.yaml)
+            #
+            # When building in development mode where embed.js is included in
+            # the Chrome extension but other JS files are not, the webassets
+            # environment in buildext.py needs to generate the same URLs for
+            # vendor JS files referenced in embed.js as the '/embed.js'
+            # route in the main app, so that the MD5 hashes match.
+            return '{}/{}'.format(resolve('h:static').abspath(), item)
+        else:
+            return resolve(item).abspath()
+
+
+def build_extension_common(webassets_env, service_url, bundle_app=False):
     """
     Copy the contents of src to dest, including some generic extension scripts.
     """
     # Create the assets directory
-    request = env['request']
-    content_dir = request.webassets_env.directory
+    content_dir = webassets_env.directory
 
     # Copy over the config and destroy scripts
     shutil.copyfile('h/static/extension/destroy.js',
@@ -51,11 +80,12 @@ def build_extension_common(env, bundle_app=False):
     # Render the embed code.
     with codecs.open(content_dir + '/embed.js', 'w', 'utf-8') as fp:
         if bundle_app:
-            app_html_url = request.webassets_env.url + '/app.html'
+            app_html_url = webassets_env.url + '/app.html'
         else:
-            app_html_url = request.route_url('widget')
-        data = client.render_embed_js(webassets_env=request.webassets_env,
-                                      app_html_url=app_html_url, )
+            app_html_url = '{}app.html'.format(service_url)
+
+        data = client.render_embed_js(webassets_env=webassets_env,
+                                      app_html_url=app_html_url)
         fp.write(data)
 
 
@@ -82,7 +112,7 @@ def copytree(src, dst):
             shutil.copyfile(s, d)
 
 
-def chrome_manifest(request):
+def chrome_manifest(script_host_url):
     # Chrome is strict about the format of the version string
     if '+' in h.__version__:
         tag, detail = h.__version__.split('+')
@@ -93,21 +123,14 @@ def chrome_manifest(request):
         version = h.__version__
         version_name = 'Official Build'
 
-    src = request.resource_url(request.context)
+    context = {
+        'script_src': script_host_url,
+        'version': version,
+        'version_name': version_name
+    }
 
-    # We need to use only the host and port for the CSP script-src when
-    # developing. If we provide a path such as /assets the CSP check fails.
-    # See:
-    #
-    #   https://developer.chrome.com/extensions/contentSecurityPolicy#relaxing-remote-script
-    if urlparse.urlparse(src).hostname not in ('localhost', '127.0.0.1'):
-        src = urlparse.urljoin(src, request.webassets_env.url)
-
-    value = {'src': src, 'version': version, 'version_name': version_name}
-
-    return render('h:browser/chrome/manifest.json.jinja2',
-                  value,
-                  request=request)
+    template = jinja_env.get_template('browser/chrome/manifest.json.jinja2')
+    return template.render(context)
 
 
 def build_type_from_api_url(api_url):
@@ -124,18 +147,18 @@ def build_type_from_api_url(api_url):
         return 'dev'
 
 
-def settings_dict(base_url, api_url, sentry_dsn):
+def settings_dict(service_url, api_url, sentry_public_dsn):
     """ Returns a dictionary of settings to be bundled with the extension """
     config = {
         'apiUrl': api_url,
         'buildType': build_type_from_api_url(api_url),
-        'serviceUrl': base_url,
+        'serviceUrl': service_url,
     }
 
-    if sentry_dsn:
+    if sentry_public_dsn:
         config.update({
             'raven': {
-                'dsn': sentry_dsn,
+                'dsn': sentry_public_dsn,
                 'release': h.__version__,
             },
         })
@@ -143,34 +166,27 @@ def settings_dict(base_url, api_url, sentry_dsn):
     return config
 
 
-def get_env(config_uri, base_url):
-    """
-    Return a preconfigured paste environment object. Sets up the WSGI
-    application and ensures that webassets knows to load files from
-    ``h:static`` regardless of the ``webassets.base_dir`` setting.
-    """
-    request = Request.blank('', base_url=base_url)
-    env = paster.bootstrap(config_uri, request)
-    request.root = env['root']
-
-    request.sentry = raven.Client(release=raven.fetch_package_version('h'))
-
-    # Ensure that the webassets URL is absolute
-    request.webassets_env.url = urlparse.urljoin(base_url,
-                                                 request.webassets_env.url)
+def get_webassets_env(base_dir, service_url, assets_url, debug=False):
+    webassets_env = webassets.Environment(
+        directory=os.path.abspath('./build/chrome/public'),
+        url=assets_url or '{}assets'.format(service_url))
 
     # Disable webassets caching and manifest generation
-    request.webassets_env.cache = False
-    request.webassets_env.manifest = False
+    webassets_env.cache = False
+    webassets_env.manifest = False
+    webassets_env.resolver = Resolver()
+    webassets_env.config['UGLIFYJS_BIN'] = './node_modules/.bin/uglifyjs'
+    webassets_env.debug = debug
 
     # By default, webassets will use its base_dir setting as its search path.
     # When building extensions, we change base_dir so as to build assets
     # directly into the extension directories. As a result, we have to add
     # back the correct search path.
-    request.webassets_env.append_path(
-        resolve('h:static').abspath(), request.webassets_env.url)
+    webassets_env.append_path(resolve('h:static').abspath(), webassets_env.url)
+    loader = YAMLLoader(resolve('h:assets.yaml').abspath())
+    webassets_env.register(loader.load_bundles())
 
-    return env
+    return webassets_env
 
 
 def build_chrome(args):
@@ -188,22 +204,22 @@ def build_chrome(args):
 
         chrome-extension://<extensionid>/public
     """
-    paster.setup_logging(args.config_uri)
+    service_url = args.service_url
+    if not service_url.endswith('/'):
+        service_url = '{}/'.format(service_url)
 
-    os.environ['WEBASSETS_BASE_DIR'] = os.path.abspath('./build/chrome/public')
-    if args.assets is not None:
-        os.environ['WEBASSETS_BASE_URL'] = args.assets
-
-    env = get_env(args.config_uri, args.base)
+    webassets_env = get_webassets_env(base_dir='./build/chrome/public',
+                                      service_url=service_url,
+                                      assets_url=args.assets,
+                                      debug=args.debug)
 
     # Prepare a fresh build.
     clean('build/chrome')
     os.makedirs('build/chrome')
-
-    # Bundle the extension assets.
-    webassets_env = env['request'].webassets_env
     content_dir = webassets_env.directory
     os.makedirs(content_dir)
+
+    # Bundle the extension assets.
     copytree('h/browser/chrome/content', 'build/chrome/content')
     copytree('h/browser/chrome/help', 'build/chrome/help')
     copytree('h/browser/chrome/images', 'build/chrome/images')
@@ -219,80 +235,77 @@ def build_chrome(args):
     subprocess.call(subprocess_args)
 
     # Render the sidebar html
-    base_url = env['request'].route_url('index')
-    api_url = env['request'].route_url('api')
-    websocket_url = client.websocketize(env['request'].route_url('ws'))
-    sentry_dsn = env['request'].sentry.get_public_dsn('https')
-    settings = settings_dict(base_url=base_url,
-                             api_url=api_url,
-                             sentry_dsn=sentry_dsn)
+    api_url = '{}api/'.format(service_url)
+    websocket_url = websocketize('{}ws'.format(service_url))
 
     if webassets_env.url.startswith('chrome-extension:'):
-        build_extension_common(env, bundle_app=True)
+        build_extension_common(webassets_env, service_url, bundle_app=True)
         with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
             data = client.render_app_html(
                 api_url=api_url,
-                base_url=base_url,
+                service_url=service_url,
 
                 # Google Analytics tracking is currently not enabled
                 # for the extension
                 ga_tracking_id=None,
-                sentry_dsn=sentry_dsn,
                 webassets_env=webassets_env,
-                websocket_url=websocket_url)
+                websocket_url=websocket_url,
+                sentry_public_dsn=args.sentry_public_dsn)
             fp.write(data)
     else:
-        build_extension_common(env)
+        build_extension_common(webassets_env, service_url)
 
     # Render the manifest.
     with codecs.open('build/chrome/manifest.json', 'w', 'utf-8') as fp:
-        data = chrome_manifest(env['request'])
+        script_url = urlparse.urlparse(webassets_env.url)
+        script_host_url = '{}://{}'.format(script_url.scheme,
+                                           script_url.netloc)
+        data = chrome_manifest(script_host_url)
         fp.write(data)
 
     # Write build settings to a JSON file
     with codecs.open('build/chrome/settings-data.js', 'w', 'utf-8') as fp:
+        settings = settings_dict(service_url, api_url, args.sentry_public_dsn)
         fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings))
 
 
+def check_sentry_dsn_is_public(dsn):
+    parsed_dsn = urlparse.urlparse(dsn)
+    if parsed_dsn.password:
+        raise argparse.ArgumentTypeError(
+            "Must be a public Sentry DSN which does not contain a secret key.")
+    return dsn
+
+
 parser = argparse.ArgumentParser('hypothesis-buildext')
-
-parser.add_argument('config_uri', help='paster configuration URI')
-
 parser.add_argument('--debug',
                     action='store_true',
                     default=False,
                     help='create source maps to enable debugging in browser')
-
-subparsers = parser.add_subparsers(title='browser', dest='browser')
-subparsers.required = True
-
-parser_chrome = subparsers.add_parser(
-    'chrome',
-    help="build the Google Chrome extension",
-    description=textwrap.dedent(build_chrome.__doc__),
-    formatter_class=argparse.RawDescriptionHelpFormatter)
-parser_chrome.add_argument('--base',
-                           help='Base URL',
-                           default='http://localhost:5000',
-                           metavar='URL')
-parser_chrome.add_argument('--assets',
-                           help='A path (relative to base) or URL from which '
-                           'to load the static assets',
-                           default=None,
-                           metavar='PATH/URL')
+parser.add_argument('--sentry-public-dsn',
+                    default='',
+                    help='Specify the public Sentry DSN for crash reporting',
+                    metavar='DSN',
+                    type=check_sentry_dsn_is_public)
+parser.add_argument('--service',
+                    help='The URL of the Hypothesis service which the '
+                    'extension should connect to',
+                    default='http://localhost:5000/',
+                    dest='service_url',
+                    metavar='URL')
+parser.add_argument('--assets',
+                    help='A path (relative to base) or URL from which '
+                    'to load the static assets',
+                    default=None,
+                    metavar='PATH/URL')
+parser.add_argument('browser',
+                    help='Specifies the browser to build an extension for',
+                    choices=['chrome'])
 
 BROWSERS = {'chrome': build_chrome}
 
 
 def main():
-    # Set a flag in the environment that other code can use to detect if it's
-    # running in a script rather than a full web application. See also
-    # h/script.py.
-    #
-    # FIXME: This is a nasty hack and should go when we no longer need to spin
-    # up an entire application to build the extensions.
-    os.environ['H_SCRIPT'] = 'true'
-
     args = parser.parse_args()
     BROWSERS[args.browser](args)
 

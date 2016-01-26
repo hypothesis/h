@@ -57,32 +57,38 @@ def asset_urls(webassets_env, name):
     return webassets_env[name].urls()
 
 
-def _app_html_context(webassets_env, api_url, base_url, ga_tracking_id,
-                      sentry_dsn, websocket_url):
+def url_with_path(url):
+    if urlparse(url).path == '':
+        return '{}/'.format(url)
+    else:
+        return url
+
+
+def _app_html_context(webassets_env, api_url, service_url, ga_tracking_id,
+                      sentry_public_dsn, websocket_url):
     """
     Returns a dict of asset URLs and contents used by the sidebar app
     HTML tempate.
     """
 
-    if urlparse(base_url).hostname == 'localhost':
+    if urlparse(service_url).hostname == 'localhost':
         ga_cookie_domain = 'none'
     else:
         ga_cookie_domain = 'auto'
 
     # the serviceUrl parameter must contain a path element
-    if urlparse(base_url).path == '':
-        base_url += '/'
+    service_url = url_with_path(service_url)
 
     app_config = {
         'apiUrl': api_url,
-        'serviceUrl': base_url,
+        'serviceUrl': service_url,
         'websocketUrl': websocket_url,
     }
 
-    if sentry_dsn:
+    if sentry_public_dsn:
         app_config.update({
             'raven': {
-                'dsn': sentry_dsn,
+                'dsn': sentry_public_dsn,
                 'release': __version__
             }
         })
@@ -93,29 +99,29 @@ def _app_html_context(webassets_env, api_url, base_url, ga_tracking_id,
                                  ANGULAR_DIRECTIVE_TEMPLATES),
         'app_css_urls': asset_urls(webassets_env, 'app_css'),
         'app_js_urls': asset_urls(webassets_env, 'app_js'),
-        'base_url': base_url,
         'ga_tracking_id': ga_tracking_id,
         'ga_cookie_domain': ga_cookie_domain,
-        'register_url': base_url + 'register',
+        'register_url': service_url + 'register',
     }
 
 
 def render_app_html(webassets_env,
-                    base_url,
+                    service_url,
                     api_url,
                     websocket_url,
-                    sentry_dsn,
+                    sentry_public_dsn,
                     ga_tracking_id=None,
                     extra={}):
     """
     Return the HTML for the Hypothesis app page,
     used by the sidebar, stream and single-annotation page.
 
-    :param base_url: The base URL of the Hypothesis service
+    :param service_url: The base URL of the Hypothesis service
                      (eg. https://hypothes.is/)
     :param api_url: The root URL for the Hypothesis service API
     :param websocket_url: The WebSocket URL which the client should connect to
-    :param sentry_dsn: The _public_ Sentry DSN for client-side crash reporting
+    :param sentry_public_dsn: The _public_ Sentry DSN for client-side
+                              crash reporting
     :param ga_tracking_id: The Google Analytics tracking ID
     :param extra: A dict of optional properties specifying link tags and
                   meta attributes to be included on the page, passed through to
@@ -123,9 +129,9 @@ def render_app_html(webassets_env,
     """
     template = jinja_env.get_template('app.html.jinja2')
     assets_dict = _app_html_context(api_url=api_url,
-                                    base_url=base_url,
+                                    service_url=service_url,
                                     ga_tracking_id=ga_tracking_id,
-                                    sentry_dsn=sentry_dsn,
+                                    sentry_public_dsn=sentry_public_dsn,
                                     webassets_env=webassets_env,
                                     websocket_url=websocket_url)
     return template.render(_merge(assets_dict, extra))

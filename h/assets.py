@@ -7,31 +7,25 @@ import pyramid
 from h._compat import string_types
 
 
+def _locate_npm_bin(name):
+    return './node_modules/.bin/{}'.format(name)
+
+
 class Browserify(ExternalTool):
     """
-    An input filter for webassets that browserifies CoffeeScript or JavaScript.
+    An input filter for webassets that bundles CoffeeScript or JavaScript
+    using Browserify.
     """
     name = 'browserify'
-    options = {
-        'binary': 'BROWSERIFY_BIN',
-        'extra_args': 'BROWSERIFY_EXTRA_ARGS',
-    }
-    extra_args = None
     max_debug_level = None
+    extra_args = None
 
-    def input(self, in_, out, **kwargs):
-        args = [self.binary or 'browserify']
-
-        args.append(kwargs['source_path'])
-
+    def input(self, in_, out, **kw):
+        args = [_locate_npm_bin('browserify'), '--extension=.coffee',
+                '--transform', 'coffeeify']
         if self.get_config('debug'):
             args.append('-d')
-
-        if self.extra_args is not None:
-            if isinstance(self.extra_args, string_types):
-                self.extra_args = self.extra_args.split()
-            args.extend(self.extra_args)
-
+        args.append(kw['source_path'])
         self.subprocess(args, out)
 
 register_filter(Browserify)
@@ -40,40 +34,28 @@ register_filter(Browserify)
 # The release versions of webassets upstream don't support extra arguments yet.
 class CleanCSS(ExternalTool):
     """
-    Minify css using `Clean-css <https://github.com/GoalSmashers/clean-css/>`_.
-
-    Clean-css is an external tool written for NodeJS; this filter assumes that
-    the ``cleancss`` executable is in the path. Otherwise, you may define
-    a ``CLEANCSS_BIN`` setting.
-
-    Additional options may be passed to ``cleancss`` binary using the setting
-    ``CLEANCSS_EXTRA_ARGS``, which expects a list of strings.
+    Minify CSS using `Clean-css <https://github.com/GoalSmashers/clean-css/>`_.
     """
 
     name = 'cleancss'
     options = {
-        'binary': 'CLEANCSS_BIN',
-        'extra_args': 'CLEANCSS_EXTRA_ARGS',
+        'binary': _locate_npm_bin('cleancss'),
+        'extra_args': '--skip-advanced --skip-rebase',
     }
 
-    def output(self, _in, out, **kw):
-        args = [self.binary or 'cleancss']
-        if self.extra_args:
-            if isinstance(self.extra_args, string_types):
-                self.extra_args = self.extra_args.split()
-            args.extend(self.extra_args)
+    def run(self, _in, out, extra_args):
+        args = [_locate_npm_bin('cleancss')] + extra_args
         self.subprocess(args, out, _in)
+
+    def output(self, _in, out, **kw):
+        self.run(_in, out, [])
 
     def input(self, _in, out, **kw):
-        args = [self.binary or 'cleancss', '--root',
-                os.path.dirname(kw['source_path'])]
-        if self.extra_args:
-            if isinstance(self.extra_args, string_types):
-                self.extra_args = self.extra_args.split()
-            args.extend(self.extra_args)
-        self.subprocess(args, out, _in)
+        extra_args = ['--root', os.path.dirname(kw['source_path'])]
+        self.run(_in, out, extra_args)
 
 register_filter(CleanCSS)
+
 
 class PostCSS(ExternalTool):
     """ Add vendor prefixes using postcss and autoprefixer.
@@ -95,6 +77,7 @@ class PostCSS(ExternalTool):
         self.subprocess(args, out, _in)
 
 register_filter(PostCSS)
+
 
 class AssetRequest(object):
     """A subscriber predicate that checks whether a route is a static asset.
