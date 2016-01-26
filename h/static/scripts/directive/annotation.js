@@ -27,11 +27,11 @@ function domainModelTagsFromViewModelTags(viewModelTags) {
  */
 function errorMessage(reason) {
   var message;
-  if (reason.status === 0) {
+  if (reason.status <= 0) {
     message = 'Service unreachable.';
   } else {
     message = reason.status + ' ' + reason.statusText;
-    if (reason.data.reason) {
+    if (reason.data && reason.data.reason) {
       message = message + ': ' + reason.data.reason;
     }
   }
@@ -193,43 +193,6 @@ function updateViewModel($scope, time, domainModel, vm, permissions) {
   }
 }
 
-/** Return truthy if the given annotation is valid, falsy otherwise.
- *
-* A public annotation has to have some text and/or some tags to be valid,
-* public annotations with no text or tags (i.e. public highlights) are not
-* valid.
-*
-* Non-public annotations just need to have a target to be valid, non-public
-* highlights are valid.
-*
-* @param {object} annotation The annotation to be validated
-*
-*/
-function validate(domainModel) {
-  if (!angular.isObject(domainModel)) {
-    return;
-  }
-
-  var permissions = domainModel.permissions || {};
-  var readPermissions = permissions.read || [];
-  var targets = domainModel.target || [];
-
-  if (domainModel.tags && domainModel.tags.length) {
-    return domainModel.tags.length;
-  }
-
-  if (domainModel.text && domainModel.text.length) {
-    return domainModel.text.length;
-  }
-
-  var worldReadable = false;
-  if (readPermissions.indexOf('group:__world__') !== -1) {
-    worldReadable = true;
-  }
-
-  return (targets.length && !worldReadable);
-}
-
 /** Return a vm tags array from the given domainModel tags array.
  *
  * domainModel.tags and vm.form.tags use different formats.  This
@@ -317,6 +280,9 @@ function AnnotationController(
 
     /** Determines whether the annotation body should be collapsed. */
     vm.collapseBody = true;
+
+    /** True if the annotation is currently being saved. */
+    vm.isSaving = false;
 
     /** The domain model, contains the currently saved version of the
       * annotation from the server (or in the case of new annotations that
@@ -661,7 +627,13 @@ function AnnotationController(
     */
   vm.save = function() {
     if (!domainModel.user) {
-      return flash.info('Please sign in to save your annotations.');
+      flash.info('Please sign in to save your annotations.');
+      return Promise.resolve();
+    }
+    if ((vm.action === 'create' || vm.action === 'edit') &&
+        !vm.hasContent() && vm.isShared()) {
+      flash.info('Please add text or a tag before publishing.');
+      return Promise.resolve();
     }
 
     // Update stored tags with the new tags of this annotation.
@@ -671,47 +643,45 @@ function AnnotationController(
     });
     tags.store(newTags);
 
+    var saved;
     switch (vm.action) {
       case 'create':
         updateDomainModel(domainModel, vm, permissions, groups);
-
-        if (!validate(domainModel)) {
-          return flash.info('Please add text or a tag before publishing.');
-        }
-
-        var onFulfilled = function() {
+        saved = domainModel.$create().then(function () {
           $rootScope.$emit('annotationCreated', domainModel);
           updateView(domainModel);
-          view();
           drafts.remove(domainModel);
-        };
-        var onRejected = function(reason) {
-          flash.error(
-            errorMessage(reason), 'Saving annotation failed');
-        };
-        return domainModel.$create().then(onFulfilled, onRejected);
+        });
+        break;
 
       case 'edit':
         var updatedModel = angular.copy(domainModel);
         updateDomainModel(updatedModel, vm, permissions, groups);
-
-        if (!validate(updatedModel)) {
-          return flash.info('Please add text or a tag before publishing.');
-        }
-
-        onFulfilled = function() {
+        saved = updatedModel.$update({
+          id: updatedModel.id
+        }).then(function () {
           drafts.remove(domainModel);
           $rootScope.$emit('annotationUpdated', updatedModel);
-          view();
-        };
-        onRejected = function(reason) {
-          flash.error(
-            errorMessage(reason), 'Saving annotation failed');
-        };
-        return updatedModel.$update({
-          id: updatedModel.id
-        }).then(onFulfilled, onRejected);
+        });
+        break;
+
+      default:
+        throw new Error('Tried to save an annotation that is not being edited');
     }
+
+    // optimistically switch back to view mode and display the saving
+    // indicator
+    vm.isSaving = true;
+    view();
+
+    return saved.then(function () {
+      vm.isSaving = false;
+    }).catch(function (reason) {
+      vm.isSaving = false;
+      vm.edit();
+      flash.error(
+        errorMessage(reason), 'Saving annotation failed');
+    });
   };
 
   /**
@@ -863,7 +833,6 @@ module.exports = {
   extractDocumentMetadata: extractDocumentMetadata,
   link: link,
   updateDomainModel: updateDomainModel,
-  validate: validate,
 
   // These are meant to be the public API of this module.
   directive: annotation,
