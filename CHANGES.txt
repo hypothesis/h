@@ -1,18 +1,39 @@
 Unreleased
-===================
+==========
+
+Features
+--------
+
+- Searching for "group:<groupid>" in the stream pages will now function
+  correctly (#2882).
+
+- Detect when the Chrome extension is being installed by an administrative
+  policy and suppress the "welcome page" tab (#2891).
+
+Bug fixes
+---------
+
+- Don't display the "create an account" banner on the stream or standalone
+  annotation pages (#2879).
+
+- Fix a problem where canceling edits to an annotation would revert the
+  annotation to its first known state rather than the state before the edit was
+  started (#2884).
+
+- Fix a problem where multiple clicks on the save button would create multiple
+  near-identical annotations (#2887).
 
 Miscellanea
 -----------
 
-- Removed the incomplete Firefox extension code which had fallen
-  a long way behind Chrome, with the intention of replacing it with
-  one based on WebExtensions in the near future.
-
-- Removed the option to configure a static blocklist of URLs on which
-  the Hypothesis client would refuse to load.
+- Add support for Sentry client-side error reporting in the Chrome extension and
+  site code (#2850).
 
 - Strip WebTrends "WT.*" query parameters as part of URI normalization (#2862).
 
+- Removed the incomplete Firefox extension code which had fallen a long way
+  behind Chrome, with the intention of replacing it with one based on
+  WebExtensions in the near future (#2877).
 
 0.8.11 (2016-01-14)
 ===================
