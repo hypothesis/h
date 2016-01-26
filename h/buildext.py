@@ -15,7 +15,6 @@ import textwrap
 
 from jinja2 import Environment, PackageLoader
 from pyramid.path import AssetResolver
-import raven
 import webassets
 from webassets.loaders import YAMLLoader
 
@@ -148,7 +147,7 @@ def build_type_from_api_url(api_url):
         return 'dev'
 
 
-def settings_dict(base_url, api_url, sentry_dsn):
+def settings_dict(base_url, api_url, sentry_public_dsn):
     """ Returns a dictionary of settings to be bundled with the extension """
     config = {
         'apiUrl': api_url,
@@ -156,10 +155,10 @@ def settings_dict(base_url, api_url, sentry_dsn):
         'serviceUrl': url_with_path(base_url),
     }
 
-    if sentry_dsn:
+    if sentry_public_dsn:
         config.update({
             'raven': {
-                'dsn': sentry_dsn,
+                'dsn': sentry_public_dsn,
                 'release': h.__version__,
             },
         })
@@ -238,15 +237,6 @@ def build_chrome(args):
     # Render the sidebar html
     api_url = '{}/api'.format(base_url)
     websocket_url = websocketize('{}/ws'.format(base_url))
-    sentry_dsn = None
-
-    if args.sentry_dsn:
-        sentry_dsn = raven.Client(args.sentry_dsn).get_public_dsn()
-        if (sentry_dsn.startswith('//')):
-            # the Raven client generates schemeless public DSNs by default,
-            # but we're running code in a page served from a 'chrome-extension:'
-            # URL, so we need to specify the scheme explicitly
-            sentry_dsn = 'https:'.format(sentry_dsn)
 
     if webassets_env.url.startswith('chrome-extension:'):
         build_extension_common(webassets_env, base_url, bundle_app=True)
@@ -260,7 +250,7 @@ def build_chrome(args):
                 ga_tracking_id=None,
                 webassets_env=webassets_env,
                 websocket_url=websocket_url,
-                sentry_dsn=sentry_dsn)
+                sentry_public_dsn=args.sentry_public_dsn)
             fp.write(data)
     else:
         build_extension_common(webassets_env, base_url)
@@ -275,8 +265,16 @@ def build_chrome(args):
 
     # Write build settings to a JSON file
     with codecs.open('build/chrome/settings-data.js', 'w', 'utf-8') as fp:
-        settings = settings_dict(base_url, api_url, sentry_dsn)
+        settings = settings_dict(base_url, api_url, args.sentry_public_dsn)
         fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings))
+
+
+def check_sentry_dsn_is_public(dsn):
+    parsed_dsn = urlparse.urlparse(dsn)
+    if parsed_dsn.password:
+        raise argparse.ArgumentTypeError(
+            "Must be a public Sentry DSN which does not contain a secret key.")
+    return dsn
 
 
 parser = argparse.ArgumentParser('hypothesis-buildext')
@@ -284,10 +282,11 @@ parser.add_argument('--debug',
                     action='store_true',
                     default=False,
                     help='create source maps to enable debugging in browser')
-parser.add_argument('--sentry-dsn',
+parser.add_argument('--sentry-public-dsn',
                     default='',
-                    help='Specify the Sentry DSN for crash reporting',
-                    metavar='SENTRY_DSN')
+                    help='Specify the public Sentry DSN for crash reporting',
+                    metavar='DSN',
+                    type=check_sentry_dsn_is_public)
 parser.add_argument(
     '--service',
     help="""The URL of the Hypothesis service which the extension

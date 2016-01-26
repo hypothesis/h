@@ -85,10 +85,10 @@ def _app_html_context(webassets_env, api_url, base_url, ga_tracking_id,
         'websocketUrl': websocket_url,
     }
 
-    if sentry_dsn:
+    if sentry_public_dsn:
         app_config.update({
             'raven': {
-                'dsn': sentry_dsn,
+                'dsn': sentry_public_dsn,
                 'release': __version__
             }
         })
@@ -110,7 +110,7 @@ def render_app_html(webassets_env,
                     base_url,
                     api_url,
                     websocket_url,
-                    sentry_dsn,
+                    sentry_public_dsn,
                     ga_tracking_id=None,
                     extra={}):
     """
@@ -121,7 +121,8 @@ def render_app_html(webassets_env,
                      (eg. https://hypothes.is/)
     :param api_url: The root URL for the Hypothesis service API
     :param websocket_url: The WebSocket URL which the client should connect to
-    :param sentry_dsn: The _public_ Sentry DSN for client-side crash reporting
+    :param sentry_public_dsn: The _public_ Sentry DSN for client-side
+                              crash reporting
     :param ga_tracking_id: The Google Analytics tracking ID
     :param extra: A dict of optional properties specifying link tags and
                   meta attributes to be included on the page, passed through to
@@ -131,7 +132,7 @@ def render_app_html(webassets_env,
     assets_dict = _app_html_context(api_url=api_url,
                                     base_url=base_url,
                                     ga_tracking_id=ga_tracking_id,
-                                    sentry_dsn=sentry_dsn,
+                                    sentry_public_dsn=sentry_public_dsn,
                                     webassets_env=webassets_env,
                                     websocket_url=websocket_url)
     return template.render(_merge(assets_dict, extra))
