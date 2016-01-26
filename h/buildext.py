@@ -40,20 +40,27 @@ resolve = AssetResolver().resolve
 
 
 class Resolver(webassets.env.Resolver):
-    """A custom resolver for webassets which can resolve
-       package-relative paths (eg. 'h:path/to/asset.css') that are used
-       in assets.yaml
+    """
+    Asset path resolver for webassets which can resolve package-relative paths.
+
+    This resolver supports the <package>:<path> path specifiers
+    (eg. 'h:path/to/asset.css') which are used in assets.yaml.
     """
 
     def search_for_source(self, ctx, item):
         if item.startswith('../'):
-            # relative URLs in assets.yaml are relative to h/static
-            # Note that the return path here is not canonicalized
-            # (ie. '../' is not removed) for consistency with the way
-            # webassets resolves paths in the main app.
+            # When building assets outside of the root 'h/static' directory,
+            # webassets puts the results in
+            # `h/static/webassets-external/[MD5_HASH_OF_PATH]_filename` where
+            # MD5_HASH_OF_PATH is a hash of the absolute, non-canonicalized
+            # path (ie. still containing any '../../' from the item path
+            # in assets.yaml)
             #
-            # This can be removed once webassets is replaced with a better
-            # system for client asset generation
+            # When building in development mode where embed.js is included in
+            # the Chrome extension but other JS files are not, the webassets
+            # environment in buildext.py needs to generate the same URLs for
+            # vendor JS files referenced in embed.js as the '/embed.js'
+            # route in the main app, so that the MD5 hashes match.
             return '{}/{}'.format(resolve('h:static').abspath(), item)
         else:
             return resolve(item).abspath()
