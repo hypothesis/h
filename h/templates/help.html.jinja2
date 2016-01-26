@@ -10,9 +10,7 @@
     <script>
       function hypothesisConfig() { return {firstRun: true} }
     </script>
-    <script async defer>
-      {% include "embed.js.jinja2" %}
-    </script>
+    <script async defer src="{{ embed_js_url }}"></script>
   {% endif %}
 {% endblock %}
 

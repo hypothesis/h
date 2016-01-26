@@ -116,6 +116,7 @@ def widget(context, request):
 def help_page(context, request):
     current_route = request.matched_route.name
     return {
+        'embed_js_url': request.route_path('embed'),
         'is_help': current_route == 'help',
         'is_onboarding': current_route == 'onboarding',
     }
