@@ -198,16 +198,8 @@ def build_chrome(args):
     """
     Build the Chrome extension. You can supply the base URL of an h
     installation with which this extension will communicate, such as
-    "http://localhost:5000" (the default) when developing locally or
+    "http://localhost:5000" when developing locally or
     "https://hypothes.is" to talk to the production Hypothesis application.
-
-    By default, the extension will load static assets (JavaScript/CSS/etc.)
-    from the application you specify. This can be useful when developing, but
-    when building a production extension for deployment to the Chrome Store you
-    will need to specify an assets URL that links to the built assets within
-    the Chrome Extension, such as:
-
-        chrome-extension://<extensionid>/public
     """
     service_url = args.service_url
     if not service_url.endswith('/'):
