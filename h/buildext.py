@@ -302,7 +302,7 @@ parser.add_argument('--sentry-public-dsn',
 parser.add_argument('--service',
                     help='The URL of the Hypothesis service which the '
                     'extension should connect to',
-                    default='http://localhost:5000/',
+                    default='https://hypothes.is/',
                     dest='service_url',
                     metavar='URL')
 parser.add_argument('--no-bundle-sidebar',
