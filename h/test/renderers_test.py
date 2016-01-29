@@ -19,3 +19,13 @@ def test_render_simple_csv():
              'rows': [[1, 2], [3, 4]]}
 
     assert renderer(value, sys) == "One,Two\r\n1,2\r\n3,4\r\n"
+
+
+def test_render_unicode_csv():
+    renderer = renderers.CSV({})
+    req = DummyRequest()
+    sys = {'request': req}
+    value = {'header': [u'ӓ', u'č'],
+             'rows': [[u'ñ', u'あ'], [u'ﺕ', u'Ӫ']]}
+
+    assert renderer(value, sys) == u"ӓ,č\r\nñ,あ\r\nﺕ,Ӫ\r\n".encode('utf-8')

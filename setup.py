@@ -63,6 +63,7 @@ INSTALL_REQUIRES = [
     'pyramid-jinja2>=2.3.3',
     'raven>=5.8.0,<5.9.0',
     'requests>=2.7.0',
+    'unicodecsv>=0.14.1,<0.15',
     'ws4py>=0.3,<0.4',
     'zope.sqlalchemy>=0.7.6,<0.8.0',
 

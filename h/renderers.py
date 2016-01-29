@@ -2,7 +2,7 @@
 # Taken from:
 # https://pyramid-cookbook.readthedocs.org/en/latest/templates/customrenderers.html
 # with minor modifications
-import csv
+import unicodecsv as csv
 from h._compat import StringIO
 
 
