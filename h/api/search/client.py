@@ -6,12 +6,12 @@ import elasticsearch
 class Client(object):
 
     """
-    A convenience wrapper around a connection to ElasticSearch.
+    A convenience wrapper around a connection to Elasticsearch.
 
     Holds a connection object, an index name, and an enumeration of document
     types stored in the index.
 
-    :param host: ElasticSearch host URL
+    :param host: Elasticsearch host URL
     :param index: index name
     """
 

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-Index mappings and analysis settings for ElasticSearch, and associated tools.
+Index mappings and analysis settings for Elasticsearch, and associated tools.
 
 This module contains the index mappings and analysis settings for data indexed
-into ElasticSearch. It also contains some helper functions to create and update
-these settings in an ElasticSearch instance.
+into Elasticsearch. It also contains some helper functions to create and update
+these settings in an Elasticsearch instance.
 """
 
 from __future__ import unicode_literals
@@ -243,7 +243,7 @@ def _ensure_icu_plugin(conn):
     # pylint: disable=unexpected-keyword-arg
     names = [x.strip() for x in conn.cat.plugins(h='component').split('\n')]
     if 'analysis-icu' not in names:
-        message = ("The ElasticSearch ICU Analysis plugin is not installed. "
+        message = ("The Elasticsearch ICU Analysis plugin is not installed. "
                    "Refer to "
                    "https://github.com/elastic/elasticsearch-analysis-icu "
                    "for installation instructions.")
@@ -310,7 +310,7 @@ def _update_index_mappings(conn, name, mappings):
         if not e.error.startswith('MergeMappingException'):
             raise
 
-        message = ("ElasticSearch index mapping cannot be automatically "
+        message = ("Elasticsearch index mapping cannot be automatically "
                    "updated! Please reindex it. You may find the `hypothesis "
                    "reindex` command helpful.")
         log.critical(message)

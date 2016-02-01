@@ -21,7 +21,7 @@ def dummy_search_results(start=1, count=0, name='annotation'):
 
 
 def dummy_request():
-    """Return a mock request with a faked out ElasticSearch connection."""
+    """Return a mock request with a faked out Elasticsearch connection."""
     es = mock.Mock(spec_set=['conn', 'index', 't'])
     es.conn.search.return_value = dummy_search_results(0)
 

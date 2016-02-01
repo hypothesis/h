@@ -154,7 +154,7 @@ _add_common_args(parser_assets)
 
 
 def reindex(args):
-    """Reindex the annotations into a new ElasticSearch index."""
+    """Reindex the annotations into a new Elasticsearch index."""
     request = bootstrap(args)
 
     # Configure the new index
