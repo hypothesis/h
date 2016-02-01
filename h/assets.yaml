@@ -132,7 +132,7 @@ app_js:
     - output: scripts/app.min.js
       filters: uglifyjs
       contents:
-        - output: h:static/scripts/app.js
+        - output: static/scripts/app.js
           filters: browserify
           contents: h:static/scripts/app.coffee
           depends:
