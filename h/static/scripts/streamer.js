@@ -86,8 +86,19 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     sendClientConfig();
   });
 
-  socket.on('error', function (error) {
-    console.warn('Error connecting to H push notification service:', error);
+  socket.on('error', function (event) {
+    console.warn('Error connecting to H push notification service:', event);
+
+    // In development, warn if the connection failure might be due to
+    // the app's origin not having been whitelisted in the H service's config.
+    //
+    // Unfortunately the error event does not provide a way to get at the
+    // HTTP status code for HTTP -> WS upgrade requests.
+    var websocketHost = new URL(url).hostname;
+    if (['localhost', '127.0.0.1'].indexOf(websocketHost) !== -1) {
+      console.warn('Check that your H service is configured to allow ' +
+                   'WebSocket connections from ' + window.location.origin);
+    }
   });
 
   socket.on('message', function (event) {
