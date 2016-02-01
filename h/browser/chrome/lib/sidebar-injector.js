@@ -226,6 +226,10 @@ function SidebarInjector(chromeTabs, dependencies) {
    * ie. Given '{ foo : "bar" }', this function will return
    * script code to add '<meta name="foo" content="bar">' to the
    * <head> element of the page.
+   *
+   * This enables configuration data to be shared amongst content
+   * scripts which may be running in isolated worlds (see
+   * https://developer.chrome.com/extensions/content_scripts)
    */
   function generateMetaTagCode(env) {
     var envSetupCode = '';
