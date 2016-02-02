@@ -383,7 +383,15 @@ class RegisterController(object):
 
         activation = Activation.get_by_code(code)
         if activation is None:
-            return httpexceptions.HTTPNotFound()
+            self.request.session.flash(jinja2.Markup(_(
+                "We didn't recognize that activation link. "
+                "Perhaps you've already activated your account? "
+                'If so, try <a href="{url}">signing in</a> using the username '
+                'and password that you provided.').format(
+                    url=self.request.route_url('login'))),
+                'success')
+            return httpexceptions.HTTPFound(
+                location=self.request.route_url('index'))
 
         user = User.get_by_activation(activation)
         if user is None or user.id != id_:

@@ -81,6 +81,12 @@ def invalid_form(errors=None):
     return form
 
 
+def mock_flash_function():
+    """Return a mock object with the same API as request.session.flash()."""
+    return mock.create_autospec(DummyRequest().session.flash,
+                                return_value=None)
+
+
 @pytest.mark.usefixtures('routes_mapper')
 def test_login_redirects_when_logged_in(authn_policy):
     request = DummyRequest()
@@ -676,13 +682,18 @@ def test_activate_looks_up_activation_by_code(activation_model):
 
 
 @activate_fixtures
-def test_activate_returns_not_found_if_activation_unknown(activation_model):
+def test_activate_redirects_if_activation_unknown(activation_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    request.session.flash = mock_flash_function()
     activation_model.get_by_code.return_value = None
 
     result = RegisterController(request).activate()
 
-    assert isinstance(result, httpexceptions.HTTPNotFound)
+    assert isinstance(result, httpexceptions.HTTPFound)
+    assert request.session.flash.call_count == 1
+    assert request.session.flash.call_args[0][0].startswith(
+        "We didn't recognize that activation link.")
+
 
 
 @activate_fixtures
