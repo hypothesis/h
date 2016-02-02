@@ -125,8 +125,9 @@ setup(
             'hypothesis-worker=h.worker:main',
         ],
         'h.worker': [
-            'notification=h.notification.worker:run',
+            'activation=h.accounts.worker:worker',
             'nipsa=h.api.nipsa.worker:worker',
+            'notification=h.notification.worker:run',
         ],
         'h.annotool': [
             'prepare=h.api.transform:prepare',

@@ -455,8 +455,7 @@ class RegisterController(object):
 
         # Send the activation email
         message = activation_email(self.request, user)
-        mailer = get_mailer(self.request)
-        mailer.send(message)
+        self.request.get_queue_writer().publish('activations', message)
 
         self.request.session.flash(jinja2.Markup(_(
             'Thank you for creating an account! '
@@ -576,20 +575,20 @@ class NotificationsController(object):
 
 
 def activation_email(request, user):
-    """
-    Generate an 'activate your account' email for the specified user.
+    """Return the data for an 'activate your account' email for the given user.
 
-    :rtype: pyramid_mailer.message.Message
+    :rtype: dict
+
     """
     link = request.route_url('activate', id=user.id, code=user.activation.code)
-
     emailtext = ("Please validate your email and activate your account by "
                  "visiting: {link}")
     body = emailtext.format(link=link)
-    msg = Message(subject=_("Please activate your account"),
-                  recipients=[user.email],
-                  body=body)
-    return msg
+    return {
+        "subject": _("Please activate your account"),
+        "recipients": [user.email],
+        "body": body
+    }
 
 
 def reset_password_email(user, reset_code, reset_link):

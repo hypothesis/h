@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 
+import collections
 import mock
 from mock import patch, Mock, MagicMock
 import pytest
@@ -22,6 +23,17 @@ from h.accounts.views import ProfileController
 from h.accounts.views import NotificationsController
 
 
+class DummyQueueWriter():
+    def __init__(self):
+        self.queues = collections.defaultdict(list)
+
+    def __call__(self):
+        return self
+
+    def publish(self, topic, message):
+        self.queues[topic].append(message)
+
+
 class DummyRequest(_DummyRequest):
     def __init__(self, *args, **kwargs):
         params = {
@@ -29,6 +41,8 @@ class DummyRequest(_DummyRequest):
             'db': DummySession(),
             # Add a dummy feature flag querier to the request
             'feature': DummyFeature(),
+            # Add a dummy queue writer to the request
+            'get_queue_writer': DummyQueueWriter(),
         }
         params.update(kwargs)
         super(DummyRequest, self).__init__(*args, **params)
@@ -411,7 +425,7 @@ def test_forgot_password_redirects_on_success():
 
 @pytest.mark.usefixtures('routes_mapper')
 def test_forgot_password_form_redirects_when_logged_in(authn_policy):
-    request = DummyRequest()
+    request = DummyRequest(method='POST')
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     with pytest.raises(httpexceptions.HTTPFound):
@@ -475,7 +489,6 @@ def test_reset_password_redirects_on_success():
 
 register_fixtures = pytest.mark.usefixtures('activation_model',
                                             'authn_policy',
-                                            'mailer',
                                             'notify',
                                             'routes_mapper',
                                             'user_model')
@@ -561,8 +574,7 @@ def test_register_generates_activation_email_from_user(activation_email,
 
 @patch('h.accounts.views.activation_email')
 @register_fixtures
-def test_register_sends_activation_email(activation_email,
-                                         mailer):
+def test_register_publishes_activation_message_to_nsq(activation_email):
     request = DummyRequest(method='POST')
     controller = RegisterController(request)
     controller.form = form_validating_to({
@@ -573,7 +585,8 @@ def test_register_sends_activation_email(activation_email,
 
     controller.register()
 
-    assert activation_email.return_value in mailer.outbox
+    activation_mail_queue = request.get_queue_writer.queues['activations']
+    assert activation_email.return_value in activation_mail_queue
 
 
 @patch('h.accounts.views.RegistrationEvent')

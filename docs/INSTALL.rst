@@ -148,6 +148,10 @@ In addition, there are several important components of a production Hypothesis
 installation which will need to be run in their own containers. For example,
 worker processes::
 
+    $ docker run --name h-worker-activation \
+                 [...additional config...] \
+                 hypothesis/hypothesis \
+                 hypothesis-worker conf/app.ini activation
     $ docker run --name h-worker-notification \
                  [...additional config...] \
                  hypothesis/hypothesis \
