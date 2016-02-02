@@ -453,6 +453,19 @@ def test_users_index_looks_up_users_by_username(User):
 
 
 @users_index_fixtures
+def test_users_index_looks_up_users_by_email(User):
+    es = MagicMock()
+    request = DummyRequest(params={"username": "bob@builder.com"},
+                           es=es)
+
+    User.get_by_username.return_value = None
+
+    admin.users_index(request)
+
+    User.get_by_email.assert_called_with("bob@builder.com")
+
+
+@users_index_fixtures
 def test_users_index_queries_annotation_count(User):
     es = MagicMock()
     request = DummyRequest(params={"username": "bob"},
@@ -471,6 +484,7 @@ def test_users_index_no_user_found(User):
     request = DummyRequest(params={"username": "bob"},
                            es=es)
     User.get_by_username.return_value = None
+    User.get_by_email.return_value = None
 
     result = admin.users_index(request)
 

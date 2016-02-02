@@ -10,7 +10,7 @@
 
   <form method="GET" class="form-inline">
     <div class="form-group">
-      <label for="username">Username</label>
+      <label for="username">Username or email</label>
       <input type="text" class="form-control" name="username">
       <input type="submit" class="btn btn-default" value="Find">
     </div>
@@ -44,7 +44,7 @@
         </tbody>
       </table>
     {% else %}
-      <p>No user found with username <em>{{ username }}</em>!</p>
+      <p>No user found with username or email <em>{{ username }}</em>!</p>
     {% endif %}
   {% endif %}
 {% endblock %}
