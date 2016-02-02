@@ -3,12 +3,19 @@ from pyramid import session
 from pyramid import view
 from pyramid import httpexceptions
 
+from elasticsearch import helpers as es_helpers
+
 from h.api import nipsa
+from h.api import storage
 from h.i18n import TranslationString as _
 from h import accounts
 from h import models
 from h import paginator
 from h import util
+
+
+class UserDeletionError(Exception):
+    pass
 
 
 @view.view_config(route_name='admin_index',
@@ -251,6 +258,28 @@ def groups_index_csv(request):
     request.response.content_disposition = 'attachment;filename=' + filename
 
     return {'header': header, 'rows': rows}
+
+
+def delete_user(request, user):
+    """
+    Deletes a user with all their group memberships and annotations.
+
+    Raises UserDeletionError when deletion fails with the appropriate error
+    message.
+    """
+    for group in user.groups:
+        if group.creator == user:
+            raise UserDeletionError('Cannot delete user who is a group creator.')
+
+    user.groups = []
+
+    userid = util.userid_from_username(user.username, request)
+    query = _all_user_annotations_query(userid)
+    annotations = es_helpers.scan(client=request.es.conn, query={'query': query})
+    for annotation in annotations:
+        storage.delete_annotation(annotation['_id'])
+
+    request.db.delete(user)
 
 
 def _all_user_annotations_query(userid):
