@@ -12,20 +12,26 @@
   <div class="content content--narrow">
     <div class="group-form is-member-of-group">
       <i class="h-icon-group group-form__heading-icon"></i>
-      <div class="group-form__heading">{{ group.name }}</div>
-
+      <div class="group-form__heading--short">{{ group.name }}</div>
       {% if document_links %}
-        Recently annotated documents:
-        <ul class="group-form-document-list">
+        <a href="{{ request.route_url('stream') }}?q=group:{{ group.pubid }}"
+           target="_blank"
+           title="Recent annotations in this group">
+           View recent group annotations</a>
+      {% else %}
+        <p class="group-form__nocontent-text">This group has not shared any annotations yet.</p>
+      {% endif %}
+    </div>
+    {% if document_links %}
+    <div class="group-document-list">
+        <ul class="group-document-list__list">
+        <p class="group-document-list__heading">Group documents:</p>
           {% for document_link in document_links %}
             <li>{{ document_link }}</li>
           {% endfor %}
         </ul>
-      {% else %}
-        <p>This group has not shared any annotations yet.</p>
-      {% endif %}
-
     </div>
+    {% endif %}
     <div class="group-form-footer">
       <div class="group-form-footer__explain-text">
         {% include "about-groups.html.jinja2" %}
