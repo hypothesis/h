@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-self-use
 
-import collections
 import mock
-from mock import patch, Mock, MagicMock
+from mock import patch, MagicMock
 import pytest
 
 import deform
@@ -23,17 +22,6 @@ from h.accounts.views import ProfileController
 from h.accounts.views import NotificationsController
 
 
-class DummyQueueWriter():
-    def __init__(self):
-        self.queues = collections.defaultdict(list)
-
-    def __call__(self):
-        return self
-
-    def publish(self, topic, message):
-        self.queues[topic].append(message)
-
-
 class DummyRequest(_DummyRequest):
     def __init__(self, *args, **kwargs):
         params = {
@@ -41,8 +29,6 @@ class DummyRequest(_DummyRequest):
             'db': DummySession(),
             # Add a dummy feature flag querier to the request
             'feature': DummyFeature(),
-            # Add a dummy queue writer to the request
-            'get_queue_writer': DummyQueueWriter(),
         }
         params.update(kwargs)
         super(DummyRequest, self).__init__(*args, **params)
@@ -389,6 +375,11 @@ def test_forgot_password_generates_mail(reset_link,
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
     reset_link.return_value = "http://example.com"
+    reset_mail.return_value = {
+        'recipients': [],
+        'subject': '',
+        'body': ''
+    }
 
     controller.forgot_password()
 
@@ -404,10 +395,18 @@ def test_forgot_password_sends_mail(reset_mail, mailer):
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
     message = reset_mail.return_value
+    reset_mail.return_value = {
+        'recipients': ['giraffe@thezoo.org'],
+        'subject': 'subject',
+        'body': 'body'
+    }
 
     controller.forgot_password()
 
-    assert message in mailer.outbox
+    mailer.send.assert_called_once_with(request,
+                                        recipients=['giraffe@thezoo.org'],
+                                        subject='subject',
+                                        body='body')
 
 
 @forgot_password_fixtures
@@ -489,6 +488,7 @@ def test_reset_password_redirects_on_success():
 
 register_fixtures = pytest.mark.usefixtures('activation_model',
                                             'authn_policy',
+                                            'mailer',
                                             'notify',
                                             'routes_mapper',
                                             'user_model')
@@ -566,15 +566,20 @@ def test_register_generates_activation_email_from_user(activation_email,
         "password": "s3crets",
     })
     new_user = user_model.return_value
+    activation_email.return_value = {
+        'recipients': [],
+        'subject': '',
+        'body': ''
+    }
 
     controller.register()
 
-    activation_email.assert_called_with(request, new_user)
+    activation_email.assert_called_once_with(request, new_user)
 
 
 @patch('h.accounts.views.activation_email')
 @register_fixtures
-def test_register_publishes_activation_message_to_nsq(activation_email):
+def test_register_sends_email(activation_email, mailer):
     request = DummyRequest(method='POST')
     controller = RegisterController(request)
     controller.form = form_validating_to({
@@ -582,11 +587,18 @@ def test_register_publishes_activation_message_to_nsq(activation_email):
         "email": "bob@example.com",
         "password": "s3crets",
     })
+    activation_email.return_value = {
+        'recipients': ['bob@example.com'],
+        'subject': 'subject',
+        'body': 'body'
+    }
 
     controller.register()
 
-    activation_mail_queue = request.get_queue_writer.queues['activations']
-    assert activation_email.return_value in activation_mail_queue
+    mailer.send.assert_called_once_with(request,
+                                        recipients=['bob@example.com'],
+                                        subject='subject',
+                                        body='body')
 
 
 @patch('h.accounts.views.RegistrationEvent')
@@ -774,14 +786,13 @@ def test_activate_successful_creates_ActivationEvent(user_model,
 
 
 @activate_fixtures
-def test_activate_successful_notifies(user_model, ActivationEvent):
+def test_activate_successful_notifies(user_model, notify, ActivationEvent):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
     RegisterController(request).activate()
 
-    request.registry.notify.assert_called_once_with(
-        ActivationEvent.return_value)
+    notify.assert_called_once_with(ActivationEvent.return_value)
 
 
 activate_already_logged_in_fixtures = pytest.mark.usefixtures('routes_mapper')
@@ -1105,3 +1116,11 @@ def ActivationEvent(config, request):
     model = patcher.start()
     request.addfinalizer(patcher.stop)
     return model
+
+
+@pytest.fixture
+def mailer(request):
+    patcher = patch('h.accounts.views.mailer', autospec=True)
+    module = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return module

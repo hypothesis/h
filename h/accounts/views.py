@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import json
 
 import colander
 import deform
@@ -10,14 +9,13 @@ from pyramid import httpexceptions
 from pyramid import security
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
-from pyramid_mailer import get_mailer
-from pyramid_mailer.message import Message
 
+from h import accounts
 from h import i18n
+from h import mailer
 from h import models
 from h import session
 from h import util
-from h import accounts
 from h.accounts import schemas
 from h.accounts.models import User
 from h.accounts.models import Activation
@@ -230,8 +228,7 @@ class ForgotPasswordController(object):
 
         link = reset_password_link(self.request, code)
         message = reset_password_email(user, code, link)
-        mailer = get_mailer(self.request)
-        mailer.send(message)
+        mailer.send(self.request, **message)
 
 
 @view_defaults(route_name='reset_password',
@@ -455,7 +452,7 @@ class RegisterController(object):
 
         # Send the activation email
         message = activation_email(self.request, user)
-        self.request.get_queue_writer().publish('activations', message)
+        mailer.send(self.request, **message)
 
         self.request.session.flash(jinja2.Markup(_(
             'Thank you for creating an account! '
@@ -592,10 +589,10 @@ def activation_email(request, user):
 
 
 def reset_password_email(user, reset_code, reset_link):
-    """
-    Generate a 'reset your password' email for the specified user.
+    """Return the data for a 'reset your password' email for the given user.
 
-    :rtype: pyramid_mailer.message.Message
+    :rtype: dict
+
     """
     emailtext = ("Hello, {username}!\n\n"
                  "Someone requested resetting your password. If it was "
@@ -609,10 +606,11 @@ def reset_password_email(user, reset_code, reset_link):
     body = emailtext.format(code=reset_code,
                             link=reset_link,
                             username=user.username)
-    msg = Message(subject=_("Reset your password"),
-                  recipients=[user.email],
-                  body=body)
-    return msg
+    return {
+        "recipients": [user.email],
+        "subject": _("Reset your password"),
+        "body": body
+    }
 
 
 def reset_password_link(request, reset_code):

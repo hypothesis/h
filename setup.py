@@ -125,7 +125,7 @@ setup(
             'hypothesis-worker=h.worker:main',
         ],
         'h.worker': [
-            'activation=h.accounts.worker:worker',
+            'mailer=h.mailer:worker',
             'nipsa=h.api.nipsa.worker:worker',
             'notification=h.notification.worker:run',
         ],
