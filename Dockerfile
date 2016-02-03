@@ -48,7 +48,7 @@ EXPOSE 5000
 ENV PYTHONIOENCODING utf_8
 
 # Build the assets
-RUN hypothesis assets conf/production.ini
+RUN hypothesis assets conf/app.ini
 
 # Allow the application to modify the webassets directory
 RUN chown -R hypothesis:hypothesis h/static/

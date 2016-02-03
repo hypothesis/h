@@ -42,7 +42,7 @@ def _add_common_args(parser):
     parser.add_argument(
         'config_uri',
         help="the path to your paster config file, for example: "
-             "'conf/development.ini'")
+             "'conf/app.ini'")
     parser.add_argument(
         '--base',
         help="the base URL of your h instance (default: "
@@ -191,7 +191,7 @@ def token(args):
     For example, to authorize yourself as user seanh to your local dev instance
     of h do:
 
-        hypothesis token --base 'http://localhost:5000' --sub 'acct:seanh@localhost' conf/development.ini
+        hypothesis token --base 'http://localhost:5000' --sub 'acct:seanh@localhost' conf/development-app.ini
 
     Then copy the output and pass it to the h API as the value of an
     X-Annotator-Auth-Token header.

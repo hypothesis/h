@@ -38,7 +38,7 @@ clean:
 	rm -f node_modules/.uptodate .eggs/.uptodate
 
 dev: deps
-	@gunicorn --reload --paste conf/development.ini
+	@gunicorn --reload --paste conf/development-app.ini
 
 test: backend-test client-test
 
