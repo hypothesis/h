@@ -78,3 +78,17 @@ def test_get_by_id_when_id_does_not_exist():
     db.Session.flush()
 
     assert models.Group.get_by_id(23) is None
+
+
+def test_created_by():
+    name_1 = "My first group"
+    name_2 = "My second group"
+    user = factories.User()
+
+    group_1 = models.Group(name=name_1, creator=user)
+    group_2 = models.Group(name=name_2, creator=user)
+
+    db.Session.add(group_1, group_2)
+    db.Session.flush()
+
+    assert models.Group.created_by(user).all() == [group_1, group_2]

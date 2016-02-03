@@ -3,12 +3,19 @@ from pyramid import session
 from pyramid import view
 from pyramid import httpexceptions
 
+from elasticsearch import helpers as es_helpers
+
 from h.api import nipsa
+from h.api import storage
 from h.i18n import TranslationString as _
 from h import accounts
 from h import models
 from h import paginator
 from h import util
+
+
+class UserDeletionError(Exception):
+    pass
 
 
 @view.view_config(route_name='admin_index',
@@ -172,8 +179,10 @@ def users_index(request):
     user_meta = {}
     username = request.params.get('username')
 
-    if username is not None:
+    if username:
         user = models.User.get_by_username(username)
+        if user is None:
+            user = models.User.get_by_email(username)
 
     if user is not None:
         # Fetch information on how many annotations the user has created
@@ -185,6 +194,28 @@ def users_index(request):
         user_meta['annotations_count'] = result['count']
 
     return {'username': username, 'user': user, 'user_meta': user_meta}
+
+
+@view.view_config(route_name='admin_users_delete',
+                  request_method='POST',
+                  permission='admin_users')
+def users_delete(request):
+    username = request.params.get('username')
+    user = models.User.get_by_username(username)
+
+    if user is None:
+        request.session.flash(
+            'Cannot find user with username %s' % username, 'error')
+    else:
+        try:
+            delete_user(request, user)
+            request.session.flash(
+                'Successfully deleted user %s' % username, 'success')
+        except UserDeletionError as e:
+            request.session.flash(str(e), 'error')
+
+    return httpexceptions.HTTPFound(
+        location=request.route_path('admin_users'))
 
 
 @view.view_config(route_name='admin_badge',
@@ -251,6 +282,28 @@ def groups_index_csv(request):
     return {'header': header, 'rows': rows}
 
 
+def delete_user(request, user):
+    """
+    Deletes a user with all their group memberships and annotations.
+
+    Raises UserDeletionError when deletion fails with the appropriate error
+    message.
+    """
+
+    if models.Group.created_by(user).count() > 0:
+        raise UserDeletionError('Cannot delete user who is a group creator.')
+
+    user.groups = []
+
+    userid = util.userid_from_username(user.username, request)
+    query = _all_user_annotations_query(userid)
+    annotations = es_helpers.scan(client=request.es.conn, query={'query': query})
+    for annotation in annotations:
+        storage.delete_annotation(annotation['_id'])
+
+    request.db.delete(user)
+
+
 def _all_user_annotations_query(userid):
     """Query matching all annotations (shared and private) owned by userid."""
     return {
@@ -268,6 +321,7 @@ def includeme(config):
     config.add_route('admin_admins', '/admin/admins')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
+    config.add_route('admin_users_delete', '/admin/users/delete')
     config.add_route('admin_groups', '/admin/groups')
     config.add_route('admin_groups_csv', '/admin/groups.csv')
     config.add_route('admin_badge', '/admin/badge')

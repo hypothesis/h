@@ -3,6 +3,7 @@ from mock import ANY
 from mock import MagicMock
 from mock import Mock
 from mock import patch
+from mock import call
 import pytest
 
 from pyramid.testing import DummyRequest as _DummyRequest
@@ -453,6 +454,19 @@ def test_users_index_looks_up_users_by_username(User):
 
 
 @users_index_fixtures
+def test_users_index_looks_up_users_by_email(User):
+    es = MagicMock()
+    request = DummyRequest(params={"username": "bob@builder.com"},
+                           es=es)
+
+    User.get_by_username.return_value = None
+
+    admin.users_index(request)
+
+    User.get_by_email.assert_called_with("bob@builder.com")
+
+
+@users_index_fixtures
 def test_users_index_queries_annotation_count(User):
     es = MagicMock()
     request = DummyRequest(params={"username": "Bob"},
@@ -477,6 +491,7 @@ def test_users_index_no_user_found(User):
     request = DummyRequest(params={"username": "bob"},
                            es=es)
     User.get_by_username.return_value = None
+    User.get_by_email.return_value = None
 
     result = admin.users_index(request)
 
@@ -497,6 +512,59 @@ def test_users_index_user_found(User):
         'user': User.get_by_username.return_value,
         'user_meta': {'annotations_count': 43},
     }
+
+
+users_delete_fixtures = pytest.mark.usefixtures('routes_mapper', 'User',
+                                                'delete_user')
+
+
+@users_delete_fixtures
+def test_users_delete_redirect(User):
+    request = DummyRequest(params={"username": "bob"})
+    User.get_by_username.return_value = None
+
+    result = admin.users_delete(request)
+    assert result.__class__ == httpexceptions.HTTPFound
+
+
+@users_delete_fixtures
+def test_users_delete_user_not_found_error(User):
+    request = DummyRequest(params={"username": "bob"})
+
+    User.get_by_username.return_value = None
+
+    admin.users_delete(request)
+
+    assert request.session.peek_flash('error') == [
+        'Cannot find user with username bob'
+    ]
+
+
+@users_delete_fixtures
+def test_users_delete_deletes_user(User, delete_user):
+    request = DummyRequest(params={"username": "bob"})
+    user = MagicMock()
+
+    User.get_by_username.return_value = user
+
+    admin.users_delete(request)
+
+    delete_user.assert_called_once_with(request, user)
+
+
+@users_delete_fixtures
+def test_users_delete_group_creator_error(User, delete_user):
+    request = DummyRequest(params={"username": "bob"})
+    user = MagicMock()
+
+    User.get_by_username.return_value = user
+    delete_user.side_effect = admin.UserDeletionError('group creator error')
+
+    admin.users_delete(request)
+
+    assert request.session.peek_flash('error') == [
+        'group creator error'
+    ]
 
 
 badge_index_fixtures = pytest.mark.usefixtures('models')
@@ -568,6 +636,75 @@ def test_badge_remove_returns_index(badge_index):
         badge_index.return_value)
 
 
+delete_user_fixtures = pytest.mark.usefixtures(
+    'elasticsearch_helpers', 'api_storage', 'Group')
+
+
+@delete_user_fixtures
+def test_delete_user_raises_when_group_creator(Group):
+    request, user = Mock(), Mock()
+
+    Group.created_by.return_value.count.return_value = 10
+
+    with pytest.raises(admin.UserDeletionError):
+        admin.delete_user(request, user)
+
+
+@delete_user_fixtures
+def test_delete_user_disassociate_group_memberships():
+    request = Mock()
+    user = Mock(groups=[Mock()])
+
+    admin.delete_user(request, user)
+
+    assert user.groups == []
+
+
+@delete_user_fixtures
+def test_delete_user_queries_annotations(elasticsearch_helpers):
+    request = DummyRequest(es=Mock(), db=Mock())
+    user = MagicMock(username=u'bob')
+
+    admin.delete_user(request, user)
+
+    elasticsearch_helpers.scan.assert_called_once_with(
+        client=request.es.conn,
+        query={
+            'query': {
+                'filtered': {
+                    'filter': {'term': {'user': u'acct:bob@example.com'}},
+                    'query': {'match_all': {}}
+                }
+            }
+        }
+    )
+
+
+@delete_user_fixtures
+def test_delete_user_deletes_annotations(elasticsearch_helpers, api_storage):
+    request, user = Mock(), MagicMock()
+    annotation_1 = {'_id': 'annotation-1'}
+    annotation_2 = {'_id': 'annotation-2'}
+
+    elasticsearch_helpers.scan.return_value = [annotation_1, annotation_2]
+
+    admin.delete_user(request, user)
+
+    assert api_storage.delete_annotation.mock_calls == [
+        call('annotation-1'),
+        call('annotation-2')
+    ]
+
+
+@delete_user_fixtures
+def test_delete_user_deletes_user():
+    request, user = Mock(), MagicMock()
+
+    admin.delete_user(request, user)
+
+    request.db.delete.assert_called_once_with(user)
+
+
 @pytest.fixture
 def models(request):
     patcher = patch('h.admin.models', autospec=True)
@@ -618,6 +755,14 @@ def User(config, request):  # pylint:disable=unused-argument
 
 
 @pytest.fixture
+def Group(request):
+    patcher = patch('h.admin.models.Group', autospec=True)
+    cls = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return cls
+
+
+@pytest.fixture
 def make_admin(config, request):  # pylint:disable=unused-argument
     patcher = patch('h.admin.accounts.make_admin', autospec=True)
     request.addfinalizer(patcher.stop)
@@ -643,3 +788,27 @@ def staff_index(config, request):  # pylint:disable=unused-argument
     patcher = patch('h.admin.staff_index', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
+
+
+@pytest.fixture
+def elasticsearch_helpers(request):
+    patcher = patch('h.admin.es_helpers', autospec=True)
+    module = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return module
+
+
+@pytest.fixture
+def api_storage(request):
+    patcher = patch('h.admin.storage', autospec=True)
+    module = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return module
+
+
+@pytest.fixture
+def delete_user(request):
+    patcher = patch('h.admin.delete_user')
+    function = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return function
