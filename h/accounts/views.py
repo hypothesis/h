@@ -374,12 +374,12 @@ class RegisterController(object):
         id_ = self.request.matchdict.get('id')
 
         if code is None or id_ is None:
-            return httpexceptions.HTTPNotFound()
+            raise httpexceptions.HTTPNotFound()
 
         try:
             id_ = int(id_)
         except ValueError:
-            return httpexceptions.HTTPNotFound()
+            raise httpexceptions.HTTPNotFound()
 
         activation = Activation.get_by_code(code)
         if activation is None:
@@ -395,7 +395,7 @@ class RegisterController(object):
 
         user = User.get_by_activation(activation)
         if user is None or user.id != id_:
-            return httpexceptions.HTTPNotFound()
+            raise httpexceptions.HTTPNotFound()
 
         # Activate the user (by deleting the activation)
         self.request.db.delete(activation)
