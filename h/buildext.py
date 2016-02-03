@@ -205,13 +205,8 @@ def build_chrome(args):
     if not service_url.endswith('/'):
         service_url = '{}/'.format(service_url)
 
-    if args.bundle_sidebar:
-        assets_url = '/public'
-    else:
-        assets_url = '{}assets'.format(service_url)
-
     webassets_env = get_webassets_env(base_dir='./build/chrome/public',
-                                      assets_url=assets_url,
+                                      assets_url='/public',
                                       debug=args.debug)
 
     # Prepare a fresh build.
