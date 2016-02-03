@@ -6,6 +6,19 @@ if (typeof(window.annotator) === 'undefined') {
     return;
 }
 
+var resourceRoot;
+var resourceRootTag =
+  document.querySelector('meta[name="hypothesis-resource-root"]');
+if (resourceRootTag) {
+  resourceRoot = resourceRootTag.content;
+}
+
+function resolve(url) {
+  if (!resourceRoot) {
+    return url;
+  }
+  return new URL(url, resourceRoot).href;
+}
 
 // Injects the hypothesis dependencies. These can be either js or css, the
 // file extension is used to determine the loading method. This file is
@@ -34,7 +47,7 @@ window.hypothesisInstall = function (inject) {
     var link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.href = href;
+    link.href = resolve(href);
 
     document.head.appendChild(link);
     fn(null);
@@ -45,7 +58,7 @@ window.hypothesisInstall = function (inject) {
     script.type = 'text/javascript';
     script.onload = function () { fn(null) };
     script.onerror = function () { fn(new Error('Failed to load script: ' + src)) };
-    script.src = src;
+    script.src = resolve(src);
 
     document.head.appendChild(script);
   };
@@ -74,7 +87,7 @@ window.hypothesisInstall = function (inject) {
 
 var baseUrl = document.createElement('link');
 baseUrl.rel = 'sidebar';
-baseUrl.href = '{{ app_html_url }}';
+baseUrl.href = resolve('{{ app_html_url }}');
 baseUrl.type = 'application/annotator+html';
 document.head.appendChild(baseUrl);
 

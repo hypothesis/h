@@ -74,16 +74,14 @@ build/%-chrome-stage.zip:
 	@rm -rf build/chrome $@
 	hypothesis-buildext chrome \
 		--service 'https://stage.hypothes.is' \
-		--sentry-public-dsn '$(SENTRY_DSN_STAGE)' \
-		--assets 'chrome-extension://iahhmhdkmkifclacffbofcnmgkpalpoj/public'
+		--sentry-public-dsn '$(SENTRY_DSN_STAGE)'
 	@zip -qr $@ build/chrome
 
 build/%-chrome-prod.zip:
 	@rm -rf build/chrome $@
 	hypothesis-buildext chrome \
 		--service 'https://hypothes.is' \
-		--sentry-public-dsn '$(SENTRY_DSN_PROD)' \
-		--assets 'chrome-extension://bjfhmglciegochdpefhhlphglcehbmek/public'
+		--sentry-public-dsn '$(SENTRY_DSN_PROD)'
 	@zip -qr $@ build/chrome
 
 .PHONY: clean cover deps dev extensions lint test

@@ -1,3 +1,17 @@
+/**
+ * Creates an <iframe> for testing the effects of code injected
+ * into the page by the sidebar injector
+ */
+function createTestFrame() {
+  var frame = document.createElement('iframe');
+  document.body.appendChild(frame);
+  frame.contentDocument.body.appendChild = function () {
+    // no-op to avoid trying to actually load <script> tags injected into
+    // the page
+  };
+  return frame;
+}
+
 describe('SidebarInjector', function () {
   'use strict';
 
@@ -14,11 +28,20 @@ describe('SidebarInjector', function () {
   // the sidebar has already been injected into the page
   var isAlreadyInjected;
 
+  // An <iframe> created by some tests to verify the effects on the DOM of
+  // code injected into the page by the sidebar
+  var contentFrame;
+
   beforeEach(function () {
     contentType = 'HTML';
     isAlreadyInjected = false;
+    contentFrame = undefined;
 
     var executeScriptSpy = sinon.spy(function (tabId, details, callback) {
+      if (contentFrame) {
+        contentFrame.contentWindow.eval(details.code);
+      }
+
       if (details.code.match(/window.annotator/)) {
         callback([isAlreadyInjected]);
       } else if (details.code.match(/detectContentType/)) {
@@ -40,6 +63,12 @@ describe('SidebarInjector', function () {
         return 'CRX_PATH' + path;
       })
     });
+  });
+
+  afterEach(function () {
+    if (contentFrame) {
+      contentFrame.parentNode.removeChild(contentFrame);
+    }
   });
 
   // Used when asserting rejected promises to raise an error if the resolved
@@ -90,6 +119,17 @@ describe('SidebarInjector', function () {
           assert.calledWith(spy, 1, {
             code: sinon.match('/public/embed.js')
           });
+        });
+      });
+
+      it('adds a hypothesis-resource-root <meta> tag to the page', function () {
+        contentFrame = createTestFrame();
+        var url = 'http://example.com/foo.html';
+        return injector.injectIntoTab({id: 1, url: url}).then(function () {
+          var resourceRoot = contentFrame.contentDocument.querySelector('meta');
+          assert.ok(resourceRoot);
+          assert.equal(resourceRoot.name, 'hypothesis-resource-root');
+          assert.equal(resourceRoot.content, 'CRX_PATH');
         });
       });
     });

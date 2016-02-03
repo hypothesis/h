@@ -80,7 +80,7 @@ def build_extension_common(webassets_env, service_url, bundle_app=False):
     # Render the embed code.
     with codecs.open(content_dir + '/embed.js', 'w', 'utf-8') as fp:
         if bundle_app:
-            app_html_url = webassets_env.url + '/app.html'
+            app_html_url = '/public/app.html'
         else:
             app_html_url = '{}app.html'.format(service_url)
 
@@ -124,10 +124,12 @@ def chrome_manifest(script_host_url):
         version_name = 'Official Build'
 
     context = {
-        'script_src': script_host_url,
         'version': version,
         'version_name': version_name
     }
+
+    if script_host_url:
+        context['script_src'] = script_host_url
 
     template = jinja_env.get_template('browser/chrome/manifest.json.jinja2')
     return template.render(context)
@@ -166,10 +168,18 @@ def settings_dict(service_url, api_url, sentry_public_dsn):
     return config
 
 
-def get_webassets_env(base_dir, service_url, assets_url, debug=False):
+def get_webassets_env(base_dir, assets_url, debug=False):
+    """
+    Get a webassets environment configured for building browser extensions.
+
+    :param base_dir: The directory into which the assets should be built.
+    :param assets_url: The relative or absolute URL used to reference assets
+                       in the app.html and embed.js files.
+    :param debug: If true, generates source maps and skips minification.
+    """
     webassets_env = webassets.Environment(
-        directory=os.path.abspath('./build/chrome/public'),
-        url=assets_url or '{}assets'.format(service_url))
+        directory=os.path.abspath(base_dir),
+        url=assets_url)
 
     # Disable webassets caching and manifest generation
     webassets_env.cache = False
@@ -178,11 +188,6 @@ def get_webassets_env(base_dir, service_url, assets_url, debug=False):
     webassets_env.config['UGLIFYJS_BIN'] = './node_modules/.bin/uglifyjs'
     webassets_env.debug = debug
 
-    # By default, webassets will use its base_dir setting as its search path.
-    # When building extensions, we change base_dir so as to build assets
-    # directly into the extension directories. As a result, we have to add
-    # back the correct search path.
-    webassets_env.append_path(resolve('h:static').abspath(), webassets_env.url)
     loader = YAMLLoader(resolve('h:assets.yaml').abspath())
     webassets_env.register(loader.load_bundles())
 
@@ -193,24 +198,15 @@ def build_chrome(args):
     """
     Build the Chrome extension. You can supply the base URL of an h
     installation with which this extension will communicate, such as
-    "http://localhost:5000" (the default) when developing locally or
+    "http://localhost:5000" when developing locally or
     "https://hypothes.is" to talk to the production Hypothesis application.
-
-    By default, the extension will load static assets (JavaScript/CSS/etc.)
-    from the application you specify. This can be useful when developing, but
-    when building a production extension for deployment to the Chrome Store you
-    will need to specify an assets URL that links to the built assets within
-    the Chrome Extension, such as:
-
-        chrome-extension://<extensionid>/public
     """
     service_url = args.service_url
     if not service_url.endswith('/'):
         service_url = '{}/'.format(service_url)
 
     webassets_env = get_webassets_env(base_dir='./build/chrome/public',
-                                      service_url=service_url,
-                                      assets_url=args.assets,
+                                      assets_url='/public',
                                       debug=args.debug)
 
     # Prepare a fresh build.
@@ -238,7 +234,7 @@ def build_chrome(args):
     api_url = '{}api/'.format(service_url)
     websocket_url = websocketize('{}ws'.format(service_url))
 
-    if webassets_env.url.startswith('chrome-extension:'):
+    if args.bundle_sidebar:
         build_extension_common(webassets_env, service_url, bundle_app=True)
         with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
             data = client.render_app_html(
@@ -258,8 +254,11 @@ def build_chrome(args):
     # Render the manifest.
     with codecs.open('build/chrome/manifest.json', 'w', 'utf-8') as fp:
         script_url = urlparse.urlparse(webassets_env.url)
-        script_host_url = '{}://{}'.format(script_url.scheme,
-                                           script_url.netloc)
+        if script_url.scheme and script_url.netloc:
+            script_host_url = '{}://{}'.format(script_url.scheme,
+                                               script_url.netloc)
+        else:
+            script_host_url = None
         data = chrome_manifest(script_host_url)
         fp.write(data)
 
@@ -290,14 +289,14 @@ parser.add_argument('--sentry-public-dsn',
 parser.add_argument('--service',
                     help='The URL of the Hypothesis service which the '
                     'extension should connect to',
-                    default='http://localhost:5000/',
+                    default='https://hypothes.is/',
                     dest='service_url',
                     metavar='URL')
-parser.add_argument('--assets',
-                    help='A path (relative to base) or URL from which '
-                    'to load the static assets',
-                    default=None,
-                    metavar='PATH/URL')
+parser.add_argument('--no-bundle-sidebar',
+                    action='store_false',
+                    dest='bundle_sidebar',
+                    help='Use the sidebar from the Hypothesis service instead'
+                         ' of building it into the extension')
 parser.add_argument('browser',
                     help='Specifies the browser to build an extension for',
                     choices=['chrome'])
