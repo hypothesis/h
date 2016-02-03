@@ -290,9 +290,8 @@ def delete_user(request, user):
     message.
     """
 
-    for group in user.groups:
-        if group.creator == user:
-            raise UserDeletionError('Cannot delete user who is a group creator.')
+    if models.Group.created_by(user).count() > 0:
+        raise UserDeletionError('Cannot delete user who is a group creator.')
 
     user.groups = []
 

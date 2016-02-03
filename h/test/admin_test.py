@@ -631,14 +631,14 @@ def test_badge_remove_returns_index(badge_index):
 
 
 delete_user_fixtures = pytest.mark.usefixtures(
-    'elasticsearch_helpers', 'api_storage')
+    'elasticsearch_helpers', 'api_storage', 'Group')
 
 
 @delete_user_fixtures
-def test_delete_user_raises_when_group_creator():
+def test_delete_user_raises_when_group_creator(Group):
     request, user = Mock(), Mock()
-    group = Mock(creator=user)
-    user.groups = [group]
+
+    Group.created_by.return_value.count.return_value = 10
 
     with pytest.raises(admin.UserDeletionError):
         admin.delete_user(request, user)
@@ -746,6 +746,14 @@ def User(config, request):  # pylint:disable=unused-argument
     patcher = patch('h.admin.models.User', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
+
+
+@pytest.fixture
+def Group(request):
+    patcher = patch('h.admin.models.Group', autospec=True)
+    cls = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return cls
 
 
 @pytest.fixture

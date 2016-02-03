@@ -81,6 +81,11 @@ class Group(Base):
         except exc.NoResultFound:
             return None
 
+    @classmethod
+    def created_by(cls, user):
+        """Return a query object filtering groups by creator."""
+        return cls.query.filter(Group.creator == user)
+
 
 USER_GROUP_TABLE = sa.Table(
     'user_group', Base.metadata,
