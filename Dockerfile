@@ -36,7 +36,7 @@ RUN npm install --production \
   && npm cache clean
 
 # Copy the rest of the application files
-COPY Procfile gunicorn.conf.py ./
+COPY gunicorn.conf.py ./
 COPY conf ./conf/
 COPY h ./h/
 COPY scripts ./scripts/
@@ -56,7 +56,6 @@ RUN chown -R hypothesis:hypothesis h/static/
 # Persist the static directory.
 VOLUME ["/var/lib/hypothesis/h/static"]
 
-# Use honcho and start all the daemons by default.
+# Start the web server by default
 USER hypothesis
-ENTRYPOINT ["honcho"]
-CMD ["start", "-c", "all=1,assets=0,initdb=0"]
+CMD ["gunicorn", "--paste", "conf/app.ini"]

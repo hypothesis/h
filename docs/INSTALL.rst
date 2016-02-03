@@ -39,13 +39,21 @@ Docker`_.
 Building the image
 ------------------
 
-We do not currently publish a built image for h. You must build the base image
-for h by running the following from the root of the repository::
+The Hypothesis team builds and publishes a Docker image,
+``hypothesis/hypothesis`` to `the Docker hub`_. You can pull and use this image
+with::
 
-    $ docker build -t hypothesis/h .
+    $ docker pull hypothesis/hypothesis
+
+In some cases you may wish to build the image yourself, which you can do with a
+command such as the following from the root of the git repository::
+
+    $ git archive HEAD | docker build -t hypothesis/hypothesis -
 
 This will take some time to complete, as it will install and configure a
 complete image of h and all its direct dependencies.
+
+.. _the Docker hub: https://hub.docker.com/r/hypothesis/hypothesis/
 
 
 Configuring container dependencies
@@ -82,10 +90,10 @@ database URL`_::
 Running the container
 ---------------------
 
-You can now run a Docker container using the ``hypothesis/h`` image you just
-built. At its simplest, this consists of running::
+You can run a Docker container using the ``hypothesis/hypothesis`` image. At its
+simplest, this consists of running::
 
-    $ docker run -d -p 5000:5000 hypothesis/h
+    $ docker run -d -p 5000:5000 hypothesis/hypothesis
 
 but this will usually result in a container which is missing some important
 configuration. In particular, you need to let the running h instance know where
@@ -109,12 +117,13 @@ container::
                  --link nsqd:nsqd \
                  --link redis:redis \
                  --link mail:mail \
-                 hypothesis/h
+                 hypothesis/hypothesis
 
 .. _docker links: https://docs.docker.com/userguide/dockerlinks/
 
-In a production environment you should also set the following container
-environment variables:
+Please note that in a production environment there are several additional steps
+you should take. First, there are several important environment variables you
+should set:
 
 -  ``APP_URL`` the base URL of the application
 -  ``SECRET_KEY`` a secret key for use in cryptographic operations
@@ -134,3 +143,24 @@ options:
 - ``MAIL_DEFAULT_SENDER`` a sender address for outbound mail
 - ``WEBASSETS_BASE_DIR`` the base directory for static assets
 - ``WEBASSETS_BASE_URL`` the base URL for static asset routes
+
+In addition, there are several important components of a production Hypothesis
+installation which will need to be run in their own containers. For example,
+worker processes::
+
+    $ docker run --name h-worker-notification \
+                 [...additional config...] \
+                 hypothesis/hypothesis \
+                 hypothesis-worker conf/app.ini notification
+    $ docker run --name h-worker-nipsa \
+                 [...additional config...] \
+                 hypothesis/hypothesis \
+                 hypothesis-worker conf/app.ini nipsa
+
+And, possibly, a websocket server::
+
+    $ docker run --name h-websocket \
+                 [...additional config...] \
+                 -p 5001:5001 \
+                 hypothesis/hypothesis \
+                 gunicorn --paste conf/websocket.ini
