@@ -402,7 +402,7 @@ class RegisterController(object):
 
         self.request.session.flash(jinja2.Markup(_(
             'Your account has been activated! '
-            'You can now <a href="{url}">login</a> using the password you '
+            'You can now <a href="{url}">sign in</a> using the password you '
             'provided.').format(url=self.request.route_url('login'))),
             'success')
         self.request.registry.notify(ActivationEvent(self.request, user))
