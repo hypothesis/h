@@ -6,7 +6,7 @@ var EventEmitter = require('tiny-emitter');
 var proxyquire = require('proxyquire');
 
 // the most recently created FakeSocket instance
-var fakeWebSocket;
+var fakeWebSocket = null;
 
 function FakeSocket(url) {
   fakeWebSocket = this;
@@ -37,6 +37,16 @@ describe('streamer', function () {
   var fakeSettings;
   var activeStreamer;
 
+  function createDefaultStreamer() {
+    activeStreamer = streamer.connect(
+      fakeRootScope,
+      fakeAnnotationMapper,
+      fakeGroups,
+      fakeSession,
+      fakeSettings
+    );
+  }
+
   beforeEach(function () {
     fakeRootScope = {
       $apply: function (callback) {
@@ -66,23 +76,23 @@ describe('streamer', function () {
     streamer = proxyquire('../streamer', {
       './websocket': FakeSocket,
     });
+  });
 
-    activeStreamer = streamer.connect(
-      fakeRootScope,
-      fakeAnnotationMapper,
-      fakeGroups,
-      fakeSession,
-      fakeSettings
-    );
+  it('should not create a websocket connection if websocketUrl is not provided', function () {
+    fakeSettings = {}
+    createDefaultStreamer();
+    assert.isNull(fakeWebSocket);
   });
 
   it('should send a client ID', function () {
+    createDefaultStreamer();
     assert.equal(fakeWebSocket.messages.length, 1);
     assert.equal(fakeWebSocket.messages[0].messageType, 'client_id');
     assert.equal(fakeWebSocket.messages[0].value, streamer.clientId);
   });
 
   it('should close any existing socket', function () {
+    createDefaultStreamer();
     var oldStreamer = activeStreamer;
     var oldWebSocket = fakeWebSocket;
     var newStreamer = streamer.connect(
@@ -98,6 +108,7 @@ describe('streamer', function () {
 
   describe('annotation notifications', function () {
     it('should load new annotations', function () {
+      createDefaultStreamer();
       fakeWebSocket.notify({
         type: 'annotation-notification',
         options: {
@@ -111,6 +122,7 @@ describe('streamer', function () {
     });
 
     it('should unload deleted annotations', function () {
+      createDefaultStreamer();
       fakeWebSocket.notify({
         type: 'annotation-notification',
         options: {
@@ -126,6 +138,7 @@ describe('streamer', function () {
 
   describe('session change notifications', function () {
     it('updates the session when a notification is received', function () {
+      createDefaultStreamer();
       var model = {
         groups: [{
           id: 'new-group'
@@ -141,6 +154,7 @@ describe('streamer', function () {
 
   describe('reconnections', function () {
     it('resends configuration messages when a reconnection occurs', function () {
+      createDefaultStreamer();
       fakeWebSocket.messages = [];
       fakeWebSocket.emit('open');
       assert.equal(fakeWebSocket.messages.length, 1);
