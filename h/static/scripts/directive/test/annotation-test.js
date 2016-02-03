@@ -249,17 +249,6 @@ describe('annotation', function() {
 
       assert.equal(domainModel.permissions, 'shared permissions');
     });
-
-    it('sets domainModel.group according to groups.focused()', function() {
-      var domainModel = {};
-      var viewModel = {form: {text: 'foo'}};
-      var groups = fakeGroups();
-      groups.focused = function() {return {id: 'focused_group_id'};};
-
-      updateDomainModel(domainModel, viewModel, fakePermissions(), groups);
-
-      assert.equal(domainModel.group, 'focused_group_id');
-    });
   });
 
   describe('link', function () {

@@ -154,7 +154,7 @@ function saveToDrafts(drafts, domainModel, vm) {
  * @param {object} vm The object to copy properties from
  *
  */
-function updateDomainModel(domainModel, vm, permissions, groups) {
+function updateDomainModel(domainModel, vm, permissions) {
   domainModel.text = vm.form.text;
   domainModel.tags = domainModelTagsFromViewModelTags(vm.form.tags);
   if (vm.isPrivate) {
@@ -162,7 +162,6 @@ function updateDomainModel(domainModel, vm, permissions, groups) {
   } else {
     domainModel.permissions = permissions.shared(domainModel.group);
   }
-  domainModel.group = groups.focused().id;
 }
 
 /** Update the view model from the domain model changes. */
@@ -646,7 +645,7 @@ function AnnotationController(
     var saved;
     switch (vm.action) {
       case 'create':
-        updateDomainModel(domainModel, vm, permissions, groups);
+        updateDomainModel(domainModel, vm, permissions);
         saved = domainModel.$create().then(function () {
           $rootScope.$emit('annotationCreated', domainModel);
           updateView(domainModel);
@@ -656,7 +655,7 @@ function AnnotationController(
 
       case 'edit':
         var updatedModel = angular.copy(domainModel);
-        updateDomainModel(updatedModel, vm, permissions, groups);
+        updateDomainModel(updatedModel, vm, permissions);
         saved = updatedModel.$update({
           id: updatedModel.id
         }).then(function () {
