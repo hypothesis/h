@@ -640,49 +640,64 @@ def test_register_form_redirects_when_logged_in(authn_policy):
         controller.register_form()
 
 
-activate_fixtures = pytest.mark.usefixtures('activation_model',
+activate_fixtures = pytest.mark.usefixtures('ActivationEvent',
+                                            'activation_model',
                                             'notify',
                                             'routes_mapper',
                                             'user_model')
 
-@activate_fixtures
-def test_activate_returns_not_found_if_code_missing():
-    request = DummyRequest(matchdict={'id': '123'})
-
-    result = RegisterController(request).activate()
-
-    assert isinstance(result, httpexceptions.HTTPNotFound)
-
 
 @activate_fixtures
-def test_activate_returns_not_found_if_id_missing():
-    request = DummyRequest(matchdict={'code': 'abc123'})
+def test_activate_404s_if_code_missing():
+    request = DummyRequest(matchdict={'id': '123'})  # No 'code' in matchdict.
 
-    result = RegisterController(request).activate()
-
-    assert isinstance(result, httpexceptions.HTTPNotFound)
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        RegisterController(request).activate()
 
 
 @activate_fixtures
-def test_activate_returns_not_found_if_id_not_integer():
-    request = DummyRequest(matchdict={'id': 'abc', 'code': 'abc456'})
+def test_activate_404s_if_id_missing():
+    request = DummyRequest(matchdict={'code': 'abc123'})  # No 'id'.
 
-    result = RegisterController(request).activate()
-
-    assert isinstance(result, httpexceptions.HTTPNotFound)
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        RegisterController(request).activate()
 
 
 @activate_fixtures
-def test_activate_looks_up_activation_by_code(activation_model):
+def test_activate_404s_if_id_not_int():
+    request = DummyRequest(matchdict={
+        'id': 'abc',  # Not an int.
+        'code': 'abc456'})
+
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        RegisterController(request).activate()
+
+
+@activate_fixtures
+def test_activate_looks_up_activation_by_code(activation_model, user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    user_model.get_by_activation.return_value.id = 123
 
-    result = RegisterController(request).activate()
+    RegisterController(request).activate()
 
     activation_model.get_by_code.assert_called_with('abc456')
 
 
 @activate_fixtures
-def test_activate_redirects_if_activation_unknown(activation_model):
+def test_activate_redirects_if_activation_not_found(activation_model):
+    """
+
+    If the activation code doesn't match any activation then we redirect to the
+    front page and flash a message suggesting that they may already be
+    activated and can sign in.
+
+    This happens if a user clicks on an activation link from an email after
+    they've already been activated, for example.
+
+    (This also happens if users visit a bogus activation URL, but we're happy
+    to do this same redirect in that edge case.)
+
+    """
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     request.session.flash = mock_flash_function()
     activation_model.get_by_code.return_value = None
@@ -695,85 +710,98 @@ def test_activate_redirects_if_activation_unknown(activation_model):
         "We didn't recognize that activation link.")
 
 
-
 @activate_fixtures
 def test_activate_looks_up_user_by_activation(activation_model, user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    activation = activation_model.get_by_code.return_value
+    user_model.get_by_activation.return_value.id = 123
 
-    result = RegisterController(request).activate()
+    RegisterController(request).activate()
 
-    user_model.get_by_activation.assert_called_with(activation)
+    user_model.get_by_activation.assert_called_once_with(
+        activation_model.get_by_code.return_value)
 
 
 @activate_fixtures
-def test_activate_returns_not_found_if_user_not_found(user_model):
+def test_activate_404s_if_user_not_found(user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value = None
 
-    result = RegisterController(request).activate()
-
-    assert isinstance(result, httpexceptions.HTTPNotFound)
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        RegisterController(request).activate()
 
 
 @activate_fixtures
-def test_activate_returns_not_found_if_userid_does_not_match(user_model):
+def test_activate_404s_if_user_id_does_not_match_user_from_hash(user_model):
+    """
+
+    We don't want to let a user with a valid hash activate a different user's
+    account!
+
+    """
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    giraffe = FakeUser(id=456)
-    user_model.get_by_activation.return_value = giraffe
+    user_model.get_by_activation.return_value.id = 2  # Not the same id.
 
-    result = RegisterController(request).activate()
-
-    assert isinstance(result, httpexceptions.HTTPNotFound)
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        RegisterController(request).activate()
 
 
 @activate_fixtures
-def test_activate_redirects_on_success(user_model):
+def test_activate_successful_deletes_activation(user_model, activation_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    giraffe = FakeUser(id=123)
-    user_model.get_by_activation.return_value = giraffe
-
-    result = RegisterController(request).activate()
-
-    assert isinstance(result, httpexceptions.HTTPRedirection)
-
-
-@activate_fixtures
-def test_activate_activates_user(activation_model, user_model):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    activation = activation_model.get_by_code.return_value
-    giraffe = FakeUser(id=123)
-    user_model.get_by_activation.return_value = giraffe
-
-    result = RegisterController(request).activate()
-
-    assert activation in request.db.deleted
-
-
-@patch('h.accounts.views.ActivationEvent')
-@activate_fixtures
-def test_activate_no_event_on_failure(event, notify):
-    request = DummyRequest()
+    request.db.delete = mock.create_autospec(request.db.delete,
+                                             return_value=None)
+    user_model.get_by_activation.return_value.id = 123
 
     RegisterController(request).activate()
 
-    assert not event.called
-    assert not notify.called
+    request.db.delete.assert_called_once_with(
+        activation_model.get_by_code.return_value)
 
 
-@patch('h.accounts.views.ActivationEvent')
 @activate_fixtures
-def test_activate_event_when_validation_succeeds(event,
-                                                 notify,
-                                                 user_model):
+def test_activate_successful_flashes_message(user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    giraffe = FakeUser(id=123)
-    user_model.get_by_activation.return_value = giraffe
+    request.session.flash = mock_flash_function()
+    user_model.get_by_activation.return_value.id = 123
 
     RegisterController(request).activate()
 
-    event.assert_called_with(request, giraffe)
-    notify.assert_called_with(event.return_value)
+    assert request.session.flash.call_count == 1
+    assert request.session.flash.call_args[0][0].startswith(
+        "Your account has been activated")
+
+
+@activate_fixtures
+def test_activate_successful_creates_ActivationEvent(user_model,
+                                                     ActivationEvent):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    user_model.get_by_activation.return_value.id = 123
+
+    RegisterController(request).activate()
+
+    ActivationEvent.assert_called_once_with(
+        request, user_model.get_by_activation.return_value)
+
+
+@activate_fixtures
+def test_activate_successful_notifies(user_model, ActivationEvent):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    user_model.get_by_activation.return_value.id = 123
+
+    RegisterController(request).activate()
+
+    request.registry.notify.assert_called_once_with(
+        ActivationEvent.return_value)
+
+
+@activate_fixtures
+def test_activate_successful_redirects(user_model):
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+    user_model.get_by_activation.return_value.id = 123
+
+    result = RegisterController(request).activate()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
 
 
 profile_fixtures = pytest.mark.usefixtures('routes_mapper')
@@ -1041,6 +1069,14 @@ def user_model(config, request):
 @pytest.fixture
 def activation_model(config, request):
     patcher = patch('h.accounts.views.Activation', autospec=True)
+    model = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return model
+
+
+@pytest.fixture
+def ActivationEvent(config, request):
+    patcher = patch('h.accounts.views.ActivationEvent', autospec=True)
     model = patcher.start()
     request.addfinalizer(patcher.stop)
     return model
