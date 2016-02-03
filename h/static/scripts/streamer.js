@@ -26,15 +26,24 @@ var socket;
  */
 // @ngInject
 function connect($rootScope, annotationMapper, groups, session, settings) {
-  // Get the socket URL
-  var url = settings.websocketUrl;
+  // The public interface of the streamer. Returned from connect.
+  var controls = {
+    setConfig: setConfig
+  };
+  // Client configuration messages, to be sent each time a new connection is
+  // established.
+  var configMessages = {};
 
   // Close any existing socket
   if (socket) {
     socket.close();
   }
 
-  var configMessages = {};
+  // If we have no URL configured, don't do anything.
+  var url = settings.websocketUrl;
+  if (!url) {
+    return controls;
+  }
 
   // Open the socket
   socket = new Socket(url);
@@ -82,6 +91,18 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     });
   }
 
+  /**
+   * Send a configuration message to the push notification service.
+   * Each message is associated with a key, which is used to re-send
+   * configuration data to the server in the event of a reconnection.
+   */
+  function setConfig(key, configMessage) {
+    configMessages[key] = configMessage;
+    if (socket && socket.isConnected()) {
+      socket.send(configMessage);
+    }
+  }
+
   socket.on('open', function () {
     sendClientConfig();
   });
@@ -110,21 +131,7 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     });
   });
 
-  /**
-   * Send a configuration message to the push notification service.
-   * Each message is associated with a key, which is used to re-send
-   * configuration data to the server in the event of a reconnection.
-   */
-  function setConfig(key, configMessage) {
-    configMessages[key] = configMessage;
-    if (socket.isConnected()) {
-      socket.send(configMessage);
-    }
-  }
-
-  return {
-    setConfig: setConfig,
-  };
+  return controls;
 }
 
 module.exports = {
