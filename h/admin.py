@@ -255,7 +255,7 @@ def _all_user_annotations_query(userid):
     """Query matching all annotations (shared and private) owned by userid."""
     return {
         'filtered': {
-            'filter': {'term': {'user': userid}},
+            'filter': {'term': {'user': userid.lower()}},
             'query': {'match_all': {}}
         }
     }
