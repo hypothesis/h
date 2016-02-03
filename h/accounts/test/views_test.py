@@ -648,22 +648,6 @@ activate_fixtures = pytest.mark.usefixtures('ActivationEvent',
 
 
 @activate_fixtures
-def test_activate_404s_if_code_missing():
-    request = DummyRequest(matchdict={'id': '123'})  # No 'code' in matchdict.
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        RegisterController(request).activate()
-
-
-@activate_fixtures
-def test_activate_404s_if_id_missing():
-    request = DummyRequest(matchdict={'code': 'abc123'})  # No 'id'.
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        RegisterController(request).activate()
-
-
-@activate_fixtures
 def test_activate_404s_if_id_not_int():
     request = DummyRequest(matchdict={
         'id': 'abc',  # Not an int.

@@ -375,9 +375,6 @@ class RegisterController(object):
         code = self.request.matchdict.get('code')
         id_ = self.request.matchdict.get('id')
 
-        if code is None or id_ is None:
-            raise httpexceptions.HTTPNotFound()
-
         try:
             id_ = int(id_)
         except ValueError:
