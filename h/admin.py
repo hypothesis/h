@@ -196,6 +196,28 @@ def users_index(request):
     return {'username': username, 'user': user, 'user_meta': user_meta}
 
 
+@view.view_config(route_name='admin_users_delete',
+                  request_method='POST',
+                  permission='admin_users')
+def users_delete(request):
+    username = request.params.get('username')
+    user = models.User.get_by_username(username)
+
+    if user is None:
+        request.session.flash(
+            'Cannot find user with username %s' % username, 'error')
+    else:
+        try:
+            delete_user(request, user)
+            request.session.flash(
+                'Successfully deleted user %s' % username, 'success')
+        except UserDeletionError as e:
+            request.session.flash(str(e), 'error')
+
+    return httpexceptions.HTTPFound(
+        location=request.route_path('admin_users'))
+
+
 @view.view_config(route_name='admin_badge',
                   request_method='GET',
                   renderer='h:templates/admin/badge.html.jinja2',
@@ -267,6 +289,7 @@ def delete_user(request, user):
     Raises UserDeletionError when deletion fails with the appropriate error
     message.
     """
+
     for group in user.groups:
         if group.creator == user:
             raise UserDeletionError('Cannot delete user who is a group creator.')
@@ -299,6 +322,7 @@ def includeme(config):
     config.add_route('admin_admins', '/admin/admins')
     config.add_route('admin_staff', '/admin/staff')
     config.add_route('admin_users', '/admin/users')
+    config.add_route('admin_users_delete', '/admin/users/delete')
     config.add_route('admin_groups', '/admin/groups')
     config.add_route('admin_groups_csv', '/admin/groups.csv')
     config.add_route('admin_badge', '/admin/badge')

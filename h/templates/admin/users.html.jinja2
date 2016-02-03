@@ -43,8 +43,34 @@
           </tr>
         </tbody>
       </table>
+
+      <form id="users-delete-form" method="POST" action="{{request.route_path('admin_users_delete')}}" class="form-inline">
+        <input type="hidden" name="username" value="{{user.username}}">
+
+        {% if user_meta['annotations_count'] > 100 %}
+          <div class="alert alert-warning" role="alert">
+            User has a lot of annotations, it might be safer to delete this user
+            directly in a shell.
+          </div>
+        {% endif %}
+
+        <button class="btn btn-danger" type="submit">Delete user</button>
+      </form>
     {% else %}
       <p>No user found with username or email <em>{{ username }}</em>!</p>
     {% endif %}
   {% endif %}
 {% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('#users-delete-form').submit(function() {
+        return confirm("This will permanently delete all the user's data. Are you sure?");
+      });
+    });
+  </script>
+{% endblock %}
+

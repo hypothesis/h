@@ -508,6 +508,59 @@ def test_users_index_user_found(User):
     }
 
 
+users_delete_fixtures = pytest.mark.usefixtures('routes_mapper', 'User',
+                                                'delete_user')
+
+
+@users_delete_fixtures
+def test_users_delete_redirect(User):
+    request = DummyRequest(params={"username": "bob"})
+    User.get_by_username.return_value = None
+
+    result = admin.users_delete(request)
+    assert result.__class__ == httpexceptions.HTTPFound
+
+
+@users_delete_fixtures
+def test_users_delete_user_not_found_error(User):
+    request = DummyRequest(params={"username": "bob"})
+
+    User.get_by_username.return_value = None
+
+    admin.users_delete(request)
+
+    assert request.session.peek_flash('error') == [
+        'Cannot find user with username bob'
+    ]
+
+
+@users_delete_fixtures
+def test_users_delete_deletes_user(User, delete_user):
+    request = DummyRequest(params={"username": "bob"})
+    user = MagicMock()
+
+    User.get_by_username.return_value = user
+
+    admin.users_delete(request)
+
+    delete_user.assert_called_once_with(request, user)
+
+
+@users_delete_fixtures
+def test_users_delete_group_creator_error(User, delete_user):
+    request = DummyRequest(params={"username": "bob"})
+    user = MagicMock()
+
+    User.get_by_username.return_value = user
+    delete_user.side_effect = admin.UserDeletionError('group creator error')
+
+    admin.users_delete(request)
+
+    assert request.session.peek_flash('error') == [
+        'group creator error'
+    ]
+
+
 badge_index_fixtures = pytest.mark.usefixtures('models')
 
 
@@ -737,3 +790,11 @@ def api_storage(request):
     module = patcher.start()
     request.addfinalizer(patcher.stop)
     return module
+
+
+@pytest.fixture
+def delete_user(request):
+    patcher = patch('h.admin.delete_user')
+    function = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return function
