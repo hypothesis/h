@@ -7,9 +7,9 @@ import colander
 import deform
 import jinja2
 from pyramid import httpexceptions
+from pyramid import security
 from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
-from pyramid.security import forget, remember
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
@@ -131,14 +131,14 @@ class AuthController(object):
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
         userid = util.userid_from_username(user.username, self.request)
-        headers = remember(self.request, userid)
+        headers = security.remember(self.request, userid)
         return headers
 
     def _logout(self):
         if self.request.authenticated_userid is not None:
             self.request.registry.notify(LogoutEvent(self.request))
             self.request.session.invalidate()
-        headers = forget(self.request)
+        headers = security.forget(self.request)
         return headers
 
 
@@ -315,6 +315,8 @@ class ResetPasswordController(object):
 @view_config(route_name='register', attr='register', request_method='POST',
              renderer='h:templates/accounts/register.html.jinja2')
 @view_config(attr='activate', route_name='activate', request_method='GET')
+@view_config(attr='activate_already_logged_in', route_name='activate',
+             request_method='GET', effective_principals=security.Authenticated)
 class RegisterController(object):
     def __init__(self, request):
         tos_link = ('<a href="/terms-of-service">' +
@@ -389,7 +391,7 @@ class RegisterController(object):
                 'If so, try <a href="{url}">signing in</a> using the username '
                 'and password that you provided.').format(
                     url=self.request.route_url('login'))),
-                'success')
+                'error')
             return httpexceptions.HTTPFound(
                 location=self.request.route_url('index'))
 
@@ -409,6 +411,33 @@ class RegisterController(object):
 
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
+
+    def activate_already_logged_in(self):
+        """Handle an activation link request while already logged in."""
+        id_ = self.request.matchdict.get('id')
+
+        try:
+            id_ = int(id_)
+        except ValueError:
+            raise httpexceptions.HTTPNotFound()
+
+        if id_ == self.request.authenticated_user.id:
+            # The user is already signed in to the account (so the account
+            # must already be activated).
+            self.request.session.flash(jinja2.Markup(_(
+                "Your account has been activated and you're now signed "
+                "in!")), 'success')
+        else:
+            self.request.session.flash(jinja2.Markup(_(
+                "You're already signed in to a different account. "
+                '<a href="{url}">Sign out</a> then try opening the '
+                'activation link again.').format(
+                    url=self.request.route_url('logout'))),
+                'error')
+
+        return httpexceptions.HTTPFound(
+            location=self.request.route_url('index'))
+
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:

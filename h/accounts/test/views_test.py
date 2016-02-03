@@ -794,14 +794,49 @@ def test_activate_successful_notifies(user_model, ActivationEvent):
         ActivationEvent.return_value)
 
 
-@activate_fixtures
-def test_activate_successful_redirects(user_model):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    user_model.get_by_activation.return_value.id = 123
+activate_already_logged_in_fixtures = pytest.mark.usefixtures('routes_mapper')
 
-    result = RegisterController(request).activate()
+
+@activate_already_logged_in_fixtures
+def test_activate_already_logged_in_when_id_not_an_int():
+    request = DummyRequest(matchdict={
+        'id': 'abc',  # Not an int.
+        'code': 'abc456'},
+        authenticated_user=mock.Mock(id=123, spec=['id']))
+
+    with pytest.raises(httpexceptions.HTTPNotFound):
+        RegisterController(request).activate_already_logged_in()
+
+
+@activate_already_logged_in_fixtures
+def test_activate_already_logged_in_to_same_account():
+    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'},
+                           authenticated_user=mock.Mock(id=123, spec=['id']))
+    request.session.flash = mock_flash_function()
+
+    result = RegisterController(request).activate_already_logged_in()
 
     assert isinstance(result, httpexceptions.HTTPFound)
+    assert request.session.flash.call_count == 1
+    assert request.session.flash.call_args[0][0].startswith(
+        "Your account has been activated and you're now signed in")
+
+
+@activate_already_logged_in_fixtures
+def test_activate_already_logged_in_to_different_account():
+    request = DummyRequest(
+        matchdict={'id': '123', 'code': 'abc456'},
+        authenticated_user=mock.Mock(
+            id=124,  # Different user id.
+            spec=['id']))
+    request.session.flash = mock_flash_function()
+
+    result = RegisterController(request).activate_already_logged_in()
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+    assert request.session.flash.call_count == 1
+    assert request.session.flash.call_args[0][0].startswith(
+        "You're already signed in to a different account")
 
 
 profile_fixtures = pytest.mark.usefixtures('routes_mapper')
