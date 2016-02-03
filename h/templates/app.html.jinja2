@@ -36,7 +36,7 @@
       on-change-sort-by="sort.name = sortBy">
     </top-bar>
 
-    <div class="create-account-banner" ng-if="isSidebar && auth.status === 'signed-out'">
+    <div class="create-account-banner" ng-if="isSidebar && auth.status === 'signed-out'" ng-cloak>
       To annotate this document
       <a href="{{ register_url }}" target="_blank">
         create a free account
