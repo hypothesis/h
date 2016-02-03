@@ -11,7 +11,6 @@ import os
 import os.path
 import shutil
 import subprocess
-import textwrap
 
 from jinja2 import Environment, PackageLoader
 from pyramid.path import AssetResolver
@@ -22,7 +21,6 @@ import h
 # h.assets provides webassets filters for JS and CSS compilation
 import h.assets
 from h import client
-from h.client import url_with_path, websocketize
 from h._compat import urlparse
 
 jinja_env = Environment(loader=PackageLoader(__package__, ''))
@@ -232,7 +230,6 @@ def build_chrome(args):
 
     # Render the sidebar html
     api_url = '{}api/'.format(service_url)
-    websocket_url = websocketize('{}ws'.format(service_url))
 
     if args.bundle_sidebar:
         build_extension_common(webassets_env, service_url, bundle_app=True)
@@ -245,7 +242,7 @@ def build_chrome(args):
                 # for the extension
                 ga_tracking_id=None,
                 webassets_env=webassets_env,
-                websocket_url=websocket_url,
+                websocket_url=args.websocket_url,
                 sentry_public_dsn=args.sentry_public_dsn)
             fp.write(data)
     else:
@@ -291,6 +288,12 @@ parser.add_argument('--service',
                     'extension should connect to',
                     default='https://hypothes.is/',
                     dest='service_url',
+                    metavar='URL')
+parser.add_argument('--websocket',
+                    help='The URL of the websocket endpoint which the '
+                    'extension should connect to (e.g. '
+                    '"wss://hypothes.is/ws")',
+                    dest='websocket_url',
                     metavar='URL')
 parser.add_argument('--no-bundle-sidebar',
                     action='store_false',

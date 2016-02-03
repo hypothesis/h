@@ -46,13 +46,6 @@ def _merge(d1, d2):
     return result
 
 
-def websocketize(value):
-    """Convert a HTTP(S) URL into a WS(S) URL."""
-    if not (value.startswith('http://') or value.startswith('https://')):
-        raise ValueError('cannot websocketize non-HTTP URL')
-    return 'ws' + value[len('http'):]
-
-
 def asset_urls(webassets_env, name):
     return webassets_env[name].urls()
 
