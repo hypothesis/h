@@ -38,6 +38,9 @@ class Worker(GeventPyWSGIWorker):
     server_class = WSGIServer
     wsgi_handler = WSGIHandler
 
+    # Used by our gunicorn config to selectively monkeypatch psycopg2
+    use_psycogreen = True
+
 
 def create_app(global_config, **settings):
     settings = get_settings(global_config, **settings)
