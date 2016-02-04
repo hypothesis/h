@@ -1,9 +1,9 @@
 'use strict';
 
-var Promise = require('core-js/library/es6/promise');
 var angular = require('angular');
 
 var events = require('./events');
+var retryUtil = require('./retry-util');
 
 var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -84,28 +84,35 @@ function session($http, $resource, $rootScope, flash, raven, settings) {
 
   /**
    * @name session.load()
-   * @description
-   * Fetches the session data from the server. This function returns an object
-   * with a $promise property which resolves to the session data.
+   * @description Fetches the session data from the server.
+   * @returns A promise for the session data.
    *
-   * N.B. The data is cached for CACHE_TTL across all actions of the session
+   * The data is cached for CACHE_TTL across all actions of the session
    * service: that is, a call to login() will update the session data and a call
    * within CACHE_TTL milliseconds to load() will return that data rather than
    * triggering a new request.
    */
   resource.load = function () {
     if (!lastLoadTime || (Date.now() - lastLoadTime) > CACHE_TTL) {
-      lastLoad = resource._load();
+
+      // The load attempt is automatically retried with a backoff.
+      //
+      // This serves to make loading the app in the extension cope better with
+      // flakey connectivity but it also throttles the frequency of calls to
+      // the /app endpoint.
       lastLoadTime = Date.now();
-      // If the load fails, we need to clear out lastLoadTime so another load
-      // attempt will succeed.
-      lastLoad.$promise.catch(function () {
+      lastLoad = retryUtil.retryPromiseOperation(function () {
+        return resource._load().$promise;
+      }).then(function (session) {
+        lastLoadTime = Date.now();
+        return session;
+      }).catch(function (err) {
         lastLoadTime = null;
+        throw err;
       });
     }
-
     return lastLoad;
-  };
+  }
 
   /**
    * @name session.update()
@@ -130,8 +137,7 @@ function session($http, $resource, $rootScope, flash, raven, settings) {
       headers[$http.defaults.xsrfHeaderName] = resource.state.csrf;
     }
 
-    // Replace lastLoad with the latest data, and update lastLoadTime.
-    lastLoad = {$promise: Promise.resolve(model), $resolved: true};
+    lastLoad = Promise.resolve(resource.state);
     lastLoadTime = Date.now();
 
     $rootScope.$broadcast(events.SESSION_CHANGED, {

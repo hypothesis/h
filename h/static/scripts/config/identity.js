@@ -74,7 +74,7 @@ function checkAuthentication($injector, $q, session) {
     var deferred = $q.defer();
     authPromise = deferred.promise;
 
-    session.load().$promise
+    session.load()
       .then(function (data) {
         if (data.userid) {
           $injector.invoke(fetchToken).then(function (token) {

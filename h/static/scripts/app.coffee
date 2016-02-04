@@ -13,7 +13,7 @@ streamer = require('./streamer')
 resolve =
   # Ensure that we have available a) the current authenticated userid, and b)
   # the list of user groups.
-  sessionState: ['session', (session) -> session.load().$promise]
+  sessionState: ['session', (session) -> session.load()]
   store: ['store', (store) -> store.$promise]
   streamer: streamer.connect
   threading: [
