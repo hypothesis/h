@@ -19,7 +19,6 @@
     @include flex-center-column();
 
     font-size: $body2-font-size;
-    min-height: 280px;
     background-color: $white;
     border: $border;
     color: $color-dove-gray;
@@ -50,6 +49,16 @@
       margin-bottom: 40px;
     }
 
+    &__heading--short {
+      font-size: $title-font-size;
+      font-weight: $title-font-weight;
+      margin-bottom: 5px;
+    }
+
+    &__nocontent-text {
+      padding-top: 10px;
+    }
+
     .form-field {
       @include flex-center-column();
     }
@@ -76,12 +85,30 @@
     }
   }
 
-  .group-form-document-list {
-    text-align:center;
-  }
+  .group-document-list {
 
-  .group-form-document-list li {
-    margin-top: 1em;
+    justify-content: left;
+    font-size: $body2-font-size;
+    line-height: $body2-line-height;
+    background-color: $white;
+    color: $color-dove-gray;
+
+    border: $border;
+    border-top: none;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    &__heading {
+      font-weight: bold;
+      margin-bottom: 1em;
+    }
+
+    &__list li {
+      margin-bottom: 1.5em;
+    }
+
   }
 
   .group-form-footer {
