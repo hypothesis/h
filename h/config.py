@@ -182,3 +182,5 @@ def _setup_webassets(settings):
 def _setup_websocket(settings):
     if 'ALLOWED_ORIGINS' in os.environ:
         settings['origins'] = os.environ['ALLOWED_ORIGINS']
+    if 'H_WEBSOCKET_URL' in os.environ:
+        settings['h.websocket_url'] = os.environ['H_WEBSOCKET_URL']

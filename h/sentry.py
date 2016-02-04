@@ -36,8 +36,13 @@ def get_client(request):
     """
     Get a Sentry client configured with context data for the current request.
     """
+    # If the `raven.transport` setting is set to 'gevent', then we use the
+    # raven-supplied gevent compatible transport.
+    transport_name = request.registry.settings.get('raven.transport')
+    transport = GeventedHTTPTransport if transport_name == 'gevent' else None
+
     client = raven.Client(release=raven.fetch_package_version('h'),
-                          transport=GeventedHTTPTransport)
+                          transport=transport)
     client.http_context(http_context_data(request))
     client.user_context(user_context_data(request))
     return client

@@ -38,7 +38,7 @@ clean:
 	rm -f node_modules/.uptodate .eggs/.uptodate
 
 dev: deps
-	@gunicorn --reload --paste conf/development.ini
+	@gunicorn --reload --paste conf/development-app.ini
 
 test: backend-test client-test
 
@@ -74,6 +74,7 @@ build/%-chrome-stage.zip:
 	@rm -rf build/chrome $@
 	hypothesis-buildext chrome \
 		--service 'https://stage.hypothes.is' \
+		--websocket 'wss://stage.hypothes.is/ws' \
 		--sentry-public-dsn '$(SENTRY_DSN_STAGE)'
 	@zip -qr $@ build/chrome
 
@@ -81,6 +82,7 @@ build/%-chrome-prod.zip:
 	@rm -rf build/chrome $@
 	hypothesis-buildext chrome \
 		--service 'https://hypothes.is' \
+		--websocket 'wss://hypothes.is/ws' \
 		--sentry-public-dsn '$(SENTRY_DSN_PROD)'
 	@zip -qr $@ build/chrome
 

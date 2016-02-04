@@ -117,7 +117,7 @@ setup(
     entry_points={
         'paste.app_factory': [
             'main=h.app:create_app',
-            'api=h.app:create_api',
+            'websocket=h.websocket:create_app',
         ],
         'console_scripts': [
             'hypothesis=h.script:main',

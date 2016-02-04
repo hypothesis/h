@@ -11,15 +11,15 @@ if 'STATSD_PORT' in os.environ:
     statsd_host = urlparse.urlparse(os.environ['STATSD_PORT_8125_UDP']).netloc
 
 
-def post_fork(_server, _worker):
+def post_fork(server, worker):
     # Support back-ported SSL changes on Debian / Ubuntu
     import _ssl
     import gevent.hub
     if hasattr(_ssl, 'SSLContext') and not hasattr(_ssl, '_sslwrap'):
         gevent.hub.PYGTE279 = True
 
-    try:
+    # Patch psycopg2 if we're asked to by the worker class
+    if getattr(server.worker_class, 'use_psycogreen', False):
         import psycogreen.gevent
         psycogreen.gevent.patch_psycopg()
-    except ImportError:
-        pass
+        worker.log.info("Made psycopg green")

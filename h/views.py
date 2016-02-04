@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import logging
 import pkg_resources
 
@@ -40,7 +39,7 @@ def _render_app(request, extra={}):
         ga_tracking_id=request.registry.settings.get('ga_tracking_id'),
         sentry_public_dsn=request.sentry.get_public_dsn(),
         webassets_env=request.webassets_env,
-        websocket_url=client.websocketize(request.route_url('ws')))
+        websocket_url=request.registry.settings.get('h.websocket_url'))
     return request.response
 
 

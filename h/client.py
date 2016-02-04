@@ -46,13 +46,6 @@ def _merge(d1, d2):
     return result
 
 
-def websocketize(value):
-    """Convert a HTTP(S) URL into a WS(S) URL."""
-    if not (value.startswith('http://') or value.startswith('https://')):
-        raise ValueError('cannot websocketize non-HTTP URL')
-    return 'ws' + value[len('http'):]
-
-
 def asset_urls(webassets_env, name):
     return webassets_env[name].urls()
 
@@ -82,8 +75,12 @@ def _app_html_context(webassets_env, api_url, service_url, ga_tracking_id,
     app_config = {
         'apiUrl': api_url,
         'serviceUrl': service_url,
-        'websocketUrl': websocket_url,
     }
+
+    if websocket_url:
+        app_config.update({
+            'websocketUrl': websocket_url,
+        })
 
     if sentry_public_dsn:
         app_config.update({
@@ -108,9 +105,9 @@ def _app_html_context(webassets_env, api_url, service_url, ga_tracking_id,
 def render_app_html(webassets_env,
                     service_url,
                     api_url,
-                    websocket_url,
                     sentry_public_dsn,
                     ga_tracking_id=None,
+                    websocket_url=None,
                     extra={}):
     """
     Return the HTML for the Hypothesis app page,

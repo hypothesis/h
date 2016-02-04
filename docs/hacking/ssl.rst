@@ -18,7 +18,7 @@ To serve your local dev instance of h over HTTPS:
 
 3. Run ``gunicorn`` with the ``certfile`` and ``keyfile`` options::
 
-    gunicorn --reload --paste conf/development.ini --certfile=server.crt --keyfile=key.pem
+    gunicorn --reload --paste conf/development-app.ini --certfile=server.crt --keyfile=key.pem
 
 4. Since the certificate is self-signed, you will need to instruct your browser to
    trust it explicitly by visiting https://127.0.0.1:5000 and selecting the option

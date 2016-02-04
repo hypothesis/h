@@ -2,7 +2,6 @@
 certifi
 cffi
 gunicorn
-honcho
 pyramid_multiauth
 pyramid_redis_sessions
 requests[security]

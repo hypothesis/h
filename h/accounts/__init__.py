@@ -51,15 +51,6 @@ def make_staff(username):
         raise NoSuchUserError
 
 
-def auth_domain(request):
-    """Return the value of the h.auth_domain config settings.
-
-    Falls back on returning request.domain if h.auth_domain isn't set.
-
-    """
-    return request.registry.settings.get('h.auth_domain', request.domain)
-
-
 def get_user(userid, request):
     """Return the User object for the given userid, or None.
 
@@ -93,7 +84,6 @@ def authenticated_user(request):
 
 def includeme(config):
     """A local identity provider."""
-    config.add_request_method(auth_domain, name='auth_domain', reify=True)
     config.add_request_method(
         authenticated_user, name='authenticated_user', reify=True)
 
