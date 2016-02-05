@@ -328,9 +328,8 @@ forgot_password_fixtures = pytest.mark.usefixtures('activation_model',
 
 
 @forgot_password_fixtures
-def test_forgot_password_returns_form_when_validation_fails(authn_policy):
+def test_forgot_password_returns_form_when_validation_fails():
     request = DummyRequest(method='POST')
-    authn_policy.authenticated_userid.return_value = None
     controller = ForgotPasswordController(request)
     controller.form = invalid_form()
 
@@ -340,10 +339,8 @@ def test_forgot_password_returns_form_when_validation_fails(authn_policy):
 
 
 @forgot_password_fixtures
-def test_forgot_password_creates_no_activations_when_validation_fails(activation_model,
-                                                                      authn_policy):
+def test_forgot_password_creates_no_activations_when_validation_fails(activation_model):
     request = DummyRequest(method='POST')
-    authn_policy.authenticated_userid.return_value = None
     controller = ForgotPasswordController(request)
     controller.form = invalid_form()
 
@@ -354,10 +351,9 @@ def test_forgot_password_creates_no_activations_when_validation_fails(activation
 
 @patch('h.accounts.views.reset_password_link')
 @forgot_password_fixtures
-def test_forgot_password_generates_reset_link(reset_link, authn_policy):
+def test_forgot_password_generates_reset_link(reset_link):
     request = DummyRequest(method='POST')
     request.registry.password_reset_serializer = FakeSerializer()
-    authn_policy.authenticated_userid.return_value = None
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
@@ -372,11 +368,9 @@ def test_forgot_password_generates_reset_link(reset_link, authn_policy):
 @forgot_password_fixtures
 def test_forgot_password_generates_mail(reset_link,
                                         reset_mail,
-                                        activation_model,
-                                        authn_policy):
+                                        activation_model):
     request = DummyRequest(method='POST')
     request.registry.password_reset_serializer = FakeSerializer()
-    authn_policy.authenticated_userid.return_value = None
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
@@ -389,10 +383,9 @@ def test_forgot_password_generates_mail(reset_link,
 
 @patch('h.accounts.views.reset_password_email')
 @forgot_password_fixtures
-def test_forgot_password_sends_mail(reset_mail, authn_policy, mailer):
+def test_forgot_password_sends_mail(reset_mail, mailer):
     request = DummyRequest(method='POST')
     request.registry.password_reset_serializer = FakeSerializer()
-    authn_policy.authenticated_userid.return_value = None
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
@@ -404,10 +397,9 @@ def test_forgot_password_sends_mail(reset_mail, authn_policy, mailer):
 
 
 @forgot_password_fixtures
-def test_forgot_password_redirects_on_success(authn_policy):
+def test_forgot_password_redirects_on_success():
     request = DummyRequest(method='POST')
     request.registry.password_reset_serializer = FakeSerializer()
-    authn_policy.authenticated_userid.return_value = None
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
@@ -482,6 +474,7 @@ def test_reset_password_redirects_on_success():
 
 
 register_fixtures = pytest.mark.usefixtures('activation_model',
+                                            'authn_policy',
                                             'mailer',
                                             'notify',
                                             'routes_mapper',
@@ -999,17 +992,17 @@ def test_notifications_form_sets_subscriptions_data_in_form(authn_policy,
 
 
 @notifications_fixtures
-def test_notifications_404s_if_not_logged_in(authn_policy):
+def test_notifications_404s_if_not_logged_in():
     request = DummyRequest(post={})
-    authn_policy.authenticated_userid.return_value = None
 
     with pytest.raises(httpexceptions.HTTPNotFound):
         NotificationsController(request).notifications()
 
 
 @notifications_fixtures
-def test_notifications_with_invalid_data_returns_form():
+def test_notifications_with_invalid_data_returns_form(authn_policy):
     request = DummyRequest(post={})
+    authn_policy.authenticated_userid.return_value = 'jerry'
     controller = NotificationsController(request)
     controller.form = invalid_form()
 
