@@ -48,12 +48,10 @@ INSTALL_REQUIRES = [
     'itsdangerous>=0.24',
     'jsonpointer==1.0',
     'jsonschema>=2.5.1,<2.6',
-    'oauthlib==0.6.3',
     'pyramid>=1.5,<1.6',
     'psycogreen>=1.0',
     'psycopg2>=2.6.1',
     'pyramid_mailer>=0.13',
-    'pyramid-oauthlib>=0.2.0,<0.3.0',
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
     'python-slugify>=1.1.3,<1.2.0',
@@ -73,7 +71,7 @@ INSTALL_REQUIRES = [
 ]
 
 DEV_EXTRAS = ['pyramid_debugtoolbar>=2.1', 'prospector[with_pyroma]', 'pep257',
-              'pyramid_multiauth', 'sphinxcontrib-httpdomain']
+              'sphinxcontrib-httpdomain']
 TESTING_EXTRAS = ['mock>=1.3.0', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
 YAML_EXTRAS = ['PyYAML']
 

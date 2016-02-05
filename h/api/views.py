@@ -17,13 +17,16 @@ authorization system. You can find the mapping between annotation "permissions"
 objects and Pyramid ACLs in :mod:`h.api.resources`.
 """
 
+import json
 import logging
 
+import pyramid
 from pyramid import httpexceptions
 from pyramid import i18n
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
+from h.api import auth
 from h.api import cors
 from h.api.events import AnnotationEvent
 from h.api import search as search_lib
@@ -157,8 +160,26 @@ def search(request):
 
 @api_config(route_name='access_token')
 def access_token(request):
-    """The OAuth 2 access token view."""
-    return request.create_token_response()
+    """Return a JWT access token for the given request.
+
+    The token can be used in the Authorization header in subsequent requests to
+    the API to authenticate the user identified by the
+    request.authenticated_userid of the _current_ request.
+
+    """
+    request.client_id = None
+    request.expires_in = 3600
+
+    auth.authenticate_client(request)
+
+    response = pyramid.response.Response(
+        json.dumps({
+            "access_token": auth.generate_signed_token(request),
+            "token_type": "Bearer",
+            "expires_in": 3600
+        }),
+        content_type="application/json")
+    return response
 
 
 # N.B. Like the rest of the API, this view is exposed behind WSGI middleware

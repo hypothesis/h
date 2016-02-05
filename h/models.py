@@ -33,15 +33,6 @@ Subscriptions = notification_models.Subscriptions
 User = accounts_models.User
 
 
-class Client(object):
-
-    """A basic implementation of :class:`h.interfaces.IClient`."""
-
-    def __init__(self, request, client_id):
-        self.client_id = client_id
-        self.client_secret = None
-
-
 def includeme(_):
     # This module is included for side-effects only. SQLAlchemy models register
     # with the global metadata object when imported.

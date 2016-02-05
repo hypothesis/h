@@ -1,130 +1,57 @@
-# -*- coding: utf-8 -*-
-"""
-OAuth integration.
+"""Our authentication policy."""
 
-Supported grant types
----------------------
-
-- A client credentials grant using the session and authenticating the client
-  with cross-site request forgery tokens.
-
-- A JSON Web Token Bearer Grant using the JSON Web Token Profile for OAuth 2.0
-  Client Authentication and Authorization Grants [jwt-bearer]_.
-
-.. [jwt-bearer] https://tools.ietf.org/html/draft-ietf-oauth-jwt-bearer
-
-
-Supported token types
----------------------
-
-- JSON Web Tokens [jwt]_ as bearer tokens.
-
-.. [jwt] https://tools.ietf.org/html/draft-ietf-oauth-json-web-token
-
-Limitations
------------
-
-- No support for 3rd party clients exists yet.
-- No support for scopes yet.
-
-"""
-import datetime
+import logging
 
 import jwt
-from jwt.compat import constant_time_compare
-from oauthlib.common import generate_client_id
-from oauthlib.oauth2 import RequestValidator as _RequestValidator
-from pyramid.exceptions import BadCSRFToken
+from pyramid import authentication
+from pyramid import interfaces
 from pyramid import security
-from pyramid import session
+from zope import interface
 
-from pyramid.util import action_method
-
-from .interfaces import IClientFactory
-from .oauth import JWT_BEARER
 from h import accounts
+from h.api import auth
 from h.api import groups
 
 
-LEEWAY = 240  # allowance for clock skew in verification
+log = logging.getLogger(__name__)
 
 
-class RequestValidator(_RequestValidator):
+JWT_BEARER = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
 
-    """Validates JSON Web Tokens."""
 
-    def client_authentication_required(self, request):
-        if request.grant_type == JWT_BEARER:
-            return False
+LEEWAY = 240  # Allowance for clock skew in verification.
 
-        return True
 
-    def authenticate_client(self, request):
-        client = None
-        user = None
+@interface.implementer(interfaces.IAuthenticationPolicy)
+class AuthenticationPolicy(object):
 
-        if request.client_id is None:
-            try:
-                session.check_csrf_token(request, token='assertion')
-            except BadCSRFToken:
-                return False
-            client_id = request.registry.settings['h.client_id']
-            client = get_client(request, client_id)
-            user = request.authenticated_userid
-        elif request.client_secret is not None:
-            client_id = request.client_id
-            client_secret = request.client_secret
-            client = get_client(request, client_id, client_secret)
+    def __init__(self):
+        self.session_policy = authentication.SessionAuthenticationPolicy()
 
-        request.client = client
-        request.user = user
-        return request.client is not None
+    def authenticated_userid(self, request):
+        if is_api_request(request):
+            return userid_from_jwt(request)
+        return self.session_policy.authenticated_userid(request)
 
-    def save_bearer_token(self, token, request):
-        # JWT authorization is stateless
-        pass
+    def unauthenticated_userid(self, request):
+        if is_api_request(request):
+            # We can't always get an unauthenticated userid for an API request,
+            # as some of the authentication tokens used may be opaque.
+            return self.authenticated_userid(request)
+        return self.session_policy.unauthenticated_userid(request)
 
-    def validate_bearer_token(self, token, scopes, request):
-        if token is None:
-            return False
+    def effective_principals(self, request):
+        return effective_principals(request.authenticated_userid, request)
 
-        try:
-            payload = jwt.decode(token, verify=False)
-        except jwt.InvalidTokenError:
-            return False
+    def remember(self, request, userid, **kw):
+        if is_api_request(request):
+            return []
+        return self.session_policy.remember(request, userid, **kw)
 
-        aud = request.host_url
-        iss = payload['iss']
-        sub = payload.get('sub')
-
-        client = get_client(request, iss)
-        if client is None:
-            return False
-
-        try:
-            payload = jwt.decode(token, key=client.client_secret,
-                                 audience=aud, leeway=LEEWAY,
-                                 algorithms=['HS256'])
-
-        except jwt.InvalidTokenError:
-            return False
-
-        request.client = client
-        request.user = sub
-
-        return True
-
-    def validate_grant_type(self, client_id, grant_type, client, request):
-        return True
-
-    def get_default_scopes(self, client_id, request):
-        return None
-
-    def get_original_scopes(self, assertion, request):
-        return None
-
-    def validate_scopes(self, client_id, scopes, client, request):
-        return scopes is None
+    def forget(self, request):
+        if is_api_request(request):
+            return []
+        return self.session_policy.forget(request)
 
 
 def auth_domain(request):
@@ -175,112 +102,53 @@ def effective_principals(userid, request, groupfinder=groupfinder):
     if groups is not None:
         principals.add(security.Authenticated)
         principals.add(userid)
-        principals.update(groups)
+        principals.update(groups_)
 
     return list(principals)
 
 
-def generate_signed_token(request):
-    """Generate a signed JSON Web Token from OAuth attributes of the request.
-
-    A JSON Web Token [jwt]_ is a token that contains a header, describing the
-    algorithm used for signing, a set of claims (the payload), and a trailing
-    signature.
-
-    .. [jwt] https://tools.ietf.org/html/draft-ietf-oauth-json-web-token
-    """
-    now = datetime.datetime.utcnow().replace(microsecond=0)
-    ttl = datetime.timedelta(seconds=request.expires_in)
-
-    claims = {
-        'iss': request.client.client_id,
-        'aud': request.host_url,
-        'sub': request.user,
-        'exp': now + ttl,
-        'iat': now,
-    }
-
-    claims.update(request.extra_credentials or {})
-    return jwt.encode(claims, request.client.client_secret)
+def is_api_request(request):
+    return (request.path.startswith('/api') and
+            request.path not in ['/api/token', '/api/badge'])
 
 
-def get_client(request, client_id, client_secret=None):
-    """Get a :class:`h.oauth.IClient` instance using the configured
-    :term:`client factory` and provided ''client_id''.
+def userid_from_jwt(request):
+    if 'Authorization' not in request.headers:
+        return None
+    token = request.headers.get('Authorization')[7:]
+    return validate_bearer_token(token, request)
 
-    Returns the client object created by the factory. Returns ``None`` if the
-    factory returns ``None`` or the provided ``client_secret`` parameter
-    does not match the ``client_secret`` attribute of the client.
-    """
-    registry = request.registry
-    factory = registry.queryUtility(IClientFactory)
-    client = factory(request, client_id)
 
+def validate_bearer_token(token, request):
+    if token is None:
+        return None
+
+    try:
+        payload = jwt.decode(token, verify=False)
+    except jwt.InvalidTokenError:
+        return False
+
+    aud = request.host_url
+    iss = payload['iss']
+    sub = payload.get('sub')
+
+    client = auth.get_client(request, iss)
     if client is None:
         return None
 
-    # Allow a default client, hard-coded in the settings.
-    if 'h.client_id' in request.registry.settings:
-        if client_id == request.registry.settings['h.client_id']:
-            if client.client_secret is None:
-                client_secret = request.registry.settings['h.client_secret']
-                client.client_secret = client_secret
+    try:
+        payload = jwt.decode(token,
+                             key=client.client_secret,
+                             audience=aud,
+                             leeway=LEEWAY,
+                             algorithms=['HS256'])
 
-    if client_secret is not None:
-        if not constant_time_compare(client_secret, client.client_secret):
-            return None
+    except jwt.InvalidTokenError:
+        return None
 
-    return client
-
-
-@action_method
-def set_client_factory(config, factory):
-    """Override the :term:`client factory` in the current configuration. The
-    ``factory`` argument must support the :class:`h.oauth.IClientFactory`
-    interface or be a dotted Python name that points to a client factory.
-    """
-    def register():
-        impl = config.maybe_dotted(factory)
-        config.registry.registerUtility(impl, IClientFactory)
-
-    intr = config.introspectable('client factory', None,
-                                 config.object_description(factory),
-                                 'client factory')
-    intr['factory'] = factory
-    config.action(IClientFactory, register, introspectables=(intr,))
-
-
-validator = RequestValidator()
+    return sub
 
 
 def includeme(config):
-    registry = config.registry
-    settings = registry.settings
-
-    config.include('pyramid_oauthlib')
-    config.add_oauth_param('assertion')
-
-    # Use session credentials as a client credentials authorization grant
-    config.add_grant_type('oauthlib.oauth2.ClientCredentialsGrant',
-                          request_validator=validator)
-
-    # Use web tokens as an authorization grant
-    config.add_grant_type('h.oauth.JWTBearerGrant', JWT_BEARER,
-                          request_validator=validator)
-
-    # Use web tokens for resource authorization
-    config.add_token_type('oauthlib.oauth2.BearerToken',
-                          request_validator=validator,
-                          token_generator=generate_signed_token)
-
-    # Configure a default client factory
-    client_class = settings.get('auth.client_factory', 'h.models.Client')
-    config.add_directive('set_client_factory', set_client_factory)
-    config.set_client_factory(client_class)
-
-    # Set default client credentials
-    settings.setdefault('h.client_id', generate_client_id())
-    settings.setdefault('h.client_secret', generate_client_id())
-
-    # Allow retrieval of the auth_domain from the request object
+    # Allow retrieval of the auth_domain from the request object.
     config.add_request_method(auth_domain, name='auth_domain', reify=True)

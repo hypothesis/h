@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from mock import ANY, MagicMock, patch, Mock
+from mock import MagicMock, patch, Mock
 from pyramid import testing
 from pyramid import security
-import unittest
 
-import jwt
 
 from h import auth, interfaces
 
@@ -18,107 +16,6 @@ class MockClient(object):
     def __init__(self, request, client_id):
         self.client_id = client_id
         self.client_secret = SECRET if client_id is KEY else None
-
-
-class TestRequestValidator(unittest.TestCase):
-
-    def setUp(self):
-        self.config = testing.setUp()
-        self.security = testing.DummySecurityPolicy()
-        self.config.set_authorization_policy(self.security)
-        self.config.set_authentication_policy(self.security)
-        self.client_patcher = patch('h.auth.get_client')
-        self.client = self.client_patcher.start()
-        self.decode_patcher = patch('jwt.decode')
-        self.decode = self.decode_patcher.start()
-        self.request = testing.DummyRequest(client=None, user=None)
-        self.validator = auth.RequestValidator()
-        self.request.registry.settings['h.client_id'] = KEY
-        self.request.registry.settings['h.client_secret'] = SECRET
-
-    def tearDown(self):
-        testing.tearDown()
-        self.client_patcher.stop()
-        self.decode_patcher.stop()
-
-    def test_authenticate_client_ok(self):
-        client = MockClient(self.request, KEY)
-        self.request.client_id = KEY
-        self.request.client_secret = SECRET
-        self.client.return_value = client
-        res = self.validator.authenticate_client(self.request)
-        assert res is True
-        assert self.request.client is client
-        assert self.request.user is None
-
-    def test_authenticate_client_not_ok(self):
-        self.request.client_id = KEY
-        self.request.client_secret = SECRET
-        self.client.return_value = None
-        res = self.validator.authenticate_client(self.request)
-        assert self.client.called
-        assert res is False
-        assert self.request.client is None
-        assert self.request.user is None
-
-    def test_authenticate_client_csrf_ok(self):
-        client = MockClient(self.request, KEY)
-        self.security.userid = 'hooper'
-        self.request.client_id = None
-        self.request.client_secret = None
-        self.client.return_value = client
-        with patch('pyramid.session.check_csrf_token') as csrf:
-            csrf.return_value = True
-            res = self.validator.authenticate_client(self.request)
-        assert res is True
-        assert self.request.client is client
-        assert self.request.user == 'hooper'
-
-    def test_authenticate_client_csrf_not_ok(self):
-        self.request.client_id = None
-        self.request.client_secret = None
-        res = self.validator.authenticate_client(self.request)
-        assert res is False
-        assert self.request.client is None
-        assert self.request.user is None
-
-    def test_validate_bearer_token_client_invalid(self):
-        self.client.return_value = None
-        self.decode.return_value = {'iss': 'fake-client'}
-        res = self.validator.validate_bearer_token('', None, self.request)
-        assert res is False
-        self.client.assert_called_once_with(self.request, 'fake-client')
-
-    def test_validate_bearer_token_format_invalid(self):
-        self.decode.side_effect = jwt.InvalidTokenError
-        res = self.validator.validate_bearer_token('', None, self.request)
-        assert res is False
-
-    def test_validate_bearer_token_signature_invalid(self):
-        client = MockClient(self.request, KEY)
-        self.client.return_value = client
-        self.decode.return_value = {'iss': KEY}
-        self.decode.side_effect = jwt.InvalidTokenError
-        res = self.validator.validate_bearer_token('', [], self.request)
-
-        expected = [
-            ('', {'verify': False}),
-            ('', {'key': SECRET, 'audience': self.request.host_url,
-                  'leeway': ANY, 'algorithms': ['HS256']})
-        ]
-
-        self.decode.call_args_list == expected
-
-        assert res is False
-
-    def test_validate_bearer_token_valid(self):
-        client = MockClient(self.request, KEY)
-        self.client.return_value = client
-        self.decode.return_value = {'iss': KEY, 'sub': 'citizen'}
-        res = self.validator.validate_bearer_token('', None, self.request)
-        assert res is True
-        assert self.request.client is client
-        assert self.request.user == 'citizen'
 
 
 def test_get_client(config):

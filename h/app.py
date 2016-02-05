@@ -3,10 +3,12 @@
 import logging
 import os
 
+from pyramid import authorization
 from pyramid.config import Configurator
 from pyramid.tweens import EXCVIEW
 from pyramid.settings import asbool
 
+from h import auth
 from h.config import settings_from_environment
 from h.security import derive_key
 
@@ -29,14 +31,15 @@ def create_app(global_config, **settings):
 
     config = Configurator(settings=settings)
 
+    config.set_authentication_policy(auth.AuthenticationPolicy())
+    config.set_authorization_policy(authorization.ACLAuthorizationPolicy())
+
     config.set_root_factory('h.resources.create_root')
 
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
     config.add_subscriber('h.subscribers.publish_annotation_event',
                           'h.api.events.AnnotationEvent')
-    config.add_subscriber('h.subscribers.set_user_from_oauth',
-                          'pyramid.events.NewRequest')
 
     config.add_tween('h.tweens.conditional_http_tween_factory', under=EXCVIEW)
     config.add_tween('h.tweens.csrf_tween_factory')
