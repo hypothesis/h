@@ -24,10 +24,6 @@ page('/groups/new', function () {
   new CreateGroupFormController(document.body);
 });
 
-page('/groups/:id/:name', function () {
-  new ShareGroupFormController(document.body);
-});
-
 document.addEventListener('DOMContentLoaded', function () {
   page.start();
 });
