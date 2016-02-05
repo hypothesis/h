@@ -57,26 +57,20 @@ def get_client(request, client_id, client_secret=None):
     return client
 
 
-def authenticate_client(request):
-    client = None
-    user = None
+def check_csrf_token(request):
+    """Return True if the request has a valid CSRF token, False otherwise."""
+    try:
+        session.check_csrf_token(request, token='assertion')
+    except exceptions.BadCSRFToken:
+        return False
+    return True
 
-    if request.client_id is None:
-        try:
-            session.check_csrf_token(request, token='assertion')
-        except exceptions.BadCSRFToken:
-            return False
-        client_id = request.registry.settings['h.client_id']
-        client = get_client(request, client_id)
-        user = request.authenticated_userid
-    elif request.client_secret is not None:
-        client_id = request.client_id
-        client_secret = request.client_secret
-        client = get_client(request, client_id, client_secret)
 
-    request.client = client
-    request.user = user
-    return request.client is not None
+def set_client_and_user(request):
+    """Set request.client and request.user."""
+    request.client = get_client(request,
+                                request.registry.settings['h.client_id'])
+    request.user = request.authenticated_userid
 
 
 def generate_signed_token(request):

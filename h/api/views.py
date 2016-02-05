@@ -170,16 +170,18 @@ def access_token(request):
     request.client_id = None
     request.expires_in = 3600
 
-    auth.authenticate_client(request)
-
-    response = pyramid.response.Response(
-        json.dumps({
-            "access_token": auth.generate_signed_token(request),
-            "token_type": "Bearer",
-            "expires_in": 3600
-        }),
-        content_type="application/json")
-    return response
+    if auth.check_csrf_token(request):
+        auth.set_client_and_user(request)
+        response = pyramid.response.Response(
+            json.dumps({
+                "access_token": auth.generate_signed_token(request),
+                "token_type": "Bearer",
+                "expires_in": 3600
+            }),
+            content_type="application/json")
+        return response
+    else:
+        raise httpexceptions.HTTPUnauthorized()
 
 
 # N.B. Like the rest of the API, this view is exposed behind WSGI middleware
