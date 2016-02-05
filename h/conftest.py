@@ -126,6 +126,8 @@ def authn_policy(config):
 
     config.set_authorization_policy(DummyAuthorizationPolicy())
     policy = MagicMock()
+    policy.authenticated_userid.return_value = None
+    policy.unauthenticated_userid.return_value = None
     config.set_authentication_policy(policy)
     return policy
 
