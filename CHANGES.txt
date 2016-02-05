@@ -1,3 +1,44 @@
+0.8.13 (2016-02-05)
+===================
+
+Features
+--------
+
+- Improve messaging for users who click on an activation link more than once, or
+  who visit an activation link when already logged in (#2904).
+
+- Allow administrators to delete user accounts from the admin panel (#2907).
+
+Bug fixes
+---------
+
+- Fix a character encoding bug that prevented CSV export of groups from the
+  admin panel (#2989).
+
+- Display the correct number of annotations for all users in the admin panel
+  (#2900).
+
+- Suppress an unsightly flash of banner on the stream pages (#2908).
+
+- Fix a bug that prevented editing of group annotations on stream pages (#2911).
+
+Miscellanea
+-----------
+
+- Numerous changes to the build process for the Chrome extension. Command-line
+  flags have changed (#2091, #2913).
+
+- Make it possible to build a client/extension that doesn't use a websocket
+  endpoint (#2906).
+
+- Move the websocket service into a standalone Pyramid application. This allows
+  the main web application to use a simpler worker type, thus preventing
+  database connection pool exhaustion in high load environments (#2913).
+
+- Move mail delivery to a worker process. This ensures that failures to deliver
+  mail are a) retried, and b) do not trigger transaction rollbacks in web
+  requests (#2903).
+
 0.8.12 (2016-02-01)
 ===================
 
