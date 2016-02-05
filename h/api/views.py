@@ -167,11 +167,9 @@ def access_token(request):
     request.authenticated_userid of the _current_ request.
 
     """
-    request.client_id = None
     request.expires_in = 3600
 
     if auth.check_csrf_token(request):
-        auth.set_client_and_user(request)
         response = pyramid.response.Response(
             json.dumps({
                 "access_token": auth.generate_signed_token(request),

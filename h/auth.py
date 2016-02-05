@@ -132,13 +132,9 @@ def validate_bearer_token(token, request):
     iss = payload['iss']
     sub = payload.get('sub')
 
-    client = auth.get_client(request, iss)
-    if client is None:
-        return None
-
     try:
         payload = jwt.decode(token,
-                             key=client.client_secret,
+                             key=request.registry.settings['h.client_secret'],
                              audience=aud,
                              leeway=LEEWAY,
                              algorithms=['HS256'])

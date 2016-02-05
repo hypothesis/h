@@ -5,50 +5,11 @@ from mock import MagicMock, patch, Mock
 from pyramid import testing
 from pyramid import security
 
+from h import auth
 
-from h import auth, interfaces
 
 KEY = 'someclient'
 SECRET = 'somesecret'
-
-
-class MockClient(object):
-    def __init__(self, request, client_id):
-        self.client_id = client_id
-        self.client_secret = SECRET if client_id is KEY else None
-
-
-def test_get_client(config):
-    client = MockClient(None, '4321')
-    mock_factory = MagicMock()
-    mock_factory.return_value = client
-    registry = config.registry
-    registry.registerUtility(mock_factory, interfaces.IClientFactory)
-    request = testing.DummyRequest(registry=config.registry)
-    assert auth.get_client(request, '4321') is client
-    mock_factory.assert_called_with(request, '4321')
-
-
-def test_get_client_missing(config):
-    mock_factory = MagicMock()
-    mock_factory.return_value = None
-    registry = config.registry
-    registry.registerUtility(mock_factory, interfaces.IClientFactory)
-    request = testing.DummyRequest(registry=config.registry)
-    assert auth.get_client(request, '9876') is None
-    mock_factory.assert_called_with(request, '9876')
-
-
-def test_get_client_bad_secret(config):
-    client = MockClient(None, '9876')
-    client.client_secret = 'scramble'
-    mock_factory = MagicMock()
-    mock_factory.return_value = client
-    registry = config.registry
-    registry.registerUtility(mock_factory, interfaces.IClientFactory)
-    request = testing.DummyRequest(registry=config.registry)
-    assert auth.get_client(request, '9876', client_secret='1234') is None
-    mock_factory.assert_called_with(request, '9876')
 
 
 # The fixtures required to mock all of groupfinder()'s dependencies.
