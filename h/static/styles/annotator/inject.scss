@@ -50,7 +50,7 @@ $base-font-size: 14px;
     color: $gray-light !important;
 
     &:active {
-      @include single-transition(background-color, .25s);
+      transition: background-color .25s;
       background-color: $gray-light !important;
     }
 
@@ -160,7 +160,7 @@ $base-font-size: 14px;
   }
 
   .annotator-frame-button {
-    @include single-transition(background-color, .25s, .25s);
+    transition: background-color .25s .25s;
     @include smallshadow;
     background: $white;
     border: solid 1px $gray-lighter;
@@ -174,7 +174,7 @@ $base-font-size: 14px;
     margin-bottom: 5px;
 
     &:active {
-      @include single-transition(background-color, .25s);
+      transition: background-color .25s;
       background-color: $gray-light;
     }
 
@@ -208,7 +208,7 @@ $base-font-size: 14px;
 // this disables the width transition for the sidebar when
 // it is manually resized by dragging
 .annotator-no-transition {
-  @include transition(none !important);
+  transition: none !important;
 }
 
 /*
@@ -245,8 +245,7 @@ $base-font-size: 14px;
 
 @media screen and (min-width: 37.5em) {
   .annotator-frame {
-    @include single-transition(margin-left, .15s);
-    @include transition-timing-function(cubic-bezier(.55, 0, .2, .8));
+    transition: margin-left .15s cubic-bezier(.55, 0, .2, .8);
     width: 428px;
     margin-left: -428px;
   }
