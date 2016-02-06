@@ -3,7 +3,7 @@ module.exports = ['$http', '$parse', ($http, $parse) ->
     button = elem.find('button')
     input = elem.find('input')
 
-    button.on('click', -> input.focus())
+    button.on('click', -> input[0].focus())
 
     scope.reset = (event) ->
       event.preventDefault()

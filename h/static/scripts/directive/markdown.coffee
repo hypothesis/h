@@ -1,4 +1,5 @@
 mediaEmbedder = require('../media-embedder')
+angular = require('angular')
 
 loadMathJax = ->
   if !MathJax?
@@ -27,9 +28,9 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
   link: (scope, elem, attr, ctrl) ->
     return unless ctrl?
 
-    inputEl = elem.find('.js-markdown-input')
-    input = elem.find('.js-markdown-input')[0]
-    output = elem.find('.js-markdown-preview')[0]
+    input = elem[0].querySelector('.js-markdown-input')
+    inputEl = angular.element(input)
+    output = elem[0].querySelector('.js-markdown-preview')
 
     userSelection = ->
       if input.selectionStart != undefined
@@ -251,17 +252,16 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
       scope.applyBlockMarkup("> ")
 
     # Keyboard shortcuts for bold, italic, and link.
-    elem.on
-      keydown: (e) ->
-        shortcuts =
-          66: scope.insertBold
-          73: scope.insertItalic
-          75: scope.insertLink
+    elem.on 'keydown', (e) ->
+      shortcuts =
+        66: scope.insertBold
+        73: scope.insertItalic
+        75: scope.insertLink
 
-        shortcut = shortcuts[e.keyCode]
-        if shortcut && (e.ctrlKey || e.metaKey)
-          e.preventDefault()
-          shortcut()
+      shortcut = shortcuts[e.keyCode]
+      if shortcut && (e.ctrlKey || e.metaKey)
+        e.preventDefault()
+        shortcut()
 
     scope.preview = false
     scope.togglePreview = ->
@@ -272,7 +272,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
           ctrl.$render()
         else
           input.style.height = output.style.height
-          $timeout -> inputEl.focus()
+          $timeout -> input.focus()
 
     mathJaxFallback = false
     renderMathAndMarkdown = (textToCheck) ->
@@ -358,7 +358,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
       scope.preview = false
       output.style.height = ""
       ctrl.$render()
-      unless readOnly then $timeout -> inputEl.focus()
+      unless readOnly then $timeout -> input.focus()
 
   require: '?ngModel'
   restrict: 'E'

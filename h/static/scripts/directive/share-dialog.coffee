@@ -9,11 +9,16 @@ module.exports = ['crossframe', (crossframe) ->
   link: (scope, elem, attrs, ctrl) ->
     scope.viaPageLink = ''
 
+    viaInput = elem[0].querySelector('.js-via')
+
     # Watch scope.shareDialog.visible: when it changes to true, focus input
     # and selection.
     scope.$watch (-> scope.shareDialog?.visible), (visible) ->
       if visible
-        scope.$evalAsync(-> elem.find('#via').focus().select())
+        scope.$evalAsync(->
+          viaInput.focus()
+          viaInput.select()
+        )
 
     scope.$watchCollection (-> crossframe.frames), (frames) ->
       if not frames.length
