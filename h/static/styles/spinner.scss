@@ -6,6 +6,8 @@
 //   <!-- Three nested spans -->
 //   <span class="spinner"><span><span></span></span></span>
 
+@import 'compass/css3/_animation';
+
 $container-width: 1em;
 $container-height: $container-width;
 $part-width: .1em;
