@@ -177,7 +177,7 @@ def access_token(request):
     expires_in = 3600
     response = pyramid.response.Response(
         json.dumps({
-            "access_token": auth.generate_signed_token(request, expires_in),
+            "access_token": auth.generate_bearer_token(request, expires_in),
             "token_type": "Bearer",
             "expires_in": expires_in
         }),

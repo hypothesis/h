@@ -2,7 +2,6 @@
 
 import logging
 
-import jwt
 from pyramid import authentication
 from pyramid import interfaces
 from pyramid import security
@@ -16,12 +15,6 @@ from h.api import groups
 log = logging.getLogger(__name__)
 
 
-JWT_BEARER = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
-
-
-LEEWAY = 240  # Allowance for clock skew in verification.
-
-
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthenticationPolicy(object):
 
@@ -30,7 +23,7 @@ class AuthenticationPolicy(object):
 
     def authenticated_userid(self, request):
         if is_api_request(request):
-            return userid_from_jwt(request)
+            return auth.userid_from_bearer_token(request)
         return self.session_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):
@@ -110,38 +103,6 @@ def effective_principals(userid, request, groupfinder=groupfinder):
 def is_api_request(request):
     return (request.path.startswith('/api') and
             request.path not in ['/api/token', '/api/badge'])
-
-
-def userid_from_jwt(request):
-    if 'Authorization' not in request.headers:
-        return None
-    token = request.headers.get('Authorization')[7:]
-    return validate_bearer_token(token, request)
-
-
-def validate_bearer_token(token, request):
-    if token is None:
-        return None
-
-    try:
-        payload = jwt.decode(token, verify=False)
-    except jwt.InvalidTokenError:
-        return False
-
-    aud = request.host_url
-    sub = payload.get('sub')
-
-    try:
-        payload = jwt.decode(token,
-                             key=request.registry.settings['h.client_secret'],
-                             audience=aud,
-                             leeway=LEEWAY,
-                             algorithms=['HS256'])
-
-    except jwt.InvalidTokenError:
-        return None
-
-    return sub
 
 
 def includeme(config):
