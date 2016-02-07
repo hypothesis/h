@@ -78,19 +78,14 @@ def userid_from_bearer_token(request):
     if 'Authorization' not in request.headers:
         return None
 
-    token = request.headers.get('Authorization')[7:]
-
-    if token is None:
-        return None
+    # The part of the Authorization header following "Bearer " is the JWT.
+    token = request.headers['Authorization'][len('Bearer '):]
 
     try:
-        payload = jwt.decode(token,
-                             key=request.registry.settings['h.client_secret'],
-                             audience=request.host_url,
-                             leeway=240,
-                             algorithms=['HS256'])
-
+        return jwt.decode(token,
+                          key=request.registry.settings['h.client_secret'],
+                          audience=request.host_url,
+                          leeway=240,
+                          algorithms=['HS256']).get('sub')
     except InvalidTokenError:
         return None
-
-    return payload.get('sub')  # The userid from the JWT.
