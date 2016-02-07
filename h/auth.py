@@ -129,7 +129,6 @@ def validate_bearer_token(token, request):
         return False
 
     aud = request.host_url
-    iss = payload['iss']
     sub = payload.get('sub')
 
     try:
