@@ -24,7 +24,7 @@ def translate_annotation_principals(principals):
     return list(result)
 
 
-def generate_signed_token(request):
+def generate_signed_token(request, expires_in):
     """Generate a signed JSON Web Token from OAuth attributes of the request.
 
     A JSON Web Token [jwt]_ is a token that contains a header, describing the
@@ -34,7 +34,7 @@ def generate_signed_token(request):
     .. [jwt] https://tools.ietf.org/html/draft-ietf-oauth-json-web-token
     """
     now = datetime.datetime.utcnow().replace(microsecond=0)
-    ttl = datetime.timedelta(seconds=request.expires_in)
+    ttl = datetime.timedelta(seconds=expires_in)
 
     claims = {
         'iss': request.registry.settings['h.client_id'],

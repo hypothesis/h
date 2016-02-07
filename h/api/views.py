@@ -169,18 +169,17 @@ def access_token(request):
     request.authenticated_userid of the _current_ request.
 
     """
-    request.expires_in = 3600
-
     try:
         session.check_csrf_token(request, token='assertion')
     except exceptions.BadCSRFToken:
         raise httpexceptions.HTTPUnauthorized()
 
+    expires_in = 3600
     response = pyramid.response.Response(
         json.dumps({
-            "access_token": auth.generate_signed_token(request),
+            "access_token": auth.generate_signed_token(request, expires_in),
             "token_type": "Bearer",
-            "expires_in": 3600
+            "expires_in": expires_in
         }),
         content_type="application/json")
 
