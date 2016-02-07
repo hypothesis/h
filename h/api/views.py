@@ -21,8 +21,10 @@ import json
 import logging
 
 import pyramid
+from pyramid import exceptions
 from pyramid import httpexceptions
 from pyramid import i18n
+from pyramid import session
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
@@ -169,17 +171,20 @@ def access_token(request):
     """
     request.expires_in = 3600
 
-    if auth.check_csrf_token(request):
-        response = pyramid.response.Response(
-            json.dumps({
-                "access_token": auth.generate_signed_token(request),
-                "token_type": "Bearer",
-                "expires_in": 3600
-            }),
-            content_type="application/json")
-        return response
-    else:
+    try:
+        session.check_csrf_token(request, token='assertion')
+    except exceptions.BadCSRFToken:
         raise httpexceptions.HTTPUnauthorized()
+
+    response = pyramid.response.Response(
+        json.dumps({
+            "access_token": auth.generate_signed_token(request),
+            "token_type": "Bearer",
+            "expires_in": 3600
+        }),
+        content_type="application/json")
+
+    return response
 
 
 # N.B. Like the rest of the API, this view is exposed behind WSGI middleware

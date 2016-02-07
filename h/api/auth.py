@@ -3,9 +3,7 @@
 import datetime
 
 import jwt
-from pyramid import exceptions
 from pyramid import security
-from pyramid import session
 
 
 def translate_annotation_principals(principals):
@@ -24,15 +22,6 @@ def translate_annotation_principals(principals):
         else:
             result.add(principal)
     return list(result)
-
-
-def check_csrf_token(request):
-    """Return True if the request has a valid CSRF token, False otherwise."""
-    try:
-        session.check_csrf_token(request, token='assertion')
-    except exceptions.BadCSRFToken:
-        return False
-    return True
 
 
 def generate_signed_token(request):
