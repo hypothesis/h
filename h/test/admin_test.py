@@ -467,17 +467,21 @@ def test_users_index_looks_up_users_by_email(User):
 
 
 @users_index_fixtures
-def test_users_index_queries_annotation_count(User):
+def test_users_index_queries_annotation_count_by_userid(User):
     es = MagicMock()
     request = DummyRequest(params={"username": "Bob"},
                            es=es)
+
+    User.get_by_username.return_value.username = 'Robert'
 
     admin.users_index(request)
 
     expected_query = {
         'query': {
-            'filtered': {'filter': {'term': {'user': u'acct:bob@example.com'}},
-            'query': {'match_all': {}}}
+            'filtered': {
+                'filter': {'term': {'user': u'acct:robert@example.com'}},
+                'query': {'match_all': {}}
+            }
         }
     }
     es.conn.count.assert_called_with(index=es.index,

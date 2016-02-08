@@ -186,8 +186,7 @@ def users_index(request):
 
     if user is not None:
         # Fetch information on how many annotations the user has created
-        userid = util.userid_from_username(username, request)
-        query = _all_user_annotations_query(userid)
+        query = _all_user_annotations_query(request, user)
         result = request.es.conn.count(index=request.es.index,
                                        doc_type=request.es.t.annotation,
                                        body={'query': query})
@@ -295,8 +294,7 @@ def delete_user(request, user):
 
     user.groups = []
 
-    userid = util.userid_from_username(user.username, request)
-    query = _all_user_annotations_query(userid)
+    query = _all_user_annotations_query(request, user)
     annotations = es_helpers.scan(client=request.es.conn, query={'query': query})
     for annotation in annotations:
         storage.delete_annotation(annotation['_id'])
@@ -304,8 +302,9 @@ def delete_user(request, user):
     request.db.delete(user)
 
 
-def _all_user_annotations_query(userid):
-    """Query matching all annotations (shared and private) owned by userid."""
+def _all_user_annotations_query(request, user):
+    """Query matching all annotations (shared and private) owned by user."""
+    userid = util.userid_from_username(user.username, request)
     return {
         'filtered': {
             'filter': {'term': {'user': userid.lower()}},
