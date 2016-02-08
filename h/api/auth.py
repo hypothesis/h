@@ -46,13 +46,12 @@ def generate_bearer_token(request, expires_in):
 
     """
     now = datetime.datetime.utcnow().replace(microsecond=0)
-    ttl = datetime.timedelta(seconds=expires_in)
 
     claims = {
         'iss': request.registry.settings['h.client_id'],
         'aud': request.host_url,
         'sub': request.authenticated_userid,
-        'exp': now + ttl,
+        'exp': now + datetime.timedelta(seconds=expires_in),
         'iat': now,
     }
 
