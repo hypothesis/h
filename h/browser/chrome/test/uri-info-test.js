@@ -1,20 +1,7 @@
 var uriInfo = require('../lib/uri-info');
 var settings = require('./settings.json');
 
-/**
- * Takes a Promise<T> and returns a Promise<Result>
- * where Result = { result: T } | { error: any }.
- *
- * This is useful for testing that promises are rejected
- * as expected in tests.
- */
-function toResult(promise) {
-  return promise.then(function (result) {
-    return { result: result };
-  }).catch(function (err) {
-    return { error: err }
-  });
-}
+var toResult = require('../../../static/scripts/test/promise-util').toResult;
 
 describe('UriInfo.query', function() {
   var server;
