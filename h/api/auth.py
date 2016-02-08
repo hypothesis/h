@@ -55,7 +55,9 @@ def generate_bearer_token(request, expires_in):
         'iat': now,
     }
 
-    return jwt.encode(claims, request.registry.settings['h.client_secret'])
+    return jwt.encode(claims,
+                      request.registry.settings['h.client_secret'],
+                      algorithm='HS256')
 
 
 def userid_from_bearer_token(request):

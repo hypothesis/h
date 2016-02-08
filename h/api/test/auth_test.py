@@ -51,6 +51,8 @@ def test_generate_bearer_token_calls_encode(jwt):
         "It should encode the expiration time as 'exp'")
     assert jwt.encode.call_args[0][0]['aud'] == request.host_url, (
         "It should encode request.host_url as 'aud'")
+    assert jwt.encode.call_args[1]['algorithm'] == 'HS256', (
+        "It should pass the right algorithm to encode()")
 
 
 @generate_bearer_token_fixtures
