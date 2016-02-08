@@ -17,10 +17,8 @@ authorization system. You can find the mapping between annotation "permissions"
 objects and Pyramid ACLs in :mod:`h.api.resources`.
 """
 
-import json
 import logging
 
-import pyramid
 from pyramid import exceptions
 from pyramid import httpexceptions
 from pyramid import i18n
@@ -160,8 +158,15 @@ def search(request):
                              separate_replies=separate_replies)
 
 
-@api_config(route_name='access_token')
-def access_token(request):
+# N.B. Like the rest of the API, this view is exposed behind WSGI middleware
+# that enables appropriate CORS headers and response to preflight request.
+#
+# However, this view requires credentials (a cookie) so is in fact not
+# currently accessible off-origin. Given that this method of authenticating to
+# the API is not intended to remain, this seems like a limitation we do not
+# need to lift any time soon.
+@api_config(route_name='token', renderer='string')
+def annotator_token(request):
     """Return a JWT access token for the given request.
 
     The token can be used in the Authorization header in subsequent requests to
@@ -174,31 +179,7 @@ def access_token(request):
     except exceptions.BadCSRFToken:
         raise httpexceptions.HTTPUnauthorized()
 
-    expires_in = 3600
-    response = pyramid.response.Response(
-        json.dumps({
-            "access_token": auth.generate_bearer_token(request, expires_in),
-            "token_type": "Bearer",
-            "expires_in": expires_in
-        }),
-        content_type="application/json")
-
-    return response
-
-
-# N.B. Like the rest of the API, this view is exposed behind WSGI middleware
-# that enables appropriate CORS headers and response to preflight request.
-#
-# However, this view requires credentials (a cookie) so is in fact not
-# currently accessible off-origin. Given that this method of authenticating to
-# the API is not intended to remain, this seems like a limitation we do not
-# need to lift any time soon.
-@api_config(route_name='token', renderer='string')
-def annotator_token(request):
-    """The Annotator Auth token view."""
-    request.grant_type = 'client_credentials'
-    response = access_token(request)
-    return response.json_body.get('access_token', response)
+    return auth.generate_bearer_token(request, 3600)
 
 
 @api_config(context=Annotations, request_method='GET')
