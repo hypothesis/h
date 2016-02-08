@@ -9,9 +9,20 @@ from h import features
 
 @pytest.fixture(scope='module', autouse=True)
 def features_override(request):
+    # Replace the primary FEATURES dictionary for the duration of testing...
     patcher = mock.patch.dict('h.features.FEATURES', {
         'notification': "A test flag for testing with."
-    })
+    }, clear=True)
+    patcher.start()
+    request.addfinalizer(patcher.stop)
+
+
+@pytest.fixture(scope='module', autouse=True)
+def features_pending_removal_override(request):
+    # And configure 'abouttoberemoved' as a feature pending removal...
+    patcher = mock.patch.dict('h.features.FEATURES_PENDING_REMOVAL', {
+        'abouttoberemoved': "A test flag that's about to be removed."
+    }, clear=True)
     patcher.start()
     request.addfinalizer(patcher.stop)
 
@@ -21,6 +32,13 @@ def test_flag_enabled_raises_for_undocumented_feature():
 
     with pytest.raises(features.UnknownFeatureError):
         features.flag_enabled(request, 'wibble')
+
+
+def test_flag_enabled_raises_for_feature_pending_removal():
+    request = DummyRequest()
+
+    with pytest.raises(features.UnknownFeatureError):
+        features.flag_enabled(request, 'abouttoberemoved')
 
 
 def test_flag_enabled_looks_up_feature_by_name(feature_model):
@@ -105,16 +123,30 @@ def test_flag_enabled_true_when_staff_true_staff_request(authn_policy,
     assert features.flag_enabled(request, 'notification') is True
 
 
+@pytest.mark.usefixtures('feature_model')
+def test_all_omits_features_pending_removal():
+    request = DummyRequest()
+
+    assert features.all(request) == {'notification': False}
+
+
 def test_remove_old_flag_removes_old_flags():
+    """
+    The remove_old_flags function should remove unknown flags.
+
+    New flags and flags pending removal should be left alone, but completely
+    unknown flags should be removed.
+    """
     new_feature = features.Feature(name='notification')
+    pending_feature = features.Feature(name='abouttoberemoved')
     old_feature = features.Feature(name='somethingelse')
-    db.Session.add(new_feature, old_feature)
+    db.Session.add_all([new_feature, pending_feature, old_feature])
     db.Session.flush()
 
     features.remove_old_flags()
 
-    remaining = [f.name for f in features.Feature.query.all()]
-    assert remaining == ['notification']
+    remaining = set([f.name for f in features.Feature.query.all()])
+    assert remaining == {'abouttoberemoved', 'notification'}
 
 
 @pytest.fixture
