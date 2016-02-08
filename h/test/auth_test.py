@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from mock import MagicMock, patch, Mock
+import mock
 from pyramid import testing
 from pyramid import security
 
@@ -12,156 +12,106 @@ KEY = 'someclient'
 SECRET = 'somesecret'
 
 
-# The fixtures required to mock all of groupfinder()'s dependencies.
-groupfinder_fixtures = pytest.mark.usefixtures('accounts', 'groups')
+effective_principals_fixtures = pytest.mark.usefixtures('accounts', 'groups')
 
 
-@groupfinder_fixtures
-def test_groupfinder_returns_no_principals(accounts):
-    """It should return only [] by default.
+@effective_principals_fixtures
+def test_effective_principals_when_user_is_None(accounts):
+    accounts.get_user.return_value = None
 
-    If the request has no client and the user is not an admin or staff member
-    nor a member of any group, it should return no additional principals.
+    principals = auth.effective_principals('acct:jiji@hypothes.is',
+                                           testing.DummyRequest())
 
-    """
-    accounts.get_user.return_value = MagicMock(admin=False, staff=False)
-
-    assert auth.groupfinder("acct:jiji@hypothes.is", Mock()) == []
+    assert principals == [security.Everyone]
 
 
-@groupfinder_fixtures
-def test_groupfinder_with_admin_user(accounts):
-    """If the user is an admin it should return "group:__admin__"."""
-    accounts.get_user.return_value = MagicMock(admin=True, staff=False)
+@effective_principals_fixtures
+def test_effective_principals_returns_Authenticated(accounts, groups):
+    # User is authenticated but is not an admin or staff or a member of any
+    # groups.
+    accounts.get_user.return_value = mock.Mock(admin=False, staff=False)
+    groups.group_principals.return_value = []
 
-    assert "group:__admin__" in auth.groupfinder(
-        "acct:jiji@hypothes.is", Mock())
+    principals = auth.effective_principals('acct:jiji@hypothes.is',
+                                           testing.DummyRequest())
 
-
-@groupfinder_fixtures
-def test_groupfinder_with_staff_user(accounts):
-    """If the user is staff it should return a "group:__staff__" principal."""
-    accounts.get_user.return_value = MagicMock(admin=False, staff=True)
-
-    assert "group:__staff__" in auth.groupfinder(
-        "acct:jiji@hypothes.is", Mock())
+    assert security.Authenticated in principals
 
 
-@groupfinder_fixtures
-def test_groupfinder_admin_and_staff(accounts):
-    accounts.get_user.return_value = MagicMock(admin=True, staff=True)
+@effective_principals_fixtures
+def test_effective_principals_returns_userid(accounts, groups):
+    # User is authenticated but is not an admin or staff or a member of any
+    # groups.
+    accounts.get_user.return_value = mock.Mock(admin=False, staff=False)
+    groups.group_principals.return_value = []
 
-    principals = auth.groupfinder("acct:jiji@hypothes.is", Mock())
+    principals = auth.effective_principals('acct:jiji@hypothes.is',
+                                           testing.DummyRequest())
 
-    assert "group:__admin__" in principals
-    assert "group:__staff__" in principals
-
-
-@groupfinder_fixtures
-def test_groupfinder_calls_group_principals(accounts, groups):
-    auth.groupfinder("acct:jiji@hypothes.is", Mock())
-
-    groups.group_principals.assert_called_once_with(
-        accounts.get_user.return_value)
+    assert 'acct:jiji@hypothes.is' in principals
 
 
-@groupfinder_fixtures
-def test_groupfinder_with_one_group(groups):
-    groups.group_principals.return_value = ['group:group-1']
+@effective_principals_fixtures
+def test_effective_principals_when_user_is_admin(accounts, groups):
+    accounts.get_user.return_value = mock.Mock(admin=True, staff=False)
+    groups.group_principals.return_value = []
 
-    additional_principals = auth.groupfinder("acct:jiji@hypothes.is", Mock())
+    principals = auth.effective_principals('acct:jiji@hypothes.is',
+                                           testing.DummyRequest())
 
-    assert 'group:group-1' in additional_principals
-
-
-@groupfinder_fixtures
-def test_groupfinder_with_three_groups(groups):
-    groups.group_principals.return_value = [
-        'group:group-1',
-        'group:group-2',
-        'group:group-3'
-    ]
-
-    additional_principals = auth.groupfinder("acct:jiji@Hypothes.is", Mock())
-
-    assert 'group:group-1' in additional_principals
-    assert 'group:group-2' in additional_principals
-    assert 'group:group-3' in additional_principals
+    assert 'group:__admin__' in principals
 
 
-def test_effective_principals_includes_everyone():
-    """
-    Even if the groupfinder returns None, implying that the userid is not
-    recognised, `security.Everyone` should be included in the list of effective
-    principals.
-    """
-    groupfinder = lambda userid, request: None
-    request = testing.DummyRequest()
+@effective_principals_fixtures
+def test_effective_principals_when_user_is_staff(accounts, groups):
+    accounts.get_user.return_value = mock.Mock(admin=False, staff=True)
+    groups.group_principals.return_value = []
 
-    result = auth.effective_principals('acct:elina@example.com',
-                                       request,
-                                       groupfinder=groupfinder)
+    principals = auth.effective_principals('acct:jiji@hypothes.is',
+                                           testing.DummyRequest())
 
-    assert result == [security.Everyone]
+    assert 'group:__staff__' in principals
 
 
-def test_effective_principals_includes_authenticated_and_userid():
-    """
-    If the groupfinder returns the empty list, implying that the userid is
-    recognised but is a member of no groups, `security.Authenticated` and the
-    passed userid should be included in the list of effective principals.
-    """
-    groupfinder = lambda userid, request: []
-    request = testing.DummyRequest()
+@effective_principals_fixtures
+def test_effective_principals_when_user_has_groups(accounts, groups):
+    accounts.get_user.return_value = mock.Mock(admin=False, staff=False)
+    groups.group_principals.return_value = ['group:abc123', 'group:def456']
 
-    result = auth.effective_principals('acct:elina@example.com',
-                                       request,
-                                       groupfinder=groupfinder)
+    principals = auth.effective_principals('acct:jiji@hypothes.is',
+                                           testing.DummyRequest())
 
-    assert set(result) == set([security.Everyone,
-                               security.Authenticated,
-                               'acct:elina@example.com'])
+    for group in groups.group_principals.return_value:
+        assert group in principals
 
 
-def test_effective_principals_includes_returned_groupfinder_principals():
-    """
-    If the groupfinder returns groups, these should be included in the list of
-    effective principals.
-    """
-    groupfinder = lambda userid, request: ['group:foo', 'group:bar']
-    request = testing.DummyRequest()
+@effective_principals_fixtures
+def test_effective_principals_with_staff_admin_and_groups(accounts, groups):
+    accounts.get_user.return_value = mock.Mock(admin=True, staff=True)
+    groups.group_principals.return_value = ['group:abc123', 'group:def456']
 
-    result = auth.effective_principals('acct:elina@example.com',
-                                       request,
-                                       groupfinder=groupfinder)
+    principals = auth.effective_principals('acct:jiji@hypothes.is',
+                                           testing.DummyRequest())
 
-    assert set(result) == set([security.Everyone,
-                               security.Authenticated,
-                               'acct:elina@example.com',
-                               'group:foo',
-                               'group:bar'])
-
-def test_effective_principals_calls_groupfinder_with_userid_and_request():
-    groupfinder = Mock()
-    groupfinder.return_value = []
-    request = testing.DummyRequest()
-
-    auth.effective_principals('acct:elina@example.com',
-                              request,
-                              groupfinder=groupfinder)
-
-    groupfinder.assert_called_with('acct:elina@example.com', request)
+    for principal in [security.Everyone,
+                      'group:__admin__',
+                      'group:__staff__',
+                      'group:abc123',
+                      'group:def456',
+                      security.Authenticated,
+                      'acct:jiji@hypothes.is']:
+        assert principal in principals
 
 
 @pytest.fixture
 def accounts(request):
-    patcher = patch('h.auth.accounts', autospec=True)
+    patcher = mock.patch('h.auth.accounts', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
 
 @pytest.fixture
 def groups(request):
-    patcher = patch('h.auth.groups', autospec=True)
+    patcher = mock.patch('h.auth.groups', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

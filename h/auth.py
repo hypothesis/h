@@ -56,29 +56,7 @@ def auth_domain(request):
     return request.registry.settings.get('h.auth_domain', request.domain)
 
 
-def groupfinder(userid, request):
-    """
-    Return the list of additional groups of which userid is a member.
-
-    Returns a list of group principals of which the passed userid is a member,
-    or None if the userid is not known by this application.
-    """
-    principals = set()
-
-    user = accounts.get_user(userid, request)
-    if user is None:
-        return
-
-    if user.admin:
-        principals.add('group:__admin__')
-    if user.staff:
-        principals.add('group:__staff__')
-    principals.update(groups.group_principals(user))
-
-    return list(principals)
-
-
-def effective_principals(userid, request, groupfinder=groupfinder):
+def effective_principals(userid, request):
     """
     Return the list of effective principals for the passed userid.
 
@@ -91,11 +69,22 @@ def effective_principals(userid, request, groupfinder=groupfinder):
     """
     principals = set([security.Everyone])
 
-    groups = groupfinder(userid, request)
-    if groups is not None:
-        principals.add(security.Authenticated)
-        principals.add(userid)
-        principals.update(groups_)
+    user = accounts.get_user(userid, request)
+
+    if user is None:
+        return list(principals)
+
+    if user.admin:
+        principals.add('group:__admin__')
+
+    if user.staff:
+        principals.add('group:__staff__')
+
+    principals.update(groups.group_principals(user))
+
+    principals.add(security.Authenticated)
+
+    principals.add(userid)
 
     return list(principals)
 
