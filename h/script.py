@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import argparse
+import collections
 import logging
 import os
 import sys
@@ -197,19 +198,17 @@ def token(args):
     X-Annotator-Auth-Token header.
 
     """
-    from h.auth import get_client, generate_signed_token
-
+    import h.api.auth
     request = bootstrap(args)
-    registry = request.registry
+    FakeRequest = collections.namedtuple(
+        'FakeRequest', 'authenticated_userid host_url registry')
+    fake_request = FakeRequest(
+        authenticated_userid=args.sub,
+        host_url=request.host_url,
+        registry=request.registry
+    )
+    print(h.api.auth.generate_bearer_token(fake_request, 3600))
 
-    request.client = get_client(request, registry.settings['h.client_id'])
-    request.user = args.sub
-    request.expires_in = args.ttl
-    request.extra_credentials = {}
-
-    token = generate_signed_token(request)
-
-    print(token)
 
 parser_token = subparsers.add_parser(
     'token', description=textwrap.dedent(token.__doc__),

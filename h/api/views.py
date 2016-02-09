@@ -19,11 +19,14 @@ objects and Pyramid ACLs in :mod:`h.api.resources`.
 
 import logging
 
+from pyramid import exceptions
 from pyramid import httpexceptions
 from pyramid import i18n
+from pyramid import session
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
+from h.api import auth
 from h.api import cors
 from h.api.events import AnnotationEvent
 from h.api import search as search_lib
@@ -155,12 +158,6 @@ def search(request):
                              separate_replies=separate_replies)
 
 
-@api_config(route_name='access_token')
-def access_token(request):
-    """The OAuth 2 access token view."""
-    return request.create_token_response()
-
-
 # N.B. Like the rest of the API, this view is exposed behind WSGI middleware
 # that enables appropriate CORS headers and response to preflight request.
 #
@@ -170,10 +167,19 @@ def access_token(request):
 # need to lift any time soon.
 @api_config(route_name='token', renderer='string')
 def annotator_token(request):
-    """The Annotator Auth token view."""
-    request.grant_type = 'client_credentials'
-    response = access_token(request)
-    return response.json_body.get('access_token', response)
+    """Return a JWT access token for the given request.
+
+    The token can be used in the Authorization header in subsequent requests to
+    the API to authenticate the user identified by the
+    request.authenticated_userid of the _current_ request.
+
+    """
+    try:
+        session.check_csrf_token(request, token='assertion')
+    except exceptions.BadCSRFToken:
+        raise httpexceptions.HTTPUnauthorized()
+
+    return auth.generate_bearer_token(request, 3600)
 
 
 @api_config(context=Annotations, request_method='GET')

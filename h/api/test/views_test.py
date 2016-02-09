@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import json
 import mock
 import pytest
 
+from pyramid import exceptions
+from pyramid import httpexceptions
 from pyramid import testing
 
 from h.api import views
@@ -97,44 +100,41 @@ def test_search_returns_search_results(search_lib):
     assert result == search_lib.search.return_value
 
 
-def test_access_token_returns_create_token_response():
-    """It should return request.create_token_response()."""
-    request = mock.Mock()
-
-    response_data = views.access_token(request)
-
-    request.create_token_response.assert_called_with()
-    assert response_data == request.create_token_response.return_value
-
-
-annotator_token_fixtures = pytest.mark.usefixtures('access_token')
+annotator_token_fixtures = pytest.mark.usefixtures('auth', 'session')
 
 
 @annotator_token_fixtures
-def test_annotator_token_sets_grant_type():
-    request = mock.Mock()
+def test_annotator_token_calls_check_csrf_token(session):
+    request = testing.DummyRequest()
 
     views.annotator_token(request)
 
-    assert request.grant_type == 'client_credentials'
+    session.check_csrf_token.assert_called_once_with(request,
+                                                     token='assertion')
 
 
 @annotator_token_fixtures
-def test_annotator_token_calls_access_token(access_token):
-    request = mock.Mock()
+def test_annotator_token_raises_Unauthorized_if_check_csrf_token_raises(
+        session):
+    session.check_csrf_token.side_effect = exceptions.BadCSRFToken
+
+    with pytest.raises(httpexceptions.HTTPUnauthorized):
+        views.annotator_token(testing.DummyRequest())
+
+
+@annotator_token_fixtures
+def test_annotator_token_calls_generate_bearer_token(auth):
+    request = testing.DummyRequest()
 
     views.annotator_token(request)
 
-    access_token.assert_called_once_with(request)
+    auth.generate_bearer_token.assert_called_once_with(request, 3600)
 
 
 @annotator_token_fixtures
-def test_annotator_token_gets_access_token_from_response_json(access_token):
-    response = access_token.return_value = mock.Mock()
-
-    views.annotator_token(mock.Mock())
-
-    response.json_body.get.assert_called_once_with('access_token', response)
+def test_annotator_token_returns_token(auth):
+    assert (views.annotator_token(testing.DummyRequest()) ==
+            auth.generate_bearer_token.return_value)
 
 
 def test_annotations_index_searches(search_lib):
@@ -328,8 +328,17 @@ def AnnotationEvent(request):
 
 
 @pytest.fixture
-def access_token(request):
-    patcher = mock.patch('h.api.views.access_token', autospec=True)
+def auth(request):
+    patcher = mock.patch('h.api.views.auth', autospec=True)
+    module = patcher.start()
+    module.generate_bearer_token = mock.Mock(return_value='abc123')
+    request.addfinalizer(patcher.stop)
+    return module
+
+
+@pytest.fixture
+def search_lib(request):
+    patcher = mock.patch('h.api.views.search_lib', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
@@ -342,10 +351,11 @@ def schemas(request):
 
 
 @pytest.fixture
-def search_lib(request):
-    patcher = mock.patch('h.api.views.search_lib', autospec=True)
+def session(request):
+    patcher = mock.patch('h.api.views.session', autospec=True)
+    module = patcher.start()
     request.addfinalizer(patcher.stop)
-    return patcher.start()
+    return module
 
 
 @pytest.fixture
