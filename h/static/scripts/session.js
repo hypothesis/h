@@ -1,5 +1,6 @@
 'use strict';
 
+var assign = require('core-js/library/fn/object/assign');
 var angular = require('angular');
 
 var events = require('./events');
@@ -7,43 +8,29 @@ var retryUtil = require('./retry-util');
 
 var CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-var ACCOUNT_ACTIONS = [
-  ['login', 'POST'],
-  ['logout', 'POST'],
-  ['profile', 'GET'],
-  ['edit_profile', 'POST'],
-  ['disable_user', 'POST']
-];
-
 function sessionActions(options) {
-  var actions = {};
+  var actions = {
+    login: {
+      method: 'POST',
+      params: { __formid__: 'login' },
+    },
 
-  // These map directly to views in `h.accounts`, and all have a similar form:
-  for (var i = 0, len = ACCOUNT_ACTIONS.length; i < len; i++) {
-    var name = ACCOUNT_ACTIONS[i][0];
-    var method = ACCOUNT_ACTIONS[i][1];
-    actions[name] = {
-      method: method,
-      params: {
-        __formid__: name
-      }
-    };
-  }
+    logout: {
+      method: 'POST',
+      params: { __formid__: 'logout' },
+    },
 
-  // Finally, add a simple method for getting the current session state
-  actions._load = {method: 'GET'};
-  actions.dismiss_sidebar_tutorial = {
-    method: 'POST',
-    url: '/app/dismiss_sidebar_tutorial'
+    _load: { method: 'GET' },
+
+    dismiss_sidebar_tutorial: {
+      method: 'POST',
+      params: { path: 'dismiss_sidebar_tutorial' },
+    }
   };
 
-  if (typeof options !== 'undefined') {
-    for (var act in actions) {
-      for (var opt in options) {
-        actions[act][opt] = options[opt];
-      }
-    }
-  }
+  Object.keys(actions).forEach(function (action) {
+    assign(actions[action], options);
+  });
 
   return actions;
 }
@@ -65,14 +52,12 @@ function sessionActions(options) {
 function session($http, $resource, $rootScope, flash, raven, settings) {
   // Headers sent by every request made by the session service.
   var headers = {};
-  // TODO: Move accounts data management (e.g. profile, edit_profile,
-  // disable_user, etc) into another module with another route.
   var actions = sessionActions({
     headers: headers,
     transformResponse: process,
     withCredentials: true
   });
-  var endpoint = new URL('/app', settings.serviceUrl).href;
+  var endpoint = new URL('/app/:path', settings.serviceUrl).href;
   var resource = $resource(endpoint, {}, actions);
 
   // Blank initial model state

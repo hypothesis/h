@@ -219,4 +219,13 @@ describe('h:session', function () {
       });
     });
   });
+
+  describe('.dismiss_sidebar_tutorial()', function () {
+    var url = 'https://test.hypothes.is/app/dismiss_sidebar_tutorial';
+    it('disables the tutorial for the user', function () {
+      $httpBackend.expectPOST(url).respond({});
+      session.dismiss_sidebar_tutorial();
+      $httpBackend.flush();
+    });
+  });
 });
