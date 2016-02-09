@@ -29,7 +29,9 @@ describe('UriInfo.query', function () {
   it('sends the correct XMLHttpRequest', function () {
     return uriInfo.query('tabUrl').then(function () {
       assert.equal(fetch.callCount, 1);
-      assert.deepEqual(fetch.lastCall.args, [badgeURL + '?uri=tabUrl']);
+      assert.deepEqual(
+        fetch.lastCall.args,
+        [badgeURL + '?uri=tabUrl', {credentials: 'include'}]);
     });
   });
 
@@ -37,9 +39,9 @@ describe('UriInfo.query', function () {
     return toResult(uriInfo.query('http://foo.com?bar=baz qüx'))
       .then(function () {
       assert.equal(fetch.callCount, 1);
-      assert.deepEqual(
-        fetch.lastCall.args,
-        [badgeURL + '?uri=http%3A%2F%2Ffoo.com%3Fbar%3Dbaz+q%C3%BCx']);
+      assert.equal(
+        fetch.lastCall.args[0],
+        badgeURL + '?uri=http%3A%2F%2Ffoo.com%3Fbar%3Dbaz+q%C3%BCx');
     });
   });
 

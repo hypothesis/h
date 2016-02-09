@@ -10,7 +10,8 @@ function encodeUriQuery(val) {
  * statistics about the annotations for a given URL.
  */
 function query(uri) {
-  return fetch(settings.apiUrl + '/badge?uri=' + encodeUriQuery(uri))
+  return fetch(settings.apiUrl + '/badge?uri=' + encodeUriQuery(uri),
+               {credentials: 'include'})
     .then(function (res) {
     return res.json();
   }).then(function (data) {
