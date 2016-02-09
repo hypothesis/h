@@ -1,45 +1,47 @@
+'use strict';
+
 var uriInfo = require('../lib/uri-info');
 var settings = require('./settings.json');
 
 var toResult = require('../../../static/scripts/test/promise-util').toResult;
 
-describe('UriInfo.query', function() {
-  var server;
+describe('UriInfo.query', function () {
   var badgeURL = settings.apiUrl + '/badge';
 
-  beforeEach(function() {
-    server = sinon.fakeServer.create({
-      autoRespond: true,
-      respondImmediately: true
-    });
-    server.respondWith(
-      "GET", badgeURL + "?uri=tabUrl",
-      [200, {}, '{"total": 1}']
+  beforeEach(function () {
+    sinon.stub(window, 'fetch').returns(
+      Promise.resolve(
+        new window.Response('{"total": 1}', {
+          status: 200,
+          headers: {}
+        })
+      )
     );
+
     sinon.stub(console, 'error');
   });
 
-  afterEach(function() {
-    server.restore();
+  afterEach(function () {
+    window.fetch.restore();
     console.error.restore();
   });
 
-  it('sends the correct XMLHttpRequest', function() {
+  it('sends the correct XMLHttpRequest', function () {
     return uriInfo.query('tabUrl').then(function () {
-      assert.equal(server.requests.length, 1);
-      var request = server.requests[0];
-      assert.equal(request.method, "GET");
-      assert.equal(request.url, badgeURL + "?uri=tabUrl");
+      assert.equal(fetch.callCount, 1);
+      assert.deepEqual(
+        fetch.lastCall.args,
+        [badgeURL + '?uri=tabUrl', {credentials: 'include'}]);
     });
   });
 
-  it('urlencodes the URL appropriately', function() {
-    return toResult(uriInfo.query("http://foo.com?bar=baz qüx"))
+  it('urlencodes the URL appropriately', function () {
+    return toResult(uriInfo.query('http://foo.com?bar=baz qüx'))
       .then(function () {
-      assert.equal(server.requests.length, 1);
-      var request = server.requests[0];
-      assert.equal(request.method, "GET");
-      assert.equal(request.url, badgeURL + "?uri=http%3A%2F%2Ffoo.com%3Fbar%3Dbaz+q%C3%BCx");
+      assert.equal(fetch.callCount, 1);
+      assert.equal(
+        fetch.lastCall.args[0],
+        badgeURL + '?uri=http%3A%2F%2Ffoo.com%3Fbar%3Dbaz+q%C3%BCx');
     });
   });
 
@@ -50,10 +52,14 @@ describe('UriInfo.query', function() {
   ];
 
   INVALID_RESPONSES.forEach(function (response) {
-    it("returns an error if the server's JSON is invalid", function() {
-      server.respondWith(
-        "GET", badgeURL + "?uri=tabUrl",
-        response
+    it('returns an error if the server\'s JSON is invalid', function () {
+      fetch.returns(
+        Promise.resolve(
+          new window.Response(
+            response[2],
+            {status: response[0], headers: response[1]}
+          )
+        )
       );
       return toResult(uriInfo.query('tabUrl')).then(function (result) {
         assert.ok(result.error);
