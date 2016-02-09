@@ -1,3 +1,5 @@
+'use strict';
+
 var settings = require('./settings');
 
 /** encodeUriQuery encodes a string for use in a query parameter */
