@@ -65,6 +65,25 @@ class URLSafeUUID(types.TypeDecorator):
         return _get_urlsafe_from_hex(hexstring)
 
 
+class AnnotationSelectorJSONB(types.TypeDecorator):
+
+    """
+    Special type for the Annotation selector column.
+
+    It transparently escapes NULL (\u0000) bytes to \\u0000 when writing to the
+    database, and the other way around when reading from the database, but
+    only on the prefix/exact/suffix fields in a TextQuoteSelector.
+    """
+
+    impl = postgresql.JSONB
+
+    def process_bind_param(self, value, dialect):
+        return _transform_quote_selector(value, _escape_null_byte)
+
+    def process_result_value(self, value, dialect):
+        return _transform_quote_selector(value, _unescape_null_byte)
+
+
 def _get_hex_from_urlsafe(value):
     bytestr = bytes(value)
 
@@ -128,3 +147,40 @@ def _must_b64_decode(data, expected_size=None):
         raise TypeError('incorrect data size')
     return result
 
+
+def _transform_quote_selector(selectors, transform_func):
+    if selectors is None:
+        return None
+
+    if not isinstance(selectors, list):
+        return selectors
+
+    for selector in selectors:
+        if not isinstance(selector, dict):
+            continue
+
+        if not selector.get('type') == 'TextQuoteSelector':
+            continue
+
+        if 'prefix' in selector:
+            selector['prefix'] = transform_func(selector['prefix'])
+        if 'exact' in selector:
+            selector['exact'] = transform_func(selector['exact'])
+        if 'suffix' in selector:
+            selector['suffix'] = transform_func(selector['suffix'])
+
+    return selectors
+
+
+def _escape_null_byte(s):
+    if s is None:
+        return s
+
+    return s.replace(u"\u0000", u"\\u0000")
+
+
+def _unescape_null_byte(s):
+    if s is None:
+        return s
+
+    return s.replace(u"\\u0000", u"\u0000")
