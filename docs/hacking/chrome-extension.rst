@@ -87,6 +87,18 @@ should be aware of:
    `Content Security Policy`_. To test the extension on these sites
    you'll need to build without the ``--no-bundle-sidebar`` option.
 
+----------------------
+Chrome version support
+----------------------
+
+We currently support at least the last 10 stable releases of Google Chrome,
+which equates to releases in the last ~14 months.
+
+See Wikipedia's `Chrome Release History`_ page for a history of recent
+releases.
+
+.. _Chrome Release History: https://en.wikipedia.org/wiki/Google_Chrome_release_history
+
 ---------------
 Troubleshooting
 ---------------
