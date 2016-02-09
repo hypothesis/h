@@ -11,7 +11,6 @@ from h.badge import models as badge_models
 __all__ = (
     'Activation',
     'Annotation',
-    'Client',
     'Blocklist',
     'Document',
     'Feature',
