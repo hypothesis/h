@@ -33,9 +33,11 @@ inherits(FakeSocket, EventEmitter);
 describe('streamer', function () {
   var fakeAnnotationMapper;
   var fakeGroups;
+  var fakeRootScope;
   var fakeSession;
   var fakeSettings;
   var activeStreamer;
+  var streamer;
 
   function createDefaultStreamer() {
     activeStreamer = streamer.connect(
