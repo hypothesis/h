@@ -11,13 +11,11 @@ possible.
 If contributing as an individual please sign the CLA for individuals:
 
 - `CLA for individuals, HTML <http://hypothes.is/contribute/individual-cla>`_
-- `CLA for individuals, PDF <https://hypothes.is/wp-content/uploads/2014/12/Hypothes.is-Project-Individual.pdf>`_
 
 If making contributions on behalf of an employer, please sign the CLA for
 employees:
 
 - `CLA for employers, HTML <http://hypothes.is/contribute/entity-cla>`_
-- `CLA for employers, PDF <https://hypothes.is/wp-content/uploads/2014/12/Hypothes.is-Project-Entity.pdf>`_
 
 A completed form can either be sent by electronic mail to
 license@hypothes.is or via conventional mail at the address below. If
