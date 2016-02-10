@@ -138,9 +138,9 @@ class AuthController(object):
 @view_defaults(route_name='session',
                accept='application/json',
                renderer='json')
-@view_config(attr='login', request_param='__formid__=login')
-@view_config(attr='logout', request_param='__formid__=logout')
 class AjaxAuthController(AuthController):
+
+    @view_config(request_param='__formid__=login')
     def login(self):
         try:
             json_body = self.request.json_body
@@ -166,6 +166,7 @@ class AjaxAuthController(AuthController):
 
         return ajax_payload(self.request, {'status': 'okay'})
 
+    @view_config(request_param='__formid__=logout')
     def logout(self):
         headers = self._logout()
         self.request.response.headers.extend(headers)
