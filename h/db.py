@@ -52,6 +52,9 @@ Session = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 #
 #   http://docs.sqlalchemy.org/en/latest/core/constraints.html#configuring-constraint-naming-conventions
 #
+# N.B. This must be kept in sync with the naming conventions in
+# :py:mod:`h.api.db`.
+#
 metadata = MetaData(naming_convention={
     "ix": "ix__%(column_0_label)s",
     "uq": "uq__%(table_name)s__%(column_0_name)s",
@@ -59,6 +62,7 @@ metadata = MetaData(naming_convention={
     "fk": "fk__%(table_name)s__%(column_0_name)s__%(referred_table_name)s",
     "pk": "pk__%(table_name)s"
 })
+
 
 # Provide a very simple base class with a dynamic query property.
 class _Base(object):
