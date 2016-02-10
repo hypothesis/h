@@ -175,8 +175,6 @@ class AjaxAuthController(AuthController):
 
 @view_defaults(route_name='forgot_password',
                renderer='h:templates/accounts/forgot_password.html.jinja2')
-@view_config(attr='forgot_password_form', request_method='GET')
-@view_config(attr='forgot_password', request_method='POST')
 class ForgotPasswordController(object):
 
     """Controller for handling forgotten password forms."""
@@ -186,7 +184,15 @@ class ForgotPasswordController(object):
         self.schema = schemas.ForgotPasswordSchema().bind(request=self.request)
         self.form = deform.Form(self.schema, buttons=(_('Request reset'),))
 
-    def forgot_password(self):
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the forgot password page, including the form."""
+        self._redirect_if_logged_in()
+
+        return {'form': self.form.render()}
+
+    @view_config(request_method='POST')
+    def post(self):
         """
         Handle submission of the forgot password form.
 
@@ -207,12 +213,6 @@ class ForgotPasswordController(object):
 
         return httpexceptions.HTTPFound(
             self.request.route_path('reset_password'))
-
-    def forgot_password_form(self):
-        """Render the forgot password form."""
-        self._redirect_if_logged_in()
-
-        return {'form': self.form.render()}
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:

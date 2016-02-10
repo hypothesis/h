@@ -333,7 +333,7 @@ def test_forgot_password_returns_form_when_validation_fails():
     controller = ForgotPasswordController(request)
     controller.form = invalid_form()
 
-    result = controller.forgot_password()
+    result = controller.post()
 
     assert result == {'form': 'invalid form'}
 
@@ -344,7 +344,7 @@ def test_forgot_password_creates_no_activations_when_validation_fails(activation
     controller = ForgotPasswordController(request)
     controller.form = invalid_form()
 
-    controller.forgot_password()
+    controller.post()
 
     assert activation_model.call_count == 0
 
@@ -358,7 +358,7 @@ def test_forgot_password_generates_reset_link(reset_link):
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
 
-    controller.forgot_password()
+    controller.post()
 
     reset_link.assert_called_with(request, "faketoken")
 
@@ -381,7 +381,7 @@ def test_forgot_password_generates_mail(reset_link,
         'body': ''
     }
 
-    controller.forgot_password()
+    controller.post()
 
     reset_mail.assert_called_with(user, "faketoken", "http://example.com")
 
@@ -401,7 +401,7 @@ def test_forgot_password_sends_mail(reset_mail, mailer):
         'body': 'body'
     }
 
-    controller.forgot_password()
+    controller.post()
 
     mailer.send.assert_called_once_with(request,
                                         recipients=['giraffe@thezoo.org'],
@@ -417,7 +417,7 @@ def test_forgot_password_redirects_on_success():
     controller = ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
 
-    result = controller.forgot_password()
+    result = controller.post()
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
@@ -428,7 +428,7 @@ def test_forgot_password_form_redirects_when_logged_in(authn_policy):
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     with pytest.raises(httpexceptions.HTTPFound):
-        ForgotPasswordController(request).forgot_password_form()
+        ForgotPasswordController(request).get()
 
 
 reset_password_fixtures = pytest.mark.usefixtures('routes_mapper')
