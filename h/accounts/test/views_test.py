@@ -440,7 +440,7 @@ def test_reset_password_returns_form_when_validation_fails():
     controller = ResetPasswordController(request)
     controller.form = invalid_form()
 
-    result = controller.reset_password()
+    result = controller.post()
 
     assert result == {'form': 'invalid form'}
 
@@ -453,7 +453,7 @@ def test_reset_password_sets_user_password_from_form():
     controller.form = form_validating_to({'user': elephant,
                                           'password': 's3cure!'})
 
-    controller.reset_password()
+    controller.post()
 
     assert elephant.password == 's3cure!'
 
@@ -467,7 +467,7 @@ def test_reset_password_emits_event(event, notify):
     controller.form = form_validating_to({'user': user,
                                           'password': 's3cure!'})
 
-    controller.reset_password()
+    controller.post()
 
     event.assert_called_with(request, user)
     notify.assert_called_with(event.return_value)
@@ -481,7 +481,7 @@ def test_reset_password_redirects_on_success():
     controller.form = form_validating_to({'user': user,
                                           'password': 's3cure!'})
 
-    result = controller.reset_password()
+    result = controller.post()
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
