@@ -4,6 +4,7 @@ from h import features
 from h.accounts import models as accounts_models
 from h.api.models.annotation import Annotation
 from h.api.models.token import Token
+from h.api.models.document import Document, DocumentMeta, DocumentURI
 from h.api.nipsa import models as nipsa_models
 from h.groups import models as groups_models
 from h.notification import models as notification_models
@@ -13,6 +14,9 @@ __all__ = (
     'Activation',
     'Annotation',
     'Blocklist',
+    'Document',
+    'DocumentMeta',
+    'DocumentURI',
     'Feature',
     'Group',
     'NipsaUser',
