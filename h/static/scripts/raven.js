@@ -54,11 +54,29 @@ function angularModule() {
  * @param {string} context - A string describing the context in which
  *                           the error occurred.
  * @param {Error} error - An error object describing what went wrong
+ *
+ * @param {details} Object - A JSON-serializable object containing additional
+ *                          information which may be useful when investigating
+ *                          the error.
  */
-function report(context, error) {
+function report(context, error, details) {
+  if (!(error instanceof Error)) {
+    // If the passed object is not an Error, raven-js
+    // will serialize it using toString() which produces unhelpful results
+    // for objects that do not provide their own toString() implementations.
+    //
+    // If the error is a plain object or non-Error subclass with a message
+    // property, such as errors returned by chrome.extension.lastError,
+    // use that instead.
+    if (typeof error === 'object' && error.message) {
+      error = error.message;
+    }
+  }
+
   Raven.captureException(error, {
     extra: {
       context: context,
+      details: details,
     },
   });
 }
