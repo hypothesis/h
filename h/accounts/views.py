@@ -303,13 +303,8 @@ class ResetPasswordController(object):
         self.request.registry.notify(PasswordResetEvent(self.request, user))
 
 
-@view_config(route_name='register', attr='register_form', request_method='GET',
-             renderer='h:templates/accounts/register.html.jinja2')
-@view_config(route_name='register', attr='register', request_method='POST',
-             renderer='h:templates/accounts/register.html.jinja2')
-@view_config(attr='activate', route_name='activate', request_method='GET')
-@view_config(attr='activate_already_logged_in', route_name='activate',
-             request_method='GET', effective_principals=security.Authenticated)
+@view_defaults(route_name='register',
+               renderer='h:templates/accounts/register.html.jinja2')
 class RegisterController(object):
     def __init__(self, request):
         tos_link = ('<a href="/terms-of-service">' +
@@ -328,7 +323,17 @@ class RegisterController(object):
                                 buttons=(_('Sign up'),),
                                 footer=form_footer)
 
-    def register(self):
+    @view_config(request_method='GET')
+    def get(self):
+        """
+        Render the empty registration form.
+        """
+        self._redirect_if_logged_in()
+
+        return {'form': self.form.render()}
+
+    @view_config(request_method='POST')
+    def post(self):
         """
         Handle submission of the new user registration form.
 
@@ -349,15 +354,43 @@ class RegisterController(object):
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
 
-    def register_form(self):
-        """
-        Render the empty registration form.
-        """
-        self._redirect_if_logged_in()
+    def _redirect_if_logged_in(self):
+        if self.request.authenticated_userid is not None:
+            raise httpexceptions.HTTPFound(self.request.route_url('stream'))
 
-        return {'form': self.form.render()}
+    def _register(self, username, email, password):
+        user = User(username=username, email=email, password=password)
+        self.request.db.add(user)
 
-    def activate(self):
+        # Create a new activation for the user
+        activation = Activation()
+        self.request.db.add(activation)
+        user.activation = activation
+
+        # Flush the session to ensure that the user can be created and the
+        # activation is successfully wired up
+        self.request.db.flush()
+
+        # Send the activation email
+        message = activation_email(self.request, user)
+        mailer.send(self.request, **message)
+
+        self.request.session.flash(jinja2.Markup(_(
+            'Thank you for creating an account! '
+            "We've sent you an email with an activation link, "
+            'before you can sign in <strong>please check your email and open '
+            'the link to activate your account</strong>.')), 'success')
+        self.request.registry.notify(RegistrationEvent(self.request, user))
+
+
+@view_defaults(route_name='activate')
+class ActivateController(object):
+
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method='GET')
+    def get_when_not_logged_in(self):
         """
         Handle a request for a user activation link.
 
@@ -402,7 +435,9 @@ class RegisterController(object):
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
 
-    def activate_already_logged_in(self):
+    @view_config(request_method='GET',
+                 effective_principals=security.Authenticated)
+    def get_when_logged_in(self):
         """Handle an activation link request while already logged in."""
         id_ = self.request.matchdict.get('id')
 
@@ -427,35 +462,6 @@ class RegisterController(object):
 
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
-
-
-    def _redirect_if_logged_in(self):
-        if self.request.authenticated_userid is not None:
-            raise httpexceptions.HTTPFound(self.request.route_url('stream'))
-
-    def _register(self, username, email, password):
-        user = User(username=username, email=email, password=password)
-        self.request.db.add(user)
-
-        # Create a new activation for the user
-        activation = Activation()
-        self.request.db.add(activation)
-        user.activation = activation
-
-        # Flush the session to ensure that the user can be created and the
-        # activation is successfully wired up
-        self.request.db.flush()
-
-        # Send the activation email
-        message = activation_email(self.request, user)
-        mailer.send(self.request, **message)
-
-        self.request.session.flash(jinja2.Markup(_(
-            'Thank you for creating an account! '
-            "We've sent you an email with an activation link, "
-            'before you can sign in <strong>please check your email and open '
-            'the link to activate your account</strong>.')), 'success')
-        self.request.registry.notify(RegistrationEvent(self.request, user))
 
 
 @view_defaults(route_name='profile',

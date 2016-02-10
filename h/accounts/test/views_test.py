@@ -13,6 +13,7 @@ from h.conftest import DummyFeature
 from h.conftest import DummySession
 
 from h import accounts
+from h.accounts.views import ActivateController
 from h.accounts.views import AjaxAuthController
 from h.accounts.views import AuthController
 from h.accounts.views import ForgotPasswordController
@@ -499,7 +500,7 @@ def test_register_returns_errors_when_validation_fails():
     controller = RegisterController(request)
     controller.form = invalid_form()
 
-    result = controller.register()
+    result = controller.post()
 
     assert result == {"form": "invalid form"}
 
@@ -515,7 +516,7 @@ def test_register_creates_user_from_form_data(user_model):
         "random_other_field": "something else",
     })
 
-    controller.register()
+    controller.post()
 
     user_model.assert_called_with(username="bob",
                                   email="bob@example.com",
@@ -532,7 +533,7 @@ def test_register_adds_new_user_to_session(user_model):
         "password": "s3crets",
     })
 
-    controller.register()
+    controller.post()
 
     assert user_model.return_value in request.db.added
 
@@ -549,7 +550,7 @@ def test_register_creates_new_activation(activation_model,
     })
     new_user = user_model.return_value
 
-    controller.register()
+    controller.post()
 
     assert new_user.activation == activation_model.return_value
 
@@ -572,7 +573,7 @@ def test_register_generates_activation_email_from_user(activation_email,
         'body': ''
     }
 
-    controller.register()
+    controller.post()
 
     activation_email.assert_called_once_with(request, new_user)
 
@@ -593,7 +594,7 @@ def test_register_sends_email(activation_email, mailer):
         'body': 'body'
     }
 
-    controller.register()
+    controller.post()
 
     mailer.send.assert_called_once_with(request,
                                         recipients=['bob@example.com'],
@@ -608,7 +609,7 @@ def test_register_no_event_when_validation_fails(event, notify):
     controller = RegisterController(request)
     controller.form = invalid_form()
 
-    controller.register()
+    controller.post()
 
     assert not event.called
     assert not notify.called
@@ -626,7 +627,7 @@ def test_register_event_when_validation_succeeds(event, notify, user_model):
     })
     new_user = user_model.return_value
 
-    controller.register()
+    controller.post()
 
     event.assert_called_with(request, new_user)
     notify.assert_called_with(event.return_value)
@@ -642,7 +643,7 @@ def test_register_event_redirects_on_success():
         "password": "s3crets",
     })
 
-    result = controller.register()
+    result = controller.post()
 
     assert isinstance(result, httpexceptions.HTTPRedirection)
 
@@ -655,7 +656,7 @@ def test_register_form_redirects_when_logged_in(authn_policy):
 
 
     with pytest.raises(httpexceptions.HTTPRedirection):
-        controller.register_form()
+        controller.get()
 
 
 activate_fixtures = pytest.mark.usefixtures('ActivationEvent',
@@ -672,7 +673,7 @@ def test_activate_404s_if_id_not_int():
         'code': 'abc456'})
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        RegisterController(request).activate()
+        ActivateController(request).get_when_not_logged_in()
 
 
 @activate_fixtures
@@ -680,7 +681,7 @@ def test_activate_looks_up_activation_by_code(activation_model, user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
-    RegisterController(request).activate()
+    ActivateController(request).get_when_not_logged_in()
 
     activation_model.get_by_code.assert_called_with('abc456')
 
@@ -704,7 +705,7 @@ def test_activate_redirects_if_activation_not_found(activation_model):
     request.session.flash = mock_flash_function()
     activation_model.get_by_code.return_value = None
 
-    result = RegisterController(request).activate()
+    result = ActivateController(request).get_when_not_logged_in()
 
     assert isinstance(result, httpexceptions.HTTPFound)
     assert request.session.flash.call_count == 1
@@ -717,7 +718,7 @@ def test_activate_looks_up_user_by_activation(activation_model, user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
-    RegisterController(request).activate()
+    ActivateController(request).get_when_not_logged_in()
 
     user_model.get_by_activation.assert_called_once_with(
         activation_model.get_by_code.return_value)
@@ -729,7 +730,7 @@ def test_activate_404s_if_user_not_found(user_model):
     user_model.get_by_activation.return_value = None
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        RegisterController(request).activate()
+        ActivateController(request).get_when_not_logged_in()
 
 
 @activate_fixtures
@@ -744,7 +745,7 @@ def test_activate_404s_if_user_id_does_not_match_user_from_hash(user_model):
     user_model.get_by_activation.return_value.id = 2  # Not the same id.
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        RegisterController(request).activate()
+        ActivateController(request).get_when_not_logged_in()
 
 
 @activate_fixtures
@@ -754,7 +755,7 @@ def test_activate_successful_deletes_activation(user_model, activation_model):
                                              return_value=None)
     user_model.get_by_activation.return_value.id = 123
 
-    RegisterController(request).activate()
+    ActivateController(request).get_when_not_logged_in()
 
     request.db.delete.assert_called_once_with(
         activation_model.get_by_code.return_value)
@@ -766,7 +767,7 @@ def test_activate_successful_flashes_message(user_model):
     request.session.flash = mock_flash_function()
     user_model.get_by_activation.return_value.id = 123
 
-    RegisterController(request).activate()
+    ActivateController(request).get_when_not_logged_in()
 
     assert request.session.flash.call_count == 1
     assert request.session.flash.call_args[0][0].startswith(
@@ -779,7 +780,7 @@ def test_activate_successful_creates_ActivationEvent(user_model,
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
-    RegisterController(request).activate()
+    ActivateController(request).get_when_not_logged_in()
 
     ActivationEvent.assert_called_once_with(
         request, user_model.get_by_activation.return_value)
@@ -790,7 +791,7 @@ def test_activate_successful_notifies(user_model, notify, ActivationEvent):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
-    RegisterController(request).activate()
+    ActivateController(request).get_when_not_logged_in()
 
     notify.assert_called_once_with(ActivationEvent.return_value)
 
@@ -806,7 +807,7 @@ def test_activate_already_logged_in_when_id_not_an_int():
         authenticated_user=mock.Mock(id=123, spec=['id']))
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        RegisterController(request).activate_already_logged_in()
+        ActivateController(request).get_when_logged_in()
 
 
 @activate_already_logged_in_fixtures
@@ -815,7 +816,7 @@ def test_activate_already_logged_in_to_same_account():
                            authenticated_user=mock.Mock(id=123, spec=['id']))
     request.session.flash = mock_flash_function()
 
-    result = RegisterController(request).activate_already_logged_in()
+    result = ActivateController(request).get_when_logged_in()
 
     assert isinstance(result, httpexceptions.HTTPFound)
     assert request.session.flash.call_count == 1
@@ -832,7 +833,7 @@ def test_activate_already_logged_in_to_different_account():
             spec=['id']))
     request.session.flash = mock_flash_function()
 
-    result = RegisterController(request).activate_already_logged_in()
+    result = ActivateController(request).get_when_logged_in()
 
     assert isinstance(result, httpexceptions.HTTPFound)
     assert request.session.flash.call_count == 1
