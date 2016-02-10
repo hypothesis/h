@@ -66,11 +66,8 @@ def error_validation(error, request):
         {'status': 'failure', 'errors': error.error.asdict()})
 
 
-@view_config(route_name='login', attr='login', request_method='POST',
-             renderer='h:templates/accounts/login.html.jinja2')
-@view_config(route_name='login', attr='login_form', request_method='GET',
-             renderer='h:templates/accounts/login.html.jinja2')
-@view_config(route_name='logout', attr='logout', request_method='GET')
+@view_defaults(route_name='login',
+               renderer='h:templates/accounts/login.html.jinja2')
 class AuthController(object):
     def __init__(self, request):
         form_footer = ('<a href="{path}">'.format(
@@ -89,7 +86,17 @@ class AuthController(object):
             self.request.route_url('stream'))
         self.logout_redirect = self.request.route_url('index')
 
-    def login(self):
+    @view_config(request_method='GET')
+    def get(self):
+        """
+        Render the empty login form.
+        """
+        self._redirect_if_logged_in()
+
+        return {'form': self.form.render()}
+
+    @view_config(request_method='POST')
+    def post(self):
         """
         Check the submitted credentials and log the user in if appropriate.
         """
@@ -105,14 +112,9 @@ class AuthController(object):
         return httpexceptions.HTTPFound(location=self.login_redirect,
                                         headers=headers)
 
-    def login_form(self):
-        """
-        Render the empty login form.
-        """
-        self._redirect_if_logged_in()
-
-        return {'form': self.form.render()}
-
+    @view_config(route_name='logout',
+                 renderer=None,
+                 request_method='GET')
     def logout(self):
         """
         Unconditionally log the user out.

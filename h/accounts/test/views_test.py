@@ -93,7 +93,7 @@ def test_login_redirects_when_logged_in(authn_policy):
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     with pytest.raises(httpexceptions.HTTPFound):
-        AuthController(request).login()
+        AuthController(request).post()
 
 
 @pytest.mark.usefixtures('routes_mapper')
@@ -102,7 +102,7 @@ def test_login_redirects_to_next_param_when_logged_in(authn_policy):
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     with pytest.raises(httpexceptions.HTTPFound) as e:
-        AuthController(request).login()
+        AuthController(request).post()
 
     assert e.value.location == '/foo/bar'
 
@@ -114,7 +114,7 @@ def test_login_returns_form_when_validation_fails(authn_policy):
     controller = AuthController(request)
     controller.form = invalid_form()
 
-    result = controller.login()
+    result = controller.post()
 
     assert result == {'form': 'invalid form'}
 
@@ -129,7 +129,7 @@ def test_login_no_event_when_validation_fails(loginevent,
     controller = AuthController(request)
     controller.form = invalid_form()
 
-    controller.login()
+    controller.post()
 
     assert not loginevent.called
     assert not notify.called
@@ -142,7 +142,7 @@ def test_login_redirects_when_validation_succeeds(authn_policy):
     controller = AuthController(request)
     controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
-    result = controller.login()
+    result = controller.post()
 
     assert isinstance(result, httpexceptions.HTTPFound)
 
@@ -155,7 +155,7 @@ def test_login_redirects_to_next_param_when_validation_succeeds(authn_policy):
     controller = AuthController(request)
     controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
-    result = controller.login()
+    result = controller.post()
 
     assert isinstance(result, httpexceptions.HTTPFound)
     assert result.location == '/foo/bar'
@@ -172,7 +172,7 @@ def test_login_event_when_validation_succeeds(loginevent,
     controller = AuthController(request)
     controller.form = form_validating_to({"user": elephant})
 
-    controller.login()
+    controller.post()
 
     loginevent.assert_called_with(request, elephant)
     notify.assert_called_with(loginevent.return_value)
