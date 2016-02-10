@@ -1,0 +1,38 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{%- set nav_pages = [
+    ('profile', 'Profile'),
+    ('profile_notifications', 'Notifications'),
+] -%}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block styles %}
+  {% assets "app_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+  {% endassets %}
+{% endblock styles  %}
+
+{% block content %}
+  <div class="content paper">
+    {% include "h:templates/includes/logo-header.html.jinja2" %}
+    <ul class="nav nav-tabs">
+      {% for route, title in nav_pages %}
+        <li{% if route == page_route %} class="active"{% endif %}>
+            <a href="{{ request.route_url(route) }}">{{ title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    {% if request.session.peek_flash('success') -%}
+    <div class="form-flash">
+      {% for message in request.session.pop_flash('success') %}
+        <p>{{ message }}</p>
+      {%- endfor %}
+    </div>
+    {%- endif %}
+
+    {% block page_content %}
+    {% endblock page_content %}
+  </div>
+{% endblock content %}
