@@ -2,34 +2,25 @@
 # pylint: disable=no-self-use
 
 import mock
-from mock import patch, MagicMock
 import pytest
 
 import deform
 from pyramid import httpexceptions
-from pyramid.testing import DummyRequest as _DummyRequest
+from pyramid import testing
 
-from h.conftest import DummyFeature
-from h.conftest import DummySession
+from h import conftest
 
 from h import accounts
-from h.accounts.views import ActivateController
-from h.accounts.views import AjaxAuthController
-from h.accounts.views import AuthController
-from h.accounts.views import ForgotPasswordController
-from h.accounts.views import ResetPasswordController
-from h.accounts.views import RegisterController
-from h.accounts.views import ProfileController
-from h.accounts.views import NotificationsController
+from h.accounts import views
 
 
-class DummyRequest(_DummyRequest):
+class DummyRequest(testing.DummyRequest):
     def __init__(self, *args, **kwargs):
         params = {
             # Add a dummy database session to the request
-            'db': DummySession(),
+            'db': conftest.DummySession(),
             # Add a dummy feature flag querier to the request
-            'feature': DummyFeature(),
+            'feature': conftest.DummyFeature(),
         }
         params.update(kwargs)
         super(DummyRequest, self).__init__(*args, **params)
@@ -66,7 +57,7 @@ class FakeInvalid(object):
 
 
 def form_validating_to(appstruct):
-    form = MagicMock()
+    form = mock.MagicMock()
     form.validate.return_value = appstruct
     form.render.return_value = 'valid form'
     return form
@@ -76,7 +67,7 @@ def invalid_form(errors=None):
     if errors is None:
         errors = {}
     invalid = FakeInvalid(errors)
-    form = MagicMock()
+    form = mock.MagicMock()
     form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
     form.render.return_value = 'invalid form'
     return form
@@ -94,7 +85,7 @@ def test_login_redirects_when_logged_in(authn_policy):
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     with pytest.raises(httpexceptions.HTTPFound):
-        AuthController(request).post()
+        views.AuthController(request).post()
 
 
 @pytest.mark.usefixtures('routes_mapper')
@@ -103,7 +94,7 @@ def test_login_redirects_to_next_param_when_logged_in(authn_policy):
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     with pytest.raises(httpexceptions.HTTPFound) as e:
-        AuthController(request).post()
+        views.AuthController(request).post()
 
     assert e.value.location == '/foo/bar'
 
@@ -112,7 +103,7 @@ def test_login_redirects_to_next_param_when_logged_in(authn_policy):
 def test_login_returns_form_when_validation_fails(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    controller = AuthController(request)
+    controller = views.AuthController(request)
     controller.form = invalid_form()
 
     result = controller.post()
@@ -121,13 +112,13 @@ def test_login_returns_form_when_validation_fails(authn_policy):
 
 
 @pytest.mark.usefixtures('routes_mapper')
-@patch('h.accounts.views.LoginEvent', autospec=True)
+@mock.patch('h.accounts.views.LoginEvent', autospec=True)
 def test_login_no_event_when_validation_fails(loginevent,
                                               authn_policy,
                                               notify):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    controller = AuthController(request)
+    controller = views.AuthController(request)
     controller.form = invalid_form()
 
     controller.post()
@@ -140,7 +131,7 @@ def test_login_no_event_when_validation_fails(loginevent,
 def test_login_redirects_when_validation_succeeds(authn_policy):
     request = DummyRequest(auth_domain='hypothes.is')
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    controller = AuthController(request)
+    controller = views.AuthController(request)
     controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
     result = controller.post()
@@ -153,7 +144,7 @@ def test_login_redirects_to_next_param_when_validation_succeeds(authn_policy):
     request = DummyRequest(
         params={'next': '/foo/bar'}, auth_domain='hypothes.is')
     authn_policy.authenticated_userid.return_value = None  # Logged out
-    controller = AuthController(request)
+    controller = views.AuthController(request)
     controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
     result = controller.post()
@@ -163,14 +154,14 @@ def test_login_redirects_to_next_param_when_validation_succeeds(authn_policy):
 
 
 @pytest.mark.usefixtures('routes_mapper')
-@patch('h.accounts.views.LoginEvent', autospec=True)
+@mock.patch('h.accounts.views.LoginEvent', autospec=True)
 def test_login_event_when_validation_succeeds(loginevent,
                                               authn_policy,
                                               notify):
     request = DummyRequest(auth_domain='hypothes.is')
     authn_policy.authenticated_userid.return_value = None  # Logged out
     elephant = FakeUser(username='avocado')
-    controller = AuthController(request)
+    controller = views.AuthController(request)
     controller.form = form_validating_to({"user": elephant})
 
     controller.post()
@@ -180,12 +171,12 @@ def test_login_event_when_validation_succeeds(loginevent,
 
 
 @pytest.mark.usefixtures('routes_mapper')
-@patch('h.accounts.views.LogoutEvent', autospec=True)
+@mock.patch('h.accounts.views.LogoutEvent', autospec=True)
 def test_logout_event(logoutevent, authn_policy, notify):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
-    result = AuthController(request).logout()
+    result = views.AuthController(request).logout()
 
     logoutevent.assert_called_with(request)
     notify.assert_called_with(logoutevent.return_value)
@@ -197,7 +188,7 @@ def test_logout_invalidates_session(authn_policy):
     request.session["foo"] = "bar"
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
-    result = AuthController(request).logout()
+    result = views.AuthController(request).logout()
 
     assert "foo" not in request.session
 
@@ -206,7 +197,7 @@ def test_logout_invalidates_session(authn_policy):
 def test_logout_redirects():
     request = DummyRequest()
 
-    result = AuthController(request).logout()
+    result = views.AuthController(request).logout()
 
     assert isinstance(result, httpexceptions.HTTPFound)
 
@@ -215,7 +206,7 @@ def test_logout_redirects():
 def test_logout_forgets_authenticated_user(authn_policy):
     request = DummyRequest()
 
-    AuthController(request).logout()
+    views.AuthController(request).logout()
 
     authn_policy.forget.assert_called_with(request)
 
@@ -225,7 +216,7 @@ def test_logout_response_has_forget_headers(authn_policy):
     request = DummyRequest()
     authn_policy.forget.return_value = {'x-erase-fingerprints': 'on the hob'}
 
-    result = AuthController(request).logout()
+    result = views.AuthController(request).logout()
 
     assert result.headers['x-erase-fingerprints'] == 'on the hob'
 
@@ -233,7 +224,7 @@ def test_logout_response_has_forget_headers(authn_policy):
 @pytest.mark.usefixtures('routes_mapper', 'session')
 def test_login_ajax_returns_status_okay_when_validation_succeeds():
     request = DummyRequest(json_body={}, auth_domain='hypothes.is')
-    controller = AjaxAuthController(request)
+    controller = views.AjaxAuthController(request)
     controller.form = form_validating_to({'user': FakeUser(username='bob')})
 
     result = controller.login()
@@ -246,7 +237,7 @@ def test_login_ajax_raises_JSONError_on_non_json_body():
     request = mock.Mock(authenticated_user=mock.Mock(groups=[]))
     type(request).json_body = mock.PropertyMock(side_effect=ValueError)
 
-    controller = AjaxAuthController(request)
+    controller = views.AjaxAuthController(request)
 
     with pytest.raises(accounts.JSONError) as exc_info:
         controller.login()
@@ -259,7 +250,7 @@ def test_login_ajax_raises_JSONError_on_non_object_json():
     request = mock.Mock(
         authenticated_user=mock.Mock(groups=[]), json_body='foo')
 
-    controller = AjaxAuthController(request)
+    controller = views.AjaxAuthController(request)
 
     with pytest.raises(accounts.JSONError) as exc_info:
         controller.login()
@@ -275,7 +266,7 @@ def test_login_ajax_converts_non_string_usernames_to_strings(_):
         request = DummyRequest(
             json_body={'username': input_, 'password': 'pass'},
             auth_domain='hypothes.is')
-        controller = AjaxAuthController(request)
+        controller = views.AjaxAuthController(request)
         controller.form.validate = mock.Mock(
             return_value={'user': mock.Mock()})
 
@@ -292,7 +283,7 @@ def test_login_ajax_converts_non_string_passwords_to_strings(_):
         request = DummyRequest(
             json_body={'username': 'user', 'password': input_},
             auth_domain='hypothes.is')
-        controller = AjaxAuthController(request)
+        controller = views.AjaxAuthController(request)
         controller.form.validate = mock.Mock(
             return_value={'user': mock.Mock()})
 
@@ -304,7 +295,7 @@ def test_login_ajax_converts_non_string_passwords_to_strings(_):
 
 @pytest.mark.usefixtures('routes_mapper')
 def test_login_ajax_raises_ValidationFailure_on_ValidationFailure():
-    controller = AjaxAuthController(DummyRequest(json_body={}))
+    controller = views.AjaxAuthController(DummyRequest(json_body={}))
     controller.form = invalid_form({'password': 'too short'})
 
     with pytest.raises(deform.ValidationFailure) as exc_info:
@@ -317,7 +308,7 @@ def test_login_ajax_raises_ValidationFailure_on_ValidationFailure():
 def test_logout_ajax_returns_status_okay():
     request = DummyRequest()
 
-    result = AjaxAuthController(request).logout()
+    result = views.AjaxAuthController(request).logout()
 
     assert result['status'] == 'okay'
 
@@ -331,7 +322,7 @@ forgot_password_fixtures = pytest.mark.usefixtures('activation_model',
 @forgot_password_fixtures
 def test_forgot_password_returns_form_when_validation_fails():
     request = DummyRequest(method='POST')
-    controller = ForgotPasswordController(request)
+    controller = views.ForgotPasswordController(request)
     controller.form = invalid_form()
 
     result = controller.post()
@@ -342,7 +333,7 @@ def test_forgot_password_returns_form_when_validation_fails():
 @forgot_password_fixtures
 def test_forgot_password_creates_no_activations_when_validation_fails(activation_model):
     request = DummyRequest(method='POST')
-    controller = ForgotPasswordController(request)
+    controller = views.ForgotPasswordController(request)
     controller.form = invalid_form()
 
     controller.post()
@@ -350,13 +341,13 @@ def test_forgot_password_creates_no_activations_when_validation_fails(activation
     assert activation_model.call_count == 0
 
 
-@patch('h.accounts.views.reset_password_link')
+@mock.patch('h.accounts.views.reset_password_link')
 @forgot_password_fixtures
 def test_forgot_password_generates_reset_link(reset_link):
     request = DummyRequest(method='POST')
     request.registry.password_reset_serializer = FakeSerializer()
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = ForgotPasswordController(request)
+    controller = views.ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
 
     controller.post()
@@ -364,8 +355,8 @@ def test_forgot_password_generates_reset_link(reset_link):
     reset_link.assert_called_with(request, "faketoken")
 
 
-@patch('h.accounts.views.reset_password_email')
-@patch('h.accounts.views.reset_password_link')
+@mock.patch('h.accounts.views.reset_password_email')
+@mock.patch('h.accounts.views.reset_password_link')
 @forgot_password_fixtures
 def test_forgot_password_generates_mail(reset_link,
                                         reset_mail,
@@ -373,7 +364,7 @@ def test_forgot_password_generates_mail(reset_link,
     request = DummyRequest(method='POST')
     request.registry.password_reset_serializer = FakeSerializer()
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = ForgotPasswordController(request)
+    controller = views.ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
     reset_link.return_value = "http://example.com"
     reset_mail.return_value = {
@@ -387,13 +378,13 @@ def test_forgot_password_generates_mail(reset_link,
     reset_mail.assert_called_with(user, "faketoken", "http://example.com")
 
 
-@patch('h.accounts.views.reset_password_email')
+@mock.patch('h.accounts.views.reset_password_email')
 @forgot_password_fixtures
 def test_forgot_password_sends_mail(reset_mail, mailer):
     request = DummyRequest(method='POST')
     request.registry.password_reset_serializer = FakeSerializer()
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = ForgotPasswordController(request)
+    controller = views.ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
     message = reset_mail.return_value
     reset_mail.return_value = {
@@ -415,7 +406,7 @@ def test_forgot_password_redirects_on_success():
     request = DummyRequest(method='POST')
     request.registry.password_reset_serializer = FakeSerializer()
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = ForgotPasswordController(request)
+    controller = views.ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
 
     result = controller.post()
@@ -429,7 +420,7 @@ def test_forgot_password_form_redirects_when_logged_in(authn_policy):
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
     with pytest.raises(httpexceptions.HTTPFound):
-        ForgotPasswordController(request).get()
+        views.ForgotPasswordController(request).get()
 
 
 reset_password_fixtures = pytest.mark.usefixtures('routes_mapper')
@@ -438,7 +429,7 @@ reset_password_fixtures = pytest.mark.usefixtures('routes_mapper')
 @reset_password_fixtures
 def test_reset_password_returns_form_when_validation_fails():
     request = DummyRequest(method='POST')
-    controller = ResetPasswordController(request)
+    controller = views.ResetPasswordController(request)
     controller.form = invalid_form()
 
     result = controller.post()
@@ -450,7 +441,7 @@ def test_reset_password_returns_form_when_validation_fails():
 def test_reset_password_sets_user_password_from_form():
     request = DummyRequest(method='POST')
     elephant = FakeUser(password='password1')
-    controller = ResetPasswordController(request)
+    controller = views.ResetPasswordController(request)
     controller.form = form_validating_to({'user': elephant,
                                           'password': 's3cure!'})
 
@@ -459,12 +450,12 @@ def test_reset_password_sets_user_password_from_form():
     assert elephant.password == 's3cure!'
 
 
-@patch('h.accounts.views.PasswordResetEvent', autospec=True)
+@mock.patch('h.accounts.views.PasswordResetEvent', autospec=True)
 @reset_password_fixtures
 def test_reset_password_emits_event(event, notify):
     request = DummyRequest(method='POST')
     user = FakeUser(password='password1')
-    controller = ResetPasswordController(request)
+    controller = views.ResetPasswordController(request)
     controller.form = form_validating_to({'user': user,
                                           'password': 's3cure!'})
 
@@ -478,7 +469,7 @@ def test_reset_password_emits_event(event, notify):
 def test_reset_password_redirects_on_success():
     request = DummyRequest(method='POST')
     user = FakeUser(password='password1')
-    controller = ResetPasswordController(request)
+    controller = views.ResetPasswordController(request)
     controller.form = form_validating_to({'user': user,
                                           'password': 's3cure!'})
 
@@ -497,7 +488,7 @@ register_fixtures = pytest.mark.usefixtures('activation_model',
 @register_fixtures
 def test_register_returns_errors_when_validation_fails():
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = invalid_form()
 
     result = controller.post()
@@ -508,7 +499,7 @@ def test_register_returns_errors_when_validation_fails():
 @register_fixtures
 def test_register_creates_user_from_form_data(user_model):
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
@@ -526,7 +517,7 @@ def test_register_creates_user_from_form_data(user_model):
 @register_fixtures
 def test_register_adds_new_user_to_session(user_model):
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
@@ -542,7 +533,7 @@ def test_register_adds_new_user_to_session(user_model):
 def test_register_creates_new_activation(activation_model,
                                          user_model):
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
@@ -555,12 +546,12 @@ def test_register_creates_new_activation(activation_model,
     assert new_user.activation == activation_model.return_value
 
 
-@patch('h.accounts.views.activation_email')
+@mock.patch('h.accounts.views.activation_email')
 @register_fixtures
 def test_register_generates_activation_email_from_user(activation_email,
                                                        user_model):
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
@@ -578,11 +569,11 @@ def test_register_generates_activation_email_from_user(activation_email,
     activation_email.assert_called_once_with(request, new_user)
 
 
-@patch('h.accounts.views.activation_email')
+@mock.patch('h.accounts.views.activation_email')
 @register_fixtures
 def test_register_sends_email(activation_email, mailer):
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
@@ -602,11 +593,11 @@ def test_register_sends_email(activation_email, mailer):
                                         body='body')
 
 
-@patch('h.accounts.views.RegistrationEvent')
+@mock.patch('h.accounts.views.RegistrationEvent')
 @register_fixtures
 def test_register_no_event_when_validation_fails(event, notify):
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = invalid_form()
 
     controller.post()
@@ -615,11 +606,11 @@ def test_register_no_event_when_validation_fails(event, notify):
     assert not notify.called
 
 
-@patch('h.accounts.views.RegistrationEvent')
+@mock.patch('h.accounts.views.RegistrationEvent')
 @register_fixtures
 def test_register_event_when_validation_succeeds(event, notify, user_model):
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
@@ -636,7 +627,7 @@ def test_register_event_when_validation_succeeds(event, notify, user_model):
 @register_fixtures
 def test_register_event_redirects_on_success():
     request = DummyRequest(method='POST')
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
     controller.form = form_validating_to({
         "username": "bob",
         "email": "bob@example.com",
@@ -652,7 +643,7 @@ def test_register_event_redirects_on_success():
 def test_register_form_redirects_when_logged_in(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
-    controller = RegisterController(request)
+    controller = views.RegisterController(request)
 
 
     with pytest.raises(httpexceptions.HTTPRedirection):
@@ -673,7 +664,7 @@ def test_activate_404s_if_id_not_int():
         'code': 'abc456'})
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        ActivateController(request).get_when_not_logged_in()
+        views.ActivateController(request).get_when_not_logged_in()
 
 
 @activate_fixtures
@@ -681,7 +672,7 @@ def test_activate_looks_up_activation_by_code(activation_model, user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
-    ActivateController(request).get_when_not_logged_in()
+    views.ActivateController(request).get_when_not_logged_in()
 
     activation_model.get_by_code.assert_called_with('abc456')
 
@@ -705,7 +696,7 @@ def test_activate_redirects_if_activation_not_found(activation_model):
     request.session.flash = mock_flash_function()
     activation_model.get_by_code.return_value = None
 
-    result = ActivateController(request).get_when_not_logged_in()
+    result = views.ActivateController(request).get_when_not_logged_in()
 
     assert isinstance(result, httpexceptions.HTTPFound)
     assert request.session.flash.call_count == 1
@@ -718,7 +709,7 @@ def test_activate_looks_up_user_by_activation(activation_model, user_model):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
-    ActivateController(request).get_when_not_logged_in()
+    views.ActivateController(request).get_when_not_logged_in()
 
     user_model.get_by_activation.assert_called_once_with(
         activation_model.get_by_code.return_value)
@@ -730,7 +721,7 @@ def test_activate_404s_if_user_not_found(user_model):
     user_model.get_by_activation.return_value = None
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        ActivateController(request).get_when_not_logged_in()
+        views.ActivateController(request).get_when_not_logged_in()
 
 
 @activate_fixtures
@@ -745,7 +736,7 @@ def test_activate_404s_if_user_id_does_not_match_user_from_hash(user_model):
     user_model.get_by_activation.return_value.id = 2  # Not the same id.
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        ActivateController(request).get_when_not_logged_in()
+        views.ActivateController(request).get_when_not_logged_in()
 
 
 @activate_fixtures
@@ -755,7 +746,7 @@ def test_activate_successful_deletes_activation(user_model, activation_model):
                                              return_value=None)
     user_model.get_by_activation.return_value.id = 123
 
-    ActivateController(request).get_when_not_logged_in()
+    views.ActivateController(request).get_when_not_logged_in()
 
     request.db.delete.assert_called_once_with(
         activation_model.get_by_code.return_value)
@@ -767,7 +758,7 @@ def test_activate_successful_flashes_message(user_model):
     request.session.flash = mock_flash_function()
     user_model.get_by_activation.return_value.id = 123
 
-    ActivateController(request).get_when_not_logged_in()
+    views.ActivateController(request).get_when_not_logged_in()
 
     assert request.session.flash.call_count == 1
     assert request.session.flash.call_args[0][0].startswith(
@@ -780,7 +771,7 @@ def test_activate_successful_creates_ActivationEvent(user_model,
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
-    ActivateController(request).get_when_not_logged_in()
+    views.ActivateController(request).get_when_not_logged_in()
 
     ActivationEvent.assert_called_once_with(
         request, user_model.get_by_activation.return_value)
@@ -791,7 +782,7 @@ def test_activate_successful_notifies(user_model, notify, ActivationEvent):
     request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
     user_model.get_by_activation.return_value.id = 123
 
-    ActivateController(request).get_when_not_logged_in()
+    views.ActivateController(request).get_when_not_logged_in()
 
     notify.assert_called_once_with(ActivationEvent.return_value)
 
@@ -807,7 +798,7 @@ def test_activate_already_logged_in_when_id_not_an_int():
         authenticated_user=mock.Mock(id=123, spec=['id']))
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        ActivateController(request).get_when_logged_in()
+        views.ActivateController(request).get_when_logged_in()
 
 
 @activate_already_logged_in_fixtures
@@ -816,7 +807,7 @@ def test_activate_already_logged_in_to_same_account():
                            authenticated_user=mock.Mock(id=123, spec=['id']))
     request.session.flash = mock_flash_function()
 
-    result = ActivateController(request).get_when_logged_in()
+    result = views.ActivateController(request).get_when_logged_in()
 
     assert isinstance(result, httpexceptions.HTTPFound)
     assert request.session.flash.call_count == 1
@@ -833,7 +824,7 @@ def test_activate_already_logged_in_to_different_account():
             spec=['id']))
     request.session.flash = mock_flash_function()
 
-    result = ActivateController(request).get_when_logged_in()
+    result = views.ActivateController(request).get_when_logged_in()
 
     assert isinstance(result, httpexceptions.HTTPFound)
     assert request.session.flash.call_count == 1
@@ -849,7 +840,7 @@ def test_profile_form_404s_if_not_logged_in():
     request = DummyRequest(authenticated_user=None)
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        ProfileController(request).get()
+        views.ProfileController(request).get()
 
 
 @profile_fixtures
@@ -857,7 +848,7 @@ def test_profile_404s_if_not_logged_in():
     request = DummyRequest(authenticated_user=None)
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        ProfileController(request).post()
+        views.ProfileController(request).post()
 
 
 @profile_fixtures
@@ -866,7 +857,7 @@ def test_profile_400s_with_no_formid():
     request = DummyRequest(post={}, authenticated_user=user)
 
     with pytest.raises(httpexceptions.HTTPBadRequest):
-        ProfileController(request).post()
+        views.ProfileController(request).post()
 
 
 @profile_fixtures
@@ -876,7 +867,7 @@ def test_profile_400s_with_bogus_formid():
                            authenticated_user=user)
 
     with pytest.raises(httpexceptions.HTTPBadRequest):
-        ProfileController(request).post()
+        views.ProfileController(request).post()
 
 
 @profile_fixtures
@@ -884,7 +875,7 @@ def test_profile_changing_email_with_valid_data_updates_email():
     user = FakeUser(email=None, password=None)
     request = DummyRequest(post={'__formid__': 'email'},
                            authenticated_user=user)
-    controller = ProfileController(request)
+    controller = views.ProfileController(request)
     controller.forms['email'] = form_validating_to({'email': 'amrit@example.com'})
 
     controller.post()
@@ -897,7 +888,7 @@ def test_profile_changing_email_with_valid_data_redirects():
     user = FakeUser(email=None, password=None)
     request = DummyRequest(post={'__formid__': 'email'},
                            authenticated_user=user)
-    controller = ProfileController(request)
+    controller = views.ProfileController(request)
     controller.forms['email'] = form_validating_to({'email': 'amrit@example.com'})
 
     result = controller.post()
@@ -910,7 +901,7 @@ def test_profile_changing_email_with_invalid_data_returns_form():
     user = FakeUser(email=None, password=None)
     request = DummyRequest(post={'__formid__': 'email'},
                            authenticated_user=user)
-    controller = ProfileController(request)
+    controller = views.ProfileController(request)
     controller.forms['email'] = invalid_form()
 
     result = controller.post()
@@ -923,7 +914,7 @@ def test_profile_changing_email_with_invalid_data_does_not_update_email():
     user = FakeUser(email=None, password=None)
     request = DummyRequest(post={'__formid__': 'email'},
                            authenticated_user=user)
-    controller = ProfileController(request)
+    controller = views.ProfileController(request)
     controller.forms['email'] = invalid_form()
 
     controller.post()
@@ -936,7 +927,7 @@ def test_profile_changing_password_with_valid_data_updates_password():
     user = FakeUser(email=None, password=None)
     request = DummyRequest(post={'__formid__': 'password'},
                            authenticated_user=user)
-    controller = ProfileController(request)
+    controller = views.ProfileController(request)
     controller.forms['password'] = form_validating_to({'new_password': 'secrets!'})
 
     controller.post()
@@ -949,7 +940,7 @@ def test_profile_changing_password_with_valid_data_redirects():
     user = FakeUser(email=None, password=None)
     request = DummyRequest(post={'__formid__': 'password'},
                            authenticated_user=user)
-    controller = ProfileController(request)
+    controller = views.ProfileController(request)
     controller.forms['password'] = form_validating_to({'new_password': 'secrets!'})
 
     result = controller.post()
@@ -962,7 +953,7 @@ def test_profile_changing_password_with_invalid_data_returns_form():
     user = FakeUser(email=None, password=None)
     request = DummyRequest(post={'__formid__': 'password'},
                            authenticated_user=user)
-    controller = ProfileController(request)
+    controller = views.ProfileController(request)
     controller.forms['password'] = invalid_form()
 
     result = controller.post()
@@ -975,7 +966,7 @@ def test_profile_changing_password_with_invalid_data_does_not_update_password():
     user = FakeUser(email=None, password=None)
     request = DummyRequest(post={'__formid__': 'password'},
                            authenticated_user=user)
-    controller = ProfileController(request)
+    controller = views.ProfileController(request)
     controller.forms['password'] = invalid_form()
 
     controller.post()
@@ -994,7 +985,7 @@ def test_notifications_form_404s_if_not_logged_in(authn_policy):
     authn_policy.authenticated_userid.return_value = None
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        NotificationsController(request).get()
+        views.NotificationsController(request).get()
 
 
 @notifications_fixtures
@@ -1006,7 +997,7 @@ def test_notifications_form_sets_subscriptions_data_in_form(authn_policy,
         FakeSubscription('reply', True),
         FakeSubscription('foo', False),
     ]
-    controller = NotificationsController(request)
+    controller = views.NotificationsController(request)
     controller.form = form_validating_to({})
 
     controller.get()
@@ -1021,14 +1012,14 @@ def test_notifications_404s_if_not_logged_in():
     request = DummyRequest(post={})
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        NotificationsController(request).post()
+        views.NotificationsController(request).post()
 
 
 @notifications_fixtures
 def test_notifications_with_invalid_data_returns_form(authn_policy):
     request = DummyRequest(post={})
     authn_policy.authenticated_userid.return_value = 'jerry'
-    controller = NotificationsController(request)
+    controller = views.NotificationsController(request)
     controller.form = invalid_form()
 
     result = controller.post()
@@ -1046,7 +1037,7 @@ def test_notifications_form_with_valid_data_updates_subscriptions(authn_policy,
         FakeSubscription('foo', False),
     ]
     subscriptions_model.get_subscriptions_for_uri.return_value = subs
-    controller = NotificationsController(request)
+    controller = views.NotificationsController(request)
     controller.form = form_validating_to({
         'notifications': set(['foo'])
     })
@@ -1063,7 +1054,7 @@ def test_notifications_form_with_valid_data_redirects(authn_policy,
     request = DummyRequest(post={})
     authn_policy.authenticated_userid.return_value = 'fiona'
     subscriptions_model.get_subscriptions_for_uri.return_value = []
-    controller = NotificationsController(request)
+    controller = views.NotificationsController(request)
     controller.form = form_validating_to({})
 
     result = controller.post()
@@ -1073,7 +1064,7 @@ def test_notifications_form_with_valid_data_redirects(authn_policy,
 
 @pytest.fixture
 def pop_flash(request):
-    patcher = patch('h.accounts.views.session.pop_flash', autospec=True)
+    patcher = mock.patch('h.accounts.views.session.pop_flash', autospec=True)
     func = patcher.start()
     request.addfinalizer(patcher.stop)
     return func
@@ -1081,7 +1072,7 @@ def pop_flash(request):
 
 @pytest.fixture
 def session(request):
-    patcher = patch('h.accounts.views.session', autospec=True)
+    patcher = mock.patch('h.accounts.views.session', autospec=True)
     session = patcher.start()
     request.addfinalizer(patcher.stop)
     return session
@@ -1089,7 +1080,7 @@ def session(request):
 
 @pytest.fixture
 def subscriptions_model(request):
-    patcher = patch('h.models.Subscriptions', autospec=True)
+    patcher = mock.patch('h.models.Subscriptions', autospec=True)
     model = patcher.start()
     request.addfinalizer(patcher.stop)
     return model
@@ -1097,7 +1088,7 @@ def subscriptions_model(request):
 
 @pytest.fixture
 def user_model(config, request):
-    patcher = patch('h.accounts.views.User', autospec=True)
+    patcher = mock.patch('h.accounts.views.User', autospec=True)
     model = patcher.start()
     request.addfinalizer(patcher.stop)
     return model
@@ -1105,7 +1096,7 @@ def user_model(config, request):
 
 @pytest.fixture
 def activation_model(config, request):
-    patcher = patch('h.accounts.views.Activation', autospec=True)
+    patcher = mock.patch('h.accounts.views.Activation', autospec=True)
     model = patcher.start()
     request.addfinalizer(patcher.stop)
     return model
@@ -1113,7 +1104,7 @@ def activation_model(config, request):
 
 @pytest.fixture
 def ActivationEvent(config, request):
-    patcher = patch('h.accounts.views.ActivationEvent', autospec=True)
+    patcher = mock.patch('h.accounts.views.ActivationEvent', autospec=True)
     model = patcher.start()
     request.addfinalizer(patcher.stop)
     return model
@@ -1121,7 +1112,7 @@ def ActivationEvent(config, request):
 
 @pytest.fixture
 def mailer(request):
-    patcher = patch('h.accounts.views.mailer', autospec=True)
+    patcher = mock.patch('h.accounts.views.mailer', autospec=True)
     module = patcher.start()
     request.addfinalizer(patcher.stop)
     return module
