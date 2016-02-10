@@ -69,6 +69,7 @@ def error_validation(error, request):
 @view_defaults(route_name='login',
                renderer='h:templates/accounts/login.html.jinja2')
 class AuthController(object):
+
     def __init__(self, request):
         form_footer = '<a href="{href}">{text}</a>'.format(
             href=request.route_path('forgot_password'),
@@ -306,6 +307,7 @@ class ResetPasswordController(object):
 @view_defaults(route_name='register',
                renderer='h:templates/accounts/register.html.jinja2')
 class RegisterController(object):
+
     def __init__(self, request):
         tos_link = ('<a href="/terms-of-service">' +
                     _('Terms of Service') +
@@ -465,6 +467,7 @@ class ActivateController(object):
 @view_defaults(route_name='profile',
                renderer='h:templates/accounts/profile.html.jinja2')
 class ProfileController(object):
+
     def __init__(self, request):
         self.request = request
 
@@ -527,6 +530,7 @@ class ProfileController(object):
 @view_defaults(route_name='profile_notifications',
                renderer='h:templates/accounts/notifications.html.jinja2')
 class NotificationsController(object):
+
     def __init__(self, request):
         self.request = request
         self.schema = schemas.NotificationsSchema().bind(request=self.request)
