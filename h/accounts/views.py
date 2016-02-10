@@ -618,7 +618,8 @@ def reset_password_link(request, reset_code):
     return request.route_url('reset_password_with_code', code=reset_code)
 
 
-@view_config(route_name='dismiss_sidebar_tutorial', request_method='POST',
+@view_config(route_name='dismiss_sidebar_tutorial',
+             request_method='POST',
              renderer='json')
 def dismiss_sidebar_tutorial(request):
     if request.authenticated_userid is None:
