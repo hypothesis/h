@@ -70,10 +70,9 @@ def error_validation(error, request):
                renderer='h:templates/accounts/login.html.jinja2')
 class AuthController(object):
     def __init__(self, request):
-        form_footer = ('<a href="{path}">'.format(
-                           path=request.route_path('forgot_password')) +
-                       _('Forgot your password?') +
-                       '</a>')
+        form_footer = '<a href="{href}">{text}</a>'.format(
+            href=request.route_path('forgot_password'),
+            text=_('Forgot your password?'))
 
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
@@ -88,18 +87,14 @@ class AuthController(object):
 
     @view_config(request_method='GET')
     def get(self):
-        """
-        Render the empty login form.
-        """
+        """Render the login page, including the login form."""
         self._redirect_if_logged_in()
 
         return {'form': self.form.render()}
 
     @view_config(request_method='POST')
     def post(self):
-        """
-        Check the submitted credentials and log the user in if appropriate.
-        """
+        """Log the user in and redirect them."""
         self._redirect_if_logged_in()
 
         try:
@@ -116,9 +111,7 @@ class AuthController(object):
                  renderer=None,
                  request_method='GET')
     def logout(self):
-        """
-        Unconditionally log the user out.
-        """
+        """Log the user out."""
         headers = self._logout()
         return httpexceptions.HTTPFound(location=self.logout_redirect,
                                         headers=headers)
