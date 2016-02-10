@@ -849,7 +849,7 @@ def test_profile_form_404s_if_not_logged_in():
     request = DummyRequest(authenticated_user=None)
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        ProfileController(request).profile_form()
+        ProfileController(request).get()
 
 
 @profile_fixtures
@@ -857,7 +857,7 @@ def test_profile_404s_if_not_logged_in():
     request = DummyRequest(authenticated_user=None)
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        ProfileController(request).profile()
+        ProfileController(request).post()
 
 
 @profile_fixtures
@@ -866,7 +866,7 @@ def test_profile_400s_with_no_formid():
     request = DummyRequest(post={}, authenticated_user=user)
 
     with pytest.raises(httpexceptions.HTTPBadRequest):
-        ProfileController(request).profile()
+        ProfileController(request).post()
 
 
 @profile_fixtures
@@ -876,7 +876,7 @@ def test_profile_400s_with_bogus_formid():
                            authenticated_user=user)
 
     with pytest.raises(httpexceptions.HTTPBadRequest):
-        ProfileController(request).profile()
+        ProfileController(request).post()
 
 
 @profile_fixtures
@@ -887,7 +887,7 @@ def test_profile_changing_email_with_valid_data_updates_email():
     controller = ProfileController(request)
     controller.forms['email'] = form_validating_to({'email': 'amrit@example.com'})
 
-    controller.profile()
+    controller.post()
 
     assert user.email == 'amrit@example.com'
 
@@ -900,7 +900,7 @@ def test_profile_changing_email_with_valid_data_redirects():
     controller = ProfileController(request)
     controller.forms['email'] = form_validating_to({'email': 'amrit@example.com'})
 
-    result = controller.profile()
+    result = controller.post()
 
     assert isinstance(result, httpexceptions.HTTPFound)
 
@@ -913,7 +913,7 @@ def test_profile_changing_email_with_invalid_data_returns_form():
     controller = ProfileController(request)
     controller.forms['email'] = invalid_form()
 
-    result = controller.profile()
+    result = controller.post()
 
     assert 'email_form' in result
 
@@ -926,7 +926,7 @@ def test_profile_changing_email_with_invalid_data_does_not_update_email():
     controller = ProfileController(request)
     controller.forms['email'] = invalid_form()
 
-    controller.profile()
+    controller.post()
 
     assert user.email is None
 
@@ -939,7 +939,7 @@ def test_profile_changing_password_with_valid_data_updates_password():
     controller = ProfileController(request)
     controller.forms['password'] = form_validating_to({'new_password': 'secrets!'})
 
-    controller.profile()
+    controller.post()
 
     assert user.password == 'secrets!'
 
@@ -952,7 +952,7 @@ def test_profile_changing_password_with_valid_data_redirects():
     controller = ProfileController(request)
     controller.forms['password'] = form_validating_to({'new_password': 'secrets!'})
 
-    result = controller.profile()
+    result = controller.post()
 
     assert isinstance(result, httpexceptions.HTTPFound)
 
@@ -965,7 +965,7 @@ def test_profile_changing_password_with_invalid_data_returns_form():
     controller = ProfileController(request)
     controller.forms['password'] = invalid_form()
 
-    result = controller.profile()
+    result = controller.post()
 
     assert 'password_form' in result
 
@@ -978,7 +978,7 @@ def test_profile_changing_password_with_invalid_data_does_not_update_password():
     controller = ProfileController(request)
     controller.forms['password'] = invalid_form()
 
-    controller.profile()
+    controller.post()
 
     assert user.password is None
 

@@ -464,8 +464,6 @@ class ActivateController(object):
 
 @view_defaults(route_name='profile',
                renderer='h:templates/accounts/profile.html.jinja2')
-@view_config(attr='profile_form', request_method='GET')
-@view_config(attr='profile', request_method='POST')
 class ProfileController(object):
     def __init__(self, request):
         self.request = request
@@ -482,7 +480,8 @@ class ProfileController(object):
                                     formid='password'),
         }
 
-    def profile_form(self):
+    @view_config(request_method='GET')
+    def get(self):
         """Show the user's profile."""
         if self.request.authenticated_user is None:
             raise httpexceptions.HTTPNotFound()
@@ -491,7 +490,8 @@ class ProfileController(object):
                 'email_form': self.forms['email'].render(),
                 'password_form': self.forms['password'].render()}
 
-    def profile(self):
+    @view_config(request_method='POST')
+    def post(self):
         """Handle POST payload from profile update form."""
         if self.request.authenticated_user is None:
             raise httpexceptions.HTTPNotFound()
