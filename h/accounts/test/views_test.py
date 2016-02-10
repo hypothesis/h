@@ -80,990 +80,901 @@ def mock_flash_function():
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_login_redirects_when_logged_in(authn_policy):
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+class TestAuthController(object):
 
-    with pytest.raises(httpexceptions.HTTPFound):
-        views.AuthController(request).post()
+    def test_post_redirects_when_logged_in(self, authn_policy):
+        request = DummyRequest()
+        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
+        with pytest.raises(httpexceptions.HTTPFound):
+            views.AuthController(request).post()
 
-@pytest.mark.usefixtures('routes_mapper')
-def test_login_redirects_to_next_param_when_logged_in(authn_policy):
-    request = DummyRequest(params={'next': '/foo/bar'})
-    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+    def test_post_redirects_to_next_param_when_logged_in(self, authn_policy):
+        request = DummyRequest(params={'next': '/foo/bar'})
+        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
-    with pytest.raises(httpexceptions.HTTPFound) as e:
-        views.AuthController(request).post()
+        with pytest.raises(httpexceptions.HTTPFound) as e:
+            views.AuthController(request).post()
 
-    assert e.value.location == '/foo/bar'
+        assert e.value.location == '/foo/bar'
 
+    def test_post_returns_form_when_validation_fails(self, authn_policy):
+        request = DummyRequest()
+        authn_policy.authenticated_userid.return_value = None  # Logged out
+        controller = views.AuthController(request)
+        controller.form = invalid_form()
 
-@pytest.mark.usefixtures('routes_mapper')
-def test_login_returns_form_when_validation_fails(authn_policy):
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = None  # Logged out
-    controller = views.AuthController(request)
-    controller.form = invalid_form()
+        result = controller.post()
 
-    result = controller.post()
+        assert result == {'form': 'invalid form'}
 
-    assert result == {'form': 'invalid form'}
+    @mock.patch('h.accounts.views.LoginEvent', autospec=True)
+    def test_post_no_event_when_validation_fails(self,
+                                                 loginevent,
+                                                 authn_policy,
+                                                 notify):
+        request = DummyRequest()
+        authn_policy.authenticated_userid.return_value = None  # Logged out
+        controller = views.AuthController(request)
+        controller.form = invalid_form()
 
+        controller.post()
 
-@pytest.mark.usefixtures('routes_mapper')
-@mock.patch('h.accounts.views.LoginEvent', autospec=True)
-def test_login_no_event_when_validation_fails(loginevent,
-                                              authn_policy,
-                                              notify):
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = None  # Logged out
-    controller = views.AuthController(request)
-    controller.form = invalid_form()
+        assert not loginevent.called
+        assert not notify.called
 
-    controller.post()
+    def test_post_redirects_when_validation_succeeds(self, authn_policy):
+        request = DummyRequest(auth_domain='hypothes.is')
+        authn_policy.authenticated_userid.return_value = None  # Logged out
+        controller = views.AuthController(request)
+        controller.form = form_validating_to(
+            {"user": FakeUser(username='cara')})
 
-    assert not loginevent.called
-    assert not notify.called
+        result = controller.post()
 
+        assert isinstance(result, httpexceptions.HTTPFound)
 
-@pytest.mark.usefixtures('routes_mapper')
-def test_login_redirects_when_validation_succeeds(authn_policy):
-    request = DummyRequest(auth_domain='hypothes.is')
-    authn_policy.authenticated_userid.return_value = None  # Logged out
-    controller = views.AuthController(request)
-    controller.form = form_validating_to({"user": FakeUser(username='cara')})
-
-    result = controller.post()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_login_redirects_to_next_param_when_validation_succeeds(authn_policy):
-    request = DummyRequest(
-        params={'next': '/foo/bar'}, auth_domain='hypothes.is')
-    authn_policy.authenticated_userid.return_value = None  # Logged out
-    controller = views.AuthController(request)
-    controller.form = form_validating_to({"user": FakeUser(username='cara')})
-
-    result = controller.post()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-    assert result.location == '/foo/bar'
-
-
-@pytest.mark.usefixtures('routes_mapper')
-@mock.patch('h.accounts.views.LoginEvent', autospec=True)
-def test_login_event_when_validation_succeeds(loginevent,
-                                              authn_policy,
-                                              notify):
-    request = DummyRequest(auth_domain='hypothes.is')
-    authn_policy.authenticated_userid.return_value = None  # Logged out
-    elephant = FakeUser(username='avocado')
-    controller = views.AuthController(request)
-    controller.form = form_validating_to({"user": elephant})
-
-    controller.post()
-
-    loginevent.assert_called_with(request, elephant)
-    notify.assert_called_with(loginevent.return_value)
-
-
-@pytest.mark.usefixtures('routes_mapper')
-@mock.patch('h.accounts.views.LogoutEvent', autospec=True)
-def test_logout_event(logoutevent, authn_policy, notify):
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
-
-    views.AuthController(request).logout()
-
-    logoutevent.assert_called_with(request)
-    notify.assert_called_with(logoutevent.return_value)
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_logout_invalidates_session(authn_policy):
-    request = DummyRequest()
-    request.session["foo"] = "bar"
-    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
-
-    views.AuthController(request).logout()
-
-    assert "foo" not in request.session
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_logout_redirects():
-    request = DummyRequest()
-
-    result = views.AuthController(request).logout()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_logout_forgets_authenticated_user(authn_policy):
-    request = DummyRequest()
-
-    views.AuthController(request).logout()
-
-    authn_policy.forget.assert_called_with(request)
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_logout_response_has_forget_headers(authn_policy):
-    request = DummyRequest()
-    authn_policy.forget.return_value = {'x-erase-fingerprints': 'on the hob'}
-
-    result = views.AuthController(request).logout()
-
-    assert result.headers['x-erase-fingerprints'] == 'on the hob'
-
-
-@pytest.mark.usefixtures('routes_mapper', 'session')
-def test_login_ajax_returns_status_okay_when_validation_succeeds():
-    request = DummyRequest(json_body={}, auth_domain='hypothes.is')
-    controller = views.AjaxAuthController(request)
-    controller.form = form_validating_to({'user': FakeUser(username='bob')})
-
-    result = controller.login()
-
-    assert result['status'] == 'okay'
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_login_ajax_raises_JSONError_on_non_json_body():
-    request = mock.Mock(authenticated_user=mock.Mock(groups=[]))
-    type(request).json_body = mock.PropertyMock(side_effect=ValueError)
-
-    controller = views.AjaxAuthController(request)
-
-    with pytest.raises(accounts.JSONError) as exc_info:
-        controller.login()
-        assert exc_info.value.message.startswith(
-            'Could not parse request body as JSON: ')
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_login_ajax_raises_JSONError_on_non_object_json():
-    request = mock.Mock(
-        authenticated_user=mock.Mock(groups=[]), json_body='foo')
-
-    controller = views.AjaxAuthController(request)
-
-    with pytest.raises(accounts.JSONError) as exc_info:
-        controller.login()
-        assert (
-            exc_info.value.message == 'Request JSON body must have a ' +
-                                      'top-level object')
-
-
-@pytest.mark.usefixtures('routes_mapper', 'session')
-@mock.patch('h.accounts.schemas.check_csrf_token')
-def test_login_ajax_converts_non_string_usernames_to_strings(_):
-    for input_, expected_output in ((None, ''), (23, '23'), (True, 'True')):
+    def test_post_redirects_to_next_param_when_validation_succeeds(
+            self,
+            authn_policy):
         request = DummyRequest(
-            json_body={'username': input_, 'password': 'pass'},
-            auth_domain='hypothes.is')
+            params={'next': '/foo/bar'}, auth_domain='hypothes.is')
+        authn_policy.authenticated_userid.return_value = None  # Logged out
+        controller = views.AuthController(request)
+        controller.form = form_validating_to(
+            {"user": FakeUser(username='cara')})
+
+        result = controller.post()
+
+        assert isinstance(result, httpexceptions.HTTPFound)
+        assert result.location == '/foo/bar'
+
+    @mock.patch('h.accounts.views.LoginEvent', autospec=True)
+    def test_post_event_when_validation_succeeds(self,
+                                                 loginevent,
+                                                 authn_policy,
+                                                 notify):
+        request = DummyRequest(auth_domain='hypothes.is')
+        authn_policy.authenticated_userid.return_value = None  # Logged out
+        elephant = FakeUser(username='avocado')
+        controller = views.AuthController(request)
+        controller.form = form_validating_to({"user": elephant})
+
+        controller.post()
+
+        loginevent.assert_called_with(request, elephant)
+        notify.assert_called_with(loginevent.return_value)
+
+    @mock.patch('h.accounts.views.LogoutEvent', autospec=True)
+    def test_logout_event(self, logoutevent, authn_policy, notify):
+        request = DummyRequest()
+        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+
+        views.AuthController(request).logout()
+
+        logoutevent.assert_called_with(request)
+        notify.assert_called_with(logoutevent.return_value)
+
+    def test_logout_invalidates_session(self, authn_policy):
+        request = DummyRequest()
+        request.session["foo"] = "bar"
+        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+
+        views.AuthController(request).logout()
+
+        assert "foo" not in request.session
+
+    def test_logout_redirects(self):
+        request = DummyRequest()
+
+        result = views.AuthController(request).logout()
+
+        assert isinstance(result, httpexceptions.HTTPFound)
+
+    def test_logout_forgets_authenticated_user(self, authn_policy):
+        request = DummyRequest()
+
+        views.AuthController(request).logout()
+
+        authn_policy.forget.assert_called_with(request)
+
+    def test_logout_response_has_forget_headers(self, authn_policy):
+        request = DummyRequest()
+        authn_policy.forget.return_value = {
+            'x-erase-fingerprints': 'on the hob'}
+
+        result = views.AuthController(request).logout()
+
+        assert result.headers['x-erase-fingerprints'] == 'on the hob'
+
+
+@pytest.mark.usefixtures('routes_mapper',
+                         'session')
+class TestAjaxAuthController(object):
+
+    def test_login_returns_status_okay_when_validation_succeeds(self):
+        request = DummyRequest(json_body={}, auth_domain='hypothes.is')
         controller = views.AjaxAuthController(request)
-        controller.form.validate = mock.Mock(
-            return_value={'user': mock.Mock()})
+        controller.form = form_validating_to(
+            {'user': FakeUser(username='bob')})
 
-        controller.login()
+        result = controller.login()
 
-        controller.form.validate.assert_called_once_with(
-            [('username', expected_output), ('password', 'pass')])
+        assert result['status'] == 'okay'
 
+    def test_login_raises_JSONError_on_non_json_body(self):
+        request = mock.Mock(authenticated_user=mock.Mock(groups=[]))
+        type(request).json_body = mock.PropertyMock(side_effect=ValueError)
 
-@pytest.mark.usefixtures('routes_mapper', 'session')
-@mock.patch('h.accounts.schemas.check_csrf_token')
-def test_login_ajax_converts_non_string_passwords_to_strings(_):
-    for input_, expected_output in ((None, ''), (23, '23'), (True, 'True')):
-        request = DummyRequest(
-            json_body={'username': 'user', 'password': input_},
-            auth_domain='hypothes.is')
         controller = views.AjaxAuthController(request)
-        controller.form.validate = mock.Mock(
-            return_value={'user': mock.Mock()})
 
-        controller.login()
+        with pytest.raises(accounts.JSONError) as exc_info:
+            controller.login()
+            assert exc_info.value.message.startswith(
+                'Could not parse request body as JSON: ')
 
-        controller.form.validate.assert_called_once_with(
-            [('username', 'user'), ('password', expected_output)])
+    def test_login_raises_JSONError_on_non_object_json(self):
+        request = mock.Mock(
+            authenticated_user=mock.Mock(groups=[]), json_body='foo')
+
+        controller = views.AjaxAuthController(request)
+
+        with pytest.raises(accounts.JSONError) as exc_info:
+            controller.login()
+            assert (
+                exc_info.value.message == 'Request JSON body must have a ' +
+                                        'top-level object')
+
+    @mock.patch('h.accounts.schemas.check_csrf_token')
+    def test_login_converts_non_string_usernames_to_strings(self, _):
+        for input_, expected_output in ((None, ''),
+                                        (23, '23'),
+                                        (True, 'True')):
+            request = DummyRequest(
+                json_body={'username': input_, 'password': 'pass'},
+                auth_domain='hypothes.is')
+            controller = views.AjaxAuthController(request)
+            controller.form.validate = mock.Mock(
+                return_value={'user': mock.Mock()})
+
+            controller.login()
+
+            controller.form.validate.assert_called_once_with(
+                [('username', expected_output), ('password', 'pass')])
+
+    @mock.patch('h.accounts.schemas.check_csrf_token')
+    def test_login_converts_non_string_passwords_to_strings(self, _):
+        for input_, expected_output in ((None, ''),
+                                        (23, '23'),
+                                        (True, 'True')):
+            request = DummyRequest(
+                json_body={'username': 'user', 'password': input_},
+                auth_domain='hypothes.is')
+            controller = views.AjaxAuthController(request)
+            controller.form.validate = mock.Mock(
+                return_value={'user': mock.Mock()})
+
+            controller.login()
+
+            controller.form.validate.assert_called_once_with(
+                [('username', 'user'), ('password', expected_output)])
+
+    def test_login_raises_ValidationFailure_on_ValidationFailure(self):
+        controller = views.AjaxAuthController(DummyRequest(json_body={}))
+        controller.form = invalid_form({'password': 'too short'})
+
+        with pytest.raises(deform.ValidationFailure) as exc_info:
+            controller.login()
+
+        assert exc_info.value.error.asdict() == {'password': 'too short'}
+
+    def test_logout_returns_status_okay(self):
+        request = DummyRequest()
+
+        result = views.AjaxAuthController(request).logout()
+
+        assert result['status'] == 'okay'
+
+
+@pytest.mark.usefixtures('activation_model',
+                         'authn_policy',
+                         'mailer',
+                         'routes_mapper')
+class TestForgotPasswordController(object):
+
+    def test_post_returns_form_when_validation_fails(self):
+        request = DummyRequest(method='POST')
+        controller = views.ForgotPasswordController(request)
+        controller.form = invalid_form()
+
+        result = controller.post()
+
+        assert result == {'form': 'invalid form'}
+
+    def test_post_creates_no_activations_when_validation_fails(
+            self,
+            activation_model):
+        request = DummyRequest(method='POST')
+        controller = views.ForgotPasswordController(request)
+        controller.form = invalid_form()
+
+        controller.post()
+
+        assert activation_model.call_count == 0
+
+    @mock.patch('h.accounts.views.reset_password_link')
+    def test_post_generates_reset_link(self, reset_link):
+        request = DummyRequest(method='POST')
+        request.registry.password_reset_serializer = FakeSerializer()
+        user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+        controller = views.ForgotPasswordController(request)
+        controller.form = form_validating_to({"user": user})
+
+        controller.post()
+
+        reset_link.assert_called_with(request, "faketoken")
+
+    @mock.patch('h.accounts.views.reset_password_email')
+    @mock.patch('h.accounts.views.reset_password_link')
+    def test_post_generates_mail(self,
+                                 reset_link,
+                                 reset_mail,
+                                 activation_model):
+        request = DummyRequest(method='POST')
+        request.registry.password_reset_serializer = FakeSerializer()
+        user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+        controller = views.ForgotPasswordController(request)
+        controller.form = form_validating_to({"user": user})
+        reset_link.return_value = "http://example.com"
+        reset_mail.return_value = {
+            'recipients': [],
+            'subject': '',
+            'body': ''
+        }
+
+        controller.post()
+
+        reset_mail.assert_called_with(user, "faketoken", "http://example.com")
+
+    @mock.patch('h.accounts.views.reset_password_email')
+    def test_post_sends_mail(self, reset_mail, mailer):
+        request = DummyRequest(method='POST')
+        request.registry.password_reset_serializer = FakeSerializer()
+        user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+        controller = views.ForgotPasswordController(request)
+        controller.form = form_validating_to({"user": user})
+        reset_mail.return_value = {
+            'recipients': ['giraffe@thezoo.org'],
+            'subject': 'subject',
+            'body': 'body'
+        }
+
+        controller.post()
+
+        mailer.send.assert_called_once_with(request,
+                                            recipients=['giraffe@thezoo.org'],
+                                            subject='subject',
+                                            body='body')
+
+    def test_post_redirects_on_success(self):
+        request = DummyRequest(method='POST')
+        request.registry.password_reset_serializer = FakeSerializer()
+        user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+        controller = views.ForgotPasswordController(request)
+        controller.form = form_validating_to({"user": user})
+
+        result = controller.post()
+
+        assert isinstance(result, httpexceptions.HTTPRedirection)
+
+    def test_get_redirects_when_logged_in(self, authn_policy):
+        request = DummyRequest(method='POST')
+        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+
+        with pytest.raises(httpexceptions.HTTPFound):
+            views.ForgotPasswordController(request).get()
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_login_ajax_raises_ValidationFailure_on_ValidationFailure():
-    controller = views.AjaxAuthController(DummyRequest(json_body={}))
-    controller.form = invalid_form({'password': 'too short'})
+class TestResetPasswordController(object):
+
+    def test_post_returns_form_when_validation_fails(self):
+        request = DummyRequest(method='POST')
+        controller = views.ResetPasswordController(request)
+        controller.form = invalid_form()
+
+        result = controller.post()
 
-    with pytest.raises(deform.ValidationFailure) as exc_info:
-        controller.login()
+        assert result == {'form': 'invalid form'}
+
+    def test_post_sets_user_password_from_form(self):
+        request = DummyRequest(method='POST')
+        elephant = FakeUser(password='password1')
+        controller = views.ResetPasswordController(request)
+        controller.form = form_validating_to({'user': elephant,
+                                              'password': 's3cure!'})
+
+        controller.post()
+
+        assert elephant.password == 's3cure!'
+
+    @mock.patch('h.accounts.views.PasswordResetEvent', autospec=True)
+    def test_post_emits_event(self, event, notify):
+        request = DummyRequest(method='POST')
+        user = FakeUser(password='password1')
+        controller = views.ResetPasswordController(request)
+        controller.form = form_validating_to({'user': user,
+                                              'password': 's3cure!'})
+
+        controller.post()
+
+        event.assert_called_with(request, user)
+        notify.assert_called_with(event.return_value)
+
+    def test_post_redirects_on_success(self):
+        request = DummyRequest(method='POST')
+        user = FakeUser(password='password1')
+        controller = views.ResetPasswordController(request)
+        controller.form = form_validating_to({'user': user,
+                                              'password': 's3cure!'})
+
+        result = controller.post()
+
+        assert isinstance(result, httpexceptions.HTTPRedirection)
+
+
+@pytest.mark.usefixtures('activation_model',
+                         'authn_policy',
+                         'mailer',
+                         'notify',
+                         'routes_mapper',
+                         'user_model')
+class TestRegisterController(object):
+
+    def test_post_returns_errors_when_validation_fails(self):
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = invalid_form()
+
+        result = controller.post()
+
+        assert result == {"form": "invalid form"}
+
+    def test_post_creates_user_from_form_data(self, user_model):
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = form_validating_to({
+            "username": "bob",
+            "email": "bob@example.com",
+            "password": "s3crets",
+            "random_other_field": "something else",
+        })
+
+        controller.post()
+
+        user_model.assert_called_with(username="bob",
+                                      email="bob@example.com",
+                                      password="s3crets")
+
+    def test_post_adds_new_user_to_session(self, user_model):
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = form_validating_to({
+            "username": "bob",
+            "email": "bob@example.com",
+            "password": "s3crets",
+        })
+
+        controller.post()
+
+        assert user_model.return_value in request.db.added
+
+    def test_post_creates_new_activation(self, activation_model, user_model):
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = form_validating_to({
+            "username": "bob",
+            "email": "bob@example.com",
+            "password": "s3crets",
+        })
+        new_user = user_model.return_value
 
-    assert exc_info.value.error.asdict() == {'password': 'too short'}
+        controller.post()
 
+        assert new_user.activation == activation_model.return_value
 
-@pytest.mark.usefixtures('routes_mapper', 'session')
-def test_logout_ajax_returns_status_okay():
-    request = DummyRequest()
-
-    result = views.AjaxAuthController(request).logout()
-
-    assert result['status'] == 'okay'
-
-
-forgot_password_fixtures = pytest.mark.usefixtures('activation_model',
-                                                   'authn_policy',
-                                                   'mailer',
-                                                   'routes_mapper')
-
-
-@forgot_password_fixtures
-def test_forgot_password_returns_form_when_validation_fails():
-    request = DummyRequest(method='POST')
-    controller = views.ForgotPasswordController(request)
-    controller.form = invalid_form()
-
-    result = controller.post()
-
-    assert result == {'form': 'invalid form'}
-
-
-@forgot_password_fixtures
-def test_forgot_password_creates_no_activations_when_validation_fails(activation_model):
-    request = DummyRequest(method='POST')
-    controller = views.ForgotPasswordController(request)
-    controller.form = invalid_form()
-
-    controller.post()
-
-    assert activation_model.call_count == 0
-
-
-@mock.patch('h.accounts.views.reset_password_link')
-@forgot_password_fixtures
-def test_forgot_password_generates_reset_link(reset_link):
-    request = DummyRequest(method='POST')
-    request.registry.password_reset_serializer = FakeSerializer()
-    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = views.ForgotPasswordController(request)
-    controller.form = form_validating_to({"user": user})
-
-    controller.post()
-
-    reset_link.assert_called_with(request, "faketoken")
-
-
-@mock.patch('h.accounts.views.reset_password_email')
-@mock.patch('h.accounts.views.reset_password_link')
-@forgot_password_fixtures
-def test_forgot_password_generates_mail(reset_link,
-                                        reset_mail,
-                                        activation_model):
-    request = DummyRequest(method='POST')
-    request.registry.password_reset_serializer = FakeSerializer()
-    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = views.ForgotPasswordController(request)
-    controller.form = form_validating_to({"user": user})
-    reset_link.return_value = "http://example.com"
-    reset_mail.return_value = {
-        'recipients': [],
-        'subject': '',
-        'body': ''
-    }
-
-    controller.post()
-
-    reset_mail.assert_called_with(user, "faketoken", "http://example.com")
-
-
-@mock.patch('h.accounts.views.reset_password_email')
-@forgot_password_fixtures
-def test_forgot_password_sends_mail(reset_mail, mailer):
-    request = DummyRequest(method='POST')
-    request.registry.password_reset_serializer = FakeSerializer()
-    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = views.ForgotPasswordController(request)
-    controller.form = form_validating_to({"user": user})
-    reset_mail.return_value = {
-        'recipients': ['giraffe@thezoo.org'],
-        'subject': 'subject',
-        'body': 'body'
-    }
-
-    controller.post()
-
-    mailer.send.assert_called_once_with(request,
-                                        recipients=['giraffe@thezoo.org'],
-                                        subject='subject',
-                                        body='body')
-
-
-@forgot_password_fixtures
-def test_forgot_password_redirects_on_success():
-    request = DummyRequest(method='POST')
-    request.registry.password_reset_serializer = FakeSerializer()
-    user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
-    controller = views.ForgotPasswordController(request)
-    controller.form = form_validating_to({"user": user})
-
-    result = controller.post()
-
-    assert isinstance(result, httpexceptions.HTTPRedirection)
-
-
-@pytest.mark.usefixtures('routes_mapper')
-def test_forgot_password_form_redirects_when_logged_in(authn_policy):
-    request = DummyRequest(method='POST')
-    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
-
-    with pytest.raises(httpexceptions.HTTPFound):
-        views.ForgotPasswordController(request).get()
-
-
-reset_password_fixtures = pytest.mark.usefixtures('routes_mapper')
-
-
-@reset_password_fixtures
-def test_reset_password_returns_form_when_validation_fails():
-    request = DummyRequest(method='POST')
-    controller = views.ResetPasswordController(request)
-    controller.form = invalid_form()
-
-    result = controller.post()
-
-    assert result == {'form': 'invalid form'}
-
-
-@reset_password_fixtures
-def test_reset_password_sets_user_password_from_form():
-    request = DummyRequest(method='POST')
-    elephant = FakeUser(password='password1')
-    controller = views.ResetPasswordController(request)
-    controller.form = form_validating_to({'user': elephant,
-                                          'password': 's3cure!'})
-
-    controller.post()
-
-    assert elephant.password == 's3cure!'
-
-
-@mock.patch('h.accounts.views.PasswordResetEvent', autospec=True)
-@reset_password_fixtures
-def test_reset_password_emits_event(event, notify):
-    request = DummyRequest(method='POST')
-    user = FakeUser(password='password1')
-    controller = views.ResetPasswordController(request)
-    controller.form = form_validating_to({'user': user,
-                                          'password': 's3cure!'})
-
-    controller.post()
-
-    event.assert_called_with(request, user)
-    notify.assert_called_with(event.return_value)
-
-
-@reset_password_fixtures
-def test_reset_password_redirects_on_success():
-    request = DummyRequest(method='POST')
-    user = FakeUser(password='password1')
-    controller = views.ResetPasswordController(request)
-    controller.form = form_validating_to({'user': user,
-                                          'password': 's3cure!'})
-
-    result = controller.post()
-
-    assert isinstance(result, httpexceptions.HTTPRedirection)
-
-
-register_fixtures = pytest.mark.usefixtures('activation_model',
-                                            'authn_policy',
-                                            'mailer',
-                                            'notify',
-                                            'routes_mapper',
-                                            'user_model')
-
-
-@register_fixtures
-def test_register_returns_errors_when_validation_fails():
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = invalid_form()
-
-    result = controller.post()
-
-    assert result == {"form": "invalid form"}
-
-
-@register_fixtures
-def test_register_creates_user_from_form_data(user_model):
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = form_validating_to({
-        "username": "bob",
-        "email": "bob@example.com",
-        "password": "s3crets",
-        "random_other_field": "something else",
-    })
-
-    controller.post()
-
-    user_model.assert_called_with(username="bob",
-                                  email="bob@example.com",
-                                  password="s3crets")
-
-
-@register_fixtures
-def test_register_adds_new_user_to_session(user_model):
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = form_validating_to({
-        "username": "bob",
-        "email": "bob@example.com",
-        "password": "s3crets",
-    })
-
-    controller.post()
-
-    assert user_model.return_value in request.db.added
-
-
-@register_fixtures
-def test_register_creates_new_activation(activation_model,
-                                         user_model):
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = form_validating_to({
-        "username": "bob",
-        "email": "bob@example.com",
-        "password": "s3crets",
-    })
-    new_user = user_model.return_value
-
-    controller.post()
-
-    assert new_user.activation == activation_model.return_value
-
-
-@mock.patch('h.accounts.views.activation_email')
-@register_fixtures
-def test_register_generates_activation_email_from_user(activation_email,
+    @mock.patch('h.accounts.views.activation_email')
+    def test_post_generates_activation_email_from_user(self,
+                                                       activation_email,
                                                        user_model):
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = form_validating_to({
-        "username": "bob",
-        "email": "bob@example.com",
-        "password": "s3crets",
-    })
-    new_user = user_model.return_value
-    activation_email.return_value = {
-        'recipients': [],
-        'subject': '',
-        'body': ''
-    }
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = form_validating_to({
+            "username": "bob",
+            "email": "bob@example.com",
+            "password": "s3crets",
+        })
+        new_user = user_model.return_value
+        activation_email.return_value = {
+            'recipients': [],
+            'subject': '',
+            'body': ''
+        }
 
-    controller.post()
+        controller.post()
 
-    activation_email.assert_called_once_with(request, new_user)
+        activation_email.assert_called_once_with(request, new_user)
+
+    @mock.patch('h.accounts.views.activation_email')
+    def test_post_sends_email(self, activation_email, mailer):
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = form_validating_to({
+            "username": "bob",
+            "email": "bob@example.com",
+            "password": "s3crets",
+        })
+        activation_email.return_value = {
+            'recipients': ['bob@example.com'],
+            'subject': 'subject',
+            'body': 'body'
+        }
+
+        controller.post()
+
+        mailer.send.assert_called_once_with(request,
+                                            recipients=['bob@example.com'],
+                                            subject='subject',
+                                            body='body')
+
+    @mock.patch('h.accounts.views.RegistrationEvent')
+    def test_post_no_event_when_validation_fails(self, event, notify):
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = invalid_form()
+
+        controller.post()
+
+        assert not event.called
+        assert not notify.called
+
+    @mock.patch('h.accounts.views.RegistrationEvent')
+    def test_post_event_when_validation_succeeds(self,
+                                                 event,
+                                                 notify,
+                                                 user_model):
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = form_validating_to({
+            "username": "bob",
+            "email": "bob@example.com",
+            "password": "s3crets",
+        })
+        new_user = user_model.return_value
+
+        controller.post()
+
+        event.assert_called_with(request, new_user)
+        notify.assert_called_with(event.return_value)
+
+    def test_post_event_redirects_on_success(self):
+        request = DummyRequest(method='POST')
+        controller = views.RegisterController(request)
+        controller.form = form_validating_to({
+            "username": "bob",
+            "email": "bob@example.com",
+            "password": "s3crets",
+        })
+
+        result = controller.post()
+
+        assert isinstance(result, httpexceptions.HTTPRedirection)
+
+    def test_get_redirects_when_logged_in(self, authn_policy):
+        request = DummyRequest()
+        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+        controller = views.RegisterController(request)
+
+        with pytest.raises(httpexceptions.HTTPRedirection):
+            controller.get()
 
 
-@mock.patch('h.accounts.views.activation_email')
-@register_fixtures
-def test_register_sends_email(activation_email, mailer):
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = form_validating_to({
-        "username": "bob",
-        "email": "bob@example.com",
-        "password": "s3crets",
-    })
-    activation_email.return_value = {
-        'recipients': ['bob@example.com'],
-        'subject': 'subject',
-        'body': 'body'
-    }
+@pytest.mark.usefixtures('ActivationEvent',
+                         'activation_model',
+                         'notify',
+                         'routes_mapper',
+                         'user_model')
+class TestActivateController(object):
 
-    controller.post()
+    def test_get_when_not_logged_in_404s_if_id_not_int(self):
+        request = DummyRequest(matchdict={
+            'id': 'abc',  # Not an int.
+            'code': 'abc456'})
 
-    mailer.send.assert_called_once_with(request,
-                                        recipients=['bob@example.com'],
-                                        subject='subject',
-                                        body='body')
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.ActivateController(request).get_when_not_logged_in()
 
+    def test_get_when_not_logged_in_looks_up_activation_by_code(
+            self,
+            activation_model,
+            user_model):
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        user_model.get_by_activation.return_value.id = 123
 
-@mock.patch('h.accounts.views.RegistrationEvent')
-@register_fixtures
-def test_register_no_event_when_validation_fails(event, notify):
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = invalid_form()
+        views.ActivateController(request).get_when_not_logged_in()
 
-    controller.post()
+        activation_model.get_by_code.assert_called_with('abc456')
 
-    assert not event.called
-    assert not notify.called
+    def test_get_when_not_logged_in_redirects_if_activation_not_found(
+            self,
+            activation_model):
+        """
 
+        If the activation code doesn't match any activation then we redirect to
+        the front page and flash a message suggesting that they may already be
+        activated and can sign in.
 
-@mock.patch('h.accounts.views.RegistrationEvent')
-@register_fixtures
-def test_register_event_when_validation_succeeds(event, notify, user_model):
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = form_validating_to({
-        "username": "bob",
-        "email": "bob@example.com",
-        "password": "s3crets",
-    })
-    new_user = user_model.return_value
+        This happens if a user clicks on an activation link from an email after
+        they've already been activated, for example.
 
-    controller.post()
+        (This also happens if users visit a bogus activation URL, but we're
+        happy to do this same redirect in that edge case.)
 
-    event.assert_called_with(request, new_user)
-    notify.assert_called_with(event.return_value)
+        """
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        request.session.flash = mock_flash_function()
+        activation_model.get_by_code.return_value = None
 
+        result = views.ActivateController(request).get_when_not_logged_in()
 
-@register_fixtures
-def test_register_event_redirects_on_success():
-    request = DummyRequest(method='POST')
-    controller = views.RegisterController(request)
-    controller.form = form_validating_to({
-        "username": "bob",
-        "email": "bob@example.com",
-        "password": "s3crets",
-    })
+        assert isinstance(result, httpexceptions.HTTPFound)
+        assert request.session.flash.call_count == 1
+        assert request.session.flash.call_args[0][0].startswith(
+            "We didn't recognize that activation link.")
 
-    result = controller.post()
+    def test_get_when_not_logged_in_looks_up_user_by_activation(
+            self,
+            activation_model,
+            user_model):
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        user_model.get_by_activation.return_value.id = 123
 
-    assert isinstance(result, httpexceptions.HTTPRedirection)
+        views.ActivateController(request).get_when_not_logged_in()
+
+        user_model.get_by_activation.assert_called_once_with(
+            activation_model.get_by_code.return_value)
+
+    def test_get_when_not_logged_in_404s_if_user_not_found(self, user_model):
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        user_model.get_by_activation.return_value = None
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.ActivateController(request).get_when_not_logged_in()
+
+    def test_get_when_not_logged_in_404s_if_user_id_does_not_match_hash(
+            self,
+            user_model):
+        """
+
+        We don't want to let a user with a valid hash activate a different
+        user's account!
+
+        """
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        user_model.get_by_activation.return_value.id = 2  # Not the same id.
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.ActivateController(request).get_when_not_logged_in()
+
+    def test_get_when_not_logged_in_successful_deletes_activation(
+            self,
+            user_model,
+            activation_model):
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        request.db.delete = mock.create_autospec(request.db.delete,
+                                                 return_value=None)
+        user_model.get_by_activation.return_value.id = 123
+
+        views.ActivateController(request).get_when_not_logged_in()
+
+        request.db.delete.assert_called_once_with(
+            activation_model.get_by_code.return_value)
+
+    def test_get_when_not_logged_in_successful_flashes_message(self,
+                                                               user_model):
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        request.session.flash = mock_flash_function()
+        user_model.get_by_activation.return_value.id = 123
+
+        views.ActivateController(request).get_when_not_logged_in()
+
+        assert request.session.flash.call_count == 1
+        assert request.session.flash.call_args[0][0].startswith(
+            "Your account has been activated")
+
+    def test_get_when_not_logged_in_successful_creates_ActivationEvent(
+            self,
+            user_model,
+            ActivationEvent):
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        user_model.get_by_activation.return_value.id = 123
+
+        views.ActivateController(request).get_when_not_logged_in()
+
+        ActivationEvent.assert_called_once_with(
+            request, user_model.get_by_activation.return_value)
+
+    def test_get_when_not_logged_in_successful_notifies(self,
+                                                        user_model,
+                                                        notify,
+                                                        ActivationEvent):
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        user_model.get_by_activation.return_value.id = 123
+
+        views.ActivateController(request).get_when_not_logged_in()
+
+        notify.assert_called_once_with(ActivationEvent.return_value)
+
+    def test_get_when_logged_in_already_logged_in_when_id_not_an_int(self):
+        request = DummyRequest(matchdict={
+            'id': 'abc',  # Not an int.
+            'code': 'abc456'},
+            authenticated_user=mock.Mock(id=123, spec=['id']))
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.ActivateController(request).get_when_logged_in()
+
+    def test_get_when_logged_in_already_logged_in_to_same_account(self):
+        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'},
+                               authenticated_user=mock.Mock(id=123,
+                                                            spec=['id']))
+        request.session.flash = mock_flash_function()
+
+        result = views.ActivateController(request).get_when_logged_in()
+
+        assert isinstance(result, httpexceptions.HTTPFound)
+        assert request.session.flash.call_count == 1
+        assert request.session.flash.call_args[0][0].startswith(
+            "Your account has been activated and you're now signed in")
+
+    def test_get_when_logged_in_already_logged_in_to_different_account(self):
+        request = DummyRequest(
+            matchdict={'id': '123', 'code': 'abc456'},
+            authenticated_user=mock.Mock(
+                id=124,  # Different user id.
+                spec=['id']))
+        request.session.flash = mock_flash_function()
+
+        result = views.ActivateController(request).get_when_logged_in()
+
+        assert isinstance(result, httpexceptions.HTTPFound)
+        assert request.session.flash.call_count == 1
+        assert request.session.flash.call_args[0][0].startswith(
+            "You're already signed in to a different account")
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_register_form_redirects_when_logged_in(authn_policy):
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
-    controller = views.RegisterController(request)
+class TestProfileController(object):
 
-    with pytest.raises(httpexceptions.HTTPRedirection):
+    def test_get_404s_if_not_logged_in(self):
+        request = DummyRequest(authenticated_user=None)
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.ProfileController(request).get()
+
+    def test_post_404s_if_not_logged_in(self):
+        request = DummyRequest(authenticated_user=None)
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.ProfileController(request).post()
+
+    def test_post_400s_with_no_formid(self):
+        user = FakeUser()
+        request = DummyRequest(post={}, authenticated_user=user)
+
+        with pytest.raises(httpexceptions.HTTPBadRequest):
+            views.ProfileController(request).post()
+
+    def test_post_400s_with_bogus_formid(self):
+        user = FakeUser()
+        request = DummyRequest(post={'__formid__': 'hax0rs'},
+                               authenticated_user=user)
+
+        with pytest.raises(httpexceptions.HTTPBadRequest):
+            views.ProfileController(request).post()
+
+    def test_post_changing_email_with_valid_data_updates_email(self):
+        user = FakeUser(email=None, password=None)
+        request = DummyRequest(post={'__formid__': 'email'},
+                               authenticated_user=user)
+        controller = views.ProfileController(request)
+        controller.forms['email'] = form_validating_to(
+            {'email': 'amrit@example.com'})
+
+        controller.post()
+
+        assert user.email == 'amrit@example.com'
+
+    def test_post_changing_email_with_valid_data_redirects(self):
+        user = FakeUser(email=None, password=None)
+        request = DummyRequest(post={'__formid__': 'email'},
+                               authenticated_user=user)
+        controller = views.ProfileController(request)
+        controller.forms['email'] = form_validating_to(
+            {'email': 'amrit@example.com'})
+
+        result = controller.post()
+
+        assert isinstance(result, httpexceptions.HTTPFound)
+
+    def test_post_changing_email_with_invalid_data_returns_form(self):
+        user = FakeUser(email=None, password=None)
+        request = DummyRequest(post={'__formid__': 'email'},
+                               authenticated_user=user)
+        controller = views.ProfileController(request)
+        controller.forms['email'] = invalid_form()
+
+        result = controller.post()
+
+        assert 'email_form' in result
+
+    def test_post_changing_email_with_invalid_data_does_not_update_email(self):
+        user = FakeUser(email=None, password=None)
+        request = DummyRequest(post={'__formid__': 'email'},
+                               authenticated_user=user)
+        controller = views.ProfileController(request)
+        controller.forms['email'] = invalid_form()
+
+        controller.post()
+
+        assert user.email is None
+
+    def test_post_changing_password_with_valid_data_updates_password(self):
+        user = FakeUser(email=None, password=None)
+        request = DummyRequest(post={'__formid__': 'password'},
+                               authenticated_user=user)
+        controller = views.ProfileController(request)
+        controller.forms['password'] = form_validating_to(
+            {'new_password': 'secrets!'})
+
+        controller.post()
+
+        assert user.password == 'secrets!'
+
+    def test_post_changing_password_with_valid_data_redirects(self):
+        user = FakeUser(email=None, password=None)
+        request = DummyRequest(post={'__formid__': 'password'},
+                               authenticated_user=user)
+        controller = views.ProfileController(request)
+        controller.forms['password'] = form_validating_to(
+            {'new_password': 'secrets!'})
+
+        result = controller.post()
+
+        assert isinstance(result, httpexceptions.HTTPFound)
+
+    def test_post_changing_password_with_invalid_data_returns_form(self):
+        user = FakeUser(email=None, password=None)
+        request = DummyRequest(post={'__formid__': 'password'},
+                               authenticated_user=user)
+        controller = views.ProfileController(request)
+        controller.forms['password'] = invalid_form()
+
+        result = controller.post()
+
+        assert 'password_form' in result
+
+    def test_post_changing_password_with_invalid_data_does_not_update_password(
+            self):
+        user = FakeUser(email=None, password=None)
+        request = DummyRequest(post={'__formid__': 'password'},
+                               authenticated_user=user)
+        controller = views.ProfileController(request)
+        controller.forms['password'] = invalid_form()
+
+        controller.post()
+
+        assert user.password is None
+
+
+@pytest.mark.usefixtures('authn_policy',
+                         'routes_mapper',
+                         'subscriptions_model')
+class TestNotificationsController(object):
+
+    def test_get_404s_if_not_logged_in(self, authn_policy):
+        request = DummyRequest()
+        authn_policy.authenticated_userid.return_value = None
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.NotificationsController(request).get()
+
+    def test_get_sets_subscriptions_data_in_form(self,
+                                                 authn_policy,
+                                                 subscriptions_model):
+        request = DummyRequest()
+        authn_policy.authenticated_userid.return_value = 'fiona'
+        subscriptions_model.get_subscriptions_for_uri.return_value = [
+            FakeSubscription('reply', True),
+            FakeSubscription('foo', False),
+        ]
+        controller = views.NotificationsController(request)
+        controller.form = form_validating_to({})
+
         controller.get()
 
-
-activate_fixtures = pytest.mark.usefixtures('ActivationEvent',
-                                            'activation_model',
-                                            'notify',
-                                            'routes_mapper',
-                                            'user_model')
-
-
-@activate_fixtures
-def test_activate_404s_if_id_not_int():
-    request = DummyRequest(matchdict={
-        'id': 'abc',  # Not an int.
-        'code': 'abc456'})
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.ActivateController(request).get_when_not_logged_in()
-
-
-@activate_fixtures
-def test_activate_looks_up_activation_by_code(activation_model, user_model):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    user_model.get_by_activation.return_value.id = 123
-
-    views.ActivateController(request).get_when_not_logged_in()
-
-    activation_model.get_by_code.assert_called_with('abc456')
-
-
-@activate_fixtures
-def test_activate_redirects_if_activation_not_found(activation_model):
-    """
-
-    If the activation code doesn't match any activation then we redirect to the
-    front page and flash a message suggesting that they may already be
-    activated and can sign in.
-
-    This happens if a user clicks on an activation link from an email after
-    they've already been activated, for example.
-
-    (This also happens if users visit a bogus activation URL, but we're happy
-    to do this same redirect in that edge case.)
-
-    """
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    request.session.flash = mock_flash_function()
-    activation_model.get_by_code.return_value = None
-
-    result = views.ActivateController(request).get_when_not_logged_in()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-    assert request.session.flash.call_count == 1
-    assert request.session.flash.call_args[0][0].startswith(
-        "We didn't recognize that activation link.")
-
-
-@activate_fixtures
-def test_activate_looks_up_user_by_activation(activation_model, user_model):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    user_model.get_by_activation.return_value.id = 123
-
-    views.ActivateController(request).get_when_not_logged_in()
-
-    user_model.get_by_activation.assert_called_once_with(
-        activation_model.get_by_code.return_value)
-
-
-@activate_fixtures
-def test_activate_404s_if_user_not_found(user_model):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    user_model.get_by_activation.return_value = None
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.ActivateController(request).get_when_not_logged_in()
-
-
-@activate_fixtures
-def test_activate_404s_if_user_id_does_not_match_user_from_hash(user_model):
-    """
-
-    We don't want to let a user with a valid hash activate a different user's
-    account!
-
-    """
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    user_model.get_by_activation.return_value.id = 2  # Not the same id.
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.ActivateController(request).get_when_not_logged_in()
-
-
-@activate_fixtures
-def test_activate_successful_deletes_activation(user_model, activation_model):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    request.db.delete = mock.create_autospec(request.db.delete,
-                                             return_value=None)
-    user_model.get_by_activation.return_value.id = 123
-
-    views.ActivateController(request).get_when_not_logged_in()
-
-    request.db.delete.assert_called_once_with(
-        activation_model.get_by_code.return_value)
-
-
-@activate_fixtures
-def test_activate_successful_flashes_message(user_model):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    request.session.flash = mock_flash_function()
-    user_model.get_by_activation.return_value.id = 123
-
-    views.ActivateController(request).get_when_not_logged_in()
-
-    assert request.session.flash.call_count == 1
-    assert request.session.flash.call_args[0][0].startswith(
-        "Your account has been activated")
-
-
-@activate_fixtures
-def test_activate_successful_creates_ActivationEvent(user_model,
-                                                     ActivationEvent):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    user_model.get_by_activation.return_value.id = 123
-
-    views.ActivateController(request).get_when_not_logged_in()
-
-    ActivationEvent.assert_called_once_with(
-        request, user_model.get_by_activation.return_value)
-
-
-@activate_fixtures
-def test_activate_successful_notifies(user_model, notify, ActivationEvent):
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
-    user_model.get_by_activation.return_value.id = 123
-
-    views.ActivateController(request).get_when_not_logged_in()
-
-    notify.assert_called_once_with(ActivationEvent.return_value)
-
-
-activate_already_logged_in_fixtures = pytest.mark.usefixtures('routes_mapper')
-
-
-@activate_already_logged_in_fixtures
-def test_activate_already_logged_in_when_id_not_an_int():
-    request = DummyRequest(matchdict={
-        'id': 'abc',  # Not an int.
-        'code': 'abc456'},
-        authenticated_user=mock.Mock(id=123, spec=['id']))
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.ActivateController(request).get_when_logged_in()
-
-
-@activate_already_logged_in_fixtures
-def test_activate_already_logged_in_to_same_account():
-    request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'},
-                           authenticated_user=mock.Mock(id=123, spec=['id']))
-    request.session.flash = mock_flash_function()
-
-    result = views.ActivateController(request).get_when_logged_in()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-    assert request.session.flash.call_count == 1
-    assert request.session.flash.call_args[0][0].startswith(
-        "Your account has been activated and you're now signed in")
-
-
-@activate_already_logged_in_fixtures
-def test_activate_already_logged_in_to_different_account():
-    request = DummyRequest(
-        matchdict={'id': '123', 'code': 'abc456'},
-        authenticated_user=mock.Mock(
-            id=124,  # Different user id.
-            spec=['id']))
-    request.session.flash = mock_flash_function()
-
-    result = views.ActivateController(request).get_when_logged_in()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-    assert request.session.flash.call_count == 1
-    assert request.session.flash.call_args[0][0].startswith(
-        "You're already signed in to a different account")
-
-
-profile_fixtures = pytest.mark.usefixtures('routes_mapper')
-
-
-@profile_fixtures
-def test_profile_form_404s_if_not_logged_in():
-    request = DummyRequest(authenticated_user=None)
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.ProfileController(request).get()
-
-
-@profile_fixtures
-def test_profile_404s_if_not_logged_in():
-    request = DummyRequest(authenticated_user=None)
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.ProfileController(request).post()
-
-
-@profile_fixtures
-def test_profile_400s_with_no_formid():
-    user = FakeUser()
-    request = DummyRequest(post={}, authenticated_user=user)
-
-    with pytest.raises(httpexceptions.HTTPBadRequest):
-        views.ProfileController(request).post()
-
-
-@profile_fixtures
-def test_profile_400s_with_bogus_formid():
-    user = FakeUser()
-    request = DummyRequest(post={'__formid__': 'hax0rs'},
-                           authenticated_user=user)
-
-    with pytest.raises(httpexceptions.HTTPBadRequest):
-        views.ProfileController(request).post()
-
-
-@profile_fixtures
-def test_profile_changing_email_with_valid_data_updates_email():
-    user = FakeUser(email=None, password=None)
-    request = DummyRequest(post={'__formid__': 'email'},
-                           authenticated_user=user)
-    controller = views.ProfileController(request)
-    controller.forms['email'] = form_validating_to(
-        {'email': 'amrit@example.com'})
-
-    controller.post()
-
-    assert user.email == 'amrit@example.com'
-
-
-@profile_fixtures
-def test_profile_changing_email_with_valid_data_redirects():
-    user = FakeUser(email=None, password=None)
-    request = DummyRequest(post={'__formid__': 'email'},
-                           authenticated_user=user)
-    controller = views.ProfileController(request)
-    controller.forms['email'] = form_validating_to(
-        {'email': 'amrit@example.com'})
-
-    result = controller.post()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-
-
-@profile_fixtures
-def test_profile_changing_email_with_invalid_data_returns_form():
-    user = FakeUser(email=None, password=None)
-    request = DummyRequest(post={'__formid__': 'email'},
-                           authenticated_user=user)
-    controller = views.ProfileController(request)
-    controller.forms['email'] = invalid_form()
-
-    result = controller.post()
-
-    assert 'email_form' in result
-
-
-@profile_fixtures
-def test_profile_changing_email_with_invalid_data_does_not_update_email():
-    user = FakeUser(email=None, password=None)
-    request = DummyRequest(post={'__formid__': 'email'},
-                           authenticated_user=user)
-    controller = views.ProfileController(request)
-    controller.forms['email'] = invalid_form()
-
-    controller.post()
-
-    assert user.email is None
-
-
-@profile_fixtures
-def test_profile_changing_password_with_valid_data_updates_password():
-    user = FakeUser(email=None, password=None)
-    request = DummyRequest(post={'__formid__': 'password'},
-                           authenticated_user=user)
-    controller = views.ProfileController(request)
-    controller.forms['password'] = form_validating_to(
-        {'new_password': 'secrets!'})
-
-    controller.post()
-
-    assert user.password == 'secrets!'
-
-
-@profile_fixtures
-def test_profile_changing_password_with_valid_data_redirects():
-    user = FakeUser(email=None, password=None)
-    request = DummyRequest(post={'__formid__': 'password'},
-                           authenticated_user=user)
-    controller = views.ProfileController(request)
-    controller.forms['password'] = form_validating_to(
-        {'new_password': 'secrets!'})
-
-    result = controller.post()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
-
-
-@profile_fixtures
-def test_profile_changing_password_with_invalid_data_returns_form():
-    user = FakeUser(email=None, password=None)
-    request = DummyRequest(post={'__formid__': 'password'},
-                           authenticated_user=user)
-    controller = views.ProfileController(request)
-    controller.forms['password'] = invalid_form()
-
-    result = controller.post()
-
-    assert 'password_form' in result
-
-
-@profile_fixtures
-def test_profile_changing_password_with_invalid_data_does_not_update_password():
-    user = FakeUser(email=None, password=None)
-    request = DummyRequest(post={'__formid__': 'password'},
-                           authenticated_user=user)
-    controller = views.ProfileController(request)
-    controller.forms['password'] = invalid_form()
-
-    controller.post()
-
-    assert user.password is None
-
-
-notifications_fixtures = pytest.mark.usefixtures('authn_policy',
-                                                 'routes_mapper',
-                                                 'subscriptions_model')
-
-
-@notifications_fixtures
-def test_notifications_form_404s_if_not_logged_in(authn_policy):
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = None
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.NotificationsController(request).get()
-
-
-@notifications_fixtures
-def test_notifications_form_sets_subscriptions_data_in_form(
-        authn_policy,
-        subscriptions_model):
-    request = DummyRequest()
-    authn_policy.authenticated_userid.return_value = 'fiona'
-    subscriptions_model.get_subscriptions_for_uri.return_value = [
-        FakeSubscription('reply', True),
-        FakeSubscription('foo', False),
-    ]
-    controller = views.NotificationsController(request)
-    controller.form = form_validating_to({})
-
-    controller.get()
-
-    controller.form.set_appstruct.assert_called_once_with({
-        'notifications': set(['reply']),
-    })
-
-
-@notifications_fixtures
-def test_notifications_404s_if_not_logged_in():
-    request = DummyRequest(post={})
-
-    with pytest.raises(httpexceptions.HTTPNotFound):
-        views.NotificationsController(request).post()
-
-
-@notifications_fixtures
-def test_notifications_with_invalid_data_returns_form(authn_policy):
-    request = DummyRequest(post={})
-    authn_policy.authenticated_userid.return_value = 'jerry'
-    controller = views.NotificationsController(request)
-    controller.form = invalid_form()
-
-    result = controller.post()
-
-    assert 'form' in result
-
-
-@notifications_fixtures
-def test_notifications_form_with_valid_data_updates_subscriptions(
-        authn_policy, subscriptions_model):
-    request = DummyRequest(post={})
-    authn_policy.authenticated_userid.return_value = 'fiona'
-    subs = [
-        FakeSubscription('reply', True),
-        FakeSubscription('foo', False),
-    ]
-    subscriptions_model.get_subscriptions_for_uri.return_value = subs
-    controller = views.NotificationsController(request)
-    controller.form = form_validating_to({
-        'notifications': set(['foo'])
-    })
-
-    controller.post()
-
-    assert subs[0].active is False
-    assert subs[1].active is True
-
-
-@notifications_fixtures
-def test_notifications_form_with_valid_data_redirects(authn_policy,
-                                                      subscriptions_model):
-    request = DummyRequest(post={})
-    authn_policy.authenticated_userid.return_value = 'fiona'
-    subscriptions_model.get_subscriptions_for_uri.return_value = []
-    controller = views.NotificationsController(request)
-    controller.form = form_validating_to({})
-
-    result = controller.post()
-
-    assert isinstance(result, httpexceptions.HTTPFound)
+        controller.form.set_appstruct.assert_called_once_with({
+            'notifications': set(['reply']),
+        })
+
+    def test_post_404s_if_not_logged_in(self):
+        request = DummyRequest(post={})
+
+        with pytest.raises(httpexceptions.HTTPNotFound):
+            views.NotificationsController(request).post()
+
+    def test_post_with_invalid_data_returns_form(self, authn_policy):
+        request = DummyRequest(post={})
+        authn_policy.authenticated_userid.return_value = 'jerry'
+        controller = views.NotificationsController(request)
+        controller.form = invalid_form()
+
+        result = controller.post()
+
+        assert 'form' in result
+
+    def test_post_with_valid_data_updates_subscriptions(self,
+                                                        authn_policy,
+                                                        subscriptions_model):
+        request = DummyRequest(post={})
+        authn_policy.authenticated_userid.return_value = 'fiona'
+        subs = [
+            FakeSubscription('reply', True),
+            FakeSubscription('foo', False),
+        ]
+        subscriptions_model.get_subscriptions_for_uri.return_value = subs
+        controller = views.NotificationsController(request)
+        controller.form = form_validating_to({
+            'notifications': set(['foo'])
+        })
+
+        controller.post()
+
+        assert subs[0].active is False
+        assert subs[1].active is True
+
+    def test_post_with_valid_data_redirects(self,
+                                            authn_policy,
+                                            subscriptions_model):
+        request = DummyRequest(post={})
+        authn_policy.authenticated_userid.return_value = 'fiona'
+        subscriptions_model.get_subscriptions_for_uri.return_value = []
+        controller = views.NotificationsController(request)
+        controller.form = form_validating_to({})
+
+        result = controller.post()
+
+        assert isinstance(result, httpexceptions.HTTPFound)
 
 
 @pytest.fixture
