@@ -12,6 +12,10 @@ function createTestFrame() {
   return frame;
 }
 
+// The root URL for the extension returned by the
+// extensionURL(path) fake
+var EXTENSION_BASE_URL = 'chrome-extension://hypothesis';
+
 describe('SidebarInjector', function () {
   'use strict';
 
@@ -60,7 +64,7 @@ describe('SidebarInjector', function () {
     injector = new SidebarInjector(fakeChromeTabs, {
       isAllowedFileSchemeAccess: fakeFileAccess,
       extensionURL: sinon.spy(function (path) {
-        return 'CRX_PATH' + path;
+        return EXTENSION_BASE_URL + path;
       })
     });
   });
@@ -78,12 +82,15 @@ describe('SidebarInjector', function () {
   }
 
   describe('.injectIntoTab', function () {
-    var protocols = ['chrome:', 'chrome-devtools:', 'chrome-extension:'];
-    protocols.forEach(function (protocol) {
-      it('bails early when trying to load an unsupported ' + protocol + ' url', function () {
+    var urls = [
+      'chrome://version',
+      'chrome-devtools://host',
+      'chrome-extension://1234/foo.html',
+      'chrome-extension://1234/foo.pdf',
+    ];
+    urls.forEach(function (url) {
+      it('bails early when trying to load an unsupported url: ' + url, function () {
         var spy = fakeChromeTabs.executeScript;
-        var url = protocol + '//foo/';
-
         return injector.injectIntoTab({id: 1, url: url}).then(
           assertReject, function (err) {
             assert.instanceOf(err, errors.RestrictedProtocolError);
@@ -93,6 +100,13 @@ describe('SidebarInjector', function () {
       });
     });
 
+    it('succeeds if the tab is already displaying the embedded PDF viewer', function () {
+        var url = EXTENSION_BASE_URL + '/content/web/viewer.html?file=' +
+          encodeURIComponent('http://origin/foo.pdf');
+        return injector.injectIntoTab({id: 1, url: url});
+      }
+    );
+
     describe('when viewing a remote PDF', function () {
       it('injects hypothesis into the page', function () {
         contentType = 'PDF';
@@ -101,7 +115,7 @@ describe('SidebarInjector', function () {
 
         return injector.injectIntoTab({id: 1, url: url}).then(function() {
           assert.calledWith(spy, 1, {
-            url: 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent(url)
+            url: EXTENSION_BASE_URL + '/content/web/viewer.html?file=' + encodeURIComponent(url)
           });
         });
       });
@@ -129,7 +143,7 @@ describe('SidebarInjector', function () {
           var resourceRoot = contentFrame.contentDocument.querySelector('meta');
           assert.ok(resourceRoot);
           assert.equal(resourceRoot.name, 'hypothesis-resource-root');
-          assert.equal(resourceRoot.content, 'CRX_PATH');
+          assert.equal(resourceRoot.content, EXTENSION_BASE_URL);
         });
       });
     });
@@ -145,7 +159,7 @@ describe('SidebarInjector', function () {
             function () {
               assert.called(spy);
               assert.calledWith(spy, 1, {
-                url: 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent('file://foo.pdf')
+                url: EXTENSION_BASE_URL + '/content/web/viewer.html?file=' + encodeURIComponent('file://foo.pdf')
               });
             }
           );
@@ -216,7 +230,7 @@ describe('SidebarInjector', function () {
     describe('when viewing a PDF', function () {
       it('reverts the tab back to the original document', function () {
         var spy = fakeChromeTabs.update.yields([]);
-        var url = 'CRX_PATH/content/web/viewer.html?file=' + encodeURIComponent('http://example.com/foo.pdf');
+        var url = EXTENSION_BASE_URL + '/content/web/viewer.html?file=' + encodeURIComponent('http://example.com/foo.pdf');
 
         return injector.removeFromTab({id: 1, url: url}).then(function () {
           assert.calledWith(spy, 1, {
