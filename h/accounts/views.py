@@ -526,8 +526,6 @@ class ProfileController(object):
 
 @view_defaults(route_name='profile_notifications',
                renderer='h:templates/accounts/notifications.html.jinja2')
-@view_config(attr='notifications_form', request_method='GET')
-@view_config(attr='notifications', request_method='POST')
 class NotificationsController(object):
     def __init__(self, request):
         self.request = request
@@ -535,7 +533,8 @@ class NotificationsController(object):
         self.form = deform.Form(self.schema,
                                 buttons=(_('Save changes'),))
 
-    def notifications_form(self):
+    @view_config(request_method='GET')
+    def get(self):
         """Render the notifications form."""
         if self.request.authenticated_userid is None:
             raise httpexceptions.HTTPNotFound()
@@ -547,7 +546,8 @@ class NotificationsController(object):
         })
         return {'form': self.form.render()}
 
-    def notifications(self):
+    @view_config(request_method='POST')
+    def post(self):
         """Process notifications POST data."""
         if self.request.authenticated_userid is None:
             raise httpexceptions.HTTPNotFound()

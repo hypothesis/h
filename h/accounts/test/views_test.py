@@ -994,7 +994,7 @@ def test_notifications_form_404s_if_not_logged_in(authn_policy):
     authn_policy.authenticated_userid.return_value = None
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        NotificationsController(request).notifications_form()
+        NotificationsController(request).get()
 
 
 @notifications_fixtures
@@ -1009,7 +1009,7 @@ def test_notifications_form_sets_subscriptions_data_in_form(authn_policy,
     controller = NotificationsController(request)
     controller.form = form_validating_to({})
 
-    controller.notifications_form()
+    controller.get()
 
     controller.form.set_appstruct.assert_called_once_with({
         'notifications': set(['reply']),
@@ -1021,7 +1021,7 @@ def test_notifications_404s_if_not_logged_in():
     request = DummyRequest(post={})
 
     with pytest.raises(httpexceptions.HTTPNotFound):
-        NotificationsController(request).notifications()
+        NotificationsController(request).post()
 
 
 @notifications_fixtures
@@ -1031,7 +1031,7 @@ def test_notifications_with_invalid_data_returns_form(authn_policy):
     controller = NotificationsController(request)
     controller.form = invalid_form()
 
-    result = controller.notifications()
+    result = controller.post()
 
     assert 'form' in result
 
@@ -1051,7 +1051,7 @@ def test_notifications_form_with_valid_data_updates_subscriptions(authn_policy,
         'notifications': set(['foo'])
     })
 
-    controller.notifications()
+    controller.post()
 
     assert subs[0].active == False
     assert subs[1].active == True
@@ -1066,7 +1066,7 @@ def test_notifications_form_with_valid_data_redirects(authn_policy,
     controller = NotificationsController(request)
     controller.form = form_validating_to({})
 
-    result = controller.notifications()
+    result = controller.post()
 
     assert isinstance(result, httpexceptions.HTTPFound)
 
