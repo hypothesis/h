@@ -45,8 +45,9 @@ function HelpPage(chromeTabs, extensionURL) {
   /**
    * Open a tab displaying the help page.
    *
-   * @p helpSection should correspond to the id of a section
-   *    within the help page.
+   * @param {string} helpSection - ID of a <section> within the help page.
+   * @param {tabs.Tab} tab - The tab where the error occurred.
+   * @param {Error} error - The error which prompted the help page.
    */
   function showHelpPage(helpSection, tab, error) {
     var params = '';

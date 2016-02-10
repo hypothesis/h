@@ -96,6 +96,20 @@ function SidebarInjector(chromeTabs, dependencies) {
     return canInject;
   }
 
+  /**
+   * Guess the content type of a page from the URL alone.
+   *
+   * This is a fallback for when it is not possible to inject
+   * a content script to determine the type of content in the page.
+   */
+  function guessContentTypeFromURL(url) {
+    if (url.indexOf('.pdf') !== -1) {
+      return CONTENT_TYPE_PDF;
+    } else {
+      return CONTENT_TYPE_HTML;
+    }
+  }
+
   function detectTabContentType(tab) {
     if (isPDFViewerURL(tab.url)) {
       return Promise.resolve(CONTENT_TYPE_PDF);
@@ -106,16 +120,21 @@ function SidebarInjector(chromeTabs, dependencies) {
         return executeScriptFn(tab.id, {
             code: toIIFEString(detectContentType)
           }).then(function (frameResults) {
-            return frameResults[0].type;
+            if (Array.isArray(frameResults)) {
+              return frameResults[0].type;
+            } else {
+              // If the content script threw an exception,
+              // frameResults may be null or undefined.
+              //
+              // In that case, fall back to guessing based on the
+              // tab URL
+              return guessContentTypeFromURL(tab.url);
+            }
           });
       } else {
-        // we cannot inject a content script in order to determine the
+        // We cannot inject a content script in order to determine the
         // file type, so fall back to a URL-based mechanism
-        if (tab.url.indexOf('.pdf') !== -1) {
-          return Promise.resolve(CONTENT_TYPE_PDF);
-        } else {
-          return Promise.resolve(CONTENT_TYPE_HTML);
-        }
+        return Promise.resolve(guessContentTypeFromURL(tab.url));
       }
     });
   }
@@ -179,15 +198,11 @@ function SidebarInjector(chromeTabs, dependencies) {
   }
 
   function injectIntoPDF(tab) {
-    return new Promise(function (resolve, reject) {
-      if (!isPDFViewerURL(tab.url)) {
-        chromeTabs.update(tab.id, {url: getPDFViewerURL(tab.url)}, function () {
-          resolve();
-        });
-      } else {
-        resolve();
-      }
-    });
+    if (isPDFViewerURL(tab.url)) {
+      return Promise.resolve();
+    }
+    var updateFn = util.promisify(chromeTabs.update);
+    return updateFn(tab.id, {url: getPDFViewerURL(tab.url)});
   }
 
   function injectIntoLocalPDF(tab) {
@@ -261,17 +276,13 @@ function SidebarInjector(chromeTabs, dependencies) {
    *            injected script via the 'window.HYPOTHESIS_ENV' object.
    */
   function injectScript(tabId, path, env) {
-    return new Promise(function (resolve) {
-      var src  = extensionURL(path);
-
-      var code = generateMetaTagCode(env) +
-        'var script = document.createElement("script");' +
-        'script.src = "{}";' +
-        'document.body.appendChild(script);';
-      var code = code.replace('{}', src);
-
-      chromeTabs.executeScript(tabId, {code: code}, resolve);
-    });
+    var src  = extensionURL(path);
+    var code = generateMetaTagCode(env) +
+      'var script = document.createElement("script");' +
+      'script.src = "{}";' +
+      'document.body.appendChild(script);';
+    var code = code.replace('{}', src);
+    return executeScriptFn(tabId, {code: code});
   }
 }
 
