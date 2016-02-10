@@ -313,9 +313,9 @@ class RegisterController(object):
         cg_link = ('<a href="/community-guidelines">' +
                    _('Community Guidelines') +
                    '</a>')
-        form_footer = _('You are agreeing to be bound by '
-                        'our {tos_link} and {cg_link}.').format(tos_link=tos_link,
-                                                                cg_link=cg_link)
+        form_footer = _(
+            'You are agreeing to be bound by our {tos_link} and '
+            '{cg_link}.').format(tos_link=tos_link, cg_link=cg_link)
 
         self.request = request
         self.schema = schemas.RegisterSchema().bind(request=self.request)
@@ -325,9 +325,7 @@ class RegisterController(object):
 
     @view_config(request_method='GET')
     def get(self):
-        """
-        Render the empty registration form.
-        """
+        """Render the empty registration form."""
         self._redirect_if_logged_in()
 
         return {'form': self.form.render()}
