@@ -27,8 +27,8 @@ class DummyRequest(testing.DummyRequest):
 
 
 class FakeSubscription(object):
-    def __init__(self, type, active):
-        self.type = type
+    def __init__(self, type_, active):
+        self.type = type_
         self.active = active
 
 
@@ -176,7 +176,7 @@ def test_logout_event(logoutevent, authn_policy, notify):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
-    result = views.AuthController(request).logout()
+    views.AuthController(request).logout()
 
     logoutevent.assert_called_with(request)
     notify.assert_called_with(logoutevent.return_value)
@@ -188,7 +188,7 @@ def test_logout_invalidates_session(authn_policy):
     request.session["foo"] = "bar"
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
 
-    result = views.AuthController(request).logout()
+    views.AuthController(request).logout()
 
     assert "foo" not in request.session
 
@@ -386,7 +386,6 @@ def test_forgot_password_sends_mail(reset_mail, mailer):
     user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
     controller = views.ForgotPasswordController(request)
     controller.form = form_validating_to({"user": user})
-    message = reset_mail.return_value
     reset_mail.return_value = {
         'recipients': ['giraffe@thezoo.org'],
         'subject': 'subject',
@@ -484,6 +483,7 @@ register_fixtures = pytest.mark.usefixtures('activation_model',
                                             'notify',
                                             'routes_mapper',
                                             'user_model')
+
 
 @register_fixtures
 def test_register_returns_errors_when_validation_fails():
@@ -644,7 +644,6 @@ def test_register_form_redirects_when_logged_in(authn_policy):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
     controller = views.RegisterController(request)
-
 
     with pytest.raises(httpexceptions.HTTPRedirection):
         controller.get()
@@ -876,7 +875,8 @@ def test_profile_changing_email_with_valid_data_updates_email():
     request = DummyRequest(post={'__formid__': 'email'},
                            authenticated_user=user)
     controller = views.ProfileController(request)
-    controller.forms['email'] = form_validating_to({'email': 'amrit@example.com'})
+    controller.forms['email'] = form_validating_to(
+        {'email': 'amrit@example.com'})
 
     controller.post()
 
@@ -889,7 +889,8 @@ def test_profile_changing_email_with_valid_data_redirects():
     request = DummyRequest(post={'__formid__': 'email'},
                            authenticated_user=user)
     controller = views.ProfileController(request)
-    controller.forms['email'] = form_validating_to({'email': 'amrit@example.com'})
+    controller.forms['email'] = form_validating_to(
+        {'email': 'amrit@example.com'})
 
     result = controller.post()
 
@@ -928,7 +929,8 @@ def test_profile_changing_password_with_valid_data_updates_password():
     request = DummyRequest(post={'__formid__': 'password'},
                            authenticated_user=user)
     controller = views.ProfileController(request)
-    controller.forms['password'] = form_validating_to({'new_password': 'secrets!'})
+    controller.forms['password'] = form_validating_to(
+        {'new_password': 'secrets!'})
 
     controller.post()
 
@@ -941,7 +943,8 @@ def test_profile_changing_password_with_valid_data_redirects():
     request = DummyRequest(post={'__formid__': 'password'},
                            authenticated_user=user)
     controller = views.ProfileController(request)
-    controller.forms['password'] = form_validating_to({'new_password': 'secrets!'})
+    controller.forms['password'] = form_validating_to(
+        {'new_password': 'secrets!'})
 
     result = controller.post()
 
@@ -989,8 +992,9 @@ def test_notifications_form_404s_if_not_logged_in(authn_policy):
 
 
 @notifications_fixtures
-def test_notifications_form_sets_subscriptions_data_in_form(authn_policy,
-                                                            subscriptions_model):
+def test_notifications_form_sets_subscriptions_data_in_form(
+        authn_policy,
+        subscriptions_model):
     request = DummyRequest()
     authn_policy.authenticated_userid.return_value = 'fiona'
     subscriptions_model.get_subscriptions_for_uri.return_value = [
@@ -1028,8 +1032,8 @@ def test_notifications_with_invalid_data_returns_form(authn_policy):
 
 
 @notifications_fixtures
-def test_notifications_form_with_valid_data_updates_subscriptions(authn_policy,
-                                                                  subscriptions_model):
+def test_notifications_form_with_valid_data_updates_subscriptions(
+        authn_policy, subscriptions_model):
     request = DummyRequest(post={})
     authn_policy.authenticated_userid.return_value = 'fiona'
     subs = [
@@ -1044,8 +1048,8 @@ def test_notifications_form_with_valid_data_updates_subscriptions(authn_policy,
 
     controller.post()
 
-    assert subs[0].active == False
-    assert subs[1].active == True
+    assert subs[0].active is False
+    assert subs[1].active is True
 
 
 @notifications_fixtures
@@ -1087,7 +1091,7 @@ def subscriptions_model(request):
 
 
 @pytest.fixture
-def user_model(config, request):
+def user_model(request):
     patcher = mock.patch('h.accounts.views.User', autospec=True)
     model = patcher.start()
     request.addfinalizer(patcher.stop)
@@ -1095,7 +1099,7 @@ def user_model(config, request):
 
 
 @pytest.fixture
-def activation_model(config, request):
+def activation_model(request):
     patcher = mock.patch('h.accounts.views.Activation', autospec=True)
     model = patcher.start()
     request.addfinalizer(patcher.stop)
@@ -1103,7 +1107,7 @@ def activation_model(config, request):
 
 
 @pytest.fixture
-def ActivationEvent(config, request):
+def ActivationEvent(request):
     patcher = mock.patch('h.accounts.views.ActivationEvent', autospec=True)
     model = patcher.start()
     request.addfinalizer(patcher.stop)
