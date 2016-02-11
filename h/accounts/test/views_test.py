@@ -12,6 +12,7 @@ from h import conftest
 
 from h import accounts
 from h.accounts import views
+from h.api.models.token import API_TOKEN_PREFIX
 
 
 class DummyRequest(testing.DummyRequest):
@@ -952,6 +953,80 @@ class TestNotificationsController(object):
         assert isinstance(result, httpexceptions.HTTPFound)
 
 
+@pytest.mark.usefixtures('models')
+class TestDeveloperController(object):
+
+    def test_get_gets_token_for_authenticated_userid(self, models):
+        request = testing.DummyRequest()
+
+        views.DeveloperController(request).get()
+
+        models.Token.get_by_userid.assert_called_once_with(
+            request.authenticated_userid)
+
+    def test_get_returns_token(self, models):
+        token = API_TOKEN_PREFIX + u'abc123'
+        models.Token.get_by_userid.return_value.value = token
+
+        data = views.DeveloperController(testing.DummyRequest()).get()
+
+        assert data.get('token') == token
+
+    def test_get_with_no_token(self, models):
+        models.Token.get_by_userid.return_value = None
+
+        assert views.DeveloperController(testing.DummyRequest()).get() == {}
+
+    def test_post_gets_token_for_authenticated_userid(self, models):
+        request = testing.DummyRequest()
+
+        views.DeveloperController(request).post()
+
+        models.Token.get_by_userid.assert_called_once_with(
+            request.authenticated_userid)
+
+    def test_post_calls_regenerate(self, models):
+        """If the user already has a token it should regenerate it."""
+        views.DeveloperController(testing.DummyRequest()).post()
+
+        models.Token.get_by_userid.return_value.regenerate.assert_called_with()
+
+    def test_post_inits_new_token_for_authenticated_userid(self, models):
+        """If the user doesn't have a token yet it should generate one."""
+        models.Token.get_by_userid.return_value = None
+        request = testing.DummyRequest(db=mock.Mock())
+
+        views.DeveloperController(request).post()
+
+        models.Token.assert_called_once_with(request.authenticated_userid)
+
+    def test_post_adds_new_token_to_db(self, models):
+        """If the user doesn't have a token yet it should add one to the db."""
+        models.Token.get_by_userid.return_value = None
+        request = testing.DummyRequest(db=mock.Mock())
+
+        views.DeveloperController(request).post()
+
+        request.db.add.assert_called_once_with(models.Token.return_value)
+
+        models.Token.assert_called_once_with(request.authenticated_userid)
+
+    def test_post_returns_token_after_regenerating(self, models):
+        """After regenerating a token it should return its new value."""
+        data = views.DeveloperController(testing.DummyRequest()).post()
+
+        assert data['token'] == models.Token.get_by_userid.return_value.value
+
+    def test_post_returns_token_after_generating(self, models):
+        """After generating a new token it should return its value."""
+        models.Token.get_by_userid.return_value = None
+        request = testing.DummyRequest(db=mock.Mock())
+
+        data = views.DeveloperController(request).post()
+
+        assert data['token'] == models.Token.return_value.value
+
+
 @pytest.fixture
 def pop_flash(request):
     patcher = mock.patch('h.accounts.views.session.pop_flash', autospec=True)
@@ -1003,6 +1078,14 @@ def ActivationEvent(request):
 @pytest.fixture
 def mailer(request):
     patcher = mock.patch('h.accounts.views.mailer', autospec=True)
+    module = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return module
+
+
+@pytest.fixture
+def models(request):
+    patcher = mock.patch('h.accounts.views.models', autospec=True)
     module = patcher.start()
     request.addfinalizer(patcher.stop)
     return module

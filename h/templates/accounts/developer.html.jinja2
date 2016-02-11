@@ -1,0 +1,51 @@
+{% extends "h:templates/layouts/profile.html.jinja2" %}
+
+{% set page_route = 'profile_developer' %}
+{% set page_title = 'Developer' %}
+
+{% block page_content %}
+  <div class="form-vertical">
+    <h2 class="form-heading">
+      <span>{% trans %}Generate your API token{% endtrans %}</span>
+    </h2>
+
+    {% if token %}
+      <label for="token">{% trans %}Your API token is:{% endtrans %}</label>
+      <input id="token" type="text" value="{{ token }}" readonly="readonly"
+             class="api-token-input">
+      <span class="help-block">
+        Please keep your API token safe as it can be used to access your
+        account.
+      </span>
+    {% else %}
+      <legend>
+        {% trans %}You haven't generated an API token yet.{% endtrans %}
+      </legend>
+    {% endif %}
+
+      <form method="POST">
+        <div class="form-actions">
+          <div class="form-actions-buttons">
+
+    {% if token %}
+            <button type="submit" class="btn btn-danger"
+                    title="{% trans %}Delete your API token and generate a new one{% endtrans%}">
+              Regenerate your API token
+            </button>
+    {% else %}
+            <button type="submit" class="btn btn-primary">
+              {% trans %}Generate your API token{% endtrans %}
+            </button>
+    {% endif %}
+          </div>
+        </div>
+      </form>
+      <h2 class="form-heading">
+        <span>{% trans %}API documentation{% endtrans %}</span>
+      </h2>
+      <legend>
+        You can learn more about the Hypothesis API at
+        <a href="https://h.readthedocs.org/en/latest/api.html">h.readthedocs.org/en/latest/api.html</a>.
+      </legend>
+  </div>
+{% endblock page_content %}

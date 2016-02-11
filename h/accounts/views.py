@@ -565,6 +565,39 @@ class NotificationsController(object):
             self.request.authenticated_userid)
 
 
+@view_defaults(route_name='profile_developer',
+               renderer='h:templates/accounts/developer.html.jinja2',
+               effective_principals=security.Authenticated)
+class DeveloperController(object):
+
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the developer page, including the form."""
+        token = models.Token.get_by_userid(self.request.authenticated_userid)
+        if token:
+            return {'token': token.value}
+        else:
+            return {}
+
+    @view_config(request_method='POST')
+    def post(self):
+        """(Re-)generate the user's API token."""
+        token = models.Token.get_by_userid(self.request.authenticated_userid)
+
+        if token:
+            # The user already has an API token, regenerate it.
+            token.regenerate()
+        else:
+            # The user doesn't have an API token yet, generate one for them.
+            token = models.Token(self.request.authenticated_userid)
+            self.request.db.add(token)
+
+        return {'token': token.value}
+
+
 def activation_email(request, user):
     """Return the data for an 'activate your account' email for the given user.
 
@@ -633,6 +666,7 @@ def includeme(config):
     config.add_route('reset_password_with_code', '/reset_password/{code}')
     config.add_route('profile', '/profile')
     config.add_route('profile_notifications', '/profile/notifications')
+    config.add_route('profile_developer', '/profile/developer')
     config.add_route('dismiss_sidebar_tutorial',
                      '/app/dismiss_sidebar_tutorial')
     config.scan(__name__)

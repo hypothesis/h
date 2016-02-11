@@ -6,6 +6,29 @@ developers interested in integrating functionality from Hypothesis into their
 own applications.
 
 
+Authorization
+-------------
+
+Some of the API URLs documented below require a valid API token.
+To use these API URLs you should:
+
+1. Generate yourself an API token on your
+   `Hypothesis developer page <https://hypothes.is/profile/developer>`_
+   (you must be signed in to Hypothesis to get to this page).
+
+2. Put the API token in the ``Authorization`` header in your requests to the
+   API.
+
+**Example request**::
+
+   GET /api
+   Host: hypothes.is
+   Accept: application/json
+   Authorization: Bearer 6879-31d62c13b0099456de5379de90f90395
+
+(Replace ``6879-31d62c13b0099456de5379de90f90395`` with your own API token.)
+
+
 root
 ----
 
@@ -225,7 +248,7 @@ create
 
 .. http:post:: /api/annotations
 
-   Create a new annotation. Requires a valid authentication token.
+   Create a new annotation. Requires a valid API token.
 
    **Example request**::
 
@@ -233,7 +256,7 @@ create
       Host: hypothes.is
       Accept: application/json
       Content-Type: application/json;charset=UTF-8
-      Authorization: Bearer eyJhbGc[...]mbl_YBM
+      Authorization: Bearer 6879-31d62c1[...]0f90395
 
       {
           "uri": "http://example.com/",
@@ -265,15 +288,15 @@ create
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
    :reqheader Content-Type: request body content type
-   :reqheader Authorization: JWT authentication token
+   :reqheader Authorization: the API token
    :resheader Content-Type: response content type
    :>json string id: unique id of new annotation
    :>json datetime created: created date of new annotation
    :>json datetime updated: updated date of new annotation (same as `created`)
    :statuscode 200: no error
    :statuscode 400: could not create annotation from your request (bad payload)
-   :statuscode 401: no auth token was provided
-   :statuscode 403: auth token provided does not convey "create" permissions
+   :statuscode 401: no API token was provided
+   :statuscode 403: API token provided does not convey "create" permissions
 
 
 update
@@ -281,8 +304,7 @@ update
 
 .. http:put:: /api/annotations/(string:id)
 
-   Update the annotation with the given `id`. Requires a valid authentication
-   token.
+   Update the annotation with the given `id`. Requires a valid API token.
 
    **Example request**::
 
@@ -290,7 +312,7 @@ update
       Host: hypothes.is
       Accept: application/json
       Content-Type: application/json;charset=UTF-8
-      Authorization: Bearer eyJhbGc[...]mbl_YBM
+      Authorization: Bearer 6879-31d62c1[...]0f90395
 
       {
           "uri": "http://example.com/foo",
@@ -312,14 +334,14 @@ update
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
    :reqheader Content-Type: request body content type
-   :reqheader Authorization: JWT authentication token
+   :reqheader Authorization: the API token
    :resheader Content-Type: response content type
    :>json datetime updated: updated date of annotation
    :statuscode 200: no error
    :statuscode 400: could not update annotation from your request (bad payload)
-   :statuscode 401: no auth token was provided
+   :statuscode 401: no API token was provided
    :statuscode 403:
-      auth token provided does not convey "update" permissions for the
+      API token provided does not convey "update" permissions for the
       annotation with the given `id`
    :statuscode 404: annotation with the given `id` was not found
 
@@ -329,15 +351,14 @@ delete
 
 .. http:delete:: /api/annotations/(string:id)
 
-   Delete the annotation with the given `id`. Requires a valid authentication
-   token.
+   Delete the annotation with the given `id`. Requires a valid API token.
 
    **Example request**::
 
       DELETE /api/annotations/AUxWM-HasREW1YKAwhil
       Host: hypothes.is
       Accept: application/json
-      Authorization: Bearer eyJhbGc[...]mbl_YBM
+      Authorization: Bearer 6879-31d62c1[...]0f90395
 
    **Example response**::
 
@@ -351,13 +372,13 @@ delete
 
    :param id: annotation's unique id
    :reqheader Accept: desired response content type
-   :reqheader Authorization: JWT authentication token
+   :reqheader Authorization: the API token
    :resheader Content-Type: response content type
    :>json boolean deleted: whether the annotation was deleted
    :>json string id: the unique `id` of the deleted annotation
    :statuscode 200: no error
-   :statuscode 401: no auth token was provided
+   :statuscode 401: no API token was provided
    :statuscode 403:
-      auth token provided does not convey "update" permissions for the
+      API token provided does not convey "update" permissions for the
       annotation with the given `id`
    :statuscode 404: annotation with the given `id` was not found

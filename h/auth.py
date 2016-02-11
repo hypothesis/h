@@ -23,7 +23,9 @@ class AuthenticationPolicy(object):
 
     def authenticated_userid(self, request):
         if is_api_request(request):
-            return auth.userid_from_bearer_token(request)
+            token = bearer_token(request)
+            return (auth.userid_from_api_token(token) or
+                    auth.userid_from_jwt(token, request))
         return self.session_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):
@@ -107,6 +109,23 @@ def group_principals(user):
 def is_api_request(request):
     return (request.path.startswith('/api') and
             request.path not in ['/api/token', '/api/badge'])
+
+
+def bearer_token(request):
+    """
+    Return the bearer token from the request's Authorization header.
+
+    The "Bearer " prefix will be stripped from the token.
+
+    If the request has no Authorization header or the Authorization header
+    doesn't contain a bearer token, returns ''.
+
+    :rtype: unicode
+    """
+    if request.headers.get('Authorization', '').startswith('Bearer '):
+        return unicode(request.headers['Authorization'][len('Bearer '):])
+    else:
+        return u''
 
 
 def includeme(config):
