@@ -55,11 +55,13 @@
     {% endif %}
 
     {% if request.sentry.get_public_dsn() %}
-      <script>
-        var RAVEN_CONFIG = {
-          dsn: "{{ request.sentry.get_public_dsn('https') }}",
-          release: "{{ h_version }}"
-        };
+      <script class="js-hypothesis-settings" type="application/json">
+        {
+          "raven": {
+            "dsn": "{{ request.sentry.get_public_dsn('https') }}",
+            "release": "{{ h_version }}"
+          }
+        }
       </script>
     {% endif %}
 

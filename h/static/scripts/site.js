@@ -1,6 +1,7 @@
 // configure error reporting
-if (window.RAVEN_CONFIG) {
-  require('./raven').init(window.RAVEN_CONFIG);
+var settings = require('./settings')(document);
+if (settings.raven) {
+  require('./raven').init(settings.raven);
 }
 
 var page = require('page');

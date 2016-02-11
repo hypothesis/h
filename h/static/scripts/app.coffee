@@ -1,7 +1,8 @@
 # initialize Raven. This is required at the top of this file
 # so that it happens early in the app's startup flow
-if window.RAVEN_CONFIG
-  require('./raven').init(window.RAVEN_CONFIG)
+settings = require('./settings')(document)
+if settings.raven
+  require('./raven').init(settings.raven)
 
 
 require('autofill-event')
@@ -143,13 +144,13 @@ module.exports = angular.module('h', [
 .service('unicode', require('./unicode'))
 .service('viewFilter', require('./view-filter'))
 
-.factory('settings', require('./settings'))
 .factory('store', require('./store'))
 
 .value('AnnotationSync', require('./annotation-sync'))
 .value('AnnotationUISync', require('./annotation-ui-sync'))
 .value('Discovery', require('./discovery'))
 .value('raven', require('./raven'))
+.value('settings', settings)
 
 .config(configureLocation)
 .config(configureRoutes)
