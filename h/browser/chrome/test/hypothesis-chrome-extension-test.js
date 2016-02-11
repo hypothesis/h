@@ -371,8 +371,8 @@ describe('HypothesisChromeExtension', function () {
 
           return toResult(injectError).then(function () {
             assert.calledWith(fakeErrors.report,
-              'Failed to inject Hypothesis sidebar:',
               error,
+              'Injecting Hypothesis sidebar',
               { url: 'file://foo.html' }
             );
           });

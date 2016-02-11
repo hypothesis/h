@@ -44,13 +44,14 @@ function isKnownError(err) {
  * ie. those which are not instances of ExtensionError, are reported to
  * Sentry.
  *
- * @param {string} context - Describes the context in which the error occurred
  * @param {Error} error - The error which happened.
+ * @param {string} when - Describes the context in which the error occurred.
+ * @param {Object} context - Additional context for the error.
  */
-function report(context, error) {
-  console.error(context, error);
+function report(error, when, context) {
+  console.error(when, error);
   if (!isKnownError(error)) {
-    raven.report(context, error);
+    raven.report(error, when, context);
   }
 }
 

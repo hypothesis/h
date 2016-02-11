@@ -34,24 +34,21 @@ describe('raven', function () {
 
   describe('.report()', function () {
     it('extracts the message property from Error-like objects', function () {
-      raven.report('context', {message: 'An error'});
+      raven.report({message: 'An error'}, 'context');
       assert.calledWith(fakeRavenJS.captureException, 'An error', {
         extra: {
-          context: 'context',
-          details: undefined,
+          when: 'context',
         },
       });
     });
 
     it('passes extra details through', function () {
       var error = new Error('an error');
-      raven.report('context', error, { url: 'foobar.com' });
+      raven.report(error, 'some operation', { url: 'foobar.com' });
       assert.calledWith(fakeRavenJS.captureException, error, {
         extra: {
-          context: 'context',
-          details: {
-            url: 'foobar.com',
-          },
+          when: 'some operation',
+          url: 'foobar.com',
         },
       });
     });

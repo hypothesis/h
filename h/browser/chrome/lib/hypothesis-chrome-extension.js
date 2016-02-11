@@ -213,7 +213,7 @@ function HypothesisChromeExtension(dependencies) {
       });
       return sidebar.injectIntoTab(tab)
         .catch(function (err) {
-          errors.report('Failed to inject Hypothesis sidebar:', err, {
+          errors.report(err, 'Injecting Hypothesis sidebar', {
             url: tab.url,
           });
           state.errorTab(tab.id, err);
