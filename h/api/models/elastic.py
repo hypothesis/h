@@ -27,9 +27,9 @@ class Annotation(annotation.Annotation):
             return ""
 
     @property
-    def parent(self):
+    def parent_id(self):
         """
-        Return the thread parent of this annotation, if it exists.
+        Return the id of the thread parent of this annotation, if it exists.
         """
         if 'references' not in self:
             return None
@@ -37,7 +37,7 @@ class Annotation(annotation.Annotation):
             return None
         if not self['references']:
             return None
-        return Annotation.fetch(self['references'][-1])
+        return self['references'][-1]
 
     @property
     def target_links(self):

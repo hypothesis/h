@@ -7,8 +7,21 @@ for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
 
-from h.api import models
+from h.api.models import elastic as models
 from h.api import transform
+
+
+def annotation_from_dict(data):
+    """
+    Create an annotation model object from the passed dict, without saving.
+
+    :param data: a dictionary of annotation properties
+    :type data: dict
+
+    :returns: the created annotation
+    :rtype: dict
+    """
+    return models.Annotation(data)
 
 
 def fetch_annotation(id):
@@ -37,7 +50,7 @@ def create_annotation(data):
     annotation = models.Annotation(data)
 
     # FIXME: this should happen when indexing, not storing.
-    transform.prepare(annotation)
+    _prepare(annotation)
 
     annotation.save()
     return annotation
@@ -62,7 +75,7 @@ def update_annotation(id, data):
     annotation.update(data)
 
     # FIXME: this should happen when indexing, not storing.
-    transform.prepare(annotation)
+    _prepare(annotation)
 
     annotation.save()
     return annotation
@@ -105,3 +118,25 @@ def expand_uri(uri):
             return [uri]
 
     return doc.uris()
+
+
+def _prepare(annotation):
+    """
+    Prepare the given annotation for storage.
+
+    Scan the passed annotation for any target URIs or document metadata URIs
+    and add normalized versions of these to the document.
+    """
+    transform.set_group_if_reply(annotation, fetcher=fetch_annotation)
+    transform.insert_group_if_none(annotation)
+    transform.set_group_permissions(annotation)
+
+    # FIXME: Remove this in a month or so, when all our clients have been
+    # updated. -N 2015-09-25
+    transform.fix_old_style_comments(annotation)
+
+    # FIXME: When this becomes simply part of a search indexing operation, this
+    # should probably not mutate its argument.
+    transform.normalize_annotation_target_uris(annotation)
+
+    transform.add_nipsa(annotation)

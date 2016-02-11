@@ -12,6 +12,7 @@ from h import i18n
 from h import models
 from h import presenters
 from h.api import search
+from h.api import storage
 from h.api import uri
 from h.groups import schemas
 
@@ -105,7 +106,8 @@ def _read_group(request, group):
     result = search.search(request,
                            private=False,
                            params={"group": group.pubid, "limit": 1000})
-    annotations = [presenters.AnnotationHTMLPresenter(models.Annotation(a))
+    annotations = [presenters.AnnotationHTMLPresenter(
+                       storage.annotation_from_dict(a))
                    for a in result['rows']]
 
     # Group the annotations by URI.
