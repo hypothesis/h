@@ -5,10 +5,13 @@ from __future__ import unicode_literals
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import aliased
 
 from h.api import uri
 from h.api.db import Base
 from h.api.db import mixins
+from h._compat import text_type
+
 
 class Document(Base, mixins.Timestamps):
     __tablename__ = 'document'
@@ -20,6 +23,39 @@ class Document(Base, mixins.Timestamps):
 
     def __repr__(self):
         return '<Document %s>' % self.id
+
+    @classmethod
+    def find_or_create_by_uris(cls, claimant_uri, uris,
+                               created=None, updated=None):
+        """
+        Find or create documents from a claimant uri and a set of uris.
+
+        It tries to find a document based on he claimant and the set of uris.
+        If none can be found it will return a new document with the claimant
+        uri as its only document uri as a self-claim.
+        """
+
+        normalized_claimant = text_type(uri.normalize(claimant_uri), 'utf-8')
+        query_uris = ([normalized_claimant] +
+                      [text_type(uri.normalize(u), 'utf-8') for u in uris])
+
+        matching_claims = (DocumentURI.query.filter(
+                DocumentURI.uri_normalized.in_(query_uris))
+                .distinct(DocumentURI.document_id).subquery())
+        matching_claims_aliased = aliased(DocumentURI, matching_claims)
+        documents = Document.query.join(matching_claims_aliased)
+
+        if documents.count() == 0:
+            doc = Document(created=created, updated=updated)
+            DocumentURI(document=doc,
+                        claimant=claimant_uri,
+                        uri=claimant_uri,
+                        type='self-claim',
+                        created=created,
+                        updated=updated)
+            Document.query.session.add(doc)
+
+        return documents
 
 
 class DocumentURI(Base, mixins.Timestamps):
@@ -62,7 +98,7 @@ class DocumentURI(Base, mixins.Timestamps):
     @claimant.setter
     def claimant(self, value):
         self._claimant = value
-        self._claimant_normalized = uri.normalize(value)
+        self._claimant_normalized = text_type(uri.normalize(value), 'utf-8')
 
     @hybrid_property
     def claimant_normalized(self):
@@ -75,7 +111,7 @@ class DocumentURI(Base, mixins.Timestamps):
     @uri.setter
     def uri(self, value):
         self._uri = value
-        self._uri_normalized = uri.normalize(value)
+        self._uri_normalized = text_type(uri.normalize(value), 'utf-8')
 
     @hybrid_property
     def uri_normalized(self):
