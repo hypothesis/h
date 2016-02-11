@@ -153,6 +153,22 @@ function SidebarInjector(chromeTabs, dependencies) {
   }
 
   function injectIntoRemoteDocument(tab) {
+    if (isPDFViewerURL(tab.url)) {
+      return Promise.resolve();
+    }
+
+    if (!isSupportedURL(tab.url)) {
+      // Chrome does not permit extensions to inject content scripts
+      // into (chrome*):// URLs and other custom schemes.
+      //
+      // A common case where this happens is when the user has an
+      // extension installed that provides a custom viewer for PDFs
+      // (or some other format). In some cases we could extract the original
+      // URL and open that in the Hypothesis viewer instead.
+      var protocol = tab.url.split(':')[0];
+      return Promise.reject(new errors.RestrictedProtocolError('Cannot load Hypothesis into ' + protocol + ' pages'));
+    }
+
     return detectTabContentType(tab).then(function (type) {
       if (type === CONTENT_TYPE_PDF) {
         return injectIntoPDF(tab);
@@ -187,16 +203,9 @@ function SidebarInjector(chromeTabs, dependencies) {
   }
 
   function injectIntoHTML(tab) {
-    return new Promise(function (resolve, reject) {
-      if (!isSupportedURL(tab.url)) {
-        var protocol = tab.url.split(':')[0];
-        return reject(new errors.RestrictedProtocolError('Cannot load Hypothesis into ' + protocol + ' pages'));
-      }
-
-      return injectScript(tab.id, '/public/config.js').then(function () {
-        injectScript(tab.id, '/public/embed.js', {
-          'hypothesis-resource-root': extensionURL('/').slice(0,-1),
-        }).then(resolve);
+    return injectScript(tab.id, '/public/config.js').then(function () {
+      return injectScript(tab.id, '/public/embed.js', {
+        'hypothesis-resource-root': extensionURL('/').slice(0,-1),
       });
     });
   }
