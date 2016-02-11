@@ -3,6 +3,8 @@
 var assign = require('core-js/modules/$.object-assign');
 var proxyquire = require('proxyquire');
 
+var toResult = require('../../../static/scripts/test/promise-util').toResult;
+
 var errors = require('../lib/errors');
 var TabState = require('../lib/tab-state');
 
@@ -333,16 +335,15 @@ describe('HypothesisChromeExtension', function () {
 
     injectErrorCases.forEach(function (ErrorType) {
       describe('with ' + ErrorType.name, function () {
-        it('puts the tab into an errored state', function (done) {
+        it('puts the tab into an errored state', function () {
           var injectError = Promise.reject(new ErrorType('msg'));
           fakeSidebarInjector.injectIntoTab.returns(injectError);
 
           triggerInstall();
 
-          injectError.catch(function () {
+          return toResult(injectError).then(function () {
             assert.called(fakeTabState.errorTab);
             assert.calledWith(fakeTabState.errorTab, 1);
-            done();
           });
         });
 
@@ -362,13 +363,18 @@ describe('HypothesisChromeExtension', function () {
         });
 
         it('logs an error', function () {
-          var injectError = Promise.reject(new ErrorType('msg'));
+          var error = new ErrorType('msg');
+          var injectError = Promise.reject(error);
           fakeSidebarInjector.injectIntoTab.returns(injectError);
 
           triggerInstall();
 
-          injectError.catch(function () {
-            assert.called(fakeErrors.report);
+          return toResult(injectError).then(function () {
+            assert.calledWith(fakeErrors.report,
+              error,
+              'Injecting Hypothesis sidebar',
+              { url: 'file://foo.html' }
+            );
           });
         });
       });

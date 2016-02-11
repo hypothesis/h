@@ -23,14 +23,13 @@ describe('errors', function () {
   describe('.report', function () {
     it('reports unknown errors via Raven', function () {
       var error = new Error('A most unexpected error');
-      errors.report('injecting the sidebar failed', error);
-      assert.calledWith(fakeRaven.report,
-                        'injecting the sidebar failed', error);
+      errors.report(error, 'injecting the sidebar');
+      assert.calledWith(fakeRaven.report, error, 'injecting the sidebar');
     });
 
     it('does not report known errors via Raven', function () {
       var error = new errors.LocalFileError('some message');
-      errors.report('injecting the sidebar failed', error);
+      errors.report(error, 'injecting the sidebar');
       assert.notCalled(fakeRaven.report);
     });
   });

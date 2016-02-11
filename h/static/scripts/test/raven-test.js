@@ -1,16 +1,16 @@
 var proxyquire = require('proxyquire');
 
 describe('raven', function () {
-  var fakeRavenJS = {
-    config: sinon.stub().returns({
-      install: sinon.stub(),
-    }),
-    captureException: sinon.stub(),
-  };
-
+  var fakeRavenJS;
   var raven;
 
   beforeEach(function () {
+    fakeRavenJS = {
+      config: sinon.stub().returns({
+        install: sinon.stub(),
+      }),
+      captureException: sinon.stub(),
+    };
     raven = proxyquire('../raven', {
       'raven-js': fakeRavenJS,
     });
@@ -29,6 +29,28 @@ describe('raven', function () {
 
       assert.calledWith(fakeRavenJS.captureException, event.reason,
         sinon.match.any);
+    });
+  });
+
+  describe('.report()', function () {
+    it('extracts the message property from Error-like objects', function () {
+      raven.report({message: 'An error'}, 'context');
+      assert.calledWith(fakeRavenJS.captureException, 'An error', {
+        extra: {
+          when: 'context',
+        },
+      });
+    });
+
+    it('passes extra details through', function () {
+      var error = new Error('an error');
+      raven.report(error, 'some operation', { url: 'foobar.com' });
+      assert.calledWith(fakeRavenJS.captureException, error, {
+        extra: {
+          when: 'some operation',
+          url: 'foobar.com',
+        },
+      });
     });
   });
 });

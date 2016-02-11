@@ -10,6 +10,8 @@
  * as a dependency.
  */
 
+require('core-js/fn/object/assign')
+
 var Raven = require('raven-js')
 
 var enabled = false;
@@ -51,16 +53,29 @@ function angularModule() {
 /**
  * Report an error to Sentry.
  *
- * @param {string} context - A string describing the context in which
- *                           the error occurred.
  * @param {Error} error - An error object describing what went wrong
+ * @param {string} when - A string describing the context in which
+ *                        the error occurred.
+ * @param {Object} [context] - A JSON-serializable object containing additional
+ *                             information which may be useful when
+ *                             investigating the error.
  */
-function report(context, error) {
-  Raven.captureException(error, {
-    extra: {
-      context: context,
-    },
-  });
+function report(error, when, context) {
+  if (!(error instanceof Error)) {
+    // If the passed object is not an Error, raven-js
+    // will serialize it using toString() which produces unhelpful results
+    // for objects that do not provide their own toString() implementations.
+    //
+    // If the error is a plain object or non-Error subclass with a message
+    // property, such as errors returned by chrome.extension.lastError,
+    // use that instead.
+    if (typeof error === 'object' && error.message) {
+      error = error.message;
+    }
+  }
+
+  var extra = Object.assign({ when: when }, context);
+  Raven.captureException(error, { extra: extra });
 }
 
 /**
@@ -80,7 +95,7 @@ function report(context, error) {
 function installUnhandledPromiseErrorHandler() {
   window.addEventListener('unhandledrejection', function (event) {
     if (event.reason) {
-      report('Unhandled Promise rejection', event.reason);
+      report(event.reason, 'Unhandled Promise rejection');
     }
   });
 }
