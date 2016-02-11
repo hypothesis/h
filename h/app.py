@@ -3,12 +3,10 @@
 import logging
 import os
 
-from pyramid import authorization
 from pyramid.config import Configurator
 from pyramid.tweens import EXCVIEW
 from pyramid.settings import asbool
 
-from h import auth
 from h.config import settings_from_environment
 from h.security import derive_key
 
@@ -30,9 +28,6 @@ def create_app(global_config, **settings):
     settings = get_settings(global_config, **settings)
 
     config = Configurator(settings=settings)
-
-    config.set_authentication_policy(auth.AuthenticationPolicy())
-    config.set_authorization_policy(authorization.ACLAuthorizationPolicy())
 
     config.set_root_factory('h.resources.create_root')
 

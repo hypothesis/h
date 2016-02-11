@@ -3,6 +3,7 @@
 import logging
 
 from pyramid import authentication
+from pyramid import authorization
 from pyramid import interfaces
 from pyramid import security
 from zope import interface
@@ -97,3 +98,11 @@ def is_api_request(request):
 def includeme(config):
     # Allow retrieval of the auth_domain from the request object.
     config.add_request_method(auth_domain, name='auth_domain', reify=True)
+
+    # Set up pyramid authentication and authorization policies. See the Pyramid
+    # documentation at:
+    #
+    #   http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/security.html
+    #
+    config.set_authentication_policy(AuthenticationPolicy())
+    config.set_authorization_policy(authorization.ACLAuthorizationPolicy())
