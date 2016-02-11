@@ -465,7 +465,8 @@ class ActivateController(object):
 
 
 @view_defaults(route_name='profile',
-               renderer='h:templates/accounts/profile.html.jinja2')
+               renderer='h:templates/accounts/profile.html.jinja2',
+               effective_principals=security.Authenticated)
 class ProfileController(object):
 
     def __init__(self, request):
@@ -486,9 +487,6 @@ class ProfileController(object):
     @view_config(request_method='GET')
     def get(self):
         """Show the user's profile."""
-        if self.request.authenticated_user is None:
-            raise httpexceptions.HTTPNotFound()
-
         return {'email': self.request.authenticated_user.email,
                 'email_form': self.forms['email'].render(),
                 'password_form': self.forms['password'].render()}
@@ -496,9 +494,6 @@ class ProfileController(object):
     @view_config(request_method='POST')
     def post(self):
         """Handle POST payload from profile update form."""
-        if self.request.authenticated_user is None:
-            raise httpexceptions.HTTPNotFound()
-
         formid = self.request.POST.get('__formid__')
         if formid is None or formid not in self.forms:
             raise httpexceptions.HTTPBadRequest()
@@ -528,7 +523,8 @@ class ProfileController(object):
 
 
 @view_defaults(route_name='profile_notifications',
-               renderer='h:templates/accounts/notifications.html.jinja2')
+               renderer='h:templates/accounts/notifications.html.jinja2',
+               effective_principals=security.Authenticated)
 class NotificationsController(object):
 
     def __init__(self, request):
@@ -540,9 +536,6 @@ class NotificationsController(object):
     @view_config(request_method='GET')
     def get(self):
         """Render the notifications form."""
-        if self.request.authenticated_userid is None:
-            raise httpexceptions.HTTPNotFound()
-
         self.form.set_appstruct({
             'notifications': set(n.type
                                  for n in self._user_notifications()
@@ -553,9 +546,6 @@ class NotificationsController(object):
     @view_config(request_method='POST')
     def post(self):
         """Process notifications POST data."""
-        if self.request.authenticated_userid is None:
-            raise httpexceptions.HTTPNotFound()
-
         try:
             appstruct = self.form.validate(self.request.POST.items())
         except deform.ValidationFailure:

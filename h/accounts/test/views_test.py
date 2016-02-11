@@ -776,18 +776,6 @@ class TestActivateController(object):
 @pytest.mark.usefixtures('routes_mapper')
 class TestProfileController(object):
 
-    def test_get_404s_if_not_logged_in(self):
-        request = DummyRequest(authenticated_user=None)
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            views.ProfileController(request).get()
-
-    def test_post_404s_if_not_logged_in(self):
-        request = DummyRequest(authenticated_user=None)
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            views.ProfileController(request).post()
-
     def test_post_400s_with_no_formid(self):
         user = FakeUser()
         request = DummyRequest(post={}, authenticated_user=user)
@@ -902,13 +890,6 @@ class TestProfileController(object):
                          'subscriptions_model')
 class TestNotificationsController(object):
 
-    def test_get_404s_if_not_logged_in(self, authn_policy):
-        request = DummyRequest()
-        authn_policy.authenticated_userid.return_value = None
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            views.NotificationsController(request).get()
-
     def test_get_sets_subscriptions_data_in_form(self,
                                                  authn_policy,
                                                  subscriptions_model):
@@ -926,12 +907,6 @@ class TestNotificationsController(object):
         controller.form.set_appstruct.assert_called_once_with({
             'notifications': set(['reply']),
         })
-
-    def test_post_404s_if_not_logged_in(self):
-        request = DummyRequest(post={})
-
-        with pytest.raises(httpexceptions.HTTPNotFound):
-            views.NotificationsController(request).post()
 
     def test_post_with_invalid_data_returns_form(self, authn_policy):
         request = DummyRequest(post={})
