@@ -1,4 +1,5 @@
 include Makefile AUTHORS CHANGES LICENSE NOTICE
+include Dockerfile
 include gunicorn.conf.py
 include package.json
 include requirements.txt
