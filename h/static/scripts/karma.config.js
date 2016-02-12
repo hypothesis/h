@@ -21,20 +21,11 @@ module.exports = function(config) {
       // Polyfills for PhantomJS
       './karma-phantomjs-polyfill.js',
 
-      // Application external deps
-      '../../../node_modules/jquery/dist/jquery.js',
-      '../../../node_modules/angular/angular.js',
-      '../../../node_modules/angular-animate/angular-animate.js',
-      '../../../node_modules/angular-resource/angular-resource.js',
-      '../../../node_modules/angular-route/angular-route.js',
-      '../../../node_modules/angular-sanitize/angular-sanitize.js',
-      '../../../node_modules/ng-tags-input/build/ng-tags-input.min.js',
-      'vendor/katex.js',
+      // Test setup
+      './test/bootstrap.js',
 
-      // Test deps
-      '../../../node_modules/angular-mocks/angular-mocks.js',
+      // Angular directive templates
       '../../templates/client/*.html',
-      'test/bootstrap.js',
 
       // Tests
       //
@@ -59,6 +50,7 @@ module.exports = function(config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       './karma-phantomjs-polyfill.js': ['browserify'],
+      './test/bootstrap.js': ['browserify'],
       '**/*-test.js': ['browserify'],
       '**/*-test.coffee': ['browserify'],
       '../../templates/client/*.html': ['ng-html2js'],
