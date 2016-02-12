@@ -6,6 +6,7 @@ include requirements.txt
 graft conf
 graft docs
 prune docs/_build
+include h/accounts/blacklist
 include h/assets.yaml
 graft h/migrations
 graft h/static
