@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 FEATURES = {
     'claim': "Enable 'claim your username' web views?",
     'new_homepage': "Show the new homepage design?",
-    'truncate_annotations': "Truncate long quotes and bodies in annotations?",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -40,6 +39,7 @@ FEATURES = {
 FEATURES_PENDING_REMOVAL = {
     'embed_media': "Replace YouTube, Vimeo etc links in annotations with embeds",
     'sidebar_tutorial': "Show a tutorial to new users in the sidebar",
+    'truncate_annotations': "Truncate long quotes and bodies in annotations?",
 }
 
 
