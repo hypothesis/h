@@ -132,8 +132,12 @@ class LoginSchema(CSRFSchema):
             raise err
 
         if not user.is_activated:
-            reason = _('Your account is not active. Please check your e-mail.')
-            raise colander.Invalid(node, reason)
+            err = colander.Invalid(node)
+            err['username'] = _(
+                "You haven't activated your account yet. "
+                '<strong>Please check your email and open the link to '
+                'activate your account</strong>.')
+            raise err
 
         value['user'] = user
 
