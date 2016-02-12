@@ -102,7 +102,10 @@ def generate_notifications(request, annotation, action):
     # If the annotation doesn't have a parent, we can't find its parent, or we
     # have no idea who the author of the parent is, then we can't send a
     # notification email.
-    parent = storage.fetch_annotation(annotation.parent_id)
+    parent_id = annotation.parent_id
+    if parent_id is None:
+        return
+    parent = storage.fetch_annotation(parent_id)
     if parent is None or 'user' not in parent:
         return
 

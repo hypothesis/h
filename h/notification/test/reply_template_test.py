@@ -321,6 +321,20 @@ def test_generate_notifications_empty_if_annotation_has_no_parent():
 
 
 @generate_notifications_fixtures
+def test_generate_notifications_does_not_fetch_if_annotation_has_no_parent(fetch):
+    """Don't try and fetch None if the annotation has no parent"""
+    annotation = _fake_anno(0)
+    request = DummyRequest()
+
+    notifications = rt.generate_notifications(request, annotation, 'create')
+
+    # Read the generator
+    list(notifications)
+
+    fetch.assert_not_called()
+
+
+@generate_notifications_fixtures
 @patch('h.notification.reply_template.render_reply_notification')
 @patch('h.notification.reply_template.Subscriptions')
 def test_generate_notifications_only_if_author_can_read_reply(Subscriptions,
