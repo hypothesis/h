@@ -27,8 +27,8 @@ RUN addgroup -S hypothesis \
 WORKDIR /var/lib/hypothesis
 
 # Copy packaging
-COPY h/_version.py ./h/
-COPY README.rst package.json setup.* requirements.txt versioneer.py ./
+COPY h/__init__.py h/_version.py ./h/
+COPY README.rst package.json setup.* requirements.txt ./
 
 # Install application dependencies.
 RUN npm install --production \
