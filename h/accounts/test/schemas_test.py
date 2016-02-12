@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import colander
-import deform
 import pytest
 from mock import Mock
 from mock import patch
@@ -34,6 +33,7 @@ class FakeExpiredSerializer(FakeSerializer):
 class FakeInvalidSerializer(FakeSerializer):
     def loads(self, token, max_age=0, return_timestamp=False):
         raise BadData("Invalid token")
+
 
 def csrf_request(config, **kwargs):
     request = DummyRequest(registry=config.registry, **kwargs)
@@ -87,9 +87,7 @@ def test_unique_email_invalid_when_user_does_not_exist(user_model):
     node = DummyNode()
     user_model.get_by_email.return_value = None
 
-    result = schemas.unique_email(node, "foo@bar.com")
-
-    assert result is None
+    assert schemas.unique_email(node, "foo@bar.com") is None
 
 
 def test_RegisterSchema_with_password_too_short(user_model):
@@ -261,7 +259,8 @@ def test_reset_password_with_expired_token(config, user_model):
 
 
 @pytest.mark.usefixtures('user_model')
-def test_reset_password_user_has_already_reset_their_password(config, user_model):
+def test_reset_password_user_has_already_reset_their_password(config,
+                                                              user_model):
     request = csrf_request(config)
     request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
@@ -327,7 +326,8 @@ def test_emailchangeschema_rejects_wrong_password(config, user_model):
     assert 'password' in exc.value.asdict()
 
 
-def test_passwordchangeschema_rejects_non_matching_passwords(config, user_model):
+def test_passwordchangeschema_rejects_non_matching_passwords(config,
+                                                             user_model):
     user = Mock()
     request = csrf_request(config, authenticated_user=user)
     schema = schemas.PasswordChangeSchema().bind(request=request)
