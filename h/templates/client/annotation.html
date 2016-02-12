@@ -57,8 +57,7 @@
   <section class="annotation-quote-list"
            ng-repeat="target in vm.target() track by $index"
            ng-if="vm.hasQuotes()">
-    <excerpt enabled="vm.feature('truncate_annotations')"
-             collapsed-height="40"
+    <excerpt collapsed-height="40"
              inline-controls="true"
              overflow-hysteresis="20">
       <blockquote class="annotation-quote"
@@ -73,15 +72,14 @@
 
   <!-- Body -->
   <section name="text" class="annotation-body">
-    <excerpt enabled="vm.feature('truncate_annotations') && !vm.editing()"
+    <excerpt enabled="!vm.editing()"
              inline-controls="false"
              on-collapsible-changed="vm.setBodyCollapsible(collapsible)"
              collapse="vm.collapseBody"
              collapsed-height="400"
              overflow-hysteresis="20">
       <markdown ng-model="vm.form.text"
-                read-only="!vm.editing()"
-                embeds-enabled="vm.feature('embed_media')">
+                read-only="!vm.editing()">
       </markdown>
     </excerpt>
   </section>

@@ -40,18 +40,16 @@ def test_model_includes_features(features, fake_user):
 
 
 @pytest.mark.parametrize(
-    "feature_enabled,user_authenticated,tutorial_dismissed,show_tutorial",
-    [(False, True,  False, False),
-     (True,  False, False, False),
-     (True,  True,  False, True),
-     (True,  True,  True,  False)])
+    "user_authenticated,tutorial_dismissed,show_tutorial",
+    [(False, False, False),
+     (True,  False, True),
+     (True,  True,  False)])
 def test_model_show_sidebar_tutorial(
-        fake_user, feature_enabled, user_authenticated, tutorial_dismissed,
-        show_tutorial):
+        fake_user, user_authenticated, tutorial_dismissed, show_tutorial):
     """It should return or not return "show_sidebar_tutorial" correctly.
 
-    It should return "show_sidebar_tutorial": True only if the sidebar_tutorial
-    feature flag is on, a user is authorized _and_ that user has not dismissed
+    It should return "show_sidebar_tutorial": True only if a user
+    is authorized _and_ that user has not dismissed
     the tutorial. Otherwise, preferences should contain no
     "show_sidebar_tutorial" value at all.
 
@@ -63,7 +61,7 @@ def test_model_show_sidebar_tutorial(
         authenticated_user = None
     request = mock.Mock(
         authenticated_user=authenticated_user,
-        feature=mock.Mock(return_value=feature_enabled))
+        )
 
     preferences = session.model(request)['preferences']
 
