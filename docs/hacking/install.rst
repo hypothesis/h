@@ -13,8 +13,7 @@ To run h in a development environment you'll need these system dependencies
 installed:
 
 -  Python_ v2.7
--  Node_ v0.10+ and its package manager, npm
--  Compass_ v1.0+
+-  Node_ v4+ and its package manager, npm
 
 You'll also need to run, at a minimum, these external services:
 
@@ -24,7 +23,6 @@ You'll also need to run, at a minimum, these external services:
 
 .. _Python: http://python.org/
 .. _Node: http://nodejs.org/
-.. _Compass: http://compass-style.org/
 .. _Elasticsearch: http://www.elasticsearch.org/
 .. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
 .. _NSQ: http://nsq.io/
@@ -65,9 +63,7 @@ Install the following packages:
         npm \
         python-dev \
         python-pip \
-        python-virtualenv \
-        ruby \
-        ruby-dev
+        python-virtualenv
 
 Add a ``node`` symlink. This is needed because the node binary from Ubuntu is
 called ``nodejs`` but many packages will try to run it as ``node``:
@@ -82,12 +78,6 @@ Upgrade pip and npm:
 
     sudo pip install -U pip virtualenv
     sudo npm install -g npm
-
-Install compass:
-
-.. code-block:: bash
-
-    sudo gem install compass
 
 
 Installing the system dependencies on OS X
@@ -109,12 +99,6 @@ Install the following packages:
         libyaml \
         node \
         python
-
-Install compass:
-
-.. code-block:: bash
-
-    gem install compass
 
 
 Installing the services

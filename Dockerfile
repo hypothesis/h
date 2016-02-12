@@ -9,15 +9,12 @@ RUN apk add --update \
     python \
     py-pip \
     nodejs \
-    ruby \
   && apk add \
     libffi-dev \
     g++ \
     make \
     postgresql-dev \
     python-dev \
-    ruby-dev \
-  && gem install --no-ri compass \
   && pip install --no-cache-dir -U pip \
   && rm -rf /var/cache/apk/*
 
