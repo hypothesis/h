@@ -124,15 +124,7 @@ setup(
         'YAML': YAML_EXTRAS,
     },
     tests_require=DEV_EXTRAS + TESTING_EXTRAS,
-    setup_requires=['setuptools_git'],
     cmdclass={'test': PyTest, 'sdist': sdist},
-    package_data={
-        'h': [
-            'browser/**/*',
-            'static/**/*',
-            'templates/**/*',
-        ]
-    },
     entry_points={
         'paste.app_factory': [
             'main=h.app:create_app',
