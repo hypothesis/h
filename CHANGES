@@ -1,3 +1,14 @@
+0.8.15 (2016-02-12)
+===================
+
+Bug fixes
+---------
+
+- Ensure a useful error is shown when users with unactivated accounts attempt to
+  sign in (#2952).
+
+- Fix an error that would prevent Hypothesis from loading in IE10/11 (#2953).
+
 0.8.14 (2016-02-12)
 ===================
 
