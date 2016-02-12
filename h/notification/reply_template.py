@@ -24,14 +24,6 @@ HTML_TEMPLATE = ROOT_PATH + 'reply_notification.html.jinja2'
 SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt.jinja2'
 
 
-def parent_values(annotation):
-    if 'references' in annotation:
-        parent = storage.fetch_annotation(annotation['references'][-1])
-        return parent
-    else:
-        return {}
-
-
 def create_template_map(request, reply, parent):
     document_title = ''
     if 'document' in reply:
@@ -90,9 +82,6 @@ def get_recipients(request, parent):
 
 
 def check_conditions(annotation, data):
-    # Get the e-mail of the owner
-    if 'user' not in data['parent'] or not data['parent']['user']:
-        return False
     # Do not notify users about their own replies
     if annotation['user'] == data['parent']['user']:
         return False
