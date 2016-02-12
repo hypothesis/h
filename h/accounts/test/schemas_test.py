@@ -66,10 +66,8 @@ def test_unblacklisted_username(config):
 def test_unique_email_looks_up_user_by_email(user_model):
     node = DummyNode()
 
-    try:
+    with pytest.raises(colander.Invalid):
         schemas.unique_email(node, "foo@bar.com")
-    except:
-        pass
 
     user_model.get_by_email.assert_called_with("foo@bar.com")
 
