@@ -26,6 +26,7 @@
   "phantom": true,
   "jquery": true,
   "predef": [
+    "-Promise", // We currently support IE10-11 which lack a Promise global
     "angular",
     "assert",
     "after",
@@ -37,7 +38,6 @@
     "it",
     "require",
     "sinon",
-    "Promise",
     "URL"
   ]
 }
