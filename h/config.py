@@ -85,6 +85,10 @@ def _setup_elasticsearch(settings):
     if 'ELASTICSEARCH_HOST' in os.environ:
         settings['es.host'] = os.environ['ELASTICSEARCH_HOST']
 
+    if 'ELASTICSEARCH_CLIENT_POOLSIZE' in os.environ:
+        settings['es.client_poolsize'] = int(
+            os.environ['ELASTICSEARCH_CLIENT_POOLSIZE'])
+
     # ELASTICSEARCH_PORT and MAIL_PORT match Docker container links
     if 'ELASTICSEARCH_PORT' in os.environ:
         es_host = os.environ['ELASTICSEARCH_PORT_9200_TCP_ADDR']
