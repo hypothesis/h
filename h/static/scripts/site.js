@@ -1,6 +1,7 @@
 // configure error reporting
-if (window.RAVEN_CONFIG) {
-  require('./raven').init(window.RAVEN_CONFIG);
+var settings = require('./settings')(document);
+if (settings.raven) {
+  require('./raven').init(settings.raven);
 }
 
 var page = require('page');
@@ -8,7 +9,6 @@ var page = require('page');
 var CreateGroupFormController = require('./create-group-form');
 var DropdownMenuController = require('./dropdown-menu');
 var InstallerController = require('./installer-controller');
-var ShareGroupFormController = require('./share-group-form');
 
 // setup components
 new DropdownMenuController(document);

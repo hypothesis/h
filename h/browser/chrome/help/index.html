@@ -64,6 +64,12 @@
         position: relative;
         margin-top: 1.5em;
       }
+
+      .error-details {
+        padding: 10px;
+        background-color: #eaeaea;
+        border-radius: 2px;
+      }
     </style>
   </head>
   <body>
@@ -111,6 +117,16 @@
       <section id="blocked-site" class="help-item">
         <img class="help-item__icon" src="sad-annotation.svg" />
         <h1 class="help-item__heading">We’re sorry, Hypothesis doesn't work on this site yet.</h1>
+      </section>
+      <section id="other-error" class="help-item">
+        <img class="help-item__icon" src="sad-annotation.svg" />
+        <h1 class="help-item__heading">We're sorry, Hypothesis failed to load on this page.</h1>
+        <p class="center">
+          The problem has been reported to our team. If it continues, please contact
+          <a href="mailto:support@hypothes.is">support@hypothes.is</a> and provide these
+          technical details:
+          <code><pre class="error-details js-error-message"></pre></code>
+        </p>
       </section>
     </article>
     <script src="./index.js"></script>

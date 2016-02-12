@@ -1,24 +1,27 @@
 'use strict';
 
+require('core-js/fn/object/assign');
+
 /**
- * @ngdoc factory
- * @name  settings
+ * Return application configuration information from the host page.
  *
- * @description
- * The 'settings' factory exposes shared application settings, read from a
- * script tag with type "application/json" and id "hypothesis-settings" in the
- * app page.
+ * Exposes shared application settings, read from script tags with the
+ * class 'js-hypothesis-settings' which contain JSON content.
+ *
+ * If there are multiple such tags, the configuration from each is merged.
+ *
+ * @param {Document|Element} document - The root element to search for
+ *                                      <script> settings tags.
  */
-// @ngInject
-function settings($document) {
-  var settingsElement = $document[0].querySelector(
-    'script[type="application/json"]#hypothesis-settings');
+function settings(document) {
+  var settingsElements =
+    document.querySelectorAll('script.js-hypothesis-settings');
 
-  if (settingsElement) {
-    return JSON.parse(settingsElement.textContent);
+  var config = {};
+  for (var i=0; i < settingsElements.length; i++) {
+    Object.assign(config, JSON.parse(settingsElements[i].textContent));
   }
-
-  return {};
+  return config;
 }
 
 module.exports = settings;

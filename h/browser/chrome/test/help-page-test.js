@@ -52,9 +52,13 @@ describe('HelpPage', function () {
       });
     });
 
-    it('throws an error if an unsupported error is provided', function () {
-      assert.throws(function () {
-        help.showHelpForError(new Error('Random Error'));
+    it('renders the "other-error" page for unknown errors', function () {
+      help.showHelpForError({id: 1, index: 1}, new Error('Unexpected Error'));
+      assert.called(fakeChromeTabs.create);
+      assert.calledWith(fakeChromeTabs.create, {
+        index: 2,
+        openerTabId: 1,
+        url: 'CRX_PATH/help/index.html?message=Unexpected%20Error#other-error'
       });
     });
   });

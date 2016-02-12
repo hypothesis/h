@@ -14,11 +14,9 @@ function HelpPage(chromeTabs, extensionURL) {
   /* Accepts an instance of errors.ExtensionError and displays an appropriate
    * help page if one exists.
    *
-   * tab   - The tab to display the error message in.
-   * error - An instance of errors.ExtensionError.
-   *
-   * Throws an error if no page is available for the action.
-   * Returns nothing.
+   * @param {Tab} tab   - The tab to display the error message in.
+   * @param {Error} error - The error to display, usually an instance of
+   *                        errors.ExtensionError
    */
   this.showHelpForError = function (tab, error) {
     if (error instanceof errors.LocalFileError) {
@@ -33,21 +31,33 @@ function HelpPage(chromeTabs, extensionURL) {
     else if (error instanceof errors.BlockedSiteError) {
       return this.showBlockedSitePage(tab);
     }
-
-    throw new Error('showHelpForError does not support the error: ' + error.message);
+    else {
+      return this.showOtherErrorPage(tab, error);
+    }
   };
 
   this.showLocalFileHelpPage = showHelpPage.bind(null, 'local-file');
   this.showNoFileAccessHelpPage = showHelpPage.bind(null, 'no-file-access');
   this.showRestrictedProtocolPage = showHelpPage.bind(null, 'restricted-protocol');
   this.showBlockedSitePage = showHelpPage.bind(null, 'blocked-site');
+  this.showOtherErrorPage = showHelpPage.bind(null, 'other-error');
 
-  // Render the help page. The helpSection should correspond to the id of a
-  // section within the help page.
-  function showHelpPage(helpSection, tab) {
+  /**
+   * Open a tab displaying the help page.
+   *
+   * @param {string} helpSection - ID of a <section> within the help page.
+   * @param {tabs.Tab} tab - The tab where the error occurred.
+   * @param {Error} error - The error which prompted the help page.
+   */
+  function showHelpPage(helpSection, tab, error) {
+    var params = '';
+    if (error) {
+      params = '?message=' + encodeURIComponent(error.message);
+    }
+
     chromeTabs.create({
       index: tab.index + 1,
-      url:  extensionURL('/help/index.html#' + helpSection),
+      url:  extensionURL('/help/index.html' + params + '#' + helpSection),
       openerTabId: tab.id,
     });
   }

@@ -14,9 +14,9 @@ export PIP_REQUIRE_VIRTUALENV
 
 default: deps
 
-deps: .eggs/.uptodate node_modules/.uptodate
+deps: h.egg-info/.uptodate node_modules/.uptodate
 
-.eggs/.uptodate: setup.py requirements.txt
+h.egg-info/.uptodate: setup.py requirements.txt
 	pip install --use-wheel -e .[dev,testing,YAML]
 	touch $@
 

@@ -12,8 +12,12 @@ __all__ = ('search',)
 def _get_client(settings):
     host = settings['es.host']
     index = settings['es.index']
+    kwargs = {}
 
-    return Client(host, index)
+    if 'es.client_poolsize' in settings:
+        kwargs['maxsize'] = settings['es.client_poolsize']
+
+    return Client(host, index, **kwargs)
 
 
 def includeme(config):

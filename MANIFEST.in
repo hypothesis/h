@@ -1,0 +1,17 @@
+include Makefile AUTHORS CHANGES LICENSE NOTICE
+include Dockerfile
+include gunicorn.conf.py
+include package.json
+include requirements.txt
+graft conf
+graft docs
+prune docs/_build
+include h/accounts/blacklist
+include h/assets.yaml
+graft h/migrations
+graft h/static
+prune h/static/.webassets-cache
+graft h/templates
+graft scripts
+global-exclude __pycache__
+global-exclude *.py[co]

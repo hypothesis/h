@@ -305,8 +305,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
       domElement = document.createElement('div')
       domElement.innerHTML = htmlString
 
-      if scope.embedsEnabled
-        mediaEmbedder.replaceLinksWithEmbeds(domElement)
+      mediaEmbedder.replaceLinksWithEmbeds(domElement)
 
       return domElement.innerHTML
 
@@ -366,6 +365,5 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
   scope:
     readOnly: '='
     required: '@'
-    embedsEnabled: '='
   templateUrl: 'markdown.html'
 ]

@@ -66,17 +66,14 @@ def error_validation(error, request):
         {'status': 'failure', 'errors': error.error.asdict()})
 
 
-@view_config(route_name='login', attr='login', request_method='POST',
-             renderer='h:templates/accounts/login.html.jinja2')
-@view_config(route_name='login', attr='login_form', request_method='GET',
-             renderer='h:templates/accounts/login.html.jinja2')
-@view_config(route_name='logout', attr='logout', request_method='GET')
+@view_defaults(route_name='login',
+               renderer='h:templates/accounts/login.html.jinja2')
 class AuthController(object):
+
     def __init__(self, request):
-        form_footer = ('<a href="{path}">'.format(
-                           path=request.route_path('forgot_password')) +
-                       _('Forgot your password?') +
-                       '</a>')
+        form_footer = '<a href="{href}">{text}</a>'.format(
+            href=request.route_path('forgot_password'),
+            text=_('Forgot your password?'))
 
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
@@ -89,10 +86,16 @@ class AuthController(object):
             self.request.route_url('stream'))
         self.logout_redirect = self.request.route_url('index')
 
-    def login(self):
-        """
-        Check the submitted credentials and log the user in if appropriate.
-        """
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the login page, including the login form."""
+        self._redirect_if_logged_in()
+
+        return {'form': self.form.render()}
+
+    @view_config(request_method='POST')
+    def post(self):
+        """Log the user in and redirect them."""
         self._redirect_if_logged_in()
 
         try:
@@ -105,18 +108,11 @@ class AuthController(object):
         return httpexceptions.HTTPFound(location=self.login_redirect,
                                         headers=headers)
 
-    def login_form(self):
-        """
-        Render the empty login form.
-        """
-        self._redirect_if_logged_in()
-
-        return {'form': self.form.render()}
-
+    @view_config(route_name='logout',
+                 renderer=None,
+                 request_method='GET')
     def logout(self):
-        """
-        Unconditionally log the user out.
-        """
+        """Log the user out."""
         headers = self._logout()
         return httpexceptions.HTTPFound(location=self.logout_redirect,
                                         headers=headers)
@@ -143,9 +139,9 @@ class AuthController(object):
 @view_defaults(route_name='session',
                accept='application/json',
                renderer='json')
-@view_config(attr='login', request_param='__formid__=login')
-@view_config(attr='logout', request_param='__formid__=logout')
 class AjaxAuthController(AuthController):
+
+    @view_config(request_param='__formid__=login')
     def login(self):
         try:
             json_body = self.request.json_body
@@ -171,6 +167,7 @@ class AjaxAuthController(AuthController):
 
         return ajax_payload(self.request, {'status': 'okay'})
 
+    @view_config(request_param='__formid__=logout')
     def logout(self):
         headers = self._logout()
         self.request.response.headers.extend(headers)
@@ -179,8 +176,6 @@ class AjaxAuthController(AuthController):
 
 @view_defaults(route_name='forgot_password',
                renderer='h:templates/accounts/forgot_password.html.jinja2')
-@view_config(attr='forgot_password_form', request_method='GET')
-@view_config(attr='forgot_password', request_method='POST')
 class ForgotPasswordController(object):
 
     """Controller for handling forgotten password forms."""
@@ -190,7 +185,15 @@ class ForgotPasswordController(object):
         self.schema = schemas.ForgotPasswordSchema().bind(request=self.request)
         self.form = deform.Form(self.schema, buttons=(_('Request reset'),))
 
-    def forgot_password(self):
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the forgot password page, including the form."""
+        self._redirect_if_logged_in()
+
+        return {'form': self.form.render()}
+
+    @view_config(request_method='POST')
+    def post(self):
         """
         Handle submission of the forgot password form.
 
@@ -212,12 +215,6 @@ class ForgotPasswordController(object):
         return httpexceptions.HTTPFound(
             self.request.route_path('reset_password'))
 
-    def forgot_password_form(self):
-        """Render the forgot password form."""
-        self._redirect_if_logged_in()
-
-        return {'form': self.form.render()}
-
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
             raise httpexceptions.HTTPFound(self.request.route_path('index'))
@@ -233,10 +230,6 @@ class ForgotPasswordController(object):
 
 @view_defaults(route_name='reset_password',
                renderer='h:templates/accounts/reset_password.html.jinja2')
-@view_config(attr='reset_password_form', request_method='GET')
-@view_config(route_name='reset_password_with_code',
-             attr='reset_password_with_code_form', request_method='GET')
-@view_config(attr='reset_password', request_method='POST')
 class ResetPasswordController(object):
 
     """Controller for handling password reset forms."""
@@ -249,7 +242,33 @@ class ResetPasswordController(object):
             action=self.request.route_path('reset_password'),
             buttons=(_('Save'),))
 
-    def reset_password(self):
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the reset password form."""
+        return {'form': self.form.render(), 'has_code': False}
+
+    @view_config(route_name='reset_password_with_code',
+                 request_method='GET')
+    def get_with_prefilled_code(self):
+        """Render the reset password form with a prefilled code."""
+        code = self.request.matchdict['code']
+
+        # If valid, we inject the supplied it into the form as a hidden field.
+        # Otherwise, we 404.
+        try:
+            user = schemas.ResetCode().deserialize(self.schema, code)
+        except colander.Invalid:
+            raise httpexceptions.HTTPNotFound()
+        else:
+            # N.B. the form field for the reset code is called 'user'. See the
+            # comment in `schemas.ResetPasswordSchema` for details.
+            self.form.set_appstruct({'user': user})
+            self.form.set_widgets({'user': deform.widget.HiddenWidget()})
+
+        return {'form': self.form.render(), 'has_code': True}
+
+    @view_config(request_method='POST')
+    def post(self):
         """
         Handle submission of the reset password form.
 
@@ -270,28 +289,6 @@ class ResetPasswordController(object):
         return httpexceptions.HTTPFound(
             location=self.request.route_path('index'))
 
-    def reset_password_form(self):
-        """Render the reset password form."""
-        return {'form': self.form.render(), 'has_code': False}
-
-    def reset_password_with_code_form(self):
-        """Render the reset password form with a prefilled code."""
-        code = self.request.matchdict['code']
-
-        # If valid, we inject the supplied it into the form as a hidden field.
-        # Otherwise, we 404.
-        try:
-            user = schemas.ResetCode().deserialize(self.schema, code)
-        except colander.Invalid:
-            raise httpexceptions.HTTPNotFound()
-        else:
-            # N.B. the form field for the reset code is called 'user'. See the
-            # comment in `schemas.ResetPasswordSchema` for details.
-            self.form.set_appstruct({'user': user})
-            self.form.set_widgets({'user': deform.widget.HiddenWidget()})
-
-        return {'form': self.form.render(), 'has_code': True}
-
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
             raise httpexceptions.HTTPFound(self.request.route_path('index'))
@@ -307,14 +304,10 @@ class ResetPasswordController(object):
         self.request.registry.notify(PasswordResetEvent(self.request, user))
 
 
-@view_config(route_name='register', attr='register_form', request_method='GET',
-             renderer='h:templates/accounts/register.html.jinja2')
-@view_config(route_name='register', attr='register', request_method='POST',
-             renderer='h:templates/accounts/register.html.jinja2')
-@view_config(attr='activate', route_name='activate', request_method='GET')
-@view_config(attr='activate_already_logged_in', route_name='activate',
-             request_method='GET', effective_principals=security.Authenticated)
+@view_defaults(route_name='register',
+               renderer='h:templates/accounts/register.html.jinja2')
 class RegisterController(object):
+
     def __init__(self, request):
         tos_link = ('<a href="/terms-of-service">' +
                     _('Terms of Service') +
@@ -322,9 +315,9 @@ class RegisterController(object):
         cg_link = ('<a href="/community-guidelines">' +
                    _('Community Guidelines') +
                    '</a>')
-        form_footer = _('You are agreeing to be bound by '
-                        'our {tos_link} and {cg_link}.').format(tos_link=tos_link,
-                                                                cg_link=cg_link)
+        form_footer = _(
+            'You are agreeing to be bound by our {tos_link} and '
+            '{cg_link}.').format(tos_link=tos_link, cg_link=cg_link)
 
         self.request = request
         self.schema = schemas.RegisterSchema().bind(request=self.request)
@@ -332,7 +325,15 @@ class RegisterController(object):
                                 buttons=(_('Sign up'),),
                                 footer=form_footer)
 
-    def register(self):
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the empty registration form."""
+        self._redirect_if_logged_in()
+
+        return {'form': self.form.render()}
+
+    @view_config(request_method='POST')
+    def post(self):
         """
         Handle submission of the new user registration form.
 
@@ -353,15 +354,43 @@ class RegisterController(object):
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
 
-    def register_form(self):
-        """
-        Render the empty registration form.
-        """
-        self._redirect_if_logged_in()
+    def _redirect_if_logged_in(self):
+        if self.request.authenticated_userid is not None:
+            raise httpexceptions.HTTPFound(self.request.route_url('stream'))
 
-        return {'form': self.form.render()}
+    def _register(self, username, email, password):
+        user = User(username=username, email=email, password=password)
+        self.request.db.add(user)
 
-    def activate(self):
+        # Create a new activation for the user
+        activation = Activation()
+        self.request.db.add(activation)
+        user.activation = activation
+
+        # Flush the session to ensure that the user can be created and the
+        # activation is successfully wired up
+        self.request.db.flush()
+
+        # Send the activation email
+        message = activation_email(self.request, user)
+        mailer.send(self.request, **message)
+
+        self.request.session.flash(jinja2.Markup(_(
+            'Thank you for creating an account! '
+            "We've sent you an email with an activation link, "
+            'before you can sign in <strong>please check your email and open '
+            'the link to activate your account</strong>.')), 'success')
+        self.request.registry.notify(RegistrationEvent(self.request, user))
+
+
+@view_defaults(route_name='activate')
+class ActivateController(object):
+
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(request_method='GET')
+    def get_when_not_logged_in(self):
         """
         Handle a request for a user activation link.
 
@@ -406,7 +435,9 @@ class RegisterController(object):
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
 
-    def activate_already_logged_in(self):
+    @view_config(request_method='GET',
+                 effective_principals=security.Authenticated)
+    def get_when_logged_in(self):
         """Handle an activation link request while already logged in."""
         id_ = self.request.matchdict.get('id')
 
@@ -433,40 +464,11 @@ class RegisterController(object):
             location=self.request.route_url('index'))
 
 
-    def _redirect_if_logged_in(self):
-        if self.request.authenticated_userid is not None:
-            raise httpexceptions.HTTPFound(self.request.route_url('stream'))
-
-    def _register(self, username, email, password):
-        user = User(username=username, email=email, password=password)
-        self.request.db.add(user)
-
-        # Create a new activation for the user
-        activation = Activation()
-        self.request.db.add(activation)
-        user.activation = activation
-
-        # Flush the session to ensure that the user can be created and the
-        # activation is successfully wired up
-        self.request.db.flush()
-
-        # Send the activation email
-        message = activation_email(self.request, user)
-        mailer.send(self.request, **message)
-
-        self.request.session.flash(jinja2.Markup(_(
-            'Thank you for creating an account! '
-            "We've sent you an email with an activation link, "
-            'before you can sign in <strong>please check your email and open '
-            'the link to activate your account</strong>.')), 'success')
-        self.request.registry.notify(RegistrationEvent(self.request, user))
-
-
 @view_defaults(route_name='profile',
-               renderer='h:templates/accounts/profile.html.jinja2')
-@view_config(attr='profile_form', request_method='GET')
-@view_config(attr='profile', request_method='POST')
+               renderer='h:templates/accounts/profile.html.jinja2',
+               effective_principals=security.Authenticated)
 class ProfileController(object):
+
     def __init__(self, request):
         self.request = request
 
@@ -482,20 +484,16 @@ class ProfileController(object):
                                     formid='password'),
         }
 
-    def profile_form(self):
+    @view_config(request_method='GET')
+    def get(self):
         """Show the user's profile."""
-        if self.request.authenticated_user is None:
-            raise httpexceptions.HTTPNotFound()
-
         return {'email': self.request.authenticated_user.email,
                 'email_form': self.forms['email'].render(),
                 'password_form': self.forms['password'].render()}
 
-    def profile(self):
+    @view_config(request_method='POST')
+    def post(self):
         """Handle POST payload from profile update form."""
-        if self.request.authenticated_user is None:
-            raise httpexceptions.HTTPNotFound()
-
         formid = self.request.POST.get('__formid__')
         if formid is None or formid not in self.forms:
             raise httpexceptions.HTTPBadRequest()
@@ -525,21 +523,19 @@ class ProfileController(object):
 
 
 @view_defaults(route_name='profile_notifications',
-               renderer='h:templates/accounts/notifications.html.jinja2')
-@view_config(attr='notifications_form', request_method='GET')
-@view_config(attr='notifications', request_method='POST')
+               renderer='h:templates/accounts/notifications.html.jinja2',
+               effective_principals=security.Authenticated)
 class NotificationsController(object):
+
     def __init__(self, request):
         self.request = request
         self.schema = schemas.NotificationsSchema().bind(request=self.request)
         self.form = deform.Form(self.schema,
                                 buttons=(_('Save changes'),))
 
-    def notifications_form(self):
+    @view_config(request_method='GET')
+    def get(self):
         """Render the notifications form."""
-        if self.request.authenticated_userid is None:
-            raise httpexceptions.HTTPNotFound()
-
         self.form.set_appstruct({
             'notifications': set(n.type
                                  for n in self._user_notifications()
@@ -547,11 +543,9 @@ class NotificationsController(object):
         })
         return {'form': self.form.render()}
 
-    def notifications(self):
+    @view_config(request_method='POST')
+    def post(self):
         """Process notifications POST data."""
-        if self.request.authenticated_userid is None:
-            raise httpexceptions.HTTPNotFound()
-
         try:
             appstruct = self.form.validate(self.request.POST.items())
         except deform.ValidationFailure:
@@ -618,7 +612,8 @@ def reset_password_link(request, reset_code):
     return request.route_url('reset_password_with_code', code=reset_code)
 
 
-@view_config(route_name='dismiss_sidebar_tutorial', request_method='POST',
+@view_config(route_name='dismiss_sidebar_tutorial',
+             request_method='POST',
              renderer='json')
 def dismiss_sidebar_tutorial(request):
     if request.authenticated_userid is None:

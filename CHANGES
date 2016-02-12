@@ -1,3 +1,28 @@
+0.8.14 (2016-02-12)
+===================
+
+Bug fixes
+---------
+
+- Fix an issue where a Hypothesis client that couldn't connect to the web
+  service would busy-loop (#2916).
+
+- Fix a bug where the "sidebar tutorial" wouldn't correctly dismiss (#2925).
+
+- Ensure that requests to the badge API correctly send a cookie (#2929).
+
+- Numerous small fixes to the Hypothesis client and Chrome extension (#2933,
+  #2941, #2947).
+
+Miscellanea
+-----------
+
+- The API component of the web application now only accepts API tokens for
+  authentication (#2923).
+
+- Improvements to the handling of unexpected errors in the Chrome extension
+  (#2942).
+
 0.8.13 (2016-02-05)
 ===================
 

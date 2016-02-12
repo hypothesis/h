@@ -20,6 +20,8 @@ class Client(object):
         annotation = 'annotation'
         document = 'document'
 
-    def __init__(self, host, index):
+    def __init__(self, host, index, **kwargs):
         self.index = index
-        self.conn = elasticsearch.Elasticsearch([host], verify_certs=True)
+        self.conn = elasticsearch.Elasticsearch([host],
+                                                verify_certs=True,
+                                                **kwargs)
