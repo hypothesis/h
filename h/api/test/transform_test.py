@@ -1,92 +1,200 @@
 # -*- coding: utf-8 -*-
+
+import copy
+
 import mock
 import pytest
 
 from h.api import transform
 
 
-@mock.patch('h.api.transform.groups')
-def test_prepare_calls_set_group_if_reply(groups):
-    annotation = {'permissions': {'read': []}}
-
-    transform.prepare(annotation)
-
-    groups.set_group_if_reply.assert_called_once_with(annotation)
+def _fake_fetcher(ann):
+    fetcher = mock.MagicMock()
+    fetcher.return_value = ann
+    return fetcher
 
 
-@mock.patch('h.api.transform.groups')
-def test_prepare_calls_insert_group(groups):
-    annotation = {'permissions': {'read': []}}
+def test_set_group_if_reply_does_not_modify_non_replies():
+    fetcher = _fake_fetcher(None)
+    # This annotation is not a reply.
+    annotation = {'group': 'test-group'}
 
-    transform.prepare(annotation)
+    transform.set_group_if_reply(annotation, fetcher=fetcher)
 
-    groups.insert_group_if_none.assert_called_once_with(annotation)
-
-
-@mock.patch('h.api.transform.groups')
-def test_prepare_calls_set_permissions(groups):
-    annotation = {'permissions': {'read': []}}
-
-    transform.prepare(annotation)
-
-    groups.set_permissions.assert_called_once_with(annotation)
+    assert annotation['group'] == 'test-group'
 
 
-@mock.patch('h.api.transform.groups')
+def test_set_group_if_reply_calls_fetcher_if_reply():
+    fetcher = _fake_fetcher(None)
+    annotation = {'references': ['parent_id']}
+
+    transform.set_group_if_reply(annotation, fetcher=fetcher)
+
+    fetcher.assert_called_once_with('parent_id')
+
+
+def test_set_group_if_reply_does_nothing_if_parent_not_found():
+    fetcher = _fake_fetcher(None)
+    annotation = {'references': ['parent_id']}
+
+    transform.set_group_if_reply(annotation, fetcher=fetcher)
+
+
+def test_set_group_if_reply_adds_group_to_replies():
+    """If a reply has no group it gets the group of its parent annotation."""
+    fetcher = _fake_fetcher({'group': 'parent_group'})
+    annotation = {'references': ['parent_id']}
+
+    transform.set_group_if_reply(annotation, fetcher=fetcher)
+
+    assert annotation['group'] == "parent_group"
+
+
+def test_set_group_if_reply_overwrites_groups_in_replies():
+    """If a reply has a group it's overwritten with the parent's group."""
+    fetcher = _fake_fetcher({'group': 'parent_group'})
+    annotation = {
+        'group': 'this should be overwritten',
+        'references': ['parent_id']
+    }
+
+    transform.set_group_if_reply(annotation, fetcher=fetcher)
+
+    assert annotation['group'] == "parent_group"
+
+
+def test_set_group_if_reply_clears_group_if_parent_has_no_group():
+    fetcher = _fake_fetcher({})
+    annotation = {
+        'group': 'this should be deleted',
+        'references': ['parent_id']
+    }
+
+    transform.set_group_if_reply(annotation, fetcher=fetcher)
+
+    assert 'group' not in annotation
+
+
+def test_insert_group_if_none_inserts_group():
+    annotation = {}
+
+    transform.insert_group_if_none(annotation)
+
+    assert annotation == {'group': '__world__'}
+
+
+def test_insert_group_if_none_does_not_overwrite_group():
+    annotation = {'group': 'foo'}
+
+    transform.insert_group_if_none(annotation)
+
+    assert annotation == {'group': 'foo'}
+
+
+def test_insert_group_if_none_does_nothing_if_already_group_world():
+    annotation = {'group': '__world__'}
+
+    transform.insert_group_if_none(annotation)
+
+    assert annotation == {'group': '__world__'}
+
+
+def test_set_group_permissions_does_not_modify_annotations_with_no_permissions():
+    annotations = [{
+        'user': 'acct:jack@hypothes.is',
+    },
+    {
+        'user': 'acct:jack@hypothes.is',
+        'group': 'xyzabc',
+    }]
+
+    for ann in annotations:
+        before = copy.deepcopy(ann)
+        transform.set_group_permissions(ann)
+
+        assert ann == before
+
+
+def test_set_group_permissions_does_not_modify_private_annotations():
+    original_annotation = {
+        'user': 'acct:jack@hypothes.is',
+        'group': 'xyzabc',
+        'permissions': {
+            'read': ['acct:jack@hypothes.is']
+        }
+    }
+    annotation_to_be_modified = copy.deepcopy(original_annotation)
+
+
+    transform.set_group_permissions(annotation_to_be_modified)
+
+    assert annotation_to_be_modified == original_annotation
+
+
+def test_set_group_permissions_does_not_modify_non_group_annotations():
+    original_annotation = {
+        'user': 'acct:jack@hypothes.is',
+        'permissions': {
+            'read': ['acct:jill@hypothes.is']
+        },
+        'group': '__world__'
+    }
+    annotation_to_be_modified = copy.deepcopy(original_annotation)
+
+    transform.set_group_permissions(annotation_to_be_modified)
+
+    assert annotation_to_be_modified == original_annotation
+
+
+def test_set_group_permissions_sets_read_permissions_for_group_annotations():
+    annotation = {
+        'user': 'acct:jack@hypothes.is',
+        'group': 'xyzabc',
+        'permissions': {
+            'read': ['group:__world__']
+        }
+    }
+
+    transform.set_group_permissions(annotation)
+
+    assert annotation['permissions']['read'] == ['group:xyzabc']
+
+
+@pytest.mark.usefixtures("uri_normalize")
 @pytest.mark.parametrize("ann_in,ann_out", [
-    # Preserves the basics
-    ({}, {}),
-    ({"other": "keys", "left": "alone"}, {"other": "keys", "left": "alone"}),
-
-    # Target field
-    ({"target": "hello"}, {"target": "hello"}),
-    ({"target": []}, {"target": []}),
-    ({"target": ["foo", "bar"]}, {"target": ["foo", "bar"]}),
-    ({"target": [{"foo": "bar"}, {"baz": "qux"}]},
-     {"target": [{"foo": "bar"}, {"baz": "qux"}]}),
-])
-def test_prepare_noop_when_nothing_to_normalize(_, ann_in, ann_out):
-    transform.prepare(ann_in)
-    assert ann_in == ann_out
-
-
-@mock.patch('h.api.transform.groups')
-@pytest.mark.parametrize("ann_in,ann_out", [
+    # Adds scope field to annotations with target.source
     ({"target": [{"source": "giraffe"}]},
      {"target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
     ({"target": [{"source": "giraffe"}, "foo"]},
      {"target": [{"source": "giraffe", "scope": ["*giraffe*"]},
                  "foo"]}),
 ])
-def test_prepare_adds_scope_field(_, ann_in, ann_out, uri_normalize):
-    transform.prepare(ann_in)
+def test_normalize_annotation_target_uris(ann_in, ann_out):
+    transform.normalize_annotation_target_uris(ann_in)
     assert ann_in == ann_out
 
 
-@mock.patch('h.api.transform.groups')
-@pytest.mark.usefixtures("uri_normalize")
 @pytest.mark.parametrize("ann_in,ann_out", [
+    # Transforms annotations lacking target field (old-style comments)
     ({"uri": "giraffe"},
-     {"uri": "giraffe",
-      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+     {"uri": "giraffe", "target": [{"source": "giraffe"}]}),
     ({"uri": "giraffe", "target": []},
-     {"uri": "giraffe",
-      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+     {"uri": "giraffe", "target": [{"source": "giraffe"}]}),
     ({"uri": "giraffe", "references": None},
      {"uri": "giraffe",
       "references": None,
-      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+      "target": [{"source": "giraffe"}]}),
     ({"uri": "giraffe", "target": None},
      {"uri": "giraffe",
-      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+      "target": [{"source": "giraffe"}]}),
     ({"uri": "giraffe", "references": []},
      {"uri": "giraffe",
       "references": [],
-      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+      "target": [{"source": "giraffe"}]}),
     ({"uri": "giraffe", "references": [], "target": []},
      {"uri": "giraffe",
       "references": [],
-      "target": [{"source": "giraffe", "scope": ["*giraffe*"]}]}),
+      "target": [{"source": "giraffe"}]}),
 
     # Does nothing if either references or target is non-empty
     ({"uri": "giraffe", "references": ['hello'], "target": []},
@@ -98,20 +206,19 @@ def test_prepare_adds_scope_field(_, ann_in, ann_out, uri_normalize):
     ({"references": [], "target": []},
      {"references": [], "target": []}),
 ])
-def test_prepare_transforms_old_style_comments(groups, ann_in, ann_out):
-    transform.prepare(ann_in)
+def test_fix_old_style_comments(ann_in, ann_out):
+    transform.fix_old_style_comments(ann_in)
     assert ann_in == ann_out
 
 
-@mock.patch('h.api.transform.groups')
 @pytest.mark.parametrize("ann,nipsa", [
     ({"user": "george"}, True),
     ({"user": "georgia"}, False),
     ({}, False),
 ])
-def test_prepare_sets_nipsa_field(_, ann, nipsa, has_nipsa):
+def test_add_nipsa(ann, nipsa, has_nipsa):
     has_nipsa.return_value = nipsa
-    transform.prepare(ann)
+    transform.add_nipsa(ann)
     if nipsa:
         assert ann["nipsa"] is True
     else:

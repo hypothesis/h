@@ -12,7 +12,7 @@ KEY = 'someclient'
 SECRET = 'somesecret'
 
 
-effective_principals_fixtures = pytest.mark.usefixtures('accounts', 'groups')
+effective_principals_fixtures = pytest.mark.usefixtures('accounts', 'group_principals')
 
 
 @effective_principals_fixtures
@@ -26,11 +26,11 @@ def test_effective_principals_when_user_is_None(accounts):
 
 
 @effective_principals_fixtures
-def test_effective_principals_returns_Authenticated(accounts, groups):
+def test_effective_principals_returns_Authenticated(accounts, group_principals):
     # User is authenticated but is not an admin or staff or a member of any
     # groups.
     accounts.get_user.return_value = mock.Mock(admin=False, staff=False)
-    groups.group_principals.return_value = []
+    group_principals.return_value = []
 
     principals = auth.effective_principals('acct:jiji@hypothes.is',
                                            testing.DummyRequest())
@@ -39,11 +39,11 @@ def test_effective_principals_returns_Authenticated(accounts, groups):
 
 
 @effective_principals_fixtures
-def test_effective_principals_returns_userid(accounts, groups):
+def test_effective_principals_returns_userid(accounts, group_principals):
     # User is authenticated but is not an admin or staff or a member of any
     # groups.
     accounts.get_user.return_value = mock.Mock(admin=False, staff=False)
-    groups.group_principals.return_value = []
+    group_principals.return_value = []
 
     principals = auth.effective_principals('acct:jiji@hypothes.is',
                                            testing.DummyRequest())
@@ -52,9 +52,9 @@ def test_effective_principals_returns_userid(accounts, groups):
 
 
 @effective_principals_fixtures
-def test_effective_principals_when_user_is_admin(accounts, groups):
+def test_effective_principals_when_user_is_admin(accounts, group_principals):
     accounts.get_user.return_value = mock.Mock(admin=True, staff=False)
-    groups.group_principals.return_value = []
+    group_principals.return_value = []
 
     principals = auth.effective_principals('acct:jiji@hypothes.is',
                                            testing.DummyRequest())
@@ -63,9 +63,9 @@ def test_effective_principals_when_user_is_admin(accounts, groups):
 
 
 @effective_principals_fixtures
-def test_effective_principals_when_user_is_staff(accounts, groups):
+def test_effective_principals_when_user_is_staff(accounts, group_principals):
     accounts.get_user.return_value = mock.Mock(admin=False, staff=True)
-    groups.group_principals.return_value = []
+    group_principals.return_value = []
 
     principals = auth.effective_principals('acct:jiji@hypothes.is',
                                            testing.DummyRequest())
@@ -74,21 +74,21 @@ def test_effective_principals_when_user_is_staff(accounts, groups):
 
 
 @effective_principals_fixtures
-def test_effective_principals_when_user_has_groups(accounts, groups):
+def test_effective_principals_when_user_has_groups(accounts, group_principals):
     accounts.get_user.return_value = mock.Mock(admin=False, staff=False)
-    groups.group_principals.return_value = ['group:abc123', 'group:def456']
+    group_principals.return_value = ['group:abc123', 'group:def456']
 
     principals = auth.effective_principals('acct:jiji@hypothes.is',
                                            testing.DummyRequest())
 
-    for group in groups.group_principals.return_value:
+    for group in group_principals.return_value:
         assert group in principals
 
 
 @effective_principals_fixtures
-def test_effective_principals_with_staff_admin_and_groups(accounts, groups):
+def test_effective_principals_with_staff_admin_and_groups(accounts, group_principals):
     accounts.get_user.return_value = mock.Mock(admin=True, staff=True)
-    groups.group_principals.return_value = ['group:abc123', 'group:def456']
+    group_principals.return_value = ['group:abc123', 'group:def456']
 
     principals = auth.effective_principals('acct:jiji@hypothes.is',
                                            testing.DummyRequest())
@@ -103,6 +103,36 @@ def test_effective_principals_with_staff_admin_and_groups(accounts, groups):
         assert principal in principals
 
 
+def _mock_group(pubid):
+    return mock.Mock(pubid=pubid)
+
+
+def test_group_principals_with_no_groups():
+    user = mock.Mock(groups=[])
+
+    assert auth.group_principals(user) == []
+
+
+def test_group_principals_with_one_group():
+    user = mock.Mock(groups=[_mock_group('pubid1')])
+
+    assert auth.group_principals(user) == ['group:pubid1']
+
+
+def test_group_principals_with_three_groups():
+    user = mock.Mock(groups=[
+        _mock_group('pubid1'),
+        _mock_group('pubid2'),
+        _mock_group('pubid3'),
+    ])
+
+    assert auth.group_principals(user) == [
+        'group:pubid1',
+        'group:pubid2',
+        'group:pubid3',
+    ]
+
+
 @pytest.fixture
 def accounts(request):
     patcher = mock.patch('h.auth.accounts', autospec=True)
@@ -111,7 +141,7 @@ def accounts(request):
 
 
 @pytest.fixture
-def groups(request):
-    patcher = mock.patch('h.auth.groups', autospec=True)
+def group_principals(request):
+    patcher = mock.patch('h.auth.group_principals', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()

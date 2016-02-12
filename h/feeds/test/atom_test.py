@@ -178,19 +178,19 @@ def test_annotation_api_url_links(_):
 
 def test_target_links():
     """Entries should have links to the annotation's targets."""
-    with mock.patch("h.test.factories.api_models.Annotation.target_links",
-                    new_callable=mock.PropertyMock) as mock_target_links:
-        annotation = factories.Annotation()
-        mock_target_links.return_value = [
-            "target href 1", "target href 2", "target href 3"]
+    annotation = factories.Annotation()
+    annotation['target'] = [
+        {'source': 'target href 1'},
+        {'source': 'target href 2'},
+        {'source': 'target href 3'},
+    ]
 
-        feed = atom.feed_from_annotations(
-            [annotation], "atom_url", lambda annotation: "annotation url")
+    feed = atom.feed_from_annotations(
+        [annotation], "atom_url", lambda annotation: "annotation url")
 
-        mock_target_links.assert_called_once_with()
-        hrefs = [link['href'] for link in feed['entries'][0]['links']]
-        for href in mock_target_links.return_value:
-            assert href in hrefs
+    hrefs = [link['href'] for link in feed['entries'][0]['links']]
+    for target in annotation['target']:
+        assert target['source'] in hrefs
 
 
 @mock.patch("h.feeds.util")

@@ -27,7 +27,6 @@ from h import queue
 from h._compat import text_type
 from h.api import auth
 from h.api import storage
-from h.models import Annotation
 
 log = logging.getLogger(__name__)
 
@@ -330,7 +329,7 @@ def handle_annotation_event(message, socket):
     annotation event, otherwise a dict containing information about the event.
     """
     action = message['action']
-    annotation = Annotation(**message['annotation'])
+    annotation = storage.annotation_from_dict(message['annotation'])
 
     if action == 'read':
         return None

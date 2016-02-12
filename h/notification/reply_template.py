@@ -8,6 +8,7 @@ from pyramid.renderers import render
 
 from h import auth
 from h.api.auth import translate_annotation_principals
+from h.api import storage
 from h.notification.notifier import TemplateRenderException
 from h.notification import types
 from h.notification.models import Subscriptions
@@ -15,7 +16,6 @@ from h.notification.gateway import user_name, \
     user_profile_url, standalone_url, get_user_by_name
 from h.notification.types import ROOT_PATH, REPLY_TYPE
 from h.accounts.events import LoginEvent, RegistrationEvent
-from h.models import Annotation
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt.jinja2'
 
 def parent_values(annotation):
     if 'references' in annotation:
-        parent = Annotation.fetch(annotation['references'][-1])
+        parent = storage.fetch_annotation(annotation['references'][-1])
         return parent
     else:
         return {}
@@ -113,7 +113,7 @@ def generate_notifications(request, annotation, action):
     # If the annotation doesn't have a parent, we can't find its parent, or we
     # have no idea who the author of the parent is, then we can't send a
     # notification email.
-    parent = annotation.parent
+    parent = storage.fetch_annotation(annotation.parent_id)
     if parent is None or 'user' not in parent:
         return
 

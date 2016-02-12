@@ -41,7 +41,7 @@ def test_expand_uri_document_uris(document_model):
 
 @pytest.fixture
 def document_model(config, request):
-    patcher = patch('h.api.models.Document', autospec=True)
+    patcher = patch('h.api.models.elastic.Document', autospec=True)
     module = patcher.start()
     request.addfinalizer(patcher.stop)
     return module

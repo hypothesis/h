@@ -4,8 +4,8 @@ import json
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 
-from ..models import Annotation
-from .reply_template import generate_notifications
+from h.api import storage
+from h.notification.reply_template import generate_notifications
 
 
 def run(request):
@@ -26,7 +26,7 @@ def run(request):
     def send_notifications(message):
         data = json.loads(message.body)
         action = data['action']
-        annotation = Annotation(**data['annotation'])
+        annotation = storage.annotation_from_dict(data['annotation'])
         mailer = get_mailer(request)
         notifications = generate_notifications(request, annotation, action)
         for (subject, body, html, recipients) in notifications:

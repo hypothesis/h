@@ -25,33 +25,24 @@ def test_target_links_from_annotation():
     assert annotation.target_links == ['target link']
 
 
-def test_parent_returns_none_if_no_references():
+def test_parent_id_returns_none_if_no_references():
     annotation = Annotation()
-    assert annotation.parent is None
+    assert annotation.parent_id is None
 
 
-def test_parent_returns_none_if_empty_references():
+def test_parent_id_returns_none_if_empty_references():
     annotation = Annotation(references=[])
-    assert annotation.parent is None
+    assert annotation.parent_id is None
 
 
-def test_parent_returns_none_if_references_not_list():
+def test_parent_id_returns_none_if_references_not_list():
     annotation = Annotation(references={'foo': 'bar'})
-    assert annotation.parent is None
+    assert annotation.parent_id is None
 
 
-@patch.object(Annotation, 'fetch', spec=True)
-def test_parent_fetches_thread_parent(fetch):
+def test_parent_id_returns_thread_parent_id():
     annotation = Annotation(references=['abc123', 'def456'])
-    annotation.parent
-    fetch.assert_called_with('def456')
-
-
-@patch.object(Annotation, 'fetch', spec=True)
-def test_parent_returns_thread_parent(fetch):
-    annotation = Annotation(references=['abc123', 'def456'])
-    parent = annotation.parent
-    assert parent == fetch.return_value
+    assert annotation.parent_id == 'def456'
 
 
 @pytest.fixture
