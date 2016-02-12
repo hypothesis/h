@@ -204,7 +204,8 @@ def test_login_inactive(config, user_model):
             'password': 'cake',
         })
 
-    assert 'not active' in exc.value.msg
+    assert ("You haven't activated your account yet" in
+            exc.value.asdict().get('username', ''))
 
 
 def test_forgot_password_invalid_with_no_user(config, user_model):
