@@ -1,6 +1,6 @@
 // ES2015 polyfills
-require('core-js/library/es6/promise');
-require('core-js/modules/$.object-assign');
+require('core-js/es6/promise');
+require('core-js/fn/object/assign');
 
 // URL constructor, required by IE 10+,
 // Microsoft Edge.
