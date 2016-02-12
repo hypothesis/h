@@ -1,4 +1,4 @@
-include Makefile AUTHORS CHANGES.txt LICENSE NOTICE
+include Makefile AUTHORS CHANGES LICENSE NOTICE
 include gunicorn.conf.py
 include package.json
 include requirements.txt
