@@ -2,6 +2,7 @@
 
 var assign = require('core-js/library/fn/object/assign');
 var angular = require('angular');
+var Promise = require('core-js/library/es6/promise');
 
 var events = require('./events');
 var retryUtil = require('./retry-util');

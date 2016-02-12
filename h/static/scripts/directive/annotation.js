@@ -1,6 +1,8 @@
 /* jshint node: true */
 'use strict';
 
+var Promise = require('core-js/library/es6/promise');
+
 var dateUtil = require('../date-util');
 var events = require('../events');
 

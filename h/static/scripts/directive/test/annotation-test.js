@@ -1,6 +1,8 @@
 /* jshint node: true */
 'use strict';
 
+var Promise = require('core-js/library/es6/promise');
+
 var events = require('../../events');
 
 var module = angular.mock.module;
