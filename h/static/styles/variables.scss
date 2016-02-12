@@ -34,7 +34,7 @@ $brand-color: #bd1c2b !default;
 $button-text-color: $gray-dark !default;
 $button-background-start: $white !default;
 $button-background-end: #f0f0f0 !default;
-$button-background-gradient: top, $button-background-start, $button-background-end !default;
+$button-background-gradient: to bottom, $button-background-start, $button-background-end !default;
 
 $error-color: #f0480c !default;
 $success-color: #1cbd41 !default;

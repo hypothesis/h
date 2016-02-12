@@ -229,7 +229,7 @@
 }
 
 .btn-danger {
-  @include background(linear-gradient(top, $error-color, shade($error-color, 5%)));
+  @include background(linear-gradient(to bottom, $error-color, shade($error-color, 5%)));
   color: white;
   border-color: shade($error-color, 15%);
   text-shadow: 0 -1px 0 rgba(0, 0, 0, .1);
