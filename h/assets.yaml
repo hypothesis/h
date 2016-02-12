@@ -7,6 +7,7 @@ bootstrap_full_js:
   contents:
     - scripts/jquery.bundle.js
     - scripts/bootstrap.bundle.js
+
 bootstrap_full_css:
   contents: styles/bootstrap.css
 
