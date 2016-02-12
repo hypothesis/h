@@ -120,7 +120,7 @@ def test_ResetPasswordSchema_with_password_too_short(config, user_model):
     assert "password" in err.value.asdict()
 
 
-def test_login_bad_csrf(config, user_model):
+def test_LoginSchema_with_bad_csrf(config, user_model):
     request = DummyRequest()
     schema = schemas.LoginSchema().bind(request=request)
     user = user_model.get_by_username.return_value
@@ -133,7 +133,7 @@ def test_login_bad_csrf(config, user_model):
         })
 
 
-def test_login_bad_username(config, user_model):
+def test_LoginSchema_with_bad_username(config, user_model):
     request = csrf_request(config)
     schema = schemas.LoginSchema().bind(request=request)
     user_model.get_by_username.return_value = None
@@ -148,7 +148,7 @@ def test_login_bad_username(config, user_model):
     assert 'username' in exc.value.asdict()
 
 
-def test_login_bad_password(config, user_model):
+def test_LoginSchema_with_bad_password(config, user_model):
     request = csrf_request(config)
     schema = schemas.LoginSchema().bind(request=request)
     user_model.validate_user.return_value = False
@@ -162,7 +162,7 @@ def test_login_bad_password(config, user_model):
     assert 'password' in exc.value.asdict()
 
 
-def test_login_good(config, user_model):
+def test_LoginSchema_with_valid_request(config, user_model):
     request = csrf_request(config)
     user = user_model.get_by_username.return_value
     user.is_activated = True
@@ -175,7 +175,8 @@ def test_login_good(config, user_model):
     })
 
 
-def test_login_email(config, user_model):
+def test_LoginSchema_with_email_instead_of_username(config, user_model):
+    """If get_by_username() returns None it should try get_by_email()."""
     request = csrf_request(config)
     schema = schemas.LoginSchema().bind(request=request)
     user_model.get_by_username.return_value = None
@@ -188,7 +189,7 @@ def test_login_email(config, user_model):
     })
 
 
-def test_login_inactive(config, user_model):
+def test_LoginSchema_with_inactive_user_account(config, user_model):
     request = csrf_request(config)
     user = user_model.get_by_username.return_value
     user.is_activated = False
@@ -204,7 +205,7 @@ def test_login_inactive(config, user_model):
             exc.value.asdict().get('username', ''))
 
 
-def test_forgot_password_invalid_with_no_user(config, user_model):
+def test_ForgotPasswordSchema_invalid_with_no_user(config, user_model):
     request = csrf_request(config)
     schema = schemas.ForgotPasswordSchema().bind(request=request)
     user_model.get_by_email.return_value = None
@@ -216,7 +217,7 @@ def test_forgot_password_invalid_with_no_user(config, user_model):
     assert 'no user with the email address' in exc.value.asdict()['email']
 
 
-def test_forgot_password_adds_user_to_appstruct(config, user_model):
+def test_ForgotPasswordSchema_adds_user_to_appstruct(config, user_model):
     request = csrf_request(config)
     schema = schemas.ForgotPasswordSchema().bind(request=request)
     user = user_model.get_by_email.return_value
@@ -226,7 +227,7 @@ def test_forgot_password_adds_user_to_appstruct(config, user_model):
     assert appstruct['user'] == user
 
 
-def test_reset_password_with_invalid_user_token(config, user_model):
+def test_ResetPasswordSchema_with_invalid_user_token(config, user_model):
     request = csrf_request(config)
     request.registry.password_reset_serializer = FakeInvalidSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
@@ -241,7 +242,7 @@ def test_reset_password_with_invalid_user_token(config, user_model):
     assert 'reset code is not valid' in exc.value.asdict()['user']
 
 
-def test_reset_password_with_expired_token(config, user_model):
+def test_ResetPasswordSchema_with_expired_token(config, user_model):
     request = csrf_request(config)
     request.registry.password_reset_serializer = FakeExpiredSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
@@ -257,8 +258,8 @@ def test_reset_password_with_expired_token(config, user_model):
 
 
 @pytest.mark.usefixtures('user_model')
-def test_reset_password_user_has_already_reset_their_password(config,
-                                                              user_model):
+def test_ResetPasswordSchema_user_has_already_reset_their_password(config,
+                                                                   user_model):
     request = csrf_request(config)
     request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
@@ -276,7 +277,7 @@ def test_reset_password_user_has_already_reset_their_password(config,
 
 
 @pytest.mark.usefixtures('user_model')
-def test_reset_password_adds_user_to_appstruct(config, user_model):
+def test_ResetPasswordSchema_adds_user_to_appstruct(config, user_model):
     request = csrf_request(config)
     request.registry.password_reset_serializer = FakeSerializer()
     schema = schemas.ResetPasswordSchema().bind(request=request)
@@ -291,7 +292,7 @@ def test_reset_password_adds_user_to_appstruct(config, user_model):
     assert appstruct['user'] == user
 
 
-def test_emailchangeschema_rejects_non_matching_emails(config, user_model):
+def test_EmailChangeSchema_rejects_non_matching_emails(config, user_model):
     user = Mock()
     request = csrf_request(config, authenticated_user=user)
     schema = schemas.EmailChangeSchema().bind(request=request)
@@ -306,7 +307,7 @@ def test_emailchangeschema_rejects_non_matching_emails(config, user_model):
     assert 'email_confirm' in exc.value.asdict()
 
 
-def test_emailchangeschema_rejects_wrong_password(config, user_model):
+def test_EmailChangeSchema_rejects_wrong_password(config, user_model):
     user = Mock()
     request = csrf_request(config, authenticated_user=user)
     schema = schemas.EmailChangeSchema().bind(request=request)
@@ -324,7 +325,7 @@ def test_emailchangeschema_rejects_wrong_password(config, user_model):
     assert 'password' in exc.value.asdict()
 
 
-def test_passwordchangeschema_rejects_non_matching_passwords(config,
+def test_PasswordChangeSchema_rejects_non_matching_passwords(config,
                                                              user_model):
     user = Mock()
     request = csrf_request(config, authenticated_user=user)
@@ -338,7 +339,7 @@ def test_passwordchangeschema_rejects_non_matching_passwords(config,
     assert 'new_password_confirm' in exc.value.asdict()
 
 
-def test_passwordchangeschema_rejects_wrong_password(config, user_model):
+def test_PasswordChangeSchema_rejects_wrong_password(config, user_model):
     user = Mock()
     request = csrf_request(config, authenticated_user=user)
     schema = schemas.PasswordChangeSchema().bind(request=request)
