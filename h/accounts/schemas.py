@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pkg_resources import resource_stream
+import logging
 
 import colander
 import deform
@@ -10,6 +11,7 @@ from h import i18n
 from h.accounts import models
 
 _ = i18n.TranslationString
+log = logging.getLogger(__name__)
 
 USERNAME_BLACKLIST = None
 
@@ -23,10 +25,15 @@ def deferred_csrf_token(node, kw):
 def get_blacklist():
     global USERNAME_BLACKLIST
     if USERNAME_BLACKLIST is None:
-        USERNAME_BLACKLIST = set(
-            l.strip().lower()
-            for l in resource_stream(__package__, 'blacklist')
-        )
+        # Try to load the blacklist file from disk. If, for whatever reason, we
+        # can't load the file, then don't crash out, just log a warning about
+        # the problem.
+        try:
+            blacklist = resource_stream(__package__, 'blacklist').readlines()
+        except IOError:
+            log.exception('unable to load blacklist')
+            blacklist = []
+        USERNAME_BLACKLIST = set(l.strip().lower() for l in blacklist)
     return USERNAME_BLACKLIST
 
 
