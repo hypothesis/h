@@ -17,7 +17,6 @@ FEATURES = {
     'claim': "Enable 'claim your username' web views?",
     'embed_media': "Replace YouTube, Vimeo etc links in annotations with embeds",
     'new_homepage': "Show the new homepage design?",
-    'sidebar_tutorial': "Show a tutorial to new users in the sidebar",
     'truncate_annotations': "Truncate long quotes and bodies in annotations?",
 }
 
@@ -39,7 +38,9 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {}
+FEATURES_PENDING_REMOVAL = {
+    'sidebar_tutorial': "Show a tutorial to new users in the sidebar",
+}
 
 
 class UnknownFeatureError(Exception):
