@@ -108,10 +108,12 @@ module.exports = function createBundle(opts) {
 
   function build() {
     var output = fs.createWriteStream(bundlePath);
-    var stream = bundle
-      .bundle()
-      .pipe(exorcist(sourcemapPath))
-      .pipe(output);
+    var b = bundle.bundle()
+    b.on('error', function (err) {
+      log('Build error', err.toString());
+    });
+    var stream = b.pipe(exorcist(sourcemapPath))
+                  .pipe(output);
     return streamFinished(stream);
   }
 
