@@ -28,24 +28,6 @@ function annotationDirective() {
   return annotation.directive;
 }
 
-/** Return Angular's $compile service. */
-function compileService() {
-  var $compile;
-  inject(function(_$compile_) {
-    $compile = _$compile_;
-  });
-  return $compile;
-}
-
-/** Return Angular's $document service. */
-function documentService() {
-  var $document;
-  inject(function(_$document_) {
-    $document = _$document_;
-  });
-  return $document;
-}
-
 describe('annotation', function() {
   describe('updateDomainModel()', function() {
     var updateDomainModel = require('../annotation').updateDomainModel;
@@ -152,15 +134,6 @@ describe('annotation', function() {
   describe('link', function () {
     var link = require('../annotation').link;
 
-    /** Return Angular's $rootScope. */
-    function getRootScope() {
-      var $rootScope;
-      inject(function(_$rootScope_) {
-        $rootScope = _$rootScope_;
-      });
-      return $rootScope;
-    }
-
     var scope;
     var mockElement;
     var mockAttributes;
@@ -171,7 +144,7 @@ describe('annotation', function() {
     var mockControllers;
 
     beforeEach(function () {
-      scope = getRootScope().$new();
+      scope = util.ngModule(inject, '$rootScope').$new();
       mockElement = {on: sinon.stub()};
       mockAttributes = undefined;  // Left undefined because link() doesn't use
                                    // it.
@@ -1021,7 +994,7 @@ describe('annotation', function() {
         dialog.find('button').click();
         parts.scope.$digest();
         assert.ok(dialog.hasClass('open'));
-        documentService().click();
+        util.ngModule(inject, '$document').click();
         assert.notOk(dialog.hasClass('open'));
       });
     });
