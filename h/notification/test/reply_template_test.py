@@ -7,8 +7,9 @@ from pyramid.testing import DummyRequest
 from pyramid import security
 
 from h.api import storage
-from h.notification.gateway import user_name, user_profile_url, standalone_url
 from h.notification import reply_template as rt
+from h.notification.gateway import user_name, user_profile_url, standalone_url
+from h.notification.notifier import TemplateRenderException
 from h.notification.types import REPLY_TYPE
 
 store_fake_data = [
@@ -114,30 +115,13 @@ class MockSubscription(Mock):
         }
 
 
-# Tests for the parent_values function
-def test_parent_values_reply():
-    """Test if the function gives back the correct parent_value"""
-    annotation = _fake_anno(1)
-    parent = rt.parent_values(annotation)
-
-    assert parent['id'] == '0'
-
-
-def test_parent_values_root_annotation():
-    """Test if it gives back an empty dict for root annotations"""
-    annotation = _fake_anno(0)
-    parent = rt.parent_values(annotation)
-
-    assert len(parent.items()) == 0
-
-
 # Tests for the create_template_map function
 def test_all_keys_are_there():
     """Checks for the existence of every needed key for the template"""
     request = _fake_request()
     annotation = _fake_anno(1)
+    parent = _fake_anno(0)
 
-    parent = rt.parent_values(annotation)
     tmap = rt.create_template_map(request, annotation, parent)
 
     assert 'document_title' in tmap
@@ -159,11 +143,9 @@ def test_template_map_key_values():
     """This test checks whether the keys holds the correct values"""
     request = _fake_request()
     annotation = _fake_anno(1)
-
-    parent = rt.parent_values(annotation)
-    tmap = rt.create_template_map(request, annotation, parent)
-
     parent = _fake_anno(0)
+
+    tmap = rt.create_template_map(request, annotation, parent)
 
     # Document properties
     assert tmap['document_title'] == annotation['document']['title']
@@ -213,9 +195,10 @@ def test_fallback_title():
     """Checks that the title falls back to using the url"""
     request = _fake_request()
     annotation = _fake_anno(4)
+    parent = _fake_anno(0)
 
-    parent = rt.parent_values(annotation)
     tmap = rt.create_template_map(request, annotation, parent)
+
     assert tmap['document_title'] == annotation['uri']
 
 
@@ -223,8 +206,8 @@ def test_unsubscribe_token_generation():
     """ensures that a serialized token is generated for the unsubscribe url"""
     request = _fake_request()
     annotation = _fake_anno(4)
+    parent = _fake_anno(0)
 
-    parent = rt.parent_values(annotation)
     rt.create_template_map(request, annotation, parent)
 
     notification_serializer = request.registry.notification_serializer
@@ -238,8 +221,8 @@ def test_unsubscribe_url_generation():
     """ensures that a serialized token is generated for the unsubscribe url"""
     request = _fake_request()
     annotation = _fake_anno(4)
+    parent = _fake_anno(0)
 
-    parent = rt.parent_values(annotation)
     rt.create_template_map(request, annotation, parent)
 
     request.route_url.assert_called_with('unsubscribe', token='TOKEN')
@@ -252,11 +235,10 @@ def test_get_email():
         user.email = 'testmail@test.com'
         mock_user_db.return_value = user
         request = _fake_request()
+        annotation = _fake_anno(0)
 
-        annotation = _fake_anno(1)
-        parent = rt.parent_values(annotation)
+        email = rt.get_recipients(request, annotation)
 
-        email = rt.get_recipients(request, parent)
         assert email[0] == user.email
 
 
@@ -265,37 +247,19 @@ def test_no_email():
     with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
         mock_user_db.return_value = {}
         request = _fake_request()
+        annotation = _fake_anno(0)
 
-        annotation = _fake_anno(1)
-        parent = rt.parent_values(annotation)
-
-        exc = False
-        try:
-            rt.get_recipients(request, parent)
-        except:
-            exc = True
-        assert exc
+        with pytest.raises(TemplateRenderException):
+            rt.get_recipients(request, annotation)
 
 
 # Tests for the check_conditions function
 def test_dont_send_to_the_same_user():
     """Tests that if the parent user and the annotation user is the same
     then this function returns False"""
-    annotation = _fake_anno(0)
-    data = {
-        'parent': rt.parent_values(annotation),
-        'subscription': {'id': 1}
-    }
-
-    send = rt.check_conditions(annotation, data)
-    assert send is False
-
-
-def test_dont_send_if_parent_is_missing():
-    """Tests that this function returns False if the annotations parent's user is missing"""
     annotation = _fake_anno(3)
     data = {
-        'parent': rt.parent_values(annotation),
+        'parent': _fake_anno(0),
         'subscription': {'id': 1}
     }
 
@@ -307,7 +271,7 @@ def test_different_subscription():
     """If subscription.uri is different from user, do not send!"""
     annotation = _fake_anno(1)
     data = {
-        'parent': rt.parent_values(annotation),
+        'parent': _fake_anno(0),
         'subscription': {
             'id': 1,
             'uri': 'acct:hippopotamus@stucked.sos'
@@ -322,7 +286,7 @@ def test_good_conditions():
     """If conditions match, this function returns with a True value"""
     annotation = _fake_anno(1)
     data = {
-        'parent': rt.parent_values(annotation),
+        'parent': _fake_anno(0),
         'subscription': {
             'id': 1,
             'uri': 'acct:elephant@nomouse.pls'
@@ -354,6 +318,20 @@ def test_generate_notifications_empty_if_annotation_has_no_parent():
     notifications = rt.generate_notifications(request, annotation, 'create')
 
     assert list(notifications) == []
+
+
+@generate_notifications_fixtures
+def test_generate_notifications_does_not_fetch_if_annotation_has_no_parent(fetch):
+    """Don't try and fetch None if the annotation has no parent"""
+    annotation = _fake_anno(0)
+    request = DummyRequest()
+
+    notifications = rt.generate_notifications(request, annotation, 'create')
+
+    # Read the generator
+    list(notifications)
+
+    fetch.assert_not_called()
 
 
 @generate_notifications_fixtures
