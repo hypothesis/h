@@ -1,7 +1,6 @@
 'use strict';
 
 var retry = require('retry');
-var Promise = require('core-js/library/es6/promise');
 
 /**
  * Retry a Promise-returning operation until it succeeds or

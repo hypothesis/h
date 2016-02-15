@@ -1,7 +1,6 @@
 /* jshint node: true */
 'use strict';
 
-var Promise = require('core-js/library/es6/promise');
 var proxyquire = require('proxyquire');
 
 var events = require('../../events');

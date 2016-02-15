@@ -1,7 +1,5 @@
 'use strict';
 
-var Promise = require('core-js/library/es6/promise');
-
 describe('annotationMapper', function() {
   var sandbox = sinon.sandbox.create();
   var $rootScope;

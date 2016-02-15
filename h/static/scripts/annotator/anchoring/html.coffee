@@ -1,5 +1,3 @@
-Promise = require('core-js/library/es6/promise')
-
 {
   FragmentAnchor
   RangeAnchor
