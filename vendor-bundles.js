@@ -27,7 +27,7 @@ function doNotParse(id) {
 
 module.exports = {
   jquery: [doNotParse('jquery')],
-  bootstrap: [doNotParse('bootstrap')],
+  bootstrap: ['bootstrap'],
   polyfills: ['./h/static/scripts/polyfills'],
   angular: [
     'angular',

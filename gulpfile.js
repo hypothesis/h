@@ -94,10 +94,16 @@ var siteBundleOpts = Object.assign({}, baseOpts, {
   entry: './h/static/scripts/site',
 });
 
+var adminSiteBundleOpts = Object.assign({}, baseOpts, {
+  name: 'admin-site',
+  entry: './h/static/scripts/admin-site',
+});
+
 var bundles = [
   appBundleOpts,
   extensionBundleOpts,
   siteBundleOpts,
+  adminSiteBundleOpts,
   injectorBundleOpts
 ];
 

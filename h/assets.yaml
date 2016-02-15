@@ -1,27 +1,18 @@
-# the full version of bootstrap, used
-# by admin pages.
-#
-# The new website uses a minimal version that only has the
-# features we need
-bootstrap_full_js:
-  contents:
-    - scripts/jquery.bundle.js
-    - scripts/bootstrap.bundle.js
-
-bootstrap_full_css:
-  contents: styles/bootstrap.css
-
-
 # Admin areas
+#
+# Note that these use a full version of Bootstrap.
+# The new website uses a minimal version that only has the
+# features we need.
 admin_css:
   contents:
-    - bootstrap_full_css
+    - styles/bootstrap.css
     - styles/admin.css
 
 admin_js:
   contents:
-    - jquery
-    - bootstrap_full_js
+    - scripts/jquery.bundle.js
+    - scripts/bootstrap.bundle.js
+    - scripts/admin-site.bundle.js
 
 
 # the H client application
