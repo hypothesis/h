@@ -101,7 +101,8 @@ def embed(context, request):
     request.response.content_type = b'text/javascript'
     request.response.text = client.render_embed_js(
         webassets_env=request.webassets_env,
-        app_html_url=request.resource_url(context, 'app.html'))
+        app_html_url=request.resource_url(context, 'app.html'),
+        base_url=request.route_url('index'))
     return request.response
 
 

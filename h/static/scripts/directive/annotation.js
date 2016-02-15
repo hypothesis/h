@@ -709,7 +709,10 @@ function AnnotationController(
 
   vm.share = function(event) {
     var $container = angular.element(event.currentTarget).parent();
-    $container.addClass('open').find('input').focus().select();
+    $container.addClass('open');
+    var shareLinkInput = $container.find('input')[0];
+    shareLinkInput.focus();
+    shareLinkInput.select();
 
     // We have to stop propagation here otherwise this click event will
     // re-close the share dialog immediately.
