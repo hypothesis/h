@@ -207,7 +207,7 @@ def token(args):
         host_url=request.host_url,
         registry=request.registry
     )
-    print(h.api.auth.generate_bearer_token(fake_request, 3600))
+    print(h.api.auth.generate_jwt(fake_request, 3600))
 
 
 parser_token = subparsers.add_parser(

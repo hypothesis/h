@@ -179,7 +179,7 @@ def annotator_token(request):
     except exceptions.BadCSRFToken:
         raise httpexceptions.HTTPUnauthorized()
 
-    return auth.generate_bearer_token(request, 3600)
+    return auth.generate_jwt(request, 3600)
 
 
 @api_config(context=Annotations, request_method='GET')

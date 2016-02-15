@@ -6,6 +6,7 @@ from pyramid import testing
 from pyramid import security
 
 from h import auth
+from h.api.models.token import API_TOKEN_PREFIX
 
 
 KEY = 'someclient'
@@ -131,6 +132,28 @@ def test_group_principals_with_three_groups():
         'group:pubid2',
         'group:pubid3',
     ]
+
+
+def test_bearer_token_returns_token():
+    request = testing.DummyRequest(headers={
+        'Authorization': 'Bearer ' + API_TOKEN_PREFIX + 'abc123'
+    })
+
+    assert auth.bearer_token(request) == API_TOKEN_PREFIX + 'abc123'
+
+
+def test_bearer_token_when_no_Authorization_header():
+    request = testing.DummyRequest(headers={})
+
+    assert auth.bearer_token(request) == ''
+
+
+def test_bearer_token_when_Authorization_header_does_not_contain_bearer():
+    request = testing.DummyRequest(headers={
+        'Authorization': API_TOKEN_PREFIX + 'abc123'  # No "Bearer " prefix.
+    })
+
+    assert auth.bearer_token(request) == ''
 
 
 @pytest.fixture

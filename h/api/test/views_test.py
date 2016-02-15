@@ -123,18 +123,18 @@ def test_annotator_token_raises_Unauthorized_if_check_csrf_token_raises(
 
 
 @annotator_token_fixtures
-def test_annotator_token_calls_generate_bearer_token(auth):
+def test_annotator_token_calls_generate_jwt(auth):
     request = testing.DummyRequest()
 
     views.annotator_token(request)
 
-    auth.generate_bearer_token.assert_called_once_with(request, 3600)
+    auth.generate_jwt.assert_called_once_with(request, 3600)
 
 
 @annotator_token_fixtures
 def test_annotator_token_returns_token(auth):
     assert (views.annotator_token(testing.DummyRequest()) ==
-            auth.generate_bearer_token.return_value)
+            auth.generate_jwt.return_value)
 
 
 def test_annotations_index_searches(search_lib):
@@ -331,7 +331,7 @@ def AnnotationEvent(request):
 def auth(request):
     patcher = mock.patch('h.api.views.auth', autospec=True)
     module = patcher.start()
-    module.generate_bearer_token = mock.Mock(return_value='abc123')
+    module.generate_jwt = mock.Mock(return_value='abc123')
     request.addfinalizer(patcher.stop)
     return module
 
