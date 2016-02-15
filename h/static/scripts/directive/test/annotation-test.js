@@ -423,19 +423,12 @@ describe('annotation', function() {
     var $timeout;
     var $window;
     var fakeAnnotationMapper;
-    var fakeAnnotationUI;
-    var fakeDocumentDomainFilter;
-    var fakeDocumentTitleFilter;
     var fakeDrafts;
-    var fakeFeatures;
     var fakeFlash;
     var fakeGroups;
     var fakePermissions;
     var fakeSession;
-    var fakeSettings;
-    var fakeTags;
     var fakeTime;
-    var fakeUrlEncodeFilter;
     var sandbox;
 
     function createDirective(annotation) {
@@ -572,7 +565,7 @@ describe('annotation', function() {
         deleteAnnotation: sandbox.stub()
       };
 
-      fakeAnnotationUI = {};
+      var fakeAnnotationUI = {};
 
       fakeDrafts = {
         update: sandbox.stub(),
@@ -580,7 +573,7 @@ describe('annotation', function() {
         get: sandbox.stub()
       };
 
-      fakeFeatures = {
+      var fakeFeatures = {
         flagEnabled: sandbox.stub().returns(true)
       };
 
@@ -608,11 +601,11 @@ describe('annotation', function() {
         }
       };
 
-      fakeSettings = {
+      var fakeSettings = {
         serviceUrl: 'https://test.hypothes.is/',
       };
 
-      fakeTags = {
+      var fakeTags = {
         filter: sandbox.stub().returns('a while ago'),
         store: sandbox.stub()
       };
