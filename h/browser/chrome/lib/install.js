@@ -20,8 +20,18 @@ chrome.runtime.requestUpdateCheck(function (status) {
 });
 
 function onInstalled(installDetails) {
+  // The install reason can be "install", "update", "chrome_update", or
+  // "shared_module_update", see:
+  //
+  //   https://developer.chrome.com/extensions/runtime#type-OnInstalledReason
+  //
+  // If we were installed (rather than updated) then trigger a "firstRun" event,
+  // passing in the details of the installed extension. See:
+  //
+  //   https://developer.chrome.com/extensions/management#method-getSelf
+  //
   if (installDetails.reason === 'install') {
-    browserExtension.firstRun(installDetails);
+    chrome.management.getSelf(browserExtension.firstRun);
   }
 
   // We need this so that 3rd party cookie blocking does not kill us.
