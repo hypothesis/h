@@ -1,3 +1,6 @@
+/**
+ * Shared functions for creating JS code bundles using Browserify.
+ */
 'use strict';
 
 var coffeeify = require('coffeeify');
@@ -39,9 +42,13 @@ function waitForever() {
  */
 
 /**
- * Bundles the JavaScript for an application.
+ * Generates a JavaScript application or library bundle and source maps
+ * for debugging.
  *
- * @param {BundleOptions} opts
+ * @param {BundleOptions} opts - Configuration information for this bundle,
+ *                               specifying the name of the bundle, what
+ *                               modules to include, which code transformations
+ *                               to apply.
  * @return {Promise} Promise for when the bundle is fully written
  *                   if opts.watch is false or a promise that
  *                   waits forever otherwise.
@@ -140,4 +147,3 @@ module.exports = function createBundle(opts) {
     return build();
   }
 }
-

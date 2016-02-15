@@ -6,6 +6,9 @@ if settings.raven
 
 
 angular = require('angular')
+
+# autofill-event relies on the existence of window.angular so
+# it must be require'd after angular is first require'd
 require('autofill-event')
 
 streamer = require('./streamer')
