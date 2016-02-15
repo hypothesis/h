@@ -2,12 +2,30 @@
 'use strict';
 
 var Promise = require('core-js/library/es6/promise');
+var proxyquire = require('proxyquire');
 
 var events = require('../../events');
 var util = require('./util');
 
 var module = angular.mock.module;
 var inject = angular.mock.inject;
+
+/**
+ * Returns the annotation directive with helpers stubbed out.
+ */
+function annotationDirective() {
+  var noop = function () { return '' };
+
+  var annotation = proxyquire('../annotation', {
+    '../filter/document-domain': noop,
+    '../filter/document-title': noop,
+    '../filter/persona': {
+      username: noop,
+    }
+  });
+
+  return annotation.directive;
+}
 
 /** Return Angular's $compile service. */
 function compileService() {
@@ -534,7 +552,7 @@ describe('annotation', function() {
 
     before(function() {
       angular.module('h', [])
-        .directive('annotation', require('../annotation').directive);
+        .directive('annotation', annotationDirective());
     });
 
     beforeEach(module('h'));
@@ -588,16 +606,6 @@ describe('annotation', function() {
         setDefault: sandbox.stub()
       };
 
-      fakePersonaFilter = sandbox.stub().returnsArg(0);
-
-      fakeDocumentTitleFilter = function(arg) {
-        return '';
-      };
-
-      fakeDocumentDomainFilter = function(arg) {
-        return '';
-      };
-
       fakeSession = {
         state: {
           userid: 'acct:bill@localhost'
@@ -618,10 +626,6 @@ describe('annotation', function() {
         decayingInterval: function () {},
       };
 
-      fakeUrlEncodeFilter = function(v) {
-        return encodeURIComponent(v);
-      };
-
       fakeGroups = {
         focused: function() {
           return {};
@@ -636,14 +640,10 @@ describe('annotation', function() {
       $provide.value('flash', fakeFlash);
       $provide.value('momentFilter', fakeMomentFilter);
       $provide.value('permissions', fakePermissions);
-      $provide.value('personaFilter', fakePersonaFilter);
-      $provide.value('documentTitleFilter', fakeDocumentTitleFilter);
-      $provide.value('documentDomainFilter', fakeDocumentDomainFilter);
       $provide.value('session', fakeSession);
       $provide.value('settings', fakeSettings);
       $provide.value('tags', fakeTags);
       $provide.value('time', fakeTime);
-      $provide.value('urlencodeFilter', fakeUrlEncodeFilter);
       $provide.value('groups', fakeGroups);
     }));
 
@@ -1598,7 +1598,7 @@ describe('annotation', function() {
   describe('AnnotationController', function() {
     before(function() {
       angular.module('h', [])
-        .directive('annotation', require('../annotation').directive);
+        .directive('annotation', annotationDirective());
     });
 
     beforeEach(module('h'));

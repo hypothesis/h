@@ -17,17 +17,18 @@ function parseAccountID(user) {
   };
 }
 
+/**
+ * Returns the username part of an account ID or an empty string.
+ */
+function username(user) {
+  var account = parseAccountID(user);
+  if (!account) {
+    return '';
+  }
+  return account.username;
+}
+
 module.exports = {
   parseAccountID: parseAccountID,
-
-  /** Export parseAccountID() as an Angular filter */
-  filter: function () {
-    return function (user, part) {
-      var account = parseAccountID(user);
-      if (!account) {
-        return null;
-      }
-      return account[part || 'username'];
-    };
-  }
+  username: username,
 };
