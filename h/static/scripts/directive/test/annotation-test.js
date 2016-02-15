@@ -4,6 +4,7 @@
 var Promise = require('core-js/library/es6/promise');
 
 var events = require('../../events');
+var util = require('./util');
 
 var module = angular.mock.module;
 var inject = angular.mock.inject;
@@ -423,17 +424,14 @@ describe('annotation', function() {
 
     function createDirective(annotation) {
       annotation = annotation || defaultAnnotation();
-      $scope.annotation = annotation;
-      var element = angular.element('<div annotation="annotation">');
-      compileService()(element)($scope);
-      $scope.$digest();
-      var controller = element.controller('annotation');
-      var scope = element.isolateScope();
+      var element = util.createDirective(document, 'annotation', {
+        annotation: annotation,
+      });
       return {
         annotation: annotation,
-        controller: controller,
+        controller: element.ctrl,
         element: element,
-        scope: scope
+        scope: element.scope,
       };
     }
 
@@ -948,11 +946,12 @@ describe('annotation', function() {
       });
 
       it('makes the annotation shared if the parent is shared', function() {
-        var controller = createDirective(annotation).controller;
-        $scope.annotation.group = 'my group';
-        $scope.annotation.permissions = {
-          read: ['my group']
+        var annotation = defaultAnnotation();
+        annotation.group = 'my group';
+        annotation.permissions = {
+          read: ['my-group'],
         };
+        var controller = createDirective(annotation).controller;
         var reply = {};
         fakeAnnotationMapper.createAnnotation.returns(reply);
         fakePermissions.isShared = function(permissions, group) {
@@ -982,12 +981,13 @@ describe('annotation', function() {
       );
 
       it('sets the reply\'s group to be the same as its parent\'s', function() {
+        var annotation = defaultAnnotation();
+        annotation.group = 'my group';
         var controller = createDirective(annotation).controller;
-        $scope.annotation.group = 'my group';
         var reply = {};
         fakeAnnotationMapper.createAnnotation.returns(reply);
         controller.reply();
-        assert.equal(reply.group, $scope.annotation.group);
+        assert.equal(reply.group, annotation.group);
       });
     });
 
@@ -1719,7 +1719,7 @@ describe('annotation', function() {
         $provide.value('documentDomainFilter', locals.documentDomainFilter);
         $provide.value('localStorage', locals.localStorage);
       });
-      locals.element = angular.element('<div annotation="annotation">');
+      locals.element = angular.element('<annotation annotation="annotation">');
       var compiledElement = compileService()(locals.element);
       locals.$rootScope = getRootScope();
       locals.parentScope = locals.$rootScope.$new();

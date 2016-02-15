@@ -215,39 +215,6 @@ describe 'thread', ->
           count.withArgs('match').returns(1)
           assert.isTrue(controller.shouldShowAsReply())
 
-    describe '#shouldShowNumReplies', ->
-      count = null
-      filterActive = false
-
-      beforeEach ->
-        createDirective()
-        count = sinon.stub()
-        controller.counter = {count: count}
-        controller.filter = {active: -> filterActive}
-
-      describe 'when not filtered', ->
-        it 'shows the reply if the thread has children', ->
-          count.withArgs('message').returns(1)
-          assert.isTrue(controller.shouldShowNumReplies())
-
-        it 'does not show the reply if the thread has no children', ->
-          count.withArgs('message').returns(0)
-          assert.isFalse(controller.shouldShowNumReplies())
-
-      describe 'when filtered with children', ->
-        beforeEach ->
-          filterActive = true
-
-        it 'shows the reply', ->
-          count.withArgs('match').returns(1)
-          count.withArgs('message').returns(1)
-          assert.isTrue(controller.shouldShowNumReplies())
-
-        it 'does not show the reply if the message count does not match the match count', ->
-          count.withArgs('match').returns(0)
-          count.withArgs('message').returns(1)
-          assert.isFalse(controller.shouldShowNumReplies())
-
     describe '#numReplies', ->
 
       beforeEach ->

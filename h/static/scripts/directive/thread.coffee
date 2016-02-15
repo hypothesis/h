@@ -82,19 +82,6 @@ ThreadController = [
 
     ###*
     # @ngdoc method
-    # @name thread.ThreadController#shouldShowNumReplies
-    # @description
-    # Returns a boolean indicating whether the reply count should be rendered
-    # for the annotation at the root of this thread.
-    ###
-    this.shouldShowNumReplies = ->
-      hasChildren = this._count('message') > 0
-      allRepliesShown = this._count('message') == this._count('match')
-      hasFilterMatch = !this._isFilterActive() || allRepliesShown
-      hasChildren && hasFilterMatch
-
-    ###*
-    # @ngdoc method
     # @name thread.ThreadController#numReplies
     # @description
     # Returns the cumulative number of replies to the annotation at the root of
