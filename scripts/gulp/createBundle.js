@@ -59,6 +59,27 @@ module.exports = function createBundle(opts) {
   var bundleOpts = {
     debug: true,
     extensions: ['.coffee'],
+
+    // Browserify will retry to detect and automatically provide
+    // browser implementations of Node modules.
+    //
+    // This can bloat the bundle hugely if implementations for large
+    // modules like 'Buffer' or 'crypto' are inadvertently pulled in.
+    // Here we explicitly whitelist the builtins that can be used.
+    //
+    // In particular 'Buffer' is excluded from the list of automatically
+    // detected variables.
+    //
+    // See node_modules/browserify/lib/builtins.js to find out which
+    // modules provide the implementations of these.
+    builtins: [
+      'console',
+      '_process',
+      'querystring',
+    ],
+    insertGlobalVars: {
+      Buffer: undefined,
+    },
   };
 
   if (opts.watch) {
