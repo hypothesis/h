@@ -37,7 +37,7 @@ function groupList( $window, groups, settings) {
     },
     restrict: 'E',
     scope: {
-      auth: '='
+      auth: '<'
     },
     templateUrl: 'group_list.html'
   };

@@ -764,12 +764,12 @@ function annotation($document) {
     link: link,
     require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount'],
     scope: {
-      annotation: '=',
+      annotation: '<',
       // Indicates whether this is the last reply in a thread.
-      isLastReply: '=',
-      replyCount: '=',
+      isLastReply: '<',
+      isSidebar: '<',
       onReplyCountClick: '&',
-      isSidebar: '='
+      replyCount: '<',
     },
     templateUrl: 'annotation.html'
   };

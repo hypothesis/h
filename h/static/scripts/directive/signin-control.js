@@ -13,7 +13,7 @@ module.exports = function () {
       /**
        * An object representing the current authentication status.
        */
-      auth: '=',
+      auth: '<',
       /**
        * Called when the user clicks on the "Sign in" text.
        */
@@ -27,7 +27,7 @@ module.exports = function () {
        *
        * FIXME: should be removed when the old design is deprecated.
        */
-      newStyle: '=',
+      newStyle: '<',
     },
     templateUrl: 'signin_control.html',
   };

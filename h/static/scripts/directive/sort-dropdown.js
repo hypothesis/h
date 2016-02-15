@@ -3,13 +3,13 @@ module.exports = function () {
     restrict: 'E',
     scope: {
       /** The name of the currently selected sort criteria. */
-      sortBy: '=',
+      sortBy: '<',
       /** A list of choices that the user can opt to sort by. */
-      sortOptions: '=',
+      sortOptions: '<',
       /** If true, the menu uses just an icon, otherwise
        * it displays 'Sorted by {{sortBy}}'
        */
-      showAsIcon: '=',
+      showAsIcon: '<',
       /** Called when the user changes the current sort criteria. */
       onChangeSortBy: '&',
     },
