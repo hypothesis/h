@@ -3,14 +3,16 @@
  */
 'use strict';
 
-var coffeeify = require('coffeeify');
-var browserify = require('browserify');
-var exorcist = require('exorcist');
 var fs = require('fs');
+var path = require('path');
+
+var browserify = require('browserify');
+var coffeeify = require('coffeeify');
+var exorcist = require('exorcist');
+var gulpUtil = require('gulp-util');
 var mkdirp = require('mkdirp');
 var uglifyify = require('uglifyify');
 var watchify = require('watchify');
-var gulpUtil = require('gulp-util');
 
 var log = gulpUtil.log;
 
@@ -36,8 +38,11 @@ function waitForever() {
  *   require?: string[];
  *   transforms: Transform[];
  *
- *   watch?: boolean;
  *   minify?: boolean;
+ * }
+ *
+ * interface BuildOptions {
+ *   watch?: boolean;
  * }
  */
 
@@ -45,16 +50,19 @@ function waitForever() {
  * Generates a JavaScript application or library bundle and source maps
  * for debugging.
  *
- * @param {BundleOptions} opts - Configuration information for this bundle,
- *                               specifying the name of the bundle, what
- *                               modules to include, which code transformations
- *                               to apply.
+ * @param {BundleOptions} config - Configuration information for this bundle,
+ *                                 specifying the name of the bundle, what
+ *                                 modules to include and which code
+ *                                 transformations to apply.
+ * @param {BuildOptions} buildOpts
  * @return {Promise} Promise for when the bundle is fully written
  *                   if opts.watch is false or a promise that
  *                   waits forever otherwise.
  */
-module.exports = function createBundle(opts) {
-  mkdirp.sync(opts.path);
+module.exports = function createBundle(config, buildOpts) {
+  mkdirp.sync(config.path);
+
+  buildOpts = buildOpts || { watch: false };
 
   var bundleOpts = {
     debug: true,
@@ -82,28 +90,34 @@ module.exports = function createBundle(opts) {
     },
   };
 
-  if (opts.watch) {
+  if (buildOpts.watch) {
     bundleOpts.cache = {};
     bundleOpts.packageCache = {};
   }
 
-  // Skip parsing of large modules.
+  // Specify modules that Browserify should not parse.
   // The 'noParse' array must contain full file paths,
   // not module names.
-  bundleOpts.noParse = (opts.noParse || []).map(function (id) {
-    return require.resolve(id);
+  bundleOpts.noParse = (config.noParse || []).map(function (id) {
+    // If package.json specifies a custom entry point for the module for
+    // use in the browser, resolve that.
+    var packageConfig = require('../../package.json');
+    if (packageConfig.browser && packageConfig.browser[id]) {
+      return require.resolve('../../' + packageConfig.browser[id]);
+    } else {
+      return require.resolve(id);
+    }
   });
 
-  var name = opts.name;
-  var path = opts.path;
+  var name = config.name;
 
   var bundleFileName = name + '.bundle.js';
-  var bundlePath = path + '/' + bundleFileName;
+  var bundlePath = config.path + '/' + bundleFileName;
   var sourcemapPath = bundlePath + '.map';
 
   var bundle = browserify([], bundleOpts);
 
-  (opts.require || []).forEach(function (req) {
+  (config.require || []).forEach(function (req) {
     // When another bundle uses 'bundle.external(<module path>)',
     // the module path is rewritten relative to the
     // base directory and a '/' prefix is added, so
@@ -114,6 +128,13 @@ module.exports = function createBundle(opts) {
     // therefore need to expose the module as '/dir/module'.
     if (req[0] == '.') {
       bundle.require(req, {expose: req.slice(1)});
+    } else if (req[0] == '/') {
+      // If the require path is absolute, the same rules as
+      // above apply but the path needs to be relative to
+      // the root of the repository
+      var relativePath = path.relative(path.resolve(path.join(__dirname, '../../')),
+                                       path.resolve(req));
+      bundle.require(req, {expose: '/' + relativePath});
     } else {
       // this is a package under node_modules/, no
       // rewriting required.
@@ -121,16 +142,16 @@ module.exports = function createBundle(opts) {
     }
   });
 
-  bundle.add(opts.entry || []);
-  bundle.external(opts.external || []);
+  bundle.add(config.entry || []);
+  bundle.external(config.external || []);
 
-  (opts.transforms || []).forEach(function (transform) {
+  (config.transforms || []).forEach(function (transform) {
     if (transform === 'coffee') {
       bundle.transform(coffeeify);
     }
   });
 
-  if (opts.minify) {
+  if (config.minify) {
     bundle.transform({global: true}, uglifyify);
   }
 
@@ -145,7 +166,7 @@ module.exports = function createBundle(opts) {
     return streamFinished(stream);
   }
 
-  if (opts.watch) {
+  if (buildOpts.watch) {
     bundle.plugin(watchify);
     bundle.on('update', function (ids) {
       var start = Date.now();

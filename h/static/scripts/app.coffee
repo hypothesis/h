@@ -1,3 +1,5 @@
+require('./polyfills')
+
 # initialize Raven. This is required at the top of this file
 # so that it happens early in the app's startup flow
 settings = require('./settings')(document)
