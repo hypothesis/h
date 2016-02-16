@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -159,3 +161,30 @@ class DocumentMeta(Base, mixins.Timestamps):
 
     def __repr__(self):
         return '<DocumentMeta %s>' % self.id
+
+
+def merge_documents(session, documents, updated=datetime.now()):
+    """
+    Takes a list of documents and merges them together. It returns the new
+    master document.
+
+    The support for setting a specific value for the `updated` should only
+    be used during the Postgres migration. It should be removed afterwards.
+    """
+    master = documents[0]
+    duplicates = documents[1:]
+
+    for doc in duplicates:
+        for _ in range(len(doc.uris)):
+            u = doc.uris.pop()
+            u.document = master
+            u.updated = updated
+
+        for _ in range(len(doc.meta)):
+            m = doc.meta.pop()
+            m.document = master
+            m.updated = updated
+
+        session.delete(doc)
+
+    return master
