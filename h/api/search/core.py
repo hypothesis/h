@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from h.api import nipsa
 from h.api.search import query
 
+FILTERS_KEY = 'h.api.search.filters'
+MATCHERS_KEY = 'h.api.search.matchers'
 
 log = logging.getLogger(__name__)
 
@@ -35,18 +36,7 @@ def search(request, params, private=True, separate_replies=False):
         separate_replies=True was passed)
     :rtype: dict
     """
-    def make_builder():
-        builder = query.Builder()
-        builder.append_filter(query.AuthFilter(request, private=private))
-        builder.append_filter(query.UriFilter())
-        builder.append_filter(
-            lambda _: nipsa.nipsa_filter(request.authenticated_userid))
-        builder.append_filter(query.GroupFilter())
-        builder.append_matcher(query.AnyMatcher())
-        builder.append_matcher(query.TagsMatcher())
-        return builder
-
-    builder = make_builder()
+    builder = default_querybuilder(request, private=private)
     if separate_replies:
         builder.append_filter(query.TopLevelAnnotationsFilter())
 
@@ -62,7 +52,7 @@ def search(request, params, private=True, separate_replies=False):
     if separate_replies:
         # Do a second query for all replies to the annotations from the first
         # query.
-        builder = make_builder()
+        builder = default_querybuilder(request, private=private)
         builder.append_matcher(query.RepliesMatcher(
             [h['_id'] for h in results['hits']['hits']]))
         reply_results = es.conn.search(index=es.index,
@@ -81,3 +71,17 @@ def search(request, params, private=True, separate_replies=False):
         return_value["replies"] = reply_rows
 
     return return_value
+
+
+def default_querybuilder(request, private=True):
+    builder = query.Builder()
+    builder.append_filter(query.AuthFilter(request, private=private))
+    builder.append_filter(query.UriFilter())
+    builder.append_filter(query.GroupFilter())
+    builder.append_matcher(query.AnyMatcher())
+    builder.append_matcher(query.TagsMatcher())
+    for factory in request.registry.get(FILTERS_KEY, []):
+        builder.append_filter(factory(request))
+    for factory in request.registry.get(MATCHERS_KEY, []):
+        builder.append_matcher(factory(request))
+    return builder

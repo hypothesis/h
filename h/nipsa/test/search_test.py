@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
 
-from h.api.nipsa import search
+from h.nipsa import search
 
 
 def test_nipsa_filter_filters_out_nipsad_annotations():

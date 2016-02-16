@@ -211,27 +211,6 @@ def test_fix_old_style_comments(ann_in, ann_out):
     assert ann_in == ann_out
 
 
-@pytest.mark.parametrize("ann,nipsa", [
-    ({"user": "george"}, True),
-    ({"user": "georgia"}, False),
-    ({}, False),
-])
-def test_add_nipsa(ann, nipsa, has_nipsa):
-    has_nipsa.return_value = nipsa
-    transform.add_nipsa(ann)
-    if nipsa:
-        assert ann["nipsa"] is True
-    else:
-        assert "nipsa" not in ann
-
-
-@pytest.fixture
-def has_nipsa(request):
-    patcher = mock.patch('h.api.nipsa.has_nipsa', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
-
-
 @pytest.fixture
 def uri_normalize(request):
     patcher = mock.patch('h.api.uri.normalize', autospec=True)

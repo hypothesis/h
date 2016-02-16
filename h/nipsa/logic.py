@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 
-from h.api.nipsa import models
+from h.nipsa import models
 
 
 def _publish(request, data):

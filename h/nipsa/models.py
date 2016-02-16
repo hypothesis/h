@@ -2,7 +2,7 @@
 import sqlalchemy
 from sqlalchemy.orm import exc
 
-from h.api import db
+from h import db
 
 
 class NipsaUser(db.Base):

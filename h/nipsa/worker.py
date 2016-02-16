@@ -4,7 +4,7 @@ import json
 
 from elasticsearch import helpers
 
-from h.api.nipsa import search as nipsa_search
+from h.nipsa import search
 
 
 def add_nipsa_action(index, annotation):
@@ -35,10 +35,10 @@ def add_or_remove_nipsa(client, index, userid, action):
     """Add/remove the NIPSA flag to/from all of the user's annotations."""
     assert action in ("add_nipsa", "remove_nipsa")
     if action == "add_nipsa":
-        query = nipsa_search.not_nipsad_annotations(userid)
+        query = search.not_nipsad_annotations(userid)
         action_func = add_nipsa_action
     else:
-        query = nipsa_search.nipsad_annotations(userid)
+        query = search.nipsad_annotations(userid)
         action_func = remove_nipsa_action
 
     annotations = helpers.scan(client=client, query=query)

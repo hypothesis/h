@@ -6,12 +6,12 @@ from pyramid import httpexceptions
 
 from elasticsearch import helpers as es_helpers
 
-from h.api import nipsa
 from h.api import storage
 from h.i18n import TranslationString as _
 from h import accounts
 from h.accounts import events
 from h import models
+from h import nipsa
 from h import paginator
 from h import util
 

@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import exc
 
 from h import db
-from h.api.nipsa import models
+from h.nipsa import models
 
 
 def test_init():

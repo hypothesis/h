@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from h._compat import string_types
-from h.api import nipsa
 from h.api import uri
 
 
@@ -109,8 +108,3 @@ def fix_old_style_comments(annotation):
 
     if has_uri and has_no_targets and has_no_references:
         annotation['target'] = [{'source': annotation.get('uri')}]
-
-
-def add_nipsa(annotation):
-    if 'user' in annotation and nipsa.has_nipsa(annotation['user']):
-        annotation['nipsa'] = True
