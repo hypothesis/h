@@ -13,6 +13,7 @@ def includeme(config):
     config.add_route('via_redirect', '/via')
 
     # client
+    config.add_route('token', '/api/token')
     config.add_route('embed', '/embed.js')
     config.add_route('widget', '/app.html')
 

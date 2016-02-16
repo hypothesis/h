@@ -19,14 +19,11 @@ objects and Pyramid ACLs in :mod:`h.api.resources`.
 
 import logging
 
-from pyramid import exceptions
 from pyramid import httpexceptions
 from pyramid import i18n
-from pyramid import session
 from pyramid.view import forbidden_view_config, notfound_view_config
 from pyramid.view import view_config
 
-from h.api import auth
 from h.api import cors
 from h.api.events import AnnotationEvent
 from h.api import search as search_lib
@@ -102,7 +99,6 @@ def error_validation(context, request):
 
 
 @api_config(context=Root)
-@api_config(route_name='api')
 def index(context, request):
     """Return the API descriptor document.
 
@@ -151,30 +147,6 @@ def search(request):
     return search_lib.search(request,
                              params,
                              separate_replies=separate_replies)
-
-
-# N.B. Like the rest of the API, this view is exposed behind WSGI middleware
-# that enables appropriate CORS headers and response to preflight request.
-#
-# However, this view requires credentials (a cookie) so is in fact not
-# currently accessible off-origin. Given that this method of authenticating to
-# the API is not intended to remain, this seems like a limitation we do not
-# need to lift any time soon.
-@api_config(route_name='token', renderer='string')
-def annotator_token(request):
-    """Return a JWT access token for the given request.
-
-    The token can be used in the Authorization header in subsequent requests to
-    the API to authenticate the user identified by the
-    request.authenticated_userid of the _current_ request.
-
-    """
-    try:
-        session.check_csrf_token(request, token='assertion')
-    except exceptions.BadCSRFToken:
-        raise httpexceptions.HTTPUnauthorized()
-
-    return auth.generate_jwt(request, 3600)
 
 
 @api_config(context=Annotations, request_method='GET')
