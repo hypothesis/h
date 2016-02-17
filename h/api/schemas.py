@@ -101,6 +101,15 @@ class CreateAnnotationSchema(object):
         # Set the annotation user field to the request user.
         appstruct['user'] = self.request.authenticated_userid
 
+        # Assert that the user has permission to create an annotation in the
+        # group they've asked to create one in.
+        if 'group' in appstruct:
+            group_principal = 'group:{}'.format(appstruct['group'])
+            if group_principal not in self.request.effective_principals:
+                raise ValidationError('group: ' +
+                                      _('You may not create annotations in '
+                                        'groups you are not a member of!'))
+
         return appstruct
 
 
