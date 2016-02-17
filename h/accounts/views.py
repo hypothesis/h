@@ -24,7 +24,7 @@ from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
 from h.accounts.events import RegistrationEvent
-from h.views import json_view
+from h.util.view import json_view
 
 _ = i18n.TranslationString
 

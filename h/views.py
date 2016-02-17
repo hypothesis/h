@@ -12,7 +12,7 @@ from pyramid import response
 
 from h import client
 from h import session
-from h.api.views import json_view
+from h.util.view import json_view
 from h.resources import Annotation
 from h.resources import Stream
 
