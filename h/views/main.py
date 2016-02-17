@@ -14,15 +14,11 @@ from pyramid import httpexceptions
 from pyramid import response
 from pyramid.view import view_config
 
-from h.resources import Annotation
-from h.resources import Stream
 from h.views.client import render_app
 
 
-@view_config(context=Annotation, permission='read')
-def annotation(context, request):
-    annotation = context.model
-
+@view_config(route_name='annotation', permission='read')
+def annotation_page(annotation, request):
     if 'title' in annotation.get('document', {}):
         title = 'Annotation by {user} on {title}'.format(
             user=annotation['user'].replace('acct:', ''),
@@ -31,8 +27,7 @@ def annotation(context, request):
         title = 'Annotation by {user}'.format(
             user=annotation['user'].replace('acct:', ''))
 
-    alternate = request.resource_url(request.root, 'api', 'annotations',
-                                     annotation['id'])
+    alternate = request.route_url('api.annotation', id=annotation['id'])
 
     return render_app(request, {
         'meta_attrs': (
@@ -69,9 +64,10 @@ def stream(context, request):
     })
 
 
-@view_config(context=Stream)
+@view_config(route_name='stream.tag_query')
+@view_config(route_name='stream.user_query')
 def stream_redirect(context, request):
-    location = request.route_url('stream', _query=context['query'])
+    location = request.route_url('stream', _query=context)
     raise httpexceptions.HTTPFound(location=location)
 
 

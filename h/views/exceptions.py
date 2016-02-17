@@ -19,8 +19,17 @@ from h.util.view import json_view
 _ = i18n.TranslationString
 
 
+# Within the API, render a JSON 403/404 message.
+@forbidden_view_config(path_info='/api/', renderer='json')
+@notfound_view_config(path_info='/api/', renderer='json')
+def api_notfound(context, request):
+    request.response.status_code = 404
+    return {'status': 'failure', 'reason': 'not_found'}
+
+
 @forbidden_view_config(renderer='h:templates/notfound.html.jinja2')
-@notfound_view_config(renderer='h:templates/notfound.html.jinja2')
+@notfound_view_config(renderer='h:templates/notfound.html.jinja2',
+                      append_slash=True)
 def notfound(context, request):
     request.response.status_int = 404
     return {}

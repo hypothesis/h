@@ -29,12 +29,11 @@ def render_atom(request, annotations, atom_url, html_url, title, subtitle):
 
     def annotation_url(annotation):
         """Return the HTML permalink URL for the given annotation."""
-        return request.resource_url(request.root, "a", annotation["id"])
+        return request.route_url('annotation', id=annotation["id"])
 
     def annotation_api_url(annotation):
         """Return the JSON API URL for the given annotation."""
-        return request.resource_url(request.root, "api", "annotations",
-                                    annotation["id"])
+        return request.route_url('api.annotation', id=annotation["id"])
 
     feed = atom.feed_from_annotations(
         annotations=annotations, atom_url=atom_url,
@@ -70,7 +69,7 @@ def render_rss(request, annotations, rss_url, html_url, title, description):
 
     def annotation_url(annotation):
         """Return the HTML permalink URL for the given annotation."""
-        return request.resource_url(request.root, "a", annotation["id"])
+        return request.route_url('annotation', id=annotation["id"])
 
     feed = rss.feed_from_annotations(
         annotations=annotations, annotation_url=annotation_url,

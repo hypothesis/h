@@ -1,12 +1,11 @@
 from pyramid import httpexceptions
 
 from h import models
-from h.api.views import api_config
-from h.api.resources import Root
+from h.util.view import json_view
 from h.api import search as search_lib
 
 
-@api_config(context=Root, name='badge')
+@json_view(route_name='badge')
 def badge(request):
     """Return the number of public annotations on a given page.
 
@@ -31,3 +30,4 @@ def badge(request):
 
 def includeme(config):
     config.scan(__name__)
+    config.add_route('badge', '/api/badge')

@@ -1,37 +1,8 @@
 # -*- coding: utf-8 -*-
 from pyramid.security import Allow
 
-from h.api import resources as api
-from h.api.resources import Resource
 
-
-class UserStreamFactory(Resource):
-    def __getitem__(self, key):
-        query = {'q': 'user:{}'.format(key)}
-        return Stream(query=query)
-
-
-
-class TagStreamFactory(Resource):
-    def __getitem__(self, key):
-        query = {'q': 'tag:{}'.format(key)}
-        return Stream(query=query)
-
-
-class Annotation(api.Annotation):
-    pass
-
-
-class Annotations(api.Annotations):
-    def factory(self, id, model):
-        return Annotation(id, model)
-
-
-class Stream(Resource):
-    pass
-
-
-class Root(Resource):
+class Root(object):
     __acl__ = [
         (Allow, 'group:__admin__', 'admin_index'),
         (Allow, 'group:__staff__', 'admin_index'),
@@ -46,14 +17,21 @@ class Root(Resource):
         (Allow, 'group:__staff__', 'admin_groups'),
     ]
 
+    def __init__(self, request):
+        self.request = request
 
-def create_root(request):
-    """
-    Returns a new traversal tree root.
-    """
-    r = Root()
-    r.add('api', api.create_root(request))
-    r.add('a', Annotations(request))
-    r.add('t', TagStreamFactory())
-    r.add('u', UserStreamFactory())
-    return r
+
+class UserStreamFactory(object):
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self, key):
+        return {'q': 'user:{}'.format(key)}
+
+
+class TagStreamFactory(object):
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self, key):
+        return {'q': 'tag:{}'.format(key)}

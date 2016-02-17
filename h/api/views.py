@@ -17,11 +17,8 @@ authorization system. You can find the mapping between annotation "permissions"
 objects and Pyramid ACLs in :mod:`h.api.resources`.
 """
 
-import logging
-
-from pyramid import httpexceptions
 from pyramid import i18n
-from pyramid.view import forbidden_view_config, notfound_view_config
+from pyramid import security
 from pyramid.view import view_config
 
 from h.api import cors
@@ -29,13 +26,8 @@ from h.api.events import AnnotationEvent
 from h.api import search as search_lib
 from h.api import schemas
 from h.api import storage
-from h.api.resources import Annotation
-from h.api.resources import Annotations
-from h.api.resources import Root
 
 _ = i18n.TranslationStringFactory(__package__)
-
-log = logging.getLogger(__name__)
 
 cors_policy = cors.policy(
     allow_headers=(
@@ -79,13 +71,6 @@ def api_config(**settings):
     return view_config(**settings)
 
 
-@forbidden_view_config(containment=Root, renderer='json')
-@notfound_view_config(containment=Root, renderer='json')
-def error_not_found(context, request):
-    request.response.status_code = httpexceptions.HTTPNotFound.code
-    return {'status': 'failure', 'reason': 'not_found'}
-
-
 @api_config(context=APIError)
 def error_api(context, request):
     request.response.status_code = context.status_code
@@ -98,47 +83,51 @@ def error_validation(context, request):
     return {'status': 'failure', 'reason': context.message}
 
 
-@api_config(context=Root)
+@api_config(route_name='api.index')
 def index(context, request):
     """Return the API descriptor document.
 
     Clients may use this to discover endpoints for the API.
     """
+    # Because request.route_url urlencodes parameters, we can't just pass in
+    # ":id" as the id here.
+    annotation_url = request.route_url('api.annotation', id='123')\
+                            .replace('123', ':id')
     return {
         'message': "Annotator Store API",
         'links': {
             'annotation': {
                 'create': {
                     'method': 'POST',
-                    'url': request.resource_url(context, 'annotations'),
+                    'url': request.route_url('api.annotations'),
                     'desc': "Create a new annotation"
                 },
                 'read': {
                     'method': 'GET',
-                    'url': request.resource_url(context, 'annotations', ':id'),
+                    'url': annotation_url,
                     'desc': "Get an existing annotation"
                 },
                 'update': {
                     'method': 'PUT',
-                    'url': request.resource_url(context, 'annotations', ':id'),
+                    'url': annotation_url,
                     'desc': "Update an existing annotation"
                 },
                 'delete': {
                     'method': 'DELETE',
-                    'url': request.resource_url(context, 'annotations', ':id'),
+                    'url': annotation_url,
                     'desc': "Delete an annotation"
                 }
             },
             'search': {
                 'method': 'GET',
-                'url': request.resource_url(context, 'search'),
+                'url': request.route_url('api.search'),
                 'desc': 'Basic search API'
             },
         }
     }
 
 
-@api_config(context=Root, name='search')
+@api_config(route_name='api.search')
 def search(request):
     """Search the database for annotations matching with the given query."""
     params = request.params.copy()
@@ -149,7 +138,7 @@ def search(request):
                              separate_replies=separate_replies)
 
 
-@api_config(context=Annotations, request_method='GET')
+@api_config(route_name='api.annotations')
 def annotations_index(request):
     """Do a search for all annotations on anything and return results.
 
@@ -159,7 +148,9 @@ def annotations_index(request):
     return search_lib.search(request, {"limit": 20})
 
 
-@api_config(context=Annotations, request_method='POST', permission='create')
+@api_config(route_name='api.annotations',
+            request_method='POST',
+            effective_principals=security.Authenticated)
 def create(request):
     """Create an annotation from the POST payload."""
     schema = schemas.CreateAnnotationSchema(request)
@@ -170,36 +161,36 @@ def create(request):
     return annotation
 
 
-@api_config(context=Annotation, request_method='GET', permission='read')
-def read(context, request):
+@api_config(route_name='api.annotation', request_method='GET', permission='read')
+def read(annotation, request):
     """Return the annotation (simply how it was stored in the database)."""
-    return context.model
+    return annotation
 
 
-@api_config(context=Annotation, request_method='PUT', permission='update')
-def update(context, request):
+@api_config(route_name='api.annotation', request_method='PUT', permission='update')
+def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
-    schema = schemas.UpdateAnnotationSchema(request, annotation=context.model)
+    schema = schemas.UpdateAnnotationSchema(request, annotation=annotation)
     appstruct = schema.validate(_json_payload(request))
-    annotation = storage.update_annotation(context.id, appstruct)
+    annotation = storage.update_annotation(annotation.id, appstruct)
 
     _publish_annotation_event(request, annotation, 'update')
     return annotation
 
 
-@api_config(context=Annotation, request_method='DELETE', permission='delete')
-def delete(context, request):
+@api_config(route_name='api.annotation', request_method='DELETE', permission='delete')
+def delete(annotation, request):
     """Delete the specified annotation."""
-    storage.delete_annotation(context.id)
+    storage.delete_annotation(annotation.id)
 
     # N.B. We publish the original model (including all the original annotation
     # fields) so that queue subscribers have context needed to decide how to
     # process the delete event. For example, the streamer needs to know the
     # target URLs of the deleted annotation in order to know which clients to
     # forward the delete event to.
-    _publish_annotation_event(request, context.model, 'delete')
+    _publish_annotation_event(request, annotation, 'delete')
 
-    return {'id': context.id, 'deleted': True}
+    return {'id': annotation.id, 'deleted': True}
 
 
 def _json_payload(request):

@@ -22,6 +22,18 @@ def includeme(config):
     config.add_route('onboarding', '/welcome')
 
     # main
+    config.add_route('annotation',
+                     '/a/{id}',
+                     factory='h.api.resources:AnnotationFactory',
+                     traverse='/{id}')
     config.add_route('robots', '/robots.txt')
     config.add_route('session', '/app')
     config.add_route('stream', '/stream')
+    config.add_route('stream.user_query',
+                     '/u/{query}',
+                     factory='h.resources:UserStreamFactory',
+                     traverse='/{query}')
+    config.add_route('stream.tag_query',
+                     '/t/{query}',
+                     factory='h.resources:TagStreamFactory',
+                     traverse='/{query}')

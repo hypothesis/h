@@ -25,7 +25,7 @@ def render_app(request, extra=None):
         # FIXME: The '' here is to ensure this has a trailing slash. This seems
         # rather messy, and is inconsistent with the rest of the application's
         # URLs.
-        api_url=request.resource_url(request.root, 'api', ''),
+        api_url=request.route_url('api.index'),
         service_url=request.route_url('index'),
         ga_tracking_id=request.registry.settings.get('ga_tracking_id'),
         sentry_public_dsn=request.sentry.get_public_dsn(),
@@ -62,7 +62,7 @@ def embed(context, request):
     request.response.content_type = b'text/javascript'
     request.response.text = client.render_embed_js(
         webassets_env=request.webassets_env,
-        app_html_url=request.resource_url(context, 'app.html'),
+        app_html_url=request.route_url('widget'),
         base_url=request.route_url('index'))
     return request.response
 
