@@ -254,11 +254,6 @@ function AnnotationController(
     /** Whether or not this annotation is private. */
     vm.isPrivate = false;
 
-    /** Copy isSidebar from $scope onto vm for consistency (we want this
-      * directive's templates to always access variables from vm rather than
-      * directly from scope). */
-    vm.isSidebar = $scope.isSidebar;
-
     /** A fuzzy, relative (eg. '6 days ago') format of the annotation's
      * last update timestamp
      */
@@ -290,7 +285,7 @@ function AnnotationController(
       * haven't been saved yet - the data that will be saved to the server when
       * they are saved).
       */
-    domainModel = $scope.annotationGet();
+    domainModel = vm.annotation;
 
     /**
       * `true` if this AnnotationController instance was created as a result of
@@ -811,17 +806,18 @@ function link(scope, elem, attrs, controllers) {
 // @ngInject
 function annotation($document) {
   return {
+    restrict: 'E',
+    bindToController: true,
     controller: AnnotationController,
     controllerAs: 'vm',
     link: link,
     require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount'],
     scope: {
-      annotationGet: '&annotation',
+      annotation: '=',
       // Indicates whether this is the last reply in a thread.
       isLastReply: '=',
-      replyCount: '@annotationReplyCount',
-      replyCountClick: '&annotationReplyCountClick',
-      showReplyCount: '@annotationShowReplyCount',
+      replyCount: '=',
+      onReplyCountClick: '&',
       isSidebar: '='
     },
     templateUrl: 'annotation.html'

@@ -11,7 +11,7 @@ function hyphenate(name) {
  * A helper for instantiating an AngularJS directive in a unit test.
  *
  * Usage:
- *   var domElement = createDirective('myComponent', {
+ *   var domElement = createDirective(document, 'myComponent', {
  *     attrA: 'initial-value'
  *   }, {
  *     scopePropery: scopeValue
@@ -25,7 +25,7 @@ function hyphenate(name) {
  *
  * The initial value may be a callback function to invoke. eg:
  *
- * var domElement = createDirective('myComponent', {
+ * var domElement = createDirective(document, 'myComponent', {
  *  onEvent: function () {
  *    console.log('event triggered');
  *  }
@@ -34,7 +34,7 @@ function hyphenate(name) {
  * If the callback accepts named arguments, these need to be specified
  * via an object with 'args' and 'callback' properties:
  *
- * var domElement = createDirective('myComponent', {
+ * var domElement = createDirective(document, 'myComponent', {
  *   onEvent: {
  *     args: ['arg1'],
  *     callback: function (arg1) {

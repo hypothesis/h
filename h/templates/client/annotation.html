@@ -15,8 +15,8 @@
 
       <span class="annotation-collapsed-replies">
         <a class="annotation-link" href=""
-          ng-click="replyCountClick()"
-          ng-pluralize count="replyCount"
+          ng-click="vm.onReplyCountClick()"
+          ng-pluralize count="vm.replyCount"
           when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
       </span>
 
@@ -140,10 +140,10 @@
       </a>
     </div>
 
-    <div class="annotation-replies" ng-if="replyCount > 0">
+    <div class="annotation-replies" ng-if="vm.replyCount > 0">
       <a class="annotation-link" href=""
-         ng-click="replyCountClick()"
-         ng-pluralize count="replyCount"
+         ng-click="vm.onReplyCountClick()"
+         ng-pluralize count="vm.replyCount"
          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
     </div>
 
