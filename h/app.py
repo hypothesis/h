@@ -52,6 +52,7 @@ def includeme(config):
 
     config.include('h.features')
 
+    config.include('h.assets')
     config.include('h.db')
     config.include('h.form')
     config.include('h.models')
@@ -73,7 +74,6 @@ def includeme(config):
     config.include('h.badge')
     config.include('h.claim')
     config.include('h.groups')
-    config.include('h.home')
     config.include('h.notification')
     config.include('h.queue')
 

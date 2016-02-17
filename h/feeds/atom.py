@@ -20,7 +20,7 @@ def _feed_entry_from_annotation(
 
     """
     try:
-        name = util.split_user(annotation["user"])["username"]
+        name = util.user.split_user(annotation["user"])["username"]
     except ValueError:
         name = annotation["user"]
     entry = {

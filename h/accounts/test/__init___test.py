@@ -94,17 +94,17 @@ get_user_fixtures = pytest.mark.usefixtures('util', 'get_by_username')
 @get_user_fixtures
 def test_get_user_calls_split_user(util):
     """It should call split_user() once with the given userid."""
-    util.split_user.return_value = {
+    util.user.split_user.return_value = {
         'username': 'fred', 'domain': 'hypothes.is'}
 
     accounts.get_user('acct:fred@hypothes.is', mock.Mock())
 
-    util.split_user.assert_called_once_with('acct:fred@hypothes.is')
+    util.user.split_user.assert_called_once_with('acct:fred@hypothes.is')
 
 
 @get_user_fixtures
 def test_get_user_returns_None_if_split_user_raises_ValueError(util):
-    util.split_user.side_effect = ValueError
+    util.user.split_user.side_effect = ValueError
 
     assert accounts.get_user('userid', mock.Mock()) is None
 
@@ -112,7 +112,7 @@ def test_get_user_returns_None_if_split_user_raises_ValueError(util):
 @get_user_fixtures
 def test_get_user_returns_None_if_domain_does_not_match(util):
     request = mock.Mock(auth_domain='hypothes.is')
-    util.split_user.return_value = {
+    util.user.split_user.return_value = {
         'username': 'username', 'domain': 'other'}
 
     assert accounts.get_user('userid', request) is None
@@ -122,7 +122,7 @@ def test_get_user_returns_None_if_domain_does_not_match(util):
 def test_get_user_calls_get_by_username(util, get_by_username):
     """It should call get_by_username() once with the username."""
     request = mock.Mock(auth_domain='hypothes.is')
-    util.split_user.return_value = {
+    util.user.split_user.return_value = {
         'username': 'username', 'domain': 'hypothes.is'}
 
     accounts.get_user('acct:username@hypothes.is', request)
@@ -134,7 +134,7 @@ def test_get_user_calls_get_by_username(util, get_by_username):
 def test_get_user_returns_user(util, get_by_username):
     """It should return the result from get_by_username()."""
     request = mock.Mock(auth_domain='hypothes.is')
-    util.split_user.return_value = {
+    util.user.split_user.return_value = {
         'username': 'username', 'domain': 'hypothes.is'}
 
     assert accounts.get_user('acct:username@hypothes.is', request) == (
@@ -154,8 +154,9 @@ def test_authenticated_user_calls_get_user(get_user):
 @pytest.fixture
 def util(request):
     patcher = mock.patch('h.accounts.util')
+    module = patcher.start()
     request.addfinalizer(patcher.stop)
-    return patcher.start()
+    return module
 
 
 @pytest.fixture

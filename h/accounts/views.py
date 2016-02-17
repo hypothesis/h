@@ -24,7 +24,7 @@ from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
 from h.accounts.events import RegistrationEvent
-from h.views import json_view
+from h.util.view import json_view
 
 _ = i18n.TranslationString
 
@@ -124,7 +124,7 @@ class AuthController(object):
     def _login(self, user):
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
-        userid = util.userid_from_username(user.username, self.request)
+        userid = util.user.userid_from_username(user.username, self.request)
         headers = security.remember(self.request, userid)
         return headers
 

@@ -1,28 +1,31 @@
-"""The home/front page of the //hypothes.is/ site."""
-from pyramid import view
+# -*- coding: utf-8 -*-
+
+"""Views serving the homepage and related endpoints."""
+
+from __future__ import unicode_literals
+
 from pyramid import httpexceptions
+from pyramid.view import view_config
 
 
-@view.view_config(route_name='via_redirect',
-                  request_method='GET')
+@view_config(route_name='via_redirect', request_method='GET')
 def via_redirect(context, request):
     url = request.params.get('url')
 
     if url is None:
         raise httpexceptions.HTTPBadRequest('"url" parameter missing')
 
-
     via_link = 'https://via.hypothes.is/{}'.format(url)
-    return httpexceptions.HTTPFound(location=via_link)
+    raise httpexceptions.HTTPFound(location=via_link)
 
 
-@view.view_config(route_name='index',
-                  request_method='GET',
-                  renderer='h:templates/old-home.html.jinja2')
+@view_config(route_name='index',
+             request_method='GET',
+             renderer='h:templates/old-home.html.jinja2')
 def index(context, request):
     context = {
-      "chrome_extension_link": ("https://chrome.google.com/webstore/detail/"
-                                "bjfhmglciegochdpefhhlphglcehbmek")
+        "chrome_extension_link": ("https://chrome.google.com/webstore/detail/"
+                                  "bjfhmglciegochdpefhhlphglcehbmek")
     }
 
     if request.authenticated_user:
@@ -40,6 +43,4 @@ def index(context, request):
 
 
 def includeme(config):
-    config.add_route('index', '/')
-    config.add_route('via_redirect', '/via')
     config.scan(__name__)

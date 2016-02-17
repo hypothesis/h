@@ -40,12 +40,6 @@ def _angular_template_context(name):
     return {'name': '{}.html'.format(name), 'content': content}
 
 
-def _merge(d1, d2):
-    result = d1.copy()
-    result.update(d2)
-    return result
-
-
 def asset_urls(webassets_env, name):
     return webassets_env[name].urls()
 
@@ -108,7 +102,7 @@ def render_app_html(webassets_env,
                     sentry_public_dsn,
                     ga_tracking_id=None,
                     websocket_url=None,
-                    extra={}):
+                    extra=None):
     """
     Return the HTML for the Hypothesis app page,
     used by the sidebar, stream and single-annotation page.
@@ -125,13 +119,15 @@ def render_app_html(webassets_env,
                   app.html.jinja2
     """
     template = jinja_env.get_template('app.html.jinja2')
-    assets_dict = _app_html_context(api_url=api_url,
-                                    service_url=service_url,
-                                    ga_tracking_id=ga_tracking_id,
-                                    sentry_public_dsn=sentry_public_dsn,
-                                    webassets_env=webassets_env,
-                                    websocket_url=websocket_url)
-    return template.render(_merge(assets_dict, extra))
+    context = _app_html_context(api_url=api_url,
+                                service_url=service_url,
+                                ga_tracking_id=ga_tracking_id,
+                                sentry_public_dsn=sentry_public_dsn,
+                                webassets_env=webassets_env,
+                                websocket_url=websocket_url).copy()
+    if extra is not None:
+        context.update(extra)
+    return template.render(context)
 
 
 def render_embed_js(webassets_env, app_html_url, base_url=None):

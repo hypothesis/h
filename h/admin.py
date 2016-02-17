@@ -56,7 +56,7 @@ def features_save(request):
                   renderer='h:templates/admin/nipsa.html.jinja2',
                   permission='admin_nipsa')
 def nipsa_index(_):
-    return {"usernames": [util.split_user(u)["username"]
+    return {"usernames": [util.user.split_user(u)["username"]
                           for u in nipsa.index()]}
 
 
@@ -70,7 +70,7 @@ def nipsa_add(request):
 
     # It's important that we nipsa the full user ID
     # ("acct:seanh@hypothes.is" not just "seanh").
-    userid = util.userid_from_username(username, request)
+    userid = util.user.userid_from_username(username, request)
 
     nipsa.add_nipsa(request, userid)
     return nipsa_index(request)
@@ -83,7 +83,7 @@ def nipsa_add(request):
                   permission='admin_nipsa')
 def nipsa_remove(request):
     username = request.params["remove"]
-    userid = util.userid_from_username(username, request)
+    userid = util.user.userid_from_username(username, request)
     nipsa.remove_nipsa(request, userid)
     return httpexceptions.HTTPSeeOther(
         location=request.route_url("admin_nipsa"))
@@ -304,7 +304,7 @@ def delete_user(request, user):
 
 def _all_user_annotations_query(request, user):
     """Query matching all annotations (shared and private) owned by user."""
-    userid = util.userid_from_username(user.username, request)
+    userid = util.user.userid_from_username(user.username, request)
     return {
         'filtered': {
             'filter': {'term': {'user': userid.lower()}},

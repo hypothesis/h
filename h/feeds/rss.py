@@ -35,7 +35,7 @@ def _feed_item_from_annotation(annotation, annotation_url):
 
     """
     try:
-        name = util.split_user(annotation["user"])["username"]
+        name = util.user.split_user(annotation["user"])["username"]
     except ValueError:
         name = annotation["user"]
     return {

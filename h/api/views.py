@@ -70,21 +70,16 @@ class PayloadError(APIError):
         )
 
 
-def json_view(**settings):
-    """A view configuration decorator with JSON defaults."""
-    settings.setdefault('accept', 'application/json')
-    settings.setdefault('renderer', 'json')
-    return view_config(**settings)
-
-
 def api_config(**settings):
     """
     A view configuration decorator with defaults.
 
     JSON in and out. CORS with tokens and client id but no cookie.
     """
+    settings.setdefault('accept', 'application/json')
+    settings.setdefault('renderer', 'json')
     settings.setdefault('decorator', cors_policy)
-    return json_view(**settings)
+    return view_config(**settings)
 
 
 @forbidden_view_config(containment=Root, renderer='json')
