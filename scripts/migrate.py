@@ -377,7 +377,12 @@ def _permissions_allow_sharing(user, group, perms):
         read_perms = [gperm]
 
     if (read_perms != [gperm] and read_perms != [user]):
-        raise Skip('invalid read permissions: {!r}'.format(perms))
+        # attempt to fix data when client auth state is out of sync by
+        # by overriding the permissions with the user of the annotation.
+        if read_perms[0].startswith('acct:'):
+            read_perms = [user]
+        else:
+            raise Skip('invalid read permissions: {!r}'.format(perms))
 
     for other in ['admin', 'delete', 'update']:
         other_perms = perms.get(other, [])
@@ -398,7 +403,7 @@ def _permissions_allow_sharing(user, group, perms):
         if len(other_perms) > 1 and user in other_perms:
             continue
 
-        if other_perms != [user]:
+        if (other_perms != [user] and not other_perms[0].startswith('acct:')):
             raise Skip('invalid {} permissions: {!r}'.format(other, perms))
 
     # And, now, we ignore everything other than the read permissions. If
