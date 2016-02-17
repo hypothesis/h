@@ -4,7 +4,10 @@
 var Promise = require('core-js/library/es6/promise');
 
 var dateUtil = require('../date-util');
+var documentDomain = require('../filter/document-domain');
+var documentTitle = require('../filter/document-title');
 var events = require('../events');
+var persona = require('../filter/persona');
 
 /** Return a domainModel tags array from the given vm tags array.
  *
@@ -192,6 +195,10 @@ function updateViewModel($scope, time, domainModel, vm, permissions) {
      });
     updateTimestamp();
   }
+
+  var documentMetadata = extractDocumentMetadata(domainModel);
+  vm.documentTitle = documentTitle(documentMetadata);
+  vm.documentDomain = documentDomain(documentMetadata);
 }
 
 /** Return a vm tags array from the given domainModel tags array.
@@ -460,11 +467,6 @@ function AnnotationController(
     }, true);
   };
 
-  /** Return some metadata extracted from the annotated document. */
-  vm.document = function() {
-    return extractDocumentMetadata(domainModel);
-  };
-
   /**
     * @ngdoc method
     * @name annotation.AnnotationController#edit
@@ -728,6 +730,10 @@ function AnnotationController(
     return $q.when(tags.filter(query));
   };
 
+  vm.tagStreamURL = function(tag) {
+    return vm.serviceUrl + 'stream?q=tag:' + encodeURIComponent(tag);
+  };
+
   vm.target = function() {
     return domainModel.target;
   };
@@ -738,7 +744,11 @@ function AnnotationController(
 
   vm.user = function() {
     return domainModel.user;
-  }
+  };
+
+  vm.username = function() {
+    return persona.username(domainModel.user);
+  };
 
   /** Sets whether or not the controls for
    * expanding/collapsing the body of lengthy annotations

@@ -1,29 +1,28 @@
-var module = angular.mock.module;
-var inject = angular.mock.inject;
+var persona = require('../persona');
 
 describe('persona', function () {
-  var filter = null;
   var term = 'acct:hacker@example.com';
 
-  before(function () {
-    angular.module('h', []).filter('persona', require('../persona').filter);
+  describe('parseAccountID', function() {
+    it('should extract the username and provider', function () {
+      assert.deepEqual(persona.parseAccountID(term), {
+        username: 'hacker',
+        provider: 'example.com',
+      });
+    });
+
+    it('should return null if the ID is invalid', function () {
+      assert.equal(persona.parseAccountID('bogus'), null);
+    });
   });
 
-  beforeEach(module('h'));
+  describe('username', function () {
+    it('should return the username from the account ID', function () {
+      assert.equal(persona.username(term), 'hacker');
+    });
 
-  beforeEach(inject(function ($filter) {
-    filter = $filter('persona');
-  }));
-
-  it('should return the requested part', function () {
-    assert.equal(filter(term), 'hacker');
-    assert.equal(filter(term, 'username'), 'hacker');
-    assert.equal(filter(term, 'provider'), 'example.com');
-  });
-
-  it('should filter out invalid account IDs', function () {
-    assert.equal(filter('bogus'), null);
-    assert.equal(filter('bogus', 'username'), null);
-    assert.notOk(filter('bogus', 'provider'), null);
+    it('should return an empty string if the ID is invalid', function () {
+      assert.equal(persona.username('bogus'), '');
+    });
   });
 });

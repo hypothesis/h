@@ -10,7 +10,7 @@
         <a class="annotation-user"
            target="_blank"
            ng-href="{{::vm.serviceUrl}}u/{{vm.user()}}"
-           >{{vm.user() | persona}}</a>
+           >{{vm.username()}}</a>
       </span>
 
       <span class="annotation-collapsed-replies">
@@ -32,11 +32,11 @@
         </span>
         <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing()" title="This is a highlight. Click 'edit' to add a note or tag."></i>
         <span class="annotation-citation"
-              ng-bind-html="vm.document() | documentTitle"
+              ng-bind-html="vm.documentTitle"
               ng-if="::!vm.isSidebar">
         </span>
         <span class="annotation-citation-domain"
-              ng-bind-html="vm.document() | documentDomain"
+              ng-bind-html="vm.documentDomain"
               ng-if="::!vm.isSidebar">
         </span>
       </span>
@@ -104,7 +104,7 @@
        ng-if="(vm.canCollapseBody || vm.form.tags.length) && !vm.editing()">
     <ul class="tag-list">
       <li class="tag-item" ng-repeat="tag in vm.form.tags">
-        <a href="{{::vm.serviceUrl}}stream?q=tag:'{{tag.text|urlencode}}'" target="_blank">{{tag.text}}</a>
+        <a ng-href="vm.tagStreamURL(tag.text)" target="_blank">{{tag.text}}</a>
       </li>
     </ul>
     <div class="u-stretch"></div>
