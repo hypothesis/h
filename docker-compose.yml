@@ -1,0 +1,44 @@
+hypthosis:
+  build: .
+  ports:
+   - "5000:5000"
+  environment:
+    DATABASE_URL: "postgresql://hypothesis:mysecretpassword@localhost:5432/hypothesis" #username:password@host:port/database
+    #APP_URL: http://127.0.0.1  #Replace with IP or DNS Name
+    SECRET_KEY: TCtkLQ3k5kNkezsFiPDvq04yG4olCwU6QF7XT6gktGDaEiBZAnxkDJXYCLMfF96W1j+A1PMO+vyfQUgMboEnoQ
+    #ALLOWED_ORIGINS: "*" #origins allowed to connect over the WebSocket protocol
+    #CLIENT_ID:        #a unique API key for authentication
+    #CLIENT_SECRET: #a unique API secret for signing authentication requests
+    #ELASTICSEARCH_INDEX: #the Elasticsearch index name for annotation storage
+    #MAIL_DEFAULT_SENDER: #a sender address for outbound mail
+    #WEBASSETS_BASE_DIR: #the base directory for static assets
+    #WEBASSETS_BASE_URL: #the base URL for static asset routes
+  links:
+   - redis
+   - postgres
+   - elasticsearch
+  command: python -m smtpd -n -c DebuggingServer localhost:25
+redis:
+  image: redis
+nsqd:
+  image: nsqio/nsq
+  command: /nsqd
+  ports:
+    - "4150:4150"
+    - "4151:4150"
+elasticsearch:
+  image: nickstenning/elasticsearch-icu
+  ports:
+    - "9300:9300"
+    - "9200:9200"
+mail:
+  image: svendowideit/ambassador
+  ports:
+    - "25:25"
+postgres:
+  image: postgres:9.3
+  environment:
+    POSTGRES_USER: hypothesis
+    POSTGRES_PASSWORD: mysecretpassword
+    PGDATA: /var/lib/postgresql/data
+    POSTGRES_DB: hypothesis
