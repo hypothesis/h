@@ -1,8 +1,6 @@
 @import 'base';
 @import 'mixins/responsive';
 
-$top-bar-height: 40px;
-
 .top-bar {
   background: $white;
   border-bottom: solid 1px $gray-lighter;
