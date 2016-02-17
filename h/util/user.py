@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Some shared utility functions."""
+"""Some shared utility functions for manipulating user data."""
 import re
 
 

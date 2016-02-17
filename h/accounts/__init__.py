@@ -63,7 +63,7 @@ def get_user(userid, request):
         return None
 
     try:
-        parts = util.split_user(userid)
+        parts = util.user.split_user(userid)
     except ValueError:
         return
 

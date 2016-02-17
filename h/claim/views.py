@@ -70,7 +70,7 @@ def _validate_request(request):
         raise exc.HTTPNotFound()
 
     try:
-        username = util.split_user(payload['userid'])['username']
+        username = util.user.split_user(payload['userid'])['username']
     except ValueError:
         log.warn('got claim token with invalid userid=%r', payload['userid'])
         raise exc.HTTPNotFound()
