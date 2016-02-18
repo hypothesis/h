@@ -9,6 +9,7 @@ from pyramid.view import view_config
 import sqlalchemy as sa
 import transaction
 
+from h.auth import role
 from h.db import Base
 
 log = logging.getLogger(__name__)
@@ -120,11 +121,11 @@ def flag_enabled(request, name):
     if feat.everyone:
         return True
     # Features that are on for admin are on if the current user is an admin.
-    if feat.admins and 'group:__admin__' in request.effective_principals:
+    if feat.admins and role.Admin in request.effective_principals:
         return True
     # Features that are on for staff are on if the current user is a staff
     # member.
-    if feat.staff and 'group:__staff__' in request.effective_principals:
+    if feat.staff and role.Staff in request.effective_principals:
         return True
     return False
 

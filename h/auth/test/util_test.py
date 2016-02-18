@@ -5,6 +5,7 @@ import mock
 from pyramid import testing
 from pyramid import security
 
+from h.auth import role
 from h.auth import util
 from h.api.models.token import API_TOKEN_PREFIX
 
@@ -60,7 +61,7 @@ def test_effective_principals_when_user_is_admin(accounts, group_principals):
     principals = util.effective_principals('acct:jiji@hypothes.is',
                                            testing.DummyRequest())
 
-    assert 'group:__admin__' in principals
+    assert role.Admin in principals
 
 
 @effective_principals_fixtures
@@ -71,7 +72,7 @@ def test_effective_principals_when_user_is_staff(accounts, group_principals):
     principals = util.effective_principals('acct:jiji@hypothes.is',
                                            testing.DummyRequest())
 
-    assert 'group:__staff__' in principals
+    assert role.Staff in principals
 
 
 @effective_principals_fixtures
@@ -95,8 +96,8 @@ def test_effective_principals_with_staff_admin_and_groups(accounts, group_princi
                                            testing.DummyRequest())
 
     for principal in [security.Everyone,
-                      'group:__admin__',
-                      'group:__staff__',
+                      role.Admin,
+                      role.Staff,
                       'group:abc123',
                       'group:def456',
                       security.Authenticated,
