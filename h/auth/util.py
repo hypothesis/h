@@ -4,6 +4,7 @@ from pyramid import security
 
 from h import accounts
 from h._compat import text_type
+from h.auth import role
 
 
 def effective_principals(userid, request):
@@ -25,10 +26,10 @@ def effective_principals(userid, request):
         return list(principals)
 
     if user.admin:
-        principals.add('group:__admin__')
+        principals.add(role.Admin)
 
     if user.staff:
-        principals.add('group:__staff__')
+        principals.add(role.Staff)
 
     principals.update(group_principals(user))
 
