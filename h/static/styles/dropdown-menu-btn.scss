@@ -1,3 +1,5 @@
+@import './primary-action-btn';
+
 // the primary action button for a form
 .dropdown-menu-btn {
   $text-color: $color-seashell;
@@ -12,7 +14,7 @@
   position: relative;
 
   &__btn {
-    @extend .primary-action-btn;
+    @include primary-action-btn;
 
     // the label occupies the entire space of the button and
     // shows a darker state on hover
