@@ -8,20 +8,28 @@ $base-line-height: 20px;
 @import './elements';
 @import './common';
 
-// components
+// Components
+// ----------
+@import './annotation';
 @import './api-token-input';
-@import './excerpt';
-@import './primary-action-btn';
 @import './dropdown-menu-btn';
+@import './excerpt';
 @import './group-list';
+@import './markdown';
+@import './primary-action-btn';
 @import './publish-annotation-btn';
 @import './search-status-bar';
 @import './share-link';
 @import './sidebar-tutorial';
 @import './signin-control';
 @import './simple-search';
+@import './spinner';
+@import './tags-input';
+@import './thread';
 @import './top-bar';
 
+// Top-level styles
+// ----------------
 body {
   $sidebar-h-padding: 9px;
 

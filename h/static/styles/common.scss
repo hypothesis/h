@@ -1,17 +1,12 @@
-@import 'compass/typography/text/force-wrap';
 @import 'compass/layout/stretching';
-@import 'base';
+@import 'compass/typography/text/force-wrap';
 
-@import 'mixins/responsive';
-@import 'grid';
-@import 'annotations';
-@import 'forms';
-@import 'markdown-editor';
-@import 'spinner';
-@import 'threads';
-@import 'styled-text';
-@import 'tags-input';
-@import 'page';
+@import './base';
+@import './forms';
+@import './grid';
+@import './mixins/responsive';
+@import './page';
+@import './styled-text';
 
 //ELEMENT STYLES////////////////////////////////
 body {
