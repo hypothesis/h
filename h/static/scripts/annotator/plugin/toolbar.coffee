@@ -28,7 +28,7 @@ module.exports = class Toolbar extends Annotator.Plugin
       $(@element).append @toolbar
 
     items = [
-      "title": "Toggle Sidebar"
+      "title": "Toggle or Resize Sidebar"
       "class": "annotator-frame-button--sidebar_toggle h-icon-chevron-left"
       "name": "sidebar-toggle"
       "on":
