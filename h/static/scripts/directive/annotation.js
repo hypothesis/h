@@ -3,11 +3,16 @@
 
 var Promise = require('core-js/library/es6/promise');
 
+var annotationMetadata = require('../annotation-metadata');
 var dateUtil = require('../date-util');
 var documentDomain = require('../filter/document-domain');
 var documentTitle = require('../filter/document-title');
 var events = require('../events');
 var persona = require('../filter/persona');
+
+var isNew = annotationMetadata.isNew;
+var isReply = annotationMetadata.isReply;
+var extractDocumentMetadata = annotationMetadata.extractDocumentMetadata;
 
 /** Return a domainModel tags array from the given vm tags array.
  *
@@ -43,71 +48,7 @@ function errorMessage(reason) {
   return message;
 }
 
-/** Extract a URI, domain and title from the given domain model object.
- *
- * @param {object} domainModel An annotation domain model object as received
- *   from the server-side API.
- * @returns {object} An object with three properties extracted from the model:
- *   uri, domain and title.
- *
- */
-function extractDocumentMetadata(domainModel) {
-  var document_;
-  var uri = domainModel.uri;
-  var domain = new URL(uri).hostname;
-  if (domainModel.document) {
-    if (uri.indexOf('urn') === 0) {
-      var i;
-      for (i = 0; i < domainModel.document.link.length; i++) {
-        var link = domainModel.document.link[i];
-        if (link.href.indexOf('urn:') === 0) {
-          continue;
-        }
-        uri = link.href;
-        break;
-      }
-    }
 
-    var documentTitle;
-    if (Array.isArray(domainModel.document.title)) {
-      documentTitle = domainModel.document.title[0];
-    } else {
-      documentTitle = domainModel.document.title;
-    }
-
-    document_ = {
-      uri: uri,
-      domain: domain,
-      title: documentTitle || domain
-    };
-  } else {
-    document_ = {
-      uri: uri,
-      domain: domain,
-      title: domain
-    };
-  }
-
-  if (document_.title.length > 30) {
-    document_.title = document_.title.slice(0, 30) + '…';
-  }
-
-  return document_;
-}
-
-/** Return `true` if the given annotation is a reply, `false` otherwise. */
-function isReply(domainModel) {
-  return (domainModel.references || []).length > 0;
-}
-
-/** Return `true` if the given annotation is new, `false` otherwise.
- *
- * "New" means this annotation has been newly created client-side and not
- * saved to the server yet.
- */
-function isNew(domainModel) {
-  return !domainModel.id;
-}
 
 /** Restore unsaved changes to this annotation from the drafts service.
  *
@@ -840,7 +781,6 @@ module.exports = {
   // to be unit tested.
   // FIXME: The code should be refactored to enable unit testing without having
   // to do this.
-  extractDocumentMetadata: extractDocumentMetadata,
   link: link,
   updateDomainModel: updateDomainModel,
 

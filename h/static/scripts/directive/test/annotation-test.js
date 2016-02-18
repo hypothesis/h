@@ -5,6 +5,7 @@ var Promise = require('core-js/library/es6/promise');
 var proxyquire = require('proxyquire');
 
 var events = require('../../events');
+var fixtures = require('../../test/annotation-fixtures');
 var util = require('./util');
 
 var module = angular.mock.module;
@@ -27,149 +28,7 @@ function annotationDirective() {
   return annotation.directive;
 }
 
-/** Return Angular's $compile service. */
-function compileService() {
-  var $compile;
-  inject(function(_$compile_) {
-    $compile = _$compile_;
-  });
-  return $compile;
-}
-
-/** Return Angular's $document service. */
-function documentService() {
-  var $document;
-  inject(function(_$document_) {
-    $document = _$document_;
-  });
-  return $document;
-}
-
 describe('annotation', function() {
-
-  describe('extractDocumentMetadata()', function() {
-    var extractDocumentMetadata = require('../annotation')
-                                    .extractDocumentMetadata;
-
-    context('when the model has a document property', function() {
-      it('returns the hostname from model.uri as the domain', function() {
-        var model = {
-          document: {},
-          uri: 'http://example.com/'
-        };
-
-        assert.equal(extractDocumentMetadata(model).domain, 'example.com');
-      });
-
-      context('when model.uri starts with "urn"', function() {
-        it(
-          'uses the first document.link uri that doesn\'t start with "urn"',
-          function() {
-            var model = {
-              uri: 'urn:isbn:0451450523',
-              document: {
-                link: [
-                  {href: 'urn:isan:0000-0000-9E59-0000-O-0000-0000-2'},
-                  {href: 'http://example.com/'}
-                ]
-              }
-            };
-
-            assert.equal(
-              extractDocumentMetadata(model).uri, 'http://example.com/');
-          }
-        );
-      });
-
-      context('when model.uri does not start with "urn"', function() {
-        it('uses model.uri as the uri', function() {
-          var model = {
-            document: {},
-            uri: 'http://example.com/'
-          };
-
-          assert.equal(
-            extractDocumentMetadata(model).uri, 'http://example.com/');
-        });
-      });
-
-      context('when document.title is a string', function() {
-        it('returns document.title as title', function() {
-          var model = {
-            uri: 'http://example.com/',
-            document: {
-              title: 'My Document'
-            }
-          };
-
-          assert.equal(
-            extractDocumentMetadata(model).title, model.document.title);
-        });
-      });
-
-      context('when document.title is an array', function() {
-        it('returns document.title[0] as title', function() {
-          var model = {
-            uri: 'http://example.com/',
-            document: {
-              title: ['My Document', 'My Other Document']
-            }
-          };
-
-          assert.equal(
-            extractDocumentMetadata(model).title, model.document.title[0]);
-        });
-      });
-
-      context('when there is no document.title', function() {
-        it('returns the domain as the title', function() {
-          var model = {
-            document: {},
-            uri: 'http://example.com/',
-          };
-
-          assert.equal(extractDocumentMetadata(model).title, 'example.com');
-        });
-      });
-    });
-
-    context('when the model does not have a document property', function() {
-      it('returns model.uri for the uri', function() {
-        var model = {uri: 'http://example.com/'};
-
-        assert.equal(extractDocumentMetadata(model).uri, model.uri);
-      });
-
-      it('returns the hostname of model.uri for the domain', function() {
-        var model = {uri: 'http://example.com/'};
-
-        assert.equal(extractDocumentMetadata(model).domain, 'example.com');
-      });
-
-      it('returns the hostname of model.uri for the title', function() {
-        var model = {uri: 'http://example.com/'};
-
-        assert.equal(extractDocumentMetadata(model).title, 'example.com');
-      });
-    });
-
-    context('when the title is longer than 30 characters', function() {
-      it('truncates the title with "…"', function() {
-        var model = {
-          uri: 'http://example.com/',
-          document: {
-            title: 'My Really Really Long Document Title'
-          }
-        };
-
-        assert.equal(
-          extractDocumentMetadata(model).title,
-          'My Really Really Long Document…'
-        );
-      });
-    });
-  });
-
   describe('updateDomainModel()', function() {
     var updateDomainModel = require('../annotation').updateDomainModel;
 
@@ -275,15 +134,6 @@ describe('annotation', function() {
   describe('link', function () {
     var link = require('../annotation').link;
 
-    /** Return Angular's $rootScope. */
-    function getRootScope() {
-      var $rootScope;
-      inject(function(_$rootScope_) {
-        $rootScope = _$rootScope_;
-      });
-      return $rootScope;
-    }
-
     var scope;
     var mockElement;
     var mockAttributes;
@@ -294,7 +144,7 @@ describe('annotation', function() {
     var mockControllers;
 
     beforeEach(function () {
-      scope = getRootScope().$new();
+      scope = util.ngModule(inject, '$rootScope').$new();
       mockElement = {on: sinon.stub()};
       mockAttributes = undefined;  // Left undefined because link() doesn't use
                                    // it.
@@ -423,28 +273,25 @@ describe('annotation', function() {
     var $timeout;
     var $window;
     var fakeAnnotationMapper;
-    var fakeAnnotationUI;
-    var fakeDocumentDomainFilter;
-    var fakeDocumentTitleFilter;
     var fakeDrafts;
-    var fakeFeatures;
     var fakeFlash;
     var fakeGroups;
-    var fakeMomentFilter;
     var fakePermissions;
-    var fakePersonaFilter;
     var fakeSession;
-    var fakeSettings;
-    var fakeTags;
     var fakeTime;
-    var fakeUrlEncodeFilter;
     var sandbox;
 
     function createDirective(annotation) {
-      annotation = annotation || defaultAnnotation();
+      annotation = annotation || fixtures.defaultAnnotation();
       var element = util.createDirective(document, 'annotation', {
         annotation: annotation,
       });
+
+      // A new annotation won't have any saved drafts yet.
+      if (!annotation.id) {
+        fakeDrafts.get.returns(null);
+      }
+
       return {
         annotation: annotation,
         controller: element.ctrl,
@@ -453,102 +300,7 @@ describe('annotation', function() {
       };
     }
 
-    /** Return the default domain model object that createDirective() uses if
-     *  no custom one is passed to it. */
-    function defaultAnnotation() {
-      return {
-        id: 'deadbeef',
-        document: {
-          title: 'A special document'
-        },
-        target: [{}],
-        uri: 'http://example.com',
-        user: 'acct:bill@localhost',
-        updated: '2015-05-10T20:18:56.613388+00:00',
-      };
-    }
 
-    /** Return an annotation domain model object for a new annotation
-     * (newly-created client-side, not yet saved to the server).
-     */
-    function newAnnotation() {
-      // A new annotation won't have any saved drafts yet.
-      fakeDrafts.get.returns(null);
-      return {
-        id: undefined,
-        $highlight: undefined,
-        target: ['foo', 'bar'],
-        references: [],
-        text: 'Annotation text',
-        tags: ['tag_1', 'tag_2']
-      };
-    }
-
-    /** Return an annotation domain model object for a new highlight
-     * (newly-created client-side, not yet saved to the server).
-     */
-    function newHighlight() {
-      // A new highlight won't have any saved drafts yet.
-      fakeDrafts.get.returns(null);
-      return {
-        id: undefined,
-        $highlight: true
-      };
-    }
-
-    /** Return an annotation domain model object for an existing annotation
-     *  received from the server.
-     */
-    function oldAnnotation() {
-      return {
-        id: 'annotation_id',
-        $highlight: undefined,
-        target: ['foo', 'bar'],
-        references: [],
-        text: 'This is my annotation',
-        tags: ['tag_1', 'tag_2']
-      };
-    }
-
-    /** Return an annotation domain model object for an existing highlight
-     *  received from the server.
-     */
-    function oldHighlight() {
-      return {
-        id: 'annotation_id',
-        $highlight: undefined,
-        target: ['foo', 'bar'],
-        references: [],
-        text: '',
-        tags: []
-      };
-    }
-
-    /** Return an annotation domain model object for an existing page note
-     *  received from the server.
-     */
-    function oldPageNote() {
-      return {
-        highlight: undefined,
-        target: [],
-        references: [],
-        text: '',
-        tags: []
-      };
-    }
-
-    /** Return an annotation domain model object for an existing reply
-     *  received from the server.
-     */
-    function oldReply() {
-      return {
-        highlight: undefined,
-        target: ['foo'],
-        references: ['parent_annotation_id'],
-        text: '',
-        tags: []
-      };
-    }
 
     before(function() {
       angular.module('h', [])
@@ -574,7 +326,7 @@ describe('annotation', function() {
         deleteAnnotation: sandbox.stub()
       };
 
-      fakeAnnotationUI = {};
+      var fakeAnnotationUI = {};
 
       fakeDrafts = {
         update: sandbox.stub(),
@@ -582,13 +334,11 @@ describe('annotation', function() {
         get: sandbox.stub()
       };
 
-      fakeFeatures = {
+      var fakeFeatures = {
         flagEnabled: sandbox.stub().returns(true)
       };
 
       fakeFlash = sandbox.stub();
-
-      fakeMomentFilter = sandbox.stub().returns('ages ago');
 
       fakePermissions = {
         isShared: sandbox.stub().returns(true),
@@ -612,11 +362,11 @@ describe('annotation', function() {
         }
       };
 
-      fakeSettings = {
+      var fakeSettings = {
         serviceUrl: 'https://test.hypothes.is/',
       };
 
-      fakeTags = {
+      var fakeTags = {
         filter: sandbox.stub().returns('a while ago'),
         store: sandbox.stub()
       };
@@ -638,7 +388,6 @@ describe('annotation', function() {
       $provide.value('drafts', fakeDrafts);
       $provide.value('features', fakeFeatures);
       $provide.value('flash', fakeFlash);
-      $provide.value('momentFilter', fakeMomentFilter);
       $provide.value('permissions', fakePermissions);
       $provide.value('session', fakeSession);
       $provide.value('settings', fakeSettings);
@@ -664,13 +413,13 @@ describe('annotation', function() {
       sandbox.restore();
     });
 
-    describe('AnnotationController() initialization', function() {
+    describe('initialization', function() {
       it('sets the user of annotations that don\'t have one', function() {
         // You can create annotations while logged out and then login.
         // When you login a new AnnotationController instance is created for
         // each of your annotations, and on initialization it will set the
         // annotation's user to your username from the session.
-        var annotation = newAnnotation();
+        var annotation = fixtures.newAnnotation();
         annotation.user = undefined;
         fakeSession.state.userid = 'acct:bill@localhost';
 
@@ -679,26 +428,48 @@ describe('annotation', function() {
         assert.equal(annotation.user, 'acct:bill@localhost');
       });
 
-      it(
-        'sets the permissions of annotations that don\'t have any',
-        function() {
-          // You can create annotations while logged out and then login.
-          // When you login a new AnnotationController instance is created for
-          // each of your annotations, and on initialization it will set the
-          // annotation's permissions using your username from the session.
-          var annotation = newAnnotation();
-          annotation.user = annotation.permissions = undefined;
-          fakeSession.state.userid = 'acct:bill@localhost';
-          fakePermissions.default.returns('default permissions');
+      it('sets the permissions of new annotations', function() {
+        // You can create annotations while logged out and then login.
+        // When you login a new AnnotationController instance is created for
+        // each of your annotations, and on initialization it will set the
+        // annotation's permissions using your username from the session.
+        var annotation = fixtures.newAnnotation();
+        annotation.user = annotation.permissions = undefined;
+        annotation.group = '__world__';
+        fakeSession.state.userid = 'acct:bill@localhost';
+        fakePermissions.default = function (group) {
+          return 'default permissions for ' + group;
+        };
 
-          createDirective(annotation);
+        createDirective(annotation);
 
-          assert.equal(annotation.permissions, 'default permissions');
-        }
-      );
+        assert.equal(annotation.permissions,
+          'default permissions for __world__');
+      });
+
+      it('preserves the permissions of existing annotations', function() {
+        var annotation = fixtures.newAnnotation();
+        annotation.permissions = {
+          permissions: {
+            read: ['foo'],
+            update: ['bar'],
+            'delete': ['gar'],
+            admin: ['har']
+          }
+        };
+        var originalPermissions = JSON.parse(JSON.stringify(
+          annotation.permissions));
+        fakePermissions['default'] = function () {
+          return 'new permissions';
+        };
+        fakePermissions.isShared = function () {};
+        fakePermissions.isPrivate = function () {};
+        createDirective(annotation);
+        assert.deepEqual(annotation.permissions, originalPermissions);
+      });
 
       it('saves new highlights to the server on initialization', function() {
-        var annotation = newHighlight();
+        var annotation = fixtures.newHighlight();
         // The user is logged-in.
         annotation.user = fakeSession.state.userid = 'acct:bill@localhost';
         annotation.$create = sandbox.stub().returns({
@@ -711,7 +482,7 @@ describe('annotation', function() {
       });
 
       it('saves new highlights to drafts if not logged in', function() {
-        var annotation = newHighlight();
+        var annotation = fixtures.newHighlight();
         // The user is not logged-in.
         annotation.user = fakeSession.state.userid = undefined;
         annotation.$create = sandbox.stub().returns({
@@ -725,7 +496,7 @@ describe('annotation', function() {
       });
 
       it('does not save new annotations on initialization', function() {
-        var annotation = newAnnotation();
+        var annotation = fixtures.newAnnotation();
         annotation.$create = sandbox.stub().returns({
           then: function() {}
         });
@@ -736,7 +507,7 @@ describe('annotation', function() {
       });
 
       it('does not save old highlights on initialization', function() {
-        var annotation = oldHighlight();
+        var annotation = fixtures.oldHighlight();
         annotation.$create = sandbox.stub().returns({
           then: function() {}
         });
@@ -747,7 +518,7 @@ describe('annotation', function() {
       });
 
       it('does not save old annotations on initialization', function() {
-        var annotation = oldAnnotation();
+        var annotation = fixtures.oldAnnotation();
         annotation.$create = sandbox.stub().returns({
           then: function() {}
         });
@@ -758,7 +529,7 @@ describe('annotation', function() {
       });
 
       it('edits new annotations on initialization', function() {
-        var annotation = newAnnotation();
+        var annotation = fixtures.newAnnotation();
 
         var controller = createDirective(annotation).controller;
 
@@ -766,7 +537,7 @@ describe('annotation', function() {
       });
 
       it('edits annotations with drafts on initialization', function() {
-        var annotation = oldAnnotation();
+        var annotation = fixtures.oldAnnotation();
         // The drafts service has some draft changes for this annotation.
         fakeDrafts.get.returns('foo');
 
@@ -776,7 +547,7 @@ describe('annotation', function() {
       });
 
       it('does not edit new highlights on initialization', function() {
-        var annotation = newHighlight();
+        var annotation = fixtures.newHighlight();
         // We have to set annotation.$create() because it'll try to call it.
         annotation.$create = sandbox.stub().returns({
           then: function() {}
@@ -788,7 +559,7 @@ describe('annotation', function() {
       });
 
       it('edits highlights with drafts on initialization', function() {
-        var annotation = oldHighlight();
+        var annotation = fixtures.oldHighlight();
         // You can edit a highlight, enter some text or tags, and save it (the
         // highlight then becomes an annotation). You can also edit a highlight
         // and then change focus to another group and back without saving the
@@ -802,7 +573,7 @@ describe('annotation', function() {
       });
     });
 
-    describe('AnnotationController.editing()', function() {
+    describe('.editing()', function() {
       it('returns true if action is "create"', function() {
         var controller = createDirective().controller;
         controller.action = 'create';
@@ -822,9 +593,9 @@ describe('annotation', function() {
       });
     });
 
-    describe('AnnotationController.isHighlight()', function() {
+    describe('.isHighlight()', function() {
       it('returns true for new highlights', function() {
-        var annotation = newHighlight();
+        var annotation = fixtures.newHighlight();
         // We need to define $create because it'll try to call it.
         annotation.$create = function() {return {then: function() {}};};
 
@@ -834,7 +605,7 @@ describe('annotation', function() {
       });
 
       it('returns false for new annotations', function() {
-        var annotation = newAnnotation();
+        var annotation = fixtures.newAnnotation();
 
         var vm = createDirective(annotation).controller;
 
@@ -842,7 +613,7 @@ describe('annotation', function() {
       });
 
       it('returns false for page notes', function() {
-        var annotation = oldPageNote();
+        var annotation = fixtures.oldPageNote();
 
         var vm = createDirective(annotation).controller;
 
@@ -850,7 +621,7 @@ describe('annotation', function() {
       });
 
       it('returns false for replies', function() {
-        var annotation = oldReply();
+        var annotation = fixtures.oldReply();
 
         var vm = createDirective(annotation).controller;
 
@@ -858,7 +629,7 @@ describe('annotation', function() {
       });
 
       it('returns false for annotations with text but no tags', function() {
-        var annotation = oldAnnotation();
+        var annotation = fixtures.oldAnnotation();
         annotation.text = 'This is my annotation';
         annotation.tags = [];
 
@@ -868,7 +639,7 @@ describe('annotation', function() {
       });
 
       it('returns false for annotations with tags but no text', function() {
-        var annotation = oldAnnotation();
+        var annotation = fixtures.oldAnnotation();
         annotation.text = '';
         annotation.tags = ['foo'];
 
@@ -878,7 +649,7 @@ describe('annotation', function() {
       });
 
       it('returns true for annotations with no text or tags', function() {
-        var annotation = oldAnnotation();
+        var annotation = fixtures.oldAnnotation();
         annotation.text = '';
         annotation.tags = [];
 
@@ -892,7 +663,7 @@ describe('annotation', function() {
       var annotation;
 
       beforeEach(function() {
-        annotation = defaultAnnotation();
+        annotation = fixtures.defaultAnnotation();
         annotation.$highlight = true;
         annotation.$create = sinon.stub().returns({
           then: angular.noop,
@@ -915,7 +686,7 @@ describe('annotation', function() {
       var annotation;
 
       beforeEach(function() {
-        annotation = defaultAnnotation();
+        annotation = fixtures.defaultAnnotation();
         annotation.permissions = {
           read: ['acct:joe@localhost'],
           update: ['acct:joe@localhost'],
@@ -946,7 +717,7 @@ describe('annotation', function() {
       });
 
       it('makes the annotation shared if the parent is shared', function() {
-        var annotation = defaultAnnotation();
+        var annotation = fixtures.defaultAnnotation();
         annotation.group = 'my group';
         annotation.permissions = {
           read: ['my-group'],
@@ -981,7 +752,7 @@ describe('annotation', function() {
       );
 
       it('sets the reply\'s group to be the same as its parent\'s', function() {
-        var annotation = defaultAnnotation();
+        var annotation = fixtures.defaultAnnotation();
         annotation.group = 'my group';
         var controller = createDirective(annotation).controller;
         var reply = {};
@@ -1082,7 +853,7 @@ describe('annotation', function() {
 
     describe('#hasQuotes', function() {
       it('returns false if the annotation has no quotes', function() {
-        var annotation = defaultAnnotation();
+        var annotation = fixtures.defaultAnnotation();
         annotation.target = [{}];
         var controller = createDirective(annotation).controller;
 
@@ -1090,7 +861,7 @@ describe('annotation', function() {
       });
 
       it('returns true if the annotation has quotes', function() {
-        var annotation = defaultAnnotation();
+        var annotation = fixtures.defaultAnnotation();
         annotation.target = [
           {
             selector: [
@@ -1112,7 +883,7 @@ describe('annotation', function() {
 
       beforeEach(function() {
         clock = sinon.useFakeTimers();
-        annotation = defaultAnnotation();
+        annotation = fixtures.defaultAnnotation();
         annotation.created = (new Date()).toString();
         annotation.updated = (new Date()).toString();
       });
@@ -1206,7 +977,7 @@ describe('annotation', function() {
 
     describe('absoluteTimestamp', function () {
       it('returns the current time', function () {
-        var annotation = defaultAnnotation();
+        var annotation = fixtures.defaultAnnotation();
         var controller = createDirective(annotation).controller;
         var expectedDate = new Date(annotation.updated);
         // the exact format of the result will depend on the current locale,
@@ -1223,7 +994,7 @@ describe('annotation', function() {
         dialog.find('button').click();
         parts.scope.$digest();
         assert.ok(dialog.hasClass('open'));
-        documentService().click();
+        util.ngModule(inject, '$document').click();
         assert.notOk(dialog.hasClass('open'));
       });
     });
@@ -1309,7 +1080,7 @@ describe('annotation', function() {
 
       beforeEach(function() {
         fakeFlash.error = sandbox.stub();
-        annotation = defaultAnnotation();
+        annotation = fixtures.defaultAnnotation();
         annotation.$create = sandbox.stub();
       });
 
@@ -1404,6 +1175,26 @@ describe('annotation', function() {
           assert.ok(controller.editing());
         });
       });
+
+      it(
+        'Passes group:<id> to the server when saving a new annotation',
+        function() {
+          fakeGroups.focused = function () {
+            return { id: 'test-id' }
+          };
+          var annotation = {
+            user: 'acct:fred@hypothes.is',
+            text: 'foo',
+          };
+          annotation.$create = sinon.stub().returns(Promise.resolve());
+          var controller = createDirective(annotation).controller;
+          controller.action = 'create';
+          return controller.save().then(function() {
+            assert.equal(annotation.$create.lastCall.thisValue.group,
+              'test-id');
+          });
+        }
+      );
     });
 
     describe('saving an edited an annotation', function() {
@@ -1411,7 +1202,7 @@ describe('annotation', function() {
 
       beforeEach(function() {
         fakeFlash.error = sandbox.stub();
-        annotation = defaultAnnotation();
+        annotation = fixtures.defaultAnnotation();
         annotation.$update = sandbox.stub();
       });
 
@@ -1500,7 +1291,7 @@ describe('annotation', function() {
       });
 
       it('removes the draft when changes are saved', function() {
-        var annotation = defaultAnnotation();
+        var annotation = fixtures.defaultAnnotation();
         annotation.$update = sandbox.stub().returns(Promise.resolve());
         var controller = createDirective(annotation).controller;
         controller.edit();
@@ -1570,7 +1361,7 @@ describe('annotation', function() {
       );
 
       it('updates domainModel.group if the annotation is new', function () {
-        var annotation = newAnnotation();
+        var annotation = fixtures.newAnnotation();
         annotation.group = 'old-group-id';
         createDirective(annotation);
         fakeGroups.focused = sandbox.stub().returns({id: 'new-group-id'});
@@ -1582,7 +1373,7 @@ describe('annotation', function() {
 
       it('does not update domainModel.group if the annotation is not new',
         function () {
-          var annotation = oldAnnotation();
+          var annotation = fixtures.oldAnnotation();
           annotation.group = 'old-group-id';
           createDirective(annotation);
           fakeGroups.focused = sandbox.stub().returns({id: 'new-group-id'});
@@ -1593,243 +1384,15 @@ describe('annotation', function() {
         }
       );
     });
-  });
 
-  describe('AnnotationController', function() {
-    before(function() {
-      angular.module('h', [])
-        .directive('annotation', annotationDirective());
-    });
 
-    beforeEach(module('h'));
-
-    beforeEach(module('h.templates'));
-
-    /** Return Angular's $rootScope. */
-    function getRootScope() {
-      var $rootScope;
-      inject(function(_$rootScope_) {
-        $rootScope = _$rootScope_;
-      });
-      return $rootScope;
-    }
-
-    /**
-    Return an annotation directive instance and stub services etc.
-    */
-    function createAnnotationDirective(args) {
-      var session = args.session || {
-        state: {
-          userid: 'acct:fred@hypothes.is'
-        }
-      };
-      var locals = {
-        personaFilter: args.personaFilter || function() {},
-        momentFilter: args.momentFilter || {},
-        urlencodeFilter: args.urlencodeFilter || {},
-        drafts: args.drafts || {
-          update: function() {},
-          remove: function() {},
-          get: function() {}
-        },
-        features: args.features || {
-          flagEnabled: function() {
-            return true;
-          }
-        },
-        flash: args.flash || {
-          info: function() {},
-          error: function() {}
-        },
-        permissions: args.permissions || {
-          isShared: function(permissions, group) {
-            if (permissions.read) {
-              return permissions.read.indexOf(group) !== -1;
-            } else {
-              return false;
-            }
-          },
-          isPrivate: function(permissions, user) {
-            if (permissions.read) {
-              return permissions.read.indexOf(user) !== -1;
-            } else {
-              return false;
-            }
-          },
-          permits: function() {
-            return true;
-          },
-          shared: function() {
-            return {};
-          },
-          'private': function() {
-            return {};
-          },
-          'default': function() {
-            return {};
-          },
-          setDefault: function() {}
-        },
-        session: session,
-        settings: {
-          serviceUrl: 'https://test.hypothes.is/'
-        },
-        tags: args.tags || {
-          store: function() {}
-        },
-        time: args.time || {
-          toFuzzyString: function() {},
-          decayingInterval: function() {}
-        },
-        annotationUI: args.annotationUI || {},
-        annotationMapper: args.annotationMapper || {},
-        groups: args.groups || {
-          get: function() {},
-          focused: function() {
-            return {};
-          }
-        },
-        documentTitleFilter: args.documentTitleFilter || function() {
-          return '';
-        },
-        documentDomainFilter: args.documentDomainFilter || function() {
-          return '';
-        },
-        localStorage: args.localStorage || {
-          setItem: function() {},
-          getItem: function() {}
-        }
-      };
-      module(function($provide) {
-        $provide.value('personaFilter', locals.personaFilter);
-        $provide.value('momentFilter', locals.momentFilter);
-        $provide.value('urlencodeFilter', locals.urlencodeFilter);
-        $provide.value('drafts', locals.drafts);
-        $provide.value('features', locals.features);
-        $provide.value('flash', locals.flash);
-        $provide.value('permissions', locals.permissions);
-        $provide.value('session', locals.session);
-        $provide.value('settings', locals.settings);
-        $provide.value('tags', locals.tags);
-        $provide.value('time', locals.time);
-        $provide.value('annotationUI', locals.annotationUI);
-        $provide.value('annotationMapper', locals.annotationMapper);
-        $provide.value('groups', locals.groups);
-        $provide.value('documentTitleFilter', locals.documentTitleFilter);
-        $provide.value('documentDomainFilter', locals.documentDomainFilter);
-        $provide.value('localStorage', locals.localStorage);
-      });
-      locals.element = angular.element('<annotation annotation="annotation">');
-      var compiledElement = compileService()(locals.element);
-      locals.$rootScope = getRootScope();
-      locals.parentScope = locals.$rootScope.$new();
-      locals.parentScope.annotation = args.annotation || {};
-      locals.directive = compiledElement(locals.parentScope);
-      locals.$rootScope.$digest();
-      locals.controller = locals.element.controller('annotation');
-      locals.isolateScope = locals.element.isolateScope();
-      return locals;
-    }
-
-    describe('createAnnotationDirective', function() {
-      it('creates the directive without crashing', function() {
-        createAnnotationDirective({});
-      });
-    });
-
-    it('sets the user of new annotations', function() {
-      var annotation = {};
-      var session = createAnnotationDirective({
-        annotation: annotation
-      }).session;
-      assert.equal(annotation.user, session.state.userid);
-    });
-
-    it('sets the permissions of new annotations', function() {
-      // This is a new annotation, doesn't have any permissions yet.
-      var annotation = {
-        group: 'test-group'
-      };
-      var permissions = {
-        'default': sinon.stub().returns('default permissions'),
-        isShared: function() {},
-        isPrivate: function() {}
-      };
-      createAnnotationDirective({
-        annotation: annotation,
-        permissions: permissions
-      });
-      assert(permissions['default'].calledWithExactly('test-group'));
-      assert.equal(
-        annotation.permissions, 'default permissions',
-        'It should set a new annotation\'s permissions to what ' +
-        'permissions.default() returns');
-    });
-
-    it(
-      'doesn\'t overwrite permissions if the annotation already has them',
-      function() {
-        var annotation = {
-          permissions: {
-            read: ['foo'],
-            update: ['bar'],
-            'delete': ['gar'],
-            admin: ['har']
-          }
-        };
-        var originalPermissions = JSON.parse(JSON.stringify(
-          annotation.permissions));
-        var permissions = {
-          'default': sinon.stub().returns('new permissions'),
-          isShared: function() {},
-          isPrivate: function() {}
-        };
-        createAnnotationDirective({
-          annotation: annotation,
-          permissions: permissions
-        });
-        assert.deepEqual(annotation.permissions, originalPermissions);
-      }
-    );
-
-    describe('save', function() {
-      it(
-        'Passes group:<id> to the server when saving a new annotation',
-        function() {
-          var annotation = {
-            user: 'acct:fred@hypothes.is',
-            text: 'foo'
-          };
-          annotation.$create = sinon.stub().returns(Promise.resolve());
-          var group = {
-            id: 'test-id'
-          };
-          var controller = createAnnotationDirective({
-            annotation: annotation,
-            groups: {
-              focused: function() {
-                return group;
-              },
-              get: function() {}
-            }
-          }).controller;
-          controller.action = 'create';
-          return controller.save().then(function() {
-            assert(annotation.$create.lastCall.thisValue.group === 'test-id');
-          });
-        }
-      );
-    });
-
-    /*
-    Simulate what happens when the user edits an annotation, clicks Save,
-    gets an error because the server fails to save the annotation, then clicks
-    Cancel - in the frontend the annotation should be restored to its original
-    value, the edits lost.
-      */
-    it('restores the original text when editing is cancelled', function() {
-      var controller = createAnnotationDirective({
-        annotation: {
+    describe('reverting edits', function () {
+      // Simulate what happens when the user edits an annotation,
+      // clicks Save, gets an error because the server fails to save the
+      // annotation, then clicks Cancel - in the frontend the annotation should
+      // be restored to its original value, the edits lost.
+      it('restores the original text', function() {
+        var controller = createDirective({
           id: 'test-annotation-id',
           user: 'acct:bill@localhost',
           text: 'Initial annotation body text',
@@ -1845,45 +1408,41 @@ describe('annotation', function() {
               data: {}
             });
           }
-        }
-      }).controller;
-      var originalText = controller.form.text;
-      // Simulate the user clicking the Edit button on the annotation.
-      controller.edit();
-      // Simulate the user typing some text into the annotation editor textarea.
-      controller.form.text = 'changed by test code';
-      // Simulate the user hitting the Save button and wait for the
-      // (unsuccessful) response from the server.
-      controller.save();
-      // At this point the annotation editor controls are still open, and the
-      // annotation's text is still the modified (unsaved) text.
-      assert(controller.form.text === 'changed by test code');
-      // Simulate the user clicking the Cancel button.
-      controller.revert();
-      assert(controller.form.text === originalText);
-    });
+        }).controller;
+        var originalText = controller.form.text;
+        // Simulate the user clicking the Edit button on the annotation.
+        controller.edit();
+        // Simulate the user typing some text into the annotation editor textarea.
+        controller.form.text = 'changed by test code';
+        // Simulate the user hitting the Save button and wait for the
+        // (unsuccessful) response from the server.
+        controller.save();
+        // At this point the annotation editor controls are still open, and the
+        // annotation's text is still the modified (unsaved) text.
+        assert(controller.form.text === 'changed by test code');
+        // Simulate the user clicking the Cancel button.
+        controller.revert();
+        assert(controller.form.text === originalText);
+      });
 
-    // test that editing reverting changes to an annotation with
-    // no text resets the text to be empty.
-    it('clears the text when reverting changes to a highlight', function() {
-      var controller = createAnnotationDirective({
-        annotation: {
+      // Test that editing reverting changes to an annotation with
+      // no text resets the text to be empty.
+      it('clears the text if the text was originally empty', function() {
+        var controller = createDirective({
           id: 'test-annotation-id',
           user: 'acct:bill@localhost',
-        }
-      }).controller;
-      controller.edit();
-      assert.equal(controller.action, 'edit');
-      controller.form.text = 'this should be reverted';
-      controller.revert();
-      assert.equal(controller.form.text, void 0);
-    });
+        }).controller;
+        controller.edit();
+        assert.equal(controller.action, 'edit');
+        controller.form.text = 'this should be reverted';
+        controller.revert();
+        assert.equal(controller.form.text, void 0);
+      });
 
-    it('reverts to the most recently saved version when canceling changes',
-      function () {
+      it('reverts to the most recently saved version',
+        function () {
 
-      var controller = createAnnotationDirective({
-        annotation: {
+        var controller = createDirective({
           user: 'acct:bill@localhost',
           $create: function () {
             this.id = 'new-annotation-id';
@@ -1892,18 +1451,18 @@ describe('annotation', function() {
           $update: function () {
             return Promise.resolve(this);
           },
-        },
-      }).controller;
-      controller.edit();
-      controller.form.text = 'New annotation text';
-      return controller.save().then(function () {
+        }).controller;
         controller.edit();
-        controller.form.text = 'Updated annotation text';
-        return controller.save();
-      }).then(function () {
-        controller.edit();
-        controller.revert();
-        assert.equal(controller.form.text, 'Updated annotation text');
+        controller.form.text = 'New annotation text';
+        return controller.save().then(function () {
+          controller.edit();
+          controller.form.text = 'Updated annotation text';
+          return controller.save();
+        }).then(function () {
+          controller.edit();
+          controller.revert();
+          assert.equal(controller.form.text, 'Updated annotation text');
+        });
       });
     });
   });

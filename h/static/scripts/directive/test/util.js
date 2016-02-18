@@ -1,10 +1,37 @@
 'use strict';
 
-// converts a camelCase name into hyphenated ('camel-case') form,
-// as Angular does when mapping directive names to tag names in HTML
+/**
+ * Converts a camelCase name into hyphenated ('camel-case') form.
+ *
+ * This matches how Angular maps directive names to HTML tag names.
+ */
 function hyphenate(name) {
   var uppercasePattern = /([A-Z])/g;
   return name.replace(uppercasePattern, '-$1').toLowerCase();
+}
+
+/**
+ * Helper for retrieving an Angular module in a test.
+ *
+ * Given the 'inject' function from the 'angular-mocks' module,
+ * retrieves an instance of the specified Angular module.
+ */
+function ngModule(inject, name) {
+  var module;
+  var helper = function (_module) {
+    module = _module;
+  };
+
+  // Tell Angular which module we want using $inject
+  // annotations. These take priority over function argument names.
+  helper.$inject = [name];
+
+  // inject() creates a new 'angular.$injector' service instance
+  // for the current test, if one has not already been created and then
+  // calls the passed function, injecting the modules it depends upon.
+  inject(helper);
+
+  return module;
 }
 
 /**
@@ -124,5 +151,6 @@ function createDirective(document, name, attrs, initialScope, initialHtml, opts)
 }
 
 module.exports = {
-  createDirective: createDirective
+  createDirective: createDirective,
+  ngModule: ngModule,
 };
