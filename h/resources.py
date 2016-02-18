@@ -19,19 +19,3 @@ class Root(object):
 
     def __init__(self, request):
         self.request = request
-
-
-class UserStreamFactory(object):
-    def __init__(self, request):
-        self.request = request
-
-    def __getitem__(self, key):
-        return {'q': 'user:{}'.format(key)}
-
-
-class TagStreamFactory(object):
-    def __init__(self, request):
-        self.request = request
-
-    def __getitem__(self, key):
-        return {'q': 'tag:{}'.format(key)}

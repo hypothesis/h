@@ -65,9 +65,16 @@ def stream(context, request):
 
 
 @view_config(route_name='stream.tag_query')
+def stream_tag_redirect(request):
+    query = {'q': 'tag:{}'.format(request.matchdict['tag'])}
+    location = request.route_url('stream', _query=query)
+    raise httpexceptions.HTTPFound(location=location)
+
+
 @view_config(route_name='stream.user_query')
-def stream_redirect(context, request):
-    location = request.route_url('stream', _query=context)
+def stream_user_redirect(request):
+    query = {'q': 'user:{}'.format(request.matchdict['user'])}
+    location = request.route_url('stream', _query=query)
     raise httpexceptions.HTTPFound(location=location)
 
 
