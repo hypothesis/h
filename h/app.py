@@ -69,7 +69,7 @@ def includeme(config):
     config.action(None, configure_jinja2_assets, args=(config,))
 
     config.include('h.accounts')
-    config.include('h.admin')
+    config.include('h.admin', route_prefix='/admin')
     config.include('h.auth')
     config.include('h.badge')
     config.include('h.claim')
