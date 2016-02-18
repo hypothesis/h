@@ -127,6 +127,7 @@ def scan(es_client, with_filter=None):
                         doc_type=es_client.t.annotation,
                         query=query,
                         preserve_order=True,
+                        scroll='1h',
                         sort='updated:asc')
 
 
