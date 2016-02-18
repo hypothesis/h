@@ -29,7 +29,7 @@ def create_app(global_config, **settings):
 
     config = Configurator(settings=settings)
 
-    config.set_root_factory('h.resources.create_root')
+    config.set_root_factory('h.resources:Root')
 
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
@@ -69,7 +69,7 @@ def includeme(config):
     config.action(None, configure_jinja2_assets, args=(config,))
 
     config.include('h.accounts')
-    config.include('h.admin')
+    config.include('h.admin', route_prefix='/admin')
     config.include('h.auth')
     config.include('h.badge')
     config.include('h.claim')

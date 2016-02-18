@@ -5,6 +5,7 @@ The `conftest` module is automatically loaded by py.test and serves as a place
 to put fixture functions that are useful application-wide.
 """
 
+import collections
 import os
 
 import pytest
@@ -155,15 +156,22 @@ def routes_mapper(config):
     from pyramid.interfaces import IRoutesMapper
 
     class DummyRoute(object):
-        def __init__(self):
+        def __init__(self, path='/dummy/route'):
+            self.path = path
             self.pregenerator = None
 
         def generate(self, kw):
-            return '/dummy/route'
+            return self.path
 
     class DummyMapper(object):
+        def __init__(self):
+            self.routes = collections.defaultdict(DummyRoute)
+
+        def add_route(self, route_name, path):
+            self.routes[route_name] = DummyRoute(path)
+
         def get_route(self, route_name):
-            return DummyRoute()
+            return self.routes[route_name]
 
     mapper = DummyMapper()
     config.registry.registerUtility(mapper, IRoutesMapper)
