@@ -2,3 +2,26 @@
   font-size: $body2-font-size;
   padding-left: 6px;
 }
+
+/* The user account dropdown menu */
+.user-picker {
+  .avatar {
+    border-radius: 2px;
+  }
+
+  .dropdown-toggle {
+    .provider {
+      color: $gray-light;
+      display: none;
+    }
+    &:hover {
+      .provider {
+        display: inline;
+      }
+    }
+  }
+
+  .dropdown.open .provider {
+    display: inline;
+  }
+}
