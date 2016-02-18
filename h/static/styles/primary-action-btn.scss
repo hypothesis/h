@@ -1,6 +1,4 @@
-// A dark grey button used for the primary action
-// in a form
-.primary-action-btn {
+@mixin primary-action-btn {
   // note that there is currently some duplication here between
   // the styling for this element and <dropdown-menu-btn>
   color: $color-seashell;
@@ -22,6 +20,12 @@
   &:hover:enabled {
     background-color: $color-mine-shaft;
   }
+}
+
+// A dark grey button used for the primary action
+// in a form
+.primary-action-btn {
+  @include primary-action-btn;
 }
 
 .primary-action-btn--short {
