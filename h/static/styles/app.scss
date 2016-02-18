@@ -102,13 +102,3 @@ body {
     top: 1em;
   }
 }
-
-.user {
-  font-weight: bold;
-  font-size: 1.1em;
-  &:hover {
-    color: $link-color-hover;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-}
