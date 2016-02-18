@@ -115,7 +115,7 @@ function excerpt() {
     },
     scope: {
       /** Whether or not expansion should be animated. Defaults to true. */
-      animate: '=',
+      animate: '<?',
       /** Whether or not truncation should be enabled */
       enabled: '&?',
       /**
@@ -124,16 +124,16 @@ function excerpt() {
        * If false, external controls can expand/collapse the excerpt by
        * setting the 'collapse' property.
        */
-      inlineControls: '=',
+      inlineControls: '<',
       /** Sets whether or not the excerpt is collapsed. */
-      collapse: '=',
+      collapse: '=?',
       /** Called when the collapsibility of the excerpt (that is, whether or
        * not the content height exceeds the collapsed height), changes.
        */
       onCollapsibleChanged: '&?',
       /** The height of this container in pixels when collapsed.
        */
-      collapsedHeight: '=',
+      collapsedHeight: '<',
       /**
        * The number of pixels by which the height of the excerpt's content
        * must extend beyond the collapsed height in order for truncation to
@@ -141,7 +141,7 @@ function excerpt() {
        * the excerpt if it has only been truncated by a very small amount, such
        * that expanding the excerpt would reveal no extra lines of text.
        */
-      overflowHysteresis: '=?',
+      overflowHysteresis: '<?',
     },
     restrict: 'E',
     transclude: true,
