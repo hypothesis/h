@@ -1,52 +1,10 @@
-"""Our authentication policy."""
+# -*- coding: utf-8 -*-
 
-import logging
+"""Authentication and authorization configuration."""
 
-from pyramid import authentication
-from pyramid import authorization
-from pyramid import interfaces
-from pyramid import security
-from zope import interface
+from h.auth.util import effective_principals
 
-from h import accounts
-from h.api import auth
-
-
-log = logging.getLogger(__name__)
-
-
-@interface.implementer(interfaces.IAuthenticationPolicy)
-class AuthenticationPolicy(object):
-
-    def __init__(self):
-        self.session_policy = authentication.SessionAuthenticationPolicy()
-
-    def authenticated_userid(self, request):
-        if is_api_request(request):
-            token = bearer_token(request)
-            return (auth.userid_from_api_token(token) or
-                    auth.userid_from_jwt(token, request))
-        return self.session_policy.authenticated_userid(request)
-
-    def unauthenticated_userid(self, request):
-        if is_api_request(request):
-            # We can't always get an unauthenticated userid for an API request,
-            # as some of the authentication tokens used may be opaque.
-            return self.authenticated_userid(request)
-        return self.session_policy.unauthenticated_userid(request)
-
-    def effective_principals(self, request):
-        return effective_principals(request.authenticated_userid, request)
-
-    def remember(self, request, userid, **kw):
-        if is_api_request(request):
-            return []
-        return self.session_policy.remember(request, userid, **kw)
-
-    def forget(self, request):
-        if is_api_request(request):
-            return []
-        return self.session_policy.forget(request)
+__all__ = ('effective_principals',)
 
 
 def auth_domain(request):
@@ -58,76 +16,6 @@ def auth_domain(request):
     return request.registry.settings.get('h.auth_domain', request.domain)
 
 
-def effective_principals(userid, request):
-    """
-    Return the list of effective principals for the passed userid.
-
-    Usually, we can leave the computation of the full set of effective
-    principals to the pyramid authentication policy. Sometimes, however, it can
-    be useful to discover the full set of effective principals for a userid
-    other than the current authenticated userid. This function replicates the
-    normal behaviour of a pyramid authentication policy and can be used for
-    that purpose.
-    """
-    principals = set([security.Everyone])
-
-    user = accounts.get_user(userid, request)
-
-    if user is None:
-        return list(principals)
-
-    if user.admin:
-        principals.add('group:__admin__')
-
-    if user.staff:
-        principals.add('group:__staff__')
-
-    principals.update(group_principals(user))
-
-    principals.add(security.Authenticated)
-
-    principals.add(userid)
-
-    return list(principals)
-
-
-def group_principals(user):
-    """Return any 'group:<pubid>' principals for the given user.
-
-    Return a list of 'group:<pubid>' principals for the groups that the given
-    user is a member of.
-
-    :param user: the authorized user, as a User object
-    :type user: h.accounts.models.User
-
-    :rtype: list of strings
-
-    """
-    return ['group:{group.pubid}'.format(group=group) for group in user.groups]
-
-
-def is_api_request(request):
-    return (request.path.startswith('/api') and
-            request.path not in ['/api/token', '/api/badge'])
-
-
-def bearer_token(request):
-    """
-    Return the bearer token from the request's Authorization header.
-
-    The "Bearer " prefix will be stripped from the token.
-
-    If the request has no Authorization header or the Authorization header
-    doesn't contain a bearer token, returns ''.
-
-    :rtype: unicode
-    """
-    if request.headers.get('Authorization', '').startswith('Bearer '):
-        return unicode(request.headers['Authorization'][len('Bearer '):])
-    else:
-        return u''
-
-
 def includeme(config):
     # Allow retrieval of the auth_domain from the request object.
     config.add_request_method(auth_domain, name='auth_domain', reify=True)
@@ -137,5 +25,7 @@ def includeme(config):
     #
     #   http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/security.html
     #
+    from h.auth.policy import AuthenticationPolicy
+    from pyramid.authorization import ACLAuthorizationPolicy
     config.set_authentication_policy(AuthenticationPolicy())
-    config.set_authorization_policy(authorization.ACLAuthorizationPolicy())
+    config.set_authorization_policy(ACLAuthorizationPolicy())
