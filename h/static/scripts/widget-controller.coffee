@@ -74,7 +74,7 @@ module.exports = class WidgetController
       !!($scope.focusedAnnotations ? {})[annotation?.$$tag]
 
     $rootScope.$on('beforeAnnotationCreated', (event, data) ->
-      if data.$highlight
+      if data.$highlight || (data.references && data.references.length > 0)
         return
       $scope.clearSelection()
     )

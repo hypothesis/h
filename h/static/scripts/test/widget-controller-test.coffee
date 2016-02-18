@@ -162,3 +162,10 @@ describe 'WidgetController', ->
       $scope.clearSelection = sinon.stub()
       $rootScope.$emit('beforeAnnotationCreated', {$highlight: true})
       assert.notCalled($scope.clearSelection)
+
+    it 'does not clear the selection if the new annotation is a reply', ->
+      $scope.clearSelection = sinon.stub()
+      $rootScope.$emit('beforeAnnotationCreated', {
+        references: ['parent-id']
+      })
+      assert.notCalled($scope.clearSelection)
