@@ -79,16 +79,6 @@ def includeme(config):
 
     config.include('h.api', route_prefix='/api')
     config.include('h.api.nipsa')
-    config.include('h.db')
-
-    # Override the traversal path for the api index route.
-    config.add_route('api', '/api/', traverse='/api/')
-
-    # Support virtual hosting the API over the index route with X-Vhm-Root.
-    config.add_view('h.api.views.index',
-                    context='h.api.resources.Root',
-                    renderer='json',
-                    route_name='index')
 
 
 def get_settings(global_config, **settings):

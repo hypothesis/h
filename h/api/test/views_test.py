@@ -100,43 +100,6 @@ def test_search_returns_search_results(search_lib):
     assert result == search_lib.search.return_value
 
 
-annotator_token_fixtures = pytest.mark.usefixtures('auth', 'session')
-
-
-@annotator_token_fixtures
-def test_annotator_token_calls_check_csrf_token(session):
-    request = testing.DummyRequest()
-
-    views.annotator_token(request)
-
-    session.check_csrf_token.assert_called_once_with(request,
-                                                     token='assertion')
-
-
-@annotator_token_fixtures
-def test_annotator_token_raises_Unauthorized_if_check_csrf_token_raises(
-        session):
-    session.check_csrf_token.side_effect = exceptions.BadCSRFToken
-
-    with pytest.raises(httpexceptions.HTTPUnauthorized):
-        views.annotator_token(testing.DummyRequest())
-
-
-@annotator_token_fixtures
-def test_annotator_token_calls_generate_jwt(auth):
-    request = testing.DummyRequest()
-
-    views.annotator_token(request)
-
-    auth.generate_jwt.assert_called_once_with(request, 3600)
-
-
-@annotator_token_fixtures
-def test_annotator_token_returns_token(auth):
-    assert (views.annotator_token(testing.DummyRequest()) ==
-            auth.generate_jwt.return_value)
-
-
 def test_annotations_index_searches(search_lib):
     request = testing.DummyRequest()
 
@@ -328,15 +291,6 @@ def AnnotationEvent(request):
 
 
 @pytest.fixture
-def auth(request):
-    patcher = mock.patch('h.api.views.auth', autospec=True)
-    module = patcher.start()
-    module.generate_jwt = mock.Mock(return_value='abc123')
-    request.addfinalizer(patcher.stop)
-    return module
-
-
-@pytest.fixture
 def search_lib(request):
     patcher = mock.patch('h.api.views.search_lib', autospec=True)
     request.addfinalizer(patcher.stop)
@@ -348,14 +302,6 @@ def schemas(request):
     patcher = mock.patch('h.api.views.schemas', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
-
-
-@pytest.fixture
-def session(request):
-    patcher = mock.patch('h.api.views.session', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
 
 
 @pytest.fixture
