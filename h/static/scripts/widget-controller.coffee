@@ -4,12 +4,12 @@ events = require('./events')
 
 module.exports = class WidgetController
   this.$inject = [
-    '$scope', 'annotationUI', 'crossframe', 'annotationMapper', 'drafts', 'groups',
-    'streamer', 'streamFilter', 'store', 'threading'
+    '$scope', '$rootScope', 'annotationUI', 'crossframe', 'annotationMapper',
+    'drafts', 'groups', 'streamer', 'streamFilter', 'store', 'threading'
   ]
   constructor:   (
-     $scope,   annotationUI,   crossframe,   annotationMapper,  drafts,    groups,
-     streamer,   streamFilter,   store,   threading
+     $scope,   $rootScope,   annotationUI,   crossframe,   annotationMapper,
+     drafts,    groups,  streamer,   streamFilter,   store,   threading
   ) ->
     $scope.threadRoot = threading.root
     $scope.sortOptions = ['Newest', 'Oldest', 'Location']
@@ -72,3 +72,9 @@ module.exports = class WidgetController
 
     $scope.hasFocus = (annotation) ->
       !!($scope.focusedAnnotations ? {})[annotation?.$$tag]
+
+    $rootScope.$on('beforeAnnotationCreated', (event, data) ->
+      if data.$highlight
+        return
+      $scope.clearSelection()
+    )
