@@ -10,5 +10,6 @@ sinon.assert.expose(assert, {prefix: null});
 //
 window.jQuery = window.$ = require('jquery');
 require('angular');
-require('angular-resource');
 require('angular-mocks');
+require('angular-resource');
+require('angular-sanitize');
