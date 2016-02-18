@@ -5,8 +5,11 @@
 @import './forms';
 @import './grid';
 @import './mixins/responsive';
-@import './page';
+
+// Note: These includes are currently source-order
+// dependent.
 @import './styled-text';
+@import './page';
 
 //ELEMENT STYLES////////////////////////////////
 body {
