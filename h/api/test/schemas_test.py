@@ -91,6 +91,44 @@ def test_createannotationschema_ignores_input_user(data, authn_policy):
     assert result == {'user': 'acct:jeanie@example.com'}
 
 
+@pytest.mark.parametrize('data,effective_principals,ok', [
+    # No group supplied
+    ({}, [], True),
+
+    # World group
+    ({'group': '__world__'}, [], False),
+    ({'group': '__world__'}, ['group:__world__'], True),
+
+    # Other group
+    ({'group': 'abcdef'}, [], False),
+    ({'group': 'abcdef'}, ['group:__world__'], False),
+    ({'group': 'abcdef'}, ['group:__world__', 'group:abcdef'], True),
+])
+def test_createannotationschema_rejects_annotations_to_other_groups(data,
+                                                                    effective_principals,
+                                                                    ok,
+                                                                    authn_policy):
+    """
+    A user cannot create an annotation in a group they're not a member of.
+
+    If a group is specified in the annotation, then reject the creation if the
+    relevant group principal is not present in the request's effective
+    principals.
+    """
+    authn_policy.effective_principals.return_value = effective_principals
+    request = testing.DummyRequest()
+    schema = schemas.CreateAnnotationSchema(request)
+
+    if ok:
+        result = schema.validate(data)
+        assert result.get('group') == data.get('group')
+
+    else:
+        with pytest.raises(schemas.ValidationError) as exc:
+            schema.validate(data)
+        assert exc.value.message.startswith('group:')
+
+
 @pytest.mark.parametrize('data', [
     {},
     {'foo': 'bar'},

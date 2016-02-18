@@ -363,7 +363,7 @@ module.exports = ['$filter', '$sanitize', '$sce', '$timeout', ($filter, $sanitiz
   require: '?ngModel'
   restrict: 'E'
   scope:
-    readOnly: '='
+    readOnly: '<'
     required: '@'
   templateUrl: 'markdown.html'
 ]

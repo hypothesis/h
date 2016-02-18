@@ -113,10 +113,6 @@ module.exports = angular.module('h', [
 .directive('topBar', require('./directive/top-bar'))
 
 .filter('converter', require('./filter/converter'))
-.filter('persona', require('./filter/persona').filter)
-.filter('urlencode', require('./filter/urlencode'))
-.filter('documentTitle', require('./filter/document-title'))
-.filter('documentDomain', require('./filter/document-domain'))
 
 .provider('identity', require('./identity'))
 

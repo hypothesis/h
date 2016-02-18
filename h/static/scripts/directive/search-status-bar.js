@@ -3,11 +3,11 @@ module.exports = function () {
   return {
     restrict: 'E',
     scope: {
-      filterActive: '=',
-      filterMatchCount: '=',
+      filterActive: '<',
+      filterMatchCount: '<',
       onClearSelection: '&',
-      searchQuery: '=',
-      selectionCount: '=',
+      searchQuery: '<',
+      selectionCount: '<',
     },
     templateUrl: 'search_status_bar.html',
   };

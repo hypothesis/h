@@ -1,30 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import json
 import mock
 import pytest
 
-from pyramid import exceptions
-from pyramid import httpexceptions
 from pyramid import testing
 
 from h.api import views
-
-
-def test_error_not_found_sets_status_code():
-    request = testing.DummyRequest()
-
-    views.error_not_found(context=None, request=request)
-
-    assert request.response.status_code == 404
-
-
-def test_error_not_found_returns_status_object():
-    request = testing.DummyRequest()
-
-    result = views.error_not_found(context=None, request=request)
-
-    assert result == {'status': 'failure', 'reason': 'not_found'}
 
 
 def test_error_api_sets_status_code_from_error():
@@ -63,23 +44,27 @@ def test_error_validation_returns_status_object():
     assert result == {'status': 'failure', 'reason': 'it exploded'}
 
 
-def test_index():
+@pytest.mark.usefixtures('routes_mapper')
+def test_index(routes_mapper):
     """Get the API descriptor"""
+    routes_mapper.add_route('api.search', '/dummy/search')
+    routes_mapper.add_route('api.annotations', '/dummy/annotations')
+    routes_mapper.add_route('api.annotation', '/dummy/annotations/:id')
     result = views.index(testing.DummyResource(), testing.DummyRequest())
 
     # Pyramid's host url defaults to http://example.com
     host = 'http://example.com'
     links = result['links']
     assert links['annotation']['create']['method'] == 'POST'
-    assert links['annotation']['create']['url'] == host + '/annotations'
+    assert links['annotation']['create']['url'] == host + '/dummy/annotations'
     assert links['annotation']['delete']['method'] == 'DELETE'
-    assert links['annotation']['delete']['url'] == host + '/annotations/:id'
+    assert links['annotation']['delete']['url'] == host + '/dummy/annotations/:id'
     assert links['annotation']['read']['method'] == 'GET'
-    assert links['annotation']['read']['url'] == host + '/annotations/:id'
+    assert links['annotation']['read']['url'] == host + '/dummy/annotations/:id'
     assert links['annotation']['update']['method'] == 'PUT'
-    assert links['annotation']['update']['url'] == host + '/annotations/:id'
+    assert links['annotation']['update']['url'] == host + '/dummy/annotations/:id'
     assert links['search']['method'] == 'GET'
-    assert links['search']['url'] == host + '/search'
+    assert links['search']['url'] == host + '/dummy/search'
 
 
 def test_search_searches(search_lib):
@@ -177,12 +162,12 @@ def test_create_returns_annotation(storage):
 
 
 def test_read_returns_annotation():
-    context = mock.Mock()
+    annotation = mock.Mock()
     request = mock.Mock()
 
-    result = views.read(context, request)
+    result = views.read(annotation, request)
 
-    assert result == context.model
+    assert result == annotation
 
 
 update_fixtures = pytest.mark.usefixtures('AnnotationEvent',
@@ -204,47 +189,47 @@ def test_update_raises_if_json_parsing_fails():
 
 @update_fixtures
 def test_update_calls_validator(schemas):
-    context = mock.Mock()
+    annotation = mock.Mock()
     request = mock.Mock()
     schema = schemas.UpdateAnnotationSchema.return_value
 
-    views.update(context, request)
+    views.update(annotation, request)
 
     schema.validate.assert_called_once_with(request.json_body)
 
 
 @update_fixtures
 def test_update_calls_update_annotation(storage, schemas):
-    context = mock.Mock()
+    annotation = mock.Mock()
     request = mock.Mock()
     schema = schemas.UpdateAnnotationSchema.return_value
     schema.validate.return_value = {'foo': 123}
 
-    views.update(context, request)
+    views.update(annotation, request)
 
-    storage.update_annotation.assert_called_once_with(context.id, {'foo': 123})
+    storage.update_annotation.assert_called_once_with(annotation.id, {'foo': 123})
 
 
 @update_fixtures
 def test_update_returns_annotation(storage):
-    context = mock.Mock()
+    annotation = mock.Mock()
     request = mock.Mock()
 
-    result = views.update(context, request)
+    result = views.update(annotation, request)
 
     assert result == storage.update_annotation.return_value
 
 
 @update_fixtures
 def test_update_event(AnnotationEvent, storage):
-    context = mock.Mock()
+    annotation = mock.Mock()
     request = mock.Mock()
     event = AnnotationEvent.return_value
-    annotation = storage.update_annotation.return_value
+    annotation_out = storage.update_annotation.return_value
 
-    views.update(context, request)
+    views.update(annotation, request)
 
-    AnnotationEvent.assert_called_once_with(request, annotation, 'update')
+    AnnotationEvent.assert_called_once_with(request, annotation_out, 'update')
     request.registry.notify.assert_called_once_with(event)
 
 
@@ -253,34 +238,34 @@ delete_fixtures = pytest.mark.usefixtures('AnnotationEvent', 'storage')
 
 @delete_fixtures
 def test_delete_calls_delete_annotation(storage):
-    context = mock.Mock()
+    annotation = mock.Mock()
     request = mock.Mock()
 
-    views.delete(context, request)
+    views.delete(annotation, request)
 
-    storage.delete_annotation.assert_called_once_with(context.id)
+    storage.delete_annotation.assert_called_once_with(annotation.id)
 
 
 @delete_fixtures
 def test_delete_event(AnnotationEvent):
-    context = mock.Mock()
+    annotation = mock.Mock()
     request = mock.Mock()
     event = AnnotationEvent.return_value
 
-    views.delete(context, request)
+    views.delete(annotation, request)
 
-    AnnotationEvent.assert_called_once_with(request, context.model, 'delete')
+    AnnotationEvent.assert_called_once_with(request, annotation, 'delete')
     request.registry.notify.assert_called_once_with(event)
 
 
 @delete_fixtures
 def test_delete_returns_object():
-    context = mock.Mock()
+    annotation = mock.Mock()
     request = mock.Mock()
 
-    result = views.delete(context, request)
+    result = views.delete(annotation, request)
 
-    assert result == {'id': context.id, 'deleted': True}
+    assert result == {'id': annotation.id, 'deleted': True}
 
 
 @pytest.fixture

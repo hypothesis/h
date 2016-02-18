@@ -20,8 +20,8 @@ module.exports = function () {
     controllerAs: 'vm',
     restrict: 'E',
     scope: {
-      isDisabled: '=',
-      label: '=',
+      isDisabled: '<',
+      label: '<',
       dropdownMenuLabel: '@',
       onClick: '&',
       onToggleDropdown: '&',

@@ -125,12 +125,6 @@ module.exports = class AppController
       $scope.search.query = ''
       annotationUI.clearSelectedAnnotations()
 
-    $rootScope.$on('beforeAnnotationCreated', (event, data) ->
-      if data.$highlight
-        return
-      $scope.clearSelection()
-    )
-
     $scope.search =
       query: $location.search()['q']
 

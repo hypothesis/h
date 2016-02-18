@@ -21,9 +21,8 @@ def test_og_document(render_app_html):
     render_app_html.return_value = '<html></html>'
     annotation = {'id': '123', 'user': 'foo'}
     annotation['document'] = {'title': 'WikiHow — How to Make a  ☆Starmap☆'}
-    context = mock.MagicMock(model=annotation)
     request = _dummy_request()
-    main.annotation(context, request)
+    main.annotation_page(annotation, request)
     args, kwargs = render_app_html.call_args
     test = lambda d: 'foo' in d['content'] and 'Starmap' in d['content']
     assert any(test(d) for d in kwargs['extra']['meta_attrs'])
@@ -33,9 +32,8 @@ def test_og_document(render_app_html):
 def test_og_no_document(render_app_html):
     render_app_html.return_value = '<html></html>'
     annotation = {'id': '123', 'user': 'foo'}
-    context = mock.MagicMock(model=annotation)
     request = _dummy_request()
-    main.annotation(context, request)
+    main.annotation_page(annotation, request)
     args, kwargs = render_app_html.call_args
     test = lambda d: 'foo' in d['content']
     assert any(test(d) for d in kwargs['extra']['meta_attrs'])

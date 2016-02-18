@@ -3,11 +3,17 @@ from __future__ import unicode_literals
 
 from annotator import annotation
 from annotator import document
+from pyramid import security
 
 from h._compat import text_type
+from h.api import auth
 
 
 class Annotation(annotation.Annotation):
+    @property
+    def id(self):
+        return self.get('id')
+
     @property
     def uri(self):
         """Return this annotation's URI or an empty string.
@@ -58,7 +64,28 @@ class Annotation(annotation.Annotation):
     def document(self):
         return self.get("document", {})
 
+    def __acl__(self):
+        """
+        Return a Pyramid ACL for this annotation.
+
+        We calculate the ACL dynamically from the value of the `permissions`
+        attribute of the annotation data.
+        """
+        acl = []
+
+        # Convert annotator-store roles to pyramid principals
+        for action, roles in self.get('permissions', {}).items():
+            principals = auth.translate_annotation_principals(roles)
+
+            for principal in principals:
+                rule = (security.Allow, principal, action)
+                acl.append(rule)
+
+        # If we haven't explicitly authorized it, it's not allowed.
+        acl.append(security.DENY_ALL)
+
+        return acl
+
 
 class Document(document.Document):
     __analysis__ = {}
-

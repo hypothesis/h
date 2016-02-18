@@ -29,9 +29,9 @@ module.exports = function () {
     controllerAs: 'vm',
     restrict: 'E',
     scope: {
-      group: '=',
-      canPost: '=',
-      isShared: '=',
+      group: '<',
+      canPost: '<',
+      isShared: '<',
       onCancel: '&',
       onSave: '&',
       onSetPrivacy: '&'

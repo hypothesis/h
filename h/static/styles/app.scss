@@ -109,6 +109,7 @@ body {
 /* The groups dropdown list. */
 
 $group-list-width: 270px;
+$group-list-spacing-below: 50px;
 
 .group-list {
   .dropdown {
@@ -117,6 +118,9 @@ $group-list-width: 270px;
 
   .dropdown-menu {
     width: $group-list-width;
+    max-height: 500px;  // fallback for browsers lacking support for vh/calc
+    max-height: calc(100vh - #{$top-bar-height} - #{$group-list-spacing-below});
+    overflow-y: auto;
 
     .group-name {
       overflow: hidden;

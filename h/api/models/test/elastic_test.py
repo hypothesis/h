@@ -4,6 +4,8 @@ import pytest
 from mock import patch
 from mock import PropertyMock
 
+from pyramid import security
+
 from h.api.models.elastic import Annotation
 
 
@@ -43,6 +45,62 @@ def test_parent_id_returns_none_if_references_not_list():
 def test_parent_id_returns_thread_parent_id():
     annotation = Annotation(references=['abc123', 'def456'])
     assert annotation.parent_id == 'def456'
+
+
+def test_acl_principal():
+    annotation = Annotation({
+        'permissions': {
+            'read': ['saoirse'],
+        }
+    })
+    actual = annotation.__acl__()
+    expect = [(security.Allow, 'saoirse', 'read'), security.DENY_ALL]
+    assert actual == expect
+
+
+def test_acl_deny_system_role():
+    annotation = Annotation({
+        'permissions': {
+            'read': [security.Everyone],
+        }
+    })
+    actual = annotation.__acl__()
+    expect = [security.DENY_ALL]
+    assert actual == expect
+
+
+def test_acl_group():
+    annotation = Annotation({
+        'permissions': {
+            'read': ['group:lulapalooza'],
+        }
+    })
+    actual = annotation.__acl__()
+    expect = [(security.Allow, 'group:lulapalooza', 'read'), security.DENY_ALL]
+    assert actual == expect
+
+
+def test_acl_group_world():
+    annotation = Annotation({
+        'permissions': {
+            'read': ['group:__world__'],
+        }
+    })
+    actual = annotation.__acl__()
+    expect = [(security.Allow, security.Everyone, 'read'), security.DENY_ALL]
+    assert actual == expect
+
+
+def test_acl_group_authenticated():
+    annotation = Annotation({
+        'permissions': {
+            'read': ['group:__authenticated__'],
+        }
+    })
+    actual = annotation.__acl__()
+    expect = [(security.Allow, security.Authenticated, 'read'),
+              security.DENY_ALL]
+    assert actual == expect
 
 
 @pytest.fixture

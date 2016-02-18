@@ -31,7 +31,7 @@ module.exports = ['$http', '$parse', ($http, $parse) ->
     # regardless of whether the it is focused or has an active query.
     #
     # If false, it is only expanded when focused or when 'query' is non-empty
-    alwaysExpanded: '='
+    alwaysExpanded: '<'
     query: '='
     onSearch: '&'
     onClear: '&'

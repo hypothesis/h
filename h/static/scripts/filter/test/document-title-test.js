@@ -1,11 +1,11 @@
 'use strict';
 
-var documentTitleFilterProvider = require('../document-title');
+var documentTitle = require('../document-title');
 
 describe('documentTitle', function() {
 
   it('returns the title linked if the document has title and uri', function() {
-    var title = documentTitleFilterProvider()({
+    var title = documentTitle({
       title: 'title',
       uri: 'http://example.com/example.html'
     });
@@ -16,7 +16,7 @@ describe('documentTitle', function() {
   });
 
   it('returns the title linked if the document has an https uri', function() {
-    var title = documentTitleFilterProvider()({
+    var title = documentTitle({
       title: 'title',
       uri: 'https://example.com/example.html'
     });
@@ -27,7 +27,7 @@ describe('documentTitle', function() {
   });
 
   it('returns the title unlinked if doc has title but no uri', function() {
-    var title = documentTitleFilterProvider()({
+    var title = documentTitle({
       title: 'title',
     });
 
@@ -35,7 +35,7 @@ describe('documentTitle', function() {
   });
 
   it('returns the title unlinked if doc has non-http uri', function() {
-    var title = documentTitleFilterProvider()({
+    var title = documentTitle({
       title: 'title',
       uri: 'file:///home/bob/Documents/example.pdf'
     });
@@ -44,7 +44,7 @@ describe('documentTitle', function() {
   });
 
   it('returns an empty string if the document has no title', function() {
-    var title = documentTitleFilterProvider()({
+    var title = documentTitle({
       uri: 'http://example.com/example.html'
     });
 
@@ -54,7 +54,7 @@ describe('documentTitle', function() {
   it('escapes HTML in the document title', function() {
     var spamLink = '<a href="http://example.com/rubies">Buy rubies!!!</a>';
 
-    var title = documentTitleFilterProvider()({
+    var title = documentTitle({
       title: '</a>' + spamLink,
       uri: 'http://example.com/example.html'
     });
@@ -65,7 +65,7 @@ describe('documentTitle', function() {
   it('escapes HTML in the document URI', function() {
     var spamLink = '<a href="http://example.com/rubies">Buy rubies!!!</a>';
 
-    var title = documentTitleFilterProvider()({
+    var title = documentTitle({
       uri: 'http://</a>' + spamLink,
       title: 'title'
     });
