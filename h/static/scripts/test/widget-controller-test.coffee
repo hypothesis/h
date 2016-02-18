@@ -4,6 +4,7 @@ events = require('../events')
 
 describe 'WidgetController', ->
   $scope = null
+  $rootScope = null
   fakeAnnotationMapper = null
   fakeAnnotationUI = null
   fakeAuth = null
@@ -84,7 +85,8 @@ describe 'WidgetController', ->
     $provide.value 'groups', fakeGroups
     return
 
-  beforeEach inject ($controller, $rootScope) ->
+  beforeEach inject ($controller, _$rootScope_) ->
+    $rootScope = _$rootScope_
     $scope = $rootScope.$new()
     viewer = $controller 'WidgetController', {$scope}
 
@@ -143,3 +145,27 @@ describe 'WidgetController', ->
       assert.calledWith(fakeAnnotationMapper.loadAnnotations,
         searchResult.rows)
       assert.calledWith(fakeThreading.thread, fakeDrafts.unsaved())
+
+  describe 'when a new annotation is created', ->
+    ###*
+    #  It should clear any selection that exists in the sidebar before
+    #  creating a new annotation. Otherwise the new annotation with its
+    #  form open for the user to type in won't be visible because it's
+    #  not part of the selection.
+    ###
+    it 'clears the selection', ->
+      $scope.clearSelection = sinon.stub()
+      $rootScope.$emit('beforeAnnotationCreated', {})
+      assert.called($scope.clearSelection)
+
+    it 'does not clear the selection if the new annotation is a highlight', ->
+      $scope.clearSelection = sinon.stub()
+      $rootScope.$emit('beforeAnnotationCreated', {$highlight: true})
+      assert.notCalled($scope.clearSelection)
+
+    it 'does not clear the selection if the new annotation is a reply', ->
+      $scope.clearSelection = sinon.stub()
+      $rootScope.$emit('beforeAnnotationCreated', {
+        references: ['parent-id']
+      })
+      assert.notCalled($scope.clearSelection)
