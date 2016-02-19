@@ -183,7 +183,10 @@ def annotation_from_data(id, data):
     if id == '_query':
         raise Skip("not an annotation (id=_query)")
 
-    ann = Annotation(id=id)
+    ann = Annotation.query.get(id)
+    if ann is None:
+        ann = Annotation(id=id)
+
     ann.created = dateparser.parse(data.pop('created')).replace(tzinfo=None)
     ann.updated = dateparser.parse(data.pop('updated')).replace(tzinfo=None)
     ann.userid = data.pop('user')
