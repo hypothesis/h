@@ -6,6 +6,7 @@ import os
 from pyramid.config import Configurator
 from pyramid.tweens import EXCVIEW
 from pyramid.settings import asbool
+import transaction
 
 from h.config import settings_from_environment
 from h.security import derive_key
@@ -21,6 +22,12 @@ def configure_jinja2_assets(config):
 
 def in_debug_mode(request):
     return asbool(request.registry.settings.get('pyramid.debug_all'))
+
+
+def tm_activate_hook(request):
+    if request.path.startswith(('/assets/', '/_debug_toolbar/')):
+        return False
+    return True
 
 
 def create_app(global_config, **settings):
@@ -57,6 +64,16 @@ def includeme(config):
     # Register a deferred action to bind the webassets environment to the
     # Jinja2 webassets extension when the configuration is committed.
     config.action(None, configure_jinja2_assets, args=(config,))
+
+    # Configure the transaction manager so that each request gets its own
+    # transaction manager, and supports retrying retryable exceptions.
+    config.add_settings({
+        "tm.attempts": 3,
+        "tm.manager_hook": lambda request: transaction.TransactionManager(),
+        "tm.activate_hook": tm_activate_hook,
+        "tm.annotate_user": False,
+    })
+    config.include('pyramid_tm')
 
     # Core site modules
     config.include('h.assets')
