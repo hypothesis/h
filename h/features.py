@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 FEATURES = {
     'claim': "Enable 'claim your username' web views?",
     'new_homepage': "Show the new homepage design?",
+    'ops_disable_streamer_uri_equivalence': "[Ops] Disable streamer URI equivalence support?",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
