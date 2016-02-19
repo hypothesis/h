@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import mock
 from pyramid import testing
+from pyramid import security
 import pytest
 
 from h.api import schemas
@@ -97,12 +98,12 @@ def test_createannotationschema_ignores_input_user(data, authn_policy):
 
     # World group
     ({'group': '__world__'}, [], False),
-    ({'group': '__world__'}, ['group:__world__'], True),
+    ({'group': '__world__'}, [security.Everyone], True),
 
     # Other group
     ({'group': 'abcdef'}, [], False),
-    ({'group': 'abcdef'}, ['group:__world__'], False),
-    ({'group': 'abcdef'}, ['group:__world__', 'group:abcdef'], True),
+    ({'group': 'abcdef'}, [security.Everyone], False),
+    ({'group': 'abcdef'}, [security.Everyone, 'group:abcdef'], True),
 ])
 def test_createannotationschema_rejects_annotations_to_other_groups(data,
                                                                     effective_principals,

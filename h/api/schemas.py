@@ -5,6 +5,7 @@ import copy
 import jsonschema
 from jsonschema.exceptions import best_match
 from pyramid import i18n
+from pyramid import security
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -104,7 +105,10 @@ class CreateAnnotationSchema(object):
         # Assert that the user has permission to create an annotation in the
         # group they've asked to create one in.
         if 'group' in appstruct:
-            group_principal = 'group:{}'.format(appstruct['group'])
+            if appstruct['group'] == '__world__':
+                group_principal = security.Everyone
+            else:
+                group_principal = 'group:{}'.format(appstruct['group'])
             if group_principal not in self.request.effective_principals:
                 raise ValidationError('group: ' +
                                       _('You may not create annotations in '
