@@ -285,8 +285,15 @@ class WebSocket(_WebSocket):
         if not isinstance(uris, list):
             uris = [uris]
 
-        for item in uris:
-            expanded.update(storage.expand_uri(item))
+        # FIXME: this is a temporary hack to allow us to disable URI
+        # equivalence support on the streamer while we debug a number of
+        # issues related to connection pool exhaustion for the websocket
+        # server.  -NS 2016-02-19
+        if self.request.feature('ops_disable_streamer_uri_equivalence'):
+            expanded.update(uris)
+        else:
+            for item in uris:
+                expanded.update(storage.expand_uri(item))
 
         clause['value'] = list(expanded)
 

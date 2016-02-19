@@ -72,6 +72,10 @@ class TestWebSocket(unittest.TestCase):
         self.s.request = fake_request
 
     def test_filter_message_with_uri_gets_expanded(self):
+        # FIXME: remove this when you remove the
+        # 'ops_disable_streamer_uri_equivalence' feature.
+        self.s.request.feature.return_value = False
+
         filter_message = json.dumps({
             'filter': {
                 'actions': {},
