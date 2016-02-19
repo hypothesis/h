@@ -1,3 +1,5 @@
+'use strict';
+
 var Socket = require('../websocket');
 
 describe('websocket wrapper', function () {
@@ -8,7 +10,7 @@ describe('websocket wrapper', function () {
     this.close = sinon.stub();
     this.send = sinon.stub();
     fakeSocket = this;
-  };
+  }
   FakeWebSocket.OPEN = 1;
 
   var WebSocket = window.WebSocket;
@@ -29,11 +31,23 @@ describe('websocket wrapper', function () {
   });
 
   it('should reconnect after an abnormal disconnection', function () {
-    var socket = new Socket('ws://test:1234');
+    new Socket('ws://test:1234');
     assert.ok(fakeSocket);
     var initialSocket = fakeSocket;
+    fakeSocket.onopen({});
     fakeSocket.onclose({code: 1006});
-    clock.tick(1000);
+    clock.tick(2000);
+    assert.ok(fakeSocket);
+    assert.notEqual(fakeSocket, initialSocket);
+  });
+
+  it('should reconnect if initial connection fails', function () {
+    new Socket('ws://test:1234');
+    assert.ok(fakeSocket);
+    var initialSocket = fakeSocket;
+    fakeSocket.onopen({});
+    fakeSocket.onclose({code: 1006});
+    clock.tick(4000);
     assert.ok(fakeSocket);
     assert.notEqual(fakeSocket, initialSocket);
   });
@@ -57,7 +71,7 @@ describe('websocket wrapper', function () {
     socket.close();
     assert.called(fakeSocket.close);
     var initialSocket = fakeSocket;
-    clock.tick(1000);
+    clock.tick(2000);
     assert.equal(fakeSocket, initialSocket);
   });
 
