@@ -1,45 +1,85 @@
 # -*- coding: utf-8 -*-
-"""Defines unit tests for h.assets."""
-from mock import Mock
-from pyramid.urldispatch import Route
-from pyramid.testing import DummyRequest
 
-from h import assets
+from sys import version_info
+from StringIO import StringIO
+
+from mock import patch
+
+from h.assets import Environment
+
+if version_info.major == 2:
+    open_target = '__builtin__.open'
+else:
+    open_target = 'builtins.open'
+
+BUNDLE_YAML = \
+"""
+app_js:
+- app.bundle.js
+- vendor.bundle.js
+"""
+
+MANIFEST_JSON = \
+"""
+{
+    "app.bundle.js": "app.bundle.js?abcdef",
+    "vendor.bundle.js": "vendor.bundle.js?1234"
+}
+"""
 
 
-class DummyEvent(object):
-    """A dummy event for testing registry events."""
+def _fake_open(path):
+    if path == 'bundles.yaml':
+        return StringIO(BUNDLE_YAML)
+    elif path == 'manifest.json':
+        return StringIO(MANIFEST_JSON)
 
-    def __init__(self, request):
-        self.request = request
+
+@patch(open_target, _fake_open)
+@patch('os.path.getmtime')
+def test_environment_lists_bundle_files(mtime):
+    env = Environment('/assets', 'bundles.yaml', 'manifest.json')
+
+    assert env.files('app_js') == [
+        'app.bundle.js',
+        'vendor.bundle.js',
+    ]
 
 
-def test_subscriber_predicate(config):
-    """Test that the ``asset_request`` subscriber predicate.
+@patch(open_target, _fake_open)
+@patch('os.path.getmtime')
+def test_environment_generates_bundle_urls(mtime):
+    env = Environment('/assets', 'bundles.yaml', 'manifest.json')
 
-    It should correctly match asset requests when its value is ``True``,
-    and other requests when ``False``.
-    """
-    config.include(assets)
+    assert env.urls('app_js') == [
+        '/assets/app.bundle.js?abcdef',
+        '/assets/vendor.bundle.js?1234',
+    ]
 
-    mock1 = Mock()
-    mock2 = Mock()
 
-    config.add_subscriber(mock1, DummyEvent, asset_request=False)
-    config.add_subscriber(mock2, DummyEvent, asset_request=True)
+@patch(open_target)
+@patch('os.path.getmtime')
+def test_environment_reloads_manifest_on_change(mtime, open):
+    manifest_content = '{"app.bundle.js":"app.bundle.js?oldhash"}'
+    bundle_content = 'app_js:\n - app.bundle.js'
 
-    request1 = DummyRequest('/')
-    request1.matched_route = None
+    def _fake_open(path):
+        if path == 'bundles.yaml':
+            return StringIO(bundle_content)
+        elif path == 'manifest.json':
+            return StringIO(manifest_content)
 
-    pattern = config.get_webassets_env().url + '*subpath'
-    request2 = DummyRequest(config.get_webassets_env().url + '/t.png')
-    request2.matched_route = Route('__' + pattern, pattern)
+    open.side_effect = _fake_open
+    mtime.return_value = 100
+    env = Environment('/assets', 'bundles.yaml', 'manifest.json')
 
-    event1 = DummyEvent(request1)
-    event2 = DummyEvent(request2)
+    # An initial call to urls() should read and cache the manifest
+    env.urls('app_js')
 
-    config.registry.notify(event1)
-    config.registry.notify(event2)
+    manifest_content = '{"app.bundle.js":"app.bundle.js?newhash"}'
+    assert env.urls('app_js') == ['/assets/app.bundle.js?oldhash']
 
-    mock1.assert_called_once_with(event1)
-    mock2.assert_called_once_with(event2)
+    # Once the manifest's mtime changes, the Environment should re-read
+    # the manifest
+    mtime.return_value = 101
+    assert env.urls('app_js') == ['/assets/app.bundle.js?newhash']

@@ -9,7 +9,7 @@
      only ever displays a single route.
      #}
     <base target="_top" href="/" />
-    {% for url in app_css_urls %}
+  {% for url in app_css_urls %}
     <link rel="stylesheet" href="{{ url }}">
     {% endfor %}
     {% for attrs in meta_attrs -%}

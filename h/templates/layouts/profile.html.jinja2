@@ -9,9 +9,9 @@
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block styles %}
-  {% assets "app_css" %}
-    <link rel="stylesheet" href="{{ ASSET_URL }}">
-  {% endassets %}
+{% for url in asset_urls("app_css") %}
+<link rel="stylesheet" href="{{ url }}">
+{% endfor %}
 {% endblock styles  %}
 
 {% block content %}

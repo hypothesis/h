@@ -53,8 +53,10 @@
   "devDependencies": {
     "chai": "^3.2.0",
     "compass-mixins": "^0.12.7",
+    "end-of-stream": "^1.1.0",
     "exorcist": "^0.4.0",
     "gulp": "^3.9.1",
+    "gulp-batch": "^1.0.5",
     "gulp-changed": "^1.3.0",
     "gulp-cli": "^1.2.1",
     "gulp-if": "^2.0.0",
@@ -78,7 +80,9 @@
     "proxyquire": "^1.6.0",
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.0.0",
+    "run-sequence": "^1.1.5",
     "sinon": "1.16.1",
+    "through2": "^2.0.1",
     "uglifyify": "^3.0.1",
     "watchify": "^3.7.0",
     "whatwg-fetch": "^0.10.1"

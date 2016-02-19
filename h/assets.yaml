@@ -4,12 +4,10 @@
 # The new website uses a minimal version that only has the
 # features we need.
 admin_css:
-  contents:
     - styles/bootstrap.css
     - styles/admin.css
 
 admin_js:
-  contents:
     - scripts/jquery.bundle.js
     - scripts/bootstrap.bundle.js
     - scripts/admin-site.bundle.js
@@ -17,7 +15,6 @@ admin_js:
 
 # the H client application
 app_js:
-  contents:
     - scripts/raven.bundle.js
     - scripts/angular.bundle.js
     - scripts/katex.bundle.js
@@ -27,7 +24,6 @@ app_js:
     - scripts/app.bundle.js
 
 app_css:
-  contents:
     - styles/angular-csp.css
     - styles/angular-toastr.css
     - styles/icomoon.css
@@ -40,14 +36,12 @@ app_css:
 # between frames participating in annotation by using the annotator bridge
 # plugin.
 inject_js:
-  contents:
   - scripts/polyfills.bundle.js
   - scripts/jquery.bundle.js
   - scripts/injector.bundle.js
 
 
 inject_css:
-  contents:
     - styles/icomoon.css
     - styles/inject.css
     - styles/pdfjs-overrides.css
@@ -55,13 +49,11 @@ inject_css:
 
 # the H website
 site_js:
-  contents:
     - scripts/jquery.bundle.js
     - scripts/raven.bundle.js
     - scripts/site.bundle.js
 
 site_css:
-  contents:
     - styles/site.css
     - styles/icomoon.css
 
@@ -70,16 +62,14 @@ site_css:
 # This will be removed once the new homepage design is live
 # (see https://trello.com/c/h6kQMQG8/187-new-homepage-design)
 front_page_js:
-  contents: bootstrap_full_js
+  - bootstrap_full_js
 
 front_page_css:
-  contents:
     - styles/main.css
     - styles/icomoon.css
 
 
 # Help page
 help_page_css:
-  contents:
     - styles/icomoon.css
     - styles/help-page.css

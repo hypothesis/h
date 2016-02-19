@@ -3,9 +3,9 @@
 {% block page_title %}Claim account{% endblock page_title %}
 
 {% block styles %}
-  {% assets "app_css" %}
-    <link rel="stylesheet" href="{{ ASSET_URL }}">
-  {% endassets %}
+{% for url in asset_urls("app_css") %}
+<link rel="stylesheet" href="{{ url }}">
+{% endfor %}
 {% endblock %}
 
 {% block content %}

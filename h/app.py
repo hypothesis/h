@@ -8,6 +8,7 @@ from pyramid.tweens import EXCVIEW
 from pyramid.settings import asbool
 import transaction
 
+from h import assets
 from h.config import settings_from_environment
 from h.security import derive_key
 
@@ -15,9 +16,11 @@ log = logging.getLogger(__name__)
 
 
 def configure_jinja2_assets(config):
-    assets_env = config.get_webassets_env()
+    assets_env = assets.Environment('/assets',
+                                    'h/assets.yaml',
+                                    'build/manifest.json')
     jinja2_env = config.get_jinja2_environment()
-    jinja2_env.assets_environment = assets_env
+    jinja2_env.globals['asset_urls'] = assets_env.urls
 
 
 def in_debug_mode(request):
@@ -60,9 +63,8 @@ def includeme(config):
     config.include('pyramid_jinja2')
     config.add_jinja2_extension('h.jinja_extensions.Filters')
     config.add_jinja2_extension('h.jinja_extensions.IncludeRawExtension')
-    config.add_jinja2_extension('webassets.ext.jinja2.AssetsExtension')
-    # Register a deferred action to bind the webassets environment to the
-    # Jinja2 webassets extension when the configuration is committed.
+    # Register a deferred action to setup the assets environment
+    # when the configuration is committed.
     config.action(None, configure_jinja2_assets, args=(config,))
 
     # Configure the transaction manager so that each request gets its own

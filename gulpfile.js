@@ -1,16 +1,21 @@
+'use strict';
+
 require('core-js/es6/promise');
 require('core-js/fn/object/assign');
 require('core-js/fn/string');
 
-var path = require('path');
-
+var batch = require('gulp-batch');
 var changed = require('gulp-changed');
+var endOfStream = require('end-of-stream');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
+var gulpUtil = require('gulp-util');
 var sass = require('gulp-sass');
 var postcss = require('gulp-postcss');
+var runSequence = require('run-sequence');
 var sourcemaps = require('gulp-sourcemaps');
 
+var manifest = require('./scripts/gulp/manifest');
 var createBundle = require('./scripts/gulp/create-bundle');
 var vendorBundles = require('./scripts/gulp/vendor-bundles');
 
@@ -31,7 +36,7 @@ var vendorModules = Object.keys(vendorBundles.bundles)
 }, []);
 
 /** Builds the bundles containing vendor JS code */
-gulp.task('build-vendor-js', function (done) {
+gulp.task('build-vendor-js', function () {
   var finished = [];
   Object.keys(vendorBundles.bundles).forEach(function (name) {
     finished.push(createBundle({
@@ -118,7 +123,6 @@ gulp.task('build-css', function () {
   };
 
   return gulp.src(styleFiles)
-    .pipe(changed(STYLE_DIR, {extension: '.css'}))
     .pipe(sourcemaps.init())
     .pipe(gulpIf(isSASSFile, sass(sassOpts).on('error', sass.logError)))
     .pipe(postcss([require('autoprefixer')]))
@@ -127,7 +131,7 @@ gulp.task('build-css', function () {
 });
 
 gulp.task('watch-css', function () {
-  gulp.watch(styleFiles, ['build-css']);
+  gulp.watch('./h/static/styles/**/*.scss', ['build-css']);
 });
 
 var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
@@ -153,7 +157,36 @@ gulp.task('watch-images', function () {
   gulp.watch(imageFiles, ['build-images']);
 });
 
-gulp.task('build', ['build-app-js', 'build-css',
-                    'build-fonts', 'build-images']);
+var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/*.@(js|css|woff|jpg|png|svg)';
+
+// Generate a JSON manifest mapping file paths to
+// URLs containing cache-busted
+function generateManifest() {
+  var stream = gulp.src(MANIFEST_SOURCE_FILES)
+    .pipe(manifest({name: 'manifest.json'}))
+    .pipe(gulp.dest('build/'));
+  stream.on('end', function () {
+    gulpUtil.log('Updated asset manifest');
+  });
+}
+
+gulp.task('generate-manifest', generateManifest);
+
+gulp.task('watch-manifest', function () {
+  gulp.watch(MANIFEST_SOURCE_FILES, batch(function (events, done) {
+    endOfStream(generateManifest(), function () {
+      done();
+    });
+  }));
+});
+
+gulp.task('build', function (callback) {
+  runSequence(['build-app-js', 'build-css',
+               'build-fonts', 'build-images'],
+              'generate-manifest',
+              callback);
+});
+
 gulp.task('watch', ['watch-app-js', 'watch-css',
-                    'watch-fonts', 'watch-images']);
+                    'watch-fonts', 'watch-images',
+                    'watch-manifest']);

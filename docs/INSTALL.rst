@@ -141,8 +141,7 @@ options:
 - ``CLIENT_SECRET`` a unique API secret for signing authentication requests
 - ``ELASTICSEARCH_INDEX`` the Elasticsearch index name for annotation storage
 - ``MAIL_DEFAULT_SENDER`` a sender address for outbound mail
-- ``WEBASSETS_BASE_DIR`` the base directory for static assets
-- ``WEBASSETS_BASE_URL`` the base URL for static asset routes
+
 
 In addition, there are several important components of a production Hypothesis
 installation which will need to be run in their own containers. For example,

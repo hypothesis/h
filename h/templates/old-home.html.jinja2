@@ -13,9 +13,9 @@
 {% endblock %}
 
 {% block styles %}
-  {% assets "front_page_css" %}
-      <link rel="stylesheet" href="{{ ASSET_URL }}">
-  {% endassets %}
+{% for url in asset_urls("front_page_css") %}
+<link rel="stylesheet" href="{{ url }}">
+{% endfor %}
 {% endblock %}
 
 {% block content %}
@@ -310,7 +310,7 @@
 {% endblock %}
 
 {% block scripts %}
-  {% assets "front_page_js" %}
-    <script src="{{ ASSET_URL }}"></script>
-  {% endassets %}
+  {% for url in asset_urls("front_page_js") %}
+  <script src="{{ url }}"></script>
+  {% endfor %}
 {% endblock %}

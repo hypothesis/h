@@ -16,8 +16,7 @@ from jinja2 import Environment, PackageLoader
 
 
 import h
-# h.assets provides webassets filters for JS and CSS compilation
-import h.assets
+from h import assets
 from h import client
 from h._compat import urlparse
 
@@ -31,40 +30,7 @@ urlparse.uses_netloc.append('resource')
 urlparse.uses_relative.append('resource')
 
 
-class AssetBundle(object):
-    def __init__(self, env, files):
-        self._env = env
-        self._files = files
-
-    def urls(self):
-        def asset_url(path):
-            return '{}/{}'.format(self._env._prefix, path)
-
-        return map(asset_url, self._files)
-
-    def files(self):
-        return self._files
-
-
-class AssetEnvironment(object):
-    """
-    A minimal implementation of webassets.Environment.
-
-    This is a simplified version of webassets.Environment used for
-    rendering the app.html and embed.js files bundled with the extension.
-    """
-    def __init__(self, prefix):
-        self._bundles = {}
-        self._prefix = prefix
-
-    def register(self, bundle_name, files):
-        self._bundles[bundle_name] = AssetBundle(self, files)
-
-    def __getitem__(self, item):
-        return self._bundles[item]
-
-
-def build_extension_common(content_dir, webassets_env,
+def build_extension_common(content_dir, assets_env,
                            service_url, bundle_app=False):
     """
     Copy the contents of src to dest, including some generic extension scripts.
@@ -81,7 +47,7 @@ def build_extension_common(content_dir, webassets_env,
         else:
             app_html_url = '{}app.html'.format(service_url)
 
-        data = client.render_embed_js(webassets_env=webassets_env,
+        data = client.render_embed_js(assets_env=assets_env,
                                       app_html_url=app_html_url)
         fp.write(data)
 
@@ -199,38 +165,12 @@ def build_chrome(args):
         shutil.copyfile('build/scripts/extension.bundle.js.map',
                         'build/chrome/lib/extension.bundle.js.map')
 
-    webassets_env = AssetEnvironment('/public')
-    webassets_env.register('app_js', [
-        'scripts/raven.bundle.js',
-        'scripts/angular.bundle.js',
-        'scripts/katex.bundle.js',
-        'scripts/showdown.bundle.js',
-        'scripts/polyfills.bundle.js',
-        'scripts/unorm.bundle.js',
-        'scripts/app.bundle.js',
-    ])
-
-    webassets_env.register('app_css', [
-        'styles/angular-csp.css',
-        'styles/angular-toastr.css',
-        'styles/icomoon.css',
-        'styles/katex.min.css',
-        'styles/app.css',
-    ])
-
-    webassets_env.register('inject_js', [
-        'scripts/jquery.bundle.js',
-        'scripts/injector.bundle.js',
-    ])
-
-    webassets_env.register('inject_css', [
-        'styles/icomoon.css',
-        'styles/inject.css',
-        'styles/pdfjs-overrides.css',
-    ])
+    assets_env = assets.Environment('/public',
+                                    'h/assets.yaml',
+                                    'build/manifest.json')
 
     for bundle in ['app_js', 'app_css', 'inject_js', 'inject_css']:
-        for path in webassets_env[bundle].files():
+        for path in assets_env.files(bundle):
             dest_path = '{}/{}'.format(content_dir, path)
             dest_dir = os.path.dirname(dest_path)
 
@@ -247,7 +187,7 @@ def build_chrome(args):
 
     # Render the sidebar html
     api_url = '{}api/'.format(service_url)
-    build_extension_common(content_dir, webassets_env,
+    build_extension_common(content_dir, assets_env,
                            service_url, bundle_app=True)
     with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
         data = client.render_app_html(
@@ -257,7 +197,7 @@ def build_chrome(args):
             # Google Analytics tracking is currently not enabled
             # for the extension
             ga_tracking_id=None,
-            webassets_env=webassets_env,
+            assets_env=assets_env,
             websocket_url=args.websocket_url,
             sentry_public_dsn=args.sentry_public_dsn)
         fp.write(data)

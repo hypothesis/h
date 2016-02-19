@@ -3,9 +3,9 @@
 {% block page_title %}{{ group.name }}{% endblock page_title %}
 
 {% block styles %}
-  {% assets "site_css" %}
-    <link rel="stylesheet" href="{{ ASSET_URL }}">
-  {% endassets %}
+{% for url in asset_urls("site_css") %}
+<link rel="stylesheet" href="{{ url }}">
+{% endfor %}
 {% endblock %}
 
 {% block content %}
@@ -65,7 +65,7 @@
 {% endblock content %}
 
 {% block scripts %}
-{% assets "site_js" %}
-  <script src="{{ ASSET_URL }}"></script>
-{% endassets %}
+{% for url in asset_urls("site_js") %}
+<script src="{{ url }}"></script>
+{% endfor %}
 {% endblock scripts %}
