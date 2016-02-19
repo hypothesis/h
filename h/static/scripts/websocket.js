@@ -34,7 +34,14 @@ function Socket(url) {
 
   function reconnect() {
     var didConnect = false;
-    var connectOperation = retry.operation();
+    var connectOperation = retry.operation({
+      // Wait 2s before attempting to reconnect
+      minTimeout: 2000,
+      // Don't retry forever
+      retries: 10,
+      // Randomize retry times to minimise the thundering herd effect
+      randomize: true
+    });
     connectOperation.attempt(function (currentAttempt) {
       socket = new WebSocket(url);
       socket.onopen = function (event) {
