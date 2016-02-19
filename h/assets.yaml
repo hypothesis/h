@@ -90,7 +90,7 @@ admin_css:
     - output: styles/admin.min.css
       filters: cleancss
       contents:
-        - output: h:static/styles/admin.css
+        - output: styles/admin.css
           filters: compass,postcss
           contents:
             - h:static/styles/admin.scss
@@ -132,7 +132,7 @@ app_js:
     - output: scripts/app.min.js
       filters: uglifyjs
       contents:
-        - output: static/scripts/app.js
+        - output: scripts/app.js
           filters: browserify
           contents: h:static/scripts/app.coffee
           depends:
@@ -224,7 +224,7 @@ site_css:
   filters: cleancss
   contents:
     - h:static/styles/vendor/icomoon.css
-    - output: h:static/styles/site.css
+    - output: styles/site.css
       filters: compass,postcss
       contents:
         - h:static/styles/site.scss
@@ -243,7 +243,7 @@ front_page_css:
   output: styles/front-page.min.css
   contents:
     - h:static/styles/front-page/main.css
-    - output: h:static/styles/front-page.css
+    - output: styles/front-page.css
       filters: cleancss
       contents:
       - h:static/styles/vendor/icomoon.css
