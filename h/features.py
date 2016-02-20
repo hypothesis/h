@@ -7,10 +7,9 @@ import os
 from pyramid import events
 from pyramid.view import view_config
 import sqlalchemy as sa
-import transaction
 
+from h import db
 from h.auth import role
-from h.db import Base
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +48,7 @@ class UnknownFeatureError(Exception):
     pass
 
 
-class Feature(Base):
+class Feature(db.Base):
 
     """A feature flag for the application."""
 
@@ -150,7 +149,6 @@ def remove_old_flags():
     count = unknown_flags.delete(synchronize_session=False)
     if count > 0:
         log.info('removed %d old/unknown feature flags from database', count)
-    transaction.commit()
 
 
 @events.subscriber(events.ApplicationCreated)
@@ -161,7 +159,10 @@ def remove_old_flags_on_boot(event):
     if 'H_SCRIPT' in os.environ:
         return
 
+    session = db.Session()
     remove_old_flags()
+    session.commit()
+    session.close()
 
 
 def all(request):
