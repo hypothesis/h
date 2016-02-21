@@ -231,7 +231,23 @@ Running h
 ---------
 
 Now that you've installed h and all of its dependencies, you should be able to
-run h in your development environment with this command:
+run h in your development environment.
+
+First, run this command to build the Hypothesis client and static assets:
+
+.. code-block:: bash
+
+    make client-assets-dev
+
+If you are making changes to the client, or the JavaScript code or styles for the
+service, you should instead run this command which will automatically rebuild the static
+assets when the source files change:
+
+.. code-block:: bash
+
+    make client-assets-watch
+
+Then to start the Hypothesis web service:
 
 .. code-block:: bash
 
