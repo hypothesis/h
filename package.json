@@ -92,7 +92,7 @@
     "node": "0.10.x"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build-assets": "gulp build"
   },
   "repository": {
     "type": "git",

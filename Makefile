@@ -1,4 +1,3 @@
-SHELL := bash
 PATH := bin:${PATH}
 NPM_BIN = "$$(npm bin)"
 
