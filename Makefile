@@ -26,14 +26,9 @@ node_modules/.uptodate: package.json
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-	rm -f h/static/scripts/vendor/*.min.js
-	rm -f h/static/scripts/account.*js
-	rm -f h/static/scripts/app.*js
-	rm -f h/static/scripts/config.*js
-	rm -f h/static/scripts/hypothesis.*js
-	rm -f h/static/styles/*.css
 	rm -f .coverage
 	rm -f node_modules/.uptodate .eggs/.uptodate
+	rm -rf build
 
 dev: deps
 	@gunicorn --reload --paste conf/development-app.ini
