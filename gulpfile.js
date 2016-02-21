@@ -35,7 +35,7 @@ var vendorModules = Object.keys(vendorBundles.bundles)
   return deps.concat(vendorBundles.bundles[key]);
 }, []);
 
-/** Builds the bundles containing vendor JS code */
+// Builds the bundles containing vendor JS code
 gulp.task('build-vendor-js', function () {
   var finished = [];
   Object.keys(vendorBundles.bundles).forEach(function (name) {
@@ -160,7 +160,7 @@ gulp.task('watch-images', function () {
 var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/*.@(js|css|woff|jpg|png|svg)';
 
 // Generate a JSON manifest mapping file paths to
-// URLs containing cache-busted
+// URLs containing cache-busting query string parameters
 function generateManifest() {
   var stream = gulp.src(MANIFEST_SOURCE_FILES)
     .pipe(manifest({name: 'manifest.json'}))
