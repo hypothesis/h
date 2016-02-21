@@ -68,7 +68,7 @@ module.exports = function createBundle(config, buildOpts) {
     debug: true,
     extensions: ['.coffee'],
 
-    // Browserify will retry to detect and automatically provide
+    // Browserify will try to detect and automatically provide
     // browser implementations of Node modules.
     //
     // This can bloat the bundle hugely if implementations for large
