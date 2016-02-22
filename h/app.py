@@ -86,6 +86,7 @@ def includeme(config):
     config.include('h.models')
     config.include('h.queue')
     config.include('h.sentry')
+    config.include('h.stats')
     config.include('h.views')
 
     # Site modules
