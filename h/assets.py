@@ -70,7 +70,7 @@ class Environment(object):
         :param bundle_config_path: YAML file defining named collections of
                                    asset bundles.
         :param manifest_path: JSON file mapping file paths in the bundle config
-                              file to cache-busted URL.
+                              file to cache-busted URLs.
         """
         self.assets_base_url = assets_base_url
         self.manifest = _CachedFile(manifest_path, json.load)
@@ -79,7 +79,7 @@ class Environment(object):
     def files(self, bundle):
         """Return the file paths for all files in a bundle."""
         bundles = self.bundles.load()
-        return [path for path in bundles[bundle]]
+        return bundles[bundle]
 
     def urls(self, bundle):
         """
