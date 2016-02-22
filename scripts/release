@@ -1,0 +1,127 @@
+#!/bin/sh
+
+# GitHub configuration for uploading release tarball. The GitHub token needs at
+# least the `public_repo` OAuth scope.
+: ${GITHUB_TOKEN:=}
+: ${GITHUB_USER:=hypothesis}
+: ${GITHUB_REPO:=h}
+
+set -eu
+
+# Run from the repo root, always
+cd "$(dirname "$0")/.."
+
+# Software required to run the release tool
+DEPS="git github-release python"
+
+abort () {
+    echo >&2 "Aborting!"
+    exit 1
+}
+
+status () {
+    echo >&2 "$@"
+}
+
+check_deps () {
+    local missing=
+    for dep in $DEPS; do
+        if ! which "$dep" >/dev/null; then
+            missing="$missing  $dep\n"
+        fi
+    done
+    if [ -n "$missing" ]; then
+        status "You are missing software required to run this tool, namely:"
+        status "$missing"
+        abort
+    fi
+}
+
+check_env () {
+    if [ -z "$GITHUB_TOKEN" ]; then
+        status "Please set GITHUB_TOKEN to a valid GitHub access token. See:"
+        status "  https://github.com/settings/tokens"
+        abort
+    fi
+}
+
+check_changes_unreleased () {
+    # Exit abnormally if the first line of CHANGES doesn't start with
+    # "Unreleased", as it should when we start this script.
+    if ! awk '/^Unreleased/{ok=1} NR==1{exit !ok}' CHANGES; then
+        status "CHANGES doesn't start with an 'Unreleased' heading: perhaps you need to update"
+        status "the changelog before running the releaser?"
+        abort
+    fi
+}
+
+get_new_version () {
+    local release=$(git describe --abbrev=0 --tags --match 'v*.*.*' | cut -dv -f2-)
+    local current_version=$(python setup.py --version)
+    status "Latest release: $release"
+    status "Current version: $current_version"
+    printf >&2 "What should the new version be? (e.g. 1.0.4) "
+    read new_version
+    echo "$new_version"
+}
+
+confirm_release () {
+    local version=$1
+    status "Going to release version ${version}. This script will:"
+    status "  create a release commit"
+    status "  tag the release commit with v${version}"
+    status "  create a python source distribution tarball"
+    status "  make a release on GitHub, attaching the source distribution tarball"
+    printf >&2 "Are you sure you wish to proceed? [yN] "
+    read confirm
+    if ! echo "$confirm" | grep -q -i '^y'; then
+        abort
+    fi
+}
+
+commit_release () {
+    local version=$1
+    local heading="$version ($(date +"%Y-%m-%d"))"
+    local rule=$(echo "$heading" | sed "s/./=/g")
+    sed -i "" -e "1s/^Unreleased.*/$heading/" CHANGES
+    sed -i "" -e "2s/^=.*/$rule/" CHANGES
+    git commit -m "Release version $version" CHANGES
+}
+
+tag_release () {
+    local version=$1
+    git tag -a -m "Release version $version"  v"$version"
+}
+
+make_sdist () {
+    python setup.py sdist
+    git checkout h/_version.py
+}
+
+push_release () {
+    local version=$1
+    # Extract everything from the fourth line to the next tag from CHANGES
+    local description=$(awk 'NR==4{p=1} /^[0-9]+\.[0-9]+\.[0-9]+/{p=0} {if(p) print $0}' CHANGES)
+    status "Pushing tag"
+    git push --follow-tags
+
+    export GITHUB_TOKEN GITHUB_USER GITHUB_REPO
+    status "Creating GitHub release"
+    github-release release -t "v$version" --description "$description" --pre-release
+    status "Uploading source distribution tarball to GitHub release"
+    github-release upload -t "v$version" -n "h-"$version".tar.gz" -f dist/h-"$version".tar.gz
+}
+
+main () {
+    check_deps
+    check_env
+    check_changes_unreleased
+    version=$(get_new_version)
+    confirm_release "$version"
+    commit_release "$version"
+    tag_release "$version"
+    make_sdist
+    push_release "$version"
+}
+
+main
