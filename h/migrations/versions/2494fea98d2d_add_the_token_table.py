@@ -1,14 +1,14 @@
 """Add the token table.
 
 Revision ID: 2494fea98d2d
-Revises: 4c0c44605c09
+Revises: 4886d7a14074
 Create Date: 2016-02-15 11:20:00.787358
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '2494fea98d2d'
-down_revision = '4c0c44605c09'
+down_revision = '4886d7a14074'
 
 from alembic import op
 import sqlalchemy as sa
