@@ -36,8 +36,9 @@ class WebSocket(_WebSocket):
         return instance
 
     def opened(self):
-        # Release the database transaction
-        self.request.tm.commit()
+        # Release the database connection
+        self.request.db.commit()
+        self.request.db.close()
 
     def _expand_clauses(self, payload):
         for clause in payload['clauses']:
@@ -64,8 +65,9 @@ class WebSocket(_WebSocket):
         clause['value'] = list(expanded)
 
     def received_message(self, msg):
-        with self.request.tm:
-            self._process_message(msg)
+        self._process_message(msg)
+        self.request.db.commit()
+        self.request.db.close()
 
     def _process_message(self, msg):
         try:
