@@ -12,7 +12,6 @@ import pytest
 
 from pyramid import testing
 from pyramid.paster import get_appsettings
-import transaction
 
 from h import db
 from h import form
@@ -87,11 +86,10 @@ def database_session(request, monkeypatch):
     once per session (see :func:`setup_database`) and then wrapping each test
     function in a SAVEPOINT/ROLLBACK TO SAVEPOINT within the transaction.
     """
-    savepoint = transaction.savepoint()
-    request.addfinalizer(savepoint.rollback)
+    db.Session.begin_nested()
+    request.addfinalizer(db.Session.rollback)
 
     # Prevent the session from committing (redirect to flush() instead):
-    monkeypatch.setattr(transaction, 'commit', db.Session.flush)
     monkeypatch.setattr(db.Session, 'commit', db.Session.flush)
     # Prevent the session from closing (make it a no-op):
     monkeypatch.setattr(db.Session, 'remove', lambda: None)

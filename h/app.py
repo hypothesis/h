@@ -6,6 +6,7 @@ import os
 from pyramid.config import Configurator
 from pyramid.tweens import EXCVIEW
 from pyramid.settings import asbool
+import transaction
 
 from h.config import settings_from_environment
 from h.security import derive_key
@@ -21,6 +22,12 @@ def configure_jinja2_assets(config):
 
 def in_debug_mode(request):
     return asbool(request.registry.settings.get('pyramid.debug_all'))
+
+
+def tm_activate_hook(request):
+    if request.path.startswith(('/assets/', '/_debug_toolbar/')):
+        return False
+    return True
 
 
 def create_app(global_config, **settings):
@@ -50,16 +57,6 @@ def create_app(global_config, **settings):
 def includeme(config):
     config.add_request_method(in_debug_mode, 'debug', reify=True)
 
-    config.include('h.features')
-
-    config.include('h.assets')
-    config.include('h.db')
-    config.include('h.form')
-    config.include('h.models')
-    config.include('h.views')
-    config.include('h.feeds')
-    config.include('h.sentry')
-
     config.include('pyramid_jinja2')
     config.add_jinja2_extension('h.jinja_extensions.Filters')
     config.add_jinja2_extension('h.jinja_extensions.IncludeRawExtension')
@@ -68,15 +65,37 @@ def includeme(config):
     # Jinja2 webassets extension when the configuration is committed.
     config.action(None, configure_jinja2_assets, args=(config,))
 
+    # Configure the transaction manager so that each request gets its own
+    # transaction manager, and supports retrying retryable exceptions.
+    config.add_settings({
+        "tm.attempts": 3,
+        "tm.manager_hook": lambda request: transaction.TransactionManager(),
+        "tm.activate_hook": tm_activate_hook,
+        "tm.annotate_user": False,
+    })
+    config.include('pyramid_tm')
+
+    # Core site modules
+    config.include('h.assets')
+    config.include('h.auth')
+    config.include('h.db')
+    config.include('h.features')
+    config.include('h.form')
+    config.include('h.models')
+    config.include('h.queue')
+    config.include('h.sentry')
+    config.include('h.views')
+
+    # Site modules
     config.include('h.accounts')
     config.include('h.admin', route_prefix='/admin')
-    config.include('h.auth')
     config.include('h.badge')
     config.include('h.claim')
+    config.include('h.feeds')
     config.include('h.groups')
     config.include('h.notification')
-    config.include('h.queue')
 
+    # API
     config.include('h.api', route_prefix='/api')
     config.include('h.api.nipsa')
 

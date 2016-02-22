@@ -20,8 +20,7 @@ from sqlalchemy import MetaData
 from sqlalchemy import engine_from_config
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-
-from zope.sqlalchemy import ZopeTransactionExtension
+import zope.sqlalchemy
 
 from h.api import db as api_db
 
@@ -44,7 +43,7 @@ __all__ = (
 #
 #   http://docs.pylonsproject.org/projects/pyramid-tm/en/latest/#transaction-usage
 #
-Session = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+Session = scoped_session(sessionmaker())
 
 # Create a default metadata object with naming conventions for indexes and
 # constraints. This makes changing such constraints and indexes with alembic
@@ -93,6 +92,15 @@ def make_engine(settings):
     return engine_from_config(settings, 'sqlalchemy.')
 
 
+def _get_request_session(request):
+    # Create a session and register it with a transaction manager, if present.
+    session = Session()
+    tm = getattr(request, 'tm', None)
+    if tm is not None:
+        zope.sqlalchemy.register(session, transaction_manager=tm)
+    return session
+
+
 def includeme(config):
     settings = config.registry.settings
     should_create = asbool(settings.get('h.db.should_create_all', False))
@@ -102,7 +110,7 @@ def includeme(config):
     # Add a property to all requests for easy access to the session. This means
     # that view functions need only refer to `request.db` in order to retrieve
     # the current database session.
-    config.add_request_method(lambda req: Session(), name='db', reify=True)
+    config.add_request_method(_get_request_session, name='db', reify=True)
 
     # Register a deferred action to bind the engine when the configuration is
     # committed. Deferring the action means that this module can be included
