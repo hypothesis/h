@@ -1465,5 +1465,21 @@ describe('annotation', function() {
         });
       });
     });
+
+    describe('tag display', function () {
+      it('displays annotation tags', function () {
+        var directive = createDirective({
+          id: '1234',
+          tags: ['atag']
+        });
+        var links = [].slice.apply(directive.element[0].querySelectorAll('a'));
+        var tagLinks = links.filter(function (link) {
+          return link.textContent === 'atag';
+        });
+        assert.equal(tagLinks.length, 1);
+        assert.equal(tagLinks[0].href,
+                     'https://test.hypothes.is/stream?q=tag:atag');
+      });
+    });
   });
 });
