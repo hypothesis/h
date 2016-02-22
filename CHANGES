@@ -1,3 +1,38 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Users can now generate long-lived API tokens from their profile page (#2948).
+
+- Correctly detect when the Chrome extension is being installed by an
+  administrative policy and suppress the "welcome page" tab (#2964).
+
+Bug fixes
+---------
+
+- Fix a crash that prevented signups if the username blacklist was missing
+  (#2954).
+
+- Groups lists are now scrollable -- long lists of groups don't flow off the end
+  of the page and become unreachable (#2973).
+
+- Fix a bug that prevented users from replying to annotations on stream search
+  pages (#2978).
+
+Miscellaneous
+-------------
+
+- Attempting to create an annotation in a group of which the logged-in user is
+  not a member will now result in an explanatory error message rather than a 404
+  (#2981).
+
+- Client upgraded to use Angular 1.5 (#2967).
+
+- An important first tranche of work that will move annotation storage to
+  PostgreSQL has been merged (#2955).
+
 0.8.15 (2016-02-12)
 ===================
 
