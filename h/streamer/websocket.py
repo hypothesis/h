@@ -49,6 +49,12 @@ class WebSocket(_WebSocket):
             log.warn('Streamer work queue full! Unable to queue message from '
                      'WebSocket client having waited 0.1s: giving up.')
 
+    def closed(self, code, reason=None):
+        try:
+            self.instances.remove(self)
+        except KeyError:
+            pass
+
 
 def handle_message(message):
     socket = message.socket

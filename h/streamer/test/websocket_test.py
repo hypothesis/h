@@ -13,6 +13,29 @@ from h.streamer import websocket
 FakeMessage = namedtuple('FakeMessage', ['data'])
 
 
+def test_websocket_stores_instance_list():
+    socket = mock.Mock()
+    clients = [websocket.WebSocket(socket), websocket.WebSocket(socket)]
+
+    for c in clients:
+        assert c in websocket.WebSocket.instances
+
+
+def test_websocket_removes_self_from_instance_list_when_closed():
+    socket = mock.Mock()
+    client1 = websocket.WebSocket(socket)
+    client2 = websocket.WebSocket(socket)
+
+    assert len(websocket.WebSocket.instances) == 2
+    client1.closed(1000)
+    assert client1 not in websocket.WebSocket.instances
+    client2.closed(1000)
+    assert client2 not in websocket.WebSocket.instances
+
+    # A second closure (however unusual) should not raise
+    client1.closed(1000)
+
+
 def test_socket_enqueues_incoming_messages():
     queue = Queue()
     request = testing.DummyRequest()
