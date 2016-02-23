@@ -24,7 +24,7 @@ function streamFinished(stream) {
 }
 
 function waitForever() {
-  return new Promise(function (resolve, reject) {});
+  return new Promise(function () {});
 }
 
 /**
@@ -62,7 +62,7 @@ function waitForever() {
 module.exports = function createBundle(config, buildOpts) {
   mkdirp.sync(config.path);
 
-  buildOpts = buildOpts || { watch: false };
+  buildOpts = buildOpts || {watch: false};
 
   var bundleOpts = {
     debug: true,
@@ -126,13 +126,14 @@ module.exports = function createBundle(config, buildOpts) {
     //
     // In the bundle which provides './dir/module', we
     // therefore need to expose the module as '/dir/module'.
-    if (req[0] == '.') {
+    if (req[0] === '.') {
       bundle.require(req, {expose: req.slice(1)});
-    } else if (req[0] == '/') {
+    } else if (req[0] === '/') {
       // If the require path is absolute, the same rules as
       // above apply but the path needs to be relative to
       // the root of the repository
-      var relativePath = path.relative(path.resolve(path.join(__dirname, '../../')),
+      var repoRootPath = path.join(__dirname, '../../');
+      var relativePath = path.relative(path.resolve(repoRootPath),
                                        path.resolve(req));
       bundle.require(req, {expose: '/' + relativePath});
     } else {
@@ -157,7 +158,7 @@ module.exports = function createBundle(config, buildOpts) {
 
   function build() {
     var output = fs.createWriteStream(bundlePath);
-    var b = bundle.bundle()
+    var b = bundle.bundle();
     b.on('error', function (err) {
       log('Build error', err.toString());
     });
@@ -188,4 +189,4 @@ module.exports = function createBundle(config, buildOpts) {
   } else {
     return build();
   }
-}
+};

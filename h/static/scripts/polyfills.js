@@ -1,3 +1,5 @@
+'use strict';
+
 // ES2015 polyfills
 require('core-js/es6/promise');
 require('core-js/fn/object/assign');
@@ -15,5 +17,5 @@ try {
 //
 // This sets `window.wgxpath`
 if (!window.document.evaluate) {
-  require('./vendor/wgxpath.install')
+  require('./vendor/wgxpath.install');
 }

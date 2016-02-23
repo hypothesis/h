@@ -4,7 +4,7 @@ var path = require('path');
 var crypto = require('crypto');
 
 var through = require('through2');
-var File = require('vinyl');
+var VinylFile = require('vinyl');
 
 /**
  * Gulp plugin that generates a cache-busting manifest file.
@@ -27,7 +27,7 @@ module.exports = function (opts) {
 
     callback();
   }, function (callback) {
-    var manifestFile = new File({
+    var manifestFile = new VinylFile({
       path: opts.name,
       contents: new Buffer(JSON.stringify(manifest, null, 2), 'utf-8'),
     });

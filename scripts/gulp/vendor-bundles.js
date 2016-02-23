@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Defines a set of vendor bundles which are
  * libraries of 3rd-party code referenced by

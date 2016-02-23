@@ -7,7 +7,7 @@
 
 // Basic polyfills for APIs which are supported natively
 // by all browsers we support (IE >= 10)
-require('core-js/es5')
+require('core-js/es5');
 
 // Additional polyfills for newer features.
 // Be careful that any polyfills used here match what is used in the

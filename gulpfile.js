@@ -92,7 +92,7 @@ gulp.task('build-app-js', ['build-vendor-js'], function () {
   }));
 });
 
-gulp.task('watch-app-js', ['build-vendor-js'], function (done) {
+gulp.task('watch-app-js', ['build-vendor-js'], function () {
   appBundleConfigs.map(function (config) {
     createBundle(config, {watch: true});
   });
@@ -139,7 +139,7 @@ var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
 gulp.task('build-fonts', function () {
   gulp.src(fontFiles)
     .pipe(changed(FONTS_DIR))
-    .pipe(gulp.dest(FONTS_DIR))
+    .pipe(gulp.dest(FONTS_DIR));
 });
 
 gulp.task('watch-fonts', function () {
@@ -150,7 +150,7 @@ var imageFiles = 'h/static/images/**/*';
 gulp.task('build-images', function () {
   gulp.src(imageFiles)
     .pipe(changed(IMAGES_DIR))
-    .pipe(gulp.dest(IMAGES_DIR))
+    .pipe(gulp.dest(IMAGES_DIR));
 });
 
 gulp.task('watch-images', function () {
