@@ -1,5 +1,6 @@
 include Makefile AUTHORS CHANGES LICENSE NOTICE
 include Dockerfile
+include gulpfile.js
 include gunicorn.conf.py
 include package.json
 include requirements.txt
@@ -12,5 +13,6 @@ graft h/migrations
 graft h/static
 graft h/templates
 graft scripts
+graft vendor
 global-exclude __pycache__
 global-exclude *.py[co]

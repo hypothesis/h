@@ -12,7 +12,6 @@ var gulpIf = require('gulp-if');
 var gulpUtil = require('gulp-util');
 var sass = require('gulp-sass');
 var postcss = require('gulp-postcss');
-var runSequence = require('run-sequence');
 var sourcemaps = require('gulp-sourcemaps');
 
 var manifest = require('./scripts/gulp/manifest');
@@ -63,10 +62,6 @@ var appBundles = [{
   transforms: ['coffee'],
   entry: './h/static/scripts/app.coffee',
 },{
-  // Browser extension background script
-  name: 'extension',
-  entry: './h/browser/chrome/lib/extension',
-},{
   // The Annotator library which provides annotation controls on
   // the page and sets up the sidebar
   name: 'injector',
@@ -100,6 +95,23 @@ gulp.task('watch-app-js', ['build-vendor-js'], function () {
   appBundleConfigs.map(function (config) {
     createBundle(config, {watch: true});
   });
+});
+
+var extensionBundleConfig = {
+  name: 'extension',
+  entry: './h/browser/chrome/lib/extension',
+  path: SCRIPT_DIR,
+  external: vendorModules,
+  minify: IS_PRODUCTION_BUILD,
+  noParse: vendorBundles.noParseModules,
+};
+
+gulp.task('build-extension-js', ['build-vendor-js'], function () {
+  return createBundle(extensionBundleConfig);
+});
+
+gulp.task('watch-extension-js', ['build-vendor-js'], function () {
+  return createBundle(extensionBundleConfig, {watch: true});
 });
 
 var styleFiles = [
@@ -174,8 +186,6 @@ function generateManifest() {
   });
 }
 
-gulp.task('generate-manifest', generateManifest);
-
 gulp.task('watch-manifest', function () {
   gulp.watch(MANIFEST_SOURCE_FILES, batch(function (events, done) {
     endOfStream(generateManifest(), function () {
@@ -184,13 +194,25 @@ gulp.task('watch-manifest', function () {
   }));
 });
 
-gulp.task('build', function (callback) {
-  runSequence(['build-app-js', 'build-css',
-               'build-fonts', 'build-images'],
-              'generate-manifest',
-              callback);
-});
+gulp.task('build-app',
+          ['build-app-js',
+           'build-css',
+           'build-fonts',
+           'build-images'],
+          generateManifest);
 
-gulp.task('watch', ['watch-app-js', 'watch-css',
-                    'watch-fonts', 'watch-images',
-                    'watch-manifest']);
+gulp.task('build',
+          ['build-app-js',
+           'build-extension-js',
+           'build-css',
+           'build-fonts',
+           'build-images'],
+          generateManifest);
+
+gulp.task('watch',
+          ['watch-app-js',
+           'watch-extension-js',
+           'watch-css',
+           'watch-fonts',
+           'watch-images',
+           'watch-manifest']);
