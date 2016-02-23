@@ -80,6 +80,10 @@ var appBundles = [{
   // Admin areas of the site
   name: 'admin-site',
   entry: './h/static/scripts/admin-site',
+},{
+  // Legacy site bundle (for old homepage)
+  name: 'legacy-site',
+  entry: './h/static/scripts/legacy-site',
 }];
 
 var appBundleConfigs = appBundles.map(function (config) {
