@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+from pyramid import security
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 
@@ -74,6 +75,26 @@ class Annotation(Base, mixins.Timestamps):
 
     #: Any additional serialisable data provided by the client.
     extra = sa.Column(pg.JSONB, nullable=True)
+
+    def __acl__(self):
+        """Return a Pyramid ACL for this annotation."""
+        acl = []
+        if self.shared:
+            group = 'group:{}'.format(self.groupid)
+            if self.groupid == '__world__':
+                group = security.Everyone
+
+            acl.append((security.Allow, group, 'read'))
+        else:
+            acl.append((security.Allow, self.userid, 'read'))
+
+        for action in ['admin', 'update', 'delete']:
+            acl.append((security.Allow, self.userid, action))
+
+        # If we haven't explicitly authorized it, it's not allowed.
+        acl.append(security.DENY_ALL)
+
+        return acl
 
     def __repr__(self):
         return '<Annotation %s>' % self.id
