@@ -76,7 +76,6 @@ module.exports = angular.module('h', [
   # Angular addons which export the Angular module name
   # via module.exports
   require('angular-jwt')
-  require('angular-animate')
   require('angular-resource')
   require('angular-route')
   require('angular-sanitize')

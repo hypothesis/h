@@ -13,7 +13,6 @@ module.exports = {
     polyfills: [require.resolve('../../h/static/scripts/polyfills')],
     angular: [
       'angular',
-      'angular-animate',
       'angular-jwt',
       'angular-resource',
       'angular-route',
