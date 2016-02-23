@@ -77,7 +77,8 @@ build/%-chrome-stage.zip:
 	hypothesis-buildext chrome \
 		--service 'https://stage.hypothes.is' \
 		--websocket 'wss://stage.hypothes.is/ws' \
-		--sentry-public-dsn '$(SENTRY_DSN_STAGE)'
+		--sentry-public-dsn '$(SENTRY_DSN_STAGE)' \
+		--bouncer 'https://hpt.is'
 	@zip -qr $@ build/chrome
 
 build/%-chrome-prod.zip:
@@ -85,7 +86,8 @@ build/%-chrome-prod.zip:
 	hypothesis-buildext chrome \
 		--service 'https://hypothes.is' \
 		--websocket 'wss://hypothes.is/ws' \
-		--sentry-public-dsn '$(SENTRY_DSN_PROD)'
+		--sentry-public-dsn '$(SENTRY_DSN_PROD)' \
+		--bouncer 'https://hpt.is'
 	@zip -qr $@ build/chrome
 
 .PHONY: clean cover deps dev extensions lint test

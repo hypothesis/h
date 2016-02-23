@@ -46,5 +46,9 @@
     "lib/*",
     "help/*",
     "content/web/viewer.html"
-  ]
+  ]{% if bouncer_url -%},
+  "externally_connectable": {
+    "matches": ["{{ bouncer_url }}"]
+  }
+  {%- endif %}
 }

@@ -75,7 +75,7 @@ def copytree(src, dst):
             shutil.copyfile(s, d)
 
 
-def chrome_manifest(script_host_url):
+def chrome_manifest(script_host_url, bouncer_url):
     # Chrome is strict about the format of the version string
     if '+' in h.__version__:
         tag, detail = h.__version__.split('+')
@@ -88,7 +88,8 @@ def chrome_manifest(script_host_url):
 
     context = {
         'version': version,
-        'version_name': version_name
+        'version_name': version_name,
+        'bouncer_url': bouncer_url,
     }
 
     if script_host_url:
@@ -204,7 +205,8 @@ def build_chrome(args):
 
     # Render the manifest.
     with codecs.open('build/chrome/manifest.json', 'w', 'utf-8') as fp:
-        data = chrome_manifest(script_host_url=None)
+        data = chrome_manifest(script_host_url=None,
+                               bouncer_url=args.bouncer_url)
         fp.write(data)
 
     # Write build settings to a JSON file
@@ -226,6 +228,13 @@ parser.add_argument('--debug',
                     action='store_true',
                     default=False,
                     help='create source maps to enable debugging in browser')
+parser.add_argument('--bouncer',
+                    dest='bouncer_url',
+                    help="A Chrome extension match pattern that matches the "
+                         "direct-link URLs of the Hypothesis direct-link "
+                         "bouncer service. JavaScript from this site is "
+                         "allowed to send messages to the Chrome extension",
+                    metavar='URL')
 parser.add_argument('--sentry-public-dsn',
                     default='',
                     help='Specify the public Sentry DSN for crash reporting',
