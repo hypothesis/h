@@ -44,6 +44,8 @@ def start(event):
                      settings,
                      nsq.USER_TOPIC,
                      WORK_QUEUE),
+        # A greenlet to periodically report to statsd
+        gevent.spawn(report_stats, settings),
         # And one to process the queued work
         gevent.spawn(process_work_queue, WORK_QUEUE)
     ]
@@ -90,6 +92,15 @@ def process_work_queue(queue, session_factory=db.Session):
             session.commit()
         finally:
             session.close()
+
+
+def report_stats(settings):
+    client = stats.get_client(settings)
+    while True:
+        client.gauge('streamer.connected_clients',
+                     len(websocket.WebSocket.instances))
+        client.gauge('streamer.queue_length', WORK_QUEUE.qsize())
+        gevent.sleep(10)
 
 
 def supervise(greenlets):

@@ -51,6 +51,7 @@ def create_app(global_config, **settings):
 
     config.include('h.auth')
     config.include('h.sentry')
+    config.include('h.stats')
 
     # We have to include models and db to set up sqlalchemy metadata.
     config.include('h.models')
