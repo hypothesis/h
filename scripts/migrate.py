@@ -5,6 +5,8 @@ A script to migrate annotation data from ElasticSearch to PostgreSQL.
 from __future__ import division, print_function, unicode_literals
 
 import argparse
+import datetime
+import dateutil.parser as dateparser
 import itertools
 import os
 import logging
@@ -15,8 +17,12 @@ from pyramid.request import Request
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from h import db
+from h.api.db import Base as APIBase
 from h.api.models.annotation import Annotation
+from h.api.models.document import Document, DocumentURI, DocumentMeta
+from h.api.models.document import merge_documents
 from h.api import uri
+from h._compat import text_type
 
 BATCH_SIZE = 2000
 
@@ -55,6 +61,8 @@ def main():
     engine = db.make_engine(request.registry.settings)
     Session.configure(bind=engine)
 
+    APIBase.query = Session.query_property()
+
     if 'DEBUG_QUERY' in os.environ:
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
@@ -70,6 +78,7 @@ def migrate_annotations(es_client):
 
     print('{:d} annotations already imported'.format(Annotation.query.count()))
 
+    start = datetime.datetime.now()
     for batch in _batch_iter(BATCH_SIZE, annotations):
         # Skip over annotations until we find the point from which we haven't
         # imported yet...
@@ -81,9 +90,13 @@ def migrate_annotations(es_client):
             started = True
 
         s, f = import_annotations(batch)
+
         success += s
         failure += f
-        print('{:d} ok, {:d} failed'.format(success, failure))
+        took = (datetime.datetime.now() - start).seconds
+        print('{:d} ok, {:d} failed, took {:d} seconds'.format(success, failure, took))
+
+        start = datetime.datetime.now()
 
     in_postgres = Annotation.query.count()
     in_elastic = es_client.conn.count(index=es_client.index,
@@ -114,6 +127,7 @@ def scan(es_client, with_filter=None):
                         doc_type=es_client.t.annotation,
                         query=query,
                         preserve_order=True,
+                        scroll='1h',
                         sort='updated:asc')
 
 
@@ -138,14 +152,20 @@ def find_start(annotations):
 
 
 def import_annotations(annotations):
-    objs = []
+    objs = set()
 
     failure = 0
     success = 0
 
     for a in annotations:
         try:
-            objs.append(annotation_from_data(a['_id'], a['_source']))
+            document_data = a['_source'].pop('document', None)
+
+            annotation = annotation_from_data(a['_id'], a['_source'])
+            objs.add(annotation)
+
+            if document_data is not None:
+                document_objs_from_data(document_data, annotation)
         except Exception as e:
             log.warn('error importing %s: %s', a['_id'], e)
             failure += 1
@@ -163,9 +183,12 @@ def annotation_from_data(id, data):
     if id == '_query':
         raise Skip("not an annotation (id=_query)")
 
-    ann = Annotation(id=id)
-    ann.created = data.pop('created')
-    ann.updated = data.pop('updated')
+    ann = Annotation.query.get(id)
+    if ann is None:
+        ann = Annotation(id=id)
+
+    ann.created = dateparser.parse(data.pop('created')).replace(tzinfo=None)
+    ann.updated = dateparser.parse(data.pop('updated')).replace(tzinfo=None)
     ann.userid = data.pop('user')
     ann.groupid = data.pop('group')
 
@@ -198,16 +221,86 @@ def annotation_from_data(id, data):
     if ann.target_uri is None:
         raise Skip("annotation is missing a target source and uri")
 
-    ann.target_uri_normalized = unicode(uri.normalize(ann.target_uri), 'utf-8')
-
-    # We are generating documents from Postgres annotations, so we can safely
-    # discard them here.
-    _ = data.pop('document', None)
+    ann.target_uri_normalized = text_type(uri.normalize(ann.target_uri))
 
     if data:
         ann.extra = data
 
     return ann
+
+
+def document_objs_from_data(data, ann):
+    links = _transfom_document_links(ann.target_uri, data)
+    uris = [link['uri'] for link in links]
+    documents = Document.find_or_create_by_uris(ann.target_uri, uris,
+                                                created=ann.created,
+                                                updated=ann.updated)
+
+    if documents.count() > 1:
+        document = merge_documents(Session, documents, updated=ann.updated)
+    else:
+        document = documents.first()
+
+    document.updated = ann.updated
+
+    document_uri_objs_from_data(document, links, ann)
+    document_meta_objs_from_data(document, data, ann)
+
+
+def document_uri_objs_from_data(document, transformed_links, ann):
+    for link in transformed_links:
+        docuri = DocumentURI.query.filter(
+                DocumentURI.claimant_normalized == text_type(uri.normalize(link.get('claimant')), 'utf-8'),
+                DocumentURI.uri_normalized == text_type(uri.normalize(link.get('uri')), 'utf-8'),
+                DocumentURI.type == link.get('type'),
+                DocumentURI.content_type == link.get('content_type')
+                ).first()
+
+        if docuri is None:
+            docuri = DocumentURI(claimant=link.get('claimant'),
+                                 uri=link.get('uri'),
+                                 type=link.get('type'),
+                                 content_type=link.get('content_type'),
+                                 document=document,
+                                 created=ann.created,
+                                 updated=ann.updated)
+            Session.add(docuri)
+            Session.flush()
+
+        docuri.updated = ann.updated
+
+
+def document_meta_objs_from_data(document, data, ann, path_prefix=[]):
+    _ = data.pop('link', None)
+
+    for key, value in data.iteritems():
+        keypath = path_prefix[:]
+        keypath.append(key)
+
+        if isinstance(value, dict):
+            return document_meta_objs_from_data(document, value, ann,
+                                                path_prefix=keypath)
+
+        if not isinstance(value, list):
+            value = [value]
+
+        type = '.'.join(keypath)
+        meta = DocumentMeta.query.filter(
+                DocumentMeta.claimant_normalized == text_type(uri.normalize(ann.target_uri)),
+                DocumentMeta.type == type).one_or_none()
+
+        if meta is None:
+            meta = DocumentMeta(claimant=ann.target_uri,
+                                type='.'.join(keypath),
+                                value=value,
+                                created=ann.created,
+                                updated=ann.updated,
+                                document=document)
+            Session.add(meta)
+            Session.flush()
+        else:
+            meta.value = value
+            meta.updated = ann.updated
 
 
 def _batch_iter(n, iterable):
@@ -288,7 +381,12 @@ def _permissions_allow_sharing(user, group, perms):
         read_perms = [gperm]
 
     if (read_perms != [gperm] and read_perms != [user]):
-        raise Skip('invalid read permissions: {!r}'.format(perms))
+        # attempt to fix data when client auth state is out of sync by
+        # by overriding the permissions with the user of the annotation.
+        if read_perms[0].startswith('acct:'):
+            read_perms = [user]
+        else:
+            raise Skip('invalid read permissions: {!r}'.format(perms))
 
     for other in ['admin', 'delete', 'update']:
         other_perms = perms.get(other, [])
@@ -309,7 +407,7 @@ def _permissions_allow_sharing(user, group, perms):
         if len(other_perms) > 1 and user in other_perms:
             continue
 
-        if other_perms != [user]:
+        if (other_perms != [user] and not other_perms[0].startswith('acct:')):
             raise Skip('invalid {} permissions: {!r}'.format(other, perms))
 
     # And, now, we ignore everything other than the read permissions. If
@@ -319,6 +417,79 @@ def _permissions_allow_sharing(user, group, perms):
         return True
 
     return False
+
+
+def _transfom_document_links(ann_target_uri, docdata):
+    transformed = []
+    doclinks = docdata.get('link', [])
+
+    # When document link is just a string, transform it to a link object with
+    # an href, so it gets further processed as either a self-claim or another
+    # claim.
+    if isinstance(doclinks, basestring):
+        doclinks = [{"href": doclinks}]
+
+    for link in doclinks:
+        # disregard self-claim urls as they're are being added separately
+        # later on.
+        if link.keys() == ['href'] and link['href'] == ann_target_uri:
+            continue
+
+        # disregard doi links as these are being added separately from the
+        # highwire and dc metadata later on.
+        if link.keys() == ['href'] and link['href'].startswith('doi:'):
+            continue
+
+        uri_ = link['href']
+        type = None
+
+        # highwire pdf (href, type=application/pdf)
+        if set(link.keys()) == set(['href', 'type']) and len(link.keys()) == 2:
+            type = 'highwire-pdf'
+
+        if type is None and link.get('rel') is not None:
+            type = 'rel-{}'.format(link['rel'])
+
+        content_type = None
+        if link.get('type'):
+            content_type = link['type']
+
+        transformed.append({
+            'claimant': ann_target_uri,
+            'uri': uri_,
+            'type': type,
+            'content_type': content_type})
+
+    # Add highwire doi link based on metadata
+    hwdoivalues = docdata.get('highwire', {}).get('doi', [])
+    for doi in hwdoivalues:
+        if not doi.startswith('doi:'):
+            doi = "doi:{}".format(doi)
+
+        transformed.append({
+            'claimant': ann_target_uri,
+            'uri': doi,
+            'type': 'highwire-doi'})
+
+    # Add dc doi link based on metadata
+    dcdoivalues = docdata.get('dc', {}).get('identifier', [])
+    for doi in dcdoivalues:
+        if not doi.startswith('doi:'):
+            doi = "doi:{}".format(doi)
+
+        transformed.append({
+            'claimant': ann_target_uri,
+            'uri': doi,
+            'type': 'dc-doi'})
+
+    # add self claim
+    transformed.append({
+        'claimant': ann_target_uri,
+        'uri': ann_target_uri,
+        'type': 'self-claim'})
+
+    return transformed
+
 
 if __name__ == '__main__':
     main()
