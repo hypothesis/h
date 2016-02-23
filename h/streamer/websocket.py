@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
 import json
 import logging
 import weakref
 
+from gevent.queue import Full
 import jsonschema
 from pyramid.threadlocal import get_current_request
 from ws4py.websocket import WebSocket as _WebSocket
@@ -12,6 +14,9 @@ from h.api import storage
 from h.streamer import filter
 
 log = logging.getLogger(__name__)
+
+# An incoming message from a WebSocket client.
+Message = namedtuple('Message', ['socket', 'payload'])
 
 
 class WebSocket(_WebSocket):
@@ -35,59 +40,57 @@ class WebSocket(_WebSocket):
         cls.instances.add(instance)
         return instance
 
-    def opened(self):
-        # Release the database connection
-        self.request.db.commit()
-        self.request.db.close()
-
-    def _expand_clauses(self, payload):
-        for clause in payload['clauses']:
-            if clause['field'] == '/uri':
-                self._expand_uris(clause)
-
-    def _expand_uris(self, clause):
-        uris = clause['value']
-        expanded = set()
-
-        if not isinstance(uris, list):
-            uris = [uris]
-
-        # FIXME: this is a temporary hack to allow us to disable URI
-        # equivalence support on the streamer while we debug a number of
-        # issues related to connection pool exhaustion for the websocket
-        # server.  -NS 2016-02-19
-        if self.request.feature('ops_disable_streamer_uri_equivalence'):
-            expanded.update(uris)
-        else:
-            for item in uris:
-                expanded.update(storage.expand_uri(item))
-
-        clause['value'] = list(expanded)
-
     def received_message(self, msg):
-        self._process_message(msg)
-        self.request.db.commit()
-        self.request.db.close()
-
-    def _process_message(self, msg):
+        work_queue = self.request.registry['streamer.work_queue']
         try:
-            data = json.loads(msg.data)
-            msg_type = data.get('messageType', 'filter')
+            work_queue.put(Message(socket=self, payload=msg.data),
+                           timeout=0.1)
+        except Full:
+            log.warn('Streamer work queue full! Unable to queue message from '
+                     'WebSocket client having waited 0.1s: giving up.')
 
-            if msg_type == 'filter':
-                payload = data['filter']
 
-                # Let's try to validate the schema
-                jsonschema.validate(payload, filter.SCHEMA)
+def handle_message(message):
+    socket = message.socket
 
-                # Add backend expands for clauses
-                self._expand_clauses(payload)
+    data = json.loads(message.payload)
 
-                self.filter = filter.FilterHandler(payload)
-            elif msg_type == 'client_id':
-                self.client_id = data.get('value')
-        except:
-            # TODO: clean this up, catch specific errors, narrow the scope
-            log.exception("Parsing filter: %s", msg)
-            self.close()
-            raise
+    try:
+        msg_type = data.get('messageType', 'filter')
+
+        if msg_type == 'filter':
+            payload = data['filter']
+
+            # Let's try to validate the schema
+            jsonschema.validate(payload, filter.SCHEMA)
+
+            # Add backend expands for clauses
+            _expand_clauses(payload)
+
+            socket.filter = filter.FilterHandler(payload)
+        elif msg_type == 'client_id':
+            socket.client_id = data.get('value')
+    except:
+        # TODO: clean this up, catch specific errors, narrow the scope
+        log.exception("Parsing filter: %s", data)
+        socket.close()
+        raise
+
+
+def _expand_clauses(payload):
+    for clause in payload['clauses']:
+        if clause['field'] == '/uri':
+            _expand_uris(clause)
+
+
+def _expand_uris(clause):
+    uris = clause['value']
+    expanded = set()
+
+    if not isinstance(uris, list):
+        uris = [uris]
+
+    for item in uris:
+        expanded.update(storage.expand_uri(item))
+
+    clause['value'] = list(expanded)

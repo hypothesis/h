@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import base64
-import functools
+from collections import namedtuple
 import json
 import logging
 import random
 import struct
+
+from gevent.queue import Full
 
 from h import queue
 from h.api import auth
@@ -19,28 +21,53 @@ log = logging.getLogger(__name__)
 ANNOTATIONS_TOPIC = 'annotations'
 USER_TOPIC = 'user'
 
+# An incoming message from a subscribed NSQ topic
+Message = namedtuple('Message', ['topic', 'payload'])
 
-def process_queue(settings, topic, handler):
+
+def process_nsq_topic(settings, topic, work_queue, raise_error=True):
     """
     Configure, start, and monitor a queue reader for the specified topic.
 
     This sets up a :py:class:`gnsq.Reader` to route messages from `topic` to
-    `handler`, and starts it. The reader should never return. If it does, this
-    fact is logged and the function returns.
+    the passed `work_queue`, and starts it. The reader should never return. If
+    it does, this function will raise an exception.
+
+    If `raise_error` is False, the function will not reraise errors from the
+    queue reader.
     """
     channel = 'stream-{}#ephemeral'.format(_random_id())
-    receiver = functools.partial(process_message, handler)
     reader = queue.get_reader(settings, topic, channel)
-    reader.on_message.connect(receiver=receiver, weak=False)
-    reader.start(block=True)
 
-    # We should never get here. If we do, it's because a reader thread has
-    # prematurely quit.
-    log.error("queue reader for topic '%s' exited: killing reader", topic)
-    reader.close()
+    # The only thing queue readers do is put the incoming messages onto the
+    # work queue.
+    #
+    # Note that this means that any errors occurring while handling the
+    # messages will not result in requeues, but this is probably the best we
+    # can do given that these messages fan out to our WebSocket clients, and we
+    # can't easily know that we haven't already sent a requeued message out to
+    # a particular client.
+    def _handler(reader, message):
+        try:
+            work_queue.put(Message(topic=reader.topic, payload=message.body),
+                           timeout=0.1)
+        except Full:
+            log.warn('Streamer work queue full! Unable to queue message from '
+                     'NSQ having waited 0.1s: giving up.')
+
+    reader.on_message.connect(receiver=_handler, weak=False)
+    reader.start()
+
+    # Reraise any exceptions raised by reader greenlets
+    reader.join(raise_error=raise_error)
+
+    # We should never get here: if we do, it means that the reader exited
+    # without raising an exception, which doesn't make much sense.
+    if raise_error:
+        raise RuntimeError('Queue reader quit unexpectedly!')
 
 
-def process_message(handler, reader, message):
+def handle_message(message, topic_handlers=None):
     """
     Deserialize and process a message from the reader.
 
@@ -50,11 +77,20 @@ def process_message(handler, reader, message):
     `None`, to signify that no message should be sent, or a JSON-serializable
     object. It is assumed that there is a 1:1 request-reply mapping between
     incoming messages and messages to be sent out over the websockets.
-
-    Any exceptions thrown by this function or by `handler` will be caught by
-    :py:class:`gnsq.Reader` and the message will be requeued as a result.
     """
-    data = json.loads(message.body)
+    if topic_handlers is None:
+        topic_handlers = {
+            ANNOTATIONS_TOPIC: handle_annotation_event,
+            USER_TOPIC: handle_user_event,
+        }
+
+    data = json.loads(message.payload)
+
+    try:
+        handler = topic_handlers[message.topic]
+    except KeyError:
+        raise RuntimeError("Don't know how to handle message from topic: "
+                           "{}".format(message.topic))
 
     # N.B. We iterate over a non-weak list of instances because there's nothing
     # to stop connections being added or dropped during iteration, and if that

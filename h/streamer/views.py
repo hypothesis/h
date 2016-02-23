@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from pyramid import httpexceptions
 from pyramid.config import aslist
-from pyramid.httpexceptions import HTTPBadRequest, HTTPForbidden
 from ws4py.exc import HandshakeError
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
@@ -13,20 +13,20 @@ def websocket_view(request):
     # scripts on other sites from using this socket, ensure that the Origin
     # header (if present) matches the request host URL or is whitelisted.
     origin = request.headers.get('Origin')
-    allowed = aslist(request.registry.settings.get('origins', ''))
+    allowed = request.registry.settings['origins']
     if origin is not None:
         if origin != request.host_url and origin not in allowed:
-            return HTTPForbidden()
+            return httpexceptions.HTTPForbidden()
     app = WebSocketWSGIApplication(handler_cls=websocket.WebSocket)
     return request.get_response(app)
 
 
 def bad_handshake(exc, request):
-    return HTTPBadRequest()
+    raise httpexceptions.HTTPBadRequest()
 
 
 def includeme(config):
-    config.add_route('ws', 'ws')
+    settings = config.registry.settings
+    settings['origins'] = aslist(settings.get('origins', ''))
     config.add_view(websocket_view, route_name='ws')
     config.add_view(bad_handshake, context=HandshakeError)
-    config.scan(__name__)

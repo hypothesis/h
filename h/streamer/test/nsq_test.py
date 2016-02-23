@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from collections import namedtuple
-
+from gevent.queue import Queue
 import mock
 import pytest
 from pyramid import security
 
 from h.streamer import nsq
-
-FakeMessage = namedtuple('FakeMessage', 'body')
 
 
 class FakeSocket(object):
@@ -215,13 +212,12 @@ def test_handle_user_event_none_when_socket_is_not_event_users():
 
 
 @mock.patch('h.streamer.websocket.WebSocket')
-def test_process_message_calls_handler_once_per_socket_with_deserialized_message(websocket):
-    handler = mock.Mock()
-    handler.return_value = None
-    message = FakeMessage('{"foo": "bar"}')
+def test_handle_message_calls_handler_once_per_socket_with_deserialized_message(websocket):
+    handler = mock.Mock(return_value=None)
+    message = nsq.Message(topic='foo', payload='{"foo": "bar"}')
     websocket.instances = [FakeSocket('a'), FakeSocket('b')]
 
-    nsq.process_message(handler, mock.Mock(), message)
+    nsq.handle_message(message, topic_handlers={'foo': handler})
 
     assert handler.mock_calls == [
         mock.call({'foo': 'bar'}, websocket.instances[0]),
@@ -230,82 +226,96 @@ def test_process_message_calls_handler_once_per_socket_with_deserialized_message
 
 
 @mock.patch('h.streamer.websocket.WebSocket')
-def test_process_message_sends_serialized_messages_down_websocket(websocket):
-    handler = mock.Mock()
-    handler.return_value = {'just': 'some message'}
-    message = FakeMessage('{"foo": "bar"}')
+def test_handle_message_sends_serialized_messages_down_websocket(websocket):
+    handler = mock.Mock(return_value={'just': 'some message'})
+    message = nsq.Message(topic='foo', payload='{"foo": "bar"}')
     socket = FakeSocket('a')
     websocket.instances = [socket]
 
-    nsq.process_message(handler, mock.Mock(), message)
+    nsq.handle_message(message, topic_handlers={'foo': handler})
 
     socket.send.assert_called_once_with('{"just": "some message"}')
 
 
 @mock.patch('h.streamer.websocket.WebSocket')
-def test_process_message_does_not_send_messages_down_websocket_if_handler_response_is_none(websocket):
-    handler = mock.Mock()
-    handler.return_value = None
-    message = FakeMessage('{"foo": "bar"}')
+def test_handle_message_does_not_send_messages_down_websocket_if_handler_response_is_none(websocket):
+    handler = mock.Mock(return_value=None)
+    message = nsq.Message(topic='foo', payload='{"foo": "bar"}')
     socket = FakeSocket('a')
     websocket.instances = [socket]
 
-    nsq.process_message(handler, mock.Mock(), message)
+    nsq.handle_message(message, topic_handlers={'foo': handler})
 
     assert socket.send.call_count == 0
 
 
 @mock.patch('h.streamer.websocket.WebSocket')
-def test_process_message_does_not_send_messages_down_websocket_if_socket_terminated(websocket):
-    handler = mock.Mock()
-    handler.return_value = {'just': 'some message'}
-    message = FakeMessage('{"foo": "bar"}')
+def test_handle_message_does_not_send_messages_down_websocket_if_socket_terminated(websocket):
+    handler = mock.Mock(return_value={'just': 'some message'})
+    message = nsq.Message(topic='foo', payload='{"foo": "bar"}')
     socket = FakeSocket('a')
     socket.terminated = True
     websocket.instances = [socket]
 
-    nsq.process_message(handler, mock.Mock(), message)
+    nsq.handle_message(message, topic_handlers={'foo': handler})
 
     assert socket.send.call_count == 0
 
 
-def test_process_queue_creates_reader_for_topic(get_reader):
-    settings = {'foo': 'bar'}
+def test_process_nsq_topic_creates_reader_for_topic(get_reader):
+    settings = {}
+    queue = Queue()
 
-    nsq.process_queue(settings, 'donkeys', lambda m, s: None)
+    nsq.process_nsq_topic(settings, 'donkeys', queue, raise_error=False)
 
     get_reader.assert_any_call(settings, 'donkeys', mock.ANY)
 
 
-@mock.patch('h.streamer.nsq.process_message')
-def test_process_queue_connects_reader_on_message_to_process_message(process_message, get_reader):
-    settings = {'foo': 'bar'}
-    handler = mock.Mock()
+def test_process_nsq_topic_connects_reader_on_message_to_handle_message(get_reader):
+    settings = {}
+    queue = Queue()
+    message = mock.Mock(body='hello')
     reader = get_reader.return_value
+    reader.topic = 'donkeys'
 
-    nsq.process_queue(settings, 'donkeys', handler)
+    nsq.process_nsq_topic(settings, 'donkeys', queue, raise_error=False)
     message_handler = reader.on_message.connect.call_args[1]['receiver']
-    message_handler(reader, 'message')
+    message_handler(reader, message)
+    result = queue.get_nowait()
 
-    process_message.assert_called_once_with(handler, reader, 'message')
+    assert result.topic == 'donkeys'
+    assert result.payload == 'hello'
 
 
-def test_process_queue_starts_reader(get_reader):
-    settings = {'foo': 'bar'}
+def test_process_nsq_topic_starts_reader(get_reader):
+    settings = {}
     reader = get_reader.return_value
+    queue = Queue()
 
-    nsq.process_queue(settings, 'donkeys', lambda m, s: None)
+    nsq.process_nsq_topic(settings, 'donkeys', queue, raise_error=False)
 
-    reader.start.assert_called_once_with(block=True)
+    reader.start.assert_called_once_with()
 
 
-def test_process_queue_close_readers_explicitly_if_it_stops(get_reader):
-    settings = {'foo': 'bar'}
+def test_process_nsq_topic_joins_reader(get_reader):
+    settings = {}
     reader = get_reader.return_value
+    queue = Queue()
 
-    nsq.process_queue(settings, 'gorillas', lambda m, s: None)
+    nsq.process_nsq_topic(settings, 'gorillas', queue, raise_error=False)
 
-    reader.close.assert_called_once_with()
+    reader.join.assert_called_once_with(raise_error=False)
+
+
+def test_process_nsq_topic_raises_if_reader_exits_early(get_reader):
+    settings = {}
+    reader = get_reader.return_value
+    queue = Queue()
+
+    with pytest.raises(RuntimeError):
+        nsq.process_nsq_topic(settings, 'gorillas', queue)
+
+    reader.join.assert_called_once_with(raise_error=True)
 
 
 @pytest.fixture
