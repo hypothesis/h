@@ -8,27 +8,27 @@ from h.accounts import events
 
 @subscriber(events.LoginEvent)
 def login(event):
-    event.request.stats.get_counter('auth.local.login').increment()
+    event.request.stats.incr('auth.local.login')
 
 
 @subscriber(events.LogoutEvent)
 def logout(event):
-    event.request.stats.get_counter('auth.local.logout').increment()
+    event.request.stats.incr('auth.local.logout')
 
 
 @subscriber(events.RegistrationEvent)
 def registration(event):
-    event.request.stats.get_counter('auth.local.register').increment()
+    event.request.stats.incr('auth.local.register')
 
 
 @subscriber(events.PasswordResetEvent)
 def password_reset(event):
-    event.request.stats.get_counter('auth.local.reset_password').increment()
+    event.request.stats.incr('auth.local.reset_password')
 
 
 @subscriber(events.ActivationEvent)
 def activation(event):
-    event.request.stats.get_counter('auth.local.activate').increment()
+    event.request.stats.incr('auth.local.activate')
 
 
 def includeme(config):
