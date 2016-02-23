@@ -99,7 +99,7 @@ $base-font-size: 14px;
   // frame styles
   @import './bucket-bar';
   @include user-select(none);
-  @extend .noise;
+  @include noise-background;
   direction: ltr;
   background: none;
   font-size: $base-font-size;
