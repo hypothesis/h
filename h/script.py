@@ -16,6 +16,7 @@ from pyramid.request import Request
 
 from h import __version__
 from h import accounts
+from h import db
 from h.api.search import config as search_config
 from h._compat import PY2, text_type
 
@@ -80,7 +81,7 @@ def admin(args):
     """Make a user an admin."""
     request = bootstrap(args)
     accounts.make_admin(args.username)
-    request.tm.commit()
+    db.Session.commit()
 
 parser_admin = subparsers.add_parser('admin', help=admin.__doc__)
 _add_common_args(parser_admin)
