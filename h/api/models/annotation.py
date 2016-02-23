@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from pyramid import security
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from h.api import uri
@@ -79,6 +80,12 @@ class Annotation(Base, mixins.Timestamps):
     #: Any additional serialisable data provided by the client.
     extra = sa.Column(pg.JSONB, nullable=True)
 
+    document_uris = sa.orm.relationship('DocumentURI',
+                                        viewonly=True,
+                                        foreign_keys='DocumentURI.uri_normalized',
+                                        primaryjoin='DocumentURI.uri_normalized == Annotation.target_uri_normalized')
+    documents = association_proxy('document_uris', 'document')
+
     @hybrid_property
     def target_uri(self):
         return self._target_uri
@@ -91,6 +98,11 @@ class Annotation(Base, mixins.Timestamps):
     @hybrid_property
     def target_uri_normalized(self):
         return self._target_uri_normalized
+
+    @hybrid_property
+    def document(self):
+        if self.documents:
+            return self.documents[0]
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
