@@ -27,25 +27,33 @@ class Document(Base, mixins.Timestamps):
         return '<Document %s>' % self.id
 
     @classmethod
-    def find_or_create_by_uris(cls, claimant_uri, uris,
+    def find_by_uris(cls, session, uris):
+        """Find documents by a list of uris."""
+        query_uris = [text_type(uri.normalize(u), 'utf-8') for u in uris]
+
+        matching_claims = (
+            session.query(DocumentURI)
+                   .filter(DocumentURI.uri_normalized.in_(query_uris))
+                   .distinct(DocumentURI.document_id)
+                   .subquery()
+        )
+
+        return session.query(Document).join(matching_claims)
+
+    @classmethod
+    def find_or_create_by_uris(cls, session, claimant_uri, uris,
                                created=None, updated=None):
         """
-        Find or create documents from a claimant uri and a set of uris.
+        Find or create documents from a claimant uri and a list of uris.
 
-        It tries to find a document based on he claimant and the set of uris.
+        It tries to find a document based on the claimant and the set of uris.
         If none can be found it will return a new document with the claimant
-        uri as its only document uri as a self-claim.
+        uri as its only document uri as a self-claim. It is the callers
+        responsibility to create any other document uris.
         """
 
-        normalized_claimant = text_type(uri.normalize(claimant_uri), 'utf-8')
-        query_uris = ([normalized_claimant] +
-                      [text_type(uri.normalize(u), 'utf-8') for u in uris])
-
-        matching_claims = (DocumentURI.query.filter(
-                DocumentURI.uri_normalized.in_(query_uris))
-                .distinct(DocumentURI.document_id).subquery())
-        matching_claims_aliased = aliased(DocumentURI, matching_claims)
-        documents = Document.query.join(matching_claims_aliased)
+        finduris = [claimant_uri] + uris
+        documents = cls.find_by_uris(session, finduris)
 
         if documents.count() == 0:
             doc = Document(created=created, updated=updated)
@@ -55,7 +63,7 @@ class Document(Base, mixins.Timestamps):
                         type='self-claim',
                         created=created,
                         updated=updated)
-            Document.query.session.add(doc)
+            session.add(doc)
 
         return documents
 

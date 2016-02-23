@@ -232,7 +232,7 @@ def annotation_from_data(id, data):
 def document_objs_from_data(data, ann):
     links = _transfom_document_links(ann.target_uri, data)
     uris = [link['uri'] for link in links]
-    documents = Document.find_or_create_by_uris(ann.target_uri, uris,
+    documents = Document.find_or_create_by_uris(Session, ann.target_uri, uris,
                                                 created=ann.created,
                                                 updated=ann.updated)
 
