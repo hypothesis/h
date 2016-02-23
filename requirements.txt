@@ -1,4 +1,4 @@
--e .[YAML]
+-e .
 certifi
 cffi
 gunicorn

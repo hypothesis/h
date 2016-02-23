@@ -92,7 +92,6 @@ INSTALL_REQUIRES = [
 DEV_EXTRAS = ['pyramid_debugtoolbar>=2.1', 'prospector[with_pyroma]', 'pep257',
               'sphinxcontrib-httpdomain']
 TESTING_EXTRAS = ['mock>=1.3.0', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
-YAML_EXTRAS = ['PyYAML']
 
 setup(
     name='h',
@@ -117,9 +116,8 @@ setup(
     zip_safe=False,
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'dev': DEV_EXTRAS + YAML_EXTRAS,
+        'dev': DEV_EXTRAS,
         'testing': TESTING_EXTRAS,
-        'YAML': YAML_EXTRAS,
     },
     tests_require=DEV_EXTRAS + TESTING_EXTRAS,
     cmdclass={'test': PyTest, 'sdist': sdist},

@@ -166,7 +166,7 @@ def build_chrome(args):
                         'build/chrome/lib/extension.bundle.js.map')
 
     assets_env = assets.Environment('/public',
-                                    'h/assets.yaml',
+                                    'h/assets.ini',
                                     'build/manifest.json')
 
     for bundle in ['app_js', 'app_css', 'inject_js', 'inject_css']:
