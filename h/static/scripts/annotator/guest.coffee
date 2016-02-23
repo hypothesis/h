@@ -1,4 +1,3 @@
-Promise = require('core-js/library/es6/promise')
 baseURI = require('document-base-uri')
 extend = require('extend')
 raf = require('raf')

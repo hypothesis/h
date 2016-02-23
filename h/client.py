@@ -40,10 +40,6 @@ def _angular_template_context(name):
     return {'name': '{}.html'.format(name), 'content': content}
 
 
-def asset_urls(webassets_env, name):
-    return webassets_env[name].urls()
-
-
 def url_with_path(url):
     if urlparse.urlparse(url).path == '':
         return '{}/'.format(url)
@@ -51,7 +47,7 @@ def url_with_path(url):
         return url
 
 
-def _app_html_context(webassets_env, api_url, service_url, ga_tracking_id,
+def _app_html_context(assets_env, api_url, service_url, ga_tracking_id,
                       sentry_public_dsn, websocket_url):
     """
     Returns a dict of asset URLs and contents used by the sidebar app
@@ -88,15 +84,15 @@ def _app_html_context(webassets_env, api_url, service_url, ga_tracking_id,
         'app_config': json.dumps(app_config),
         'angular_templates': map(_angular_template_context,
                                  ANGULAR_DIRECTIVE_TEMPLATES),
-        'app_css_urls': asset_urls(webassets_env, 'app_css'),
-        'app_js_urls': asset_urls(webassets_env, 'app_js'),
+        'app_css_urls': assets_env.urls('app_css'),
+        'app_js_urls': assets_env.urls('app_js'),
         'ga_tracking_id': ga_tracking_id,
         'ga_cookie_domain': ga_cookie_domain,
         'register_url': service_url + 'register',
     }
 
 
-def render_app_html(webassets_env,
+def render_app_html(assets_env,
                     service_url,
                     api_url,
                     sentry_public_dsn,
@@ -107,6 +103,7 @@ def render_app_html(webassets_env,
     Return the HTML for the Hypothesis app page,
     used by the sidebar, stream and single-annotation page.
 
+    :param assets_env: The assets environment
     :param service_url: The base URL of the Hypothesis service
                      (eg. https://hypothes.is/)
     :param api_url: The root URL for the Hypothesis service API
@@ -123,30 +120,31 @@ def render_app_html(webassets_env,
                                 service_url=service_url,
                                 ga_tracking_id=ga_tracking_id,
                                 sentry_public_dsn=sentry_public_dsn,
-                                webassets_env=webassets_env,
+                                assets_env=assets_env,
                                 websocket_url=websocket_url).copy()
     if extra is not None:
         context.update(extra)
     return template.render(context)
 
 
-def render_embed_js(webassets_env, app_html_url, base_url=None):
+def render_embed_js(assets_env, app_html_url, base_url=None):
     """
     Return the code for the script which is injected into a page in order
     to load the Hypothesis annotation client into it.
 
+    :param assets_env: The assets environment
     :param app_html_url: The URL of the app.html page for the sidebar
     :param base_url: The absolute base URL of the web service
     """
 
     def absolute_asset_urls(bundle_name):
         return [urlparse.urljoin(base_url, url)
-                for url in asset_urls(webassets_env, bundle_name)]
+                for url in assets_env.urls(bundle_name)]
 
     template = jinja_env.get_template('embed.js.jinja2')
     template_args = {
         'app_html_url': app_html_url,
-        'inject_js_urls': absolute_asset_urls('inject'),
-        'wgxpath_url': absolute_asset_urls('wgxpath')[0],
+        'inject_resource_urls': absolute_asset_urls('inject_js') +
+                                absolute_asset_urls('inject_css')
     }
     return template.render(template_args)

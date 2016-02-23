@@ -1,5 +1,3 @@
-var Promise = require('core-js/library/es6/promise');
-
 var retryUtil = require('../retry-util');
 var toResult = require('./promise-util').toResult;
 

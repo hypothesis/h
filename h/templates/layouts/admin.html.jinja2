@@ -23,9 +23,9 @@
       Hypothesis: {{ page_title }}
     </title>
 
-    {% block styles %}
-      {% assets "admin_css" %}<link rel="stylesheet" href="{{ ASSET_URL }}">{% endassets %}
-    {% endblock %}
+  {% for url in asset_urls("admin_css") %}
+<link rel="stylesheet" href="{{ url }}">
+{% endfor %}
   </head>
   <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -65,8 +65,8 @@
       </div>
     </div>
 
-    {% block scripts %}
-      {% assets "admin_js" %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
-    {% endblock %}
+    {% for url in asset_urls("admin_js") %}
+    <script src="{{ url }}"></script>
+    {% endfor %}
   </body>
 </html>

@@ -63,12 +63,8 @@ window.hypothesisInstall = function (inject) {
     document.head.appendChild(script);
   };
 
-  if (!window.document.evaluate) {
-    resources.push('{{ wgxpath_url | safe }}');
-  }
-
   if (typeof window.Annotator === 'undefined') {
-    {%- for url in inject_js_urls %}
+    {%- for url in inject_resource_urls %}
     resources.push('{{ url | safe }}');
     {%- endfor %}
   }

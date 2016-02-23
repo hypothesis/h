@@ -1,7 +1,6 @@
 /* jshint node: true */
 'use strict';
 
-var Promise = require('core-js/library/es6/promise');
 var proxyquire = require('proxyquire');
 
 var events = require('../../events');
@@ -338,7 +337,9 @@ describe('annotation', function() {
         flagEnabled: sandbox.stub().returns(true)
       };
 
-      fakeFlash = sandbox.stub();
+      fakeFlash = {
+        error: sandbox.stub(),
+      };
 
       fakePermissions = {
         isShared: sandbox.stub().returns(true),
@@ -1002,7 +1003,6 @@ describe('annotation', function() {
     describe('deleteAnnotation() method', function() {
       beforeEach(function() {
         fakeAnnotationMapper.deleteAnnotation = sandbox.stub();
-        fakeFlash.error = sandbox.stub();
       });
 
       it(
@@ -1079,7 +1079,6 @@ describe('annotation', function() {
       var annotation;
 
       beforeEach(function() {
-        fakeFlash.error = sandbox.stub();
         annotation = fixtures.defaultAnnotation();
         annotation.$create = sandbox.stub();
       });
@@ -1201,7 +1200,6 @@ describe('annotation', function() {
       var annotation;
 
       beforeEach(function() {
-        fakeFlash.error = sandbox.stub();
         annotation = fixtures.defaultAnnotation();
         annotation.$update = sandbox.stub();
       });

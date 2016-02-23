@@ -10,7 +10,6 @@ include h/accounts/blacklist
 include h/assets.yaml
 graft h/migrations
 graft h/static
-prune h/static/.webassets-cache
 graft h/templates
 graft scripts
 global-exclude __pycache__

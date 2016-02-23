@@ -17,12 +17,11 @@
     "autoprefixer": "^6.0.3",
     "babelify": "^6.1.3",
     "bootstrap": "3.3.5",
-    "browserify": "^9.0.3",
+    "browserify": "^13.0.0",
     "browserify-ngannotate": "^1.0.1",
-    "browserify-shim": "^3.8.3",
-    "clean-css": "3.3.9",
-    "coffee-script": "1.7.1",
+    "browserify-shim": "^3.8.12",
     "coffeeify": "^1.0.0",
+    "compass-mixins": "^0.12.7",
     "core-js": "^1.2.5",
     "diff-match-patch": "^1.0.0",
     "document-base-uri": "^1.0.0",
@@ -30,14 +29,25 @@
     "dom-anchor-text-position": "^2.0.0",
     "dom-anchor-text-quote": "^2.0.0",
     "dom-seek": "^1.0.1",
-    "es6-promise": "^3.0.2",
+    "end-of-stream": "^1.1.0",
     "escape-html": "^1.0.3",
+    "exorcist": "^0.4.0",
     "extend": "^2.0.0",
+    "gulp": "^3.9.1",
+    "gulp-batch": "^1.0.5",
+    "gulp-changed": "^1.3.0",
+    "gulp-cli": "^1.2.1",
+    "gulp-if": "^2.0.0",
+    "gulp-postcss": "^6.1.0",
+    "gulp-sass": "^2.2.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-util": "^3.0.7",
     "hammerjs": "^2.0.4",
     "inherits": "^2.0.1",
     "is-equal-shallow": "^0.1.3",
     "jquery": "1.11.1",
     "js-polyfills": "^0.1.11",
+    "mkdirp": "^0.5.1",
     "ng-tags-input": "2.2.0",
     "node-uuid": "^1.4.3",
     "page": "^1.6.4",
@@ -45,11 +55,16 @@
     "raf": "^3.1.0",
     "raven-js": "^2.0.2",
     "retry": "^0.8.0",
+    "run-sequence": "^1.1.5",
     "scroll-into-view": "^1.3.1",
     "showdown": "^1.2.1",
+    "through2": "^2.0.1",
     "tiny-emitter": "^1.0.1",
-    "uglify-js": "^2.4.14",
-    "unorm": "^1.3.3"
+    "uglifyify": "^3.0.1",
+    "unorm": "^1.3.3",
+    "vinyl": "^1.1.1",
+    "watchify": "^3.7.0",
+    "whatwg-fetch": "^0.10.1"
   },
   "devDependencies": {
     "chai": "^3.2.0",
@@ -68,14 +83,13 @@
     "proxyquire": "^1.6.0",
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.0.0",
-    "sinon": "1.16.1",
-    "whatwg-fetch": "^0.10.1"
+    "sinon": "1.16.1"
   },
   "engines": {
     "node": "0.10.x"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build-assets": "gulp build"
   },
   "repository": {
     "type": "git",
@@ -94,21 +108,25 @@
   },
   "browser": {
     "annotator": "./h/static/scripts/vendor/annotator.js",
-    "angular": "./node_modules/angular/angular.js",
     "hammerjs": "./node_modules/hammerjs/hammer.js",
-    "jquery": "./node_modules/jquery/dist/jquery.js"
+    "katex": "./h/static/scripts/vendor/katex.js",
+    "bootstrap-lite": "./h/static/styles/vendor/bootstrap/bootstrap.js"
   },
   "browserify-shim": {
     "annotator": {
       "exports": "Annotator",
       "depends": [
-        "jquery"
+        "jquery:jQuery"
       ]
     },
     "angular": {
-      "exports": "global:angular",
       "depends": [
         "jquery"
+      ]
+    },
+    "bootstrap-lite": {
+      "depends": [
+        "jquery:jQuery"
       ]
     },
     "hammerjs": "Hammer",

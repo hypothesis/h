@@ -10,7 +10,7 @@ from h.views import main
 
 def _dummy_request():
     request = testing.DummyRequest()
-    request.webassets_env = mock.MagicMock()
+    request.assets_env = mock.MagicMock()
     request.route_url = mock.MagicMock()
     request.sentry = mock.MagicMock()
     return request

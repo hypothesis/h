@@ -9,15 +9,13 @@ RUN apk add --update \
     python \
     py-pip \
     nodejs \
-    ruby \
+    git \
   && apk add \
     libffi-dev \
     g++ \
     make \
     postgresql-dev \
     python-dev \
-    ruby-dev \
-  && gem install --no-ri compass \
   && pip install --no-cache-dir -U pip \
   && rm -rf /var/cache/apk/*
 
@@ -28,33 +26,30 @@ WORKDIR /var/lib/hypothesis
 
 # Copy packaging
 COPY h/__init__.py h/_version.py ./h/
-COPY README.rst package.json setup.* requirements.txt ./
+COPY README.rst setup.* requirements.txt ./
+COPY scripts ./scripts/
+COPY package.json gulpfile.js ./
 
 # Install application dependencies.
-RUN npm install --production \
-  && pip install --no-cache-dir -r requirements.txt \
-  && npm cache clean
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application files
 COPY gunicorn.conf.py ./
 COPY conf ./conf/
 COPY h ./h/
-COPY scripts ./scripts/
+
+# Build client and static assets
+
+## Remove dependencies required only for unit testing
+RUN npm install --production \
+  && npm cache clean
+RUN npm run build-assets
 
 # Expose the default port.
 EXPOSE 5000
 
 # Set the Python IO encoding to UTF-8.
 ENV PYTHONIOENCODING utf_8
-
-# Build the assets
-RUN hypothesis assets conf/app.ini
-
-# Allow the application to modify the webassets directory
-RUN chown -R hypothesis:hypothesis h/static/
-
-# Persist the static directory.
-VOLUME ["/var/lib/hypothesis/h/static"]
 
 # Start the web server by default
 USER hypothesis

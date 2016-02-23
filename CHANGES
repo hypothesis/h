@@ -21,6 +21,9 @@ Bug fixes
 - Fix a bug that prevented users from replying to annotations on stream search
   pages (#2978).
 
+- The icons in the sidebar now load on GitHub and other sites that
+  restrict loading of inline fonts using Content Security Policy. (#2266)
+
 Miscellaneous
 -------------
 
@@ -32,6 +35,12 @@ Miscellaneous
 
 - An important first tranche of work that will move annotation storage to
   PostgreSQL has been merged (#2955).
+
+- Source maps are now generated for production builds of the client
+  and front-end assets for easier debugging and better error reporting.
+
+- The download size of the client application has been reduced
+  by 44% from 516KB (minified and gzipped) to 290KB.
 
 0.8.15 (2016-02-12)
 ===================

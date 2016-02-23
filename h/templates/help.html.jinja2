@@ -15,9 +15,9 @@
 {% endblock %}
 
 {% block styles %}
-  {% assets "help_page_css" %}
-    <link rel="stylesheet" href="{{ ASSET_URL }}">
-  {% endassets %}
+{% for url in asset_urls("help_page_css") %}
+<link rel="stylesheet" href="{{ url }}">
+{% endfor %}
 {% endblock %}
 
 {% block content %}

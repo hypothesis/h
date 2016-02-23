@@ -1,3 +1,5 @@
+require('./polyfills')
+
 # initialize Raven. This is required at the top of this file
 # so that it happens early in the app's startup flow
 settings = require('./settings')(document)
@@ -5,9 +7,11 @@ if settings.raven
   require('./raven').init(settings.raven)
 
 
-require('autofill-event')
 angular = require('angular')
-require('angular-jwt')
+
+# autofill-event relies on the existence of window.angular so
+# it must be require'd after angular is first require'd
+require('autofill-event')
 
 streamer = require('./streamer')
 
@@ -69,17 +73,24 @@ setupHttp = ['$http', ($http) ->
 setupHost = ['host', (host) -> ]
 
 module.exports = angular.module('h', [
+  # Angular addons which export the Angular module name
+  # via module.exports
+  require('angular-jwt')
+  require('angular-animate')
+  require('angular-resource')
+  require('angular-route')
+  require('angular-sanitize')
+  require('angular-toastr')
+
+  # Angular addons which do not export the Angular module
+  # name via module.exports
+  ['angulartics', require('angulartics')][0]
+  ['angulartics.google.analytics', require('angulartics/src/angulartics-ga')][0]
+  ['ngTagsInput', require('ng-tags-input')][0]
+  ['ui.bootstrap', require('./vendor/ui-bootstrap-custom-tpls-0.13.4')][0]
+
+  # Local addons
   require('./raven').angularModule().name
-  'angulartics'
-  'angulartics.google.analytics'
-  'angular-jwt'
-  'ngAnimate'
-  'ngResource'
-  'ngRoute'
-  'ngSanitize'
-  'ngTagsInput'
-  'toastr'
-  'ui.bootstrap'
 ])
 
 .controller('AppController', require('./app-controller'))
@@ -154,3 +165,5 @@ module.exports = angular.module('h', [
 .run(setupCrossFrame)
 .run(setupHttp)
 .run(setupHost)
+
+require('./config/module')

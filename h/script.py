@@ -144,16 +144,6 @@ parser_annotool.add_argument(
     help="the operation to perform on all annotations")
 
 
-def assets(args):
-    """Build the static assets."""
-    request = bootstrap(args)
-    for bundle in request.webassets_env:
-        bundle.urls()
-
-parser_assets = subparsers.add_parser('assets', help=assets.__doc__)
-_add_common_args(parser_assets)
-
-
 def reindex(args):
     """Reindex the annotations into a new Elasticsearch index."""
     request = bootstrap(args)
@@ -232,7 +222,6 @@ parser_version = subparsers.add_parser('version', help=version.__doc__)
 
 
 COMMANDS = {
-    'assets': assets,
     'admin': admin,
     'annotool': annotool,
     'initdb': initdb,

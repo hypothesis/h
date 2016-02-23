@@ -1,3 +1,5 @@
+require('../polyfills');
+
 var extend = require('extend');
 var Annotator = require('annotator');
 

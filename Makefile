@@ -1,4 +1,3 @@
-SHELL := bash
 PATH := bin:${PATH}
 NPM_BIN = "$$(npm bin)"
 
@@ -27,15 +26,9 @@ node_modules/.uptodate: package.json
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-	rm -rf h/static/webassets-external
-	rm -f h/static/scripts/vendor/*.min.js
-	rm -f h/static/scripts/account.*js
-	rm -f h/static/scripts/app.*js
-	rm -f h/static/scripts/config.*js
-	rm -f h/static/scripts/hypothesis.*js
-	rm -f h/static/styles/*.css
 	rm -f .coverage
 	rm -f node_modules/.uptodate .eggs/.uptodate
+	rm -rf build
 
 dev: deps
 	@gunicorn --reload --paste conf/development-app.ini
@@ -58,6 +51,15 @@ client-extension-test: deps
 
 client-extension-test-watch: deps
 	@$(NPM_BIN)/karma start h/browser/chrome/karma.config.js
+
+client-assets: deps
+	@NODE_ENV=production $(NPM_BIN)/gulp build
+
+client-assets-dev: deps
+	@$(NPM_BIN)/gulp build
+
+client-assets-watch: deps
+	@$(NPM_BIN)/gulp watch
 
 cover:
 	@python setup.py test --cov
