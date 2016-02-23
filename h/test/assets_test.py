@@ -12,11 +12,12 @@ if version_info.major == 2:
 else:
     open_target = 'builtins.open'
 
-BUNDLE_YAML = \
+BUNDLE_INI = \
 """
-app_js:
-- app.bundle.js
-- vendor.bundle.js
+[bundles]
+app_js =
+  app.bundle.js
+  vendor.bundle.js
 """
 
 MANIFEST_JSON = \
@@ -29,8 +30,8 @@ MANIFEST_JSON = \
 
 
 def _fake_open(path):
-    if path == 'bundles.yaml':
-        return StringIO(BUNDLE_YAML)
+    if path == 'bundles.ini':
+        return StringIO(BUNDLE_INI)
     elif path == 'manifest.json':
         return StringIO(MANIFEST_JSON)
 
@@ -38,7 +39,7 @@ def _fake_open(path):
 @patch(open_target, _fake_open)
 @patch('os.path.getmtime')
 def test_environment_lists_bundle_files(mtime):
-    env = Environment('/assets', 'bundles.yaml', 'manifest.json')
+    env = Environment('/assets', 'bundles.ini', 'manifest.json')
 
     assert env.files('app_js') == [
         'app.bundle.js',
@@ -49,7 +50,7 @@ def test_environment_lists_bundle_files(mtime):
 @patch(open_target, _fake_open)
 @patch('os.path.getmtime')
 def test_environment_generates_bundle_urls(mtime):
-    env = Environment('/assets', 'bundles.yaml', 'manifest.json')
+    env = Environment('/assets', 'bundles.ini', 'manifest.json')
 
     assert env.urls('app_js') == [
         '/assets/app.bundle.js?abcdef',
@@ -61,17 +62,17 @@ def test_environment_generates_bundle_urls(mtime):
 @patch('os.path.getmtime')
 def test_environment_reloads_manifest_on_change(mtime, open):
     manifest_content = '{"app.bundle.js":"app.bundle.js?oldhash"}'
-    bundle_content = 'app_js:\n - app.bundle.js'
+    bundle_content = '[bundles]\napp_js = \n  app.bundle.js'
 
     def _fake_open(path):
-        if path == 'bundles.yaml':
+        if path == 'bundles.ini':
             return StringIO(bundle_content)
         elif path == 'manifest.json':
             return StringIO(manifest_content)
 
     open.side_effect = _fake_open
     mtime.return_value = 100
-    env = Environment('/assets', 'bundles.yaml', 'manifest.json')
+    env = Environment('/assets', 'bundles.ini', 'manifest.json')
 
     # An initial call to urls() should read and cache the manifest
     env.urls('app_js')

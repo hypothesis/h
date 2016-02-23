@@ -16,7 +16,7 @@ default: deps
 deps: h.egg-info/.uptodate node_modules/.uptodate
 
 h.egg-info/.uptodate: setup.py requirements.txt
-	pip install --use-wheel -e .[dev,testing,YAML]
+	pip install --use-wheel -e .[dev,testing]
 	touch $@
 
 node_modules/.uptodate: package.json

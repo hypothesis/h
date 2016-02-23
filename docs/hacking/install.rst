@@ -58,7 +58,6 @@ Install the following packages:
         libevent-dev \
         libffi-dev \
         libpq-dev \
-        libyaml-dev \
         nodejs \
         npm \
         python-dev \
@@ -96,7 +95,6 @@ Install the following packages:
     brew install \
         libevent \
         libffi \
-        libyaml \
         node \
         python
 

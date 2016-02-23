@@ -13,6 +13,11 @@ else:
     string_types = (str, unicode)
 
 try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
+
+try:
     from urllib import parse as urlparse
     url_quote = urlparse.quote
     url_quote_plus = urlparse.quote_plus

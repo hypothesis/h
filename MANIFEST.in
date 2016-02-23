@@ -7,7 +7,7 @@ graft conf
 graft docs
 prune docs/_build
 include h/accounts/blacklist
-include h/assets.yaml
+include h/assets.ini
 graft h/migrations
 graft h/static
 graft h/templates

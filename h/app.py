@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 def configure_jinja2_assets(config):
     assets_env = assets.Environment('/assets',
-                                    'h/assets.yaml',
+                                    'h/assets.ini',
                                     'build/manifest.json')
     jinja2_env = config.get_jinja2_environment()
     jinja2_env.globals['asset_urls'] = assets_env.urls
