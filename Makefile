@@ -20,7 +20,7 @@ h.egg-info/.uptodate: setup.py requirements.txt
 	touch $@
 
 node_modules/.uptodate: package.json
-	npm install
+	$(NPM_BIN)/check-dependencies || npm install
 	touch $@
 
 clean:
