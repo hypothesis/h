@@ -74,6 +74,7 @@ def test_get_writer_namespace(fake_nsqd):
     writer.publish('sometopic', 'somedata')
     fake_client.publish.assert_called_with('abc123-sometopic', 'somedata')
 
+
 @patch('gnsq.Nsqd')
 def test_writer_serializes_dict(fake_nsqd):
     fake_client = fake_nsqd.return_value
@@ -85,3 +86,27 @@ def test_writer_serializes_dict(fake_nsqd):
         'key': 'value',
     })
     fake_client.publish.assert_called_with('abc-sometopic', '{"key": "value"}')
+
+
+@pytest.mark.parametrize('topic,namespace,settings_obj,expected', [
+    # No namespace
+    ('foo', None, None, 'foo'),
+    ('foo', None, {}, 'foo'),
+    ('foo', None, {'nsq.namespace': None}, 'foo'),
+    # Namespace provided
+    ('foo', 'myns', None, 'myns-foo'),
+    ('foo', None, {'nsq.namespace': 'myns'}, 'myns-foo'),
+])
+def test_resolve_topic(topic, namespace, settings_obj, expected):
+    result = queue.resolve_topic(topic,
+                                 namespace=namespace,
+                                 settings=settings_obj)
+
+    assert result == expected
+
+
+def test_resolve_topic_raises_if_namespace_and_topic_both_given():
+    with pytest.raises(ValueError):
+        queue.resolve_topic('foo',
+                            namespace='prefix',
+                            settings={'nsq.namespace': 'prefix'})

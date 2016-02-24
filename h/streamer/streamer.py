@@ -7,6 +7,7 @@ import gevent
 
 from h import db
 from h import stats
+from h.queue import resolve_topic
 from h.streamer import nsq
 from h.streamer import websocket
 
@@ -19,6 +20,10 @@ log = logging.getLogger(__name__)
 # writing to the queue must consider their behaviour when the queue is full,
 # using .put(...) with a timeout or .put_nowait(...) as appropriate.
 WORK_QUEUE = gevent.queue.Queue(maxsize=4096)
+
+# NSQ message topics that the streamer processes messages from
+ANNOTATIONS_TOPIC = 'annotations'
+USER_TOPIC = 'user'
 
 
 class UnknownMessageType(Exception):
@@ -38,16 +43,16 @@ def start(event):
         # Start greenlets to process messages from NSQ
         gevent.spawn(nsq.process_nsq_topic,
                      settings,
-                     nsq.ANNOTATIONS_TOPIC,
+                     ANNOTATIONS_TOPIC,
                      WORK_QUEUE),
         gevent.spawn(nsq.process_nsq_topic,
                      settings,
-                     nsq.USER_TOPIC,
+                     USER_TOPIC,
                      WORK_QUEUE),
         # A greenlet to periodically report to statsd
         gevent.spawn(report_stats, settings),
         # And one to process the queued work
-        gevent.spawn(process_work_queue, WORK_QUEUE)
+        gevent.spawn(process_work_queue, settings, WORK_QUEUE)
     ]
 
     # Start a "greenlet of last resort" to monitor the worker greenlets and
@@ -55,7 +60,7 @@ def start(event):
     gevent.spawn(supervise, greenlets)
 
 
-def process_work_queue(queue, session_factory=db.Session):
+def process_work_queue(settings, queue, session_factory=db.Session):
     """
     Process each message from the queue in turn, handling exceptions.
 
@@ -65,6 +70,12 @@ def process_work_queue(queue, session_factory=db.Session):
     closed between messages.
     """
     session = session_factory()
+    annotations_topic = resolve_topic(ANNOTATIONS_TOPIC, settings=settings)
+    user_topic = resolve_topic(USER_TOPIC, settings=settings)
+    topic_handlers = {
+        annotations_topic: nsq.handle_annotation_event,
+        user_topic: nsq.handle_user_event,
+    }
 
     for msg in queue:
         try:
@@ -76,7 +87,7 @@ def process_work_queue(queue, session_factory=db.Session):
                             "DEFERRABLE")
 
             if isinstance(msg, nsq.Message):
-                nsq.handle_message(msg)
+                nsq.handle_message(msg, topic_handlers=topic_handlers)
             elif isinstance(msg, websocket.Message):
                 websocket.handle_message(msg)
             else:
