@@ -518,6 +518,92 @@ def test_users_index_user_found(User):
     }
 
 
+users_activate_fixtures = pytest.mark.usefixtures('routes_mapper',
+                                                  'User',
+                                                  'events')
+
+
+@users_activate_fixtures
+def test_users_activate_gets_user(User):
+    request = DummyRequest(params={"username": "bob"})
+
+    admin.users_activate(request)
+
+    User.get_by_username.assert_called_once_with("bob")
+
+
+@users_activate_fixtures
+def test_users_activate_flashes_error_if_no_user(User):
+    request = DummyRequest(params={"username": "bob"})
+    request.session.flash = Mock()
+    User.get_by_username.return_value = None
+
+    admin.users_activate(request)
+
+    assert request.session.flash.call_count == 1
+    assert request.session.flash.call_args[0][1] == 'error'
+
+
+@users_activate_fixtures
+def test_users_activate_redirects_if_no_user(User):
+    request = DummyRequest(params={"username": "bob"})
+    User.get_by_username.return_value = None
+
+    result = admin.users_activate(request)
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+
+
+@users_activate_fixtures
+def test_users_activate_activates_user(User):
+    request = DummyRequest(params={"username": "bob"})
+
+    admin.users_activate(request)
+
+    User.get_by_username.return_value.activate.assert_called_once_with()
+
+
+@users_activate_fixtures
+def test_users_activate_flashes_success():
+    request = DummyRequest(params={"username": "bob"})
+    request.session.flash = Mock()
+
+    admin.users_activate(request)
+
+    assert request.session.flash.call_count == 1
+    assert request.session.flash.call_args[0][1] == 'success'
+
+
+@users_activate_fixtures
+def test_users_activate_inits_ActivationEvent(events, User):
+    request = DummyRequest(params={"username": "bob"})
+
+    admin.users_activate(request)
+
+    events.ActivationEvent.assert_called_once_with(
+        request, User.get_by_username.return_value)
+
+
+@users_activate_fixtures
+def test_users_activate_calls_notify(events, User):
+    request = DummyRequest(params={"username": "bob"})
+    request.registry.notify = Mock(spec=lambda event: None)
+
+    admin.users_activate(request)
+
+    request.registry.notify.assert_called_once_with(
+        events.ActivationEvent.return_value)
+
+
+@users_activate_fixtures
+def test_users_activate_redirects(User):
+    request = DummyRequest(params={"username": "bob"})
+
+    result = admin.users_activate(request)
+
+    assert isinstance(result, httpexceptions.HTTPFound)
+
+
 users_delete_fixtures = pytest.mark.usefixtures('routes_mapper', 'User',
                                                 'delete_user')
 
@@ -816,3 +902,11 @@ def delete_user(request):
     function = patcher.start()
     request.addfinalizer(patcher.stop)
     return function
+
+
+@pytest.fixture
+def events(request):
+    patcher = patch('h.admin.events', autospec=True)
+    module = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return module

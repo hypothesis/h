@@ -132,3 +132,17 @@ def test_staff_members_does_not_return_non_staff_users():
 
     for non_staff in non_staff:
         assert non_staff not in staff
+
+
+def test_User_activate_activates_user():
+    user = models.User(username='kiki', email='kiki@kiki.com',
+                       password='password')
+    activation = models.Activation()
+    user.activation = activation
+    db.Session.add(user)
+    db.Session.flush()
+
+    user.activate()
+    db.Session.commit()
+
+    assert user.is_activated
