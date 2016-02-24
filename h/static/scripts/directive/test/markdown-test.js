@@ -50,18 +50,17 @@ describe('markdown', function () {
             fn();
           };
         },
+        '../render-markdown': noCallThru(function (markdown, $sanitize) {
+          return $sanitize('rendered:' + markdown);
+        }),
+
         '../markdown-commands': {
           convertSelectionToLink: mockFormattingCommand,
           toggleBlockStyle: mockFormattingCommand,
           toggleSpanStyle: mockFormattingCommand,
           LinkType: require('../../markdown-commands').LinkType,
-        },
-      })))
-      .filter('converter', function () {
-        return function (input) {
-          return 'rendered:' + input;
-        };
-      });
+        }),
+      }));
   });
 
   beforeEach(function () {
@@ -100,17 +99,6 @@ describe('markdown', function () {
     it('should render nothing if no text is provided', function () {
       var editor = util.createDirective(document, 'markdown', {readOnly: true});
       assert.equal(getRenderedHTML(editor), 'rendered:');
-    });
-  });
-
-  describe('math rendering', function () {
-    it('should render LaTeX', function () {
-      var editor = util.createDirective(document, 'markdown', {
-        readOnly: true,
-        text: '$$x*2$$',
-      });
-      assert.equal(getRenderedHTML(editor),
-        'rendered:math:\\displaystyle {x*2}rendered:');
     });
   });
 

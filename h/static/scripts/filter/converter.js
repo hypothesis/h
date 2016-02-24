@@ -1,6 +1,8 @@
+'use strict';
+
 var showdown = require('showdown');
 
-function targetBlank(converter) {
+function targetBlank() {
   function filter(text) {
     return text.replace(/<a href=/g, '<a target="_blank" href=');
   }

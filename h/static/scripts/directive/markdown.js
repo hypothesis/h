@@ -2,10 +2,10 @@
 
 var angular = require('angular');
 var debounce = require('lodash.debounce');
-var katex = require('katex');
 
 var commands = require('../markdown-commands');
 var mediaEmbedder = require('../media-embedder');
+var renderMarkdown = require('../render-markdown');
 
 /**
  * @ngdoc directive
@@ -16,7 +16,7 @@ var mediaEmbedder = require('../media-embedder');
  * the markdown editor.
  */
 // @ngInject
-module.exports = function($filter, $sanitize) {
+module.exports = function($sanitize) {
   return {
     controller: function () {},
     link: function(scope, elem) {
@@ -132,94 +132,6 @@ module.exports = function($filter, $sanitize) {
         scope.preview = !scope.preview;
       };
 
-      var renderInlineMath = function(textToCheck) {
-        var re = /\\?\\\(|\\?\\\)/g;
-        var startMath = null;
-        var endMath = null;
-        var match;
-        var indexes = [];
-        while ((match = re.exec(textToCheck))) {
-          indexes.push(match.index);
-        }
-        for (var i = 0, index; i < indexes.length; i++) {
-          index = indexes[i];
-          if (startMath === null) {
-            startMath = index + 2;
-          } else {
-            endMath = index;
-          }
-          if (startMath !== null && endMath !== null) {
-            try {
-              var math = katex.renderToString(textToCheck.substring(startMath, endMath));
-              textToCheck = (
-                  textToCheck.substring(0, (startMath - 2)) + math +
-                  textToCheck.substring(endMath + 2)
-                  );
-              startMath = null;
-              endMath = null;
-              return renderInlineMath(textToCheck);
-            } catch (error) {
-              $sanitize(textToCheck.substring(startMath, endMath));
-            }
-          }
-        }
-        return textToCheck;
-      };
-
-      var renderMathAndMarkdown = function(textToCheck) {
-        var convert = $filter('converter');
-        var re = /\$\$/g;
-
-        var startMath = 0;
-        var endMath = 0;
-
-        var indexes = (function () {
-          var match;
-          var result = [];
-          while ((match = re.exec(textToCheck))) {
-            result.push(match.index);
-          }
-          return result;
-        })();
-        indexes.push(textToCheck.length);
-
-        var parts = (function () {
-          var result = [];
-
-          /* jshint -W083 */
-          for (var i = 0, index; i < indexes.length; i++) {
-            index = indexes[i];
-
-            result.push((function () {
-              if (startMath > endMath) {
-                endMath = index + 2;
-                try {
-                  // \\displaystyle tells KaTeX to render the math in display style (full sized fonts).
-                  return katex.renderToString($sanitize("\\displaystyle {" + textToCheck.substring(startMath, index) + "}"));
-                } catch (error) {
-                  return $sanitize(textToCheck.substring(startMath, index));
-                }
-              } else {
-                startMath = index + 2;
-                return $sanitize(convert(renderInlineMath(textToCheck.substring(endMath, index))));
-              }
-            })());
-          }
-          /* jshint +W083 */
-          return result;
-        })();
-
-        var htmlString = parts.join('');
-
-        // Transform the HTML string into a DOM element.
-        var domElement = document.createElement('div');
-        domElement.innerHTML = htmlString;
-
-        mediaEmbedder.replaceLinksWithEmbeds(domElement);
-
-        return domElement.innerHTML;
-      };
-
       // React to the changes to the input
       var handleInputChange = debounce(function () {
         scope.$apply(function () {
@@ -230,15 +142,16 @@ module.exports = function($filter, $sanitize) {
 
       // Re-render the markdown when the view needs updating.
       scope.$watch('text', function () {
-        output.innerHTML = renderMathAndMarkdown(scope.text || '');
+        output.innerHTML = renderMarkdown(scope.text || '', $sanitize);
+        mediaEmbedder.replaceLinksWithEmbeds(output);
       });
 
       scope.showEditor = function () {
         return !scope.readOnly && !scope.preview;
       };
 
+      // Exit preview mode when leaving edit mode
       scope.$watch('readOnly', function () {
-        // Exit preview mode when editor stops
         scope.preview = false;
       });
 
