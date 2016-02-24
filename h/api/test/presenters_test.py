@@ -2,11 +2,106 @@
 
 import datetime
 import mock
+import pytest
 
+from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import DocumentJSONPresenter
 from h.api.presenters import DocumentMetaJSONPresenter
 from h.api.presenters import DocumentURIJSONPresenter
 from h.api.presenters import utc_iso8601, deep_merge_dict
+
+
+class TestAnnotationJSONPresenter(object):
+    def test_asdict(self, document_asdict):
+        ann = mock.Mock(id='the-id',
+                        created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
+                        updated=datetime.datetime(2016, 2, 29, 10, 24, 5, 564),
+                        userid='acct:luke',
+                        target_uri='http://example.com',
+                        text='It is magical!',
+                        tags=['magic'],
+                        groupid='__world__',
+                        shared=True,
+                        target_selectors=[{'TestSelector': 'foobar'}],
+                        references=['referenced-id-1', 'referenced-id-2'],
+                        extra={'extra-1': 'foo', 'extra-2': 'bar'})
+
+        document_asdict.return_value = {'foo': 'bar'}
+
+        expected = {'id': 'the-id',
+                    'created': '2016-02-24T18:03:25.000768+00:00',
+                    'updated': '2016-02-29T10:24:05.000564+00:00',
+                    'user': 'acct:luke',
+                    'uri': 'http://example.com',
+                    'text': 'It is magical!',
+                    'tags': ['magic'],
+                    'group': '__world__',
+                    'permission': {'read': ['group:__world__'],
+                                   'admin': ['acct:luke'],
+                                   'update': ['acct:luke'],
+                                   'delete': ['acct:luke']},
+                    'target': [{'source': 'http://example.com',
+                                'selector': [{'TestSelector': 'foobar'}]}],
+                    'document': {'foo': 'bar'},
+                    'references': ['referenced-id-1', 'referenced-id-2'],
+                    'extra-1': 'foo',
+                    'extra-2': 'bar'}
+        assert expected == AnnotationJSONPresenter(ann).asdict()
+
+    def test_asdict_extra_cannot_override_other_data(self, document_asdict):
+        ann = mock.Mock(id='the-real-id', extra={'id': 'the-extra-id'})
+        document_asdict.return_value = {}
+
+        presented = AnnotationJSONPresenter(ann).asdict()
+        assert presented['id'] == 'the-real-id'
+
+    def test_tags(self):
+        ann = mock.Mock(tags=['interesting', 'magic'])
+        presenter = AnnotationJSONPresenter(ann)
+
+        assert ['interesting', 'magic'] == presenter.tags
+
+    def test_tags_missing(self):
+        ann = mock.Mock(tags=None)
+        presenter = AnnotationJSONPresenter(ann)
+
+        assert [] == presenter.tags
+
+    @pytest.mark.parametrize('annotation,action,expected', [
+        (mock.Mock(userid='acct:luke', shared=False), 'read', ['acct:luke']),
+        (mock.Mock(groupid='__world__', shared=True), 'read', ['group:__world__']),
+        (mock.Mock(groupid='lulapalooza', shared=True), 'read', ['group:lulapalooza']),
+        (mock.Mock(userid='acct:luke'), 'admin', ['acct:luke']),
+        (mock.Mock(userid='acct:luke'), 'update', ['acct:luke']),
+        (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
+        ])
+    def test_permission(self, annotation, action, expected):
+        presenter = AnnotationJSONPresenter(annotation)
+        assert expected == presenter.permission[action]
+
+    def test_target(self):
+        ann = mock.Mock(target_uri='http://example.com',
+                        target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
+
+        expected = [{'source': 'http://example.com', 'selector': {'PositionSelector': {'start': 0, 'end': 12}}}]
+        actual = AnnotationJSONPresenter(ann).target
+        assert expected == actual
+
+    def test_target_missing_selectors(self):
+        ann = mock.Mock(target_uri='http://example.com',
+                        target_selectors=None)
+
+        expected = [{'source': 'http://example.com', 'selector': []}]
+        actual = AnnotationJSONPresenter(ann).target
+        assert expected == actual
+
+    @pytest.fixture
+    def document_asdict(self, request):
+        patcher = mock.patch('h.api.presenters.DocumentJSONPresenter.asdict',
+                             autospec=True)
+        method = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return method
 
 
 class TestDocumentJSONPresenter(object):

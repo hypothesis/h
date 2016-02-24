@@ -6,6 +6,69 @@ Presenters for API data.
 import collections
 
 
+class AnnotationJSONPresenter(object):
+    def __init__(self, annotation):
+        self.annotation = annotation
+
+    def asdict(self):
+        docpresenter = DocumentJSONPresenter(self.annotation.document)
+
+        base = {
+            'id': self.annotation.id,
+            'created': self.created,
+            'updated': self.updated,
+            'user': self.annotation.userid,
+            'uri': self.annotation.target_uri,
+            'text': self.annotation.text,
+            'tags': self.tags,
+            'group': self.annotation.groupid,
+            'permission': self.permission,
+            'target': self.target,
+            'document': docpresenter.asdict(),
+        }
+
+        if self.annotation.references:
+            base['references'] = self.annotation.references
+
+        annotation = self.annotation.extra or {}
+        annotation.update(base)
+
+        return annotation
+
+    @property
+    def created(self):
+        if self.annotation.created:
+            return utc_iso8601(self.annotation.created)
+
+    @property
+    def updated(self):
+        if self.annotation.updated:
+            return utc_iso8601(self.annotation.updated)
+
+    @property
+    def tags(self):
+        if self.annotation.tags:
+            return self.annotation.tags
+        else:
+            return []
+
+    @property
+    def permission(self):
+        read = self.annotation.userid
+        if self.annotation.shared:
+            read = 'group:{}'.format(self.annotation.groupid)
+
+        return {'read': [read],
+                'admin': [self.annotation.userid],
+                'update': [self.annotation.userid],
+                'delete': [self.annotation.userid]}
+
+    @property
+    def target(self):
+        return [{'source': self.annotation.target_uri,
+                 'selector': self.annotation.target_selectors or []}]
+
+
 class DocumentJSONPresenter(object):
     def __init__(self, document):
         self.document = document
