@@ -16,10 +16,6 @@ from h.streamer import websocket
 
 log = logging.getLogger(__name__)
 
-# NSQ message topics that the WebSocket server
-# processes messages from
-ANNOTATIONS_TOPIC = 'annotations'
-USER_TOPIC = 'user'
 
 # An incoming message from a subscribed NSQ topic
 Message = namedtuple('Message', ['topic', 'payload'])
@@ -67,7 +63,7 @@ def process_nsq_topic(settings, topic, work_queue, raise_error=True):
         raise RuntimeError('Queue reader quit unexpectedly!')
 
 
-def handle_message(message, topic_handlers=None):
+def handle_message(message, topic_handlers):
     """
     Deserialize and process a message from the reader.
 
@@ -78,12 +74,6 @@ def handle_message(message, topic_handlers=None):
     object. It is assumed that there is a 1:1 request-reply mapping between
     incoming messages and messages to be sent out over the websockets.
     """
-    if topic_handlers is None:
-        topic_handlers = {
-            ANNOTATIONS_TOPIC: handle_annotation_event,
-            USER_TOPIC: handle_user_event,
-        }
-
     data = json.loads(message.payload)
 
     try:

@@ -11,8 +11,7 @@ class NamespacedNsqd(object):
         self.namespace = namespace
 
     def publish(self, topic, data):
-        if self.namespace is not None:
-            topic = '{0}-{1}'.format(self.namespace, topic)
+        topic = resolve_topic(topic, namespace=self.namespace)
         if not isinstance(data, str):
             data = json.dumps(data)
         return self.client.publish(topic, data)
@@ -27,10 +26,8 @@ def get_reader(settings, topic, channel):
     The caller is responsible for adding appropriate `on_message` hooks and
     starting the reader.
     """
-    ns = settings.get('nsq.namespace')
     addrs = aslist(settings.get('nsq.reader.addresses', 'localhost:4150'))
-    if ns is not None:
-        topic = '{0}-{1}'.format(ns, topic)
+    topic = resolve_topic(topic, settings=settings)
     reader = gnsq.Reader(topic, channel, nsqd_tcp_addresses=addrs)
     return reader
 
@@ -46,6 +43,27 @@ def get_writer(settings):
     hostname, port = addr.split(':', 1)
     nsqd = NamespacedNsqd(ns, hostname, http_port=port)
     return nsqd
+
+
+def resolve_topic(topic, namespace=None, settings=None):
+    """
+    Return a resolved name for the requested topic.
+
+    This uses the passed `namespace` to resolve the topic name, or,
+    alternatively, a pyramid settings object.
+    """
+    if namespace is not None and settings is not None:
+        raise ValueError('you must provide only one of namespace or settings')
+
+    if settings is not None:
+        ns = settings.get('nsq.namespace')
+    else:
+        ns = namespace
+
+    if ns is not None:
+        return '{0}-{1}'.format(ns, topic)
+
+    return topic
 
 
 def includeme(config):
