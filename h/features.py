@@ -7,6 +7,7 @@ import os
 from pyramid import events
 from pyramid.view import view_config
 import sqlalchemy as sa
+import transaction
 
 from h import db
 from h.auth import role
@@ -159,10 +160,8 @@ def remove_old_flags_on_boot(event):
     if 'H_SCRIPT' in os.environ:
         return
 
-    session = db.Session()
     remove_old_flags()
-    session.commit()
-    session.close()
+    transaction.commit()
 
 
 def all(request):

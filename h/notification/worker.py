@@ -20,14 +20,8 @@ def run(request):
     def handle_message(reader, message=None):
         if message is None:
             return
-        try:
+        with request.tm:
             send_notifications(message)
-            request.db.commit()
-        except:
-            request.db.rollback()
-            raise
-        finally:
-            request.db.close()
 
     def send_notifications(message):
         data = json.loads(message.body)

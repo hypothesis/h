@@ -80,7 +80,7 @@ def admin(args):
     """Make a user an admin."""
     request = bootstrap(args)
     accounts.make_admin(args.username)
-    request.db.commit()
+    request.tm.commit()
 
 parser_admin = subparsers.add_parser('admin', help=admin.__doc__)
 _add_common_args(parser_admin)

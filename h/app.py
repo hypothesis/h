@@ -6,9 +6,10 @@ import os
 from pyramid.config import Configurator
 from pyramid.tweens import EXCVIEW
 from pyramid.settings import asbool
-import transaction
+import zope.sqlalchemy
 
 from h import assets
+from h import db
 from h.config import settings_from_environment
 from h.security import derive_key
 
@@ -67,15 +68,16 @@ def includeme(config):
     # when the configuration is committed.
     config.action(None, configure_jinja2_assets, args=(config,))
 
-    # Configure the transaction manager so that each request gets its own
-    # transaction manager, and supports retrying retryable exceptions.
+    # Configure the transaction manager to support retrying retryable
+    # exceptions. We also register the session factory with the thread-local
+    # transaction manager, so that all sessions it creates are registered.
     config.add_settings({
         "tm.attempts": 3,
-        "tm.manager_hook": lambda request: transaction.TransactionManager(),
         "tm.activate_hook": tm_activate_hook,
         "tm.annotate_user": False,
     })
     config.include('pyramid_tm')
+    zope.sqlalchemy.register(db.Session)
 
     # Core site modules
     config.include('h.assets')

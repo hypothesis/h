@@ -20,7 +20,6 @@ from sqlalchemy import MetaData
 from sqlalchemy import engine_from_config
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-import zope.sqlalchemy
 
 from h.api import db as api_db
 
@@ -35,13 +34,6 @@ __all__ = (
 # session):
 #
 #   http://docs.sqlalchemy.org/en/latest/orm/contextual.html#using-thread-local-scope-with-web-applications
-#
-# Using ZopeTransactionExtension from zope.sqlalchemy ensures that sessions are
-# correctly scoped to the current processing request, and that sessions are
-# automatically committed (or aborted) when the request terminates. This
-# integration with pyramid is provided by `pyramid_tm`:
-#
-#   http://docs.pylonsproject.org/projects/pyramid-tm/en/latest/#transaction-usage
 #
 Session = scoped_session(sessionmaker())
 
@@ -92,13 +84,6 @@ def make_engine(settings):
     return engine_from_config(settings, 'sqlalchemy.')
 
 
-def register_session_with_tm(request):
-    """Register the current session with the request transaction manager."""
-    tm = getattr(request, 'tm', None)
-    if tm is not None:
-        zope.sqlalchemy.register(request.db, transaction_manager=tm)
-
-
 def includeme(config):
     settings = config.registry.settings
     should_create = asbool(settings.get('h.db.should_create_all', False))
@@ -109,11 +94,6 @@ def includeme(config):
     # that view functions need only refer to `request.db` in order to retrieve
     # the current database session.
     config.add_request_method(lambda _: Session(), name='db', reify=True)
-
-    # Ensure that for all requests, the database session is bound to the
-    # request transaction manager, if it exists.
-    config.add_subscriber(lambda e: register_session_with_tm(e.request),
-                          'pyramid.events.NewRequest')
 
     # Register a deferred action to bind the engine when the configuration is
     # committed. Deferring the action means that this module can be included
