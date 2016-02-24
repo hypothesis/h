@@ -1,3 +1,21 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Major improvements to the behaviour of the websocket server (AKA the
+  "streamer") under high concurrency (#2996).
+
+Miscellaneous
+-------------
+
+- This release contains an all-new build system for the frontend assets, which
+  include the assets for the web service and the browser extension (#2958).
+
+- A second large piece of the work to move annotation storage into PostgreSQL
+  has been merged (#2986).
+
 0.9.0 (2016-02-22)
 ==================
 
