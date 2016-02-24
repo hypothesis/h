@@ -60,7 +60,9 @@ class DummySession(object):
 @pytest.fixture(scope='session', autouse=True)
 def settings():
     """Default app settings (conf/test.ini)."""
-    settings = get_appsettings('conf/test.ini')
+    settings = {
+        'sqlalchemy.url': 'postgresql://postgres@localhost/htest',
+    }
 
     if 'TEST_DATABASE_URL' in os.environ:
         settings['sqlalchemy.url'] = normalize_database_url(
