@@ -20,7 +20,7 @@ To build and install the Chrome extension:
 
    .. code-block:: bash
 
-      hypothesis-buildext chrome --debug --service 'http://127.0.0.1:5000' --bouncer 'http://127.0.0.1:8000/*'
+      hypothesis-buildext chrome --debug --service 'http://127.0.0.1:5000' --bouncer 'http://127.0.0.1:8000/'
 
    .. note::
 

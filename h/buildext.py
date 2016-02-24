@@ -86,10 +86,13 @@ def chrome_manifest(script_host_url, bouncer_url):
         version = h.__version__
         version_name = 'Official Build'
 
+    # If a bouncer URL was supplied, allow connections from the whole domain
+    bouncer = urlparse.urljoin(bouncer_url, '*') if bouncer_url else None
+
     context = {
         'version': version,
         'version_name': version_name,
-        'bouncer_url': bouncer_url,
+        'bouncer': bouncer
     }
 
     if script_host_url:
@@ -229,11 +232,9 @@ parser.add_argument('--debug',
                     default=False,
                     help='create source maps to enable debugging in browser')
 parser.add_argument('--bouncer',
+                    help='The URL of the direct-link bouncer service the '
+                         'extension should use (e.g. "https://hpt.is/")',
                     dest='bouncer_url',
-                    help="A Chrome extension match pattern that matches the "
-                         "direct-link URLs of the Hypothesis direct-link "
-                         "bouncer service. JavaScript from this site is "
-                         "allowed to send messages to the Chrome extension",
                     metavar='URL')
 parser.add_argument('--sentry-public-dsn',
                     default='',
