@@ -10,19 +10,25 @@ language:
   - python
 python:
   - '2.7'
+before_install:
+  - pip install coveralls tox
+  - npm install gulp-cli
 install:
-  - pip install -U pip wheel
-  - pip install coveralls pyramid_redis_sessions
+  - pip install --use-wheel -e .
   - npm install
-  - make
 before_script:
   - createdb htest
 script:
-  # Run all tests, with coverage if possible
-  - make cover
+  # Run python tests
+  - tox
+  # Run client (app) tests
+  - gulp test-app
+  # Run extension tests
+  - gulp test-extension
   # Build browser extensions
   - make extensions
 after_success:
+  - tox -e coverage
   - coveralls
 cache:
   directories:

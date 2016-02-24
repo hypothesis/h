@@ -1,12 +1,14 @@
 [run]
 branch = True
+source = h
 omit =
-    # versioneer
-    h/_version.py
-
     # development
     h/testing.py
-
     # test
     */conftest.py
     */test/*
+
+[paths]
+source =
+   h
+   .tox/*/lib/python*/site-packages/h
