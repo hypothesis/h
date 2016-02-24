@@ -1,3 +1,12 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Fix a blocker bug preventing database transactions from being committed
+  correctly (7ef09c3).
+
 0.9.1 (2016-02-24)
 ==================
 
