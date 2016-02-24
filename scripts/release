@@ -106,6 +106,7 @@ push_release () {
 
     export GITHUB_TOKEN GITHUB_USER GITHUB_REPO
     status "Creating GitHub release"
+    sleep 1 # Wait a second to give GitHub a chance to realise the tag exists...
     github-release release -t "v$version" --description "$description" --pre-release
     status "Uploading source distribution tarball to GitHub release"
     github-release upload -t "v$version" -n "h-"$version".tar.gz" -f dist/h-"$version".tar.gz
