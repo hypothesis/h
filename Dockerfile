@@ -1,4 +1,4 @@
-FROM gliderlabs/alpine:3.2
+FROM gliderlabs/alpine:3.3
 MAINTAINER Hypothes.is Project and contributors
 
 # Install system build and runtime dependencies.
@@ -27,23 +27,24 @@ WORKDIR /var/lib/hypothesis
 # Copy packaging
 COPY h/__init__.py h/_version.py ./h/
 COPY README.rst setup.* requirements.txt ./
-COPY scripts ./scripts/
-COPY package.json gulpfile.js ./
 
 # Install application dependencies.
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application files
-COPY gunicorn.conf.py ./
+COPY gulpfile.js gunicorn.conf.py package.json ./
 COPY conf ./conf/
 COPY h ./h/
+COPY scripts ./scripts/
 
-# Build client and static assets
+# Copy prebuilt node-sass binary
+COPY vendor ./vendor/
 
-## Remove dependencies required only for unit testing
-RUN npm install --production \
+# Build frontend assets
+RUN SASS_BINARY_PATH=$PWD/vendor/node-sass-linux-x64.node npm install --production \
+  && SASS_BINARY_PATH=$PWD/vendor/node-sass-linux-x64.node NODE_ENV=production node_modules/.bin/gulp build-app \
+  && rm -rf node_modules \
   && npm cache clean
-RUN npm run build-assets
 
 # Expose the default port.
 EXPOSE 5000

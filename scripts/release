@@ -95,7 +95,6 @@ tag_release () {
 
 make_sdist () {
     python setup.py sdist
-    git checkout h/_version.py
 }
 
 push_release () {

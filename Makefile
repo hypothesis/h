@@ -28,7 +28,18 @@ clean:
 	find . -type d -name "__pycache__" -delete
 	rm -f .coverage
 	rm -f node_modules/.uptodate .eggs/.uptodate
-	rm -rf build
+	rm -rf build dist
+
+dist: dist/h-$(BUILD_ID).tar.gz
+
+dist/h-$(BUILD_ID).tar.gz:
+	python setup.py sdist
+
+dist/h-$(BUILD_ID): dist/h-$(BUILD_ID).tar.gz
+	tar -C dist -zxf $<
+
+docker: dist/h-$(BUILD_ID)
+	docker build -t hypothesis/hypothesis:dev $<
 
 dev: deps
 	@gunicorn --reload --paste conf/development-app.ini
@@ -90,4 +101,4 @@ build/%-chrome-prod.zip:
 		--bouncer 'https://hpt.is'
 	@zip -qr $@ build/chrome
 
-.PHONY: clean cover deps dev extensions lint test
+.PHONY: clean cover deps dev dist docker extensions lint test
