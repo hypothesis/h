@@ -90,7 +90,7 @@ commit_release () {
 
 tag_release () {
     local version=$1
-    git tag -a -m "Release version $version"  v"$version"
+    git tag -a -s -m "Release version $version"  v"$version"
 }
 
 make_sdist () {
