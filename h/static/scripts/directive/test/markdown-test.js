@@ -1,5 +1,6 @@
 'use strict';
 
+var angular = require('angular');
 var proxyquire = require('proxyquire');
 
 var util = require('./util');
@@ -41,7 +42,7 @@ describe('markdown', function () {
   before(function () {
     angular.module('app', ['ngSanitize'])
       .directive('markdown', proxyquire('../markdown', {
-        angular: noCallThru(require('angular')),
+        angular: noCallThru(angular),
         katex: {
           renderToString: function (input) {
             return 'math:' + input.replace(/$$/g, '');

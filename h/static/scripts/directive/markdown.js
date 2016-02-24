@@ -1,5 +1,7 @@
 'use strict';
 
+/* globals MathJax */
+
 var angular = require('angular');
 var katex = require('katex');
 
@@ -41,13 +43,14 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
       var output = elem[0].querySelector('.js-markdown-preview');
 
       var userSelection = function() {
+        var selection;
         if (input.selectionStart !== undefined) {
           var startPos = input.selectionStart;
           var endPos = input.selectionEnd;
           var selectedText = input.value.substring(startPos, endPos);
           var textBefore = input.value.substring(0, (startPos));
           var textAfter = input.value.substring(endPos);
-          var selection = {
+          selection = {
             before: textBefore,
             after: textAfter,
             selection: selectedText,
@@ -69,12 +72,17 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
       };
 
       var applyInlineMarkup = function(markupL, innertext, markupR) {
-        markupR || (markupR = markupL);
+        if (!markupR) {
+          markupR = markupL;
+        }
+        var newtext;
+        var end;
+        var start;
         var text = userSelection();
         if (text.selection === "") {
-          var newtext = text.before + markupL + innertext + markupR + text.after;
-          var start = (text.before + markupL).length;
-          var end = (text.before + innertext + markupR).length;
+          newtext = text.before + markupL + innertext + markupR + text.after;
+          start = (text.before + markupL).length;
+          end = (text.before + innertext + markupR).length;
           return insertMarkup(newtext, start, end);
         } else {
           // Check to see if markup has already been applied before to the selection.
@@ -123,10 +131,14 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
 
       scope.insertLink = function() {
         var text = userSelection();
+        var newtext;
+        var start;
+        var end;
+
         if (text.selection === "") {
-          var newtext = text.before + "[Link Text](https://example.com)" + text.after;
-          var start = text.before.length + 1;
-          var end = text.before.length + 10;
+          newtext = text.before + "[Link Text](https://example.com)" + text.after;
+          start = text.before.length + 1;
+          end = text.before.length + 10;
           return insertMarkup(newtext, start, end);
         } else {
           // Check to see if markup has already been applied to avoid double presses.
@@ -142,10 +154,13 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
 
       scope.insertIMG = function() {
         var text = userSelection();
+        var newtext;
+        var start;
+        var end;
         if (text.selection === "") {
-          var newtext = text.before + "![Image Description](https://yourimage.jpg)" + text.after;
-          var start = text.before.length + 21;
-          var end = text.before.length + 42;
+          newtext = text.before + "![Image Description](https://yourimage.jpg)" + text.after;
+          start = text.before.length + 21;
+          end = text.before.length + 42;
           return insertMarkup(newtext, start, end);
         } else {
           // Check to see if markup has already been applied to avoid double presses.
@@ -159,21 +174,30 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
         }
       };
 
+      /* jshint maxcomplexity:false */
       scope.applyBlockMarkup = function(markup) {
         var text = userSelection();
+        var ch;
+        var value;
+        var start;
+        var end;
+        var index;
+        var i;
+        var newtext;
+
         if (text.selection !== "") {
           var newstring = "";
-          var index = text.before.length;
+          index = text.before.length;
           if (index === 0) {
             // The selection takes place at the very start of the input
-            for (var j = 0, char; j < text.selection.length; j++) {
-              char = text.selection[j];
-              if (char === "\n") {
+            for (var j = 0; j < text.selection.length; j++) {
+              ch = text.selection[j];
+              if (ch === "\n") {
                 newstring = newstring + "\n" + markup;
               } else if (index === 0) {
-                newstring = newstring + markup + char;
+                newstring = newstring + markup + ch;
               } else {
-                newstring = newstring + char;
+                newstring = newstring + ch;
               }
               index += 1;
             }
@@ -184,29 +208,29 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
               newstring = newstring + markup;
               newlinedetected = true;
             }
-            for (var k = 0, char; k < text.selection.length; k++) {
-              char = text.selection[k];
-              if (char === "\n") {
+            for (var k = 0; k < text.selection.length; k++) {
+              ch = text.selection[k];
+              if (ch === "\n") {
                 newstring = newstring + "\n" + markup;
                 newlinedetected = true;
               } else {
-                newstring = newstring + char;
+                newstring = newstring + ch;
               }
               index += 1;
             }
             if (!newlinedetected) {
               // Edge case: The selection does not include any new lines and does not start at 0.
               // We need to find the newline before the currently selected text and add markup there.
-              var i = 0;
-              var indexoflastnewline = undefined;
+              i = 0;
+              var indexoflastnewline;
               newstring = "";
               var iterable = text.before + text.selection;
-              for (var i1 = 0, char; i1 < iterable.length; i1++) {
-                char = iterable[i1];
-                if (char === "\n") {
+              for (var i1 = 0; i1 < iterable.length; i1++) {
+                ch = iterable[i1];
+                if (ch === "\n") {
                   indexoflastnewline = i;
                 }
-                newstring = newstring + char;
+                newstring = newstring + ch;
                 i++;
               }
               if (indexoflastnewline === undefined) {
@@ -218,9 +242,9 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
                     markup + newstring.substring(indexoflastnewline + 1)
                     );
               }
-              var value = newstring + text.after;
-              var start = (text.before + markup).length;
-              var end = (text.before + text.selection + markup).length;
+              value = newstring + text.after;
+              start = (text.before + markup).length;
+              end = (text.before + text.selection + markup).length;
               insertMarkup(value, start, end);
               return;
             }
@@ -241,7 +265,7 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
           // No selection, cursor is not on new line.
           // Check to see if markup has already been inserted.
           if (text.before.slice(text.before.length - markup.length) === markup) {
-            var newtext = (
+            newtext = (
                 text.before.substring(0, (index)) + "\n" +
                 text.before.substring(index + 1 + markup.length) + text.after
                 );
@@ -330,65 +354,13 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
       };
 
       var mathJaxFallback = false;
-      var renderMathAndMarkdown = function(textToCheck) {
-        var convert = $filter('converter');
-        var re = /\$\$/g;
-
-        var startMath = 0;
-        var endMath = 0;
-
-        var indexes = (function () {
-          var match;
-          var result = [];
-          while (match = re.exec(textToCheck)) {
-            result.push(match.index);
-          }
-          return result;
-        })();
-        indexes.push(textToCheck.length);
-
-        var parts = (function () {
-          var result = [];
-          for (var i = 0, index; i < indexes.length; i++) {
-            index = indexes[i];
-            result.push((function () {
-              if (startMath > endMath) {
-                endMath = index + 2;
-                try {
-                  // \\displaystyle tells KaTeX to render the math in display style (full sized fonts).
-                  return katex.renderToString($sanitize("\\displaystyle {" + textToCheck.substring(startMath, index) + "}"));
-                } catch (error) {
-                  loadMathJax();
-                  mathJaxFallback = true;
-                  return $sanitize(textToCheck.substring(startMath, index));
-                }
-              } else {
-                startMath = index + 2;
-                return $sanitize(convert(renderInlineMath(textToCheck.substring(endMath, index))));
-              }
-            })());
-          }
-          return result;
-        })();
-
-        var htmlString = parts.join('');
-
-        // Transform the HTML string into a DOM element.
-        var domElement = document.createElement('div');
-        domElement.innerHTML = htmlString;
-
-        mediaEmbedder.replaceLinksWithEmbeds(domElement);
-
-        return domElement.innerHTML;
-      };
-
       var renderInlineMath = function(textToCheck) {
         var re = /\\?\\\(|\\?\\\)/g;
         var startMath = null;
         var endMath = null;
-        var match = undefined;
+        var match;
         var indexes = [];
-        while (match = re.exec(textToCheck)) {
+        while ((match = re.exec(textToCheck))) {
           indexes.push(match.index);
         }
         for (var i = 0, index; i < indexes.length; i++) {
@@ -416,6 +388,62 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
           }
         }
         return textToCheck;
+      };
+
+      var renderMathAndMarkdown = function(textToCheck) {
+        var convert = $filter('converter');
+        var re = /\$\$/g;
+
+        var startMath = 0;
+        var endMath = 0;
+
+        var indexes = (function () {
+          var match;
+          var result = [];
+          while ((match = re.exec(textToCheck))) {
+            result.push(match.index);
+          }
+          return result;
+        })();
+        indexes.push(textToCheck.length);
+
+        var parts = (function () {
+          var result = [];
+
+          /* jshint -W083 */
+          for (var i = 0, index; i < indexes.length; i++) {
+            index = indexes[i];
+
+            result.push((function () {
+              if (startMath > endMath) {
+                endMath = index + 2;
+                try {
+                  // \\displaystyle tells KaTeX to render the math in display style (full sized fonts).
+                  return katex.renderToString($sanitize("\\displaystyle {" + textToCheck.substring(startMath, index) + "}"));
+                } catch (error) {
+                  loadMathJax();
+                  mathJaxFallback = true;
+                  return $sanitize(textToCheck.substring(startMath, index));
+                }
+              } else {
+                startMath = index + 2;
+                return $sanitize(convert(renderInlineMath(textToCheck.substring(endMath, index))));
+              }
+            })());
+          }
+          /* jshint +W083 */
+          return result;
+        })();
+
+        var htmlString = parts.join('');
+
+        // Transform the HTML string into a DOM element.
+        var domElement = document.createElement('div');
+        domElement.innerHTML = htmlString;
+
+        mediaEmbedder.replaceLinksWithEmbeds(domElement);
+
+        return domElement.innerHTML;
       };
 
       // Re-render the markdown when the view needs updating.
