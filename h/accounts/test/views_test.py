@@ -279,8 +279,10 @@ class TestAjaxAuthController(object):
 
             controller.login()
 
-            controller.form.validate.assert_called_once_with(
-                [('username', 'user'), ('password', expected_output)])
+            assert controller.form.validate.called
+            pstruct = controller.form.validate.call_args[0][0]
+            assert sorted(pstruct) == sorted([('username', 'user'),
+                                              ('password', expected_output)])
 
     def test_login_raises_ValidationFailure_on_ValidationFailure(self):
         controller = views.AjaxAuthController(DummyRequest(json_body={}))
