@@ -1,3 +1,5 @@
+'use strict';
+
 // Minimal set of polyfills for PhantomJS 1.x under Karma.
 // this Polyfills:
 //
