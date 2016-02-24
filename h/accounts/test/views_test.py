@@ -260,8 +260,10 @@ class TestAjaxAuthController(object):
 
             controller.login()
 
-            controller.form.validate.assert_called_once_with(
-                [('username', expected_output), ('password', 'pass')])
+            assert controller.form.validate.called
+            pstruct = controller.form.validate.call_args[0][0]
+            assert sorted(pstruct) == sorted([('username', expected_output),
+                                              ('password', 'pass')])
 
     @mock.patch('h.accounts.schemas.check_csrf_token')
     def test_login_converts_non_string_passwords_to_strings(self, _):
