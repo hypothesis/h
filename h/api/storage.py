@@ -8,11 +8,11 @@ assumed to be validated.
 """
 
 from functools import partial
-from pyramid.threadlocal import get_current_request
 
-from h.api.events import AnnotationBeforeSaveEvent
-from h.api.models import elastic as models
 from h.api import transform
+from h.api.events import AnnotationBeforeSaveEvent
+from h.api.models import elastic
+from h.api.models.annotation import Annotation
 
 
 def annotation_from_dict(data):
@@ -25,7 +25,7 @@ def annotation_from_dict(data):
     :returns: the created annotation
     :rtype: dict
     """
-    return models.Annotation(data)
+    return elastic.Annotation(data)
 
 
 def fetch_annotation(request, id):
@@ -38,7 +38,10 @@ def fetch_annotation(request, id):
     :returns: the annotation, if found, or None.
     :rtype: dict, NoneType
     """
-    return models.Annotation.fetch(id)
+    if _postgres_enabled(request):
+        return request.db.query(Annotation).get(id)
+
+    return elastic.Annotation.fetch(id)
 
 
 def create_annotation(request, data):
@@ -51,7 +54,7 @@ def create_annotation(request, data):
     :returns: the created annotation
     :rtype: dict
     """
-    annotation = models.Annotation(data)
+    annotation = elastic.Annotation(data)
 
     # FIXME: this should happen when indexing, not storing.
     _prepare(request, annotation)
@@ -75,7 +78,7 @@ def update_annotation(request, id, data):
     :returns: the updated annotation
     :rtype: dict
     """
-    annotation = models.Annotation.fetch(id)
+    annotation = elastic.Annotation.fetch(id)
     annotation.update(data)
 
     # FIXME: this should happen when indexing, not storing.
@@ -92,7 +95,7 @@ def delete_annotation(request, id):
     :param id: the annotation id
     :type id: str
     """
-    annotation = models.Annotation.fetch(id)
+    annotation = elastic.Annotation.fetch(id)
     annotation.delete()
 
 
@@ -110,7 +113,7 @@ def expand_uri(uri):
     :returns: a list of equivalent URIs
     :rtype: list
     """
-    doc = models.Document.get_by_uri(uri)
+    doc = elastic.Document.get_by_uri(uri)
     if doc is None:
         return [uri]
 
@@ -151,3 +154,7 @@ def _prepare(request, annotation):
     request = get_current_request()
     event = AnnotationBeforeSaveEvent(request, annotation)
     request.registry.notify(event)
+
+
+def _postgres_enabled(request):
+    return request.feature('postgres_read')
