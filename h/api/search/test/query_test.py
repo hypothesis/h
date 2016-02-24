@@ -371,10 +371,11 @@ def test_tagsmatcher_aliases_tag_to_tags():
 
     result = query.TagsMatcher()(params)
 
-    assert result == {'bool': {'must': [
-        {'match': {'tags': {'query': 'foo', 'operator': 'and'}}},
-        {'match': {'tags': {'query': 'bar', 'operator': 'and'}}},
-    ]}}
+    assert list(result.keys()) == ['bool']
+    assert list(result['bool'].keys()) == ['must']
+    assert len(result['bool']['must']) == 2
+    assert {'match': {'tags': {'query': 'foo', 'operator': 'and'}}} in result['bool']['must']
+    assert {'match': {'tags': {'query': 'bar', 'operator': 'and'}}} in result['bool']['must']
 
 
 def test_tagsmatcher_with_both_tag_and_tags():
@@ -383,10 +384,11 @@ def test_tagsmatcher_with_both_tag_and_tags():
 
     result = query.TagsMatcher()(params)
 
-    assert result == {'bool': {'must': [
-        {'match': {'tags': {'query': 'foo', 'operator': 'and'}}},
-        {'match': {'tags': {'query': 'bar', 'operator': 'and'}}},
-    ]}}
+    assert list(result.keys()) == ['bool']
+    assert list(result['bool'].keys()) == ['must']
+    assert len(result['bool']['must']) == 2
+    assert {'match': {'tags': {'query': 'foo', 'operator': 'and'}}} in result['bool']['must']
+    assert {'match': {'tags': {'query': 'bar', 'operator': 'and'}}} in result['bool']['must']
 
 
 @pytest.fixture
