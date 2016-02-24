@@ -26,6 +26,13 @@ class Document(Base, mixins.Timestamps):
     def __repr__(self):
         return '<Document %s>' % self.id
 
+    @property
+    def title(self):
+        titles = [m.value for m in self.meta if m.type == 'title']
+
+        if titles:
+            return titles[0]
+
     @classmethod
     def find_by_uris(cls, session, uris):
         """Find documents by a list of uris."""

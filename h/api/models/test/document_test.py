@@ -9,6 +9,34 @@ from h.api.models.document import Document, DocumentURI, DocumentMeta
 from h.api.models.document import merge_documents
 
 
+def test_document_title():
+    doc = Document()
+    DocumentMeta(type='title', value='The Title', document=doc, claimant='http://example.com')
+    db.Session.add(doc)
+    db.Session.flush()
+
+    assert doc.title == 'The Title'
+
+
+def test_document_title_returns_first():
+    doc = Document()
+    DocumentMeta(type='title', value='The US Title', document=doc, claimant='http://example.com')
+    DocumentMeta(type='title', value='The UK Title', document=doc, claimant='http://example.co.uk')
+    db.Session.add(doc)
+    db.Session.flush()
+
+    assert doc.title == 'The US Title'
+
+
+def test_document_title_meta_not_found():
+    doc = Document()
+    DocumentMeta(type='other', value='something', document=doc, claimant='http://example.com')
+    db.Session.add(doc)
+    db.Session.flush()
+
+    assert doc.title is None
+
+
 def test_document_find_by_uris():
     document1 = Document()
     uri1 = 'https://de.wikipedia.org/wiki/Hauptseite'
