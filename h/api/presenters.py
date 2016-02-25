@@ -6,6 +6,29 @@ Presenters for API data.
 import collections
 
 
+class DocumentURIJSONPresenter(object):
+    def __init__(self, document_uri):
+        self.document_uri = document_uri
+
+    def asdict(self):
+        data = {'href': self.document_uri.uri}
+
+        rel = self.rel
+        if rel:
+            data['rel'] = rel
+
+        type = self.document_uri.content_type
+        if type:
+            data['type'] = type
+
+        return data
+
+    @property
+    def rel(self):
+        type = self.document_uri.type
+        if type and type.startswith('rel-'):
+            return self.document_uri.type[4:]
+
 def utc_iso8601(datetime):
     return datetime.strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')
 
