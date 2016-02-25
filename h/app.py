@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-"""The main h application."""
-import logging
-import os
 
-from pyramid.config import Configurator
+"""The main h application."""
+
+from __future__ import unicode_literals
+
+import logging
+
 from pyramid.tweens import EXCVIEW
 from pyramid.settings import asbool
 import zope.sqlalchemy
 
 from h import assets
 from h import db
-from h.config import settings_from_environment
-from h.security import derive_key
+from h.config import configure
 
 log = logging.getLogger(__name__)
 
@@ -35,11 +36,17 @@ def tm_activate_hook(request):
 
 
 def create_app(global_config, **settings):
-    """Configure and add static routes and views. Return the WSGI app."""
-    settings = get_settings(global_config, **settings)
+    """
+    Create the h WSGI application.
 
-    config = Configurator(settings=settings)
+    This function serves as a paste app factory.
+    """
+    config = configure(settings=settings)
+    config.include(__name__)
+    return config.make_wsgi_app()
 
+
+def includeme(config):
     config.set_root_factory('h.resources:Root')
 
     config.add_subscriber('h.subscribers.add_renderer_globals',
@@ -52,13 +59,6 @@ def create_app(global_config, **settings):
     config.add_tween('h.tweens.auth_token')
 
     config.add_renderer('csv', 'h.renderers.CSV')
-
-    config.include(__name__)
-
-    return config.make_wsgi_app()
-
-
-def includeme(config):
     config.add_request_method(in_debug_mode, 'debug', reify=True)
 
     config.include('pyramid_jinja2')
@@ -101,41 +101,3 @@ def includeme(config):
     config.include('h.groups')
     config.include('h.nipsa')
     config.include('h.notification')
-
-
-def get_settings(global_config, **settings):
-    """
-    Return a paste settings objects extended as necessary with data from the
-    environment.
-    """
-    result = {}
-    result.update(settings)
-    result.update(settings_from_environment())
-    result.update(global_config)
-
-    if 'secret_key' in result and not isinstance(result['secret_key'],
-                                                 bytes):
-        result['secret_key'] = result['secret_key'].encode('utf-8')
-
-    result.update(missing_secrets(result))
-    return result
-
-
-def missing_secrets(settings):
-    missing = {}
-
-    if 'secret_key' not in settings:
-        log.warn('No secret key provided: using transient key. Please '
-                 'configure the secret_key setting or the SECRET_KEY '
-                 'environment variable!')
-        missing['secret_key'] = os.urandom(64)
-
-    # If the redis session secret hasn't been set explicitly, derive it from
-    # the global secret key.
-    if 'redis.sessions.secret' not in settings:
-        secret = settings.get('secret_key')
-        if secret is None:
-            secret = missing['secret_key']
-        missing['redis.sessions.secret'] = derive_key(secret, b'h.session')
-
-    return missing

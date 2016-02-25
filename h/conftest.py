@@ -11,12 +11,11 @@ import os
 import pytest
 
 from pyramid import testing
-from pyramid.paster import get_appsettings
 
 from h import db
 from h import form
 from h.api import db as api_db
-from h.config import normalize_database_url
+from h.settings import database_url
 
 
 class DummyFeature(object):
@@ -65,7 +64,7 @@ def settings():
     }
 
     if 'TEST_DATABASE_URL' in os.environ:
-        settings['sqlalchemy.url'] = normalize_database_url(
+        settings['sqlalchemy.url'] = database_url(
             os.environ['TEST_DATABASE_URL'])
 
     return settings
