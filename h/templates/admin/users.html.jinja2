@@ -27,7 +27,23 @@
           <tr><th>Last login</th><td>{{ user.last_login_date }}</td></tr>
           <tr>
             <th>Is activated?</th>
-            <td>{% if user.is_activated %}&#x2714;{% else %}&#x2718;{% endif %}</td>
+            <td>
+              {% if user.is_activated %}
+                &#x2714;
+              {% else %}
+                &#x2718;
+                <form action="{{request.route_path('admin_users_activate')}}"
+                      class="users-activate-form"
+                      method="POST">
+                  <input type="hidden"
+                         name="username"
+                         value="{{user.username}}">
+                  <button class="btn btn-primary btn-xs" type="submit">
+                    Activate
+                  </button>
+                </form>
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <th>Is admin?</th>

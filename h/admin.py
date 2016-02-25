@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import jinja2
 from pyramid import session
 from pyramid import view
 from pyramid import httpexceptions
@@ -9,6 +10,7 @@ from h.api import nipsa
 from h.api import storage
 from h.i18n import TranslationString as _
 from h import accounts
+from h.accounts import events
 from h import models
 from h import paginator
 from h import util
@@ -195,6 +197,34 @@ def users_index(request):
     return {'username': username, 'user': user, 'user_meta': user_meta}
 
 
+@view.view_config(route_name='admin_users_activate',
+                  request_method='POST',
+                  request_param='username',
+                  permission='admin_users')
+def users_activate(request):
+    username = request.params['username']
+    user = models.User.get_by_username(username)
+
+    if user is None:
+        request.session.flash(jinja2.Markup(_(
+            "User {name} doesn't exist!".format(name=username))),
+            'error')
+        return httpexceptions.HTTPFound(
+            location=request.route_path('admin_users'))
+
+    user.activate()
+
+    request.session.flash(jinja2.Markup(_(
+        'User {name} has been activated!'.format(name=user.username))),
+        'success')
+
+    request.registry.notify(events.ActivationEvent(request, user))
+
+    return httpexceptions.HTTPFound(
+        location=request.route_path('admin_users',
+                                    _query=(('username', user.username),)))
+
+
 @view.view_config(route_name='admin_users_delete',
                   request_method='POST',
                   permission='admin_users')
@@ -320,6 +350,7 @@ def includeme(config):
     config.add_route('admin_admins', '/admins')
     config.add_route('admin_staff', '/staff')
     config.add_route('admin_users', '/users')
+    config.add_route('admin_users_activate', '/users/activate')
     config.add_route('admin_users_delete', '/users/delete')
     config.add_route('admin_groups', '/groups')
     config.add_route('admin_groups_csv', '/groups.csv')

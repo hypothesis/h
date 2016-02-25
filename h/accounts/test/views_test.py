@@ -691,10 +691,9 @@ class TestActivateController(object):
         with pytest.raises(httpexceptions.HTTPNotFound):
             views.ActivateController(request).get_when_not_logged_in()
 
-    def test_get_when_not_logged_in_successful_deletes_activation(
+    def test_get_when_not_logged_in_successful_activates_user(
             self,
-            user_model,
-            activation_model):
+            user_model):
         request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
         request.db.delete = mock.create_autospec(request.db.delete,
                                                  return_value=None)
@@ -702,8 +701,7 @@ class TestActivateController(object):
 
         views.ActivateController(request).get_when_not_logged_in()
 
-        request.db.delete.assert_called_once_with(
-            activation_model.get_by_code.return_value)
+        user_model.get_by_activation.return_value.activate.assert_called_once_with()
 
     def test_get_when_not_logged_in_successful_flashes_message(self,
                                                                user_model):

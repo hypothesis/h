@@ -422,14 +422,14 @@ class ActivateController(object):
         if user is None or user.id != id_:
             raise httpexceptions.HTTPNotFound()
 
-        # Activate the user (by deleting the activation)
-        self.request.db.delete(activation)
+        user.activate()
 
         self.request.session.flash(jinja2.Markup(_(
             'Your account has been activated! '
             'You can now <a href="{url}">sign in</a> using the password you '
             'provided.').format(url=self.request.route_url('login'))),
             'success')
+
         self.request.registry.notify(ActivationEvent(self.request, user))
 
         return httpexceptions.HTTPFound(

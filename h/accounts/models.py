@@ -132,6 +132,11 @@ class User(Base):
 
         return False
 
+    def activate(self):
+        """Activate the user by deleting any activation they have."""
+        session = sa.orm.object_session(self)
+        session.delete(self.activation)
+
     # Hashed password
     _password = sa.Column('password', sa.UnicodeText(), nullable=False)
     # Password salt
