@@ -6,6 +6,8 @@ node_modules/
 
 # py.test state cache
 .cache/
+.coverage
+.tox/
 
 .eggs/
 *.egg

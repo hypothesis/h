@@ -215,37 +215,14 @@ At any later time, you can activate your virtualenv by running:
 
     workon h
 
-Install h's Python dependencies into the virtual environment, and its Node
-dependencies into the ``h/node_modules`` directory:
-
-.. code-block:: bash
-
-    cd h
-    make deps
-
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
 
 Running h
 ---------
 
-Now that you've installed h and all of its dependencies, you should be able to
-run h in your development environment.
-
-First, run this command to build the Hypothesis client and static assets:
-
-.. code-block:: bash
-
-    make client-assets-dev
-
-If you are making changes to the client, or the JavaScript code or styles for the
-service, you should instead run this command which will automatically rebuild the static
-assets when the source files change:
-
-.. code-block:: bash
-
-    make client-assets-watch
-
-Then to start the Hypothesis web service:
+Run the following command to start the Hypothesis web service. If this is a
+fresh clone of the repository, this may take some time to run, as it will need
+to install the application dependencies and build the client assets.
 
 .. code-block:: bash
 
@@ -260,32 +237,44 @@ it crash for some reason.
     be possible on sites accessed via HTTPS due to browser policy restricting
     the inclusion of non-SSL content.
 
+If you are making changes to the client, or the JavaScript code or styles for the
+service, you may find it useful to install Gulp_ and run the `watch` task. This
+will automatically rebuild the assets whenever the source files change.
+
+.. code-block:: bash
+
+    npm install -g gulp-cli
+    gulp watch
+
+.. _Gulp: http://gulpjs.com/
+
 .. _running-the-tests:
 
 Running the tests
 -----------------
 
-There are test suites for both the frontend and backend code.
-
-To run the complete set of tests, run:
+There are test suites for both the frontend and backend code. To run the
+complete set of tests, run:
 
 .. code-block:: bash
 
     make test
 
-To run the frontend test suite only, run:
+To run the frontend test suite only, install Gulp_ and run the appropriate test
+task. For example:
 
 .. code-block:: bash
 
-    make client-test
+    npm install -g gulp-cli
+    gulp test-app
 
-When working on the front-end code, you can run the Karma test runner in auto-watch
-mode which will re-run the tests whenever a change is made to the source code.
-To start the test runner in auto-watch mode, run:
+When working on the front-end code, you can run the Karma test runner in
+auto-watch mode which will re-run the tests whenever a change is made to the
+source code. To start the test runner in auto-watch mode, run:
 
 .. code-block:: bash
 
-    make client-test-watch
+    gulp test-watch-app
 
 You can further speed up the testing cycle for front-end code by using
 mocha's `.only()`_ to only run a particular suite of tests or even just
@@ -327,4 +316,3 @@ admin access rights using H's command-line tools.
 See the :doc:`../administration` documentation for information
 on how to give the initial user admin rights and access the Administration
 Dashboard.
-

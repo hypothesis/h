@@ -6,30 +6,7 @@ import sys
 
 from setuptools import setup, find_packages
 from setuptools.command.sdist import sdist as _sdist
-from setuptools.command.test import test as TestCommand
-
-
-class PyTest(TestCommand):
-    user_options = [
-        ('cov', None, 'measure coverage')
-    ]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.cov = None
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = ['h']
-        self.test_suite = True
-        if self.cov:
-            self.test_args += ['--cov', 'h',
-                               '--cov-config', '.coveragerc']
-
-    def run_tests(self):
-        import pytest
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
+from setuptools.command.test import test as _test
 
 
 VERSION = __import__('h').__version__
@@ -58,6 +35,11 @@ class sdist(_sdist):
     def run(self):
         with static_version_file():
             return _sdist.run(self)
+
+
+class test(_test):
+    def run(self):
+        print('please run tox instead')
 
 
 INSTALL_REQUIRES = [
@@ -99,7 +81,6 @@ INSTALL_REQUIRES = [
 
 DEV_EXTRAS = ['pyramid_debugtoolbar>=2.1', 'prospector[with_pyroma]', 'pep257',
               'sphinxcontrib-httpdomain']
-TESTING_EXTRAS = ['mock>=1.3.0', 'pytest>=2.5', 'pytest-cov', 'factory-boy']
 
 setup(
     name='h',
@@ -125,10 +106,9 @@ setup(
     install_requires=INSTALL_REQUIRES,
     extras_require={
         'dev': DEV_EXTRAS,
-        'testing': TESTING_EXTRAS,
     },
-    tests_require=DEV_EXTRAS + TESTING_EXTRAS,
-    cmdclass={'test': PyTest, 'sdist': sdist},
+    cmdclass={'sdist': sdist,
+              'test': test},
     entry_points={
         'paste.app_factory': [
             'main=h.app:create_app',
