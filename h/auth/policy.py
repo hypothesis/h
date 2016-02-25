@@ -4,7 +4,7 @@ from pyramid import authentication
 from pyramid import interfaces
 from zope import interface
 
-from h.api import auth as api_auth
+from h.auth import tokens
 from h.auth.util import bearer_token
 from h.auth.util import effective_principals
 
@@ -18,8 +18,8 @@ class AuthenticationPolicy(object):
     def authenticated_userid(self, request):
         if _is_api_request(request):
             token = bearer_token(request)
-            return (api_auth.userid_from_api_token(token) or
-                    api_auth.userid_from_jwt(token, request))
+            return (tokens.userid_from_api_token(token) or
+                    tokens.userid_from_jwt(token, request))
         return self.session_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):

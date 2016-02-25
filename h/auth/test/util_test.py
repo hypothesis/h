@@ -7,7 +7,6 @@ from pyramid import security
 
 from h.auth import role
 from h.auth import util
-from h.api.models.token import API_TOKEN_PREFIX
 
 
 KEY = 'someclient'
@@ -137,10 +136,10 @@ def test_group_principals_with_three_groups():
 
 def test_bearer_token_returns_token():
     request = testing.DummyRequest(headers={
-        'Authorization': 'Bearer ' + API_TOKEN_PREFIX + 'abc123'
+        'Authorization': 'Bearer f00ba12'
     })
 
-    assert util.bearer_token(request) == API_TOKEN_PREFIX + 'abc123'
+    assert util.bearer_token(request) == 'f00ba12'
 
 
 def test_bearer_token_when_no_Authorization_header():
@@ -151,7 +150,7 @@ def test_bearer_token_when_no_Authorization_header():
 
 def test_bearer_token_when_Authorization_header_does_not_contain_bearer():
     request = testing.DummyRequest(headers={
-        'Authorization': API_TOKEN_PREFIX + 'abc123'  # No "Bearer " prefix.
+        'Authorization': 'f00ba12'  # No "Bearer " prefix.
     })
 
     assert util.bearer_token(request) == ''

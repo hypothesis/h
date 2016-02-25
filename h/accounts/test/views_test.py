@@ -12,7 +12,6 @@ from h import conftest
 
 from h import accounts
 from h.accounts import views
-from h.api.models.token import API_TOKEN_PREFIX
 
 
 class DummyRequest(testing.DummyRequest):
@@ -967,12 +966,11 @@ class TestDeveloperController(object):
             request.authenticated_userid)
 
     def test_get_returns_token(self, models):
-        token = API_TOKEN_PREFIX + u'abc123'
-        models.Token.get_by_userid.return_value.value = token
+        models.Token.get_by_userid.return_value.value = u'abc123'
 
         data = views.DeveloperController(testing.DummyRequest()).get()
 
-        assert data.get('token') == token
+        assert data.get('token') == u'abc123'
 
     def test_get_with_no_token(self, models):
         models.Token.get_by_userid.return_value = None

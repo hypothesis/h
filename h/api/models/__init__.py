@@ -10,6 +10,3 @@ Please note: access to these model objects should almost certainly not be
 direct to the submodules of this package, but rather through the helper
 functions in `h.api.storage`.
 """
-from h.api.models.token import Token
-
-__all__ = ('Token')
