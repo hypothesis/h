@@ -59,6 +59,7 @@ module.exports = function(config) {
     browserify: {
       debug: true,
       extensions: ['.coffee'],
+      noParse: [require.resolve('./vendor/katex')],
       configure: function (bundle) {
         bundle
           .transform('coffeeify')

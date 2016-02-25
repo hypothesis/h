@@ -13,10 +13,7 @@
     "chrome": false,
     "h": false,
     "Promise": false,
-    "angular": false,
     "chai": false,
-    "moment": false,
-    "jstz": false,
     "sinon": false,
     "JSON": false
   },
@@ -30,7 +27,6 @@
     "URL",
     "after",
     "afterEach",
-    "angular",
     "assert",
     "before",
     "beforeEach",
