@@ -157,6 +157,28 @@ def test_bearer_token_when_Authorization_header_does_not_contain_bearer():
     assert util.bearer_token(request) == ''
 
 
+@pytest.mark.parametrize("p_in,p_out", [
+    # The basics
+    ([], []),
+    (['acct:donna@example.com'], ['acct:donna@example.com']),
+    (['group:foo'], ['group:foo']),
+
+    # Remove pyramid principals
+    (['system.Everyone'], []),
+
+    # Remap annotatator principal names
+    (['group:__world__'], [security.Everyone]),
+
+    # Normalise multiple principals
+    (['me', 'myself', 'me', 'group:__world__', 'group:foo', 'system.Admins'],
+     ['me', 'myself', security.Everyone, 'group:foo']),
+])
+def test_translate_annotation_principals(p_in, p_out):
+    result = util.translate_annotation_principals(p_in)
+
+    assert set(result) == set(p_out)
+
+
 @pytest.fixture
 def accounts(request):
     patcher = mock.patch('h.auth.util.accounts', autospec=True)

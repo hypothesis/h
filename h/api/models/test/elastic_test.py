@@ -91,18 +91,6 @@ def test_acl_group_world():
     assert actual == expect
 
 
-def test_acl_group_authenticated():
-    annotation = Annotation({
-        'permissions': {
-            'read': ['group:__authenticated__'],
-        }
-    })
-    actual = annotation.__acl__()
-    expect = [(security.Allow, security.Authenticated, 'read'),
-              security.DENY_ALL]
-    assert actual == expect
-
-
 @pytest.fixture
 def link_text(request):
     patcher = patch('h.api.models.elastic.Annotation.link_text',

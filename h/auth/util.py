@@ -70,3 +70,19 @@ def bearer_token(request):
         return text_type(request.headers['Authorization'][len('Bearer '):])
     else:
         return u''
+
+
+def translate_annotation_principals(principals):
+    """
+    Translate a list of annotation principals to a list of pyramid principals.
+    """
+    result = set([])
+    for principal in principals:
+        # Ignore suspicious principals from annotations
+        if principal.startswith('system.'):
+            continue
+        if principal == 'group:__world__':
+            result.add(security.Everyone)
+        else:
+            result.add(principal)
+    return list(result)

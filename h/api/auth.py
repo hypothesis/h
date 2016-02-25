@@ -10,24 +10,6 @@ from h import models
 from h.api.models.token import API_TOKEN_PREFIX
 
 
-def translate_annotation_principals(principals):
-    """
-    Translate a list of annotation principals to a list of pyramid principals.
-    """
-    result = set([])
-    for principal in principals:
-        # Ignore suspicious principals from annotations
-        if principal.startswith('system.'):
-            continue
-        if principal == 'group:__world__':
-            result.add(security.Everyone)
-        elif principal == 'group:__authenticated__':
-            result.add(security.Authenticated)
-        else:
-            result.add(principal)
-    return list(result)
-
-
 def generate_jwt(request, expires_in):
     """Return a signed JSON Web Token for the given request.
 

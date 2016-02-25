@@ -6,7 +6,6 @@ from annotator import document
 from pyramid import security
 
 from h._compat import text_type
-from h.api import auth
 
 
 class Annotation(annotation.Annotation):
@@ -75,10 +74,14 @@ class Annotation(annotation.Annotation):
 
         # Convert annotator-store roles to pyramid principals
         for action, roles in self.get('permissions', {}).items():
-            principals = auth.translate_annotation_principals(roles)
-
-            for principal in principals:
-                rule = (security.Allow, principal, action)
+            for r in roles:
+                if r.startswith('system.'):
+                    continue
+                if r == 'group:__world__':
+                    p = security.Everyone
+                else:
+                    p = r
+                rule = (security.Allow, p, action)
                 acl.append(rule)
 
         # If we haven't explicitly authorized it, it's not allowed.
