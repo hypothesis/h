@@ -3,8 +3,19 @@
 import datetime
 import mock
 
+from h.api.presenters import DocumentMetaJSONPresenter
 from h.api.presenters import DocumentURIJSONPresenter
 from h.api.presenters import utc_iso8601, deep_merge_dict
+
+
+class TestDocumentMetaJSONPresenter(object):
+    def test_asdict(self):
+        meta = mock.Mock(type='twitter.url.main_url',
+                         value='https://example.com')
+        presenter = DocumentMetaJSONPresenter(meta)
+
+        expected = {'twitter': {'url': {'main_url': 'https://example.com'}}}
+        assert expected == presenter.asdict()
 
 
 class TestDocumentURIJSONPresenter(object):
