@@ -21,6 +21,8 @@ before_script:
 script:
   # Run python tests
   - tox
+  # Check python package manifest
+  - tox -e manifest
   # Run client (app) tests
   - gulp test-app
   # Run extension tests
