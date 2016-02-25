@@ -6,6 +6,28 @@ Presenters for API data.
 import collections
 
 
+class DocumentJSONPresenter(object):
+    def __init__(self, document):
+        self.document = document
+
+    def asdict(self):
+        if not self.document:
+            return {}
+
+        d = {}
+
+        for docmeta in self.document.meta:
+            meta_presenter = DocumentMetaJSONPresenter(docmeta)
+            deep_merge_dict(d, meta_presenter.asdict())
+
+        d['link'] = []
+        for docuri in self.document.uris:
+            uri_presenter = DocumentURIJSONPresenter(docuri)
+            d['link'].append(uri_presenter.asdict())
+
+        return d
+
+
 class DocumentMetaJSONPresenter(object):
     def __init__(self, document_meta):
         self.document_meta = document_meta
