@@ -1,17 +1,23 @@
 require('./polyfills')
 
-# initialize Raven. This is required at the top of this file
+# Initialize Raven. This is required at the top of this file
 # so that it happens early in the app's startup flow
 settings = require('./settings')(document)
 if settings.raven
-  require('./raven').init(settings.raven)
-
+  raven = require('./raven')
+  raven.init(settings.raven)
 
 angular = require('angular')
 
 # autofill-event relies on the existence of window.angular so
 # it must be require'd after angular is first require'd
 require('autofill-event')
+
+# Setup Angular integration for Raven
+if settings.raven
+  raven.angularModule(angular)
+else
+  angular.module('ngRaven', [])
 
 streamer = require('./streamer')
 
@@ -89,7 +95,7 @@ module.exports = angular.module('h', [
   ['ui.bootstrap', require('./vendor/ui-bootstrap-custom-tpls-0.13.4')][0]
 
   # Local addons
-  require('./raven').angularModule().name
+  'ngRaven'
 ])
 
 .controller('AppController', require('./app-controller'))

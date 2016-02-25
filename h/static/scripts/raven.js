@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * This module configures Raven for reporting crashes
  * to Sentry.
@@ -10,17 +12,73 @@
  * as a dependency.
  */
 
-require('core-js/fn/object/assign')
+require('core-js/fn/object/assign');
 
-var Raven = require('raven-js')
+var Raven = require('raven-js');
 
-var enabled = false;
+// This is only used in apps where Angular is used,
+// but is required globally due to
+// https://github.com/thlorenz/proxyquireify/issues/40
+//
+// Fortunately it does not pull in Angular as a dependency but returns
+// a function that takes it as an input argument.
+var angularPlugin = require('raven-js/plugins/angular');
+
+/**
+ * Returns the input URL if it is an HTTP URL or the filename part of the URL
+ * otherwise.
+ *
+ * @param {string} url - The script URL associated with an exception stack
+ *                       frame.
+ */
+function convertLocalURLsToFilenames(url) {
+  if (!url) {
+    return url;
+  }
+
+  if (url.match(/https?:/)) {
+    return url;
+  }
+
+  // Strip the query string (which is used as a cache buster)
+  // and extract the filename from the URL
+  return url.replace(/\?.*/,'').split('/').slice(-1)[0];
+}
+
+/**
+ * Return a transformed version of @p data with local URLs replaced
+ * with filenames.
+ *
+ * In environments where the client is served from a local URL,
+ * eg. chrome-extension://<ID>/scripts/bundle.js, the script URL
+ * and the sourcemap it references will not be accessible to Sentry.
+ *
+ * Therefore on the client we replace references to such URLs with just
+ * the filename part and then as part of the release process, upload both
+ * the source file and the source map to Sentry.
+ *
+ * Using just the filename allows us to upload a single set of source files
+ * and sourcemaps for a release though a given release of H might be served
+ * from multiple actual URLs (eg. different browser extensions).
+ */
+function translateSourceURLs(data) {
+  try {
+    var frames = data.exception.values[0].stacktrace.frames;
+    frames.forEach(function (frame) {
+      frame.filename = convertLocalURLsToFilenames(frame.filename);
+    });
+    data.culprit = frames[0].filename;
+  } catch (err) {
+    console.warn('Failed to normalize error stack trace', err, data);
+  }
+  return data;
+}
 
 function init(config) {
   Raven.config(config.dsn, {
     release: config.release,
+    dataCallback: translateSourceURLs,
   }).install();
-  enabled = true;
   installUnhandledPromiseErrorHandler();
 }
 
@@ -35,18 +93,27 @@ function setUserInfo(info) {
 /**
  * Initializes and returns the Angular module which provides
  * a custom wrapper around Angular's $exceptionHandler service,
- * logging any exceptions passed to it using Sentry
+ * logging any exceptions passed to it using Sentry.
+ *
+ * This must be invoked _after_ Raven is configured using init().
  */
-function angularModule() {
-  if (enabled) {
-    if (window.angular) {
-      var angularPlugin = require('raven-js/plugins/angular');
-      angularPlugin(Raven, angular);
-    }
-  } else {
-    // define a stub module in environments where Raven is not enabled
-    angular.module('ngRaven', []);
-  }
+function angularModule(angular) {
+  var prevCallback = Raven._globalOptions.dataCallback;
+  angularPlugin(Raven, angular);
+
+  // Hack: Ensure that both our data callback and the one provided by
+  // the Angular plugin are run when submitting errors.
+  //
+  // The Angular plugin replaces any previously installed
+  // data callback with its own which does not in turn call the
+  // previously registered callback that we registered when calling
+  // Raven.config().
+  //
+  // See https://github.com/getsentry/raven-js/issues/522
+  var angularCallback = Raven._globalOptions.dataCallback;
+  Raven.setDataCallback(function (data) {
+    return angularCallback(prevCallback(data));
+  });
   return angular.module('ngRaven');
 }
 
