@@ -9,7 +9,7 @@ some nuance may be lost in the medium and plan accordingly.
 .. _#hypothes.is: http://webchat.freenode.net/?channels=hypothes.is
 .. _freenode.net: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
-.. _archive: http://list.hypothes.is/archive/dev
+.. _archive: https://groups.google.com/a/list.hypothes.is/forum/#!forum/dev
 .. _Github: http://github.com/hypothesis/h
 
 If you plan to be an active contributor please join our mailing list
