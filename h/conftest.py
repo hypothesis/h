@@ -91,8 +91,13 @@ def database_session(request, monkeypatch):
     db.Session.begin_nested()
     request.addfinalizer(db.Session.rollback)
 
-    # Prevent the session from committing (redirect to flush() instead):
-    monkeypatch.setattr(db.Session, 'commit', db.Session.flush)
+    # Prevent the session from committing, but simulate the effects of a commit
+    # within our transaction. N.B. we must not only flush SQLA state to the
+    # database but also expire the persistence state of all objects.
+    def _fake_commit():
+        db.Session.flush()
+        db.Session.expire_all()
+    monkeypatch.setattr(db.Session, 'commit', _fake_commit)
     # Prevent the session from closing (make it a no-op):
     monkeypatch.setattr(db.Session, 'remove', lambda: None)
 
