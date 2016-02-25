@@ -57,6 +57,7 @@ def includeme(config):
     config.add_tween('h.tweens.conditional_http_tween_factory', under=EXCVIEW)
     config.add_tween('h.tweens.csrf_tween_factory')
     config.add_tween('h.tweens.auth_token')
+    config.add_tween('h.tweens.content_security_policy_tween_factory')
 
     config.add_renderer('csv', 'h.renderers.CSV')
     config.add_request_method(in_debug_mode, 'debug', reify=True)
@@ -78,6 +79,15 @@ def includeme(config):
     })
     config.include('pyramid_tm')
     zope.sqlalchemy.register(db.Session)
+
+    # Enable a Content Security Policy
+    # This is initially copied from:
+    # https://github.com/pypa/warehouse/blob/e1cf03faf9bbaa15d67d0de2c70f9a9f732596aa/warehouse/config.py#L327
+    config.add_settings({
+        'csp': {
+            'report-uri': [config.registry.settings.get('csp.report_uri')],
+        },
+    })
 
     # Core site modules
     config.include('h.assets')

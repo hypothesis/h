@@ -72,3 +72,19 @@ def csrf_tween_factory(handler, registry):
         return response
 
     return csrf_tween
+
+
+def content_security_policy_tween_factory(handler, registry):
+    policy = registry.settings.get('csp', {})
+    policy = "; ".join([
+        " ".join([k] + [v2 for v2 in v if v2 is not None])
+        for k, v in sorted(policy.items())
+        if [v2 for v2 in v if v2 is not None]
+    ])
+
+    def content_security_policy_tween(request):
+        resp = handler(request)
+        resp.headers["Content-Security-Policy-Report-Only"] = policy.format(request=request)
+        return resp
+
+    return content_security_policy_tween

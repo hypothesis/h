@@ -75,6 +75,9 @@ SETTINGS = [
     EnvSetting('h.db.should_drop_all', 'MODEL_DROP_ALL', type=asbool),
     EnvSetting('h.websocket_url', 'H_WEBSOCKET_URL'),
 
+    # Content Security Policy configuration
+    EnvSetting('csp.report_uri', 'CSP_REPORT_URI'),
+
     # Debug/development settings
     EnvSetting('debug_query', 'DEBUG_QUERY'),
 ]
