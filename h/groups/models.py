@@ -6,6 +6,7 @@ from sqlalchemy.orm import exc
 import slugify
 
 from h.db import Base
+from h.db import mixins
 from h import pubid
 
 
@@ -13,7 +14,7 @@ GROUP_NAME_MIN_LENGTH = 4
 GROUP_NAME_MAX_LENGTH = 25
 
 
-class Group(Base):
+class Group(Base, mixins.Timestamps):
     __tablename__ = 'group'
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
@@ -24,15 +25,6 @@ class Group(Base):
                       unique=True,
                       nullable=False)
     name = sa.Column(sa.UnicodeText(), nullable=False)
-    created = sa.Column(sa.DateTime,
-                        default=datetime.datetime.utcnow,
-                        server_default=sa.func.now(),
-                        nullable=False)
-    updated = sa.Column(sa.DateTime,
-                        server_default=sa.func.now(),
-                        default=datetime.datetime.utcnow,
-                        onupdate=datetime.datetime.utcnow,
-                        nullable=False)
 
     # We store information about who created the group -- we don't use this
     # currently, but it seems careless to lose this information when in the
