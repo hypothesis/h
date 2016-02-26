@@ -6,7 +6,6 @@ from __future__ import division, print_function, unicode_literals
 
 import argparse
 import datetime
-import dateutil.parser as dateparser
 import itertools
 import os
 import logging
@@ -18,11 +17,10 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from h import db
 from h.api.db import Base as APIBase
+from h.api.models import elastic
 from h.api.models.annotation import Annotation
 from h.api.models.document import Document, DocumentURI, DocumentMeta
 from h.api.models.document import merge_documents
-from h.api import uri
-from h._compat import text_type
 
 BATCH_SIZE = 2000
 
@@ -94,7 +92,8 @@ def migrate_annotations(es_client):
         success += s
         failure += f
         took = (datetime.datetime.now() - start).seconds
-        print('{:d} ok, {:d} failed, took {:d} seconds'.format(success, failure, took))
+        print('{:d} ok, {:d} failed, took {:d} seconds'.format(
+            success, failure, took))
 
         start = datetime.datetime.now()
 
@@ -160,8 +159,11 @@ def import_annotations(annotations):
     for a in annotations:
         try:
             document_data = a['_source'].pop('document', None)
+            data = a['_source']
+            data['id'] = a['_id']
+            es_annotation = elastic.Annotation(data)
 
-            annotation = annotation_from_data(a['_id'], a['_source'])
+            annotation = annotation_from_data(es_annotation)
             objs.add(annotation)
 
             if document_data is not None:
@@ -178,53 +180,29 @@ def import_annotations(annotations):
     return success, failure
 
 
-def annotation_from_data(id, data):
+def annotation_from_data(es_ann):
     # No joke. This is a thing.
-    if id == '_query':
+    if es_ann.id == '_query':
         raise Skip("not an annotation (id=_query)")
 
-    ann = Annotation.query.get(id)
+    ann = Annotation.query.get(es_ann.id)
     if ann is None:
-        ann = Annotation(id=id)
+        ann = Annotation(id=es_ann.id)
 
-    ann.created = dateparser.parse(data.pop('created')).replace(tzinfo=None)
-    ann.updated = dateparser.parse(data.pop('updated')).replace(tzinfo=None)
-    ann.userid = data.pop('user')
-    ann.groupid = data.pop('group')
-
-    text = data.pop('text', None)
-    if text:
-        ann.text = text
-
-    tags = data.pop('tags', None)
-    if tags:
-        ann.tags = _filter_tags(tags)
-
-    references = data.pop('references', None)
-    if references:
-        ann.references = _filter_references(references)
-
-    perms = data.pop('permissions')
-    ann.shared = _permissions_allow_sharing(ann.userid, ann.groupid, perms)
-
-    targets = data.pop('target', [])
-    target = targets[0] if len(targets) > 0 else None
-
-    if target is not None:
-        ann.target_uri = target.pop('source', None)
-        ann.target_selectors = target.pop('selector', [])
-
-    datauri = data.pop('uri', None)
-    if ann.target_uri is None:
-        ann.target_uri = datauri
-
-    if ann.target_uri is None:
+    if es_ann.target_uri is None:
         raise Skip("annotation is missing a target source and uri")
 
-    ann.target_uri_normalized = text_type(uri.normalize(ann.target_uri))
-
-    if data:
-        ann.extra = data
+    ann.created = es_ann.created
+    ann.updated = es_ann.updated
+    ann.userid = es_ann.userid
+    ann.groupid = es_ann.groupid
+    ann.text = es_ann.text
+    ann.tags = es_ann.tags
+    ann.references = es_ann.references
+    ann.shared = es_ann.shared
+    ann.target_uri = es_ann.target_uri
+    ann.target_selectors = es_ann.target_selectors
+    ann.extra = es_ann.extra
 
     return ann
 
@@ -310,113 +288,6 @@ def _batch_iter(n, iterable):
         if not batch:
             return
         yield batch
-
-
-def _filter_tags(tags):
-    if isinstance(tags, basestring):
-        return [tags]
-    if not isinstance(tags, list):
-        raise Skip("weird tags: {!r}".format(tags))
-    return tags
-
-
-def _filter_references(references):
-    if not isinstance(references, list):
-        raise Skip("non-list references field: {!r}".format(references))
-
-    # Some of the values in the references fields aren't IDs (i.e. they're not
-    # base64-encoded UUIDs or base64-encoded flake IDs. Instead, they're
-    # base64-encoded random numbers between 0 and 1, in ASCII...
-    #
-    # So, we filter out things that couldn't possibly be valid IDs.
-    references = [r for r in references if len(r) in [20, 22]]
-
-    return references
-
-
-def _permissions_allow_sharing(user, group, perms):
-    gperm = 'group:{}'.format(group)
-
-    allowed_keys = set(['admin', 'delete', 'read', 'update'])
-    if set(perms) - allowed_keys:
-        raise Skip("invalid permission keys: {!r}".format(perms))
-
-    # Extract a (deduplicated) copy of the read perms field...
-    read_perms = list(set(perms.get('read', [])))
-
-    # We explicitly fix up some known weird scenarios with the permissions
-    # field. The idea here is to cover the ones we've investigated and know
-    # about, but throw a Skip if we see something we don't recognise. Then if
-    # necessary we can make a decision on it and add a rule to handle it here.
-    #
-    # 1. Missing 'read' permissions field. Fix: set the permissions to private.
-    if not read_perms:
-        read_perms = [user]
-
-    # 2. 'read' permissions field is [None]. Fix: as in 1).
-    elif read_perms == [None]:
-        read_perms = [user]
-
-    # 3. Group 'read' permissions that don't match the annotation group. I
-    #    believe this is a result of a bug where the focused group was
-    #    incorrectly restored from localStorage.
-    #
-    #    CHECK THIS ONE: example annotation ids:
-    #
-    #    - AVHVDy7M8sFu_DXLVTfR (Jon)
-    #    - AVH0xnzy8sFu_DXLVU8L (Jeremy)
-    #    - AVHvR_bC8sFu_DXLVUl2 (Jeremy)
-    #
-    #    Fix: set the permissions to be the correct permissions for the group
-    #    the annotation is actually in...
-    elif (len(read_perms) == 1 and
-          read_perms[0].startswith('group:') and
-          read_perms != [gperm]):
-        read_perms = [gperm]
-
-    # 4. Read permissions includes 'group:__world__' but also other principals.
-    #
-    #    This is equivalent to including only 'group:__world__'.
-    elif len(read_perms) > 1 and group == '__world__' and gperm in read_perms:
-        read_perms = [gperm]
-
-    if (read_perms != [gperm] and read_perms != [user]):
-        # attempt to fix data when client auth state is out of sync by
-        # by overriding the permissions with the user of the annotation.
-        if read_perms[0].startswith('acct:'):
-            read_perms = [user]
-        else:
-            raise Skip('invalid read permissions: {!r}'.format(perms))
-
-    for other in ['admin', 'delete', 'update']:
-        other_perms = perms.get(other, [])
-
-        # If one of these is missing, who cares? We can assume it's supposed to
-        # be the owner...
-        if not other_perms:
-            continue
-
-        # Multiple permissions for one of these that includes the owner
-        # accounts for about 20 annotations in the database. All of these fit
-        # into one of the following categories:
-        #
-        # - created by staff for testing purposes
-        # - modified post-hoc to allow admin editing of an annotation
-        # - created by two non-staff users, for testing purposes (this accounts
-        #   for a whole 3 annotations)
-        if len(other_perms) > 1 and user in other_perms:
-            continue
-
-        if (other_perms != [user] and not other_perms[0].startswith('acct:')):
-            raise Skip('invalid {} permissions: {!r}'.format(other, perms))
-
-    # And, now, we ignore everything other than the read permissions. If
-    # they're a group permission the annotation is considered "shared,"
-    # otherwise not.
-    if read_perms == [gperm]:
-        return True
-
-    return False
 
 
 def _transfom_document_links(ann_target_uri, docdata):
