@@ -12,7 +12,7 @@ python:
 before_install:
   - nvm install 4.3
   - node --version
-  - pip install coveralls tox
+  - pip install tox
   - npm install gulp-cli
 install:
   - pip install --use-wheel -e .
@@ -32,7 +32,7 @@ script:
   - make extensions
 after_success:
   - tox -e coverage
-  - coveralls
+  - tox -e codecov
 cache:
   directories:
     - node_modules
