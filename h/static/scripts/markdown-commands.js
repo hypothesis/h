@@ -66,6 +66,12 @@ function replaceText(state, pos, length, text) {
     //    Increment end by difference in length between original and replaced
     //    text
     newSelectionEnd += text.length - length;
+  } else if (pos < newSelectionStart &&
+             pos + length > newSelectionEnd) {
+    // 6. Replaced text fully contains selection:
+    //    Expand selection to replaced text
+    newSelectionStart = pos;
+    newSelectionEnd = pos + length;
   }
 
   return {
@@ -157,6 +163,56 @@ function toggleSpanStyle(state, prefix, suffix, placeholder) {
   return newState;
 }
 
+function startOfLine(str, pos) {
+  var start = str.lastIndexOf('\n', pos);
+  if (start < 0) {
+    return 0;
+  } else {
+    return start + 1;
+  }
+}
+
+function endOfLine(str, pos) {
+  var end = str.indexOf('\n', pos);
+  if (end < 0) {
+    return str.length;
+  } else {
+    return end;
+  }
+}
+
+/**
+ * Transform lines between two positions in an input field.
+ *
+ * @param {EditorState} state - The initial state of the input field
+ * @param {number} start - The start position within the input text
+ * @param {number} end - The end position within the input text
+ * @param {(EditorState, number) => EditorState} callback
+ *  - Callback which is invoked with the current state of the input and
+ *    the start of the current line and returns the new state of the input.
+ */
+function transformLines(state, start, end, callback) {
+  var lineStart = startOfLine(state.text, start);
+  var lineEnd = endOfLine(state.text, start);
+
+  while (lineEnd <= endOfLine(state.text, end)) {
+    var isLastLine = lineEnd === state.text.length;
+    var currentLineLength = lineEnd - lineStart;
+
+    state = callback(state, lineStart, lineEnd);
+
+    var newLineLength = endOfLine(state.text, lineStart) - lineStart;
+    end += newLineLength - currentLineLength;
+
+    if (isLastLine) {
+      break;
+    }
+    lineStart = lineStart + newLineLength + 1;
+    lineEnd = endOfLine(state.text, lineStart);
+  }
+  return state;
+}
+
 /**
  * Toggle Markdown-style formatting around a block of text.
  *
@@ -166,42 +222,34 @@ function toggleSpanStyle(state, prefix, suffix, placeholder) {
  * @return {EditorState} - The new state of the input field.
  */
 function toggleBlockStyle(state, prefix) {
-  // Expand the start and end of the selection to the start and
-  // and of their respective lines
-  var start = state.text.lastIndexOf('\n', state.selectionStart);
-  if (start < 0) {
-    start = 0;
-  } else {
-    start += 1;
-  }
-  var end = state.text.indexOf('\n', state.selectionEnd);
-  if (end < 0) {
-    end = state.text.length;
-  }
+  var start = state.selectionStart;
+  var end = state.selectionEnd;
 
-  // Test whether all input lines are already formatted with this style
-  var lines = state.text.slice(start, end).split('\n');
-  var prefixedLines = lines.filter(function (line) {
-    return line.slice(0, prefix.length) === prefix;
+  // Test whether all lines in the selected range already have the style
+  // applied
+  var blockHasStyle = true;
+  transformLines(state, start, end, function (state, lineStart) {
+    if (state.text.slice(lineStart, lineStart + prefix.length) !== prefix) {
+      blockHasStyle = false;
+    }
+    return state;
   });
 
-  var newLines;
-  if (prefixedLines.length === lines.length) {
-    // All lines already start with the block prefix, remove the formatting.
-    newLines = lines.map(function (line) {
-      return line.slice(prefix.length);
+  if (blockHasStyle) {
+    // Remove the formatting.
+    return transformLines(state, start, end, function (state, lineStart) {
+      return replaceText(state, lineStart, prefix.length, '');
     });
   } else {
     // Add the block style to any lines which do not already have it applied
-    newLines = lines.map(function (line) {
-      if (line.slice(0, prefix.length) === prefix) {
-        return line;
+    return transformLines(state, start, end, function (state, lineStart) {
+      if (state.text.slice(lineStart, lineStart + prefix.length) === prefix) {
+        return state;
       } else {
-        return prefix + line;
+        return replaceText(state, lineStart, 0, prefix);
       }
     });
   }
-  return replaceText(state, start, end - start, newLines.join('\n'));
 }
 
 module.exports = {

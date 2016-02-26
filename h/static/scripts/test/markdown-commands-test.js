@@ -78,12 +78,17 @@ describe('markdown commands', function () {
 
     it('adds formatting to blocks', function () {
       var output = toggle(parseState('one\n<sel>two\nthree</sel>\nfour'));
-      assert.equal(formatState(output), 'one\n<sel>> two\n> three</sel>\nfour');
+      assert.equal(formatState(output), 'one\n> <sel>two\n> three</sel>\nfour');
     });
 
     it('removes formatting from blocks', function () {
       var output = toggle(parseState('one \n<sel>> two\n> three</sel>\nfour'));
       assert.equal(formatState(output), 'one \n<sel>two\nthree</sel>\nfour');
+    });
+
+    it('preserves the selection', function () {
+      var output = toggle(parseState('one <sel>two\nthree </sel>four'));
+      assert.equal(formatState(output), '> one <sel>two\n> three </sel>four');
     });
   });
 
