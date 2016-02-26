@@ -16,7 +16,10 @@ before_install:
   - npm install gulp-cli
 install:
   - pip install --use-wheel -e .
+  - nvm install 4.3
+  - node --version
   - npm install
+  - npm rebuild node-sass
 before_script:
   - createdb htest
 script:
