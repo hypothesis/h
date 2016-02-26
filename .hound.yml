@@ -3,6 +3,9 @@ coffeescript:
 javascript:
   config_file: .jshintrc
   ignore_file: .jshintignore
+jscs:
+  enabled: true
+  config_file: .jscsrc
 ruby:
   enabled: false
 scss:
