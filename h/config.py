@@ -77,6 +77,7 @@ SETTINGS = [
 
     # Content Security Policy configuration
     EnvSetting('csp.report_uri', 'CSP_REPORT_URI'),
+    EnvSetting('csp.report_only', 'CSP_REPORT_ONLY'),
 
     # Debug/development settings
     EnvSetting('debug_query', 'DEBUG_QUERY'),

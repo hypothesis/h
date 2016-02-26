@@ -82,9 +82,14 @@ def content_security_policy_tween_factory(handler, registry):
         if [v2 for v2 in v if v2 is not None]
     ])
 
+    if registry.settings.get('csp.report_only', False):
+        header_name = 'Content-Security-Policy-Report-Only'
+    else:
+        header_name = 'Content-Security-Policy'
+
     def content_security_policy_tween(request):
         resp = handler(request)
-        resp.headers["Content-Security-Policy-Report-Only"] = policy.format(request=request)
+        resp.headers[header_name] = policy.format(request=request)
         return resp
 
     return content_security_policy_tween
