@@ -1,10 +1,15 @@
 {
   "preset": "google",
   "requireSemicolons": true,
-
   "excludeFiles": [
-    "node_modules/**",
-    "h/static/scripts/vendor"
+    ".tox/**",
+    "build/**",
+    "docs/_build/**",
+    "dist/**",
+    "h/browser/chrome/content/**",
+    "h/static/scripts/vendor/**",
+    "h/static/styles/vendor/**",
+    "node_modules/**"
   ],
   "maxErrors": 10,
   "disallowSpacesInAnonymousFunctionExpression": null,
