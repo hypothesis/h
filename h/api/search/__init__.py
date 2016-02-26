@@ -5,6 +5,8 @@ from pyramid.settings import asbool
 from h.api.search.client import Client
 from h.api.search.config import configure_index
 from h.api.search.core import search
+from h.api.search.core import FILTERS_KEY
+from h.api.search.core import MATCHERS_KEY
 
 __all__ = ('search',)
 
@@ -24,6 +26,15 @@ def includeme(config):
     settings = config.registry.settings
     settings.setdefault('es.host', 'http://localhost:9200')
     settings.setdefault('es.index', 'annotator')
+
+    # Allow users of this module to register additional search filter and
+    # search matcher factories.
+    config.registry[FILTERS_KEY] = []
+    config.registry[MATCHERS_KEY] = []
+    config.add_directive('add_search_filter',
+                         lambda c, f: c.registry[FILTERS_KEY].append(f))
+    config.add_directive('add_search_matcher',
+                         lambda c, m: c.registry[MATCHERS_KEY].append(m))
 
     # Add a property to all requests for easy access to the elasticsearch
     # client. This can be used for direct or bulk access without having to

@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+
+
+class Filter(object):
+    def __init__(self, request):
+        self.request = request
+
+    def __call__(self, _):
+        return nipsa_filter(self.request.authenticated_userid)
+
+
 def nipsa_filter(userid=None):
     """Return an Elasticsearch filter for filtering out NIPSA'd annotations.
 

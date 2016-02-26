@@ -28,16 +28,7 @@ def dummy_request():
     return DummyRequest(es=es)
 
 
-search_fixtures = pytest.mark.usefixtures('query', 'nipsa', 'log')
-
-
-@search_fixtures
-def test_search_passes_private_to_AuthFilter(query):
-    request = dummy_request()
-
-    core.search(request, {}, private=True)
-
-    query.AuthFilter.assert_called_once_with(request, private=True)
+search_fixtures = pytest.mark.usefixtures('query', 'log')
 
 
 @search_fixtures
@@ -144,17 +135,78 @@ def test_search_does_not_log_a_warning_if_there_are_not_too_many_replies(log):
     assert not log.warn.called
 
 
+@pytest.mark.parametrize('private', [True, False])
+def test_default_querybuilder_passes_private_to_AuthFilter(private, query):
+    request = dummy_request()
+
+    core.default_querybuilder(request, private=private)
+
+    query.AuthFilter.assert_called_once_with(request, private=private)
+
+
+@pytest.mark.parametrize('filter_type', [
+    'AuthFilter',
+    'UriFilter',
+    'GroupFilter'
+])
+def test_default_querybuilder_includes_default_filters(filter_type):
+    request = dummy_request()
+
+    builder = core.default_querybuilder(request)
+
+    assert instance_of_type(filter_type) in builder.filters
+
+
+def test_default_querybuilder_includes_registered_filters():
+    filter_factory = mock.Mock(return_value=mock.sentinel.MY_FILTER,
+                               spec_set=[])
+    request = dummy_request()
+    request.registry[core.FILTERS_KEY] = [filter_factory]
+
+    builder = core.default_querybuilder(request)
+
+    filter_factory.assert_called_once_with(request)
+    assert mock.sentinel.MY_FILTER in builder.filters
+
+
+@pytest.mark.parametrize('matcher_type', [
+    'AnyMatcher',
+    'TagsMatcher',
+])
+def test_default_querybuilder_includes_default_matchers(matcher_type):
+    request = dummy_request()
+
+    builder = core.default_querybuilder(request)
+
+    assert instance_of_type(matcher_type) in builder.matchers
+
+
+def test_default_querybuilder_includes_registered_matchers():
+    matcher_factory = mock.Mock(return_value=mock.sentinel.MY_MATCHER,
+                                spec_set=[])
+    request = dummy_request()
+    request.registry[core.MATCHERS_KEY] = [matcher_factory]
+
+    builder = core.default_querybuilder(request)
+
+    matcher_factory.assert_called_once_with(request)
+    assert mock.sentinel.MY_MATCHER in builder.matchers
+
+
+class instance_of_type(object):
+    def __init__(self, typename):
+        self.typename = typename
+
+    def __eq__(self, other):
+        return type(other).__name__ == self.typename
+
+    def __repr__(self):
+        return '<matcher for instance of type "{}">'.format(self.typename)
+
+
 @pytest.fixture
 def query(request):
     patcher = mock.patch('h.api.search.core.query', autospec=True)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
-
-
-@pytest.fixture
-def nipsa(request):
-    patcher = mock.patch('h.api.search.core.nipsa', autospec=True)
     result = patcher.start()
     request.addfinalizer(patcher.stop)
     return result
