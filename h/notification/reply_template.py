@@ -7,7 +7,7 @@ from pyramid.events import subscriber
 from pyramid.renderers import render
 
 from h import auth
-from h.api.auth import translate_annotation_principals
+from h.auth.util import translate_annotation_principals
 from h.api import storage
 from h.notification.notifier import TemplateRenderException
 from h.notification import types

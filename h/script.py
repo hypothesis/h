@@ -188,7 +188,7 @@ def token(args):
     X-Annotator-Auth-Token header.
 
     """
-    import h.api.auth
+    import h.auth.tokens
     request = bootstrap(args)
     FakeRequest = collections.namedtuple(
         'FakeRequest', 'authenticated_userid host_url registry')
@@ -197,7 +197,7 @@ def token(args):
         host_url=request.host_url,
         registry=request.registry
     )
-    print(h.api.auth.generate_jwt(fake_request, 3600))
+    print(h.auth.tokens.generate_jwt(fake_request, 3600))
 
 
 parser_token = subparsers.add_parser(

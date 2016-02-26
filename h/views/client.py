@@ -15,7 +15,7 @@ from pyramid.view import view_config
 
 from h import client
 from h import session as h_session
-from h.api.auth import generate_jwt
+from h.auth.tokens import generate_jwt
 from h.util.view import json_view
 
 

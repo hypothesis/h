@@ -3,29 +3,8 @@
 import datetime
 
 import jwt
-from jwt import InvalidTokenError
-from pyramid import security
 
-from h import models
-from h.api.models.token import API_TOKEN_PREFIX
-
-
-def translate_annotation_principals(principals):
-    """
-    Translate a list of annotation principals to a list of pyramid principals.
-    """
-    result = set([])
-    for principal in principals:
-        # Ignore suspicious principals from annotations
-        if principal.startswith('system.'):
-            continue
-        if principal == 'group:__world__':
-            result.add(security.Everyone)
-        elif principal == 'group:__authenticated__':
-            result.add(security.Authenticated)
-        else:
-            result.add(principal)
-    return list(result)
+from h.auth import models
 
 
 def generate_jwt(request, expires_in):
@@ -87,7 +66,7 @@ def userid_from_jwt(token, request):
                           audience=request.host_url,
                           leeway=240,
                           algorithms=['HS256']).get('sub')
-    except InvalidTokenError:
+    except jwt.InvalidTokenError:
         return None
 
 
@@ -107,7 +86,7 @@ def userid_from_api_token(token):
     :returns: the userid authenticated by the token, or None
     :rtype: unicode or None
     """
-    if not token.startswith(API_TOKEN_PREFIX):
+    if not token.startswith(models.Token.prefix):
         return None
 
     token_obj = models.Token.get_by_value(token)
