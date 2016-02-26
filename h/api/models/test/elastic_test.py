@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import datetime
 
@@ -8,7 +9,8 @@ from mock import PropertyMock
 
 from pyramid import security
 
-from h.api.models.elastic import Annotation, Document
+from h.api.models.elastic import Annotation
+from h.api.models.elastic import Document, DocumentMeta, DocumentURI
 
 
 class TestAnnotation(object):
@@ -266,3 +268,206 @@ class TestAnnotation(object):
                         new_callable=PropertyMock)
         request.addfinalizer(patcher.stop)
         return patcher.start()
+
+
+class TestDocument(object):
+    def test_created(self):
+        doc = Document({}, created=datetime.datetime(2016, 2, 25, 16, 45, 23, 371848))
+        assert doc.created == datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)
+
+    def test_updated(self):
+        doc = Document({}, updated=datetime.datetime(2016, 2, 25, 16, 45, 23, 371848))
+        assert doc.updated == datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)
+
+    def test_meta(self):
+        doc = Document({'og': {'title': ['Example Page'], 'url': ['http://example.com']},
+                        'title': ['Example Page'],
+                        'link': ['http://example.com', 'https://example.com']},
+                       claimant='http://example.com',
+                       created=datetime.datetime(2016, 2, 25, 16, 45, 23, 371848),
+                       updated=datetime.datetime(2016, 2, 25, 16, 45, 23, 371849))
+
+        expected = [DocumentMeta({'type': 'og.title', 'value': ['Example Page'],
+                                  'claimant': 'http://example.com',
+                                  'created': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848),
+                                  'updated': datetime.datetime(2016, 2, 25, 16, 45, 23, 371849)}),
+
+                    DocumentMeta({'type': 'og.url', 'value': ['http://example.com'],
+                                  'claimant': 'http://example.com',
+                                  'created': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848),
+                                  'updated': datetime.datetime(2016, 2, 25, 16, 45, 23, 371849)}),
+
+                    DocumentMeta({'type': 'title', 'value': ['Example Page'],
+                                  'claimant': 'http://example.com',
+                                  'created': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848),
+                                  'updated': datetime.datetime(2016, 2, 25, 16, 45, 23, 371849)})]
+        assert sorted(doc.meta) == sorted(expected)
+
+    def test_uris_only_one_self_claim(self):
+        doc = Document({'link': [{'href': 'http://example.com'}]},
+                       claimant='http://example.com')
+
+        expected = [DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'http://example.com',
+                                 'type': 'self-claim',
+                                 'created': None, 'updated': None})]
+
+        assert doc.uris == expected
+
+    def test_uris_disregard_doi_links(self):
+        doc = Document({'link': [{'href': 'doi:foobar'}]})
+        # it always includes a self-claim, not removing doi links would result
+        # in a length of 2
+        assert len(doc.uris) == 1
+
+    def test_uris_str_link(self):
+        doc = Document({'link': 'http://example.com'},
+                       claimant='http://example.com',
+                       created=datetime.datetime(2016, 2, 25, 16, 45, 23, 371848),
+                       updated=datetime.datetime(2016, 2, 25, 16, 45, 23, 371849))
+
+        expected = [DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'http://example.com',
+                                 'type': 'self-claim',
+                                 'created': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848),
+                                 'updated': datetime.datetime(2016, 2, 25, 16, 45, 23, 371849)})]
+
+        assert doc.uris == expected
+
+    def test_uris_recognize_highwire_pdf(self):
+        doc = Document({'link': [{'href': 'pdf-uri', 'type': 'application/pdf'}]},
+                       claimant='http://example.com')
+
+        expected = [DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'pdf-uri',
+                                 'type': 'highwire-pdf',
+                                 'content_type': 'application/pdf',
+                                 'created': None, 'updated': None}),
+
+                    DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'http://example.com',
+                                 'type': 'self-claim',
+                                 'created': None, 'updated': None})]
+
+        assert sorted(doc.uris) == sorted(expected)
+
+    def test_uris_prefix_type_when_rel(self):
+        doc = Document({'link': [{'href': 'https://example.com', 'rel': 'canonical'}]},
+                       claimant='http://example.com')
+
+        expected = [DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'https://example.com',
+                                 'type': 'rel-canonical',
+                                 'content_type': None,
+                                 'created': None, 'updated': None}),
+
+                    DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'http://example.com',
+                                 'type': 'self-claim',
+                                 'created': None, 'updated': None})]
+
+        assert sorted(doc.uris) == sorted(expected)
+
+    @pytest.mark.parametrize('doc', [
+        Document({'highwire': {'doi': ['foobar']}}, claimant='http://example.com'),
+        Document({'highwire': {'doi': ['doi:foobar']}}, claimant='http://example.com')])
+    def test_uris_generates_doi_uri_from_highwire_meta(self, doc):
+        expected = [DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'doi:foobar',
+                                 'type': 'highwire-doi',
+                                 'created': None, 'updated': None}),
+
+                    DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'http://example.com',
+                                 'type': 'self-claim',
+                                 'created': None, 'updated': None})]
+
+        assert sorted(doc.uris) == sorted(expected)
+
+    @pytest.mark.parametrize('doc', [
+        Document({'dc': {'identifier': ['foobar']}}, claimant='http://example.com'),
+        Document({'dc': {'identifier': ['doi:foobar']}}, claimant='http://example.com')])
+    def test_uris_generates_doi_uri_from_dc_meta(self, doc):
+        expected = [DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'doi:foobar',
+                                 'type': 'dc-doi',
+                                 'created': None, 'updated': None}),
+
+                    DocumentURI({'claimant': 'http://example.com',
+                                 'uri': 'http://example.com',
+                                 'type': 'self-claim',
+                                 'created': None, 'updated': None})]
+
+        assert sorted(doc.uris) == sorted(expected)
+
+
+class TestDocumentMeta(object):
+    def test_created(self):
+        meta = DocumentMeta({'created': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)})
+        assert meta.created == datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)
+
+    def test_updated(self):
+        meta = DocumentMeta({'updated': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)})
+        assert meta.updated == datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)
+
+    def test_claimant(self):
+        meta = DocumentMeta({'claimant': 'http://example.com'})
+        assert meta.claimant == 'http://example.com'
+
+    def test_claimant_normalized(self):
+        meta = DocumentMeta({'claimant': 'http://example.com/'})
+        assert meta.claimant_normalized == 'http://example.com'
+
+    def test_type(self):
+        meta = DocumentMeta({'type': 'title'})
+        assert meta.type == 'title'
+
+    def test_type_normalizes_multiple_dots(self):
+        meta = DocumentMeta({'type': 'dc..description'})
+        assert meta.type == 'dc.description'
+
+    def test_type_normalizes_case(self):
+        meta = DocumentMeta({'type': 'dc.Contributor.Sponsor'})
+        assert meta.type == 'dc.contributor.sponsor'
+
+    def test_type_normalizes_colons(self):
+        meta = DocumentMeta({'type': 'facebook.book:isbn'})
+        assert meta.type == 'facebook.book.isbn'
+
+    def test_value(self):
+        meta = DocumentMeta({'value': 'Example Page'})
+        assert meta.value == 'Example Page'
+
+
+class TestDocumentURI(object):
+    def test_created(self):
+        docuri = DocumentURI({'created': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)})
+        assert docuri.created == datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)
+
+    def test_updated(self):
+        docuri = DocumentURI({'updated': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)})
+        assert docuri.updated == datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)
+
+    def test_claimant(self):
+        docuri = DocumentURI({'claimant': 'http://example.com'})
+        assert docuri.claimant == 'http://example.com'
+
+    def test_claimant_normalized(self):
+        docuri = DocumentURI({'claimant': 'http://example.com/'})
+        assert docuri.claimant_normalized == 'http://example.com'
+
+    def test_uri(self):
+        docuri = DocumentURI({'uri': 'http://example.com'})
+        assert docuri.uri == 'http://example.com'
+
+    def test_uri_normalized(self):
+        docuri = DocumentURI({'uri': 'http://example.com/'})
+        assert docuri.uri_normalized == 'http://example.com'
+
+    def test_type(self):
+        docuri = DocumentURI({'type': 'rel-canonical'})
+        assert docuri.type == 'rel-canonical'
+
+    def test_content_type(self):
+        docuri = DocumentURI({'content_type': 'application/pdf'})
+        assert docuri.content_type == 'application/pdf'

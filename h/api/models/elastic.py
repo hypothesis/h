@@ -2,12 +2,14 @@
 from __future__ import unicode_literals
 
 from dateutil import parser as dateparser
+import re
 
 from annotator import annotation
 from annotator import document
 from pyramid import security
 
 from h._compat import text_type
+from h.api import uri
 
 
 class Annotation(annotation.Annotation):
@@ -208,7 +210,10 @@ class Annotation(annotation.Annotation):
     @property
     def document(self):
         if self.get('document') and isinstance(self['document'], dict):
-            return Document(self['document'])
+            return Document(self['document'],
+                            claimant=self.target_uri,
+                            created=self.created,
+                            updated=self.updated)
 
     def __acl__(self):
         """
@@ -239,3 +244,188 @@ class Annotation(annotation.Annotation):
 
 class Document(document.Document):
     __analysis__ = {}
+
+    def __init__(self, d, claimant=None, created=None, updated=None):
+        super(document.Document, self).__init__(d)
+        self.claimant = claimant
+        self.created = created
+        self.updated = updated
+
+    @property
+    def title(self):
+        return self.get('title')
+
+    @property
+    def meta(self):
+        items = {k: v for k, v in self.iteritems() if k != 'link'}
+        meta = []
+        self._transform_meta(meta, items)
+        return meta
+
+    @property
+    def uris(self):
+        return [DocumentURI(link) for link in self._transform_links()]
+
+    def _transform_meta(self, meta, data, path_prefix=[]):
+        for key, value in data.iteritems():
+            keypath = path_prefix[:]
+            keypath.append(key)
+
+            if isinstance(value, dict):
+                self._transform_meta(meta, value, path_prefix=keypath)
+            else:
+                if not isinstance(value, list):
+                    value = [value]
+
+                m = DocumentMeta({'type': '.'.join(keypath),
+                                  'value': value,
+                                  'claimant': self.claimant,
+                                  'created': self.created,
+                                  'updated': self.updated})
+                meta.append(m)
+
+    def _transform_links(self):
+        transformed = []
+        links = self.get('link', [])
+
+        # When document link is just a string, transform it to a link object with
+        # an href, so it gets further processed as either a self-claim or another
+        # claim.
+        if isinstance(links, basestring):
+            links = [{"href": links}]
+
+        for link in links:
+            # disregard self-claim urls as they're are being added separately
+            # later on.
+            if link.keys() == ['href'] and link['href'] == self.claimant:
+                continue
+
+            # disregard doi links as these are being added separately from the
+            # highwire and dc metadata later on.
+            if link.keys() == ['href'] and link['href'].startswith('doi:'):
+                continue
+
+            uri_ = link['href']
+            type = None
+
+            # highwire pdf (href, type=application/pdf)
+            if set(link.keys()) == set(['href', 'type']) and len(link.keys()) == 2:
+                type = 'highwire-pdf'
+
+            if type is None and link.get('rel') is not None:
+                type = 'rel-{}'.format(link['rel'])
+
+            content_type = None
+            if link.get('type'):
+                content_type = link['type']
+
+            transformed.append({'claimant': self.claimant,
+                                'uri': uri_,
+                                'type': type,
+                                'content_type': content_type,
+                                'created': self.created,
+                                'updated': self.updated})
+
+        # Add highwire doi link based on metadata
+        hwdoivalues = self.get('highwire', {}).get('doi', [])
+        for doi in hwdoivalues:
+            if not doi.startswith('doi:'):
+                doi = "doi:{}".format(doi)
+
+            transformed.append({'claimant': self.claimant,
+                                'uri': doi,
+                                'type': 'highwire-doi',
+                                'created': self.created,
+                                'updated': self.updated})
+
+        # Add dc doi link based on metadata
+        dcdoivalues = self.get('dc', {}).get('identifier', [])
+        for doi in dcdoivalues:
+            if not doi.startswith('doi:'):
+                doi = "doi:{}".format(doi)
+
+            transformed.append({'claimant': self.claimant,
+                                'uri': doi,
+                                'type': 'dc-doi',
+                                'created': self.created,
+                                'updated': self.updated})
+
+        # add self claim
+        transformed.append({'claimant': self.claimant,
+                            'uri': self.claimant,
+                            'type': 'self-claim',
+                            'created': self.created,
+                            'updated': self.updated})
+
+        return transformed
+
+
+class DocumentMeta(dict):
+    @property
+    def created(self):
+        return self.get('created')
+
+    @property
+    def updated(self):
+        return self.get('updated')
+
+    @property
+    def claimant(self):
+        return self.get('claimant')
+
+    @property
+    def claimant_normalized(self):
+        claimant = self.claimant
+        if claimant:
+            return text_type(uri.normalize(claimant), 'utf-8')
+
+    @property
+    def type(self):
+        value = self.get('type')
+        if value:
+            value = value.lower().replace(':', '.')
+            value = re.sub(r'\.{2,}', '.', value)
+
+        return value
+
+    @property
+    def value(self):
+        return self.get('value')
+
+
+class DocumentURI(dict):
+    @property
+    def created(self):
+        return self.get('created')
+
+    @property
+    def updated(self):
+        return self.get('updated')
+
+    @property
+    def claimant(self):
+        return self.get('claimant')
+
+    @property
+    def claimant_normalized(self):
+        claimant = self.claimant
+        if claimant:
+            return text_type(uri.normalize(claimant), 'utf-8')
+
+    @property
+    def uri(self):
+        return self.get('uri')
+
+    @property
+    def uri_normalized(self):
+        uri_ = self.uri
+        if uri_:
+            return text_type(uri.normalize(uri_), 'utf-8')
+
+    @property
+    def type(self):
+        return self.get('type')
+
+    @property
+    def content_type(self):
+        return self.get('content_type')

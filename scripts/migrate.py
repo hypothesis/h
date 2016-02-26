@@ -158,7 +158,6 @@ def import_annotations(annotations):
 
     for a in annotations:
         try:
-            document_data = a['_source'].pop('document', None)
             data = a['_source']
             data['id'] = a['_id']
             es_annotation = elastic.Annotation(data)
@@ -166,8 +165,7 @@ def import_annotations(annotations):
             annotation = annotation_from_data(es_annotation)
             objs.add(annotation)
 
-            if document_data is not None:
-                document_objs_from_data(document_data, annotation)
+            create_or_update_document_objects(es_annotation)
         except Exception as e:
             log.warn('error importing %s: %s', a['_id'], e)
             failure += 1
@@ -207,78 +205,69 @@ def annotation_from_data(es_ann):
     return ann
 
 
-def document_objs_from_data(data, ann):
-    links = _transfom_document_links(ann.target_uri, data)
-    uris = [link['uri'] for link in links]
-    documents = Document.find_or_create_by_uris(Session, ann.target_uri, uris,
-                                                created=ann.created,
-                                                updated=ann.updated)
+def create_or_update_document_objects(es_ann):
+    es_doc = es_ann.document
+
+    if not es_doc:
+        return
+
+    uris = [u.uri for u in es_doc.uris]
+    documents = Document.find_or_create_by_uris(Session, es_ann.target_uri, uris,
+                                                created=es_doc.created,
+                                                updated=es_doc.updated)
 
     if documents.count() > 1:
-        document = merge_documents(Session, documents, updated=ann.updated)
+        document = merge_documents(Session, documents, updated=es_doc.updated)
     else:
         document = documents.first()
 
-    document.updated = ann.updated
+    document.updated = es_doc.updated
 
-    document_uri_objs_from_data(document, links, ann)
-    document_meta_objs_from_data(document, data, ann)
+    for uri_ in es_doc.uris:
+        create_or_update_document_uri(uri_, document)
 
-
-def document_uri_objs_from_data(document, transformed_links, ann):
-    for link in transformed_links:
-        docuri = DocumentURI.query.filter(
-                DocumentURI.claimant_normalized == text_type(uri.normalize(link.get('claimant')), 'utf-8'),
-                DocumentURI.uri_normalized == text_type(uri.normalize(link.get('uri')), 'utf-8'),
-                DocumentURI.type == link.get('type'),
-                DocumentURI.content_type == link.get('content_type')
-                ).first()
-
-        if docuri is None:
-            docuri = DocumentURI(claimant=link.get('claimant'),
-                                 uri=link.get('uri'),
-                                 type=link.get('type'),
-                                 content_type=link.get('content_type'),
-                                 document=document,
-                                 created=ann.created,
-                                 updated=ann.updated)
-            Session.add(docuri)
-            Session.flush()
-
-        docuri.updated = ann.updated
+    for meta in es_doc.meta:
+        create_or_update_document_meta(meta, document)
 
 
-def document_meta_objs_from_data(document, data, ann, path_prefix=[]):
-    _ = data.pop('link', None)
+def create_or_update_document_uri(es_docuri, pg_document):
+    docuri = DocumentURI.query.filter(
+            DocumentURI.claimant_normalized == es_docuri.claimant_normalized,
+            DocumentURI.uri_normalized == es_docuri.uri_normalized,
+            DocumentURI.type == es_docuri.type,
+            DocumentURI.content_type == es_docuri.content_type).first()
 
-    for key, value in data.iteritems():
-        keypath = path_prefix[:]
-        keypath.append(key)
+    if docuri is None:
+        docuri = DocumentURI(claimant=es_docuri.claimant,
+                             uri=es_docuri.uri,
+                             type=es_docuri.type,
+                             content_type=es_docuri.content_type,
+                             document=pg_document,
+                             created=es_docuri.created,
+                             updated=es_docuri.updated)
+        Session.add(docuri)
+        Session.flush()
 
-        if isinstance(value, dict):
-            return document_meta_objs_from_data(document, value, ann,
-                                                path_prefix=keypath)
+    docuri.updated = es_docuri.updated
 
-        if not isinstance(value, list):
-            value = [value]
 
-        type = '.'.join(keypath)
-        meta = DocumentMeta.query.filter(
-                DocumentMeta.claimant_normalized == text_type(uri.normalize(ann.target_uri)),
-                DocumentMeta.type == type).one_or_none()
+def create_or_update_document_meta(es_meta, pg_document):
+    meta = DocumentMeta.query.filter(
+            DocumentMeta.claimant_normalized == es_meta.claimant_normalized,
+            DocumentMeta.type == es_meta.type).one_or_none()
 
-        if meta is None:
-            meta = DocumentMeta(claimant=ann.target_uri,
-                                type='.'.join(keypath),
-                                value=value,
-                                created=ann.created,
-                                updated=ann.updated,
-                                document=document)
-            Session.add(meta)
-            Session.flush()
-        else:
-            meta.value = value
-            meta.updated = ann.updated
+    if meta is None:
+        meta = DocumentMeta(claimant=es_meta.claimant,
+                            type=es_meta.type,
+                            value=es_meta.value,
+                            created=es_meta.created,
+                            updated=es_meta.updated,
+                            document=pg_document)
+        Session.add(meta)
+        Session.flush()
+    else:
+        meta.value = es_meta.value
+        meta.updated = es_meta.updated
 
 
 def _batch_iter(n, iterable):
@@ -288,78 +277,6 @@ def _batch_iter(n, iterable):
         if not batch:
             return
         yield batch
-
-
-def _transfom_document_links(ann_target_uri, docdata):
-    transformed = []
-    doclinks = docdata.get('link', [])
-
-    # When document link is just a string, transform it to a link object with
-    # an href, so it gets further processed as either a self-claim or another
-    # claim.
-    if isinstance(doclinks, basestring):
-        doclinks = [{"href": doclinks}]
-
-    for link in doclinks:
-        # disregard self-claim urls as they're are being added separately
-        # later on.
-        if link.keys() == ['href'] and link['href'] == ann_target_uri:
-            continue
-
-        # disregard doi links as these are being added separately from the
-        # highwire and dc metadata later on.
-        if link.keys() == ['href'] and link['href'].startswith('doi:'):
-            continue
-
-        uri_ = link['href']
-        type = None
-
-        # highwire pdf (href, type=application/pdf)
-        if set(link.keys()) == set(['href', 'type']) and len(link.keys()) == 2:
-            type = 'highwire-pdf'
-
-        if type is None and link.get('rel') is not None:
-            type = 'rel-{}'.format(link['rel'])
-
-        content_type = None
-        if link.get('type'):
-            content_type = link['type']
-
-        transformed.append({
-            'claimant': ann_target_uri,
-            'uri': uri_,
-            'type': type,
-            'content_type': content_type})
-
-    # Add highwire doi link based on metadata
-    hwdoivalues = docdata.get('highwire', {}).get('doi', [])
-    for doi in hwdoivalues:
-        if not doi.startswith('doi:'):
-            doi = "doi:{}".format(doi)
-
-        transformed.append({
-            'claimant': ann_target_uri,
-            'uri': doi,
-            'type': 'highwire-doi'})
-
-    # Add dc doi link based on metadata
-    dcdoivalues = docdata.get('dc', {}).get('identifier', [])
-    for doi in dcdoivalues:
-        if not doi.startswith('doi:'):
-            doi = "doi:{}".format(doi)
-
-        transformed.append({
-            'claimant': ann_target_uri,
-            'uri': doi,
-            'type': 'dc-doi'})
-
-    # add self claim
-    transformed.append({
-        'claimant': ann_target_uri,
-        'uri': ann_target_uri,
-        'type': 'self-claim'})
-
-    return transformed
 
 
 if __name__ == '__main__':
