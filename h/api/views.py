@@ -23,6 +23,7 @@ from pyramid.view import view_config
 
 from h.api import cors
 from h.api.events import AnnotationEvent
+from h.api.presenters import AnnotationJSONPresenter
 from h.api import search as search_lib
 from h.api import schemas
 from h.api import storage
@@ -154,7 +155,8 @@ def create(request):
 @api_config(route_name='api.annotation', request_method='GET', permission='read')
 def read(annotation, request):
     """Return the annotation (simply how it was stored in the database)."""
-    return annotation
+    presenter = AnnotationJSONPresenter(annotation)
+    return presenter.asdict()
 
 
 @api_config(route_name='api.annotation', request_method='PUT', permission='update')

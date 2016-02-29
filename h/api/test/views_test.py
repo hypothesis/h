@@ -145,13 +145,16 @@ def test_create_returns_annotation(storage):
     assert result == storage.create_annotation.return_value
 
 
-def test_read_returns_annotation():
+def test_read_returns_presented_annotation(AnnotationJSONPresenter):
     annotation = mock.Mock()
     request = mock.Mock()
+    presenter = mock.Mock()
+    AnnotationJSONPresenter.return_value = presenter
 
     result = views.read(annotation, request)
 
-    assert result == annotation
+    AnnotationJSONPresenter.assert_called_once_with(annotation)
+    assert result == presenter.asdict()
 
 
 update_fixtures = pytest.mark.usefixtures('AnnotationEvent',
@@ -259,6 +262,14 @@ def AnnotationEvent(request):
     patcher = mock.patch('h.api.views.AnnotationEvent', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
+
+
+@pytest.fixture
+def AnnotationJSONPresenter(request):
+    patcher = mock.patch('h.api.views.AnnotationJSONPresenter', autoSpec=True)
+    cls = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return cls
 
 
 @pytest.fixture
