@@ -10,7 +10,6 @@ var endOfStream = require('end-of-stream');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gulpUtil = require('gulp-util');
-var karma = require('karma');
 var sass = require('gulp-sass');
 var postcss = require('gulp-postcss');
 var sourcemaps = require('gulp-sourcemaps');
@@ -219,6 +218,7 @@ gulp.task('watch',
            'watch-manifest']);
 
 gulp.task('test-app', function (callback) {
+  var karma = require('karma');
   new karma.Server({
     configFile: __dirname + '/h/static/scripts/karma.config.js',
     singleRun: true,
@@ -226,6 +226,7 @@ gulp.task('test-app', function (callback) {
 });
 
 gulp.task('test-extension', function (callback) {
+  var karma = require('karma');
   new karma.Server({
     configFile: __dirname + '/h/browser/chrome/karma.config.js',
     singleRun: true,
@@ -233,12 +234,14 @@ gulp.task('test-extension', function (callback) {
 });
 
 gulp.task('test-watch-app', function (callback) {
+  var karma = require('karma');
   new karma.Server({
     configFile: __dirname + '/h/static/scripts/karma.config.js',
   }, callback).start();
 });
 
 gulp.task('test-watch-extension', function (callback) {
+  var karma = require('karma');
   new karma.Server({
     configFile: __dirname + '/h/browser/chrome/karma.config.js',
   }, callback).start();
