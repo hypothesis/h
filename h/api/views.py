@@ -169,7 +169,9 @@ def update(annotation, request):
     annotation = storage.update_annotation(request, annotation.id, appstruct)
 
     _publish_annotation_event(request, annotation, 'update')
-    return annotation
+
+    presenter = AnnotationJSONPresenter(annotation)
+    return presenter.asdict()
 
 
 @api_config(route_name='api.annotation', request_method='DELETE', permission='delete')
