@@ -7,7 +7,7 @@ from alembic import context
 from sqlalchemy import MetaData
 from sqlalchemy import engine_from_config, pool
 
-from h.config import normalize_database_url
+from h.settings import database_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -44,7 +44,7 @@ def configure_logging():
 
 def get_database_url():
     if 'DATABASE_URL' in os.environ:
-        return normalize_database_url(os.environ['DATABASE_URL'])
+        return database_url(os.environ['DATABASE_URL'])
     return config.get_main_option("sqlalchemy.url")
 
 
