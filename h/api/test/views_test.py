@@ -85,22 +85,6 @@ def test_search_returns_search_results(search_lib):
     assert result == search_lib.search.return_value
 
 
-def test_annotations_index_searches(search_lib):
-    request = testing.DummyRequest()
-
-    views.annotations_index(request)
-
-    search_lib.search.assert_called_once_with(request, {"limit": 20})
-
-
-def test_annotations_index_returns_search_results(search_lib):
-    request = testing.DummyRequest()
-
-    result = views.annotations_index(request)
-
-    assert result == search_lib.search.return_value
-
-
 create_fixtures = pytest.mark.usefixtures('AnnotationEvent',
                                           'schemas',
                                           'storage')

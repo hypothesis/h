@@ -138,16 +138,6 @@ def search(request):
                              separate_replies=separate_replies)
 
 
-@api_config(route_name='api.annotations')
-def annotations_index(request):
-    """Do a search for all annotations on anything and return results.
-
-    This will use the default limit, 20 at time of writing, and results
-    are ordered most recent first.
-    """
-    return search_lib.search(request, {"limit": 20})
-
-
 @api_config(route_name='api.annotations',
             request_method='POST',
             effective_principals=security.Authenticated)
