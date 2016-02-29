@@ -84,8 +84,11 @@ def includeme(config):
     # This is initially copied from:
     # https://github.com/pypa/warehouse/blob/e1cf03faf9bbaa15d67d0de2c70f9a9f732596aa/warehouse/config.py#L327
     config.add_settings({
-        'csp': {
-            'report-uri': [config.registry.settings.get('csp.report_uri')],
+        "csp": {
+            "font-src": ["'self'", "fonts.gstatic.com"],
+            "report-uri": [config.registry.settings.get("csp.report_uri")],
+            "script-src": ["'self'"],
+            "style-src": ["'self'", "fonts.googleapis.com"],
         },
     })
 
