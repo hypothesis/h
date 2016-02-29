@@ -218,7 +218,7 @@ def _normalize_query(uri):
     query = uri.query
 
     try:
-        items = urlparse.parse_qsl(query, keep_blank_values=True)
+        items = urlparse.parse_qsl(query, keep_blank_values=True, strict_parsing=True)
     except ValueError:
         # If we can't parse the query string, we better preserve it as it was.
         return query

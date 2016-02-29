@@ -100,6 +100,10 @@ from h.api import uri
     # Query: remove empty
     ("http://example.com?", "http://example.com"),
 
+    # Query: Preserve the query string if we can't parse it
+    ("http://example.com?&", "http://example.com?&"),
+    ("http://example.com?foo=&", "http://example.com?foo=&"),
+
     # Query: ensure UNRESERVED characters are decoded
     ("http://example.com?foo%7Ebar=baz", "http://example.com?foo~bar=baz"),
     ("http://example.com?foo~bar=baz", "http://example.com?foo~bar=baz"),
