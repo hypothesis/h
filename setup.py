@@ -45,7 +45,7 @@ INSTALL_REQUIRES = [
     'itsdangerous>=0.24',
     'jsonpointer==1.0',
     'jsonschema>=2.5.1,<2.6',
-    'pyramid>=1.5,<1.6',
+    'pyramid>=1.6,<1.7',
     'psycogreen>=1.0',
     'psycopg2>=2.6.1',
     'pyramid_mailer>=0.13',
