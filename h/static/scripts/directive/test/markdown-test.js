@@ -39,6 +39,14 @@ describe('markdown', function () {
     return contentElement.innerHTML;
   }
 
+  function mockFormattingCommand() {
+    return {
+      text: 'formatted text',
+      selectionStart: 0,
+      selectionEnd: 0,
+    };
+  }
+
   before(function () {
     angular.module('app', ['ngSanitize'])
       .directive('markdown', proxyquire('../markdown', {
@@ -47,6 +55,12 @@ describe('markdown', function () {
           renderToString: function (input) {
             return 'math:' + input.replace(/$$/g, '');
           },
+        },
+        '../markdown-commands': {
+          convertSelectionToLink: mockFormattingCommand,
+          toggleBlockStyle: mockFormattingCommand,
+          toggleSpanStyle: mockFormattingCommand,
+          LinkType: require('../../markdown-commands').LinkType,
         },
         '@noCallThru': true,
       }))
@@ -100,6 +114,35 @@ describe('markdown', function () {
       });
       assert.equal(getRenderedHTML(editor),
         'rendered:math:\\displaystyle {x*2}rendered:');
+    });
+  });
+
+  describe('toolbar buttons', function () {
+    it('should apply formatting when clicking toolbar buttons', function () {
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: false,
+        ngModel: 'Hello World',
+      });
+      var input = inputElement(editor);
+      var buttons = editor[0].querySelectorAll('.markdown-tools-button');
+      for (var i=0; i < buttons.length; i++) {
+        input.value = 'original text';
+        angular.element(buttons[i]).click();
+        assert.equal(input.value, mockFormattingCommand().text);
+      }
+    });
+  });
+
+  describe('editing', function () {
+    it('should update the input model', function () {
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: false,
+        ngModel: 'Hello World',
+      });
+      var input = inputElement(editor);
+      input.value = 'new text';
+      util.sendEvent(input, 'change');
+      assert.equal(editor.scope.ngModel, 'new text');
     });
   });
 });

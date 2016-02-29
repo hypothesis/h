@@ -1,5 +1,7 @@
 'use strict';
 
+/* global angular */
+
 /**
  * Converts a camelCase name into hyphenated ('camel-case') form.
  *
@@ -101,7 +103,7 @@ function createDirective(document, name, attrs, initialScope, initialHtml, opts)
   angular.mock.inject(function (_$compile_, _$rootScope_) {
     $compile = _$compile_;
     $scope = _$rootScope_.$new();
-  })
+  });
   var templateElement = document.createElement(hyphenate(name));
   Object.keys(attrs).forEach(function (key) {
     var attrName = hyphenate(key);
@@ -145,12 +147,22 @@ function createDirective(document, name, attrs, initialScope, initialHtml, opts)
     childScope.$digest();
     element.ctrl = element.controller(name);
     return element;
-  }
+  };
 
   return linkDirective(initialScope);
+}
+
+/** Helper to dispatch a native event to a DOM element. */
+function sendEvent(element, eventType) {
+  // createEvent() used instead of Event constructor
+  // for PhantomJS compatibility
+  var event = document.createEvent('Event');
+  event.initEvent(eventType, true /* bubbles */, true /* cancelable */);
+  element.dispatchEvent(event);
 }
 
 module.exports = {
   createDirective: createDirective,
   ngModule: ngModule,
+  sendEvent: sendEvent,
 };
