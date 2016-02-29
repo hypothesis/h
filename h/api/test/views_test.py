@@ -86,6 +86,7 @@ def test_search_returns_search_results(search_lib):
 
 
 create_fixtures = pytest.mark.usefixtures('AnnotationEvent',
+                                          'AnnotationJSONPresenter',
                                           'schemas',
                                           'storage')
 
@@ -137,12 +138,16 @@ def test_create_event(AnnotationEvent, storage):
 
 
 @create_fixtures
-def test_create_returns_annotation(storage):
+def test_create_returns_presented_annotation(AnnotationJSONPresenter, storage):
     request = mock.Mock()
+    presenter = mock.Mock()
+    AnnotationJSONPresenter.return_value = presenter
 
     result = views.create(request)
 
-    assert result == storage.create_annotation.return_value
+    AnnotationJSONPresenter.assert_called_once_with(
+            storage.create_annotation.return_value)
+    assert result == presenter.asdict()
 
 
 def test_read_returns_presented_annotation(AnnotationJSONPresenter):
