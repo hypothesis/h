@@ -4,13 +4,12 @@
  -->
 <ul class="stream-list ng-hide"
     ng-show="true"
-    deep-count="count"
-    thread-filter="search.query"
     window-scroll="loadMore(20)">
   <search-status-bar
     ng-show="!isLoading()"
-    filter-active="threadFilter.active()"
-    filter-match-count="count('match')"
+    ng-if="!isStream"
+    filter-active="search.query"
+    filter-match-count="rootThread().children.length"
     on-clear-selection="clearSelection()"
     search-query="search ? search.query : ''"
     selection-count="selectedAnnotationsCount"
@@ -33,15 +32,17 @@
   </li>
   <li id="{{vm.id}}"
       class="annotation-card thread"
-      ng-class="{'js-hover': hasFocus(child.message)}"
-      deep-count="count"
-      thread="child" thread-filter
-      ng-include="'thread.html'"
-      ng-mouseenter="focus(child.message)"
-      ng-click="scrollTo(child.message)"
+      ng-class="{'js-hover': hasFocus(child.annotation)}"
+      ng-mouseenter="focus(child.annotation)"
+      ng-click="scrollTo(child.annotation)"
       ng-mouseleave="focus()"
-      ng-repeat="child in threadRoot.children | orderBy : sort.predicate"
-      ng-show="vm.shouldShow()">
+      ng-repeat="child in rootThread().children track by child.annotation.id">
+      <annotation-thread
+        thread="child"
+        show-document-info="::!isSidebar"
+        on-toggle-replies="toggleCollapsed(id)"
+        on-force-visible="forceVisible(id)">
+      </annotation-thread>
   </li>
   <loggedout-message ng-if="isSidebar && shouldShowLoggedOutMessage()"
     on-login="login()" ng-cloak>
