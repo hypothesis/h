@@ -1,10 +1,18 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Fix error in NSQ connection configuration (c25fa95).
+
 0.9.6 (2016-03-01)
 ==================
 
 Bug fixes
 ---------
 
-- Fix WebSocket server initialization (#3039)
+- Fix WebSocket server initialization (#3039).
 
 0.9.5 (2016-03-01)
 ==================
@@ -12,7 +20,7 @@ Bug fixes
 Bug fixes
 ---------
 
-- Fix a bug that prevented the release from being built (a7e2189)
+- Fix a bug that prevented the release from being built (a7e2189).
 
 0.9.4 (2016-03-01)
 ==================
