@@ -65,6 +65,8 @@ def main():
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
     migrate_annotations(request.es)
+    print('')
+    delete_nonexisting_annotations(request.es)
 
 
 def migrate_annotations(es_client):
@@ -108,6 +110,24 @@ def migrate_annotations(es_client):
     print('{:d} in postgres, {:d} in es = {:.2f}%'.format(in_postgres,
                                                           in_elastic,
                                                           percent))
+
+
+def delete_nonexisting_annotations(es):
+    print('Collecting Postgres annotation ids...')
+    in_postgres = set((row.id for row in Session.query(Annotation.id)))
+    print('Collected {:d} Postgres annotation ids'.format(len(in_postgres)))
+
+    print('Collecting Elasticsearch annotation ids...')
+    es_count = 0
+    for batch in _batch_iter(BATCH_SIZE, scan(es)):
+        in_postgres.difference_update((a['_id'] for a in batch))
+        es_count += len(batch)
+
+    print('Collected {:d} Elasticsearch annotation ids'.format(es_count))
+
+    Session.query(Annotation).filter(Annotation.id.in_(in_postgres)).delete(synchronize_session=False)
+    Session.commit()
+    print('Deleted {:d} postgres annotations'.format(len(in_postgres)))
 
 
 def scan(es_client, with_filter=None):
