@@ -17,7 +17,6 @@ var sourcemaps = require('gulp-sourcemaps');
 var manifest = require('./scripts/gulp/manifest');
 var createBundle = require('./scripts/gulp/create-bundle');
 var vendorBundles = require('./scripts/gulp/vendor-bundles');
-var uploadToSentry = require('./scripts/gulp/upload-to-sentry');
 
 var IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
 var SCRIPT_DIR = 'build/scripts';
@@ -256,6 +255,7 @@ gulp.task('test-watch-extension', function (callback) {
 });
 
 gulp.task('upload-sourcemaps', function () {
+  var uploadToSentry = require('./scripts/gulp/upload-to-sentry');
   gulp.src(['build/scripts/*.js', 'build/scripts/*.map'])
     .pipe(uploadToSentry({
       apiKey: getEnv('SENTRY_API_KEY'),
