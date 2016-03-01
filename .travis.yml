@@ -1,38 +1,48 @@
 # use Travis container build infrastructure
 sudo: false
-addons:
-  artifacts:
-    paths:
-      # Upload all built zipfiles (browser extensions)
-      - $(ls build/*.zip | tr "\n" ":")
-  postgresql: "9.4"
-language: python
-python:
-  - '2.7'
-before_install:
-  - nvm install 4.3
-  - node --version
-  - pip install tox
-  - npm install gulp-cli
-install:
-  - pip install --use-wheel -e .
-  - npm install
-before_script:
-  - createdb htest
-script:
-  # Run python tests
-  - tox
-  # Check python package manifest
-  - tox -e manifest
-  # Run client (app) tests
-  - gulp test-app
-  # Run extension tests
-  - gulp test-extension
-  # Build browser extensions
-  - make extensions
-after_success:
-  - tox -e coverage
-  - tox -e codecov
+matrix:
+  include:
+    # Python (backend) tests
+    - env: ACTION=tox TOXENV=py27
+      language: python
+      python: '2.7'
+      addons:
+        postgresql: "9.4"
+      before_script: createdb htest
+
+    # Check Python package manifest
+    - env: ACTION=tox TOXENV=manifest
+      language: python
+      python: '2.7'
+
+    # Test frontend (client/app)
+    - env: ACTION=gulp GULPTASK=test-app
+      language: node_js
+      node_js: '4.3'
+
+    # Test browser extension
+    - env: ACTION=gulp GULPTASK=test-extension
+      language: node_js
+      node_js: '4.3'
+
+    # Build browser extensions
+    - env: ACTION=extensions
+      language: python
+      python: '2.7'
+      addons:
+        artifacts:
+          paths:
+            # Upload all built zipfiles (browser extensions)
+            - $(ls build/*.zip | tr "\n" ":")
+      before_install:
+        # Unfortunately it seems to be impossible to call `nvm install` from an
+        # external script on Travis, so we have to inline this one.
+        - nvm install 4.3
+        - npm install gulp-cli
+before_install: ./.travis/before_install
+install: ./.travis/install
+script: ./.travis/script
+after_success: ./.travis/after_success
 cache:
   directories:
     - node_modules

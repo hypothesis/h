@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eu
+
+case "$ACTION" in
+    gulp)
+        npm install
+        ;;
+    extensions)
+        pip install --use-wheel -e .
+        npm install
+        ;;
+esac

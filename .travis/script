@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+case "$ACTION" in
+    tox)
+        tox
+        ;;
+    gulp)
+        gulp "$GULPTASK"
+        ;;
+    extensions)
+        make extensions
+        ;;
+esac

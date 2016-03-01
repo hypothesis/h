@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+case "$ACTION" in
+    tox)
+        pip install tox
+        ;;
+    gulp)
+        npm install gulp-cli
+        ;;
+esac
