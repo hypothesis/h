@@ -145,7 +145,6 @@ module.exports = angular.module('h', [
 .service('session', require('./session'))
 .service('streamFilter', require('./stream-filter'))
 .service('tags', require('./tags'))
-.service('time', require('./time'))
 .service('threading', require('./threading'))
 .service('unicode', require('./unicode'))
 .service('viewFilter', require('./view-filter'))
@@ -157,6 +156,7 @@ module.exports = angular.module('h', [
 .value('Discovery', require('./discovery'))
 .value('raven', require('./raven'))
 .value('settings', settings)
+.value('time', require('./time'))
 
 .config(configureLocation)
 .config(configureRoutes)
