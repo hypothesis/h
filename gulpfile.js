@@ -16,9 +16,10 @@ var gulpUtil = require('gulp-util');
 var postcss = require('gulp-postcss');
 var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
+var through = require('through2');
 
-var manifest = require('./scripts/gulp/manifest');
 var createBundle = require('./scripts/gulp/create-bundle');
+var manifest = require('./scripts/gulp/manifest');
 var vendorBundles = require('./scripts/gulp/vendor-bundles');
 
 var IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
@@ -26,6 +27,9 @@ var SCRIPT_DIR = 'build/scripts';
 var STYLE_DIR = 'build/styles';
 var FONTS_DIR = 'build/fonts';
 var IMAGES_DIR = 'build/images';
+var TEMPLATES_DIR = 'h/templates/client';
+
+var liveReloadServer;
 
 function parseCommandLine() {
   commander
@@ -201,17 +205,45 @@ gulp.task('watch-images', function () {
   gulp.watch(imageFiles, ['build-images']);
 });
 
+gulp.task('watch-templates', function () {
+  gulp.watch(TEMPLATES_DIR + '/*.html', function (file) {
+    liveReloadServer.notifyChanged([file.path]);
+  });
+});
+
 var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/*.@(js|css|woff|jpg|png|svg)';
 
-// Generate a JSON manifest mapping file paths to
-// URLs containing cache-busting query string parameters
-function generateManifest() {
-  var stream = gulp.src(MANIFEST_SOURCE_FILES)
-    .pipe(manifest({name: 'manifest.json'}))
-    .pipe(gulp.dest('build/'));
-  stream.on('end', function () {
-    gulpUtil.log('Updated asset manifest');
+var prevManifest = {};
+
+/**
+ * Return an array of asset paths that changed between
+ * two versions of a manifest.
+ */
+function changedAssets(prevManifest, newManifest) {
+  return Object.keys(newManifest).filter(function (asset) {
+    return newManifest[asset] !== prevManifest[asset];
   });
+}
+
+/**
+ * Generate a JSON manifest mapping file paths to
+ * URLs containing cache-busting query string parameters.
+ */
+function generateManifest() {
+  gulp.src(MANIFEST_SOURCE_FILES)
+    .pipe(manifest({name: 'manifest.json'}))
+    .pipe(through.obj(function (file, enc, callback) {
+      gulpUtil.log('Updated asset manifest');
+      if (liveReloadServer) {
+        var newManifest = JSON.parse(file.contents.toString());
+        var changed = changedAssets(prevManifest, newManifest);
+        prevManifest = newManifest;
+        liveReloadServer.notifyChanged(changed);
+      }
+      this.push(file);
+      callback();
+    }))
+    .pipe(gulp.dest('build/'));
 }
 
 gulp.task('watch-manifest', function () {
@@ -220,6 +252,11 @@ gulp.task('watch-manifest', function () {
       done();
     });
   }));
+});
+
+gulp.task('start-live-reload-server', function () {
+  var LiveReloadServer = require('./scripts/gulp/live-reload-server');
+  liveReloadServer = new LiveReloadServer(3000, 'http://localhost:5000');
 });
 
 gulp.task('build-app',
@@ -238,12 +275,14 @@ gulp.task('build',
           generateManifest);
 
 gulp.task('watch',
-          ['watch-app-js',
+          ['start-live-reload-server',
+           'watch-app-js',
            'watch-extension-js',
            'watch-css',
            'watch-fonts',
            'watch-images',
-           'watch-manifest']);
+           'watch-manifest',
+           'watch-templates']);
 
 function runKarma(baseConfig, opts, done) {
   // See https://github.com/karma-runner/karma-mocha#configuration

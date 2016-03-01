@@ -83,7 +83,8 @@
     "proxyquire-universal": "^1.0.8",
     "proxyquireify": "^3.0.0",
     "request": "^2.69.0",
-    "sinon": "1.16.1"
+    "sinon": "1.16.1",
+    "websocket": "^1.0.22"
   },
   "engines": {
     "node": "0.10.x"
