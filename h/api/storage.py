@@ -7,6 +7,7 @@ for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
 
+from functools import partial
 from pyramid.threadlocal import get_current_request
 
 from h.api.events import AnnotationBeforeSaveEvent
@@ -27,7 +28,7 @@ def annotation_from_dict(data):
     return models.Annotation(data)
 
 
-def fetch_annotation(id):
+def fetch_annotation(request, id):
     """
     Fetch the annotation with the given id.
 
@@ -40,7 +41,7 @@ def fetch_annotation(id):
     return models.Annotation.fetch(id)
 
 
-def create_annotation(data):
+def create_annotation(request, data):
     """
     Create an annotation from passed data.
 
@@ -53,13 +54,13 @@ def create_annotation(data):
     annotation = models.Annotation(data)
 
     # FIXME: this should happen when indexing, not storing.
-    _prepare(annotation)
+    _prepare(request, annotation)
 
     annotation.save()
     return annotation
 
 
-def update_annotation(id, data):
+def update_annotation(request, id, data):
     """
     Update the annotation with the given id from passed data.
 
@@ -78,13 +79,13 @@ def update_annotation(id, data):
     annotation.update(data)
 
     # FIXME: this should happen when indexing, not storing.
-    _prepare(annotation)
+    _prepare(request, annotation)
 
     annotation.save()
     return annotation
 
 
-def delete_annotation(id):
+def delete_annotation(request, id):
     """
     Delete the annotation with the given id.
 
@@ -123,14 +124,15 @@ def expand_uri(uri):
     return doc.uris()
 
 
-def _prepare(annotation):
+def _prepare(request, annotation):
     """
     Prepare the given annotation for storage.
 
     Scan the passed annotation for any target URIs or document metadata URIs
     and add normalized versions of these to the document.
     """
-    transform.set_group_if_reply(annotation, fetcher=fetch_annotation)
+    fetcher = partial(fetch_annotation, request)
+    transform.set_group_if_reply(request, annotation, fetcher=fetcher)
     transform.insert_group_if_none(annotation)
     transform.set_group_permissions(annotation)
 

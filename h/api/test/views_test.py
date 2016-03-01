@@ -111,7 +111,7 @@ def test_create_calls_create_annotation(storage, schemas):
 
     views.create(request)
 
-    storage.create_annotation.assert_called_once_with({'foo': 123})
+    storage.create_annotation.assert_called_once_with(request, {'foo': 123})
 
 
 @create_fixtures
@@ -191,7 +191,9 @@ def test_update_calls_update_annotation(storage, schemas):
 
     views.update(annotation, request)
 
-    storage.update_annotation.assert_called_once_with(annotation.id, {'foo': 123})
+    storage.update_annotation.assert_called_once_with(request,
+                                                      annotation.id,
+                                                      {'foo': 123})
 
 
 @update_fixtures
@@ -227,7 +229,7 @@ def test_delete_calls_delete_annotation(storage):
 
     views.delete(annotation, request)
 
-    storage.delete_annotation.assert_called_once_with(annotation.id)
+    storage.delete_annotation.assert_called_once_with(request, annotation.id)
 
 
 @delete_fixtures

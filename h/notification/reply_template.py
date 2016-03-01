@@ -105,7 +105,7 @@ def generate_notifications(request, annotation, action):
     parent_id = annotation.parent_id
     if parent_id is None:
         return
-    parent = storage.fetch_annotation(parent_id)
+    parent = storage.fetch_annotation(request, parent_id)
     if parent is None or 'user' not in parent:
         return
 
