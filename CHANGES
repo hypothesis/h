@@ -1,27 +1,28 @@
-0.9.4 (2016-03-01)
-==================
+Unreleased (2016-03-01)
+=======================
 
 Features
 --------
 
-- Enable admins to activate users (#3015)
+- Enable admins to activate users (#3015).
 
-- Preserve selection when applying block formatting (67409c8)
+- Preserve selection when applying block formatting (67409c8).
 
 Bug fixes
 ---------
 
-- Fix a link to our mailing list archive (#3019)
+- Fix a link to our mailing list archive (#3019).
 
-- Fix typo in NIPSA admin template (50abf12)
+- Fix typo in NIPSA admin template (50abf12).
 
+- Fix tags autocomplete dropdown CSS (#3009).
 
 Miscellanea
 -----------
 
-- Pyramid upgraded to 1.6 (#3034)
+- Pyramid upgraded to 1.6 (#3034).
 
-- The undocumented API endpoint /api/annotations has been removed (#3036)
+- The undocumented API endpoint /api/annotations has been removed (#3036).
 
 0.9.3 (2016-02-24)
 ==================
