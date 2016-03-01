@@ -17,6 +17,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var manifest = require('./scripts/gulp/manifest');
 var createBundle = require('./scripts/gulp/create-bundle');
 var vendorBundles = require('./scripts/gulp/vendor-bundles');
+var uploadToSentry = require('./scripts/gulp/upload-to-sentry');
 
 var IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
 var SCRIPT_DIR = 'build/scripts';
@@ -26,6 +27,13 @@ var IMAGES_DIR = 'build/images';
 
 function isSASSFile(file) {
   return file.path.match(/\.scss$/);
+}
+
+function getEnv(key) {
+  if (!process.env.hasOwnProperty(key)) {
+    throw new Error(`Environment variable ${key} is not set`);
+  }
+  return process.env[key];
 }
 
 /** A list of all modules included in vendor bundles. */
@@ -245,4 +253,14 @@ gulp.task('test-watch-extension', function (callback) {
   new karma.Server({
     configFile: __dirname + '/h/browser/chrome/karma.config.js',
   }, callback).start();
+});
+
+gulp.task('upload-sourcemaps', function () {
+  gulp.src(['build/scripts/*.js', 'build/scripts/*.map'])
+    .pipe(uploadToSentry({
+      apiKey: getEnv('SENTRY_API_KEY'),
+      release: getEnv('SENTRY_RELEASE_VERSION'),
+      organization: getEnv('SENTRY_ORGANIZATION'),
+      project: getEnv('SENTRY_PROJECT'),
+    }));
 });
