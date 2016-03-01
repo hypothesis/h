@@ -25,10 +25,22 @@ function initialSelection(settings) {
  * - The state of the bucket bar
  *
  */
-
 // @ngInject
 module.exports = function (settings) {
+  // Subscribers listening for changes to the state of
+  // the model
+  var listeners = [];
+
+  function notify(model) {
+    listeners.forEach(function (listener) {
+      listener(model);
+    });
+  }
+
   return {
+    // List of all loaded annotations
+    annotations: [],
+
     visibleHighlights: false,
 
     // Contains a map of annotation tag:true pairs.
@@ -36,6 +48,16 @@ module.exports = function (settings) {
 
     // Contains a map of annotation id:true pairs.
     selectedAnnotationMap: initialSelection(settings),
+
+    // Map of annotation IDs to expanded/collapsed state. For annotations not
+    // present in the map, the default state is used which depends on whether
+    // the annotation is a top-level annotation or a reply, whether it is
+    // selected and whether it matches the current filter.
+    expanded: {},
+
+    // Set of IDs of annotations that have been explicitly shown
+    // by the user even if they do not match the current search filter
+    forceVisible: {},
 
     /**
      * @ngdoc method
@@ -51,6 +73,7 @@ module.exports = function (settings) {
         selection[annotation.$$tag] = true;
       }
       this.focusedAnnotationMap = value(selection);
+      notify(this);
     },
 
     /**
@@ -60,6 +83,23 @@ module.exports = function (settings) {
      */
     hasSelectedAnnotations: function () {
       return !!this.selectedAnnotationMap;
+    },
+
+    setCollapsed: function (id, collapsed) {
+      this.expanded = Object.assign({}, this.expanded);
+      this.expanded[id] = !collapsed;
+      notify(this);
+    },
+
+    setForceVisible: function (id, forceVisible) {
+      this.forceVisible = Object.assign({}, this.forceVisible);
+      this.forceVisible[id] = forceVisible;
+      notify(this);
+    },
+
+    clearForceVisible: function () {
+      this.forceVisible = {};
+      notify(this);
     },
 
     /**
@@ -87,6 +127,7 @@ module.exports = function (settings) {
         }
       }
       this.selectedAnnotationMap = value(selection);
+      notify(this);
     },
 
     /**
@@ -108,6 +149,7 @@ module.exports = function (settings) {
         }
       }
       this.selectedAnnotationMap = value(selection);
+      notify(this);
     },
 
     /**
@@ -122,6 +164,7 @@ module.exports = function (settings) {
         delete selection[annotation.id];
         this.selectedAnnotationMap = value(selection);
       }
+      notify(this);
     },
 
     /**
@@ -132,6 +175,36 @@ module.exports = function (settings) {
      */
     clearSelectedAnnotations: function () {
       this.selectedAnnotationMap = null;
-    }
+      notify(this);
+    },
+
+    addAnnotations: function (annotations) {
+      this.annotations = this.annotations.concat(annotations);
+      notify(this);
+    },
+
+    /**
+     * Remove an annotaton from the currently displayed set.
+     */
+    removeAnnotations: function (annotations) {
+      var idsAndTags = annotations.reduce(function (map, annot) {
+        var id = annot.id || annot.$$tag;
+        map[id] = true;
+      }, {});
+      this.annotations = this.annotations.filter(function (annot) {
+        var id = annot.id || annot.$$tag;
+        return !idsAndTags[id];
+      });
+      notify(this);
+    },
+
+    clearAnnotations: function () {
+      this.annotations = [];
+      notify(this);
+    },
+
+    subscribe: function (listener) {
+      listeners.push(listener);
+    },
   };
 };

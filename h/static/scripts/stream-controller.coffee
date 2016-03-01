@@ -5,13 +5,15 @@ mail = require('./vendor/jwz')
 module.exports = class StreamController
   this.$inject = [
     '$scope', '$route', '$rootScope', '$routeParams',
-    'queryParser', 'searchFilter', 'store',
-    'streamer', 'streamFilter', 'threading', 'annotationMapper'
+    'annotationUI',
+    'queryParser', 'rootThread', 'searchFilter', 'store',
+    'streamer', 'streamFilter', 'annotationMapper'
   ]
   constructor: (
      $scope,   $route,   $rootScope,   $routeParams
-     queryParser,   searchFilter,   store,
-     streamer,   streamFilter,   threading,   annotationMapper
+     annotationUI,
+     queryParser,   rootThread,   searchFilter,   store,
+     streamer,   streamFilter,   annotationMapper
   ) ->
     offset = 0
 
@@ -26,16 +28,11 @@ module.exports = class StreamController
         offset += rows.length
         annotationMapper.loadAnnotations(rows, replies)
 
-    # Disable the thread filter (client-side search)
-    $scope.$on '$routeChangeSuccess', ->
-      if $scope.threadFilter?
-        $scope.threadFilter.active(false)
-        $scope.threadFilter.freeze(true)
-
     # Reload on query change (ignore hash change)
     lastQuery = $routeParams.q
     $scope.$on '$routeUpdate', ->
       if $routeParams.q isnt lastQuery
+        annotationUI.clearAnnotations()
         $route.reload()
 
     # Initialize the base filter
@@ -51,8 +48,19 @@ module.exports = class StreamController
     # Perform the initial search
     fetch(20)
 
+    $scope.$watch('sort.name', (name) ->
+      rootThread.sortBy(name)
+    )
+
+    $scope.toggleCollapsed = (id) ->
+      annotationUI.setCollapsed(id, annotationUI.expanded[id])
+
+    $scope.forceVisible = (id) ->
+      annotationUI.setForceVisible(id, true)
+
     $scope.isStream = true
     $scope.sortOptions = ['Newest', 'Oldest']
     $scope.sort.name = 'Newest'
-    $scope.threadRoot = threading.root
+    $scope.rootThread = ->
+      return rootThread.thread()
     $scope.loadMore = fetch

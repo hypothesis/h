@@ -31,10 +31,16 @@ function groupIDFromSelection(selection, results) {
 // @ngInject
 module.exports = function WidgetController(
   $scope, $rootScope, annotationUI, crossframe, annotationMapper,
-  drafts, groups, settings, streamer, streamFilter, store, threading
+  drafts, groups, rootThread, settings, streamer, streamFilter, store
 ) {
-  $scope.threadRoot = threading.root;
+
   $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
+
+  function annotationExists(id) {
+    return annotationUI.annotations.some(function (annot) {
+      return annot.id === id;
+    });
+  }
 
   function focusAnnotation(annotation) {
     var highlights = [];
@@ -43,6 +49,7 @@ module.exports = function WidgetController(
     }
     crossframe.call('focusAnnotations', highlights);
   }
+
 
   function scrollToAnnotation(annotation) {
     if (!annotation) {
@@ -60,20 +67,22 @@ module.exports = function WidgetController(
   function firstSelectedAnnotation() {
     if (annotationUI.selectedAnnotationMap) {
       var id = Object.keys(annotationUI.selectedAnnotationMap)[0];
-      return threading.idTable[id] && threading.idTable[id].message;
+      return annotationUI.annotations.find(function (annot) {
+        return annot.id === id;
+      });
     } else {
       return null;
     }
   }
 
+  var searchClients = [];
+
   function _resetAnnotations() {
     // Unload all the annotations
-    annotationMapper.unloadAnnotations(threading.annotationList());
+    annotationMapper.unloadAnnotations(annotationUI.annotations);
     // Reload all the drafts
-    threading.thread(drafts.unsaved());
+    annotationUI.addAnnotations(drafts.unsaved());
   }
-
-  var searchClients = [];
 
   function _loadAnnotationsFor(uri, group) {
     var searchClient = new SearchClient(store.SearchResource, {
@@ -196,6 +205,27 @@ module.exports = function WidgetController(
     return crossframe.frames;
   }, loadAnnotations);
 
+  // Watch the inputs that determine which annotations are currently
+  // visible and how they are sorted and rebuild the thread when they change
+  $scope.$watch('sort.name', function (mode) {
+    rootThread.sortBy(mode);
+  });
+  $scope.$watch('search.query', function (query) {
+    rootThread.setSearchQuery(query);
+  });
+
+  $scope.rootThread = function () {
+    return rootThread.thread();
+  };
+
+  $scope.toggleCollapsed = function (id) {
+    annotationUI.setCollapsed(id, !!annotationUI.expanded[id]);
+  };
+
+  $scope.forceVisible = function (id) {
+    annotationUI.setForceVisible(id, true);
+  };
+
   $scope.focus = focusAnnotation;
   $scope.scrollTo = scrollToAnnotation;
 
@@ -207,9 +237,10 @@ module.exports = function WidgetController(
   };
 
   $scope.selectedAnnotationUnavailable = function () {
+    var selectedID = firstKey(annotationUI.selectedAnnotationMap);
     return !isLoading() &&
-           annotationUI.hasSelectedAnnotations() &&
-           !threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
+           selectedID &&
+           !annotationExists(selectedID);
   };
 
   $scope.shouldShowLoggedOutMessage = function () {
@@ -227,21 +258,22 @@ module.exports = function WidgetController(
     // The user is logged out and has landed on a direct linked
     // annotation. If there is an annotation selection and that
     // selection is available to the user, show the CTA.
+    var selectedID = firstKey(annotationUI.selectedAnnotationMap);
     return !isLoading() &&
-           annotationUI.hasSelectedAnnotations() &&
-           !!threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
+           selectedID &&
+           annotationExists(selectedID);
   };
 
   $scope.isLoading = isLoading;
 
   $scope.topLevelThreadCount = function () {
-    return threading.root.children.length;
+    return rootThread.thread().totalChildren;
   };
 
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
     if (data.$highlight || (data.references && data.references.length > 0)) {
       return;
     }
-    return $scope.clearSelection();
+    $scope.clearSelection();
   });
 };

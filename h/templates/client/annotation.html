@@ -33,11 +33,11 @@
         <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing()" title="This is a highlight. Click 'edit' to add a note or tag."></i>
         <span class="annotation-citation"
               ng-bind-html="vm.documentTitle"
-              ng-if="::!vm.isSidebar">
+              ng-if="::vm.showDocumentInfo">
         </span>
         <span class="annotation-citation-domain"
               ng-bind-html="vm.documentDomain"
-              ng-if="::!vm.isSidebar">
+              ng-if="::vm.showDocumentInfo">
         </span>
       </span>
     </span>
