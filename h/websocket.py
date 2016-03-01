@@ -9,12 +9,11 @@ serving the "streamer" over the websocket.
 
 from gunicorn.workers.ggevent import GeventPyWSGIWorker
 from gunicorn.workers.ggevent import PyWSGIHandler
-from pyramid.config import Configurator
 from ws4py.server.geventserver import WSGIServer
 from ws4py.server.geventserver import WebSocketWSGIHandler
 
 from h import features
-from h.app import get_settings
+from h.config import configure
 
 
 class WSGIHandler(PyWSGIHandler, WebSocketWSGIHandler):
@@ -43,9 +42,7 @@ class Worker(GeventPyWSGIWorker):
 
 
 def create_app(global_config, **settings):
-    settings = get_settings(global_config, **settings)
-
-    config = Configurator(settings=settings)
+    config = configure(settings=settings)
 
     config.add_request_method(features.flag_enabled, name='feature')
 
