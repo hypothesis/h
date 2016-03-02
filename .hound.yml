@@ -4,7 +4,7 @@ javascript:
   config_file: .jshintrc
   ignore_file: .jshintignore
 jscs:
-  enabled: true
+  enabled: false
   config_file: .jscsrc
 ruby:
   enabled: false
