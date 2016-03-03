@@ -42,7 +42,8 @@ def get_reader(request, topic, channel):
             sentry.captureException(exc_info=True, extra=extra)
 
         def _capture_error(error):
-            sentry.captureException(exc_info=True, extra=extra)
+            sentry.captureException(exc_info=(type(error), error, None),
+                                    extra=extra)
 
         def _capture_message(message):
             if message is not None:
