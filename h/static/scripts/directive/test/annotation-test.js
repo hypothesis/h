@@ -347,7 +347,7 @@ describe('annotation', function() {
       };
 
       var fakeFeatures = {
-        flagEnabled: sandbox.stub().returns(true)
+        flagEnabled: sandbox.stub().returns(true),
       };
 
       fakeFlash = {
@@ -1494,6 +1494,33 @@ describe('annotation', function() {
         assert.equal(tagLinks.length, 1);
         assert.equal(tagLinks[0].href,
                      'https://test.hypothes.is/stream?q=tag:atag');
+      });
+    });
+
+    describe('annotation metadata', function () {
+      function findLink(directive) {
+        var links = directive.element[0]
+          .querySelectorAll('header .annotation-link');
+        return links[links.length-1];
+      }
+
+      it('displays HTML links when in-context links are not available', function () {
+        var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
+          links: {html: 'https://test.hypothes.is/a/deadbeef'},
+        });
+        var directive = createDirective(annotation);
+        assert.equal(findLink(directive).href, annotation.links.html);
+      });
+
+      it('displays in-context links when available', function () {
+        var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
+          links: {
+            html: 'https://test.hypothes.is/a/deadbeef',
+            incontext: 'https://hpt.is/deadbeef'
+          },
+        });
+        var directive = createDirective(annotation);
+        assert.equal(findLink(directive).href, annotation.links.incontext);
       });
     });
   });
