@@ -166,6 +166,8 @@ def import_annotations(annotations):
             objs.add(annotation)
 
             create_or_update_document_objects(es_annotation)
+
+            Session.flush()
         except Exception as e:
             log.warn('error importing %s: %s', a['_id'], e)
             failure += 1
@@ -246,7 +248,6 @@ def create_or_update_document_uri(es_docuri, pg_document):
                              created=es_docuri.created,
                              updated=es_docuri.updated)
         Session.add(docuri)
-        Session.flush()
 
     docuri.updated = es_docuri.updated
 
@@ -264,7 +265,6 @@ def create_or_update_document_meta(es_meta, pg_document):
                             updated=es_meta.updated,
                             document=pg_document)
         Session.add(meta)
-        Session.flush()
     else:
         meta.value = es_meta.value
         meta.updated = es_meta.updated
