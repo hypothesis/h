@@ -248,6 +248,8 @@ def create_or_update_document_uri(es_docuri, pg_document):
                              created=es_docuri.created,
                              updated=es_docuri.updated)
         Session.add(docuri)
+    elif not docuri.document == pg_document:
+        log.warn('Found DocumentURI with id {:d} does not match expected document with id {:d}', docuri.id, pg_document.id)
 
     docuri.updated = es_docuri.updated
 
@@ -268,6 +270,8 @@ def create_or_update_document_meta(es_meta, pg_document):
     else:
         meta.value = es_meta.value
         meta.updated = es_meta.updated
+        if not meta.document == pg_document:
+            log.warn('Found DocumentMeta with id {:d} does not match expected document with id {:d}', meta.id, pg_document.id)
 
 
 def _batch_iter(n, iterable):
