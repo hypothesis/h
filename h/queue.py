@@ -92,9 +92,5 @@ def resolve_topic(topic, namespace=None, settings=None):
 
 
 def includeme(config):
-    config.add_request_method(
-        lambda req, t, c: get_reader(req, t, c),
-        name='get_queue_reader')
-    config.add_request_method(
-        lambda req: get_writer(req),
-        name='get_queue_writer')
+    config.add_request_method(get_reader, name='get_queue_reader')
+    config.add_request_method(get_writer, name='get_queue_writer')
