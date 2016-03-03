@@ -455,6 +455,15 @@ class TestDocumentMeta(object):
         meta = DocumentMeta({'type': 'facebook.book:isbn'})
         assert meta.type == 'facebook.book.isbn'
 
+    def test_type_normalizes_og(self):
+        meta = DocumentMeta({'type': 'og.title'})
+        assert meta.type == 'facebook.title'
+
+    @pytest.mark.parametrize('type', ['oga.title', 'dc.og.title'])
+    def test_type_skips_og_normalisation(self, type):
+        meta = DocumentMeta({'type': type})
+        assert meta.type == type
+
     def test_value(self):
         meta = DocumentMeta({'value': 'Example Page'})
         assert meta.value == 'Example Page'
