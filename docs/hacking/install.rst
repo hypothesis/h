@@ -58,18 +58,15 @@ Install the following packages:
         libevent-dev \
         libffi-dev \
         libpq-dev \
-        nodejs \
         npm \
         python-dev \
         python-pip \
         python-virtualenv
 
-Add a ``node`` symlink. This is needed because the node binary from Ubuntu is
-called ``nodejs`` but many packages will try to run it as ``node``:
-
-.. code-block:: bash
-
-    sudo ln -s /usr/bin/nodejs /usr/bin/node
+Install node by following the
+`instructions on nodejs.org <https://nodejs.org/en/download/package-manager/>`_
+(the version of the nodejs package in the standard Ubuntu repositories is too
+old).
 
 Upgrade pip and npm:
 
