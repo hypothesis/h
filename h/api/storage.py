@@ -149,9 +149,6 @@ def _prepare(request, annotation):
 
     # Fire an AnnotationBeforeSaveEvent so subscribers who wish to modify an
     # annotation before save can do so.
-    #
-    # FIXME: Don't use get_current_request here.
-    request = get_current_request()
     event = AnnotationBeforeSaveEvent(request, annotation)
     request.registry.notify(event)
 
