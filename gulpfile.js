@@ -30,7 +30,7 @@ function isSASSFile(file) {
 
 function getEnv(key) {
   if (!process.env.hasOwnProperty(key)) {
-    throw new Error(`Environment variable ${key} is not set`);
+    throw new Error('Environment variable ${key} is not set');
   }
   return process.env[key];
 }
