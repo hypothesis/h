@@ -271,6 +271,27 @@ class TestAnnotation(object):
 
 
 class TestDocument(object):
+    def test_init(self):
+        doc = Document({'foo': 'bar'})
+        assert doc == {'foo': 'bar'}
+
+    def test_init_claimant(self):
+        doc = Document({}, claimant='http://example.com')
+        assert doc.claimant == 'http://example.com'
+
+    def test_init_created(self):
+        doc = Document({}, created='created-value')
+        assert doc.created == 'created-value'
+
+    def test_init_updated(self):
+        doc = Document({}, updated='updated-value')
+        assert doc.updated == 'updated-value'
+
+    def test_init_id(self):
+        """It passes through other keyword arguments through to super class."""
+        doc = Document({}, id='id-value')
+        assert doc['id'] == 'id-value'
+
     def test_created(self):
         doc = Document({}, created=datetime.datetime(2016, 2, 25, 16, 45, 23, 371848))
         assert doc.created == datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)

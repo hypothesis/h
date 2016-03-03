@@ -245,11 +245,12 @@ class Annotation(annotation.Annotation):
 class Document(document.Document):
     __analysis__ = {}
 
-    def __init__(self, d, claimant=None, created=None, updated=None):
-        super(document.Document, self).__init__(d)
-        self.claimant = claimant
-        self.created = created
-        self.updated = updated
+    def __init__(self, *args, **kwargs):
+        self.claimant = kwargs.pop('claimant', None)
+        self.created = kwargs.pop('created', None)
+        self.updated = kwargs.pop('updated', None)
+
+        super(Document, self).__init__(*args, **kwargs)
 
     @property
     def title(self):
