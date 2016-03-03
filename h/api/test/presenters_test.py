@@ -106,8 +106,8 @@ class TestAnnotationJSONPresenter(object):
 
 class TestDocumentJSONPresenter(object):
     def test_asdict(self):
-        document = mock.Mock(uris=[mock.Mock(uri='http://foo.com', type=None, content_type=None),
-                                   mock.Mock(uri='http://foo.org', type='rel-canonical', content_type=None)],
+        document = mock.Mock(document_uris=[mock.Mock(uri='http://foo.com', type=None, content_type=None),
+                                            mock.Mock(uri='http://foo.org', type='rel-canonical', content_type=None)],
                              meta=[mock.Mock(type='twitter.url.main_url', value='http://foo.org'),
                                    mock.Mock(type='twitter.title', value='Foo')])
         presenter = DocumentJSONPresenter(document)

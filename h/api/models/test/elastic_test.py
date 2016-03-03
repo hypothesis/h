@@ -333,13 +333,13 @@ class TestDocument(object):
                                  'type': 'self-claim',
                                  'created': None, 'updated': None})]
 
-        assert doc.uris == expected
+        assert doc.document_uris == expected
 
     def test_uris_disregard_doi_links(self):
         doc = Document({'link': [{'href': 'doi:foobar'}]})
         # it always includes a self-claim, not removing doi links would result
         # in a length of 2
-        assert len(doc.uris) == 1
+        assert len(doc.document_uris) == 1
 
     def test_uris_str_link(self):
         doc = Document({'link': 'http://example.com'},
@@ -353,7 +353,7 @@ class TestDocument(object):
                                  'created': datetime.datetime(2016, 2, 25, 16, 45, 23, 371848),
                                  'updated': datetime.datetime(2016, 2, 25, 16, 45, 23, 371849)})]
 
-        assert doc.uris == expected
+        assert doc.document_uris == expected
 
     def test_uris_recognize_highwire_pdf(self):
         doc = Document({'link': [{'href': 'pdf-uri', 'type': 'application/pdf'}]},
@@ -370,7 +370,7 @@ class TestDocument(object):
                                  'type': 'self-claim',
                                  'created': None, 'updated': None})]
 
-        assert sorted(doc.uris) == sorted(expected)
+        assert sorted(doc.document_uris) == sorted(expected)
 
     def test_uris_prefix_type_when_rel(self):
         doc = Document({'link': [{'href': 'https://example.com', 'rel': 'canonical'}]},
@@ -387,7 +387,7 @@ class TestDocument(object):
                                  'type': 'self-claim',
                                  'created': None, 'updated': None})]
 
-        assert sorted(doc.uris) == sorted(expected)
+        assert sorted(doc.document_uris) == sorted(expected)
 
     @pytest.mark.parametrize('doc', [
         Document({'highwire': {'doi': ['foobar']}}, claimant='http://example.com'),
@@ -403,7 +403,7 @@ class TestDocument(object):
                                  'type': 'self-claim',
                                  'created': None, 'updated': None})]
 
-        assert sorted(doc.uris) == sorted(expected)
+        assert sorted(doc.document_uris) == sorted(expected)
 
     @pytest.mark.parametrize('doc', [
         Document({'dc': {'identifier': ['foobar']}}, claimant='http://example.com'),
@@ -419,7 +419,7 @@ class TestDocument(object):
                                  'type': 'self-claim',
                                  'created': None, 'updated': None})]
 
-        assert sorted(doc.uris) == sorted(expected)
+        assert sorted(doc.document_uris) == sorted(expected)
 
 
 class TestDocumentMeta(object):

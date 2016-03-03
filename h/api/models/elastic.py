@@ -264,7 +264,7 @@ class Document(document.Document):
         return meta
 
     @property
-    def uris(self):
+    def document_uris(self):
         return [DocumentURI(link) for link in self._transform_links()]
 
     def _transform_meta(self, meta, data, path_prefix=[]):

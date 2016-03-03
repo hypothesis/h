@@ -15,8 +15,8 @@ annotation_fixture = pytest.mark.usefixtures('annotation')
 
 @annotation_fixture
 def test_document(annotation):
-    document = Document(uris=[DocumentURI(claimant=annotation.target_uri,
-                                          uri=annotation.target_uri)])
+    document = Document(document_uris=[DocumentURI(claimant=annotation.target_uri,
+                                                   uri=annotation.target_uri)])
     db.Session.add(document)
     db.Session.flush()
 
@@ -25,8 +25,8 @@ def test_document(annotation):
 
 @annotation_fixture
 def test_document_not_found(annotation):
-    document = Document(uris=[DocumentURI(claimant='something-else',
-                                          uri='something-else')])
+    document = Document(document_uris=[DocumentURI(claimant='something-else',
+                                                   uri='something-else')])
     db.Session.add(document)
     db.Session.flush()
 

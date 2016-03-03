@@ -84,7 +84,7 @@ class DocumentJSONPresenter(object):
             deep_merge_dict(d, meta_presenter.asdict())
 
         d['link'] = []
-        for docuri in self.document.uris:
+        for docuri in self.document.document_uris:
             uri_presenter = DocumentURIJSONPresenter(docuri)
             d['link'].append(uri_presenter.asdict())
 
