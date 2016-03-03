@@ -265,6 +265,12 @@ class Document(document.Document):
 
     @property
     def uris(self):
+        """
+        Returns a list of the DocumentURIs for the document.
+
+        This overrides the inherited `uris` method from the annotator-store
+        which used to return a list of uri strings.
+        """
         return [DocumentURI(link) for link in self._transform_links()]
 
     def _transform_meta(self, meta, data, path_prefix=[]):

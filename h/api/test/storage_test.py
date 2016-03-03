@@ -40,25 +40,20 @@ def test_expand_uri_no_document(document_model):
 
 
 def test_expand_uri_document_doesnt_expand_canonical_uris(document_model):
-    document = document_model.get_by_uri.return_value
-    document.get.return_value = [
-        {"href": "http://foo.com/"},
-        {"href": "http://bar.com/"},
-        {"href": "http://example.com/", "rel": "canonical"},
-    ]
-    document.uris.return_value = [
-        "http://foo.com/",
-        "http://bar.com/",
-        "http://example.com/",
-    ]
+    document_model.get_by_uri.return_value = mock.Mock(uris=[
+        mock.Mock(uri='http://foo.com/'),
+        mock.Mock(uri='http://bar.com'),
+        mock.Mock(uri='http://example.com/', type='rel-canonical'),
+    ])
     assert storage.expand_uri("http://example.com/") == ["http://example.com/"]
 
 
 def test_expand_uri_document_uris(document_model):
-    document_model.get_by_uri.return_value.uris.return_value = [
-        "http://foo.com/",
-        "http://bar.com/",
-    ]
+    document_model.get_by_uri.return_value = mock.Mock(uris=[
+        mock.Mock(uri="http://foo.com/"),
+        mock.Mock(uri=None),
+        mock.Mock(uri="http://bar.com/"),
+    ])
     assert storage.expand_uri("http://example.com/") == [
         "http://foo.com/",
         "http://bar.com/",

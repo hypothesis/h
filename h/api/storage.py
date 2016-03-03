@@ -120,11 +120,11 @@ def expand_uri(uri):
     # We check if the match was a "canonical" link. If so, all annotations
     # created on that page are guaranteed to have that as their target.source
     # field, so we don't need to expand to other URIs and risk false positives.
-    for link in doc.get('link', []):
-        if link.get('href') == uri and link.get('rel') == 'canonical':
+    for u in doc.uris:
+        if u.uri == uri and u.type == 'rel-canonical':
             return [uri]
 
-    return doc.uris()
+    return [u.uri for u in doc.uris if u.uri is not None]
 
 
 def _prepare(request, annotation):
