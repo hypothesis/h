@@ -20,7 +20,11 @@ class Document(Base, mixins.Timestamps):
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
-    uris = sa.orm.relationship('DocumentURI', backref='document')
+    # FIXME: This relationship should be named `uris` again after the
+    #        dependency on the annotator-store is removed, as it clashes with
+    #        making the Postgres and Elasticsearch interface of a Document
+    #        object behave the same way.
+    document_uris = sa.orm.relationship('DocumentURI', backref='document')
     meta = sa.orm.relationship('DocumentMeta', backref='document')
 
     def __repr__(self):
@@ -190,8 +194,8 @@ def merge_documents(session, documents, updated=datetime.now()):
     duplicates = documents[1:]
 
     for doc in duplicates:
-        for _ in range(len(doc.uris)):
-            u = doc.uris.pop()
+        for _ in range(len(doc.document_uris)):
+            u = doc.document_uris.pop()
             u.document = master
             u.updated = updated
 

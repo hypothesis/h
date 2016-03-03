@@ -213,7 +213,7 @@ def create_or_update_document_objects(es_ann):
     if not es_doc:
         return
 
-    uris = [u.uri for u in es_doc.uris]
+    uris = [u.uri for u in es_doc.document_uris]
     documents = Document.find_or_create_by_uris(Session, es_ann.target_uri, uris,
                                                 created=es_doc.created,
                                                 updated=es_doc.updated)
@@ -225,7 +225,7 @@ def create_or_update_document_objects(es_ann):
 
     document.updated = es_doc.updated
 
-    for uri_ in es_doc.uris:
+    for uri_ in es_doc.document_uris:
         create_or_update_document_uri(uri_, document)
 
     for meta in es_doc.meta:

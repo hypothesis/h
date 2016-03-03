@@ -40,13 +40,13 @@ def test_document_title_meta_not_found():
 def test_document_find_by_uris():
     document1 = Document()
     uri1 = 'https://de.wikipedia.org/wiki/Hauptseite'
-    document1.uris.append(DocumentURI(claimant=uri1, uri=uri1))
+    document1.document_uris.append(DocumentURI(claimant=uri1, uri=uri1))
 
     document2 = Document()
     uri2 = 'https://en.wikipedia.org/wiki/Main_Page'
-    document2.uris.append(DocumentURI(claimant=uri2, uri=uri2))
+    document2.document_uris.append(DocumentURI(claimant=uri2, uri=uri2))
     uri3 = 'https://en.wikipedia.org'
-    document2.uris.append(DocumentURI(claimant=uri3, uri=uri2))
+    document2.document_uris.append(DocumentURI(claimant=uri3, uri=uri2))
 
     db.Session.add_all([document1, document2])
     db.Session.flush()
@@ -60,7 +60,7 @@ def test_document_find_by_uris():
 
 def test_document_find_by_uris_no_matches():
     document = Document()
-    document.uris.append(DocumentURI(
+    document.document_uris.append(DocumentURI(
         claimant='https://en.wikipedia.org/wiki/Main_Page',
         uri='https://en.wikipedia.org/wiki/Main_Page'))
     db.Session.add(document)
@@ -111,9 +111,9 @@ def test_document_find_or_create_by_uris_no_results():
 
     actual = documents.first()
     assert isinstance(actual, Document)
-    assert len(actual.uris) == 1
+    assert len(actual.document_uris) == 1
 
-    docuri = actual.uris[0]
+    docuri = actual.document_uris[0]
     assert docuri.claimant == 'https://en.wikipedia.org/wiki/Pluto'
     assert docuri.uri == 'https://en.wikipedia.org/wiki/Pluto'
     assert docuri.type == 'self-claim'
@@ -147,8 +147,8 @@ def test_merge_documents_rewires_document_uris(merge_data):
     merge_documents(db.Session, merge_data)
     db.Session.flush()
 
-    assert len(master.uris) == 2
-    assert len(duplicate.uris) == 0
+    assert len(master.document_uris) == 2
+    assert len(duplicate.document_uris) == 0
 
 
 @merge_documents_fixtures
@@ -164,7 +164,7 @@ def test_merge_documents_rewires_document_meta(merge_data):
 
 @pytest.fixture
 def merge_data(request):
-    master = Document(uris=[DocumentURI(
+    master = Document(document_uris=[DocumentURI(
             claimant='https://en.wikipedia.org/wiki/Main_Page',
             uri='https://en.wikipedia.org/wiki/Main_Page',
             type='self-claim')],
@@ -172,7 +172,7 @@ def merge_data(request):
                 claimant='https://en.wikipedia.org/wiki/Main_Page',
                 type='title',
                 value='Wikipedia, the free encyclopedia')])
-    duplicate = Document(uris=[DocumentURI(
+    duplicate = Document(document_uris=[DocumentURI(
             claimant='https://m.en.wikipedia.org/wiki/Main_Page',
             uri='https://en.wikipedia.org/wiki/Main_Page',
             type='rel-canonical')],
