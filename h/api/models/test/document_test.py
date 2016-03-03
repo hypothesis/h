@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import pytest
 
 from h import db
@@ -7,42 +9,103 @@ from h.api.models.document import Document, DocumentURI, DocumentMeta
 from h.api.models.document import merge_documents
 
 
+def test_document_title():
+    doc = Document()
+    DocumentMeta(type='title', value='The Title', document=doc, claimant='http://example.com')
+    db.Session.add(doc)
+    db.Session.flush()
+
+    assert doc.title == 'The Title'
+
+
+def test_document_title_returns_first():
+    doc = Document()
+    DocumentMeta(type='title', value='The US Title', document=doc, claimant='http://example.com')
+    DocumentMeta(type='title', value='The UK Title', document=doc, claimant='http://example.co.uk')
+    db.Session.add(doc)
+    db.Session.flush()
+
+    assert doc.title == 'The US Title'
+
+
+def test_document_title_meta_not_found():
+    doc = Document()
+    DocumentMeta(type='other', value='something', document=doc, claimant='http://example.com')
+    db.Session.add(doc)
+    db.Session.flush()
+
+    assert doc.title is None
+
+
+def test_document_find_by_uris():
+    document1 = Document()
+    uri1 = 'https://de.wikipedia.org/wiki/Hauptseite'
+    document1.uris.append(DocumentURI(claimant=uri1, uri=uri1))
+
+    document2 = Document()
+    uri2 = 'https://en.wikipedia.org/wiki/Main_Page'
+    document2.uris.append(DocumentURI(claimant=uri2, uri=uri2))
+    uri3 = 'https://en.wikipedia.org'
+    document2.uris.append(DocumentURI(claimant=uri3, uri=uri2))
+
+    db.Session.add_all([document1, document2])
+    db.Session.flush()
+
+    actual = Document.find_by_uris(db.Session, [
+        'https://en.wikipedia.org/wiki/Main_Page',
+        'https://m.en.wikipedia.org/wiki/Main_Page'])
+    assert actual.count() == 1
+    assert actual.first() == document2
+
+
+def test_document_find_by_uris_no_matches():
+    document = Document()
+    document.uris.append(DocumentURI(
+        claimant='https://en.wikipedia.org/wiki/Main_Page',
+        uri='https://en.wikipedia.org/wiki/Main_Page'))
+    db.Session.add(document)
+    db.Session.flush()
+
+    actual = Document.find_by_uris(db.Session, ['https://de.wikipedia.org/wiki/Hauptseite'])
+    assert actual.count() == 0
+
+
 def test_document_find_or_create_by_uris():
     document = Document()
     docuri1 = DocumentURI(
-        claimant=u'https://en.wikipedia.org/wiki/Main_Page',
-        uri=u'https://en.wikipedia.org/wiki/Main_Page',
+        claimant='https://en.wikipedia.org/wiki/Main_Page',
+        uri='https://en.wikipedia.org/wiki/Main_Page',
         document=document)
     docuri2 = DocumentURI(
-        claimant=u'https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
-        uri=u'https://en.wikipedia.org/wiki/Main_Page',
+        claimant='https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
+        uri='https://en.wikipedia.org/wiki/Main_Page',
         document=document)
 
     db.Session.add(docuri1)
     db.Session.add(docuri2)
     db.Session.flush()
 
-    actual = Document.find_or_create_by_uris(
-        u'https://en.wikipedia.org/wiki/Main_Page',
-        [u'https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
-         u'https://m.en.wikipedia.org/wiki/Main_Page'])
+    actual = Document.find_or_create_by_uris(db.Session,
+        'https://en.wikipedia.org/wiki/Main_Page',
+        ['https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
+         'https://m.en.wikipedia.org/wiki/Main_Page'])
     assert actual.count() == 1
     assert actual.first() == document
 
 
-def test_document_find_by_uris_no_results():
+def test_document_find_or_create_by_uris_no_results():
     document = Document()
     docuri = DocumentURI(
-        claimant=u'https://en.wikipedia.org/wiki/Main_Page',
-        uri=u'https://en.wikipedia.org/wiki/Main_Page',
+        claimant='https://en.wikipedia.org/wiki/Main_Page',
+        uri='https://en.wikipedia.org/wiki/Main_Page',
         document=document)
 
     db.Session.add(docuri)
     db.Session.flush()
 
-    documents = Document.find_or_create_by_uris(
-        u'https://en.wikipedia.org/wiki/Pluto',
-        [u'https://m.en.wikipedia.org/wiki/Pluto'])
+    documents = Document.find_or_create_by_uris(db.Session,
+        'https://en.wikipedia.org/wiki/Pluto',
+        ['https://m.en.wikipedia.org/wiki/Pluto'])
 
     assert documents.count() == 1
 
@@ -51,8 +114,8 @@ def test_document_find_by_uris_no_results():
     assert len(actual.uris) == 1
 
     docuri = actual.uris[0]
-    assert docuri.claimant == u'https://en.wikipedia.org/wiki/Pluto'
-    assert docuri.uri == u'https://en.wikipedia.org/wiki/Pluto'
+    assert docuri.claimant == 'https://en.wikipedia.org/wiki/Pluto'
+    assert docuri.uri == 'https://en.wikipedia.org/wiki/Pluto'
     assert docuri.type == 'self-claim'
 
 
@@ -87,6 +150,7 @@ def test_merge_documents_rewires_document_uris(merge_data):
     assert len(master.uris) == 2
     assert len(duplicate.uris) == 0
 
+
 @merge_documents_fixtures
 def test_merge_documents_rewires_document_meta(merge_data):
     master, duplicate = merge_data
@@ -101,21 +165,21 @@ def test_merge_documents_rewires_document_meta(merge_data):
 @pytest.fixture
 def merge_data(request):
     master = Document(uris=[DocumentURI(
-            claimant=u'https://en.wikipedia.org/wiki/Main_Page',
-            uri=u'https://en.wikipedia.org/wiki/Main_Page',
-            type=u'self-claim')],
+            claimant='https://en.wikipedia.org/wiki/Main_Page',
+            uri='https://en.wikipedia.org/wiki/Main_Page',
+            type='self-claim')],
             meta=[DocumentMeta(
-                claimant=u'https://en.wikipedia.org/wiki/Main_Page',
-                type=u'title',
-                value=u'Wikipedia, the free encyclopedia')])
+                claimant='https://en.wikipedia.org/wiki/Main_Page',
+                type='title',
+                value='Wikipedia, the free encyclopedia')])
     duplicate = Document(uris=[DocumentURI(
-            claimant=u'https://m.en.wikipedia.org/wiki/Main_Page',
-            uri=u'https://en.wikipedia.org/wiki/Main_Page',
-            type=u'rel-canonical')],
+            claimant='https://m.en.wikipedia.org/wiki/Main_Page',
+            uri='https://en.wikipedia.org/wiki/Main_Page',
+            type='rel-canonical')],
             meta=[DocumentMeta(
-                claimant=u'https://m.en.wikipedia.org/wiki/Main_Page',
-                type=u'title',
-                value=u'Wikipedia, the free encyclopedia')])
+                claimant='https://m.en.wikipedia.org/wiki/Main_Page',
+                type='title',
+                value='Wikipedia, the free encyclopedia')])
 
     db.Session.add_all([master, duplicate])
     db.Session.flush()

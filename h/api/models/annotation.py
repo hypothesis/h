@@ -2,12 +2,17 @@
 
 from __future__ import unicode_literals
 
+from pyramid import security
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
 
+from h.api import uri
 from h.api.db import Base
 from h.api.db import mixins
 from h.api.db import types
+from h._compat import text_type
 
 
 class Annotation(Base, mixins.Timestamps):
@@ -59,9 +64,9 @@ class Annotation(Base, mixins.Timestamps):
                        server_default=sa.sql.expression.false())
 
     #: The URI of the annotated page, as provided by the client.
-    target_uri = sa.Column(sa.UnicodeText)
+    _target_uri = sa.Column('target_uri', sa.UnicodeText)
     #: The URI of the annotated page in normalized form.
-    target_uri_normalized = sa.Column(sa.UnicodeText)
+    _target_uri_normalized = sa.Column('target_uri_normalized', sa.UnicodeText)
     #: The serialized selectors for the annotation on the annotated page.
     target_selectors = sa.Column(types.AnnotationSelectorJSONB,
                                  default=list,
@@ -74,6 +79,50 @@ class Annotation(Base, mixins.Timestamps):
 
     #: Any additional serialisable data provided by the client.
     extra = sa.Column(pg.JSONB, nullable=True)
+
+    document_uris = sa.orm.relationship('DocumentURI',
+                                        viewonly=True,
+                                        foreign_keys='DocumentURI.uri_normalized',
+                                        primaryjoin='DocumentURI.uri_normalized == Annotation.target_uri_normalized')
+    documents = association_proxy('document_uris', 'document')
+
+    @hybrid_property
+    def target_uri(self):
+        return self._target_uri
+
+    @target_uri.setter
+    def target_uri(self, value):
+        self._target_uri = value
+        self._target_uri_normalized = text_type(uri.normalize(value), 'utf-8')
+
+    @hybrid_property
+    def target_uri_normalized(self):
+        return self._target_uri_normalized
+
+    @hybrid_property
+    def document(self):
+        if self.documents:
+            return self.documents[0]
+
+    def __acl__(self):
+        """Return a Pyramid ACL for this annotation."""
+        acl = []
+        if self.shared:
+            group = 'group:{}'.format(self.groupid)
+            if self.groupid == '__world__':
+                group = security.Everyone
+
+            acl.append((security.Allow, group, 'read'))
+        else:
+            acl.append((security.Allow, self.userid, 'read'))
+
+        for action in ['admin', 'update', 'delete']:
+            acl.append((security.Allow, self.userid, action))
+
+        # If we haven't explicitly authorized it, it's not allowed.
+        acl.append(security.DENY_ALL)
+
+        return acl
 
     def __repr__(self):
         return '<Annotation %s>' % self.id

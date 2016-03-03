@@ -10,3 +10,13 @@ Please note: access to these model objects should almost certainly not be
 direct to the submodules of this package, but rather through the helper
 functions in `h.api.storage`.
 """
+
+from h.api.models.annotation import Annotation
+from h.api.models.document import Document, DocumentMeta, DocumentURI
+
+__all__ = (
+    'Annotation',
+    'Document',
+    'DocumentMeta',
+    'DocumentURI',
+)

@@ -8,7 +8,7 @@ class AnnotationFactory(object):
         self.request = request
 
     def __getitem__(self, id):
-        annotation = storage.fetch_annotation(id)
+        annotation = storage.fetch_annotation(self.request, id)
         if annotation is None:
             raise KeyError()
         return annotation

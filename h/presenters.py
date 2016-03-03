@@ -127,12 +127,7 @@ class AnnotationHTMLPresenter(object):
         """
         document_ = self.annotation.document
         if document_:
-            try:
-                title = document_["title"]
-            except (KeyError, TypeError):
-                # Sometimes document_ has no "title" key or isn't a dict at
-                # all.
-                title = ""
+            title = document_.title
             if title:
                 # Convert non-string titles into strings.
                 # We're assuming that title cannot be a byte string.

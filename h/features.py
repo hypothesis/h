@@ -18,6 +18,7 @@ FEATURES = {
     'claim': "Enable 'claim your username' web views?",
     'new_homepage': "Show the new homepage design?",
     'ops_disable_streamer_uri_equivalence': "[Ops] Disable streamer URI equivalence support?",
+    'postgres_read': 'Use postgres to fetch annotations from storage'
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.

@@ -2,25 +2,32 @@
 
 from __future__ import unicode_literals
 
-import mock
+from mock import patch, MagicMock, PropertyMock
 from pyramid import testing
+import pytest
 
+from h.api.models.annotation import Annotation
+from h.api.models.document import Document
 from h.views import main
 
 
 def _dummy_request():
     request = testing.DummyRequest()
-    request.assets_env = mock.MagicMock()
-    request.route_url = mock.MagicMock()
-    request.sentry = mock.MagicMock()
+    request.assets_env = MagicMock()
+    request.route_url = MagicMock()
+    request.sentry = MagicMock()
     return request
 
 
-@mock.patch('h.client.render_app_html')
-def test_og_document(render_app_html):
+@patch('h.client.render_app_html')
+@pytest.mark.usefixtures('annotation_document', 'document_title')
+def test_og_document(render_app_html, annotation_document, document_title):
+    annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
+    document = Document()
+    annotation_document.return_value = document
+    document_title.return_value = 'WikiHow — How to Make a ☆Starmap☆'
+
     render_app_html.return_value = '<html></html>'
-    annotation = {'id': '123', 'user': 'foo'}
-    annotation['document'] = {'title': 'WikiHow — How to Make a  ☆Starmap☆'}
     request = _dummy_request()
     main.annotation_page(annotation, request)
     args, kwargs = render_app_html.call_args
@@ -28,12 +35,31 @@ def test_og_document(render_app_html):
     assert any(test(d) for d in kwargs['extra']['meta_attrs'])
 
 
-@mock.patch('h.client.render_app_html')
+@patch('h.client.render_app_html')
 def test_og_no_document(render_app_html):
+    annotation = Annotation(id='123', userid='foo', target_uri='http://example.com')
+
     render_app_html.return_value = '<html></html>'
-    annotation = {'id': '123', 'user': 'foo'}
     request = _dummy_request()
     main.annotation_page(annotation, request)
     args, kwargs = render_app_html.call_args
     test = lambda d: 'foo' in d['content']
     assert any(test(d) for d in kwargs['extra']['meta_attrs'])
+
+
+@pytest.fixture
+def annotation_document(request):
+    patcher = patch('h.api.models.annotation.Annotation.document',
+                    new_callable=PropertyMock)
+    prop = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return prop
+
+
+@pytest.fixture
+def document_title(request):
+    patcher = patch('h.api.models.document.Document.title',
+                    new_callable=PropertyMock)
+    prop = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return prop

@@ -439,6 +439,6 @@ def effective_principals(request):
 def fetch(request):
     patcher = patch.object(storage, 'fetch_annotation')
     fetch = patcher.start()
-    fetch.side_effect = _fake_anno
+    fetch.side_effect = lambda _, id: _fake_anno(id)
     request.addfinalizer(patcher.stop)
     return fetch

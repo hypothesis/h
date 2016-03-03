@@ -23,6 +23,7 @@ from pyramid.view import view_config
 
 from h.api import cors
 from h.api.events import AnnotationEvent
+from h.api.presenters import AnnotationJSONPresenter
 from h.api import search as search_lib
 from h.api import schemas
 from h.api import storage
@@ -145,16 +146,19 @@ def create(request):
     """Create an annotation from the POST payload."""
     schema = schemas.CreateAnnotationSchema(request)
     appstruct = schema.validate(_json_payload(request))
-    annotation = storage.create_annotation(appstruct)
+    annotation = storage.create_annotation(request, appstruct)
 
     _publish_annotation_event(request, annotation, 'create')
-    return annotation
+
+    presenter = AnnotationJSONPresenter(annotation)
+    return presenter.asdict()
 
 
 @api_config(route_name='api.annotation', request_method='GET', permission='read')
 def read(annotation, request):
     """Return the annotation (simply how it was stored in the database)."""
-    return annotation
+    presenter = AnnotationJSONPresenter(annotation)
+    return presenter.asdict()
 
 
 @api_config(route_name='api.annotation', request_method='PUT', permission='update')
@@ -162,16 +166,18 @@ def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
     schema = schemas.UpdateAnnotationSchema(request, annotation=annotation)
     appstruct = schema.validate(_json_payload(request))
-    annotation = storage.update_annotation(annotation.id, appstruct)
+    annotation = storage.update_annotation(request, annotation.id, appstruct)
 
     _publish_annotation_event(request, annotation, 'update')
-    return annotation
+
+    presenter = AnnotationJSONPresenter(annotation)
+    return presenter.asdict()
 
 
 @api_config(route_name='api.annotation', request_method='DELETE', permission='delete')
 def delete(annotation, request):
     """Delete the specified annotation."""
-    storage.delete_annotation(annotation.id)
+    storage.delete_annotation(request, annotation.id)
 
     # N.B. We publish the original model (including all the original annotation
     # fields) so that queue subscribers have context needed to decide how to

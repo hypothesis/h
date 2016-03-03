@@ -3,6 +3,7 @@ import mock
 import jinja2
 
 from h import presenters
+from h.api.models import elastic
 
 
 def _annotation(annotation=None, **kwargs):
@@ -68,16 +69,22 @@ title_fixtures = pytest.mark.usefixtures('uri', 'filename')
 
 
 @title_fixtures
-def test_title_with_a_document_that_has_a_title():
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {'title': 'document title'}}),
+    mock.Mock(document=mock.Mock(title='document title'))])
+def test_title_with_a_document_that_has_a_title(annotation):
     """If the document has a title it should use it."""
-    annotation = _annotation(document={'title': 'document title'})
+    annotation = _annotation(annotation)
     assert annotation.title == 'document title'
 
 
 @title_fixtures
-def test_title_escapes_html_in_document_titles():
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {'title': '</a><a href="http://example.com/rubies">Buy rubies!!!</a>'}}),
+    mock.Mock(document=mock.Mock(title='</a><a href="http://example.com/rubies">Buy rubies!!!</a>'))])
+def test_title_escapes_html_in_document_titles(annotation):
     spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
-    annotation = _annotation(document={'title': '</a>' + spam_link})
+    annotation = _annotation(annotation)
 
     title = annotation.title
 
@@ -88,89 +95,124 @@ def test_title_escapes_html_in_document_titles():
 
 
 @title_fixtures
-def test_title_with_file_uri(filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {}}),
+    mock.Mock(document=mock.Mock(title=None))])
+def test_title_with_file_uri(filename, annotation):
     """If the document has no title and the annotation has a file:// uri then
     it should return the filename part only."""
     filename.return_value = "MyFile.pdf"
-    annotation = _annotation(document={})
+    annotation = _annotation(annotation)
 
     assert annotation.title == "MyFile.pdf"
 
 
 @title_fixtures
-def test_title_returns_Markup_when_filename_returns_Markup(filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {}}),
+    mock.Mock(document=mock.Mock(title=None))])
+def test_title_returns_Markup_when_filename_returns_Markup(filename, annotation):
     filename.return_value = jinja2.Markup("MyFile.pdf")
-    annotation = _annotation(document={})
+    annotation = _annotation(annotation)
 
     assert isinstance(annotation.title, jinja2.Markup)
 
 
 @title_fixtures
-def test_title_unquotes_uris(uri, filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {}}),
+    mock.Mock(document=mock.Mock(title=None))])
+def test_title_unquotes_uris(uri, filename, annotation):
     filename.return_value = ""  # This is not a file:// URI.
     uri.return_value = "http://example.com/example%201.html"
-    annotation = _annotation()
+    annotation = _annotation(annotation)
 
     assert annotation.title == "http://example.com/example 1.html"
 
 
 @title_fixtures
-def test_title_returns_Markup_when_uri_returns_Markup(uri, filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {}}),
+    mock.Mock(document=mock.Mock(title=None))])
+def test_title_returns_Markup_when_uri_returns_Markup(uri, filename, annotation):
     filename.return_value = ""  # This is not a file:// URI.
     uri.return_value = jinja2.Markup("http://example.com/example.html")
-    annotation = _annotation()
+    annotation = _annotation(annotation)
 
     assert isinstance(annotation.title, jinja2.Markup)
 
 
 @title_fixtures
-def test_title_when_document_has_None_for_title(uri, filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {'title': None}}),
+    mock.Mock(document=mock.Mock(title=None))])
+def test_title_when_document_has_None_for_title(uri, filename, annotation):
     """If the document has None for its title it should use the uri instead."""
     uri.return_value = "http://example.com/example.html"
     filename.return_value = ""  # This is not a file:// URI.
-    annotation = _annotation(document={'title': None})
+    annotation = _annotation(annotation)
 
     assert annotation.title == "http://example.com/example.html"
 
 
 @title_fixtures
-def test_title_when_document_title_is_not_a_string(uri, filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {'title': 23}}),
+    elastic.Annotation({'document': {'title': 23.7}}),
+    elastic.Annotation({'document': {'title': False}}),
+    mock.Mock(document=mock.Mock(title={'foo': 'bar'})),
+    mock.Mock(document=mock.Mock(title=[1, 2, 3]))])
+def test_title_when_document_title_is_not_a_string(uri, filename, annotation):
     """If the document has None for its title it should use the uri instead."""
     uri.return_value = u"http://example.com/example.html"
     filename.return_value = ""  # This is not a file:// URI.
 
-    for title in (23, 23.7, False, {"foo": "bar"}, [1, 2, 3]):
-        annotation = _annotation(document={'title': title})
-        assert isinstance(annotation.title, unicode)
+    annotation = _annotation(annotation)
+    assert isinstance(annotation.title, unicode)
 
 
 @title_fixtures
-def test_title_when_document_has_empty_string_for_title(uri, filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {'title': ''}}),
+    mock.Mock(document=mock.Mock(title=''))])
+def test_title_when_document_has_empty_string_for_title(uri, filename, annotation):
     """If the document has "" for its title it should use the uri instead."""
     uri.return_value = "http://example.com/example.html"
     filename.return_value = ""  # This is not a file:// URI.
-    annotation = _annotation(document={'title': ""})
+    annotation = _annotation(annotation)
 
     assert annotation.title == "http://example.com/example.html"
 
 
 @title_fixtures
-def test_title_when_no_document_title_no_filename_and_no_uri(uri, filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': {}}),
+    mock.Mock(document=mock.Mock(title=None))])
+def test_title_when_no_document_title_no_filename_and_no_uri(uri, filename, annotation):
     uri.return_value = ""
     filename.return_value = ""
-    annotation = _annotation(document={})
+    annotation = _annotation(annotation)
 
     assert annotation.title == ""
 
 
 @title_fixtures
-def test_title_when_annotations_document_is_not_a_dict(uri, filename):
+@pytest.mark.parametrize('annotation', [
+    elastic.Annotation({'document': False}),
+    elastic.Annotation({'document': 23}),
+    elastic.Annotation({'document': 12.7}),
+    elastic.Annotation({'document': None}),
+    elastic.Annotation({'document': []}),
+    elastic.Annotation({'document': [1, 2, 3]}),
+    elastic.Annotation({'document': 'foo'}),
+    elastic.Annotation({'document': u'bar'}),
+    mock.Mock(document=None)])
+def test_title_when_annotations_document_is_not_a_dict(uri, filename, annotation):
     uri.return_value = "http://www.example.com/example.html"
     filename.return_value = ""  # This is not a file:// URI.
 
-    for document in (False, 23, 12.7, None, [], [1, 2, 3], "foo", u"bar"):
-        annotation = _annotation(document=document)
-        assert annotation.title == uri.return_value
+    annotation = _annotation(annotation)
+    assert annotation.title == uri.return_value
 
 
 hostname_or_filename_fixtures = pytest.mark.usefixtures('uri', 'filename')

@@ -19,15 +19,16 @@ from h.views.client import render_app
 
 @view_config(route_name='annotation', permission='read')
 def annotation_page(annotation, request):
-    if 'title' in annotation.get('document', {}):
+    document = annotation.document
+    if document and document.title:
         title = 'Annotation by {user} on {title}'.format(
-            user=annotation['user'].replace('acct:', ''),
-            title=annotation['document']['title'])
+            user=annotation.userid.replace('acct:', ''),
+            title=document.title)
     else:
         title = 'Annotation by {user}'.format(
-            user=annotation['user'].replace('acct:', ''))
+            user=annotation.userid.replace('acct:', ''))
 
-    alternate = request.route_url('api.annotation', id=annotation['id'])
+    alternate = request.route_url('api.annotation', id=annotation.id)
 
     return render_app(request, {
         'meta_attrs': (

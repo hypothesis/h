@@ -6,7 +6,6 @@ from __future__ import division, print_function, unicode_literals
 
 import argparse
 import datetime
-import dateutil.parser as dateparser
 import itertools
 import os
 import logging
@@ -18,11 +17,10 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from h import db
 from h.api.db import Base as APIBase
+from h.api.models import elastic
 from h.api.models.annotation import Annotation
 from h.api.models.document import Document, DocumentURI, DocumentMeta
 from h.api.models.document import merge_documents
-from h.api import uri
-from h._compat import text_type
 
 BATCH_SIZE = 2000
 
@@ -94,7 +92,8 @@ def migrate_annotations(es_client):
         success += s
         failure += f
         took = (datetime.datetime.now() - start).seconds
-        print('{:d} ok, {:d} failed, took {:d} seconds'.format(success, failure, took))
+        print('{:d} ok, {:d} failed, took {:d} seconds'.format(
+            success, failure, took))
 
         start = datetime.datetime.now()
 
@@ -159,13 +158,16 @@ def import_annotations(annotations):
 
     for a in annotations:
         try:
-            document_data = a['_source'].pop('document', None)
+            data = a['_source']
+            data['id'] = a['_id']
+            es_annotation = elastic.Annotation(data)
 
-            annotation = annotation_from_data(a['_id'], a['_source'])
+            annotation = annotation_from_data(es_annotation)
             objs.add(annotation)
 
-            if document_data is not None:
-                document_objs_from_data(document_data, annotation)
+            create_or_update_document_objects(es_annotation)
+
+            Session.flush()
         except Exception as e:
             log.warn('error importing %s: %s', a['_id'], e)
             failure += 1
@@ -178,129 +180,98 @@ def import_annotations(annotations):
     return success, failure
 
 
-def annotation_from_data(id, data):
+def annotation_from_data(es_ann):
     # No joke. This is a thing.
-    if id == '_query':
+    if es_ann.id == '_query':
         raise Skip("not an annotation (id=_query)")
 
-    ann = Annotation.query.get(id)
+    ann = Annotation.query.get(es_ann.id)
     if ann is None:
-        ann = Annotation(id=id)
+        ann = Annotation(id=es_ann.id)
 
-    ann.created = dateparser.parse(data.pop('created')).replace(tzinfo=None)
-    ann.updated = dateparser.parse(data.pop('updated')).replace(tzinfo=None)
-    ann.userid = data.pop('user')
-    ann.groupid = data.pop('group')
-
-    text = data.pop('text', None)
-    if text:
-        ann.text = text
-
-    tags = data.pop('tags', None)
-    if tags:
-        ann.tags = _filter_tags(tags)
-
-    references = data.pop('references', None)
-    if references:
-        ann.references = _filter_references(references)
-
-    perms = data.pop('permissions')
-    ann.shared = _permissions_allow_sharing(ann.userid, ann.groupid, perms)
-
-    targets = data.pop('target', [])
-    target = targets[0] if len(targets) > 0 else None
-
-    if target is not None:
-        ann.target_uri = target.pop('source', None)
-        ann.target_selectors = target.pop('selector', [])
-
-    datauri = data.pop('uri', None)
-    if ann.target_uri is None:
-        ann.target_uri = datauri
-
-    if ann.target_uri is None:
+    if es_ann.target_uri is None:
         raise Skip("annotation is missing a target source and uri")
 
-    ann.target_uri_normalized = text_type(uri.normalize(ann.target_uri))
-
-    if data:
-        ann.extra = data
+    ann.created = es_ann.created
+    ann.updated = es_ann.updated
+    ann.userid = es_ann.userid
+    ann.groupid = es_ann.groupid
+    ann.text = es_ann.text
+    ann.tags = es_ann.tags
+    ann.references = es_ann.references
+    ann.shared = es_ann.shared
+    ann.target_uri = es_ann.target_uri
+    ann.target_selectors = es_ann.target_selectors
+    ann.extra = es_ann.extra
 
     return ann
 
 
-def document_objs_from_data(data, ann):
-    links = _transfom_document_links(ann.target_uri, data)
-    uris = [link['uri'] for link in links]
-    documents = Document.find_or_create_by_uris(ann.target_uri, uris,
-                                                created=ann.created,
-                                                updated=ann.updated)
+def create_or_update_document_objects(es_ann):
+    es_doc = es_ann.document
+
+    if not es_doc:
+        return
+
+    uris = [u.uri for u in es_doc.uris]
+    documents = Document.find_or_create_by_uris(Session, es_ann.target_uri, uris,
+                                                created=es_doc.created,
+                                                updated=es_doc.updated)
 
     if documents.count() > 1:
-        document = merge_documents(Session, documents, updated=ann.updated)
+        document = merge_documents(Session, documents, updated=es_doc.updated)
     else:
         document = documents.first()
 
-    document.updated = ann.updated
+    document.updated = es_doc.updated
 
-    document_uri_objs_from_data(document, links, ann)
-    document_meta_objs_from_data(document, data, ann)
+    for uri_ in es_doc.uris:
+        create_or_update_document_uri(uri_, document)
 
-
-def document_uri_objs_from_data(document, transformed_links, ann):
-    for link in transformed_links:
-        docuri = DocumentURI.query.filter(
-                DocumentURI.claimant_normalized == text_type(uri.normalize(link.get('claimant')), 'utf-8'),
-                DocumentURI.uri_normalized == text_type(uri.normalize(link.get('uri')), 'utf-8'),
-                DocumentURI.type == link.get('type'),
-                DocumentURI.content_type == link.get('content_type')
-                ).first()
-
-        if docuri is None:
-            docuri = DocumentURI(claimant=link.get('claimant'),
-                                 uri=link.get('uri'),
-                                 type=link.get('type'),
-                                 content_type=link.get('content_type'),
-                                 document=document,
-                                 created=ann.created,
-                                 updated=ann.updated)
-            Session.add(docuri)
-            Session.flush()
-
-        docuri.updated = ann.updated
+    for meta in es_doc.meta:
+        create_or_update_document_meta(meta, document)
 
 
-def document_meta_objs_from_data(document, data, ann, path_prefix=[]):
-    _ = data.pop('link', None)
+def create_or_update_document_uri(es_docuri, pg_document):
+    docuri = DocumentURI.query.filter(
+            DocumentURI.claimant_normalized == es_docuri.claimant_normalized,
+            DocumentURI.uri_normalized == es_docuri.uri_normalized,
+            DocumentURI.type == es_docuri.type,
+            DocumentURI.content_type == es_docuri.content_type).first()
 
-    for key, value in data.iteritems():
-        keypath = path_prefix[:]
-        keypath.append(key)
+    if docuri is None:
+        docuri = DocumentURI(claimant=es_docuri.claimant,
+                             uri=es_docuri.uri,
+                             type=es_docuri.type,
+                             content_type=es_docuri.content_type,
+                             document=pg_document,
+                             created=es_docuri.created,
+                             updated=es_docuri.updated)
+        Session.add(docuri)
+    elif not docuri.document == pg_document:
+        log.warn('Found DocumentURI with id {:d} does not match expected document with id {:d}', docuri.id, pg_document.id)
 
-        if isinstance(value, dict):
-            return document_meta_objs_from_data(document, value, ann,
-                                                path_prefix=keypath)
+    docuri.updated = es_docuri.updated
 
-        if not isinstance(value, list):
-            value = [value]
 
-        type = '.'.join(keypath)
-        meta = DocumentMeta.query.filter(
-                DocumentMeta.claimant_normalized == text_type(uri.normalize(ann.target_uri)),
-                DocumentMeta.type == type).one_or_none()
+def create_or_update_document_meta(es_meta, pg_document):
+    meta = DocumentMeta.query.filter(
+            DocumentMeta.claimant_normalized == es_meta.claimant_normalized,
+            DocumentMeta.type == es_meta.type).one_or_none()
 
-        if meta is None:
-            meta = DocumentMeta(claimant=ann.target_uri,
-                                type='.'.join(keypath),
-                                value=value,
-                                created=ann.created,
-                                updated=ann.updated,
-                                document=document)
-            Session.add(meta)
-            Session.flush()
-        else:
-            meta.value = value
-            meta.updated = ann.updated
+    if meta is None:
+        meta = DocumentMeta(claimant=es_meta.claimant,
+                            type=es_meta.type,
+                            value=es_meta.value,
+                            created=es_meta.created,
+                            updated=es_meta.updated,
+                            document=pg_document)
+        Session.add(meta)
+    else:
+        meta.value = es_meta.value
+        meta.updated = es_meta.updated
+        if not meta.document == pg_document:
+            log.warn('Found DocumentMeta with id {:d} does not match expected document with id {:d}', meta.id, pg_document.id)
 
 
 def _batch_iter(n, iterable):
@@ -310,185 +281,6 @@ def _batch_iter(n, iterable):
         if not batch:
             return
         yield batch
-
-
-def _filter_tags(tags):
-    if isinstance(tags, basestring):
-        return [tags]
-    if not isinstance(tags, list):
-        raise Skip("weird tags: {!r}".format(tags))
-    return tags
-
-
-def _filter_references(references):
-    if not isinstance(references, list):
-        raise Skip("non-list references field: {!r}".format(references))
-
-    # Some of the values in the references fields aren't IDs (i.e. they're not
-    # base64-encoded UUIDs or base64-encoded flake IDs. Instead, they're
-    # base64-encoded random numbers between 0 and 1, in ASCII...
-    #
-    # So, we filter out things that couldn't possibly be valid IDs.
-    references = [r for r in references if len(r) in [20, 22]]
-
-    return references
-
-
-def _permissions_allow_sharing(user, group, perms):
-    gperm = 'group:{}'.format(group)
-
-    allowed_keys = set(['admin', 'delete', 'read', 'update'])
-    if set(perms) - allowed_keys:
-        raise Skip("invalid permission keys: {!r}".format(perms))
-
-    # Extract a (deduplicated) copy of the read perms field...
-    read_perms = list(set(perms.get('read', [])))
-
-    # We explicitly fix up some known weird scenarios with the permissions
-    # field. The idea here is to cover the ones we've investigated and know
-    # about, but throw a Skip if we see something we don't recognise. Then if
-    # necessary we can make a decision on it and add a rule to handle it here.
-    #
-    # 1. Missing 'read' permissions field. Fix: set the permissions to private.
-    if not read_perms:
-        read_perms = [user]
-
-    # 2. 'read' permissions field is [None]. Fix: as in 1).
-    elif read_perms == [None]:
-        read_perms = [user]
-
-    # 3. Group 'read' permissions that don't match the annotation group. I
-    #    believe this is a result of a bug where the focused group was
-    #    incorrectly restored from localStorage.
-    #
-    #    CHECK THIS ONE: example annotation ids:
-    #
-    #    - AVHVDy7M8sFu_DXLVTfR (Jon)
-    #    - AVH0xnzy8sFu_DXLVU8L (Jeremy)
-    #    - AVHvR_bC8sFu_DXLVUl2 (Jeremy)
-    #
-    #    Fix: set the permissions to be the correct permissions for the group
-    #    the annotation is actually in...
-    elif (len(read_perms) == 1 and
-          read_perms[0].startswith('group:') and
-          read_perms != [gperm]):
-        read_perms = [gperm]
-
-    # 4. Read permissions includes 'group:__world__' but also other principals.
-    #
-    #    This is equivalent to including only 'group:__world__'.
-    elif len(read_perms) > 1 and group == '__world__' and gperm in read_perms:
-        read_perms = [gperm]
-
-    if (read_perms != [gperm] and read_perms != [user]):
-        # attempt to fix data when client auth state is out of sync by
-        # by overriding the permissions with the user of the annotation.
-        if read_perms[0].startswith('acct:'):
-            read_perms = [user]
-        else:
-            raise Skip('invalid read permissions: {!r}'.format(perms))
-
-    for other in ['admin', 'delete', 'update']:
-        other_perms = perms.get(other, [])
-
-        # If one of these is missing, who cares? We can assume it's supposed to
-        # be the owner...
-        if not other_perms:
-            continue
-
-        # Multiple permissions for one of these that includes the owner
-        # accounts for about 20 annotations in the database. All of these fit
-        # into one of the following categories:
-        #
-        # - created by staff for testing purposes
-        # - modified post-hoc to allow admin editing of an annotation
-        # - created by two non-staff users, for testing purposes (this accounts
-        #   for a whole 3 annotations)
-        if len(other_perms) > 1 and user in other_perms:
-            continue
-
-        if (other_perms != [user] and not other_perms[0].startswith('acct:')):
-            raise Skip('invalid {} permissions: {!r}'.format(other, perms))
-
-    # And, now, we ignore everything other than the read permissions. If
-    # they're a group permission the annotation is considered "shared,"
-    # otherwise not.
-    if read_perms == [gperm]:
-        return True
-
-    return False
-
-
-def _transfom_document_links(ann_target_uri, docdata):
-    transformed = []
-    doclinks = docdata.get('link', [])
-
-    # When document link is just a string, transform it to a link object with
-    # an href, so it gets further processed as either a self-claim or another
-    # claim.
-    if isinstance(doclinks, basestring):
-        doclinks = [{"href": doclinks}]
-
-    for link in doclinks:
-        # disregard self-claim urls as they're are being added separately
-        # later on.
-        if link.keys() == ['href'] and link['href'] == ann_target_uri:
-            continue
-
-        # disregard doi links as these are being added separately from the
-        # highwire and dc metadata later on.
-        if link.keys() == ['href'] and link['href'].startswith('doi:'):
-            continue
-
-        uri_ = link['href']
-        type = None
-
-        # highwire pdf (href, type=application/pdf)
-        if set(link.keys()) == set(['href', 'type']) and len(link.keys()) == 2:
-            type = 'highwire-pdf'
-
-        if type is None and link.get('rel') is not None:
-            type = 'rel-{}'.format(link['rel'])
-
-        content_type = None
-        if link.get('type'):
-            content_type = link['type']
-
-        transformed.append({
-            'claimant': ann_target_uri,
-            'uri': uri_,
-            'type': type,
-            'content_type': content_type})
-
-    # Add highwire doi link based on metadata
-    hwdoivalues = docdata.get('highwire', {}).get('doi', [])
-    for doi in hwdoivalues:
-        if not doi.startswith('doi:'):
-            doi = "doi:{}".format(doi)
-
-        transformed.append({
-            'claimant': ann_target_uri,
-            'uri': doi,
-            'type': 'highwire-doi'})
-
-    # Add dc doi link based on metadata
-    dcdoivalues = docdata.get('dc', {}).get('identifier', [])
-    for doi in dcdoivalues:
-        if not doi.startswith('doi:'):
-            doi = "doi:{}".format(doi)
-
-        transformed.append({
-            'claimant': ann_target_uri,
-            'uri': doi,
-            'type': 'dc-doi'})
-
-    # add self claim
-    transformed.append({
-        'claimant': ann_target_uri,
-        'uri': ann_target_uri,
-        'type': 'self-claim'})
-
-    return transformed
 
 
 if __name__ == '__main__':

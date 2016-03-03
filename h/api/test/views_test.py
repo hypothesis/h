@@ -86,6 +86,7 @@ def test_search_returns_search_results(search_lib):
 
 
 create_fixtures = pytest.mark.usefixtures('AnnotationEvent',
+                                          'AnnotationJSONPresenter',
                                           'schemas',
                                           'storage')
 
@@ -111,7 +112,7 @@ def test_create_calls_create_annotation(storage, schemas):
 
     views.create(request)
 
-    storage.create_annotation.assert_called_once_with({'foo': 123})
+    storage.create_annotation.assert_called_once_with(request, {'foo': 123})
 
 
 @create_fixtures
@@ -137,24 +138,32 @@ def test_create_event(AnnotationEvent, storage):
 
 
 @create_fixtures
-def test_create_returns_annotation(storage):
+def test_create_returns_presented_annotation(AnnotationJSONPresenter, storage):
     request = mock.Mock()
+    presenter = mock.Mock()
+    AnnotationJSONPresenter.return_value = presenter
 
     result = views.create(request)
 
-    assert result == storage.create_annotation.return_value
+    AnnotationJSONPresenter.assert_called_once_with(
+            storage.create_annotation.return_value)
+    assert result == presenter.asdict()
 
 
-def test_read_returns_annotation():
+def test_read_returns_presented_annotation(AnnotationJSONPresenter):
     annotation = mock.Mock()
     request = mock.Mock()
+    presenter = mock.Mock()
+    AnnotationJSONPresenter.return_value = presenter
 
     result = views.read(annotation, request)
 
-    assert result == annotation
+    AnnotationJSONPresenter.assert_called_once_with(annotation)
+    assert result == presenter.asdict()
 
 
 update_fixtures = pytest.mark.usefixtures('AnnotationEvent',
+                                          'AnnotationJSONPresenter',
                                           'schemas',
                                           'storage')
 
@@ -191,17 +200,23 @@ def test_update_calls_update_annotation(storage, schemas):
 
     views.update(annotation, request)
 
-    storage.update_annotation.assert_called_once_with(annotation.id, {'foo': 123})
+    storage.update_annotation.assert_called_once_with(request,
+                                                      annotation.id,
+                                                      {'foo': 123})
 
 
 @update_fixtures
-def test_update_returns_annotation(storage):
+def test_update_returns_presented_annotation(AnnotationJSONPresenter, storage):
     annotation = mock.Mock()
     request = mock.Mock()
+    presenter = mock.Mock()
+    AnnotationJSONPresenter.return_value = presenter
 
     result = views.update(annotation, request)
 
-    assert result == storage.update_annotation.return_value
+    AnnotationJSONPresenter.assert_called_once_with(
+            storage.update_annotation.return_value)
+    assert result == presenter.asdict()
 
 
 @update_fixtures
@@ -227,7 +242,7 @@ def test_delete_calls_delete_annotation(storage):
 
     views.delete(annotation, request)
 
-    storage.delete_annotation.assert_called_once_with(annotation.id)
+    storage.delete_annotation.assert_called_once_with(request, annotation.id)
 
 
 @delete_fixtures
@@ -257,6 +272,14 @@ def AnnotationEvent(request):
     patcher = mock.patch('h.api.views.AnnotationEvent', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
+
+
+@pytest.fixture
+def AnnotationJSONPresenter(request):
+    patcher = mock.patch('h.api.views.AnnotationJSONPresenter', autoSpec=True)
+    cls = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return cls
 
 
 @pytest.fixture
