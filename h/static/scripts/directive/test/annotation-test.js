@@ -1,20 +1,20 @@
 /* jshint node: true */
 'use strict';
 
+var angular = require('angular');
 var proxyquire = require('proxyquire');
 
 var events = require('../../events');
 var fixtures = require('../../test/annotation-fixtures');
 var util = require('./util');
 
-var module = angular.mock.module;
 var inject = angular.mock.inject;
 
 /**
  * Returns the annotation directive with helpers stubbed out.
  */
 function annotationDirective() {
-  var noop = function () { return '' };
+  var noop = function () { return ''; };
 
   var annotation = proxyquire('../annotation', {
     '../filter/document-domain': noop,
@@ -321,11 +321,9 @@ describe('annotation', function() {
         .directive('annotation', annotationDirective());
     });
 
-    beforeEach(module('h'));
-
-    beforeEach(module('h.templates'));
-
-    beforeEach(module(function($provide) {
+    beforeEach(angular.mock.module('h'));
+    beforeEach(angular.mock.module('h.templates'));
+    beforeEach(angular.mock.module(function($provide) {
       sandbox = sinon.sandbox.create();
 
       fakeAnnotationMapper = {
@@ -927,7 +925,7 @@ describe('annotation', function() {
 
         annotation.updated = null;
         annotation.$create = function () {
-          annotation.updated = (new Date).toString();
+          annotation.updated = (new Date()).toString();
           return Promise.resolve(annotation);
         };
         var controller = createDirective(annotation).controller;
@@ -952,9 +950,9 @@ describe('annotation', function() {
         clock.tick(10 * 60 * 1000);
 
         annotation.$update = function () {
-          this.updated = (new Date).toString();
+          this.updated = (new Date()).toString();
           return Promise.resolve(this);
-        }
+        };
         var controller = createDirective(annotation).controller;
         assert.equal(controller.relativeTimestamp, 'ages ago');
         controller.edit();
@@ -983,7 +981,7 @@ describe('annotation', function() {
       });
 
       it('is no longer updated after the scope is destroyed', function() {
-        var controller = createDirective(annotation).controller;
+        createDirective(annotation);
         $scope.$digest();
         $scope.$destroy();
         $timeout.flush();
@@ -1038,10 +1036,14 @@ describe('annotation', function() {
 
       it(
         'doesn\'t call annotationMapper.delete() if the delete is cancelled',
-        function() {
-          var controller = createDirective().controller;
+        function(done) {
+          var parts = createDirective();
           sandbox.stub($window, 'confirm').returns(false);
-          assert(fakeAnnotationMapper.deleteAnnotation.notCalled);
+          parts.controller['delete']().then(function() {
+            assert.notCalled(fakeAnnotationMapper.deleteAnnotation);
+            done();
+          });
+          $timeout.flush();
         }
       );
 
@@ -1194,7 +1196,7 @@ describe('annotation', function() {
         'Passes group:<id> to the server when saving a new annotation',
         function() {
           fakeGroups.focused = function () {
-            return { id: 'test-id' }
+            return { id: 'test-id' };
           };
           var annotation = {
             user: 'acct:fred@hypothes.is',

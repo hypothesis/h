@@ -1,8 +1,6 @@
 /* jshint node: true */
 'use strict';
 
-var Promise = require('core-js/library/es6/promise');
-
 var annotationMetadata = require('../annotation-metadata');
 var dateUtil = require('../date-util');
 var documentDomain = require('../filter/document-domain');
