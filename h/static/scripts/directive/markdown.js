@@ -34,7 +34,7 @@ var loadMathJax = function() {
  * the markdown editor.
  */
 // @ngInject
-module.exports = function($filter, $sanitize, $sce, $timeout) {
+module.exports = function($filter, $sanitize, $sce) {
   return {
     link: function(scope, elem, attr, ctrl) {
       if (!(typeof ctrl !== "undefined" && ctrl !== null)) { return; }
@@ -61,6 +61,16 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
         // changed. This re-focuses the input field but really it should
         // happen automatically.
         input.focus();
+      }
+
+      function focusInput() {
+        // When the visibility of the editor changes, focus it.
+        // A timeout is used so that focus() is not called until
+        // the visibility change has been applied (by adding or removing
+        // the relevant CSS classes)
+        setTimeout(function () {
+          input.focus();
+        }, 0);
       }
 
       scope.insertBold = function() {
@@ -145,7 +155,7 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
             return ctrl.$render();
           } else {
             input.style.height = output.style.height;
-            return $timeout(function() { return input.focus(); });
+            focusInput();
           }
         }
       };
@@ -265,12 +275,12 @@ module.exports = function($filter, $sanitize, $sce, $timeout) {
       // Reset height of output div in case it has been changed.
       // Re-render when it becomes uneditable.
       // Auto-focus the input box when the widget becomes editable.
-      return scope.$watch('readOnly', function(readOnly) {
+      scope.$watch('readOnly', function(readOnly) {
         scope.preview = false;
         output.style.height = "";
         ctrl.$render();
         if (!readOnly) {
-          input.focus();
+          focusInput();
         }
       });
     },

@@ -1,3 +1,12 @@
+Unreleased
+==========
+
+Features
+--------
+
+- The annotation text input is focused automatically when
+  new annotations are created.
+
 0.9.7 (2016-03-01)
 ==================
 

@@ -10,8 +10,9 @@ describe 'Host', ->
   CrossFrame = null
   fakeCrossFrame = null
 
-  createHost = (options={}) ->
-    element = document.createElement('div')
+  createHost = (options={}, element=null) ->
+    if !element
+      element = document.createElement('div')
     return new Host(element, options)
 
   beforeEach ->
@@ -40,6 +41,34 @@ describe 'Host', ->
       host = createHost()
       host.publish('panelReady')
       assert.equal(host.frame.css('display'), '')
+
+  describe 'focus', ->
+    element = null
+    frame = null
+    host = null
+
+    beforeEach ->
+      element = document.createElement('div')
+      document.body.appendChild(element)
+      host = createHost({}, element)
+      frame = element.querySelector('[name=hyp_sidebar_frame]')
+      sinon.spy(frame.contentWindow, 'focus')
+
+    afterEach ->
+      frame.contentWindow.focus.restore()
+      element.parentNode.removeChild(element)
+
+    it 'focuses the sidebar when a new annotation is created', ->
+      host.publish('beforeAnnotationCreated', [{
+        $highlight: false,
+      }])
+      assert.called(frame.contentWindow.focus)
+
+    it 'does not focus the sidebar when a new highlight is created', ->
+      host.publish('beforeAnnotationCreated', [{
+        $highlight: true,
+      }])
+      assert.notCalled(frame.contentWindow.focus)
 
   describe 'options', ->
     it 'disables highlighting if showHighlights: false is given', (done) ->

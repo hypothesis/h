@@ -36,6 +36,13 @@ module.exports = class Host extends Guest
       # Show the UI
       @frame.css('display', '')
 
+    this.on 'beforeAnnotationCreated', (annotation) ->
+      # When a new non-highlight annotation is created, focus
+      # the sidebar so that the text editor can be focused as
+      # soon as the annotation card appears
+      if !annotation.$highlight
+        app[0].contentWindow.focus()
+
   destroy: ->
     @frame.remove()
     super

@@ -229,7 +229,10 @@ module.exports = [
           ctrl.container = thread
           if ctrl.isNew()
             # Scroll the sidebar to show new annotations.
-            $location.hash(ctrl.id)
+            # Note that only top level annotation cards have their ID set
+            annotationCard = document.getElementById(ctrl.id)
+            if annotationCard
+              annotationCard.scrollIntoView();
           scope.$digest()
 
     controller: ThreadController
