@@ -135,7 +135,7 @@ def _prepare(request, annotation):
     and add normalized versions of these to the document.
     """
     fetcher = partial(fetch_annotation, request)
-    transform.set_group_if_reply(request, annotation, fetcher=fetcher)
+    transform.set_group_if_reply(annotation, fetcher=fetcher)
     transform.insert_group_if_none(annotation)
     transform.set_group_permissions(annotation)
 
