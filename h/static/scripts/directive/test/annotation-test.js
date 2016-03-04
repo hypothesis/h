@@ -153,7 +153,10 @@ describe('annotation', function() {
       };
       mockThreadController = {
         collapsed: true,
-        toggleCollapsed: sinon.stub()
+        toggleCollapsed: sinon.stub(),
+        parent: {
+          toggleCollapsed: sinon.stub()
+        }
       };
       mockThreadFilterController = {
         active: sinon.stub(),
@@ -263,6 +266,18 @@ describe('annotation', function() {
         true,
         mockThreadFilterController.freeze.lastCall.calledWithExactly(false));
     });
+
+    it('does not collapse parent thread after edit', function() {
+      mockAnnotationController.editing.returns(true);
+      link(scope, mockElement, mockAttributes, mockControllers);
+      scope.$digest();
+
+      mockAnnotationController.editing.returns(false);
+      scope.$digest();
+
+      assert.calledWith(mockThreadController.parent.toggleCollapsed, false);
+    });
+
   });
 
   describe('AnnotationController', function() {
