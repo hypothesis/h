@@ -386,6 +386,7 @@ class DocumentMeta(dict):
         if value:
             value = value.lower().replace(':', '.')
             value = re.sub(r'\.{2,}', '.', value)
+            value = re.sub(r'^og\.', 'facebook.', value)
 
         return value
 
