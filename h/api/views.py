@@ -134,9 +134,16 @@ def search(request):
     params = request.params.copy()
 
     separate_replies = params.pop('_separate_replies', False)
-    return search_lib.search(request,
-                             params,
-                             separate_replies=separate_replies)
+    out = search_lib.search(request,
+                            params,
+                            separate_replies=separate_replies)
+
+    # Run the results through the JSON presenter
+    out['rows'] = [_present_searchdict(a) for a in out['rows']]
+    if separate_replies:
+        out['replies'] = [_present_searchdict(a) for a in out['replies']]
+
+    return out
 
 
 @api_config(route_name='api.annotations',
@@ -199,6 +206,12 @@ def _json_payload(request):
         return request.json_body
     except ValueError:
         raise PayloadError()
+
+
+def _present_searchdict(mapping):
+    """Run an object returned from search through a presenter."""
+    ann = storage.annotation_from_dict(mapping)
+    return AnnotationJSONPresenter(ann).asdict()
 
 
 def _publish_annotation_event(request, annotation, action):

@@ -79,10 +79,41 @@ def test_search_searches(search_lib):
 
 def test_search_returns_search_results(search_lib):
     request = testing.DummyRequest()
+    search_lib.search.return_value = {'total': 0, 'rows': []}
 
     result = views.search(request)
 
-    assert result == search_lib.search.return_value
+    assert result == {'total': 0, 'rows': []}
+
+
+def test_search_presents_annotations(search_lib, AnnotationJSONPresenter):
+    request = testing.DummyRequest()
+    search_lib.search.return_value = {'total': 2, 'rows': [{'foo': 'bar'},
+                                                           {'baz': 'bat'}]}
+    presenter = AnnotationJSONPresenter.return_value
+    presenter.asdict.return_value = {'giraffe': True}
+
+    result = views.search(request)
+
+    assert result == {'total': 2, 'rows': [{'giraffe': True},
+                                           {'giraffe': True}]}
+
+
+def test_search_presents_replies(search_lib, AnnotationJSONPresenter):
+    request = testing.DummyRequest(params={'_separate_replies': '1'})
+    search_lib.search.return_value = {'total': 1,
+                                      'rows': [{'foo': 'bar'}],
+                                      'replies': [{'baz': 'bat'},
+                                                  {'baz': 'bat'}]}
+    presenter = AnnotationJSONPresenter.return_value
+    presenter.asdict.return_value = {'giraffe': True}
+
+    result = views.search(request)
+
+    assert result == {'total': 1,
+                      'rows': [{'giraffe': True}],
+                      'replies': [{'giraffe': True},
+                                  {'giraffe': True}]}
 
 
 create_fixtures = pytest.mark.usefixtures('AnnotationEvent',
@@ -276,7 +307,7 @@ def AnnotationEvent(request):
 
 @pytest.fixture
 def AnnotationJSONPresenter(request):
-    patcher = mock.patch('h.api.views.AnnotationJSONPresenter', autoSpec=True)
+    patcher = mock.patch('h.api.views.AnnotationJSONPresenter', autospec=True)
     cls = patcher.start()
     request.addfinalizer(patcher.stop)
     return cls
