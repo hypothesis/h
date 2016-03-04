@@ -9,7 +9,6 @@
   "strict": "global",
   "undef": true,
   "unused": true,
-  "esversion": 6,
   "esnext": true,
   "globals": {
     "chrome": false,
