@@ -1,5 +1,7 @@
 #!/bin/sh
 
+: ${TRAVIS_TAG:=}
+
 set -eu
 
 case "$ACTION" in
@@ -10,6 +12,10 @@ case "$ACTION" in
         gulp "$GULPTASK"
         ;;
     extensions)
+        if [ -n "$TRAVIS_TAG" ]; then
+            export SENTRY_RELEASE_VERSION=$(echo "$TRAVIS_TAG" | cut -dv -f2-)
+            gulp build upload-sourcemaps
+        fi
         make extensions
         ;;
 esac
