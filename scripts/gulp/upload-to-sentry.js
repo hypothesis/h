@@ -6,7 +6,7 @@ var gulpUtil = require('gulp-util');
 var request = require('request');
 var through = require('through2');
 
-var SENTRY_API_ROOT = 'https://app.getsentry.com/api/0'
+var SENTRY_API_ROOT = 'https://app.getsentry.com/api/0';
 
 /**
  * interface SentryOptions {
@@ -119,7 +119,7 @@ module.exports = function uploadToSentry(opts, projects, release) {
     })
     .catch(function (err) {
       gulpUtil.log('Sentry upload failed: ', err);
-      throw err;
+      callback(err);
     });
   });
 };
