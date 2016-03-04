@@ -254,7 +254,9 @@ gulp.task('test-watch-extension', function (callback) {
   }, callback).start();
 });
 
-gulp.task('upload-sourcemaps', function () {
+gulp.task('upload-sourcemaps',
+          ['build-app-js',
+           'build-extension-js'], function () {
   var uploadToSentry = require('./scripts/gulp/upload-to-sentry');
   gulp.src(['build/scripts/*.js', 'build/scripts/*.map'])
     .pipe(uploadToSentry({
