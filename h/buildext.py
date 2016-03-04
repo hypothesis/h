@@ -3,6 +3,9 @@
 :mod:`h.buildext` is a utility to build the Hypothesis browser extensions. It
 is exposed as the command-line utility hypothesis-buildext.
 """
+
+from __future__ import print_function
+
 import argparse
 import codecs
 import json
@@ -10,10 +13,9 @@ import logging
 import os
 import os.path
 import shutil
-import subprocess
+import sys
 
 from jinja2 import Environment, PackageLoader
-
 
 import h
 from h import assets
@@ -30,26 +32,8 @@ urlparse.uses_netloc.append('resource')
 urlparse.uses_relative.append('resource')
 
 
-def build_extension_common(content_dir, assets_env,
-                           service_url, bundle_app=False):
-    """
-    Copy the contents of src to dest, including some generic extension scripts.
-    """
-    # Copy over the config and destroy scripts
-    shutil.copyfile('h/static/extension/destroy.js',
-                    content_dir + '/destroy.js')
-    shutil.copyfile('h/static/extension/config.js', content_dir + '/config.js')
-
-    # Render the embed code.
-    with codecs.open(content_dir + '/embed.js', 'w', 'utf-8') as fp:
-        if bundle_app:
-            app_html_url = '/public/app.html'
-        else:
-            app_html_url = '{}app.html'.format(service_url)
-
-        data = client.render_embed_js(assets_env=assets_env,
-                                      app_html_url=app_html_url)
-        fp.write(data)
+class MissingSourceFile(Exception):
+    pass
 
 
 def clean(path):
@@ -73,6 +57,25 @@ def copytree(src, dst):
             copytree(s, d)
         else:
             shutil.copyfile(s, d)
+
+
+def copyfilelist(src, dst, filelist):
+    """
+    Copy a list of source files from src to dst.
+
+    Raises MissingSourceFile if any of the files in the list are missing.
+    """
+    for path in filelist:
+        srcpath = os.path.join(src, path)
+        dstpath = os.path.join(dst, path)
+
+        if not os.path.exists(srcpath):
+            raise MissingSourceFile(srcpath)
+
+        if not os.path.exists(os.path.dirname(dstpath)):
+            os.makedirs(os.path.dirname(dstpath))
+
+        shutil.copyfile(srcpath, dstpath)
 
 
 def chrome_manifest(script_host_url, bouncer_url):
@@ -146,74 +149,75 @@ def build_chrome(args):
     if not service_url.endswith('/'):
         service_url = '{}/'.format(service_url)
 
+    build_dir = 'build/chrome'
+    public_dir = os.path.join(build_dir, 'public')
+
     # Prepare a fresh build.
-    clean('build/chrome')
-    os.makedirs('build/chrome')
-    content_dir = 'build/chrome/public'
-    os.makedirs(content_dir)
+    clean(build_dir)
+    os.makedirs(build_dir)
+    os.makedirs(public_dir)
 
     # Bundle the extension assets.
-    copytree('h/browser/chrome/content', 'build/chrome/content')
-    copytree('h/browser/chrome/help', 'build/chrome/help')
-    copytree('h/browser/chrome/images', 'build/chrome/images')
-    copytree('h/static/images', 'build/chrome/public/images')
-    copytree('h/static/styles/vendor/fonts', 'build/chrome/public/fonts')
+    copytree('h/browser/chrome/content', os.path.join(build_dir, 'content'))
+    copytree('h/browser/chrome/help', os.path.join(build_dir, 'help'))
+    copytree('h/browser/chrome/images', os.path.join(build_dir, 'images'))
+    copytree('h/static/images', os.path.join(public_dir, 'images'))
+    copytree('h/static/styles/vendor/fonts', os.path.join(public_dir, 'fonts'))
 
-    subprocess_args = ['node_modules/.bin/gulp', 'build']
-    subprocess.call(subprocess_args)
-
-    os.makedirs('build/chrome/lib')
-    shutil.copyfile('build/scripts/extension.bundle.js',
-                    'build/chrome/lib/extension.bundle.js')
+    extension_sources = ['extension.bundle.js']
     if args.debug:
-        shutil.copyfile('build/scripts/extension.bundle.js.map',
-                        'build/chrome/lib/extension.bundle.js.map')
+        extension_sources.extend([x + '.map' for x in extension_sources])
 
-    assets_env = assets.Environment('/public',
-                                    'h/assets.ini',
-                                    'build/manifest.json')
-
+    client_sources = []
+    env = assets.Environment('/public', 'h/assets.ini', 'build/manifest.json')
     for bundle in ['app_js', 'app_css', 'inject_js', 'inject_css']:
-        for path in assets_env.files(bundle):
-            dest_path = '{}/{}'.format(content_dir, path)
-            dest_dir = os.path.dirname(dest_path)
+        client_sources.extend(env.files(bundle))
+    if args.debug:
+        client_sources.extend([x + '.map' for x in client_sources])
 
-            if not os.path.exists(dest_dir):
-                os.makedirs(dest_dir)
-            shutil.copyfile('build/{}'.format(path), dest_path)
+    try:
+        copyfilelist(src='build/scripts',
+                     dst=os.path.join(build_dir, 'lib'),
+                     filelist=extension_sources)
+        copyfilelist(src='build',
+                     dst=public_dir,
+                     filelist=client_sources)
+        copyfilelist(src='h/static/extension',
+                     dst=public_dir,
+                     filelist=['config.js', 'destroy.js'])
+    except MissingSourceFile as e:
+        print("Missing source file: {:s}! Have you run `gulp build`?"
+              .format(e))
+        sys.exit(1)
 
-            sourcemap_path = '{}.map'.format(path)
-            sourcemap_dest_path = '{}/{}'.format(content_dir, sourcemap_path)
-
-            if args.debug:
-                shutil.copyfile('build/{}'.format(sourcemap_path),
-                                sourcemap_dest_path)
+    # Render the embed code.
+    with codecs.open(os.path.join(public_dir, 'embed.js'), 'w', 'utf-8') as fp:
+        data = client.render_embed_js(assets_env=env,
+                                      app_html_url='/public/app.html')
+        fp.write(data)
 
     # Render the sidebar html
     api_url = '{}api/'.format(service_url)
-    build_extension_common(content_dir, assets_env,
-                           service_url, bundle_app=True)
-    with codecs.open(content_dir + '/app.html', 'w', 'utf-8') as fp:
+    with codecs.open(os.path.join(public_dir, 'app.html'), 'w', 'utf-8') as fp:
         data = client.render_app_html(
             api_url=api_url,
             service_url=service_url,
-
             # Google Analytics tracking is currently not enabled
             # for the extension
             ga_tracking_id=None,
-            assets_env=assets_env,
+            assets_env=env,
             websocket_url=args.websocket_url,
             sentry_public_dsn=args.sentry_public_dsn)
         fp.write(data)
 
     # Render the manifest.
-    with codecs.open('build/chrome/manifest.json', 'w', 'utf-8') as fp:
+    with codecs.open(os.path.join(build_dir, 'manifest.json'), 'w', 'utf-8') as fp:
         data = chrome_manifest(script_host_url=None,
                                bouncer_url=args.bouncer_url)
         fp.write(data)
 
     # Write build settings to a JSON file
-    with codecs.open('build/chrome/settings-data.js', 'w', 'utf-8') as fp:
+    with codecs.open(os.path.join(build_dir, 'settings-data.js'), 'w', 'utf-8') as fp:
         settings = settings_dict(service_url, api_url, args.sentry_public_dsn)
         fp.write('window.EXTENSION_CONFIG = ' + json.dumps(settings))
 

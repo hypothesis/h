@@ -9,5 +9,7 @@ case "$ACTION" in
     extensions)
         pip install --use-wheel -e .
         npm install
+        # trick the Makefile into skipping npm install
+        touch node_modules/.uptodate
         ;;
 esac

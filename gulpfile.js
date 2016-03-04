@@ -254,13 +254,18 @@ gulp.task('test-watch-extension', function (callback) {
   }, callback).start();
 });
 
-gulp.task('upload-sourcemaps', function () {
+gulp.task('upload-sourcemaps',
+          ['build-app-js',
+           'build-extension-js'], function () {
   var uploadToSentry = require('./scripts/gulp/upload-to-sentry');
-  gulp.src(['build/scripts/*.js', 'build/scripts/*.map'])
-    .pipe(uploadToSentry({
-      apiKey: getEnv('SENTRY_API_KEY'),
-      release: getEnv('SENTRY_RELEASE_VERSION'),
-      organization: getEnv('SENTRY_ORGANIZATION'),
-      project: getEnv('SENTRY_PROJECT'),
-    }));
+
+  var opts = {
+    key: getEnv('SENTRY_API_KEY'),
+    organization: getEnv('SENTRY_ORGANIZATION'),
+  };
+  var projects = getEnv('SENTRY_PROJECTS').split(',');
+  var release = getEnv('SENTRY_RELEASE_VERSION');
+
+  return gulp.src(['build/scripts/*.js', 'build/scripts/*.map'])
+    .pipe(uploadToSentry(opts, projects, release));
 });

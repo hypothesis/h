@@ -58,7 +58,7 @@ test: node_modules/.uptodate
 extensions: build/$(ISODATE)-$(BUILD_ID)-chrome-stage.zip
 extensions: build/$(ISODATE)-$(BUILD_ID)-chrome-prod.zip
 
-build/%-chrome-stage.zip:
+build/%-chrome-stage.zip: build/manifest.json
 	@rm -rf build/chrome $@
 	hypothesis-buildext chrome \
 		--service 'https://stage.hypothes.is' \
@@ -67,7 +67,7 @@ build/%-chrome-stage.zip:
 		--bouncer 'https://hpt.is'
 	@zip -qr $@ build/chrome
 
-build/%-chrome-prod.zip:
+build/%-chrome-prod.zip: build/manifest.json
 	@rm -rf build/chrome $@
 	hypothesis-buildext chrome \
 		--service 'https://hypothes.is' \
