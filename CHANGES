@@ -5,19 +5,15 @@ Features
 --------
 
 - The annotation text input is focused automatically when
-  new annotations are created.
+  new annotations are created (#3041).
 
-Documentation
--------------
+Miscellanea
+-----------
 
-- Updated the Ubuntu development install instuctions (#3046)
-
-Miscellaneous
--------------
-
-- Introduce a presentation layer for the API (#3011, #3047, #3050, #3054)
-- Handle deleted annotations in Postgres migration script (#3040)
-- Upload sourcemaps to Sentry (#3055)
+- Introduce a presentation layer for the API (#3011, #3047, #3050, #3054).
+- Handle deleted annotations in Postgres migration script (#3040).
+- Updated the Ubuntu development install instuctions (#3046).
+- Upload sourcemaps to Sentry (#3055).
 
 0.9.7 (2016-03-01)
 ==================
