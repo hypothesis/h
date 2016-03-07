@@ -83,8 +83,9 @@ commit_release () {
     local version=$1
     local heading="$version ($(date +"%Y-%m-%d"))"
     local rule=$(echo "$heading" | sed "s/./=/g")
-    sed -i "" -e "1s/^Unreleased.*/$heading/" CHANGES
-    sed -i "" -e "2s/^=.*/$rule/" CHANGES
+    sed -i.bak -e "1s/^Unreleased.*/$heading/" CHANGES
+    sed -i.bak -e "2s/^=.*/$rule/" CHANGES
+    rm CHANGES.bak
     git commit -m "Release version $version" CHANGES
 }
 
