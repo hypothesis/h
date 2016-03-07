@@ -22,7 +22,7 @@ class AnnotationJSONPresenter(object):
             'text': self.annotation.text,
             'tags': self.tags,
             'group': self.annotation.groupid,
-            'permission': self.permission,
+            'permissions': self.permissions,
             'target': self.target,
             'document': docpresenter.asdict(),
         }
@@ -53,7 +53,7 @@ class AnnotationJSONPresenter(object):
             return []
 
     @property
-    def permission(self):
+    def permissions(self):
         read = self.annotation.userid
         if self.annotation.shared:
             read = 'group:{}'.format(self.annotation.groupid)
