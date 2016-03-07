@@ -36,7 +36,7 @@ class TestAnnotationJSONPresenter(object):
                     'text': 'It is magical!',
                     'tags': ['magic'],
                     'group': '__world__',
-                    'permission': {'read': ['group:__world__'],
+                    'permissions': {'read': ['group:__world__'],
                                    'admin': ['acct:luke'],
                                    'update': ['acct:luke'],
                                    'delete': ['acct:luke']},
@@ -75,9 +75,9 @@ class TestAnnotationJSONPresenter(object):
         (mock.Mock(userid='acct:luke'), 'update', ['acct:luke']),
         (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
         ])
-    def test_permission(self, annotation, action, expected):
+    def test_permissions(self, annotation, action, expected):
         presenter = AnnotationJSONPresenter(annotation)
-        assert expected == presenter.permission[action]
+        assert expected == presenter.permissions[action]
 
     def test_target(self):
         ann = mock.Mock(target_uri='http://example.com',
