@@ -44,6 +44,7 @@ def test_get_reader(fake_reader):
                                    nsqd_tcp_addresses=['foo:1234',
                                                        'bar:4567'])
 
+
 @patch('gnsq.Reader')
 def test_get_reader_namespace(fake_reader):
     """
@@ -59,6 +60,39 @@ def test_get_reader_namespace(fake_reader):
     fake_reader.assert_called_with('abc123-safari',
                                    'elephants',
                                    nsqd_tcp_addresses=['localhost:4150'])
+
+
+@patch('raven.Client')
+def test_get_reader_sentry_on_exception_hook(fake_client):
+    req = DummyRequest()
+    req.sentry = fake_client()
+    reader = queue.get_reader(req, 'safari', 'elephants')
+    reader.on_exception.send(error='An error happened')
+
+    req.sentry.captureException.assert_called_with(exc_info=True,
+                                                   extra={'topic': 'safari'})
+
+
+@patch('raven.Client')
+def test_get_reader_sentry_on_error_hook(fake_client):
+    req = DummyRequest()
+    req.sentry = fake_client()
+    reader = queue.get_reader(req, 'safari', 'elephants')
+    reader.on_error.send()
+
+    req.sentry.captureException.assert_called_with(
+        exc_info=(type(None), None, None),
+        extra={'topic': 'safari'})
+
+
+@patch('raven.Client')
+def test_get_reader_sentry_on_giving_up_hook(fake_client):
+    req = DummyRequest()
+    req.sentry = fake_client()
+    reader = queue.get_reader(req, 'safari', 'elephants')
+    reader.on_giving_up.send()
+
+    req.sentry.captureMessage.assert_called_with(extra={'topic': 'safari'})
 
 
 @patch('gnsq.Nsqd')
