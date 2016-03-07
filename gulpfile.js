@@ -67,7 +67,7 @@ var appBundles = [{
   // The sidebar application for displaying and editing annotations
   name: 'app',
   transforms: ['coffee'],
-  entry: './h/static/scripts/app.coffee',
+  entry: './h/static/scripts/app',
 },{
   // The Annotator library which provides annotation controls on
   // the page and sets up the sidebar
