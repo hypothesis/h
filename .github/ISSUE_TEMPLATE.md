@@ -1,26 +1,27 @@
+<!--
+Thank you for reporting an issue with Hypothesis! This is our bug and issue
+tracker. If you have any support questions please email support@hypothes.is
+instead.
 
-Thank you for bringing this issue to our attention!
+To make it easy for us to help you please fill out the information requested
+below.
+-->
+### Steps to reproduce
+1.
+2.
+3.
 
-**Short description **
+### Expected behaviour
+Tell us what should happen.
 
-I was trying to do [...]
+### Actual behaviour
+Tell us what happens instead.
 
-**Steps to reproduce **
+### Browser/system information
+Tell us which browser, browser version, and operating system you were using when
+you encountered this issue.
 
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-
-**Expected results **
-
-
-**Actual results**
-
-
-**On which browsers did you notice this **
-
-
-**Do you have a screenshot to help us see what's happening?**
-
-
-**Other details**s
+### Additional details
+If you have other information which might be helpful, please include it. If a
+screenshot will help to illustrate the issue you are reporting, please include
+one.
