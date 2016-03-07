@@ -734,6 +734,12 @@ function link(scope, elem, attrs, controllers) {
         if (threadFilter) {
           threadFilter.freeze(false);
         }
+
+        // Ensure that the just-edited annotation remains visible.
+        if (thread.parent) {
+          thread.parent.toggleCollapsed(false);
+        }
+
       }
     });
 
