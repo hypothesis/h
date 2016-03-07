@@ -38,7 +38,8 @@ def test_tween_csp_uri():
 
     response = tween(request)
 
-    assert 'report-uri localhost' in response.headers['Content-Security-Policy']
+    expected = 'report-uri localhost'
+    assert expected == response.headers['Content-Security-Policy']
 
 
 def test_tween_csp_header():
@@ -51,12 +52,12 @@ def test_tween_csp_header():
             "style-src": ["'self'", "fonts.googleapis.com"],
         },
     }
-
     tween = tweens.content_security_policy_tween_factory(
         lambda req: req.response,
         request.registry)
 
     response = tween(request)
+
     expected = "font-src 'self' fonts.gstatic.com; report-uri localhost; " \
         "script-src 'self'; style-src 'self' fonts.googleapis.com"
 
