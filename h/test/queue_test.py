@@ -25,8 +25,8 @@ class DummyRequest(_DummyRequest):
 
 @patch('gnsq.Reader')
 def test_get_reader_default(fake_reader):
-    req = DummyRequest()
-    queue.get_reader(req, 'ethics-in-games-journalism', 'channel4')
+    settings = {}
+    queue.get_reader(settings, 'ethics-in-games-journalism', 'channel4')
     fake_reader.assert_called_with('ethics-in-games-journalism',
                                    'channel4',
                                    nsqd_tcp_addresses=['localhost:4150'])
@@ -34,11 +34,8 @@ def test_get_reader_default(fake_reader):
 
 @patch('gnsq.Reader')
 def test_get_reader(fake_reader):
-    req = DummyRequest()
-    req.registry.settings = {
-        'nsq.reader.addresses': "foo:1234\nbar:4567"
-    }
-    queue.get_reader(req, 'ethics-in-games-journalism', 'channel4')
+    settings = {'nsq.reader.addresses': "foo:1234\nbar:4567"}
+    queue.get_reader(settings, 'ethics-in-games-journalism', 'channel4')
     fake_reader.assert_called_with('ethics-in-games-journalism',
                                    'channel4',
                                    nsqd_tcp_addresses=['foo:1234',
@@ -52,11 +49,8 @@ def test_get_reader_namespace(fake_reader):
     a reader that automatically prefixes the namespace onto the name of the
     topic being read.
     """
-    req = DummyRequest()
-    req.registry.settings = {
-        'nsq.namespace': "abc123"
-    }
-    queue.get_reader(req, 'safari', 'elephants')
+    settings = {'nsq.namespace': "abc123"}
+    queue.get_reader(settings, 'safari', 'elephants')
     fake_reader.assert_called_with('abc123-safari',
                                    'elephants',
                                    nsqd_tcp_addresses=['localhost:4150'])
@@ -64,49 +58,51 @@ def test_get_reader_namespace(fake_reader):
 
 @patch('raven.Client')
 def test_get_reader_sentry_on_exception_hook(fake_client):
-    req = DummyRequest()
-    req.sentry = fake_client()
-    reader = queue.get_reader(req, 'safari', 'elephants')
+    settings = {}
+    sentry = fake_client()
+    reader = queue.get_reader(settings, 'safari', 'elephants',
+                              sentry_client=sentry)
     reader.on_exception.send(error='An error happened')
 
-    req.sentry.captureException.assert_called_with(exc_info=True,
-                                                   extra={'topic': 'safari'})
+    sentry.captureException.assert_called_with(exc_info=True,
+                                               extra={'topic': 'safari'})
 
 
 @patch('raven.Client')
 def test_get_reader_sentry_on_error_hook(fake_client):
-    req = DummyRequest()
-    req.sentry = fake_client()
-    reader = queue.get_reader(req, 'safari', 'elephants')
+    settings = {}
+    sentry = fake_client()
+    reader = queue.get_reader(settings, 'safari', 'elephants',
+                              sentry_client=sentry)
     reader.on_error.send()
 
-    req.sentry.captureException.assert_called_with(
+    sentry.captureException.assert_called_with(
         exc_info=(type(None), None, None),
         extra={'topic': 'safari'})
 
 
 @patch('raven.Client')
 def test_get_reader_sentry_on_giving_up_hook(fake_client):
-    req = DummyRequest()
-    req.sentry = fake_client()
-    reader = queue.get_reader(req, 'safari', 'elephants')
+    settings = {}
+    sentry = fake_client()
+    reader = queue.get_reader(settings, 'safari', 'elephants',
+                              sentry_client=sentry)
     reader.on_giving_up.send()
 
-    req.sentry.captureMessage.assert_called_with(extra={'topic': 'safari'})
+    sentry.captureMessage.assert_called_with(extra={'topic': 'safari'})
 
 
 @patch('gnsq.Nsqd')
 def test_get_writer_default(fake_nsqd):
-    req = DummyRequest()
-    queue.get_writer(req)
+    settings = {}
+    queue.get_writer(settings)
     fake_nsqd.assert_called_with('localhost', http_port='4151')
 
 
 @patch('gnsq.Nsqd')
 def test_get_writer(fake_nsqd):
-    req = DummyRequest()
-    req.registry.settings = {'nsq.writer.address': 'philae:2014'}
-    queue.get_writer(req)
+    settings = {'nsq.writer.address': 'philae:2014'}
+    queue.get_writer(settings)
     fake_nsqd.assert_called_with('philae', http_port='2014')
 
 
@@ -117,13 +113,10 @@ def test_get_writer_namespace(fake_nsqd):
     a writer that automatically prefixes the namespace onto the topic names
     given to :method:`gnsq.Nsqd.publish` or :method:`gnsq.Nsqd.mpublish`.
     """
-    req = DummyRequest()
-    req.registry.settings = {
-        'nsq.namespace': "abc123"
-    }
+    settings = {'nsq.namespace': "abc123"}
     fake_client = fake_nsqd.return_value
 
-    writer = queue.get_writer(req)
+    writer = queue.get_writer(settings)
 
     writer.publish('sometopic', 'somedata')
     fake_client.publish.assert_called_with('abc123-sometopic', 'somedata')
@@ -131,12 +124,9 @@ def test_get_writer_namespace(fake_nsqd):
 
 @patch('gnsq.Nsqd')
 def test_writer_serializes_dict(fake_nsqd):
-    req = DummyRequest()
-    req.registry.settings = {
-        'nsq.namespace': 'abc',
-    }
+    settings = {'nsq.namespace': 'abc'}
     fake_client = fake_nsqd.return_value
-    writer = queue.get_writer(req)
+    writer = queue.get_writer(settings)
     writer.publish('sometopic', {
         'key': 'value',
     })
