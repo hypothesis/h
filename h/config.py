@@ -13,6 +13,7 @@ from pyramid.settings import asbool
 from h.security import derive_key
 from h.settings import DockerSetting
 from h.settings import EnvSetting
+from h.settings import SettingError
 from h.settings import database_url
 from h.settings import mandrill_settings
 
@@ -90,7 +91,11 @@ def configure(environ=None, settings=None):
         settings = {}
 
     for s in SETTINGS:
-        result = s(environ)
+        try:
+            result = s(environ)
+        except SettingError as e:
+            log.warn(e)
+
         if result is not None:
             settings.update(result)
 
