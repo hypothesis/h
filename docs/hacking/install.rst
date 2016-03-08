@@ -227,6 +227,10 @@ will automatically rebuild the assets whenever the source files change.
     npm install -g gulp-cli
     gulp watch
 
+When `gulp watch` is running, you can visit http://localhost:3000
+to see a page with an embedded Hypothesis client which will automatically reload
+when styles, templates or JavaScript source files are changed.
+
 .. _Gulp: http://gulpjs.com/
 
 .. _running-the-tests:
