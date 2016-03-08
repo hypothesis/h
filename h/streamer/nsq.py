@@ -14,6 +14,8 @@ from h.api import storage
 from h.auth.util import translate_annotation_principals
 from h.streamer import websocket
 
+import h.sentry
+
 log = logging.getLogger(__name__)
 
 
@@ -33,7 +35,8 @@ def process_nsq_topic(settings, topic, work_queue, raise_error=True):
     queue reader.
     """
     channel = 'stream-{}#ephemeral'.format(_random_id())
-    reader = queue.get_reader(settings, topic, channel)
+    client = h.sentry.get_client(settings)
+    reader = queue.get_reader(settings, topic, channel, sentry_client=client)
 
     # The only thing queue readers do is put the incoming messages onto the
     # work queue.
