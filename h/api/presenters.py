@@ -65,8 +65,11 @@ class AnnotationJSONPresenter(object):
 
     @property
     def target(self):
-        return [{'source': self.annotation.target_uri,
-                 'selector': self.annotation.target_selectors or []}]
+        target = {'source': self.annotation.target_uri}
+        if self.annotation.target_selectors:
+            target['selector'] = self.annotation.target_selectors
+
+        return [target]
 
 
 class DocumentJSONPresenter(object):
