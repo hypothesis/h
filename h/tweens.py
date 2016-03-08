@@ -75,6 +75,9 @@ def csrf_tween_factory(handler, registry):
 
 
 def content_security_policy_tween_factory(handler, registry):
+    if not registry.settings.get('csp.enabled', False):
+        return handler
+
     policy = registry.settings.get('csp', {})
     policy = "; ".join([
         " ".join([k] + [v2 for v2 in v if v2 is not None])

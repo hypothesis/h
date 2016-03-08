@@ -67,6 +67,9 @@ SETTINGS = [
     EnvSetting('secret_key', 'SECRET_KEY', type=bytes),
 
     # Configuration for h
+    EnvSetting('csp.enabled', 'CSP_ENABLED', type=asbool),
+    EnvSetting('csp.report_uri', 'CSP_REPORT_URI'),
+    EnvSetting('csp.report_only', 'CSP_REPORT_ONLY'),
     EnvSetting('ga_tracking_id', 'GOOGLE_ANALYTICS_TRACKING_ID'),
     EnvSetting('h.auth_domain', 'AUTH_DOMAIN'),
     EnvSetting('h.client_id', 'CLIENT_ID'),
@@ -74,10 +77,6 @@ SETTINGS = [
     EnvSetting('h.db.should_create_all', 'MODEL_CREATE_ALL', type=asbool),
     EnvSetting('h.db.should_drop_all', 'MODEL_DROP_ALL', type=asbool),
     EnvSetting('h.websocket_url', 'H_WEBSOCKET_URL'),
-
-    # Content Security Policy configuration
-    EnvSetting('csp.report_uri', 'CSP_REPORT_URI'),
-    EnvSetting('csp.report_only', 'CSP_REPORT_ONLY'),
 
     # Debug/development settings
     EnvSetting('debug_query', 'DEBUG_QUERY'),
