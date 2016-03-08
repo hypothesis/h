@@ -19,7 +19,7 @@ class AnnotationJSONPresenter(object):
             'updated': self.updated,
             'user': self.annotation.userid,
             'uri': self.annotation.target_uri,
-            'text': self.annotation.text,
+            'text': self.text,
             'tags': self.tags,
             'group': self.annotation.groupid,
             'permissions': self.permissions,
