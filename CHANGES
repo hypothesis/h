@@ -1,11 +1,27 @@
 Unreleased
 ==========
 
-Bug Fixes
----------
+Bug fixes
+--------
 
-- Fix compatibility with IE 10, 11.0 and early versions
-  of Microsoft Edge (#3064)
+- Replies are now correctly displayed after creation (#3057).
+
+- Fix a bug that caused annotations to be rendered incorrectly, both in the API
+  (where they had a `permission` field instead of a `permissions` field) and in
+  the UI (where they had edit controls they shouldn't have had) (#3059).
+
+- Fix a bug that caused page notes to be hidden on all pages (#3063).
+
+- Fix compatibility with IE 10, 11.0 and early versions of Microsoft Edge
+  (#3064).
+
+- Restore two-step confirmation for user deletion in admin panel (#3066).
+
+Miscellanea
+-----------
+
+- Early support for serving Content-Security-Policy headers from the
+  application (#3024).
 
 0.10.0 (2016-03-07)
 ===================
