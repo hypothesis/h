@@ -91,10 +91,10 @@ def resolve_topic(topic, namespace=None, settings=None):
 
 
 def _get_queue_reader(request, topic, channel):
-    get_reader(request.registry.settings,
-               topic,
-               channel,
-               sentry_client=request.sentry)
+    return get_reader(request.registry.settings,
+                      topic,
+                      channel,
+                      sentry_client=request.sentry)
 
 
 def includeme(config):
