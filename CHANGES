@@ -1,6 +1,12 @@
 Unreleased
 ==========
 
+Bug Fixes
+---------
+
+- Fix compatibility with IE 10, 11.0 and early versions
+  of Microsoft Edge (#3064)
+
 0.10.0 (2016-03-07)
 ===================
 
