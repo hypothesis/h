@@ -51,7 +51,7 @@
                 {% if feat.staff %}checked{% endif %}>
             </td>
             <td>
-              {{ feat.description }}
+              {{ feat.description|safe }}
             </td>
           </tr>
           {% endfor %}
