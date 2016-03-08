@@ -262,13 +262,24 @@ def test_handle_message_does_not_send_messages_down_websocket_if_socket_terminat
     assert socket.send.call_count == 0
 
 
+@mock.patch('h.sentry')
+def test_process_nsq_topic_creates_sentry_client(fake_sentry, get_reader):
+    settings = {}
+    queue = Queue()
+
+    nsq.process_nsq_topic(settings, 'donkeys', queue, raise_error=False)
+
+    fake_sentry.get_client.assert_called_once_with(settings)
+
+
 def test_process_nsq_topic_creates_reader_for_topic(get_reader):
     settings = {}
     queue = Queue()
 
     nsq.process_nsq_topic(settings, 'donkeys', queue, raise_error=False)
 
-    get_reader.assert_any_call(settings, 'donkeys', mock.ANY)
+    get_reader.assert_any_call(settings, 'donkeys', mock.ANY,
+                               sentry_client=mock.ANY)
 
 
 def test_process_nsq_topic_connects_reader_on_message_to_handle_message(get_reader):
