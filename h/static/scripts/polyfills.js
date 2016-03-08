@@ -9,7 +9,7 @@ require('core-js/fn/object/assign');
 try {
   new window.URL('https://hypothes.is');
 } catch (err) {
-  window.URL = require('js-polyfills/url').URL;
+  require('js-polyfills/url');
 }
 
 // document.evaluate() implementation,
