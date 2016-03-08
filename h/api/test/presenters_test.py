@@ -55,6 +55,18 @@ class TestAnnotationJSONPresenter(object):
         presented = AnnotationJSONPresenter(ann).asdict()
         assert presented['id'] == 'the-real-id'
 
+    def test_text(self):
+        ann = mock.Mock(text='It is magical!')
+        presenter = AnnotationJSONPresenter(ann)
+
+        assert 'It is magical!' == presenter.text
+
+    def test_text_missing(self):
+        ann = mock.Mock(text=None)
+        presenter = AnnotationJSONPresenter(ann)
+
+        assert '' == presenter.text
+
     def test_tags(self):
         ann = mock.Mock(tags=['interesting', 'magic'])
         presenter = AnnotationJSONPresenter(ann)

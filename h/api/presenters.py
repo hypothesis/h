@@ -46,6 +46,13 @@ class AnnotationJSONPresenter(object):
             return utc_iso8601(self.annotation.updated)
 
     @property
+    def text(self):
+        if self.annotation.text:
+            return self.annotation.text
+        else:
+            return ''
+
+    @property
     def tags(self):
         if self.annotation.tags:
             return self.annotation.tags
