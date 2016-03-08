@@ -91,7 +91,7 @@ class TestAnnotationJSONPresenter(object):
         ann = mock.Mock(target_uri='http://example.com',
                         target_selectors=None)
 
-        expected = [{'source': 'http://example.com', 'selector': []}]
+        expected = [{'source': 'http://example.com'}]
         actual = AnnotationJSONPresenter(ann).target
         assert expected == actual
 
