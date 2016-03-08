@@ -17,7 +17,9 @@ log = logging.getLogger(__name__)
 FEATURES = {
     'direct_linking': "Generate direct links to annotations in context in the client?",
     'new_homepage': "Show the new homepage design?",
-    'postgres_read': 'Use postgres to fetch annotations from storage'
+    'postgres_read': 'Use postgres to fetch annotations from storage',
+    'postgres_write': 'Send annotation CRUDs to <em>both</em> Postgres and the old '
+                      'Elasticsearch index',
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
