@@ -9,6 +9,33 @@
 // an initial CoffeeScript -> ES2015 conversion,
 // then reformats the result using TypeScript formatter
 // and JSCS
+//
+// The conversion process for H source is as follows:
+//
+//  1. Run this script on the .coffee file(s) to
+//     perform an initial conversion.
+//
+//     If there is anything in the CoffeeScript that
+//     decaffeinate cannot handle, you might need to
+//     simplify the offending CoffeeScript (as indicated
+//     by the error output) and try again.
+//
+//  2. Remove the input .coffee files from the source tree.
+//  3. Remove any ES2015-isms which are not currently allowed
+//     in the main codebase, also check for common issues
+//     in the converted source from the list below.
+//  4. Re-run the tests and verify that everything works.
+//  5. Repeat steps 1-4 with the '-test.coffee' file that
+//     corresponds to the converted source file.
+//
+// Issues to look out for in the converted source:
+//
+//  - Run JSHint on the generated output and check for any
+//    violations (eg. unused variables)
+//  - Unnecessary 'return' statements in the last
+//    line of a function. CoffeeScript implicitly returns
+//    the last expression in a function, so the generated
+//    JS source has to do the same.
 
 var Checker = require('jscs');
 var babylon = require('babylon');
