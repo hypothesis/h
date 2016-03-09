@@ -162,10 +162,10 @@ def create(request):
 
     annotation = storage.create_annotation(request, legacy_appstruct)
 
-    _publish_annotation_event(request, annotation, 'create')
+    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+    _publish_annotation_event(request, annotation_dict, 'create')
 
-    presenter = AnnotationJSONPresenter(request, annotation)
-    return presenter.asdict()
+    return annotation_dict
 
 
 @api_config(route_name='api.annotation', request_method='GET', permission='read')

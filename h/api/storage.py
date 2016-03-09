@@ -9,11 +9,19 @@ assumed to be validated.
 
 from functools import partial
 
+from pyramid import i18n
+from pyramid import security
+
+from h.api import schemas
 from h.api import transform
+from h.api import models
 from h.api.events import AnnotationBeforeSaveEvent
 from h.api.models import elastic
 from h.api.models.annotation import Annotation
 from h.api.models.document import Document
+
+
+_ = i18n.TranslationStringFactory(__package__)
 
 
 def annotation_from_dict(data):
@@ -48,6 +56,14 @@ def fetch_annotation(request, id):
     return elastic.Annotation.fetch(id)
 
 
+def legacy_create_annotation(request, data):
+    annotation = elastic.Annotation(data)
+    # FIXME: this should happen when indexing, not storing.
+    _prepare(request, annotation)
+    annotation.save()
+    return annotation
+
+
 def create_annotation(request, data):
     """
     Create an annotation from passed data.
@@ -61,12 +77,74 @@ def create_annotation(request, data):
     :returns: the created annotation
     :rtype: dict
     """
-    annotation = elastic.Annotation(data)
+    document_uri_dicts = data['document']['document_uri_dicts']
+    document_meta_dicts = data['document']['document_meta_dicts']
+    del data['document']
 
-    # FIXME: this should happen when indexing, not storing.
-    _prepare(request, annotation)
+    # Replies must have the same group as their parent.
+    if data['references']:
+        top_level_annotation_id = data['references'][0]
+        top_level_annotation = fetch_annotation(request,
+                                                top_level_annotation_id)
+        if top_level_annotation:
+            data['groupid'] = top_level_annotation.groupid
+        else:
+            raise schemas.ValidationError(
+                'references.0: ' +
+                _('Annotation {annotation_id} does not exist').format(
+                    annotation_id=top_level_annotation_id)
+            )
 
-    annotation.save()
+    # The user must have permission to create an annotation in the group
+    # they've asked to create one in.
+    if data['groupid'] == '__world__':
+        group_principal = security.Everyone
+    else:
+        group_principal = 'group:{}'.format(data['groupid'])
+    if group_principal not in request.effective_principals:
+        raise schemas.ValidationError('group: ' +
+                                      _('You may not create annotations in '
+                                        'groups you are not a member of!'))
+
+    annotation = models.Annotation(**data)
+    request.db.add(annotation)
+
+    # We need to flush the db here so that annotation.created and
+    # annotation.updated get created.
+    request.db.flush()
+
+    documents = models.Document.find_or_create_by_uris(
+        request.db,
+        annotation.target_uri,
+        [u['uri'] for u in document_uri_dicts],
+        created=annotation.created,
+        updated=annotation.updated)
+
+    if documents.count() > 1:
+        document = models.merge_documents(request.db,
+                                          documents,
+                                          updated=annotation.updated)
+    else:
+        document = documents.first()
+
+    document.updated = annotation.updated
+
+    for document_uri_dict in document_uri_dicts:
+        models.create_or_update_document_uri(
+            db=request.db,
+            document=document,
+            created=annotation.created,
+            updated=annotation.updated,
+            **document_uri_dict)
+
+    for document_meta_dict in document_meta_dicts:
+        models.create_or_update_document_meta(
+            db=request.db,
+            document=document,
+            created=annotation.created,
+            updated=annotation.updated,
+            **document_meta_dict)
+
     return annotation
 
 

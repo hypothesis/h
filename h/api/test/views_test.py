@@ -158,29 +158,41 @@ def test_create_calls_validator(schemas, copy):
 
 
 @create_fixtures
-def test_create_event(AnnotationEvent, storage):
+def test_create_inits_AnnotationJSONPresenter(AnnotationJSONPresenter, storage):
     request = mock.Mock()
-    annotation = storage.create_annotation.return_value
-    event = AnnotationEvent.return_value
 
     views.create(request)
 
-    AnnotationEvent.assert_called_once_with(request, annotation, 'create')
-    request.registry.notify.assert_called_once_with(event)
+    AnnotationJSONPresenter.assert_called_once_with(
+        request, storage.create_annotation.return_value)
+
+
+@create_fixtures
+def test_create_publishes_annotation_event(AnnotationEvent,
+                                           AnnotationJSONPresenter):
+    """It should publish an annotation "create" event for the annotation."""
+    request = mock.Mock()
+
+    views.create(request)
+
+    AnnotationEvent.assert_called_once_with(
+        request,
+        AnnotationJSONPresenter.return_value.asdict.return_value,
+        'create')
+    request.registry.notify.assert_called_once_with(
+        AnnotationEvent.return_value)
 
 
 @create_fixtures
 def test_create_returns_presented_annotation(AnnotationJSONPresenter, storage):
     request = mock.Mock()
-    presenter = mock.Mock()
-    AnnotationJSONPresenter.return_value = presenter
 
     result = views.create(request)
 
     AnnotationJSONPresenter.assert_called_once_with(
             request,
             storage.create_annotation.return_value)
-    assert result == presenter.asdict()
+    assert result == AnnotationJSONPresenter.return_value.asdict.return_value
 
 
 def test_read_returns_presented_annotation(AnnotationJSONPresenter):
