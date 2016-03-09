@@ -10,6 +10,7 @@ assumed to be validated.
 from functools import partial
 
 from h.api import transform
+from h.api import models
 from h.api.events import AnnotationBeforeSaveEvent
 from h.api.models import elastic
 from h.api.models.annotation import Annotation
@@ -48,6 +49,53 @@ def fetch_annotation(request, id):
     return elastic.Annotation.fetch(id)
 
 
+def _legacy_create_annotation_in_elasticsearch(request, data):
+    annotation = elastic.Annotation(data)
+    # FIXME: this should happen when indexing, not storing.
+    _prepare(request, annotation)
+    annotation.save()
+    return annotation
+
+
+def _create_annotation(request, data):
+    annotation = models.Annotation()
+
+    del data['user']  # The userid from the POSTed data is ignored.
+    annotation.userid = request.authenticated_userid
+
+    annotation.text = data.pop('text', None)
+    annotation.tags = data.pop('tags', None)
+
+    if data.pop('permissions')['read'] == [annotation.userid]:
+        annotation.shared = False
+    else:
+        annotation.shared = True
+
+    target = data.pop('target', [])
+    if target:  # Replies and page notes don't have 'target'.
+        target = target[0]  # Multiple targets are ignored.
+        annotation.target_selectors = target['selector']
+
+    annotation.target_uri = data.pop('uri')
+    annotation.references = data.pop('references', [])
+
+    group = data.pop('group')
+    if annotation.is_reply:
+        top_level_annotation_id = annotation.references[0]
+        top_level_annotation = fetch_annotation(request,
+                                                top_level_annotation_id)
+        if top_level_annotation:
+            annotation.groupid = top_level_annotation.groupid
+    else:
+        annotation.groupid = group
+
+    annotation.extras = data
+
+    request.db.add(annotation)
+
+    return annotation
+
+
 def create_annotation(request, data):
     """
     Create an annotation from passed data.
@@ -61,13 +109,10 @@ def create_annotation(request, data):
     :returns: the created annotation
     :rtype: dict
     """
-    annotation = elastic.Annotation(data)
-
-    # FIXME: this should happen when indexing, not storing.
-    _prepare(request, annotation)
-
-    annotation.save()
-    return annotation
+    if request.feature('postgres_write'):
+        return _create_annotation(request, data)
+    else:
+        return _legacy_create_annotation_in_elasticsearch(request, data)
 
 
 def update_annotation(request, id, data):

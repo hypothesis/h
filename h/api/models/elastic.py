@@ -145,6 +145,13 @@ class Annotation(annotation.Annotation):
         return [r for r in references if len(r) in [20, 22]]
 
     @property
+    def is_reply(self):
+        if self.references:
+            return True
+        else:
+            return False
+
+    @property
     def target_selectors(self):
         targets = self.get('target', [])
         if targets and isinstance(targets[0], dict):
