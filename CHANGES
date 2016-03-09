@@ -23,6 +23,13 @@ Miscellanea
 - Early support for serving Content-Security-Policy headers from the
   application (#3024).
 
+Bug fixes
+---------
+
+- Fixed error when rendering invalid LaTeX markup. As a side effect,
+  the fallback to MathJax rendering for markup that is not supported
+  by KaTeX has been removed for the time being (#3042).
+
 0.10.0 (2016-03-07)
 ===================
 

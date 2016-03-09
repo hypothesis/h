@@ -1,29 +1,10 @@
 'use strict';
 
-/* globals MathJax */
-
 var angular = require('angular');
 var katex = require('katex');
 
 var commands = require('../markdown-commands');
 var mediaEmbedder = require('../media-embedder');
-
-var loadMathJax = function() {
-  if (!(typeof MathJax !== "undefined" && MathJax !== null)) {
-    return $.ajax({
-      url: "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full",
-      dataType: 'script',
-      cache: true,
-      complete: function () {
-        // MathJax configuration overides.
-        return MathJax.Hub.Config({
-          showMathMenu: false,
-          displayAlign: "left"
-        });
-      }
-    });
-  }
-};
 
 /**
  * @ngdoc directive
@@ -160,7 +141,6 @@ module.exports = function($filter, $sanitize, $sce) {
         }
       };
 
-      var mathJaxFallback = false;
       var renderInlineMath = function(textToCheck) {
         var re = /\\?\\\(|\\?\\\)/g;
         var startMath = null;
@@ -188,8 +168,6 @@ module.exports = function($filter, $sanitize, $sce) {
               endMath = null;
               return renderInlineMath(textToCheck);
             } catch (error) {
-              loadMathJax();
-              mathJaxFallback = true;
               $sanitize(textToCheck.substring(startMath, endMath));
             }
           }
@@ -228,8 +206,6 @@ module.exports = function($filter, $sanitize, $sce) {
                   // \\displaystyle tells KaTeX to render the math in display style (full sized fonts).
                   return katex.renderToString($sanitize("\\displaystyle {" + textToCheck.substring(startMath, index) + "}"));
                 } catch (error) {
-                  loadMathJax();
-                  mathJaxFallback = true;
                   return $sanitize(textToCheck.substring(startMath, index));
                 }
               } else {
@@ -260,11 +236,6 @@ module.exports = function($filter, $sanitize, $sce) {
         }
         var value = ctrl.$viewValue || '';
         output.innerHTML = renderMathAndMarkdown(value);
-        if (mathJaxFallback) {
-          return $timeout((function() {
-            return ((typeof MathJax !== "undefined" && MathJax !== null) ? MathJax.Hub : undefined).Queue(['Typeset', MathJax.Hub, output]);
-          }), 0, false);
-        }
       };
 
       // React to the changes to the input
