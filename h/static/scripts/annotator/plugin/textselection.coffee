@@ -30,14 +30,19 @@ module.exports = class TextSelection extends Annotator.Plugin
   #
   # Returns nothing.
   checkForEndSelection: (event = {}) =>
-    # Get the currently selected ranges.
-    selection = Annotator.Util.getGlobal().getSelection()
-    ranges = for i in [0...selection.rangeCount]
-      r = selection.getRangeAt(0)
-      if r.collapsed then continue else r
+    callback = ->
+      # Get the currently selected ranges.
+      selection = Annotator.Util.getGlobal().getSelection()
+      ranges = for i in [0...selection.rangeCount]
+        r = selection.getRangeAt(0)
+        if r.collapsed then continue else r
 
-    if ranges.length
-      event.ranges = ranges
-      @annotator.onSuccessfulSelection event
-    else
-      @annotator.onFailedSelection event
+      if ranges.length
+        event.ranges = ranges
+        @annotator.onSuccessfulSelection event
+      else
+        @annotator.onFailedSelection event
+
+    # Run callback after the current event loop tick
+    # so that the mouseup event can update the document selection.
+    setTimeout callback, 0

@@ -2,9 +2,9 @@
 
 import argparse
 import os
-
 from base64 import b64encode
 from zipfile import ZipFile
+
 
 def main():
     parser = argparse.ArgumentParser('Update the icomoon icon font from the provided archive')
@@ -23,18 +23,8 @@ def main():
 
     for line in css_input_file:
         if "format('woff')" in line:
-            # inline the WOFF format file
-            woff_content = icon_font_archive.open('fonts/h.woff').read()
-            woff_src_line = """
-    /* WARNING - the URL below is inlined
-     * because the CSS asset pipeline is not correctly rebasing
-     * URLs when concatenating files together.
-     *
-     * See issue #2571
-     */
-    src:url('data:application/font-woff;base64,%s') format('woff');
-"""
-            css_output_file.write(woff_src_line % b64encode(woff_content))
+            # Rewrite the H font URL
+            css_output_file.write("  src: url('../fonts/h.woff') format('woff');\n")
         elif "url(" in line:
             # skip non-WOFF format fonts
             pass
