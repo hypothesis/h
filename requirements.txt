@@ -1,7 +1,6 @@
 -e .
 certifi
 cffi
-gunicorn
 pyramid_redis_sessions
 requests[security]
 wsaccel
