@@ -6,10 +6,13 @@ Presenters for API data.
 import collections
 
 
-class AnnotationJSONPresenter(object):
-    def __init__(self, annotation):
+class AnnotationBasePresenter(object):
+    def __init__(self, request, annotation):
         self.annotation = annotation
+        self.request = request
 
+
+class AnnotationJSONPresenter(AnnotationBasePresenter):
     def asdict(self):
         docpresenter = DocumentJSONPresenter(self.annotation.document)
 
@@ -139,6 +142,7 @@ class DocumentURIJSONPresenter(object):
         type = self.document_uri.type
         if type and type.startswith('rel-'):
             return self.document_uri.type[4:]
+
 
 def utc_iso8601(datetime):
     return datetime.strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')

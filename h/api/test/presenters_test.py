@@ -3,7 +3,9 @@
 import datetime
 import mock
 import pytest
+from pyramid.testing import DummyRequest
 
+from h.api.presenters import AnnotationBasePresenter
 from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import DocumentJSONPresenter
 from h.api.presenters import DocumentMetaJSONPresenter
@@ -11,8 +13,20 @@ from h.api.presenters import DocumentURIJSONPresenter
 from h.api.presenters import utc_iso8601, deep_merge_dict
 
 
+class TestAnnotationBasePresenter(object):
+    def test_constructor_args(self):
+        request = DummyRequest()
+        annotation = mock.Mock()
+
+        presenter = AnnotationBasePresenter(request, annotation)
+
+        assert presenter.request == request
+        assert presenter.annotation == annotation
+
+
 class TestAnnotationJSONPresenter(object):
     def test_asdict(self, document_asdict):
+        request = DummyRequest()
         ann = mock.Mock(id='the-id',
                         created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
                         updated=datetime.datetime(2016, 2, 29, 10, 24, 5, 564),
@@ -46,36 +60,44 @@ class TestAnnotationJSONPresenter(object):
                     'references': ['referenced-id-1', 'referenced-id-2'],
                     'extra-1': 'foo',
                     'extra-2': 'bar'}
-        assert expected == AnnotationJSONPresenter(ann).asdict()
+
+        result = AnnotationJSONPresenter(request, ann).asdict()
+
+        assert result == expected
 
     def test_asdict_extra_cannot_override_other_data(self, document_asdict):
+        request = DummyRequest()
         ann = mock.Mock(id='the-real-id', extra={'id': 'the-extra-id'})
         document_asdict.return_value = {}
 
-        presented = AnnotationJSONPresenter(ann).asdict()
+        presented = AnnotationJSONPresenter(request, ann).asdict()
         assert presented['id'] == 'the-real-id'
 
     def test_text(self):
+        request = DummyRequest()
         ann = mock.Mock(text='It is magical!')
-        presenter = AnnotationJSONPresenter(ann)
+        presenter = AnnotationJSONPresenter(request, ann)
 
         assert 'It is magical!' == presenter.text
 
     def test_text_missing(self):
+        request = DummyRequest()
         ann = mock.Mock(text=None)
-        presenter = AnnotationJSONPresenter(ann)
+        presenter = AnnotationJSONPresenter(request, ann)
 
         assert '' == presenter.text
 
     def test_tags(self):
+        request = DummyRequest()
         ann = mock.Mock(tags=['interesting', 'magic'])
-        presenter = AnnotationJSONPresenter(ann)
+        presenter = AnnotationJSONPresenter(request, ann)
 
         assert ['interesting', 'magic'] == presenter.tags
 
     def test_tags_missing(self):
+        request = DummyRequest()
         ann = mock.Mock(tags=None)
-        presenter = AnnotationJSONPresenter(ann)
+        presenter = AnnotationJSONPresenter(request, ann)
 
         assert [] == presenter.tags
 
@@ -88,23 +110,26 @@ class TestAnnotationJSONPresenter(object):
         (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
         ])
     def test_permissions(self, annotation, action, expected):
-        presenter = AnnotationJSONPresenter(annotation)
+        request = DummyRequest()
+        presenter = AnnotationJSONPresenter(request, annotation)
         assert expected == presenter.permissions[action]
 
     def test_target(self):
+        request = DummyRequest()
         ann = mock.Mock(target_uri='http://example.com',
                         target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
 
         expected = [{'source': 'http://example.com', 'selector': {'PositionSelector': {'start': 0, 'end': 12}}}]
-        actual = AnnotationJSONPresenter(ann).target
+        actual = AnnotationJSONPresenter(request, ann).target
         assert expected == actual
 
     def test_target_missing_selectors(self):
+        request = DummyRequest()
         ann = mock.Mock(target_uri='http://example.com',
                         target_selectors=None)
 
         expected = [{'source': 'http://example.com'}]
-        actual = AnnotationJSONPresenter(ann).target
+        actual = AnnotationJSONPresenter(request, ann).target
         assert expected == actual
 
     @pytest.fixture
