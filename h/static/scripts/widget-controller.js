@@ -3,6 +3,7 @@
 var angular = require('angular');
 
 var events = require('./events');
+var SearchClient = require('./search-client');
 
 // @ngInject
 module.exports = function WidgetController(
@@ -12,9 +13,6 @@ module.exports = function WidgetController(
   $scope.threadRoot = threading.root;
   $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
 
-  var DEFAULT_CHUNK_SIZE = 200;
-  var loaded = [];
-
   var _resetAnnotations = function () {
     // Unload all the annotations
     annotationMapper.unloadAnnotations(threading.annotationList());
@@ -22,51 +20,59 @@ module.exports = function WidgetController(
     threading.thread(drafts.unsaved());
   };
 
-  var _loadAnnotationsFrom = function (query, offset) {
-    var queryCore = {
-      limit: $scope.chunkSize || DEFAULT_CHUNK_SIZE,
-      offset: offset,
-      sort: 'created',
-      order: 'asc',
-      group: groups.focused().id
-    };
-    var q = angular.extend(queryCore, query);
-    q._separate_replies = true;
+  var searchClients = [];
 
-    store.SearchResource.get(q, function (results) {
-      var total = results.total;
-      offset += results.rows.length;
-      if (offset < total) {
-        _loadAnnotationsFrom(query, offset);
-      }
-
-      annotationMapper.loadAnnotations(results.rows, results.replies);
+  function _loadAnnotationsFor(uri, group) {
+    var searchClient = new SearchClient(store.SearchResource);
+    searchClients.push(searchClient);
+    searchClient.on('results', function (results) {
+      annotationMapper.loadAnnotations(results);
     });
-  };
+    searchClient.on('end', function () {
+      searchClients.splice(searchClients.indexOf(searchClient), 1);
+    });
+    searchClient.get({
+      uri: uri,
+      group: group,
+    });
+  }
 
+  /**
+   * Load annotations for all URLs associated with @p frames.
+   *
+   * @param {Array<{uri:string}>} frames - Hypothesis client frames
+   *        to load annotations for.
+   */
   var loadAnnotations = function (frames) {
-    for (var i = 0, f; i < frames.length; i++) {
-      f = frames[i];
-      var ref;
-      if (ref = f.uri, loaded.indexOf(ref) >= 0) {
-        continue;
+    searchClients.forEach(function (client) {
+      client.cancel();
+    });
+
+    var urls = frames.reduce(function (urls, frame) {
+      if (urls.indexOf(frame.uri) !== -1) {
+        return urls;
+      } else {
+        return urls.concat(frame.uri);
       }
-      loaded.push(f.uri);
-      _loadAnnotationsFrom({uri: f.uri}, 0);
+    }, []);
+
+    for (var i=0; i < urls.length; i++) {
+      _loadAnnotationsFor(urls[i], groups.focused().id);
     }
 
-    if (loaded.length > 0) {
-      streamFilter.resetFilter().addClause('/uri', 'one_of', loaded);
+    if (urls.length > 0) {
+      streamFilter.resetFilter().addClause('/uri', 'one_of', urls);
       streamer.setConfig('filter', {filter: streamFilter.getFilter()});
     }
   };
 
   $scope.$on(events.GROUP_FOCUSED, function () {
+    annotationUI.clearSelectedAnnotations();
     _resetAnnotations(annotationMapper, drafts, threading);
-    loaded = [];
     return loadAnnotations(crossframe.frames);
   });
 
+  // Watch anything that may require us to reload annotations.
   $scope.$watchCollection(function () {
     return crossframe.frames;
   }, loadAnnotations);
