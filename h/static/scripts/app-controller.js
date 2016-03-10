@@ -6,11 +6,25 @@ var annotationMetadata = require('./annotation-metadata');
 var events = require('./events');
 var parseAccountID = require('./filter/persona').parseAccountID;
 
+function authStateFromUserID(userid) {
+  if (userid) {
+    var parsed = parseAccountID(userid);
+    return {
+      status: 'signed-in',
+      userid: userid,
+      username: parsed.username,
+      provider: parsed.provider,
+    };
+  } else {
+    return {status: 'signed-out'};
+  }
+}
+
 // @ngInject
 module.exports = function AppController(
   $controller, $document, $location, $rootScope, $route, $scope,
   $window, annotationUI, auth, drafts, features, groups,
-  identity, session
+  session
 ) {
   $controller('AnnotationUIController', {$scope: $scope});
 
@@ -46,37 +60,21 @@ module.exports = function AppController(
 
   // Reload the view when the user switches accounts
   $scope.$on(events.USER_CHANGED, function (event, data) {
+    $scope.auth = authStateFromUserID(data.userid);
+    $scope.accountDialog.visible = false;
+
     if (!data || !data.initialLoad) {
       $route.reload();
     }
   });
 
-  identity.watch({
-    onlogin: function (identity) {
-      // Hide the account dialog
-      $scope.accountDialog.visible = false;
-      // Update the current logged-in user information
-      var userid = auth.userid(identity);
-      var parsed = parseAccountID(userid);
-      angular.copy({
-        status: 'signed-in',
-        userid: userid,
-        username: parsed.username,
-        provider: parsed.provider,
-      }, $scope.auth);
-    },
-    onlogout: function () {
-      angular.copy({status: 'signed-out'}, $scope.auth);
-    },
-    onready: function () {
-      // If their status is still 'unknown', then `onlogin` wasn't called and
-      // we know the current user isn't signed in.
-      if ($scope.auth.status === 'unknown') {
-        angular.copy({status: 'signed-out'}, $scope.auth);
-        if (isFirstRun) {
-          $scope.login();
-        }
-      }
+  session.load().then(function (state) {
+    // When the authentication status of the user is known,
+    // update the auth info in the top bar and show the login form
+    // after first install of the extension.
+    $scope.auth = authStateFromUserID(state.userid);
+    if (!state.userid && isFirstRun) {
+      $scope.login();
     }
   });
 
@@ -106,9 +104,6 @@ module.exports = function AppController(
   // Start the login flow. This will present the user with the login dialog.
   $scope.login = function () {
     $scope.accountDialog.visible = true;
-    return identity.request({
-      oncancel: function () { $scope.accountDialog.visible = false; }
-    });
   };
 
   // Prompt to discard any unsaved drafts.
@@ -127,16 +122,17 @@ module.exports = function AppController(
 
   // Log the user out.
   $scope.logout = function () {
-    if (promptToLogout()) {
-      var iterable = drafts.unsaved();
-      for (var i = 0, draft; i < iterable.length; i++) {
-        draft = iterable[i];
-        $rootScope.$emit("annotationDeleted", draft);
-      }
-      drafts.discard();
-      $scope.accountDialog.visible = false;
-      return identity.logout();
+    if (!promptToLogout()) {
+      return;
     }
+    var iterable = drafts.unsaved();
+    for (var i = 0, draft; i < iterable.length; i++) {
+      draft = iterable[i];
+      $rootScope.$emit("annotationDeleted", draft);
+    }
+    drafts.discard();
+    $scope.accountDialog.visible = false;
+    return auth.logout();
   };
 
   $scope.clearSelection = function () {

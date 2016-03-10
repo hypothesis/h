@@ -91,6 +91,15 @@ function setupCrossFrame(crossframe) {
 }
 
 // @ngInject
+function configureHttp($httpProvider, jwtInterceptorProvider) {
+  // Use the Pyramid XSRF header name
+  $httpProvider.defaults.xsrfHeaderName = 'X-CSRF-Token';
+  // Setup JWT tokens for API requests
+  $httpProvider.interceptors.push('jwtInterceptor');
+  jwtInterceptorProvider.tokenGetter = require('./auth').tokenGetter;
+}
+
+// @ngInject
 function setupHttp($http) {
   $http.defaults.headers.common['X-Client-Id'] = streamer.clientId;
 }
@@ -147,11 +156,9 @@ module.exports = angular.module('h', [
 
   .filter('converter', require('./filter/converter'))
 
-  .provider('identity', require('./identity'))
-
   .service('annotationMapper', require('./annotation-mapper'))
   .service('annotationUI', require('./annotation-ui'))
-  .service('auth', require('./auth'))
+  .service('auth', require('./auth').service)
   .service('bridge', require('./bridge'))
   .service('crossframe', require('./cross-frame'))
   .service('drafts', require('./drafts'))
@@ -181,10 +188,9 @@ module.exports = angular.module('h', [
   .value('settings', settings)
   .value('time', require('./time'))
 
+  .config(configureHttp)
   .config(configureLocation)
   .config(configureRoutes)
 
   .run(setupCrossFrame)
   .run(setupHttp);
-
-require('./config/module');
