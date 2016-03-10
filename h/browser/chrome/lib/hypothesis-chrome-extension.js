@@ -10,6 +10,15 @@ var TabStore = require('./tab-store');
 var TAB_STATUS_LOADING = 'loading';
 var TAB_STATUS_COMPLETE = 'complete';
 
+/**
+ * Returns true if a tab URL contains a link to an annotation,
+ * which should result in Hypothesis being automatically injected into
+ * the tab.
+ */
+function urlHasAnnotationFragment(url) {
+  return url.match(/#annotations:(.*)$/);
+}
+
 /* The main extension application. This wires together all the smaller
  * modules. The app listens to all new created/updated/removed tab events
  * and uses the TabState object to keep track of whether the sidebar is
@@ -54,7 +63,7 @@ function HypothesisChromeExtension(dependencies) {
   /* Sets up the extension and binds event listeners. Requires a window
    * object to be passed so that it can listen for localStorage events.
    */
-  this.listen = function (window) {
+  this.listen = function () {
     chromeBrowserAction.onClicked.addListener(onBrowserActionClicked);
     chromeTabs.onCreated.addListener(onTabCreated);
 
@@ -174,8 +183,13 @@ function HypothesisChromeExtension(dependencies) {
     if (changeInfo.status === TAB_STATUS_LOADING) {
       resetTabState(tabId, tab.url);
     } else if (changeInfo.status === TAB_STATUS_COMPLETE) {
+      var newActiveState = state.getState(tabId);
+      if (urlHasAnnotationFragment(tab.url)) {
+        newActiveState = TabState.states.ACTIVE;
+      }
       state.setState(tabId, {
         ready: true,
+        state: newActiveState,
       });
     }
   }
