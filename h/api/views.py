@@ -139,9 +139,11 @@ def search(request):
                             separate_replies=separate_replies)
 
     # Run the results through the JSON presenter
-    out['rows'] = [_present_searchdict(a) for a in out['rows']]
+    out['rows'] = [_present_searchdict(request, a)
+                   for a in out['rows']]
     if separate_replies:
-        out['replies'] = [_present_searchdict(a) for a in out['replies']]
+        out['replies'] = [_present_searchdict(request, a)
+                          for a in out['replies']]
 
     return out
 
@@ -157,14 +159,14 @@ def create(request):
 
     _publish_annotation_event(request, annotation, 'create')
 
-    presenter = AnnotationJSONPresenter(annotation)
+    presenter = AnnotationJSONPresenter(request, annotation)
     return presenter.asdict()
 
 
 @api_config(route_name='api.annotation', request_method='GET', permission='read')
 def read(annotation, request):
     """Return the annotation (simply how it was stored in the database)."""
-    presenter = AnnotationJSONPresenter(annotation)
+    presenter = AnnotationJSONPresenter(request, annotation)
     return presenter.asdict()
 
 
@@ -177,7 +179,7 @@ def update(annotation, request):
 
     _publish_annotation_event(request, annotation, 'update')
 
-    presenter = AnnotationJSONPresenter(annotation)
+    presenter = AnnotationJSONPresenter(request, annotation)
     return presenter.asdict()
 
 
@@ -208,10 +210,10 @@ def _json_payload(request):
         raise PayloadError()
 
 
-def _present_searchdict(mapping):
+def _present_searchdict(request, mapping):
     """Run an object returned from search through a presenter."""
     ann = storage.annotation_from_dict(mapping)
-    return AnnotationJSONPresenter(ann).asdict()
+    return AnnotationJSONPresenter(request, ann).asdict()
 
 
 def _publish_annotation_event(request, annotation, action):

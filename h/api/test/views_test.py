@@ -177,6 +177,7 @@ def test_create_returns_presented_annotation(AnnotationJSONPresenter, storage):
     result = views.create(request)
 
     AnnotationJSONPresenter.assert_called_once_with(
+            request,
             storage.create_annotation.return_value)
     assert result == presenter.asdict()
 
@@ -189,7 +190,7 @@ def test_read_returns_presented_annotation(AnnotationJSONPresenter):
 
     result = views.read(annotation, request)
 
-    AnnotationJSONPresenter.assert_called_once_with(annotation)
+    AnnotationJSONPresenter.assert_called_once_with(request, annotation)
     assert result == presenter.asdict()
 
 
@@ -246,6 +247,7 @@ def test_update_returns_presented_annotation(AnnotationJSONPresenter, storage):
     result = views.update(annotation, request)
 
     AnnotationJSONPresenter.assert_called_once_with(
+            request,
             storage.update_annotation.return_value)
     assert result == presenter.asdict()
 
