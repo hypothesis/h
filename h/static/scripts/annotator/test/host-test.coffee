@@ -84,3 +84,11 @@ describe 'Host', ->
         assert.isTrue(host.visibleHighlights)
         done()
       host.publish('panelReady')
+
+    it 'passes options to the sidebar iframe', ->
+      appURL = 'http://localhost:1000/app.html'
+      host = createHost({
+        app: appURL,
+        annotations: '1234'
+      })
+      assert.equal(host.frame[0].children[0].src, appURL + '?annotations=1234')

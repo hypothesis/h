@@ -1,10 +1,12 @@
 'use strict';
 
 require('./polyfills');
+var queryString = require('query-string');
 
 // Initialize Raven. This is required at the top of this file
 // so that it happens early in the app's startup flow
 var settings = require('./settings')(document);
+Object.assign(settings, queryString.parse(window.location.search));
 if (settings.raven) {
   var raven = require('./raven');
   raven.init(settings.raven);

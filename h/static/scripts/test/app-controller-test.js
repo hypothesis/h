@@ -15,6 +15,7 @@ describe('AppController', function () {
   var fakeLocation = null;
   var fakeParams = null;
   var fakeSession = null;
+  var fakeSettings = null;
   var fakeGroups = null;
   var fakeRoute = null;
   var fakeSettings = null;
