@@ -14,6 +14,11 @@ from h.api.presenters import utc_iso8601, deep_merge_dict
 
 
 class TestAnnotationBasePresenter(object):
+
+    @pytest.fixture(autouse=True)
+    def link_routes(self, routes_mapper):
+        routes_mapper.add_route('api.annotation', '/dummy/abc123')
+
     def test_constructor_args(self):
         request = DummyRequest()
         annotation = mock.Mock()
@@ -23,8 +28,22 @@ class TestAnnotationBasePresenter(object):
         assert presenter.request == request
         assert presenter.annotation == annotation
 
+    def test_links(self):
+        request = DummyRequest()
+        annotation = mock.Mock()
+
+        links = AnnotationBasePresenter(request, annotation).links
+
+        assert 'json' in links
+        assert links['json'] == 'http://example.com/dummy/abc123'
+
 
 class TestAnnotationJSONPresenter(object):
+
+    @pytest.fixture(autouse=True)
+    def link_routes(self, routes_mapper):
+        routes_mapper.add_route('api.annotation', '/dummy/abc123')
+
     def test_asdict(self, document_asdict):
         request = DummyRequest()
         ann = mock.Mock(id='the-id',
@@ -57,6 +76,7 @@ class TestAnnotationJSONPresenter(object):
                     'target': [{'source': 'http://example.com',
                                 'selector': [{'TestSelector': 'foobar'}]}],
                     'document': {'foo': 'bar'},
+                    'links': {'json': 'http://example.com/dummy/abc123'},
                     'references': ['referenced-id-1', 'referenced-id-2'],
                     'extra-1': 'foo',
                     'extra-2': 'bar'}

@@ -11,6 +11,12 @@ class AnnotationBasePresenter(object):
         self.annotation = annotation
         self.request = request
 
+    @property
+    def links(self):
+        return {
+            'json': self.request.route_url('api.annotation',
+                                           id=self.annotation.id),
+        }
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
     def asdict(self):
@@ -28,6 +34,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
             'permissions': self.permissions,
             'target': self.target,
             'document': docpresenter.asdict(),
+            'links': self.links,
         }
 
         if self.annotation.references:
