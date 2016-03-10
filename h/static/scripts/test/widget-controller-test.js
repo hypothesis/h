@@ -1,15 +1,36 @@
 'use strict';
 
 var angular = require('angular');
+var inherits = require('inherits');
+var proxyquire = require('proxyquire');
+var EventEmitter = require('tiny-emitter');
 
 var events = require('../events');
+
+function noCallThru(stub) {
+  return Object.assign(stub, {'@noCallThru':true});
+}
+
+var searchClients;
+function FakeSearchClient(resource) {
+  assert.ok(resource);
+  searchClients.push(this);
+  this.cancel = sinon.stub();
+
+  this.get = function (query) {
+    assert.ok(query.uri);
+    this.emit('results', [{id: query.uri + '123', group: '__world__'}]);
+    this.emit('results', [{id: query.uri + '456', group: 'private-group'}]);
+    this.emit('end');
+  };
+}
+inherits(FakeSearchClient, EventEmitter);
 
 describe('WidgetController', function () {
   var $scope = null;
   var $rootScope = null;
   var fakeAnnotationMapper = null;
   var fakeAnnotationUI = null;
-  var fakeAuth = null;
   var fakeCrossFrame = null;
   var fakeDrafts = null;
   var fakeStore = null;
@@ -22,12 +43,16 @@ describe('WidgetController', function () {
 
   before(function () {
     angular.module('h', [])
-      .controller('WidgetController', require('../widget-controller'));
+      .controller('WidgetController', proxyquire('../widget-controller', {
+        angular: noCallThru(angular),
+        './search-client': noCallThru(FakeSearchClient),
+      }));
   });
 
   beforeEach(angular.mock.module('h'));
 
   beforeEach(angular.mock.module(function ($provide) {
+    searchClients = [];
     sandbox = sinon.sandbox.create();
 
     fakeAnnotationMapper = {
@@ -36,43 +61,15 @@ describe('WidgetController', function () {
     };
 
     fakeAnnotationUI = {
-      tool: 'comment',
-      clearSelectedAnnotations: sandbox.spy()
+      clearSelectedAnnotations: sandbox.spy(),
+      selectedAnnotationMap: {},
+      hasSelectedAnnotations: function () {
+        return Object.keys(this.selectedAnnotationMap).length > 0;
+      },
     };
-    fakeAuth = {user: null};
     fakeCrossFrame = {frames: []};
     fakeDrafts = {
       unsaved: sandbox.stub()
-    };
-
-    fakeStore = {
-      SearchResource: {
-        get: function (query, callback) {
-          var offset = query.offset || 0;
-          var limit = query.limit || 20;
-          var result =
-            {
-              total: 100,
-              rows: ((function () {
-                var result1 = [];
-                var end = offset + limit - 1;
-                var i = offset;
-                if (offset <= end) {
-                  while (i <= end) {
-                    result1.push(i++);
-                  }
-                } else {
-                  while (i >= end) {
-                    result1.push(i--);
-                  }
-                }
-                return result1;
-              })()),
-              replies: []
-            };
-          return callback(result);
-        }
-      },
     };
 
     fakeStreamer = {
@@ -87,11 +84,19 @@ describe('WidgetController', function () {
 
     fakeThreading = {
       root: {},
-      thread: sandbox.stub()
+      thread: sandbox.stub(),
+      annotationList: function () {
+        return [{id: '123'}];
+      },
     };
 
     fakeGroups = {
-      focused: function () { return {id: 'foo'}; }
+      focused: function () { return {id: 'foo'}; },
+      focus: sinon.stub(),
+    };
+
+    fakeStore = {
+      SearchResource: {},
     };
 
     $provide.value('annotationMapper', fakeAnnotationMapper);
@@ -103,7 +108,6 @@ describe('WidgetController', function () {
     $provide.value('streamFilter', fakeStreamFilter);
     $provide.value('threading', fakeThreading);
     $provide.value('groups', fakeGroups);
-    return;
   }));
 
   beforeEach(angular.mock.inject(function ($controller, _$rootScope_) {
@@ -118,60 +122,40 @@ describe('WidgetController', function () {
 
   describe('loadAnnotations', function () {
     it('loads all annotations for a frame', function () {
-      $scope.chunkSize = 20;
-      fakeCrossFrame.frames.push({uri: 'http://example.com'});
+      var uri = 'http://example.com';
+      fakeCrossFrame.frames.push({uri: uri});
       $scope.$digest();
       var loadSpy = fakeAnnotationMapper.loadAnnotations;
-      assert.callCount(loadSpy, 5);
-      assert.calledWith(loadSpy, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
-      assert.calledWith(loadSpy, [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]);
-      assert.calledWith(loadSpy, [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59]);
-      assert.calledWith(loadSpy, [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]);
-      assert.calledWith(loadSpy, [80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]);
+      assert.calledWith(loadSpy, [sinon.match({id: uri + '123'})]);
+      assert.calledWith(loadSpy, [sinon.match({id: uri + '456'})]);
     });
 
-    it('passes _separate_replies: true to the search API', function () {
-      fakeStore.SearchResource.get = sandbox.stub();
-      fakeCrossFrame.frames.push({uri: 'http://example.com'});
-
+    it('loads all annotations for all frames', function () {
+      var uris = ['http://example.com', 'http://foobar.com'];
+      fakeCrossFrame.frames = uris.map(function (uri) {
+        return {uri: uri};
+      });
       $scope.$digest();
-
-      assert.equal(
-        fakeStore.SearchResource.get.firstCall.args[0]._separate_replies, true);
-    });
-
-    return it('passes annotations and replies from search to loadAnnotations()', function () {
-      fakeStore.SearchResource.get = function (query, callback) {
-        return callback({
-          rows: ['annotation_1', 'annotation_2'],
-          replies: ['reply_1', 'reply_2', 'reply_3']
-        });
-      };
-      fakeCrossFrame.frames.push({uri: 'http://example.com'});
-      $scope.$digest();
-
-      assert(fakeAnnotationMapper.loadAnnotations.calledOnce);
-      assert(fakeAnnotationMapper.loadAnnotations.calledWith(
-        ['annotation_1', 'annotation_2'], ['reply_1', 'reply_2', 'reply_3']
-      ));
+      var loadSpy = fakeAnnotationMapper.loadAnnotations;
+      assert.calledWith(loadSpy, [sinon.match({id: uris[0] + '123'})]);
+      assert.calledWith(loadSpy, [sinon.match({id: uris[0] + '456'})]);
+      assert.calledWith(loadSpy, [sinon.match({id: uris[1] + '123'})]);
+      assert.calledWith(loadSpy, [sinon.match({id: uris[1] + '456'})]);
     });
   });
 
   describe('when the focused group changes', function () {
-    return it('should load annotations for the new group', function () {
-      fakeThreading.annotationList = sandbox.stub().returns([{id: '1'}]);
-      fakeCrossFrame.frames.push({uri: 'http://example.com'});
-      var searchResult = {total: 10, rows: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], replies: []};
-      fakeStore.SearchResource.get = function (query, callback) {
-        return callback(searchResult);
-      };
+    it('should load annotations for the new group', function () {
+      var uri = 'http://example.com';
+      fakeCrossFrame.frames.push({uri: uri});
+      var loadSpy = fakeAnnotationMapper.loadAnnotations;
 
       $scope.$broadcast(events.GROUP_FOCUSED);
-
-      assert.calledWith(fakeAnnotationMapper.unloadAnnotations, [{id: '1'}]);
-      $scope.$digest();
-      assert.calledWith(fakeAnnotationMapper.loadAnnotations, searchResult.rows);
+      assert.calledWith(fakeAnnotationMapper.unloadAnnotations, [{id: '123'}]);
       assert.calledWith(fakeThreading.thread, fakeDrafts.unsaved());
+      $scope.$digest();
+      assert.calledWith(loadSpy, [sinon.match({id: uri + '123'})]);
+      assert.calledWith(loadSpy, [sinon.match({id: uri + '456'})]);
     });
   });
 
