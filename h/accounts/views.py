@@ -645,6 +645,18 @@ def reset_password_link(request, reset_code):
     return request.route_url('reset_password_with_code', code=reset_code)
 
 
+# TODO: This can be removed after October 2016, which will be >1 year from the
+#       date that the last account claim emails were sent out. At this point,
+#       if we have not done so already, we should remove all unclaimed
+#       usernames from the accounts tables.
+@view_config(route_name='claim_account_legacy',
+             request_method='GET',
+             renderer='h:templates/accounts/claim_account_legacy.html.jinja2')
+def claim_account_legacy(request):
+    """Render a page explaining that claim links are no longer valid."""
+    return {}
+
+
 @view_config(route_name='dismiss_sidebar_tutorial',
              request_method='POST',
              renderer='json')
@@ -667,6 +679,7 @@ def includeme(config):
     config.add_route('profile', '/profile')
     config.add_route('profile_notifications', '/profile/notifications')
     config.add_route('profile_developer', '/profile/developer')
+    config.add_route('claim_account_legacy', '/claim_account/{token}')
     config.add_route('dismiss_sidebar_tutorial',
                      '/app/dismiss_sidebar_tutorial')
     config.scan(__name__)
