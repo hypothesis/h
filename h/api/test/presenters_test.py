@@ -40,12 +40,25 @@ class TestAnnotationBasePresenter(object):
     def test_links_includes_registered_links(self):
         request = DummyRequest()
         annotation = mock.Mock()
-        dummy_link_generator = mock.Mock()
-        dummy_link_generator.return_value = 'http://foo.com/bar/123'
-
         add_annotation_link_generator(request.registry,
                                       'giraffe',
-                                      dummy_link_generator)
+                                      lambda r, a: 'http://foo.com/bar/123')
+
+        links = AnnotationBasePresenter(request, annotation).links
+
+        assert links == {
+            'giraffe': 'http://foo.com/bar/123'
+        }
+
+    def test_links_omits_link_generators_that_return_none(self):
+        request = DummyRequest()
+        annotation = mock.Mock()
+        add_annotation_link_generator(request.registry,
+                                      'giraffe',
+                                      lambda r, a: 'http://foo.com/bar/123')
+        add_annotation_link_generator(request.registry,
+                                      'donkey',
+                                      lambda r, a: None)
 
         links = AnnotationBasePresenter(request, annotation).links
 
@@ -57,7 +70,6 @@ class TestAnnotationBasePresenter(object):
         request = DummyRequest()
         annotation = mock.Mock()
         dummy_link_generator = mock.Mock(return_value='')
-
         add_annotation_link_generator(request.registry,
                                       'giraffe',
                                       dummy_link_generator)

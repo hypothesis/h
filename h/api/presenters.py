@@ -21,8 +21,12 @@ class AnnotationBasePresenter(object):
         # :py:func:`h.api.presenters.add_annotation_link_generator` for
         # details.
         link_generators = self.request.registry.get(LINK_GENERATORS_KEY, {})
-        return {name: generator(self.request, self.annotation)
-                for name, generator in link_generators.items()}
+        out = {}
+        for name, generator in link_generators.items():
+            link = generator(self.request, self.annotation)
+            if link is not None:
+                out[name] = link
+        return out
 
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
