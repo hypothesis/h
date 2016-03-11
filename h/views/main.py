@@ -79,5 +79,15 @@ def stream_user_redirect(request):
     raise httpexceptions.HTTPFound(location=location)
 
 
+def _html_link(request, annotation):
+    """Generate a link to an HTML representation of an annotation."""
+    return request.route_url('annotation', id=annotation.id)
+
+
 def includeme(config):
     config.scan(__name__)
+
+    # Add an annotation link generator for the `annotation` view -- this adds a
+    # named link called "html" to API rendered views of annotations. See
+    # :py:mod:`h.api.presenters` for details.
+    config.add_annotation_link_generator('html', _html_link)
