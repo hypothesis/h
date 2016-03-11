@@ -14,6 +14,7 @@ from pyramid import httpexceptions
 from pyramid import response
 from pyramid.view import view_config
 
+from h._compat import urlparse
 from h.views.client import render_app
 
 
@@ -84,10 +85,34 @@ def _html_link(request, annotation):
     return request.route_url('annotation', id=annotation.id)
 
 
+def _incontext_link(request, annotation):
+    """Generate a link to an annotation on the page where it was made."""
+    if not request.feature('direct_linking'):
+        return
+    try:
+        return request.route_url('annotation.incontext', id=annotation.id)
+    # A KeyError means that the 'annotation.incontext' route does not
+    # exist, which in turn means that a bouncer URL has not been set for
+    # this application.
+    except KeyError:
+        pass
+
+
 def includeme(config):
     config.scan(__name__)
+
+    # Add a static (i.e. external) route for the bouncer service if we have a
+    # URL for a bouncer service set.
+    bouncer_url = config.registry.settings.get('h.bouncer_url')
+    if bouncer_url:
+        bouncer_route = urlparse.urljoin(bouncer_url, '{id}')
+        config.add_route('annotation.incontext', bouncer_route, static=True)
 
     # Add an annotation link generator for the `annotation` view -- this adds a
     # named link called "html" to API rendered views of annotations. See
     # :py:mod:`h.api.presenters` for details.
     config.add_annotation_link_generator('html', _html_link)
+
+    # Add an annotation link generator for viewing annotations in context on
+    # the page on which they were made.
+    config.add_annotation_link_generator('incontext', _incontext_link)
