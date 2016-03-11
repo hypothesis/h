@@ -93,6 +93,17 @@ class TestAnnotationJSONPresenter(object):
         presented = AnnotationJSONPresenter(request, ann).asdict()
         assert presented['id'] == 'the-real-id'
 
+    def test_asdict_extra_uses_copy_of_extra(self, document_asdict):
+        extra = {'foo': 'bar'}
+        request = DummyRequest()
+        ann = mock.Mock(id='my-id', extra=extra)
+        document_asdict.return_value = {}
+
+        presented = AnnotationJSONPresenter(request, ann).asdict()
+
+        # Presenting the annotation shouldn't change the "extra" dict.
+        assert extra == {'foo': 'bar'}
+
     def test_text(self):
         request = DummyRequest()
         ann = mock.Mock(text='It is magical!')

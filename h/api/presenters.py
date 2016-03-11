@@ -4,6 +4,7 @@ Presenters for API data.
 """
 
 import collections
+import copy
 
 
 class AnnotationBasePresenter(object):
@@ -40,7 +41,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         if self.annotation.references:
             base['references'] = self.annotation.references
 
-        annotation = self.annotation.extra or {}
+        annotation = copy.copy(self.annotation.extra) or {}
         annotation.update(base)
 
         return annotation
