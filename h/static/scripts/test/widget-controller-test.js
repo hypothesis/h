@@ -12,17 +12,19 @@ function noCallThru(stub) {
 }
 
 var searchClients;
-function FakeSearchClient(resource) {
+function FakeSearchClient(resource, opts) {
   assert.ok(resource);
   searchClients.push(this);
   this.cancel = sinon.stub();
+  this.incremental = !!opts.incremental;
 
-  this.get = function (query) {
+  this.get = sinon.spy(function (query) {
     assert.ok(query.uri);
+
     this.emit('results', [{id: query.uri + '123', group: '__world__'}]);
     this.emit('results', [{id: query.uri + '456', group: 'private-group'}]);
     this.emit('end');
-  };
+  });
 }
 inherits(FakeSearchClient, EventEmitter);
 
@@ -141,6 +143,69 @@ describe('WidgetController', function () {
       assert.calledWith(loadSpy, [sinon.match({id: uris[0] + '456'})]);
       assert.calledWith(loadSpy, [sinon.match({id: uris[1] + '123'})]);
       assert.calledWith(loadSpy, [sinon.match({id: uris[1] + '456'})]);
+    });
+
+    context('when there is a selection', function () {
+      var uri = 'http://example.com';
+      var id = uri + '123';
+
+      beforeEach(function () {
+        fakeCrossFrame.frames = [{uri: uri}];
+        fakeAnnotationUI.selectedAnnotationMap[id] = true;
+        $scope.$digest();
+      });
+
+      it('switches to the selected annotation\'s group', function () {
+        assert.calledWith(fakeGroups.focus, '__world__');
+        assert.calledOnce(fakeAnnotationMapper.loadAnnotations);
+        assert.calledWith(fakeAnnotationMapper.loadAnnotations, [
+          {id: uri + '123', group: '__world__'},
+        ]);
+      });
+
+      it('fetches annotations for all groups', function () {
+        assert.calledWith(searchClients[0].get, {uri: uri, group: null});
+      });
+
+      it('loads annotations in one batch', function () {
+        assert.notOk(searchClients[0].incremental);
+      });
+    });
+
+    context('when there is no selection', function () {
+      var uri = 'http://example.com';
+
+      beforeEach(function () {
+        fakeCrossFrame.frames = [{uri: uri}];
+        fakeGroups.focused = function () { return { id: 'a-group' }; };
+        $scope.$digest();
+      });
+
+      it('fetches annotations for the current group', function () {
+        assert.calledWith(searchClients[0].get, {uri: uri, group: 'a-group'});
+      });
+
+      it('loads annotations in batches', function () {
+        assert.ok(searchClients[0].incremental);
+      });
+    });
+
+    context('when the selected annotation is not available', function () {
+      var uri = 'http://example.com';
+      var id = uri + 'does-not-exist';
+
+      beforeEach(function () {
+        fakeCrossFrame.frames = [{uri: uri}];
+        fakeAnnotationUI.selectedAnnotationMap[id] = true;
+        fakeGroups.focused = function () { return { id: 'private-group' }; };
+        $scope.$digest();
+      });
+
+      it('loads annotations from the focused group instead', function () {
+        assert.calledWith(fakeGroups.focus, 'private-group');
+        assert.calledWith(fakeAnnotationMapper.loadAnnotations,
+          [{group: "private-group", id: "http://example.com456"}]);
+      });
     });
   });
 
