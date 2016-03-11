@@ -92,6 +92,14 @@ def includeme(config):
         },
     })
 
+    # API module
+    #
+    # We include this first so that:
+    # - configuration directives provided by modules in `h.api` are available
+    #   to the rest of the application at startup.
+    # - we can override behaviour from `h.api` if necessary.
+    config.include('h.api', route_prefix='/api')
+
     # Core site modules
     config.include('h.assets')
     config.include('h.auth')
@@ -105,7 +113,6 @@ def includeme(config):
     config.include('h.views')
 
     # Site modules
-    config.include('h.api', route_prefix='/api')
     config.include('h.accounts')
     config.include('h.admin', route_prefix='/admin')
     config.include('h.badge')

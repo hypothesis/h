@@ -4,6 +4,9 @@ Presenters for API data.
 """
 
 import collections
+import copy
+
+LINK_GENERATORS_KEY = 'h.api.presenters.link_generators'
 
 
 class AnnotationBasePresenter(object):
@@ -13,10 +16,18 @@ class AnnotationBasePresenter(object):
 
     @property
     def links(self):
-        return {
-            'json': self.request.route_url('api.annotation',
-                                           id=self.annotation.id),
-        }
+        """A dictionary of named hypermedia links for this annotation."""
+        # Named link generators are registered elsewhere in the code. See
+        # :py:func:`h.api.presenters.add_annotation_link_generator` for
+        # details.
+        link_generators = self.request.registry.get(LINK_GENERATORS_KEY, {})
+        out = {}
+        for name, generator in link_generators.items():
+            link = generator(self.request, self.annotation)
+            if link is not None:
+                out[name] = link
+        return out
+
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
     def asdict(self):
@@ -40,7 +51,7 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         if self.annotation.references:
             base['references'] = self.annotation.references
 
-        annotation = self.annotation.extra or {}
+        annotation = copy.copy(self.annotation.extra) or {}
         annotation.update(base)
 
         return annotation
@@ -151,6 +162,21 @@ class DocumentURIJSONPresenter(object):
             return self.document_uri.type[4:]
 
 
+def add_annotation_link_generator(registry, name, generator):
+    """
+    Registers a function which generates a named link for an annotation.
+
+    Annotation hypermedia links are added to the rendered annotations in a
+    `links` property or similar. `name` is the unique identifier for the link
+    type, and `generator` is a callable which accepts two arguments -- the
+    current request, and the annotation for which to generate a link -- and
+    returns a string.
+    """
+    if LINK_GENERATORS_KEY not in registry:
+        registry[LINK_GENERATORS_KEY] = {}
+    registry[LINK_GENERATORS_KEY][name] = generator
+
+
 def utc_iso8601(datetime):
     return datetime.strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')
 
@@ -165,3 +191,16 @@ def deep_merge_dict(a, b):
             deep_merge_dict(a[k], v)
         else:
             a[k] = v
+
+
+def _json_link(request, annotation):
+    return request.route_url('api.annotation', id=annotation.id)
+
+
+def includeme(config):
+    config.add_directive(
+        'add_annotation_link_generator',
+        lambda c, n, g: add_annotation_link_generator(c.registry, n, g))
+
+    # Add a default 'json' link type
+    config.add_annotation_link_generator('json', _json_link)

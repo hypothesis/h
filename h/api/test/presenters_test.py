@@ -10,6 +10,7 @@ from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import DocumentJSONPresenter
 from h.api.presenters import DocumentMetaJSONPresenter
 from h.api.presenters import DocumentURIJSONPresenter
+from h.api.presenters import add_annotation_link_generator
 from h.api.presenters import utc_iso8601, deep_merge_dict
 
 
@@ -28,22 +29,57 @@ class TestAnnotationBasePresenter(object):
         assert presenter.request == request
         assert presenter.annotation == annotation
 
-    def test_links(self):
+    def test_links_empty(self):
         request = DummyRequest()
         annotation = mock.Mock()
 
         links = AnnotationBasePresenter(request, annotation).links
 
-        assert 'json' in links
-        assert links['json'] == 'http://example.com/dummy/abc123'
+        assert links == {}
+
+    def test_links_includes_registered_links(self):
+        request = DummyRequest()
+        annotation = mock.Mock()
+        add_annotation_link_generator(request.registry,
+                                      'giraffe',
+                                      lambda r, a: 'http://foo.com/bar/123')
+
+        links = AnnotationBasePresenter(request, annotation).links
+
+        assert links == {
+            'giraffe': 'http://foo.com/bar/123'
+        }
+
+    def test_links_omits_link_generators_that_return_none(self):
+        request = DummyRequest()
+        annotation = mock.Mock()
+        add_annotation_link_generator(request.registry,
+                                      'giraffe',
+                                      lambda r, a: 'http://foo.com/bar/123')
+        add_annotation_link_generator(request.registry,
+                                      'donkey',
+                                      lambda r, a: None)
+
+        links = AnnotationBasePresenter(request, annotation).links
+
+        assert links == {
+            'giraffe': 'http://foo.com/bar/123'
+        }
+
+    def test_link_generators_called_with_request_and_annotation(self):
+        request = DummyRequest()
+        annotation = mock.Mock()
+        dummy_link_generator = mock.Mock(return_value='')
+        add_annotation_link_generator(request.registry,
+                                      'giraffe',
+                                      dummy_link_generator)
+
+        links = AnnotationBasePresenter(request, annotation).links
+
+        dummy_link_generator.assert_called_once_with(request, annotation)
 
 
 class TestAnnotationJSONPresenter(object):
-
-    @pytest.fixture(autouse=True)
-    def link_routes(self, routes_mapper):
-        routes_mapper.add_route('api.annotation', '/dummy/abc123')
-
     def test_asdict(self, document_asdict):
         request = DummyRequest()
         ann = mock.Mock(id='the-id',
@@ -76,7 +112,7 @@ class TestAnnotationJSONPresenter(object):
                     'target': [{'source': 'http://example.com',
                                 'selector': [{'TestSelector': 'foobar'}]}],
                     'document': {'foo': 'bar'},
-                    'links': {'json': 'http://example.com/dummy/abc123'},
+                    'links': {},
                     'references': ['referenced-id-1', 'referenced-id-2'],
                     'extra-1': 'foo',
                     'extra-2': 'bar'}
@@ -92,6 +128,36 @@ class TestAnnotationJSONPresenter(object):
 
         presented = AnnotationJSONPresenter(request, ann).asdict()
         assert presented['id'] == 'the-real-id'
+
+    def test_asdict_extra_uses_copy_of_extra(self, document_asdict):
+        extra = {'foo': 'bar'}
+        request = DummyRequest()
+        ann = mock.Mock(id='my-id', extra=extra)
+        document_asdict.return_value = {}
+
+        presented = AnnotationJSONPresenter(request, ann).asdict()
+
+        # Presenting the annotation shouldn't change the "extra" dict.
+        assert extra == {'foo': 'bar'}
+
+    def test_asdict_with_link_generators(self, document_asdict):
+        request = DummyRequest()
+        ann = mock.Mock(id='my-id', extra={})
+        document_asdict.return_value = {}
+
+        add_annotation_link_generator(request.registry,
+                                      'giraffe',
+                                      lambda r, a: 'http://giraffe.com')
+        add_annotation_link_generator(request.registry,
+                                      'withid',
+                                      lambda r, a: 'http://withid.com/' + a.id)
+
+        presented = AnnotationJSONPresenter(request, ann).asdict()
+
+        assert presented['links'] == {
+            'giraffe': 'http://giraffe.com',
+            'withid': 'http://withid.com/my-id',
+        }
 
     def test_text(self):
         request = DummyRequest()
