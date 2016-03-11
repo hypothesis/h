@@ -382,17 +382,26 @@ class DocumentMeta(dict):
 
     @property
     def type(self):
-        value = self.get('type')
+        return self.get('type')
+
+    @property
+    def value(self):
+        return self.get('value')
+
+    @property
+    def normalized_type(self):
+        """
+        Normalized version of the type string
+
+        This should only be used in the Postgres migration script.
+        """
+        value = self.type
         if value:
             value = value.lower().replace(':', '.')
             value = re.sub(r'\.{2,}', '.', value)
             value = re.sub(r'^og\.', 'facebook.', value)
 
         return value
-
-    @property
-    def value(self):
-        return self.get('value')
 
 
 class DocumentURI(dict):

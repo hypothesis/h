@@ -277,11 +277,11 @@ def create_or_update_document_uri(es_docuri, pg_document):
 def create_or_update_document_meta(es_meta, pg_document):
     meta = DocumentMeta.query.filter(
             DocumentMeta.claimant_normalized == es_meta.claimant_normalized,
-            DocumentMeta.type == es_meta.type).one_or_none()
+            DocumentMeta.type == es_meta.normalized_type).one_or_none()
 
     if meta is None:
         meta = DocumentMeta(claimant=es_meta.claimant,
-                            type=es_meta.type,
+                            type=es_meta.normalized_type,
                             value=es_meta.value,
                             created=es_meta.created,
                             updated=es_meta.updated,

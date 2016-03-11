@@ -443,22 +443,6 @@ class TestDocumentMeta(object):
         meta = DocumentMeta({'type': 'title'})
         assert meta.type == 'title'
 
-    def test_type_normalizes_multiple_dots(self):
-        meta = DocumentMeta({'type': 'dc..description'})
-        assert meta.type == 'dc.description'
-
-    def test_type_normalizes_case(self):
-        meta = DocumentMeta({'type': 'dc.Contributor.Sponsor'})
-        assert meta.type == 'dc.contributor.sponsor'
-
-    def test_type_normalizes_colons(self):
-        meta = DocumentMeta({'type': 'facebook.book:isbn'})
-        assert meta.type == 'facebook.book.isbn'
-
-    def test_type_normalizes_og(self):
-        meta = DocumentMeta({'type': 'og.title'})
-        assert meta.type == 'facebook.title'
-
     @pytest.mark.parametrize('type', ['oga.title', 'dc.og.title'])
     def test_type_skips_og_normalisation(self, type):
         meta = DocumentMeta({'type': type})
@@ -467,6 +451,22 @@ class TestDocumentMeta(object):
     def test_value(self):
         meta = DocumentMeta({'value': 'Example Page'})
         assert meta.value == 'Example Page'
+
+    def test_normalized_type_normalizes_multiple_dots(self):
+        meta = DocumentMeta({'type': 'dc..description'})
+        assert meta.normalized_type == 'dc.description'
+
+    def test_normalized_type_normalizes_case(self):
+        meta = DocumentMeta({'type': 'dc.Contributor.Sponsor'})
+        assert meta.normalized_type == 'dc.contributor.sponsor'
+
+    def test_normalized_type_normalizes_colons(self):
+        meta = DocumentMeta({'type': 'facebook.book:isbn'})
+        assert meta.normalized_type == 'facebook.book.isbn'
+
+    def test_normalized_type_normalizes_og(self):
+        meta = DocumentMeta({'type': 'og.title'})
+        assert meta.normalized_type == 'facebook.title'
 
 
 class TestDocumentURI(object):
