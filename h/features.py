@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 
 FEATURES = {
     'claim': "Enable 'claim your username' web views?",
+    'direct_linking': "Generate direct links to annotations in context in the client?",
     'new_homepage': "Show the new homepage design?",
     'ops_disable_streamer_uri_equivalence': "[Ops] Disable streamer URI equivalence support?",
     'postgres_read': 'Use postgres to fetch annotations from storage'
