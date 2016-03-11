@@ -3,12 +3,22 @@
 var events = require('./events');
 var SearchClient = require('./search-client');
 
+function firstKey(object) {
+  for (var k in object) {
+    if (!object.hasOwnProperty(k)) {
+      continue;
+    }
+    return k;
+  }
+  return null;
+}
+
 /**
  * Returns the group ID of the first annotation in `results` whose
  * ID is a key in `selection`.
  */
 function groupIDFromSelection(selection, results) {
-  var id = Object.keys(selection)[0];
+  var id = firstKey(selection);
   var annot = results.find(function (annot) {
     return annot.id === id;
   });
@@ -191,6 +201,12 @@ module.exports = function WidgetController(
       return false;
     }
     return annotation.$$tag in $scope.focusedAnnotations;
+  };
+
+  $scope.selectedAnnotationUnavailable = function () {
+    return searchClients.length === 0 &&
+           annotationUI.hasSelectedAnnotations() &&
+           !threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
   };
 
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
