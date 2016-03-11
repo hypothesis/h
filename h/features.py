@@ -18,7 +18,6 @@ FEATURES = {
     'claim': "Enable 'claim your username' web views?",
     'direct_linking': "Generate direct links to annotations in context in the client?",
     'new_homepage': "Show the new homepage design?",
-    'ops_disable_streamer_uri_equivalence': "[Ops] Disable streamer URI equivalence support?",
     'postgres_read': 'Use postgres to fetch annotations from storage'
 }
 
@@ -41,9 +40,7 @@ FEATURES = {
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
 FEATURES_PENDING_REMOVAL = {
-    'embed_media': "Replace YouTube, Vimeo etc links in annotations with embeds",
-    'sidebar_tutorial': "Show a tutorial to new users in the sidebar",
-    'truncate_annotations': "Truncate long quotes and bodies in annotations?",
+    'ops_disable_streamer_uri_equivalence': "[Ops] Disable streamer URI equivalence support?",
 }
 
 
