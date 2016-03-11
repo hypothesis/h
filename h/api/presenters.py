@@ -189,7 +189,14 @@ def deep_merge_dict(a, b):
             a[k] = v
 
 
+def _json_link(request, annotation):
+    return request.route_url('api.annotation', id=annotation.id)
+
+
 def includeme(config):
     config.add_directive(
         'add_annotation_link_generator',
         lambda c, n, g: add_annotation_link_generator(c.registry, n, g))
+
+    # Add a default 'json' link type
+    config.add_annotation_link_generator('json', _json_link)
