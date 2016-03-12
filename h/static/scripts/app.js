@@ -25,7 +25,6 @@ if (settings.raven) {
   angular.module('ngRaven', []);
 }
 
-var mail = require('./vendor/jwz');
 var streamer = require('./streamer');
 
 // Fetch external state that the app needs before it can run. This includes the
@@ -40,20 +39,6 @@ var resolve = {
     return store.$promise;
   },
   streamer: streamer.connect,
-  // @ngInject
-  threading: function (annotationMapper, drafts, threading) {
-    // Unload all the annotations
-    annotationMapper.unloadAnnotations(threading.annotationList());
-
-    // Reset the threading root
-    threading.createIdTable([]);
-    threading.root = mail.messageContainer();
-
-    // Reload all new, unsaved annotations
-    threading.thread(drafts.unsaved());
-
-    return threading;
-  },
 };
 
 // @ngInject
@@ -147,7 +132,6 @@ module.exports = angular.module('h', [
   .directive('annotation', require('./directive/annotation').directive)
   .directive('annotationShareDialog', require('./directive/annotation-share-dialog'))
   .directive('annotationThread', require('./directive/annotation-thread'))
-  .directive('deepCount', require('./directive/deep-count'))
   .directive('dropdownMenuBtn', require('./directive/dropdown-menu-btn'))
   .directive('excerpt', require('./directive/excerpt').directive)
   .directive('feedbackLink', require('./directive/feedback-link'))
@@ -167,8 +151,6 @@ module.exports = angular.module('h', [
   .directive('sortDropdown', require('./directive/sort-dropdown'))
   .directive('spinner', require('./directive/spinner'))
   .directive('statusButton', require('./directive/status-button'))
-  .directive('thread', require('./directive/thread'))
-  .directive('threadFilter', require('./directive/thread-filter'))
   .directive('topBar', require('./directive/top-bar'))
   .directive('windowScroll', require('./directive/window-scroll'))
 
@@ -186,13 +168,11 @@ module.exports = angular.module('h', [
   .service('localStorage', require('./local-storage'))
   .service('permissions', require('./permissions'))
   .service('queryParser', require('./query-parser'))
-  .service('render', require('./render'))
   .service('rootThread', require('./root-thread'))
   .service('searchFilter', require('./search-filter'))
   .service('session', require('./session'))
   .service('streamFilter', require('./stream-filter'))
   .service('tags', require('./tags'))
-  .service('threading', require('./threading'))
   .service('unicode', require('./unicode'))
   .service('viewFilter', require('./view-filter'))
 
