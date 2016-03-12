@@ -1,6 +1,4 @@
 angular = require('angular')
-mail = require('./vendor/jwz')
-
 
 module.exports = class StreamController
   this.$inject = [
