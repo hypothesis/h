@@ -10,6 +10,7 @@ from pyramid.testing import DummyRequest
 from h import db
 from h.api import storage
 from h.api.models.annotation import Annotation
+from h.api.models.document import Document, DocumentURI
 
 
 def test_fetch_annotation_elastic(postgres_enabled, ElasticAnnotation):
@@ -34,35 +35,78 @@ def test_fetch_annotation_postgres(postgres_enabled):
     assert annotation == actual
 
 
-def test_expand_uri_no_document(document_model):
+def test_expand_uri_postgres_no_document(postgres_enabled):
+    request = DummyRequest(db=db.Session)
+    postgres_enabled.return_value = True
+
+    actual = storage.expand_uri(request, 'http://example.com/')
+    assert actual == ['http://example.com/']
+
+
+def test_expand_uri_elastic_no_document(postgres_enabled, document_model):
+    postgres_enabled.return_value = False
     request = DummyRequest()
     document_model.get_by_uri.return_value = None
     assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
 
 
-def test_expand_uri_document_doesnt_expand_canonical_uris(document_model):
+def test_expand_uri_postgres_document_doesnt_expand_canonical_uris(postgres_enabled):
+    request = DummyRequest(db=db.Session)
+    postgres_enabled.return_value = True
+
+    document = Document(document_uris=[
+        DocumentURI(uri='http://foo.com/', claimant='http://example.com'),
+        DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
+        DocumentURI(uri='http://example.com/', type='rel-canonical', claimant='http://example.com'),
+    ])
+    db.Session.add(document)
+    db.Session.flush()
+
+    assert storage.expand_uri(request, "http://example.com/") == [
+            "http://example.com/"]
+
+
+def test_expand_uri_elastic_document_doesnt_expand_canonical_uris(postgres_enabled, document_model):
+    postgres_enabled.return_value = False
+
     request = DummyRequest()
     document = document_model.get_by_uri.return_value
-    document.get.return_value = [
-        {"href": "http://foo.com/"},
-        {"href": "http://bar.com/"},
-        {"href": "http://example.com/", "rel": "canonical"},
-    ]
-    document.uris.return_value = [
-        "http://foo.com/",
-        "http://bar.com/",
-        "http://example.com/",
+    type(document).document_uris = uris = mock.PropertyMock()
+    uris.return_value = [
+        mock.Mock(uri='http://foo.com/'),
+        mock.Mock(uri='http://bar.com/'),
+        mock.Mock(uri='http://example.com/', type='rel-canonical'),
     ]
     assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
 
 
-def test_expand_uri_document_uris(document_model):
+def test_expand_uri_postgres_document_uris(postgres_enabled):
+    request = DummyRequest(db=db.Session)
+    postgres_enabled.return_value = True
+
+    document = Document(document_uris=[
+        DocumentURI(uri='http://foo.com/', claimant='http://bar.com'),
+        DocumentURI(uri='http://bar.com/', claimant='http://bar.com'),
+    ])
+    db.Session.add(document)
+    db.Session.flush()
+
+    assert storage.expand_uri(request, 'http://foo.com/') == [
+        'http://foo.com/',
+        'http://bar.com/'
+    ]
+
+
+def test_expand_uri_elastic_document_uris(postgres_enabled, document_model):
+    postgres_enabled.return_value = False
     request = DummyRequest()
-    document_model.get_by_uri.return_value.uris.return_value = [
-        "http://foo.com/",
-        "http://bar.com/",
+    document = document_model.get_by_uri.return_value
+    type(document).document_uris = uris = mock.PropertyMock()
+    uris.return_value = [
+        mock.Mock(uri="http://foo.com/"),
+        mock.Mock(uri="http://bar.com/"),
     ]
     assert storage.expand_uri(request, "http://example.com/") == [
         "http://foo.com/",

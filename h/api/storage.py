@@ -13,6 +13,7 @@ from h.api import transform
 from h.api.events import AnnotationBeforeSaveEvent
 from h.api.models import elastic
 from h.api.models.annotation import Annotation
+from h.api.models.document import Document
 
 
 def annotation_from_dict(data):
@@ -129,18 +130,24 @@ def expand_uri(request, uri):
     :returns: a list of equivalent URIs
     :rtype: list
     """
-    doc = elastic.Document.get_by_uri(uri)
+    doc = None
+    if _postgres_enabled(request):
+        doc = Document.find_by_uris(request.db, [uri]).one_or_none()
+    else:
+        doc = elastic.Document.get_by_uri(uri)
+
     if doc is None:
         return [uri]
 
     # We check if the match was a "canonical" link. If so, all annotations
     # created on that page are guaranteed to have that as their target.source
     # field, so we don't need to expand to other URIs and risk false positives.
-    for link in doc.get('link', []):
-        if link.get('href') == uri and link.get('rel') == 'canonical':
+    docuris = doc.document_uris
+    for docuri in docuris:
+        if docuri.uri == uri and docuri.type == 'rel-canonical':
             return [uri]
 
-    return doc.uris()
+    return [docuri.uri for docuri in docuris]
 
 
 def _prepare(request, annotation):
