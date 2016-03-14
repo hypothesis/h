@@ -8,6 +8,25 @@ Bug fixes
   the fallback to MathJax rendering for markup that is not supported
   by KaTeX has been removed for the time being (#3042).
 
+- Render annotation's text property as empty string instead of `null` (#3072).
+
+- Split out DocumentMeta type normalisation to only use it in the Postgres
+  migration (#3090).
+
+Miscellanea
+-----------
+
+- Render annotation links in API response (#3081) including an `incontext` link
+  behind the direct-linking feature flag (#3087).
+
+- Properly hook up Chrome staging extension with staging bouncer (#3077).
+
+- Add a utility script to aid the transition away from CoffeeScript (#3075).
+
+- Remove `h.claim` package (#3089).
+
+- Clean up old and unused feature flags (#3088).
+
 0.11.0 (2016-03-08)
 ===================
 
