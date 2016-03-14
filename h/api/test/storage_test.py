@@ -35,11 +35,14 @@ def test_fetch_annotation_postgres(postgres_enabled):
 
 
 def test_expand_uri_no_document(document_model):
+    request = DummyRequest()
     document_model.get_by_uri.return_value = None
-    assert storage.expand_uri("http://example.com/") == ["http://example.com/"]
+    assert storage.expand_uri(request, "http://example.com/") == [
+            "http://example.com/"]
 
 
 def test_expand_uri_document_doesnt_expand_canonical_uris(document_model):
+    request = DummyRequest()
     document = document_model.get_by_uri.return_value
     document.get.return_value = [
         {"href": "http://foo.com/"},
@@ -51,15 +54,17 @@ def test_expand_uri_document_doesnt_expand_canonical_uris(document_model):
         "http://bar.com/",
         "http://example.com/",
     ]
-    assert storage.expand_uri("http://example.com/") == ["http://example.com/"]
+    assert storage.expand_uri(request, "http://example.com/") == [
+            "http://example.com/"]
 
 
 def test_expand_uri_document_uris(document_model):
+    request = DummyRequest()
     document_model.get_by_uri.return_value.uris.return_value = [
         "http://foo.com/",
         "http://bar.com/",
     ]
-    assert storage.expand_uri("http://example.com/") == [
+    assert storage.expand_uri(request, "http://example.com/") == [
         "http://foo.com/",
         "http://bar.com/",
     ]

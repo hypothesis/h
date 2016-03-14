@@ -170,7 +170,8 @@ class UriFilter(object):
         if uristr is None:
             return None
 
-        scopes = [uri.normalize(u) for u in storage.expand_uri(uristr)]
+        uris = storage.expand_uri(self.request, uristr)
+        scopes = [uri.normalize(u) for u in uris]
         return {"terms": {"target.scope": scopes}}
 
 

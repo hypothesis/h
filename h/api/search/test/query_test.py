@@ -315,7 +315,7 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
     of the expansion.
     """
     request = mock.Mock()
-    storage.expand_uri.side_effect = lambda x: [
+    storage.expand_uri.side_effect = lambda _, x: [
         "http://giraffes.com/",
         "https://elephants.com/",
     ]
@@ -324,7 +324,7 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
 
     result = urifilter({"uri": "http://example.com/"})
 
-    storage.expand_uri.assert_called_with("http://example.com/")
+    storage.expand_uri.assert_called_with(request, "http://example.com/")
 
     assert result == {"terms":
         {"target.scope": ["http://giraffes.com", "https://elephants.com"]}

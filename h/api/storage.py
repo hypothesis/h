@@ -99,7 +99,7 @@ def delete_annotation(request, id):
     annotation.delete()
 
 
-def expand_uri(uri):
+def expand_uri(request, uri):
     """
     Return all URIs which refer to the same underlying document as `uri`.
 
