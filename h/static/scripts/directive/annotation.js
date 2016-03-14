@@ -1,8 +1,6 @@
 /* jshint node: true */
 'use strict';
 
-var Promise = require('core-js/library/es6/promise');
-
 var annotationMetadata = require('../annotation-metadata');
 var dateUtil = require('../date-util');
 var documentDomain = require('../filter/document-domain');
@@ -111,13 +109,22 @@ function updateDomainModel(domainModel, vm, permissions) {
 }
 
 /** Update the view model from the domain model changes. */
-function updateViewModel($scope, time, domainModel, vm, permissions) {
+function updateViewModel($scope, time, domainModel,
+                         vm, permissions) {
 
   vm.form = {
     text: domainModel.text,
     tags: viewModelTagsFromDomainModelTags(domainModel.tags),
   };
-  vm.annotationURI = new URL('/a/' + domainModel.id, vm.serviceUrl).href;
+
+  if (domainModel.links) {
+    vm.annotationURI = domainModel.links.incontext ||
+                       domainModel.links.html ||
+                       '';
+  } else {
+    vm.annotationURI = '';
+  }
+
   vm.isPrivate = permissions.isPrivate(
     domainModel.permissions, domainModel.user);
 

@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Return a fake annotation with the basic properties filled in.
  */
