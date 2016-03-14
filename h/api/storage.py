@@ -32,6 +32,9 @@ def fetch_annotation(request, id):
     """
     Fetch the annotation with the given id.
 
+    :param request: the request object
+    :type request: pyramid.request.Request
+
     :param id: the annotation id
     :type id: str
 
@@ -47,6 +50,9 @@ def fetch_annotation(request, id):
 def create_annotation(request, data):
     """
     Create an annotation from passed data.
+
+    :param request: the request object
+    :type request: pyramid.request.Request
 
     :param data: a dictionary of annotation properties
     :type data: dict
@@ -70,8 +76,12 @@ def update_annotation(request, id, data):
     This executes a partial update of the annotation identified by `id` using
     the passed data.
 
+    :param request: the request object
+    :type request: pyramid.request.Request
+
     :param id: the annotation id
     :type id: str
+
     :param data: a dictionary of annotation properties
     :type data: dict
 
@@ -92,6 +102,9 @@ def delete_annotation(request, id):
     """
     Delete the annotation with the given id.
 
+    :param request: the request object
+    :type request: pyramid.request.Request
+
     :param id: the annotation id
     :type id: str
     """
@@ -106,6 +119,9 @@ def expand_uri(request, uri):
     This function determines whether we already have "document" records for the
     passed URI, and if so returns the set of all URIs which we currently
     believe refer to the same document.
+
+    :param request: the request object
+    :type request: pyramid.request.Request
 
     :param uri: a URI associated with the document
     :type id: str
