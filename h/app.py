@@ -116,7 +116,6 @@ def includeme(config):
     config.include('h.accounts')
     config.include('h.admin', route_prefix='/admin')
     config.include('h.badge')
-    config.include('h.claim')
     config.include('h.feeds')
     config.include('h.groups')
     config.include('h.nipsa')

@@ -11,8 +11,11 @@
 {% block content %}
   <div id="claim" class="content paper">
     {% include "h:templates/includes/logo-header.html.jinja2" %}
-    <div class="form-vertical">
-      {{ form | safe }}
-    </div>
+    <p>
+      Sorry, your claim link has expired. If you still wish to claim a username
+      you reserved, please contact us at
+      <a href="mailto:support@hypothes.is?Subject=Claim%20my%20username">
+        support@hypothes.is</a>.
   </div>
 {% endblock content %}
+
