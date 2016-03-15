@@ -35,6 +35,10 @@ module.exports = function WidgetController(
     threading.thread(drafts.unsaved());
   }
 
+  /**
+   * List of clients actively fetching annotations for connected documents.
+   * @type {Array<SearchClient>}
+   */
   var searchClients = [];
 
   function _loadAnnotationsFor(uri, group) {
@@ -76,7 +80,9 @@ module.exports = function WidgetController(
    * @param {Array<{uri:string}>} frames - Hypothesis client frames
    *        to load annotations for.
    */
-  var loadAnnotations = function (frames) {
+  function loadAnnotations(frames) {
+    _resetAnnotations();
+
     searchClients.forEach(function (client) {
       client.cancel();
     });
@@ -111,7 +117,7 @@ module.exports = function WidgetController(
       streamFilter.resetFilter().addClause('/uri', 'one_of', urls);
       streamer.setConfig('filter', {filter: streamFilter.getFilter()});
     }
-  };
+  }
 
   $scope.$on(events.GROUP_FOCUSED, function () {
     if (searchClients.length) {
@@ -122,10 +128,8 @@ module.exports = function WidgetController(
       // loading of annotations, we should cancel the current load.
       return;
     }
-
     annotationUI.clearSelectedAnnotations();
-    _resetAnnotations();
-    return loadAnnotations(crossframe.frames);
+    loadAnnotations(crossframe.frames);
   });
 
   // Watch anything that may require us to reload annotations.
@@ -138,12 +142,12 @@ module.exports = function WidgetController(
     if (angular.isObject(annotation)) {
       highlights = [annotation.$$tag];
     }
-    return crossframe.call('focusAnnotations', highlights);
+    crossframe.call('focusAnnotations', highlights);
   };
 
   $scope.scrollTo = function (annotation) {
     if (angular.isObject(annotation)) {
-      return crossframe.call('scrollToAnnotation', annotation.$$tag);
+      crossframe.call('scrollToAnnotation', annotation.$$tag);
     }
   };
 
