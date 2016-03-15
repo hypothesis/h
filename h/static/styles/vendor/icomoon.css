@@ -1,175 +1,185 @@
 @font-face {
-	font-family: 'h';
-	src: url('../fonts/h.woff') format('woff');
-	font-weight: normal;
-	font-style: normal;
+    font-family: 'h';
+  src: url('../fonts/h.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
 }
 
 [class^="h-icon-"], [class*=" h-icon-"] {
     /* use !important to prevent issues with browser extensions that change fonts */
-	font-family: 'h' !important;
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
+    font-family: 'h' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
 
-	/* Better Font Rendering =========== */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+.h-icon-annotate:before {
+    content: "\e903";
+}
+.h-icon-highlight:before {
+    content: "\e904";
+}
+.h-icon-note:before {
+    content: "\e905";
+}
 .h-icon-account:before {
-	content: "\e800";
+    content: "\e800";
 }
 .h-icon-sort:before {
-	content: "\e801";
+    content: "\e801";
 }
 .h-icon-group:before {
-	content: "\e61e";
+    content: "\e61e";
 }
 .h-icon-cancel-outline:before {
-	content: "\e619";
+    content: "\e619";
 }
 .h-icon-google-plus:before {
-	content: "\ea88";
+    content: "\ea88";
 }
 .h-icon-facebook:before {
-	content: "\ea8d";
+    content: "\ea8d";
 }
 .h-icon-twitter:before {
-	content: "\ea91";
+    content: "\ea91";
 }
 .h-icon-github:before {
-	content: "\e900";
+    content: "\e900";
 }
 .h-icon-feed:before {
-	content: "\e901";
+    content: "\e901";
 }
 .h-icon-cc-by:before {
-	content: "\e61f";
+    content: "\e61f";
 }
 .h-icon-cc-logo:before {
-	content: "\e620";
+    content: "\e620";
 }
 .h-icon-cc-zero:before {
-	content: "\e621";
+    content: "\e621";
 }
 .h-icon-markdown:before {
-	content: "\e60b";
+    content: "\e60b";
 }
 .h-icon-move:before {
-	content: "\e902";
+    content: "\e902";
 }
 .h-icon-arrow-right:before {
-	content: "\e61d";
+    content: "\e61d";
 }
 .h-icon-arrow-drop-down:before {
-	content: "\e629";
+    content: "\e629";
 }
 .h-icon-link:before {
-	content: "\e628";
+    content: "\e628";
 }
 .h-icon-create:before {
-	content: "\e627";
+    content: "\e627";
 }
 .h-icon-delete:before {
-	content: "\e624";
+    content: "\e624";
 }
 .h-icon-remove:before {
-	content: "\e625";
+    content: "\e625";
 }
 .h-icon-edit:before {
-	content: "\e626";
+    content: "\e626";
 }
 .h-icon-bookmark:before {
-	content: "\e600";
+    content: "\e600";
 }
 .h-icon-done:before {
-	content: "\e601";
+    content: "\e601";
 }
 .h-icon-lock:before {
-	content: "\e602";
+    content: "\e602";
 }
 .h-icon-search:before {
-	content: "\e603";
+    content: "\e603";
 }
 .h-icon-settings:before {
-	content: "\e604";
+    content: "\e604";
 }
 .h-icon-visibility:before {
-	content: "\e605";
+    content: "\e605";
 }
 .h-icon-visibility-off:before {
-	content: "\e606";
+    content: "\e606";
 }
 .h-icon-add:before {
-	content: "\e608";
+    content: "\e608";
 }
 .h-icon-clear:before {
-	content: "\e609";
+    content: "\e609";
 }
 .h-icon-content-copy:before {
-	content: "\e60a";
+    content: "\e60a";
 }
 .h-icon-flag:before {
-	content: "\e60c";
+    content: "\e60c";
 }
 .h-icon-reply:before {
-	content: "\e60d";
+    content: "\e60d";
 }
 .h-icon-border-color:before {
-	content: "\e60e";
+    content: "\e60e";
 }
 .h-icon-format-bold:before {
-	content: "\e60f";
+    content: "\e60f";
 }
 .h-icon-format-italic:before {
-	content: "\e610";
+    content: "\e610";
 }
 .h-icon-format-list-bulleted:before {
-	content: "\e611";
+    content: "\e611";
 }
 .h-icon-format-list-numbered:before {
-	content: "\e612";
+    content: "\e612";
 }
 .h-icon-format-quote:before {
-	content: "\e613";
+    content: "\e613";
 }
 .h-icon-functions:before {
-	content: "\e614";
+    content: "\e614";
 }
 .h-icon-insert-comment:before {
-	content: "\e617";
+    content: "\e617";
 }
 .h-icon-insert-link:before {
-	content: "\e615";
+    content: "\e615";
 }
 .h-icon-insert-photo:before {
-	content: "\e616";
+    content: "\e616";
 }
 .h-icon-cancel:before {
-	content: "\e61a";
+    content: "\e61a";
 }
 .h-icon-check:before {
-	content: "\e61b";
+    content: "\e61b";
 }
 .h-icon-chevron-left:before {
-	content: "\e607";
+    content: "\e607";
 }
 .h-icon-chevron-right:before {
-	content: "\e618";
+    content: "\e618";
 }
 .h-icon-close:before {
-	content: "\e61c";
+    content: "\e61c";
 }
 .h-icon-public:before {
-	content: "\e622";
+    content: "\e622";
 }
 .h-icon-share:before {
-	content: "\e623";
+    content: "\e623";
 }
 .h-icon-mail:before {
-	content: "\e62a";
+    content: "\e62a";
 }
+

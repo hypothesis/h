@@ -7,57 +7,73 @@ $base-font-size: 14px;
 .annotator-adder {
   box-sizing: border-box;
   direction: ltr;
-  height: 35px;
-  margin-left: -20px;
-  margin-top: -50px;
-  padding: 0;
+  margin-top: -60px;
+  margin-left: -65px;
   position: absolute;
   background: $white;
-  border: 3px solid $gray;
+  border: 1px solid rgba(0,0,0,0.20);
   border-radius: 4px;
+  box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.15);
   z-index: 999;
+}
 
-  &:before {
-    @include rotate(45deg);
-    background: $white;
-    bottom: -8px;
-    border-bottom: 4px solid $gray;
-    border-right: 4px solid $gray;
-    content: "";
-    display: block;
-    height: 6px;
-    left: 0;
-    margin-left: auto;
-    margin-right: auto;
-    position: absolute;
-    right: 0;
-    width: 6px;
+.annotator-adder:before {
+  @include rotate(45deg);
+  background: $white;
+  bottom: -5px;
+  border-bottom: 1px solid rgba(0,0,0,0.20);
+  border-right: 1px solid rgba(0,0,0,0.20);
+  content: "";
+  display: block;
+  height: 6px;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  position: absolute;
+  right: 0;
+  width: 6px;
+}
+
+.annotator-adder-actions {
+  display: flex;
+  flex-direction: row;
+}
+
+.annotator-adder-actions:hover .annotator-adder-actions__button {
+  color: $gray-light !important;
+}
+
+.annotator-adder-actions__button {
+  @include box-shadow(none);
+  font-family: h;
+  font-size: 18px;
+  background: transparent !important;
+  color: $gray-dark !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+
+  padding-top: 7px;
+  padding-bottom: 6px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.annotator-adder-actions .annotator-adder-actions__button:hover {
+  color: $gray-dark !important;
+
+  .annotator-adder-actions__label {
+    color: $gray-dark !important;
   }
+}
 
-  button {
-    @include box-shadow(none);
-    display: inline-block;
-    font-family: h;
-    border: none;
-    cursor: pointer;
-    height: 100%;
-    width: 35px;
-    font-size: 18px;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    background: $white !important;
-    color: $gray-light !important;
-
-    &:active {
-      transition: background-color .25s;
-      background-color: $gray-light !important;
-    }
-
-    &:hover {
-      color: $gray-dark !important;
-    }
-  }
+.annotator-adder-actions__label {
+  font-size: 11px;
+  margin: 2px 0px;
+  font-family: sans-serif;
+  color: $gray-light !important;
 }
 
 
