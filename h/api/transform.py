@@ -4,6 +4,21 @@ from h._compat import string_types
 from h.api import uri
 
 
+def prepare(annotation, fetcher):
+    """Prepare the given annotation for storage."""
+    set_group_if_reply(annotation, fetcher=fetcher)
+    insert_group_if_none(annotation)
+    set_group_permissions(annotation)
+
+    # FIXME: Remove this in a month or so, when all our clients have been
+    # updated. -N 2015-09-25
+    fix_old_style_comments(annotation)
+
+    # FIXME: When this becomes simply part of a search indexing operation, this
+    # should probably not mutate its argument.
+    normalize_annotation_target_uris(annotation)
+
+
 def set_group_if_reply(annotation, fetcher):
     """
     If the annotation is a reply set its group to that of its parent.
