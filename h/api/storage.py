@@ -151,24 +151,9 @@ def expand_uri(request, uri):
 
 
 def _prepare(request, annotation):
-    """
-    Prepare the given annotation for storage.
-
-    Scan the passed annotation for any target URIs or document metadata URIs
-    and add normalized versions of these to the document.
-    """
+    """Prepare the given annotation for storage."""
     fetcher = partial(fetch_annotation, request)
-    transform.set_group_if_reply(annotation, fetcher=fetcher)
-    transform.insert_group_if_none(annotation)
-    transform.set_group_permissions(annotation)
-
-    # FIXME: Remove this in a month or so, when all our clients have been
-    # updated. -N 2015-09-25
-    transform.fix_old_style_comments(annotation)
-
-    # FIXME: When this becomes simply part of a search indexing operation, this
-    # should probably not mutate its argument.
-    transform.normalize_annotation_target_uris(annotation)
+    transform.prepare(annotation, fetcher)
 
     # Fire an AnnotationBeforeSaveEvent so subscribers who wish to modify an
     # annotation before save can do so.
