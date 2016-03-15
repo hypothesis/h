@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 // @ngInject
 function Controller($scope, $timeout, flash, session, formRespond, settings) {
   var pendingTimeout = null;
@@ -11,10 +13,10 @@ function Controller($scope, $timeout, flash, session, formRespond, settings) {
 
     angular.copy({}, $scope.model);
 
-    if ($scope.form != null) {
-      $scope.form.$setPristine()
+    if ($scope.form) {
+      $scope.form.$setPristine();
     }
-  };
+  }
 
   function failure(form, response) {
     var errors, reason;
@@ -28,12 +30,12 @@ function Controller($scope, $timeout, flash, session, formRespond, settings) {
     }
 
     return formRespond(form, errors, reason);
-  };
+  }
 
   function timeout() {
     angular.copy({}, $scope.model);
 
-    if ($scope.form != null) {
+    if ($scope.form) {
       $scope.form.$setPristine();
     }
 
@@ -42,7 +44,7 @@ function Controller($scope, $timeout, flash, session, formRespond, settings) {
   }
 
   function cancelTimeout() {
-    if (pendingTimeout == null) {
+    if (!pendingTimeout) {
       return;
     }
     $timeout.cancel(pendingTimeout);
@@ -68,7 +70,7 @@ function Controller($scope, $timeout, flash, session, formRespond, settings) {
     });
   };
 
-  if ($scope.model == null) {
+  if (!$scope.model) {
     $scope.model = {};
   }
 

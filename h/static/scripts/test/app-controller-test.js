@@ -12,12 +12,12 @@ describe('AppController', function () {
   var fakeAuth = null;
   var fakeDrafts = null;
   var fakeFeatures = null;
-  var fakeIdentity = null;
   var fakeLocation = null;
   var fakeParams = null;
   var fakeSession = null;
   var fakeGroups = null;
   var fakeRoute = null;
+  var fakeSettings = null;
   var fakeWindow = null;
 
   var sandbox = null;
@@ -45,7 +45,7 @@ describe('AppController', function () {
     };
 
     fakeAuth = {
-      userid: sandbox.stub()
+      logout: sandbox.stub().returns(Promise.resolve()),
     };
 
     fakeDrafts = {
@@ -62,19 +62,15 @@ describe('AppController', function () {
       flagEnabled: sandbox.stub().returns(false)
     };
 
-    fakeIdentity = {
-      watch: sandbox.spy(),
-      request: sandbox.spy(),
-      logout: sandbox.stub()
-    };
-
     fakeLocation = {
       search: sandbox.stub().returns({})
     };
 
     fakeParams = {id: 'test'};
 
-    fakeSession = {};
+    fakeSession = {
+      load: sandbox.stub().returns(Promise.resolve({userid: null})),
+    };
 
     fakeGroups = {focus: sandbox.spy()};
 
@@ -85,12 +81,16 @@ describe('AppController', function () {
       confirm: sandbox.stub()
     };
 
+    fakeSettings = {
+      firstRun: false,
+    };
+
     $provide.value('annotationUI', fakeAnnotationUI);
     $provide.value('auth', fakeAuth);
     $provide.value('drafts', fakeDrafts);
     $provide.value('features', fakeFeatures);
-    $provide.value('identity', fakeIdentity);
     $provide.value('session', fakeSession);
+    $provide.value('settings', fakeSettings);
     $provide.value('groups', fakeGroups);
     $provide.value('$route', fakeRoute);
     $provide.value('$location', fakeLocation);
@@ -123,46 +123,54 @@ describe('AppController', function () {
     });
   });
 
-  it('watches the identity service for identity change events', function () {
-    createController();
-    assert.calledOnce(fakeIdentity.watch);
-  });
-
   it('auth.status is "unknown" on startup', function () {
     createController();
     assert.equal($scope.auth.status, 'unknown');
   });
 
-  it('sets auth.status to "signed-out" when the identity has been checked but the user is not authenticated', function () {
+  it('sets auth.status to "signed-out" if userid is null', function () {
     createController();
-    var identityCallbackArgs = fakeIdentity.watch.args[0][0];
-    identityCallbackArgs.onready();
-    assert.equal($scope.auth.status, 'signed-out');
+    return fakeSession.load().then(function () {
+      assert.equal($scope.auth.status, 'signed-out');
+    });
   });
 
-  it('sets auth.status to "signed-in" when the identity has been checked and the user is authenticated', function () {
+  it('sets auth.status to "signed-in" if userid is non-null', function () {
+    fakeSession.load = function () {
+      return Promise.resolve({userid: 'acct:jim@hypothes.is'});
+    };
     createController();
-    fakeAuth.userid.withArgs('test-assertion').returns('acct:hey@joe');
-    var identityCallbackArgs = fakeIdentity.watch.args[0][0];
-    identityCallbackArgs.onlogin('test-assertion');
-    assert.equal($scope.auth.status, 'signed-in');
+    return fakeSession.load().then(function () {
+      assert.equal($scope.auth.status, 'signed-in');
+    });
   });
 
   it('sets userid, username, and provider properties at login', function () {
+    fakeSession.load = function () {
+      return Promise.resolve({userid: 'acct:jim@hypothes.is'});
+    };
     createController();
-    fakeAuth.userid.withArgs('test-assertion').returns('acct:hey@joe');
-    var identityCallbackArgs = fakeIdentity.watch.args[0][0];
-    identityCallbackArgs.onlogin('test-assertion');
-    assert.equal($scope.auth.userid, 'acct:hey@joe');
-    assert.equal($scope.auth.username, 'hey');
-    assert.equal($scope.auth.provider, 'joe');
+    return fakeSession.load().then(function () {
+      assert.equal($scope.auth.userid, 'acct:jim@hypothes.is');
+      assert.equal($scope.auth.username, 'jim');
+      assert.equal($scope.auth.provider, 'hypothes.is');
+    });
   });
 
-  it('sets auth.status to "signed-out" at logout', function () {
+  it('updates auth when the logged-in user changes', function () {
     createController();
-    var identityCallbackArgs = fakeIdentity.watch.args[0][0];
-    identityCallbackArgs.onlogout();
-    assert.equal($scope.auth.status, "signed-out");
+    return fakeSession.load().then(function () {
+      $scope.$broadcast(events.USER_CHANGED, {
+        initialLoad: false,
+        userid: 'acct:john@hypothes.is',
+      });
+      assert.deepEqual($scope.auth, {
+        status: 'signed-in',
+        userid: 'acct:john@hypothes.is',
+        username: 'john',
+        provider: 'hypothes.is',
+      });
+    });
   });
 
   it('does not show login form for logged in users', function () {

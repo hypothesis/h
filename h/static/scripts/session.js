@@ -96,7 +96,7 @@ function session($http, $resource, $rootScope, flash, raven, settings) {
       });
     }
     return lastLoad;
-  }
+  };
 
   /**
    * @name session.update()
@@ -131,13 +131,14 @@ function session($http, $resource, $rootScope, flash, raven, settings) {
     if (userChanged) {
       $rootScope.$broadcast(events.USER_CHANGED, {
         initialLoad: isInitialLoad,
+        userid: model.userid,
       });
 
       // associate error reports with the current user in Sentry
       if (resource.state.userid) {
         raven.setUserInfo({
           id: resource.state.userid,
-        })
+        });
       } else {
         raven.setUserInfo(undefined);
       }
@@ -153,7 +154,7 @@ function session($http, $resource, $rootScope, flash, raven, settings) {
     return model;
   };
 
-  function process(data, headersGetter) {
+  function process(data) {
     // Parse as json
     data = angular.fromJson(data);
 

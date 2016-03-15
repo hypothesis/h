@@ -50,6 +50,7 @@
     "node-uuid": "^1.4.3",
     "page": "^1.6.4",
     "postcss": "^5.0.6",
+    "query-string": "^3.0.1",
     "raf": "^3.1.0",
     "raven-js": "^2.0.2",
     "retry": "^0.8.0",
