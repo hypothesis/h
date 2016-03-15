@@ -114,6 +114,102 @@ def test_expand_uri_elastic_document_uris(postgres_enabled, document_model):
     ]
 
 
+@pytest.mark.usefixtures('AnnotationBeforeSaveEvent',
+                         'elastic',
+                         'partial',
+                         'transform')
+class TestCreateAnnotation(object):
+
+    """Tests for create_annotation() when postgres_write is off."""
+
+    def test_it_inits_an_elastic_annotation_model(self, elastic):
+        data = self.annotation_data()
+
+        storage.create_annotation(self.mock_request(), data)
+
+        elastic.Annotation.assert_called_once_with(data)
+
+    def test_it_calls_partial(self, partial):
+        request = self.mock_request()
+
+        storage.create_annotation(request, self.annotation_data())
+
+        partial.assert_called_once_with(storage.fetch_annotation, request)
+
+    def test_it_calls_prepare(self, elastic, partial, transform):
+        storage.create_annotation(self.mock_request(), self.annotation_data())
+
+        transform.prepare.assert_called_once_with(
+            elastic.Annotation.return_value, partial.return_value)
+
+    def test_it_inits_AnnotationBeforeSaveEvent(self,
+                                                AnnotationBeforeSaveEvent,
+                                                elastic):
+        request = self.mock_request()
+
+        storage.create_annotation(request, self.annotation_data())
+
+        AnnotationBeforeSaveEvent.assert_called_once_with(
+            request, elastic.Annotation.return_value)
+
+    def test_it_calls_notify(self, AnnotationBeforeSaveEvent):
+        request = self.mock_request()
+
+        storage.create_annotation(request, self.annotation_data())
+
+        request.registry.notify.assert_called_once_with(
+            AnnotationBeforeSaveEvent.return_value)
+
+    def test_it_calls_annotation_save(self, elastic):
+        storage.create_annotation(self.mock_request(), self.annotation_data())
+
+        elastic.Annotation.return_value.save.assert_called_once_with()
+
+    def test_it_returns_the_annotation(self, elastic):
+        result = storage.create_annotation(self.mock_request(),
+                                           self.annotation_data())
+
+        assert result == elastic.Annotation.return_value
+
+    def mock_request(self):
+        request = DummyRequest(feature=mock.Mock(spec=lambda feature: False,
+                               return_value=False))
+        request.registry.notify = mock.Mock(spec=lambda event: None)
+        return request
+
+    def annotation_data(self):
+        return {'foo': 'bar'}
+
+    @pytest.fixture
+    def AnnotationBeforeSaveEvent(self, request):
+        patcher = patch('h.api.storage.AnnotationBeforeSaveEvent',
+                        autospec=True)
+        AnnotationBeforeSaveEvent = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return AnnotationBeforeSaveEvent
+
+    @pytest.fixture
+    def elastic(self, request):
+        patcher = patch('h.api.storage.elastic', autospec=True)
+        elastic = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return elastic
+
+    @pytest.fixture
+    def partial(self, request):
+        patcher = patch('h.api.storage.partial', autospec=True)
+        partial = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return partial
+
+    @pytest.fixture
+    def transform(self, request):
+        patcher = patch('h.api.storage.transform', autospec=True)
+        transform = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return transform
+
+
 @pytest.fixture
 def document_model(config, request):
     patcher = patch('h.api.models.elastic.Document', autospec=True)
