@@ -6,6 +6,19 @@ h. If you are looking for instructions on deploying h in a production
 environment, please consult the :doc:`/INSTALL` instead.
 
 
+Get the h source code from GitHub
+---------------------------------
+
+Use ``git`` to download the h source code:
+
+.. code-block:: bash
+
+    git clone https://github.com/hypothesis/h.git
+
+This will download the code into an ``h`` directory in your current working
+directory.
+
+
 Requirements
 ------------
 
@@ -177,49 +190,20 @@ system that Docker can be installed on:
 .. _Docker website: https://www.docker.com/
 
 
-Get the h source code from GitHub
----------------------------------
-
-Use ``git`` to download the h source code:
-
-.. code-block:: bash
-
-    git clone https://github.com/hypothesis/h.git
-
-This will download the code into an ``h`` directory in your current working
-directory.
-
-
-Install h into a Python virtualenv
-----------------------------------
-
-Although it is strictly optional, we highly recommend that you install h inside
-a Python "virtualenv". First, follow the instructions for your platform on
-installing virtualenvwrapper_. Then, at a shell, you can create a virtualenv for
-the h application with:
-
-.. code-block:: bash
-
-    mkvirtualenv h
-
-You will notice that the your shell prompt changes to include a (h) symbol. That
-means that you now have your virtual environment activated. This is required for
-running the code.
-
-At any later time, you can activate your virtualenv by running:
-
-.. code-block:: bash
-
-    workon h
-
-.. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.org/en/latest/install.html
-
 Running h
 ---------
 
 Run the following command to start the Hypothesis web service. If this is a
 fresh clone of the repository, this may take some time to run, as it will need
 to install the application dependencies and build the client assets.
+
+.. note::
+    Although it is strictly optional, we highly recommend that you install h
+    inside a Python "virtualenv". Please refer to the `virtualenv environment`_
+    section featured in the Hitchhiker's guide to Python for a comprehensive
+    introduction.
+
+.. _virtualenv environment: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 
 .. code-block:: bash
 
