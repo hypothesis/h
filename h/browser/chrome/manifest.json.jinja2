@@ -4,7 +4,19 @@
   "version": "{{ version }}",
   "version_name": "{{ version }} ({{ version_name }})",
   "manifest_version": 2,
+
+  {% if browser == 'chrome' %}
   "minimum_chrome_version": "38",
+  {% endif %}
+
+  {% if browser == 'firefox' %}
+  "applications": {
+    "gecko": {
+      "id": "firefox@hypothes.is",
+      "strict_min_version": "45.0.0"
+    }
+  },
+  {% endif %}
 
   "description": "Collaboratively annotate, highlight, and tag web pages and PDF documents.",
   "icons": {
@@ -27,7 +39,9 @@
     "script-src 'self' 'unsafe-eval' {{ script_src }}; object-src 'self'; font-src 'self' data:;",
 
   "background": {
+    {% if browser == 'chrome' %}
     "persistent": true,
+    {% endif %}
     "scripts": [
       "settings-data.js",
       "public/scripts/raven.bundle.js",

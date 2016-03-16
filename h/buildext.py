@@ -78,7 +78,7 @@ def copyfilelist(src, dst, filelist):
         shutil.copyfile(srcpath, dstpath)
 
 
-def chrome_manifest(script_host_url, bouncer_url):
+def chrome_manifest(script_host_url, bouncer_url, browser):
     # Chrome is strict about the format of the version string
     if '+' in h.__version__:
         tag, detail = h.__version__.split('+')
@@ -95,7 +95,8 @@ def chrome_manifest(script_host_url, bouncer_url):
     context = {
         'version': version,
         'version_name': version_name,
-        'bouncer': bouncer
+        'bouncer': bouncer,
+        'browser': browser,
     }
 
     if script_host_url:
@@ -138,7 +139,7 @@ def settings_dict(service_url, api_url, sentry_public_dsn):
     return config
 
 
-def build_chrome(args):
+def build_extension(args):
     """
     Build the Chrome extension. You can supply the base URL of an h
     installation with which this extension will communicate, such as
@@ -149,7 +150,7 @@ def build_chrome(args):
     if not service_url.endswith('/'):
         service_url = '{}/'.format(service_url)
 
-    build_dir = 'build/chrome'
+    build_dir = 'build/' + args.browser
     public_dir = os.path.join(build_dir, 'public')
 
     # Prepare a fresh build.
@@ -213,7 +214,8 @@ def build_chrome(args):
     # Render the manifest.
     with codecs.open(os.path.join(build_dir, 'manifest.json'), 'w', 'utf-8') as fp:
         data = chrome_manifest(script_host_url=None,
-                               bouncer_url=args.bouncer_url)
+                               bouncer_url=args.bouncer_url,
+                               browser=args.browser)
         fp.write(data)
 
     # Write build settings to a JSON file
@@ -259,14 +261,12 @@ parser.add_argument('--websocket',
                     metavar='URL')
 parser.add_argument('browser',
                     help='Specifies the browser to build an extension for',
-                    choices=['chrome'])
-
-BROWSERS = {'chrome': build_chrome}
+                    choices=['chrome', 'firefox'])
 
 
 def main():
     args = parser.parse_args()
-    BROWSERS[args.browser](args)
+    build_extension(args)
 
 
 if __name__ == '__main__':
