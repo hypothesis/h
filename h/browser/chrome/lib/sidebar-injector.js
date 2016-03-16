@@ -2,7 +2,6 @@
 
 var detectContentType = require('./detect-content-type');
 var errors = require('./errors');
-var settings = require('./settings');
 var util = require('./util');
 
 var CONTENT_TYPE_HTML = 'HTML';
@@ -12,11 +11,23 @@ function toIIFEString(fn) {
   return '(' + fn.toString() + ')()';
 }
 
-function addMetaTagFn(name, content) {
-  var metaTag = document.createElement('meta');
-  metaTag.name = name;
-  metaTag.content = content;
-  document.head.appendChild(metaTag);
+/**
+ * Extract the value returned by a content script injected via
+ * chrome.tabs.executeScript() into the main frame of a page.
+ *
+ * executeScript() returns an array of results, one per frame which the script
+ * was injected into.
+ *
+ * See https://developer.chrome.com/extensions/tabs#method-executeScript
+ *
+ * @param {Array<any>} result
+ */
+function extractContentScriptResult(result) {
+  if (Array.isArray(result) && result.length > 0) {
+    return result[0];
+  } else {
+    return;
+  }
 }
 
 /* The SidebarInjector is used to deploy and remove the Hypothesis sidebar
@@ -120,8 +131,9 @@ function SidebarInjector(chromeTabs, dependencies) {
         return executeScriptFn(tab.id, {
             code: toIIFEString(detectContentType)
           }).then(function (frameResults) {
-            if (Array.isArray(frameResults)) {
-              return frameResults[0].type;
+            var result = extractContentScriptResult(frameResults);
+            if (result) {
+              return result.type;
             } else {
               // If the content script threw an exception,
               // frameResults may be null or undefined.
@@ -192,7 +204,16 @@ function SidebarInjector(chromeTabs, dependencies) {
       if (type === CONTENT_TYPE_PDF) {
         return injectIntoPDF(tab);
       } else {
-        return injectIntoHTML(tab);
+        return injectIntoHTML(tab).then(function (results) {
+          var result = extractContentScriptResult(results);
+          if (result &&
+              typeof result.installedURL === 'string' &&
+              result.installedURL.indexOf(extensionURL('/')) === -1) {
+            throw new errors.AlreadyInjectedError(
+              'Hypothesis is already injected into this page'
+            );
+          }
+        });
       }
     });
   }
@@ -218,11 +239,7 @@ function SidebarInjector(chromeTabs, dependencies) {
   }
 
   function injectIntoHTML(tab) {
-    return injectScript(tab.id, '/public/config.js').then(function () {
-      return injectScript(tab.id, '/public/embed.js', {
-        'hypothesis-resource-root': extensionURL('/').slice(0,-1),
-      });
-    });
+    return injectScript(tab.id, '/public/embed.js');
   }
 
   function removeFromPDF(tab) {
@@ -235,54 +252,18 @@ function SidebarInjector(chromeTabs, dependencies) {
   }
 
   function removeFromHTML(tab) {
-    return new Promise(function (resolve, reject) {
-      if (!isSupportedURL(tab.url)) {
-        return resolve();
-      }
-      injectScript(tab.id, '/public/destroy.js').then(resolve);
-    });
-  }
-
-  /**
-   * Generates code to add a set of <meta> tags to
-   * the page which expose keys and values from an @p env object.
-   *
-   * ie. Given '{ foo : "bar" }', this function will return
-   * script code to add '<meta name="foo" content="bar">' to the
-   * <head> element of the page.
-   *
-   * This enables configuration data to be shared amongst content
-   * scripts which may be running in isolated worlds (see
-   * https://developer.chrome.com/extensions/content_scripts)
-   */
-  function generateMetaTagCode(env) {
-    var envSetupCode = '';
-    if (env) {
-      var addMetaTagFnStr = addMetaTagFn.toString();
-      Object.keys(env).forEach(function (key) {
-        var content = JSON.stringify(env[key].toString());
-        envSetupCode += '(' + addMetaTagFnStr + ')' +
-          '("' + key + '",' + content + ');';
-      });
+    if (!isSupportedURL(tab.url)) {
+      return Promise.resolve();
     }
-    return envSetupCode;
+    return injectScript(tab.id, '/public/destroy.js');
   }
 
   /**
    * Inject the script from the source file at @p path into the
    * page currently loaded in the tab at the given ID.
-   *
-   * @param env An optional map of keys and values to expose to the
-   *            injected script via the 'window.HYPOTHESIS_ENV' object.
    */
-  function injectScript(tabId, path, env) {
-    var src  = extensionURL(path);
-    var code = generateMetaTagCode(env) +
-      'var script = document.createElement("script");' +
-      'script.src = "{}";' +
-      'document.body.appendChild(script);';
-    var code = code.replace('{}', src);
-    return executeScriptFn(tabId, {code: code});
+  function injectScript(tabId, path) {
+    return executeScriptFn(tabId, {file: path});
   }
 }
 

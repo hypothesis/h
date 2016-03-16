@@ -1,16 +1,19 @@
 (function () {
-// Prevent double embedding
-if (typeof(window.annotator) === 'undefined') {
-    window.annotator = {};
-} else {
-    return;
+// Detect presence of Hypothesis in the page
+var appLinkEl = document.querySelector('link[type="application/annotator+html"]');
+if (appLinkEl) {
+  return {
+    installedURL: appLinkEl.href,
+  };
 }
 
+// When run from a Chrome extension, load
+// resources bundled with the extension
 var resourceRoot;
-var resourceRootTag =
-  document.querySelector('meta[name="hypothesis-resource-root"]');
-if (resourceRootTag) {
-  resourceRoot = resourceRootTag.content;
+if (window.chrome &&
+    window.chrome.extension &&
+    window.chrome.extension.getURL) {
+  resourceRoot = window.chrome.extension.getURL('/');
 }
 
 function resolve(url) {
@@ -88,4 +91,6 @@ baseUrl.type = 'application/annotator+html';
 document.head.appendChild(baseUrl);
 
 window.hypothesisInstall();
+
+return {installedURL: baseUrl.href};
 })();

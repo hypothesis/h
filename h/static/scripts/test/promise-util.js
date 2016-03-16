@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Takes a Promise<T> and returns a Promise<Result>
  * where Result = { result: T } | { error: any }.
@@ -9,7 +11,7 @@ function toResult(promise) {
   return promise.then(function (result) {
     return { result: result };
   }).catch(function (err) {
-    return { error: err }
+    return { error: err };
   });
 }
 

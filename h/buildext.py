@@ -182,9 +182,9 @@ def build_chrome(args):
         copyfilelist(src='build',
                      dst=public_dir,
                      filelist=client_sources)
-        copyfilelist(src='h/static/extension',
+        copyfilelist(src='h/browser/chrome/lib',
                      dst=public_dir,
-                     filelist=['config.js', 'destroy.js'])
+                     filelist=['destroy.js'])
     except MissingSourceFile as e:
         print("Missing source file: {:s}! Have you run `gulp build`?"
               .format(e))
