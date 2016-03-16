@@ -236,7 +236,7 @@ def test_admins_add_returns_index_on_NoSuchUserError(make_admin, admins_index):
 
 
 # The fixtures required to mock all of admins_remove()'s dependencies.
-admins_remove_fixtures = pytest.mark.usefixtures('User')
+admins_remove_fixtures = pytest.mark.usefixtures('User', 'routes_mapper')
 
 
 @admins_remove_fixtures
@@ -245,7 +245,6 @@ def test_admins_remove_calls_get_by_username(User):
                                 Mock(username="bob"),
                                 Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
 
     admin.admins_remove(request)
 
@@ -258,7 +257,6 @@ def test_admins_remove_sets_admin_to_False(User):
                                 Mock(username="bob"),
                                 Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
     user = Mock(admin=True)
     User.get_by_username.return_value = user
 
@@ -273,7 +271,6 @@ def test_admins_remove_returns_redirect_on_success(User):
                                 Mock(username="bob"),
                                 Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
 
     response = admin.admins_remove(request)
 
@@ -284,7 +281,6 @@ def test_admins_remove_returns_redirect_on_success(User):
 def test_admins_remove_returns_redirect_when_too_few_admins(User):
     User.admins.return_value = [Mock(username="fred")]
     request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
 
     response = admin.admins_remove(request)
 
@@ -295,7 +291,6 @@ def test_admins_remove_returns_redirect_when_too_few_admins(User):
 def test_admins_remove_does_not_delete_last_admin(User):
     User.admins.return_value = [Mock(username="fred")]
     request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
     user = Mock(admin=True)
     User.get_by_username.return_value = user
 
@@ -386,7 +381,7 @@ def test_staff_add_returns_index_on_NoSuchUserError(make_staff, staff_index):
 
 
 # The fixtures required to mock all of staff_remove()'s dependencies.
-staff_remove_fixtures = pytest.mark.usefixtures('User')
+staff_remove_fixtures = pytest.mark.usefixtures('User', 'routes_mapper')
 
 
 @staff_remove_fixtures
@@ -395,7 +390,6 @@ def test_staff_remove_calls_get_by_username(User):
                                        Mock(username="bob"),
                                        Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
 
     admin.staff_remove(request)
 
@@ -408,7 +402,6 @@ def test_staff_remove_sets_staff_to_False(User):
                                        Mock(username="bob"),
                                        Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
     user = Mock(staff=True)
     User.get_by_username.return_value = user
 
@@ -423,7 +416,6 @@ def test_staff_remove_returns_redirect_on_success(User):
                                 Mock(username="bob"),
                                 Mock(username="frank")]
     request = DummyRequest(params={"remove": "fred"})
-    request.route_url = Mock()
 
     response = admin.admins_remove(request)
 
