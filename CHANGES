@@ -1,3 +1,32 @@
+Unreleased
+==========
+
+Features
+--------
+
+- The 'Adder' that appears when selecting text has a new, clearer design
+  (#3078).
+
+- The 'Link' button on annotation cards now displays links to annotations in
+  context (feature flagged: direct_linking).
+
+Bug fixes
+---------
+
+- The Chrome extension now correctly indicates when it was not injected into a
+  page because another Hypothesis client is already present.
+
+- Fixed an issue where the client displayed an inconsistent login state when
+  switching accounts whilst Hypothesis was active in multiple tabs (#2924).
+
+- Fixed an issue where private group annotations were not loaded correctly
+  after switching user accounts (#3083).
+
+Miscellanea
+-----------
+
+- The undocumented window.hypothesisInstall() function has been removed.
+
 0.12.0 (2016-03-14)
 ===================
 
