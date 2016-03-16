@@ -1,3 +1,5 @@
+'use strict';
+
 var raven = require('../../../static/scripts/raven');
 
 function ExtensionError(message) {
@@ -30,6 +32,12 @@ function BlockedSiteError(message) {
 }
 BlockedSiteError.prototype = Object.create(ExtensionError.prototype);
 
+function AlreadyInjectedError(message) {
+  Error.apply(this, arguments);
+  this.message = message;
+}
+AlreadyInjectedError.prototype = Object.create(ExtensionError.prototype);
+
 /**
  * Returns true if @p err is a recognized 'expected' error.
  */
@@ -57,6 +65,7 @@ function report(error, when, context) {
 
 module.exports = {
   ExtensionError: ExtensionError,
+  AlreadyInjectedError: AlreadyInjectedError,
   LocalFileError: LocalFileError,
   NoFileAccessError: NoFileAccessError,
   RestrictedProtocolError: RestrictedProtocolError,

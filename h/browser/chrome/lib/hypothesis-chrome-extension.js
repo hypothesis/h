@@ -218,6 +218,13 @@ function HypothesisChromeExtension(dependencies) {
       });
       return sidebar.injectIntoTab(tab)
         .catch(function (err) {
+          if (err instanceof errors.AlreadyInjectedError) {
+            state.setState(tab.id, {
+              state: TabState.states.INACTIVE,
+              extensionSidebarInstalled: false,
+            });
+            return;
+          }
           errors.report(err, 'Injecting Hypothesis sidebar', {
             url: tab.url,
           });

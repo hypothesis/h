@@ -33,8 +33,10 @@ Annotator.Plugin.CrossFrame.Bridge = require('../bridge');
 Annotator.Plugin.CrossFrame.Discovery = require('../discovery');
 
 var docs = 'https://h.readthedocs.org/en/latest/hacking/customized-embedding.html';
+var appLinkEl =
+  document.querySelector('link[type="application/annotator+html"]');
 var options = {
-  app: jQuery('link[type="application/annotator+html"]').attr('href')
+  app: appLinkEl.href,
 };
 
 if (window.hasOwnProperty('hypothesisConfig')) {
@@ -54,5 +56,11 @@ Annotator.noConflict().$.noConflict(true)(function() {
     Klass = options.constructor;
     delete options.constructor;
   }
+
   window.annotator = new Klass(document.body, options);
+  appLinkEl.addEventListener('destroy', function () {
+    appLinkEl.parentElement.removeChild(appLinkEl);
+    window.annotator.destroy();
+    window.annotator = undefined;
+  });
 });

@@ -1,34 +1,22 @@
-/**
- * Creates an <iframe> for testing the effects of code injected
- * into the page by the sidebar injector
- */
-function createTestFrame() {
-  var frame = document.createElement('iframe');
-  document.body.appendChild(frame);
-  frame.contentDocument.body.appendChild = function () {
-    // no-op to avoid trying to actually load <script> tags injected into
-    // the page
-  };
-  return frame;
-}
+'use strict';
+
+var toResult = require('../../../static/scripts/test/promise-util').toResult;
 
 // The root URL for the extension returned by the
 // extensionURL(path) fake
 var EXTENSION_BASE_URL = 'chrome-extension://hypothesis';
 
 describe('SidebarInjector', function () {
-  'use strict';
-
   var errors = require('../lib/errors');
   var SidebarInjector = require('../lib/sidebar-injector');
   var injector;
   var fakeChromeTabs;
   var fakeFileAccess;
 
-  // the content type that the detection script injected into
+  // The content type that the detection script injected into
   // the page should report ('HTML' or 'PDF')
   var contentType;
-  // the return value from the content script which checks whether
+  // The return value from the content script which checks whether
   // the sidebar has already been injected into the page
   var isAlreadyInjected;
 
@@ -36,20 +24,28 @@ describe('SidebarInjector', function () {
   // code injected into the page by the sidebar
   var contentFrame;
 
+  // Mock return value from embed.js when injected into page
+  var embedScriptReturnValue;
+
   beforeEach(function () {
     contentType = 'HTML';
     isAlreadyInjected = false;
     contentFrame = undefined;
+    embedScriptReturnValue = {
+      installedURL: EXTENSION_BASE_URL + '/public/app.html',
+    };
 
     var executeScriptSpy = sinon.spy(function (tabId, details, callback) {
       if (contentFrame) {
         contentFrame.contentWindow.eval(details.code);
       }
 
-      if (details.code.match(/window.annotator/)) {
-        callback([isAlreadyInjected]);
-      } else if (details.code.match(/detectContentType/)) {
+      if (details.code && details.code.match(/detectContentType/)) {
         callback([{type: contentType}]);
+      } else if (details.file && details.file.match(/embed/)) {
+        callback([embedScriptReturnValue]);
+      } else if (details.file && details.file.match(/destroy/)) {
+        callback([isAlreadyInjected]);
       } else {
         callback([false]);
       }
@@ -75,12 +71,6 @@ describe('SidebarInjector', function () {
     }
   });
 
-  // Used when asserting rejected promises to raise an error if the resolved
-  // path is taken. Otherwise Mocha will just assume the test passed.
-  function assertReject() {
-    assert(false, 'Expected the promise to reject the call');
-  }
-
   describe('.injectIntoTab', function () {
     var urls = [
       'chrome://version',
@@ -91,12 +81,12 @@ describe('SidebarInjector', function () {
     urls.forEach(function (url) {
       it('bails early when trying to load an unsupported url: ' + url, function () {
         var spy = fakeChromeTabs.executeScript;
-        return injector.injectIntoTab({id: 1, url: url}).then(
-          assertReject, function (err) {
-            assert.instanceOf(err, errors.RestrictedProtocolError);
-            assert.notCalled(spy);
-          }
-        );
+        return toResult(injector.injectIntoTab({id: 1, url: url}))
+          .then(function (result) {
+          assert.ok(result.error);
+          assert.instanceOf(result.error, errors.RestrictedProtocolError);
+          assert.notCalled(spy);
+        });
       });
     });
 
@@ -121,29 +111,25 @@ describe('SidebarInjector', function () {
       });
     });
 
-    describe('when viewing an remote HTML page', function () {
+    describe('when viewing a remote HTML page', function () {
       it('injects hypothesis into the page', function () {
         var spy = fakeChromeTabs.executeScript;
         var url = 'http://example.com/foo.html';
 
         return injector.injectIntoTab({id: 1, url: url}).then(function() {
           assert.calledWith(spy, 1, {
-            code: sinon.match('/public/config.js')
-          });
-          assert.calledWith(spy, 1, {
-            code: sinon.match('/public/embed.js')
+            file: sinon.match('/public/embed.js')
           });
         });
       });
 
-      it('adds a hypothesis-resource-root <meta> tag to the page', function () {
-        contentFrame = createTestFrame();
-        var url = 'http://example.com/foo.html';
-        return injector.injectIntoTab({id: 1, url: url}).then(function () {
-          var resourceRoot = contentFrame.contentDocument.querySelector('meta');
-          assert.ok(resourceRoot);
-          assert.equal(resourceRoot.name, 'hypothesis-resource-root');
-          assert.equal(resourceRoot.content, EXTENSION_BASE_URL);
+      it('reports an error if Hypothesis is already embedded', function () {
+        embedScriptReturnValue = {installedURL: 'https://hypothes.is/app.html'};
+        var url = 'http://example.com';
+        return toResult(injector.injectIntoTab({id: 1, url: url}))
+          .then(function (result) {
+          assert.ok(result.error);
+          assert.instanceOf(result.error, errors.AlreadyInjectedError);
         });
       });
     });
@@ -176,8 +162,8 @@ describe('SidebarInjector', function () {
           var url = 'file://foo.pdf';
 
           var promise = injector.injectIntoTab({id: 1, url: url});
-          return promise.then(assertReject, function (err) {
-            assert.instanceOf(err, errors.NoFileAccessError);
+          return toResult(promise).then(function (result) {
+            assert.instanceOf(result.error, errors.NoFileAccessError);
             assert.notCalled(fakeChromeTabs.executeScript);
           });
         });
@@ -187,18 +173,8 @@ describe('SidebarInjector', function () {
       it('returns an error', function () {
         var url = 'file://foo.html';
         var promise = injector.injectIntoTab({id: 1, url: url});
-        return promise.then(assertReject, function (err) {
-          assert.instanceOf(err, errors.LocalFileError);
-        });
-      });
-
-      it('retuns an error before loading the config', function () {
-        var url = 'file://foo.html';
-        var promise = injector.injectIntoTab({id: 1, url: url});
-        return promise.then(assertReject, function (err) {
-          assert.isFalse(fakeChromeTabs.executeScript.calledWith(1, {
-            code: sinon.match(/config\.js/),
-          }));
+        return toResult(promise).then(function (result) {
+          assert.instanceOf(result.error, errors.LocalFileError);
         });
       });
     });
@@ -245,7 +221,7 @@ describe('SidebarInjector', function () {
         isAlreadyInjected = true;
         return injector.removeFromTab({id: 1, url: 'http://example.com/foo.html'}).then(function () {
           assert.calledWith(fakeChromeTabs.executeScript, 1, {
-            code: sinon.match('/public/destroy.js')
+            file: sinon.match('/public/destroy.js')
           });
         });
       });
