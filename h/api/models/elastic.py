@@ -289,6 +289,14 @@ class Document(document.Document):
         transformed = []
         links = self.get('link', [])
 
+        # add self-claim uri when claimant is not missing
+        if self.claimant:
+            transformed.append({'claimant': self.claimant,
+                                'uri': self.claimant,
+                                'type': 'self-claim',
+                                'created': self.created,
+                                'updated': self.updated})
+
         # When document link is just a string, transform it to a link object with
         # an href, so it gets further processed as either a self-claim or another
         # claim.
@@ -296,8 +304,7 @@ class Document(document.Document):
             links = [{"href": links}]
 
         for link in links:
-            # disregard self-claim urls as they're are being added separately
-            # later on.
+            # disregard self-claim urls as they have already been added
             if link.keys() == ['href'] and link['href'] == self.claimant:
                 continue
 
@@ -350,13 +357,6 @@ class Document(document.Document):
                                 'type': 'dc-doi',
                                 'created': self.created,
                                 'updated': self.updated})
-
-        # add self claim
-        transformed.append({'claimant': self.claimant,
-                            'uri': self.claimant,
-                            'type': 'self-claim',
-                            'created': self.created,
-                            'updated': self.updated})
 
         return transformed
 

@@ -335,11 +335,18 @@ class TestDocument(object):
 
         assert doc.document_uris == expected
 
+    def test_uris_discard_self_claim_when_claimant_is_missing(self):
+        doc = Document({'link': [{'href': 'http://example.com'}]})
+        expected = [DocumentURI({'claimant': None,
+                                 'uri': 'http://example.com',
+                                 'type': None,
+                                 'content_type': None,
+                                 'created': None, 'updated': None})]
+        assert doc.document_uris == expected
+
     def test_uris_disregard_doi_links(self):
         doc = Document({'link': [{'href': 'doi:foobar'}]})
-        # it always includes a self-claim, not removing doi links would result
-        # in a length of 2
-        assert len(doc.document_uris) == 1
+        assert len(doc.document_uris) == 0
 
     def test_uris_str_link(self):
         doc = Document({'link': 'http://example.com'},
