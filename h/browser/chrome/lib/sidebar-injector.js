@@ -40,6 +40,10 @@ function addJSONScriptTagFn(name, content) {
 function extractContentScriptResult(result) {
   if (Array.isArray(result) && result.length > 0) {
     return result[0];
+  } else if (typeof result === 'object') {
+    // Firefox currently returns an object instead of
+    // an array from executeScript()
+    return result;
   } else {
     return;
   }

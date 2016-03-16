@@ -92,7 +92,11 @@ module.exports = class Discovery
     #
     #   https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
     #
-    if origin is 'null'
+    # When sending messages to or from a Firefox WebExtension, current
+    # versions of Firefox have a bug that causes the origin check to fail even
+    # though the target and actual origins of the message match.
+    if origin is 'null' || origin.match('moz-extension:') ||
+       window.location.protocol == 'moz-extension:'
       origin = '*'
 
     # Check if the message is at all related to our discovery mechanism
