@@ -2,10 +2,18 @@
 
 function value(selection) {
   if (Object.keys(selection).length) {
-    return selection;
+    return Object.freeze(selection);
   } else {
     return null;
   }
+}
+
+function initialSelection(settings) {
+  var selection = {};
+  if (settings.annotations) {
+    selection[settings.annotations] = true;
+  }
+  return value(selection);
 }
 
 /**
@@ -17,7 +25,9 @@ function value(selection) {
  * - The state of the bucket bar
  *
  */
-module.exports = function () {
+
+// @ngInject
+module.exports = function (settings) {
   return {
     visibleHighlights: false,
 
@@ -25,7 +35,7 @@ module.exports = function () {
     focusedAnnotationMap: null,
 
     // Contains a map of annotation id:true pairs.
-    selectedAnnotationMap: null,
+    selectedAnnotationMap: initialSelection(settings),
 
     /**
      * @ngdoc method
@@ -62,17 +72,19 @@ module.exports = function () {
     },
 
     /**
-     * @ngdoc method
-     * @name annotationUI.selectAnnotations
-     * @returns nothing
-     * @description Takes an array of annotation objects and uses them to
-     * set the selectedAnnotationMap property.
+     * Set the currently selected annotation IDs.
+     *
+     * @param {Array<string|{id:string}>} annotations - Annotations or IDs
+     *        of annotations to select.
      */
     selectAnnotations: function (annotations) {
       var selection = {};
-      for (var i = 0, annotation; i < annotations.length; i++) {
-        annotation = annotations[i];
-        selection[annotation.id] = true;
+      for (var i = 0; i < annotations.length; i++) {
+        if (typeof annotations[i] === 'string') {
+          selection[annotations[i]] = true;
+        } else {
+          selection[annotations[i].id] = true;
+        }
       }
       this.selectedAnnotationMap = value(selection);
     },

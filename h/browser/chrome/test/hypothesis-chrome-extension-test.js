@@ -35,7 +35,6 @@ describe('HypothesisChromeExtension', function () {
   var fakeHelpPage;
   var fakeTabStore;
   var fakeTabState;
-  var fakeTabErrorCache;
   var fakeBrowserAction;
   var fakeSidebarInjector;
 
@@ -96,7 +95,7 @@ describe('HypothesisChromeExtension', function () {
     };
 
     function FakeTabState(initialState, onchange) {
-      fakeTabState.onChangeHandler = onchange
+      fakeTabState.onChangeHandler = onchange;
     }
     FakeTabState.prototype = fakeTabState;
 
@@ -206,13 +205,13 @@ describe('HypothesisChromeExtension', function () {
       }
 
       beforeEach(function () {
-        fakeTabState.clearTab = sandbox.spy()
+        fakeTabState.clearTab = sandbox.spy();
         fakeTabState.isTabActive = function (tabId) {
           return tabState[tabId].state === TabState.states.ACTIVE;
         };
         fakeTabState.isTabErrored = function (tabId) {
           return tabState[tabId].state === TabState.states.ERRORED;
-        }
+        };
         fakeTabState.getState = function (tabId) {
           return tabState[tabId];
         };
@@ -242,6 +241,13 @@ describe('HypothesisChromeExtension', function () {
       it('resets the tab state to active if errored', function () {
         var tab = createTab({state: TabState.states.ERRORED});
         fakeChromeTabs.onUpdated.listener(tab.id, {status: 'loading'}, tab);
+        assert.equal(tabState[tab.id].state, TabState.states.ACTIVE);
+      });
+
+      it('injects the sidebar if a direct link is present', function () {
+        var tab = createTab();
+        tab.url += '#annotations:456';
+        fakeChromeTabs.onUpdated.listener(tab.id, {status: 'complete'}, tab);
         assert.equal(tabState[tab.id].state, TabState.states.ACTIVE);
       });
     });

@@ -24,7 +24,7 @@ function authStateFromUserID(userid) {
 module.exports = function AppController(
   $controller, $document, $location, $rootScope, $route, $scope,
   $window, annotationUI, auth, drafts, features, groups,
-  session
+  session, settings
 ) {
   $controller('AnnotationUIController', {$scope: $scope});
 
@@ -41,8 +41,6 @@ module.exports = function AppController(
 
   // Allow all child scopes access to the session
   $scope.session = session;
-
-  var isFirstRun = $location.search().hasOwnProperty('firstrun');
 
   // App dialogs
   $scope.accountDialog = {visible: false};
@@ -73,7 +71,7 @@ module.exports = function AppController(
     // update the auth info in the top bar and show the login form
     // after first install of the extension.
     $scope.auth = authStateFromUserID(state.userid);
-    if (!state.userid && isFirstRun) {
+    if (!state.userid && settings.firstRun) {
       $scope.login();
     }
   });

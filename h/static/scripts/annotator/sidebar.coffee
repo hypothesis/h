@@ -24,7 +24,7 @@ module.exports = class Sidebar extends Host
     super
     this.hide()
 
-    if options.firstRun
+    if options.firstRun || options.annotations
       this.on 'panelReady', => this.show()
 
     if @plugins.BucketBar?

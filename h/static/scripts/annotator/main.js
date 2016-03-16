@@ -1,6 +1,7 @@
+'use strict';
+
 require('../polyfills');
 
-var extend = require('extend');
 var Annotator = require('annotator');
 
 // Polyfills
@@ -32,23 +33,11 @@ Annotator.Plugin.CrossFrame.AnnotationSync = require('../annotation-sync');
 Annotator.Plugin.CrossFrame.Bridge = require('../bridge');
 Annotator.Plugin.CrossFrame.Discovery = require('../discovery');
 
-var docs = 'https://h.readthedocs.org/en/latest/hacking/customized-embedding.html';
 var appLinkEl =
   document.querySelector('link[type="application/annotator+html"]');
-var options = {
-  app: appLinkEl.href,
-};
-
-if (window.hasOwnProperty('hypothesisConfig')) {
-  if (typeof window.hypothesisConfig === 'function') {
-    extend(options, window.hypothesisConfig());
-  } else {
-    throw new TypeError('hypothesisConfig must be a function, see: ' + docs);
-  }
-}
+var options = require('./config')(window);
 
 Annotator.noConflict().$.noConflict(true)(function() {
-  'use strict';
   var Klass = window.PDFViewerApplication ?
       Annotator.PdfSidebar :
       Annotator.Sidebar;
