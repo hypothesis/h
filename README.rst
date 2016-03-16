@@ -13,6 +13,11 @@ Hypothesis
 .. image:: https://img.shields.io/badge/IRC-%23hypothes.is-blue.svg
    :target: `#hypothes.is`_
    :alt: #hypothes.is IRC channel
+.. image:: https://img.shields.io/badge/license-BSD-blue.svg
+   :target: https://github.com/hypothesis/h/blob/master/LICENSE
+   :alt: License badge
+.. image:: https://img.shields.io/badge/python-2.7-blue.svg
+   :alt: Python version badge
 
 
 About
