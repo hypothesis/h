@@ -35,6 +35,10 @@ function injectScript(src) {
   var script = document.createElement('script');
   script.type = 'text/javascript';
   script.src = resolve(src);
+
+  // Set 'async' to false to maintain execution order of scripts.
+  // See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
+  script.async = false;
   document.head.appendChild(script);
 };
 
