@@ -298,7 +298,8 @@ def test_urifilter_inactive_when_no_uri_param():
     """
     When there's no `uri` parameter, return None.
     """
-    urifilter = query.UriFilter()
+    request = mock.Mock()
+    urifilter = query.UriFilter(request)
 
     assert urifilter({"foo": "bar"}) is None
 
@@ -313,16 +314,17 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
     It should expand the input URI before searching, and normalize the results
     of the expansion.
     """
-    storage.expand_uri.side_effect = lambda x: [
+    request = mock.Mock()
+    storage.expand_uri.side_effect = lambda _, x: [
         "http://giraffes.com/",
         "https://elephants.com/",
     ]
     uri.normalize.side_effect = lambda x: x[:-1]  # Strip the trailing slash
-    urifilter = query.UriFilter()
+    urifilter = query.UriFilter(request)
 
     result = urifilter({"uri": "http://example.com/"})
 
-    storage.expand_uri.assert_called_with("http://example.com/")
+    storage.expand_uri.assert_called_with(request, "http://example.com/")
 
     assert result == {"terms":
         {"target.scope": ["http://giraffes.com", "https://elephants.com"]}

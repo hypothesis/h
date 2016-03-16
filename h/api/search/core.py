@@ -76,7 +76,7 @@ def search(request, params, private=True, separate_replies=False):
 def default_querybuilder(request, private=True):
     builder = query.Builder()
     builder.append_filter(query.AuthFilter(request, private=private))
-    builder.append_filter(query.UriFilter())
+    builder.append_filter(query.UriFilter(request))
     builder.append_filter(query.GroupFilter())
     builder.append_matcher(query.AnyMatcher())
     builder.append_matcher(query.TagsMatcher())

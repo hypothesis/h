@@ -157,12 +157,21 @@ class UriFilter(object):
     A filter that selects only annotations where the 'uri' parameter matches.
     """
 
+    def __init__(self, request):
+        """Initialize a new UriFilter.
+
+        :param request: the pyramid.request object
+
+        """
+        self.request = request
+
     def __call__(self, params):
         uristr = params.pop('uri', None)
         if uristr is None:
             return None
 
-        scopes = [uri.normalize(u) for u in storage.expand_uri(uristr)]
+        uris = storage.expand_uri(self.request, uristr)
+        scopes = [uri.normalize(u) for u in uris]
         return {"terms": {"target.scope": scopes}}
 
 

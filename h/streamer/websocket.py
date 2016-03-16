@@ -71,7 +71,7 @@ def handle_message(message):
             jsonschema.validate(payload, filter.SCHEMA)
 
             # Add backend expands for clauses
-            _expand_clauses(payload)
+            _expand_clauses(socket.request, payload)
 
             socket.filter = filter.FilterHandler(payload)
         elif msg_type == 'client_id':
@@ -83,13 +83,13 @@ def handle_message(message):
         raise
 
 
-def _expand_clauses(payload):
+def _expand_clauses(request, payload):
     for clause in payload['clauses']:
         if clause['field'] == '/uri':
-            _expand_uris(clause)
+            _expand_uris(request, clause)
 
 
-def _expand_uris(clause):
+def _expand_uris(request, clause):
     uris = clause['value']
     expanded = set()
 
@@ -97,6 +97,6 @@ def _expand_uris(clause):
         uris = [uris]
 
     for item in uris:
-        expanded.update(storage.expand_uri(item))
+        expanded.update(storage.expand_uri(request, item))
 
     clause['value'] = list(expanded)
