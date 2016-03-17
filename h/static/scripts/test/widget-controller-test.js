@@ -69,7 +69,10 @@ describe('WidgetController', function () {
         return Object.keys(this.selectedAnnotationMap).length > 0;
       },
     };
-    fakeCrossFrame = {frames: []};
+    fakeCrossFrame = {
+      call: sinon.stub(),
+      frames: [],
+    };
     fakeDrafts = {
       unsaved: sandbox.stub()
     };
@@ -206,6 +209,27 @@ describe('WidgetController', function () {
         assert.calledWith(fakeAnnotationMapper.loadAnnotations,
           [{group: "private-group", id: "http://example.com456"}]);
       });
+    });
+  });
+
+  describe('when an annotation is anchored', function () {
+    it('focuses and scrolls to the annotation if already selected', function () {
+      var uri = 'http://example.com';
+      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeCrossFrame.frames.push({uri: uri});
+      var annot = {
+        $$tag: 'atag',
+        id: '123',
+      };
+      fakeThreading.idTable = {
+        '123': {
+          message: annot,
+        },
+      };
+      $scope.$digest();
+      $rootScope.$broadcast(events.ANNOTATIONS_SYNCED, [{tag: 'atag'}]);
+      assert.calledWith(fakeCrossFrame.call, 'focusAnnotations', ['atag']);
+      assert.calledWith(fakeCrossFrame.call, 'scrollToAnnotation', 'atag');
     });
   });
 

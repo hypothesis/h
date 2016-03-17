@@ -1,7 +1,5 @@
 'use strict';
 
-var angular = require('angular');
-
 var events = require('./events');
 var SearchClient = require('./search-client');
 
@@ -28,6 +26,36 @@ module.exports = function WidgetController(
   $scope.threadRoot = threading.root;
   $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
 
+  function focusAnnotation(annotation) {
+    var highlights = [];
+    if (annotation) {
+      highlights = [annotation.$$tag];
+    }
+    crossframe.call('focusAnnotations', highlights);
+  }
+
+  function scrollToAnnotation(annotation) {
+    if (!annotation) {
+      return;
+    }
+    crossframe.call('scrollToAnnotation', annotation.$$tag);
+  }
+
+  /**
+   * Returns the Annotation object for the first annotation in the
+   * selected annotation set. Note that 'first' refers to the order
+   * of annotations passed to annotationUI when selecting annotations,
+   * not the order in which they appear in the document.
+   */
+  function firstSelectedAnnotation() {
+    if (annotationUI.selectedAnnotationMap) {
+      var id = Object.keys(annotationUI.selectedAnnotationMap)[0];
+      return threading.idTable[id] && threading.idTable[id].message;
+    } else {
+      return null;
+    }
+  }
+
   function _resetAnnotations() {
     // Unload all the annotations
     annotationMapper.unloadAnnotations(threading.annotationList());
@@ -48,6 +76,8 @@ module.exports = function WidgetController(
     searchClients.push(searchClient);
     searchClient.on('results', function (results) {
       if (annotationUI.hasSelectedAnnotations()) {
+        // Focus the group containing the selected annotation and filter
+        // annotations to those from this group
         var groupID = groupIDFromSelection(annotationUI.selectedAnnotationMap,
           results);
         if (!groupID) {
@@ -55,16 +85,18 @@ module.exports = function WidgetController(
           // loading annotations for the currently focused group
           groupID = groups.focused().id;
         }
-        groups.focus(groupID);
         results = results.filter(function (result) {
           return result.group === groupID;
         });
+        groups.focus(groupID);
       }
+
       if (results.length) {
         annotationMapper.loadAnnotations(results);
       }
     });
     searchClient.on('end', function () {
+      // Remove client from list of active search clients
       searchClients.splice(searchClients.indexOf(searchClient), 1);
     });
     searchClient.get({uri: uri, group: group});
@@ -113,6 +145,23 @@ module.exports = function WidgetController(
     }
   };
 
+  // When a direct-linked annotation is successfully anchored in the page,
+  // focus and scroll to it
+  $rootScope.$on(events.ANNOTATIONS_SYNCED, function (event, tags) {
+    var selectedAnnot = firstSelectedAnnotation();
+    if (!selectedAnnot) {
+      return;
+    }
+    var matchesSelection = tags.some(function (tag) {
+      return tag.tag === selectedAnnot.$$tag;
+    });
+    if (!matchesSelection) {
+      return;
+    }
+    focusAnnotation(selectedAnnot);
+    scrollToAnnotation(selectedAnnot);
+  });
+
   $scope.$on(events.GROUP_FOCUSED, function () {
     if (searchClients.length) {
       // If the current group changes as a _result_ of loading annotations,
@@ -133,19 +182,8 @@ module.exports = function WidgetController(
     return crossframe.frames;
   }, loadAnnotations);
 
-  $scope.focus = function (annotation) {
-    var highlights = [];
-    if (angular.isObject(annotation)) {
-      highlights = [annotation.$$tag];
-    }
-    return crossframe.call('focusAnnotations', highlights);
-  };
-
-  $scope.scrollTo = function (annotation) {
-    if (angular.isObject(annotation)) {
-      return crossframe.call('scrollToAnnotation', annotation.$$tag);
-    }
-  };
+  $scope.focus = focusAnnotation;
+  $scope.scrollTo = scrollToAnnotation;
 
   $scope.hasFocus = function (annotation) {
     if (!annotation || !$scope.focusedAnnotations) {
@@ -154,7 +192,7 @@ module.exports = function WidgetController(
     return annotation.$$tag in $scope.focusedAnnotations;
   };
 
-  $rootScope.$on('beforeAnnotationCreated', function (event, data) {
+  $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
     if (data.$highlight || (data.references && data.references.length > 0)) {
       return;
     }
