@@ -12,7 +12,21 @@
 }
 
 .share-link:hover {
-  text-decoration: underline;
+  width: 100%;
+  color: $gray-dark;
+}
+
+.share-dialog-link {
+  font-size: $body1-font-size;
+  margin: 10px;
+  padding: 5px;
+  color: $text-color;
+  border: 1px solid $gray-lighter;
+  border-radius: 2px;
+  background: #F2F2F2;
+}
+
+.share-dialog-link:hover {
   color: $gray-dark;
 }
 
@@ -25,6 +39,30 @@
   border: 1px solid $gray-lighter;
   border-radius: 2px;
   width: 100%;
+}
+
+.share-dialog-target {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 1px solid $gray-lighter;
+  font-size: $body1-font-size;
+  padding: 10px;
+}
+
+.share-dialog-target__label {
+  font-weight: bold;
+}
+
+.share-dialog-target__icon {
+  color: #7A7A7A;
+  text-decoration: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.share-dialog-target__icon:hover {
+  color: #202020;
 }
 
 .share-link-icons {

@@ -155,6 +155,11 @@ $annotation-card-left-padding: 10px;
   }
 
   &.open .share-dialog {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &.open .share-dialog--actions {
     display: block;
   }
 }
@@ -162,18 +167,20 @@ $annotation-card-left-padding: 10px;
 .share-dialog {
   position: absolute;
   right: 0;
-  bottom: 100%;
-  padding: 3px;
+  bottom: 130%;
   z-index: 1;
-  display: block;
   background: $white;
   border: 1px solid $gray-lighter;
   border-radius: 2px;
   white-space: nowrap;
+  width: 200px;
+  font-size: $body1-font-size;
+  cursor: default;
+  box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.15);
 
   &:after, &:before {
     top: 100%;
-    right: 20px;
+    right: 10px;
     border: solid transparent;
     content: " ";
     height: 0;
@@ -195,13 +202,18 @@ $annotation-card-left-padding: 10px;
     border-width: 6px;
     margin-right: -6px;
   }
+}
 
-  input {
-    padding: 0;
-    width: 220px;
-    border: none;
-    color: $text-color;
-  }
+.share-dialog--actions {
+  padding: 3px;
+  width: inherit;
+}
+
+.share-dialog__link {
+  padding: 0;
+  width: 220px;
+  border: none;
+  color: $text-color;
 }
 
 .annotation-collapsed-replies {
