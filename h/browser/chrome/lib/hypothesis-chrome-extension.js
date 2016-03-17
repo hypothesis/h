@@ -183,7 +183,7 @@ function HypothesisChromeExtension(dependencies) {
     if (changeInfo.status === TAB_STATUS_LOADING) {
       resetTabState(tabId, tab.url);
     } else if (changeInfo.status === TAB_STATUS_COMPLETE) {
-      var newActiveState = state.getState(tabId);
+      var newActiveState = state.getState(tabId).state;
       if (urlHasAnnotationFragment(tab.url)) {
         newActiveState = TabState.states.ACTIVE;
       }

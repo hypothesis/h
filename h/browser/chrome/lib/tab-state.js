@@ -1,6 +1,5 @@
 'use strict';
 
-var assign = require('core-js/modules/$.object-assign');
 var isShallowEqual = require('is-equal-shallow');
 
 var uriInfo = require('./uri-info');
@@ -63,7 +62,7 @@ function TabState(initialState, onchange) {
   this.load = function (newState) {
     var newCurrentState = {};
     Object.keys(newState).forEach(function (tabId) {
-      newCurrentState[tabId] = assign({}, DEFAULT_STATE, newState[tabId]);
+      newCurrentState[tabId] = Object.assign({}, DEFAULT_STATE, newState[tabId]);
     });
     currentState = newCurrentState;
   };
@@ -96,7 +95,7 @@ function TabState(initialState, onchange) {
 
   this.annotationCount = function(tabId) {
     return this.getState(tabId).annotationCount;
-  }
+  };
 
   this.isTabActive = function (tabId) {
     return this.getState(tabId).state === states.ACTIVE;
@@ -121,7 +120,7 @@ function TabState(initialState, onchange) {
   this.setState = function (tabId, stateUpdate) {
     var newState;
     if (stateUpdate) {
-      newState = assign({}, this.getState(tabId), stateUpdate);
+      newState = Object.assign({}, this.getState(tabId), stateUpdate);
       if (newState.state !== states.ERRORED) {
         newState.error = undefined;
       }
@@ -136,7 +135,7 @@ function TabState(initialState, onchange) {
     if (_this.onchange) {
       _this.onchange(tabId, newState);
     }
-  }
+  };
 
   /**
    * Query the server for the annotation count for a URL
@@ -152,7 +151,7 @@ function TabState(initialState, onchange) {
       self.setState(tabId, { annotationCount: result.total });
     }).catch(function (err) {
       self.setState(tabId, { annotationCount: 0 });
-      console.error('Failed to fetch annotation count for %s: %s', tabUrl, err)
+      console.error('Failed to fetch annotation count for %s: %s', tabUrl, err);
     });
   };
 

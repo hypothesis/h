@@ -1,6 +1,5 @@
 'use strict';
 
-var assign = require('core-js/modules/$.object-assign');
 var proxyquire = require('proxyquire');
 
 var toResult = require('../../../static/scripts/test/promise-util').toResult;
@@ -23,6 +22,14 @@ function FakeListener() {
   this.addListener = function (callback) {
     this.listener = callback;
   };
+}
+
+/**
+ * Return true if a tab state is valid
+ * @param {TabState} state
+ */
+function isValidState(state) {
+  return Object.values(TabState.states).indexOf(state.state) !== -1;
 }
 
 describe('HypothesisChromeExtension', function () {
@@ -196,7 +203,7 @@ describe('HypothesisChromeExtension', function () {
       var tabState = {};
       function createTab(initialState) {
         var tabId = 1;
-        tabState[tabId] = assign({
+        tabState[tabId] = Object.assign({
           state: TabState.states.INACTIVE,
           annotationCount: 0,
           ready: false,
@@ -216,7 +223,8 @@ describe('HypothesisChromeExtension', function () {
           return tabState[tabId];
         };
         fakeTabState.setState = function (tabId, state) {
-          tabState[tabId] = assign(tabState[tabId], state);
+          tabState[tabId] = Object.assign(tabState[tabId], state);
+          assert(isValidState(tabState[tabId]));
         };
         ext.listen({addEventListener: sandbox.stub()});
       });
