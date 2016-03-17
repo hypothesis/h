@@ -72,12 +72,15 @@ function groups(localStorage, session, settings, $rootScope, $http) {
 
   /** Set the group with the passed id as the currently focused group. */
   function focus(id) {
-   var g = get(id);
-   if (g) {
-     focusedGroup = g;
-     localStorage.setItem(STORAGE_KEY, g.id);
-     $rootScope.$broadcast(events.GROUP_FOCUSED, g.id);
-   }
+    var prevFocused = focused();
+    var g = get(id);
+    if (g) {
+      focusedGroup = g;
+      localStorage.setItem(STORAGE_KEY, g.id);
+      if (prevFocused.id !== g.id) {
+        $rootScope.$broadcast(events.GROUP_FOCUSED, g.id);
+      }
+    }
   }
 
   // reset the focused group if the user leaves it
