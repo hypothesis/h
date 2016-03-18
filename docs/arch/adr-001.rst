@@ -1,0 +1,80 @@
+ADR 1: PostgreSQL persistence for annotations
+=============================================
+
+Context
+-------
+
+The annotations stored by the Hypothesis web service are arguably its most
+critical data. Until now they have been stored in an Elasticsearch index,
+primarily as a result of historical accident (this is how `annotator-store`_,
+which was originally intended as a demonstrator application, stored
+annotations). Alongside, we store "document metadata" which describes
+relationships between different URIs, as scraped from metadata within annotated
+pages.
+
+While storing annotation data directly in Elasticsearch makes for a very simple
+JSON API (data is passed essentially unaltered by the web application straight
+to Elasticsearch) it has a number of disadvantages, including:
+
+1. The persistence guarantees made by Elasticsearch are weak relative to most
+   databases, and while many `data loss bugs`_ have been fixed, it is not
+   unreasonable to have ongoing concerns about durability of data in
+   Elasticsearch.
+
+2. The lack of database-enforced schema validation means that maintaining data
+   validity becomes an application-layer concern. The fact that Elasticsearch
+   also lacks transactional write capabilities makes certain kinds of validation
+   checks nearly impossible to implement correctly.
+
+3. Serving as both primary persistence store and search index causes tension
+   between the desire to keep data normalised (to simplify the process of
+   ensuring data consistency), and to keep data in a format suitable for
+   efficient search, which usually implies denormalisation.
+
+4. As requirements for search and query change, it is desirable to be able to
+   iterate on the format of the search index. When the search index is also the
+   primary data store, this introduces additional risks which typically deter or
+   at least increase the cost of such iteration.
+
+5. Lastly, making changes to the internal schema of annotation data in
+   Elasticsearch requires the creation of custom in-house data migration tools.
+   In contrast, most relational database systems have established schema and
+   data migration libraries available.
+
+.. _annotator-store: https://github.com/openannotation/annotator-store.
+.. _data loss bugs: https://aphyr.com/posts/317-jepsen-elasticsearch
+
+Decision
+--------
+
+We will migrate all annotation data, and all associated document metadata, into
+a PostgreSQL database, which will serve as the primary data store for such data.
+
+We will continue to use Elasticsearch as a search index, but the data stored
+within will be "ephemeral" -- that is, we will always be able to regenerate it
+from data stored in PostgreSQL.
+
+The internal schemas of the data stored in PostgreSQL will be designed to
+simplify data manipulation while ensuring self-consistency.
+
+We will build appropriate tools to ensure that the Elasticsearch index is kept
+up-to-date as data in the PostgreSQL database changes.
+
+Status
+------
+
+Accepted.
+
+Consequences
+------------
+
+These changes will make it easier and safer to iterate on the internal schemas
+of annotation storage, thanks to improved migration tooling for PostgreSQL and
+the presence of transactional updates.
+
+They will also make it easier and safe to iterate on the format of the search
+index used to search annotations, thanks to the ephemeral nature of the data in
+the search index.
+
+The potential future minimal requirements for a program which reuses the code
+which serves our "annotation API" now include PostgreSQL.
