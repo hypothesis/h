@@ -27,14 +27,13 @@ def test_model_sorts_groups(User):
     assert ids == ['__world__', 'c', 'a', 'b']
 
 
-@mock.patch('h.session.features', autospec=True)
-def test_model_includes_features(features, fake_user):
+def test_model_includes_features(fake_user):
     feature_dict = {
         'feature_one': True,
         'feature_two': False,
     }
-    features.all = mock.Mock(return_value=feature_dict)
     request = mock.Mock(authenticated_user=fake_user)
+    request.feature.all.return_value = feature_dict
 
     assert session.model(request)['features'] == feature_dict
 

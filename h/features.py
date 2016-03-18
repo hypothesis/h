@@ -100,34 +100,53 @@ class Feature(db.Base):
         return '<Feature {f.name} everyone={f.everyone}>'.format(f=self)
 
 
-def flag_enabled(request, name):
-    """
-    Determine if the named feature is enabled for the current request.
+class Client(object):
+    def __init__(self, request):
+        self.request = request
 
-    If the feature has no override in the database, it will default to False.
-    Features must be documented, and an UnknownFeatureError will be thrown if
-    an undocumented feature is interrogated.
-    """
-    if name not in FEATURES:
-        raise UnknownFeatureError(
-            '{0} is not a valid feature name'.format(name))
+        all_ = request.db.query(Feature).filter(
+            Feature.name.in_(FEATURES.keys())).all()
+        self._cache = {f.name: f for f in all_}
 
-    feat = Feature.get_by_name(name)
+    def __call__(self, name):
+        return self.enabled(name)
 
-    # Features that don't exist in the database are off.
-    if feat is None:
+    def enabled(self, name):
+        """
+        Determine if the named feature is enabled for the current request.
+
+        If the feature has no override in the database, it will default to
+        False. Features must be documented, and an UnknownFeatureError will be
+        thrown if an undocumented feature is interrogated.
+        """
+        if name not in FEATURES:
+            raise UnknownFeatureError(
+                '{0} is not a valid feature name'.format(name))
+
+        feature = self._cache.get(name)
+
+        # Features that don't exist in the database are off.
+        if feature is None:
+            return False
+        # Features that are on for everyone are on.
+        if feature.everyone:
+            return True
+        # Features that are on for admin are on if the current user is an
+        # admin.
+        if feature.admins and role.Admin in self.request.effective_principals:
+            return True
+        # Features that are on for staff are on if the current user is a staff
+        # member.
+        if feature.staff and role.Staff in self.request.effective_principals:
+            return True
         return False
-    # Features that are on for everyone are on.
-    if feat.everyone:
-        return True
-    # Features that are on for admin are on if the current user is an admin.
-    if feat.admins and role.Admin in request.effective_principals:
-        return True
-    # Features that are on for staff are on if the current user is a staff
-    # member.
-    if feat.staff and role.Staff in request.effective_principals:
-        return True
-    return False
+
+    def all(self):
+        """
+        Returns a dict mapping feature flag names to enabled states
+        for the user associated with a given request.
+        """
+        return {name: self.enabled(name) for name in FEATURES.keys()}
 
 
 def remove_old_flags():
@@ -163,14 +182,6 @@ def remove_old_flags_on_boot(event):
     transaction.commit()
 
 
-def all(request):
-    """
-    Returns a dict mapping feature flag names to enabled states
-    for the user associated with a given request.
-    """
-    return {k: flag_enabled(request, k) for k in FEATURES.keys()}
-
-
 # Deprecated dedicated endpoint for feature flag data,
 # kept for compatibility with older clients (<= 0.8.6).
 # Newer clients get feature flag data as part of the session data
@@ -181,10 +192,10 @@ def all(request):
              renderer='json',
              http_cache=(0, {'no_store': False}))
 def features_status(request):
-    return all(request)
+    return request.feature.all()
 
 
 def includeme(config):
-    config.add_request_method(flag_enabled, name='feature')
+    config.add_request_method(Client, name='feature', reify=True)
     config.add_route('features_status', '/app/features')
     config.scan(__name__)
