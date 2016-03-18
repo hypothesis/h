@@ -1,10 +1,7 @@
 'use strict';
 
 var proxyquire = require('proxyquire');
-
-function noCallThru(stub) {
-  return Object.assign(stub, {'@noCallThru':true});
-}
+var noCallThru = require('./util').noCallThru;
 
 function fakeExceptionData(scriptURL) {
   return {
@@ -51,10 +48,10 @@ describe('raven', function () {
       Raven.setDataCallback(fakeAngularTransformer);
     });
 
-    raven = proxyquire('../raven', {
-      'raven-js': noCallThru(fakeRavenJS),
-      'raven-js/plugins/angular': noCallThru(fakeAngularPlugin),
-    });
+    raven = proxyquire('../raven', noCallThru({
+      'raven-js': fakeRavenJS,
+      'raven-js/plugins/angular': fakeAngularPlugin,
+    }));
   });
 
   describe('.install()', function () {

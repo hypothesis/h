@@ -6,10 +6,7 @@ var proxyquire = require('proxyquire');
 var EventEmitter = require('tiny-emitter');
 
 var events = require('../events');
-
-function noCallThru(stub) {
-  return Object.assign(stub, {'@noCallThru':true});
-}
+var noCallThru = require('./util').noCallThru;
 
 var searchClients;
 function FakeSearchClient(resource, opts) {
@@ -45,10 +42,12 @@ describe('WidgetController', function () {
 
   before(function () {
     angular.module('h', [])
-      .controller('WidgetController', proxyquire('../widget-controller', {
-        angular: noCallThru(angular),
-        './search-client': noCallThru(FakeSearchClient),
-      }));
+      .controller('WidgetController', proxyquire('../widget-controller',
+        noCallThru({
+          angular: angular,
+          './search-client': FakeSearchClient,
+        })
+      ));
   });
 
   beforeEach(angular.mock.module('h'));
