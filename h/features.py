@@ -101,12 +101,20 @@ class Feature(db.Base):
 
 
 class Client(object):
+    """
+    A Client instance provides access to the state of a feature flag based on
+    the current request.
+
+    For scenarios where a request object can be long-lived (e.g. in workers),
+    it is advisable to reload the cache with `reload()` before executing any
+    other code.
+    """
+
     def __init__(self, request):
         self.request = request
+        self._cache = {}
 
-        all_ = request.db.query(Feature).filter(
-            Feature.name.in_(FEATURES.keys())).all()
-        self._cache = {f.name: f for f in all_}
+        self.reload()
 
     def __call__(self, name):
         return self.enabled(name)
@@ -147,6 +155,12 @@ class Client(object):
         for the user associated with a given request.
         """
         return {name: self.enabled(name) for name in FEATURES.keys()}
+
+    def reload(self):
+        """Reloads the internal cache"""
+        all_ = self.request.db.query(Feature).filter(
+            Feature.name.in_(FEATURES.keys())).all()
+        self._cache = {f.name: f for f in all_}
 
 
 def remove_old_flags():

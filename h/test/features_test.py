@@ -29,30 +29,9 @@ def features_pending_removal_override(request):
 
 
 class TestClient(object):
-    def test_init_loads_features(self):
-        db.Session.add(features.Feature(name='notification'))
-        db.Session.flush()
-
-        client = self.client()
-        assert client._cache.keys() == ['notification']
-
-    def test_init_skips_database_features_missing_from_dict(self):
-        """
-        Test that init does not load features that are still in the database
-        but not in the FEATURES dict anymore
-        """
-        db.Session.add(features.Feature(name='new_homepage'))
-        db.Session.flush()
-
-        client = self.client()
-        assert len(client._cache) == 0
-
-    def test_init_skips_pending_removal_features(self):
-        db.Session.add(features.Feature(name='abouttoberemoved'))
-        db.Session.flush()
-
-        client = self.client()
-        assert len(client._cache) == 0
+    def test_init_loads_features(self, client_reload):
+        features.Client(DummyRequest())
+        client_reload.assert_called_with()
 
     def test_enabled_raises_for_undocumented_feature(self, client):
         with pytest.raises(features.UnknownFeatureError):
@@ -63,37 +42,37 @@ class TestClient(object):
             client.enabled('abouttoberemoved')
 
     def test_enabled_false_if_not_in_database(self, client):
-        assert client.enabled('notification') == False
+        assert client.enabled('notification') is False
 
     def test_enabled_false_if_everyone_false(self, client):
         client._cache['notification'] = features.Feature(everyone=False)
-        assert client.enabled('notification') == False
+        assert client.enabled('notification') is False
 
     def test_enabled_true_if_everyone_true(self, client):
         client._cache['notification'] = features.Feature(everyone=True)
-        assert client.enabled('notification') == True
+        assert client.enabled('notification') is True
 
     def test_enabled_false_when_admins_true_normal_request(self, client):
         client._cache['notification'] = features.Feature(admins=True)
-        assert client.enabled('notification') == False
+        assert client.enabled('notification') is False
 
     def test_enabled_true_when_admins_true_admin_request(self,
                                                          client,
                                                          authn_policy):
         client._cache['notification'] = features.Feature(admins=True)
         authn_policy.effective_principals.return_value = [role.Admin]
-        assert client.enabled('notification') == True
+        assert client.enabled('notification') is True
 
     def test_enabled_false_when_staff_true_normal_request(self, client):
         client._cache['notification'] = features.Feature(staff=True)
-        assert client.enabled('notification') == False
+        assert client.enabled('notification') is False
 
     def test_enabled_true_when_staff_true_staff_request(self,
                                                         client,
                                                         authn_policy):
         client._cache['notification'] = features.Feature(staff=True)
         authn_policy.effective_principals.return_value = [role.Staff]
-        assert client.enabled('notification') == True
+        assert client.enabled('notification') is True
 
     def test_all_checks_enabled(self, client, enabled):
         client.all()
@@ -102,9 +81,43 @@ class TestClient(object):
     def test_all_omits_features_pending_removal(self, client):
         assert client.all() == {'notification': False}
 
+    def test_reload_loads_features(self, client):
+        db.Session.add(features.Feature(name='notification'))
+        db.Session.flush()
+
+        client.reload()
+        assert client._cache.keys() == ['notification']
+
+    def test_reload_skips_database_features_missing_from_dict(self, client):
+        """
+        Test that reload does not load features that are still in the database
+        but not in the FEATURES dict anymore
+        """
+        db.Session.add(features.Feature(name='notification'))
+        db.Session.add(features.Feature(name='new_homepage'))
+        db.Session.flush()
+
+        client.reload()
+        assert len(client._cache) == 1
+
+    def test_reload_skips_pending_removal_features(self, client):
+        db.Session.add(features.Feature(name='notification'))
+        db.Session.add(features.Feature(name='abouttoberemoved'))
+        db.Session.flush()
+
+        client.reload()
+        assert len(client._cache) == 1
+
     @pytest.fixture
     def client(self):
         return features.Client(DummyRequest(db=db.Session))
+
+    @pytest.fixture
+    def client_reload(self, request, client):
+        patcher = mock.patch('h.features.Client.reload')
+        method = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return method
 
     @pytest.fixture
     def enabled(self, request, client):
