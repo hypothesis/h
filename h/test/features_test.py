@@ -28,107 +28,90 @@ def features_pending_removal_override(request):
     request.addfinalizer(patcher.stop)
 
 
-def test_flag_enabled_raises_for_undocumented_feature():
-    request = DummyRequest()
+class TestClient(object):
+    def test_init_loads_features(self):
+        db.Session.add(features.Feature(name='notification'))
+        db.Session.flush()
 
-    with pytest.raises(features.UnknownFeatureError):
-        features.flag_enabled(request, 'wibble')
+        client = self.client()
+        assert client._cache.keys() == ['notification']
 
+    def test_init_skips_database_features_missing_from_dict(self):
+        """
+        Test that init does not load features that are still in the database
+        but not in the FEATURES dict anymore
+        """
+        db.Session.add(features.Feature(name='new_homepage'))
+        db.Session.flush()
 
-def test_flag_enabled_raises_for_feature_pending_removal():
-    request = DummyRequest()
+        client = self.client()
+        assert len(client._cache) == 0
 
-    with pytest.raises(features.UnknownFeatureError):
-        features.flag_enabled(request, 'abouttoberemoved')
+    def test_init_skips_pending_removal_features(self):
+        db.Session.add(features.Feature(name='abouttoberemoved'))
+        db.Session.flush()
 
+        client = self.client()
+        assert len(client._cache) == 0
 
-def test_flag_enabled_looks_up_feature_by_name(feature_model):
-    request = DummyRequest()
+    def test_enabled_raises_for_undocumented_feature(self, client):
+        with pytest.raises(features.UnknownFeatureError):
+            client.enabled('wibble')
 
-    features.flag_enabled(request, 'notification')
+    def test_enabled_raises_for_feature_pending_removal(self, client):
+        with pytest.raises(features.UnknownFeatureError):
+            client.enabled('abouttoberemoved')
 
-    feature_model.get_by_name.assert_called_with('notification')
+    def test_enabled_false_if_not_in_database(self, client):
+        assert client.enabled('notification') == False
 
+    def test_enabled_false_if_everyone_false(self, client):
+        client._cache['notification'] = features.Feature(everyone=False)
+        assert client.enabled('notification') == False
 
-def test_flag_enabled_false_if_not_in_database(feature_model):
-    feature_model.get_by_name.return_value = None
-    request = DummyRequest()
+    def test_enabled_true_if_everyone_true(self, client):
+        client._cache['notification'] = features.Feature(everyone=True)
+        assert client.enabled('notification') == True
 
-    result = features.flag_enabled(request, 'notification')
+    def test_enabled_false_when_admins_true_normal_request(self, client):
+        client._cache['notification'] = features.Feature(admins=True)
+        assert client.enabled('notification') == False
 
-    assert not result
+    def test_enabled_true_when_admins_true_admin_request(self,
+                                                         client,
+                                                         authn_policy):
+        client._cache['notification'] = features.Feature(admins=True)
+        authn_policy.effective_principals.return_value = [role.Admin]
+        assert client.enabled('notification') == True
 
+    def test_enabled_false_when_staff_true_normal_request(self, client):
+        client._cache['notification'] = features.Feature(staff=True)
+        assert client.enabled('notification') == False
 
-def test_flag_enabled_false_if_everyone_false(feature_model):
-    request = DummyRequest()
+    def test_enabled_true_when_staff_true_staff_request(self,
+                                                        client,
+                                                        authn_policy):
+        client._cache['notification'] = features.Feature(staff=True)
+        authn_policy.effective_principals.return_value = [role.Staff]
+        assert client.enabled('notification') == True
 
-    result = features.flag_enabled(request, 'notification')
+    def test_all_checks_enabled(self, client, enabled):
+        client.all()
+        enabled.assert_called_with('notification')
 
-    assert not result
+    def test_all_omits_features_pending_removal(self, client):
+        assert client.all() == {'notification': False}
 
+    @pytest.fixture
+    def client(self):
+        return features.Client(DummyRequest(db=db.Session))
 
-def test_flag_enabled_true_if_everyone_true(feature_model):
-    feature_model.get_by_name.return_value.everyone = True
-    request = DummyRequest()
-
-    result = features.flag_enabled(request, 'notification')
-
-    assert result
-
-
-def test_flag_enabled_false_when_admins_true_normal_request(feature_model):
-    feature_model.get_by_name.return_value.admins = True
-    request = DummyRequest()
-
-    result = features.flag_enabled(request, 'notification')
-
-    assert not result
-
-
-def test_flag_enabled_true_when_admins_true_admin_request(authn_policy,
-                                                          feature_model):
-    authn_policy.effective_principals.return_value = [role.Admin]
-    feature_model.get_by_name.return_value.admins = True
-    request = DummyRequest()
-
-    result = features.flag_enabled(request, 'notification')
-
-    assert result
-
-
-def test_flag_enabled_false_when_staff_true_normal_request(feature_model):
-    """It should return False for staff features if user is not staff.
-
-    If a feature is enabled for staff, and the user is not a staff member,
-    flag_enabled() should return False.
-
-    """
-    # The feature is enabled for staff members.
-    feature_model.get_by_name.return_value.staff = True
-
-    request = DummyRequest()
-
-    assert features.flag_enabled(request, 'notification') is False
-
-
-def test_flag_enabled_true_when_staff_true_staff_request(authn_policy,
-                                                         feature_model):
-    # The authorized user is a staff member.
-    authn_policy.effective_principals.return_value = [role.Staff]
-
-    # The feature is enabled for staff.
-    feature_model.get_by_name.return_value.staff = True
-
-    request = DummyRequest()
-
-    assert features.flag_enabled(request, 'notification') is True
-
-
-@pytest.mark.usefixtures('feature_model')
-def test_all_omits_features_pending_removal():
-    request = DummyRequest()
-
-    assert features.all(request) == {'notification': False}
+    @pytest.fixture
+    def enabled(self, request, client):
+        patcher = mock.patch('h.features.Client.enabled')
+        method = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return method
 
 
 def test_remove_old_flag_removes_old_flags():
