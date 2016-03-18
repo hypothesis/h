@@ -44,7 +44,7 @@ class Worker(GeventPyWSGIWorker):
 def create_app(global_config, **settings):
     config = configure(settings=settings)
 
-    config.add_request_method(features.flag_enabled, name='feature')
+    config.add_request_method(features.Client, name='feature', reify=True)
 
     config.include('h.auth')
     config.include('h.sentry')
