@@ -45,47 +45,56 @@ class TestClient(object):
         assert client.enabled('notification') is False
 
     def test_enabled_false_if_everyone_false(self, client):
-        client._cache['notification'] = features.Feature(everyone=False)
+        self.with_feature(features.Feature(name='notification', everyone=False),
+                          client=client)
         assert client.enabled('notification') is False
 
     def test_enabled_true_if_everyone_true(self, client):
-        client._cache['notification'] = features.Feature(everyone=True)
+        self.with_feature(features.Feature(name='notification', everyone=True),
+                          client=client)
         assert client.enabled('notification') is True
 
     def test_enabled_false_when_admins_true_normal_request(self, client):
-        client._cache['notification'] = features.Feature(admins=True)
+        self.with_feature(features.Feature(name='notification', admins=True),
+                          client=client)
         assert client.enabled('notification') is False
 
     def test_enabled_true_when_admins_true_admin_request(self,
                                                          client,
                                                          authn_policy):
-        client._cache['notification'] = features.Feature(admins=True)
         authn_policy.effective_principals.return_value = [role.Admin]
+        self.with_feature(features.Feature(name='notification', admins=True),
+                          client=client)
         assert client.enabled('notification') is True
 
     def test_enabled_false_when_staff_true_normal_request(self, client):
-        client._cache['notification'] = features.Feature(staff=True)
+        self.with_feature(features.Feature(name='notification', staff=True),
+                          client=client)
+
         assert client.enabled('notification') is False
 
     def test_enabled_true_when_staff_true_staff_request(self,
                                                         client,
                                                         authn_policy):
-        client._cache['notification'] = features.Feature(staff=True)
         authn_policy.effective_principals.return_value = [role.Staff]
+        self.with_feature(features.Feature(name='notification', staff=True),
+                          client=client)
+
         assert client.enabled('notification') is True
 
     def test_all_checks_enabled(self, client, enabled):
-        client.all()
-        enabled.assert_called_with('notification')
-
-    def test_all_omits_features_pending_removal(self, client):
-        assert client.all() == {'notification': False}
+        cache = mock.Mock()
+        client._cache = cache
+        assert client.all() == cache
 
     def test_reload_loads_features(self, client):
         db.Session.add(features.Feature(name='notification'))
         db.Session.flush()
 
         client.reload()
+        assert client._cache.keys() == ['notification']
+
+    def test_reload_includes_features_not_in_db(self, client):
         assert client._cache.keys() == ['notification']
 
     def test_reload_skips_database_features_missing_from_dict(self, client):
@@ -107,6 +116,11 @@ class TestClient(object):
 
         client.reload()
         assert len(client._cache) == 1
+
+    def with_feature(self, feature, client):
+        db.Session.add(feature)
+        db.Session.flush()
+        client.reload()
 
     @pytest.fixture
     def client(self):
