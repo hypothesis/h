@@ -125,6 +125,18 @@ describe('WidgetController', function () {
   });
 
   describe('loadAnnotations', function () {
+    it('unloads any existing annotations', function () {
+      // When new clients connect, all existing annotations should be unloaded
+      // before reloading annotations for each currently-connected client
+      fakeCrossFrame.frames.push({uri: 'http://example.com/page-a'});
+      $scope.$digest();
+      fakeAnnotationMapper.unloadAnnotations = sandbox.spy();
+      fakeCrossFrame.frames.push({uri: 'http://example.com/page-b'});
+      $scope.$digest();
+      assert.calledWith(fakeAnnotationMapper.unloadAnnotations,
+        fakeThreading.annotationList());
+    });
+
     it('loads all annotations for a frame', function () {
       var uri = 'http://example.com';
       fakeCrossFrame.frames.push({uri: uri});

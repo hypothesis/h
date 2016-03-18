@@ -108,7 +108,9 @@ module.exports = function WidgetController(
    * @param {Array<{uri:string}>} frames - Hypothesis client frames
    *        to load annotations for.
    */
-  var loadAnnotations = function (frames) {
+  function loadAnnotations(frames) {
+    _resetAnnotations();
+
     searchClients.forEach(function (client) {
       client.cancel();
     });
@@ -173,7 +175,6 @@ module.exports = function WidgetController(
     }
 
     annotationUI.clearSelectedAnnotations();
-    _resetAnnotations();
     return loadAnnotations(crossframe.frames);
   });
 
