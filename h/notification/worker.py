@@ -18,6 +18,8 @@ def run(request):
     round-robin fashion.
     """
     def handle_message(reader, message=None):
+        request.feature.reload()
+
         if message is None:
             return
         with request.tm:
