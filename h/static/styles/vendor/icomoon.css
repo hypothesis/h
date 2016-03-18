@@ -20,6 +20,9 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+.h-icon-google-plus:before {
+    content: "\e906";
+}
 .h-icon-annotate:before {
     content: "\e903";
 }
@@ -41,7 +44,7 @@
 .h-icon-cancel-outline:before {
     content: "\e619";
 }
-.h-icon-google-plus:before {
+.h-icon-google-plus-old:before {
     content: "\ea88";
 }
 .h-icon-facebook:before {

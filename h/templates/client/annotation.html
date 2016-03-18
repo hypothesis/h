@@ -154,18 +154,50 @@
     <div class="annotation-actions" ng-if="!vm.isSaving && !vm.editing() && vm.id()">
       <div ng-show="vm.isSaving">Saving…</div>
       <button class="small btn btn-clean"
-              ng-click="vm.reply()"
-              ><i class="h-icon-reply btn-icon"></i> Reply</button>
-      <span class="share-dialog-wrapper">
+        ng-click="vm.reply()">
+        <i class="h-icon-reply btn-icon"></i>
+        Reply
+      </button>
+      <span class="share-dialog-wrapper" ng-if="!vm.feature('direct_linking')">
         <button class="small btn btn-clean"
-                ng-click="vm.share($event)"
-                ><i class="h-icon-link btn-icon"></i> Link</button>
-        <span class="share-dialog" ng-click="$event.stopPropagation()">
+          ng-click="vm.share($event)">
+          <i class="h-icon-link btn-icon"></i>
+          Link
+        </button>
+        <span class="share-dialog share-dialog--actions" ng-click="$event.stopPropagation()">
           <a target="_blank"
-             class="h-icon-link"
-             ng-href="{{vm.annotationURI}}"
-             title="Open in new tab"></a>
-          <input type="text" value="{{vm.annotationURI}}" readonly>
+            class="h-icon-link"
+            ng-href="{{vm.annotationURI}}"
+            title="Open in new tab">
+          </a>
+          <input class="share-dialog__link" type="text" value="{{vm.annotationURI}}" readonly>
+        </span>
+      </span>
+      <span class="share-dialog-wrapper" ng-if="vm.feature('direct_linking')">
+        <button class="small btn btn-clean"
+          ng-click="vm.share($event)">
+          <i class="h-icon-share btn-icon"></i>
+        </button>
+        <span class="share-dialog" ng-click="$event.stopPropagation()">
+          <span class="share-dialog-target">
+            <span class="share-dialog-target__label">Share:</span>
+            <a href="https://twitter.com/intent/tweet?url={{vm.annotationURI}}"
+              target="_blank"
+              title="Tweet link"
+              class="share-dialog-target__icon h-icon-twitter"></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{vm.annotationURI}}"
+              target="_blank"
+              title="Share on Facebook"
+              class="share-dialog-target__icon h-icon-facebook"></a>
+            <a href="https://plus.google.com/share?url={{vm.annotationURI}}"
+              target="_blank"
+              title="Post on Google Plus"
+              class="share-dialog-target__icon h-icon-google-plus"></a>
+            <a href="mailto:?subject=Let's%20Annotate&amp;body={{vm.annotationURI}}"
+              title="Share via email"
+              class="share-dialog-target__icon h-icon-mail"></a>
+          </span>
+          <input class="share-dialog-link" type="text" value="{{vm.annotationURI}}" readonly>
         </span>
       </span>
       <button class="small btn btn-clean"
