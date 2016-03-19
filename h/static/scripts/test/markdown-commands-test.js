@@ -84,6 +84,10 @@ describe('markdown commands', function () {
       'preserves the selection': {
         input: 'one <sel>two\nthree </sel>four',
         output: '> one <sel>two\n> three </sel>four',
+      },
+      'inserts the block prefix before an empty selection': {
+        input: '<sel></sel>',
+        output: '> <sel></sel>',
       }
     };
 
