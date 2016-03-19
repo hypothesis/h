@@ -713,6 +713,10 @@ function AnnotationController(
     $scope.$digest();
   };
 
+  vm.setText = function (text) {
+    vm.form.text = text;
+  };
+
   init();
 }
 

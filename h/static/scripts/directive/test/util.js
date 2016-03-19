@@ -96,8 +96,8 @@ function createDirective(document, name, attrs, initialScope, initialHtml, opts)
   opts = opts || {};
   opts.parentElement = opts.parentElement || document.body;
 
-  // create a template consisting of a single element, the directive
-  // we want to create and compile it
+  // Create a template consisting of a single element, the directive
+  // we want to create and compile it.
   var $compile;
   var $scope;
   angular.mock.inject(function (_$compile_, _$rootScope_) {
@@ -109,15 +109,20 @@ function createDirective(document, name, attrs, initialScope, initialHtml, opts)
     var attrName = hyphenate(key);
     var attrKey = key;
     if (typeof attrs[key] === 'function') {
+      // If the input property is a function, generate a function expression,
+      // eg. `<my-component on-event="onEvent()">`
       attrKey += '()';
     } else if (attrs[key].callback) {
+      // If the input property is a function which accepts arguments,
+      // generate the argument list.
+      // eg. `<my-component on-change="onChange(newValue)">`
       attrKey += '(' + attrs[key].args.join(',') + ')';
     }
     templateElement.setAttribute(attrName, attrKey);
   });
   templateElement.innerHTML = initialHtml;
 
-  // add the element to the document's body so that
+  // Add the element to the document's body so that
   // it responds to events, becomes visible, reports correct
   // values for its dimensions etc.
   opts.parentElement.appendChild(templateElement);

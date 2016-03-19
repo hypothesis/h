@@ -15,11 +15,10 @@ var mediaEmbedder = require('../media-embedder');
  * the markdown editor.
  */
 // @ngInject
-module.exports = function($filter, $sanitize, $sce) {
+module.exports = function($filter, $sanitize) {
   return {
-    link: function(scope, elem, attr, ctrl) {
-      if (!(typeof ctrl !== "undefined" && ctrl !== null)) { return; }
-
+    controller: function () {},
+    link: function(scope, elem) {
       var input = elem[0].querySelector('.js-markdown-input');
       var inputEl = angular.element(input);
       var output = elem[0].querySelector('.js-markdown-preview');
@@ -128,17 +127,8 @@ module.exports = function($filter, $sanitize, $sce) {
       });
 
       scope.preview = false;
-      scope.togglePreview = function() {
-        if (!scope.readOnly) {
-          scope.preview = !scope.preview;
-          if (scope.preview) {
-            output.style.height = input.style.height;
-            return ctrl.$render();
-          } else {
-            input.style.height = output.style.height;
-            focusInput();
-          }
-        }
+      scope.togglePreview = function () {
+        scope.preview = !scope.preview;
       };
 
       var renderInlineMath = function(textToCheck) {
@@ -229,38 +219,39 @@ module.exports = function($filter, $sanitize, $sce) {
         return domElement.innerHTML;
       };
 
-      // Re-render the markdown when the view needs updating.
-      ctrl.$render = function() {
-        if (!scope.readOnly && !scope.preview) {
-          input.value = ctrl.$viewValue || '';
-        }
-        var value = ctrl.$viewValue || '';
-        output.innerHTML = renderMathAndMarkdown(value);
-      };
-
       // React to the changes to the input
-      inputEl.bind('blur change keyup', function() {
-        ctrl.$setViewValue(input.value);
+      inputEl.bind('blur change keyup', function () {
+        scope.onEditText({text: input.value});
       });
 
-      // Reset height of output div in case it has been changed.
-      // Re-render when it becomes uneditable.
-      // Auto-focus the input box when the widget becomes editable.
-      scope.$watch('readOnly', function(readOnly) {
+      // Re-render the markdown when the view needs updating.
+      scope.$watch('text', function () {
+        output.innerHTML = renderMathAndMarkdown(scope.text || '');
+      });
+
+      scope.showEditor = function () {
+        return !scope.readOnly && !scope.preview;
+      };
+
+      scope.$watch('readOnly', function () {
+        // Exit preview mode when editor stops
         scope.preview = false;
-        output.style.height = "";
-        ctrl.$render();
-        if (!readOnly) {
+      });
+
+      scope.$watch('showEditor()', function (show) {
+        if (show) {
+          input.value = scope.text || '';
           focusInput();
         }
       });
     },
 
-    require: '?ngModel',
     restrict: 'E',
     scope: {
       readOnly: '<',
-      required: '@'
+      text: '<?',
+      onEditText: '&',
+      required: '@',
     },
     template: require('../../../templates/client/markdown.html'),
   };
