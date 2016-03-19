@@ -31,7 +31,7 @@ module.exports = class CrossFrame
             parsed[k] = v
           parsed
         emit: (args...) ->
-          $rootScope.$apply ->
+          $rootScope.$applyAsync ->
             $rootScope.$emit.call($rootScope, args...)
         on: (event, handler) ->
           $rootScope.$on(event, (event, args...) -> handler.apply(this, args))
