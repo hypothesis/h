@@ -59,7 +59,8 @@
            ng-if="vm.hasQuotes()">
     <excerpt collapsed-height="40"
              inline-controls="true"
-             overflow-hysteresis="20">
+             overflow-hysteresis="20"
+             content-data="selector.exact">
       <blockquote class="annotation-quote"
                   ng-bind-html="selector.exact"
                   ng-repeat="selector in target.selector
@@ -77,7 +78,8 @@
              on-collapsible-changed="vm.setBodyCollapsible(collapsible)"
              collapse="vm.collapseBody"
              collapsed-height="400"
-             overflow-hysteresis="20">
+             overflow-hysteresis="20"
+             content-data="vm.form.text">
       <markdown ng-model="vm.form.text"
                 read-only="!vm.editing()">
       </markdown>

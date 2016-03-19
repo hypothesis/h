@@ -2,9 +2,23 @@
 
 var angular = require('angular');
 
-var assign = require('core-js/modules/$.object-assign');
 var util = require('./util');
 var excerpt = require('../excerpt');
+
+/**
+ * Wait for an <excerpt> to recompute its overflowing state.
+ *
+ * This happens asynchronously after an <excerpt> is created in order to wait
+ * for Angular directives used by the <excerpt>'s content to fully resolve.
+ *
+ * @return {Promise}
+ */
+function waitForLayout(element) {
+  element.scope.$digest();
+  return new Promise(function (resolve) {
+    window.requestAnimationFrame(resolve);
+  });
+}
 
 describe('excerpt directive', function () {
   var SHORT_DIV = '<div id="foo" style="height:5px;"></div>';
@@ -19,7 +33,7 @@ describe('excerpt directive', function () {
       collapsedHeight: 40,
       inlineControls: false,
     };
-    attrs = assign(defaultAttrs, attrs);
+    attrs = Object.assign(defaultAttrs, attrs);
     return util.createDirective(document, 'excerpt', attrs, {}, content);
   }
 
@@ -27,9 +41,21 @@ describe('excerpt directive', function () {
     return el.querySelector('.excerpt').offsetHeight;
   }
 
+  var defaultRAF = window.requestAnimationFrame;
+
   before(function () {
     angular.module('app', [])
       .directive('excerpt', excerpt.directive);
+
+    // requestAnimationFrame() is used internally by <excerpt>
+    // to schedule overflow state checks
+    window.requestAnimationFrame = function (callback) {
+      setTimeout(callback, 0);
+    };
+  });
+
+  after(function () {
+    window.requestAnimationFrame = defaultRAF;
   });
 
   beforeEach(function () {
@@ -59,8 +85,9 @@ describe('excerpt directive', function () {
     it('truncates long contents when enabled', function () {
       var element = excerptDirective({enabled: false}, TALL_DIV);
       element.scope.enabled = true;
-      element.scope.$digest();
-      assert.isBelow(height(element[0]), 100);
+      return waitForLayout(element).then(function () {
+        assert.isBelow(height(element[0]), 100);
+      });
     });
   });
 
@@ -86,10 +113,11 @@ describe('excerpt directive', function () {
     it('displays inline controls if collapsed', function () {
       var element = excerptDirective({inlineControls: true},
         TALL_DIV);
-      element.scope.$digest();
-      var expandLink = findInlineControl(element[0]);
-      assert.ok(expandLink);
-      assert.equal(expandLink.querySelector('a').textContent, 'More');
+      return waitForLayout(element).then(function () {
+        var expandLink = findInlineControl(element[0]);
+        assert.ok(expandLink);
+        assert.equal(expandLink.querySelector('a').textContent, 'More');
+      });
     });
 
     it('does not display inline controls if not collapsed', function () {
@@ -102,12 +130,13 @@ describe('excerpt directive', function () {
     it('toggles the expanded state when clicked', function () {
       var element = excerptDirective({inlineControls: true},
         TALL_DIV);
-      element.scope.$digest();
-      var expandLink = findInlineControl(element[0]);
-      angular.element(expandLink.querySelector('a')).click();
-      element.scope.$digest();
-      var collapseLink = findInlineControl(element[0]);
-      assert.equal(collapseLink.querySelector('a').textContent, 'Less');
+      return waitForLayout(element).then(function () {
+        var expandLink = findInlineControl(element[0]);
+        angular.element(expandLink.querySelector('a')).click();
+        element.scope.$digest();
+        var collapseLink = findInlineControl(element[0]);
+        assert.equal(collapseLink.querySelector('a').textContent, 'Less');
+      });
     });
   });
 
@@ -126,12 +155,16 @@ describe('excerpt directive', function () {
   describe('.collapse', function () {
     it('collapses the body if collapse is true', function () {
       var element = excerptDirective({collapse: true}, TALL_DIV);
-      assert.isBelow(height(element[0]), 100);
+      return waitForLayout(element).then(function () {
+        assert.isBelow(height(element[0]), 100);
+      });
     });
 
     it('does not collapse the body if collapse is false', function () {
       var element = excerptDirective({collapse: false}, TALL_DIV);
-      assert.isAbove(height(element[0]), 100);
+      return waitForLayout(element).then(function () {
+        assert.isAbove(height(element[0]), 100);
+      });
     });
   });
 
@@ -144,7 +177,9 @@ describe('excerpt directive', function () {
           callback: callback,
         }
       }, TALL_DIV);
-      assert.calledWith(callback, true);
+      return waitForLayout(element).then(function () {
+        assert.calledWith(callback, true);
+      });
     });
 
     it('reports false if excerpt is short', function () {
@@ -155,7 +190,9 @@ describe('excerpt directive', function () {
           callback: callback,
         }
       }, SHORT_DIV);
-      assert.calledWith(callback, false);
+      return waitForLayout(element).then(function () {
+        assert.calledWith(callback, false);
+      });
     });
   });
 
@@ -166,8 +203,9 @@ describe('excerpt directive', function () {
         collapsedHeight: 40,
         overflowHysteresis: 10,
       }, slightlyOverflowingDiv);
-      element.scope.$digest();
-      assert.isAbove(height(element[0]), 44);
+      return waitForLayout(element).then(function () {
+        assert.isAbove(height(element[0]), 44);
+      });
     });
 
     it('does collapse if overflow exceeds hysteresis', function () {
@@ -176,8 +214,9 @@ describe('excerpt directive', function () {
         collapsedHeight: 40,
         overflowHysteresis: 10,
       }, overflowingDiv);
-      element.scope.$digest();
-      assert.isBelow(height(element[0]), 50);
+      return waitForLayout(element).then(function () {
+        assert.isBelow(height(element[0]), 50);
+      });
     });
   });
 });
