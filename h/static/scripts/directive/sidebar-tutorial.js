@@ -33,7 +33,7 @@ module.exports = {
       controllerAs: 'vm',
       restrict: 'E',
       scope: {},
-      templateUrl: 'sidebar_tutorial.html'
+      template: require('../../../templates/client/sidebar_tutorial.html'),
     };
   },
   Controller: SidebarTutorialController

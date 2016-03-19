@@ -60,25 +60,27 @@ function configureLocation($locationProvider) {
 }
 
 // @ngInject
+var VIEWER_TEMPLATE = require('../../templates/client/viewer.html');
+
 function configureRoutes($routeProvider) {
   $routeProvider.when('/a/:id',
     {
       controller: 'AnnotationViewerController',
-      templateUrl: 'viewer.html',
+      template: VIEWER_TEMPLATE,
       reloadOnSearch: false,
       resolve: resolve
     });
   $routeProvider.when('/viewer',
     {
       controller: 'WidgetController',
-      templateUrl: 'viewer.html',
+      template: VIEWER_TEMPLATE,
       reloadOnSearch: false,
       resolve: resolve
     });
   $routeProvider.when('/stream',
     {
       controller: 'StreamController',
-      templateUrl: 'viewer.html',
+      template: VIEWER_TEMPLATE,
       reloadOnSearch: false,
       resolve: resolve
     });
@@ -110,6 +112,15 @@ function processAppOpts() {
   if (settings.liveReloadServer) {
     require('./live-reload-client').connect(settings.liveReloadServer);
   }
+}
+
+// @ngInject
+function setupTemplateCache($templateCache) {
+  // 'thread.html' is used via ng-include so it needs to be added
+  // to the template cache. Other components just require() templates
+  // directly as strings.
+  $templateCache.put('thread.html',
+    require('../../templates/client/thread.html'));
 }
 
 module.exports = angular.module('h', [
@@ -202,6 +213,7 @@ module.exports = angular.module('h', [
   .config(configureRoutes)
 
   .run(setupCrossFrame)
-  .run(setupHttp);
+  .run(setupHttp)
+  .run(setupTemplateCache);
 
 processAppOpts();

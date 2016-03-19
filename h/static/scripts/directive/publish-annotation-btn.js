@@ -36,6 +36,6 @@ module.exports = function () {
       onSave: '&',
       onSetPrivacy: '&'
     },
-    templateUrl: 'publish_annotation_btn.html'
+    template: require('../../../templates/client/publish_annotation_btn.html'),
   };
 }

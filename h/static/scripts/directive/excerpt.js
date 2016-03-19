@@ -145,7 +145,7 @@ function excerpt() {
     },
     restrict: 'E',
     transclude: true,
-    templateUrl: 'excerpt.html',
+    template: require('../../../templates/client/excerpt.html'),
   };
 }
 

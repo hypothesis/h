@@ -984,7 +984,6 @@ describe('annotation', function() {
         createDirective(annotation);
         $scope.$digest();
         $scope.$destroy();
-        $timeout.flush();
         $timeout.verifyNoPendingTasks();
       });
     });

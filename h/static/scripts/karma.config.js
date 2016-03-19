@@ -1,5 +1,8 @@
+'use strict';
+
 // Karma configuration
 var path = require('path');
+var stringify = require('stringify');
 
 module.exports = function(config) {
   config.set({
@@ -63,6 +66,11 @@ module.exports = function(config) {
       configure: function (bundle) {
         bundle
           .transform('coffeeify')
+          .transform(stringify, {
+            appliesTo: {
+              includeExtensions: ['.html'],
+            },
+          })
           .plugin('proxyquire-universal')
           // fix for Proxyquire in PhantomJS 1.x.
           // See https://github.com/bitwit/proxyquireify-phantom-menace

@@ -13,6 +13,6 @@ module.exports = function () {
       /** Called when the user changes the current sort criteria. */
       onChangeSortBy: '&',
     },
-    templateUrl: 'sort_dropdown.html',
+    template: require('../../../templates/client/sort_dropdown.html'),
   }
 }

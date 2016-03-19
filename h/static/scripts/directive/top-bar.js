@@ -15,6 +15,6 @@ module.exports = function () {
       sortOptions: '<',
       onChangeSortBy: '&',
     },
-    templateUrl: 'top_bar.html',
+    template: require('../../../templates/client/top_bar.html'),
   };
 };

@@ -12,6 +12,6 @@ module.exports = function () {
       selectionCount: '<',
       totalCount: '<',
     },
-    templateUrl: 'search_status_bar.html',
+    template: require('../../../templates/client/search_status_bar.html'),
   };
 };
