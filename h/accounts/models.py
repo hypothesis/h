@@ -103,7 +103,6 @@ class User(Base):
                                                   self._set_username))
 
     email = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
-    status = sa.Column(sa.Integer())
 
     last_login_date = sa.Column(sa.TIMESTAMP(timezone=False),
                                 default=datetime.datetime.utcnow,
