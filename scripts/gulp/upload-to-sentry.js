@@ -87,7 +87,7 @@ function uploadReleaseFile(opts, project, release, file) {
  * Upload a stream of Vinyl files as a Sentry release.
  *
  * This creates a new release in Sentry using the organization, project
- * and release settings in @p opts and uploads the input stream of Vinyl
+ * and release settings in `opts` and uploads the input stream of Vinyl
  * files as artefacts for the release.
  *
  * @param {SentryOptions} opts
