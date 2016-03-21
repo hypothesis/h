@@ -273,10 +273,7 @@
 
 .btn-icon {
   display: inline-block;
-  // enlarge icons within buttons and shift the icon
-  // down slightly so that the icon aligns vertically
-  // with the button label
-  transform: scale(1.2) translateY(10%);
+  font-size: 16px;
 }
 
 // Positions a message/icon to the left of a button.

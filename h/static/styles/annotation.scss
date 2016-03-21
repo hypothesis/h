@@ -98,17 +98,25 @@ $annotation-card-left-padding: 10px;
 .annotation-actions {
   float: right;
   margin-top: 0;
+}
 
-  button {
-    color: $gray-light;
-    font-weight: normal;
-    margin: 0 .2em;
-    padding: 0;
+.annotation-action-btn {
+  color: $dg-4;
+  font-weight: normal;
+  padding: 0;
+  margin: 0px 0px 0px 8px;
 
-    .annotation:hover & {
-      color: $link-color;
-    }
+  &:hover {
+    color: $dg-1;
   }
+
+  &:focus, &:active {
+    color: $dg-1;
+  }
+}
+
+.annotation-action-btn__label {
+  margin: 0px 0px 0px 3px;
 }
 
 .annotation-quote {
