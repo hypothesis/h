@@ -4,8 +4,8 @@ var events = require('./events');
 var SearchClient = require('./search-client');
 
 /**
- * Returns the group ID of the first annotation in @p results whose
- * ID is a key in @p selection.
+ * Returns the group ID of the first annotation in `results` whose
+ * ID is a key in `selection`.
  */
 function groupIDFromSelection(selection, results) {
   var id = Object.keys(selection)[0];
@@ -145,7 +145,7 @@ module.exports = function WidgetController(
       streamFilter.resetFilter().addClause('/uri', 'one_of', urls);
       streamer.setConfig('filter', {filter: streamFilter.getFilter()});
     }
-  };
+  }
 
   // When a direct-linked annotation is successfully anchored in the page,
   // focus and scroll to it
@@ -165,12 +165,12 @@ module.exports = function WidgetController(
   });
 
   $scope.$on(events.GROUP_FOCUSED, function () {
+    // The focused group may be changed during loading annotations (in which
+    // case, searchClients.length > 0), as a result of switching to the group
+    // containing the selected annotation.
+    //
+    // In that case, we don't want to trigger reloading annotations again.
     if (searchClients.length) {
-      // If the current group changes as a _result_ of loading annotations,
-      // avoid trying to load annotations again.
-      //
-      // If however the group changes because of a user action during
-      // loading of annotations, we should cancel the current load.
       return;
     }
 
