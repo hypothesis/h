@@ -267,7 +267,10 @@ class Document(document.Document):
     def document_uris(self):
         return [DocumentURI(link) for link in self._transform_links()]
 
-    def _transform_meta(self, meta, data, path_prefix=[]):
+    def _transform_meta(self, meta, data, path_prefix=None):
+        if path_prefix is None:
+            path_prefix = []
+
         for key, value in data.iteritems():
             keypath = path_prefix[:]
             keypath.append(key)
