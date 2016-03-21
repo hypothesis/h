@@ -4,19 +4,7 @@ var angular = require('angular');
 var proxyquire = require('proxyquire');
 
 var util = require('./util');
-
-/**
- * Disable calling through to the original module for a stub.
- *
- * By default proxyquire will call through to the original module
- * for any methods not provided by a stub. This function disables
- * this behavior for a stub and returns the input stub.
- *
- * This prevents unintended usage of the original dependency.
- */
-function noCallThru(stub) {
-  return Object.assign(stub, {'@noCallThru':true});
-}
+var noCallThru = require('../../test/util').noCallThru;
 
 describe('markdown', function () {
   function isHidden(element) {
@@ -49,8 +37,8 @@ describe('markdown', function () {
 
   before(function () {
     angular.module('app', ['ngSanitize'])
-      .directive('markdown', proxyquire('../markdown', {
-        angular: noCallThru(angular),
+      .directive('markdown', proxyquire('../markdown', noCallThru({
+        angular: angular,
         katex: {
           renderToString: function (input) {
             return 'math:' + input.replace(/$$/g, '');
@@ -62,8 +50,7 @@ describe('markdown', function () {
           toggleSpanStyle: mockFormattingCommand,
           LinkType: require('../../markdown-commands').LinkType,
         },
-        '@noCallThru': true,
-      }))
+      })))
       .filter('converter', function () {
         return function (input) {
           return 'rendered:' + input;

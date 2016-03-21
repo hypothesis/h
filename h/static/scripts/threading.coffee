@@ -1,5 +1,6 @@
 angular = require('angular')
 mail = require('./vendor/jwz')
+events = require('./events')
 
 # The threading service provides the model for the currently loaded
 # set of annotations, structured as a tree of annotations and replies.
@@ -31,10 +32,10 @@ module.exports = class Threading
 
     # Create a root container.
     @root = mail.messageContainer()
-    $rootScope.$on('beforeAnnotationCreated', this.beforeAnnotationCreated)
-    $rootScope.$on('annotationCreated', this.annotationCreated)
-    $rootScope.$on('annotationDeleted', this.annotationDeleted)
-    $rootScope.$on('annotationsLoaded', this.annotationsLoaded)
+    $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, this.beforeAnnotationCreated)
+    $rootScope.$on(events.ANNOTATION_CREATED, this.annotationCreated)
+    $rootScope.$on(events.ANNOTATION_DELETED, this.annotationDeleted)
+    $rootScope.$on(events.ANNOTATIONS_LOADED, this.annotationsLoaded)
 
   # TODO: Refactor the jwz API for progressive updates.
   # Right now the idTable is wiped when `messageThread.thread()` is called and
