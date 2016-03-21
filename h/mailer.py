@@ -43,6 +43,8 @@ def worker(request):
     """
     def handle_message(_, message):
         """Receive a message from nsq and send it as an email."""
+        request.feature.clear()
+
         body = json.loads(message.body)
         email = pyramid_mailer.message.Message(
             subject=body["subject"], recipients=body["recipients"],

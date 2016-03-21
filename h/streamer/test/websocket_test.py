@@ -52,6 +52,15 @@ def test_socket_enqueues_incoming_messages():
     assert result.payload == 'client data'
 
 
+def test_handle_message_clears_feature_cache():
+    socket = mock.Mock()
+    message = websocket.Message(socket=socket, payload=json.dumps({
+        'messageType': 'foo'}))
+    websocket.handle_message(message)
+
+    socket.request.feature.clear.assert_called_with()
+
+
 def test_handle_message_sets_socket_client_id_for_client_id_messages():
     socket = mock.Mock()
     socket.client_id = None
