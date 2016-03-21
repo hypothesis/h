@@ -41,14 +41,14 @@ function replaceText(state, pos, length, text) {
   var newSelectionStart = state.selectionStart;
   var newSelectionEnd = state.selectionEnd;
 
-  if (newSelectionEnd <= pos) {
-    // 1. Selection is before replaced text: Leave selection unchanged
-  } else if (newSelectionStart >= pos + length) {
-    // 2. Selection is after replaced text:
+  if (newSelectionStart >= pos + length) {
+    // 1. Selection is after replaced text:
     //    Increment (start, end) by difference in length between original and
     //    replaced text
     newSelectionStart += text.length - length;
     newSelectionEnd += text.length - length;
+  } else if (newSelectionEnd <= pos) {
+    // 2. Selection is before replaced text: Leave selection unchanged
   } else if (newSelectionStart <= pos &&
              newSelectionEnd >= pos + length) {
     // 3. Selection fully contains replaced text:
@@ -148,7 +148,7 @@ function toggleSpanStyle(state, prefix, suffix, placeholder) {
 
   if (state.selectionStart === state.selectionEnd && placeholder) {
     newState = replaceText(state, state.selectionStart, 0, placeholder);
-    newState.selectionEnd = newState.selectionStart + placeholder.length;
+    newState.selectionStart = newState.selectionEnd - placeholder.length;
   }
 
   if (selectionPrefix === prefix && selectionSuffix === suffix) {

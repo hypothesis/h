@@ -22,6 +22,10 @@ Bug fixes
 - Fixed an issue where private group annotations were not loaded correctly
   after switching user accounts (#3083).
 
+- Fix cursor position after using editor toolbar buttons to create a new list
+  or quote, if the selection was previously empty and the cursor was positioned
+  at the start of the line.
+
 Miscellanea
 -----------
 

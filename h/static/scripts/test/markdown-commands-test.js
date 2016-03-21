@@ -72,23 +72,32 @@ describe('markdown commands', function () {
   });
 
   describe('block formatting', function () {
-    function toggle(state) {
-      return commands.toggleBlockStyle(state, '> ');
-    }
+    var CASES = {
+      'adds formatting to blocks': {
+        input: 'one\n<sel>two\nthree</sel>\nfour',
+        output: 'one\n> <sel>two\n> three</sel>\nfour',
+      },
+      'removes formatting from blocks': {
+        input: 'one \n<sel>> two\n> three</sel>\nfour',
+        output: 'one \n<sel>two\nthree</sel>\nfour',
+      },
+      'preserves the selection': {
+        input: 'one <sel>two\nthree </sel>four',
+        output: '> one <sel>two\n> three </sel>four',
+      },
+      'inserts the block prefix before an empty selection': {
+        input: '<sel></sel>',
+        output: '> <sel></sel>',
+      }
+    };
 
-    it('adds formatting to blocks', function () {
-      var output = toggle(parseState('one\n<sel>two\nthree</sel>\nfour'));
-      assert.equal(formatState(output), 'one\n> <sel>two\n> three</sel>\nfour');
-    });
-
-    it('removes formatting from blocks', function () {
-      var output = toggle(parseState('one \n<sel>> two\n> three</sel>\nfour'));
-      assert.equal(formatState(output), 'one \n<sel>two\nthree</sel>\nfour');
-    });
-
-    it('preserves the selection', function () {
-      var output = toggle(parseState('one <sel>two\nthree </sel>four'));
-      assert.equal(formatState(output), '> one <sel>two\n> three </sel>four');
+    Object.keys(CASES).forEach(function (case_) {
+      it(case_, function () {
+        var output = commands.toggleBlockStyle(
+          parseState(CASES[case_].input), '> '
+        );
+        assert.equal(formatState(output), CASES[case_].output);
+      });
     });
   });
 
