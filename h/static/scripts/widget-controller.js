@@ -103,7 +103,7 @@ module.exports = function WidgetController(
   }
 
   /**
-   * Load annotations for all URLs associated with @p frames.
+   * Load annotations for all URLs associated with `frames`.
    *
    * @param {Array<{uri:string}>} frames - Hypothesis client frames
    *        to load annotations for.

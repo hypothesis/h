@@ -34,7 +34,7 @@ var LinkType = {
  * @param {EditorState} state - The state of the input field.
  * @param {number} pos - The start position of the text to remove.
  * @param {number} length - The number of characters to remove.
- * @param {string} text - The replacement text to insert at @p pos.
+ * @param {string} text - The replacement text to insert at `pos`.
  * @return {EditorState} - The new state of the input field.
  */
 function replaceText(state, pos, length, text) {

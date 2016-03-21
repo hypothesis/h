@@ -46,7 +46,7 @@ function convertLocalURLsToFilenames(url) {
 }
 
 /**
- * Return a transformed version of @p data with local URLs replaced
+ * Return a transformed version of `data` with local URLs replaced
  * with filenames.
  *
  * In environments where the client is served from a local URL,

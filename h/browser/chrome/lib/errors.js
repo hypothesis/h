@@ -39,7 +39,7 @@ function AlreadyInjectedError(message) {
 AlreadyInjectedError.prototype = Object.create(ExtensionError.prototype);
 
 /**
- * Returns true if @p err is a recognized 'expected' error.
+ * Returns true if `err` is a recognized 'expected' error.
  */
 function isKnownError(err) {
   return err instanceof ExtensionError;

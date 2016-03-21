@@ -259,7 +259,7 @@ function SidebarInjector(chromeTabs, dependencies) {
   }
 
   /**
-   * Inject the script from the source file at @p path into the
+   * Inject the script from the source file at `path` into the
    * page currently loaded in the tab at the given ID.
    */
   function injectScript(tabId, path) {
