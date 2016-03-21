@@ -25,7 +25,7 @@ function groups(localStorage, session, settings, $rootScope, $http) {
 
   function all() {
     return session.state.groups || [];
-  };
+  }
 
   // Return the full object for the group with the given id.
   function get(id) {
@@ -35,7 +35,7 @@ function groups(localStorage, session, settings, $rootScope, $http) {
         return gs[i];
       }
     }
-  };
+  }
 
   /** Leave the group with the given ID.
    * Returns a promise which resolves when the action completes.
@@ -51,7 +51,7 @@ function groups(localStorage, session, settings, $rootScope, $http) {
     // by optimistically updating the session state
 
     return response;
-  };
+  }
 
 
   /** Return the currently focused group. If no group is explicitly focused we
@@ -72,12 +72,15 @@ function groups(localStorage, session, settings, $rootScope, $http) {
 
   /** Set the group with the passed id as the currently focused group. */
   function focus(id) {
-   var g = get(id);
-   if (g) {
-     focusedGroup = g;
-     localStorage.setItem(STORAGE_KEY, g.id);
-     $rootScope.$broadcast(events.GROUP_FOCUSED, g.id);
-   }
+    var prevFocused = focused();
+    var g = get(id);
+    if (g) {
+      focusedGroup = g;
+      localStorage.setItem(STORAGE_KEY, g.id);
+      if (prevFocused.id !== g.id) {
+        $rootScope.$broadcast(events.GROUP_FOCUSED, g.id);
+      }
+    }
   }
 
   // reset the focused group if the user leaves it

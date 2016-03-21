@@ -45,7 +45,7 @@ describe('groups', function() {
         }
       }
     };
-    fakeHttp = sandbox.stub()
+    fakeHttp = sandbox.stub();
   });
 
   afterEach(function () {
@@ -134,7 +134,7 @@ describe('groups', function() {
     });
   });
 
-  describe('.focus() method', function() {
+  describe('.focus()', function() {
     it('sets the focused group to the named group', function() {
       var s = service();
       s.focus('id2');
@@ -154,6 +154,20 @@ describe('groups', function() {
       s.focus('id3');
 
       assert.calledWithMatch(fakeLocalStorage.setItem, sinon.match.any, 'id3');
+    });
+
+    it('emits the GROUP_FOCUSED event if the focused group changed', function () {
+      var s = service();
+      s.focus('id3');
+      assert.calledWith(fakeRootScope.$broadcast, events.GROUP_FOCUSED, 'id3');
+    });
+
+    it('does not emit GROUP_FOCUSED if the focused group did not change', function () {
+      var s = service();
+      s.focus('id3');
+      fakeRootScope.$broadcast = sinon.stub();
+      s.focus('id3');
+      assert.notCalled(fakeRootScope.$broadcast);
     });
   });
 
