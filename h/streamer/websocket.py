@@ -58,6 +58,7 @@ class WebSocket(_WebSocket):
 
 def handle_message(message):
     socket = message.socket
+    socket.request.feature.clear()
 
     data = json.loads(message.payload)
 
