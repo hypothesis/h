@@ -57,6 +57,8 @@ def worker(request):
     """
     def handle_message(_, message):
         """Handle a message on the "nipsa_users_annotations" channel."""
+        request.feature.clear()
+
         add_or_remove_nipsa(
             client=request.es.conn,
             index=request.es.index,
