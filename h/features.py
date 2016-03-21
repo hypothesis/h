@@ -101,15 +101,26 @@ class Feature(db.Base):
 
 
 class Client(object):
+    """
+    Determine if the named feature is enabled for the current request.
+    If the feature has no override in the database, it will default to
+    False. Features must be documented, and an UnknownFeatureError will be
+    thrown if an undocumented feature is interrogated.
+    """
+
     def __init__(self, request):
         self.request = request
-
-        all_ = request.db.query(Feature).filter(
-            Feature.name.in_(FEATURES.keys())).all()
-        self._cache = {f.name: f for f in all_}
+        self._cache = {}
 
     def __call__(self, name):
         return self.enabled(name)
+
+    def load(self):
+        """Loads the feature flag states into the internal cache."""
+        all_ = self._fetch_features()
+        features = {f.name: f for f in all_}
+        self._cache = {n: self._state(features.get(n))
+                       for n in FEATURES.keys()}
 
     def enabled(self, name):
         """
@@ -118,13 +129,36 @@ class Client(object):
         If the feature has no override in the database, it will default to
         False. Features must be documented, and an UnknownFeatureError will be
         thrown if an undocumented feature is interrogated.
+
+        When the internal cache is empty, it will automatically load the
+        feature flags from the database first.
         """
         if name not in FEATURES:
             raise UnknownFeatureError(
                 '{0} is not a valid feature name'.format(name))
 
-        feature = self._cache.get(name)
+        if not self._cache:
+            self.load()
 
+        return self._cache[name]
+
+    def all(self):
+        """
+        Returns a dict mapping feature flag names to enabled states
+        for the user associated with a given request.
+
+        When the internal cache is empty, it will automatically load the
+        feature flags from the database first.
+        """
+        if not self._cache:
+            self.load()
+
+        return self._cache
+
+    def clear(self):
+        self._cache = {}
+
+    def _state(self, feature):
         # Features that don't exist in the database are off.
         if feature is None:
             return False
@@ -141,12 +175,9 @@ class Client(object):
             return True
         return False
 
-    def all(self):
-        """
-        Returns a dict mapping feature flag names to enabled states
-        for the user associated with a given request.
-        """
-        return {name: self.enabled(name) for name in FEATURES.keys()}
+    def _fetch_features(self):
+        return self.request.db.query(Feature).filter(
+                Feature.name.in_(FEATURES.keys())).all()
 
 
 def remove_old_flags():
