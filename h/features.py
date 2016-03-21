@@ -101,12 +101,20 @@ class Feature(db.Base):
 
 
 class Client(object):
+    """
+    A Client instance provides access to the state of a feature flag based on
+    the current request.
+
+    For scenarios where a request object can be long-lived (e.g. in workers),
+    it is advisable to reload the cache with `reload()` before executing any
+    other code.
+    """
+
     def __init__(self, request):
         self.request = request
+        self._cache = {}
 
-        all_ = request.db.query(Feature).filter(
-            Feature.name.in_(FEATURES.keys())).all()
-        self._cache = {f.name: f for f in all_}
+        self.reload()
 
     def __call__(self, name):
         return self.enabled(name)
@@ -123,8 +131,25 @@ class Client(object):
             raise UnknownFeatureError(
                 '{0} is not a valid feature name'.format(name))
 
-        feature = self._cache.get(name)
+        return self._cache.get(name, False)
 
+    def all(self):
+        """
+        Returns a dict mapping feature flag names to enabled states
+        for the user associated with a given request.
+        """
+        return self._cache
+
+    def reload(self):
+        """Reloads the internal cache"""
+        names = FEATURES.keys()
+        all_ = self.request.db.query(Feature).filter(
+            Feature.name.in_(names)).all()
+        features = {f.name: f for f in all_}
+
+        self._cache = {n: self._state(features.get(n, None)) for n in names}
+
+    def _state(self, feature):
         # Features that don't exist in the database are off.
         if feature is None:
             return False
@@ -140,13 +165,6 @@ class Client(object):
         if feature.staff and role.Staff in self.request.effective_principals:
             return True
         return False
-
-    def all(self):
-        """
-        Returns a dict mapping feature flag names to enabled states
-        for the user associated with a given request.
-        """
-        return {name: self.enabled(name) for name in FEATURES.keys()}
 
 
 def remove_old_flags():
