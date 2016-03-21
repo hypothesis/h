@@ -173,7 +173,6 @@ def registration_subscriptions(event):
     request = event.request
     user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
     create_subscription(event.request, user_uri, True)
-    event.user.subscriptions = True
 
 
 # For backwards compatibility, generate reply notification if not exists
@@ -185,7 +184,6 @@ def check_reply_subscriptions(event):
                                                        types.REPLY_TYPE)
     if not len(res):
         create_subscription(event.request, user_uri, True)
-        event.user.subscriptions = True
 
 
 def includeme(config):

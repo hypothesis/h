@@ -216,51 +216,6 @@ class User(Base):
         uid = _username_to_uid(username)
         return cls.query.filter(cls.uid == uid).first()
 
-    # TODO: remove all this status bitfield stuff
-    @property
-    def email_confirmed(self):
-        return bool((self.status or 0) & 0b001)
-
-    @email_confirmed.setter
-    def email_confirmed(self, value):
-        if value:
-            self.status = (self.status or 0) | 0b001
-        else:
-            self.status = (self.status or 0) & ~0b001
-
-    @property
-    def optout(self):
-        return bool((self.status or 0) & 0b010)
-
-    @optout.setter
-    def optout(self, value):
-        if value:
-            self.status = (self.status or 0) | 0b010
-        else:
-            self.status = (self.status or 0) & ~0b010
-
-    @property
-    def subscriptions(self):
-        return bool((self.status or 0) & 0b100)
-
-    @subscriptions.setter
-    def subscriptions(self, value):
-        if value:
-            self.status = (self.status or 0) | 0b100
-        else:
-            self.status = (self.status or 0) & ~0b100
-
-    @property
-    def invited(self):
-        return bool((self.status or 0) & 0b1000)
-
-    @invited.setter
-    def invited(self, value):
-        if value:
-            self.status = (self.status or 0) | 0b1000
-        else:
-            self.status = (self.status or 0) & ~0b1000
-
     @classmethod
     def admins(cls):
         """Return a list of all admin users."""
