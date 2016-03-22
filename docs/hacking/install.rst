@@ -257,9 +257,12 @@ source code. To start the test runner in auto-watch mode, run:
 
     gulp test-watch-app
 
-You can further speed up the testing cycle for front-end code by using
-mocha's `.only()`_ to only run a particular suite of tests or even just
-a single test.
+To run only a subset of tests for front-end code, use the ``--grep``
+argument or mocha's `.only()`_ modifier.
+
+.. code-block:: bash
+
+    gulp test-watch-app --grep <pattern>
 
 .. _.only(): http://jaketrent.com/post/run-single-mocha-test/
 

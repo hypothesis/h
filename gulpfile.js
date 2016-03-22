@@ -4,14 +4,17 @@ require('core-js/es6/promise');
 require('core-js/fn/object/assign');
 require('core-js/fn/string');
 
+var path = require('path');
+
 var batch = require('gulp-batch');
 var changed = require('gulp-changed');
+var commander = require('commander');
 var endOfStream = require('end-of-stream');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gulpUtil = require('gulp-util');
-var sass = require('gulp-sass');
 var postcss = require('gulp-postcss');
+var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
 
 var manifest = require('./scripts/gulp/manifest');
@@ -23,6 +26,24 @@ var SCRIPT_DIR = 'build/scripts';
 var STYLE_DIR = 'build/styles';
 var FONTS_DIR = 'build/fonts';
 var IMAGES_DIR = 'build/images';
+
+function parseCommandLine() {
+  commander
+    // Test configuration.
+    // See https://github.com/karma-runner/karma-mocha#configuration
+    .option('--grep [pattern]', 'Run only tests matching a given pattern')
+    .parse(process.argv);
+
+  if (commander.grep) {
+    gulpUtil.log(`Running tests matching pattern /${commander.grep}/`);
+  }
+
+  return {
+    grep: commander.grep,
+  };
+}
+
+var taskArgs = parseCommandLine();
 
 function isSASSFile(file) {
   return file.path.match(/\.scss$/);
@@ -224,34 +245,36 @@ gulp.task('watch',
            'watch-images',
            'watch-manifest']);
 
-gulp.task('test-app', function (callback) {
+function runKarma(baseConfig, opts, done) {
+  // See https://github.com/karma-runner/karma-mocha#configuration
+  var cliOpts = {
+    client: {
+      mocha: {
+        grep: taskArgs.grep,
+      }
+    },
+  };
+
   var karma = require('karma');
-  new karma.Server({
-    configFile: __dirname + '/h/static/scripts/karma.config.js',
-    singleRun: true,
-  }, callback).start();
+  new karma.Server(Object.assign({}, {
+    configFile: path.resolve(__dirname, baseConfig),
+  }, cliOpts, opts), done).start();
+}
+
+gulp.task('test-app', function (callback) {
+  runKarma('./h/static/scripts/karma.config.js', {singleRun:true}, callback);
 });
 
 gulp.task('test-extension', function (callback) {
-  var karma = require('karma');
-  new karma.Server({
-    configFile: __dirname + '/h/browser/chrome/karma.config.js',
-    singleRun: true,
-  }, callback).start();
+  runKarma('./h/browser/chrome/karma.config.js', {singleRun:true}, callback);
 });
 
 gulp.task('test-watch-app', function (callback) {
-  var karma = require('karma');
-  new karma.Server({
-    configFile: __dirname + '/h/static/scripts/karma.config.js',
-  }, callback).start();
+  runKarma('./h/static/scripts/karma.config.js', {}, callback);
 });
 
 gulp.task('test-watch-extension', function (callback) {
-  var karma = require('karma');
-  new karma.Server({
-    configFile: __dirname + '/h/browser/chrome/karma.config.js',
-  }, callback).start();
+  runKarma('./h/browser/chrome/karma.config.js', {}, callback);
 });
 
 gulp.task('upload-sourcemaps',
