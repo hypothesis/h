@@ -52,7 +52,7 @@ class TestExpandURI(object):
         request = DummyRequest()
         models.elastic.Document.get_by_uri.return_value = None
         assert storage.expand_uri(request, "http://example.com/") == [
-                "http://example.com/"]
+            "http://example.com/"]
 
     def test_expand_uri_postgres_document_doesnt_expand_canonical_uris(
             self,
@@ -70,7 +70,7 @@ class TestExpandURI(object):
         db.Session.flush()
 
         assert storage.expand_uri(request, "http://example.com/") == [
-                "http://example.com/"]
+            "http://example.com/"]
 
     def test_expand_uri_elastic_document_doesnt_expand_canonical_uris(
             self,
@@ -87,7 +87,7 @@ class TestExpandURI(object):
             mock.Mock(uri='http://example.com/', type='rel-canonical'),
         ]
         assert storage.expand_uri(request, "http://example.com/") == [
-                "http://example.com/"]
+            "http://example.com/"]
 
     def test_expand_uri_postgres_document_uris(self, postgres_enabled):
         request = DummyRequest(db=db.Session)
