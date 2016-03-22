@@ -54,6 +54,8 @@ def _legacy_create_annotation_in_elasticsearch(request, data):
     return annotation
 
 
+# FIXME: A lot of transforming data work that's being done here should
+# move into schemas.py.
 def _create_annotation(request, data):
     annotation = models.Annotation()
 
@@ -86,9 +88,49 @@ def _create_annotation(request, data):
     else:
         annotation.groupid = group
 
+    document_uri_dicts = data['document']['document_uri_dicts']
+    document_meta_dicts = data['document']['document_meta_dicts']
+    del data['document']
+
     annotation.extras = data
 
     request.db.add(annotation)
+
+    # We need to flush the db here so that annotation.created and
+    # annotation.updated get created.
+    request.db.flush()
+
+    documents = models.Document.find_or_create_by_uris(
+        request.db,
+        annotation.target_uri,
+        [u['uri'] for u in document_uri_dicts],
+        created=annotation.created,
+        updated=annotation.updated)
+
+    if documents.count() > 1:
+        document = models.merge_documents(request.db,
+                                          documents,
+                                          updated=annotation.updated)
+    else:
+        document = documents.first()
+
+    document.updated = annotation.updated
+
+    for document_uri_dict in document_uri_dicts:
+        models.create_or_update_document_uri(
+            db=request.db,
+            document=document,
+            created=annotation.created,
+            updated=annotation.updated,
+            **document_uri_dict)
+
+    for document_meta_dict in document_meta_dicts:
+        models.create_or_update_document_meta(
+            db=request.db,
+            document=document,
+            created=annotation.created,
+            updated=annotation.updated,
+            **document_meta_dict)
 
     return annotation
 
