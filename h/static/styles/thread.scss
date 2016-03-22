@@ -31,7 +31,10 @@ $thread-padding: $annotation-card-left-padding;
   }
 
   &__icon {
-    font-size: 50px;
+    background-image: url(../images/icons/lock.svg);
+    background-repeat: no-repeat;
+    width: 56px;
+    height: 48px;
   }
 }
 
