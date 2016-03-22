@@ -31,7 +31,7 @@ function groupIDFromSelection(selection, results) {
 // @ngInject
 module.exports = function WidgetController(
   $scope, $rootScope, annotationUI, crossframe, annotationMapper,
-  drafts, groups, streamer, streamFilter, store, threading
+  drafts, groups, settings, streamer, streamFilter, store, threading
 ) {
   $scope.threadRoot = threading.root;
   $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
@@ -207,6 +207,26 @@ module.exports = function WidgetController(
     return searchClients.length === 0 &&
            annotationUI.hasSelectedAnnotations() &&
            !threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
+  };
+
+  $scope.shouldShowLoggedOutMessage = function () {
+    // If user is not logged out, don't show CTA.
+    if ($scope.auth.status !== 'signed-out') {
+      return false;
+    }
+
+    // If user has not landed on a direct linked annotation
+    // don't show the CTA.
+    if (!settings.annotations) {
+      return false;
+    }
+
+    // The user is logged out and has landed on a direct linked
+    // annotation. If there is an annotation selection and that
+    // selection is available to the user, show the CTA.
+    return searchClients.length === 0 &&
+           annotationUI.hasSelectedAnnotations() &&
+           !!threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
   };
 
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
