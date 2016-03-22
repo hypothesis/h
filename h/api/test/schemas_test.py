@@ -89,7 +89,7 @@ def test_createannotationschema_ignores_input_user(data, authn_policy):
 
     result = schema.validate(data)
 
-    assert result == {'user': 'acct:jeanie@example.com'}
+    assert result['user'] == 'acct:jeanie@example.com'
 
 
 @pytest.mark.parametrize('data,effective_principals,ok', [
@@ -146,6 +146,87 @@ def test_createannotationschema_permits_all_other_changes(data):
 
     for k in data:
         assert result[k] == data[k]
+
+
+# FIXME: parse_document_claims needs to be patched for all tests of code that
+# uses it.
+@mock.patch('h.api.schemas.parse_document_claims')
+def test_createannotationschema_calls_document_uris_from_data(
+        parse_document_claims):
+    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+    document_data = {'foo': 'bar'}
+    uri = 'http://example.com/example'
+    data = {
+        'document': document_data,
+        'uri': uri,
+    }
+
+    schema.validate(data)
+
+    parse_document_claims.document_uris_from_data.assert_called_once_with(
+        document_data,
+        claimant=uri,
+    )
+
+
+@mock.patch('h.api.schemas.parse_document_claims')
+def test_createannotationschema_puts_document_uris_in_appstruct(
+        parse_document_claims):
+    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+
+    appstruct = schema.validate({})
+
+    assert appstruct['document']['document_uri_dicts'] == (
+        parse_document_claims.document_uris_from_data.return_value)
+
+
+@mock.patch('h.api.schemas.parse_document_claims')
+def test_createannotationschema_calls_document_metas_from_data(
+        parse_document_claims):
+    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+    document_data = {'foo': 'bar'}
+    uri = 'http://example.com/example'
+    data = {
+        'document': document_data,
+        'uri': uri,
+    }
+
+    schema.validate(data)
+
+    parse_document_claims.document_metas_from_data.assert_called_once_with(
+        document_data,
+        claimant=uri,
+    )
+
+
+@mock.patch('h.api.schemas.parse_document_claims')
+def test_createannotationschema_puts_document_metas_in_appstruct(
+        parse_document_claims):
+    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+
+    appstruct = schema.validate({})
+
+    assert appstruct['document']['document_meta_dicts'] == (
+        parse_document_claims.document_metas_from_data.return_value)
+
+
+def test_createannotationschema_clears_existing_keys_from_document():
+    """
+    Any keys in the document dict should be removed.
+
+    They're replaced with the 'document_uri_dicts' and 'document_meta_dicts'
+    keys.
+
+    """
+    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+
+    appstruct = schema.validate({
+        'document': {
+            'foo': 'bar'  # This should be deleted.
+        },
+    })
+
+    assert 'foo' not in appstruct['document']
 
 
 def test_updateannotationschema_passes_input_to_structure_validator():
