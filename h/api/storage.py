@@ -16,9 +16,6 @@ from h.api import schemas
 from h.api import transform
 from h.api import models
 from h.api.events import AnnotationBeforeSaveEvent
-from h.api.models import elastic
-from h.api.models.annotation import Annotation
-from h.api.models.document import Document
 
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -34,7 +31,7 @@ def annotation_from_dict(data):
     :returns: the created annotation
     :rtype: dict
     """
-    return elastic.Annotation(data)
+    return models.elastic.Annotation(data)
 
 
 def fetch_annotation(request, id):
@@ -51,13 +48,13 @@ def fetch_annotation(request, id):
     :rtype: dict, NoneType
     """
     if _postgres_enabled(request):
-        return request.db.query(Annotation).get(id)
+        return request.db.query(models.Annotation).get(id)
 
-    return elastic.Annotation.fetch(id)
+    return models.elastic.Annotation.fetch(id)
 
 
 def legacy_create_annotation(request, data):
-    annotation = elastic.Annotation(data)
+    annotation = models.elastic.Annotation(data)
     # FIXME: this should happen when indexing, not storing.
     _prepare(request, annotation)
     annotation.save()
@@ -167,7 +164,7 @@ def update_annotation(request, id, data):
     :returns: the updated annotation
     :rtype: dict
     """
-    annotation = elastic.Annotation.fetch(id)
+    annotation = models.elastic.Annotation.fetch(id)
     annotation.update(data)
 
     # FIXME: this should happen when indexing, not storing.
@@ -187,7 +184,7 @@ def delete_annotation(request, id):
     :param id: the annotation id
     :type id: str
     """
-    annotation = elastic.Annotation.fetch(id)
+    annotation = models.elastic.Annotation.fetch(id)
     annotation.delete()
 
 
@@ -210,9 +207,9 @@ def expand_uri(request, uri):
     """
     doc = None
     if _postgres_enabled(request):
-        doc = Document.find_by_uris(request.db, [uri]).one_or_none()
+        doc = models.Document.find_by_uris(request.db, [uri]).one_or_none()
     else:
-        doc = elastic.Document.get_by_uri(uri)
+        doc = models.elastic.Document.get_by_uri(uri)
 
     if doc is None:
         return [uri]
