@@ -15,14 +15,14 @@ from h.api.models.annotation import Annotation
 from h.api.models.document import Document, DocumentURI
 
 
-def test_fetch_annotation_elastic(postgres_enabled, ElasticAnnotation):
+def test_fetch_annotation_elastic(postgres_enabled, models):
     postgres_enabled.return_value = False
-    ElasticAnnotation.fetch.return_value = mock.Mock()
+    models.elastic.Annotation.fetch.return_value = mock.Mock()
 
     actual = storage.fetch_annotation(DummyRequest(), '123')
 
-    ElasticAnnotation.fetch.assert_called_once_with('123')
-    assert ElasticAnnotation.fetch.return_value == actual
+    models.elastic.Annotation.fetch.assert_called_once_with('123')
+    assert models.elastic.Annotation.fetch.return_value == actual
 
 
 def test_fetch_annotation_postgres(postgres_enabled):
@@ -45,10 +45,10 @@ def test_expand_uri_postgres_no_document(postgres_enabled):
     assert actual == ['http://example.com/']
 
 
-def test_expand_uri_elastic_no_document(postgres_enabled, document_model):
+def test_expand_uri_elastic_no_document(postgres_enabled, models):
     postgres_enabled.return_value = False
     request = DummyRequest()
-    document_model.get_by_uri.return_value = None
+    models.elastic.Document.get_by_uri.return_value = None
     assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
 
@@ -69,11 +69,11 @@ def test_expand_uri_postgres_document_doesnt_expand_canonical_uris(postgres_enab
             "http://example.com/"]
 
 
-def test_expand_uri_elastic_document_doesnt_expand_canonical_uris(postgres_enabled, document_model):
+def test_expand_uri_elastic_document_doesnt_expand_canonical_uris(postgres_enabled, models):
     postgres_enabled.return_value = False
 
     request = DummyRequest()
-    document = document_model.get_by_uri.return_value
+    document = models.elastic.Document.get_by_uri.return_value
     type(document).document_uris = uris = mock.PropertyMock()
     uris.return_value = [
         mock.Mock(uri='http://foo.com/'),
@@ -101,10 +101,10 @@ def test_expand_uri_postgres_document_uris(postgres_enabled):
     ]
 
 
-def test_expand_uri_elastic_document_uris(postgres_enabled, document_model):
+def test_expand_uri_elastic_document_uris(postgres_enabled, models):
     postgres_enabled.return_value = False
     request = DummyRequest()
-    document = document_model.get_by_uri.return_value
+    document = models.elastic.Document.get_by_uri.return_value
     type(document).document_uris = uris = mock.PropertyMock()
     uris.return_value = [
         mock.Mock(uri="http://foo.com/"),
@@ -117,19 +117,20 @@ def test_expand_uri_elastic_document_uris(postgres_enabled, document_model):
 
 
 @pytest.mark.usefixtures('AnnotationBeforeSaveEvent',
-                         'elastic',
+                         'models',  # Don't try to talk to real Elasticsearch!
                          'partial',
                          'transform')
 class TestCreateAnnotation(object):
 
     """Tests for create_annotation() when postgres_write is off."""
 
-    def test_it_inits_an_elastic_annotation_model(self, elastic):
+
+    def test_it_inits_an_elastic_annotation_model(self, models):
         data = self.annotation_data()
 
         storage.create_annotation(self.mock_request(), data)
 
-        elastic.Annotation.assert_called_once_with(data)
+        models.elastic.Annotation.assert_called_once_with(data)
 
     def test_it_calls_partial(self, partial):
         request = self.mock_request()
@@ -138,21 +139,21 @@ class TestCreateAnnotation(object):
 
         partial.assert_called_once_with(storage.fetch_annotation, request)
 
-    def test_it_calls_prepare(self, elastic, partial, transform):
+    def test_it_calls_prepare(self, models, partial, transform):
         storage.create_annotation(self.mock_request(), self.annotation_data())
 
         transform.prepare.assert_called_once_with(
-            elastic.Annotation.return_value, partial.return_value)
+            models.elastic.Annotation.return_value, partial.return_value)
 
     def test_it_inits_AnnotationBeforeSaveEvent(self,
                                                 AnnotationBeforeSaveEvent,
-                                                elastic):
+                                                models):
         request = self.mock_request()
 
         storage.create_annotation(request, self.annotation_data())
 
         AnnotationBeforeSaveEvent.assert_called_once_with(
-            request, elastic.Annotation.return_value)
+            request, models.elastic.Annotation.return_value)
 
     def test_it_calls_notify(self, AnnotationBeforeSaveEvent):
         request = self.mock_request()
@@ -162,16 +163,16 @@ class TestCreateAnnotation(object):
         request.registry.notify.assert_called_once_with(
             AnnotationBeforeSaveEvent.return_value)
 
-    def test_it_calls_annotation_save(self, elastic):
+    def test_it_calls_annotation_save(self, models):
         storage.create_annotation(self.mock_request(), self.annotation_data())
 
-        elastic.Annotation.return_value.save.assert_called_once_with()
+        models.elastic.Annotation.return_value.save.assert_called_once_with()
 
-    def test_it_returns_the_annotation(self, elastic):
+    def test_it_returns_the_annotation(self, models):
         result = storage.create_annotation(self.mock_request(),
                                            self.annotation_data())
 
-        assert result == elastic.Annotation.return_value
+        assert result == models.elastic.Annotation.return_value
 
     def mock_request(self):
         request = DummyRequest(feature=mock.Mock(spec=lambda feature: False,
@@ -189,13 +190,6 @@ class TestCreateAnnotation(object):
         AnnotationBeforeSaveEvent = patcher.start()
         request.addfinalizer(patcher.stop)
         return AnnotationBeforeSaveEvent
-
-    @pytest.fixture
-    def elastic(self, request):
-        patcher = patch('h.api.storage.elastic', autospec=True)
-        elastic = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return elastic
 
     @pytest.fixture
     def partial(self, request):
@@ -400,14 +394,6 @@ class TestCreateAnnotationPostgres(object):
 
 
 @pytest.fixture
-def document_model(config, request):
-    patcher = patch('h.api.models.elastic.Document', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
-
-
-@pytest.fixture
 def models(request):
     patcher = patch('h.api.storage.models')
     models = patcher.start()
@@ -422,11 +408,3 @@ def postgres_enabled(request):
     func = patcher.start()
     request.addfinalizer(patcher.stop)
     return func
-
-
-@pytest.fixture
-def ElasticAnnotation(request):
-    patcher = patch('h.api.storage.elastic.Annotation', autospec=True)
-    cls = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return cls
