@@ -20,6 +20,7 @@
     "browserify-ngannotate": "^1.0.1",
     "browserify-shim": "^3.8.12",
     "coffeeify": "^1.0.0",
+    "commander": "^2.9.0",
     "compass-mixins": "^0.12.7",
     "core-js": "^1.2.5",
     "diff-match-patch": "^1.0.0",
