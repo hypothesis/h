@@ -16,105 +16,109 @@ from h.api.models.annotation import Annotation
 from h.api.models.document import Document, DocumentURI
 
 
-def test_fetch_annotation_elastic(postgres_enabled, models):
-    postgres_enabled.return_value = False
-    models.elastic.Annotation.fetch.return_value = mock.Mock()
+class TestFetchAnnotation(object):
 
-    actual = storage.fetch_annotation(DummyRequest(), '123')
+    def test_elastic(self, postgres_enabled, models):
+        postgres_enabled.return_value = False
+        models.elastic.Annotation.fetch.return_value = mock.Mock()
 
-    models.elastic.Annotation.fetch.assert_called_once_with('123')
-    assert models.elastic.Annotation.fetch.return_value == actual
+        actual = storage.fetch_annotation(DummyRequest(), '123')
 
+        models.elastic.Annotation.fetch.assert_called_once_with('123')
+        assert models.elastic.Annotation.fetch.return_value == actual
 
-def test_fetch_annotation_postgres(postgres_enabled):
-    request = DummyRequest(db=db.Session)
-    postgres_enabled.return_value = True
+    def test_postgres(self, postgres_enabled):
+        request = DummyRequest(db=db.Session)
+        postgres_enabled.return_value = True
 
-    annotation = Annotation(userid='luke')
-    db.Session.add(annotation)
-    db.Session.flush()
+        annotation = Annotation(userid='luke')
+        db.Session.add(annotation)
+        db.Session.flush()
 
-    actual = storage.fetch_annotation(request, annotation.id)
-    assert annotation == actual
-
-
-def test_expand_uri_postgres_no_document(postgres_enabled):
-    request = DummyRequest(db=db.Session)
-    postgres_enabled.return_value = True
-
-    actual = storage.expand_uri(request, 'http://example.com/')
-    assert actual == ['http://example.com/']
+        actual = storage.fetch_annotation(request, annotation.id)
+        assert annotation == actual
 
 
-def test_expand_uri_elastic_no_document(postgres_enabled, models):
-    postgres_enabled.return_value = False
-    request = DummyRequest()
-    models.elastic.Document.get_by_uri.return_value = None
-    assert storage.expand_uri(request, "http://example.com/") == [
+class TestExpandURI(object):
+
+    def test_expand_uri_postgres_no_document(self, postgres_enabled):
+        request = DummyRequest(db=db.Session)
+        postgres_enabled.return_value = True
+
+        actual = storage.expand_uri(request, 'http://example.com/')
+        assert actual == ['http://example.com/']
+
+    def test_expand_uri_elastic_no_document(self, postgres_enabled, models):
+        postgres_enabled.return_value = False
+        request = DummyRequest()
+        models.elastic.Document.get_by_uri.return_value = None
+        assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
 
+    def test_expand_uri_postgres_document_doesnt_expand_canonical_uris(
+            self,
+            postgres_enabled):
+        request = DummyRequest(db=db.Session)
+        postgres_enabled.return_value = True
 
-def test_expand_uri_postgres_document_doesnt_expand_canonical_uris(postgres_enabled):
-    request = DummyRequest(db=db.Session)
-    postgres_enabled.return_value = True
+        document = Document(document_uris=[
+            DocumentURI(uri='http://foo.com/', claimant='http://example.com'),
+            DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
+            DocumentURI(uri='http://example.com/', type='rel-canonical',
+                        claimant='http://example.com'),
+        ])
+        db.Session.add(document)
+        db.Session.flush()
 
-    document = Document(document_uris=[
-        DocumentURI(uri='http://foo.com/', claimant='http://example.com'),
-        DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
-        DocumentURI(uri='http://example.com/', type='rel-canonical', claimant='http://example.com'),
-    ])
-    db.Session.add(document)
-    db.Session.flush()
-
-    assert storage.expand_uri(request, "http://example.com/") == [
+        assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
 
+    def test_expand_uri_elastic_document_doesnt_expand_canonical_uris(
+            self,
+            postgres_enabled,
+            models):
+        postgres_enabled.return_value = False
 
-def test_expand_uri_elastic_document_doesnt_expand_canonical_uris(postgres_enabled, models):
-    postgres_enabled.return_value = False
-
-    request = DummyRequest()
-    document = models.elastic.Document.get_by_uri.return_value
-    type(document).document_uris = uris = mock.PropertyMock()
-    uris.return_value = [
-        mock.Mock(uri='http://foo.com/'),
-        mock.Mock(uri='http://bar.com/'),
-        mock.Mock(uri='http://example.com/', type='rel-canonical'),
-    ]
-    assert storage.expand_uri(request, "http://example.com/") == [
+        request = DummyRequest()
+        document = models.elastic.Document.get_by_uri.return_value
+        type(document).document_uris = uris = mock.PropertyMock()
+        uris.return_value = [
+            mock.Mock(uri='http://foo.com/'),
+            mock.Mock(uri='http://bar.com/'),
+            mock.Mock(uri='http://example.com/', type='rel-canonical'),
+        ]
+        assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
 
+    def test_expand_uri_postgres_document_uris(self, postgres_enabled):
+        request = DummyRequest(db=db.Session)
+        postgres_enabled.return_value = True
 
-def test_expand_uri_postgres_document_uris(postgres_enabled):
-    request = DummyRequest(db=db.Session)
-    postgres_enabled.return_value = True
+        document = Document(document_uris=[
+            DocumentURI(uri='http://foo.com/', claimant='http://bar.com'),
+            DocumentURI(uri='http://bar.com/', claimant='http://bar.com'),
+        ])
+        db.Session.add(document)
+        db.Session.flush()
 
-    document = Document(document_uris=[
-        DocumentURI(uri='http://foo.com/', claimant='http://bar.com'),
-        DocumentURI(uri='http://bar.com/', claimant='http://bar.com'),
-    ])
-    db.Session.add(document)
-    db.Session.flush()
+        assert storage.expand_uri(request, 'http://foo.com/') == [
+            'http://foo.com/',
+            'http://bar.com/'
+        ]
 
-    assert storage.expand_uri(request, 'http://foo.com/') == [
-        'http://foo.com/',
-        'http://bar.com/'
-    ]
-
-
-def test_expand_uri_elastic_document_uris(postgres_enabled, models):
-    postgres_enabled.return_value = False
-    request = DummyRequest()
-    document = models.elastic.Document.get_by_uri.return_value
-    type(document).document_uris = uris = mock.PropertyMock()
-    uris.return_value = [
-        mock.Mock(uri="http://foo.com/"),
-        mock.Mock(uri="http://bar.com/"),
-    ]
-    assert storage.expand_uri(request, "http://example.com/") == [
-        "http://foo.com/",
-        "http://bar.com/",
-    ]
+    def test_expand_uri_elastic_document_uris(self, postgres_enabled, models):
+        postgres_enabled.return_value = False
+        request = DummyRequest()
+        document = models.elastic.Document.get_by_uri.return_value
+        type(document).document_uris = uris = mock.PropertyMock()
+        uris.return_value = [
+            mock.Mock(uri="http://foo.com/"),
+            mock.Mock(uri="http://bar.com/"),
+        ]
+        assert storage.expand_uri(request, "http://example.com/") == [
+            "http://foo.com/",
+            "http://bar.com/",
+        ]
 
 
 @pytest.mark.usefixtures('AnnotationBeforeSaveEvent',
