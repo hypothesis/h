@@ -6,6 +6,12 @@ instead.
 To make it easy for us to help you please fill out the information requested
 below.
 -->
+
+### I checked, if the bug is already listed
+
+- [ ] yes
+- [ ] no ([Please do so :smile:](https://github.com/hypothesis/h/issues))
+
 ### Steps to reproduce
 1.
 2.
