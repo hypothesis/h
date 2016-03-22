@@ -15,6 +15,29 @@ $thread-padding: $annotation-card-left-padding;
   }
 }
 
+.annotation-unavailable-message {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $gray-lighter;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  border-radius: 3px;
+  align-items: center;
+
+  &__label {
+    margin-top: 10px;
+    max-width: 160px;
+    text-align: center;
+  }
+
+  &__icon {
+    background-image: url(../images/icons/lock.svg);
+    background-repeat: no-repeat;
+    width: 56px;
+    height: 48px;
+  }
+}
+
 .thread-replies .thread:first-child {
   margin-top: 0.5em;
 }

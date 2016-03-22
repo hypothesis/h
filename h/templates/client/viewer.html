@@ -21,6 +21,13 @@
       on-change-sort-by="sort.name = sortBy">
     </sort-dropdown>
   </li>
+  <li class="annotation-unavailable-message"
+      ng-if="selectedAnnotationUnavailable()">
+    <div class="annotation-unavailable-message__icon"></div>
+    <p class="annotation-unavailable-message__label">
+      You do not have permission to see this annotation
+    </p>
+  </li>
   <li id="{{vm.id}}"
       class="annotation-card thread"
       ng-class="{'js-hover': hasFocus(child.message)}"
