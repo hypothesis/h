@@ -4,32 +4,41 @@ Unreleased
 Features
 --------
 
-- The 'Adder' that appears when selecting text has a new, clearer design
-  (#3078).
+- The 'adder' that appears when selecting text has a new, clearer design, and
+  the toolbar 'note' button allows the creation of annotations when a selection
+  has been made (#3078).
 
-- The 'Link' button on annotation cards now displays links to annotations in
-  context (feature flagged: direct_linking).
+- The client can now respond to a URL fragment of the form `#annotations:<id>`
+  in order to focus and scroll to a specified annotation on page load (#3085).
+
+- The 'link' button on annotation cards can now display links to annotations in
+  context on the page where they were made (feature flagged: direct_linking)
+  (#3105).
 
 Bug fixes
 ---------
 
-- The Chrome extension now correctly indicates when it was not injected into a
-  page because another Hypothesis client is already present.
-
 - Fixed an issue where the client displayed an inconsistent login state when
-  switching accounts whilst Hypothesis was active in multiple tabs (#2924).
+  switching accounts with Hypothesis active in multiple tabs (#2924).
 
-- Fixed an issue where private group annotations were not loaded correctly
-  after switching user accounts (#3083).
+- Fixed an issue where private group annotations were not loaded correctly after
+  switching user accounts (#3083).
+
+- The Chrome extension now correctly indicates when it was not injected into a
+  page because another Hypothesis client is already present (#3097).
 
 - Fix cursor position after using editor toolbar buttons to create a new list
   or quote, if the selection was previously empty and the cursor was positioned
-  at the start of the line.
+  at the start of the line (#3114).
 
 Miscellanea
 -----------
 
-- The undocumented window.hypothesisInstall() function has been removed.
+- The undocumented `window.hypothesisInstall()` function has been removed
+  (#3098).
+
+- Substantial improvements to the feature flagging system, reducing the amount
+  of network chatter between the application and the database (#3110, #3115).
 
 0.12.0 (2016-03-14)
 ===================
