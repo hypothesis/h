@@ -7,7 +7,7 @@ $thread-padding: $annotation-card-left-padding;
 
   & > li.thread:hover,
   & > li.thread.js-hover {
-    @include focus-outline;
+    border: 1px solid $highlight;
   }
 
   & > li.thread > .threadexp {
