@@ -123,11 +123,9 @@ module.exports = function AppController(
     if (!promptToLogout()) {
       return;
     }
-    var iterable = drafts.unsaved();
-    for (var i = 0, draft; i < iterable.length; i++) {
-      draft = iterable[i];
-      $rootScope.$emit("annotationDeleted", draft);
-    }
+    drafts.unsaved().forEach(function (draft) {
+      $rootScope.$emit(events.ANNOTATION_DELETED, draft);
+    });
     drafts.discard();
     $scope.accountDialog.visible = false;
     return auth.logout();
