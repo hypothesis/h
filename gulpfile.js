@@ -9,6 +9,7 @@ var path = require('path');
 var batch = require('gulp-batch');
 var changed = require('gulp-changed');
 var commander = require('commander');
+var debounce = require('lodash.debounce');
 var endOfStream = require('end-of-stream');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
@@ -29,7 +30,12 @@ var FONTS_DIR = 'build/fonts';
 var IMAGES_DIR = 'build/images';
 var TEMPLATES_DIR = 'h/templates/client';
 
+// LiveReloadServer instance for sending messages to connected
+// development clients
 var liveReloadServer;
+// List of file paths that changed since the last live-reload
+// notification was dispatched
+var liveReloadChangedFiles = [];
 
 function parseCommandLine() {
   commander
@@ -225,6 +231,26 @@ function changedAssets(prevManifest, newManifest) {
   });
 }
 
+var debouncedLiveReload = debounce(function () {
+  // Notify dev clients about the changed assets. Note: This currently has an
+  // issue that if CSS, JS and templates are all changed in quick succession,
+  // some of the assets might be empty/incomplete files that are still being
+  // generated when this is invoked, causing the reload to fail.
+  //
+  // Live reload notifications are debounced to reduce the likelihood of this
+  // happening.
+  liveReloadServer.notifyChanged(liveReloadChangedFiles);
+  liveReloadChangedFiles = [];
+}, 250);
+
+function triggerLiveReload(changedFiles) {
+  if (!liveReloadServer) {
+    return;
+  }
+  liveReloadChangedFiles = liveReloadChangedFiles.concat(changedFiles);
+  debouncedLiveReload();
+}
+
 /**
  * Generate a JSON manifest mapping file paths to
  * URLs containing cache-busting query string parameters.
@@ -234,12 +260,12 @@ function generateManifest() {
     .pipe(manifest({name: 'manifest.json'}))
     .pipe(through.obj(function (file, enc, callback) {
       gulpUtil.log('Updated asset manifest');
-      if (liveReloadServer) {
-        var newManifest = JSON.parse(file.contents.toString());
-        var changed = changedAssets(prevManifest, newManifest);
-        prevManifest = newManifest;
-        liveReloadServer.notifyChanged(changed);
-      }
+
+      var newManifest = JSON.parse(file.contents.toString());
+      var changed = changedAssets(prevManifest, newManifest);
+      prevManifest = newManifest;
+      triggerLiveReload(changed);
+
       this.push(file);
       callback();
     }))
