@@ -1,5 +1,8 @@
 'use strict';
 
+var angular = require('angular');
+
+var events = require('./events');
 
 // Fetch the container object for the passed annotation from the threading
 // service, but only return it if it has an associated message.
@@ -28,14 +31,14 @@ function annotationMapper($rootScope, threading, store) {
       var container = getContainer(threading, annotation);
       if (container !== null) {
         angular.copy(annotation, container.message);
-        $rootScope.$emit('annotationUpdated', container.message);
+        $rootScope.$emit(events.ANNOTATION_UPDATED, container.message);
         return;
       }
 
       loaded.push(new store.AnnotationResource(annotation));
     });
 
-    $rootScope.$emit('annotationsLoaded', loaded);
+    $rootScope.$emit(events.ANNOTATIONS_LOADED, loaded);
   }
 
   function unloadAnnotations(annotations) {
@@ -45,13 +48,13 @@ function annotationMapper($rootScope, threading, store) {
         annotation = angular.copy(annotation, container.message);
       }
 
-      $rootScope.$emit('annotationDeleted', annotation);
+      $rootScope.$emit(events.ANNOTATION_DELETED, annotation);
     });
   }
 
   function createAnnotation(annotation) {
     annotation = new store.AnnotationResource(annotation);
-    $rootScope.$emit('beforeAnnotationCreated', annotation);
+    $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED, annotation);
     return annotation;
   }
 
@@ -59,7 +62,7 @@ function annotationMapper($rootScope, threading, store) {
     return annotation.$delete({
       id: annotation.id
     }).then(function () {
-      $rootScope.$emit('annotationDeleted', annotation);
+      $rootScope.$emit(events.ANNOTATION_DELETED, annotation);
       return annotation;
     });
   }
