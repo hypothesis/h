@@ -1,3 +1,16 @@
+Unreleased
+==========
+
+Miscellanea
+-----------
+
+- Remove usage of `h.accounts.User.status` bitfield (#3120).
+
+- Show message when a direct-linked annotation is selected but the annotation
+  is not available (#3093).
+
+- Properly hook up Chrome production extension with production bouncer (#3077).
+
 0.13.0 (2016-03-22)
 ===================
 
