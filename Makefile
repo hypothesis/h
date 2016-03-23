@@ -73,7 +73,7 @@ build/%-chrome-prod.zip: build/manifest.json
 		--service 'https://hypothes.is' \
 		--websocket 'wss://hypothes.is/ws' \
 		--sentry-public-dsn '$(SENTRY_DSN_PROD)' \
-		--bouncer 'https://hpt.is'
+		--bouncer 'https://hyp.is'
 	@zip -qr $@ build/chrome
 
 ################################################################################
