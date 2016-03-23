@@ -221,6 +221,18 @@
               class="share-dialog-target__icon h-icon-mail"></a>
           </span>
           <input class="share-dialog-link" type="text" value="{{vm.annotationURI}}" readonly>
+          <span class="share-dialog-msg" ng-if="vm.group() && !vm.group().public && !vm.isPrivate">
+            <span class="share-dialog-msg__audience">
+              Group.
+            </span>
+            Only group members will be able to view this annotation.
+          </span>
+          <span class="share-dialog-msg" ng-if="vm.isPrivate">
+            <span class="share-dialog-msg__audience">
+              Only me.
+            </span>
+            No one else will be able to view this annotation.
+          </span>
         </span>
       </span>
     </div>
