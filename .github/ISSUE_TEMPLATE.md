@@ -1,10 +1,19 @@
 <!--
-Thank you for reporting an issue with Hypothesis! This is our bug and issue
-tracker. If you have any support questions please email support@hypothes.is
-instead.
+Thank you for reporting an issue with Hypothesis! This is our bug tracker. If
+you have any support questions please email support@hypothes.is instead.
 
-To make it easy for us to help you please fill out the information requested
-below.
+In order to make it easy for us to help you, please note the following:
+
+1. Only report **bugs** with Hypothesis here. If you want to discuss potential
+   new features, please use our developer mailing list:
+
+       https://groups.google.com/a/list.hypothes.is/forum/#!forum/dev
+
+2. Be sure to check that the bug you're reporting isn't already reported. You
+   can use the GitHub issues search box to help with this.
+
+3. Fill out the information requested by the template below. If you can't supply
+   all the information, don't worry, but do please use the template.
 -->
 ### Steps to reproduce
 1.
