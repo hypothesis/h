@@ -40,7 +40,7 @@ def test_jsonschema_sets_appropriate_error_message_when_data_invalid():
 
 
 def test_createannotationschema_passes_input_to_structure_validator():
-    request = testing.DummyRequest()
+    request = mock_request()
     schema = schemas.CreateAnnotationSchema(request)
     schema.structure = mock.Mock()
     schema.structure.validate.return_value = {}
@@ -51,7 +51,7 @@ def test_createannotationschema_passes_input_to_structure_validator():
 
 
 def test_createannotationschema_raises_if_structure_validator_raises():
-    request = testing.DummyRequest()
+    request = mock_request()
     schema = schemas.CreateAnnotationSchema(request)
     schema.structure = mock.Mock()
     schema.structure.validate.side_effect = schemas.ValidationError('asplode')
@@ -66,7 +66,7 @@ def test_createannotationschema_raises_if_structure_validator_raises():
     'id',
 ])
 def test_createannotationschema_removes_protected_fields(field):
-    request = testing.DummyRequest()
+    request = mock_request()
     schema = schemas.CreateAnnotationSchema(request)
     data = {}
     data[field] = 'something forbidden'
@@ -84,7 +84,7 @@ def test_createannotationschema_removes_protected_fields(field):
 def test_createannotationschema_ignores_input_user(data, authn_policy):
     """Any user field sent in the payload should be ignored."""
     authn_policy.authenticated_userid.return_value = 'acct:jeanie@example.com'
-    request = testing.DummyRequest()
+    request = mock_request()
     schema = schemas.CreateAnnotationSchema(request)
 
     result = schema.validate(data)
@@ -117,7 +117,7 @@ def test_createannotationschema_rejects_annotations_to_other_groups(data,
     principals.
     """
     authn_policy.effective_principals.return_value = effective_principals
-    request = testing.DummyRequest()
+    request = mock_request()
     schema = schemas.CreateAnnotationSchema(request)
 
     if ok:
@@ -139,7 +139,7 @@ def test_createannotationschema_rejects_annotations_to_other_groups(data,
     {'null': None},
 ])
 def test_createannotationschema_permits_all_other_changes(data):
-    request = testing.DummyRequest()
+    request = mock_request()
     schema = schemas.CreateAnnotationSchema(request)
 
     result = schema.validate(data)
@@ -153,11 +153,12 @@ def test_createannotationschema_permits_all_other_changes(data):
 @mock.patch('h.api.schemas.parse_document_claims')
 def test_createannotationschema_calls_document_uris_from_data(
         parse_document_claims):
-    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+    schema = schemas.CreateAnnotationSchema(mock_request(postgres_write=True))
     document_data = {'foo': 'bar'}
     uri = 'http://example.com/example'
     data = {
         'document': document_data,
+        'permissions': {'read': []},
         'uri': uri,
     }
 
@@ -172,9 +173,9 @@ def test_createannotationschema_calls_document_uris_from_data(
 @mock.patch('h.api.schemas.parse_document_claims')
 def test_createannotationschema_puts_document_uris_in_appstruct(
         parse_document_claims):
-    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+    schema = schemas.CreateAnnotationSchema(mock_request(postgres_write=True))
 
-    appstruct = schema.validate({})
+    appstruct = schema.validate({'permissions': {'read': []}})
 
     assert appstruct['document']['document_uri_dicts'] == (
         parse_document_claims.document_uris_from_data.return_value)
@@ -183,11 +184,12 @@ def test_createannotationschema_puts_document_uris_in_appstruct(
 @mock.patch('h.api.schemas.parse_document_claims')
 def test_createannotationschema_calls_document_metas_from_data(
         parse_document_claims):
-    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+    schema = schemas.CreateAnnotationSchema(mock_request(postgres_write=True))
     document_data = {'foo': 'bar'}
     uri = 'http://example.com/example'
     data = {
         'document': document_data,
+        'permissions': {'read': []},
         'uri': uri,
     }
 
@@ -202,9 +204,9 @@ def test_createannotationschema_calls_document_metas_from_data(
 @mock.patch('h.api.schemas.parse_document_claims')
 def test_createannotationschema_puts_document_metas_in_appstruct(
         parse_document_claims):
-    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+    schema = schemas.CreateAnnotationSchema(mock_request(postgres_write=True))
 
-    appstruct = schema.validate({})
+    appstruct = schema.validate({'permissions': {'read': []}})
 
     assert appstruct['document']['document_meta_dicts'] == (
         parse_document_claims.document_metas_from_data.return_value)
@@ -218,12 +220,13 @@ def test_createannotationschema_clears_existing_keys_from_document():
     keys.
 
     """
-    schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+    schema = schemas.CreateAnnotationSchema(mock_request(postgres_write=True))
 
     appstruct = schema.validate({
         'document': {
             'foo': 'bar'  # This should be deleted.
         },
+        'permissions': {'read': []},
     })
 
     assert 'foo' not in appstruct['document']
@@ -339,3 +342,16 @@ def test_updateannotationschema_permits_all_other_changes(data):
 
     for k in data:
         assert result[k] == data[k]
+
+
+def mock_request(postgres_write=False):
+    request = testing.DummyRequest()
+
+    def feature(flag):
+        if flag == 'postgres_write':
+            return postgres_write
+        return False
+
+    request.feature = mock.Mock(side_effect=feature, spec=feature)
+
+    return request

@@ -9,9 +9,16 @@ assumed to be validated.
 
 from functools import partial
 
+from pyramid import i18n
+from pyramid import security
+
+from h.api import schemas
 from h.api import transform
 from h.api import models
 from h.api.events import AnnotationBeforeSaveEvent
+
+
+_ = i18n.TranslationStringFactory(__package__)
 
 
 def annotation_from_dict(data):
@@ -54,46 +61,35 @@ def _legacy_create_annotation_in_elasticsearch(request, data):
     return annotation
 
 
-# FIXME: A lot of transforming data work that's being done here should
-# move into schemas.py.
 def _create_annotation(request, data):
-    annotation = models.Annotation()
-
-    del data['user']  # The userid from the POSTed data is ignored.
-    annotation.userid = request.authenticated_userid
-
-    annotation.text = data.pop('text', None)
-    annotation.tags = data.pop('tags', None)
-
-    if data.pop('permissions')['read'] == [annotation.userid]:
-        annotation.shared = False
-    else:
-        annotation.shared = True
-
-    target = data.pop('target', [])
-    if target:  # Replies and page notes don't have 'target'.
-        target = target[0]  # Multiple targets are ignored.
-        annotation.target_selectors = target['selector']
-
-    annotation.target_uri = data.pop('uri')
-    annotation.references = data.pop('references', [])
-
-    group = data.pop('group')
-    if annotation.is_reply:
-        top_level_annotation_id = annotation.references[0]
-        top_level_annotation = fetch_annotation(request,
-                                                top_level_annotation_id)
-        if top_level_annotation:
-            annotation.groupid = top_level_annotation.groupid
-    else:
-        annotation.groupid = group
 
     document_uri_dicts = data['document']['document_uri_dicts']
     document_meta_dicts = data['document']['document_meta_dicts']
     del data['document']
 
-    annotation.extras = data
+    # Replies must have the same group as their parent.
+    if data['references']:
+        top_level_annotation_id = data['references'][0]
+        top_level_annotation = fetch_annotation(request,
+                                                top_level_annotation_id)
+        if top_level_annotation:
+            data['groupid'] = top_level_annotation.groupid
+        else:
+            # FIXME: Fail here with a validation error.
+            pass
 
+    # The user must have permission to create an annotation in the group
+    # they've asked to create one in.
+    if data['groupid'] == '__world__':
+        group_principal = security.Everyone
+    else:
+        group_principal = 'group:{}'.format(data['groupid'])
+    if group_principal not in request.effective_principals:
+        raise schemas.ValidationError('group: ' +
+                                      _('You may not create annotations in '
+                                        'groups you are not a member of!'))
+
+    annotation = models.Annotation(**data)
     request.db.add(annotation)
 
     # We need to flush the db here so that annotation.created and

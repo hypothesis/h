@@ -7,10 +7,12 @@ import copy
 import pytest
 import mock
 from mock import patch
+from pyramid import security
 from pyramid.testing import DummyRequest
 
 from h import db
 from h.api import storage
+from h.api import schemas
 from h.api.models.annotation import Annotation
 from h.api.models.document import Document, DocumentURI
 
@@ -216,89 +218,20 @@ class TestCreateAnnotationPostgres(object):
 
     """Tests for create_annotation() when postgres_write is on."""
 
-    def test_it_inits_an_Annotation_model(self, models):
-        storage.create_annotation(self.mock_request(), self.annotation_data())
-
-        models.Annotation.assert_called_once_with()
-
-    def test_it_sets_userid_to_authenticated_userid(self, models):
-        request = self.mock_request()
-        data = self.annotation_data()
-        # request.authenticated_userid should be used even if the data contains
-        # a different userid.
-        data['user'] = 'acct:other@localhost'
-
-        storage.create_annotation(request, data)
-
-        assert models.Annotation.return_value.userid == (
-            request.authenticated_userid)
-
-    def test_it_saves_text(self, models):
-        data = self.annotation_data()
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
-
-        assert models.Annotation.return_value.text == data['text']
-
-    def test_it_saves_tags(self, models):
-        data = self.annotation_data()
-
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
-
-        assert models.Annotation.return_value.tags == data['tags']
-
-    def test_it_sets_shared_to_True_if_read_permissions_are_shared(self,
-                                                                   models):
-        data = self.annotation_data()
-        data['permissions'] = {'read': ['__world__']}
-
-        storage.create_annotation(self.mock_request(), data)
-
-        assert models.Annotation.return_value.shared is True
-
-    def test_it_sets_shared_to_False_if_read_permissions_are_private(self,
-                                                                     models):
-        request = self.mock_request()
-        data = self.annotation_data()
-        data['permissions'] = {'read': [request.authenticated_userid]}
-
-        storage.create_annotation(request, data)
-
-        assert models.Annotation.return_value.shared is False
-
-    def test_it_saves_selectors(self, models):
-        data = self.annotation_data()
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
-
-        assert models.Annotation.return_value.target_selectors == (
-            data['target'][0]['selector'])
-
-    def test_it_saves_uri(self, models):
-        data = self.annotation_data()
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
-
-        assert models.Annotation.return_value.target_uri == data['uri']
-
-    def test_it_saves_references(self, models):
-        data = self.annotation_data()
-        data['references'] = ['foo', 'bar']
-
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
-
-        assert models.Annotation.return_value.references == data['references']
-
-    def test_it_saves_group(self, models):
-        data = self.annotation_data()
-
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
-
-        assert models.Annotation.return_value.groupid == data['group']
-
     def test_it_fetches_parent_annotation_for_replies(self,
-                                                      fetch_annotation,
-                                                      models):
+                                                      authn_policy,
+                                                      fetch_annotation):
         request = self.mock_request()
-        models.Annotation.return_value.is_reply = True
+
+        # Make the annotation's parent belong to 'test-group'.
+        fetch_annotation.return_value.groupid = 'test-group'
+
+        # The request will need permission to write to 'test-group'.
+        authn_policy.effective_principals.return_value = ['group:test-group']
+
         data = self.annotation_data()
+
+        # The annotation is a reply.
         data['references'] = ['parent_annotation_id']
 
         storage.create_annotation(request, data)
@@ -306,24 +239,42 @@ class TestCreateAnnotationPostgres(object):
         fetch_annotation.assert_called_once_with(request,
                                                  'parent_annotation_id')
 
-    def test_it_overrides_group_for_replies(self, fetch_annotation, models):
-        fetch_annotation.return_value.groupid = "parent's group id"
-        models.Annotation.return_value.is_reply = True
+    def test_it_sets_group_for_replies(self,
+                                       authn_policy,
+                                       fetch_annotation,
+                                       models):
+        # Make the annotation's parent belong to 'test-group'.
+        fetch_annotation.return_value.groupid = 'test-group'
+
+        # The request will need permission to write to 'test-group'.
+        authn_policy.effective_principals.return_value = ['group:test-group']
+
         data = self.annotation_data()
-        data['groupid'] = "reply's group id"
+        assert data['groupid'] != 'test-group'
+
+        # The annotation is a reply.
         data['references'] = ['parent_annotation_id']
 
         storage.create_annotation(self.mock_request(), data)
 
-        assert models.Annotation.return_value.groupid == "parent's group id"
+        assert models.Annotation.call_args[1]['groupid'] == 'test-group'
 
-    def test_it_saves_extras(self, models):
+    def test_it_raises_if_user_does_not_have_permissions_for_group(self):
         data = self.annotation_data()
-        data['foo'] = 'bar'
+        data['groupid'] = 'foo-group'
 
-        storage.create_annotation(self.mock_request(), data)
+        with pytest.raises(schemas.ValidationError) as err:
+            storage.create_annotation(self.mock_request(), data)
 
-        assert models.Annotation.return_value.extras == {'foo': 'bar'}
+        assert str(err.value).startswith('group: ')
+
+    def test_it_inits_an_Annotation_model(self, models):
+        data = self.annotation_data()
+
+        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
+
+        del data['document']
+        models.Annotation.assert_called_once_with(**data)
 
     def test_it_adds_the_annotation_to_the_database(self, models):
         request = self.mock_request()
@@ -500,25 +451,17 @@ class TestCreateAnnotationPostgres(object):
 
         assert annotation == models.Annotation.return_value
 
-    def test_it_does_not_crash_if_data_contains_no_target(self):
-        # Replies have no target.
+    def test_it_does_not_crash_if_target_selectors_is_empty(self):
+        # Page notes have [] for target_selectors.
         data = self.annotation_data()
-        del data['target']
-
-        storage.create_annotation(self.mock_request(), data)
-
-    def test_it_does_not_crash_if_target_is_empty_list(self):
-        # Page notes have [] for the target.
-        data = self.annotation_data()
-        data['target'] = []
+        data['target_selectors'] = []
 
         storage.create_annotation(self.mock_request(), data)
 
     def test_it_does_not_crash_if_no_text_or_tags(self):
         # Highlights have no text or tags.
         data = self.annotation_data()
-        del data['text']
-        del data['tags']
+        data['text'] = data['tags'] = ''
 
         storage.create_annotation(self.mock_request(), data)
 
@@ -542,14 +485,14 @@ class TestCreateAnnotationPostgres(object):
 
     def annotation_data(self):
         return {
-            'user': 'acct:test@localhost',
+            'userid': 'acct:test@localhost',
             'text': 'text',
             'tags': ['one', 'two'],
-            'permissions': {'read': ['acct:test@localhost']},
-            'uri': 'http://www.example.com/example.html',
-            'group': '__world__',
+            'shared': False,
+            'target_uri': 'http://www.example.com/example.html',
+            'groupid': '__world__',
             'references': [],
-            'target': [{'selector': ['selector_one', 'selector_two']}],
+            'target_selectors': ['selector_one', 'selector_two'],
             'document': {
                 'document_uri_dicts': [],
                 'document_meta_dicts': [],
