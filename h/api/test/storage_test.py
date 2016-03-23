@@ -259,6 +259,20 @@ class TestCreateAnnotationPostgres(object):
 
         assert models.Annotation.call_args[1]['groupid'] == 'test-group'
 
+    def test_it_raises_if_parent_annotation_does_not_exist(self,
+                                                           fetch_annotation):
+        fetch_annotation.return_value = None
+
+        data = self.annotation_data()
+
+        # The annotation is a reply.
+        data['references'] = ['parent_annotation_id']
+
+        with pytest.raises(schemas.ValidationError) as err:
+            storage.create_annotation(self.mock_request(), data)
+
+        assert str(err.value).startswith('references.0: ')
+
     def test_it_raises_if_user_does_not_have_permissions_for_group(self):
         data = self.annotation_data()
         data['groupid'] = 'foo-group'

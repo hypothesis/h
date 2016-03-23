@@ -75,8 +75,11 @@ def _create_annotation(request, data):
         if top_level_annotation:
             data['groupid'] = top_level_annotation.groupid
         else:
-            # FIXME: Fail here with a validation error.
-            pass
+            raise schemas.ValidationError(
+                'references.0: ' +
+                _('Annotation {annotation_id} does not exist').format(
+                    annotation_id=top_level_annotation_id)
+            )
 
     # The user must have permission to create an annotation in the group
     # they've asked to create one in.
