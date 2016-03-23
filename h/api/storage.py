@@ -61,7 +61,21 @@ def _legacy_create_annotation_in_elasticsearch(request, data):
     return annotation
 
 
-def _create_annotation(request, data):
+def create_annotation(request, data):
+    """
+    Create an annotation from passed data.
+
+    :param request: the request object
+    :type request: pyramid.request.Request
+
+    :param data: a dictionary of annotation properties
+    :type data: dict
+
+    :returns: the created annotation
+    :rtype: dict
+    """
+    if not request.feature('postgres_write'):
+        return _legacy_create_annotation_in_elasticsearch(request, data)
 
     document_uri_dicts = data['document']['document_uri_dicts']
     document_meta_dicts = data['document']['document_meta_dicts']
@@ -132,25 +146,6 @@ def _create_annotation(request, data):
             **document_meta_dict)
 
     return annotation
-
-
-def create_annotation(request, data):
-    """
-    Create an annotation from passed data.
-
-    :param request: the request object
-    :type request: pyramid.request.Request
-
-    :param data: a dictionary of annotation properties
-    :type data: dict
-
-    :returns: the created annotation
-    :rtype: dict
-    """
-    if request.feature('postgres_write'):
-        return _create_annotation(request, data)
-    else:
-        return _legacy_create_annotation_in_elasticsearch(request, data)
 
 
 def update_annotation(request, id, data):
