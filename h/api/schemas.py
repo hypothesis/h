@@ -95,36 +95,9 @@ class CreateAnnotationSchema(object):
         self.structure = AnnotationSchema()
 
     def validate(self, data):
-        if self.request.feature('postgres_write'):
-            return self._validate(data)
-        else:
+        if not self.request.feature('postgres_write'):
             return self._legacy_validate(data)
 
-    def _legacy_validate(self, data):
-        appstruct = self.structure.validate(data)
-
-        # Some fields are not to be set by the user, ignore them.
-        for field in PROTECTED_FIELDS:
-            appstruct.pop(field, None)
-
-        # Set the annotation user field to the request user.
-        appstruct['user'] = self.request.authenticated_userid
-
-        # Assert that the user has permission to create an annotation in the
-        # group they've asked to create one in.
-        if 'group' in appstruct:
-            if appstruct['group'] == '__world__':
-                group_principal = security.Everyone
-            else:
-                group_principal = 'group:{}'.format(appstruct['group'])
-            if group_principal not in self.request.effective_principals:
-                raise ValidationError('group: ' +
-                                      _('You may not create annotations in '
-                                        'groups you are not a member of!'))
-
-        return appstruct
-
-    def _validate(self, data):
         appstruct = self.structure.validate(data)
 
         new_appstruct = {}
@@ -183,6 +156,30 @@ class CreateAnnotationSchema(object):
         }
 
         return new_appstruct
+
+    def _legacy_validate(self, data):
+        appstruct = self.structure.validate(data)
+
+        # Some fields are not to be set by the user, ignore them.
+        for field in PROTECTED_FIELDS:
+            appstruct.pop(field, None)
+
+        # Set the annotation user field to the request user.
+        appstruct['user'] = self.request.authenticated_userid
+
+        # Assert that the user has permission to create an annotation in the
+        # group they've asked to create one in.
+        if 'group' in appstruct:
+            if appstruct['group'] == '__world__':
+                group_principal = security.Everyone
+            else:
+                group_principal = 'group:{}'.format(appstruct['group'])
+            if group_principal not in self.request.effective_principals:
+                raise ValidationError('group: ' +
+                                      _('You may not create annotations in '
+                                        'groups you are not a member of!'))
+
+        return appstruct
 
 
 class UpdateAnnotationSchema(object):
