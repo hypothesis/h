@@ -79,6 +79,9 @@ SETTINGS = [
     EnvSetting('h.db.should_create_all', 'MODEL_CREATE_ALL', type=asbool),
     EnvSetting('h.db.should_drop_all', 'MODEL_DROP_ALL', type=asbool),
     EnvSetting('h.websocket_url', 'H_WEBSOCKET_URL'),
+    # The client Sentry DSN should be of the public kind, lacking the password
+    # component in the DSN URI.
+    EnvSetting('h.client.sentry_dsn', 'SENTRY_DSN_CLIENT'),
 
     # Debug/development settings
     EnvSetting('debug_query', 'DEBUG_QUERY'),
