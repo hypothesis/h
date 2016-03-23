@@ -40,4 +40,7 @@ module.exports = {
 
   /** A set of annotations were loaded from the server. */
   ANNOTATIONS_LOADED: 'annotationsLoaded',
+
+  /** An annotation is unloaded. */
+  ANNOTATIONS_UNLOADED: 'annotationsUnloaded',
 };

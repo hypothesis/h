@@ -42,14 +42,14 @@ function annotationMapper($rootScope, threading, store) {
   }
 
   function unloadAnnotations(annotations) {
-    annotations.forEach(function (annotation) {
+    var unloaded = annotations.map(function (annotation) {
       var container = getContainer(threading, annotation);
       if (container !== null && annotation !== container.message) {
         annotation = angular.copy(annotation, container.message);
       }
-
-      $rootScope.$emit(events.ANNOTATION_DELETED, annotation);
+      return annotation;
     });
+    $rootScope.$emit(events.ANNOTATIONS_UNLOADED, unloaded);
   }
 
   function createAnnotation(annotation) {

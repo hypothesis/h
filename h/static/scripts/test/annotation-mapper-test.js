@@ -38,7 +38,7 @@ describe('annotationMapper', function() {
     sandbox.restore();
   });
 
-  describe('.loadAnnotations()', function () {
+  describe('#loadAnnotations()', function () {
     it('triggers the annotationLoaded event', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1}, {id: 2}, {id: 3}];
@@ -108,14 +108,13 @@ describe('annotationMapper', function() {
     });
   });
 
-  describe('.unloadAnnotations()', function () {
-    it('triggers the annotationDeleted event', function () {
+  describe('#unloadAnnotations()', function () {
+    it('triggers the annotationsUnloaded event', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1}, {id: 2}, {id: 3}];
       annotationMapper.unloadAnnotations(annotations);
-      annotations.forEach(function (annot) {
-        assert.calledWith($rootScope.$emit, events.ANNOTATION_DELETED, annot);
-      });
+      assert.calledWith($rootScope.$emit,
+        events.ANNOTATIONS_UNLOADED, annotations);
     });
 
     it('replaces the properties on the cached annotation with those from the deleted one', function () {
@@ -125,14 +124,14 @@ describe('annotationMapper', function() {
       fakeThreading.idTable[1] = cached;
 
       annotationMapper.unloadAnnotations(annotations);
-      assert.calledWith($rootScope.$emit, events.ANNOTATION_DELETED, {
+      assert.calledWith($rootScope.$emit, events.ANNOTATIONS_UNLOADED, [{
         id: 1,
         url: 'http://example.com'
-      });
+      }]);
     });
   });
 
-  describe('.createAnnotation()', function () {
+  describe('#createAnnotation()', function () {
     it('creates a new annotaton resource', function () {
       var ann = {};
       fakeStore.AnnotationResource.returns(ann);
@@ -157,7 +156,7 @@ describe('annotationMapper', function() {
     });
   });
 
-  describe('.deleteAnnotation()', function () {
+  describe('#deleteAnnotation()', function () {
     it('deletes the annotation on the server', function () {
       var p = Promise.resolve();
       var ann = {$delete: sandbox.stub().returns(p)};

@@ -179,7 +179,9 @@ module.exports = function WidgetController(
     // case, searchClients.length > 0), as a result of switching to the group
     // containing the selected annotation.
     //
-    // In that case, we don't want to trigger reloading annotations again.
+    // In that case, we don't want to trigger reloading annotations again and we
+    // also want to preserve the selection if the user visits a direct link to a
+    // group annotation whilst signed out, then signs in.
     if (searchClients.length) {
       return;
     }

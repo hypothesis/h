@@ -300,6 +300,23 @@ describe 'AnnotationSync', ->
 
         assert.notCalled(fakeBridge.call)
 
+    describe 'the "annotationsUnloaded" event', ->
+      it 'sends calls to delete the annotations over the bridge', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        annSync.cache.tag1 = ann
+        options.emit('annotationsUnloaded', [ann])
+
+        assert.calledWith(fakeBridge.call, 'deleteAnnotation',
+          {msg: ann, tag: ann.$$tag}, sinon.match.func)
+
+      it 'removes the annotations from the cache', ->
+        ann = {id: 1, $$tag: 'tag1'}
+        annSync = createAnnotationSync()
+        annSync.cache.tag1 = ann
+        options.emit('annotationsUnloaded', [ann])
+        assert.isUndefined(annSync.cache.tag1)
+
     describe 'the "annotationsLoaded" event', ->
       it 'formats the provided annotations', ->
         annotations = [{id: 1}, {id: 2}, {id: 3}]
