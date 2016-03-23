@@ -39,6 +39,7 @@ class TestJSONSchema(object):
         assert message.startswith("123 is not of type 'string'")
 
 
+@pytest.mark.use_fixtures('parse_document_claims')
 class TestCreateAnnotationSchema(object):
 
     def test_it_passes_input_to_structure_validator(self):
@@ -147,9 +148,6 @@ class TestCreateAnnotationSchema(object):
         for k in data:
             assert result[k] == data[k]
 
-    # FIXME: parse_document_claims needs to be patched for all tests of code
-    # that uses it.
-    @mock.patch('h.api.schemas.parse_document_claims')
     def test_it_calls_document_uris_from_data(self, parse_document_claims):
         schema = schemas.CreateAnnotationSchema(
             self.mock_request(postgres_write=True))
@@ -168,7 +166,6 @@ class TestCreateAnnotationSchema(object):
             claimant=uri,
         )
 
-    @mock.patch('h.api.schemas.parse_document_claims')
     def test_it_puts_document_uris_in_appstruct(self, parse_document_claims):
         schema = schemas.CreateAnnotationSchema(
             self.mock_request(postgres_write=True))
@@ -178,7 +175,6 @@ class TestCreateAnnotationSchema(object):
         assert appstruct['document']['document_uri_dicts'] == (
             parse_document_claims.document_uris_from_data.return_value)
 
-    @mock.patch('h.api.schemas.parse_document_claims')
     def test_it_calls_document_metas_from_data(self, parse_document_claims):
         schema = schemas.CreateAnnotationSchema(
             self.mock_request(postgres_write=True))
@@ -197,7 +193,6 @@ class TestCreateAnnotationSchema(object):
             claimant=uri,
         )
 
-    @mock.patch('h.api.schemas.parse_document_claims')
     def test_it_puts_document_metas_in_appstruct(self, parse_document_claims):
         schema = schemas.CreateAnnotationSchema(
             self.mock_request(postgres_write=True))
@@ -238,6 +233,14 @@ class TestCreateAnnotationSchema(object):
         request.feature = mock.Mock(side_effect=feature, spec=feature)
 
         return request
+
+    @pytest.fixture
+    def parse_document_claims(self, request):
+        patcher = mock.patch('h.api.schemas.parse_document_claims',
+                             autospec=True)
+        parse_document_claims = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return parse_document_claims
 
 
 class TestUpdateAnnotationSchema(object):
