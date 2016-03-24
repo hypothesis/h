@@ -21,6 +21,7 @@ from h.util.view import json_view
 
 def render_app(request, extra=None):
     """Render a page that serves a preconfigured annotation client."""
+    client_sentry_dsn = request.registry.settings.get('h.client.sentry_dsn')
     html = client.render_app_html(
         assets_env=request.assets_env,
         # FIXME: The '' here is to ensure this has a trailing slash. This seems
@@ -29,7 +30,7 @@ def render_app(request, extra=None):
         api_url=request.route_url('api.index'),
         service_url=request.route_url('index'),
         ga_tracking_id=request.registry.settings.get('ga_tracking_id'),
-        sentry_public_dsn=request.sentry.get_public_dsn(),
+        sentry_public_dsn=client_sentry_dsn,
         websocket_url=request.registry.settings.get('h.websocket_url'),
         extra=extra)
     request.response.text = html
