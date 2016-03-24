@@ -10,348 +10,348 @@ from h import db
 from h.api.models import document
 
 
-def test_document_title():
-    doc = document.Document()
-    document.DocumentMeta(type='title', value='The Title', document=doc, claimant='http://example.com')
-    db.Session.add(doc)
-    db.Session.flush()
+class TestDocumentTitle(object):
 
-    assert doc.title == 'The Title'
+    def test_it_returns_the_value_of_the_one_title_DocumentMeta(self):
+        """When there's only one DocumentMeta it should return its title."""
+        doc = document.Document()
+        document.DocumentMeta(type='title',
+                              value='The Title',
+                              document=doc,
+                              claimant='http://example.com')
+        db.Session.add(doc)
+        db.Session.flush()
 
+        assert doc.title == 'The Title'
 
-def test_document_title_returns_first():
-    doc = document.Document()
-    document.DocumentMeta(type='title', value='The US Title', document=doc, claimant='http://example.com')
-    document.DocumentMeta(type='title', value='The UK Title', document=doc, claimant='http://example.co.uk')
-    db.Session.add(doc)
-    db.Session.flush()
+    def test_it_returns_the_value_of_the_first_title_DocumentMeta(self):
+        doc = document.Document()
+        document.DocumentMeta(type='title',
+                              value='The US Title',
+                              document=doc,
+                              claimant='http://example.com')
+        document.DocumentMeta(type='title',
+                              value='The UK Title',
+                              document=doc,
+                              claimant='http://example.co.uk')
+        db.Session.add(doc)
+        db.Session.flush()
 
-    assert doc.title == 'The US Title'
+        assert doc.title == 'The US Title'
 
+    def test_it_returns_None_if_there_are_no_title_DocumentMetas(self):
+        doc = document.Document()
+        document.DocumentMeta(type='other',
+                              value='something',
+                              document=doc,
+                              claimant='http://example.com')
+        db.Session.add(doc)
+        db.Session.flush()
 
-def test_document_title_meta_not_found():
-    doc = document.Document()
-    document.DocumentMeta(type='other', value='something', document=doc, claimant='http://example.com')
-    db.Session.add(doc)
-    db.Session.flush()
-
-    assert doc.title is None
-
-
-def test_document_find_by_uris():
-    document1 = document.Document()
-    uri1 = 'https://de.wikipedia.org/wiki/Hauptseite'
-    document1.document_uris.append(document.DocumentURI(claimant=uri1, uri=uri1))
-
-    document2 = document.Document()
-    uri2 = 'https://en.wikipedia.org/wiki/Main_Page'
-    document2.document_uris.append(document.DocumentURI(claimant=uri2, uri=uri2))
-    uri3 = 'https://en.wikipedia.org'
-    document2.document_uris.append(document.DocumentURI(claimant=uri3, uri=uri2))
-
-    db.Session.add_all([document1, document2])
-    db.Session.flush()
-
-    actual = document.Document.find_by_uris(db.Session, [
-        'https://en.wikipedia.org/wiki/Main_Page',
-        'https://m.en.wikipedia.org/wiki/Main_Page'])
-    assert actual.count() == 1
-    assert actual.first() == document2
+        assert doc.title is None
 
 
-def test_document_find_by_uris_no_matches():
-    document_ = document.Document()
-    document_.document_uris.append(document.DocumentURI(
-        claimant='https://en.wikipedia.org/wiki/Main_Page',
-        uri='https://en.wikipedia.org/wiki/Main_Page'))
-    db.Session.add(document_)
-    db.Session.flush()
+class TestDocumentFindByURIs(object):
 
-    actual = document.Document.find_by_uris(db.Session, ['https://de.wikipedia.org/wiki/Hauptseite'])
-    assert actual.count() == 0
+    def test_with_one_matching_Document(self):
+        # One Document with a non-matching DocumentURI pointing to it.
+        # find_by_uris() should not return this Document.
+        document1 = document.Document()
+        uri1 = 'https://de.wikipedia.org/wiki/Hauptseite'
+        document1.document_uris.append(
+            document.DocumentURI(claimant=uri1, uri=uri1))
 
+        # A second Document with one matching and one non-matching DocumentURI
+        # pointing to it. find_by_uris() should return this Document.
+        document2 = document.Document()
+        uri2 = 'https://en.wikipedia.org/wiki/Main_Page'
+        document2.document_uris.append(
+            document.DocumentURI(claimant=uri2, uri=uri2))
+        uri3 = 'https://en.wikipedia.org'
+        document2.document_uris.append(
+            document.DocumentURI(claimant=uri3, uri=uri2))
 
-def test_document_find_or_create_by_uris():
-    document_ = document.Document()
-    docuri1 = document.DocumentURI(
-        claimant='https://en.wikipedia.org/wiki/Main_Page',
-        uri='https://en.wikipedia.org/wiki/Main_Page',
-        document=document_)
-    docuri2 = document.DocumentURI(
-        claimant='https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
-        uri='https://en.wikipedia.org/wiki/Main_Page',
-        document=document_)
+        db.Session.add_all([document1, document2])
+        db.Session.flush()
 
-    db.Session.add(docuri1)
-    db.Session.add(docuri2)
-    db.Session.flush()
+        actual = document.Document.find_by_uris(db.Session, [
+            'https://en.wikipedia.org/wiki/Main_Page',
+            'https://m.en.wikipedia.org/wiki/Main_Page'])
 
-    actual = document.Document.find_or_create_by_uris(db.Session,
-        'https://en.wikipedia.org/wiki/Main_Page',
-        ['https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
-         'https://m.en.wikipedia.org/wiki/Main_Page'])
-    assert actual.count() == 1
-    assert actual.first() == document_
+        assert actual.count() == 1
+        assert actual.first() == document2
 
+    def test_no_matches(self):
+        document_ = document.Document()
+        document_.document_uris.append(document.DocumentURI(
+            claimant='https://en.wikipedia.org/wiki/Main_Page',
+            uri='https://en.wikipedia.org/wiki/Main_Page'))
+        db.Session.add(document_)
+        db.Session.flush()
 
-def test_document_find_or_create_by_uris_no_results():
-    document_ = document.Document()
-    docuri = document.DocumentURI(
-        claimant='https://en.wikipedia.org/wiki/Main_Page',
-        uri='https://en.wikipedia.org/wiki/Main_Page',
-        document=document_)
-
-    db.Session.add(docuri)
-    db.Session.flush()
-
-    documents = document.Document.find_or_create_by_uris(db.Session,
-        'https://en.wikipedia.org/wiki/Pluto',
-        ['https://m.en.wikipedia.org/wiki/Pluto'])
-
-    assert documents.count() == 1
-
-    actual = documents.first()
-    assert isinstance(actual, document.Document)
-    assert len(actual.document_uris) == 1
-
-    docuri = actual.document_uris[0]
-    assert docuri.claimant == 'https://en.wikipedia.org/wiki/Pluto'
-    assert docuri.uri == 'https://en.wikipedia.org/wiki/Pluto'
-    assert docuri.type == 'self-claim'
+        actual = document.Document.find_by_uris(
+            db.Session, ['https://de.wikipedia.org/wiki/Hauptseite'])
+        assert actual.count() == 0
 
 
-create_or_update_document_uri_fixtures = pytest.mark.usefixtures(
+class TestDocumentFindOrCreateByURIs(object):
+
+    def test_with_one_existing_Document(self):
+        """
+        When there's one matching Document it should return that Document.
+
+        When searching with two URIs that match two DocumentURIs that both
+        point to the same Document, it should return that Document.
+
+        """
+        document_ = document.Document()
+        docuri1 = document.DocumentURI(
+            claimant='https://en.wikipedia.org/wiki/Main_Page',
+            uri='https://en.wikipedia.org/wiki/Main_Page',
+            document=document_)
+        docuri2 = document.DocumentURI(
+            claimant='https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
+            uri='https://en.wikipedia.org/wiki/Main_Page',
+            document=document_)
+
+        db.Session.add(docuri1)
+        db.Session.add(docuri2)
+        db.Session.flush()
+
+        actual = document.Document.find_or_create_by_uris(db.Session,
+            'https://en.wikipedia.org/wiki/Main_Page',
+            ['https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
+            'https://m.en.wikipedia.org/wiki/Main_Page'])
+
+        assert actual.count() == 1
+        assert actual.first() == document_
+
+    def test_with_no_existing_documents(self):
+        """When there are no matching Documents it creates and returns one."""
+        document_ = document.Document()
+        docuri = document.DocumentURI(
+            claimant='https://en.wikipedia.org/wiki/Main_Page',
+            uri='https://en.wikipedia.org/wiki/Main_Page',
+            document=document_)
+
+        db.Session.add(docuri)
+        db.Session.flush()
+
+        documents = document.Document.find_or_create_by_uris(
+            db.Session,
+            'https://en.wikipedia.org/wiki/Pluto',
+            ['https://m.en.wikipedia.org/wiki/Pluto'])
+
+        assert documents.count() == 1
+
+        actual = documents.first()
+        assert isinstance(actual, document.Document)
+        assert len(actual.document_uris) == 1
+
+        docuri = actual.document_uris[0]
+        assert docuri.claimant == 'https://en.wikipedia.org/wiki/Pluto'
+        assert docuri.uri == 'https://en.wikipedia.org/wiki/Pluto'
+        assert docuri.type == 'self-claim'
+
+
+@pytest.mark.usefixtures(
     'DocumentURI',
     'log',
 )
+class TestCreateOrUpdateDocumentURI(object):
 
+    def test_it_calls_filter(self, DocumentURI):
+        document.create_or_update_document_uri(
+            db=mock_db(),
+            claimant='http://example.com/example_claimant.html',
+            uri='http://example.com/example_uri.html',
+            type='self-claim',
+            content_type=None,
+            document=mock_document(),
+            created=datetime.datetime.now(),
+            updated=datetime.datetime.now())
 
-def mock_docuri_dict(uri=None):
-    """Return a mock docuri_dict for create_or_update_document_uri()."""
-    if uri is None:
+        # FIXME: We need to assert that this is called with the right
+        # arguments, but that's very awkward to do with the way sqlalchemy
+        # querying works.' Move this functionality onto the model class itself
+        # where the tests can use the actual database.
+        assert DocumentURI.query.filter.call_count == 1
+
+    def test_it_calls_first(self, DocumentURI):
+        document.create_or_update_document_uri(
+            db=mock_db(),
+            claimant='http://example.com/example_claimant.html',
+            uri='http://example.com/example_uri.html',
+            type='self-claim',
+            content_type=None,
+            document=mock_document(),
+            created=datetime.datetime.now(),
+            updated=datetime.datetime.now())
+
+        DocumentURI.query.filter.return_value.first.assert_called_once_with()
+
+    def test_it_inits_DocumentURI(self, DocumentURI):
+        """If there's no matching object in the db it should init a new one."""
+        DocumentURI.query.filter.return_value.first.return_value = None
+        claimant = 'http://example.com/example_claimant.html'
         uri = 'http://example.com/example_uri.html'
+        type_ = 'self-claim'
+        content_type = 'text/html'
+        document_ = mock_document()
+        created = datetime.datetime.now() - datetime.timedelta(days=1)
+        updated = datetime.datetime.now()
 
-    now = datetime.datetime.now()
+        document.create_or_update_document_uri(
+            db=mock_db(),
+            claimant=claimant,
+            uri=uri,
+            type=type_,
+            content_type=content_type,
+            document=document_,
+            created=created,
+            updated=updated)
 
-    return {
-        'type': 'self-claim',
-        'claimant': 'http://example.com/example_claimant.html',
-        'uri': uri,
-        'created': now,
-        'updated': now
-    }
+        DocumentURI.assert_called_once_with(
+            claimant=claimant,
+            uri=uri,
+            type=type_,
+            content_type=content_type,
+            document=document_,
+            created=created,
+            updated=updated)
 
+    def test_it_inits_DocumentURI_when_no_content_type(self, DocumentURI):
+        """It shouldn't crash if docuri_dict contains no content_type."""
+        DocumentURI.query.filter.return_value.first.return_value = None
+        claimant = 'http://example.com/example_claimant.html'
+        uri = 'http://example.com/example_uri.html'
+        type_ = 'self-claim'
+        content_type = None
+        document_ = mock_document()
+        created = datetime.datetime.now() - datetime.timedelta(days=1)
+        updated = datetime.datetime.now()
 
-def mock_document():
-    """Return a mock Document object for create_or_update_document_uri()."""
-    class Document:
-        @property
-        def id(self):
-            pass
-        @property
-        def created(self):
-            pass
-        @property
-        def updated(self):
-            pass
-    return mock.Mock(spec=Document)
+        document.create_or_update_document_uri(
+            db=mock_db(),
+            claimant=claimant,
+            uri=uri,
+            type=type_,
+            content_type=content_type,
+            document=document_,
+            created=created,
+            updated=updated)
 
+        DocumentURI.assert_called_once_with(
+            claimant=claimant,
+            uri=uri,
+            type=type_,
+            content_type=content_type,
+            document=document_,
+            created=created,
+            updated=updated)
 
-def mock_db():
-    """Return a mock db session object."""
-    class DB:
-        def add(self, obj):
-            pass
-    return mock.Mock(spec=DB())
+    def test_it_adds_DocumentURI_to_db(self, DocumentURI):
+        DocumentURI.query.filter.return_value.first.return_value = None
+        db = mock_db()
 
+        document.create_or_update_document_uri(
+            db=db,
+            claimant='http://example.com/example_claimant.html',
+            uri='http://example.com/example_uri.html',
+            type='self-claim',
+            content_type=None,
+            document=mock_document(),
+            created=datetime.datetime.now(),
+            updated=datetime.datetime.now())
 
-@create_or_update_document_uri_fixtures
-def test_create_or_update_document_uri_calls_filter(DocumentURI):
-    document.create_or_update_document_uri(
-        db=mock_db(),
-        claimant='http://example.com/example_claimant.html',
-        uri='http://example.com/example_uri.html',
-        type='self-claim',
-        content_type=None,
-        document=mock_document(),
-        created=datetime.datetime.now(),
-        updated=datetime.datetime.now())
+        db.add.assert_called_once_with(DocumentURI.return_value)
 
-    # FIXME: We need to assert that this is called with the right arguments,
-    # but that's very awkward to do with the way sqlalchemy querying works.'
-    # Move this functionality onto the model class itself where the tests can
-    # use the actual database.
-    assert DocumentURI.query.filter.call_count == 1
+    def test_it_does_not_create_new_DocumentURI(self, DocumentURI):
+        """It shouldn't create a new DocumentURI if one already exists."""
+        DocumentURI.query.filter.return_value.first.return_value = mock.Mock()
+        db = mock_db()
 
+        document.create_or_update_document_uri(
+            db=db,
+            claimant='http://example.com/example_claimant.html',
+            uri='http://example.com/example_uri.html',
+            type='self-claim',
+            content_type=None,
+            document=mock_document(),
+            created=datetime.datetime.now(),
+            updated=datetime.datetime.now())
 
-@create_or_update_document_uri_fixtures
-def test_create_or_update_document_uri_calls_first(DocumentURI):
-    document.create_or_update_document_uri(
-        db=mock_db(),
-        claimant='http://example.com/example_claimant.html',
-        uri='http://example.com/example_uri.html',
-        type='self-claim',
-        content_type=None,
-        document=mock_document(),
-        created=datetime.datetime.now(),
-        updated=datetime.datetime.now())
+        assert not DocumentURI.called
+        assert not db.add.called
 
-    DocumentURI.query.filter.return_value.first.assert_called_once_with()
+    def test_it_logs_warning_if_document_ids_differ(self, log, DocumentURI):
+        """
+        It should log a warning on Document objects mismatch.
 
+        If there's an existing DocumentURI and its .document property is
+        different to the given document it shoulg log a warning.
 
-@create_or_update_document_uri_fixtures
-def test_create_or_update_document_uri_inits_DocumentURI(DocumentURI):
-    """If there's no matching object in the db it should init a new one."""
-    DocumentURI.query.filter.return_value.first.return_value = None
-    claimant = 'http://example.com/example_claimant.html'
-    uri = 'http://example.com/example_uri.html'
-    type_ = 'self-claim'
-    content_type = 'text/html'
-    document_ = mock_document()
-    created = datetime.datetime.now() - datetime.timedelta(days=1)
-    updated = datetime.datetime.now()
+        """
+        # existing_document_uri.document won't be equal to the given document.
+        existing_document_uri = mock.Mock(document=mock_document())
+        DocumentURI.query.filter.return_value.first.return_value = (
+            existing_document_uri)
 
-    document.create_or_update_document_uri(
-        db=mock_db(),
-        claimant=claimant,
-        uri=uri,
-        type=type_,
-        content_type=content_type,
-        document=document_,
-        created=created,
-        updated=updated)
+        document.create_or_update_document_uri(
+            db=mock_db(),
+            claimant='http://example.com/example_claimant.html',
+            uri='http://example.com/example_uri.html',
+            type='self-claim',
+            content_type=None,
+            document=mock_document(),
+            created=datetime.datetime.now(),
+            updated=datetime.datetime.now())
 
-    DocumentURI.assert_called_once_with(
-        claimant=claimant,
-        uri=uri,
-        type=type_,
-        content_type=content_type,
-        document=document_,
-        created=created,
-        updated=updated)
+        assert log.warn.call_count == 1
 
+    def test_it_updates_updated_time(self, DocumentURI):
+        # existing_document_uri has an older .updated time than than the
+        # updated argument we will pass to create_or_update_document_uri().
+        now = datetime.datetime.now()
+        yesterday = now - datetime.timedelta(days=1)
+        existing_document_uri = mock.Mock(updated=yesterday)
 
-@create_or_update_document_uri_fixtures
-def test_create_or_update_document_uri_inits_DocumentURI_when_no_content_type(
-        DocumentURI):
-    """It shouldn't crash if docuri_dict contains no content_type."""
-    DocumentURI.query.filter.return_value.first.return_value = None
-    claimant = 'http://example.com/example_claimant.html'
-    uri = 'http://example.com/example_uri.html'
-    type_ = 'self-claim'
-    content_type = None
-    document_ = mock_document()
-    created = datetime.datetime.now() - datetime.timedelta(days=1)
-    updated = datetime.datetime.now()
+        DocumentURI.query.filter.return_value.first.return_value = (
+            existing_document_uri)
 
-    document.create_or_update_document_uri(
-        db=mock_db(),
-        claimant=claimant,
-        uri=uri,
-        type=type_,
-        content_type=content_type,
-        document=document_,
-        created=created,
-        updated=updated)
+        document.create_or_update_document_uri(
+            db=mock_db(),
+            claimant='http://example.com/example_claimant.html',
+            uri='http://example.com/example_uri.html',
+            type='self-claim',
+            content_type=None,
+            document=mock_document(),
+            created=now - datetime.timedelta(days=3),
+            updated=now)
 
-    DocumentURI.assert_called_once_with(
-        claimant=claimant,
-        uri=uri,
-        type=type_,
-        content_type=content_type,
-        document=document_,
-        created=created,
-        updated=updated)
+        assert existing_document_uri.updated == now
 
+    def mock_docuri_dict(self, uri=None):
+        """Return a mock document URI dict."""
+        if uri is None:
+            uri = 'http://example.com/example_uri.html'
 
-@create_or_update_document_uri_fixtures
-def test_create_or_update_document_uri_adds_DocumentURI_to_db(DocumentURI):
-    DocumentURI.query.filter.return_value.first.return_value = None
-    db = mock_db()
+        now = datetime.datetime.now()
 
-    document.create_or_update_document_uri(
-        db=db,
-        claimant='http://example.com/example_claimant.html',
-        uri='http://example.com/example_uri.html',
-        type='self-claim',
-        content_type=None,
-        document=mock_document(),
-        created=datetime.datetime.now(),
-        updated=datetime.datetime.now())
+        return {
+            'type': 'self-claim',
+            'claimant': 'http://example.com/example_claimant.html',
+            'uri': uri,
+            'created': now,
+            'updated': now
+        }
 
-    db.add.assert_called_once_with(DocumentURI.return_value)
-
-
-@create_or_update_document_uri_fixtures
-def test_create_or_update_document_uri_does_not_create_new_DocumentURI(DocumentURI):
-    """It shouldn't create a new DocumentURI if one already exists."""
-    DocumentURI.query.filter.return_value.first.return_value = mock.Mock()
-    db = mock_db()
-
-    document.create_or_update_document_uri(
-        db=db,
-        claimant='http://example.com/example_claimant.html',
-        uri='http://example.com/example_uri.html',
-        type='self-claim',
-        content_type=None,
-        document=mock_document(),
-        created=datetime.datetime.now(),
-        updated=datetime.datetime.now())
-
-    assert not DocumentURI.called
-    assert not db.add.called
-
-
-@create_or_update_document_uri_fixtures
-def test_create_or_update_document_uri_logs_warning_if_document_ids_differ(
-        log,
-        DocumentURI):
-    """
-    It should log a warning on Document objects mismatch.
-
-    If there's an existing DocumentURI and its .document property is different
-    to the given document it shoulg log a warning.
-
-    """
-    # existing_document_uri.document will not be equal to the given document'
-    existing_document_uri = mock.Mock(document=mock_document())
-    DocumentURI.query.filter.return_value.first.return_value = existing_document_uri
-
-    document.create_or_update_document_uri(
-        db=mock_db(),
-        claimant='http://example.com/example_claimant.html',
-        uri='http://example.com/example_uri.html',
-        type='self-claim',
-        content_type=None,
-        document=mock_document(),
-        created=datetime.datetime.now(),
-        updated=datetime.datetime.now())
-
-    assert log.warn.call_count == 1
-
-
-@create_or_update_document_uri_fixtures
-def test_create_or_update_document_uri_updates_updated_time(DocumentURI):
-    # existing_document_uri has an older .updated time than than the updated
-    # argument we will pass to create_or_update_document_uri().
-    now = datetime.datetime.now()
-    yesterday = now - datetime.timedelta(days=1)
-    existing_document_uri = mock.Mock(updated=yesterday)
-
-    DocumentURI.query.filter.return_value.first.return_value = (
-        existing_document_uri)
-
-    document.create_or_update_document_uri(
-        db=mock_db(),
-        claimant='http://example.com/example_claimant.html',
-        uri='http://example.com/example_uri.html',
-        type='self-claim',
-        content_type=None,
-        document=mock_document(),
-        created=now - datetime.timedelta(days=3),
-        updated=now)
-
-    assert existing_document_uri.updated == now
+    @pytest.fixture
+    def DocumentURI(self, request):
+        patcher = mock.patch('h.api.models.document.DocumentURI')
+        DocumentURI = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return DocumentURI
 
 
 @pytest.mark.usefixtures('DocumentMeta',
@@ -450,7 +450,7 @@ class TestCreateOrUpdateDocumentMeta(object):
 
     def test_it_sets_value(self, DocumentMeta):
         """If there's an existing DocumentMeta it should update its value."""
-        existing_document_meta = self.mock_document_meta()
+        existing_document_meta = mock_document_meta()
         existing_document_meta.value = 'old value'
         DocumentMeta.query.filter.return_value.one_or_none\
             .return_value = existing_document_meta
@@ -470,7 +470,7 @@ class TestCreateOrUpdateDocumentMeta(object):
 
     def test_sets_updated(self, DocumentMeta):
         """If there's an existing DocumentMeta it should update its updated."""
-        existing_document_meta = self.mock_document_meta()
+        existing_document_meta = mock_document_meta()
         existing_document_meta.updated = yesterday()
         DocumentMeta.query.filter.return_value.one_or_none\
             .return_value = existing_document_meta
@@ -499,7 +499,7 @@ class TestCreateOrUpdateDocumentMeta(object):
         """
         document_one = mock_document()
         document_two = mock_document()
-        existing_document_meta = self.mock_document_meta(document=document_one)
+        existing_document_meta = mock_document_meta(document=document_one)
         DocumentMeta.query.filter.return_value.one_or_none\
             .return_value = existing_document_meta
 
@@ -516,61 +516,72 @@ class TestCreateOrUpdateDocumentMeta(object):
 
         assert log.warn.call_count == 1
 
-    def mock_document_meta(self, document=None):
-        class DocumentMeta(object):
-            def __init__(self):
-                self.claimant_normalized = None
-                self.type = None
-                self.value = None
-                self.created = None
-                self.updated = None
-                self.document = document
-                self.id = None
-                self.document_id = None
-        return mock.Mock(spec=DocumentMeta())
+    @pytest.fixture
+    def DocumentMeta(self, request):
+        patcher = mock.patch('h.api.models.document.DocumentMeta')
+        DocumentMeta = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return DocumentMeta
 
 
-merge_documents_fixtures = pytest.mark.usefixtures('merge_data')
+@pytest.mark.usefixtures('merge_data')
+class TestMergeDocuments(object):
 
+    def test_merge_documents_returns_master(self, merge_data):
+        master, _ = merge_data
 
-@merge_documents_fixtures
-def test_merge_documents_returns_master(merge_data):
-    master, duplicate = merge_data
+        merged_master = document.merge_documents(db.Session, merge_data)
 
-    merged_master = document.merge_documents(db.Session, merge_data)
-    assert merged_master == master
+        assert merged_master == master
 
+    def test_merge_documents_deletes_duplicate_documents(self, merge_data):
+        _, duplicate = merge_data
 
-@merge_documents_fixtures
-def test_merge_documents_deletes_duplicate_documents(merge_data):
-    master, duplicate = merge_data
+        document.merge_documents(db.Session, merge_data)
+        db.Session.flush()
 
-    document.merge_documents(db.Session, merge_data)
-    db.Session.flush()
+        assert document.Document.query.get(duplicate.id) is None
 
-    assert document.Document.query.get(duplicate.id) is None
+    def test_merge_documents_rewires_document_uris(self, merge_data):
+        master, duplicate = merge_data
 
+        document.merge_documents(db.Session, merge_data)
+        db.Session.flush()
 
-@merge_documents_fixtures
-def test_merge_documents_rewires_document_uris(merge_data):
-    master, duplicate = merge_data
+        assert len(master.document_uris) == 2
+        assert len(duplicate.document_uris) == 0
 
-    document.merge_documents(db.Session, merge_data)
-    db.Session.flush()
+    def test_merge_documents_rewires_document_meta(self, merge_data):
+        master, duplicate = merge_data
 
-    assert len(master.document_uris) == 2
-    assert len(duplicate.document_uris) == 0
+        document.merge_documents(db.Session, merge_data)
+        db.Session.flush()
 
+        assert len(master.meta) == 2
+        assert len(duplicate.meta) == 0
 
-@merge_documents_fixtures
-def test_merge_documents_rewires_document_meta(merge_data):
-    master, duplicate = merge_data
+    @pytest.fixture
+    def merge_data(self, request):
+        master = document.Document(document_uris=[document.DocumentURI(
+                claimant='https://en.wikipedia.org/wiki/Main_Page',
+                uri='https://en.wikipedia.org/wiki/Main_Page',
+                type='self-claim')],
+                meta=[document.DocumentMeta(
+                    claimant='https://en.wikipedia.org/wiki/Main_Page',
+                    type='title',
+                    value='Wikipedia, the free encyclopedia')])
+        duplicate = document.Document(document_uris=[document.DocumentURI(
+                claimant='https://m.en.wikipedia.org/wiki/Main_Page',
+                uri='https://en.wikipedia.org/wiki/Main_Page',
+                type='rel-canonical')],
+                meta=[document.DocumentMeta(
+                    claimant='https://m.en.wikipedia.org/wiki/Main_Page',
+                    type='title',
+                    value='Wikipedia, the free encyclopedia')])
 
-    document.merge_documents(db.Session, merge_data)
-    db.Session.flush()
-
-    assert len(master.meta) == 2
-    assert len(duplicate.meta) == 0
+        db.Session.add_all([master, duplicate])
+        db.Session.flush()
+        return (master, duplicate)
 
 
 def now():
@@ -581,44 +592,41 @@ def yesterday():
     return now() - datetime.timedelta(days=1)
 
 
-@pytest.fixture
-def DocumentURI(config, request):
-    patcher = mock.patch('h.api.models.document.DocumentURI')
-    DocumentURI = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return DocumentURI
+def mock_db():
+    """Return a mock db session object."""
+    class DB(object):
+        def add(self, obj):
+            pass
+    return mock.Mock(spec=DB())
 
 
-@pytest.fixture
-def DocumentMeta(config, request):
-    patcher = mock.patch('h.api.models.document.DocumentMeta')
-    DocumentMeta = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return DocumentMeta
+def mock_document():
+    """Return a mock Document object."""
+    class Document(object):
+        @property
+        def id(self):
+            pass
+        @property
+        def created(self):
+            pass
+        @property
+        def updated(self):
+            pass
+    return mock.Mock(spec=Document)
 
 
-@pytest.fixture
-def merge_data(request):
-    master = document.Document(document_uris=[document.DocumentURI(
-            claimant='https://en.wikipedia.org/wiki/Main_Page',
-            uri='https://en.wikipedia.org/wiki/Main_Page',
-            type='self-claim')],
-            meta=[document.DocumentMeta(
-                claimant='https://en.wikipedia.org/wiki/Main_Page',
-                type='title',
-                value='Wikipedia, the free encyclopedia')])
-    duplicate = document.Document(document_uris=[document.DocumentURI(
-            claimant='https://m.en.wikipedia.org/wiki/Main_Page',
-            uri='https://en.wikipedia.org/wiki/Main_Page',
-            type='rel-canonical')],
-            meta=[document.DocumentMeta(
-                claimant='https://m.en.wikipedia.org/wiki/Main_Page',
-                type='title',
-                value='Wikipedia, the free encyclopedia')])
-
-    db.Session.add_all([master, duplicate])
-    db.Session.flush()
-    return (master, duplicate)
+def mock_document_meta(document=None):
+    class DocumentMeta(object):
+        def __init__(self):
+            self.claimant_normalized = None
+            self.type = None
+            self.value = None
+            self.created = None
+            self.updated = None
+            self.document = document
+            self.id = None
+            self.document_id = None
+    return mock.Mock(spec=DocumentMeta())
 
 
 @pytest.fixture
