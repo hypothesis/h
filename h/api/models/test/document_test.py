@@ -155,136 +155,89 @@ class TestDocumentFindOrCreateByURIs(object):
 
 
 @pytest.mark.usefixtures(
-    'DocumentURI',
     'log',
 )
 class TestCreateOrUpdateDocumentURI(object):
 
-    def test_it_calls_filter(self, DocumentURI):
-        document.create_or_update_document_uri(
-            db=mock_db(),
-            claimant='http://example.com/example_claimant.html',
-            uri='http://example.com/example_uri.html',
-            type='self-claim',
-            content_type=None,
-            document=mock_document(),
-            created=now(),
-            updated=now())
-
-        # FIXME: We need to assert that this is called with the right
-        # arguments, but that's very awkward to do with the way sqlalchemy
-        # querying works.' Move this functionality onto the model class itself
-        # where the tests can use the actual database.
-        assert DocumentURI.query.filter.call_count == 1
-
-    def test_it_calls_first(self, DocumentURI):
-        document.create_or_update_document_uri(
-            db=mock_db(),
-            claimant='http://example.com/example_claimant.html',
-            uri='http://example.com/example_uri.html',
-            type='self-claim',
-            content_type=None,
-            document=mock_document(),
-            created=now(),
-            updated=now())
-
-        DocumentURI.query.filter.return_value.first.assert_called_once_with()
-
-    def test_it_inits_DocumentURI(self, DocumentURI):
-        """If there's no matching object in the db it should init a new one."""
-        DocumentURI.query.filter.return_value.first.return_value = None
-        claimant = 'http://example.com/example_claimant.html'
-        uri = 'http://example.com/example_uri.html'
-        type_ = 'self-claim'
-        content_type = 'text/html'
-        document_ = mock_document()
-        created = yesterday()
-        updated = now()
-
-        document.create_or_update_document_uri(
-            db=mock_db(),
-            claimant=claimant,
-            uri=uri,
-            type=type_,
-            content_type=content_type,
-            document=document_,
-            created=created,
-            updated=updated)
-
-        DocumentURI.assert_called_once_with(
-            claimant=claimant,
-            uri=uri,
-            type=type_,
-            content_type=content_type,
-            document=document_,
-            created=created,
-            updated=updated)
-
-    def test_it_inits_DocumentURI_when_no_content_type(self, DocumentURI):
-        """It shouldn't crash if docuri_dict contains no content_type."""
-        DocumentURI.query.filter.return_value.first.return_value = None
+    def test_it_updates_the_existing_DocumentURI_if_there_is_one(self):
         claimant = 'http://example.com/example_claimant.html'
         uri = 'http://example.com/example_uri.html'
         type_ = 'self-claim'
         content_type = None
-        document_ = mock_document()
+        document_ = document.Document()
         created = yesterday()
-        updated = now()
-
-        document.create_or_update_document_uri(
-            db=mock_db(),
+        updated = yesterday()
+        document_uri = document.DocumentURI(
             claimant=claimant,
             uri=uri,
             type=type_,
             content_type=content_type,
             document=document_,
             created=created,
-            updated=updated)
+            updated=updated,
+        )
+        db.Session.add(document_uri)
 
-        DocumentURI.assert_called_once_with(
+        mock_db = mock.Mock()
+        now_ = now()
+        document.create_or_update_document_uri(
+            db=mock_db,
             claimant=claimant,
             uri=uri,
             type=type_,
             content_type=content_type,
             document=document_,
+            created=now_,
+            updated=now_,
+        )
+
+        assert document_uri.created == created
+        assert document_uri.updated == now_
+        assert not mock_db.add.called
+
+    def test_it_creates_a_new_DocumentURI_if_there_is_no_existing_one(self):
+        claimant = 'http://example.com/example_claimant.html'
+        uri = 'http://example.com/example_uri.html'
+        type_ = 'self-claim'
+        content_type = None
+        document_ = document.Document()
+        created = yesterday()
+        updated = yesterday()
+
+        # Add one non-matching DocumentURI to the database.
+        db.Session.add(document.DocumentURI(
+            claimant=claimant,
+            uri=uri,
+            type=type_,
+            # Different content_type means this DocumentURI should not match
+            # the query.
+            content_type='different',
+            document=document_,
             created=created,
-            updated=updated)
-
-    def test_it_adds_DocumentURI_to_db(self, DocumentURI):
-        DocumentURI.query.filter.return_value.first.return_value = None
-        db = mock_db()
+            updated=updated,
+        ))
 
         document.create_or_update_document_uri(
-            db=db,
-            claimant='http://example.com/example_claimant.html',
-            uri='http://example.com/example_uri.html',
-            type='self-claim',
-            content_type=None,
-            document=mock_document(),
+            db=db.Session,
+            claimant=claimant,
+            uri=uri,
+            type=type_,
+            content_type=content_type,
+            document=document_,
             created=now(),
-            updated=now())
+            updated=now(),
+        )
 
-        db.add.assert_called_once_with(DocumentURI.return_value)
+        document_uri = db.Session.query(document.DocumentURI).all()[-1]
+        assert document_uri.claimant == claimant
+        assert document_uri.uri == uri
+        assert document_uri.type == type_
+        assert document_uri.content_type == content_type
+        assert document_uri.document == document_
+        assert document_uri.created > created
+        assert document_uri.updated > updated
 
-    def test_it_does_not_create_new_DocumentURI(self, DocumentURI):
-        """It shouldn't create a new DocumentURI if one already exists."""
-        DocumentURI.query.filter.return_value.first.return_value = mock.Mock()
-        db = mock_db()
-
-        document.create_or_update_document_uri(
-            db=db,
-            claimant='http://example.com/example_claimant.html',
-            uri='http://example.com/example_uri.html',
-            type='self-claim',
-            content_type=None,
-            document=mock_document(),
-            created=now(),
-            updated=now())
-
-        assert not DocumentURI.called
-        assert not db.add.called
-
-    def test_it_logs_warning_if_document_ids_differ(self, log, DocumentURI):
+    def test_it_logs_a_warning_if_document_ids_differ(self, log, DocumentURI):
         """
         It should log a warning on Document objects mismatch.
 
@@ -308,41 +261,6 @@ class TestCreateOrUpdateDocumentURI(object):
             updated=now())
 
         assert log.warn.call_count == 1
-
-    def test_it_updates_updated_time(self, DocumentURI):
-        # existing_document_uri has an older .updated time than than the
-        # updated argument we will pass to create_or_update_document_uri().
-        created = yesterday()
-        updated = now()
-        existing_document_uri = mock.Mock(updated=yesterday)
-
-        DocumentURI.query.filter.return_value.first.return_value = (
-            existing_document_uri)
-
-        document.create_or_update_document_uri(
-            db=mock_db(),
-            claimant='http://example.com/example_claimant.html',
-            uri='http://example.com/example_uri.html',
-            type='self-claim',
-            content_type=None,
-            document=mock_document(),
-            created=created,
-            updated=updated)
-
-        assert existing_document_uri.updated == updated
-
-    def mock_docuri_dict(self, uri=None):
-        """Return a mock document URI dict."""
-        if uri is None:
-            uri = 'http://example.com/example_uri.html'
-
-        return {
-            'type': 'self-claim',
-            'claimant': 'http://example.com/example_claimant.html',
-            'uri': uri,
-            'created': now(),
-            'updated': now()
-        }
 
     @pytest.fixture
     def DocumentURI(self, request):
