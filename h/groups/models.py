@@ -34,9 +34,9 @@ class Group(Base, mixins.Timestamps):
     creator = sa.orm.relationship('User')
 
     # Group membership
-    members = sa.orm.relationship('User',
-                                  secondary='user_group',
-                                  backref='groups')
+    members = sa.orm.relationship(
+        'User', secondary='user_group', backref=sa.orm.backref(
+            'groups', order_by='Group.name'))
 
     def __init__(self, name, creator):
         self.name = name
