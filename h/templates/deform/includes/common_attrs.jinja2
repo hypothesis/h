@@ -1,7 +1,7 @@
 name="{{ field.name }}"
 value="{{ cstruct }}"
 id="{{ field.oid }}"
-class="form-input{% if field.widget.css_class %} {{ field.widget.css_class }}{% endif %}"
+class="form-input{% if field.widget.css_class %} {{ field.widget.css_class }}{% endif %}{% if field.widget.autofocus %} js-select-onfocus{% endif %}"
 {%- if field.widget.size -%}
 size="{{ field.widget.size }}"
 {% endif -%}
@@ -12,7 +12,7 @@ aria-describedby="hint-{{ field.oid }}"
 aria-invalid="true"
 {% endif -%}
 {%- if field.widget.autofocus -%}
-autofocus onfocus="this.select()"
+autofocus
 {% endif -%}
 {%- if field.widget.disable_autocomplete -%}
 autocomplete="off"
