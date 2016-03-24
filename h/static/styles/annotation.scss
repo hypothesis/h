@@ -180,7 +180,6 @@ $annotation-card-left-padding: 10px;
   background: $white;
   border: 1px solid $gray-lighter;
   border-radius: 2px;
-  white-space: nowrap;
   width: 200px;
   font-size: $body1-font-size;
   cursor: default;
@@ -222,6 +221,17 @@ $annotation-card-left-padding: 10px;
   width: 220px;
   border: none;
   color: $text-color;
+}
+
+.share-dialog-msg {
+  color: $gray-light;
+  margin: -5px 10px 10px 10px;
+  line-height: 15px;
+  font-size: 11px;
+}
+
+.share-dialog-msg__audience {
+  font-style: italic;
 }
 
 .annotation-collapsed-replies {
