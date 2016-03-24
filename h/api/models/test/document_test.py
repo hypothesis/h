@@ -270,142 +270,90 @@ class TestCreateOrUpdateDocumentURI(object):
         return DocumentURI
 
 
-@pytest.mark.usefixtures('DocumentMeta',
-                         'log')
 class TestCreateOrUpdateDocumentMeta(object):
 
-    def test_it_calls_filter(self, DocumentMeta):
-        document.create_or_update_document_meta(
-            db=mock_db(),
-            claimant='http://example.com/claimant',
-            claimant_normalized='http://example.com/claimant_normalized',
-            type='title',
-            value='Example Page',
-            document=mock.Mock(),
-            created=yesterday(),
-            updated=now(),
-        )
-
-        # FIXME: We need to assert that this is called with the right
-        # arguments, but that's very awkward to do with the way sqlalchemy
-        # querying works.' Move this functionality onto the model class itself
-        # where the tests can use the actual database.
-        assert DocumentMeta.query.filter.call_count == 1
-
-    def test_it_calls_one_or_none(self, DocumentMeta):
-        document.create_or_update_document_meta(
-            db=mock_db(),
-            claimant='http://example.com/claimant',
-            claimant_normalized='http://example.com/claimant_normalized',
-            type='title',
-            value='Example Page',
-            document=mock.Mock(),
-            created=yesterday(),
-            updated=now(),
-        )
-
-        DocumentMeta.query.filter.return_value.one_or_none\
-            .assert_called_once_with()
-
-    def test_it_creates_a_new_DocumentMeta(self, DocumentMeta):
-        """It should create a new DocumentMeta if there isn't one already."""
-        DocumentMeta.query.filter.return_value.one_or_none\
-            .return_value = None
+    def test_it_creates_a_new_DocumentMeta_if_there_is_no_existing_one(self):
         claimant = 'http://example.com/claimant'
         claimant_normalized = 'http://example.com/claimant_normalized'
         type_ = 'title'
-        value = 'Example Page'
+        value = 'the title'
+        document_ = document.Document()
         created = yesterday()
         updated = now()
 
+        # Add one non-matching DocumentMeta to the database.
+        # This should be ignored.
+        db.Session.add(document.DocumentMeta(
+            _claimant=claimant,
+            _claimant_normalized=claimant_normalized,
+            # Different type means this should not match the query.
+            type='different',
+            value=value,
+            document=document_,
+            created=created,
+            updated=updated,
+        ))
+
         document.create_or_update_document_meta(
-            db=mock_db(),
+            db=db.Session,
             claimant=claimant,
             claimant_normalized=claimant_normalized,
             type=type_,
             value=value,
-            document=mock.sentinel.document,
+            document=document_,
             created=created,
             updated=updated,
         )
 
-        DocumentMeta.assert_called_once_with(
+        document_meta = db.Session.query(document.DocumentMeta).all()[-1]
+        assert document_meta.claimant == claimant
+        assert document_meta.claimant_normalized == claimant_normalized
+        assert document_meta.type == type_
+        assert document_meta.value == value
+        assert document_meta.document == document_
+        assert document_meta.created == created
+        assert document_meta.updated == updated
+
+    def test_it_updates_an_existing_DocumentMeta_if_there_is_one(self):
+        claimant = 'http://example.com/claimant'
+        claimant_normalized = 'http://example.com/claimant_normalized'
+        type_ = 'title'
+        value = 'the title'
+        document_ = document.Document()
+        created = yesterday()
+        updated = now()
+        document_meta = document.DocumentMeta(
             _claimant=claimant,
             _claimant_normalized=claimant_normalized,
             type=type_,
             value=value,
-            document=mock.sentinel.document,
+            document=document_,
             created=created,
             updated=updated,
         )
+        db.Session.add(document_meta)
 
-    def test_it_adds_document_meta_to_db(self, DocumentMeta):
-        """
-        It should add the new DocumentMeta to the db.
-
-        If there's no existing equivalent DocumentMeta already in the db then
-        it should add the a new one to the db
-
-        """
-        db = mock_db()
-        DocumentMeta.query.filter.return_value.one_or_none\
-            .return_value = None
-
+        mock_db = mock.Mock()
+        new_updated = now()
         document.create_or_update_document_meta(
-            db=db,
-            claimant='http://example.com/claimant',
-            claimant_normalized='http://example.com/claimant_normalized',
-            type='title',
-            value='Example Page',
-            document=mock.Mock(),
-            created=yesterday(),
-            updated=now(),
-        )
-
-        db.add.assert_called_once_with(DocumentMeta.return_value)
-
-    def test_it_sets_value(self, DocumentMeta):
-        """If there's an existing DocumentMeta it should update its value."""
-        existing_document_meta = mock_document_meta()
-        existing_document_meta.value = 'old value'
-        DocumentMeta.query.filter.return_value.one_or_none\
-            .return_value = existing_document_meta
-
-        document.create_or_update_document_meta(
-            db=mock_db(),
-            claimant='http://example.com/claimant',
-            claimant_normalized='http://example.com/claimant_normalized',
-            type='title',
+            db=mock_db,
+            claimant=claimant,
+            claimant_normalized=claimant_normalized,
+            type=type_,
             value='new value',
-            document=mock.Mock(),
-            created=yesterday(),
-            updated=now(),
+            document=document.Document(),  # This should be ignored.
+            created=now(),  # This should be ignored.
+            updated=new_updated,
         )
 
-        assert existing_document_meta.value == 'new value'
+        assert document_meta.value == 'new value'
+        assert document_meta.updated == new_updated
+        assert document_meta.created == created, "It shouldn't update created"
+        assert document_meta.document == document_, (
+            "It shouldn't update document")
+        assert not mock_db.add.called
 
-    def test_sets_updated(self, DocumentMeta):
-        """If there's an existing DocumentMeta it should update its updated."""
-        existing_document_meta = mock_document_meta()
-        existing_document_meta.updated = yesterday()
-        DocumentMeta.query.filter.return_value.one_or_none\
-            .return_value = existing_document_meta
-        now_ = now()
-
-        document.create_or_update_document_meta(
-            db=mock_db(),
-            claimant='http://example.com/claimant',
-            claimant_normalized='http://example.com/claimant_normalized',
-            type='title',
-            value='new value',
-            document=mock.Mock(),
-            created=yesterday(),
-            updated=now_,
-        )
-
-        assert existing_document_meta.updated == now_
-
-    def test_it_logs_warning(self, DocumentMeta, log):
+    def test_it_logs_a_warning(self, DocumentMeta, log):
         """
         It should warn on document mismatches.
 
