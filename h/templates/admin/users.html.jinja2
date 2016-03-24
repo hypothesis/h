@@ -72,6 +72,32 @@
 
         <button class="btn btn-danger" type="submit">Delete user</button>
       </form>
+
+      {% if user.groups %}
+        <hr>
+
+        <h2>Groups this user belongs to</h2>
+
+        <table class="table table-auto table-striped">
+          <thead>
+            <th>Name</th>
+            <th>URL</th>
+          </thead>
+          <tbody>
+            {% for group in user.groups %}
+              <tr>
+                <td>{{group.name}}</td>
+                <td>
+                  {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
+                  <a href="{{ group_url }}">
+                    {{ group_url }}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
     {% else %}
       <p>No user found with username or email <em>{{ username }}</em>!</p>
     {% endif %}
