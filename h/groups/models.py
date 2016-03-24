@@ -24,7 +24,7 @@ class Group(Base, mixins.Timestamps):
                       default=pubid.generate,
                       unique=True,
                       nullable=False)
-    name = sa.Column(sa.UnicodeText(), nullable=False)
+    name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     # We store information about who created the group -- we don't use this
     # currently, but it seems careless to lose this information when in the
