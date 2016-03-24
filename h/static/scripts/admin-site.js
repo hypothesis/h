@@ -8,3 +8,9 @@ if (settings.raven) {
 
 window.$ = window.jQuery = require('jquery');
 require('bootstrap');
+
+var page = require('page');
+
+document.addEventListener('DOMContentLoaded', function () {
+  page.start();
+});
