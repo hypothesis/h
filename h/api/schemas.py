@@ -61,6 +61,119 @@ class AnnotationSchema(JSONSchema):
             'document': {
                 'type': 'object',
                 'properties': {
+                    'dc': {
+                        'type': 'object',
+                        'properties': {
+                            'identifier': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'string',
+                                },
+                            },
+                        },
+                    },
+                    'highwire': {
+                        'type': 'object',
+                        'properties': {
+                            'doi': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'string',
+                                },
+                            },
+                        },
+                    },
+                    'link': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'href': {
+                                    'type': 'string',
+                                },
+                                'type': {
+                                    'type': 'string',
+                                },
+                            },
+                            'required': [
+                                'href',
+                            ],
+                        },
+                    },
+                },
+            },
+            'group': {
+                'type': 'string',
+            },
+            'permissions': {
+                'title': 'Permissions',
+                'description': 'Annotation action access control list',
+                'type': 'object',
+                'patternProperties': {
+                    '^(admin|delete|read|update)$': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string',
+                            'pattern': '^(acct:|group:).+$',
+                        },
+                    }
+                },
+                'required': [
+                    'read',
+                ],
+            },
+            'references': {
+                'type': 'array',
+                'items': {
+                    'type': 'string',
+                },
+            },
+            'tags': {
+                'type': 'array',
+                'items': {
+                    'type': 'string',
+                },
+            },
+            'target': {
+                'type': 'array',
+                'items': [
+                    {
+                        'type': 'object',
+                        'properties': {
+                            'selector': {
+                            },
+                        },
+                        'required': [
+                            'selector',
+                        ],
+                    },
+                ],
+            },
+            'text': {
+                'type': 'string',
+            },
+            'uri': {
+                'type': 'string',
+            },
+        },
+        'required': [
+            'permissions',
+        ],
+    }
+
+
+class LegacyAnnotationSchema(JSONSchema):
+
+    """
+    Validate an annotation object.
+    """
+
+    schema = {
+        'type': 'object',
+        'properties': {
+            'document': {
+                'type': 'object',
+                'properties': {
                     'link': {
                         'type': 'array',
                     },
@@ -92,7 +205,10 @@ class CreateAnnotationSchema(object):
 
     def __init__(self, request):
         self.request = request
-        self.structure = AnnotationSchema()
+        if self.request.feature('postgres_write'):
+            self.structure = AnnotationSchema()
+        else:
+            self.structure = LegacyAnnotationSchema()
 
     def validate(self, data):
         if not self.request.feature('postgres_write'):
@@ -139,7 +255,7 @@ class CreateAnnotationSchema(object):
         if new_appstruct['references'] and 'groupid' in new_appstruct:
             del new_appstruct['groupid']
 
-        new_appstruct['extras'] = appstruct
+        new_appstruct['extra'] = appstruct
 
         # Transform the "document" dict that the client posts into a convenient
         # format for creating DocumentURI and DocumentMeta objects later.
@@ -191,7 +307,7 @@ class UpdateAnnotationSchema(object):
     def __init__(self, request, annotation):
         self.request = request
         self.annotation = annotation
-        self.structure = AnnotationSchema()
+        self.structure = LegacyAnnotationSchema()
 
     def validate(self, data):
         appstruct = self.structure.validate(data)
