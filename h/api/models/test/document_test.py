@@ -168,8 +168,8 @@ class TestCreateOrUpdateDocumentURI(object):
             type='self-claim',
             content_type=None,
             document=mock_document(),
-            created=datetime.datetime.now(),
-            updated=datetime.datetime.now())
+            created=now(),
+            updated=now())
 
         # FIXME: We need to assert that this is called with the right
         # arguments, but that's very awkward to do with the way sqlalchemy
@@ -185,8 +185,8 @@ class TestCreateOrUpdateDocumentURI(object):
             type='self-claim',
             content_type=None,
             document=mock_document(),
-            created=datetime.datetime.now(),
-            updated=datetime.datetime.now())
+            created=now(),
+            updated=now())
 
         DocumentURI.query.filter.return_value.first.assert_called_once_with()
 
@@ -198,8 +198,8 @@ class TestCreateOrUpdateDocumentURI(object):
         type_ = 'self-claim'
         content_type = 'text/html'
         document_ = mock_document()
-        created = datetime.datetime.now() - datetime.timedelta(days=1)
-        updated = datetime.datetime.now()
+        created = yesterday()
+        updated = now()
 
         document.create_or_update_document_uri(
             db=mock_db(),
@@ -228,8 +228,8 @@ class TestCreateOrUpdateDocumentURI(object):
         type_ = 'self-claim'
         content_type = None
         document_ = mock_document()
-        created = datetime.datetime.now() - datetime.timedelta(days=1)
-        updated = datetime.datetime.now()
+        created = yesterday()
+        updated = now()
 
         document.create_or_update_document_uri(
             db=mock_db(),
@@ -261,8 +261,8 @@ class TestCreateOrUpdateDocumentURI(object):
             type='self-claim',
             content_type=None,
             document=mock_document(),
-            created=datetime.datetime.now(),
-            updated=datetime.datetime.now())
+            created=now(),
+            updated=now())
 
         db.add.assert_called_once_with(DocumentURI.return_value)
 
@@ -278,8 +278,8 @@ class TestCreateOrUpdateDocumentURI(object):
             type='self-claim',
             content_type=None,
             document=mock_document(),
-            created=datetime.datetime.now(),
-            updated=datetime.datetime.now())
+            created=now(),
+            updated=now())
 
         assert not DocumentURI.called
         assert not db.add.called
@@ -304,16 +304,16 @@ class TestCreateOrUpdateDocumentURI(object):
             type='self-claim',
             content_type=None,
             document=mock_document(),
-            created=datetime.datetime.now(),
-            updated=datetime.datetime.now())
+            created=now(),
+            updated=now())
 
         assert log.warn.call_count == 1
 
     def test_it_updates_updated_time(self, DocumentURI):
         # existing_document_uri has an older .updated time than than the
         # updated argument we will pass to create_or_update_document_uri().
-        now = datetime.datetime.now()
-        yesterday = now - datetime.timedelta(days=1)
+        created = yesterday()
+        updated = now()
         existing_document_uri = mock.Mock(updated=yesterday)
 
         DocumentURI.query.filter.return_value.first.return_value = (
@@ -326,24 +326,22 @@ class TestCreateOrUpdateDocumentURI(object):
             type='self-claim',
             content_type=None,
             document=mock_document(),
-            created=now - datetime.timedelta(days=3),
-            updated=now)
+            created=created,
+            updated=updated)
 
-        assert existing_document_uri.updated == now
+        assert existing_document_uri.updated == updated
 
     def mock_docuri_dict(self, uri=None):
         """Return a mock document URI dict."""
         if uri is None:
             uri = 'http://example.com/example_uri.html'
 
-        now = datetime.datetime.now()
-
         return {
             'type': 'self-claim',
             'claimant': 'http://example.com/example_claimant.html',
             'uri': uri,
-            'created': now,
-            'updated': now
+            'created': now(),
+            'updated': now()
         }
 
     @pytest.fixture
