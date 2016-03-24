@@ -1,5 +1,7 @@
 'use strict';
 
+var queryString = require('query-string');
+
 var detectContentType = require('./detect-content-type');
 var errors = require('./errors');
 var util = require('./util');
@@ -50,6 +52,8 @@ function SidebarInjector(chromeTabs, dependencies) {
 
   var executeScriptFn = util.promisify(chromeTabs.executeScript);
 
+  var PDFViewerBaseURL = extensionURL('/content/web/viewer.html');
+
   if (typeof extensionURL !== 'function') {
     throw new TypeError('extensionURL must be a function');
   }
@@ -89,8 +93,14 @@ function SidebarInjector(chromeTabs, dependencies) {
   };
 
   function getPDFViewerURL(url) {
-    var PDF_VIEWER_URL = extensionURL('/content/web/viewer.html');
-    return PDF_VIEWER_URL + '?file=' + encodeURIComponent(url);
+    // Encode the original URL but preserve the fragment, so that a
+    // '#annotations' fragment in the original URL will persist and trigger the
+    // sidebar to focus and scroll to that annotation when the PDF viewer loads.
+    var parsedURL = new URL(url);
+    var hash = parsedURL.hash;
+    parsedURL.hash = '';
+    var encodedURL = encodeURIComponent(parsedURL.href);
+    return PDFViewerBaseURL + '?file=' + encodedURL + hash;
   }
 
   // returns true if the extension is permitted to inject
@@ -156,7 +166,7 @@ function SidebarInjector(chromeTabs, dependencies) {
    * viewer bundled with the extension.
    */
   function isPDFViewerURL(url) {
-    return url.indexOf(getPDFViewerURL('')) === 0;
+    return url.indexOf(PDFViewerBaseURL) === 0;
   }
 
   function isFileURL(url) {
@@ -244,9 +254,22 @@ function SidebarInjector(chromeTabs, dependencies) {
 
   function removeFromPDF(tab) {
     return new Promise(function (resolve) {
-      var url = tab.url.slice(getPDFViewerURL('').length).split('#')[0];
+      var parsedURL = new URL(tab.url);
+      var originalURL = queryString.parse(parsedURL.search).file;
+      if (!originalURL) {
+        throw new Error('Failed to extract original URL from ' + tab.url);
+      }
+      var hash = parsedURL.hash;
+
+      // If the original URL was a direct link, drop the #annotations fragment
+      // as otherwise the Chrome extension will re-activate itself on this tab
+      // when the original URL loads.
+      if (hash.indexOf('#annotations:') === 0) {
+        hash = '';
+      }
+
       chromeTabs.update(tab.id, {
-        url: decodeURIComponent(url)
+        url: decodeURIComponent(originalURL) + hash,
       }, resolve);
     });
   }

@@ -6,6 +6,8 @@ var toResult = require('../../../static/scripts/test/promise-util').toResult;
 // extensionURL(path) fake
 var EXTENSION_BASE_URL = 'chrome-extension://hypothesis';
 
+var PDF_VIEWER_BASE_URL = EXTENSION_BASE_URL + '/content/web/viewer.html?file=';
+
 describe('SidebarInjector', function () {
   var errors = require('../lib/errors');
   var SidebarInjector = require('../lib/sidebar-injector');
@@ -91,21 +93,33 @@ describe('SidebarInjector', function () {
     });
 
     it('succeeds if the tab is already displaying the embedded PDF viewer', function () {
-        var url = EXTENSION_BASE_URL + '/content/web/viewer.html?file=' +
+        var url = PDF_VIEWER_BASE_URL +
           encodeURIComponent('http://origin/foo.pdf');
         return injector.injectIntoTab({id: 1, url: url});
       }
     );
 
     describe('when viewing a remote PDF', function () {
+      var url = 'http://example.com/foo.pdf';
+
       it('injects hypothesis into the page', function () {
         contentType = 'PDF';
         var spy = fakeChromeTabs.update.yields({tab: 1});
-        var url = 'http://example.com/foo.pdf';
-
         return injector.injectIntoTab({id: 1, url: url}).then(function() {
           assert.calledWith(spy, 1, {
-            url: EXTENSION_BASE_URL + '/content/web/viewer.html?file=' + encodeURIComponent(url)
+            url: PDF_VIEWER_BASE_URL + encodeURIComponent(url)
+          });
+        });
+      });
+
+      it('preserves #annotations fragments in the URL', function () {
+        contentType = 'PDF';
+        var spy = fakeChromeTabs.update.yields({tab: 1});
+        var hash = '#annotations:456';
+        return injector.injectIntoTab({id: 1, url: url + hash})
+          .then(function () {
+          assert.calledWith(spy, 1, {
+            url: PDF_VIEWER_BASE_URL + encodeURIComponent(url) + hash,
           });
         });
       });
@@ -145,7 +159,7 @@ describe('SidebarInjector', function () {
             function () {
               assert.called(spy);
               assert.calledWith(spy, 1, {
-                url: EXTENSION_BASE_URL + '/content/web/viewer.html?file=' + encodeURIComponent('file://foo.pdf')
+                url: PDF_VIEWER_BASE_URL + encodeURIComponent('file://foo.pdf')
               });
             }
           );
@@ -206,8 +220,19 @@ describe('SidebarInjector', function () {
     describe('when viewing a PDF', function () {
       it('reverts the tab back to the original document', function () {
         var spy = fakeChromeTabs.update.yields([]);
-        var url = EXTENSION_BASE_URL + '/content/web/viewer.html?file=' + encodeURIComponent('http://example.com/foo.pdf');
+        var url = PDF_VIEWER_BASE_URL +
+          encodeURIComponent('http://example.com/foo.pdf') + '#foo';
+        return injector.removeFromTab({id: 1, url: url}).then(function () {
+          assert.calledWith(spy, 1, {
+            url: 'http://example.com/foo.pdf#foo'
+          });
+        });
+      });
 
+      it('drops #annotations fragments', function () {
+        var spy = fakeChromeTabs.update.yields([]);
+        var url = PDF_VIEWER_BASE_URL +
+          encodeURIComponent('http://example.com/foo.pdf') + '#annotations:456';
         return injector.removeFromTab({id: 1, url: url}).then(function () {
           assert.calledWith(spy, 1, {
             url: 'http://example.com/foo.pdf'
