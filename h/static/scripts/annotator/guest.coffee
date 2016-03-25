@@ -341,6 +341,11 @@ module.exports = class Guest extends Annotator
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('focusAnnotations', tags)
 
+  showAdder: (position) ->
+    @adder
+      .css(position)
+      .show()
+
   onSuccessfulSelection: (event, immediate) ->
     unless event?
       throw "Called onSuccessfulSelection without an event!"
@@ -360,10 +365,23 @@ module.exports = class Guest extends Annotator
       @onAdderClick event
     else
       # Show the adder button
-      @adder
-        .css(Annotator.Util.mousePosition(event, @element[0]))
-        .show()
+      adderPosition = {}
 
+      # By default adder position is where the user releases the mouse
+      # while making a text selection.
+      adderPosition = Annotator.Util.mousePosition(event, @element[0])
+
+      # If the user launches the plugin after making a selection
+      # position the adder in the top and middle of the bounding
+      # box of the selection.
+      if event.type == 'ready'
+        selection = Annotator.Util.getGlobal().getSelection()
+        if !selection.isCollapsed
+          rect = selection.getRangeAt(0).getBoundingClientRect();
+          adderPosition.top = rect.top + window.scrollY
+          adderPosition.left = (rect.width / 2) + rect.left
+
+      this.showAdder(adderPosition)
     true
 
   onFailedSelection: (event) ->
