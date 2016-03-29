@@ -33,6 +33,25 @@ def test_document_not_found(annotation):
     assert annotation.document is None
 
 
+@annotation_fixture
+def test_is_reply_when_the_annotation_is_a_reply(annotation):
+    """If self.references is non-empty it should return True."""
+    # A non-empty references list means the annotation is a reply.
+    annotation.references = ["grandparent_annotation_id",
+                             "parent_annotation_id"]
+
+    assert annotation.is_reply is True
+
+
+@annotation_fixture
+def test_is_reply_when_the_annotation_is_not_a_reply(annotation):
+    """If self.references is non-empty it should return True."""
+    # An empty references list means the annotation is not a reply.
+    annotation.references = []
+
+    assert annotation.is_reply is False
+
+
 def test_acl_private():
     ann = Annotation(shared=False, userid='saoirse')
     actual = ann.__acl__()

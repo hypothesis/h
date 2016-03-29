@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from datetime import datetime
+import logging
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
@@ -13,6 +14,9 @@ from h.api import uri
 from h.api.db import Base
 from h.api.db import mixins
 from h._compat import text_type
+
+
+log = logging.getLogger(__name__)
 
 
 class Document(Base, mixins.Timestamps):
@@ -40,7 +44,7 @@ class Document(Base, mixins.Timestamps):
     @classmethod
     def find_by_uris(cls, session, uris):
         """Find documents by a list of uris."""
-        query_uris = [text_type(uri.normalize(u), 'utf-8') for u in uris]
+        query_uris = [normalize(u) for u in uris]
 
         matching_claims = (
             session.query(DocumentURI)
@@ -119,7 +123,7 @@ class DocumentURI(Base, mixins.Timestamps):
     @claimant.setter
     def claimant(self, value):
         self._claimant = value
-        self._claimant_normalized = text_type(uri.normalize(value), 'utf-8')
+        self._claimant_normalized = normalize(value)
 
     @hybrid_property
     def claimant_normalized(self):
@@ -132,7 +136,7 @@ class DocumentURI(Base, mixins.Timestamps):
     @uri.setter
     def uri(self, value):
         self._uri = value
-        self._uri_normalized = text_type(uri.normalize(value), 'utf-8')
+        self._uri_normalized = normalize(value)
 
     @hybrid_property
     def uri_normalized(self):
@@ -172,7 +176,7 @@ class DocumentMeta(Base, mixins.Timestamps):
     @claimant.setter
     def claimant(self, value):
         self._claimant = value
-        self._claimant_normalized = text_type(uri.normalize(value), 'utf-8')
+        self._claimant_normalized = normalize(value)
 
     @hybrid_property
     def claimant_normalized(self):
@@ -180,6 +184,153 @@ class DocumentMeta(Base, mixins.Timestamps):
 
     def __repr__(self):
         return '<DocumentMeta %s>' % self.id
+
+
+def create_or_update_document_uri(db,
+                                  claimant,
+                                  uri,
+                                  type,
+                                  content_type,
+                                  document,
+                                  created,
+                                  updated):
+    """
+    Create or update a DocumentURI with the given parameters.
+
+    If an equivalent DocumentURI already exists in the database then its
+    updated time will be updated.
+
+    If no equivalent DocumentURI exists in the database then a new one will be
+    created and added to the database.
+
+    To be considered "equivalent" an existing DocumentURI must have the same
+    claimant, uri, type and content_type, but the Document object that it
+    belongs to may be different. The claimant and uri are normalized before
+    comparing.
+
+    :param db: the database session
+    :type db: sqlalchemy.orm.session.Session
+
+    :param claimant: the .claimant property of the DocumentURI
+    :type claimant: unicode
+
+    :param uri: the .uri property of the DocumentURI
+    :type uri: unicode
+
+    :param type: the .type property of the DocumentURI
+    :type type: unicode
+
+    :param content_type: the .content_type property of the DocumentURI
+    :type content_type: unicode
+
+    :param document: the Document that the new DocumentURI will belong to, if a
+        new DocumentURI is created
+    :type document: h.api.models.Document
+
+    :param created: the time that will be used as the .created time for the new
+        DocumentURI, if a new one is created
+    :type created: datetime.datetime
+
+    :param updated: the time that will be set as the .updated time for the new
+        or existing DocumentURI
+    :type updated: datetime.datetime
+
+    """
+    docuri = DocumentURI.query.filter(
+        DocumentURI.claimant_normalized == normalize(claimant),
+        DocumentURI.uri_normalized == normalize(uri),
+        DocumentURI.type == type,
+        DocumentURI.content_type == content_type).first()
+
+    if docuri is None:
+        docuri = DocumentURI(claimant=claimant,
+                             uri=uri,
+                             type=type,
+                             content_type=content_type,
+                             document=document,
+                             created=created,
+                             updated=updated)
+        db.add(docuri)
+    elif not docuri.document == document:
+        log.warn('Found DocumentURI with id %d does not match expected '
+                 'document with id %d', docuri.document_id, document.id)
+
+    docuri.updated = updated
+
+
+def create_or_update_document_meta(db,
+                                   claimant,
+                                   claimant_normalized,
+                                   type,
+                                   value,
+                                   document,
+                                   created,
+                                   updated):
+    """
+    Create or update a DocumentMeta with the given parameters.
+
+    If an equivalent DocumentMeta already exists in the database then its value
+    and updated time will be updated.
+
+    If no equivalent DocumentMeta exists in the database then a new one will be
+    created and added to the database.
+
+    To be considered "equivalent" an existing DocumentMeta must have the given
+    claimant and type, but its value, document and created and updated times
+    needn't match the given ones.
+
+    :param db: the database session
+    :type db: sqlalchemy.orm.session.Session
+
+    :param claimant: the value to use for the DocumentMeta's claimant attribute
+        if a new DocumentMeta is created
+    :type claimant: unicode
+
+    :param claimant_normalized: the value of the new or existing DocumentMeta's
+        claimant_normalized attribute
+    :type claimant_normalized: unicode
+
+    :param type: the value of the new or existing DocumentMeta's type attribute
+    :type type: unicode
+
+    :param value: the value to set the new or existing DocumentMeta's value
+        attribute to
+    :type value: unicode
+
+    :param document: the value to use for the DocumentMeta's document if a new
+        DocumentMeta is created
+    :type document: h.api.models.Document
+
+    :param created: the value to use for the DocumentMeta's created attribute
+        if a new DocumentMeta is created
+    :type created: datetime.datetime
+
+    :param updated: the value to set the new or existing DocumentMeta's updated
+        attribute to
+    :type updated: datetime.datetime
+
+    """
+    existing_dm = DocumentMeta.query.filter(
+        DocumentMeta.claimant_normalized == claimant_normalized,
+        DocumentMeta.type == type).one_or_none()
+
+    if existing_dm is None:
+        db.add(DocumentMeta(
+            _claimant=claimant,
+            _claimant_normalized=claimant_normalized,
+            type=type,
+            value=value,
+            document=document,
+            created=created,
+            updated=updated,
+        ))
+    else:
+        existing_dm.value = value
+        existing_dm.updated = updated
+        if not existing_dm.document == document:
+            log.warn('Found DocumentMeta with id %d does not match expected '
+                     'document with id %d', existing_dm.id,
+                     document.id)
 
 
 def merge_documents(session, documents, updated=datetime.now()):
@@ -207,3 +358,7 @@ def merge_documents(session, documents, updated=datetime.now()):
         session.delete(doc)
 
     return master
+
+
+def normalize(uri_):
+    return text_type(uri.normalize(uri_), 'utf-8')
