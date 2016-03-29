@@ -85,18 +85,16 @@
     }
   }
 
-  .group-document-list {
-
+  .group-document-list, .group-members-list {
+    display: flex;
     justify-content: left;
     font-size: $body2-font-size;
     line-height: $body2-line-height;
     background-color: $white;
     color: $color-dove-gray;
-
-    border: $border;
-    border-top: none;
+    border-left: $border;
+    border-right: $border;
     padding-top: 20px;
-    padding-bottom: 10px;
     padding-left: 20px;
     padding-right: 20px;
 
@@ -109,6 +107,10 @@
       margin-bottom: 1.5em;
     }
 
+  }
+
+  .group-members-list {
+    border-bottom: $border;
   }
 
   .group-form-footer {

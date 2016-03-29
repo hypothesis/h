@@ -32,17 +32,27 @@
         </ul>
     </div>
     {% endif %}
+    {% if group.members %}
+    <div class="group-members-list">
+      <ul class="group-members-list__list">
+        <p class="group-members-list__heading">Group Members:</p>
+        {% for member in group.members|sort(attribute='username')  %}
+          <li>
+            <a href="{{ request.route_url('stream') }}?q=group:{{ group.pubid }} user:{{ member.username }}"
+              target="_blank"
+              title="{{ member.username }}'s annotations in this group">
+              {{ member.username }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
     <div class="group-form-footer">
       <div class="group-form-footer__explain-text">
         {% include "about-groups.html.jinja2" %}
-
-        <p class="group-form-footer__heading">You can</p>
-        <ol class="group-form-footer__list">
-          <li>Annotate any web resource privately within the group.</li>
-          <li>Restrict the annotations shown for a web resource to only those
-              belonging to the group.</li>
-          <li>Invite anyone to join the group using the link below:</li>
-        </ol>
+        <p class="group-form-footer__heading">Invite</p>
+        Invite anyone to join the group using the link below:
         <input class="share-link-field" value="{{ group_url }}">
         <a href="//twitter.com/intent/tweet?url={{ group_url }}"
            target="_blank"

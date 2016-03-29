@@ -125,7 +125,10 @@ def _read_group(request, group):
                       for annotation in annotations_by_uri.values()]
 
     template_data = {
-        'group': group, 'group_url': url, 'document_links': document_links}
+        'group': group,
+        'group_url': url,
+        'document_links': document_links
+    }
 
     return renderers.render_to_response(
         renderer_name='h:templates/groups/share.html.jinja2',
