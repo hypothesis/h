@@ -24,7 +24,7 @@ class Group(Base, mixins.Timestamps):
                       default=pubid.generate,
                       unique=True,
                       nullable=False)
-    name = sa.Column(sa.UnicodeText(), nullable=False)
+    name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     # We store information about who created the group -- we don't use this
     # currently, but it seems careless to lose this information when in the
@@ -34,9 +34,9 @@ class Group(Base, mixins.Timestamps):
     creator = sa.orm.relationship('User')
 
     # Group membership
-    members = sa.orm.relationship('User',
-                                  secondary='user_group',
-                                  backref='groups')
+    members = sa.orm.relationship(
+        'User', secondary='user_group', backref=sa.orm.backref(
+            'groups', order_by='Group.name'))
 
     def __init__(self, name, creator):
         self.name = name
