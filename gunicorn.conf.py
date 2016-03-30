@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 
+if 'GUNICORN_TIMEOUT' in os.environ:
+    timeout = int(os.environ['GUNICORN_TIMEOUT'])
+
 # Smart detect heroku stack and assume a trusted proxy.
 # This is a convenience that should hopefully not be too surprising.
 if 'heroku' in os.environ.get('LD_LIBRARY_PATH', ''):
