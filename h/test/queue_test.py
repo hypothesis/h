@@ -1,95 +1,141 @@
 # -*- coding: utf-8 -*-
+
+from collections import namedtuple
+
 import pytest
-from pyramid import testing
-from pyramid.testing import DummyRequest as _DummyRequest
+from mock import Mock
 from mock import patch
+
+import blinker
 
 from h import queue
 
 
-class DummySentry:
-    def extra_context(self, context):
-        pass
+FakeMessage = namedtuple('FakeMessage', ['body'])
 
 
-class DummyRegistry:
-    pass
+class FakeReader(object):
+    """
+    A fake `gnsq.Reader` class.
+
+    This is swapped out automatically for every test in this module by the
+    `fake_reader` fixture.
+    """
+    on_exception = blinker.Signal()
+    on_error = blinker.Signal()
+    on_giving_up = blinker.Signal()
+
+    def __init__(self, topic, channel, **kwargs):
+        self.topic = topic
+        self.channel = channel
+        self.kwargs = kwargs
+
+    def simulate_exception(self, message=None, error=None):
+        if message is None:
+            message = FakeMessage(body="a message")
+        if error is None:
+            error = RuntimeError("explosion!")
+        self.on_exception.send(self, message=message, error=error)
+
+    def simulate_error(self, error=None):
+        if error is None:
+            error = RuntimeError("explosion!")
+        self.on_error.send(self, error=error)
+
+    def simulate_giving_up(self, message=None):
+        if message is None:
+            message = FakeMessage(body="a message")
+        self.on_giving_up.send(self, message=message)
 
 
-class DummyRequest(_DummyRequest):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('sentry', DummySentry())
-        kwargs.setdefault('registry', DummyRegistry())
-        super(DummyRequest, self).__init__(*args, **kwargs)
+class FakeClient(object):
+    """A fake `raven.Client` class."""
+
+    captureException = Mock(spec=[])
+    captureMessage = Mock(spec=[])
 
 
-@patch('gnsq.Reader')
-def test_get_reader_default(fake_reader):
+def test_get_reader_default():
     settings = {}
-    queue.get_reader(settings, 'ethics-in-games-journalism', 'channel4')
-    fake_reader.assert_called_with('ethics-in-games-journalism',
-                                   'channel4',
-                                   nsqd_tcp_addresses=['localhost:4150'])
+
+    reader = queue.get_reader(settings,
+                              'ethics-in-games-journalism',
+                              'channel4')
+
+    assert reader.topic == 'ethics-in-games-journalism'
+    assert reader.channel == 'channel4'
+    assert reader.kwargs['nsqd_tcp_addresses'] == ['localhost:4150']
 
 
-@patch('gnsq.Reader')
-def test_get_reader(fake_reader):
+def test_get_reader_respects_address_settings():
     settings = {'nsq.reader.addresses': "foo:1234\nbar:4567"}
-    queue.get_reader(settings, 'ethics-in-games-journalism', 'channel4')
-    fake_reader.assert_called_with('ethics-in-games-journalism',
-                                   'channel4',
-                                   nsqd_tcp_addresses=['foo:1234',
-                                                       'bar:4567'])
+
+    reader = queue.get_reader(settings,
+                              'ethics-in-games-journalism',
+                              'channel4')
+
+    assert reader.kwargs['nsqd_tcp_addresses'] == ['foo:1234', 'bar:4567']
 
 
-@patch('gnsq.Reader')
-def test_get_reader_namespace(fake_reader):
+def test_get_reader_uses_namespace():
     """
     When the ``nsq.namespace`` setting is provided, `get_reader` should return
     a reader that automatically prefixes the namespace onto the name of the
     topic being read.
     """
     settings = {'nsq.namespace': "abc123"}
-    queue.get_reader(settings, 'safari', 'elephants')
-    fake_reader.assert_called_with('abc123-safari',
-                                   'elephants',
-                                   nsqd_tcp_addresses=['localhost:4150'])
+
+    reader = queue.get_reader(settings, 'safari', 'elephants')
+
+    assert reader.topic == 'abc123-safari'
 
 
-@patch('raven.Client')
-def test_get_reader_sentry_on_exception_hook(fake_client):
+def test_get_reader_connects_on_exception_hook_to_sentry_client():
     settings = {}
-    sentry = fake_client()
-    reader = queue.get_reader(settings, 'safari', 'elephants',
-                              sentry_client=sentry)
-    reader.on_exception.send(error='An error happened')
+    client = FakeClient()
+    reader = queue.get_reader(settings,
+                              'safari',
+                              'elephants',
+                              sentry_client=client)
 
-    sentry.captureException.assert_called_with(exc_info=True,
-                                               extra={'topic': 'safari'})
+    reader.simulate_exception(message=FakeMessage("foobar"))
+
+    client.captureException.assert_called_with(exc_info=True,
+                                               extra={'topic': 'safari',
+                                                      'channel': 'elephants',
+                                                      'message': 'foobar'})
 
 
-@patch('raven.Client')
-def test_get_reader_sentry_on_error_hook(fake_client):
+def test_get_reader_connects_on_error_hook_to_sentry_client():
     settings = {}
-    sentry = fake_client()
-    reader = queue.get_reader(settings, 'safari', 'elephants',
-                              sentry_client=sentry)
-    reader.on_error.send()
+    client = FakeClient()
+    reader = queue.get_reader(settings,
+                              'safari',
+                              'elephants',
+                              sentry_client=client)
 
-    sentry.captureException.assert_called_with(
-        exc_info=(type(None), None, None),
-        extra={'topic': 'safari'})
+    error = RuntimeError("asplode!")
+    reader.simulate_error(error=error)
+
+    client.captureException.assert_called_with(
+        exc_info=(RuntimeError, error, None),
+        extra={'topic': 'safari', 'channel': 'elephants'})
 
 
-@patch('raven.Client')
-def test_get_reader_sentry_on_giving_up_hook(fake_client):
+def test_get_reader_connects_on_giving_up_hook_to_sentry_client():
     settings = {}
-    sentry = fake_client()
-    reader = queue.get_reader(settings, 'safari', 'elephants',
-                              sentry_client=sentry)
-    reader.on_giving_up.send()
+    client = FakeClient()
+    reader = queue.get_reader(settings,
+                              'safari',
+                              'elephants',
+                              sentry_client=client)
 
-    sentry.captureMessage.assert_called_with(extra={'topic': 'safari'})
+    reader.simulate_giving_up(message=FakeMessage("nopeski"))
+
+    client.captureMessage.assert_called_with("Giving up on message",
+                                             extra={'topic': 'safari',
+                                                    'channel': 'elephants',
+                                                    'message': 'nopeski'})
 
 
 @patch('gnsq.Nsqd')
@@ -155,3 +201,11 @@ def test_resolve_topic_raises_if_namespace_and_topic_both_given():
         queue.resolve_topic('foo',
                             namespace='prefix',
                             settings={'nsq.namespace': 'prefix'})
+
+
+@pytest.fixture(scope='module', autouse=True)
+def fake_reader(request):
+    patcher = patch('gnsq.Reader', new_callable=lambda: FakeReader)
+    klass = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return klass

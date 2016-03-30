@@ -31,27 +31,7 @@ def get_reader(settings, topic, channel, sentry_client=None):
     reader = gnsq.Reader(topic, channel, nsqd_tcp_addresses=addrs)
 
     if sentry_client is not None:
-        extra = {'topic': topic}
-
-        def _capture_exception(message, error):
-            if message is not None:
-                extra['message'] = message.body
-            sentry_client.captureException(exc_info=True, extra=extra)
-
-        def _capture_error(error):
-            sentry_client.captureException(
-                exc_info=(type(error), error, None),
-                extra=extra
-            )
-
-        def _capture_message(message):
-            if message is not None:
-                extra['message'] = message.body
-            sentry_client.captureMessage(extra=extra)
-
-        reader.on_exception.connect(_capture_exception, weak=False)
-        reader.on_giving_up.connect(_capture_message, weak=False)
-        reader.on_error.connect(_capture_error, weak=False)
+        _attach_error_handlers(reader, sentry_client)
 
     return reader
 
@@ -88,6 +68,37 @@ def resolve_topic(topic, namespace=None, settings=None):
         return '{0}-{1}'.format(ns, topic)
 
     return topic
+
+
+def _attach_error_handlers(reader, client):
+    """
+    Attach error handlers to a queue reader that report to a Sentry client.
+
+    :param reader: a reader instance
+    :type reader: gnsq.Reader
+
+    :param client: a Raven client instance
+    :type client: raven.Client
+    """
+    def _capture_error(reader, error=None):
+        exc_info = (type(error), error, None)
+        extra = {'topic': reader.topic, 'channel': reader.channel}
+        client.captureException(exc_info=exc_info, extra=extra)
+    reader.on_error.connect(_capture_error, weak=False)
+
+    def _capture_exception(reader, message=None, error=None):
+        extra = {'topic': reader.topic, 'channel': reader.channel}
+        if message is not None:
+            extra['message'] = message.body
+        client.captureException(exc_info=True, extra=extra)
+    reader.on_exception.connect(_capture_exception, weak=False)
+
+    def _capture_giving_up(reader, message=None):
+        extra = {'topic': reader.topic, 'channel': reader.channel}
+        if message is not None:
+            extra['message'] = message.body
+        client.captureMessage('Giving up on message', extra=extra)
+    reader.on_giving_up.connect(_capture_giving_up, weak=False)
 
 
 def _get_queue_reader(request, topic, channel):
