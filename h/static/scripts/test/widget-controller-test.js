@@ -39,6 +39,7 @@ describe('WidgetController', function () {
   var fakeGroups = null;
   var sandbox = null;
   var viewer = null;
+  var fakeSettings = null;
 
   before(function () {
     angular.module('h', [])
@@ -100,6 +101,10 @@ describe('WidgetController', function () {
       focus: sinon.stub(),
     };
 
+    fakeSettings = {
+      annotations: 'test',
+    };
+
     fakeStore = {
       SearchResource: {},
     };
@@ -113,6 +118,7 @@ describe('WidgetController', function () {
     $provide.value('streamFilter', fakeStreamFilter);
     $provide.value('threading', fakeThreading);
     $provide.value('groups', fakeGroups);
+    $provide.value('settings', fakeSettings);
   }));
 
   beforeEach(angular.mock.inject(function ($controller, _$rootScope_) {
@@ -307,6 +313,56 @@ describe('WidgetController', function () {
       fakeAnnotationUI.selectedAnnotationMap = null;
       $scope.$digest();
       assert.isFalse($scope.selectedAnnotationUnavailable());
+    });
+
+    it('shows logged out message if selection is available', function () {
+      $scope.auth = {
+        status: 'signed-out'
+      };
+      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeThreading.idTable = {'123': {}};
+      $scope.$digest();
+      assert.isTrue($scope.shouldShowLoggedOutMessage());
+    });
+
+    it('does not show loggedout message if selection is unavailable', function () {
+      $scope.auth = {
+        status: 'signed-out'
+      };
+      fakeAnnotationUI.selectedAnnotationMap = {'missing': true};
+      fakeThreading.idTable = {'123': {}};
+      $scope.$digest();
+      assert.isFalse($scope.shouldShowLoggedOutMessage());
+    });
+
+    it('does not show loggedout message if there is no selection', function () {
+      $scope.auth = {
+        status: 'signed-out'
+      };
+      fakeAnnotationUI.selectedAnnotationMap = null;
+      $scope.$digest();
+      assert.isFalse($scope.shouldShowLoggedOutMessage());
+    });
+
+    it('does not show loggedout message if user is not logged out', function () {
+      $scope.auth = {
+        status: 'signed-in'
+      };
+      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeThreading.idTable = {'123': {}};
+      $scope.$digest();
+      assert.isFalse($scope.shouldShowLoggedOutMessage());
+    });
+
+    it('does not show loggedout message if not a direct link', function () {
+      $scope.auth = {
+        status: 'signed-out'
+      };
+      delete fakeSettings.annotations;
+      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeThreading.idTable = {'123': {}};
+      $scope.$digest();
+      assert.isFalse($scope.shouldShowLoggedOutMessage());
     });
   });
 });

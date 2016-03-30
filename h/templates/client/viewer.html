@@ -40,5 +40,23 @@
       ng-repeat="child in threadRoot.children | orderBy : sort.predicate"
       ng-show="vm.shouldShow()">
   </li>
+  <li class="loggedout-message" ng-if="isSidebar && shouldShowLoggedOutMessage()" ng-cloak>
+    This is a public annotation created with Hypothes.is
+    <span class="loggedout-message-actions">
+      <a class="loggedout-message-actions__link" href="{{ register_url }}" target="_blank">
+        Sign up
+      </a>
+      for a free account or
+      <a class="loggedout-message-actions__link" href="" ng-click="login()">
+        log in
+      </a>
+      to reply or create a new annotation
+    </span>
+    <span class="loggedout-message-logo">
+      <a href="https://hypothes.is">
+        <i class="h-icon-hypothesis-logo loggedout-message-logo__icon"></i>
+      </a>
+    </span>
+  </li>
 </ul>
 <!-- / Thread view -->
