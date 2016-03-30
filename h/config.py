@@ -49,6 +49,7 @@ SETTINGS = [
     # Configuration for external components
     EnvSetting('es.client_poolsize', 'ELASTICSEARCH_CLIENT_POOLSIZE',
                type=int),
+    EnvSetting('es.client_timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type=int),
     EnvSetting('es.host', 'ELASTICSEARCH_HOST'),
     EnvSetting('es.index', 'ELASTICSEARCH_INDEX'),
     EnvSetting('mail.default_sender', 'MAIL_DEFAULT_SENDER'),
