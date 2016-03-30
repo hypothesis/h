@@ -124,6 +124,7 @@ describe('WidgetController', function () {
   beforeEach(angular.mock.inject(function ($controller, _$rootScope_) {
     $rootScope = _$rootScope_;
     $scope = $rootScope.$new();
+    $scope.search = {query: ''};
     viewer = $controller('WidgetController', {$scope: $scope});
   }));
 
@@ -166,13 +167,13 @@ describe('WidgetController', function () {
       assert.calledWith(loadSpy, [sinon.match({id: uris[1] + '456'})]);
     });
 
-    context('when there is a selection', function () {
+    context('when there is a direct-linked annotation', function () {
       var uri = 'http://example.com';
       var id = uri + '123';
 
       beforeEach(function () {
         fakeCrossFrame.frames = [{uri: uri}];
-        fakeAnnotationUI.selectedAnnotationMap[id] = true;
+        $scope.search.query = 'id:' + id;
         $scope.$digest();
       });
 
@@ -217,7 +218,7 @@ describe('WidgetController', function () {
 
       beforeEach(function () {
         fakeCrossFrame.frames = [{uri: uri}];
-        fakeAnnotationUI.selectedAnnotationMap[id] = true;
+        $scope.search.query = 'id:' + id;
         fakeGroups.focused = function () { return { id: 'private-group' }; };
         $scope.$digest();
       });
@@ -231,9 +232,9 @@ describe('WidgetController', function () {
   });
 
   describe('when an annotation is anchored', function () {
-    it('focuses and scrolls to the annotation if already selected', function () {
+    it('focuses and scrolls to the annotation if direct-linked', function () {
       var uri = 'http://example.com';
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      $scope.search.query = 'id:123';
       fakeCrossFrame.frames.push({uri: uri});
       var annot = {
         $$tag: 'atag',
@@ -295,51 +296,49 @@ describe('WidgetController', function () {
   });
 
   describe('direct linking messages', function () {
-    it('displays a message if the selection is unavailable', function () {
-      fakeAnnotationUI.selectedAnnotationMap = {'missing': true};
+    it('displays a message if the annotation is unavailable', function () {
+      $scope.search.query = 'id:missing';
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
-      assert.isTrue($scope.selectedAnnotationUnavailable());
+      assert.isTrue($scope.annotationUnavailable());
     });
 
-    it('does not show a message if the selection is available', function () {
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+    it('does not show a message if the annotation is available', function () {
+      $scope.search.query = 'id:123';
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
-      assert.isFalse($scope.selectedAnnotationUnavailable());
+      assert.isFalse($scope.annotationUnavailable());
     });
 
-    it('does not a show a message if there is no selection', function () {
-      fakeAnnotationUI.selectedAnnotationMap = null;
+    it('does not a show a message if there is no direct-linked annotation', function () {
       $scope.$digest();
-      assert.isFalse($scope.selectedAnnotationUnavailable());
+      assert.isFalse($scope.annotationUnavailable());
     });
 
-    it('shows logged out message if selection is available', function () {
+    it('shows logged out message if annotation is available', function () {
       $scope.auth = {
         status: 'signed-out'
       };
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      $scope.search.query = 'id:123';
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isTrue($scope.shouldShowLoggedOutMessage());
     });
 
-    it('does not show loggedout message if selection is unavailable', function () {
+    it('does not show loggedout message if annotation is unavailable', function () {
       $scope.auth = {
         status: 'signed-out'
       };
-      fakeAnnotationUI.selectedAnnotationMap = {'missing': true};
+      $scope.search.query = 'id:missing';
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
     });
 
-    it('does not show loggedout message if there is no selection', function () {
+    it('does not show loggedout message if there is no annotation', function () {
       $scope.auth = {
         status: 'signed-out'
       };
-      fakeAnnotationUI.selectedAnnotationMap = null;
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
     });
@@ -348,18 +347,7 @@ describe('WidgetController', function () {
       $scope.auth = {
         status: 'signed-in'
       };
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
-      fakeThreading.idTable = {'123': {}};
-      $scope.$digest();
-      assert.isFalse($scope.shouldShowLoggedOutMessage());
-    });
-
-    it('does not show loggedout message if not a direct link', function () {
-      $scope.auth = {
-        status: 'signed-out'
-      };
-      delete fakeSettings.annotations;
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      $scope.search.query = 'id:123';
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());

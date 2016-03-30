@@ -86,6 +86,10 @@ module.exports = ['unicode', (unicode) ->
       autofalse: (annotation) -> return not annotation.user?
       value: (annotation) -> return annotation.user
       match: (term, value) -> return value.indexOf(term) > -1
+    id:
+      autofalse: (annotation) -> return not annotation.id?
+      value: (annotation) -> return annotation.id
+      match: (term, value) -> return value == term
     any:
       fields: ['quote', 'text', 'tag', 'user']
 

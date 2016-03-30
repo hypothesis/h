@@ -136,8 +136,13 @@ module.exports = function AppController(
     annotationUI.clearSelectedAnnotations();
   };
 
+  var initialQuery = $location.search().q || '';
+  if (settings.annotations) {
+    initialQuery = 'id:' + settings.annotations;
+  }
+
   $scope.search = {
-    query: $location.search().q,
+    query: initialQuery,
     clear: function () {
       $location.search('q', null);
     },

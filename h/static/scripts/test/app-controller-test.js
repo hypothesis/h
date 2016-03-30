@@ -197,6 +197,17 @@ describe('AppController', function () {
     assert.calledOnce(fakeRoute.reload);
   });
 
+  it('initializes search.query to an empty string if there is no direct-linked annotation ID', function () {
+    createController();
+    assert.equal($scope.search.query, '');
+  });
+
+  it('initializes search.query from the direct-linked annotation ID', function () {
+    fakeSettings.annotations = 'someid';
+    createController();
+    assert.equal($scope.search.query, 'id:someid');
+  });
+
   describe('logout()', function () {
     it('prompts the user if there are drafts', function () {
       fakeDrafts.count.returns(1);
