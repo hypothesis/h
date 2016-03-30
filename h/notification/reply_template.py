@@ -171,7 +171,7 @@ def create_subscription(request, uri, active):
 @subscriber(RegistrationEvent)
 def registration_subscriptions(event):
     request = event.request
-    user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
+    user_uri = u'acct:{}@{}'.format(event.user.username, request.domain)
     create_subscription(event.request, user_uri, True)
 
 
