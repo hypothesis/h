@@ -181,7 +181,7 @@
       </button>
       <span class="share-dialog-wrapper" ng-if="!vm.feature('direct_linking')">
         <button class="btn btn-clean annotation-action-btn"
-          ng-click="vm.share($event)">
+          ng-click="vm.showShareDialog = !vm.showShareDialog">
           <i class="h-icon-link btn-icon "></i>
           <span class="annotation-action-btn__label">
             Link
@@ -198,45 +198,19 @@
       </span>
       <span class="share-dialog-wrapper" ng-if="vm.feature('direct_linking')">
         <button class="btn btn-clean annotation-action-btn"
-          ng-click="vm.share($event)">
+          ng-click="vm.showShareDialog = true">
           <i class="h-icon-annotation-share btn-icon "></i>
           <span class="annotation-action-btn__label">
             Share
           </span>
         </button>
-        <span class="share-dialog" ng-click="$event.stopPropagation()">
-          <span class="share-dialog-target">
-            <span class="share-dialog-target__label">Share:</span>
-            <a href="https://twitter.com/intent/tweet?url={{vm.annotationURI}}"
-              target="_blank"
-              title="Tweet link"
-              class="share-dialog-target__icon h-icon-twitter"></a>
-            <a href="https://www.facebook.com/sharer/sharer.php?u={{vm.annotationURI}}"
-              target="_blank"
-              title="Share on Facebook"
-              class="share-dialog-target__icon h-icon-facebook"></a>
-            <a href="https://plus.google.com/share?url={{vm.annotationURI}}"
-              target="_blank"
-              title="Post on Google Plus"
-              class="share-dialog-target__icon h-icon-google-plus"></a>
-            <a href="mailto:?subject=Let's%20Annotate&amp;body={{vm.annotationURI}}"
-              title="Share via email"
-              class="share-dialog-target__icon h-icon-mail"></a>
-          </span>
-          <input class="share-dialog-link" type="text" value="{{vm.annotationURI}}" readonly>
-          <span class="share-dialog-msg" ng-if="vm.group() && !vm.group().public && !vm.isPrivate">
-            <span class="share-dialog-msg__audience">
-              Group.
-            </span>
-            Only group members will be able to view this annotation.
-          </span>
-          <span class="share-dialog-msg" ng-if="vm.isPrivate">
-            <span class="share-dialog-msg__audience">
-              Only me.
-            </span>
-            No one else will be able to view this annotation.
-          </span>
-        </span>
+        <annotation-share-dialog
+          group="vm.group()"
+          uri="vm.annotationURI"
+          is-private="vm.isPrivate"
+          is-open="vm.showShareDialog"
+          on-close="vm.showShareDialog = false">
+        </annotation-share-dialog>
       </span>
     </div>
   </footer>
