@@ -24,7 +24,7 @@
        the stream view.
   !-->
   <div class="top-bar__inner content" ng-if="::isSidebar">
-    <group-list class="group-list" auth="auth"></group-list>
+    <group-list class="group-list u-fixed-size" auth="auth"></group-list>
     <div class="top-bar__expander"></div>
     <simple-search
       class="simple-search"
@@ -45,6 +45,7 @@
       <i class="h-icon-annotation-share"></i>
     </a>
     <signin-control
+      class="u-fixed-size"
       auth="auth"
       new-style="true"
       on-login="onLogin()"
