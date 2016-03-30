@@ -235,6 +235,9 @@ function AnnotationController(
     /** True if the annotation is currently being saved. */
     vm.isSaving = false;
 
+    /** True if the 'Share' dialog for this annotation is currently open. */
+    vm.showShareDialog = false;
+
     /** The domain model, contains the currently saved version of the
       * annotation from the server (or in the case of new annotations that
       * haven't been saved yet - the data that will be saved to the server when
@@ -650,22 +653,6 @@ function AnnotationController(
       permissions.setDefault(privacy);
     }
     vm.isPrivate = (privacy === 'private');
-  };
-
-  vm.share = function(event) {
-    var $container = angular.element(event.currentTarget).parent();
-    $container.addClass('open');
-    var shareLinkInput = $container.find('input')[0];
-    shareLinkInput.focus();
-    shareLinkInput.select();
-
-    // We have to stop propagation here otherwise this click event will
-    // re-close the share dialog immediately.
-    event.stopPropagation();
-
-    $document.one('click', function() {
-      $container.removeClass('open');
-    });
   };
 
   /**

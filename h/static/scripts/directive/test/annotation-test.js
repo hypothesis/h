@@ -999,18 +999,6 @@ describe('annotation', function() {
       });
     });
 
-    describe('share', function() {
-      it('sets and unsets the open class on the share wrapper', function() {
-        var parts = createDirective();
-        var dialog = parts.element.find('.share-dialog-wrapper');
-        dialog.find('button').click();
-        parts.scope.$digest();
-        assert.ok(dialog.hasClass('open'));
-        util.ngModule(inject, '$document').click();
-        assert.notOk(dialog.hasClass('open'));
-      });
-    });
-
     describe('deleteAnnotation() method', function() {
       beforeEach(function() {
         fakeAnnotationMapper.deleteAnnotation = sandbox.stub();
