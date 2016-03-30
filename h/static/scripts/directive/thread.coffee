@@ -196,8 +196,8 @@ isHiddenThread = (elem) ->
 # Directive that instantiates {@link thread.ThreadController ThreadController}.
 ###
 module.exports = [
-  '$parse', '$window', '$location', '$anchorScroll', 'render',
-  ($parse,   $window,   $location,   $anchorScroll,   render) ->
+  '$parse', 'render',
+  ($parse, render) ->
     linkFn = (scope, elem, attrs, [ctrl, counter, filter]) ->
 
       # We would ideally use require for this, but searching parents only for a
