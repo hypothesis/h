@@ -1,5 +1,9 @@
 'use strict';
 
+var angular = require('angular');
+
+var events = require('../events');
+
 describe('annotationMapper', function() {
   var sandbox = sinon.sandbox.create();
   var $rootScope;
@@ -34,22 +38,24 @@ describe('annotationMapper', function() {
     sandbox.restore();
   });
 
-  describe('.loadAnnotations()', function () {
+  describe('#loadAnnotations()', function () {
     it('triggers the annotationLoaded event', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1}, {id: 2}, {id: 3}];
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
-      assert.calledWith($rootScope.$emit, 'annotationsLoaded', [{}, {}, {}]);
+      assert.calledWith($rootScope.$emit, events.ANNOTATIONS_LOADED,
+        [{}, {}, {}]);
     });
 
     it('also includes replies in the annotationLoaded event', function () {
       sandbox.stub($rootScope, '$emit');
-      var annotations = [{id: 1}]
+      var annotations = [{id: 1}];
       var replies = [{id: 2}, {id: 3}];
       annotationMapper.loadAnnotations(annotations, replies);
       assert.called($rootScope.$emit);
-      assert.calledWith($rootScope.$emit, 'annotationsLoaded', [{}, {}, {}]);
+      assert.calledWith($rootScope.$emit, events.ANNOTATIONS_LOADED,
+        [{}, {}, {}]);
     });
 
     it('triggers the annotationUpdated event for each annotation in the threading cache', function () {
@@ -60,7 +66,8 @@ describe('annotationMapper', function() {
 
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
-      assert.calledWith($rootScope.$emit, 'annotationUpdated', cached.message);
+      assert.calledWith($rootScope.$emit, events.ANNOTATION_UPDATED,
+        cached.message);
     });
 
     it('also triggers annotationUpdated for cached replies', function () {
@@ -71,7 +78,8 @@ describe('annotationMapper', function() {
       fakeThreading.idTable[3] = cached;
 
       annotationMapper.loadAnnotations(annotations, replies);
-      assert($rootScope.$emit.calledWith("annotationUpdated", {id: 3}))
+      assert($rootScope.$emit.calledWith(events.ANNOTATION_UPDATED,
+        {id: 3}));
     });
 
     it('replaces the properties on the cached annotation with those from the loaded one', function () {
@@ -82,7 +90,7 @@ describe('annotationMapper', function() {
 
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
-      assert.calledWith($rootScope.$emit, 'annotationUpdated', {
+      assert.calledWith($rootScope.$emit, events.ANNOTATION_UPDATED, {
         id: 1,
         url: 'http://example.com'
       });
@@ -96,19 +104,17 @@ describe('annotationMapper', function() {
 
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
-      assert.calledWith($rootScope.$emit, 'annotationsLoaded', []);
+      assert.calledWith($rootScope.$emit, events.ANNOTATIONS_LOADED, []);
     });
   });
 
-  describe('.unloadAnnotations()', function () {
-    it('triggers the annotationDeleted event', function () {
+  describe('#unloadAnnotations()', function () {
+    it('triggers the annotationsUnloaded event', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1}, {id: 2}, {id: 3}];
       annotationMapper.unloadAnnotations(annotations);
-      assert.called($rootScope.$emit);
-      assert.calledWith($rootScope.$emit, 'annotationDeleted', annotations[0]);
-      assert.calledWith($rootScope.$emit, 'annotationDeleted', annotations[1]);
-      assert.calledWith($rootScope.$emit, 'annotationDeleted', annotations[2]);
+      assert.calledWith($rootScope.$emit,
+        events.ANNOTATIONS_UNLOADED, annotations);
     });
 
     it('replaces the properties on the cached annotation with those from the deleted one', function () {
@@ -118,15 +124,14 @@ describe('annotationMapper', function() {
       fakeThreading.idTable[1] = cached;
 
       annotationMapper.unloadAnnotations(annotations);
-      assert.called($rootScope.$emit);
-      assert.calledWith($rootScope.$emit, 'annotationDeleted', {
+      assert.calledWith($rootScope.$emit, events.ANNOTATIONS_UNLOADED, [{
         id: 1,
         url: 'http://example.com'
-      });
+      }]);
     });
   });
 
-  describe('.createAnnotation()', function () {
+  describe('#createAnnotation()', function () {
     it('creates a new annotaton resource', function () {
       var ann = {};
       fakeStore.AnnotationResource.returns(ann);
@@ -146,11 +151,12 @@ describe('annotationMapper', function() {
       var ann = {};
       fakeStore.AnnotationResource.returns(ann);
       annotationMapper.createAnnotation();
-      assert.calledWith($rootScope.$emit, 'beforeAnnotationCreated', ann);
+      assert.calledWith($rootScope.$emit,
+        events.BEFORE_ANNOTATION_CREATED, ann);
     });
   });
 
-  describe('.deleteAnnotation()', function () {
+  describe('#deleteAnnotation()', function () {
     it('deletes the annotation on the server', function () {
       var p = Promise.resolve();
       var ann = {$delete: sandbox.stub().returns(p)};
@@ -163,8 +169,8 @@ describe('annotationMapper', function() {
       var p = Promise.resolve();
       var ann = {$delete: sandbox.stub().returns(p)};
       annotationMapper.deleteAnnotation(ann).then(function () {
-        assert.called($rootScope.$emit);
-        assert.calledWith($rootScope.$emit, 'annotationDeleted', ann);
+        assert.calledWith($rootScope.$emit,
+          events.ANNOTATION_DELETED, ann);
       }).then(done, done);
       $rootScope.$apply();
     });

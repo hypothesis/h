@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * The drafts service provides temporary storage for unsaved edits to new or
  * existing annotations.

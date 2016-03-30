@@ -130,6 +130,15 @@ module.exports = class AnnotationSync
       return unless bodies.length
       @bridge.call('loadAnnotations', bodies)
 
+    'annotationsUnloaded': (annotations) ->
+      self = this
+      annotations.forEach (annotation) ->
+        # In the client, unloading an annotation is handled the same way as
+        # deleting an annotation. Within the app however, we handle the events
+        # differently in some cases
+        delete self.cache[annotation.$$tag]
+        self._mkCallRemotelyAndParseResults('deleteAnnotation')(annotation)
+
   _syncCache: (channel) ->
     # Synchronise (here to there) the items in our cache
     annotations = (this._format a for t, a of @cache)

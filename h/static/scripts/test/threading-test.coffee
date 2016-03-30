@@ -1,7 +1,11 @@
 {module, inject} = angular.mock
 
+events = require('../events')
+threading = require('../threading')
+
 describe 'Threading', ->
   instance = null
+  $rootScope = null
 
   before ->
     angular.module('h', [])
@@ -9,8 +13,16 @@ describe 'Threading', ->
 
   beforeEach module('h')
 
-  beforeEach inject (_threading_) ->
+  beforeEach inject (_threading_, _$rootScope_) ->
     instance = _threading_
+    $rootScope = _$rootScope_
+
+  describe 'when an annotation is unloaded', ->
+    it 'removes the annotation from the thread', ->
+      $rootScope.$broadcast(events.ANNOTATIONS_LOADED, [{id: 'a'}])
+      assert.equal(instance.root.children.length, 1)
+      $rootScope.$broadcast(events.ANNOTATIONS_UNLOADED, [{id: 'a'}])
+      assert.equal(instance.root.children.length, 0)
 
   describe 'pruneEmpties', ->
     it 'keeps public messages with no children', ->

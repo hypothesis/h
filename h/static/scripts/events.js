@@ -35,6 +35,12 @@ module.exports = {
   /** An annotation was either deleted or unloaded. */
   ANNOTATION_DELETED: 'annotationDeleted',
 
+  /** An annotation has been updated. */
+  ANNOTATION_UPDATED: 'annotationUpdated',
+
   /** A set of annotations were loaded from the server. */
   ANNOTATIONS_LOADED: 'annotationsLoaded',
+
+  /** An annotation is unloaded. */
+  ANNOTATIONS_UNLOADED: 'annotationsUnloaded',
 };

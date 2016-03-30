@@ -1,5 +1,7 @@
 'use strict';
 
+var events = require('./events');
+
 /** Watch the UI state and update scope properties. */
 // @ngInject
 function AnnotationUIController($rootScope, $scope, annotationUI) {
@@ -24,7 +26,7 @@ function AnnotationUIController($rootScope, $scope, annotationUI) {
     $scope.focusedAnnotations = map;
   });
 
-  $rootScope.$on('annotationDeleted', function (event, annotation) {
+  $rootScope.$on(events.ANNOTATION_DELETED, function (event, annotation) {
     annotationUI.removeSelectedAnnotation(annotation);
   });
 }

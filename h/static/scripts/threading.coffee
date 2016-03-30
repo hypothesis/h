@@ -36,6 +36,7 @@ module.exports = class Threading
     $rootScope.$on(events.ANNOTATION_CREATED, this.annotationCreated)
     $rootScope.$on(events.ANNOTATION_DELETED, this.annotationDeleted)
     $rootScope.$on(events.ANNOTATIONS_LOADED, this.annotationsLoaded)
+    $rootScope.$on(events.ANNOTATIONS_UNLOADED, this.annotationsUnloaded)
 
   # TODO: Refactor the jwz API for progressive updates.
   # Right now the idTable is wiped when `messageThread.thread()` is called and
@@ -117,6 +118,10 @@ module.exports = class Threading
         child.message = null
         this.pruneEmpties(@root)
         break
+
+  annotationsUnloaded: (event, annotations) =>
+    for annot in annotations
+      this.annotationDeleted(event, annot)
 
   annotationsLoaded: (event, annotations) =>
     messages = (@root.flattenChildren() or []).concat(annotations)
