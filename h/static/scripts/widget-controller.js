@@ -138,6 +138,10 @@ module.exports = function WidgetController(
     searchClient.get({uri: uri, group: group});
   }
 
+  function isLoading() {
+    return searchClients.length > 0;
+  }
+
   /**
    * Load annotations for all URLs associated with `frames`.
    *
@@ -202,12 +206,11 @@ module.exports = function WidgetController(
   });
 
   $scope.$on(events.GROUP_FOCUSED, function () {
-    // The focused group may be changed during loading annotations (in which
-    // case, searchClients.length > 0), as a result of switching to the group
-    // containing a direct-linked annotation.
+    // The focused group may be changed during loading annotations as a result
+    // of switching to the group containing a direct-linked annotation.
     //
     // In that case, we don't want to trigger reloading annotations again.
-    if (searchClients.length) {
+    if (isLoading()) {
       return;
     }
 
@@ -231,7 +234,7 @@ module.exports = function WidgetController(
   };
 
   $scope.annotationUnavailable = function () {
-    return searchClients.length === 0 &&
+    return !isLoading() &&
            !!directLinkedAnnotationID() &&
            !threading.idTable[directLinkedAnnotationID()];
   };
@@ -245,10 +248,12 @@ module.exports = function WidgetController(
     // The user is logged out and has landed on a direct linked
     // annotation, and that annotation is available to the user,
     // show the CTA
-    return searchClients.length === 0 &&
+    return !isLoading() &&
            !!directLinkedAnnotationID() &&
            !!threading.idTable[directLinkedAnnotationID()];
   };
+
+  $scope.isLoading = isLoading;
 
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
     if (data.$highlight || (data.references && data.references.length > 0)) {
