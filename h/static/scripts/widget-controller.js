@@ -234,6 +234,10 @@ module.exports = function WidgetController(
 
   $scope.isLoading = isLoading;
 
+  $scope.topLevelThreadCount = function () {
+    return threading.root.children.length;
+  };
+
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
     if (data.$highlight || (data.references && data.references.length > 0)) {
       return;
