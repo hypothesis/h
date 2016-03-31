@@ -1,3 +1,38 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Improved iconography for annotation cards (#3116).
+
+- Add "call to action" copy explaining to logged-out users what they're looking
+  at when viewing a direct-linked annotation (#3124).
+
+- Annotation selections in the sidebar are now preserved across
+  login/logout/account change -- this applies to "direct links" in particular
+  (#3133).
+
+- Admin information pages for users now show group memberships (#3138).
+
+Bug fixes
+---------
+
+- Fixed a typo in the Chrome extension content security policy that caused
+  extension console warnings (#3140).
+
+- Fix a bug that caused worker processes to crash when encountering unexpected
+  exceptions while handling NSQ messages (#3156).
+
+Miscellanea
+-----------
+
+- Sentry error reports from the client code are now configured using a distinct
+  DSN (#3132).
+
+- Elasticsearch client timeouts and gunicorn worker timeouts are now
+  configurable using environment variables (1a6ae98, e0ef808).
+
 0.14.0 (2016-03-23)
 ===================
 
