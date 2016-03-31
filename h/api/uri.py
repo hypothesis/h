@@ -64,6 +64,7 @@ elsewhere in the Hypothesis application. URI expansion is handled by
 """
 import re
 
+from h._compat import text_type
 from h._compat import urlparse
 from h._compat import url_quote, url_quote_plus, url_unquote, url_unquote_plus
 
@@ -140,11 +141,11 @@ def normalize(uristr):
 
     # If this isn't a URL, we don't perform any normalization
     if uri.scheme.lower() not in URL_SCHEMES:
-        return uristr
+        return text_type(uristr, 'utf-8')
 
     # Don't perform normalization on URLs with no hostname.
     if uri.hostname is None:
-        return uristr
+        return text_type(uristr, 'utf-8')
 
     scheme = uri.scheme
     netloc = _normalize_netloc(uri)
@@ -154,7 +155,7 @@ def normalize(uristr):
 
     uri = urlparse.SplitResult(scheme, netloc, path, query, fragment)
 
-    return uri.geturl()
+    return text_type(uri.geturl(), 'utf-8')
 
 
 def _normalize_netloc(uri):

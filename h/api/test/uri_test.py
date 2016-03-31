@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import pytest
 
 from h.api import uri
+from h._compat import text_type
 
-
-@pytest.mark.parametrize("url_in,url_out", [
+TEST_URLS = [
     # Should strip https://via.hypothes.is/ from the start of URIs
     ("https://via.hypothes.is/https://example.com", "https://example.com"),
     ("https://via.hypothes.is/http://foo.com/bar/", "http://foo.com/bar"),
@@ -154,6 +154,13 @@ from h.api import uri
     ("http://example.com?gclid_foo=abcde", "http://example.com?gclid_foo=abcde"),
     ("http://example.com?bar_gclid=abcde", "http://example.com?bar_gclid=abcde"),
     ("http://example.com?WT=abcde", "http://example.com?WT=abcde"),
-])
+]
+
+
+@pytest.mark.parametrize("url_in,url_out", TEST_URLS)
 def test_normalize(url_in, url_out):
     assert uri.normalize(url_in) == url_out
+
+@pytest.mark.parametrize("url,_", TEST_URLS)
+def test_normalize_returns_unicode(url, _):
+    assert isinstance(uri.normalize(url), text_type)
