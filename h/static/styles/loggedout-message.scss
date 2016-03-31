@@ -7,13 +7,7 @@
   flex-direction: column;
 }
 
-.loggedout-message-actions {
-  margin: auto;
-  width: 75%;
-  text-align: center;
-}
-
-.loggedout-message-actions__link {
+.loggedout-message__link {
   text-decoration: underline;
   color: $dg-3;
 
