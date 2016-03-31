@@ -458,17 +458,7 @@ def mock_db_session():
 
 def mock_document():
     """Return a mock Document object."""
-    class Document(object):
-        @property
-        def id(self):
-            pass
-        @property
-        def created(self):
-            pass
-        @property
-        def updated(self):
-            pass
-    return mock.Mock(spec=Document)
+    return mock.Mock(spec=document.Document())
 
 
 def mock_document_meta(document=None):
