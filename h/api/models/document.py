@@ -185,7 +185,7 @@ class DocumentMeta(Base, mixins.Timestamps):
         return '<DocumentMeta %s>' % self.id
 
 
-def create_or_update_document_uri(db,
+def create_or_update_document_uri(session,
                                   claimant,
                                   uri,
                                   type,
@@ -207,8 +207,8 @@ def create_or_update_document_uri(db,
     belongs to may be different. The claimant and uri are normalized before
     comparing.
 
-    :param db: the database session
-    :type db: sqlalchemy.orm.session.Session
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param claimant: the .claimant property of the DocumentURI
     :type claimant: unicode
@@ -249,7 +249,7 @@ def create_or_update_document_uri(db,
                              document=document,
                              created=created,
                              updated=updated)
-        db.add(docuri)
+        session.add(docuri)
     elif not docuri.document == document:
         log.warn('Found DocumentURI with id %d does not match expected '
                  'document with id %d', docuri.document_id, document.id)
@@ -257,7 +257,7 @@ def create_or_update_document_uri(db,
     docuri.updated = updated
 
 
-def create_or_update_document_meta(db,
+def create_or_update_document_meta(session,
                                    claimant,
                                    claimant_normalized,
                                    type,
@@ -278,8 +278,8 @@ def create_or_update_document_meta(db,
     claimant and type, but its value, document and created and updated times
     needn't match the given ones.
 
-    :param db: the database session
-    :type db: sqlalchemy.orm.session.Session
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param claimant: the value to use for the DocumentMeta's claimant attribute
         if a new DocumentMeta is created
@@ -314,14 +314,14 @@ def create_or_update_document_meta(db,
         DocumentMeta.type == type).one_or_none()
 
     if existing_dm is None:
-        db.add(DocumentMeta(
-            _claimant=claimant,
-            _claimant_normalized=claimant_normalized,
-            type=type,
-            value=value,
-            document=document,
-            created=created,
-            updated=updated,
+        session.add(DocumentMeta(
+                    _claimant=claimant,
+                    _claimant_normalized=claimant_normalized,
+                   type=type,
+                   value=value,
+                   document=document,
+                   created=created,
+                   updated=updated,
         ))
     else:
         existing_dm.value = value

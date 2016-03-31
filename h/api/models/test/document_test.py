@@ -178,10 +178,10 @@ class TestCreateOrUpdateDocumentURI(object):
         )
         db.Session.add(document_uri)
 
-        mock_db = mock.Mock()
+        mock_db_session = mock.Mock()
         now_ = now()
         document.create_or_update_document_uri(
-            db=mock_db,
+            session=mock_db_session,
             claimant=claimant,
             uri=uri,
             type=type_,
@@ -193,7 +193,7 @@ class TestCreateOrUpdateDocumentURI(object):
 
         assert document_uri.created == created
         assert document_uri.updated == now_
-        assert not mock_db.add.called
+        assert not mock_db_session.add.called
 
     def test_it_creates_a_new_DocumentURI_if_there_is_no_existing_one(self):
         claimant = 'http://example.com/example_claimant.html'
@@ -218,7 +218,7 @@ class TestCreateOrUpdateDocumentURI(object):
         ))
 
         document.create_or_update_document_uri(
-            db=db.Session,
+            session=db.Session,
             claimant=claimant,
             uri=uri,
             type=type_,
@@ -251,7 +251,7 @@ class TestCreateOrUpdateDocumentURI(object):
             existing_document_uri)
 
         document.create_or_update_document_uri(
-            db=mock_db(),
+            session=mock_db_session(),
             claimant='http://example.com/example_claimant.html',
             uri='http://example.com/example_uri.html',
             type='self-claim',
@@ -295,7 +295,7 @@ class TestCreateOrUpdateDocumentMeta(object):
         ))
 
         document.create_or_update_document_meta(
-            db=db.Session,
+            session=db.Session,
             claimant=claimant,
             claimant_normalized=claimant_normalized,
             type=type_,
@@ -333,10 +333,10 @@ class TestCreateOrUpdateDocumentMeta(object):
         )
         db.Session.add(document_meta)
 
-        mock_db = mock.Mock()
+        mock_db_session = mock.Mock()
         new_updated = now()
         document.create_or_update_document_meta(
-            db=mock_db,
+            session=mock_db_session,
             claimant=claimant,
             claimant_normalized=claimant_normalized,
             type=type_,
@@ -351,7 +351,7 @@ class TestCreateOrUpdateDocumentMeta(object):
         assert document_meta.created == created, "It shouldn't update created"
         assert document_meta.document == document_, (
             "It shouldn't update document")
-        assert not mock_db.add.called
+        assert not mock_db_session.add.called
 
     def test_it_logs_a_warning(self, DocumentMeta, log):
         """
@@ -368,7 +368,7 @@ class TestCreateOrUpdateDocumentMeta(object):
             .return_value = existing_document_meta
 
         document.create_or_update_document_meta(
-            db=mock_db(),
+            session=mock_db_session(),
             claimant='http://example.com/claimant',
             claimant_normalized='http://example.com/claimant_normalized',
             type='title',
@@ -456,7 +456,7 @@ def yesterday():
     return now() - datetime.timedelta(days=1)
 
 
-def mock_db():
+def mock_db_session():
     """Return a mock db session object."""
     class DB(object):
         def add(self, obj):
