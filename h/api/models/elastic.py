@@ -8,8 +8,8 @@ from annotator import annotation
 from annotator import document
 from pyramid import security
 
-from h._compat import text_type
 from h.api import uri
+from h.api._compat import text_type
 
 
 class Annotation(annotation.Annotation):

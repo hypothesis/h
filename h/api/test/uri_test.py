@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 from h.api import uri
-from h._compat import text_type
+from h.api._compat import text_type
 
 TEST_URLS = [
     # Should strip https://via.hypothes.is/ from the start of URIs

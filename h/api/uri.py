@@ -64,9 +64,10 @@ elsewhere in the Hypothesis application. URI expansion is handled by
 """
 import re
 
-from h._compat import text_type
-from h._compat import urlparse
-from h._compat import url_quote, url_quote_plus, url_unquote, url_unquote_plus
+from h.api._compat import text_type
+from h.api._compat import urlparse
+from h.api._compat import url_quote, url_quote_plus
+from h.api._compat import url_unquote, url_unquote_plus
 
 
 URL_SCHEMES = set(['http', 'https'])
