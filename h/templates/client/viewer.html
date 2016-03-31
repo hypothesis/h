@@ -41,16 +41,13 @@
       ng-show="vm.shouldShow()">
   </li>
   <li class="loggedout-message" ng-if="isSidebar && shouldShowLoggedOutMessage()" ng-cloak>
-    This is a public annotation created with Hypothes.is
-    <span class="loggedout-message-actions">
-      <a class="loggedout-message-actions__link" href="{{ register_url }}" target="_blank">
-        Sign up
-      </a>
-      for a free account or
-      <a class="loggedout-message-actions__link" href="" ng-click="login()">
-        log in
-      </a>
-      to reply or create a new annotation
+    <span>
+      This is a public annotation created with Hypothesis.
+      <br>
+      To reply or make your own annotations on this document,
+      <a class="loggedout-message__link" href="{{ register_url }}" target="_blank">create a free account</a>
+      or
+      <a class="loggedout-message__link" href="" ng-click="login()">sign in</a>.
     </span>
     <span class="loggedout-message-logo">
       <a href="https://hypothes.is">
