@@ -12,7 +12,6 @@ from h.api import uri
 from h.api.db import Base
 from h.api.db import mixins
 from h.api.db import types
-from h._compat import text_type
 
 
 class Annotation(Base, mixins.Timestamps):
@@ -93,7 +92,7 @@ class Annotation(Base, mixins.Timestamps):
     @target_uri.setter
     def target_uri(self, value):
         self._target_uri = value
-        self._target_uri_normalized = text_type(uri.normalize(value), 'utf-8')
+        self._target_uri_normalized = uri.normalize(value)
 
     @hybrid_property
     def target_uri_normalized(self):
