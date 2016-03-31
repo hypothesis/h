@@ -251,8 +251,9 @@ def create_or_update_document_uri(session,
                              updated=updated)
         session.add(docuri)
     elif not docuri.document == document:
-        log.warn('Found DocumentURI with id %d does not match expected '
-                 'document with id %d', docuri.document_id, document.id)
+        log.warn("Found DocumentURI (id: %d)'s document_id (%d) doesn't match "
+                 "given Document's id (%d)",
+                 docuri.id, docuri.document_id, document.id)
 
     docuri.updated = updated
 
