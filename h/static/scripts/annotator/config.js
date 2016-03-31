@@ -33,6 +33,14 @@ function config(window_) {
     }
   }
 
+  // Extract the direct linked ID from the URL.
+  //
+  // The Chrome extension or proxy may already have provided this config
+  // via a tag injected into the DOM, which avoids the problem where the page's
+  // JS rewrites the URL before Hypothesis loads.
+  //
+  // In environments where the config has not been injected into the DOM,
+  // we try to retrieve it from the URL here.
   var directLinkedID = annotationIDs.extractIDFromURL(window_.location.href);
   if (directLinkedID) {
     options.annotations = directLinkedID;
