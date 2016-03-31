@@ -253,6 +253,14 @@ module.exports = function WidgetController(
            !!threading.idTable[directLinkedAnnotationID()];
   };
 
+  $scope.topLevelThreadCount = function () {
+    return threading.root.children.length;
+  };
+
+  $scope.shouldShowTotalCount = function () {
+    return groups.focused().public && !!directLinkedAnnotationID();
+  };
+
   $scope.isLoading = isLoading;
 
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {

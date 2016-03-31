@@ -13,6 +13,8 @@
     search-query="search ? search.query : ''"
     selection-count="selectedAnnotationsCount"
     on-clear-selection="clearSelection()"
+    total-count="topLevelThreadCount()"
+    show-total-count-message="shouldShowTotalCount()"
     ng-show="!isLoading()">
   </search-status-bar>
   <li ng-if="isStream">

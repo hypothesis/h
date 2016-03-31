@@ -51,6 +51,7 @@ def _current_groups(request):
         groups.append({
             'name': group.name,
             'id': group.pubid,
+            'public': False,
             'url': request.route_url('group_read',
                                      pubid=group.pubid,
                                      slug=group.slug),

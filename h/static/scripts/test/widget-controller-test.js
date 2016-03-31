@@ -8,6 +8,8 @@ var EventEmitter = require('tiny-emitter');
 var events = require('../events');
 var noCallThru = require('./util').noCallThru;
 
+var publicGroup = {id: '__world__', public: true};
+
 var searchClients;
 function FakeSearchClient(resource, opts) {
   assert.ok(resource);
@@ -97,7 +99,7 @@ describe('WidgetController', function () {
     };
 
     fakeGroups = {
-      focused: function () { return {id: 'foo'}; },
+      focused: function () { return {id: 'foo', public: false}; },
       focus: sinon.stub(),
     };
 
@@ -351,6 +353,31 @@ describe('WidgetController', function () {
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
+    });
+  });
+
+  describe('#shouldShowTotalCount', function () {
+    it('is true when there is a direct-linked annotation and the public group is selected', function () {
+      fakeGroups.focused = function () {
+        return publicGroup;
+      };
+      $scope.search.query = 'id:123';
+      $scope.$digest();
+      assert.isTrue($scope.shouldShowTotalCount());
+    });
+
+    it('is false when there is no direct-linked annotation', function () {
+      fakeGroups.focused = function () {
+        return publicGroup;
+      };
+      $scope.$digest();
+      assert.isFalse($scope.shouldShowTotalCount());
+    });
+
+    it('is false when a private group is selected', function () {
+      $scope.search.query = 'id:123';
+      $scope.$digest();
+      assert.isFalse($scope.shouldShowTotalCount());
     });
   });
 });

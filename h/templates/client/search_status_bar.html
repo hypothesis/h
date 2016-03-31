@@ -1,4 +1,12 @@
-<div class="search-status-bar" ng-show="filterActive">
+<div class="search-status-bar" ng-if="filterActive && showTotalCountMessage">
+  <button class="primary-action-btn primary-action-btn--short"
+          ng-click="onClearSelection()"
+          title="Show all {{totalCount}} public annotations on this page"
+  >
+    See all {{totalCount}} public annotations
+  </button>
+</div>
+<div class="search-status-bar" ng-if="filterActive && !showTotalCountMessage">
   <button class="primary-action-btn primary-action-btn--short"
           ng-click="onClearSelection()"
           title="Clear the search filter and show all annotations"
@@ -11,7 +19,7 @@
                   'one': '1 search result',
                   'other': '{} search results'}"></span>
 </div>
-<div class="search-status-bar" ng-show="!filterActive && selectionCount > 0">
+<div class="search-status-bar" ng-if="!filterActive && selectionCount > 0">
   <button class="primary-action-btn primary-action-btn--short"
           ng-click="onClearSelection()"
           title="Clear the selection and show all annotations"
