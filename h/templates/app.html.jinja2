@@ -52,13 +52,6 @@
       <main ng-view=""></main>
     </div>
 
-    <!-- Templates for Angular components !-->
-    {% for template in angular_templates -%}
-      <script type="text/ng-template" id="{{template.name}}">
-        {{ template.content | safe }}
-      </script>
-    {% endfor -%}
-
     <!-- App Configuration !-->
     <script class="js-hypothesis-settings" type="application/json">
       {{ app_config | safe }}
