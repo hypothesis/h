@@ -462,6 +462,11 @@ def mock_document():
 
 
 def mock_document_meta(document=None):
+
+    # We define a class to use as the mock spec here because we can't use the
+    # real DocumentMeta class because that class may be patched in the tests
+    # that are calling this function (so we'd end up using a mock object as a
+    # spec instead, and get completely the wrong spec).
     class DocumentMeta(object):
         def __init__(self):
             self.type = None
@@ -471,6 +476,7 @@ def mock_document_meta(document=None):
             self.document = document
             self.id = None
             self.document_id = None
+
     return mock.Mock(spec=DocumentMeta())
 
 
