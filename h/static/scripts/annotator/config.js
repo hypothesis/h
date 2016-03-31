@@ -1,6 +1,7 @@
 'use strict';
 
 var annotationIDs = require('../util/annotation-ids');
+var settings = require('../settings');
 
 var docs = 'https://h.readthedocs.org/en/latest/hacking/customized-embedding.html';
 
@@ -15,15 +16,12 @@ function config(window_) {
       document.querySelector('link[type="application/annotator+html"]').href,
   };
 
-  // Parse config from `<meta name="hypothesis-config" content="<JSON>">` tags
-  var configElement = window_.document
-    .querySelector('meta[name="hypothesis-config"]');
-  if (configElement) {
-    try {
-      Object.assign(options, JSON.parse(configElement.content));
-    } catch (err) {
-      console.warn('Could not parse Hypothesis config from', configElement);
-    }
+  // Parse config from `<script class="js-hypothesis-config">` tags
+  try {
+    Object.assign(options, settings(window_.document, 'js-hypothesis-config'));
+  } catch (err) {
+    console.warn('Could not parse settings from js-hypothesis-config tags',
+      err);
   }
 
   // Parse config from `window.hypothesisConfig` function

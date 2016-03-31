@@ -3,26 +3,32 @@
 var config = require('../config');
 
 describe('annotator configuration', function () {
-  var fakeMetaConfig;
+  var fakeScriptConfig;
+
+  function fakeQuerySelector(selector) {
+    if (selector === 'link[type="application/annotator+html"]') {
+      return {href: 'app.html'};
+    } else if (selector === 'script.js-hypothesis-config' &&
+               fakeScriptConfig) {
+      return {textContent: fakeScriptConfig};
+    } else {
+      return null;
+    }
+  }
 
   var fakeWindowBase = {
     document: {
-      querySelector: sinon.spy(function (selector) {
-        if (selector === 'link[type="application/annotator+html"]') {
-          return {href: 'app.html'};
-        } else if (selector === 'meta[name="hypothesis-config"]' &&
-                   fakeMetaConfig) {
-          return {content:fakeMetaConfig};
-        } else {
-          return null;
-        }
-      }),
+      querySelector: fakeQuerySelector,
+      querySelectorAll: function (selector) {
+        var match = fakeQuerySelector(selector);
+        return match ? [match] : [];
+      },
     },
     location: {hash: ''},
   };
 
   beforeEach(function () {
-    fakeMetaConfig = '';
+    fakeScriptConfig = '';
   });
 
   it('reads the app src from the link tag', function () {
@@ -59,7 +65,7 @@ describe('annotator configuration', function () {
   });
 
   it('merges the config from the "hypothesis-config" meta tag', function () {
-    fakeMetaConfig = '{"annotations":"456"}';
+    fakeScriptConfig = '{"annotations":"456"}';
     assert.deepEqual(config(fakeWindowBase), {
       app: 'app.html',
       annotations: '456',

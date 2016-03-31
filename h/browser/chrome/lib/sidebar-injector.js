@@ -14,6 +14,19 @@ function toIIFEString(fn) {
 }
 
 /**
+ * Adds a <script> tag containing JSON config data to the page.
+ *
+ * Note that this function is stringified and injected into the page via a
+ * content script, so it cannot reference any external variables.
+ */
+function addJSONScriptTagFn(name, content) {
+  var scriptTag = document.createElement('script');
+  scriptTag.className = name;
+  scriptTag.textContent = content;
+  document.head.appendChild(scriptTag);
+}
+
+/**
  * Extract the value returned by a content script injected via
  * chrome.tabs.executeScript() into the main frame of a page.
  *
@@ -62,18 +75,23 @@ function SidebarInjector(chromeTabs, dependencies) {
     throw new TypeError('isAllowedFileSchemeAccess must be a function');
   }
 
-  /* Injects the Hypothesis sidebar into the tab provided.
+  /**
+   * Injects the Hypothesis sidebar into the tab provided.
    *
-   * tab - A tab object representing the tab to insert the sidebar into.
+   * @param {Tab} tab - A tab object representing the tab to insert the sidebar
+   *        into.
+   * @param {Object?} config - An object containing configuration info that
+   *        is passed to the app when it loads.
    *
    * Returns a promise that will be resolved if the injection succeeded
    * otherwise it will be rejected with an error.
    */
-  this.injectIntoTab = function(tab) {
+  this.injectIntoTab = function(tab, config) {
+    config = config || {};
     if (isFileURL(tab.url)) {
       return injectIntoLocalDocument(tab);
     } else {
-      return injectIntoRemoteDocument(tab);
+      return injectIntoRemoteDocument(tab, config);
     }
   };
 
@@ -193,7 +211,7 @@ function SidebarInjector(chromeTabs, dependencies) {
     });
   }
 
-  function injectIntoRemoteDocument(tab) {
+  function injectIntoRemoteDocument(tab, config) {
     if (isPDFViewerURL(tab.url)) {
       return Promise.resolve();
     }
@@ -214,7 +232,9 @@ function SidebarInjector(chromeTabs, dependencies) {
       if (type === CONTENT_TYPE_PDF) {
         return injectIntoPDF(tab);
       } else {
-        return injectIntoHTML(tab).then(function (results) {
+        return injectConfig(tab.id, config).then(function () {
+          return injectIntoHTML(tab);
+        }).then(function (results) {
           var result = extractContentScriptResult(results);
           if (result &&
               typeof result.installedURL === 'string' &&
@@ -287,6 +307,22 @@ function SidebarInjector(chromeTabs, dependencies) {
    */
   function injectScript(tabId, path) {
     return executeScriptFn(tabId, {file: path});
+  }
+
+  /**
+   * Inject configuration information for the Hypothesis application
+   * into the page as JSON data via a <meta> tag.
+   *
+   * A <meta> tag is used because that makes it available to JS content
+   * running in isolated worlds.
+   */
+  function injectConfig(tabId, config) {
+    var configStr = JSON.stringify(config).replace(/"/g, '\\"');
+    var configCode =
+      'var hypothesisConfig = "' + configStr + '";\n' +
+      '(' + addJSONScriptTagFn.toString() + ')' +
+      '("js-hypothesis-config", hypothesisConfig)';
+    return executeScriptFn(tabId, {code: configCode});
   }
 }
 
