@@ -274,7 +274,6 @@ class TestCreateOrUpdateDocumentMeta(object):
 
     def test_it_creates_a_new_DocumentMeta_if_there_is_no_existing_one(self):
         claimant = 'http://example.com/claimant'
-        claimant_normalized = 'http://example.com/claimant_normalized'
         type_ = 'title'
         value = 'the title'
         document_ = document.Document()
@@ -284,8 +283,7 @@ class TestCreateOrUpdateDocumentMeta(object):
         # Add one non-matching DocumentMeta to the database.
         # This should be ignored.
         db.Session.add(document.DocumentMeta(
-            _claimant=claimant,
-            _claimant_normalized=claimant_normalized,
+            claimant=claimant,
             # Different type means this should not match the query.
             type='different',
             value=value,
@@ -297,7 +295,6 @@ class TestCreateOrUpdateDocumentMeta(object):
         document.create_or_update_document_meta(
             session=db.Session,
             claimant=claimant,
-            claimant_normalized=claimant_normalized,
             type=type_,
             value=value,
             document=document_,
@@ -307,7 +304,6 @@ class TestCreateOrUpdateDocumentMeta(object):
 
         document_meta = db.Session.query(document.DocumentMeta).all()[-1]
         assert document_meta.claimant == claimant
-        assert document_meta.claimant_normalized == claimant_normalized
         assert document_meta.type == type_
         assert document_meta.value == value
         assert document_meta.document == document_
@@ -316,15 +312,13 @@ class TestCreateOrUpdateDocumentMeta(object):
 
     def test_it_updates_an_existing_DocumentMeta_if_there_is_one(self):
         claimant = 'http://example.com/claimant'
-        claimant_normalized = 'http://example.com/claimant_normalized'
         type_ = 'title'
         value = 'the title'
         document_ = document.Document()
         created = yesterday()
         updated = now()
         document_meta = document.DocumentMeta(
-            _claimant=claimant,
-            _claimant_normalized=claimant_normalized,
+            claimant=claimant,
             type=type_,
             value=value,
             document=document_,
@@ -338,7 +332,6 @@ class TestCreateOrUpdateDocumentMeta(object):
         document.create_or_update_document_meta(
             session=mock_db_session,
             claimant=claimant,
-            claimant_normalized=claimant_normalized,
             type=type_,
             value='new value',
             document=document.Document(),  # This should be ignored.
@@ -370,7 +363,6 @@ class TestCreateOrUpdateDocumentMeta(object):
         document.create_or_update_document_meta(
             session=mock_db_session(),
             claimant='http://example.com/claimant',
-            claimant_normalized='http://example.com/claimant_normalized',
             type='title',
             value='new value',
             document=document_two,
@@ -482,7 +474,6 @@ def mock_document():
 def mock_document_meta(document=None):
     class DocumentMeta(object):
         def __init__(self):
-            self.claimant_normalized = None
             self.type = None
             self.value = None
             self.created = None

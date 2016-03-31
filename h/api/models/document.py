@@ -260,7 +260,6 @@ def create_or_update_document_uri(session,
 
 def create_or_update_document_meta(session,
                                    claimant,
-                                   claimant_normalized,
                                    type,
                                    value,
                                    document,
@@ -286,10 +285,6 @@ def create_or_update_document_meta(session,
         if a new DocumentMeta is created
     :type claimant: unicode
 
-    :param claimant_normalized: the value of the new or existing DocumentMeta's
-        claimant_normalized attribute
-    :type claimant_normalized: unicode
-
     :param type: the value of the new or existing DocumentMeta's type attribute
     :type type: unicode
 
@@ -311,19 +306,18 @@ def create_or_update_document_meta(session,
 
     """
     existing_dm = DocumentMeta.query.filter(
-        DocumentMeta.claimant_normalized == claimant_normalized,
+        DocumentMeta.claimant_normalized == uri_normalize(claimant),
         DocumentMeta.type == type).one_or_none()
 
     if existing_dm is None:
         session.add(DocumentMeta(
-                    _claimant=claimant,
-                    _claimant_normalized=claimant_normalized,
-                   type=type,
-                   value=value,
-                   document=document,
-                   created=created,
-                   updated=updated,
-        ))
+                    claimant=claimant,
+                    type=type,
+                    value=value,
+                    document=document,
+                    created=created,
+                    updated=updated,
+                    ))
     else:
         existing_dm.value = value
         existing_dm.updated = updated
