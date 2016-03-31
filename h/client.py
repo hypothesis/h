@@ -16,6 +16,7 @@ ANGULAR_DIRECTIVE_TEMPLATES = [
     'dropdown_menu_btn',
     'excerpt',
     'group_list',
+    'loggedout_message',
     'login_form',
     'markdown',
     'publish_annotation_btn',
