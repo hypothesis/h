@@ -15,6 +15,14 @@ def test_incontext_link(api_request):
     assert links.incontext_link(api_request, annotation) == 'https://hyp.is/123'
 
 
+def test_incontext_link_is_none_for_replies(api_request):
+    annotation = Mock()
+    annotation.id = '123'
+    annotation.references = ['parent']
+
+    assert links.incontext_link(api_request, annotation) == None
+
+
 @pytest.fixture
 def api_request():
     def feature(name):

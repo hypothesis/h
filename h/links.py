@@ -15,7 +15,8 @@ def html_link(request, annotation):
 
 def incontext_link(request, annotation):
     """Generate a link to an annotation on the page where it was made."""
-    if not request.feature('direct_linking'):
+    is_reply = bool(annotation.references)
+    if not request.feature('direct_linking') or is_reply:
         return None
 
     bouncer_url = request.registry.settings.get('h.bouncer_url')
