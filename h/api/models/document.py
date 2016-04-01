@@ -8,7 +8,6 @@ import logging
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import aliased
 
 from h.api.db import Base
 from h.api.db import mixins
