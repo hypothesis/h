@@ -12,7 +12,6 @@ from sqlalchemy.orm import aliased
 from h.api import uri
 from h.api.db import Base
 from h.api.db import mixins
-from h._compat import text_type
 
 
 class Document(Base, mixins.Timestamps):
@@ -40,7 +39,7 @@ class Document(Base, mixins.Timestamps):
     @classmethod
     def find_by_uris(cls, session, uris):
         """Find documents by a list of uris."""
-        query_uris = [text_type(uri.normalize(u), 'utf-8') for u in uris]
+        query_uris = [uri.normalize(u) for u in uris]
 
         matching_claims = (
             session.query(DocumentURI)
@@ -119,7 +118,7 @@ class DocumentURI(Base, mixins.Timestamps):
     @claimant.setter
     def claimant(self, value):
         self._claimant = value
-        self._claimant_normalized = text_type(uri.normalize(value), 'utf-8')
+        self._claimant_normalized = uri.normalize(value)
 
     @hybrid_property
     def claimant_normalized(self):
@@ -132,7 +131,7 @@ class DocumentURI(Base, mixins.Timestamps):
     @uri.setter
     def uri(self, value):
         self._uri = value
-        self._uri_normalized = text_type(uri.normalize(value), 'utf-8')
+        self._uri_normalized = uri.normalize(value)
 
     @hybrid_property
     def uri_normalized(self):
@@ -172,7 +171,7 @@ class DocumentMeta(Base, mixins.Timestamps):
     @claimant.setter
     def claimant(self, value):
         self._claimant = value
-        self._claimant_normalized = text_type(uri.normalize(value), 'utf-8')
+        self._claimant_normalized = uri.normalize(value)
 
     @hybrid_property
     def claimant_normalized(self):

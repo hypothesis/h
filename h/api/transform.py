@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from h._compat import string_types
 from h.api import uri
+from h.api._compat import string_types
 
 
 def set_group_if_reply(annotation, fetcher):

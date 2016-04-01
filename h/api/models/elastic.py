@@ -8,8 +8,8 @@ from annotator import annotation
 from annotator import document
 from pyramid import security
 
-from h._compat import text_type
 from h.api import uri
+from h.api._compat import text_type
 
 
 class Annotation(annotation.Annotation):
@@ -381,7 +381,7 @@ class DocumentMeta(dict):
     def claimant_normalized(self):
         claimant = self.claimant
         if claimant:
-            return text_type(uri.normalize(claimant), 'utf-8')
+            return uri.normalize(claimant)
 
     @property
     def type(self):
@@ -424,7 +424,7 @@ class DocumentURI(dict):
     def claimant_normalized(self):
         claimant = self.claimant
         if claimant:
-            return text_type(uri.normalize(claimant), 'utf-8')
+            return uri.normalize(claimant)
 
     @property
     def uri(self):
@@ -434,7 +434,7 @@ class DocumentURI(dict):
     def uri_normalized(self):
         uri_ = self.uri
         if uri_:
-            return text_type(uri.normalize(uri_), 'utf-8')
+            return uri.normalize(uri_)
 
     @property
     def type(self):
