@@ -8,12 +8,14 @@
     thread-filter="search.query"
     window-scroll="loadMore(20)">
   <search-status-bar
+    ng-show="!isLoading()"
     filter-active="threadFilter.active()"
     filter-match-count="count('match')"
+    on-clear-selection="clearSelection()"
     search-query="search ? search.query : ''"
     selection-count="selectedAnnotationsCount"
-    on-clear-selection="clearSelection()"
-    ng-show="!isLoading()">
+    total-count="topLevelThreadCount()"
+    >
   </search-status-bar>
   <li ng-if="isStream">
     <sort-dropdown
