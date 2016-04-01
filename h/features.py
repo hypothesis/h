@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 FEATURES = {
     'direct_linking': "Generate direct links to annotations in context in the client?",
     'new_homepage': "Show the new homepage design?",
-    'postgres_read': 'Use postgres to fetch annotations from storage'
+    'postgres': 'Read/write annotation and document data from/to postgres'
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.

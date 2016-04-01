@@ -177,4 +177,4 @@ def _prepare(request, annotation):
 
 
 def _postgres_enabled(request):
-    return request.feature('postgres_read')
+    return request.feature('postgres')
