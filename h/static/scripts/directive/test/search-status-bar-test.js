@@ -12,7 +12,6 @@ describe('searchStatusBar', function () {
 
   beforeEach(function () {
     angular.mock.module('app');
-    angular.mock.module('h.templates');
   });
 
   context('when there is a filter', function () {

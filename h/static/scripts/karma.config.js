@@ -43,12 +43,6 @@ module.exports = function(config) {
     exclude: [
     ],
 
-    // strip templates of leading path
-    ngHtml2JsPreprocessor: {
-      moduleName: 'h.templates',
-      cacheIdFromPath: path.basename
-    },
-
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
@@ -56,7 +50,6 @@ module.exports = function(config) {
       './test/bootstrap.js': ['browserify'],
       '**/*-test.js': ['browserify'],
       '**/*-test.coffee': ['browserify'],
-      '../../templates/client/*.html': ['ng-html2js'],
     },
 
     browserify: {

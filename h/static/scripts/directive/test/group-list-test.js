@@ -1,17 +1,9 @@
 'use strict';
 
-var events = require('../../events');
+var angular = require('angular');
+
 var groupList = require('../group-list');
 var util = require('./util');
-
-// returns true if a jQuery-like element has
-// been hidden directly via an ng-show directive.
-//
-// This does not check whether the element is a descendant
-// of a hidden element
-function isElementHidden(element) {
-  return element.hasClass('ng-hide');
-}
 
 describe('groupList', function () {
   var $rootScope;
@@ -38,7 +30,6 @@ describe('groupList', function () {
 
   beforeEach(function () {
     angular.mock.module('app');
-    angular.mock.module('h.templates');
   });
 
   beforeEach(angular.mock.inject(function (_$rootScope_, _$window_) {

@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 var util = require('./util');
 
 var fakeStorage = {};
@@ -26,7 +28,6 @@ describe('publishAnnotationBtn', function () {
 
   beforeEach(function () {
     angular.mock.module('app');
-    angular.mock.module('h.templates');
 
     // create a new instance of the directive with default
     // attributes
@@ -38,7 +39,7 @@ describe('publishAnnotationBtn', function () {
      canPost: true,
      isShared: false,
      onSave: function () {},
-     onSetPrivacy: function (level) {},
+     onSetPrivacy: function () {},
      onCancel: function () {}
    });
   });

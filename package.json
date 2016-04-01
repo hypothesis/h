@@ -75,7 +75,6 @@
     "karma-browserify": "^3.0.3",
     "karma-chai": "^0.1.0",
     "karma-mocha": "^0.1.4",
-    "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sinon": "^1.0.4",
     "mocha": "^1.20.1",

@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 var util = require('./util');
 
 describe('sortDropdown', function () {
@@ -10,7 +12,6 @@ describe('sortDropdown', function () {
 
   beforeEach(function () {
     angular.mock.module('app');
-    angular.mock.module('h.templates');
   });
 
   it('should update the sort mode on click', function () {
