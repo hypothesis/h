@@ -22,7 +22,14 @@ def incontext_link(request, annotation):
     bouncer_url = request.registry.settings.get('h.bouncer_url')
     if not bouncer_url:
         return None
-    return urlparse.urljoin(bouncer_url, annotation.id)
+
+    link = urlparse.urljoin(bouncer_url, annotation.id)
+    uri = annotation.target_uri
+    if uri and uri.startswith(('http://', 'https://')):
+        # We can't use urljoin here, because if it detects the second argument
+        # is a URL it will discard the base URL, breaking the link entirely.
+        link += '/' + uri[uri.index('://')+3:]
+    return link
 
 
 def includeme(config):
