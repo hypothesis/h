@@ -118,5 +118,6 @@ def includeme(config):
     config.include('h.badge')
     config.include('h.feeds')
     config.include('h.groups')
+    config.include('h.links')
     config.include('h.nipsa')
     config.include('h.notification')
