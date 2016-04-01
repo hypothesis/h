@@ -64,7 +64,7 @@ describe('annotator configuration', function () {
     });
   });
 
-  it('merges the config from the "hypothesis-config" meta tag', function () {
+  it('merges the config from the "js-hypothesis-config" <script> tag', function () {
     fakeScriptConfig = '{"annotations":"456"}';
     assert.deepEqual(config(fakeWindowBase), {
       app: 'app.html',
