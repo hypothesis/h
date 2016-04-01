@@ -1,23 +1,10 @@
-{module, inject} = angular.mock
+SearchFilter = require('../search-filter')
 
 describe 'searchFilter', ->
-  sandbox = null
   searchFilter = null
 
-  before ->
-    angular.module('h', [])
-    .service('searchFilter', require('../search-filter'))
-
-  beforeEach module('h')
-
   beforeEach ->
-    sandbox = sinon.sandbox.create()
-
-  beforeEach inject (_searchFilter_) ->
-    searchFilter = _searchFilter_
-
-  afterEach ->
-    sandbox.restore()
+    searchFilter = new SearchFilter()
 
   describe 'toObject', ->
     it 'puts a simple search string under the any filter', ->
@@ -26,13 +13,14 @@ describe 'searchFilter', ->
       assert.equal(result.any[0], query)
 
     it 'uses the filters as keys in the result object', ->
-      query = 'user:john text:foo quote:bar group:agroup other'
+      query = 'id:anid user:john text:foo quote:bar group:agroup other'
       result = searchFilter.toObject(query)
       assert.equal(result.any[0], 'other')
       assert.equal(result.user[0], 'john')
       assert.equal(result.text[0], 'foo')
       assert.equal(result.quote[0], 'bar')
       assert.equal(result.group[0], 'agroup')
+      assert.equal(result.id[0], 'anid')
 
     it 'collects the same filters into a list', ->
       query = 'user:john text:foo quote:bar other user:doe text:fuu text:fii'
@@ -63,3 +51,21 @@ describe 'searchFilter', ->
       assert.equal(result.any[1], 'john:doe')
       assert.equal(result.any[2], 'hi-fi')
       assert.equal(result.any[3], 'a:bc')
+
+  describe '#generateFacetedFilter', ->
+    it 'populates facets', ->
+      facets = ['quote','result','tag','text','uri','user','id']
+      for facet in facets
+        query = facet + ':sometoken'
+        filter = searchFilter.generateFacetedFilter(query)
+        assert.deepEqual(filter[facet], {
+          terms: ['sometoken'],
+          operator: filter[facet].operator,
+        })
+
+    it 'puts other terms in the "any" facet', ->
+      filter = searchFilter.generateFacetedFilter('foo bar')
+      assert.deepEqual(filter.any, {
+        terms: ['foo', 'bar'],
+        operator: 'and',
+      })

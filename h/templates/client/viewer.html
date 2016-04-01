@@ -12,7 +12,10 @@
     filter-match-count="count('match')"
     search-query="search ? search.query : ''"
     selection-count="selectedAnnotationsCount"
-    on-clear-selection="clearSelection()">
+    on-clear-selection="clearSelection()"
+    total-count="topLevelThreadCount()"
+    show-total-count-message="shouldShowTotalCount()"
+    ng-show="!isLoading()">
   </search-status-bar>
   <li ng-if="isStream">
     <sort-dropdown
@@ -22,7 +25,7 @@
     </sort-dropdown>
   </li>
   <li class="annotation-unavailable-message"
-      ng-if="selectedAnnotationUnavailable()">
+      ng-if="annotationUnavailable()">
     <div class="annotation-unavailable-message__icon"></div>
     <p class="annotation-unavailable-message__label">
       You do not have permission to see this annotation

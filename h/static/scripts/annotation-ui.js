@@ -8,14 +8,6 @@ function value(selection) {
   }
 }
 
-function initialSelection(settings) {
-  var selection = {};
-  if (settings.annotations) {
-    selection[settings.annotations] = true;
-  }
-  return value(selection);
-}
-
 /**
  * Stores the UI state of the annotator in connected clients.
  *
@@ -27,7 +19,7 @@ function initialSelection(settings) {
  */
 
 // @ngInject
-module.exports = function (settings) {
+module.exports = function () {
   return {
     visibleHighlights: false,
 
@@ -35,7 +27,7 @@ module.exports = function (settings) {
     focusedAnnotationMap: null,
 
     // Contains a map of annotation id:true pairs.
-    selectedAnnotationMap: initialSelection(settings),
+    selectedAnnotationMap: null,
 
     /**
      * @ngdoc method

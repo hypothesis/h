@@ -6,20 +6,7 @@ describe('annotationUI', function () {
   var annotationUI;
 
   beforeEach(function () {
-    annotationUI = annotationUIFactory({});
-  });
-
-  describe('initialization', function () {
-    it('does not set a selection when settings.annotations is null', function () {
-      assert.isFalse(annotationUI.hasSelectedAnnotations());
-    });
-
-    it('sets the selection when settings.annotations is set', function () {
-      annotationUI = annotationUIFactory({annotations: 'testid'});
-      assert.deepEqual(annotationUI.selectedAnnotationMap, {
-        testid: true,
-      });
-    });
+    annotationUI = annotationUIFactory();
   });
 
   describe('.focusAnnotations()', function () {

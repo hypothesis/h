@@ -3,6 +3,10 @@
   flex-grow: 1;
 }
 
+.u-fixed-size {
+  flex-shrink: 0;
+}
+
 .u-layout-row {
   display: flex;
   flex-direction: row;

@@ -3,22 +3,14 @@
 var events = require('./events');
 var SearchClient = require('./search-client');
 
-function firstKey(object) {
-  for (var k in object) {
-    if (!object.hasOwnProperty(k)) {
-      continue;
-    }
-    return k;
-  }
-  return null;
-}
-
 /**
  * Returns the group ID of the first annotation in `results` whose
- * ID is a key in `selection`.
+ * ID matches `id`
+ *
+ * @param {string} id
+ * @param {Array<Annotation>} results
  */
-function groupIDFromSelection(selection, results) {
-  var id = firstKey(selection);
+function groupIDFromAnnotation(id, results) {
   var annot = results.find(function (annot) {
     return annot.id === id;
   });
@@ -26,6 +18,28 @@ function groupIDFromSelection(selection, results) {
     return;
   }
   return annot.group;
+}
+
+/**
+ * Return the parent annotation of `annot` which may be either an annotation
+ * or a reply.
+ *
+ * @param {Threading} threading - Threading service
+ * @param {Annotation} annot
+ */
+function rootAncestorOf(threading, annot) {
+  if (!annot.references ||
+       annot.references.length === 0) {
+    return annot;
+  }
+
+  // Replies can be nested, we're only interested in the root ancestor
+  // which is an annotation rather than a reply.
+  var root = threading.idTable[annot.references[0]].message;
+  if (!root) {
+    return annot;
+  }
+  return root;
 }
 
 // @ngInject
@@ -52,18 +66,30 @@ module.exports = function WidgetController(
   }
 
   /**
+   * Returns the ID of the direct-linked annotation (if any).
+   * This ID is passed to the app via an 'id:<annotation ID>' search query
+   */
+  function directLinkedAnnotationID() {
+    var idMatch = $scope.search.query.match(/^id:(.*)$/);
+    if (idMatch) {
+      return idMatch[1];
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * Returns the Annotation object for the first annotation in the
    * selected annotation set. Note that 'first' refers to the order
    * of annotations passed to annotationUI when selecting annotations,
    * not the order in which they appear in the document.
    */
-  function firstSelectedAnnotation() {
-    if (annotationUI.selectedAnnotationMap) {
-      var id = Object.keys(annotationUI.selectedAnnotationMap)[0];
-      return threading.idTable[id] && threading.idTable[id].message;
-    } else {
+  function directLinkedAnnotation() {
+    var id = directLinkedAnnotationID();
+    if (!id) {
       return null;
     }
+    return threading.idTable[id] && threading.idTable[id].message;
   }
 
   function _resetAnnotations() {
@@ -78,17 +104,17 @@ module.exports = function WidgetController(
   function _loadAnnotationsFor(uri, group) {
     var searchClient = new SearchClient(store.SearchResource, {
       // If no group is specified, we are fetching annotations from
-      // all groups in order to find out which group contains the selected
+      // all groups in order to find out which group contains the direct-linked
       // annotation, therefore we need to load all chunks before processing
       // the results
       incremental: !!group,
     });
     searchClients.push(searchClient);
     searchClient.on('results', function (results) {
-      if (annotationUI.hasSelectedAnnotations()) {
-        // Focus the group containing the selected annotation and filter
+      if (directLinkedAnnotationID()) {
+        // Focus the group containing the annotation and filter
         // annotations to those from this group
-        var groupID = groupIDFromSelection(annotationUI.selectedAnnotationMap,
+        var groupID = groupIDFromAnnotation(directLinkedAnnotationID(),
           results);
         if (!groupID) {
           // If the selected annotation is not available, fall back to
@@ -112,6 +138,10 @@ module.exports = function WidgetController(
     searchClient.get({uri: uri, group: group});
   }
 
+  function isLoading() {
+    return searchClients.length > 0;
+  }
+
   /**
    * Load annotations for all URLs associated with `frames`.
    *
@@ -133,18 +163,16 @@ module.exports = function WidgetController(
       }
     }, []);
 
-    // If there is no selection, load annotations only for the focused group.
+    // If there is no direct-linked annotation, load annotations only for the
+    // focused group, otherwise we load annotations for all groups, find out
+    // which group that annotation is in and then filter the results on the
+    // client by that group.
     //
-    // If there is a selection, we load annotations for all groups, find out
-    // which group the first selected annotation is in and then filter the
-    // results on the client by that group.
-    //
-    // In the common case where the total number of annotations on
-    // a page that are visible to the user is not greater than
-    // the batch size, this saves an extra roundtrip to the server
-    // to fetch the selected annotation in order to determine which group
-    // it is in before fetching the remaining annotations.
-    var group = annotationUI.hasSelectedAnnotations() ?
+    // In the common case where the total number of annotations on a page that
+    // are visible to the user is not greater than the batch size, this saves an
+    // extra roundtrip to the server to fetch the annotation in order to
+    // determine which group it is in before fetching the remaining annotations.
+    var group = directLinkedAnnotationID() ?
       null : groups.focused().id;
 
     for (var i=0; i < urls.length; i++) {
@@ -160,29 +188,29 @@ module.exports = function WidgetController(
   // When a direct-linked annotation is successfully anchored in the page,
   // focus and scroll to it
   $rootScope.$on(events.ANNOTATIONS_SYNCED, function (event, tags) {
-    var selectedAnnot = firstSelectedAnnotation();
-    if (!selectedAnnot) {
+    var annot = directLinkedAnnotation();
+    if (!annot) {
       return;
     }
-    var matchesSelection = tags.some(function (tag) {
-      return tag.tag === selectedAnnot.$$tag;
-    });
-    if (!matchesSelection) {
+
+    if (!tags.some(function (tag) { return tag.tag === annot.$$tag; })) {
       return;
     }
-    focusAnnotation(selectedAnnot);
-    scrollToAnnotation(selectedAnnot);
+
+    // Only annotations (not replies) can be scrolled to and focused, so
+    // we need to find the parent of the direct-linked annotation
+    // and focus/scroll to that.
+    var parent = rootAncestorOf(threading, annot);
+    focusAnnotation(parent);
+    scrollToAnnotation(parent);
   });
 
   $scope.$on(events.GROUP_FOCUSED, function () {
-    // The focused group may be changed during loading annotations (in which
-    // case, searchClients.length > 0), as a result of switching to the group
-    // containing the selected annotation.
+    // The focused group may be changed during loading annotations as a result
+    // of switching to the group containing a direct-linked annotation.
     //
-    // In that case, we don't want to trigger reloading annotations again and we
-    // also want to preserve the selection if the user visits a direct link to a
-    // group annotation whilst signed out, then signs in.
-    if (searchClients.length) {
+    // In that case, we don't want to trigger reloading annotations again.
+    if (isLoading()) {
       return;
     }
 
@@ -205,10 +233,10 @@ module.exports = function WidgetController(
     return annotation.$$tag in $scope.focusedAnnotations;
   };
 
-  $scope.selectedAnnotationUnavailable = function () {
-    return searchClients.length === 0 &&
-           annotationUI.hasSelectedAnnotations() &&
-           !threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
+  $scope.annotationUnavailable = function () {
+    return !isLoading() &&
+           !!directLinkedAnnotationID() &&
+           !threading.idTable[directLinkedAnnotationID()];
   };
 
   $scope.shouldShowLoggedOutMessage = function () {
@@ -217,19 +245,23 @@ module.exports = function WidgetController(
       return false;
     }
 
-    // If user has not landed on a direct linked annotation
-    // don't show the CTA.
-    if (!settings.annotations) {
-      return false;
-    }
-
     // The user is logged out and has landed on a direct linked
-    // annotation. If there is an annotation selection and that
-    // selection is available to the user, show the CTA.
-    return searchClients.length === 0 &&
-           annotationUI.hasSelectedAnnotations() &&
-           !!threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
+    // annotation, and that annotation is available to the user,
+    // show the CTA
+    return !isLoading() &&
+           !!directLinkedAnnotationID() &&
+           !!threading.idTable[directLinkedAnnotationID()];
   };
+
+  $scope.topLevelThreadCount = function () {
+    return threading.root.children.length;
+  };
+
+  $scope.shouldShowTotalCount = function () {
+    return groups.focused().public && !!directLinkedAnnotationID();
+  };
+
+  $scope.isLoading = isLoading;
 
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
     if (data.$highlight || (data.references && data.references.length > 0)) {

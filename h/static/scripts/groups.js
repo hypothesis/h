@@ -37,7 +37,8 @@ function groups(localStorage, session, settings, $rootScope, $http) {
     }
   }
 
-  /** Leave the group with the given ID.
+  /**
+   * Leave the group with the given ID.
    * Returns a promise which resolves when the action completes.
    */
   function leave(id) {

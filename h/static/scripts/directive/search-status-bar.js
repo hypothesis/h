@@ -1,3 +1,5 @@
+'use strict';
+
 // @ngInject
 module.exports = function () {
   return {
@@ -8,6 +10,8 @@ module.exports = function () {
       onClearSelection: '&',
       searchQuery: '<',
       selectionCount: '<',
+      showTotalCountMessage: '<',
+      totalCount: '<',
     },
     templateUrl: 'search_status_bar.html',
   };
