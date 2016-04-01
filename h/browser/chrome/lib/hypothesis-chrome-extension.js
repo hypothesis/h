@@ -1,5 +1,7 @@
 'use strict';
 
+var annotationIDs = require('../../../static/scripts/util/annotation-ids');
+
 var errors = require('./errors');
 var TabState = require('./tab-state');
 var BrowserAction = require('./browser-action');
@@ -9,15 +11,6 @@ var TabStore = require('./tab-store');
 
 var TAB_STATUS_LOADING = 'loading';
 var TAB_STATUS_COMPLETE = 'complete';
-
-/**
- * Returns true if a tab URL contains a link to an annotation,
- * which should result in Hypothesis being automatically injected into
- * the tab.
- */
-function urlHasAnnotationFragment(url) {
-  return url.match(/#annotations:(.*)$/);
-}
 
 /* The main extension application. This wires together all the smaller
  * modules. The app listens to all new created/updated/removed tab events
@@ -182,9 +175,14 @@ function HypothesisChromeExtension(dependencies) {
   function onTabUpdated(tabId, changeInfo, tab) {
     if (changeInfo.status === TAB_STATUS_LOADING) {
       resetTabState(tabId, tab.url);
+      var directLinkedID = annotationIDs.extractIDFromURL(tab.url);
+      if (directLinkedID) {
+        state.setState(tab.id, {directLinkedAnnotation: directLinkedID});
+      }
     } else if (changeInfo.status === TAB_STATUS_COMPLETE) {
-      var newActiveState = state.getState(tabId).state;
-      if (urlHasAnnotationFragment(tab.url)) {
+      var tabState = state.getState(tabId);
+      var newActiveState = tabState.state;
+      if (tabState.directLinkedAnnotation) {
         newActiveState = TabState.states.ACTIVE;
       }
       state.setState(tabId, {
@@ -230,7 +228,16 @@ function HypothesisChromeExtension(dependencies) {
       state.setState(tab.id, {
         extensionSidebarInstalled: true,
       });
-      return sidebar.injectIntoTab(tab)
+
+      var config = {
+        annotations: state.getState(tab.id).directLinkedAnnotation
+      };
+
+      return sidebar.injectIntoTab(tab, config)
+        .then(function () {
+          // Clear the direct link once H has been successfully injected
+          state.setState(tab.id, {directLinkedAnnotation: undefined});
+        })
         .catch(function (err) {
           if (err instanceof errors.AlreadyInjectedError) {
             state.setState(tab.id, {

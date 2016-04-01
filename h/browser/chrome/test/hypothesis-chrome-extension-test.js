@@ -255,6 +255,21 @@ describe('HypothesisChromeExtension', function () {
       it('injects the sidebar if a direct link is present', function () {
         var tab = createTab();
         tab.url += '#annotations:456';
+        fakeChromeTabs.onUpdated.listener(tab.id, {status: 'loading'}, tab);
+        fakeChromeTabs.onUpdated.listener(tab.id, {status: 'complete'}, tab);
+        assert.equal(tabState[tab.id].state, TabState.states.ACTIVE);
+      });
+
+      it('injects the sidebar if the page rewrites the URL fragment', function () {
+        var tab = createTab();
+        var origURL = tab.url;
+        tab.url += '#annotations:456';
+        fakeChromeTabs.onUpdated.listener(tab.id, {status: 'loading'}, tab);
+
+        // Simulate client side JS rewriting the URL fragment before the sidebar
+        // is injected
+        tab.url = origURL + '#modified-fragment';
+        fakeChromeTabs.onUpdated.listener(tab.id, {status: 'loading'}, tab);
         fakeChromeTabs.onUpdated.listener(tab.id, {status: 'complete'}, tab);
         assert.equal(tabState[tab.id].state, TabState.states.ACTIVE);
       });

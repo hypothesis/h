@@ -3,12 +3,33 @@
 var config = require('../config');
 
 describe('annotator configuration', function () {
+  var fakeScriptConfig;
+
+  function fakeQuerySelector(selector) {
+    if (selector === 'link[type="application/annotator+html"]') {
+      return {href: 'app.html'};
+    } else if (selector === 'script.js-hypothesis-config' &&
+               fakeScriptConfig) {
+      return {textContent: fakeScriptConfig};
+    } else {
+      return null;
+    }
+  }
+
   var fakeWindowBase = {
     document: {
-      querySelector: sinon.stub().returns({href: 'app.html'}),
+      querySelector: fakeQuerySelector,
+      querySelectorAll: function (selector) {
+        var match = fakeQuerySelector(selector);
+        return match ? [match] : [];
+      },
     },
     location: {hash: ''},
   };
+
+  beforeEach(function () {
+    fakeScriptConfig = '';
+  });
 
   it('reads the app src from the link tag', function () {
     var linkEl = document.createElement('link');
@@ -23,7 +44,7 @@ describe('annotator configuration', function () {
 
   it('reads the #annotation query fragment', function () {
     var fakeWindow = Object.assign({}, fakeWindowBase, {
-      location: {hash:'#annotations:456'},
+      location: {href:'https://foo.com/#annotations:456'},
     });
     assert.deepEqual(config(fakeWindow), {
       app: 'app.html',
@@ -40,6 +61,14 @@ describe('annotator configuration', function () {
     assert.deepEqual(config(fakeWindow), {
       app: 'app.html',
       firstRun: true,
+    });
+  });
+
+  it('merges the config from the "js-hypothesis-config" <script> tag', function () {
+    fakeScriptConfig = '{"annotations":"456"}';
+    assert.deepEqual(config(fakeWindowBase), {
+      app: 'app.html',
+      annotations: '456',
     });
   });
 });

@@ -8,6 +8,20 @@ var EXTENSION_BASE_URL = 'chrome-extension://hypothesis';
 
 var PDF_VIEWER_BASE_URL = EXTENSION_BASE_URL + '/content/web/viewer.html?file=';
 
+/**
+ * Creates an <iframe> for testing the effects of code injected
+ * into the page by the sidebar injector
+ */
+function createTestFrame() {
+  var frame = document.createElement('iframe');
+  document.body.appendChild(frame);
+  frame.contentDocument.body.appendChild = function () {
+    // no-op to avoid trying to actually load <script> tags injected into
+    // the page
+  };
+  return frame;
+}
+
 describe('SidebarInjector', function () {
   var errors = require('../lib/errors');
   var SidebarInjector = require('../lib/sidebar-injector');
@@ -145,6 +159,19 @@ describe('SidebarInjector', function () {
           assert.ok(result.error);
           assert.instanceOf(result.error, errors.AlreadyInjectedError);
         });
+      });
+
+      it('injects config options into the page', function () {
+        contentFrame = createTestFrame();
+        var url = 'http://example.com';
+        return injector.injectIntoTab({id: 1, url: url}, {annotations:'456'})
+          .then(function () {
+            var configEl = contentFrame.contentDocument
+              .querySelector('script.js-hypothesis-config');
+            assert.ok(configEl);
+            assert.deepEqual(JSON.parse(configEl.textContent),
+              {annotations:'456'});
+          });
       });
     });
 
