@@ -139,6 +139,7 @@ module.exports = angular.module('h', [
   .directive('formValidate', require('./directive/form-validate'))
   .directive('groupList', require('./directive/group-list').directive)
   .directive('hAutofocus', require('./directive/h-autofocus'))
+  .directive('loggedoutMessage', require('./directive/loggedout-message'))
   .directive('loginForm', require('./directive/login-form').directive)
   .directive('markdown', require('./directive/markdown'))
   .directive('simpleSearch', require('./directive/simple-search'))
