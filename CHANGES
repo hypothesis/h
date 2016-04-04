@@ -1,3 +1,18 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Fix a bug that prevented "direct links" to annotations on PDFs from working
+  correctly (#3139).
+
+Miscellanea
+-----------
+
+- Annotation "incontext" links are now generated with the URL of the annotated
+  page appended (#3172).
+
 0.15.0 (2016-03-31)
 ===================
 
