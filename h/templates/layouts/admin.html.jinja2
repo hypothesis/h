@@ -26,6 +26,17 @@
   {% for url in asset_urls("admin_css") %}
 <link rel="stylesheet" href="{{ url }}">
 {% endfor %}
+
+    {% if request.sentry.get_public_dsn() %}
+      <script class="js-hypothesis-settings" type="application/json">
+        {
+          "raven": {
+            "dsn": "{{ request.sentry.get_public_dsn('https') }}",
+            "release": "{{ h_version }}"
+          }
+        }
+      </script>
+    {% endif %}
   </head>
   <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
