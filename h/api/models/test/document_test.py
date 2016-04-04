@@ -178,10 +178,9 @@ class TestCreateOrUpdateDocumentURI(object):
         )
         db.Session.add(document_uri)
 
-        mock_db_session = mock.Mock()
         now_ = now()
         document.create_or_update_document_uri(
-            session=mock_db_session,
+            session=db.Session,
             claimant=claimant,
             uri=uri,
             type=type_,
@@ -193,7 +192,8 @@ class TestCreateOrUpdateDocumentURI(object):
 
         assert document_uri.created == created
         assert document_uri.updated == now_
-        assert not mock_db_session.add.called
+        assert len(db.Session.query(document.DocumentURI).all()) == 1, (
+            "It shouldn't have added any new objects to the db")
 
     def test_it_creates_a_new_DocumentURI_if_there_is_no_existing_one(self):
         claimant = 'http://example.com/example_claimant.html'
@@ -327,10 +327,9 @@ class TestCreateOrUpdateDocumentMeta(object):
         )
         db.Session.add(document_meta)
 
-        mock_db_session = mock.Mock()
         new_updated = now()
         document.create_or_update_document_meta(
-            session=mock_db_session,
+            session=db.Session,
             claimant=claimant,
             type=type_,
             value='new value',
@@ -344,7 +343,8 @@ class TestCreateOrUpdateDocumentMeta(object):
         assert document_meta.created == created, "It shouldn't update created"
         assert document_meta.document == document_, (
             "It shouldn't update document")
-        assert not mock_db_session.add.called
+        assert len(db.Session.query(document.DocumentMeta).all()) == 1, (
+            "It shouldn't have added any new objects to the db")
 
     def test_it_logs_a_warning(self, DocumentMeta, log):
         """
@@ -452,6 +452,8 @@ def mock_db_session():
     """Return a mock db session object."""
     class DB(object):
         def add(self, obj):
+            pass
+        def query(self, cls):
             pass
     return mock.Mock(spec=DB())
 

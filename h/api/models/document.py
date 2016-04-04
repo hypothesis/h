@@ -234,7 +234,7 @@ def create_or_update_document_uri(session,
     :type updated: datetime.datetime
 
     """
-    docuri = DocumentURI.query.filter(
+    docuri = session.query(DocumentURI).filter(
         DocumentURI.claimant_normalized == uri_normalize(claimant),
         DocumentURI.uri_normalized == uri_normalize(uri),
         DocumentURI.type == type,
@@ -304,7 +304,7 @@ def create_or_update_document_meta(session,
     :type updated: datetime.datetime
 
     """
-    existing_dm = DocumentMeta.query.filter(
+    existing_dm = session.query(DocumentMeta).filter(
         DocumentMeta.claimant_normalized == uri_normalize(claimant),
         DocumentMeta.type == type).one_or_none()
 
