@@ -289,7 +289,7 @@ def create_or_update_document_meta(session,
 
     :param value: the value to set the new or existing DocumentMeta's value
         attribute to
-    :type value: unicode
+    :type value: list of unicode strings
 
     :param document: the value to use for the DocumentMeta's document if a new
         DocumentMeta is created
