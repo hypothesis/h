@@ -12,10 +12,16 @@ functions in `h.api.storage`.
 """
 
 from h.api.models.annotation import Annotation
-from h.api.models.document import Document, DocumentMeta, DocumentURI
+from h.api.models.document import create_or_update_document_meta
+from h.api.models.document import create_or_update_document_uri
+from h.api.models.document import Document
+from h.api.models.document import DocumentMeta
+from h.api.models.document import DocumentURI
 
 __all__ = (
     'Annotation',
+    'create_or_update_document_meta',
+    'create_or_update_document_uri',
     'Document',
     'DocumentMeta',
     'DocumentURI',
