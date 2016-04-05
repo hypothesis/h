@@ -9,6 +9,7 @@ var path = require('path');
 var batch = require('gulp-batch');
 var changed = require('gulp-changed');
 var commander = require('commander');
+var debounce = require('lodash.debounce');
 var endOfStream = require('end-of-stream');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
@@ -16,9 +17,10 @@ var gulpUtil = require('gulp-util');
 var postcss = require('gulp-postcss');
 var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
+var through = require('through2');
 
-var manifest = require('./scripts/gulp/manifest');
 var createBundle = require('./scripts/gulp/create-bundle');
+var manifest = require('./scripts/gulp/manifest');
 var vendorBundles = require('./scripts/gulp/vendor-bundles');
 
 var IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
@@ -26,6 +28,14 @@ var SCRIPT_DIR = 'build/scripts';
 var STYLE_DIR = 'build/styles';
 var FONTS_DIR = 'build/fonts';
 var IMAGES_DIR = 'build/images';
+var TEMPLATES_DIR = 'h/templates/client';
+
+// LiveReloadServer instance for sending messages to connected
+// development clients
+var liveReloadServer;
+// List of file paths that changed since the last live-reload
+// notification was dispatched
+var liveReloadChangedFiles = [];
 
 function parseCommandLine() {
   commander
@@ -201,17 +211,65 @@ gulp.task('watch-images', function () {
   gulp.watch(imageFiles, ['build-images']);
 });
 
+gulp.task('watch-templates', function () {
+  gulp.watch(TEMPLATES_DIR + '/*.html', function (file) {
+    liveReloadServer.notifyChanged([file.path]);
+  });
+});
+
 var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/*.@(js|css|woff|jpg|png|svg)';
 
-// Generate a JSON manifest mapping file paths to
-// URLs containing cache-busting query string parameters
-function generateManifest() {
-  var stream = gulp.src(MANIFEST_SOURCE_FILES)
-    .pipe(manifest({name: 'manifest.json'}))
-    .pipe(gulp.dest('build/'));
-  stream.on('end', function () {
-    gulpUtil.log('Updated asset manifest');
+var prevManifest = {};
+
+/**
+ * Return an array of asset paths that changed between
+ * two versions of a manifest.
+ */
+function changedAssets(prevManifest, newManifest) {
+  return Object.keys(newManifest).filter(function (asset) {
+    return newManifest[asset] !== prevManifest[asset];
   });
+}
+
+var debouncedLiveReload = debounce(function () {
+  // Notify dev clients about the changed assets. Note: This currently has an
+  // issue that if CSS, JS and templates are all changed in quick succession,
+  // some of the assets might be empty/incomplete files that are still being
+  // generated when this is invoked, causing the reload to fail.
+  //
+  // Live reload notifications are debounced to reduce the likelihood of this
+  // happening.
+  liveReloadServer.notifyChanged(liveReloadChangedFiles);
+  liveReloadChangedFiles = [];
+}, 250);
+
+function triggerLiveReload(changedFiles) {
+  if (!liveReloadServer) {
+    return;
+  }
+  liveReloadChangedFiles = liveReloadChangedFiles.concat(changedFiles);
+  debouncedLiveReload();
+}
+
+/**
+ * Generate a JSON manifest mapping file paths to
+ * URLs containing cache-busting query string parameters.
+ */
+function generateManifest() {
+  gulp.src(MANIFEST_SOURCE_FILES)
+    .pipe(manifest({name: 'manifest.json'}))
+    .pipe(through.obj(function (file, enc, callback) {
+      gulpUtil.log('Updated asset manifest');
+
+      var newManifest = JSON.parse(file.contents.toString());
+      var changed = changedAssets(prevManifest, newManifest);
+      prevManifest = newManifest;
+      triggerLiveReload(changed);
+
+      this.push(file);
+      callback();
+    }))
+    .pipe(gulp.dest('build/'));
 }
 
 gulp.task('watch-manifest', function () {
@@ -220,6 +278,11 @@ gulp.task('watch-manifest', function () {
       done();
     });
   }));
+});
+
+gulp.task('start-live-reload-server', function () {
+  var LiveReloadServer = require('./scripts/gulp/live-reload-server');
+  liveReloadServer = new LiveReloadServer(3000, 'http://localhost:5000');
 });
 
 gulp.task('build-app',
@@ -238,12 +301,14 @@ gulp.task('build',
           generateManifest);
 
 gulp.task('watch',
-          ['watch-app-js',
+          ['start-live-reload-server',
+           'watch-app-js',
            'watch-extension-js',
            'watch-css',
            'watch-fonts',
            'watch-images',
-           'watch-manifest']);
+           'watch-manifest',
+           'watch-templates']);
 
 function runKarma(baseConfig, opts, done) {
   // See https://github.com/karma-runner/karma-mocha#configuration

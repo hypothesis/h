@@ -1,3 +1,12 @@
+Unreleased
+==========
+
+Miscellanea
+-----------
+
+- Added a live reload facility for development of the Hypothesis
+  front-end (#3038)
+
 0.16.0 (2016-04-04)
 ===================
 

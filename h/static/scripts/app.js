@@ -106,6 +106,12 @@ function setupHttp($http) {
   $http.defaults.headers.common['X-Client-Id'] = streamer.clientId;
 }
 
+function processAppOpts() {
+  if (settings.liveReloadServer) {
+    require('./live-reload-client').connect(settings.liveReloadServer);
+  }
+}
+
 module.exports = angular.module('h', [
   // Angular addons which export the Angular module name
   // via module.exports
@@ -197,3 +203,5 @@ module.exports = angular.module('h', [
 
   .run(setupCrossFrame)
   .run(setupHttp);
+
+processAppOpts();
