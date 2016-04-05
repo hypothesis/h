@@ -39,11 +39,11 @@ class TestJSONSchema(object):
         assert message.startswith("123 is not of type 'string'")
 
 
-class TestCreateAnnotationSchema(object):
+class TestLegacyCreateAnnotationSchema(object):
 
     def test_it_passes_input_to_structure_validator(self):
-        request = testing.DummyRequest()
-        schema = schemas.CreateAnnotationSchema(request)
+        request = self.mock_request()
+        schema = schemas.LegacyCreateAnnotationSchema(request)
         schema.structure = mock.Mock()
         schema.structure.validate.return_value = {}
 
@@ -52,11 +52,11 @@ class TestCreateAnnotationSchema(object):
         schema.structure.validate.assert_called_once_with({'foo': 'bar'})
 
     def test_it_raises_if_structure_validator_raises(self):
-        request = testing.DummyRequest()
-        schema = schemas.CreateAnnotationSchema(request)
+        request = self.mock_request()
+        schema = schemas.LegacyCreateAnnotationSchema(request)
         schema.structure = mock.Mock()
-        schema.structure.validate.side_effect = schemas.ValidationError(
-            'asplode')
+        schema.structure.validate.side_effect = (
+            schemas.ValidationError('asplode'))
 
         with pytest.raises(schemas.ValidationError):
             schema.validate({'foo': 'bar'})
@@ -67,8 +67,8 @@ class TestCreateAnnotationSchema(object):
         'id',
     ])
     def test_it_removes_protected_fields(self, field):
-        request = testing.DummyRequest()
-        schema = schemas.CreateAnnotationSchema(request)
+        request = self.mock_request()
+        schema = schemas.LegacyCreateAnnotationSchema(request)
         data = {}
         data[field] = 'something forbidden'
 
@@ -85,12 +85,12 @@ class TestCreateAnnotationSchema(object):
         """Any user field sent in the payload should be ignored."""
         authn_policy.authenticated_userid.return_value = (
             'acct:jeanie@example.com')
-        request = testing.DummyRequest()
-        schema = schemas.CreateAnnotationSchema(request)
+        request = self.mock_request()
+        schema = schemas.LegacyCreateAnnotationSchema(request)
 
         result = schema.validate(data)
 
-        assert result == {'user': 'acct:jeanie@example.com'}
+        assert result['user'] == 'acct:jeanie@example.com'
 
     @pytest.mark.parametrize('data,effective_principals,ok', [
         # No group supplied
@@ -118,8 +118,8 @@ class TestCreateAnnotationSchema(object):
         principals.
         """
         authn_policy.effective_principals.return_value = effective_principals
-        request = testing.DummyRequest()
-        schema = schemas.CreateAnnotationSchema(request)
+        request = self.mock_request()
+        schema = schemas.LegacyCreateAnnotationSchema(request)
 
         if ok:
             result = schema.validate(data)
@@ -139,13 +139,276 @@ class TestCreateAnnotationSchema(object):
         {'null': None},
     ])
     def test_it_permits_all_other_changes(self, data):
-        request = testing.DummyRequest()
-        schema = schemas.CreateAnnotationSchema(request)
+        request = self.mock_request()
+        schema = schemas.LegacyCreateAnnotationSchema(request)
 
         result = schema.validate(data)
 
         for k in data:
             assert result[k] == data[k]
+
+    def mock_request(self):
+        request = testing.DummyRequest()
+        request.feature = mock.Mock(return_value=False,
+                                    spec=lambda flag: False)
+        return request
+
+
+class TestCreateAnnotationSchema(object):
+
+    def test_it_passes_input_to_AnnotationSchema_validator(self,
+                                                           AnnotationSchema):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        schema.validate(mock.sentinel.input_data)
+
+        schema.structure.validate.assert_called_once_with(
+            mock.sentinel.input_data)
+
+    def test_it_raises_if_AnnotationSchema_validate_raises(self,
+                                                           AnnotationSchema):
+        AnnotationSchema.return_value.validate.side_effect = (
+            schemas.ValidationError('asplode'))
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        with pytest.raises(schemas.ValidationError):
+            schema.validate({'foo': 'bar'})
+
+    @pytest.mark.parametrize('field', [
+        'created',
+        'updated',
+        'user',
+        'id',
+    ])
+    def test_it_removes_protected_fields(self, field):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(field='something forbidden'),
+        )
+
+        assert field not in result
+
+    def test_it_sets_userid(self, authn_policy):
+        authn_policy.authenticated_userid.return_value = (
+            'acct:harriet@example.com')
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(self.annotation_data())
+
+        assert result['userid'] == 'acct:harriet@example.com'
+
+    def test_it_renames_uri_to_target_uri(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(uri='http://example.com/example'),
+        )
+
+        assert result['target_uri'] == 'http://example.com/example'
+        assert 'uri' not in result
+
+    def test_it_inserts_empty_string_if_data_has_no_uri(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        data = self.annotation_data()
+        assert 'uri' not in data
+
+        assert schema.validate(data)['target_uri'] == ''
+
+    def test_it_keeps_text(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(text='some annotation text'))
+
+        assert result['text'] == 'some annotation text'
+
+    def test_it_inserts_empty_string_if_data_contains_no_text(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        data = self.annotation_data()
+        assert 'text' not in data
+
+        assert schema.validate(data)['text'] == ''
+
+    def test_it_keeps_tags(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(tags=['foo', 'bar']))
+
+        assert result['tags'] == ['foo', 'bar']
+
+    def test_it_inserts_empty_list_if_data_contains_no_tags(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        data = self.annotation_data()
+        assert 'tags' not in data
+
+        assert schema.validate(data)['tags'] == []
+
+    def test_it_replaces_private_permissions_with_shared_False(
+            self,
+            authn_policy):
+        authn_policy.authenticated_userid.return_value = (
+            'acct:harriet@example.com')
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(
+                permissions={'read': ['acct:harriet@example.com']},
+            ),
+        )
+
+        assert result['shared'] is False
+        assert 'permissions' not in result
+
+    def test_it_replaces_shared_permissions_with_shared_True(
+            self,
+            authn_policy):
+        authn_policy.authenticated_userid.return_value = (
+            'acct:harriet@example.com')
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(
+                permissions={'read': ['group:__world__']},
+            ),
+        )
+
+        assert result['shared'] is True
+        assert 'permissions' not in result
+
+    def test_it_does_not_crash_if_data_contains_no_target(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        data = self.annotation_data()
+        assert 'target' not in data
+
+        schema.validate(data)
+
+    def test_it_replaces_target_with_target_selectors(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(
+                target=[
+                    {
+                        'foo': 'bar',  # This should be removed,
+                        'selector': 'the selectors',
+                    },
+                    'this should be removed',
+                ],
+            ),
+        )
+
+        assert result['target_selectors'] == 'the selectors'
+
+    def test_it_renames_group_to_groupid(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(self.annotation_data(group='foo'))
+
+        assert result['groupid'] == 'foo'
+        assert 'group' not in result
+
+    def test_it_inserts_default_groupid_if_no_group(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        data = self.annotation_data()
+        assert 'group' not in data
+
+        result = schema.validate(data)
+
+        assert result['groupid'] == '__world__'
+
+    def test_it_keeps_references(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(references=['parent id', 'parent id 2']))
+
+        assert result['references'] == ['parent id', 'parent id 2']
+
+    def test_it_inserts_empty_list_if_no_references(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        data = self.annotation_data()
+        assert 'references' not in data
+
+        result = schema.validate(data)
+
+        assert result['references'] == []
+
+    def test_it_deletes_groupid_for_replies(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate(
+            self.annotation_data(
+                group='foo',
+                references=['parent annotation id'],
+            )
+        )
+
+        assert 'groupid' not in result
+
+    def test_it_moves_extra_data_into_extra_sub_dict(self):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        result = schema.validate({
+            # Throw in all the fields, just to make sure that none of them get
+            # into extra.
+            'created': 'created',
+            'updated': 'updated',
+            'user': 'user',
+            'id': 'id',
+            'uri': 'uri',
+            'text': 'text',
+            'tags': ['gar', 'har'],
+            'permissions': {'read': ['group:__world__']},
+            'target': [],
+            'group': '__world__',
+            'references': ['parent'],
+
+            # These should end up in extra.
+            'foo': 1,
+            'bar': 2,
+        })
+
+        assert result['extra'] == {'foo': 1, 'bar': 2}
+
+    def mock_request(self, authenticated_userid=None):
+        request = testing.DummyRequest(
+            authenticated_userid=authenticated_userid)
+
+        def feature(flag):
+            if flag == 'postgres':
+                return True
+            return False
+
+        request.feature = mock.Mock(side_effect=feature, spec=feature)
+        return request
+
+    def annotation_data(self, **kwargs):
+        """Return test input data for CreateAnnotationSchema.validate()."""
+        data = {
+            'permissions': {
+                'read': []
+            }
+        }
+        data.update(kwargs)
+        return data
+
+    @pytest.fixture
+    def AnnotationSchema(self, request):
+        patcher = mock.patch('h.api.schemas.AnnotationSchema',
+                             autospec=True)
+        AnnotationSchema = patcher.start()
+        AnnotationSchema.return_value.validate.return_value = (
+            self.annotation_data())
+        request.addfinalizer(patcher.stop)
+        return AnnotationSchema
 
 
 class TestUpdateAnnotationSchema(object):
