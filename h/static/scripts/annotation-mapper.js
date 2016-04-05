@@ -1,9 +1,14 @@
 'use strict';
 
-var angular = require('angular');
-
 var events = require('./events');
 
+/**
+ * Returns the already-loaded annotation with a given ID,
+ * if there is one.
+ *
+ * @param {string} id
+ * @return {Annotation?} The existing Annotation instance
+ */
 function getExistingAnnotation(annotationUI, id) {
   return annotationUI.annotations.find(function (annot) {
     return annot.id === id;
@@ -18,10 +23,8 @@ function annotationMapper($rootScope, annotationUI, store) {
 
     var loaded = [];
     annotations.forEach(function (annotation) {
-      var existing = getExistingAnnotation(annotationUI, annotation.id);
-      if (existing) {
-        angular.copy(annotation, existing);
-        $rootScope.$emit(events.ANNOTATION_UPDATED, existing);
+      if (getExistingAnnotation(annotationUI, annotation.id)) {
+        $rootScope.$emit(events.ANNOTATION_UPDATED, annotation);
         return;
       }
       loaded.push(new store.AnnotationResource(annotation));
@@ -31,14 +34,7 @@ function annotationMapper($rootScope, annotationUI, store) {
   }
 
   function unloadAnnotations(annotations) {
-    var unloaded = annotations.map(function (annotation) {
-      var existing = getExistingAnnotation(annotationUI, annotation.id);
-      if (existing && annotation !== existing) {
-        annotation = angular.copy(annotation, existing);
-      }
-      return annotation;
-    });
-    $rootScope.$emit(events.ANNOTATIONS_UNLOADED, unloaded);
+    $rootScope.$emit(events.ANNOTATIONS_UNLOADED, annotations);
   }
 
   function createAnnotation(annotation) {
