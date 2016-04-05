@@ -7,6 +7,8 @@ from jsonschema.exceptions import best_match
 from pyramid import i18n
 from pyramid import security
 
+from h.api import parse_document_claims
+
 _ = i18n.TranslationStringFactory(__package__)
 
 # These annotation fields are not to be set by the user.
@@ -133,6 +135,20 @@ class CreateAnnotationSchema(object):
             del new_appstruct['groupid']
 
         new_appstruct['extra'] = appstruct
+
+        # Transform the "document" dict that the client posts into a convenient
+        # format for creating DocumentURI and DocumentMeta objects later.
+        document_data = appstruct.pop('document', {})
+        document_uri_dicts = parse_document_claims.document_uris_from_data(
+            copy.deepcopy(document_data),
+            claimant=new_appstruct['target_uri'])
+        document_meta_dicts = parse_document_claims.document_metas_from_data(
+            copy.deepcopy(document_data),
+            claimant=new_appstruct['target_uri'])
+        new_appstruct['document'] = {
+            'document_uri_dicts': document_uri_dicts,
+            'document_meta_dicts': document_meta_dicts
+        }
 
         return new_appstruct
 

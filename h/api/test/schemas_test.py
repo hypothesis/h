@@ -154,6 +154,7 @@ class TestLegacyCreateAnnotationSchema(object):
         return request
 
 
+@pytest.mark.usefixtures('parse_document_claims')
 class TestCreateAnnotationSchema(object):
 
     def test_it_passes_input_to_AnnotationSchema_validator(self,
@@ -378,6 +379,106 @@ class TestCreateAnnotationSchema(object):
 
         assert result['extra'] == {'foo': 1, 'bar': 2}
 
+    def test_it_calls_document_uris_from_data(self, parse_document_claims):
+        document_data = {'foo': 'bar'}
+        target_uri = 'http://example.com/example'
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        schema.validate(
+            self.annotation_data(
+                document=document_data,
+                uri=target_uri,
+            )
+        )
+
+        parse_document_claims.document_uris_from_data.assert_called_once_with(
+            document_data,
+            claimant=target_uri,
+        )
+
+    def test_it_puts_document_uris_in_appstruct(self, parse_document_claims):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        appstruct = schema.validate(self.annotation_data())
+
+        assert appstruct['document']['document_uri_dicts'] == (
+            parse_document_claims.document_uris_from_data.return_value)
+
+    def test_it_calls_document_metas_from_data(self, parse_document_claims):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+        document_data = {'foo': 'bar'}
+        target_uri = 'http://example.com/example'
+
+        schema.validate(
+            self.annotation_data(
+                document=document_data,
+                uri=target_uri,
+            )
+        )
+
+        parse_document_claims.document_metas_from_data.assert_called_once_with(
+            document_data,
+            claimant=target_uri,
+        )
+
+    def test_it_does_not_pass_modified_dict_to_document_metas_from_data(
+            self,
+            parse_document_claims):
+        """
+
+        If document_uris_from_data() modifies the document dict that it's
+        given, the original dict (or one with the same values as it) should be
+        passed t document_metas_from_data(), not the modified copy.
+
+        """
+        document = {
+            'top_level_key': 'original_value',
+            'sub_dict': {
+                'key': 'original_value'
+            }
+        }
+        def document_uris_from_data(document, claimant):
+            document['new_key'] = 'new_value'
+            document['top_level_key'] = 'new_value'
+            document['sub_dict']['key'] = 'new_value'
+        parse_document_claims.document_uris_from_data.side_effect = (
+            document_uris_from_data)
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        schema.validate(self.annotation_data(document=document))
+
+        assert (
+            parse_document_claims.document_metas_from_data.call_args[0][0] ==
+            document)
+
+    def test_it_puts_document_metas_in_appstruct(self, parse_document_claims):
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        appstruct = schema.validate(self.annotation_data())
+
+        assert appstruct['document']['document_meta_dicts'] == (
+            parse_document_claims.document_metas_from_data.return_value)
+
+    def test_it_clears_existing_keys_from_document(self):
+        """
+        Any keys in the document dict should be removed.
+
+        They're replaced with the 'document_uri_dicts' and
+        'document_meta_dicts' keys.
+
+        """
+        schema = schemas.CreateAnnotationSchema(self.mock_request())
+
+        appstruct = schema.validate(
+            self.annotation_data(
+                document={
+                    'foo': 'bar'  # This should be deleted.
+                },
+            ),
+        )
+
+        assert 'foo' not in appstruct['document']
+
     def mock_request(self, authenticated_userid=None):
         request = testing.DummyRequest(
             authenticated_userid=authenticated_userid)
@@ -409,6 +510,14 @@ class TestCreateAnnotationSchema(object):
             self.annotation_data())
         request.addfinalizer(patcher.stop)
         return AnnotationSchema
+
+    @pytest.fixture
+    def parse_document_claims(self, request):
+        patcher = mock.patch('h.api.schemas.parse_document_claims',
+                             autospec=True)
+        parse_document_claims = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return parse_document_claims
 
 
 class TestUpdateAnnotationSchema(object):
