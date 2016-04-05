@@ -61,6 +61,119 @@ class AnnotationSchema(JSONSchema):
             'document': {
                 'type': 'object',
                 'properties': {
+                    'dc': {
+                        'type': 'object',
+                        'properties': {
+                            'identifier': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'string',
+                                },
+                            },
+                        },
+                    },
+                    'highwire': {
+                        'type': 'object',
+                        'properties': {
+                            'doi': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'string',
+                                },
+                            },
+                        },
+                    },
+                    'link': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'href': {
+                                    'type': 'string',
+                                },
+                                'type': {
+                                    'type': 'string',
+                                },
+                            },
+                            'required': [
+                                'href',
+                            ],
+                        },
+                    },
+                },
+            },
+            'group': {
+                'type': 'string',
+            },
+            'permissions': {
+                'title': 'Permissions',
+                'description': 'Annotation action access control list',
+                'type': 'object',
+                'patternProperties': {
+                    '^(admin|delete|read|update)$': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string',
+                            'pattern': '^(acct:|group:).+$',
+                        },
+                    }
+                },
+                'required': [
+                    'read',
+                ],
+            },
+            'references': {
+                'type': 'array',
+                'items': {
+                    'type': 'string',
+                },
+            },
+            'tags': {
+                'type': 'array',
+                'items': {
+                    'type': 'string',
+                },
+            },
+            'target': {
+                'type': 'array',
+                'items': [
+                    {
+                        'type': 'object',
+                        'properties': {
+                            'selector': {
+                            },
+                        },
+                        'required': [
+                            'selector',
+                        ],
+                    },
+                ],
+            },
+            'text': {
+                'type': 'string',
+            },
+            'uri': {
+                'type': 'string',
+            },
+        },
+        'required': [
+            'permissions',
+        ],
+    }
+
+
+class LegacyAnnotationSchema(JSONSchema):
+
+    """
+    Validate an annotation object.
+    """
+
+    schema = {
+        'type': 'object',
+        'properties': {
+            'document': {
+                'type': 'object',
+                'properties': {
                     'link': {
                         'type': 'array',
                     },
@@ -161,7 +274,7 @@ class LegacyCreateAnnotationSchema(object):
 
     def __init__(self, request):
         self.request = request
-        self.structure = AnnotationSchema()
+        self.structure = LegacyAnnotationSchema()
 
     def validate(self, data):
         appstruct = self.structure.validate(data)
@@ -197,7 +310,7 @@ class UpdateAnnotationSchema(object):
     def __init__(self, request, annotation):
         self.request = request
         self.annotation = annotation
-        self.structure = AnnotationSchema()
+        self.structure = LegacyAnnotationSchema()
 
     def validate(self, data):
         appstruct = self.structure.validate(data)
