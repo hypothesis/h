@@ -5,7 +5,7 @@ from pyramid import interfaces
 from zope import interface
 
 from h.auth import tokens
-from h.auth.util import effective_principals
+from h.auth import util
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
@@ -28,7 +28,7 @@ class AuthenticationPolicy(object):
         return self.session_policy.unauthenticated_userid(request)
 
     def effective_principals(self, request):
-        return effective_principals(request.authenticated_userid, request)
+        return util.effective_principals(request.authenticated_userid, request)
 
     def remember(self, request, userid, **kw):
         if _is_api_request(request):
