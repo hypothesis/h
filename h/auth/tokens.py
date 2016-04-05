@@ -54,7 +54,10 @@ def userid_from_jwt(token, request):
     from token.
 
     :param token: the JWT to check
-    :type request: unicode
+    :type token: unicode
+
+    :param request: the request object
+    :type request: pyramid.request.Request
 
     :returns: the userid authenticated by the JWT or None
     :rtype: unicode or None
@@ -81,7 +84,7 @@ def userid_from_api_token(token):
     from token.
 
     :param token: the token to check
-    :type request: unicode
+    :type token: unicode
 
     :returns: the userid authenticated by the token, or None
     :rtype: unicode or None
