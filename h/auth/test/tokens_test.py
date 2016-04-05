@@ -3,6 +3,7 @@
 import datetime
 
 import mock
+from pyramid.testing import DummyRequest
 import pytest
 
 from h import db
@@ -145,6 +146,73 @@ def test_userid_from_api_token_returns_userid_for_valid_tokens():
     result = tokens.userid_from_api_token(token.value)
 
     assert result == 'acct:foo@example.com'
+
+
+def test_authenticated_userid_is_none_if_header_missing():
+    request = DummyRequest()
+
+    assert tokens.authenticated_userid(request) is None
+
+
+@pytest.mark.parametrize('value', [
+    'junk header',
+    'bearer:wibble',
+    'Bearer',
+    'Bearer ',
+])
+def test_authenticated_userid_is_none_if_header_incorrectly_formatted(value):
+    request = DummyRequest(headers={'Authorization': value})
+
+    assert tokens.authenticated_userid(request) is None
+
+
+@mock.patch('h.auth.tokens.userid_from_api_token')
+@mock.patch('h.auth.tokens.userid_from_jwt')
+def test_authenticated_userid_passes_token_to_extractor_functions(jwt, api_token):
+    api_token.return_value = None
+    jwt.return_value = None
+    request = DummyRequest(headers={'Authorization': 'Bearer f00ba12'})
+
+    tokens.authenticated_userid(request)
+
+    api_token.assert_called_once_with('f00ba12')
+    jwt.assert_called_once_with('f00ba12', request)
+
+
+@mock.patch('h.auth.tokens.userid_from_api_token')
+@mock.patch('h.auth.tokens.userid_from_jwt')
+def test_authenticated_userid_returns_userid_from_api_token_if_present(jwt, api_token):
+    api_token.return_value = 'acct:foo@example.com'
+    jwt.return_value = 'acct:bar@example.com'
+    request = DummyRequest(headers={'Authorization': 'Bearer f00ba12'})
+
+    result = tokens.authenticated_userid(request)
+
+    assert result == 'acct:foo@example.com'
+
+
+@mock.patch('h.auth.tokens.userid_from_api_token')
+@mock.patch('h.auth.tokens.userid_from_jwt')
+def test_authenticated_userid_returns_userid_from_jwt_as_fallback(jwt, api_token):
+    api_token.return_value = None
+    jwt.return_value = 'acct:bar@example.com'
+    request = DummyRequest(headers={'Authorization': 'Bearer f00ba12'})
+
+    result = tokens.authenticated_userid(request)
+
+    assert result == 'acct:bar@example.com'
+
+
+@mock.patch('h.auth.tokens.userid_from_api_token')
+@mock.patch('h.auth.tokens.userid_from_jwt')
+def test_authenticated_userid_returns_none_if_neither_token_valid(jwt, api_token):
+    api_token.return_value = None
+    jwt.return_value = None
+    request = DummyRequest(headers={'Authorization': 'Bearer f00ba12'})
+
+    result = tokens.authenticated_userid(request)
+
+    assert result is None
 
 
 def mock_request(token=None):

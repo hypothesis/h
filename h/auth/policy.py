@@ -5,7 +5,6 @@ from pyramid import interfaces
 from zope import interface
 
 from h.auth import tokens
-from h.auth.util import bearer_token
 from h.auth.util import effective_principals
 
 
@@ -17,16 +16,15 @@ class AuthenticationPolicy(object):
 
     def authenticated_userid(self, request):
         if _is_api_request(request):
-            token = bearer_token(request)
-            return (tokens.userid_from_api_token(token) or
-                    tokens.userid_from_jwt(token, request))
+            return tokens.authenticated_userid(request)
         return self.session_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):
         if _is_api_request(request):
-            # We can't always get an unauthenticated userid for an API request,
-            # as some of the authentication tokens used may be opaque.
-            return self.authenticated_userid(request)
+            # We can't really get an "unauthenticated" userid for an API
+            # request. We have to actually go and decode/look up the tokens and
+            # get what is effectively an authenticated userid.
+            return tokens.authenticated_userid(request)
         return self.session_policy.unauthenticated_userid(request)
 
     def effective_principals(self, request):

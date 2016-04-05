@@ -4,6 +4,7 @@ import datetime
 
 import jwt
 
+from h._compat import text_type
 from h.auth import models
 
 
@@ -97,3 +98,29 @@ def userid_from_api_token(token):
         return token_obj.userid
     else:
         return None
+
+
+def authenticated_userid(request):
+    """
+    Return the token-authenticated userid for the passed request.
+
+    This function inspects the passed request for bearer tokens, and attempts
+    to interpret any found tokens as either API tokens or JWTs, in that order.
+
+    :param request: a request object
+    :type request: pyramid.request.Request
+
+    :returns: the userid authenticated for the passed request or None
+    :rtype: unicode or None
+    """
+    token = None
+    if request.headers.get('Authorization', '').startswith('Bearer '):
+        token = text_type(request.headers['Authorization'][len('Bearer '):])
+
+    # If token is None or an empty string, it is clearly invalid and we should
+    # reject it.
+    if not token:
+        return None
+
+    return (userid_from_api_token(token) or
+            userid_from_jwt(token, request))
