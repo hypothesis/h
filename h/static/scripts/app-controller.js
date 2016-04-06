@@ -89,7 +89,9 @@ module.exports = function AppController(
         predicateFn = ['-!!message', 'message.updated'];
         break;
       case 'Location':
-        predicateFn = annotationMetadata.location;
+        predicateFn = function (thread) {
+          return annotationMetadata.location(thread.message);
+        };
         break;
     }
     $scope.sort = {

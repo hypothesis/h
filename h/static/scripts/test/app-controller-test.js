@@ -1,13 +1,17 @@
 'use strict';
 
 var angular = require('angular');
+var proxyquire = require('proxyquire');
 
+var annotationFixtures = require('./annotation-fixtures');
 var events = require('../events');
+var util = require('./util');
 
 describe('AppController', function () {
   var $controller = null;
   var $scope = null;
   var $rootScope = null;
+  var fakeAnnotationMetadata = null;
   var fakeAnnotationUI = null;
   var fakeAuth = null;
   var fakeDrafts = null;
@@ -28,9 +32,18 @@ describe('AppController', function () {
     return $controller('AppController', locals);
   };
 
-  before(function () {
-    return angular.module('h', [])
-      .controller('AppController', require('../app-controller'))
+  beforeEach(function () {
+    fakeAnnotationMetadata = {
+      location: function () { return 0; },
+    };
+
+    var AppController = proxyquire('../app-controller', util.noCallThru({
+      'angular': angular,
+      './annotation-metadata': fakeAnnotationMetadata,
+    }));
+
+    angular.module('h', [])
+      .controller('AppController', AppController)
       .controller('AnnotationUIController', angular.noop);
   });
 
@@ -261,6 +274,26 @@ describe('AppController', function () {
       $scope.logout();
 
       assert.equal(fakeWindow.confirm.callCount, 0);
+    });
+  });
+
+  describe('sorting', function () {
+    function annotationThread() {
+      return {message: annotationFixtures.defaultAnnotation()};
+    }
+
+    it('sorts threads by location when sort name is "Location"', function () {
+      var threads = [annotationThread(), annotationThread()];
+      fakeAnnotationMetadata.location = function (annotation) {
+        return threads.findIndex(function (thread) {
+          return thread.message === annotation;
+        });
+      };
+      createController();
+      $scope.sort.name = 'Location';
+      $scope.$digest();
+      assert.equal($scope.sort.predicate(threads[0]), 0);
+      assert.equal($scope.sort.predicate(threads[1]), 1);
     });
   });
 });
