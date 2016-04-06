@@ -399,11 +399,3 @@ def storage(request):
     patcher = mock.patch('h.api.views.storage', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
-
-
-@pytest.fixture
-def _publish_annotation_event(request):
-    patcher = mock.patch('h.api.views._publish_annotation_event',
-                         autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
