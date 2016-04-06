@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 var assign = require('core-js/modules/$.object-assign');
 var util = require('./util');
 var excerpt = require('../excerpt');
@@ -107,6 +109,18 @@ describe('excerpt directive', function () {
       element.scope.$digest();
       var collapseLink = findInlineControl(element[0]);
       assert.equal(collapseLink.querySelector('a').textContent, 'Less');
+    });
+  });
+
+  describe('bottom area', function () {
+    it('expands the excerpt when clicking at the bottom if collapsed', function () {
+      var element = excerptDirective({inlineControls: true},
+        TALL_DIV);
+      element.scope.$digest();
+      assert.isTrue(element.ctrl.collapse);
+      var bottomArea = element[0].querySelector('.excerpt__shadow');
+      angular.element(bottomArea).click();
+      assert.isFalse(element.ctrl.collapse);
     });
   });
 

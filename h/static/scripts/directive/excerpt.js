@@ -22,13 +22,23 @@ function ExcerptController() {
   };
 
   this.toggle = function (event) {
+    // When the user clicks a link explicitly to toggle the collapsed state,
+    // the event is not propagated.
     event.stopPropagation();
     this.collapse = !this.collapse;
   };
 
+  this.expand = function () {
+    // When the user expands the excerpt 'implicitly' by clicking at the bottom
+    // of the collapsed excerpt, the event is allowed to propagate. For
+    // annotation cards, this causes clicking on a quote to scroll the view to
+    // the selected annotation.
+    this.collapse = false;
+  };
+
   this.showInlineControls = function () {
     return this.overflowing() && this.inlineControls;
-  }
+  };
 
   this.bottomShadowStyles = function () {
     return {
@@ -36,7 +46,7 @@ function ExcerptController() {
       'excerpt__shadow--transparent': this.inlineControls,
       'is-hidden': !this.isExpandable(),
     };
-  }
+  };
 }
 
 function toPx(val) {
@@ -80,7 +90,7 @@ function excerpt() {
         return {
           'max-height': maxHeight,
         };
-      }
+      };
 
       ctrl.overflowing = function overflowing() {
         if (!contentElem) {
