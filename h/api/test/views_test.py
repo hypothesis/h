@@ -8,337 +8,354 @@ from pyramid import testing
 from h.api import views
 
 
-def test_error_api_sets_status_code_from_error():
-    request = testing.DummyRequest()
-    exc = views.APIError("it exploded", status_code=429)
+class TestError(object):
 
-    views.error_api(exc, request)
+    def test_it_sets_status_code_from_error(self):
+        request = testing.DummyRequest()
+        exc = views.APIError("it exploded", status_code=429)
 
-    assert request.response.status_code == 429
+        views.error_api(exc, request)
 
+        assert request.response.status_code == 429
 
-def test_error_api_returns_status_object():
-    request = testing.DummyRequest()
-    exc = views.APIError("it exploded", status_code=429)
+    def test_it_returns_status_object(self):
+        request = testing.DummyRequest()
+        exc = views.APIError("it exploded", status_code=429)
 
-    result = views.error_api(exc, request)
+        result = views.error_api(exc, request)
 
-    assert result == {'status': 'failure', 'reason': 'it exploded'}
+        assert result == {'status': 'failure', 'reason': 'it exploded'}
 
+    def test_it_sets_bad_request_status_code(self):
+        request = testing.DummyRequest()
+        exc = mock.Mock(message="it exploded")
 
-def test_error_validation_sets_bad_request_status_code():
-    request = testing.DummyRequest()
-    exc = mock.Mock(message="it exploded")
+        views.error_validation(exc, request)
 
-    views.error_validation(exc, request)
+        assert request.response.status_code == 400
 
-    assert request.response.status_code == 400
+    def test_it_returns_status_object(self):
+        request = testing.DummyRequest()
+        exc = mock.Mock(message="it exploded")
 
+        result = views.error_validation(exc, request)
 
-def test_error_validation_returns_status_object():
-    request = testing.DummyRequest()
-    exc = mock.Mock(message="it exploded")
-
-    result = views.error_validation(exc, request)
-
-    assert result == {'status': 'failure', 'reason': 'it exploded'}
+        assert result == {'status': 'failure', 'reason': 'it exploded'}
 
 
 @pytest.mark.usefixtures('routes_mapper')
-def test_index(routes_mapper):
-    """Get the API descriptor"""
-    routes_mapper.add_route('api.search', '/dummy/search')
-    routes_mapper.add_route('api.annotations', '/dummy/annotations')
-    routes_mapper.add_route('api.annotation', '/dummy/annotations/:id')
-    result = views.index(testing.DummyResource(), testing.DummyRequest())
+class TestIndex(object):
 
-    # Pyramid's host url defaults to http://example.com
-    host = 'http://example.com'
-    links = result['links']
-    assert links['annotation']['create']['method'] == 'POST'
-    assert links['annotation']['create']['url'] == host + '/dummy/annotations'
-    assert links['annotation']['delete']['method'] == 'DELETE'
-    assert links['annotation']['delete']['url'] == host + '/dummy/annotations/:id'
-    assert links['annotation']['read']['method'] == 'GET'
-    assert links['annotation']['read']['url'] == host + '/dummy/annotations/:id'
-    assert links['annotation']['update']['method'] == 'PUT'
-    assert links['annotation']['update']['url'] == host + '/dummy/annotations/:id'
-    assert links['search']['method'] == 'GET'
-    assert links['search']['url'] == host + '/dummy/search'
+    def test_it_returns_the_right_links(self, routes_mapper):
+        routes_mapper.add_route('api.search', '/dummy/search')
+        routes_mapper.add_route('api.annotations', '/dummy/annotations')
+        routes_mapper.add_route('api.annotation', '/dummy/annotations/:id')
 
+        result = views.index(testing.DummyResource(), testing.DummyRequest())
 
-def test_search_searches(search_lib):
-    request = testing.DummyRequest()
-
-    views.search(request)
-
-    search_lib.search.assert_called_once_with(request,
-                                              request.params,
-                                              separate_replies=False)
+        host = 'http://example.com'  # Pyramid's default host URL'
+        links = result['links']
+        assert links['annotation']['create']['method'] == 'POST'
+        assert links['annotation']['create']['url'] == (
+            host + '/dummy/annotations')
+        assert links['annotation']['delete']['method'] == 'DELETE'
+        assert links['annotation']['delete']['url'] == (
+            host + '/dummy/annotations/:id')
+        assert links['annotation']['read']['method'] == 'GET'
+        assert links['annotation']['read']['url'] == (
+            host + '/dummy/annotations/:id')
+        assert links['annotation']['update']['method'] == 'PUT'
+        assert links['annotation']['update']['url'] == (
+            host + '/dummy/annotations/:id')
+        assert links['search']['method'] == 'GET'
+        assert links['search']['url'] == host + '/dummy/search'
 
 
-def test_search_returns_search_results(search_lib):
-    request = testing.DummyRequest()
-    search_lib.search.return_value = {'total': 0, 'rows': []}
+class TestSearch(object):
 
-    result = views.search(request)
+    def test_it_searches(self, search_lib):
+        request = testing.DummyRequest()
 
-    assert result == {'total': 0, 'rows': []}
+        views.search(request)
 
+        search_lib.search.assert_called_once_with(request,
+                                                  request.params,
+                                                  separate_replies=False)
 
-def test_search_presents_annotations(search_lib, AnnotationJSONPresenter):
-    request = testing.DummyRequest()
-    search_lib.search.return_value = {'total': 2, 'rows': [{'foo': 'bar'},
-                                                           {'baz': 'bat'}]}
-    presenter = AnnotationJSONPresenter.return_value
-    presenter.asdict.return_value = {'giraffe': True}
+    def test_it_returns_search_results(self, search_lib):
+        request = testing.DummyRequest()
+        search_lib.search.return_value = {'total': 0, 'rows': []}
 
-    result = views.search(request)
+        result = views.search(request)
 
-    assert result == {'total': 2, 'rows': [{'giraffe': True},
-                                           {'giraffe': True}]}
+        assert result == {'total': 0, 'rows': []}
 
+    def test_it_presents_annotations(self,
+                                     search_lib,
+                                     AnnotationJSONPresenter):
+        request = testing.DummyRequest()
+        search_lib.search.return_value = {'total': 2, 'rows': [{'foo': 'bar'},
+                                                               {'baz': 'bat'}]}
+        presenter = AnnotationJSONPresenter.return_value
+        presenter.asdict.return_value = {'giraffe': True}
 
-def test_search_presents_replies(search_lib, AnnotationJSONPresenter):
-    request = testing.DummyRequest(params={'_separate_replies': '1'})
-    search_lib.search.return_value = {'total': 1,
-                                      'rows': [{'foo': 'bar'}],
-                                      'replies': [{'baz': 'bat'},
-                                                  {'baz': 'bat'}]}
-    presenter = AnnotationJSONPresenter.return_value
-    presenter.asdict.return_value = {'giraffe': True}
+        result = views.search(request)
 
-    result = views.search(request)
+        assert result == {'total': 2, 'rows': [{'giraffe': True},
+                                               {'giraffe': True}]}
 
-    assert result == {'total': 1,
-                      'rows': [{'giraffe': True}],
-                      'replies': [{'giraffe': True},
-                                  {'giraffe': True}]}
+    def test_it_presents_replies(self, search_lib, AnnotationJSONPresenter):
+        request = testing.DummyRequest(params={'_separate_replies': '1'})
+        search_lib.search.return_value = {'total': 1,
+                                          'rows': [{'foo': 'bar'}],
+                                          'replies': [{'baz': 'bat'},
+                                                      {'baz': 'bat'}]}
+        presenter = AnnotationJSONPresenter.return_value
+        presenter.asdict.return_value = {'giraffe': True}
 
+        result = views.search(request)
 
-create_fixtures = pytest.mark.usefixtures('AnnotationEvent',
-                                          'AnnotationJSONPresenter',
-                                          'schemas',
-                                          'storage')
+        assert result == {'total': 1,
+                          'rows': [{'giraffe': True}],
+                          'replies': [{'giraffe': True},
+                                      {'giraffe': True}]}
 
-
-@create_fixtures
-def test_create_raises_if_json_parsing_fails():
-    """The view raises PayloadError if parsing of the request body fails."""
-    request = mock.Mock()
-
-    # Make accessing the request.json_body property raise ValueError.
-    type(request).json_body = mock.PropertyMock(side_effect=ValueError)
-
-    with pytest.raises(views.PayloadError):
-        views.update(mock.Mock(), request)
-
-
-@create_fixtures
-def test_create_calls_create_annotation(storage, schemas):
-    """It should call storage.create_annotation() appropriately."""
-    request = mock.Mock()
-    schema = schemas.LegacyCreateAnnotationSchema.return_value
-    schema.validate.return_value = {'foo': 123}
-
-    views.create(request)
-
-    storage.legacy_create_annotation.assert_called_once_with(request,
-                                                             {'foo': 123})
+    @pytest.fixture
+    def search_lib(self, request):
+        patcher = mock.patch('h.api.views.search_lib', autospec=True)
+        request.addfinalizer(patcher.stop)
+        return patcher.start()
 
 
-@create_fixtures
-def test_create_calls_validator(schemas, copy):
-    request = mock.Mock()
-    copy.deepcopy.side_effect = lambda x: x
-    schema = schemas.LegacyCreateAnnotationSchema.return_value
+@pytest.mark.usefixtures('AnnotationEvent',
+                         'AnnotationJSONPresenter',
+                         'schemas',
+                         'storage')
+class TestCreate(object):
 
-    views.create(request)
+    def test_it_raises_if_json_parsing_fails(self):
+        """It raises PayloadError if parsing of the request body fails."""
+        request = mock.Mock()
 
-    schema.validate.assert_called_once_with(request.json_body)
+        # Make accessing the request.json_body property raise ValueError.
+        type(request).json_body = mock.PropertyMock(side_effect=ValueError)
 
+        with pytest.raises(views.PayloadError):
+            views.update(mock.Mock(), request)
 
-@create_fixtures
-def test_create_inits_AnnotationJSONPresenter(AnnotationJSONPresenter, storage):
-    request = mock.Mock()
+    def test_it_calls_create_annotation(self, storage, schemas):
+        """It should call storage.create_annotation() appropriately."""
+        request = mock.Mock()
+        schema = schemas.LegacyCreateAnnotationSchema.return_value
+        schema.validate.return_value = {'foo': 123}
 
-    views.create(request)
+        views.create(request)
 
-    AnnotationJSONPresenter.assert_called_once_with(
-        request, storage.legacy_create_annotation.return_value)
+        storage.legacy_create_annotation.assert_called_once_with(request,
+                                                                 {'foo': 123})
 
+    def test_it_calls_validator(self, schemas, copy):
+        request = mock.Mock()
+        copy.deepcopy.side_effect = lambda x: x
+        schema = schemas.LegacyCreateAnnotationSchema.return_value
 
-@create_fixtures
-def test_create_publishes_annotation_event(AnnotationEvent,
+        views.create(request)
+
+        schema.validate.assert_called_once_with(request.json_body)
+
+    def test_it_inits_AnnotationJSONPresenter(self,
+                                              AnnotationJSONPresenter,
+                                              storage):
+        request = mock.Mock()
+
+        views.create(request)
+
+        AnnotationJSONPresenter.assert_called_once_with(
+            request, storage.legacy_create_annotation.return_value)
+
+    def test_it_publishes_annotation_event(self,
+                                           AnnotationEvent,
                                            AnnotationJSONPresenter):
-    """It should publish an annotation "create" event for the annotation."""
-    request = mock.Mock()
+        """It publishes an annotation "create" event for the annotation."""
+        request = mock.Mock()
 
-    views.create(request)
+        views.create(request)
 
-    AnnotationEvent.assert_called_once_with(
-        request,
-        AnnotationJSONPresenter.return_value.asdict.return_value,
-        'create')
-    request.registry.notify.assert_called_once_with(
-        AnnotationEvent.return_value)
+        AnnotationEvent.assert_called_once_with(
+            request,
+            AnnotationJSONPresenter.return_value.asdict.return_value,
+            'create')
+        request.registry.notify.assert_called_once_with(
+            AnnotationEvent.return_value)
 
+    def test_it_returns_presented_annotation(self,
+                                             AnnotationJSONPresenter,
+                                             storage):
+        request = mock.Mock()
 
-@create_fixtures
-def test_create_returns_presented_annotation(AnnotationJSONPresenter, storage):
-    request = mock.Mock()
+        result = views.create(request)
 
-    result = views.create(request)
-
-    AnnotationJSONPresenter.assert_called_once_with(
+        AnnotationJSONPresenter.assert_called_once_with(
             request,
             storage.legacy_create_annotation.return_value)
-    assert result == AnnotationJSONPresenter.return_value.asdict.return_value
+        assert result == (
+            AnnotationJSONPresenter.return_value.asdict.return_value)
+
+    @pytest.fixture
+    def copy(self, request):
+        patcher = mock.patch('h.api.views.copy', autospec=True)
+        request.addfinalizer(patcher.stop)
+        return patcher.start()
 
 
-def test_read_returns_presented_annotation(AnnotationJSONPresenter):
-    annotation = mock.Mock()
-    request = mock.Mock()
-    presenter = mock.Mock()
-    AnnotationJSONPresenter.return_value = presenter
+@pytest.mark.usefixtures('AnnotationJSONPresenter')
+class TestRead(object):
 
-    result = views.read(annotation, request)
+    def test_it_returns_presented_annotation(self, AnnotationJSONPresenter):
+        annotation = mock.Mock()
+        request = mock.Mock()
+        presenter = mock.Mock()
+        AnnotationJSONPresenter.return_value = presenter
 
-    AnnotationJSONPresenter.assert_called_once_with(request, annotation)
-    assert result == presenter.asdict()
+        result = views.read(annotation, request)
 
-
-def test_read_jsonld_sets_correct_content_type(AnnotationJSONLDPresenter):
-    AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
-
-    annotation = mock.Mock()
-    request = testing.DummyRequest()
-
-    views.read_jsonld(annotation, request)
-
-    assert request.response.content_type == 'application/ld+json'
-    assert request.response.content_type_params == {
-        'profile': 'http://foo.com/context.jsonld'
-    }
+        AnnotationJSONPresenter.assert_called_once_with(request, annotation)
+        assert result == presenter.asdict()
 
 
-def test_read_jsonld_returns_presented_annotation(AnnotationJSONLDPresenter):
-    annotation = mock.Mock()
-    presenter = mock.Mock()
-    AnnotationJSONLDPresenter.return_value = presenter
-    AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
-    request = testing.DummyRequest()
+@pytest.mark.usefixtures('AnnotationJSONLDPresenter')
+class TestReadJSONLD(object):
 
-    result = views.read_jsonld(annotation, request)
+    def test_it_sets_correct_content_type(self, AnnotationJSONLDPresenter):
+        AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
 
-    AnnotationJSONLDPresenter.assert_called_once_with(request, annotation)
-    assert result == presenter.asdict()
+        annotation = mock.Mock()
+        request = testing.DummyRequest()
 
+        views.read_jsonld(annotation, request)
 
-update_fixtures = pytest.mark.usefixtures('AnnotationEvent',
-                                          'AnnotationJSONPresenter',
-                                          'schemas',
-                                          'storage')
+        assert request.response.content_type == 'application/ld+json'
+        assert request.response.content_type_params == {
+            'profile': 'http://foo.com/context.jsonld'
+        }
 
 
-@update_fixtures
-def test_update_raises_if_json_parsing_fails():
-    """The view raises PayloadError if parsing of the request body fails."""
-    request = mock.Mock()
+    def test_it_returns_presented_annotation(self, AnnotationJSONLDPresenter):
+        annotation = mock.Mock()
+        presenter = mock.Mock()
+        AnnotationJSONLDPresenter.return_value = presenter
+        AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
+        request = testing.DummyRequest()
 
-    # Make accessing the request.json_body property raise ValueError.
-    type(request).json_body = mock.PropertyMock(side_effect=ValueError)
+        result = views.read_jsonld(annotation, request)
 
-    with pytest.raises(views.PayloadError):
-        views.update(mock.Mock(), request)
+        AnnotationJSONLDPresenter.assert_called_once_with(request, annotation)
+        assert result == presenter.asdict()
 
-
-@update_fixtures
-def test_update_calls_validator(schemas):
-    annotation = mock.Mock()
-    request = mock.Mock()
-    schema = schemas.UpdateAnnotationSchema.return_value
-
-    views.update(annotation, request)
-
-    schema.validate.assert_called_once_with(request.json_body)
+    @pytest.fixture
+    def AnnotationJSONLDPresenter(self, request):
+        patcher = mock.patch('h.api.views.AnnotationJSONLDPresenter',
+                             autospec=True)
+        cls = patcher.start()
+        request.addfinalizer(patcher.stop)
+        return cls
 
 
-@update_fixtures
-def test_update_calls_update_annotation(storage, schemas):
-    annotation = mock.Mock()
-    request = mock.Mock()
-    schema = schemas.UpdateAnnotationSchema.return_value
-    schema.validate.return_value = {'foo': 123}
+@pytest.mark.usefixtures('AnnotationEvent',
+                         'AnnotationJSONPresenter',
+                         'schemas',
+                         'storage')
+class TestUpdate(object):
 
-    views.update(annotation, request)
+    def test_it_raises_if_json_parsing_fails(self):
+        """It raises PayloadError if parsing of the request body fails."""
+        request = mock.Mock()
 
-    storage.update_annotation.assert_called_once_with(request,
-                                                      annotation.id,
-                                                      {'foo': 123})
+        # Make accessing the request.json_body property raise ValueError.
+        type(request).json_body = mock.PropertyMock(side_effect=ValueError)
 
+        with pytest.raises(views.PayloadError):
+            views.update(mock.Mock(), request)
 
-@update_fixtures
-def test_update_returns_presented_annotation(AnnotationJSONPresenter, storage):
-    annotation = mock.Mock()
-    request = mock.Mock()
-    presenter = mock.Mock()
-    AnnotationJSONPresenter.return_value = presenter
+    def test_it_calls_validator(self, schemas):
+        annotation = mock.Mock()
+        request = mock.Mock()
+        schema = schemas.UpdateAnnotationSchema.return_value
 
-    result = views.update(annotation, request)
+        views.update(annotation, request)
 
-    AnnotationJSONPresenter.assert_called_once_with(
+        schema.validate.assert_called_once_with(request.json_body)
+
+    def test_it_calls_update_annotation(self, storage, schemas):
+        annotation = mock.Mock()
+        request = mock.Mock()
+        schema = schemas.UpdateAnnotationSchema.return_value
+        schema.validate.return_value = {'foo': 123}
+
+        views.update(annotation, request)
+
+        storage.update_annotation.assert_called_once_with(request,
+                                                          annotation.id,
+                                                          {'foo': 123})
+
+    def test_it_returns_presented_annotation(self,
+                                             AnnotationJSONPresenter,
+                                             storage):
+        annotation = mock.Mock()
+        request = mock.Mock()
+        presenter = mock.Mock()
+        AnnotationJSONPresenter.return_value = presenter
+
+        result = views.update(annotation, request)
+
+        AnnotationJSONPresenter.assert_called_once_with(
             request,
             storage.update_annotation.return_value)
-    assert result == presenter.asdict()
+        assert result == presenter.asdict()
+
+    def test_it_calls_notify_with_an_event(self, AnnotationEvent, storage):
+        annotation = mock.Mock()
+        request = mock.Mock()
+        event = AnnotationEvent.return_value
+        annotation_out = storage.update_annotation.return_value
+
+        views.update(annotation, request)
+
+        AnnotationEvent.assert_called_once_with(request,
+                                                annotation_out,
+                                                'update')
+        request.registry.notify.assert_called_once_with(event)
 
 
-@update_fixtures
-def test_update_event(AnnotationEvent, storage):
-    annotation = mock.Mock()
-    request = mock.Mock()
-    event = AnnotationEvent.return_value
-    annotation_out = storage.update_annotation.return_value
+@pytest.mark.usefixtures('AnnotationEvent', 'storage')
+class TestDelete(object):
 
-    views.update(annotation, request)
+    def test_it_calls_delete_annotation(self, storage):
+        annotation = mock.Mock()
+        request = mock.Mock()
 
-    AnnotationEvent.assert_called_once_with(request, annotation_out, 'update')
-    request.registry.notify.assert_called_once_with(event)
+        views.delete(annotation, request)
 
+        storage.delete_annotation.assert_called_once_with(request,
+                                                          annotation.id)
 
-delete_fixtures = pytest.mark.usefixtures('AnnotationEvent', 'storage')
+    def test_it_calls_notify_with_an_event(self, AnnotationEvent):
+        annotation = mock.Mock()
+        request = mock.Mock()
+        event = AnnotationEvent.return_value
 
+        views.delete(annotation, request)
 
-@delete_fixtures
-def test_delete_calls_delete_annotation(storage):
-    annotation = mock.Mock()
-    request = mock.Mock()
+        AnnotationEvent.assert_called_once_with(request, annotation, 'delete')
+        request.registry.notify.assert_called_once_with(event)
 
-    views.delete(annotation, request)
+    def test_it_returns_object(self):
+        annotation = mock.Mock()
+        request = mock.Mock()
 
-    storage.delete_annotation.assert_called_once_with(request, annotation.id)
+        result = views.delete(annotation, request)
 
-
-@delete_fixtures
-def test_delete_event(AnnotationEvent):
-    annotation = mock.Mock()
-    request = mock.Mock()
-    event = AnnotationEvent.return_value
-
-    views.delete(annotation, request)
-
-    AnnotationEvent.assert_called_once_with(request, annotation, 'delete')
-    request.registry.notify.assert_called_once_with(event)
-
-
-@delete_fixtures
-def test_delete_returns_object():
-    annotation = mock.Mock()
-    request = mock.Mock()
-
-    result = views.delete(annotation, request)
-
-    assert result == {'id': annotation.id, 'deleted': True}
+        assert result == {'id': annotation.id, 'deleted': True}
 
 
 @pytest.fixture
@@ -361,14 +378,6 @@ def copy(request):
     patcher = mock.patch('h.api.views.copy', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
-
-
-@pytest.fixture
-def AnnotationJSONLDPresenter(request):
-    patcher = mock.patch('h.api.views.AnnotationJSONLDPresenter', autospec=True)
-    cls = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return cls
 
 
 @pytest.fixture
