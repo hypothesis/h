@@ -100,6 +100,49 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
                 'delete': [self.annotation.userid]}
 
 
+class AnnotationJSONLDPresenter(AnnotationBasePresenter):
+
+    """
+    Presenter for annotations that renders a JSON-LD format compatible with the
+    draft Web Annotation Data Model, as defined at:
+
+      https://www.w3.org/TR/annotation-model/
+    """
+
+    CONTEXT_URL = 'http://www.w3.org/ns/anno.jsonld'
+
+    def asdict(self):
+        return {
+            '@context': self.CONTEXT_URL,
+            'type': 'Annotation',
+            'id': self.id,
+            'created': self.created,
+            'modified': self.updated,
+            'creator': self.annotation.userid,
+            'body': self.bodies,
+            'target': self.target,
+        }
+
+    @property
+    def id(self):
+        return self.request.route_url('annotation', id=self.annotation.id)
+
+    @property
+    def bodies(self):
+        bodies = [{
+            'type': 'TextualBody',
+            'text': self.text,
+            'format': 'text/markdown',
+        }]
+        for t in self.tags:
+            bodies.append({
+                'type': 'TextualBody',
+                'text': t,
+                'purpose': 'tagging',
+            })
+        return bodies
+
+
 class DocumentJSONPresenter(object):
     def __init__(self, document):
         self.document = document
