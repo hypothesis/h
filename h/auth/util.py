@@ -3,7 +3,6 @@
 from pyramid import security
 
 from h import accounts
-from h._compat import text_type
 from h.auth import role
 
 
@@ -53,23 +52,6 @@ def group_principals(user):
 
     """
     return ['group:{group.pubid}'.format(group=group) for group in user.groups]
-
-
-def bearer_token(request):
-    """
-    Return the bearer token from the request's Authorization header.
-
-    The "Bearer " prefix will be stripped from the token.
-
-    If the request has no Authorization header or the Authorization header
-    doesn't contain a bearer token, returns ''.
-
-    :rtype: unicode
-    """
-    if request.headers.get('Authorization', '').startswith('Bearer '):
-        return text_type(request.headers['Authorization'][len('Bearer '):])
-    else:
-        return u''
 
 
 def translate_annotation_principals(principals):
