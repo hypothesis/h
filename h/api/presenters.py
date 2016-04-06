@@ -15,6 +15,16 @@ class AnnotationBasePresenter(object):
         self.request = request
 
     @property
+    def created(self):
+        if self.annotation.created:
+            return utc_iso8601(self.annotation.created)
+
+    @property
+    def updated(self):
+        if self.annotation.updated:
+            return utc_iso8601(self.annotation.updated)
+
+    @property
     def links(self):
         """A dictionary of named hypermedia links for this annotation."""
         # Named link generators are registered elsewhere in the code. See
@@ -27,6 +37,28 @@ class AnnotationBasePresenter(object):
             if link is not None:
                 out[name] = link
         return out
+
+    @property
+    def text(self):
+        if self.annotation.text:
+            return self.annotation.text
+        else:
+            return ''
+
+    @property
+    def tags(self):
+        if self.annotation.tags:
+            return self.annotation.tags
+        else:
+            return []
+
+    @property
+    def target(self):
+        target = {'source': self.annotation.target_uri}
+        if self.annotation.target_selectors:
+            target['selector'] = self.annotation.target_selectors
+
+        return [target]
 
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
@@ -57,30 +89,6 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
         return annotation
 
     @property
-    def created(self):
-        if self.annotation.created:
-            return utc_iso8601(self.annotation.created)
-
-    @property
-    def updated(self):
-        if self.annotation.updated:
-            return utc_iso8601(self.annotation.updated)
-
-    @property
-    def text(self):
-        if self.annotation.text:
-            return self.annotation.text
-        else:
-            return ''
-
-    @property
-    def tags(self):
-        if self.annotation.tags:
-            return self.annotation.tags
-        else:
-            return []
-
-    @property
     def permissions(self):
         read = self.annotation.userid
         if self.annotation.shared:
@@ -90,14 +98,6 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
                 'admin': [self.annotation.userid],
                 'update': [self.annotation.userid],
                 'delete': [self.annotation.userid]}
-
-    @property
-    def target(self):
-        target = {'source': self.annotation.target_uri}
-        if self.annotation.target_selectors:
-            target['selector'] = self.annotation.target_selectors
-
-        return [target]
 
 
 class DocumentJSONPresenter(object):
