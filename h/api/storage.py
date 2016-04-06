@@ -189,8 +189,12 @@ def delete_annotation(request, id):
     :param id: the annotation id
     :type id: str
     """
-    annotation = models.elastic.Annotation.fetch(id)
-    annotation.delete()
+    if _postgres_enabled(request):
+        annotation = fetch_annotation(request, id, _postgres=True)
+        request.db.delete(annotation)
+
+    legacy_annotation = fetch_annotation(request, id, _postgres=False)
+    legacy_annotation.delete()
 
 
 def expand_uri(request, uri):
