@@ -404,7 +404,7 @@ class TestCreateAnnotation(object):
         assert models.create_or_update_document_uri.call_count == 3
         for doc_uri_dict in annotation_data['document']['document_uri_dicts']:
             models.create_or_update_document_uri.assert_any_call(
-                db=request.db,
+                session=request.db,
                 document=models.Document.find_or_create_by_uris.return_value.first.return_value,
                 created=annotation.created,
                 updated=annotation.updated,
@@ -450,7 +450,7 @@ class TestCreateAnnotation(object):
         for document_meta_dict in annotation_data['document'][
                 'document_meta_dicts']:
             models.create_or_update_document_meta.assert_any_call(
-                db=request.db,
+                session=request.db,
                 document=models.Document.find_or_create_by_uris.return_value.first.return_value,
                 created=annotation.created,
                 updated=annotation.updated,

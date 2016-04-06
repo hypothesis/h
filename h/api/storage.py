@@ -128,7 +128,7 @@ def create_annotation(request, data):
 
     for document_uri_dict in document_uri_dicts:
         models.create_or_update_document_uri(
-            db=request.db,
+            session=request.db,
             document=document,
             created=annotation.created,
             updated=annotation.updated,
@@ -136,7 +136,7 @@ def create_annotation(request, data):
 
     for document_meta_dict in document_meta_dicts:
         models.create_or_update_document_meta(
-            db=request.db,
+            session=request.db,
             document=document,
             created=annotation.created,
             updated=annotation.updated,
