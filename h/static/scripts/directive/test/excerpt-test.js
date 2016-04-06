@@ -111,6 +111,18 @@ describe('excerpt directive', function () {
     });
   });
 
+  describe('bottom area', function () {
+    it('expands the excerpt when clicking at the bottom if collapsed', function () {
+      var element = excerptDirective({inlineControls: true},
+        TALL_DIV);
+      element.scope.$digest();
+      assert.isTrue(element.ctrl.collapse);
+      var bottomArea = element[0].querySelector('.excerpt__shadow');
+      angular.element(bottomArea).click();
+      assert.isFalse(element.ctrl.collapse);
+    });
+  });
+
   describe('.collapse', function () {
     it('collapses the body if collapse is true', function () {
       var element = excerptDirective({collapse: true}, TALL_DIV);

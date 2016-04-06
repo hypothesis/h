@@ -2,6 +2,9 @@
 <div class="excerpt__container" ng-if="vm.enabled()">
   <div class="excerpt" ng-style="vm.contentStyle()">
     <div ng-transclude></div>
+    <div ng-click="vm.expand()"
+         ng-class="vm.bottomShadowStyles()"
+         title="Show the full excerpt"></div>
     <div class="excerpt__inline-controls"
          ng-show="vm.showInlineControls()">
       <span class="excerpt__toggle-link" ng-show="vm.isExpandable()">
@@ -14,7 +17,4 @@
       </span>
     </div>
   </div>
-  <div ng-click="vm.toggle($event)"
-       ng-class="vm.bottomShadowStyles()"
-       title="Show the full excerpt"></div>
 </div>
