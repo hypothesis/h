@@ -138,7 +138,7 @@ def test_create_raises_if_json_parsing_fails():
 def test_create_calls_create_annotation(storage, schemas):
     """It should call storage.create_annotation() appropriately."""
     request = mock.Mock()
-    schema = schemas.CreateAnnotationSchema.return_value
+    schema = schemas.LegacyCreateAnnotationSchema.return_value
     schema.validate.return_value = {'foo': 123}
 
     views.create(request)
@@ -147,9 +147,10 @@ def test_create_calls_create_annotation(storage, schemas):
 
 
 @create_fixtures
-def test_create_calls_validator(schemas):
+def test_create_calls_validator(schemas, copy):
     request = mock.Mock()
-    schema = schemas.CreateAnnotationSchema.return_value
+    copy.deepcopy.side_effect = lambda x: x
+    schema = schemas.LegacyCreateAnnotationSchema.return_value
 
     views.create(request)
 
@@ -313,6 +314,13 @@ def AnnotationJSONPresenter(request):
     cls = patcher.start()
     request.addfinalizer(patcher.stop)
     return cls
+
+
+@pytest.fixture
+def copy(request):
+    patcher = mock.patch('h.api.views.copy', autospec=True)
+    request.addfinalizer(patcher.stop)
+    return patcher.start()
 
 
 @pytest.fixture

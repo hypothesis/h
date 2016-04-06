@@ -16,6 +16,7 @@ particular, requests to the CRUD API endpoints are protected by the Pyramid
 authorization system. You can find the mapping between annotation "permissions"
 objects and Pyramid ACLs in :mod:`h.api.resources`.
 """
+import copy
 
 from pyramid import i18n
 from pyramid import security
@@ -153,9 +154,12 @@ def search(request):
             effective_principals=security.Authenticated)
 def create(request):
     """Create an annotation from the POST payload."""
-    schema = schemas.CreateAnnotationSchema(request)
-    appstruct = schema.validate(_json_payload(request))
-    annotation = storage.create_annotation(request, appstruct)
+    json_payload = _json_payload(request)
+
+    legacy_schema = schemas.LegacyCreateAnnotationSchema(request)
+    legacy_appstruct = legacy_schema.validate(copy.deepcopy(json_payload))
+
+    annotation = storage.create_annotation(request, legacy_appstruct)
 
     _publish_annotation_event(request, annotation, 'create')
 

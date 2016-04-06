@@ -7,6 +7,8 @@ from jsonschema.exceptions import best_match
 from pyramid import i18n
 from pyramid import security
 
+from h.api import parse_document_claims
+
 _ = i18n.TranslationStringFactory(__package__)
 
 # These annotation fields are not to be set by the user.
@@ -59,6 +61,119 @@ class AnnotationSchema(JSONSchema):
             'document': {
                 'type': 'object',
                 'properties': {
+                    'dc': {
+                        'type': 'object',
+                        'properties': {
+                            'identifier': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'string',
+                                },
+                            },
+                        },
+                    },
+                    'highwire': {
+                        'type': 'object',
+                        'properties': {
+                            'doi': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'string',
+                                },
+                            },
+                        },
+                    },
+                    'link': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'href': {
+                                    'type': 'string',
+                                },
+                                'type': {
+                                    'type': 'string',
+                                },
+                            },
+                            'required': [
+                                'href',
+                            ],
+                        },
+                    },
+                },
+            },
+            'group': {
+                'type': 'string',
+            },
+            'permissions': {
+                'title': 'Permissions',
+                'description': 'Annotation action access control list',
+                'type': 'object',
+                'patternProperties': {
+                    '^(admin|delete|read|update)$': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string',
+                            'pattern': '^(acct:|group:).+$',
+                        },
+                    }
+                },
+                'required': [
+                    'read',
+                ],
+            },
+            'references': {
+                'type': 'array',
+                'items': {
+                    'type': 'string',
+                },
+            },
+            'tags': {
+                'type': 'array',
+                'items': {
+                    'type': 'string',
+                },
+            },
+            'target': {
+                'type': 'array',
+                'items': [
+                    {
+                        'type': 'object',
+                        'properties': {
+                            'selector': {
+                            },
+                        },
+                        'required': [
+                            'selector',
+                        ],
+                    },
+                ],
+            },
+            'text': {
+                'type': 'string',
+            },
+            'uri': {
+                'type': 'string',
+            },
+        },
+        'required': [
+            'permissions',
+        ],
+    }
+
+
+class LegacyAnnotationSchema(JSONSchema):
+
+    """
+    Validate an annotation object.
+    """
+
+    schema = {
+        'type': 'object',
+        'properties': {
+            'document': {
+                'type': 'object',
+                'properties': {
                     'link': {
                         'type': 'array',
                     },
@@ -84,13 +199,82 @@ class AnnotationSchema(JSONSchema):
 
 class CreateAnnotationSchema(object):
 
+    """Validate the POSTed data of a create annotation request."""
+
+    def __init__(self, request):
+        self.request = request
+        self.structure = AnnotationSchema()
+
+    def validate(self, data):
+        appstruct = self.structure.validate(data)
+
+        new_appstruct = {}
+
+        # Some fields are not to be set by the user, ignore them.
+        for field in PROTECTED_FIELDS:
+            appstruct.pop(field, None)
+
+        new_appstruct['userid'] = self.request.authenticated_userid
+
+        new_appstruct['target_uri'] = appstruct.pop('uri', '')
+        new_appstruct['text'] = appstruct.pop('text', '')
+        new_appstruct['tags'] = appstruct.pop('tags', [])
+
+        # Replace the client's complex permissions object with a simple shared
+        # boolean.
+        if appstruct.pop('permissions')['read'] == [new_appstruct['userid']]:
+            new_appstruct['shared'] = False
+        else:
+            new_appstruct['shared'] = True
+
+        # The 'target' dict that the client sends is replaced with a single
+        # annotation.target_selectors whose value is the first selector in
+        # the client'ss target.selectors list.
+        # Anything else in the target dict, and any selectors after the first,
+        # are discarded.
+        target = appstruct.pop('target', [])
+        if target:  # Replies and page notes don't have 'target'.
+            target = target[0]  # Multiple targets are ignored.
+            new_appstruct['target_selectors'] = target['selector']
+
+        new_appstruct['groupid'] = appstruct.pop('group', '__world__')
+
+        new_appstruct['references'] = appstruct.pop('references', [])
+
+        # Replies always get the same groupid as their parent. The parent's
+        # groupid is added to the reply annotation later by the storage code.
+        # Here we just delete any group sent by the client from replies.
+        if new_appstruct['references'] and 'groupid' in new_appstruct:
+            del new_appstruct['groupid']
+
+        new_appstruct['extra'] = appstruct
+
+        # Transform the "document" dict that the client posts into a convenient
+        # format for creating DocumentURI and DocumentMeta objects later.
+        document_data = appstruct.pop('document', {})
+        document_uri_dicts = parse_document_claims.document_uris_from_data(
+            copy.deepcopy(document_data),
+            claimant=new_appstruct['target_uri'])
+        document_meta_dicts = parse_document_claims.document_metas_from_data(
+            copy.deepcopy(document_data),
+            claimant=new_appstruct['target_uri'])
+        new_appstruct['document'] = {
+            'document_uri_dicts': document_uri_dicts,
+            'document_meta_dicts': document_meta_dicts
+        }
+
+        return new_appstruct
+
+
+class LegacyCreateAnnotationSchema(object):
+
     """
     Validate the payload from a user when creating an annotation.
     """
 
     def __init__(self, request):
         self.request = request
-        self.structure = AnnotationSchema()
+        self.structure = LegacyAnnotationSchema()
 
     def validate(self, data):
         appstruct = self.structure.validate(data)
@@ -126,7 +310,7 @@ class UpdateAnnotationSchema(object):
     def __init__(self, request, annotation):
         self.request = request
         self.annotation = annotation
-        self.structure = AnnotationSchema()
+        self.structure = LegacyAnnotationSchema()
 
     def validate(self, data):
         appstruct = self.structure.validate(data)
