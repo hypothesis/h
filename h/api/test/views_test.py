@@ -145,7 +145,7 @@ class TestCreateLegacy(object):
         type(request).json_body = mock.PropertyMock(side_effect=ValueError)
 
         with pytest.raises(views.PayloadError):
-            views.update(mock.Mock(), request)
+            views.create(request)
 
     def test_it_calls_legacy_create_annotation(self, storage, schemas):
         request = self.mock_request()
