@@ -130,13 +130,16 @@ class TestSearch(object):
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
+                         'copy',
                          'schemas',
                          'storage')
-class TestCreate(object):
+class TestCreateLegacy(object):
+
+    """Tests for create() when the 'postgres' feature flag is off."""
 
     def test_it_raises_if_json_parsing_fails(self):
         """It raises PayloadError if parsing of the request body fails."""
-        request = mock.Mock()
+        request = self.mock_request()
 
         # Make accessing the request.json_body property raise ValueError.
         type(request).json_body = mock.PropertyMock(side_effect=ValueError)
@@ -144,9 +147,8 @@ class TestCreate(object):
         with pytest.raises(views.PayloadError):
             views.update(mock.Mock(), request)
 
-    def test_it_calls_create_annotation(self, storage, schemas):
-        """It should call storage.create_annotation() appropriately."""
-        request = mock.Mock()
+    def test_it_calls_legacy_create_annotation(self, storage, schemas):
+        request = self.mock_request()
         schema = schemas.LegacyCreateAnnotationSchema.return_value
         schema.validate.return_value = {'foo': 123}
 
@@ -156,7 +158,7 @@ class TestCreate(object):
                                                                  {'foo': 123})
 
     def test_it_calls_validator(self, schemas, copy):
-        request = mock.Mock()
+        request = self.mock_request()
         copy.deepcopy.side_effect = lambda x: x
         schema = schemas.LegacyCreateAnnotationSchema.return_value
 
@@ -167,7 +169,7 @@ class TestCreate(object):
     def test_it_inits_AnnotationJSONPresenter(self,
                                               AnnotationJSONPresenter,
                                               storage):
-        request = mock.Mock()
+        request = self.mock_request()
 
         views.create(request)
 
@@ -178,7 +180,7 @@ class TestCreate(object):
                                            AnnotationEvent,
                                            AnnotationJSONPresenter):
         """It publishes an annotation "create" event for the annotation."""
-        request = mock.Mock()
+        request = self.mock_request()
 
         views.create(request)
 
@@ -192,7 +194,7 @@ class TestCreate(object):
     def test_it_returns_presented_annotation(self,
                                              AnnotationJSONPresenter,
                                              storage):
-        request = mock.Mock()
+        request = self.mock_request()
 
         result = views.create(request)
 
@@ -201,6 +203,15 @@ class TestCreate(object):
             storage.legacy_create_annotation.return_value)
         assert result == (
             AnnotationJSONPresenter.return_value.asdict.return_value)
+
+    def mock_request(self):
+        return mock.Mock(feature=mock.Mock(return_value=False))
+
+    @pytest.fixture
+    def copy(self, request):
+        patcher = mock.patch('h.api.views.copy', autospec=True)
+        request.addfinalizer(patcher.stop)
+        return patcher.start()
 
     @pytest.fixture
     def copy(self, request):
