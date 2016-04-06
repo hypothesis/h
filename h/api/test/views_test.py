@@ -143,7 +143,8 @@ def test_create_calls_create_annotation(storage, schemas):
 
     views.create(request)
 
-    storage.create_annotation.assert_called_once_with(request, {'foo': 123})
+    storage.legacy_create_annotation.assert_called_once_with(request,
+                                                             {'foo': 123})
 
 
 @create_fixtures
@@ -164,7 +165,7 @@ def test_create_inits_AnnotationJSONPresenter(AnnotationJSONPresenter, storage):
     views.create(request)
 
     AnnotationJSONPresenter.assert_called_once_with(
-        request, storage.create_annotation.return_value)
+        request, storage.legacy_create_annotation.return_value)
 
 
 @create_fixtures
@@ -191,7 +192,7 @@ def test_create_returns_presented_annotation(AnnotationJSONPresenter, storage):
 
     AnnotationJSONPresenter.assert_called_once_with(
             request,
-            storage.create_annotation.return_value)
+            storage.legacy_create_annotation.return_value)
     assert result == AnnotationJSONPresenter.return_value.asdict.return_value
 
 

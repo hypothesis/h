@@ -157,12 +157,25 @@ def create(request):
     """Create an annotation from the POST payload."""
     json_payload = _json_payload(request)
 
+    # Validate the annotation for, and create the annotation in, PostgreSQL.
+    if request.feature('postgres'):
+        schema = schemas.CreateAnnotationSchema(request)
+        appstruct = schema.validate(copy.deepcopy(json_payload))
+        annotation = storage.create_annotation(request, appstruct)
+
+    # Validate the annotation for, and create the annotation in, Elasticsearch.
     legacy_schema = schemas.LegacyCreateAnnotationSchema(request)
     legacy_appstruct = legacy_schema.validate(copy.deepcopy(json_payload))
+    legacy_annotation = storage.legacy_create_annotation(request,
+                                                         legacy_appstruct)
 
-    annotation = storage.create_annotation(request, legacy_appstruct)
+    if request.feature('postgres'):
+        annotation_dict = (
+            AnnotationJSONPresenter(request, annotation).asdict())
+    else:
+        annotation_dict = (
+            AnnotationJSONPresenter(request, legacy_annotation).asdict())
 
-    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
     _publish_annotation_event(request, annotation_dict, 'create')
 
     return annotation_dict
