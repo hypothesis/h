@@ -11,7 +11,6 @@ var coffeeify = require('coffeeify');
 var exorcist = require('exorcist');
 var gulpUtil = require('gulp-util');
 var mkdirp = require('mkdirp');
-var stringify = require('stringify');
 var uglifyify = require('uglifyify');
 var watchify = require('watchify');
 
@@ -117,12 +116,6 @@ module.exports = function createBundle(config, buildOpts) {
   var sourcemapPath = bundlePath + '.map';
 
   var bundle = browserify([], bundleOpts);
-
-  bundle.transform(stringify, {
-    appliesTo: {
-      includeExtensions: ['.html'],
-    },
-  });
 
   (config.require || []).forEach(function (req) {
     // When another bundle uses 'bundle.external(<module path>)',

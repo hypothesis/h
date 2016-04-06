@@ -102,7 +102,10 @@
   "browserify": {
     "transform": [
       "browserify-ngannotate",
-      "browserify-shim"
+      "browserify-shim",
+      ["stringify", {
+        "appliesTo": {"includeExtensions": [".html"]}
+      }]
     ]
   },
   "browser": {
