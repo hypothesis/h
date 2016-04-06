@@ -1,11 +1,20 @@
 Unreleased
 ==========
 
+Bug fixes
+---------
+
+- Fix a regression in sorting annotations when the sort order is set to
+  'Location' (#3179).
+
+- Clicking on an annotation quote now scrolls the page to that annotation when
+  the quote is collapsed (#3180).
+
 Miscellanea
 -----------
 
-- Added a live reload facility for development of the Hypothesis
-  front-end (#3038)
+- Add a live reload facility for development of the Hypothesis front-end
+  (#3038).
 
 0.16.0 (2016-04-04)
 ===================
