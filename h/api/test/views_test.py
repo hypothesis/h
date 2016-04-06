@@ -71,6 +71,7 @@ class TestIndex(object):
         assert links['search']['url'] == host + '/dummy/search'
 
 
+@pytest.mark.usefixtures('search_lib', 'AnnotationJSONPresenter')
 class TestSearch(object):
 
     def test_it_searches(self, search_lib):
