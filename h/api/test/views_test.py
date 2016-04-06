@@ -282,12 +282,24 @@ class TestCreate(object):
         """It should call storage.create_annotation() appropriately."""
         request = self.mock_request()
         schema = schemas.LegacyCreateAnnotationSchema.return_value
+
+        views.create(request)
+
+        storage.legacy_create_annotation.assert_called_once_with(
+            request,
+            schema.validate.return_value)
+
+    def test_it_reuses_the_postgres_annotation_id_in_elasticsearch(self,
+                                                                   schemas,
+                                                                   storage):
+        request = self.mock_request()
+        schema = schemas.LegacyCreateAnnotationSchema.return_value
         schema.validate.return_value = {'foo': 123}
 
         views.create(request)
 
-        storage.legacy_create_annotation.assert_called_once_with(request,
-                                                                 {'foo': 123})
+        assert storage.legacy_create_annotation.call_args[0][1]['id'] == (
+            storage.create_annotation.return_value.id)
 
     def test_it_inits_AnnotationJSONPresenter(self,
                                               AnnotationJSONPresenter,

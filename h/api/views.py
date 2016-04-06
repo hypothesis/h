@@ -166,6 +166,13 @@ def create(request):
     # Validate the annotation for, and create the annotation in, Elasticsearch.
     legacy_schema = schemas.LegacyCreateAnnotationSchema(request)
     legacy_appstruct = legacy_schema.validate(copy.deepcopy(json_payload))
+
+    # When 'postgres' is on make sure that annotations in the legacy
+    # Elasticsearch database use the same IDs as the PostgreSQL ones.
+    if request.feature('postgres'):
+        assert annotation.id
+        legacy_appstruct['id'] = annotation.id
+
     legacy_annotation = storage.legacy_create_annotation(request,
                                                          legacy_appstruct)
 
