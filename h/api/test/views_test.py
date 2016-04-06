@@ -213,6 +213,121 @@ class TestCreateLegacy(object):
         request.addfinalizer(patcher.stop)
         return patcher.start()
 
+
+@pytest.mark.usefixtures('AnnotationEvent',
+                         'AnnotationJSONPresenter',
+                         'copy',
+                         'schemas',
+                         'storage')
+class TestCreate(object):
+
+    def test_it_raises_if_json_parsing_fails(self):
+        """It raises PayloadError if parsing of the request body fails."""
+        request = self.mock_request()
+
+        # Make accessing the request.json_body property raise ValueError.
+        type(request).json_body = mock.PropertyMock(side_effect=ValueError)
+
+        with pytest.raises(views.PayloadError):
+            views.create(request)
+
+    def test_it_inits_CreateAnnotationSchema(self, schemas):
+        request = self.mock_request()
+
+        views.create(request)
+
+        schemas.CreateAnnotationSchema.assert_called_once_with(request)
+
+    def test_it_calls_schema_validate(self, copy, schemas):
+        """It should call validate() with a deep copy of json_body."""
+        copy.deepcopy.side_effect = [mock.sentinel.first_copy,
+                                     mock.sentinel.second_copy]
+        request = self.mock_request()
+
+        views.create(request)
+
+        assert copy.deepcopy.call_args_list[0] == mock.call(request.json_body)
+        schemas.CreateAnnotationSchema.return_value.validate\
+            .assert_called_once_with(mock.sentinel.first_copy)
+
+    def test_it_calls_create_annotation(self, storage, schemas):
+        request = self.mock_request()
+        schema = schemas.CreateAnnotationSchema.return_value
+
+        views.create(request)
+
+        storage.create_annotation.assert_called_once_with(
+            request, schema.validate.return_value)
+
+    def test_it_inits_LegacyCreateAnnotationSchema(self, schemas):
+        request = self.mock_request()
+
+        views.create(request)
+
+        schemas.LegacyCreateAnnotationSchema.assert_called_once_with(request)
+
+    def test_it_calls_legacy_schema_validate(self, copy, schemas):
+        """It should call validate() with a deep copy of json_body."""
+        copy.deepcopy.side_effect = [mock.sentinel.first_copy,
+                                     mock.sentinel.second_copy]
+        request = self.mock_request()
+
+        views.create(request)
+
+        assert copy.deepcopy.call_args_list[0] == mock.call(request.json_body)
+        schemas.LegacyCreateAnnotationSchema.return_value.validate\
+            .assert_called_once_with(mock.sentinel.second_copy)
+
+    def test_it_calls_legacy_create_annotation(self, storage, schemas):
+        """It should call storage.create_annotation() appropriately."""
+        request = self.mock_request()
+        schema = schemas.LegacyCreateAnnotationSchema.return_value
+        schema.validate.return_value = {'foo': 123}
+
+        views.create(request)
+
+        storage.legacy_create_annotation.assert_called_once_with(request,
+                                                                 {'foo': 123})
+
+    def test_it_inits_AnnotationJSONPresenter(self,
+                                              AnnotationJSONPresenter,
+                                              storage):
+        request = self.mock_request()
+
+        views.create(request)
+
+        AnnotationJSONPresenter.assert_called_once_with(
+            request, storage.create_annotation.return_value)
+
+    def test_it_publishes_annotation_event(self,
+                                           AnnotationEvent,
+                                           AnnotationJSONPresenter):
+        """It publishes an annotation "create" event for the annotation."""
+        request = self.mock_request()
+
+        views.create(request)
+
+        AnnotationEvent.assert_called_once_with(
+            request,
+            AnnotationJSONPresenter.return_value.asdict.return_value,
+            'create')
+        request.registry.notify.assert_called_once_with(
+            AnnotationEvent.return_value)
+
+    def test_it_returns_presented_annotation(self,
+                                             AnnotationJSONPresenter,
+                                             storage):
+        request = self.mock_request()
+
+        result = views.create(request)
+
+        AnnotationJSONPresenter.return_value.asdict.assert_called_once_with()
+        assert result == (
+            AnnotationJSONPresenter.return_value.asdict.return_value)
+
+    def mock_request(self):
+        return mock.Mock(feature=mock.Mock(return_value=True))
+
     @pytest.fixture
     def copy(self, request):
         patcher = mock.patch('h.api.views.copy', autospec=True)
