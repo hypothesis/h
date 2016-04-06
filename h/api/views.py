@@ -25,6 +25,7 @@ from pyramid.view import view_config
 from h.api import cors
 from h.api.events import AnnotationEvent
 from h.api.presenters import AnnotationJSONPresenter
+from h.api.presenters import AnnotationJSONLDPresenter
 from h.api import search as search_lib
 from h.api import schemas
 from h.api import storage
@@ -171,6 +172,16 @@ def create(request):
 def read(annotation, request):
     """Return the annotation (simply how it was stored in the database)."""
     presenter = AnnotationJSONPresenter(request, annotation)
+    return presenter.asdict()
+
+
+@api_config(route_name='api.annotation.jsonld',
+            request_method='GET',
+            permission='read')
+def read_jsonld(annotation, request):
+    request.response.content_type = 'application/ld+json'
+    request.response.content_type_params = {'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
+    presenter = AnnotationJSONLDPresenter(request, annotation)
     return presenter.asdict()
 
 

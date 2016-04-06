@@ -13,4 +13,8 @@ def includeme(config):
                      '/annotations/{id:[A-Za-z0-9_-]{20,22}}',
                      factory='h.api.resources:AnnotationFactory',
                      traverse='/{id}')
+    config.add_route('api.annotation.jsonld',
+                     '/annotations/{id:[A-Za-z0-9_-]{20,22}}.jsonld',
+                     factory='h.api.resources:AnnotationFactory',
+                     traverse='/{id}')
     config.add_route('api.search', '/search')

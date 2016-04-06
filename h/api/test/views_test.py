@@ -195,6 +195,33 @@ def test_read_returns_presented_annotation(AnnotationJSONPresenter):
     assert result == presenter.asdict()
 
 
+def test_read_jsonld_sets_correct_content_type(AnnotationJSONLDPresenter):
+    AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
+
+    annotation = mock.Mock()
+    request = testing.DummyRequest()
+
+    views.read_jsonld(annotation, request)
+
+    assert request.response.content_type == 'application/ld+json'
+    assert request.response.content_type_params == {
+        'profile': 'http://foo.com/context.jsonld'
+    }
+
+
+def test_read_jsonld_returns_presented_annotation(AnnotationJSONLDPresenter):
+    annotation = mock.Mock()
+    presenter = mock.Mock()
+    AnnotationJSONLDPresenter.return_value = presenter
+    AnnotationJSONLDPresenter.CONTEXT_URL = 'http://foo.com/context.jsonld'
+    request = testing.DummyRequest()
+
+    result = views.read_jsonld(annotation, request)
+
+    AnnotationJSONLDPresenter.assert_called_once_with(request, annotation)
+    assert result == presenter.asdict()
+
+
 update_fixtures = pytest.mark.usefixtures('AnnotationEvent',
                                           'AnnotationJSONPresenter',
                                           'schemas',
@@ -321,6 +348,14 @@ def copy(request):
     patcher = mock.patch('h.api.views.copy', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
+
+
+@pytest.fixture
+def AnnotationJSONLDPresenter(request):
+    patcher = mock.patch('h.api.views.AnnotationJSONLDPresenter', autospec=True)
+    cls = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return cls
 
 
 @pytest.fixture
