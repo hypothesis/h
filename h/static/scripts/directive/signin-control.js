@@ -29,6 +29,6 @@ module.exports = function () {
        */
       newStyle: '<',
     },
-    templateUrl: 'signin_control.html',
+    template: require('../../../templates/client/signin_control.html'),
   };
 };

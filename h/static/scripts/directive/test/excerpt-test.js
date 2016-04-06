@@ -1,5 +1,7 @@
 'use strict';
 
+var angular = require('angular');
+
 var assign = require('core-js/modules/$.object-assign');
 var util = require('./util');
 var excerpt = require('../excerpt');
@@ -32,7 +34,6 @@ describe('excerpt directive', function () {
 
   beforeEach(function () {
     angular.mock.module('app');
-    angular.mock.module('h.templates');
   });
 
   describe('enabled state', function () {

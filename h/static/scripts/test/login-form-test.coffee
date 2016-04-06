@@ -30,7 +30,6 @@ describe 'loginForm.Controller', ->
     .controller('loginFormController', require('../directive/login-form').Controller)
 
   beforeEach module('h')
-  beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
     $provide.value '$timeout', sandbox.spy()

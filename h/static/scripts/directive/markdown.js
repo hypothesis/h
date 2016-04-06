@@ -262,6 +262,6 @@ module.exports = function($filter, $sanitize, $sce) {
       readOnly: '<',
       required: '@'
     },
-    templateUrl: 'markdown.html'
+    template: require('../../../templates/client/markdown.html'),
   };
 };

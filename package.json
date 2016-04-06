@@ -58,6 +58,7 @@
     "retry": "^0.8.0",
     "scroll-into-view": "^1.3.1",
     "showdown": "^1.2.1",
+    "stringify": "^5.1.0",
     "through2": "^2.0.1",
     "tiny-emitter": "^1.0.1",
     "uglifyify": "^3.0.1",
@@ -74,7 +75,6 @@
     "karma-browserify": "^3.0.3",
     "karma-chai": "^0.1.0",
     "karma-mocha": "^0.1.4",
-    "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sinon": "^1.0.4",
     "mocha": "^1.20.1",
@@ -102,7 +102,10 @@
   "browserify": {
     "transform": [
       "browserify-ngannotate",
-      "browserify-shim"
+      "browserify-shim",
+      ["stringify", {
+        "appliesTo": {"includeExtensions": [".html"]}
+      }]
     ]
   },
   "browser": {

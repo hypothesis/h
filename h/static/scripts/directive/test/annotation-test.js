@@ -322,7 +322,6 @@ describe('annotation', function() {
     });
 
     beforeEach(angular.mock.module('h'));
-    beforeEach(angular.mock.module('h.templates'));
     beforeEach(angular.mock.module(function($provide) {
       sandbox = sinon.sandbox.create();
 
@@ -984,7 +983,6 @@ describe('annotation', function() {
         createDirective(annotation);
         $scope.$digest();
         $scope.$destroy();
-        $timeout.flush();
         $timeout.verifyNoPendingTasks();
       });
     });

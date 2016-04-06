@@ -784,7 +784,7 @@ function annotation($document) {
       onReplyCountClick: '&',
       replyCount: '<',
     },
-    templateUrl: 'annotation.html'
+    template: require('../../../templates/client/annotation.html'),
   };
 }
 

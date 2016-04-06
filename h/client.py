@@ -11,36 +11,6 @@ from h import __version__
 
 jinja_env = Environment(loader=PackageLoader(__package__, 'templates'))
 
-ANGULAR_DIRECTIVE_TEMPLATES = [
-    'annotation',
-    'dropdown_menu_btn',
-    'excerpt',
-    'group_list',
-    'loggedout_message',
-    'login_form',
-    'markdown',
-    'publish_annotation_btn',
-    'search_status_bar',
-    'share_dialog',
-    'sidebar_tutorial',
-    'signin_control',
-    'sort_dropdown',
-    'thread',
-    'top_bar',
-    'viewer',
-]
-
-
-def _angular_template_context(name):
-    """Return the context for rendering a 'text/ng-template' <script>
-       tag for an Angular directive.
-    """
-    angular_template_path = 'client/{}.html'.format(name)
-    content, _, _ = jinja_env.loader.get_source(jinja_env,
-                                                angular_template_path)
-    return {'name': '{}.html'.format(name), 'content': content}
-
-
 def url_with_path(url):
     if urlparse.urlparse(url).path == '':
         return '{}/'.format(url)
@@ -83,8 +53,6 @@ def _app_html_context(assets_env, api_url, service_url, ga_tracking_id,
 
     return {
         'app_config': json.dumps(app_config),
-        'angular_templates': map(_angular_template_context,
-                                 ANGULAR_DIRECTIVE_TEMPLATES),
         'app_css_urls': assets_env.urls('app_css'),
         'app_js_urls': assets_env.urls('app_js'),
         'ga_tracking_id': ga_tracking_id,

@@ -26,6 +26,6 @@ module.exports = function () {
       onClick: '&',
       onToggleDropdown: '&',
     },
-    templateUrl: 'dropdown_menu_btn.html'
+    template: require('../../../templates/client/dropdown_menu_btn.html'),
   };
 };

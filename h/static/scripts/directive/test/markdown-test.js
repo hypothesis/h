@@ -60,7 +60,6 @@ describe('markdown', function () {
 
   beforeEach(function () {
     angular.mock.module('app');
-    angular.mock.module('h.templates');
   });
 
   describe('read only state', function () {

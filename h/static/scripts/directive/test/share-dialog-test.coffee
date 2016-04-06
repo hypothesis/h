@@ -10,7 +10,6 @@ describe 'share-dialog', ->
     .directive('shareDialog', require('../share-dialog'))
 
   beforeEach module('h')
-  beforeEach module('h.templates')
 
   beforeEach module ($provide) ->
     fakeCrossFrame = {frames: []}

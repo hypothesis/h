@@ -31,5 +31,5 @@ module.exports = ['crossframe', (crossframe) ->
         scope.viaPageLink = 'https://via.hypothes.is/' + frames[0].uri
 
   restrict: 'E'
-  templateUrl: 'share_dialog.html'
+  template: require('../../../templates/client/share_dialog.html')
 ]
