@@ -143,7 +143,6 @@ def document_uris_from_links(link_dicts, claimant):
         uri_ = link['href']
         type_ = None
 
-
         # Handle rel="..." links.
         if type_ is None and link.get('rel') is not None:
             type_ = 'rel-{}'.format(link['rel'])

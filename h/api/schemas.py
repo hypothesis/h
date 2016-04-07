@@ -216,8 +216,8 @@ class CreateAnnotationSchema(object):
 
         new_appstruct['userid'] = self.request.authenticated_userid
 
-        new_appstruct['target_uri'] = appstruct.pop('uri', '')
-        new_appstruct['text'] = appstruct.pop('text', '')
+        new_appstruct['target_uri'] = appstruct.pop('uri', u'')
+        new_appstruct['text'] = appstruct.pop('text', u'')
         new_appstruct['tags'] = appstruct.pop('tags', [])
 
         # Replace the client's complex permissions object with a simple shared
@@ -237,7 +237,7 @@ class CreateAnnotationSchema(object):
             target = target[0]  # Multiple targets are ignored.
             new_appstruct['target_selectors'] = target['selector']
 
-        new_appstruct['groupid'] = appstruct.pop('group', '__world__')
+        new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
 
         new_appstruct['references'] = appstruct.pop('references', [])
 
