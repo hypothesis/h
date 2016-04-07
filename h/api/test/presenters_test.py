@@ -3,10 +3,12 @@
 import datetime
 import mock
 import pytest
+from pyramid import testing
 from pyramid.testing import DummyRequest
 
 from h.api.presenters import AnnotationBasePresenter
 from h.api.presenters import AnnotationJSONPresenter
+from h.api.presenters import AnnotationJSONLDPresenter
 from h.api.presenters import DocumentJSONPresenter
 from h.api.presenters import DocumentMetaJSONPresenter
 from h.api.presenters import DocumentURIJSONPresenter
@@ -28,6 +30,40 @@ class TestAnnotationBasePresenter(object):
 
         assert presenter.request == request
         assert presenter.annotation == annotation
+
+    def test_created_returns_none_if_missing(self):
+        request = DummyRequest()
+        annotation = mock.Mock(created=None)
+
+        created = AnnotationBasePresenter(request, annotation).created
+
+        assert created is None
+
+    def test_created_uses_iso_format(self):
+        request = DummyRequest()
+        when = datetime.datetime(2012, 3, 14, 23, 34, 47, 12)
+        annotation = mock.Mock(created=when)
+
+        created = AnnotationBasePresenter(request, annotation).created
+
+        assert created == '2012-03-14T23:34:47.000012+00:00'
+
+    def test_updated_returns_none_if_missing(self):
+        request = DummyRequest()
+        annotation = mock.Mock(updated=None)
+
+        updated = AnnotationBasePresenter(request, annotation).updated
+
+        assert updated is None
+
+    def test_updated_uses_iso_format(self):
+        request = DummyRequest()
+        when = datetime.datetime(1983, 8, 31, 7, 18, 20, 98763)
+        annotation = mock.Mock(updated=when)
+
+        updated = AnnotationBasePresenter(request, annotation).updated
+
+        assert updated == '1983-08-31T07:18:20.098763+00:00'
 
     def test_links_empty(self):
         request = DummyRequest()
@@ -77,6 +113,52 @@ class TestAnnotationBasePresenter(object):
         links = AnnotationBasePresenter(request, annotation).links
 
         dummy_link_generator.assert_called_once_with(request, annotation)
+
+    def test_text(self):
+        request = DummyRequest()
+        ann = mock.Mock(text='It is magical!')
+        presenter = AnnotationBasePresenter(request, ann)
+
+        assert 'It is magical!' == presenter.text
+
+    def test_text_missing(self):
+        request = DummyRequest()
+        ann = mock.Mock(text=None)
+        presenter = AnnotationBasePresenter(request, ann)
+
+        assert '' == presenter.text
+
+    def test_tags(self):
+        request = DummyRequest()
+        ann = mock.Mock(tags=['interesting', 'magic'])
+        presenter = AnnotationBasePresenter(request, ann)
+
+        assert ['interesting', 'magic'] == presenter.tags
+
+    def test_tags_missing(self):
+        request = DummyRequest()
+        ann = mock.Mock(tags=None)
+        presenter = AnnotationBasePresenter(request, ann)
+
+        assert [] == presenter.tags
+
+    def test_target(self):
+        request = DummyRequest()
+        ann = mock.Mock(target_uri='http://example.com',
+                        target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
+
+        expected = [{'source': 'http://example.com', 'selector': {'PositionSelector': {'start': 0, 'end': 12}}}]
+        actual = AnnotationJSONPresenter(request, ann).target
+        assert expected == actual
+
+    def test_target_missing_selectors(self):
+        request = DummyRequest()
+        ann = mock.Mock(target_uri='http://example.com',
+                        target_selectors=None)
+
+        expected = [{'source': 'http://example.com'}]
+        actual = AnnotationJSONPresenter(request, ann).target
+        assert expected == actual
 
 
 class TestAnnotationJSONPresenter(object):
@@ -159,34 +241,6 @@ class TestAnnotationJSONPresenter(object):
             'withid': 'http://withid.com/my-id',
         }
 
-    def test_text(self):
-        request = DummyRequest()
-        ann = mock.Mock(text='It is magical!')
-        presenter = AnnotationJSONPresenter(request, ann)
-
-        assert 'It is magical!' == presenter.text
-
-    def test_text_missing(self):
-        request = DummyRequest()
-        ann = mock.Mock(text=None)
-        presenter = AnnotationJSONPresenter(request, ann)
-
-        assert '' == presenter.text
-
-    def test_tags(self):
-        request = DummyRequest()
-        ann = mock.Mock(tags=['interesting', 'magic'])
-        presenter = AnnotationJSONPresenter(request, ann)
-
-        assert ['interesting', 'magic'] == presenter.tags
-
-    def test_tags_missing(self):
-        request = DummyRequest()
-        ann = mock.Mock(tags=None)
-        presenter = AnnotationJSONPresenter(request, ann)
-
-        assert [] == presenter.tags
-
     @pytest.mark.parametrize('annotation,action,expected', [
         (mock.Mock(userid='acct:luke', shared=False), 'read', ['acct:luke']),
         (mock.Mock(groupid='__world__', shared=True), 'read', ['group:__world__']),
@@ -200,24 +254,6 @@ class TestAnnotationJSONPresenter(object):
         presenter = AnnotationJSONPresenter(request, annotation)
         assert expected == presenter.permissions[action]
 
-    def test_target(self):
-        request = DummyRequest()
-        ann = mock.Mock(target_uri='http://example.com',
-                        target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
-
-        expected = [{'source': 'http://example.com', 'selector': {'PositionSelector': {'start': 0, 'end': 12}}}]
-        actual = AnnotationJSONPresenter(request, ann).target
-        assert expected == actual
-
-    def test_target_missing_selectors(self):
-        request = DummyRequest()
-        ann = mock.Mock(target_uri='http://example.com',
-                        target_selectors=None)
-
-        expected = [{'source': 'http://example.com'}]
-        actual = AnnotationJSONPresenter(request, ann).target
-        assert expected == actual
-
     @pytest.fixture
     def document_asdict(self, request):
         patcher = mock.patch('h.api.presenters.DocumentJSONPresenter.asdict',
@@ -225,6 +261,84 @@ class TestAnnotationJSONPresenter(object):
         method = patcher.start()
         request.addfinalizer(patcher.stop)
         return method
+
+
+class TestAnnotationJSONLDPresenter(object):
+
+    @pytest.fixture(autouse=True)
+    def routes(self, request):
+        config = testing.setUp()
+        config.add_route('annotation', '/ann/{id}')
+        request.addfinalizer(testing.tearDown)
+
+    def test_asdict(self):
+        request = DummyRequest()
+        annotation = mock.Mock(
+            id='foobar',
+            created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
+            updated=datetime.datetime(2016, 2, 29, 10, 24, 5, 564),
+            userid='acct:luke',
+            target_uri='http://example.com',
+            text='It is magical!',
+            tags=['magic'],
+            target_selectors=[{'TestSelector': 'foobar'}])
+        expected = {
+            '@context': 'http://www.w3.org/ns/anno.jsonld',
+            'type': 'Annotation',
+            'id': 'http://example.com/ann/foobar',
+            'created': '2016-02-24T18:03:25.000768+00:00',
+            'modified': '2016-02-29T10:24:05.000564+00:00',
+            'creator': 'acct:luke',
+            'body': [{'type': 'TextualBody',
+                      'format': 'text/markdown',
+                      'text': 'It is magical!'},
+                     {'type': 'TextualBody',
+                      'purpose': 'tagging',
+                      'text': 'magic'}],
+            'target': [{'source': 'http://example.com',
+                        'selector': [{'TestSelector': 'foobar'}]}]
+        }
+
+        result = AnnotationJSONLDPresenter(request, annotation).asdict()
+
+        assert result == expected
+
+    def test_id_returns_annotation_url(self):
+        request = DummyRequest()
+        annotation = mock.Mock(id='foobar')
+
+        presenter = AnnotationJSONLDPresenter(request, annotation)
+
+        assert presenter.id == 'http://example.com/ann/foobar'
+
+    def test_bodies_returns_textual_body(self):
+        request = DummyRequest()
+        annotation = mock.Mock(text='Flib flob flab', tags=None)
+
+        bodies = AnnotationJSONLDPresenter(request, annotation).bodies
+
+        assert bodies == [{
+            'type': 'TextualBody',
+            'text': 'Flib flob flab',
+            'format': 'text/markdown',
+        }]
+
+    def test_bodies_appends_tag_bodies(self):
+        request = DummyRequest()
+        annotation = mock.Mock(text='Flib flob flab', tags=['giraffe', 'lion'])
+
+        bodies = AnnotationJSONLDPresenter(request, annotation).bodies
+
+        assert {
+            'type': 'TextualBody',
+            'text': 'giraffe',
+            'purpose': 'tagging',
+        } in bodies
+        assert {
+            'type': 'TextualBody',
+            'text': 'lion',
+            'purpose': 'tagging',
+        } in bodies
 
 
 class TestDocumentJSONPresenter(object):
