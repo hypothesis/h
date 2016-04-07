@@ -153,7 +153,6 @@ class TestExpandURI(object):
                          'transform')
 class TestLegacyCreateAnnotation(object):
 
-
     def test_it_inits_an_elastic_annotation_model(self, models):
         data = self.annotation_data()
 
