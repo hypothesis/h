@@ -81,12 +81,7 @@ ENTRY_POINTS = {
     'console_scripts': [
         'hypothesis=h.script:main',
         'hypothesis-buildext=h.buildext:main',
-        'hypothesis-worker=h.worker:main',
-    ],
-    'h.worker': [
-        'mailer=h.mailer:worker',
-        'nipsa=h.nipsa.worker:worker',
-        'notification=h.notification.worker:run',
+        'hypothesis-celery=h.celery:main',
     ],
     'h.annotool': [
         'prepare=h.api.transform:prepare',
