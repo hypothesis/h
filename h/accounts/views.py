@@ -230,7 +230,7 @@ class ForgotPasswordController(object):
 
         link = reset_password_link(self.request, code)
         message = reset_password_email(user, code, link)
-        mailer.send(self.request, **message)
+        mailer.send.delay(**message)
 
 
 @view_defaults(route_name='reset_password',
@@ -378,7 +378,7 @@ class RegisterController(object):
 
         # Send the activation email
         message = activation_email(self.request, user)
-        mailer.send(self.request, **message)
+        mailer.send.delay(**message)
 
         self.request.session.flash(jinja2.Markup(_(
             'Thank you for creating an account! '
