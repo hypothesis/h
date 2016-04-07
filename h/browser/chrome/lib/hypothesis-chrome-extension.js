@@ -246,9 +246,11 @@ function HypothesisChromeExtension(dependencies) {
             });
             return;
           }
-          errors.report(err, 'Injecting Hypothesis sidebar', {
-            url: tab.url,
-          });
+          if (!errors.shouldIgnoreInjectionError(err)) {
+            errors.report(err, 'Injecting Hypothesis sidebar', {
+              url: tab.url,
+            });
+          }
           state.errorTab(tab.id, err);
         });
     }
