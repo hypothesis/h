@@ -34,6 +34,7 @@ INSTALL_REQUIRES = [
     'alembic>=0.7.0',
     'annotator>=0.14.2,<0.15',
     'blinker>=1.3,<1.4',
+    'celery[redis]>=3.1.23,<3.2',
     'cryptacular>=1.4,<1.5',
     'cryptography>=0.7',
     'deform>=0.9,<1.0',
