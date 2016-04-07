@@ -101,7 +101,7 @@ make_sdist () {
 push_release () {
     local version=$1
     # Extract everything from the fourth line to the next tag from CHANGES
-    local description=$(awk 'NR==4{p=1} /^[0-9]+\.[0-9]+\.[0-9]+/{p=0} {if(p) print $0}' CHANGES)
+    local description="$(awk 'NR==4{p=1} /^[0-9]+\.[0-9]+\.[0-9]+/{p=0} {if(p) print $0}' CHANGES)"
     status "Pushing tag"
     git push --follow-tags
 
