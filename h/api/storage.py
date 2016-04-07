@@ -34,7 +34,7 @@ def annotation_from_dict(data):
     return models.elastic.Annotation(data)
 
 
-def fetch_annotation(request, id):
+def fetch_annotation(request, id, _postgres=None):
     """
     Fetch the annotation with the given id.
 
@@ -47,7 +47,12 @@ def fetch_annotation(request, id):
     :returns: the annotation, if found, or None.
     :rtype: dict, NoneType
     """
-    if _postgres_enabled(request):
+    # If no postgres arg is passed then decide whether to use postgres based
+    # on the postgres feature flag.
+    if _postgres is None:
+        _postgres = _postgres_enabled(request)
+
+    if _postgres:
         return request.db.query(models.Annotation).get(id)
 
     return models.elastic.Annotation.fetch(id)
@@ -82,7 +87,8 @@ def create_annotation(request, data):
     if data['references']:
         top_level_annotation_id = data['references'][0]
         top_level_annotation = fetch_annotation(request,
-                                                top_level_annotation_id)
+                                                top_level_annotation_id,
+                                                _postgres=True)
         if top_level_annotation:
             data['groupid'] = top_level_annotation.groupid
         else:
@@ -226,7 +232,7 @@ def expand_uri(request, uri):
 
 def _prepare(request, annotation):
     """Prepare the given annotation for storage."""
-    fetcher = partial(fetch_annotation, request)
+    fetcher = partial(fetch_annotation, request, _postgres=False)
     transform.prepare(annotation, fetcher)
 
     # Fire an AnnotationBeforeSaveEvent so subscribers who wish to modify an

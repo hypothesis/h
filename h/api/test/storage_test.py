@@ -38,6 +38,32 @@ class TestFetchAnnotation(object):
         actual = storage.fetch_annotation(request, annotation.id)
         assert annotation == actual
 
+    def test_it_uses_postgres_if_postgres_arg_is_True(self, postgres_enabled):
+        """If postgres=True it uses postgres even if feature flag is off."""
+        request = DummyRequest(db=db.Session)
+        postgres_enabled.return_value = False  # The feature flag is off.
+        annotation = Annotation(userid='luke')
+        db.Session.add(annotation)
+        db.Session.flush()
+
+        actual = storage.fetch_annotation(
+            request, annotation.id, _postgres=True)
+
+        assert annotation == actual
+
+    def test_it_uses_elastic_if_postgres_arg_is_False(self,
+                                                      postgres_enabled,
+                                                      models):
+        """If postgres=False it uses elastic even if the feature flag is on."""
+        postgres_enabled.return_value = True  # The feature flag is on.
+        models.elastic.Annotation.fetch.return_value = mock.Mock()
+
+        actual = storage.fetch_annotation(
+            DummyRequest(), '123', _postgres=False)
+
+        models.elastic.Annotation.fetch.assert_called_once_with('123')
+        assert models.elastic.Annotation.fetch.return_value == actual
+
 
 class TestExpandURI(object):
 
@@ -140,7 +166,8 @@ class TestLegacyCreateAnnotation(object):
 
         storage.legacy_create_annotation(request, self.annotation_data())
 
-        partial.assert_called_once_with(storage.fetch_annotation, request)
+        partial.assert_called_once_with(
+            storage.fetch_annotation, request, _postgres=False)
 
     def test_it_calls_prepare(self, models, partial, transform):
         storage.legacy_create_annotation(self.mock_request(),
@@ -233,7 +260,8 @@ class TestCreateAnnotation(object):
         storage.create_annotation(request, data)
 
         fetch_annotation.assert_called_once_with(request,
-                                                 'parent_annotation_id')
+                                                 'parent_annotation_id',
+                                                 _postgres=True)
 
     def test_it_sets_group_for_replies(self,
                                        authn_policy,
