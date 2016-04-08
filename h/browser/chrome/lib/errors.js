@@ -45,6 +45,29 @@ function isKnownError(err) {
   return err instanceof ExtensionError;
 }
 
+var IGNORED_ERRORS = [
+  /The tab was closed/,
+  /Cannot access contents of.*/,
+];
+
+/**
+ * Returns true if a given `err` is anticipated during sidebar injection, such
+ * as the tab being closed by the user, and should not be reported to Sentry.
+ *
+ * @param {{message: string}} err - The Error-like object
+ */
+function shouldIgnoreInjectionError(err) {
+  if (IGNORED_ERRORS.some(function (pattern) {
+    return err.message.match(pattern);
+  })) {
+    return true;
+  }
+  if (isKnownError(err)) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * Report an error.
  *
@@ -71,4 +94,5 @@ module.exports = {
   RestrictedProtocolError: RestrictedProtocolError,
   BlockedSiteError: BlockedSiteError,
   report: report,
+  shouldIgnoreInjectionError: shouldIgnoreInjectionError,
 };

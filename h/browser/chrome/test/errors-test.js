@@ -20,7 +20,39 @@ describe('errors', function () {
     console.error.restore();
   });
 
-  describe('.report', function () {
+  describe('#shouldIgnoreInjectionError', function () {
+    var ignoredErrors = [
+      'The tab was closed',
+      'Cannot access contents of url "file:///C:/t/cpp.pdf". ' +
+      'Extension manifest must request permission to access this host.',
+      'Cannot access contents of page',
+    ];
+
+    var unexpectedErrors = [
+      'SyntaxError: A typo',
+    ];
+
+    it('should be true for "expected" errors', function () {
+      ignoredErrors.forEach(function (message) {
+        var error = {message: message};
+        assert.isTrue(errors.shouldIgnoreInjectionError(error));
+      });
+    });
+
+    it('should be false for unexpected errors', function () {
+      unexpectedErrors.forEach(function (message) {
+        var error = {message: message};
+        assert.isFalse(errors.shouldIgnoreInjectionError(error));
+      });
+    });
+
+    it('should be true for the extension\'s custom error classes', function () {
+      var error = new errors.LocalFileError('some message');
+      assert.isTrue(errors.shouldIgnoreInjectionError(error));
+    });
+  });
+
+  describe('#report', function () {
     it('reports unknown errors via Raven', function () {
       var error = new Error('A most unexpected error');
       errors.report(error, 'injecting the sidebar');

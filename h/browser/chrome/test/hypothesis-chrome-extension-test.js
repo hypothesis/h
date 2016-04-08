@@ -98,6 +98,7 @@ describe('HypothesisChromeExtension', function () {
       removeFromTab: sandbox.stub().returns(Promise.resolve()),
     };
     fakeErrors = {
+      shouldIgnoreInjectionError: function () { return false; },
       report: sandbox.spy(),
     };
 
@@ -392,7 +393,22 @@ describe('HypothesisChromeExtension', function () {
             sinon.match.instanceOf(ErrorType));
         });
 
-        it('logs an error', function () {
+        it('does not log known errors', function () {
+          var error = new Error('Some error');
+          fakeErrors.shouldIgnoreInjectionError = function () {
+            return true;
+          };
+          var injectError = Promise.reject(error);
+          fakeSidebarInjector.injectIntoTab.returns(injectError);
+
+          triggerInstall();
+
+          return toResult(injectError).then(function () {
+            assert.notCalled(fakeErrors.report);
+          });
+        });
+
+        it('logs unexpected errors', function () {
           var error = new ErrorType('msg');
           var injectError = Promise.reject(error);
           fakeSidebarInjector.injectIntoTab.returns(injectError);
