@@ -228,8 +228,5 @@ def mock_request(token=None):
 
 
 @pytest.fixture
-def jwt(request):
-    patcher = mock.patch('h.auth.tokens.jwt', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
+def jwt(patch):
+    return patch('h.auth.tokens.jwt')

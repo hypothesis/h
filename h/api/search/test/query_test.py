@@ -394,18 +394,14 @@ def test_tagsmatcher_with_both_tag_and_tags():
 
 
 @pytest.fixture
-def storage(request):
-    patcher = mock.patch('h.api.search.query.storage', autospec=True)
-    storage = patcher.start()
+def storage(patch):
+    storage = patch('h.api.search.query.storage')
     storage.expand_uri.side_effect = lambda x: [x]
-    request.addfinalizer(patcher.stop)
     return storage
 
 
 @pytest.fixture
-def uri(request):
-    patcher = mock.patch('h.api.search.query.uri', autospec=True)
-    uri = patcher.start()
+def uri(patch):
+    uri = patch('h.api.search.query.uri')
     uri.normalize.side_effect = lambda x: x
-    request.addfinalizer(patcher.stop)
     return uri

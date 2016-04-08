@@ -81,13 +81,13 @@ class TestClient(object):
                                             client,
                                             client_load):
 
-        def test_load():
-            client._cache = {'notification': True}
+        def test_load(self):
+            self._cache = {'notification': True}
         client_load.side_effect = test_load
 
         client._cache = {}
         client.enabled('notification')
-        client_load.assert_called_with()
+        client_load.assert_called_with(client)
 
     def test_enabled_false_if_not_in_database(self, client):
         assert client.enabled('notification') is False
@@ -139,7 +139,7 @@ class TestClient(object):
     def test_all_loads_cache_when_empty(self, client, client_load):
         client._cache = {}
         client.all()
-        client_load.assert_called_with()
+        client_load.assert_called_with(client)
 
     def test_all_returns_cache(self, client):
         cache = mock.Mock()
@@ -156,18 +156,12 @@ class TestClient(object):
         return features.Client(DummyRequest(db=db.Session))
 
     @pytest.fixture
-    def client_load(self, request, client):
-        patcher = mock.patch('h.features.Client.load')
-        method = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return method
+    def client_load(self, patch):
+        return patch('h.features.Client.load')
 
     @pytest.fixture
-    def fetcher(self, request, client):
-        patcher = mock.patch('h.features.Client._fetch_features')
-        method = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return method
+    def fetcher(self, patch):
+        return patch('h.features.Client._fetch_features')
 
 
 def test_remove_old_flag_removes_old_flags():
@@ -190,10 +184,8 @@ def test_remove_old_flag_removes_old_flags():
 
 
 @pytest.fixture
-def feature_model(request):
-    patcher = mock.patch('h.features.Feature', autospec=True)
-    request.addfinalizer(patcher.stop)
-    model = patcher.start()
+def feature_model(patch):
+    model = patch('h.features.Feature')
     model.get_by_name.return_value.everyone = False
     model.get_by_name.return_value.admins = False
     return model

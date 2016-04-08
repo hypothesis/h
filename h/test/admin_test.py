@@ -789,96 +789,68 @@ def test_delete_user_deletes_user():
 
 
 @pytest.fixture
-def models(request):
-    patcher = patch('h.admin.models', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def models(patch):
+    return patch('h.admin.models')
 
 
 @pytest.fixture
-def badge_index(request):
-    patcher = patch('h.admin.badge_index', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def badge_index(patch):
+    return patch('h.admin.badge_index')
 
 
 @pytest.fixture
-def Feature(request):
-    patcher = patch('h.models.Feature', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def Feature(patch):
+    return patch('h.models.Feature')
 
 
 @pytest.fixture
-def check_csrf_token(request):
-    patcher = patch('pyramid.session.check_csrf_token', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def check_csrf_token(patch):
+    return patch('pyramid.session.check_csrf_token')
 
 
 @pytest.fixture
-def nipsa(config, request):  # pylint:disable=unused-argument
-    patcher = patch('h.admin.nipsa', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def nipsa(patch):
+    return patch('h.admin.nipsa')
 
 
 @pytest.fixture
-def nipsa_index(config, request):  # pylint:disable=unused-argument
-    patcher = patch('h.admin.nipsa_index', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def nipsa_index(patch):
+    return patch('h.admin.nipsa_index')
 
 
 @pytest.fixture
-def User(config, request):  # pylint:disable=unused-argument
-    patcher = patch('h.admin.models.User', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def User(patch):
+    return patch('h.admin.models.User')
 
 
 @pytest.fixture
-def make_admin(config, request):  # pylint:disable=unused-argument
-    patcher = patch('h.admin.accounts.make_admin', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def make_admin(patch):
+    return patch('h.admin.accounts.make_admin')
 
 
 @pytest.fixture
-def make_staff(config, request):  # pylint:disable=unused-argument
-    patcher = patch('h.admin.accounts.make_staff', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def make_staff(patch):
+    return patch('h.admin.accounts.make_staff')
 
 
 @pytest.fixture
-def admins_index(config, request):  # pylint:disable=unused-argument
-    patcher = patch('h.admin.admins_index', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def admins_index(patch):
+    return patch('h.admin.admins_index')
 
 
 @pytest.fixture
-def staff_index(config, request):  # pylint:disable=unused-argument
-    patcher = patch('h.admin.staff_index', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def staff_index(patch):
+    return patch('h.admin.staff_index')
 
 
 @pytest.fixture
-def elasticsearch_helpers(request):
-    patcher = patch('h.admin.es_helpers', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
+def elasticsearch_helpers(patch):
+    return patch('h.admin.es_helpers')
 
 
 @pytest.fixture
-def api_storage(request):
-    patcher = patch('h.admin.storage', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
+def api_storage(patch):
+    return patch('h.admin.storage')
 
 
 @pytest.fixture
@@ -888,16 +860,10 @@ def user_created_no_groups(models):
 
 
 @pytest.fixture
-def delete_user(request):
-    patcher = patch('h.admin.delete_user')
-    function = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return function
+def delete_user(patch):
+    return patch('h.admin.delete_user')
 
 
 @pytest.fixture
-def events(request):
-    patcher = patch('h.admin.events', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
+def events(patch):
+    return patch('h.admin.events')

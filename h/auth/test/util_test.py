@@ -157,14 +157,10 @@ def test_translate_annotation_principals(p_in, p_out):
 
 
 @pytest.fixture
-def accounts(request):
-    patcher = mock.patch('h.auth.util.accounts', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def accounts(patch):
+    return patch('h.auth.util.accounts')
 
 
 @pytest.fixture
-def group_principals(request):
-    patcher = mock.patch('h.auth.util.group_principals', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def group_principals(patch):
+    return patch('h.auth.util.group_principals')

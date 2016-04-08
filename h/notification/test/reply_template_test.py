@@ -427,12 +427,8 @@ def test_send_if_everything_is_okay():
 
 
 @pytest.fixture
-def effective_principals(request):
-    patcher = patch('h.auth.effective_principals')
-    func = patcher.start()
-    func.return_value = [security.Everyone]
-    request.addfinalizer(patcher.stop)
-    return func
+def effective_principals(patch):
+    return patch('h.auth.effective_principals', return_value=[security.Everyone])
 
 
 @pytest.fixture(autouse=True)

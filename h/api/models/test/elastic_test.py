@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import datetime
 
 import pytest
-from mock import patch
 from mock import PropertyMock
 
 from pyramid import security
@@ -242,32 +241,28 @@ class TestAnnotation(object):
         assert actual == expect
 
     @pytest.fixture
-    def link_text(self, request):
-        patcher = patch('h.api.models.elastic.Annotation.link_text',
-                        new_callable=PropertyMock)
-        request.addfinalizer(patcher.stop)
-        return patcher.start()
+    def link_text(self, patch):
+        return patch('h.api.models.elastic.Annotation.link_text',
+                     autospec=None,
+                     new_callable=PropertyMock)
 
     @pytest.fixture
-    def title(self, request):
-        patcher = patch('h.api.models.elastic.Annotation.title',
-                        new_callable=PropertyMock)
-        request.addfinalizer(patcher.stop)
-        return patcher.start()
+    def title(self, patch):
+        return patch('h.api.models.elastic.Annotation.title',
+                     autospec=None,
+                     new_callable=PropertyMock)
 
     @pytest.fixture
-    def href(self, request):
-        patcher = patch('h.api.models.elastic.Annotation.href',
-                        new_callable=PropertyMock)
-        request.addfinalizer(patcher.stop)
-        return patcher.start()
+    def href(self, patch):
+        return patch('h.api.models.elastic.Annotation.href',
+                     autospec=None,
+                     new_callable=PropertyMock)
 
     @pytest.fixture
-    def hostname_or_filename(self, request):
-        patcher = patch('h.api.models.elastic.Annotation.hostname_or_filename',
-                        new_callable=PropertyMock)
-        request.addfinalizer(patcher.stop)
-        return patcher.start()
+    def hostname_or_filename(self, patch):
+        return patch('h.api.models.elastic.Annotation.hostname_or_filename',
+                     autospec=None,
+                     new_callable=PropertyMock)
 
 
 class TestDocument(object):

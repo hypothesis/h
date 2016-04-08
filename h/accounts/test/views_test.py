@@ -1028,64 +1028,35 @@ class TestDeveloperController(object):
 
 
 @pytest.fixture
-def pop_flash(request):
-    patcher = mock.patch('h.accounts.views.session.pop_flash', autospec=True)
-    func = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return func
+def session(patch):
+    return patch('h.accounts.views.session')
 
 
 @pytest.fixture
-def session(request):
-    patcher = mock.patch('h.accounts.views.session', autospec=True)
-    session = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return session
+def subscriptions_model(patch):
+    return patch('h.models.Subscriptions')
 
 
 @pytest.fixture
-def subscriptions_model(request):
-    patcher = mock.patch('h.models.Subscriptions', autospec=True)
-    model = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return model
+def user_model(patch):
+    return patch('h.accounts.views.User')
 
 
 @pytest.fixture
-def user_model(request):
-    patcher = mock.patch('h.accounts.views.User', autospec=True)
-    model = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return model
+def activation_model(patch):
+    return patch('h.accounts.views.Activation')
 
 
 @pytest.fixture
-def activation_model(request):
-    patcher = mock.patch('h.accounts.views.Activation', autospec=True)
-    model = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return model
+def ActivationEvent(patch):
+    return patch('h.accounts.views.ActivationEvent')
 
 
 @pytest.fixture
-def ActivationEvent(request):
-    patcher = mock.patch('h.accounts.views.ActivationEvent', autospec=True)
-    model = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return model
+def mailer(patch):
+    return patch('h.accounts.views.mailer')
 
 
 @pytest.fixture
-def mailer(request):
-    patcher = mock.patch('h.accounts.views.mailer', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
-
-
-@pytest.fixture
-def models(request):
-    patcher = mock.patch('h.accounts.views.models', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
+def models(patch):
+    return patch('h.accounts.views.models')

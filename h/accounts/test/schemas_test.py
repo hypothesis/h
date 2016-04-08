@@ -2,7 +2,6 @@
 import colander
 import pytest
 from mock import Mock
-from mock import patch
 from pyramid.exceptions import BadCSRFToken
 from pyramid.testing import DummyRequest
 from itsdangerous import BadData, SignatureExpired
@@ -356,14 +355,10 @@ def test_PasswordChangeSchema_rejects_wrong_password(config, user_model):
 
 
 @pytest.fixture
-def activation_model(config, request):
-    patcher = patch('h.accounts.schemas.models.Activation', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def activation_model(patch):
+    return patch('h.accounts.schemas.models.Activation')
 
 
 @pytest.fixture
-def user_model(config, request):
-    patcher = patch('h.accounts.schemas.models.User', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def user_model(patch):
+    return patch('h.accounts.schemas.models.User')

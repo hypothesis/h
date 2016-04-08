@@ -541,53 +541,24 @@ class TestDocumentURIsFromData(object):
         assert document_uri_self_claim.return_value in document_uris
 
     @pytest.fixture
-    def document_uris_from_dc(self, request):
-        patcher = mock.patch(
-            'h.api.parse_document_claims.document_uris_from_dc',
-            autospec=True)
-        document_uris_from_dc = patcher.start()
-        document_uris_from_dc.return_value = []
-        request.addfinalizer(patcher.stop)
-        return document_uris_from_dc
+    def document_uris_from_dc(self, patch):
+        return patch('h.api.parse_document_claims.document_uris_from_dc', return_value=[])
 
     @pytest.fixture
-    def document_uris_from_highwire_pdf(self, request):
-        patcher = mock.patch(
-            'h.api.parse_document_claims.document_uris_from_highwire_pdf',
-            autospec=True)
-        document_uris_from_highwire_pdf = patcher.start()
-        document_uris_from_highwire_pdf.return_value = []
-        request.addfinalizer(patcher.stop)
-        return document_uris_from_highwire_pdf
+    def document_uris_from_highwire_pdf(self, patch):
+        return patch('h.api.parse_document_claims.document_uris_from_highwire_pdf', return_value=[])
 
     @pytest.fixture
-    def document_uris_from_highwire_doi(self, request):
-        patcher = mock.patch(
-            'h.api.parse_document_claims.document_uris_from_highwire_doi',
-            autospec=True)
-        document_uris_from_highwire_doi = patcher.start()
-        document_uris_from_highwire_doi.return_value = []
-        request.addfinalizer(patcher.stop)
-        return document_uris_from_highwire_doi
+    def document_uris_from_highwire_doi(self, patch):
+        return patch('h.api.parse_document_claims.document_uris_from_highwire_doi', return_value=[])
 
     @pytest.fixture
-    def document_uris_from_links(self, request):
-        patcher = mock.patch(
-            'h.api.parse_document_claims.document_uris_from_links',
-            autospec=True)
-        document_uris_from_links = patcher.start()
-        document_uris_from_links.return_value = []
-        request.addfinalizer(patcher.stop)
-        return document_uris_from_links
+    def document_uris_from_links(self, patch):
+        return patch('h.api.parse_document_claims.document_uris_from_links', return_value=[])
 
     @pytest.fixture
-    def document_uri_self_claim(self, request):
-        patcher = mock.patch(
-            'h.api.parse_document_claims.document_uri_self_claim',
-            autospec=True)
-        document_uri_self_claim = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return document_uri_self_claim
+    def document_uri_self_claim(self, patch):
+        return patch('h.api.parse_document_claims.document_uri_self_claim')
 
 
 def one(list_):

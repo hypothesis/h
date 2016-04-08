@@ -51,17 +51,12 @@ def test_annotator_token_returns_token(generate_jwt):
 
 
 @pytest.fixture
-def generate_jwt(request):
-    patcher = mock.patch('h.views.client.generate_jwt', autospec=True)
-    func = patcher.start()
+def generate_jwt(patch):
+    func = patch('h.views.client.generate_jwt')
     func.return_value = 'abc123'
-    request.addfinalizer(patcher.stop)
     return func
 
 
 @pytest.fixture
-def session(request):
-    patcher = mock.patch('h.views.client.session', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
+def session(patch):
+    return patch('h.views.client.session')
