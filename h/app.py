@@ -53,6 +53,8 @@ def includeme(config):
                           'pyramid.events.BeforeRender')
     config.add_subscriber('h.subscribers.publish_annotation_event',
                           'h.api.events.AnnotationEvent')
+    config.add_subscriber('h.subscribers.send_reply_notifications',
+                          'h.api.events.AnnotationEvent')
 
     config.add_tween('h.tweens.conditional_http_tween_factory', under=EXCVIEW)
     config.add_tween('h.tweens.csrf_tween_factory')
