@@ -59,5 +59,3 @@ notifications:
     urls:
       - https://support.hypothes.is/travis
     on_success: always
-    on_failure: always # generate lots of noise while testing
-    on_start: always
