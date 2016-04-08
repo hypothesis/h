@@ -29,134 +29,83 @@ def test_remove_nipsa_action():
     }
 
 
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_add_nipsa_gets_query(search, _):
-    worker.add_or_remove_nipsa(client=mock.Mock(),
-                               index="foo",
-                               userid="test_userid",
-                               action="add_nipsa")
+@mock.patch("h.nipsa.worker.helpers", autospec=True)
+def test_bulk_update_annotations_scans_with_query(helpers):
+    client = mock.Mock(spec_set=['conn', 'index'])
+
+    worker.bulk_update_annotations(client=client,
+                                   query=mock.sentinel.query,
+                                   action=mock.sentinel.action)
+
+    helpers.scan.assert_called_once_with(client=client.conn,
+                                         index=client.index,
+                                         query=mock.sentinel.query)
 
 
-    search.not_nipsad_annotations.assert_called_once_with("test_userid")
+@mock.patch("h.nipsa.worker.helpers", autospec=True)
+def test_bulk_update_annotations_generates_actions_for_each_annotation(helpers):
+    action = mock.Mock(spec_set=[])
+    client = mock.Mock(spec_set=['conn', 'index'])
+    helpers.scan.return_value = [mock.sentinel.anno1,
+                                 mock.sentinel.anno2,
+                                 mock.sentinel.anno3]
+
+    worker.bulk_update_annotations(client=client,
+                                   query=mock.sentinel.query,
+                                   action=action)
+
+    assert action.call_args_list == [
+        mock.call(client.index, mock.sentinel.anno1),
+        mock.call(client.index, mock.sentinel.anno2),
+        mock.call(client.index, mock.sentinel.anno3),
+    ]
 
 
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_remove_nipsa_gets_query(search, _):
-    worker.add_or_remove_nipsa(client=mock.Mock(),
-                               index="foo",
-                               userid="test_userid",
-                               action="remove_nipsa")
+@mock.patch("h.nipsa.worker.helpers", autospec=True)
+def test_bulk_update_annotations_calls_bulk_with_actions(helpers):
+    action = mock.Mock(spec_set=[], side_effect=[
+        mock.sentinel.action1,
+        mock.sentinel.action2,
+        mock.sentinel.action3,
+    ])
+    client = mock.Mock(spec_set=['conn', 'index'])
+    helpers.scan.return_value = [mock.sentinel.anno1,
+                                 mock.sentinel.anno2,
+                                 mock.sentinel.anno3]
 
-    search.nipsad_annotations.assert_called_once_with("test_userid")
+    worker.bulk_update_annotations(client=client,
+                                   query=mock.sentinel.query,
+                                   action=action)
 
-
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_add_nipsa_passes_es_client_to_scan(_, helpers):
-    client = mock.Mock()
-
-    worker.add_or_remove_nipsa(client=client,
-                               index="foo",
-                               userid="test_userid",
-                               action="add_nipsa")
-
-    assert helpers.scan.call_args[1]["client"] == client
+    helpers.bulk.assert_called_once_with(client=client.conn,
+                                         actions=[mock.sentinel.action1,
+                                                  mock.sentinel.action2,
+                                                  mock.sentinel.action3])
 
 
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_remove_nipsa_passes_es_client_to_scan(_, helpers):
-    client = mock.Mock()
+@mock.patch("h.nipsa.worker.bulk_update_annotations", autospec=True)
+@mock.patch("h.nipsa.worker.celery", autospec=True)
+@mock.patch("h.nipsa.worker.search", autospec=True)
+def test_add_nipsa_calls_bulk_update_annotations_correctly(search, celery, bulk):
+    celery.request = mock.Mock(spec_set=['legacy_es'])
+    expected_query = search.not_nipsad_annotations('acct:jeannie@example.com')
 
-    worker.add_or_remove_nipsa(client=client,
-                               index="foo",
-                               userid="test_userid",
-                               action="remove_nipsa")
+    worker.add_nipsa('acct:jeannie@example.com')
 
-    assert helpers.scan.call_args[1]["client"] == client
-
-
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_add_nipsa_passes_query_to_scan(search, helpers):
-    query = mock.MagicMock()
-    search.not_nipsad_annotations.return_value = query
-
-    worker.add_or_remove_nipsa(client=mock.Mock(),
-                               index="foo",
-                               userid="test_userid",
-                               action="add_nipsa")
-
-    assert helpers.scan.call_args[1]["query"] == query
+    bulk.assert_called_once_with(celery.request.legacy_es,
+                                 expected_query,
+                                 worker.add_nipsa_action)
 
 
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_remove_nipsa_passes_query_to_scan(search, helpers):
-    query = mock.MagicMock()
-    search.nipsad_annotations.return_value = query
+@mock.patch("h.nipsa.worker.bulk_update_annotations", autospec=True)
+@mock.patch("h.nipsa.worker.celery", autospec=True)
+@mock.patch("h.nipsa.worker.search", autospec=True)
+def test_remove_nipsa_calls_bulk_update_annotations_correctly(search, celery, bulk):
+    celery.request = mock.Mock(spec_set=['legacy_es'])
+    expected_query = search.nipsad_annotations('acct:jeannie@example.com')
 
-    worker.add_or_remove_nipsa(client=mock.Mock(),
-                               index="foo",
-                               userid="test_userid",
-                               action="remove_nipsa")
+    worker.remove_nipsa('acct:jeannie@example.com')
 
-    assert helpers.scan.call_args[1]["query"] == query
-
-
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_add_nipsa_passes_actions_to_bulk(_, helpers):
-    helpers.scan.return_value = [
-        {"_id": "foo"}, {"_id": "bar"}, {"_id": "gar"}]
-
-    worker.add_or_remove_nipsa(client=mock.Mock(),
-                               index="foo",
-                               userid="test_userid",
-                               action="add_nipsa")
-
-    actions = helpers.bulk.call_args[1]["actions"]
-    assert [action["_id"] for action in actions] == ["foo", "bar", "gar"]
-
-
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_remove_nipsa_passes_actions_to_bulk(_, helpers):
-    helpers.scan.return_value = [
-        {"_id": "foo"}, {"_id": "bar"}, {"_id": "gar"}]
-
-    worker.add_or_remove_nipsa(client=mock.Mock(),
-                               index="foo",
-                               userid="test_userid",
-                               action="remove_nipsa")
-
-    actions = helpers.bulk.call_args[1]["actions"]
-    assert [action["_id"] for action in actions] == ["foo", "bar", "gar"]
-
-
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_add_nipsa_passes_es_client_to_bulk(_, helpers):
-    client = mock.Mock()
-
-    worker.add_or_remove_nipsa(client=client,
-                               index="foo",
-                               userid="test_userid",
-                               action="remove_nipsa")
-
-    assert helpers.bulk.call_args[1]["client"] == client
-
-
-@mock.patch("h.nipsa.worker.helpers")
-@mock.patch("h.nipsa.worker.search")
-def test_remove_nipsa_passes_actions_to_bulk(_, helpers):
-    client = mock.Mock()
-
-    worker.add_or_remove_nipsa(client=client,
-                               index="foo",
-                               userid="test_userid",
-                               action="remove_nipsa")
-
-    assert helpers.bulk.call_args[1]["client"] == client
+    bulk.assert_called_once_with(celery.request.legacy_es,
+                                 expected_query,
+                                 worker.remove_nipsa_action)

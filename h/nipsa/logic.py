@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
 
 from h.nipsa import models
-
-
-def _publish(request, data):
-    request.get_queue_writer().publish("nipsa_user_requests", data)
+from h.nipsa import worker
 
 
 def index():
@@ -30,7 +26,7 @@ def add_nipsa(request, userid):
         nipsa_user = models.NipsaUser(userid)
         request.db.add(nipsa_user)
 
-    _publish(request, json.dumps({"action": "add_nipsa", "userid": userid}))
+    worker.add_nipsa.delay(userid)
 
 
 def remove_nipsa(request, userid):
@@ -44,7 +40,7 @@ def remove_nipsa(request, userid):
     if nipsa_user:
         request.db.delete(nipsa_user)
 
-    _publish(request, json.dumps({"action": "remove_nipsa", "userid": userid}))
+    worker.remove_nipsa.delay(userid)
 
 
 def has_nipsa(userid):

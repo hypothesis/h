@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
+
 import mock
+import pytest
 
 from h.nipsa import logic
 
@@ -55,13 +56,11 @@ def test_add_nipsa_does_not_add_when_user_already_exists(NipsaUser):
     assert not request.db.add.called
 
 
-@mock.patch("h.nipsa.logic._publish")
 @mock.patch("h.nipsa.models.NipsaUser")
-def test_add_nipsa_publishes_when_user_already_exists(
-        NipsaUser, _publish):
+def test_add_nipsa_schedules_task_when_user_already_exists(NipsaUser, worker):
     """
-    Even if the user is already NIPSA'd, add_nipsa() should still publish an
-    "add_nipsa" message to the queue.
+    Even if the user is already NIPSA'd, add_nipsa() should still schedule an
+    "add_nipsa" task.
     """
     nipsa_user = mock.Mock()
     NipsaUser.get_by_userid.return_value = nipsa_user
@@ -69,8 +68,7 @@ def test_add_nipsa_publishes_when_user_already_exists(
 
     logic.add_nipsa(request=request, userid="test_id")
 
-    _publish.assert_called_once_with(
-        request, json.dumps({"action": "add_nipsa", "userid": "test_id"}))
+    worker.add_nipsa.delay.assert_called_once_with("test_id")
     NipsaUser.get_by_userid.assert_called_once_with("test_id")
 
 
@@ -89,9 +87,8 @@ def test_add_nipsa_adds_user_if_user_does_not_exist(NipsaUser):
     request.db.add.assert_called_once_with(nipsa_user)
 
 
-@mock.patch("h.nipsa.logic._publish")
 @mock.patch("h.nipsa.models.NipsaUser")
-def test_add_nipsa_publishes_if_user_does_not_exist(NipsaUser, _publish):
+def test_add_nipsa_schedules_task_if_user_does_not_exist(NipsaUser, worker):
     request = mock.Mock()
 
     nipsa_user = mock.Mock()
@@ -102,8 +99,7 @@ def test_add_nipsa_publishes_if_user_does_not_exist(NipsaUser, _publish):
 
     logic.add_nipsa(request=request, userid="test_id")
 
-    _publish.assert_called_once_with(
-        request, json.dumps({"action": "add_nipsa", "userid": "test_id"}))
+    worker.add_nipsa.delay.assert_called_once_with("test_id")
 
 
 @mock.patch("h.nipsa.models.NipsaUser")
@@ -129,20 +125,18 @@ def test_remove_nipsa_does_not_delete_user_that_does_not_exist(NipsaUser):
     assert not request.db.delete.called
 
 
-@mock.patch("h.nipsa.logic._publish")
 @mock.patch("h.nipsa.models.NipsaUser")
-def test_remove_nipsa_publishes_when_user_does_not_exist(NipsaUser, _publish):
+def test_remove_nipsa_schedules_task_when_user_does_not_exist(NipsaUser, worker):
     """
-    Even if the user is not NIPSA'd, remove_nipsa() should still publish an
-    "remove_nipsa" message to the queue.
+    Even if the user is not NIPSA'd, remove_nipsa() should still schedule a
+    "remove_nipsa" task.
     """
     NipsaUser.get_by_userid.return_value = None
     request = mock.Mock()
 
     logic.remove_nipsa(request=request, userid="test_id")
 
-    _publish.assert_called_once_with(
-        request, json.dumps({"action": "remove_nipsa", "userid": "test_id"}))
+    worker.remove_nipsa.delay.assert_called_once_with("test_id")
 
 
 @mock.patch("h.nipsa.models.NipsaUser")
@@ -158,9 +152,8 @@ def test_remove_nipsa_deletes_user(NipsaUser):
     request.db.delete.assert_called_once_with(nipsa_user)
 
 
-@mock.patch("h.nipsa.logic._publish")
 @mock.patch("h.nipsa.models.NipsaUser")
-def test_remove_nipsa_publishes_if_user_exists(NipsaUser, _publish):
+def test_remove_nipsa_schedules_task_if_user_exists(NipsaUser, worker):
     request = mock.Mock()
 
     nipsa_user = mock.Mock()
@@ -169,8 +162,7 @@ def test_remove_nipsa_publishes_if_user_exists(NipsaUser, _publish):
 
     logic.remove_nipsa(request=request, userid="test_id")
 
-    _publish.assert_called_once_with(
-        request, json.dumps({"action": "remove_nipsa", "userid": "test_id"}))
+    worker.remove_nipsa.delay.assert_called_once_with("test_id")
 
 
 @mock.patch("h.nipsa.models.NipsaUser")
@@ -194,3 +186,11 @@ def test_has_nipsa_returns_False_if_user_is_not_nipsad(NipsaUser):
     NipsaUser.get_by_userid.return_value = None
 
     assert logic.has_nipsa(userid="test_user") is False
+
+
+@pytest.fixture(autouse=True)
+def worker(request):
+    patcher = mock.patch("h.nipsa.logic.worker", autospec=True)
+    module = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return module
