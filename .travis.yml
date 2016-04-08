@@ -55,3 +55,7 @@ notifications:
       - secure: SKPwtfoH32aDop6hLhQdgrUhl58gM6CMBUATMdq0KMmEwCxskPbIArqxGUKxeeiO3c3jBQ+Yuq3b4m8GbR2AJxxelO0DRLNyV1lAjfeJ/QzCc3Taxqo0yel4uAFNg/oCYWH50dv2oAgDP3CHk/tKXmsgDWOjcm6A6k35xst16xI=
     on_success: change
     on_failure: always
+  webhooks:
+    urls:
+      - https://support.hypothes.is/travis
+    on_success: always
