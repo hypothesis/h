@@ -64,6 +64,27 @@ class TestCelery(object):
         register_logger_signal.assert_called_once_with(mock.sentinel.sentry,
                                                        loglevel=logging.ERROR)
 
+    def test_reset_feature_flags_resets_request_feature_flags(self):
+        sender = mock.Mock(spec=['app'])
+
+        celery.reset_feature_flags(sender)
+
+        sender.app.request.feature.clear.assert_called_once_with()
+
+    def test_transaction_commit_commits_request_transaction(self):
+        sender = mock.Mock(spec=['app'])
+
+        celery.transaction_commit(sender)
+
+        sender.app.request.tm.commit.assert_called_once_with()
+
+    def test_transaction_abort_aborts_request_transaction(self):
+        sender = mock.Mock(spec=['app'])
+
+        celery.transaction_abort(sender)
+
+        sender.app.request.tm.abort.assert_called_once_with()
+
 
 def _patch(modulepath, request):
     patcher = mock.patch(modulepath, autospec=True)

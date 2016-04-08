@@ -71,5 +71,23 @@ def bootstrap_worker(sender, **kwargs):
     register_logger_signal(request.sentry, loglevel=logging.ERROR)
 
 
+@signals.task_prerun.connect
+def reset_feature_flags(sender, **kwargs):
+    """Reset feature flags before running each task."""
+    sender.app.request.feature.clear()
+
+
+@signals.task_success.connect
+def transaction_commit(sender, **kwargs):
+    """Commit the request transaction after each successful task execution."""
+    sender.app.request.tm.commit()
+
+
+@signals.task_failure.connect
+def transaction_abort(sender, **kwargs):
+    """Abort the request transaction after each failed task execution."""
+    sender.app.request.tm.abort()
+
+
 def main():
     celery.start()
