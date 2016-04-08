@@ -18,6 +18,7 @@ from celery import signals
 from celery.utils.log import get_task_logger
 from pyramid import paster
 from pyramid.request import Request
+from raven.contrib.celery import register_signal, register_logger_signal
 
 __all__ = (
     'celery',
@@ -64,6 +65,10 @@ def bootstrap_worker(sender, **kwargs):
     request.root = env['root']
 
     sender.app.request = request
+
+    # Configure Sentry reporting on task failure
+    register_signal(request.sentry)
+    register_logger_signal(request.sentry, loglevel=logging.ERROR)
 
 
 def main():

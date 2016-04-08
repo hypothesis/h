@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import mock
 from pyramid.request import Request
 import pytest
@@ -22,6 +24,14 @@ class TestCelery(object):
         paster.bootstrap.side_effect = fake_bootstrap
         return paster
 
+    @pytest.fixture(autouse=True)
+    def register_signal(self, request):
+        return _patch('h.celery.register_signal', request)
+
+    @pytest.fixture(autouse=True)
+    def register_logger_signal(self, request):
+        return _patch('h.celery.register_logger_signal', request)
+
     def test_bootstrap_worker_calls_paster_bootstrap(self, paster):
         sender = mock.Mock(spec=['app'])
 
@@ -42,6 +52,17 @@ class TestCelery(object):
         celery.bootstrap_worker(sender)
 
         assert sender.app.request.root == mock.sentinel.root
+
+    def test_bootstrap_worker_configures_sentry_reporting(self,
+                                                          register_signal,
+                                                          register_logger_signal):
+        sender = mock.Mock(spec=['app'])
+
+        celery.bootstrap_worker(sender)
+
+        register_signal.assert_called_once_with(mock.sentinel.sentry)
+        register_logger_signal.assert_called_once_with(mock.sentinel.sentry,
+                                                       loglevel=logging.ERROR)
 
 
 def _patch(modulepath, request):
