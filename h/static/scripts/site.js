@@ -6,7 +6,7 @@ if (settings.raven) {
   require('./raven').init(settings.raven);
 }
 
-var page = require('page');
+var page = require('./page');
 
 var CreateGroupFormController = require('./create-group-form');
 var DropdownMenuController = require('./dropdown-menu');
@@ -37,8 +37,4 @@ page('/register', function() {
 
 page('/forgot_password', function() {
   new FormSelectOnFocusController(document.body);
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-  page.start({click: false});
 });
