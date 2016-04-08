@@ -121,7 +121,7 @@ def deform():
     form.init()
 
 
-@pytest.fixture()
+@pytest.fixture
 def authn_policy(config):
     from mock import MagicMock
 
@@ -137,7 +137,7 @@ def authn_policy(config):
     return policy
 
 
-@pytest.fixture()
+@pytest.fixture
 def mailer(config):
     from pyramid_mailer.interfaces import IMailer
     from pyramid_mailer.testing import DummyMailer
@@ -146,7 +146,7 @@ def mailer(config):
     return mailer
 
 
-@pytest.fixture()
+@pytest.fixture
 def notify(config, request):
     from mock import patch
 
@@ -155,7 +155,7 @@ def notify(config, request):
     return patcher.start()
 
 
-@pytest.fixture()
+@pytest.fixture
 def routes_mapper(config):
     from pyramid.interfaces import IRoutesMapper
 
