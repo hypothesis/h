@@ -43,13 +43,12 @@ class TestError(object):
         assert result == {'status': 'failure', 'reason': 'it exploded'}
 
 
-@pytest.mark.usefixtures('routes_mapper')
 class TestIndex(object):
 
-    def test_it_returns_the_right_links(self, routes_mapper):
-        routes_mapper.add_route('api.search', '/dummy/search')
-        routes_mapper.add_route('api.annotations', '/dummy/annotations')
-        routes_mapper.add_route('api.annotation', '/dummy/annotations/:id')
+    def test_it_returns_the_right_links(self, config):
+        config.add_route('api.search', '/dummy/search')
+        config.add_route('api.annotations', '/dummy/annotations')
+        config.add_route('api.annotation', '/dummy/annotations/:id')
 
         result = views.index(testing.DummyResource(), testing.DummyRequest())
 

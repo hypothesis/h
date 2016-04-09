@@ -141,6 +141,11 @@ class AuthController(object):
                renderer='json')
 class AjaxAuthController(AuthController):
 
+    def __init__(self, request):
+        self.request = request
+        self.schema = schemas.LoginSchema().bind(request=self.request)
+        self.form = deform.Form(self.schema)
+
     @view_config(request_param='__formid__=login')
     def login(self):
         try:

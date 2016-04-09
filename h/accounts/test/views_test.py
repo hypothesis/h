@@ -34,9 +34,10 @@ class FakeSubscription(object):
 
 class FakeUser(object):
     def __init__(self, **kwargs):
-        self.activation = None
-        for k in kwargs:
-            setattr(self, k, kwargs[k])
+        defaults = {'activation': None, 'email': None, 'password': None}
+        defaults.update(kwargs)
+        for k, v in defaults.items():
+            setattr(self, k, v)
 
 
 class FakeSerializer(object):
@@ -79,7 +80,7 @@ def mock_flash_function():
                                 return_value=None)
 
 
-@pytest.mark.usefixtures('routes_mapper')
+@pytest.mark.usefixtures('routes')
 class TestAuthController(object):
 
     def test_post_redirects_when_logged_in(self, authn_policy):
@@ -207,9 +208,14 @@ class TestAuthController(object):
 
         assert result.headers['x-erase-fingerprints'] == 'on the hob'
 
+    @pytest.fixture
+    def routes(self, config):
+        config.add_route('forgot_password', '/forgot')
+        config.add_route('index', '/index')
+        config.add_route('stream', '/stream')
 
-@pytest.mark.usefixtures('routes_mapper',
-                         'session')
+
+@pytest.mark.usefixtures('session')
 class TestAjaxAuthController(object):
 
     def test_login_returns_status_okay_when_validation_succeeds(self):
@@ -303,7 +309,7 @@ class TestAjaxAuthController(object):
 @pytest.mark.usefixtures('activation_model',
                          'authn_policy',
                          'mailer',
-                         'routes_mapper')
+                         'routes')
 class TestForgotPasswordController(object):
 
     def test_post_returns_form_when_validation_fails(self):
@@ -398,8 +404,14 @@ class TestForgotPasswordController(object):
         with pytest.raises(httpexceptions.HTTPFound):
             views.ForgotPasswordController(request).get()
 
+    @pytest.fixture
+    def routes(self, config):
+        config.add_route('index', '/index')
+        config.add_route('reset_password', '/reset')
+        config.add_route('reset_password_with_code', '/reset-with-code')
 
-@pytest.mark.usefixtures('routes_mapper')
+
+@pytest.mark.usefixtures('routes')
 class TestResetPasswordController(object):
 
     def test_post_returns_form_when_validation_fails(self):
@@ -446,12 +458,19 @@ class TestResetPasswordController(object):
 
         assert isinstance(result, httpexceptions.HTTPRedirection)
 
+    @pytest.fixture
+    def routes(self, config):
+        config.add_route('index', '/index')
+        config.add_route('login', '/login')
+        config.add_route('reset_password', '/reset')
+        config.add_route('reset_password_with_code', '/reset-with-code')
+
 
 @pytest.mark.usefixtures('activation_model',
                          'authn_policy',
                          'mailer',
                          'notify',
-                         'routes_mapper',
+                         'routes',
                          'user_model')
 class TestRegisterController(object):
 
@@ -602,11 +621,17 @@ class TestRegisterController(object):
         with pytest.raises(httpexceptions.HTTPRedirection):
             controller.get()
 
+    @pytest.fixture
+    def routes(self, config):
+        config.add_route('activate', '/activate')
+        config.add_route('index', '/index')
+        config.add_route('stream', '/stream')
+
 
 @pytest.mark.usefixtures('ActivationEvent',
                          'activation_model',
                          'notify',
-                         'routes_mapper',
+                         'routes',
                          'user_model')
 class TestActivateController(object):
 
@@ -774,30 +799,29 @@ class TestActivateController(object):
         assert request.session.flash.call_args[0][0].startswith(
             "You're already signed in to a different account")
 
+    @pytest.fixture
+    def routes(self, config):
+        config.add_route('index', '/index')
+        config.add_route('login', '/login')
+        config.add_route('logout', '/logout')
 
-@pytest.mark.usefixtures('routes_mapper')
+
+@pytest.mark.usefixtures('req', 'routes')
 class TestProfileController(object):
 
-    def test_post_400s_with_no_formid(self):
-        user = FakeUser()
-        request = DummyRequest(post={}, authenticated_user=user)
+    def test_post_400s_with_no_formid(self, req):
+        with pytest.raises(httpexceptions.HTTPBadRequest):
+            views.ProfileController(req).post()
+
+    def test_post_400s_with_bogus_formid(self, req):
+        req.POST = {'__formid__': 'hax0rs'}
 
         with pytest.raises(httpexceptions.HTTPBadRequest):
-            views.ProfileController(request).post()
+            views.ProfileController(req).post()
 
-    def test_post_400s_with_bogus_formid(self):
-        user = FakeUser()
-        request = DummyRequest(post={'__formid__': 'hax0rs'},
-                               authenticated_user=user)
-
-        with pytest.raises(httpexceptions.HTTPBadRequest):
-            views.ProfileController(request).post()
-
-    def test_post_changing_email_with_valid_data_updates_email(self):
-        user = FakeUser(email=None, password=None)
-        request = DummyRequest(post={'__formid__': 'email'},
-                               authenticated_user=user)
-        controller = views.ProfileController(request)
+    def test_post_changing_email_with_valid_data_updates_email(self, req, user):
+        req.POST = {'__formid__': 'email'}
+        controller = views.ProfileController(req)
         controller.forms['email'] = form_validating_to(
             {'email': 'amrit@example.com'})
 
@@ -805,11 +829,9 @@ class TestProfileController(object):
 
         assert user.email == 'amrit@example.com'
 
-    def test_post_changing_email_with_valid_data_redirects(self):
-        user = FakeUser(email=None, password=None)
-        request = DummyRequest(post={'__formid__': 'email'},
-                               authenticated_user=user)
-        controller = views.ProfileController(request)
+    def test_post_changing_email_with_valid_data_redirects(self, req):
+        req.POST = {'__formid__': 'email'}
+        controller = views.ProfileController(req)
         controller.forms['email'] = form_validating_to(
             {'email': 'amrit@example.com'})
 
@@ -817,33 +839,27 @@ class TestProfileController(object):
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
-    def test_post_changing_email_with_invalid_data_returns_form(self):
-        user = FakeUser(email=None, password=None)
-        request = DummyRequest(post={'__formid__': 'email'},
-                               authenticated_user=user)
-        controller = views.ProfileController(request)
+    def test_post_changing_email_with_invalid_data_returns_form(self, req):
+        req.POST = {'__formid__': 'email'}
+        controller = views.ProfileController(req)
         controller.forms['email'] = invalid_form()
 
         result = controller.post()
 
         assert 'email_form' in result
 
-    def test_post_changing_email_with_invalid_data_does_not_update_email(self):
-        user = FakeUser(email=None, password=None)
-        request = DummyRequest(post={'__formid__': 'email'},
-                               authenticated_user=user)
-        controller = views.ProfileController(request)
+    def test_post_changing_email_with_invalid_data_does_not_update_email(self, req, user):
+        req.POST = {'__formid__': 'email'}
+        controller = views.ProfileController(req)
         controller.forms['email'] = invalid_form()
 
         controller.post()
 
         assert user.email is None
 
-    def test_post_changing_password_with_valid_data_updates_password(self):
-        user = FakeUser(email=None, password=None)
-        request = DummyRequest(post={'__formid__': 'password'},
-                               authenticated_user=user)
-        controller = views.ProfileController(request)
+    def test_post_changing_password_with_valid_data_updates_password(self, req, user):
+        req.POST = {'__formid__': 'password'}
+        controller = views.ProfileController(req)
         controller.forms['password'] = form_validating_to(
             {'new_password': 'secrets!'})
 
@@ -851,11 +867,9 @@ class TestProfileController(object):
 
         assert user.password == 'secrets!'
 
-    def test_post_changing_password_with_valid_data_redirects(self):
-        user = FakeUser(email=None, password=None)
-        request = DummyRequest(post={'__formid__': 'password'},
-                               authenticated_user=user)
-        controller = views.ProfileController(request)
+    def test_post_changing_password_with_valid_data_redirects(self, req):
+        req.POST = {'__formid__': 'password'}
+        controller = views.ProfileController(req)
         controller.forms['password'] = form_validating_to(
             {'new_password': 'secrets!'})
 
@@ -863,32 +877,42 @@ class TestProfileController(object):
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
-    def test_post_changing_password_with_invalid_data_returns_form(self):
-        user = FakeUser(email=None, password=None)
-        request = DummyRequest(post={'__formid__': 'password'},
-                               authenticated_user=user)
-        controller = views.ProfileController(request)
+    def test_post_changing_password_with_invalid_data_returns_form(self, req):
+        req.POST = {'__formid__': 'password'}
+        controller = views.ProfileController(req)
         controller.forms['password'] = invalid_form()
 
         result = controller.post()
 
         assert 'password_form' in result
 
-    def test_post_changing_password_with_invalid_data_does_not_update_password(
-            self):
-        user = FakeUser(email=None, password=None)
-        request = DummyRequest(post={'__formid__': 'password'},
-                               authenticated_user=user)
-        controller = views.ProfileController(request)
+    def test_post_changing_password_with_invalid_data_does_not_update_password(self, req, user):
+        req.POST = {'__formid__': 'password'}
+        controller = views.ProfileController(req)
         controller.forms['password'] = invalid_form()
 
         controller.post()
 
         assert user.password is None
 
+    @pytest.fixture
+    def req(self, config, user):
+        req = DummyRequest(authenticated_user=user, post={})
+        config.begin(req)
+        return req
+
+    @pytest.fixture
+    def routes(self, config):
+        config.add_route('profile', '/my/profile')
+
+    @pytest.fixture
+    def user(self):
+        return FakeUser()
+
+
 
 @pytest.mark.usefixtures('authn_policy',
-                         'routes_mapper',
+                         'routes',
                          'subscriptions_model')
 class TestNotificationsController(object):
 
@@ -952,6 +976,10 @@ class TestNotificationsController(object):
         result = controller.post()
 
         assert isinstance(result, httpexceptions.HTTPFound)
+
+    @pytest.fixture
+    def routes(self, config):
+        config.add_route('profile_notifications', '/p/notifications')
 
 
 @pytest.mark.usefixtures('models')

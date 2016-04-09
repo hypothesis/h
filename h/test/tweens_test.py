@@ -48,6 +48,7 @@ def test_tween_csp_uri():
     request = DummyRequest()
     request.registry.settings.update({
         'csp.enabled': True,
+        'csp.report_only': False,
         'csp': {'report-uri': ['localhost']},
     })
     tween = tweens.content_security_policy_tween_factory(
@@ -64,6 +65,7 @@ def test_tween_csp_header():
     request = DummyRequest()
     request.registry.settings.update({
         "csp.enabled": True,
+        "csp.report_only": False,
         "csp": {
             "font-src": ["'self'", "fonts.gstatic.com"],
             "report-uri": ['localhost'],

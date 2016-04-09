@@ -68,17 +68,12 @@ def autopatcher(request, target, **kwargs):
     return obj
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def settings():
-    """Default app settings (conf/test.ini)."""
-    settings = {
-        'sqlalchemy.url': 'postgresql://postgres@localhost/htest',
-    }
-
-    if 'TEST_DATABASE_URL' in os.environ:
-        settings['sqlalchemy.url'] = database_url(
-            os.environ['TEST_DATABASE_URL'])
-
+    """Default app settings."""
+    settings = {}
+    settings['sqlalchemy.url'] = database_url(os.environ.get('TEST_DATABASE_URL',
+                                                             'postgresql://postgres@localhost/htest'))
     return settings
 
 
@@ -113,17 +108,11 @@ def database_session(request, monkeypatch):
     monkeypatch.setattr(db.Session, 'remove', lambda: None)
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def config(request, settings):
     """Pyramid configurator object."""
-    req = testing.DummyRequest()
-    config = testing.setUp(request=req, settings=settings)
-
-    def destroy():
-        testing.tearDown()
-
-    request.addfinalizer(destroy)
-
+    config = testing.setUp(settings=settings)
+    request.addfinalizer(testing.tearDown)
     return config
 
 
@@ -168,30 +157,3 @@ def notify(config, request):
 @pytest.fixture
 def patch(request):
     return functools.partial(autopatcher, request)
-
-
-@pytest.fixture
-def routes_mapper(config):
-    from pyramid.interfaces import IRoutesMapper
-
-    class DummyRoute(object):
-        def __init__(self, path='/dummy/route'):
-            self.path = path
-            self.pregenerator = None
-
-        def generate(self, kw):
-            return self.path
-
-    class DummyMapper(object):
-        def __init__(self):
-            self.routes = collections.defaultdict(DummyRoute)
-
-        def add_route(self, route_name, path):
-            self.routes[route_name] = DummyRoute(path)
-
-        def get_route(self, route_name):
-            return self.routes[route_name]
-
-    mapper = DummyMapper()
-    config.registry.registerUtility(mapper, IRoutesMapper)
-    return mapper
