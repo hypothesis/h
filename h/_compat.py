@@ -3,14 +3,31 @@
 
 import sys
 
+__all__ = (
+    'PY2',
+
+    'text_type',
+    'string_types',
+
+    'configparser',
+
+    'urlparse',
+    'url_quote',
+    'url_quote_plus',
+    'url_unquote',
+    'url_unquote_plus',
+
+    'StringIO',
+)
+
 PY2 = sys.version_info[0] == 2
 
 if not PY2:
     text_type = str
     string_types = (str,)
 else:
-    text_type = unicode
-    string_types = (str, unicode)
+    text_type = unicode  # noqa
+    string_types = (str, unicode)  # noqa
 
 try:
     import ConfigParser as configparser
