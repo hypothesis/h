@@ -180,7 +180,3 @@ def routes_mapper(config):
     mapper = DummyMapper()
     config.registry.registerUtility(mapper, IRoutesMapper)
     return mapper
-
-
-def _make_session():
-    return scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
