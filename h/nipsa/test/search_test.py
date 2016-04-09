@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import copy
 
 from h.nipsa import search
 

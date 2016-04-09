@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
-from mock import patch, Mock, MagicMock
+from mock import patch, Mock
 
 import pytest
 from pyramid.testing import DummyRequest

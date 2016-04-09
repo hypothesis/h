@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from mock import ANY
 from mock import MagicMock
 from mock import Mock
 from mock import patch

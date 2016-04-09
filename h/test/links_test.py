@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from pyramid.testing import DummyRequest
-from mock import Mock
 import pytest
 
 from h import links

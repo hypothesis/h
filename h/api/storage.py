@@ -10,7 +10,6 @@ assumed to be validated.
 from functools import partial
 
 from pyramid import i18n
-from pyramid import security
 
 from h.api import schemas
 from h.api import transform
