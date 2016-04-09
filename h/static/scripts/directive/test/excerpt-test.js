@@ -5,40 +5,22 @@ var angular = require('angular');
 var util = require('./util');
 var excerpt = require('../excerpt');
 
-/**
- * Wait for an <excerpt> to recompute its overflowing state.
- *
- * This happens asynchronously after an <excerpt> is created in order to wait
- * for Angular directives used by the <excerpt>'s content to fully resolve.
- *
- * @return {Promise}
- */
-function waitForLayout(element) {
-  element.scope.$digest();
-  return new Promise(function (resolve) {
-    window.requestAnimationFrame(resolve);
-  });
-}
-
 describe('excerpt directive', function () {
+  // ExcerptOverflowMonitor fake instance created by the current test
+  var fakeOverflowMonitor;
+
   var SHORT_DIV = '<div id="foo" style="height:5px;"></div>';
   var TALL_DIV =  '<div id="foo" style="height:200px;">foo bar</div>';
 
   function excerptDirective(attrs, content) {
     var defaultAttrs = {
-      // disable animation so that expansion/collapse happens immediately
-      // when the controls are toggled in tests
-      animate: false,
       enabled: true,
+      contentData: 'the content',
       collapsedHeight: 40,
       inlineControls: false,
     };
     attrs = Object.assign(defaultAttrs, attrs);
     return util.createDirective(document, 'excerpt', attrs, {}, content);
-  }
-
-  function height(el) {
-    return el.querySelector('.excerpt').offsetHeight;
   }
 
   before(function () {
@@ -47,7 +29,91 @@ describe('excerpt directive', function () {
   });
 
   beforeEach(function () {
+    function FakeOverflowMonitor(ctrl) {
+      fakeOverflowMonitor = this;
+
+      this.ctrl = ctrl;
+      this.check = sinon.stub();
+      this.contentStyle = sinon.stub().returns({});
+    }
+
     angular.mock.module('app');
+    angular.mock.module(function ($provide) {
+      $provide.value('ExcerptOverflowMonitor', FakeOverflowMonitor);
+    });
+  });
+
+  context('when created', function () {
+    it('schedules an overflow state recalculation', function () {
+      excerptDirective({}, '<span id="foo"></span>');
+      assert.called(fakeOverflowMonitor.check);
+    });
+
+    it('passes input properties to overflow state recalc', function () {
+      var attrs = {
+        animate: false,
+        enabled: true,
+        collapsedHeight: 40,
+        inlineControls: false,
+        overflowHysteresis: 20,
+      };
+      excerptDirective(attrs, '<span></span>');
+      assert.deepEqual(fakeOverflowMonitor.ctrl.getState(), {
+        animate: attrs.animate,
+        enabled: attrs.enabled,
+        collapsedHeight: attrs.collapsedHeight,
+        collapse: true,
+        overflowHysteresis: attrs.overflowHysteresis,
+      });
+    });
+
+    it('reports the content height to ExcerptOverflowMonitor', function () {
+      excerptDirective({}, TALL_DIV);
+      assert.deepEqual(fakeOverflowMonitor.ctrl.contentHeight(), 200);
+    });
+  });
+
+  context('input changes', function () {
+    it('schedules an overflow state check when inputs change', function () {
+      var element = excerptDirective({}, '<span></span>');
+      fakeOverflowMonitor.check.reset();
+      element.scope.contentData = 'new-content';
+      element.scope.$digest();
+      assert.calledOnce(fakeOverflowMonitor.check);
+    });
+
+    it('does not schedule a state check if inputs are unchanged', function () {
+      var element = excerptDirective({}, '<span></span>');
+      fakeOverflowMonitor.check.reset();
+      element.scope.$digest();
+      assert.notCalled(fakeOverflowMonitor.check);
+    });
+  });
+
+  context('document events', function () {
+    it('schedules an overflow check when media loads', function () {
+      var element = excerptDirective({}, '<img src="https://example.com/foo.jpg">');
+      fakeOverflowMonitor.check.reset();
+      util.sendEvent(element[0], 'load');
+      assert.called(fakeOverflowMonitor.check);
+    });
+
+    it('schedules an overflow check when the window is resized', function () {
+      var element = excerptDirective({}, '<span></span>');
+      fakeOverflowMonitor.check.reset();
+      util.sendEvent(element[0].ownerDocument.defaultView, 'resize');
+      assert.called(fakeOverflowMonitor.check);
+    });
+  });
+
+  context('excerpt content style', function () {
+    it('sets the content style using ExcerptOverflowMonitor#contentStyle()', function () {
+      var element = excerptDirective({}, '<span></span>');
+      fakeOverflowMonitor.contentStyle.returns({'max-height': '52px'});
+      element.scope.$digest();
+      var content = element[0].querySelector('.excerpt');
+      assert.equal(content.style.cssText.trim(), 'max-height: 52px;');
+    });
   });
 
   describe('enabled state', function () {
@@ -68,14 +134,6 @@ describe('excerpt directive', function () {
 
       assert.equal(element.find('.excerpt #foo').length, 0);
       assert.equal(element.find('#foo').length, 1);
-    });
-
-    it('truncates long contents when enabled', function () {
-      var element = excerptDirective({enabled: false}, TALL_DIV);
-      element.scope.enabled = true;
-      return waitForLayout(element).then(function () {
-        assert.isBelow(height(element[0]), 100);
-      });
     });
   });
 
@@ -101,30 +159,26 @@ describe('excerpt directive', function () {
     it('displays inline controls if collapsed', function () {
       var element = excerptDirective({inlineControls: true},
         TALL_DIV);
-      return waitForLayout(element).then(function () {
-        var expandLink = findInlineControl(element[0]);
-        assert.ok(expandLink);
-        assert.equal(expandLink.querySelector('a').textContent, 'More');
-      });
+      fakeOverflowMonitor.ctrl.onOverflowChanged(true);
+      var expandLink = findInlineControl(element[0]);
+      assert.ok(expandLink);
+      assert.equal(expandLink.querySelector('a').textContent, 'More');
     });
 
     it('does not display inline controls if not collapsed', function () {
-      var element = excerptDirective({inlineControls: true},
-        SHORT_DIV);
+      var element = excerptDirective({inlineControls: true}, SHORT_DIV);
       var expandLink = findInlineControl(element[0]);
       assert.notOk(expandLink);
     });
 
     it('toggles the expanded state when clicked', function () {
-      var element = excerptDirective({inlineControls: true},
-        TALL_DIV);
-      return waitForLayout(element).then(function () {
-        var expandLink = findInlineControl(element[0]);
-        angular.element(expandLink.querySelector('a')).click();
-        element.scope.$digest();
-        var collapseLink = findInlineControl(element[0]);
-        assert.equal(collapseLink.querySelector('a').textContent, 'Less');
-      });
+      var element = excerptDirective({inlineControls: true}, TALL_DIV);
+      fakeOverflowMonitor.ctrl.onOverflowChanged(true);
+      var expandLink = findInlineControl(element[0]);
+      angular.element(expandLink.querySelector('a')).click();
+      element.scope.$digest();
+      var collapseLink = findInlineControl(element[0]);
+      assert.equal(collapseLink.querySelector('a').textContent, 'Less');
     });
   });
 
@@ -140,71 +194,19 @@ describe('excerpt directive', function () {
     });
   });
 
-  describe('.collapse', function () {
-    it('collapses the body if collapse is true', function () {
-      var element = excerptDirective({collapse: true}, TALL_DIV);
-      return waitForLayout(element).then(function () {
-        assert.isBelow(height(element[0]), 100);
-      });
-    });
-
-    it('does not collapse the body if collapse is false', function () {
-      var element = excerptDirective({collapse: false}, TALL_DIV);
-      return waitForLayout(element).then(function () {
-        assert.isAbove(height(element[0]), 100);
-      });
-    });
-  });
-
-  describe('.onCollapsibleChanged', function () {
-    it('reports true if excerpt is tall', function () {
+  describe('#onCollapsibleChanged', function () {
+    it('is called when overflow state changes', function () {
       var callback = sinon.stub();
-      var element = excerptDirective({
+      excerptDirective({
         onCollapsibleChanged: {
           args: ['collapsible'],
           callback: callback,
         }
-      }, TALL_DIV);
-      return waitForLayout(element).then(function () {
-        assert.calledWith(callback, true);
-      });
-    });
-
-    it('reports false if excerpt is short', function () {
-      var callback = sinon.stub();
-      var element = excerptDirective({
-        onCollapsibleChanged: {
-          args: ['collapsible'],
-          callback: callback,
-        }
-      }, SHORT_DIV);
-      return waitForLayout(element).then(function () {
-        assert.calledWith(callback, false);
-      });
-    });
-  });
-
-  describe('overflowHysteresis', function () {
-    it('does not collapse if overflow is less than hysteresis', function () {
-      var slightlyOverflowingDiv = '<div class="foo" style="height:45px;"></div>';
-      var element = excerptDirective({
-        collapsedHeight: 40,
-        overflowHysteresis: 10,
-      }, slightlyOverflowingDiv);
-      return waitForLayout(element).then(function () {
-        assert.isAbove(height(element[0]), 44);
-      });
-    });
-
-    it('does collapse if overflow exceeds hysteresis', function () {
-      var overflowingDiv = '<div style="height:60px;"></div>';
-      var element = excerptDirective({
-        collapsedHeight: 40,
-        overflowHysteresis: 10,
-      }, overflowingDiv);
-      return waitForLayout(element).then(function () {
-        assert.isBelow(height(element[0]), 50);
-      });
+      }, '<span></span>');
+      fakeOverflowMonitor.ctrl.onOverflowChanged(true);
+      assert.calledWith(callback, true);
+      fakeOverflowMonitor.ctrl.onOverflowChanged(false);
+      assert.calledWith(callback, false);
     });
   });
 });

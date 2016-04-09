@@ -49,10 +49,6 @@ function ExcerptController() {
   };
 }
 
-function toPx(val) {
-  return val.toString() + 'px';
-}
-
 /**
  * @ngdoc directive
  * @name excerpt
@@ -62,129 +58,58 @@ function toPx(val) {
  *              and collapsing the resulting truncated element.
  */
 // @ngInject
-function excerpt() {
+function excerpt(ExcerptOverflowMonitor) {
   return {
     bindToController: true,
     controller: ExcerptController,
     controllerAs: 'vm',
     link: function (scope, elem, attrs, ctrl) {
-      var pendingOverflowCheck = false;
+      var overflowMonitor = new ExcerptOverflowMonitor({
+        getState: function () {
+          return {
+            enabled: ctrl.enabled,
+            animate: ctrl.animate,
+            collapsedHeight: ctrl.collapsedHeight,
+            collapse: ctrl.collapse,
+            overflowHysteresis: ctrl.overflowHysteresis,
+          };
+        },
+        contentHeight: function () {
+          var contentElem = elem[0].querySelector('.excerpt');
+          if (!contentElem) {
+            return;
+          }
+          return contentElem.scrollHeight;
+        },
+        onOverflowChanged: function (overflowing) {
+          ctrl.overflowing = overflowing;
+          if (ctrl.onCollapsibleChanged) {
+            ctrl.onCollapsibleChanged({collapsible: overflowing});
+          }
+          scope.$digest();
+        },
+      }, window.requestAnimationFrame);
 
-      // Return the content element of the excerpt.
-      // This changes when the enabled state of the excerpt changes.
-      function getContentElement() {
-        return elem[0].querySelector('.excerpt');
-      }
+      ctrl.contentStyle = overflowMonitor.contentStyle;
 
-      // Listen for events which might cause the size of the excerpt's
-      // content to change, even if the content data has not changed.
-
-      // This currently includes top-level window resize events and media
-      // (images, iframes) within the content loading.
-      elem[0].addEventListener('load', scheduleOverflowCheck,
-        true /* capture. 'load' events do not bubble */);
-
-      window.addEventListener('resize', scheduleOverflowCheck);
-
-      /**
-       * Recompute whether the excerpt's content is overflowing the collapsed
-       * element.
-       *
-       * This check is scheduled manually in response to changes in the inputs
-       * to this component and certain events to avoid excessive layout flushes
-       * caused by accessing the element's size.
-       */
-      function recomputeOverflowState() {
-        if (!pendingOverflowCheck) {
-          return;
-        }
-
-        pendingOverflowCheck = false;
-
-        var contentElem = getContentElement();
-        if (!contentElem) {
-          return;
-        }
-
-        var overflowing = false;
-        if (ctrl.enabled) {
-          var hysteresisPx = ctrl.overflowHysteresis || 0;
-          overflowing = contentElem.scrollHeight >
-                 (ctrl.collapsedHeight + hysteresisPx);
-        }
-        if (overflowing === ctrl.overflowing) {
-          return;
-        }
-
-        ctrl.overflowing = overflowing;
-        if (ctrl.onCollapsibleChanged) {
-         ctrl.onCollapsibleChanged({collapsible: ctrl.overflowing});
-        }
-      }
-
+      // Listen for document events which might affect whether the excerpt
+      // is overflowing, even if its content has not changed.
+      elem[0].addEventListener('load', overflowMonitor.check, false /* capture */);
+      window.addEventListener('resize', overflowMonitor.check);
       scope.$on('$destroy', function () {
-        pendingOverflowCheck = false;
-        window.removeEventListener('resize', scheduleOverflowCheck);
+        window.removeEventListener('resize', overflowMonitor.check);
       });
 
-      // Schedule a deferred check of whether the content is collapsed.
-      function scheduleOverflowCheck() {
-        if (pendingOverflowCheck) {
-          return;
-        }
-        pendingOverflowCheck = true;
-        requestAnimationFrame(function () {
-          recomputeOverflowState();
-          scope.$digest();
-        });
-      }
-
-      ctrl.contentStyle = function () {
-        if (!ctrl.enabled) {
-          return {};
-        }
-
-        var maxHeight = '';
-        if (ctrl.overflowing) {
-          if (ctrl.collapse) {
-            maxHeight = toPx(ctrl.collapsedHeight);
-          } else if (ctrl.animate) {
-            // Animating the height change requires that the final
-            // height be specified exactly, rather than relying on
-            // auto height
-            var contentElem = getContentElement();
-            maxHeight = toPx(contentElem.scrollHeight);
-          }
-        } else if (typeof ctrl.overflowing === 'undefined' &&
-                   ctrl.collapse) {
-          // If the excerpt is collapsed but the overflowing state has not yet
-          // been computed then the exact max height is unknown, but it will be
-          // in the range [ctrl.collapsedHeight, ctrl.collapsedHeight +
-          // ctrl.overflowHysteresis]
-          //
-          // Here we guess that the final content height is most likely to be
-          // either less than `collapsedHeight` or more than `collapsedHeight` +
-          // `overflowHysteresis`, in which case it will be truncated to
-          // `collapsedHeight`.
-          maxHeight = toPx(ctrl.collapsedHeight);
-        }
-
-        return {
-          'max-height': maxHeight,
-        };
-      };
-
-      // Watch properties which may affect whether the excerpt
-      // needs to be collapsed and recompute the overflow state
-      scope.$watch('vm.contentData', scheduleOverflowCheck);
-      scope.$watch('vm.enabled', scheduleOverflowCheck);
+      // Watch input properties which may affect the overflow state
+      scope.$watch('vm.contentData', overflowMonitor.check);
+      scope.$watch('vm.enabled', overflowMonitor.check);
 
       // Trigger an initial calculation of the overflow state.
       //
       // This is performed asynchronously so that the content of the <excerpt>
       // has settled - ie. all Angular directives have been fully applied and
       // the DOM has stopped changing. This may take several $digest cycles.
-      scheduleOverflowCheck();
+      overflowMonitor.check();
     },
     scope: {
       /** Whether or not expansion should be animated. Defaults to true. */
