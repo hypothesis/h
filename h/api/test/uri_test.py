@@ -81,7 +81,8 @@ TEST_URLS = [
     ("http://example.com/%41%42%43/%31%32%33", "http://example.com/ABC/123"),
     ("http://example.com/hello%2Bworld", "http://example.com/hello+world"),
     ("http://example.com/hello+world", "http://example.com/hello+world"),
-    ("http://example.com/%3A%40%2D%2E%5F%7E%21%24%26%27%28%29%2A%2B%2C%3D%3B", "http://example.com/:@-._~!$&'()*+,=;"),
+    ("http://example.com/%3A%40%2D%2E%5F%7E%21%24%26%27%28%29%2A%2B%2C%3D%3B",
+     "http://example.com/:@-._~!$&'()*+,=;"),
     ("http://example.com/:@-._~!$&'()*+,=;", "http://example.com/:@-._~!$&'()*+,=;"),
 
     # Path: ensure RESERVED characters are encoded
@@ -109,8 +110,10 @@ TEST_URLS = [
     ("http://example.com?foo~bar=baz", "http://example.com?foo~bar=baz"),
     ("http://example.com?foo=bar%7Ebaz", "http://example.com?foo=bar~baz"),
     ("http://example.com?foo=bar~baz", "http://example.com?foo=bar~baz"),
-    ("http://example.com?-._~:@!$'()*,=-._~:@!$='()*,", "http://example.com?-._~:@!$'()*,=-._~:@!$='()*,"),
-    ("http://example.com?%2D%2E%5F%7E%3A%40%21%24%27%28%29%2A%2C=%2D%2E%5F%7E%3A%40%21%24%3D%27%28%29%2A%2C", "http://example.com?-._~:@!$'()*,=-._~:@!$='()*,"),
+    ("http://example.com?-._~:@!$'()*,=-._~:@!$='()*,",
+     "http://example.com?-._~:@!$'()*,=-._~:@!$='()*,"),
+    ("http://example.com?%2D%2E%5F%7E%3A%40%21%24%27%28%29%2A%2C=%2D%2E%5F%7E%3A%40%21%24%3D%27%28%29%2A%2C",
+     "http://example.com?-._~:@!$'()*,=-._~:@!$='()*,"),
 
     # Query: ensure RESERVED characters are encoded
     ("http://example.com?foo bar=baz", "http://example.com?foo+bar=baz"),
@@ -125,7 +128,8 @@ TEST_URLS = [
     ("http://example.com?foo=[bar]baz", "http://example.com?foo=%5Bbar%5Dbaz"),
 
     # Query: ensure OTHER characters are encoded
-    ("http://example.com?你好世界=γειά σου κόσμος", "http://example.com?%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C=%CE%B3%CE%B5%CE%B9%CE%AC+%CF%83%CE%BF%CF%85+%CE%BA%CF%8C%CF%83%CE%BC%CE%BF%CF%82"),
+    ("http://example.com?你好世界=γειά σου κόσμος",
+     "http://example.com?%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C=%CE%B3%CE%B5%CE%B9%CE%AC+%CF%83%CE%BF%CF%85+%CE%BA%CF%8C%CF%83%CE%BC%CE%BF%CF%82"),
     ("http://example.com?love=♥", "http://example.com?love=%E2%99%A5"),
 
     # Query: normalize case of encodings
@@ -160,6 +164,7 @@ TEST_URLS = [
 @pytest.mark.parametrize("url_in,url_out", TEST_URLS)
 def test_normalize(url_in, url_out):
     assert uri.normalize(url_in) == url_out
+
 
 @pytest.mark.parametrize("url,_", TEST_URLS)
 def test_normalize_returns_unicode(url, _):
