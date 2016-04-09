@@ -41,21 +41,9 @@ describe('excerpt directive', function () {
     return el.querySelector('.excerpt').offsetHeight;
   }
 
-  var defaultRAF = window.requestAnimationFrame;
-
   before(function () {
     angular.module('app', [])
       .directive('excerpt', excerpt.directive);
-
-    // requestAnimationFrame() is used internally by <excerpt>
-    // to schedule overflow state checks
-    window.requestAnimationFrame = function (callback) {
-      setTimeout(callback, 0);
-    };
-  });
-
-  after(function () {
-    window.requestAnimationFrame = defaultRAF;
   });
 
   beforeEach(function () {
