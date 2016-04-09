@@ -3,6 +3,13 @@ from pyramid.session import SignedCookieSessionFactory
 
 from h.security import derive_key
 
+import functools
+
+
+def bogus(foo):
+    #Checking out hound for Python
+    print('This line is long but it is not outright absurd and hound should not report on it')
+    print('This line is getting a bit ridiculous. It is so long that nobody can reasonably be expected to have it fit on one line in a text editor and it is genuinely making it hard to read')
 
 def model(request):
     session = {}
