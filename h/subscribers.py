@@ -3,6 +3,8 @@
 import json
 
 from h import __version__
+from h.api import presenters
+
 
 
 def add_renderer_globals(event):
@@ -30,4 +32,8 @@ def publish_annotation_event(event):
         'annotation': event.annotation,
         'src_client_id': event.request.headers.get('X-Client-Id'),
     }
-    queue.publish('annotations', json.dumps(data))
+
+    annotation_dict = presenters.AnnotationJSONPresenter(
+        event.request, event.annotation).asdict()
+
+    queue.publish('annotations', json.dumps(annotation_dict))
