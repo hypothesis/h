@@ -27,13 +27,14 @@ def add_renderer_globals(event):
 def publish_annotation_event(event):
     """Publish an annotation event to the message queue."""
     queue = event.request.get_queue_writer()
-    data = {
-        'action': event.action,
-        'annotation': event.annotation,
-        'src_client_id': event.request.headers.get('X-Client-Id'),
-    }
 
     annotation_dict = presenters.AnnotationJSONPresenter(
         event.request, event.annotation).asdict()
 
-    queue.publish('annotations', json.dumps(annotation_dict))
+    data = {
+        'action': event.action,
+        'annotation': annotation_dict,
+        'src_client_id': event.request.headers.get('X-Client-Id'),
+    }
+
+    queue.publish('annotations', json.dumps(data))
