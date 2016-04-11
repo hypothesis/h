@@ -52,6 +52,7 @@ SETTINGS = [
     EnvSetting('es.client_timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type=int),
     EnvSetting('es.host', 'ELASTICSEARCH_HOST'),
     EnvSetting('es.index', 'ELASTICSEARCH_INDEX'),
+    EnvSetting('legacy.es.index', 'LEGACY_ELASTICSEARCH_INDEX'),
     EnvSetting('mail.default_sender', 'MAIL_DEFAULT_SENDER'),
     EnvSetting('mail.host', 'MAIL_HOST'),
     EnvSetting('mail.port', 'MAIL_PORT', type=int),

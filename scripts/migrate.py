@@ -64,9 +64,9 @@ def main():
     if 'DEBUG_QUERY' in os.environ:
         logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-    migrate_annotations(request.es)
+    migrate_annotations(request.legacy_es)
     print('')
-    delete_nonexisting_annotations(request.es)
+    delete_nonexisting_annotations(request.legacy_es)
 
 
 def migrate_annotations(es_client):

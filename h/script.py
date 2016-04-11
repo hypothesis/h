@@ -102,23 +102,23 @@ def annotool(args):
     """
     request = bootstrap(args)
 
-    annotations = es_helpers.scan(request.es.conn,
+    annotations = es_helpers.scan(request.legacy_es.conn,
                                   query={'query': {'match_all': {}}},
-                                  index=request.es.index,
-                                  doc_type=request.es.t.annotation)
+                                  index=request.legacy_es.index,
+                                  doc_type=request.legacy_es.t.annotation)
 
     chunksize = 1000
     state = {'total': 0, 'pending': []}
 
     def _flush():
         bodies = [{
-            '_index': request.es.index,
-            '_type': request.es.t.annotation,
+            '_index': request.legacy_es.index,
+            '_type': request.legacy_es.t.annotation,
             '_op_type': 'update',
             '_id': x['_id'],
             'doc': x['_source'],
         } for x in state['pending']]
-        es_helpers.bulk(request.es.conn, bodies)
+        es_helpers.bulk(request.legacy_es.conn, bodies)
 
         state['total'] += len(state['pending'])
         log.info("processed %d annotations", state['total'])
@@ -149,19 +149,19 @@ def reindex(args):
     request = bootstrap(args)
 
     # Configure the new index
-    search_config.configure_index(request.es, args.target)
+    search_config.configure_index(request.legacy_es, args.target)
 
     # Reindex the annotations
-    es_helpers.reindex(client=request.es.conn,
-                       source_index=request.es.index,
+    es_helpers.reindex(client=request.legacy_es.conn,
+                       source_index=request.legacy_es.index,
                        target_index=args.target)
 
     if args.update_alias:
-        request.es.conn.indices.update_aliases(body={'actions': [
+        request.legacy_es.conn.indices.update_aliases(body={'actions': [
             # Remove all existing aliases
-            {"remove": {"index": "*", "alias": request.es.index}},
+            {"remove": {"index": "*", "alias": request.legacy_es.index}},
             # Alias current index name to new target
-            {"add": {"index": args.target, "alias": request.es.index}},
+            {"add": {"index": args.target, "alias": request.legacy_es.index}},
         ]})
 
 parser_reindex = subparsers.add_parser('reindex', help=reindex.__doc__)

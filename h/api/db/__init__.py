@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from annotator import es
+from annotator import es as legacy_es
 from sqlalchemy import MetaData
 from sqlalchemy.ext import declarative
 
@@ -52,10 +52,10 @@ def includeme(config):
     settings = config.registry.settings
 
     if 'es.host' in settings:
-        es.host = settings['es.host']
+        legacy_es.host = settings['es.host']
 
-    if 'es.index' in settings:
-        es.index = settings['es.index']
+    if 'legacy.es.index' in settings:
+        legacy_es.index = settings['legacy.es.index']
 
     if 'es.compatibility' in settings:
-        es.compatibility_mode = settings['es.compatibility']
+        legacy_es.compatibility_mode = settings['es.compatibility']

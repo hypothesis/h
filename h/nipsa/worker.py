@@ -60,8 +60,8 @@ def worker(request):
         request.feature.clear()
 
         add_or_remove_nipsa(
-            client=request.es.conn,
-            index=request.es.index,
+            client=request.legacy_es.conn,
+            index=request.legacy_es.index,
             **json.loads(message.body))
 
     reader = request.get_queue_reader(
