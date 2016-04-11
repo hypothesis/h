@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from mock import Mock
-from mock import patch
 from pyramid.testing import DummyRequest
 import pytest
 
@@ -33,8 +32,5 @@ class TestAnnotationFactory(object):
             factory['123']
 
     @pytest.fixture
-    def storage(self, request):
-        patcher = patch('h.api.resources.storage', autospec=True)
-        module = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return module
+    def storage(self, patch):
+        return patch('h.api.resources.storage')

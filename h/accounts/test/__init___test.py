@@ -152,15 +152,10 @@ def test_authenticated_user_calls_get_user(get_user):
 
 
 @pytest.fixture
-def util(request):
-    patcher = mock.patch('h.accounts.util')
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
+def util(patch):
+    return patch('h.accounts.util')
 
 
 @pytest.fixture
-def get_by_username(request):
-    patcher = mock.patch('h.accounts.models.User.get_by_username')
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def get_by_username(patch):
+    return patch('h.accounts.models.User.get_by_username', autospec=False)

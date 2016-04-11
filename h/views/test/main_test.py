@@ -48,18 +48,14 @@ def test_og_no_document(render_app_html):
 
 
 @pytest.fixture
-def annotation_document(request):
-    patcher = patch('h.api.models.annotation.Annotation.document',
-                    new_callable=PropertyMock)
-    prop = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return prop
+def annotation_document(patch):
+    return patch('h.api.models.annotation.Annotation.document',
+                 autospec=None,
+                 new_callable=PropertyMock)
 
 
 @pytest.fixture
-def document_title(request):
-    patcher = patch('h.api.models.document.Document.title',
-                    new_callable=PropertyMock)
-    prop = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return prop
+def document_title(patch):
+    return patch('h.api.models.document.Document.title',
+                 autospec=None,
+                 new_callable=PropertyMock)

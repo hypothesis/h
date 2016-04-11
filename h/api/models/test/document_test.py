@@ -263,11 +263,8 @@ class TestCreateOrUpdateDocumentURI(object):
         assert log.warn.call_count == 1
 
     @pytest.fixture
-    def DocumentURI(self, request):
-        patcher = mock.patch('h.api.models.document.DocumentURI')
-        DocumentURI = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return DocumentURI
+    def DocumentURI(self, patch):
+        return patch('h.api.models.document.DocumentURI')
 
 
 class TestCreateOrUpdateDocumentMeta(object):
@@ -373,11 +370,8 @@ class TestCreateOrUpdateDocumentMeta(object):
         assert log.warn.call_count == 1
 
     @pytest.fixture
-    def DocumentMeta(self, request):
-        patcher = mock.patch('h.api.models.document.DocumentMeta')
-        DocumentMeta = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return DocumentMeta
+    def DocumentMeta(self, patch):
+        return patch('h.api.models.document.DocumentMeta')
 
 
 @pytest.mark.usefixtures('merge_data')
@@ -483,8 +477,5 @@ def mock_document_meta(document=None):
 
 
 @pytest.fixture
-def log(config, request):
-    patcher = mock.patch('h.api.models.document.log', autospec=True)
-    log = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return log
+def log(patch):
+    return patch('h.api.models.document.log')

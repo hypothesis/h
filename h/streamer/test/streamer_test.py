@@ -109,14 +109,10 @@ def session():
 
 
 @pytest.fixture(autouse=True)
-def nsq_handle_message(request):
-    patcher = mock.patch('h.streamer.nsq.handle_message')
-    patcher.start()
-    request.addfinalizer(patcher.stop)
+def nsq_handle_message(patch):
+    return patch('h.streamer.nsq.handle_message')
 
 
 @pytest.fixture(autouse=True)
-def websocket_handle_message(request):
-    patcher = mock.patch('h.streamer.websocket.handle_message')
-    patcher.start()
-    request.addfinalizer(patcher.stop)
+def websocket_handle_message(patch):
+    return patch('h.streamer.websocket.handle_message')

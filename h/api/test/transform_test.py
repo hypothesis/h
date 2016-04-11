@@ -212,9 +212,7 @@ def test_fix_old_style_comments(ann_in, ann_out):
 
 
 @pytest.fixture
-def uri_normalize(request):
-    patcher = mock.patch('h.api.uri.normalize', autospec=True)
-    func = patcher.start()
+def uri_normalize(patch):
+    func = patch('h.api.uri.normalize')
     func.side_effect = lambda x: "*%s*" % x
-    request.addfinalizer(patcher.stop)
     return func

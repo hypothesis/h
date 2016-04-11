@@ -41,14 +41,10 @@ def test_badge_raises_if_no_uri():
 
 
 @pytest.fixture
-def models(config, request):  # pylint:disable=unused-argument
-    patcher = mock.patch('h.badge.views.models', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def models(patch):
+    return patch('h.badge.views.models')
 
 
 @pytest.fixture
-def search_lib(config, request):  # pylint:disable=unused-argument
-    patcher = mock.patch('h.badge.views.search_lib', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def search_lib(patch):
+    return patch('h.badge.views.search_lib')

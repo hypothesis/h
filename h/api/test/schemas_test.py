@@ -864,22 +864,14 @@ class TestCreateAnnotationSchema(object):
         return data
 
     @pytest.fixture
-    def AnnotationSchema(self, request):
-        patcher = mock.patch('h.api.schemas.AnnotationSchema',
-                             autospec=True)
-        AnnotationSchema = patcher.start()
-        AnnotationSchema.return_value.validate.return_value = (
-            self.annotation_data())
-        request.addfinalizer(patcher.stop)
-        return AnnotationSchema
+    def AnnotationSchema(self, patch):
+        cls = patch('h.api.schemas.AnnotationSchema')
+        cls.return_value.validate.return_value = self.annotation_data()
+        return cls
 
     @pytest.fixture
-    def parse_document_claims(self, request):
-        patcher = mock.patch('h.api.schemas.parse_document_claims',
-                             autospec=True)
-        parse_document_claims = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return parse_document_claims
+    def parse_document_claims(self, patch):
+        return patch('h.api.schemas.parse_document_claims')
 
 
 class TestUpdateAnnotationSchema(object):

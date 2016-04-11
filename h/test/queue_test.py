@@ -203,9 +203,6 @@ def test_resolve_topic_raises_if_namespace_and_topic_both_given():
                             settings={'nsq.namespace': 'prefix'})
 
 
-@pytest.fixture(scope='module', autouse=True)
-def fake_reader(request):
-    patcher = patch('gnsq.Reader', new_callable=lambda: FakeReader)
-    klass = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return klass
+@pytest.fixture(autouse=True)
+def fake_reader(patch):
+    return patch('gnsq.Reader', autospec=None, new_callable=lambda: FakeReader)

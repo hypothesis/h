@@ -205,16 +205,10 @@ class instance_of_type(object):
 
 
 @pytest.fixture
-def query(request):
-    patcher = mock.patch('h.api.search.core.query', autospec=True)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
+def query(patch):
+    return patch('h.api.search.core.query')
 
 
 @pytest.fixture
-def log(request):
-    patcher = mock.patch('h.api.search.core.log', autospec=True)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
+def log(patch):
+    return patch('h.api.search.core.log')

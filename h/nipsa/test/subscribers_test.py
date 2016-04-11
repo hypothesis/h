@@ -27,8 +27,5 @@ def test_transform_annotation(ann, nipsa, has_nipsa):
 
 
 @pytest.fixture
-def has_nipsa(request):
-    patcher = mock.patch('h.nipsa.logic.has_nipsa', autospec=True)
-    func = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return func
+def has_nipsa(patch):
+    return patch('h.nipsa.logic.has_nipsa')

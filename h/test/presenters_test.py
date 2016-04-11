@@ -517,60 +517,42 @@ def test_created_day_string_from_annotation():
 
 
 @pytest.fixture
-def uri(request):
-    patcher = mock.patch(
-        'h.presenters.AnnotationHTMLPresenter.uri',
-        new_callable=mock.PropertyMock)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
+def uri(patch):
+    return patch('h.presenters.AnnotationHTMLPresenter.uri',
+                 autospec=None,
+                 new_callable=mock.PropertyMock)
 
 
 @pytest.fixture
-def filename(request):
-    patcher = mock.patch(
-        'h.presenters.AnnotationHTMLPresenter.filename',
-        new_callable=mock.PropertyMock)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
+def filename(patch):
+    return patch('h.presenters.AnnotationHTMLPresenter.filename',
+                 autospec=None,
+                 new_callable=mock.PropertyMock)
 
 
 @pytest.fixture
-def title(request):
-    patcher = mock.patch(
-        'h.presenters.AnnotationHTMLPresenter.title',
-        new_callable=mock.PropertyMock)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
+def title(patch):
+    return patch('h.presenters.AnnotationHTMLPresenter.title',
+                 autospec=None,
+                 new_callable=mock.PropertyMock)
 
 
 @pytest.fixture
-def link_text(request):
-    patcher = mock.patch(
-        'h.presenters.AnnotationHTMLPresenter.link_text',
-        new_callable=mock.PropertyMock)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
+def link_text(patch):
+    return patch('h.presenters.AnnotationHTMLPresenter.link_text',
+                 autospec=None,
+                 new_callable=mock.PropertyMock)
 
 
 @pytest.fixture
-def href(request):
-    patcher = mock.patch(
-        'h.presenters.AnnotationHTMLPresenter.href',
-        new_callable=mock.PropertyMock)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
+def href(patch):
+    return patch('h.presenters.AnnotationHTMLPresenter.href',
+                 autospec=None,
+                 new_callable=mock.PropertyMock)
 
 
 @pytest.fixture
-def hostname_or_filename(request):
-    patcher = mock.patch(
-        'h.presenters.AnnotationHTMLPresenter.hostname_or_filename',
-        new_callable=mock.PropertyMock)
-    result = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return result
+def hostname_or_filename(patch):
+    return patch('h.presenters.AnnotationHTMLPresenter.hostname_or_filename',
+                 autospec=None,
+                 new_callable=mock.PropertyMock)

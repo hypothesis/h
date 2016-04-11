@@ -545,58 +545,42 @@ def test_leave_publishes_leave_event(Group, session_model):
 
 
 @pytest.fixture
-def Form(request):
-    patcher = mock.patch('h.groups.views.deform.Form', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def Form(patch):
+    return patch('h.groups.views.deform.Form')
 
 
 @pytest.fixture
-def GroupSchema(request):
-    patcher = mock.patch('h.groups.views.schemas.GroupSchema', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def GroupSchema(patch):
+    return patch('h.groups.views.schemas.GroupSchema')
 
 
 @pytest.fixture
-def Group(request):
-    patcher = mock.patch('h.groups.views.models.Group', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def Group(patch):
+    return patch('h.groups.views.models.Group')
 
 
 @pytest.fixture
-def session_model(request):
-    patcher = mock.patch('h.session.model')
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def session_model(patch):
+    return patch('h.session.model', autospec=False)
 
 
 @pytest.fixture
-def renderers(request):
-    patcher = mock.patch('h.groups.views.renderers', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def renderers(patch):
+    return patch('h.groups.views.renderers')
 
 
 @pytest.fixture
-def search(request):
-    patcher = mock.patch('h.groups.views.search', autospec=True)
-    search = patcher.start()
-    search.search.return_value = {'rows': [], 'total': 0}
-    request.addfinalizer(patcher.stop)
-    return search
+def search(patch):
+    mod = patch('h.groups.views.search')
+    mod.search.return_value = {'rows': [], 'total': 0}
+    return mod
 
 
 @pytest.fixture
-def uri(request):
-    patcher = mock.patch('h.groups.views.uri', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def uri(patch):
+    return patch('h.groups.views.uri')
 
 
 @pytest.fixture
-def presenters(request):
-    patcher = mock.patch('h.groups.views.presenters', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def presenters(patch):
+    return patch('h.groups.views.presenters')

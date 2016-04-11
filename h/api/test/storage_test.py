@@ -6,7 +6,6 @@ import copy
 
 import pytest
 import mock
-from mock import patch
 from pyramid.testing import DummyRequest
 
 from h import db
@@ -214,26 +213,16 @@ class TestLegacyCreateAnnotation(object):
         return {'foo': 'bar'}
 
     @pytest.fixture
-    def AnnotationBeforeSaveEvent(self, request):
-        patcher = patch('h.api.storage.AnnotationBeforeSaveEvent',
-                        autospec=True)
-        AnnotationBeforeSaveEvent = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return AnnotationBeforeSaveEvent
+    def AnnotationBeforeSaveEvent(self, patch):
+        return patch('h.api.storage.AnnotationBeforeSaveEvent')
 
     @pytest.fixture
-    def partial(self, request):
-        patcher = patch('h.api.storage.partial', autospec=True)
-        partial = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return partial
+    def partial(self, patch):
+        return patch('h.api.storage.partial')
 
     @pytest.fixture
-    def transform(self, request):
-        patcher = patch('h.api.storage.transform', autospec=True)
-        transform = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return transform
+    def transform(self, patch):
+        return patch('h.api.storage.transform')
 
 
 @pytest.mark.usefixtures('fetch_annotation',
@@ -618,33 +607,17 @@ class TestDeleteAnnotation(object):
 
 
 @pytest.fixture
-def document_model(config, request):
-    patcher = patch('h.api.models.elastic.Document', autospec=True)
-    module = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return module
+def fetch_annotation(patch):
+    return patch('h.api.storage.fetch_annotation')
 
 
 @pytest.fixture
-def fetch_annotation(request):
-    patcher = patch('h.api.storage.fetch_annotation', autospec=True)
-    fetch_annotation = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return fetch_annotation
-
-
-@pytest.fixture
-def models(request):
-    patcher = patch('h.api.storage.models')
-    models = patcher.start()
+def models(patch):
+    models = patch('h.api.storage.models', autospec=False)
     models.Annotation.return_value.is_reply = False
-    request.addfinalizer(patcher.stop)
     return models
 
 
 @pytest.fixture
-def postgres_enabled(request):
-    patcher = patch('h.api.storage._postgres_enabled', autospec=True)
-    func = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return func
+def postgres_enabled(patch):
+    return patch('h.api.storage._postgres_enabled')

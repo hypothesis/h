@@ -122,10 +122,8 @@ class TestSearch(object):
                                       {'giraffe': True}]}
 
     @pytest.fixture
-    def search_lib(self, request):
-        patcher = mock.patch('h.api.views.search_lib', autospec=True)
-        request.addfinalizer(patcher.stop)
-        return patcher.start()
+    def search_lib(self, patch):
+        return patch('h.api.views.search_lib')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -208,10 +206,8 @@ class TestCreateLegacy(object):
         return mock.Mock(feature=mock.Mock(return_value=False))
 
     @pytest.fixture
-    def copy(self, request):
-        patcher = mock.patch('h.api.views.copy', autospec=True)
-        request.addfinalizer(patcher.stop)
-        return patcher.start()
+    def copy(self, patch):
+        return patch('h.api.views.copy')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -341,10 +337,8 @@ class TestCreate(object):
         return mock.Mock(feature=mock.Mock(return_value=True))
 
     @pytest.fixture
-    def copy(self, request):
-        patcher = mock.patch('h.api.views.copy', autospec=True)
-        request.addfinalizer(patcher.stop)
-        return patcher.start()
+    def copy(self, patch):
+        return patch('h.api.views.copy')
 
 
 @pytest.mark.usefixtures('AnnotationJSONPresenter')
@@ -392,12 +386,8 @@ class TestReadJSONLD(object):
         assert result == presenter.asdict()
 
     @pytest.fixture
-    def AnnotationJSONLDPresenter(self, request):
-        patcher = mock.patch('h.api.views.AnnotationJSONLDPresenter',
-                             autospec=True)
-        cls = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return cls
+    def AnnotationJSONLDPresenter(self, patch):
+        return patch('h.api.views.AnnotationJSONLDPresenter')
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -507,43 +497,30 @@ class TestDelete(object):
 
 
 @pytest.fixture
-def AnnotationEvent(request):
-    patcher = mock.patch('h.api.views.AnnotationEvent', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def AnnotationEvent(patch):
+    return patch('h.api.views.AnnotationEvent')
 
 
 @pytest.fixture
-def AnnotationJSONPresenter(request):
-    patcher = mock.patch('h.api.views.AnnotationJSONPresenter', autospec=True)
-    cls = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return cls
+def AnnotationJSONPresenter(patch):
+    return patch('h.api.views.AnnotationJSONPresenter')
 
 
 @pytest.fixture
-def copy(request):
-    patcher = mock.patch('h.api.views.copy', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def copy(patch):
+    return patch('h.api.views.copy')
 
 
 @pytest.fixture
-def search_lib(request):
-    patcher = mock.patch('h.api.views.search_lib', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def search_lib(patch):
+    return patch('h.api.views.search_lib')
 
 
 @pytest.fixture
-def schemas(request):
-    patcher = mock.patch('h.api.views.schemas', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def schemas(patch):
+    return patch('h.api.views.schemas')
 
 
 @pytest.fixture
-def storage(request):
-    patcher = mock.patch('h.api.views.storage', autospec=True)
-    request.addfinalizer(patcher.stop)
-    return patcher.start()
+def storage(patch):
+    return patch('h.api.views.storage')

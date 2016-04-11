@@ -6,8 +6,10 @@ to put fixture functions that are useful application-wide.
 """
 
 import collections
+import functools
 import os
 
+import mock
 import pytest
 
 from pyramid import testing
@@ -54,6 +56,16 @@ class DummySession(object):
 
     def flush(self):
         self.flushed = True
+
+
+def autopatcher(request, target, **kwargs):
+    """Patch and cleanup automatically. Wraps :py:func:`mock.patch`."""
+    options = {'autospec': True}
+    options.update(kwargs)
+    patcher = mock.patch(target, **options)
+    obj = patcher.start()
+    request.addfinalizer(patcher.stop)
+    return obj
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -148,11 +160,14 @@ def mailer(config):
 
 @pytest.fixture
 def notify(config, request):
-    from mock import patch
-
-    patcher = patch.object(config.registry, 'notify', autospec=True)
+    patcher = mock.patch.object(config.registry, 'notify', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
+
+
+@pytest.fixture
+def patch(request):
+    return functools.partial(autopatcher, request)
 
 
 @pytest.fixture

@@ -255,12 +255,8 @@ class TestAnnotationJSONPresenter(object):
         assert expected == presenter.permissions[action]
 
     @pytest.fixture
-    def document_asdict(self, request):
-        patcher = mock.patch('h.api.presenters.DocumentJSONPresenter.asdict',
-                             autospec=True)
-        method = patcher.start()
-        request.addfinalizer(patcher.stop)
-        return method
+    def document_asdict(self, patch):
+        return patch('h.api.presenters.DocumentJSONPresenter.asdict')
 
 
 class TestAnnotationJSONLDPresenter(object):

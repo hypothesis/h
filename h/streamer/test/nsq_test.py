@@ -330,8 +330,5 @@ def test_process_nsq_topic_raises_if_reader_exits_early(get_reader):
 
 
 @pytest.fixture
-def get_reader(request):
-    patcher = mock.patch('h.queue.get_reader')
-    func = patcher.start()
-    request.addfinalizer(patcher.stop)
-    return func
+def get_reader(patch):
+    return patch('h.queue.get_reader')
