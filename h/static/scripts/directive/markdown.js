@@ -251,7 +251,6 @@ module.exports = function($filter, $sanitize) {
       readOnly: '<',
       text: '<?',
       onEditText: '&',
-      required: '@',
     },
     template: require('../../../templates/client/markdown.html'),
   };
