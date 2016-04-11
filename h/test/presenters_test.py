@@ -235,6 +235,14 @@ def test_hostname_or_filename_returns_Markup_if_filename_does(filename):
 
 
 @hostname_or_filename_fixtures
+def test_hostname_or_filename_unquotes_filenames(filename):
+    filename.return_value = "My%20File.pdf"
+    annotation = _annotation()
+
+    assert annotation.hostname_or_filename == "My File.pdf"
+
+
+@hostname_or_filename_fixtures
 def test_hostname_or_filename_returns_hostname_for_non_files(uri, filename):
     filename.return_value = ""
     uri.return_value = "http://www.example.com/example.html"
@@ -368,7 +376,7 @@ def test_document_link_happy_path(hostname_or_filename, href, title,
 
     assert _annotation().document_link == (
         '<a href="http://www.example.com/example.html" '
-        'title="Example Document">Example Document</a><br>(www.example.com)')
+        'title="Example Document">Example Document</a><br>www.example.com')
 
 
 @document_link_fixtures
@@ -385,7 +393,7 @@ def test_document_link_returns_Markup(hostname_or_filename, href, title,
 @document_link_fixtures
 def test_document_link_hostname_same_as_link_text(hostname_or_filename, href,
                                                   title, link_text):
-    """If '(hostname)' is the same as the link text it shouldn't be shown."""
+    """If hostname is the same as the link text it shouldn't be shown."""
     href.return_value = "http://www.example.com"
     title.return_value = "www.example.com"
 
@@ -399,9 +407,64 @@ def test_document_link_hostname_same_as_link_text(hostname_or_filename, href,
 
 
 @document_link_fixtures
+def test_document_link_hostname_same_as_link_text_ignores_when_href_missing(hostname_or_filename,
+                                                                            href,
+                                                                            title,
+                                                                            link_text):
+    """
+    It should keep the hostname the same when href is missing, even if it
+    is the same as the link text.
+    """
+    href.return_value = None
+    title.return_value = "example.pdf"
+
+    # .hostname_or_filename and .link_text are the same.
+    hostname_or_filename.return_value = "example.pdf"
+    link_text.return_value = "example.pdf"
+
+    assert _annotation().document_link == (
+        '<em>Local file:</em> <br>example.pdf')
+
+
+@document_link_fixtures
+def test_document_link_title_same_as_hostname(hostname_or_filename, href,
+                                              title):
+    """If title is the same as the hostname it shouldn't be shown."""
+    href.return_value = None
+
+    # .hostname_or_filename and .title are the same.
+    hostname_or_filename.return_value = "Example Document.pdf"
+    title.return_value = "Example Document.pdf"
+
+    assert _annotation().document_link == (
+        '<em>Local file:</em> <br>Example Document.pdf')
+
+
+@document_link_fixtures
+def test_document_link_title_same_as_hostname_ignores_when_href(hostname_or_filename,
+                                                                link_text,
+                                                                href,
+                                                                title):
+    """
+    It should keep the title the same when href is present, even it if is the
+    same as the hostname
+    """
+    href.return_value = "http://example.com"
+    link_text.return_value = "Example Document"
+
+    # .hostname_or_filename and .title are the same.
+    hostname_or_filename.return_value = "example.com"
+    title.return_value = "example.com"
+
+    assert _annotation().document_link == (
+        '<a href="http://example.com" title="example.com">Example Document</a><br>'
+        'example.com')
+
+
+@document_link_fixtures
 def test_document_link_hostname_part_of_link_text(hostname_or_filename, href,
                                                   title, link_text):
-    """If '(hostname)' is part of the link text it shouldn't be shown."""
+    """If hostname is part of the link text it shouldn't be shown."""
     href.return_value = "http://www.example.com/example.html"
     title.return_value = "www.example.com/example.html"
 
@@ -425,11 +488,11 @@ def test_document_link_truncates_hostname(hostname_or_filename, href, title,
     # .hostname_or_filename is too long.
     hostname_or_filename.return_value = "a" * 70
 
-    expected_hostname = "a" * 60 + "&hellip;"
+    expected_hostname = "a" * 55 + "&hellip;"
     expected_result = (
         '<a href="http://www.example.com/example.html" '
         'title="www.example.com/example.html">'
-        'www.example.com/example.html</a><br>({hostname})'.format(
+        'www.example.com/example.html</a><br>{hostname}'.format(
             hostname=expected_hostname))
     assert _annotation().document_link == expected_result
 
@@ -444,18 +507,18 @@ def test_document_link_truncates_link_text(hostname_or_filename, href, title,
     # .link_text is too long.
     link_text.return_value = "a" * 70
 
-    expected_link_text = "a" * 60 + "&hellip;"
+    expected_link_text = "a" * 55 + "&hellip;"
     expected_result = (
         '<a href="http://www.example.com/example.html" '
         'title="www.example.com/example.html">{link_text}</a><br>'
-        '(www.example.com)'.format(link_text=expected_link_text))
+        'www.example.com'.format(link_text=expected_link_text))
     assert _annotation().document_link == expected_result
 
 
 @document_link_fixtures
 def test_document_link_hostname_but_no_href(hostname_or_filename, href, title,
                                             link_text):
-    hostname_or_filename.return_value = "www.example.com"
+    hostname_or_filename.return_value = "Example.pdf"
     title.return_value = "Example Document"
     link_text.return_value = "Example Document"
 
@@ -463,8 +526,7 @@ def test_document_link_hostname_but_no_href(hostname_or_filename, href, title,
     href.return_value = ""
 
     assert _annotation().document_link == (
-        '<a title="Example Document">Example Document</a><br>'
-        '(www.example.com)')
+        '<em>Local file:</em> Example Document<br>Example.pdf')
 
 
 @document_link_fixtures
@@ -486,16 +548,14 @@ def test_document_link_href_but_no_hostname(hostname_or_filename, href, title,
 @document_link_fixtures
 def test_document_link_no_href_and_no_hostname(hostname_or_filename, href,
                                                title, link_text):
-    title.return_value = "www.example.com/example.html"
-    link_text.return_value = "www.example.com/example.html"
+    title.return_value = "Example"
+    link_text.return_value = "Example"
 
     # No .href and no .hostname_or_filename.
     href.return_value = ""
     hostname_or_filename.return_value = ""
 
-    assert _annotation().document_link == (
-        '<a title="www.example.com/example.html">'
-        'www.example.com/example.html</a>')
+    assert _annotation().document_link == "<em>Local file:</em> Example"
 
 
 def test_description():

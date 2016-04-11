@@ -9,7 +9,7 @@ import jinja2
 from h._compat import text_type
 
 
-def _format_document_link(href, title, link_text, hostname):
+def _format_document_link(href, title, link_text, host_or_filename):
     """Return a document link for the given components.
 
     Helper function for the .document_link property below.
@@ -19,33 +19,35 @@ def _format_document_link(href, title, link_text, hostname):
         double-escaped.
 
     """
-    if hostname and hostname in link_text:
-        hostname = ""
+    if href and host_or_filename and host_or_filename in link_text:
+        host_or_filename = ""
+    elif not href and title == host_or_filename:
+        title = ""
 
-    def truncate(content, length=60):
+    def truncate(content, length=55):
         """Truncate the given string to at most length chars."""
         if len(content) <= length:
             return content
         else:
             return content[:length] + jinja2.Markup("&hellip;")
 
-    hostname = truncate(hostname)
+    host_or_filename = truncate(host_or_filename)
     link_text = truncate(link_text)
 
-    if href and hostname:
-        link = '<a href="{href}" title="{title}">{link_text}</a><br>({hostname})'
-    elif hostname:
-        link = '<a title="{title}">{link_text}</a><br>({hostname})'
+    if href and host_or_filename:
+        link = '<a href="{href}" title="{title}">{link_text}</a><br>{host_or_filename}'
     elif href:
         link = '<a href="{href}" title="{title}">{link_text}</a>'
     else:
-        link = '<a title="{title}">{link_text}</a>'
+        link = '<em>Local file:</em> {title}'
+        if host_or_filename:
+            link += '<br>{host_or_filename}'
 
     link = link.format(
         href=jinja2.escape(href),
         title=jinja2.escape(title),
         link_text=jinja2.escape(link_text),
-        hostname=jinja2.escape(hostname))
+        host_or_filename=jinja2.escape(host_or_filename))
 
     return jinja2.Markup(link)
 
@@ -102,7 +104,7 @@ class AnnotationHTMLPresenter(object):
 
         """
         if self.filename:
-            return jinja2.escape(self.filename)
+            return jinja2.escape(urllib2.unquote(self.filename))
         else:
             hostname = urlparse.urlparse(self.uri).hostname
 
@@ -198,7 +200,9 @@ class AnnotationHTMLPresenter(object):
 
         Returns HTML strings like:
 
-          <a href="{href}" title="{title}">{link_text}</a> ({hostname})
+          <a href="{href}" title="{title}">{link_text}</a> {hostname}
+
+          <em>Local file:</em> {title}<br>{hostname}
 
         where:
 
@@ -216,7 +220,7 @@ class AnnotationHTMLPresenter(object):
           hostname.
           If the hostname is too long it is truncated with &hellip;.
 
-        The ({hostname}) part will be missing if it wouldn't be any different
+        The {hostname} part will be missing if it wouldn't be any different
         from the {link_text} part.
 
         The href="{href}" will be missing if there's no http(s) uri to link to
