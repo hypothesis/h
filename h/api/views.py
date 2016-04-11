@@ -228,7 +228,10 @@ def delete(annotation, request):
     # process the delete event. For example, the streamer needs to know the
     # target URLs of the deleted annotation in order to know which clients to
     # forward the delete event to.
-    _publish_annotation_event(request, annotation, 'delete')
+    _publish_annotation_event(
+        request,
+        AnnotationJSONPresenter(request, annotation).asdict(),
+        'delete')
 
     return {'id': annotation.id, 'deleted': True}
 
