@@ -50,16 +50,13 @@ class TestIndexAnnotation:
     @pytest.fixture
     def presenters(self, patch):
         presenters = patch('h.api.search.client.presenters')
-        presenters.AnnotationJSONPresenter.return_value = mock.Mock(
-            asdict=mock.Mock(
-                return_value={
-                    'id': 'test_annotation_id',
-                    'target': [
-                        {
-                            'source': 'http://example.com/example',
-                        },
-                    ],
-                }
-            )
-        )
+        presenter = presenters.AnnotationJSONPresenter.return_value
+        presenter.asdict.return_value = {
+            'id': 'test_annotation_id',
+            'target': [
+                {
+                    'source': 'http://example.com/example',
+                },
+            ],
+        }
         return presenters
