@@ -20,32 +20,32 @@ class TestPublishAnnotationEvent:
 
         event.request.get_queue_writer.assert_called_once_with()
 
-    def test_it_presents_the_annotation(self):
+    def test_it_presents_the_annotation(self, presenters):
         event = self.event()
 
         subscribers.publish_annotation_event(event)
 
-        subscribers.presenters.AnnotationJSONPresenter.assert_called_once_with(
+        presenters.AnnotationJSONPresenter.assert_called_once_with(
             event.request,
             event.annotation,
         )
-        subscribers.presenters.AnnotationJSONPresenter.return_value.asdict\
+        presenters.AnnotationJSONPresenter.return_value.asdict\
             .assert_called_once_with()
 
-    def test_it_serializes_the_data(self):
+    def test_it_serializes_the_data(self, json, presenters):
         event = self.event()
         event.request.headers = {'X-Client-Id': 'client_id'}
 
         subscribers.publish_annotation_event(event)
 
-        subscribers.json.dumps.assert_called_once_with({
+        json.dumps.assert_called_once_with({
             'action': event.action,
-            'annotation': subscribers.presenters.AnnotationJSONPresenter
+            'annotation': presenters.AnnotationJSONPresenter
                 .return_value.asdict.return_value,
             'src_client_id': 'client_id',
         })
 
-    def test_it_publishes_the_serialized_data(self):
+    def test_it_publishes_the_serialized_data(self, json):
         event = self.event()
 
         subscribers.publish_annotation_event(event)
@@ -53,7 +53,7 @@ class TestPublishAnnotationEvent:
         event.request.get_queue_writer.return_value.publish\
             .assert_called_once_with(
                 'annotations',
-                subscribers.json.dumps.return_value)
+                json.dumps.return_value)
 
     def event(self):
         return mock.Mock(
@@ -63,15 +63,9 @@ class TestPublishAnnotationEvent:
         )
 
     @pytest.fixture
-    def json(self, monkeypatch):
-        monkeypatch.setattr(
-            'h.subscribers.json',
-            mock.Mock(spec=subscribers.json),
-        )
+    def json(self, patch):
+        return patch('h.subscribers.json')
 
     @pytest.fixture
-    def presenters(self, monkeypatch):
-        monkeypatch.setattr(
-            'h.subscribers.presenters',
-            mock.Mock(spec=subscribers.presenters),
-        )
+    def presenters(self, patch):
+        return patch('h.subscribers.presenters')

@@ -10,16 +10,16 @@ from h.api.search import client
 @pytest.mark.usefixtures('elasticsearch', 'presenters')
 class TestIndexAnnotation:
 
-    def test_it_presents_the_annotation(self):
+    def test_it_presents_the_annotation(self, presenters):
         request = mock.Mock()
         annotation = mock.Mock()
 
         self.client().index_annotation(request, annotation)
 
-        client.presenters.AnnotationJSONPresenter.assert_called_once_with(
+        presenters.AnnotationJSONPresenter.assert_called_once_with(
             request, annotation)
 
-    def test_it_indexes_the_annotation(self):
+    def test_it_indexes_the_annotation(self, presenters):
         client_ = self.client()
 
         client_.index_annotation(mock.Mock(), mock.Mock())
@@ -27,7 +27,7 @@ class TestIndexAnnotation:
         client_.conn.index.assert_called_once_with(
             index='hypothesis',
             doc_type='annotation',
-            body=client.presenters.AnnotationJSONPresenter.return_value.asdict.return_value,
+            body=presenters.AnnotationJSONPresenter.return_value.asdict.return_value,
             id='test_annotation_id',
         )
 
@@ -47,19 +47,13 @@ class TestIndexAnnotation:
         )
 
     @pytest.fixture
-    def elasticsearch(self, monkeypatch):
-        monkeypatch.setattr(
-            'h.api.search.client.elasticsearch',
-            mock.Mock(spec=client.elasticsearch),
-        )
+    def elasticsearch(self, patch):
+        return patch('h.api.search.client.elasticsearch')
 
     @pytest.fixture
-    def presenters(self, monkeypatch):
-        monkeypatch.setattr(
-            'h.api.search.client.presenters',
-            mock.Mock(spec=client.presenters),
-        )
-        client.presenters.AnnotationJSONPresenter.return_value = mock.Mock(
+    def presenters(self, patch):
+        presenters = patch('h.api.search.client.presenters')
+        presenters.AnnotationJSONPresenter.return_value = mock.Mock(
             asdict=mock.Mock(
                 return_value={
                     'id': 'test_annotation_id',
@@ -71,3 +65,4 @@ class TestIndexAnnotation:
                 }
             )
         )
+        return presenters
