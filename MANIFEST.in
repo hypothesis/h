@@ -14,6 +14,7 @@ graft h/migrations
 graft h/static
 graft h/templates
 graft scripts
+prune tests
 graft vendor
 global-exclude __pycache__
 global-exclude *.py[co]
