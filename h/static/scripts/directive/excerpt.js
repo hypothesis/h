@@ -64,6 +64,19 @@ function excerpt(ExcerptOverflowMonitor) {
     controller: ExcerptController,
     controllerAs: 'vm',
     link: function (scope, elem, attrs, ctrl) {
+      // Test if the element or any of its parents have been hidden by
+      // an 'ng-show' directive
+      function isElementHidden() {
+        var el = elem[0];
+        while (el) {
+          if (el.classList.contains('ng-hide')) {
+            return true;
+          }
+          el = el.parentElement;
+        }
+        return false;
+      }
+
       var overflowMonitor = new ExcerptOverflowMonitor({
         getState: function () {
           return {
@@ -103,6 +116,15 @@ function excerpt(ExcerptOverflowMonitor) {
       window.addEventListener('resize', overflowMonitor.check);
       scope.$on('$destroy', function () {
         window.removeEventListener('resize', overflowMonitor.check);
+      });
+
+      // Watch for changes to the visibility of the excerpt.
+      // Unfortunately there is no DOM API for this, so we rely on a digest
+      // being triggered after the visibility changes.
+      scope.$watch(isElementHidden, function (hidden) {
+        if (!hidden) {
+          overflowMonitor.check();
+        }
       });
 
       // Watch input properties which may affect the overflow state

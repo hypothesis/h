@@ -106,6 +106,24 @@ describe('excerpt directive', function () {
     });
   });
 
+  context('visibility changes', function () {
+    it('schedules an overflow check when shown', function () {
+      var element = excerptDirective({}, '<span></span>');
+      fakeOverflowMonitor.check.reset();
+
+      // ng-hide is the class used by the ngShow and ngHide directives
+      // to show or hide elements. For now, this is the only way of hiding
+      // or showing excerpts that we need to support.
+      element[0].classList.add('ng-hide');
+      element.scope.$digest();
+      assert.notCalled(fakeOverflowMonitor.check);
+
+      element[0].classList.remove('ng-hide');
+      element.scope.$digest();
+      assert.called(fakeOverflowMonitor.check);
+    });
+  });
+
   context('excerpt content style', function () {
     it('sets the content style using ExcerptOverflowMonitor#contentStyle()', function () {
       var element = excerptDirective({}, '<span></span>');
