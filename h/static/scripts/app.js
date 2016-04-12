@@ -204,6 +204,7 @@ module.exports = angular.module('h', [
   .value('AnnotationSync', require('./annotation-sync'))
   .value('AnnotationUISync', require('./annotation-ui-sync'))
   .value('Discovery', require('./discovery'))
+  .value('ExcerptOverflowMonitor', require('./directive/excerpt-overflow-monitor'))
   .value('raven', require('./raven'))
   .value('settings', settings)
   .value('time', require('./time'))
