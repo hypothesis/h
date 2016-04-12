@@ -3,6 +3,8 @@
 import json
 
 from h import __version__
+from h.api import presenters
+
 
 
 def add_renderer_globals(event):
@@ -25,9 +27,14 @@ def add_renderer_globals(event):
 def publish_annotation_event(event):
     """Publish an annotation event to the message queue."""
     queue = event.request.get_queue_writer()
+
+    annotation_dict = presenters.AnnotationJSONPresenter(
+        event.request, event.annotation).asdict()
+
     data = {
         'action': event.action,
-        'annotation': event.annotation,
+        'annotation': annotation_dict,
         'src_client_id': event.request.headers.get('X-Client-Id'),
     }
+
     queue.publish('annotations', json.dumps(data))

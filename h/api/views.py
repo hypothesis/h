@@ -177,15 +177,11 @@ def create(request):
                                                          legacy_appstruct)
 
     if request.feature('postgres'):
-        annotation_dict = (
-            AnnotationJSONPresenter(request, annotation).asdict())
-    else:
-        annotation_dict = (
-            AnnotationJSONPresenter(request, legacy_annotation).asdict())
+        _publish_annotation_event(request, annotation, 'create')
+        return AnnotationJSONPresenter(request, annotation).asdict()
 
-    _publish_annotation_event(request, annotation_dict, 'create')
-
-    return annotation_dict
+    _publish_annotation_event(request, legacy_annotation, 'create')
+    return AnnotationJSONPresenter(request, legacy_annotation).asdict()
 
 
 @api_config(route_name='api.annotation', request_method='GET', permission='read')
@@ -230,7 +226,7 @@ def delete(annotation, request):
     # forward the delete event to.
     _publish_annotation_event(
         request,
-        AnnotationJSONPresenter(request, annotation).asdict(),
+        annotation,
         'delete')
 
     return {'id': annotation.id, 'deleted': True}
@@ -262,3 +258,5 @@ def _publish_annotation_event(request, annotation, action):
 
 def includeme(config):
     config.scan(__name__)
+    config.add_subscriber('h.api.subscribers.index_annotation_event',
+                          'h.api.events.AnnotationEvent')
