@@ -27,8 +27,7 @@ class DummyRequest(_DummyRequest):
 
 
 features_save_fixtures = pytest.mark.usefixtures('Feature',
-                                                 'check_csrf_token',
-                                                 'routes_mapper')
+                                                 'check_csrf_token')
 
 
 @features_save_fixtures
@@ -131,7 +130,7 @@ def test_nipsa_add_returns_index(nipsa_index):
 
 
 # The fixtures required to mock all of nipsa_remove()'s dependencies.
-nipsa_remove_fixtures = pytest.mark.usefixtures('nipsa', 'routes_mapper')
+nipsa_remove_fixtures = pytest.mark.usefixtures('nipsa')
 
 
 @nipsa_remove_fixtures
@@ -235,7 +234,7 @@ def test_admins_add_returns_index_on_NoSuchUserError(make_admin, admins_index):
 
 
 # The fixtures required to mock all of admins_remove()'s dependencies.
-admins_remove_fixtures = pytest.mark.usefixtures('User', 'routes_mapper')
+admins_remove_fixtures = pytest.mark.usefixtures('User')
 
 
 @admins_remove_fixtures
@@ -380,7 +379,7 @@ def test_staff_add_returns_index_on_NoSuchUserError(make_staff, staff_index):
 
 
 # The fixtures required to mock all of staff_remove()'s dependencies.
-staff_remove_fixtures = pytest.mark.usefixtures('User', 'routes_mapper')
+staff_remove_fixtures = pytest.mark.usefixtures('User')
 
 
 @staff_remove_fixtures
@@ -509,9 +508,7 @@ def test_users_index_user_found(User):
     }
 
 
-users_activate_fixtures = pytest.mark.usefixtures('routes_mapper',
-                                                  'User',
-                                                  'events')
+users_activate_fixtures = pytest.mark.usefixtures('User', 'events')
 
 
 @users_activate_fixtures
@@ -595,8 +592,7 @@ def test_users_activate_redirects(User):
     assert isinstance(result, httpexceptions.HTTPFound)
 
 
-users_delete_fixtures = pytest.mark.usefixtures('routes_mapper', 'User',
-                                                'delete_user')
+users_delete_fixtures = pytest.mark.usefixtures('User', 'delete_user')
 
 
 @users_delete_fixtures
@@ -786,6 +782,15 @@ def test_delete_user_deletes_user():
     admin.delete_user(request, user)
 
     request.db.delete.assert_called_once_with(user)
+
+
+@pytest.fixture(autouse=True)
+def routes(config):
+    config.add_route('admin_admins', '/adm/admins')
+    config.add_route('admin_features', '/adm/features')
+    config.add_route('admin_nipsa', '/adm/nipsa')
+    config.add_route('admin_staff', '/adm/staff')
+    config.add_route('admin_users', '/adm/users')
 
 
 @pytest.fixture

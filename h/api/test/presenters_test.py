@@ -16,11 +16,8 @@ from h.api.presenters import add_annotation_link_generator
 from h.api.presenters import utc_iso8601, deep_merge_dict
 
 
+@pytest.mark.usefixtures('routes')
 class TestAnnotationBasePresenter(object):
-
-    @pytest.fixture(autouse=True)
-    def link_routes(self, routes_mapper):
-        routes_mapper.add_route('api.annotation', '/dummy/abc123')
 
     def test_constructor_args(self):
         request = DummyRequest()
@@ -160,6 +157,11 @@ class TestAnnotationBasePresenter(object):
         actual = AnnotationJSONPresenter(request, ann).target
         assert expected == actual
 
+    @pytest.fixture
+    def routes(self, config):
+        config.add_route('api.annotation', '/dummy/:id')
+
+
 
 class TestAnnotationJSONPresenter(object):
     def test_asdict(self, document_asdict):
@@ -259,13 +261,8 @@ class TestAnnotationJSONPresenter(object):
         return patch('h.api.presenters.DocumentJSONPresenter.asdict')
 
 
+@pytest.mark.usefixtures('routes')
 class TestAnnotationJSONLDPresenter(object):
-
-    @pytest.fixture(autouse=True)
-    def routes(self, request):
-        config = testing.setUp()
-        config.add_route('annotation', '/ann/{id}')
-        request.addfinalizer(testing.tearDown)
 
     def test_asdict(self):
         request = DummyRequest()
@@ -335,6 +332,12 @@ class TestAnnotationJSONLDPresenter(object):
             'text': 'lion',
             'purpose': 'tagging',
         } in bodies
+
+    @pytest.fixture
+    def routes(self, request):
+        config = testing.setUp()
+        config.add_route('annotation', '/ann/{id}')
+        request.addfinalizer(testing.tearDown)
 
 
 class TestDocumentJSONPresenter(object):
