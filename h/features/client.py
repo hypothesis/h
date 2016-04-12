@@ -21,7 +21,7 @@ class Client(object):
     def __init__(self, request, fetcher=models.Feature.all):
         self.request = request
         self._fetcher = fetcher
-        self._cache = {}
+        self._cache = None
 
     def __call__(self, name):
         return self.enabled(name)
@@ -37,7 +37,7 @@ class Client(object):
         When the internal cache is empty, it will automatically load the
         feature flags from the database first.
         """
-        if not self._cache:
+        if self._cache is None:
             self._load()
 
         if name not in self._cache:
@@ -54,13 +54,13 @@ class Client(object):
         When the internal cache is empty, it will automatically load the
         feature flags from the database first.
         """
-        if not self._cache:
+        if self._cache is None:
             self._load()
 
         return self._cache
 
     def clear(self):
-        self._cache = {}
+        self._cache = None
 
     def _load(self):
         """Loads the feature flag states into the internal cache."""

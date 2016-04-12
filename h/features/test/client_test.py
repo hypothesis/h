@@ -25,6 +25,20 @@ class TestClient(object):
 
         fetcher.assert_called_once_with()
 
+    def test_enabled_caches_empty_result_sets(self, client, fetcher):
+        """Even an empty result set from the fetcher should be cached."""
+        fetcher.return_value = []
+        try:
+            client.enabled('foo')
+        except UnknownFeatureError:
+            pass
+        try:
+            client.enabled('bar')
+        except UnknownFeatureError:
+            pass
+
+        fetcher.assert_called_once_with()
+
     def test_enabled_raises_for_unknown_features(self, client):
         with pytest.raises(UnknownFeatureError):
             client.enabled('wibble')
@@ -61,6 +75,14 @@ class TestClient(object):
         fetcher.assert_called_once_with()
 
     def test_all_caches_features(self, client, fetcher):
+        client.all()
+        client.all()
+
+        fetcher.assert_called_once_with()
+
+    def test_all_caches_empty_result_sets(self, client, fetcher):
+        """Even an empty result set from the fetcher should be cached."""
+        fetcher.return_value = []
         client.all()
         client.all()
 
