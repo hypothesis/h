@@ -5,29 +5,12 @@ import pytest
 
 from h import db
 from h import features
+from h.features.models import Feature
 from h.auth import role
 
 
-@pytest.fixture(scope='module', autouse=True)
-def features_override(request):
-    # Replace the primary FEATURES dictionary for the duration of testing...
-    patcher = mock.patch.dict('h.features.FEATURES', {
-        'notification': "A test flag for testing with."
-    }, clear=True)
-    patcher.start()
-    request.addfinalizer(patcher.stop)
-
-
-@pytest.fixture(scope='module', autouse=True)
-def features_pending_removal_override(request):
-    # And configure 'abouttoberemoved' as a feature pending removal...
-    patcher = mock.patch.dict('h.features.FEATURES_PENDING_REMOVAL', {
-        'abouttoberemoved': "A test flag that's about to be removed."
-    }, clear=True)
-    patcher.start()
-    request.addfinalizer(patcher.stop)
-
-
+@pytest.mark.usefixtures('features_override',
+                         'features_pending_removal_override')
 class TestClient(object):
     def test_init_stores_the_request(self):
         request = DummyRequest()
@@ -39,7 +22,7 @@ class TestClient(object):
         assert client._cache == {}
 
     def test_load_loads_features(self, client):
-        db.Session.add(features.Feature(name='notification'))
+        db.Session.add(Feature(name='notification'))
         db.Session.flush()
 
         client.load()
@@ -54,16 +37,16 @@ class TestClient(object):
         Test that load does not load features that are still in the database
         but not in the FEATURES dict anymore
         """
-        db.Session.add(features.Feature(name='notification'))
-        db.Session.add(features.Feature(name='new_homepage'))
+        db.Session.add(Feature(name='notification'))
+        db.Session.add(Feature(name='new_homepage'))
         db.Session.flush()
 
         client.load()
         assert client._cache.keys() == ['notification']
 
     def test_load_skips_pending_removal_features(self, client):
-        db.Session.add(features.Feature(name='notification'))
-        db.Session.add(features.Feature(name='abouttoberemoved'))
+        db.Session.add(Feature(name='notification'))
+        db.Session.add(Feature(name='abouttoberemoved'))
         db.Session.flush()
 
         client.load()
@@ -93,20 +76,17 @@ class TestClient(object):
         assert client.enabled('notification') is False
 
     def test_enabled_false_if_everyone_false(self, client, fetcher):
-        fetcher.return_value = [
-            features.Feature(name='notification', everyone=False)]
+        fetcher.return_value = [Feature(name='notification', everyone=False)]
         assert client.enabled('notification') is False
 
     def test_enabled_true_if_everyone_true(self, client, fetcher):
-        fetcher.return_value = [
-            features.Feature(name='notification', everyone=True)]
+        fetcher.return_value = [Feature(name='notification', everyone=True)]
         assert client.enabled('notification') is True
 
     def test_enabled_false_when_admins_true_normal_request(self,
                                                            client,
                                                            fetcher):
-        fetcher.return_value = [
-            features.Feature(name='notification', admins=True)]
+        fetcher.return_value = [Feature(name='notification', admins=True)]
         assert client.enabled('notification') is False
 
     def test_enabled_true_when_admins_true_admin_request(self,
@@ -114,15 +94,13 @@ class TestClient(object):
                                                          fetcher,
                                                          authn_policy):
         authn_policy.effective_principals.return_value = [role.Admin]
-        fetcher.return_value = [
-            features.Feature(name='notification', admins=True)]
+        fetcher.return_value = [Feature(name='notification', admins=True)]
         assert client.enabled('notification') is True
 
     def test_enabled_false_when_staff_true_normal_request(self,
                                                           client,
                                                           fetcher):
-        fetcher.return_value = [
-            features.Feature(name='notification', staff=True)]
+        fetcher.return_value = [Feature(name='notification', staff=True)]
 
         assert client.enabled('notification') is False
 
@@ -131,8 +109,7 @@ class TestClient(object):
                                                         fetcher,
                                                         authn_policy):
         authn_policy.effective_principals.return_value = [role.Staff]
-        fetcher.return_value = [
-            features.Feature(name='notification', staff=True)]
+        fetcher.return_value = [Feature(name='notification', staff=True)]
 
         assert client.enabled('notification') is True
 
@@ -161,31 +138,22 @@ class TestClient(object):
 
     @pytest.fixture
     def fetcher(self, patch):
-        return patch('h.features.Client._fetch_features')
+        return patch('h.features.models.Feature.all', autospec=None)
 
+    @pytest.fixture
+    def features_override(self, request):
+        # Replace the primary FEATURES dictionary for the duration of testing...
+        patcher = mock.patch.dict('h.features.models.FEATURES', {
+            'notification': "A test flag for testing with."
+        }, clear=True)
+        patcher.start()
+        request.addfinalizer(patcher.stop)
 
-def test_remove_old_flag_removes_old_flags():
-    """
-    The remove_old_flags function should remove unknown flags.
-
-    New flags and flags pending removal should be left alone, but completely
-    unknown flags should be removed.
-    """
-    new_feature = features.Feature(name='notification')
-    pending_feature = features.Feature(name='abouttoberemoved')
-    old_feature = features.Feature(name='somethingelse')
-    db.Session.add_all([new_feature, pending_feature, old_feature])
-    db.Session.flush()
-
-    features.remove_old_flags()
-
-    remaining = set([f.name for f in features.Feature.query.all()])
-    assert remaining == {'abouttoberemoved', 'notification'}
-
-
-@pytest.fixture
-def feature_model(patch):
-    model = patch('h.features.Feature')
-    model.get_by_name.return_value.everyone = False
-    model.get_by_name.return_value.admins = False
-    return model
+    @pytest.fixture
+    def features_pending_removal_override(self, request):
+        # And configure 'abouttoberemoved' as a feature pending removal...
+        patcher = mock.patch.dict('h.features.models.FEATURES_PENDING_REMOVAL', {
+            'abouttoberemoved': "A test flag that's about to be removed."
+        }, clear=True)
+        patcher.start()
+        request.addfinalizer(patcher.stop)
