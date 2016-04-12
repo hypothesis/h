@@ -86,6 +86,11 @@ function excerpt(ExcerptOverflowMonitor) {
           if (ctrl.onCollapsibleChanged) {
             ctrl.onCollapsibleChanged({collapsible: overflowing});
           }
+          // Even though this change happens outside the framework, we use
+          // $digest() rather than $apply() here to avoid a large number of full
+          // digest cycles if many excerpts update their overflow state at the
+          // same time. The onCollapsibleChanged() handler, if any, is
+          // responsible for triggering any necessary digests in parent scopes.
           scope.$digest();
         },
       }, window.requestAnimationFrame);
@@ -131,8 +136,12 @@ function excerpt(ExcerptOverflowMonitor) {
       inlineControls: '<',
       /** Sets whether or not the excerpt is collapsed. */
       collapse: '=?',
-      /** Called when the collapsibility of the excerpt (that is, whether or
+      /**
+       * Called when the collapsibility of the excerpt (that is, whether or
        * not the content height exceeds the collapsed height), changes.
+       *
+       * Note: This function is *not* called from inside a digest cycle,
+       * the caller is responsible for triggering any necessary digests.
        */
       onCollapsibleChanged: '&?',
       /** The height of this container in pixels when collapsed.

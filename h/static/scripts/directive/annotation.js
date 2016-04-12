@@ -698,12 +698,19 @@ function AnnotationController(
     return persona.username(domainModel.user);
   };
 
-  /** Sets whether or not the controls for
-   * expanding/collapsing the body of lengthy annotations
-   * should be shown.
+  /**
+   * Sets whether or not the controls for expanding/collapsing the body of
+   * lengthy annotations should be shown.
    */
-  vm.setBodyCollapsible = function(canCollapse) {
+  vm.setBodyCollapsible = function (canCollapse) {
+    if (canCollapse === vm.canCollapseBody) {
+      return;
+    }
     vm.canCollapseBody = canCollapse;
+
+    // This event handler is called from outside the digest cycle, so
+    // explicitly trigger a digest.
+    $scope.$digest();
   };
 
   init();
@@ -768,7 +775,7 @@ function link(scope, elem, attrs, controllers) {
   *
   */
 // @ngInject
-function annotation($document) {
+function annotation() {
   return {
     restrict: 'E',
     bindToController: true,
