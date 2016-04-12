@@ -36,6 +36,7 @@ def _app_html_context(assets_env, api_url, service_url, ga_tracking_id,
     app_config = {
         'apiUrl': api_url,
         'serviceUrl': service_url,
+        'release': __version__
     }
 
     if websocket_url:

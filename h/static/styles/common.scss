@@ -177,6 +177,7 @@ html {
     line-height: 1;
     white-space: nowrap;
     font-size: $body2-font-size;
+    cursor: pointer;
 
     &:hover {
       color: $brand-color;

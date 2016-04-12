@@ -29,6 +29,7 @@
       on-logout="logout()"
       account-dialog="accountDialog"
       share-dialog="shareDialog"
+      on-show-about-version-dialog="aboutThisVersionDialog.visible = true"
       is-sidebar="::isSidebar"
       search-controller="search"
       sort-by="sort.name"
@@ -49,6 +50,10 @@
                 on-close="accountDialog.visible=false"></login-form>
       <sidebar-tutorial ng-if="isSidebar"></sidebar-tutorial>
       <share-dialog ng-show="shareDialog.visible"></share-dialog>
+      <about-this-version-dialog ng-if="aboutThisVersionDialog.visible"
+        on-close="aboutThisVersionDialog.visible = false"
+        auth="auth">
+      </about-this-version-dialog>
       <main ng-view=""></main>
     </div>
 

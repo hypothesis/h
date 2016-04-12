@@ -72,5 +72,5 @@ describe 'CrossFrame', ->
       fakeBridge.onConnect.yields(channel)
       crossframe.connect()
       assert.deepEqual(crossframe.frames, [
-        {channel: channel, uri: uri}
+        {channel: channel, uri: uri, documentFingerprint: null}
       ])

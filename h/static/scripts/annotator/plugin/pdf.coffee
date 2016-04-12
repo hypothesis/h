@@ -55,8 +55,9 @@ module.exports = class PDF extends Annotator.Plugin
       # as per http://tools.ietf.org/html/rfc3406#section-3.0
       urn = "urn:x-pdf:" + PDFViewerApplication.documentFingerprint
       link = [{href: urn}, {href: PDFViewerApplication.url}]
+      documentFingerprint = PDFViewerApplication.documentFingerprint
 
-      return {title, link}
+      return {title, link, documentFingerprint}
 
   # This method (re-)anchors annotations when pages are rendered and destroyed.
   _update: ->

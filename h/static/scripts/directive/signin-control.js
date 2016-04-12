@@ -15,6 +15,10 @@ module.exports = function () {
        */
       auth: '<',
       /**
+       * Called when the user clicks on the "About this version" text.
+       */
+      onShowAboutVersionDialog: '&',
+      /**
        * Called when the user clicks on the "Sign in" text.
        */
       onLogin: '&',

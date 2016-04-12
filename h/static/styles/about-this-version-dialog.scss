@@ -1,0 +1,23 @@
+.about-this-version__key {
+  width: 100px;
+  float: left;
+  color: $gray-light;
+}
+
+.about-this-version__val {
+  margin-left: 100px;
+  word-wrap: break-word;
+}
+
+.about-this-version-feedback {
+  margin-top: 10px;
+}
+
+.about-this-version-feedback__link {
+  text-decoration: underline;
+  color: $dg-4;
+
+  &:hover {
+    color: $dg-1;
+  }
+}
