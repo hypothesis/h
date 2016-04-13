@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from h.api.search.index import index
+from h.api.search.index import delete
+
 
 def index_annotation_event(event):
     """Index a created, updated or deleted annotation into Elasticsearch."""
@@ -8,4 +11,6 @@ def index_annotation_event(event):
         return
 
     if event.action == 'create':
-        event.request.es.index_annotation(event.request, event.annotation)
+        index(event.request.es, event.annotation, event.request)
+    elif event.action == 'delete':
+        delete(event.request.es, event.annotation)
