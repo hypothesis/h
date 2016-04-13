@@ -1,8 +1,10 @@
 "use strict";
 
-var mock = angular.mock;
+var angular = require('angular');
 
 var events = require('../events');
+
+var mock = angular.mock;
 
 describe('h:session', function () {
   var $httpBackend;
@@ -10,7 +12,6 @@ describe('h:session', function () {
 
   var fakeFlash;
   var fakeRaven;
-  var fakeXsrf;
   var sandbox;
   var session;
 
@@ -50,7 +51,7 @@ describe('h:session', function () {
 
   // There's little point testing every single route here, as they're
   // declarative and ultimately we'd be testing ngResource.
-  describe('.login()', function () {
+  describe('#login()', function () {
     var url = 'https://test.hypothes.is/app?__formid__=login';
 
     it('should send an HTTP POST to the action', function () {
@@ -129,7 +130,7 @@ describe('h:session', function () {
     });
   });
 
-  describe('.load()', function () {
+  describe('#load()', function () {
     var url = 'https://test.hypothes.is/app';
 
     it('should fetch the session data', function () {
@@ -157,9 +158,15 @@ describe('h:session', function () {
       session.load();
       $httpBackend.flush();
     });
+
+    it('should tolerate failed requests', function () {
+      $httpBackend.expectGET(url).respond(-1, null);
+      session.load();
+      $httpBackend.flush();
+    });
   });
 
-  describe('.update()', function () {
+  describe('#update()', function () {
     it('broadcasts SESSION_CHANGED when the session changes', function () {
       var sessionChangeCallback = sinon.stub();
 
@@ -220,7 +227,7 @@ describe('h:session', function () {
     });
   });
 
-  describe('.dismiss_sidebar_tutorial()', function () {
+  describe('#dismiss_sidebar_tutorial()', function () {
     var url = 'https://test.hypothes.is/app/dismiss_sidebar_tutorial';
     it('disables the tutorial for the user', function () {
       $httpBackend.expectPOST(url).respond({});
