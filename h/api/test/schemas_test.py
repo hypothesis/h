@@ -841,18 +841,14 @@ class TestCreateAnnotationSchema(object):
         with pytest.raises(schemas.ValidationError):
             schema.validate({'foo': 'bar'})
 
-    @pytest.fixture
-    def AnnotationSchema(self, patch):
-        cls = patch('h.api.schemas.AnnotationSchema')
-        cls.return_value.validate.return_value = annotation_data()
-        return cls
 
 
-class TestUpdateAnnotationSchema(object):
+
+class TestLegacyUpdateAnnotationSchema(object):
 
     def test_it_passes_input_to_structure_validator(self):
         request = testing.DummyRequest()
-        schema = schemas.UpdateAnnotationSchema(request, {})
+        schema = schemas.LegacyUpdateAnnotationSchema(request, {})
         schema.structure = mock.Mock()
         schema.structure.validate.return_value = {}
 
@@ -862,7 +858,7 @@ class TestUpdateAnnotationSchema(object):
 
     def test_it_raises_if_structure_validator_raises(self):
         request = testing.DummyRequest()
-        schema = schemas.UpdateAnnotationSchema(request, {})
+        schema = schemas.LegacyUpdateAnnotationSchema(request, {})
         schema.structure = mock.Mock()
         schema.structure.validate.side_effect = (
             schemas.ValidationError('asplode'))
@@ -879,7 +875,7 @@ class TestUpdateAnnotationSchema(object):
     def test_it_removes_protected_fields(self, field):
         request = testing.DummyRequest()
         annotation = {}
-        schema = schemas.UpdateAnnotationSchema(request, annotation)
+        schema = schemas.LegacyUpdateAnnotationSchema(request, annotation)
         data = {}
         data[field] = 'something forbidden'
 
@@ -895,7 +891,7 @@ class TestUpdateAnnotationSchema(object):
         annotation = {
             'permissions': {'admin': ['acct:harriet@example.com']}
         }
-        schema = schemas.UpdateAnnotationSchema(request, annotation)
+        schema = schemas.LegacyUpdateAnnotationSchema(request, annotation)
         data = {
             'permissions': {'admin': ['acct:foo@example.com']}
         }
@@ -918,7 +914,7 @@ class TestUpdateAnnotationSchema(object):
         authn_policy.authenticated_userid.return_value = (
             'acct:mallory@example.com')
         request = testing.DummyRequest()
-        schema = schemas.UpdateAnnotationSchema(request, annotation)
+        schema = schemas.LegacyUpdateAnnotationSchema(request, annotation)
         data = {
             'permissions': {'admin': ['acct:mallory@example.com']}
         }
@@ -932,7 +928,7 @@ class TestUpdateAnnotationSchema(object):
         """An annotation may not be moved between groups."""
         request = testing.DummyRequest()
         annotation = {'group': 'flibble'}
-        schema = schemas.UpdateAnnotationSchema(request, annotation)
+        schema = schemas.LegacyUpdateAnnotationSchema(request, annotation)
         data = {
             'group': '__world__'
         }
@@ -953,12 +949,65 @@ class TestUpdateAnnotationSchema(object):
     def test_it_permits_all_other_changes(self, data):
         request = testing.DummyRequest()
         annotation = {'group': 'flibble'}
-        schema = schemas.UpdateAnnotationSchema(request, annotation)
+        schema = schemas.LegacyUpdateAnnotationSchema(request, annotation)
 
         result = schema.validate(data)
 
         for k in data:
             assert result[k] == data[k]
+
+
+@pytest.mark.usefixtures('AnnotationSchema')
+class TestUpdateAnnotationSchema(object):
+
+    def test_it_passes_input_to_AnnotationSchema_validator(self,
+                                                           annotation,
+                                                           AnnotationSchema):
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        schema.validate(mock.sentinel.input_data)
+
+        schema.structure.validate.assert_called_once_with(
+            mock.sentinel.input_data)
+
+    def test_it_raises_if_AnnotationSchema_validate_raises(self,
+                                                           annotation,
+                                                           AnnotationSchema):
+        AnnotationSchema.return_value.validate.side_effect = (
+            schemas.ValidationError('asplode'))
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        with pytest.raises(schemas.ValidationError):
+            schema.validate({'foo': 'bar'})
+
+    def test_it_raises_if_you_try_to_change_the_group(self,
+                                                      annotation,
+                                                      AnnotationSchema):
+        annotation.groupid = 'original-group'
+        AnnotationSchema.return_value.validate.return_value['groupid'] = (
+            'new-group')
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        with pytest.raises(schemas.ValidationError):
+            schema.validate(mock.sentinel.input_data)
+
+    def test_it_returns_the_appstruct_from_AnnotationSchema(self,
+                                                            annotation,
+                                                            AnnotationSchema):
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        appstruct = schema.validate(mock.sentinel.input_data)
+
+        assert appstruct == AnnotationSchema.return_value.validate.return_value
+
+
+    @pytest.fixture
+    def annotation(self):
+        return mock.Mock(groupid='foogroup')
 
 def annotation_data(**kwargs):
     """Return test input data for AnnotationSchema.validate()."""
@@ -969,3 +1018,12 @@ def annotation_data(**kwargs):
     }
     data.update(kwargs)
     return data
+
+
+@pytest.fixture
+def AnnotationSchema(patch):
+    cls = patch('h.api.schemas.AnnotationSchema')
+    cls.return_value.validate.return_value = {
+        'groupid': 'foogroup',
+    }
+    return cls

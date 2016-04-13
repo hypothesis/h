@@ -307,6 +307,26 @@ class LegacyCreateAnnotationSchema(object):
 
 class UpdateAnnotationSchema(object):
 
+    """Validate the POSTed data of an update annotation request."""
+
+    def __init__(self, request, annotation):
+        self.request = request
+        self.annotation = annotation
+        self.structure = AnnotationSchema(request)
+
+    def validate(self, data):
+        appstruct = self.structure.validate(data)
+
+        if appstruct['groupid'] != self.annotation.groupid:
+            raise ValidationError('group: ' + _("You can't move annotations "
+                                                "between groups"))
+
+        return appstruct
+
+
+
+class LegacyUpdateAnnotationSchema(object):
+
     """
     Validate the payload from a user when updating an annotation.
     """
