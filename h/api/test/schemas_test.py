@@ -825,7 +825,7 @@ class TestCreateAnnotationSchema(object):
 
     def test_it_passes_input_to_AnnotationSchema_validator(self,
                                                            AnnotationSchema):
-        schema = schemas.CreateAnnotationSchema(mock.Mock())
+        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
         schema.validate(mock.sentinel.input_data)
 
@@ -836,7 +836,7 @@ class TestCreateAnnotationSchema(object):
                                                            AnnotationSchema):
         AnnotationSchema.return_value.validate.side_effect = (
             schemas.ValidationError('asplode'))
-        schema = schemas.CreateAnnotationSchema(mock.Mock())
+        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
         with pytest.raises(schemas.ValidationError):
             schema.validate({'foo': 'bar'})
