@@ -2,10 +2,14 @@
 """Functions for updating the search index."""
 
 from __future__ import unicode_literals
+import logging
 
 import elasticsearch
 
 from h.api import presenters
+
+
+log = logging.getLogger(__name__)
 
 
 def index(es, annotation, request):
@@ -35,3 +39,29 @@ def index(es, annotation, request):
         body=annotation_dict,
         id=annotation_dict["id"],
     )
+
+
+def delete(es, annotation):
+    """
+    Delete an annotation from the search index.
+
+    If no annotation with the given annotation's ID exists in the search index,
+    just log the resulting elasticsearch exception (don't crash).
+
+    :param es: the Elasticsearch client object to use
+    :type es: h.api.search.Client
+
+    :param annotation: the annotation whose corresponding document to delete
+        from the search index
+    :type annotation: h.api.models.Annotation
+
+    """
+    try:
+        es.conn.delete(
+            index=es.index,
+            doc_type=es.t.annotation,
+            id=annotation.id,
+        )
+    except elasticsearch.NotFoundError:
+        log.exception('Tried to delete a nonexistent annotation from the '
+                      'search index, annotation id: %s', annotation.id)

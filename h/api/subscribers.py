@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from h.api.search.index import index
+from h.api.search.index import delete
 
 
 def index_annotation_event(event):
@@ -11,3 +12,5 @@ def index_annotation_event(event):
 
     if event.action == 'create':
         index(event.request.es, event.annotation, event.request)
+    elif event.action == 'delete':
+        delete(event.request.es, event.annotation)
