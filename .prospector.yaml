@@ -30,7 +30,7 @@ pylint:
     #       a local variable or parameter, pylint will still complain that
     #       you're shadowing the builtin.
     #
-    good-names: _,i,j,k,v,e,db,fn,fp,log,parser,id
+    good-names: _,i,j,k,v,e,db,fn,fp,log,parser,id,es
 pep257:
   disable:
     - D100  # Missing docstring in public module
