@@ -409,9 +409,7 @@ class TestAnnotationSchema(object):
     def test_it_removes_protected_fields(self, field):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        result = schema.validate(
-            self.annotation_data(field='something forbidden'),
-        )
+        result = schema.validate(annotation_data(field='something forbidden'))
 
         assert field not in result
 
@@ -420,7 +418,7 @@ class TestAnnotationSchema(object):
             'acct:harriet@example.com')
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        result = schema.validate(self.annotation_data())
+        result = schema.validate(annotation_data())
 
         assert result['userid'] == 'acct:harriet@example.com'
 
@@ -428,7 +426,7 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
         result = schema.validate(
-            self.annotation_data(uri='http://example.com/example'),
+            annotation_data(uri='http://example.com/example'),
         )
 
         assert result['target_uri'] == 'http://example.com/example'
@@ -437,7 +435,7 @@ class TestAnnotationSchema(object):
     def test_it_inserts_empty_string_if_data_has_no_uri(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        data = self.annotation_data()
+        data = annotation_data()
         assert 'uri' not in data
 
         assert schema.validate(data)['target_uri'] == ''
@@ -445,15 +443,14 @@ class TestAnnotationSchema(object):
     def test_it_keeps_text(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        result = schema.validate(
-            self.annotation_data(text='some annotation text'))
+        result = schema.validate(annotation_data(text='some annotation text'))
 
         assert result['text'] == 'some annotation text'
 
     def test_it_inserts_empty_string_if_data_contains_no_text(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        data = self.annotation_data()
+        data = annotation_data()
         assert 'text' not in data
 
         assert schema.validate(data)['text'] == ''
@@ -461,15 +458,14 @@ class TestAnnotationSchema(object):
     def test_it_keeps_tags(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        result = schema.validate(
-            self.annotation_data(tags=['foo', 'bar']))
+        result = schema.validate(annotation_data(tags=['foo', 'bar']))
 
         assert result['tags'] == ['foo', 'bar']
 
     def test_it_inserts_empty_list_if_data_contains_no_tags(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        data = self.annotation_data()
+        data = annotation_data()
         assert 'tags' not in data
 
         assert schema.validate(data)['tags'] == []
@@ -482,7 +478,7 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
         result = schema.validate(
-            self.annotation_data(
+            annotation_data(
                 permissions={'read': ['acct:harriet@example.com']},
             ),
         )
@@ -498,7 +494,7 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
         result = schema.validate(
-            self.annotation_data(
+            annotation_data(
                 permissions={'read': ['group:__world__']},
             ),
         )
@@ -509,7 +505,7 @@ class TestAnnotationSchema(object):
     def test_it_does_not_crash_if_data_contains_no_target(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        data = self.annotation_data()
+        data = annotation_data()
         assert 'target' not in data
 
         schema.validate(data)
@@ -518,7 +514,7 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
         result = schema.validate(
-            self.annotation_data(
+            annotation_data(
                 target=[
                     {
                         'foo': 'bar',  # This should be removed,
@@ -534,7 +530,7 @@ class TestAnnotationSchema(object):
     def test_it_renames_group_to_groupid(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        result = schema.validate(self.annotation_data(group='foo'))
+        result = schema.validate(annotation_data(group='foo'))
 
         assert result['groupid'] == 'foo'
         assert 'group' not in result
@@ -542,7 +538,7 @@ class TestAnnotationSchema(object):
     def test_it_inserts_default_groupid_if_no_group(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        data = self.annotation_data()
+        data = annotation_data()
         assert 'group' not in data
 
         result = schema.validate(data)
@@ -553,14 +549,14 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
         result = schema.validate(
-            self.annotation_data(references=['parent id', 'parent id 2']))
+            annotation_data(references=['parent id', 'parent id 2']))
 
         assert result['references'] == ['parent id', 'parent id 2']
 
     def test_it_inserts_empty_list_if_no_references(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        data = self.annotation_data()
+        data = annotation_data()
         assert 'references' not in data
 
         result = schema.validate(data)
@@ -571,7 +567,7 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
         result = schema.validate(
-            self.annotation_data(
+            annotation_data(
                 group='foo',
                 references=['parent annotation id'],
             )
@@ -610,7 +606,7 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
         schema.validate(
-            self.annotation_data(
+            annotation_data(
                 document=document_data,
                 uri=target_uri,
             )
@@ -624,7 +620,7 @@ class TestAnnotationSchema(object):
     def test_it_puts_document_uris_in_appstruct(self, parse_document_claims):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate(self.annotation_data())
+        appstruct = schema.validate(annotation_data())
 
         assert appstruct['document']['document_uri_dicts'] == (
             parse_document_claims.document_uris_from_data.return_value)
@@ -635,7 +631,7 @@ class TestAnnotationSchema(object):
         target_uri = 'http://example.com/example'
 
         schema.validate(
-            self.annotation_data(
+            annotation_data(
                 document=document_data,
                 uri=target_uri,
             )
@@ -670,7 +666,7 @@ class TestAnnotationSchema(object):
             document_uris_from_data)
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        schema.validate(self.annotation_data(document=document))
+        schema.validate(annotation_data(document=document))
 
         assert (
             parse_document_claims.document_metas_from_data.call_args[0][0] ==
@@ -679,7 +675,7 @@ class TestAnnotationSchema(object):
     def test_it_puts_document_metas_in_appstruct(self, parse_document_claims):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate(self.annotation_data())
+        appstruct = schema.validate(annotation_data())
 
         assert appstruct['document']['document_meta_dicts'] == (
             parse_document_claims.document_metas_from_data.return_value)
@@ -695,7 +691,7 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
 
         appstruct = schema.validate(
-            self.annotation_data(
+            annotation_data(
                 document={
                     'foo': 'bar'  # This should be deleted.
                 },
@@ -703,16 +699,6 @@ class TestAnnotationSchema(object):
         )
 
         assert 'foo' not in appstruct['document']
-
-    def annotation_data(self, **kwargs):
-        """Return test input data for AnnotationSchema.validate()."""
-        data = {
-            'permissions': {
-                'read': []
-            }
-        }
-        data.update(kwargs)
-        return data
 
     @pytest.fixture
     def parse_document_claims(self, patch):
@@ -858,19 +844,8 @@ class TestCreateAnnotationSchema(object):
     @pytest.fixture
     def AnnotationSchema(self, patch):
         cls = patch('h.api.schemas.AnnotationSchema')
-        cls.return_value.validate.return_value = self.annotation_data()
+        cls.return_value.validate.return_value = annotation_data()
         return cls
-
-    def annotation_data(self, **kwargs):
-        """Return test input data for AnnotationSchema.validate()."""
-        data = {
-            'permissions': {
-                'read': []
-            }
-        }
-        data.update(kwargs)
-        return data
-
 
 
 class TestUpdateAnnotationSchema(object):
@@ -984,3 +959,13 @@ class TestUpdateAnnotationSchema(object):
 
         for k in data:
             assert result[k] == data[k]
+
+def annotation_data(**kwargs):
+    """Return test input data for AnnotationSchema.validate()."""
+    data = {
+        'permissions': {
+            'read': []
+        }
+    }
+    data.update(kwargs)
+    return data
