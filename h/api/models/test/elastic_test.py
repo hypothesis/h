@@ -300,6 +300,18 @@ class TestDocument(object):
         doc = Document({}, updated=datetime.datetime(2016, 2, 25, 16, 45, 23, 371848))
         assert doc.updated == datetime.datetime(2016, 2, 25, 16, 45, 23, 371848)
 
+    def test_title(self):
+        doc = Document({'title': 'Example Page'})
+        assert doc.title == 'Example Page'
+
+    def test_title_array(self):
+        doc = Document({'title': ['Example Page']})
+        assert doc.title == 'Example Page'
+
+    def test_title_empty_array(seld):
+        doc = Document({'title': []})
+        assert doc.title is None
+
     def test_meta(self):
         doc = Document({'og': {'title': ['Example Page'], 'url': ['http://example.com']},
                         'title': ['Example Page'],
