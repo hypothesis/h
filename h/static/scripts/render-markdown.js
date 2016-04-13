@@ -10,6 +10,12 @@ function targetBlank() {
   return [{type: 'output', filter: filter}];
 }
 
+/**
+ * Render markdown to HTML.
+ *
+ * This function does *not* sanitize the HTML in any way, that is the caller's
+ * responsibility.
+ */
 function renderMarkdown(html) {
   // see https://github.com/showdownjs/showdown#valid-options
   var converter = new showdown.Converter({
@@ -24,83 +30,48 @@ function renderMarkdown(html) {
   return converter.makeHtml(html);
 }
 
-function renderInlineMath(textToCheck, $sanitize) {
-  var re = /\\?\\\(|\\?\\\)/g;
-  var startMath = null;
-  var endMath = null;
-  var match;
-  var indexes = [];
-  while ((match = re.exec(textToCheck))) {
-    indexes.push(match.index);
-  }
-  for (var i = 0, index; i < indexes.length; i++) {
-    index = indexes[i];
-    if (startMath === null) {
-      startMath = index + 2;
-    } else {
-      endMath = index;
-    }
-    if (startMath !== null && endMath !== null) {
-      try {
-        var math = katex.renderToString(textToCheck.substring(startMath, endMath));
-        textToCheck = (
-            textToCheck.substring(0, (startMath - 2)) + math +
-            textToCheck.substring(endMath + 2)
-            );
-        startMath = null;
-        endMath = null;
-        return renderInlineMath(textToCheck);
-      } catch (error) {
-        $sanitize(textToCheck.substring(startMath, endMath));
-      }
+/**
+ * Replaces inline math between '\(' and '\)' delimiters
+ * with math rendered by KaTeX.
+ */
+function renderInlineMath(text, $sanitize) {
+  var mathStart = text.indexOf('\\(');
+  if (mathStart !== -1) {
+    var mathEnd = text.indexOf('\\)', mathStart);
+    if (mathEnd !== -1) {
+      var markdownSection = text.slice(0, mathStart);
+      var mathSection = text.slice(mathStart + 2, mathEnd);
+      var renderedMath = katex.renderToString(mathSection);
+      return markdownSection +
+             renderedMath +
+             renderInlineMath(text.slice(mathEnd + 2), $sanitize);
     }
   }
-  return textToCheck;
+  return text;
 }
 
+/**
+ * Renders mixed blocks of markdown and LaTeX to HTML.
+ *
+ * LaTeX blocks are delimited by '$$' (for blocks) or '\(' and '\)'
+ * (for inline math).
+ */
 function renderMathAndMarkdown(textToCheck, $sanitize) {
-  var re = /\$\$/g;
-
-  var startMath = 0;
-  var endMath = 0;
-
-  var indexes = (function () {
-    var match;
-    var result = [];
-    while ((match = re.exec(textToCheck))) {
-      result.push(match.index);
+  return textToCheck.split('$$').map(function (part, index) {
+    if (index % 2 === 0) {
+      // Plain markdown block
+      return $sanitize(renderMarkdown(renderInlineMath(part, $sanitize)));
+    } else {
+      // Math block
+      try {
+        // \\displaystyle tells KaTeX to render the math in display style
+        // (full sized fonts).
+        return katex.renderToString($sanitize("\\displaystyle {" + part + "}"));
+      } catch (error) {
+        return $sanitize(part);
+      }
     }
-    return result;
-  })();
-  indexes.push(textToCheck.length);
-
-  var parts = (function () {
-    var result = [];
-
-    /* jshint -W083 */
-    for (var i = 0, index; i < indexes.length; i++) {
-      index = indexes[i];
-
-      result.push((function () {
-        if (startMath > endMath) {
-          endMath = index + 2;
-          try {
-            // \\displaystyle tells KaTeX to render the math in display style (full sized fonts).
-            return katex.renderToString($sanitize("\\displaystyle {" + textToCheck.substring(startMath, index) + "}"));
-          } catch (error) {
-            return $sanitize(textToCheck.substring(startMath, index));
-          }
-        } else {
-          startMath = index + 2;
-          return $sanitize(renderMarkdown(renderInlineMath(textToCheck.substring(endMath, index), $sanitize)));
-        }
-      })());
-    }
-    /* jshint +W083 */
-    return result;
-  })();
-
-  return parts.join('');
+  }).join('');
 }
 
 module.exports = renderMathAndMarkdown;
