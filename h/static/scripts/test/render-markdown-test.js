@@ -51,9 +51,26 @@ describe('render-markdown', function () {
     });
   });
 
-  describe('math rendering', function () {
-    it('should render LaTeX', function () {
+  describe('math blocks', function () {
+    it('should render LaTeX blocks', function () {
       assert.equal(render('$$x*2$$'), 'math:\\displaystyle {x*2}');
+    });
+
+    it('should render mixed blocks', function () {
+      assert.equal(render('one $$x*2$$ two $$x*3$$ three'),
+        '<p>one </p>math:\\displaystyle {x*2}<p>two </p>' +
+        'math:\\displaystyle {x*3}<p>three</p>');
+    });
+  });
+
+  describe('inline math', function () {
+    it('should render inline LaTeX', function () {
+      assert.equal(render('\\(x*2\\)'), '<p>math:x*2</p>');
+    });
+
+    it('should render mixed inline LaTeX blocks', function () {
+      assert.equal(render('one \\(x+2\\) two \\(x+3\\) four'),
+        '<p>one math:x+2 two math:x+3 four</p>');
     });
   });
 });
