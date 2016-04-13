@@ -1,3 +1,31 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Annotations are now available in (beta-quality) Web Annotation compatible
+  JSON-LD format via the API (#3181).
+
+Bug fixes
+---------
+
+- Don't report expected/unavoidable errors when injecting the sidebar to Sentry
+  (#3186).
+
+- Fix broken links the admin panel (#3187).
+
+- Fix an infinite loop occasionally triggered by the truncation of long
+  annotations (#3188).
+
+Miscellanea
+-----------
+
+- Numerous major changes to annotation storage as part of the work to migrate
+  annotation data to PostgreSQL (#3153, #3184, #3190, #3199).
+
+- Add a skeleton functional test suite for the web application (#3198).
+
 0.17.0 (2016-04-06)
 ===================
 
