@@ -10,24 +10,25 @@ from h.api import models
 from h.api import subscribers
 
 
+@pytest.mark.usefixtures('index')
 class TestIndexAnnotationEvent:
 
-    def test_it_does_not_index_annotations_if_postgres_is_off(self):
+    def test_it_does_not_create_annotations_if_postgres_is_off(self, index):
         event = self.event('create')
         event.request.feature.return_value = False
 
         subscribers.index_annotation_event(event)
 
-        assert not event.request.es.index_annotation.called
+        assert not index.called
 
-    def test_it_calls_index_annotation(self):
+    def test_it_calls_index_when_action_is_create(self, index):
         event = self.event('create')
         event.request.feature.return_value = True
 
         subscribers.index_annotation_event(event)
 
-        event.request.es.index_annotation.assert_called_once_with(
-            event.request, event.annotation)
+        index.assert_called_once_with(
+            event.request.es, event.annotation, event.request)
 
     def event(self, action):
         return mock.Mock(
@@ -36,3 +37,7 @@ class TestIndexAnnotationEvent:
                                         action),
             action=action,
         )
+
+    @pytest.fixture
+    def index(self, patch):
+        return patch('h.api.subscribers.index')
