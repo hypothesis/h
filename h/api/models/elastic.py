@@ -254,7 +254,14 @@ class Document(document.Document):
 
     @property
     def title(self):
-        return self.get('title')
+        value = self.get('title')
+        if isinstance(value, list):
+            try:
+                return value[0]
+            except IndexError:
+                return None
+
+        return value
 
     @property
     def meta(self):

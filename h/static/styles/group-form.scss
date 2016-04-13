@@ -105,6 +105,11 @@
 
     &__list li {
       margin-bottom: 1.5em;
+
+      em {
+        font-style: italic;
+        color: $color-silver-chalice;
+      }
     }
 
   }
