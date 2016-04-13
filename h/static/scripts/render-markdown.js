@@ -34,7 +34,7 @@ function renderMarkdown(html) {
  * Replaces inline math between '\(' and '\)' delimiters
  * with math rendered by KaTeX.
  */
-function renderInlineMath(text, $sanitize) {
+function renderInlineMath(text) {
   var mathStart = text.indexOf('\\(');
   if (mathStart !== -1) {
     var mathEnd = text.indexOf('\\)', mathStart);
@@ -44,7 +44,7 @@ function renderInlineMath(text, $sanitize) {
       var renderedMath = katex.renderToString(mathSection);
       return markdownSection +
              renderedMath +
-             renderInlineMath(text.slice(mathEnd + 2), $sanitize);
+             renderInlineMath(text.slice(mathEnd + 2));
     }
   }
   return text;
@@ -56,22 +56,24 @@ function renderInlineMath(text, $sanitize) {
  * LaTeX blocks are delimited by '$$' (for blocks) or '\(' and '\)'
  * (for inline math).
  */
-function renderMathAndMarkdown(textToCheck, $sanitize) {
-  return textToCheck.split('$$').map(function (part, index) {
+function renderMathAndMarkdown(text, $sanitize) {
+  var html = text.split('$$').map(function (part, index) {
     if (index % 2 === 0) {
       // Plain markdown block
-      return $sanitize(renderMarkdown(renderInlineMath(part, $sanitize)));
+      return renderMarkdown(renderInlineMath(part));
     } else {
       // Math block
       try {
         // \\displaystyle tells KaTeX to render the math in display style
         // (full sized fonts).
-        return katex.renderToString($sanitize("\\displaystyle {" + part + "}"));
+        return katex.renderToString("\\displaystyle {" + part + "}");
       } catch (error) {
-        return $sanitize(part);
+        return part;
       }
     }
   }).join('');
+
+  return $sanitize(html);
 }
 
 module.exports = renderMathAndMarkdown;
