@@ -841,7 +841,13 @@ class TestCreateAnnotationSchema(object):
         with pytest.raises(schemas.ValidationError):
             schema.validate({'foo': 'bar'})
 
+    def test_it_returns_the_appstruct_from_AnnotationSchema(self,
+                                                            AnnotationSchema):
+        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
+        appstruct = schema.validate(mock.sentinel.input_data)
+
+        assert appstruct == AnnotationSchema.return_value.validate.return_value
 
 
 class TestLegacyUpdateAnnotationSchema(object):
