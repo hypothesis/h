@@ -13,7 +13,7 @@ Bug fixes
 - Don't report expected/unavoidable errors when injecting the sidebar to Sentry
   (#3186).
 
-- Fix broken links the admin panel (#3187).
+- Fix broken links in the admin panel (#3187).
 
 - Fix an infinite loop occasionally triggered by the truncation of long
   annotations (#3188).
