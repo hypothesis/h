@@ -102,9 +102,16 @@
     "transform": [
       "browserify-ngannotate",
       "browserify-shim",
-      ["stringify", {
-        "appliesTo": {"includeExtensions": [".html"]}
-      }]
+      [
+        "stringify",
+        {
+          "appliesTo": {
+            "includeExtensions": [
+              ".html"
+            ]
+          }
+        }
+      ]
     ]
   },
   "browser": {
