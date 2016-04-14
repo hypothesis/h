@@ -207,7 +207,9 @@ def update(annotation, request):
     schema = schemas.LegacyUpdateAnnotationSchema(request,
                                                   annotation=annotation)
     appstruct = schema.validate(_json_payload(request))
-    annotation = storage.update_annotation(request, annotation.id, appstruct)
+    annotation = storage.legacy_update_annotation(request,
+                                                  annotation.id,
+                                                  appstruct)
 
     _publish_annotation_event(request, annotation, 'update')
 

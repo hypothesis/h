@@ -127,7 +127,7 @@ def create_annotation(request, data):
     return annotation
 
 
-def update_annotation(request, id, data):
+def legacy_update_annotation(request, id, data):
     """
     Update the annotation with the given id from passed data.
 

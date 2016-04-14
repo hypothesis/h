@@ -414,7 +414,7 @@ class TestUpdate(object):
 
         schema.validate.assert_called_once_with(request.json_body)
 
-    def test_it_calls_update_annotation(self, storage, schemas):
+    def test_it_calls_legacy_update_annotation(self, storage, schemas):
         annotation = mock.Mock()
         request = mock.Mock()
         schema = schemas.LegacyUpdateAnnotationSchema.return_value
@@ -422,9 +422,9 @@ class TestUpdate(object):
 
         views.update(annotation, request)
 
-        storage.update_annotation.assert_called_once_with(request,
-                                                          annotation.id,
-                                                          {'foo': 123})
+        storage.legacy_update_annotation.assert_called_once_with(request,
+                                                                 annotation.id,
+                                                                 {'foo': 123})
 
     def test_it_returns_presented_annotation(self,
                                              AnnotationJSONPresenter,
@@ -438,14 +438,14 @@ class TestUpdate(object):
 
         AnnotationJSONPresenter.assert_called_once_with(
             request,
-            storage.update_annotation.return_value)
+            storage.legacy_update_annotation.return_value)
         assert result == presenter.asdict()
 
     def test_it_calls_notify_with_an_event(self, AnnotationEvent, storage):
         annotation = mock.Mock()
         request = mock.Mock()
         event = AnnotationEvent.return_value
-        annotation_out = storage.update_annotation.return_value
+        annotation_out = storage.legacy_update_annotation.return_value
 
         views.update(annotation, request)
 
