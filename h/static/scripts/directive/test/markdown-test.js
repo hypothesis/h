@@ -100,6 +100,23 @@ describe('markdown', function () {
       var editor = util.createDirective(document, 'markdown', {readOnly: true});
       assert.equal(getRenderedHTML(editor), 'rendered:');
     });
+
+    it('should sanitize the result', function () {
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: true,
+        text: 'Hello <script>alert("attack");</script> World',
+      });
+      assert.equal(getRenderedHTML(editor),
+        'rendered:Hello  World');
+    });
+
+    it('should tolerate malformed HTML', function () {
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: true,
+        text: 'Hello <one two.',
+      });
+      assert.equal(getRenderedHTML(editor), 'rendered:Hello ');
+    });
   });
 
   describe('toolbar buttons', function () {
