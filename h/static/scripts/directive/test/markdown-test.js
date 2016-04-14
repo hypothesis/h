@@ -59,8 +59,14 @@ describe('markdown', function () {
           toggleBlockStyle: mockFormattingCommand,
           toggleSpanStyle: mockFormattingCommand,
           LinkType: require('../../markdown-commands').LinkType,
+        },
+        '../media-embedder': noCallThru({
+          replaceLinksWithEmbeds: function (element) {
+            // Tag the element as having been processed
+            element.dataset.replacedLinksWithEmbeds = 'yes';
+          },
         }),
-      }));
+      })));
   });
 
   beforeEach(function () {
@@ -108,6 +114,14 @@ describe('markdown', function () {
       });
       assert.equal(getRenderedHTML(editor),
         'rendered:Hello  World');
+    });
+
+    it('should replace links with embeds in rendered output', function () {
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: true,
+        text: 'A video: https://www.youtube.com/watch?v=yJDv-zdhzMY',
+      });
+      assert.equal(viewElement(editor).dataset.replacedLinksWithEmbeds, 'yes');
     });
 
     it('should tolerate malformed HTML', function () {
