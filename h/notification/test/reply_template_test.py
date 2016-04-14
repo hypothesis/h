@@ -19,6 +19,7 @@ store_fake_data = [
         'id': '0',
         'created': '2013-10-27T19:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
+        'group': '__world__',
         'text': 'The animals went in two by two, hurrah! hurrah!',
         'permissions': {'read': ['group:__world__']},
         'uri': 'www.howtoreachtheark.now',
@@ -29,6 +30,7 @@ store_fake_data = [
         'id': '1',
         'created': '2014-10-27T19:50:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
+        'group': '__world__',
         'text': 'The animals went in three by three, hurrah! hurrah',
         'permissions': {'read': ['group:__world__']},
         'references': [0],
@@ -40,6 +42,7 @@ store_fake_data = [
         'id': '2',
         'created': '2014-10-27T19:55:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
+        'group': '__world__',
         'text': 'The animals went in four by four, hurrah! hurrah',
         'permissions': {'read': ['group:__world__']},
         'references': [0, 1],
@@ -51,6 +54,7 @@ store_fake_data = [
         'id': '3',
         'created': '2014-10-27T20:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
+        'group': '__world__',
         'text': 'The animals went in two by two, hurrah! hurrah!',
         'permissions': {'read': ['group:__world__']},
         'references': [0],
@@ -62,6 +66,7 @@ store_fake_data = [
         'id': '4',
         'created': '2014-10-27T20:40:53.245691+00:00',
         'document': {'title': ''},
+        'group': '__world__',
         'text': 'The animals went in two by two, hurrah! hurrah!',
         'permissions': {'read': ['group:__world__']},
         'references': [0],
@@ -83,6 +88,7 @@ store_fake_data = [
     {
         # A reply for testing permissions
         'id': '7',
+        'group': 'wibble',
         'permissions': {'read': ['acct:jane@example.com', 'group:wibble']},
         'references': [5],
         'user': 'acct:jane@example.com'
@@ -173,23 +179,21 @@ def test_template_map_key_values():
 def test_create_template_map_when_parent_has_no_text():
     """It shouldn't crash if the parent annotation has no 'text' item."""
     rt.create_template_map(
-            Mock(application_url='https://hypothes.is'),
-        reply={
-            'document': {
-                'title': 'Document Title'
-            },
-            'user': 'acct:bob@hypothes.is',
-            'text': "This is Bob's annotation",
-            'created': '2013-10-27T19:40:53.245691+00:00',
-            'id': '0'
-        },
-        # parent dict has no 'text' item.
-        parent={
-            'uri': 'http://example.com/example.html',
-            'user': 'acct:fred@hypothes.is',
-            'created': '2013-10-27T19:40:53.245691+00:00',
-            'id': '1'
-        })
+        Mock(application_url='https://hypothes.is'),
+        reply=Mock(
+            document=Mock(title='Document Title'),
+            userid='acct:bob@hypothes.is',
+            text="This is Bob's annotation",
+            created=datetime.datetime(2013, 10, 27, 19, 40, 53),
+            id='0'
+        ),
+        parent=Mock(
+            uri='http://example.com/example.html',
+            userid='acct:fred@hypothes.is',
+            created=datetime.datetime(2013, 10, 27, 19, 40, 53),
+            id='1',
+            text=None  # Parent annotation has no 'text' item.
+        ))
 
 
 def test_fallback_title():

@@ -2,6 +2,7 @@
 import logging
 from datetime import datetime
 
+from pyramid import security
 from pyramid.events import subscriber
 from pyramid.renderers import render
 
@@ -25,34 +26,34 @@ SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt.jinja2'
 
 def create_template_map(request, reply, parent):
     document_title = ''
-    if 'document' in reply:
-        document_title = reply['document'].get('title', '')
+    if reply.document:
+        document_title = reply.document.title
 
     if document_title is '':
-        document_title = parent['uri']
+        document_title = parent.target_uri
 
-    parent_user = user_name(parent['user'])
-    reply_user = user_name(reply['user'])
+    parent_user = user_name(parent.userid)
+    reply_user = user_name(reply.userid)
 
     token = request.registry.notification_serializer.dumps({
         'type': REPLY_TYPE,
-        'uri': parent['user'],
+        'uri': parent.userid,
     })
     unsubscribe = request.route_url('unsubscribe', token=token)
 
     return {
         'document_title': document_title,
-        'document_path': parent['uri'],
-        'parent_text': parent.get('text', ''),
+        'document_path': parent.target_uri,
+        'parent_text': parent.text,
         'parent_user': parent_user,
         'parent_timestamp': format_timestamp(parent.created),
-        'parent_user_profile': user_profile_url(request, parent['user']),
-        'parent_path': standalone_url(request, parent['id']),
-        'reply_text': reply['text'],
+        'parent_user_profile': user_profile_url(request, parent.userid),
+        'parent_path': standalone_url(request, parent.id),
+        'reply_text': reply.text,
         'reply_user': reply_user,
-        'reply_timestamp': format_timestamp(reply['created']),
-        'reply_user_profile': user_profile_url(request, reply['user']),
-        'reply_path': standalone_url(request, reply['id']),
+        'reply_timestamp': format_timestamp(reply.created),
+        'reply_user_profile': user_profile_url(request, reply.userid),
+        'reply_path': standalone_url(request, reply.id),
         'unsubscribe': unsubscribe
     }
 
@@ -65,7 +66,7 @@ def format_timestamp(timestamp, now=datetime.utcnow):
 
 
 def get_recipients(request, parent):
-    username = user_name(parent['user'])
+    username = user_name(parent.userid)
     user_obj = get_user_by_name(request, username)
     if not user_obj:
         raise TemplateRenderException('User not found')
@@ -74,11 +75,11 @@ def get_recipients(request, parent):
 
 def check_conditions(annotation, data):
     # Do not notify users about their own replies
-    if annotation['user'] == data['parent']['user']:
+    if annotation.userid == data['parent'].userid:
         return False
 
     # Is he the proper user?
-    if data['parent']['user'] != data['subscription']['uri']:
+    if data['parent'].userid != data['subscription']['uri']:
         return False
 
     # Else okay
@@ -97,17 +98,24 @@ def generate_notifications(request, annotation, action):
     if parent_id is None:
         return
     parent = storage.fetch_annotation(request, parent_id)
-    if parent is None or 'user' not in parent:
+    if parent is None or not annotation.userid:
         return
 
-    # We don't send replies to the author of the parent unless they're going to
-    # be able to read it. That means there must be some overlap between the set
-    # of effective principals of the parent's author, and the read permissions
-    # of the reply.
-    child_read_permissions = annotation.get('permissions', {}).get('read', [])
-    parent_principals = auth.effective_principals(parent['user'], request)
-    read_principals = translate_annotation_principals(child_read_permissions)
-    if not set(parent_principals).intersection(read_principals):
+    # Don't send reply notifications to the author of the parent annotation if
+    # the reply is private (the author of the parent annotation won't be able
+    # to read the reply).
+    if not annotation.shared:
+        return
+
+    # Don't send reply notifications to the author of the parent annotation if
+    # the reply is in a group that the author of the parent annotation isn't
+    # (the author of the parent annotation won't be able to read the reply).
+    parent_principals = auth.effective_principals(parent.userid, request)
+    if annotation.groupid == '__world__':
+        group_principal = security.Everyone
+    else:
+        group_principal = 'group:{}'.format(annotation.groupid)
+    if group_principal not in parent_principals:
         return
 
     # Store the parent values as additional data
