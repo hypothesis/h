@@ -15,6 +15,7 @@ var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gulpUtil = require('gulp-util');
 var postcss = require('gulp-postcss');
+var postcssURL = require('postcss-url');
 var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
 var through = require('through2');
@@ -171,15 +172,25 @@ var styleFiles = [
 ];
 
 gulp.task('build-css', function () {
+  // Rewrite font URLs to look for fonts in 'build/fonts' instead of
+  // 'build/styles/fonts'
+  function rewriteCSSURL(url) {
+    return url.replace(/^fonts\//, '../fonts/');
+  }
+
   var sassOpts = {
     outputStyle: IS_PRODUCTION_BUILD ? 'compressed' : 'nested',
     includePaths: ['node_modules/compass-mixins/lib/'],
   };
 
+  var cssURLRewriter = postcssURL({
+    url: rewriteCSSURL,
+  });
+
   return gulp.src(styleFiles)
     .pipe(sourcemaps.init())
     .pipe(gulpIf(isSASSFile, sass(sassOpts).on('error', sass.logError)))
-    .pipe(postcss([require('autoprefixer')]))
+    .pipe(postcss([require('autoprefixer'), cssURLRewriter]))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(STYLE_DIR));
 });
