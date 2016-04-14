@@ -1,3 +1,27 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Background tasks are now processed by Celery workers rather than our own
+  homebrew worker implementation (#3189).
+
+- Improved display for local files in the "recently annotated documents" list on
+  group pages (#3200).
+
+Bug fixes
+---------
+
+- Fix the display of documents with multiple possible titles in group pages
+  (#3200).
+
+Miscellanea
+-----------
+
+- More changes to support the migration of annotation data to PostgreSQL (#3203,
+  #3206).
+
 0.18.0 (2016-04-13)
 ===================
 
