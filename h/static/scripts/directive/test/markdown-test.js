@@ -66,7 +66,7 @@ describe('markdown', function () {
     it('should show the rendered view when readOnly is true', function () {
       var editor = util.createDirective(document, 'markdown', {
         readOnly: true,
-        ngModel: 'Hello World',
+        text: 'Hello World',
       });
       assert.isTrue(isHidden(inputElement(editor)));
       assert.isFalse(isHidden(viewElement(editor)));
@@ -75,7 +75,7 @@ describe('markdown', function () {
     it('should show the editor when readOnly is false', function () {
       var editor = util.createDirective(document, 'markdown', {
         readOnly: false,
-        ngModel: 'Hello World',
+        text: 'Hello World',
       });
       assert.isFalse(isHidden(inputElement(editor)));
       assert.isTrue(isHidden(viewElement(editor)));
@@ -86,9 +86,14 @@ describe('markdown', function () {
     it('should render input markdown', function () {
       var editor = util.createDirective(document, 'markdown', {
         readOnly: true,
-        ngModel: 'Hello World',
+        text: 'Hello World',
       });
       assert.equal(getRenderedHTML(editor), 'rendered:Hello World');
+    });
+
+    it('should render nothing if no text is provided', function () {
+      var editor = util.createDirective(document, 'markdown', {readOnly: true});
+      assert.equal(getRenderedHTML(editor), 'rendered:');
     });
   });
 
@@ -96,7 +101,7 @@ describe('markdown', function () {
     it('should render LaTeX', function () {
       var editor = util.createDirective(document, 'markdown', {
         readOnly: true,
-        ngModel: '$$x*2$$',
+        text: '$$x*2$$',
       });
       assert.equal(getRenderedHTML(editor),
         'rendered:math:\\displaystyle {x*2}rendered:');
@@ -107,7 +112,7 @@ describe('markdown', function () {
     it('should apply formatting when clicking toolbar buttons', function () {
       var editor = util.createDirective(document, 'markdown', {
         readOnly: false,
-        ngModel: 'Hello World',
+        text: 'Hello World',
       });
       var input = inputElement(editor);
       var buttons = editor[0].querySelectorAll('.markdown-tools-button');
@@ -120,15 +125,84 @@ describe('markdown', function () {
   });
 
   describe('editing', function () {
-    it('should update the input model', function () {
+    it('should populate the input with the current text', function () {
       var editor = util.createDirective(document, 'markdown', {
         readOnly: false,
-        ngModel: 'Hello World',
+        text: 'initial comment',
+        onEditText: function () {},
+      });
+      var input = inputElement(editor);
+      assert.equal(input.value, 'initial comment');
+    });
+
+    it('should populate the input with empty text if no text is specified', function () {
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: false,
+        onEditText: function () {},
+      });
+      var input = inputElement(editor);
+      assert.equal(input.value, '');
+    });
+
+    it('should call onEditText() callback when text changes', function () {
+      var onEditText = sinon.stub();
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: false,
+        text: 'Hello World',
+        onEditText: {
+          args: ['text'],
+          callback: onEditText,
+        },
       });
       var input = inputElement(editor);
       input.value = 'new text';
       util.sendEvent(input, 'change');
-      assert.equal(editor.scope.ngModel, 'new text');
+      assert.called(onEditText);
+      assert.calledWith(onEditText, 'new text');
+    });
+  });
+
+  describe('preview state', function () {
+    var editor;
+
+    function togglePreview() {
+      var toggle = editor[0].querySelector('.markdown-tools-toggle');
+      angular.element(toggle).click();
+      editor.scope.$digest();
+    }
+
+    function isPreviewing() {
+      return editor.isolateScope().preview;
+    }
+
+    beforeEach(function () {
+      // Create a new editor, initially in editing mode
+      editor = util.createDirective(document, 'markdown', {
+        readOnly: false,
+        text: 'Hello World',
+      });
+    });
+
+    it('enters preview mode when clicking the "Preview" toggle button', function () {
+      togglePreview();
+      assert.isTrue(isPreviewing());
+    });
+
+    it('should hide the input when previewing changes', function () {
+      togglePreview();
+      assert.isTrue(isHidden(inputElement(editor)));
+    });
+
+    it('should show the rendered markdown when previewing changes', function () {
+      togglePreview();
+      assert.isFalse(isHidden(viewElement(editor)));
+    });
+
+    it('exits preview mode when switching to read-only mode', function () {
+      togglePreview();
+      editor.scope.readOnly = true;
+      editor.scope.$digest();
+      assert.isFalse(isPreviewing());
     });
   });
 });
