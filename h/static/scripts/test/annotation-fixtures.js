@@ -30,6 +30,18 @@ function newAnnotation() {
   };
 }
 
+/** Return a new annotation which has no tags or text. */
+function newEmptyAnnotation() {
+  return {
+    id: undefined,
+    $highlight: undefined,
+    target: ['foo'],
+    references: [],
+    text: '',
+    tags: [],
+  };
+}
+
 /** Return an annotation domain model object for a new highlight
  * (newly-created client-side, not yet saved to the server).
  */
@@ -97,6 +109,7 @@ function oldReply() {
 module.exports = {
   defaultAnnotation: defaultAnnotation,
   newAnnotation: newAnnotation,
+  newEmptyAnnotation: newEmptyAnnotation,
   newHighlight: newHighlight,
   oldAnnotation: oldAnnotation,
   oldHighlight: oldHighlight,
