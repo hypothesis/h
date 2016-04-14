@@ -7,17 +7,14 @@ var util = require('./util');
 describe('shareDialog', function () {
   var fakeCrossFrame;
 
-  before(function () {
-    angular.module('h', [])
-      .directive('shareDialog', require('../share-dialog'));
-  });
-
-  beforeEach(angular.mock.module('h'));
-
-  beforeEach(angular.mock.module(function ($provide) {
+  beforeEach(function () {
     fakeCrossFrame = { frames: [] };
-    $provide.value('crossframe', fakeCrossFrame);
-  }));
+
+    angular.module('h', [])
+      .directive('shareDialog', require('../share-dialog'))
+      .value('crossframe', fakeCrossFrame);
+    angular.mock.module('h');
+  });
 
   it('generates new via link', function () {
     var element = util.createDirective(document, 'shareDialog', {});

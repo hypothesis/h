@@ -1,3 +1,12 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Fix sidebar not scrolling to show Share or Login dialogs when clicking the
+  links in the top bar to show them
+
 0.19.1 (2016-04-14)
 ===================
 
