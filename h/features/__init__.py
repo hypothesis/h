@@ -9,6 +9,10 @@ import transaction
 from h.features import client
 from h.features import models
 
+__all__ = ('Client',)
+
+Client = client.Client
+
 
 def _remove_old_flags_on_boot(event):
     """Remove old feature flags from the database on startup."""
@@ -24,7 +28,7 @@ def _remove_old_flags_on_boot(event):
 def includeme(config):
     config.include('h.features.views')
 
-    config.add_request_method(client.Client, name='feature', reify=True)
+    config.add_request_method(Client, name='feature', reify=True)
     config.add_subscriber(_remove_old_flags_on_boot,
                           'pyramid.events.ApplicationCreated')
 
