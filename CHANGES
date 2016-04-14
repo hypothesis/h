@@ -1,3 +1,12 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Fix a bug that prevented the "Post" button from correctly updating its
+  enabled/disabled state when typing an annotation body (#3213).
+
 0.19.0 (2016-04-14)
 ===================
 
