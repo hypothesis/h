@@ -28,30 +28,33 @@ if (settings.raven) {
 var mail = require('./vendor/jwz');
 var streamer = require('./streamer');
 
-var resolve =
-  // Ensure that we have available a) the current authenticated userid, and b)
-  // the list of user groups.
-  {
-    sessionState: ['session', function (session) { return session.load(); }],
-    store: ['store', function (store) { return store.$promise; }],
-    streamer: streamer.connect,
-    threading: [
-      'annotationMapper', 'drafts', 'threading',
-      function (annotationMapper, drafts, threading) {
-        // Unload all the annotations
-        annotationMapper.unloadAnnotations(threading.annotationList());
+// Fetch external state that the app needs before it can run. This includes the
+// authenticated user state, the API endpoint URLs and WebSocket connection.
+var resolve = {
+  // @ngInject
+  sessionState: function (session) {
+    return session.load();
+  },
+  // @ngInject
+  store: function (store) {
+    return store.$promise;
+  },
+  streamer: streamer.connect,
+  // @ngInject
+  threading: function (annotationMapper, drafts, threading) {
+    // Unload all the annotations
+    annotationMapper.unloadAnnotations(threading.annotationList());
 
-        // Reset the threading root
-        threading.createIdTable([]);
-        threading.root = mail.messageContainer();
+    // Reset the threading root
+    threading.createIdTable([]);
+    threading.root = mail.messageContainer();
 
-        // Reload all new, unsaved annotations
-        threading.thread(drafts.unsaved());
+    // Reload all new, unsaved annotations
+    threading.thread(drafts.unsaved());
 
-        return threading;
-      }
-    ]
-  };
+    return threading;
+  },
+};
 
 // @ngInject
 function configureLocation($locationProvider) {
