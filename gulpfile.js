@@ -196,7 +196,12 @@ gulp.task('build-css', function () {
 });
 
 gulp.task('watch-css', function () {
-  gulp.watch('./h/static/styles/**/*.scss', ['build-css']);
+  var vendorCSS = styleFiles.filter(function (path) {
+    return path.endsWith('.css');
+  });
+  var styleFileGlobs = vendorCSS.concat('./h/static/styles/**/*.scss');
+
+  gulp.watch(styleFileGlobs, ['build-css']);
 });
 
 var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
