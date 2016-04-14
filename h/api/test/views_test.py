@@ -408,7 +408,7 @@ class TestUpdate(object):
     def test_it_calls_validator(self, schemas):
         annotation = mock.Mock()
         request = mock.Mock()
-        schema = schemas.UpdateAnnotationSchema.return_value
+        schema = schemas.LegacyUpdateAnnotationSchema.return_value
 
         views.update(annotation, request)
 
@@ -417,7 +417,7 @@ class TestUpdate(object):
     def test_it_calls_update_annotation(self, storage, schemas):
         annotation = mock.Mock()
         request = mock.Mock()
-        schema = schemas.UpdateAnnotationSchema.return_value
+        schema = schemas.LegacyUpdateAnnotationSchema.return_value
         schema.validate.return_value = {'foo': 123}
 
         views.update(annotation, request)

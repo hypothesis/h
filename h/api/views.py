@@ -204,7 +204,8 @@ def read_jsonld(annotation, request):
 @api_config(route_name='api.annotation', request_method='PUT', permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
-    schema = schemas.UpdateAnnotationSchema(request, annotation=annotation)
+    schema = schemas.LegacyUpdateAnnotationSchema(request,
+                                                  annotation=annotation)
     appstruct = schema.validate(_json_payload(request))
     annotation = storage.update_annotation(request, annotation.id, appstruct)
 
