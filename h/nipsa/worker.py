@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Worker functions for the NIPSA feature."""
-import json
 
 from elasticsearch import helpers
 
+from h.celery import celery
+from h.celery import get_task_logger
 from h.nipsa import search
+
+log = get_task_logger(__name__)
 
 
 def add_nipsa_action(index, annotation):
@@ -31,40 +34,43 @@ def remove_nipsa_action(index, annotation):
     }
 
 
-def add_or_remove_nipsa(client, index, userid, action):
-    """Add/remove the NIPSA flag to/from all of the user's annotations."""
-    assert action in ("add_nipsa", "remove_nipsa")
-    if action == "add_nipsa":
-        query = search.not_nipsad_annotations(userid)
-        action_func = add_nipsa_action
-    else:
-        query = search.nipsad_annotations(userid)
-        action_func = remove_nipsa_action
-
-    annotations = helpers.scan(client=client, query=query)
-    actions = [action_func(index, a) for a in annotations]
-    helpers.bulk(client=client, actions=actions)
-
-
-def worker(request):
-    """Worker function for NIPSA'ing and un-NIPSA'ing users.
-
-    This is a worker function that listens for user-related NIPSA messages on
-    NSQ (when the NIPSA API adds the NIPSA flag to or removes the NIPSA flag
-    from a user) and adds the NIPSA flag to or removes the NIPSA flag from all
-    of the NIPSA'd user's annotations.
-
+def bulk_update_annotations(client, query, action):
     """
-    def handle_message(_, message):
-        """Handle a message on the "nipsa_users_annotations" channel."""
-        request.feature.clear()
+    Bulk update annotations matching a query with a passed action function.
 
-        add_or_remove_nipsa(
-            client=request.legacy_es.conn,
-            index=request.legacy_es.index,
-            **json.loads(message.body))
+    This uses Elasticsearch's scan/scroll query and bulk update APIs to perform
+    updates to a set of annotations. Annotations matching the passed query will
+    be passed one-by-one to the passed "action" function, which must return an
+    action dictionary in the form dictated by the Elasticsearch bulk update
+    API.
 
-    reader = request.get_queue_reader(
-        "nipsa_user_requests", "nipsa_users_annotations")
-    reader.on_message.connect(handle_message)
-    reader.start(block=True)
+    :param client: the Elasticsearch client instance
+    :type client: h.api.search.client.Client
+
+    :param query: a query dict selecting annotations to update
+    :type query: dict
+
+    :param action: a function mapping annotations to bulk actions
+    :type action: function
+    """
+    annotations = helpers.scan(client=client.conn,
+                               index=client.index,
+                               query=query)
+    actions = [action(client.index, a) for a in annotations]
+    helpers.bulk(client=client.conn, actions=actions)
+
+
+@celery.task
+def add_nipsa(userid):
+    log.info("setting nipsa flag for user annotations: %s", userid)
+    bulk_update_annotations(celery.request.legacy_es,
+                            search.not_nipsad_annotations(userid),
+                            add_nipsa_action)
+
+
+@celery.task
+def remove_nipsa(userid):
+    log.info("clearing nipsa flag for user annotations: %s", userid)
+    bulk_update_annotations(celery.request.legacy_es,
+                            search.nipsad_annotations(userid),
+                            remove_nipsa_action)

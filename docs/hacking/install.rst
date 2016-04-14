@@ -33,6 +33,7 @@ You'll also need to run, at a minimum, these external services:
 -  Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
    installed
 -  NSQ_ v0.3+
+-  Redis_ v2.4+
 
 .. _Python: http://python.org/
 .. _Node: http://nodejs.org/
@@ -40,6 +41,7 @@ You'll also need to run, at a minimum, these external services:
 .. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
 .. _NSQ: http://nsq.io/
 .. _PostgreSQL: http://www.postgresql.org/
+.. _Redis: http://redis.io/
 
 
 The following sections will explain how to install these system dependencies
@@ -122,7 +124,8 @@ system that Docker can be installed on:
 
 2. Download and run the
    `official NSQ image <https://hub.docker.com/r/nsqio/nsq/>`_,
-   the `official PostgreSQL image <https://hub.docker.com/_/postgres/>`_,
+   the `official PostgreSQL image <https://hub.docker.com/_/postgres/>`_, the
+   `official Redis image <https://hub.docker.com/_/redis/>`_,
    and our custom
    `Elasticsearch with ICU image <https://hub.docker.com/r/nickstenning/elasticsearch-icu/>`_:
 
@@ -130,15 +133,16 @@ system that Docker can be installed on:
 
       docker run -d --name nsqd -p 4150:4150 -p 4151:4151 nsqio/nsq /nsqd
       docker run -d --name postgres -p 5432:5432 postgres
+      docker run -d --name redis -p 6379:6379 redis
       docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
 
-   You'll now have three Docker containers named ``nsqd``, ``postgres`` and
-   ``elasticsearch`` running and exposing the nsqd service on ports 4150 and
-   4151, Elasticsearch on 9200 and 9300, and PostgreSQL on 5432. You should be
-   able to see them by running ``docker ps``. You should also be able to visit
-   your Elasticsearch service by opening http://127.0.0.1:9200/ in a browser,
-   and connect to your PostgreSQL by running
-   ``psql postgresql://postgres@localhost/postgres`` (if you have psql
+   You'll now have four Docker containers named ``nsqd``, ``postgres``,
+   ``redis`` and ``elasticsearch`` running and exposing the nsqd service on
+   ports 4150 and 4151, Elasticsearch on 9200 and 9300, Redis on 6379, and
+   PostgreSQL on 5432. You should be able to see them by running ``docker ps``.
+   You should also be able to visit your Elasticsearch service by opening
+   http://127.0.0.1:9200/ in a browser, and connect to your PostgreSQL by
+   running ``psql postgresql://postgres@localhost/postgres`` (if you have psql
    installed).
 
    .. note::
@@ -149,7 +153,7 @@ system that Docker can be installed on:
 
       .. code-block:: bash
 
-         docker start postgres elasticsearch nsqd
+         docker start postgres elasticsearch nsqd redis
 
 3. Create the `htest` database in the ``postgres`` container. This is needed
    to run the h tests:
@@ -232,6 +236,13 @@ to see a page with an embedded Hypothesis client which will automatically reload
 when styles, templates or JavaScript source files are changed.
 
 .. _Gulp: http://gulpjs.com/
+
+If you are running background tasks, you must have a Celery worker running. To
+run a Celery worker in development, run:
+
+.. code-block:: bash
+
+    CONFIG_URI=conf/development-app.ini hypothesis-celery worker
 
 .. _running-the-tests:
 

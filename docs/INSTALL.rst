@@ -145,20 +145,12 @@ options:
 
 In addition, there are several important components of a production Hypothesis
 installation which will need to be run in their own containers. For example,
-worker processes::
+a worker process::
 
-    $ docker run --name h-worker-mailer \
+    $ docker run --name h-worker \
                  [...additional config...] \
                  hypothesis/hypothesis \
-                 hypothesis-worker conf/app.ini mailer
-    $ docker run --name h-worker-notification \
-                 [...additional config...] \
-                 hypothesis/hypothesis \
-                 hypothesis-worker conf/app.ini notification
-    $ docker run --name h-worker-nipsa \
-                 [...additional config...] \
-                 hypothesis/hypothesis \
-                 hypothesis-worker conf/app.ini nipsa
+                 hypothesis-celery worker
 
 And, possibly, a websocket server::
 

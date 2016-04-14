@@ -3,8 +3,9 @@
 import json
 
 from h import __version__
+from h import mailer
 from h.api import presenters
-
+from h.notification.reply_template import generate_notifications
 
 
 def add_renderer_globals(event):
@@ -38,3 +39,24 @@ def publish_annotation_event(event):
     }
 
     queue.publish('annotations', json.dumps(data))
+
+
+def send_reply_notifications(event,
+                             generate=generate_notifications,
+                             send=mailer.send.delay):
+    """Queue any reply notification emails triggered by an annotation event."""
+    try:
+        notifications = generate(event.request, event.annotation, event.action)
+        for (subject, body, html, recipients) in notifications:
+            send(recipients, subject, body, html)
+    # We know for a fact that occasionally `generate_notifications` throws
+    # exceptions. We don't want this to cause the annotation CRUD action to
+    # fail, but we do want to collect the error in Sentry, so we explicitly
+    # wrap this here.
+    #
+    # FIXME: Fix the underlying bugs in `generate_notifications` and remove
+    # this try/except.
+    except Exception:
+        event.request.sentry.captureException()
+        if event.request.debug:
+            raise
