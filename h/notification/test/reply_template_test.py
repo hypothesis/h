@@ -231,18 +231,24 @@ def test_unsubscribe_url_generation():
 
 class TestFormatTimestamp:
 
-    @pytest.mark.parametrize('in_str,out_str', [
-        ('2016-04-14T16:45:36.529730+00:00', '14 April at 16:45'),
+    @pytest.mark.parametrize('in_date,out_str', [
+        (
+            datetime.datetime(2016, 4, 14, 16, 45, 36, 529730),
+            '14 April at 16:45',
+        ),
     ])
-    def test_it_converts_iso_format_to_friendly(self, in_str, out_str, now):
-        """It converts ISO 8601 strings (incl. UTC offset) to friendly ones."""
-        assert rt.format_timestamp(in_str, now=now) == out_str
+    def test_it_converts_iso_format_to_friendly(self, in_date, out_str, now):
+        """It converts datetime.datetime objects to friendly strings."""
+        assert rt.format_timestamp(in_date, now=now) == out_str
 
-    @pytest.mark.parametrize('in_str,out_str', [
-        ('2012-04-14T16:45:36.529730+00:00', '14 April 2012 at 16:45'),
+    @pytest.mark.parametrize('in_date,out_str', [
+        (
+            datetime.datetime(2012, 4, 14, 16, 45, 36, 529730),
+            '14 April 2012 at 16:45',
+        ),
     ])
     def test_it_inserts_year_if_date_older_than_current_year(self,
-                                                             in_str,
+                                                             in_date,
                                                              out_str,
                                                              now):
         """
@@ -252,11 +258,11 @@ class TestFormatTimestamp:
         year into the output string.
 
         """
-        assert rt.format_timestamp(in_str, now=now) == out_str
+        assert rt.format_timestamp(in_date, now=now) == out_str
 
     @pytest.fixture
     def now(self):
-        return lambda: datetime.datetime(2016, 04, 14)
+        return lambda: datetime.datetime(2016, 4, 14)
 
 
 # Tests for the get_recipients function

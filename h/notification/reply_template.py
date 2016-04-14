@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import re
 from datetime import datetime
 
 from pyramid.events import subscriber
@@ -46,7 +45,7 @@ def create_template_map(request, reply, parent):
         'document_path': parent['uri'],
         'parent_text': parent.get('text', ''),
         'parent_user': parent_user,
-        'parent_timestamp': format_timestamp(parent['created']),
+        'parent_timestamp': format_timestamp(parent.created),
         'parent_user_profile': user_profile_url(request, parent['user']),
         'parent_path': standalone_url(request, parent['id']),
         'reply_text': reply['text'],
@@ -58,19 +57,11 @@ def create_template_map(request, reply, parent):
     }
 
 
-def format_timestamp(timestamp, now=datetime.now):
-    # Currently we cut the UTC format because time.strptime has problems
-    # parsing it, and of course it'd only correct the backend's timezone
-    # which is not meaningful for international users. This trims the
-    # timezone in the format +00:00.
-    timestamp = re.sub(r'\+\d\d:\d\d$', '', timestamp)
-    timestamp_format = '%Y-%m-%dT%H:%M:%S.%f'
-    parsed = datetime.strptime(timestamp, timestamp_format)
-
+def format_timestamp(timestamp, now=datetime.utcnow):
     template_format = '%d %B at %H:%M'
-    if parsed.year < now().year:
+    if timestamp.year < now().year:
         template_format = '%d %B %Y at %H:%M'
-    return parsed.strftime(template_format)
+    return timestamp.strftime(template_format)
 
 
 def get_recipients(request, parent):
