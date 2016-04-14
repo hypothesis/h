@@ -18,7 +18,7 @@ var converter;
  * This function does *not* sanitize the HTML in any way, that is the caller's
  * responsibility.
  */
-function renderMarkdown(html) {
+function renderMarkdown(markdown) {
   if (!converter) {
     // see https://github.com/showdownjs/showdown#valid-options
     converter = new showdown.Converter({
@@ -31,7 +31,7 @@ function renderMarkdown(html) {
       literalMidWordUnderscores: true,
     });
   }
-  return converter.makeHtml(html);
+  return converter.makeHtml(markdown);
 }
 
 /**
@@ -59,6 +59,11 @@ function renderInlineMath(text) {
  *
  * LaTeX blocks are delimited by '$$' (for blocks) or '\(' and '\)'
  * (for inline math).
+ *
+ * @param {string} text - The markdown and LaTeX to render
+ * @param {(string) => string} $sanitize - A function that sanitizes HTML to
+ *        remove any potentially unsafe tokens (eg. <script> tags).
+ * @return {string} The sanitized HTML
  */
 function renderMathAndMarkdown(text, $sanitize) {
   var html = text.split('$$').map(function (part, index) {
