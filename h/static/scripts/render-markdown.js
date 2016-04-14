@@ -10,6 +10,8 @@ function targetBlank() {
   return [{type: 'output', filter: filter}];
 }
 
+var converter;
+
 /**
  * Render markdown to HTML.
  *
@@ -17,16 +19,18 @@ function targetBlank() {
  * responsibility.
  */
 function renderMarkdown(html) {
-  // see https://github.com/showdownjs/showdown#valid-options
-  var converter = new showdown.Converter({
-    extensions: [targetBlank],
-    simplifiedAutoLink: true,
-    // Since we're using simplifiedAutoLink we also use
-    // literalMidWordUnderscores because otherwise _'s in URLs get
-    // transformed into <em>'s.
-    // See https://github.com/showdownjs/showdown/issues/211
-    literalMidWordUnderscores: true,
-  });
+  if (!converter) {
+    // see https://github.com/showdownjs/showdown#valid-options
+    converter = new showdown.Converter({
+      extensions: [targetBlank],
+      simplifiedAutoLink: true,
+      // Since we're using simplifiedAutoLink we also use
+      // literalMidWordUnderscores because otherwise _'s in URLs get
+      // transformed into <em>'s.
+      // See https://github.com/showdownjs/showdown/issues/211
+      literalMidWordUnderscores: true,
+    });
+  }
   return converter.makeHtml(html);
 }
 
