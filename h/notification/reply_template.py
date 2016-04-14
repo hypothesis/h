@@ -58,7 +58,7 @@ def create_template_map(request, reply, parent):
     }
 
 
-def format_timestamp(timestamp):
+def format_timestamp(timestamp, now=datetime.now):
     # Currently we cut the UTC format because time.strptime has problems
     # parsing it, and of course it'd only correct the backend's timezone
     # which is not meaningful for international users. This trims the
@@ -68,7 +68,7 @@ def format_timestamp(timestamp):
     parsed = datetime.strptime(timestamp, timestamp_format)
 
     template_format = '%d %B at %H:%M'
-    if parsed.year < datetime.now().year:
+    if parsed.year < now().year:
         template_format = '%d %B %Y at %H:%M'
     return parsed.strftime(template_format)
 

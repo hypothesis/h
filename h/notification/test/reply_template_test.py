@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
+import datetime
 from mock import patch, Mock
 
 import pytest
@@ -226,6 +227,37 @@ def test_unsubscribe_url_generation():
     rt.create_template_map(request, annotation, parent)
 
     request.route_url.assert_called_with('unsubscribe', token='TOKEN')
+
+
+class TestFormatTimestamp:
+
+    @pytest.mark.parametrize('in_str,out_str', [
+        ('2016-04-14T16:45:36.529730+00:00', '14 April at 16:45'),
+    ])
+    def test_it_converts_iso_format_to_friendly(self, in_str, out_str, now):
+        """It converts ISO 8601 strings (incl. UTC offset) to friendly ones."""
+        assert rt.format_timestamp(in_str, now=now) == out_str
+
+    @pytest.mark.parametrize('in_str,out_str', [
+        ('2012-04-14T16:45:36.529730+00:00', '14 April 2012 at 16:45'),
+    ])
+    def test_it_inserts_year_if_date_older_than_current_year(self,
+                                                             in_str,
+                                                             out_str,
+                                                             now):
+        """
+        It inserts the year for dates older than this year.
+
+        If the input date is older than the current year then it inserts the
+        year into the output string.
+
+        """
+        assert rt.format_timestamp(in_str, now=now) == out_str
+
+    @pytest.fixture
+    def now(self):
+        return lambda: datetime.datetime(2016, 04, 14)
+
 
 # Tests for the get_recipients function
 def test_get_email():
