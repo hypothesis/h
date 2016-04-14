@@ -1,6 +1,7 @@
 'use strict';
 
 var angular = require('angular');
+var debounce = require('lodash.debounce');
 var katex = require('katex');
 
 var commands = require('../markdown-commands');
@@ -220,9 +221,12 @@ module.exports = function($filter, $sanitize) {
       };
 
       // React to the changes to the input
-      inputEl.bind('blur change keyup', function () {
-        scope.onEditText({text: input.value});
-      });
+      var handleInputChange = debounce(function () {
+        scope.$apply(function () {
+          scope.onEditText({text: input.value});
+        });
+      }, 100);
+      inputEl.bind('blur change keyup', handleInputChange);
 
       // Re-render the markdown when the view needs updating.
       scope.$watch('text', function () {

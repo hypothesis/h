@@ -44,6 +44,12 @@ describe('markdown', function () {
             return 'math:' + input.replace(/$$/g, '');
           },
         },
+        'lodash.debounce': function (fn) {
+          // Make input change debouncing synchronous in tests
+          return function () {
+            fn();
+          };
+        },
         '../markdown-commands': {
           convertSelectionToLink: mockFormattingCommand,
           toggleBlockStyle: mockFormattingCommand,
