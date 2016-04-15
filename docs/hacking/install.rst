@@ -18,20 +18,11 @@ installed:
 
 You'll also need to run, at a minimum, these external services:
 
--  Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
-   installed
--  NSQ_ v0.3+
--  PostgreSQL_ 9.4+
--  Redis_ v2.4+
+.. include:: services.rst
 
 .. _Git: https://git-scm.com/
 .. _Python: http://python.org/
 .. _Node: http://nodejs.org/
-.. _Elasticsearch: http://www.elasticsearch.org/
-.. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
-.. _NSQ: http://nsq.io/
-.. _PostgreSQL: http://www.postgresql.org/
-.. _Redis: http://redis.io/
 
 
 The following sections will explain how to install these system dependencies
@@ -118,10 +109,13 @@ Install the following packages:
 Installing the services
 -----------------------
 
-h requires Elasticsearch_ 1.0+ with the `Elasticsearch ICU Analysis`_ plugin,
-`NSQ`_ 0.3+ and `PostgreSQL`_ 9.4+. You can install these services however you
-want, but the easiest way is by using Docker. This should work on any operating
-system that Docker can be installed on:
+h requires trhe following external services:
+
+.. include:: services.rst
+
+You can install these services however you want, but the easiest way is by
+using Docker. This should work on any operating system that Docker can be
+installed on:
 
 1. Install Docker by following the instructions on the
    `Docker website`_.
