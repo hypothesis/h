@@ -47,6 +47,7 @@ SETTINGS = [
     mandrill_settings,
 
     # Configuration for external components
+    EnvSetting('broker_url', 'BROKER_URL'),
     EnvSetting('es.client_poolsize', 'ELASTICSEARCH_CLIENT_POOLSIZE',
                type=int),
     EnvSetting('es.client_timeout', 'ELASTICSEARCH_CLIENT_TIMEOUT', type=int),
