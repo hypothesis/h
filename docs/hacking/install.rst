@@ -29,19 +29,6 @@ The following sections will explain how to install these system dependencies
 and services.
 
 
-Get the h source code from GitHub
----------------------------------
-
-Use ``git`` to download the h source code:
-
-.. code-block:: bash
-
-    git clone https://github.com/hypothesis/h.git
-
-This will download the code into an ``h`` directory in your current working
-directory.
-
-
 Installing the system dependencies
 ----------------------------------
 
@@ -190,6 +177,26 @@ installed on:
 
 
 .. _Docker website: https://www.docker.com/
+
+
+Getting the h source code from GitHub
+-------------------------------------
+
+Use ``git`` to download the h source code:
+
+.. code-block:: bash
+
+    git clone https://github.com/hypothesis/h.git
+
+This will download the code into an ``h`` directory in your current working
+directory.
+
+Change into the ``h`` directory from the remainder of the installation
+process:
+
+.. code-block:: bash
+
+   cd h
 
 
 Running h
