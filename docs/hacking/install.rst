@@ -56,7 +56,6 @@ Install the following packages:
         libffi-dev \
         libfontconfig \
         libpq-dev \
-        npm \
         python-dev \
         python-pip \
         python-virtualenv
