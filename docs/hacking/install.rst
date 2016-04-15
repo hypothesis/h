@@ -273,12 +273,34 @@ when styles, templates or JavaScript source files are changed.
 
 .. _Gulp: http://gulpjs.com/
 
-If you are running background tasks, you must have a Celery worker running. To
-run a Celery worker in development, run:
+
+Running the WebSocket for realtime features
+-------------------------------------------
+
+To test h's realtime features (for example, seeing new or updated annotations
+from other users appear in your browser without a page reload) you need to run
+a websocket process.  Open a new terminal, ``cd`` into your ``h`` directory,
+:ref:`activate your Python virtual environment <activating_your_virtual_environment>`,
+then run:
+
+.. code-block:: bash
+
+   gunicorn --reload --paste conf/development-websocket.ini
+
+
+Running Celery for background tasks
+-----------------------------------
+
+To test h's background tasks (for example, sending emails) you need to run a
+Celery worker process.
+Open a new terminal, ``cd`` into your ``h`` directory,
+:ref:`activate your Python virtual environment <activating_your_virtual_environment>`,
+then run:
 
 .. code-block:: bash
 
     CONFIG_URI=conf/development-app.ini hypothesis-celery worker
+
 
 .. _running-the-tests:
 
