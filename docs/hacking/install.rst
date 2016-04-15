@@ -259,11 +259,6 @@ This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
 
-.. note::
-    Using the bookmarklet or otherwise embedding the application may not
-    be possible on sites accessed via HTTPS due to browser policy restricting
-    the inclusion of non-SSL content.
-
 If you are making changes to the client, or the JavaScript code or styles for the
 service, you may find it useful to run `gulp watch`. This will automatically
 rebuild the assets whenever the source files change.
