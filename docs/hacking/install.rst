@@ -117,15 +117,15 @@ installed on:
 
    .. code-block:: bash
 
-      docker run -d --name nsqd -p 4150:4150 -p 4151:4151 nsqio/nsq /nsqd
-      docker run -d --name postgres -p 5432:5432 postgres
-      docker run -d --name redis -p 6379:6379 redis
-      docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
+      sudo docker run -d --name nsqd -p 4150:4150 -p 4151:4151 nsqio/nsq /nsqd
+      sudo docker run -d --name postgres -p 5432:5432 postgres
+      sudo docker run -d --name redis -p 6379:6379 redis
+      sudo docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
 
    You'll now have four Docker containers named ``nsqd``, ``postgres``,
    ``redis`` and ``elasticsearch`` running and exposing the nsqd service on
    ports 4150 and 4151, Elasticsearch on 9200 and 9300, Redis on 6379, and
-   PostgreSQL on 5432. You should be able to see them by running ``docker ps``.
+   PostgreSQL on 5432. You should be able to see them by running ``sudo docker ps``.
    You should also be able to visit your Elasticsearch service by opening
    http://127.0.0.1:9200/ in a browser, and connect to your PostgreSQL by
    running ``psql postgresql://postgres@localhost/postgres`` (if you have psql
@@ -139,14 +139,14 @@ installed on:
 
       .. code-block:: bash
 
-         docker start postgres elasticsearch nsqd redis
+         sudo docker start postgres elasticsearch nsqd redis
 
 3. Create the `htest` database in the ``postgres`` container. This is needed
    to run the h tests:
 
    .. code-block:: bash
 
-      docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres -c "CREATE DATABASE htest;"'
+      sudo docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres -c "CREATE DATABASE htest;"'
 
 
 .. tip::
@@ -157,7 +157,7 @@ installed on:
 
    .. code-block:: bash
 
-      docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
+      sudo docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
 
    This runs psql in a fourth Docker container (from the same official
    PostgreSQL image, which also contains psql) and links it to your named
@@ -172,7 +172,7 @@ installed on:
 
    .. code-block:: bash
 
-      docker logs nsqd
+      sudo docker logs nsqd
 
    For more on how to use Docker see the `Docker website`_.
 
