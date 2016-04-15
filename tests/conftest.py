@@ -12,7 +12,6 @@ TEST_SETTINGS = {
     'h.db.should_create_all': True,
     'h.db.should_drop_all': True,
     'h.search.autoconfig': True,
-    'pyramid.includes': 'h.session',
     'sqlalchemy.url': os.environ.get('TEST_DATABASE_URL',
                                      'postgresql://postgres@localhost/htest')
 }
@@ -21,9 +20,11 @@ TEST_SETTINGS = {
 @pytest.fixture
 def config():
     from h.config import configure
-    _drop_indices(settings=TEST_SETTINGS)
-    config = configure(settings=TEST_SETTINGS)
+    config = configure()
+    config.registry.settings.update(TEST_SETTINGS)
+    _drop_indices(settings=config.registry.settings)
     config.include('h.app')
+    config.include('h.session')
     return config
 
 
