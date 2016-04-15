@@ -16,7 +16,7 @@ installed:
 -  Python_ v2.7
 -  Node_ v4+ and its package manager, npm
 
-You'll also need to run, at a minimum, these external services:
+You'll also need to run these external services:
 
 .. include:: services.rst
 
