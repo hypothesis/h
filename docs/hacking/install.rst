@@ -54,6 +54,7 @@ Install the following packages:
         git \
         libevent-dev \
         libffi-dev \
+        libfontconfig \
         libpq-dev \
         npm \
         python-dev \
