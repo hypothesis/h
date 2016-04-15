@@ -210,6 +210,39 @@ process:
    cd h
 
 
+Creating a Python virtual environment
+-------------------------------------
+
+Create a Python virtual environment to install and run the h Python code and
+Python dependencies in:
+
+.. code-block:: bash
+
+   virtualenv .venv
+
+
+.. _activating_your_virtual_environment:
+
+Activating your virtual environment
+-----------------------------------
+
+Activate the virtual environment that you've created:
+
+.. code-block:: bash
+
+   source .venv/bin/activate
+
+.. tip::
+
+   You'll need to re-activate this virtualenv with the
+   ``source .venv/bin/activate`` command each time you open a new terminal,
+   before running h.
+   See the `Virtual Environments`_ section in the Hitchhiker's guide to
+   Python for an introduction to Python virtual environments.
+
+.. _Virtual Environments: http://docs.python-guide.org/en/latest/dev/virtualenvs/
+
+
 Running h
 ---------
 
@@ -217,13 +250,6 @@ Run the following command to start the Hypothesis web service. If this is a
 fresh clone of the repository, this may take some time to run, as it will need
 to install the application dependencies and build the client assets.
 
-.. note::
-    Although it is strictly optional, we highly recommend that you install h
-    inside a Python "virtualenv". Please refer to the `virtualenv environment`_
-    section featured in the Hitchhiker's guide to Python for a comprehensive
-    introduction.
-
-.. _virtualenv environment: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 
 .. code-block:: bash
 
