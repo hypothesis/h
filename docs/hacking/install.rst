@@ -42,7 +42,7 @@ Installing the system dependencies on Ubuntu 14.04
 ``````````````````````````````````````````````````
 
 This section describes how to install h's system dependencies on Ubuntu 14.04.
-These steps will also probably work with little or no changes on other versions
+These steps will also probably work with few or no changes on other versions
 of Ubuntu, Debian, or other Debian-based GNU/Linux distributions.
 
 Install the following packages:
@@ -245,28 +245,31 @@ Activate the virtual environment that you've created:
 Running h
 ---------
 
-Run the following command to start the Hypothesis web service. If this is a
-fresh clone of the repository, this may take some time to run, as it will need
-to install the application dependencies and build the client assets.
-
+Start the Hypothesis web service:
 
 .. code-block:: bash
 
     make dev
+
+The first time you run ``make dev`` it might take a while to start because
+it'll need to install the application dependencies and build the client assets.
 
 This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
 
 If you are making changes to the client, or the JavaScript code or styles for the
-service, you may find it useful to run `gulp watch`. This will automatically
-rebuild the assets whenever the source files change.
+service, you may find it useful to run this command from your ``h`` directory
+in a separate terminal:
 
 .. code-block:: bash
 
     gulp watch
 
-When `gulp watch` is running, you can visit http://localhost:3000
+``gulp watch`` will automatically rebuild the assets whenever the source files
+change.
+
+When ``gulp watch`` is running, you can visit http://localhost:3000
 to see a page with an embedded Hypothesis client which will automatically reload
 when styles, templates or JavaScript source files are changed.
 
