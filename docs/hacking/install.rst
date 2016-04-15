@@ -338,6 +338,7 @@ argument or mocha's `.only()`_ modifier.
 
 .. _.only(): http://jaketrent.com/post/run-single-mocha-test/
 
+
 Debugging h
 -----------
 
@@ -359,7 +360,7 @@ environment variable (to any value). Set it to the special value ``trace`` to
 turn on result set logging as well.
 
 
-Feature Flags
+Feature flags
 -------------
 
 Features flags allow admins to enable or disable features for certain groups
