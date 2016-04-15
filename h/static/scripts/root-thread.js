@@ -64,12 +64,13 @@ module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
 
     // Get the currently loaded annotations and the set of inputs which
     // determines what is visible and build the visible thread structure
-    thread = buildThread(annotationUI.annotations, {
-      forceVisible: truthyKeys(annotationUI.forceVisible),
-      expanded: annotationUI.expanded,
-      selected: truthyKeys(annotationUI.selectedAnnotationMap || {}),
-      currentSortFn: sortFn,
-      searchFilter: filterFn,
+    var state = annotationUI.getState();
+    thread = buildThread(state.annotations, {
+      forceVisible: truthyKeys(state.forceVisible),
+      expanded: state.expanded,
+      selected: truthyKeys(state.selectedAnnotationMap || {}),
+      sortCompareFn: sortFn,
+      filterFn: filterFn,
     });
   }
   rebuildRootThread();

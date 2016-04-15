@@ -5,7 +5,7 @@ var angular = require('angular');
 var events = require('./events');
 
 function getExistingAnnotation(annotationUI, id) {
-  return annotationUI.annotations.find(function (annot) {
+  return annotationUI.getState().annotations.find(function (annot) {
     return annot.id === id;
   });
 }

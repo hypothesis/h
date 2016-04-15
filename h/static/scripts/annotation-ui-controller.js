@@ -6,7 +6,7 @@ var events = require('./events');
 // @ngInject
 function AnnotationUIController($rootScope, $scope, annotationUI) {
   $rootScope.$watch(function () {
-    return annotationUI.selectedAnnotationMap;
+    return annotationUI.getState().selectedAnnotationMap;
   }, function (map) {
     map = map || {};
     var count = Object.keys(map).length;
@@ -20,7 +20,7 @@ function AnnotationUIController($rootScope, $scope, annotationUI) {
   });
 
   $rootScope.$watch(function () {
-    return annotationUI.focusedAnnotationMap;
+    return annotationUI.getState().focusedAnnotationMap;
   }, function (map) {
     map = map || {};
     $scope.focusedAnnotations = map;

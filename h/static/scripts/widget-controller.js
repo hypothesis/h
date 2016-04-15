@@ -37,7 +37,7 @@ module.exports = function WidgetController(
   $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
 
   function annotationExists(id) {
-    return annotationUI.annotations.some(function (annot) {
+    return annotationUI.getState().annotations.some(function (annot) {
       return annot.id === id;
     });
   }
@@ -65,9 +65,9 @@ module.exports = function WidgetController(
    * not the order in which they appear in the document.
    */
   function firstSelectedAnnotation() {
-    if (annotationUI.selectedAnnotationMap) {
-      var id = Object.keys(annotationUI.selectedAnnotationMap)[0];
-      return annotationUI.annotations.find(function (annot) {
+    if (annotationUI.getState().selectedAnnotationMap) {
+      var id = Object.keys(annotationUI.getState().selectedAnnotationMap)[0];
+      return annotationUI.getState().annotations.find(function (annot) {
         return annot.id === id;
       });
     } else {
@@ -79,7 +79,7 @@ module.exports = function WidgetController(
 
   function _resetAnnotations() {
     // Unload all the annotations
-    annotationMapper.unloadAnnotations(annotationUI.annotations);
+    annotationMapper.unloadAnnotations(annotationUI.getState().annotations);
     // Reload all the drafts
     annotationUI.addAnnotations(drafts.unsaved());
   }
@@ -97,8 +97,8 @@ module.exports = function WidgetController(
       if (annotationUI.hasSelectedAnnotations()) {
         // Focus the group containing the selected annotation and filter
         // annotations to those from this group
-        var groupID = groupIDFromSelection(annotationUI.selectedAnnotationMap,
-          results);
+        var groupID = groupIDFromSelection(
+          annotationUI.getState().selectedAnnotationMap, results);
         if (!groupID) {
           // If the selected annotation is not available, fall back to
           // loading annotations for the currently focused group
@@ -219,7 +219,7 @@ module.exports = function WidgetController(
   };
 
   $scope.toggleCollapsed = function (id) {
-    annotationUI.setCollapsed(id, !!annotationUI.expanded[id]);
+    annotationUI.setCollapsed(id, !!annotationUI.getState().expanded[id]);
   };
 
   $scope.forceVisible = function (id) {
@@ -237,7 +237,7 @@ module.exports = function WidgetController(
   };
 
   $scope.selectedAnnotationUnavailable = function () {
-    var selectedID = firstKey(annotationUI.selectedAnnotationMap);
+    var selectedID = firstKey(annotationUI.getState().selectedAnnotationMap);
     return !isLoading() &&
            selectedID &&
            !annotationExists(selectedID);
@@ -258,7 +258,7 @@ module.exports = function WidgetController(
     // The user is logged out and has landed on a direct linked
     // annotation. If there is an annotation selection and that
     // selection is available to the user, show the CTA.
-    var selectedID = firstKey(annotationUI.selectedAnnotationMap);
+    var selectedID = firstKey(annotationUI.getState().selectedAnnotationMap);
     return !isLoading() &&
            selectedID &&
            annotationExists(selectedID);

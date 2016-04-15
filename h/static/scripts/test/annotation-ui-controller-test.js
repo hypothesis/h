@@ -23,9 +23,11 @@ describe('AnnotationUIController', function () {
     $scope.search = {};
 
     annotationUI = {
-      tool: 'comment',
-      selectedAnnotationMap: null,
-      focusedAnnotationsMap: null,
+      state: {
+        tool: 'comment',
+        selectedAnnotationMap: null,
+        focusedAnnotationsMap: null,
+      },
       removeSelectedAnnotation: sandbox.stub()
     };
 
@@ -40,26 +42,26 @@ describe('AnnotationUIController', function () {
   });
 
   it('updates the view when the selection changes', function () {
-    annotationUI.selectedAnnotationMap = { 1: true, 2: true };
+    annotationUI.getState().selectedAnnotationMap = { 1: true, 2: true };
     $rootScope.$digest();
     assert.deepEqual($scope.selectedAnnotations, { 1: true, 2: true });
   });
 
   it('updates the selection counter when the selection changes', function () {
-    annotationUI.selectedAnnotationMap = { 1: true, 2: true };
+    annotationUI.getState().selectedAnnotationMap = { 1: true, 2: true };
     $rootScope.$digest();
     assert.deepEqual($scope.selectedAnnotationsCount, 2);
   });
 
   it('clears the selection when no annotations are selected', function () {
-    annotationUI.selectedAnnotationMap = {};
+    annotationUI.getState().selectedAnnotationMap = {};
     $rootScope.$digest();
     assert.deepEqual($scope.selectedAnnotations, null);
     assert.deepEqual($scope.selectedAnnotationsCount, 0);
   });
 
   it('updates the focused annotations when the focus map changes', function () {
-    annotationUI.focusedAnnotationMap = { 1: true, 2: true };
+    annotationUI.getState().focusedAnnotationMap = { 1: true, 2: true };
     $rootScope.$digest();
     assert.deepEqual($scope.focusedAnnotations, { 1: true, 2: true });
   });
