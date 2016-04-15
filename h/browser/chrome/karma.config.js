@@ -56,10 +56,17 @@ module.exports = function(config) {
       },
     },
 
-    // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['dots'],
+    mochaReporter: {
+      // Display a helpful diff when comparing complex objects
+      // See https://www.npmjs.com/package/karma-mocha-reporter#showdiff
+      showDiff: true,
+      // Only show the total test counts and details for failed tests
+      output: 'minimal',
+    },
+
+    // Use https://www.npmjs.com/package/karma-mocha-reporter
+    // for more helpful rendering of test failures
+    reporters: ['mocha'],
 
 
     // web server port
