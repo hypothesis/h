@@ -21,6 +21,7 @@ You'll also need to run, at a minimum, these external services:
 -  Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
    installed
 -  NSQ_ v0.3+
+-  PostgreSQL_ 9.4+
 -  Redis_ v2.4+
 
 .. _Git: https://git-scm.com/
