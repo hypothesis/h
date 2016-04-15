@@ -180,6 +180,16 @@ installed on:
 .. _Docker website: https://www.docker.com/
 
 
+Installing the gulp command
+---------------------------
+
+Install ``gulp-cli`` to get the ``gulp`` command:
+
+.. code-block:: bash
+
+    sudo npm install -g gulp-cli
+
+
 Getting the h source code from GitHub
 -------------------------------------
 
@@ -229,12 +239,11 @@ it crash for some reason.
     the inclusion of non-SSL content.
 
 If you are making changes to the client, or the JavaScript code or styles for the
-service, you may find it useful to install Gulp_ and run the `watch` task. This
-will automatically rebuild the assets whenever the source files change.
+service, you may find it useful to run `gulp watch`. This will automatically
+rebuild the assets whenever the source files change.
 
 .. code-block:: bash
 
-    npm install -g gulp-cli
     gulp watch
 
 When `gulp watch` is running, you can visit http://localhost:3000
@@ -262,12 +271,11 @@ complete set of tests, run:
 
     make test
 
-To run the frontend test suite only, install Gulp_ and run the appropriate test
-task. For example:
+To run the frontend test suite only, run the appropriate test task with gulp.
+For example:
 
 .. code-block:: bash
 
-    npm install -g gulp-cli
     gulp test-app
 
 When working on the front-end code, you can run the Karma test runner in
