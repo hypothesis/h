@@ -10,7 +10,7 @@ var events = require('./events');
  * @return {Annotation?} The existing Annotation instance
  */
 function getExistingAnnotation(annotationUI, id) {
-  return annotationUI.annotations.find(function (annot) {
+  return annotationUI.getState().annotations.find(function (annot) {
     return annot.id === id;
   });
 }

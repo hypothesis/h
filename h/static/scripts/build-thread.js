@@ -6,7 +6,7 @@ var DEFAULT_THREAD_STATE = {
   annotation: undefined,
   /** The parent Thread */
   parent: undefined,
-  /** True if replies to this annotation are hidden. */
+  /** True if this thread is collapsed, hiding replies to this annotation. */
   collapsed: false,
   /** True if this annotation matches the current filters. */
   visible: true,
@@ -36,7 +36,7 @@ function id(annotation) {
  * @return {Thread} - The input annotations threaded into a tree structure.
  */
 function threadAnnotations(annotations) {
-  // map of annotation ID -> container
+  // Map of annotation ID -> container
   var threads = {};
 
   // Build mapping of annotation ID -> thread
@@ -144,7 +144,6 @@ function sort(threads, compareFn) {
  * of `thread` are sorted.
  */
 function sortThread(thread, compareFn) {
-  // Children should always be sorted by age.
   return Object.assign({}, thread, {
     children: sort(thread.children, compareFn),
   });
@@ -193,7 +192,7 @@ var defaultOpts = {
    * Predicate function that returns true if an annotation should be
    * displayed.
    */
-  searchFilter: undefined,
+  filterFn: undefined,
   /**
    * Mapping of annotation IDs to expansion states.
    */
@@ -202,7 +201,7 @@ var defaultOpts = {
    * Less-than comparison function used to compare annotations in order to sort
    * the top-level thread.
    */
-  currentSortFn: function (a, b) {
+  sortCompareFn: function (a, b) {
     return a.id < b.id;
   },
 };
@@ -236,7 +235,7 @@ function buildThread(annotations, opts) {
         opts.selected.indexOf(id(annotation)) === -1) {
       return false;
     }
-    if (opts.searchFilter && !opts.searchFilter(annotation)) {
+    if (opts.filterFn && !opts.filterFn(annotation)) {
       return false;
     }
     return true;
@@ -254,7 +253,7 @@ function buildThread(annotations, opts) {
 
   // Expand any threads which:
   // 1) Have been explicitly expanded OR
-  // 2) Have children matching the search filter OR
+  // 2) Have children matching the filter OR
   // 3) Contain children which have been selected
   thread = mapThread(thread, function (thread) {
     if (!thread.annotation) {
@@ -263,13 +262,12 @@ function buildThread(annotations, opts) {
 
     var id = thread.annotation.id;
 
-    // If the thread was explicitly expanded or collapsed,
-    // respect that option
+    // If the thread was explicitly expanded or collapsed, respect that option
     if (opts.expanded.hasOwnProperty(id)) {
       return Object.assign({}, thread, {collapsed: !opts.expanded[id]});
     }
 
-    var hasUnfilteredChildren = opts.searchFilter && hasVisibleChildren(thread);
+    var hasUnfilteredChildren = opts.filterFn && hasVisibleChildren(thread);
 
     return Object.assign({}, thread, {
       collapsed: thread.collapsed &&
@@ -284,7 +282,7 @@ function buildThread(annotations, opts) {
   });
 
   // Sort the root thread according to the current search criteria
-  thread = sortThread(thread, opts.currentSortFn);
+  thread = sortThread(thread, opts.sortCompareFn);
 
   // Update reply counts
   thread = countReplies(thread);

@@ -51,7 +51,7 @@ module.exports = class StreamController
     )
 
     $scope.toggleCollapsed = (id) ->
-      annotationUI.setCollapsed(id, annotationUI.expanded[id])
+      annotationUI.setCollapsed(id, annotationUI.getState().expanded[id])
 
     $scope.forceVisible = (id) ->
       annotationUI.setForceVisible(id, true)

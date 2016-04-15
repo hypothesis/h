@@ -16,28 +16,8 @@ function initialSelection(settings) {
   return value(selection);
 }
 
-/**
- * Stores the UI state of the annotator in connected clients.
- *
- * This includes:
- * - The set of annotations that are currently selected
- * - The annotation(s) that are currently hovered/focused
- * - The state of the bucket bar
- *
- */
-// @ngInject
-module.exports = function (settings) {
-  // Subscribers listening for changes to the state of
-  // the model
-  var listeners = [];
-
-  function notify(model) {
-    listeners.forEach(function (listener) {
-      listener(model);
-    });
-  }
-
-  return {
+function initialState(settings) {
+  return Object.freeze({
     // List of all loaded annotations
     annotations: [],
 
@@ -58,6 +38,57 @@ module.exports = function (settings) {
     // Set of IDs of annotations that have been explicitly shown
     // by the user even if they do not match the current search filter
     forceVisible: {},
+  });
+}
+
+/**
+ * Stores the UI state of the annotator in connected clients.
+ *
+ * This includes:
+ * - The annotations that are currently loaded
+ * - The IDs of annotations that are currently selected or focused
+ * - The IDs of annotations whose conversation threads are expanded
+ * - The state of the bucket bar
+ *
+ */
+// @ngInject
+module.exports = function (settings) {
+  // List of subscribers listening for changes to the UI state
+  var listeners = [];
+  var state = initialState(settings);
+
+  // Update the UI state and notify subscribers of the change.
+  function setState(newState) {
+    state = Object.assign({}, state, newState);
+    listeners.forEach(function (listener) {
+      listener();
+    });
+  }
+
+  function subscribe(listener) {
+    listeners.push(listener);
+    return function () {
+      listeners = listeners.filter(function (other) {
+        return other !== listener;
+      });
+    };
+  }
+
+  return {
+    /**
+     * Return the current UI state of the sidebar. This should not be modified
+     * directly but only though the helper methods below.
+     */
+    getState: function () {
+      return state;
+    },
+
+    /** Listen for changes to the UI state of the sidebar. */
+    subscribe: subscribe,
+
+    setShowHighlights: function (show) {
+      setState({visibleHighlights: show});
+    },
 
     /**
      * @ngdoc method
@@ -72,8 +103,7 @@ module.exports = function (settings) {
         annotation = annotations[i];
         selection[annotation.$$tag] = true;
       }
-      this.focusedAnnotationMap = value(selection);
-      notify(this);
+      setState({focusedAnnotationMap: value(selection)});
     },
 
     /**
@@ -82,24 +112,23 @@ module.exports = function (settings) {
      * @returns true if there are any selected annotations.
      */
     hasSelectedAnnotations: function () {
-      return !!this.selectedAnnotationMap;
+      return !!state.selectedAnnotationMap;
     },
 
     setCollapsed: function (id, collapsed) {
-      this.expanded = Object.assign({}, this.expanded);
-      this.expanded[id] = !collapsed;
-      notify(this);
+      var expanded = Object.assign({}, state.expanded);
+      expanded[id] = !collapsed;
+      setState({expanded: expanded});
     },
 
-    setForceVisible: function (id, forceVisible) {
-      this.forceVisible = Object.assign({}, this.forceVisible);
-      this.forceVisible[id] = forceVisible;
-      notify(this);
+    setForceVisible: function (id, visible) {
+      var forceVisible = Object.assign({}, state.forceVisible);
+      forceVisible[id] = visible;
+      setState({forceVisible: forceVisible});
     },
 
     clearForceVisible: function () {
-      this.forceVisible = {};
-      notify(this);
+      setState({forceVisible: {}});
     },
 
     /**
@@ -108,7 +137,7 @@ module.exports = function (settings) {
      * @returns true if the provided annotation is selected.
      */
     isAnnotationSelected: function (id) {
-      return (this.selectedAnnotationMap || {}).hasOwnProperty(id);
+      return (state.selectedAnnotationMap || {}).hasOwnProperty(id);
     },
 
     /**
@@ -126,8 +155,7 @@ module.exports = function (settings) {
           selection[annotations[i].id] = true;
         }
       }
-      this.selectedAnnotationMap = value(selection);
-      notify(this);
+      setState({selectedAnnotationMap: value(selection)});
     },
 
     /**
@@ -138,7 +166,7 @@ module.exports = function (settings) {
      * selectedAnnotationMap if not present otherwise removes them.
      */
     xorSelectedAnnotations: function (annotations) {
-      var selection = Object.assign({}, this.selectedAnnotationMap);
+      var selection = Object.assign({}, state.selectedAnnotationMap);
       for (var i = 0, annotation; i < annotations.length; i++) {
         annotation = annotations[i];
         var id = annotation.id;
@@ -148,8 +176,7 @@ module.exports = function (settings) {
           selection[id] = true;
         }
       }
-      this.selectedAnnotationMap = value(selection);
-      notify(this);
+      setState({selectedAnnotationMap: value(selection)});
     },
 
     /**
@@ -159,12 +186,11 @@ module.exports = function (settings) {
      * @description removes an annotation from the current selection.
      */
     removeSelectedAnnotation: function (annotation) {
-      var selection = Object.assign({}, this.selectedAnnotationMap);
+      var selection = Object.assign({}, state.selectedAnnotationMap);
       if (selection) {
         delete selection[annotation.id];
-        this.selectedAnnotationMap = value(selection);
+        setState({selectedAnnotationMap: value(selection)});
       }
-      notify(this);
     },
 
     /**
@@ -174,13 +200,11 @@ module.exports = function (settings) {
      * @description removes all annotations from the current selection.
      */
     clearSelectedAnnotations: function () {
-      this.selectedAnnotationMap = null;
-      notify(this);
+      setState({selectedAnnotationMap: null});
     },
 
     addAnnotations: function (annotations) {
-      this.annotations = this.annotations.concat(annotations);
-      notify(this);
+      setState({annotations: state.annotations.concat(annotations)});
     },
 
     /**
@@ -190,21 +214,17 @@ module.exports = function (settings) {
       var idsAndTags = annotations.reduce(function (map, annot) {
         var id = annot.id || annot.$$tag;
         map[id] = true;
+        return map;
       }, {});
-      this.annotations = this.annotations.filter(function (annot) {
+      var newAnnotations = state.annotations.filter(function (annot) {
         var id = annot.id || annot.$$tag;
         return !idsAndTags[id];
       });
-      notify(this);
+      setState({annotations: newAnnotations});
     },
 
     clearAnnotations: function () {
-      this.annotations = [];
-      notify(this);
-    },
-
-    subscribe: function (listener) {
-      listeners.push(listener);
+      setState({annotations: []});
     },
   };
 };
