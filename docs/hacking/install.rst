@@ -6,6 +6,37 @@ for h. If you are looking for instructions for deploying h in a production
 environment, please consult the :doc:`/INSTALL` instead.
 
 
+Requirements
+------------
+
+To run h in a development environment you'll need these system dependencies
+installed:
+
+-  Git_
+-  Python_ v2.7
+-  Node_ v4+ and its package manager, npm
+
+You'll also need to run, at a minimum, these external services:
+
+-  Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
+   installed
+-  NSQ_ v0.3+
+-  Redis_ v2.4+
+
+.. _Git: https://git-scm.com/
+.. _Python: http://python.org/
+.. _Node: http://nodejs.org/
+.. _Elasticsearch: http://www.elasticsearch.org/
+.. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
+.. _NSQ: http://nsq.io/
+.. _PostgreSQL: http://www.postgresql.org/
+.. _Redis: http://redis.io/
+
+
+The following sections will explain how to install these system dependencies
+and services.
+
+
 Get the h source code from GitHub
 ---------------------------------
 
@@ -19,33 +50,6 @@ This will download the code into an ``h`` directory in your current working
 directory.
 
 
-Requirements
-------------
-
-To run h in a development environment you'll need these system dependencies
-installed:
-
--  Python_ v2.7
--  Node_ v4+ and its package manager, npm
-
-You'll also need to run, at a minimum, these external services:
-
--  Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
-   installed
--  NSQ_ v0.3+
--  Redis_ v2.4+
-
-.. _Python: http://python.org/
-.. _Node: http://nodejs.org/
-.. _Elasticsearch: http://www.elasticsearch.org/
-.. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
-.. _NSQ: http://nsq.io/
-.. _PostgreSQL: http://www.postgresql.org/
-.. _Redis: http://redis.io/
-
-
-The following sections will explain how to install these system dependencies
-and services.
 
 Installing the system dependencies
 ----------------------------------
