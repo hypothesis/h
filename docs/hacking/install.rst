@@ -66,7 +66,7 @@ Install node by following the
 (the version of the nodejs package in the standard Ubuntu repositories is too
 old).
 
-Upgrade pip and npm:
+Upgrade pip, virtualenv and npm:
 
 .. code-block:: bash
 
