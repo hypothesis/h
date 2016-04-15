@@ -1,3 +1,5 @@
+@import '../mixins/icons';
+
 .sidebar-tutorial__header {
   color: $color-cardinal;
   font-weight: $title-font-weight;
@@ -47,4 +49,9 @@
                       Note: This also puts the same amount of space above the
                       first list item (i.e. between the list and whatever's
                       above it). */
+}
+
+
+@include icons {
+  font-family: 'h';
 }
