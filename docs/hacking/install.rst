@@ -1,8 +1,8 @@
 Installing h in a development environment
 #########################################
 
-This document contains instructions on setting up a development environment for
-h. If you are looking for instructions on deploying h in a production
+This document contains instructions for setting up a development environment
+for h. If you are looking for instructions for deploying h in a production
 environment, please consult the :doc:`/INSTALL` instead.
 
 
