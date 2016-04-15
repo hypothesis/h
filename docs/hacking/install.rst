@@ -51,7 +51,6 @@ This will download the code into an ``h`` directory in your current working
 directory.
 
 
-
 Installing the system dependencies
 ----------------------------------
 
