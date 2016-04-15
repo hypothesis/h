@@ -1,5 +1,4 @@
-// Karma configuration
-// Generated on Mon Nov 17 2014 13:59:51 GMT+0000 (GMT)
+'use strict';
 
 module.exports = function(config) {
   config.set({
@@ -50,7 +49,10 @@ module.exports = function(config) {
       configure: function(bundle) {
         bundle
           .plugin('proxyquire-universal')
-          .require('phantom-ownpropertynames/implement', {entry: true});
+          // fix for Proxyquire in PhantomJS 1.x.
+          // See https://github.com/bitwit/proxyquireify-phantom-menace
+          .require(require.resolve('phantom-ownpropertynames/implement'),
+            {entry: true});
       },
     },
 

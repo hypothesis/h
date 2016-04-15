@@ -1,8 +1,5 @@
 'use strict';
 
-// Karma configuration
-var path = require('path');
-
 module.exports = function(config) {
   config.set({
 
@@ -61,7 +58,8 @@ module.exports = function(config) {
           .plugin('proxyquire-universal')
           // fix for Proxyquire in PhantomJS 1.x.
           // See https://github.com/bitwit/proxyquireify-phantom-menace
-          .require('phantom-ownpropertynames/implement', {entry: true});
+          .require(require.resolve('phantom-ownpropertynames/implement'),
+            {entry: true});
       }
     },
 

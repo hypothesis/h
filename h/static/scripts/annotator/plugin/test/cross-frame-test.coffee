@@ -34,7 +34,7 @@ describe 'Annotator.Plugin.CrossFrame', ->
   afterEach ->
     sandbox.restore()
 
-  describe 'constructor', ->
+  describe 'CrossFrame constructor', ->
     it 'instantiates the Discovery component', ->
       createCrossFrame()
       assert.calledWith(CrossFrame.Discovery, window)
