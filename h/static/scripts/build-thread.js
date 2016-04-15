@@ -139,13 +139,16 @@ function sort(threads, compareFn) {
 }
 
 /**
- * Return a copy of `thread` with siblings sorted according
- * to `compareFn` . Sorting is non-recursive, so only the immediate children
- * of `thread` are sorted.
+ * Return a copy of `thread` with siblings of the top-level thread sorted according
+ * to `compareFn` and replies sorted by `replyCompareFn`.
  */
-function sortThread(thread, compareFn) {
+function sortThread(thread, compareFn, replyCompareFn) {
+  var children = thread.children.map(function (child) {
+    return sortThread(child, replyCompareFn, replyCompareFn);
+  });
+
   return Object.assign({}, thread, {
-    children: sort(thread.children, compareFn),
+    children: sort(children, compareFn),
   });
 }
 
@@ -203,6 +206,13 @@ var defaultOpts = {
    */
   sortCompareFn: function (a, b) {
     return a.id < b.id;
+  },
+  /**
+   * Less-than comparison function used to compare annotations in order to sort
+   * replies.
+   */
+  replySortCompareFn: function (a, b) {
+    return a.created < b.created;
   },
 };
 
@@ -282,7 +292,7 @@ function buildThread(annotations, opts) {
   });
 
   // Sort the root thread according to the current search criteria
-  thread = sortThread(thread, opts.sortCompareFn);
+  thread = sortThread(thread, opts.sortCompareFn, opts.replySortCompareFn);
 
   // Update reply counts
   thread = countReplies(thread);

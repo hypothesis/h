@@ -140,13 +140,15 @@ describe('build-thread', function () {
         $$tag: 't2',
         references: ['1'],
       }];
-      var thread = createThread(fixture);
+      var thread = createThread(fixture, {}, ['parent']);
       assert.deepEqual(thread, [{
         annotation: fixture[0],
         children: [{
           annotation: fixture[1],
+          children: [],
           parent: '1',
-        }]
+        }],
+        parent: undefined,
       }]);
     });
   });
@@ -182,30 +184,32 @@ describe('build-thread', function () {
     });
 
     it('expands threads with visible children', function () {
-      var thread = buildThread(SIMPLE_FIXTURE, {forceVisible: ['3']});
+      // Simulate performing a search which only matches the top-level
+      // annotation, not its reply, and then clicking
+      // 'View N more in conversation' to show the complete discussion thread
+      var thread = buildThread(SIMPLE_FIXTURE, {
+        filterFn: function (annot) {
+          return annot.text.match(/first/);
+        },
+        forceVisible: ['3']
+      });
       assert.isFalse(thread.children[0].collapsed);
     });
   });
 
   describe('filtering', function () {
-    var fixture = [{
-      id: '1',
-      text: 'first',
-      references: [],
-    },{
-      id: '2',
-      text: 'second',
-      references: [],
-    }];
-
     context('when there is an active filter', function () {
       it('shows only annotations that match the filter', function () {
         var threads = createThread(SIMPLE_FIXTURE, {
           filterFn: function (annot) { return annot.text.match(/first/); },
         }, ['visible']);
         assert.deepEqual(threads, [{
-          annotation: fixture[0],
-          children: [],
+          annotation: SIMPLE_FIXTURE[0],
+          children: [{
+            annotation: SIMPLE_FIXTURE[2],
+            children: [],
+            visible: false,
+          }],
           visible: true,
         }]);
       });
@@ -215,9 +219,9 @@ describe('build-thread', function () {
           filterFn: function (annot) { return annot.text.match(/third/); },
         }, ['visible']);
         assert.deepEqual(threads, [{
-          annotation: fixture[0],
+          annotation: SIMPLE_FIXTURE[0],
           children: [{
-            annotation: fixture[2],
+            annotation: SIMPLE_FIXTURE[2],
             children: [],
             visible: true,
           }],
@@ -229,44 +233,62 @@ describe('build-thread', function () {
     context('when there is a selection', function () {
       it('shows only selected annotations', function () {
         var thread = createThread(SIMPLE_FIXTURE, {
-          selection: ['1']
+          selected: ['1']
         });
-        assert.deepEqual(thread, [{annotation: fixture[0], children: []}]);
+        assert.deepEqual(thread, [{
+          annotation: SIMPLE_FIXTURE[0],
+          children: [{
+            annotation: SIMPLE_FIXTURE[2],
+            children: [],
+          }]
+        }]);
       });
     });
   });
 
   describe('sort order', function () {
-    var fixture = [{
-      id: '1',
-      updated: 100,
-      references: [],
-    },{
-      id: '2',
-      updated: 200,
-      references: [],
-    }];
+    var annots = function (threads) {
+      return threads.map(function (thread) { return thread.annotation; });
+    };
 
     it('sorts top-level annotations using the comparison function', function () {
+      var fixture = [{
+        id: '1',
+        updated: 100,
+        references: [],
+      },{
+        id: '2',
+        updated: 200,
+        references: [],
+      }];
+
       var thread = createThread(fixture, {
         sortCompareFn: function (a, b) {
           return a.updated > b.updated;
         },
       });
-      assert.deepEqual(thread, {
-        annotation: undefined,
-        children: [{
-          annotation: fixture[1],
-          children: [],
-        },{
-          annotation: fixture[0],
-          children: [],
-        }]
-      });
+      assert.deepEqual(annots(thread), [fixture[1], fixture[0]]);
     });
 
-    it('sorts replies by age', function () {
-      // TODO
+    it('sorts replies by creation date', function () {
+      var fixture = [{
+        id: '1',
+        references: [],
+        updated: 0,
+      },{
+        id: '3',
+        references: ['1'],
+        created: 100
+      },{
+        id: '2',
+        references: ['1'],
+        created: 50,
+      }];
+      var thread = createThread(fixture, {
+        sortCompareFn: function (a, b) { return a.id < b.id; }
+      });
+      assert.deepEqual(annots(thread[0].children),
+        [fixture[2], fixture[1]]);
     });
   });
 
