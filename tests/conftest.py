@@ -20,6 +20,11 @@ TEST_SETTINGS = {
 @pytest.fixture
 def config():
     from h.config import configure
+    from h.db import Session
+
+    # Expire any previous database session
+    Session.remove()
+
     config = configure()
     config.registry.settings.update(TEST_SETTINGS)
     _drop_indices(settings=config.registry.settings)
