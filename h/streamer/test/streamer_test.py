@@ -109,10 +109,9 @@ def session():
 
 
 @pytest.fixture(autouse=True)
-def nsq_handle_message(patch):
-    return patch('h.streamer.messages.handle_message')
-
-
-@pytest.fixture(autouse=True)
 def websocket_handle_message(patch):
     return patch('h.streamer.websocket.handle_message')
+
+@pytest.fixture(autouse=True)
+def messages_handle_message(patch):
+    return patch('h.streamer.messages.handle_message')

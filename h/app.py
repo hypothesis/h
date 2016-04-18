@@ -109,7 +109,6 @@ def includeme(config):
     config.include('h.features')
     config.include('h.form')
     config.include('h.models')
-    config.include('h.queue')
     config.include('h.realtime')
     config.include('h.sentry')
     config.include('h.stats')

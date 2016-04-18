@@ -7,9 +7,7 @@ import gevent
 
 from h import db
 from h import stats
-from h.queue import resolve_topic
 from h.streamer import messages
-from h.streamer import nsq
 from h.streamer import websocket
 
 log = logging.getLogger(__name__)

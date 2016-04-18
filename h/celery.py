@@ -35,7 +35,7 @@ celery.conf.update(
     CELERY_ACCEPT_CONTENT=['json'],
     # Enable at-least-once delivery mode. This probably isn't actually what we
     # want for all of our queues, but it makes the failure-mode behaviour of
-    # Celery the same as our NSQ worker:
+    # Celery the same as our old NSQ worker:
     CELERY_ACKS_LATE=True,
     CELERY_DISABLE_RATE_LIMITS=True,
     CELERY_IGNORE_RESULT=True,
