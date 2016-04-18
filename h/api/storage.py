@@ -97,16 +97,6 @@ def create_annotation(request, data):
                     annotation_id=top_level_annotation_id)
             )
 
-    # The user must have permission to create an annotation in the group
-    # they've asked to create one in.
-    if data['groupid'] != '__world__':
-        group_principal = 'group:{}'.format(data['groupid'])
-        if group_principal not in request.effective_principals:
-            raise schemas.ValidationError('group: ' +
-                                          _('You may not create annotations '
-                                            'in groups you are not a member '
-                                            'of!'))
-
     annotation = models.Annotation(**data)
     request.db.add(annotation)
 
