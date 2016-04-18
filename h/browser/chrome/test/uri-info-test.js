@@ -1,9 +1,10 @@
 'use strict';
 
+var toResult = require('../../../static/scripts/test/promise-util').toResult;
+var unroll = require('../../../static/scripts/test/util').unroll;
+
 var uriInfo = require('../lib/uri-info');
 var settings = require('./settings.json');
-
-var toResult = require('../../../static/scripts/test/promise-util').toResult;
 
 describe('UriInfo.query', function () {
   var badgeURL = settings.apiUrl + '/badge';
@@ -45,25 +46,23 @@ describe('UriInfo.query', function () {
     });
   });
 
-  var INVALID_RESPONSES = [
-    [200, {}, 'this is not valid json'],
-    [200, {}, '{"total": "not a valid number"}'],
-    [200, {}, '{"rows": []}'],
+  var INVALID_RESPONSE_FIXTURES = [
+    {status: 200, headers: {}, body: 'this is not valid json'},
+    {status: 200, headers: {}, body: '{"total": "not a valid number"}'},
+    {status: 200, headers: {}, body: '{"rows": []}'},
   ];
 
-  INVALID_RESPONSES.forEach(function (response) {
-    it('returns an error if the server\'s JSON is invalid', function () {
-      fetch.returns(
-        Promise.resolve(
-          new window.Response(
-            response[2],
-            {status: response[0], headers: response[1]}
-          )
+  unroll('returns an error if the server\'s JSON is invalid', function (response) {
+    fetch.returns(
+      Promise.resolve(
+        new window.Response(
+          response.body,
+          {status: response.status, headers: response.headers}
         )
-      );
-      return toResult(uriInfo.query('tabUrl')).then(function (result) {
-        assert.ok(result.error);
-      });
+      )
+    );
+    return toResult(uriInfo.query('tabUrl')).then(function (result) {
+      assert.ok(result.error);
     });
-  });
+  }, INVALID_RESPONSE_FIXTURES);
 });

@@ -3,6 +3,7 @@
 var angular = require('angular');
 
 var util = require('./util');
+var unroll = require('../../test/util').unroll;
 
 describe('searchStatusBar', function () {
   before(function () {
@@ -25,21 +26,19 @@ describe('searchStatusBar', function () {
   });
 
   context('when there is a selection', function () {
-    var cases = [
+    var FIXTURES = [
       {count: 0, message: 'Show all annotations'},
       {count: 1, message: 'Show all annotations'},
       {count: 10, message: 'Show all 10 annotations'},
     ];
 
-    cases.forEach(function (testCase) {
-      it('should display the "Show all annotations" message', function () {
-        var elem = util.createDirective(document, 'searchStatusBar', {
-          selectionCount: 1,
-          totalCount: testCase.count
-        });
-        var clearBtn = elem[0].querySelector('button');
-        assert.include(clearBtn.textContent, testCase.message);
+    unroll('should display the "Show all annotations" message when there are #count annotations', function (testCase) {
+      var elem = util.createDirective(document, 'searchStatusBar', {
+        selectionCount: 1,
+        totalCount: testCase.count
       });
-    });
+      var clearBtn = elem[0].querySelector('button');
+      assert.include(clearBtn.textContent, testCase.message);
+    }, FIXTURES);
   });
 });

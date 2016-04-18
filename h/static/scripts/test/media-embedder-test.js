@@ -34,7 +34,7 @@ describe('media-embedder', function () {
     var urls = [
       'https://youtu.be/QCkm0lL-6lc',
       'https://youtu.be/QCkm0lL-6lc/',
-    ]
+    ];
     urls.forEach(function (url) {
       var element = domElement('<a href="' + url + '">' + url + '</a>');
 
@@ -55,7 +55,7 @@ describe('media-embedder', function () {
       'https://vimeo.com/149000090/#fragment',
       'https://vimeo.com/149000090?foo=bar&a=b',
       'https://vimeo.com/149000090/?foo=bar&a=b',
-    ]
+    ];
     urls.forEach(function (url) {
       var element = domElement('<a href="' + url + '">' + url + '</a>');
 
