@@ -159,10 +159,20 @@ describe('h:session', function () {
       $httpBackend.flush();
     });
 
-    it('should tolerate failed requests', function () {
-      $httpBackend.expectGET(url).respond(-1, null);
-      session.load();
-      $httpBackend.flush();
+    var failedRequestCases = [{
+      status: -1,
+      body: null,
+    },{
+      status: 504,
+      body: 'Gateway Timeout',
+    }];
+
+    failedRequestCases.forEach(function (testCase) {
+      it('should tolerate failed requests', function () {
+        $httpBackend.expectGET(url).respond(testCase.status, testCase.body);
+        session.load();
+        $httpBackend.flush();
+      });
     });
   });
 

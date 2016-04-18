@@ -155,7 +155,7 @@ function session($http, $resource, $rootScope, flash, raven, settings) {
   };
 
   function process(data, headersGetter, status) {
-    if (status < 200) {
+    if (status < 200 || status >= 500) {
       return;
     }
 
