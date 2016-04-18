@@ -2,6 +2,8 @@
 
 var angular = require('angular');
 
+var retryUtil = require('./retry-util');
+
 function prependTransform(defaults, transform) {
   // We can't guarantee that the default transformation is an array
   var result = angular.isArray(defaults) ? defaults.slice(0) : [defaults];
@@ -57,10 +59,14 @@ function encodeUriQuery(val) {
 // then proceed to parse as a delimiter in the query string. To avoid this
 // problem we use a very conservative encoder, found above.
 function serializeParams(params) {
-  if (!params) return '';
+  if (!params) {
+    return '';
+  }
   var parts = [];
   forEachSorted(params, function(value, key) {
-    if (value === null || typeof value === 'undefined') return;
+    if (value === null || typeof value === 'undefined') {
+      return;
+    }
     if (angular.isArray(value)) {
       angular.forEach(value, function(v, k) {
         parts.push(encodeUriQuery(key)  + '=' + encodeUriQuery(serializeValue(v)));
@@ -99,28 +105,27 @@ function store($http, $resource, settings) {
   };
 
   // We call the API root and it gives back the actions it provides.
-  instance.$resolved = false;
-  instance.$promise = $http.get(settings.apiUrl)
-    .finally(function () { instance.$resolved = true; })
-    .then(function (response) {
-      var links = response.data.links;
+  instance.$promise = retryUtil.retryPromiseOperation(function () {
+    return $http.get(settings.apiUrl);
+  }).then(function (response) {
+    var links = response.data.links;
 
-      // N.B. in both cases below we explicitly override the default `get`
-      // action because there is no way to provide defaultOptions to the default
-      // action.
-      instance.SearchResource = $resource(links.search.url, {}, {
-        get: angular.extend({url: links.search.url}, defaultOptions),
-      });
-
-      instance.AnnotationResource = $resource(links.annotation.read.url, {}, {
-        get: angular.extend(links.annotation.read, defaultOptions),
-        create: angular.extend(links.annotation.create, defaultOptions),
-        update: angular.extend(links.annotation.update, defaultOptions),
-        delete: angular.extend(links.annotation.delete, defaultOptions),
-      });
-
-      return instance;
+    // N.B. in both cases below we explicitly override the default `get`
+    // action because there is no way to provide defaultOptions to the default
+    // action.
+    instance.SearchResource = $resource(links.search.url, {}, {
+      get: angular.extend({url: links.search.url}, defaultOptions),
     });
+
+    instance.AnnotationResource = $resource(links.annotation.read.url, {}, {
+      get: angular.extend(links.annotation.read, defaultOptions),
+      create: angular.extend(links.annotation.create, defaultOptions),
+      update: angular.extend(links.annotation.update, defaultOptions),
+      delete: angular.extend(links.annotation.delete, defaultOptions),
+    });
+
+    return instance;
+  });
 
   return instance;
 }

@@ -1,7 +1,9 @@
 'use strict';
 
-var inject = angular.mock.inject;
-var module = angular.mock.module;
+var angular = require('angular');
+var proxyquire = require('proxyquire');
+
+var util = require('./util');
 
 describe('store', function () {
   var $httpBackend = null;
@@ -10,12 +12,19 @@ describe('store', function () {
 
   before(function () {
     angular.module('h', ['ngResource'])
-    .service('store', require('../store'));
+    .service('store', proxyquire('../store', util.noCallThru({
+      angular: angular,
+      './retry-util': {
+        retryPromiseOperation: function (fn) {
+          return fn();
+        },
+      },
+    })));
   });
 
-  beforeEach(module('h'));
+  beforeEach(angular.mock.module('h'));
 
-  beforeEach(module(function ($provide) {
+  beforeEach(angular.mock.module(function ($provide) {
     sandbox = sinon.sandbox.create();
     $provide.value('settings', {apiUrl: 'http://example.com/api'});
   }));
@@ -26,7 +35,7 @@ describe('store', function () {
     sandbox.restore();
   });
 
-  beforeEach(inject(function ($q, _$httpBackend_, _store_) {
+  beforeEach(angular.mock.inject(function ($q, _$httpBackend_, _store_) {
     $httpBackend = _$httpBackend_;
     store = _store_;
 
@@ -50,8 +59,8 @@ describe('store', function () {
   }));
 
   it('reads the operations from the backend', function () {
-    assert.isFunction(store.AnnotationResource, 'expected store.AnnotationResource to be a function')
-    assert.isFunction(store.SearchResource, 'expected store.SearchResource to be a function')
+    assert.isFunction(store.AnnotationResource);
+    assert.isFunction(store.SearchResource);
   });
 
   it('saves a new annotation', function () {
