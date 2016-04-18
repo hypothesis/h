@@ -1,5 +1,6 @@
 'use strict';
 
+var escapeHtml = require('escape-html');
 var katex = require('katex');
 var showdown = require('showdown');
 
@@ -12,12 +13,6 @@ function targetBlank() {
 
 var converter;
 
-/**
- * Render markdown to HTML.
- *
- * This function does *not* sanitize the HTML in any way, that is the caller's
- * responsibility.
- */
 function renderMarkdown(markdown) {
   if (!converter) {
     // see https://github.com/showdownjs/showdown#valid-options
@@ -34,55 +29,102 @@ function renderMarkdown(markdown) {
   return converter.makeHtml(markdown);
 }
 
-/**
- * Replaces inline math between '\(' and '\)' delimiters
- * with math rendered by KaTeX.
- */
-function renderInlineMath(text) {
-  var mathStart = text.indexOf('\\(');
-  if (mathStart !== -1) {
-    var mathEnd = text.indexOf('\\)', mathStart);
-    if (mathEnd !== -1) {
-      var markdownSection = text.slice(0, mathStart);
-      var mathSection = text.slice(mathStart + 2, mathEnd);
-      var renderedMath = katex.renderToString(mathSection);
-      return markdownSection +
-             renderedMath +
-             renderInlineMath(text.slice(mathEnd + 2));
-    }
-  }
-  return text;
+function mathPlaceholder(id) {
+  return '{math:' + id.toString() + '}';
 }
 
 /**
- * Renders mixed blocks of markdown and LaTeX to HTML.
- *
- * LaTeX blocks are delimited by '$$' (for blocks) or '\(' and '\)'
- * (for inline math).
- *
- * @param {string} text - The markdown and LaTeX to render
- * @param {(string) => string} $sanitize - A function that sanitizes HTML to
- *        remove any potentially unsafe tokens (eg. <script> tags).
- * @return {string} The sanitized HTML
+ * Parses a string containing mixed markdown and LaTeX in between
+ * '$$..$$' or '\( ... \)' delimiters and returns an object containing a
+ * list of math blocks found in the string, plus the input string with math
+ * blocks replaced by placeholders.
  */
-function renderMathAndMarkdown(text, $sanitize) {
-  var html = text.split('$$').map(function (part, index) {
-    if (index % 2 === 0) {
-      // Plain markdown block
-      return renderMarkdown(renderInlineMath(part));
-    } else {
-      // Math block
-      try {
-        // \\displaystyle tells KaTeX to render the math in display style
-        // (full sized fonts).
-        return katex.renderToString("\\displaystyle {" + part + "}");
-      } catch (error) {
-        return part;
-      }
-    }
-  }).join('');
+function extractMath(content) {
+  var mathBlocks = [];
+  var pos = 0;
+  var replacedContent = content;
 
-  return $sanitize(html);
+  while (true) {
+    var blockMathStart = replacedContent.indexOf('$$', pos);
+    var inlineMathStart = replacedContent.indexOf('\\(', pos);
+
+    if (blockMathStart === -1 && inlineMathStart === -1) {
+      break;
+    }
+
+    var mathStart;
+    var mathEnd;
+    if (blockMathStart !== -1 &&
+        (inlineMathStart === -1 || blockMathStart < inlineMathStart)) {
+      mathStart = blockMathStart;
+      mathEnd = replacedContent.indexOf('$$', mathStart + 2);
+    } else {
+      mathStart = inlineMathStart;
+      mathEnd = replacedContent.indexOf('\\)', mathStart + 2);
+    }
+
+    if (mathEnd === -1) {
+      break;
+    } else {
+      mathEnd = mathEnd + 2;
+    }
+
+    var id = mathBlocks.length + 1;
+    var placeholder = mathPlaceholder(id);
+    mathBlocks.push({
+      id: id,
+      expression: replacedContent.slice(mathStart + 2, mathEnd - 2),
+      inline: inlineMathStart !== -1,
+    });
+
+    var replacement;
+    if (inlineMathStart !== -1) {
+      replacement = placeholder;
+    } else {
+      // Add new lines before and after math blocks so that they render
+      // as separate paragraphs
+      replacement = '\n\n' + placeholder + '\n\n';
+    }
+
+    replacedContent = replacedContent.slice(0, mathStart) +
+                      replacement +
+                      replacedContent.slice(mathEnd);
+    pos = mathStart + replacement.length;
+  }
+
+  return {
+    mathBlocks: mathBlocks,
+    content: replacedContent,
+  };
+}
+
+function insertMath(html, mathBlocks) {
+  return mathBlocks.reduce(function (html, block) {
+    var renderedMath;
+    try {
+      if (block.inline) {
+        renderedMath = katex.renderToString(block.expression);
+      } else {
+        // '\displaystyle {}' results in full-height fonts being used
+        // for blocks.
+        renderedMath = katex.renderToString('\\displaystyle {' + block.expression + '}');
+      }
+    } catch (err) {
+      renderedMath = escapeHtml(block.expression);
+    }
+    return html.replace(mathPlaceholder(block.id), renderedMath);
+  }, html);
+}
+
+function renderMathAndMarkdown(markdown, sanitizeFn) {
+  // KaTeX takes care of escaping its input, so we want to avoid passing its
+  // output through the HTML sanitizer. Therefore we first extract the math
+  // blocks from the input, render and sanitize the remaining markdown and then
+  // render and re-insert the math blocks back into the output.
+  var mathInfo = extractMath(markdown);
+  var markdownHTML = sanitizeFn(renderMarkdown(mathInfo.content));
+  var mathAndMarkdownHTML = insertMath(markdownHTML, mathInfo.mathBlocks);
+  return mathAndMarkdownHTML;
 }
 
 module.exports = renderMathAndMarkdown;

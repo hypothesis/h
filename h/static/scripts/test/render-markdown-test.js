@@ -6,6 +6,14 @@ describe('render-markdown', function () {
   var render;
   var renderMarkdown;
 
+  function fakeSanitize(html) {
+    return '{safe}' + html + '{/safe}';
+  }
+
+  function noopSanitize(html) {
+    return html;
+  }
+
   beforeEach(function () {
     renderMarkdown = proxyquire('../render-markdown', {
       katex: {
@@ -14,8 +22,9 @@ describe('render-markdown', function () {
         },
       },
     });
-    render = function (markdown) {
-      return renderMarkdown(markdown, function (html) { return html; });
+    render = function (markdown, sanitizeFn) {
+      sanitizeFn = sanitizeFn || noopSanitize;
+      return renderMarkdown(markdown, sanitizeFn);
     };
   });
 
@@ -43,23 +52,33 @@ describe('render-markdown', function () {
     });
 
     it('should sanitize the result', function () {
-      var sanitize = function (html) {
-        return '<safe>' + html + '</safe>';
-      };
-      assert.equal(renderMarkdown('one **two** three', sanitize),
-        '<safe><p>one <strong>two</strong> three</p></safe>');
+      assert.equal(renderMarkdown('one **two** three', fakeSanitize),
+        '{safe}<p>one <strong>two</strong> three</p>{/safe}');
     });
   });
 
   describe('math blocks', function () {
     it('should render LaTeX blocks', function () {
-      assert.equal(render('$$x*2$$'), 'math:\\displaystyle {x*2}');
+      assert.equal(render('$$x*2$$'), '<p>math:\\displaystyle {x*2}</p>');
     });
 
     it('should render mixed blocks', function () {
       assert.equal(render('one $$x*2$$ two $$x*3$$ three'),
-        '<p>one </p>math:\\displaystyle {x*2}<p>two </p>' +
-        'math:\\displaystyle {x*3}<p>three</p>');
+        '<p>one </p>\n\n<p>math:\\displaystyle {x*2}</p>\n\n' +
+        '<p>two </p>\n\n<p>math:\\displaystyle {x*3}</p>\n\n<p>three</p>');
+    });
+
+    it('should not sanitize math renderer output', function () {
+      var fakeSanitize = function (html) {
+        return html.toLowerCase();
+      };
+      assert.equal(render('$$X*2$$ FOO', fakeSanitize),
+        '<p>math:\\displaystyle {X*2}</p>\n\n<p>foo</p>');
+    });
+
+    it('should render mixed inline and block math', function () {
+      assert.equal(render('one \\(x*2\\) three $$x*3$$'),
+        '<p>one math:x*2 three </p>\n\n<p>math:\\displaystyle {x*3}</p>');
     });
   });
 
