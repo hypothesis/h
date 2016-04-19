@@ -162,6 +162,7 @@ var styleFiles = [
   './h/static/styles/front-page/main.css',
   './h/static/styles/help-page.scss',
   './h/static/styles/site.scss',
+  './h/static/styles/old-home.scss',
 
   // Vendor
   './h/static/styles/vendor/angular-csp.css',

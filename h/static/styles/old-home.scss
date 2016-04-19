@@ -1,0 +1,22 @@
+@at-root {
+  .press-release-banner {
+    background-color: #f7f7f7;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .press-release-banner > p {
+    font-size: 21px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  /* FIXME: Remove the '!important' hack below and move
+  This to the correct stylesheet in the new homepage.
+   */
+  .social-media-link {
+    font-size: 16px !important;
+    text-decoration: none !important;
+  }
+}

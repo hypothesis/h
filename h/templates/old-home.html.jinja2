@@ -19,29 +19,6 @@
 {% endblock %}
 
 {% block content %}
-  <style>
-    .press-release-banner {
-      background-color: #f7f7f7;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .press-release-banner > p {
-      font-size: 21px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    /* FIXME: Remove the '!important' hack below and move
-       This to the correct stylesheet in the new homepage.
-     */
-    .social-media-link {
-      font-size: 16px !important;
-      text-decoration: none !important;
-    }
-  </style>
-
   <header class="navbar navbar-default navbar-static-top">
     <div class="container">
       <div class="navbar-header">
@@ -125,8 +102,8 @@
 
                 <span class="hidden unhide-in-chrome">
                   <a class="btn btn-primary hidden-xs"
+                      id="js-chrome-extension-install"
                       href="{{ chrome_extension_link }}"
-                      onclick="chrome.webstore.install();return false;"
                       data-chromeext-button="">
                     <img alt="" class="installer__browser-logo--chrome"
                           src="{{ base_url }}assets/images/browser-chrome-64x64.png">
@@ -173,20 +150,6 @@
                 <a href="#" class="" data-toggle="modal" data-target="#addtoyoursite" data-addtosite-button="">
                   add it to your website</a>.
               </p>
-              <script>
-                if (window.chrome !== undefined) {
-                  var elements = document.getElementsByClassName(
-                      "unhide-in-chrome");
-                  for (var i=0; i<elements.length; i++) {
-                    elements[i].classList.remove("hidden");
-                  }
-                  elements = document.getElementsByClassName(
-                      "hide-in-chrome");
-                  for (var i=0; i<elements.length; i++) {
-                    elements[i].classList.add("hidden");
-                  }
-                }
-              </script>
 
               <div class="modal fade" id="bookmarklet" tabindex="-1"
                     role="dialog" aria-hidden="true">
@@ -203,9 +166,10 @@
                       <div>
                         <a title="Drag me to the bookmarks bar"
                             data-bookmarklet-button=""
+                            id="js-bookmarklet-install"
                             class="btn btn-primary btn-lg installer__button--draggable"
-                            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();"
-                            onclick="alert('Drag me to the bookmarks bar');return false;">Launch Hypothesis
+                            href="javascript:(function(){window.hypothesisConfig=function(){return{showHighlights:true};};var d=document,s=d.createElement('script');s.setAttribute('src','{{ request.route_url("embed") }}');d.body.appendChild(s)})();">
+                            Launch Hypothesis
                         </a>
                         <p><i class="h-icon-move"></i> Drag the button into
                         your bookmarks bar then click it to launch the
