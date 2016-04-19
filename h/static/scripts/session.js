@@ -154,8 +154,11 @@ function session($http, $resource, $rootScope, flash, raven, settings) {
     return model;
   };
 
-  function process(data) {
-    // Parse as json
+  function process(data, headersGetter, status) {
+    if (status < 200 || status >= 500) {
+      return;
+    }
+
     data = angular.fromJson(data);
 
     // Lift response data
