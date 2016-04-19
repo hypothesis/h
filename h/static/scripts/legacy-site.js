@@ -13,3 +13,11 @@ if (window.chrome !== undefined) {
     elements[i].classList.add('hidden');
   }
 }
+
+var bookmarkletInstaller = document.getElementById('js-bookmarklet-install');
+if (bookmarkletInstaller) {
+  bookmarkletInstaller.addEventListener('click', function (event) {
+    window.alert('Drag me to the bookmarks bar');
+    event.preventDefault();
+  });
+}
