@@ -12,15 +12,15 @@ from h.streamer import websocket
 
 log = logging.getLogger(__name__)
 
-# Queue of messages to process, from both client websockets and NSQ topics to
-# which the streamer is subscribed.
+# Queue of messages to process, from both client websockets and message queues
+# to which the streamer is subscribed.
 #
 # The maxsize ensures that memory used by this queue is bounded. Producers
 # writing to the queue must consider their behaviour when the queue is full,
 # using .put(...) with a timeout or .put_nowait(...) as appropriate.
 WORK_QUEUE = gevent.queue.Queue(maxsize=4096)
 
-# NSQ message topics that the streamer processes messages from
+# Message queues that the streamer processes messages from
 ANNOTATION_TOPIC = 'annotation'
 USER_TOPIC = 'user'
 
@@ -31,15 +31,15 @@ class UnknownMessageType(Exception):
 
 def start(event):
     """
-    Start some greenlets to process the incoming data from NSQ.
+    Start some greenlets to process the incoming data from the message queue.
 
     This subscriber is called when the application is booted, and kicks off
-    greenlets running `process_queue` for each NSQ topic we subscribe to. The
-    function does not block.
+    greenlets running `process_queue` for each message queue we subscribe to.
+    The function does not block.
     """
     settings = event.app.registry.settings
     greenlets = [
-        # Start greenlets to process messages from NSQ
+        # Start greenlets to process messages from RabbitMQ
         gevent.spawn(messages.process_messages,
                      settings,
                      ANNOTATION_TOPIC,

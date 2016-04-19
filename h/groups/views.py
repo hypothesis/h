@@ -36,7 +36,7 @@ def create_form(request):
 
 
 def _send_group_notification(request, event_type, pubid):
-    """Publishes a group join/leave notification on the NSQ event queue"""
+    """Publishes a group join/leave notification."""
     # messages to the 'user' topic include the full session state
     # so that the receiver can publish notifications to clients which are
     # up to date wrt. changes made by the caller of _send_group_notification()
