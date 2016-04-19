@@ -7,8 +7,7 @@ import gevent
 
 from h import db
 from h import stats
-from h.queue import resolve_topic
-from h.streamer import nsq
+from h.streamer import messages
 from h.streamer import websocket
 
 log = logging.getLogger(__name__)
@@ -22,7 +21,7 @@ log = logging.getLogger(__name__)
 WORK_QUEUE = gevent.queue.Queue(maxsize=4096)
 
 # NSQ message topics that the streamer processes messages from
-ANNOTATIONS_TOPIC = 'annotations'
+ANNOTATION_TOPIC = 'annotation'
 USER_TOPIC = 'user'
 
 
@@ -41,11 +40,11 @@ def start(event):
     settings = event.app.registry.settings
     greenlets = [
         # Start greenlets to process messages from NSQ
-        gevent.spawn(nsq.process_nsq_topic,
+        gevent.spawn(messages.process_messages,
                      settings,
-                     ANNOTATIONS_TOPIC,
+                     ANNOTATION_TOPIC,
                      WORK_QUEUE),
-        gevent.spawn(nsq.process_nsq_topic,
+        gevent.spawn(messages.process_messages,
                      settings,
                      USER_TOPIC,
                      WORK_QUEUE),
@@ -70,11 +69,9 @@ def process_work_queue(settings, queue, session_factory=db.Session):
     closed between messages.
     """
     session = session_factory()
-    annotations_topic = resolve_topic(ANNOTATIONS_TOPIC, settings=settings)
-    user_topic = resolve_topic(USER_TOPIC, settings=settings)
     topic_handlers = {
-        annotations_topic: nsq.handle_annotation_event,
-        user_topic: nsq.handle_user_event,
+        ANNOTATION_TOPIC: messages.handle_annotation_event,
+        USER_TOPIC: messages.handle_user_event,
     }
 
     for msg in queue:
@@ -86,8 +83,8 @@ def process_work_queue(settings, queue, session_factory=db.Session):
                             "READ ONLY "
                             "DEFERRABLE")
 
-            if isinstance(msg, nsq.Message):
-                nsq.handle_message(msg, topic_handlers=topic_handlers)
+            if isinstance(msg, messages.Message):
+                messages.handle_message(msg, topic_handlers=topic_handlers)
             elif isinstance(msg, websocket.Message):
                 websocket.handle_message(msg)
             else:

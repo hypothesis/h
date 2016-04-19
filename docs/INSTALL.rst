@@ -15,14 +15,14 @@ In addition to the Docker container, h depends on the following services:
 -  An SQL database. We only officially support PostgreSQL_.
 -  Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
    installed. Used for storing annotation data.
--  NSQ_, a distributed message queue. Used for interprocess communication.
+-  RabbitMQ_, a robust message queue. Used for interprocess communication.
 -  Redis_, a fast key-value store. Used for persistent session storage.
 
 .. _Docker: https://www.docker.com/
 .. _PostgreSQL: http://www.postgresql.org/
 .. _Elasticsearch: https://www.elastic.co/products/elasticsearch
 .. _Elasticsearch ICU Analysis: https://github.com/elastic/elasticsearch-analysis-icu
-.. _NSQ: http://nsq.io/
+.. _RabbitMQ: http://www.rabbitmq.com/
 .. _Redis: http://redis.io/
 
 
@@ -63,18 +63,18 @@ At a minimum, you will need:
 
 -  a PostgreSQL database
 -  an Elasticsearch server with the ICU analysis plugin enabled
--  an nsqd server
+-  a RabbitMQ server
 -  a Redis server
 -  a mailer
 
 One option is to containerise these services, although you should investigate
 for yourself if this is a sensible approach for your environment.
 
-For example, we choose to run Elasticsearch, nsqd, and Redis in containers. We
+For example, we choose to run Elasticsearch, RabbitMQ, and Redis in containers. We
 also use an `ambassador container`_ to point to our mailserver::
 
     $ docker run -d --name elasticsearch nickstenning/elasticsearch-icu
-    $ docker run -d --name nsqd --expose 4150 --expose 4151 nsqio/nsq /nsqd
+    $ docker run -d --name rabbitmq --expose 5672 rabbitmq
     $ docker run -d --name redis redis
     $ docker run -d --name mail --expose 25 -e MAIL_PORT_25_TCP=tcp://smtp.mydomain.com:25 svendowideit/ambassador
 
@@ -103,7 +103,6 @@ configuration of these services:
 
 -  ``elasticsearch``
 -  ``mail``
--  ``nsqd``
 -  ``redis``
 -  ``statsd``
 
@@ -113,8 +112,9 @@ container::
 
     $ docker run -d -p 5000:5000 \
                  -e DATABASE_URL=postgresql://scott:tiger@dbserver/mydatabase \
+                 -e BROKER_URL=amqp://guest:guest@rabbitmqserver/myvhost \
                  --link elasticsearch:elasticsearch \
-                 --link nsqd:nsqd \
+                 --link rabbitmq:rabbitmq \
                  --link redis:redis \
                  --link mail:mail \
                  hypothesis/hypothesis

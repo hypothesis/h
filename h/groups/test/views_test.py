@@ -152,7 +152,7 @@ def test_create_publishes_join_event(Group, session_model):
 
     views.create(request)
 
-    request.get_queue_writer().publish.assert_called_once_with('user', {
+    request.realtime.publish_user.assert_called_once_with({
         'type': 'group-join',
         'userid': request.authenticated_userid,
         'group': group.pubid,
@@ -491,7 +491,7 @@ def test_join_publishes_join_event(Group, session_model):
 
     views.join(request)
 
-    request.get_queue_writer().publish.assert_called_once_with('user', {
+    request.realtime.publish_user.assert_called_once_with({
         'type': 'group-join',
         'userid': request.authenticated_userid,
         'group': mock.sentinel.pubid,
@@ -536,7 +536,7 @@ def test_leave_publishes_leave_event(Group, session_model):
 
     views.leave(request)
 
-    request.get_queue_writer().publish.assert_called_once_with('user', {
+    request.realtime.publish_user.assert_called_once_with({
         'type': 'group-leave',
         'userid': request.authenticated_userid,
         'group': mock.sentinel.pubid,

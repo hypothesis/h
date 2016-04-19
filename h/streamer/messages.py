@@ -1,69 +1,52 @@
 # -*- coding: utf-8 -*-
 
-import base64
 from collections import namedtuple
 import json
 import logging
-import random
-import struct
 
 from gevent.queue import Full
 
-from h import queue
+from h import realtime
+from h.realtime import Consumer
 from h.api import storage
 from h.auth.util import translate_annotation_principals
 from h.streamer import websocket
-
 import h.sentry
 
 log = logging.getLogger(__name__)
 
 
-# An incoming message from a subscribed NSQ topic
+# An incoming message from a subscribed realtime consumer
 Message = namedtuple('Message', ['topic', 'payload'])
 
 
-def process_nsq_topic(settings, topic, work_queue, raise_error=True):
+def process_messages(settings, routing_key, work_queue, raise_error=True):
     """
-    Configure, start, and monitor a queue reader for the specified topic.
+    Configure, start, and monitor a realtime consumer for the specified
+    routing key.
 
-    This sets up a :py:class:`gnsq.Reader` to route messages from `topic` to
-    the passed `work_queue`, and starts it. The reader should never return. If
-    it does, this function will raise an exception.
-
-    If `raise_error` is False, the function will not reraise errors from the
-    queue reader.
+    This sets up a :py:class:`h.realtime.Consumer` to route messages from
+    `routing_key` to the passed `work_queue`, and starts it. The consumer
+    should never return. If it does, this function will raise an exception.
     """
-    channel = 'stream-{}#ephemeral'.format(_random_id())
-    client = h.sentry.get_client(settings)
-    reader = queue.get_reader(settings, topic, channel, sentry_client=client)
 
-    # The only thing queue readers do is put the incoming messages onto the
-    # work queue.
-    #
-    # Note that this means that any errors occurring while handling the
-    # messages will not result in requeues, but this is probably the best we
-    # can do given that these messages fan out to our WebSocket clients, and we
-    # can't easily know that we haven't already sent a requeued message out to
-    # a particular client.
-    def _handler(reader, message):
+    def _handler(payload):
         try:
-            work_queue.put(Message(topic=reader.topic, payload=message.body),
-                           timeout=0.1)
+            message = Message(topic=routing_key, payload=payload)
+            work_queue.put(message, timeout=0.1)
         except Full:
             log.warn('Streamer work queue full! Unable to queue message from '
-                     'NSQ having waited 0.1s: giving up.')
+                     'h.realtime having waited 0.1s: giving up.')
 
-    reader.on_message.connect(receiver=_handler, weak=False)
-    reader.start()
+    conn = realtime.get_connection(settings)
+    sentry_client = h.sentry.get_client(settings)
+    consumer = Consumer(connection=conn,
+                        routing_key=routing_key,
+                        handler=_handler, sentry_client=sentry_client)
+    consumer.run()
 
-    # Reraise any exceptions raised by reader greenlets
-    reader.join(raise_error=raise_error)
-
-    # We should never get here: if we do, it means that the reader exited
-    # without raising an exception, which doesn't make much sense.
     if raise_error:
-        raise RuntimeError('Queue reader quit unexpectedly!')
+        raise RuntimeError('Realtime consumer quit unexpectedly!')
 
 
 def handle_message(message, topic_handlers):
@@ -77,7 +60,7 @@ def handle_message(message, topic_handlers):
     object. It is assumed that there is a 1:1 request-reply mapping between
     incoming messages and messages to be sent out over the websockets.
     """
-    data = json.loads(message.payload)
+    data = message.payload
 
     try:
         handler = topic_handlers[message.topic]
@@ -182,9 +165,3 @@ def _authorized_to_read(request, annotation):
     if set(read_principals).intersection(request.effective_principals):
         return True
     return False
-
-
-def _random_id():
-    """Generate a short random string"""
-    data = struct.pack('Q', random.getrandbits(64))
-    return base64.urlsafe_b64encode(data).strip(b'=')

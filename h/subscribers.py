@@ -27,8 +27,6 @@ def add_renderer_globals(event):
 
 def publish_annotation_event(event):
     """Publish an annotation event to the message queue."""
-    queue = event.request.get_queue_writer()
-
     annotation_dict = presenters.AnnotationJSONPresenter(
         event.request, event.annotation).asdict()
 
@@ -38,7 +36,7 @@ def publish_annotation_event(event):
         'src_client_id': event.request.headers.get('X-Client-Id'),
     }
 
-    queue.publish('annotations', json.dumps(data))
+    event.request.realtime.publish_annotation(data)
 
 
 def send_reply_notifications(event,

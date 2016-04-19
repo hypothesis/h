@@ -31,11 +31,12 @@ celery = Celery('h')
 celery.conf.update(
     # Default to using database number 10 so we don't conflict with the session
     # store.
-    BROKER_URL=os.environ.get('BROKER_URL', 'redis://localhost:6379/10'),
+    BROKER_URL=os.environ.get('CELERY_BROKER_URL',
+        os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost:5672//')),
     CELERY_ACCEPT_CONTENT=['json'],
     # Enable at-least-once delivery mode. This probably isn't actually what we
     # want for all of our queues, but it makes the failure-mode behaviour of
-    # Celery the same as our NSQ worker:
+    # Celery the same as our old NSQ worker:
     CELERY_ACKS_LATE=True,
     CELERY_DISABLE_RATE_LIMITS=True,
     CELERY_IGNORE_RESULT=True,
