@@ -21,3 +21,11 @@ if (bookmarkletInstaller) {
     event.preventDefault();
   });
 }
+
+var chromeextInstaller = document.getElementById('js-chrome-extension-install');
+if (chromeextInstaller) {
+  chromeextInstaller.addEventListener('click', function (event) {
+    chrome.webstore.install();
+    event.preventDefault();
+  });
+}
