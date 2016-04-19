@@ -57,6 +57,8 @@
 }
 
 .annotation-share-dialog-link {
+  position: relative;
+
   font-size: $body1-font-size;
   margin: 10px;
   padding: 5px;
@@ -116,10 +118,20 @@
   color: $dg-1;
 }
 
+// Feedback message displayed after the user copies the link to the clipboard
 .annotation-share-dialog-link__feedback {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  bottom: 5px;
+  right: 30px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
   font-size: 11px;
   background: white;
   border: 1px solid #d3d3d3;
   border-radius: 2px;
-  padding: 0px 11px 0px 11px;
 }
