@@ -43,7 +43,7 @@ describe('annotationShareDialog', function () {
     var stub;
 
     beforeEach(function () {
-      stub = sinon.stub(document, 'execCommand');
+      stub = sinon.stub(document, 'execCommand').returns(true);
       element = util.createDirective(document,
         'annotationShareDialog',
         {
@@ -62,16 +62,16 @@ describe('annotationShareDialog', function () {
       stub.restore();
     });
 
-    it('sets success class on successful copy to clipboard', function () {
+    it('displays message after successful copy', function () {
       var expectedMessage = 'Link copied to clipboard!';
 
       getCopyBtn().click();
 
       var actualMessage = element.find('.annotation-share-dialog-link__feedback').text();
-      assert.isAbove(actualMessage.indexOf(expectedMessage), -1);
+      assert.include(actualMessage, expectedMessage);
     });
 
-    it('unsets success class after one second on successful copy to clipboard', function () {
+    it('hides message after a delay after a successful copy', function () {
       var clock = sinon.useFakeTimers();
       var expectedMessage = 'Link copied to clipboard!';
 
@@ -81,17 +81,17 @@ describe('annotationShareDialog', function () {
       clock.restore();
 
       var actualMessage = element.find('.annotation-share-dialog-link__feedback').text();
-      assert.isBelow(actualMessage.indexOf(expectedMessage), 0);
+      assert.notInclude(actualMessage, expectedMessage);
     });
 
-    it('sets fail class on unsuccessful copy to clipboard', function () {
-      stub.throws(new Error('An error'));
+    it('displays message after failed copy', function () {
+      stub.returns(false);
       var expectedMessage = 'Select and copy to share';
 
       getCopyBtn().click();
 
       var actualMessage = element.find('.annotation-share-dialog-link__feedback').text();
-      assert.isAbove(actualMessage.indexOf(expectedMessage), -1);
+      assert.include(actualMessage, expectedMessage);
     });
   });
 
@@ -109,8 +109,8 @@ describe('annotationShareDialog', function () {
       var actualAudience = element.find('.annotation-share-dialog-msg__audience').text();
       var expectedMessage = 'Only group members will be able to view this annotation.';
       var expectedAudience = 'Group.';
-      assert.isAbove(actualMessage.indexOf(expectedMessage), -1);
-      assert.isAbove(actualAudience.indexOf(expectedAudience), -1);
+      assert.include(actualMessage, expectedMessage);
+      assert.include(actualAudience, expectedAudience);
     });
 
     it('is private', function () {
@@ -122,8 +122,8 @@ describe('annotationShareDialog', function () {
       var actualAudience = element.find('.annotation-share-dialog-msg__audience').text();
       var expectedMessage = 'No one else will be able to view this annotation.';
       var expectedAudience = 'Only me.';
-      assert.isAbove(actualMessage.indexOf(expectedMessage), -1);
-      assert.isAbove(actualAudience.indexOf(expectedAudience), -1);
+      assert.include(actualMessage, expectedMessage);
+      assert.include(actualAudience, expectedAudience);
     });
   });
 });

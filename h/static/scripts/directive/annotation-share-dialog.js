@@ -46,7 +46,12 @@ module.exports = function () {
 
         try {
           shareLinkInput.select();
-          document.execCommand('copy');
+
+          // In some browsers, execCommand() returns false if it fails,
+          // in others, it may throw an exception instead.
+          if (!document.execCommand('copy')) {
+            throw new Error('Copying link failed');
+          }
 
           this.copyToClipboardMessage = 'Link copied to clipboard!';
         } catch (ex) {
