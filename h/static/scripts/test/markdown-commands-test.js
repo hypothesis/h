@@ -1,6 +1,7 @@
 'use strict';
 
 var commands = require('../markdown-commands');
+var unroll = require('./util').unroll;
 
 /**
  * Convert a string containing '<sel>' and '</sel>' markers
@@ -72,33 +73,30 @@ describe('markdown commands', function () {
   });
 
   describe('block formatting', function () {
-    var CASES = {
-      'adds formatting to blocks': {
-        input: 'one\n<sel>two\nthree</sel>\nfour',
-        output: 'one\n> <sel>two\n> three</sel>\nfour',
-      },
-      'removes formatting from blocks': {
-        input: 'one \n<sel>> two\n> three</sel>\nfour',
-        output: 'one \n<sel>two\nthree</sel>\nfour',
-      },
-      'preserves the selection': {
-        input: 'one <sel>two\nthree </sel>four',
-        output: '> one <sel>two\n> three </sel>four',
-      },
-      'inserts the block prefix before an empty selection': {
-        input: '<sel></sel>',
-        output: '> <sel></sel>',
-      }
-    };
+    var FIXTURES = [{
+      tag: 'adds formatting to blocks',
+      input: 'one\n<sel>two\nthree</sel>\nfour',
+      output: 'one\n> <sel>two\n> three</sel>\nfour',
+    },{
+      tag: 'removes formatting from blocks',
+      input: 'one \n<sel>> two\n> three</sel>\nfour',
+      output: 'one \n<sel>two\nthree</sel>\nfour',
+    },{
+      tag: 'preserves the selection',
+      input: 'one <sel>two\nthree </sel>four',
+      output: '> one <sel>two\n> three </sel>four',
+    },{
+      tag: 'inserts the block prefix before an empty selection',
+      input: '<sel></sel>',
+      output: '> <sel></sel>',
+    }];
 
-    Object.keys(CASES).forEach(function (case_) {
-      it(case_, function () {
-        var output = commands.toggleBlockStyle(
-          parseState(CASES[case_].input), '> '
-        );
-        assert.equal(formatState(output), CASES[case_].output);
-      });
-    });
+    unroll('#tag', function (fixture) {
+      var output = commands.toggleBlockStyle(
+        parseState(fixture.input), '> '
+      );
+      assert.equal(formatState(output), fixture.output);
+    }, FIXTURES);
   });
 
   describe('link formatting', function () {
