@@ -20,6 +20,9 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+.h-icon-clipboard:before {
+    content: "\e90c";
+}
 .h-icon-hypothesis-logo:before {
     content: "\e90b";
 }

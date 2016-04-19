@@ -152,88 +152,6 @@ $annotation-card-left-padding: 10px;
   }
 }
 
-// Share dialog
-// ------------
-
-.share-dialog-wrapper {
-  position: relative;
-
-  .share-dialog {
-    display: none;
-  }
-
-  &.open .share-dialog {
-    display: flex;
-    flex-direction: column;
-  }
-
-  &.open .share-dialog--actions {
-    display: block;
-  }
-}
-
-.share-dialog {
-  position: absolute;
-  right: 0;
-  bottom: 130%;
-  z-index: 1;
-  background: $white;
-  border: 1px solid $gray-lighter;
-  border-radius: 2px;
-  width: 200px;
-  font-size: $body1-font-size;
-  cursor: default;
-  box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.15);
-
-  &:after, &:before {
-    top: 100%;
-    right: 10px;
-    border: solid transparent;
-    content: " ";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-  }
-
-  &:after {
-    border-color: rgba(255, 255, 255, 0);
-    border-top-color: $white;
-    border-width: 5px;
-    margin-right: -5px;
-  }
-
-  &:before {
-    border-color: rgba(211, 211, 211, 0);
-    border-top-color: $gray-lighter;
-    border-width: 6px;
-    margin-right: -6px;
-  }
-}
-
-.share-dialog--actions {
-  padding: 3px;
-  width: inherit;
-}
-
-.share-dialog__link {
-  padding: 0;
-  width: 220px;
-  border: none;
-  color: $text-color;
-}
-
-.share-dialog-msg {
-  color: $gray-light;
-  margin: -5px 10px 10px 10px;
-  line-height: 15px;
-  font-size: 11px;
-}
-
-.share-dialog-msg__audience {
-  font-style: italic;
-}
-
 .annotation-collapsed-replies {
   display: none;
 }
@@ -255,6 +173,26 @@ $annotation-card-left-padding: 10px;
       margin-left: .25em;
     }
   }
+}
+
+.share-dialog-wrapper {
+  position: relative;
+
+  &.open .share-dialog--actions {
+    display: block;
+  }
+}
+
+.share-dialog--actions {
+  padding: 3px;
+  width: inherit;
+}
+
+.share-dialog__link {
+  padding: 0;
+  width: 220px;
+  border: none;
+  color: $text-color;
 }
 
 // the actions for publishing annotations and reverting changes
