@@ -6,6 +6,7 @@ var proxyquire = require('proxyquire');
 
 var events = require('../../events');
 var fixtures = require('../../test/annotation-fixtures');
+var testUtil = require('../../test/util');
 var util = require('./util');
 
 var inject = angular.mock.inject;
@@ -17,6 +18,7 @@ function annotationDirective() {
   var noop = function () { return ''; };
 
   var annotation = proxyquire('../annotation', {
+    angular: testUtil.noCallThru(angular),
     '../filter/document-domain': noop,
     '../filter/document-title': noop,
     '../filter/persona': {
@@ -1100,7 +1102,7 @@ describe('annotation', function() {
           sandbox.spy($rootScope, '$emit');
           annotation.$create.returns(Promise.resolve());
           controller.save().then(function() {
-            assert($rootScope.$emit.calledWith('annotationCreated'));
+            assert($rootScope.$emit.calledWith(events.ANNOTATION_CREATED));
             done();
           });
         }
@@ -1311,7 +1313,7 @@ describe('annotation', function() {
           text: 'new text',
         };
 
-        $rootScope.$emit('annotationUpdated', updatedModel);
+        $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
 
         assert.equal(parts.controller.form.text, 'new text');
       });
@@ -1324,9 +1326,46 @@ describe('annotation', function() {
           text: 'new text',
         };
 
-        $rootScope.$emit('annotationUpdated', updatedModel);
+        $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
 
         assert.equal(parts.controller.form.text, 'original text');
+      });
+    });
+
+    describe('when another new annotation is created', function () {
+      it('removes the current annotation if empty', function () {
+        var annotation = fixtures.newEmptyAnnotation();
+        createDirective(annotation);
+        $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED,
+          fixtures.newAnnotation());
+        assert.calledWith(fakeDrafts.remove, annotation);
+      });
+
+      it('does not remove the current annotation if is is not new', function () {
+        var parts = createDirective(fixtures.defaultAnnotation());
+        parts.controller.form.text = '';
+        parts.controller.form.tags = [];
+        $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED,
+          fixtures.newAnnotation());
+        assert.notCalled(fakeDrafts.remove);
+      });
+
+      it('does not remove the current annotation if it has text', function () {
+        var annotation = fixtures.newAnnotation();
+        var parts = createDirective(annotation);
+        parts.controller.form.text = 'An incomplete thought';
+        $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED,
+          fixtures.newAnnotation());
+        assert.notCalled(fakeDrafts.remove);
+      });
+
+      it('does not remove the current annotation if it has tags', function () {
+        var annotation = fixtures.newAnnotation();
+        var parts = createDirective(annotation);
+        parts.controller.form.tags = [{text: 'a-tag'}];
+        $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED,
+          fixtures.newAnnotation());
+        assert.notCalled(fakeDrafts.remove);
       });
     });
 

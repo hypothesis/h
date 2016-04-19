@@ -1,6 +1,8 @@
 /* jshint node: true */
 'use strict';
 
+var angular = require('angular');
+
 var annotationMetadata = require('../annotation-metadata');
 var dateUtil = require('../date-util');
 var documentDomain = require('../filter/document-domain');
@@ -260,7 +262,11 @@ function AnnotationController(
     // successfully saved to the server, and also when changes to the
     // annotation made by another client are received by this client from the
     // server.
-    $rootScope.$on('annotationUpdated', onAnnotationUpdated);
+    $rootScope.$on(events.ANNOTATION_UPDATED, onAnnotationUpdated);
+
+    // When a new annotation is created, remove any existing annotations that
+    // are empty
+    $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, deleteIfNewAndEmpty);
 
     // Call `onDestroy()` when this AnnotationController's scope is removed.
     $scope.$on('$destroy', onDestroy);
@@ -306,6 +312,12 @@ function AnnotationController(
     if (updatedDomainModel.id === domainModel.id) {
       domainModel = updatedDomainModel;
       updateView(updatedDomainModel);
+    }
+  }
+
+  function deleteIfNewAndEmpty() {
+    if (isNew(domainModel) && !vm.form.text && vm.form.tags.length === 0) {
+      vm.revert();
     }
   }
 
@@ -363,7 +375,7 @@ function AnnotationController(
       // Highlights are always private.
       domainModel.permissions = permissions.private();
       domainModel.$create().then(function() {
-        $rootScope.$emit('annotationCreated', domainModel);
+        $rootScope.$emit(events.ANNOTATION_CREATED, domainModel);
         updateView(domainModel);
       });
     } else {
@@ -562,7 +574,7 @@ function AnnotationController(
   vm.revert = function() {
     drafts.remove(domainModel);
     if (vm.action === 'create') {
-      $rootScope.$emit('annotationDeleted', domainModel);
+      $rootScope.$emit(events.ANNOTATION_DELETED, domainModel);
     } else {
       updateView(domainModel);
       view();
@@ -597,7 +609,7 @@ function AnnotationController(
       case 'create':
         updateDomainModel(domainModel, vm, permissions);
         saved = domainModel.$create().then(function () {
-          $rootScope.$emit('annotationCreated', domainModel);
+          $rootScope.$emit(events.ANNOTATION_CREATED, domainModel);
           updateView(domainModel);
           drafts.remove(domainModel);
         });
@@ -610,7 +622,7 @@ function AnnotationController(
           id: updatedModel.id
         }).then(function () {
           drafts.remove(domainModel);
-          $rootScope.$emit('annotationUpdated', updatedModel);
+          $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
         });
         break;
 
