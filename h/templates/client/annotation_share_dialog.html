@@ -1,5 +1,5 @@
-<span class="annotation-share-dialog" ng-class="{'is-open': vm.isOpen}">
-  <span class="annotation-share-dialog-target">
+<div class="annotation-share-dialog" ng-class="{'is-open': vm.isOpen}">
+  <div class="annotation-share-dialog-target">
     <span class="annotation-share-dialog-target__label">Share:</span>
     <a href="https://twitter.com/intent/tweet?url={{vm.uri}}"
       target="_blank"
@@ -16,8 +16,8 @@
     <a href="mailto:?subject=Let's%20Annotate&amp;body={{vm.uri}}"
       title="Share via email"
       class="annotation-share-dialog-target__icon h-icon-mail"></a>
-  </span>
-  <span class="annotation-share-dialog-link" type="text">
+  </div>
+  <div class="annotation-share-dialog-link" type="text">
     <input class="annotation-share-dialog-link__text"
       value="{{vm.uri}}" readonly>
     <span class="annotation-share-dialog-link__feedback" ng-if="vm.copyToClipboardMessage">
@@ -27,17 +27,17 @@
       ng-click="vm.copyToClipboard($event)">
       <i class="h-icon-clipboard btn-icon"></i>
     </button>
-  </span>
-  <span class="annotation-share-dialog-msg" ng-if="vm.group && !vm.group.public && !vm.isPrivate">
+  </div>
+  <div class="annotation-share-dialog-msg" ng-if="vm.group && !vm.group.public && !vm.isPrivate">
     <span class="annotation-share-dialog-msg__audience">
       Group.
     </span>
     Only group members will be able to view this annotation.
-  </span>
-  <span class="annotation-share-dialog-msg" ng-if="vm.isPrivate">
+  </div>
+  <div class="annotation-share-dialog-msg" ng-if="vm.isPrivate">
     <span class="annotation-share-dialog-msg__audience">
       Only me.
     </span>
     No one else will be able to view this annotation.
-  </span>
-</span>
+  </div>
+</div>
