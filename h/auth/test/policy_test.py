@@ -21,7 +21,7 @@ TOKEN_AUTH_PATHS = (
 )
 
 
-@pytest.mark.usefixtures('policy')
+@pytest.mark.usefixtures('accounts', 'policy', 'tokens')
 class TestAuthenticationPolicy(object):
 
     def test_authenticated_userid_delegates_for_session_auth_paths(self, session_request):
@@ -30,7 +30,6 @@ class TestAuthenticationPolicy(object):
         self.upstream_policy.authenticated_userid.assert_called_once_with(session_request)
         assert result == self.upstream_policy.authenticated_userid.return_value
 
-    @mock.patch('h.auth.policy.tokens')
     def test_authenticated_userid_uses_tokens_for_token_auth_paths(self, tokens, token_request):
         result = self.policy.authenticated_userid(token_request)
 
@@ -43,7 +42,6 @@ class TestAuthenticationPolicy(object):
         self.upstream_policy.unauthenticated_userid.assert_called_once_with(session_request)
         assert result == self.upstream_policy.unauthenticated_userid.return_value
 
-    @mock.patch('h.auth.policy.tokens')
     def test_unauthenticated_userid_uses_tokens_for_token_auth_paths(self, tokens, token_request):
         result = self.policy.unauthenticated_userid(token_request)
 
@@ -97,6 +95,10 @@ class TestAuthenticationPolicy(object):
     @pytest.fixture(params=SESSION_AUTH_PATHS)
     def session_request(self, request):
         return DummyRequest(path=request.param)
+
+    @pytest.fixture
+    def tokens(self, patch):
+        return patch('h.auth.policy.tokens')
 
     @pytest.fixture(params=TOKEN_AUTH_PATHS)
     def token_request(self, request):
