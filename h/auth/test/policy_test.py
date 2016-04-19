@@ -23,24 +23,6 @@ TOKEN_AUTH_PATHS = (
 
 class TestAuthenticationPolicy(object):
 
-    @pytest.fixture(autouse=True)
-    def policy(self):
-        self.upstream_policy = mock.Mock(spec_set=SessionAuthenticationPolicy())
-        self.policy = AuthenticationPolicy()
-        self.policy.session_policy = self.upstream_policy
-
-    # session_request and token_request are parametrized fixtures, which will
-    # take on each value in the passed `params` sequence in turn. This is a
-    # quick and easy way to generate a named fixture which takes multiple
-    # values and can be used by multiple tests.
-    @pytest.fixture(params=SESSION_AUTH_PATHS)
-    def session_request(self, request):
-        return DummyRequest(path=request.param)
-
-    @pytest.fixture(params=TOKEN_AUTH_PATHS)
-    def token_request(self, request):
-        return DummyRequest(path=request.param)
-
     def test_authenticated_userid_delegates_for_session_auth_paths(self, session_request):
         result = self.policy.authenticated_userid(session_request)
 
@@ -100,3 +82,21 @@ class TestAuthenticationPolicy(object):
 
         self.upstream_policy.forget.assert_not_called()
         assert result == []
+
+    @pytest.fixture(autouse=True)
+    def policy(self):
+        self.upstream_policy = mock.Mock(spec_set=SessionAuthenticationPolicy())
+        self.policy = AuthenticationPolicy()
+        self.policy.session_policy = self.upstream_policy
+
+    # session_request and token_request are parametrized fixtures, which will
+    # take on each value in the passed `params` sequence in turn. This is a
+    # quick and easy way to generate a named fixture which takes multiple
+    # values and can be used by multiple tests.
+    @pytest.fixture(params=SESSION_AUTH_PATHS)
+    def session_request(self, request):
+        return DummyRequest(path=request.param)
+
+    @pytest.fixture(params=TOKEN_AUTH_PATHS)
+    def token_request(self, request):
+        return DummyRequest(path=request.param)
