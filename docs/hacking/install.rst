@@ -96,7 +96,7 @@ Install the following packages:
 Installing the services
 -----------------------
 
-h requires trhe following external services:
+h requires the following external services:
 
 .. include:: services.rst
 
@@ -276,10 +276,10 @@ when styles, templates or JavaScript source files are changed.
 .. _Gulp: http://gulpjs.com/
 
 
-Running the WebSocket for realtime features
--------------------------------------------
+Running the WebSocket for real-time features
+--------------------------------------------
 
-To test h's realtime features (for example, seeing new or updated annotations
+To test h's real-time features (for example, seeing new or updated annotations
 from other users appear in your browser without a page reload) you need to run
 a websocket process.  Open a new terminal, ``cd`` into your ``h`` directory,
 :ref:`activate your Python virtual environment <activating_your_virtual_environment>`,
