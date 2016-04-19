@@ -152,9 +152,11 @@ module.exports = angular.module('h', [
   .controller('StreamController', require('./stream-controller'))
   .controller('WidgetController', require('./widget-controller'))
 
+  .directive('aboutThisVersionDialog', require('./directive/about-this-version-dialog'))
   .directive('annotation', require('./directive/annotation').directive)
   .directive('deepCount', require('./directive/deep-count'))
   .directive('excerpt', require('./directive/excerpt').directive)
+  .directive('feedbackLink', require('./directive/feedback-link'))
   .directive('formInput', require('./directive/form-input'))
   .directive('formValidate', require('./directive/form-validate'))
   .directive('groupList', require('./directive/group-list').directive)

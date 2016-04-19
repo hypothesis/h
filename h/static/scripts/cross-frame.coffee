@@ -46,8 +46,11 @@ module.exports = class CrossFrame
         if err
           channel.destroy()
         else
+          documentFingerprint = null
+          if info.metadata and info.metadata.documentFingerprint
+            documentFingerprint = info.metadata.documentFingerprint
           $rootScope.$apply =>
-            @frames.push({channel: channel, uri: info.uri})
+            @frames.push({channel: channel, uri: info.uri, documentFingerprint: documentFingerprint})
 
     this.connect = ->
       discovery = createDiscovery()

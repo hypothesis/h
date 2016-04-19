@@ -10,11 +10,13 @@ $base-line-height: 20px;
 
 // Components
 // ----------
+@import './about-this-version-dialog';
 @import './annotation';
 @import './api-token-input';
 @import './dropdown-menu-btn';
 @import './excerpt';
 @import './group-list';
+@import './loggedout-message';
 @import './markdown';
 @import './primary-action-btn';
 @import './publish-annotation-btn';
@@ -27,7 +29,6 @@ $base-line-height: 20px;
 @import './tags-input';
 @import './thread';
 @import './top-bar';
-@import './loggedout-message';
 
 // Top-level styles
 // ----------------

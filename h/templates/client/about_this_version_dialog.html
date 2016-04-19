@@ -1,0 +1,37 @@
+<div class="sheet">
+  <i class="close h-icon-close"
+    role="button"
+    title="Close"
+    ng-click="vm.onClose()"></i>
+  <div class="about-this-version">
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="">About this version</a></li>
+    </ul>
+    <dl class="tab-content">
+      <dt class="about-this-version__key">Version: </dt>
+      <dd class="about-this-version__val">{{ vm.version }}</dd>
+      <dt class="about-this-version__key">User agent: </dt>
+      <dd class="about-this-version__val">{{ vm.userAgent }}</dd>
+      <dt class="about-this-version__key">URL: </dt>
+      <dd class="about-this-version__val">{{ vm.url }}</dd>
+      <div ng-if="vm.documentFingerprint">
+        <dt class="about-this-version__key">PDF fingerprint: </dt>
+        <dd class="about-this-version__val">{{ vm.documentFingerprint }}</dd>
+      </div>
+      <div ng-if="vm.auth.userid">
+        <dt class="about-this-version__key">Username: </dt>
+        <dd class="about-this-version__val">{{ vm.auth.username }}</dd>
+      </div>
+      <dt class="about-this-version__key">Date: </dt>
+      <dd class="about-this-version__val">{{ vm.dateTime | date:'dd MMM yyyy HH:mm:ss Z' }}</dd>
+      <feedback-link
+        version="vm.version"
+        user-agent="vm.userAgent"
+        url="vm.url"
+        document-fingerprint="vm.documentFingerprint"
+        auth="vm.auth"
+        date-time="vm.dateTime">
+      </feedback-link>
+    </div>
+  </div>
+</div>
