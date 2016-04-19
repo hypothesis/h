@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import mock
 import pytest
+from pyramid import httpexceptions
+from pyramid import testing
 
 from h import accounts
 
@@ -141,14 +143,81 @@ def test_get_user_returns_user(util, get_by_username):
         get_by_username.return_value)
 
 
-@mock.patch("h.accounts.get_user")
-def test_authenticated_user_calls_get_user(get_user):
-    """It should call get_user() with request.authenticated_userid."""
-    request=mock.Mock(authenticated_userid="userid")
+authenticated_user_fixtures = pytest.mark.usefixtures('get_user')
+
+
+@authenticated_user_fixtures
+def test_authenticated_user_calls_get_user(authn_policy, get_user):
+    """It should call get_user() correctly."""
+    request = testing.DummyRequest()
+    authn_policy.authenticated_userid.return_value = 'userid'
 
     accounts.authenticated_user(request)
 
-    get_user.assert_called_once_with("userid", request)
+    get_user.assert_called_once_with('userid', request)
+
+
+@authenticated_user_fixtures
+def test_authenticated_user_invalidates_session_if_user_does_not_exist(
+        authn_policy, get_user):
+    """It should log the user out if they no longer exist in the db."""
+    request = testing.DummyRequest()
+    request.current_route_url = lambda: '/'
+    request.session.invalidate = mock.Mock()
+    authn_policy.authenticated_userid.return_value = 'userid'
+    get_user.return_value = None
+
+    try:
+        accounts.authenticated_user(request)
+    except Exception:
+        pass
+
+    request.session.invalidate.assert_called_once_with()
+
+
+@authenticated_user_fixtures
+def test_authenticated_user_does_not_invalidate_session_if_not_authenticated(
+        authn_policy, get_user):
+    """
+    If authenticated_userid is None it shouldn't invalidate the session.
+
+    Even though the user with id None obviously won't exist in the db.
+
+    This also tests that it doesn't raise a redirect in this case.
+
+    """
+    request = testing.DummyRequest()
+    request.current_route_url = lambda: '/'
+    request.session.invalidate = mock.Mock()
+    authn_policy.authenticated_userid.return_value = None
+    get_user.return_value = None
+
+    accounts.authenticated_user(request)
+
+    assert not request.session.invalidate.called
+
+
+@authenticated_user_fixtures
+def test_authenticated_user_redirects_if_user_does_not_exist(
+        authn_policy, get_user):
+    request = testing.DummyRequest()
+    request.current_route_url = lambda: '/the/page/that/I/was/on'
+    authn_policy.authenticated_userid.return_value = 'userid'
+    get_user.return_value = None
+
+    with pytest.raises(httpexceptions.HTTPFound) as err:
+        accounts.authenticated_user(request)
+
+    assert err.value.location == '/the/page/that/I/was/on', (
+        'It should redirect to the same page that was requested')
+
+
+@authenticated_user_fixtures
+def test_authenticated_user_returns_user_from_get_user(get_user):
+    """It should return the user from get_user()."""
+    request = mock.Mock(authenticated_userid='userid')
+
+    assert accounts.authenticated_user(request) == get_user.return_value
 
 
 @pytest.fixture
@@ -159,3 +228,8 @@ def util(patch):
 @pytest.fixture
 def get_by_username(patch):
     return patch('h.accounts.models.User.get_by_username', autospec=False)
+
+
+@pytest.fixture
+def get_user(patch):
+    return patch('h.accounts.get_user')

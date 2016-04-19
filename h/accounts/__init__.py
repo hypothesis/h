@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from itsdangerous import URLSafeTimedSerializer
+from pyramid import httpexceptions
 
 from h.security import derive_key
 
@@ -79,8 +80,18 @@ def authenticated_user(request):
     :rtype: h.accounts.models.User or None
 
     """
-    return get_user(request.authenticated_userid, request)
+    user = get_user(request.authenticated_userid, request)
 
+    # If the authenticated user doesn't exist in the db then log them out.
+    # This happens when we delete a user account but the user still has a
+    # valid session for that account (because we don't invalidate sessions
+    # when we delete user accounts).
+    if request.authenticated_userid and not user:
+        request.session.invalidate()
+        raise httpexceptions.HTTPFound(
+            location=request.current_route_url())
+
+    return user
 
 def includeme(config):
     """A local identity provider."""
