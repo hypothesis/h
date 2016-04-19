@@ -36,6 +36,30 @@ class TestAuthenticationPolicy(object):
         tokens.authenticated_userid.assert_called_once_with(token_request)
         assert result == tokens.authenticated_userid.return_value
 
+    def test_authenticated_userid_returns_None_if_user_does_not_exist(
+            self, accounts, session_request, tokens, token_request):
+        accounts.get_user.return_value = None
+        tokens.authenticated_userid.return_value = 'acct:hugh@hypothes.is'
+        self.upstream_policy.authenticated_userid.return_value = (
+            'acct:hugh@hypothes.is')
+
+        assert self.policy.authenticated_userid(session_request) is None
+        assert self.policy.authenticated_userid(token_request) is None
+
+    def test_authenticated_userid_calls_forget_if_user_does_not_exist(
+            self, accounts, forget, session_request, tokens, token_request):
+        accounts.get_user.return_value = None
+        tokens.authenticated_userid.return_value = 'acct:hugh@hypothes.is'
+        self.upstream_policy.authenticated_userid.return_value = (
+            'acct:hugh@hypothes.is')
+
+        self.policy.authenticated_userid(session_request)
+        forget.assert_called_once_with(self.policy, session_request)
+
+        self.policy.authenticated_userid(token_request)
+        assert forget.call_count == 2
+        assert forget.call_args == mock.call(self.policy, token_request)
+
     def test_unauthenticated_userid_delegates_for_session_auth_paths(self, session_request):
         result = self.policy.unauthenticated_userid(session_request)
 
@@ -47,6 +71,30 @@ class TestAuthenticationPolicy(object):
 
         tokens.authenticated_userid.assert_called_once_with(token_request)
         assert result == tokens.authenticated_userid.return_value
+
+    def test_unauthenticated_userid_returns_None_if_user_does_not_exist(
+            self, accounts, session_request, tokens, token_request):
+        accounts.get_user.return_value = None
+        tokens.authenticated_userid.return_value = 'acct:hugh@hypothes.is'
+        self.upstream_policy.unauthenticated_userid.return_value = (
+            'acct:hugh@hypothes.is')
+
+        assert self.policy.unauthenticated_userid(session_request) is None
+        assert self.policy.unauthenticated_userid(token_request) is None
+
+    def test_unauthenticated_userid_calls_forget_if_user_does_not_exist(
+            self, accounts, forget, session_request, tokens, token_request):
+        accounts.get_user.return_value = None
+        tokens.authenticated_userid.return_value = 'acct:hugh@hypothes.is'
+        self.upstream_policy.unauthenticated_userid.return_value = (
+            'acct:hugh@hypothes.is')
+
+        self.policy.unauthenticated_userid(session_request)
+        forget.assert_called_once_with(self.policy, session_request)
+
+        self.policy.unauthenticated_userid(token_request)
+        assert forget.call_count == 2
+        assert forget.call_args == mock.call(self.policy, token_request)
 
     @mock.patch('h.auth.policy.util')
     def test_effective_principals_calls_effective_principals_with_authenticated_userid(self, util, authn_policy):
@@ -81,6 +129,14 @@ class TestAuthenticationPolicy(object):
 
         self.upstream_policy.forget.assert_not_called()
         assert result == []
+
+    @pytest.fixture
+    def accounts(self, patch):
+        return patch('h.auth.policy.accounts')
+
+    @pytest.fixture
+    def forget(self, patch):
+        return patch('h.auth.policy.AuthenticationPolicy.forget')
 
     @pytest.fixture
     def policy(self):
