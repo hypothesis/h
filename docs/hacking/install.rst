@@ -108,7 +108,7 @@ installed on:
    `Docker website`_.
 
 2. Download and run the
-   `official NSQ image <https://hub.docker.com/r/nsqio/nsq/>`_,
+   `official RabbitMQ image <https://hub.docker.com/_/rabbitmq/>`_,
    the `official PostgreSQL image <https://hub.docker.com/_/postgres/>`_, the
    `official Redis image <https://hub.docker.com/_/redis/>`_,
    and our custom
@@ -116,16 +116,15 @@ installed on:
 
    .. code-block:: bash
 
-      sudo docker run -d --name nsqd -p 4150:4150 -p 4151:4151 nsqio/nsq /nsqd
       sudo docker run -d --name postgres -p 5432:5432 postgres
-      sudo docker run -d --name redis -p 6379:6379 redis
       sudo docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
+      sudo docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 --hostname rabbit rabbitmq:3-management
+      sudo docker run -d --name redis -p 6379:6379 redis
 
-   You'll now have four Docker containers named ``nsqd``, ``postgres``,
-   ``redis`` and ``elasticsearch`` running and exposing the nsqd service on
-   ports 4150 and 4151, Elasticsearch on 9200 and 9300, Redis on 6379, and
-   PostgreSQL on 5432. You should be able to see them by running ``sudo docker ps``.
-   You should also be able to visit your Elasticsearch service by opening
+   You'll now have four Docker containers named ``postgres``, ``elasticsearch``,
+   ``rabbitmq`` and ``redis`` running and exposing their various services on the
+   ports defined above. You should be able to see them by running ``sudo docker
+   ps``. You should also be able to visit your Elasticsearch service by opening
    http://127.0.0.1:9200/ in a browser, and connect to your PostgreSQL by
    running ``psql postgresql://postgres@localhost/postgres`` (if you have psql
    installed).
@@ -138,7 +137,7 @@ installed on:
 
       .. code-block:: bash
 
-         sudo docker start postgres elasticsearch nsqd redis
+         sudo docker start postgres elasticsearch rabbitmq redis
 
 3. Create the `htest` database in the ``postgres`` container. This is needed
    to run the h tests:
@@ -171,7 +170,7 @@ installed on:
 
    .. code-block:: bash
 
-      sudo docker logs nsqd
+      sudo docker logs rabbitmq
 
    For more on how to use Docker see the `Docker website`_.
 
