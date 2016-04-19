@@ -9,6 +9,7 @@ module.exports = function () {
       onShowAboutVersionDialog: '&',
       onLogin: '&',
       onLogout: '&',
+      onSharePage: '&',
       searchController: '<',
       accountDialog: '<',
       shareDialog: '<',

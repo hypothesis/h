@@ -1,6 +1,7 @@
 'use strict';
 
 var angular = require('angular');
+var scrollIntoView = require('scroll-into-view');
 
 var annotationMetadata = require('./annotation-metadata');
 var events = require('./events');
@@ -102,9 +103,25 @@ module.exports = function AppController(
     };
   });
 
+  /** Scroll to the view to the element matching the given selector */
+  function scrollToView(selector) {
+    // Add a timeout so that if the element has just been shown (eg. via ngIf)
+    // it is added to the DOM before we try to locate and scroll to it.
+    setTimeout(function () {
+      scrollIntoView($document[0].querySelector(selector));
+    }, 0);
+  }
+
   // Start the login flow. This will present the user with the login dialog.
   $scope.login = function () {
     $scope.accountDialog.visible = true;
+    scrollToView('login-form');
+  };
+
+  // Display the dialog for sharing the current page
+  $scope.share = function () {
+    $scope.shareDialog.visible = true;
+    scrollToView('share-dialog');
   };
 
   // Prompt to discard any unsaved drafts.

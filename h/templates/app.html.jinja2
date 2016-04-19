@@ -27,8 +27,7 @@
       auth="auth"
       on-login="login()"
       on-logout="logout()"
-      account-dialog="accountDialog"
-      share-dialog="shareDialog"
+      on-share-page="share()"
       on-show-about-version-dialog="aboutThisVersionDialog.visible = true"
       is-sidebar="::isSidebar"
       search-controller="search"
@@ -46,10 +45,15 @@
     </div>
 
     <div class="content" ng-cloak>
-      <login-form ng-if="accountDialog.visible"
-                on-close="accountDialog.visible=false"></login-form>
+      <login-form
+        ng-if="accountDialog.visible"
+        on-close="accountDialog.visible = false">
+      </login-form>
       <sidebar-tutorial ng-if="isSidebar"></sidebar-tutorial>
-      <share-dialog ng-show="shareDialog.visible"></share-dialog>
+      <share-dialog
+        ng-if="shareDialog.visible"
+        on-close="shareDialog.visible = false">
+      </share-dialog>
       <about-this-version-dialog ng-if="aboutThisVersionDialog.visible"
         on-close="aboutThisVersionDialog.visible = false"
         auth="auth">

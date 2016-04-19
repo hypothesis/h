@@ -210,6 +210,22 @@ describe('AppController', function () {
     assert.calledOnce(fakeRoute.reload);
   });
 
+  describe('#login()', function () {
+    it('shows the login dialog', function () {
+      createController();
+      $scope.login();
+      assert.equal($scope.accountDialog.visible, true);
+    });
+  });
+
+  describe('#share()', function () {
+    it('shows the share dialog', function () {
+      createController();
+      $scope.share();
+      assert.equal($scope.shareDialog.visible, true);
+    });
+  });
+
   describe('logout()', function () {
     it('prompts the user if there are drafts', function () {
       fakeDrafts.count.returns(1);

@@ -2,7 +2,7 @@
   <i class="close h-icon-close"
      role="button"
      title="Close"
-     ng-click="shareDialog.visible = false"></i>
+     ng-click="vm.onClose()"></i>
   <div class="form-vertical">
     <ul class="nav nav-tabs">
       <li class="active"><a href="">Share</a></li>
@@ -11,22 +11,22 @@
       <p>Share the link below to show anyone these annotations and invite them to contribute their own.</p>
       <p><input class="js-via form-input"
           type="text"
-          ng-value="viaPageLink"
+          ng-value="vm.viaPageLink"
           readonly /></p>
       <p class="share-link-icons">
-      <a href="https://twitter.com/intent/tweet?url={{viaPageLink}}"
+      <a href="https://twitter.com/intent/tweet?url={{vm.viaPageLink}}"
          target="_blank"
          title="Tweet link"
          class="share-link-icon h-icon-twitter"></a>
-      <a href="https://www.facebook.com/sharer/sharer.php?u={{viaPageLink}}"
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{vm.viaPageLink}}"
          target="_blank"
          title="Share on Facebook"
          class="share-link-icon h-icon-facebook"></a>
-      <a href="https://plus.google.com/share?url={{viaPageLink}}"
+      <a href="https://plus.google.com/share?url={{vm.viaPageLink}}"
          target="_blank"
          title="Post on Google Plus"
          class="share-link-icon h-icon-google-plus"></a>
-      <a href="mailto:?subject=Let's%20Annotate&amp;body={{viaPageLink}}"
+      <a href="mailto:?subject=Let's%20Annotate&amp;body={{vm.viaPageLink}}"
          title="Share via email"
          class="share-link-icon h-icon-mail"></a>
       </p>
