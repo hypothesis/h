@@ -21,6 +21,7 @@ TOKEN_AUTH_PATHS = (
 )
 
 
+@pytest.mark.usefixtures('policy')
 class TestAuthenticationPolicy(object):
 
     def test_authenticated_userid_delegates_for_session_auth_paths(self, session_request):
@@ -83,7 +84,7 @@ class TestAuthenticationPolicy(object):
         self.upstream_policy.forget.assert_not_called()
         assert result == []
 
-    @pytest.fixture(autouse=True)
+    @pytest.fixture
     def policy(self):
         self.upstream_policy = mock.Mock(spec_set=SessionAuthenticationPolicy())
         self.policy = AuthenticationPolicy()
