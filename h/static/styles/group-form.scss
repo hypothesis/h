@@ -104,7 +104,7 @@
     }
 
     &__list li {
-      margin-bottom: 1.5em;
+      margin-bottom: 1.2em;
 
       em {
         font-style: italic;
@@ -112,10 +112,15 @@
       }
     }
 
+    &__memberlist li {
+      margin-bottom: 0.2em;
+    }
+
   }
 
   .group-members-list {
     border-bottom: $border;
+    padding-bottom: 20px;
   }
 
   .group-form-footer {

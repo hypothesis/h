@@ -34,7 +34,7 @@
     {% endif %}
     {% if group.members %}
     <div class="group-members-list">
-      <ul class="group-members-list__list">
+      <ul class="group-members-list__memberlist">
         <p class="group-members-list__heading">Group Members:</p>
         {% for member in group.members|sort(attribute='username')  %}
           <li>
