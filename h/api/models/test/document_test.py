@@ -16,7 +16,7 @@ class TestDocumentTitle(object):
         """When there's only one DocumentMeta it should return its title."""
         doc = document.Document()
         document.DocumentMeta(type='title',
-                              value='The Title',
+                              value=['The Title'],
                               document=doc,
                               claimant='http://example.com')
         db.Session.add(doc)
@@ -27,11 +27,11 @@ class TestDocumentTitle(object):
     def test_it_returns_the_value_of_the_first_title_DocumentMeta(self):
         doc = document.Document()
         document.DocumentMeta(type='title',
-                              value='The US Title',
+                              value=['The US Title'],
                               document=doc,
                               claimant='http://example.com')
         document.DocumentMeta(type='title',
-                              value='The UK Title',
+                              value=['The UK Title'],
                               document=doc,
                               claimant='http://example.co.uk')
         db.Session.add(doc)
