@@ -86,6 +86,15 @@ module.exports = class Discovery
   _onMessage: (event) =>
     {source, origin, data} = event
 
+    # If `origin` is 'null' the source frame is a file URL or loaded over some
+    # other scheme for which the `origin` is undefined. In this case, the only
+    # way to ensure the message arrives is to use the wildcard origin. See:
+    #
+    #   https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+    #
+    if origin is 'null'
+      origin = '*'
+
     # Check if the message is at all related to our discovery mechanism
     match = data.match? /^__cross_frame_dhcp_(discovery|offer|request|ack)(?::(\d+))?$/
     return unless match
