@@ -68,6 +68,43 @@ def legacy_create_annotation(request, data):
     return annotation
 
 
+def update_document_metadata(db,
+                             annotation,
+                             document_meta_dicts,
+                             document_uri_dicts):
+    documents = models.Document.find_or_create_by_uris(
+        db,
+        annotation.target_uri,
+        [u['uri'] for u in document_uri_dicts],
+        created=annotation.created,
+        updated=annotation.updated)
+
+    if documents.count() > 1:
+        document = models.merge_documents(db,
+                                          documents,
+                                          updated=annotation.updated)
+    else:
+        document = documents.first()
+
+    document.updated = annotation.updated
+
+    for document_uri_dict in document_uri_dicts:
+        models.create_or_update_document_uri(
+            session=db,
+            document=document,
+            created=annotation.created,
+            updated=annotation.updated,
+            **document_uri_dict)
+
+    for document_meta_dict in document_meta_dicts:
+        models.create_or_update_document_meta(
+            session=db,
+            document=document,
+            created=annotation.created,
+            updated=annotation.updated,
+            **document_meta_dict)
+
+
 def create_annotation(request, data):
     """
     Create an annotation from passed data.
@@ -92,37 +129,8 @@ def create_annotation(request, data):
     # annotation.updated get created.
     request.db.flush()
 
-    documents = models.Document.find_or_create_by_uris(
-        request.db,
-        annotation.target_uri,
-        [u['uri'] for u in document_uri_dicts],
-        created=annotation.created,
-        updated=annotation.updated)
-
-    if documents.count() > 1:
-        document = models.merge_documents(request.db,
-                                          documents,
-                                          updated=annotation.updated)
-    else:
-        document = documents.first()
-
-    document.updated = annotation.updated
-
-    for document_uri_dict in document_uri_dicts:
-        models.create_or_update_document_uri(
-            session=request.db,
-            document=document,
-            created=annotation.created,
-            updated=annotation.updated,
-            **document_uri_dict)
-
-    for document_meta_dict in document_meta_dicts:
-        models.create_or_update_document_meta(
-            session=request.db,
-            document=document,
-            created=annotation.created,
-            updated=annotation.updated,
-            **document_meta_dict)
+    update_document_metadata(
+        request.db, annotation, document_meta_dicts, document_uri_dicts)
 
     return annotation
 
