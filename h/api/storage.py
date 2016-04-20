@@ -118,15 +118,44 @@ def create_annotation(request, data):
     # annotation.updated get created.
     request.db.flush()
 
+    update_document_metadata(
+        request.db, annotation, document_meta_dicts, document_uri_dicts)
+
+    return annotation
+
+
+def update_document_metadata(session,
+                             annotation,
+                             document_meta_dicts,
+                             document_uri_dicts):
+    """
+    Create and update document metadata from the given annotation.
+
+    Document, DocumentURI and DocumentMeta objects will be created, updated
+    and deleted in the database as required by the given annotation and
+    document meta and uri dicts.
+
+    :param annotation: the annotation that the document metadata comes from
+    :type annotation: h.api.models.Annotation
+
+    :param document_meta_dicts: the document metadata dicts that the client
+        posted with the annotation, validated
+    :type document_meta_dicts: list of dicts
+
+    :param document_uri_dicts: the document URI dicts that the client
+        posted with the annotation, validated
+    :type document_uri_dicts: list of dicts
+
+    """
     documents = models.Document.find_or_create_by_uris(
-        request.db,
+        session,
         annotation.target_uri,
         [u['uri'] for u in document_uri_dicts],
         created=annotation.created,
         updated=annotation.updated)
 
     if documents.count() > 1:
-        document = models.merge_documents(request.db,
+        document = models.merge_documents(session,
                                           documents,
                                           updated=annotation.updated)
     else:
@@ -136,7 +165,7 @@ def create_annotation(request, data):
 
     for document_uri_dict in document_uri_dicts:
         models.create_or_update_document_uri(
-            session=request.db,
+            session=session,
             document=document,
             created=annotation.created,
             updated=annotation.updated,
@@ -144,13 +173,11 @@ def create_annotation(request, data):
 
     for document_meta_dict in document_meta_dicts:
         models.create_or_update_document_meta(
-            session=request.db,
+            session=session,
             document=document,
             created=annotation.created,
             updated=annotation.updated,
             **document_meta_dict)
-
-    return annotation
 
 
 def legacy_update_annotation(request, id, data):

@@ -231,8 +231,8 @@ class TestLegacyCreateAnnotation(object):
         return patch('h.api.storage.transform')
 
 
-@pytest.mark.usefixtures('fetch_annotation',
-                         'models')
+@pytest.mark.usefixtures('models',
+                         'update_document_metadata')
 class TestCreateAnnotation(object):
 
     def test_it_fetches_parent_annotation_for_replies(self,
@@ -315,169 +315,24 @@ class TestCreateAnnotation(object):
 
         request.db.add.assert_called_once_with(models.Annotation.return_value)
 
-    def test_it_calls_find_or_create_by_uris(self, models):
+    def test_it_calls_update_document_metadata(self,
+                                               models,
+                                               update_document_metadata):
         request = self.mock_request()
-        annotation = models.Annotation.return_value
         annotation_data = self.annotation_data()
-        annotation_data['document']['document_uri_dicts'] = [
-            {
-                'uri': 'http://example.com/example_1',
-                'claimant': 'http://example.com/claimant',
-                'type': 'type',
-                'content_type': None,
-            },
-            {
-                'uri': 'http://example.com/example_2',
-                'claimant': 'http://example.com/claimant',
-                'type': 'type',
-                'content_type': None,
-            },
-            {
-                'uri': 'http://example.com/example_3',
-                'claimant': 'http://example.com/claimant',
-                'type': 'type',
-                'content_type': None,
-            },
-        ]
+        annotation_data['document']['document_meta_dicts'] = (
+            mock.sentinel.document_meta_dicts)
+        annotation_data['document']['document_uri_dicts'] = (
+            mock.sentinel.document_uri_dicts)
 
-        storage.create_annotation(request, annotation_data)
+        annotation = storage.create_annotation(request, annotation_data)
 
-        models.Document.find_or_create_by_uris.assert_called_once_with(
+        update_document_metadata.assert_called_once_with(
             request.db,
-            annotation.target_uri,
-            [
-                'http://example.com/example_1',
-                'http://example.com/example_2',
-                'http://example.com/example_3',
-            ],
-            created=annotation.created,
-            updated=annotation.updated,
+            models.Annotation.return_value,
+            mock.sentinel.document_meta_dicts,
+            mock.sentinel.document_uri_dicts
         )
-
-    def test_it_calls_merge_documents(self, models):
-        """If it finds more than one document it calls merge_documents()."""
-        models.Document.find_or_create_by_uris.return_value = mock.Mock(
-            count=mock.Mock(return_value=3))
-        request = self.mock_request()
-
-        storage.create_annotation(request, self.annotation_data())
-
-        models.merge_documents.assert_called_once_with(
-            request.db,
-            models.Document.find_or_create_by_uris.return_value,
-            updated=models.Annotation.return_value.updated,
-        )
-
-    def test_it_calls_first(self, models):
-        """If it finds only one document it calls first()."""
-        models.Document.find_or_create_by_uris.return_value = mock.Mock(
-            count=mock.Mock(return_value=1))
-
-        storage.create_annotation(self.mock_request(), self.annotation_data())
-
-        models.Document.find_or_create_by_uris.return_value\
-            .first.assert_called_once_with()
-
-    def test_it_updates_document_updated(self, models):
-        yesterday = "yesterday"
-        document = models.merge_documents.return_value = mock.Mock(
-            updated=yesterday)
-        models.Document.find_or_create_by_uris.return_value.first\
-            .return_value = document
-
-        storage.create_annotation(self.mock_request(), self.annotation_data())
-
-        assert document.updated == models.Annotation.return_value.updated
-
-    def test_it_calls_create_or_update_document_uri(
-            self,
-            models):
-        models.Document.find_or_create_by_uris.return_value.count\
-            .return_value = 1
-
-        request = self.mock_request()
-
-        annotation = models.Annotation.return_value
-
-        annotation_data = self.annotation_data()
-        annotation_data['document']['document_uri_dicts'] = [
-            {
-                'uri': 'http://example.com/example_1',
-                'claimant': 'http://example.com/claimant',
-                'type': 'type',
-                'content_type': None,
-            },
-            {
-                'uri': 'http://example.com/example_2',
-                'claimant': 'http://example.com/claimant',
-                'type': 'type',
-                'content_type': None,
-            },
-            {
-                'uri': 'http://example.com/example_3',
-                'claimant': 'http://example.com/claimant',
-                'type': 'type',
-                'content_type': None,
-            },
-        ]
-
-        storage.create_annotation(request, copy.deepcopy(annotation_data))
-
-        assert models.create_or_update_document_uri.call_count == 3
-        for doc_uri_dict in annotation_data['document']['document_uri_dicts']:
-            models.create_or_update_document_uri.assert_any_call(
-                session=request.db,
-                document=models.Document.find_or_create_by_uris.return_value.first.return_value,
-                created=annotation.created,
-                updated=annotation.updated,
-                **doc_uri_dict
-            )
-
-    def test_it_calls_create_or_update_document_meta(self, models):
-        models.Document.find_or_create_by_uris.return_value.count\
-            .return_value = 1
-
-        request = self.mock_request()
-
-        annotation = models.Annotation.return_value
-
-        annotation_data = self.annotation_data()
-        annotation_data['document']['document_meta_dicts'] = [
-            {
-                'claimant': 'http://example.com/claimant',
-                'claimant_normalized':
-                    'http://example.com/claimant_normalized',
-                'type': 'title',
-                'value': 'foo',
-            },
-            {
-                'type': 'article title',
-                'claimant_normalized':
-                    'http://example.com/claimant_normalized',
-                'value': 'bar',
-                'claimant': 'http://example.com/claimant',
-            },
-            {
-                'type': 'site title',
-                'claimant_normalized':
-                    'http://example.com/claimant_normalized',
-                'value': 'gar',
-                'claimant': 'http://example.com/claimant',
-            },
-        ]
-
-        storage.create_annotation(request, copy.deepcopy(annotation_data))
-
-        assert models.create_or_update_document_meta.call_count == 3
-        for document_meta_dict in annotation_data['document'][
-                'document_meta_dicts']:
-            models.create_or_update_document_meta.assert_any_call(
-                session=request.db,
-                document=models.Document.find_or_create_by_uris.return_value.first.return_value,
-                created=annotation.created,
-                updated=annotation.updated,
-                **document_meta_dict
-            )
 
     def test_it_returns_the_annotation(self, models):
         annotation = storage.create_annotation(self.mock_request(),
@@ -532,6 +387,182 @@ class TestCreateAnnotation(object):
                 'document_meta_dicts': [],
             }
         }
+
+    @pytest.fixture
+    def update_document_metadata(self, patch):
+        return patch('h.api.storage.update_document_metadata')
+
+
+class TestUpdateDocumentMetadata(object):
+
+    def test_it_calls_find_or_create_by_uris(self, annotation, models, db):
+        document_uri_dicts = [
+            {
+                'uri': 'http://example.com/example_1',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+            {
+                'uri': 'http://example.com/example_2',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+            {
+                'uri': 'http://example.com/example_3',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+        ]
+
+        storage.update_document_metadata(db,
+                                         annotation,
+                                         [],
+                                         document_uri_dicts)
+
+        models.Document.find_or_create_by_uris.assert_called_once_with(
+            db,
+            annotation.target_uri,
+            [
+                'http://example.com/example_1',
+                'http://example.com/example_2',
+                'http://example.com/example_3',
+            ],
+            created=annotation.created,
+            updated=annotation.updated,
+        )
+
+    def test_it_calls_merge_documents(self, annotation, db, models):
+        """If it finds more than one document it calls merge_documents()."""
+        models.Document.find_or_create_by_uris.return_value = mock.Mock(
+            count=mock.Mock(return_value=3))
+
+        storage.update_document_metadata(db, annotation, [], [])
+
+        models.merge_documents.assert_called_once_with(
+            db,
+            models.Document.find_or_create_by_uris.return_value,
+            updated=annotation.updated)
+
+    def test_it_calls_first(self, annotation, db, models):
+        """If it finds only one document it calls first()."""
+        models.Document.find_or_create_by_uris.return_value = mock.Mock(
+            count=mock.Mock(return_value=1))
+
+        storage.update_document_metadata(db, annotation, [], [])
+
+        models.Document.find_or_create_by_uris.return_value\
+            .first.assert_called_once_with()
+
+    def test_it_updates_document_updated(self, annotation, db, models):
+        yesterday = "yesterday"
+        document = models.merge_documents.return_value = mock.Mock(
+            updated=yesterday)
+        models.Document.find_or_create_by_uris.return_value.first\
+            .return_value = document
+
+        storage.update_document_metadata(db, annotation, [], [])
+
+        assert document.updated == annotation.updated
+
+    def test_it_calls_create_or_update_document_uri(self,
+                                                    db,
+                                                    annotation,
+                                                    models):
+        models.Document.find_or_create_by_uris.return_value.count\
+            .return_value = 1
+
+        document_uri_dicts = [
+            {
+                'uri': 'http://example.com/example_1',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+            {
+                'uri': 'http://example.com/example_2',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+            {
+                'uri': 'http://example.com/example_3',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+        ]
+
+        storage.update_document_metadata(db,
+                                         annotation,
+                                         [],
+                                         document_uri_dicts)
+
+        assert models.create_or_update_document_uri.call_count == 3
+        for doc_uri_dict in document_uri_dicts:
+            models.create_or_update_document_uri.assert_any_call(
+                session=db,
+                document=models.Document.find_or_create_by_uris.return_value.first.return_value,
+                created=annotation.created,
+                updated=annotation.updated,
+                **doc_uri_dict
+            )
+
+    def test_it_calls_create_or_update_document_meta(self,
+                                                     annotation,
+                                                     db,
+                                                     models):
+        models.Document.find_or_create_by_uris.return_value.count\
+            .return_value = 1
+
+        document_meta_dicts = [
+            {
+                'claimant': 'http://example.com/claimant',
+                'claimant_normalized':
+                    'http://example.com/claimant_normalized',
+                'type': 'title',
+                'value': 'foo',
+            },
+            {
+                'type': 'article title',
+                'claimant_normalized':
+                    'http://example.com/claimant_normalized',
+                'value': 'bar',
+                'claimant': 'http://example.com/claimant',
+            },
+            {
+                'type': 'site title',
+                'claimant_normalized':
+                    'http://example.com/claimant_normalized',
+                'value': 'gar',
+                'claimant': 'http://example.com/claimant',
+            },
+        ]
+
+        storage.update_document_metadata(db,
+                                         annotation,
+                                         document_meta_dicts,
+                                         [])
+
+        assert models.create_or_update_document_meta.call_count == 3
+        for document_meta_dict in document_meta_dicts:
+            models.create_or_update_document_meta.assert_any_call(
+                session=db,
+                document=models.Document.find_or_create_by_uris.return_value.first.return_value,
+                created=annotation.created,
+                updated=annotation.updated,
+                **document_meta_dict
+            )
+
+    @pytest.fixture
+    def annotation(self):
+        return mock.Mock(spec=Annotation())
+
+    @pytest.fixture
+    def db(self):
+        return mock.Mock(spec=db.Session)
 
 
 @pytest.mark.usefixtures('fetch_annotation')
