@@ -116,15 +116,15 @@ installed on:
 
    .. code-block:: bash
 
-      sudo docker run -d --name postgres -p 5432:5432 postgres
-      sudo docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
-      sudo docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 --hostname rabbit rabbitmq:3-management
-      sudo docker run -d --name redis -p 6379:6379 redis
+      docker run -d --name postgres -p 5432:5432 postgres
+      docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 nickstenning/elasticsearch-icu
+      docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 --hostname rabbit rabbitmq:3-management
+      docker run -d --name redis -p 6379:6379 redis
 
    You'll now have four Docker containers named ``postgres``, ``elasticsearch``,
    ``rabbitmq`` and ``redis`` running and exposing their various services on the
-   ports defined above. You should be able to see them by running ``sudo docker
-   ps``. You should also be able to visit your Elasticsearch service by opening
+   ports defined above. You should be able to see them by running ``docker ps``.
+   You should also be able to visit your Elasticsearch service by opening
    http://127.0.0.1:9200/ in a browser, and connect to your PostgreSQL by
    running ``psql postgresql://postgres@localhost/postgres`` (if you have psql
    installed).
@@ -137,14 +137,14 @@ installed on:
 
       .. code-block:: bash
 
-         sudo docker start postgres elasticsearch rabbitmq redis
+         docker start postgres elasticsearch rabbitmq redis
 
 3. Create the `htest` database in the ``postgres`` container. This is needed
    to run the h tests:
 
    .. code-block:: bash
 
-      sudo docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres -c "CREATE DATABASE htest;"'
+      docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres -c "CREATE DATABASE htest;"'
 
 
 .. tip::
@@ -155,7 +155,7 @@ installed on:
 
    .. code-block:: bash
 
-      sudo docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
+      docker run -it --link postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
 
    This runs psql in a fourth Docker container (from the same official
    PostgreSQL image, which also contains psql) and links it to your named
@@ -170,7 +170,7 @@ installed on:
 
    .. code-block:: bash
 
-      sudo docker logs rabbitmq
+      docker logs rabbitmq
 
    For more on how to use Docker see the `Docker website`_.
 
@@ -374,3 +374,27 @@ admin access rights using H's command-line tools.
 See the :doc:`../administration` documentation for information
 on how to give the initial user admin rights and access the Administration
 Dashboard.
+
+
+Troubleshooting
+---------------
+
+
+Cannot connect to the Docker daemon
+```````````````````````````````````
+
+If you get an error that looks like this when trying to run ``docker``
+commands::
+
+ Cannot connect to the Docker daemon. Is the docker daemon running on this host?
+ Error: failed to start containers: postgres
+
+it could be because you don't have permission to access the Unix socket that
+the docker daemon is bound to. On some operating systems (e.g. Linux) you need
+to either:
+
+* Take additional steps during Docker installation to give your Unix user
+  access to the Docker daemon's port (consult the installation
+  instructions for your operating system on the `Docker website`_), or
+
+* Prefix all ``docker`` commands with ``sudo``.
