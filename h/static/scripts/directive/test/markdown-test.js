@@ -50,18 +50,23 @@ describe('markdown', function () {
             fn();
           };
         },
+        '../render-markdown': noCallThru(function (markdown, $sanitize) {
+          return $sanitize('rendered:' + markdown);
+        }),
+
         '../markdown-commands': {
           convertSelectionToLink: mockFormattingCommand,
           toggleBlockStyle: mockFormattingCommand,
           toggleSpanStyle: mockFormattingCommand,
           LinkType: require('../../markdown-commands').LinkType,
         },
-      })))
-      .filter('converter', function () {
-        return function (input) {
-          return 'rendered:' + input;
-        };
-      });
+        '../media-embedder': noCallThru({
+          replaceLinksWithEmbeds: function (element) {
+            // Tag the element as having been processed
+            element.dataset.replacedLinksWithEmbeds = 'yes';
+          },
+        }),
+      })));
   });
 
   beforeEach(function () {
@@ -101,16 +106,30 @@ describe('markdown', function () {
       var editor = util.createDirective(document, 'markdown', {readOnly: true});
       assert.equal(getRenderedHTML(editor), 'rendered:');
     });
-  });
 
-  describe('math rendering', function () {
-    it('should render LaTeX', function () {
+    it('should sanitize the result', function () {
       var editor = util.createDirective(document, 'markdown', {
         readOnly: true,
-        text: '$$x*2$$',
+        text: 'Hello <script>alert("attack");</script> World',
       });
       assert.equal(getRenderedHTML(editor),
-        'rendered:math:\\displaystyle {x*2}rendered:');
+        'rendered:Hello  World');
+    });
+
+    it('should replace links with embeds in rendered output', function () {
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: true,
+        text: 'A video: https://www.youtube.com/watch?v=yJDv-zdhzMY',
+      });
+      assert.equal(viewElement(editor).dataset.replacedLinksWithEmbeds, 'yes');
+    });
+
+    it('should tolerate malformed HTML', function () {
+      var editor = util.createDirective(document, 'markdown', {
+        readOnly: true,
+        text: 'Hello <one two.',
+      });
+      assert.equal(getRenderedHTML(editor), 'rendered:Hello ');
     });
   });
 
