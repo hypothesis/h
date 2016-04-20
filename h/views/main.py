@@ -55,8 +55,8 @@ def robots(context, request):
 
 @view_config(route_name='stream')
 def stream(context, request):
-    atom = request.route_url('stream_atom')
-    rss = request.route_url('stream_rss')
+    atom = request.route_url('stream_atom', _query=request.query_string)
+    rss = request.route_url('stream_rss', _query=request.query_string)
     return render_app(request, {
         'link_tags': [
             {'rel': 'alternate', 'href': atom, 'type': 'application/atom+xml'},
