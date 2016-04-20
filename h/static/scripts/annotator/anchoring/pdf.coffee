@@ -62,8 +62,34 @@ findPage = (offset) ->
   index = 0
   total = 0
 
+  # We call `count` once for each page, in order. The passed offset is found on
+  # the first page where the cumulative length of the text content exceeds the
+  # offset value.
+  #
+  # When we find the page the offset is on, we return an object containing the
+  # page index, the offset at the start of that page, and the textContent of
+  # that page.
+  #
+  # To understand this a little better, here's a worked example. Imagine a
+  # document with the following page lengths:
+  #
+  #    Page 0 has length 100
+  #    Page 1 has length 50
+  #    Page 2 has length 50
+  #
+  # Then here are the pages that various offsets are found on:
+  #
+  #    offset | index
+  #    --------------
+  #    0      | 0
+  #    99     | 0
+  #    100    | 1
+  #    101    | 1
+  #    149    | 1
+  #    150    | 2
+  #
   count = (textContent) ->
-    if total + textContent.length >= offset
+    if total + textContent.length > offset
       offset = total
       return Promise.resolve({index, offset, textContent})
     else
