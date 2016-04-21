@@ -6,6 +6,7 @@ var scrollIntoView = require('scroll-into-view');
 var annotationMetadata = require('./annotation-metadata');
 var events = require('./events');
 var parseAccountID = require('./filter/persona').parseAccountID;
+var scopeTimeout = require('./util/scope-timeout');
 
 function authStateFromUserID(userid) {
   if (userid) {
@@ -107,7 +108,7 @@ module.exports = function AppController(
   function scrollToView(selector) {
     // Add a timeout so that if the element has just been shown (eg. via ngIf)
     // it is added to the DOM before we try to locate and scroll to it.
-    setTimeout(function () {
+    scopeTimeout($scope, function () {
       scrollIntoView($document[0].querySelector(selector));
     }, 0);
   }

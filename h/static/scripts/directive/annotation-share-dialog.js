@@ -2,6 +2,8 @@
 
 var angular = require('angular');
 
+var scopeTimeout = require('../util/scope-timeout');
+
 module.exports = function () {
   return {
     bindToController: true,
@@ -15,7 +17,7 @@ module.exports = function () {
       $scope.$watch('vm.isOpen', function (isOpen) {
         if (isOpen) {
           // Focus the input and select it once the dialog has become visible
-          setTimeout(function () {
+          scopeTimeout($scope, function () {
             shareLinkInput.focus();
             shareLinkInput.select();
           });
@@ -32,11 +34,9 @@ module.exports = function () {
           // Stop listening for clicks outside the dialog once it is closed.
           // The setTimeout() here is to ignore the initial click that opens
           // the dialog.
-          setTimeout(function () {
-              document.addEventListener('click', hideListener);
-            },
-            0
-          );
+          scopeTimeout($scope, function () {
+            document.addEventListener('click', hideListener);
+          }, 0);
         }
       }.bind(this));
 

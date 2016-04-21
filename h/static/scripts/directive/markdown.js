@@ -6,6 +6,7 @@ var debounce = require('lodash.debounce');
 var commands = require('../markdown-commands');
 var mediaEmbedder = require('../media-embedder');
 var renderMarkdown = require('../render-markdown');
+var scopeTimeout = require('../util/scope-timeout');
 
 /**
  * @ngdoc directive
@@ -49,7 +50,7 @@ module.exports = function($sanitize) {
         // A timeout is used so that focus() is not called until
         // the visibility change has been applied (by adding or removing
         // the relevant CSS classes)
-        setTimeout(function () {
+        scopeTimeout(scope, function () {
           input.focus();
         }, 0);
       }
