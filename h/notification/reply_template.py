@@ -102,20 +102,8 @@ def generate_notifications(request, annotation, action):
         return
 
     # Don't send reply notifications to the author of the parent annotation if
-    # the reply is private (the author of the parent annotation won't be able
-    # to read the reply).
-    if not annotation.shared:
-        return
-
-    # Don't send reply notifications to the author of the parent annotation if
-    # the reply is in a group that the author of the parent annotation isn't
-    # (the author of the parent annotation won't be able to read the reply).
-    parent_principals = auth.effective_principals(parent.userid, request)
-    if annotation.groupid == '__world__':
-        group_principal = security.Everyone
-    else:
-        group_principal = 'group:{}'.format(annotation.groupid)
-    if group_principal not in parent_principals:
+    # the author doesn't have permission to read the reply.
+    if not auth.has_permission(request, annotation, parent.userid, 'read'):
         return
 
     # Store the parent values as additional data

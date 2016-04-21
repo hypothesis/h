@@ -338,7 +338,10 @@ def test_good_conditions():
     send = rt.check_conditions(annotation, data)
     assert send is True
 
-generate_notifications_fixtures = pytest.mark.usefixtures('effective_principals')
+
+generate_notifications_fixtures = pytest.mark.usefixtures(
+    'auth', 'effective_principals')
+
 
 @generate_notifications_fixtures
 def test_generate_notifications_empty_if_action_not_create():
@@ -379,16 +382,15 @@ def test_generate_notifications_does_not_fetch_if_annotation_has_no_parent(fetch
 @generate_notifications_fixtures
 @patch('h.notification.reply_template.render_reply_notification')
 @patch('h.notification.reply_template.Subscriptions')
-def test_generate_notifications_only_if_author_can_read_reply(Subscriptions,
-                                                              render_reply_notification,
-                                                              effective_principals):
+def test_generate_notifications_only_if_author_can_read_reply(
+        Subscriptions,
+        render_reply_notification,
+        auth,
+        effective_principals):
     """
     If the annotation is not readable by the parent author, no notifications
     should be generated.
     """
-    private_annotation = _fake_anno(6)
-    shared_annotation = _fake_anno(7)
-    request = _fake_request()
     effective_principals.return_value = [
         security.Everyone,
         security.Authenticated,
@@ -405,10 +407,16 @@ def test_generate_notifications_only_if_author_can_read_reply(Subscriptions,
         ['dummy@example.com']
     )
 
-    notifications = rt.generate_notifications(request, private_annotation, 'create')
+    auth.has_permission.return_value = False
+    notifications = rt.generate_notifications(_fake_request(),
+                                              _fake_anno(6),
+                                              'create')
     assert list(notifications) == []
 
-    notifications = rt.generate_notifications(request, shared_annotation, 'create')
+    auth.has_permission.return_value = True
+    notifications = rt.generate_notifications(_fake_request(),
+                                              _fake_anno(7),
+                                              'create')
     assert list(notifications) != []
 
 
@@ -466,6 +474,11 @@ def test_send_if_everything_is_okay():
                     mock_user_db.return_value = user
                     msgs = rt.generate_notifications(request, annotation, 'create')
                     msgs.next()
+
+
+@pytest.fixture
+def auth(patch):
+    return patch('h.notification.reply_template.auth')
 
 
 @pytest.fixture
