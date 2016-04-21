@@ -74,6 +74,18 @@ describe 'Discovery', ->
       matcher = sinon.match(/__cross_frame_dhcp_ack:\d+/)
       assert.calledWith(fakeTopWindow.postMessage, matcher, 'top')
 
+    it 'sends an "ack" to the wildcard origin if a request comes from a frame with null origin', ->
+      fakeFrameWindow.addEventListener.yields({
+        data: '__cross_frame_dhcp_request'
+        source: fakeTopWindow
+        origin: 'null'
+      })
+      server.startDiscovery(->)
+
+      assert.called(fakeTopWindow.postMessage)
+      matcher = sinon.match(/__cross_frame_dhcp_ack:\d+/)
+      assert.calledWith(fakeTopWindow.postMessage, matcher, '*')
+
     it 'calls the discovery callback on receiving "request"', ->
       fakeFrameWindow.addEventListener.yields({
         data: '__cross_frame_dhcp_request'
