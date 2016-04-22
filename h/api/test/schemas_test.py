@@ -39,6 +39,7 @@ class TestJSONSchema(object):
         assert message.startswith("123 is not of type 'string'")
 
 
+@pytest.mark.usefixtures('authn_policy', 'storage')
 class TestAnnotationSchema(object):
 
     def test_it_does_not_raise_for_minimal_valid_data(self):
@@ -563,17 +564,78 @@ class TestAnnotationSchema(object):
 
         assert result['references'] == []
 
-    def test_it_deletes_groupid_for_replies(self):
+    def test_it_inserts_the_group_in_replies(self, authn_policy, storage):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
+        data = annotation_data(references=['parent_annotation_id'])
+        assert 'group' not in data
+        assert 'groupid' not in data
+        storage.fetch_annotation.return_value.groupid = 'parent_group'
+        authn_policy.effective_principals.return_value.append(
+            'group:parent_group')
 
-        result = schema.validate(
-            annotation_data(
-                group='foo',
-                references=['parent annotation id'],
-            )
-        )
+        result = schema.validate(data)
 
-        assert 'groupid' not in result
+        assert result['groupid'] == 'parent_group'
+
+    def test_it_overwrites_invalid_groups_in_replies(self,
+                                                     authn_policy,
+                                                     storage):
+        schema = schemas.AnnotationSchema(testing.DummyRequest())
+        data = annotation_data(
+            group='some_other_group',
+            references=['parent_annotation_id'],)
+        storage.fetch_annotation.return_value.groupid = 'parent_group'
+        authn_policy.effective_principals.return_value.append(
+            'group:parent_group')
+
+        result = schema.validate(data)
+
+        assert result['groupid'] == 'parent_group'
+        assert 'group' not in result
+
+    def test_it_leaves_the_group_of_a_reply_if_valid(self,
+                                                     authn_policy,
+                                                     storage):
+        schema = schemas.AnnotationSchema(testing.DummyRequest())
+        data = annotation_data(
+            group='parent_group',
+            references=['parent_annotation_id'],)
+        storage.fetch_annotation.return_value.groupid = 'parent_group'
+        authn_policy.effective_principals.return_value.append(
+            'group:parent_group')
+
+        result = schema.validate(data)
+
+        assert result['groupid'] == 'parent_group'
+
+    def test_it_raises_if_parent_id_does_not_exist(self, storage):
+        schema = schemas.AnnotationSchema(testing.DummyRequest())
+        data = annotation_data(
+            group='parent_group',
+            references=['parent_annotation_id'],)
+        # Parent doesn't exist in db.
+        storage.fetch_annotation.return_value = None
+
+        with pytest.raises(schemas.ValidationError) as err:
+            schema.validate(data)
+
+        assert err.value.message == ('references.0: Annotation '
+                                     'parent_annotation_id does not exist')
+
+    def test_it_raises_if_user_does_not_have_permission_for_group(
+            self,
+            authn_policy):
+        schema = schemas.AnnotationSchema(testing.DummyRequest())
+        data = annotation_data(group='foogroup')
+        # User doesn't have permissions for this group.
+        assert 'group:foogroup' not in (
+            authn_policy.effective_principals.return_value)
+
+        with pytest.raises(schemas.ValidationError) as err:
+            schema.validate(data)
+
+        assert err.value.message == ('group: You may not create annotations '
+                                     'in groups you are not a member of!')
 
     def test_it_moves_extra_data_into_extra_sub_dict(self):
         schema = schemas.AnnotationSchema(testing.DummyRequest())
@@ -590,7 +652,7 @@ class TestAnnotationSchema(object):
             'tags': ['gar', 'har'],
             'permissions': {'read': ['group:__world__']},
             'target': [],
-            'group': '__world__',
+            'group': 'foo',
             'references': ['parent'],
 
             # These should end up in extra.
@@ -701,8 +763,19 @@ class TestAnnotationSchema(object):
         assert 'foo' not in appstruct['document']
 
     @pytest.fixture
+    def authn_policy(self, authn_policy):
+        authn_policy.effective_principals.return_value = ['group:foo']
+        return authn_policy
+
+    @pytest.fixture
     def parse_document_claims(self, patch):
         return patch('h.api.schemas.parse_document_claims')
+
+    @pytest.fixture
+    def storage(self, patch):
+        storage = patch('h.api.schemas.storage')
+        storage.fetch_annotation.return_value.groupid = 'foo'
+        return storage
 
 
 class TestLegacyCreateAnnotationSchema(object):

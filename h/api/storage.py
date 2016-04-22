@@ -11,7 +11,6 @@ from functools import partial
 
 from pyramid import i18n
 
-from h.api import schemas
 from h.api import transform
 from h.api import models
 from h.api.events import AnnotationBeforeSaveEvent
@@ -81,31 +80,6 @@ def create_annotation(request, data):
     document_uri_dicts = data['document']['document_uri_dicts']
     document_meta_dicts = data['document']['document_meta_dicts']
     del data['document']
-
-    # Replies must have the same group as their parent.
-    if data['references']:
-        top_level_annotation_id = data['references'][0]
-        top_level_annotation = fetch_annotation(request,
-                                                top_level_annotation_id,
-                                                _postgres=True)
-        if top_level_annotation:
-            data['groupid'] = top_level_annotation.groupid
-        else:
-            raise schemas.ValidationError(
-                'references.0: ' +
-                _('Annotation {annotation_id} does not exist').format(
-                    annotation_id=top_level_annotation_id)
-            )
-
-    # The user must have permission to create an annotation in the group
-    # they've asked to create one in.
-    if data['groupid'] != '__world__':
-        group_principal = 'group:{}'.format(data['groupid'])
-        if group_principal not in request.effective_principals:
-            raise schemas.ValidationError('group: ' +
-                                          _('You may not create annotations '
-                                            'in groups you are not a member '
-                                            'of!'))
 
     annotation = models.Annotation(**data)
     request.db.add(annotation)

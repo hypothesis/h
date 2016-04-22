@@ -8,6 +8,7 @@ from pyramid import i18n
 from pyramid import security
 
 from h.api import parse_document_claims
+from h.api import storage
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -199,11 +200,30 @@ class AnnotationSchema(JSONSchema):
         new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
         new_appstruct['references'] = appstruct.pop('references', [])
 
-        # Replies always get the same groupid as their parent. The parent's
-        # groupid is added to the reply annotation later by the storage code.
-        # Here we just delete any group sent by the client from replies.
-        if new_appstruct['references'] and 'groupid' in new_appstruct:
-            del new_appstruct['groupid']
+        # Replies must have the same group as their parent.
+        if new_appstruct['references']:
+            top_level_annotation_id = new_appstruct['references'][0]
+            top_level_annotation = storage.fetch_annotation(
+                self.request,
+                top_level_annotation_id,
+                _postgres=True)
+            if top_level_annotation:
+                new_appstruct['groupid'] = top_level_annotation.groupid
+            else:
+                raise ValidationError(
+                    'references.0: ' +
+                    _('Annotation {annotation_id} does not exist').format(
+                        annotation_id=top_level_annotation_id)
+                )
+
+        # The user must have permission to create an annotation in the group
+        # they've asked to create one in.
+        if new_appstruct['groupid'] != '__world__':
+            group_principal = 'group:{}'.format(new_appstruct['groupid'])
+            if group_principal not in self.request.effective_principals:
+                raise ValidationError(
+                    'group: ' + _('You may not create annotations in groups '
+                                  'you are not a member of!'))
 
         new_appstruct['extra'] = appstruct
 

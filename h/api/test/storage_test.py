@@ -225,74 +225,8 @@ class TestLegacyCreateAnnotation(object):
         return patch('h.api.storage.transform')
 
 
-@pytest.mark.usefixtures('fetch_annotation',
-                         'models')
+@pytest.mark.usefixtures('models')
 class TestCreateAnnotation(object):
-
-    def test_it_fetches_parent_annotation_for_replies(self,
-                                                      authn_policy,
-                                                      fetch_annotation):
-        request = self.mock_request()
-
-        # Make the annotation's parent belong to 'test-group'.
-        fetch_annotation.return_value.groupid = 'test-group'
-
-        # The request will need permission to write to 'test-group'.
-        authn_policy.effective_principals.return_value = ['group:test-group']
-
-        data = self.annotation_data()
-
-        # The annotation is a reply.
-        data['references'] = ['parent_annotation_id']
-
-        storage.create_annotation(request, data)
-
-        fetch_annotation.assert_called_once_with(request,
-                                                 'parent_annotation_id',
-                                                 _postgres=True)
-
-    def test_it_sets_group_for_replies(self,
-                                       authn_policy,
-                                       fetch_annotation,
-                                       models):
-        # Make the annotation's parent belong to 'test-group'.
-        fetch_annotation.return_value.groupid = 'test-group'
-
-        # The request will need permission to write to 'test-group'.
-        authn_policy.effective_principals.return_value = ['group:test-group']
-
-        data = self.annotation_data()
-        assert data['groupid'] != 'test-group'
-
-        # The annotation is a reply.
-        data['references'] = ['parent_annotation_id']
-
-        storage.create_annotation(self.mock_request(), data)
-
-        assert models.Annotation.call_args[1]['groupid'] == 'test-group'
-
-    def test_it_raises_if_parent_annotation_does_not_exist(self,
-                                                           fetch_annotation):
-        fetch_annotation.return_value = None
-
-        data = self.annotation_data()
-
-        # The annotation is a reply.
-        data['references'] = ['parent_annotation_id']
-
-        with pytest.raises(schemas.ValidationError) as err:
-            storage.create_annotation(self.mock_request(), data)
-
-        assert str(err.value).startswith('references.0: ')
-
-    def test_it_raises_if_user_does_not_have_permissions_for_group(self):
-        data = self.annotation_data()
-        data['groupid'] = 'foo-group'
-
-        with pytest.raises(schemas.ValidationError) as err:
-            storage.create_annotation(self.mock_request(), data)
-
-        assert str(err.value).startswith('group: ')
 
     def test_it_inits_an_Annotation_model(self, models):
         data = self.annotation_data()
