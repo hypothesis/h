@@ -1,4 +1,3 @@
-
 .sidebar-tutorial__header {
   color: $color-cardinal;
   font-weight: $title-font-weight;
@@ -29,11 +28,13 @@
   display: table;
   padding: 0;
 }
+
 .sidebar-tutorial__list-item {
   list-style: none;
   counter-increment: sidebar-tutorial__list;
   display: table-row;
 }
+
 .sidebar-tutorial__list-item::before {
   content: counter(sidebar-tutorial__list) ".";
   display: table-cell; /* aha! */
