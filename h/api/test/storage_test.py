@@ -218,17 +218,83 @@ class TestLegacyCreateAnnotation(object):
     def annotation_data(self):
         return {'foo': 'bar'}
 
-    @pytest.fixture
-    def AnnotationBeforeSaveEvent(self, patch):
-        return patch('h.api.storage.AnnotationBeforeSaveEvent')
 
-    @pytest.fixture
-    def partial(self, patch):
-        return patch('h.api.storage.partial')
+@pytest.mark.usefixtures('AnnotationBeforeSaveEvent',
+                         'models',
+                         'transform')
+class TestLegacyUpdateAnnotation(object):
 
-    @pytest.fixture
-    def transform(self, patch):
-        return patch('h.api.storage.transform')
+    def test_it_fetches_the_annotation(self, models):
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        models.elastic.Annotation.fetch.assert_called_once_with(
+            'test_annotation_id')
+
+    def test_it_calls_update(self, models):
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        models.elastic.Annotation.fetch.return_value.update\
+            .assert_called_once_with(mock.sentinel.data)
+
+    def test_it_calls_partial(self, partial):
+        request = DummyRequest()
+
+        storage.legacy_update_annotation(request,
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        partial.assert_called_once_with(
+            storage.fetch_annotation, request, _postgres=False)
+
+    def test_it_calls_prepare(self, models, partial, transform):
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        transform.prepare.assert_called_once_with(
+            models.elastic.Annotation.fetch.return_value, partial.return_value)
+
+    def test_it_inits_AnnotationBeforeSaveEvent(self,
+                                                AnnotationBeforeSaveEvent,
+                                                models):
+        request = DummyRequest()
+
+        storage.legacy_update_annotation(request,
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        AnnotationBeforeSaveEvent.assert_called_once_with(
+            request, models.elastic.Annotation.fetch.return_value)
+
+    def test_it_calls_notify(self, AnnotationBeforeSaveEvent):
+        request = DummyRequest()
+        request.registry.notify = mock.Mock()
+
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        request.registry.notify.assert_called_once_with(
+            AnnotationBeforeSaveEvent.return_value)
+
+    def test_it_calls_save(self, models):
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        models.elastic.Annotation.fetch.return_value.save\
+            .assert_called_once_with()
+
+    def test_it_returns_the_annotation(self, models):
+        returned = storage.legacy_update_annotation(DummyRequest(),
+                                                    'test_annotation_id',
+                                                     mock.sentinel.data)
+
+        assert returned == models.elastic.Annotation.fetch.return_value
 
 
 class TestUpdateDocumentMetadata(object):
@@ -579,6 +645,11 @@ class TestDeleteAnnotation(object):
 
 
 @pytest.fixture
+def AnnotationBeforeSaveEvent(patch):
+    return patch('h.api.storage.AnnotationBeforeSaveEvent')
+
+
+@pytest.fixture
 def fetch_annotation(patch):
     return patch('h.api.storage.fetch_annotation')
 
@@ -591,5 +662,15 @@ def models(patch):
 
 
 @pytest.fixture
+def partial(patch):
+    return patch('h.api.storage.partial')
+
+
+@pytest.fixture
 def postgres_enabled(patch):
     return patch('h.api.storage._postgres_enabled')
+
+
+@pytest.fixture
+def transform(patch):
+    return patch('h.api.storage.transform')
