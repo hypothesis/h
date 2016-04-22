@@ -63,6 +63,12 @@ class TestFetchAnnotation(object):
         models.elastic.Annotation.fetch.assert_called_once_with('123')
         assert models.elastic.Annotation.fetch.return_value == actual
 
+    def test_it_does_not_crash_if_id_is_invalid(self):
+        request = DummyRequest(db=db.Session)
+        postgres_enabled.return_value = True
+
+        assert storage.fetch_annotation(request, 'foo', _postgres=True) is None
+
 
 class TestExpandURI(object):
 
