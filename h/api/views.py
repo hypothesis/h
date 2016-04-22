@@ -29,6 +29,7 @@ from h.api.presenters import AnnotationJSONLDPresenter
 from h.api import search as search_lib
 from h.api import schemas
 from h.api import storage
+from h.api.models import elastic
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -205,20 +206,40 @@ def read_jsonld(annotation, request):
     return presenter.asdict()
 
 
-@api_config(route_name='api.annotation', request_method='PUT', permission='update')
+@api_config(route_name='api.annotation',
+            request_method='PUT',
+            permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
-    schema = schemas.LegacyUpdateAnnotationSchema(request,
-                                                  annotation=annotation)
-    appstruct = schema.validate(_json_payload(request))
-    annotation = storage.legacy_update_annotation(request,
-                                                  annotation.id,
-                                                  appstruct)
+    json_payload = _json_payload(request)
 
-    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-    _publish_annotation_event(request, annotation, 'update',
-                              annotation_dict=annotation_dict)
-    return annotation_dict
+    legacy_annotation = elastic.Annotation.fetch(annotation.id)
+
+    # Validate the annotation for, and update the annotation in, PostgreSQL.
+    if request.feature('postgres'):
+        schema = schemas.UpdateAnnotationSchema(request, annotation=annotation)
+        appstruct = schema.validate(copy.deepcopy(json_payload))
+        annotation = storage.update_annotation(request.db,
+                                               annotation.id,
+                                               appstruct)
+
+    # Validate the annotation for, and update the annotation in, Elasticsearch.
+    legacy_schema = schemas.LegacyUpdateAnnotationSchema(
+        request, annotation=legacy_annotation)
+    legacy_appstruct = legacy_schema.validate(copy.deepcopy(json_payload))
+    legacy_annotation = storage.legacy_update_annotation(request,
+                                                         legacy_annotation.id,
+                                                         legacy_appstruct)
+
+    if request.feature('postgres'):
+        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+        _publish_annotation_event(request, annotation_dict, 'update')
+        return annotation_dict
+    else:
+        annotation_dict = (
+            AnnotationJSONPresenter(request, legacy_annotation).asdict())
+        _publish_annotation_event(request, annotation_dict, 'update')
+        return annotation_dict
 
 
 @api_config(route_name='api.annotation', request_method='DELETE', permission='delete')
