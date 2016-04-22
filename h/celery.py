@@ -40,7 +40,7 @@ celery.conf.update(
     CELERY_ACKS_LATE=True,
     CELERY_DISABLE_RATE_LIMITS=True,
     CELERY_IGNORE_RESULT=True,
-    CELERY_IMPORTS=('h.mailer', 'h.nipsa.worker'),
+    CELERY_IMPORTS=('h.mailer', 'h.nipsa.worker', 'h.indexer'),
     CELERY_TASK_SERIALIZER='json',
     # Only accept one task at a time. This also probably isn't what we want
     # (especially not for, say, a search indexer task) but it makes the
