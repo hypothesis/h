@@ -1,0 +1,15 @@
+{{ reply_user.username }} has just left a reply to your annotation on "{{ document_title }}".
+{{ document_url }}
+
+On {{ parent.created | human_timestamp }} {{ parent_user.username }} said:
+
+"{{ parent.text or "" }}"
+
+On {{ reply.created | human_timestamp }} {{ reply_user.username }} said:
+
+"{{ reply.text or "" }}"
+
+View this reply: {{ reply_url }}
+or view {{ reply_user.username }}'s stream: {{ reply_user_url }}
+
+If you'd rather not receive these notifications you can unsubscribe here: {{ unsubscribe_url }}

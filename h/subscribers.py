@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import json
-
 from h import __version__
+from h import emails
 from h import mailer
 from h.api import presenters
 from h.notification.reply_template import generate_notifications
@@ -40,13 +39,17 @@ def publish_annotation_event(event):
 
 
 def send_reply_notifications(event,
-                             generate=generate_notifications,
+                             generate_notifications=generate_notifications,
+                             generate_mail=emails.reply_notification.generate,
                              send=mailer.send.delay):
     """Queue any reply notification emails triggered by an annotation event."""
+    request = event.request
+    annotation = event.annotation
+    action = event.action
     try:
-        notifications = generate(event.request, event.annotation, event.action)
-        for (subject, body, html, recipients) in notifications:
-            send(recipients, subject, body, html)
+        for notification in generate_notifications(request, annotation, action):
+            send_params = generate_mail(request, notification)
+            send(*send_params)
     # We know for a fact that occasionally `generate_notifications` throws
     # exceptions. We don't want this to cause the annotation CRUD action to
     # fail, but we do want to collect the error in Sentry, so we explicitly

@@ -5,9 +5,6 @@ from ..security import derive_key
 
 
 def includeme(config):
-    config.include('.types')
-    config.include('.gateway')
-    config.include('.notifier')
     config.include('.reply_template')
     config.include('.views')
 

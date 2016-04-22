@@ -1,0 +1,23 @@
+<p>
+  <a href="{{ reply_user_url }}">{{ reply_user.username }}</a>
+  has just left a reply to your annotation on
+  &ldquo;<a href="{{ document_url }}">{{ document_title }}</a>&rdquo;.
+</p>
+<p>
+  On <a href="{{ parent_url }}">{{ parent.created | human_timestamp }}</a>
+  {{ parent_user.username }} said:
+</p>
+<blockquote>&ldquo;{{ parent.text or "" }}&rdquo;</blockquote>
+<p>
+  On <a href="{{ reply_url }}">{{ reply.created | human_timestamp }}</a>
+  {{ reply_user.username }} said:
+</p>
+<blockquote>&ldquo;{{ reply.text or "" }}&rdquo;</blockquote>
+<p><a href="{{ reply_url }}">Reply to {{ reply_user.username }}</a>.</p>
+<hr>
+<p>
+  <small>
+    If you&rsquo;d rather not receive these notifications you can
+    <a href="{{ unsubscribe_url }}">unsubscribe now</a>.
+  </small>
+</p>
