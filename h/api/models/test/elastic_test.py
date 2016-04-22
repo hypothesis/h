@@ -49,6 +49,23 @@ class TestAnnotation(object):
     def test_target_uri_from_target_source(self, annotation):
         assert annotation.target_uri == 'http://example.com'
 
+    def test_target_uri_normalized_normalizes_target_uri(self,
+                                                         target_uri,
+                                                         uri_normalize):
+        annotation = Annotation()
+        target_uri.return_value = 'http://example.com'
+        annotation.target_uri_normalized
+        uri_normalize.assert_called_once_with(annotation.target_uri)
+
+    def test_target_uri_normalized_returns_normalized_uri(self, uri_normalize):
+        annotation = Annotation(uri='http://example.com')
+        uri_normalize.return_value = 'normalized'
+        assert annotation.target_uri_normalized == 'normalized'
+
+    def test_target_uri_normalized_returns_none_when_target_uri_not_set(self):
+        annotation = Annotation()
+        assert annotation.target_uri_normalized is None
+
     def test_text(self):
         annotation = Annotation({'text': 'Lorem ipsum'})
         assert annotation.text == 'Lorem ipsum'
@@ -263,6 +280,16 @@ class TestAnnotation(object):
         return patch('h.api.models.elastic.Annotation.hostname_or_filename',
                      autospec=None,
                      new_callable=PropertyMock)
+
+    @pytest.fixture
+    def target_uri(self, patch):
+        return patch('h.api.models.elastic.Annotation.target_uri',
+                     autospec=None,
+                     new_callable=PropertyMock)
+
+    @pytest.fixture
+    def uri_normalize(self, patch):
+        return patch('h.api.models.elastic.uri.normalize')
 
 
 class TestDocument(object):
