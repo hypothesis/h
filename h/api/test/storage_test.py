@@ -561,9 +561,73 @@ class TestCreateAnnotation(object):
             }
         }
 
+
+@pytest.mark.usefixtures('models',
+                         'update_document_metadata')
+class TestUpdateAnnotation(object):
+
+    def test_it_calls_get(self, annotation_data, models):
+        storage.update_annotation(mock.sentinel.session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        models.Annotation.query.get.assert_called_once_with(
+            'test_annotation_id')
+
+    def test_it_updates_the_annotation(self, annotation_data, models):
+        annotation = models.Annotation.query.get.return_value = mock.Mock()
+
+        storage.update_annotation(mock.sentinel.session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        for key, value in annotation_data.items():
+            assert getattr(annotation, key) == value
+
+    def test_it_calls_update_document_metadata(self,
+                                               annotation_data,
+                                               models,
+                                               update_document_metadata):
+        annotation = models.Annotation.query.get.return_value = mock.Mock()
+        annotation_data['document']['document_meta_dicts'] = (
+            mock.sentinel.document_meta_dicts)
+        annotation_data['document']['document_uri_dicts'] = (
+            mock.sentinel.document_uri_dicts)
+
+        storage.update_annotation(mock.sentinel.session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        update_document_metadata.assert_called_once_with(
+            mock.sentinel.session,
+            annotation,
+            mock.sentinel.document_meta_dicts,
+            mock.sentinel.document_uri_dicts
+        )
+
+    def test_it_returns_the_annotation(self, annotation_data, models):
+        annotation = storage.update_annotation(mock.sentinel.session,
+                                               'test_annotation_id',
+                                               annotation_data)
+
+        assert annotation == models.Annotation.query.get.return_value
+
     @pytest.fixture
-    def update_document_metadata(self, patch):
-        return patch('h.api.storage.update_document_metadata')
+    def annotation_data(self):
+        return {
+            'userid': 'acct:test@localhost',
+            'text': 'text',
+            'tags': ['one', 'two'],
+            'shared': False,
+            'target_uri': 'http://www.example.com/example.html',
+            'groupid': '__world__',
+            'references': [],
+            'target_selectors': ['selector_one', 'selector_two'],
+            'document': {
+                'document_uri_dicts': [],
+                'document_meta_dicts': [],
+            }
+        }
 
 
 @pytest.mark.usefixtures('fetch_annotation')
@@ -674,3 +738,7 @@ def postgres_enabled(patch):
 @pytest.fixture
 def transform(patch):
     return patch('h.api.storage.transform')
+
+@pytest.fixture
+def update_document_metadata(patch):
+    return patch('h.api.storage.update_document_metadata')
