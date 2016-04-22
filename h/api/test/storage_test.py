@@ -80,7 +80,7 @@ class TestExpandURI(object):
         assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
 
-    def test_expand_uri_postgres_document_doesnt_expand_canonical_uris(
+    def test_expand_uri_postgres_document_returns_all_canonical_uris_when_canonical(
             self,
             postgres_enabled):
         request = DummyRequest(db=db.Session)
@@ -91,12 +91,14 @@ class TestExpandURI(object):
             DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
             DocumentURI(uri='http://example.com/', type='rel-canonical',
                         claimant='http://example.com'),
+            DocumentURI(uri='https://example.com/', type='rel-canonical',
+                        claimant='https://example.com'),
         ])
         db.Session.add(document)
         db.Session.flush()
 
         assert storage.expand_uri(request, "http://example.com/") == [
-            "http://example.com/"]
+            "http://example.com/", "https://example.com/"]
 
     def test_expand_uri_elastic_document_doesnt_expand_canonical_uris(
             self,

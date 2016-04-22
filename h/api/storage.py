@@ -222,13 +222,16 @@ def expand_uri(request, uri):
     if doc is None:
         return [uri]
 
-    # We check if the match was a "canonical" link. If so, all annotations
-    # created on that page are guaranteed to have that as their target.source
-    # field, so we don't need to expand to other URIs and risk false positives.
+    # We check if the match was a "canonical" link. If so, we return a list of
+    # all canonical uris we have stored in our database. This will surface all
+    # annotations since they are guaranteed to have the canonical uri as their
+    # target.source field.
+    # Since we return all canonical uris we have stored we also make sure that
+    # this behaviour still works when the website changes its canonical uri.
     docuris = doc.document_uris
     for docuri in docuris:
         if docuri.uri == uri and docuri.type == 'rel-canonical':
-            return [uri]
+            return [du.uri for du in docuris if du.type == 'rel-canonical']
 
     return [docuri.uri for docuri in docuris]
 
