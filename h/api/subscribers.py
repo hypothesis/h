@@ -10,7 +10,7 @@ def index_annotation_event(event):
     if not event.request.feature('postgres'):
         return
 
-    if event.action == 'create':
+    if event.action in ['create', 'update']:
         index(event.request.es, event.annotation, event.request)
     elif event.action == 'delete':
         delete(event.request.es, event.annotation)
