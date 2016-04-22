@@ -14,6 +14,7 @@ from pyramid import i18n
 from h.api import transform
 from h.api import models
 from h.api.events import AnnotationBeforeSaveEvent
+from h.api.db import types
 
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -51,7 +52,10 @@ def fetch_annotation(request, id, _postgres=None):
         _postgres = _postgres_enabled(request)
 
     if _postgres:
-        return request.db.query(models.Annotation).get(id)
+        try:
+            return request.db.query(models.Annotation).get(id)
+        except types.InvalidUUID:
+            return None
 
     return models.elastic.Annotation.fetch(id)
 
