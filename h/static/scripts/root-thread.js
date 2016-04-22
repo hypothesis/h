@@ -83,15 +83,13 @@ module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
                     events.ANNOTATIONS_LOADED];
   loadEvents.forEach(function (event) {
     $rootScope.$on(event, function (event, annotation) {
+      var annotations = [].concat(annotation);
+
       // Remove any annotations which are already loaded
-      if (Array.isArray(annotation)) {
-        annotationUI.removeAnnotations(annotation);
-      } else {
-        annotationUI.removeAnnotations([annotation]);
-      }
+      annotationUI.removeAnnotations(annotations);
 
       // Add the new annotations
-      annotationUI.addAnnotations(annotation);
+      annotationUI.addAnnotations(annotations);
 
       // Ensure that newly created annotations are always visible
       if (event.name === events.BEFORE_ANNOTATION_CREATED) {
@@ -140,8 +138,6 @@ module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
     /**
      * Set the query to use when filtering annotations.
      * @param {string} query - The filter query
-     *
-     * FIXME - Replace 'search' with 'filter' here and in 'build-thread'
      */
     setSearchQuery: function (query) {
       searchQuery = query;
