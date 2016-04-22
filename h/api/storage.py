@@ -72,6 +72,25 @@ def update_document_metadata(session,
                              annotation,
                              document_meta_dicts,
                              document_uri_dicts):
+    """
+    Create and update document metadata from the given annotation.
+
+    Document, DocumentURI and DocumentMeta objects will be created, updated
+    and deleted in the database as required by the given annotation and
+    document meta and uri dicts.
+
+    :param annotation: the annotation that the document metadata comes from
+    :type annotation: h.api.models.Annotation
+
+    :param document_meta_dicts: the document metadata dicts that the client
+        posted with the annotation, validated
+    :type document_meta_dicts: list of dicts
+
+    :param document_uri_dicts: the document URI dicts that the client
+        posted with the annotation, validated
+    :type document_uri_dicts: list of dicts
+
+    """
     documents = models.Document.find_or_create_by_uris(
         session,
         annotation.target_uri,
