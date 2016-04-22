@@ -13,7 +13,6 @@ describe('annotationThread', function () {
 
   beforeEach(function () {
     angular.mock.module('app');
-    angular.mock.module('h.templates');
   });
 
   it('renders the tree structure of parent and child annotations', function () {
