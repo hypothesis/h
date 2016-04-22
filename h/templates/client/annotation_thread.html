@@ -1,0 +1,46 @@
+<a href=""
+   class="threadexp"
+   title="{{vm.thread.collapsed && 'Expand' || 'Collapse'}}"
+   ng-click="vm.toggleCollapsed()"
+   ng-if="vm.thread.parent">
+   <span ng-class="{'h-icon-arrow-right': vm.thread.collapsed,
+                    'h-icon-arrow-drop-down': !vm.thread.collapsed}"></span>
+</a>
+
+<!-- Annotation -->
+<annotation class="annotation thread-message {{vm.thread.collapsed && 'collapsed'}}"
+         annotation="vm.thread.annotation"
+         is-last-reply="$last"
+         is-sidebar="::vm.isSidebar"
+         name="annotation"
+         ng-if="vm.thread.annotation"
+         ng-show="vm.thread.visible"
+         show-document-info="vm.showDocumentInfo"
+         on-reply-count-click="vm.toggleCollapsed()"
+         on-editing-changed="vm.onEditingChanged(vm.thread.id,editing)"
+         reply-count="vm.thread.replyCount">
+</annotation>
+
+<div class="thread-load-more" ng-if="vm.hiddenReplyCount() > 0">
+  <a class="load-more small"
+     href=""
+     ng-click="vm.showThreadAndReplies()"
+     ng-pluralize
+     count="vm.hiddenReplyCount()"
+     when="{'0': '',
+           one: 'View one more in conversation',
+           other: 'View {} more in conversation'}"
+     ></a>
+</div>
+
+<!-- Replies -->
+<ul class="thread-replies" ng-show="!vm.thread.collapsed">
+  <li class="thread" ng-repeat="child in vm.thread.children track by child.annotation.id">
+    <annotation-thread
+      show-document-info="false"
+      thread="child"
+      on-toggle-replies="vm.onToggleReplies({id:id})"
+      on-force-visible="vm.onForceVisible({id:id})">
+    </annotation-thread>
+  </li>
+</ul>

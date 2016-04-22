@@ -1,40 +1,32 @@
 'use strict';
 
-var angular = require('angular');
-
 var events = require('./events');
 
-// Fetch the container object for the passed annotation from the threading
-// service, but only return it if it has an associated message.
-function getContainer(threading, annotation) {
-  var container = threading.idTable[annotation.id];
-  if (container === null || typeof container === 'undefined') {
-    return null;
-  }
-  // Also return null if the container has no message
-  if (!container.message) {
-    return null;
-  }
-  return container;
+/**
+ * Returns the already-loaded annotation with a given ID,
+ * if there is one.
+ *
+ * @param {string} id
+ * @return {Annotation?} The existing Annotation instance
+ */
+function getExistingAnnotation(annotationUI, id) {
+  return annotationUI.getState().annotations.find(function (annot) {
+    return annot.id === id;
+  });
 }
-
 
 // Wraps the annotation store to trigger events for the CRUD actions
 // @ngInject
-function annotationMapper($rootScope, threading, store) {
+function annotationMapper($rootScope, annotationUI, store) {
   function loadAnnotations(annotations, replies) {
     annotations = annotations.concat(replies || []);
 
     var loaded = [];
-
     annotations.forEach(function (annotation) {
-      var container = getContainer(threading, annotation);
-      if (container !== null) {
-        angular.copy(annotation, container.message);
-        $rootScope.$emit(events.ANNOTATION_UPDATED, container.message);
+      if (getExistingAnnotation(annotationUI, annotation.id)) {
+        $rootScope.$emit(events.ANNOTATION_UPDATED, annotation);
         return;
       }
-
       loaded.push(new store.AnnotationResource(annotation));
     });
 
@@ -42,14 +34,7 @@ function annotationMapper($rootScope, threading, store) {
   }
 
   function unloadAnnotations(annotations) {
-    var unloaded = annotations.map(function (annotation) {
-      var container = getContainer(threading, annotation);
-      if (container !== null && annotation !== container.message) {
-        annotation = angular.copy(annotation, container.message);
-      }
-      return annotation;
-    });
-    $rootScope.$emit(events.ANNOTATIONS_UNLOADED, unloaded);
+    $rootScope.$emit(events.ANNOTATIONS_UNLOADED, annotations);
   }
 
   function createAnnotation(annotation) {

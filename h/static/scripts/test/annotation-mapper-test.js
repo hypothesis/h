@@ -7,32 +7,33 @@ var events = require('../events');
 describe('annotationMapper', function() {
   var sandbox = sinon.sandbox.create();
   var $rootScope;
+  var fakeAnnotationUI;
   var fakeStore;
-  var fakeThreading;
   var annotationMapper;
 
-  before(function () {
-    angular.module('h', [])
-    .service('annotationMapper', require('../annotation-mapper'));
-  });
-
-  beforeEach(angular.mock.module('h'));
-  beforeEach(angular.mock.module(function ($provide) {
+  beforeEach(function () {
     fakeStore = {
-      AnnotationResource: sandbox.stub().returns({})
+      AnnotationResource: sandbox.stub().returns({}),
     };
-    fakeThreading = {
-      idTable: {}
+    fakeAnnotationUI = {
+      state: {
+        annotations: [],
+      },
+      getState: function() {
+        return this.state;
+      }
     };
+    angular.module('app', [])
+      .service('annotationMapper', require('../annotation-mapper'))
+      .value('annotationUI', fakeAnnotationUI)
+      .value('store', fakeStore);
+    angular.mock.module('app');
 
-    $provide.value('store', fakeStore);
-    $provide.value('threading', fakeThreading);
-  }));
-
-  beforeEach(angular.mock.inject(function (_annotationMapper_, _$rootScope_) {
-    $rootScope = _$rootScope_;
-    annotationMapper = _annotationMapper_;
-  }));
+    angular.mock.inject(function (_$rootScope_, _annotationMapper_) {
+      $rootScope = _$rootScope_;
+      annotationMapper = _annotationMapper_;
+    });
+  });
 
   afterEach(function () {
     sandbox.restore();
@@ -58,24 +59,22 @@ describe('annotationMapper', function() {
         [{}, {}, {}]);
     });
 
-    it('triggers the annotationUpdated event for each annotation in the threading cache', function () {
+    it('triggers the annotationUpdated event for each loaded annotation', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1}, {id: 2}, {id: 3}];
-      var cached = {message: {id: 1, $$tag: 'tag1'}};
-      fakeThreading.idTable[1] = cached;
+      fakeAnnotationUI.state.annotations = annotations.slice();
 
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
       assert.calledWith($rootScope.$emit, events.ANNOTATION_UPDATED,
-        cached.message);
+        annotations[0]);
     });
 
     it('also triggers annotationUpdated for cached replies', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1}];
       var replies = [{id: 2}, {id: 3}, {id: 4}];
-      var cached = {message: {id: 3, $$tag: 'tag3'}};
-      fakeThreading.idTable[3] = cached;
+      fakeAnnotationUI.state.annotations = [{id:3}];
 
       annotationMapper.loadAnnotations(annotations, replies);
       assert($rootScope.$emit.calledWith(events.ANNOTATION_UPDATED,
@@ -85,8 +84,7 @@ describe('annotationMapper', function() {
     it('replaces the properties on the cached annotation with those from the loaded one', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1, url: 'http://example.com'}];
-      var cached = {message: {id: 1, $$tag: 'tag1'}};
-      fakeThreading.idTable[1] = cached;
+      fakeAnnotationUI.state.annotations = [{id:1, $$tag: 'tag1'}];
 
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
@@ -99,8 +97,7 @@ describe('annotationMapper', function() {
     it('excludes cached annotations from the annotationLoaded event', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1, url: 'http://example.com'}];
-      var cached = {message: {id: 1, $$tag: 'tag1'}};
-      fakeThreading.idTable[1] = cached;
+      fakeAnnotationUI.state.annotations = [{id: 1, $$tag: 'tag1'}];
 
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
@@ -120,8 +117,7 @@ describe('annotationMapper', function() {
     it('replaces the properties on the cached annotation with those from the deleted one', function () {
       sandbox.stub($rootScope, '$emit');
       var annotations = [{id: 1, url: 'http://example.com'}];
-      var cached = {message: {id: 1, $$tag: 'tag1'}};
-      fakeThreading.idTable[1] = cached;
+      fakeAnnotationUI.state.annotations = [{id: 1, $$tag: 'tag1'}];
 
       annotationMapper.unloadAnnotations(annotations);
       assert.calledWith($rootScope.$emit, events.ANNOTATIONS_UNLOADED, [{

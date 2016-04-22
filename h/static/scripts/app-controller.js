@@ -28,7 +28,6 @@ module.exports = function AppController(
   $window, annotationUI, auth, drafts, features, groups,
   session, settings
 ) {
-  $controller('AnnotationUIController', {$scope: $scope});
 
   // This stores information about the current user's authentication status.
   // When the controller instantiates we do not yet know if the user is

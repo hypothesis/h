@@ -42,8 +42,8 @@ function AnnotationUISync($rootScope, $window, bridge, annotationSync,
       if (typeof state !== 'boolean') {
         state = true;
       }
-      if (annotationUI.visibleHighlights !== state) {
-        annotationUI.visibleHighlights = state;
+      if (annotationUI.getState().visibleHighlights !== state) {
+        annotationUI.setShowHighlights(state);
         bridge.call('setVisibleHighlights', state);
       }
     }
@@ -72,7 +72,7 @@ function AnnotationUISync($rootScope, $window, bridge, annotationSync,
       return;
     } else {
       // Synchronize the state of guests
-      channel.call('setVisibleHighlights', annotationUI.visibleHighlights);
+      channel.call('setVisibleHighlights', annotationUI.getState().visibleHighlights);
     }
   };
 
