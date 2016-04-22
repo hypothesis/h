@@ -24,11 +24,13 @@ describe('AnnotationUIController', function () {
 
     annotationUI = {
       state: {
-        tool: 'comment',
         selectedAnnotationMap: null,
         focusedAnnotationsMap: null,
       },
-      removeSelectedAnnotation: sandbox.stub()
+      getState: function () {
+        return this.state;
+      },
+      removeSelectedAnnotation: sandbox.stub(),
     };
 
     $controller('AnnotationUIController', {
