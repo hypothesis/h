@@ -252,7 +252,7 @@ class TestCreate(object):
         views.create(request)
 
         storage.create_annotation.assert_called_once_with(
-            request, schema.validate.return_value)
+            request.db, schema.validate.return_value)
 
     def test_it_inits_LegacyCreateAnnotationSchema(self, schemas):
         request = self.mock_request()

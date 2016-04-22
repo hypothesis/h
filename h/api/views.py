@@ -161,7 +161,7 @@ def create(request):
     if request.feature('postgres'):
         schema = schemas.CreateAnnotationSchema(request)
         appstruct = schema.validate(copy.deepcopy(json_payload))
-        annotation = storage.create_annotation(request, appstruct)
+        annotation = storage.create_annotation(request.db, appstruct)
 
     # Validate the annotation for, and create the annotation in, Elasticsearch.
     legacy_schema = schemas.LegacyCreateAnnotationSchema(request)

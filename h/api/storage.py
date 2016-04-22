@@ -68,19 +68,19 @@ def legacy_create_annotation(request, data):
     return annotation
 
 
-def update_document_metadata(db,
+def update_document_metadata(session,
                              annotation,
                              document_meta_dicts,
                              document_uri_dicts):
     documents = models.Document.find_or_create_by_uris(
-        db,
+        session,
         annotation.target_uri,
         [u['uri'] for u in document_uri_dicts],
         created=annotation.created,
         updated=annotation.updated)
 
     if documents.count() > 1:
-        document = models.merge_documents(db,
+        document = models.merge_documents(session,
                                           documents,
                                           updated=annotation.updated)
     else:
@@ -90,7 +90,7 @@ def update_document_metadata(db,
 
     for document_uri_dict in document_uri_dicts:
         models.create_or_update_document_uri(
-            session=db,
+            session=session,
             document=document,
             created=annotation.created,
             updated=annotation.updated,
@@ -98,19 +98,19 @@ def update_document_metadata(db,
 
     for document_meta_dict in document_meta_dicts:
         models.create_or_update_document_meta(
-            session=db,
+            session=session,
             document=document,
             created=annotation.created,
             updated=annotation.updated,
             **document_meta_dict)
 
 
-def create_annotation(request, data):
+def create_annotation(session, data):
     """
     Create an annotation from passed data.
 
-    :param request: the request object
-    :type request: pyramid.request.Request
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param data: a dictionary of annotation properties
     :type data: dict
@@ -123,14 +123,14 @@ def create_annotation(request, data):
     del data['document']
 
     annotation = models.Annotation(**data)
-    request.db.add(annotation)
+    session.add(annotation)
 
     # We need to flush the db here so that annotation.created and
     # annotation.updated get created.
-    request.db.flush()
+    session.flush()
 
     update_document_metadata(
-        request.db, annotation, document_meta_dicts, document_uri_dicts)
+        session, annotation, document_meta_dicts, document_uri_dicts)
 
     return annotation
 

@@ -476,39 +476,39 @@ class TestCreateAnnotation(object):
     def test_it_inits_an_Annotation_model(self, models):
         data = self.annotation_data()
 
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
+        storage.create_annotation(self.mock_session(), copy.deepcopy(data))
 
         del data['document']
         models.Annotation.assert_called_once_with(**data)
 
     def test_it_adds_the_annotation_to_the_database(self, models):
-        request = self.mock_request()
+        session = self.mock_session()
 
-        storage.create_annotation(request, self.annotation_data())
+        storage.create_annotation(session, self.annotation_data())
 
-        request.db.add.assert_called_once_with(models.Annotation.return_value)
+        session.add.assert_called_once_with(models.Annotation.return_value)
 
     def test_it_calls_update_document_metadata(self,
                                                models,
                                                update_document_metadata):
-        request = self.mock_request()
+        session = self.mock_session()
         annotation_data = self.annotation_data()
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
         annotation_data['document']['document_uri_dicts'] = (
             mock.sentinel.document_uri_dicts)
 
-        annotation = storage.create_annotation(request, annotation_data)
+        annotation = storage.create_annotation(session, annotation_data)
 
         update_document_metadata.assert_called_once_with(
-            request.db,
+            session,
             models.Annotation.return_value,
             mock.sentinel.document_meta_dicts,
             mock.sentinel.document_uri_dicts
         )
 
     def test_it_returns_the_annotation(self, models):
-        annotation = storage.create_annotation(self.mock_request(),
+        annotation = storage.create_annotation(self.mock_session(),
                                                self.annotation_data())
 
         assert annotation == models.Annotation.return_value
@@ -518,32 +518,22 @@ class TestCreateAnnotation(object):
         data = self.annotation_data()
         data['target_selectors'] = []
 
-        storage.create_annotation(self.mock_request(), data)
+        storage.create_annotation(self.mock_session(), data)
 
     def test_it_does_not_crash_if_no_text_or_tags(self):
         # Highlights have no text or tags.
         data = self.annotation_data()
         data['text'] = data['tags'] = ''
 
-        storage.create_annotation(self.mock_request(), data)
+        storage.create_annotation(self.mock_session(), data)
 
-    def mock_request(self):
-        request = DummyRequest(
-            feature=mock.Mock(
-                side_effect=lambda flag: flag == "postgres_write"),
-            authenticated_userid='acct:test@localhost'
-        )
-
-        request.registry.notify = mock.Mock(spec=lambda event: None)
-
-        class DBSpec(object):
+    def mock_session(self):
+        class SessionSpec(object):
             def add(self, annotation):
                 pass
             def flush():
                 pass
-        request.db = mock.Mock(spec=DBSpec)
-
-        return request
+        return mock.Mock(spec=SessionSpec)
 
     def annotation_data(self):
         return {
