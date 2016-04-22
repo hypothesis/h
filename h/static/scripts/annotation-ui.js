@@ -1,8 +1,10 @@
 'use strict';
 
+var Immutable = require('seamless-immutable');
+
 function value(selection) {
   if (Object.keys(selection).length) {
-    return Object.freeze(selection);
+    return Immutable(selection);
   } else {
     return null;
   }
@@ -59,7 +61,7 @@ module.exports = function (settings) {
 
   // Update the UI state and notify subscribers of the change.
   function setState(newState) {
-    state = Object.assign({}, state, newState);
+    state = Object.freeze(Object.assign({}, state, newState));
     listeners.forEach(function (listener) {
       listener();
     });
@@ -86,16 +88,18 @@ module.exports = function (settings) {
     /** Listen for changes to the UI state of the sidebar. */
     subscribe: subscribe,
 
+    /**
+     * Sets whether annotation highlights in connected documents are shown
+     * or not.
+     */
     setShowHighlights: function (show) {
       setState({visibleHighlights: show});
     },
 
     /**
-     * @ngdoc method
-     * @name annotationUI.focusedAnnotations
-     * @returns nothing
-     * @description Takes an array of annotations and uses them to set
-     * the focusedAnnotationMap.
+     * Sets which annotations are currently focused.
+     *
+     * @param {Array<Annotation>} annotations
      */
     focusAnnotations: function (annotations) {
       var selection = {};
@@ -107,34 +111,47 @@ module.exports = function (settings) {
     },
 
     /**
-     * @ngdoc method
-     * @name annotationUI.hasSelectedAnnotations
-     * @returns true if there are any selected annotations.
+     * Return true if any annotations are currently selected.
      */
     hasSelectedAnnotations: function () {
       return !!state.selectedAnnotationMap;
     },
 
+    /**
+     * Sets whether replies to the annotation with ID `id` are collapsed.
+     *
+     * @param {string} id - Annotation ID
+     * @param {boolean} collapsed
+     */
     setCollapsed: function (id, collapsed) {
       var expanded = Object.assign({}, state.expanded);
       expanded[id] = !collapsed;
       setState({expanded: expanded});
     },
 
+    /**
+     * Sets whether a given annotation should be visible, even if it does not
+     * match the current search query.
+     *
+     * @param {string} id - Annotation ID
+     * @param {boolean} visible
+     */
     setForceVisible: function (id, visible) {
       var forceVisible = Object.assign({}, state.forceVisible);
       forceVisible[id] = visible;
       setState({forceVisible: forceVisible});
     },
 
+    /**
+     * Clear the set of annotations which have been explicitly shown by
+     * setForceVisible()
+     */
     clearForceVisible: function () {
       setState({forceVisible: {}});
     },
 
     /**
-     * @ngdoc method
-     * @name annotationUI.isAnnotationSelected
-     * @returns true if the provided annotation is selected.
+     * Returns true if the annotation with the given `id` is selected.
      */
     isAnnotationSelected: function (id) {
       return (state.selectedAnnotationMap || {}).hasOwnProperty(id);
@@ -158,13 +175,7 @@ module.exports = function (settings) {
       setState({selectedAnnotationMap: value(selection)});
     },
 
-    /**
-     * @ngdoc method
-     * @name annotationUI.xorSelectedAnnotations()
-     * @returns nothing
-     * @description takes an array of annotations and adds them to the
-     * selectedAnnotationMap if not present otherwise removes them.
-     */
+    /** Toggle whether annotations are selected or not. */
     xorSelectedAnnotations: function (annotations) {
       var selection = Object.assign({}, state.selectedAnnotationMap);
       for (var i = 0, annotation; i < annotations.length; i++) {
@@ -179,12 +190,7 @@ module.exports = function (settings) {
       setState({selectedAnnotationMap: value(selection)});
     },
 
-    /**
-     * @ngdoc method
-     * @name annotationUI.removeSelectedAnnotation()
-     * @returns nothing
-     * @description removes an annotation from the current selection.
-     */
+    /** De-select an annotation. */
     removeSelectedAnnotation: function (annotation) {
       var selection = Object.assign({}, state.selectedAnnotationMap);
       if (selection) {
@@ -193,23 +199,17 @@ module.exports = function (settings) {
       }
     },
 
-    /**
-     * @ngdoc method
-     * @name annotationUI.clearSelectedAnnotations()
-     * @returns nothing
-     * @description removes all annotations from the current selection.
-     */
+    /** De-select all annotations. */
     clearSelectedAnnotations: function () {
       setState({selectedAnnotationMap: null});
     },
 
+    /** Add annotations to the currently displayed set. */
     addAnnotations: function (annotations) {
       setState({annotations: state.annotations.concat(annotations)});
     },
 
-    /**
-     * Remove an annotaton from the currently displayed set.
-     */
+    /** Remove annotations from the currently displayed set. */
     removeAnnotations: function (annotations) {
       var idsAndTags = annotations.reduce(function (map, annot) {
         var id = annot.id || annot.$$tag;
@@ -223,6 +223,7 @@ module.exports = function (settings) {
       setState({annotations: newAnnotations});
     },
 
+    /** Set the currently displayed annotations to the empty set. */
     clearAnnotations: function () {
       setState({annotations: []});
     },
