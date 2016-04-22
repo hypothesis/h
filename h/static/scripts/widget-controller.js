@@ -247,7 +247,7 @@ module.exports = function WidgetController(
   $scope.selectedAnnotationUnavailable = function () {
     var selectedID = firstKey(annotationUI.getState().selectedAnnotationMap);
     return !isLoading() &&
-           selectedID &&
+           !!selectedID &&
            !annotationExists(selectedID);
   };
 
@@ -268,7 +268,7 @@ module.exports = function WidgetController(
     // selection is available to the user, show the CTA.
     var selectedID = firstKey(annotationUI.getState().selectedAnnotationMap);
     return !isLoading() &&
-           selectedID &&
+           !!selectedID &&
            annotationExists(selectedID);
   };
 
