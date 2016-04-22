@@ -303,7 +303,7 @@ class TestDocument(object):
         doc = Document({'title': ['Example Page']})
         assert doc.title == 'Example Page'
 
-    def test_title_empty_array(seld):
+    def test_title_empty_array(self):
         doc = Document({'title': []})
         assert doc.title is None
 
