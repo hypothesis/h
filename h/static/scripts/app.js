@@ -123,7 +123,6 @@ module.exports = angular.module('h', [
 ])
 
   .controller('AppController', require('./app-controller'))
-  .controller('AnnotationUIController', require('./annotation-ui-controller'))
   .controller('AnnotationViewerController', require('./annotation-viewer-controller'))
   .controller('StreamController', require('./stream-controller'))
   .controller('WidgetController', require('./widget-controller'))

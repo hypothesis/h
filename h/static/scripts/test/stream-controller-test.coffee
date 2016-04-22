@@ -4,6 +4,7 @@ describe 'StreamController', ->
   $controller = null
   $scope = null
   fakeAnnotationMapper = null
+  fakeAnnotationUI = null
   fakeParams = null
   fakeQueryParser = null
   fakeRoute = null
@@ -28,6 +29,12 @@ describe 'StreamController', ->
 
     fakeAnnotationMapper = {
       loadAnnotations: sandbox.spy()
+    }
+
+    fakeAnnotationUI = {
+      clearAnnotations: sandbox.spy()
+      setCollapsed: sandbox.spy()
+      setForceVisible: sandbox.spy()
     }
 
     fakeParams = {id: 'test'}
@@ -63,19 +70,20 @@ describe 'StreamController', ->
       getFilter: sandbox.stub()
     }
 
-    fakeThreading = {
-      root: {}
+    fakeRootThread = {
+      thread: sandbox.stub()
     }
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
+    $provide.value 'annotationUI', fakeAnnotationUI
     $provide.value '$route', fakeRoute
     $provide.value '$routeParams', fakeParams
     $provide.value 'queryParser', fakeQueryParser
+    $provide.value 'rootThread', fakeRootThread
     $provide.value 'searchFilter', fakeSearchFilter
     $provide.value 'store', fakeStore
     $provide.value 'streamer', fakeStreamer
     $provide.value 'streamFilter', fakeStreamFilter
-    $provide.value 'threading', fakeThreading
     return
 
   beforeEach inject (_$controller_, $rootScope) ->
@@ -106,17 +114,6 @@ describe 'StreamController', ->
     )
 
 
-  describe 'on $routeChangeSuccess', ->
-
-    it 'disables page search', ->
-      createController()
-      $scope.threadFilter = {active: sinon.stub(), freeze: sinon.stub()}
-      $scope.$broadcast('$routeChangeSuccess')
-      assert.calledOnce($scope.threadFilter.active)
-      assert.calledWith($scope.threadFilter.active, false)
-      assert.calledOnce($scope.threadFilter.freeze)
-      assert.calledWith($scope.threadFilter.freeze, true)
-
   describe 'on $routeUpdate', ->
 
     it 'reloads the route when the query changes', ->
@@ -124,6 +121,7 @@ describe 'StreamController', ->
       createController()
       fakeParams.q = 'new query'
       $scope.$broadcast('$routeUpdate')
+      assert.called(fakeAnnotationUI.clearAnnotations)
       assert.calledOnce(fakeRoute.reload)
 
     it 'does not reload the route when the query is the same', ->

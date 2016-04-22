@@ -43,6 +43,7 @@ describe('rootThread', function () {
       },
       subscribe: sinon.stub(),
       removeAnnotations: sinon.stub(),
+      removeSelectedAnnotation: sinon.stub(),
       addAnnotations: sinon.stub(),
       setCollapsed: sinon.stub(),
       clearForceVisible: sinon.stub(),
@@ -248,5 +249,10 @@ describe('rootThread', function () {
       {event: events.ANNOTATION_DELETED, annotations: annot},
       {event: events.ANNOTATIONS_UNLOADED, annotations: [annot]},
     ]);
+
+    it('deselects deleted annotations', function () {
+      $rootScope.$broadcast(events.ANNOTATION_DELETED, annot);
+      assert.calledWith(fakeAnnotationUI.removeSelectedAnnotation, annot);
+    });
   });
 });

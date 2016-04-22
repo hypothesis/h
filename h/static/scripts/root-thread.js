@@ -103,6 +103,7 @@ module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
   // Remove any annotations that are deleted or unloaded
   $rootScope.$on(events.ANNOTATION_DELETED, function (event, annotation) {
     annotationUI.removeAnnotations([annotation]);
+    annotationUI.removeSelectedAnnotation(annotation);
   });
   $rootScope.$on(events.ANNOTATIONS_UNLOADED, function (event, annotations) {
     annotationUI.removeAnnotations(annotations);

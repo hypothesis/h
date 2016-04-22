@@ -230,16 +230,24 @@ module.exports = function WidgetController(
   $scope.scrollTo = scrollToAnnotation;
 
   $scope.hasFocus = function (annotation) {
-    if (!annotation || !$scope.focusedAnnotations) {
+    if (!annotation || !annotationUI.getState().focusedAnnotationMap) {
       return false;
     }
-    return annotation.$$tag in $scope.focusedAnnotations;
+    return annotation.$$tag in annotationUI.getState().focusedAnnotationMap;
+  };
+
+  $scope.selectedAnnotationCount = function () {
+    var selection = annotationUI.getState().selectedAnnotationMap;
+    if (!selection) {
+      return 0;
+    }
+    return Object.keys(selection).length;
   };
 
   $scope.selectedAnnotationUnavailable = function () {
     var selectedID = firstKey(annotationUI.getState().selectedAnnotationMap);
     return !isLoading() &&
-           selectedID &&
+           !!selectedID &&
            !annotationExists(selectedID);
   };
 
@@ -260,7 +268,7 @@ module.exports = function WidgetController(
     // selection is available to the user, show the CTA.
     var selectedID = firstKey(annotationUI.getState().selectedAnnotationMap);
     return !isLoading() &&
-           selectedID &&
+           !!selectedID &&
            annotationExists(selectedID);
   };
 

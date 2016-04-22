@@ -13,6 +13,13 @@ function showAllChildren(thread, showFn) {
   });
 }
 
+function showAllParents(thread, showFn) {
+  while (thread.parent && thread.parent.annotation) {
+    showFn({id: thread.parent.annotation.id});
+    thread = thread.parent;
+  }
+}
+
 // @ngInject
 function AnnotationThreadController() {
   this.toggleCollapsed = function () {
@@ -23,6 +30,7 @@ function AnnotationThreadController() {
    * Show this thread and any of its children
    */
   this.showThreadAndReplies = function () {
+    showAllParents(this.thread, this.onForceVisible);
     this.onForceVisible({id: this.thread.annotation.id});
     showAllChildren(this.thread, this.onForceVisible);
   };
