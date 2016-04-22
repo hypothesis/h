@@ -266,5 +266,3 @@ def _publish_annotation_event(request, annotation, action, annotation_dict=None)
 
 def includeme(config):
     config.scan(__name__)
-    config.add_subscriber('h.api.subscribers.index_annotation_event',
-                          'h.api.events.AnnotationEvent')
