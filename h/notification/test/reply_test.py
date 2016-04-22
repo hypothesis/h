@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-"""Defines unit tests for h.notifier."""
 
 from mock import patch, Mock
 
@@ -7,7 +6,7 @@ import pytest
 from pyramid.testing import DummyRequest
 
 from h.api import storage
-from h.notification import reply_template as rt
+from h.notification import reply
 
 store_fake_data = [
     {
@@ -129,7 +128,7 @@ def test_dont_send_to_the_same_user():
         'subscription': {'id': 1}
     }
 
-    send = rt.check_conditions(annotation, data)
+    send = reply.check_conditions(annotation, data)
     assert send is False
 
 
@@ -144,7 +143,7 @@ def test_different_subscription():
         }
     }
 
-    send = rt.check_conditions(annotation, data)
+    send = reply.check_conditions(annotation, data)
     assert send is False
 
 
@@ -159,7 +158,7 @@ def test_good_conditions():
         }
     }
 
-    send = rt.check_conditions(annotation, data)
+    send = reply.check_conditions(annotation, data)
     assert send is True
 
 
@@ -172,7 +171,7 @@ def test_generate_notifications_empty_if_action_not_create():
     annotation = storage.annotation_from_dict({})
     request = DummyRequest()
 
-    notifications = rt.generate_notifications(request, annotation, 'update')
+    notifications = reply.generate_notifications(request, annotation, 'update')
 
     assert list(notifications) == []
 
@@ -183,7 +182,7 @@ def test_generate_notifications_empty_if_annotation_has_no_parent():
     annotation = _fake_anno(0)
     request = DummyRequest()
 
-    notifications = rt.generate_notifications(request, annotation, 'create')
+    notifications = reply.generate_notifications(request, annotation, 'create')
 
     assert list(notifications) == []
 
@@ -194,7 +193,7 @@ def test_generate_notifications_does_not_fetch_if_annotation_has_no_parent(fetch
     annotation = _fake_anno(0)
     request = DummyRequest()
 
-    notifications = rt.generate_notifications(request, annotation, 'create')
+    notifications = reply.generate_notifications(request, annotation, 'create')
 
     # Read the generator
     list(notifications)
@@ -203,7 +202,7 @@ def test_generate_notifications_does_not_fetch_if_annotation_has_no_parent(fetch
 
 
 @generate_notifications_fixtures
-@patch('h.notification.reply_template.Subscriptions')
+@patch('h.notification.reply.Subscriptions')
 def test_generate_notifications_only_if_author_can_read_reply(
         Subscriptions,
         auth):
@@ -216,27 +215,27 @@ def test_generate_notifications_only_if_author_can_read_reply(
     ]
 
     auth.has_permission.return_value = False
-    notifications = rt.generate_notifications(_fake_request(),
-                                              _fake_anno(6),
-                                              'create')
+    notifications = reply.generate_notifications(_fake_request(),
+                                                 _fake_anno(6),
+                                                 'create')
     assert list(notifications) == []
 
     auth.has_permission.return_value = True
-    notifications = rt.generate_notifications(_fake_request(),
-                                              _fake_anno(7),
-                                              'create')
+    notifications = reply.generate_notifications(_fake_request(),
+                                                 _fake_anno(7),
+                                                 'create')
     assert list(notifications) != []
 
 
 @generate_notifications_fixtures
-@patch('h.notification.reply_template.Subscriptions')
+@patch('h.notification.reply.Subscriptions')
 def test_generate_notifications_checks_subscriptions(Subscriptions):
     """If the annotation has a parent, then proceed to check subscriptions."""
     request = _fake_request()
     annotation = _fake_anno(1)
     Subscriptions.get_active_subscriptions_for_a_type.return_value = []
 
-    notifications = rt.generate_notifications(request, annotation, 'create')
+    notifications = reply.generate_notifications(request, annotation, 'create')
 
     # Read the generator
     list(notifications)
@@ -250,14 +249,14 @@ def test_check_conditions_false_stops_sending():
     request = _fake_request()
     annotation = _fake_anno(1)
 
-    with patch('h.notification.reply_template.Subscriptions') as mock_subs:
+    with patch('h.notification.reply.Subscriptions') as mock_subs:
         mock_subs.get_active_subscriptions_for_a_type.return_value = [
             MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
         ]
-        with patch('h.notification.reply_template.check_conditions') as mock_conditions:
+        with patch('h.notification.reply.check_conditions') as mock_conditions:
             mock_conditions.return_value = False
             with pytest.raises(StopIteration):
-                msgs = rt.generate_notifications(request, annotation, 'create')
+                msgs = reply.generate_notifications(request, annotation, 'create')
                 msgs.next()
 
 
@@ -267,24 +266,24 @@ def test_send_if_everything_is_okay():
     request = _fake_request()
     annotation = _fake_anno(1)
 
-    with patch('h.notification.reply_template.Subscriptions') as mock_subs:
+    with patch('h.notification.reply.Subscriptions') as mock_subs:
         mock_subs.get_active_subscriptions_for_a_type.return_value = [
             MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
         ]
-        with patch('h.notification.reply_template.check_conditions') as mock_conditions:
+        with patch('h.notification.reply.check_conditions') as mock_conditions:
             mock_conditions.return_value = True
-            msgs = rt.generate_notifications(request, annotation, 'create')
+            msgs = reply.generate_notifications(request, annotation, 'create')
             msgs.next()
 
 
 @pytest.fixture
 def auth(patch):
-    return patch('h.notification.reply_template.auth')
+    return patch('h.notification.reply.auth')
 
 
 @pytest.fixture
 def get_user(patch):
-    return patch('h.notification.reply_template.accounts.get_user')
+    return patch('h.notification.reply.accounts.get_user')
 
 
 @pytest.fixture(autouse=True)

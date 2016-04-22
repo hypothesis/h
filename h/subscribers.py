@@ -4,7 +4,7 @@ from h import __version__
 from h import emails
 from h import mailer
 from h.api import presenters
-from h.notification.reply_template import generate_notifications
+from h.notification import reply
 
 
 def add_renderer_globals(event):
@@ -39,7 +39,7 @@ def publish_annotation_event(event):
 
 
 def send_reply_notifications(event,
-                             generate_notifications=generate_notifications,
+                             generate_notifications=reply.generate_notifications,
                              generate_mail=emails.reply_notification.generate,
                              send=mailer.send.delay):
     """Queue any reply notification emails triggered by an annotation event."""
