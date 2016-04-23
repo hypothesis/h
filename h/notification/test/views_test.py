@@ -1,73 +1,75 @@
 # -*- coding: utf-8 -*-
-from mock import patch, Mock
-from pytest import raises
+
+import mock
 from pyramid.testing import DummyRequest
-from webob.cookies import SignedSerializer
+import pytest
+
+from h import db
+from h.models import Subscriptions
+from h.notification import views
 
 
-def configure(config):
-    serializer = SignedSerializer('foobar', 'h.notification.secret')
-    config.registry.notification_serializer = serializer
+@pytest.mark.usefixtures('subscriptions', 'token_serializer')
+class TestUnsubscribe(object):
 
+    def test_deserializes_token(self, token_serializer):
+        request = DummyRequest(matchdict={'token': 'wibble'}, db=db.Session)
 
-def _unsubscribe_request():
-    request = DummyRequest()
-    token = request.registry.notification_serializer.dumps({
-        'type': 'reply',
-        'uri': 'acct:user@localhost',
-    })
-    request.matchdict['token'] = token
-    return request
+        views.unsubscribe(request)
 
+        token_serializer.loads.assert_called_once_with('wibble')
 
-def test_successful_unsubscribe(config):
-    """ ensure unsubscribe unsets the active flag on the subscription """
-    configure(config)
-    with patch('h.notification.models.Subscriptions'
-               '.get_templates_for_uri_and_type') as mock_subs:
-        mock_db = Mock(add=Mock())
-        mock_subscription = Mock(active=True)
+    def test_successfully_unsubscribes_user(self, subscriptions, token_serializer):
+        sub1, _, _ = subscriptions
+        request = DummyRequest(matchdict={'token': 'wibble'}, db=db.Session)
+        token_serializer.loads.return_value = {'type': 'reply', 'uri': 'acct:foo@example.com'}
 
-        mock_subs.return_value = [mock_subscription]
+        views.unsubscribe(request)
 
-        request = _unsubscribe_request()
-        request.db = mock_db
+        assert not sub1.active
 
-        from h.notification.views import unsubscribe
-        unsubscribe(request)
+    def test_ignores_other_subscriptions(self, subscriptions, token_serializer):
+        _, sub2, sub3 = subscriptions
+        request = DummyRequest(matchdict={'token': 'wibble'}, db=db.Session)
+        token_serializer.loads.return_value = {'type': 'reply', 'uri': 'acct:foo@example.com'}
 
-        assert mock_subscription.active is False
-        mock_db.add.assert_called_with(mock_subscription)
+        views.unsubscribe(request)
 
+        assert sub2.active
+        assert sub3.active
 
-def test_idempotent_unsubscribe(config):
-    """ if called a second time it should not update the model """
-    configure(config)
-    with patch('h.notification.models.Subscriptions'
-               '.get_templates_for_uri_and_type') as mock_subs:
-        mock_db = Mock(add=Mock())
-        mock_subscription = Mock(active=False)
+    def test_multiple_calls_ok(self, subscriptions, token_serializer):
+        sub1, _, _ = subscriptions
+        request = DummyRequest(matchdict={'token': 'wibble'}, db=db.Session)
+        token_serializer.loads.return_value = {'type': 'reply', 'uri': 'acct:foo@example.com'}
 
-        mock_subs.return_value = [mock_subscription]
+        views.unsubscribe(request)
+        views.unsubscribe(request)
 
-        request = _unsubscribe_request()
-        request.db = mock_db
+        assert not sub1.active
 
-        from h.notification.views import unsubscribe
-        unsubscribe(request)
+    def test_raises_not_found_if_token_invalue(self, token_serializer):
+        from pyramid.exceptions import HTTPNotFound
+        request = DummyRequest(matchdict={'token': 'wibble'}, db=db.Session)
+        token_serializer.loads.side_effect = ValueError('token invalid')
 
-        assert mock_subscription.active is False
-        assert not mock_db.add.called
+        with pytest.raises(HTTPNotFound):
+            views.unsubscribe(request)
 
+    @pytest.fixture
+    def subscriptions(self):
+        subs = [
+            Subscriptions(type='reply', uri='acct:foo@example.com', active=True),
+            Subscriptions(type='dingo', uri='acct:foo@example.com', active=True),
+            Subscriptions(type='reply', uri='acct:bar@example.com', active=True),
+        ]
+        db.Session.add_all(subs)
+        db.Session.flush()
+        return subs
 
-def test_invalid_token(config):
-    """It raises an error if an invalid token is provided """
-    configure(config)
-    request = DummyRequest()
-    request.matchdict['token'] = 'foobar'
-
-    from h.notification.views import unsubscribe
-    with raises(ValueError) as excinfo:
-        unsubscribe(request)
-
-    assert str(excinfo.value) == 'Invalid signature'
+    @pytest.fixture
+    def token_serializer(self, config):
+        serializer = mock.Mock(spec_set=['loads'])
+        serializer.loads.return_value = {'type': 'matches', 'uri': 'nothing'}
+        config.registry.notification_serializer = serializer
+        return serializer
