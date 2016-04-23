@@ -13,6 +13,24 @@ KEY = 'someclient'
 SECRET = 'somesecret'
 
 
+class FakeContext(object):
+    deny_all = False
+
+
+class PrefixAuthorizationPolicy(object):
+    """
+    A dummy authorization policy that gives anyone any permission that starts
+    with one of their effective principals.
+
+    Unless context.deny_all is True. And then we don't.
+    """
+
+    def permits(self, context, principals, permission):
+        if getattr(context, 'deny_all'):
+            return False
+        return permission.startswith(tuple(principals))
+
+
 effective_principals_fixtures = pytest.mark.usefixtures('accounts', 'group_principals')
 
 
@@ -134,6 +152,24 @@ def test_group_principals_with_three_groups():
     ]
 
 
+def test_has_permission_uses_authz_policy_to_establish_permission(config, effective_principals):
+    ctx = FakeContext()
+    config.set_authorization_policy(PrefixAuthorizationPolicy())
+    effective_principals.side_effect = lambda userid, _: [userid, 'anyone']
+    request = testing.DummyRequest()
+
+    assert util.has_permission(request, ctx, 'foo', 'foo_eat_cake')
+    assert util.has_permission(request, ctx, 'foo', 'foo_dance')
+    assert util.has_permission(request, ctx, 'foo', 'anyone_monkey_around')
+    assert util.has_permission(request, ctx, 'bar', 'bar_wear_shoes')
+    assert util.has_permission(request, ctx, 'bar', 'barricade')
+    assert not util.has_permission(request, ctx, 'foo', 'barricade')
+    assert not util.has_permission(request, ctx, 'bar', 'read_a_book')
+    ctx.deny_all = True
+    assert not util.has_permission(request, ctx, 'foo', 'foo_eat_cake')
+    assert not util.has_permission(request, ctx, 'foo', 'foo_dance')
+
+
 @pytest.mark.parametrize("p_in,p_out", [
     # The basics
     ([], []),
@@ -159,6 +195,11 @@ def test_translate_annotation_principals(p_in, p_out):
 @pytest.fixture
 def accounts(patch):
     return patch('h.auth.util.accounts')
+
+
+@pytest.fixture
+def effective_principals(patch):
+    return patch('h.auth.util.effective_principals')
 
 
 @pytest.fixture
