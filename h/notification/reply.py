@@ -9,7 +9,7 @@ from h import auth
 from h import accounts
 from h.api import storage
 from h.notification.models import Subscriptions
-from h.accounts.events import LoginEvent, RegistrationEvent
+from h.accounts.events import RegistrationEvent
 
 log = logging.getLogger(__name__)
 
@@ -127,16 +127,6 @@ def registration_subscriptions(event):
     request = event.request
     user_uri = u'acct:{}@{}'.format(event.user.username, request.domain)
     create_subscription(event.request, user_uri, True)
-
-
-# For backwards compatibility, generate reply notification if not exists
-@subscriber(LoginEvent)
-def check_reply_subscriptions(event):
-    request = event.request
-    user_uri = 'acct:{}@{}'.format(event.user.username, request.domain)
-    res = Subscriptions.get_templates_for_uri_and_type(user_uri, 'reply')
-    if not len(res):
-        create_subscription(event.request, user_uri, True)
 
 
 def includeme(config):
