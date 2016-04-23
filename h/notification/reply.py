@@ -37,26 +37,14 @@ class Notification(namedtuple('Notification', [
     """
 
 
-def check_conditions(annotation, data):
-    # Do not notify users about their own replies
-    if annotation.userid == data['parent'].userid:
-        return False
-
-    # Is he the proper user?
-    if data['parent'].userid != data['subscription']['uri']:
-        return False
-
-    # Else okay
-    return True
-
-
-def generate_notifications(request, annotation, action):
+def get_notification(request, annotation, action):
     """
     Check if the passed annotation and action pair should send a notification.
 
     Checks to see if the annotation event represented by the passed annotation
     and action should trigger a notification. If it should, this function
-    yields the relevant :py:class:`~h.notification.reply.Notification` object.
+    returns the relevant :py:class:`~h.notification.reply.Notification` object.
+    Otherwise, it returns None.
 
     :param request: the current request object
     :type request: pyramid.request.Request
@@ -65,7 +53,7 @@ def generate_notifications(request, annotation, action):
     :param action: the event action
     :type action: str
 
-    :returns: :py:class:`~h.notification.reply.Notification` instances
+    :returns: a :py:class:`~h.notification.reply.Notification`, or None
     """
     # Only send notifications when new annotations are created
     if action != 'create':
@@ -96,6 +84,10 @@ def generate_notifications(request, annotation, action):
         log.warn('user who just replied no longer exists: %s', reply.userid)
         return
 
+    # Do not notify users about their own replies
+    if parent_user == reply_user:
+        return
+
     # Don't send reply notifications to the author of the parent annotation if
     # the author doesn't have permission to read the reply.
     if not auth.has_permission(request, reply, parent.userid, 'read'):
@@ -107,21 +99,15 @@ def generate_notifications(request, annotation, action):
     if reply.document is None:
         return
 
-    # Store the parent values as additional data
-    data = {
-        'parent': parent
-    }
+    # Bail if there is no active 'reply' subscription for the user being
+    # replied to.
+    sub = request.db.query(Subscriptions).filter_by(active=True,
+                                                    type='reply',
+                                                    uri=parent.userid).first()
+    if sub is None:
+        return
 
-    subscriptions = Subscriptions.get_active_subscriptions_for_a_type('reply')
-    for subscription in subscriptions:
-        data['subscription'] = subscription.__json__(request)
-
-        # Validate annotation
-        if check_conditions(reply, data):
-            # TODO: we should not be assuming that the reply has a document
-            # property, and instead should use the document associated with the
-            # thread root
-            yield Notification(reply, reply_user, parent, parent_user, reply.document)
+    return Notification(reply, reply_user, parent, parent_user, reply.document)
 
 
 # Create a reply template for a uri

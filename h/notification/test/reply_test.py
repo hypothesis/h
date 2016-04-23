@@ -1,295 +1,223 @@
 # -*- coding: utf-8 -*-
 
-from mock import patch, Mock
+from __future__ import unicode_literals
 
 import pytest
 from pyramid.testing import DummyRequest
 
-from h.api import storage
-from h.notification import reply
+from h import db
+from h.api.models import elastic
+from h.models import Annotation
+from h.models import Document, DocumentMeta
+from h.models import Subscriptions
+from h.models import User
+from h.notification.reply import Notification
+from h.notification.reply import get_notification
 
-store_fake_data = [
-    {
-        # Root (parent)
-        'id': '0',
-        'created': '2013-10-27T19:40:53.245691+00:00',
-        'document': {'title': 'How to reach the ark NOW?'},
+FIXTURE_DATA = {
+    'reply_elastic': {
+        'id': 'OECV3AmDEeaAtTt8rjCjIg',
         'group': '__world__',
-        'text': 'The animals went in two by two, hurrah! hurrah!',
         'permissions': {'read': ['group:__world__']},
-        'uri': 'www.howtoreachtheark.now',
-        'user': 'acct:elephant@nomouse.pls'
+        'user': 'acct:elephant@safari.net',
     },
-    {
-        # Reply
-        'id': '1',
-        'created': '2014-10-27T19:50:53.245691+00:00',
-        'document': {'title': 'How to reach the ark NOW?'},
+    'parent_elastic': {
+        'id': 'SucHcAmDEeaAtf_ZeH-rhA',
         'group': '__world__',
-        'text': 'The animals went in three by three, hurrah! hurrah',
         'permissions': {'read': ['group:__world__']},
-        'references': [0],
-        'uri': 'www.howtoreachtheark.now',
-        'user': 'acct:wasp@stinger.rulz'
+        'user': 'acct:giraffe@safari.net',
     },
-    {
-        # Reply_of_reply
-        'id': '2',
-        'created': '2014-10-27T19:55:53.245691+00:00',
-        'document': {'title': 'How to reach the ark NOW?'},
-        'group': '__world__',
-        'text': 'The animals went in four by four, hurrah! hurrah',
-        'permissions': {'read': ['group:__world__']},
-        'references': [0, 1],
-        'uri': 'www.howtoreachtheark.now',
-        'user': 'acct:hippopotamus@stucked.sos'
+    'reply_postgres': {
+        'id': 'OECV3AmDEeaAtTt8rjCjIg',
+        'groupid': '__world__',
+        'shared': True,
+        'userid': 'acct:elephant@safari.net',
     },
-    {
-        # Reply to the root with the same user
-        'id': '3',
-        'created': '2014-10-27T20:40:53.245691+00:00',
-        'document': {'title': 'How to reach the ark NOW?'},
-        'group': '__world__',
-        'text': 'The animals went in two by two, hurrah! hurrah!',
-        'permissions': {'read': ['group:__world__']},
-        'references': [0],
-        'uri': 'www.howtoreachtheark.now',
-        'user': 'acct:elephant@nomouse.pls'
+    'parent_postgres': {
+        'id': 'SucHcAmDEeaAtf_ZeH-rhA',
+        'groupid': '__world__',
+        'shared': True,
+        'userid': 'acct:giraffe@safari.net',
     },
-    {
-        # Reply to the root with the same user
-        'id': '4',
-        'created': '2014-10-27T20:40:53.245691+00:00',
-        'document': {'title': ''},
-        'group': '__world__',
-        'text': 'The animals went in two by two, hurrah! hurrah!',
-        'permissions': {'read': ['group:__world__']},
-        'references': [0],
-        'uri': 'www.howtoreachtheark.now',
-        'user': 'acct:elephant@nomouse.pls'
-    },
-    {
-        # A thread root for testing permissions
-        'id': '5',
-        'user': 'acct:amrit@example.org'
-    },
-    {
-        # A reply for testing permissions
-        'id': '6',
-        'permissions': {'read': ['acct:jane@example.com']},
-        'references': [5],
-        'user': 'acct:jane@example.com'
-    },
-    {
-        # A reply for testing permissions
-        'id': '7',
-        'document': {'title': ''},
-        'group': 'wibble',
-        'permissions': {'read': ['acct:jane@example.com', 'group:wibble']},
-        'references': [5],
-        'user': 'acct:jane@example.com'
-    },
-]
+}
 
 
-def _fake_request():
-    mock_dumps = Mock(return_value='TOKEN')
-    request = DummyRequest()
-    request.domain = 'www.howtoreachtheark.now'
-    request.registry.notification_serializer = Mock(dumps=mock_dumps)
-    request.route_url = Mock()
-    request.route_url.return_value = 'UNSUBSCRIBE_URL'
-    return request
+@pytest.mark.usefixtures('authz_policy', 'fetch_annotation', 'get_user', 'subscription')
+class TestGetNotification(object):
+    def test_returns_correct_params_when_subscribed(self, get_user, reply, parent):
+        request = DummyRequest(db=db.Session)
 
+        result = get_notification(request, reply, 'create')
 
-def _fake_anno(id):
-    try:
-        offset = int(id)
-    except TypeError:
-        return None
-    return storage.annotation_from_dict(store_fake_data[offset])
+        assert isinstance(result, Notification)
+        assert result.reply == reply
+        assert result.parent == parent
+        assert result.reply_user == get_user(reply.userid, request)
+        assert result.parent_user == get_user(parent.userid, request)
+        assert result.document == reply.document
 
+    def test_returns_none_when_action_is_not_create(self, reply):
+        request = DummyRequest(db=db.Session)
 
-class MockSubscription(Mock):
-    def __json__(self, request):
-        return {
-            'id': self.id or '',
-            'uri': self.uri or ''
+        assert get_notification(request, reply, 'update') is None
+        assert get_notification(request, reply, 'delete') is None
+        assert get_notification(request, reply, 'frobnicate') is None
+
+    def test_returns_none_when_annotation_is_not_reply(self, reply, storage_driver):
+        request = DummyRequest(db=db.Session)
+        if storage_driver == 'elastic':
+            del reply['references']
+        else:
+            reply.references = None
+
+        result = get_notification(request, reply, 'create')
+
+        assert result is None
+
+    def test_returns_none_when_parent_does_not_exist(self, annotations, reply, parent):
+        request = DummyRequest(db=db.Session)
+        del annotations[parent.id]
+
+        result = get_notification(request, reply, 'create')
+
+        assert result is None
+
+    def test_returns_none_when_parent_user_does_not_exist(self, get_user, reply):
+        request = DummyRequest(db=db.Session)
+
+        def _only_return_reply_user(userid, _):
+            if userid == 'acct:elephant@safari.net':
+                return User(username='elephant')
+            return None
+        get_user.side_effect = _only_return_reply_user
+
+        result = get_notification(request, reply, 'create')
+
+        assert result is None
+
+    def test_returns_none_when_reply_user_does_not_exist(self, get_user, reply):
+        """
+        Don't send a reply if somehow the replying user ceased to exist.
+
+        It's not clear when or why this would ever happen, but we can't
+        construct the reply email without the user who replied existing. We log
+        a warning if this happens.
+        """
+        request = DummyRequest(db=db.Session)
+
+        def _only_return_parent_user(userid, _):
+            if userid == 'acct:giraffe@safari.net':
+                return User(username='giraffe')
+            return None
+        get_user.side_effect = _only_return_parent_user
+
+        result = get_notification(request, reply, 'create')
+
+        assert result is None
+
+    def test_returns_none_when_reply_by_same_user(self, reply, parent, storage_driver):
+        request = DummyRequest(db=db.Session)
+        if storage_driver == 'elastic':
+            parent['user'] = 'acct:elephant@safari.net'
+        else:
+            parent.userid = 'acct:elephant@safari.net'
+
+        result = get_notification(request, reply, 'create')
+
+        assert result is None
+
+    def test_returns_none_when_parent_user_cannot_read_reply(self, reply, storage_driver):
+        request = DummyRequest(db=db.Session)
+        if storage_driver == 'elastic':
+            reply['permissions'] = {'read': ['acct:elephant@safari.net']}
+        else:
+            reply.shared = False
+
+        result = get_notification(request, reply, 'create')
+
+        assert result is None
+
+    def test_returns_none_when_subscription_inactive(self, reply, subscription):
+        request = DummyRequest(db=db.Session)
+        subscription.active = False
+
+        result = get_notification(request, reply, 'create')
+
+        assert result is None
+
+    def test_returns_none_when_subscription_absent(self, reply, parent, subscription):
+        request = DummyRequest(db=db.Session)
+        db.Session.delete(subscription)
+
+        result = get_notification(request, reply, 'create')
+
+        assert result is None
+
+    @pytest.fixture
+    def annotations(self):
+        return {}
+
+    @pytest.fixture
+    def authz_policy(self, config):
+        from pyramid.authorization import ACLAuthorizationPolicy
+        config.set_authorization_policy(ACLAuthorizationPolicy())
+
+    @pytest.fixture
+    def fetch_annotation(self, patch, annotations):
+        fetch_annotation = patch('h.notification.reply.storage.fetch_annotation')
+        fetch_annotation.side_effect = lambda _, id: annotations.get(id)
+        return fetch_annotation
+
+    @pytest.fixture
+    def get_user(self, patch):
+        users = {
+            'acct:giraffe@safari.net': User(username='giraffe'),
+            'acct:elephant@safari.net': User(username='elephant'),
         }
+        get_user = patch('h.notification.reply.accounts.get_user')
+        get_user.side_effect = lambda userid, _: users.get(userid)
+        return get_user
 
+    @pytest.fixture
+    def parent(self, annotations, storage_driver):
+        if storage_driver == 'elastic':
+            parent = elastic.Annotation(**FIXTURE_DATA['parent_elastic'])
+        else:
+            parent = Annotation(**FIXTURE_DATA['parent_postgres'])
+        annotations[parent.id] = parent
+        return parent
 
-# Tests for the check_conditions function
-def test_dont_send_to_the_same_user():
-    """Tests that if the parent user and the annotation user is the same
-    then this function returns False"""
-    annotation = _fake_anno(3)
-    data = {
-        'parent': _fake_anno(0),
-        'subscription': {'id': 1}
-    }
+    @pytest.fixture
+    def reply(self, annotations, storage_driver, parent):
+        if storage_driver == 'elastic':
+            reply = elastic.Annotation(**FIXTURE_DATA['reply_elastic'])
+            reply['document'] = {'title': ['Some document']}
+            reply['references'] = [parent.id]
+        else:
+            # We need to create a document object to provide the title, and
+            # ensure it is associated with the annotation through the
+            # annotation's `target_uri`
+            doc = Document.find_or_create_by_uris(db.Session,
+                                                  claimant_uri='http://example.net/foo',
+                                                  uris=[]).one()
+            doc.meta.append(DocumentMeta(type='title',
+                                         value=['Some document'],
+                                         claimant='http://example.com/foo'))
+            reply = Annotation(**FIXTURE_DATA['reply_postgres'])
+            reply.target_uri = 'http://example.net/foo'
+            reply.references = [parent.id]
+            db.Session.add(reply)
+            db.Session.flush()
+        annotations[reply.id] = reply
+        return reply
 
-    send = reply.check_conditions(annotation, data)
-    assert send is False
+    @pytest.fixture(params=['elastic', 'postgres'])
+    def storage_driver(self, request):
+        return request.param
 
-
-def test_different_subscription():
-    """If subscription.uri is different from user, do not send!"""
-    annotation = _fake_anno(1)
-    data = {
-        'parent': _fake_anno(0),
-        'subscription': {
-            'id': 1,
-            'uri': 'acct:hippopotamus@stucked.sos'
-        }
-    }
-
-    send = reply.check_conditions(annotation, data)
-    assert send is False
-
-
-def test_good_conditions():
-    """If conditions match, this function returns with a True value"""
-    annotation = _fake_anno(1)
-    data = {
-        'parent': _fake_anno(0),
-        'subscription': {
-            'id': 1,
-            'uri': 'acct:elephant@nomouse.pls'
-        }
-    }
-
-    send = reply.check_conditions(annotation, data)
-    assert send is True
-
-
-generate_notifications_fixtures = pytest.mark.usefixtures('auth', 'get_user')
-
-
-@generate_notifications_fixtures
-def test_generate_notifications_empty_if_action_not_create():
-    """If the action is not 'create', no notifications should be generated."""
-    annotation = storage.annotation_from_dict({})
-    request = DummyRequest()
-
-    notifications = reply.generate_notifications(request, annotation, 'update')
-
-    assert list(notifications) == []
-
-
-@generate_notifications_fixtures
-def test_generate_notifications_empty_if_annotation_has_no_parent():
-    """If the annotation has no parent no notifications should be generated."""
-    annotation = _fake_anno(0)
-    request = DummyRequest()
-
-    notifications = reply.generate_notifications(request, annotation, 'create')
-
-    assert list(notifications) == []
-
-
-@generate_notifications_fixtures
-def test_generate_notifications_does_not_fetch_if_annotation_has_no_parent(fetch):
-    """Don't try and fetch None if the annotation has no parent"""
-    annotation = _fake_anno(0)
-    request = DummyRequest()
-
-    notifications = reply.generate_notifications(request, annotation, 'create')
-
-    # Read the generator
-    list(notifications)
-
-    fetch.assert_not_called()
-
-
-@generate_notifications_fixtures
-@patch('h.notification.reply.Subscriptions')
-def test_generate_notifications_only_if_author_can_read_reply(
-        Subscriptions,
-        auth):
-    """
-    If the annotation is not readable by the parent author, no notifications
-    should be generated.
-    """
-    Subscriptions.get_active_subscriptions_for_a_type.return_value = [
-        MockSubscription(id=1, uri='acct:amrit@example.org')
-    ]
-
-    auth.has_permission.return_value = False
-    notifications = reply.generate_notifications(_fake_request(),
-                                                 _fake_anno(6),
-                                                 'create')
-    assert list(notifications) == []
-
-    auth.has_permission.return_value = True
-    notifications = reply.generate_notifications(_fake_request(),
-                                                 _fake_anno(7),
-                                                 'create')
-    assert list(notifications) != []
-
-
-@generate_notifications_fixtures
-@patch('h.notification.reply.Subscriptions')
-def test_generate_notifications_checks_subscriptions(Subscriptions):
-    """If the annotation has a parent, then proceed to check subscriptions."""
-    request = _fake_request()
-    annotation = _fake_anno(1)
-    Subscriptions.get_active_subscriptions_for_a_type.return_value = []
-
-    notifications = reply.generate_notifications(request, annotation, 'create')
-
-    # Read the generator
-    list(notifications)
-
-    Subscriptions.get_active_subscriptions_for_a_type.assert_called_with('reply')
-
-
-@generate_notifications_fixtures
-def test_check_conditions_false_stops_sending():
-    """If the check conditions() returns False, no notifications are generated"""
-    request = _fake_request()
-    annotation = _fake_anno(1)
-
-    with patch('h.notification.reply.Subscriptions') as mock_subs:
-        mock_subs.get_active_subscriptions_for_a_type.return_value = [
-            MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
-        ]
-        with patch('h.notification.reply.check_conditions') as mock_conditions:
-            mock_conditions.return_value = False
-            with pytest.raises(StopIteration):
-                msgs = reply.generate_notifications(request, annotation, 'create')
-                msgs.next()
-
-
-@generate_notifications_fixtures
-def test_send_if_everything_is_okay():
-    """Test whether we generate notifications if every condition is okay"""
-    request = _fake_request()
-    annotation = _fake_anno(1)
-
-    with patch('h.notification.reply.Subscriptions') as mock_subs:
-        mock_subs.get_active_subscriptions_for_a_type.return_value = [
-            MockSubscription(id=1, uri='acct:elephant@nomouse.pls')
-        ]
-        with patch('h.notification.reply.check_conditions') as mock_conditions:
-            mock_conditions.return_value = True
-            msgs = reply.generate_notifications(request, annotation, 'create')
-            msgs.next()
-
-
-@pytest.fixture
-def auth(patch):
-    return patch('h.notification.reply.auth')
-
-
-@pytest.fixture
-def get_user(patch):
-    return patch('h.notification.reply.accounts.get_user')
-
-
-@pytest.fixture(autouse=True)
-def fetch(request):
-    patcher = patch.object(storage, 'fetch_annotation')
-    fetch = patcher.start()
-    fetch.side_effect = lambda _, id: _fake_anno(id)
-    request.addfinalizer(patcher.stop)
-    return fetch
+    @pytest.fixture
+    def subscription(self):
+        sub = Subscriptions(type='reply', active=True, uri='acct:giraffe@safari.net')
+        db.Session.add(sub)
+        db.Session.flush()
+        return sub

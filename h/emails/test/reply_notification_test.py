@@ -11,7 +11,7 @@ from h.emails.reply_notification import generate
 from h.models import Annotation
 from h.models import Document, DocumentMeta
 from h.models import User
-from h.notification.reply_template import Notification
+from h.notification.reply import Notification
 
 
 @pytest.mark.usefixtures('routes', 'token_serializer')

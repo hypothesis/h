@@ -39,7 +39,7 @@ def publish_annotation_event(event):
 
 
 def send_reply_notifications(event,
-                             generate_notifications=reply.generate_notifications,
+                             get_notification=reply.get_notification,
                              generate_mail=emails.reply_notification.generate,
                              send=mailer.send.delay):
     """Queue any reply notification emails triggered by an annotation event."""
@@ -47,16 +47,16 @@ def send_reply_notifications(event,
     annotation = event.annotation
     action = event.action
     try:
-        for notification in generate_notifications(request, annotation, action):
-            send_params = generate_mail(request, notification)
-            send(*send_params)
-    # We know for a fact that occasionally `generate_notifications` throws
-    # exceptions. We don't want this to cause the annotation CRUD action to
-    # fail, but we do want to collect the error in Sentry, so we explicitly
-    # wrap this here.
+        notification = get_notification(request, annotation, action)
+        if notification is None:
+            return
+        send_params = generate_mail(request, notification)
+        send(*send_params)
+    # We don't want any exceptions thrown by this code to cause the annotation
+    # CRUD action to fail, but we do want to collect the error in Sentry, so we
+    # explicitly wrap this here.
     #
-    # FIXME: Fix the underlying bugs in `generate_notifications` and remove
-    # this try/except.
+    # FIXME: Fix the underlying bugs and remove this try/except.
     except Exception:
         event.request.sentry.captureException()
         if event.request.debug:
