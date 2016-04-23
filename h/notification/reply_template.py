@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
-import re
 from datetime import datetime
 
+from pyramid import security
 from pyramid.events import subscriber
 from pyramid.renderers import render
 
@@ -26,55 +26,47 @@ SUBJECT_TEMPLATE = ROOT_PATH + 'reply_notification_subject.txt.jinja2'
 
 def create_template_map(request, reply, parent):
     document_title = ''
-    if 'document' in reply:
-        document_title = reply['document'].get('title', '')
+    if reply.document:
+        document_title = reply.document.title
 
     if document_title is '':
-        document_title = parent['uri']
+        document_title = parent.target_uri
 
-    parent_user = user_name(parent['user'])
-    reply_user = user_name(reply['user'])
+    parent_user = user_name(parent.userid)
+    reply_user = user_name(reply.userid)
 
     token = request.registry.notification_serializer.dumps({
         'type': REPLY_TYPE,
-        'uri': parent['user'],
+        'uri': parent.userid,
     })
     unsubscribe = request.route_url('unsubscribe', token=token)
 
     return {
         'document_title': document_title,
-        'document_path': parent['uri'],
-        'parent_text': parent.get('text', ''),
+        'document_path': parent.target_uri,
+        'parent_text': parent.text,
         'parent_user': parent_user,
-        'parent_timestamp': format_timestamp(parent['created']),
-        'parent_user_profile': user_profile_url(request, parent['user']),
-        'parent_path': standalone_url(request, parent['id']),
-        'reply_text': reply['text'],
+        'parent_timestamp': format_timestamp(parent.created),
+        'parent_user_profile': user_profile_url(request, parent.userid),
+        'parent_path': standalone_url(request, parent.id),
+        'reply_text': reply.text,
         'reply_user': reply_user,
-        'reply_timestamp': format_timestamp(reply['created']),
-        'reply_user_profile': user_profile_url(request, reply['user']),
-        'reply_path': standalone_url(request, reply['id']),
+        'reply_timestamp': format_timestamp(reply.created),
+        'reply_user_profile': user_profile_url(request, reply.userid),
+        'reply_path': standalone_url(request, reply.id),
         'unsubscribe': unsubscribe
     }
 
 
-def format_timestamp(timestamp):
-    # Currently we cut the UTC format because time.strptime has problems
-    # parsing it, and of course it'd only correct the backend's timezone
-    # which is not meaningful for international users. This trims the
-    # timezone in the format +00:00.
-    timestamp = re.sub(r'\+\d\d:\d\d$', '', timestamp)
-    timestamp_format = '%Y-%m-%dT%H:%M:%S.%f'
-    parsed = datetime.strptime(timestamp, timestamp_format)
-
+def format_timestamp(timestamp, now=datetime.utcnow):
     template_format = '%d %B at %H:%M'
-    if parsed.year < datetime.now().year:
+    if timestamp.year < now().year:
         template_format = '%d %B %Y at %H:%M'
-    return parsed.strftime(template_format)
+    return timestamp.strftime(template_format)
 
 
 def get_recipients(request, parent):
-    username = user_name(parent['user'])
+    username = user_name(parent.userid)
     user_obj = get_user_by_name(request, username)
     if not user_obj:
         raise TemplateRenderException('User not found')
@@ -83,11 +75,11 @@ def get_recipients(request, parent):
 
 def check_conditions(annotation, data):
     # Do not notify users about their own replies
-    if annotation['user'] == data['parent']['user']:
+    if annotation.userid == data['parent'].userid:
         return False
 
     # Is he the proper user?
-    if data['parent']['user'] != data['subscription']['uri']:
+    if data['parent'].userid != data['subscription']['uri']:
         return False
 
     # Else okay
@@ -106,17 +98,12 @@ def generate_notifications(request, annotation, action):
     if parent_id is None:
         return
     parent = storage.fetch_annotation(request, parent_id)
-    if parent is None or 'user' not in parent:
+    if parent is None or not annotation.userid:
         return
 
-    # We don't send replies to the author of the parent unless they're going to
-    # be able to read it. That means there must be some overlap between the set
-    # of effective principals of the parent's author, and the read permissions
-    # of the reply.
-    child_read_permissions = annotation.get('permissions', {}).get('read', [])
-    parent_principals = auth.effective_principals(parent['user'], request)
-    read_principals = translate_annotation_principals(child_read_permissions)
-    if not set(parent_principals).intersection(read_principals):
+    # Don't send reply notifications to the author of the parent annotation if
+    # the author doesn't have permission to read the reply.
+    if not auth.has_permission(request, annotation, parent.userid, 'read'):
         return
 
     # Store the parent values as additional data

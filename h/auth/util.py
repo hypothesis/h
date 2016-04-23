@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from pyramid import authorization
 from pyramid import security
 
 from h import accounts
@@ -52,6 +53,29 @@ def group_principals(user):
 
     """
     return ['group:{group.pubid}'.format(group=group) for group in user.groups]
+
+
+def has_permission(request, context, userid, permission):
+    """
+    Return True if userid has permission on context object.
+
+    Return True if the given userid has the given permission on the given
+    context object, False otherwise.
+
+    For example:
+
+        if has_permission(request,
+                          some_annotation,
+                          'acct:philip@hypothes.is',
+                          'read'):
+            print 'philip can read this annotation'
+        else:
+            print "philip isn't allowed to read this annotation"
+
+    """
+    policy = request.registry.queryUtility(authorization.IAuthorizationPolicy)
+    users_principals = effective_principals(userid, request)
+    return bool(policy.permits(context, users_principals, permission))
 
 
 def translate_annotation_principals(principals):

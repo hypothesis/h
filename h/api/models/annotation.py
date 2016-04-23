@@ -103,6 +103,17 @@ class Annotation(Base, mixins.Timestamps):
         if self.documents:
             return self.documents[0]
 
+    @property
+    def parent_id(self):
+        """
+        Return the ID of the annotation that this annotation is a reply to.
+
+        Return None if this annotation is not a reply.
+
+        """
+        if self.references:
+            return self.references[-1]
+
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
         acl = []

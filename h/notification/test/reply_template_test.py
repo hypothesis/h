@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
+import datetime
 from mock import patch, Mock
 
 import pytest
@@ -18,6 +19,7 @@ store_fake_data = [
         'id': '0',
         'created': '2013-10-27T19:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
+        'group': '__world__',
         'text': 'The animals went in two by two, hurrah! hurrah!',
         'permissions': {'read': ['group:__world__']},
         'uri': 'www.howtoreachtheark.now',
@@ -28,6 +30,7 @@ store_fake_data = [
         'id': '1',
         'created': '2014-10-27T19:50:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
+        'group': '__world__',
         'text': 'The animals went in three by three, hurrah! hurrah',
         'permissions': {'read': ['group:__world__']},
         'references': [0],
@@ -39,6 +42,7 @@ store_fake_data = [
         'id': '2',
         'created': '2014-10-27T19:55:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
+        'group': '__world__',
         'text': 'The animals went in four by four, hurrah! hurrah',
         'permissions': {'read': ['group:__world__']},
         'references': [0, 1],
@@ -50,6 +54,7 @@ store_fake_data = [
         'id': '3',
         'created': '2014-10-27T20:40:53.245691+00:00',
         'document': {'title': 'How to reach the ark NOW?'},
+        'group': '__world__',
         'text': 'The animals went in two by two, hurrah! hurrah!',
         'permissions': {'read': ['group:__world__']},
         'references': [0],
@@ -61,6 +66,7 @@ store_fake_data = [
         'id': '4',
         'created': '2014-10-27T20:40:53.245691+00:00',
         'document': {'title': ''},
+        'group': '__world__',
         'text': 'The animals went in two by two, hurrah! hurrah!',
         'permissions': {'read': ['group:__world__']},
         'references': [0],
@@ -82,6 +88,7 @@ store_fake_data = [
     {
         # A reply for testing permissions
         'id': '7',
+        'group': 'wibble',
         'permissions': {'read': ['acct:jane@example.com', 'group:wibble']},
         'references': [5],
         'user': 'acct:jane@example.com'
@@ -172,23 +179,21 @@ def test_template_map_key_values():
 def test_create_template_map_when_parent_has_no_text():
     """It shouldn't crash if the parent annotation has no 'text' item."""
     rt.create_template_map(
-            Mock(application_url='https://hypothes.is'),
-        reply={
-            'document': {
-                'title': 'Document Title'
-            },
-            'user': 'acct:bob@hypothes.is',
-            'text': "This is Bob's annotation",
-            'created': '2013-10-27T19:40:53.245691+00:00',
-            'id': '0'
-        },
-        # parent dict has no 'text' item.
-        parent={
-            'uri': 'http://example.com/example.html',
-            'user': 'acct:fred@hypothes.is',
-            'created': '2013-10-27T19:40:53.245691+00:00',
-            'id': '1'
-        })
+        Mock(application_url='https://hypothes.is'),
+        reply=Mock(
+            document=Mock(title='Document Title'),
+            userid='acct:bob@hypothes.is',
+            text="This is Bob's annotation",
+            created=datetime.datetime(2013, 10, 27, 19, 40, 53),
+            id='0'
+        ),
+        parent=Mock(
+            uri='http://example.com/example.html',
+            userid='acct:fred@hypothes.is',
+            created=datetime.datetime(2013, 10, 27, 19, 40, 53),
+            id='1',
+            text=None  # Parent annotation has no 'text' item.
+        ))
 
 
 def test_fallback_title():
@@ -226,6 +231,43 @@ def test_unsubscribe_url_generation():
     rt.create_template_map(request, annotation, parent)
 
     request.route_url.assert_called_with('unsubscribe', token='TOKEN')
+
+
+class TestFormatTimestamp:
+
+    @pytest.mark.parametrize('in_date,out_str', [
+        (
+            datetime.datetime(2016, 4, 14, 16, 45, 36, 529730),
+            '14 April at 16:45',
+        ),
+    ])
+    def test_it_converts_iso_format_to_friendly(self, in_date, out_str, now):
+        """It converts datetime.datetime objects to friendly strings."""
+        assert rt.format_timestamp(in_date, now=now) == out_str
+
+    @pytest.mark.parametrize('in_date,out_str', [
+        (
+            datetime.datetime(2012, 4, 14, 16, 45, 36, 529730),
+            '14 April 2012 at 16:45',
+        ),
+    ])
+    def test_it_inserts_year_if_date_older_than_current_year(self,
+                                                             in_date,
+                                                             out_str,
+                                                             now):
+        """
+        It inserts the year for dates older than this year.
+
+        If the input date is older than the current year then it inserts the
+        year into the output string.
+
+        """
+        assert rt.format_timestamp(in_date, now=now) == out_str
+
+    @pytest.fixture
+    def now(self):
+        return lambda: datetime.datetime(2016, 4, 14)
+
 
 # Tests for the get_recipients function
 def test_get_email():
@@ -296,7 +338,10 @@ def test_good_conditions():
     send = rt.check_conditions(annotation, data)
     assert send is True
 
-generate_notifications_fixtures = pytest.mark.usefixtures('effective_principals')
+
+generate_notifications_fixtures = pytest.mark.usefixtures(
+    'auth', 'effective_principals')
+
 
 @generate_notifications_fixtures
 def test_generate_notifications_empty_if_action_not_create():
@@ -337,16 +382,15 @@ def test_generate_notifications_does_not_fetch_if_annotation_has_no_parent(fetch
 @generate_notifications_fixtures
 @patch('h.notification.reply_template.render_reply_notification')
 @patch('h.notification.reply_template.Subscriptions')
-def test_generate_notifications_only_if_author_can_read_reply(Subscriptions,
-                                                              render_reply_notification,
-                                                              effective_principals):
+def test_generate_notifications_only_if_author_can_read_reply(
+        Subscriptions,
+        render_reply_notification,
+        auth,
+        effective_principals):
     """
     If the annotation is not readable by the parent author, no notifications
     should be generated.
     """
-    private_annotation = _fake_anno(6)
-    shared_annotation = _fake_anno(7)
-    request = _fake_request()
     effective_principals.return_value = [
         security.Everyone,
         security.Authenticated,
@@ -363,10 +407,16 @@ def test_generate_notifications_only_if_author_can_read_reply(Subscriptions,
         ['dummy@example.com']
     )
 
-    notifications = rt.generate_notifications(request, private_annotation, 'create')
+    auth.has_permission.return_value = False
+    notifications = rt.generate_notifications(_fake_request(),
+                                              _fake_anno(6),
+                                              'create')
     assert list(notifications) == []
 
-    notifications = rt.generate_notifications(request, shared_annotation, 'create')
+    auth.has_permission.return_value = True
+    notifications = rt.generate_notifications(_fake_request(),
+                                              _fake_anno(7),
+                                              'create')
     assert list(notifications) != []
 
 
@@ -424,6 +474,11 @@ def test_send_if_everything_is_okay():
                     mock_user_db.return_value = user
                     msgs = rt.generate_notifications(request, annotation, 'create')
                     msgs.next()
+
+
+@pytest.fixture
+def auth(patch):
+    return patch('h.notification.reply_template.auth')
 
 
 @pytest.fixture

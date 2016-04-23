@@ -35,9 +35,10 @@ class Document(Base, mixins.Timestamps):
     @property
     def title(self):
         titles = [m.value for m in self.meta if m.type == 'title']
-
-        if titles:
-            return titles[0]
+        try:
+            return titles[0][0]
+        except IndexError:
+            return None
 
     @classmethod
     def find_by_uris(cls, session, uris):
