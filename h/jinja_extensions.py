@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from functools import wraps
 
+import datetime
 import json
 
 from jinja2 import Markup
@@ -16,6 +17,7 @@ class Filters(Extension):
     def __init__(self, environment):
         super(Filters, self).__init__(environment)
 
+        environment.filters['human_timestamp'] = human_timestamp
         environment.filters['to_json'] = to_json
 
 
@@ -29,6 +31,14 @@ class IncludeRawExtension(Extension):
         super(IncludeRawExtension, self).__init__(environment)
 
         environment.globals['include_raw'] = _get_includer(environment)
+
+
+def human_timestamp(timestamp, now=datetime.datetime.utcnow):
+    """Turn a :py:class:`datetime.datetime` into a human-friendly string."""
+    fmt = '%d %B at %H:%M'
+    if timestamp.year < now().year:
+        fmt = '%d %B %Y at %H:%M'
+    return timestamp.strftime(fmt)
 
 
 def to_json(value):

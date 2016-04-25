@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 """Defines unit tests for h.notifier."""
-import datetime
+
 from mock import patch, Mock
 
 import pytest
 from pyramid.testing import DummyRequest
-from pyramid import security
 
 from h.api import storage
 from h.notification import reply_template as rt
-from h.notification.gateway import user_name, user_profile_url, standalone_url
-from h.notification.notifier import TemplateRenderException
-from h.notification.types import REPLY_TYPE
 
 store_fake_data = [
     {
@@ -88,6 +84,7 @@ store_fake_data = [
     {
         # A reply for testing permissions
         'id': '7',
+        'document': {'title': ''},
         'group': 'wibble',
         'permissions': {'read': ['acct:jane@example.com', 'group:wibble']},
         'references': [5],
@@ -120,179 +117,6 @@ class MockSubscription(Mock):
             'id': self.id or '',
             'uri': self.uri or ''
         }
-
-
-# Tests for the create_template_map function
-def test_all_keys_are_there():
-    """Checks for the existence of every needed key for the template"""
-    request = _fake_request()
-    annotation = _fake_anno(1)
-    parent = _fake_anno(0)
-
-    tmap = rt.create_template_map(request, annotation, parent)
-
-    assert 'document_title' in tmap
-    assert 'document_path' in tmap
-    assert 'parent_text' in tmap
-    assert 'parent_user' in tmap
-    assert 'parent_timestamp' in tmap
-    assert 'parent_user_profile' in tmap
-    assert 'parent_path' in tmap
-    assert 'reply_text' in tmap
-    assert 'reply_user' in tmap
-    assert 'reply_timestamp' in tmap
-    assert 'reply_user_profile' in tmap
-    assert 'reply_path' in tmap
-    assert 'unsubscribe' in tmap
-
-
-def test_template_map_key_values():
-    """This test checks whether the keys holds the correct values"""
-    request = _fake_request()
-    annotation = _fake_anno(1)
-    parent = _fake_anno(0)
-
-    tmap = rt.create_template_map(request, annotation, parent)
-
-    # Document properties
-    assert tmap['document_title'] == annotation['document']['title']
-    assert tmap['document_path'] == parent['uri']
-
-    # Parent properties
-    assert tmap['parent_text'] == parent['text']
-    assert tmap['parent_user'] == user_name(parent['user'])
-    assert tmap['parent_user_profile'] == user_profile_url(request, parent['user'])
-    assert tmap['parent_path'] == standalone_url(request, parent['id'])
-
-    # Annotation properties
-    assert tmap['reply_text'] == annotation['text']
-    assert tmap['reply_user'] == user_name(annotation['user'])
-    assert tmap['reply_user_profile'] == user_profile_url(request, annotation['user'])
-    assert tmap['reply_path'] == standalone_url(request, annotation['id'])
-
-    assert tmap['parent_timestamp'] == '27 October 2013 at 19:40'
-    assert tmap['reply_timestamp'] == '27 October 2014 at 19:50'
-
-    assert tmap['unsubscribe'] == 'UNSUBSCRIBE_URL'
-
-
-def test_create_template_map_when_parent_has_no_text():
-    """It shouldn't crash if the parent annotation has no 'text' item."""
-    rt.create_template_map(
-        Mock(application_url='https://hypothes.is'),
-        reply=Mock(
-            document=Mock(title='Document Title'),
-            userid='acct:bob@hypothes.is',
-            text="This is Bob's annotation",
-            created=datetime.datetime(2013, 10, 27, 19, 40, 53),
-            id='0'
-        ),
-        parent=Mock(
-            uri='http://example.com/example.html',
-            userid='acct:fred@hypothes.is',
-            created=datetime.datetime(2013, 10, 27, 19, 40, 53),
-            id='1',
-            text=None  # Parent annotation has no 'text' item.
-        ))
-
-
-def test_fallback_title():
-    """Checks that the title falls back to using the url"""
-    request = _fake_request()
-    annotation = _fake_anno(4)
-    parent = _fake_anno(0)
-
-    tmap = rt.create_template_map(request, annotation, parent)
-
-    assert tmap['document_title'] == annotation['uri']
-
-
-def test_unsubscribe_token_generation():
-    """ensures that a serialized token is generated for the unsubscribe url"""
-    request = _fake_request()
-    annotation = _fake_anno(4)
-    parent = _fake_anno(0)
-
-    rt.create_template_map(request, annotation, parent)
-
-    notification_serializer = request.registry.notification_serializer
-    notification_serializer.dumps.assert_called_with({
-        'type': REPLY_TYPE,
-        'uri': parent['user'],
-    })
-
-
-def test_unsubscribe_url_generation():
-    """ensures that a serialized token is generated for the unsubscribe url"""
-    request = _fake_request()
-    annotation = _fake_anno(4)
-    parent = _fake_anno(0)
-
-    rt.create_template_map(request, annotation, parent)
-
-    request.route_url.assert_called_with('unsubscribe', token='TOKEN')
-
-
-class TestFormatTimestamp:
-
-    @pytest.mark.parametrize('in_date,out_str', [
-        (
-            datetime.datetime(2016, 4, 14, 16, 45, 36, 529730),
-            '14 April at 16:45',
-        ),
-    ])
-    def test_it_converts_iso_format_to_friendly(self, in_date, out_str, now):
-        """It converts datetime.datetime objects to friendly strings."""
-        assert rt.format_timestamp(in_date, now=now) == out_str
-
-    @pytest.mark.parametrize('in_date,out_str', [
-        (
-            datetime.datetime(2012, 4, 14, 16, 45, 36, 529730),
-            '14 April 2012 at 16:45',
-        ),
-    ])
-    def test_it_inserts_year_if_date_older_than_current_year(self,
-                                                             in_date,
-                                                             out_str,
-                                                             now):
-        """
-        It inserts the year for dates older than this year.
-
-        If the input date is older than the current year then it inserts the
-        year into the output string.
-
-        """
-        assert rt.format_timestamp(in_date, now=now) == out_str
-
-    @pytest.fixture
-    def now(self):
-        return lambda: datetime.datetime(2016, 4, 14)
-
-
-# Tests for the get_recipients function
-def test_get_email():
-    """Tests whether it gives back the user.email property"""
-    with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
-        user = Mock()
-        user.email = 'testmail@test.com'
-        mock_user_db.return_value = user
-        request = _fake_request()
-        annotation = _fake_anno(0)
-
-        email = rt.get_recipients(request, annotation)
-
-        assert email[0] == user.email
-
-
-def test_no_email():
-    """If user has no email we must throw an exception"""
-    with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
-        mock_user_db.return_value = {}
-        request = _fake_request()
-        annotation = _fake_anno(0)
-
-        with pytest.raises(TemplateRenderException):
-            rt.get_recipients(request, annotation)
 
 
 # Tests for the check_conditions function
@@ -339,8 +163,7 @@ def test_good_conditions():
     assert send is True
 
 
-generate_notifications_fixtures = pytest.mark.usefixtures(
-    'auth', 'effective_principals')
+generate_notifications_fixtures = pytest.mark.usefixtures('auth', 'get_user')
 
 
 @generate_notifications_fixtures
@@ -380,32 +203,17 @@ def test_generate_notifications_does_not_fetch_if_annotation_has_no_parent(fetch
 
 
 @generate_notifications_fixtures
-@patch('h.notification.reply_template.render_reply_notification')
 @patch('h.notification.reply_template.Subscriptions')
 def test_generate_notifications_only_if_author_can_read_reply(
         Subscriptions,
-        render_reply_notification,
-        auth,
-        effective_principals):
+        auth):
     """
     If the annotation is not readable by the parent author, no notifications
     should be generated.
     """
-    effective_principals.return_value = [
-        security.Everyone,
-        security.Authenticated,
-        'acct:amrit@example.org',
-        'group:wibble',
-    ]
     Subscriptions.get_active_subscriptions_for_a_type.return_value = [
         MockSubscription(id=1, uri='acct:amrit@example.org')
     ]
-    render_reply_notification.return_value = (
-        'Dummy subject',
-        'Dummy text',
-        'Dummy HTML',
-        ['dummy@example.com']
-    )
 
     auth.has_permission.return_value = False
     notifications = rt.generate_notifications(_fake_request(),
@@ -433,8 +241,7 @@ def test_generate_notifications_checks_subscriptions(Subscriptions):
     # Read the generator
     list(notifications)
 
-    Subscriptions.get_active_subscriptions_for_a_type.assert_called_with(
-        REPLY_TYPE)
+    Subscriptions.get_active_subscriptions_for_a_type.assert_called_with('reply')
 
 
 @generate_notifications_fixtures
@@ -466,14 +273,8 @@ def test_send_if_everything_is_okay():
         ]
         with patch('h.notification.reply_template.check_conditions') as mock_conditions:
             mock_conditions.return_value = True
-            with patch('h.notification.reply_template.render') as mock_render:
-                mock_render.return_value = ''
-                with patch('h.notification.reply_template.get_user_by_name') as mock_user_db:
-                    user = Mock()
-                    user.email = 'testmail@test.com'
-                    mock_user_db.return_value = user
-                    msgs = rt.generate_notifications(request, annotation, 'create')
-                    msgs.next()
+            msgs = rt.generate_notifications(request, annotation, 'create')
+            msgs.next()
 
 
 @pytest.fixture
@@ -482,8 +283,8 @@ def auth(patch):
 
 
 @pytest.fixture
-def effective_principals(patch):
-    return patch('h.auth.effective_principals', return_value=[security.Everyone])
+def get_user(patch):
+    return patch('h.notification.reply_template.accounts.get_user')
 
 
 @pytest.fixture(autouse=True)
