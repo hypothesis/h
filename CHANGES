@@ -1,11 +1,42 @@
 Unreleased
 ==========
 
+Features
+--------
+
+- Remove any empty annotations with no tags or text when creating new
+  annotations (#3214).
+
+- Add a 'Copy to Clipboard' button in the annotation share dialog (#3197).
+
+- Add 'About this version' panel accessible via Help -> About this version
+  (#3216).
+
+- When activing Hypothesis on a page whose canonical URL has changed since it
+  was first annotated, surface all annotations for that page, not just those
+  made since the page had its current canonical URL (#3241). This fixes an
+  issue where annotations disappeared from WordPress blogs.
+
 Bug fixes
 ---------
 
-- Fix sidebar not scrolling to show Share or Login dialogs when clicking the
-  links in the top bar to show them
+- Fix sidebar not scrolling to show Share or Login dialogs when activating them
+  via links in the top bar (#3215).
+
+- Do not treat characters inside math expressions as possible markdown
+  formatting commands (#3208).
+
+- Fix failure to anchor annotations made at the start of PDF pages (#3234).
+
+- Fixed KaTeX font URLs failing to load when rendering math (#3209).
+
+- Handle request failures more gracefully for various network requests made by
+  the sidebar (#3210, #3211).
+
+Miscellanea
+-----------
+
+- Switched real-time message processing from NSQ to RabbitMQ (#3217).
 
 0.19.1 (2016-04-14)
 ===================
