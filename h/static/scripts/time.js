@@ -58,8 +58,8 @@ function nSec(date, now) {
   return '{} sec'.replace('{}', Math.floor(delta(date, now)));
 }
 
-function nMinutesAgo(date, now) {
-  return '{} minutes ago'.replace('{}', Math.floor(delta(date, now) / minute));
+function nMin(date, now) {
+  return '{} min'.replace('{}', Math.floor(delta(date, now) / minute));
 }
 
 function nHoursAgo(date, now) {
@@ -82,7 +82,7 @@ var BREAKPOINTS = [
   [lessThanThirtySecondsAgo,    function () {return 'Just now';},      1],
   [lessThanOneMinuteAgo,        nSec,                                  1],
   [lessThanTwoMinutesAgo,       function () {return 'a minute ago';},  minute],
-  [lessThanOneHourAgo,          nMinutesAgo,                           minute],
+  [lessThanOneHourAgo,          nMin,                                  minute],
   [lessThanTwoHoursAgo,         function () {return 'an hour ago';},   hour],
   [lessThanOneDayAgo,           nHoursAgo,                             hour],
   [lessThanTwoDaysAgo,          function () {return 'a day ago';},     day],
