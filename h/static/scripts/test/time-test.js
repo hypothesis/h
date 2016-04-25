@@ -12,7 +12,7 @@ var FIXTURES_TO_FUZZY_STRING = [
   [10, 'Just now'],
   [29, 'Just now'],
   [49, '49 sec'],
-  [minute + 5, 'a minute ago'],
+  [minute + 5, '1 min'],
   [3 * minute + 5, '3 min'],
   [4 * hour, '4 hr'],
   [27 * hour, 'a day ago'],
