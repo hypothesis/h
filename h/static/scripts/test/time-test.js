@@ -9,8 +9,8 @@ var month = day * 30;
 var year = day * 365;
 
 var FIXTURES_TO_FUZZY_STRING = [
-  [10, 'moments ago'],
-  [29, 'moments ago'],
+  [10, 'Just now'],
+  [29, 'Just now'],
   [49, '49 seconds ago'],
   [minute + 5, 'a minute ago'],
   [3 * minute + 5, '3 minutes ago'],

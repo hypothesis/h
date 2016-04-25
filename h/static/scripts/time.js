@@ -79,7 +79,7 @@ function nYearsAgo(date, now) {
 }
 
 var BREAKPOINTS = [
-  [lessThanThirtySecondsAgo,    function () {return 'moments ago';},   1],
+  [lessThanThirtySecondsAgo,    function () {return 'Just now';},      1],
   [lessThanOneMinuteAgo,        nSecondsAgo,                           1],
   [lessThanTwoMinutesAgo,       function () {return 'a minute ago';},  minute],
   [lessThanOneHourAgo,          nMinutesAgo,                           minute],
