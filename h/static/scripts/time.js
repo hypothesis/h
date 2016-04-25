@@ -50,18 +50,42 @@ function lessThanTwoYearsAgo(date, now) {
   return ((now - date) < (2 * 365 * 24 * 60 * 60 * 1000));
 }
 
+function nSecondsAgo(delta) {
+  return '{} seconds ago'.replace('{}', Math.floor(delta));
+}
+
+function nMinutesAgo(delta) {
+  return '{} minutes ago'.replace('{}', Math.floor(delta / minute));
+}
+
+function nHoursAgo(delta) {
+  return '{} hours ago'.replace('{}', Math.floor(delta / hour));
+}
+
+function nDaysAgo(delta) {
+  return '{} days ago'.replace('{}', Math.floor(delta / day));
+}
+
+function nMonthsAgo(delta) {
+  return '{} months ago'.replace('{}', Math.floor(delta / month));
+}
+
+function nYearsAgo(delta) {
+  return '{} years ago'.replace('{}', Math.floor(delta / year));
+}
+
 var BREAKPOINTS = [
-  [lessThanThirtySecondsAgo,    'moments ago',     1],
-  [lessThanOneMinuteAgo,        '{} seconds ago',  1],
-  [lessThanTwoMinutesAgo,       'a minute ago',    minute],
-  [lessThanOneHourAgo,          '{} minutes ago',  minute],
-  [lessThanTwoHoursAgo,         'an hour ago',     hour],
-  [lessThanOneDayAgo,           '{} hours ago',    hour],
-  [lessThanTwoDaysAgo,          'a day ago',       day],
-  [lessThanThirtyDaysAgo,       '{} days ago',     day],
-  [lessThanOneYearAgo,          '{} months ago',   month],
-  [lessThanTwoYearsAgo,         'one year ago',    year],
-  [function () {return true;},  '{} years ago',    year]
+  [lessThanThirtySecondsAgo,    function () {return 'moments ago';},   1],
+  [lessThanOneMinuteAgo,        nSecondsAgo,                           1],
+  [lessThanTwoMinutesAgo,       function () {return 'a minute ago';},  minute],
+  [lessThanOneHourAgo,          nMinutesAgo,                           minute],
+  [lessThanTwoHoursAgo,         function () {return 'an hour ago';},   hour],
+  [lessThanOneDayAgo,           nHoursAgo,                             hour],
+  [lessThanTwoDaysAgo,          function () {return 'a day ago';},     day],
+  [lessThanThirtyDaysAgo,       nDaysAgo,                              day],
+  [lessThanOneYearAgo,          nMonthsAgo,                            month],
+  [lessThanTwoYearsAgo,         function () {return 'one year ago';},  year],
+  [function () {return true;},  nYearsAgo,                             year]
 ];
 
 function getBreakpoint(date) {
@@ -146,9 +170,7 @@ function toFuzzyString(date) {
   if (!breakpoint) {
     return '';
   }
-  var template = breakpoint[1];
-  var resolution = breakpoint[2];
-  return template.replace('{}', String(Math.floor(delta / resolution)));
+  return breakpoint[1](delta);
 }
 
 module.exports = {
