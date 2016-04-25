@@ -6,33 +6,77 @@ var day = hour * 24;
 var month = day * 30;
 var year = day * 365;
 
+function lessThanThirtySecondsAgo(date, now) {
+  return ((now - date) < 30000);
+}
+
+function lessThanOneMinuteAgo(date, now) {
+  return ((now - date) < 60000);
+}
+
+function lessThanTwoMinutesAgo(date, now) {
+  return ((now - date) < 120000);
+}
+
+function lessThanOneHourAgo(date, now) {
+  return ((now - date) < (60 * 60 * 1000));
+}
+
+function lessThanTwoHoursAgo(date, now) {
+  return ((now - date) < (120 * 60 * 1000));
+}
+
+function lessThanOneDayAgo(date, now) {
+  return ((now - date) < (24 * 60 * 60 * 1000));
+}
+
+function lessThanTwoDaysAgo(date, now) {
+  return ((now - date) < (48 * 60 * 60 * 1000));
+}
+
+function lessThanThirtyDaysAgo(date, now) {
+  return ((now - date) < (30 * 24 * 60 * 60 * 1000));
+}
+
+function lessThanOneYearAgo(date, now) {
+  // Here we approximate "one year" as being a calendar year and not a leap
+  // year: 365 days.
+  return ((now - date) < (365 * 24 * 60 * 60 * 1000));
+}
+
+function lessThanTwoYearsAgo(date, now) {
+  // Here we approximate "one year" as being a calendar year and not a leap
+  // year: 365 days.
+  return ((now - date) < (2 * 365 * 24 * 60 * 60 * 1000));
+}
+
 var BREAKPOINTS = [
-  [30,         'moments ago',    1],
-  [minute,     '{} seconds ago', 1],
-  [2 * minute, 'a minute ago',   minute],
-  [hour,       '{} minutes ago', minute],
-  [2 * hour,   'an hour ago',    hour],
-  [day,        '{} hours ago',   hour],
-  [2 * day,    'a day ago',      day],
-  [month,      '{} days ago',    day],
-  [year,       '{} months ago',  month],
-  [2 * year,   'one year ago',   year],
-  [Infinity,   '{} years ago',   year]
+  [lessThanThirtySecondsAgo,    'moments ago',     1],
+  [lessThanOneMinuteAgo,        '{} seconds ago',  1],
+  [lessThanTwoMinutesAgo,       'a minute ago',    minute],
+  [lessThanOneHourAgo,          '{} minutes ago',  minute],
+  [lessThanTwoHoursAgo,         'an hour ago',     hour],
+  [lessThanOneDayAgo,           '{} hours ago',    hour],
+  [lessThanTwoDaysAgo,          'a day ago',       day],
+  [lessThanThirtyDaysAgo,       '{} days ago',     day],
+  [lessThanOneYearAgo,          '{} months ago',   month],
+  [lessThanTwoYearsAgo,         'one year ago',    year],
+  [function () {return true;},  '{} years ago',    year]
 ];
 
 function getBreakpoint(date) {
-  var delta = Math.round((new Date() - new Date(date)) / 1000);
   var breakpoint;
+  var now = new Date();
 
   for (var i = 0; i < BREAKPOINTS.length; i++) {
-    if (BREAKPOINTS[i][0] > delta) {
+    if (BREAKPOINTS[i][0](date, now)) {
       breakpoint = BREAKPOINTS[i];
       break;
     }
   }
 
   return {
-    delta: delta,
+    delta: Math.round((new Date() - new Date(date)) / 1000),
     breakpoint: breakpoint,
   };
 }
