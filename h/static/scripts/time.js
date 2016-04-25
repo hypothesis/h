@@ -50,28 +50,32 @@ function lessThanTwoYearsAgo(date, now) {
   return ((now - date) < (2 * 365 * 24 * 60 * 60 * 1000));
 }
 
-function nSecondsAgo(delta) {
-  return '{} seconds ago'.replace('{}', Math.floor(delta));
+function delta(date, now) {
+  return Math.round((now - date) / 1000);
 }
 
-function nMinutesAgo(delta) {
-  return '{} minutes ago'.replace('{}', Math.floor(delta / minute));
+function nSecondsAgo(date, now) {
+  return '{} seconds ago'.replace('{}', Math.floor(delta(date, now)));
 }
 
-function nHoursAgo(delta) {
-  return '{} hours ago'.replace('{}', Math.floor(delta / hour));
+function nMinutesAgo(date, now) {
+  return '{} minutes ago'.replace('{}', Math.floor(delta(date, now) / minute));
 }
 
-function nDaysAgo(delta) {
-  return '{} days ago'.replace('{}', Math.floor(delta / day));
+function nHoursAgo(date, now) {
+  return '{} hours ago'.replace('{}', Math.floor(delta(date, now) / hour));
 }
 
-function nMonthsAgo(delta) {
-  return '{} months ago'.replace('{}', Math.floor(delta / month));
+function nDaysAgo(date, now) {
+  return '{} days ago'.replace('{}', Math.floor(delta(date, now) / day));
 }
 
-function nYearsAgo(delta) {
-  return '{} years ago'.replace('{}', Math.floor(delta / year));
+function nMonthsAgo(date, now) {
+  return '{} months ago'.replace('{}', Math.floor(delta(date, now) / month));
+}
+
+function nYearsAgo(date, now) {
+  return '{} years ago'.replace('{}', Math.floor(delta(date, now) / year));
 }
 
 var BREAKPOINTS = [
@@ -88,9 +92,8 @@ var BREAKPOINTS = [
   [function () {return true;},  nYearsAgo,                             year]
 ];
 
-function getBreakpoint(date) {
+function getBreakpoint(date, now) {
   var breakpoint;
-  var now = new Date();
 
   for (var i = 0; i < BREAKPOINTS.length; i++) {
     if (BREAKPOINTS[i][0](date, now)) {
@@ -99,10 +102,7 @@ function getBreakpoint(date) {
     }
   }
 
-  return {
-    delta: Math.round((new Date() - new Date(date)) / 1000),
-    breakpoint: breakpoint,
-  };
+  return breakpoint;
 }
 
 function nextFuzzyUpdate(date) {
@@ -110,7 +110,7 @@ function nextFuzzyUpdate(date) {
     return null;
   }
 
-  var breakpoint = getBreakpoint(date).breakpoint;
+  var breakpoint = getBreakpoint(date, new Date());
   if (!breakpoint) {
     return null;
   }
@@ -164,13 +164,13 @@ function toFuzzyString(date) {
   if (!date) {
     return '';
   }
-  var breakpointInfo = getBreakpoint(date);
-  var breakpoint = breakpointInfo.breakpoint;
-  var delta = breakpointInfo.delta;
+  var now = new Date();
+
+  var breakpoint = getBreakpoint(date, now);
   if (!breakpoint) {
     return '';
   }
-  return breakpoint[1](delta);
+  return breakpoint[1](new Date(date), now);
 }
 
 module.exports = {
