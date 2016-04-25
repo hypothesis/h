@@ -18,16 +18,8 @@ function lessThanOneHourAgo(date, now) {
   return ((now - date) < (60 * 60 * 1000));
 }
 
-function lessThanTwoHoursAgo(date, now) {
-  return ((now - date) < (120 * 60 * 1000));
-}
-
 function lessThanOneDayAgo(date, now) {
   return ((now - date) < (24 * 60 * 60 * 1000));
-}
-
-function lessThanTwoDaysAgo(date, now) {
-  return ((now - date) < (48 * 60 * 60 * 1000));
 }
 
 function lessThanThirtyDaysAgo(date, now) {
@@ -78,9 +70,7 @@ var BREAKPOINTS = [
   [lessThanThirtySecondsAgo,    function () {return 'Just now';},      1],
   [lessThanOneMinuteAgo,        nSec,                                  1],
   [lessThanOneHourAgo,          nMin,                                  minute],
-  [lessThanTwoHoursAgo,         function () {return 'an hour ago';},   hour],
   [lessThanOneDayAgo,           nHr,                                   hour],
-  [lessThanTwoDaysAgo,          function () {return 'a day ago';},     day],
   [lessThanThirtyDaysAgo,       nDaysAgo,                              day],
   [lessThanOneYearAgo,          nMonthsAgo,                            month],
   [lessThanTwoYearsAgo,         function () {return 'one year ago';},  year],
