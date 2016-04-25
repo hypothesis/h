@@ -16,13 +16,13 @@ var FIXTURES_TO_FUZZY_STRING = [
   [3 * minute + 5, '3 min'],
   [hour, '1 hr'],
   [4 * hour, '4 hr'],
-  [27 * hour, '1 days ago'],
-  [3 * day + 30 * minute, '3 days ago'],
-  [6 * month + 2 * day, '6 months ago'],
-  [1 * year, 'one year ago'],
-  [1 * year + 2 * month, 'one year ago'],
-  [2 * year, '2 years ago'],
-  [8 * year, '8 years ago']
+  [27 * hour, '01 Jan'],
+  [3 * day + 30 * minute, '01 Jan'],
+  [6 * month + 2 * day, '01 Jan'],
+  [1 * year, '01 Jan 1970'],
+  [1 * year + 2 * month, '01 Jan 1970'],
+  [2 * year, '01 Jan 1970'],
+  [8 * year, '01 Jan 1970']
 ];
 
 var FIXTURES_NEXT_FUZZY_UPDATE = [

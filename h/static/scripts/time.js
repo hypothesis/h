@@ -22,20 +22,8 @@ function lessThanOneDayAgo(date, now) {
   return ((now - date) < (24 * 60 * 60 * 1000));
 }
 
-function lessThanThirtyDaysAgo(date, now) {
-  return ((now - date) < (30 * 24 * 60 * 60 * 1000));
-}
-
-function lessThanOneYearAgo(date, now) {
-  // Here we approximate "one year" as being a calendar year and not a leap
-  // year: 365 days.
-  return ((now - date) < (365 * 24 * 60 * 60 * 1000));
-}
-
-function lessThanTwoYearsAgo(date, now) {
-  // Here we approximate "one year" as being a calendar year and not a leap
-  // year: 365 days.
-  return ((now - date) < (2 * 365 * 24 * 60 * 60 * 1000));
+function thisYear(date, now) {
+  return date.getFullYear() === now.getFullYear();
 }
 
 function delta(date, now) {
@@ -54,16 +42,13 @@ function nHr(date, now) {
   return '{} hr'.replace('{}', Math.floor(delta(date, now) / hour));
 }
 
-function nDaysAgo(date, now) {
-  return '{} days ago'.replace('{}', Math.floor(delta(date, now) / day));
+function dayAndMonth(date) {
+  return date.toLocaleDateString(undefined, {day: '2-digit', month: 'short'});
 }
 
-function nMonthsAgo(date, now) {
-  return '{} months ago'.replace('{}', Math.floor(delta(date, now) / month));
-}
-
-function nYearsAgo(date, now) {
-  return '{} years ago'.replace('{}', Math.floor(delta(date, now) / year));
+function dayAndMonthAndYear(date) {
+  return date.toLocaleDateString(
+    undefined, {day: '2-digit', month: 'short', year: 'numeric'});
 }
 
 var BREAKPOINTS = [
@@ -71,10 +56,8 @@ var BREAKPOINTS = [
   [lessThanOneMinuteAgo,        nSec,                                  1],
   [lessThanOneHourAgo,          nMin,                                  minute],
   [lessThanOneDayAgo,           nHr,                                   hour],
-  [lessThanThirtyDaysAgo,       nDaysAgo,                              day],
-  [lessThanOneYearAgo,          nMonthsAgo,                            month],
-  [lessThanTwoYearsAgo,         function () {return 'one year ago';},  year],
-  [function () {return true;},  nYearsAgo,                             year]
+  [thisYear,                    dayAndMonth,                           month],
+  [function () {return true;},  dayAndMonthAndYear,                    year]
 ];
 
 function getBreakpoint(date, now) {
