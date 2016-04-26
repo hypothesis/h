@@ -185,7 +185,7 @@ class TestCreateLegacy(object):
             request,
             storage.legacy_create_annotation.return_value,
             'create')
-        request.registry.notify.assert_called_once_with(
+        request.notify_after_commit.assert_called_once_with(
             AnnotationEvent.return_value)
 
     def test_it_returns_presented_annotation(self,
@@ -318,7 +318,7 @@ class TestCreate(object):
             request,
             storage.create_annotation.return_value,
             'create')
-        request.registry.notify.assert_called_once_with(
+        request.notify_after_commit.assert_called_once_with(
             AnnotationEvent.return_value)
 
     def test_it_returns_presented_annotation(self,
@@ -452,7 +452,7 @@ class TestUpdate(object):
         AnnotationEvent.assert_called_once_with(request,
                                                 annotation_out,
                                                 'update')
-        request.registry.notify.assert_called_once_with(event)
+        request.notify_after_commit.assert_called_once_with(event)
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
@@ -477,7 +477,7 @@ class TestDelete(object):
         views.delete(annotation, request)
 
         AnnotationEvent.assert_called_once_with(request, annotation, 'delete')
-        request.registry.notify.assert_called_once_with(event)
+        request.notify_after_commit.assert_called_once_with(event)
 
     def test_it_returns_object(self):
         annotation = mock.Mock()

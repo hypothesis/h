@@ -254,7 +254,7 @@ def _present_searchdict(request, mapping):
 def _publish_annotation_event(request, annotation, action):
     """Publish an event to the annotations queue for this annotation action"""
     event = AnnotationEvent(request, annotation, action)
-    request.registry.notify(event)
+    request.notify_after_commit(event)
 
 
 def includeme(config):
