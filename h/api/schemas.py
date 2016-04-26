@@ -156,9 +156,6 @@ class AnnotationSchema(JSONSchema):
                 'type': 'string',
             },
         },
-        'required': [
-            'permissions',
-        ],
     }
 
     def __init__(self):
@@ -226,9 +223,11 @@ class CreateAnnotationSchema(object):
         new_appstruct['text'] = appstruct.pop('text', u'')
         new_appstruct['tags'] = appstruct.pop('tags', [])
 
+        permissions = appstruct.pop('permissions', None)
+
         # Replace the client's complex permissions object with a simple shared
         # boolean.
-        if appstruct.pop('permissions')['read'] == [new_appstruct['userid']]:
+        if permissions and permissions['read'] == [new_appstruct['userid']]:
             new_appstruct['shared'] = False
         else:
             new_appstruct['shared'] = True

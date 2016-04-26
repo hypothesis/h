@@ -237,16 +237,6 @@ class TestAnnotationSchema(object):
 
         assert str(err.value) == "group: False is not of type 'string'"
 
-    def test_it_raises_if_permissions_is_missing(self):
-        schema = schemas.AnnotationSchema()
-        data = self.valid_input_data()
-        del data['permissions']
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(data)
-
-        assert str(err.value) == "'permissions' is a required property"
-
     def test_it_raises_if_permissions_is_not_a_dict(self):
         schema = schemas.AnnotationSchema()
 
@@ -643,6 +633,16 @@ class TestCreateAnnotationSchema(object):
 
         assert appstruct['shared'] is True
         assert 'permissions' not in appstruct
+
+    def test_it_defaults_to_shared_if_no_permissions_object_sent(
+            self,
+            AnnotationSchema):
+        del AnnotationSchema.return_value.validate.return_value['permissions']
+        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+
+        appstruct = schema.validate({})
+
+        assert appstruct['shared'] is True
 
     def test_it_does_not_crash_if_data_contains_no_target(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
