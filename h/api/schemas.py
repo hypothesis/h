@@ -366,7 +366,10 @@ class UpdateAnnotationSchema(object):
                 'document_meta_dicts': document_meta_dicts
             }
 
-        new_appstruct['extra'] = appstruct
+        if appstruct:
+            # Copy annotation.extra because we don't want to modify it here.
+            new_appstruct['extra'] = dict(self.annotation.extra)
+            new_appstruct['extra'].update(appstruct)
 
         return new_appstruct
 

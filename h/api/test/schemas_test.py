@@ -1324,6 +1324,57 @@ class TestUpdateAnnotationSchema(object):
 
         appstruct = schema.validate({})
 
+    def test_it_adds_extra_fields_into_the_extra_dict(self,
+                                                      annotation,
+                                                      AnnotationSchema):
+        annotation.extra = {}
+        AnnotationSchema.return_value.validate.return_value['foo'] = 'bar'
+        AnnotationSchema.return_value.validate.return_value['custom'] = 23
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        appstruct = schema.validate({})
+
+        assert appstruct['extra'] == {'foo': 'bar', 'custom': 23}
+
+    def test_it_overwrites_extra_fields_in_the_extra_dict(self,
+                                                          annotation,
+                                                          AnnotationSchema):
+        annotation.extra = {'foo': 'old', 'custom': 16}
+        AnnotationSchema.return_value.validate.return_value['foo'] = 'bar'
+        AnnotationSchema.return_value.validate.return_value['custom'] = 23
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        appstruct = schema.validate({})
+
+        assert appstruct['extra'] == {'foo': 'bar', 'custom': 23}
+
+    def test_it_does_not_modify_extra_fields_that_are_not_sent(
+            self,
+            annotation,
+            AnnotationSchema):
+        annotation.extra = {'foo': 'old', 'custom': 16}
+        AnnotationSchema.return_value.validate.return_value['foo'] = 'bar'
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        appstruct = schema.validate({})
+
+        assert appstruct['extra']['custom'] == 16
+
+    def test_it_does_not_modify_extra_fields_if_none_are_sent(
+            self,
+            annotation,
+            AnnotationSchema):
+        annotation.extra = {'foo': 'old', 'custom': 16}
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        appstruct = schema.validate({})
+
+        assert 'extra' not in appstruct
+
     @pytest.fixture
     def annotation(self):
         return mock.Mock(groupid='foogroup')
