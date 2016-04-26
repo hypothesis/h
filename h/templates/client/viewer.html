@@ -36,7 +36,7 @@
       ng-mouseenter="focus(child.annotation)"
       ng-click="scrollTo(child.annotation)"
       ng-mouseleave="focus()"
-      ng-repeat="child in rootThread().children track by child.annotation.id">
+      ng-repeat="child in rootThread().children track by child.id">
       <annotation-thread
         thread="child"
         show-document-info="::!isSidebar"

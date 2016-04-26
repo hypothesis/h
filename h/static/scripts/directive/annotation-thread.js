@@ -8,14 +8,14 @@ function hiddenReplyCount(thread) {
 
 function showAllChildren(thread, showFn) {
   thread.children.forEach(function (child) {
-    showFn({id: child.annotation.id});
+    showFn({id: child.id});
     showAllChildren(child, showFn);
   });
 }
 
 function showAllParents(thread, showFn) {
   while (thread.parent && thread.parent.annotation) {
-    showFn({id: thread.parent.annotation.id});
+    showFn({id: thread.parent.id});
     thread = thread.parent;
   }
 }
@@ -23,7 +23,7 @@ function showAllParents(thread, showFn) {
 // @ngInject
 function AnnotationThreadController() {
   this.toggleCollapsed = function () {
-    this.onToggleReplies({id: this.thread.annotation.id});
+    this.onToggleReplies({id: this.thread.id});
   };
 
   /**
@@ -31,7 +31,7 @@ function AnnotationThreadController() {
    */
   this.showThreadAndReplies = function () {
     showAllParents(this.thread, this.onForceVisible);
-    this.onForceVisible({id: this.thread.annotation.id});
+    this.onForceVisible({id: this.thread.id});
     showAllChildren(this.thread, this.onForceVisible);
   };
 

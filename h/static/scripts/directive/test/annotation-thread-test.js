@@ -33,8 +33,10 @@ describe('annotationThread', function () {
   it('renders the tree structure of parent and child annotations', function () {
     var element = util.createDirective(document, 'annotationThread', {
       thread: {
+        id: '1',
         annotation: {id: '1', text: 'text'},
         children: [{
+          id: '2',
           annotation: {id: '2', text: 'areply'},
           children: [],
         }],
@@ -49,6 +51,7 @@ describe('annotationThread', function () {
   it('does not render hidden threads', function () {
     var element = util.createDirective(document, 'annotationThread', {
       thread: {
+        id: '1',
         annotation: {id: '1'},
         visible: false,
         children: []
@@ -62,9 +65,11 @@ describe('annotationThread', function () {
   it('shows replies if not collapsed', function () {
     var element = util.createDirective(document, 'annotationThread', {
       thread: {
+        id: '1',
         annotation: {id: '1'},
         visible: true,
         children: [{
+          id: '2',
           annotation: {id: '2'},
           children: [],
           visible: true,
@@ -79,9 +84,11 @@ describe('annotationThread', function () {
   it('does not show replies if collapsed', function () {
     var element = util.createDirective(document, 'annotationThread', {
       thread: {
+        id: '1',
         annotation: {id: '1'},
         visible: true,
         children: [{
+          id: '2',
           annotation: {id: '2'},
           children: [],
           visible: true,
@@ -98,6 +105,7 @@ describe('annotationThread', function () {
       var onToggleReplies = sinon.stub();
       var element = util.createDirective(document, 'annotationThread', {
         thread: {
+          id: '123',
           annotation: {id: '123'},
           children: [],
         },
@@ -116,12 +124,15 @@ describe('annotationThread', function () {
       var onForceVisible = sinon.stub();
       var element = util.createDirective(document, 'annotationThread', {
         thread: {
+          id: '123',
           annotation: {id: '123'},
           children: [{
+            id: 'child-id',
             annotation: {id: 'child-id'},
             children: [],
           }],
           parent: {
+            id: 'parent-id',
             annotation: {id: 'parent-id'},
           },
         },

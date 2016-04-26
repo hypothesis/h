@@ -21,6 +21,10 @@
          reply-count="vm.thread.replyCount">
 </annotation>
 
+<div ng-if="!vm.thread.annotation" class="thread-deleted">
+  <p><em>Message not available.</em></p>
+</div>
+
 <div class="thread-load-more" ng-if="vm.hiddenReplyCount() > 0">
   <a class="load-more small"
      href=""
@@ -35,7 +39,7 @@
 
 <!-- Replies -->
 <ul class="thread-replies" ng-show="!vm.thread.collapsed">
-  <li class="thread" ng-repeat="child in vm.thread.children track by child.annotation.id">
+  <li class="thread" ng-repeat="child in vm.thread.children track by child.id">
     <annotation-thread
       show-document-info="false"
       thread="child"
