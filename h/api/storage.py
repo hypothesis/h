@@ -202,17 +202,20 @@ def update_annotation(session, annotation_id, data):
     :rtype: h.api.models.Annotation
 
     """
-    document_uri_dicts = data['document']['document_uri_dicts']
-    document_meta_dicts = data['document']['document_meta_dicts']
-    del data['document']
+    # Remove any 'document' field first so that we don't try to save it on the
+    # annotation object.
+    document = data.pop('document', None)
 
     annotation = models.Annotation.query.get(annotation_id)
 
     for key, value in data.items():
         setattr(annotation, key, value)
 
-    update_document_metadata(
-        session, annotation, document_meta_dicts, document_uri_dicts)
+    if document:
+        document_uri_dicts = document['document_uri_dicts']
+        document_meta_dicts = document['document_meta_dicts']
+        update_document_metadata(
+            session, annotation, document_meta_dicts, document_uri_dicts)
 
     return annotation
 

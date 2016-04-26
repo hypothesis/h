@@ -673,6 +673,17 @@ class TestUpdateAnnotation(object):
 
         assert annotation == models.Annotation.query.get.return_value
 
+    def test_it_does_not_crash_if_no_document_in_data(self):
+
+        storage.update_annotation(mock.Mock(), 'test_annotation_id', {})
+
+    def test_it_does_not_call_update_document_meta_if_no_document_in_data(
+            self,
+            update_document_metadata):
+        storage.update_annotation(mock.Mock(), 'test_annotation_id', {})
+
+        assert not update_document_metadata.called
+
     @pytest.fixture
     def annotation_data(self):
         return {
