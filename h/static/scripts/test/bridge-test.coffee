@@ -37,7 +37,9 @@ describe 'Bridge', ->
 
     it 'adds the channel to the .links property', ->
       channel = createChannel()
-      assert.include(bridge.links, {channel: channel, window: fakeWindow})
+      assert.isTrue(bridge.links.some((link) ->
+        link.channel == channel && link.window == fakeWindow
+      ))
 
     it 'registers any existing listeners on the channel', ->
       message1 = sandbox.spy()
