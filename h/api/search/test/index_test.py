@@ -58,9 +58,7 @@ class TestIndexAnnotation:
 class TestDeleteAnnotation:
 
     def test_it_deletes_the_annotation(self, es):
-        annotation = mock.Mock(id='test_annotation_id')
-
-        index.delete(es, annotation)
+        index.delete(es, 'test_annotation_id')
 
         es.conn.delete.assert_called_once_with(
             index='hypothesis',

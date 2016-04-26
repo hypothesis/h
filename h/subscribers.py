@@ -4,6 +4,7 @@ from h import __version__
 from h import emails
 from h import mailer
 from h.api import presenters
+from h.api import storage
 from h.notification import reply
 
 
@@ -26,12 +27,9 @@ def add_renderer_globals(event):
 
 def publish_annotation_event(event):
     """Publish an annotation event to the message queue."""
-    annotation_dict = presenters.AnnotationJSONPresenter(
-        event.request, event.annotation).asdict()
-
     data = {
         'action': event.action,
-        'annotation': annotation_dict,
+        'annotation': event.annotation_dict,
         'src_client_id': event.request.headers.get('X-Client-Id'),
     }
 
@@ -44,7 +42,7 @@ def send_reply_notifications(event,
                              send=mailer.send.delay):
     """Queue any reply notification emails triggered by an annotation event."""
     request = event.request
-    annotation = event.annotation
+    annotation = storage.fetch_annotation(event.request, event.annotation_id)
     action = event.action
     try:
         notification = get_notification(request, annotation, action)

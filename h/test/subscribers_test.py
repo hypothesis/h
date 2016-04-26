@@ -21,16 +21,6 @@ class FakeMailer(object):
 @pytest.mark.usefixtures('presenters')
 class TestPublishAnnotationEvent:
 
-    def test_it_presents_the_annotation(self, event, presenters):
-        subscribers.publish_annotation_event(event)
-
-        presenters.AnnotationJSONPresenter.assert_called_once_with(
-            event.request,
-            event.annotation,
-        )
-        presenters.AnnotationJSONPresenter.return_value.asdict\
-            .assert_called_once_with()
-
     def test_it_publishes_the_serialized_data(self, event, presenters):
         event.request.headers = {'X-Client-Id': 'client_id'}
 
@@ -38,7 +28,7 @@ class TestPublishAnnotationEvent:
 
         event.request.realtime.publish_annotation.assert_called_once_with({
             'action': event.action,
-            'annotation': presenters.AnnotationJSONPresenter.return_value.asdict.return_value,
+            'annotation': event.annotation_dict,
             'src_client_id': 'client_id'
         })
 
@@ -46,7 +36,7 @@ class TestPublishAnnotationEvent:
     def event(self):
         return mock.Mock(
             spec=AnnotationEvent(testing.DummyRequest(),
-                                 mock.Mock(spec=models.Annotation()),
+                                 {'id': 'test_annotation_id'},
                                  'create'),
         )
 
@@ -55,13 +45,14 @@ class TestPublishAnnotationEvent:
         return patch('h.subscribers.presenters')
 
 
+@pytest.mark.usefixtures('fetch_annotation')
 class TestSendReplyNotifications(object):
-    def test_calls_get_notification_with_request_annotation_and_action(self):
+    def test_calls_get_notification_with_request_annotation_and_action(self, fetch_annotation):
         send = FakeMailer()
         get_notification = mock.Mock(spec_set=[], return_value=None)
         generate_mail = mock.Mock(spec_set=[], return_value=[])
         event = AnnotationEvent(mock.sentinel.request,
-                                mock.sentinel.annotation,
+                                {'id': mock.sentinel.annotation_id},
                                 mock.sentinel.action)
 
         subscribers.send_reply_notifications(event,
@@ -69,8 +60,11 @@ class TestSendReplyNotifications(object):
                                              generate_mail=generate_mail,
                                              send=send)
 
+        fetch_annotation.assert_called_once_with(mock.sentinel.request,
+                                                 mock.sentinel.annotation_id)
+
         get_notification.assert_called_once_with(mock.sentinel.request,
-                                                 mock.sentinel.annotation,
+                                                 fetch_annotation.return_value,
                                                  mock.sentinel.action)
 
     def test_generates_and_sends_mail_for_any_notification(self):
@@ -115,3 +109,7 @@ class TestSendReplyNotifications(object):
                                                  get_notification=get_notification,
                                                  generate_mail=generate_mail,
                                                  send=send)
+
+    @pytest.fixture
+    def fetch_annotation(self, patch):
+        return patch('h.subscribers.storage.fetch_annotation')

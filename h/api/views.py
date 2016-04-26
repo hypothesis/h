@@ -177,11 +177,15 @@ def create(request):
                                                          legacy_appstruct)
 
     if request.feature('postgres'):
-        _publish_annotation_event(request, annotation, 'create')
-        return AnnotationJSONPresenter(request, annotation).asdict()
+        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+        _publish_annotation_event(request, annotation, 'create',
+                                  annotation_dict=annotation_dict)
+        return annotation_dict
 
-    _publish_annotation_event(request, legacy_annotation, 'create')
-    return AnnotationJSONPresenter(request, legacy_annotation).asdict()
+    annotation_dict = AnnotationJSONPresenter(request, legacy_annotation).asdict()
+    _publish_annotation_event(request, legacy_annotation, 'create',
+                              annotation_dict=annotation_dict)
+    return annotation_dict
 
 
 @api_config(route_name='api.annotation', request_method='GET', permission='read')
@@ -209,10 +213,10 @@ def update(annotation, request):
     appstruct = schema.validate(_json_payload(request))
     annotation = storage.update_annotation(request, annotation.id, appstruct)
 
-    _publish_annotation_event(request, annotation, 'update')
-
-    presenter = AnnotationJSONPresenter(request, annotation)
-    return presenter.asdict()
+    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+    _publish_annotation_event(request, annotation, 'update',
+                              annotation_dict=annotation_dict)
+    return annotation_dict
 
 
 @api_config(route_name='api.annotation', request_method='DELETE', permission='delete')
@@ -251,9 +255,12 @@ def _present_searchdict(request, mapping):
     return AnnotationJSONPresenter(request, ann).asdict()
 
 
-def _publish_annotation_event(request, annotation, action):
+def _publish_annotation_event(request, annotation, action, annotation_dict=None):
     """Publish an event to the annotations queue for this annotation action"""
-    event = AnnotationEvent(request, annotation, action)
+    if annotation_dict is None:
+        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+
+    event = AnnotationEvent(request, annotation_dict, action)
     request.notify_after_commit(event)
 
 
