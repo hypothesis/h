@@ -76,6 +76,8 @@ describe('WidgetController', function () {
       getState: function () {
         return this.state;
       },
+      setCollapsed: sinon.stub(),
+      setForceVisible: sinon.stub(),
     };
     fakeCrossFrame = {
       call: sinon.stub(),
@@ -375,6 +377,23 @@ describe('WidgetController', function () {
       fakeAnnotationUI.state.annotations = [{id: '123'}];
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
+    });
+  });
+
+  describe('#forceVisible', function () {
+    it('shows the thread', function () {
+      var thread = {id: '1'};
+      $scope.forceVisible(thread);
+      assert.calledWith(fakeAnnotationUI.setForceVisible, thread.id, true);
+    });
+
+    it('uncollapses the parent', function () {
+      var thread = {
+        id: '2',
+        parent: {id: '3'},
+      };
+      $scope.forceVisible(thread);
+      assert.calledWith(fakeAnnotationUI.setCollapsed, thread.parent.id, false);
     });
   });
 });

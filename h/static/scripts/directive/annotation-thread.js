@@ -1,21 +1,22 @@
 'use strict';
 
-function hiddenReplyCount(thread) {
+function hiddenCount(thread) {
+  var isHidden = thread.annotation && !thread.visible;
   return thread.children.reduce(function (count, reply) {
-    return count + (reply.visible ? 0 : 1) + hiddenReplyCount(reply);
-  }, 0);
+    return count + hiddenCount(reply);
+  }, isHidden ? 1 : 0);
 }
 
 function showAllChildren(thread, showFn) {
   thread.children.forEach(function (child) {
-    showFn({id: child.id});
+    showFn({thread: child});
     showAllChildren(child, showFn);
   });
 }
 
 function showAllParents(thread, showFn) {
   while (thread.parent && thread.parent.annotation) {
-    showFn({id: thread.parent.id});
+    showFn({thread: thread.parent});
     thread = thread.parent;
   }
 }
@@ -31,7 +32,7 @@ function AnnotationThreadController() {
    */
   this.showThreadAndReplies = function () {
     showAllParents(this.thread, this.onForceVisible);
-    this.onForceVisible({id: this.thread.id});
+    this.onForceVisible({thread: this.thread});
     showAllChildren(this.thread, this.onForceVisible);
   };
 
@@ -40,9 +41,8 @@ function AnnotationThreadController() {
    * thread which have been hidden because they do not match the current
    * search filter.
    */
-  this.hiddenReplyCount = function () {
-    var count = this.thread.visible ? 0 : 1;
-    return count + hiddenReplyCount(this.thread);
+  this.hiddenCount = function () {
+    return hiddenCount(this.thread);
   };
 }
 

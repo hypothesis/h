@@ -122,28 +122,30 @@ describe('annotationThread', function () {
   describe('#showThreadAndReplies', function () {
     it('reveals all parents and replies', function () {
       var onForceVisible = sinon.stub();
-      var element = util.createDirective(document, 'annotationThread', {
-        thread: {
-          id: '123',
-          annotation: {id: '123'},
-          children: [{
-            id: 'child-id',
-            annotation: {id: 'child-id'},
-            children: [],
-          }],
-          parent: {
-            id: 'parent-id',
-            annotation: {id: 'parent-id'},
-          },
+      var thread = {
+        id: '123',
+        annotation: {id: '123'},
+        children: [{
+          id: 'child-id',
+          annotation: {id: 'child-id'},
+          children: [],
+        }],
+        parent: {
+          id: 'parent-id',
+          annotation: {id: 'parent-id'},
         },
+      };
+      var element = util.createDirective(document, 'annotationThread', {
+        thread: thread,
         onForceVisible: {
-          args: ['id'],
+          args: ['thread'],
           callback: onForceVisible,
         },
       });
       element.ctrl.showThreadAndReplies();
-      assert.calledWith(onForceVisible, 'parent-id');
-      assert.calledWith(onForceVisible, 'child-id');
+      assert.calledWith(onForceVisible, thread.parent);
+      assert.calledWith(onForceVisible, thread);
+      assert.calledWith(onForceVisible, thread.children[0]);
     });
   });
 });

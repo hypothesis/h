@@ -222,8 +222,11 @@ module.exports = function WidgetController(
     annotationUI.setCollapsed(id, !!annotationUI.getState().expanded[id]);
   };
 
-  $scope.forceVisible = function (id) {
-    annotationUI.setForceVisible(id, true);
+  $scope.forceVisible = function (thread) {
+    annotationUI.setForceVisible(thread.id, true);
+    if (thread.parent) {
+      annotationUI.setCollapsed(thread.parent.id, false);
+    }
   };
 
   $scope.focus = focusAnnotation;

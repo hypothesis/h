@@ -41,7 +41,7 @@
         thread="child"
         show-document-info="::!isSidebar"
         on-toggle-replies="toggleCollapsed(id)"
-        on-force-visible="forceVisible(id)">
+        on-force-visible="forceVisible(thread)">
       </annotation-thread>
   </li>
   <loggedout-message ng-if="isSidebar && shouldShowLoggedOutMessage()"
