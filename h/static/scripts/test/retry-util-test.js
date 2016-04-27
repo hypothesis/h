@@ -1,3 +1,5 @@
+'use strict';
+
 var retryUtil = require('../retry-util');
 var toResult = require('./promise-util').toResult;
 
@@ -35,8 +37,8 @@ describe('retry-util', function () {
         return Promise.reject(error);
       });
       var wrappedOperation = retryUtil.retryPromiseOperation(operation, {
-        minTimeout: 1,
-        maxRetries: 2,
+        minTimeout: 3,
+        retries: 2,
       });
       return toResult(wrappedOperation).then(function (result) {
         assert.equal(result.error, error);
