@@ -23,6 +23,7 @@ from pyramid import security
 from pyramid.view import view_config
 
 from h.api import cors
+from h.api import exceptions
 from h.api.events import AnnotationEvent
 from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import AnnotationJSONLDPresenter
@@ -80,7 +81,7 @@ def error_api(context, request):
     return {'status': 'failure', 'reason': context.message}
 
 
-@api_config(context=schemas.ValidationError)
+@api_config(context=exceptions.ValidationError)
 def error_validation(context, request):
     request.response.status_code = 400
     return {'status': 'failure', 'reason': context.message}

@@ -2,21 +2,21 @@
 """Classes for validating data passed to the annotations API."""
 
 import copy
+import functools
+
 import jsonschema
 from jsonschema.exceptions import best_match
 from pyramid import i18n
 from pyramid import security
 
+from h.api import checkers
+from h.api import exceptions
 from h.api import parse_document_claims
 
 _ = i18n.TranslationStringFactory(__package__)
 
 # These annotation fields are not to be set by the user.
 PROTECTED_FIELDS = ['created', 'updated', 'user', 'id']
-
-
-class ValidationError(Exception):
-    pass
 
 
 class JSONSchema(object):
@@ -30,8 +30,8 @@ class JSONSchema(object):
 
     schema = {}
 
-    def __init__(self):
-        self.validator = jsonschema.Draft4Validator(self.schema)
+    def __init__(self, format_checker=None):
+        self.validator = jsonschema.Draft4Validator(self.schema, format_checker=format_checker)
 
     def validate(self, data):
         """
@@ -39,13 +39,13 @@ class JSONSchema(object):
 
         :param data: The data to be validated
         :return: valid data
-        :raises ValidationError: if the data is invalid
+        :raises h.api.exceptions.ValidationError: if the data is invalid
         """
         # Take a copy to ensure we don't modify what we were passed.
         appstruct = copy.deepcopy(data)
         error = best_match(self.validator.iter_errors(appstruct))
         if error is not None:
-            raise ValidationError(_format_jsonschema_error(error))
+            raise exceptions.ValidationError(_format_jsonschema_error(error))
         return appstruct
 
 
@@ -104,6 +104,7 @@ class AnnotationSchema(JSONSchema):
             },
             'group': {
                 'type': 'string',
+                'format': 'group_permissions',
             },
             'permissions': {
                 'title': 'Permissions',
@@ -161,8 +162,8 @@ class AnnotationSchema(JSONSchema):
         ],
     }
 
-    def __init__(self, request):
-        super(AnnotationSchema, self).__init__()
+    def __init__(self, request, format_checker=None):
+        super(AnnotationSchema, self).__init__(format_checker=format_checker)
         self.request = request
 
     def validate(self, data):
@@ -264,7 +265,14 @@ class CreateAnnotationSchema(object):
     """Validate the POSTed data of a create annotation request."""
 
     def __init__(self, request):
-        self.structure = AnnotationSchema(request)
+        checker = jsonschema.FormatChecker()
+        checker.checks('group_permissions')(
+            functools.partial(
+                checkers.check_group_permissions,
+                request.effective_principals
+            )
+        )
+        self.structure = AnnotationSchema(request, format_checker=checker)
 
     def validate(self, data):
         return self.structure.validate(data)
@@ -298,9 +306,9 @@ class LegacyCreateAnnotationSchema(object):
             else:
                 group_principal = 'group:{}'.format(appstruct['group'])
             if group_principal not in self.request.effective_principals:
-                raise ValidationError('group: ' +
-                                      _('You may not create annotations in '
-                                        'groups you are not a member of!'))
+                raise exceptions.ValidationError(
+                    'group: ' + _('You may not create annotations in groups '
+                                  'you are not a member of!'))
 
         return appstruct
 
@@ -318,8 +326,8 @@ class UpdateAnnotationSchema(object):
         appstruct = self.structure.validate(data)
 
         if appstruct['groupid'] != self.annotation.groupid:
-            raise ValidationError('group: ' + _("You can't move annotations "
-                                                "between groups"))
+            raise exceptions.ValidationError(
+                'group: ' + _("You can't move annotations between groups"))
 
         return appstruct
 
@@ -352,17 +360,17 @@ class LegacyUpdateAnnotationSchema(object):
             appstruct['permissions'] != permissions
         )
         if changing_permissions and userid not in permissions.get('admin', []):
-            raise ValidationError('permissions: ' +
-                                  _('You may not change the permissions on '
+            raise exceptions.ValidationError(
+                'permissions: ' + _('You may not change the permissions on '
                                     'an annotation unless you have the '
                                     '"admin" permission on that annotation!'))
 
         # Annotations may not be moved between groups.
         if 'group' in appstruct and 'group' in self.annotation:
             if appstruct['group'] != self.annotation['group']:
-                raise ValidationError('group: ' +
-                                      _('You may not move annotations between '
-                                        'groups!'))
+                raise exceptions.ValidationError(
+                    'group: ' + _('You may not move annotations between '
+                                  'groups!'))
 
         return appstruct
 
