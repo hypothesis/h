@@ -79,11 +79,10 @@ class Annotation(Base, mixins.Timestamps):
     #: Any additional serialisable data provided by the client.
     extra = sa.Column(pg.JSONB, nullable=True)
 
-    document_uris = sa.orm.relationship('DocumentURI',
-                                        viewonly=True,
-                                        foreign_keys='DocumentURI.uri_normalized',
-                                        primaryjoin='DocumentURI.uri_normalized == Annotation.target_uri_normalized')
-    documents = association_proxy('document_uris', 'document')
+    document = sa.orm.relationship('Document',
+                                   secondary='join(DocumentURI, Document, DocumentURI.document_id == Document.id)',
+                                   primaryjoin='Annotation.target_uri_normalized == DocumentURI.uri_normalized',
+                                   uselist=False)
 
     @hybrid_property
     def target_uri(self):
@@ -97,11 +96,6 @@ class Annotation(Base, mixins.Timestamps):
     @hybrid_property
     def target_uri_normalized(self):
         return self._target_uri_normalized
-
-    @hybrid_property
-    def document(self):
-        if self.documents:
-            return self.documents[0]
 
     @property
     def parent_id(self):
