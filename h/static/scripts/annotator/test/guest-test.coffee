@@ -1,5 +1,6 @@
 Annotator = require('annotator')
 $ = Annotator.$
+Annotator['@noCallThru'] = true;
 
 highlighter = {}
 anchoring = {}

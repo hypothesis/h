@@ -1,5 +1,4 @@
-// Karma configuration
-// Generated on Mon Nov 17 2014 13:59:51 GMT+0000 (GMT)
+'use strict';
 
 module.exports = function(config) {
   config.set({
@@ -50,14 +49,24 @@ module.exports = function(config) {
       configure: function(bundle) {
         bundle
           .plugin('proxyquire-universal')
-          .require('phantom-ownpropertynames/implement', {entry: true});
+          // fix for Proxyquire in PhantomJS 1.x.
+          // See https://github.com/bitwit/proxyquireify-phantom-menace
+          .require(require.resolve('phantom-ownpropertynames/implement'),
+            {entry: true});
       },
     },
 
-    // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['dots'],
+    mochaReporter: {
+      // Display a helpful diff when comparing complex objects
+      // See https://www.npmjs.com/package/karma-mocha-reporter#showdiff
+      showDiff: true,
+      // Only show the total test counts and details for failed tests
+      output: 'minimal',
+    },
+
+    // Use https://www.npmjs.com/package/karma-mocha-reporter
+    // for more helpful rendering of test failures
+    reporters: ['mocha'],
 
 
     // web server port
