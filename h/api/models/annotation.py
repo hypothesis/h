@@ -28,6 +28,7 @@ class Annotation(Base, mixins.Timestamps):
         #   http://www.postgresql.org/docs/9.5/static/gin-intro.html
         #
         sa.Index('ix__annotation_tags', 'tags', postgresql_using='gin'),
+        sa.Index('ix__annotation_updated', 'updated'),
     )
 
     #: Annotation ID: these are stored as UUIDs in the database, and mapped
