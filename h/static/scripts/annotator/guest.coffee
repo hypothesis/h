@@ -148,6 +148,9 @@ module.exports = class Guest extends Annotator
     @element.find('.annotator-hl').each ->
       $(this).contents().insertBefore(this)
       $(this).remove()
+    @element.find('.annotator-sel').each ->
+      $(this).contents().insertBefore(this)
+      $(this).remove()
 
     @element.data('annotator', null)
 
@@ -196,6 +199,7 @@ module.exports = class Guest extends Annotator
         range = Annotator.Range.sniff(anchor.range)
         normedRange = range.normalize(root)
         highlights = highlighter.highlightRange(normedRange)
+
         $(highlights).data('annotation', anchor.annotation)
         anchor.highlights = highlights
         return anchor
@@ -341,6 +345,11 @@ module.exports = class Guest extends Annotator
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('focusAnnotations', tags)
 
+  showAdder: (position) ->
+    @adder
+      .css(position)
+      .show()
+
   onSuccessfulSelection: (event, immediate) ->
     unless event?
       throw "Called onSuccessfulSelection without an event!"
@@ -360,10 +369,7 @@ module.exports = class Guest extends Annotator
       @onAdderClick event
     else
       # Show the adder button
-      @adder
-        .css(Annotator.Util.mousePosition(event, @element[0]))
-        .show()
-
+      this.showAdder(this.getAdderPosition())
     true
 
   onFailedSelection: (event) ->
@@ -374,6 +380,41 @@ module.exports = class Guest extends Annotator
       .attr('title', 'New Page Note')
       .removeClass('h-icon-annotate')
       .addClass('h-icon-note');
+
+  getAdderPosition: (selection) ->
+    adderPosition = {}
+
+    if !selection
+      selection = Annotator.Util.getGlobal().getSelection()
+
+    if !selection.isCollapsed
+      range = Annotator.Range.sniff(selection.getRangeAt(0));
+
+      normedRange = range.normalize(@element[0])
+
+      white = /^\s*$/
+      nodes = $(normedRange.textNodes()).filter((i) -> not white.test @nodeValue)
+      nodes.wrap($("<span class='annotator-sel'></span>"))
+
+      if this.isSelectionBackwards(selection)
+        el = @element.find('.annotator-sel:first')
+        adderPosition.top = el.offset().top + window.scrollY
+        adderPosition.left = el.offset().left
+      else
+        el = @element.find('.annotator-sel:last')
+        adderPosition.top = el.offset().top + window.scrollY
+        adderPosition.left = el.offset().left + el.width()
+
+    adderPosition
+
+  isSelectionBackwards: (selection) ->
+    range = document.createRange();
+    range.setStart(selection.anchorNode, selection.anchorOffset);
+    range.setEnd(selection.focusNode, selection.focusOffset);
+    backwards = range.collapsed;
+    range.detach();
+
+    backwards
 
   selectAnnotations: (annotations, toggle) ->
     if toggle
