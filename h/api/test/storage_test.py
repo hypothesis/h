@@ -63,6 +63,12 @@ class TestFetchAnnotation(object):
         models.elastic.Annotation.fetch.assert_called_once_with('123')
         assert models.elastic.Annotation.fetch.return_value == actual
 
+    def test_it_does_not_crash_if_id_is_invalid(self):
+        request = DummyRequest(db=db.Session)
+        postgres_enabled.return_value = True
+
+        assert storage.fetch_annotation(request, 'foo', _postgres=True) is None
+
 
 class TestExpandURI(object):
 
@@ -212,108 +218,89 @@ class TestLegacyCreateAnnotation(object):
     def annotation_data(self):
         return {'foo': 'bar'}
 
-    @pytest.fixture
-    def AnnotationBeforeSaveEvent(self, patch):
-        return patch('h.api.storage.AnnotationBeforeSaveEvent')
 
-    @pytest.fixture
-    def partial(self, patch):
-        return patch('h.api.storage.partial')
+@pytest.mark.usefixtures('AnnotationBeforeSaveEvent',
+                         'models',
+                         'transform')
+class TestLegacyUpdateAnnotation(object):
 
-    @pytest.fixture
-    def transform(self, patch):
-        return patch('h.api.storage.transform')
+    def test_it_fetches_the_annotation(self, models):
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        models.elastic.Annotation.fetch.assert_called_once_with(
+            'test_annotation_id')
+
+    def test_it_calls_update(self, models):
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        models.elastic.Annotation.fetch.return_value.update\
+            .assert_called_once_with(mock.sentinel.data)
+
+    def test_it_calls_partial(self, partial):
+        request = DummyRequest()
+
+        storage.legacy_update_annotation(request,
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        partial.assert_called_once_with(
+            storage.fetch_annotation, request, _postgres=False)
+
+    def test_it_calls_prepare(self, models, partial, transform):
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        transform.prepare.assert_called_once_with(
+            models.elastic.Annotation.fetch.return_value, partial.return_value)
+
+    def test_it_inits_AnnotationBeforeSaveEvent(self,
+                                                AnnotationBeforeSaveEvent,
+                                                models):
+        request = DummyRequest()
+
+        storage.legacy_update_annotation(request,
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        AnnotationBeforeSaveEvent.assert_called_once_with(
+            request, models.elastic.Annotation.fetch.return_value)
+
+    def test_it_calls_notify(self, AnnotationBeforeSaveEvent):
+        request = DummyRequest()
+        request.registry.notify = mock.Mock()
+
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        request.registry.notify.assert_called_once_with(
+            AnnotationBeforeSaveEvent.return_value)
+
+    def test_it_calls_save(self, models):
+        storage.legacy_update_annotation(DummyRequest(),
+                                         'test_annotation_id',
+                                         mock.sentinel.data)
+
+        models.elastic.Annotation.fetch.return_value.save\
+            .assert_called_once_with()
+
+    def test_it_returns_the_annotation(self, models):
+        returned = storage.legacy_update_annotation(DummyRequest(),
+                                                    'test_annotation_id',
+                                                     mock.sentinel.data)
+
+        assert returned == models.elastic.Annotation.fetch.return_value
 
 
-@pytest.mark.usefixtures('fetch_annotation',
-                         'models')
-class TestCreateAnnotation(object):
+class TestUpdateDocumentMetadata(object):
 
-    def test_it_fetches_parent_annotation_for_replies(self,
-                                                      authn_policy,
-                                                      fetch_annotation):
-        request = self.mock_request()
-
-        # Make the annotation's parent belong to 'test-group'.
-        fetch_annotation.return_value.groupid = 'test-group'
-
-        # The request will need permission to write to 'test-group'.
-        authn_policy.effective_principals.return_value = ['group:test-group']
-
-        data = self.annotation_data()
-
-        # The annotation is a reply.
-        data['references'] = ['parent_annotation_id']
-
-        storage.create_annotation(request, data)
-
-        fetch_annotation.assert_called_once_with(request,
-                                                 'parent_annotation_id',
-                                                 _postgres=True)
-
-    def test_it_sets_group_for_replies(self,
-                                       authn_policy,
-                                       fetch_annotation,
-                                       models):
-        # Make the annotation's parent belong to 'test-group'.
-        fetch_annotation.return_value.groupid = 'test-group'
-
-        # The request will need permission to write to 'test-group'.
-        authn_policy.effective_principals.return_value = ['group:test-group']
-
-        data = self.annotation_data()
-        assert data['groupid'] != 'test-group'
-
-        # The annotation is a reply.
-        data['references'] = ['parent_annotation_id']
-
-        storage.create_annotation(self.mock_request(), data)
-
-        assert models.Annotation.call_args[1]['groupid'] == 'test-group'
-
-    def test_it_raises_if_parent_annotation_does_not_exist(self,
-                                                           fetch_annotation):
-        fetch_annotation.return_value = None
-
-        data = self.annotation_data()
-
-        # The annotation is a reply.
-        data['references'] = ['parent_annotation_id']
-
-        with pytest.raises(schemas.ValidationError) as err:
-            storage.create_annotation(self.mock_request(), data)
-
-        assert str(err.value).startswith('references.0: ')
-
-    def test_it_raises_if_user_does_not_have_permissions_for_group(self):
-        data = self.annotation_data()
-        data['groupid'] = 'foo-group'
-
-        with pytest.raises(schemas.ValidationError) as err:
-            storage.create_annotation(self.mock_request(), data)
-
-        assert str(err.value).startswith('group: ')
-
-    def test_it_inits_an_Annotation_model(self, models):
-        data = self.annotation_data()
-
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
-
-        del data['document']
-        models.Annotation.assert_called_once_with(**data)
-
-    def test_it_adds_the_annotation_to_the_database(self, models):
-        request = self.mock_request()
-
-        storage.create_annotation(request, self.annotation_data())
-
-        request.db.add.assert_called_once_with(models.Annotation.return_value)
-
-    def test_it_calls_find_or_create_by_uris(self, models):
-        request = self.mock_request()
-        annotation = models.Annotation.return_value
-        annotation_data = self.annotation_data()
-        annotation_data['document']['document_uri_dicts'] = [
+    def test_it_calls_find_or_create_by_uris(self, annotation, models, db):
+        document_uri_dicts = [
             {
                 'uri': 'http://example.com/example_1',
                 'claimant': 'http://example.com/claimant',
@@ -334,10 +321,13 @@ class TestCreateAnnotation(object):
             },
         ]
 
-        storage.create_annotation(request, annotation_data)
+        storage.update_document_metadata(db,
+                                         annotation,
+                                         [],
+                                         document_uri_dicts)
 
         models.Document.find_or_create_by_uris.assert_called_once_with(
-            request.db,
+            db,
             annotation.target_uri,
             [
                 'http://example.com/example_1',
@@ -348,53 +338,47 @@ class TestCreateAnnotation(object):
             updated=annotation.updated,
         )
 
-    def test_it_calls_merge_documents(self, models):
+    def test_it_calls_merge_documents(self, annotation, db, models):
         """If it finds more than one document it calls merge_documents()."""
         models.Document.find_or_create_by_uris.return_value = mock.Mock(
             count=mock.Mock(return_value=3))
-        request = self.mock_request()
 
-        storage.create_annotation(request, self.annotation_data())
+        storage.update_document_metadata(db, annotation, [], [])
 
         models.merge_documents.assert_called_once_with(
-            request.db,
+            db,
             models.Document.find_or_create_by_uris.return_value,
-            updated=models.Annotation.return_value.updated,
-        )
+            updated=annotation.updated)
 
-    def test_it_calls_first(self, models):
+    def test_it_calls_first(self, annotation, db, models):
         """If it finds only one document it calls first()."""
         models.Document.find_or_create_by_uris.return_value = mock.Mock(
             count=mock.Mock(return_value=1))
 
-        storage.create_annotation(self.mock_request(), self.annotation_data())
+        storage.update_document_metadata(db, annotation, [], [])
 
         models.Document.find_or_create_by_uris.return_value\
             .first.assert_called_once_with()
 
-    def test_it_updates_document_updated(self, models):
+    def test_it_updates_document_updated(self, annotation, db, models):
         yesterday = "yesterday"
         document = models.merge_documents.return_value = mock.Mock(
             updated=yesterday)
         models.Document.find_or_create_by_uris.return_value.first\
             .return_value = document
 
-        storage.create_annotation(self.mock_request(), self.annotation_data())
+        storage.update_document_metadata(db, annotation, [], [])
 
-        assert document.updated == models.Annotation.return_value.updated
+        assert document.updated == annotation.updated
 
-    def test_it_calls_create_or_update_document_uri(
-            self,
-            models):
+    def test_it_calls_create_or_update_document_uri(self,
+                                                    db,
+                                                    annotation,
+                                                    models):
         models.Document.find_or_create_by_uris.return_value.count\
             .return_value = 1
 
-        request = self.mock_request()
-
-        annotation = models.Annotation.return_value
-
-        annotation_data = self.annotation_data()
-        annotation_data['document']['document_uri_dicts'] = [
+        document_uri_dicts = [
             {
                 'uri': 'http://example.com/example_1',
                 'claimant': 'http://example.com/claimant',
@@ -415,28 +399,29 @@ class TestCreateAnnotation(object):
             },
         ]
 
-        storage.create_annotation(request, copy.deepcopy(annotation_data))
+        storage.update_document_metadata(db,
+                                         annotation,
+                                         [],
+                                         document_uri_dicts)
 
         assert models.create_or_update_document_uri.call_count == 3
-        for doc_uri_dict in annotation_data['document']['document_uri_dicts']:
+        for doc_uri_dict in document_uri_dicts:
             models.create_or_update_document_uri.assert_any_call(
-                session=request.db,
+                session=db,
                 document=models.Document.find_or_create_by_uris.return_value.first.return_value,
                 created=annotation.created,
                 updated=annotation.updated,
                 **doc_uri_dict
             )
 
-    def test_it_calls_create_or_update_document_meta(self, models):
+    def test_it_calls_create_or_update_document_meta(self,
+                                                     annotation,
+                                                     db,
+                                                     models):
         models.Document.find_or_create_by_uris.return_value.count\
             .return_value = 1
 
-        request = self.mock_request()
-
-        annotation = models.Annotation.return_value
-
-        annotation_data = self.annotation_data()
-        annotation_data['document']['document_meta_dicts'] = [
+        document_meta_dicts = [
             {
                 'claimant': 'http://example.com/claimant',
                 'claimant_normalized':
@@ -460,21 +445,70 @@ class TestCreateAnnotation(object):
             },
         ]
 
-        storage.create_annotation(request, copy.deepcopy(annotation_data))
+        storage.update_document_metadata(db,
+                                         annotation,
+                                         document_meta_dicts,
+                                         [])
 
         assert models.create_or_update_document_meta.call_count == 3
-        for document_meta_dict in annotation_data['document'][
-                'document_meta_dicts']:
+        for document_meta_dict in document_meta_dicts:
             models.create_or_update_document_meta.assert_any_call(
-                session=request.db,
+                session=db,
                 document=models.Document.find_or_create_by_uris.return_value.first.return_value,
                 created=annotation.created,
                 updated=annotation.updated,
                 **document_meta_dict
             )
 
+    @pytest.fixture
+    def annotation(self):
+        return mock.Mock(spec=Annotation())
+
+    @pytest.fixture
+    def db(self):
+        return mock.Mock(spec=db.Session)
+
+
+@pytest.mark.usefixtures('models',
+                         'update_document_metadata')
+class TestCreateAnnotation(object):
+
+    def test_it_inits_an_Annotation_model(self, models):
+        data = self.annotation_data()
+
+        storage.create_annotation(self.mock_session(), copy.deepcopy(data))
+
+        del data['document']
+        models.Annotation.assert_called_once_with(**data)
+
+    def test_it_adds_the_annotation_to_the_database(self, models):
+        session = self.mock_session()
+
+        storage.create_annotation(session, self.annotation_data())
+
+        session.add.assert_called_once_with(models.Annotation.return_value)
+
+    def test_it_calls_update_document_metadata(self,
+                                               models,
+                                               update_document_metadata):
+        session = self.mock_session()
+        annotation_data = self.annotation_data()
+        annotation_data['document']['document_meta_dicts'] = (
+            mock.sentinel.document_meta_dicts)
+        annotation_data['document']['document_uri_dicts'] = (
+            mock.sentinel.document_uri_dicts)
+
+        annotation = storage.create_annotation(session, annotation_data)
+
+        update_document_metadata.assert_called_once_with(
+            session,
+            models.Annotation.return_value,
+            mock.sentinel.document_meta_dicts,
+            mock.sentinel.document_uri_dicts
+        )
+
     def test_it_returns_the_annotation(self, models):
-        annotation = storage.create_annotation(self.mock_request(),
+        annotation = storage.create_annotation(self.mock_session(),
                                                self.annotation_data())
 
         assert annotation == models.Annotation.return_value
@@ -484,33 +518,91 @@ class TestCreateAnnotation(object):
         data = self.annotation_data()
         data['target_selectors'] = []
 
-        storage.create_annotation(self.mock_request(), data)
+        storage.create_annotation(self.mock_session(), data)
 
     def test_it_does_not_crash_if_no_text_or_tags(self):
         # Highlights have no text or tags.
         data = self.annotation_data()
         data['text'] = data['tags'] = ''
 
-        storage.create_annotation(self.mock_request(), data)
+        storage.create_annotation(self.mock_session(), data)
 
-    def mock_request(self):
-        request = DummyRequest(
-            feature=mock.Mock(
-                side_effect=lambda flag: flag == "postgres_write"),
-            authenticated_userid='acct:test@localhost'
-        )
-
-        request.registry.notify = mock.Mock(spec=lambda event: None)
-
-        class DBSpec(object):
+    def mock_session(self):
+        class SessionSpec(object):
             def add(self, annotation):
                 pass
             def flush():
                 pass
-        request.db = mock.Mock(spec=DBSpec)
+        return mock.Mock(spec=SessionSpec)
 
-        return request
+    def annotation_data(self):
+        return {
+            'userid': 'acct:test@localhost',
+            'text': 'text',
+            'tags': ['one', 'two'],
+            'shared': False,
+            'target_uri': 'http://www.example.com/example.html',
+            'groupid': '__world__',
+            'references': [],
+            'target_selectors': ['selector_one', 'selector_two'],
+            'document': {
+                'document_uri_dicts': [],
+                'document_meta_dicts': [],
+            }
+        }
 
+
+@pytest.mark.usefixtures('models',
+                         'update_document_metadata')
+class TestUpdateAnnotation(object):
+
+    def test_it_calls_get(self, annotation_data, models):
+        storage.update_annotation(mock.sentinel.session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        models.Annotation.query.get.assert_called_once_with(
+            'test_annotation_id')
+
+    def test_it_updates_the_annotation(self, annotation_data, models):
+        annotation = models.Annotation.query.get.return_value = mock.Mock()
+
+        storage.update_annotation(mock.sentinel.session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        for key, value in annotation_data.items():
+            assert getattr(annotation, key) == value
+
+    def test_it_calls_update_document_metadata(self,
+                                               annotation_data,
+                                               models,
+                                               update_document_metadata):
+        annotation = models.Annotation.query.get.return_value = mock.Mock()
+        annotation_data['document']['document_meta_dicts'] = (
+            mock.sentinel.document_meta_dicts)
+        annotation_data['document']['document_uri_dicts'] = (
+            mock.sentinel.document_uri_dicts)
+
+        storage.update_annotation(mock.sentinel.session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        update_document_metadata.assert_called_once_with(
+            mock.sentinel.session,
+            annotation,
+            mock.sentinel.document_meta_dicts,
+            mock.sentinel.document_uri_dicts
+        )
+
+    def test_it_returns_the_annotation(self, annotation_data, models):
+        annotation = storage.update_annotation(mock.sentinel.session,
+                                               'test_annotation_id',
+                                               annotation_data)
+
+        assert annotation == models.Annotation.query.get.return_value
+
+    @pytest.fixture
     def annotation_data(self):
         return {
             'userid': 'acct:test@localhost',
@@ -607,6 +699,11 @@ class TestDeleteAnnotation(object):
 
 
 @pytest.fixture
+def AnnotationBeforeSaveEvent(patch):
+    return patch('h.api.storage.AnnotationBeforeSaveEvent')
+
+
+@pytest.fixture
 def fetch_annotation(patch):
     return patch('h.api.storage.fetch_annotation')
 
@@ -619,5 +716,19 @@ def models(patch):
 
 
 @pytest.fixture
+def partial(patch):
+    return patch('h.api.storage.partial')
+
+
+@pytest.fixture
 def postgres_enabled(patch):
     return patch('h.api.storage._postgres_enabled')
+
+
+@pytest.fixture
+def transform(patch):
+    return patch('h.api.storage.transform')
+
+@pytest.fixture
+def update_document_metadata(patch):
+    return patch('h.api.storage.update_document_metadata')

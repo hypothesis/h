@@ -29,6 +29,7 @@ from h.api.presenters import AnnotationJSONLDPresenter
 from h.api import search as search_lib
 from h.api import schemas
 from h.api import storage
+from h.api.models import elastic
 
 _ = i18n.TranslationStringFactory(__package__)
 
@@ -161,7 +162,7 @@ def create(request):
     if request.feature('postgres'):
         schema = schemas.CreateAnnotationSchema(request)
         appstruct = schema.validate(copy.deepcopy(json_payload))
-        annotation = storage.create_annotation(request, appstruct)
+        annotation = storage.create_annotation(request.db, appstruct)
 
     # Validate the annotation for, and create the annotation in, Elasticsearch.
     legacy_schema = schemas.LegacyCreateAnnotationSchema(request)
@@ -201,18 +202,37 @@ def read_jsonld(annotation, request):
     return presenter.asdict()
 
 
-@api_config(route_name='api.annotation', request_method='PUT', permission='update')
+@api_config(route_name='api.annotation',
+            request_method='PUT',
+            permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
-    schema = schemas.LegacyUpdateAnnotationSchema(request,
-                                                  annotation=annotation)
-    appstruct = schema.validate(_json_payload(request))
-    annotation = storage.update_annotation(request, annotation.id, appstruct)
+    json_payload = _json_payload(request)
 
-    _publish_annotation_event(request, annotation, 'update')
+    legacy_annotation = elastic.Annotation.fetch(annotation.id)
 
-    presenter = AnnotationJSONPresenter(request, annotation)
-    return presenter.asdict()
+    # Validate the annotation for, and update the annotation in, PostgreSQL.
+    if request.feature('postgres'):
+        schema = schemas.UpdateAnnotationSchema(request, annotation=annotation)
+        appstruct = schema.validate(copy.deepcopy(json_payload))
+        annotation = storage.update_annotation(request.db,
+                                               annotation.id,
+                                               appstruct)
+
+    # Validate the annotation for, and update the annotation in, Elasticsearch.
+    legacy_schema = schemas.LegacyUpdateAnnotationSchema(
+        request, annotation=legacy_annotation)
+    legacy_appstruct = legacy_schema.validate(copy.deepcopy(json_payload))
+    legacy_annotation = storage.legacy_update_annotation(request,
+                                                         legacy_annotation.id,
+                                                         legacy_appstruct)
+
+    if request.feature('postgres'):
+        _publish_annotation_event(request, annotation, 'update')
+        return AnnotationJSONPresenter(request, annotation).asdict()
+    else:
+        _publish_annotation_event(request, legacy_annotation, 'update')
+        return AnnotationJSONPresenter(request, legacy_annotation).asdict()
 
 
 @api_config(route_name='api.annotation', request_method='DELETE', permission='delete')

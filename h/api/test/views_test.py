@@ -252,7 +252,7 @@ class TestCreate(object):
         views.create(request)
 
         storage.create_annotation.assert_called_once_with(
-            request, schema.validate.return_value)
+            request.db, schema.validate.return_value)
 
     def test_it_inits_LegacyCreateAnnotationSchema(self, schemas):
         request = self.mock_request()
@@ -391,68 +391,263 @@ class TestReadJSONLD(object):
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
+                         'elastic',
+                         'schemas',
+                         'storage')
+class TestUpdateLegacy(object):
+
+    """Tests for update() when the 'postgres' feature flag is off."""
+
+    def test_it_raises_if_json_parsing_fails(self, mock_request):
+        """It raises PayloadError if parsing of the request body fails."""
+        # Make accessing the request.json_body property raise ValueError.
+        type(mock_request).json_body = mock.PropertyMock(
+            side_effect=ValueError)
+
+        with pytest.raises(views.PayloadError):
+            views.update(mock.Mock(), mock_request)
+
+    def test_it_fetches_the_legacy_annotation(self, elastic, mock_request):
+        annotation = mock.Mock()
+
+        views.update(annotation, mock_request)
+
+        elastic.Annotation.fetch.assert_called_once_with(annotation.id)
+
+    def test_it_does_not_init_the_schema(self, mock_request, schemas):
+        views.update(mock.Mock(), mock_request)
+
+        assert not schemas.UpdateAnnotationSchema.called
+
+    def test_it_does_not_call_update_annotation(self,
+                                               mock_request,
+                                               storage,
+                                               schemas):
+        schema = schemas.UpdateAnnotationSchema.return_value
+
+        views.update(mock.Mock(), mock_request)
+
+        assert not storage.update_annotation.called
+
+    def test_it_inits_the_legacy_schema(self, elastic, mock_request, schemas):
+        legacy_annotation = elastic.Annotation.fetch.return_value = mock.Mock()
+
+        views.update(legacy_annotation, mock_request)
+
+        schemas.LegacyUpdateAnnotationSchema.assert_called_once_with(
+            mock_request, legacy_annotation)
+
+    def test_it_calls_legacy_validate(self, copy, mock_request, schemas):
+        copy.deepcopy.side_effect = lambda x: x
+        legacy_schema = schemas.LegacyUpdateAnnotationSchema.return_value
+
+        views.update(mock.Mock(), mock_request)
+
+        legacy_schema.validate.assert_called_once_with(mock_request.json_body)
+
+    def test_it_calls_legacy_update_annotation(self,
+                                               elastic,
+                                               mock_request,
+                                               schemas,
+                                               storage):
+        legacy_annotation = elastic.Annotation.fetch.return_value = mock.Mock()
+
+        views.update(mock.Mock(), mock_request)
+
+        storage.legacy_update_annotation.assert_called_once_with(
+            mock_request,
+            legacy_annotation.id,
+            schemas.LegacyUpdateAnnotationSchema.return_value.validate\
+                .return_value)
+
+    def test_it_inits_an_AnnotationEvent(self,
+                                         AnnotationEvent,
+                                         mock_request,
+                                         storage):
+        annotation = mock.Mock()
+
+        views.update(annotation, mock_request)
+
+        AnnotationEvent.assert_called_once_with(
+            mock_request,
+            storage.legacy_update_annotation.return_value,
+            'update')
+
+    def test_it_calls_notify(self, AnnotationEvent, mock_request):
+        views.update(mock.Mock(), mock_request)
+
+        mock_request.registry.notify.assert_called_once_with(
+            AnnotationEvent.return_value)
+
+    def test_it_inits_a_presenter(self,
+                                  AnnotationJSONPresenter,
+                                  mock_request,
+                                  storage):
+        views.update(mock.Mock(), mock_request)
+
+        AnnotationJSONPresenter.assert_called_once_with(
+            mock_request, storage.legacy_update_annotation.return_value)
+
+    def test_it_dictizes_the_presenter(self,
+                                       AnnotationJSONPresenter,
+                                       mock_request):
+        returned = views.update(mock.Mock(), mock_request)
+
+        AnnotationJSONPresenter.return_value.asdict.assert_called_once_with()
+
+    def test_it_returns_a_presented_dict(self,
+                                         AnnotationJSONPresenter,
+                                         mock_request):
+        returned = views.update(mock.Mock(), mock_request)
+
+        assert returned == (
+            AnnotationJSONPresenter.return_value.asdict.return_value)
+
+    @pytest.fixture
+    def elastic(self, patch):
+        return patch('h.api.views.elastic')
+
+    @pytest.fixture
+    def mock_request(self):
+        return mock.Mock(feature=mock.Mock(return_value=False))
+
+
+@pytest.mark.usefixtures('AnnotationEvent',
+                         'AnnotationJSONPresenter',
+                         'elastic',
                          'schemas',
                          'storage')
 class TestUpdate(object):
 
-    def test_it_raises_if_json_parsing_fails(self):
+    def test_it_raises_if_json_parsing_fails(self, mock_request):
         """It raises PayloadError if parsing of the request body fails."""
-        request = mock.Mock()
-
         # Make accessing the request.json_body property raise ValueError.
-        type(request).json_body = mock.PropertyMock(side_effect=ValueError)
+        type(mock_request).json_body = mock.PropertyMock(
+            side_effect=ValueError)
 
         with pytest.raises(views.PayloadError):
-            views.update(mock.Mock(), request)
+            views.update(mock.Mock(), mock_request)
 
-    def test_it_calls_validator(self, schemas):
+    def test_it_fetches_the_legacy_annotation(self, elastic, mock_request):
         annotation = mock.Mock()
-        request = mock.Mock()
-        schema = schemas.LegacyUpdateAnnotationSchema.return_value
 
-        views.update(annotation, request)
+        views.update(annotation, mock_request)
 
-        schema.validate.assert_called_once_with(request.json_body)
+        elastic.Annotation.fetch.assert_called_once_with(annotation.id)
 
-    def test_it_calls_update_annotation(self, storage, schemas):
+    def test_it_inits_the_schema(self, mock_request, schemas):
         annotation = mock.Mock()
-        request = mock.Mock()
-        schema = schemas.LegacyUpdateAnnotationSchema.return_value
-        schema.validate.return_value = {'foo': 123}
 
-        views.update(annotation, request)
+        views.update(annotation, mock_request)
 
-        storage.update_annotation.assert_called_once_with(request,
-                                                          annotation.id,
-                                                          {'foo': 123})
+        schemas.UpdateAnnotationSchema.assert_called_once_with(mock_request,
+                                                               annotation)
 
-    def test_it_returns_presented_annotation(self,
-                                             AnnotationJSONPresenter,
-                                             storage):
+    def test_it_calls_validate(self, copy, mock_request, schemas):
         annotation = mock.Mock()
-        request = mock.Mock()
-        presenter = mock.Mock()
-        AnnotationJSONPresenter.return_value = presenter
+        copy.deepcopy.side_effect = lambda x: x
+        schema = schemas.UpdateAnnotationSchema.return_value
 
-        result = views.update(annotation, request)
+        views.update(annotation, mock_request)
+
+        schema.validate.assert_called_once_with(mock_request.json_body)
+
+    def test_it_calls_update_annotation(self,
+                                        elastic,
+                                        mock_request,
+                                        storage,
+                                        schemas):
+        annotation = mock.Mock()
+        schema = schemas.UpdateAnnotationSchema.return_value
+        schema.validate.return_value = mock.sentinel.validated_data
+
+        views.update(annotation, mock_request)
+
+        storage.update_annotation.assert_called_once_with(
+            mock_request.db,
+            annotation.id,
+            mock.sentinel.validated_data
+        )
+
+    def test_it_inits_the_legacy_schema(self, elastic, mock_request, schemas):
+        legacy_annotation = elastic.Annotation.fetch.return_value = mock.Mock()
+
+        views.update(legacy_annotation, mock_request)
+
+        schemas.LegacyUpdateAnnotationSchema.assert_called_once_with(
+            mock_request, legacy_annotation)
+
+    def test_it_calls_legacy_validate(self, copy, mock_request, schemas):
+        copy.deepcopy.side_effect = lambda x: x
+        legacy_schema = schemas.LegacyUpdateAnnotationSchema.return_value
+
+        views.update(mock.Mock(), mock_request)
+
+        legacy_schema.validate.assert_called_once_with(mock_request.json_body)
+
+    def test_it_calls_legacy_update_annotation(self,
+                                               elastic,
+                                               mock_request,
+                                               schemas,
+                                               storage):
+        legacy_annotation = elastic.Annotation.fetch.return_value = mock.Mock()
+
+        views.update(mock.Mock(), mock_request)
+
+        storage.legacy_update_annotation.assert_called_once_with(
+            mock_request,
+            legacy_annotation.id,
+            schemas.LegacyUpdateAnnotationSchema.return_value.validate\
+                .return_value)
+
+    def test_it_inits_an_AnnotationEvent(self,
+                                         AnnotationEvent,
+                                         mock_request,
+                                         storage):
+        annotation = mock.Mock()
+
+        views.update(annotation, mock_request)
+
+        AnnotationEvent.assert_called_once_with(
+            mock_request, storage.update_annotation.return_value, 'update')
+
+    def test_it_calls_notify(self, AnnotationEvent, mock_request):
+        views.update(mock.Mock(), mock_request)
+
+        mock_request.registry.notify.assert_called_once_with(
+            AnnotationEvent.return_value)
+
+    def test_it_inits_a_presenter(self,
+                                  AnnotationJSONPresenter,
+                                  mock_request,
+                                  storage):
+        views.update(mock.Mock(), mock_request)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            request,
-            storage.update_annotation.return_value)
-        assert result == presenter.asdict()
+            mock_request, storage.update_annotation.return_value)
 
-    def test_it_calls_notify_with_an_event(self, AnnotationEvent, storage):
-        annotation = mock.Mock()
-        request = mock.Mock()
-        event = AnnotationEvent.return_value
-        annotation_out = storage.update_annotation.return_value
+    def test_it_dictizes_the_presenter(self,
+                                       AnnotationJSONPresenter,
+                                       mock_request):
+        returned = views.update(mock.Mock(), mock_request)
 
-        views.update(annotation, request)
+        AnnotationJSONPresenter.return_value.asdict.assert_called_once_with()
 
-        AnnotationEvent.assert_called_once_with(request,
-                                                annotation_out,
-                                                'update')
-        request.registry.notify.assert_called_once_with(event)
+    def test_it_returns_a_presented_dict(self,
+                                         AnnotationJSONPresenter,
+                                         mock_request):
+        returned = views.update(mock.Mock(), mock_request)
+
+        assert returned == (
+            AnnotationJSONPresenter.return_value.asdict.return_value)
+
+    @pytest.fixture
+    def elastic(self, patch):
+        return patch('h.api.views.elastic')
+
+    @pytest.fixture
+    def mock_request(self):
+        return mock.Mock(feature=mock.Mock(return_value=True))
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
