@@ -553,8 +553,10 @@ class TestUpdate(object):
 
         views.update(annotation, mock_request)
 
-        schemas.UpdateAnnotationSchema.assert_called_once_with(mock_request,
-                                                               annotation)
+        schemas.UpdateAnnotationSchema.assert_called_once_with(
+            mock_request,
+            annotation.target_uri,
+            annotation.extra)
 
     def test_it_calls_validate(self, copy, mock_request, schemas):
         annotation = mock.Mock()
