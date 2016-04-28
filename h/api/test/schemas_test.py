@@ -409,9 +409,10 @@ class TestAnnotationSchema(object):
     def test_it_removes_protected_fields(self, field):
         schema = schemas.AnnotationSchema()
 
-        result = schema.validate(annotation_data(field='something forbidden'))
+        appstruct = schema.validate(
+            annotation_data(field='something forbidden'))
 
-        assert field not in result
+        assert field not in appstruct
 
 
 class TestLegacyCreateAnnotationSchema(object):
@@ -555,19 +556,19 @@ class TestCreateAnnotationSchema(object):
             'acct:harriet@example.com')
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        result = schema.validate(annotation_data())
+        appstruct = schema.validate(annotation_data())
 
-        assert result['userid'] == 'acct:harriet@example.com'
+        assert appstruct['userid'] == 'acct:harriet@example.com'
 
     def test_it_renames_uri_to_target_uri(self, AnnotationSchema):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
         AnnotationSchema.return_value.validate.return_value['uri'] = (
             'http://example.com/example')
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['target_uri'] == 'http://example.com/example'
-        assert 'uri' not in result
+        assert appstruct['target_uri'] == 'http://example.com/example'
+        assert 'uri' not in appstruct
 
     def test_it_inserts_empty_string_if_data_has_no_uri(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
@@ -582,9 +583,9 @@ class TestCreateAnnotationSchema(object):
         AnnotationSchema.return_value.validate.return_value['text'] = (
             'some annotation text')
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['text'] == 'some annotation text'
+        assert appstruct['text'] == 'some annotation text'
 
     def test_it_inserts_empty_string_if_data_contains_no_text(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
@@ -599,9 +600,9 @@ class TestCreateAnnotationSchema(object):
         AnnotationSchema.return_value.validate.return_value['tags'] = [
             'foo', 'bar']
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['tags'] == ['foo', 'bar']
+        assert appstruct['tags'] == ['foo', 'bar']
 
     def test_it_inserts_empty_list_if_data_contains_no_tags(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
@@ -622,10 +623,10 @@ class TestCreateAnnotationSchema(object):
             'acct:harriet@example.com')
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['shared'] is False
-        assert 'permissions' not in result
+        assert appstruct['shared'] is False
+        assert 'permissions' not in appstruct
 
     def test_it_replaces_shared_permissions_with_shared_True(
             self,
@@ -634,14 +635,14 @@ class TestCreateAnnotationSchema(object):
             'acct:harriet@example.com')
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        result = schema.validate(
+        appstruct = schema.validate(
             annotation_data(
                 permissions={'read': ['group:__world__']},
             ),
         )
 
-        assert result['shared'] is True
-        assert 'permissions' not in result
+        assert appstruct['shared'] is True
+        assert 'permissions' not in appstruct
 
     def test_it_does_not_crash_if_data_contains_no_target(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
@@ -661,44 +662,44 @@ class TestCreateAnnotationSchema(object):
             'this should be removed',
         ]
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['target_selectors'] == 'the selectors'
+        assert appstruct['target_selectors'] == 'the selectors'
 
     def test_it_renames_group_to_groupid(self, AnnotationSchema):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
         AnnotationSchema.return_value.validate.return_value['group'] = 'foo'
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['groupid'] == 'foo'
-        assert 'group' not in result
+        assert appstruct['groupid'] == 'foo'
+        assert 'group' not in appstruct
 
     def test_it_inserts_default_groupid_if_no_group(self, AnnotationSchema):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
         del AnnotationSchema.return_value.validate.return_value['group']
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['groupid'] == '__world__'
+        assert appstruct['groupid'] == '__world__'
 
     def test_it_keeps_references(self, AnnotationSchema):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
         AnnotationSchema.return_value.validate.return_value['references'] = [
             'parent id', 'parent id 2']
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['references'] == ['parent id', 'parent id 2']
+        assert appstruct['references'] == ['parent id', 'parent id 2']
 
     def test_it_inserts_empty_list_if_no_references(self, AnnotationSchema):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
         assert 'references' not in AnnotationSchema.return_value.validate\
             .return_value
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['references'] == []
+        assert appstruct['references'] == []
 
     def test_it_deletes_groupid_for_replies(self, AnnotationSchema):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
@@ -706,9 +707,9 @@ class TestCreateAnnotationSchema(object):
         AnnotationSchema.return_value.validate.return_value['references'] = [
             'parent annotation id']
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert 'groupid' not in result
+        assert 'groupid' not in appstruct
 
     def test_it_moves_extra_data_into_extra_sub_dict(self, AnnotationSchema):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
@@ -732,9 +733,9 @@ class TestCreateAnnotationSchema(object):
             'bar': 2,
         }
 
-        result = schema.validate({})
+        appstruct = schema.validate({})
 
-        assert result['extra'] == {'foo': 1, 'bar': 2}
+        assert appstruct['extra'] == {'foo': 1, 'bar': 2}
 
     def test_it_calls_document_uris_from_data(self,
                                               AnnotationSchema,
@@ -875,9 +876,9 @@ class TestLegacyUpdateAnnotationSchema(object):
         data = {}
         data[field] = 'something forbidden'
 
-        result = schema.validate(data)
+        appstruct = schema.validate(data)
 
-        assert field not in result
+        assert field not in appstruct
 
     def test_it_allows_permissions_changes_if_admin(self, authn_policy):
         """If a user is an admin on an annotation, they can change perms."""
@@ -892,9 +893,9 @@ class TestLegacyUpdateAnnotationSchema(object):
             'permissions': {'admin': ['acct:foo@example.com']}
         }
 
-        result = schema.validate(data)
+        appstruct = schema.validate(data)
 
-        assert result == data
+        assert appstruct == data
 
     @pytest.mark.parametrize('annotation', [
         {},
@@ -947,10 +948,10 @@ class TestLegacyUpdateAnnotationSchema(object):
         annotation = {'group': 'flibble'}
         schema = schemas.LegacyUpdateAnnotationSchema(request, annotation)
 
-        result = schema.validate(data)
+        appstruct = schema.validate(data)
 
         for k in data:
-            assert result[k] == data[k]
+            assert appstruct[k] == data[k]
 
 
 @pytest.mark.usefixtures('AnnotationSchema')
