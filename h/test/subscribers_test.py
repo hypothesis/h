@@ -21,14 +21,32 @@ class FakeMailer(object):
 @pytest.mark.usefixtures('presenters')
 class TestPublishAnnotationEvent:
 
-    def test_it_publishes_the_serialized_data(self, event, presenters):
+    def test_it_initializes_a_new_before_save_event(
+        self, event, presenters, AnnotationBeforeSaveEvent, deepcopy):
+
+        subscribers.publish_annotation_event(event)
+
+        deepcopy.assert_called_once_with(event.annotation_dict)
+
+        AnnotationBeforeSaveEvent.assert_called_once_with(event.request,
+                                                          deepcopy.return_value)
+
+    def test_it_notifies_before_save_event(self, event, AnnotationBeforeSaveEvent, deepcopy):
+        event.request.registry.notify = mock.Mock(spec=lambda event: None)
+        before_save_event = AnnotationBeforeSaveEvent.return_value
+
+        subscribers.publish_annotation_event(event)
+
+        event.request.registry.notify.assert_called_once_with(before_save_event)
+
+    def test_it_publishes_the_serialized_data(self, event, presenters, deepcopy):
         event.request.headers = {'X-Client-Id': 'client_id'}
 
         subscribers.publish_annotation_event(event)
 
         event.request.realtime.publish_annotation.assert_called_once_with({
             'action': event.action,
-            'annotation': event.annotation_dict,
+            'annotation': deepcopy.return_value,
             'src_client_id': 'client_id'
         })
 
@@ -43,6 +61,14 @@ class TestPublishAnnotationEvent:
     @pytest.fixture
     def presenters(self, patch):
         return patch('h.subscribers.presenters')
+
+    @pytest.fixture
+    def AnnotationBeforeSaveEvent(self, patch):
+        return patch('h.subscribers.AnnotationBeforeSaveEvent')
+
+    @pytest.fixture
+    def deepcopy(self, patch):
+        return patch('h.subscribers.deepcopy')
 
 
 @pytest.mark.usefixtures('fetch_annotation')
