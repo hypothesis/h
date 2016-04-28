@@ -78,12 +78,16 @@ tags-input {
 
   .tag-list {
     @include pie-clearfix;
-    margin-top: -.4545em;
+    // Margin between bottom of ascent of annotation body and
+    // top of tags list should be ~15px
+    margin-top: -$layout-h-margin + 10px ;
+    // Margin between top of x-height of annotation footer
+    // labels and bottom of tags list should be ~15px
+    margin-bottom: $layout-h-margin - 10px ;
 
     .tag-item {
       float: left;
       margin-right: .4545em;
-      margin-top: .4545em;
 
       a {
         text-decoration: none;

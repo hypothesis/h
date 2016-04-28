@@ -793,6 +793,7 @@ function annotation() {
       isSidebar: '<',
       onReplyCountClick: '&',
       replyCount: '<',
+      isCollapsed: '<'
     },
     template: require('../../../templates/client/annotation.html'),
   };

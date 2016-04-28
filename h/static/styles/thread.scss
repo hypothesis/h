@@ -5,11 +5,6 @@ $thread-padding: $annotation-card-left-padding;
     margin-bottom: .72em;
   }
 
-  & > li.thread:hover,
-  & > li.thread.js-hover {
-    border: 1px solid $highlight;
-  }
-
   & > li.thread > .threadexp {
     display: none;
   }
@@ -25,7 +20,6 @@ $thread-padding: $annotation-card-left-padding;
   align-items: center;
 
   &__label {
-    margin-top: 10px;
     max-width: 160px;
     text-align: center;
   }
@@ -38,8 +32,34 @@ $thread-padding: $annotation-card-left-padding;
   }
 }
 
-.thread-replies .thread:first-child {
-  margin-top: 0.5em;
+.thread-replies {
+  .annotation-action-btn {
+    color: $grey-4;
+  }
+
+  .annotation-footer {
+    // Margin between bottom of ascent of annotation body and
+    // top of annotation footer should be ~15px
+    margin-top: $layout-h-margin - 8px;
+    // Margin between bottom of ascent of annotation footer labels
+    // and top of ascent of username should be ~20px
+    margin-bottom: $layout-h-margin - 3px;
+  }
+
+  .annotation-header {
+    // Margin between bottom of ascent of annotation card footer labels
+    // and top of ascent of username should be ~20px
+    margin-top: $layout-h-margin - 2px;
+  }
+
+  .annotation-body {
+    // Margin between top of ascent of annotation body and
+    // bottom of ascent of username should be ~15px
+    margin-top: $layout-h-margin - 8px;
+    // Margin between bottom of ascent of annotation body and
+    // top of annotation footer labels should be ~15px
+    margin-bottom: $layout-h-margin - 3px;
+  }
 }
 
 .thread {
@@ -48,15 +68,22 @@ $thread-padding: $annotation-card-left-padding;
 
   & > ul {
     padding-left: $thread-padding + 3px;
+    padding-right: $thread-padding + 3px;
     margin-left: -$thread-padding;
+    margin-right: -$thread-padding;
   }
 
   // nested threads for annotation replies
   .thread {
-    border-left: 1px dotted $gray-light;
+    border-left: 1px dotted $grey-3;
     padding: 0;
     padding-left: $thread-padding;
-    margin-top: 10px;
+
+    &:hover {
+      & > .threadexp > span {
+        color: $grey-7;
+      }
+    }
   }
 
   .threadexp {
@@ -68,7 +95,7 @@ $thread-padding: $annotation-card-left-padding;
 
     span {
       background: $white;
-      color: $gray-light;
+      color: $grey-4;
       display: block;
       line-height: inherit;
       text-align: center;

@@ -42,8 +42,8 @@ $base-font-size: 14px;
 
   // frame styles
   @import './bucket-bar';
-  @include noise-background;
   user-select: none;
+  @include grey-background;
   direction: ltr;
   background: none;
   font-size: $base-font-size;
