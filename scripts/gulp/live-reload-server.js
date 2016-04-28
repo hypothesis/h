@@ -38,9 +38,11 @@ function LiveReloadServer(port, appServer) {
     <body>
       <pre style="margin: 75px;">${changelogText()}</pre>
       <script>
+      var appHost = document.location.hostname;
+
       window.hypothesisConfig = function () {
         return {
-          liveReloadServer: 'ws://localhost:${port}',
+          liveReloadServer: 'ws://' + appHost + ':${port}',
 
           // Open the sidebar when the page loads
           firstRun: true,
@@ -52,8 +54,11 @@ function LiveReloadServer(port, appServer) {
           window.location.reload();
         }
       });
+
+      var embedScript = document.createElement('script');
+      embedScript.src = '${appServer}/embed.js'.replace('localhost', appHost);
+      document.body.appendChild(embedScript);
       </script>
-      <script src="${appServer}/embed.js"></script>
     </body>
     </html>
       `;
