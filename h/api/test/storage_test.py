@@ -453,7 +453,10 @@ class TestCreateAnnotation(object):
 
 class TestUpdateDocumentMetadata(object):
 
-    def test_it_calls_find_or_create_by_uris(self, annotation, models, db):
+    def test_it_calls_find_or_create_by_uris(self,
+                                             annotation,
+                                             models,
+                                             session):
         document_uri_dicts = [
             {
                 'uri': 'http://example.com/example_1',
@@ -475,13 +478,13 @@ class TestUpdateDocumentMetadata(object):
             },
         ]
 
-        storage.update_document_metadata(db,
+        storage.update_document_metadata(session,
                                          annotation,
                                          [],
                                          document_uri_dicts)
 
         models.Document.find_or_create_by_uris.assert_called_once_with(
-            db,
+            session,
             annotation.target_uri,
             [
                 'http://example.com/example_1',
@@ -492,41 +495,41 @@ class TestUpdateDocumentMetadata(object):
             updated=annotation.updated,
         )
 
-    def test_it_calls_merge_documents(self, annotation, db, models):
+    def test_it_calls_merge_documents(self, annotation, session, models):
         """If it finds more than one document it calls merge_documents()."""
         models.Document.find_or_create_by_uris.return_value = mock.Mock(
             count=mock.Mock(return_value=3))
 
-        storage.update_document_metadata(db, annotation, [], [])
+        storage.update_document_metadata(session, annotation, [], [])
 
         models.merge_documents.assert_called_once_with(
-            db,
+            session,
             models.Document.find_or_create_by_uris.return_value,
             updated=annotation.updated)
 
-    def test_it_calls_first(self, annotation, db, models):
+    def test_it_calls_first(self, annotation, session, models):
         """If it finds only one document it calls first()."""
         models.Document.find_or_create_by_uris.return_value = mock.Mock(
             count=mock.Mock(return_value=1))
 
-        storage.update_document_metadata(db, annotation, [], [])
+        storage.update_document_metadata(session, annotation, [], [])
 
         models.Document.find_or_create_by_uris.return_value\
             .first.assert_called_once_with()
 
-    def test_it_updates_document_updated(self, annotation, db, models):
+    def test_it_updates_document_updated(self, annotation, session, models):
         yesterday = "yesterday"
         document = models.merge_documents.return_value = mock.Mock(
             updated=yesterday)
         models.Document.find_or_create_by_uris.return_value.first\
             .return_value = document
 
-        storage.update_document_metadata(db, annotation, [], [])
+        storage.update_document_metadata(session, annotation, [], [])
 
         assert document.updated == annotation.updated
 
     def test_it_calls_create_or_update_document_uri(self,
-                                                    db,
+                                                    session,
                                                     annotation,
                                                     models):
         models.Document.find_or_create_by_uris.return_value.count\
@@ -553,7 +556,7 @@ class TestUpdateDocumentMetadata(object):
             },
         ]
 
-        storage.update_document_metadata(db,
+        storage.update_document_metadata(session,
                                          annotation,
                                          [],
                                          document_uri_dicts)
@@ -561,7 +564,7 @@ class TestUpdateDocumentMetadata(object):
         assert models.create_or_update_document_uri.call_count == 3
         for doc_uri_dict in document_uri_dicts:
             models.create_or_update_document_uri.assert_any_call(
-                session=db,
+                session=session,
                 document=models.Document.find_or_create_by_uris.return_value.first.return_value,
                 created=annotation.created,
                 updated=annotation.updated,
@@ -570,7 +573,7 @@ class TestUpdateDocumentMetadata(object):
 
     def test_it_calls_create_or_update_document_meta(self,
                                                      annotation,
-                                                     db,
+                                                     session,
                                                      models):
         models.Document.find_or_create_by_uris.return_value.count\
             .return_value = 1
@@ -599,7 +602,7 @@ class TestUpdateDocumentMetadata(object):
             },
         ]
 
-        storage.update_document_metadata(db,
+        storage.update_document_metadata(session,
                                          annotation,
                                          document_meta_dicts,
                                          [])
@@ -607,7 +610,7 @@ class TestUpdateDocumentMetadata(object):
         assert models.create_or_update_document_meta.call_count == 3
         for document_meta_dict in document_meta_dicts:
             models.create_or_update_document_meta.assert_any_call(
-                session=db,
+                session=session,
                 document=models.Document.find_or_create_by_uris.return_value.first.return_value,
                 created=annotation.created,
                 updated=annotation.updated,
@@ -619,7 +622,7 @@ class TestUpdateDocumentMetadata(object):
         return mock.Mock(spec=Annotation())
 
     @pytest.fixture
-    def db(self):
+    def session(self):
         return mock.Mock(spec=db.Session)
 
 
