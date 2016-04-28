@@ -10,6 +10,7 @@ module.exports = class TextSelection extends Annotator.Plugin
     $(document).bind({
       "touchend": @checkForEndSelection
       "mouseup": @checkForEndSelection
+      "ready": @checkForEndSelection
     })
 
     null
@@ -18,6 +19,7 @@ module.exports = class TextSelection extends Annotator.Plugin
     $(document).unbind({
       "touchend": @checkForEndSelection
       "mouseup": @checkForEndSelection
+      "ready": @checkForEndSelection
     })
     super
 

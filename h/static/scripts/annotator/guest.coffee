@@ -7,7 +7,7 @@ Annotator = require('annotator')
 $ = Annotator.$
 
 highlighter = require('./highlighter')
-
+rangeUtil = require('./range-util')
 
 animationPromise = (fn) ->
   return new Promise (resolve, reject) ->
@@ -16,7 +16,6 @@ animationPromise = (fn) ->
         resolve(fn())
       catch error
         reject(error)
-
 
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
@@ -196,6 +195,7 @@ module.exports = class Guest extends Annotator
         range = Annotator.Range.sniff(anchor.range)
         normedRange = range.normalize(root)
         highlights = highlighter.highlightRange(normedRange)
+
         $(highlights).data('annotation', anchor.annotation)
         anchor.highlights = highlights
         return anchor
@@ -341,6 +341,11 @@ module.exports = class Guest extends Annotator
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('focusAnnotations', tags)
 
+  showAdder: (position) ->
+    @adder
+      .css(position)
+      .show()
+
   onSuccessfulSelection: (event, immediate) ->
     unless event?
       throw "Called onSuccessfulSelection without an event!"
@@ -360,10 +365,8 @@ module.exports = class Guest extends Annotator
       @onAdderClick event
     else
       # Show the adder button
-      @adder
-        .css(Annotator.Util.mousePosition(event, @element[0]))
-        .show()
-
+      selection = Annotator.Util.getGlobal().getSelection()
+      this.showAdder(rangeUtil.selectionEndPosition(selection))
     true
 
   onFailedSelection: (event) ->
