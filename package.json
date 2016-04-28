@@ -49,6 +49,7 @@
     "lodash.debounce": "^4.0.3",
     "mkdirp": "^0.5.1",
     "ng-tags-input": "2.2.0",
+    "node-sass": "~3.4.1",
     "node-uuid": "^1.4.3",
     "postcss": "^5.0.6",
     "postcss-url": "^5.1.1",
