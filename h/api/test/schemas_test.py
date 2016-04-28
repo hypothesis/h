@@ -395,6 +395,7 @@ class TestAnnotationSchema(object):
         'updated',
         'user',
         'id',
+        'links',
     ])
     def test_it_removes_protected_fields(self, field):
         schema = schemas.AnnotationSchema()
@@ -429,6 +430,7 @@ class TestLegacyCreateAnnotationSchema(object):
         'created',
         'updated',
         'id',
+        'links',
     ])
     def test_it_removes_protected_fields(self, field, mock_request):
         schema = schemas.LegacyCreateAnnotationSchema(mock_request)
@@ -864,6 +866,7 @@ class TestLegacyUpdateAnnotationSchema(object):
         'updated',
         'user',
         'id',
+        'links',
     ])
     def test_it_removes_protected_fields(self, field):
         request = testing.DummyRequest()
@@ -972,7 +975,7 @@ class TestUpdateAnnotationSchema(object):
 
     def test_you_cannot_update_protected_fields(self,
                                                 AnnotationSchema):
-        for protected_field in ['created', 'updated', 'user', 'id']:
+        for protected_field in ['created', 'updated', 'user', 'id', 'links']:
             AnnotationSchema.return_value.validate\
                 .return_value[protected_field] = 'foo'
             schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
