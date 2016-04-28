@@ -180,6 +180,43 @@ def update_document_metadata(session,
             **document_meta_dict)
 
 
+def update_annotation(session, annotation_id, data):
+    """
+    Update an existing annotation and its associated document metadata.
+
+    Update the annotation identified by annotation_id with the given
+    data. Create, delete and update document metadata as appropriate.
+
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
+
+    :param annotation_id: the ID of the annotation to be updated, this is
+        assumed to be a validated ID of an annotation that does already exist
+        in the database
+    :type annotation_id: string
+
+    :param data: the validated data with which to update the annotation
+    :type data: dict
+
+    :returns: the updated annotation
+    :rtype: h.api.models.Annotation
+
+    """
+    document_uri_dicts = data['document']['document_uri_dicts']
+    document_meta_dicts = data['document']['document_meta_dicts']
+    del data['document']
+
+    annotation = models.Annotation.query.get(annotation_id)
+
+    for key, value in data.items():
+        setattr(annotation, key, value)
+
+    update_document_metadata(
+        session, annotation, document_meta_dicts, document_uri_dicts)
+
+    return annotation
+
+
 def legacy_update_annotation(request, id, data):
     """
     Update the annotation with the given id from passed data.
