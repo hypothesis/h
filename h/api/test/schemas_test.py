@@ -1324,6 +1324,7 @@ class TestUpdateAnnotationSchema(object):
     def annotation(self):
         return mock.Mock(groupid='foogroup')
 
+
 def annotation_data(**kwargs):
     """Return test input data for AnnotationSchema.validate()."""
     data = {
