@@ -407,9 +407,8 @@ class TestAnnotationSchema(object):
 
 class TestLegacyCreateAnnotationSchema(object):
 
-    def test_it_passes_input_to_structure_validator(self):
-        request = self.mock_request()
-        schema = schemas.LegacyCreateAnnotationSchema(request)
+    def test_it_passes_input_to_structure_validator(self, mock_request):
+        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
         schema.structure = mock.Mock()
         schema.structure.validate.return_value = {}
 
@@ -417,9 +416,8 @@ class TestLegacyCreateAnnotationSchema(object):
 
         schema.structure.validate.assert_called_once_with({'foo': 'bar'})
 
-    def test_it_raises_if_structure_validator_raises(self):
-        request = self.mock_request()
-        schema = schemas.LegacyCreateAnnotationSchema(request)
+    def test_it_raises_if_structure_validator_raises(self, mock_request):
+        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
         schema.structure = mock.Mock()
         schema.structure.validate.side_effect = (
             schemas.ValidationError('asplode'))
@@ -432,9 +430,8 @@ class TestLegacyCreateAnnotationSchema(object):
         'updated',
         'id',
     ])
-    def test_it_removes_protected_fields(self, field):
-        request = self.mock_request()
-        schema = schemas.LegacyCreateAnnotationSchema(request)
+    def test_it_removes_protected_fields(self, field, mock_request):
+        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
         data = {}
         data[field] = 'something forbidden'
 
@@ -447,12 +444,11 @@ class TestLegacyCreateAnnotationSchema(object):
         {'user': None},
         {'user': 'acct:foo@bar.com'},
     ])
-    def test_it_ignores_input_user(self, data, authn_policy):
+    def test_it_ignores_input_user(self, data, authn_policy, mock_request):
         """Any user field sent in the payload should be ignored."""
         authn_policy.authenticated_userid.return_value = (
             'acct:jeanie@example.com')
-        request = self.mock_request()
-        schema = schemas.LegacyCreateAnnotationSchema(request)
+        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
 
         appstruct = schema.validate(data)
 
@@ -475,7 +471,8 @@ class TestLegacyCreateAnnotationSchema(object):
                                                     data,
                                                     effective_principals,
                                                     ok,
-                                                    authn_policy):
+                                                    authn_policy,
+                                                    mock_request):
         """
         A user cannot create an annotation in a group they're not a member of.
 
@@ -484,8 +481,7 @@ class TestLegacyCreateAnnotationSchema(object):
         principals.
         """
         authn_policy.effective_principals.return_value = effective_principals
-        request = self.mock_request()
-        schema = schemas.LegacyCreateAnnotationSchema(request)
+        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
 
         if ok:
             appstruct = schema.validate(data)
@@ -504,15 +500,15 @@ class TestLegacyCreateAnnotationSchema(object):
         {'numbers': 12345},
         {'null': None},
     ])
-    def test_it_permits_all_other_changes(self, data):
-        request = self.mock_request()
-        schema = schemas.LegacyCreateAnnotationSchema(request)
+    def test_it_permits_all_other_changes(self, data, mock_request):
+        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
 
         appstruct = schema.validate(data)
 
         for k in data:
             assert appstruct[k] == data[k]
 
+    @pytest.fixture
     def mock_request(self):
         request = testing.DummyRequest()
         request.feature = mock.Mock(return_value=False,
