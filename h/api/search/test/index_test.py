@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import mock
 import pytest
+from pyramid.testing import DummyRequest
 
 import elasticsearch
 
@@ -21,6 +22,23 @@ class TestIndexAnnotation:
 
         presenters.AnnotationJSONPresenter.assert_called_once_with(
             request, annotation)
+
+    def test_it_creates_an_annotation_before_save_event(self, es, presenters, AnnotationBeforeSaveEvent):
+        request = mock.Mock()
+        presented = presenters.AnnotationJSONPresenter.return_value.asdict()
+
+        index.index(es, mock.Mock(), request)
+
+        AnnotationBeforeSaveEvent.assert_called_once_with(request, presented)
+
+    def test_it_notifies_before_save_event(self, es, presenters, AnnotationBeforeSaveEvent):
+        request = DummyRequest()
+        request.registry.notify = mock.Mock(spec=lambda event: None)
+
+        index.index(es, mock.Mock(), request)
+
+        event = AnnotationBeforeSaveEvent.return_value
+        request.registry.notify.assert_called_once_with(event)
 
     def test_it_indexes_the_annotation(self, es, presenters):
         index.index(es, mock.Mock(), mock.Mock())
@@ -52,6 +70,10 @@ class TestIndexAnnotation:
             ],
         }
         return presenters
+
+    @pytest.fixture
+    def AnnotationBeforeSaveEvent(self, patch):
+        return patch('h.api.search.index.AnnotationBeforeSaveEvent')
 
 
 @pytest.mark.usefixtures('log')

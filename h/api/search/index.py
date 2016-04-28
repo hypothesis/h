@@ -7,6 +7,7 @@ import logging
 import elasticsearch
 
 from h.api import presenters
+from h.api.events import AnnotationBeforeSaveEvent
 
 
 log = logging.getLogger(__name__)
@@ -32,6 +33,9 @@ def index(es, annotation, request):
 
     annotation_dict['target'][0]['scope'] = [
         annotation.target_uri_normalized]
+
+    event = AnnotationBeforeSaveEvent(request, annotation_dict)
+    request.registry.notify(event)
 
     es.conn.index(
         index=es.index,
