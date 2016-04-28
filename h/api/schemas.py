@@ -161,68 +161,6 @@ class AnnotationSchema(JSONSchema):
         ],
     }
 
-    def __init__(self, request):
-        super(AnnotationSchema, self).__init__()
-        self.request = request
-
-    def validate(self, data):
-        appstruct = super(AnnotationSchema, self).validate(data)
-
-        new_appstruct = {}
-
-        # Some fields are not to be set by the user, ignore them.
-        for field in PROTECTED_FIELDS:
-            appstruct.pop(field, None)
-
-        new_appstruct['userid'] = self.request.authenticated_userid
-        new_appstruct['target_uri'] = appstruct.pop('uri', u'')
-        new_appstruct['text'] = appstruct.pop('text', u'')
-        new_appstruct['tags'] = appstruct.pop('tags', [])
-
-        # Replace the client's complex permissions object with a simple shared
-        # boolean.
-        if appstruct.pop('permissions')['read'] == [new_appstruct['userid']]:
-            new_appstruct['shared'] = False
-        else:
-            new_appstruct['shared'] = True
-
-        # The 'target' dict that the client sends is replaced with a single
-        # annotation.target_selectors whose value is the first selector in
-        # the client'ss target.selectors list.
-        # Anything else in the target dict, and any selectors after the first,
-        # are discarded.
-        target = appstruct.pop('target', [])
-        if target:  # Replies and page notes don't have 'target'.
-            target = target[0]  # Multiple targets are ignored.
-            new_appstruct['target_selectors'] = target['selector']
-
-        new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
-        new_appstruct['references'] = appstruct.pop('references', [])
-
-        # Replies always get the same groupid as their parent. The parent's
-        # groupid is added to the reply annotation later by the storage code.
-        # Here we just delete any group sent by the client from replies.
-        if new_appstruct['references'] and 'groupid' in new_appstruct:
-            del new_appstruct['groupid']
-
-        new_appstruct['extra'] = appstruct
-
-        # Transform the "document" dict that the client posts into a convenient
-        # format for creating DocumentURI and DocumentMeta objects later.
-        document_data = appstruct.pop('document', {})
-        document_uri_dicts = parse_document_claims.document_uris_from_data(
-            copy.deepcopy(document_data),
-            claimant=new_appstruct['target_uri'])
-        document_meta_dicts = parse_document_claims.document_metas_from_data(
-            copy.deepcopy(document_data),
-            claimant=new_appstruct['target_uri'])
-        new_appstruct['document'] = {
-            'document_uri_dicts': document_uri_dicts,
-            'document_meta_dicts': document_meta_dicts
-        }
-
-        return new_appstruct
-
 
 class LegacyAnnotationSchema(JSONSchema):
 
@@ -264,10 +202,66 @@ class CreateAnnotationSchema(object):
     """Validate the POSTed data of a create annotation request."""
 
     def __init__(self, request):
-        self.structure = AnnotationSchema(request)
+        self.structure = AnnotationSchema()
+        self.request = request
 
     def validate(self, data):
-        return self.structure.validate(data)
+        appstruct = self.structure.validate(data)
+
+        new_appstruct = {}
+
+        # Some fields are not to be set by the user, ignore them.
+        for field in PROTECTED_FIELDS:
+            appstruct.pop(field, None)
+
+        new_appstruct['userid'] = self.request.authenticated_userid
+        new_appstruct['target_uri'] = appstruct.pop('uri', u'')
+        new_appstruct['text'] = appstruct.pop('text', u'')
+        new_appstruct['tags'] = appstruct.pop('tags', [])
+
+        # Replace the client's complex permissions object with a simple shared
+        # boolean.
+        if appstruct.pop('permissions')['read'] == [new_appstruct['userid']]:
+            new_appstruct['shared'] = False
+        else:
+            new_appstruct['shared'] = True
+
+        # The 'target' dict that the client sends is replaced with a single
+        # annotation.target_selectors whose value is the first selector in
+        # the client'ss target.selectors list.
+        # Anything else in the target dict, and any selectors after the first,
+        # are discarded.
+        target = appstruct.pop('target', [])
+        if target:  # Replies and page notes don't have 'target'.
+            target = target[0]  # Multiple targets are ignored.
+            new_appstruct['target_selectors'] = target['selector']
+
+        new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
+        new_appstruct['references'] = appstruct.pop('references', [])
+
+        # Replies always get the same groupid as their parent. The parent's
+        # groupid is added to the reply annotation later by the storage code.
+        # Here we just delete any group sent by the client from replies.
+        if new_appstruct['references'] and 'groupid' in new_appstruct:
+            del new_appstruct['groupid']
+
+        # Transform the "document" dict that the client posts into a convenient
+        # format for creating DocumentURI and DocumentMeta objects later.
+        document_data = appstruct.pop('document', {})
+        document_uri_dicts = parse_document_claims.document_uris_from_data(
+            copy.deepcopy(document_data),
+            claimant=new_appstruct['target_uri'])
+        document_meta_dicts = parse_document_claims.document_metas_from_data(
+            copy.deepcopy(document_data),
+            claimant=new_appstruct['target_uri'])
+        new_appstruct['document'] = {
+            'document_uri_dicts': document_uri_dicts,
+            'document_meta_dicts': document_meta_dicts
+        }
+
+        new_appstruct['extra'] = appstruct
+
+        return new_appstruct
 
 
 class LegacyCreateAnnotationSchema(object):
@@ -312,17 +306,58 @@ class UpdateAnnotationSchema(object):
     def __init__(self, request, annotation):
         self.request = request
         self.annotation = annotation
-        self.structure = AnnotationSchema(request)
+        self.structure = AnnotationSchema()
 
     def validate(self, data):
         appstruct = self.structure.validate(data)
 
-        if appstruct['groupid'] != self.annotation.groupid:
-            raise ValidationError('group: ' + _("You can't move annotations "
-                                                "between groups"))
+        new_appstruct = {}
 
-        return appstruct
+        # Some fields are not to be set by the user, ignore them.
+        for field in PROTECTED_FIELDS:
+            appstruct.pop(field, None)
 
+        # Fields that are allowed to be updated and that have a different name
+        # internally than in the public API.
+        if 'uri' in appstruct:
+            new_appstruct['target_uri'] = appstruct.pop('uri')
+
+        if 'permissions' in appstruct:
+            permissions = appstruct.pop('permissions')
+            if permissions['read'] == [self.request.authenticated_userid]:
+                new_appstruct['shared'] = False
+            else:
+                new_appstruct['shared'] = True
+
+        if 'target' in appstruct:
+            new_appstruct['target_selectors'] = (
+                appstruct.pop('target')[0]['selector'])
+
+        # Fields that are allowed to be updated and that have the same internal
+        # and external name.
+        for key in ['text', 'tags']:
+            if key in appstruct:
+                new_appstruct[key] = appstruct.pop(key)
+
+        if 'document' in appstruct:
+            claimant = new_appstruct.get('target_uri',
+                                         self.annotation.target_uri)
+            document_data = appstruct.pop('document')
+            document_uri_dicts = parse_document_claims.document_uris_from_data(
+                copy.deepcopy(document_data),
+                claimant=claimant)
+            document_meta_dicts = (
+                parse_document_claims.document_metas_from_data(
+                    copy.deepcopy(document_data),
+                    claimant=claimant))
+            new_appstruct['document'] = {
+                'document_uri_dicts': document_uri_dicts,
+                'document_meta_dicts': document_meta_dicts
+            }
+
+        new_appstruct['extra'] = appstruct
+
+        return new_appstruct
 
 
 class LegacyUpdateAnnotationSchema(object):
