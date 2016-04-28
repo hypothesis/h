@@ -450,10 +450,6 @@ class TestCreateAnnotation(object):
             }
         }
 
-    @pytest.fixture
-    def update_document_metadata(self, patch):
-        return patch('h.api.storage.update_document_metadata')
-
 
 class TestUpdateDocumentMetadata(object):
 
@@ -627,6 +623,87 @@ class TestUpdateDocumentMetadata(object):
         return mock.Mock(spec=db.Session)
 
 
+@pytest.mark.usefixtures('models',
+                         'update_document_metadata')
+class TestUpdateAnnotation(object):
+
+    def test_it_calls_get(self, annotation_data, models, session):
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        session.query.assert_called_once_with(models.Annotation)
+        session.query.return_value.get.assert_called_once_with(
+            'test_annotation_id')
+
+    def test_it_updates_the_annotation(self, annotation_data, models, session):
+        annotation = session.query.return_value.get.return_value = mock.Mock()
+
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        for key, value in annotation_data.items():
+            assert getattr(annotation, key) == value
+
+    def test_it_calls_update_document_metadata(self,
+                                               annotation_data,
+                                               models,
+                                               session,
+                                               update_document_metadata):
+        annotation = session.query.return_value.get.return_value = mock.Mock()
+        annotation_data['document']['document_meta_dicts'] = (
+            mock.sentinel.document_meta_dicts)
+        annotation_data['document']['document_uri_dicts'] = (
+            mock.sentinel.document_uri_dicts)
+
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        update_document_metadata.assert_called_once_with(
+            session,
+            annotation,
+            mock.sentinel.document_meta_dicts,
+            mock.sentinel.document_uri_dicts
+        )
+
+    def test_it_returns_the_annotation(self, annotation_data, models, session):
+        annotation = storage.update_annotation(session,
+                                               'test_annotation_id',
+                                               annotation_data)
+
+        assert annotation == session.query.return_value.get.return_value
+
+    def test_it_does_not_crash_if_no_document_in_data(self):
+
+        storage.update_annotation(mock.Mock(), 'test_annotation_id', {})
+
+    def test_it_does_not_call_update_document_meta_if_no_document_in_data(
+            self,
+            update_document_metadata):
+        storage.update_annotation(mock.Mock(), 'test_annotation_id', {})
+
+        assert not update_document_metadata.called
+
+    @pytest.fixture
+    def annotation_data(self):
+        return {
+            'userid': 'acct:test@localhost',
+            'text': 'text',
+            'tags': ['one', 'two'],
+            'shared': False,
+            'target_uri': 'http://www.example.com/example.html',
+            'groupid': '__world__',
+            'references': [],
+            'target_selectors': ['selector_one', 'selector_two'],
+            'document': {
+                'document_uri_dicts': [],
+                'document_meta_dicts': [],
+            }
+        }
+
+
 @pytest.mark.usefixtures('fetch_annotation')
 class TestDeleteAnnotationLegacy(object):
 
@@ -701,7 +778,7 @@ class TestDeleteAnnotation(object):
     def mock_request(self):
         request = DummyRequest()
         request.feature = mock.Mock(return_value=True)
-        request.db = mock.Mock(spec=db.Session)
+        request.db = session()
         return request
 
 
@@ -733,5 +810,14 @@ def postgres_enabled(patch):
 
 
 @pytest.fixture
+def session():
+    return mock.Mock(spec=db.Session)
+
+
+@pytest.fixture
 def transform(patch):
     return patch('h.api.storage.transform')
+
+@pytest.fixture
+def update_document_metadata(patch):
+    return patch('h.api.storage.update_document_metadata')
