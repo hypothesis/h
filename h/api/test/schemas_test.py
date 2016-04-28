@@ -993,6 +993,52 @@ class TestUpdateAnnotationSchema(object):
             assert protected_field not in appstruct
             assert protected_field not in appstruct.get('extra', {})
 
+    def test_you_cannot_change_an_annotations_group(self,
+                                                    annotation,
+                                                    AnnotationSchema):
+        annotation.groupid = 'original-group'
+        AnnotationSchema.return_value.validate.return_value['groupid'] = (
+            'new-group')
+        AnnotationSchema.return_value.validate.return_value['group'] = (
+            'new-group')
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        appstruct = schema.validate({})
+
+        assert 'groupid' not in appstruct
+        assert 'groupid' not in appstruct.get('extra', {})
+        assert 'group' not in appstruct
+        assert 'group' not in appstruct.get('extra', {})
+
+    def test_you_cannot_change_an_annotations_userid(self,
+                                                     annotation,
+                                                     AnnotationSchema):
+        annotation.userid = 'original_userid'
+        AnnotationSchema.return_value.validate.return_value['userid'] = (
+            'new_userid')
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        appstruct = schema.validate({})
+
+        assert 'userid' not in appstruct
+        assert 'userid' not in appstruct.get('extra', {})
+
+    def test_you_cannot_change_an_annotations_references(self,
+                                                         annotation,
+                                                         AnnotationSchema):
+        annotation.references = ['original_parent']
+        AnnotationSchema.return_value.validate.return_value['references'] = [
+            'new_parent']
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
+                                                annotation)
+
+        appstruct = schema.validate({})
+
+        assert 'references' not in appstruct
+        assert 'references' not in appstruct.get('extra', {})
+
     def test_it_renames_uri_to_target_uri(self, annotation, AnnotationSchema):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
                                                 annotation)
