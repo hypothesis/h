@@ -282,10 +282,9 @@ class UpdateAnnotationSchema(object):
 
     """Validate the POSTed data of an update annotation request."""
 
-    def __init__(self, request, existing_target_uri, existing_extra):
+    def __init__(self, request, existing_target_uri):
         self.request = request
         self.existing_target_uri = existing_target_uri
-        self.existing_extra = existing_extra
         self.structure = AnnotationSchema()
 
     def validate(self, data):
@@ -324,10 +323,9 @@ class UpdateAnnotationSchema(object):
                 appstruct.pop('document'),
                 new_appstruct.get('target_uri', self.existing_target_uri))
 
+        # Anything still left in appstruct goes into extra.
         if appstruct:
-            # Copy annotation.extra because we don't want to modify it here.
-            new_appstruct['extra'] = dict(self.existing_extra)
-            new_appstruct['extra'].update(appstruct)
+            new_appstruct['extra'] = appstruct
 
         return new_appstruct
 

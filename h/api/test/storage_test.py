@@ -639,8 +639,7 @@ class TestUpdateAnnotation(object):
             'test_annotation_id')
 
     def test_it_updates_the_annotation(self, annotation_data, models):
-        annotation = models.Annotation.query.get.return_value = mock.Mock()
-
+        annotation = models.Annotation.query.get.return_value
         storage.update_annotation(mock.Mock(),
                                   'test_annotation_id',
                                   annotation_data)
@@ -648,11 +647,62 @@ class TestUpdateAnnotation(object):
         for key, value in annotation_data.items():
             assert getattr(annotation, key) == value
 
+    def test_it_adds_new_extras(self, annotation_data, models):
+        annotation = models.Annotation.query.get.return_value
+        annotation.extra = {}
+        annotation_data['extra'] = {'foo': 'bar'}
+
+        storage.update_annotation(mock.Mock(),
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        assert annotation.extra == {'foo': 'bar'}
+
+    def test_it_overwrites_existing_extras(self, annotation_data, models):
+        annotation = models.Annotation.query.get.return_value
+        annotation.extra = {'foo': 'original_value'}
+        annotation_data['extra'] = {'foo': 'new_value'}
+
+        storage.update_annotation(mock.Mock(),
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        assert annotation.extra == {'foo': 'new_value'}
+
+    def test_it_does_not_change_extras_that_are_not_sent(self,
+                                                         annotation_data,
+                                                         models):
+        annotation = models.Annotation.query.get.return_value
+        annotation.extra = {
+            'one': 1,
+            'two': 2,
+        }
+        annotation_data['extra'] = {'two': 22}
+
+        storage.update_annotation(mock.Mock(),
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        assert annotation.extra['one'] == 1
+
+    def test_it_does_not_change_extras_if_none_are_sent(self,
+                                                        annotation_data,
+                                                        models):
+        annotation = models.Annotation.query.get.return_value
+        annotation.extra = {'one': 1, 'two': 2}
+        assert 'extra' not in annotation_data
+
+        storage.update_annotation(mock.Mock(),
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        assert annotation.extra == {'one': 1, 'two': 2}
+
     def test_it_calls_update_document_metadata(self,
                                                annotation_data,
                                                models,
                                                update_document_metadata):
-        annotation = models.Annotation.query.get.return_value = mock.Mock()
+        annotation = models.Annotation.query.get.return_value
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
         annotation_data['document']['document_uri_dicts'] = (
@@ -797,6 +847,7 @@ def fetch_annotation(patch):
 def models(patch):
     models = patch('h.api.storage.models', autospec=False)
     models.Annotation.return_value.is_reply = False
+    models.Annotation.query.get.return_value.extra = {}
     return models
 
 

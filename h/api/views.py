@@ -217,9 +217,7 @@ def update(annotation, request):
 
     # Validate the annotation for, and update the annotation in, PostgreSQL.
     if request.feature('postgres'):
-        schema = schemas.UpdateAnnotationSchema(request,
-                                                annotation.target_uri,
-                                                annotation.extra)
+        schema = schemas.UpdateAnnotationSchema(request, annotation.target_uri)
         appstruct = schema.validate(copy.deepcopy(json_payload))
         annotation = storage.update_annotation(request.db,
                                                annotation.id,
