@@ -42,6 +42,21 @@ $success-color: #1cbd41 !default;
 $mask-start-color: rgba($white, 0) !default;
 $mask-end-color: $white !default;
 
+
+// Variables for the new color palette
+// ------------------------------------
+$grey-1: #F2F2F2;
+$grey-2: #ECECEC;
+$grey-3: #DBDBDB;
+$grey-4: #A6A6A6;
+$grey-5: #7A7A7A;
+$grey-6: #3F3F3F;
+$grey-7: #202020;
+
+$brand: #BD1C2B;
+$highlight: #58CEF4;
+
+
 @function color-weight($c, $n: 500) {
   @if $n == 50 {
     @return tint($c, 85%);
@@ -102,6 +117,11 @@ $body2-line-height:       1.4em;
 $title-font-size:         20px;
 $title-font-weight:       bold;
 
+$normal-font-size: 13px;
+$normal-line-height: 17px;
+
+$small-font-size: 11px;
+$small-line-height: 12px;
 
 // Front page typography
 // -------------------------

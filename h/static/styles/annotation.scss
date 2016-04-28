@@ -2,18 +2,52 @@
 
 //ANNOTATION CARD////////////////////////////////
 
+@mixin font-small {
+  font-size: $small-font-size;
+  line-height: $small-line-height;
+}
+
+@mixin font-normal {
+  font-size: $normal-font-size;
+  line-height: $normal-line-height;
+}
+
 // the padding at the left-edge of the annotation card
 // and its container
 $annotation-card-left-padding: 10px;
 
 .annotation-card {
-  background-color: white;
+  box-shadow: 0px 1px 1px 1px rgba(0, 0, 0, 0.10);
   border-radius: 2px;
-  border: 1px solid $color-mercury;
-  padding-left: 12px;
-  padding-right: 12px;
-  padding-top: 12px;
-  padding-bottom: 15px;
+  padding: $layout-h-margin;
+  background: $white;
+}
+
+.annotation-card:hover {
+  box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+
+  .annotation-header__user {
+    color: $grey-7;
+  }
+
+  .annotation-quote {
+    border-left: $highlight 3px solid;
+    color: $grey-5;
+  }
+
+  .annotation-replies__link {
+    color: $grey-6;
+    text-decoration: underline;
+  }
+
+  .annotation-action-btn {
+    color: $grey-6;
+  }
+
+  .annotation-header__timestamp {
+    color: $grey-5;
+  }
 }
 
 .annotation {
@@ -24,13 +58,8 @@ $annotation-card-left-padding: 10px;
 }
 
 .annotation-link {
-  font-size: $body1-font-size;
-  color: $color-gray;
-  &:focus { outline: 0; }
-
-  .annotation:hover & {
-    color: $link-color;
-  }
+  @include font-small;
+  color: $grey-4;
 }
 
 .annotation-quote-list,
@@ -43,11 +72,11 @@ $annotation-card-left-padding: 10px;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  margin-bottom: 5px;
 }
 
 .annotation-header__share-info {
-  color: $color-gray;
+  color: $grey-6;
+  @include font-normal;
 }
 
 .annotation-header__group {
@@ -60,10 +89,18 @@ $annotation-card-left-padding: 10px;
   margin-left: 5px;
 }
 
+.annotation-text {
+  @include font-normal;
+  color: $grey-6;
+}
+
 // the footer at the bottom of an annotation displaying
 // the annotation actions and reply counts
 .annotation-footer {
-  margin-bottom: 0;
+  @include font-normal;
+  color: $grey-5;
+  margin-bottom: 5px;
+  margin-top: 20px;
 }
 
 .u-flex-spacer {
@@ -71,8 +108,8 @@ $annotation-card-left-padding: 10px;
 }
 
 .annotation-quote-list {
-  margin-top: 14px;
-  margin-bottom: 14px;
+  margin-top: $layout-h-margin;
+  margin-bottom: $layout-h-margin;
 }
 
 .annotation-media-embed {
@@ -80,19 +117,24 @@ $annotation-card-left-padding: 10px;
   height: 208px;
 }
 
-.annotation-user {
-  color: $text-color;
+.annotation-header__user {
+  @include font-normal;
+  color: $grey-7;
   font-weight: bold;
-  font-size: $body1-font-size;
-  &:hover {
-    color: $link-color-hover;
-    cursor: pointer;
-    text-decoration: underline;
-  }
 }
 
 .annotation-replies {
   float: left;
+}
+
+.annotation-replies__link {
+  @include font-normal;
+  color: $grey-5;
+}
+
+.annotation-header__timestamp {
+  @include font-small;
+  color: $grey-4;
 }
 
 .annotation-actions {
@@ -101,18 +143,10 @@ $annotation-card-left-padding: 10px;
 }
 
 .annotation-action-btn {
-  color: $dg-4;
+  color: $grey-5;
   font-weight: normal;
   padding: 0;
   margin: 0px 0px 0px 8px;
-
-  &:hover {
-    color: $dg-1;
-  }
-
-  &:focus, &:active {
-    color: $dg-1;
-  }
 }
 
 .annotation-action-btn__label {
@@ -121,6 +155,8 @@ $annotation-card-left-padding: 10px;
 
 .annotation-quote {
   @include quote;
+  @include font-normal;
+  color: $grey-4;
   del {
     background:#ffe6e6;
   }
@@ -140,16 +176,16 @@ $annotation-card-left-padding: 10px;
   font-size: 0.8em;
   padding-top: 0.583em;
 
-  a {
-    color: $gray-light;
-    display: block;
-  }
-
   @include icons {
-    font-size: 13px;
+    font-size: $normal-font-size;
     vertical-align: -2px;
     margin-right: 1px;
   }
+}
+
+.annotation-license__link {
+  color: $gray-light;
+  display: block;
 }
 
 .annotation-collapsed-replies {

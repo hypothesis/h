@@ -6,38 +6,28 @@
   <header class="annotation-header">
     <!-- User -->
     <span ng-if="vm.user()">
-      <span>
-        <a class="annotation-user"
-           target="_blank"
-           ng-href="{{::vm.serviceUrl}}u/{{vm.user()}}"
-           >{{vm.username()}}</a>
-      </span>
-
-      <span class="annotation-collapsed-replies">
-        <a class="annotation-link" href=""
-          ng-click="vm.onReplyCountClick()"
-          ng-pluralize count="vm.replyCount"
-          when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
-      </span>
-
+      <a class="annotation-header__user"
+        target="_blank"
+        ng-href="{{::vm.serviceUrl}}u/{{vm.user()}}"
+        >{{vm.username()}}</a>
       <br>
       <span class="annotation-header__share-info">
         <a class="annotation-header__group"
-           target="_blank" ng-if="vm.group() && vm.group().url" href="{{vm.group().url}}">
+          target="_blank" ng-if="vm.group() && vm.group().url" href="{{vm.group().url}}">
           <i class="h-icon-group"></i><span class="annotation-header__group-name">{{vm.group().name}}</span>
         </a>
         <span ng-show="vm.isPrivate"
-              title="This annotation is visible only to you.">
+          title="This annotation is visible only to you.">
           <i class="h-icon-lock"></i><span class="annotation-header__group-name" ng-show="!vm.group().url">Only me</span>
         </span>
         <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing()" title="This is a highlight. Click 'edit' to add a note or tag."></i>
         <span class="annotation-citation"
-              ng-bind-html="vm.documentTitle"
-              ng-if="::!vm.isSidebar">
+          ng-bind-html="vm.documentTitle"
+          ng-if="::!vm.isSidebar">
         </span>
         <span class="annotation-citation-domain"
-              ng-bind-html="vm.documentDomain"
-              ng-if="::!vm.isSidebar">
+          ng-bind-html="vm.documentDomain"
+          ng-if="::!vm.isSidebar">
         </span>
       </span>
     </span>
@@ -45,7 +35,7 @@
     <span class="u-flex-spacer"></span>
 
     <!-- Timestamp -->
-    <a class="annotation-link"
+    <a class="annotation-header__timestamp"
        target="_blank"
        title="{{vm.absoluteTimestamp}}"
        ng-if="!vm.editing() && vm.updated()"
@@ -55,34 +45,34 @@
 
   <!-- Excerpts -->
   <section class="annotation-quote-list"
-           ng-repeat="target in vm.target() track by $index"
-           ng-if="vm.hasQuotes()">
+    ng-repeat="target in vm.target() track by $index"
+    ng-if="vm.hasQuotes()">
     <excerpt collapsed-height="40"
-             inline-controls="true"
-             overflow-hysteresis="20"
-             content-data="selector.exact">
+      inline-controls="true"
+      overflow-hysteresis="20"
+      content-data="selector.exact">
       <blockquote class="annotation-quote"
-                  ng-bind-html="selector.exact"
-                  ng-repeat="selector in target.selector
-                             | filter : {'type': 'TextQuoteSelector'}
-                             track by $index"></blockquote>
+        ng-bind-html="selector.exact"
+        ng-repeat="selector in target.selector
+          | filter : {'type': 'TextQuoteSelector'}
+          track by $index"></blockquote>
     </excerpt>
   </section>
 
   <!-- / Excerpts -- >
 
   <!-- Body -->
-  <section name="text" class="annotation-body">
+  <section name="text" class="annotation-body annotation-text">
     <excerpt enabled="!vm.editing()"
-             inline-controls="false"
-             on-collapsible-changed="vm.setBodyCollapsible(collapsible)"
-             collapse="vm.collapseBody"
-             collapsed-height="400"
-             overflow-hysteresis="20"
-             content-data="vm.form.text">
+      inline-controls="false"
+      on-collapsible-changed="vm.setBodyCollapsible(collapsible)"
+      collapse="vm.collapseBody"
+      collapsed-height="400"
+      overflow-hysteresis="20"
+      content-data="vm.form.text">
       <markdown text="vm.form.text"
-                on-edit-text="vm.setText(text)"
-                read-only="!vm.editing()">
+        on-edit-text="vm.setText(text)"
+        read-only="!vm.editing()">
       </markdown>
     </excerpt>
   </section>
@@ -91,15 +81,15 @@
   <!-- Tags -->
   <div class="annotation-body form-field" ng-if="vm.editing()">
     <tags-input ng-model="vm.form.tags"
-                name="tags"
-                class="tags"
-                placeholder="Add tags…"
-                min-length="1"
-                replace-spaces-with-dashes="false"
-                enable-editing-last-tag="true">
-        <auto-complete source="vm.tagsAutoComplete($query)"
-                       min-length="1"
-                       max-results-to-show="10"></auto-complete>
+      name="tags"
+      class="tags"
+      placeholder="Add tags…"
+      min-length="1"
+      replace-spaces-with-dashes="false"
+      enable-editing-last-tag="true">
+      <auto-complete source="vm.tagsAutoComplete($query)"
+        min-length="1"
+        max-results-to-show="10"></auto-complete>
     </tags-input>
   </div>
 
@@ -112,17 +102,17 @@
     </ul>
     <div class="u-stretch"></div>
     <a class="annotation-link u-strong" ng-show="vm.canCollapseBody"
-       ng-click="vm.toggleCollapseBody($event)"
-       ng-title="vm.collapseBody ? 'Show the full annotation text' : 'Show the first few lines only'"
-       ng-bind="vm.collapseBody ? 'More' : 'Less'"></a>
+      ng-click="vm.toggleCollapseBody($event)"
+      ng-title="vm.collapseBody ? 'Show the full annotation text' : 'Show the first few lines only'"
+      ng-bind="vm.collapseBody ? 'More' : 'Less'"></a>
   </div>
   <!-- / Tags -->
 
   <footer class="annotation-footer">
     <div class="annotation-form-actions" ng-if="vm.editing()" ng-switch="vm.action">
       <button ng-switch-when="delete"
-              ng-click="vm.save()"
-              class="dropdown-menu-btn"><i class="h-icon-check btn-icon"></i> Delete</button>
+        ng-click="vm.save()"
+        class="dropdown-menu-btn"><i class="h-icon-check btn-icon"></i> Delete</button>
       <publish-annotation-btn
         class="publish-annotation-btn"
         group="vm.group()"
@@ -134,20 +124,21 @@
     </div>
 
     <div class="annotation-section annotation-license"
-         ng-show="vm.isShared() && vm.editing()">
-      <a href="http://creativecommons.org/publicdomain/zero/1.0/"
-         title="View more information about the Creative Commons Public Domain license"
-         target="_blank">
+      ng-show="vm.isShared() && vm.editing()">
+      <a class="annotation-license__link" href="http://creativecommons.org/publicdomain/zero/1.0/"
+        title="View more information about the Creative Commons Public Domain license"
+        target="_blank">
         <i class="h-icon-cc-logo"></i><i class="h-icon-cc-zero"></i>
         Annotations can be freely reused by anyone for any purpose.
       </a>
     </div>
 
     <div class="annotation-replies" ng-if="vm.replyCount > 0">
-      <a class="annotation-link" href=""
-         ng-click="vm.onReplyCountClick()"
-         ng-pluralize count="vm.replyCount"
-         when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
+      <a href=""
+        class="annotation-replies__link"
+        ng-click="vm.onReplyCountClick()"
+        ng-pluralize count="vm.replyCount"
+        when="{'0': '', 'one': '1 reply', 'other': '{} replies'}"></a>
     </div>
 
     <div class="annotation-actions" ng-if="vm.isSaving">
