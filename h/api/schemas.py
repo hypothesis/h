@@ -11,9 +11,6 @@ from h.api import parse_document_claims
 
 _ = i18n.TranslationStringFactory(__package__)
 
-# These annotation fields are not to be set by the user.
-PROTECTED_FIELDS = ['created', 'updated', 'user', 'id']
-
 
 class ValidationError(Exception):
     pass
@@ -214,33 +211,22 @@ class CreateAnnotationSchema(object):
 
         new_appstruct = {}
 
-        # Some fields are not to be set by the user, ignore them.
-        for field in PROTECTED_FIELDS:
-            appstruct.pop(field, None)
+        _remove_protected_fields(appstruct)
 
         new_appstruct['userid'] = self.request.authenticated_userid
         new_appstruct['target_uri'] = appstruct.pop('uri', u'')
         new_appstruct['text'] = appstruct.pop('text', u'')
         new_appstruct['tags'] = appstruct.pop('tags', [])
 
-        permissions = appstruct.pop('permissions', None)
-
-        # Replace the client's complex permissions object with a simple shared
-        # boolean.
-        if permissions and permissions['read'] == [new_appstruct['userid']]:
-            new_appstruct['shared'] = False
+        if 'permissions' in appstruct:
+            new_appstruct['shared'] = _shared(appstruct.pop('permissions'),
+                                              new_appstruct['userid'])
         else:
             new_appstruct['shared'] = True
 
-        # The 'target' dict that the client sends is replaced with a single
-        # annotation.target_selectors whose value is the first selector in
-        # the client's target.selectors list.
-        # Anything else in the target dict, and any selectors after the first,
-        # are discarded.
-        target = appstruct.pop('target', [])
-        if target:  # Replies and page notes don't have 'target'.
-            target = target[0]  # Multiple targets are ignored.
-            new_appstruct['target_selectors'] = target['selector']
+        if 'target' in appstruct:  # Replies and page notes don't have targets.
+            new_appstruct['target_selectors'] = _target_selectors(
+                appstruct.pop('target'))
 
         new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
         new_appstruct['references'] = appstruct.pop('references', [])
@@ -251,19 +237,8 @@ class CreateAnnotationSchema(object):
         if new_appstruct['references'] and 'groupid' in new_appstruct:
             del new_appstruct['groupid']
 
-        # Transform the "document" dict that the client posts into a convenient
-        # format for creating DocumentURI and DocumentMeta objects later.
-        document_data = appstruct.pop('document', {})
-        document_uri_dicts = parse_document_claims.document_uris_from_data(
-            copy.deepcopy(document_data),
-            claimant=new_appstruct['target_uri'])
-        document_meta_dicts = parse_document_claims.document_metas_from_data(
-            copy.deepcopy(document_data),
-            claimant=new_appstruct['target_uri'])
-        new_appstruct['document'] = {
-            'document_uri_dicts': document_uri_dicts,
-            'document_meta_dicts': document_meta_dicts
-        }
+        new_appstruct['document'] = _document(appstruct.pop('document', {}),
+                                              new_appstruct['target_uri'])
 
         new_appstruct['extra'] = appstruct
 
@@ -283,9 +258,7 @@ class LegacyCreateAnnotationSchema(object):
     def validate(self, data):
         appstruct = self.structure.validate(data)
 
-        # Some fields are not to be set by the user, ignore them.
-        for field in PROTECTED_FIELDS:
-            appstruct.pop(field, None)
+        _remove_protected_fields(appstruct)
 
         # Set the annotation user field to the request user.
         appstruct['user'] = self.request.authenticated_userid
@@ -319,9 +292,7 @@ class UpdateAnnotationSchema(object):
 
         new_appstruct = {}
 
-        # Some fields are not to be set by the user, ignore them.
-        for field in PROTECTED_FIELDS:
-            appstruct.pop(field, None)
+        _remove_protected_fields(appstruct)
 
         # Some fields are not allowed to be changed in annotation updates.
         for key in ['group', 'groupid', 'userid', 'references']:
@@ -333,15 +304,13 @@ class UpdateAnnotationSchema(object):
             new_appstruct['target_uri'] = appstruct.pop('uri')
 
         if 'permissions' in appstruct:
-            permissions = appstruct.pop('permissions')
-            if permissions['read'] == [self.request.authenticated_userid]:
-                new_appstruct['shared'] = False
-            else:
-                new_appstruct['shared'] = True
+            new_appstruct['shared'] = _shared(
+                appstruct.pop('permissions'),
+                self.request.authenticated_userid)
 
         if 'target' in appstruct:
-            new_appstruct['target_selectors'] = (
-                appstruct.pop('target')[0]['selector'])
+            new_appstruct['target_selectors'] = _target_selectors(
+                appstruct.pop('target'))
 
         # Fields that are allowed to be updated and that have the same internal
         # and external name.
@@ -350,20 +319,9 @@ class UpdateAnnotationSchema(object):
                 new_appstruct[key] = appstruct.pop(key)
 
         if 'document' in appstruct:
-            claimant = new_appstruct.get('target_uri',
-                                         self.annotation.target_uri)
-            document_data = appstruct.pop('document')
-            document_uri_dicts = parse_document_claims.document_uris_from_data(
-                copy.deepcopy(document_data),
-                claimant=claimant)
-            document_meta_dicts = (
-                parse_document_claims.document_metas_from_data(
-                    copy.deepcopy(document_data),
-                    claimant=claimant))
-            new_appstruct['document'] = {
-                'document_uri_dicts': document_uri_dicts,
-                'document_meta_dicts': document_meta_dicts
-            }
+            new_appstruct['document'] = _document(
+                appstruct.pop('document'),
+                new_appstruct.get('target_uri', self.annotation.target_uri))
 
         if appstruct:
             # Copy annotation.extra because we don't want to modify it here.
@@ -387,9 +345,7 @@ class LegacyUpdateAnnotationSchema(object):
     def validate(self, data):
         appstruct = self.structure.validate(data)
 
-        # Some fields are not to be set by the user, ignore them.
-        for field in PROTECTED_FIELDS:
-            appstruct.pop(field, None)
+        _remove_protected_fields(appstruct)
 
         # The user may not change the permissions of an annotation on which
         # they are lacking 'admin' rights.
@@ -415,6 +371,27 @@ class LegacyUpdateAnnotationSchema(object):
         return appstruct
 
 
+def _document(document, claimant):
+    """
+    Return document meta and document URI data from the given document dict.
+
+    Transforms the "document" dict that the client posts into a convenient
+    format for creating DocumentURI and DocumentMeta objects later.
+
+    """
+    document = document or {}
+    document_uri_dicts = parse_document_claims.document_uris_from_data(
+        copy.deepcopy(document),
+        claimant=claimant)
+    document_meta_dicts = parse_document_claims.document_metas_from_data(
+        copy.deepcopy(document),
+        claimant=claimant)
+    return {
+        'document_uri_dicts': document_uri_dicts,
+        'document_meta_dicts': document_meta_dicts
+    }
+
+
 def _format_jsonschema_error(error):
     """Format a :py:class:`jsonschema.ValidationError` as a string."""
     if error.path:
@@ -422,3 +399,44 @@ def _format_jsonschema_error(error):
         return '{path}: {message}'.format(path=dotted_path,
                                           message=error.message)
     return error.message
+
+
+def _remove_protected_fields(appstruct):
+    # Some fields are not to be set by the user, ignore them.
+    for field in ['created', 'updated', 'user', 'id']:
+        appstruct.pop(field, None)
+
+
+def _shared(permissions, userid):
+    """
+    Return True if the given permissions object represents shared permissions.
+
+    Return False otherwise.
+
+    Reduces the client's complex permissions dict to a simple shared boolean.
+
+    :param permissions: the permissions dict sent by the client in an
+        annotation create or update request
+    :type permissions: dict
+
+    :param userid: the userid of the user who created the annotation
+    :type userid: unicode
+
+    """
+    return permissions['read'] != [userid]
+
+
+def _target_selectors(targets):
+    """
+    Return the target selectors from the given target list.
+
+    Transforms the target lists that the client sends in annotation create and
+    update requests into our internal target_selectors format.
+
+    """
+    # Any targets other than the first in the list are discarded.
+    # Any fields of the target other than 'selector' are discarded.
+    if targets:
+        return targets[0]['selector']
+    else:
+        return []
