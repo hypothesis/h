@@ -63,6 +63,12 @@ def bulk_update_annotations(client, query, action):
 @celery.task
 def add_nipsa(userid):
     log.info("setting nipsa flag for user annotations: %s", userid)
+
+    if celery.request.feature('postgres'):
+        bulk_update_annotations(celery.request.es,
+                                search.not_nipsad_annotations(userid),
+                                add_nipsa_action)
+
     bulk_update_annotations(celery.request.legacy_es,
                             search.not_nipsad_annotations(userid),
                             add_nipsa_action)
@@ -71,6 +77,12 @@ def add_nipsa(userid):
 @celery.task
 def remove_nipsa(userid):
     log.info("clearing nipsa flag for user annotations: %s", userid)
+
+    if celery.request.feature('postgres'):
+        bulk_update_annotations(celery.request.es,
+                                search.nipsad_annotations(userid),
+                                remove_nipsa_action)
+
     bulk_update_annotations(celery.request.legacy_es,
                             search.nipsad_annotations(userid),
                             remove_nipsa_action)
