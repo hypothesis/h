@@ -34,15 +34,15 @@ def annotation_from_dict(data):
     return models.elastic.Annotation(data)
 
 
-def fetch_annotation(request, id, _postgres=None):
+def fetch_annotation(request, id_, _postgres=None):
     """
     Fetch the annotation with the given id.
 
     :param request: the request object
     :type request: pyramid.request.Request
 
-    :param id: the annotation id
-    :type id: str
+    :param id_: the annotation ID
+    :type id_: str
 
     :returns: the annotation, if found, or None.
     :rtype: dict, NoneType
@@ -54,11 +54,11 @@ def fetch_annotation(request, id, _postgres=None):
 
     if _postgres:
         try:
-            return request.db.query(models.Annotation).get(id)
+            return request.db.query(models.Annotation).get(id_)
         except types.InvalidUUID:
             return None
 
-    return models.elastic.Annotation.fetch(id)
+    return models.elastic.Annotation.fetch(id_)
 
 
 def legacy_create_annotation(request, data):
@@ -97,8 +97,8 @@ def create_annotation(request, data):
         else:
             raise schemas.ValidationError(
                 'references.0: ' +
-                _('Annotation {annotation_id} does not exist').format(
-                    annotation_id=top_level_annotation_id)
+                _('Annotation {id} does not exist').format(
+                    id=top_level_annotation_id)
             )
 
     # The user must have permission to create an annotation in the group
@@ -180,20 +180,19 @@ def update_document_metadata(session,
             **document_meta_dict)
 
 
-def update_annotation(session, annotation_id, data):
+def update_annotation(session, id_, data):
     """
     Update an existing annotation and its associated document metadata.
 
-    Update the annotation identified by annotation_id with the given
+    Update the annotation identified by id_ with the given
     data. Create, delete and update document metadata as appropriate.
 
     :param session: the database session
     :type session: sqlalchemy.orm.session.Session
 
-    :param annotation_id: the ID of the annotation to be updated, this is
-        assumed to be a validated ID of an annotation that does already exist
-        in the database
-    :type annotation_id: string
+    :param id_: the ID of the annotation to be updated, this is assumed to be a
+        validated ID of an annotation that does already exist in the database
+    :type id_: string
 
     :param data: the validated data with which to update the annotation
     :type data: dict
@@ -206,7 +205,7 @@ def update_annotation(session, annotation_id, data):
     # annotation object.
     document = data.pop('document', None)
 
-    annotation = session.query(models.Annotation).get(annotation_id)
+    annotation = session.query(models.Annotation).get(id_)
 
     for key, value in data.items():
         setattr(annotation, key, value)
@@ -220,7 +219,7 @@ def update_annotation(session, annotation_id, data):
     return annotation
 
 
-def legacy_update_annotation(request, id, data):
+def legacy_update_annotation(request, id_, data):
     """
     Update the annotation with the given id from passed data.
 
@@ -230,8 +229,8 @@ def legacy_update_annotation(request, id, data):
     :param request: the request object
     :type request: pyramid.request.Request
 
-    :param id: the annotation id
-    :type id: str
+    :param id_: the annotation ID
+    :type id_: str
 
     :param data: a dictionary of annotation properties
     :type data: dict
@@ -239,7 +238,7 @@ def legacy_update_annotation(request, id, data):
     :returns: the updated annotation
     :rtype: dict
     """
-    annotation = models.elastic.Annotation.fetch(id)
+    annotation = models.elastic.Annotation.fetch(id_)
     annotation.update(data)
 
     # FIXME: this should happen when indexing, not storing.
@@ -249,21 +248,21 @@ def legacy_update_annotation(request, id, data):
     return annotation
 
 
-def delete_annotation(request, id):
+def delete_annotation(request, id_):
     """
     Delete the annotation with the given id.
 
     :param request: the request object
     :type request: pyramid.request.Request
 
-    :param id: the annotation id
-    :type id: str
+    :param id_: the annotation ID
+    :type id_: str
     """
     if _postgres_enabled(request):
-        annotation = fetch_annotation(request, id, _postgres=True)
+        annotation = fetch_annotation(request, id_, _postgres=True)
         request.db.delete(annotation)
 
-    legacy_annotation = fetch_annotation(request, id, _postgres=False)
+    legacy_annotation = fetch_annotation(request, id_, _postgres=False)
     legacy_annotation.delete()
 
 
