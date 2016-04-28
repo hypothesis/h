@@ -34,14 +34,6 @@ class TestError(object):
 
         assert request.response.status_code == 400
 
-    def test_it_returns_status_object(self):
-        request = testing.DummyRequest()
-        exc = mock.Mock(message="it exploded")
-
-        result = views.error_validation(exc, request)
-
-        assert result == {'status': 'failure', 'reason': 'it exploded'}
-
 
 class TestIndex(object):
 
