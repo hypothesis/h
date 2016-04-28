@@ -317,6 +317,10 @@ class UpdateAnnotationSchema(object):
         for field in PROTECTED_FIELDS:
             appstruct.pop(field, None)
 
+        # Some fields are not allowed to be changed in annotation updates.
+        for key in ['group', 'groupid', 'userid', 'references']:
+            appstruct.pop(key, '')
+
         # Fields that are allowed to be updated and that have a different name
         # internally than in the public API.
         if 'uri' in appstruct:
