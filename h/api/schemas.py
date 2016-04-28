@@ -235,7 +235,7 @@ class CreateAnnotationSchema(object):
 
         # The 'target' dict that the client sends is replaced with a single
         # annotation.target_selectors whose value is the first selector in
-        # the client'ss target.selectors list.
+        # the client's target.selectors list.
         # Anything else in the target dict, and any selectors after the first,
         # are discarded.
         target = appstruct.pop('target', [])
