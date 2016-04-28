@@ -205,7 +205,7 @@ class TestLegacyCreateAnnotation(object):
 
     def test_it_returns_the_annotation(self, models):
         result = storage.legacy_create_annotation(self.mock_request(),
-                                           self.annotation_data())
+                                                  self.annotation_data())
 
         assert result == models.elastic.Annotation.return_value
 
@@ -809,7 +809,6 @@ class TestDeleteAnnotation(object):
 
         storage.delete_annotation(request, "test_id")
 
-
         assert fetch_annotation.call_args == mock.call(request,
                                                        "test_id",
                                                        _postgres=False)
@@ -864,6 +863,7 @@ def postgres_enabled(patch):
 @pytest.fixture
 def transform(patch):
     return patch('h.api.storage.transform')
+
 
 @pytest.fixture
 def update_document_metadata(patch):

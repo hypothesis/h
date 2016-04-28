@@ -383,7 +383,6 @@ class TestReadJSONLD(object):
             'profile': 'http://foo.com/context.jsonld'
         }
 
-
     def test_it_returns_presented_annotation(self, AnnotationJSONLDPresenter):
         annotation = mock.Mock()
         presenter = mock.Mock()
@@ -469,8 +468,7 @@ class TestUpdateLegacy(object):
         storage.legacy_update_annotation.assert_called_once_with(
             mock_request,
             legacy_annotation.id,
-            schemas.LegacyUpdateAnnotationSchema.return_value.validate\
-                .return_value)
+            schemas.LegacyUpdateAnnotationSchema.return_value.validate.return_value)
 
     def test_it_inits_an_AnnotationEvent(self,
                                          AnnotationEvent,
@@ -594,8 +592,7 @@ class TestUpdate(object):
         storage.legacy_update_annotation.assert_called_once_with(
             mock_request,
             legacy_annotation.id,
-            schemas.LegacyUpdateAnnotationSchema.return_value.validate\
-                .return_value)
+            schemas.LegacyUpdateAnnotationSchema.return_value.validate.return_value)
 
     def test_it_inits_an_AnnotationEvent(self,
                                          AnnotationEvent,
