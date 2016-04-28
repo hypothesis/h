@@ -519,8 +519,7 @@ class TestLegacyCreateAnnotationSchema(object):
 @pytest.mark.usefixtures('AnnotationSchema')
 class TestCreateAnnotationSchema(object):
 
-    def test_it_passes_input_to_AnnotationSchema_validator(self,
-                                                           AnnotationSchema):
+    def test_it_passes_input_to_AnnotationSchema_validator(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
         schema.validate(mock.sentinel.input_data)
@@ -954,8 +953,7 @@ class TestLegacyUpdateAnnotationSchema(object):
 @pytest.mark.usefixtures('AnnotationSchema')
 class TestUpdateAnnotationSchema(object):
 
-    def test_it_calls_AnnotationSchema_validate(self,
-                                                AnnotationSchema):
+    def test_it_calls_AnnotationSchema_validate(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         schema.validate(mock.sentinel.input_data)
@@ -1272,7 +1270,7 @@ class TestUpdateAnnotationSchema(object):
         AnnotationSchema.return_value.validate.return_value = {}
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
-        appstruct = schema.validate({})
+        schema.validate({})
 
     def test_it_adds_extra_fields_into_the_extra_dict(self,
                                                       AnnotationSchema):
@@ -1284,9 +1282,7 @@ class TestUpdateAnnotationSchema(object):
 
         assert appstruct['extra'] == {'foo': 'bar', 'custom': 23}
 
-    def test_it_does_not_modify_extra_fields_if_none_are_sent(
-            self,
-            AnnotationSchema):
+    def test_it_does_not_modify_extra_fields_if_none_are_sent(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         appstruct = schema.validate({})

@@ -334,8 +334,7 @@ class TestCreate(object):
             AnnotationEvent.return_value)
 
     def test_it_returns_presented_annotation(self,
-                                             AnnotationJSONPresenter,
-                                             storage):
+                                             AnnotationJSONPresenter):
         request = self.mock_request()
 
         result = views.create(request)
@@ -434,7 +433,7 @@ class TestUpdateLegacy(object):
                                                 mock_request,
                                                 storage,
                                                 schemas):
-        schema = schemas.UpdateAnnotationSchema.return_value
+        schemas.UpdateAnnotationSchema.return_value
 
         views.update(mock.Mock(), mock_request)
 
@@ -502,7 +501,7 @@ class TestUpdateLegacy(object):
     def test_it_dictizes_the_presenter(self,
                                        AnnotationJSONPresenter,
                                        mock_request):
-        returned = views.update(mock.Mock(), mock_request)
+        views.update(mock.Mock(), mock_request)
 
         AnnotationJSONPresenter.return_value.asdict.assert_called_with()
 
@@ -563,6 +562,22 @@ class TestUpdate(object):
         views.update(annotation, mock_request)
 
         schema.validate.assert_called_once_with(mock_request.json_body)
+
+    def test_it_calls_update_annotation(self,
+                                        mock_request,
+                                        storage,
+                                        schemas):
+        annotation = mock.Mock()
+        schema = schemas.UpdateAnnotationSchema.return_value
+        schema.validate.return_value = mock.sentinel.validated_data
+
+        views.update(annotation, mock_request)
+
+        storage.update_annotation.assert_called_once_with(
+            mock_request.db,
+            annotation.id,
+            mock.sentinel.validated_data
+        )
 
     def test_it_inits_the_legacy_schema(self, elastic, mock_request, schemas):
         legacy_annotation = elastic.Annotation.fetch.return_value = mock.Mock()
