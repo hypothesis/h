@@ -138,12 +138,12 @@ def update_document_metadata(session,
     :param annotation: the annotation that the document metadata comes from
     :type annotation: h.api.models.Annotation
 
-    :param document_meta_dicts: the document metadata dicts that the client
-        posted with the annotation, validated
+    :param document_meta_dicts: the document metadata dicts that were derived
+        by validation from the "document" dict that the client posted
     :type document_meta_dicts: list of dicts
 
-    :param document_uri_dicts: the document URI dicts that the client
-        posted with the annotation, validated
+    :param document_uri_dicts: the document URI dicts that were derived by
+        validation from the "document" dict that the client posted
     :type document_uri_dicts: list of dicts
 
     """
