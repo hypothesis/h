@@ -1,4 +1,5 @@
 baseURI = require('document-base-uri')
+classnames = require('classnames')
 extend = require('extend')
 raf = require('raf')
 scrollIntoView = require('scroll-into-view')
@@ -6,6 +7,7 @@ scrollIntoView = require('scroll-into-view')
 Annotator = require('annotator')
 $ = Annotator.$
 
+adder = require('./adder')
 highlighter = require('./highlighter')
 rangeUtil = require('./range-util')
 
@@ -41,22 +43,12 @@ module.exports = class Guest extends Annotator
   visibleHighlights: false
 
   html: extend {}, Annotator::html,
-    adder: '''
-      <div class="annotator-adder">
-        <div class="annotator-adder-actions">
-          <button class="annotator-adder-actions__button h-icon-annotate" data-action="comment">
-            <span class="annotator-adder-actions__label" data-action="comment">Annotate</span>
-          </button>
-          <button class="annotator-adder-actions__button h-icon-highlight" data-action="highlight">
-            <span class="annotator-adder-actions__label" data-action="highlight">Highlight</span>
-          </button>
-        </div>
-      </div>
-    '''
+    adder: adder.template()
 
   constructor: (element, options) ->
     super
 
+    this.adderCtrl = new adder.Adder(@adder)
     this.anchors = []
 
     cfOptions =
@@ -341,11 +333,6 @@ module.exports = class Guest extends Annotator
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('focusAnnotations', tags)
 
-  showAdder: (position) ->
-    @adder
-      .css(position)
-      .show()
-
   onSuccessfulSelection: (event, immediate) ->
     unless event?
       throw "Called onSuccessfulSelection without an event!"
@@ -366,11 +353,12 @@ module.exports = class Guest extends Annotator
     else
       # Show the adder button
       selection = Annotator.Util.getGlobal().getSelection()
-      this.showAdder(rangeUtil.selectionEndPosition(selection))
+      this.adderCtrl.showAt(rangeUtil.selectionEndPosition(selection),
+                            adder.ARROW_POINTING_DOWN)
     true
 
   onFailedSelection: (event) ->
-    @adder.hide()
+    this.adderCtrl.hide()
     @selectedRanges = []
 
     Annotator.$('.annotator-toolbar .h-icon-annotate')
@@ -435,7 +423,7 @@ module.exports = class Guest extends Annotator
   onAdderClick: (event) ->
     event.preventDefault?()
     event.stopPropagation?()
-    @adder.hide()
+    this.adderCtrl.hide()
     switch $(event.target).data('action')
       when 'highlight'
         this.setVisibleHighlights true
