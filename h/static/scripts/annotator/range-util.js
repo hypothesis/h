@@ -116,12 +116,13 @@ function getTextBoundingBoxes(range) {
 }
 
 /**
- * Returns the rectangle for the line of text containing the focus point
- * of a Selection.
+ * Returns the rectangle, in document coordinates, for the line of text
+ * containing the focus point of a Selection.
+ *
+ * Returns null if the selection is empty.
  *
  * @param {Selection} selection
- * @return {Object?} A rect containing the coordinates in the document of the
- *         line of text containing the focus point of the selection.
+ * @return {Rect?}
  */
 function selectionFocusRect(selection) {
   if (selection.isCollapsed) {

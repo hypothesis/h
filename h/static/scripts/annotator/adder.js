@@ -9,14 +9,12 @@ var classnames = require('classnames');
 var ARROW_POINTING_DOWN = 1;
 
 /**
- * Show the adder above the selection with an arrow pointing down at the
+ * Show the adder above the selection with an arrow pointing up at the
  * selected text.
  */
 var ARROW_POINTING_UP = 2;
 
-/**
- * Returns the HTML template for the adder.
- */
+/** Returns the HTML template for the adder. */
 function template() {
   return require('./adder.html');
 }
@@ -25,20 +23,20 @@ function toPx(pixels) {
   return pixels.toString() + 'px';
 }
 
+var ARROW_HEIGHT = 10;
+
+// The preferred gap between the end of the text selection and the adder's
+// arrow position.
+var ARROW_H_MARGIN = 20;
+
 /**
  * Controller for the 'adder' toolbar which appears next to the selection
  * and provides controls for the user to create new annotations.
  *
- * @param {JQuery} element - jQuery element for the adder.
+ * @param {Element} element - DOM element for the adder, created from template()
  */
 function Adder(element) {
   this.element = element;
-
-  var ARROW_HEIGHT = 10;
-
-  // The preferred gap between the end of the text selection and the adder's
-  // arrow position.
-  var ARROW_H_MARGIN = 20;
 
   var view = element.ownerDocument.defaultView;
 
@@ -68,12 +66,12 @@ function Adder(element) {
    * @param {Rect} targetRect - The rect of text to target, in document
    *        coordinates.
    * @param {boolean} isSelectionBackwards - True if the selection was made
-   *        backwards, such that the focus point is at the left edge of
-   *        `targetRect`.
+   *        backwards, such that the focus point is mosty likely at the top-left
+   *        edge of `targetRect`.
    */
   this.target = function (targetRect, isSelectionBackwards) {
     // Set the initial arrow direction based on whether the selection was made
-    // upwards or downwards.
+    // forwards/upwards or downwards/backwards.
     var arrowDirection;
     if (isSelectionBackwards) {
       arrowDirection = ARROW_POINTING_DOWN;
@@ -92,11 +90,11 @@ function Adder(element) {
       left = targetRect.left + targetRect.width - width() / 2 - hMargin;
     }
 
-    // Flip arrow direction if adder would appear above the top or below
-    // the bottom of the page.
+    // Flip arrow direction if adder would appear above the top or below the
+    // bottom of the viewport.
     //
-    // Note: `pageYOffset` is used instead of `scrollY` here for
-    // IE compatibility
+    // Note: `pageYOffset` is used instead of `scrollY` here for IE
+    // compatibility
     if (targetRect.top - height() < view.pageYOffset &&
         arrowDirection === ARROW_POINTING_DOWN) {
       arrowDirection = ARROW_POINTING_UP;
@@ -110,7 +108,7 @@ function Adder(element) {
       top = targetRect.top - height() - ARROW_HEIGHT;
     }
 
-    // Constrain the adder to the viewport
+    // Constrain the adder to the viewport.
     left = Math.max(left, view.pageXOffset);
     left = Math.min(left, view.pageXOffset + view.innerWidth - width());
 

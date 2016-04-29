@@ -1,5 +1,4 @@
 baseURI = require('document-base-uri')
-classnames = require('classnames')
 extend = require('extend')
 raf = require('raf')
 scrollIntoView = require('scroll-into-view')
