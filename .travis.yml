@@ -32,8 +32,8 @@ matrix:
       addons:
         artifacts:
           paths:
-            # Upload all built zipfiles (browser extensions)
-            - $(ls build/*.zip | tr "\n" ":")
+            # Upload all built extension packages
+            - $(ls build/*.zip build/*.xpi | tr "\n" ":")
       before_install:
         # Unfortunately it seems to be impossible to call `nvm install` from an
         # external script on Travis, so we have to inline this one.
