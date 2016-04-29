@@ -1,8 +1,6 @@
 .annotator-adder {
   box-sizing: border-box;
   direction: ltr;
-  margin-top: -60px;
-  margin-left: -65px;
   position: absolute;
   background: $white;
   border: 1px solid rgba(0,0,0,0.20);
@@ -30,6 +28,11 @@
 .annotator-adder--arrow-down:before {
   @include adder-arrow(45deg);
   bottom: -5px;
+}
+
+.annotator-adder--arrow-up:before {
+  @include adder-arrow(225deg);
+  top: -5px;
 }
 
 .annotator-adder-actions {

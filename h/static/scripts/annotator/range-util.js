@@ -116,13 +116,14 @@ function getTextBoundingBoxes(range) {
 }
 
 /**
- * Returns the coordinates of the end (ie. at the focus point) of the text in a
- * selection.
+ * Returns the rectangle for the line of text containing the focus point
+ * of a Selection.
  *
  * @param {Selection} selection
- * @return {Object?} The X and Y coordinates of the selection.
+ * @return {Object?} A rect containing the coordinates in the document of the
+ *         line of text containing the focus point of the selection.
  */
-function selectionEndPosition(selection) {
+function selectionFocusRect(selection) {
   if (selection.isCollapsed) {
     return null;
   }
@@ -130,14 +131,15 @@ function selectionEndPosition(selection) {
   if (textBoxes.length === 0) {
     return null;
   }
+
   if (isSelectionBackwards(selection)) {
-    return {top: textBoxes[0].top, left: textBoxes[0].left};
+    return textBoxes[0];
   } else {
-    var lastBox = textBoxes[textBoxes.length - 1];
-    return {top: lastBox.top, left: lastBox.left + lastBox.width};
+    return textBoxes[textBoxes.length - 1];
   }
 }
 
 module.exports = {
-  selectionEndPosition: selectionEndPosition,
+  isSelectionBackwards: isSelectionBackwards,
+  selectionFocusRect: selectionFocusRect,
 };

@@ -11,7 +11,7 @@ describe('range-util', function () {
     selection.collapse();
 
     testNode = document.createElement('span');
-    testNode.innerHTML = 'Some text content here';
+    testNode.innerHTML = 'Some text <br>content here';
     document.body.appendChild(testNode);
   });
 
@@ -25,28 +25,30 @@ describe('range-util', function () {
     selection.addRange(range);
   }
 
-  describe('#selectionEndPosition', function () {
+  describe('#selectionFocusRect', function () {
     it('returns null if the selection is empty', function () {
-      assert.isNull(rangeUtil.selectionEndPosition(selection));
+      assert.isNull(rangeUtil.selectionFocusRect(selection));
     });
 
     it('returns a point if the selection is not empty', function () {
       selectNode(testNode);
-      assert.ok(rangeUtil.selectionEndPosition(selection));
+      assert.ok(rangeUtil.selectionFocusRect(selection));
     });
 
-    it('returns the top-left corner if the selection is backwards', function () {
+    it('returns the first line\'s rect if the selection is backwards', function () {
       selectNode(testNode);
       selection.collapseToEnd();
       selection.extend(testNode, 0);
-      var pos = rangeUtil.selectionEndPosition(selection);
-      assert.equal(pos.left, testNode.offsetLeft);
+      var rect = rangeUtil.selectionFocusRect(selection);
+      assert.equal(rect.left, testNode.offsetLeft);
+      assert.equal(rect.top, testNode.offsetTop);
     });
 
-    it('returns the bottom-right corner if the selection is forwards', function () {
+    it('returns the last line\'s rect if the selection is forwards', function () {
       selectNode(testNode);
-      var pos = rangeUtil.selectionEndPosition(selection);
-      assert.equal(pos.left, testNode.offsetLeft + testNode.offsetWidth);
+      var rect = rangeUtil.selectionFocusRect(selection);
+      assert.equal(rect.left, testNode.offsetLeft);
+      assert.equal(rect.top + rect.height, testNode.offsetTop + testNode.offsetHeight);
     });
   });
 });

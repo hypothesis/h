@@ -48,7 +48,7 @@ module.exports = class Guest extends Annotator
   constructor: (element, options) ->
     super
 
-    this.adderCtrl = new adder.Adder(@adder)
+    this.adderCtrl = new adder.Adder(@adder[0])
     this.anchors = []
 
     cfOptions =
@@ -353,8 +353,10 @@ module.exports = class Guest extends Annotator
     else
       # Show the adder button
       selection = Annotator.Util.getGlobal().getSelection()
-      this.adderCtrl.showAt(rangeUtil.selectionEndPosition(selection),
-                            adder.ARROW_POINTING_DOWN)
+      isBackwards = rangeUtil.isSelectionBackwards(selection)
+      focusRect = rangeUtil.selectionFocusRect(selection)
+      {left, top, arrowDirection} = this.adderCtrl.target(focusRect, isBackwards)
+      this.adderCtrl.showAt(left, top, arrowDirection)
     true
 
   onFailedSelection: (event) ->
