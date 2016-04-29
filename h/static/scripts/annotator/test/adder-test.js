@@ -32,9 +32,17 @@ describe('adder', function () {
   }
 
   describe('#target', function () {
-    it('positions the adder above the selection', function () {
+    it('positions the adder below the selection if the selection is forwards', function () {
       var target = adderCtrl.target(rect(100,200,100,20), false);
-      assert.isAbove(target.top, 100);
+      assert.isAbove(target.top, 220);
+      assert.isAbove(target.left, 100);
+      assert.isBelow(target.left, 200);
+      assert.equal(target.arrowDirection, adder.ARROW_POINTING_UP);
+    });
+
+    it('positions the adder above the selection if the selection is backwards', function () {
+      var target = adderCtrl.target(rect(100,200,100,20), true);
+      assert.isBelow(target.top, 200);
       assert.isAbove(target.left, 100);
       assert.isBelow(target.left, 200);
       assert.equal(target.arrowDirection, adder.ARROW_POINTING_DOWN);

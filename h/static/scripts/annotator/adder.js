@@ -72,8 +72,14 @@ function Adder(element) {
    *        `targetRect`.
    */
   this.target = function (targetRect, isSelectionBackwards) {
-    // Set position and arrow direction depending on available space
-    var arrowDirection = ARROW_POINTING_DOWN;
+    // Set the initial arrow direction based on whether the selection was made
+    // upwards or downwards.
+    var arrowDirection;
+    if (isSelectionBackwards) {
+      arrowDirection = ARROW_POINTING_DOWN;
+    } else {
+      arrowDirection = ARROW_POINTING_UP;
+    }
     var top;
     var left;
 
@@ -86,11 +92,16 @@ function Adder(element) {
       left = targetRect.left + targetRect.width - width() / 2 - hMargin;
     }
 
+    // Flip arrow direction if adder would appear above the top or below
+    // the bottom of the page.
+    //
     // Note: `pageYOffset` is used instead of `scrollY` here for
     // IE compatibility
     if (targetRect.top - height() < view.pageYOffset &&
         arrowDirection === ARROW_POINTING_DOWN) {
       arrowDirection = ARROW_POINTING_UP;
+    } else if (targetRect.top + height() > view.pageYOffset + view.innerHeight) {
+      arrowDirection = ARROW_POINTING_DOWN;
     }
 
     if (arrowDirection === ARROW_POINTING_UP) {
