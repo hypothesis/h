@@ -13,7 +13,10 @@
   "applications": {
     "gecko": {
       "id": "firefox@hypothes.is",
-      "strict_min_version": "45.0.0"
+
+      {# Firefox v48 is required for
+         https://bugzilla.mozilla.org/show_bug.cgi?id=1210583 #}
+      "strict_min_version": "48.0.0"
     }
   },
   {% endif %}

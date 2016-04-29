@@ -141,9 +141,10 @@ def settings_dict(service_url, api_url, sentry_public_dsn):
 
 def build_extension(args):
     """
-    Build the Chrome extension. You can supply the base URL of an h
-    installation with which this extension will communicate, such as
-    "http://localhost:5000" when developing locally or
+    Build the Chrome or Firefox extensions.
+
+    You can supply the base URL of an h installation with which this extension
+    will communicate, such as "http://localhost:5000" when developing locally or
     "https://hypothes.is" to talk to the production Hypothesis application.
     """
     service_url = args.service_url
