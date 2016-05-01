@@ -8,7 +8,7 @@ else that you think will help.
 We ask only that you follow a few simple guidelines for contributing:
 
 1. Be courteous and respectful of others. Read our `communication guidelines
-   <https://h.readthedocs.org/en/latest/hacking/communications.html>`_.
+   <https://h.readthedocs.io/en/latest/hacking/communications.html>`_.
 
 2. If you find a bug, please report it in `a GitHub issue
    <https://github.com/hypothesis/h/issues>`_, but do check first that no-one
@@ -30,11 +30,11 @@ We ask only that you follow a few simple guidelines for contributing:
 
 4. If you haven't already done so (and you're submitting substantial changes to
    the code or documentation), please ensure you sign our `Contributor License
-   Agreement <https://h.readthedocs.org/en/latest/hacking/cla.html>`_.
+   Agreement <https://h.readthedocs.io/en/latest/hacking/cla.html>`_.
 
 Still reading?
 --------------
 
 If you're wondering about how to set up a development environment, how to build
 the documentation, or anything else, there's plenty more in our `Contributor's
-guide <https://h.readthedocs.org/en/latest/hacking/>`_.
+guide <https://h.readthedocs.io/en/latest/hacking/>`_.

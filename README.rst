@@ -39,7 +39,7 @@ Installation and deployment
 ---------------------------
 
 See the
-`Installation guide <https://h.readthedocs.org/en/latest/INSTALL.html>`_ for
+`Installation guide <https://h.readthedocs.io/en/latest/INSTALL.html>`_ for
 instructions on deploying h in a production environment.
 
 
@@ -65,7 +65,7 @@ started.
 .. _freenode: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
 .. _development mailing list: https://groups.google.com/a/list.hypothes.is/forum/#!forum/dev
-.. _Contributor's guide: https://h.readthedocs.org/en/latest/hacking/
+.. _Contributor's guide: https://h.readthedocs.io/en/latest/hacking/
 .. _New Contributor Friendly: https://github.com/hypothesis/h/issues?q=is%3Aopen+is%3Aissue+label%3A%22New+Contributor+Friendly%22
 
 

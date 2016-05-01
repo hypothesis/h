@@ -37,7 +37,7 @@ removed a SQLAlchemy ORM class, or added, removed or modified a
 migration script that can be used to upgrade the production database from the
 previous to your new schema.
 
-We use `Alembic <http://alembic.readthedocs.org/en/latest/>`_ to create and run
+We use `Alembic <https://alembic.readthedocs.io/en/latest/>`_ to create and run
 migration scripts. See the Alembic docs (and look at existing scripts in
 `h/migrations/versions <https://github.com/hypothesis/h/tree/master/h/migrations/versions>`_)
 for details, but the basic steps to create a new migration script for h are:
@@ -53,7 +53,7 @@ for details, but the basic steps to create a new migration script for h are:
 2. Edit the generated script, fill in the ``upgrade()`` and ``downgrade()``
    methods.
 
-   See http://alembic.readthedocs.org/en/latest/ops.html#ops for details.
+   See https://alembic.readthedocs.io/en/latest/ops.html#ops for details.
 
    .. note::
 
@@ -116,7 +116,7 @@ Troubleshooting Migration Scripts
 ---------------------------------------
 
 SQLite doesn't support ``ALTER TABLE``. To get around this, use
-`Alembic's batch mode <https://alembic.readthedocs.org/en/latest/batch.html>`_.
+`Alembic's batch mode <https://alembic.readthedocs.io/en/latest/batch.html>`_.
 
 
 Cannot add a NOT NULL column with default value NULL

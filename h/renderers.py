@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Taken from:
-# https://pyramid-cookbook.readthedocs.org/en/latest/templates/customrenderers.html
+# https://pyramid-cookbook.readthedocs.io/en/latest/templates/customrenderers.html
 # with minor modifications
 import unicodecsv as csv
 from h._compat import StringIO
