@@ -19,6 +19,7 @@ from h.api.models.document import Document
 from h.api.models.document import DocumentMeta
 from h.api.models.document import DocumentURI
 from h.api.models.document import merge_documents
+from h.api.models.document import update_document_metadata
 
 
 __all__ = (
