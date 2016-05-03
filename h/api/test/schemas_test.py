@@ -631,7 +631,7 @@ class TestCreateAnnotationSchema(object):
         assert appstruct['shared'] is True
         assert 'permissions' not in appstruct
 
-    def test_it_defaults_to_shared_if_no_permissions_object_sent(
+    def test_it_defaults_to_private_if_no_permissions_object_sent(
             self,
             AnnotationSchema):
         del AnnotationSchema.return_value.validate.return_value['permissions']
@@ -639,7 +639,7 @@ class TestCreateAnnotationSchema(object):
 
         appstruct = schema.validate({})
 
-        assert appstruct['shared'] is True
+        assert appstruct['shared'] is False
 
     def test_it_does_not_crash_if_data_contains_no_target(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())

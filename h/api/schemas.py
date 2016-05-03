@@ -211,7 +211,7 @@ class CreateAnnotationSchema(object):
             new_appstruct['shared'] = _shared(appstruct.pop('permissions'),
                                               new_appstruct['userid'])
         else:
-            new_appstruct['shared'] = True
+            new_appstruct['shared'] = False
 
         if 'target' in appstruct:  # Replies and page notes don't have targets.
             new_appstruct['target_selectors'] = _target_selectors(
