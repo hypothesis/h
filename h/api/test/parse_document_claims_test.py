@@ -375,7 +375,7 @@ class TestDocumentURISelfClaim(object):
                          'document_uri_self_claim')
 class TestDocumentURIsFromData(object):
 
-    def test_it_calls_document_uris_from_links(self, document_uris_from_links):
+    def test_it_gets_document_uris_from_links(self, document_uris_from_links):
         document_data = {
             'link': [
                 # In production these would be link dicts not strings.
@@ -413,7 +413,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_links.assert_called_once_with(
             [], claimant)
 
-    def test_it_calls_documents_uris_from_highwire_pdf(
+    def test_it_gets_documents_uris_from_highwire_pdf(
             self,
             document_uris_from_highwire_pdf):
         document_data = {
@@ -453,7 +453,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_highwire_pdf.assert_called_once_with(
             {}, claimant)
 
-    def test_it_calls_documents_uris_from_highwire_doi(
+    def test_it_gets_documents_uris_from_highwire_doi(
             self,
             document_uris_from_highwire_doi):
         document_data = {
@@ -493,8 +493,8 @@ class TestDocumentURIsFromData(object):
         document_uris_from_highwire_doi.assert_called_once_with(
             {}, claimant)
 
-    def test_it_calls_documents_uris_from_dc(self,
-                                             document_uris_from_dc):
+    def test_it_gets_documents_uris_from_dc(self,
+                                            document_uris_from_dc):
         document_data = {
             'dc': {
                 'identifier': [
@@ -531,7 +531,7 @@ class TestDocumentURIsFromData(object):
         document_uris_from_dc.assert_called_once_with(
             {}, claimant)
 
-    def test_it_calls_document_uri_self_claim(self, document_uri_self_claim):
+    def test_it_gets_self_claim_document_uris(self, document_uri_self_claim):
         claimant = 'http://example.com/claimant'
 
         document_uris = parse_document_claims.document_uris_from_data(
