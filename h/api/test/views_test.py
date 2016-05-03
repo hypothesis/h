@@ -136,7 +136,9 @@ class TestCreateLegacy(object):
         with pytest.raises(views.PayloadError):
             views.create(request)
 
-    def test_it_calls_legacy_create_annotation(self, storage, schemas):
+    def test_it_creates_the_annotation_in_legacy_storage(self,
+                                                         storage,
+                                                         schemas):
         request = self.mock_request()
         schema = schemas.LegacyCreateAnnotationSchema.return_value
         schema.validate.return_value = {'foo': 123}
@@ -146,7 +148,7 @@ class TestCreateLegacy(object):
         storage.legacy_create_annotation.assert_called_once_with(request,
                                                                  {'foo': 123})
 
-    def test_it_calls_validator(self, schemas, copy):
+    def test_it_validates_the_posted_data(self, schemas, copy):
         request = self.mock_request()
         copy.deepcopy.side_effect = lambda x: x
         schema = schemas.LegacyCreateAnnotationSchema.return_value
@@ -231,7 +233,7 @@ class TestCreate(object):
 
         schemas.CreateAnnotationSchema.assert_called_once_with(request)
 
-    def test_it_calls_schema_validate(self, copy, schemas):
+    def test_it_validates_the_posted_data(self, copy, schemas):
         """It should call validate() with a deep copy of json_body."""
         copy.deepcopy.side_effect = [mock.sentinel.first_copy,
                                      mock.sentinel.second_copy]
@@ -243,7 +245,7 @@ class TestCreate(object):
         schemas.CreateAnnotationSchema.return_value.validate\
             .assert_called_once_with(mock.sentinel.first_copy)
 
-    def test_it_calls_create_annotation(self, storage, schemas):
+    def test_it_creates_the_annotation_in_storage(self, storage, schemas):
         request = self.mock_request()
         schema = schemas.CreateAnnotationSchema.return_value
 
@@ -259,7 +261,9 @@ class TestCreate(object):
 
         schemas.LegacyCreateAnnotationSchema.assert_called_once_with(request)
 
-    def test_it_calls_legacy_schema_validate(self, copy, schemas):
+    def test_it_validates_the_posted_data_with_the_legacy_schema(self,
+                                                                 copy,
+                                                                 schemas):
         """It should call validate() with a deep copy of json_body."""
         copy.deepcopy.side_effect = [mock.sentinel.first_copy,
                                      mock.sentinel.second_copy]
@@ -271,7 +275,9 @@ class TestCreate(object):
         schemas.LegacyCreateAnnotationSchema.return_value.validate\
             .assert_called_once_with(mock.sentinel.second_copy)
 
-    def test_it_calls_legacy_create_annotation(self, storage, schemas):
+    def test_it_creates_the_annotation_in_legacy_storage(self,
+                                                         storage,
+                                                         schemas):
         """It should call storage.create_annotation() appropriately."""
         request = self.mock_request()
         schema = schemas.LegacyCreateAnnotationSchema.return_value
@@ -432,7 +438,11 @@ class TestUpdateLegacy(object):
         schemas.LegacyUpdateAnnotationSchema.assert_called_once_with(
             mock_request, legacy_annotation)
 
-    def test_it_calls_legacy_validate(self, copy, mock_request, schemas):
+    def test_it_validates_the_posted_data_with_the_legacy_schema(
+            self,
+            copy,
+            mock_request,
+            schemas):
         copy.deepcopy.side_effect = lambda x: x
         legacy_schema = schemas.LegacyUpdateAnnotationSchema.return_value
 
@@ -440,11 +450,11 @@ class TestUpdateLegacy(object):
 
         legacy_schema.validate.assert_called_once_with(mock_request.json_body)
 
-    def test_it_calls_legacy_update_annotation(self,
-                                               elastic,
-                                               mock_request,
-                                               schemas,
-                                               storage):
+    def test_it_updates_the_annotation_in_legacy_storage(self,
+                                                         elastic,
+                                                         mock_request,
+                                                         schemas,
+                                                         storage):
         legacy_annotation = mock.Mock()
 
         views.update(legacy_annotation, mock_request)
@@ -467,7 +477,7 @@ class TestUpdateLegacy(object):
             AnnotationJSONPresenter.return_value.asdict.return_value,
             'update')
 
-    def test_it_calls_notify_after_commit(self, AnnotationEvent, mock_request):
+    def test_it_fires_the_AnnotationEvent(self, AnnotationEvent, mock_request):
         views.update(mock.Mock(), mock_request)
 
         mock_request.notify_after_commit.assert_called_once_with(
@@ -540,7 +550,7 @@ class TestUpdate(object):
             mock_request,
             annotation.target_uri)
 
-    def test_it_calls_validate(self, copy, mock_request, schemas):
+    def test_it_validates_the_posted_data(self, copy, mock_request, schemas):
         annotation = mock.Mock()
         copy.deepcopy.side_effect = lambda x: x
         schema = schemas.UpdateAnnotationSchema.return_value
@@ -549,10 +559,10 @@ class TestUpdate(object):
 
         schema.validate.assert_called_once_with(mock_request.json_body)
 
-    def test_it_calls_update_annotation(self,
-                                        mock_request,
-                                        storage,
-                                        schemas):
+    def test_it_updates_the_annotation_in_storage(self,
+                                                  mock_request,
+                                                  storage,
+                                                  schemas):
         annotation = mock.Mock()
         schema = schemas.UpdateAnnotationSchema.return_value
         schema.validate.return_value = mock.sentinel.validated_data
@@ -573,7 +583,11 @@ class TestUpdate(object):
         schemas.LegacyUpdateAnnotationSchema.assert_called_once_with(
             mock_request, legacy_annotation)
 
-    def test_it_calls_legacy_validate(self, copy, mock_request, schemas):
+    def test_it_validates_the_posted_data_with_the_legacy_schema(
+            self,
+            copy,
+            mock_request,
+            schemas):
         copy.deepcopy.side_effect = lambda x: x
         legacy_schema = schemas.LegacyUpdateAnnotationSchema.return_value
 
@@ -581,10 +595,10 @@ class TestUpdate(object):
 
         legacy_schema.validate.assert_called_once_with(mock_request.json_body)
 
-    def test_it_calls_legacy_update_annotation(self,
-                                               mock_request,
-                                               schemas,
-                                               storage):
+    def test_it_updates_the_annotation_in_legacy_storage(self,
+                                                         mock_request,
+                                                         schemas,
+                                                         storage):
         legacy_annotation = storage.fetch_annotation.return_value = mock.Mock()
 
         views.update(mock.Mock(), mock_request)
@@ -607,7 +621,7 @@ class TestUpdate(object):
             AnnotationJSONPresenter.return_value.asdict.return_value,
             'update')
 
-    def test_it_calls_notify(self, AnnotationEvent, mock_request):
+    def test_it_fires_the_AnnotationEvent(self, AnnotationEvent, mock_request):
         views.update(mock.Mock(), mock_request)
 
         mock_request.notify_after_commit.assert_called_once_with(
@@ -647,7 +661,7 @@ class TestUpdate(object):
                          'storage')
 class TestDelete(object):
 
-    def test_it_calls_delete_annotation(self, storage):
+    def test_it_deletes_then_annotation_from_storage(self, storage):
         annotation = mock.Mock()
         request = mock.Mock()
 
@@ -656,7 +670,9 @@ class TestDelete(object):
         storage.delete_annotation.assert_called_once_with(request,
                                                           annotation.id)
 
-    def test_it_calls_notify_with_an_event(self, AnnotationEvent, AnnotationJSONPresenter):
+    def test_it_inits_and_fires_an_AnnotationEvent(self,
+                                                   AnnotationEvent,
+                                                   AnnotationJSONPresenter):
         annotation = mock.Mock()
         request = mock.Mock()
         event = AnnotationEvent.return_value
