@@ -214,33 +214,39 @@ def read_jsonld(annotation, request):
             permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
-    json_payload = _json_payload(request)
-
-    legacy_annotation = elastic.Annotation.fetch(annotation.id)
-
-    # Validate the annotation for, and update the annotation in, PostgreSQL.
     if request.feature('postgres'):
-        schema = schemas.UpdateAnnotationSchema(request, annotation.target_uri)
-        appstruct = schema.validate(copy.deepcopy(json_payload))
-        annotation = storage.update_annotation(request.db,
-                                               annotation.id,
-                                               appstruct)
+        legacy_annotation = elastic.Annotation.fetch(annotation.id)
+        _update_elastic(legacy_annotation, request, notify=False)
+        return _update_postgres(annotation, request)
+    return _update_elastic(annotation, request, notify=True)
 
-    # Validate the annotation for, and update the annotation in, Elasticsearch.
-    legacy_schema = schemas.LegacyUpdateAnnotationSchema(
-        request, annotation=legacy_annotation)
-    legacy_appstruct = legacy_schema.validate(copy.deepcopy(json_payload))
-    legacy_annotation = storage.legacy_update_annotation(request,
-                                                         legacy_annotation.id,
-                                                         legacy_appstruct)
 
-    if request.feature('postgres'):
+def _update_postgres(annotation, request):
+    schema = schemas.UpdateAnnotationSchema(request, annotation.target_uri)
+    appstruct = schema.validate(copy.deepcopy(_json_payload(request)))
+
+    annotation = storage.update_annotation(request.db,
+                                           annotation.id,
+                                           appstruct)
+
+    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+
+    _publish_annotation_event(request, annotation_dict, 'update')
+
+    return annotation_dict
+
+
+def _update_elastic(annotation, request, notify):
+    schema = schemas.LegacyUpdateAnnotationSchema(request,
+                                                  annotation=annotation)
+    appstruct = schema.validate(copy.deepcopy(_json_payload(request)))
+
+    annotation = storage.legacy_update_annotation(request,
+                                                  annotation.id,
+                                                  appstruct)
+
+    if notify:
         annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-        _publish_annotation_event(request, annotation_dict, 'update')
-        return annotation_dict
-    else:
-        annotation_dict = (
-            AnnotationJSONPresenter(request, legacy_annotation).asdict())
         _publish_annotation_event(request, annotation_dict, 'update')
         return annotation_dict
 

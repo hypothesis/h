@@ -409,13 +409,6 @@ class TestUpdateLegacy(object):
         with pytest.raises(views.PayloadError):
             views.update(mock.Mock(), mock_request)
 
-    def test_it_fetches_the_legacy_annotation(self, elastic, mock_request):
-        annotation = mock.Mock()
-
-        views.update(annotation, mock_request)
-
-        elastic.Annotation.fetch.assert_called_once_with(annotation.id)
-
     def test_it_does_not_init_the_schema(self, mock_request, schemas):
         views.update(mock.Mock(), mock_request)
 
@@ -452,9 +445,9 @@ class TestUpdateLegacy(object):
                                                mock_request,
                                                schemas,
                                                storage):
-        legacy_annotation = elastic.Annotation.fetch.return_value = mock.Mock()
+        legacy_annotation = mock.Mock()
 
-        views.update(mock.Mock(), mock_request)
+        views.update(legacy_annotation, mock_request)
 
         storage.legacy_update_annotation.assert_called_once_with(
             mock_request,
