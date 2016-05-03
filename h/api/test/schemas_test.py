@@ -637,7 +637,7 @@ class TestCreateAnnotationSchema(object):
 
         appstruct = schema.validate({})
 
-        assert appstruct['shared'] is True
+        assert appstruct['shared'] is False
 
     def test_it_does_not_crash_if_data_contains_no_target(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
