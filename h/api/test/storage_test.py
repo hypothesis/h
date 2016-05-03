@@ -165,7 +165,7 @@ class TestLegacyCreateAnnotation(object):
 
         models.elastic.Annotation.assert_called_once_with(data)
 
-    def test_it_calls_partial(self, partial):
+    def test_it_creates_a_fetcher_function(self, partial):
         request = self.mock_request()
 
         storage.legacy_create_annotation(request, self.annotation_data())
@@ -173,15 +173,18 @@ class TestLegacyCreateAnnotation(object):
         partial.assert_called_once_with(
             storage.fetch_annotation, request, _postgres=False)
 
-    def test_it_calls_prepare(self, models, partial, transform):
+    def test_it_prepares_the_annotation_for_indexing(self,
+                                                     models,
+                                                     partial,
+                                                     transform):
         storage.legacy_create_annotation(self.mock_request(),
                                          self.annotation_data())
         transform.prepare.assert_called_once_with(
             models.elastic.Annotation.return_value, partial.return_value)
 
-    def test_it_inits_AnnotationTransformEvent(self,
-                                               AnnotationTransformEvent,
-                                               models):
+    def test_it_inits_an_AnnotationTransformEvent(self,
+                                                  AnnotationTransformEvent,
+                                                  models):
         request = self.mock_request()
 
         storage.legacy_create_annotation(request, self.annotation_data())
@@ -189,7 +192,8 @@ class TestLegacyCreateAnnotation(object):
         AnnotationTransformEvent.assert_called_once_with(
             request, models.elastic.Annotation.return_value)
 
-    def test_it_calls_notify(self, AnnotationTransformEvent):
+    def test_it_fires_the_AnnotationBeforeSaveEvent(self,
+                                                    AnnotationTransformEvent):
         request = self.mock_request()
 
         storage.legacy_create_annotation(request, self.annotation_data())
@@ -197,7 +201,7 @@ class TestLegacyCreateAnnotation(object):
         request.registry.notify.assert_called_once_with(
             AnnotationTransformEvent.return_value)
 
-    def test_it_calls_annotation_save(self, models):
+    def test_it_saves_the_annotation_to_Elasticsearch(self, models):
         storage.legacy_create_annotation(self.mock_request(),
                                          self.annotation_data())
 
@@ -232,7 +236,7 @@ class TestLegacyUpdateAnnotation(object):
         models.elastic.Annotation.fetch.assert_called_once_with(
             'test_annotation_id')
 
-    def test_it_calls_update(self, models):
+    def test_it_updates_the_annotation_object(self, models):
         storage.legacy_update_annotation(DummyRequest(),
                                          'test_annotation_id',
                                          mock.sentinel.data)
@@ -240,7 +244,7 @@ class TestLegacyUpdateAnnotation(object):
         models.elastic.Annotation.fetch.return_value.update\
             .assert_called_once_with(mock.sentinel.data)
 
-    def test_it_calls_partial(self, partial):
+    def test_it_creates_a_fetcher_function(self, partial):
         request = DummyRequest()
 
         storage.legacy_update_annotation(request, 'test_annotation_id', {})
@@ -248,7 +252,10 @@ class TestLegacyUpdateAnnotation(object):
         partial.assert_called_once_with(
             storage.fetch_annotation, request, _postgres=False)
 
-    def test_it_calls_prepare(self, models, partial, transform):
+    def test_it_prepares_the_annotation_for_indexing(self,
+                                                     models,
+                                                     partial,
+                                                     transform):
         storage.legacy_update_annotation(DummyRequest(),
                                          'test_annotation_id',
                                          {})
@@ -256,9 +263,9 @@ class TestLegacyUpdateAnnotation(object):
         transform.prepare.assert_called_once_with(
             models.elastic.Annotation.fetch.return_value, partial.return_value)
 
-    def test_it_inits_AnnotationBeforeSaveEvent(self,
-                                                AnnotationTransformEvent,
-                                                models):
+    def test_it_inits_an_AnnotationTransformEvent(self,
+                                                  AnnotationTransformEvent,
+                                                  models):
         request = DummyRequest()
 
         storage.legacy_update_annotation(request, 'test_annotation_id', {})
@@ -266,7 +273,8 @@ class TestLegacyUpdateAnnotation(object):
         AnnotationTransformEvent.assert_called_once_with(
             request, models.elastic.Annotation.fetch.return_value)
 
-    def test_it_calls_notify(self, AnnotationTransformEvent):
+    def test_it_fires_the_AnnotationTransformEvent(self,
+                                                   AnnotationTransformEvent):
         request = DummyRequest()
         request.registry.notify = mock.Mock()
 
@@ -277,7 +285,7 @@ class TestLegacyUpdateAnnotation(object):
         request.registry.notify.assert_called_once_with(
             AnnotationTransformEvent.return_value)
 
-    def test_it_calls_save(self, models):
+    def test_it_saves_the_annotation_to_Elasticsearch(self, models):
         storage.legacy_update_annotation(DummyRequest(),
                                          'test_annotation_id',
                                          {})
@@ -377,9 +385,10 @@ class TestCreateAnnotation(object):
 
         request.db.add.assert_called_once_with(models.Annotation.return_value)
 
-    def test_it_calls_update_document_metadata(self,
-                                               models,
-                                               update_document_metadata):
+    def test_it_updates_the_document_metadata_from_the_annotation(
+            self,
+            models,
+            update_document_metadata):
         request = self.mock_request()
         annotation_data = self.annotation_data()
         annotation_data['document']['document_meta_dicts'] = (
@@ -455,7 +464,7 @@ class TestCreateAnnotation(object):
                          'update_document_metadata')
 class TestUpdateAnnotation(object):
 
-    def test_it_calls_get(self, annotation_data, models):
+    def test_it_gets_the_annotation_model(self, annotation_data, models):
         storage.update_annotation(mock.Mock(),
                                   'test_annotation_id',
                                   annotation_data)
@@ -523,10 +532,11 @@ class TestUpdateAnnotation(object):
 
         assert annotation.extra == {'one': 1, 'two': 2}
 
-    def test_it_calls_update_document_metadata(self,
-                                               annotation_data,
-                                               models,
-                                               update_document_metadata):
+    def test_it_updates_the_document_metadata_from_the_annotation(
+            self,
+            annotation_data,
+            models,
+            update_document_metadata):
         annotation = models.Annotation.query.get.return_value
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
