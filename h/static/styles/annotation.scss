@@ -17,7 +17,7 @@
 $annotation-card-left-padding: 10px;
 
 .annotation-card {
-  box-shadow: 0px 1px 1px 1px rgba(0, 0, 0, 0.10);
+  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.10);
   border-radius: 2px;
   padding: $layout-h-margin;
   background: $white;
@@ -157,6 +157,8 @@ $annotation-card-left-padding: 10px;
   @include quote;
   @include font-normal;
   color: $grey-4;
+  font-family: sans-serif;
+
   del {
     background:#ffe6e6;
   }

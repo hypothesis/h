@@ -21,10 +21,9 @@
   border-left: 3px solid $gray-lighter;
 }
 
-//NOISE///////////
-//Provides the noise background
-@mixin noise-background {
-  background: url("../images/noise_1.png");
+//Provides the grey-background
+@mixin grey-background {
+  background: $grey-2;
 }
 
 .annotator-hide {
