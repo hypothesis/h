@@ -437,10 +437,10 @@ class TestMergeDocuments(object):
 
 class TestUpdateDocumentMetadata(object):
 
-    def test_it_calls_find_or_create_by_uris(self,
-                                             annotation,
-                                             Document,
-                                             session):
+    def test_it_uses_the_target_uri_to_get_the_document(self,
+                                                        annotation,
+                                                        Document,
+                                                        session):
         document_uri_dicts = [
             {
                 'uri': 'http://example.com/example_1',
@@ -479,11 +479,12 @@ class TestUpdateDocumentMetadata(object):
             updated=annotation.updated,
         )
 
-    def test_it_calls_merge_documents(self,
-                                      annotation,
-                                      Document,
-                                      merge_documents,
-                                      session):
+    def test_if_there_are_multiple_documents_it_merges_them_into_one(
+            self,
+            annotation,
+            Document,
+            merge_documents,
+            session):
         """If it finds more than one document it calls merge_documents()."""
         Document.find_or_create_by_uris.return_value = mock.Mock(
             count=mock.Mock(return_value=3))
@@ -520,12 +521,12 @@ class TestUpdateDocumentMetadata(object):
 
         assert document_.updated == annotation.updated
 
-    def test_it_calls_create_or_update_document_uri(
-            self,
-            session,
-            annotation,
-            Document,
-            create_or_update_document_uri):
+    def test_it_saves_all_the_document_uris(self,
+                                            session,
+                                            annotation,
+                                            Document,
+                                            create_or_update_document_uri):
+        """It creates or updates a DocumentURI for each document URI dict."""
         Document.find_or_create_by_uris.return_value.count.return_value = 1
 
         document_uri_dicts = [
@@ -564,12 +565,12 @@ class TestUpdateDocumentMetadata(object):
                 **doc_uri_dict
             )
 
-    def test_it_calls_create_or_update_document_meta(
-            self,
-            annotation,
-            create_or_update_document_meta,
-            Document,
-            session):
+    def test_it_saves_all_the_document_metas(self,
+                                             annotation,
+                                             create_or_update_document_meta,
+                                             Document,
+                                             session):
+        """It creates or updates a DocumentMeta for each document meta dict."""
         Document.find_or_create_by_uris.return_value.count\
             .return_value = 1
 
