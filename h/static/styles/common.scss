@@ -1,6 +1,3 @@
-@import 'compass/layout/stretching';
-@import 'compass/typography/text/force-wrap';
-
 @import './base';
 @import './forms';
 @import './grid';
@@ -55,7 +52,7 @@ html {
 
 //Candidate for cleanup
 .btn-link {
-  @include box-shadow(none);
+  box-shadow: none;
   @include reset-box-model;
   background: none;
   background-color: transparent;
@@ -191,7 +188,7 @@ html {
   // These psuedo-elements add the speech bubble tail / triangle.
   &:before, &:after {
     // http://www.red-team-design.com/css-diagonal-borders-still-not-rendering-properly-on-firefox
-    @include scale(.9999);
+    transform: scale(.9999);
     border-color: rgba(0, 0, 0, 0);
 
     border-style: solid;

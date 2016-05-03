@@ -1,4 +1,4 @@
-@import 'compass/reset';
+@import './mixins/reset';
 
 /*
   Consistency fixes
@@ -14,7 +14,11 @@ html {
   text-size-adjust: 100%;
 }
 
-body { min-height: 100%; font-size: 100%; }
+body {
+  min-height: 100%;
+  font-size: 100%;
+  margin: 0;
+}
 
 sub, sup {
   font-size: 75%;
@@ -57,6 +61,16 @@ textarea {overflow: auto;}
 img::selection,
 img::-moz-selection {
   background: transparent;
+}
+
+ul, li {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+blockquote {
+  margin: 0;
 }
 
 // Custom elements

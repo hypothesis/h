@@ -18,6 +18,7 @@ module.exports = class Host extends Guest
     .attr('allowfullscreen', '')
     .attr('seamless', '')
     .attr('src', options.app)
+    .addClass('h-sidebar-iframe')
 
     @frame = $('<div></div>')
     .css('display', 'none')

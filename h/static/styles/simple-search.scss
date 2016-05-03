@@ -10,7 +10,7 @@
 }
 
 .simple-search-icon {
-  @include order(0);
+  order: 0;
 }
 
 :not(:focus) ~ .simple-search-icon {

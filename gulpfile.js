@@ -181,7 +181,6 @@ gulp.task('build-css', function () {
 
   var sassOpts = {
     outputStyle: IS_PRODUCTION_BUILD ? 'compressed' : 'nested',
-    includePaths: ['node_modules/compass-mixins/lib/'],
   };
 
   var cssURLRewriter = postcssURL({
