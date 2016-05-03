@@ -732,9 +732,10 @@ class TestCreateAnnotationSchema(object):
 
         assert appstruct['extra'] == {'foo': 1, 'bar': 2}
 
-    def test_it_calls_document_uris_from_data(self,
-                                              AnnotationSchema,
-                                              parse_document_claims):
+    def test_it_extracts_document_uris_from_the_document(
+            self,
+            AnnotationSchema,
+            parse_document_claims):
         document_data = {'foo': 'bar'}
         target_uri = 'http://example.com/example'
         AnnotationSchema.return_value.validate.return_value['document'] = (
@@ -757,9 +758,10 @@ class TestCreateAnnotationSchema(object):
         assert appstruct['document']['document_uri_dicts'] == (
             parse_document_claims.document_uris_from_data.return_value)
 
-    def test_it_calls_document_metas_from_data(self,
-                                               AnnotationSchema,
-                                               parse_document_claims):
+    def test_it_extracts_document_metas_from_the_document(
+            self,
+            AnnotationSchema,
+            parse_document_claims):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
         document_data = {'foo': 'bar'}
         target_uri = 'http://example.com/example'
@@ -953,7 +955,7 @@ class TestLegacyUpdateAnnotationSchema(object):
 @pytest.mark.usefixtures('AnnotationSchema')
 class TestUpdateAnnotationSchema(object):
 
-    def test_it_calls_AnnotationSchema_validate(self):
+    def test_it_passes_input_to_AnnotationSchema_validate(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         schema.validate(mock.sentinel.input_data)
@@ -1096,9 +1098,10 @@ class TestUpdateAnnotationSchema(object):
 
         assert appstruct['tags'] == ['new']
 
-    def test_it_calls_document_uris_from_data(self,
-                                              AnnotationSchema,
-                                              parse_document_claims):
+    def test_it_extracts_document_uris_from_the_document(
+            self,
+            AnnotationSchema,
+            parse_document_claims):
         document_data = {'foo': 'bar'}
         target_uri = 'http://example.com/example'
         AnnotationSchema.return_value.validate.return_value['document'] = (
@@ -1149,9 +1152,10 @@ class TestUpdateAnnotationSchema(object):
         assert appstruct['document']['document_uri_dicts'] == (
             parse_document_claims.document_uris_from_data.return_value)
 
-    def test_it_calls_document_metas_from_data(self,
-                                               AnnotationSchema,
-                                               parse_document_claims):
+    def test_it_extracts_document_metas_from_the_document(
+            self,
+            AnnotationSchema,
+            parse_document_claims):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         document_data = {'foo': 'bar'}
         target_uri = 'http://example.com/example'
