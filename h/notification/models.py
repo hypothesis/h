@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sqlalchemy as sa
-from sqlalchemy import func, and_
+from sqlalchemy import func
 
 from h.db import Base
 
@@ -15,39 +15,10 @@ class Subscriptions(Base):
     active = sa.Column(sa.Boolean, default=True, nullable=False)
 
     @classmethod
-    def get_by_id(cls, id_):
-        """Get a subscription by its primary key."""
-        return cls.query.filter(cls.id == id_).first()
-
-    @classmethod
-    def get_active_subscriptions_for_a_type(cls, ttype):
-        return cls.query.filter(
-            and_(
-                cls.active,
-                func.lower(cls.type) == func.lower(ttype)
-            )
-        ).all()
-
-    @classmethod
     def get_subscriptions_for_uri(cls, uri):
         return cls.query.filter(
             func.lower(cls.uri) == func.lower(uri)
         ).all()
-
-    @classmethod
-    def get_templates_for_uri_and_type(cls, uri, ttype):
-        return cls.query.filter(
-            and_(
-                func.lower(cls.uri) == func.lower(uri),
-                func.lower(cls.type) == func.lower(ttype)
-            )
-        ).all()
-
-    def __json__(self, request):
-        return {'id': self.id,
-                'uri': self.uri,
-                'type': self.type,
-                'active': self.active}
 
     def __repr__(self):
         return '<Subscription uri=%s type=%s active=%s>' % (self.uri,

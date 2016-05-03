@@ -5,7 +5,7 @@ from ..security import derive_key
 
 
 def includeme(config):
-    config.include('.reply_template')
+    config.include('.reply')
     config.include('.views')
 
     secret = config.registry.settings['secret_key']
