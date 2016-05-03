@@ -215,7 +215,9 @@ def read_jsonld(annotation, request):
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
     if request.feature('postgres'):
-        legacy_annotation = elastic.Annotation.fetch(annotation.id)
+        legacy_annotation = storage.fetch_annotation(request,
+                                                     annotation.id,
+                                                     _postgres=False)
         _update_elastic(legacy_annotation, request, notify=False)
         return _update_postgres(annotation, request)
     return _update_elastic(annotation, request, notify=True)

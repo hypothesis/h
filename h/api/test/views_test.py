@@ -509,7 +509,6 @@ class TestUpdateLegacy(object):
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
-                         'elastic',
                          'schemas',
                          'storage')
 class TestUpdate(object):
@@ -523,12 +522,14 @@ class TestUpdate(object):
         with pytest.raises(views.PayloadError):
             views.update(mock.Mock(), mock_request)
 
-    def test_it_fetches_the_legacy_annotation(self, elastic, mock_request):
+    def test_it_fetches_the_legacy_annotation(self, storage, mock_request):
         annotation = mock.Mock()
 
         views.update(annotation, mock_request)
 
-        elastic.Annotation.fetch.assert_called_once_with(annotation.id)
+        storage.fetch_annotation.assert_called_once_with(mock_request,
+                                                         annotation.id,
+                                                         _postgres=False)
 
     def test_it_inits_the_schema(self, mock_request, schemas):
         annotation = mock.Mock()
@@ -564,8 +565,8 @@ class TestUpdate(object):
             mock.sentinel.validated_data
         )
 
-    def test_it_inits_the_legacy_schema(self, elastic, mock_request, schemas):
-        legacy_annotation = elastic.Annotation.fetch.return_value = mock.Mock()
+    def test_it_inits_the_legacy_schema(self, storage, mock_request, schemas):
+        legacy_annotation = storage.fetch_annotation.return_value = mock.Mock()
 
         views.update(legacy_annotation, mock_request)
 
@@ -581,11 +582,10 @@ class TestUpdate(object):
         legacy_schema.validate.assert_called_once_with(mock_request.json_body)
 
     def test_it_calls_legacy_update_annotation(self,
-                                               elastic,
                                                mock_request,
                                                schemas,
                                                storage):
-        legacy_annotation = elastic.Annotation.fetch.return_value = mock.Mock()
+        legacy_annotation = storage.fetch_annotation.return_value = mock.Mock()
 
         views.update(mock.Mock(), mock_request)
 
@@ -636,10 +636,6 @@ class TestUpdate(object):
 
         assert returned == (
             AnnotationJSONPresenter.return_value.asdict.return_value)
-
-    @pytest.fixture
-    def elastic(self, patch):
-        return patch('h.api.views.elastic')
 
     @pytest.fixture
     def mock_request(self):
