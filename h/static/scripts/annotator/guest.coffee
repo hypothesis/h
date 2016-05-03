@@ -6,8 +6,9 @@ scrollIntoView = require('scroll-into-view')
 Annotator = require('annotator')
 $ = Annotator.$
 
+adder = require('./adder')
 highlighter = require('./highlighter')
-
+rangeUtil = require('./range-util')
 
 animationPromise = (fn) ->
   return new Promise (resolve, reject) ->
@@ -16,7 +17,6 @@ animationPromise = (fn) ->
         resolve(fn())
       catch error
         reject(error)
-
 
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
@@ -42,22 +42,12 @@ module.exports = class Guest extends Annotator
   visibleHighlights: false
 
   html: extend {}, Annotator::html,
-    adder: '''
-      <div class="annotator-adder">
-        <div class="annotator-adder-actions">
-          <button class="annotator-adder-actions__button h-icon-annotate" data-action="comment">
-            <span class="annotator-adder-actions__label" data-action="comment">Annotate</span>
-          </button>
-          <button class="annotator-adder-actions__button h-icon-highlight" data-action="highlight">
-            <span class="annotator-adder-actions__label" data-action="highlight">Highlight</span>
-          </button>
-        </div>
-      </div>
-    '''
+    adder: adder.template()
 
   constructor: (element, options) ->
     super
 
+    this.adderCtrl = new adder.Adder(@adder[0])
     this.anchors = []
 
     cfOptions =
@@ -196,6 +186,7 @@ module.exports = class Guest extends Annotator
         range = Annotator.Range.sniff(anchor.range)
         normedRange = range.normalize(root)
         highlights = highlighter.highlightRange(normedRange)
+
         $(highlights).data('annotation', anchor.annotation)
         anchor.highlights = highlights
         return anchor
@@ -360,14 +351,15 @@ module.exports = class Guest extends Annotator
       @onAdderClick event
     else
       # Show the adder button
-      @adder
-        .css(Annotator.Util.mousePosition(event, @element[0]))
-        .show()
-
+      selection = Annotator.Util.getGlobal().getSelection()
+      isBackwards = rangeUtil.isSelectionBackwards(selection)
+      focusRect = rangeUtil.selectionFocusRect(selection)
+      {left, top, arrowDirection} = this.adderCtrl.target(focusRect, isBackwards)
+      this.adderCtrl.showAt(left, top, arrowDirection)
     true
 
   onFailedSelection: (event) ->
-    @adder.hide()
+    this.adderCtrl.hide()
     @selectedRanges = []
 
     Annotator.$('.annotator-toolbar .h-icon-annotate')
@@ -432,7 +424,7 @@ module.exports = class Guest extends Annotator
   onAdderClick: (event) ->
     event.preventDefault?()
     event.stopPropagation?()
-    @adder.hide()
+    this.adderCtrl.hide()
     switch $(event.target).data('action')
       when 'highlight'
         this.setVisibleHighlights true
