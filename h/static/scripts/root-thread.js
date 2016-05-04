@@ -1,5 +1,8 @@
 'use strict';
 
+var EventEmitter = require('tiny-emitter');
+var inherits = require('inherits');
+
 var buildThread = require('./build-thread');
 var events = require('./events');
 var metadata = require('./annotation-metadata');
@@ -37,7 +40,8 @@ var sortFns = {
  * The root thread is then displayed by viewer.html
  */
 // @ngInject
-module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
+function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
+  var self = this;
   var thread;
 
   /**
@@ -72,6 +76,7 @@ module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
       sortCompareFn: sortFn,
       filterFn: filterFn,
     });
+    self.emit('changed', thread);
   }
   rebuildRootThread();
   annotationUI.subscribe(rebuildRootThread);
@@ -112,19 +117,20 @@ module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
     annotationUI.removeAnnotations(annotations);
   });
 
-  return {
-    /**
-     * Rebuild the conversation thread based on the currently loaded annotations
-     * and search/sort/filter settings.
-     */
-    rebuild: rebuildRootThread,
+  /**
+   * Rebuild the conversation thread based on the currently loaded annotations
+   * and search/sort/filter settings.
+   */
+  this.rebuild = rebuildRootThread;
 
-    /**
-     * Returns the current root conversation thread.
-     * @return {Thread}
-     */
-    thread: function () {
-      return thread;
-    },
+  /**
+   * Returns the current root conversation thread.
+   * @return {Thread}
+   */
+  this.thread = function () {
+    return thread;
   };
-};
+}
+inherits(RootThread, EventEmitter);
+
+module.exports = RootThread;

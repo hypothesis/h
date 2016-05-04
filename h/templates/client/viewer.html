@@ -30,13 +30,14 @@
       You do not have permission to see this annotation
     </p>
   </li>
-  <li id="{{vm.id}}"
+  <li ng-style="{height: virtualThreadList.offscreenUpperHeight}"></li>
+  <li id="{{child.id}}"
       class="annotation-card thread"
       ng-class="{'js-hover': hasFocus(child.annotation)}"
       ng-mouseenter="focus(child.annotation)"
       ng-click="scrollTo(child.annotation)"
       ng-mouseleave="focus()"
-      ng-repeat="child in rootThread().children track by child.id">
+      ng-repeat="child in virtualThreadList.visibleThreads track by child.id">
       <annotation-thread
         thread="child"
         show-document-info="::!isSidebar"
@@ -44,6 +45,7 @@
         on-force-visible="forceVisible(thread)">
       </annotation-thread>
   </li>
+  <li ng-style="{height: virtualThreadList.offscreenLowerHeight}"></li>
   <loggedout-message ng-if="isSidebar && shouldShowLoggedOutMessage()"
     on-login="login()" ng-cloak>
   </loggedout-message>

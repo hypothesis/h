@@ -1,8 +1,9 @@
 'use strict';
 
+var SearchClient = require('./search-client');
 var events = require('./events');
 var memoize = require('./util/memoize');
-var SearchClient = require('./search-client');
+var scopeTimeout = require('./util/scope-timeout');
 
 function firstKey(object) {
   for (var k in object) {
@@ -32,8 +33,37 @@ function groupIDFromSelection(selection, results) {
 // @ngInject
 module.exports = function WidgetController(
   $scope, $rootScope, annotationUI, crossframe, annotationMapper,
-  drafts, groups, rootThread, settings, streamer, streamFilter, store
+  drafts, groups, rootThread, settings, streamer, streamFilter, store,
+  VirtualThreadList
 ) {
+  function getThreadHeight(id) {
+    var threadElement = document.getElementById(id);
+    if (!threadElement) {
+      return;
+    }
+    return threadElement.getBoundingClientRect().height;
+  }
+
+  var visibleThreads = new VirtualThreadList($scope, window, rootThread.thread());
+  visibleThreads.on('changed', function (state) {
+    $scope.virtualThreadList = {
+      visibleThreads: state.visibleThreads,
+      offscreenUpperHeight: state.offscreenUpperHeight + 'px',
+      offscreenLowerHeight: state.offscreenLowerHeight + 'px',
+    };
+
+    scopeTimeout($scope, function () {
+      state.visibleThreads.forEach(function (thread) {
+        visibleThreads.setThreadHeight(thread.id, getThreadHeight(thread.id));
+      });
+    }, 50);
+  });
+  rootThread.on('changed', function (thread) {
+    visibleThreads.setRootThread(thread);
+  });
+  $scope.$on('$destroy', function () {
+    visibleThreads.detach();
+  });
 
   $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
 

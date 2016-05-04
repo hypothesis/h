@@ -1,6 +1,13 @@
 'use strict';
 
 var angular = require('angular');
+var EventEmitter = require('tiny-emitter');
+var inherits = require('inherits');
+
+function FakeRootThread() {
+  this.thread = sinon.stub();
+}
+inherits(FakeRootThread, EventEmitter);
 
 describe('AnnotationViewerController', function () {
 
@@ -30,9 +37,7 @@ describe('AnnotationViewerController', function () {
         search: {},
       },
       annotationUI: {},
-      rootThread: {
-        thread: sinon.stub(),
-      },
+      rootThread: new FakeRootThread(),
       streamer: opts.streamer || { setConfig: function () {} },
       store: opts.store || {
         AnnotationResource: { get: sinon.spy() },
@@ -52,6 +57,7 @@ describe('AnnotationViewerController', function () {
       },
       annotationMapper: opts.annotationMapper || { loadAnnotations: sinon.spy() },
     };
+    inherits(locals.rootThread, EventEmitter);
     locals.ctrl = getControllerService()(
       'AnnotationViewerController', locals);
     return locals;

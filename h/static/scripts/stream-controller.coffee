@@ -56,6 +56,14 @@ module.exports = class StreamController
     $scope.forceVisible = (id) ->
       annotationUI.setForceVisible(id, true)
 
+    rootThread.on('changed', (thread) ->
+      $scope.virtualThreadList = {
+        visibleThreads: thread.children,
+        offscreenUpperHeight: '0px',
+        offscreenLowerHeight: '0px',
+      };
+    );
+
     $scope.isStream = true
     $scope.sortOptions = ['Newest', 'Oldest']
     $scope.sort.name = 'Newest'

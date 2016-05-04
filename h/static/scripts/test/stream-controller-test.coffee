@@ -1,4 +1,11 @@
+EventEmitter = require('tiny-emitter')
+inherits = require('inherits')
+
 {module, inject} = angular.mock
+
+class FakeRootThread extends EventEmitter
+  constructor: () ->
+    this.thread = sinon.stub()
 
 describe 'StreamController', ->
   $controller = null
@@ -70,9 +77,7 @@ describe 'StreamController', ->
       getFilter: sandbox.stub()
     }
 
-    fakeRootThread = {
-      thread: sandbox.stub()
-    }
+    fakeRootThread = new FakeRootThread()
 
     $provide.value 'annotationMapper', fakeAnnotationMapper
     $provide.value 'annotationUI', fakeAnnotationUI
