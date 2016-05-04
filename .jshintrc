@@ -12,7 +12,6 @@
   "esnext": true,
   "globals": {
     "chrome": false,
-    "h": false,
     "Promise": false,
     "chai": false,
     "sinon": false,
@@ -31,6 +30,7 @@
     "assert",
     "before",
     "beforeEach",
+    "chrome",
     "context",
     "describe",
     "it",

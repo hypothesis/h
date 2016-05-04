@@ -4,7 +4,22 @@
   "version": "{{ version }}",
   "version_name": "{{ version }} ({{ version_name }})",
   "manifest_version": 2,
+
+  {% if browser == 'chrome' %}
   "minimum_chrome_version": "38",
+  {% endif %}
+
+  {% if browser == 'firefox' %}
+  "applications": {
+    "gecko": {
+      "id": "firefox@hypothes.is",
+
+      {# Firefox v48 is required for
+         https://bugzilla.mozilla.org/show_bug.cgi?id=1210583 #}
+      "strict_min_version": "48.0.0"
+    }
+  },
+  {% endif %}
 
   "description": "Collaboratively annotate, highlight, and tag web pages and PDF documents.",
   "icons": {
@@ -27,7 +42,9 @@
     "script-src 'self' 'unsafe-eval' {{ script_src }}; object-src 'self'; font-src 'self' data:;",
 
   "background": {
+    {% if browser == 'chrome' %}
     "persistent": true,
+    {% endif %}
     "scripts": [
       "settings-data.js",
       "public/scripts/raven.bundle.js",

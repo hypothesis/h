@@ -15,21 +15,27 @@ var browserExtension = new HypothesisChromeExtension({
 
 browserExtension.listen(window);
 
-chrome.runtime.onInstalled.addListener(onInstalled);
+if (chrome.runtime.onInstalled) {
+  chrome.runtime.onInstalled.addListener(onInstalled);
+}
 
 // Respond to messages sent by the JavaScript from https://hpt.is.
 // This is how it knows whether the user has this Chrome extension installed.
-chrome.runtime.onMessageExternal.addListener(
-  function (request, sender, sendResponse) {
-    if (request.type === 'ping') {
-      sendResponse({type: 'pong'});
+if (chrome.runtime.onMessageExternal) {
+  chrome.runtime.onMessageExternal.addListener(
+    function (request, sender, sendResponse) {
+      if (request.type === 'ping') {
+        sendResponse({type: 'pong'});
+      }
     }
-  }
-);
+  );
+}
 
-chrome.runtime.requestUpdateCheck(function (status) {
-  chrome.runtime.onUpdateAvailable.addListener(onUpdateAvailable);
-});
+if (chrome.runtime.requestUpdateCheck) {
+  chrome.runtime.requestUpdateCheck(function () {
+    chrome.runtime.onUpdateAvailable.addListener(onUpdateAvailable);
+  });
+}
 
 function onInstalled(installDetails) {
   // The install reason can be "install", "update", "chrome_update", or

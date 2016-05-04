@@ -7,13 +7,14 @@ if (appLinkEl) {
   };
 }
 
-// When run from a Chrome extension, load
-// resources bundled with the extension
+// When run from a Chrome or Firefox extension, load resources bundled with the
+// extension. Note that in Firefox, the 'chrome' object is accessible as a
+// global but not attached to the 'window' object.
 var resourceRoot;
-if (window.chrome &&
-    window.chrome.extension &&
-    window.chrome.extension.getURL) {
-  resourceRoot = window.chrome.extension.getURL('/');
+if (typeof chrome !== 'undefined' &&
+    typeof chrome.extension !== 'undefined' &&
+    typeof chrome.extension.getURL !== 'undefined') {
+  resourceRoot = chrome.extension.getURL('/');
 }
 
 function resolve(url) {
