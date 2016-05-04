@@ -16,6 +16,7 @@ import os
 from celery import Celery
 from celery import signals
 from celery.utils.log import get_task_logger
+from kombu import Exchange, Queue
 from pyramid import paster
 from pyramid.request import Request
 from raven.contrib.celery import register_signal, register_logger_signal
@@ -40,8 +41,22 @@ celery.conf.update(
     CELERY_ACKS_LATE=True,
     CELERY_DISABLE_RATE_LIMITS=True,
     CELERY_IGNORE_RESULT=True,
-    CELERY_IMPORTS=('h.mailer', 'h.nipsa.worker'),
+    CELERY_IMPORTS=('h.mailer', 'h.nipsa.worker', 'h.indexer'),
+    CELERY_ROUTES={
+        'h.indexer.add_annotation': 'indexer',
+        'h.indexer.delete_annotation': 'indexer',
+    },
     CELERY_TASK_SERIALIZER='json',
+    CELERY_QUEUES=[
+        Queue('celery',
+              durable=True,
+              routing_key='celery',
+              exchange=Exchange('celery', type='direct', durable=True)),
+        Queue('indexer',
+              durable=True,
+              routing_key='indexer',
+              exchange=Exchange('indexer', type='direct', durable=True)),
+    ],
     # Only accept one task at a time. This also probably isn't what we want
     # (especially not for, say, a search indexer task) but it makes the
     # behaviour consistent with the previous NSQ-based worker:

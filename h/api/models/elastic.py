@@ -50,6 +50,12 @@ class Annotation(annotation.Annotation):
             return target_links[0]
 
     @property
+    def target_uri_normalized(self):
+        target_uri = self.target_uri
+        if target_uri:
+            return uri.normalize(target_uri)
+
+    @property
     def text(self):
         text = self.get('text', None)
         if text:

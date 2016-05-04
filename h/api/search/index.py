@@ -51,9 +51,9 @@ def delete(es, annotation_id):
     :param es: the Elasticsearch client object to use
     :type es: h.api.search.Client
 
-    :param annotation: the annotation whose corresponding document to delete
-        from the search index
-    :type annotation: h.api.models.Annotation
+    :param annotation_id: the annotation id whose corresponding document to
+        delete from the search index
+    :type annotation_id: str
 
     """
     try:
