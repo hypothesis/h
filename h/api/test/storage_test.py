@@ -146,7 +146,7 @@ class TestExpandURI(object):
         ]
 
 
-@pytest.mark.usefixtures('AnnotationBeforeSaveEvent',
+@pytest.mark.usefixtures('AnnotationTransformEvent',
                          'models',  # Don't try to talk to real Elasticsearch!
                          'partial',
                          'transform')
@@ -173,23 +173,23 @@ class TestLegacyCreateAnnotation(object):
         transform.prepare.assert_called_once_with(
             models.elastic.Annotation.return_value, partial.return_value)
 
-    def test_it_inits_AnnotationBeforeSaveEvent(self,
-                                                AnnotationBeforeSaveEvent,
-                                                models):
+    def test_it_inits_AnnotationTransformEvent(self,
+                                               AnnotationTransformEvent,
+                                               models):
         request = self.mock_request()
 
         storage.legacy_create_annotation(request, self.annotation_data())
 
-        AnnotationBeforeSaveEvent.assert_called_once_with(
+        AnnotationTransformEvent.assert_called_once_with(
             request, models.elastic.Annotation.return_value)
 
-    def test_it_calls_notify(self, AnnotationBeforeSaveEvent):
+    def test_it_calls_notify(self, AnnotationTransformEvent):
         request = self.mock_request()
 
         storage.legacy_create_annotation(request, self.annotation_data())
 
         request.registry.notify.assert_called_once_with(
-            AnnotationBeforeSaveEvent.return_value)
+            AnnotationTransformEvent.return_value)
 
     def test_it_calls_annotation_save(self, models):
         storage.legacy_create_annotation(self.mock_request(),
@@ -213,8 +213,8 @@ class TestLegacyCreateAnnotation(object):
         return {'foo': 'bar'}
 
     @pytest.fixture
-    def AnnotationBeforeSaveEvent(self, patch):
-        return patch('h.api.storage.AnnotationBeforeSaveEvent')
+    def AnnotationTransformEvent(self, patch):
+        return patch('h.api.storage.AnnotationTransformEvent')
 
     @pytest.fixture
     def partial(self, patch):

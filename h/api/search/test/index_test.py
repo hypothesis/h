@@ -23,21 +23,21 @@ class TestIndexAnnotation:
         presenters.AnnotationJSONPresenter.assert_called_once_with(
             request, annotation)
 
-    def test_it_creates_an_annotation_before_save_event(self, es, presenters, AnnotationBeforeSaveEvent):
+    def test_it_creates_an_annotation_before_save_event(self, es, presenters, AnnotationTransformEvent):
         request = mock.Mock()
         presented = presenters.AnnotationJSONPresenter.return_value.asdict()
 
         index.index(es, mock.Mock(), request)
 
-        AnnotationBeforeSaveEvent.assert_called_once_with(request, presented)
+        AnnotationTransformEvent.assert_called_once_with(request, presented)
 
-    def test_it_notifies_before_save_event(self, es, presenters, AnnotationBeforeSaveEvent):
+    def test_it_notifies_before_save_event(self, es, presenters, AnnotationTransformEvent):
         request = DummyRequest()
         request.registry.notify = mock.Mock(spec=lambda event: None)
 
         index.index(es, mock.Mock(), request)
 
-        event = AnnotationBeforeSaveEvent.return_value
+        event = AnnotationTransformEvent.return_value
         request.registry.notify.assert_called_once_with(event)
 
     def test_it_indexes_the_annotation(self, es, presenters):
@@ -72,8 +72,8 @@ class TestIndexAnnotation:
         return presenters
 
     @pytest.fixture
-    def AnnotationBeforeSaveEvent(self, patch):
-        return patch('h.api.search.index.AnnotationBeforeSaveEvent')
+    def AnnotationTransformEvent(self, patch):
+        return patch('h.api.search.index.AnnotationTransformEvent')
 
 
 @pytest.mark.usefixtures('log')

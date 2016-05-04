@@ -22,18 +22,18 @@ class FakeMailer(object):
 class TestPublishAnnotationEvent:
 
     def test_it_initializes_a_new_before_save_event(
-        self, event, presenters, AnnotationBeforeSaveEvent, deepcopy):
+        self, event, presenters, AnnotationTransformEvent, deepcopy):
 
         subscribers.publish_annotation_event(event)
 
         deepcopy.assert_called_once_with(event.annotation_dict)
 
-        AnnotationBeforeSaveEvent.assert_called_once_with(event.request,
-                                                          deepcopy.return_value)
+        AnnotationTransformEvent.assert_called_once_with(event.request,
+                                                         deepcopy.return_value)
 
-    def test_it_notifies_before_save_event(self, event, AnnotationBeforeSaveEvent, deepcopy):
+    def test_it_notifies_before_save_event(self, event, AnnotationTransformEvent, deepcopy):
         event.request.registry.notify = mock.Mock(spec=lambda event: None)
-        before_save_event = AnnotationBeforeSaveEvent.return_value
+        before_save_event = AnnotationTransformEvent.return_value
 
         subscribers.publish_annotation_event(event)
 
@@ -63,8 +63,8 @@ class TestPublishAnnotationEvent:
         return patch('h.subscribers.presenters')
 
     @pytest.fixture
-    def AnnotationBeforeSaveEvent(self, patch):
-        return patch('h.subscribers.AnnotationBeforeSaveEvent')
+    def AnnotationTransformEvent(self, patch):
+        return patch('h.subscribers.AnnotationTransformEvent')
 
     @pytest.fixture
     def deepcopy(self, patch):

@@ -7,7 +7,7 @@ from h import emails
 from h import mailer
 from h.api import presenters
 from h.api import storage
-from h.api.events import AnnotationBeforeSaveEvent
+from h.api.events import AnnotationTransformEvent
 from h.notification import reply
 
 
@@ -31,8 +31,8 @@ def add_renderer_globals(event):
 def publish_annotation_event(event):
     """Publish an annotation event to the message queue."""
     annotation_dict = deepcopy(event.annotation_dict)
-    before_save_event = AnnotationBeforeSaveEvent(event.request,
-                                                  annotation_dict)
+    before_save_event = AnnotationTransformEvent(event.request,
+                                                 annotation_dict)
     event.request.registry.notify(before_save_event)
 
     data = {

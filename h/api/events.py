@@ -15,15 +15,16 @@ class AnnotationEvent(object):
             return self.annotation_dict.get('id')
 
 
-class AnnotationBeforeSaveEvent(object):
+class AnnotationTransformEvent(object):
 
     """
-    An event fired just before an annotation is saved.
+    An event fired before an annotation is indexed or otherwise needs to be
+    transformed by third-party code.
 
     This event can be used by subscribers who wish to modify the content of an
-    annotation just before it is saved.
+    annotation just before it is indexed or in other use-cases.
     """
 
-    def __init__(self, request, annotation):
+    def __init__(self, request, annotation_dict):
         self.request = request
-        self.annotation = annotation
+        self.annotation_dict = annotation_dict
