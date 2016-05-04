@@ -93,7 +93,6 @@ def includeme(config):
 
     config.include('pyramid_jinja2')
     config.add_jinja2_extension('h.jinja_extensions.Filters')
-    config.add_jinja2_extension('h.jinja_extensions.IncludeRawExtension')
     # Register a deferred action to setup the assets environment
     # when the configuration is committed.
     config.action(None, configure_jinja2_assets, args=(config,))
