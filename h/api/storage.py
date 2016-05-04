@@ -222,7 +222,7 @@ def expand_uri(request, uri):
     :type request: pyramid.request.Request
 
     :param uri: a URI associated with the document
-    :type id: str
+    :type uri: str
 
     :returns: a list of equivalent URIs
     :rtype: list
