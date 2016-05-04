@@ -41,7 +41,7 @@ def index(es, annotation, request):
     )
 
 
-def delete(es, annotation):
+def delete(es, annotation_id):
     """
     Delete an annotation from the search index.
 
@@ -60,8 +60,8 @@ def delete(es, annotation):
         es.conn.delete(
             index=es.index,
             doc_type=es.t.annotation,
-            id=annotation.id,
+            id=annotation_id,
         )
     except elasticsearch.NotFoundError:
         log.exception('Tried to delete a nonexistent annotation from the '
-                      'search index, annotation id: %s', annotation.id)
+                      'search index, annotation id: %s', annotation_id)

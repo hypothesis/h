@@ -6,7 +6,6 @@ import pytest
 from pyramid import testing
 
 from h.api import events
-from h.api import models
 from h.api import subscribers
 
 
@@ -29,14 +28,23 @@ class TestIndexAnnotationEvent:
 
         assert not delete.called
 
-    def test_it_calls_index_when_action_is_create(self, index, delete):
+    def test_it_fetches_the_annotation_when_action_is_create(self, fetch_annotation):
+        event = self.event('create')
+        event.request.feature.return_value = True
+
+        subscribers.index_annotation_event(event)
+
+        fetch_annotation.assert_called_once_with(event.request,
+                                                 event.annotation_id)
+
+    def test_it_calls_index_when_action_is_create(self, fetch_annotation, index, delete):
         event = self.event('create')
         event.request.feature.return_value = True
 
         subscribers.index_annotation_event(event)
 
         index.assert_called_once_with(
-            event.request.es, event.annotation, event.request)
+            event.request.es, fetch_annotation.return_value, event.request)
         assert not delete.called
 
     def test_it_calls_delete_when_action_is_delete(self, delete, index):
@@ -45,16 +53,20 @@ class TestIndexAnnotationEvent:
 
         subscribers.index_annotation_event(event)
 
-        delete.assert_called_once_with(event.request.es, event.annotation)
+        delete.assert_called_once_with(event.request.es, event.annotation_id)
         assert not index.called
 
     def event(self, action):
         return mock.Mock(
             spec=events.AnnotationEvent(testing.DummyRequest(),
-                                        mock.Mock(spec=models.Annotation()),
+                                        {'id': 'test_annotation_id'},
                                         action),
             action=action,
         )
+
+    @pytest.fixture
+    def fetch_annotation(self, patch):
+        return patch('h.api.storage.fetch_annotation')
 
     @pytest.fixture
     def index(self, patch):
