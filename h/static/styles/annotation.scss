@@ -45,6 +45,10 @@ $annotation-card-left-padding: 10px;
     color: $grey-6;
   }
 
+  & > .annotation .annotation-text {
+    color: $grey-7;
+  }
+
   .annotation-header__timestamp {
     color: $grey-5;
   }
@@ -53,7 +57,7 @@ $annotation-card-left-padding: 10px;
 .annotation {
   display: block;
   font-family: $sans-font-family;
-  font-weight: 300;
+  font-weight: 400;
   position: relative;
 }
 
@@ -75,7 +79,7 @@ $annotation-card-left-padding: 10px;
 }
 
 .annotation-header__share-info {
-  color: $grey-6;
+  color: $grey-5;
   @include font-normal;
 }
 
