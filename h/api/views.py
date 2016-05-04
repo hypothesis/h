@@ -224,7 +224,9 @@ def update(annotation, request):
 
 
 def _update_postgres(annotation, request):
-    schema = schemas.UpdateAnnotationSchema(request, annotation.target_uri)
+    schema = schemas.UpdateAnnotationSchema(request,
+                                            annotation.target_uri,
+                                            annotation.groupid)
     appstruct = schema.validate(copy.deepcopy(_json_payload(request)))
 
     annotation = storage.update_annotation(request.db,

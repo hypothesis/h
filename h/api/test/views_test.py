@@ -548,7 +548,8 @@ class TestUpdate(object):
 
         schemas.UpdateAnnotationSchema.assert_called_once_with(
             mock_request,
-            annotation.target_uri)
+            annotation.target_uri,
+            annotation.groupid)
 
     def test_it_validates_the_posted_data(self, copy, mock_request, schemas):
         annotation = mock.Mock()
