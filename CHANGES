@@ -1,3 +1,17 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Show adder when Hypothesis loads if there is already a text selection on the
+  page (#3257).
+
+- Make annotation adder position itself more intelligently in relation to the
+  selected text and viewport boundaries (#3257).
+
+- Link to the Chrome extension on the help page (#3265).
+
 0.20.0 (2016-04-25)
 ===================
 
