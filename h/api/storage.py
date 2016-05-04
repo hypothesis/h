@@ -14,7 +14,7 @@ from pyramid import i18n
 from h.api import schemas
 from h.api import transform
 from h.api import models
-from h.api.events import AnnotationBeforeSaveEvent
+from h.api.events import AnnotationTransformEvent
 
 
 _ = i18n.TranslationStringFactory(__package__)
@@ -238,9 +238,9 @@ def _prepare(request, annotation):
     fetcher = partial(fetch_annotation, request, _postgres=False)
     transform.prepare(annotation, fetcher)
 
-    # Fire an AnnotationBeforeSaveEvent so subscribers who wish to modify an
+    # Fire an AnnotationTransformEvent so subscribers who wish to modify an
     # annotation before save can do so.
-    event = AnnotationBeforeSaveEvent(request, annotation)
+    event = AnnotationTransformEvent(request, annotation)
     request.registry.notify(event)
 
 

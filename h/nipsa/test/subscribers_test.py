@@ -8,7 +8,7 @@ import pytest
 from h.nipsa import subscribers
 
 
-FakeEvent = namedtuple('FakeEvent', ['annotation'])
+FakeEvent = namedtuple('FakeEvent', ['annotation_dict'])
 
 
 @pytest.mark.parametrize("ann,nipsa", [
@@ -17,7 +17,7 @@ FakeEvent = namedtuple('FakeEvent', ['annotation'])
     ({}, False),
 ])
 def test_transform_annotation(ann, nipsa, has_nipsa):
-    event = FakeEvent(annotation=ann)
+    event = FakeEvent(annotation_dict=ann)
     has_nipsa.return_value = nipsa
     subscribers.transform_annotation(event)
     if nipsa:
