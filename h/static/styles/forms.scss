@@ -1,7 +1,5 @@
 // Common form styles.
 @import "mixins/forms";
-@import "compass/css3/images";
-@import "compass/utilities/general/clearfix";
 
 .form-field {
   @include pie-clearfix;
@@ -13,6 +11,7 @@
   position: relative;
   text-transform: uppercase;
   font-weight: bold;
+  font-size: 1em;
   margin-top: 1.5em;
   margin-bottom: 1.5em;
 
@@ -229,20 +228,20 @@
 }
 
 .btn-danger {
-  @include background(linear-gradient(to bottom, $error-color, shade($error-color, 5%)));
+  background: linear-gradient(to bottom, $error-color, shade($error-color, 5%));
   color: white;
   border-color: shade($error-color, 15%);
   text-shadow: 0 -1px 0 rgba(0, 0, 0, .1);
 
   &:focus, &:hover, &:active, &.js-hover, &.js-focus, &.js-active {
-    @include box-shadow(0 1px 0 rgba(0, 0, 0, .05));
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .05);
     color: white;
     background: tint($error-color, 5%);
     border-color: $error-color;
   }
 
   &:active, &.js-active {
-    @include box-shadow(inset 0 1px 0 rgba(0, 0, 0, .3));
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, .3);
     color: white;
     background: shade($error-color, 10%);
     border-color: shade($error-color, 30%);
@@ -254,7 +253,7 @@
 
   &, &:focus, &:hover, &:active, &[disabled],
   &.js-hover, &.js-focus, &.js-active, &.js-disabled {
-    @include box-shadow(none);
+    box-shadow: none;
     background: none;
   }
 
@@ -322,7 +321,7 @@
 }
 
 [status-button-state] .btn-message-text {
-  @include transition(opacity .2s .6s ease-in);
+  transition: opacity .2s .6s ease-in;
   opacity: 0;
 }
 
@@ -331,12 +330,12 @@
 }
 
 [status-button-state] .btn-message-success .btn-message-icon {
-  @include transform(scale(0));
+  transform: scale(0);
 }
 
 [status-button-state=success] .btn-message-success .btn-message-icon {
-  @include transition(transform .15s 0 cubic-bezier(0, 1.8, 1, 1.8));
-  @include transform(scale(1));
+  transition: transform .15s 0 cubic-bezier(0, 1.8, 1, 1.8);
+  transform: scale(1);
 }
 
 // TODO: Move into seperate module stylesheet.

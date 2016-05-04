@@ -42,8 +42,8 @@ $base-font-size: 14px;
 
   // frame styles
   @import './bucket-bar';
-  @include user-select(none);
   @include noise-background;
+  user-select: none;
   direction: ltr;
   background: none;
   font-size: $base-font-size;
@@ -67,7 +67,8 @@ $base-font-size: 14px;
     width: initial;
   }
 
-  & > iframe {
+  .h-sidebar-iframe {
+    border: none;
     height: 100%;
     width: 100%;
     z-index: 3;
@@ -98,8 +99,8 @@ $base-font-size: 14px;
 
     ul, li {
       box-sizing: border-box;
+      list-style: none;
       @include reset-box-model;
-      @include reset-list-style;
     }
   }
 
@@ -129,7 +130,7 @@ $base-font-size: 14px;
   }
 
   .annotator-frame-button--sidebar_toggle {
-    @include box-shadow(none);
+    box-shadow: none;
     border-radius: 0px;
     border-style: none none solid solid;
     padding-right: 6px;

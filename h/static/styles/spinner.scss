@@ -6,15 +6,13 @@
 //   <!-- Three nested spans -->
 //   <span class="spinner"><span><span></span></span></span>
 
-@import 'compass/css3/_animation';
-
 $container-width: 1em;
 $container-height: $container-width;
 $part-width: .1em;
 $part-height: 3 * $part-width;
 
-@include keyframes(spin) {
-  to { @include transform(rotate(1turn)); }
+@keyframes(spin) {
+  to { transform: rotate(1turn); }
 }
 
 .spinner {
@@ -24,7 +22,7 @@ $part-height: 3 * $part-width;
   height: $container-width;
   text-indent: 999em;
   overflow: hidden;
-  @include animation(spin 1.25s infinite steps(12));
+  animation: spin 1.25s infinite steps(12);
 }
 
 .spinner:before,
@@ -41,8 +39,8 @@ $part-height: 3 * $part-width;
   height: $part-height;
   border-radius: 0.1em;
   background: #eee;
-  @include box-shadow(0 ($container-height - $part-height) rgba(0, 0, 0, 0.15));
-  @include transform-origin(50%, $container-height / 2);
+  box-shadow: 0 ($container-height - $part-height) rgba(0, 0, 0, 0.15);
+  transform-origin: 50% $container-height / 2;
 }
 
 .spinner:before {
@@ -50,26 +48,26 @@ $part-height: 3 * $part-width;
 }
 
 .spinner:after {
-  @include transform(rotate(-30deg));
+  transform: rotate(-30deg);
   background: rgba(0, 0, 0, 0.6);
 }
 
 .spinner > span:before {
-  @include transform(rotate(-60deg));
+  transform: rotate(-60deg);
   background: rgba(0, 0, 0, 0.5);
 }
 
 .spinner > span:after {
-  @include transform(rotate(-90deg));
+  transform: rotate(-90deg);
   background: rgba(0, 0, 0, 0.4);
 }
 
 .spinner > span > span:before {
-    @include transform(rotate(-120deg));
+    transform: rotate(-120deg);
     background: rgba(0, 0, 0, 0.3);
 }
 
 .spinner > span > span:after {
-    @include transform(rotate(-150deg));
+    transform: rotate(-150deg);
     background: rgba(0, 0, 0, 0.2);
 }

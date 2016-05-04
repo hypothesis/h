@@ -45,7 +45,7 @@
 }
 
 .annotator-adder-actions__button {
-  @include box-shadow(none);
+  box-shadow: none;
   font-family: h;
   font-size: 18px;
   background: transparent !important;
