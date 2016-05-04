@@ -153,13 +153,6 @@ class AnnotationSchema(JSONSchema):
         },
     }
 
-    def __init__(self):
-        super(AnnotationSchema, self).__init__()
-
-    def validate(self, data):
-        appstruct = super(AnnotationSchema, self).validate(data)
-        return appstruct
-
 
 class LegacyAnnotationSchema(JSONSchema):
 
