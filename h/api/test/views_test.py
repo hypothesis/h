@@ -438,7 +438,6 @@ class TestReadJSONLD(object):
             'profile': 'http://foo.com/context.jsonld'
         }
 
-
     def test_it_returns_presented_annotation(self, AnnotationJSONLDPresenter):
         annotation = mock.Mock()
         presenter = mock.Mock()

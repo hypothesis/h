@@ -188,7 +188,9 @@ def create(request):
     return annotation_dict
 
 
-@api_config(route_name='api.annotation', request_method='GET', permission='read')
+@api_config(route_name='api.annotation',
+            request_method='GET',
+            permission='read')
 def read(annotation, request):
     """Return the annotation (simply how it was stored in the database)."""
     presenter = AnnotationJSONPresenter(request, annotation)
@@ -200,12 +202,15 @@ def read(annotation, request):
             permission='read')
 def read_jsonld(annotation, request):
     request.response.content_type = 'application/ld+json'
-    request.response.content_type_params = {'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
+    request.response.content_type_params = {
+        'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
     presenter = AnnotationJSONLDPresenter(request, annotation)
     return presenter.asdict()
 
 
-@api_config(route_name='api.annotation', request_method='PUT', permission='update')
+@api_config(route_name='api.annotation',
+            request_method='PUT',
+            permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
     if request.feature('postgres'):
@@ -250,7 +255,9 @@ def _update_elastic(annotation, request, notify):
         return annotation_dict
 
 
-@api_config(route_name='api.annotation', request_method='DELETE', permission='delete')
+@api_config(route_name='api.annotation',
+            request_method='DELETE',
+            permission='delete')
 def delete(annotation, request):
     """Delete the specified annotation."""
     storage.delete_annotation(request, annotation.id)
@@ -286,8 +293,11 @@ def _present_searchdict(request, mapping):
     return AnnotationJSONPresenter(request, ann).asdict()
 
 
-def _publish_annotation_event(request, annotation, action, annotation_dict=None):
-    """Publish an event to the annotations queue for this annotation action"""
+def _publish_annotation_event(request,
+                              annotation,
+                              action,
+                              annotation_dict=None):
+    """Publish an event to the annotations queue for this annotation action."""
     if annotation_dict is None:
         annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
 
