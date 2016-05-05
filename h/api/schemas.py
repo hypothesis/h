@@ -48,9 +48,7 @@ class JSONSchema(object):
 
 class AnnotationSchema(JSONSchema):
 
-    """
-    Validate an annotation object.
-    """
+    """Validate an annotation object."""
 
     schema = {
         'type': 'object',
@@ -158,9 +156,7 @@ class AnnotationSchema(JSONSchema):
 
 class LegacyAnnotationSchema(JSONSchema):
 
-    """
-    Validate an annotation object.
-    """
+    """Validate an annotation object."""
 
     schema = {
         'type': 'object',
@@ -240,9 +236,7 @@ class CreateAnnotationSchema(object):
 
 class LegacyCreateAnnotationSchema(object):
 
-    """
-    Validate the payload from a user when creating an annotation.
-    """
+    """Validate the payload from a user when creating an annotation."""
 
     def __init__(self, request):
         self.request = request
@@ -323,9 +317,7 @@ class UpdateAnnotationSchema(object):
 
 class LegacyUpdateAnnotationSchema(object):
 
-    """
-    Validate the payload from a user when updating an annotation.
-    """
+    """Validate the payload from a user when updating an annotation."""
 
     def __init__(self, request, annotation):
         self.request = request

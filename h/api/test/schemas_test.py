@@ -88,7 +88,7 @@ class TestAnnotationSchema(object):
                 },
             ],
             'text': 'foo',
-            'uri' : 'foo',
+            'uri': 'foo',
         })
 
     def test_it_raises_if_document_is_not_a_dict(self):
@@ -792,6 +792,7 @@ class TestCreateAnnotationSchema(object):
                 'key': 'original_value'
             }
         }
+
         def document_uris_from_data(document, claimant):
             document['new_key'] = 'new_value'
             document['top_level_key'] = 'new_value'
@@ -1209,6 +1210,7 @@ class TestUpdateAnnotationSchema(object):
                 'key': 'original_value'
             }
         }
+
         def document_uris_from_data(document, claimant):
             document['new_key'] = 'new_value'
             document['top_level_key'] = 'new_value'
