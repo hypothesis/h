@@ -23,7 +23,7 @@
 
 //Provides the grey-background
 @mixin grey-background {
-  background: rgba(0, 0, 0, 0.08);
+  background: $grey-2;
 }
 
 .annotator-hide {
