@@ -954,10 +954,8 @@ class TestLegacyUpdateAnnotationSchema(object):
 class TestUpdateAnnotationSchema(object):
 
     def test_it_calls_AnnotationSchema_validate(self,
-                                                annotation,
                                                 AnnotationSchema):
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         schema.validate(mock.sentinel.input_data)
 
@@ -965,24 +963,20 @@ class TestUpdateAnnotationSchema(object):
             mock.sentinel.input_data)
 
     def test_it_raises_if_AnnotationSchema_validate_raises(self,
-                                                           annotation,
                                                            AnnotationSchema):
         AnnotationSchema.return_value.validate.side_effect = (
             schemas.ValidationError('asplode'))
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         with pytest.raises(schemas.ValidationError):
             schema.validate({})
 
     def test_you_cannot_update_protected_fields(self,
-                                                annotation,
                                                 AnnotationSchema):
         for protected_field in ['created', 'updated', 'user', 'id']:
             AnnotationSchema.return_value.validate\
                 .return_value[protected_field] = 'foo'
-            schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                    annotation)
+            schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
             appstruct = schema.validate({})
 
@@ -990,15 +984,12 @@ class TestUpdateAnnotationSchema(object):
             assert protected_field not in appstruct.get('extra', {})
 
     def test_you_cannot_change_an_annotations_group(self,
-                                                    annotation,
                                                     AnnotationSchema):
-        annotation.groupid = 'original-group'
         AnnotationSchema.return_value.validate.return_value['groupid'] = (
             'new-group')
         AnnotationSchema.return_value.validate.return_value['group'] = (
             'new-group')
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         appstruct = schema.validate({})
 
@@ -1008,13 +999,10 @@ class TestUpdateAnnotationSchema(object):
         assert 'group' not in appstruct.get('extra', {})
 
     def test_you_cannot_change_an_annotations_userid(self,
-                                                     annotation,
                                                      AnnotationSchema):
-        annotation.userid = 'original_userid'
         AnnotationSchema.return_value.validate.return_value['userid'] = (
             'new_userid')
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         appstruct = schema.validate({})
 
@@ -1022,22 +1010,18 @@ class TestUpdateAnnotationSchema(object):
         assert 'userid' not in appstruct.get('extra', {})
 
     def test_you_cannot_change_an_annotations_references(self,
-                                                         annotation,
                                                          AnnotationSchema):
-        annotation.references = ['original_parent']
         AnnotationSchema.return_value.validate.return_value['references'] = [
             'new_parent']
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         appstruct = schema.validate({})
 
         assert 'references' not in appstruct
         assert 'references' not in appstruct.get('extra', {})
 
-    def test_it_renames_uri_to_target_uri(self, annotation, AnnotationSchema):
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+    def test_it_renames_uri_to_target_uri(self, AnnotationSchema):
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         AnnotationSchema.return_value.validate.return_value['uri'] = (
             'http://example.com/example')
 
@@ -1049,7 +1033,6 @@ class TestUpdateAnnotationSchema(object):
 
     def test_it_replaces_private_permissions_with_shared_False(
             self,
-            annotation,
             AnnotationSchema,
             authn_policy):
         AnnotationSchema.return_value.validate.return_value['permissions'] = {
@@ -1057,8 +1040,7 @@ class TestUpdateAnnotationSchema(object):
         }
         authn_policy.authenticated_userid.return_value = (
             'acct:harriet@example.com')
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         appstruct = schema.validate({})
 
@@ -1067,7 +1049,6 @@ class TestUpdateAnnotationSchema(object):
         assert 'permissions' not in appstruct.get('extras', {})
 
     def test_it_replaces_shared_permissions_with_shared_True(self,
-                                                             annotation,
                                                              AnnotationSchema,
                                                              authn_policy):
         AnnotationSchema.return_value.validate.return_value['permissions'] = {
@@ -1075,8 +1056,7 @@ class TestUpdateAnnotationSchema(object):
         }
         authn_policy.authenticated_userid.return_value = (
             'acct:harriet@example.com')
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         appstruct = schema.validate({})
 
@@ -1085,10 +1065,8 @@ class TestUpdateAnnotationSchema(object):
         assert 'permissions' not in appstruct.get('extras', {})
 
     def test_it_converts_target_to_target_selectors(self,
-                                                    annotation,
                                                     AnnotationSchema):
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         AnnotationSchema.return_value.validate.return_value['target'] = [
             {
                 'foo': 'bar',  # This should be removed,
@@ -1103,20 +1081,16 @@ class TestUpdateAnnotationSchema(object):
         assert 'target' not in appstruct
         assert 'target' not in appstruct.get('extras', {})
 
-    def test_you_can_update_text(self, annotation, AnnotationSchema):
-        annotation.text = 'old_text'
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+    def test_you_can_update_text(self, AnnotationSchema):
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         AnnotationSchema.return_value.validate.return_value['text'] = 'new'
 
         appstruct = schema.validate({})
 
         assert appstruct['text'] == 'new'
 
-    def test_you_can_update_tags(self, annotation, AnnotationSchema):
-        annotation.tags = ['old', 'tags']
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+    def test_you_can_update_tags(self, AnnotationSchema):
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         AnnotationSchema.return_value.validate.return_value['tags'] = ['new']
 
         appstruct = schema.validate({})
@@ -1124,7 +1098,6 @@ class TestUpdateAnnotationSchema(object):
         assert appstruct['tags'] == ['new']
 
     def test_it_calls_document_uris_from_data(self,
-                                              annotation,
                                               AnnotationSchema,
                                               parse_document_claims):
         document_data = {'foo': 'bar'}
@@ -1132,8 +1105,7 @@ class TestUpdateAnnotationSchema(object):
         AnnotationSchema.return_value.validate.return_value['document'] = (
             document_data)
         AnnotationSchema.return_value.validate.return_value['uri'] = target_uri
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         schema.validate({})
 
@@ -1144,7 +1116,6 @@ class TestUpdateAnnotationSchema(object):
 
     def test_it_passes_existing_target_uri_to_document_uris_from_data(
             self,
-            annotation,
             AnnotationSchema,
             parse_document_claims):
         """
@@ -1156,27 +1127,23 @@ class TestUpdateAnnotationSchema(object):
 
         """
         document_data = {'foo': 'bar'}
-        annotation.target_uri = 'http://example.com/existing_target_uri'
         AnnotationSchema.return_value.validate.return_value['document'] = (
             document_data)
         assert 'uri' not in AnnotationSchema.return_value.validate.return_value
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+                                                mock.sentinel.target_uri)
 
         schema.validate({})
 
         parse_document_claims.document_uris_from_data.assert_called_once_with(
             document_data,
-            claimant=annotation.target_uri,
-        )
+            claimant=mock.sentinel.target_uri)
 
     def test_it_puts_document_uris_in_appstruct(self,
-                                                annotation,
                                                 AnnotationSchema,
                                                 parse_document_claims):
         AnnotationSchema.return_value.validate.return_value['document'] = {}
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         appstruct = schema.validate({})
 
@@ -1184,11 +1151,9 @@ class TestUpdateAnnotationSchema(object):
             parse_document_claims.document_uris_from_data.return_value)
 
     def test_it_calls_document_metas_from_data(self,
-                                               annotation,
                                                AnnotationSchema,
                                                parse_document_claims):
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         document_data = {'foo': 'bar'}
         target_uri = 'http://example.com/example'
         AnnotationSchema.return_value.validate.return_value['document'] = (
@@ -1204,7 +1169,6 @@ class TestUpdateAnnotationSchema(object):
 
     def test_it_passes_existing_target_uri_to_document_metas_from_data(
             self,
-            annotation,
             AnnotationSchema,
             parse_document_claims):
         """
@@ -1216,23 +1180,20 @@ class TestUpdateAnnotationSchema(object):
 
         """
         document_data = {'foo': 'bar'}
-        annotation.target_uri = 'http://example.com/existing_target_uri'
         AnnotationSchema.return_value.validate.return_value['document'] = (
             document_data)
         assert 'uri' not in AnnotationSchema.return_value.validate.return_value
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+                                                mock.sentinel.target_uri)
 
         schema.validate({})
 
         parse_document_claims.document_metas_from_data.assert_called_once_with(
             document_data,
-            claimant=annotation.target_uri,
-        )
+            claimant=mock.sentinel.target_uri)
 
     def test_it_does_not_pass_modified_dict_to_document_metas_from_data(
             self,
-            annotation,
             AnnotationSchema,
             parse_document_claims):
         """
@@ -1254,8 +1215,7 @@ class TestUpdateAnnotationSchema(object):
             document['sub_dict']['key'] = 'new_value'
         parse_document_claims.document_uris_from_data.side_effect = (
             document_uris_from_data)
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         AnnotationSchema.return_value.validate.return_value['document'] = (
             document)
 
@@ -1266,11 +1226,9 @@ class TestUpdateAnnotationSchema(object):
             document)
 
     def test_it_puts_document_metas_in_appstruct(self,
-                                                 annotation,
                                                  AnnotationSchema,
                                                  parse_document_claims):
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         AnnotationSchema.return_value.validate.return_value['document'] = {}
 
         appstruct = schema.validate({})
@@ -1279,7 +1237,6 @@ class TestUpdateAnnotationSchema(object):
             parse_document_claims.document_metas_from_data.return_value)
 
     def test_it_clears_existing_keys_from_document(self,
-                                                   annotation,
                                                    AnnotationSchema):
         """
         Any keys in the document dict should be removed.
@@ -1288,8 +1245,7 @@ class TestUpdateAnnotationSchema(object):
         'document_meta_dicts' keys.
 
         """
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         AnnotationSchema.return_value.validate.return_value['document'] = {
             'foo': 'bar'  # This should be deleted.
         }
@@ -1299,10 +1255,8 @@ class TestUpdateAnnotationSchema(object):
         assert 'foo' not in appstruct['document']
 
     def test_document_does_not_end_up_in_extra(self,
-                                               annotation,
                                                AnnotationSchema):
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
         AnnotationSchema.return_value.validate.return_value['document'] = {
             'foo': 'bar'
         }
@@ -1312,17 +1266,50 @@ class TestUpdateAnnotationSchema(object):
         assert 'document' not in appstruct.get('extra', {})
 
     def test_it_does_not_crash_when_fields_are_missing(self,
-                                                       annotation,
                                                        AnnotationSchema):
         AnnotationSchema.return_value.validate.return_value = {}
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
-                                                annotation)
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
 
         appstruct = schema.validate({})
 
-    @pytest.fixture
-    def annotation(self):
-        return mock.Mock(groupid='foogroup')
+    def test_it_adds_extra_fields_into_the_extra_dict(self,
+                                                      AnnotationSchema):
+        AnnotationSchema.return_value.validate.return_value['foo'] = 'bar'
+        AnnotationSchema.return_value.validate.return_value['custom'] = 23
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
+
+        appstruct = schema.validate({})
+
+        assert appstruct['extra'] == {'foo': 'bar', 'custom': 23}
+
+    def test_it_overwrites_extra_fields_in_the_extra_dict(self,
+                                                          AnnotationSchema):
+        AnnotationSchema.return_value.validate.return_value['foo'] = 'bar'
+        AnnotationSchema.return_value.validate.return_value['custom'] = 23
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
+
+        appstruct = schema.validate({})
+
+        assert appstruct['extra'] == {'foo': 'bar', 'custom': 23}
+
+    def test_it_does_not_modify_extra_fields_that_are_not_sent(
+            self,
+            AnnotationSchema):
+        AnnotationSchema.return_value.validate.return_value['foo'] = 'bar'
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
+
+        appstruct = schema.validate({})
+
+        assert 'custom' not in appstruct['extra']
+
+    def test_it_does_not_modify_extra_fields_if_none_are_sent(
+            self,
+            AnnotationSchema):
+        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '')
+
+        appstruct = schema.validate({})
+
+        assert not appstruct.get('extra')
 
 
 def annotation_data(**kwargs):
