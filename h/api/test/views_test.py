@@ -367,8 +367,7 @@ class TestCreate(object):
             AnnotationEvent.return_value)
 
     def test_it_returns_presented_annotation(self,
-                                             AnnotationJSONPresenter,
-                                             storage):
+                                             AnnotationJSONPresenter):
         request = self.mock_request()
 
         result = views.create(request)
