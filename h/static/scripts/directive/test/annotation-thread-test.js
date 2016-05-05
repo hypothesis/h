@@ -10,10 +10,12 @@ function PageObject(element) {
     return Array.from(element[0].querySelectorAll('annotation'));
   };
   this.visibleReplies = function () {
-    return Array.from(element[0].querySelectorAll('.thread:not(.ng-hide)'));
+    return Array.from(element[0].querySelectorAll(
+      '.annotation-thread__content > ul > li:not(.ng-hide)'
+    ));
   };
   this.replyList = function () {
-    return element[0].querySelector('.thread-replies');
+    return element[0].querySelector('.annotation-thread__content > ul');
   };
   this.isHidden = function (element) {
     return element.classList.contains('ng-hide');

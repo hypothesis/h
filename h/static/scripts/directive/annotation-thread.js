@@ -37,6 +37,29 @@ function AnnotationThreadController() {
     });
   };
 
+  this.threadClasses = function () {
+    return {
+      'annotation-thread': true,
+      'annotation-thread--reply': this.thread.depth > 0,
+      'annotation-thread--top-reply': this.thread.depth === 1,
+    };
+  };
+
+  this.threadToggleClasses = function () {
+    return {
+      'annotation-thread__collapse-toggle': true,
+      'is-open': !this.thread.collapsed,
+    };
+  };
+
+  this.annotationClasses = function () {
+    return {
+      annotation: true,
+      'annotation--reply': this.thread.depth > 0,
+      'is-collapsed': this.thread.collapsed,
+    };
+  };
+
   /**
    * Show this thread and any of its children
    */
@@ -44,6 +67,10 @@ function AnnotationThreadController() {
     showAllParents(this.thread, this.onForceVisible);
     this.onForceVisible({thread: this.thread});
     showAllChildren(this.thread, this.onForceVisible);
+  };
+
+  this.isTopLevelThread = function () {
+    return !this.thread.parent;
   };
 
   /**

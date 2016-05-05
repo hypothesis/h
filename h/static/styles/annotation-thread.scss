@@ -1,0 +1,100 @@
+.annotation-thread {
+  display: flex;
+  flex-direction: row;
+}
+
+// Direct or nested reply to an annotation
+.annotation-thread--reply {
+  // The negative margin is used so that the hovered background of reply threads
+  // extends beyond the left/right edges of the parent annotation's content.
+  // See https://goo.gl/fC5yfa
+  margin-left: -10px;
+  margin-right: -10px;
+
+  // Left padding is set so that left edge of collapse toggle arrow is
+  // aligned with left edge of the parent annotation's content.
+  padding-left: 5px;
+  padding-right: 10px;
+}
+
+// Top-level reply to an annotation
+.annotation-thread--top-reply {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+li:first-child .annotation-thread--top-reply {
+  // Gap between baseline of 'Hide/Show Replies' for annotation and top
+  // of first reply should be ~15px
+  margin-top: 5px;
+}
+
+// The dashed line at the left edge of replies
+.annotation-thread__thread-line {
+  width: 8px;
+  margin-right: 13px;
+  border-right: 1px dashed $grey-3;
+}
+
+.annotation-thread__content {
+  flex-grow: 1;
+}
+
+.annotation-thread--reply:hover {
+  .annotation-thread__collapse-toggle {
+    color: $grey-7;
+    background-color: $grey-1;
+  }
+
+  background-color: $grey-1;
+}
+
+// Toggle arrow which expands and collapses threads.
+// This is aligned so that it appears above a dashed line which appears
+// to the left of the threads.
+.annotation-thread__collapse-toggle {
+  width: 10px;
+  color: $grey-4;
+  display: block;
+  text-align: center;
+
+  font-size: 15px;
+  line-height: 22px;
+
+  // The toggle arrow covers up the top of the dashed line alongside the
+  // thread.
+  background: $white;
+  height: 100%;
+
+  &.is-open {
+    // When the thread is expanded, the top of the dashed line is should be
+    // aligned with the reply's body.
+    height: 30px;
+  }
+}
+
+.annotation-thread__load-more {
+  clear: both;
+}
+
+// Note: This belongs in a separate component
+.annotation-unavailable-message {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $gray-lighter;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  border-radius: 3px;
+  align-items: center;
+
+  &__label {
+    text-align: center;
+  }
+
+  &__icon {
+    background-image: url(../images/icons/lock.svg);
+    background-repeat: no-repeat;
+    width: 56px;
+    height: 48px;
+  }
+}

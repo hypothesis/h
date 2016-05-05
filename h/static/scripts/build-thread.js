@@ -191,12 +191,16 @@ function sortThread(thread, compareFn, replyCompareFn) {
 }
 
 /**
- * Return a copy of @p thread with the replyCount property updated.
+ * Return a copy of @p thread with the `replyCount` and `depth` properties
+ * updated.
  */
-function countReplies(thread) {
-  var children = thread.children.map(countReplies);
+function countRepliesAndDepth(thread, depth) {
+  var children = thread.children.map(function (c) {
+    return countRepliesAndDepth(c, depth + 1);
+  });
   return Object.assign({}, thread, {
     children: children,
+    depth: depth,
     replyCount: children.reduce(function (total, child) {
       return total + 1 + child.replyCount;
     }, 0),
@@ -324,8 +328,8 @@ function buildThread(annotations, opts) {
   // Sort the root thread according to the current search criteria
   thread = sortThread(thread, opts.sortCompareFn, opts.replySortCompareFn);
 
-  // Update reply counts
-  thread = countReplies(thread);
+  // Update `replyCount` and `depth` properties
+  thread = countRepliesAndDepth(thread, -1);
 
   return thread;
 }

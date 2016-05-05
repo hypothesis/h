@@ -10,7 +10,7 @@ $annotation-card-left-padding: 10px;
   box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.10);
   border-radius: 2px;
   padding: $layout-h-margin;
-  background: $white;
+  background-color: $white;
 }
 
 .annotation-card:hover {
@@ -211,22 +211,20 @@ $annotation-card-left-padding: 10px;
   display: none;
 }
 
-.thread-replies {
-  .annotation.collapsed {
-    margin-bottom: 0;
+.annotation--reply.is-collapsed {
+  margin-bottom: 0;
 
-    .annotation-header {
-      margin: 0;
-    }
+  .annotation-header {
+    margin: 0;
+  }
 
-    .annotation-body, .annotation-footer {
-      display: none;
-    }
+  .annotation-body, .annotation-footer {
+    display: none;
+  }
 
-    .annotation-collapsed-replies {
-      display: inline;
-      margin-left: .25em;
-    }
+  .annotation-collapsed-replies {
+    display: inline;
+    margin-left: .25em;
   }
 }
 
@@ -240,4 +238,32 @@ $annotation-card-left-padding: 10px;
   display: flex;
   flex-direction: row;
   margin-bottom: 10px;
+}
+
+// Style adjustments for annotation cards that are replies
+.annotation--reply {
+  .annotation-action-btn {
+    color: $grey-4;
+  }
+
+  .annotation-footer {
+    // Margin between bottom of ascent of annotation body and
+    // top of annotation footer should be ~15px
+    margin-top: $layout-h-margin - 8px;
+  }
+
+  .annotation-header {
+    // Margin between bottom of ascent of annotation card footer labels
+    // and top of ascent of username should be ~20px
+    margin-top: 0px;
+  }
+
+  .annotation-body {
+    // Margin between top of ascent of annotation body and
+    // bottom of ascent of username should be ~15px
+    margin-top: $layout-h-margin - 8px;
+    // Margin between bottom of ascent of annotation body and
+    // top of annotation footer labels should be ~15px
+    margin-bottom: $layout-h-margin - 3px;
+  }
 }
