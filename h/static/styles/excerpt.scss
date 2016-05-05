@@ -5,6 +5,10 @@
   .excerpt {
     transition: max-height $expand-duration ease-in;
     overflow: hidden;
+
+    p {
+      margin: 0;
+    }
   }
 
   // a container which wraps the <excerpt> and contains the excerpt

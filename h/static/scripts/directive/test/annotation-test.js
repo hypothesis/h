@@ -1525,7 +1525,7 @@ describe('annotation', function() {
     describe('annotation metadata', function () {
       function findLink(directive) {
         var links = directive.element[0]
-          .querySelectorAll('header .annotation-link');
+          .querySelectorAll('header .annotation-header__timestamp');
         return links[links.length-1];
       }
 

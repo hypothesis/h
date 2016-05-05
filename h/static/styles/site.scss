@@ -23,10 +23,10 @@
 // pages
 @import './home';
 
-// body with grey noise background and Lato font used
+// body with grey background and Lato font used
 // in the sidebar and groups pages
 .body--default {
-  @include noise-background;
+  @include grey-background;
   font-family: $sans-font-family;
 }
 
