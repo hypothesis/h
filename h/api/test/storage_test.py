@@ -387,7 +387,7 @@ class TestCreateAnnotation(object):
         annotation_data['document']['document_uri_dicts'] = (
             mock.sentinel.document_uri_dicts)
 
-        annotation = storage.create_annotation(request, annotation_data)
+        storage.create_annotation(request, annotation_data)
 
         update_document_metadata.assert_called_once_with(
             request.db,
