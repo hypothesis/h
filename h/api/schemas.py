@@ -206,19 +206,18 @@ class CreateAnnotationSchema(object):
         new_appstruct['target_uri'] = appstruct.pop('uri', u'')
         new_appstruct['text'] = appstruct.pop('text', u'')
         new_appstruct['tags'] = appstruct.pop('tags', [])
+        new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
+        new_appstruct['references'] = appstruct.pop('references', [])
 
         if 'permissions' in appstruct:
             new_appstruct['shared'] = _shared(appstruct.pop('permissions'),
-                                              new_appstruct['userid'])
+                                              new_appstruct['groupid'])
         else:
             new_appstruct['shared'] = False
 
         if 'target' in appstruct:  # Replies and page notes don't have targets.
             new_appstruct['target_selectors'] = _target_selectors(
                 appstruct.pop('target'))
-
-        new_appstruct['groupid'] = appstruct.pop('group', u'__world__')
-        new_appstruct['references'] = appstruct.pop('references', [])
 
         # Replies always get the same groupid as their parent. The parent's
         # groupid is added to the reply annotation later by the storage code.
@@ -269,9 +268,10 @@ class UpdateAnnotationSchema(object):
 
     """Validate the POSTed data of an update annotation request."""
 
-    def __init__(self, request, existing_target_uri):
+    def __init__(self, request, existing_target_uri, groupid):
         self.request = request
         self.existing_target_uri = existing_target_uri
+        self.groupid = groupid
         self.structure = AnnotationSchema()
 
     def validate(self, data):
@@ -291,9 +291,8 @@ class UpdateAnnotationSchema(object):
             new_appstruct['target_uri'] = appstruct.pop('uri')
 
         if 'permissions' in appstruct:
-            new_appstruct['shared'] = _shared(
-                appstruct.pop('permissions'),
-                self.request.authenticated_userid)
+            new_appstruct['shared'] = _shared(appstruct.pop('permissions'),
+                                              self.groupid)
 
         if 'target' in appstruct:
             new_appstruct['target_selectors'] = _target_selectors(
@@ -389,7 +388,7 @@ def _remove_protected_fields(appstruct):
         appstruct.pop(field, None)
 
 
-def _shared(permissions, userid):
+def _shared(permissions, groupid):
     """
     Return True if the given permissions object represents shared permissions.
 
@@ -401,11 +400,12 @@ def _shared(permissions, userid):
         annotation create or update request
     :type permissions: dict
 
-    :param userid: the userid of the user who created the annotation
-    :type userid: unicode
+    :param groupid: the groupid of the annotation that the permissions dict
+        applies to
+    :type groupid: unicode
 
     """
-    return permissions['read'] != [userid]
+    return permissions['read'] == ['group:{id}'.format(id=groupid)]
 
 
 def _target_selectors(targets):
