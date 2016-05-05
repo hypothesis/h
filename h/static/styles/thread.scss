@@ -5,7 +5,7 @@ $thread-padding: $annotation-card-left-padding;
     margin-bottom: .72em;
   }
 
-  & > li.thread > .threadexp {
+  & > .thread > .thread-collapse-toggle {
     display: none;
   }
 }
@@ -62,6 +62,14 @@ $thread-padding: $annotation-card-left-padding;
   }
 }
 
+.thread-replies:hover {
+  background-color: $grey-2;
+
+  .thread-collapse-toggle {
+    background-color: $grey-2;
+  }
+}
+
 .thread {
   cursor: pointer;
   position: relative;
@@ -73,34 +81,39 @@ $thread-padding: $annotation-card-left-padding;
     margin-right: -$thread-padding;
   }
 
-  // nested threads for annotation replies
+  // Nested threads for annotation replies
   .thread {
-    border-left: 1px dotted $grey-3;
+    border-left: 1px dashed $grey-3;
     padding: 0;
     padding-left: $thread-padding;
 
     &:hover {
-      & > .threadexp > span {
+      & > .thread-collapse-toggle {
         color: $grey-7;
       }
     }
   }
+}
 
-  .threadexp {
-    position: absolute;
-    left: -.7em;
-    width: 1.4em;
-    height: 1.4em;
-    font-size: 1.1em;
+// Toggle arrow which expands and collapses threads.
+// This is aligned so that it appears above a dashed line which appears
+// to the left of the threads.
+.thread-collapse-toggle {
+  position: absolute;
+  left: -7px;
+  width: 10px;
+  color: $grey-4;
+  display: block;
+  text-align: center;
 
-    span {
-      background: $white;
-      color: $grey-4;
-      display: block;
-      line-height: inherit;
-      text-align: center;
-    }
-  }
+  font-size: 15px;
+  line-height: 22px;
+
+  // The toggle arrow covers up the top of the dashed line alongside the
+  // thread, so that the top of the dashed line is aligned with the top of
+  // the reply's body
+  background: $white;
+  height: 25px;
 }
 
 .thread-load-more {
