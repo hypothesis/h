@@ -91,304 +91,89 @@ class TestAnnotationSchema(object):
             'uri': 'foo',
         })
 
-    def test_it_raises_if_document_is_not_a_dict(self):
-        schema = schemas.AnnotationSchema()
+    @pytest.mark.parametrize("input_data,error_message", [
+        ({'document': False}, "document: False is not of type 'object'"),
 
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document=False,
-            ))
+        ({'document': {'dc': False}},
+         "document.dc: False is not of type 'object'"),
 
-        assert str(err.value) == "document: False is not of type 'object'"
+        ({'document': {'dc': {'identifier': False}}},
+         "document.dc.identifier: False is not of type 'array'"),
 
-    def test_it_raises_if_document_dc_is_not_a_dict(self):
-        schema = schemas.AnnotationSchema()
+        ({'document': {'dc': {'identifier': [False]}}},
+         "document.dc.identifier.0: False is not of type 'string'"),
 
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'dc': False}
-            ))
+        ({'document': {'highwire': False}},
+         "document.highwire: False is not of type 'object'"),
 
-        assert str(err.value) == "document.dc: False is not of type 'object'"
+        ({'document': {'highwire': {'doi': False}}},
+         "document.highwire.doi: False is not of type 'array'"),
 
-    def test_it_raises_if_document_dc_identifier_is_not_a_list(self):
-        schema = schemas.AnnotationSchema()
+        ({'document': {'highwire': {'doi': [False]}}},
+         "document.highwire.doi.0: False is not of type 'string'"),
 
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'dc': {'identifier': False}}
-            ))
+        ({'document': {'link': False}},
+         "document.link: False is not of type 'array'"),
 
-        assert str(err.value) == (
-            "document.dc.identifier: False is not of type 'array'")
+        ({'document': {'link': [False]}},
+         "document.link.0: False is not of type 'object'"),
 
-    def test_it_raises_if_document_dc_identifier_item_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
+        ({'document': {'link': [{}]}},
+         "document.link.0: 'href' is a required property"),
 
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'dc': {'identifier': [False]}}
-            ))
+        ({'document': {'link': [{'href': False}]}},
+         "document.link.0.href: False is not of type 'string'"),
 
-        assert str(err.value) == (
-            "document.dc.identifier.0: False is not of type 'string'")
-
-    def test_it_raises_if_document_highwire_is_not_a_dict(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'highwire': False}
-            ))
-
-        assert str(err.value) == (
-            "document.highwire: False is not of type 'object'")
-
-    def test_it_raises_if_document_highwire_doi_is_not_a_list(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'highwire': {'doi': False}}
-            ))
-
-        assert str(err.value) == (
-            "document.highwire.doi: False is not of type 'array'")
-
-    def test_it_raises_if_document_highwire_doi_item_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'highwire': {'doi': [False]}}
-            ))
-
-        assert str(err.value) == (
-            "document.highwire.doi.0: False is not of type 'string'")
-
-    def test_it_raises_if_document_link_is_not_a_list(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'link': False}
-            ))
-
-        assert str(err.value) == "document.link: False is not of type 'array'"
-
-    def test_it_raises_if_document_link_item_is_not_a_dict(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'link': [False]}
-            ))
-
-        assert str(err.value) == (
-            "document.link.0: False is not of type 'object'")
-
-    def test_it_raises_if_document_link_item_has_no_href(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'link': [{}]}
-            ))
-
-        assert str(err.value) == (
-            "document.link.0: 'href' is a required property")
-
-    def test_it_raises_if_document_link_item_href_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={'link': [{'href': False}]}
-            ))
-
-        assert str(err.value) == (
-            "document.link.0.href: False is not of type 'string'")
-
-    def test_it_raises_if_document_link_item_type_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                document={
-                    'link': [
-                        {
-                            'href': 'http://example.com',
-                            'type': False
-                        }
-                    ]
+        ({'document': {
+            'link': [
+                {
+                    'href': 'http://example.com',
+                    'type': False
                 }
-            ))
+            ]
+        }}, "document.link.0.type: False is not of type 'string'"),
 
-        assert str(err.value) == (
-            "document.link.0.type: False is not of type 'string'")
+        ({'group': False}, "group: False is not of type 'string'"),
 
-    def test_it_raises_if_group_is_not_a_string(self):
+        ({'permissions': False}, "permissions: False is not of type 'object'"),
+
+        ({'permissions': {}}, "permissions: 'read' is a required property"),
+
+        ({'permissions': {'read': False}},
+         "permissions.read: False is not of type 'array'"),
+
+        ({'permissions': {'read': [False]}},
+         "permissions.read.0: False is not of type 'string'"),
+
+        ({'permissions': {'read': ["foo"]}},
+         "permissions.read.0: u'foo' does not match '^(acct:|group:).+$'"),
+
+        ({'references': False}, "references: False is not of type 'array'"),
+
+        ({'references': [False]},
+         "references.0: False is not of type 'string'"),
+
+        ({'tags': False}, "tags: False is not of type 'array'"),
+
+        ({'tags': [False]}, "tags.0: False is not of type 'string'"),
+
+        ({'target': False}, "target: False is not of type 'array'"),
+
+        ({'target': [False]}, "target.0: False is not of type 'object'"),
+
+        ({'target': [{}]}, "target.0: 'selector' is a required property"),
+
+        ({'text': False}, "text: False is not of type 'string'"),
+
+        ({'uri': False}, "uri: False is not of type 'string'"),
+    ])
+    def test_it_raises_for_invalid_data(self, input_data, error_message):
         schema = schemas.AnnotationSchema()
 
         with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                group=False
-            ))
+            schema.validate(self.valid_input_data(**input_data))
 
-        assert str(err.value) == "group: False is not of type 'string'"
-
-    def test_it_raises_if_permissions_is_not_a_dict(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                permissions=False
-            ))
-
-        assert str(err.value) == "permissions: False is not of type 'object'"
-
-    def test_it_raises_if_permissions_has_no_read(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                permissions={}
-            ))
-
-        assert str(err.value) == "permissions: 'read' is a required property"
-
-    def test_it_raises_if_permissions_read_is_not_a_list(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                permissions={'read': False}
-            ))
-
-        assert str(err.value) == (
-            "permissions.read: False is not of type 'array'")
-
-    def test_it_raises_if_permissions_read_item_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                permissions={'read': [False]}
-            ))
-
-        assert str(err.value) == (
-            "permissions.read.0: False is not of type 'string'")
-
-    def test_it_raises_if_permissions_read_item_is_wrong_format(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                permissions={'read': ["foo"]}
-            ))
-
-        assert str(err.value) == (
-            "permissions.read.0: u'foo' does not match '^(acct:|group:).+$'")
-
-    def test_it_raises_if_references_is_not_a_list(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                references=False
-            ))
-
-        assert str(err.value) == "references: False is not of type 'array'"
-
-    def test_it_raises_if_references_item_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                references=[False]
-            ))
-
-        assert str(err.value) == "references.0: False is not of type 'string'"
-
-    def test_it_raises_if_tags_is_not_a_list(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                tags=False
-            ))
-
-        assert str(err.value) == "tags: False is not of type 'array'"
-
-    def test_it_raises_if_tags_item_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                tags=[False]
-            ))
-
-        assert str(err.value) == "tags.0: False is not of type 'string'"
-
-    def test_it_raises_if_target_is_not_a_list(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                target=False
-            ))
-
-        assert str(err.value) == "target: False is not of type 'array'"
-
-    def test_it_raises_if_target_item_is_not_a_dict(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                target=[False]
-            ))
-
-        assert str(err.value) == "target.0: False is not of type 'object'"
-
-    def test_it_raises_if_target_has_no_selector(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                target=[{}]
-            ))
-
-        assert str(err.value) == "target.0: 'selector' is a required property"
-
-    def test_it_raises_if_text_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                text=False
-            ))
-
-        assert str(err.value) == "text: False is not of type 'string'"
-
-    def test_it_raises_if_uri_is_not_a_string(self):
-        schema = schemas.AnnotationSchema()
-
-        with pytest.raises(schemas.ValidationError) as err:
-            schema.validate(self.valid_input_data(
-                uri=False
-            ))
-
-        assert str(err.value) == "uri: False is not of type 'string'"
-
-    def valid_input_data(self, **kwargs):
-        """Return a minimal valid input data for AnnotationSchema."""
-        data = {
-            'permissions': {
-                'read': [],
-            },
-        }
-        data.update(kwargs)
-        return data
+        assert str(err.value) == error_message
 
     @pytest.mark.parametrize('field', [
         'created',
@@ -411,6 +196,16 @@ class TestAnnotationSchema(object):
             'permissions': {
                 'read': []
             }
+        }
+        data.update(kwargs)
+        return data
+
+    def valid_input_data(self, **kwargs):
+        """Return a minimal valid input data for AnnotationSchema."""
+        data = {
+            'permissions': {
+                'read': [],
+            },
         }
         data.update(kwargs)
         return data
