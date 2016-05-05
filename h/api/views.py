@@ -208,17 +208,46 @@ def read_jsonld(annotation, request):
 @api_config(route_name='api.annotation', request_method='PUT', permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
+    if request.feature('postgres'):
+        annotation_dict = _update_postgres(annotation, request)
+        legacy_annotation = storage.fetch_annotation(request,
+                                                     annotation.id,
+                                                     _postgres=False)
+        _update_elastic(legacy_annotation, request, notify=False)
+        return annotation_dict
+    return _update_elastic(annotation, request, notify=True)
+
+
+def _update_postgres(annotation, request):
+    schema = schemas.UpdateAnnotationSchema(request,
+                                            annotation.target_uri,
+                                            annotation.groupid)
+    appstruct = schema.validate(copy.deepcopy(_json_payload(request)))
+
+    annotation = storage.update_annotation(request.db,
+                                           annotation.id,
+                                           appstruct)
+
+    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+
+    _publish_annotation_event(request, annotation_dict, 'update')
+
+    return annotation_dict
+
+
+def _update_elastic(annotation, request, notify):
     schema = schemas.LegacyUpdateAnnotationSchema(request,
                                                   annotation=annotation)
-    appstruct = schema.validate(_json_payload(request))
+    appstruct = schema.validate(copy.deepcopy(_json_payload(request)))
+
     annotation = storage.legacy_update_annotation(request,
                                                   annotation.id,
                                                   appstruct)
 
-    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-    _publish_annotation_event(request, annotation, 'update',
-                              annotation_dict=annotation_dict)
-    return annotation_dict
+    if notify:
+        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+        _publish_annotation_event(request, annotation_dict, 'update')
+        return annotation_dict
 
 
 @api_config(route_name='api.annotation', request_method='DELETE', permission='delete')
