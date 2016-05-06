@@ -2,6 +2,8 @@
 
 var angular = require('angular');
 
+var createFakeStore = require('./create-fake-store');
+
 describe('AnnotationUISync', function () {
   var sandbox = sinon.sandbox.create();
   var $digest;
@@ -47,11 +49,13 @@ describe('AnnotationUISync', function () {
       }
     };
 
+    var store = createFakeStore({visibleHighlights: false});
     fakeAnnotationUI = {
       focusAnnotations: sandbox.stub(),
       selectAnnotations: sandbox.stub(),
       xorSelectedAnnotations: sandbox.stub(),
-      visibleHighlights: false,
+      setShowHighlights: sandbox.stub(),
+      getState: store.getState,
     };
 
     createAnnotationUISync = function () {
@@ -141,10 +145,10 @@ describe('AnnotationUISync', function () {
   });
 
   describe('on "setVisibleHighlights" event', function () {
-    it('updates the annotationUI with the new value', function () {
+    it('updates the annotationUI state', function () {
       createAnnotationUISync();
       publish('setVisibleHighlights', true);
-      assert.equal(fakeAnnotationUI.visibleHighlights, true);
+      assert.calledWith(fakeAnnotationUI.setShowHighlights, true);
     });
 
     it('notifies the other frames of the change', function () {

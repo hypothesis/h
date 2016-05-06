@@ -5,6 +5,7 @@ var inherits = require('inherits');
 var proxyquire = require('proxyquire');
 var EventEmitter = require('tiny-emitter');
 
+var createFakeStore = require('./create-fake-store');
 var events = require('../events');
 var noCallThru = require('./util').noCallThru;
 
@@ -62,12 +63,26 @@ describe('WidgetController', function () {
       unloadAnnotations: sandbox.spy()
     };
 
+    var store = createFakeStore({selectedAnnotationMap: {}});
     fakeAnnotationUI = {
       clearSelectedAnnotations: sandbox.spy(),
-      selectedAnnotationMap: {},
       hasSelectedAnnotations: function () {
-        return !!this.selectedAnnotationMap &&
-               Object.keys(this.selectedAnnotationMap).length > 0;
+        return !!this.getState().selectedAnnotationMap &&
+               Object.keys(this.getState().selectedAnnotationMap).length > 0;
+      },
+      getState: store.getState,
+      subscribe: store.subscribe,
+      _select: function (ids) {
+        if (!ids.length) {
+          store.setState({selectedAnnotationMap: null});
+          return;
+        }
+        store.setState({
+          selectedAnnotationMap: ids.reduce(function (map, id) {
+            map[id] = true;
+            return map;
+          }, {}),
+        });
       },
     };
     fakeCrossFrame = {
@@ -172,7 +187,7 @@ describe('WidgetController', function () {
 
       beforeEach(function () {
         fakeCrossFrame.frames = [{uri: uri}];
-        fakeAnnotationUI.selectedAnnotationMap[id] = true;
+        fakeAnnotationUI._select([id]);
         $scope.$digest();
       });
 
@@ -217,7 +232,7 @@ describe('WidgetController', function () {
 
       beforeEach(function () {
         fakeCrossFrame.frames = [{uri: uri}];
-        fakeAnnotationUI.selectedAnnotationMap[id] = true;
+        fakeAnnotationUI._select([id]);
         fakeGroups.focused = function () { return { id: 'private-group' }; };
         $scope.$digest();
       });
@@ -233,7 +248,7 @@ describe('WidgetController', function () {
   describe('when an annotation is anchored', function () {
     it('focuses and scrolls to the annotation if already selected', function () {
       var uri = 'http://example.com';
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeAnnotationUI._select(['123']);
       fakeCrossFrame.frames.push({uri: uri});
       var annot = {
         $$tag: 'atag',
@@ -296,21 +311,21 @@ describe('WidgetController', function () {
 
   describe('direct linking messages', function () {
     it('displays a message if the selection is unavailable', function () {
-      fakeAnnotationUI.selectedAnnotationMap = {'missing': true};
+      fakeAnnotationUI._select(['missing']);
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isTrue($scope.selectedAnnotationUnavailable());
     });
 
     it('does not show a message if the selection is available', function () {
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeAnnotationUI._select(['123']);
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.selectedAnnotationUnavailable());
     });
 
     it('does not a show a message if there is no selection', function () {
-      fakeAnnotationUI.selectedAnnotationMap = null;
+      fakeAnnotationUI._select([]);
       $scope.$digest();
       assert.isFalse($scope.selectedAnnotationUnavailable());
     });
@@ -319,7 +334,7 @@ describe('WidgetController', function () {
       $scope.auth = {
         status: 'signed-out'
       };
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeAnnotationUI._select(['123']);
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isTrue($scope.shouldShowLoggedOutMessage());
@@ -329,7 +344,7 @@ describe('WidgetController', function () {
       $scope.auth = {
         status: 'signed-out'
       };
-      fakeAnnotationUI.selectedAnnotationMap = {'missing': true};
+      fakeAnnotationUI._select(['missing']);
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
@@ -339,7 +354,7 @@ describe('WidgetController', function () {
       $scope.auth = {
         status: 'signed-out'
       };
-      fakeAnnotationUI.selectedAnnotationMap = null;
+      fakeAnnotationUI._select([]);
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
     });
@@ -348,7 +363,7 @@ describe('WidgetController', function () {
       $scope.auth = {
         status: 'signed-in'
       };
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeAnnotationUI._select(['123']);
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
@@ -359,7 +374,7 @@ describe('WidgetController', function () {
         status: 'signed-out'
       };
       delete fakeSettings.annotations;
-      fakeAnnotationUI.selectedAnnotationMap = {'123': true};
+      fakeAnnotationUI._select(['123']);
       fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());

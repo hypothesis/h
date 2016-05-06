@@ -1,8 +1,11 @@
 'use strict';
 
+var immutable = require('seamless-immutable');
+var redux = require('redux');
+
 function value(selection) {
   if (Object.keys(selection).length) {
-    return Object.freeze(selection);
+    return immutable(selection);
   } else {
     return null;
   }
@@ -16,19 +19,8 @@ function initialSelection(settings) {
   return value(selection);
 }
 
-/**
- * Stores the UI state of the annotator in connected clients.
- *
- * This includes:
- * - The set of annotations that are currently selected
- * - The annotation(s) that are currently hovered/focused
- * - The state of the bucket bar
- *
- */
-
-// @ngInject
-module.exports = function (settings) {
-  return {
+function initialState(settings) {
+  return Object.freeze({
     visibleHighlights: false,
 
     // Contains a map of annotation tag:true pairs.
@@ -36,13 +28,72 @@ module.exports = function (settings) {
 
     // Contains a map of annotation id:true pairs.
     selectedAnnotationMap: initialSelection(settings),
+  });
+}
+
+var types = {
+  SELECT_ANNOTATIONS: 'SELECT_ANNOTATIONS',
+  FOCUS_ANNOTATIONS: 'FOCUS_ANNOTATIONS',
+  SET_HIGHLIGHTS_VISIBLE: 'SET_HIGHLIGHTS_VISIBLE',
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case types.SELECT_ANNOTATIONS:
+      return Object.assign({}, state, {selectedAnnotationMap: action.selection});
+    case types.FOCUS_ANNOTATIONS:
+      return Object.assign({}, state, {focusedAnnotationMap: action.focused});
+    case types.SET_HIGHLIGHTS_VISIBLE:
+      return Object.assign({}, state, {visibleHighlights: action.visible});
+    default:
+      return state;
+  }
+}
+
+/**
+ * Stores the UI state of the annotator in connected clients.
+ *
+ * This includes:
+ * - The IDs of annotations that are currently selected or focused
+ * - The state of the bucket bar
+ *
+ */
+// @ngInject
+module.exports = function (settings) {
+  var store = redux.createStore(reducer, initialState(settings));
+
+  function select(annotations) {
+    store.dispatch({
+      type: types.SELECT_ANNOTATIONS,
+      selection: value(annotations),
+    });
+  }
+
+  return {
+    /**
+     * Return the current UI state of the sidebar. This should not be modified
+     * directly but only though the helper methods below.
+     */
+    getState: store.getState,
+
+    /** Listen for changes to the UI state of the sidebar. */
+    subscribe: store.subscribe,
 
     /**
-     * @ngdoc method
-     * @name annotationUI.focusedAnnotations
-     * @returns nothing
-     * @description Takes an array of annotations and uses them to set
-     * the focusedAnnotationMap.
+     * Sets whether annotation highlights in connected documents are shown
+     * or not.
+     */
+    setShowHighlights: function (show) {
+      store.dispatch({
+        type: types.SET_HIGHLIGHTS_VISIBLE,
+        visible: show,
+      });
+    },
+
+    /**
+     * Sets which annotations are currently focused.
+     *
+     * @param {Array<Annotation>} annotations
      */
     focusAnnotations: function (annotations) {
       var selection = {};
@@ -50,25 +101,24 @@ module.exports = function (settings) {
         annotation = annotations[i];
         selection[annotation.$$tag] = true;
       }
-      this.focusedAnnotationMap = value(selection);
+      store.dispatch({
+        type: types.FOCUS_ANNOTATIONS,
+        focused: value(selection),
+      });
     },
 
     /**
-     * @ngdoc method
-     * @name annotationUI.hasSelectedAnnotations
-     * @returns true if there are any selected annotations.
+     * Return true if any annotations are currently selected.
      */
     hasSelectedAnnotations: function () {
-      return !!this.selectedAnnotationMap;
+      return !!store.getState().selectedAnnotationMap;
     },
 
     /**
-     * @ngdoc method
-     * @name annotationUI.isAnnotationSelected
-     * @returns true if the provided annotation is selected.
+     * Returns true if the annotation with the given `id` is selected.
      */
     isAnnotationSelected: function (id) {
-      return (this.selectedAnnotationMap || {}).hasOwnProperty(id);
+      return (store.getState().selectedAnnotationMap || {}).hasOwnProperty(id);
     },
 
     /**
@@ -86,18 +136,12 @@ module.exports = function (settings) {
           selection[annotations[i].id] = true;
         }
       }
-      this.selectedAnnotationMap = value(selection);
+      select(selection);
     },
 
-    /**
-     * @ngdoc method
-     * @name annotationUI.xorSelectedAnnotations()
-     * @returns nothing
-     * @description takes an array of annotations and adds them to the
-     * selectedAnnotationMap if not present otherwise removes them.
-     */
+    /** Toggle whether annotations are selected or not. */
     xorSelectedAnnotations: function (annotations) {
-      var selection = Object.assign({}, this.selectedAnnotationMap);
+      var selection = Object.assign({}, store.getState().selectedAnnotationMap);
       for (var i = 0, annotation; i < annotations.length; i++) {
         annotation = annotations[i];
         var id = annotation.id;
@@ -107,31 +151,21 @@ module.exports = function (settings) {
           selection[id] = true;
         }
       }
-      this.selectedAnnotationMap = value(selection);
+      select(selection);
     },
 
-    /**
-     * @ngdoc method
-     * @name annotationUI.removeSelectedAnnotation()
-     * @returns nothing
-     * @description removes an annotation from the current selection.
-     */
+    /** De-select an annotation. */
     removeSelectedAnnotation: function (annotation) {
-      var selection = Object.assign({}, this.selectedAnnotationMap);
+      var selection = Object.assign({}, store.getState().selectedAnnotationMap);
       if (selection) {
         delete selection[annotation.id];
-        this.selectedAnnotationMap = value(selection);
+        select(selection);
       }
     },
 
-    /**
-     * @ngdoc method
-     * @name annotationUI.clearSelectedAnnotations()
-     * @returns nothing
-     * @description removes all annotations from the current selection.
-     */
+    /** De-select all annotations. */
     clearSelectedAnnotations: function () {
-      this.selectedAnnotationMap = null;
-    }
+      select({});
+    },
   };
 };

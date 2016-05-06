@@ -58,8 +58,8 @@ module.exports = function WidgetController(
    * not the order in which they appear in the document.
    */
   function firstSelectedAnnotation() {
-    if (annotationUI.selectedAnnotationMap) {
-      var id = Object.keys(annotationUI.selectedAnnotationMap)[0];
+    if (annotationUI.getState().selectedAnnotationMap) {
+      var id = Object.keys(annotationUI.getState().selectedAnnotationMap)[0];
       return threading.idTable[id] && threading.idTable[id].message;
     } else {
       return null;
@@ -88,8 +88,8 @@ module.exports = function WidgetController(
       if (annotationUI.hasSelectedAnnotations()) {
         // Focus the group containing the selected annotation and filter
         // annotations to those from this group
-        var groupID = groupIDFromSelection(annotationUI.selectedAnnotationMap,
-          results);
+        var groupID = groupIDFromSelection(
+          annotationUI.getState().selectedAnnotationMap, results);
         if (!groupID) {
           // If the selected annotation is not available, fall back to
           // loading annotations for the currently focused group
@@ -200,16 +200,20 @@ module.exports = function WidgetController(
   $scope.scrollTo = scrollToAnnotation;
 
   $scope.hasFocus = function (annotation) {
-    if (!annotation || !$scope.focusedAnnotations) {
+    if (!annotation || !annotationUI.getState().focusedAnnotationMap) {
       return false;
     }
-    return annotation.$$tag in $scope.focusedAnnotations;
+    return annotation.$$tag in annotationUI.getState().focusedAnnotationMap;
   };
+
+  function selectedID() {
+    return firstKey(annotationUI.getState().selectedAnnotationMap);
+  }
 
   $scope.selectedAnnotationUnavailable = function () {
     return !isLoading() &&
-           annotationUI.hasSelectedAnnotations() &&
-           !threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
+           !!selectedID() &&
+           !threading.idTable[selectedID()];
   };
 
   $scope.shouldShowLoggedOutMessage = function () {
@@ -228,8 +232,8 @@ module.exports = function WidgetController(
     // annotation. If there is an annotation selection and that
     // selection is available to the user, show the CTA.
     return !isLoading() &&
-           annotationUI.hasSelectedAnnotations() &&
-           !!threading.idTable[firstKey(annotationUI.selectedAnnotationMap)];
+           !!selectedID() &&
+           !!threading.idTable[selectedID()];
   };
 
   $scope.isLoading = isLoading;

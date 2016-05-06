@@ -2,6 +2,8 @@
 
 var angular = require('angular');
 
+var createFakeStore = require('./create-fake-store');
+
 describe('AnnotationUIController', function () {
   var $scope;
   var $rootScope;
@@ -22,11 +24,15 @@ describe('AnnotationUIController', function () {
     $scope = $rootScope.$new();
     $scope.search = {};
 
-    annotationUI = {
-      tool: 'comment',
+    var store = createFakeStore({
       selectedAnnotationMap: null,
       focusedAnnotationsMap: null,
-      removeSelectedAnnotation: sandbox.stub()
+    });
+    annotationUI = {
+      removeSelectedAnnotation: sandbox.stub(),
+      setState: store.setState,
+      getState: store.getState,
+      subscribe: store.subscribe,
     };
 
     $controller('AnnotationUIController', {
@@ -40,27 +46,23 @@ describe('AnnotationUIController', function () {
   });
 
   it('updates the view when the selection changes', function () {
-    annotationUI.selectedAnnotationMap = { 1: true, 2: true };
-    $rootScope.$digest();
+    annotationUI.setState({selectedAnnotationMap: { 1: true, 2: true }});
     assert.deepEqual($scope.selectedAnnotations, { 1: true, 2: true });
   });
 
   it('updates the selection counter when the selection changes', function () {
-    annotationUI.selectedAnnotationMap = { 1: true, 2: true };
-    $rootScope.$digest();
+    annotationUI.setState({selectedAnnotationMap: { 1: true, 2: true }});
     assert.deepEqual($scope.selectedAnnotationsCount, 2);
   });
 
   it('clears the selection when no annotations are selected', function () {
-    annotationUI.selectedAnnotationMap = {};
-    $rootScope.$digest();
+    annotationUI.setState({selectedAnnotationMap: null});
     assert.deepEqual($scope.selectedAnnotations, null);
     assert.deepEqual($scope.selectedAnnotationsCount, 0);
   });
 
   it('updates the focused annotations when the focus map changes', function () {
-    annotationUI.focusedAnnotationMap = { 1: true, 2: true };
-    $rootScope.$digest();
+    annotationUI.setState({focusedAnnotationMap: { 1: true, 2: true }});
     assert.deepEqual($scope.focusedAnnotations, { 1: true, 2: true });
   });
 
