@@ -2,6 +2,8 @@
 
 var annotationUIFactory = require('../annotation-ui');
 
+var annotationFixtures = require('./annotation-fixtures');
+
 var unroll = require('./util').unroll;
 
 describe('annotationUI', function () {
@@ -24,6 +26,32 @@ describe('annotationUI', function () {
     });
   });
 
+  describe('#addAnnotations()', function () {
+    it('adds annotations to the current state', function () {
+      var annot = annotationFixtures.defaultAnnotation();
+      annotationUI.addAnnotations([annot]);
+      assert.deepEqual(annotationUI.getState().annotations, [annot]);
+    });
+  });
+
+  describe('#removeAnnotations()', function () {
+    it('removes annotations from the current state', function () {
+      var annot = annotationFixtures.defaultAnnotation();
+      annotationUI.addAnnotations([annot]);
+      annotationUI.removeAnnotations([annot]);
+      assert.deepEqual(annotationUI.getState().annotations, []);
+    });
+  });
+
+  describe('#clearAnnotations()', function () {
+    it('removes all annotations', function () {
+      var annot = annotationFixtures.defaultAnnotation();
+      annotationUI.addAnnotations([annot]);
+      annotationUI.clearAnnotations();
+      assert.deepEqual(annotationUI.getState().annotations, []);
+    });
+  });
+
   describe('#setShowHighlights()', function () {
     unroll('sets the visibleHighlights state flag to #state', function (testCase) {
       annotationUI.setShowHighlights(testCase.state);
@@ -38,8 +66,30 @@ describe('annotationUI', function () {
     it('notifies subscribers when the UI state changes', function () {
       var listener = sinon.stub();
       annotationUI.subscribe(listener);
-      annotationUI.focusAnnotations([{ $$tag: 1}]);
+      annotationUI.addAnnotations(annotationFixtures.defaultAnnotation());
       assert.called(listener);
+    });
+  });
+
+  describe('#setForceVisible()', function () {
+    it('sets the visibility of the annotation', function () {
+      annotationUI.setForceVisible('id1', true);
+      assert.deepEqual(annotationUI.getState().forceVisible, {id1:true});
+    });
+  });
+
+  describe('#clearForceVisible()', function () {
+    it('clears the forceVisible set', function () {
+      annotationUI.setForceVisible('id1', true);
+      annotationUI.clearForceVisible();
+      assert.deepEqual(annotationUI.getState().forceVisible, {});
+    });
+  });
+
+  describe('#setCollapsed()', function () {
+    it('sets the expanded state of the annotation', function () {
+      annotationUI.setCollapsed('parent_id', false);
+      assert.deepEqual(annotationUI.getState().expanded, {'parent_id': true});
     });
   });
 
