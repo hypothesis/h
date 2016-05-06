@@ -23,6 +23,7 @@ function addJSONScriptTagFn(name, content) {
   var scriptTag = document.createElement('script');
   scriptTag.className = name;
   scriptTag.textContent = content;
+  scriptTag.type = 'application/json';
   document.head.appendChild(scriptTag);
 }
 
@@ -325,7 +326,7 @@ function SidebarInjector(chromeTabs, dependencies) {
     var configCode =
       'var hypothesisConfig = "' + configStr + '";\n' +
       '(' + addJSONScriptTagFn.toString() + ')' +
-      '("js-hypothesis-config", hypothesisConfig)';
+      '("js-hypothesis-config", hypothesisConfig);\n';
     return executeScriptFn(tabId, {code: configCode});
   }
 }
