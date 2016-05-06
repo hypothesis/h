@@ -42,13 +42,31 @@ function nHr(date, now) {
   return '{} hr'.replace('{}', Math.floor(delta(date, now) / hour));
 }
 
+// Cached DateTimeFormat instance, instantiating a DateTimeFormat is expensive.
+var dayAndMonthFormatter;
+
 function dayAndMonth(date) {
-  return date.toLocaleDateString(undefined, {day: '2-digit', month: 'short'});
+  if (!dayAndMonthFormatter) {
+    dayAndMonthFormatter = new Intl.DateTimeFormat(undefined, {
+      month: 'short',
+      day: '2-digit',
+    });
+  }
+  return dayAndMonthFormatter.format(date);
 }
 
+// Cached DateTimeFormat instance, instantiating a DateTimeFormat is expensive.
+var dayMonthAndYearFormatter;
+
 function dayAndMonthAndYear(date) {
-  return date.toLocaleDateString(
-    undefined, {day: '2-digit', month: 'short', year: 'numeric'});
+  if (!dayMonthAndYearFormatter) {
+    dayMonthAndYearFormatter = new Intl.DateTimeFormat(undefined, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+  return dayMonthAndYearFormatter.format(date);
 }
 
 var BREAKPOINTS = [
