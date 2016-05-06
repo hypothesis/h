@@ -10,7 +10,23 @@ Features
 - Make annotation adder position itself more intelligently in relation to the
   selected text and viewport boundaries (#3257).
 
+- Add "indexer" worker queue to handle synchronisation of the search index with
+  the database under the 'postgres' feature flag (#3242).
+
+Bug fixes
+---------
+
+- Fix a syntax error thrown when injecting the Hypothesis sidebar (#3289).
+
+Miscellanea
+-----------
+
 - Link to the Chrome extension on the help page (#3265).
+
+- Major work on storage as we continue to work towards a migration of all
+  annotation data to PostgreSQL (#3262, #3250, #3242).
+
+- Preliminary builds of a Firefox WebExtensions add-on (#3263).
 
 0.20.0 (2016-04-25)
 ===================
