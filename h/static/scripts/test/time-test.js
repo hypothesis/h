@@ -99,6 +99,27 @@ describe('time', function () {
       it('creates correct fuzzy string for fixture ' + i,
         testFixture(f));
     }
+
+    it('falls back to simple strings for >24hrs ago', function () {
+      // If window.Intl is not available then the date formatting for dates
+      // more than one day ago falls back to a simple date string.
+      window.Intl = undefined;
+      var d = new Date();
+      sandbox.clock.tick(day * 2 * 1000);
+
+      assert.equal(time.toFuzzyString(d), 'Thu Jan 01 1970');
+    });
+
+    it('falls back to simple strings for >1yr ago', function () {
+      // If window.Intl is not available then the date formatting for dates
+      // more than one year ago falls back to a simple date string.
+      window.Intl = undefined;
+      var d = new Date();
+      sandbox.clock.tick(year * 2 * 1000);
+
+      assert.equal(time.toFuzzyString(d), 'Thu Jan 01 1970');
+    });
+
   });
 
   describe('.decayingInterval', function () {

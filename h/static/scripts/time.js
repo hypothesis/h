@@ -56,14 +56,20 @@ var formatters = {};
  *
  */
 function format(date, options) {
-  var key = JSON.stringify(options);
-  var formatter = formatters[key];
+  if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+    var key = JSON.stringify(options);
+    var formatter = formatters[key];
 
-  if (!formatter) {
-    formatter = formatters[key] = new Intl.DateTimeFormat(undefined, options);
+    if (!formatter) {
+      formatter = formatters[key] = new Intl.DateTimeFormat(undefined,
+                                                            options);
+    }
+
+    return formatter.format(date);
+  } else {
+    // IE < 11, Safari <= 9.0.
+    return date.toDateString();
   }
-
-  return formatter.format(date);
 }
 
 function dayAndMonth(date) {
