@@ -11,6 +11,10 @@
   right: 0;
   top: 0;
   z-index: 5;
+
+  // Force top-bar onto a new compositor layer so that it does not judder when
+  // the window is scrolled.
+  transform: translate3d(0,0,0);
 }
 
 .top-bar__inner {
