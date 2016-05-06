@@ -51,6 +51,34 @@ describe('time', function () {
   });
 
   describe('.toFuzzyString', function () {
+
+    var originalIntl;
+
+    before(function () {
+
+      // Intl isn't implemented in PhantomJS so we have to mock it in these
+      // tests. The mock version returns the results we'd expect from the real
+      // one for the test values that we use.
+      originalIntl = window.Intl;
+      window.Intl = {
+        DateTimeFormat: function () {
+          return {
+            format: function () {
+              if (new Date().getYear() === 70) {
+                return '01 Jan';
+              } else {
+                return '01 Jan 1970';
+              }
+            }
+          };
+        }
+      };
+    });
+
+    after(function () {
+      window.Intl = originalIntl;
+    });
+
     it('Handles empty dates', function () {
       var t = null;
       var expect = '';
