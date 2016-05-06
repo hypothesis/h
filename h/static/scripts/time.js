@@ -42,31 +42,43 @@ function nHr(date, now) {
   return '{} hr'.replace('{}', Math.floor(delta(date, now) / hour));
 }
 
-// Cached DateTimeFormat instance, instantiating a DateTimeFormat is expensive.
-var dayAndMonthFormatter;
+// Cached DateTimeFormat instances,
+// because instantiating a DateTimeFormat is expensive.
+var formatters = {};
 
-function dayAndMonth(date) {
-  if (!dayAndMonthFormatter) {
-    dayAndMonthFormatter = new Intl.DateTimeFormat(undefined, {
-      month: 'short',
-      day: '2-digit',
-    });
+/**
+ * Efficiently return `date` formatted with `options`.
+ *
+ * This is a wrapper for Intl.DateTimeFormat.format() that caches
+ * DateTimeFormat instances because they're expensive to create.
+ *
+ * @returns {string}
+ *
+ */
+function format(date, options) {
+  var key = JSON.stringify(options);
+  var formatter = formatters[key];
+
+  if (!formatter) {
+    formatter = formatters[key] = new Intl.DateTimeFormat(undefined, options);
   }
-  return dayAndMonthFormatter.format(date);
+
+  return formatter.format(date);
 }
 
-// Cached DateTimeFormat instance, instantiating a DateTimeFormat is expensive.
-var dayMonthAndYearFormatter;
+function dayAndMonth(date) {
+  return format(date, {
+    month: 'short',
+    day: '2-digit',
+  });
+}
 
 function dayAndMonthAndYear(date) {
-  if (!dayMonthAndYearFormatter) {
-    dayMonthAndYearFormatter = new Intl.DateTimeFormat(undefined, {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  }
-  return dayMonthAndYearFormatter.format(date);
+  return format(date, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
 }
 
 var BREAKPOINTS = [
