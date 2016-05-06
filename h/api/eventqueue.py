@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import collections
+import logging
+
+
+log = logging.getLogger(__name__)
 
 
 class EventQueue(object):
@@ -19,7 +23,18 @@ class EventQueue(object):
                 event = self.queue.popleft()
             except IndexError:
                 break
-            self.request.registry.notify(event)
+
+            try:
+                self.request.registry.notify(event)
+            except Exception:
+                sentry = getattr(event.request, 'sentry', None)
+                if sentry is not None:
+                    sentry.captureException()
+                else:
+                    log.exception('Queued event subscriber failed')
+
+                if event.request.debug:
+                    raise
 
     def response_callback(self, request, response):
         if request.exception is not None:
