@@ -721,51 +721,7 @@ function AnnotationController(
 
 function link(scope, elem, attrs, controllers) {
   var ctrl = controllers[0];
-  var thread = controllers[1];
-  var threadFilter = controllers[2];
-  var counter = controllers[3];
-
   elem.on('keydown', ctrl.onKeydown);
-
-  // FIXME: Replace this counting code with something more sane.
-  if (counter !== null) {
-    scope.$watch((function() {return ctrl.editing();}), function(editing, old) {
-      if (editing) {  // The user has just started editing this annotation.
-
-        // Keep track of edits going on in the thread.
-        // This 'edit' count is for example to uncollapse a thread if one of
-        // the replies in the thread is currently being edited when the
-        // annotations are first rendered (this can happen when switching
-        // focus to a different group then back again, for example).
-        counter.count('edit', 1);
-
-        // Always show an annotation if it is being edited, even if there's an
-        // active search filter that does not match the annotation.
-        if ((thread !== null) && (threadFilter !== null)) {
-          threadFilter.active(false);
-          threadFilter.freeze(true);
-        }
-
-      } else if (old) {  // The user has just finished editing this annotation.
-        counter.count('edit', -1);
-        if (threadFilter) {
-          threadFilter.freeze(false);
-        }
-
-        // Ensure that the just-edited annotation remains visible.
-        if (thread.parent) {
-          thread.parent.toggleCollapsed(false);
-        }
-
-      }
-    });
-
-    scope.$on('$destroy', function() {
-      if (ctrl.editing() && counter) {
-        counter.count('edit', -1);
-      }
-    });
-  }
 }
 
 /**
@@ -785,12 +741,12 @@ function annotation() {
     controller: AnnotationController,
     controllerAs: 'vm',
     link: link,
-    require: ['annotation', '?^thread', '?^threadFilter', '?^deepCount'],
+    require: ['annotation'],
     scope: {
       annotation: '<',
       // Indicates whether this is the last reply in a thread.
       isLastReply: '<',
-      isSidebar: '<',
+      showDocumentInfo: '<',
       onReplyCountClick: '&',
       replyCount: '<',
       isCollapsed: '<'

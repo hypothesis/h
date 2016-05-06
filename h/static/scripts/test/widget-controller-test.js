@@ -27,20 +27,20 @@ function FakeSearchClient(resource, opts) {
 inherits(FakeSearchClient, EventEmitter);
 
 describe('WidgetController', function () {
-  var $scope = null;
-  var $rootScope = null;
-  var annotationUI = null;
-  var fakeAnnotationMapper = null;
-  var fakeCrossFrame = null;
-  var fakeDrafts = null;
-  var fakeStore = null;
-  var fakeStreamer = null;
-  var fakeStreamFilter = null;
-  var fakeThreading = null;
-  var fakeGroups = null;
-  var sandbox = null;
-  var viewer = null;
-  var fakeSettings = null;
+  var $rootScope;
+  var $scope;
+  var annotationUI;
+  var fakeAnnotationMapper;
+  var fakeCrossFrame;
+  var fakeDrafts;
+  var fakeGroups;
+  var fakeRootThread;
+  var fakeSettings;
+  var fakeStore;
+  var fakeStreamer;
+  var fakeStreamFilter;
+  var sandbox;
+  var viewer;
 
   before(function () {
     angular.module('h', [])
@@ -64,12 +64,13 @@ describe('WidgetController', function () {
     };
 
     annotationUI = annotationUIFactory({});
+
     fakeCrossFrame = {
       call: sinon.stub(),
       frames: [],
     };
     fakeDrafts = {
-      unsaved: sandbox.stub()
+      unsaved: sandbox.stub().returns([]),
     };
 
     fakeStreamer = {
@@ -82,17 +83,17 @@ describe('WidgetController', function () {
       getFilter: sandbox.stub().returns({})
     };
 
-    fakeThreading = {
-      root: {},
-      thread: sandbox.stub(),
-      annotationList: function () {
-        return [{id: '123'}];
-      },
-    };
-
     fakeGroups = {
       focused: function () { return {id: 'foo'}; },
       focus: sinon.stub(),
+    };
+
+    fakeRootThread = {
+      thread: sinon.stub().returns({
+        totalChildren: 0,
+      }),
+      setSearchQuery: sinon.stub(),
+      sortBy: sinon.stub(),
     };
 
     fakeSettings = {
@@ -107,10 +108,10 @@ describe('WidgetController', function () {
     $provide.value('annotationUI', annotationUI);
     $provide.value('crossframe', fakeCrossFrame);
     $provide.value('drafts', fakeDrafts);
+    $provide.value('rootThread', fakeRootThread);
     $provide.value('store', fakeStore);
     $provide.value('streamer', fakeStreamer);
     $provide.value('streamFilter', fakeStreamFilter);
-    $provide.value('threading', fakeThreading);
     $provide.value('groups', fakeGroups);
     $provide.value('settings', fakeSettings);
   }));
@@ -129,13 +130,14 @@ describe('WidgetController', function () {
     it('unloads any existing annotations', function () {
       // When new clients connect, all existing annotations should be unloaded
       // before reloading annotations for each currently-connected client
+      annotationUI.addAnnotations([{id: '123'}]);
       fakeCrossFrame.frames.push({uri: 'http://example.com/page-a'});
       $scope.$digest();
       fakeAnnotationMapper.unloadAnnotations = sandbox.spy();
       fakeCrossFrame.frames.push({uri: 'http://example.com/page-b'});
       $scope.$digest();
       assert.calledWith(fakeAnnotationMapper.unloadAnnotations,
-        fakeThreading.annotationList());
+        annotationUI.getState().annotations);
     });
 
     it('loads all annotations for a frame', function () {
@@ -170,6 +172,10 @@ describe('WidgetController', function () {
         $scope.$digest();
       });
 
+      it('selectedAnnotationCount is > 0', function () {
+        assert.equal($scope.selectedAnnotationCount(), 1);
+      });
+
       it('switches to the selected annotation\'s group', function () {
         assert.calledWith(fakeGroups.focus, '__world__');
         assert.calledOnce(fakeAnnotationMapper.loadAnnotations);
@@ -194,6 +200,10 @@ describe('WidgetController', function () {
         fakeCrossFrame.frames = [{uri: uri}];
         fakeGroups.focused = function () { return { id: 'a-group' }; };
         $scope.$digest();
+      });
+
+      it('selectedAnnotationCount is 0', function () {
+        assert.equal($scope.selectedAnnotationCount(), 0);
       });
 
       it('fetches annotations for the current group', function () {
@@ -233,11 +243,7 @@ describe('WidgetController', function () {
         $$tag: 'atag',
         id: '123',
       };
-      fakeThreading.idTable = {
-        '123': {
-          message: annot,
-        },
-      };
+      annotationUI.addAnnotations([annot]);
       $scope.$digest();
       $rootScope.$broadcast(events.ANNOTATIONS_SYNCED, [{tag: 'atag'}]);
       assert.calledWith(fakeCrossFrame.call, 'focusAnnotations', ['atag']);
@@ -248,12 +254,18 @@ describe('WidgetController', function () {
   describe('when the focused group changes', function () {
     it('should load annotations for the new group', function () {
       var uri = 'http://example.com';
+
+      annotationUI.addAnnotations([{id: '123'}]);
+      annotationUI.addAnnotations = sinon.stub();
+
+      fakeDrafts.unsaved.returns([{id: uri + '123'}, {id: uri + '456'}]);
+
       fakeCrossFrame.frames.push({uri: uri});
       var loadSpy = fakeAnnotationMapper.loadAnnotations;
 
       $scope.$broadcast(events.GROUP_FOCUSED);
       assert.calledWith(fakeAnnotationMapper.unloadAnnotations, [{id: '123'}]);
-      assert.calledWith(fakeThreading.thread, fakeDrafts.unsaved());
+      assert.calledWith(annotationUI.addAnnotations, fakeDrafts.unsaved());
       $scope.$digest();
       assert.calledWith(loadSpy, [sinon.match({id: uri + '123'})]);
       assert.calledWith(loadSpy, [sinon.match({id: uri + '456'})]);
@@ -291,14 +303,13 @@ describe('WidgetController', function () {
   describe('direct linking messages', function () {
     it('displays a message if the selection is unavailable', function () {
       annotationUI.selectAnnotations(['missing']);
-      fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isTrue($scope.selectedAnnotationUnavailable());
     });
 
     it('does not show a message if the selection is available', function () {
+      annotationUI.addAnnotations([{id: '123'}]);
       annotationUI.selectAnnotations(['123']);
-      fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.selectedAnnotationUnavailable());
     });
@@ -313,8 +324,8 @@ describe('WidgetController', function () {
       $scope.auth = {
         status: 'signed-out'
       };
+      annotationUI.addAnnotations([{id: '123'}]);
       annotationUI.selectAnnotations(['123']);
-      fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isTrue($scope.shouldShowLoggedOutMessage());
     });
@@ -324,7 +335,6 @@ describe('WidgetController', function () {
         status: 'signed-out'
       };
       annotationUI.selectAnnotations(['missing']);
-      fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
     });
@@ -342,8 +352,8 @@ describe('WidgetController', function () {
       $scope.auth = {
         status: 'signed-in'
       };
+      annotationUI.addAnnotations([{id: '123'}]);
       annotationUI.selectAnnotations(['123']);
-      fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
     });
@@ -353,10 +363,28 @@ describe('WidgetController', function () {
         status: 'signed-out'
       };
       delete fakeSettings.annotations;
+      annotationUI.addAnnotations([{id: '123'}]);
       annotationUI.selectAnnotations(['123']);
-      fakeThreading.idTable = {'123': {}};
       $scope.$digest();
       assert.isFalse($scope.shouldShowLoggedOutMessage());
+    });
+  });
+
+  describe('#forceVisible', function () {
+    it('shows the thread', function () {
+      var thread = {id: '1'};
+      $scope.forceVisible(thread);
+      assert.deepEqual(annotationUI.getState().forceVisible, {1: true});
+    });
+
+    it('uncollapses the parent', function () {
+      var thread = {
+        id: '2',
+        parent: {id: '3'},
+      };
+      assert.equal(annotationUI.getState().expanded[thread.parent.id], undefined);
+      $scope.forceVisible(thread);
+      assert.equal(annotationUI.getState().expanded[thread.parent.id], true);
     });
   });
 });
