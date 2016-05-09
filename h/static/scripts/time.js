@@ -119,6 +119,10 @@ var BREAKPOINTS = [
 ];
 
 function getBreakpoint(date, now) {
+
+  // Turn the given ISO 8601 string into a Date object.
+  date = new Date(date);
+
   var breakpoint;
   for (var i = 0; i < BREAKPOINTS.length; i++) {
     breakpoint = BREAKPOINTS[i];

@@ -76,7 +76,7 @@ describe('time', function () {
 
     var testFixture = function (f) {
       return function () {
-        var t = new Date();
+        var t = new Date().toISOString();
         var expect = f[1];
         sandbox.clock.tick(f[0] * 1000);
         assert.equal(time.toFuzzyString(t, mockIntl()), expect);
@@ -92,7 +92,7 @@ describe('time', function () {
     it('falls back to simple strings for >24hrs ago', function () {
       // If window.Intl is not available then the date formatting for dates
       // more than one day ago falls back to a simple date string.
-      var d = new Date();
+      var d = new Date().toISOString();
       sandbox.clock.tick(day * 2 * 1000);
 
       assert.equal(time.toFuzzyString(d, null), 'Thu Jan 01 1970');
@@ -101,7 +101,7 @@ describe('time', function () {
     it('falls back to simple strings for >1yr ago', function () {
       // If window.Intl is not available then the date formatting for dates
       // more than one year ago falls back to a simple date string.
-      var d = new Date();
+      var d = new Date().toISOString();
       sandbox.clock.tick(year * 2 * 1000);
 
       assert.equal(time.toFuzzyString(d, null), 'Thu Jan 01 1970');
@@ -165,7 +165,7 @@ describe('time', function () {
 
     var testFixture = function (f) {
       return function () {
-        var t = new Date();
+        var t = new Date().toISOString();
         var expect = f[1];
         sandbox.clock.tick(f[0] * 1000);
         assert.equal(time.nextFuzzyUpdate(t), expect);
