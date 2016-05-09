@@ -28,9 +28,10 @@ describe('AnnotationViewerController', function () {
       $routeParams: opts.$routeParams || { id: 'test_annotation_id' },
       $scope: opts.$scope || {
         search: {},
-        threading: {
-          getContainer: function () {}
-        }
+      },
+      annotationUI: {},
+      rootThread: {
+        thread: sinon.stub(),
       },
       streamer: opts.streamer || { setConfig: function () {} },
       store: opts.store || {
@@ -50,7 +51,6 @@ describe('AnnotationViewerController', function () {
         getFilter: function () {}
       },
       annotationMapper: opts.annotationMapper || { loadAnnotations: sinon.spy() },
-      threading: opts.threading || { idTable: {} }
     };
     locals.ctrl = getControllerService()(
       'AnnotationViewerController', locals);

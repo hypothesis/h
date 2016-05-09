@@ -5,7 +5,7 @@ var angular = require('angular');
 // @ngInject
 function AnnotationViewerController (
   $location, $routeParams, $scope,
-  streamer, store, streamFilter, annotationMapper, threading
+  annotationUI, rootThread, streamer, store, streamFilter, annotationMapper
 ) {
   var id = $routeParams.id;
 
@@ -17,9 +17,16 @@ function AnnotationViewerController (
     $location.path('/stream').search('q', query);
   };
 
+  $scope.rootThread = function () {
+    return rootThread.thread();
+  };
+
+  $scope.toggleCollapsed = function (id) {
+    annotationUI.setCollapsed(id, !!annotationUI.getState().expanded[id]);
+  };
+
   store.AnnotationResource.get({ id: id }, function (annotation) {
     annotationMapper.loadAnnotations([annotation]);
-    $scope.threadRoot = { children: [threading.idTable[id]] };
   });
 
   store.SearchResource.get({ references: id }, function (data) {
