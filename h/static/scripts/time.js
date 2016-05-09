@@ -114,12 +114,11 @@ function nextFuzzyUpdate(date) {
     return null;
   }
 
-  var breakpoint = getBreakpoint(date, new Date());
-  if (!breakpoint) {
+  var secs = getBreakpoint(date, new Date())[2];
+
+  if (secs === null) {
     return null;
   }
-
-  var secs = breakpoint[2];
 
   // We don't want to refresh anything more often than 5 seconds
   secs = Math.max(secs, 5);
