@@ -143,7 +143,7 @@ describe('time', function () {
       assert.notCalled(callback);
     });
 
-    it('does not set a timeout for dates > 24hrs ago', function() {
+    it('does not set a timeout for dates > 24hrs ago', function () {
       var date = new Date();
       var ONE_DAY = day * 1000;
       sandbox.clock.tick(10 * ONE_DAY);
