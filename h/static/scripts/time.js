@@ -121,15 +121,12 @@ var BREAKPOINTS = [
 
 function getBreakpoint(date, now) {
   var breakpoint;
-
   for (var i = 0; i < BREAKPOINTS.length; i++) {
-    if (BREAKPOINTS[i].test(date, now)) {
-      breakpoint = BREAKPOINTS[i];
-      break;
+    breakpoint = BREAKPOINTS[i];
+    if (breakpoint.test(date, now)) {
+      return breakpoint;
     }
   }
-
-  return breakpoint;
 }
 
 function nextFuzzyUpdate(date) {
@@ -195,11 +192,7 @@ function toFuzzyString(date) {
   }
   var now = new Date();
 
-  var breakpoint = getBreakpoint(date, now);
-  if (!breakpoint) {
-    return '';
-  }
-  return breakpoint.format(new Date(date), now);
+  return getBreakpoint(date, now).format(new Date(date), now);
 }
 
 module.exports = {
