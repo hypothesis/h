@@ -2,39 +2,148 @@
 
 var minute = 60;
 var hour = minute * 60;
-var day = hour * 24;
-var month = day * 30;
-var year = day * 365;
 
-var BREAKPOINTS = [
-  [30,         'moments ago',    1],
-  [minute,     '{} seconds ago', 1],
-  [2 * minute, 'a minute ago',   minute],
-  [hour,       '{} minutes ago', minute],
-  [2 * hour,   'an hour ago',    hour],
-  [day,        '{} hours ago',   hour],
-  [2 * day,    'a day ago',      day],
-  [month,      '{} days ago',    day],
-  [year,       '{} months ago',  month],
-  [2 * year,   'one year ago',   year],
-  [Infinity,   '{} years ago',   year]
-];
+function lessThanThirtySecondsAgo(date, now) {
+  return ((now - date) < 30 * 1000);
+}
 
-function getBreakpoint(date) {
-  var delta = Math.round((new Date() - new Date(date)) / 1000);
-  var breakpoint;
+function lessThanOneMinuteAgo(date, now) {
+  return ((now - date) < 60 * 1000);
+}
 
-  for (var i = 0; i < BREAKPOINTS.length; i++) {
-    if (BREAKPOINTS[i][0] > delta) {
-      breakpoint = BREAKPOINTS[i];
-      break;
-    }
+function lessThanOneHourAgo(date, now) {
+  return ((now - date) < (60 * 60 * 1000));
+}
+
+function lessThanOneDayAgo(date, now) {
+  return ((now - date) < (24 * 60 * 60 * 1000));
+}
+
+function thisYear(date, now) {
+  return date.getFullYear() === now.getFullYear();
+}
+
+function delta(date, now) {
+  return Math.round((now - date) / 1000);
+}
+
+function nSec(date, now) {
+  return '{} secs'.replace('{}', Math.floor(delta(date, now)));
+}
+
+function nMin(date, now) {
+  var n = Math.floor(delta(date, now) / minute);
+  var template = '{} min';
+
+  if (n > 1) {
+    template = template + 's';
   }
 
-  return {
-    delta: delta,
-    breakpoint: breakpoint,
-  };
+  return template.replace('{}', n);
+}
+
+function nHr(date, now) {
+  var n = Math.floor(delta(date, now) / hour);
+  var template = '{} hr';
+
+  if (n > 1) {
+    template = template + 's';
+  }
+
+  return template.replace('{}', n);
+}
+
+// Cached DateTimeFormat instances,
+// because instantiating a DateTimeFormat is expensive.
+var formatters = {};
+
+/**
+ * Efficiently return `date` formatted with `options`.
+ *
+ * This is a wrapper for Intl.DateTimeFormat.format() that caches
+ * DateTimeFormat instances because they're expensive to create.
+ * Calling Date.toLocaleDateString() lots of times is also expensive in some
+ * browsers as it appears to create a new formatter for each call.
+ *
+ * @returns {string}
+ *
+ */
+function format(date, options, Intl) {
+  // If the tests have passed in a mock Intl then use it, otherwise use the
+  // real one.
+  if (typeof Intl === 'undefined') {
+    Intl = window.Intl;
+  }
+
+  if (Intl && Intl.DateTimeFormat) {
+    var key = JSON.stringify(options);
+    var formatter = formatters[key];
+
+    if (!formatter) {
+      formatter = formatters[key] = new Intl.DateTimeFormat(undefined,
+                                                            options);
+    }
+
+    return formatter.format(date);
+  } else {
+    // IE < 11, Safari <= 9.0.
+    return date.toDateString();
+  }
+}
+
+function dayAndMonth(date, now, Intl) {
+  return format(date, {month: 'short', day: 'numeric'}, Intl);
+}
+
+function dayAndMonthAndYear(date, now, Intl) {
+  return format(date, {day: 'numeric', month: 'short', year: 'numeric'}, Intl);
+}
+
+var BREAKPOINTS = [
+  {
+    test: lessThanThirtySecondsAgo,
+    format: function () {return 'Just now';},
+    nextUpdate: 1
+  },
+  {
+    test: lessThanOneMinuteAgo,
+    format: nSec,
+    nextUpdate: 1
+  },
+  {
+    test: lessThanOneHourAgo,
+    format: nMin,
+    nextUpdate: minute
+  },
+  {
+    test: lessThanOneDayAgo,
+    format: nHr,
+    nextUpdate: hour
+  },
+  {
+    test: thisYear,
+    format: dayAndMonth,
+    nextUpdate: null
+  },
+  {
+    test: function () {return true;},
+    format: dayAndMonthAndYear,
+    nextUpdate: null
+  }
+];
+
+function getBreakpoint(date, now) {
+
+  // Turn the given ISO 8601 string into a Date object.
+  date = new Date(date);
+
+  var breakpoint;
+  for (var i = 0; i < BREAKPOINTS.length; i++) {
+    breakpoint = BREAKPOINTS[i];
+    if (breakpoint.test(date, now)) {
+      return breakpoint;
+    }
+  }
 }
 
 function nextFuzzyUpdate(date) {
@@ -42,12 +151,11 @@ function nextFuzzyUpdate(date) {
     return null;
   }
 
-  var breakpoint = getBreakpoint(date).breakpoint;
-  if (!breakpoint) {
+  var secs = getBreakpoint(date, new Date()).nextUpdate;
+
+  if (secs === null) {
     return null;
   }
-
-  var secs = breakpoint[2];
 
   // We don't want to refresh anything more often than 5 seconds
   secs = Math.max(secs, 5);
@@ -73,6 +181,9 @@ function decayingInterval(date, callback) {
   var timer;
   var update = function () {
     var fuzzyUpdate = nextFuzzyUpdate(date);
+    if (fuzzyUpdate === null) {
+      return;
+    }
     var nextUpdate = (1000 * fuzzyUpdate) + 500;
     timer = setTimeout(function () {
       callback(date);
@@ -92,19 +203,13 @@ function decayingInterval(date, callback) {
  * @param {number} date - The absolute timestamp to format.
  * @return {string} A 'fuzzy' string describing the relative age of the date.
  */
-function toFuzzyString(date) {
+function toFuzzyString(date, Intl) {
   if (!date) {
     return '';
   }
-  var breakpointInfo = getBreakpoint(date);
-  var breakpoint = breakpointInfo.breakpoint;
-  var delta = breakpointInfo.delta;
-  if (!breakpoint) {
-    return '';
-  }
-  var template = breakpoint[1];
-  var resolution = breakpoint[2];
-  return template.replace('{}', String(Math.floor(delta / resolution)));
+  var now = new Date();
+
+  return getBreakpoint(date, now).format(new Date(date), now, Intl);
 }
 
 module.exports = {
