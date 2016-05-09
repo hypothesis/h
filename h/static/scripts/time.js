@@ -7,11 +7,11 @@ var month = day * 30;
 var year = day * 365;
 
 function lessThanThirtySecondsAgo(date, now) {
-  return ((now - date) < 30000);
+  return ((now - date) < 30 * 1000);
 }
 
 function lessThanOneMinuteAgo(date, now) {
-  return ((now - date) < 60000);
+  return ((now - date) < 60 * 1000);
 }
 
 function lessThanOneHourAgo(date, now) {
