@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from h import db
+from h.api import models
 from h.api.models import document
 
 
@@ -432,6 +433,203 @@ class TestMergeDocuments(object):
         db.Session.add_all([master, duplicate])
         db.Session.flush()
         return (master, duplicate)
+
+
+class TestUpdateDocumentMetadata(object):
+
+    def test_it_uses_the_target_uri_to_get_the_document(self,
+                                                        annotation,
+                                                        Document,
+                                                        session):
+        document_uri_dicts = [
+            {
+                'uri': 'http://example.com/example_1',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+            {
+                'uri': 'http://example.com/example_2',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+            {
+                'uri': 'http://example.com/example_3',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+        ]
+
+        document.update_document_metadata(session,
+                                          annotation,
+                                          [],
+                                          document_uri_dicts)
+
+        Document.find_or_create_by_uris.assert_called_once_with(
+            session,
+            annotation.target_uri,
+            [
+                'http://example.com/example_1',
+                'http://example.com/example_2',
+                'http://example.com/example_3',
+            ],
+            created=annotation.created,
+            updated=annotation.updated,
+        )
+
+    def test_if_there_are_multiple_documents_it_merges_them_into_one(
+            self,
+            annotation,
+            Document,
+            merge_documents,
+            session):
+        """If it finds more than one document it calls merge_documents()."""
+        Document.find_or_create_by_uris.return_value = mock.Mock(
+            count=mock.Mock(return_value=3))
+
+        document.update_document_metadata(session, annotation, [], [])
+
+        merge_documents.assert_called_once_with(
+            session,
+            Document.find_or_create_by_uris.return_value,
+            updated=annotation.updated)
+
+    def test_it_calls_first(self, annotation, session, Document):
+        """If it finds only one document it calls first()."""
+        Document.find_or_create_by_uris.return_value = mock.Mock(
+            count=mock.Mock(return_value=1))
+
+        document.update_document_metadata(session, annotation, [], [])
+
+        Document.find_or_create_by_uris.return_value\
+            .first.assert_called_once_with()
+
+    def test_it_updates_document_updated(self,
+                                         annotation,
+                                         Document,
+                                         merge_documents,
+                                         session):
+        yesterday_ = "yesterday"
+        document_ = merge_documents.return_value = mock.Mock(
+            updated=yesterday_)
+        Document.find_or_create_by_uris.return_value.first.return_value = (
+            document_)
+
+        document.update_document_metadata(session, annotation, [], [])
+
+        assert document_.updated == annotation.updated
+
+    def test_it_saves_all_the_document_uris(self,
+                                            session,
+                                            annotation,
+                                            Document,
+                                            create_or_update_document_uri):
+        """It creates or updates a DocumentURI for each document URI dict."""
+        Document.find_or_create_by_uris.return_value.count.return_value = 1
+
+        document_uri_dicts = [
+            {
+                'uri': 'http://example.com/example_1',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+            {
+                'uri': 'http://example.com/example_2',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+            {
+                'uri': 'http://example.com/example_3',
+                'claimant': 'http://example.com/claimant',
+                'type': 'type',
+                'content_type': None,
+            },
+        ]
+
+        document.update_document_metadata(session,
+                                          annotation,
+                                          [],
+                                          document_uri_dicts)
+
+        assert create_or_update_document_uri.call_count == 3
+        for doc_uri_dict in document_uri_dicts:
+            create_or_update_document_uri.assert_any_call(
+                session=session,
+                document=Document.find_or_create_by_uris.return_value.first.return_value,
+                created=annotation.created,
+                updated=annotation.updated,
+                **doc_uri_dict
+            )
+
+    def test_it_saves_all_the_document_metas(self,
+                                             annotation,
+                                             create_or_update_document_meta,
+                                             Document,
+                                             session):
+        """It creates or updates a DocumentMeta for each document meta dict."""
+        Document.find_or_create_by_uris.return_value.count\
+            .return_value = 1
+
+        document_meta_dicts = [
+            {
+                'claimant': 'http://example.com/claimant',
+                'type': 'title',
+                'value': 'foo',
+            },
+            {
+                'type': 'article title',
+                'value': 'bar',
+                'claimant': 'http://example.com/claimant',
+            },
+            {
+                'type': 'site title',
+                'value': 'gar',
+                'claimant': 'http://example.com/claimant',
+            },
+        ]
+
+        document.update_document_metadata(session,
+                                          annotation,
+                                          document_meta_dicts,
+                                          [])
+
+        assert create_or_update_document_meta.call_count == 3
+        for document_meta_dict in document_meta_dicts:
+            create_or_update_document_meta.assert_any_call(
+                session=session,
+                document=Document.find_or_create_by_uris.return_value.first.return_value,
+                created=annotation.created,
+                updated=annotation.updated,
+                **document_meta_dict
+            )
+
+    @pytest.fixture
+    def annotation(self):
+        return mock.Mock(spec=models.Annotation())
+
+    @pytest.fixture
+    def create_or_update_document_meta(self, patch):
+        return patch('h.api.models.document.create_or_update_document_meta')
+
+    @pytest.fixture
+    def create_or_update_document_uri(self, patch):
+        return patch('h.api.models.document.create_or_update_document_uri')
+
+    @pytest.fixture
+    def Document(self, patch):
+        return patch('h.api.models.document.Document')
+
+    @pytest.fixture
+    def merge_documents(self, patch):
+        return patch('h.api.models.document.merge_documents')
+
+    @pytest.fixture
+    def session(self):
+        return mock.Mock(spec=db.Session)
 
 
 def now():
