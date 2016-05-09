@@ -90,19 +90,43 @@ function dayAndMonthAndYear(date) {
 }
 
 var BREAKPOINTS = [
-  [lessThanThirtySecondsAgo,    function () {return 'Just now';},      1],
-  [lessThanOneMinuteAgo,        nSec,                                  1],
-  [lessThanOneHourAgo,          nMin,                                  minute],
-  [lessThanOneDayAgo,           nHr,                                   hour],
-  [thisYear,                    dayAndMonth,                           null],
-  [function () {return true;},  dayAndMonthAndYear,                    null]
+  {
+    test: lessThanThirtySecondsAgo,
+    format: function () {return 'Just now';},
+    nextUpdate: 1
+  },
+  {
+    test: lessThanOneMinuteAgo,
+    format: nSec,
+    nextUpdate: 1
+  },
+  {
+    test: lessThanOneHourAgo,
+    format: nMin,
+    nextUpdate: minute
+  },
+  {
+    test: lessThanOneDayAgo,
+    format: nHr,
+    nextUpdate: hour
+  },
+  {
+    test: thisYear,
+    format: dayAndMonth,
+    nextUpdate: null
+  },
+  {
+    test: function () {return true;},
+    format: dayAndMonthAndYear,
+    nextUpdate: null
+  }
 ];
 
 function getBreakpoint(date, now) {
   var breakpoint;
 
   for (var i = 0; i < BREAKPOINTS.length; i++) {
-    if (BREAKPOINTS[i][0](date, now)) {
+    if (BREAKPOINTS[i].test(date, now)) {
       breakpoint = BREAKPOINTS[i];
       break;
     }
@@ -116,7 +140,7 @@ function nextFuzzyUpdate(date) {
     return null;
   }
 
-  var secs = getBreakpoint(date, new Date())[2];
+  var secs = getBreakpoint(date, new Date()).nextUpdate;
 
   if (secs === null) {
     return null;
@@ -178,7 +202,7 @@ function toFuzzyString(date) {
   if (!breakpoint) {
     return '';
   }
-  return breakpoint[1](new Date(date), now);
+  return breakpoint.format(new Date(date), now);
 }
 
 module.exports = {
