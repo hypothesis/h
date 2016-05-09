@@ -6,6 +6,7 @@ import pytest
 from pyramid import testing
 
 from h.api import views
+from h.api.schemas import ValidationError
 
 
 class TestError(object):
@@ -251,6 +252,15 @@ class TestCreate(object):
         schemas.CreateAnnotationSchema.return_value.validate\
             .assert_called_once_with(mock.sentinel.first_copy)
 
+    def test_it_raises_if_validate_raises(self, schemas):
+        schemas.CreateAnnotationSchema.return_value.validate.side_effect = (
+            ValidationError('asplode'))
+
+        with pytest.raises(ValidationError) as err:
+            views.create(self.mock_request())
+
+        assert err.value.message == 'asplode'
+
     def test_it_calls_create_annotation(self, storage, schemas):
         request = self.mock_request()
         schema = schemas.CreateAnnotationSchema.return_value
@@ -259,6 +269,14 @@ class TestCreate(object):
 
         storage.create_annotation.assert_called_once_with(
             request, schema.validate.return_value)
+
+    def test_it_raises_if_create_annotation_raises(self, storage):
+        storage.create_annotation.side_effect = ValidationError('asplode')
+
+        with pytest.raises(ValidationError) as err:
+            views.create(self.mock_request())
+
+        assert err.value.message == 'asplode'
 
     def test_it_inits_LegacyCreateAnnotationSchema(self, schemas):
         request = self.mock_request()
@@ -278,6 +296,15 @@ class TestCreate(object):
         assert copy.deepcopy.call_args_list[0] == mock.call(request.json_body)
         schemas.LegacyCreateAnnotationSchema.return_value.validate\
             .assert_called_once_with(mock.sentinel.second_copy)
+
+    def test_it_raises_if_legacy_schema_validate_raises(self, copy, schemas):
+        schemas.LegacyCreateAnnotationSchema.return_value.validate\
+            .side_effect = ValidationError('asplode')
+
+        with pytest.raises(ValidationError) as err:
+            views.create(self.mock_request())
+
+        assert err.value.message == 'asplode'
 
     def test_it_calls_legacy_create_annotation(self, storage, schemas):
         """It should call storage.create_annotation() appropriately."""
@@ -343,6 +370,29 @@ class TestCreate(object):
         AnnotationJSONPresenter.return_value.asdict.assert_called_once_with()
         assert result == (
             AnnotationJSONPresenter.return_value.asdict.return_value)
+
+    def test_it_does_not_save_to_es_if_pg_validation_fails(self,
+                                                           schemas,
+                                                           storage):
+        schemas.CreateAnnotationSchema.return_value.validate.side_effect = (
+            ValidationError('asplode'))
+
+        try:
+            views.create(self.mock_request())
+        except ValidationError:
+            pass
+
+        assert not storage.legacy_create_annotation.called
+
+    def test_it_does_not_save_to_es_if_pg_storage_fails(self, storage):
+        storage.create_annotation.side_effect = ValidationError('asplode')
+
+        try:
+            views.create(self.mock_request())
+        except ValidationError:
+            pass
+
+        assert not storage.legacy_create_annotation.called
 
     def mock_request(self):
         return mock.Mock(feature=mock.Mock(return_value=True))
