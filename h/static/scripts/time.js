@@ -51,6 +51,8 @@ var formatters = {};
  *
  * This is a wrapper for Intl.DateTimeFormat.format() that caches
  * DateTimeFormat instances because they're expensive to create.
+ * Calling Date.toLocaleDateString() lots of times is also expensive in some
+ * browsers as it appears to create a new formatter for each call.
  *
  * @returns {string}
  *
