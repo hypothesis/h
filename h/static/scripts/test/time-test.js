@@ -52,15 +52,8 @@ describe('time', function () {
 
   describe('.toFuzzyString', function () {
 
-    var originalIntl;
-
-    before(function () {
-
-      // Intl isn't implemented in PhantomJS so we have to mock it in these
-      // tests. The mock version returns the results we'd expect from the real
-      // one for the test values that we use.
-      originalIntl = window.Intl;
-      window.Intl = {
+    function mockIntl() {
+      return {
         DateTimeFormat: function () {
           return {
             format: function () {
@@ -73,16 +66,12 @@ describe('time', function () {
           };
         }
       };
-    });
-
-    after(function () {
-      window.Intl = originalIntl;
-    });
+    }
 
     it('Handles empty dates', function () {
       var t = null;
       var expect = '';
-      assert.equal(time.toFuzzyString(t), expect);
+      assert.equal(time.toFuzzyString(t, mockIntl()), expect);
     });
 
     var testFixture = function (f) {
@@ -90,7 +79,7 @@ describe('time', function () {
         var t = new Date();
         var expect = f[1];
         sandbox.clock.tick(f[0] * 1000);
-        assert.equal(time.toFuzzyString(t), expect);
+        assert.equal(time.toFuzzyString(t, mockIntl()), expect);
       };
     };
 
@@ -103,21 +92,19 @@ describe('time', function () {
     it('falls back to simple strings for >24hrs ago', function () {
       // If window.Intl is not available then the date formatting for dates
       // more than one day ago falls back to a simple date string.
-      window.Intl = undefined;
       var d = new Date();
       sandbox.clock.tick(day * 2 * 1000);
 
-      assert.equal(time.toFuzzyString(d), 'Thu Jan 01 1970');
+      assert.equal(time.toFuzzyString(d, null), 'Thu Jan 01 1970');
     });
 
     it('falls back to simple strings for >1yr ago', function () {
       // If window.Intl is not available then the date formatting for dates
       // more than one year ago falls back to a simple date string.
-      window.Intl = undefined;
       var d = new Date();
       sandbox.clock.tick(year * 2 * 1000);
 
-      assert.equal(time.toFuzzyString(d), 'Thu Jan 01 1970');
+      assert.equal(time.toFuzzyString(d, null), 'Thu Jan 01 1970');
     });
 
   });

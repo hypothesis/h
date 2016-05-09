@@ -54,8 +54,14 @@ var formatters = {};
  * @returns {string}
  *
  */
-function format(date, options) {
-  if (typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+function format(date, options, Intl) {
+  // If the tests have passed in a mock Intl then use it, otherwise use the
+  // real one.
+  if (typeof Intl === 'undefined') {
+    Intl = window.Intl;
+  }
+
+  if (Intl && Intl.DateTimeFormat) {
     var key = JSON.stringify(options);
     var formatter = formatters[key];
 
@@ -71,19 +77,12 @@ function format(date, options) {
   }
 }
 
-function dayAndMonth(date) {
-  return format(date, {
-    month: 'short',
-    day: '2-digit',
-  });
+function dayAndMonth(date, now, Intl) {
+  return format(date, {month: 'short', day: '2-digit'}, Intl);
 }
 
-function dayAndMonthAndYear(date) {
-  return format(date, {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  });
+function dayAndMonthAndYear(date, now, Intl) {
+  return format(date, {day: '2-digit', month: 'short', year: 'numeric'}, Intl);
 }
 
 var BREAKPOINTS = [
@@ -186,13 +185,13 @@ function decayingInterval(date, callback) {
  * @param {number} date - The absolute timestamp to format.
  * @return {string} A 'fuzzy' string describing the relative age of the date.
  */
-function toFuzzyString(date) {
+function toFuzzyString(date, Intl) {
   if (!date) {
     return '';
   }
   var now = new Date();
 
-  return getBreakpoint(date, now).format(new Date(date), now);
+  return getBreakpoint(date, now).format(new Date(date), now, Intl);
 }
 
 module.exports = {
