@@ -32,10 +32,10 @@ var FIXTURES_NEXT_FUZZY_UPDATE = [
   [minute + 5, minute],
   [3 * minute + 5, minute],
   [4 * hour, hour],
-  [27 * hour, day],
-  [3 * day + 30 * minute, day],
-  [6 * month + 2 * day, 24 * day], // longer times are not supported
-  [8 * year, 24 * day]            // by setTimout
+  [27 * hour, null],
+  [3 * day + 30 * minute, null],
+  [6 * month + 2 * day, null],
+  [8 * year, null]
 ];
 
 describe('time', function () {
@@ -153,6 +153,18 @@ describe('time', function () {
       var cancel = time.decayingInterval(date, callback);
       cancel();
       sandbox.clock.tick(minute * 1000);
+      assert.notCalled(callback);
+    });
+
+    it('does not set a timeout for dates > 24hrs ago', function() {
+      var date = new Date();
+      var ONE_DAY = day * 1000;
+      sandbox.clock.tick(10 * ONE_DAY);
+      var callback = sandbox.stub();
+
+      time.decayingInterval(date, callback);
+      sandbox.clock.tick(ONE_DAY * 2);
+
       assert.notCalled(callback);
     });
   });

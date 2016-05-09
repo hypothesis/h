@@ -92,8 +92,8 @@ var BREAKPOINTS = [
   [lessThanOneMinuteAgo,        nSec,                                  1],
   [lessThanOneHourAgo,          nMin,                                  minute],
   [lessThanOneDayAgo,           nHr,                                   hour],
-  [thisYear,                    dayAndMonth,                           month],
-  [function () {return true;},  dayAndMonthAndYear,                    year]
+  [thisYear,                    dayAndMonth,                           null],
+  [function () {return true;},  dayAndMonthAndYear,                    null]
 ];
 
 function getBreakpoint(date, now) {
@@ -145,6 +145,9 @@ function decayingInterval(date, callback) {
   var timer;
   var update = function () {
     var fuzzyUpdate = nextFuzzyUpdate(date);
+    if (fuzzyUpdate === null) {
+      return;
+    }
     var nextUpdate = (1000 * fuzzyUpdate) + 500;
     timer = setTimeout(function () {
       callback(date);
