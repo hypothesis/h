@@ -2,9 +2,6 @@
 
 var minute = 60;
 var hour = minute * 60;
-var day = hour * 24;
-var month = day * 30;
-var year = day * 365;
 
 function lessThanThirtySecondsAgo(date, now) {
   return ((now - date) < 30 * 1000);
