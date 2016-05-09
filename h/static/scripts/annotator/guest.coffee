@@ -46,7 +46,6 @@ module.exports = class Guest extends Annotator
 
   constructor: (element, options) ->
     super
-
     this.adderCtrl = new adder.Adder(@adder[0])
     this.anchors = []
 
@@ -118,7 +117,7 @@ module.exports = class Guest extends Annotator
       .catch((reason) -> cb(reason))
 
     crossframe.on 'setVisibleHighlights', (state) =>
-      this.setVisibleHighlights(state)
+      this.toggleHighlightClass(state)
 
   _setupWrapper: ->
     @wrapper = @element
