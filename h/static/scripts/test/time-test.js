@@ -16,13 +16,13 @@ var FIXTURES_TO_FUZZY_STRING = [
   [3 * minute + 5, '3 min'],
   [hour, '1 hr'],
   [4 * hour, '4 hr'],
-  [27 * hour, '01 Jan'],
-  [3 * day + 30 * minute, '01 Jan'],
-  [6 * month + 2 * day, '01 Jan'],
-  [1 * year, '01 Jan 1970'],
-  [1 * year + 2 * month, '01 Jan 1970'],
-  [2 * year, '01 Jan 1970'],
-  [8 * year, '01 Jan 1970']
+  [27 * hour, '1 Jan'],
+  [3 * day + 30 * minute, '1 Jan'],
+  [6 * month + 2 * day, '1 Jan'],
+  [1 * year, '1 Jan 1970'],
+  [1 * year + 2 * month, '1 Jan 1970'],
+  [2 * year, '1 Jan 1970'],
+  [8 * year, '1 Jan 1970']
 ];
 
 var FIXTURES_NEXT_FUZZY_UPDATE = [
@@ -58,9 +58,9 @@ describe('time', function () {
           return {
             format: function () {
               if (new Date().getYear() === 70) {
-                return '01 Jan';
+                return '1 Jan';
               } else {
-                return '01 Jan 1970';
+                return '1 Jan 1970';
               }
             }
           };

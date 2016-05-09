@@ -78,11 +78,11 @@ function format(date, options, Intl) {
 }
 
 function dayAndMonth(date, now, Intl) {
-  return format(date, {month: 'short', day: '2-digit'}, Intl);
+  return format(date, {month: 'short', day: 'numeric'}, Intl);
 }
 
 function dayAndMonthAndYear(date, now, Intl) {
-  return format(date, {day: '2-digit', month: 'short', year: 'numeric'}, Intl);
+  return format(date, {day: 'numeric', month: 'short', year: 'numeric'}, Intl);
 }
 
 var BREAKPOINTS = [
