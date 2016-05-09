@@ -28,15 +28,29 @@ function delta(date, now) {
 }
 
 function nSec(date, now) {
-  return '{} sec'.replace('{}', Math.floor(delta(date, now)));
+  return '{} secs'.replace('{}', Math.floor(delta(date, now)));
 }
 
 function nMin(date, now) {
-  return '{} min'.replace('{}', Math.floor(delta(date, now) / minute));
+  var n = Math.floor(delta(date, now) / minute);
+  var template = '{} min';
+
+  if (n > 1) {
+    template = template + 's';
+  }
+
+  return template.replace('{}', n);
 }
 
 function nHr(date, now) {
-  return '{} hr'.replace('{}', Math.floor(delta(date, now) / hour));
+  var n = Math.floor(delta(date, now) / hour);
+  var template = '{} hr';
+
+  if (n > 1) {
+    template = template + 's';
+  }
+
+  return template.replace('{}', n);
 }
 
 // Cached DateTimeFormat instances,
