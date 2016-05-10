@@ -815,13 +815,6 @@ class TestUpdateAnnotationSchema(object):
 
         schema.validate({})
 
-    def test_it_overwrites_extra_fields_in_the_extra_dict(self):
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-
-        appstruct = schema.validate({'foo': 'bar', 'custom': 23})
-
-        assert appstruct['extra'] == {'foo': 'bar', 'custom': 23}
-
 
 @pytest.fixture
 def parse_document_claims(patch):
