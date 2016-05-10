@@ -43,7 +43,19 @@
 .markdown-body {
   @include styled-text;
 
-  p {
-    margin: 0;
+  // Margin between bottom of ascent of username and top of
+  // x-height of annotation-body should be ~15px.
+  // Remove additional margin-top added by the first p within
+  // the annotation-body
+  p:first-child {
+    margin-top: 0;
+  }
+  // Margin between bottom of ascent of annotation-body and top of
+  // ascent of annotation-footer should be ~15px in threaded-replies
+  // and 20px in the top level annotation.
+  // Remove additional margin-bottom added by the last p within
+  // the annotation-body
+  p:last-child {
+    margin-bottom: 0;
   }
 }
