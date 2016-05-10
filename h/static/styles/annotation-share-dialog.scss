@@ -65,7 +65,7 @@
   color: $text-color;
   border: 1px solid $gray-lighter;
   border-radius: 2px;
-  background: $lg-3;
+  background: $grey-1;
   white-space: nowrap;
   overflow: hidden;
   display: flex;
@@ -85,13 +85,13 @@
 }
 
 .annotation-share-dialog-link__btn {
-  color: $dg-3;
+  color: $grey-5;
   padding: 0px;
   margin-left: 7px;
 }
 
 .annotation-share-dialog-link__btn:hover {
-  color: $dg-1;
+  color: $grey-7;
 }
 
 .annotation-share-dialog-target {
@@ -108,14 +108,14 @@
 }
 
 .annotation-share-dialog-target__icon {
-  color: $dg-3;
+  color: $grey-5;
   text-decoration: none;
   font-size: 20px;
   cursor: pointer;
 }
 
 .annotation-share-dialog-target__icon:hover {
-  color: $dg-1;
+  color: $grey-7;
 }
 
 // Feedback message displayed after the user copies the link to the clipboard
