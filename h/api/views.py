@@ -16,8 +16,6 @@ particular, requests to the CRUD API endpoints are protected by the Pyramid
 authorization system. You can find the mapping between annotation "permissions"
 objects and Pyramid ACLs in :mod:`h.api.resources`.
 """
-import copy
-
 from pyramid import i18n
 from pyramid import security
 from pyramid.view import view_config
@@ -155,17 +153,15 @@ def search(request):
             effective_principals=security.Authenticated)
 def create(request):
     """Create an annotation from the POST payload."""
-    json_payload = _json_payload(request)
-
     # Validate the annotation for, and create the annotation in, PostgreSQL.
     if request.feature('postgres'):
         schema = schemas.CreateAnnotationSchema(request)
-        appstruct = schema.validate(copy.deepcopy(json_payload))
+        appstruct = schema.validate(_json_payload(request))
         annotation = storage.create_annotation(request, appstruct)
 
     # Validate the annotation for, and create the annotation in, Elasticsearch.
     legacy_schema = schemas.LegacyCreateAnnotationSchema(request)
-    legacy_appstruct = legacy_schema.validate(copy.deepcopy(json_payload))
+    legacy_appstruct = legacy_schema.validate(_json_payload(request))
 
     # When 'postgres' is on make sure that annotations in the legacy
     # Elasticsearch database use the same IDs as the PostgreSQL ones.
@@ -188,7 +184,9 @@ def create(request):
     return annotation_dict
 
 
-@api_config(route_name='api.annotation', request_method='GET', permission='read')
+@api_config(route_name='api.annotation',
+            request_method='GET',
+            permission='read')
 def read(annotation, request):
     """Return the annotation (simply how it was stored in the database)."""
     presenter = AnnotationJSONPresenter(request, annotation)
@@ -200,28 +198,64 @@ def read(annotation, request):
             permission='read')
 def read_jsonld(annotation, request):
     request.response.content_type = 'application/ld+json'
-    request.response.content_type_params = {'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
+    request.response.content_type_params = {
+        'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
     presenter = AnnotationJSONLDPresenter(request, annotation)
     return presenter.asdict()
 
 
-@api_config(route_name='api.annotation', request_method='PUT', permission='update')
+@api_config(route_name='api.annotation',
+            request_method='PUT',
+            permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
+    if request.feature('postgres'):
+        annotation_dict = _update_postgres(annotation, request)
+        legacy_annotation = storage.fetch_annotation(request,
+                                                     annotation.id,
+                                                     _postgres=False)
+        _update_elastic(legacy_annotation, request, notify=False)
+        return annotation_dict
+    return _update_elastic(annotation, request, notify=True)
+
+
+def _update_postgres(annotation, request):
+    schema = schemas.UpdateAnnotationSchema(request,
+                                            annotation.target_uri,
+                                            annotation.groupid)
+    appstruct = schema.validate(_json_payload(request))
+
+    annotation = storage.update_annotation(request.db,
+                                           annotation.id,
+                                           appstruct)
+
+    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+
+    _publish_annotation_event(
+        request, annotation, 'update', annotation_dict=annotation_dict)
+
+    return annotation_dict
+
+
+def _update_elastic(annotation, request, notify):
     schema = schemas.LegacyUpdateAnnotationSchema(request,
                                                   annotation=annotation)
     appstruct = schema.validate(_json_payload(request))
+
     annotation = storage.legacy_update_annotation(request,
                                                   annotation.id,
                                                   appstruct)
 
-    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-    _publish_annotation_event(request, annotation, 'update',
-                              annotation_dict=annotation_dict)
-    return annotation_dict
+    if notify:
+        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+        _publish_annotation_event(
+            request, annotation, 'update', annotation_dict=annotation_dict)
+        return annotation_dict
 
 
-@api_config(route_name='api.annotation', request_method='DELETE', permission='delete')
+@api_config(route_name='api.annotation',
+            request_method='DELETE',
+            permission='delete')
 def delete(annotation, request):
     """Delete the specified annotation."""
     storage.delete_annotation(request, annotation.id)
@@ -257,8 +291,11 @@ def _present_searchdict(request, mapping):
     return AnnotationJSONPresenter(request, ann).asdict()
 
 
-def _publish_annotation_event(request, annotation, action, annotation_dict=None):
-    """Publish an event to the annotations queue for this annotation action"""
+def _publish_annotation_event(request,
+                              annotation,
+                              action,
+                              annotation_dict=None):
+    """Publish an event to the annotations queue for this annotation action."""
     if annotation_dict is None:
         annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
 
