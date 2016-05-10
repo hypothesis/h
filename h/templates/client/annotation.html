@@ -118,7 +118,8 @@
     <div class="annotation-form-actions" ng-if="vm.editing()" ng-switch="vm.action">
       <button ng-switch-when="delete"
         ng-click="vm.save()"
-        class="dropdown-menu-btn"><i class="h-icon-check btn-icon"></i> Delete</button>
+        class="dropdown-menu-btn"
+        aria-label="Delete" h-tooltip><i class="h-icon-check btn-icon"></i></button>
       <publish-annotation-btn
         class="publish-annotation-btn"
         group="vm.group()"
@@ -155,34 +156,30 @@
       <div ng-show="vm.isSaving">Saving…</div>
       <button class="btn btn-clean annotation-action-btn"
         ng-show="vm.authorize('update') && !vm.isSaving"
-        ng-click="vm.edit()">
+        ng-click="vm.edit()"
+        aria-label="Edit"
+        h-tooltip>
         <i class="h-icon-annotation-edit btn-icon "></i>
-        <span class="annotation-action-btn__label">
-          Edit
-        </span>
       </button>
       <button class="btn btn-clean annotation-action-btn"
         ng-show="vm.authorize('delete')"
-        ng-click="vm.delete()">
+        ng-click="vm.delete()"
+        aria-label="Delete"
+        h-tooltip>
         <i class="h-icon-annotation-delete btn-icon "></i>
-        <span class="annotation-action-btn__label">
-          Delete
-        </span>
       </button>
       <button class="btn btn-clean annotation-action-btn"
-        ng-click="vm.reply()">
+        ng-click="vm.reply()"
+        aria-label="Reply"
+        h-tooltip>
         <i class="h-icon-annotation-reply btn-icon "></i>
-        <span class="annotation-action-btn__label">
-          Reply
-        </span>
       </button>
       <span class="share-dialog-wrapper" ng-if="!vm.feature('direct_linking')">
         <button class="btn btn-clean annotation-action-btn"
-          ng-click="vm.showShareDialog = !vm.showShareDialog">
+          ng-click="vm.showShareDialog = !vm.showShareDialog"
+          aria-label="Link"
+          h-tooltip>
           <i class="h-icon-link btn-icon "></i>
-          <span class="annotation-action-btn__label">
-            Link
-          </span>
         </button>
         <span class="share-dialog share-dialog--actions" ng-click="$event.stopPropagation()">
           <a target="_blank"
@@ -195,11 +192,10 @@
       </span>
       <span class="share-dialog-wrapper" ng-if="vm.feature('direct_linking')">
         <button class="btn btn-clean annotation-action-btn"
-          ng-click="vm.showShareDialog = true">
+          ng-click="vm.showShareDialog = true"
+          aria-label="Share"
+          h-tooltip>
           <i class="h-icon-annotation-share btn-icon "></i>
-          <span class="annotation-action-btn__label">
-            Share
-          </span>
         </button>
         <annotation-share-dialog
           group="vm.group()"
