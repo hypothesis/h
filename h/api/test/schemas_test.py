@@ -596,6 +596,7 @@ class TestCreateAnnotationSchema(object):
 
         assert 'groupid' not in appstruct
 
+
 class TestLegacyUpdateAnnotationSchema(object):
 
     def test_it_passes_input_to_structure_validator(self):
