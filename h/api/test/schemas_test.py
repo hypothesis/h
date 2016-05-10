@@ -810,11 +810,6 @@ class TestUpdateAnnotationSchema(object):
             document_data,
             claimant=mock.sentinel.target_uri)
 
-    def test_it_does_not_crash_when_fields_are_missing(self):
-        schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-
-        schema.validate({})
-
 
 @pytest.fixture
 def parse_document_claims(patch):
