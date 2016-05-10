@@ -5,6 +5,7 @@ include gulpfile.js
 include gunicorn.conf.py
 include package.json
 include requirements.txt
+exclude Jenkinsfile
 graft conf
 graft docs
 prune docs/_build

@@ -2,6 +2,7 @@ PATH := bin:${PATH}
 NPM_BIN := $(shell npm bin)
 ISODATE := $(shell TZ=UTC date '+%Y%m%d')
 BUILD_ID := $(shell python -c 'import h; print(h.__version__)')
+DOCKER_TAG = dev
 
 # Unless the user has specified otherwise in their environment, it's probably a
 # good idea to refuse to install unless we're in an activated virtualenv.
@@ -38,7 +39,7 @@ dist/h-$(BUILD_ID): dist/h-$(BUILD_ID).tar.gz
 
 .PHONY: docker
 docker: dist/h-$(BUILD_ID)
-	docker build -t hypothesis/hypothesis:dev $<
+	docker build -t hypothesis/hypothesis:$(DOCKER_TAG) $<
 
 .PHONY: lint
 lint: h.egg-info/.uptodate
