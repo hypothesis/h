@@ -41,7 +41,7 @@ INSTALL_REQUIRES = [
     'deform>=0.9,<1.0',
     'deform-jinja2>=0.5,<0.6',
     'elasticsearch>=1.1.0,<2.0.0',
-    'gevent>=1.0.2,<1.1.0',
+    'gevent>=1.1,<1.2',
     'gunicorn>=19.2,<20',
     'itsdangerous>=0.24',
     'jsonpointer==1.0',
