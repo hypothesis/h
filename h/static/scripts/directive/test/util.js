@@ -43,7 +43,7 @@ function ngModule(inject, name) {
  *   var domElement = createDirective(document, 'myComponent', {
  *     attrA: 'initial-value'
  *   }, {
- *     scopePropery: scopeValue
+ *     scopeProperty: scopeValue
  *   },
  *   'Hello, world!');
  *
