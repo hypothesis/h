@@ -3,8 +3,11 @@
 import mock
 import pytest
 
+from h.groups import models
+from h.test import factories
+
 from h import db
-from h.features.models import Feature
+from h.features.models import Feature, Cohort
 
 
 @pytest.mark.usefixtures('features_override',
@@ -71,3 +74,59 @@ class TestFeature(object):
         }, clear=True)
         patcher.start()
         request.addfinalizer(patcher.stop)
+
+
+class TestCohort(object):
+    def test_init(self):
+        name = "My Hypothesis Cohort"
+        user = factories.User()
+
+        cohort = Cohort(name=name, creator=user)
+        db.Session.add(cohort)
+        db.Session.flush()
+
+        assert cohort.id
+        assert cohort.name == name
+        assert cohort.created
+        assert cohort.updated
+        assert cohort.members == [user]
+
+    def test_with_short_name(self):
+        """Should raise ValueError if name shorter than 4 characters."""
+        with pytest.raises(ValueError):
+            Cohort(name="abc", creator=factories.User())
+
+    def test_with_long_name(self):
+        """Should raise ValueError if name longer than 25 characters."""
+        with pytest.raises(ValueError):
+            Cohort(name="abcdefghijklmnopqrstuvwxyz", creator=factories.User())
+
+    def test_repr(self):
+        name = "My Hypothesis Cohort"
+        user = factories.User()
+
+        cohort = Cohort(name=name, creator=user)
+        db.Session.add(cohort)
+        db.Session.flush()
+
+        assert repr(cohort) == "<Cohort: my-hypothesis-cohort>"
+
+    def test_get_by_id_when_id_does_exist(self):
+        name = "My Hypothesis Cohort"
+        user = factories.User()
+
+        cohort = Cohort(name=name, creator=user)
+        db.Session.add(cohort)
+        db.Session.flush()
+
+        assert Cohort.get_by_id(cohort.id) == cohort
+
+    def test_get_by_id_when_id_does_not_exist(self):
+        name = "My Hypothesis Cohort"
+        user = factories.User()
+
+        cohort = Cohort(name=name, creator=user)
+        db.Session.add(cohort)
+        db.Session.flush()
+
+        assert Cohort.get_by_id(23) is None
