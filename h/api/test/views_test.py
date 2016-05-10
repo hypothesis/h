@@ -552,7 +552,7 @@ class TestUpdateLegacy(object):
                                   storage):
         views.update(mock.Mock(), mock_request)
 
-        assert AnnotationJSONPresenter.call_count == 2
+        assert AnnotationJSONPresenter.call_count == 1
         AnnotationJSONPresenter.assert_any_call(
             mock_request, storage.legacy_update_annotation.return_value)
 

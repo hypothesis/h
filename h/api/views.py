@@ -235,7 +235,8 @@ def _update_postgres(annotation, request):
 
     annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
 
-    _publish_annotation_event(request, annotation_dict, 'update')
+    _publish_annotation_event(
+        request, annotation, 'update', annotation_dict=annotation_dict)
 
     return annotation_dict
 
@@ -251,7 +252,8 @@ def _update_elastic(annotation, request, notify):
 
     if notify:
         annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-        _publish_annotation_event(request, annotation_dict, 'update')
+        _publish_annotation_event(
+            request, annotation, 'update', annotation_dict=annotation_dict)
         return annotation_dict
 
 
