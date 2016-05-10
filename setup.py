@@ -79,7 +79,7 @@ ENTRY_POINTS = {
         'websocket=h.websocket:create_app',
     ],
     'console_scripts': [
-        'hypothesis=h.script:main',
+        'hypothesis=h.cli:main',
         'hypothesis-buildext=h.buildext:main',
         'hypothesis-celery=h.celery:main',
     ],
