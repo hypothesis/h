@@ -35,6 +35,7 @@ INSTALL_REQUIRES = [
     'annotator>=0.14.2,<0.15',
     'blinker>=1.3,<1.4',
     'celery>=3.1.23,<3.2',
+    'click>=6.6,<7.0',
     'cryptacular>=1.4,<1.5',
     'cryptography>=0.7',
     'deform>=0.9,<1.0',

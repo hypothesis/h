@@ -1,237 +1,46 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import argparse
-import collections
+import functools
 import logging
 import os
-import sys
-import textwrap
 
-from pkg_resources import iter_entry_points
-
-from elasticsearch import helpers as es_helpers
+import click
 from pyramid import paster
+from pyramid import path
 from pyramid.request import Request
 
 from h import __version__
-from h import accounts
-from h.api.search import config as search_config
-from h._compat import PY2, text_type
-
-ANNOTOOL_OPERATIONS = {e.name: e for e in iter_entry_points('h.annotool')}
-
-ENV_OVERRIDES = {
-    'MODEL_CREATE_ALL': 'False',
-    'MODEL_DROP_ALL': 'False',
-    'SECRET_KEY': 'notsecret',
-}
-os.environ.update(ENV_OVERRIDES)
-
 
 log = logging.getLogger('h')
 
-parser = argparse.ArgumentParser(
-    'hypothesis',
-    description='The Hypothesis Project Annotation System')
-
-subparsers = parser.add_subparsers(title='command', dest='command')
-subparsers.required = True
-
-
-def _add_common_args(parser):
-    parser.add_argument(
-        'config_uri',
-        help="the path to your paster config file, for example: "
-             "'conf/app.ini'")
-    parser.add_argument(
-        '--base',
-        help="the base URL of your h instance (default: "
-             "'http://localhost:5000')",
-        default='http://localhost:5000',
-        metavar='URL')
+SUBCOMMANDS = (
+    'h.cli.commands.admin.admin',
+    'h.cli.commands.initdb.initdb',
+    'h.cli.commands.reindex.reindex',
+)
 
 
-def bootstrap(args):
+def bootstrap(config):
     """
     Bootstrap the application from the given arguments.
 
     Returns a bootstrapped request object.
     """
-    paster.setup_logging(args.config_uri)
-    request = Request.blank('/', base_url=args.base)
-    paster.bootstrap(args.config_uri, request=request)
+    paster.setup_logging(config)
+    request = Request.blank('/')
+    paster.bootstrap(config, request=request)
     return request
 
 
-def initdb(args):
-    """Create database tables and elasticsearch indices."""
-    # Force model creation using the MODEL_CREATE_ALL env var
-    os.environ['MODEL_CREATE_ALL'] = 'True'
-
-    # Start the application, triggering model creation
-    bootstrap(args)
-
-parser_initdb = subparsers.add_parser('initdb', help=initdb.__doc__)
-_add_common_args(parser_initdb)
-
-
-def admin(args):
-    """Make a user an admin."""
-    request = bootstrap(args)
-    accounts.make_admin(args.username)
-    request.tm.commit()
-
-parser_admin = subparsers.add_parser('admin', help=admin.__doc__)
-_add_common_args(parser_admin)
-parser_admin.add_argument(
-    'username',
-    type=lambda s: text_type(s, sys.getfilesystemencoding()) if PY2 else text_type,
-    help="the name of the user to make into an admin, e.g. 'fred'")
-
-
-def annotool(args):
-    """
-    Perform operations on the annotation database.
-
-    This command provides a way of running named commands across the database
-    of annotations and can be used to run data migrations, analytics, etc.
-
-    **NB**: This tool cannot currently be used for making changes to the
-    annotation "document" field.
-    """
-    request = bootstrap(args)
-
-    annotations = es_helpers.scan(request.legacy_es.conn,
-                                  query={'query': {'match_all': {}}},
-                                  index=request.legacy_es.index,
-                                  doc_type=request.legacy_es.t.annotation)
-
-    chunksize = 1000
-    state = {'total': 0, 'pending': []}
-
-    def _flush():
-        bodies = [{
-            '_index': request.legacy_es.index,
-            '_type': request.legacy_es.t.annotation,
-            '_op_type': 'update',
-            '_id': x['_id'],
-            'doc': x['_source'],
-        } for x in state['pending']]
-        es_helpers.bulk(request.legacy_es.conn, bodies)
-
-        state['total'] += len(state['pending'])
-        log.info("processed %d annotations", state['total'])
-        state['pending'] = []
-
-    for annotation in annotations:
-        func = ANNOTOOL_OPERATIONS[args.operation].load()
-        func(annotation['_source'])
-
-        state['pending'].append(annotation)
-
-        if len(state['pending']) >= chunksize:
-            _flush()
-
-    if state['pending']:
-        _flush()
-
-parser_annotool = subparsers.add_parser('annotool', help=annotool.__doc__)
-_add_common_args(parser_annotool)
-parser_annotool.add_argument(
-    'operation',
-    choices=ANNOTOOL_OPERATIONS,
-    help="the operation to perform on all annotations")
-
-
-def reindex(args):
-    """Reindex the annotations into a new Elasticsearch index."""
-    request = bootstrap(args)
-
-    # Configure the new index
-    search_config.configure_index(request.legacy_es, args.target)
-
-    # Reindex the annotations
-    es_helpers.reindex(client=request.legacy_es.conn,
-                       source_index=request.legacy_es.index,
-                       target_index=args.target)
-
-    if args.update_alias:
-        request.legacy_es.conn.indices.update_aliases(body={'actions': [
-            # Remove all existing aliases
-            {"remove": {"index": "*", "alias": request.legacy_es.index}},
-            # Alias current index name to new target
-            {"add": {"index": args.target, "alias": request.legacy_es.index}},
-        ]})
-
-parser_reindex = subparsers.add_parser('reindex', help=reindex.__doc__)
-_add_common_args(parser_reindex)
-parser_reindex.add_argument('-u', '--update-alias',
-                            action='store_true',
-                            help='Whether to assume the current index is an '
-                                 'alias and update it on reindex completion')
-parser_reindex.add_argument('target', help='The name of the target index')
-
-
-def token(args):
-    """
-    Generate an OAuth bearer token for the specified principal.
-
-    This token is suitable for authenticating HTTP requests to the h API.
-
-    For example, to authorize yourself as user seanh to your local dev instance
-    of h do:
-
-        hypothesis token --base 'http://localhost:5000' --sub 'acct:seanh@localhost' conf/development-app.ini
-
-    Then copy the output and pass it to the h API as the value of an
-    X-Annotator-Auth-Token header.
-
-    """
-    import h.auth.tokens
-    request = bootstrap(args)
-    FakeRequest = collections.namedtuple(
-        'FakeRequest', 'authenticated_userid host_url registry')
-    fake_request = FakeRequest(
-        authenticated_userid=args.sub,
-        host_url=request.host_url,
-        registry=request.registry
-    )
-    print(h.auth.tokens.generate_jwt(fake_request, 3600))
-
-
-parser_token = subparsers.add_parser(
-    'token', description=textwrap.dedent(token.__doc__),
-    formatter_class=argparse.RawDescriptionHelpFormatter)
-_add_common_args(parser_token)
-parser_token.add_argument(
-    '--sub',
-    help="subject (userid, group, etc.) of the token, for example: "
-         "'acct:seanh@127.0.0.1'")
-parser_token.add_argument(
-    '--ttl', type=int, default=3600,
-    help='token time-to-live in seconds, for example: 60 (default: 3600, '
-         'one hour)')
-
-
-def version(args):
-    """Print the package version"""
-    print('{prog} {version}'.format(prog=parser.prog, version=__version__))
-
-parser_version = subparsers.add_parser('version', help=version.__doc__)
-
-
-COMMANDS = {
-    'admin': admin,
-    'annotool': annotool,
-    'initdb': initdb,
-    'reindex': reindex,
-    'token': token,
-    'version': version,
-}
-
-
-def main():
+@click.group()
+@click.option('--dev',
+              help="Use defaults suitable for development?",
+              default=False,
+              is_flag=True)
+@click.version_option(version=__version__)
+@click.pass_context
+def cli(ctx, dev):
     # Set a flag in the environment that other code can use to detect if it's
     # running in a script rather than a full web application.
     #
@@ -239,8 +48,20 @@ def main():
     # up an entire application to build the extensions.
     os.environ['H_SCRIPT'] = 'true'
 
-    args = parser.parse_args()
-    COMMANDS[args.command](args)
+    # Override other important environment variables
+    os.environ['MODEL_CREATE_ALL'] = 'False'
+    os.environ['MODEL_DROP_ALL'] = 'False'
+    os.environ['SECRET_KEY'] = 'notsecret'
+
+    config = 'conf/development-app.ini' if dev else 'conf/app.ini'
+    ctx.obj['bootstrap'] = functools.partial(bootstrap, config)
+
+
+def main():
+    resolver = path.DottedNameResolver()
+    for cmd in SUBCOMMANDS:
+        cli.add_command(resolver.resolve(cmd))
+    cli(prog_name='hypothesis', obj={})
 
 
 if __name__ == '__main__':
