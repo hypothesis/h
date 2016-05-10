@@ -1,7 +1,7 @@
 output-format: grouped
 strictness: veryhigh
 doc-warnings: true
-max-line-length: 79
+max-line-length: 160
 pep8:
   full: true
 pylint:
