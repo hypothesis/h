@@ -17,7 +17,7 @@ Client = client.Client
 def _remove_old_flags_on_boot(event):
     """Remove old feature flags from the database on startup."""
     # Skip this if we're in a script, not actual app startup. See the comment
-    # in h.script:main for an explanation.
+    # in h.cli:main for an explanation.
     if 'H_SCRIPT' in os.environ:
         return
 
