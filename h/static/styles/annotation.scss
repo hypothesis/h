@@ -52,6 +52,9 @@ $annotation-card-left-padding: 10px;
 .annotation-link {
   @include font-small;
   color: $grey-4;
+  // Decrease the margin between the more/less link
+  // and the annotation body.
+  margin-top: -12px;
 }
 
 .annotation-replies:hover {
@@ -173,6 +176,8 @@ $annotation-card-left-padding: 10px;
   @include font-normal;
   color: $grey-4;
   font-family: sans-serif;
+  letter-spacing: 0.1px;
+  font-size: 12px;
 
   del {
     background:#ffe6e6;
