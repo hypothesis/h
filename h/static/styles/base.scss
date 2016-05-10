@@ -17,14 +17,13 @@
   color: $gray;
   font-family: $serif-font-family;
   font-style: italic;
-  padding: 0 .615em;
+  padding: 0 1em;
   border-left: 3px solid $gray-lighter;
 }
 
-//NOISE///////////
-//Provides the noise background
-@mixin noise-background {
-  background: url("../images/noise_1.png");
+//Provides the grey-background
+@mixin grey-background {
+  background: $grey-2;
 }
 
 .annotator-hide {

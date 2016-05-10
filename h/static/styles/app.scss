@@ -34,7 +34,7 @@ $base-line-height: 20px;
 body {
   $sidebar-h-padding: 9px;
 
-  @include noise-background;
+  @include grey-background;
   font-family: $sans-font-family;
   font-weight: 300;
   padding: $sidebar-h-padding;

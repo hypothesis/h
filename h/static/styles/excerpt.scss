@@ -27,6 +27,7 @@
   .excerpt__toggle-link {
     padding-left: 15px;
     background-image: linear-gradient(to right, transparent 0px, white 12px);
+    line-height: $normal-line-height;
   }
 
   .excerpt__toggle-link > a {

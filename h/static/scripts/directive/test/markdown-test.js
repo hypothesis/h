@@ -16,7 +16,7 @@ describe('markdown', function () {
   }
 
   function viewElement(editor) {
-    return editor[0].querySelector('.styled-text');
+    return editor[0].querySelector('.markdown-body');
   }
 
   function getRenderedHTML(editor) {

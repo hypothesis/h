@@ -39,3 +39,11 @@
     float: right;
   }
 }
+
+.markdown-body {
+  @include styled-text;
+
+  p {
+    margin: 0;
+  }
+}

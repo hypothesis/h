@@ -15,11 +15,11 @@
 }
 
 @mixin form-input {
+  @include font-normal;
   border: 1px solid $gray-lighter;
   border-radius: 2px;
   padding: .5em .75em;
   font-weight: normal;
-  font-size: 1.2em;
   color: $gray;
   background-color: #FAFAFA;
 }
