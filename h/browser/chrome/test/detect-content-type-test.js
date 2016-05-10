@@ -1,3 +1,5 @@
+'use strict';
+
 var detectContentType = require('../lib/detect-content-type');
 
 describe('detectContentType()', function () {
@@ -16,9 +18,16 @@ describe('detectContentType()', function () {
     assert.deepEqual(detectContentType(), { type: 'HTML' } );
   });
 
-  it('returns "PDF" if the Chrome PDF plugin is present', function () {
-    el.innerHTML =
-     '<embed name="plugin" type="application/pdf"></embed>';
+  it('returns "PDF" if Google Chrome PDF viewer is present', function () {
+    el.innerHTML = '<embed name="plugin" type="application/pdf"></embed>';
     assert.deepEqual(detectContentType(), { type: 'PDF' });
+  });
+
+  it('returns "PDF" if Firefox PDF viewer is present', function () {
+    var fakeDocument = {
+      querySelector: function () { return null; },
+      baseURI: 'resource://pdf.js',
+    };
+    assert.deepEqual(detectContentType(fakeDocument), { type: 'PDF' });
   });
 });
