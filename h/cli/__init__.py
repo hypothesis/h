@@ -16,6 +16,7 @@ log = logging.getLogger('h')
 
 SUBCOMMANDS = (
     'h.cli.commands.admin.admin',
+    'h.cli.commands.devserver.devserver',
     'h.cli.commands.initdb.initdb',
     'h.cli.commands.reindex.reindex',
 )

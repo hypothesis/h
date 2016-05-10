@@ -10,15 +10,15 @@ To serve your local dev instance of h over HTTPS:
 
 1. Generate a private key and certificate signing request::
 
-    openssl req -newkey rsa:1024 -nodes -keyout key.pem -out req.pem
+    openssl req -newkey rsa:1024 -nodes -keyout .tlskey.pem -out .tlscsr.pem
 
 2. Generate a self-signed certificate::
 
-    openssl x509 -req -in req.pem -signkey key.pem -out server.crt
+    openssl x509 -req -in .tlscsr.pem -signkey .tlskey.pem -out .tlscert.pem
 
-3. Run ``gunicorn`` with the ``certfile`` and ``keyfile`` options::
+3. Run ``hypothesis devserver`` with the ``--https`` option::
 
-    gunicorn --reload --paste conf/development-app.ini --certfile=server.crt --keyfile=key.pem
+    hypothesis devserver --https
 
 4. Since the certificate is self-signed, you will need to instruct your browser to
    trust it explicitly by visiting https://127.0.0.1:5000 and selecting the option

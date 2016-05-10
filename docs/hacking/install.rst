@@ -244,7 +244,7 @@ Activate the virtual environment that you've created:
 Running h
 ---------
 
-Start the Hypothesis web service:
+Start a development server:
 
 .. code-block:: bash
 
@@ -257,50 +257,12 @@ This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
 
-If you are making changes to the client, or the JavaScript code or styles for the
-service, you may find it useful to run this command from your ``h`` directory
-in a separate terminal:
-
-.. code-block:: bash
-
-    gulp watch
-
-``gulp watch`` will automatically rebuild the assets whenever the source files
-change.
-
-When ``gulp watch`` is running, you can visit http://localhost:3000
-to see a page with an embedded Hypothesis client which will automatically reload
-when styles, templates or JavaScript source files are changed.
+This command also starts a server on port 3000 (http://localhost:3000) which
+serves a page with an embedded Hypothesis client which will automatically reload
+when styles, templates or JavaScript source files are changed. This can be
+useful when developing the frontend.
 
 .. _Gulp: http://gulpjs.com/
-
-
-Running the WebSocket for real-time features
---------------------------------------------
-
-To test h's real-time features (for example, seeing new or updated annotations
-from other users appear in your browser without a page reload) you need to run
-a websocket process.  Open a new terminal, ``cd`` into your ``h`` directory,
-:ref:`activate your Python virtual environment <activating_your_virtual_environment>`,
-then run:
-
-.. code-block:: bash
-
-   gunicorn --reload --paste conf/development-websocket.ini
-
-
-Running Celery for background tasks
------------------------------------
-
-To test h's background tasks (for example, sending emails) you need to run a
-Celery worker process.
-Open a new terminal, ``cd`` into your ``h`` directory,
-:ref:`activate your Python virtual environment <activating_your_virtual_environment>`,
-then run:
-
-.. code-block:: bash
-
-    CONFIG_URI=conf/development-app.ini hypothesis-celery worker
 
 
 .. _running-the-tests:
