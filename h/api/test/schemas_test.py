@@ -53,10 +53,16 @@ def update_annotation_schema_validate(data,
     return schema.validate(data)
 
 
-@pytest.mark.parametrize('validate', [
-    create_annotation_schema_validate,
-    update_annotation_schema_validate,
-])
+@pytest.mark.parametrize('validate',
+    [
+        create_annotation_schema_validate,
+        update_annotation_schema_validate,
+    ],
+    ids=[
+        'CreateAnnotationSchema.validate()',
+        'UpdateAnnotationSchema.validate()'
+    ]
+)
 class TestCreateUpdateAnnotationSchema(object):
 
     """Shared tests for CreateAnnotationSchema and UpdateAnnotationSchema."""
