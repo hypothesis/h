@@ -68,7 +68,7 @@ class TestCreateUpdateAnnotationSchema(object):
     """Shared tests for CreateAnnotationSchema and UpdateAnnotationSchema."""
 
     def test_it_does_not_raise_for_minimal_valid_data(self, validate):
-        validate(self.valid_input_data())
+        validate({})
 
     def test_it_does_not_raise_for_full_valid_data(self, validate):
         # Use all the keys to make sure that valid data for all of them passes.
@@ -193,7 +193,7 @@ class TestCreateUpdateAnnotationSchema(object):
                                         input_data,
                                         error_message):
         with pytest.raises(schemas.ValidationError) as err:
-            validate(self.valid_input_data(**input_data))
+            validate(input_data)
 
         assert str(err.value) == error_message
 
@@ -205,8 +205,7 @@ class TestCreateUpdateAnnotationSchema(object):
         'links',
     ])
     def test_it_removes_protected_fields(self, validate, field):
-        appstruct = validate(
-            self.valid_input_data(field='something forbidden'))
+        appstruct = validate({'field': 'something forbidden'})
 
         assert field not in appstruct
 
@@ -377,16 +376,6 @@ class TestCreateUpdateAnnotationSchema(object):
         appstruct = validate({})
 
         assert not appstruct.get('extra')
-
-    def valid_input_data(self, **kwargs):
-        """Return a minimal valid input data for AnnotationSchema."""
-        data = {
-            'permissions': {
-                'read': [],
-            },
-        }
-        data.update(kwargs)
-        return data
 
 
 class TestLegacyCreateAnnotationSchema(object):
