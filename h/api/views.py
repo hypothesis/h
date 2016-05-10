@@ -16,8 +16,6 @@ particular, requests to the CRUD API endpoints are protected by the Pyramid
 authorization system. You can find the mapping between annotation "permissions"
 objects and Pyramid ACLs in :mod:`h.api.resources`.
 """
-import copy
-
 from pyramid import i18n
 from pyramid import security
 from pyramid.view import view_config
@@ -155,17 +153,15 @@ def search(request):
             effective_principals=security.Authenticated)
 def create(request):
     """Create an annotation from the POST payload."""
-    json_payload = _json_payload(request)
-
     # Validate the annotation for, and create the annotation in, PostgreSQL.
     if request.feature('postgres'):
         schema = schemas.CreateAnnotationSchema(request)
-        appstruct = schema.validate(copy.deepcopy(json_payload))
+        appstruct = schema.validate(_json_payload(request))
         annotation = storage.create_annotation(request, appstruct)
 
     # Validate the annotation for, and create the annotation in, Elasticsearch.
     legacy_schema = schemas.LegacyCreateAnnotationSchema(request)
-    legacy_appstruct = legacy_schema.validate(copy.deepcopy(json_payload))
+    legacy_appstruct = legacy_schema.validate(_json_payload(request))
 
     # When 'postgres' is on make sure that annotations in the legacy
     # Elasticsearch database use the same IDs as the PostgreSQL ones.
@@ -227,7 +223,7 @@ def _update_postgres(annotation, request):
     schema = schemas.UpdateAnnotationSchema(request,
                                             annotation.target_uri,
                                             annotation.groupid)
-    appstruct = schema.validate(copy.deepcopy(_json_payload(request)))
+    appstruct = schema.validate(_json_payload(request))
 
     annotation = storage.update_annotation(request.db,
                                            annotation.id,
@@ -244,7 +240,7 @@ def _update_postgres(annotation, request):
 def _update_elastic(annotation, request, notify):
     schema = schemas.LegacyUpdateAnnotationSchema(request,
                                                   annotation=annotation)
-    appstruct = schema.validate(copy.deepcopy(_json_payload(request)))
+    appstruct = schema.validate(_json_payload(request))
 
     annotation = storage.legacy_update_annotation(request,
                                                   annotation.id,

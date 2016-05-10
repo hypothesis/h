@@ -120,7 +120,6 @@ class TestSearch(object):
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
-                         'copy',
                          'schemas',
                          'storage')
 class TestCreateLegacy(object):
@@ -148,8 +147,7 @@ class TestCreateLegacy(object):
         storage.legacy_create_annotation.assert_called_once_with(mock_request,
                                                                  {'foo': 123})
 
-    def test_it_validates_the_posted_data(self, mock_request, schemas, copy):
-        copy.deepcopy.side_effect = lambda x: x
+    def test_it_validates_the_posted_data(self, mock_request, schemas):
         schema = schemas.LegacyCreateAnnotationSchema.return_value
 
         views.create(mock_request)
@@ -202,14 +200,9 @@ class TestCreateLegacy(object):
     def mock_request(self):
         return mock.Mock(feature=mock.Mock(return_value=False))
 
-    @pytest.fixture
-    def copy(self, patch):
-        return patch('h.api.views.copy')
-
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
-                         'copy',
                          'schemas',
                          'storage')
 class TestCreate(object):
@@ -228,17 +221,12 @@ class TestCreate(object):
 
         schemas.CreateAnnotationSchema.assert_called_once_with(mock_request)
 
-    def test_it_validates_the_posted_data(self, copy, mock_request, schemas):
-        """It should call validate() with a deep copy of json_body."""
-        copy.deepcopy.side_effect = [mock.sentinel.first_copy,
-                                     mock.sentinel.second_copy]
-
+    def test_it_validates_the_posted_data(self, mock_request, schemas):
+        """It should call validate() with a request.json_body."""
         views.create(mock_request)
 
-        assert copy.deepcopy.call_args_list[0] == mock.call(
-            mock_request.json_body)
         schemas.CreateAnnotationSchema.return_value.validate\
-            .assert_called_once_with(mock.sentinel.first_copy)
+            .assert_called_once_with(mock_request.json_body)
 
     def test_it_raises_if_validate_raises(self, mock_request, schemas):
         schemas.CreateAnnotationSchema.return_value.validate.side_effect = (
@@ -279,22 +267,15 @@ class TestCreate(object):
             mock_request)
 
     def test_it_validates_the_posted_data_with_the_legacy_schema(self,
-                                                                 copy,
                                                                  mock_request,
                                                                  schemas):
-        """It should call validate() with a deep copy of json_body."""
-        copy.deepcopy.side_effect = [mock.sentinel.first_copy,
-                                     mock.sentinel.second_copy]
-
+        """It should call validate() with request.json_body."""
         views.create(mock_request)
 
-        assert copy.deepcopy.call_args_list[0] == mock.call(
-            mock_request.json_body)
         schemas.LegacyCreateAnnotationSchema.return_value.validate\
-            .assert_called_once_with(mock.sentinel.second_copy)
+            .assert_called_once_with(mock_request.json_body)
 
     def test_it_raises_if_legacy_schema_validate_raises(self,
-                                                        copy,
                                                         mock_request,
                                                         schemas):
         schemas.LegacyCreateAnnotationSchema.return_value.validate\
@@ -400,10 +381,6 @@ class TestCreate(object):
     def mock_request(self):
         return mock.Mock(feature=mock.Mock(return_value=True))
 
-    @pytest.fixture
-    def copy(self, patch):
-        return patch('h.api.views.copy')
-
 
 @pytest.mark.usefixtures('AnnotationJSONPresenter')
 class TestRead(object):
@@ -490,10 +467,8 @@ class TestUpdateLegacy(object):
 
     def test_it_validates_the_posted_data_with_the_legacy_schema(
             self,
-            copy,
             mock_request,
             schemas):
-        copy.deepcopy.side_effect = lambda x: x
         legacy_schema = schemas.LegacyUpdateAnnotationSchema.return_value
 
         views.update(mock.Mock(), mock_request)
@@ -610,9 +585,8 @@ class TestUpdate(object):
         with pytest.raises(views.PayloadError):
             views.update(mock.Mock(), mock_request)
 
-    def test_it_validates_the_posted_data(self, copy, mock_request, schemas):
+    def test_it_validates_the_posted_data(self, mock_request, schemas):
         annotation = mock.Mock()
-        copy.deepcopy.side_effect = lambda x: x
         schema = schemas.UpdateAnnotationSchema.return_value
 
         views.update(annotation, mock_request)
@@ -658,10 +632,8 @@ class TestUpdate(object):
 
     def test_it_validates_the_posted_data_with_the_legacy_schema(
             self,
-            copy,
             mock_request,
             schemas):
-        copy.deepcopy.side_effect = lambda x: x
         legacy_schema = schemas.LegacyUpdateAnnotationSchema.return_value
 
         views.update(mock.Mock(), mock_request)
@@ -815,11 +787,6 @@ def AnnotationEvent(patch):
 @pytest.fixture
 def AnnotationJSONPresenter(patch):
     return patch('h.api.views.AnnotationJSONPresenter')
-
-
-@pytest.fixture
-def copy(patch):
-    return patch('h.api.views.copy')
 
 
 @pytest.fixture
