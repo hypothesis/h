@@ -186,19 +186,9 @@ class TestAnnotationSchema(object):
         schema = schemas.AnnotationSchema()
 
         appstruct = schema.validate(
-            self.annotation_data(field='something forbidden'))
+            self.valid_input_data(field='something forbidden'))
 
         assert field not in appstruct
-
-    def annotation_data(self, **kwargs):
-        """Return test input data for AnnotationSchema.validate()."""
-        data = {
-            'permissions': {
-                'read': []
-            }
-        }
-        data.update(kwargs)
-        return data
 
     def valid_input_data(self, **kwargs):
         """Return a minimal valid input data for AnnotationSchema."""
