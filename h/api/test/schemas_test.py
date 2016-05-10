@@ -338,144 +338,136 @@ class TestCreateAnnotationSchema(object):
 
         assert appstruct['userid'] == 'acct:harriet@example.com'
 
-    def test_it_renames_uri_to_target_uri(self, input_data):
+    def test_it_renames_uri_to_target_uri(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['uri'] = 'http://example.com/example'
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'uri': 'http://example.com/example'})
 
         assert appstruct['target_uri'] == 'http://example.com/example'
         assert 'uri' not in appstruct
 
-    def test_it_inserts_empty_string_if_data_has_no_uri(self, input_data):
+    def test_it_inserts_empty_string_if_data_has_no_uri(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        assert 'uri' not in input_data
 
-        assert schema.validate(input_data)['target_uri'] == ''
+        assert schema.validate({})['target_uri'] == ''
 
-    def test_it_keeps_text(self, input_data):
+    def test_it_keeps_text(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['text'] = 'some annotation text'
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'text': 'some annotation text'})
 
         assert appstruct['text'] == 'some annotation text'
 
-    def test_it_inserts_empty_string_if_data_contains_no_text(self,
-                                                              input_data):
+    def test_it_inserts_empty_string_if_data_contains_no_text(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        assert 'text' not in input_data
 
-        assert schema.validate(input_data)['text'] == ''
+        assert schema.validate({})['text'] == ''
 
-    def test_it_keeps_tags(self, input_data):
+    def test_it_keeps_tags(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['tags'] = ['foo', 'bar']
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'tags': ['foo', 'bar']})
 
         assert appstruct['tags'] == ['foo', 'bar']
 
-    def test_it_inserts_empty_list_if_data_contains_no_tags(self, input_data):
-        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        assert 'tags' not in input_data
-
-        assert schema.validate(input_data)['tags'] == []
-
-    def test_it_replaces_private_permissions_with_shared_False(self,
-                                                               input_data):
-        input_data['permissions'] = {'read': ['acct:harriet@example.com']}
+    def test_it_inserts_empty_list_if_data_contains_no_tags(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate(input_data)
+        assert schema.validate({})['tags'] == []
+
+    def test_it_replaces_private_permissions_with_shared_False(self):
+        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+
+        appstruct = schema.validate({
+            'permissions': {'read': ['acct:harriet@example.com']}
+        })
 
         assert appstruct['shared'] is False
         assert 'permissions' not in appstruct
 
-    def test_it_replaces_shared_permissions_with_shared_True(self, input_data):
-        input_data['permissions'] = {'read': ['group:__world__']}
-        input_data['group'] = '__world__'
+    def test_it_replaces_shared_permissions_with_shared_True(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'permissions': {'read': ['group:__world__']},
+            'group': '__world__'
+        })
 
         assert appstruct['shared'] is True
         assert 'permissions' not in appstruct
 
-    def test_it_defaults_to_private_if_no_permissions_object_sent(self,
-                                                                  input_data):
-        del input_data['permissions']
+    def test_it_defaults_to_private_if_no_permissions_object_sent(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({})
 
         assert appstruct['shared'] is False
 
-    def test_it_does_not_crash_if_data_contains_no_target(self, input_data):
+    def test_it_does_not_crash_if_data_contains_no_target(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        assert 'target' not in input_data
 
-        schema.validate(input_data)
+        schema.validate({})
 
-    def test_it_replaces_target_with_target_selectors(self, input_data):
+    def test_it_replaces_target_with_target_selectors(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['target'] = [
-            {
-                'foo': 'bar',  # This should be removed,
-                'selector': 'the selectors',
-            },
-            'this should be removed',
-        ]
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'target': [
+                {
+                    'foo': 'bar',  # This should be removed,
+                    'selector': 'the selectors',
+                },
+                'this should be removed',
+            ]
+        })
 
         assert appstruct['target_selectors'] == 'the selectors'
 
-    def test_it_renames_group_to_groupid(self, input_data):
+    def test_it_renames_group_to_groupid(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['group'] = 'foo'
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'group': 'foo'})
 
         assert appstruct['groupid'] == 'foo'
         assert 'group' not in appstruct
 
-    def test_it_inserts_default_groupid_if_no_group(self, input_data):
+    def test_it_inserts_default_groupid_if_no_group(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        del input_data['group']
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({})
 
         assert appstruct['groupid'] == '__world__'
 
-    def test_it_keeps_references(self, input_data):
+    def test_it_keeps_references(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['references'] = ['parent id', 'parent id 2']
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'references': ['parent id', 'parent id 2']
+        })
 
         assert appstruct['references'] == ['parent id', 'parent id 2']
 
-    def test_it_inserts_empty_list_if_no_references(self, input_data):
+    def test_it_inserts_empty_list_if_no_references(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        assert 'references' not in input_data
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({})
 
         assert appstruct['references'] == []
 
-    def test_it_deletes_groupid_for_replies(self, input_data):
+    def test_it_deletes_groupid_for_replies(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['group'] = 'foo'
-        input_data['references'] = ['parent annotation id']
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'group': 'foo',
+            'references': ['parent annotation id']
+        })
 
         assert 'groupid' not in appstruct
 
-    def test_it_moves_extra_data_into_extra_sub_dict(self, input_data):
+    def test_it_moves_extra_data_into_extra_sub_dict(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data = {
+
+        appstruct = schema.validate({
             # Throw in all the fields, just to make sure that none of them get
             # into extra.
             'created': 'created',
@@ -493,22 +485,18 @@ class TestCreateAnnotationSchema(object):
             # These should end up in extra.
             'foo': 1,
             'bar': 2,
-        }
-
-        appstruct = schema.validate(input_data)
+        })
 
         assert appstruct['extra'] == {'foo': 1, 'bar': 2}
 
     def test_it_extracts_document_uris_from_the_document(
             self,
-            input_data,
             parse_document_claims):
         target_uri = 'http://example.com/example'
-        document_data = input_data['document'] = {'foo': 'bar'}
-        input_data['uri'] = target_uri
+        document_data = {'foo': 'bar'}
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        schema.validate(input_data)
+        schema.validate({'document': document_data, 'uri': target_uri})
 
         parse_document_claims.document_uris_from_data.assert_called_once_with(
             document_data,
@@ -525,15 +513,15 @@ class TestCreateAnnotationSchema(object):
 
     def test_it_extracts_document_metas_from_the_document(
             self,
-            input_data,
             parse_document_claims):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
         document_data = {'foo': 'bar'}
         target_uri = 'http://example.com/example'
-        input_data['document'] = {'foo': 'bar'}
-        input_data['uri'] = target_uri
 
-        schema.validate(input_data)
+        schema.validate({
+            'document': {'foo': 'bar'},
+            'uri': target_uri
+            })
 
         parse_document_claims.document_metas_from_data.assert_called_once_with(
             document_data,
@@ -542,7 +530,6 @@ class TestCreateAnnotationSchema(object):
 
     def test_it_does_not_pass_modified_dict_to_document_metas_from_data(
             self,
-            input_data,
             parse_document_claims):
         """
 
@@ -565,9 +552,8 @@ class TestCreateAnnotationSchema(object):
         parse_document_claims.document_uris_from_data.side_effect = (
             document_uris_from_data)
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['document'] = document
 
-        schema.validate(input_data)
+        schema.validate({'document': document})
 
         assert (
             parse_document_claims.document_metas_from_data.call_args[0][0] ==
@@ -581,7 +567,7 @@ class TestCreateAnnotationSchema(object):
         assert appstruct['document']['document_meta_dicts'] == (
             parse_document_claims.document_metas_from_data.return_value)
 
-    def test_it_clears_existing_keys_from_document(self, input_data):
+    def test_it_clears_existing_keys_from_document(self):
         """
         Any keys in the document dict should be removed.
 
@@ -590,24 +576,14 @@ class TestCreateAnnotationSchema(object):
 
         """
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-        input_data['document'] = {
-            'foo': 'bar'  # This should be deleted.
-        }
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'document': {
+                'foo': 'bar'  # This should be deleted.
+            }
+        })
 
         assert 'foo' not in appstruct['document']
-
-    @pytest.fixture
-    def input_data(self):
-        return {
-            'permissions': {
-                'read': ['group:__world__'],
-                'update': ['acct:testuser@hypothes.is'],
-                'delete': ['acct:testuser@hypothes.is'],
-            },
-            'group': '__world__',
-        }
 
 
 class TestLegacyUpdateAnnotationSchema(object):
@@ -726,8 +702,9 @@ class TestLegacyUpdateAnnotationSchema(object):
 
 class TestUpdateAnnotationSchema(object):
 
-    def test_you_cannot_update_protected_fields(self, input_data):
+    def test_you_cannot_update_protected_fields(self):
         for protected_field in ['created', 'updated', 'user', 'id', 'links']:
+            input_data = {}
             input_data[protected_field] = 'foo'
             schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
                                                     '',
@@ -738,112 +715,108 @@ class TestUpdateAnnotationSchema(object):
             assert protected_field not in appstruct
             assert protected_field not in appstruct.get('extra', {})
 
-    def test_you_cannot_change_an_annotations_group(self, input_data):
-        input_data['groupid'] = 'new-group'
-        input_data['group'] = 'new-group'
+    def test_you_cannot_change_an_annotations_group(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'groupid': 'new-group',
+            'group': 'new-group'
+        })
+
 
         assert 'groupid' not in appstruct
         assert 'groupid' not in appstruct.get('extra', {})
         assert 'group' not in appstruct
         assert 'group' not in appstruct.get('extra', {})
 
-    def test_you_cannot_change_an_annotations_userid(self, input_data):
-        input_data['userid'] = 'new_userid'
+    def test_you_cannot_change_an_annotations_userid(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'userid': 'new_userid'})
 
         assert 'userid' not in appstruct
         assert 'userid' not in appstruct.get('extra', {})
 
-    def test_you_cannot_change_an_annotations_references(self, input_data):
-        input_data['references'] = ['new_parent']
+    def test_you_cannot_change_an_annotations_references(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'references': ['new_parent']})
 
         assert 'references' not in appstruct
         assert 'references' not in appstruct.get('extra', {})
 
-    def test_it_renames_uri_to_target_uri(self, input_data):
+    def test_it_renames_uri_to_target_uri(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        input_data['uri'] = 'http://example.com/example'
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'uri': 'http://example.com/example'})
 
         assert appstruct['target_uri'] == 'http://example.com/example'
         assert 'uri' not in appstruct
         assert 'uri' not in appstruct.get('extras', {})
 
-    def test_it_replaces_private_permissions_with_shared_False(self,
-                                                               input_data):
-        input_data['permissions'] = {'read': ['acct:harriet@example.com']}
+    def test_it_replaces_private_permissions_with_shared_False(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'permissions': {'read': ['acct:harriet@example.com']}
+        })
 
         assert appstruct['shared'] is False
         assert 'permissions' not in appstruct
         assert 'permissions' not in appstruct.get('extras', {})
 
-    def test_it_replaces_shared_permissions_with_shared_True(self, input_data):
-        input_data['permissions'] = {'read': ['group:__world__']}
+    def test_it_replaces_shared_permissions_with_shared_True(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
                                                 '',
                                                 '__world__')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'permissions': {'read': ['group:__world__']}
+        })
 
         assert appstruct['shared'] is True
         assert 'permissions' not in appstruct
         assert 'permissions' not in appstruct.get('extras', {})
 
-    def test_it_converts_target_to_target_selectors(self, input_data):
+    def test_it_converts_target_to_target_selectors(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        input_data['target'] = [
-            {
-                'foo': 'bar',  # This should be removed,
-                'selector': 'the selectors',
-            },
-            'this should be removed',
-        ]
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'target': [
+                {
+                    'foo': 'bar',  # This should be removed,
+                    'selector': 'the selectors',
+                },
+                'this should be removed',
+            ]
+        })
 
         assert appstruct['target_selectors'] == 'the selectors'
         assert 'target' not in appstruct
         assert 'target' not in appstruct.get('extras', {})
 
-    def test_you_can_update_text(self, input_data):
+    def test_you_can_update_text(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        input_data['text'] = 'new'
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'text': 'new'})
 
         assert appstruct['text'] == 'new'
 
-    def test_you_can_update_tags(self, input_data):
+    def test_you_can_update_tags(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        input_data['tags'] = ['new']
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'tags': ['new']})
 
         assert appstruct['tags'] == ['new']
 
     def test_it_extracts_document_uris_from_the_document(
             self,
-            input_data,
             parse_document_claims):
         document_data = {'foo': 'bar'}
         target_uri = 'http://example.com/example'
-        input_data['document'] = document_data
-        input_data['uri'] = target_uri
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        schema.validate(input_data)
+        schema.validate({'document': document_data, 'uri': target_uri})
 
         parse_document_claims.document_uris_from_data.assert_called_once_with(
             document_data,
@@ -852,7 +825,6 @@ class TestUpdateAnnotationSchema(object):
 
     def test_it_passes_existing_target_uri_to_document_uris_from_data(
             self,
-            input_data,
             parse_document_claims):
         """
         If no 'uri' is given it should use the existing target_uri.
@@ -863,40 +835,33 @@ class TestUpdateAnnotationSchema(object):
 
         """
         document_data = {'foo': 'bar'}
-        input_data['document'] = document_data
-        assert 'uri' not in input_data
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
                                                 mock.sentinel.target_uri,
                                                 '')
 
-        schema.validate(input_data)
+        schema.validate({'document': document_data})
 
         parse_document_claims.document_uris_from_data.assert_called_once_with(
             document_data,
             claimant=mock.sentinel.target_uri)
 
     def test_it_puts_document_uris_in_appstruct(self,
-                                                input_data,
                                                 parse_document_claims):
-        input_data['document'] = {}
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'document': {}})
 
         assert appstruct['document']['document_uri_dicts'] == (
             parse_document_claims.document_uris_from_data.return_value)
 
     def test_it_extracts_document_metas_from_the_document(
             self,
-            input_data,
             parse_document_claims):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
         document_data = {'foo': 'bar'}
         target_uri = 'http://example.com/example'
-        input_data['document'] = document_data
-        input_data['uri'] = target_uri
 
-        schema.validate(input_data)
+        schema.validate({'document': document_data, 'uri': target_uri})
 
         parse_document_claims.document_metas_from_data.assert_called_once_with(
             document_data,
@@ -905,7 +870,6 @@ class TestUpdateAnnotationSchema(object):
 
     def test_it_passes_existing_target_uri_to_document_metas_from_data(
             self,
-            input_data,
             parse_document_claims):
         """
         If no 'uri' is given it should use the existing target_uri.
@@ -916,13 +880,11 @@ class TestUpdateAnnotationSchema(object):
 
         """
         document_data = {'foo': 'bar'}
-        input_data['document'] = document_data
-        assert 'uri' not in input_data
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(),
                                                 mock.sentinel.target_uri,
                                                 '')
 
-        schema.validate(input_data)
+        schema.validate({'document': document_data})
 
         parse_document_claims.document_metas_from_data.assert_called_once_with(
             document_data,
@@ -930,7 +892,6 @@ class TestUpdateAnnotationSchema(object):
 
     def test_it_does_not_pass_modified_dict_to_document_metas_from_data(
             self,
-            input_data,
             parse_document_claims):
         """
 
@@ -953,26 +914,23 @@ class TestUpdateAnnotationSchema(object):
         parse_document_claims.document_uris_from_data.side_effect = (
             document_uris_from_data)
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        input_data['document'] = document
 
-        schema.validate(input_data)
+        schema.validate({'document': document})
 
         assert (
             parse_document_claims.document_metas_from_data.call_args[0][0] ==
             document)
 
     def test_it_puts_document_metas_in_appstruct(self,
-                                                 input_data,
                                                  parse_document_claims):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        input_data['document'] = {}
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'document': {}})
 
         assert appstruct['document']['document_meta_dicts'] == (
             parse_document_claims.document_metas_from_data.return_value)
 
-    def test_it_clears_existing_keys_from_document(self, input_data):
+    def test_it_clears_existing_keys_from_document(self):
         """
         Any keys in the document dict should be removed.
 
@@ -981,19 +939,19 @@ class TestUpdateAnnotationSchema(object):
 
         """
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        input_data['document'] = {
-            'foo': 'bar'  # This should be deleted.
-        }
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({
+            'document': {
+                'foo': 'bar'  # This should be deleted.
+            }
+        })
 
         assert 'foo' not in appstruct['document']
 
-    def test_document_does_not_end_up_in_extra(self, input_data):
+    def test_document_does_not_end_up_in_extra(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        input_data['document'] = {'foo': 'bar'}
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'document': {'foo': 'bar'}})
 
         assert 'document' not in appstruct.get('extra', {})
 
@@ -1002,52 +960,33 @@ class TestUpdateAnnotationSchema(object):
 
         schema.validate({})
 
-    def test_it_adds_extra_fields_into_the_extra_dict(self, input_data):
-        input_data['foo'] = 'bar'
-        input_data['custom'] = 23
+    def test_it_adds_extra_fields_into_the_extra_dict(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'foo': 'bar', 'custom': 23})
 
         assert appstruct['extra'] == {'foo': 'bar', 'custom': 23}
 
-    def test_it_overwrites_extra_fields_in_the_extra_dict(self, input_data):
-        input_data['foo'] = 'bar'
-        input_data['custom'] = 23
+    def test_it_overwrites_extra_fields_in_the_extra_dict(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'foo': 'bar', 'custom': 23})
 
         assert appstruct['extra'] == {'foo': 'bar', 'custom': 23}
 
-    def test_it_does_not_modify_extra_fields_that_are_not_sent(self,
-                                                               input_data):
-        input_data['foo'] = 'bar'
+    def test_it_does_not_modify_extra_fields_that_are_not_sent(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({'foo': 'bar'})
 
         assert 'custom' not in appstruct['extra']
 
-    def test_it_does_not_modify_extra_fields_if_none_are_sent(self,
-                                                              input_data):
+    def test_it_does_not_modify_extra_fields_if_none_are_sent(self):
         schema = schemas.UpdateAnnotationSchema(testing.DummyRequest(), '', '')
-        assert 'extra' not in input_data
 
-        appstruct = schema.validate(input_data)
+        appstruct = schema.validate({})
 
         assert not appstruct.get('extra')
-
-    @pytest.fixture
-    def input_data(self):
-        return {
-            'permissions': {
-                'read': ['group:__world__'],
-                'update': ['acct:testuser@hypothes.is'],
-                'delete': ['acct:testuser@hypothes.is'],
-            },
-            'group': '__world__',
-        }
 
 
 @pytest.fixture
