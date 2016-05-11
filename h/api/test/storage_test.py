@@ -476,8 +476,61 @@ class TestUpdateAnnotation(object):
         session.query.return_value.get.assert_called_once_with(
             'test_annotation_id')
 
+    def test_it_adds_new_extras(self, annotation_data, session):
+        annotation = session.query.return_value.get.return_value
+        annotation.extra = {}
+        annotation_data['extra'] = {'foo': 'bar'}
+
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        assert annotation.extra == {'foo': 'bar'}
+
+    def test_it_overwrites_existing_extras(self,
+                                           annotation_data,
+                                           session):
+        annotation = session.query.return_value.get.return_value
+        annotation.extra = {'foo': 'original_value'}
+        annotation_data['extra'] = {'foo': 'new_value'}
+
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        assert annotation.extra == {'foo': 'new_value'}
+
+    def test_it_does_not_change_extras_that_are_not_sent(self,
+                                                         annotation_data,
+                                                         session):
+        annotation = session.query.return_value.get.return_value
+        annotation.extra = {
+            'one': 1,
+            'two': 2,
+        }
+        annotation_data['extra'] = {'two': 22}
+
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        assert annotation.extra['one'] == 1
+
+    def test_it_does_not_change_extras_if_none_are_sent(self,
+                                                        annotation_data,
+                                                        session):
+        annotation = session.query.return_value.get.return_value
+        annotation.extra = {'one': 1, 'two': 2}
+        assert not annotation_data.get('extra')
+
+        storage.update_annotation(session,
+                                  'test_annotation_id',
+                                  annotation_data)
+
+        assert annotation.extra == {'one': 1, 'two': 2}
+
     def test_it_updates_the_annotation(self, annotation_data, models, session):
-        annotation = session.query.return_value.get.return_value = mock.Mock()
+        annotation = session.query.return_value.get.return_value
 
         storage.update_annotation(session,
                                   'test_annotation_id',
@@ -492,7 +545,7 @@ class TestUpdateAnnotation(object):
             models,
             session,
             update_document_metadata):
-        annotation = session.query.return_value.get.return_value = mock.Mock()
+        annotation = session.query.return_value.get.return_value
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
         annotation_data['document']['document_uri_dicts'] = (
@@ -516,14 +569,16 @@ class TestUpdateAnnotation(object):
 
         assert annotation == session.query.return_value.get.return_value
 
-    def test_it_does_not_crash_if_no_document_in_data(self):
-
-        storage.update_annotation(mock.Mock(), 'test_annotation_id', {})
+    def test_it_does_not_crash_if_no_document_in_data(self,
+                                                      session):
+        storage.update_annotation(session, 'test_annotation_id', {})
 
     def test_it_does_not_call_update_document_meta_if_no_document_in_data(
             self,
+            session,
             update_document_metadata):
-        storage.update_annotation(mock.Mock(), 'test_annotation_id', {})
+
+        storage.update_annotation(session, 'test_annotation_id', {})
 
         assert not update_document_metadata.called
 
@@ -541,7 +596,8 @@ class TestUpdateAnnotation(object):
             'document': {
                 'document_uri_dicts': [],
                 'document_meta_dicts': [],
-            }
+            },
+            'extra': {},
         }
 
 
@@ -651,7 +707,9 @@ def postgres_enabled(patch):
 
 @pytest.fixture
 def session():
-    return mock.Mock(spec=db.Session)
+    session = mock.Mock(spec=db.Session)
+    session.query.return_value.get.return_value.extra = {}
+    return session
 
 
 @pytest.fixture
