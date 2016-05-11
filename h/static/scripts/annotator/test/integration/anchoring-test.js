@@ -111,9 +111,6 @@ describe('anchoring', function () {
     tag: 'a simple quote',
     quotes: ['This has not been a scientist\'s war'],
   },{
-    // Currently failing due to an issue with concurrently anchoring nested
-    // annotations.
-    // See https://github.com/hypothesis/h/issues/3278#issuecomment-218421956
     tag: 'nested quotes',
     quotes: [
       'This has not been a scientist\'s war;' +
