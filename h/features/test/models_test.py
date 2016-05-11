@@ -6,7 +6,7 @@ import pytest
 from h.test import factories
 
 from h import db
-from h.features.models import Feature, Cohort
+from h.features.models import Feature, FeatureCohort
 
 
 @pytest.mark.usefixtures('features_override',
@@ -78,9 +78,8 @@ class TestFeature(object):
 class TestCohort(object):
     def test_init(self):
         name = "My Hypothesis Cohort"
-        user = factories.User()
 
-        cohort = Cohort(name=name, creator=user)
+        cohort = FeatureCohort(name=name)
         db.Session.add(cohort)
         db.Session.flush()
 
@@ -91,20 +90,18 @@ class TestCohort(object):
 
     def test_get_by_id_when_id_does_exist(self):
         name = "My Hypothesis Cohort"
-        user = factories.User()
 
-        cohort = Cohort(name=name, creator=user)
+        cohort = FeatureCohort(name=name)
         db.Session.add(cohort)
         db.Session.flush()
 
-        assert Cohort.get_by_id(cohort.id) == cohort
+        assert FeatureCohort.query.get(cohort.id) == cohort
 
     def test_get_by_id_when_id_does_not_exist(self):
         name = "My Hypothesis Cohort"
-        user = factories.User()
 
-        cohort = Cohort(name=name, creator=user)
+        cohort = FeatureCohort(name=name)
         db.Session.add(cohort)
         db.Session.flush()
 
-        assert Cohort.get_by_id(23) is None
+        assert FeatureCohort.query.get(23) is None

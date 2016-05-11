@@ -109,29 +109,30 @@ class Feature(Base):
         return '<Feature {f.name} everyone={f.everyone}>'.format(f=self)
 
 
-class Cohort(Base, mixins.Timestamps):
-    __tablename__ = 'cohort'
+class FeatureCohort(Base, mixins.Timestamps):
+    __tablename__ = 'featurecohort'
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     # Cohort membership
     members = sa.orm.relationship(
-        'User', secondary='user_cohort', backref=sa.orm.backref(
-            'cohorts', order_by='Cohort.name'))
+        'User', secondary='featurecohort_user', backref=sa.orm.backref(
+            'cohorts', order_by='FeatureCohort.name'))
 
     def __init__(self, name):
         self.name = name
 
 
 USER_COHORT_TABLE = sa.Table(
-    'user_cohort', Base.metadata,
+    'featurecohort_user', Base.metadata,
+    sa.Column('id', sa.Integer, nullable=False),
+    sa.Column('cohort_id',
+              sa.Integer,
+              sa.ForeignKey('featurecohort.id'),
+              nullable=False),
     sa.Column('user_id',
               sa.Integer,
               sa.ForeignKey('user.id'),
               nullable=False),
-    sa.Column('cohort_id',
-              sa.Integer,
-              sa.ForeignKey('cohort.id'),
-              nullable=False)
 )
