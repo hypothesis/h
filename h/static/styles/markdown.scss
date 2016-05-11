@@ -56,6 +56,6 @@
   // Remove additional margin-bottom added by the last p within
   // the annotation-body
   p:last-child {
-    margin-bottom: 0;
+    margin-bottom: 1px;
   }
 }
