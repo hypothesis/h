@@ -21,14 +21,16 @@ class JSONSchema(object):
     """
     Validate data according to a Draft 4 JSON Schema.
 
-    Inherit from this class and override the `schema` class property with a
-    valid JSON schema.
+    Inherit from this class and override the `schema` property with a valid
+    JSON schema.
     """
 
-    schema = {}
-
     def __init__(self):
-        self.validator = jsonschema.Draft4Validator(self.schema)
+        self.schema = {}
+
+    @property
+    def validator(self):
+        return jsonschema.Draft4Validator(self.schema)
 
     def validate(self, data):
         """
@@ -50,108 +52,110 @@ class AnnotationSchema(JSONSchema):
 
     """Validate an annotation object."""
 
-    schema = {
-        'type': 'object',
-        'properties': {
-            'document': {
-                'type': 'object',
-                'properties': {
-                    'dc': {
-                        'type': 'object',
-                        'properties': {
-                            'identifier': {
-                                'type': 'array',
-                                'items': {
-                                    'type': 'string',
-                                },
-                            },
-                        },
-                    },
-                    'highwire': {
-                        'type': 'object',
-                        'properties': {
-                            'doi': {
-                                'type': 'array',
-                                'items': {
-                                    'type': 'string',
-                                },
-                            },
-                        },
-                    },
-                    'link': {
-                        'type': 'array',
-                        'items': {
+    def __init__(self):
+        JSONSchema.__init__(self)
+        self.schema = {
+            'type': 'object',
+            'properties': {
+                'document': {
+                    'type': 'object',
+                    'properties': {
+                        'dc': {
                             'type': 'object',
                             'properties': {
-                                'href': {
-                                    'type': 'string',
+                                'identifier': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'string',
+                                    },
                                 },
-                                'type': {
-                                    'type': 'string',
+                            },
+                        },
+                        'highwire': {
+                            'type': 'object',
+                            'properties': {
+                                'doi': {
+                                    'type': 'array',
+                                    'items': {
+                                        'type': 'string',
+                                    },
+                                },
+                            },
+                        },
+                        'link': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'href': {
+                                        'type': 'string',
+                                    },
+                                    'type': {
+                                        'type': 'string',
+                                    },
+                                },
+                                'required': [
+                                    'href',
+                                ],
+                            },
+                        },
+                    },
+                },
+                'group': {
+                    'type': 'string',
+                },
+                'permissions': {
+                    'title': 'Permissions',
+                    'description': 'Annotation action access control list',
+                    'type': 'object',
+                    'patternProperties': {
+                        '^(admin|delete|read|update)$': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'string',
+                                'pattern': '^(acct:|group:).+$',
+                            },
+                        }
+                    },
+                    'required': [
+                        'read',
+                    ],
+                },
+                'references': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string',
+                    },
+                },
+                'tags': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string',
+                    },
+                },
+                'target': {
+                    'type': 'array',
+                    'items': [
+                        {
+                            'type': 'object',
+                            'properties': {
+                                'selector': {
                                 },
                             },
                             'required': [
-                                'href',
+                                'selector',
                             ],
                         },
-                    },
+                    ],
                 },
-            },
-            'group': {
-                'type': 'string',
-            },
-            'permissions': {
-                'title': 'Permissions',
-                'description': 'Annotation action access control list',
-                'type': 'object',
-                'patternProperties': {
-                    '^(admin|delete|read|update)$': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'string',
-                            'pattern': '^(acct:|group:).+$',
-                        },
-                    }
+                'text': {
+                    'type': 'string',
                 },
-                'required': [
-                    'read',
-                ],
-            },
-            'references': {
-                'type': 'array',
-                'items': {
+                'uri': {
                     'type': 'string',
                 },
             },
-            'tags': {
-                'type': 'array',
-                'items': {
-                    'type': 'string',
-                },
-            },
-            'target': {
-                'type': 'array',
-                'items': [
-                    {
-                        'type': 'object',
-                        'properties': {
-                            'selector': {
-                            },
-                        },
-                        'required': [
-                            'selector',
-                        ],
-                    },
-                ],
-            },
-            'text': {
-                'type': 'string',
-            },
-            'uri': {
-                'type': 'string',
-            },
-        },
-    }
+        }
 
 
 class LegacyAnnotationSchema(JSONSchema):
@@ -193,6 +197,7 @@ class CreateAnnotationSchema(object):
 
     def __init__(self, request):
         self.structure = AnnotationSchema()
+        self.structure.schema['required'] = ['uri']
         self.request = request
 
     def validate(self, data):
