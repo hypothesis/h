@@ -13,6 +13,11 @@ node_modules/
 *.egg
 *.egg-info
 
+# development TLS cert/key
+.tlscert.pem
+.tlscsr.pem
+.tlskey.pem
+
 *.pyc
 *.pyo
 

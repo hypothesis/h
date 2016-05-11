@@ -25,7 +25,7 @@ clean:
 
 .PHONY: dev
 dev: build/manifest.json h.egg-info/.uptodate
-	@gunicorn --reload --paste conf/development-app.ini
+	@hypothesis devserver
 
 .PHONY: dist
 dist: dist/h-$(BUILD_ID).tar.gz
