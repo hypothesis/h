@@ -529,7 +529,7 @@ class TestUpdateAnnotation(object):
 
         assert annotation.extra == {'one': 1, 'two': 2}
 
-    def test_it_updates_the_annotation(self, annotation_data, models, session):
+    def test_it_updates_the_annotation(self, annotation_data, session):
         annotation = session.query.return_value.get.return_value
 
         storage.update_annotation(session,
@@ -542,7 +542,6 @@ class TestUpdateAnnotation(object):
     def test_it_updates_the_document_metadata_from_the_annotation(
             self,
             annotation_data,
-            models,
             session,
             update_document_metadata):
         annotation = session.query.return_value.get.return_value
@@ -562,7 +561,7 @@ class TestUpdateAnnotation(object):
             mock.sentinel.document_uri_dicts
         )
 
-    def test_it_returns_the_annotation(self, annotation_data, models, session):
+    def test_it_returns_the_annotation(self, annotation_data, session):
         annotation = storage.update_annotation(session,
                                                'test_annotation_id',
                                                annotation_data)
