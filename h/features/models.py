@@ -124,7 +124,7 @@ class FeatureCohort(Base, mixins.Timestamps):
         self.name = name
 
 
-USER_COHORT_TABLE = sa.Table(
+FEATURECOHORT_USER_TABLE = sa.Table(
     'featurecohort_user', Base.metadata,
     sa.Column('id', sa.Integer, nullable=False),
     sa.Column('cohort_id',
