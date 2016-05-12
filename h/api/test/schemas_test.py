@@ -210,16 +210,7 @@ class TestCreateUpdateAnnotationSchema(object):
         appstruct = validate(data)
 
         assert field not in appstruct
-
-    def test_you_cannot_write_protected_fields(self, validate):
-        for protected_field in ['created', 'updated', 'user', 'id', 'links']:
-            input_data = {}
-            input_data[protected_field] = 'foo'
-
-            appstruct = validate(input_data)
-
-            assert protected_field not in appstruct
-            assert protected_field not in appstruct.get('extra', {})
+        assert field not in appstruct.get('extra', {})
 
     def test_it_renames_uri_to_target_uri(self, validate):
         appstruct = validate({'uri': 'http://example.com/example'})
