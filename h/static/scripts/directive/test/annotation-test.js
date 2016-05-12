@@ -1271,7 +1271,7 @@ describe('annotation', function() {
       });
     });
 
-    describe('onGroupFocused()', function() {
+    describe('when component is destroyed', function () {
       it('if the annotation is being edited it updates drafts', function() {
         var parts = createDirective();
         parts.controller.isPrivate = true;
@@ -1283,25 +1283,25 @@ describe('annotation', function() {
         });
         fakeDrafts.update = sinon.stub();
 
-        $rootScope.$broadcast(events.GROUP_FOCUSED);
+        parts.scope.$broadcast('$destroy');
 
         assert.calledWith(
           fakeDrafts.update,
           parts.annotation, {isPrivate:true, tags:[], text:'unsaved-text'});
       });
 
-      it('if the annotation isn\'t being edited it doesn\'t update drafts',
-         function() {
-           var parts = createDirective();
-           parts.controller.isPrivate = true;
-           fakeDrafts.update = sinon.stub();
+      it('if the annotation isn\'t being edited it doesn\'t update drafts', function() {
+         var parts = createDirective();
+         parts.controller.isPrivate = true;
+         fakeDrafts.update = sinon.stub();
 
-           $rootScope.$broadcast(events.GROUP_FOCUSED);
+         parts.scope.$broadcast('$destroy');
 
-           assert.notCalled(fakeDrafts.update);
-         }
-      );
+         assert.notCalled(fakeDrafts.update);
+       });
+    });
 
+    describe('onGroupFocused()', function() {
       it('updates domainModel.group if the annotation is new', function () {
         var annotation = fixtures.newAnnotation();
         annotation.group = 'old-group-id';

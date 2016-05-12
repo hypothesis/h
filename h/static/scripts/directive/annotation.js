@@ -268,14 +268,11 @@ function AnnotationController(
     // are empty
     $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, deleteIfNewAndEmpty);
 
-    // Call `onDestroy()` when this AnnotationController's scope is removed.
+    // Call `onDestroy()` when the component is destroyed.
     $scope.$on('$destroy', onDestroy);
 
     // Call `onGroupFocused()` whenever the currently-focused group changes.
     $scope.$on(events.GROUP_FOCUSED, onGroupFocused);
-
-    // Call `onUserChanged()` whenever the user logs in or out.
-    $scope.$on(events.USER_CHANGED, onUserChanged);
 
     // New annotations (just created locally by the client, rather then
     // received from the server) have some fields missing. Add them.
@@ -322,31 +319,25 @@ function AnnotationController(
   }
 
   function onDestroy() {
+    // If the annotation component is destroyed whilst the annotation is being
+    // edited, persist temporary state so that we can restore it if the
+    // annotation editor is later recreated.
+    //
+    // The annotation component may be destroyed when switching accounts,
+    // when switching groups or when the component is scrolled off-screen.
+    if (vm.editing()) {
+      saveToDrafts(drafts, domainModel, vm);
+    }
+
     if (vm.cancelTimestampRefresh) {
       vm.cancelTimestampRefresh();
     }
   }
 
   function onGroupFocused() {
-    if (vm.editing()) {
-      saveToDrafts(drafts, domainModel, vm);
-    }
-
     // New annotations move to the new group, when a new group is focused.
     if (isNew(domainModel)) {
       domainModel.group = groups.focused().id;
-    }
-  }
-
-  function onUserChanged(event, args) {
-    // If the user creates an annotation while signed out and then signs in
-    // we want those annotations to still be in the sidebar after sign in.
-    // So we need to save a draft of the annotation here on sign in because
-    // app.coffee / the routing code is about to destroy all the
-    // AnnotationController instances and only the ones that have saved drafts
-    // will be re-created.
-    if (vm.editing() && session.state.userid) {
-      saveToDrafts(drafts, domainModel, vm);
     }
   }
 
