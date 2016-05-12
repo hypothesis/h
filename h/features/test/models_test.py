@@ -3,10 +3,8 @@
 import mock
 import pytest
 
-from h.test import factories
-
 from h import db
-from h.features.models import Feature, FeatureCohort
+from h.features.models import Feature
 
 
 @pytest.mark.usefixtures('features_override',
@@ -73,35 +71,3 @@ class TestFeature(object):
         }, clear=True)
         patcher.start()
         request.addfinalizer(patcher.stop)
-
-
-class TestCohort(object):
-    def test_init(self):
-        name = "My Hypothesis Cohort"
-
-        cohort = FeatureCohort(name=name)
-        db.Session.add(cohort)
-        db.Session.flush()
-
-        assert cohort.id
-        assert cohort.name == name
-        assert cohort.created
-        assert cohort.updated
-
-    def test_get_by_id_when_id_does_exist(self):
-        name = "My Hypothesis Cohort"
-
-        cohort = FeatureCohort(name=name)
-        db.Session.add(cohort)
-        db.Session.flush()
-
-        assert FeatureCohort.query.get(cohort.id) == cohort
-
-    def test_get_by_id_when_id_does_not_exist(self):
-        name = "My Hypothesis Cohort"
-
-        cohort = FeatureCohort(name=name)
-        db.Session.add(cohort)
-        db.Session.flush()
-
-        assert FeatureCohort.query.get(23) is None
