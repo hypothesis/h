@@ -20,7 +20,7 @@ To build and install the Chrome extension:
 
    .. code-block:: bash
 
-      hypothesis-buildext chrome --debug --service 'http://127.0.0.1:5000' --bouncer 'http://127.0.0.1:8000/'
+      hypothesis-buildext chrome --debug --service 'http://localhost:5000' --bouncer 'http://localhost:8000/'
 
    .. note::
 
@@ -116,7 +116,7 @@ Insecure Response errors in the console
 
 You've built the extension with an ``https`` base URL, the extension fails to
 load and you see ``net::ERR_INSECURE_RESPONSE`` errors in the console.
-You need to open https://127.0.0.1:5000 (or whatever ``--service`` you gave)
+You need to open https://localhost:5000 (or whatever ``--service`` you gave)
 and tell Chrome to allow access to the site even though the certificate isn't
 known.
 
@@ -134,7 +134,7 @@ Empty Response errors in the console
 ====================================
 
 The extension fails to load and you see
-``GET http://127.0.0.:5000/... net::ERR_EMPTY_RESPONSE`` errors in the console.
+``GET http://localhost:5000/... net::ERR_EMPTY_RESPONSE`` errors in the console.
 This happens if you're running h on ``https`` but you've built the Chrome
 extension with an ``http`` base URL. Either run h on ``http`` or rebuild the
 extension with ``--service https://...``.
@@ -144,7 +144,7 @@ Connection Refused errors in the console
 ========================================
 
 The extension fails to load and you see
-``GET https://127.0.0.1:5000/... net::ERR_CONNECTION_REFUSED`` errors in the
+``GET https://localhost:5000/... net::ERR_CONNECTION_REFUSED`` errors in the
 console. This happens if you built the extension with an ``https`` service URL
 but you're running h on ``http``. Either run h on ``https`` (see
 :doc:`Run your local h instance using https </hacking/ssl>`)

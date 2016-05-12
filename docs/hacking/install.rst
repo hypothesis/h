@@ -125,7 +125,7 @@ installed on:
    ``rabbitmq`` and ``redis`` running and exposing their various services on the
    ports defined above. You should be able to see them by running ``docker ps``.
    You should also be able to visit your Elasticsearch service by opening
-   http://127.0.0.1:9200/ in a browser, and connect to your PostgreSQL by
+   http://localhost:9200/ in a browser, and connect to your PostgreSQL by
    running ``psql postgresql://postgres@localhost/postgres`` (if you have psql
    installed).
 
