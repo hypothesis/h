@@ -2,11 +2,14 @@
 """Functions for updating the search index."""
 
 from __future__ import unicode_literals
+from collections import namedtuple
 import itertools
 import logging
+from h.api._compat import xrange
 
 import elasticsearch
 from elasticsearch import helpers as es_helpers
+from sqlalchemy.orm import subqueryload
 
 from h.api import models
 from h.api import presenters
@@ -14,6 +17,10 @@ from h.api.events import AnnotationTransformEvent
 
 
 log = logging.getLogger(__name__)
+
+
+class Window(namedtuple('Window', ['start', 'end'])):
+    pass
 
 
 def index(es, annotation, request):
@@ -72,6 +79,98 @@ def delete(es, annotation_id):
     except elasticsearch.NotFoundError:
         log.exception('Tried to delete a nonexistent annotation from the '
                       'search index, annotation id: %s', annotation_id)
+
+
+class BatchIndexer(object):
+    """
+    A convenience class for reindexing all annotations from the database to
+    the search index.
+    """
+
+    def __init__(self, session, es_client, request):
+        self.session = session
+        self.es_client = es_client
+        self.request = request
+
+    def index_all(self):
+        """Reindex all annotations, and retry failed indexing operations once."""
+
+        errored = None
+        for _ in range(2):
+            errored = self.index(errored)
+            log.debug(
+                'Failed to index {} annotations, might retry'.format(len(errored)))
+
+            if not errored:
+                break
+
+    def index(self, annotation_ids=None):
+        """
+        Reindex annotations.
+
+        :param annotation_ids: a list of ids to reindex, reindexes all when `None`.
+        :type annotation_ids: collection
+
+        :returns: a set of errored ids
+        :rtype: set
+        """
+        if not annotation_ids:
+            annotations = self._stream_all_annotations()
+        else:
+            annotations = self._stream_filtered_annotations(annotation_ids)
+
+        indexing = es_helpers.streaming_bulk(self.es_client.conn, annotations,
+                                             chunk_size=100,
+                                             raise_on_error=False,
+                                             expand_action_callback=self._prepare)
+        errored = set()
+        for ok, item in indexing:
+            if not ok:
+                errored.add(item['index']['_id'])
+        return errored
+
+    def _prepare(self, annotation):
+        action = {'index': {'_index': self.es_client.index,
+                            '_type': self.es_client.t.annotation,
+                            '_id': annotation.id}}
+        data = presenters.AnnotationJSONPresenter(self.request, annotation).asdict()
+
+        return (action, data)
+
+    def _stream_all_annotations(self, chunksize=2000):
+        # This is using a windowed query for loading all annotations in batches.
+        # It is the most performant way of loading a big set of records from
+        # the database while still supporting eagerloading of associated
+        # document data.
+
+        updated = self.session.query(models.Annotation.updated). \
+                execution_options(stream_results=True). \
+                order_by(models.Annotation.updated.asc()).all()
+
+        count = len(updated)
+        windows = [Window(start=updated[x].updated,
+                          end=updated[min(x+chunksize, count)-1].updated)
+                   for x in xrange(0, count, chunksize)]
+        basequery = self._eager_loaded_query().order_by(models.Annotation.updated.asc())
+
+        for window in windows:
+            in_window = models.Annotation.updated.between(window.start, window.end)
+            for a in basequery.filter(in_window):
+                yield a
+
+    def _stream_filtered_annotations(self, annotation_ids):
+        annotations = self._eager_loaded_query(). \
+            execution_options(stream_results=True). \
+            filter(models.Annotation.id.in_(annotation_ids))
+
+        for a in annotations:
+            yield a
+
+    def _eager_loaded_query(self):
+        return self.session.query(models.Annotation).options(
+            subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
+            subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
+        )
 
 
 class BatchDeleter(object):
