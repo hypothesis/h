@@ -7,14 +7,15 @@ var inherits = require('inherits');
 /**
  * VirtualThreadList is a helper for virtualizing the annotation thread list.
  *
- * 'Virtualizing' the thread list hugely optimizes updates for the UI by only
- * creating annotation cards for annotations which are either in or near the
- * viewport.
+ * 'Virtualizing' the thread list improves UI performance by only creating
+ * annotation cards for annotations which are either in or near the viewport.
  *
- * This technique is used in all native UI frameworks but is especially
- * important as long as Angular is used for the view layer of the application
- * because every active watcher/template expression contributes overhead to the
- * $digest cycle and thus towards a feeling of lagginess in the UI.
+ * Reducing the number of annotation cards that are actually created optimizes
+ * the initial population of the list, since annotation cards are big components
+ * that are expensive to create and consume a lot of memory. For Angular
+ * applications this also helps significantly with UI responsiveness by limiting
+ * the number of watchers (functions created by template expressions or
+ * '$scope.$watch' calls) that have to be run on every '$scope.$digest()' cycle.
  *
  * @param {Window} container - The Window displaying the list of annotation threads.
  * @param {Thread} rootThread - The initial Thread object for the top-level
@@ -72,11 +73,12 @@ VirtualThreadList.prototype.setRootThread = function (thread) {
  * When calculating the amount of space required for offscreen threads,
  * the actual or 'last-seen' height is used if known. Otherwise an estimate
  * is used.
+ *
+ * @param {string} id - The annotation ID or $$tag
+ * @param {number?} height - The height of the annotation or undefined to
+ *        revert to the default height for this thread.
  */
 VirtualThreadList.prototype.setThreadHeight = function (id, height) {
-  if (this._heights[id] === height) {
-    return;
-  }
   this._heights[id] = height;
 };
 
@@ -96,8 +98,15 @@ VirtualThreadList.prototype._updateVisibleThreads = function () {
   // measured
   var DEFAULT_HEIGHT = 200;
 
+  // Estimated height in pixels of annotation cards which are below the
+  // viewport and not actually created. This is used to create an empty spacer
+  // element below visible cards in order to give the list's scrollbar the
+  // correct dimensions.
   var offscreenLowerHeight = 0;
+  // Same as offscreenLowerHeight but for cards above the viewport.
   var offscreenUpperHeight = 0;
+  // List of annotations which are in or near the viewport and need to
+  // actually be created.
   var visibleThreads = [];
 
   var allThreads = this._rootThread.children;
