@@ -1,3 +1,30 @@
+Unreleased
+==========
+
+Features
+--------
+
+- New visual design for annotation cards (#3274).
+
+- Annotation cards now display more precise timestamps for annotations which
+  were last changed more than 24 hours ago. (#3247)
+
+Miscellanea
+-----------
+
+- Added `hypothesis devserver` command which runs all the services needed for a
+  development instance of Hypothesis and multiplexes their output into the
+  terminal (#3307).
+
+- Added `hypothesis migrate` command to simplify the execution of database
+  migrations (#3319).
+
+- Removed several unused `hypothesis` subcommands (#3303).
+
+- Added `--dev` flag to `hypothesis` command which replaces the need to specify
+  a config file path as an argument to subcommands (#3303).
+
+
 0.21.0 (2016-05-06)
 ===================
 
