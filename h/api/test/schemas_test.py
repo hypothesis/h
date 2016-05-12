@@ -205,7 +205,9 @@ class TestCreateUpdateAnnotationSchema(object):
         'links',
     ])
     def test_it_removes_protected_fields(self, validate, field):
-        appstruct = validate({'field': 'something forbidden'})
+        data = {}
+        data[field] = 'something forbidden'
+        appstruct = validate(data)
 
         assert field not in appstruct
 
