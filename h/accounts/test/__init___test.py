@@ -205,10 +205,10 @@ def test_authenticated_user_redirects_if_user_does_not_exist(
     authn_policy.authenticated_userid.return_value = 'userid'
     get_user.return_value = None
 
-    with pytest.raises(httpexceptions.HTTPFound) as err:
+    with pytest.raises(httpexceptions.HTTPFound) as exc:
         accounts.authenticated_user(request)
 
-    assert err.value.location == '/the/page/that/I/was/on', (
+    assert exc.value.location == '/the/page/that/I/was/on', (
         'It should redirect to the same page that was requested')
 
 
