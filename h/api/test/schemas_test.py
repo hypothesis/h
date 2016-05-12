@@ -192,10 +192,10 @@ class TestCreateUpdateAnnotationSchema(object):
                                         validate,
                                         input_data,
                                         error_message):
-        with pytest.raises(schemas.ValidationError) as err:
+        with pytest.raises(schemas.ValidationError) as exc:
             validate(input_data)
 
-        assert str(err.value) == error_message
+        assert str(exc.value) == error_message
 
     @pytest.mark.parametrize('field', [
         'created',

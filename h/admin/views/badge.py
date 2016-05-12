@@ -21,8 +21,8 @@ def badge_index(_):
 def badge_add(request):
     try:
         request.db.add(models.Blocklist(uri=request.params['add']))
-    except ValueError as err:
-        request.session.flash(err.message, 'error')
+    except ValueError as exc:
+        request.session.flash(exc.message, 'error')
     return badge_index(request)
 
 

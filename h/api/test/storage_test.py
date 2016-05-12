@@ -356,19 +356,19 @@ class TestCreateAnnotation(object):
         # The annotation is a reply.
         data['references'] = ['parent_annotation_id']
 
-        with pytest.raises(schemas.ValidationError) as err:
+        with pytest.raises(schemas.ValidationError) as exc:
             storage.create_annotation(self.mock_request(), data)
 
-        assert str(err.value).startswith('references.0: ')
+        assert str(exc.value).startswith('references.0: ')
 
     def test_it_raises_if_user_does_not_have_permissions_for_group(self):
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
 
-        with pytest.raises(schemas.ValidationError) as err:
+        with pytest.raises(schemas.ValidationError) as exc:
             storage.create_annotation(self.mock_request(), data)
 
-        assert str(err.value).startswith('group: ')
+        assert str(exc.value).startswith('group: ')
 
     def test_it_inits_an_Annotation_model(self, models):
         data = self.annotation_data()

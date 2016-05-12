@@ -150,10 +150,10 @@ class AjaxAuthController(AuthController):
     def login(self):
         try:
             json_body = self.request.json_body
-        except ValueError as err:
+        except ValueError as exc:
             raise accounts.JSONError(
                 _('Could not parse request body as JSON: {message}'.format(
-                    message=err.message)))
+                    message=exc.message)))
 
         if not isinstance(json_body, dict):
             raise accounts.JSONError(

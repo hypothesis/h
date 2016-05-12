@@ -232,10 +232,10 @@ class TestCreate(object):
         schemas.CreateAnnotationSchema.return_value.validate.side_effect = (
             ValidationError('asplode'))
 
-        with pytest.raises(ValidationError) as err:
+        with pytest.raises(ValidationError) as exc:
             views.create(mock_request)
 
-        assert err.value.message == 'asplode'
+        assert exc.value.message == 'asplode'
 
     def test_it_creates_the_annotation_in_storage(self,
                                                   mock_request,
@@ -253,10 +253,10 @@ class TestCreate(object):
                                                    storage):
         storage.create_annotation.side_effect = ValidationError('asplode')
 
-        with pytest.raises(ValidationError) as err:
+        with pytest.raises(ValidationError) as exc:
             views.create(mock_request)
 
-        assert err.value.message == 'asplode'
+        assert exc.value.message == 'asplode'
 
     def test_it_inits_LegacyCreateAnnotationSchema(self,
                                                    mock_request,
@@ -281,10 +281,10 @@ class TestCreate(object):
         schemas.LegacyCreateAnnotationSchema.return_value.validate\
             .side_effect = ValidationError('asplode')
 
-        with pytest.raises(ValidationError) as err:
+        with pytest.raises(ValidationError) as exc:
             views.create(mock_request)
 
-        assert err.value.message == 'asplode'
+        assert exc.value.message == 'asplode'
 
     def test_it_creates_the_annotation_in_legacy_storage(self,
                                                          mock_request,

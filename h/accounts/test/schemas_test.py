@@ -90,33 +90,33 @@ def test_unique_email_invalid_when_user_does_not_exist(user_model):
 def test_RegisterSchema_with_password_too_short(user_model):
     schema = schemas.RegisterSchema().bind(request=DummyRequest())
 
-    with pytest.raises(colander.Invalid) as err:
+    with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"password": "a"})
-    assert "password" in err.value.asdict()
+    assert "password" in exc.value.asdict()
 
 
 def test_RegisterSchema_with_username_too_short(user_model):
     schema = schemas.RegisterSchema().bind(request=DummyRequest())
 
-    with pytest.raises(colander.Invalid) as err:
+    with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"username": "a"})
-    assert "username" in err.value.asdict()
+    assert "username" in exc.value.asdict()
 
 
 def test_RegisterSchema_with_username_too_long(user_model):
     schema = schemas.RegisterSchema().bind(request=DummyRequest())
 
-    with pytest.raises(colander.Invalid) as err:
+    with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"username": "a" * 500})
-    assert "username" in err.value.asdict()
+    assert "username" in exc.value.asdict()
 
 
 def test_ResetPasswordSchema_with_password_too_short(config, user_model):
     schema = schemas.ResetPasswordSchema().bind(request=csrf_request(config))
 
-    with pytest.raises(colander.Invalid) as err:
+    with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"password": "a"})
-    assert "password" in err.value.asdict()
+    assert "password" in exc.value.asdict()
 
 
 def test_LoginSchema_with_bad_csrf(config, user_model):
