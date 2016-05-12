@@ -5,25 +5,19 @@ var events = require('./events');
 /** Watch the UI state and update scope properties. */
 // @ngInject
 function AnnotationUIController($rootScope, $scope, annotationUI) {
-  $rootScope.$watch(function () {
-    return annotationUI.selectedAnnotationMap;
-  }, function (map) {
-    map = map || {};
-    var count = Object.keys(map).length;
-    $scope.selectedAnnotationsCount = count;
+  annotationUI.subscribe(function () {
+    var state = annotationUI.getState();
 
-    if (count) {
-      $scope.selectedAnnotations = map;
+    $scope.selectedAnnotations = state.selectedAnnotationMap;
+
+    if (state.selectedAnnotationMap) {
+      $scope.selectedAnnotationsCount =
+        Object.keys(state.selectedAnnotationMap).length;
     } else {
-      $scope.selectedAnnotations = null;
+      $scope.selectedAnnotationsCount = 0;
     }
-  });
 
-  $rootScope.$watch(function () {
-    return annotationUI.focusedAnnotationMap;
-  }, function (map) {
-    map = map || {};
-    $scope.focusedAnnotations = map;
+    $scope.focusedAnnotations = state.focusedAnnotationMap;
   });
 
   $rootScope.$on(events.ANNOTATION_DELETED, function (event, annotation) {

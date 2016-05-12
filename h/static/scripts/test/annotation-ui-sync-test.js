@@ -2,12 +2,14 @@
 
 var angular = require('angular');
 
+var annotationUIFactory = require('../annotation-ui');
+
 describe('AnnotationUISync', function () {
   var sandbox = sinon.sandbox.create();
   var $digest;
   var publish;
   var fakeBridge;
-  var fakeAnnotationUI;
+  var annotationUI;
   var fakeAnnotationSync;
   var createAnnotationUISync;
   var createChannel = function () {
@@ -43,21 +45,18 @@ describe('AnnotationUISync', function () {
 
     fakeAnnotationSync = {
       getAnnotationForTag: function (tag) {
-        return { id: Number(tag.replace('tag', '')) };
+        return {
+          id: Number(tag.replace('tag', '')),
+          $$tag: tag,
+        };
       }
     };
 
-    fakeAnnotationUI = {
-      focusAnnotations: sandbox.stub(),
-      selectAnnotations: sandbox.stub(),
-      xorSelectedAnnotations: sandbox.stub(),
-      visibleHighlights: false,
-    };
-
+    annotationUI = annotationUIFactory({});
     createAnnotationUISync = function () {
       new AnnotationUISync(
         $rootScope, fakeWindow, fakeBridge, fakeAnnotationSync,
-        fakeAnnotationUI
+        annotationUI
       );
     };
   }));
@@ -93,10 +92,11 @@ describe('AnnotationUISync', function () {
     it('updates the annotationUI to include the shown annotations', function () {
       createAnnotationUISync();
       publish('showAnnotations', ['tag1', 'tag2', 'tag3']);
-      assert.called(fakeAnnotationUI.selectAnnotations);
-      assert.calledWith(fakeAnnotationUI.selectAnnotations, [
-        { id: 1 }, { id: 2 }, { id: 3 }
-      ]);
+      assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
+        1: true,
+        2: true,
+        3: true,
+      });
     });
 
     it('triggers a digest', function () {
@@ -110,10 +110,11 @@ describe('AnnotationUISync', function () {
     it('updates the annotationUI to show the provided annotations', function () {
       createAnnotationUISync();
       publish('focusAnnotations', ['tag1', 'tag2', 'tag3']);
-      assert.called(fakeAnnotationUI.focusAnnotations);
-      assert.calledWith(fakeAnnotationUI.focusAnnotations, [
-        { id: 1 }, { id: 2 }, { id: 3 }
-      ]);
+      assert.deepEqual(annotationUI.getState().focusedAnnotationMap, {
+        tag1: true,
+        tag2: true,
+        tag3: true,
+      });
     });
 
     it('triggers a digest', function () {
@@ -127,10 +128,11 @@ describe('AnnotationUISync', function () {
     it('updates the annotationUI to show the provided annotations', function () {
       createAnnotationUISync();
       publish('toggleAnnotationSelection', ['tag1', 'tag2', 'tag3']);
-      assert.called(fakeAnnotationUI.xorSelectedAnnotations);
-      assert.calledWith(fakeAnnotationUI.xorSelectedAnnotations, [
-        { id: 1 }, { id: 2 }, { id: 3 }
-      ]);
+      assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
+        1: true,
+        2: true,
+        3: true,
+      });
     });
 
     it('triggers a digest', function () {
@@ -141,10 +143,10 @@ describe('AnnotationUISync', function () {
   });
 
   describe('on "setVisibleHighlights" event', function () {
-    it('updates the annotationUI with the new value', function () {
+    it('updates the annotationUI state', function () {
       createAnnotationUISync();
       publish('setVisibleHighlights', true);
-      assert.equal(fakeAnnotationUI.visibleHighlights, true);
+      assert.equal(annotationUI.getState().visibleHighlights, true);
     });
 
     it('notifies the other frames of the change', function () {

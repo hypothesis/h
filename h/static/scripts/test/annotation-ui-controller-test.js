@@ -2,6 +2,8 @@
 
 var angular = require('angular');
 
+var annotationUIFactory = require('../annotation-ui');
+
 describe('AnnotationUIController', function () {
   var $scope;
   var $rootScope;
@@ -22,12 +24,7 @@ describe('AnnotationUIController', function () {
     $scope = $rootScope.$new();
     $scope.search = {};
 
-    annotationUI = {
-      tool: 'comment',
-      selectedAnnotationMap: null,
-      focusedAnnotationsMap: null,
-      removeSelectedAnnotation: sandbox.stub()
-    };
+    annotationUI = annotationUIFactory({});
 
     $controller('AnnotationUIController', {
       $scope: $scope,
@@ -40,34 +37,34 @@ describe('AnnotationUIController', function () {
   });
 
   it('updates the view when the selection changes', function () {
-    annotationUI.selectedAnnotationMap = { 1: true, 2: true };
-    $rootScope.$digest();
+    annotationUI.selectAnnotations(['1','2']);
     assert.deepEqual($scope.selectedAnnotations, { 1: true, 2: true });
   });
 
   it('updates the selection counter when the selection changes', function () {
-    annotationUI.selectedAnnotationMap = { 1: true, 2: true };
-    $rootScope.$digest();
+    annotationUI.selectAnnotations(['1','2']);
     assert.deepEqual($scope.selectedAnnotationsCount, 2);
   });
 
   it('clears the selection when no annotations are selected', function () {
-    annotationUI.selectedAnnotationMap = {};
-    $rootScope.$digest();
+    annotationUI.selectAnnotations([]);
     assert.deepEqual($scope.selectedAnnotations, null);
     assert.deepEqual($scope.selectedAnnotationsCount, 0);
   });
 
   it('updates the focused annotations when the focus map changes', function () {
-    annotationUI.focusedAnnotationMap = { 1: true, 2: true };
-    $rootScope.$digest();
+    annotationUI.focusAnnotations([
+      {$$tag: '1'},
+      {$$tag: '2'},
+    ]);
     assert.deepEqual($scope.focusedAnnotations, { 1: true, 2: true });
   });
 
   describe('on annotationDeleted', function () {
     it('removes the deleted annotation from the selection', function () {
+      annotationUI.selectAnnotations(['1']);
       $rootScope.$emit('annotationDeleted', { id: 1 });
-      assert.calledWith(annotationUI.removeSelectedAnnotation, { id: 1 });
+      assert.equal(annotationUI.getState().selectedAnnotationMap, null);
     });
   });
 });
