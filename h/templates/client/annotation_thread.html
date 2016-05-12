@@ -39,7 +39,9 @@
 
 <!-- Replies -->
 <ul class="thread-replies" ng-show="!vm.thread.collapsed">
-  <li class="thread" ng-repeat="child in vm.thread.children track by child.id">
+  <li class="thread"
+      ng-repeat="child in vm.thread.children track by child.id"
+      ng-show="vm.shouldShowReply(child)">
     <annotation-thread
       show-document-info="false"
       thread="child"

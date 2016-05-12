@@ -7,6 +7,13 @@ function hiddenCount(thread) {
   }, isHidden ? 1 : 0);
 }
 
+function visibleCount(thread) {
+  var isVisible = thread.annotation && thread.visible;
+  return thread.children.reduce(function (count, reply) {
+    return count + visibleCount(reply);
+  }, isVisible ? 1 : 0);
+}
+
 function showAllChildren(thread, showFn) {
   thread.children.forEach(function (child) {
     showFn({thread: child});
@@ -46,6 +53,10 @@ function AnnotationThreadController() {
    */
   this.hiddenCount = function () {
     return hiddenCount(this.thread);
+  };
+
+  this.shouldShowReply = function (child) {
+    return visibleCount(child) > 0;
   };
 }
 

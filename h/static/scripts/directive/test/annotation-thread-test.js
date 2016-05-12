@@ -9,8 +9,8 @@ function PageObject(element) {
   this.annotations = function () {
     return Array.from(element[0].querySelectorAll('annotation'));
   };
-  this.replies = function () {
-    return Array.from(element[0].querySelectorAll('annotation-thread'));
+  this.visibleReplies = function () {
+    return Array.from(element[0].querySelectorAll('.thread:not(.ng-hide)'));
   };
   this.replyList = function () {
     return element[0].querySelector('.thread-replies');
@@ -39,13 +39,14 @@ describe('annotationThread', function () {
           id: '2',
           annotation: {id: '2', text: 'areply'},
           children: [],
+          visible: true,
         }],
         visible: true,
       },
     });
     var pageObject = new PageObject(element);
     assert.equal(pageObject.annotations().length, 2);
-    assert.equal(pageObject.replies().length, 1);
+    assert.equal(pageObject.visibleReplies().length, 1);
   });
 
   it('does not render hidden threads', function () {
@@ -78,7 +79,7 @@ describe('annotationThread', function () {
       }
     });
     var pageObject = new PageObject(element);
-    assert.equal(pageObject.replies().length, 1);
+    assert.isFalse(pageObject.isHidden(pageObject.replyList()));
   });
 
   it('does not show replies if collapsed', function () {
@@ -98,6 +99,30 @@ describe('annotationThread', function () {
     });
     var pageObject = new PageObject(element);
     assert.isTrue(pageObject.isHidden(pageObject.replyList()));
+  });
+
+  it('only shows replies that match the search filter', function () {
+    var element = util.createDirective(document, 'annotationThread', {
+      thread: {
+        id: '1',
+        annotation: {id: '1'},
+        visible: true,
+        children: [{
+          id: '2',
+          annotation: {id: '2'},
+          children: [],
+          visible: false,
+        },{
+          id: '3',
+          annotation: {id: '3'},
+          children: [],
+          visible: true,
+        }],
+        collapsed: false,
+      }
+    });
+    var pageObject = new PageObject(element);
+    assert.equal(pageObject.visibleReplies().length, 1);
   });
 
   describe('#toggleCollapsed', function () {
