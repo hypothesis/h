@@ -116,9 +116,9 @@ class FeatureCohort(Base, mixins.Timestamps):
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
     # Cohort membership
-    members = sa.orm.relationship(
-        'User', secondary='featurecohort_user', backref=sa.orm.backref(
-            'cohorts', order_by='FeatureCohort.name'))
+    members = sa.orm.relationship('User',
+                                  secondary='featurecohort_user',
+                                  backref='cohorts')
 
     def __init__(self, name):
         self.name = name
