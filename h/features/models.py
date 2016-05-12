@@ -5,8 +5,10 @@ from __future__ import unicode_literals
 import logging
 
 import sqlalchemy as sa
+from sqlalchemy.orm import exc
 
 from h.db import Base
+from h.db import mixins
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +17,10 @@ FEATURES = {
     'new_homepage': "Show the new homepage design?",
     'postgres': 'Read/write annotation and document data from/to postgres'
 }
+
+COHORT_NAME_MIN_LENGTH = 4
+COHORT_NAME_MAX_LENGTH = 25
+
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
 # We can't do this in one step, because removing it entirely will cause stage
@@ -105,3 +111,52 @@ class Feature(Base):
 
     def __repr__(self):
         return '<Feature {f.name} everyone={f.everyone}>'.format(f=self)
+
+
+class Cohort(Base, mixins.Timestamps):
+    __tablename__ = 'cohort'
+
+    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
+
+    # Cohort membership
+    members = sa.orm.relationship(
+        'User', secondary='user_cohort', backref=sa.orm.backref(
+            'cohorts', order_by='Cohort.name'))
+
+    def __init__(self, name, creator):
+        self.name = name
+        self.creator = creator
+        self.members.append(creator)
+
+    @sa.orm.validates('name')
+    def validate_name(self, key, name):
+        if not COHORT_NAME_MIN_LENGTH <= len(name) <= COHORT_NAME_MAX_LENGTH:
+            raise ValueError('name must be between {min} and {max} characters '
+                             'long'.format(min=COHORT_NAME_MIN_LENGTH,
+                                           max=COHORT_NAME_MAX_LENGTH))
+        return name
+
+    def __repr__(self):
+        return '<Cohort: %s>' % self.slug
+
+    @classmethod
+    def get_by_id(cls, id_):
+        """Return the cohort with the given id, or None."""
+        try:
+            return cls.query.filter(cls.id == id_).one()
+        except exc.NoResultFound:
+            return None
+
+
+USER_COHORT_TABLE = sa.Table(
+    'user_cohort', Base.metadata,
+    sa.Column('user_id',
+              sa.Integer,
+              sa.ForeignKey('user.id'),
+              nullable=False),
+    sa.Column('cohort_id',
+              sa.Integer,
+              sa.ForeignKey('cohort.id'),
+              nullable=False)
+)
