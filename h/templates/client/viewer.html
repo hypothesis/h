@@ -27,7 +27,16 @@
       ng-if="selectedAnnotationUnavailable()">
     <div class="annotation-unavailable-message__icon"></div>
     <p class="annotation-unavailable-message__label">
-      You do not have permission to see this annotation
+      <span ng-if="auth.status === 'signed-out'">
+        This annotation is not available.
+        <br>
+        You may need to
+        <a class="loggedout-message__link" href="" ng-click="login()">sign in</a>
+        to see it.
+      </span>
+      <span ng-if="auth.status === 'signed-in'">
+        You do not have permission to view this annotation.
+      </span>
     </p>
   </li>
   <li class="thread-list__spacer"
