@@ -116,10 +116,10 @@ describe('annotationUI', function () {
     });
   });
 
-  describe('#xorSelectedAnnotations()', function () {
+  describe('#toggleSelectedAnnotations()', function () {
     it('adds annotations missing from the selectedAnnotationMap', function () {
       annotationUI.selectAnnotations([{ id: 1 }, { id: 2}]);
-      annotationUI.xorSelectedAnnotations([{ id: 3 }, { id: 4 }]);
+      annotationUI.toggleSelectedAnnotations([{ id: 3 }, { id: 4 }]);
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
         1: true, 2: true, 3: true, 4: true
       });
@@ -127,13 +127,13 @@ describe('annotationUI', function () {
 
     it('removes annotations already in the selectedAnnotationMap', function () {
       annotationUI.selectAnnotations([{id: 1}, {id: 3}]);
-      annotationUI.xorSelectedAnnotations([{ id: 1 }, { id: 2 }]);
+      annotationUI.toggleSelectedAnnotations([{ id: 1 }, { id: 2 }]);
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, { 2: true, 3: true });
     });
 
     it('nulls the map if no annotations are selected', function () {
       annotationUI.selectAnnotations([{id: 1}]);
-      annotationUI.xorSelectedAnnotations([{ id: 1 }]);
+      annotationUI.toggleSelectedAnnotations([{ id: 1 }]);
       assert.isNull(annotationUI.getState().selectedAnnotationMap);
     });
   });

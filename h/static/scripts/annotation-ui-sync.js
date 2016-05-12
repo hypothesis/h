@@ -36,7 +36,7 @@ function AnnotationUISync($rootScope, $window, bridge, annotationSync,
     toggleAnnotationSelection: function (tags) {
       tags = tags || [];
       var annotations = getAnnotationsByTags(tags);
-      annotationUI.xorSelectedAnnotations(annotations);
+      annotationUI.toggleSelectedAnnotations(annotations);
     },
     setVisibleHighlights: function (state) {
       if (typeof state !== 'boolean') {

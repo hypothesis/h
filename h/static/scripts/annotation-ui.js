@@ -1,9 +1,17 @@
 'use strict';
 
+/**
+ * AnnotationUI provides the central store of UI state for the application,
+ * using [Redux](http://redux.js.org/).
+ *
+ * Redux is used to provide a predictable way of updating UI state and
+ * responding to UI state changes.
+ */
+
 var immutable = require('seamless-immutable');
 var redux = require('redux');
 
-function value(selection) {
+function freeze(selection) {
   if (Object.keys(selection).length) {
     return immutable(selection);
   } else {
@@ -16,7 +24,7 @@ function initialSelection(settings) {
   if (settings.annotations) {
     selection[settings.annotations] = true;
   }
-  return value(selection);
+  return freeze(selection);
 }
 
 function initialState(settings) {
@@ -65,7 +73,7 @@ module.exports = function (settings) {
   function select(annotations) {
     store.dispatch({
       type: types.SELECT_ANNOTATIONS,
-      selection: value(annotations),
+      selection: freeze(annotations),
     });
   }
 
@@ -103,7 +111,7 @@ module.exports = function (settings) {
       }
       store.dispatch({
         type: types.FOCUS_ANNOTATIONS,
-        focused: value(selection),
+        focused: freeze(selection),
       });
     },
 
@@ -140,7 +148,7 @@ module.exports = function (settings) {
     },
 
     /** Toggle whether annotations are selected or not. */
-    xorSelectedAnnotations: function (annotations) {
+    toggleSelectedAnnotations: function (annotations) {
       var selection = Object.assign({}, store.getState().selectedAnnotationMap);
       for (var i = 0, annotation; i < annotations.length; i++) {
         annotation = annotations[i];
