@@ -17,7 +17,7 @@ import sqlalchemy as sa
 def upgrade():
     op.create_table('featurecohort',
         sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('name', sa.Unicode(length=100), nullable=False),
+        sa.Column('name', sa.UnicodeText(), nullable=False),
         sa.Column('created', sa.DateTime(), server_default=sa.func.now(), nullable=False),
         sa.Column('updated', sa.DateTime(), server_default=sa.func.now(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
