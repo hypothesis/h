@@ -210,14 +210,6 @@ function hasVisibleChildren(thread) {
   });
 }
 
-
-function hasSelectedChildren(thread, selected) {
-  return thread.children.some(function (child) {
-    return selected.indexOf(child.id) !== -1 ||
-           hasSelectedChildren(child, selected);
-  });
-}
-
 /**
  * Default options for buildThread()
  */
@@ -279,15 +271,21 @@ function buildThread(annotations, opts) {
     if (opts.forceVisible && opts.forceVisible.indexOf(id(annotation)) !== -1) {
       return true;
     }
-    if (opts.selected.length > 0 &&
-        opts.selected.indexOf(id(annotation)) === -1) {
-      return false;
-    }
     if (opts.filterFn && !opts.filterFn(annotation)) {
       return false;
     }
     return true;
   };
+
+  // When there is a selection, only include top-level threads (annotations)
+  // that are selected
+  if (opts.selected.length > 0) {
+    thread = Object.assign({}, thread, {
+      children: thread.children.filter(function (child) {
+        return opts.selected.indexOf(child.id) !== -1;
+      }),
+    });
+  }
 
   // Set the visibility of threads based on whether they match
   // the current search filter
@@ -315,8 +313,7 @@ function buildThread(annotations, opts) {
 
     return Object.assign({}, thread, {
       collapsed: thread.collapsed &&
-                 !hasUnfilteredChildren &&
-                 !hasSelectedChildren(thread, opts.selected)
+                 !hasUnfilteredChildren,
     });
   });
 
