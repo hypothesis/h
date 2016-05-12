@@ -198,6 +198,9 @@ class CreateAnnotationSchema(object):
     def validate(self, data):
         appstruct = self.structure.validate(data)
 
+        if not appstruct.get('uri', ''):
+            raise ValidationError('uri: ' + _("'uri' is a required property"))
+
         new_appstruct = {}
 
         _remove_protected_fields(appstruct)

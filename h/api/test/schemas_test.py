@@ -40,6 +40,10 @@ class TestJSONSchema(object):
 
 
 def create_annotation_schema_validate(data):
+    # 'uri' is required when creating new annotations.
+    if 'uri' not in data:
+        data['uri'] = 'http://example.com/example'
+
     schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
     return schema.validate(data)
 
@@ -485,36 +489,49 @@ class TestLegacyCreateAnnotationSchema(object):
 
 class TestCreateAnnotationSchema(object):
 
+    def test_it_raises_if_data_has_no_uri(self):
+        data = self.valid_data()
+        del data['uri']
+        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+
+        with pytest.raises(schemas.ValidationError) as exc:
+            schema.validate(data)
+
+        assert exc.value.message == "uri: 'uri' is a required property"
+
+    def test_it_raises_if_uri_is_empty_string(self):
+        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
+
+        with pytest.raises(schemas.ValidationError) as exc:
+            schema.validate(self.valid_data(uri=''))
+
+        assert exc.value.message == "uri: 'uri' is a required property"
+
     def test_it_sets_userid(self, authn_policy):
         authn_policy.authenticated_userid.return_value = (
             'acct:harriet@example.com')
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({})
+        appstruct = schema.validate(self.valid_data())
 
         assert appstruct['userid'] == 'acct:harriet@example.com'
-
-    def test_it_inserts_empty_string_if_data_has_no_uri(self):
-        schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
-
-        assert schema.validate({})['target_uri'] == ''
 
     def test_it_inserts_empty_string_if_data_contains_no_text(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        assert schema.validate({})['text'] == ''
+        assert schema.validate(self.valid_data())['text'] == ''
 
     def test_it_inserts_empty_list_if_data_contains_no_tags(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        assert schema.validate({})['tags'] == []
+        assert schema.validate(self.valid_data())['tags'] == []
 
     def test_it_replaces_private_permissions_with_shared_False(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({
-            'permissions': {'read': ['acct:harriet@example.com']}
-        })
+        appstruct = schema.validate(self.valid_data(
+            permissions={'read': ['acct:harriet@example.com']}
+        ))
 
         assert appstruct['shared'] is False
         assert 'permissions' not in appstruct
@@ -522,10 +539,10 @@ class TestCreateAnnotationSchema(object):
     def test_it_replaces_shared_permissions_with_shared_True(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({
-            'permissions': {'read': ['group:__world__']},
-            'group': '__world__'
-        })
+        appstruct = schema.validate(self.valid_data(
+            permissions={'read': ['group:__world__']},
+            group='__world__'
+        ))
 
         assert appstruct['shared'] is True
         assert 'permissions' not in appstruct
@@ -533,14 +550,14 @@ class TestCreateAnnotationSchema(object):
     def test_it_defaults_to_private_if_no_permissions_object_sent(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({})
+        appstruct = schema.validate(self.valid_data())
 
         assert appstruct['shared'] is False
 
     def test_it_renames_group_to_groupid(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({'group': 'foo'})
+        appstruct = schema.validate(self.valid_data(group='foo'))
 
         assert appstruct['groupid'] == 'foo'
         assert 'group' not in appstruct
@@ -548,35 +565,43 @@ class TestCreateAnnotationSchema(object):
     def test_it_inserts_default_groupid_if_no_group(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({})
+        appstruct = schema.validate(self.valid_data())
 
         assert appstruct['groupid'] == '__world__'
 
     def test_it_keeps_references(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({
-            'references': ['parent id', 'parent id 2']
-        })
+        appstruct = schema.validate(self.valid_data(
+            references=['parent id', 'parent id 2']
+        ))
 
         assert appstruct['references'] == ['parent id', 'parent id 2']
 
     def test_it_inserts_empty_list_if_no_references(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({})
+        appstruct = schema.validate(self.valid_data())
 
         assert appstruct['references'] == []
 
     def test_it_deletes_groupid_for_replies(self):
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
-        appstruct = schema.validate({
-            'group': 'foo',
-            'references': ['parent annotation id']
-        })
+        appstruct = schema.validate(self.valid_data(
+            group='foo',
+            references=['parent annotation id']
+        ))
 
         assert 'groupid' not in appstruct
+
+    def valid_data(self, **kwargs):
+        """Return minimal valid data for creating a new annotation."""
+        data = {
+            'uri': 'http://example.com/example',
+        }
+        data.update(kwargs)
+        return data
 
 
 class TestLegacyUpdateAnnotationSchema(object):
