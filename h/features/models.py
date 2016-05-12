@@ -17,7 +17,6 @@ FEATURES = {
     'postgres': 'Read/write annotation and document data from/to postgres'
 }
 
-
 # Once a feature has been fully deployed, we remove the flag from the codebase.
 # We can't do this in one step, because removing it entirely will cause stage
 # to remove the flag data from the database on boot, which will in turn disable
@@ -126,7 +125,11 @@ class FeatureCohort(Base, mixins.Timestamps):
 
 FEATURECOHORT_USER_TABLE = sa.Table(
     'featurecohort_user', Base.metadata,
-    sa.Column('id', sa.Integer, nullable=False),
+    sa.Column('id',
+              sa.Integer,
+              nullable=False,
+              autoincrement=True,
+              primary_key=True),
     sa.Column('cohort_id',
               sa.Integer,
               sa.ForeignKey('featurecohort.id'),
@@ -135,4 +138,5 @@ FEATURECOHORT_USER_TABLE = sa.Table(
               sa.Integer,
               sa.ForeignKey('user.id'),
               nullable=False),
+    sa.UniqueConstraint('cohort_id', 'user_id'),
 )
