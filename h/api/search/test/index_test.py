@@ -7,6 +7,9 @@ from pyramid.testing import DummyRequest
 
 import elasticsearch
 
+from h import db
+from h.api import models
+from h.api import presenters
 from h.api.search import client
 from h.api.search import index
 
@@ -99,6 +102,148 @@ class TestDeleteAnnotation:
     @pytest.fixture
     def log(self, patch):
         return patch('h.api.search.index.log')
+
+
+class TestBatchDeleter(object):
+    def test_delete_all_fetches_deleted_annotation_ids(self, deleter, deleted_annotation_ids):
+        deleter.delete_all()
+        assert deleted_annotation_ids.call_count == 1
+
+    def test_delete_all_deletes_annotation_ids(self, deleter, deleted_annotation_ids, delete):
+        deleted_annotation_ids.return_value = set([mock.Mock()])
+        delete.return_value = set()
+
+        deleter.delete_all()
+        delete.assert_called_once_with(deleter, deleted_annotation_ids.return_value)
+
+    def test_delete_all_skips_deleting_when_no_deleted_annotation_ids(self,
+                                                                      deleter,
+                                                                      deleted_annotation_ids,
+                                                                      delete):
+        deleted_annotation_ids.return_value = set()
+
+        deleter.delete_all()
+        assert not delete.called
+
+    def test_delete_all_retries_failed_deletion_attempts_once(self,
+                                                              deleter,
+                                                              deleted_annotation_ids,
+                                                              delete):
+        deleted_annotation_ids.return_value = set(['id-1', 'id-2'])
+        delete.return_value = set(['id-1'])
+
+        deleter.delete_all()
+        assert delete.call_args_list == [
+            mock.call(deleter, set(['id-1', 'id-2'])),
+            mock.call(deleter, set(['id-1']))
+        ]
+
+    def test_deleted_annotation_ids(self, es_scan, annotation):
+        deleter = self.deleter(session=db.Session)
+
+        es_scan.return_value = [
+            {'_id': 'deleted-from-postgres-id',
+             '_source': {'uri': 'http://example.org'}}]
+
+        deleted_ids = deleter.deleted_annotation_ids()
+        assert deleted_ids == set(['deleted-from-postgres-id'])
+
+    def test_deleted_annotation_ids_no_changes(self, es_scan, annotation):
+        request = DummyRequest()
+        deleter = self.deleter(session=db.Session)
+
+        es_scan.return_value = [
+            {'_id': annotation.id,
+             '_source': presenters.AnnotationJSONPresenter(request, annotation)}]
+
+        deleted_ids = deleter.deleted_annotation_ids()
+        assert len(deleted_ids) == 0
+
+    def test_delete_deletes_from_es(self, deleter, streaming_bulk):
+        ids = set(['test-annotation-id'])
+
+        deleter.delete(ids)
+        streaming_bulk.assert_called_once_with(
+            deleter.es_client.conn, ids, chunk_size=mock.ANY,
+            raise_on_error=False, expand_action_callback=mock.ANY)
+
+    def test_delete_correctly_presents_bulk_actions(self, deleter, streaming_bulk):
+        results = []
+
+        def fake_streaming_bulk(*args, **kwargs):
+            id_ = args[1][0]
+            callback = kwargs.get('expand_action_callback')
+            results.append(callback(id_))
+            return set()
+
+        streaming_bulk.side_effect = fake_streaming_bulk
+
+        deleter.delete(['test-annotation-id'])
+        assert results[0] == (
+            {'delete': {'_type': deleter.es_client.t.annotation,
+                        '_index': deleter.es_client.index,
+                        '_id': 'test-annotation-id'}},
+            None,
+        )
+
+    def test_delete_returns_failed_bulk_actions(self, deleter, streaming_bulk):
+        def fake_streaming_bulk(*args, **kwargs):
+            ids = args[1]
+            for id_ in ids:
+                if id_.startswith('fail'):
+                    yield (False, {'delete': {'_id': id_, 'status': 504}})
+                else:
+                    yield (True, {'delete': {'_id': id_, 'status': 200}})
+
+        streaming_bulk.side_effect = fake_streaming_bulk
+
+        result = deleter.delete(['succeed-1', 'fail-1', 'fail-2', 'succeed-2'])
+        assert result == set(['fail-1', 'fail-2'])
+
+    def test_delete_does_not_return_failed_404_bulk_actions(self, deleter, streaming_bulk):
+        def fake_streaming_bulk(*args, **kwargs):
+            ids = args[1]
+            for id_ in ids:
+                if id_ == 'fail-404':
+                    yield (False, {'delete': {'_id': id_, 'status': 404}})
+                elif id_.startswith('fail-504'):
+                    yield (False, {'delete': {'_id': id_, 'status': 504}})
+                else:
+                    yield (True, {'delete': {'_id': id_, 'status': 200}})
+
+        streaming_bulk.side_effect = fake_streaming_bulk
+
+        result = deleter.delete(['succeed-1', 'fail-404', 'fail-504'])
+        assert result == set(['fail-504'])
+
+    @pytest.fixture
+    def deleter(self, session=None):
+        if session is None:
+            session = mock.MagicMock()
+        return index.BatchDeleter(session, mock.MagicMock())
+
+    @pytest.fixture
+    def deleted_annotation_ids(self, patch):
+        return patch('h.api.search.index.BatchDeleter.deleted_annotation_ids')
+
+    @pytest.fixture
+    def delete(self, patch):
+        return patch('h.api.search.index.BatchDeleter.delete')
+
+    @pytest.fixture
+    def es_scan(self, patch):
+        return patch('h.api.search.index.es_helpers.scan')
+
+    @pytest.fixture
+    def streaming_bulk(self, patch):
+        return patch('h.api.search.index.es_helpers.streaming_bulk')
+
+    @pytest.fixture
+    def annotation(self):
+        ann = models.Annotation(userid="bob", target_uri="http://example.com")
+        db.Session.add(ann)
+        db.Session.flush()
+        return ann
 
 
 @pytest.fixture
