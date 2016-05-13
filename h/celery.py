@@ -17,8 +17,6 @@ from celery import Celery
 from celery import signals
 from celery.utils.log import get_task_logger
 from kombu import Exchange, Queue
-from pyramid import paster
-from pyramid.request import Request
 from raven.contrib.celery import register_signal, register_logger_signal
 
 __all__ = (
@@ -66,20 +64,7 @@ celery.conf.update(
 
 @signals.worker_init.connect
 def bootstrap_worker(sender, **kwargs):
-    base_url = os.environ.get('APP_URL')
-    config_uri = os.environ.get('CONFIG_URI', 'conf/app.ini')
-
-    paster.setup_logging(config_uri)
-
-    if base_url is None:
-        base_url = 'http://localhost'
-        log.warn('APP_URL not found in environment, using default: %s',
-                 base_url)
-
-    request = Request.blank('/', base_url=base_url)
-    env = paster.bootstrap(config_uri, request=request)
-    request.root = env['root']
-
+    request = sender.app.webapp_bootstrap()
     sender.app.request = request
 
     # Configure Sentry reporting on task failure
@@ -105,5 +90,9 @@ def transaction_abort(sender, **kwargs):
     sender.app.request.tm.abort()
 
 
-def main():
-    celery.start()
+def start(argv, bootstrap):
+    """Run the Celery CLI."""
+    # We attach the bootstrap function directly to the Celery application
+    # instance, and it's then used in the worker bootstrap subscriber above.
+    celery.webapp_bootstrap = bootstrap
+    celery.start(argv)

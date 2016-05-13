@@ -43,7 +43,6 @@ def devserver(https):
         raise click.ClickException('cannot import honcho: did you run `pip install -e .[dev]` yet?')
 
     os.environ['PYTHONUNBUFFERED'] = 'true'
-    os.environ['CONFIG_URI'] = 'conf/development-app.ini'
     if https:
         gunicorn_args = '--certfile=.tlscert.pem --keyfile=.tlskey.pem'
         os.environ['APP_URL'] = 'https://localhost:5000'
@@ -57,7 +56,7 @@ def devserver(https):
     m = Manager()
     m.add_process('web', 'gunicorn --reload --paste conf/development-app.ini %s' % gunicorn_args)
     m.add_process('ws', 'gunicorn --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
-    m.add_process('worker', 'hypothesis-celery worker --autoreload')
+    m.add_process('worker', 'hypothesis --dev celery worker --autoreload')
     m.add_process('assets', 'gulp watch')
     m.loop()
 

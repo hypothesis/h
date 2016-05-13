@@ -83,7 +83,6 @@ ENTRY_POINTS = {
     'console_scripts': [
         'hypothesis=h.cli:main',
         'hypothesis-buildext=h.buildext:main',
-        'hypothesis-celery=h.celery:main',
     ],
     'h.annotool': [
         'prepare=h.api.transform:prepare',

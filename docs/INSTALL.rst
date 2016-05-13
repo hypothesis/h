@@ -150,7 +150,7 @@ a worker process::
     $ docker run --name h-worker \
                  [...additional config...] \
                  hypothesis/hypothesis \
-                 hypothesis-celery worker
+                 hypothesis celery worker
 
 And, possibly, a websocket server::
 
