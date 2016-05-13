@@ -49,6 +49,10 @@ function initialState(settings) {
     // Set of IDs of annotations that have been explicitly shown
     // by the user even if they do not match the current search filter
     forceVisible: {},
+
+    filterQuery: null,
+
+    sortMode: 'Location',
   });
 }
 
@@ -61,6 +65,8 @@ var types = {
   ADD_ANNOTATIONS: 'ADD_ANNOTATIONS',
   REMOVE_ANNOTATIONS: 'REMOVE_ANNOTATIONS',
   CLEAR_ANNOTATIONS: 'CLEAR_ANNOTATIONS',
+  SET_FILTER_QUERY: 'SET_FILTER_QUERY',
+  SORT_BY: 'SORT_BY',
 };
 
 function excludeAnnotations(current, annotations) {
@@ -104,6 +110,14 @@ function reducer(state, action) {
       return Object.assign({}, state, {forceVisible: action.forceVisible});
     case types.SET_EXPANDED:
       return Object.assign({}, state, {expanded: action.expanded});
+    case types.SET_FILTER_QUERY:
+      return Object.assign({}, state, {
+        filterQuery: action.query,
+        forceVisible: {},
+        expanded: {},
+      });
+    case types.SORT_BY:
+      return Object.assign({}, state, {sortMode: action.mode});
     default:
       return state;
   }
@@ -205,17 +219,6 @@ module.exports = function (settings) {
     },
 
     /**
-     * Clear the set of annotations which have been explicitly shown by
-     * setForceVisible()
-     */
-    clearForceVisible: function () {
-      store.dispatch({
-        type: types.SET_FORCE_VISIBLE,
-        forceVisible: {},
-      });
-    },
-
-    /**
      * Returns true if the annotation with the given `id` is selected.
      */
     isAnnotationSelected: function (id) {
@@ -288,6 +291,22 @@ module.exports = function (settings) {
     /** Set the currently displayed annotations to the empty set. */
     clearAnnotations: function () {
       store.dispatch({type: types.CLEAR_ANNOTATIONS});
+    },
+
+    /** Set the query used to filter displayed annotations. */
+    setFilterQuery: function (query) {
+      store.dispatch({
+        type: types.SET_FILTER_QUERY,
+        query: query,
+      });
+    },
+
+    /** Sets the sort mode for the annotation list. */
+    sortBy: function (mode) {
+      store.dispatch({
+        type: types.SORT_BY,
+        mode: mode,
+      });
     },
   };
 };

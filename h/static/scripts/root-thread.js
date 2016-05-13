@@ -27,11 +27,12 @@ var sortFns = {
 /**
  * Root conversation thread for the sidebar and stream.
  *
- * Listens for annotations being loaded, created and unloaded and
- * builds a conversation thread.
+ * This performs two functions:
  *
- * The thread is sorted and filtered according to
- * current sort and filter settings.
+ * 1. It listens for annotations being loaded, created and unloaded and
+ *    dispatches annotationUI.{addAnnotations|removeAnnotations} actions.
+ * 2. Listens for changes in the UI state and rebuilds the root conversation
+ *    thread.
  *
  * The root thread is then displayed by viewer.html
  */
@@ -39,24 +40,23 @@ var sortFns = {
 module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
   var thread;
 
-  var sortFn = sortFns.Location;
-  var searchQuery;
-
   /**
    * Rebuild the root conversation thread. This should be called
    * whenever the set of annotations to render or the sort/search/filter
    * settings change.
    */
   function rebuildRootThread() {
+    var sortFn = sortFns[annotationUI.getState().sortMode];
+
     var filters;
-    if (searchQuery) {
-      // TODO - Only regenerate the filter function when the search
-      // query changes
-      filters = searchFilter.generateFacetedFilter(searchQuery);
+    var filterQuery = annotationUI.getState().filterQuery;
+
+    if (filterQuery) {
+      filters = searchFilter.generateFacetedFilter(filterQuery);
     }
 
     var filterFn;
-    if (searchQuery) {
+    if (filterQuery) {
       filterFn = function (annot) {
         return viewFilter.filter([annot], filters).length > 0;
       };
@@ -77,7 +77,10 @@ module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
   annotationUI.subscribe(rebuildRootThread);
 
   // Listen for annotations being created or loaded
-  // and show them in the UI
+  // and show them in the UI.
+  //
+  // Note: These events could all be converted into actions that are handled by
+  // the Redux store in annotationUI.
   var loadEvents = [events.BEFORE_ANNOTATION_CREATED,
                     events.ANNOTATION_CREATED,
                     events.ANNOTATIONS_LOADED];
@@ -122,28 +125,6 @@ module.exports = function ($rootScope, annotationUI, searchFilter, viewFilter) {
      */
     thread: function () {
       return thread;
-    },
-
-    /**
-     * Set the sort order for annotations.
-     * @param {'Location'|'Newest'|'Oldest'} mode
-     */
-    sortBy: function (mode) {
-      if (!sortFns[mode]) {
-        throw new Error('Unknown sort mode: ' + mode);
-      }
-      sortFn = sortFns[mode];
-      rebuildRootThread();
-    },
-
-    /**
-     * Set the query to use when filtering annotations.
-     * @param {string} query - The filter query
-     */
-    setSearchQuery: function (query) {
-      searchQuery = query;
-      annotationUI.clearForceVisible();
-      rebuildRootThread();
     },
   };
 };

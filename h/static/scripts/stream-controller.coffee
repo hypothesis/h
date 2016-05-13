@@ -47,7 +47,7 @@ module.exports = class StreamController
     fetch(20)
 
     $scope.$watch('sort.name', (name) ->
-      rootThread.sortBy(name)
+      annotationUI.sortBy(name)
     )
 
     $scope.setCollapsed = (id, collapsed) ->

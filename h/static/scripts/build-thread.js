@@ -299,8 +299,7 @@ function buildThread(annotations, opts) {
 
   // Expand any threads which:
   // 1) Have been explicitly expanded OR
-  // 2) Have children matching the filter OR
-  // 3) Contain children which have been selected
+  // 2) Have children matching the filter
   thread = mapThread(thread, function (thread) {
     var id = thread.id;
 

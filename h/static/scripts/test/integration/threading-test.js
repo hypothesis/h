@@ -63,14 +63,14 @@ describe('annotation threading', function () {
 
   it('should filter annotations when a search is set', function () {
     annotationUI.addAnnotations(fixtures.annotations);
-    rootThread.setSearchQuery('second');
+    annotationUI.setFilterQuery('second');
     assert.equal(rootThread.thread().children.length, 1);
     assert.equal(rootThread.thread().children[0].id, '2');
   });
 
   unroll('should sort annotations by #mode', function (testCase) {
     annotationUI.addAnnotations(fixtures.annotations);
-    rootThread.sortBy(testCase.mode);
+    annotationUI.sortBy(testCase.mode);
     var actualOrder = rootThread.thread().children.map(function (thread) {
       return thread.annotation.id;
     });

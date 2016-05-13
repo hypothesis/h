@@ -207,10 +207,10 @@ module.exports = function WidgetController(
   // Watch the inputs that determine which annotations are currently
   // visible and how they are sorted and rebuild the thread when they change
   $scope.$watch('sort.name', function (mode) {
-    rootThread.sortBy(mode);
+    annotationUI.sortBy(mode);
   });
   $scope.$watch('search.query', function (query) {
-    rootThread.setSearchQuery(query);
+    annotationUI.setFilterQuery(query);
   });
 
   $scope.rootThread = function () {
