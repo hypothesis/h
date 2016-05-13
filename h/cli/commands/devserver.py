@@ -46,12 +46,12 @@ def devserver(https):
     if https:
         gunicorn_args = '--certfile=.tlscert.pem --keyfile=.tlskey.pem'
         os.environ['APP_URL'] = 'https://localhost:5000'
-        os.environ['H_WEBSOCKET_URL'] = 'wss://localhost:5001/ws'
+        os.environ['WEBSOCKET_URL'] = 'wss://localhost:5001/ws'
         os.environ['ALLOWED_ORIGINS'] = 'https://localhost:5000'
     else:
         gunicorn_args = ''
         os.environ['APP_URL'] = 'http://localhost:5000'
-        os.environ['H_WEBSOCKET_URL'] = 'ws://localhost:5001/ws'
+        os.environ['WEBSOCKET_URL'] = 'ws://localhost:5001/ws'
 
     m = Manager()
     m.add_process('web',
