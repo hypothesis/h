@@ -2,7 +2,7 @@
 
 (See gh2642 for rationale for 'ng-show="true"')
  -->
-<ul class="stream-list ng-hide"
+<ul class="thread-list ng-hide"
     ng-show="true"
     window-scroll="loadMore(20)">
   <search-status-bar
@@ -30,7 +30,8 @@
       You do not have permission to see this annotation
     </p>
   </li>
-  <li ng-style="{height: virtualThreadList.offscreenUpperHeight}"></li>
+  <li class="thread-list__spacer"
+      ng-style="{height: virtualThreadList.offscreenUpperHeight}"></li>
   <li id="{{child.id}}"
       class="annotation-card thread"
       ng-class="{'js-hover': hasFocus(child.annotation)}"
@@ -45,7 +46,8 @@
         on-force-visible="forceVisible(thread)">
       </annotation-thread>
   </li>
-  <li ng-style="{height: virtualThreadList.offscreenLowerHeight}"></li>
+  <li class="thread-list__spacer"
+      ng-style="{height: virtualThreadList.offscreenLowerHeight}"></li>
   <loggedout-message ng-if="isSidebar && shouldShowLoggedOutMessage()"
     on-login="login()" ng-cloak>
   </loggedout-message>

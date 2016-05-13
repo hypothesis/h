@@ -1,6 +1,6 @@
 $thread-padding: $annotation-card-left-padding;
 
-.stream-list {
+.thread-list {
   & > * {
     margin-bottom: .72em;
   }
@@ -8,6 +8,13 @@ $thread-padding: $annotation-card-left-padding;
   & > li.thread > .threadexp {
     display: none;
   }
+}
+
+.thread-list__spacer {
+  // This is a hidden element which is used to reserve space for off-screen
+  // threads, so it should not occupy any space other than that set via its
+  // 'height' inline style property.
+  margin: 0;
 }
 
 .annotation-unavailable-message {
