@@ -26,8 +26,12 @@ class Document(Base, mixins.Timestamps):
     #        dependency on the annotator-store is removed, as it clashes with
     #        making the Postgres and Elasticsearch interface of a Document
     #        object behave the same way.
-    document_uris = sa.orm.relationship('DocumentURI', backref='document')
-    meta = sa.orm.relationship('DocumentMeta', backref='document')
+    document_uris = sa.orm.relationship('DocumentURI',
+                                        backref='document',
+                                        order_by='DocumentURI.updated.desc()')
+    meta = sa.orm.relationship('DocumentMeta',
+                               backref='document',
+                               order_by='DocumentMeta.updated.desc()')
 
     def __repr__(self):
         return '<Document %s>' % self.id
@@ -89,6 +93,8 @@ class DocumentURI(Base, mixins.Timestamps):
                             'uri_normalized',
                             'type',
                             'content_type'),
+        sa.Index('ix__document_uri_document_id', 'document_id'),
+        sa.Index('ix__document_uri_updated', 'updated'),
     )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
@@ -149,6 +155,8 @@ class DocumentMeta(Base, mixins.Timestamps):
     __tablename__ = 'document_meta'
     __table_args__ = (
         sa.UniqueConstraint('claimant_normalized', 'type'),
+        sa.Index('ix__document_meta_document_id', 'document_id'),
+        sa.Index('ix__document_meta_updated', 'updated'),
     )
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
