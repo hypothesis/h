@@ -93,6 +93,7 @@ class DocumentURI(Base, mixins.Timestamps):
                             'uri_normalized',
                             'type',
                             'content_type'),
+        sa.Index('ix__document_uri_document_id', 'document_id'),
         sa.Index('ix__document_uri_updated', 'updated'),
     )
 
@@ -154,6 +155,7 @@ class DocumentMeta(Base, mixins.Timestamps):
     __tablename__ = 'document_meta'
     __table_args__ = (
         sa.UniqueConstraint('claimant_normalized', 'type'),
+        sa.Index('ix__document_meta_document_id', 'document_id'),
         sa.Index('ix__document_meta_updated', 'updated'),
     )
 
