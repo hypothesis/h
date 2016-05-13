@@ -84,9 +84,6 @@ ENTRY_POINTS = {
         'hypothesis=h.cli:main',
         'hypothesis-buildext=h.buildext:main',
     ],
-    'h.annotool': [
-        'prepare=h.api.transform:prepare',
-    ]
 }
 
 with open('README.rst', encoding='utf-8') as fp:
