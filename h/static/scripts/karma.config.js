@@ -23,16 +23,16 @@ module.exports = function(config) {
       // Test setup
       './test/bootstrap.js',
 
-      // Angular directive templates
-      '../../templates/client/*.html',
-
-      // Tests
-      //
       // Karma watching is disabled for these files because they are
       // bundled with karma-browserify which handles watching itself via
       // watchify
+
+      // Unit tests
       { pattern: '**/*-test.coffee', watched: false, included: true, served: true },
-      { pattern: '**/*-test.js', watched: false, included: true, served: true }
+      { pattern: '**/test/*-test.js', watched: false, included: true, served: true },
+
+      // Integration tests
+      { pattern: '**/integration/*-test.js', watched: false, included: true, served: true }
     ],
 
     // list of files to exclude
