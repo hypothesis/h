@@ -38,6 +38,9 @@ def index(es, annotation, request):
     :type annotation: h.api.models.Annotation
 
     """
+    # FIXME: this should not use the same presenter as we use to render
+    # annotations for clients. It is useful in the mean time until we get rid of
+    # the legacy ElasticSearch annotation storage.
     annotation_dict = presenters.AnnotationJSONPresenter(
         request, annotation).asdict()
 
@@ -133,6 +136,9 @@ class BatchIndexer(object):
         action = {'index': {'_index': self.es_client.index,
                             '_type': self.es_client.t.annotation,
                             '_id': annotation.id}}
+        # FIXME: this should not use the same presenter as we use to render
+        # annotations for clients. It is useful in the mean time until we get rid of
+        # the legacy ElasticSearch annotation storage.
         data = presenters.AnnotationJSONPresenter(self.request, annotation).asdict()
 
         return (action, data)
