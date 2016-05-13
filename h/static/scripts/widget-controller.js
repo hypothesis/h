@@ -41,7 +41,19 @@ module.exports = function WidgetController(
     if (!threadElement) {
       return;
     }
-    return threadElement.getBoundingClientRect().height;
+
+    // Get the height of the element inside the border-box, excluding
+    // top and bottom margins.
+    var elementHeight = threadElement.getBoundingClientRect().height;
+
+    var style = window.getComputedStyle(threadElement);
+
+    // Get the bottom margin of the element. style.margin{Side} will return
+    // values of the form 'Npx', from which we extract 'N'.
+    var marginHeight = parseFloat(style.marginTop) +
+                       parseFloat(style.marginBottom);
+
+    return elementHeight + marginHeight;
   }
 
   var visibleThreads = new VirtualThreadList($scope, window, rootThread.thread());
