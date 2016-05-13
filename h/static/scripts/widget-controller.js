@@ -1,6 +1,7 @@
 'use strict';
 
 var events = require('./events');
+var memoize = require('./util/memoize');
 var SearchClient = require('./search-client');
 
 function firstKey(object) {
@@ -275,6 +276,16 @@ module.exports = function WidgetController(
   };
 
   $scope.isLoading = isLoading;
+
+  var visibleCount = memoize(function (thread) {
+    return thread.children.reduce(function (count, child) {
+      return count + visibleCount(child);
+    }, thread.visible ? 1 : 0);
+  });
+
+  $scope.visibleCount = function () {
+    return visibleCount(rootThread.thread());
+  };
 
   $scope.topLevelThreadCount = function () {
     return rootThread.thread().totalChildren;

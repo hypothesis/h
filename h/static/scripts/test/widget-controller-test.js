@@ -387,4 +387,22 @@ describe('WidgetController', function () {
       assert.equal(annotationUI.getState().expanded[thread.parent.id], true);
     });
   });
+
+  describe('#visibleCount', function () {
+    it('returns the total number of visible annotations or replies', function () {
+      fakeRootThread.thread.returns({
+        children: [{
+          id: '1',
+          visible: true,
+          children: [{ id: '3', visible: true, children: [] }],
+        },{
+          id: '2',
+          visible: false,
+          children: [],
+        }],
+      });
+      $scope.$digest();
+      assert.equal($scope.visibleCount(), 2);
+    });
+  });
 });
