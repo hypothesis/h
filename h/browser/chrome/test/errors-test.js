@@ -23,9 +23,11 @@ describe('errors', function () {
   describe('#shouldIgnoreInjectionError', function () {
     var ignoredErrors = [
       'The tab was closed',
+      'No tab with id 42',
       'Cannot access contents of url "file:///C:/t/cpp.pdf". ' +
       'Extension manifest must request permission to access this host.',
       'Cannot access contents of page',
+      'The extensions gallery cannot be scripted.',
     ];
 
     var unexpectedErrors = [

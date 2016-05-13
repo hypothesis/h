@@ -46,8 +46,12 @@ function isKnownError(err) {
 }
 
 var IGNORED_ERRORS = [
+  // Errors that can happen when the tab is closed during injection
   /The tab was closed/,
+  /No tab with id.*/,
+  // Attempts to access pages for which Chrome does not allow scripting
   /Cannot access contents of.*/,
+  /The extensions gallery cannot be scripted/,
 ];
 
 /**
