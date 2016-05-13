@@ -83,6 +83,7 @@ class Annotation(Base, mixins.Timestamps):
     document = sa.orm.relationship('Document',
                                    secondary='join(DocumentURI, Document, DocumentURI.document_id == Document.id)',
                                    primaryjoin='Annotation.target_uri_normalized == DocumentURI.uri_normalized',
+                                   viewonly=True,
                                    uselist=False)
 
     @hybrid_property
