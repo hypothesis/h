@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 import click
 
 
@@ -7,6 +9,10 @@ import click
 @click.pass_context
 def initdb(ctx):
     """Create database tables and elasticsearch indices."""
-    # Start the application, triggering model creation
+    # Settings to autocreate database tables and indices
+    os.environ['MODEL_CREATE_ALL'] = 'true'
+    os.environ['SEARCH_AUTOCONFIG'] = 'true'
+
+    # Start the application
     bootstrap = ctx.obj['bootstrap']
-    bootstrap(create_db=True)
+    bootstrap()

@@ -24,7 +24,7 @@ SUBCOMMANDS = (
 )
 
 
-def bootstrap(app_url, dev=False, create_db=False):
+def bootstrap(app_url, dev=False):
     """
     Bootstrap the application from the given arguments.
 
@@ -36,13 +36,6 @@ def bootstrap(app_url, dev=False, create_db=False):
     # FIXME: This is a nasty hack and should go when we no longer need to spin
     # up an entire application to build the extensions.
     os.environ['H_SCRIPT'] = 'true'
-
-    # Override other important environment variables
-    os.environ['MODEL_CREATE_ALL'] = 'True' if create_db else 'False'
-    os.environ['MODEL_DROP_ALL'] = 'False'
-
-    if dev:
-        os.environ['SECRET_KEY'] = 'notsecret'
 
     # In development, we will happily provide a default APP_URL, but it must be
     # set in production mode.

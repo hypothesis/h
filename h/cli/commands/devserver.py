@@ -54,7 +54,10 @@ def devserver(https):
         os.environ['H_WEBSOCKET_URL'] = 'ws://localhost:5001/ws'
 
     m = Manager()
-    m.add_process('web', 'gunicorn --reload --paste conf/development-app.ini %s' % gunicorn_args)
+    m.add_process('web',
+                  'MODEL_CREATE_ALL=true '
+                  'SEARCH_AUTOCONFIG=true '
+                  'gunicorn --reload --paste conf/development-app.ini %s' % gunicorn_args)
     m.add_process('ws', 'gunicorn --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
     m.add_process('worker', 'hypothesis --dev celery worker --autoreload')
     m.add_process('assets', 'gulp watch')
