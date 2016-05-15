@@ -6,26 +6,25 @@ import datetime
 import mock
 import pytest
 
-from h import db
 from h.api import models
 from h.api.models import document
 
 
 class TestDocumentTitle(object):
 
-    def test_it_returns_the_value_of_the_one_title_DocumentMeta(self):
+    def test_it_returns_the_value_of_the_one_title_DocumentMeta(self, db_session):
         """When there's only one DocumentMeta it should return its title."""
         doc = document.Document()
         document.DocumentMeta(type='title',
                               value=['The Title'],
                               document=doc,
                               claimant='http://example.com')
-        db.Session.add(doc)
-        db.Session.flush()
+        db_session.add(doc)
+        db_session.flush()
 
         assert doc.title == 'The Title'
 
-    def test_it_returns_the_value_of_the_first_title_DocumentMeta(self):
+    def test_it_returns_the_value_of_the_first_title_DocumentMeta(self, db_session):
         doc = document.Document()
         document.DocumentMeta(type='title',
                               value=['The US Title'],
@@ -35,26 +34,26 @@ class TestDocumentTitle(object):
                               value=['The UK Title'],
                               document=doc,
                               claimant='http://example.co.uk')
-        db.Session.add(doc)
-        db.Session.flush()
+        db_session.add(doc)
+        db_session.flush()
 
         assert doc.title == 'The US Title'
 
-    def test_it_returns_None_if_there_are_no_title_DocumentMetas(self):
+    def test_it_returns_None_if_there_are_no_title_DocumentMetas(self, db_session):
         doc = document.Document()
         document.DocumentMeta(type='other',
                               value='something',
                               document=doc,
                               claimant='http://example.com')
-        db.Session.add(doc)
-        db.Session.flush()
+        db_session.add(doc)
+        db_session.flush()
 
         assert doc.title is None
 
 
 class TestDocumentFindByURIs(object):
 
-    def test_with_one_matching_Document(self):
+    def test_with_one_matching_Document(self, db_session):
         # One Document with a non-matching DocumentURI pointing to it.
         # find_by_uris() should not return this Document.
         document1 = document.Document()
@@ -72,32 +71,32 @@ class TestDocumentFindByURIs(object):
         document2.document_uris.append(
             document.DocumentURI(claimant=uri3, uri=uri2))
 
-        db.Session.add_all([document1, document2])
-        db.Session.flush()
+        db_session.add_all([document1, document2])
+        db_session.flush()
 
-        actual = document.Document.find_by_uris(db.Session, [
+        actual = document.Document.find_by_uris(db_session, [
             'https://en.wikipedia.org/wiki/Main_Page',
             'https://m.en.wikipedia.org/wiki/Main_Page'])
 
         assert actual.count() == 1
         assert actual.first() == document2
 
-    def test_no_matches(self):
+    def test_no_matches(self, db_session):
         document_ = document.Document()
         document_.document_uris.append(document.DocumentURI(
             claimant='https://en.wikipedia.org/wiki/Main_Page',
             uri='https://en.wikipedia.org/wiki/Main_Page'))
-        db.Session.add(document_)
-        db.Session.flush()
+        db_session.add(document_)
+        db_session.flush()
 
         actual = document.Document.find_by_uris(
-            db.Session, ['https://de.wikipedia.org/wiki/Hauptseite'])
+            db_session, ['https://de.wikipedia.org/wiki/Hauptseite'])
         assert actual.count() == 0
 
 
 class TestDocumentFindOrCreateByURIs(object):
 
-    def test_with_one_existing_Document(self):
+    def test_with_one_existing_Document(self, db_session):
         """
         When there's one matching Document it should return that Document.
 
@@ -115,11 +114,11 @@ class TestDocumentFindOrCreateByURIs(object):
             uri='https://en.wikipedia.org/wiki/Main_Page',
             document=document_)
 
-        db.Session.add(docuri1)
-        db.Session.add(docuri2)
-        db.Session.flush()
+        db_session.add(docuri1)
+        db_session.add(docuri2)
+        db_session.flush()
 
-        actual = document.Document.find_or_create_by_uris(db.Session,
+        actual = document.Document.find_or_create_by_uris(db_session,
             'https://en.wikipedia.org/wiki/Main_Page',
             ['https://en.wikipedia.org/wiki/http/en.m.wikipedia.org/wiki/Main_Page',
             'https://m.en.wikipedia.org/wiki/Main_Page'])
@@ -127,7 +126,7 @@ class TestDocumentFindOrCreateByURIs(object):
         assert actual.count() == 1
         assert actual.first() == document_
 
-    def test_with_no_existing_documents(self):
+    def test_with_no_existing_documents(self, db_session):
         """When there are no matching Documents it creates and returns one."""
         document_ = document.Document()
         docuri = document.DocumentURI(
@@ -135,11 +134,11 @@ class TestDocumentFindOrCreateByURIs(object):
             uri='https://en.wikipedia.org/wiki/Main_Page',
             document=document_)
 
-        db.Session.add(docuri)
-        db.Session.flush()
+        db_session.add(docuri)
+        db_session.flush()
 
         documents = document.Document.find_or_create_by_uris(
-            db.Session,
+            db_session,
             'https://en.wikipedia.org/wiki/Pluto',
             ['https://m.en.wikipedia.org/wiki/Pluto'])
 
@@ -160,7 +159,7 @@ class TestDocumentFindOrCreateByURIs(object):
 )
 class TestCreateOrUpdateDocumentURI(object):
 
-    def test_it_updates_the_existing_DocumentURI_if_there_is_one(self):
+    def test_it_updates_the_existing_DocumentURI_if_there_is_one(self, db_session):
         claimant = 'http://example.com/example_claimant.html'
         uri = 'http://example.com/example_uri.html'
         type_ = 'self-claim'
@@ -177,11 +176,11 @@ class TestCreateOrUpdateDocumentURI(object):
             created=created,
             updated=updated,
         )
-        db.Session.add(document_uri)
+        db_session.add(document_uri)
 
         now_ = now()
         document.create_or_update_document_uri(
-            session=db.Session,
+            session=db_session,
             claimant=claimant,
             uri=uri,
             type=type_,
@@ -193,10 +192,10 @@ class TestCreateOrUpdateDocumentURI(object):
 
         assert document_uri.created == created
         assert document_uri.updated == now_
-        assert len(db.Session.query(document.DocumentURI).all()) == 1, (
+        assert len(db_session.query(document.DocumentURI).all()) == 1, (
             "It shouldn't have added any new objects to the db")
 
-    def test_it_creates_a_new_DocumentURI_if_there_is_no_existing_one(self):
+    def test_it_creates_a_new_DocumentURI_if_there_is_no_existing_one(self, db_session):
         claimant = 'http://example.com/example_claimant.html'
         uri = 'http://example.com/example_uri.html'
         type_ = 'self-claim'
@@ -206,7 +205,7 @@ class TestCreateOrUpdateDocumentURI(object):
         updated = yesterday()
 
         # Add one non-matching DocumentURI to the database.
-        db.Session.add(document.DocumentURI(
+        db_session.add(document.DocumentURI(
             claimant=claimant,
             uri=uri,
             type=type_,
@@ -219,7 +218,7 @@ class TestCreateOrUpdateDocumentURI(object):
         ))
 
         document.create_or_update_document_uri(
-            session=db.Session,
+            session=db_session,
             claimant=claimant,
             uri=uri,
             type=type_,
@@ -229,7 +228,7 @@ class TestCreateOrUpdateDocumentURI(object):
             updated=now(),
         )
 
-        document_uri = db.Session.query(document.DocumentURI).all()[-1]
+        document_uri = db_session.query(document.DocumentURI).all()[-1]
         assert document_uri.claimant == claimant
         assert document_uri.uri == uri
         assert document_uri.type == type_
@@ -270,7 +269,7 @@ class TestCreateOrUpdateDocumentURI(object):
 
 class TestCreateOrUpdateDocumentMeta(object):
 
-    def test_it_creates_a_new_DocumentMeta_if_there_is_no_existing_one(self):
+    def test_it_creates_a_new_DocumentMeta_if_there_is_no_existing_one(self, db_session):
         claimant = 'http://example.com/claimant'
         type_ = 'title'
         value = 'the title'
@@ -280,7 +279,7 @@ class TestCreateOrUpdateDocumentMeta(object):
 
         # Add one non-matching DocumentMeta to the database.
         # This should be ignored.
-        db.Session.add(document.DocumentMeta(
+        db_session.add(document.DocumentMeta(
             claimant=claimant,
             # Different type means this should not match the query.
             type='different',
@@ -291,7 +290,7 @@ class TestCreateOrUpdateDocumentMeta(object):
         ))
 
         document.create_or_update_document_meta(
-            session=db.Session,
+            session=db_session,
             claimant=claimant,
             type=type_,
             value=value,
@@ -300,7 +299,7 @@ class TestCreateOrUpdateDocumentMeta(object):
             updated=updated,
         )
 
-        document_meta = db.Session.query(document.DocumentMeta).all()[-1]
+        document_meta = db_session.query(document.DocumentMeta).all()[-1]
         assert document_meta.claimant == claimant
         assert document_meta.type == type_
         assert document_meta.value == value
@@ -308,7 +307,7 @@ class TestCreateOrUpdateDocumentMeta(object):
         assert document_meta.created == created
         assert document_meta.updated == updated
 
-    def test_it_updates_an_existing_DocumentMeta_if_there_is_one(self):
+    def test_it_updates_an_existing_DocumentMeta_if_there_is_one(self, db_session):
         claimant = 'http://example.com/claimant'
         type_ = 'title'
         value = 'the title'
@@ -323,11 +322,11 @@ class TestCreateOrUpdateDocumentMeta(object):
             created=created,
             updated=updated,
         )
-        db.Session.add(document_meta)
+        db_session.add(document_meta)
 
         new_updated = now()
         document.create_or_update_document_meta(
-            session=db.Session,
+            session=db_session,
             claimant=claimant,
             type=type_,
             value='new value',
@@ -341,7 +340,7 @@ class TestCreateOrUpdateDocumentMeta(object):
         assert document_meta.created == created, "It shouldn't update created"
         assert document_meta.document == document_, (
             "It shouldn't update document")
-        assert len(db.Session.query(document.DocumentMeta).all()) == 1, (
+        assert len(db_session.query(document.DocumentMeta).all()) == 1, (
             "It shouldn't have added any new objects to the db")
 
     def test_it_logs_a_warning(self, DocumentMeta, log):
@@ -378,41 +377,41 @@ class TestCreateOrUpdateDocumentMeta(object):
 @pytest.mark.usefixtures('merge_data')
 class TestMergeDocuments(object):
 
-    def test_merge_documents_returns_master(self, merge_data):
+    def test_merge_documents_returns_master(self, db_session, merge_data):
         master, _ = merge_data
 
-        merged_master = document.merge_documents(db.Session, merge_data)
+        merged_master = document.merge_documents(db_session, merge_data)
 
         assert merged_master == master
 
-    def test_merge_documents_deletes_duplicate_documents(self, merge_data):
+    def test_merge_documents_deletes_duplicate_documents(self, db_session, merge_data):
         _, duplicate = merge_data
 
-        document.merge_documents(db.Session, merge_data)
-        db.Session.flush()
+        document.merge_documents(db_session, merge_data)
+        db_session.flush()
 
         assert document.Document.query.get(duplicate.id) is None
 
-    def test_merge_documents_rewires_document_uris(self, merge_data):
+    def test_merge_documents_rewires_document_uris(self, db_session, merge_data):
         master, duplicate = merge_data
 
-        document.merge_documents(db.Session, merge_data)
-        db.Session.flush()
+        document.merge_documents(db_session, merge_data)
+        db_session.flush()
 
         assert len(master.document_uris) == 2
         assert len(duplicate.document_uris) == 0
 
-    def test_merge_documents_rewires_document_meta(self, merge_data):
+    def test_merge_documents_rewires_document_meta(self, db_session, merge_data):
         master, duplicate = merge_data
 
-        document.merge_documents(db.Session, merge_data)
-        db.Session.flush()
+        document.merge_documents(db_session, merge_data)
+        db_session.flush()
 
         assert len(master.meta) == 2
         assert len(duplicate.meta) == 0
 
     @pytest.fixture
-    def merge_data(self, request):
+    def merge_data(self, db_session, request):
         master = document.Document(document_uris=[document.DocumentURI(
                 claimant='https://en.wikipedia.org/wiki/Main_Page',
                 uri='https://en.wikipedia.org/wiki/Main_Page',
@@ -430,8 +429,8 @@ class TestMergeDocuments(object):
                     type='title',
                     value='Wikipedia, the free encyclopedia')])
 
-        db.Session.add_all([master, duplicate])
-        db.Session.flush()
+        db_session.add_all([master, duplicate])
+        db_session.flush()
         return (master, duplicate)
 
 
@@ -628,8 +627,8 @@ class TestUpdateDocumentMetadata(object):
         return patch('h.api.models.document.merge_documents')
 
     @pytest.fixture
-    def session(self):
-        return mock.Mock(spec=db.Session)
+    def session(self, db_session):
+        return mock.Mock(spec=db_session)
 
 
 def now():

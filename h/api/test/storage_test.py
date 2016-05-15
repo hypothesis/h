@@ -8,7 +8,6 @@ import pytest
 import mock
 from pyramid.testing import DummyRequest
 
-from h import db
 from h.api import storage
 from h.api import schemas
 from h.api.models.annotation import Annotation
@@ -26,24 +25,24 @@ class TestFetchAnnotation(object):
         models.elastic.Annotation.fetch.assert_called_once_with('123')
         assert models.elastic.Annotation.fetch.return_value == actual
 
-    def test_postgres(self, postgres_enabled):
-        request = DummyRequest(db=db.Session)
+    def test_postgres(self, db_session, postgres_enabled):
+        request = DummyRequest(db=db_session)
         postgres_enabled.return_value = True
 
         annotation = Annotation(userid='luke')
-        db.Session.add(annotation)
-        db.Session.flush()
+        db_session.add(annotation)
+        db_session.flush()
 
         actual = storage.fetch_annotation(request, annotation.id)
         assert annotation == actual
 
-    def test_it_uses_postgres_if_postgres_arg_is_True(self, postgres_enabled):
+    def test_it_uses_postgres_if_postgres_arg_is_True(self, db_session, postgres_enabled):
         """If postgres=True it uses postgres even if feature flag is off."""
-        request = DummyRequest(db=db.Session)
+        request = DummyRequest(db=db_session)
         postgres_enabled.return_value = False  # The feature flag is off.
         annotation = Annotation(userid='luke')
-        db.Session.add(annotation)
-        db.Session.flush()
+        db_session.add(annotation)
+        db_session.flush()
 
         actual = storage.fetch_annotation(
             request, annotation.id, _postgres=True)
@@ -63,8 +62,8 @@ class TestFetchAnnotation(object):
         models.elastic.Annotation.fetch.assert_called_once_with('123')
         assert models.elastic.Annotation.fetch.return_value == actual
 
-    def test_it_does_not_crash_if_id_is_invalid(self):
-        request = DummyRequest(db=db.Session)
+    def test_it_does_not_crash_if_id_is_invalid(self, db_session):
+        request = DummyRequest(db=db_session)
         postgres_enabled.return_value = True
 
         assert storage.fetch_annotation(request, 'foo', _postgres=True) is None
@@ -72,8 +71,8 @@ class TestFetchAnnotation(object):
 
 class TestExpandURI(object):
 
-    def test_expand_uri_postgres_no_document(self, postgres_enabled):
-        request = DummyRequest(db=db.Session)
+    def test_expand_uri_postgres_no_document(self, db_session, postgres_enabled):
+        request = DummyRequest(db=db_session)
         postgres_enabled.return_value = True
 
         actual = storage.expand_uri(request, 'http://example.com/')
@@ -88,8 +87,9 @@ class TestExpandURI(object):
 
     def test_expand_uri_postgres_document_doesnt_expand_canonical_uris(
             self,
+            db_session,
             postgres_enabled):
-        request = DummyRequest(db=db.Session)
+        request = DummyRequest(db=db_session)
         postgres_enabled.return_value = True
 
         document = Document(document_uris=[
@@ -98,8 +98,8 @@ class TestExpandURI(object):
             DocumentURI(uri='http://example.com/', type='rel-canonical',
                         claimant='http://example.com'),
         ])
-        db.Session.add(document)
-        db.Session.flush()
+        db_session.add(document)
+        db_session.flush()
 
         assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
@@ -121,16 +121,16 @@ class TestExpandURI(object):
         assert storage.expand_uri(request, "http://example.com/") == [
             "http://example.com/"]
 
-    def test_expand_uri_postgres_document_uris(self, postgres_enabled):
-        request = DummyRequest(db=db.Session)
+    def test_expand_uri_postgres_document_uris(self, db_session, postgres_enabled):
+        request = DummyRequest(db=db_session)
         postgres_enabled.return_value = True
 
         document = Document(document_uris=[
             DocumentURI(uri='http://foo.com/', claimant='http://bar.com'),
             DocumentURI(uri='http://bar.com/', claimant='http://bar.com'),
         ])
-        db.Session.add(document)
-        db.Session.flush()
+        db_session.add(document)
+        db_session.flush()
 
         assert storage.expand_uri(request, 'http://foo.com/') == [
             'http://foo.com/',
@@ -627,17 +627,14 @@ class TestDeleteAnnotationLegacy(object):
 @pytest.mark.usefixtures('fetch_annotation')
 class TestDeleteAnnotation(object):
 
-    def test_it_fetches_the_annotation(self, fetch_annotation):
-        request = self.mock_request()
+    def test_it_fetches_the_annotation(self, fetch_annotation, mock_request):
+        storage.delete_annotation(mock_request, "test_id")
 
-        storage.delete_annotation(request, "test_id")
-
-        assert fetch_annotation.call_args_list[0] == mock.call(request,
+        assert fetch_annotation.call_args_list[0] == mock.call(mock_request,
                                                                "test_id",
                                                                _postgres=True)
 
-    def test_it_deletes_the_annotation(self, fetch_annotation):
-        request = self.mock_request()
+    def test_it_deletes_the_annotation(self, fetch_annotation, mock_request):
         first_return_value = mock.Mock()
         second_return_value = mock.Mock()
         fetch_annotation.side_effect = [
@@ -645,20 +642,18 @@ class TestDeleteAnnotation(object):
             second_return_value,
         ]
 
-        storage.delete_annotation(request, "test_id")
+        storage.delete_annotation(mock_request, "test_id")
 
-        request.db.delete.assert_called_once_with(first_return_value)
+        mock_request.db.delete.assert_called_once_with(first_return_value)
 
-    def test_it_fetches_the_legacy_annotation(self, fetch_annotation):
-        request = self.mock_request()
+    def test_it_fetches_the_legacy_annotation(self, fetch_annotation, mock_request):
+        storage.delete_annotation(mock_request, "test_id")
 
-        storage.delete_annotation(request, "test_id")
-
-        assert fetch_annotation.call_args == mock.call(request,
+        assert fetch_annotation.call_args == mock.call(mock_request,
                                                        "test_id",
                                                        _postgres=False)
 
-    def test_it_deletes_the_legacy_annotation(self, fetch_annotation):
+    def test_it_deletes_the_legacy_annotation(self, fetch_annotation, mock_request):
         first_return_value = mock.Mock()
         second_return_value = mock.Mock()
         fetch_annotation.side_effect = [
@@ -666,14 +661,15 @@ class TestDeleteAnnotation(object):
             second_return_value,
         ]
 
-        storage.delete_annotation(self.mock_request(), "test_id")
+        storage.delete_annotation(mock_request, "test_id")
 
         second_return_value.delete.assert_called_once_with()
 
-    def mock_request(self):
+    @pytest.fixture
+    def mock_request(self, session):
         request = DummyRequest()
         request.feature = mock.Mock(return_value=True)
-        request.db = session()
+        request.db = session
         return request
 
 
@@ -705,8 +701,8 @@ def postgres_enabled(patch):
 
 
 @pytest.fixture
-def session():
-    session = mock.Mock(spec=db.Session)
+def session(db_session):
+    session = mock.Mock(spec=db_session)
     session.query.return_value.get.return_value.extra = {}
     return session
 

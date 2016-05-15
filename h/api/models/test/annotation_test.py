@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from pyramid import security
 import pytest
 
-from h import db
 from h.api.models.annotation import Annotation
 from h.api.models.document import Document, DocumentURI
 
@@ -14,21 +13,21 @@ annotation_fixture = pytest.mark.usefixtures('annotation')
 
 
 @annotation_fixture
-def test_document(annotation):
+def test_document(annotation, db_session):
     document = Document(document_uris=[DocumentURI(claimant=annotation.target_uri,
                                                    uri=annotation.target_uri)])
-    db.Session.add(document)
-    db.Session.flush()
+    db_session.add(document)
+    db_session.flush()
 
     assert annotation.document == document
 
 
 @annotation_fixture
-def test_document_not_found(annotation):
+def test_document_not_found(annotation, db_session):
     document = Document(document_uris=[DocumentURI(claimant='something-else',
                                                    uri='something-else')])
-    db.Session.add(document)
-    db.Session.flush()
+    db_session.add(document)
+    db_session.flush()
 
     assert annotation.document is None
 
@@ -85,9 +84,9 @@ def test_acl_group_shared():
 
 
 @pytest.fixture
-def annotation():
+def annotation(db_session):
     ann = Annotation(userid="testuser", target_uri="http://example.com")
 
-    db.Session.add(ann)
-    db.Session.flush()
+    db_session.add(ann)
+    db_session.flush()
     return ann
