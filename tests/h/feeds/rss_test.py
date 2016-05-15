@@ -2,8 +2,9 @@ import datetime
 
 import mock
 
-from h.test import factories
 from h.feeds import rss
+
+from ... import factories
 
 
 def _annotation_url():

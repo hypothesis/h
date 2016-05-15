@@ -8,10 +8,10 @@ import deform
 from pyramid import httpexceptions
 from pyramid import testing
 
-from h import conftest
-
 from h import accounts
 from h.accounts import views
+
+from .. import conftest
 
 
 class DummyRequest(testing.DummyRequest):

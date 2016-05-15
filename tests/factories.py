@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """Factory classes for easily generating test objects."""
+
+from __future__ import absolute_import
+
 import random
 import datetime
 

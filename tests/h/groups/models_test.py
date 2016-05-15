@@ -3,7 +3,8 @@ import pytest
 
 from h import db
 from h.groups import models
-from h.test import factories
+
+from ... import factories
 
 
 def test_init():

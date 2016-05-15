@@ -4,7 +4,8 @@
 import mock
 
 from h.feeds import atom
-from h.test import factories
+
+from ... import factories
 
 
 def test_feed_id():

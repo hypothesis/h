@@ -3,7 +3,7 @@
 """Unit tests for h/test/factories.py."""
 import datetime
 
-import h.test.factories as factories
+from .. import factories
 
 
 class TestAnnotation(object):
