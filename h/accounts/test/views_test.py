@@ -83,25 +83,25 @@ def mock_flash_function():
 @pytest.mark.usefixtures('routes')
 class TestAuthController(object):
 
-    def test_post_redirects_when_logged_in(self, authn_policy):
+    def test_post_redirects_when_logged_in(self, config):
         request = DummyRequest()
-        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+        config.testing_securitypolicy("acct:jane@doe.org")
 
         with pytest.raises(httpexceptions.HTTPFound):
             views.AuthController(request).post()
 
-    def test_post_redirects_to_next_param_when_logged_in(self, authn_policy):
+    def test_post_redirects_to_next_param_when_logged_in(self, config):
         request = DummyRequest(params={'next': '/foo/bar'})
-        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+        config.testing_securitypolicy("acct:jane@doe.org")
 
         with pytest.raises(httpexceptions.HTTPFound) as e:
             views.AuthController(request).post()
 
         assert e.value.location == '/foo/bar'
 
-    def test_post_returns_form_when_validation_fails(self, authn_policy):
+    def test_post_returns_form_when_validation_fails(self, config):
         request = DummyRequest()
-        authn_policy.authenticated_userid.return_value = None  # Logged out
+        config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(request)
         controller.form = invalid_form()
 
@@ -112,10 +112,10 @@ class TestAuthController(object):
     @mock.patch('h.accounts.views.LoginEvent', autospec=True)
     def test_post_no_event_when_validation_fails(self,
                                                  loginevent,
-                                                 authn_policy,
+                                                 config,
                                                  notify):
         request = DummyRequest()
-        authn_policy.authenticated_userid.return_value = None  # Logged out
+        config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(request)
         controller.form = invalid_form()
 
@@ -124,9 +124,9 @@ class TestAuthController(object):
         assert not loginevent.called
         assert not notify.called
 
-    def test_post_redirects_when_validation_succeeds(self, authn_policy):
+    def test_post_redirects_when_validation_succeeds(self, config):
         request = DummyRequest(auth_domain='hypothes.is')
-        authn_policy.authenticated_userid.return_value = None  # Logged out
+        config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(request)
         controller.form = form_validating_to(
             {"user": FakeUser(username='cara')})
@@ -137,10 +137,10 @@ class TestAuthController(object):
 
     def test_post_redirects_to_next_param_when_validation_succeeds(
             self,
-            authn_policy):
+            config):
         request = DummyRequest(
             params={'next': '/foo/bar'}, auth_domain='hypothes.is')
-        authn_policy.authenticated_userid.return_value = None  # Logged out
+        config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(request)
         controller.form = form_validating_to(
             {"user": FakeUser(username='cara')})
@@ -153,10 +153,10 @@ class TestAuthController(object):
     @mock.patch('h.accounts.views.LoginEvent', autospec=True)
     def test_post_event_when_validation_succeeds(self,
                                                  loginevent,
-                                                 authn_policy,
+                                                 config,
                                                  notify):
         request = DummyRequest(auth_domain='hypothes.is')
-        authn_policy.authenticated_userid.return_value = None  # Logged out
+        config.testing_securitypolicy(None)  # Logged out
         elephant = FakeUser(username='avocado')
         controller = views.AuthController(request)
         controller.form = form_validating_to({"user": elephant})
@@ -167,19 +167,19 @@ class TestAuthController(object):
         notify.assert_called_with(loginevent.return_value)
 
     @mock.patch('h.accounts.views.LogoutEvent', autospec=True)
-    def test_logout_event(self, logoutevent, authn_policy, notify):
+    def test_logout_event(self, logoutevent, config, notify):
         request = DummyRequest()
-        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+        config.testing_securitypolicy("acct:jane@doe.org")
 
         views.AuthController(request).logout()
 
         logoutevent.assert_called_with(request)
         notify.assert_called_with(logoutevent.return_value)
 
-    def test_logout_invalidates_session(self, authn_policy):
+    def test_logout_invalidates_session(self, config):
         request = DummyRequest()
         request.session["foo"] = "bar"
-        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+        config.testing_securitypolicy("acct:jane@doe.org")
 
         views.AuthController(request).logout()
 
@@ -192,17 +192,11 @@ class TestAuthController(object):
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
-    def test_logout_forgets_authenticated_user(self, authn_policy):
+    def test_logout_response_has_forget_headers(self, config):
         request = DummyRequest()
-
-        views.AuthController(request).logout()
-
-        authn_policy.forget.assert_called_with(request)
-
-    def test_logout_response_has_forget_headers(self, authn_policy):
-        request = DummyRequest()
-        authn_policy.forget.return_value = {
-            'x-erase-fingerprints': 'on the hob'}
+        config.testing_securitypolicy(forget_result={
+            'x-erase-fingerprints': 'on the hob'
+        })
 
         result = views.AuthController(request).logout()
 
@@ -307,7 +301,7 @@ class TestAjaxAuthController(object):
 
 
 @pytest.mark.usefixtures('activation_model',
-                         'authn_policy',
+                         'config',
                          'mailer',
                          'routes')
 class TestForgotPasswordController(object):
@@ -396,9 +390,9 @@ class TestForgotPasswordController(object):
 
         assert isinstance(result, httpexceptions.HTTPRedirection)
 
-    def test_get_redirects_when_logged_in(self, authn_policy):
+    def test_get_redirects_when_logged_in(self, config):
         request = DummyRequest(method='POST')
-        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+        config.testing_securitypolicy("acct:jane@doe.org")
 
         with pytest.raises(httpexceptions.HTTPFound):
             views.ForgotPasswordController(request).get()
@@ -466,7 +460,7 @@ class TestResetPasswordController(object):
 
 
 @pytest.mark.usefixtures('activation_model',
-                         'authn_policy',
+                         'config',
                          'mailer',
                          'notify',
                          'routes',
@@ -611,9 +605,9 @@ class TestRegisterController(object):
 
         assert isinstance(result, httpexceptions.HTTPRedirection)
 
-    def test_get_redirects_when_logged_in(self, authn_policy):
+    def test_get_redirects_when_logged_in(self, config):
         request = DummyRequest()
-        authn_policy.authenticated_userid.return_value = "acct:jane@doe.org"
+        config.testing_securitypolicy("acct:jane@doe.org")
         controller = views.RegisterController(request)
 
         with pytest.raises(httpexceptions.HTTPRedirection):
@@ -909,16 +903,16 @@ class TestProfileController(object):
 
 
 
-@pytest.mark.usefixtures('authn_policy',
+@pytest.mark.usefixtures('config',
                          'routes',
                          'subscriptions_model')
 class TestNotificationsController(object):
 
     def test_get_sets_subscriptions_data_in_form(self,
-                                                 authn_policy,
+                                                 config,
                                                  subscriptions_model):
         request = DummyRequest()
-        authn_policy.authenticated_userid.return_value = 'fiona'
+        config.testing_securitypolicy('fiona')
         subscriptions_model.get_subscriptions_for_uri.return_value = [
             FakeSubscription('reply', True),
             FakeSubscription('foo', False),
@@ -932,9 +926,9 @@ class TestNotificationsController(object):
             'notifications': set(['reply']),
         })
 
-    def test_post_with_invalid_data_returns_form(self, authn_policy):
+    def test_post_with_invalid_data_returns_form(self, config):
         request = DummyRequest(post={})
-        authn_policy.authenticated_userid.return_value = 'jerry'
+        config.testing_securitypolicy('jerry')
         controller = views.NotificationsController(request)
         controller.form = invalid_form()
 
@@ -943,10 +937,10 @@ class TestNotificationsController(object):
         assert 'form' in result
 
     def test_post_with_valid_data_updates_subscriptions(self,
-                                                        authn_policy,
+                                                        config,
                                                         subscriptions_model):
         request = DummyRequest(post={})
-        authn_policy.authenticated_userid.return_value = 'fiona'
+        config.testing_securitypolicy('fiona')
         subs = [
             FakeSubscription('reply', True),
             FakeSubscription('foo', False),
@@ -963,10 +957,10 @@ class TestNotificationsController(object):
         assert subs[1].active is True
 
     def test_post_with_valid_data_redirects(self,
-                                            authn_policy,
+                                            config,
                                             subscriptions_model):
         request = DummyRequest(post={})
-        authn_policy.authenticated_userid.return_value = 'fiona'
+        config.testing_securitypolicy('fiona')
         subscriptions_model.get_subscriptions_for_uri.return_value = []
         controller = views.NotificationsController(request)
         controller.form = form_validating_to({})

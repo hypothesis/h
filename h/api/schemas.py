@@ -256,7 +256,7 @@ class LegacyCreateAnnotationSchema(object):
         # group they've asked to create one in.
         if 'group' in appstruct:
             if appstruct['group'] == '__world__':
-                group_principal = security.Everyone
+                group_principal = security.Authenticated
             else:
                 group_principal = 'group:{}'.format(appstruct['group'])
             if group_principal not in self.request.effective_principals:

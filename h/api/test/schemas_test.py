@@ -415,34 +415,34 @@ class TestLegacyCreateAnnotationSchema(object):
         {'user': None},
         {'user': 'acct:foo@bar.com'},
     ])
-    def test_it_ignores_input_user(self, data, authn_policy, mock_request):
+    def test_it_ignores_input_user(self, data, config, mock_request):
         """Any user field sent in the payload should be ignored."""
-        authn_policy.authenticated_userid.return_value = (
-            'acct:jeanie@example.com')
+        config.testing_securitypolicy(userid='acct:jeanie@example.com')
         schema = schemas.LegacyCreateAnnotationSchema(mock_request)
 
         appstruct = schema.validate(data)
 
         assert appstruct['user'] == 'acct:jeanie@example.com'
 
-    @pytest.mark.parametrize('data,effective_principals,ok', [
+    @pytest.mark.parametrize('data,userid,groupids,ok', [
         # No group supplied
-        ({}, [], True),
+        ({}, None, [], True),
 
         # World group
-        ({'group': '__world__'}, [], False),
-        ({'group': '__world__'}, [security.Everyone], True),
+        ({'group': '__world__'}, None, [], False),
+        ({'group': '__world__'}, 'acct:foo@example.com', [], True),
 
         # Other group
-        ({'group': 'abcdef'}, [], False),
-        ({'group': 'abcdef'}, [security.Everyone], False),
-        ({'group': 'abcdef'}, [security.Everyone, 'group:abcdef'], True),
+        ({'group': 'abcdef'}, None, [], False),
+        ({'group': 'abcdef'}, 'acct:foo@example.com', [], False),
+        ({'group': 'abcdef'}, 'acct:foo@example.com', ['group:abcdef'], True),
     ])
     def test_it_rejects_annotations_to_other_groups(self,
                                                     data,
-                                                    effective_principals,
+                                                    userid,
+                                                    groupids,
                                                     ok,
-                                                    authn_policy,
+                                                    config,
                                                     mock_request):
         """
         A user cannot create an annotation in a group they're not a member of.
@@ -451,7 +451,7 @@ class TestLegacyCreateAnnotationSchema(object):
         the relevant group principal is not present in the request's effective
         principals.
         """
-        authn_policy.effective_principals.return_value = effective_principals
+        config.testing_securitypolicy(userid, groupids)
         schema = schemas.LegacyCreateAnnotationSchema(mock_request)
 
         if ok:
@@ -507,9 +507,8 @@ class TestCreateAnnotationSchema(object):
 
         assert exc.value.message == "uri: 'uri' is a required property"
 
-    def test_it_sets_userid(self, authn_policy):
-        authn_policy.authenticated_userid.return_value = (
-            'acct:harriet@example.com')
+    def test_it_sets_userid(self, config):
+        config.testing_securitypolicy('acct:harriet@example.com')
         schema = schemas.CreateAnnotationSchema(testing.DummyRequest())
 
         appstruct = schema.validate(self.valid_data())
@@ -644,10 +643,9 @@ class TestLegacyUpdateAnnotationSchema(object):
 
         assert field not in appstruct
 
-    def test_it_allows_permissions_changes_if_admin(self, authn_policy):
+    def test_it_allows_permissions_changes_if_admin(self, config):
         """If a user is an admin on an annotation, they can change perms."""
-        authn_policy.authenticated_userid.return_value = (
-            'acct:harriet@example.com')
+        config.testing_securitypolicy('acct:harriet@example.com')
         request = testing.DummyRequest()
         annotation = {
             'permissions': {'admin': ['acct:harriet@example.com']}
@@ -670,10 +668,9 @@ class TestLegacyUpdateAnnotationSchema(object):
     ])
     def test_it_denies_permissions_changes_if_not_admin(self,
                                                         annotation,
-                                                        authn_policy):
+                                                        config):
         """If a user isn't admin on an annotation they can't change perms."""
-        authn_policy.authenticated_userid.return_value = (
-            'acct:mallory@example.com')
+        config.testing_securitypolicy('acct:mallory@example.com')
         request = testing.DummyRequest()
         schema = schemas.LegacyUpdateAnnotationSchema(request, annotation)
         data = {

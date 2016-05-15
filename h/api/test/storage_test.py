@@ -306,7 +306,7 @@ class TestLegacyUpdateAnnotation(object):
 class TestCreateAnnotation(object):
 
     def test_it_fetches_parent_annotation_for_replies(self,
-                                                      authn_policy,
+                                                      config,
                                                       fetch_annotation):
         request = self.mock_request()
 
@@ -314,7 +314,7 @@ class TestCreateAnnotation(object):
         fetch_annotation.return_value.groupid = 'test-group'
 
         # The request will need permission to write to 'test-group'.
-        authn_policy.effective_principals.return_value = ['group:test-group']
+        config.testing_securitypolicy('acct:foo@example.com', groupids=['group:test-group'])
 
         data = self.annotation_data()
 
@@ -328,14 +328,14 @@ class TestCreateAnnotation(object):
                                                  _postgres=True)
 
     def test_it_sets_group_for_replies(self,
-                                       authn_policy,
+                                       config,
                                        fetch_annotation,
                                        models):
         # Make the annotation's parent belong to 'test-group'.
         fetch_annotation.return_value.groupid = 'test-group'
 
         # The request will need permission to write to 'test-group'.
-        authn_policy.effective_principals.return_value = ['group:test-group']
+        config.testing_securitypolicy('acct:foo@example.com', groupids=['group:test-group'])
 
         data = self.annotation_data()
         assert data['groupid'] != 'test-group'

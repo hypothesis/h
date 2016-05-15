@@ -147,10 +147,10 @@ authenticated_user_fixtures = pytest.mark.usefixtures('get_user')
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_calls_get_user(authn_policy, get_user):
+def test_authenticated_user_calls_get_user(config, get_user):
     """It should call get_user() correctly."""
     request = testing.DummyRequest()
-    authn_policy.authenticated_userid.return_value = 'userid'
+    config.testing_securitypolicy('userid')
 
     accounts.authenticated_user(request)
 
@@ -158,13 +158,12 @@ def test_authenticated_user_calls_get_user(authn_policy, get_user):
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_invalidates_session_if_user_does_not_exist(
-        authn_policy, get_user):
+def test_authenticated_user_invalidates_session_if_user_does_not_exist(config, get_user):
     """It should log the user out if they no longer exist in the db."""
     request = testing.DummyRequest()
     request.current_route_url = lambda: '/'
     request.session.invalidate = mock.Mock()
-    authn_policy.authenticated_userid.return_value = 'userid'
+    config.testing_securitypolicy('userid')
     get_user.return_value = None
 
     try:
@@ -176,8 +175,7 @@ def test_authenticated_user_invalidates_session_if_user_does_not_exist(
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_does_not_invalidate_session_if_not_authenticated(
-        authn_policy, get_user):
+def test_authenticated_user_does_not_invalidate_session_if_not_authenticated(config, get_user):
     """
     If authenticated_userid is None it shouldn't invalidate the session.
 
@@ -189,7 +187,7 @@ def test_authenticated_user_does_not_invalidate_session_if_not_authenticated(
     request = testing.DummyRequest()
     request.current_route_url = lambda: '/'
     request.session.invalidate = mock.Mock()
-    authn_policy.authenticated_userid.return_value = None
+    config.testing_securitypolicy()
     get_user.return_value = None
 
     accounts.authenticated_user(request)
@@ -198,11 +196,10 @@ def test_authenticated_user_does_not_invalidate_session_if_not_authenticated(
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_redirects_if_user_does_not_exist(
-        authn_policy, get_user):
+def test_authenticated_user_redirects_if_user_does_not_exist(config, get_user):
     request = testing.DummyRequest()
     request.current_route_url = lambda: '/the/page/that/I/was/on'
-    authn_policy.authenticated_userid.return_value = 'userid'
+    config.testing_securitypolicy('userid')
     get_user.return_value = None
 
     with pytest.raises(httpexceptions.HTTPFound) as exc:

@@ -5,7 +5,6 @@ The `conftest` module is automatically loaded by py.test and serves as a place
 to put fixture functions that are useful application-wide.
 """
 
-import collections
 import functools
 import os
 
@@ -120,22 +119,6 @@ def config(request, settings):
 def deform():
     """Allow tests that use deform to find our custom templates."""
     form.init()
-
-
-@pytest.fixture
-def authn_policy(config):
-    from mock import MagicMock
-
-    class DummyAuthorizationPolicy(object):
-        def permits(self, *args, **kwargs):
-            return True
-
-    config.set_authorization_policy(DummyAuthorizationPolicy())
-    policy = MagicMock()
-    policy.authenticated_userid.return_value = None
-    policy.unauthenticated_userid.return_value = None
-    config.set_authentication_policy(policy)
-    return policy
 
 
 @pytest.fixture
