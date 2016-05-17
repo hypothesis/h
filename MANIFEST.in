@@ -1,4 +1,4 @@
-include Makefile AUTHORS CHANGES LICENSE NOTICE
+include Makefile AUTHORS CHANGES CODE_OF_CONDUCT LICENSE NOTICE
 include *.rst
 include Dockerfile
 include gulpfile.js
