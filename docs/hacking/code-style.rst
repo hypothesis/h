@@ -36,9 +36,7 @@ you can use the YAPF_ tool::
 JavaScript
 ----------
 
-Generally, no semi-colons are used. This may change. If you're
-starting a new file, do what you like. Like with Python, please follow
-the `Google JavaScript Style Guide`_. Additionally, Python-like
+Like with Python, please follow the `Google JavaScript Style Guide`_. Additionally, Python-like
 spacing is followed for blank lines.
 
 .. _Google JavaScript Style Guide: https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
