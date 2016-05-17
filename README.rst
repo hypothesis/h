@@ -61,6 +61,9 @@ getting started on one of the issues that are ready for work. Issues tagged with
 the label '`New Contributor Friendly`_' are ideal for those just getting
 started.
 
+Please note that this project is released with a Contributor Code of Conduct.
+By participating in this project you agree to abide by its terms.
+
 .. _#hypothes.is: https://www.irccloud.com/invite?channel=%23hypothes.is&amp;hostname=irc.freenode.net&amp;port=6667&amp;ssl=1
 .. _freenode: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
