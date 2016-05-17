@@ -118,7 +118,7 @@ class TestSearch(object):
         return patch('h.api.views.search_lib')
 
 
-@pytest.mark.usefixtures('AnnotationEvent',
+@pytest.mark.usefixtures('AnnotationEventTest',
                          'AnnotationJSONPresenter',
                          'schemas',
                          'storage')
@@ -164,11 +164,12 @@ class TestCreateLegacy(object):
             mock_request, storage.legacy_create_annotation.return_value)
 
     def test_it_publishes_annotation_event(self,
-                                           AnnotationEvent,
+                                           AnnotationEventTest,
                                            AnnotationJSONPresenter,
                                            mock_request,
                                            storage):
         """It publishes an annotation "create" event for the annotation."""
+        # Testing
         views.create(mock_request)
 
         annotation = storage.legacy_create_annotation.return_value
@@ -177,12 +178,12 @@ class TestCreateLegacy(object):
                                                         annotation)
         presented = AnnotationJSONPresenter.return_value.asdict()
 
-        AnnotationEvent.assert_called_once_with(
+        AnnotationEventTest.assert_called_once_with(
             mock_request,
             presented,
             'create')
         mock_request.notify_after_commit.assert_called_once_with(
-            AnnotationEvent.return_value)
+            AnnotationEventTest.return_value)
 
     def test_it_returns_presented_annotation(self,
                                              AnnotationJSONPresenter,
@@ -201,7 +202,7 @@ class TestCreateLegacy(object):
         return mock.Mock(feature=mock.Mock(return_value=False))
 
 
-@pytest.mark.usefixtures('AnnotationEvent',
+@pytest.mark.usefixtures('AnnotationEventTest',
                          'AnnotationJSONPresenter',
                          'schemas',
                          'storage')
@@ -322,7 +323,7 @@ class TestCreate(object):
             mock_request, storage.create_annotation.return_value)
 
     def test_it_publishes_annotation_event(self,
-                                           AnnotationEvent,
+                                           AnnotationEventTest,
                                            AnnotationJSONPresenter,
                                            mock_request,
                                            storage):
@@ -335,12 +336,12 @@ class TestCreate(object):
                                                         annotation)
         presented = AnnotationJSONPresenter.return_value.asdict()
 
-        AnnotationEvent.assert_called_once_with(
+        AnnotationEventTest.assert_called_once_with(
             mock_request,
             presented,
             'create')
         mock_request.notify_after_commit.assert_called_once_with(
-            AnnotationEvent.return_value)
+            AnnotationEventTest.return_value)
 
     def test_it_returns_presented_annotation(self,
                                              AnnotationJSONPresenter,
@@ -430,7 +431,7 @@ class TestReadJSONLD(object):
         return patch('h.api.views.AnnotationJSONLDPresenter')
 
 
-@pytest.mark.usefixtures('AnnotationEvent',
+@pytest.mark.usefixtures('AnnotationEventTest',
                          'AnnotationJSONPresenter',
                          'schemas',
                          'storage')
@@ -502,24 +503,24 @@ class TestUpdateLegacy(object):
         with pytest.raises(ValidationError):
             views.update(mock.Mock(), mock_request)
 
-    def test_it_inits_an_AnnotationEvent(self,
-                                         AnnotationEvent,
+    def test_it_inits_an_AnnotationEventTest(self,
+                                         AnnotationEventTest,
                                          AnnotationJSONPresenter,
                                          mock_request):
         annotation = mock.Mock()
 
         views.update(annotation, mock_request)
 
-        AnnotationEvent.assert_called_once_with(
+        AnnotationEventTest.assert_called_once_with(
             mock_request,
             AnnotationJSONPresenter.return_value.asdict.return_value,
             'update')
 
-    def test_it_fires_the_AnnotationEvent(self, AnnotationEvent, mock_request):
+    def test_it_fires_the_AnnotationEventTest(self, AnnotationEventTest, mock_request):
         views.update(mock.Mock(), mock_request)
 
         mock_request.notify_after_commit.assert_called_once_with(
-            AnnotationEvent.return_value)
+            AnnotationEventTest.return_value)
 
     def test_it_inits_a_presenter(self,
                                   AnnotationJSONPresenter,
@@ -551,7 +552,7 @@ class TestUpdateLegacy(object):
         return mock.Mock(feature=mock.Mock(return_value=False))
 
 
-@pytest.mark.usefixtures('AnnotationEvent',
+@pytest.mark.usefixtures('AnnotationEventTest',
                          'AnnotationJSONPresenter',
                          'schemas',
                          'storage')
@@ -693,24 +694,24 @@ class TestUpdate(object):
 
         assert not storage.legacy_update_annotation.called
 
-    def test_it_inits_an_AnnotationEvent(self,
-                                         AnnotationEvent,
+    def test_it_inits_an_AnnotationEventTest(self,
+                                         AnnotationEventTest,
                                          AnnotationJSONPresenter,
                                          mock_request):
         annotation = mock.Mock()
 
         views.update(annotation, mock_request)
 
-        AnnotationEvent.assert_called_once_with(
+        AnnotationEventTest.assert_called_once_with(
             mock_request,
             AnnotationJSONPresenter.return_value.asdict.return_value,
             'update')
 
-    def test_it_fires_the_AnnotationEvent(self, AnnotationEvent, mock_request):
+    def test_it_fires_the_AnnotationEventTest(self, AnnotationEventTest, mock_request):
         views.update(mock.Mock(), mock_request)
 
         mock_request.notify_after_commit.assert_called_once_with(
-            AnnotationEvent.return_value)
+            AnnotationEventTest.return_value)
 
     def test_it_inits_a_presenter(self,
                                   AnnotationJSONPresenter,
@@ -741,7 +742,7 @@ class TestUpdate(object):
         return mock.Mock(feature=mock.Mock(return_value=True))
 
 
-@pytest.mark.usefixtures('AnnotationEvent',
+@pytest.mark.usefixtures('AnnotationEventTest',
                          'AnnotationJSONPresenter',
                          'storage')
 class TestDelete(object):
@@ -755,19 +756,19 @@ class TestDelete(object):
         storage.delete_annotation.assert_called_once_with(request,
                                                           annotation.id)
 
-    def test_it_inits_and_fires_an_AnnotationEvent(self,
-                                                   AnnotationEvent,
+    def test_it_inits_and_fires_an_AnnotationEventTest(self,
+                                                   AnnotationEventTest,
                                                    AnnotationJSONPresenter):
         annotation = mock.Mock()
         request = mock.Mock()
-        event = AnnotationEvent.return_value
+        event = AnnotationEventTest.return_value
 
         views.delete(annotation, request)
 
         AnnotationJSONPresenter.assert_called_once_with(request, annotation)
         presented = AnnotationJSONPresenter.return_value.asdict()
 
-        AnnotationEvent.assert_called_once_with(request, presented, 'delete')
+        AnnotationEventTest.assert_called_once_with(request, presented, 'delete')
         request.notify_after_commit.assert_called_once_with(event)
 
     def test_it_returns_object(self):
@@ -780,7 +781,7 @@ class TestDelete(object):
 
 
 @pytest.fixture
-def AnnotationEvent(patch):
+def AnnotationEventTest(patch):
     return patch('h.api.views.AnnotationEvent')
 
 

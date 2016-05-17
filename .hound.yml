@@ -6,6 +6,9 @@ javascript:
 jscs:
   enabled: false
   config_file: .jscsrc
+python:
+  enabled: true
+  config_file: .flake8.ini
 ruby:
   enabled: false
 scss:
