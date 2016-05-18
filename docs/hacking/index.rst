@@ -13,6 +13,5 @@ and how to contribute code or documentation to the project.
    submitting-a-pr
    code-style
    documentation
-   customized-embedding
    ssl
    making-changes-to-model-code

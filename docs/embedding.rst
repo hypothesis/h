@@ -1,5 +1,5 @@
-Customized embedding
-####################
+How to add Hypothesis to your website
+#####################################
 
 To customize the application, define a function ``window.hypothesisConfig``
 which returns an options object.
