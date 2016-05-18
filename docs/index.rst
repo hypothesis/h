@@ -9,7 +9,6 @@ Contents:
    community
    embedding
    api
-   INSTALL
    administration
    hacking/index
    CHANGES
