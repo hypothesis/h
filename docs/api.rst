@@ -1,5 +1,5 @@
-HTTP API
-========
+The Hypothesis API
+==================
 
 This document details the ``h`` application's public HTTP API. It is targeted at
 developers interested in integrating functionality from Hypothesis into their
