@@ -1,5 +1,5 @@
-Administration
---------------
+Accessing the admin interface
+-----------------------------
 
 To access the admin interface, a user must be logged in and have admin
 permissions. To grant admin permissions to a user, run the following command:

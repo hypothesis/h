@@ -10,7 +10,6 @@ Contents:
    embedding
    api
    developing/index
-   administration
    CHANGES
 
 
