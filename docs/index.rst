@@ -6,6 +6,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   community
    INSTALL
    administration
    hacking/index

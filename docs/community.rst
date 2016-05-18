@@ -1,5 +1,5 @@
-Communications
-##############
+The Hypothesis community
+########################
 
 Please be courteous and respectful in your communication on IRC
 (`#hypothes.is`_ on `freenode.net`_), the mailing list (`subscribe`_,

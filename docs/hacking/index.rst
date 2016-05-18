@@ -7,7 +7,6 @@ and how to contribute code or documentation to the project.
 .. toctree::
    :maxdepth: 1
 
-   communications
    cla
    install
    chrome-extension
