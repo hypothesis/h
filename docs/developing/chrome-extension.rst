@@ -14,7 +14,7 @@ Building the Chrome extension for development
 
 To build and install the Chrome extension:
 
-1. Do an :doc:`h development install </hacking/install>`.
+1. Do an :doc:`h development install <install>`.
 
 2. Run this command to build the Chrome extension:
 
@@ -30,7 +30,7 @@ To build and install the Chrome extension:
 
       If you want to test the extension on pages served via HTTPS, you will
       need to configure the extension to communicate with a Hypothesis service
-      that is **also served over HTTPS**. See :doc:`Serving h over SSL </hacking/ssl>`
+      that is **also served over HTTPS**. See :doc:`Serving h over SSL <ssl>`
       for instructions on serving a local instance of H via SSL.
 
 
@@ -147,5 +147,5 @@ The extension fails to load and you see
 ``GET https://localhost:5000/... net::ERR_CONNECTION_REFUSED`` errors in the
 console. This happens if you built the extension with an ``https`` service URL
 but you're running h on ``http``. Either run h on ``https`` (see
-:doc:`Run your local h instance using https </hacking/ssl>`)
+:doc:`Run your local h instance using https <ssl>`)
 or rebuild the extension  with ``--service http://...``.

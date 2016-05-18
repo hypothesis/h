@@ -9,8 +9,8 @@ Contents:
    community
    embedding
    api
+   developing/index
    administration
-   hacking/index
    CHANGES
 
 
