@@ -31,11 +31,17 @@
   "homepage_url": "https://hypothes.is/",
   "incognito": "split",
 
+  "options_ui": {
+    "page": "lib/options.html",
+    "chrome_style": true
+  },
+
   "offline_enabled": false,
   "permissions": [
     "<all_urls>",
 
     "contentSettings",
+    "storage",
     "tabs"
   ],
   "content_security_policy":

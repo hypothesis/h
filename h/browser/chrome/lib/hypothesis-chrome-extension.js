@@ -41,6 +41,7 @@ var TAB_STATUS_COMPLETE = 'complete';
  */
 function HypothesisChromeExtension(dependencies) {
   var chromeTabs = dependencies.chromeTabs;
+  var chromeStorage = dependencies.chromeStorage;
   var chromeBrowserAction = dependencies.chromeBrowserAction;
   var help  = new HelpPage(chromeTabs, dependencies.extensionURL);
   var store = new TabStore(localStorage);
@@ -162,7 +163,7 @@ function HypothesisChromeExtension(dependencies) {
       annotationCount: 0,
       extensionSidebarInstalled: false,
     });
-    state.updateAnnotationCount(tabId, url);
+    updateAnnotationCountIfEnabled(tabId, url);
   }
 
   // This function will be called multiple times as the tab reloads.
@@ -200,7 +201,7 @@ function HypothesisChromeExtension(dependencies) {
     state.clearTab(removedTabId);
 
     chromeTabs.get(addedTabId, function (tab) {
-      state.updateAnnotationCount(addedTabId, tab.url);
+      updateAnnotationCountIfEnabled(addedTabId, tab.url);
     });
   }
 
@@ -261,6 +262,16 @@ function HypothesisChromeExtension(dependencies) {
         });
       });
     }
+  }
+
+  function updateAnnotationCountIfEnabled(tabId, url) {
+    chromeStorage.sync.get({
+      badge: true,
+    }, function (items) {
+      if (items.badge) {
+        state.updateAnnotationCount(tabId, url);
+      }
+    });
   }
 }
 

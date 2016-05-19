@@ -5,6 +5,7 @@ var HypothesisChromeExtension = require('./hypothesis-chrome-extension');
 var browserExtension = new HypothesisChromeExtension({
   chromeTabs: chrome.tabs,
   chromeBrowserAction: chrome.browserAction,
+  chromeStorage: chrome.storage,
   extensionURL: function (path) {
     return chrome.extension.getURL(path);
   },

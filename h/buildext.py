@@ -181,6 +181,9 @@ def build_extension(args):
         copyfilelist(src='build/scripts',
                      dst=os.path.join(build_dir, 'lib'),
                      filelist=extension_sources)
+        copyfilelist(src='h/browser/chrome/lib',
+                     dst=os.path.join(build_dir, 'lib'),
+                     filelist=['options.html', 'options.js'])
         copyfilelist(src='build',
                      dst=public_dir,
                      filelist=client_sources)
