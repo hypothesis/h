@@ -52,15 +52,17 @@ class TestClient(object):
     def test_enabled_false_when_admins_true_normal_request(self, client):
         assert client.enabled('on-for-admins') is False
 
-    def test_enabled_true_when_admins_true_admin_request(self, client, authn_policy):
-        authn_policy.effective_principals.return_value = [role.Admin]
+    def test_enabled_true_when_admins_true_admin_request(self, client, config):
+        config.testing_securitypolicy('acct:foo@example.com',
+                                      groupids=[role.Admin])
         assert client.enabled('on-for-admins') is True
 
     def test_enabled_false_when_staff_true_normal_request(self, client):
         assert client.enabled('on-for-staff') is False
 
-    def test_enabled_true_when_staff_true_staff_request(self, client, authn_policy):
-        authn_policy.effective_principals.return_value = [role.Staff]
+    def test_enabled_true_when_staff_true_staff_request(self, client, config):
+        config.testing_securitypolicy('acct:foo@example.com',
+                                      groupids=[role.Staff])
         assert client.enabled('on-for-staff') is True
 
     def test_call_false_if_everyone_false(self, client):
@@ -88,8 +90,9 @@ class TestClient(object):
 
         fetcher.assert_called_once_with()
 
-    def test_all_returns_feature_dictionary(self, client, authn_policy):
-        authn_policy.effective_principals.return_value = [role.Staff]
+    def test_all_returns_feature_dictionary(self, client, config):
+        config.testing_securitypolicy('acct:foo@example.com',
+                                      groupids=[role.Staff])
 
         result = client.all()
 

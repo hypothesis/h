@@ -68,8 +68,8 @@ class TestAuthenticationPolicy(object):
         assert result == tokens.authenticated_userid.return_value
 
     @mock.patch('h.auth.policy.util')
-    def test_effective_principals_calls_effective_principals_with_authenticated_userid(self, util, authn_policy):
-        authn_policy.authenticated_userid.return_value = 'acct:rami@example.com'
+    def test_effective_principals_calls_effective_principals_with_authenticated_userid(self, util, config):
+        config.testing_securitypolicy('acct:rami@example.com')
         request = DummyRequest()
 
         result = self.policy.effective_principals(request)
