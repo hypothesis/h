@@ -6,79 +6,64 @@ from webob import multidict
 
 from h.api.search import query
 
+MISSING = object()
 
-def test_builder_offset_defaults_to_0():
-    """If no offset is given then "from": 0 is used in the query by default."""
+OFFSET_DEFAULT = 0
+LIMIT_DEFAULT = 20
+
+
+@pytest.mark.parametrize('offset,from_', [
+    # defaults to OFFSET_DEFAULT
+    (MISSING, OFFSET_DEFAULT),
+    # straightforward pass-through
+    (7, 7),
+    (42, 42),
+    # string values should be converted
+    ("23", 23),
+    ("82", 82),
+    # invalid values should be ignored and the default should be returned
+    ("foo",  OFFSET_DEFAULT),
+    ("",     OFFSET_DEFAULT),
+    ("   ",  OFFSET_DEFAULT),
+    ("-23",  OFFSET_DEFAULT),
+    ("32.7", OFFSET_DEFAULT),
+])
+def test_builder_offset(offset, from_):
     builder = query.Builder()
 
-    q = builder.build({})
+    if offset is MISSING:
+        q = builder.build({})
+    else:
+        q = builder.build({"offset": offset})
 
-    assert q["from"] == 0
+    assert q["from"] == from_
 
 
-def test_builder_custom_offsets_are_passed_in():
-    """If an offset is given it's returned in the query dict."""
+@pytest.mark.parametrize('limit,size', [
+    # defaults to LIMIT_DEFAULT
+    (MISSING, LIMIT_DEFAULT),
+    # straightforward pass-through
+    (7, 7),
+    (42, 42),
+    # string values should be converted
+    ("17", 17),
+    ("72", 72),
+    # invalid values should be ignored and the default should be returned
+    ("foo",  LIMIT_DEFAULT),
+    ("",     LIMIT_DEFAULT),
+    ("   ",  LIMIT_DEFAULT),
+    ("-23",  LIMIT_DEFAULT),
+    ("32.7", LIMIT_DEFAULT),
+])
+def test_builder_limit(limit, size):
     builder = query.Builder()
 
-    q = builder.build({"offset": 7})
+    if limit is MISSING:
+        q = builder.build({})
+    else:
+        q = builder.build({"limit": limit})
 
-    assert q["from"] == 7
-
-
-def test_builder_offset_string_is_converted_to_int():
-    """'offset' arguments should be converted from strings to ints."""
-    builder = query.Builder()
-
-    q = builder.build({"offset": "23"})
-
-    assert q["from"] == 23
-
-
-def test_builder_with_invalid_offset():
-    """Invalid 'offset' params should be ignored."""
-    for invalid_offset in ("foo", '', '   ', "-23", "32.7"):
-        builder = query.Builder()
-
-        q = builder.build({"offset": invalid_offset})
-
-        assert q["from"] == 0
-
-
-def test_builder_limit_defaults_to_20():
-    """If no limit is given "size": 20 is used in the query by default."""
-    builder = query.Builder()
-
-    q = builder.build({})
-
-    assert q["size"] == 20
-
-
-def test_builder_custom_limits_are_passed_in():
-    """If a limit is given it's returned in the query dict as "size"."""
-    builder = query.Builder()
-
-    q = builder.build({"limit": 7})
-
-    assert q["size"] == 7
-
-
-def test_builder_limit_strings_are_converted_to_ints():
-    """String values for limit should be converted to ints."""
-    builder = query.Builder()
-
-    q = builder.build({"limit": "17"})
-
-    assert q["size"] == 17
-
-
-def test_builder_with_invalid_limit():
-    """Invalid 'limit' params should be ignored."""
-    for invalid_limit in ("foo", '', '   ', "-23", "32.7"):
-        builder = query.Builder()
-
-        q = builder.build({"limit": invalid_limit})
-
-        assert q["size"] == 20  # (20 is the default value.)
+    assert q["size"] == size
 
 
 def test_builder_sort_is_by_updated():
