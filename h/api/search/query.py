@@ -2,6 +2,9 @@
 from h.api import storage
 from h.api import uri
 
+LIMIT_DEFAULT = 20
+LIMIT_MAX = 200
+
 
 class Builder(object):
 
@@ -71,10 +74,11 @@ def extract_offset(params):
 def extract_limit(params):
     try:
         val = int(params.pop("limit"))
+        val = min(val, LIMIT_MAX)
         if val < 0:
             raise ValueError
     except (ValueError, KeyError):
-        return 20
+        return LIMIT_DEFAULT
     else:
         return val
 
