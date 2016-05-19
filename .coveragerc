@@ -4,9 +4,6 @@ source = h
 omit =
     # development
     h/testing.py
-    # test
-    */conftest.py
-    */test/*
 
 [paths]
 source =

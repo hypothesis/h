@@ -138,5 +138,5 @@ if __name__ == "__main__":
           entry_points=ENTRY_POINTS,
           cmdclass={'sdist': sdist,
                     'test': test},
-          packages=find_packages(exclude=['*.test']),
+          packages=find_packages(include=['h', 'h.*']),
           zip_safe=False)

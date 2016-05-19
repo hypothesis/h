@@ -1,8 +1,10 @@
 import datetime
+
 import mock
 
-from h.test import factories
 from h.feeds import util
+
+from ... import factories
 
 
 def test_tag_uri_for_annotation():

@@ -1,6 +1,6 @@
-Functional and integrated tests
-===============================
+Tests
+=====
 
-This directory contains functional and integrated tests for the `h` application.
-Unit tests live alongside the code they test in `test` directories, and should
-not be added here.
+This directory contains tests for the `h` application and associated code. Unit
+tests live in the `h` directory, and functional/integrated tests in the
+`functional` directory.
