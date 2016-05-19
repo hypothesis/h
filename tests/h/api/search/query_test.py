@@ -10,6 +10,7 @@ MISSING = object()
 
 OFFSET_DEFAULT = 0
 LIMIT_DEFAULT = 20
+LIMIT_MAX = 200
 
 
 @pytest.mark.parametrize('offset,from_', [
@@ -54,6 +55,10 @@ def test_builder_offset(offset, from_):
     ("   ",  LIMIT_DEFAULT),
     ("-23",  LIMIT_DEFAULT),
     ("32.7", LIMIT_DEFAULT),
+    # values above the maximum should be clamped to the maximum value
+    (LIMIT_MAX, LIMIT_MAX),
+    (LIMIT_MAX + 1, LIMIT_MAX),
+    (LIMIT_MAX + 1000, LIMIT_MAX),
 ])
 def test_builder_limit(limit, size):
     builder = query.Builder()
