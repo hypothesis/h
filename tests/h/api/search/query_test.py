@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import pytest
 import mock
+import pytest
+from hypothesis import strategies as st
+from hypothesis import given
 from webob import multidict
 
 from h.api.search import query
@@ -40,35 +42,47 @@ def test_builder_offset(offset, from_):
     assert q["from"] == from_
 
 
-@pytest.mark.parametrize('limit,size', [
-    # defaults to LIMIT_DEFAULT
-    (MISSING, LIMIT_DEFAULT),
-    # straightforward pass-through
-    (7, 7),
-    (42, 42),
-    # string values should be converted
-    ("17", 17),
-    ("72", 72),
-    # invalid values should be ignored and the default should be returned
-    ("foo",  LIMIT_DEFAULT),
-    ("",     LIMIT_DEFAULT),
-    ("   ",  LIMIT_DEFAULT),
-    ("-23",  LIMIT_DEFAULT),
-    ("32.7", LIMIT_DEFAULT),
-    # values above the maximum should be clamped to the maximum value
-    (LIMIT_MAX, LIMIT_MAX),
-    (LIMIT_MAX + 1, LIMIT_MAX),
-    (LIMIT_MAX + 1000, LIMIT_MAX),
-])
-def test_builder_limit(limit, size):
+@given(st.text())
+@pytest.mark.fuzz
+def test_builder_limit_output_within_bounds(text):
+    """Given any string input, output should be in the allowed range."""
     builder = query.Builder()
 
-    if limit is MISSING:
-        q = builder.build({})
-    else:
-        q = builder.build({"limit": limit})
+    q = builder.build({"limit": text})
 
-    assert q["size"] == size
+    assert isinstance(q["size"], int)
+    assert 0 <= q["size"] <= LIMIT_MAX
+
+
+@given(st.integers())
+@pytest.mark.fuzz
+def test_builder_limit_output_within_bounds_int_input(lim):
+    """Given any integer input, output should be in the allowed range."""
+    builder = query.Builder()
+
+    q = builder.build({"limit": str(lim)})
+
+    assert isinstance(q["size"], int)
+    assert 0 <= q["size"] <= LIMIT_MAX
+
+
+@given(st.integers(min_value=0, max_value=LIMIT_MAX))
+@pytest.mark.fuzz
+def test_builder_limit_matches_input(lim):
+    """Given an integer in the allowed range, it should be passed through."""
+    builder = query.Builder()
+
+    q = builder.build({"limit": str(lim)})
+
+    assert q["size"] == lim
+
+
+def test_builder_limit_missing():
+    builder = query.Builder()
+
+    q = builder.build({})
+
+    assert q["size"] == LIMIT_DEFAULT
 
 
 def test_builder_sort_is_by_updated():
