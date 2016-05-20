@@ -7,7 +7,6 @@ from pyramid.testing import DummyRequest
 
 import elasticsearch
 
-from h import db
 from h.api import models
 from h.api import presenters
 from h.api.search import client
@@ -125,29 +124,35 @@ class TestBatchIndexer(object):
             mock.call(indexer, set(['id-1'])),
         ]
 
-    def test_index_indexes_all_annotations_to_es(self, streaming_bulk):
+    def test_index_indexes_all_annotations_to_es(self, db_session, streaming_bulk):
         ann_1, ann_2 = self.annotation(), self.annotation()
+        db_session.add_all([ann_1, ann_2])
+        db_session.flush()
 
-        indexer = self.indexer(session=db.Session)
+        indexer = self.indexer(session=db_session)
         indexer.index()
 
         streaming_bulk.assert_called_once_with(
             indexer.es_client.conn, GeneratorEquals([ann_1, ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
-    def test_index_indexes_filtered_annotations_to_es(self, streaming_bulk):
+    def test_index_indexes_filtered_annotations_to_es(self, db_session, streaming_bulk):
         ann_1, ann_2 = self.annotation(), self.annotation()
+        db_session.add_all([ann_1, ann_2])
+        db_session.flush()
 
-        indexer = self.indexer(session=db.Session)
+        indexer = self.indexer(session=db_session)
         indexer.index([ann_2.id])
 
         streaming_bulk.assert_called_once_with(
             indexer.es_client.conn, GeneratorEquals([ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
-    def test_index_correctly_presents_bulk_actions(self, streaming_bulk, mock_request):
-        indexer = self.indexer(session=db.Session)
+    def test_index_correctly_presents_bulk_actions(self, db_session, streaming_bulk, mock_request):
+        indexer = self.indexer(session=db_session)
         annotation = self.annotation()
+        db_session.add(annotation)
+        db_session.flush()
         results = []
 
         def fake_streaming_bulk(*args, **kwargs):
@@ -166,10 +171,13 @@ class TestBatchIndexer(object):
             presenters.AnnotationJSONPresenter(mock_request, annotation).asdict()
         )
 
-    def test_index_returns_failed_bulk_actions(self, streaming_bulk):
-        indexer = self.indexer(session=db.Session)
+    def test_index_returns_failed_bulk_actions(self, db_session, streaming_bulk):
+        indexer = self.indexer(session=db_session)
         ann_success_1, ann_success_2 = self.annotation(), self.annotation()
         ann_fail_1, ann_fail_2 = self.annotation(), self.annotation()
+        db_session.add_all([ann_success_1, ann_success_2,
+                            ann_fail_1, ann_fail_2])
+        db_session.flush()
 
         def fake_streaming_bulk(*args, **kwargs):
             for ann in args[1]:
@@ -202,10 +210,7 @@ class TestBatchIndexer(object):
         return DummyRequest()
 
     def annotation(self):
-        ann = models.Annotation(userid="bob", target_uri="http://example.com")
-        db.Session.add(ann)
-        db.Session.flush()
-        return ann
+        return models.Annotation(userid="bob", target_uri="http://example.com")
 
 
 class TestBatchDeleter(object):
@@ -242,8 +247,8 @@ class TestBatchDeleter(object):
             mock.call(deleter, set(['id-1']))
         ]
 
-    def test_deleted_annotation_ids(self, es_scan, annotation):
-        deleter = self.deleter(session=db.Session)
+    def test_deleted_annotation_ids(self, db_session, es_scan, annotation):
+        deleter = self.deleter(session=db_session)
 
         es_scan.return_value = [
             {'_id': 'deleted-from-postgres-id',
@@ -252,9 +257,9 @@ class TestBatchDeleter(object):
         deleted_ids = deleter.deleted_annotation_ids()
         assert deleted_ids == set(['deleted-from-postgres-id'])
 
-    def test_deleted_annotation_ids_no_changes(self, es_scan, annotation):
+    def test_deleted_annotation_ids_no_changes(self, db_session, es_scan, annotation):
         request = DummyRequest()
-        deleter = self.deleter(session=db.Session)
+        deleter = self.deleter(session=db_session)
 
         es_scan.return_value = [
             {'_id': annotation.id,
@@ -343,10 +348,10 @@ class TestBatchDeleter(object):
         return patch('h.api.search.index.es_helpers.streaming_bulk')
 
     @pytest.fixture
-    def annotation(self):
+    def annotation(self, db_session):
         ann = models.Annotation(userid="bob", target_uri="http://example.com")
-        db.Session.add(ann)
-        db.Session.flush()
+        db_session.add(ann)
+        db_session.flush()
         return ann
 
 
