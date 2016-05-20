@@ -76,7 +76,3 @@ def main():
     for cmd in SUBCOMMANDS:
         cli.add_command(resolver.resolve(cmd))
     cli(prog_name='hypothesis', obj={})
-
-
-if __name__ == '__main__':
-    main()

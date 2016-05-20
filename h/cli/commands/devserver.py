@@ -56,7 +56,7 @@ def devserver(https, web, ws, worker, assets):
     try:
         from honcho.manager import Manager
     except ImportError:
-        raise click.ClickException('cannot import honcho: did you run `pip install -e .[dev]` yet?')
+        raise click.ClickException('cannot import honcho: did you run `pip install -r requirements-dev.in` yet?')
 
     os.environ['PYTHONUNBUFFERED'] = 'true'
     if https:

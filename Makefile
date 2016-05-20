@@ -1,4 +1,5 @@
-PATH := bin:${PATH}
+PATH := $(shell pwd)/bin:$(PATH)
+SHELL := /bin/bash
 NPM_BIN := $(shell npm bin)
 ISODATE := $(shell TZ=UTC date '+%Y%m%d')
 BUILD_ID := $(shell python -c 'import h; print(h.__version__)')
@@ -22,12 +23,12 @@ build/manifest.json: node_modules/.uptodate
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-	rm -f node_modules/.uptodate h.egg-info/.uptodate
+	rm -f node_modules/.uptodate .pydeps
 	rm -rf build dist
 
 ## Run the development H server locally
 .PHONY: dev
-dev: build/manifest.json h.egg-info/.uptodate
+dev: build/manifest.json .pydeps
 	@hypothesis devserver
 
 .PHONY: dist
@@ -54,7 +55,7 @@ test: node_modules/.uptodate
 ################################################################################
 
 # Fake targets to aid with deps installation
-h.egg-info/.uptodate: setup.py requirements.txt
+.pydeps: setup.py requirements.txt
 	@echo installing python dependencies
 	@pip install --use-wheel -r requirements-dev.in tox
 	@touch $@
