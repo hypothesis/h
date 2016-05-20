@@ -56,7 +56,7 @@ test: node_modules/.uptodate
 # Fake targets to aid with deps installation
 h.egg-info/.uptodate: setup.py requirements.txt
 	@echo installing python dependencies
-	@pip install --use-wheel -e .[dev] tox
+	@pip install --use-wheel -r requirements-dev.in tox
 	@touch $@
 
 node_modules/.uptodate: package.json

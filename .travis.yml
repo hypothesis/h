@@ -10,11 +10,6 @@ matrix:
         postgresql: "9.4"
       before_script: createdb htest
 
-    # Check Python package manifest
-    - env: ACTION=tox TOXENV=manifest
-      language: python
-      python: '2.7'
-
     # Test web application frontend
     - env: ACTION=gulp GULPTASK=test
       language: node_js
