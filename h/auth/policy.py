@@ -15,12 +15,12 @@ class AuthenticationPolicy(object):
         self.session_policy = authentication.SessionAuthenticationPolicy()
 
     def authenticated_userid(self, request):
-        if _is_api_request(request):
+        if _is_token_request(request):
             return tokens.authenticated_userid(request)
         return self.session_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):
-        if _is_api_request(request):
+        if _is_token_request(request):
             # We can't really get an "unauthenticated" userid for an API
             # request. We have to actually go and decode/look up the tokens and
             # get what is effectively an authenticated userid.
@@ -31,16 +31,18 @@ class AuthenticationPolicy(object):
         return util.effective_principals(request.authenticated_userid, request)
 
     def remember(self, request, userid, **kw):
-        if _is_api_request(request):
+        if _is_token_request(request):
             return []
         return self.session_policy.remember(request, userid, **kw)
 
     def forget(self, request):
-        if _is_api_request(request):
+        if _is_token_request(request):
             return []
         return self.session_policy.forget(request)
 
 
-def _is_api_request(request):
-    return (request.path.startswith('/api') and
-            request.path not in ['/api/token', '/api/badge'])
+def _is_token_request(request):
+    is_api_request = (request.path.startswith('/api') and
+                      request.path not in ['/api/token', '/api/badge'])
+    is_ws_request = request.path == '/ws'
+    return is_api_request or is_ws_request
