@@ -29,34 +29,65 @@ function FakeDocument() {
 }
 
 describe('selections', function () {
+  var clock;
   var fakeDocument;
+  var range;
   var rangeSub;
   var onSelectionChanged;
 
   beforeEach(function () {
+    clock = sinon.useFakeTimers();
     fakeDocument = new FakeDocument();
     onSelectionChanged = sinon.stub();
 
-    var fakeSetTimeout = function (fn) { fn(); };
-    var fakeClearTimeout = function () {};
-
-    var ranges = selections(fakeDocument, fakeSetTimeout, fakeClearTimeout);
+    var ranges = selections(fakeDocument);
     rangeSub = ranges.subscribe({next: onSelectionChanged});
-  });
 
-  afterEach(function () {
-    rangeSub.unsubscribe();
-  });
-
-  unroll('emits the selected range when #event occurs', function (testCase) {
-    var range = {};
+    range = {};
     fakeDocument.selection = {
       rangeCount: 1,
       getRangeAt: function (index) {
         return index === 0 ? range : null;
       },
     };
+  });
+
+  afterEach(function () {
+    rangeSub.unsubscribe();
+    clock.restore();
+  });
+
+  unroll('emits the selected range when #event occurs', function (testCase) {
     fakeDocument.dispatchEvent({type: testCase.event});
+    clock.tick(testCase.delay);
     assert.calledWith(onSelectionChanged, range);
-  }, [{event: 'mouseup'}, {event: 'ready'}]);
+  }, [
+    {event: 'mouseup', delay: 20},
+    {event: 'ready', delay: 20},
+  ]);
+
+  describe('when the selection changes', function () {
+    it('emits a selection if the mouse is not down', function () {
+      fakeDocument.dispatchEvent({type: 'selectionchange'});
+      clock.tick(200);
+      assert.calledWith(onSelectionChanged, range);
+    });
+
+    it('does not emit a selection if the mouse is down', function () {
+      fakeDocument.dispatchEvent({type: 'mousedown'});
+      fakeDocument.dispatchEvent({type: 'selectionchange'});
+      clock.tick(200);
+      assert.notCalled(onSelectionChanged);
+    });
+
+    it('does not emit a selection until there is a pause since the last change', function () {
+      fakeDocument.dispatchEvent({type: 'selectionchange'});
+      clock.tick(90);
+      fakeDocument.dispatchEvent({type: 'selectionchange'});
+      clock.tick(90);
+      assert.notCalled(onSelectionChanged);
+      clock.tick(20);
+      assert.called(onSelectionChanged);
+    });
+  });
 });
