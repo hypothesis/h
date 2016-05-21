@@ -24,9 +24,6 @@ Annotator.Plugin.Toolbar = require('./plugin/toolbar');
 Annotator.Plugin.PDF = require('./plugin/pdf');
 require('../vendor/annotator.document');  // Does not export the plugin :(
 
-// Selection plugins
-Annotator.Plugin.TextSelection = require('./plugin/textselection');
-
 // Cross-frame communication
 Annotator.Plugin.CrossFrame = require('./plugin/cross-frame');
 Annotator.Plugin.CrossFrame.AnnotationSync = require('../annotation-sync');
