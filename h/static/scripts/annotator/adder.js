@@ -39,6 +39,7 @@ function Adder(element) {
   this.element = element;
 
   var view = element.ownerDocument.defaultView;
+  var enterTimeout;
 
   // Set initial style. The adder is hidden using the `visibility`
   // property rather than `display` so that we can compute its size in order to
@@ -56,6 +57,8 @@ function Adder(element) {
 
   /** Hide the adder */
   this.hide = function () {
+    clearTimeout(enterTimeout);
+    element.className = classnames({'annotator-adder': true});
     element.style.visibility = 'hidden';
   };
 
@@ -131,6 +134,11 @@ function Adder(element) {
     element.style.top = toPx(top);
     element.style.left = toPx(left);
     element.style.visibility = 'visible';
+
+    clearTimeout(enterTimeout);
+    enterTimeout = setTimeout(function () {
+      element.className += ' is-active';
+    }, 1);
   };
 }
 
