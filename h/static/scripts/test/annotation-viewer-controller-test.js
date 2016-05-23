@@ -36,7 +36,7 @@ describe('AnnotationViewerController', function () {
       $scope: opts.$scope || {
         search: {},
       },
-      annotationUI: {},
+      annotationUI: {subscribe: sinon.stub()},
       rootThread: new FakeRootThread(),
       streamer: opts.streamer || { setConfig: function () {} },
       store: opts.store || {

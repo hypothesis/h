@@ -63,6 +63,9 @@ VirtualThreadList.prototype.detach = function () {
  * matching annotations changes.
  */
 VirtualThreadList.prototype.setRootThread = function (thread) {
+  if (thread === this._rootThread) {
+    return;
+  }
   this._rootThread = thread;
   this._updateVisibleThreads();
 };

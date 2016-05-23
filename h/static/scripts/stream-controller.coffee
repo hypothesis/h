@@ -52,9 +52,12 @@ module.exports = class StreamController
     $scope.forceVisible = (id) ->
       annotationUI.setForceVisible(id, true)
 
-    rootThread.on('changed', (thread) ->
+    thread = ->
+      rootThread.thread(annotationUI.getState())
+
+    annotationUI.subscribe( ->
       $scope.virtualThreadList = {
-        visibleThreads: thread.children,
+        visibleThreads: thread().children,
         offscreenUpperHeight: '0px',
         offscreenLowerHeight: '0px',
       };
@@ -64,6 +67,4 @@ module.exports = class StreamController
     annotationUI.setSortKey('Newest')
 
     $scope.isStream = true
-    $scope.rootThread = ->
-      return rootThread.thread()
     $scope.loadMore = fetch

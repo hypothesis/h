@@ -43,6 +43,7 @@ describe 'StreamController', ->
       setCollapsed: sandbox.spy()
       setForceVisible: sandbox.spy()
       setSortKey: sandbox.spy()
+      subscribe: sandbox.spy()
     }
 
     fakeParams = {id: 'test'}

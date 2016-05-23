@@ -17,17 +17,17 @@ function AnnotationViewerController (
     $location.path('/stream').search('q', query);
   };
 
-  rootThread.on('changed', function (thread) {
+  function thread() {
+    return rootThread.thread(annotationUI.getState());
+  }
+
+  annotationUI.subscribe(function () {
     $scope.virtualThreadList = {
-      visibleThreads: thread.children,
+      visibleThreads: thread().children,
       offscreenUpperHeight: '0px',
       offscreenLowerHeight: '0px',
     };
   });
-
-  $scope.rootThread = function () {
-    return rootThread.thread();
-  };
 
   $scope.setCollapsed = function (id, collapsed) {
     annotationUI.setCollapsed(id, collapsed);

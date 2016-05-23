@@ -1,10 +1,8 @@
 'use strict';
 
-var EventEmitter = require('tiny-emitter');
-var inherits = require('inherits');
-
 var buildThread = require('./build-thread');
 var events = require('./events');
+var memoize = require('./util/memoize');
 var metadata = require('./annotation-metadata');
 
 function truthyKeys(map) {
@@ -41,19 +39,18 @@ var sortFns = {
  */
 // @ngInject
 function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
-  var self = this;
-  var thread;
 
   /**
-   * Rebuild the root conversation thread. This should be called
-   * whenever the set of annotations to render or the sort/search/filter
-   * settings change.
+   * Build the root conversation thread from the given UI state.
+   *
+   * @param state - The current UI state (loaded annotations, sort mode,
+   *        filter settings etc.)
    */
-  function rebuildRootThread() {
-    var sortFn = sortFns[annotationUI.getState().sortKey];
+  function buildRootThread(state) {
+    var sortFn = sortFns[state.sortKey];
 
     var filters;
-    var filterQuery = annotationUI.getState().filterQuery;
+    var filterQuery = state.filterQuery;
 
     if (filterQuery) {
       filters = searchFilter.generateFacetedFilter(filterQuery);
@@ -68,18 +65,14 @@ function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
 
     // Get the currently loaded annotations and the set of inputs which
     // determines what is visible and build the visible thread structure
-    var state = annotationUI.getState();
-    thread = buildThread(state.annotations, {
+    return buildThread(state.annotations, {
       forceVisible: truthyKeys(state.forceVisible),
       expanded: state.expanded,
       selected: truthyKeys(state.selectedAnnotationMap || {}),
       sortCompareFn: sortFn,
       filterFn: filterFn,
     });
-    self.emit('changed', thread);
   }
-  rebuildRootThread();
-  annotationUI.subscribe(rebuildRootThread);
 
   // Listen for annotations being created or loaded
   // and show them in the UI.
@@ -118,19 +111,10 @@ function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
   });
 
   /**
-   * Rebuild the conversation thread based on the currently loaded annotations
-   * and search/sort/filter settings.
-   */
-  this.rebuild = rebuildRootThread;
-
-  /**
-   * Returns the current root conversation thread.
+   * Build the root conversation thread from the given UI state.
    * @return {Thread}
    */
-  this.thread = function () {
-    return thread;
-  };
+  this.thread = memoize(buildRootThread);
 }
-inherits(RootThread, EventEmitter);
 
 module.exports = RootThread;
