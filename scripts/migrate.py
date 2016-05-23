@@ -119,7 +119,7 @@ def delete_nonexisting_annotations(es):
 
     print('Collecting Elasticsearch annotation ids...')
     es_count = 0
-    for batch in _batch_iter(BATCH_SIZE, scan(es)):
+    for batch in _batch_iter(BATCH_SIZE, scan(es, exclude_source=True)):
         in_postgres.difference_update((a['_id'] for a in batch))
         es_count += len(batch)
 
@@ -130,8 +130,11 @@ def delete_nonexisting_annotations(es):
     print('Deleted {:d} postgres annotations'.format(len(in_postgres)))
 
 
-def scan(es_client, with_filter=None):
+def scan(es_client, with_filter=None, exclude_source=False):
     query = {'query': {'match_all': {}}}
+
+    if exclude_source:
+        query['_source'] = False
 
     if with_filter is not None:
         query['query'] = {
