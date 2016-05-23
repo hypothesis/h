@@ -188,11 +188,14 @@ class TestBatchIndexer(object):
         streaming_bulk.side_effect = fake_streaming_bulk
 
         indexer.index()
+
+        rendered = presenters.AnnotationJSONPresenter(mock_request, annotation).asdict()
+        rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
         assert results[0] == (
             {'index': {'_type': indexer.es_client.t.annotation,
                        '_index': indexer.es_client.index,
                        '_id': annotation.id}},
-            presenters.AnnotationJSONPresenter(mock_request, annotation).asdict()
+            rendered
         )
 
     def test_index_returns_failed_bulk_actions(self, db_session, streaming_bulk):

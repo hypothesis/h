@@ -148,6 +148,7 @@ class BatchIndexer(object):
         # annotations for clients. It is useful in the mean time until we get rid of
         # the legacy ElasticSearch annotation storage.
         data = presenters.AnnotationJSONPresenter(self.request, annotation).asdict()
+        data['target'][0]['scope'] = [annotation.target_uri_normalized]
 
         return (action, data)
 
