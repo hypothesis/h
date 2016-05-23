@@ -265,7 +265,7 @@ create
               "read": ["group:__world__"],
               "update": ["acct:joebloggs@example.org"],
               "delete": ["acct:joebloggs@example.org"],
-              "admin": ["acct:joebloggs@example.org"],
+              "admin": ["acct:joebloggs@example.org"]
           },
           "document": { ... },
           "target": [ ... ],
