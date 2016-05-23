@@ -76,6 +76,14 @@ def includeme(config):
         name='legacy_es',
         reify=True)
 
+    # request.new_es is always a client for the legacy Elasticsearch index,
+    # regardless of whether the 'postgres' feature flag is on.
+    # This should be used to write to the new search index.
+    config.add_request_method(
+        lambda r: _get_client(r.registry.settings),
+        name='new_es',
+        reify=True)
+
     # request.es is a client for either the new or the legacy Elasticsearch
     # index, depending on the 'postgres' feature flaf.
     # This should always be used to read from the search index.
