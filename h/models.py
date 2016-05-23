@@ -29,6 +29,7 @@ __all__ = (
 Activation = accounts_models.Activation
 Blocklist = badge_models.Blocklist
 Feature = features_models.Feature
+FeatureCohort = features_models.FeatureCohort
 Group = groups_models.Group
 NipsaUser = nipsa_models.NipsaUser
 Token = auth_models.Token
