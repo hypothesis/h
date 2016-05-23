@@ -36,6 +36,8 @@ describe('rootThread', function () {
         selectedAnnotationMap: null,
         expanded: {},
         forceVisible: {},
+        filterQuery: null,
+        sortMode: 'Location',
       },
 
       getState: function () {
@@ -46,7 +48,6 @@ describe('rootThread', function () {
       removeSelectedAnnotation: sinon.stub(),
       addAnnotations: sinon.stub(),
       setCollapsed: sinon.stub(),
-      clearForceVisible: sinon.stub(),
     };
 
     fakeBuildThread = sinon.stub().returns(fixtures.emptyThread);
@@ -146,13 +147,7 @@ describe('rootThread', function () {
     });
   });
 
-  describe('#sortBy', function () {
-    it('rebuilds the thread when the sort order changes', function () {
-      assertRebuildsThread(function () {
-        rootThread.sortBy('Newest');
-      });
-    });
-
+  describe('when the sort order changes', function () {
     function sortBy(annotations, sortCompareFn) {
       return annotations.slice().sort(function (a,b) {
         return sortCompareFn(a,b) ? -1 : sortCompareFn(b,a) ? 1 : 0;
@@ -181,7 +176,10 @@ describe('rootThread', function () {
       }];
 
       fakeBuildThread.reset();
-      rootThread.sortBy(testCase.order);
+      fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state, {
+        sortMode: testCase.order,
+      });
+      rootThread.rebuild();
       var sortCompareFn = fakeBuildThread.args[0][1].sortCompareFn;
       var actualOrder = sortBy(annotations, sortCompareFn).map(function (annot) {
         return annotations.indexOf(annot);
@@ -194,30 +192,21 @@ describe('rootThread', function () {
     ]);
   });
 
-  describe('#setSearchQuery', function () {
-    it('rebuilds the thread when the search query changes', function () {
-      assertRebuildsThread(function () {
-        rootThread.setSearchQuery('new query');
-      });
-    });
-
-    it('generates a thread filter function from the search query', function () {
+  describe('when the filter query changes', function () {
+    it('generates a thread filter function from the query', function () {
       fakeBuildThread.reset();
       var filters = [{any: {terms: ['queryterm']}}];
       var annotation = annotationFixtures.defaultAnnotation();
       fakeSearchFilter.generateFacetedFilter.returns(filters);
-      rootThread.setSearchQuery('queryterm');
+      fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state,
+        {filterQuery: 'queryterm'});
+      rootThread.rebuild();
       var filterFn = fakeBuildThread.args[0][1].filterFn;
 
       fakeViewFilter.filter.returns([annotation]);
       assert.equal(filterFn(annotation), true);
       assert.calledWith(fakeViewFilter.filter, sinon.match([annotation]),
         filters);
-    });
-
-    it('clears the set of explicitly shown conversations', function () {
-      rootThread.setSearchQuery('new query');
-      assert.called(fakeAnnotationUI.clearForceVisible);
     });
   });
 

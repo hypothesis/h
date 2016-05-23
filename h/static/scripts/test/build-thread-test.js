@@ -201,11 +201,6 @@ describe('build-thread', function () {
       assert.isTrue(thread.children[0].children[0].collapsed);
     });
 
-    it('expands threads with selected children', function () {
-      var thread = buildThread(SIMPLE_FIXTURE, {selected: ['3']});
-      assert.isFalse(thread.children[0].collapsed);
-    });
-
     it('expands threads with visible children', function () {
       // Simulate performing a search which only matches the top-level
       // annotation, not its reply, and then clicking

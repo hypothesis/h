@@ -78,14 +78,6 @@ describe('annotationUI', function () {
     });
   });
 
-  describe('#clearForceVisible()', function () {
-    it('clears the forceVisible set', function () {
-      annotationUI.setForceVisible('id1', true);
-      annotationUI.clearForceVisible();
-      assert.deepEqual(annotationUI.getState().forceVisible, {});
-    });
-  });
-
   describe('#setCollapsed()', function () {
     it('sets the expanded state of the annotation', function () {
       annotationUI.setCollapsed('parent_id', false);
@@ -209,6 +201,21 @@ describe('annotationUI', function () {
       annotationUI.selectAnnotations([{id: 1}]);
       annotationUI.clearSelectedAnnotations();
       assert.isNull(annotationUI.getState().selectedAnnotationMap);
+    });
+  });
+
+  describe('#setFilterQuery()', function () {
+    it('sets the filter query', function () {
+      annotationUI.setFilterQuery('a-query');
+      assert.equal(annotationUI.getState().filterQuery, 'a-query');
+    });
+
+    it('resets the force-visible and expanded sets', function () {
+      annotationUI.setForceVisible('123', true);
+      annotationUI.setCollapsed('456', false);
+      annotationUI.setFilterQuery('some-query');
+      assert.deepEqual(annotationUI.getState().forceVisible, {});
+      assert.deepEqual(annotationUI.getState().expanded, {});
     });
   });
 });

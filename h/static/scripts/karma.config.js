@@ -46,6 +46,7 @@ module.exports = function(config) {
       './test/bootstrap.js': ['browserify'],
       '**/*-test.js': ['browserify'],
       '**/*-test.coffee': ['browserify'],
+      '**/*-it.js': ['browserify'],
     },
 
     browserify: {

@@ -1,6 +1,7 @@
 'use strict';
 
 var events = require('./events');
+var memoize = require('./util/memoize');
 var SearchClient = require('./search-client');
 
 function firstKey(object) {
@@ -31,10 +32,16 @@ function groupIDFromSelection(selection, results) {
 // @ngInject
 module.exports = function WidgetController(
   $scope, $rootScope, annotationUI, crossframe, annotationMapper,
-  drafts, groups, settings, streamer, streamFilter, store, threading
+  drafts, groups, rootThread, settings, streamer, streamFilter, store
 ) {
-  $scope.threadRoot = threading.root;
+
   $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
+
+  function annotationExists(id) {
+    return annotationUI.getState().annotations.some(function (annot) {
+      return annot.id === id;
+    });
+  }
 
   function focusAnnotation(annotation) {
     var highlights = [];
@@ -60,20 +67,22 @@ module.exports = function WidgetController(
   function firstSelectedAnnotation() {
     if (annotationUI.getState().selectedAnnotationMap) {
       var id = Object.keys(annotationUI.getState().selectedAnnotationMap)[0];
-      return threading.idTable[id] && threading.idTable[id].message;
+      return annotationUI.getState().annotations.find(function (annot) {
+        return annot.id === id;
+      });
     } else {
       return null;
     }
   }
 
+  var searchClients = [];
+
   function _resetAnnotations() {
     // Unload all the annotations
-    annotationMapper.unloadAnnotations(threading.annotationList());
+    annotationMapper.unloadAnnotations(annotationUI.getState().annotations);
     // Reload all the drafts
-    threading.thread(drafts.unsaved());
+    annotationUI.addAnnotations(drafts.unsaved());
   }
-
-  var searchClients = [];
 
   function _loadAnnotationsFor(uri, group) {
     var searchClient = new SearchClient(store.SearchResource, {
@@ -196,6 +205,30 @@ module.exports = function WidgetController(
     return crossframe.frames;
   }, loadAnnotations);
 
+  // Watch the inputs that determine which annotations are currently
+  // visible and how they are sorted and rebuild the thread when they change
+  $scope.$watch('sort.name', function (mode) {
+    annotationUI.sortBy(mode);
+  });
+  $scope.$watch('search.query', function (query) {
+    annotationUI.setFilterQuery(query);
+  });
+
+  $scope.rootThread = function () {
+    return rootThread.thread();
+  };
+
+  $scope.setCollapsed = function (id, collapsed) {
+    annotationUI.setCollapsed(id, collapsed);
+  };
+
+  $scope.forceVisible = function (thread) {
+    annotationUI.setForceVisible(thread.id, true);
+    if (thread.parent) {
+      annotationUI.setCollapsed(thread.parent.id, false);
+    }
+  };
+
   $scope.focus = focusAnnotation;
   $scope.scrollTo = scrollToAnnotation;
 
@@ -206,14 +239,19 @@ module.exports = function WidgetController(
     return annotation.$$tag in annotationUI.getState().focusedAnnotationMap;
   };
 
-  function selectedID() {
-    return firstKey(annotationUI.getState().selectedAnnotationMap);
-  }
+  $scope.selectedAnnotationCount = function () {
+    var selection = annotationUI.getState().selectedAnnotationMap;
+    if (!selection) {
+      return 0;
+    }
+    return Object.keys(selection).length;
+  };
 
   $scope.selectedAnnotationUnavailable = function () {
+    var selectedID = firstKey(annotationUI.getState().selectedAnnotationMap);
     return !isLoading() &&
-           !!selectedID() &&
-           !threading.idTable[selectedID()];
+           !!selectedID &&
+           !annotationExists(selectedID);
   };
 
   $scope.shouldShowLoggedOutMessage = function () {
@@ -231,21 +269,32 @@ module.exports = function WidgetController(
     // The user is logged out and has landed on a direct linked
     // annotation. If there is an annotation selection and that
     // selection is available to the user, show the CTA.
+    var selectedID = firstKey(annotationUI.getState().selectedAnnotationMap);
     return !isLoading() &&
-           !!selectedID() &&
-           !!threading.idTable[selectedID()];
+           !!selectedID &&
+           annotationExists(selectedID);
   };
 
   $scope.isLoading = isLoading;
 
+  var visibleCount = memoize(function (thread) {
+    return thread.children.reduce(function (count, child) {
+      return count + visibleCount(child);
+    }, thread.visible ? 1 : 0);
+  });
+
+  $scope.visibleCount = function () {
+    return visibleCount(rootThread.thread());
+  };
+
   $scope.topLevelThreadCount = function () {
-    return threading.root.children.length;
+    return rootThread.thread().totalChildren;
   };
 
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
     if (data.$highlight || (data.references && data.references.length > 0)) {
       return;
     }
-    return $scope.clearSelection();
+    $scope.clearSelection();
   });
 };
