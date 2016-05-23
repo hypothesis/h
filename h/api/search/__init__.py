@@ -71,6 +71,7 @@ def includeme(config):
     # request.legacy_es is always a client for the legacy Elasticsearch index,
     # regardless of whether the 'postgres' feature flag is on.
     # This should be used to write to the legacy search index.
+    # TODO: Remove when postgres migration is done
     config.add_request_method(
         lambda r: _legacy_get_client(r.registry.settings),
         name='legacy_es',
@@ -79,6 +80,7 @@ def includeme(config):
     # request.new_es is always a client for the legacy Elasticsearch index,
     # regardless of whether the 'postgres' feature flag is on.
     # This should be used to write to the new search index.
+    # TODO: Remove when postgres migration is done
     config.add_request_method(
         lambda r: _get_client(r.registry.settings),
         name='new_es',
