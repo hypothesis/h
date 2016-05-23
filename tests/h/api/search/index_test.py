@@ -111,6 +111,30 @@ class TestDeleteAnnotation:
         return patch('h.api.search.index.log')
 
 
+@pytest.mark.usefixtures('BatchIndexer', 'BatchDeleter')
+class TestReindex(object):
+    def test_it_indexes_all_annotations(self, BatchIndexer):
+        index.reindex(mock.sentinel.session, mock.sentinel.es, mock.sentinel.request)
+
+        BatchIndexer.assert_called_once_with(
+            mock.sentinel.session, mock.sentinel.es, mock.sentinel.request)
+        assert BatchIndexer.return_value.index_all.called
+
+    def test_it_removes_all_deleted_annotations(self, BatchDeleter):
+        index.reindex(mock.sentinel.session, mock.sentinel.es, mock.sentinel.request)
+
+        BatchDeleter.assert_called_once_with(mock.sentinel.session, mock.sentinel.es)
+        assert BatchDeleter.return_value.delete_all.called
+
+    @pytest.fixture
+    def BatchIndexer(self, patch):
+        return patch('h.api.search.index.BatchIndexer')
+
+    @pytest.fixture
+    def BatchDeleter(self, patch):
+        return patch('h.api.search.index.BatchDeleter')
+
+
 class TestBatchIndexer(object):
     def test_index_all(self, indexer, index):
         indexer.index_all()

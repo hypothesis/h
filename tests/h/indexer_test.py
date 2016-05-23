@@ -50,29 +50,17 @@ class TestDeleteAnnotation(object):
         return patch('h.indexer.delete')
 
 
-@pytest.mark.usefixtures('celery', 'BatchIndexer', 'BatchDeleter')
+@pytest.mark.usefixtures('celery')
 class TestReindex(object):
-    def test_it_indexes_all_annotations(self, celery, BatchIndexer):
-        indexer.reindex()
+    def test_it_reindexes(self, celery, reindex):
+        indexer.reindex_annotations()
 
-        BatchIndexer.assert_called_once_with(
-            celery.request.db, celery.request.es, celery.request)
-        assert BatchIndexer.return_value.index_all.called
-
-    def test_it_removes_all_deleted_annotations(self, celery, BatchDeleter):
-        indexer.reindex()
-
-        BatchDeleter.assert_called_once_with(
-            celery.request.db, celery.request.es)
-        assert BatchDeleter.return_value.delete_all.called
+        reindex.assert_called_once_with(
+            celery.request.db, celery.request.new_es, celery.request)
 
     @pytest.fixture
-    def BatchIndexer(self, patch):
-        return patch('h.indexer.BatchIndexer')
-
-    @pytest.fixture
-    def BatchDeleter(self, patch):
-        return patch('h.indexer.BatchDeleter')
+    def reindex(self, patch):
+        return patch('h.indexer.reindex')
 
 
 @pytest.mark.usefixtures('add_annotation', 'delete_annotation')
@@ -135,6 +123,7 @@ class TestSubscribeAnnotationEvent(object):
 @pytest.fixture
 def celery(patch):
     cel = patch('h.indexer.celery')
-    cel.request = DummyRequest(db=mock.Mock(), es=mock.Mock(), feature=mock.Mock())
+    cel.request = DummyRequest(
+        db=mock.Mock(), es=mock.Mock(), new_es=mock.Mock(), feature=mock.Mock())
     cel.request.feature.return_value = True
     return cel

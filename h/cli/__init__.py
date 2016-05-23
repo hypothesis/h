@@ -19,6 +19,7 @@ SUBCOMMANDS = (
     'h.cli.commands.celery.celery',
     'h.cli.commands.devserver.devserver',
     'h.cli.commands.initdb.initdb',
+    'h.cli.commands.legacy_reindex.legacy_reindex',
     'h.cli.commands.migrate.migrate',
     'h.cli.commands.reindex.reindex',
 )

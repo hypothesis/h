@@ -43,7 +43,7 @@ celery.conf.update(
     CELERY_ROUTES={
         'h.indexer.add_annotation': 'indexer',
         'h.indexer.delete_annotation': 'indexer',
-        'h.indexer.reindex': 'indexer',
+        'h.indexer.reindex_annotations': 'indexer',
     },
     CELERY_TASK_SERIALIZER='json',
     CELERY_QUEUES=[

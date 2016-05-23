@@ -84,6 +84,14 @@ def delete(es, annotation_id):
                       'search index, annotation id: %s', annotation_id)
 
 
+def reindex(session, es, request):
+    indexing = BatchIndexer(session, es, request)
+    indexing.index_all()
+
+    deleting = BatchDeleter(session, es)
+    deleting.delete_all()
+
+
 class BatchIndexer(object):
     """
     A convenience class for reindexing all annotations from the database to
