@@ -333,10 +333,41 @@ module.exports = function WidgetController(
     return rootThread.thread().totalChildren;
   };
 
+  /**
+   * Return the offset between the top of the window and the top of the
+   * first annotation card.
+   */
+  function cardListYOffset() {
+    var cardListTopEl = document.querySelector('.js-thread-list-top');
+    return cardListTopEl.getBoundingClientRect().top + window.pageYOffset;
+  }
+
+  /** Scroll the annotation with a given ID or $$tag into view. */
+  function scrollIntoView(id) {
+    var estimatedYOffset = visibleThreads.yOffsetOf(id);
+    var estimatedPos = estimatedYOffset - cardListYOffset();
+
+    window.scroll(0, estimatedPos);
+
+    // As a result of scrolling the sidebar, the heights of some of the cards
+    // above `id` might change because the initial estimate will be replaced by
+    // the actual known height after a card is rendered.
+    //
+    // So we wait briefly after the view is scrolled then check whether the
+    // estimated Y offset changed and if so, trigger scrolling again.
+    scopeTimeout($scope, function () {
+      var newYOffset = visibleThreads.yOffsetOf(id);
+      if (newYOffset !== estimatedYOffset) {
+        scrollIntoView(id);
+      }
+    }, 200);
+  }
+
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
     if (data.$highlight || (data.references && data.references.length > 0)) {
       return;
     }
     $scope.clearSelection();
+    scrollIntoView(data.$$tag);
   });
 };

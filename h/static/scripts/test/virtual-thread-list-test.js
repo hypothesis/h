@@ -154,4 +154,28 @@ describe('VirtualThreadList', function () {
       event: 'scroll',
     }]);
   });
+
+  describe('#yOffsetOf', function () {
+    unroll('returns #offset as the Y offset of the #nth thread', function (testCase) {
+      var thread = generateRootThread(10);
+      threadList.setRootThread(thread);
+      idRange(0, 10).forEach(function (id) {
+        threadList.setThreadHeight(id, 100);
+      });
+      var id = idRange(testCase.index, testCase.index)[0];
+      assert.equal(threadList.yOffsetOf(id), testCase.offset);
+    }, [{
+      nth: 'first',
+      index: 0,
+      offset: 0,
+    },{
+      nth: 'second',
+      index: 1,
+      offset: 100,
+    },{
+      nth: 'last',
+      index: 9,
+      offset: 900,
+    }]);
+  });
 });

@@ -82,6 +82,28 @@ VirtualThreadList.prototype.setThreadHeight = function (id, height) {
   this._heights[id] = height;
 };
 
+VirtualThreadList.prototype._height = function (id) {
+  // Default guess of the height required for a threads that have not been
+  // measured
+  var DEFAULT_HEIGHT = 200;
+  return this._heights[id] || DEFAULT_HEIGHT;
+};
+
+/** Return the vertical offset of an annotation card from the top of the list. */
+VirtualThreadList.prototype.yOffsetOf = function (id) {
+  var self = this;
+  var allThreads = this._rootThread.children;
+  var matchIndex = allThreads.findIndex(function (thread) {
+    return thread.id === id;
+  });
+  if (matchIndex === -1) {
+    return 0;
+  }
+  return allThreads.slice(0, matchIndex).reduce(function (offset, thread) {
+    return offset + self._height(thread.id);
+  }, 0);
+};
+
 /**
  * Recalculates the set of visible threads and estimates of the amount of space
  * required for offscreen threads above and below the viewport.
@@ -94,9 +116,6 @@ VirtualThreadList.prototype._updateVisibleThreads = function () {
   var MARGIN_ABOVE = 800;
   // Same as MARGIN_ABOVE but for the space below the viewport
   var MARGIN_BELOW = 800;
-  // Default guess of the height required for a threads that have not been
-  // measured
-  var DEFAULT_HEIGHT = 200;
 
   // Estimated height in pixels of annotation cards which are below the
   // viewport and not actually created. This is used to create an empty spacer
@@ -116,7 +135,7 @@ VirtualThreadList.prototype._updateVisibleThreads = function () {
 
   for (var i = 0; i < allThreads.length; i++) {
     thread = allThreads[i];
-    var threadHeight = this._heights[thread.id] || DEFAULT_HEIGHT;
+    var threadHeight = this._height(thread.id);
 
     if (usedHeight + threadHeight < this.window.pageYOffset - MARGIN_ABOVE) {
       // Thread is above viewport
