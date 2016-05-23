@@ -11,7 +11,7 @@ from h.api.search import config
               help='Whether to update the current index alias on completion.')
 @click.argument('target')
 @click.pass_context
-def reindex(ctx, target, update_alias):
+def legacy_reindex(ctx, target, update_alias):
     """
     Reindex the annotations into a new Elasticsearch index.
 
