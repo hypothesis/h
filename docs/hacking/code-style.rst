@@ -1,42 +1,46 @@
 Code style
 ##########
 
-Notes on code style follow for the different languages used in the
-project. Most important, though, is to follow the style of the code
-you are modifying, if your edits are not new files.
-
-Please stick to strict, 80-column line limits except for small
-exceptions that would still be readable if they were truncated.
-
-Eliminate trailing whitespace wherever possible.
-
-Linting
--------
-
-We run a variety of analysis tools on the python codebase using the prospector
-package. This is run by the CI on each push but can also be run manually
-via the ``lint`` make command::
-
-    $ make lint
+This section contains some code style guidelines for the different programming
+languages used in the project.
 
 
 Python
 ------
-Strict PEP8_. The project also adheres closely to the
-`Google Python Style Guide`_. To reformat code in PEP8_ style,
-you can use the YAPF_ tool::
 
-    $ pip install yapf
-    $ yapf -i <Python source file>
+Follow `PEP 8 <https://www.python.org/dev/peps/pep-0008/>`_, the linting tools
+below can find PEP 8 problems for you automatically.
 
-.. _PEP8: http://www.python.org/dev/peps/pep-0008/
-.. _Google Python Style Guide: https://google-styleguide.googlecode.com/svn/trunk/pyguide.html
-.. _YAPF: https://github.com/google/yapf
+Linting
+```````
+
+We recommend running `Flake8 <https://pypi.python.org/pypi/flake8>`_
+and `Prospector <https://pypi.python.org/pypi/prospector>`_ over your code to
+find bugs and style problems, using the configurations provided in this git
+repo. With our configurations Flake8 is faster and less noisy so is nicer to
+run more frequently, Prospector is more thorough so it can be run less
+frequently and may find some problems that Flake8 missed.
+
+Automated code formatting
+`````````````````````````
+
+You can use `YAPF <https://github.com/google/yapf>`_ (along with the YAPF
+configuration in this git repo) to automatically reformat Python code.
+We don't strictly adhere to YAPF-generated formatting but it can be a useful
+convenience.
+
+Additional reading
+``````````````````
+
+* Although we don't strictly follow all of it, the
+  `Google Python Style Guide <https://google.github.io/styleguide/pyguide.html>`_
+  contains a lot of good advice.
+
 
 JavaScript
 ----------
 
-Like with Python, please follow the `Google JavaScript Style Guide`_. Additionally, Python-like
+Please follow the `Google JavaScript Style Guide`_. Additionally, Python-like
 spacing is followed for blank lines.
 
 .. _Google JavaScript Style Guide: https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
