@@ -75,10 +75,12 @@ VirtualThreadList.prototype.setRootThread = function (thread) {
  * is used.
  *
  * @param {string} id - The annotation ID or $$tag
- * @param {number?} height - The height of the annotation or undefined to
- *        revert to the default height for this thread.
+ * @param {number} height - The height of the annotation thread.
  */
 VirtualThreadList.prototype.setThreadHeight = function (id, height) {
+  if (isNaN(height) || height <= 0) {
+    throw new Error('Invalid thread height %d', height);
+  }
   this._heights[id] = height;
 };
 

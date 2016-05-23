@@ -286,18 +286,14 @@ describe('WidgetController', function () {
 
   describe('when a new annotation is created', function () {
     var windowScroll;
-    var cardListTopEl;
 
     beforeEach(function () {
       $scope.clearSelection = sinon.stub();
       windowScroll = sinon.stub(window, 'scroll');
-      cardListTopEl = $('<div class="js-thread-list-top"></div>');
-      cardListTopEl.appendTo(document.body);
     });
 
     afterEach(function () {
       windowScroll.restore();
-      cardListTopEl.remove();
     });
 
     /**
