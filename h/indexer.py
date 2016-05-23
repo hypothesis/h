@@ -7,13 +7,12 @@ from h.celery import celery
 from h.api import storage
 from h.api.search.index import index
 from h.api.search.index import delete
-from h.api.search.index import BatchIndexer
-from h.api.search.index import BatchDeleter
+from h.api.search.index import reindex
 
 __all__ = (
     'add_annotation',
     'delete_annotation',
-    'reindex',
+    'reindex_annotations',
 )
 
 
@@ -32,15 +31,11 @@ def delete_annotation(id_):
 
 
 @celery.task
-def reindex():
+def reindex_annotations():
     if not celery.request.feature('postgres'):
         return
 
-    indexing = BatchIndexer(celery.request.db, celery.request.es, celery.request)
-    indexing.index_all()
-
-    deleting = BatchDeleter(celery.request.db, celery.request.es)
-    deleting.delete_all()
+    reindex(celery.request.db, celery.request.new_es, celery.request)
 
 
 def subscribe_annotation_event(event):
