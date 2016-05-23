@@ -1,3 +1,29 @@
+Unreleased
+==========
+
+Features
+--------
+
+- It is now possible to authenticate to the WebSocket using an API token
+  (#3345).
+
+Bug fixes
+---------
+
+- The search `limit` parameter is now clamped within a range of acceptable
+  values (#3341).
+
+Miscellanea
+-----------
+
+- The setting for the WebSocket URL has changed from `H_WEBSOCKET_URL` to
+  `WEBSOCKET_URL` (#3329).
+
+- Added a code of conduct to the project repository (e3fad12).
+
+- Numerous important changes to support the upcoming migration of annotation
+  data to PostgreSQL (#3323, #3349, #3350, 4c25cd8).
+
 0.22.0 (2016-05-12)
 ===================
 
