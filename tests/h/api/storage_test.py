@@ -601,30 +601,6 @@ class TestUpdateAnnotation(object):
 
 
 @pytest.mark.usefixtures('fetch_annotation')
-class TestDeleteAnnotationLegacy(object):
-
-    """Tests for delete_annotation() when the postgres feature flag is off."""
-
-    def test_it_only_fetches_the_legacy_annotation(self, fetch_annotation):
-        request = self.mock_request()
-
-        storage.delete_annotation(request, "test_id")
-
-        fetch_annotation.assert_called_once_with(
-            request, "test_id", _postgres=False)
-
-    def test_it_deletes_the_legacy_annotation(self, fetch_annotation):
-        storage.delete_annotation(self.mock_request(), "test_id")
-
-        fetch_annotation.return_value.delete.assert_called_once_with()
-
-    def mock_request(self):
-        request = DummyRequest()
-        request.feature = mock.Mock(return_value=False)
-        return request
-
-
-@pytest.mark.usefixtures('fetch_annotation')
 class TestDeleteAnnotation(object):
 
     def test_it_fetches_the_annotation(self, fetch_annotation, mock_request):
@@ -645,25 +621,6 @@ class TestDeleteAnnotation(object):
         storage.delete_annotation(mock_request, "test_id")
 
         mock_request.db.delete.assert_called_once_with(first_return_value)
-
-    def test_it_fetches_the_legacy_annotation(self, fetch_annotation, mock_request):
-        storage.delete_annotation(mock_request, "test_id")
-
-        assert fetch_annotation.call_args == mock.call(mock_request,
-                                                       "test_id",
-                                                       _postgres=False)
-
-    def test_it_deletes_the_legacy_annotation(self, fetch_annotation, mock_request):
-        first_return_value = mock.Mock()
-        second_return_value = mock.Mock()
-        fetch_annotation.side_effect = [
-            first_return_value,
-            second_return_value,
-        ]
-
-        storage.delete_annotation(mock_request, "test_id")
-
-        second_return_value.delete.assert_called_once_with()
 
     @pytest.fixture
     def mock_request(self, session):
