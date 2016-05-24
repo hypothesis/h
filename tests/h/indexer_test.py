@@ -66,17 +66,9 @@ class TestReindex(object):
 @pytest.mark.usefixtures('add_annotation', 'delete_annotation')
 class TestSubscribeAnnotationEvent(object):
 
-    def test_it_skips_enqueueing_when_postgres_is_off(self, add_annotation, delete_annotation):
-        event = self.event('create', 'test_annotation_id')
-        event.request.feature.return_value = False
-
-        assert not delete_annotation.delay.called
-        assert not add_annotation.delay.called
-
     def test_it_enqueues_add_annotation_celery_task_for_create_action(
             self, add_annotation, delete_annotation):
         event = self.event('create', 'test_annotation_id')
-        event.request.feature.return_value = True
 
         indexer.subscribe_annotation_event(event)
 
@@ -86,7 +78,6 @@ class TestSubscribeAnnotationEvent(object):
     def test_it_enqueues_add_annotation_celery_task_for_update_action(
             self, add_annotation, delete_annotation):
         event = self.event('update', 'test_annotation_id')
-        event.request.feature.return_value = True
 
         indexer.subscribe_annotation_event(event)
 
@@ -96,7 +87,6 @@ class TestSubscribeAnnotationEvent(object):
     def test_it_enqueues_delete_annotation_celery_task_for_delete_action(
             self, add_annotation, delete_annotation):
         event = self.event('delete', 'test_annotation_id')
-        event.request.feature.return_value = True
 
         indexer.subscribe_annotation_event(event)
 
@@ -123,7 +113,5 @@ class TestSubscribeAnnotationEvent(object):
 @pytest.fixture
 def celery(patch):
     cel = patch('h.indexer.celery')
-    cel.request = DummyRequest(
-        db=mock.Mock(), es=mock.Mock(), feature=mock.Mock())
-    cel.request.feature.return_value = True
+    cel.request = DummyRequest(db=mock.Mock(), es=mock.Mock())
     return cel

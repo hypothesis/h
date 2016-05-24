@@ -32,16 +32,10 @@ def delete_annotation(id_):
 
 @celery.task
 def reindex_annotations():
-    if not celery.request.feature('postgres'):
-        return
-
     reindex(celery.request.db, celery.request.es, celery.request)
 
 
 def subscribe_annotation_event(event):
-    if not event.request.feature('postgres'):
-        return
-
     if event.action in ['create', 'update']:
         add_annotation.delay(event.annotation_id)
     elif event.action == 'delete':
