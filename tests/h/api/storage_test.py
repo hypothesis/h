@@ -195,11 +195,7 @@ class TestCreateAnnotation(object):
         storage.create_annotation(self.mock_request(), data)
 
     def mock_request(self):
-        request = DummyRequest(
-            feature=mock.Mock(
-                side_effect=lambda flag: flag == "postgres_write"),
-            authenticated_userid='acct:test@localhost'
-        )
+        request = DummyRequest(authenticated_userid='acct:test@localhost')
 
         request.registry.notify = mock.Mock(spec=lambda event: None)
 
