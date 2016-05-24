@@ -14,7 +14,6 @@ log = logging.getLogger(__name__)
 FEATURES = {
     'direct_linking': "Generate direct links to annotations in context in the client?",
     'new_homepage': "Show the new homepage design?",
-    'postgres': 'Read/write annotation and document data from/to postgres'
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.
@@ -38,6 +37,7 @@ FEATURES = {
 FEATURES_PENDING_REMOVAL = {
     'claim': "Enable 'claim your username' web views?",
     'ops_disable_streamer_uri_equivalence': "[Ops] Disable streamer URI equivalence support?",
+    'postgres': 'Read/write annotation and document data from/to postgres',
 }
 
 
