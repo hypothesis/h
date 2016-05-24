@@ -6,7 +6,6 @@ import pytest
 from pyramid.testing import DummyRequest
 
 from h import db
-from h.api.models import elastic
 from h.models import Annotation
 from h.models import Document, DocumentMeta
 from h.models import Subscriptions
@@ -15,25 +14,13 @@ from h.notification.reply import Notification
 from h.notification.reply import get_notification
 
 FIXTURE_DATA = {
-    'reply_elastic': {
-        'id': 'OECV3AmDEeaAtTt8rjCjIg',
-        'group': '__world__',
-        'permissions': {'read': ['group:__world__']},
-        'user': 'acct:elephant@safari.net',
-    },
-    'parent_elastic': {
-        'id': 'SucHcAmDEeaAtf_ZeH-rhA',
-        'group': '__world__',
-        'permissions': {'read': ['group:__world__']},
-        'user': 'acct:giraffe@safari.net',
-    },
-    'reply_postgres': {
+    'reply': {
         'id': 'OECV3AmDEeaAtTt8rjCjIg',
         'groupid': '__world__',
         'shared': True,
         'userid': 'acct:elephant@safari.net',
     },
-    'parent_postgres': {
+    'parent': {
         'id': 'SucHcAmDEeaAtf_ZeH-rhA',
         'groupid': '__world__',
         'shared': True,
@@ -63,12 +50,9 @@ class TestGetNotification(object):
         assert get_notification(request, reply, 'delete') is None
         assert get_notification(request, reply, 'frobnicate') is None
 
-    def test_returns_none_when_annotation_is_not_reply(self, reply, storage_driver):
+    def test_returns_none_when_annotation_is_not_reply(self, reply):
         request = DummyRequest(db=db.Session)
-        if storage_driver == 'elastic':
-            del reply['references']
-        else:
-            reply.references = None
+        reply.references = None
 
         result = get_notification(request, reply, 'create')
 
@@ -115,23 +99,17 @@ class TestGetNotification(object):
 
         assert result is None
 
-    def test_returns_none_when_reply_by_same_user(self, reply, parent, storage_driver):
+    def test_returns_none_when_reply_by_same_user(self, reply, parent):
         request = DummyRequest(db=db.Session)
-        if storage_driver == 'elastic':
-            parent['user'] = 'acct:elephant@safari.net'
-        else:
-            parent.userid = 'acct:elephant@safari.net'
+        parent.userid = 'acct:elephant@safari.net'
 
         result = get_notification(request, reply, 'create')
 
         assert result is None
 
-    def test_returns_none_when_parent_user_cannot_read_reply(self, reply, storage_driver):
+    def test_returns_none_when_parent_user_cannot_read_reply(self, reply):
         request = DummyRequest(db=db.Session)
-        if storage_driver == 'elastic':
-            reply['permissions'] = {'read': ['acct:elephant@safari.net']}
-        else:
-            reply.shared = False
+        reply.shared = False
 
         result = get_notification(request, reply, 'create')
 
@@ -179,41 +157,29 @@ class TestGetNotification(object):
         return get_user
 
     @pytest.fixture
-    def parent(self, annotations, storage_driver):
-        if storage_driver == 'elastic':
-            parent = elastic.Annotation(**FIXTURE_DATA['parent_elastic'])
-        else:
-            parent = Annotation(**FIXTURE_DATA['parent_postgres'])
+    def parent(self, annotations):
+        parent = Annotation(**FIXTURE_DATA['parent'])
         annotations[parent.id] = parent
         return parent
 
     @pytest.fixture
-    def reply(self, annotations, storage_driver, parent):
-        if storage_driver == 'elastic':
-            reply = elastic.Annotation(**FIXTURE_DATA['reply_elastic'])
-            reply['document'] = {'title': ['Some document']}
-            reply['references'] = [parent.id]
-        else:
-            # We need to create a document object to provide the title, and
-            # ensure it is associated with the annotation through the
-            # annotation's `target_uri`
-            doc = Document.find_or_create_by_uris(db.Session,
-                                                  claimant_uri='http://example.net/foo',
-                                                  uris=[]).one()
-            doc.meta.append(DocumentMeta(type='title',
-                                         value=['Some document'],
-                                         claimant='http://example.com/foo'))
-            reply = Annotation(**FIXTURE_DATA['reply_postgres'])
-            reply.target_uri = 'http://example.net/foo'
-            reply.references = [parent.id]
-            db.Session.add(reply)
-            db.Session.flush()
+    def reply(self, annotations, parent):
+        # We need to create a document object to provide the title, and
+        # ensure it is associated with the annotation through the
+        # annotation's `target_uri`
+        doc = Document.find_or_create_by_uris(db.Session,
+                                              claimant_uri='http://example.net/foo',
+                                              uris=[]).one()
+        doc.meta.append(DocumentMeta(type='title',
+                                     value=['Some document'],
+                                     claimant='http://example.com/foo'))
+        reply = Annotation(**FIXTURE_DATA['reply'])
+        reply.target_uri = 'http://example.net/foo'
+        reply.references = [parent.id]
+        db.Session.add(reply)
+        db.Session.flush()
         annotations[reply.id] = reply
         return reply
-
-    @pytest.fixture(params=['elastic', 'postgres'])
-    def storage_driver(self, request):
-        return request.param
 
     @pytest.fixture
     def subscription(self):
