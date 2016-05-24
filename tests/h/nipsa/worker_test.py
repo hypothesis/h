@@ -88,7 +88,7 @@ def test_bulk_update_annotations_calls_bulk_with_actions(helpers):
 @mock.patch("h.nipsa.worker.search", autospec=True)
 class TestAddNipsa(object):
     def test_calls_bulk_update_annotations(self, search, celery, bulk):
-        celery.request = mock.Mock(spec_set=['feature', 'legacy_es', 'es'])
+        celery.request = mock.Mock(spec_set=['feature', 'es'])
         celery.request.feature.return_value = True
         expected_query = search.not_nipsad_annotations('acct:jeannie@example.com')
 
@@ -98,24 +98,13 @@ class TestAddNipsa(object):
                              expected_query,
                              worker.add_nipsa_action)
 
-    def test_add_nipsa_calls_bulk_update_annotations_with_legacy_es(self, search, celery, bulk):
-        celery.request = mock.Mock(spec_set=['feature', 'legacy_es'])
-        celery.request.feature.return_value = False
-        expected_query = search.not_nipsad_annotations('acct:jeannie@example.com')
-
-        worker.add_nipsa('acct:jeannie@example.com')
-
-        bulk.assert_called_once_with(celery.request.legacy_es,
-                                     expected_query,
-                                     worker.add_nipsa_action)
-
 
 @mock.patch("h.nipsa.worker.bulk_update_annotations", autospec=True)
 @mock.patch("h.nipsa.worker.celery", autospec=True)
 @mock.patch("h.nipsa.worker.search", autospec=True)
 class TestRemoveNipsa(object):
     def test_remove_nipsa_calls_bulk_update_annotations(self, search, celery, bulk):
-        celery.request = mock.Mock(spec_set=['feature', 'es', 'legacy_es'])
+        celery.request = mock.Mock(spec_set=['feature', 'es'])
         celery.request.feature.return_value = True
         expected_query = search.nipsad_annotations('acct:jeannie@example.com')
 
@@ -124,14 +113,3 @@ class TestRemoveNipsa(object):
         bulk.assert_any_call(celery.request.es,
                              expected_query,
                              worker.remove_nipsa_action)
-
-    def test_remove_nipsa_calls_bulk_update_annotations_with_legacy_es(self, search, celery, bulk):
-        celery.request = mock.Mock(spec_set=['feature', 'legacy_es'])
-        celery.request.feature.return_value = False
-        expected_query = search.nipsad_annotations('acct:jeannie@example.com')
-
-        worker.remove_nipsa('acct:jeannie@example.com')
-
-        bulk.assert_called_once_with(celery.request.legacy_es,
-                                     expected_query,
-                                     worker.remove_nipsa_action)
