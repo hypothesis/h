@@ -16,18 +16,8 @@ from h.api.models.document import Document, DocumentURI
 
 class TestFetchAnnotation(object):
 
-    def test_elastic(self, postgres_enabled, models):
-        postgres_enabled.return_value = False
-        models.elastic.Annotation.fetch.return_value = mock.Mock()
-
-        actual = storage.fetch_annotation(DummyRequest(), '123')
-
-        models.elastic.Annotation.fetch.assert_called_once_with('123')
-        assert models.elastic.Annotation.fetch.return_value == actual
-
-    def test_postgres(self, db_session, postgres_enabled):
+    def test_it_fetches_and_returns_the_annotation(self, db_session):
         request = DummyRequest(db=db_session)
-        postgres_enabled.return_value = True
 
         annotation = Annotation(userid='luke')
         db_session.add(annotation)
@@ -36,37 +26,10 @@ class TestFetchAnnotation(object):
         actual = storage.fetch_annotation(request, annotation.id)
         assert annotation == actual
 
-    def test_it_uses_postgres_if_postgres_arg_is_True(self, db_session, postgres_enabled):
-        """If postgres=True it uses postgres even if feature flag is off."""
-        request = DummyRequest(db=db_session)
-        postgres_enabled.return_value = False  # The feature flag is off.
-        annotation = Annotation(userid='luke')
-        db_session.add(annotation)
-        db_session.flush()
-
-        actual = storage.fetch_annotation(
-            request, annotation.id, _postgres=True)
-
-        assert annotation == actual
-
-    def test_it_uses_elastic_if_postgres_arg_is_False(self,
-                                                      postgres_enabled,
-                                                      models):
-        """If postgres=False it uses elastic even if the feature flag is on."""
-        postgres_enabled.return_value = True  # The feature flag is on.
-        models.elastic.Annotation.fetch.return_value = mock.Mock()
-
-        actual = storage.fetch_annotation(
-            DummyRequest(), '123', _postgres=False)
-
-        models.elastic.Annotation.fetch.assert_called_once_with('123')
-        assert models.elastic.Annotation.fetch.return_value == actual
-
     def test_it_does_not_crash_if_id_is_invalid(self, db_session):
         request = DummyRequest(db=db_session)
-        postgres_enabled.return_value = True
 
-        assert storage.fetch_annotation(request, 'foo', _postgres=True) is None
+        assert storage.fetch_annotation(request, 'foo') is None
 
 
 class TestExpandURI(object):
@@ -131,8 +94,7 @@ class TestCreateAnnotation(object):
         storage.create_annotation(request, data)
 
         fetch_annotation.assert_called_once_with(request,
-                                                 'parent_annotation_id',
-                                                 _postgres=True)
+                                                 'parent_annotation_id')
 
     def test_it_sets_group_for_replies(self,
                                        config,
@@ -414,8 +376,7 @@ class TestDeleteAnnotation(object):
         storage.delete_annotation(mock_request, "test_id")
 
         assert fetch_annotation.call_args_list[0] == mock.call(mock_request,
-                                                               "test_id",
-                                                               _postgres=True)
+                                                               "test_id")
 
     def test_it_deletes_the_annotation(self, fetch_annotation, mock_request):
         first_return_value = mock.Mock()
@@ -447,11 +408,6 @@ def models(patch):
     models = patch('h.api.storage.models', autospec=False)
     models.Annotation.return_value.is_reply = False
     return models
-
-
-@pytest.fixture
-def postgres_enabled(patch):
-    return patch('h.api.storage._postgres_enabled')
 
 
 @pytest.fixture

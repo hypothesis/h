@@ -30,7 +30,7 @@ def annotation_from_dict(data):
     return models.elastic.Annotation(data)
 
 
-def fetch_annotation(request, id_, _postgres=None):
+def fetch_annotation(request, id_):
     """
     Fetch the annotation with the given id.
 
@@ -41,20 +41,13 @@ def fetch_annotation(request, id_, _postgres=None):
     :type id_: str
 
     :returns: the annotation, if found, or None.
-    :rtype: dict, NoneType
+    :rtype: h.api.models.Annotation, NoneType
     """
-    # If no postgres arg is passed then decide whether to use postgres based
-    # on the postgres feature flag.
-    if _postgres is None:
-        _postgres = _postgres_enabled(request)
 
-    if _postgres:
-        try:
-            return request.db.query(models.Annotation).get(id_)
-        except types.InvalidUUID:
-            return None
-
-    return models.elastic.Annotation.fetch(id_)
+    try:
+        return request.db.query(models.Annotation).get(id_)
+    except types.InvalidUUID:
+        return None
 
 
 def create_annotation(request, data):
@@ -202,7 +195,3 @@ def expand_uri(request, uri):
             return [uri]
 
     return [docuri.uri for docuri in docuris]
-
-
-def _postgres_enabled(request):
-    return request.feature('postgres')
