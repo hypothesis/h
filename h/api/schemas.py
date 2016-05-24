@@ -314,44 +314,6 @@ class UpdateAnnotationSchema(object):
         return new_appstruct
 
 
-class LegacyUpdateAnnotationSchema(object):
-
-    """Validate the payload from a user when updating an annotation."""
-
-    def __init__(self, request, annotation):
-        self.request = request
-        self.annotation = annotation
-        self.structure = LegacyAnnotationSchema()
-
-    def validate(self, data):
-        appstruct = self.structure.validate(data)
-
-        _remove_protected_fields(appstruct)
-
-        # The user may not change the permissions of an annotation on which
-        # they are lacking 'admin' rights.
-        userid = self.request.authenticated_userid
-        permissions = self.annotation.get('permissions', {})
-        changing_permissions = (
-            'permissions' in appstruct and
-            appstruct['permissions'] != permissions
-        )
-        if changing_permissions and userid not in permissions.get('admin', []):
-            raise ValidationError('permissions: ' +
-                                  _('You may not change the permissions on '
-                                    'an annotation unless you have the '
-                                    '"admin" permission on that annotation!'))
-
-        # Annotations may not be moved between groups.
-        if 'group' in appstruct and 'group' in self.annotation:
-            if appstruct['group'] != self.annotation['group']:
-                raise ValidationError('group: ' +
-                                      _('You may not move annotations between '
-                                        'groups!'))
-
-        return appstruct
-
-
 def _document(document, claimant):
     """
     Return document meta and document URI data from the given document dict.

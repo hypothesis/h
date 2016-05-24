@@ -170,35 +170,6 @@ def update_annotation(session, id_, data):
     return annotation
 
 
-def legacy_update_annotation(request, id_, data):
-    """
-    Update the annotation with the given id from passed data.
-
-    This executes a partial update of the annotation identified by `id` using
-    the passed data.
-
-    :param request: the request object
-    :type request: pyramid.request.Request
-
-    :param id_: the annotation ID
-    :type id_: str
-
-    :param data: a dictionary of annotation properties
-    :type data: dict
-
-    :returns: the updated annotation
-    :rtype: dict
-    """
-    annotation = models.elastic.Annotation.fetch(id_)
-    annotation.update(data)
-
-    # FIXME: this should happen when indexing, not storing.
-    _prepare(request, annotation)
-
-    annotation.save()
-    return annotation
-
-
 def delete_annotation(request, id_):
     """
     Delete the annotation with the given id.
