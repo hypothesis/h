@@ -108,77 +108,6 @@ class TestExpandURI(object):
         ]
 
 
-@pytest.mark.usefixtures('AnnotationTransformEvent',
-                         'models',  # Don't try to talk to real Elasticsearch!
-                         'partial',
-                         'transform')
-class TestLegacyCreateAnnotation(object):
-
-    def test_it_inits_an_elastic_annotation_model(self, models):
-        data = self.annotation_data()
-
-        storage.legacy_create_annotation(self.mock_request(), data)
-
-        models.elastic.Annotation.assert_called_once_with(data)
-
-    def test_it_creates_a_fetcher_function(self, partial):
-        request = self.mock_request()
-
-        storage.legacy_create_annotation(request, self.annotation_data())
-
-        partial.assert_called_once_with(
-            storage.fetch_annotation, request, _postgres=False)
-
-    def test_it_prepares_the_annotation_for_indexing(self,
-                                                     models,
-                                                     partial,
-                                                     transform):
-        storage.legacy_create_annotation(self.mock_request(),
-                                         self.annotation_data())
-        transform.prepare.assert_called_once_with(
-            models.elastic.Annotation.return_value, partial.return_value)
-
-    def test_it_inits_AnnotationTransformEvent(self,
-                                               AnnotationTransformEvent,
-                                               models):
-        request = self.mock_request()
-
-        storage.legacy_create_annotation(request, self.annotation_data())
-
-        AnnotationTransformEvent.assert_called_once_with(
-            request, models.elastic.Annotation.return_value)
-
-    def test_it_fires_the_AnnotationTransformEvent(self,
-                                                   AnnotationTransformEvent):
-        request = self.mock_request()
-
-        storage.legacy_create_annotation(request, self.annotation_data())
-
-        request.registry.notify.assert_called_once_with(
-            AnnotationTransformEvent.return_value)
-
-    def test_it_saves_the_annotation_to_Elasticsearch(self, models):
-        storage.legacy_create_annotation(self.mock_request(),
-                                         self.annotation_data())
-
-        models.elastic.Annotation.return_value.save.assert_called_once_with()
-
-    def test_it_returns_the_annotation(self, models):
-        result = storage.legacy_create_annotation(self.mock_request(),
-                                                  self.annotation_data())
-
-        assert result == models.elastic.Annotation.return_value
-
-    def mock_request(self):
-        request = DummyRequest(feature=mock.Mock(spec=lambda feature: False,
-                               return_value=False))
-        request.registry.notify = mock.Mock(spec=lambda event: None)
-        return request
-
-    def annotation_data(self):
-        return {'foo': 'bar'}
-
-
 @pytest.mark.usefixtures('models',
                          'update_document_metadata')
 class TestCreateAnnotation(object):
@@ -509,11 +438,6 @@ class TestDeleteAnnotation(object):
 
 
 @pytest.fixture
-def AnnotationTransformEvent(patch):
-    return patch('h.api.storage.AnnotationTransformEvent')
-
-
-@pytest.fixture
 def fetch_annotation(patch):
     return patch('h.api.storage.fetch_annotation')
 
@@ -526,11 +450,6 @@ def models(patch):
 
 
 @pytest.fixture
-def partial(patch):
-    return patch('h.api.storage.partial')
-
-
-@pytest.fixture
 def postgres_enabled(patch):
     return patch('h.api.storage._postgres_enabled')
 
@@ -540,11 +459,6 @@ def session(db_session):
     session = mock.Mock(spec=db_session)
     session.query.return_value.get.return_value.extra = {}
     return session
-
-
-@pytest.fixture
-def transform(patch):
-    return patch('h.api.storage.transform')
 
 
 @pytest.fixture

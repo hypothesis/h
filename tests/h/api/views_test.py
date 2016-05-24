@@ -122,89 +122,6 @@ class TestSearch(object):
                          'AnnotationJSONPresenter',
                          'schemas',
                          'storage')
-class TestCreateLegacy(object):
-
-    """Tests for create() when the 'postgres' feature flag is off."""
-
-    def test_it_raises_if_json_parsing_fails(self, mock_request):
-        """It raises PayloadError if parsing of the request body fails."""
-        # Make accessing the request.json_body property raise ValueError.
-        type(mock_request).json_body = mock.PropertyMock(
-            side_effect=ValueError)
-
-        with pytest.raises(views.PayloadError):
-            views.create(mock_request)
-
-    def test_it_creates_the_annotation_in_legacy_storage(self,
-                                                         mock_request,
-                                                         storage,
-                                                         schemas):
-        schema = schemas.LegacyCreateAnnotationSchema.return_value
-        schema.validate.return_value = {'foo': 123}
-
-        views.create(mock_request)
-
-        storage.legacy_create_annotation.assert_called_once_with(mock_request,
-                                                                 {'foo': 123})
-
-    def test_it_validates_the_posted_data(self, mock_request, schemas):
-        schema = schemas.LegacyCreateAnnotationSchema.return_value
-
-        views.create(mock_request)
-
-        schema.validate.assert_called_once_with(mock_request.json_body)
-
-    def test_it_inits_AnnotationJSONPresenter(self,
-                                              AnnotationJSONPresenter,
-                                              mock_request,
-                                              storage):
-        views.create(mock_request)
-
-        AnnotationJSONPresenter.assert_called_once_with(
-            mock_request, storage.legacy_create_annotation.return_value)
-
-    def test_it_publishes_annotation_event(self,
-                                           AnnotationEvent,
-                                           AnnotationJSONPresenter,
-                                           mock_request,
-                                           storage):
-        """It publishes an annotation "create" event for the annotation."""
-        views.create(mock_request)
-
-        annotation = storage.legacy_create_annotation.return_value
-
-        AnnotationJSONPresenter.assert_called_once_with(mock_request,
-                                                        annotation)
-        presented = AnnotationJSONPresenter.return_value.asdict()
-
-        AnnotationEvent.assert_called_once_with(
-            mock_request,
-            presented,
-            'create')
-        mock_request.notify_after_commit.assert_called_once_with(
-            AnnotationEvent.return_value)
-
-    def test_it_returns_presented_annotation(self,
-                                             AnnotationJSONPresenter,
-                                             mock_request,
-                                             storage):
-        result = views.create(mock_request)
-
-        AnnotationJSONPresenter.assert_called_once_with(
-            mock_request,
-            storage.legacy_create_annotation.return_value)
-        assert result == (
-            AnnotationJSONPresenter.return_value.asdict.return_value)
-
-    @pytest.fixture
-    def mock_request(self):
-        return mock.Mock(feature=mock.Mock(return_value=False))
-
-
-@pytest.mark.usefixtures('AnnotationEvent',
-                         'AnnotationJSONPresenter',
-                         'schemas',
-                         'storage')
 class TestCreate(object):
 
     def test_it_raises_if_json_parsing_fails(self, mock_request):
@@ -258,60 +175,6 @@ class TestCreate(object):
 
         assert exc.value.message == 'asplode'
 
-    def test_it_inits_LegacyCreateAnnotationSchema(self,
-                                                   mock_request,
-                                                   schemas):
-        views.create(mock_request)
-
-        schemas.LegacyCreateAnnotationSchema.assert_called_once_with(
-            mock_request)
-
-    def test_it_validates_the_posted_data_with_the_legacy_schema(self,
-                                                                 mock_request,
-                                                                 schemas):
-        """It should call validate() with request.json_body."""
-        views.create(mock_request)
-
-        schemas.LegacyCreateAnnotationSchema.return_value.validate\
-            .assert_called_once_with(mock_request.json_body)
-
-    def test_it_raises_if_legacy_schema_validate_raises(self,
-                                                        mock_request,
-                                                        schemas):
-        schemas.LegacyCreateAnnotationSchema.return_value.validate\
-            .side_effect = ValidationError('asplode')
-
-        with pytest.raises(ValidationError) as exc:
-            views.create(mock_request)
-
-        assert exc.value.message == 'asplode'
-
-    def test_it_creates_the_annotation_in_legacy_storage(self,
-                                                         mock_request,
-                                                         storage,
-                                                         schemas):
-        """It should call storage.create_annotation() appropriately."""
-        schema = schemas.LegacyCreateAnnotationSchema.return_value
-
-        views.create(mock_request)
-
-        storage.legacy_create_annotation.assert_called_once_with(
-            mock_request,
-            schema.validate.return_value)
-
-    def test_it_reuses_the_postgres_annotation_id_in_elasticsearch(
-            self,
-            mock_request,
-            schemas,
-            storage):
-        schema = schemas.LegacyCreateAnnotationSchema.return_value
-        schema.validate.return_value = {'foo': 123}
-
-        views.create(mock_request)
-
-        assert storage.legacy_create_annotation.call_args[0][1]['id'] == (
-            storage.create_annotation.return_value.id)
-
     def test_it_inits_AnnotationJSONPresenter(self,
                                               AnnotationJSONPresenter,
                                               mock_request,
@@ -351,35 +214,9 @@ class TestCreate(object):
         assert result == (
             AnnotationJSONPresenter.return_value.asdict.return_value)
 
-    def test_it_does_not_save_to_es_if_pg_validation_fails(self,
-                                                           mock_request,
-                                                           schemas,
-                                                           storage):
-        schemas.CreateAnnotationSchema.return_value.validate.side_effect = (
-            ValidationError('asplode'))
-
-        try:
-            views.create(mock_request)
-        except ValidationError:
-            pass
-
-        assert not storage.legacy_create_annotation.called
-
-    def test_it_does_not_save_to_es_if_pg_storage_fails(self,
-                                                        mock_request,
-                                                        storage):
-        storage.create_annotation.side_effect = ValidationError('asplode')
-
-        try:
-            views.create(mock_request)
-        except ValidationError:
-            pass
-
-        assert not storage.legacy_create_annotation.called
-
     @pytest.fixture
     def mock_request(self):
-        return mock.Mock(feature=mock.Mock(return_value=True))
+        return mock.Mock()
 
 
 @pytest.mark.usefixtures('AnnotationJSONPresenter')

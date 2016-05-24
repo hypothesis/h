@@ -7,14 +7,10 @@ for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
 
-from functools import partial
-
 from pyramid import i18n
 
 from h.api import schemas
-from h.api import transform
 from h.api import models
-from h.api.events import AnnotationTransformEvent
 from h.api.db import types
 
 
@@ -61,14 +57,6 @@ def fetch_annotation(request, id_, _postgres=None):
     return models.elastic.Annotation.fetch(id_)
 
 
-def legacy_create_annotation(request, data):
-    annotation = models.elastic.Annotation(data)
-    # FIXME: this should happen when indexing, not storing.
-    _prepare(request, annotation)
-    annotation.save()
-    return annotation
-
-
 def create_annotation(request, data):
     """
     Create an annotation from passed data.
@@ -90,8 +78,7 @@ def create_annotation(request, data):
     if data['references']:
         top_level_annotation_id = data['references'][0]
         top_level_annotation = fetch_annotation(request,
-                                                top_level_annotation_id,
-                                                _postgres=True)
+                                                top_level_annotation_id)
         if top_level_annotation:
             data['groupid'] = top_level_annotation.groupid
         else:
@@ -215,17 +202,6 @@ def expand_uri(request, uri):
             return [uri]
 
     return [docuri.uri for docuri in docuris]
-
-
-def _prepare(request, annotation):
-    """Prepare the given annotation for storage."""
-    fetcher = partial(fetch_annotation, request, _postgres=False)
-    transform.prepare(annotation, fetcher)
-
-    # Fire an AnnotationTransformEvent so subscribers who wish to modify an
-    # annotation before save can do so.
-    event = AnnotationTransformEvent(request, annotation)
-    request.registry.notify(event)
 
 
 def _postgres_enabled(request):

@@ -151,39 +151,6 @@ class AnnotationSchema(JSONSchema):
     }
 
 
-class LegacyAnnotationSchema(JSONSchema):
-
-    """Validate an annotation object."""
-
-    schema = {
-        'type': 'object',
-        'properties': {
-            'document': {
-                'type': 'object',
-                'properties': {
-                    'link': {
-                        'type': 'array',
-                    },
-                },
-            },
-            'permissions': {
-                'title': 'Permissions',
-                'description': 'Annotation action access control list',
-                'type': 'object',
-                'patternProperties': {
-                    '^(admin|delete|read|update)$': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'string',
-                            'pattern': '^(acct:|group:).+$',
-                        },
-                    }
-                },
-            },
-        },
-    }
-
-
 class CreateAnnotationSchema(object):
 
     """Validate the POSTed data of a create annotation request."""
@@ -231,37 +198,6 @@ class CreateAnnotationSchema(object):
         new_appstruct['extra'] = appstruct
 
         return new_appstruct
-
-
-class LegacyCreateAnnotationSchema(object):
-
-    """Validate the payload from a user when creating an annotation."""
-
-    def __init__(self, request):
-        self.request = request
-        self.structure = LegacyAnnotationSchema()
-
-    def validate(self, data):
-        appstruct = self.structure.validate(data)
-
-        _remove_protected_fields(appstruct)
-
-        # Set the annotation user field to the request user.
-        appstruct['user'] = self.request.authenticated_userid
-
-        # Assert that the user has permission to create an annotation in the
-        # group they've asked to create one in.
-        if 'group' in appstruct:
-            if appstruct['group'] == '__world__':
-                group_principal = security.Authenticated
-            else:
-                group_principal = 'group:{}'.format(appstruct['group'])
-            if group_principal not in self.request.effective_principals:
-                raise ValidationError('group: ' +
-                                      _('You may not create annotations in '
-                                        'groups you are not a member of!'))
-
-        return appstruct
 
 
 class UpdateAnnotationSchema(object):

@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import mock
 from pyramid import testing
-from pyramid import security
 import pytest
 
 from h.api import schemas
@@ -371,118 +370,6 @@ class TestCreateUpdateAnnotationSchema(object):
         appstruct = validate({})
 
         assert not appstruct.get('extra')
-
-
-class TestLegacyCreateAnnotationSchema(object):
-
-    def test_it_passes_input_to_structure_validator(self, mock_request):
-        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
-        schema.structure = mock.Mock()
-        schema.structure.validate.return_value = {}
-
-        schema.validate({'foo': 'bar'})
-
-        schema.structure.validate.assert_called_once_with({'foo': 'bar'})
-
-    def test_it_raises_if_structure_validator_raises(self, mock_request):
-        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
-        schema.structure = mock.Mock()
-        schema.structure.validate.side_effect = (
-            schemas.ValidationError('asplode'))
-
-        with pytest.raises(schemas.ValidationError):
-            schema.validate({'foo': 'bar'})
-
-    @pytest.mark.parametrize('field', [
-        'created',
-        'updated',
-        'id',
-        'links',
-    ])
-    def test_it_removes_protected_fields(self, field, mock_request):
-        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
-        data = {}
-        data[field] = 'something forbidden'
-
-        appstruct = schema.validate(data)
-
-        assert field not in appstruct
-
-    @pytest.mark.parametrize('data', [
-        {},
-        {'user': None},
-        {'user': 'acct:foo@bar.com'},
-    ])
-    def test_it_ignores_input_user(self, data, config, mock_request):
-        """Any user field sent in the payload should be ignored."""
-        config.testing_securitypolicy(userid='acct:jeanie@example.com')
-        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
-
-        appstruct = schema.validate(data)
-
-        assert appstruct['user'] == 'acct:jeanie@example.com'
-
-    @pytest.mark.parametrize('data,userid,groupids,ok', [
-        # No group supplied
-        ({}, None, [], True),
-
-        # World group
-        ({'group': '__world__'}, None, [], False),
-        ({'group': '__world__'}, 'acct:foo@example.com', [], True),
-
-        # Other group
-        ({'group': 'abcdef'}, None, [], False),
-        ({'group': 'abcdef'}, 'acct:foo@example.com', [], False),
-        ({'group': 'abcdef'}, 'acct:foo@example.com', ['group:abcdef'], True),
-    ])
-    def test_it_rejects_annotations_to_other_groups(self,
-                                                    data,
-                                                    userid,
-                                                    groupids,
-                                                    ok,
-                                                    config,
-                                                    mock_request):
-        """
-        A user cannot create an annotation in a group they're not a member of.
-
-        If a group is specified in the annotation, then reject the creation if
-        the relevant group principal is not present in the request's effective
-        principals.
-        """
-        config.testing_securitypolicy(userid, groupids)
-        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
-
-        if ok:
-            appstruct = schema.validate(data)
-            assert appstruct.get('group') == data.get('group')
-
-        else:
-            with pytest.raises(schemas.ValidationError) as exc:
-                schema.validate(data)
-            assert exc.value.message.startswith('group:')
-
-    @pytest.mark.parametrize('data', [
-        {},
-        {'foo': 'bar'},
-        {'a_list': ['of', 'important', 'things']},
-        {'an_object': {'with': 'stuff'}},
-        {'numbers': 12345},
-        {'null': None},
-    ])
-    def test_it_permits_all_other_changes(self, data, mock_request):
-        schema = schemas.LegacyCreateAnnotationSchema(mock_request)
-
-        appstruct = schema.validate(data)
-
-        for k in data:
-            assert appstruct[k] == data[k]
-
-    @pytest.fixture
-    def mock_request(self):
-        request = testing.DummyRequest()
-        request.feature = mock.Mock(return_value=False,
-                                    spec=lambda flag: False)
-        return request
 
 
 class TestCreateAnnotationSchema(object):

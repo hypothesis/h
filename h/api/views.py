@@ -153,33 +153,12 @@ def search(request):
             effective_principals=security.Authenticated)
 def create(request):
     """Create an annotation from the POST payload."""
-    # Validate the annotation for, and create the annotation in, PostgreSQL.
-    if request.feature('postgres'):
-        schema = schemas.CreateAnnotationSchema(request)
-        appstruct = schema.validate(_json_payload(request))
-        annotation = storage.create_annotation(request, appstruct)
+    schema = schemas.CreateAnnotationSchema(request)
+    appstruct = schema.validate(_json_payload(request))
+    annotation = storage.create_annotation(request, appstruct)
 
-    # Validate the annotation for, and create the annotation in, Elasticsearch.
-    legacy_schema = schemas.LegacyCreateAnnotationSchema(request)
-    legacy_appstruct = legacy_schema.validate(_json_payload(request))
-
-    # When 'postgres' is on make sure that annotations in the legacy
-    # Elasticsearch database use the same IDs as the PostgreSQL ones.
-    if request.feature('postgres'):
-        assert annotation.id
-        legacy_appstruct['id'] = annotation.id
-
-    legacy_annotation = storage.legacy_create_annotation(request,
-                                                         legacy_appstruct)
-
-    if request.feature('postgres'):
-        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-        _publish_annotation_event(request, annotation, 'create',
-                                  annotation_dict=annotation_dict)
-        return annotation_dict
-
-    annotation_dict = AnnotationJSONPresenter(request, legacy_annotation).asdict()
-    _publish_annotation_event(request, legacy_annotation, 'create',
+    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+    _publish_annotation_event(request, annotation, 'create',
                               annotation_dict=annotation_dict)
     return annotation_dict
 
