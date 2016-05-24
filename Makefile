@@ -41,10 +41,6 @@ dist/h-$(BUILD_ID): dist/h-$(BUILD_ID).tar.gz
 docker: dist/h-$(BUILD_ID)
 	docker build -t hypothesis/hypothesis:$(DOCKER_TAG) $<
 
-.PHONY: lint
-lint: h.egg-info/.uptodate
-	@prospector
-
 .PHONY: test
 test: node_modules/.uptodate
 	@pip install -q tox
