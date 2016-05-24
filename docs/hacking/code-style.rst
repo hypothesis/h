@@ -11,6 +11,35 @@ Python
 Follow `PEP 8 <https://www.python.org/dev/peps/pep-0008/>`_, the linting tools
 below can find PEP 8 problems for you automatically.
 
+Docstrings
+``````````
+
+All public modules, functions, classes, and methods should normally have
+docstrings. See `PEP 257 <https://www.python.org/dev/peps/pep-0257/>`_ for
+general advice on how to write docstrings (although we don't write module
+docstrings that describe every object exported by the module).
+
+The ``pep257`` tool (which is run by ``prospector``, see below) can point out
+PEP 257 violations for you.
+
+It's good to use Sphinx references in docstrings because they can be syntax
+highlighted and hyperlinked when the docstrings are extracted by Sphinx into
+HTML documentation, and because Sphinx can print warnings for references that
+are no longer correct:
+
+* Use `Sphinx Python cross-references <http://www.sphinx-doc.org/en/stable/domains.html#cross-referencing-python-objects>`_
+  to reference other Python modules, functions etc. from docstrings (there are
+  also Sphinx domains for referencing
+  objects from other programming languages, such as
+  `JavaScript <http://www.sphinx-doc.org/en/stable/domains.html#the-javascript-domain>`_).
+
+* Use `Sphinx info field lists <http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists>`_
+  to document parameters, return values and exceptions that might be raised.
+
+* You can also use `reStructuredText <http://www.sphinx-doc.org/en/stable/rest.html>`_
+  to add markup (bold, code samples, lists, etc) to docstrings.
+
+
 Linting
 ```````
 
