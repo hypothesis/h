@@ -186,8 +186,6 @@ class TestCreateUpdateAnnotationSchema(object):
 
         ({'target': [False]}, "target.0: False is not of type 'object'"),
 
-        ({'target': [{}]}, "target.0: 'selector' is a required property"),
-
         ({'text': False}, "text: False is not of type 'string'"),
 
         ({'uri': False}, "uri: False is not of type 'string'"),

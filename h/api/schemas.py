@@ -138,9 +138,6 @@ class AnnotationSchema(JSONSchema):
                             'selector': {
                             },
                         },
-                        'required': [
-                            'selector',
-                        ],
                     },
                 ],
             },
@@ -218,7 +215,7 @@ class CreateAnnotationSchema(object):
         else:
             new_appstruct['shared'] = False
 
-        if 'target' in appstruct:  # Replies and page notes don't have targets.
+        if 'target' in appstruct:
             new_appstruct['target_selectors'] = _target_selectors(
                 appstruct.pop('target'))
 
@@ -421,7 +418,7 @@ def _target_selectors(targets):
     """
     # Any targets other than the first in the list are discarded.
     # Any fields of the target other than 'selector' are discarded.
-    if targets:
+    if targets and 'selector' in targets[0]:
         return targets[0]['selector']
     else:
         return []
