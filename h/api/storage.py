@@ -230,11 +230,7 @@ def expand_uri(request, uri):
     :returns: a list of equivalent URIs
     :rtype: list
     """
-    doc = None
-    if _postgres_enabled(request):
-        doc = models.Document.find_by_uris(request.db, [uri]).one_or_none()
-    else:
-        doc = models.elastic.Document.get_by_uri(uri)
+    doc = models.Document.find_by_uris(request.db, [uri]).one_or_none()
 
     if doc is None:
         return [uri]
