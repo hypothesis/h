@@ -160,11 +160,11 @@ class BatchIndexer(object):
 
         updated = self.session.query(models.Annotation.updated). \
                 execution_options(stream_results=True). \
-                order_by(models.Annotation.updated.asc()).all()
+                order_by(models.Annotation.updated.desc()).all()
 
         count = len(updated)
-        windows = [Window(start=updated[x].updated,
-                          end=updated[min(x+chunksize, count)-1].updated)
+        windows = [Window(start=updated[min(x+chunksize, count)-1].updated,
+                          end=updated[x].updated)
                    for x in xrange(0, count, chunksize)]
         basequery = self._eager_loaded_query().order_by(models.Annotation.updated.asc())
 
