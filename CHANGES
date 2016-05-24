@@ -1,3 +1,16 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- We have had to temporarily revertthe change which allows authenticating to the
+  WebSocket with API tokens, as this had unintended side-effects preventing
+  cookie authentication to same (3ed6ff3).
+
+- Fix a problem with updating page notes when the 'postgres' feature flag was
+  switched on (#3355).
+
 0.23.0 (2016-05-23)
 ===================
 
