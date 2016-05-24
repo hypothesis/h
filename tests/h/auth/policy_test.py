@@ -12,14 +12,12 @@ SESSION_AUTH_PATHS = (
     '/account/profile',
     '/api/badge',
     '/api/token',
-    '/ws/foo',
 )
 
 TOKEN_AUTH_PATHS = (
     '/api',
     '/api/foo',
     '/api/annotations/abc123',
-    '/ws',
 )
 
 
