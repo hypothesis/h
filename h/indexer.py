@@ -35,7 +35,7 @@ def reindex_annotations():
     if not celery.request.feature('postgres'):
         return
 
-    reindex(celery.request.db, celery.request.new_es, celery.request)
+    reindex(celery.request.db, celery.request.es, celery.request)
 
 
 def subscribe_annotation_event(event):

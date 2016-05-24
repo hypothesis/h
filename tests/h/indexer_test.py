@@ -56,7 +56,7 @@ class TestReindex(object):
         indexer.reindex_annotations()
 
         reindex.assert_called_once_with(
-            celery.request.db, celery.request.new_es, celery.request)
+            celery.request.db, celery.request.es, celery.request)
 
     @pytest.fixture
     def reindex(self, patch):
@@ -124,6 +124,6 @@ class TestSubscribeAnnotationEvent(object):
 def celery(patch):
     cel = patch('h.indexer.celery')
     cel.request = DummyRequest(
-        db=mock.Mock(), es=mock.Mock(), new_es=mock.Mock(), feature=mock.Mock())
+        db=mock.Mock(), es=mock.Mock(), feature=mock.Mock())
     cel.request.feature.return_value = True
     return cel

@@ -69,15 +69,6 @@ def includeme(config):
         name='legacy_es',
         reify=True)
 
-    # request.new_es is always a client for the legacy Elasticsearch index,
-    # regardless of whether the 'postgres' feature flag is on.
-    # This should be used to write to the new search index.
-    # TODO: Remove when postgres migration is done
-    config.add_request_method(
-        lambda r: _get_client(r.registry.settings),
-        name='new_es',
-        reify=True)
-
     # If requested, automatically configure the index
     if asbool(settings.get('h.search.autoconfig', False)):
         configure_index(_get_client(settings))
