@@ -17,6 +17,14 @@ function AnnotationViewerController (
     $location.path('/stream').search('q', query);
   };
 
+  rootThread.on('changed', function (thread) {
+    $scope.virtualThreadList = {
+      visibleThreads: thread.children,
+      offscreenUpperHeight: '0px',
+      offscreenLowerHeight: '0px',
+    };
+  });
+
   $scope.rootThread = function () {
     return rootThread.thread();
   };

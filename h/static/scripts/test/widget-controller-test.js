@@ -26,6 +26,23 @@ function FakeSearchClient(resource, opts) {
 }
 inherits(FakeSearchClient, EventEmitter);
 
+function FakeRootThread() {
+  this.thread = sinon.stub().returns({
+    totalChildren: 0,
+  });
+}
+inherits(FakeRootThread, EventEmitter);
+
+function FakeVirtualThreadList() {
+  this.setRootThread = sinon.stub();
+  this.setThreadHeight = sinon.stub();
+  this.detach = sinon.stub();
+  this.yOffsetOf = function () {
+    return 100;
+  };
+}
+inherits(FakeVirtualThreadList, EventEmitter);
+
 describe('WidgetController', function () {
   var $rootScope;
   var $scope;
@@ -88,13 +105,7 @@ describe('WidgetController', function () {
       focus: sinon.stub(),
     };
 
-    fakeRootThread = {
-      thread: sinon.stub().returns({
-        totalChildren: 0,
-      }),
-      setSearchQuery: sinon.stub(),
-      sortBy: sinon.stub(),
-    };
+    fakeRootThread = new FakeRootThread();
 
     fakeSettings = {
       annotations: 'test',
@@ -104,6 +115,7 @@ describe('WidgetController', function () {
       SearchResource: {},
     };
 
+    $provide.value('VirtualThreadList', FakeVirtualThreadList);
     $provide.value('annotationMapper', fakeAnnotationMapper);
     $provide.value('annotationUI', annotationUI);
     $provide.value('crossframe', fakeCrossFrame);
@@ -273,6 +285,21 @@ describe('WidgetController', function () {
   });
 
   describe('when a new annotation is created', function () {
+    var windowScroll;
+    var cardListTopEl;
+
+    beforeEach(function () {
+      $scope.clearSelection = sinon.stub();
+      windowScroll = sinon.stub(window, 'scroll');
+      cardListTopEl = $('<div class="js-thread-list-top"></div>');
+      cardListTopEl.appendTo(document.body);
+    });
+
+    afterEach(function () {
+      windowScroll.restore();
+      cardListTopEl.remove();
+    });
+
     /**
      *  It should clear any selection that exists in the sidebar before
      *  creating a new annotation. Otherwise the new annotation with its
@@ -280,23 +307,25 @@ describe('WidgetController', function () {
      *  not part of the selection.
      */
     it('clears the selection', function () {
-      $scope.clearSelection = sinon.stub();
       $rootScope.$emit('beforeAnnotationCreated', {});
       assert.called($scope.clearSelection);
     });
 
     it('does not clear the selection if the new annotation is a highlight', function () {
-      $scope.clearSelection = sinon.stub();
       $rootScope.$emit('beforeAnnotationCreated', {$highlight: true});
       assert.notCalled($scope.clearSelection);
     });
 
     it('does not clear the selection if the new annotation is a reply', function () {
-      $scope.clearSelection = sinon.stub();
       $rootScope.$emit('beforeAnnotationCreated', {
         references: ['parent-id']
       });
       assert.notCalled($scope.clearSelection);
+    });
+
+    it('scrolls the viewport to the new annotation', function () {
+      $rootScope.$emit('beforeAnnotationCreated', {$$tag: '123'});
+      assert.called(windowScroll);
     });
   });
 

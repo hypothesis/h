@@ -1,8 +1,9 @@
 'use strict';
 
+var SearchClient = require('./search-client');
 var events = require('./events');
 var memoize = require('./util/memoize');
-var SearchClient = require('./search-client');
+var scopeTimeout = require('./util/scope-timeout');
 
 function firstKey(object) {
   for (var k in object) {
@@ -32,8 +33,49 @@ function groupIDFromSelection(selection, results) {
 // @ngInject
 module.exports = function WidgetController(
   $scope, $rootScope, annotationUI, crossframe, annotationMapper,
-  drafts, groups, rootThread, settings, streamer, streamFilter, store
+  drafts, groups, rootThread, settings, streamer, streamFilter, store,
+  VirtualThreadList
 ) {
+  function getThreadHeight(id) {
+    var threadElement = document.getElementById(id);
+    if (!threadElement) {
+      return;
+    }
+
+    // Get the height of the element inside the border-box, excluding
+    // top and bottom margins.
+    var elementHeight = threadElement.getBoundingClientRect().height;
+
+    var style = window.getComputedStyle(threadElement);
+
+    // Get the bottom margin of the element. style.margin{Side} will return
+    // values of the form 'Npx', from which we extract 'N'.
+    var marginHeight = parseFloat(style.marginTop) +
+                       parseFloat(style.marginBottom);
+
+    return elementHeight + marginHeight;
+  }
+
+  var visibleThreads = new VirtualThreadList($scope, window, rootThread.thread());
+  visibleThreads.on('changed', function (state) {
+    $scope.virtualThreadList = {
+      visibleThreads: state.visibleThreads,
+      offscreenUpperHeight: state.offscreenUpperHeight + 'px',
+      offscreenLowerHeight: state.offscreenLowerHeight + 'px',
+    };
+
+    scopeTimeout($scope, function () {
+      state.visibleThreads.forEach(function (thread) {
+        visibleThreads.setThreadHeight(thread.id, getThreadHeight(thread.id));
+      });
+    }, 50);
+  });
+  rootThread.on('changed', function (thread) {
+    visibleThreads.setRootThread(thread);
+  });
+  $scope.$on('$destroy', function () {
+    visibleThreads.detach();
+  });
 
   $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
 
@@ -291,10 +333,41 @@ module.exports = function WidgetController(
     return rootThread.thread().totalChildren;
   };
 
+  /**
+   * Return the offset between the top of the window and the top of the
+   * first annotation card.
+   */
+  function cardListYOffset() {
+    var cardListTopEl = document.querySelector('.js-thread-list-top');
+    return cardListTopEl.getBoundingClientRect().top + window.pageYOffset;
+  }
+
+  /** Scroll the annotation with a given ID or $$tag into view. */
+  function scrollIntoView(id) {
+    var estimatedYOffset = visibleThreads.yOffsetOf(id);
+    var estimatedPos = estimatedYOffset - cardListYOffset();
+
+    window.scroll(0, estimatedPos);
+
+    // As a result of scrolling the sidebar, the heights of some of the cards
+    // above `id` might change because the initial estimate will be replaced by
+    // the actual known height after a card is rendered.
+    //
+    // So we wait briefly after the view is scrolled then check whether the
+    // estimated Y offset changed and if so, trigger scrolling again.
+    scopeTimeout($scope, function () {
+      var newYOffset = visibleThreads.yOffsetOf(id);
+      if (newYOffset !== estimatedYOffset) {
+        scrollIntoView(id);
+      }
+    }, 200);
+  }
+
   $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, function (event, data) {
     if (data.$highlight || (data.references && data.references.length > 0)) {
       return;
     }
     $scope.clearSelection();
+    scrollIntoView(data.$$tag);
   });
 };
