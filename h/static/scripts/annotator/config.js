@@ -3,7 +3,7 @@
 var annotationIDs = require('../util/annotation-ids');
 var settings = require('../settings');
 
-var docs = 'https://h.readthedocs.io/en/latest/hacking/customized-embedding.html';
+var docs = 'https://h.readthedocs.io/en/latest/embedding.html';
 
 /**
  * Reads the Hypothesis configuration from the environment.

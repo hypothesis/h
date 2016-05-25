@@ -60,7 +60,7 @@ By participating in this project you agree to abide by its terms.
 .. _freenode: http://freenode.net/
 .. _subscribe: mailto:dev+subscribe@list.hypothes.is
 .. _development mailing list: https://groups.google.com/a/list.hypothes.is/forum/#!forum/dev
-.. _Contributor's guide: https://h.readthedocs.io/en/latest/hacking/
+.. _Contributor's guide: https://h.readthedocs.io/en/latest/developing/
 .. _New Contributor Friendly: https://github.com/hypothesis/h/issues?q=is%3Aopen+is%3Aissue+label%3A%22New+Contributor+Friendly%22
 
 
