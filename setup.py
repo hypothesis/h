@@ -68,6 +68,7 @@ INSTALL_REQUIRES = [
 ]
 EXTRAS_REQUIRE = {
     'dev': [
+        'flake8',
         'honcho',
         'pyramid_debugtoolbar>=2.1',
         'prospector[with_pyroma]',
