@@ -1,10 +1,19 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Improved performance and reduced memory usage of the sidebar when using
+  Hypothesis on heavily annotated pages (#3287, #3360).
+
 0.23.1 (2016-05-24)
 ===================
 
 Bug fixes
 ---------
 
-- We have had to temporarily revertthe change which allows authenticating to the
+- We have had to temporarily revert the change which allows authenticating to the
   WebSocket with API tokens, as this had unintended side-effects preventing
   cookie authentication to same (3ed6ff3).
 
