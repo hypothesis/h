@@ -19,6 +19,8 @@ pylint:
   disable:
     - line-too-long  # PEP8 checks this and doesn't complain about
                      # unavoidable long lines (such as URLs).
+    - missing-docstring  # The pep257 tool reports missing docstrings to us
+                         # so we don't need pylint to do so.
     - too-few-public-methods
   options:
     # Some good names that pylint would otherwise reject:
@@ -39,12 +41,6 @@ pylint:
     #       you're shadowing the builtin.
     #
     good-names: _,i,j,k,v,e,db,fn,fp,log,parser,id,es
-pep257:
-  disable:
-    - D100  # Missing docstring in public module
-    - D101  # Missing docstring in public class
-    - D102  # Missing docstring in public method
-    - D103  # Missing docstring in public function
 pyroma:
   run: true
 ignore-paths:
