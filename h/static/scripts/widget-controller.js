@@ -36,6 +36,11 @@ module.exports = function WidgetController(
   drafts, groups, rootThread, settings, streamer, streamFilter, store,
   VirtualThreadList
 ) {
+
+  /**
+   * Returns the height of the thread for an annotation if it exists in the view
+   * or undefined otherwise.
+   */
   function getThreadHeight(id) {
     var threadElement = document.getElementById(id);
     if (!threadElement) {
@@ -56,6 +61,10 @@ module.exports = function WidgetController(
     return elementHeight + marginHeight;
   }
 
+  // `visibleThreads` keeps track of the subset of all threads matching the
+  // current filters which are in or near the viewport and the view then renders
+  // only those threads, using placeholders above and below the visible threads
+  // to reserve space for threads which are not actually rendered.
   var visibleThreads = new VirtualThreadList($scope, window, rootThread.thread());
   visibleThreads.on('changed', function (state) {
     $scope.virtualThreadList = {
@@ -66,7 +75,11 @@ module.exports = function WidgetController(
 
     scopeTimeout($scope, function () {
       state.visibleThreads.forEach(function (thread) {
-        visibleThreads.setThreadHeight(thread.id, getThreadHeight(thread.id));
+        var height = getThreadHeight(thread.id);
+        if (!height) {
+          return;
+        }
+        visibleThreads.setThreadHeight(thread.id, height);
       });
     }, 50);
   });
@@ -334,29 +347,33 @@ module.exports = function WidgetController(
   };
 
   /**
-   * Return the offset between the top of the window and the top of the
-   * first annotation card.
+   * Return the vertical scroll offset for the document in order to position the
+   * annotation thread with a given `id` or $$tag at the top-left corner
+   * of the view.
    */
-  function cardListYOffset() {
-    var cardListTopEl = document.querySelector('.js-thread-list-top');
-    return cardListTopEl.getBoundingClientRect().top + window.pageYOffset;
+  function scrollOffset(id) {
+    var maxYOffset = document.body.clientHeight - window.innerHeight;
+    return Math.min(maxYOffset, visibleThreads.yOffsetOf(id));
   }
 
   /** Scroll the annotation with a given ID or $$tag into view. */
   function scrollIntoView(id) {
-    var estimatedYOffset = visibleThreads.yOffsetOf(id);
-    var estimatedPos = estimatedYOffset - cardListYOffset();
+    var estimatedYOffset = scrollOffset(id);
+    window.scroll(0, estimatedYOffset);
 
-    window.scroll(0, estimatedPos);
-
-    // As a result of scrolling the sidebar, the heights of some of the cards
-    // above `id` might change because the initial estimate will be replaced by
-    // the actual known height after a card is rendered.
+    // As a result of scrolling the sidebar, the target scroll offset for
+    // annotation `id` might have changed as a result of:
+    //
+    // 1. Heights of some cards above `id` changing from an initial estimate to
+    //    an actual measured height after the card is rendered.
+    // 2. The height of the document changing as a result of any cards heights'
+    //    changing. This may affect the scroll offset if the original target
+    //    was near to the bottom of the list.
     //
     // So we wait briefly after the view is scrolled then check whether the
     // estimated Y offset changed and if so, trigger scrolling again.
     scopeTimeout($scope, function () {
-      var newYOffset = visibleThreads.yOffsetOf(id);
+      var newYOffset = scrollOffset(id);
       if (newYOffset !== estimatedYOffset) {
         scrollIntoView(id);
       }
