@@ -11,7 +11,6 @@ pylint:
     - line-too-long  # PEP8 checks this and doesn't complain about
                      # unavoidable long lines (such as URLs).
     - too-few-public-methods
-    - W0142  # Used * or ** magic
   options:
     # Some good names that pylint would otherwise reject:
     #
