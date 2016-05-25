@@ -1,4 +1,6 @@
-var uuid = require('node-uuid')
+'use strict';
+
+var uuid = require('node-uuid');
 
 var Socket = require('./websocket');
 
@@ -53,8 +55,8 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
   });
 
   function handleAnnotationNotification(message) {
-    action = message.options.action
-    annotations = message.payload
+    var action = message.options.action;
+    var annotations = message.payload;
 
     if (annotations.length === 0) {
       return;
@@ -64,7 +66,7 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     // FIXME: Have the server only send us annotations from the focused
     // group in the first place.
     annotations = annotations.filter(function (ann) {
-      return ann.group == groups.focused().id
+      return ann.group === groups.focused().id;
     });
 
     switch (action) {
@@ -127,17 +129,17 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     // scope watches on app state affected by the received message
     // are updated
     $rootScope.$apply(function () {
-      message = JSON.parse(event.data);
+      var message = JSON.parse(event.data);
       if (!message) {
         return;
       }
 
       if (message.type === 'annotation-notification') {
-        handleAnnotationNotification(message)
+        handleAnnotationNotification(message);
       } else if (message.type === 'session-change') {
-        handleSessionChangeNotification(message)
+        handleSessionChangeNotification(message);
       } else {
-        console.warn('received unsupported notification', message.type)
+        console.warn('received unsupported notification', message.type);
       }
     });
   });
