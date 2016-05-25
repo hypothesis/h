@@ -35,14 +35,6 @@ Hypothesis is a tool for annotating the web.
   - A publisher embed code
 
 
-Installation and deployment
----------------------------
-
-See the
-`Installation guide <https://h.readthedocs.io/en/latest/INSTALL.html>`_ for
-instructions on deploying h in a production environment.
-
-
 Development
 -----------
 
