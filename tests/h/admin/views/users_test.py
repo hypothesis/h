@@ -296,8 +296,8 @@ def test_delete_user_deletes_annotations(elasticsearch_helpers, api_storage):
     views.delete_user(request, user)
 
     assert api_storage.delete_annotation.mock_calls == [
-        call(request, 'annotation-1'),
-        call(request, 'annotation-2')
+        call(request.db, 'annotation-1'),
+        call(request.db, 'annotation-2')
     ]
 
 

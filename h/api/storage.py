@@ -149,17 +149,17 @@ def update_annotation(session, id_, data):
     return annotation
 
 
-def delete_annotation(request, id_):
+def delete_annotation(session, id_):
     """
     Delete the annotation with the given id.
 
-    :param request: the request object
-    :type request: pyramid.request.Request
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param id_: the annotation ID
     :type id_: str
     """
-    request.db.query(models.Annotation).filter_by(id=id_).delete()
+    session.query(models.Annotation).filter_by(id=id_).delete()
 
 
 def expand_uri(session, uri):

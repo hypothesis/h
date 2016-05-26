@@ -362,14 +362,12 @@ class TestUpdateAnnotation(object):
 class TestDeleteAnnotation(object):
 
     def test_it_deletes_the_annotation(self, db_session):
-        request = DummyRequest(db=db_session)
-
         ann_1 = Annotation(userid='luke')
         ann_2 = Annotation(userid='leia')
         db_session.add_all([ann_1, ann_2])
         db_session.flush()
 
-        storage.delete_annotation(request, ann_1.id)
+        storage.delete_annotation(db_session, ann_1.id)
         db_session.commit()
 
         assert db_session.query(Annotation).get(ann_1.id) is None
