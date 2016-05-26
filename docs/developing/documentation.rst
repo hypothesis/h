@@ -1,7 +1,7 @@
 Writing documentation
 #####################
 
-To build the documentation issue the ``make html`` command from the docs
+To build the documentation issue the ``make html`` command from the ``docs``
 directory:
 
 .. code-block:: bash
