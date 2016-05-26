@@ -2,8 +2,17 @@ output-format: grouped
 strictness: veryhigh
 doc-warnings: true
 max-line-length: 160
+
+# We run flake8 first and then prospector as a second-pass linter.
+# Since flake8 already runs pyflakes, pep8 and mccabe, don't run them again
+# with prospector.
+mccabe:
+  run: false
 pep8:
-  full: true
+  run: false
+pyflakes:
+  run: false
+
 pylint:
   enable:
     - relative-import
