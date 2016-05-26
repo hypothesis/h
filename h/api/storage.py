@@ -7,14 +7,10 @@ for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
 
-from functools import partial
-
 from pyramid import i18n
 
 from h.api import schemas
-from h.api import transform
 from h.api import models
-from h.api.events import AnnotationTransformEvent
 from h.api.db import types
 
 
@@ -34,7 +30,7 @@ def annotation_from_dict(data):
     return models.elastic.Annotation(data)
 
 
-def fetch_annotation(request, id_, _postgres=None):
+def fetch_annotation(request, id_):
     """
     Fetch the annotation with the given id.
 
@@ -45,28 +41,13 @@ def fetch_annotation(request, id_, _postgres=None):
     :type id_: str
 
     :returns: the annotation, if found, or None.
-    :rtype: dict, NoneType
+    :rtype: h.api.models.Annotation, NoneType
     """
-    # If no postgres arg is passed then decide whether to use postgres based
-    # on the postgres feature flag.
-    if _postgres is None:
-        _postgres = _postgres_enabled(request)
 
-    if _postgres:
-        try:
-            return request.db.query(models.Annotation).get(id_)
-        except types.InvalidUUID:
-            return None
-
-    return models.elastic.Annotation.fetch(id_)
-
-
-def legacy_create_annotation(request, data):
-    annotation = models.elastic.Annotation(data)
-    # FIXME: this should happen when indexing, not storing.
-    _prepare(request, annotation)
-    annotation.save()
-    return annotation
+    try:
+        return request.db.query(models.Annotation).get(id_)
+    except types.InvalidUUID:
+        return None
 
 
 def create_annotation(request, data):
@@ -90,8 +71,7 @@ def create_annotation(request, data):
     if data['references']:
         top_level_annotation_id = data['references'][0]
         top_level_annotation = fetch_annotation(request,
-                                                top_level_annotation_id,
-                                                _postgres=True)
+                                                top_level_annotation_id)
         if top_level_annotation:
             data['groupid'] = top_level_annotation.groupid
         else:
@@ -170,35 +150,6 @@ def update_annotation(session, id_, data):
     return annotation
 
 
-def legacy_update_annotation(request, id_, data):
-    """
-    Update the annotation with the given id from passed data.
-
-    This executes a partial update of the annotation identified by `id` using
-    the passed data.
-
-    :param request: the request object
-    :type request: pyramid.request.Request
-
-    :param id_: the annotation ID
-    :type id_: str
-
-    :param data: a dictionary of annotation properties
-    :type data: dict
-
-    :returns: the updated annotation
-    :rtype: dict
-    """
-    annotation = models.elastic.Annotation.fetch(id_)
-    annotation.update(data)
-
-    # FIXME: this should happen when indexing, not storing.
-    _prepare(request, annotation)
-
-    annotation.save()
-    return annotation
-
-
 def delete_annotation(request, id_):
     """
     Delete the annotation with the given id.
@@ -209,12 +160,8 @@ def delete_annotation(request, id_):
     :param id_: the annotation ID
     :type id_: str
     """
-    if _postgres_enabled(request):
-        annotation = fetch_annotation(request, id_, _postgres=True)
-        request.db.delete(annotation)
-
-    legacy_annotation = fetch_annotation(request, id_, _postgres=False)
-    legacy_annotation.delete()
+    annotation = fetch_annotation(request, id_)
+    request.db.delete(annotation)
 
 
 def expand_uri(request, uri):
@@ -234,11 +181,7 @@ def expand_uri(request, uri):
     :returns: a list of equivalent URIs
     :rtype: list
     """
-    doc = None
-    if _postgres_enabled(request):
-        doc = models.Document.find_by_uris(request.db, [uri]).one_or_none()
-    else:
-        doc = models.elastic.Document.get_by_uri(uri)
+    doc = models.Document.find_by_uris(request.db, [uri]).one_or_none()
 
     if doc is None:
         return [uri]
@@ -252,18 +195,3 @@ def expand_uri(request, uri):
             return [uri]
 
     return [docuri.uri for docuri in docuris]
-
-
-def _prepare(request, annotation):
-    """Prepare the given annotation for storage."""
-    fetcher = partial(fetch_annotation, request, _postgres=False)
-    transform.prepare(annotation, fetcher)
-
-    # Fire an AnnotationTransformEvent so subscribers who wish to modify an
-    # annotation before save can do so.
-    event = AnnotationTransformEvent(request, annotation)
-    request.registry.notify(event)
-
-
-def _postgres_enabled(request):
-    return request.feature('postgres')

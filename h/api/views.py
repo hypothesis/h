@@ -153,33 +153,12 @@ def search(request):
             effective_principals=security.Authenticated)
 def create(request):
     """Create an annotation from the POST payload."""
-    # Validate the annotation for, and create the annotation in, PostgreSQL.
-    if request.feature('postgres'):
-        schema = schemas.CreateAnnotationSchema(request)
-        appstruct = schema.validate(_json_payload(request))
-        annotation = storage.create_annotation(request, appstruct)
+    schema = schemas.CreateAnnotationSchema(request)
+    appstruct = schema.validate(_json_payload(request))
+    annotation = storage.create_annotation(request, appstruct)
 
-    # Validate the annotation for, and create the annotation in, Elasticsearch.
-    legacy_schema = schemas.LegacyCreateAnnotationSchema(request)
-    legacy_appstruct = legacy_schema.validate(_json_payload(request))
-
-    # When 'postgres' is on make sure that annotations in the legacy
-    # Elasticsearch database use the same IDs as the PostgreSQL ones.
-    if request.feature('postgres'):
-        assert annotation.id
-        legacy_appstruct['id'] = annotation.id
-
-    legacy_annotation = storage.legacy_create_annotation(request,
-                                                         legacy_appstruct)
-
-    if request.feature('postgres'):
-        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-        _publish_annotation_event(request, annotation, 'create',
-                                  annotation_dict=annotation_dict)
-        return annotation_dict
-
-    annotation_dict = AnnotationJSONPresenter(request, legacy_annotation).asdict()
-    _publish_annotation_event(request, legacy_annotation, 'create',
+    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+    _publish_annotation_event(request, annotation, 'create',
                               annotation_dict=annotation_dict)
     return annotation_dict
 
@@ -209,17 +188,7 @@ def read_jsonld(annotation, request):
             permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
-    if request.feature('postgres'):
-        annotation_dict = _update_postgres(annotation, request)
-        legacy_annotation = storage.fetch_annotation(request,
-                                                     annotation.id,
-                                                     _postgres=False)
-        _update_elastic(legacy_annotation, request, notify=False)
-        return annotation_dict
-    return _update_elastic(annotation, request, notify=True)
 
-
-def _update_postgres(annotation, request):
     schema = schemas.UpdateAnnotationSchema(request,
                                             annotation.target_uri,
                                             annotation.groupid)
@@ -235,22 +204,6 @@ def _update_postgres(annotation, request):
         request, annotation, 'update', annotation_dict=annotation_dict)
 
     return annotation_dict
-
-
-def _update_elastic(annotation, request, notify):
-    schema = schemas.LegacyUpdateAnnotationSchema(request,
-                                                  annotation=annotation)
-    appstruct = schema.validate(_json_payload(request))
-
-    annotation = storage.legacy_update_annotation(request,
-                                                  annotation.id,
-                                                  appstruct)
-
-    if notify:
-        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-        _publish_annotation_event(
-            request, annotation, 'update', annotation_dict=annotation_dict)
-        return annotation_dict
 
 
 @api_config(route_name='api.annotation',

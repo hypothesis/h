@@ -14,4 +14,4 @@ def reindex(ctx):
 
     request = ctx.obj['bootstrap']()
 
-    index.reindex(request.db, request.new_es, request)
+    index.reindex(request.db, request.es, request)
