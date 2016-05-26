@@ -35,14 +35,10 @@ class TestFetchAnnotation(object):
 class TestExpandURI(object):
 
     def test_expand_uri_no_document(self, db_session):
-        request = DummyRequest(db=db_session)
-
-        actual = storage.expand_uri(request, 'http://example.com/')
+        actual = storage.expand_uri(db_session, 'http://example.com/')
         assert actual == ['http://example.com/']
 
     def test_expand_uri_document_doesnt_expand_canonical_uris(self, db_session):
-        request = DummyRequest(db=db_session)
-
         document = Document(document_uris=[
             DocumentURI(uri='http://foo.com/', claimant='http://example.com'),
             DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
@@ -52,12 +48,10 @@ class TestExpandURI(object):
         db_session.add(document)
         db_session.flush()
 
-        assert storage.expand_uri(request, "http://example.com/") == [
+        assert storage.expand_uri(db_session, "http://example.com/") == [
             "http://example.com/"]
 
     def test_expand_uri_document_uris(self, db_session):
-        request = DummyRequest(db=db_session)
-
         document = Document(document_uris=[
             DocumentURI(uri='http://foo.com/', claimant='http://bar.com'),
             DocumentURI(uri='http://bar.com/', claimant='http://bar.com'),
@@ -65,7 +59,7 @@ class TestExpandURI(object):
         db_session.add(document)
         db_session.flush()
 
-        assert storage.expand_uri(request, 'http://foo.com/') == [
+        assert storage.expand_uri(db_session, 'http://foo.com/') == [
             'http://foo.com/',
             'http://bar.com/'
         ]

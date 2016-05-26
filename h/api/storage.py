@@ -163,7 +163,7 @@ def delete_annotation(request, id_):
     request.db.delete(annotation)
 
 
-def expand_uri(request, uri):
+def expand_uri(session, uri):
     """
     Return all URIs which refer to the same underlying document as `uri`.
 
@@ -171,8 +171,8 @@ def expand_uri(request, uri):
     passed URI, and if so returns the set of all URIs which we currently
     believe refer to the same document.
 
-    :param request: the request object
-    :type request: pyramid.request.Request
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param uri: a URI associated with the document
     :type uri: str
@@ -180,7 +180,7 @@ def expand_uri(request, uri):
     :returns: a list of equivalent URIs
     :rtype: list
     """
-    doc = models.Document.find_by_uris(request.db, [uri]).one_or_none()
+    doc = models.Document.find_by_uris(session, [uri]).one_or_none()
 
     if doc is None:
         return [uri]
