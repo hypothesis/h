@@ -47,7 +47,8 @@ def devserver(https):
         gunicorn_args = '--certfile=.tlscert.pem --keyfile=.tlskey.pem'
         os.environ['APP_URL'] = 'https://localhost:5000'
         os.environ['WEBSOCKET_URL'] = 'wss://localhost:5001/ws'
-        os.environ['ALLOWED_ORIGINS'] = 'https://localhost:5000'
+        os.environ['ALLOWED_ORIGINS'] = ' '.join(
+            ['https://localhost:5000', os.environ.get('ALLOWED_ORIGINS', '')])
     else:
         gunicorn_args = ''
         os.environ['APP_URL'] = 'http://localhost:5000'
