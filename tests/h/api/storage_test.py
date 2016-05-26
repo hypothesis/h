@@ -359,29 +359,21 @@ class TestUpdateAnnotation(object):
         }
 
 
-@pytest.mark.usefixtures('fetch_annotation')
 class TestDeleteAnnotation(object):
 
-    def test_it_fetches_the_annotation(self, fetch_annotation, session):
-        request = DummyRequest(db=session)
-        storage.delete_annotation(request, "test_id")
+    def test_it_deletes_the_annotation(self, db_session):
+        request = DummyRequest(db=db_session)
 
-        assert fetch_annotation.call_args_list[0] == mock.call(request,
-                                                               "test_id")
+        ann_1 = Annotation(userid='luke')
+        ann_2 = Annotation(userid='leia')
+        db_session.add_all([ann_1, ann_2])
+        db_session.flush()
 
-    def test_it_deletes_the_annotation(self, fetch_annotation, session):
-        request = DummyRequest(db=session)
+        storage.delete_annotation(request, ann_1.id)
+        db_session.commit()
 
-        first_return_value = mock.Mock()
-        second_return_value = mock.Mock()
-        fetch_annotation.side_effect = [
-            first_return_value,
-            second_return_value,
-        ]
-
-        storage.delete_annotation(request, "test_id")
-
-        request.db.delete.assert_called_once_with(first_return_value)
+        assert db_session.query(Annotation).get(ann_1.id) is None
+        assert db_session.query(Annotation).get(ann_2.id) == ann_2
 
 
 @pytest.fixture
