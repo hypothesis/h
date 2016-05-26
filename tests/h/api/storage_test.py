@@ -368,13 +368,16 @@ class TestUpdateAnnotation(object):
 @pytest.mark.usefixtures('fetch_annotation')
 class TestDeleteAnnotation(object):
 
-    def test_it_fetches_the_annotation(self, fetch_annotation, mock_request):
-        storage.delete_annotation(mock_request, "test_id")
+    def test_it_fetches_the_annotation(self, fetch_annotation, session):
+        request = DummyRequest(db=session)
+        storage.delete_annotation(request, "test_id")
 
-        assert fetch_annotation.call_args_list[0] == mock.call(mock_request,
+        assert fetch_annotation.call_args_list[0] == mock.call(request,
                                                                "test_id")
 
-    def test_it_deletes_the_annotation(self, fetch_annotation, mock_request):
+    def test_it_deletes_the_annotation(self, fetch_annotation, session):
+        request = DummyRequest(db=session)
+
         first_return_value = mock.Mock()
         second_return_value = mock.Mock()
         fetch_annotation.side_effect = [
@@ -382,16 +385,9 @@ class TestDeleteAnnotation(object):
             second_return_value,
         ]
 
-        storage.delete_annotation(mock_request, "test_id")
+        storage.delete_annotation(request, "test_id")
 
-        mock_request.db.delete.assert_called_once_with(first_return_value)
-
-    @pytest.fixture
-    def mock_request(self, session):
-        request = DummyRequest()
-        request.feature = mock.Mock(return_value=True)
-        request.db = session
-        return request
+        request.db.delete.assert_called_once_with(first_return_value)
 
 
 @pytest.fixture
