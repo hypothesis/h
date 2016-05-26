@@ -13,6 +13,9 @@
 # serve to show the default.
 
 import sys, os
+from datetime import datetime
+
+CURRENT_YEAR = datetime.now().year
 
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
@@ -53,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'The Hypothesis Annotation Framework'
-copyright = u'2012, Hypothes.is Project and contributors'
+copyright = u'2012-{}, Hypothes.is Project and contributors'.format(CURRENT_YEAR)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -76,7 +79,7 @@ release = '0.0.2'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'hacking/services.rst']
+exclude_patterns = ['_build', 'developing/services.rst']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None

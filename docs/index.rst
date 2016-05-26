@@ -1,20 +1,20 @@
 Hypothesis
 ==========
 
-Contents:
+Hypothesis is a tool for annotating the web. This documentation is for:
+
+* Publishers embedding Hypothesis in their web pages.
+* Developers working with data stored in the Hypothesis service.
+* Contributors to the Hypothesis service and client.
+
+Contents
+--------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   INSTALL
-   administration
-   hacking/index
+   community
+   embedding
    api
+   developing/index
    CHANGES
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

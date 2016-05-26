@@ -1,5 +1,13 @@
-Customized embedding
-####################
+How to add Hypothesis to your website
+#####################################
+
+Adding Hypothesis to any web page can be done by adding a single ``<script>``
+tag to a web page. See our `Guide for publishers`_ for details.
+
+.. _Guide for publishers: https://hypothes.is/for-publishers/
+
+Customizing Hypothesis
+----------------------
 
 To customize the application, define a function ``window.hypothesisConfig``
 which returns an options object.

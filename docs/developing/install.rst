@@ -2,8 +2,7 @@ Installing h in a development environment
 #########################################
 
 This document contains instructions for setting up a development environment
-for h. If you are looking for instructions for deploying h in a production
-environment, please consult the :doc:`/INSTALL` document instead.
+for h.
 
 
 Requirements
@@ -333,7 +332,7 @@ To access the Administration Dashboard, you will need to first create a
 user account in your local instance of H and then give that account
 admin access rights using H's command-line tools.
 
-See the :doc:`../administration` documentation for information
+See the :doc:`administration` documentation for information
 on how to give the initial user admin rights and access the Administration
 Dashboard.
 
