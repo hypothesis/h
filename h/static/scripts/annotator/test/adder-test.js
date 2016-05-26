@@ -18,6 +18,7 @@ describe('adder', function () {
   });
 
   afterEach(function () {
+    adderCtrl.hide();
     adderCtrl.element.parentNode.removeChild(adderCtrl.element);
   });
 

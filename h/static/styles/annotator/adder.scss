@@ -1,4 +1,11 @@
+$adder-transition-duration: 80ms;
+
 .annotator-adder {
+  // Adder entry animation settings
+  animation-duration: $adder-transition-duration;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+
   box-sizing: border-box;
   direction: ltr;
   position: absolute;
@@ -7,6 +14,26 @@
   border-radius: 4px;
   box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.15);
   z-index: 999;
+
+  // Give the adder a very low opacity initially.  It will then fade-in when
+  // shown.
+  opacity: 0.05;
+}
+
+@keyframes adder-fade-in {
+  0% { opacity: 0.05; }
+  20% { opacity: 0.7; }
+  100% { opacity: 1.0; }
+}
+
+@keyframes adder-pop-up {
+  from { transform: scale(0.8) translateY(10px); }
+  to { transform: scale(1.0) translateY(0px); }
+}
+
+@keyframes adder-pop-down {
+  from { transform: scale(0.8) translateY(-10px); }
+  to { transform: scale(1.0) translateY(0px); }
 }
 
 @mixin adder-arrow($rotation) {
@@ -25,9 +52,17 @@
   width: 6px;
 }
 
+.annotator-adder--arrow-down.is-active {
+  animation-name: adder-fade-in, adder-pop-up;
+}
+
 .annotator-adder--arrow-down:before {
   @include adder-arrow(45deg);
   bottom: -5px;
+}
+
+.annotator-adder--arrow-up.is-active {
+  animation-name: adder-fade-in, adder-pop-down;
 }
 
 .annotator-adder--arrow-up:before {
@@ -60,6 +95,8 @@
   padding-bottom: 6px;
   padding-left: 10px;
   padding-right: 10px;
+
+  transition: color $adder-transition-duration;
 }
 
 .annotator-adder-actions .annotator-adder-actions__button:hover {
@@ -75,4 +112,5 @@
   margin: 2px 0px;
   font-family: sans-serif;
   color: $gray-light !important;
+  transition: color $adder-transition-duration;
 }
