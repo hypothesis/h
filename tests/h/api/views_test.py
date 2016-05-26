@@ -216,7 +216,9 @@ class TestCreate(object):
 
     @pytest.fixture
     def mock_request(self):
-        return mock.Mock()
+        request = testing.DummyRequest(notify_after_commit=mock.Mock())
+        type(request).json_body = mock.PropertyMock(return_value={})
+        return request
 
 
 @pytest.mark.usefixtures('AnnotationJSONPresenter')
