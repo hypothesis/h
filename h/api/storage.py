@@ -159,8 +159,7 @@ def delete_annotation(request, id_):
     :param id_: the annotation ID
     :type id_: str
     """
-    annotation = fetch_annotation(request, id_)
-    request.db.delete(annotation)
+    request.db.query(models.Annotation).filter_by(id=id_).delete()
 
 
 def expand_uri(session, uri):
