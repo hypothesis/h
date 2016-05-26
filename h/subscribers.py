@@ -50,7 +50,7 @@ def send_reply_notifications(event,
                              send=mailer.send.delay):
     """Queue any reply notification emails triggered by an annotation event."""
     request = event.request
-    annotation = storage.fetch_annotation(event.request, event.annotation_id)
+    annotation = storage.fetch_annotation(event.request.db, event.annotation_id)
     action = event.action
     try:
         notification = get_notification(request, annotation, action)

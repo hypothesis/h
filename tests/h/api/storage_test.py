@@ -17,19 +17,15 @@ from h.api.models.document import Document, DocumentURI
 class TestFetchAnnotation(object):
 
     def test_it_fetches_and_returns_the_annotation(self, db_session):
-        request = DummyRequest(db=db_session)
-
         annotation = Annotation(userid='luke')
         db_session.add(annotation)
         db_session.flush()
 
-        actual = storage.fetch_annotation(request, annotation.id)
+        actual = storage.fetch_annotation(db_session, annotation.id)
         assert annotation == actual
 
     def test_it_does_not_crash_if_id_is_invalid(self, db_session):
-        request = DummyRequest(db=db_session)
-
-        assert storage.fetch_annotation(request, 'foo') is None
+        assert storage.fetch_annotation(db_session, 'foo') is None
 
 
 class TestExpandURI(object):
@@ -87,7 +83,7 @@ class TestCreateAnnotation(object):
 
         storage.create_annotation(request, data)
 
-        fetch_annotation.assert_called_once_with(request,
+        fetch_annotation.assert_called_once_with(request.db,
                                                  'parent_annotation_id')
 
     def test_it_sets_group_for_replies(self,

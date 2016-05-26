@@ -30,12 +30,12 @@ def annotation_from_dict(data):
     return models.elastic.Annotation(data)
 
 
-def fetch_annotation(request, id_):
+def fetch_annotation(session, id_):
     """
     Fetch the annotation with the given id.
 
-    :param request: the request object
-    :type request: pyramid.request.Request
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param id_: the annotation ID
     :type id_: str
@@ -44,7 +44,7 @@ def fetch_annotation(request, id_):
     :rtype: h.api.models.Annotation, NoneType
     """
     try:
-        return request.db.query(models.Annotation).get(id_)
+        return session.query(models.Annotation).get(id_)
     except types.InvalidUUID:
         return None
 
@@ -69,7 +69,7 @@ def create_annotation(request, data):
     # Replies must have the same group as their parent.
     if data['references']:
         top_level_annotation_id = data['references'][0]
-        top_level_annotation = fetch_annotation(request,
+        top_level_annotation = fetch_annotation(request.db,
                                                 top_level_annotation_id)
         if top_level_annotation:
             data['groupid'] = top_level_annotation.groupid
