@@ -72,6 +72,7 @@ EXTRAS_REQUIRE = {
         'honcho',
         'pyramid_debugtoolbar>=2.1',
         'prospector[with_pyroma]',
+        'sphinx_rtd_theme',
         'sphinxcontrib-httpdomain'
     ],
 }
