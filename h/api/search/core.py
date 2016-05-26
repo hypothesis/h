@@ -57,7 +57,7 @@ def search(request, params, private=True, separate_replies=False):
             [h['_id'] for h in results['hits']['hits']]))
         reply_results = es.conn.search(index=es.index,
                                        doc_type=es.t.annotation,
-                                       body=builder.build({'limit': 100}))
+                                       body=builder.build({'limit': 200}))
 
         if len(reply_results['hits']['hits']) < reply_results['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "
