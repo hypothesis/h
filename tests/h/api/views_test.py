@@ -390,7 +390,7 @@ class TestDelete(object):
 
         views.delete(annotation, request)
 
-        storage.delete_annotation.assert_called_once_with(request,
+        storage.delete_annotation.assert_called_once_with(request.db,
                                                           annotation.id)
 
     def test_it_inits_and_fires_an_AnnotationEvent(self,

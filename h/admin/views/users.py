@@ -107,7 +107,7 @@ def delete_user(request, user):
     query = _all_user_annotations_query(request, user)
     annotations = es_helpers.scan(client=request.es.conn, query={'query': query})
     for annotation in annotations:
-        storage.delete_annotation(request, annotation['_id'])
+        storage.delete_annotation(request.db, annotation['_id'])
 
     request.db.delete(user)
 

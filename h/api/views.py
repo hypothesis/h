@@ -210,7 +210,7 @@ def update(annotation, request):
             permission='delete')
 def delete(annotation, request):
     """Delete the specified annotation."""
-    storage.delete_annotation(request, annotation.id)
+    storage.delete_annotation(request.db, annotation.id)
 
     # N.B. We publish the original model (including all the original annotation
     # fields) so that queue subscribers have context needed to decide how to

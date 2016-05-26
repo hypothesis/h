@@ -17,32 +17,24 @@ from h.api.models.document import Document, DocumentURI
 class TestFetchAnnotation(object):
 
     def test_it_fetches_and_returns_the_annotation(self, db_session):
-        request = DummyRequest(db=db_session)
-
         annotation = Annotation(userid='luke')
         db_session.add(annotation)
         db_session.flush()
 
-        actual = storage.fetch_annotation(request, annotation.id)
+        actual = storage.fetch_annotation(db_session, annotation.id)
         assert annotation == actual
 
     def test_it_does_not_crash_if_id_is_invalid(self, db_session):
-        request = DummyRequest(db=db_session)
-
-        assert storage.fetch_annotation(request, 'foo') is None
+        assert storage.fetch_annotation(db_session, 'foo') is None
 
 
 class TestExpandURI(object):
 
     def test_expand_uri_no_document(self, db_session):
-        request = DummyRequest(db=db_session)
-
-        actual = storage.expand_uri(request, 'http://example.com/')
+        actual = storage.expand_uri(db_session, 'http://example.com/')
         assert actual == ['http://example.com/']
 
     def test_expand_uri_document_doesnt_expand_canonical_uris(self, db_session):
-        request = DummyRequest(db=db_session)
-
         document = Document(document_uris=[
             DocumentURI(uri='http://foo.com/', claimant='http://example.com'),
             DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
@@ -52,12 +44,10 @@ class TestExpandURI(object):
         db_session.add(document)
         db_session.flush()
 
-        assert storage.expand_uri(request, "http://example.com/") == [
+        assert storage.expand_uri(db_session, "http://example.com/") == [
             "http://example.com/"]
 
     def test_expand_uri_document_uris(self, db_session):
-        request = DummyRequest(db=db_session)
-
         document = Document(document_uris=[
             DocumentURI(uri='http://foo.com/', claimant='http://bar.com'),
             DocumentURI(uri='http://bar.com/', claimant='http://bar.com'),
@@ -65,7 +55,7 @@ class TestExpandURI(object):
         db_session.add(document)
         db_session.flush()
 
-        assert storage.expand_uri(request, 'http://foo.com/') == [
+        assert storage.expand_uri(db_session, 'http://foo.com/') == [
             'http://foo.com/',
             'http://bar.com/'
         ]
@@ -93,7 +83,7 @@ class TestCreateAnnotation(object):
 
         storage.create_annotation(request, data)
 
-        fetch_annotation.assert_called_once_with(request,
+        fetch_annotation.assert_called_once_with(request.db,
                                                  'parent_annotation_id')
 
     def test_it_sets_group_for_replies(self,
@@ -365,29 +355,19 @@ class TestUpdateAnnotation(object):
         }
 
 
-@pytest.mark.usefixtures('fetch_annotation')
 class TestDeleteAnnotation(object):
 
-    def test_it_fetches_the_annotation(self, fetch_annotation, session):
-        request = DummyRequest(db=session)
-        storage.delete_annotation(request, "test_id")
+    def test_it_deletes_the_annotation(self, db_session):
+        ann_1 = Annotation(userid='luke')
+        ann_2 = Annotation(userid='leia')
+        db_session.add_all([ann_1, ann_2])
+        db_session.flush()
 
-        assert fetch_annotation.call_args_list[0] == mock.call(request,
-                                                               "test_id")
+        storage.delete_annotation(db_session, ann_1.id)
+        db_session.commit()
 
-    def test_it_deletes_the_annotation(self, fetch_annotation, session):
-        request = DummyRequest(db=session)
-
-        first_return_value = mock.Mock()
-        second_return_value = mock.Mock()
-        fetch_annotation.side_effect = [
-            first_return_value,
-            second_return_value,
-        ]
-
-        storage.delete_annotation(request, "test_id")
-
-        request.db.delete.assert_called_once_with(first_return_value)
+        assert db_session.query(Annotation).get(ann_1.id) is None
+        assert db_session.query(Annotation).get(ann_2.id) == ann_2
 
 
 @pytest.fixture

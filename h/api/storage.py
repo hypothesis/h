@@ -30,12 +30,12 @@ def annotation_from_dict(data):
     return models.elastic.Annotation(data)
 
 
-def fetch_annotation(request, id_):
+def fetch_annotation(session, id_):
     """
     Fetch the annotation with the given id.
 
-    :param request: the request object
-    :type request: pyramid.request.Request
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param id_: the annotation ID
     :type id_: str
@@ -44,7 +44,7 @@ def fetch_annotation(request, id_):
     :rtype: h.api.models.Annotation, NoneType
     """
     try:
-        return request.db.query(models.Annotation).get(id_)
+        return session.query(models.Annotation).get(id_)
     except types.InvalidUUID:
         return None
 
@@ -69,7 +69,7 @@ def create_annotation(request, data):
     # Replies must have the same group as their parent.
     if data['references']:
         top_level_annotation_id = data['references'][0]
-        top_level_annotation = fetch_annotation(request,
+        top_level_annotation = fetch_annotation(request.db,
                                                 top_level_annotation_id)
         if top_level_annotation:
             data['groupid'] = top_level_annotation.groupid
@@ -149,21 +149,20 @@ def update_annotation(session, id_, data):
     return annotation
 
 
-def delete_annotation(request, id_):
+def delete_annotation(session, id_):
     """
     Delete the annotation with the given id.
 
-    :param request: the request object
-    :type request: pyramid.request.Request
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param id_: the annotation ID
     :type id_: str
     """
-    annotation = fetch_annotation(request, id_)
-    request.db.delete(annotation)
+    session.query(models.Annotation).filter_by(id=id_).delete()
 
 
-def expand_uri(request, uri):
+def expand_uri(session, uri):
     """
     Return all URIs which refer to the same underlying document as `uri`.
 
@@ -171,8 +170,8 @@ def expand_uri(request, uri):
     passed URI, and if so returns the set of all URIs which we currently
     believe refer to the same document.
 
-    :param request: the request object
-    :type request: pyramid.request.Request
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
 
     :param uri: a URI associated with the document
     :type uri: str
@@ -180,7 +179,7 @@ def expand_uri(request, uri):
     :returns: a list of equivalent URIs
     :rtype: list
     """
-    doc = models.Document.find_by_uris(request.db, [uri]).one_or_none()
+    doc = models.Document.find_by_uris(session, [uri]).one_or_none()
 
     if doc is None:
         return [uri]

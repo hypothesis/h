@@ -87,10 +87,10 @@ def handle_message(message):
 def _expand_clauses(request, payload):
     for clause in payload['clauses']:
         if clause['field'] == '/uri':
-            _expand_uris(request, clause)
+            _expand_uris(request.db, clause)
 
 
-def _expand_uris(request, clause):
+def _expand_uris(session, clause):
     uris = clause['value']
     expanded = set()
 
@@ -98,6 +98,6 @@ def _expand_uris(request, clause):
         uris = [uris]
 
     for item in uris:
-        expanded.update(storage.expand_uri(request, item))
+        expanded.update(storage.expand_uri(session, item))
 
     clause['value'] = list(expanded)

@@ -174,7 +174,7 @@ class UriFilter(object):
         if uristr is None:
             return None
 
-        uris = storage.expand_uri(self.request, uristr)
+        uris = storage.expand_uri(self.request.db, uristr)
         scopes = [uri.normalize(u) for u in uris]
         return {"terms": {"target.scope": scopes}}
 

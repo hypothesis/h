@@ -80,13 +80,14 @@ class TestSendReplyNotifications(object):
         event = AnnotationEvent(mock.sentinel.request,
                                 {'id': mock.sentinel.annotation_id},
                                 mock.sentinel.action)
+        mock.sentinel.request.db = mock.Mock()
 
         subscribers.send_reply_notifications(event,
                                              get_notification=get_notification,
                                              generate_mail=generate_mail,
                                              send=send)
 
-        fetch_annotation.assert_called_once_with(mock.sentinel.request,
+        fetch_annotation.assert_called_once_with(mock.sentinel.request.db,
                                                  mock.sentinel.annotation_id)
 
         get_notification.assert_called_once_with(mock.sentinel.request,
@@ -100,6 +101,7 @@ class TestSendReplyNotifications(object):
         generate_mail = mock.Mock(spec_set=[])
         generate_mail.return_value = (['foo@example.com'], 'Your email', 'Text body', 'HTML body')
         event = AnnotationEvent(s.request, None, None)
+        s.request.db = mock.Mock()
 
         subscribers.send_reply_notifications(event,
                                              get_notification=get_notification,
@@ -113,7 +115,7 @@ class TestSendReplyNotifications(object):
         send = FakeMailer()
         get_notification = mock.Mock(spec_set=[], side_effect=RuntimeError('asplode!'))
         generate_mail = mock.Mock(spec_set=[], return_value=[])
-        request = testing.DummyRequest(sentry=mock.Mock(), debug=False)
+        request = testing.DummyRequest(sentry=mock.Mock(), db=mock.Mock(), debug=False)
         event = AnnotationEvent(request, None, None)
 
         subscribers.send_reply_notifications(event,
@@ -127,7 +129,7 @@ class TestSendReplyNotifications(object):
         send = FakeMailer()
         get_notification = mock.Mock(spec_set=[], side_effect=RuntimeError('asplode!'))
         generate_mail = mock.Mock(spec_set=[], return_value=[])
-        request = testing.DummyRequest(sentry=mock.Mock(), debug=True)
+        request = testing.DummyRequest(sentry=mock.Mock(), db=mock.Mock(), debug=True)
         event = AnnotationEvent(request, None, None)
 
         with pytest.raises(RuntimeError):

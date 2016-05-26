@@ -16,7 +16,7 @@ class TestAddAnnotation(object):
 
         indexer.add_annotation(id_)
 
-        fetch_annotation.assert_called_once_with(celery.request, id_)
+        fetch_annotation.assert_called_once_with(celery.request.db, id_)
 
     def test_it_calls_index_with_annotation(self, fetch_annotation, index, celery):
         id_ = 'test-annotation-id'

@@ -68,7 +68,7 @@ def get_notification(request, annotation, action):
     # Now we know we're dealing with a reply
     reply = annotation
 
-    parent = storage.fetch_annotation(request, parent_id)
+    parent = storage.fetch_annotation(request.db, parent_id)
     if parent is None:
         return
 
