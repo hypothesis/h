@@ -73,6 +73,7 @@ EXTRAS_REQUIRE = {
         'pyramid_debugtoolbar>=2.1',
         'prospector[with_pyroma]',
         'sphinx_rtd_theme',
+        'py3kwarn',
         'sphinxcontrib-httpdomain'
     ],
 }
