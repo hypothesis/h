@@ -1,11 +1,14 @@
 {% extends "h:templates/layouts/admin.html.jinja2" %}
 
 {% set page_id = 'cohorts' %}
-{% set page_title = 'Cohorts' %}
+{% set page_title = 'Feature Cohorts' %}
 
 {% block content %}
   <p>
     On this page you can see a list of all the feature cohorts.
+  </p>
+  <p>
+    Back to <a href="{{ request.route_url('admin_features') }}">Feature flags</a>
   </p>
 
   <div class="panel panel-default">
