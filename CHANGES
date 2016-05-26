@@ -1,3 +1,16 @@
+Unreleased
+==========
+
+Miscellanea
+-----------
+
+- Remove code that writes to the legacy storage system (#3357)
+
+- Visual improvements to the adder (#3346, #3370)
+
+- Alleviate the issue where not all replies are loaded by increasing the limit
+  to 200 per request (#3374)
+
 0.24.0 (2016-05-25)
 ===================
 
