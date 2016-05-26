@@ -43,7 +43,6 @@ def fetch_annotation(request, id_):
     :returns: the annotation, if found, or None.
     :rtype: h.api.models.Annotation, NoneType
     """
-
     try:
         return request.db.query(models.Annotation).get(id_)
     except types.InvalidUUID:

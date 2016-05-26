@@ -5,7 +5,6 @@ import copy
 import jsonschema
 from jsonschema.exceptions import best_match
 from pyramid import i18n
-from pyramid import security
 
 from h.api import parse_document_claims
 

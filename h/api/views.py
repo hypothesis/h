@@ -188,7 +188,6 @@ def read_jsonld(annotation, request):
             permission='update')
 def update(annotation, request):
     """Update the specified annotation with data from the PUT payload."""
-
     schema = schemas.UpdateAnnotationSchema(request,
                                             annotation.target_uri,
                                             annotation.groupid)
