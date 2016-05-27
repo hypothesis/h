@@ -15,6 +15,8 @@
              is-last-reply="$last"
              is-sidebar="::vm.isSidebar"
              name="annotation"
+             ng-mouseenter="vm.annotationHovered = true"
+             ng-mouseleave="vm.annotationHovered = false"
              ng-if="vm.thread.annotation"
              ng-show="vm.thread.visible"
              show-document-info="vm.showDocumentInfo"

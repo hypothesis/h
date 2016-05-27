@@ -30,6 +30,10 @@ function showAllParents(thread, showFn) {
 
 // @ngInject
 function AnnotationThreadController() {
+  // Flag that tracks whether the content of the annotation is hovered,
+  // excluding any replies.
+  this.annotationHovered = false;
+
   this.toggleCollapsed = function () {
     this.onChangeCollapsed({
       id: this.thread.id,
@@ -49,6 +53,7 @@ function AnnotationThreadController() {
     return {
       'annotation-thread__collapse-toggle': true,
       'is-open': !this.thread.collapsed,
+      'is-hovered': this.annotationHovered,
     };
   };
 

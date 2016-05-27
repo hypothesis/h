@@ -42,11 +42,16 @@ li:first-child .annotation-thread--top-reply {
 
 .annotation-thread--reply:hover {
   .annotation-thread__collapse-toggle {
-    color: $grey-7;
     background-color: $grey-1;
   }
-
   background-color: $grey-1;
+}
+
+// Darken expand/collapse toggle when an annotation is hovered. This is only
+// when the annotation itself is hovered, not the replies.
+.annotation-thread__collapse-toggle:hover,
+.annotation-thread__collapse-toggle.is-hovered {
+  color: $grey-7;
 }
 
 // Toggle arrow which expands and collapses threads.
