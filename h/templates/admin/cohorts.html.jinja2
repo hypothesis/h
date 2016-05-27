@@ -34,7 +34,11 @@
       <tbody>
         {% for cohort in results %}
           <tr>
-            <td>{{ cohort.name }}</td>
+            <td>
+              <a href="{{ request.route_url('admin_edit_cohort', id=cohort.id) }}">
+                {{ cohort.name }}
+              </a>
+            </td>
             <td>{{ cohort.members|length }}</td>
           </tr>
         {% endfor %}

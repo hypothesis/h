@@ -59,5 +59,54 @@ def cohorts_add(request):
     return httpexceptions.HTTPSeeOther(url)
 
 
+@view_config(route_name='admin_edit_cohort',
+             request_method='GET',
+             renderer='h:templates/admin/edit_cohort.html.jinja2',
+             permission='admin_features')
+def cohorts_edit(context, request):
+    id = request.matchdict['id']
+    cohort = request.db.query(models.FeatureCohort).get(id)
+    return {'cohort': cohort, 'members': cohort.members}
+
+
+@view_config(route_name='admin_edit_cohort',
+             request_method='POST',
+             request_param='add',
+             renderer='h:templates/admin/edit_cohort.html.jinja2',
+             permission='admin_features')
+def cohorts_edit_add(request):
+    member_name = request.params['add']
+    cohort_id = request.matchdict['id']
+
+    member = models.User.get_by_username(member_name)
+    if member is None:
+        request.session.flash(
+            _("User {member_name} doesn't exist.".format(member_name=member_name)),
+            "error")
+    else:
+        cohort = request.db.query(models.FeatureCohort).get(cohort_id)
+        cohort.members.append(member)
+
+    url = request.route_url('admin_edit_cohort', id=cohort_id)
+    return httpexceptions.HTTPSeeOther(url)
+
+
+@view_config(route_name='admin_edit_cohort',
+             request_method='POST',
+             request_param='remove',
+             renderer='h:templates/admin/edit_cohort.html.jinja2',
+             permission='admin_features')
+def cohorts_edit_remove(request):
+    member_name = request.params['remove']
+    cohort_id = request.matchdict['id']
+
+    cohort = request.db.query(models.FeatureCohort).get(cohort_id)
+    member = request.db.query(models.User).filter_by(uid=member_name).first()
+    cohort.members.remove(member)
+
+    url = request.route_url('admin_edit_cohort', id=cohort_id)
+    return httpexceptions.HTTPSeeOther(url)
+
+
 def includeme(config):
     config.scan(__name__)
