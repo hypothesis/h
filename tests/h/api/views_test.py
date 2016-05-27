@@ -186,7 +186,6 @@ class TestCreate(object):
 
     def test_it_publishes_annotation_event(self,
                                            AnnotationEvent,
-                                           AnnotationJSONPresenter,
                                            mock_request,
                                            storage):
         """It publishes an annotation "create" event for the annotation."""
@@ -194,14 +193,8 @@ class TestCreate(object):
 
         annotation = storage.create_annotation.return_value
 
-        AnnotationJSONPresenter.assert_called_once_with(mock_request,
-                                                        annotation)
-        presented = AnnotationJSONPresenter.return_value.asdict()
-
         AnnotationEvent.assert_called_once_with(
-            mock_request,
-            presented,
-            'create')
+            mock_request, annotation.id, 'create')
         mock_request.notify_after_commit.assert_called_once_with(
             AnnotationEvent.return_value)
 
@@ -333,16 +326,14 @@ class TestUpdate(object):
 
     def test_it_inits_an_AnnotationEvent(self,
                                          AnnotationEvent,
-                                         AnnotationJSONPresenter,
+                                         storage,
                                          mock_request):
         annotation = mock.Mock()
 
         views.update(annotation, mock_request)
 
         AnnotationEvent.assert_called_once_with(
-            mock_request,
-            AnnotationJSONPresenter.return_value.asdict.return_value,
-            'update')
+            mock_request, storage.update_annotation.return_value.id, 'update')
 
     def test_it_fires_the_AnnotationEvent(self, AnnotationEvent, mock_request):
         views.update(mock.Mock(), mock_request)
@@ -394,18 +385,14 @@ class TestDelete(object):
                                                           annotation.id)
 
     def test_it_inits_and_fires_an_AnnotationEvent(self,
-                                                   AnnotationEvent,
-                                                   AnnotationJSONPresenter):
+                                                   AnnotationEvent):
         annotation = mock.Mock()
         request = mock.Mock()
         event = AnnotationEvent.return_value
 
         views.delete(annotation, request)
 
-        AnnotationJSONPresenter.assert_called_once_with(request, annotation)
-        presented = AnnotationJSONPresenter.return_value.asdict()
-
-        AnnotationEvent.assert_called_once_with(request, presented, 'delete')
+        AnnotationEvent.assert_called_once_with(request, annotation.id, 'delete')
         request.notify_after_commit.assert_called_once_with(event)
 
     def test_it_returns_object(self):

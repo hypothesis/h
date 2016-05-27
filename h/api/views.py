@@ -157,9 +157,8 @@ def create(request):
     appstruct = schema.validate(_json_payload(request))
     annotation = storage.create_annotation(request, appstruct)
 
+    _publish_annotation_event(request, annotation, 'create')
     annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-    _publish_annotation_event(request, annotation, 'create',
-                              annotation_dict=annotation_dict)
     return annotation_dict
 
 
@@ -197,11 +196,9 @@ def update(annotation, request):
                                            annotation.id,
                                            appstruct)
 
+    _publish_annotation_event(request, annotation, 'update')
+
     annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-
-    _publish_annotation_event(
-        request, annotation, 'update', annotation_dict=annotation_dict)
-
     return annotation_dict
 
 
@@ -245,13 +242,9 @@ def _present_searchdict(request, mapping):
 
 def _publish_annotation_event(request,
                               annotation,
-                              action,
-                              annotation_dict=None):
+                              action):
     """Publish an event to the annotations queue for this annotation action."""
-    if annotation_dict is None:
-        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-
-    event = AnnotationEvent(request, annotation_dict, action)
+    event = AnnotationEvent(request, annotation.id, action)
     request.notify_after_commit(event)
 
 

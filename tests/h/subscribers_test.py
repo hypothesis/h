@@ -34,7 +34,7 @@ class TestPublishAnnotationEvent:
     def event(self):
         return mock.Mock(
             spec=AnnotationEvent(testing.DummyRequest(),
-                                 {'id': 'test_annotation_id'},
+                                 'test_annotation_id',
                                  'create'),
         )
 
@@ -46,7 +46,7 @@ class TestSendReplyNotifications(object):
         get_notification = mock.Mock(spec_set=[], return_value=None)
         generate_mail = mock.Mock(spec_set=[], return_value=[])
         event = AnnotationEvent(mock.sentinel.request,
-                                {'id': mock.sentinel.annotation_id},
+                                mock.sentinel.annotation_id,
                                 mock.sentinel.action)
         mock.sentinel.request.db = mock.Mock()
 
