@@ -8,8 +8,10 @@ from gevent.queue import Full
 
 from h import realtime
 from h.realtime import Consumer
+from h.api import presenters
 from h.api import storage
 from h.auth.util import translate_annotation_principals
+from h.nipsa.logic import has_nipsa
 from h.streamer import websocket
 import h.sentry
 
@@ -91,7 +93,6 @@ def handle_annotation_event(message, socket):
     annotation event, otherwise a dict containing information about the event.
     """
     action = message['action']
-    annotation = storage.annotation_from_dict(message['annotation'])
 
     if action == 'read':
         return None
@@ -99,25 +100,41 @@ def handle_annotation_event(message, socket):
     if message['src_client_id'] == socket.client_id:
         return None
 
-    if annotation.get('nipsa') and (
-            socket.request.authenticated_userid != annotation.get('user', '')):
-        return None
-
-    if not _authorized_to_read(socket.request, annotation):
-        return None
-
     # We don't send anything until we have received a filter from the client
     if socket.filter is None:
         return None
 
-    if not socket.filter.match(annotation, action):
-        return None
-
-    return {
-        'payload': [annotation],
+    notification = {
         'type': 'annotation-notification',
         'options': {'action': action},
     }
+    id_ = message['annotation_id']
+
+    # Return early when action is delete
+    if action == 'delete':
+        notification['payload'] = [{'id': id_}]
+        return notification
+
+    annotation = storage.fetch_annotation(socket.request.db, id_)
+
+    if annotation is None:
+        return None
+
+    serialized = presenters.AnnotationJSONPresenter(
+        socket.request, annotation).asdict()
+
+    if has_nipsa(annotation.userid) and (
+            socket.request.authenticated_userid != serialized.get('user', '')):
+        return None
+
+    if not _authorized_to_read(socket.request, serialized):
+        return None
+
+    if not socket.filter.match(serialized, action):
+        return None
+
+    notification['payload'] = [serialized]
+    return notification
 
 
 def handle_user_event(message, socket):
