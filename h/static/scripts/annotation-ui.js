@@ -52,7 +52,10 @@ function initialState(settings) {
 
     filterQuery: null,
 
-    sortMode: 'Location',
+    // Key by which annotations are currently sorted.
+    sortKey: 'Location',
+    // Keys by which annotations can be sorted.
+    sortKeysAvailable: ['Newest', 'Oldest', 'Location'],
   });
 }
 
@@ -66,7 +69,7 @@ var types = {
   REMOVE_ANNOTATIONS: 'REMOVE_ANNOTATIONS',
   CLEAR_ANNOTATIONS: 'CLEAR_ANNOTATIONS',
   SET_FILTER_QUERY: 'SET_FILTER_QUERY',
-  SORT_BY: 'SORT_BY',
+  SET_SORT_KEY: 'SET_SORT_KEY',
 };
 
 function excludeAnnotations(current, annotations) {
@@ -116,8 +119,8 @@ function reducer(state, action) {
         forceVisible: {},
         expanded: {},
       });
-    case types.SORT_BY:
-      return Object.assign({}, state, {sortMode: action.mode});
+    case types.SET_SORT_KEY:
+      return Object.assign({}, state, {sortKey: action.key});
     default:
       return state;
   }
@@ -301,11 +304,11 @@ module.exports = function (settings) {
       });
     },
 
-    /** Sets the sort mode for the annotation list. */
-    sortBy: function (mode) {
+    /** Sets the sort key for the annotation list. */
+    setSortKey: function (key) {
       store.dispatch({
-        type: types.SORT_BY,
-        mode: mode,
+        type: types.SET_SORT_KEY,
+        key: key,
       });
     },
   };

@@ -90,8 +90,6 @@ module.exports = function WidgetController(
     visibleThreads.detach();
   });
 
-  $scope.sortOptions = ['Newest', 'Oldest', 'Location'];
-
   function annotationExists(id) {
     return annotationUI.getState().annotations.some(function (annot) {
       return annot.id === id;
@@ -262,9 +260,6 @@ module.exports = function WidgetController(
 
   // Watch the inputs that determine which annotations are currently
   // visible and how they are sorted and rebuild the thread when they change
-  $scope.$watch('sort.name', function (mode) {
-    annotationUI.sortBy(mode);
-  });
   $scope.$watch('search.query', function (query) {
     annotationUI.setFilterQuery(query);
   });

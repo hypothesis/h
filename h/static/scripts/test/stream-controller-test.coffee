@@ -42,6 +42,7 @@ describe 'StreamController', ->
       clearAnnotations: sandbox.spy()
       setCollapsed: sandbox.spy()
       setForceVisible: sandbox.spy()
+      setSortKey: sandbox.spy()
     }
 
     fakeParams = {id: 'test'}
@@ -94,7 +95,6 @@ describe 'StreamController', ->
   beforeEach inject (_$controller_, $rootScope) ->
     $controller = _$controller_
     $scope = $rootScope.$new()
-    $scope.sort = {}
 
   afterEach ->
     sandbox.restore()

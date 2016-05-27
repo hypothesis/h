@@ -1,27 +1,18 @@
 <span class="ng-cloak" dropdown keyboard-nav>
-  <span role="button"
-        data-toggle="dropdown"
-        dropdown-toggle
-        ng-if="!showAsIcon">
-    Sorted by {{sortBy | lowercase}}
-    <i class="h-icon-arrow-drop-down"></i>
-  </span>
   <button
     type="button"
     class="top-bar__btn"
-    ng-if="showAsIcon"
     dropdown-toggle
-    title="Sort by {{sortBy}}">
+    title="Sort by {{sortKey}}">
     <i class="h-icon-sort"></i>
   </button>
   <div class="dropdown-menu__top-arrow"></div>
-  <ul class="dropdown-menu"
-      ng-class="showAsIcon ? 'pull-right' : 'pull-none'" role="menu">
+  <ul class="dropdown-menu pull-right" role="menu">
     <li class="dropdown-menu__row"
-        ng-repeat="sortOption in sortOptions"
-        ng-click="onChangeSortBy({sortBy: sortOption})"
+        ng-repeat="key in sortKeysAvailable"
+        ng-click="onChangeSortKey({sortKey: key})"
         ><span class="dropdown-menu-radio"
-               ng-class="{'is-selected' : sortOption === sortBy}"
-        ></span><a class="dropdown-menu__link" href="">{{sortOption}}</a></li>
+               ng-class="{'is-selected' : sortKey === key}"
+        ></span><a class="dropdown-menu__link" href="">{{key}}</a></li>
   </ul>
 </span>

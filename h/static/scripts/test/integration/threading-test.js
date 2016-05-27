@@ -70,16 +70,16 @@ describe('annotation threading', function () {
 
   unroll('should sort annotations by #mode', function (testCase) {
     annotationUI.addAnnotations(fixtures.annotations);
-    annotationUI.sortBy(testCase.mode);
+    annotationUI.setSortKey(testCase.sortKey);
     var actualOrder = rootThread.thread().children.map(function (thread) {
       return thread.annotation.id;
     });
     assert.deepEqual(actualOrder, testCase.expectedOrder);
   }, [{
-    mode: 'Oldest',
+    sortKey: 'Oldest',
     expectedOrder: ['1','2'],
   },{
-    mode: 'Newest',
+    sortKey: 'Newest',
     expectedOrder: ['2','1'],
   }]);
 });

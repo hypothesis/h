@@ -37,7 +37,8 @@ describe('rootThread', function () {
         expanded: {},
         forceVisible: {},
         filterQuery: null,
-        sortMode: 'Location',
+        sortKey: 'Location',
+        sortKeysAvailable: ['Location'],
       },
 
       getState: function () {
@@ -177,7 +178,8 @@ describe('rootThread', function () {
 
       fakeBuildThread.reset();
       fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state, {
-        sortMode: testCase.order,
+        sortKey: testCase.order,
+        sortKeysAvailable: [testCase.order],
       });
       rootThread.rebuild();
       var sortCompareFn = fakeBuildThread.args[0][1].sortCompareFn;

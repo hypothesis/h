@@ -3,7 +3,6 @@
 var angular = require('angular');
 var proxyquire = require('proxyquire');
 
-var annotationFixtures = require('./annotation-fixtures');
 var events = require('../events');
 var util = require('./util');
 
@@ -290,26 +289,6 @@ describe('AppController', function () {
       $scope.logout();
 
       assert.equal(fakeWindow.confirm.callCount, 0);
-    });
-  });
-
-  describe('sorting', function () {
-    function annotationThread() {
-      return {message: annotationFixtures.defaultAnnotation()};
-    }
-
-    it('sorts threads by location when sort name is "Location"', function () {
-      var threads = [annotationThread(), annotationThread()];
-      fakeAnnotationMetadata.location = function (annotation) {
-        return threads.findIndex(function (thread) {
-          return thread.message === annotation;
-        });
-      };
-      createController();
-      $scope.sort.name = 'Location';
-      $scope.$digest();
-      assert.equal($scope.sort.predicate(threads[0]), 0);
-      assert.equal($scope.sort.predicate(threads[1]), 1);
     });
   });
 });
