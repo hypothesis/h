@@ -63,6 +63,9 @@ body {
   }
 }
 
+// Elements in root template (viewer.html)
+// ---------------------------------------
+
 .create-account-banner {
   background-color: $gray-dark;
   border-radius: 2px;
@@ -117,4 +120,25 @@ body {
   // threads, so it should not occupy any space other than that set via its
   // 'height' inline style property.
   margin: 0;
+}
+
+.annotation-unavailable-message {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $gray-lighter;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  border-radius: 3px;
+  align-items: center;
+
+  &__label {
+    text-align: center;
+  }
+
+  &__icon {
+    background-image: url(../images/icons/lock.svg);
+    background-repeat: no-repeat;
+    width: 56px;
+    height: 48px;
+  }
 }
