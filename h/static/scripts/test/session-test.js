@@ -30,7 +30,7 @@ describe('h:session', function () {
     };
 
     $provide.value('settings', {
-      serviceUrl: 'https://test.hypothes.is',
+      serviceUrl: 'https://test.hypothes.is/root/',
     });
     $provide.value('flash', fakeFlash);
     $provide.value('raven', fakeRaven);
@@ -52,7 +52,7 @@ describe('h:session', function () {
   // There's little point testing every single route here, as they're
   // declarative and ultimately we'd be testing ngResource.
   describe('#login()', function () {
-    var url = 'https://test.hypothes.is/app?__formid__=login';
+    var url = 'https://test.hypothes.is/root/app?__formid__=login';
 
     it('should send an HTTP POST to the action', function () {
       $httpBackend.expectPOST(url, {code: 123}).respond({});
@@ -131,7 +131,7 @@ describe('h:session', function () {
   });
 
   describe('#load()', function () {
-    var url = 'https://test.hypothes.is/app';
+    var url = 'https://test.hypothes.is/root/app';
 
     it('should fetch the session data', function () {
       $httpBackend.expectGET(url).respond({});
@@ -238,7 +238,7 @@ describe('h:session', function () {
   });
 
   describe('#dismiss_sidebar_tutorial()', function () {
-    var url = 'https://test.hypothes.is/app/dismiss_sidebar_tutorial';
+    var url = 'https://test.hypothes.is/root/app/dismiss_sidebar_tutorial';
     it('disables the tutorial for the user', function () {
       $httpBackend.expectPOST(url).respond({});
       session.dismiss_sidebar_tutorial();
