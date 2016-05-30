@@ -232,24 +232,8 @@ $annotation-card-left-padding: 10px;
   }
 }
 
-.share-dialog-wrapper {
+.annotation-share-dialog-wrapper {
   position: relative;
-
-  &.open .share-dialog--actions {
-    display: block;
-  }
-}
-
-.share-dialog--actions {
-  padding: 3px;
-  width: inherit;
-}
-
-.share-dialog__link {
-  padding: 0;
-  width: 220px;
-  border: none;
-  color: $text-color;
 }
 
 // the actions for publishing annotations and reverting changes
