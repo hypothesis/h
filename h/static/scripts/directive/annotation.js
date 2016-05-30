@@ -690,6 +690,10 @@ function AnnotationController(
     return persona.username(domainModel.user);
   };
 
+  vm.isReply = function () {
+    return isReply(domainModel);
+  };
+
   /**
    * Sets whether or not the controls for expanding/collapsing the body of
    * lengthy annotations should be shown.
