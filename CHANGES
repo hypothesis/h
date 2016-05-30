@@ -1,3 +1,26 @@
+Unreleased
+==========
+
+Features
+--------
+
+- The annotation adder now appears in response to selection changes made via
+  touch or keyboard input (#3347)
+
+Bug fixes
+---------
+
+- The client now works on web pages which define a global variable called
+  "global" (#3385)
+
+- The client now accepts a relative URL for the "serviceUrl" parameter
+  specifying the Hypothesis service to connect to (#3381)
+
+Miscellanea
+-----------
+
+- Documentation pages now have URLs without a '.html' extension (#3373)
+
 0.25.0 (2016-05-26)
 ===================
 
