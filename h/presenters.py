@@ -67,7 +67,7 @@ class AnnotationHTMLPresenter(object):
 
     @property
     def uri(self):
-        return jinja2.escape(self.annotation.uri)
+        return jinja2.escape(self.annotation.target_uri)
 
     @property
     def filename(self):
