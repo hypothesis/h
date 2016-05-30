@@ -9,6 +9,7 @@ $ = Annotator.$
 adder = require('./adder')
 highlighter = require('./highlighter')
 rangeUtil = require('./range-util')
+selections = require('./selections')
 
 animationPromise = (fn) ->
   return new Promise (resolve, reject) ->
@@ -47,7 +48,15 @@ module.exports = class Guest extends Annotator
   constructor: (element, options) ->
     super
 
+    self = this
     this.adderCtrl = new adder.Adder(@adder[0])
+    this.selections = selections(document).subscribe
+      next: (range) ->
+        if range
+          self._onSelection(range)
+        else
+          self._onClearSelection()
+
     this.anchors = []
 
     cfOptions =
@@ -133,6 +142,7 @@ module.exports = class Guest extends Annotator
   destroy: ->
     $('#annotator-dynamic-style').remove()
 
+    this.selections.unsubscribe()
     @adder.remove()
 
     @element.find('.annotator-hl').each ->
@@ -332,33 +342,21 @@ module.exports = class Guest extends Annotator
     tags = (a.$$tag for a in annotations)
     @crossframe?.call('focusAnnotations', tags)
 
-  onSuccessfulSelection: (event, immediate) ->
-    unless event?
-      throw "Called onSuccessfulSelection without an event!"
-    unless event.ranges?
-      throw "Called onSuccessulSelection with an event with missing ranges!"
-
-    @selectedRanges = event.ranges
+  _onSelection: (range) ->
+    @selectedRanges = [range]
 
     Annotator.$('.annotator-toolbar .h-icon-note')
       .attr('title', 'New Annotation')
       .removeClass('h-icon-note')
       .addClass('h-icon-annotate');
 
-    # Do we want immediate annotation?
-    if immediate
-      # Create an annotation
-      @onAdderClick event
-    else
-      # Show the adder button
-      selection = Annotator.Util.getGlobal().getSelection()
-      isBackwards = rangeUtil.isSelectionBackwards(selection)
-      focusRect = rangeUtil.selectionFocusRect(selection)
-      {left, top, arrowDirection} = this.adderCtrl.target(focusRect, isBackwards)
-      this.adderCtrl.showAt(left, top, arrowDirection)
-    true
+    selection = Annotator.Util.getGlobal().getSelection()
+    isBackwards = rangeUtil.isSelectionBackwards(selection)
+    focusRect = rangeUtil.selectionFocusRect(selection)
+    {left, top, arrowDirection} = this.adderCtrl.target(focusRect, isBackwards)
+    this.adderCtrl.showAt(left, top, arrowDirection)
 
-  onFailedSelection: (event) ->
+  _onClearSelection: () ->
     this.adderCtrl.hide()
     @selectedRanges = []
 
