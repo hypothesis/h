@@ -174,23 +174,7 @@
         h-tooltip>
         <i class="h-icon-annotation-reply btn-icon "></i>
       </button>
-      <span class="share-dialog-wrapper" ng-if="!vm.feature('direct_linking')">
-        <button class="btn btn-clean annotation-action-btn"
-          ng-click="vm.showShareDialog = !vm.showShareDialog"
-          aria-label="Link"
-          h-tooltip>
-          <i class="h-icon-link btn-icon "></i>
-        </button>
-        <span class="share-dialog share-dialog--actions" ng-click="$event.stopPropagation()">
-          <a target="_blank"
-            class="h-icon-link"
-            ng-href="{{vm.annotationURI}}"
-            title="Open in new tab">
-          </a>
-          <input class="share-dialog__link" type="text" value="{{vm.annotationURI}}" readonly>
-        </span>
-      </span>
-      <span class="share-dialog-wrapper" ng-if="vm.feature('direct_linking')">
+      <span class="share-dialog-wrapper">
         <button class="btn btn-clean annotation-action-btn"
           ng-click="vm.showShareDialog = true"
           aria-label="Share"
