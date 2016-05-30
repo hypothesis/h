@@ -50,8 +50,6 @@ def test_incontext_link_appends_schemaless_uri_if_present(api_request,
 
 @pytest.fixture
 def api_request():
-    def feature(name):
-        return name == 'direct_linking'
-    request = DummyRequest(feature=feature)
+    request = DummyRequest()
     request.registry.settings = {'h.bouncer_url': 'https://hyp.is'}
     return request
