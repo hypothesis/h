@@ -30,7 +30,7 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = [
     'PyJWT>=1.0.0,<2.0.0',
-    'SQLAlchemy>=0.8.0',
+    'SQLAlchemy>=1.0.13',
     'alembic>=0.7.0',
     'annotator>=0.14.2,<0.15',
     'blinker>=1.3,<1.4',
