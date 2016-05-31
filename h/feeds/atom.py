@@ -20,16 +20,17 @@ def _feed_entry_from_annotation(
 
     """
     try:
-        name = util.user.split_user(annotation["user"])["username"]
+        name = util.user.split_user(annotation.userid)["username"]
     except ValueError:
-        name = annotation["user"]
+        name = annotation.userid
+
     entry = {
         "id": h.feeds.util.tag_uri_for_annotation(
             annotation.annotation, annotation_url),
         "author": {"name": name},
         "title": annotation.title,
-        "updated": annotation["updated"],
-        "published": annotation["created"],
+        "updated": _utc_iso8601_string(annotation.updated),
+        "published": _utc_iso8601_string(annotation.created),
         "content": annotation.description,
         "links": [
             {"rel": "alternate", "type": "text/html",
@@ -41,10 +42,15 @@ def _feed_entry_from_annotation(
             {"rel": "alternate", "type": "application/json",
              "href": annotation_api_url(annotation.annotation)}
         )
-    entry["links"].extend(
-        [{"rel": "related", "href": link} for link in annotation.target_links])
+    # TODO
+    # entry["links"].extend(
+    #     [{"rel": "related", "href": link} for link in annotation.target_links])
 
     return entry
+
+
+def _utc_iso8601_string(timestamp):
+    return timestamp.strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')
 
 
 def feed_from_annotations(
@@ -79,6 +85,6 @@ def feed_from_annotations(
     }
 
     if annotations:
-        feed["updated"] = annotations[0]["updated"]
+        feed["updated"] = _utc_iso8601_string(annotations[0].updated)
 
     return feed
