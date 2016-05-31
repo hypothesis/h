@@ -1,6 +1,5 @@
 """Functions for generating RSS feeds."""
 from pyramid import i18n
-from dateutil import parser
 
 from h import presenters
 from h import util
@@ -21,8 +20,8 @@ def _pubDate_string_from_annotation(annotation):
     element of an RSS feed.
 
     """
-    return parser.parse(annotation['created']).strftime(
-        '%a, %d %b %Y %H:%M:%S %z')
+    if annotation.created:
+        return annotation.created.strftime('%a, %d %b %Y %H:%M:%S +0000')
 
 
 def _feed_item_from_annotation(annotation, annotation_url):
@@ -35,16 +34,15 @@ def _feed_item_from_annotation(annotation, annotation_url):
 
     """
     try:
-        name = util.user.split_user(annotation["user"])["username"]
+        name = util.user.split_user(annotation.userid)["username"]
     except ValueError:
-        name = annotation["user"]
+        name = annotation.userid
     return {
         "author": {"name": name},
-        "title": annotation.title,
-        "description": annotation.description,
+        "title": "TODO: title", #annotation.title,
+        "description": "TODO: description", #annotation.description,
         "pubDate": _pubDate_string_from_annotation(annotation),
-        "guid": h.feeds.util.tag_uri_for_annotation(
-            annotation, annotation_url),
+        "guid": h.feeds.util.tag_uri_for_annotation(annotation, annotation_url),
         "link": annotation_url(annotation)
     }
 
@@ -59,7 +57,7 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
     :rtype: dict
 
     """
-    annotations = [presenters.AnnotationHTMLPresenter(a) for a in annotations]
+    # annotations = [presenters.AnnotationHTMLPresenter(a) for a in annotations]
 
     feed = {
         'title': title,
@@ -73,8 +71,7 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
             for annotation in annotations]
     }
 
-    if annotations:
-        feed['pubDate'] = parser.parse(annotations[0]['updated']).strftime(
-            '%a, %d %b %Y %H:%M:%S %Z')
+    if annotations and annotations[0].updated:
+        feed['pubDate'] = annotations[0].updated.strftime('%a, %d %b %Y %H:%M:%S UTC')
 
     return feed
