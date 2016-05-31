@@ -5,16 +5,10 @@
 
 // Direct or nested reply to an annotation
 .annotation-thread--reply {
-  // The negative margin is used so that the hovered background of reply threads
-  // extends beyond the left/right edges of the parent annotation's content.
-  // See https://goo.gl/fC5yfa
-  margin-left: -10px;
-  margin-right: -10px;
-
-  // Left padding is set so that left edge of collapse toggle arrow is
-  // aligned with left edge of the parent annotation's content.
-  padding-left: 5px;
-  padding-right: 10px;
+  // Left margin is set so that left edge of collapse toggle arrow
+  // for the reply is aligned with the left edge of the parent annotation's
+  // content.
+  margin-left: -5px;
 }
 
 // Top-level reply to an annotation
@@ -38,13 +32,6 @@ li:first-child .annotation-thread--top-reply {
 
 .annotation-thread__content {
   flex-grow: 1;
-}
-
-.annotation-thread--reply:hover {
-  .annotation-thread__collapse-toggle {
-    background-color: $grey-1;
-  }
-  background-color: $grey-1;
 }
 
 // Darken expand/collapse toggle when an annotation is hovered. This is only
@@ -73,7 +60,7 @@ li:first-child .annotation-thread--top-reply {
 
   &.is-open {
     // When the thread is expanded, the top of the dashed line is should be
-    // aligned with the reply's body.
-    height: 30px;
+    // aligned with the top of the privacy indicator ("Only me") if present
+    height: 25px;
   }
 }
