@@ -28,6 +28,20 @@ class TestFetchAnnotation(object):
         assert storage.fetch_annotation(db_session, 'foo') is None
 
 
+class TestFetchOrderedAnnotations(object):
+
+    def test_it_returns_annotations_for_ids_in_the_same_order(self, db_session):
+        ann_1 = Annotation(userid='luke')
+        ann_2 = Annotation(userid='luke')
+        db_session.add_all([ann_1, ann_2])
+        db_session.flush()
+
+        assert [ann_2, ann_1] == storage.fetch_ordered_annotations(db_session,
+                                                                   [ann_2.id, ann_1.id])
+        assert [ann_1, ann_2] == storage.fetch_ordered_annotations(db_session,
+                                                                   [ann_1.id, ann_2.id])
+
+
 class TestExpandURI(object):
 
     def test_expand_uri_no_document(self, db_session):

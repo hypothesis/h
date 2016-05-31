@@ -49,6 +49,17 @@ def fetch_annotation(session, id_):
         return None
 
 
+def fetch_ordered_annotations(session, ids):
+    if not ids:
+        return []
+
+    ordering = {x: i for i, x in enumerate(ids)}
+
+    anns = session.query(models.Annotation).filter(models.Annotation.id.in_(ids)).all()
+    anns = sorted(anns, key=lambda a: ordering.get(a.id))
+    return anns
+
+
 def create_annotation(request, data):
     """
     Create an annotation from passed data.
