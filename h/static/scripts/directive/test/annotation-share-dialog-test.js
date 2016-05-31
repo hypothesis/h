@@ -14,7 +14,8 @@ describe('annotationShareDialog', function () {
   before(function () {
     angular.module('app', [])
       .directive('annotationShareDialog',
-        require('../annotation-share-dialog'));
+        require('../annotation-share-dialog'))
+      .value('urlEncodeFilter', function (val) { return val; });
   });
 
   beforeEach(function () {

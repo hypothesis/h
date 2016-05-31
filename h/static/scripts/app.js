@@ -187,6 +187,7 @@ module.exports = angular.module('h', [
   .value('raven', require('./raven'))
   .value('settings', settings)
   .value('time', require('./time'))
+  .value('urlEncodeFilter', require('./filter/url').encode)
 
   .config(configureHttp)
   .config(configureLocation)
