@@ -14,15 +14,15 @@
           ng-value="vm.viaPageLink"
           readonly /></p>
       <p class="share-link-icons">
-      <a href="https://twitter.com/intent/tweet?url={{vm.viaPageLink}}"
+      <a href="https://twitter.com/intent/tweet?url={{vm.viaPageLink | urlEncode}}"
          target="_blank"
          title="Tweet link"
          class="share-link-icon h-icon-twitter"></a>
-      <a href="https://www.facebook.com/sharer/sharer.php?u={{vm.viaPageLink}}"
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{vm.viaPageLink | urlEncode}}"
          target="_blank"
          title="Share on Facebook"
          class="share-link-icon h-icon-facebook"></a>
-      <a href="https://plus.google.com/share?url={{vm.viaPageLink}}"
+      <a href="https://plus.google.com/share?url={{vm.viaPageLink | urlEncode}}"
          target="_blank"
          title="Post on Google Plus"
          class="share-link-icon h-icon-google-plus"></a>

@@ -1,15 +1,15 @@
 <div class="annotation-share-dialog" ng-class="{'is-open': vm.isOpen}">
   <div class="annotation-share-dialog-target">
     <span class="annotation-share-dialog-target__label">Share:</span>
-    <a href="https://twitter.com/intent/tweet?url={{vm.uri}}"
+    <a href="https://twitter.com/intent/tweet?url={{vm.uri | urlEncode}}"
       target="_blank"
       title="Tweet link"
       class="annotation-share-dialog-target__icon h-icon-twitter"></a>
-    <a href="https://www.facebook.com/sharer/sharer.php?u={{vm.uri}}"
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{vm.uri | urlEncode}}"
       target="_blank"
       title="Share on Facebook"
       class="annotation-share-dialog-target__icon h-icon-facebook"></a>
-    <a href="https://plus.google.com/share?url={{vm.uri}}"
+    <a href="https://plus.google.com/share?url={{vm.uri | urlEncode}}"
       target="_blank"
       title="Post on Google Plus"
       class="annotation-share-dialog-target__icon h-icon-google-plus"></a>

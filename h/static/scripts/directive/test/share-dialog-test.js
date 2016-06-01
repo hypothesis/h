@@ -12,7 +12,8 @@ describe('shareDialog', function () {
 
     angular.module('h', [])
       .directive('shareDialog', require('../share-dialog'))
-      .value('crossframe', fakeCrossFrame);
+      .value('crossframe', fakeCrossFrame)
+      .value('urlEncodeFilter', function (val) { return val; });
     angular.mock.module('h');
   });
 

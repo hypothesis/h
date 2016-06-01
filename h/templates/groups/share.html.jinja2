@@ -54,15 +54,15 @@
         <p class="group-form-footer__heading">Invite</p>
         Invite anyone to join the group using the link below:
         <input class="share-link-field" value="{{ group_url }}">
-        <a href="//twitter.com/intent/tweet?url={{ group_url }}"
+        <a href="//twitter.com/intent/tweet?url={{ group_url | urlencode }}"
            target="_blank"
            title="Tweet link"
            class="share-link-icon h-icon-twitter"></a>
-        <a href="//www.facebook.com/sharer/sharer.php?u={{ group_url }}"
+        <a href="//www.facebook.com/sharer/sharer.php?u={{ group_url | urlencode }}"
            target="_blank"
            title="Share on Facebook"
            class="share-link-icon h-icon-facebook"></a>
-        <a href="//plus.google.com/share?url={{ group_url }}"
+        <a href="//plus.google.com/share?url={{ group_url | urlencode }}"
            target="_blank"
            title="Post on Google Plus"
            class="share-link-icon h-icon-google-plus"></a>
