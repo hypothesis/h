@@ -30,13 +30,29 @@ class TestPublishAnnotationEvent:
             'src_client_id': 'client_id'
         })
 
+    def test_it_adds_annotation_dict_to_realtime_event(self, event):
+        annotation_dict = mock.Mock()
+        type(event).annotation_dict = mock.PropertyMock(return_value=annotation_dict)
+        event.request.headers = {'X-Client-Id': 'client_id'}
+
+        subscribers.publish_annotation_event(event)
+
+        event.request.realtime.publish_annotation.assert_called_once_with({
+            'action': event.action,
+            'annotation_id': event.annotation_id,
+            'src_client_id': 'client_id',
+            'annotation_dict': annotation_dict
+        })
+
     @pytest.fixture
     def event(self):
-        return mock.Mock(
+        event =  mock.Mock(
             spec=AnnotationEvent(testing.DummyRequest(),
                                  'test_annotation_id',
                                  'create'),
         )
+        type(event).annotation_dict = mock.PropertyMock(return_value=None)
+        return event
 
 
 @pytest.mark.usefixtures('fetch_annotation')

@@ -111,29 +111,28 @@ def handle_annotation_event(message, socket):
     id_ = message['annotation_id']
 
     # Return early when action is delete
+    serialized = None
     if action == 'delete':
-        notification['payload'] = [{'id': id_}]
-        return notification
+        serialized = message['annotation_dict']
+    else:
+        annotation = storage.fetch_annotation(socket.request.db, id_)
+        serialized = presenters.AnnotationJSONPresenter(
+            socket.request, annotation).asdict()
 
-    annotation = storage.fetch_annotation(socket.request.db, id_)
-
-    if annotation is None:
+    userid = serialized.get('user')
+    if has_nipsa(userid) and socket.request.authenticated_userid != userid:
         return None
 
-    serialized = presenters.AnnotationJSONPresenter(
-        socket.request, annotation).asdict()
-
-    if has_nipsa(annotation.userid) and (
-            socket.request.authenticated_userid != serialized.get('user', '')):
-        return None
-
-    if not _authorized_to_read(socket.request, serialized):
+    permissions = serialized.get('permissions')
+    if not _authorized_to_read(socket.request, permissions):
         return None
 
     if not socket.filter.match(serialized, action):
         return None
 
     notification['payload'] = [serialized]
+    if action == 'delete':
+        notification['payload'] = [{'id': id_}]
     return notification
 
 
@@ -160,24 +159,13 @@ def handle_user_event(message, socket):
     }
 
 
-def _authorized_to_read(request, annotation):
+def _authorized_to_read(request, permissions):
     """Return True if the passed request is authorized to read the annotation.
 
     If the annotation belongs to a private group, this will return False if the
     authenticated user isn't a member of that group.
     """
-    # TODO: remove this when we've diagnosed this issue
-    if ('permissions' not in annotation or
-            'read' not in annotation['permissions']):
-        request.sentry.captureMessage(
-            'streamer received annotation lacking valid permissions',
-            level='warn',
-            extra={
-                'id': annotation['id'],
-                'permissions': json.dumps(annotation.get('permissions')),
-            })
-
-    read_permissions = annotation.get('permissions', {}).get('read', [])
+    read_permissions = permissions.get('read', [])
     read_principals = translate_annotation_principals(read_permissions)
     if set(read_principals).intersection(request.effective_principals):
         return True

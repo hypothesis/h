@@ -244,7 +244,11 @@ def _publish_annotation_event(request,
                               annotation,
                               action):
     """Publish an event to the annotations queue for this annotation action."""
-    event = AnnotationEvent(request, annotation.id, action)
+    annotation_dict = None
+    if action == 'delete':
+        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+
+    event = AnnotationEvent(request, annotation.id, action, annotation_dict)
     request.notify_after_commit(event)
 
 

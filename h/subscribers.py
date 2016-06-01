@@ -32,6 +32,8 @@ def publish_annotation_event(event):
         'annotation_id': event.annotation_id,
         'src_client_id': event.request.headers.get('X-Client-Id'),
     }
+    if event.annotation_dict:
+        data['annotation_dict'] = event.annotation_dict
 
     event.request.realtime.publish_annotation(data)
 
