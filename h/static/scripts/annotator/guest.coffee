@@ -6,6 +6,7 @@ scrollIntoView = require('scroll-into-view')
 Annotator = require('annotator')
 $ = Annotator.$
 
+TaskQueue = require('./task-queue')
 adder = require('./adder')
 highlighter = require('./highlighter')
 rangeUtil = require('./range-util')
@@ -59,6 +60,9 @@ module.exports = class Guest extends Annotator
 
     this.anchors = []
 
+    # Queue of annotation anchoring tasks
+    this._anchoringQueue = new TaskQueue()
+
     cfOptions =
       on: (event, handler) =>
         this.subscribe(event, handler)
@@ -107,8 +111,14 @@ module.exports = class Guest extends Annotator
       this.detach(annotation)
 
     this.subscribe 'annotationsLoaded', (annotations) =>
-      for annotation in annotations
-        this.anchor(annotation)
+      self = this
+      annotations.forEach((annotation) ->
+        # Annotations are anchored sequentially so that the DOM is not mutated
+        # in-between an annotation's location in the document being resolved to
+        # a DOM Range and the Range being highlighted by wrapping it in an
+        # 'annotator-hl' span.
+        self._anchoringQueue.push(-> self.anchor(annotation))
+      )
 
   _connectAnnotationUISync: (crossframe) ->
     crossframe.on 'focusAnnotations', (tags=[]) =>

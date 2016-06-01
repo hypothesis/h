@@ -11,6 +11,8 @@ raf['@noCallThru'] = true
 scrollIntoView = sinon.stub()
 scrollIntoView['@noCallThru'] = true
 
+createTask = require('./create-task')
+
 proxyquire = require('proxyquire')
 Guest = proxyquire('../guest', {
   './highlighter': highlighter,
@@ -100,13 +102,21 @@ describe 'Guest', ->
         assert.calledWith(guest.detach, ann)
 
       it 'anchors annotations on "annotationsLoaded"', ->
+        task1 = createTask()
+        task2 = createTask()
+
         ann1 = {id: 1, $$tag: 'tag1'}
         ann2 = {id: 2, $$tag: 'tag2'}
-        sandbox.stub(guest, 'anchor')
+        anchorStub = sandbox.stub(guest, 'anchor', (ann) ->
+          if ann == ann1
+            task1.taskFn()
+          else if ann == ann2
+            task2.taskFn()
+        )
         options.emit('annotationsLoaded', [ann1, ann2])
-        assert.calledTwice(guest.anchor)
-        assert.calledWith(guest.anchor, ann1)
-        assert.calledWith(guest.anchor, ann2)
+
+        # Wait for Guest#anchor() to be called for both annotations
+        return Promise.all([task1.done, task2.done])
 
       it 'proxies all other events into the annotator event system', ->
         fooHandler = sandbox.stub()
