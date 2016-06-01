@@ -9,15 +9,13 @@ from h.admin.views import cohorts as views
 
 
 def test_cohorts_index_when_no_cohorts():
-    req = DummyRequest()
+    req = DummyRequest(db=db.Session)
     result = views.cohorts_index({}, req)
     assert result["results"] == []
 
 
 def test_new_cohort_creates_cohort():
-    req = DummyRequest()
-    req.db = db.Session
-
+    req = DummyRequest(db=db.Session)
     req.params['add'] = 'cohort'
     result = views.cohorts_add(req)
     assert isinstance(result, exc.HTTPSeeOther)
