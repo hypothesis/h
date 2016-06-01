@@ -63,9 +63,11 @@ img::-moz-selection {
   background: transparent;
 }
 
-ul, li {
-  padding: 0;
-  margin: 0;
+ul, ol, li {
+  @include reset-box-model;
+}
+
+ul, ol {
   list-style: none;
 }
 
