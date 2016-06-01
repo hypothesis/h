@@ -27,7 +27,7 @@ def cohorts_add(request):
     cohort_name = request.params['add']
     cohort = models.FeatureCohort(name=cohort_name)
     request.db.add(cohort)
-    request.db.flush()
+
     url = request.route_url('admin_cohorts')
     return exc.HTTPSeeOther(url)
 
