@@ -1424,30 +1424,54 @@ describe('annotation', function() {
       });
     });
 
-    describe('annotation metadata', function () {
-      function findLink(directive) {
-        var links = directive.element[0]
-          .querySelectorAll('header .annotation-header__timestamp');
-        return links[links.length-1];
-      }
-
-      it('displays HTML links when in-context links are not available', function () {
-        var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
-          links: {html: 'https://test.hypothes.is/a/deadbeef'},
-        });
-        var directive = createDirective(annotation);
-        assert.equal(findLink(directive).href, annotation.links.html);
-      });
-
-      it('displays in-context links when available', function () {
+    describe('annotation links', function () {
+      it('linkInContext uses the in-context links when available', function () {
         var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
           links: {
             html: 'https://test.hypothes.is/a/deadbeef',
             incontext: 'https://hpt.is/deadbeef'
           },
         });
-        var directive = createDirective(annotation);
-        assert.equal(findLink(directive).href, annotation.links.incontext);
+        var controller = createDirective(annotation).controller;
+
+        assert.equal(controller.linkInContext, annotation.links.incontext);
+      });
+
+      it('linkInContext falls back to the HTML link when in-context links are missing', function () {
+        var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
+          links: {
+            html: 'https://test.hypothes.is/a/deadbeef',
+          },
+        });
+        var controller = createDirective(annotation).controller;
+
+        assert.equal(controller.linkInContext, annotation.links.html);
+      });
+
+      it('linkHTML uses the HTML link when available', function () {
+        var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
+          links: {
+            html: 'https://test.hypothes.is/a/deadbeef',
+            incontext: 'https://hpt.is/deadbeef'
+          },
+        });
+        var controller = createDirective(annotation).controller;
+
+        assert.equal(controller.linkHTML, annotation.links.html);
+      });
+
+      it('linkInContext is blank when unknown', function () {
+        var annotation = fixtures.defaultAnnotation();
+        var controller = createDirective(annotation).controller;
+
+        assert.equal(controller.linkInContext, '');
+      });
+
+      it('linkHTML is blank when unknown', function () {
+        var annotation = fixtures.defaultAnnotation();
+        var controller = createDirective(annotation).controller;
+
+        assert.equal(controller.linkHTML, '');
       });
     });
   });
