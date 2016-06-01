@@ -45,7 +45,7 @@
        target="_blank"
        title="{{vm.absoluteTimestamp}}"
        ng-if="!vm.editing() && vm.updated()"
-       ng-href="{{vm.annotationURI}}"
+       ng-href="{{vm.linkHTML}}"
        >{{vm.relativeTimestamp}}</a>
   </header>
 
@@ -183,7 +183,7 @@
         </button>
         <annotation-share-dialog
           group="vm.group()"
-          uri="vm.annotationURI"
+          uri="vm.linkInContext"
           is-private="vm.isPrivate"
           is-open="vm.showShareDialog"
           on-close="vm.showShareDialog = false">

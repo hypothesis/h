@@ -120,11 +120,13 @@ function updateViewModel($scope, time, domainModel,
   };
 
   if (domainModel.links) {
-    vm.annotationURI = domainModel.links.incontext ||
+    vm.linkInContext = domainModel.links.incontext ||
                        domainModel.links.html ||
                        '';
+    vm.linkHTML = domainModel.links.html || '';
   } else {
-    vm.annotationURI = '';
+    vm.linkInContext = '';
+    vm.linkHTML = '';
   }
 
   vm.isPrivate = permissions.isPrivate(
