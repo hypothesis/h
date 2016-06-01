@@ -13,7 +13,8 @@ from h import paginator
              permission='admin_features')
 @paginator.paginate
 def cohorts_index(context, request):
-    return models.FeatureCohort.query.order_by(models.FeatureCohort.created.desc())
+    query = request.db.query(models.FeatureCohort)
+    return query.order_by(models.FeatureCohort.name)
 
 
 @view_config(route_name='admin_cohorts',
