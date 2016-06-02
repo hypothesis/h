@@ -67,7 +67,7 @@ class AnnotationHTMLPresenter(object):
 
     @property
     def uri(self):
-        return jinja2.escape(self.annotation.uri)
+        return jinja2.escape(self.annotation.target_uri)
 
     @property
     def filename(self):
@@ -244,7 +244,7 @@ class AnnotationHTMLPresenter(object):
 
         """
         def get_selection():
-            targets = self.annotation.get("target")
+            targets = self.annotation.target_selectors
             if not isinstance(targets, list):
                 return
             for target in targets:
@@ -267,7 +267,7 @@ class AnnotationHTMLPresenter(object):
             description += "&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
                 selection=selection)
 
-        text = self.annotation.get("text")
+        text = self.annotation.text
         if text:
             text = jinja2.escape(text)
             description += "{text}".format(text=text)
