@@ -563,10 +563,10 @@ def test_document_link_no_href_and_no_hostname(hostname_or_filename, href,
 
 def test_description():
     annotation = _annotation(
-        annotation={
-            "target": [{'selector': [{'exact': 'selected text'}]}],
-            "text": "entered text"
-        }
+        annotation=mock.Mock(
+            target_selectors=[{'selector': [{'exact': 'selected text'}]}],
+            text="entered text"
+        )
     )
 
     assert annotation.description == (
