@@ -28,10 +28,10 @@ def _feed_entry_from_annotation(
         "id": h.feeds.util.tag_uri_for_annotation(
             annotation.annotation, annotation_url),
         "author": {"name": name},
-        "title": "TODO: title", #annotation.title,
+        "title": annotation.title,
         "updated": _utc_iso8601_string(annotation.updated),
         "published": _utc_iso8601_string(annotation.created),
-        "content": "TODO: description", #annotation.description,
+        "content": annotation.description,
         "links": [
             {"rel": "alternate", "type": "text/html",
              "href": annotation_url(annotation.annotation)},
