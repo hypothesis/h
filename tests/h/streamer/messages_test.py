@@ -157,6 +157,23 @@ class TestHandleAnnotationEvent(object):
 
         fetch_annotation.assert_called_once_with(socket.request.db, 'panda')
 
+    def test_it_skips_notification_when_fetch_failed(self, fetch_annotation):
+        """
+        When a create/update and a delete event happens in quick succession
+        we could fail to load the annotation, even though the event action is
+        update/create. This tests that in that case we silently abort and don't
+        sent a notification to the client.
+        """
+        message = {
+            'annotation_id': 'panda',
+            'action': 'update',
+            'src_client_id': 'pigeon'
+        }
+        socket = FakeSocket('giraffe')
+        fetch_annotation.return_value = None
+
+        assert messages.handle_annotation_event(message, socket) is None
+
     def test_it_serializes_the_annotation(self,
                                           fetch_annotation,
                                           presenters):

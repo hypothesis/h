@@ -116,6 +116,9 @@ def handle_annotation_event(message, socket):
         serialized = message['annotation_dict']
     else:
         annotation = storage.fetch_annotation(socket.request.db, id_)
+        if annotation is None:
+            return None
+
         serialized = presenters.AnnotationJSONPresenter(
             socket.request, annotation).asdict()
 
