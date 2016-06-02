@@ -78,7 +78,7 @@ class TestAnnotation(object):
 
     def test_source(self):
         annotation = factories.Annotation(random_number=3)
-        assert annotation["target"][0]["source"] == (
+        assert annotation["target_selectors"][0]["source"] == (
             "http://example.com/document_3")
 
     def test_permissions(self):
