@@ -91,12 +91,8 @@ class Annotation(factory.Factory):
         return "http://example.com/document_{n}".format(n=stub.random_number)
 
     @factory.LazyAttribute
-    def target(stub):
-        return [{
-            "source": stub.uri,
-            "pos": {"top": 200.00, "height": 20},
-            "selector": [
-                {"type": "RangeSelector",
+    def target_selectors(stub):
+        return [{"type": "RangeSelector",
                  "startContainer": "/div[1]/article[1]/",
                  "endContainer": "/div[1]/article[1]/section[1]",
                  "startOffset": 0,
@@ -112,7 +108,6 @@ class Annotation(factory.Factory):
                 {"type": "FragmentSelector",
                  "value": ""}
             ]
-        }]
 
     @factory.LazyAttribute
     def permissions(stub):
