@@ -157,13 +157,14 @@ $annotation-card-left-padding: 10px;
 .annotation-actions {
   float: right;
   margin-top: 0;
+  display: flex;
 }
 
 .annotation-action-btn {
   color: $grey-5;
   font-weight: normal;
   padding: 0;
-  margin: 0px 0px 0px 8px;
+  margin: 0px 0px 0px 12px;
 }
 
 .annotation-action-btn__label {
