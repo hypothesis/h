@@ -46,10 +46,6 @@ module.exports = class StreamController
     # Perform the initial search
     fetch(20)
 
-    $scope.$watch('sort.name', (name) ->
-      annotationUI.sortBy(name)
-    )
-
     $scope.setCollapsed = (id, collapsed) ->
       annotationUI.setCollapsed(id, collapsed)
 
@@ -64,9 +60,10 @@ module.exports = class StreamController
       };
     );
 
+    # Sort the stream so that the newest annotations are at the top
+    annotationUI.setSortKey('Newest')
+
     $scope.isStream = true
-    $scope.sortOptions = ['Newest', 'Oldest']
-    $scope.sort.name = 'Newest'
     $scope.rootThread = ->
       return rootThread.thread()
     $scope.loadMore = fetch

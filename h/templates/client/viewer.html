@@ -16,13 +16,6 @@
     total-count="topLevelThreadCount()"
     >
   </search-status-bar>
-  <li ng-if="isStream">
-    <sort-dropdown
-      sort-by="sort.name"
-      sort-options="sortOptions"
-      on-change-sort-by="sort.name = sortBy">
-    </sort-dropdown>
-  </li>
   <li class="annotation-unavailable-message"
       ng-if="selectedAnnotationUnavailable()">
     <div class="annotation-unavailable-message__icon"></div>

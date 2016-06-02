@@ -14,13 +14,13 @@ describe('sortDropdown', function () {
     angular.mock.module('app');
   });
 
-  it('should update the sort mode on click', function () {
+  it('should update the sort key on click', function () {
     var changeSpy = sinon.spy();
     var elem = util.createDirective(document, 'sortDropdown', {
-      sortOptions: ['Newest', 'Oldest'],
-      sortBy: 'Newest',
-      onChangeSortBy: {
-        args: ['sortBy'],
+      sortKeysAvailable: ['Newest', 'Oldest'],
+      sortKey: 'Newest',
+      onChangeSortKey: {
+        args: ['sortKey'],
         callback: changeSpy,
       }
     });

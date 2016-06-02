@@ -50,7 +50,7 @@ function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
    * settings change.
    */
   function rebuildRootThread() {
-    var sortFn = sortFns[annotationUI.getState().sortMode];
+    var sortFn = sortFns[annotationUI.getState().sortKey];
 
     var filters;
     var filterQuery = annotationUI.getState().filterQuery;

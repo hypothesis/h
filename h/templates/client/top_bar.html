@@ -35,10 +35,9 @@
       title="Filter the annotation list">
     </simple-search>
     <sort-dropdown
-      sort-options="sortOptions"
-      sort-by="sortBy"
-      show-as-icon="true"
-      on-change-sort-by="onChangeSortBy({sortBy: sortBy})">
+      sort-keys-available="sortKeysAvailable"
+      sort-key="sortKey"
+      on-change-sort-key="onChangeSortKey({sortKey: sortKey})">
     </sort-dropdown>
     <a class="top-bar__btn"
        ng-click="onSharePage()"

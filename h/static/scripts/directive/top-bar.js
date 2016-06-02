@@ -13,9 +13,9 @@ module.exports = function () {
       searchController: '<',
       accountDialog: '<',
       shareDialog: '<',
-      sortBy: '<',
-      sortOptions: '<',
-      onChangeSortBy: '&',
+      sortKey: '<',
+      sortKeysAvailable: '<',
+      onChangeSortKey: '&',
     },
     template: require('../../../templates/client/top_bar.html'),
   };

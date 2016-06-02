@@ -3,7 +3,6 @@
 var angular = require('angular');
 var scrollIntoView = require('scroll-into-view');
 
-var annotationMetadata = require('./annotation-metadata');
 var events = require('./events');
 var parseAccountID = require('./filter/persona').parseAccountID;
 var scopeTimeout = require('./util/scope-timeout');
@@ -53,11 +52,15 @@ module.exports = function AppController(
   // the stream page or an individual annotation page.
   $scope.isSidebar = $window.top !== $window;
 
-  // Default sort
-  $scope.sort = {
-    name: 'Location',
-    options: ['Newest', 'Oldest', 'Location']
+  $scope.sortKey = function () {
+    return annotationUI.getState().sortKey;
   };
+
+  $scope.sortKeysAvailable = function () {
+    return annotationUI.getState().sortKeysAvailable;
+  };
+
+  $scope.setSortKey = annotationUI.setSortKey;
 
   // Reload the view when the user switches accounts
   $scope.$on(events.USER_CHANGED, function (event, data) {
@@ -77,31 +80,6 @@ module.exports = function AppController(
     if (!state.userid && settings.firstRun) {
       $scope.login();
     }
-  });
-
-  $scope.$watch('sort.name', function (name) {
-    if (!name) {
-      return;
-    }
-    var predicateFn;
-    switch (name) {
-      case 'Newest':
-        predicateFn = ['-!!message', '-message.updated'];
-        break;
-      case 'Oldest':
-        predicateFn = ['-!!message', 'message.updated'];
-        break;
-      case 'Location':
-        predicateFn = function (thread) {
-          return annotationMetadata.location(thread.message);
-        };
-        break;
-    }
-    $scope.sort = {
-      name: name,
-      predicate: predicateFn,
-      options: $scope.sort.options,
-    };
   });
 
   /** Scroll to the view to the element matching the given selector */
