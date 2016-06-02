@@ -6,10 +6,14 @@ Guest = require('./guest')
 
 module.exports = class Host extends Guest
   constructor: (element, options) ->
+    # Make a copy of all options except `options.app`, the app base URL.
     appOpts = queryString.stringify(
       Object.assign({}, options, {app: undefined})
     )
-    options.app += (if '?' in options.app then '&' else '?') + appOpts
+    if options.app and '?' in options.app
+      options.app += '&' + appOpts
+    else
+      options.app += '?' + appOpts
 
     # Create the iframe
     app = $('<iframe></iframe>')
