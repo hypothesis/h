@@ -19,12 +19,17 @@ def _annotation_url():
 
 
 def _annotation(**kwargs):
-    return models.Annotation(userid='acct:janebloggs@hypothes.is', **kwargs)
+    args = dict(
+        userid='acct:janebloggs@hypothes.is',
+        target_selectors=[],
+    )
+    args.update(**kwargs)
+    return models.Annotation(**args)
 
 
 def test_feed_from_annotations_item_author():
     """Feed items should include the annotation's author."""
-    annotation = models.Annotation(userid='acct:janebloggs@hypothes.is')
+    annotation = _annotation()
 
     feed = rss.feed_from_annotations(
         [annotation], _annotation_url(), mock.Mock(), '', '', '')
