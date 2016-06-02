@@ -20,7 +20,7 @@ def _annotation(annotation=None, **kwargs):
 def test_uri_is_escaped():
     spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
 
-    uri = _annotation(uri='http://</a>' + spam_link).uri
+    uri = _annotation(target_uri='http://</a>' + spam_link).uri
 
     assert jinja2.escape(spam_link) in uri
     for char in ['<', '>', '"', "'"]:
@@ -28,41 +28,44 @@ def test_uri_is_escaped():
 
 
 def test_uri_returns_Markup():
-    assert isinstance(_annotation(uri="http://foo.com").uri, jinja2.Markup)
+    assert isinstance(_annotation(target_uri="http://foo.com").uri,
+                      jinja2.Markup)
 
 
 def test_filename_with_http_uri():
-    assert _annotation(uri="http://example.com/example.html").filename == ""
+    assert _annotation(
+        target_uri="http://example.com/example.html").filename == ""
 
 
 def test_filename_with_file_uri():
-    assert _annotation(uri="file:///home/seanh/MyFile.pdf").filename == (
-        "MyFile.pdf")
+    assert _annotation(
+        target_uri="file:///home/seanh/MyFile.pdf").filename == "MyFile.pdf"
 
 
 def test_filename_returns_Markup():
     annotation = _annotation(
-        uri=jinja2.Markup("file:///home/seanh/MyFile.pdf"))
+        target_uri=jinja2.Markup("file:///home/seanh/MyFile.pdf"))
     assert isinstance(annotation.filename, jinja2.Markup)
 
 
 def test_filename_with_FILE_uri():
-    assert _annotation(uri="FILE:///home/seanh/MyFile.pdf").filename == (
-        "MyFile.pdf")
+    assert _annotation(
+        target_uri="FILE:///home/seanh/MyFile.pdf").filename == "MyFile.pdf"
 
 
 def test_filename_with_folder():
-    assert _annotation(uri="file:///home/seanh/My%20Documents/").filename == ""
+    assert _annotation(
+        target_uri="file:///home/seanh/My%20Documents/").filename == ""
 
 
 def test_filename_with_no_uri():
     # self.uri should always be unicode, the worst is should ever be is an
     # empty string.
-    assert _annotation(uri=u"").filename == ""
+    assert _annotation(target_uri=u"").filename == ""
 
 
 def test_filename_with_nonsense_uri():
-    assert _annotation(uri=u"foobar").filename == ""
+    assert _annotation(target_uri=u"foobar").filename == ""
 
 
 title_fixtures = pytest.mark.usefixtures('uri', 'filename')
