@@ -39,8 +39,8 @@ def _feed_item_from_annotation(annotation, annotation_url):
         name = annotation.userid
     return {
         "author": {"name": name},
-        "title": "TODO: title", #annotation.title,
-        "description": "TODO: description", #annotation.description,
+        "title": annotation.title,
+        "description": annotation.description,
         "pubDate": _pubDate_string_from_annotation(annotation),
         "guid": h.feeds.util.tag_uri_for_annotation(annotation, annotation_url),
         "link": annotation_url(annotation)
@@ -57,7 +57,7 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
     :rtype: dict
 
     """
-    # annotations = [presenters.AnnotationHTMLPresenter(a) for a in annotations]
+    annotations = [presenters.AnnotationHTMLPresenter(a) for a in annotations]
 
     feed = {
         'title': title,
