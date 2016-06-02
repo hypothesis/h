@@ -91,7 +91,7 @@ class Annotation(factory.Factory):
         return "http://example.com/document_{n}".format(n=stub.random_number)
 
     @factory.LazyAttribute
-    def target(stub):
+    def target_selectors(stub):
         return [{
             "source": stub.uri,
             "pos": {"top": 200.00, "height": 20},
