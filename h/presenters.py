@@ -62,9 +62,6 @@ class AnnotationHTMLPresenter(object):
     def __getattr__(self, attr):
         return getattr(self.annotation, attr)
 
-    def __getitem__(self, key):
-        return self.annotation[key]
-
     @property
     def uri(self):
         return jinja2.escape(self.annotation.target_uri)
