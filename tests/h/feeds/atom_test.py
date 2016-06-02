@@ -14,7 +14,8 @@ def _annotation(**kwargs):
     args = {
         'userid': 'acct:janebloggs@hypothes.is',
         'created': datetime.now(),
-        'updated': datetime.now()
+        'updated': datetime.now(),
+        'target_selectors': [],
     }
     args.update(kwargs)
     return models.Annotation(**args)
