@@ -20,8 +20,7 @@ def _pubDate_string_from_annotation(annotation):
     element of an RSS feed.
 
     """
-    if annotation.created:
-        return annotation.created.strftime('%a, %d %b %Y %H:%M:%S +0000')
+    return annotation.created.strftime('%a, %d %b %Y %H:%M:%S +0000')
 
 
 def _feed_item_from_annotation(annotation, annotation_url):
@@ -71,7 +70,7 @@ def feed_from_annotations(annotations, annotation_url, rss_url, html_url,
             for annotation in annotations]
     }
 
-    if annotations and annotations[0].updated:
+    if annotations:
         feed['pubDate'] = annotations[0].updated.strftime('%a, %d %b %Y %H:%M:%S UTC')
 
     return feed
