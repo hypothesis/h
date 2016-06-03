@@ -108,9 +108,6 @@ $annotation-card-left-padding: 10px;
 .annotation-footer {
   @include font-normal;
   color: $grey-5;
-  // Margin between bottom of ascent of annotation footer labels
-  // and bottom of annotation card should be ~20px.
-  margin-bottom: $layout-h-margin - 13px;
   margin-top: $layout-h-margin;
 }
 
