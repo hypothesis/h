@@ -23,7 +23,7 @@ FakeGroup = namedtuple('FakeGroup', ['pubid'])
     # User is admin: role.Admin should be in principals
     (FakeUser(admin=True, staff=False, groups=[]),
      [role.Admin]),
-    # User is staff: role.Staff§ should be in principals
+    # User is staff: role.Staff should be in principals
     (FakeUser(admin=False, staff=True, groups=[]),
      [role.Staff]),
     # User is admin and staff
