@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import exc
 import slugify
 
+from h.api import models
 from h.db import Base
 from h.db import mixins
 from h import pubid
@@ -57,6 +58,28 @@ class Group(Base, mixins.Timestamps):
 
     def __repr__(self):
         return '<Group: %s>' % self.slug
+
+    def documents(self, limit=25):
+        """
+        Return this group's most recently annotated documents.
+
+        Only returns documents that have shared annotations in this group,
+        not documents that only have private annotations in the group.
+
+        """
+        documents = []
+        annotations = (
+            sa.orm.object_session(self).query(models.Annotation)
+            .filter_by(groupid=self.pubid, shared=True)
+            .order_by(models.Annotation.updated.desc())
+            .limit(1000))
+        for annotation in annotations:
+            if annotation.document not in documents:
+                documents.append(annotation.document)
+                if len(documents) >= limit:
+                    break
+
+        return documents
 
     @classmethod
     def get_by_pubid(cls, pubid):
