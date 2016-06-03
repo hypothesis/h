@@ -89,8 +89,8 @@ def get_notification(request, annotation, action):
         return
 
     # Don't send reply notifications to the author of the parent annotation if
-    # the author doesn't have permission to read the reply.
-    if not auth.has_permission(request, reply, parent.userid, 'read'):
+    # the reply was private.
+    if not reply.shared:
         return
 
     # FIXME: we should be retrieving the document from the root annotation, not
