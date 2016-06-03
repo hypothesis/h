@@ -26,9 +26,11 @@ class TestAuthenticationPolicy(object):
 
     @pytest.fixture(autouse=True)
     def policy(self):
-        self.upstream_policy = mock.Mock(spec_set=SessionAuthenticationPolicy())
+        self.session_policy = mock.Mock(spec_set=SessionAuthenticationPolicy())
+        self.token_policy = mock.Mock(spec_set=TokenAuthenticationPolicy())
         self.policy = AuthenticationPolicy()
-        self.policy.session_policy = self.upstream_policy
+        self.policy.session_policy = self.session_policy
+        self.policy.token_policy = self.token_policy
 
     # session_request and token_request are parametrized fixtures, which will
     # take on each value in the passed `params` sequence in turn. This is a
@@ -42,65 +44,65 @@ class TestAuthenticationPolicy(object):
     def token_request(self, request):
         return DummyRequest(path=request.param)
 
-    def test_authenticated_userid_delegates_for_session_auth_paths(self, session_request):
+    def test_authenticated_userid_uses_session_policy_for_session_auth_paths(self, session_request):
         result = self.policy.authenticated_userid(session_request)
 
-        self.upstream_policy.authenticated_userid.assert_called_once_with(session_request)
-        assert result == self.upstream_policy.authenticated_userid.return_value
+        self.session_policy.authenticated_userid.assert_called_once_with(session_request)
+        assert result == self.session_policy.authenticated_userid.return_value
 
-    @mock.patch('h.auth.policy.tokens')
-    def test_authenticated_userid_uses_tokens_for_token_auth_paths(self, tokens, token_request):
+    def test_authenticated_userid_uses_token_policy_for_token_auth_paths(self, token_request):
         result = self.policy.authenticated_userid(token_request)
 
-        tokens.authenticated_userid.assert_called_once_with(token_request)
-        assert result == tokens.authenticated_userid.return_value
+        self.token_policy.authenticated_userid.assert_called_once_with(token_request)
+        assert result == self.token_policy.authenticated_userid.return_value
 
-    def test_unauthenticated_userid_delegates_for_session_auth_paths(self, session_request):
+    def test_unauthenticated_userid_uses_session_policy_for_session_auth_paths(self, session_request):
         result = self.policy.unauthenticated_userid(session_request)
 
-        self.upstream_policy.unauthenticated_userid.assert_called_once_with(session_request)
-        assert result == self.upstream_policy.unauthenticated_userid.return_value
+        self.session_policy.unauthenticated_userid.assert_called_once_with(session_request)
+        assert result == self.session_policy.unauthenticated_userid.return_value
 
-    @mock.patch('h.auth.policy.tokens')
-    def test_unauthenticated_userid_uses_tokens_for_token_auth_paths(self, tokens, token_request):
+    def test_unauthenticated_userid_uses_token_policy_for_token_auth_paths(self, token_request):
         result = self.policy.unauthenticated_userid(token_request)
 
-        tokens.authenticated_userid.assert_called_once_with(token_request)
-        assert result == tokens.authenticated_userid.return_value
+        self.token_policy.unauthenticated_userid.assert_called_once_with(token_request)
+        assert result == self.token_policy.unauthenticated_userid.return_value
 
-    @mock.patch('h.auth.policy.util')
-    def test_effective_principals_calls_effective_principals_with_authenticated_userid(self, util, config):
-        config.testing_securitypolicy('acct:rami@example.com')
-        request = DummyRequest()
+    def test_effective_principals_uses_session_policy_for_session_auth_paths(self, session_request):
+        result = self.policy.effective_principals(session_request)
 
-        result = self.policy.effective_principals(request)
+        self.session_policy.effective_principals.assert_called_once_with(session_request)
+        assert result == self.session_policy.effective_principals.return_value
 
-        util.effective_principals.assert_called_once_with('acct:rami@example.com', request)
-        assert result == util.effective_principals.return_value
+    def test_effective_principals_uses_token_policy_for_token_auth_paths(self, token_request):
+        result = self.policy.effective_principals(token_request)
 
-    def test_remember_delegates_for_session_auth_paths(self, session_request):
+        self.token_policy.effective_principals.assert_called_once_with(token_request)
+        assert result == self.token_policy.effective_principals.return_value
+
+    def test_remember_uses_session_policy_for_session_auth_paths(self, session_request):
         result = self.policy.remember(session_request, 'foo', bar='baz')
 
-        self.upstream_policy.remember.assert_called_once_with(session_request, 'foo', bar='baz')
-        assert result == self.upstream_policy.remember.return_value
+        self.session_policy.remember.assert_called_once_with(session_request, 'foo', bar='baz')
+        assert result == self.session_policy.remember.return_value
 
-    def test_remember_does_nothing_for_token_auth_paths(self, token_request):
+    def test_remember_uses_token_policy_for_token_auth_paths(self, token_request):
         result = self.policy.remember(token_request, 'foo', bar='baz')
 
-        self.upstream_policy.remember.assert_not_called()
-        assert result == []
+        self.token_policy.remember.assert_called_once_with(token_request, 'foo', bar='baz')
+        assert result == self.token_policy.remember.return_value
 
-    def test_forget_delegates_for_session_auth_paths(self, session_request):
+    def test_forget_uses_session_policy_for_session_auth_paths(self, session_request):
         result = self.policy.forget(session_request)
 
-        self.upstream_policy.forget.assert_called_once_with(session_request)
-        assert result == self.upstream_policy.forget.return_value
+        self.session_policy.forget.assert_called_once_with(session_request)
+        assert result == self.session_policy.forget.return_value
 
-    def test_forget_does_nothing_for_token_auth_paths(self, token_request):
+    def test_forget_uses_token_policy_for_token_auth_paths(self, token_request):
         result = self.policy.forget(token_request)
 
-        self.upstream_policy.forget.assert_not_called()
-        assert result == []
+        self.token_policy.forget.assert_called_once_with(token_request)
+        assert result == self.token_policy.forget.return_value
 
 
 @pytest.mark.usefixtures('api_token', 'jwt')

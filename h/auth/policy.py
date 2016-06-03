@@ -12,34 +12,33 @@ from h.auth import util
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthenticationPolicy(object):
-
     def __init__(self):
-        self.session_policy = SessionAuthenticationPolicy()
+        self.session_policy = SessionAuthenticationPolicy(callback=util.groupfinder)
+        self.token_policy = TokenAuthenticationPolicy(callback=util.groupfinder)
 
     def authenticated_userid(self, request):
         if _is_api_request(request):
-            return tokens.authenticated_userid(request)
+            return self.token_policy.authenticated_userid(request)
         return self.session_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):
         if _is_api_request(request):
-            # We can't really get an "unauthenticated" userid for an API
-            # request. We have to actually go and decode/look up the tokens and
-            # get what is effectively an authenticated userid.
-            return tokens.authenticated_userid(request)
+            return self.token_policy.unauthenticated_userid(request)
         return self.session_policy.unauthenticated_userid(request)
 
     def effective_principals(self, request):
-        return util.effective_principals(request.authenticated_userid, request)
+        if _is_api_request(request):
+            return self.token_policy.effective_principals(request)
+        return self.session_policy.effective_principals(request)
 
     def remember(self, request, userid, **kw):
         if _is_api_request(request):
-            return []
+            return self.token_policy.remember(request, userid, **kw)
         return self.session_policy.remember(request, userid, **kw)
 
     def forget(self, request):
         if _is_api_request(request):
-            return []
+            return self.token_policy.forget(request)
         return self.session_policy.forget(request)
 
 

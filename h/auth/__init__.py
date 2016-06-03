@@ -2,10 +2,7 @@
 
 """Authentication and authorization configuration."""
 
-from h.auth.util import effective_principals
-from h.auth.util import has_permission
-
-__all__ = ('effective_principals', 'has_permission')
+__all__ = ()
 
 
 def auth_domain(request):
