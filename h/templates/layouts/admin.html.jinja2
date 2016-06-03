@@ -1,12 +1,15 @@
 {%- set nav_pages = [
-    ('index', 'admin_index', 'Home'),
-    ('features', 'admin_features', 'Feature flags'),
-    ('nipsa', 'admin_nipsa', 'NIPSA'),
-    ('admins', 'admin_admins', 'Administrators'),
-    ('staff', 'admin_staff', 'Staff'),
-    ('users', 'admin_users', 'Users'),
-    ('groups', 'admin_groups', 'Groups'),
-    ('badge', 'admin_badge', 'Badge'),
+    ('index', 'admin_index', 'Home', []),
+    ('features', 'admin_features', 'Feature flags', [
+      ('features', 'admin_features', 'Manage feature flags'),
+      ('cohorts', 'admin_cohorts', 'Manage feature cohorts'),
+    ]),
+    ('nipsa', 'admin_nipsa', 'NIPSA', []),
+    ('admins', 'admin_admins', 'Administrators', []),
+    ('staff', 'admin_staff', 'Staff', []),
+    ('users', 'admin_users', 'Users', []),
+    ('groups', 'admin_groups', 'Groups', []),
+    ('badge', 'admin_badge', 'Badge', []),
 ] -%}
 
 {%- set page_id = page_id|default('home') -%}
@@ -54,11 +57,25 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            {% for id, permission, title in nav_pages %}
+            {% for id, permission, title, children in nav_pages %}
               {% if request.has_permission(permission) %}
-                <li{% if id == page_id %} class="active"{% endif %}>
-                  <a href="{{ request.route_url(permission) }}">{{ title }}</a>
-                </li>
+                {% if not children %}
+                  <li{% if id == page_id %} class="active"{% endif %}>
+                    <a href="{{ request.route_url(permission) }}">{{ title }}</a>
+                  </li>
+                {% else %}
+                  <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                      {{ title }}
+                      <span class="caret"></span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        {% for id, url, title in children %}
+                          <li><a href="{{ request.route_url(url) }}">{{ title }}</a></li>
+                        {% endfor %}
+                      </ul>
+                  </li>
+                {% endif %}
               {% endif %}
             {% endfor %}
           </ul>
