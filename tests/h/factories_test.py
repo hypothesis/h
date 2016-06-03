@@ -76,11 +76,6 @@ class TestAnnotation(object):
         assert annotation["uri"] == "http://example.com/document_3"
         assert "random_number" not in annotation
 
-    def test_source(self):
-        annotation = factories.Annotation(random_number=3)
-        assert annotation["target_selectors"][0]["source"] == (
-            "http://example.com/document_3")
-
     def test_permissions(self):
         annotation = factories.Annotation(username="test_user")
         assert "test_user" in annotation["permissions"]["admin"][0]

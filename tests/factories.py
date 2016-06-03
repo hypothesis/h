@@ -93,8 +93,6 @@ class Annotation(factory.Factory):
     @factory.LazyAttribute
     def target_selectors(stub):
         return [{
-            "source": stub.uri,
-            "pos": {"top": 200.00, "height": 20},
             "selector": [
                 {"type": "RangeSelector",
                  "startContainer": "/div[1]/article[1]/",
