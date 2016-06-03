@@ -190,23 +190,6 @@ def test_annotation_api_url_links(_):
     }
 
 
-def test_target_links():
-    """Entries should have links to the annotation's targets."""
-    annotation = factories.Annotation()
-    annotation['target'] = [
-        {'source': 'target href 1'},
-        {'source': 'target href 2'},
-        {'source': 'target href 3'},
-    ]
-
-    feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url")
-
-    hrefs = [link['href'] for link in feed['entries'][0]['links']]
-    for target in annotation['target']:
-        assert target['source'] in hrefs
-
-
 def test_feed_updated():
     annotations = [
         _annotation(updated=datetime(year=2015, month=3, day=11, hour=10, minute=45, second=54, microsecond=537626)),

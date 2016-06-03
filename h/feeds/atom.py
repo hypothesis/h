@@ -42,9 +42,6 @@ def _feed_entry_from_annotation(
             {"rel": "alternate", "type": "application/json",
              "href": annotation_api_url(annotation.annotation)}
         )
-    # TODO
-    # entry["links"].extend(
-    #     [{"rel": "related", "href": link} for link in annotation.target_links])
 
     return entry
 
