@@ -24,6 +24,7 @@ def _annotation(**kwargs):
         'target_selectors': [],
         'created': datetime.datetime.utcnow(),
         'updated': datetime.datetime.utcnow(),
+        'document': models.Document(),
     }
     args.update(**kwargs)
     return models.Annotation(**args)
