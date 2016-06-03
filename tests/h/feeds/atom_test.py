@@ -13,8 +13,8 @@ from ... import factories
 def _annotation(**kwargs):
     args = {
         'userid': 'acct:janebloggs@hypothes.is',
-        'created': datetime.now(),
-        'updated': datetime.now(),
+        'created': datetime.utcnow(),
+        'updated': datetime.utcnow(),
         'target_selectors': [],
     }
     args.update(kwargs)
