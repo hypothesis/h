@@ -208,6 +208,7 @@ describe('rootThread', function () {
     }, [
       {event: events.BEFORE_ANNOTATION_CREATED, annotations: annot},
       {event: events.ANNOTATION_CREATED, annotations: annot},
+      {event: events.ANNOTATION_UPDATED, annotations: annot},
       {event: events.ANNOTATIONS_LOADED, annotations: [annot]},
     ]);
 
