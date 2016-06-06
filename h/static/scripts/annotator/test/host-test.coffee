@@ -11,6 +11,7 @@ describe 'Host', ->
   fakeCrossFrame = null
 
   createHost = (options={}, element=null) ->
+    options = Object.assign({app: '/base/test/empty.html'}, options)
     if !element
       element = document.createElement('div')
     return new Host(element, options)
@@ -86,9 +87,6 @@ describe 'Host', ->
       host.publish('panelReady')
 
     it 'passes options to the sidebar iframe', ->
-      appURL = 'http://localhost:1000/app.html'
-      host = createHost({
-        app: appURL,
-        annotations: '1234'
-      })
+      appURL = new URL('/base/test/empty.html', window.location.href)
+      host = createHost({annotations: '1234'})
       assert.equal(host.frame[0].children[0].src, appURL + '?annotations=1234')

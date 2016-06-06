@@ -23,6 +23,9 @@ module.exports = function(config) {
       // Test setup
       './test/bootstrap.js',
 
+      // Empty HTML file to assist with some tests
+      { pattern: './test/empty.html', watched: false },
+
       // Karma watching is disabled for these files because they are
       // bundled with karma-browserify which handles watching itself via
       // watchify
