@@ -1,0 +1,70 @@
+.annotation-thread {
+  display: flex;
+  flex-direction: row;
+}
+
+// Direct or nested reply to an annotation
+.annotation-thread--reply {
+  // Left margin is set so that left edge of collapse toggle arrow
+  // for the reply is aligned with the left edge of the parent annotation's
+  // content.
+  margin-left: -5px;
+}
+
+// Top-level reply to an annotation
+.annotation-thread--top-reply {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+li:first-child .annotation-thread--top-reply {
+  // Gap between baseline of 'Hide/Show Replies' for annotation and top
+  // of first reply should be ~15px
+  margin-top: 5px;
+}
+
+// Container for the toggle arrow and dashed line at the left edge of replies.
+.annotation-thread__thread-edge {
+  display: flex;
+  flex-direction: column;
+  width: 8px;
+  margin-right: 13px;
+}
+
+// The dashed line at the left edge of replies
+.annotation-thread__thread-line {
+  border-right: 1px dashed $grey-3;
+  flex-grow: 1;
+}
+
+.annotation-thread__content {
+  flex-grow: 1;
+}
+
+// Darken expand/collapse toggle when an annotation is hovered. This is only
+// when the annotation itself is hovered, not the replies.
+.annotation-thread__collapse-toggle:hover,
+.annotation-thread__collapse-toggle.is-hovered {
+  color: $grey-7;
+}
+
+// Toggle arrow which expands and collapses threads.
+// This is aligned so that it appears above a dashed line which appears
+// to the left of the threads.
+.annotation-thread__collapse-toggle {
+  width: 10px;
+  color: $grey-4;
+  display: block;
+  text-align: center;
+
+  font-size: 15px;
+  line-height: 22px;
+
+  height: 100%;
+
+  &.is-open {
+    // When the thread is expanded, the top of the dashed line is should be
+    // aligned with the top of the privacy indicator ("Only me") if present
+    height: 24px;
+  }
+}

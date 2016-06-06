@@ -11,6 +11,7 @@ $base-line-height: 20px;
 @import './about-this-version-dialog';
 @import './annotation';
 @import './annotation-share-dialog';
+@import './annotation-thread';
 @import './api-token-input';
 @import './dropdown-menu-btn';
 @import './excerpt';
@@ -26,7 +27,6 @@ $base-line-height: 20px;
 @import './simple-search';
 @import './spinner';
 @import './tags-input';
-@import './thread';
 @import './tooltip';
 @import './top-bar';
 
@@ -62,6 +62,9 @@ body {
     padding-right: 4rem;
   }
 }
+
+// Elements in root template (viewer.html)
+// ---------------------------------------
 
 .create-account-banner {
   background-color: $gray-dark;
@@ -102,5 +105,40 @@ body {
     position: absolute;
     right: 1em;
     top: 1em;
+  }
+}
+
+.thread-list {
+  & > * {
+    // Default spacing between items in the annotation card list
+    margin-bottom: .72em;
+  }
+}
+
+.thread-list__spacer {
+  // This is a hidden element which is used to reserve space for off-screen
+  // threads, so it should not occupy any space other than that set via its
+  // 'height' inline style property.
+  margin: 0;
+}
+
+.annotation-unavailable-message {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $gray-lighter;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  border-radius: 3px;
+  align-items: center;
+
+  &__label {
+    text-align: center;
+  }
+
+  &__icon {
+    background-image: url(../images/icons/lock.svg);
+    background-repeat: no-repeat;
+    width: 56px;
+    height: 48px;
   }
 }

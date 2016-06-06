@@ -327,4 +327,16 @@ describe('build-thread', function () {
       }]);
     });
   });
+
+  describe('depth', function () {
+    it('is 0 for annotations', function () {
+      var thread = createThread(SIMPLE_FIXTURE, {}, ['depth']);
+      assert.deepEqual(thread[0].depth, 0);
+    });
+
+    it('is 1 for top-level replies', function () {
+      var thread = createThread(SIMPLE_FIXTURE, {}, ['depth']);
+      assert.deepEqual(thread[0].children[0].depth, 1);
+    });
+  });
 });

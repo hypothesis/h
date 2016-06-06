@@ -140,7 +140,7 @@
       </a>
     </div>
 
-    <div class="annotation-replies" ng-if="vm.replyCount > 0">
+    <div class="annotation-replies" ng-if="!vm.isReply() && vm.replyCount > 0">
       <a href=""
         ng-click="vm.onReplyCountClick()">
         <span class="annotation-replies__link">{{ vm.isCollapsed ? 'Show replies' : 'Hide replies' }}</span>
