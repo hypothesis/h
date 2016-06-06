@@ -54,7 +54,9 @@ class Annotation(Base, mixins.Timestamps):
     #: The textual body of the annotation.
     text = sa.Column(sa.UnicodeText)
     #: The tags associated with the annotation.
-    tags = sa.Column(pg.ARRAY(sa.UnicodeText, zero_indexes=True))
+    tags = sa.Column(
+        types.MutableList.as_mutable(
+            pg.ARRAY(sa.UnicodeText, zero_indexes=True)))
 
     #: A boolean indicating whether this annotation is shared with members of
     #: the group it is published in. "Private"/"Only me" annotations have

@@ -135,6 +135,40 @@ def test_deleting_extras_inline_is_persisted(db_session):
     assert 'foo' not in annotation.extra
 
 
+def test_appending_tags_inline_is_persisted(db_session):
+    """
+    In-place changes to Annotation.tags should be persisted.
+
+    Changes made by Annotation.tags.append() should be persisted to the
+    database.
+
+    """
+    annotation = Annotation(userid='fred')
+    annotation.tags = []  # FIXME: Annotation should have a default value here.
+    db_session.add(annotation)
+    db_session.flush()
+
+    annotation.tags.append('foo')
+    db_session.commit()
+    annotation = Annotation.query.get(annotation.id)
+
+    assert 'foo' in annotation.tags
+
+
+def test_deleting_tags_inline_is_persisted(db_session):
+    """In-place deletions of annotation tags should be persisted."""
+    annotation = Annotation(userid='fred')
+    annotation.tags = ['foo']
+    db_session.add(annotation)
+    db_session.flush()
+
+    del annotation.tags[0]
+    db_session.commit()
+    annotation = Annotation.query.get(annotation.id)
+
+    assert 'foo' not in annotation.tags
+
+
 @pytest.fixture
 def annotation(db_session):
     ann = Annotation(userid="testuser", target_uri="http://example.com")

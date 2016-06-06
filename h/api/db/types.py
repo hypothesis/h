@@ -9,6 +9,7 @@ import uuid
 from sqlalchemy import types
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import DontWrapMixin
+from sqlalchemy.ext.mutable import Mutable
 
 
 # A magic byte (expressed as two hexadecimal nibbles) which we use to expand a
@@ -63,6 +64,81 @@ class URLSafeUUID(types.TypeDecorator):
             return None
         hexstring = uuid.UUID(value).hex
         return _get_urlsafe_from_hex(hexstring)
+
+
+# This class can be deleted when we upgrade to SQLAlchemy 1.1 which adds
+# sqlalchemy.ext.mutable.MutableList.
+class MutableList(Mutable, list):
+
+    """
+    A list subclass that persists in-place changes.
+
+    If you use a normal list as an attribute of an ORM class then in-place
+    changes to the list won't be persisted to the session, so use this class
+    instead.
+
+    To use this class wrap another list-like type in this class's as_mutable()
+    class method when declaring a column:
+
+        my_array_column = sa.Column(
+            MutableList.as_mutable(pg.Array(sa.UnicodeText)))
+
+    See: http://docs.sqlalchemy.org/en/rel_1_0/orm/extensions/mutable.html
+    """
+
+    @classmethod
+    def coerce(cls, key, value):
+        if not isinstance(value, MutableList):
+            if isinstance(value, list):
+                return MutableList(value)
+            return Mutable.coerce(key, value)
+        else:
+            return value
+
+    def __setitem__(self, idx, value):
+        list.__setitem__(self, idx, value)
+        self.changed()
+
+    def __setslice__(self, start, stop, values):
+        list.__setslice__(self, start, stop, values)
+        self.changed()
+
+    def __delitem__(self, idx):
+        list.__delitem__(self, idx)
+        self.changed()
+
+    def __delslice__(self, start, stop):
+        list.__delslice__(self, start, stop)
+        self.changed()
+
+    def append(self, value):
+        list.append(self, value)
+        self.changed()
+
+    def insert(self, idx, value):
+        list.insert(self, idx, value)
+        self.changed()
+
+    def extend(self, values):
+        list.extend(self, values)
+        self.changed()
+
+    def pop(self, *args, **kw):
+        value = list.pop(self, *args, **kw)
+        self.changed()
+        return value
+
+    def remove(self, value):
+        list.remove(self, value)
+        self.changed()
+
+    def sort(self, *args, **kwargs):
+        list.sort(self, *args, **kwargs)
+        self.changed()
+
+    def reverse(self):
+        list.reverse(self)
+        self.changed()
 
 
 class AnnotationSelectorJSONB(types.TypeDecorator):
