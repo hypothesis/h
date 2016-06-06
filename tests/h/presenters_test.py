@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 import mock
 import jinja2
@@ -44,7 +46,8 @@ class TestAnnotationHTMLPresenter(object):
     def test_created_day_string_from_annotation(self):
         annotation = self._annotation(
             annotation=mock.Mock(
-                created="2015-09-04T17:37:49.517852+00:00"))
+                created=datetime.datetime(2015, 9, 4, 17, 37, 49, 517852))
+            )
         assert annotation.created_day_string == '2015-09-04'
 
 
