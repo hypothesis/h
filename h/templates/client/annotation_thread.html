@@ -1,5 +1,5 @@
 <div ng-class="vm.threadClasses()">
-  <div class="annotation-thread__thread-line" ng-if="!vm.isTopLevelThread()">
+  <div class="annotation-thread__thread-edge" ng-if="!vm.isTopLevelThread()">
     <a href=""
        ng-class="vm.threadToggleClasses()"
        title="{{vm.thread.collapsed && 'Expand' || 'Collapse'}}"
@@ -7,6 +7,7 @@
        <span ng-class="{'h-icon-arrow-right': vm.thread.collapsed,
                         'h-icon-arrow-drop-down': !vm.thread.collapsed}"></span>
     </a>
+    <div class="annotation-thread__thread-line"></div>
   </div>
   <div class="annotation-thread__content">
     <annotation ng-class="vm.annotationClasses()"

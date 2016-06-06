@@ -23,11 +23,18 @@ li:first-child .annotation-thread--top-reply {
   margin-top: 5px;
 }
 
-// The dashed line at the left edge of replies
-.annotation-thread__thread-line {
+// Container for the toggle arrow and dashed line at the left edge of replies.
+.annotation-thread__thread-edge {
+  display: flex;
+  flex-direction: column;
   width: 8px;
   margin-right: 13px;
+}
+
+// The dashed line at the left edge of replies
+.annotation-thread__thread-line {
   border-right: 1px dashed $grey-3;
+  flex-grow: 1;
 }
 
 .annotation-thread__content {
@@ -53,14 +60,11 @@ li:first-child .annotation-thread--top-reply {
   font-size: 15px;
   line-height: 22px;
 
-  // The toggle arrow covers up the top of the dashed line alongside the
-  // thread.
-  background: $white;
   height: 100%;
 
   &.is-open {
     // When the thread is expanded, the top of the dashed line is should be
     // aligned with the top of the privacy indicator ("Only me") if present
-    height: 25px;
+    height: 24px;
   }
 }
