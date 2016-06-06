@@ -78,7 +78,10 @@ class Annotation(Base, mixins.Timestamps):
                            server_default=sa.text('ARRAY[]::uuid[]'))
 
     #: Any additional serialisable data provided by the client.
-    extra = sa.Column(pg.JSONB, nullable=False)
+    extra = sa.Column(pg.JSONB,
+                      default=dict,
+                      server_default=sa.func.jsonb('{}'),
+                      nullable=False)
 
     document = sa.orm.relationship('Document',
                                    secondary='join(DocumentURI, Document, DocumentURI.document_id == Document.id)',
