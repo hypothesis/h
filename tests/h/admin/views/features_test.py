@@ -7,6 +7,8 @@ import pytest
 from h import db
 from h.admin.views import features as views
 
+from .... import factories
+
 
 class DummyFeature(object):
     def __init__(self, name):
@@ -75,7 +77,7 @@ def test_cohorts_index_when_no_cohorts():
     assert result["results"] == []
 
 
-def test_new_cohort_creates_cohort():
+def test_new_cohort_creates_cohort_with_no_members():
     req = DummyRequest(db=db.Session)
     req.params['add'] = 'cohort'
     result = views.cohorts_add(req)
@@ -83,13 +85,50 @@ def test_new_cohort_creates_cohort():
 
     result = views.cohorts_index({}, req)
     assert len(result["results"]) == 1
-    assert result["results"][0].name == "cohort"
+
+    cohort = result["results"][0]
+    assert cohort.name == "cohort"
+    assert len(cohort.members) == 0
+
+
+def create_cohort(req):
+    req.params['add'] = 'cohort'
+    views.cohorts_add(req)
+    return views.cohorts_index({}, req)['results'][0]
+
+
+def add_user_to_cohort(req, user, cohort):
+    req.matchdict['id'] = cohort.id
+    req.params['add'] = user.username
+    views.cohorts_edit_add(req)
+
+
+def test_cohort_edit_add_and_remove_user():
+    req = DummyRequest(db=db.Session)
+    user = factories.User()
+    db.Session.add(user)
+    cohort = create_cohort(req)
+    add_user_to_cohort(req, user, cohort)
+
+    req.matchdict['id'] = cohort.id
+    res = views.cohorts_edit({}, req)
+    assert len(res['members']) == 1
+    assert res['members'][0].username == user.username
+
+    req.matchdict['id'] = cohort.id
+    req.params['remove'] = user.username
+    views.cohorts_edit_remove(req)
+
+    req.matchdict['id'] = cohort.id
+    res = views.cohorts_edit({}, req)
+    assert len(res['members']) == 0
 
 
 @pytest.fixture(autouse=True)
 def routes(config):
     config.add_route('admin_features', '/adm/features')
     config.add_route('admin_cohorts', '/adm/cohorts')
+    config.add_route('admin_edit_cohort', '/adm/cohorts/{id}')
 
 
 @pytest.fixture
