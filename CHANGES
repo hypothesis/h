@@ -4,22 +4,33 @@ Unreleased
 Features
 --------
 
-- The annotation adder now appears in response to selection changes made via
-  touch or keyboard input (#3347)
+- Show adder in response to selection changes made via touch or keyboard input
+  (#3347)
+
+- Change timestamps in annotation cards to link to the standalone annotation
+  page rather than the original document (#3395)
 
 Bug fixes
 ---------
 
-- The client now works on web pages which define a global variable called
-  "global" (#3385)
+- Fix client on web pages which define a global variable called "global"
+  (#3385)
 
-- The client now accepts a relative URL for the "serviceUrl" parameter
-  specifying the Hypothesis service to connect to (#3381)
+- Support relative URLs for the "serviceUrl" parameter in the client specifying
+  the Hypothesis service to connect to (#3381)
+
+- Fix spacing around 'Share' icon in annotation cards (#3399)
+
+- Fix display of numbered and bullet-point lists in annotation cards (#3396)
+
+- URL encode Twitter/Facebook/Google share links correctly (#3394)
 
 Miscellanea
 -----------
 
 - Documentation pages now have URLs without a '.html' extension (#3373)
+
+- Remove "direct_linking" feature flag (#3382)
 
 0.25.0 (2016-05-26)
 ===================
