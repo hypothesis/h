@@ -9,7 +9,7 @@ def includeme(config):
     config.add_route('admin_badge', '/badge')
     config.add_route('admin_features', '/features')
     config.add_route('admin_cohorts', '/features/cohorts')
-    config.add_route('admin_edit_cohort', '/features/cohorts/{id}')
+    config.add_route('admin_cohorts_edit', '/features/cohorts/{id}')
     config.add_route('admin_groups', '/groups')
     config.add_route('admin_groups_csv', '/groups.csv')
     config.add_route('admin_nipsa', '/nipsa')

@@ -128,7 +128,7 @@ def test_cohort_edit_add_and_remove_user():
 def routes(config):
     config.add_route('admin_features', '/adm/features')
     config.add_route('admin_cohorts', '/adm/cohorts')
-    config.add_route('admin_edit_cohort', '/adm/cohorts/{id}')
+    config.add_route('admin_cohorts_edit', '/adm/cohorts/{id}')
 
 
 @pytest.fixture

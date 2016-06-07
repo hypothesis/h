@@ -59,7 +59,7 @@ def cohorts_add(request):
     return httpexceptions.HTTPSeeOther(url)
 
 
-@view_config(route_name='admin_edit_cohort',
+@view_config(route_name='admin_cohorts_edit',
              request_method='GET',
              renderer='h:templates/admin/edit_cohort.html.jinja2',
              permission='admin_features')
@@ -69,7 +69,7 @@ def cohorts_edit(context, request):
     return {'cohort': cohort, 'members': cohort.members}
 
 
-@view_config(route_name='admin_edit_cohort',
+@view_config(route_name='admin_cohorts_edit',
              request_method='POST',
              request_param='add',
              renderer='h:templates/admin/edit_cohort.html.jinja2',
@@ -87,11 +87,11 @@ def cohorts_edit_add(request):
         cohort = request.db.query(models.FeatureCohort).get(cohort_id)
         cohort.members.append(member)
 
-    url = request.route_url('admin_edit_cohort', id=cohort_id)
+    url = request.route_url('admin_cohorts_edit', id=cohort_id)
     return httpexceptions.HTTPSeeOther(url)
 
 
-@view_config(route_name='admin_edit_cohort',
+@view_config(route_name='admin_cohorts_edit',
              request_method='POST',
              request_param='remove',
              renderer='h:templates/admin/edit_cohort.html.jinja2',
@@ -104,7 +104,7 @@ def cohorts_edit_remove(request):
     member = request.db.query(models.User).filter_by(uid=member_name).first()
     cohort.members.remove(member)
 
-    url = request.route_url('admin_edit_cohort', id=cohort_id)
+    url = request.route_url('admin_cohorts_edit', id=cohort_id)
     return httpexceptions.HTTPSeeOther(url)
 
 
