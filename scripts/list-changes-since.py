@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import dateutil.parser
 import re
 import requests
 import subprocess
@@ -35,28 +36,70 @@ def get_last_tag():
     return tags.stdout.decode().splitlines()[0]
 
 
-def get_prs_closed_since(version):
-    git_list_result = run(['git','log','--oneline','{}..master'.format(version)],
+def get_tag_date(tag):
+    tag_date_result = run(['git', 'tag', '--list', tag, '--format=%(taggerdate)'],
         stdout=PIPE)
-    prs = []
-    for message in git_list_result.stdout.split(b'\n'):
-        match = re.match('.*Merge pull request #([0-9]+)', str(message))
-        if match:
-            prs.append(int(match.group(1)))
-    return prs
+    tag_date_str = tag_date_result.stdout.decode().strip()
+    return dateutil.parser.parse(tag_date_str)
 
 
-def get_pr_info(auth_token, repo, id):
-    pr_url = '{}/repos/{}/pulls/{}'.format(GITHUB_API_URL, repo, id)
+def github_request(auth_token, repo, path, **kwargs):
+    """
+    Make a GitHub API request and return an iterator over items in the response.
+
+    `github_request` follows `next` links in paged responses automatically.
+    """
+    params = kwargs
+    url = '{}/repos/{}/{}'.format(GITHUB_API_URL, repo, path)
     headers = {}
     if auth_token:
         headers['Authorization'] = 'token {}'.format(auth_token)
-    res = requests.get(pr_url, headers=headers)
-    if res.status_code != 200:
-        raise Exception('GitHub request failed:', res.json()['message'])
-    data = res.json()
 
-    return PRInfo(id, title=data['title'].strip())
+    while url:
+        res = requests.get(url, headers=headers, params=params)
+        if res.status_code != 200:
+            raise Exception('GitHub request failed:', res.text)
+
+        page = res.json()
+        if isinstance(page, list):
+            for item in page:
+                yield item
+            url = res.links.get('next') and res.links.get('next')['url']
+            params = None
+        else:
+            yield page
+            break
+
+
+def get_prs_merged_since(auth_token, repo, tag):
+    """
+    Return all pull requests merged since `tag` was created.
+
+    Pull requests are sorted in ascending order of merge date.
+    """
+    tag_date = get_tag_date(tag)
+    prs = []
+
+    def merge_date(pr):
+        if pr.get('merged_at'):
+            return dateutil.parser.parse(pr['merged_at'])
+        else:
+            return None
+
+    # The GitHub API does not provide a `since` parameter to retrieve PRs
+    # closed since a given date, so instead we iterate over PRs in descending
+    # order of last update and stop when we reach a PR that was last updated
+    # before the given tag was created.
+    for closed_pr in github_request(auth_token, repo, 'pulls', state='closed',
+                                    sort='updated', direction='desc'):
+        pr_date = dateutil.parser.parse(closed_pr['updated_at'])
+        if pr_date < tag_date:
+            break
+        merged_at = merge_date(closed_pr)
+        if merged_at and merged_at > tag_date:
+            prs += [closed_pr]
+
+    return sorted(prs, key=merge_date)
 
 
 def format_list(items):
@@ -94,8 +137,9 @@ https://help.github.com/articles/creating-an-access-token-for-command-line-use/
     args = parser.parse_args()
     tag = args.tag or get_last_tag()
 
-    closed_prs = get_prs_closed_since(tag)
-    pr_details = [get_pr_info(args.token, args.repo, id) for id in closed_prs]
+    pr_details = []
+    for pr in get_prs_merged_since(args.token, args.repo, tag):
+        pr_details += [PRInfo(pr['number'], title=pr['title'].strip())]
 
     def item_label(pr):
         return '{} (#{}).'.format(pr.title, pr.id)
