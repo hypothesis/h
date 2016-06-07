@@ -102,7 +102,12 @@ def cohorts_edit_remove(request):
 
     cohort = request.db.query(models.FeatureCohort).get(cohort_id)
     member = request.db.query(models.User).filter_by(uid=member_name).first()
-    cohort.members.remove(member)
+    try:
+        cohort.members.remove(member)
+    except ValueError:
+        request.session.flash(
+            _("User {member_name} doesn't exist.".format(member_name=member_name)),
+            "error")
 
     url = request.route_url('admin_cohorts_edit', id=cohort_id)
     return httpexceptions.HTTPSeeOther(url)
