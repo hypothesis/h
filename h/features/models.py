@@ -33,12 +33,7 @@ FEATURES = {
 #
 # 4. Finally, remove the feature from FEATURES_PENDING_REMOVAL.
 #
-FEATURES_PENDING_REMOVAL = {
-    'claim': "Enable 'claim your username' web views?",
-    'direct_linking': "Generate direct links to annotations in context in the client?",
-    'ops_disable_streamer_uri_equivalence': "[Ops] Disable streamer URI equivalence support?",
-    'postgres': 'Read/write annotation and document data from/to postgres',
-}
+FEATURES_PENDING_REMOVAL = {}
 
 
 class Feature(Base):
