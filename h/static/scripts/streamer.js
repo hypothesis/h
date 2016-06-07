@@ -63,11 +63,14 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
     }
 
     // Discard annotations that aren't from the currently focused group.
+    // Unless the action is delete, where we only get an id
     // FIXME: Have the server only send us annotations from the focused
     // group in the first place.
-    annotations = annotations.filter(function (ann) {
-      return ann.group === groups.focused().id;
-    });
+    if (action !== 'delete') {
+      annotations = annotations.filter(function (ann) {
+        return ann.group === groups.focused().id;
+      });
+    }
 
     switch (action) {
       case 'create':

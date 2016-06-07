@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from copy import deepcopy
 
 from h import __version__
 from h import emails
 from h import mailer
-from h.api import presenters
 from h.api import storage
-from h.api.events import AnnotationTransformEvent
 from h.notification import reply
 
 
@@ -30,16 +27,13 @@ def add_renderer_globals(event):
 
 def publish_annotation_event(event):
     """Publish an annotation event to the message queue."""
-    annotation_dict = deepcopy(event.annotation_dict)
-    before_save_event = AnnotationTransformEvent(event.request,
-                                                 annotation_dict)
-    event.request.registry.notify(before_save_event)
-
     data = {
         'action': event.action,
-        'annotation': annotation_dict,
+        'annotation_id': event.annotation_id,
         'src_client_id': event.request.headers.get('X-Client-Id'),
     }
+    if event.annotation_dict:
+        data['annotation_dict'] = event.annotation_dict
 
     event.request.realtime.publish_annotation(data)
 

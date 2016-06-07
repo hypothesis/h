@@ -6,7 +6,6 @@ import pytest
 from pyramid import testing
 
 from h import subscribers
-from h.api import models
 from h.api.events import AnnotationEvent
 
 
@@ -18,57 +17,42 @@ class FakeMailer(object):
         self.lastcall = (recipients, subject, body, html)
 
 
-@pytest.mark.usefixtures('presenters')
 class TestPublishAnnotationEvent:
 
-    def test_it_initializes_a_new_before_save_event(
-        self, event, presenters, AnnotationTransformEvent, deepcopy):
-
-        subscribers.publish_annotation_event(event)
-
-        deepcopy.assert_called_once_with(event.annotation_dict)
-
-        AnnotationTransformEvent.assert_called_once_with(event.request,
-                                                         deepcopy.return_value)
-
-    def test_it_notifies_before_save_event(self, event, AnnotationTransformEvent, deepcopy):
-        event.request.registry.notify = mock.Mock(spec=lambda event: None)
-        before_save_event = AnnotationTransformEvent.return_value
-
-        subscribers.publish_annotation_event(event)
-
-        event.request.registry.notify.assert_called_once_with(before_save_event)
-
-    def test_it_publishes_the_serialized_data(self, event, presenters, deepcopy):
+    def test_it_publishes_the_realtime_event(self, event):
         event.request.headers = {'X-Client-Id': 'client_id'}
 
         subscribers.publish_annotation_event(event)
 
         event.request.realtime.publish_annotation.assert_called_once_with({
             'action': event.action,
-            'annotation': deepcopy.return_value,
+            'annotation_id': event.annotation_id,
             'src_client_id': 'client_id'
+        })
+
+    def test_it_adds_annotation_dict_to_realtime_event(self, event):
+        annotation_dict = mock.Mock()
+        type(event).annotation_dict = mock.PropertyMock(return_value=annotation_dict)
+        event.request.headers = {'X-Client-Id': 'client_id'}
+
+        subscribers.publish_annotation_event(event)
+
+        event.request.realtime.publish_annotation.assert_called_once_with({
+            'action': event.action,
+            'annotation_id': event.annotation_id,
+            'src_client_id': 'client_id',
+            'annotation_dict': annotation_dict
         })
 
     @pytest.fixture
     def event(self):
-        return mock.Mock(
+        event =  mock.Mock(
             spec=AnnotationEvent(testing.DummyRequest(),
-                                 {'id': 'test_annotation_id'},
+                                 'test_annotation_id',
                                  'create'),
         )
-
-    @pytest.fixture
-    def presenters(self, patch):
-        return patch('h.subscribers.presenters')
-
-    @pytest.fixture
-    def AnnotationTransformEvent(self, patch):
-        return patch('h.subscribers.AnnotationTransformEvent')
-
-    @pytest.fixture
-    def deepcopy(self, patch):
-        return patch('h.subscribers.deepcopy')
+        type(event).annotation_dict = mock.PropertyMock(return_value=None)
+        return event
 
 
 @pytest.mark.usefixtures('fetch_annotation')
@@ -78,7 +62,7 @@ class TestSendReplyNotifications(object):
         get_notification = mock.Mock(spec_set=[], return_value=None)
         generate_mail = mock.Mock(spec_set=[], return_value=[])
         event = AnnotationEvent(mock.sentinel.request,
-                                {'id': mock.sentinel.annotation_id},
+                                mock.sentinel.annotation_id,
                                 mock.sentinel.action)
         mock.sentinel.request.db = mock.Mock()
 

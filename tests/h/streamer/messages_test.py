@@ -142,100 +142,127 @@ class TestHandleMessage(object):
         return patch('h.streamer.websocket.WebSocket')
 
 
+@pytest.mark.usefixtures('fetch_annotation', 'has_nipsa')
 class TestHandleAnnotationEvent(object):
-    def test_notification_format(self):
-        """Check the format of the returned notification in the happy case."""
+    def test_it_fetches_the_annotation(self, fetch_annotation, presenter_asdict):
         message = {
-            'annotation': {'permissions': {'read': ['group:__world__']}},
+            'annotation_id': 'panda',
             'action': 'update',
             'src_client_id': 'pigeon'
         }
         socket = FakeSocket('giraffe')
+        presenter_asdict.return_value = self.serialized_annotation()
+
+        messages.handle_annotation_event(message, socket)
+
+        fetch_annotation.assert_called_once_with(socket.request.db, 'panda')
+
+    def test_it_skips_notification_when_fetch_failed(self, fetch_annotation):
+        """
+        When a create/update and a delete event happens in quick succession
+        we could fail to load the annotation, even though the event action is
+        update/create. This tests that in that case we silently abort and don't
+        sent a notification to the client.
+        """
+        message = {
+            'annotation_id': 'panda',
+            'action': 'update',
+            'src_client_id': 'pigeon'
+        }
+        socket = FakeSocket('giraffe')
+        fetch_annotation.return_value = None
+
+        assert messages.handle_annotation_event(message, socket) is None
+
+    def test_it_serializes_the_annotation(self,
+                                          fetch_annotation,
+                                          presenters):
+        message = {'action': '_', 'annotation_id': '_', 'src_client_id': '_'}
+        socket = FakeSocket('giraffe')
+        presenters.AnnotationJSONPresenter.return_value.asdict.return_value = (
+            self.serialized_annotation())
+
+        messages.handle_annotation_event(message, socket)
+
+        presenters.AnnotationJSONPresenter.assert_called_once_with(
+            socket.request, fetch_annotation.return_value)
+        assert presenters.AnnotationJSONPresenter.return_value.asdict.called
+
+    def test_notification_format(self, presenter_asdict):
+        """Check the format of the returned notification in the happy case."""
+        message = {
+            'annotation_id': 'panda',
+            'action': 'update',
+            'src_client_id': 'pigeon'
+        }
+        socket = FakeSocket('giraffe')
+        presenter_asdict.return_value = self.serialized_annotation()
 
         assert messages.handle_annotation_event(message, socket) == {
-            'payload': [message['annotation']],
+            'payload': [self.serialized_annotation()],
             'type': 'annotation-notification',
             'options': {'action': 'update'},
         }
 
-    def test_none_for_sender_socket(self):
+    def test_none_for_sender_socket(self, presenter_asdict):
         """Should return None if the socket's client_id matches the message's."""
-        message = {
-            'annotation': {'permissions': {'read': ['group:__world__']}},
-            'action': 'update',
-            'src_client_id': 'pigeon'
-        }
+        message = {'src_client_id': 'pigeon', 'annotation_id': '_', 'action': '_'}
         socket = FakeSocket('pigeon')
+        presenter_asdict.return_value = self.serialized_annotation()
 
-        assert messages.handle_annotation_event(message, socket) is None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is None
 
-    def test_none_if_no_socket_filter(self):
+    def test_none_if_no_socket_filter(self, presenter_asdict):
         """Should return None if the socket has no filter."""
-        message = {
-            'annotation': {'permissions': {'read': ['group:__world__']}},
-            'action': 'update',
-            'src_client_id': 'pigeon'
-        }
+        message = {'src_client_id': '_', 'annotation_id': '_', 'action': '_'}
         socket = FakeSocket('giraffe')
         socket.filter = None
+        presenter_asdict.return_value = self.serialized_annotation()
 
-        assert messages.handle_annotation_event(message, socket) is None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is None
 
-    def test_none_if_action_is_read(self):
+    def test_none_if_action_is_read(self, presenter_asdict):
         """Should return None if the message action is 'read'."""
-        message = {
-            'annotation': {'permissions': {'read': ['group:__world__']}},
-            'action': 'read',
-            'src_client_id': 'pigeon'
-        }
+        message = {'action': 'read', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
+        presenter_asdict.return_value = self.serialized_annotation()
 
-        assert messages.handle_annotation_event(message, socket) is None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is None
 
-    def test_none_if_filter_does_not_match(self):
+    def test_none_if_filter_does_not_match(self, presenter_asdict):
         """Should return None if the socket filter doesn't match the message."""
-        message = {
-            'annotation': {'permissions': {'read': ['group:__world__']}},
-            'action': 'update',
-            'src_client_id': 'pigeon'
-        }
+        message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
         socket.filter.match.return_value = False
+        presenter_asdict.return_value = self.serialized_annotation()
 
-        assert messages.handle_annotation_event(message, socket) is None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is None
 
-    def test_none_if_annotation_nipsad(self):
+    def test_none_if_annotation_nipsad(self, has_nipsa, presenter_asdict):
         """Should return None if the annotation is from a NIPSA'd user."""
-        message = {
-            'annotation': {
-                'user': 'fred',
-                'nipsa': True,
-                'permissions': {'read': ['group:__world__']}
-            },
-            'action': 'update',
-            'src_client_id': 'pigeon'
-        }
+        message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
+        presenter_asdict.return_value = self.serialized_annotation()
+        has_nipsa.return_value = True
 
-        assert messages.handle_annotation_event(message, socket) is None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is None
 
-    def test_sends_nipsad_annotations_to_owners(self):
+    def test_sends_nipsad_annotations_to_owners(self, presenter_asdict):
         """NIPSA'd users should see their own annotations."""
-        message = {
-            'annotation': {
-                'user': 'fred',
-                'nipsa': True,
-                'permissions': {'read': ['group:__world__']}
-            },
-            'action': 'update',
-            'src_client_id': 'pigeon'
-        }
+        message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
         socket.request.authenticated_userid = 'fred'
+        presenter_asdict.return_value = self.serialized_annotation({'nipsa': True})
 
-        assert messages.handle_annotation_event(message, socket) is not None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is not None
 
-    def test_sends_if_annotation_public(self):
+    def test_sends_if_annotation_public(self, presenter_asdict):
         """
         Everyone should see annotations which are public.
 
@@ -245,48 +272,65 @@ class TestHandleAnnotationEvent(object):
         'group:__world__', ensuring that everyone (including logged-out users)
         receives all public annotations.
         """
-        message = {
-            'annotation': {
-                'user': 'fred',
-                'permissions': {'read': ['group:__world__']}
-            },
-            'action': 'update',
-            'src_client_id': 'pigeon'
-        }
+        message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
         socket.request.effective_principals = [security.Everyone]
+        presenter_asdict.return_value = self.serialized_annotation()
 
-        assert messages.handle_annotation_event(message, socket) is not None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is not None
 
-    def test_none_if_not_in_group(self):
+    def test_none_if_not_in_group(self, presenter_asdict):
         """Users shouldn't see annotations in groups they aren't members of."""
-        message = {
-            'annotation': {
-                'user': 'fred',
-                'permissions': {'read': ['group:private-group']}
-            },
-            'action': 'update',
-            'src_client_id': 'pigeon'
-        }
+        message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
         socket.request.effective_principals = ['fred']  # No 'group:private-group'.
+        presenter_asdict.return_value = self.serialized_annotation({
+            'permissions': {'read': ['group:private-group']}})
 
-        assert messages.handle_annotation_event(message, socket) is None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is None
 
-    def test_sends_if_in_group(self):
+    def test_sends_if_in_group(self, presenter_asdict):
         """Users should see annotations in groups they are members of."""
-        message = {
-            'annotation': {
-                'user': 'fred',
-                'permissions': {'read': ['group:private-group']}
-            },
-            'action': 'update',
-            'src_client_id': 'pigeon'
-        }
+        message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
         socket.request.effective_principals = ['fred', 'group:private-group']
+        presenter_asdict.return_value = self.serialized_annotation({
+            'permissions': {'read': ['group:private-group']}})
 
-        assert messages.handle_annotation_event(message, socket) is not None
+        result = messages.handle_annotation_event(message, socket)
+        assert result is not None
+
+    def serialized_annotation(self, data=None):
+        if data is None:
+            data = {}
+
+        serialized = {
+            'user': 'fred',
+            'permissions': {'read': ['group:__world__']}
+        }
+        serialized.update(data)
+
+        return serialized
+
+    @pytest.fixture
+    def fetch_annotation(self, patch):
+        return patch('h.streamer.messages.storage.fetch_annotation')
+
+    @pytest.fixture
+    def presenters(self, patch):
+        return patch('h.streamer.messages.presenters')
+
+    @pytest.fixture
+    def presenter_asdict(self, patch):
+        return patch('h.streamer.messages.presenters.AnnotationJSONPresenter.asdict')
+
+    @pytest.fixture
+    def has_nipsa(self, patch):
+        func = patch('h.streamer.messages.has_nipsa')
+        func.return_value = False
+        return func
 
 
 class TestHandleUserEvent(object):

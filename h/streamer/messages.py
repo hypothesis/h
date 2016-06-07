@@ -8,8 +8,10 @@ from gevent.queue import Full
 
 from h import realtime
 from h.realtime import Consumer
+from h.api import presenters
 from h.api import storage
 from h.auth.util import translate_annotation_principals
+from h.nipsa.logic import has_nipsa
 from h.streamer import websocket
 import h.sentry
 
@@ -91,7 +93,6 @@ def handle_annotation_event(message, socket):
     annotation event, otherwise a dict containing information about the event.
     """
     action = message['action']
-    annotation = storage.annotation_from_dict(message['annotation'])
 
     if action == 'read':
         return None
@@ -99,25 +100,43 @@ def handle_annotation_event(message, socket):
     if message['src_client_id'] == socket.client_id:
         return None
 
-    if annotation.get('nipsa') and (
-            socket.request.authenticated_userid != annotation.get('user', '')):
-        return None
-
-    if not _authorized_to_read(socket.request, annotation):
-        return None
-
     # We don't send anything until we have received a filter from the client
     if socket.filter is None:
         return None
 
-    if not socket.filter.match(annotation, action):
-        return None
-
-    return {
-        'payload': [annotation],
+    notification = {
         'type': 'annotation-notification',
         'options': {'action': action},
     }
+    id_ = message['annotation_id']
+
+    # Return early when action is delete
+    serialized = None
+    if action == 'delete':
+        serialized = message['annotation_dict']
+    else:
+        annotation = storage.fetch_annotation(socket.request.db, id_)
+        if annotation is None:
+            return None
+
+        serialized = presenters.AnnotationJSONPresenter(
+            socket.request, annotation).asdict()
+
+    userid = serialized.get('user')
+    if has_nipsa(userid) and socket.request.authenticated_userid != userid:
+        return None
+
+    permissions = serialized.get('permissions')
+    if not _authorized_to_read(socket.request, permissions):
+        return None
+
+    if not socket.filter.match(serialized, action):
+        return None
+
+    notification['payload'] = [serialized]
+    if action == 'delete':
+        notification['payload'] = [{'id': id_}]
+    return notification
 
 
 def handle_user_event(message, socket):
@@ -143,24 +162,13 @@ def handle_user_event(message, socket):
     }
 
 
-def _authorized_to_read(request, annotation):
+def _authorized_to_read(request, permissions):
     """Return True if the passed request is authorized to read the annotation.
 
     If the annotation belongs to a private group, this will return False if the
     authenticated user isn't a member of that group.
     """
-    # TODO: remove this when we've diagnosed this issue
-    if ('permissions' not in annotation or
-            'read' not in annotation['permissions']):
-        request.sentry.captureMessage(
-            'streamer received annotation lacking valid permissions',
-            level='warn',
-            extra={
-                'id': annotation['id'],
-                'permissions': json.dumps(annotation.get('permissions')),
-            })
-
-    read_permissions = annotation.get('permissions', {}).get('read', [])
+    read_permissions = permissions.get('read', [])
     read_principals = translate_annotation_principals(read_permissions)
     if set(read_principals).intersection(request.effective_principals):
         return True

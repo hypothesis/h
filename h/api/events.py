@@ -4,15 +4,11 @@
 class AnnotationEvent(object):
     """An event representing an action on an annotation."""
 
-    def __init__(self, request, annotation_dict, action):
+    def __init__(self, request, annotation_id, action, annotation_dict=None):
         self.request = request
-        self.annotation_dict = annotation_dict
+        self.annotation_id = annotation_id
         self.action = action
-
-    @property
-    def annotation_id(self):
-        if self.annotation_dict:
-            return self.annotation_dict.get('id')
+        self.annotation_dict = annotation_dict
 
 
 class AnnotationTransformEvent(object):
