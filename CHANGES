@@ -10,6 +10,8 @@ Features
 - Change timestamps in annotation cards to link to the standalone annotation
   page rather than the original document (#3395)
 
+- Improve presentation of reply threads (#3376)
+
 Bug fixes
 ---------
 
