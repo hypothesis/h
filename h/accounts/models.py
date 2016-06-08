@@ -50,9 +50,9 @@ class Activation(Base):
                      default=_generate_random_string)
 
     @classmethod
-    def get_by_code(cls, code):
+    def get_by_code(cls, session, code):
         """Fetch an activation by code."""
-        return cls.query.filter(cls.code == code).first()
+        return session.query(cls).filter(cls.code == code).first()
 
 
 class User(Base):
@@ -171,30 +171,20 @@ class User(Base):
         return text_type(CRYPT.encode(password + self.salt))
 
     @classmethod
-    def get_by_email(cls, email):
+    def get_by_email(cls, session, email):
         """Fetch a user by email address."""
-        return cls.query.filter(
+        return session.query(cls).filter(
             sa.func.lower(cls.email) == email.lower()
         ).first()
 
     @classmethod
-    def get_by_activation(cls, activation):
+    def get_by_activation(cls, session, activation):
         """Fetch a user by activation instance."""
-        user = cls.query.filter(
+        user = session.query(cls).filter(
             cls.activation_id == activation.id
         ).first()
 
         return user
-
-    @classmethod
-    def get_user(cls, username, password):
-        """Fetch a user by username and validate their password."""
-        user = cls.get_by_username(username)
-
-        valid = cls.validate_user(user, password)
-
-        if valid:
-            return user
 
     @classmethod
     def validate_user(cls, user, password):

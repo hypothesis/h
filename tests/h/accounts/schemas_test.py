@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import colander
 import pytest
+import mock
 from mock import Mock
 from pyramid.exceptions import BadCSRFToken
 from pyramid.testing import DummyRequest
@@ -10,7 +11,10 @@ from h.accounts import schemas
 
 
 class DummyNode(object):
-    pass
+    def __init__(self):
+        self.bindings = {
+            'request': DummyRequest(db=mock.sentinel.db_session)
+        }
 
 
 class FakeSerializer(object):
@@ -35,7 +39,7 @@ class FakeInvalidSerializer(FakeSerializer):
 
 
 def csrf_request(config, **kwargs):
-    request = DummyRequest(registry=config.registry, **kwargs)
+    request = DummyRequest(db=mock.sentinel.db_session, registry=config.registry, **kwargs)
     request.headers['X-CSRF-Token'] = request.session.get_csrf_token()
     return request
 
@@ -68,7 +72,7 @@ def test_unique_email_looks_up_user_by_email(user_model):
     with pytest.raises(colander.Invalid):
         schemas.unique_email(node, "foo@bar.com")
 
-    user_model.get_by_email.assert_called_with("foo@bar.com")
+    user_model.get_by_email.assert_called_with(mock.sentinel.db_session, "foo@bar.com")
 
 
 def test_unique_email_invalid_when_user_exists(user_model):

@@ -411,7 +411,7 @@ class ActivateController(object):
         except ValueError:
             raise httpexceptions.HTTPNotFound()
 
-        activation = Activation.get_by_code(code)
+        activation = Activation.get_by_code(self.request.db, code)
         if activation is None:
             self.request.session.flash(jinja2.Markup(_(
                 "We didn't recognize that activation link. "
@@ -423,7 +423,7 @@ class ActivateController(object):
             return httpexceptions.HTTPFound(
                 location=self.request.route_url('index'))
 
-        user = User.get_by_activation(activation)
+        user = User.get_by_activation(self.request.db, activation)
         if user is None or user.id != id_:
             raise httpexceptions.HTTPNotFound()
 

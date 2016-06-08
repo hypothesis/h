@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import mock
 from mock import Mock
 from mock import MagicMock
 from mock import call
@@ -41,15 +42,15 @@ def test_users_index_looks_up_users_by_username(User):
 
 @users_index_fixtures
 def test_users_index_looks_up_users_by_email(User):
-    es = MagicMock()
-    request = DummyRequest(params={"username": "bob@builder.com"},
-                           es=es)
+    request = DummyRequest(db=mock.sentinel.db_session,
+                           es=MagicMock(),
+                           params={"username": "bob@builder.com"})
 
     User.get_by_username.return_value = None
 
     views.users_index(request)
 
-    User.get_by_email.assert_called_with("bob@builder.com")
+    User.get_by_email.assert_called_with(mock.sentinel.db_session, "bob@builder.com")
 
 
 @users_index_fixtures
@@ -77,9 +78,9 @@ def test_users_index_queries_annotation_count_by_userid(User):
 
 @users_index_fixtures
 def test_users_index_no_user_found(User):
-    es = MagicMock()
-    request = DummyRequest(params={"username": "bob"},
-                           es=es)
+    request = DummyRequest(db=mock.sentinel.db_session,
+                           es=MagicMock(),
+                           params={"username": "bob"})
     User.get_by_username.return_value = None
     User.get_by_email.return_value = None
 

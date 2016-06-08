@@ -39,7 +39,8 @@ def get_blacklist():
 
 def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
-    user = models.User.get_by_email(value)
+    request = node.bindings['request']
+    user = models.User.get_by_email(request.db, value)
     if user:
         msg = _("Sorry, an account with this email address already exists.")
         raise colander.Invalid(node, msg)
@@ -121,12 +122,13 @@ class LoginSchema(CSRFSchema):
     def validator(self, node, value):
         super(LoginSchema, self).validator(node, value)
 
+        request = node.bindings['request']
         username = value.get('username')
         password = value.get('password')
 
         user = models.User.get_by_username(username)
         if user is None:
-            user = models.User.get_by_email(username)
+            user = models.User.get_by_email(request.db, username)
 
         if user is None:
             err = colander.Invalid(node)
@@ -161,8 +163,9 @@ class ForgotPasswordSchema(CSRFSchema):
     def validator(self, node, value):
         super(ForgotPasswordSchema, self).validator(node, value)
 
+        request = node.bindings['request']
         email = value.get('email')
-        user = models.User.get_by_email(email)
+        user = models.User.get_by_email(request.db, email)
 
         if user is None:
             err = colander.Invalid(node)
