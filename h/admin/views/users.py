@@ -28,7 +28,7 @@ def users_index(request):
     if username:
         user = models.User.get_by_username(username)
         if user is None:
-            user = models.User.get_by_email(username)
+            user = models.User.get_by_email(request.db, username)
 
     if user is not None:
         # Fetch information on how many annotations the user has created

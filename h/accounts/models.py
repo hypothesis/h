@@ -171,9 +171,9 @@ class User(Base):
         return text_type(CRYPT.encode(password + self.salt))
 
     @classmethod
-    def get_by_email(cls, email):
+    def get_by_email(cls, session, email):
         """Fetch a user by email address."""
-        return cls.query.filter(
+        return session.query(cls).filter(
             sa.func.lower(cls.email) == email.lower()
         ).first()
 
