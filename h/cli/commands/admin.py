@@ -2,7 +2,7 @@
 
 import click
 
-from h import accounts
+from h import models
 
 
 @click.command()
@@ -16,5 +16,9 @@ def admin(ctx, username):
     administrative privileges.
     """
     request = ctx.obj['bootstrap']()
-    accounts.make_admin(username)
+    user = models.User.get_by_username(username)
+    if user is None:
+        raise click.ClickException('no user with username "{}"'.format(username))
+    else:
+        user.admin = True
     request.tm.commit()

@@ -5,7 +5,6 @@ from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
 import pytest
 
-from h import accounts
 from h.admin.views import admins as views
 
 
@@ -45,49 +44,69 @@ def test_admins_index_when_multiple_admins(User):
     assert result["admin_users"] == ["fred", "bob", "frank"]
 
 
-# The fixtures required to mock all of admins_add()'s dependencies.
-admins_add_fixtures = pytest.mark.usefixtures('make_admin', 'admins_index')
+@pytest.mark.usefixtures('user_agnos', 'user_bojan')
+class TestAdminsAdd(object):
 
+    def test_makes_users_admins(self, user_bojan):
+        request = DummyRequest(params={"add": "bojan"})
 
-@admins_add_fixtures
-def test_admins_add_calls_make_admin(make_admin):
-    request = DummyRequest(params={"add": "seanh"})
+        views.admins_add(request)
 
-    views.admins_add(request)
+        assert user_bojan.admin
 
-    make_admin.assert_called_once_with("seanh")
+    def test_is_idempotent(self, user_agnos):
+        request = DummyRequest(params={"add": "agnos"})
 
+        views.admins_add(request)
 
-@admins_add_fixtures
-def test_admins_add_returns_index_on_success(admins_index):
-    request = DummyRequest(params={"add": "seanh"})
-    admins_index.return_value = "expected data"
+        assert user_agnos.admin
 
-    result = views.admins_add(request)
+    def test_returns_list_of_admin_users(self):
+        request = DummyRequest(params={"add": "bojan"})
 
-    assert result == "expected data"
+        result = views.admins_add(request)
 
+        assert set(result['admin_users']) == set(['agnos', 'bojan'])
 
-@admins_add_fixtures
-def test_admins_add_flashes_on_NoSuchUserError(make_admin):
-    make_admin.side_effect = accounts.NoSuchUserError
-    request = DummyRequest(params={"add": "seanh"})
-    request.session.flash = Mock()
+    def test_returns_list_of_admin_users_even_when_user_not_found(self):
+        request = DummyRequest(params={"add": "florp"})
 
-    views.admins_add(request)
+        result = views.admins_add(request)
 
-    assert request.session.flash.call_count == 1
+        assert set(result['admin_users']) == set(['agnos'])
 
+    def test_flashes_when_user_not_found(self):
+        request = DummyRequest(params={"add": "florp"})
+        request.session.flash = Mock()
 
-@admins_add_fixtures
-def test_admins_add_returns_index_on_NoSuchUserError(make_admin, admins_index):
-    make_admin.side_effect = accounts.NoSuchUserError
-    admins_index.return_value = "expected data"
-    request = DummyRequest(params={"add": "seanh"})
+        views.admins_add(request)
 
-    result = views.admins_add(request)
+        assert request.session.flash.call_count == 1
 
-    assert result == "expected data"
+    @pytest.fixture
+    def user_agnos(self, db_session):
+        from h import models
+
+        agnos = models.User(username='agnos',
+                            email='agnos@example.com',
+                            password='agn0s',
+                            admin=True)
+        db_session.add(agnos)
+        db_session.flush()
+
+        return agnos
+
+    @pytest.fixture
+    def user_bojan(self, db_session):
+        from h import models
+
+        bojan = models.User(username='bojan',
+                            email='bojan@example.com',
+                            password='b0jan')
+        db_session.add(bojan)
+        db_session.flush()
+
+        return bojan
 
 
 # The fixtures required to mock all of admins_remove()'s dependencies.
