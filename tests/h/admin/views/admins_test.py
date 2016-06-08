@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from mock import Mock
 from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
@@ -8,74 +10,58 @@ import pytest
 from h.admin.views import admins as views
 
 
-# The fixtures required to mock all of admins_index()'s dependencies.
-admins_index_fixtures = pytest.mark.usefixtures('User')
+@pytest.mark.usefixtures('routes')
+class TestAdminsIndex(object):
+    def test_when_no_admins(self):
+        request = DummyRequest()
+
+        result = views.admins_index(request)
+
+        assert result["admin_users"] == []
+
+    @pytest.mark.usefixtures('users')
+    def test_context_contains_admin_usernames(self):
+        request = DummyRequest()
+
+        result = views.admins_index(request)
+
+        assert set(result["admin_users"]) == set(["agnos", "bojan", "cristof"])
 
 
-@admins_index_fixtures
-def test_admins_index_when_no_admins(User):
-    request = DummyRequest()
-    User.admins.return_value = []
+@pytest.mark.usefixtures('users', 'routes')
+class TestAdminsAddRemove(object):
 
-    result = views.admins_index(request)
-
-    assert result["admin_users"] == []
-
-
-@admins_index_fixtures
-def test_admins_index_when_one_admin(User):
-    request = DummyRequest()
-    User.admins.return_value = [Mock(username="fred")]
-
-    result = views.admins_index(request)
-
-    assert result["admin_users"] == ["fred"]
-
-
-@admins_index_fixtures
-def test_admins_index_when_multiple_admins(User):
-    request = DummyRequest()
-    User.admins.return_value = [Mock(username="fred"),
-                                Mock(username="bob"),
-                                Mock(username="frank")]
-
-    result = views.admins_index(request)
-
-    assert result["admin_users"] == ["fred", "bob", "frank"]
-
-
-@pytest.mark.usefixtures('user_agnos', 'user_bojan')
-class TestAdminsAdd(object):
-
-    def test_makes_users_admins(self, user_bojan):
-        request = DummyRequest(params={"add": "bojan"})
+    def test_add_makes_users_admins(self, users):
+        request = DummyRequest(params={"add": "eva"})
 
         views.admins_add(request)
 
-        assert user_bojan.admin
+        assert users['eva'].admin
 
-    def test_is_idempotent(self, user_agnos):
+    def test_add_is_idempotent(self, users):
         request = DummyRequest(params={"add": "agnos"})
 
         views.admins_add(request)
 
-        assert user_agnos.admin
+        assert users['agnos'].admin
 
-    def test_returns_list_of_admin_users(self):
-        request = DummyRequest(params={"add": "bojan"})
+    def test_add_redirects_to_index(self):
+        request = DummyRequest(params={"add": "eva"})
 
         result = views.admins_add(request)
 
-        assert set(result['admin_users']) == set(['agnos', 'bojan'])
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/admins'
 
-    def test_returns_list_of_admin_users_even_when_user_not_found(self):
+    def test_add_redirects_to_index_when_user_not_found(self):
         request = DummyRequest(params={"add": "florp"})
 
         result = views.admins_add(request)
 
-        assert set(result['admin_users']) == set(['agnos'])
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/admins'
 
-    def test_flashes_when_user_not_found(self):
+    def test_add_flashes_when_user_not_found(self):
         request = DummyRequest(params={"add": "florp"})
         request.session.flash = Mock()
 
@@ -83,111 +69,69 @@ class TestAdminsAdd(object):
 
         assert request.session.flash.call_count == 1
 
-    @pytest.fixture
-    def user_agnos(self, db_session):
-        from h import models
+    def test_remove_makes_users_not_admins(self, users):
+        request = DummyRequest(params={"remove": "cristof"})
 
-        agnos = models.User(username='agnos',
-                            email='agnos@example.com',
-                            password='agn0s',
-                            admin=True)
-        db_session.add(agnos)
-        db_session.flush()
+        views.admins_remove(request)
 
-        return agnos
+        assert not users['cristof'].admin
 
-    @pytest.fixture
-    def user_bojan(self, db_session):
-        from h import models
+    def test_remove_is_idempotent(self, users):
+        request = DummyRequest(params={"remove": "eva"})
 
-        bojan = models.User(username='bojan',
-                            email='bojan@example.com',
-                            password='b0jan')
-        db_session.add(bojan)
-        db_session.flush()
+        views.admins_remove(request)
 
-        return bojan
+        assert not users['eva'].admin
 
+    def test_remove_will_not_remove_last_admin(self, users):
+        views.admins_remove(DummyRequest(params={"remove": "cristof"}))
+        views.admins_remove(DummyRequest(params={"remove": "bojan"}))
+        views.admins_remove(DummyRequest(params={"remove": "agnos"}))
 
-# The fixtures required to mock all of admins_remove()'s dependencies.
-admins_remove_fixtures = pytest.mark.usefixtures('User')
+        assert users['agnos'].admin
 
+    def test_remove_redirects_to_index(self):
+        request = DummyRequest(params={"remove": "agnos"})
 
-@admins_remove_fixtures
-def test_admins_remove_calls_get_by_username(User):
-    User.admins.return_value = [Mock(username="fred"),
-                                Mock(username="bob"),
-                                Mock(username="frank")]
-    request = DummyRequest(params={"remove": "fred"})
+        result = views.admins_remove(request)
 
-    views.admins_remove(request)
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/admins'
 
-    User.get_by_username.assert_called_once_with("fred")
+    def test_remove_redirects_to_index_when_user_not_found(self):
+        request = DummyRequest(params={"remove": "florp"})
+
+        result = views.admins_remove(request)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/admins'
 
 
-@admins_remove_fixtures
-def test_admins_remove_sets_admin_to_False(User):
-    User.admins.return_value = [Mock(username="fred"),
-                                Mock(username="bob"),
-                                Mock(username="frank")]
-    request = DummyRequest(params={"remove": "fred"})
-    user = Mock(admin=True)
-    User.get_by_username.return_value = user
+@pytest.fixture
+def users(db_session):
+    from h import models
 
-    views.admins_remove(request)
+    admins = ['agnos', 'bojan', 'cristof']
+    nonadmins = ['david', 'eva', 'flora']
 
-    assert user.admin is False
+    users = {}
 
+    for admin in admins:
+        users[admin] = models.User(username=admin,
+                                   email=admin + '@example.com',
+                                   password='secret',
+                                   admin=True)
+    for nonadmin in nonadmins:
+        users[nonadmin] = models.User(username=nonadmin,
+                                      email=nonadmin + '@example.com',
+                                      password='secret')
 
-@admins_remove_fixtures
-def test_admins_remove_returns_redirect_on_success(User):
-    User.admins.return_value = [Mock(username="fred"),
-                                Mock(username="bob"),
-                                Mock(username="frank")]
-    request = DummyRequest(params={"remove": "fred"})
+    db_session.add_all(list(users.values()))
+    db_session.flush()
 
-    response = views.admins_remove(request)
-
-    assert isinstance(response, httpexceptions.HTTPSeeOther)
-
-
-@admins_remove_fixtures
-def test_admins_remove_returns_redirect_when_too_few_admins(User):
-    User.admins.return_value = [Mock(username="fred")]
-    request = DummyRequest(params={"remove": "fred"})
-
-    response = views.admins_remove(request)
-
-    assert isinstance(response, httpexceptions.HTTPSeeOther)
+    return users
 
 
-@admins_remove_fixtures
-def test_admins_remove_does_not_delete_last_admin(User):
-    User.admins.return_value = [Mock(username="fred")]
-    request = DummyRequest(params={"remove": "fred"})
-    user = Mock(admin=True)
-    User.get_by_username.return_value = user
-
-    views.admins_remove(request)
-
-    assert user.admin is True
-
-
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def routes(config):
     config.add_route('admin_admins', '/adm/admins')
-
-
-@pytest.fixture
-def User(patch):
-    return patch('h.models.User')
-
-
-@pytest.fixture
-def admins_index(patch):
-    return patch('h.admin.views.admins.admins_index')
-
-
-@pytest.fixture
-def make_admin(patch):
-    return patch('h.admin.views.admins.accounts.make_admin')
