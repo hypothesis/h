@@ -15,13 +15,6 @@ class Error(Exception):
     pass
 
 
-class NoSuchUserError(Error):
-
-    """Exception raised when asking for a user that doesn't exist."""
-
-    pass
-
-
 class JSONError(Error):
 
     """Exception raised when there's a problem with a request's JSON body.
@@ -32,15 +25,6 @@ class JSONError(Error):
     """
 
     pass
-
-
-def make_staff(username):
-    """Make the given user a staff member."""
-    user = models.User.get_by_username(username)
-    if user:
-        user.staff = True
-    else:
-        raise NoSuchUserError
 
 
 def get_user(userid, request):
