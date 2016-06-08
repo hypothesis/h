@@ -3,7 +3,6 @@
 from pyramid import httpexceptions
 from pyramid.view import view_config
 
-from h import accounts
 from h import models
 from h.i18n import TranslationString as _
 
@@ -25,13 +24,15 @@ def staff_index(_):
 def staff_add(request):
     """Make a given user a staff member."""
     username = request.params['add']
-    try:
-        accounts.make_staff(username)
-    except accounts.NoSuchUserError:
+    user = models.User.get_by_username(username)
+    if user is None:
         request.session.flash(
             _("User {username} doesn't exist.".format(username=username)),
             "error")
-    return staff_index(request)
+    else:
+        user.staff = True
+    index = request.route_path('admin_staff')
+    return httpexceptions.HTTPSeeOther(location=index)
 
 
 @view_config(route_name='admin_staff',
@@ -43,9 +44,10 @@ def staff_remove(request):
     """Remove a user from the staff."""
     username = request.params['remove']
     user = models.User.get_by_username(username)
-    user.staff = False
-    return httpexceptions.HTTPSeeOther(
-        location=request.route_url('admin_staff'))
+    if user is not None:
+        user.staff = False
+    index = request.route_path('admin_staff')
+    return httpexceptions.HTTPSeeOther(location=index)
 
 
 def includeme(config):
