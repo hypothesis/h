@@ -17,13 +17,3 @@ def auth_domain(request):
 def includeme(config):
     # Allow retrieval of the auth_domain from the request object.
     config.add_request_method(auth_domain, name='auth_domain', reify=True)
-
-    # Set up pyramid authentication and authorization policies. See the Pyramid
-    # documentation at:
-    #
-    #   http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/security.html
-    #
-    from h.auth.policy import AuthenticationPolicy
-    from pyramid.authorization import ACLAuthorizationPolicy
-    config.set_authentication_policy(AuthenticationPolicy())
-    config.set_authorization_policy(ACLAuthorizationPolicy())
