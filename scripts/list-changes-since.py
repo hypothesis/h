@@ -64,7 +64,10 @@ def github_request(auth_token, repo, path, **kwargs):
         if isinstance(page, list):
             for item in page:
                 yield item
-            url = res.links.get('next') and res.links.get('next')['url']
+            try:
+                url = res.links['next']['url']
+            except KeyError:
+                url = None
             params = None
         else:
             yield page
