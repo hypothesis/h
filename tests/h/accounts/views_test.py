@@ -678,12 +678,14 @@ class TestActivateController(object):
             self,
             activation_model,
             user_model):
-        request = DummyRequest(matchdict={'id': '123', 'code': 'abc456'})
+        request = DummyRequest(db=mock.sentinel.db_session,
+                               matchdict={'id': '123', 'code': 'abc456'})
         user_model.get_by_activation.return_value.id = 123
 
         views.ActivateController(request).get_when_not_logged_in()
 
         user_model.get_by_activation.assert_called_once_with(
+            mock.sentinel.db_session,
             activation_model.get_by_code.return_value)
 
     def test_get_when_not_logged_in_404s_if_user_not_found(self, user_model):

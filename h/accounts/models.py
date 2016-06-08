@@ -178,9 +178,9 @@ class User(Base):
         ).first()
 
     @classmethod
-    def get_by_activation(cls, activation):
+    def get_by_activation(cls, session, activation):
         """Fetch a user by activation instance."""
-        user = cls.query.filter(
+        user = session.query(cls).filter(
             cls.activation_id == activation.id
         ).first()
 
