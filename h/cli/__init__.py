@@ -20,6 +20,7 @@ SUBCOMMANDS = (
     'h.cli.commands.devserver.devserver',
     'h.cli.commands.initdb.initdb',
     'h.cli.commands.migrate.migrate',
+    'h.cli.commands.move_uri.move_uri',
     'h.cli.commands.reindex.reindex',
 )
 
