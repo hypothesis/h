@@ -31,7 +31,8 @@ def admins_add(request):
             "error")
     else:
         user.admin = True
-    return admins_index(request)
+    index = request.route_path('admin_admins')
+    return httpexceptions.HTTPSeeOther(location=index)
 
 
 @view_config(route_name='admin_admins',
@@ -44,9 +45,10 @@ def admins_remove(request):
     if len(models.User.admins()) > 1:
         username = request.params['remove']
         user = models.User.get_by_username(username)
-        user.admin = False
-    return httpexceptions.HTTPSeeOther(
-        location=request.route_url('admin_admins'))
+        if user is not None:
+            user.admin = False
+    index = request.route_path('admin_admins')
+    return httpexceptions.HTTPSeeOther(location=index)
 
 
 def includeme(config):
