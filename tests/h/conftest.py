@@ -85,7 +85,7 @@ def setup_database(settings):
 
 
 @pytest.fixture(autouse=True)
-def database_session(request, monkeypatch):
+def db_session(request, monkeypatch):
     """
     Prepare the SQLAlchemy session object.
 
@@ -105,6 +105,8 @@ def database_session(request, monkeypatch):
     monkeypatch.setattr(db.Session, 'commit', _fake_commit)
     # Prevent the session from closing (make it a no-op):
     monkeypatch.setattr(db.Session, 'remove', lambda: None)
+
+    return db.Session()
 
 
 @pytest.fixture

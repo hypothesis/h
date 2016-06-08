@@ -3,7 +3,6 @@
 from pyramid import httpexceptions
 from pyramid.view import view_config
 
-from h import accounts
 from h import models
 from h.i18n import TranslationString as _
 
@@ -25,12 +24,13 @@ def admins_index(_):
 def admins_add(request):
     """Make a given user an admin."""
     username = request.params['add']
-    try:
-        accounts.make_admin(username)
-    except accounts.NoSuchUserError:
+    user = models.User.get_by_username(username)
+    if user is None:
         request.session.flash(
             _("User {username} doesn't exist.".format(username=username)),
             "error")
+    else:
+        user.admin = True
     return admins_index(request)
 
 
