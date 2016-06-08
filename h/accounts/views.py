@@ -411,7 +411,7 @@ class ActivateController(object):
         except ValueError:
             raise httpexceptions.HTTPNotFound()
 
-        activation = Activation.get_by_code(code)
+        activation = Activation.get_by_code(self.request.db, code)
         if activation is None:
             self.request.session.flash(jinja2.Markup(_(
                 "We didn't recognize that activation link. "

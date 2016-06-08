@@ -50,9 +50,9 @@ class Activation(Base):
                      default=_generate_random_string)
 
     @classmethod
-    def get_by_code(cls, code):
+    def get_by_code(cls, session, code):
         """Fetch an activation by code."""
-        return cls.query.filter(cls.code == code).first()
+        return session.query(cls).filter(cls.code == code).first()
 
 
 class User(Base):
