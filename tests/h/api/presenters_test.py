@@ -562,3 +562,16 @@ class Berlin(datetime.tzinfo):
 
     def dst(self, dt):
         return datetime.timedelta()
+
+
+@pytest.fixture(autouse=True)
+def clear_registry():
+    # If you call add_annotation_link_generator() as some tests in this module
+    # do it'll add stuff to the request registry that you pass to it.
+    # Then when a later test runs and creates a _new_ DummyRequest instance,
+    # that request's registry will still contain the stuff added by the
+    # previous test!
+    # DummyRequest.registry is shared across requests.
+    # So rather than requiring each test that adds to the registry to also
+    # clear it, this autouse fixture just clears the registry after every test.
+    DummyRequest().registry.clear()
