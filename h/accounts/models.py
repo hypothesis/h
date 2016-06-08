@@ -187,16 +187,6 @@ class User(Base):
         return user
 
     @classmethod
-    def get_user(cls, username, password):
-        """Fetch a user by username and validate their password."""
-        user = cls.get_by_username(username)
-
-        valid = cls.validate_user(user, password)
-
-        if valid:
-            return user
-
-    @classmethod
     def validate_user(cls, user, password):
         """Validate the passed password for the specified user."""
         if not user:
