@@ -101,7 +101,7 @@ def cohorts_edit_remove(request):
     cohort_id = request.matchdict['id']
 
     cohort = request.db.query(models.FeatureCohort).get(cohort_id)
-    member = request.db.query(models.User).filter_by(uid=member_name).first()
+    member = request.db.query(models.User).filter_by(username=member_name).first()
     try:
         cohort.members.remove(member)
     except ValueError:
