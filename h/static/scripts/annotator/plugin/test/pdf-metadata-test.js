@@ -83,6 +83,24 @@ describe('pdf-metadata', function () {
           assert.deepEqual(actualMetadata, expectedMetadata);
         });
       });
+
+      it('does not save file:// URLs in document metadata', function () {
+        var pdfMetadata;
+        var fakePDFViewerApplication = {
+          documentFingerprint: 'fakeFingerprint',
+          url: 'file://fakeUrl',
+        };
+        var expectedMetadata = {
+          link: [{href: 'urn:x-pdf:' + fakePDFViewerApplication.documentFingerprint}],
+        };
+
+        pdfMetadata = new PDFMetadata(fakePDFViewerApplication);
+
+        return pdfMetadata.getMetadata().then(function (actualMetadata) {
+          assert.equal(actualMetadata.link.length, 1);
+          assert.equal(actualMetadata.link[0].href, expectedMetadata.link[0].href);
+        });
+      });
     });
   });
 });
