@@ -54,7 +54,13 @@ module.exports = class PDF extends Annotator.Plugin
       # This is an experimental URN,
       # as per http://tools.ietf.org/html/rfc3406#section-3.0
       urn = "urn:x-pdf:" + PDFViewerApplication.documentFingerprint
-      link = [{href: urn}, {href: PDFViewerApplication.url}]
+
+      # If it is a local file, remove the file path
+      pdfUrl = PDFViewerApplication.url
+      if pdfUrl.indexOf("file://") is 0
+        pdfUrl = pdfUrl.split('/').pop()
+
+      link = [{href: urn}, {href: pdfUrl}]
       documentFingerprint = PDFViewerApplication.documentFingerprint
 
       return {title, link, documentFingerprint}
