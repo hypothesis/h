@@ -515,7 +515,7 @@ function AnnotationController(
   };
 
   // Save on Meta + Enter or Ctrl + Enter.
-  vm.onKeydown = function(event) {
+  vm.onKeydown = function (event) {
     if (event.keyCode === 13 && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       vm.save();
@@ -716,20 +716,6 @@ function AnnotationController(
   init();
 }
 
-function link(scope, elem, attrs, controllers) {
-  var ctrl = controllers[0];
-  elem.on('keydown', ctrl.onKeydown);
-}
-
-/**
-  * @ngdoc directive
-  * @name annotation
-  * @restrict A
-  * @description
-  * Directive that instantiates
-  * {@link annotation.AnnotationController AnnotationController}.
-  *
-  */
 // @ngInject
 function annotation() {
   return {
@@ -737,12 +723,8 @@ function annotation() {
     bindToController: true,
     controller: AnnotationController,
     controllerAs: 'vm',
-    link: link,
-    require: ['annotation'],
     scope: {
       annotation: '<',
-      // Indicates whether this is the last reply in a thread.
-      isLastReply: '<',
       showDocumentInfo: '<',
       onReplyCountClick: '&',
       replyCount: '<',
@@ -758,7 +740,6 @@ module.exports = {
   // to be unit tested.
   // FIXME: The code should be refactored to enable unit testing without having
   // to do this.
-  link: link,
   updateDomainModel: updateDomainModel,
 
   // These are meant to be the public API of this module.
