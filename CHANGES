@@ -1,3 +1,20 @@
+Unreleased
+==========
+
+Features
+--------
+- It is now possible to authenticate to the WebSocket using an API token
+  (#3419).
+
+Miscellanea
+-----------
+
+- Load annotations from database in streamer server (#3378)
+
+- Remove the "links" field from the search index (#3413).
+
+- Add CLI command for moving existing annotations to a new URL (#3416).
+
 0.26.0 (2016-06-07)
 ===================
 
