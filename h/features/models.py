@@ -35,6 +35,23 @@ FEATURES = {
 #
 FEATURES_PENDING_REMOVAL = {}
 
+FEATURE_FEATURECOHORT_TABLE = sa.Table(
+    'feature_featurecohort', Base.metadata,
+    sa.Column('id',
+              sa.Integer(),
+              nullable=False),
+    sa.Column('feature_id',
+              sa.Integer(),
+              nullable=False),
+    sa.Column('cohort_id',
+              sa.Integer(),
+              nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['cohort_id'], ['featurecohort.id']),
+    sa.ForeignKeyConstraint(['feature_id'], ['feature.id']),
+    sa.UniqueConstraint('cohort_id', 'feature_id'),
+)
+
 
 class Feature(Base):
 
@@ -62,6 +79,10 @@ class Feature(Base):
                       nullable=False,
                       default=False,
                       server_default=sa.sql.expression.false())
+
+    featurecohorts = sa.orm.relationship('FeatureCohort',
+                                         secondary=FEATURE_FEATURECOHORT_TABLE,
+                                         backref='cohorts')
 
     @property
     def description(self):
