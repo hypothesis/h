@@ -1,85 +1,101 @@
 # -*- coding: utf-8 -*-
 
-from mock import Mock
+import mock
 import pytest
+from pyramid import httpexceptions
+from pyramid.testing import DummyRequest
 
+from h import models
 from h.admin.views import badge as views
 
 
-badge_index_fixtures = pytest.mark.usefixtures('models')
+class TestBadgeIndex(object):
+    def test_when_nothing_blocked(self, req):
+        result = views.badge_index(req)
+
+        assert result["uris"] == []
+
+    def test_with_blocked_uris(self, req, blocked_uris):
+        result = views.badge_index(req)
+
+        assert set(result["uris"]) == set(blocked_uris)
 
 
-@badge_index_fixtures
-def test_badge_index_returns_all_blocklisted_urls(models):
-    assert views.badge_index(Mock()) == {
-        "uris": models.Blocklist.all.return_value}
+@pytest.mark.usefixtures('blocked_uris', 'routes')
+class TestBadgeAddRemove(object):
+    def test_add_blocks_uri(self, req):
+        req.params = {'add': 'test_uri'}
 
+        views.badge_add(req)
 
-badge_add_fixtures = pytest.mark.usefixtures('models', 'badge_index')
+        assert models.Blocklist.is_blocked(req.db, 'test_uri')
 
+    def test_add_redirects_to_index(self, req):
+        req.params = {'add': 'test_uri'}
 
-@badge_add_fixtures
-def test_badge_add_adds_uri_to_model(models):
-    request = Mock(params={'add': 'test_uri'})
+        result = views.badge_add(req)
 
-    views.badge_add(request)
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/badge'
 
-    models.Blocklist.assert_called_once_with(uri='test_uri')
-    request.db.add.assert_called_once_with(models.Blocklist.return_value)
+    def test_add_flashes_error_if_uri_already_blocked(self, req):
+        req.params = {'add': 'blocked1'}
+        req.session.flash = mock.Mock()
 
+        views.badge_add(req)
 
-@badge_add_fixtures
-def test_badge_add_returns_index(badge_index):
-    request = Mock(params={'add': 'test_uri'})
+        assert req.session.flash.call_count == 1
 
-    assert views.badge_add(request) == badge_index.return_value
+    def test_add_redirects_to_index_if_uri_already_blocked(self, req):
+        req.params = {'add': 'blocked1'}
 
+        result = views.badge_add(req)
 
-@badge_add_fixtures
-def test_badge_add_flashes_error_if_uri_already_blocked(models):
-    request = Mock(params={'add': 'test_uri'})
-    models.Blocklist.side_effect = ValueError("test_error_message")
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/badge'
 
-    views.badge_add(request)
+    def test_remove_unblocks_uri(self, req):
+        req.params = {'remove': 'blocked2'}
 
-    assert not request.db.add.called
-    request.session.flash.assert_called_once_with(
-        "test_error_message", "error")
+        views.badge_remove(req)
 
+        assert not models.Blocklist.is_blocked(req.db, 'blocked2')
 
-@badge_add_fixtures
-def test_badge_add_returns_index_if_uri_already_blocked(models, badge_index):
-    request = Mock(params={'add': 'test_uri'})
-    models.Blocklist.side_effect = ValueError("test_error_message")
+    def test_remove_redirects_to_index(self, req):
+        req.params = {'remove': 'blocked1'}
 
-    assert views.badge_add(request) == badge_index.return_value
+        result = views.badge_remove(req)
 
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/badge'
 
-badge_remove_fixtures = pytest.mark.usefixtures('models', 'badge_index')
+    def test_remove_redirects_to_index_even_if_not_blocked(self, req):
+        req.params = {'remove': 'test_uri'}
 
+        result = views.badge_remove(req)
 
-@badge_remove_fixtures
-def test_badge_remove_deletes_model(models):
-    request = Mock(params={'remove': 'test_uri'})
-
-    views.badge_remove(request)
-
-    models.Blocklist.get_by_uri.assert_called_once_with('test_uri')
-    request.db.delete.assert_called_once_with(
-        models.Blocklist.get_by_uri.return_value)
-
-
-@badge_remove_fixtures
-def test_badge_remove_returns_index(badge_index):
-    assert views.badge_remove(Mock(params={'remove': 'test_uri'})) == (
-        badge_index.return_value)
-
-
-@pytest.fixture
-def badge_index(patch):
-    return patch('h.admin.views.badge.badge_index')
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/badge'
 
 
 @pytest.fixture
-def models(patch):
-    return patch('h.admin.views.badge.models')
+def blocked_uris(db_session):
+    from h import models
+
+    uris = []
+    for uri in ['blocked1', 'blocked2', 'blocked3']:
+        uris.append(models.Blocklist(uri=uri))
+    db_session.add_all(uris)
+    db_session.flush()
+
+    return uris
+
+
+@pytest.fixture
+def req(db_session):
+    return DummyRequest(db=db_session)
+
+
+@pytest.fixture
+def routes(config):
+    config.add_route('admin_badge', '/adm/badge')

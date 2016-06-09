@@ -21,7 +21,7 @@ def badge(request):
     if not uri:
         raise httpexceptions.HTTPBadRequest()
 
-    if models.Blocklist.is_blocked(uri):
+    if models.Blocklist.is_blocked(request.db, uri):
         return {'total': 0}
 
     return {

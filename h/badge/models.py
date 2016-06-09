@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import sqlalchemy as sa
-from sqlalchemy.orm import exc
 from sqlalchemy.sql import expression
 
 from h.db import Base
-from h.i18n import TranslationString as _
 
 
 class Blocklist(Base):
@@ -24,29 +22,8 @@ class Blocklist(Base):
     def __repr__(self):
         return self.uri
 
-    @sa.orm.validates('uri')
-    def validate_uri(self, key, uri):
-        if self.get_by_uri(uri):
-            raise ValueError(_("{uri} is already blocked.").format(uri=uri))
-        else:
-            return uri
-
     @classmethod
-    def get_by_uri(cls, uri):
-        try:
-            return cls.query.filter(Blocklist.uri == uri).one()
-        except exc.NoResultFound:
-            return None
-
-    @classmethod
-    def all(cls):
-        return cls.query.all()
-
-    @classmethod
-    def is_blocked(cls, uri):
+    def is_blocked(cls, session, uri):
         """Return True if the given URI is blocked."""
-
-        if cls.query.filter(expression.literal(uri).like(cls.uri)).all():
-            return True
-        else:
-            return False
+        uri_matches = expression.literal(uri).like(cls.uri)
+        return session.query(cls).filter(uri_matches).count() > 0
