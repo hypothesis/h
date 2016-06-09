@@ -38,12 +38,12 @@ class Token(Base, mixins.Timestamps):
         self.regenerate()
 
     @classmethod
-    def get_by_userid(cls, userid):
-        return cls.query.filter(cls.userid == userid).first()
+    def get_by_userid(cls, session, userid):
+        return session.query(cls).filter(cls.userid == userid).first()
 
     @classmethod
-    def get_by_value(cls, value):
-        return cls.query.filter(cls.value == value).first()
+    def get_by_value(cls, session, value):
+        return session.query(cls).filter(cls.value == value).first()
 
     def regenerate(self):
         self.value = self.prefix + _token()

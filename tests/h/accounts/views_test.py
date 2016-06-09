@@ -981,43 +981,51 @@ class TestNotificationsController(object):
 class TestDeveloperController(object):
 
     def test_get_gets_token_for_authenticated_userid(self, models):
-        request = testing.DummyRequest()
+        request = testing.DummyRequest(db=mock.sentinel.db_session)
 
         views.DeveloperController(request).get()
 
         models.Token.get_by_userid.assert_called_once_with(
+            request.db,
             request.authenticated_userid)
 
     def test_get_returns_token(self, models):
+        request = testing.DummyRequest(db=mock.sentinel.db_session)
         models.Token.get_by_userid.return_value.value = u'abc123'
 
-        data = views.DeveloperController(testing.DummyRequest()).get()
+        data = views.DeveloperController(request).get()
 
         assert data.get('token') == u'abc123'
 
     def test_get_with_no_token(self, models):
+        request = testing.DummyRequest(db=mock.Mock())
         models.Token.get_by_userid.return_value = None
 
-        assert views.DeveloperController(testing.DummyRequest()).get() == {}
+        result = views.DeveloperController(request).get()
+
+        assert result == {}
 
     def test_post_gets_token_for_authenticated_userid(self, models):
-        request = testing.DummyRequest()
+        request = testing.DummyRequest(db=mock.Mock())
 
         views.DeveloperController(request).post()
 
         models.Token.get_by_userid.assert_called_once_with(
+            request.db,
             request.authenticated_userid)
 
     def test_post_calls_regenerate(self, models):
         """If the user already has a token it should regenerate it."""
-        views.DeveloperController(testing.DummyRequest()).post()
+        request = testing.DummyRequest(db=mock.sentinel.db_session)
+
+        views.DeveloperController(request).post()
 
         models.Token.get_by_userid.return_value.regenerate.assert_called_with()
 
     def test_post_inits_new_token_for_authenticated_userid(self, models):
         """If the user doesn't have a token yet it should generate one."""
-        models.Token.get_by_userid.return_value = None
         request = testing.DummyRequest(db=mock.Mock())
+        models.Token.get_by_userid.return_value = None
 
         views.DeveloperController(request).post()
 
@@ -1025,8 +1033,8 @@ class TestDeveloperController(object):
 
     def test_post_adds_new_token_to_db(self, models):
         """If the user doesn't have a token yet it should add one to the db."""
-        models.Token.get_by_userid.return_value = None
         request = testing.DummyRequest(db=mock.Mock())
+        models.Token.get_by_userid.return_value = None
 
         views.DeveloperController(request).post()
 
@@ -1036,7 +1044,9 @@ class TestDeveloperController(object):
 
     def test_post_returns_token_after_regenerating(self, models):
         """After regenerating a token it should return its new value."""
-        data = views.DeveloperController(testing.DummyRequest()).post()
+        request = testing.DummyRequest(db=mock.sentinel.db_session)
+
+        data = views.DeveloperController(request).post()
 
         assert data['token'] == models.Token.get_by_userid.return_value.value
 

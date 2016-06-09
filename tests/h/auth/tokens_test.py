@@ -2,6 +2,7 @@
 
 import datetime
 
+import mock
 import pytest
 from pyramid.testing import DummyRequest
 
@@ -122,34 +123,37 @@ def test_userid_from_api_token_returns_None_when_token_doesnt_start_with_prefix(
     As a sanity check, don't even attempt to look up tokens that don't start
     with the expected prefix.
     """
+    request = mock_request()
     token = models.Token('acct:foo@example.com')
     token.value = u'abc123'
     db.Session.add(token)
 
-    result = tokens.userid_from_api_token(u'abc123')
+    result = tokens.userid_from_api_token(u'abc123', request)
 
     assert result is None
 
 
 def test_userid_from_api_token_returns_None_for_nonexistent_tokens():
+    request = mock_request()
     madeuptoken = models.Token.prefix + '123abc'
 
-    result = tokens.userid_from_api_token(madeuptoken)
+    result = tokens.userid_from_api_token(madeuptoken, request)
 
     assert result is None
 
 
 def test_userid_from_api_token_returns_userid_for_valid_tokens():
+    request = mock_request()
     token = models.Token('acct:foo@example.com')
     db.Session.add(token)
 
-    result = tokens.userid_from_api_token(token.value)
+    result = tokens.userid_from_api_token(token.value, request)
 
     assert result == 'acct:foo@example.com'
 
 
 def mock_request():
-    request = DummyRequest()
+    request = DummyRequest(db=db.Session)
     request.registry.settings = {
         'h.client_id': 'id',
         'h.client_secret': 'secret'

@@ -145,7 +145,7 @@ class TestTokenAuthenticationPolicy(object):
 
         policy.unauthenticated_userid(request)
 
-        api_token.assert_called_once_with('f00ba12')
+        api_token.assert_called_once_with('f00ba12', request)
         jwt.assert_called_once_with('f00ba12', request)
 
     def test_unauthenticated_userid_returns_userid_from_api_token_if_present(self, jwt, api_token):

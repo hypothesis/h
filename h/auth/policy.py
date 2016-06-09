@@ -98,7 +98,7 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         if not token:
             return None
 
-        return (tokens.userid_from_api_token(token) or
+        return (tokens.userid_from_api_token(token, request) or
                 tokens.userid_from_jwt(token, request))
 
 
