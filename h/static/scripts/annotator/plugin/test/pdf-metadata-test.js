@@ -3,23 +3,29 @@
 var PDFMetadata = require('../pdf-metadata');
 
 describe('pdf-metadata', function () {
-  describe('get pdf metadata when documentload event fires', function () {
-    it('should get pdf urn', function () {
-      var fakeApp = {};
-      var pdfMetadata = new PDFMetadata(fakeApp);
+  it('waits for the PDF to load before returning metadata', function () {
+    var fakeApp = {};
+    var pdfMetadata = new PDFMetadata(fakeApp);
 
-      var event = document.createEvent('Event');
-      event.initEvent('documentload', false, false);
-      fakeApp.documentFingerprint = 'fakeFingerprint';
-      window.dispatchEvent(event);
+    var event = document.createEvent('Event');
+    event.initEvent('documentload', false, false);
+    fakeApp.documentFingerprint = 'fakeFingerprint';
+    window.dispatchEvent(event);
 
-      return pdfMetadata.getUri().then(function (uri) {
-        assert.equal('urn:x-pdf:fakeFingerprint', uri);
-      });
+    return pdfMetadata.getUri().then(function (uri) {
+      assert.equal(uri, 'urn:x-pdf:fakeFingerprint');
     });
   });
 
-  describe('get pdf metadata when documentFingerprint is set', function () {
+  it('does not wait for the PDF to load if it has already loaded', function () {
+    var fakePDFViewerApplication = {documentFingerprint: 'fakeFingerprint'};
+    var pdfMetadata = new PDFMetadata(fakePDFViewerApplication);
+    return pdfMetadata.getUri().then(function (uri) {
+      assert.equal(uri, 'urn:x-pdf:fakeFingerprint');
+    });
+  });
+
+  describe('metadata sources', function () {
     var pdfMetadata;
     var fakePDFViewerApplication = {
       documentFingerprint: 'fakeFingerprint',
@@ -41,13 +47,13 @@ describe('pdf-metadata', function () {
     describe('#getUri', function () {
       it('returns the URN-ified document fingerprint as its URI', function () {
         return pdfMetadata.getUri().then(function (uri) {
-          assert.equal('urn:x-pdf:fakeFingerprint', uri);
+          assert.equal(uri, 'urn:x-pdf:fakeFingerprint');
         });
       });
     });
 
     describe('#getMetadata', function () {
-      it('should get a metadataobject with dc:title', function () {
+      it('gets the title from the dc:title field', function () {
         var expectedMetadata = {
           title: 'dcTitle',
           link: [{href: 'urn:x-pdf:' + fakePDFViewerApplication.documentFingerprint},
@@ -63,7 +69,7 @@ describe('pdf-metadata', function () {
         });
       });
 
-      it('should get a metadataobject with documentInfo.Title', function () {
+      it('gets the title from the documentInfo.Title field', function () {
         var expectedMetadata = {
           title: fakePDFViewerApplication.documentInfo.Title,
           link: [{href: 'urn:x-pdf:' + fakePDFViewerApplication.documentFingerprint},
@@ -74,7 +80,7 @@ describe('pdf-metadata', function () {
         fakePDFViewerApplication.metadata.has = sinon.stub().returns(false);
 
         return pdfMetadata.getMetadata().then(function (actualMetadata) {
-          assert.deepEqual(expectedMetadata, actualMetadata);
+          assert.deepEqual(actualMetadata, expectedMetadata);
         });
       });
     });
