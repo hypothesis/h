@@ -8,6 +8,7 @@ from pyramid.testing import DummyRequest
 
 from h.api.presenters import AnnotationBasePresenter
 from h.api.presenters import AnnotationJSONPresenter
+from h.api.presenters import AnnotationSearchIndexPresenter
 from h.api.presenters import AnnotationJSONLDPresenter
 from h.api.presenters import DocumentJSONPresenter
 from h.api.presenters import DocumentMetaJSONPresenter
@@ -261,6 +262,121 @@ class TestAnnotationJSONPresenter(object):
         return patch('h.api.presenters.DocumentJSONPresenter.asdict')
 
 
+@pytest.mark.usefixtures('DocumentJSONPresenter')
+class TestAnnotationSearchIndexPresenter(object):
+
+    def test_asdict(self, DocumentJSONPresenter):
+        request = DummyRequest()
+        annotation = mock.Mock(
+            id='xyz123',
+            created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
+            updated=datetime.datetime(2016, 2, 29, 10, 24, 5, 564),
+            userid='acct:luke@hypothes.is',
+            target_uri='http://example.com',
+            target_uri_normalized='http://example.com/normalized',
+            text='It is magical!',
+            tags=['magic'],
+            groupid='__world__',
+            shared=True,
+            target_selectors=[{'TestSelector': 'foobar'}],
+            references=['referenced-id-1', 'referenced-id-2'],
+            extra={'extra-1': 'foo', 'extra-2': 'bar'})
+        DocumentJSONPresenter.return_value.asdict.return_value = {'foo': 'bar'}
+
+        annotation_dict = AnnotationSearchIndexPresenter(
+            request, annotation).asdict()
+
+        assert annotation_dict == {
+            'id': 'xyz123',
+            'created': '2016-02-24T18:03:25.000768+00:00',
+            'updated': '2016-02-29T10:24:05.000564+00:00',
+            'user': 'acct:luke@hypothes.is',
+            'uri': 'http://example.com',
+            'text': 'It is magical!',
+            'tags': ['magic'],
+            'group': '__world__',
+            'permissions': {'read': ['group:__world__'],
+                            'admin': ['acct:luke@hypothes.is'],
+                            'update': ['acct:luke@hypothes.is'],
+                            'delete': ['acct:luke@hypothes.is']},
+            'target': [{'scope': ['http://example.com/normalized'],
+                        'source': 'http://example.com',
+                        'selector': [{'TestSelector': 'foobar'}]}],
+            'document': {'foo': 'bar'},
+            'references': ['referenced-id-1', 'referenced-id-2'],
+            'extra-1': 'foo',
+            'extra-2': 'bar',
+        }
+
+    def test_asdict_extra_cannot_override_other_data(self):
+        request = DummyRequest()
+        annotation = mock.Mock(id='the-real-id', extra={'id': 'the-extra-id'})
+
+        annotation_dict = AnnotationSearchIndexPresenter(
+            request, annotation).asdict()
+
+        assert annotation_dict['id'] == 'the-real-id'
+
+    def test_asdict_does_not_modify_extra(self):
+        extra = {'foo': 'bar'}
+        request = DummyRequest()
+        annotation = mock.Mock(id='my-id', extra=extra)
+
+        AnnotationSearchIndexPresenter(request, annotation).asdict()
+
+        assert extra == {'foo': 'bar'}, (
+                "Presenting the annotation shouldn't change the 'extra' dict")
+
+    def test_asdict_does_not_return_links_from_link_generators(self):
+        request = DummyRequest()
+        annotation = mock.Mock(id='my-id', extra={})
+        add_annotation_link_generator(request.registry,
+                                      'giraffe',
+                                      lambda r, a: 'http://giraffe.com')
+        add_annotation_link_generator(request.registry,
+                                      'withid',
+                                      lambda r, a: 'http://withid.com/' + a.id)
+
+        annotation_dict = AnnotationSearchIndexPresenter(
+            request, annotation).asdict()
+
+        assert 'links' not in annotation_dict
+
+    @pytest.mark.parametrize('annotation,action,expected', [
+        (mock.Mock(userid='acct:luke', shared=False), 'read', ['acct:luke']),
+        (mock.Mock(groupid='__world__', shared=True), 'read',
+            ['group:__world__']),
+        (mock.Mock(groupid='lulapalooza', shared=True), 'read',
+            ['group:lulapalooza']),
+        (mock.Mock(userid='acct:luke'), 'admin', ['acct:luke']),
+        (mock.Mock(userid='acct:luke'), 'update', ['acct:luke']),
+        (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
+        ])
+    def test_permissions(self, annotation, action, expected):
+        request = DummyRequest()
+        presenter = AnnotationSearchIndexPresenter(request, annotation)
+
+        assert expected == presenter.permissions[action]
+
+    def test_it_copies_target_uri_normalized_to_target_scope(self):
+        request = DummyRequest()
+        annotation = mock.Mock(
+            target_uri_normalized='http://example.com/normalized',
+            extra={})
+
+        annotation_dict = AnnotationSearchIndexPresenter(
+            request, annotation).asdict()
+
+        assert annotation_dict['target'][0]['scope'] == [
+            'http://example.com/normalized']
+
+    @pytest.fixture
+    def DocumentJSONPresenter(self, patch):
+        class_ = patch('h.api.presenters.DocumentJSONPresenter')
+        class_.return_value.asdict.return_value = {}
+        return class_
+
+
 @pytest.mark.usefixtures('routes')
 class TestAnnotationJSONLDPresenter(object):
 
@@ -446,3 +562,16 @@ class Berlin(datetime.tzinfo):
 
     def dst(self, dt):
         return datetime.timedelta()
+
+
+@pytest.fixture(autouse=True)
+def clear_registry():
+    # If you call add_annotation_link_generator() as some tests in this module
+    # do it'll add stuff to the request registry that you pass to it.
+    # Then when a later test runs and creates a _new_ DummyRequest instance,
+    # that request's registry will still contain the stuff added by the
+    # previous test!
+    # DummyRequest.registry is shared across requests.
+    # So rather than requiring each test that adds to the registry to also
+    # clear it, this autouse fixture just clears the registry after every test.
+    DummyRequest().registry.clear()

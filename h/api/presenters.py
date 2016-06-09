@@ -62,6 +62,9 @@ class AnnotationBasePresenter(object):
 
 
 class AnnotationJSONPresenter(AnnotationBasePresenter):
+
+    """Present an annotation in the JSON format returned by API requests."""
+
     def asdict(self):
         docpresenter = DocumentJSONPresenter(self.annotation.document)
 
@@ -90,14 +93,43 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
 
     @property
     def permissions(self):
-        read = self.annotation.userid
-        if self.annotation.shared:
-            read = 'group:{}'.format(self.annotation.groupid)
+        return _permissions(self.annotation)
 
-        return {'read': [read],
-                'admin': [self.annotation.userid],
-                'update': [self.annotation.userid],
-                'delete': [self.annotation.userid]}
+
+class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
+
+    """Present an annotation in the JSON format used in the search index."""
+
+    def asdict(self):
+        docpresenter = DocumentJSONPresenter(self.annotation.document)
+
+        base = {
+            'id': self.annotation.id,
+            'created': self.created,
+            'updated': self.updated,
+            'user': self.annotation.userid,
+            'uri': self.annotation.target_uri,
+            'text': self.text,
+            'tags': self.tags,
+            'group': self.annotation.groupid,
+            'permissions': self.permissions,
+            'target': self.target,
+            'document': docpresenter.asdict(),
+        }
+
+        base['target'][0]['scope'] = [self.annotation.target_uri_normalized]
+
+        if self.annotation.references:
+            base['references'] = self.annotation.references
+
+        annotation = copy.copy(self.annotation.extra) or {}
+        annotation.update(base)
+
+        return annotation
+
+    @property
+    def permissions(self):
+        return _permissions(self.annotation)
 
 
 class AnnotationJSONLDPresenter(AnnotationBasePresenter):
@@ -238,6 +270,24 @@ def deep_merge_dict(a, b):
 
 def _json_link(request, annotation):
     return request.route_url('api.annotation', id=annotation.id)
+
+
+def _permissions(annotation):
+    """
+    Return a permissions dict for the given annotation.
+
+    Converts our simple internal annotation storage format into the legacy
+    complex permissions dict format that is still used in some places.
+
+    """
+    read = annotation.userid
+    if annotation.shared:
+        read = 'group:{}'.format(annotation.groupid)
+
+    return {'read': [read],
+            'admin': [annotation.userid],
+            'update': [annotation.userid],
+            'delete': [annotation.userid]}
 
 
 def includeme(config):
