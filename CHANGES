@@ -6,6 +6,9 @@ Features
 - It is now possible to authenticate to the WebSocket using an API token
   (#3419).
 
+- Improve anchoring of annotations on PDFs by using the PDF fingerprint, when
+  available, instead of the URL (#3404).
+
 Miscellanea
 -----------
 
