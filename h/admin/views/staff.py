@@ -24,7 +24,7 @@ def staff_index(_):
 def staff_add(request):
     """Make a given user a staff member."""
     username = request.params['add']
-    user = models.User.get_by_username(username)
+    user = models.User.get_by_username(request.db, username)
     if user is None:
         request.session.flash(
             _("User {username} doesn't exist.".format(username=username)),
@@ -43,7 +43,7 @@ def staff_add(request):
 def staff_remove(request):
     """Remove a user from the staff."""
     username = request.params['remove']
-    user = models.User.get_by_username(username)
+    user = models.User.get_by_username(request.db, username)
     if user is not None:
         user.staff = False
     index = request.route_path('admin_staff')

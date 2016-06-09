@@ -78,7 +78,7 @@ def cohorts_edit_add(request):
     member_name = request.params['add']
     cohort_id = request.matchdict['id']
 
-    member = models.User.get_by_username(member_name)
+    member = models.User.get_by_username(request.db, member_name)
     if member is None:
         request.session.flash(
             _("User {member_name} doesn't exist.".format(member_name=member_name)),

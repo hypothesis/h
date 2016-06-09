@@ -200,10 +200,10 @@ class User(Base):
         return valid
 
     @classmethod
-    def get_by_username(cls, username):
+    def get_by_username(cls, session, username):
         """Fetch a user by username."""
         uid = _username_to_uid(username)
-        return cls.query.filter(cls.uid == uid).first()
+        return session.query(cls).filter(cls.uid == uid).first()
 
     @classmethod
     def admins(cls):

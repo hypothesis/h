@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock
+import mock
 from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
 import pytest
@@ -12,18 +12,14 @@ from h.admin.views import admins as views
 
 @pytest.mark.usefixtures('routes')
 class TestAdminsIndex(object):
-    def test_when_no_admins(self):
-        request = DummyRequest()
-
-        result = views.admins_index(request)
+    def test_when_no_admins(self, req):
+        result = views.admins_index(req)
 
         assert result["admin_users"] == []
 
     @pytest.mark.usefixtures('users')
-    def test_context_contains_admin_usernames(self):
-        request = DummyRequest()
-
-        result = views.admins_index(request)
+    def test_context_contains_admin_usernames(self, req):
+        result = views.admins_index(req)
 
         assert set(result["admin_users"]) == set(["agnos", "bojan", "cristof"])
 
@@ -31,80 +27,93 @@ class TestAdminsIndex(object):
 @pytest.mark.usefixtures('users', 'routes')
 class TestAdminsAddRemove(object):
 
-    def test_add_makes_users_admins(self, users):
-        request = DummyRequest(params={"add": "eva"})
+    def test_add_makes_users_admins(self, req, users):
+        req.params = {"add": "eva"}
 
-        views.admins_add(request)
+        views.admins_add(req)
 
         assert users['eva'].admin
 
-    def test_add_is_idempotent(self, users):
-        request = DummyRequest(params={"add": "agnos"})
+    def test_add_is_idempotent(self, req, users):
+        req.params = {"add": "agnos"}
 
-        views.admins_add(request)
+        views.admins_add(req)
 
         assert users['agnos'].admin
 
-    def test_add_redirects_to_index(self):
-        request = DummyRequest(params={"add": "eva"})
+    def test_add_redirects_to_index(self, req):
+        req.params = {"add": "eva"}
 
-        result = views.admins_add(request)
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location == '/adm/admins'
-
-    def test_add_redirects_to_index_when_user_not_found(self):
-        request = DummyRequest(params={"add": "florp"})
-
-        result = views.admins_add(request)
+        result = views.admins_add(req)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/admins'
 
-    def test_add_flashes_when_user_not_found(self):
-        request = DummyRequest(params={"add": "florp"})
-        request.session.flash = Mock()
+    def test_add_redirects_to_index_when_user_not_found(self, req):
+        req.params = {"add": "florp"}
 
-        views.admins_add(request)
+        result = views.admins_add(req)
 
-        assert request.session.flash.call_count == 1
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/admins'
 
-    def test_remove_makes_users_not_admins(self, users):
-        request = DummyRequest(params={"remove": "cristof"})
+    def test_add_flashes_when_user_not_found(self, req):
+        req.params = {"add": "florp"}
+        req.session.flash = mock.Mock()
 
-        views.admins_remove(request)
+        views.admins_add(req)
+
+        assert req.session.flash.call_count == 1
+
+    def test_remove_makes_users_not_admins(self, req, users):
+        req.params = {"remove": "cristof"}
+
+        views.admins_remove(req)
 
         assert not users['cristof'].admin
 
-    def test_remove_is_idempotent(self, users):
-        request = DummyRequest(params={"remove": "eva"})
+    def test_remove_is_idempotent(self, req, users):
+        req.params = {"remove": "eva"}
 
-        views.admins_remove(request)
+        views.admins_remove(req)
 
         assert not users['eva'].admin
 
-    def test_remove_will_not_remove_last_admin(self, users):
-        views.admins_remove(DummyRequest(params={"remove": "cristof"}))
-        views.admins_remove(DummyRequest(params={"remove": "bojan"}))
-        views.admins_remove(DummyRequest(params={"remove": "agnos"}))
+    def test_remove_will_not_remove_last_admin(self, req, users):
+        req.params = {"remove": "cristof"}
+        views.admins_remove(req)
+        req.params = {"remove": "bojan"}
+        views.admins_remove(req)
+        req.params = {"remove": "agnos"}
+        views.admins_remove(req)
 
         assert users['agnos'].admin
 
-    def test_remove_redirects_to_index(self):
-        request = DummyRequest(params={"remove": "agnos"})
+    def test_remove_redirects_to_index(self, req):
+        req.params = {"remove": "agnos"}
 
-        result = views.admins_remove(request)
+        result = views.admins_remove(req)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/admins'
+
+    def test_remove_redirects_to_index_when_user_not_found(self, req):
+        req.params = {"remove": "florp"}
+
+        result = views.admins_remove(req)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/admins'
 
-    def test_remove_redirects_to_index_when_user_not_found(self):
-        request = DummyRequest(params={"remove": "florp"})
 
-        result = views.admins_remove(request)
+@pytest.fixture
+def req(db_session):
+    return DummyRequest(db=db_session)
 
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location == '/adm/admins'
+
+@pytest.fixture
+def routes(config):
+    config.add_route('admin_admins', '/adm/admins')
 
 
 @pytest.fixture
@@ -132,6 +141,3 @@ def users(db_session):
     return users
 
 
-@pytest.fixture
-def routes(config):
-    config.add_route('admin_admins', '/adm/admins')

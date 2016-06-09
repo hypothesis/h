@@ -40,13 +40,13 @@ def test_get_user_returns_None_if_domain_does_not_match(util):
 @get_user_fixtures
 def test_get_user_calls_get_by_username(util, get_by_username):
     """It should call get_by_username() once with the username."""
-    request = mock.Mock(auth_domain='hypothes.is')
+    request = mock.Mock(auth_domain='hypothes.is', db=mock.sentinel.db_session)
     util.user.split_user.return_value = {
         'username': 'username', 'domain': 'hypothes.is'}
 
     accounts.get_user('acct:username@hypothes.is', request)
 
-    get_by_username.assert_called_once_with('username')
+    get_by_username.assert_called_once_with(mock.sentinel.db_session, 'username')
 
 
 @get_user_fixtures

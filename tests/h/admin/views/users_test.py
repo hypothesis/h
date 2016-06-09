@@ -14,6 +14,8 @@ from h.admin.views import users as views
 class DummyRequest(_DummyRequest):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('auth_domain', 'example.com')
+        kwargs.setdefault('db', mock.sentinel.db_session)
+        kwargs.setdefault('es', mock.MagicMock())
         super(DummyRequest, self).__init__(*args, **kwargs)
 
 
@@ -31,20 +33,16 @@ def test_users_index():
 
 @users_index_fixtures
 def test_users_index_looks_up_users_by_username(User):
-    es = MagicMock()
-    request = DummyRequest(params={"username": "bob"},
-                           es=es)
+    request = DummyRequest(params={"username": "bob"})
 
     views.users_index(request)
 
-    User.get_by_username.assert_called_with("bob")
+    User.get_by_username.assert_called_with(mock.sentinel.db_session, "bob")
 
 
 @users_index_fixtures
 def test_users_index_looks_up_users_by_email(User):
-    request = DummyRequest(db=mock.sentinel.db_session,
-                           es=MagicMock(),
-                           params={"username": "bob@builder.com"})
+    request = DummyRequest(params={"username": "bob@builder.com"})
 
     User.get_by_username.return_value = None
 
@@ -55,9 +53,8 @@ def test_users_index_looks_up_users_by_email(User):
 
 @users_index_fixtures
 def test_users_index_queries_annotation_count_by_userid(User):
-    es = MagicMock()
-    request = DummyRequest(params={"username": "Bob"},
-                           es=es)
+    request = DummyRequest(params={"username": "Bob"})
+    es = request.es
 
     User.get_by_username.return_value.username = 'Robert'
 
@@ -78,9 +75,7 @@ def test_users_index_queries_annotation_count_by_userid(User):
 
 @users_index_fixtures
 def test_users_index_no_user_found(User):
-    request = DummyRequest(db=mock.sentinel.db_session,
-                           es=MagicMock(),
-                           params={"username": "bob"})
+    request = DummyRequest(params={"username": "bob"})
     User.get_by_username.return_value = None
     User.get_by_email.return_value = None
 
@@ -91,10 +86,8 @@ def test_users_index_no_user_found(User):
 
 @users_index_fixtures
 def test_users_index_user_found(User):
-    es = MagicMock()
-    request = DummyRequest(params={"username": "bob"},
-                           es=es)
-    es.conn.count.return_value = {'count': 43}
+    request = DummyRequest(params={"username": "bob"})
+    request.es.conn.count.return_value = {'count': 43}
 
     result = views.users_index(request)
 
@@ -110,11 +103,12 @@ users_activate_fixtures = pytest.mark.usefixtures('User', 'ActivationEvent')
 
 @users_activate_fixtures
 def test_users_activate_gets_user(User):
-    request = DummyRequest(params={"username": "bob"})
+    request = DummyRequest(db=mock.sentinel.db_session,
+                           params={"username": "bob"})
 
     views.users_activate(request)
 
-    User.get_by_username.assert_called_once_with("bob")
+    User.get_by_username.assert_called_once_with(mock.sentinel.db_session, "bob")
 
 
 @users_activate_fixtures
@@ -248,7 +242,7 @@ delete_user_fixtures = pytest.mark.usefixtures('api_storage',
 
 @delete_user_fixtures
 def test_delete_user_raises_when_group_creator(models):
-    request, user = Mock(), Mock()
+    request, user = DummyRequest(db=MagicMock()), Mock()
 
     models.Group.created_by.return_value.count.return_value = 10
 
@@ -258,7 +252,7 @@ def test_delete_user_raises_when_group_creator(models):
 
 @delete_user_fixtures
 def test_delete_user_disassociate_group_memberships():
-    request = Mock()
+    request = DummyRequest(db=MagicMock())
     user = Mock(groups=[Mock()])
 
     views.delete_user(request, user)
@@ -268,7 +262,7 @@ def test_delete_user_disassociate_group_memberships():
 
 @delete_user_fixtures
 def test_delete_user_queries_annotations(elasticsearch_helpers):
-    request = DummyRequest(es=Mock(), db=Mock())
+    request = DummyRequest(db=MagicMock())
     user = MagicMock(username=u'bob')
 
     views.delete_user(request, user)
@@ -288,7 +282,7 @@ def test_delete_user_queries_annotations(elasticsearch_helpers):
 
 @delete_user_fixtures
 def test_delete_user_deletes_annotations(elasticsearch_helpers, api_storage):
-    request, user = Mock(), MagicMock()
+    request, user = DummyRequest(db=MagicMock()), MagicMock()
     annotation_1 = {'_id': 'annotation-1'}
     annotation_2 = {'_id': 'annotation-2'}
 
@@ -304,7 +298,7 @@ def test_delete_user_deletes_annotations(elasticsearch_helpers, api_storage):
 
 @delete_user_fixtures
 def test_delete_user_deletes_user():
-    request, user = Mock(), MagicMock()
+    request, user = DummyRequest(db=MagicMock()), MagicMock()
 
     views.delete_user(request, user)
 
