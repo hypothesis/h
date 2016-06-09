@@ -11,9 +11,10 @@ from h.i18n import TranslationString as _
              request_method='GET',
              renderer='h:templates/admin/admins.html.jinja2',
              permission='admin_admins')
-def admins_index(_):
+def admins_index(request):
     """A list of all the admin users as an HTML page."""
-    return {"admin_users": [u.username for u in models.User.admins()]}
+    admins = request.db.query(models.User).filter(models.User.admin)
+    return {"admin_users": [u.username for u in admins]}
 
 
 @view_config(route_name='admin_admins',
@@ -42,7 +43,8 @@ def admins_add(request):
              permission='admin_admins')
 def admins_remove(request):
     """Remove a user from the admins."""
-    if len(models.User.admins()) > 1:
+    n_admins = request.db.query(models.User).filter(models.User.admin).count()
+    if n_admins > 1:
         username = request.params['remove']
         user = models.User.get_by_username(request.db, username)
         if user is not None:

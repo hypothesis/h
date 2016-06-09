@@ -11,9 +11,10 @@ from h.i18n import TranslationString as _
              request_method='GET',
              renderer='h:templates/admin/staff.html.jinja2',
              permission='admin_staff')
-def staff_index(_):
+def staff_index(request):
     """A list of all the staff members as an HTML page."""
-    return {"staff": [u.username for u in models.User.staff_members()]}
+    staff = request.db.query(models.User).filter(models.User.staff)
+    return {"staff": [u.username for u in staff]}
 
 
 @view_config(route_name='admin_staff',
