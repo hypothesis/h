@@ -64,7 +64,7 @@
                     <a href="{{ request.route_url(permission) }}">{{ title }}</a>
                   </li>
                 {% else %}
-                  <li class="dropdown">
+                  <li class="dropdown{% if id in page_id %} active{% endif %}">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                       {{ title }}
                       <span class="caret"></span>

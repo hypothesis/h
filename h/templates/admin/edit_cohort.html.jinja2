@@ -1,0 +1,59 @@
+{% extends "h:templates/layouts/admin.html.jinja2" %}
+
+{% set page_id = 'features.cohorts.edit' %}
+{% set page_title = 'Edit Cohort ' + cohort.name  %}
+
+{% block content %}
+  <p>
+    Users currently belonging to cohort {{ cohort.name }}
+  </p>
+  <p>
+    Back to <a href="{{ request.route_url('admin_cohorts') }}">Feature flag cohorts</a>
+  </p>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Add user to cohort {{ cohort.name }}</h3>
+    </div>
+    <div class="panel-body">
+      <form method="POST"
+            class="form-inline"
+            action="{{ request.route_url('admin_cohorts_edit', id=cohort.id) }}">
+        <div class="form-group">
+          <label for="add">Username</label>
+          <input type="hidden" name="cohort" value="{{ cohort.id }}">
+          <input type="text" class="form-control" name="add">
+          <input type="submit" class="btn btn-default" value="Add">
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Members</h3>
+    </div>
+    <div class="panel-body">
+      {% if members %}
+        <form method="POST" action="{{ request.route_url('admin_cohorts_edit', id=cohort.id) }}">
+          <input type="hidden" name="cohort" value="{{ cohort.id }}">
+          <ul>
+            {% for user in members %}
+              <li>
+                {{ user.username }}
+                <button type="submit" class="btn btn-link btn-sm"
+                        name="remove" value="{{ user.username }}">
+                  Remove
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        </form>
+      {% else %}
+        <p><em>This cohort has no members&hellip;</em></p>
+      {% endif %}
+    </div>
+  </div>
+
+{% endblock %}

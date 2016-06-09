@@ -1,6 +1,6 @@
 {% extends "h:templates/layouts/admin.html.jinja2" %}
 
-{% set page_id = 'cohorts' %}
+{% set page_id = 'features.cohorts' %}
 {% set page_title = 'Feature Cohorts' %}
 
 {% block content %}
@@ -34,7 +34,11 @@
       <tbody>
         {% for cohort in results %}
           <tr>
-            <td>{{ cohort.name }}</td>
+            <td>
+              <a href="{{ request.route_url('admin_cohorts_edit', id=cohort.id) }}">
+                {{ cohort.name }}
+              </a>
+            </td>
             <td>{{ cohort.members|length }}</td>
           </tr>
         {% endfor %}
