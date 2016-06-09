@@ -6,6 +6,9 @@ import deform
 from pyramid import httpexceptions as exc
 from pyramid.view import view_config
 from pyramid import renderers
+from sqlalchemy import and_
+from sqlalchemy.orm import joinedload
+from sqlalchemy.sql import expression
 
 
 from h import i18n
@@ -101,26 +104,27 @@ def _read_group(request, group):
     """
     url = request.route_url('group_read', pubid=group.pubid, slug=group.slug)
 
-    result = search.search(request,
-                           private=False,
-                           params={"group": group.pubid, "limit": 1000})
-    annotations = [presenters.AnnotationHTMLPresenter(
-                       storage.annotation_from_dict(a))
-                   for a in result['rows']]
+    # Find documents that have at least one annotation that:
+    # a. is shared, and
+    # b. is in this group.
+    documents = (
+        request.db.query(models.Document)
+        .options(joinedload(models.Document.meta))
+        .filter(
+            models.Document.annotations.any(
+                and_(
+                    models.Annotation.shared == expression.true(),
+                    models.Annotation.groupid == group.pubid
+                )
+            )
+        )
+        .order_by(models.Annotation.created)
+        [:25]
+    )
 
-    # Group the annotations by URI.
-    # Create a dict mapping the (normalized) URIs of the annotated documents
-    # to the most recent annotation of each document.
-    annotations_by_uri = collections.OrderedDict()
-    for annotation in annotations:
-        normalized_uri = uri.normalize(annotation.uri)
-        if normalized_uri not in annotations_by_uri:
-            annotations_by_uri[normalized_uri] = annotation
-            if len(annotations_by_uri) >= 25:
-                break
-
-    document_links = [annotation.document_link
-                      for annotation in annotations_by_uri.values()]
+    document_links = [
+        presenters.DocumentHTMLPresenter(document).link
+        for document in documents]
 
     template_data = {
         'group': group,

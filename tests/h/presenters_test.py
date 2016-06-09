@@ -20,7 +20,7 @@ def _annotation(annotation=None, **kwargs):
 def test_uri_is_escaped():
     spam_link = '<a href="http://example.com/rubies">Buy rubies!!!</a>'
 
-    uri = _annotation(uri='http://</a>' + spam_link).uri
+    uri = _annotation(target_uri='http://</a>' + spam_link).uri
 
     assert jinja2.escape(spam_link) in uri
     for char in ['<', '>', '"', "'"]:
@@ -36,19 +36,21 @@ def test_filename_with_http_uri():
 
 
 def test_filename_with_file_uri():
-    assert _annotation(uri="file:///home/seanh/MyFile.pdf").filename == (
-        "MyFile.pdf")
+    filename = _annotation(target_uri="file:///home/seanh/MyFile.pdf").filename
+
+    assert filename == "MyFile.pdf"
 
 
 def test_filename_returns_Markup():
     annotation = _annotation(
-        uri=jinja2.Markup("file:///home/seanh/MyFile.pdf"))
+        target_uri=jinja2.Markup("file:///home/seanh/MyFile.pdf"))
     assert isinstance(annotation.filename, jinja2.Markup)
 
 
 def test_filename_with_FILE_uri():
-    assert _annotation(uri="FILE:///home/seanh/MyFile.pdf").filename == (
-        "MyFile.pdf")
+    filename = _annotation(target_uri="FILE:///home/seanh/MyFile.pdf").filename
+
+    assert filename == "MyFile.pdf"
 
 
 def test_filename_with_folder():

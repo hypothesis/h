@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
+import itertools
+
 import deform
 import mock
 import pytest
 from pyramid import httpexceptions
+from pyramid import testing
 
+from h import db
+from h.api import models
 from h.groups import views
 
 
@@ -161,8 +166,8 @@ def test_create_publishes_join_event(Group, session_model):
 
 
 # The fixtures required to mock all of read()'s dependencies.
-read_fixtures = pytest.mark.usefixtures(
-    'search', 'Group', 'renderers', 'uri', 'presenters')
+read_fixtures = pytest.mark.usefixtures('search', 'Group', 'renderers',
+                                        'routes', 'uri', 'presenters')
 
 
 @read_fixtures
@@ -295,142 +300,155 @@ def test_read_if_not_a_member_returns_response(Group, renderers):
 
 
 @read_fixtures
-def test_read_if_already_a_member_renders_template(Group, renderers):
+def test_read_if_already_a_member_renders_template(share_group_request,
+                                                   renderers):
     """It should render the "Share this group" template."""
-    request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
+    views.read(share_group_request)
 
-    views.read(request)
     assert renderers.render_to_response.call_args[1]['renderer_name'] == (
         'h:templates/groups/share.html.jinja2')
 
 
 @read_fixtures
-def test_read_if_already_a_member_passes_group(Group, renderers):
+def test_read_if_already_a_member_passes_group(share_group_request,
+                                               Group,
+                                               renderers):
     """It passes the group to the template."""
-    request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
+    views.read(share_group_request)
 
-    views.read(request)
-
-    assert renderers.render_to_response.call_args[1]['value']['group'] == g
+    assert renderers.render_to_response.call_args[1]['value']['group'] == (
+        Group.get_by_pubid.return_value)
 
 
 @read_fixtures
-def test_read_if_already_a_member_returns_response(Group, renderers):
+def test_read_if_already_a_member_presents_document_links(share_group_request,
+                                                          presenters):
+    """It should call AnnotationHTMLPresenter with each annotation."""
+
+    document_1 = document(db, u'http://example.com/document_1')
+    document_2 = document(db, u'http://example.com/document_2')
+    document_3 = document(db, u'http://example.com/document_3')
+    annotation(document_1, groupid=u'xyz123', shared=True)
+    annotation(document_2, groupid=u'xyz123', shared=True)
+    annotation(document_3, groupid=u'xyz123', shared=True)
+
+    views.read(share_group_request)
+
+    presenters.DocumentHTMLPresenter.assert_has_calls(
+        [mock.call(document_1), mock.call(document_2), mock.call(document_3)],
+        any_order=True
+    )
+
+
+@read_fixtures
+def test_read_if_already_a_member_passes_document_links(share_group_request,
+                                                        presenters,
+                                                        renderers):
+    """It should pass the document links to the template."""
+    document_1 = document(db, u'http://example.com/document_1')
+    document_2 = document(db, u'http://example.com/document_2')
+    document_3 = document(db, u'http://example.com/document_3')
+    annotation(document_1, groupid=u'xyz123', shared=True)
+    annotation(document_2, groupid=u'xyz123', shared=True)
+    annotation(document_3, groupid=u'xyz123', shared=True)
+
+    views.read(share_group_request)
+
+    assert renderers.render_to_response.call_args[1]['value']['document_links'] == [
+        'document_link_1', 'document_link_2', 'document_link_3']
+
+
+@read_fixtures
+def test_read_if_already_a_member_truncates_document_links(share_group_request,
+                                                           renderers):
+    """It should only pass the most recent 25 document links."""
+    # 50 shared annotations, of different documents, belonging to the group.
+    for i in range(50):
+        annotation(
+            document(db, u'http://example.com/document_' + str(i)),
+            groupid=u'xyz123', shared=True)
+
+    views.read(share_group_request)
+
+    links = renderers.render_to_response.call_args[1]['value']['document_links']
+    assert len(links) == 25
+
+
+@read_fixtures
+def test_read_if_already_a_member_does_not_return_dupes(share_group_request,
+                                                        presenters,
+                                                        renderers):
+    """
+    It should return each document only once.
+
+    Even if the group has more than one annotation of the document.
+
+    """
+    document_1 = document(db, u'http://example.com/document_1')
+    document_2 = document(db, u'http://example.com/document_2')
+    annotation(document_1, groupid=u'xyz123', shared=True)
+    annotation(document_2, groupid=u'xyz123', shared=True)
+
+    # This shouldn't cause document_1 to be rendered twice.
+    annotation(document_1, groupid=u'xyz123', shared=True)
+
+    views.read(share_group_request)
+
+    assert renderers.render_to_response.call_args[1]['value']['document_links'] == [
+        'document_link_1', 'document_link_2']
+
+
+@read_fixtures
+def test_read_if_already_a_member_does_not_return_documents_from_other_groups(
+        share_group_request,
+        presenters,
+        renderers):
+    """It should not return documents annotated by other groups."""
+    annotation(
+        document(db, u'http://example.com/document_1'),
+        groupid=u'other_group',  # Annotation belongs to a different group.
+        shared=True)
+
+    views.read(share_group_request)
+
+    assert not renderers.render_to_response.call_args[1]['value']['document_links']
+
+
+@read_fixtures
+def test_read_if_already_a_member_does_not_return_private_documents(
+        share_group_request,
+        presenters,
+        renderers):
+    """It shouldn't return documents that've only been annotated privately."""
+    annotation(
+        document(db, u'http://example.com/document_1'),
+        groupid=u'xyz123',
+        shared=False)  # Annotation is private.
+
+    views.read(share_group_request)
+
+    assert not renderers.render_to_response.call_args[1]['value']['document_links']
+
+
+@read_fixtures
+def test_read_if_already_a_member_when_group_has_no_annotated_documents(
+        share_group_request,
+        presenters,
+        renderers):
+    views.read(share_group_request)
+
+    assert not presenters.AnnotationHTMLPresenter.called
+    assert renderers.render_to_response.call_args[1]['value']['document_links'] == []
+
+
+@read_fixtures
+def test_read_if_already_a_member_returns_response(share_group_request,
+                                                   renderers):
     """It should return the response from render_to_response()."""
-    request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
     renderers.render_to_response.return_value = mock.sentinel.response
 
-    assert views.read(request) == mock.sentinel.response
+    assert views.read(share_group_request) == mock.sentinel.response
 
-
-@read_fixtures
-def test_read_calls_search_correctly(Group, search, renderers):
-    """It should call search() with the right args to get the annotations."""
-    request = _mock_request(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
-    renderers.render_to_response.return_value = mock.sentinel.response
-
-    views.read(request)
-
-    search.search.assert_called_once_with(
-            request, private=False, params={"group": g.pubid, "limit": 1000})
-
-
-class MockAnnotationHTMLPresenter(object):
-
-    def __init__(self, annotation):
-        self.annotation = annotation
-
-    def __getattr__(self, attr):
-        return getattr(self.annotation, attr)
-
-    @property
-    def document_link(self):
-        return "document_link_" + self.annotation.uri[-1]
-
-
-@read_fixtures
-def test_read_returns_document_links(Group, search, renderers, uri,
-                                     presenters):
-    """It should return the list of document links."""
-    presenters.AnnotationHTMLPresenter = MockAnnotationHTMLPresenter
-    request = mock.Mock(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
-    annotations = [{'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
-    search.search.return_value = {'rows': annotations, 'total': 3}
-    def normalize(uri):
-        return uri + "_normalized"
-    uri.normalize.side_effect = normalize
-
-    views.read(request)
-    assert (renderers.render_to_response.call_args[1]['value']['document_links']
-        == ["document_link_1", "document_link_2", "document_link_3"])
-
-
-@read_fixtures
-def test_read_duplicate_documents_are_removed(Group, search, renderers, uri,
-                                              presenters):
-    """
-
-    If the group has multiple annotations whose uris all normalize to the same
-    uri, only the document_link of the first one of these annotations should be
-    sent to the template.
-
-    """
-    presenters.AnnotationHTMLPresenter = MockAnnotationHTMLPresenter
-    request = mock.Mock(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
-    annotations = [{'uri': 'uri_1'}, {'uri': 'uri_2'}, {'uri': 'uri_3'}]
-    search.search.return_value = {'rows': annotations, 'total': 3}
-
-    def normalize(uri):
-        # All annotations' URIs normalize to the same URI.
-        return "normalized"
-    uri.normalize.side_effect = normalize
-
-    views.read(request)
-
-    assert (
-        renderers.render_to_response.call_args[1]['value']['document_links']
-        == ["document_link_1"])
-
-
-@read_fixtures
-def test_read_documents_are_truncated(Group, search, renderers, uri,
-                                      presenters):
-    """It should send at most 25 document links to the template."""
-    presenters.AnnotationHTMLPresenter = MockAnnotationHTMLPresenter
-    request = mock.Mock(matchdict=_matchdict())
-    g = Group.get_by_pubid.return_value = mock.Mock(slug=mock.sentinel.slug)
-    user = request.authenticated_user = mock.Mock()
-    user.groups = [g]  # The user is a member of the group.
-    annotations = [{'uri': 'uri_{n}'.format(n=n)} for n in range(50)]
-    search.search.return_value = {'rows': annotations, 'total': 50}
-
-    def normalize(uri):
-        return uri + "_normalized"
-    uri.normalize.side_effect = normalize
-
-    views.read(request)
-
-    assert (len(
-        renderers.render_to_response.call_args[1]['value']['document_links'])
-        == 25)
 
 # The fixtures required to mock all of join()'s dependencies.
 join_fixtures = pytest.mark.usefixtures('Group', 'session_model')
@@ -544,6 +562,61 @@ def test_leave_publishes_leave_event(Group, session_model):
     })
 
 
+def annotation(document, groupid=u'__world__', shared=False):
+    """
+    Add an annotation of the given Document to the db and return it.
+
+    The given Document must already have an associated DocumentURI.
+
+    """
+    annotation = models.Annotation(
+        userid=u'fred', groupid=groupid, shared=shared,
+        target_uri=document.document_uris[0].uri)
+    db.Session.add(annotation)
+    return annotation
+
+
+def document(db, uri):
+    """
+    Add a new Document to the database and return the Document.
+
+    Also add to the db a DocumentURI with the given uri and associated with the
+    new Document.
+
+    """
+    document = models.Document()
+    db.Session.add(document)
+    db.Session.flush()
+
+    document_uri = models.DocumentURI(claimant=uri,
+                                      document_id=document.id,
+                                      uri=uri)
+    db.Session.add_all([document_uri])
+
+    return document
+
+
+@pytest.fixture
+def share_group_request(Group, config, pubid=u'__world__'):
+    """
+    Return a logged-in, already-member request for the group read page.
+
+    The user is logged-in and is a member of the group.
+
+    """
+    request = testing.DummyRequest(db=db.Session)
+    request.matchdict.update({'pubid': pubid, 'slug': 'slug'})
+
+    # The user is logged-in.
+    config.testing_securitypolicy('userid')
+    request.authenticated_user = mock.Mock()
+
+    # The user is a member of the group.
+    request.authenticated_user.groups = [Group.get_by_pubid.return_value]
+
+    return request
+
+
 @pytest.fixture
 def Form(patch):
     return patch('h.groups.views.deform.Form')
@@ -556,7 +629,9 @@ def GroupSchema(patch):
 
 @pytest.fixture
 def Group(patch):
-    return patch('h.groups.views.models.Group')
+    Group = patch('h.groups.views.models.Group')
+    Group.get_by_pubid.return_value = mock.Mock(slug='slug', pubid=u'xyz123')
+    return Group
 
 
 @pytest.fixture
@@ -567,6 +642,11 @@ def session_model(patch):
 @pytest.fixture
 def renderers(patch):
     return patch('h.groups.views.renderers')
+
+
+@pytest.fixture
+def routes(config):
+    config.add_route('group_read', '/groups/{pubid}/{slug:[^/]*}')
 
 
 @pytest.fixture
@@ -583,4 +663,13 @@ def uri(patch):
 
 @pytest.fixture
 def presenters(patch):
-    return patch('h.groups.views.presenters')
+    presenters = patch('h.groups.views.presenters')
+
+    # The first call to DocumentHTMLPresenter() returns
+    # mock.Mock(link='document_link_1'), the second returns
+    # mock.Mock(link='document_link_2'), and so on.
+    presenters.DocumentHTMLPresenter.side_effect = itertools.imap(
+        lambda i: mock.Mock(link="document_link_" + str(i)),
+        itertools.count(start=1))
+
+    return presenters
