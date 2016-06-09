@@ -49,9 +49,15 @@ PDFMetadata.prototype.getMetadata = function () {
     }
 
     var link = [
-      {href: fingerprintToURN(app.documentFingerprint)},
-      {href: app.url}
+      {href: fingerprintToURN(app.documentFingerprint)}
     ];
+
+    // Local file:// URLs should not be saved in document metadata.
+    // Entries in document.link should be URIs. In the case of
+    // local files, omit the URL.
+    if (app.url.indexOf('file://') !== 0) {
+      link.push({href: app.url});
+    }
 
     return {
       title: title,
