@@ -73,7 +73,7 @@ def userid_from_jwt(token, request):
         return None
 
 
-def userid_from_api_token(token):
+def userid_from_api_token(token, request):
     """
     Return the userid authenticated by the given API token.
 
@@ -86,13 +86,16 @@ def userid_from_api_token(token):
     :param token: the token to check
     :type token: unicode
 
+    :param request: the request object
+    :type request: pyramid.request.Request
+
     :returns: the userid authenticated by the token, or None
     :rtype: unicode or None
     """
     if not token.startswith(models.Token.prefix):
         return None
 
-    token_obj = models.Token.get_by_value(token)
+    token_obj = models.Token.get_by_value(request.db, token)
     if token_obj:
         return token_obj.userid
     else:
