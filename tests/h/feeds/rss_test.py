@@ -2,6 +2,7 @@ import datetime
 
 import mock
 
+from h import models
 from h.feeds import rss
 
 from ... import factories
@@ -17,9 +18,18 @@ def _annotation_url():
     return mock.Mock(return_value='https://hypothes.is/a/id')
 
 
+def _annotation(**kwargs):
+    args = dict(
+        userid='acct:janebloggs@hypothes.is',
+        target_selectors=[],
+    )
+    args.update(**kwargs)
+    return models.Annotation(**args)
+
+
 def test_feed_from_annotations_item_author():
     """Feed items should include the annotation's author."""
-    annotation = factories.Annotation(username="janebloggs")
+    annotation = _annotation()
 
     feed = rss.feed_from_annotations(
         [annotation], _annotation_url(), mock.Mock(), '', '', '')
@@ -27,14 +37,12 @@ def test_feed_from_annotations_item_author():
     assert feed['entries'][0]['author'] == {'name': 'janebloggs'}
 
 
-def test_feed_from_annotations_pubDate():
+def test_feed_annotations_pubDate():
     """It should render the pubDates of annotations correctly."""
-    annotation = factories.Annotation(
-        created=datetime.datetime(year=2015, month=3, day=11, hour=10,
-                                  minute=43, seconds=54).isoformat())
+    ann = _annotation(created=datetime.datetime(year=2015, month=3, day=11, hour=10, minute=43, second=54))
 
     feed = rss.feed_from_annotations(
-        [annotation], _annotation_url(), mock.Mock(), '', '', '')
+        [ann], _annotation_url(), mock.Mock(), '', '', '')
 
     assert feed['entries'][0]['pubDate'] == 'Wed, 11 Mar 2015 10:43:54 +0000'
 
@@ -138,9 +146,9 @@ def test_feed_from_annotations_with_3_annotations():
 def test_feed_from_annotations_pubDate():
     """The pubDate should be the updated time of the most recent annotation."""
     annotations = [
-        factories.Annotation(updated='2015-03-11T10:45:54.537626+00:00'),
-        factories.Annotation(updated='2015-02-11T10:43:54.537626+00:00'),
-        factories.Annotation(updated='2015-01-11T10:43:54.537626+00:00')
+        _annotation(updated=datetime.datetime(year=2015, month=3, day=11, hour=10, minute=45, second=54, microsecond=537626)),
+        _annotation(updated=datetime.datetime(year=2015, month=2, day=11, hour=10, minute=43, second=54, microsecond=537626)),
+        _annotation(updated=datetime.datetime(year=2015, month=1, day=11, hour=10, minute=43, second=54, microsecond=537626))
     ]
 
     feed = rss.feed_from_annotations(
