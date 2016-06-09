@@ -10,11 +10,11 @@ describe('pdf-metadata', function () {
 
       var event = document.createEvent('Event');
       event.initEvent('documentload', false, false);
-      fakeApp.url = 'http://example.com/foo.pdf';
+      fakeApp.documentFingerprint = 'fakeFingerprint';
       window.dispatchEvent(event);
 
       return pdfMetadata.getUri().then(function (uri) {
-        assert.equal('http://example.com/foo.pdf', uri);
+        assert.equal('urn:x-pdf:fakeFingerprint', uri);
       });
     });
   });
@@ -39,9 +39,9 @@ describe('pdf-metadata', function () {
     });
 
     describe('#getUri', function () {
-      it('returns the PDF URL as its URI', function () {
+      it('returns the URN-ified document fingerprint as its URI', function () {
         return pdfMetadata.getUri().then(function (uri) {
-          assert.equal('fakeUrl', uri);
+          assert.equal('urn:x-pdf:fakeFingerprint', uri);
         });
       });
     });

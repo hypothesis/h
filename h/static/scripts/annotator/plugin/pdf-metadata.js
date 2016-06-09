@@ -27,7 +27,7 @@ function PDFMetadata(app) {
  */
 PDFMetadata.prototype.getUri = function () {
   return this._loaded.then(function (app) {
-    return app.url;
+    return fingerprintToURN(app.documentFingerprint);
   });
 };
 
