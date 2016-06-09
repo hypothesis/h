@@ -25,10 +25,17 @@ def incontext_link(request, annotation):
 
     link = urlparse.urljoin(bouncer_url, annotation.id)
     uri = annotation.target_uri
-    if uri and uri.startswith(('http://', 'https://')):
+    if uri.startswith(('http://', 'https://')):
         # We can't use urljoin here, because if it detects the second argument
         # is a URL it will discard the base URL, breaking the link entirely.
         link += '/' + uri[uri.index('://')+3:]
+    elif uri.startswith('urn:x-pdf:') and annotation.document:
+        for docuri in annotation.document.document_uris:
+            uri = docuri.uri
+            if uri.startswith(('http://', 'https://')):
+                link += '/' + uri[uri.index('://')+3:]
+                break
+
     return link
 
 
