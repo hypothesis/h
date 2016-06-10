@@ -74,7 +74,7 @@ class Group(Base, mixins.Timestamps):
             .order_by(models.Annotation.updated.desc())
             .limit(1000))
         for annotation in annotations:
-            if annotation.document not in documents:
+            if annotation.document and annotation.document not in documents:
                 documents.append(annotation.document)
                 if len(documents) >= limit:
                     break

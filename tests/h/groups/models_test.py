@@ -169,6 +169,21 @@ def test_documents_when_group_has_no_documents(group):
     assert group.documents() == []
 
 
+def test_documents_does_not_return_null_documents(group):
+    """
+    It shouldn't return None when an annotation has no document.
+
+    Some annotations have no document and annotation.document will be None.
+    In this case nothing should be added to the list of documents,
+    it should not return None in the list of documents that it returns.
+
+    """
+    db.Session.add(api.models.Annotation(
+        userid=u'fred', groupid=group.pubid, shared=True))
+
+    assert None not in group.documents()
+
+
 def annotation(document_, groupid, shared):
     """Add a new annotation of the given document to the db and return it."""
     annotation_ = api.models.Annotation(
