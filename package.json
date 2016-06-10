@@ -48,7 +48,7 @@
     "js-polyfills": "^0.1.16",
     "lodash.debounce": "^4.0.3",
     "mkdirp": "^0.5.1",
-    "ng-tags-input": "2.2.0",
+    "ng-tags-input": "^3.1.1",
     "node-uuid": "^1.4.3",
     "postcss": "^5.0.6",
     "postcss-url": "^5.1.1",
