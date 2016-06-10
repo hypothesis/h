@@ -2,7 +2,7 @@
   <strong>You must be signed in to create annotations.</strong>
 </header>
 
-<div ng-if="vm.user()">
+<div ng-keydown="vm.onKeydown($event)" ng-if="vm.user()">
   <header class="annotation-header">
     <!-- User -->
     <span ng-if="vm.user()">

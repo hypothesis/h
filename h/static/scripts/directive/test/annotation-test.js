@@ -132,58 +132,6 @@ describe('annotation', function() {
     });
   });
 
-  describe('link', function () {
-    var link = require('../annotation').link;
-
-    var scope;
-    var mockElement;
-    var mockAttributes;
-    var mockAnnotationController;
-    var mockThreadController;
-    var mockThreadFilterController;
-    var mockDeepCountController;
-    var mockControllers;
-
-    beforeEach(function () {
-      scope = util.ngModule(inject, '$rootScope').$new();
-      mockElement = {on: sinon.stub()};
-      mockAttributes = undefined;  // Left undefined because link() doesn't use
-                                   // it.
-      mockAnnotationController = {
-        editing: sinon.stub().returns(false),
-        onKeydown: "annotationController.onKeydown"  // Sentinel value.
-      };
-      mockThreadController = {
-        collapsed: true,
-        toggleCollapsed: sinon.stub(),
-        parent: {
-          toggleCollapsed: sinon.stub()
-        }
-      };
-      mockThreadFilterController = {
-        active: sinon.stub(),
-        freeze: sinon.stub()
-      };
-      mockDeepCountController = {
-        count: sinon.stub()
-      };
-      mockControllers = [
-        mockAnnotationController, mockThreadController,
-        mockThreadFilterController, mockDeepCountController];
-    });
-
-    it('binds AnnotationController.onKeydown to "keydown"', function () {
-      link(scope, mockElement, mockAttributes, mockControllers);
-
-      assert.equal(1, mockElement.on.callCount);
-      assert.equal(
-        true,
-        mockElement.on.calledWithExactly(
-          'keydown', mockAnnotationController.onKeydown)
-      );
-    });
-  });
-
   describe('AnnotationController', function() {
     var $q;
     var $rootScope;
