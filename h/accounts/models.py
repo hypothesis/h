@@ -8,7 +8,6 @@ import cryptacular.bcrypt
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.sql import expression
 
 from h.db import Base
 from h._compat import text_type
@@ -204,18 +203,6 @@ class User(Base):
         """Fetch a user by username."""
         uid = _username_to_uid(username)
         return session.query(cls).filter(cls.uid == uid).first()
-
-    @classmethod
-    def admins(cls):
-        """Return a list of all admin users."""
-        return cls.query.filter(
-            cls.admin == expression.true()).all()
-
-    @classmethod
-    def staff_members(cls):
-        """Return a list of all staff members."""
-        return cls.query.filter(
-            cls.staff == expression.true()).all()
 
     def __repr__(self):
         return '<User: %s>' % self.username
