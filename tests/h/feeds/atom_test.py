@@ -1,11 +1,25 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=protected-access
 """Unit tests for h/atom.py."""
+from datetime import datetime
 import mock
 
+from h.api import models
 from h.feeds import atom
 
 from ... import factories
+
+
+def _annotation(**kwargs):
+    args = {
+        'userid': 'acct:janebloggs@hypothes.is',
+        'created': datetime.utcnow(),
+        'updated': datetime.utcnow(),
+        'target_selectors': [],
+        'document': models.Document(),
+    }
+    args.update(kwargs)
+    return models.Annotation(**args)
 
 
 def test_feed_id():
@@ -71,8 +85,6 @@ def test_html_url_link():
         'rel': 'alternate', 'type': 'text/html', 'href': 'html_url'}
 
 
-
-
 @mock.patch("h.feeds.util")
 def test_entry_id(util):
     """The ids of feed entries should come from tag_uri_for_annotation()."""
@@ -112,22 +124,24 @@ def test_entry_title():
 
 def test_entry_updated():
     """The updated times of entries should come from the annotations."""
-    annotation = factories.Annotation()
+    annotation = _annotation(
+        updated=datetime(year=2016, month=2, day=29, hour=16, minute=39, second=12, microsecond=537626))
 
     feed = atom.feed_from_annotations(
         [annotation], "atom_url", lambda annotation: "annotation url")
 
-    assert feed['entries'][0]['updated'] == annotation['updated']
+    assert feed['entries'][0]['updated'] == '2016-02-29T16:39:12.537626+00:00'
 
 
 def test_entry_published():
     """The published times of entries should come from the annotations."""
-    annotation = factories.Annotation()
+    annotation = _annotation(
+        created=datetime(year=2016, month=5, day=31, hour=12, minute=15, second=45, microsecond=537626))
 
     feed = atom.feed_from_annotations(
         [annotation], "atom_url", lambda annotation: "annotation url")
 
-    assert feed['entries'][0]['published'] == annotation['created']
+    assert feed['entries'][0]['published'] == '2016-05-31T12:15:45.537626+00:00'
 
 
 def test_entry_content():
@@ -177,28 +191,14 @@ def test_annotation_api_url_links(_):
     }
 
 
-def test_target_links():
-    """Entries should have links to the annotation's targets."""
-    annotation = factories.Annotation()
-    annotation['target'] = [
-        {'source': 'target href 1'},
-        {'source': 'target href 2'},
-        {'source': 'target href 3'},
+def test_feed_updated():
+    annotations = [
+        _annotation(updated=datetime(year=2015, month=3, day=11, hour=10, minute=45, second=54, microsecond=537626)),
+        _annotation(updated=datetime(year=2015, month=2, day=11, hour=10, minute=43, second=54, microsecond=537626)),
+        _annotation(updated=datetime(year=2015, month=1, day=11, hour=10, minute=43, second=54, microsecond=537626))
     ]
 
     feed = atom.feed_from_annotations(
-        [annotation], "atom_url", lambda annotation: "annotation url")
+        annotations, "atom_url", lambda annotation: "annotation url")
 
-    hrefs = [link['href'] for link in feed['entries'][0]['links']]
-    for target in annotation['target']:
-        assert target['source'] in hrefs
-
-
-@mock.patch("h.feeds.util")
-def test_feed_updated(_):
-    annotations = [
-        factories.Annotation(), factories.Annotation(), factories.Annotation()]
-
-    feed = atom.feed_from_annotations(annotations, mock.Mock(), mock.Mock())
-
-    assert feed['updated'] == annotations[0]['updated']
+    assert feed['updated'] == '2015-03-11T10:45:54.537626+00:00'

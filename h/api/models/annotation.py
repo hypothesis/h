@@ -90,7 +90,8 @@ class Annotation(Base, mixins.Timestamps):
                                    secondary='join(DocumentURI, Document, DocumentURI.document_id == Document.id)',
                                    primaryjoin='Annotation.target_uri_normalized == DocumentURI.uri_normalized',
                                    viewonly=True,
-                                   uselist=False)
+                                   uselist=False,
+                                   backref='annotations')
 
     @hybrid_property
     def target_uri(self):

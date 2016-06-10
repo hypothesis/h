@@ -58,22 +58,99 @@ class AnnotationHTMLPresenter(object):
 
     def __init__(self, annotation):
         self.annotation = annotation
+        self.document = DocumentHTMLPresenter(self.annotation.document)
 
     def __getattr__(self, attr):
         return getattr(self.annotation, attr)
 
-    def __getitem__(self, key):
-        return self.annotation[key]
-
     @property
     def uri(self):
-        return jinja2.escape(self.annotation.uri)
+        return jinja2.escape(self.annotation.target_uri)
+
+    @property
+    def description(self):
+        """An HTML-formatted description of this annotation.
+
+        The description contains the target text that the user selected to
+        annotate, as a <blockquote>, and the body text of the annotation
+        itself.
+
+        """
+        def get_selection():
+            selectors = self.annotation.target_selectors
+            for selector in selectors:
+                if "exact" in selector:
+                    return selector["exact"]
+
+        description = ""
+
+        selection = get_selection()
+        if selection:
+            selection = jinja2.escape(selection)
+            description += "&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
+                selection=selection)
+
+        text = self.annotation.text
+        if text:
+            text = jinja2.escape(text)
+            description += "{text}".format(text=text)
+
+        return description
+
+    @property
+    def created_day_string(self):
+        """A simple created day string for this annotation.
+
+        Returns a day string like '2015-03-11' from the annotation's 'created'
+        date.
+
+        """
+        created_string = jinja2.escape(self.annotation.created)
+        return parser.parse(created_string).strftime("%Y-%m-%d")
+
+    @property
+    def document_link(self):
+        """Return a link to this annotation's document."""
+        return self.document.link
 
     @property
     def filename(self):
-        """Return the filename of this annotation's document, or "".
+        """Return the filename of this annotation's document."""
+        return self.document.filename
 
-        If the annotated URI is a file:// URI then return the filename part
+    @property
+    def hostname_or_filename(self):
+        """Return the hostname of this annotation's document."""
+        return self.document.hostname_or_filename
+
+    @property
+    def href(self):
+        """Return an href for this annotation's document, or ""."""
+        return self.document.href
+
+    @property
+    def link_text(self):
+        """Return some link text for this annotation's document."""
+        return self.document.link_text
+
+    @property
+    def title(self):
+        """Return a title for this annotation."""
+        return self.document.title
+
+
+class DocumentHTMLPresenter(object):
+    """Wraps Document model objects and adds some HTML properties."""
+
+    def __init__(self, document):
+        self.document = document
+
+    @property
+    def filename(self):
+        """
+        Return the filename of this document, or "".
+
+        If the document's URI is a file:// URI then return the filename part
         of it, otherwise return "".
 
         The filename is escaped and safe to be rendered.
@@ -88,10 +165,34 @@ class AnnotationHTMLPresenter(object):
             return ""
 
     @property
-    def hostname_or_filename(self):
-        """Return the hostname of this annotation's document.
+    def href(self):
+        """
+        Return an href for this document, or "".
 
-        Returns the hostname part of the annotated document's URI, e.g.
+        Returns a value suitable for use as the value of the href attribute in
+        an <a> element in an HTML document.
+
+        Returns an empty string if the document doesn't have an http(s):// URI.
+
+        The href is escaped and safe to be rendered.
+
+        If it contains escaped characters the returned value will be a
+        Markup object so that it doesn't get double-escaped.
+
+        """
+        uri = self.uri
+        if (uri.lower().startswith("http://") or
+                uri.lower().startswith("https://")):
+            return jinja2.escape(uri)
+        else:
+            return ""
+
+    @property
+    def hostname_or_filename(self):
+        """
+        Return the hostname or filename of this document.
+
+        Returns the hostname part of the document's URI, e.g.
         "www.example.com" for "http://www.example.com/example.html".
 
         If the URI is a file:// URI then return the filename part of it
@@ -114,89 +215,9 @@ class AnnotationHTMLPresenter(object):
             return jinja2.escape(hostname)
 
     @property
-    def title(self):
-        """Return a title for this annotation.
-
-        Return the annotated document's title or if the document has no title
-        then return its filename (if it's a file:// URI) or its URI for
-        non-file URIs.
-
-        The title is escaped and safe to be rendered.
-
-        If it contains escaped characters then the title will be a
-        Markup object, so that it won't be double-escaped.
-
+    def link(self):
         """
-        document_ = self.annotation.document
-        if document_:
-            title = document_.title
-            if title:
-                # Convert non-string titles into strings.
-                # We're assuming that title cannot be a byte string.
-                title = text_type(title)
-
-                return jinja2.escape(title)
-
-        if self.filename:
-            return jinja2.escape(urllib2.unquote(self.filename))
-        else:
-            return jinja2.escape(urllib2.unquote(self.uri))
-
-    @property
-    def href(self):
-        """Return an href for this annotation's document, or "".
-
-        Returns a value suitable for use as the value of the href attribute in
-        an <a> element in an HTML document.
-
-        Returns an empty string if the annotation doesn't have a document with
-        an http(s):// URI.
-
-        The href is escaped and safe to be rendered.
-
-        If it contains escaped characters the returned value will be a
-        Markup object so that it doesn't get double-escaped.
-
-        """
-        uri = self.uri
-        if (uri.lower().startswith("http://") or
-                uri.lower().startswith("https://")):
-            return jinja2.escape(uri)
-        else:
-            return ""
-
-    @property
-    def link_text(self):
-        """Return some link text for this annotation's document.
-
-        Return a text representation of this annotation's document suitable
-        for use as the link text in a link like <a ...>{link_text}</a>.
-
-        Returns the document's title if it has one, or failing that uses part
-        of the annotated URI if the annotation has one.
-
-        The link text is escaped and safe for rendering.
-
-        If it contains escaped characters the returned value will be a
-        Markup object so it doesn't get double-escaped.
-
-        """
-        title = jinja2.escape(self.title)
-
-        # Sometimes self.title is the annotated document's URI (if the document
-        # has no title). In those cases we want to remove the http(s):// from
-        # the front and unquote it for link text.
-        lower = title.lower()
-        if lower.startswith("http://") or lower.startswith("https://"):
-            parts = urlparse.urlparse(title)
-            return urllib2.unquote(parts.netloc + parts.path)
-
-        else:
-            return title
-
-    @property
-    def document_link(self):
-        """Return a link to this annotation's document.
+        Return a link to this document.
 
         Returns HTML strings like:
 
@@ -206,8 +227,7 @@ class AnnotationHTMLPresenter(object):
 
         where:
 
-        - {href} is the uri of the annotated document,
-          if it has an http(s):// uri
+        - {href} is the uri of the document, if it has an http(s):// uri
         - {title} is the title of the document.
           If the document has no title then its uri will be used instead.
           If it's a local file:// uri then only the filename part is used,
@@ -235,52 +255,63 @@ class AnnotationHTMLPresenter(object):
             self.href, self.title, self.link_text, self.hostname_or_filename)
 
     @property
-    def description(self):
-        """An HTML-formatted description of this annotation.
+    def link_text(self):
+        """
+        Return some link text for this document.
 
-        The description contains the target text that the user selected to
-        annotate, as a <blockquote>, and the body text of the annotation
-        itself.
+        Return a text representation of this document suitable for use as the
+        link text in a link like <a ...>{link_text}</a>.
+
+        Returns the document's title if it has one, or failing that uses part
+        of the document's URI if it has one.
+
+        The link text is escaped and safe for rendering.
+
+        If it contains escaped characters the returned value will be a
+        Markup object so it doesn't get double-escaped.
 
         """
-        def get_selection():
-            targets = self.annotation.get("target")
-            if not isinstance(targets, list):
-                return
-            for target in targets:
-                if not isinstance(target, dict):
-                    continue
-                selectors = target.get("selector")
-                if not isinstance(selectors, list):
-                    continue
-                for selector in selectors:
-                    if not isinstance(selector, dict):
-                        continue
-                    if "exact" in selector:
-                        return selector["exact"]
+        title = jinja2.escape(self.title)
 
-        description = ""
+        # Sometimes self.title is the annotated document's URI (if the document
+        # has no title). In those cases we want to remove the http(s):// from
+        # the front and unquote it for link text.
+        lower = title.lower()
+        if lower.startswith("http://") or lower.startswith("https://"):
+            parts = urlparse.urlparse(title)
+            return urllib2.unquote(parts.netloc + parts.path)
 
-        selection = get_selection()
-        if selection:
-            selection = jinja2.escape(selection)
-            description += "&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
-                selection=selection)
-
-        text = self.annotation.get("text")
-        if text:
-            text = jinja2.escape(text)
-            description += "{text}".format(text=text)
-
-        return description
+        else:
+            return title
 
     @property
-    def created_day_string(self):
-        """A simple created day string for this annotation.
+    def title(self):
+        """
+        Return a title for this document.
 
-        Returns a day string like '2015-03-11' from the annotation's 'created'
-        date.
+        Return the document's title or if the document has no title then return
+        its filename (if it's a file:// URI) or its URI for non-file URIs.
+
+        The title is escaped and safe to be rendered.
+
+        If it contains escaped characters then the title will be a
+        Markup object, so that it won't be double-escaped.
 
         """
-        created_string = jinja2.escape(self.annotation["created"])
-        return parser.parse(created_string).strftime("%Y-%m-%d")
+        title = self.document.title
+        if title:
+            # Convert non-string titles into strings.
+            # We're assuming that title cannot be a byte string.
+            title = text_type(title)
+            return jinja2.escape(title)
+
+        if self.filename:
+            return jinja2.escape(urllib2.unquote(self.filename))
+        else:
+            return jinja2.escape(urllib2.unquote(self.uri))
+
+    @property
+    def uri(self):
+        if self.document.document_uris:
+            return jinja2.escape(self.document.document_uris[0].uri)
+        return ''
