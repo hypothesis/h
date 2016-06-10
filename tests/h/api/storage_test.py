@@ -11,7 +11,7 @@ from pyramid.testing import DummyRequest
 from h.api import storage
 from h.api import schemas
 from h.api.models.annotation import Annotation
-from h.api.models.document import Document, DocumentURI
+from h.api.models.document import Document, DocumentURI, DocumentMeta
 
 
 class TestFetchAnnotation(object):
@@ -40,6 +40,23 @@ class TestFetchOrderedAnnotations(object):
                                                                    [ann_2.id, ann_1.id])
         assert [ann_1, ann_2] == storage.fetch_ordered_annotations(db_session,
                                                                    [ann_1.id, ann_2.id])
+
+    def test_it_allows_to_prefetch_document_data(self, db_session):
+        ann_1 = Annotation(userid='luke', target_uri='http://example.com')
+        ann_2 = Annotation(userid='luke', target_uri='http://example.com')
+        db_session.add_all([ann_1, ann_2])
+
+        doc = Document(
+            document_uris=[DocumentURI(uri='http://bar.com/', claimant='http://example.com'),
+                           DocumentURI(uri='http://example.com/', type='rel-canonical', claimant='http://example.com')],
+            meta=[DocumentMeta(claimant='http://example.com', type='title', value='Example')])
+        db_session.add(doc)
+
+        db_session.flush()
+
+        assert [ann_2, ann_1] == storage.fetch_ordered_annotations(db_session,
+                                                                   [ann_2.id, ann_1.id],
+                                                                   load_documents=True)
 
 
 class TestExpandURI(object):

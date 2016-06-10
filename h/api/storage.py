@@ -8,6 +8,7 @@ assumed to be validated.
 """
 
 from pyramid import i18n
+from sqlalchemy.orm import subqueryload
 
 from h.api import schemas
 from h.api import models
@@ -49,14 +50,21 @@ def fetch_annotation(session, id_):
         return None
 
 
-def fetch_ordered_annotations(session, ids):
+def fetch_ordered_annotations(session, ids, load_documents=False):
     if not ids:
         return []
 
     ordering = {x: i for i, x in enumerate(ids)}
 
-    anns = session.query(models.Annotation).filter(models.Annotation.id.in_(ids)).all()
-    anns = sorted(anns, key=lambda a: ordering.get(a.id))
+    query = session.query(models.Annotation).filter(models.Annotation.id.in_(ids))
+
+    if load_documents:
+        query = query.options(
+            subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
+            subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
+        )
+
+    anns = sorted(query, key=lambda a: ordering.get(a.id))
     return anns
 
 
