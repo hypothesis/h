@@ -1,61 +1,24 @@
 # -*- coding: utf-8 -*-
-import pytest
 
-from h import db
+from __future__ import unicode_literals
+
 from h.badge import models
 
 
-def test_cannot_add_same_uri_twice():
-    db.Session.add(models.Blocklist(uri="test_uri"))
-    db.Session.flush()
+def test_is_blocked(db_session):
+    db_session.add(models.Blocklist(uri="http://example.com"))
+    db_session.add(models.Blocklist(uri="http://example.com/bar"))
+    db_session.flush()
 
-    with pytest.raises(ValueError):
-        models.Blocklist(uri="test_uri")
-
-
-def test_get_by_uri_returns_model():
-    model = models.Blocklist(uri="test_uri")
-    db.Session.add(model)
-    db.Session.flush()
-
-    assert models.Blocklist.get_by_uri("test_uri") == model
+    assert models.Blocklist.is_blocked(db_session, "http://example.com")
+    assert models.Blocklist.is_blocked(db_session, "http://example.com/bar")
+    assert not models.Blocklist.is_blocked(db_session, "http://example.com/foo")
 
 
-def test_get_by_uri_returns_None_if_no_match():
-    model = models.Blocklist(uri="test_uri")
-    db.Session.add(model)
-    db.Session.flush()
+def test_is_blocked_with_wildcards(db_session):
+    db_session.add(models.Blocklist(uri="%//example.com%"))
+    db_session.flush()
 
-    assert models.Blocklist.get_by_uri("another_uri") is None
-
-
-def test_all():
-    uris = [
-        models.Blocklist(uri="first"),
-        models.Blocklist(uri="second"),
-        models.Blocklist(uri="third")
-    ]
-    for uri in uris:
-        db.Session.add(uri)
-    db.Session.flush()
-
-    assert models.Blocklist.all() == uris
-
-
-def test_is_blocked():
-    db.Session.add(models.Blocklist(uri=u"http://example.com"))
-    db.Session.add(models.Blocklist(uri=u"http://example.com/bar"))
-    db.Session.flush()
-
-    assert models.Blocklist.is_blocked(u"http://example.com")
-    assert models.Blocklist.is_blocked(u"http://example.com/bar")
-    assert not models.Blocklist.is_blocked(u"http://example.com/foo")
-
-
-def test_is_blocked_with_wildcards():
-    db.Session.add(models.Blocklist(uri="%//example.com%"))
-    db.Session.flush()
-
-    assert models.Blocklist.is_blocked("http://example.com/")
-    assert models.Blocklist.is_blocked("http://example.com/bar")
-    assert models.Blocklist.is_blocked("http://example.com/foo")
+    assert models.Blocklist.is_blocked(db_session, "http://example.com/")
+    assert models.Blocklist.is_blocked(db_session, "http://example.com/bar")
+    assert models.Blocklist.is_blocked(db_session, "http://example.com/foo")
