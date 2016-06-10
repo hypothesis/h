@@ -35,23 +35,6 @@ FEATURES = {
 #
 FEATURES_PENDING_REMOVAL = {}
 
-FEATURE_FEATURECOHORT_TABLE = sa.Table(
-    'feature_featurecohort', Base.metadata,
-    sa.Column('id',
-              sa.Integer(),
-              nullable=False),
-    sa.Column('feature_id',
-              sa.Integer(),
-              nullable=False),
-    sa.Column('cohort_id',
-              sa.Integer(),
-              nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.ForeignKeyConstraint(['cohort_id'], ['featurecohort.id']),
-    sa.ForeignKeyConstraint(['feature_id'], ['feature.id']),
-    sa.UniqueConstraint('cohort_id', 'feature_id'),
-)
-
 
 class Feature(Base):
 
@@ -79,10 +62,6 @@ class Feature(Base):
                       nullable=False,
                       default=False,
                       server_default=sa.sql.expression.false())
-
-    featurecohorts = sa.orm.relationship('FeatureCohort',
-                                         secondary=FEATURE_FEATURECOHORT_TABLE,
-                                         backref='cohorts')
 
     @property
     def description(self):
@@ -135,6 +114,10 @@ class FeatureCohort(Base, mixins.Timestamps):
                                   secondary='featurecohort_user',
                                   backref='cohorts')
 
+    features = sa.orm.relationship('Feature',
+                                   secondary='featurecohort_feature',
+                                   backref='cohorts')
+
     def __init__(self, name):
         self.name = name
 
@@ -155,4 +138,22 @@ FEATURECOHORT_USER_TABLE = sa.Table(
               sa.ForeignKey('user.id'),
               nullable=False),
     sa.UniqueConstraint('cohort_id', 'user_id'),
+)
+
+FEATURECOHORT_FEATURE_TABLE = sa.Table(
+    'featurecohort_feature', Base.metadata,
+    sa.Column('id',
+              sa.Integer(),
+              nullable=False,
+              autoincrement=True,
+              primary_key=True),
+    sa.Column('cohort_id',
+              sa.Integer(),
+              sa.ForeignKey('featurecohort.id'),
+              nullable=False),
+    sa.Column('feature_id',
+              sa.Integer(),
+              sa.ForeignKey('feature.id'),
+              nullable=False),
+    sa.UniqueConstraint('cohort_id', 'feature_id'),
 )

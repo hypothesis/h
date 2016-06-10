@@ -15,7 +15,7 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.create_table('feature_featurecohort',
+    op.create_table('featurecohort_feature',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('feature_id', sa.Integer(), nullable=False),
         sa.Column('cohort_id', sa.Integer(), nullable=False),
@@ -27,4 +27,4 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_table('feature_featurecohort')
+    op.drop_table('featurecohort_feature')
