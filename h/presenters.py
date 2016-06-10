@@ -60,9 +60,6 @@ class AnnotationHTMLPresenter(object):
         self.annotation = annotation
         self.document = DocumentHTMLPresenter(self.annotation.document)
 
-    def __getattr__(self, attr):
-        return getattr(self.annotation, attr)
-
     @property
     def uri(self):
         return jinja2.escape(self.annotation.target_uri)
@@ -137,6 +134,23 @@ class AnnotationHTMLPresenter(object):
     def title(self):
         """Return a title for this annotation."""
         return self.document.title
+
+    # Explicitly forward some annotation properties for convenient access.
+    @property
+    def id(self):
+        return self.annotation.id
+
+    @property
+    def created(self):
+        return self.annotation.created
+
+    @property
+    def updated(self):
+        return self.annotation.updated
+
+    @property
+    def userid(self):
+        return self.annotation.userid
 
 
 class DocumentHTMLPresenter(object):
