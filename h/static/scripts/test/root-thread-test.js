@@ -77,26 +77,9 @@ describe('rootThread', function () {
     });
   });
 
-  describe('initialization', function () {
-    it('builds a thread from the current set of annotations', function () {
-      assert.equal(rootThread.thread(), fixtures.emptyThread);
-    });
-  });
-
-  function assertRebuildsThread(fn) {
-    fakeBuildThread.reset();
-    var thread = Object.assign({}, fixtures.emptyThread);
-    fakeBuildThread.returns(thread);
-    fn();
-    assert.called(fakeBuildThread);
-    assert.equal(rootThread.thread(), thread);
-  }
-
-  describe('#rebuild', function () {
-    it('rebuilds the thread', function () {
-      assertRebuildsThread(function () {
-        rootThread.rebuild();
-      });
+  describe('#thread', function () {
+    it('returns the result of buildThread()', function() {
+      assert.equal(rootThread.thread(fakeAnnotationUI.state), fixtures.emptyThread);
     });
 
     it('passes loaded annotations to buildThread()', function () {
@@ -104,7 +87,7 @@ describe('rootThread', function () {
       fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state, {
         annotations: [annotation],
       });
-      rootThread.rebuild();
+      rootThread.thread(fakeAnnotationUI.state);
       assert.calledWith(fakeBuildThread, sinon.match([annotation]));
     });
 
@@ -112,7 +95,7 @@ describe('rootThread', function () {
       fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state, {
         selectedAnnotationMap: {id1: true, id2: true},
       });
-      rootThread.rebuild();
+      rootThread.thread(fakeAnnotationUI.state);
       assert.calledWith(fakeBuildThread, [], sinon.match({
         selected: ['id1', 'id2'],
       }));
@@ -122,7 +105,7 @@ describe('rootThread', function () {
       fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state, {
         expanded: {id1: true, id2: true},
       });
-      rootThread.rebuild();
+      rootThread.thread(fakeAnnotationUI.state);
       assert.calledWith(fakeBuildThread, [], sinon.match({
         expanded: {id1: true, id2: true},
       }));
@@ -132,19 +115,10 @@ describe('rootThread', function () {
       fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state, {
         forceVisible: {id1: true, id2: true},
       });
-      rootThread.rebuild();
+      rootThread.thread(fakeAnnotationUI.state);
       assert.calledWith(fakeBuildThread, [], sinon.match({
         forceVisible: ['id1', 'id2'],
       }));
-    });
-  });
-
-  context('when the annotationUI state changes', function () {
-    it('rebuilds the root thread', function () {
-      assertRebuildsThread(function () {
-        var subscriber = fakeAnnotationUI.subscribe.args[0][0];
-        subscriber();
-      });
     });
   });
 
@@ -181,7 +155,7 @@ describe('rootThread', function () {
         sortKey: testCase.order,
         sortKeysAvailable: [testCase.order],
       });
-      rootThread.rebuild();
+      rootThread.thread(fakeAnnotationUI.state);
       var sortCompareFn = fakeBuildThread.args[0][1].sortCompareFn;
       var actualOrder = sortBy(annotations, sortCompareFn).map(function (annot) {
         return annotations.indexOf(annot);
@@ -202,7 +176,7 @@ describe('rootThread', function () {
       fakeSearchFilter.generateFacetedFilter.returns(filters);
       fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state,
         {filterQuery: 'queryterm'});
-      rootThread.rebuild();
+      rootThread.thread(fakeAnnotationUI.state);
       var filterFn = fakeBuildThread.args[0][1].filterFn;
 
       fakeViewFilter.filter.returns([annotation]);

@@ -61,11 +61,19 @@ module.exports = function WidgetController(
     return elementHeight + marginHeight;
   }
 
+  function thread() {
+    return rootThread.thread(annotationUI.getState());
+  }
+
   // `visibleThreads` keeps track of the subset of all threads matching the
   // current filters which are in or near the viewport and the view then renders
   // only those threads, using placeholders above and below the visible threads
   // to reserve space for threads which are not actually rendered.
-  var visibleThreads = new VirtualThreadList($scope, window, rootThread.thread());
+  var visibleThreads = new VirtualThreadList($scope, window, thread());
+  annotationUI.subscribe(function () {
+    visibleThreads.setRootThread(thread());
+  });
+
   visibleThreads.on('changed', function (state) {
     $scope.virtualThreadList = {
       visibleThreads: state.visibleThreads,
@@ -83,9 +91,7 @@ module.exports = function WidgetController(
       });
     }, 50);
   });
-  rootThread.on('changed', function (thread) {
-    visibleThreads.setRootThread(thread);
-  });
+
   $scope.$on('$destroy', function () {
     visibleThreads.detach();
   });
@@ -264,10 +270,6 @@ module.exports = function WidgetController(
     annotationUI.setFilterQuery(query);
   });
 
-  $scope.rootThread = function () {
-    return rootThread.thread();
-  };
-
   $scope.setCollapsed = function (id, collapsed) {
     annotationUI.setCollapsed(id, collapsed);
   };
@@ -334,11 +336,11 @@ module.exports = function WidgetController(
   });
 
   $scope.visibleCount = function () {
-    return visibleCount(rootThread.thread());
+    return visibleCount(thread());
   };
 
   $scope.topLevelThreadCount = function () {
-    return rootThread.thread().totalChildren;
+    return thread().totalChildren;
   };
 
   /**

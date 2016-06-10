@@ -52,26 +52,26 @@ describe('annotation threading', function () {
 
   it('should display newly loaded annotations', function () {
     annotationUI.addAnnotations(fixtures.annotations);
-    assert.equal(rootThread.thread().children.length, 2);
+    assert.equal(rootThread.thread(annotationUI.getState()).children.length, 2);
   });
 
   it('should not display unloaded annotations', function () {
     annotationUI.addAnnotations(fixtures.annotations);
     annotationUI.removeAnnotations(fixtures.annotations);
-    assert.equal(rootThread.thread().children.length, 0);
+    assert.equal(rootThread.thread(annotationUI.getState()).children.length, 0);
   });
 
   it('should filter annotations when a search is set', function () {
     annotationUI.addAnnotations(fixtures.annotations);
     annotationUI.setFilterQuery('second');
-    assert.equal(rootThread.thread().children.length, 1);
-    assert.equal(rootThread.thread().children[0].id, '2');
+    assert.equal(rootThread.thread(annotationUI.getState()).children.length, 1);
+    assert.equal(rootThread.thread(annotationUI.getState()).children[0].id, '2');
   });
 
   unroll('should sort annotations by #mode', function (testCase) {
     annotationUI.addAnnotations(fixtures.annotations);
     annotationUI.setSortKey(testCase.sortKey);
-    var actualOrder = rootThread.thread().children.map(function (thread) {
+    var actualOrder = rootThread.thread(annotationUI.getState()).children.map(function (thread) {
       return thread.annotation.id;
     });
     assert.deepEqual(actualOrder, testCase.expectedOrder);
