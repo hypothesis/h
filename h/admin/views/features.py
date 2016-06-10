@@ -32,6 +32,15 @@ def features_save(request):
                 setattr(feat, attr, True)
             else:
                 setattr(feat, attr, False)
+        for cohort in request.db.query(models.FeatureCohort).all():
+            val = request.POST.get('{0}[{1}]'.format(feat.name, cohort.name))
+            if val == 'on':
+                if cohort not in feat.cohorts:
+                    feat.cohorts.append(cohort)
+            else:
+                if cohort in feat.cohorts:
+                    feat.cohorts.remove(cohort)
+
     request.session.flash(_("Changes saved."), "success")
     return httpexceptions.HTTPSeeOther(
         location=request.route_url('admin_features'))

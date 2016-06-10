@@ -57,7 +57,7 @@
                   <input
                     type="checkbox"
                     name="{{ feat.name }}[{{ c.name }}]"
-                    {% if c in feat.featurecohorts %}checked{% endif %}>
+                    {% if c in feat.cohorts %}checked{% endif %}>
                   <label for="{{ feat.name }}[{{ c.name }}]">{{ c.name }}</label>
                 </fieldset>
               {% endfor %}
