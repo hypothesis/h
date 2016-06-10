@@ -1,3 +1,15 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Add option to disable the badge on the extension's toolbar button (#3342).
+
+- Avoid revealing information about the file structure of the user's system to
+  the Hypothesis service by not saving "file://" URLs with annotations made on
+  PDFs (#3441).
+
 0.27.0 (2016-06-09)
 ===================
 
