@@ -127,6 +127,8 @@ class Feature(Base):
 class FeatureCohort(Base, mixins.Timestamps):
     __tablename__ = 'featurecohort'
 
+    RESERVED_FEATURECOHORT_NAMES = {'everyone', 'admins', 'staff'}
+
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
     name = sa.Column(sa.UnicodeText(), nullable=False, index=True)
 
