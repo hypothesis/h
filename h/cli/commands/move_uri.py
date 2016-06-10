@@ -5,6 +5,7 @@ import click
 from h import models
 from h.api import uri
 from h.api.search.index import BatchIndexer
+from h.api.models import merge_documents
 
 
 @click.command('move-uri')
@@ -55,7 +56,13 @@ def move_uri(ctx, old, new):
     if annotations:
         indexer = BatchIndexer(request.db, request.es, request)
         ids = [a.id for a in annotations]
-        res = indexer.index(ids)
+        indexer.index(ids)
+
+    request.db.flush()
+
+    documents = models.Document.find_by_uris(request.db, [new])
+    if documents.count() > 1:
+        merge_documents(request.db, documents)
 
     request.tm.commit()
 
