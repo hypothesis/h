@@ -50,6 +50,44 @@ class TestAnnotationHTMLPresenter(object):
             )
         assert annotation.created_day_string == '2015-09-04'
 
+    def test_it_does_not_crash_when_annotation_has_no_document(self):
+        annotation = mock.Mock(document=None)
+        presenter = presenters.AnnotationHTMLPresenter(annotation)
+
+        # Some AnnotationHTMLPresenter properties rely on the annotation's
+        # document. Call them all to make sure that none of them crash when
+        # the document is None.
+        # pylint: disable=pointless-statement
+        presenter.document_link
+        presenter.hostname_or_filename
+        presenter.href
+        presenter.link_text
+        presenter.title
+
+    @mock.patch('h.presenters.DocumentHTMLPresenter')
+    def test_it_does_not_init_DocumentHTMLPresenter_if_no_document(
+            self, DocumentHTMLPresenter):
+        """
+        It shouldn't init DocumentHTMLPresenter if document is None.
+
+        We don't want DocumentHTMLPresenter to be initialized with None for
+        a document, so make sure that AnnotationHTMLPresenter doesn't do so.
+
+        """
+        annotation = mock.Mock(document=None)
+        presenter = presenters.AnnotationHTMLPresenter(annotation)
+
+        # Call all these as well to make sure that none of them cause a
+        # DocumentHTMLPresenter to be initialized.
+        # pylint: disable=pointless-statement
+        presenter.document_link
+        presenter.hostname_or_filename
+        presenter.href
+        presenter.link_text
+        presenter.title
+
+        assert not DocumentHTMLPresenter.called
+
 
 class TestDocumentHTMLPresenter(object):
 
