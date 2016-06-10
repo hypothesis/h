@@ -55,11 +55,8 @@ def cohorts_index(context, request):
 def cohorts_add(request):
     """Create a new feature cohort."""
     cohort_name = request.params['add']
-    if cohort_name not in models.FeatureCohort.RESERVED_FEATURECOHORT_NAMES:
-        cohort = models.FeatureCohort(name=cohort_name)
-        request.db.add(cohort)
-    else:
-        request.session.flash(_("Name cannot be one of: everyone, admins, staff."), "error")
+    cohort = models.FeatureCohort(name=cohort_name)
+    request.db.add(cohort)
 
     url = request.route_url('admin_cohorts')
     return httpexceptions.HTTPSeeOther(url)
