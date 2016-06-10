@@ -401,7 +401,7 @@ def test_read_if_already_a_member_when_group_has_no_annotated_documents(
 
     views.read(share_group_request)
 
-    assert not presenters.AnnotationHTMLPresenter.called
+    assert not presenters.DocumentHTMLPresenter.called
     assert renderers.render_to_response.call_args[1]['value']['document_links'] == []
 
 
