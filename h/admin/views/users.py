@@ -26,7 +26,7 @@ def users_index(request):
     username = request.params.get('username')
 
     if username:
-        user = models.User.get_by_username(username)
+        user = models.User.get_by_username(request.db, username)
         if user is None:
             user = models.User.get_by_email(request.db, username)
 
@@ -47,7 +47,7 @@ def users_index(request):
              permission='admin_users')
 def users_activate(request):
     username = request.params['username']
-    user = models.User.get_by_username(username)
+    user = models.User.get_by_username(request.db, username)
 
     if user is None:
         request.session.flash(jinja2.Markup(_(
@@ -74,7 +74,7 @@ def users_activate(request):
              permission='admin_users')
 def users_delete(request):
     username = request.params.get('username')
-    user = models.User.get_by_username(username)
+    user = models.User.get_by_username(request.db, username)
 
     if user is None:
         request.session.flash(

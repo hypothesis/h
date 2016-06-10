@@ -92,7 +92,8 @@ def test_unique_email_invalid_when_user_does_not_exist(user_model):
 
 
 def test_RegisterSchema_with_password_too_short(user_model):
-    schema = schemas.RegisterSchema().bind(request=DummyRequest())
+    request = DummyRequest(db=mock.sentinel.db_session)
+    schema = schemas.RegisterSchema().bind(request=request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"password": "a"})
@@ -100,7 +101,8 @@ def test_RegisterSchema_with_password_too_short(user_model):
 
 
 def test_RegisterSchema_with_username_too_short(user_model):
-    schema = schemas.RegisterSchema().bind(request=DummyRequest())
+    request = DummyRequest(db=mock.sentinel.db_session)
+    schema = schemas.RegisterSchema().bind(request=request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"username": "a"})
@@ -108,7 +110,8 @@ def test_RegisterSchema_with_username_too_short(user_model):
 
 
 def test_RegisterSchema_with_username_too_long(user_model):
-    schema = schemas.RegisterSchema().bind(request=DummyRequest())
+    request = DummyRequest(db=mock.sentinel.db_session)
+    schema = schemas.RegisterSchema().bind(request=request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"username": "a" * 500})

@@ -46,7 +46,7 @@ def get_user(userid, request):
     if parts['domain'] != request.auth_domain:
         return None
 
-    return models.User.get_by_username(parts['username'])
+    return models.User.get_by_username(request.db, parts['username'])
 
 
 def authenticated_user(request):

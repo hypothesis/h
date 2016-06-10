@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from mock import Mock
+import mock
 from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
 import pytest
@@ -12,18 +12,14 @@ from h.admin.views import staff as views
 
 @pytest.mark.usefixtures('routes')
 class TestStaffIndex(object):
-    def test_when_no_staff(self):
-        request = DummyRequest()
-
-        result = views.staff_index(request)
+    def test_when_no_staff(self, req):
+        result = views.staff_index(req)
 
         assert result["staff"] == []
 
     @pytest.mark.usefixtures('users')
-    def test_context_contains_staff_usernames(self):
-        request = DummyRequest()
-
-        result = views.staff_index(request)
+    def test_context_contains_staff_usernames(self, req):
+        result = views.staff_index(req)
 
         assert set(result["staff"]) == set(["agnos", "bojan", "cristof"])
 
@@ -31,73 +27,83 @@ class TestStaffIndex(object):
 @pytest.mark.usefixtures('users', 'routes')
 class TestStaffAddRemove(object):
 
-    def test_add_makes_users_staff(self, users):
-        request = DummyRequest(params={"add": "eva"})
+    def test_add_makes_users_staff(self, req, users):
+        req.params = {"add": "eva"}
 
-        views.staff_add(request)
+        views.staff_add(req)
 
         assert users['eva'].staff
 
-    def test_add_is_idempotent(self, users):
-        request = DummyRequest(params={"add": "agnos"})
+    def test_add_is_idempotent(self, req, users):
+        req.params = {"add": "agnos"}
 
-        views.staff_add(request)
+        views.staff_add(req)
 
         assert users['agnos'].staff
 
-    def test_add_redirects_to_index(self):
-        request = DummyRequest(params={"add": "eva"})
+    def test_add_redirects_to_index(self, req):
+        req.params = {"add": "eva"}
 
-        result = views.staff_add(request)
-
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location == '/adm/staff'
-
-    def test_add_redirects_to_index_when_user_not_found(self):
-        request = DummyRequest(params={"add": "florp"})
-
-        result = views.staff_add(request)
+        result = views.staff_add(req)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/staff'
 
-    def test_add_flashes_when_user_not_found(self):
-        request = DummyRequest(params={"add": "florp"})
-        request.session.flash = Mock()
+    def test_add_redirects_to_index_when_user_not_found(self, req):
+        req.params = {"add": "florp"}
 
-        views.staff_add(request)
+        result = views.staff_add(req)
 
-        assert request.session.flash.call_count == 1
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/staff'
 
-    def test_remove_makes_users_not_staff(self, users):
-        request = DummyRequest(params={"remove": "cristof"})
+    def test_add_flashes_when_user_not_found(self, req):
+        req.params = {"add": "florp"}
+        req.session.flash = mock.Mock()
 
-        views.staff_remove(request)
+        views.staff_add(req)
+
+        assert req.session.flash.call_count == 1
+
+    def test_remove_makes_users_not_staff(self, req, users):
+        req.params = {"remove": "cristof"}
+
+        views.staff_remove(req)
 
         assert not users['cristof'].staff
 
-    def test_remove_is_idempotent(self, users):
-        request = DummyRequest(params={"remove": "eva"})
+    def test_remove_is_idempotent(self, req, users):
+        req.params = {"remove": "eva"}
 
-        views.staff_remove(request)
+        views.staff_remove(req)
 
         assert not users['eva'].staff
 
-    def test_remove_redirects_to_index(self):
-        request = DummyRequest(params={"remove": "agnos"})
+    def test_remove_redirects_to_index(self, req):
+        req.params = {"remove": "agnos"}
 
-        result = views.staff_remove(request)
+        result = views.staff_remove(req)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/staff'
+
+    def test_remove_redirects_to_index_when_user_not_found(self, req):
+        req.params = {"remove": "florp"}
+
+        result = views.staff_remove(req)
 
         assert isinstance(result, httpexceptions.HTTPSeeOther)
         assert result.location == '/adm/staff'
 
-    def test_remove_redirects_to_index_when_user_not_found(self):
-        request = DummyRequest(params={"remove": "florp"})
 
-        result = views.staff_remove(request)
+@pytest.fixture
+def req(db_session):
+    return DummyRequest(db=db_session)
 
-        assert isinstance(result, httpexceptions.HTTPSeeOther)
-        assert result.location == '/adm/staff'
+
+@pytest.fixture
+def routes(config):
+    config.add_route('admin_staff', '/adm/staff')
 
 
 @pytest.fixture
@@ -123,8 +129,3 @@ def users(db_session):
     db_session.flush()
 
     return users
-
-
-@pytest.fixture()
-def routes(config):
-    config.add_route('admin_staff', '/adm/staff')
