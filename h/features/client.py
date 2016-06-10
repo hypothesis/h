@@ -79,4 +79,7 @@ class Client(object):
         # member.
         if feature.staff and role.Staff in self.request.effective_principals:
             return True
+        for cohort in feature.cohorts:
+            if self.request.authenticated_user in cohort.members:
+                return True
         return False
