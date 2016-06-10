@@ -130,12 +130,7 @@ def update_annotation(session, id_, data):
 
     annotation = session.query(models.Annotation).get(id_)
 
-    # Just modifying the annotation.extra dict in place doesn't let sqlalchemy
-    # know that it has changed and needs to be saved to the database.
-    # Work around this for now by copying, modifying then assigning.
-    extra = dict(annotation.extra)
-    extra.update(data.pop('extra', {}))
-    annotation.extra = extra
+    annotation.extra.update(data.pop('extra', {}))
 
     for key, value in data.items():
         setattr(annotation, key, value)
