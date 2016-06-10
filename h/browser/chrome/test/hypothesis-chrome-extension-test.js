@@ -36,6 +36,7 @@ describe('HypothesisChromeExtension', function () {
   var sandbox = sinon.sandbox.create();
   var HypothesisChromeExtension;
   var ext;
+  var fakeChromeStorage;
   var fakeChromeTabs;
   var fakeChromeBrowserAction;
   var fakeErrors;
@@ -47,6 +48,7 @@ describe('HypothesisChromeExtension', function () {
 
   function createExt() {
     return new HypothesisChromeExtension({
+      chromeStorage: fakeChromeStorage,
       chromeTabs: fakeChromeTabs,
       chromeBrowserAction: fakeChromeBrowserAction,
       extensionURL: sandbox.stub(),
@@ -55,6 +57,11 @@ describe('HypothesisChromeExtension', function () {
   }
 
   beforeEach(function () {
+    fakeChromeStorage = {
+      sync: {
+        get: sandbox.stub().callsArgWith(1, {badge: true})
+      }
+    };
     fakeChromeTabs = {
       onCreated: new FakeListener(),
       onUpdated: new FakeListener(),
