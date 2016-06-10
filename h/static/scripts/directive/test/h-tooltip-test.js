@@ -6,6 +6,7 @@ var util = require('./util');
 
 function testComponent() {
   return {
+    controller: function () {},
     restrict: 'E',
     template: '<div aria-label="Share" h-tooltip>Label</div>',
   };

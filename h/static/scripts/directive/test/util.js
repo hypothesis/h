@@ -151,6 +151,12 @@ function createDirective(document, name, attrs, initialScope, initialHtml, opts)
     element.scope = childScope;
     childScope.$digest();
     element.ctrl = element.controller(name);
+
+    if (!element.ctrl) {
+      throw new Error('Failed to create "' + name + '" directive in test.' +
+        'Did you forget to register it with angular.module(...).directive() ?');
+    }
+
     return element;
   };
 

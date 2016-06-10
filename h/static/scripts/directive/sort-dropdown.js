@@ -2,6 +2,7 @@
 
 module.exports = function () {
   return {
+    controller: function () {},
     restrict: 'E',
     scope: {
       /** The name of the currently selected sort key. */
@@ -12,5 +13,5 @@ module.exports = function () {
       onChangeSortKey: '&',
     },
     template: require('../../../templates/client/sort_dropdown.html'),
-  }
+  };
 };

@@ -4,7 +4,6 @@
 var angular = require('angular');
 
 var annotationMetadata = require('../annotation-metadata');
-var dateUtil = require('../date-util');
 var documentDomain = require('../filter/document-domain');
 var documentTitle = require('../filter/document-title');
 var events = require('../events');
@@ -111,7 +110,7 @@ function updateDomainModel(domainModel, vm, permissions) {
 }
 
 /** Update the view model from the domain model changes. */
-function updateViewModel($scope, time, domainModel,
+function updateViewModel($scope, domainModel,
                          vm, permissions) {
 
   vm.form = {
@@ -131,22 +130,6 @@ function updateViewModel($scope, time, domainModel,
 
   vm.isPrivate = permissions.isPrivate(
     domainModel.permissions, domainModel.user);
-
-  function updateTimestamp() {
-    vm.relativeTimestamp = time.toFuzzyString(domainModel.updated);
-    vm.absoluteTimestamp = dateUtil.format(new Date(domainModel.updated));
-  }
-
-  if (domainModel.updated) {
-    if (vm.cancelTimestampRefresh) {
-      vm.cancelTimestampRefresh();
-    }
-    vm.cancelTimestampRefresh =
-     time.decayingInterval(domainModel.updated, function () {
-       $scope.$apply(updateTimestamp);
-     });
-    updateTimestamp();
-  }
 
   var documentMetadata = extractDocumentMetadata(domainModel);
   vm.documentTitle = documentTitle(documentMetadata);
@@ -175,7 +158,7 @@ function viewModelTagsFromDomainModelTags(domainModelTags) {
 function AnnotationController(
   $document, $q, $rootScope, $scope, $timeout, $window, annotationUI,
   annotationMapper, drafts, flash, features, groups, permissions, session,
-  settings, tags, time) {
+  settings, tags) {
 
   var vm = this;
   var domainModel;
@@ -212,21 +195,6 @@ function AnnotationController(
 
     /** Whether or not this annotation is private. */
     vm.isPrivate = false;
-
-    /** A fuzzy, relative (eg. '6 days ago') format of the annotation's
-     * last update timestamp
-     */
-    vm.relativeTimestamp = null;
-
-    /** A formatted version of the annotation's last update timestamp
-     * (eg. 'Tue 22nd Dec 2015, 16:00')
-     */
-    vm.absoluteTimestamp = '';
-
-    /** A callback for resetting the automatic refresh of
-     * vm.relativeTimestamp and vm.absoluteTimestamp
-     */
-    vm.cancelTimestampRefresh = undefined;
 
     /** Determines whether controls to expand/collapse the annotation body
      * are displayed adjacent to the tags field.
@@ -304,7 +272,7 @@ function AnnotationController(
   }
 
   function updateView(domainModel) {
-    updateViewModel($scope, time, domainModel, vm, permissions);
+    updateViewModel($scope, domainModel, vm, permissions);
   }
 
   function onAnnotationUpdated(event, updatedDomainModel) {
@@ -329,10 +297,6 @@ function AnnotationController(
     // when switching groups or when the component is scrolled off-screen.
     if (vm.editing()) {
       saveToDrafts(drafts, domainModel, vm);
-    }
-
-    if (vm.cancelTimestampRefresh) {
-      vm.cancelTimestampRefresh();
     }
   }
 

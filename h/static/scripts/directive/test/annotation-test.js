@@ -144,7 +144,6 @@ describe('annotation', function() {
     var fakeGroups;
     var fakePermissions;
     var fakeSession;
-    var fakeTime;
     var sandbox;
 
     function createDirective(annotation) {
@@ -236,11 +235,6 @@ describe('annotation', function() {
         store: sandbox.stub()
       };
 
-      fakeTime = {
-        toFuzzyString: sandbox.stub().returns('a while ago'),
-        decayingInterval: function () {},
-      };
-
       fakeGroups = {
         focused: function() {
           return {};
@@ -257,7 +251,6 @@ describe('annotation', function() {
       $provide.value('session', fakeSession);
       $provide.value('settings', fakeSettings);
       $provide.value('tags', fakeTags);
-      $provide.value('time', fakeTime);
       $provide.value('groups', fakeGroups);
     }));
 
@@ -739,115 +732,6 @@ describe('annotation', function() {
         var controller = createDirective(annotation).controller;
 
         assert.isTrue(controller.hasQuotes());
-      });
-    });
-
-    describe('relativeTimestamp', function() {
-      var annotation;
-      var clock;
-
-      beforeEach(function() {
-        clock = sinon.useFakeTimers();
-        annotation = fixtures.defaultAnnotation();
-        annotation.created = (new Date()).toString();
-        annotation.updated = (new Date()).toString();
-      });
-
-      afterEach(function() {
-        clock.restore();
-      });
-
-      it('is not updated for unsaved annotations', function() {
-        annotation.updated = null;
-        var controller = createDirective(annotation).controller;
-        // Unsaved annotations don't have an updated time yet so a timestamp
-        // string can't be computed for them.
-        $scope.$digest();
-        assert.equal(controller.relativeTimestamp, null);
-      });
-
-      it('is updated when a new annotation is saved', function () {
-        fakeTime.decayingInterval = function (date, callback) {
-          callback();
-        };
-
-        // fake clocks are not required for this test
-        clock.restore();
-
-        annotation.updated = null;
-        annotation.$create = function () {
-          annotation.updated = (new Date()).toString();
-          return Promise.resolve(annotation);
-        };
-        var controller = createDirective(annotation).controller;
-        controller.action = 'create';
-        controller.form.text = 'test';
-        return controller.save().then(function () {
-          assert.equal(controller.relativeTimestamp, 'a while ago');
-        });
-      });
-
-      it('is updated when a change to an existing annotation is saved',
-       function () {
-        fakeTime.toFuzzyString = function(date) {
-          var ONE_MINUTE = 60 * 1000;
-          if (Date.now() - new Date(date) < ONE_MINUTE) {
-            return 'just now';
-          } else {
-            return 'ages ago';
-          }
-        };
-
-        clock.tick(10 * 60 * 1000);
-
-        annotation.$update = function () {
-          this.updated = (new Date()).toString();
-          return Promise.resolve(this);
-        };
-        var controller = createDirective(annotation).controller;
-        assert.equal(controller.relativeTimestamp, 'ages ago');
-        controller.edit();
-        controller.form.text = 'test';
-        clock.restore();
-        return controller.save().then(function () {
-          assert.equal(controller.relativeTimestamp, 'just now');
-        });
-      });
-
-      it('is updated on first digest', function() {
-        var controller = createDirective(annotation).controller;
-        $scope.$digest();
-        assert.equal(controller.relativeTimestamp, 'a while ago');
-      });
-
-      it('is updated after a timeout', function() {
-        fakeTime.decayingInterval = function (date, callback) {
-          setTimeout(callback, 10);
-        };
-        var controller = createDirective(annotation).controller;
-        fakeTime.toFuzzyString.returns('ages ago');
-        $scope.$digest();
-        clock.tick(11000);
-        assert.equal(controller.relativeTimestamp, 'ages ago');
-      });
-
-      it('is no longer updated after the scope is destroyed', function() {
-        createDirective(annotation);
-        $scope.$digest();
-        $scope.$destroy();
-        $timeout.verifyNoPendingTasks();
-      });
-    });
-
-    describe('absoluteTimestamp', function () {
-      it('returns the current time', function () {
-        var annotation = fixtures.defaultAnnotation();
-        var controller = createDirective(annotation).controller;
-        var expectedDate = new Date(annotation.updated);
-        // the exact format of the result will depend on the current locale,
-        // but check that at least the current year and time are present
-        assert.match(controller.absoluteTimestamp, new RegExp('.*2015.*' +
-          expectedDate.toLocaleTimeString()));
       });
     });
 

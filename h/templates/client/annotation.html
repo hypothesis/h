@@ -40,13 +40,11 @@
 
     <span class="u-flex-spacer"></span>
 
-    <!-- Timestamp -->
-    <a class="annotation-header__timestamp"
-       target="_blank"
-       title="{{vm.absoluteTimestamp}}"
-       ng-if="!vm.editing() && vm.updated()"
-       ng-href="{{vm.linkHTML}}"
-       >{{vm.relativeTimestamp}}</a>
+    <timestamp
+      class-name="'annotation-header__timestamp'"
+      timestamp="vm.updated()"
+      href="vm.linkHTML"
+      ng-if="!vm.editing() && vm.updated()"></timestamp>
   </header>
 
   <!-- Excerpts -->
