@@ -84,24 +84,15 @@
 
   <!-- Tags -->
   <div class="annotation-body form-field" ng-if="vm.editing()">
-    <tags-input ng-model="vm.form.tags"
-      name="tags"
-      class="tags"
-      placeholder="Add tags…"
-      min-length="1"
-      replace-spaces-with-dashes="false"
-      enable-editing-last-tag="true">
-      <auto-complete source="vm.tagsAutoComplete($query)"
-        min-length="1"
-        max-results-to-show="10"></auto-complete>
-    </tags-input>
+    <tag-editor tags="vm.form.tags"
+                on-edit-tags="vm.setTags(tags)"></tag-editor>
   </div>
 
   <div class="annotation-body u-layout-row tags tags-read-only"
        ng-if="(vm.canCollapseBody || vm.form.tags.length) && !vm.editing()">
     <ul class="tag-list">
       <li class="tag-item" ng-repeat="tag in vm.form.tags">
-        <a ng-href="{{vm.tagStreamURL(tag.text)}}" target="_blank">{{tag.text}}</a>
+        <a ng-href="{{vm.tagStreamURL(tag)}}" target="_blank">{{tag}}</a>
       </li>
     </ul>
     <div class="u-stretch"></div>

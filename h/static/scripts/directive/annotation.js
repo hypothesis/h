@@ -13,19 +13,6 @@ var isNew = annotationMetadata.isNew;
 var isReply = annotationMetadata.isReply;
 var extractDocumentMetadata = annotationMetadata.extractDocumentMetadata;
 
-/** Return a domainModel tags array from the given vm tags array.
- *
- * domainModel.tags and vm.form.tags use different formats.  This
- * function returns a domainModel.tags-formatted copy of the given
- * vm.form.tags-formatted array.
- *
- */
-function domainModelTagsFromViewModelTags(viewModelTags) {
-  return (viewModelTags || []).map(function(tag) {
-    return tag.text;
-  });
-}
-
 /** Return a human-readable error message for the given server error.
  *
  * @param {object} reason The error object from the server. Should have
@@ -92,16 +79,13 @@ function saveToDrafts(drafts, domainModel, vm) {
  * Copy any properties from vm that might have been modified by the user into
  * domainModel, overwriting any existing properties in domainModel.
  *
- * Additionally, the `tags` property of vm - an array of objects each with a
- * `text` string - will become a simple array of strings in domainModel.
- *
  * @param {object} domainModel The object to copy properties to
  * @param {object} vm The object to copy properties from
  *
  */
 function updateDomainModel(domainModel, vm, permissions) {
   domainModel.text = vm.form.text;
-  domainModel.tags = domainModelTagsFromViewModelTags(vm.form.tags);
+  domainModel.tags = vm.form.tags;
   if (vm.isPrivate) {
     domainModel.permissions = permissions.private();
   } else {
@@ -115,7 +99,7 @@ function updateViewModel($scope, domainModel,
 
   vm.form = {
     text: domainModel.text,
-    tags: viewModelTagsFromDomainModelTags(domainModel.tags),
+    tags: domainModel.tags,
   };
 
   if (domainModel.links) {
@@ -136,19 +120,6 @@ function updateViewModel($scope, domainModel,
   vm.documentDomain = documentDomain(documentMetadata);
 }
 
-/** Return a vm tags array from the given domainModel tags array.
- *
- * domainModel.tags and vm.form.tags use different formats.  This
- * function returns a vm.form.tags-formatted copy of the given
- * domainModel.tags-formatted array.
- *
- */
-function viewModelTagsFromDomainModelTags(domainModelTags) {
-  return (domainModelTags || []).map(function(tag) {
-    return {text: tag};
-  });
-}
-
 /**
   * @ngdoc type
   * @name annotation.AnnotationController
@@ -158,7 +129,7 @@ function viewModelTagsFromDomainModelTags(domainModelTags) {
 function AnnotationController(
   $document, $q, $rootScope, $scope, $timeout, $window, annotationUI,
   annotationMapper, drafts, flash, features, groups, permissions, session,
-  settings, tags) {
+  settings) {
 
   var vm = this;
   var domainModel;
@@ -554,13 +525,6 @@ function AnnotationController(
       return Promise.resolve();
     }
 
-    // Update stored tags with the new tags of this annotation.
-    var newTags = vm.form.tags.filter(function(tag) {
-      var tags = domainModel.tags || [];
-      return tags.indexOf(tag.text) === -1;
-    });
-    tags.store(newTags);
-
     var saved;
     switch (vm.action) {
       case 'create':
@@ -624,16 +588,6 @@ function AnnotationController(
     vm.isPrivate = (privacy === 'private');
   };
 
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#tagsAutoComplete.
-    * @returns {Promise} immediately resolved to {string[]} -
-    * the tags to show in autocomplete.
-    */
-  vm.tagsAutoComplete = function(query) {
-    return $q.when(tags.filter(query));
-  };
-
   vm.tagStreamURL = function(tag) {
     return vm.serviceUrl + 'stream?q=tag:' + encodeURIComponent(tag);
   };
@@ -675,6 +629,10 @@ function AnnotationController(
 
   vm.setText = function (text) {
     vm.form.text = text;
+  };
+
+  vm.setTags = function (tags) {
+    vm.form.tags = tags;
   };
 
   init();

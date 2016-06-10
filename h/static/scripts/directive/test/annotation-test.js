@@ -83,20 +83,14 @@ describe('annotation', function() {
       var domainModel = {};
       var viewModel = {
         form: {
-          tags: [
-            {text: 'foo'},
-            {text: 'bar'}
-          ]
+          tags: ['foo', 'bar'],
         }
       };
 
       updateDomainModel(domainModel, viewModel, fakePermissions(),
                         fakeGroups());
 
-      assert.deepEqual(
-        domainModel.tags, ['foo', 'bar'],
-        'The array of {tag: "text"} objects in  viewModel becomes an array ' +
-        'of "text" strings in domainModel');
+      assert.deepEqual(domainModel.tags, ['foo', 'bar']);
     });
 
     it('sets domainModel.permissions to private if vm.isPrivate', function() {
@@ -230,11 +224,6 @@ describe('annotation', function() {
         serviceUrl: 'https://test.hypothes.is/',
       };
 
-      var fakeTags = {
-        filter: sandbox.stub().returns('a while ago'),
-        store: sandbox.stub()
-      };
-
       fakeGroups = {
         focused: function() {
           return {};
@@ -250,7 +239,6 @@ describe('annotation', function() {
       $provide.value('permissions', fakePermissions);
       $provide.value('session', fakeSession);
       $provide.value('settings', fakeSettings);
-      $provide.value('tags', fakeTags);
       $provide.value('groups', fakeGroups);
     }));
 
@@ -700,11 +688,7 @@ describe('annotation', function() {
         controller.form.text = 'bar';
         assert.ok(controller.hasContent());
         controller.form.text = '';
-        controller.form.tags = [
-          {
-            text: 'foo'
-          }
-        ];
+        controller.form.tags = ['foo'];
         assert.ok(controller.hasContent());
       });
     });
@@ -995,11 +979,7 @@ describe('annotation', function() {
     describe('drafts', function() {
       it('starts editing immediately if there is a draft', function() {
         fakeDrafts.get.returns({
-          tags: [
-            {
-              text: 'unsaved'
-            }
-          ],
+          tags: ['unsaved'],
           text: 'unsaved-text'
         });
         var controller = createDirective().controller;
@@ -1008,15 +988,11 @@ describe('annotation', function() {
 
       it('uses the text and tags from the draft if present', function() {
         fakeDrafts.get.returns({
-          tags: [{text: 'unsaved-tag'}],
+          tags: ['unsaved-tag'],
           text: 'unsaved-text'
         });
         var controller = createDirective().controller;
-        assert.deepEqual(controller.form.tags, [
-          {
-            text: 'unsaved-tag'
-          }
-        ]);
+        assert.deepEqual(controller.form.tags, ['unsaved-tag']);
         assert.equal(controller.form.text, 'unsaved-text');
       });
 
@@ -1096,7 +1072,7 @@ describe('annotation', function() {
       it('does not remove the current annotation if it has tags', function () {
         var annotation = fixtures.newAnnotation();
         var parts = createDirective(annotation);
-        parts.controller.form.tags = [{text: 'a-tag'}];
+        parts.controller.form.tags = ['a-tag'];
         $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED,
           fixtures.newAnnotation());
         assert.notCalled(fakeDrafts.remove);

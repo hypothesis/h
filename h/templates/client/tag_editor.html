@@ -1,0 +1,13 @@
+<tags-input ng-model="vm.tagList"
+  name="tags"
+  class="tags"
+  placeholder="Add tags…"
+  min-length="1"
+  replace-spaces-with-dashes="false"
+  enable-editing-last-tag="true"
+  on-tag-added="vm.onTagsChanged()"
+  on-tag-removed="vm.onTagsChanged()">
+  <auto-complete source="vm.autocomplete($query)"
+    min-length="1"
+    max-results-to-show="10"></auto-complete>
+</tags-input>
