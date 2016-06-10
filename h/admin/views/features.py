@@ -14,7 +14,10 @@ from h.i18n import TranslationString as _
              renderer='h:templates/admin/features.html.jinja2',
              permission='admin_features')
 def features_index(request):
-    return {"features": models.Feature.all(request.db)}
+    return {
+        "features": models.Feature.all(request.db),
+        "cohorts": request.db.query(models.FeatureCohort).all(),
+    }
 
 
 @view_config(route_name='admin_features',

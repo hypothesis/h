@@ -25,6 +25,7 @@
             <th>Everyone</th>
             <th>Admins</th>
             <th>Staff</th>
+            <th>Cohorts</th>
             <th></th>
           </tr>
         </thead>
@@ -49,6 +50,17 @@
                 type="checkbox"
                 name="{{ feat.name }}[staff]"
                 {% if feat.staff %}checked{% endif %}>
+            </td>
+            <td>
+              {% for c in cohorts %}
+                <fieldset>
+                  <input
+                    type="checkbox"
+                    name="{{ feat.name }}[{{ c.name }}]"
+                    {% if c in feat.featurecohorts %}checked{% endif %}>
+                  <label for="{{ feat.name }}[{{ c.name }}]">{{ c.name }}</label>
+                </fieldset>
+              {% endfor %}
             </td>
             <td>
               {{ feat.description }}
