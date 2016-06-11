@@ -88,8 +88,18 @@ var Observable = require('zen-observable');
    });
  }
 
+/** Drop the first `n` events from the `src` Observable. */
+function drop(src, n) {
+  var count = 0;
+  return src.filter(function () {
+    ++count;
+    return count > n;
+  });
+}
+
 module.exports = {
   buffer: buffer,
+  drop: drop,
   listen: listen,
   merge: merge,
   Observable: Observable,
