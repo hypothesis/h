@@ -167,6 +167,7 @@ def create_app(global_config, **settings):
     config.include('pyramid_services')
 
     config.include('h.auth')
+    config.include('h.session')
     config.include('h.sentry')
     config.include('h.stats')
 
