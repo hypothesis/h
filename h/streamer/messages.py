@@ -11,7 +11,6 @@ from h.realtime import Consumer
 from h.api import presenters
 from h.api import storage
 from h.auth.util import translate_annotation_principals
-from h.nipsa.logic import has_nipsa
 from h.streamer import websocket
 import h.sentry
 
@@ -123,7 +122,8 @@ def handle_annotation_event(message, socket):
             socket.request, annotation).asdict()
 
     userid = serialized.get('user')
-    if has_nipsa(userid) and socket.request.authenticated_userid != userid:
+    nipsa_service = socket.request.find_service(name='nipsa')
+    if nipsa_service.is_flagged(userid) and socket.request.authenticated_userid != userid:
         return None
 
     permissions = serialized.get('permissions')

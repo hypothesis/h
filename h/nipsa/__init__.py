@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from h.nipsa.logic import index
-from h.nipsa.logic import add_nipsa
-from h.nipsa.logic import remove_nipsa
 from h.nipsa import services
 from h.nipsa import search
-
-__all__ = ('index', 'add_nipsa', 'remove_nipsa')
 
 
 def includeme(config):
