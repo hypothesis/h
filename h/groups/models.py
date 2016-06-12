@@ -87,9 +87,9 @@ class Group(Base, mixins.Timestamps):
         return session.query(cls).filter(cls.pubid == pubid).first()
 
     @classmethod
-    def created_by(cls, user):
+    def created_by(cls, session, user):
         """Return a query object filtering groups by creator."""
-        return cls.query.filter(Group.creator == user)
+        return session.query(cls).filter(Group.creator == user)
 
 
 USER_GROUP_TABLE = sa.Table(

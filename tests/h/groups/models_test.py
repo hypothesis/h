@@ -71,7 +71,7 @@ def test_created_by():
     db.Session.add(group_1, group_2)
     db.Session.flush()
 
-    assert models.Group.created_by(user).all() == [group_1, group_2]
+    assert models.Group.created_by(db.Session, user).all() == [group_1, group_2]
 
 
 @pytest.mark.usefixtures('documents')
