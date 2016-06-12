@@ -82,9 +82,9 @@ class Group(Base, mixins.Timestamps):
         return documents
 
     @classmethod
-    def get_by_pubid(cls, pubid):
+    def get_by_pubid(cls, session, pubid):
         """Return the group with the given pubid, or None."""
-        return cls.query.filter(cls.pubid == pubid).first()
+        return session.query(cls).filter(cls.pubid == pubid).first()
 
     @classmethod
     def created_by(cls, user):

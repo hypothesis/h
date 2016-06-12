@@ -172,9 +172,10 @@ read_fixtures = pytest.mark.usefixtures('Group',
 
 @read_fixtures
 def test_read_gets_group_by_pubid(Group):
-    views.read(_mock_request(matchdict={'pubid': 'abc', 'slug': 'snail'}))
+    request = _mock_request(matchdict={'pubid': 'abc', 'slug': 'snail'})
+    views.read(request)
 
-    Group.get_by_pubid.assert_called_once_with('abc')
+    Group.get_by_pubid.assert_called_once_with(request.db, 'abc')
 
 
 @read_fixtures
@@ -420,9 +421,10 @@ join_fixtures = pytest.mark.usefixtures('Group', 'session_model')
 
 @join_fixtures
 def test_join_gets_group_by_pubid(Group):
-    views.join(_mock_request(matchdict={'pubid': 'twibble', 'slug': 'snail'}))
+    request = _mock_request(matchdict={'pubid': 'twibble', 'slug': 'snail'})
+    views.join(request)
 
-    Group.get_by_pubid.assert_called_once_with("twibble")
+    Group.get_by_pubid.assert_called_once_with(request.db, "twibble")
 
 
 @join_fixtures
@@ -534,7 +536,7 @@ def share_group_request(Group, config, pubid=u'__world__'):
     The user is logged-in and is a member of the group.
 
     """
-    request = testing.DummyRequest()
+    request = testing.DummyRequest(db=mock.sentinel.db_session)
     request.matchdict.update({'pubid': pubid, 'slug': 'slug'})
 
     # The user is logged-in.
