@@ -60,28 +60,6 @@ def test_repr():
     assert repr(group) == "<Group: my-hypothesis-group>"
 
 
-def test_get_by_id_when_id_does_exist():
-    name = "My Hypothesis Group"
-    user = factories.User()
-
-    group = models.Group(name=name, creator=user)
-    db.Session.add(group)
-    db.Session.flush()
-
-    assert models.Group.get_by_id(group.id) == group
-
-
-def test_get_by_id_when_id_does_not_exist():
-    name = "My Hypothesis Group"
-    user = factories.User()
-
-    group = models.Group(name=name, creator=user)
-    db.Session.add(group)
-    db.Session.flush()
-
-    assert models.Group.get_by_id(23) is None
-
-
 def test_created_by():
     name_1 = "My first group"
     name_2 = "My second group"

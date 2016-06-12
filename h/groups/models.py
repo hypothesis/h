@@ -87,15 +87,6 @@ class Group(Base, mixins.Timestamps):
         return cls.query.filter(cls.pubid == pubid).first()
 
     @classmethod
-    def get_by_id(cls, id_):
-        """Return the group with the given id, or None."""
-        try:
-            return cls.query.filter(
-                cls.id == id_).one()
-        except exc.NoResultFound:
-            return None
-
-    @classmethod
     def created_by(cls, user):
         """Return a query object filtering groups by creator."""
         return cls.query.filter(Group.creator == user)
