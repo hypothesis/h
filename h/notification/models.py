@@ -15,8 +15,8 @@ class Subscriptions(Base):
     active = sa.Column(sa.Boolean, default=True, nullable=False)
 
     @classmethod
-    def get_subscriptions_for_uri(cls, uri):
-        return cls.query.filter(
+    def get_subscriptions_for_uri(cls, session, uri):
+        return session.query(cls).filter(
             func.lower(cls.uri) == func.lower(uri)
         ).all()
 
