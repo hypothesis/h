@@ -110,7 +110,7 @@ def test_setting_extras_inline_is_persisted(db_session):
     # dict. Without this commit() this test would never fail.
     db_session.commit()
 
-    annotation = Annotation.query.get(annotation.id)
+    annotation = db_session.query(Annotation).get(annotation.id)
 
     assert annotation.extra == {'foo': 'bar'}
 
@@ -130,7 +130,7 @@ def test_deleting_extras_inline_is_persisted(db_session):
 
     del annotation.extra['foo']
     db_session.commit()
-    annotation = Annotation.query.get(annotation.id)
+    annotation = db_session.query(Annotation).get(annotation.id)
 
     assert 'foo' not in annotation.extra
 
@@ -150,7 +150,7 @@ def test_appending_tags_inline_is_persisted(db_session):
 
     annotation.tags.append('foo')
     db_session.commit()
-    annotation = Annotation.query.get(annotation.id)
+    annotation = db_session.query(Annotation).get(annotation.id)
 
     assert 'foo' in annotation.tags
 
@@ -164,7 +164,7 @@ def test_deleting_tags_inline_is_persisted(db_session):
 
     del annotation.tags[0]
     db_session.commit()
-    annotation = Annotation.query.get(annotation.id)
+    annotation = db_session.query(Annotation).get(annotation.id)
 
     assert 'foo' not in annotation.tags
 
