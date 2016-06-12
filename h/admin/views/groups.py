@@ -12,7 +12,7 @@ from h import paginator
              permission='admin_groups')
 @paginator.paginate
 def groups_index(context, request):
-    return models.Group.query.order_by(models.Group.created.desc())
+    return request.db.query(models.Group).order_by(models.Group.created.desc())
 
 
 @view_config(route_name='admin_groups_csv',
@@ -20,7 +20,7 @@ def groups_index(context, request):
              renderer='csv',
              permission='admin_groups')
 def groups_index_csv(request):
-    groups = models.Group.query
+    groups = request.db.query(models.Group)
 
     header = ['Group name', 'Group URL', 'Creator username',
               'Creator email', 'Number of members']

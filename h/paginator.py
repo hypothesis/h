@@ -19,7 +19,7 @@ def paginate(wrapped=None, page_size=PAGE_SIZE):
 
         @paginate
         def my_view(context, request):
-            return User.query
+            return request.db.query(User)
 
     will, when wrapped, return a dictionary like the following:
 
