@@ -4,7 +4,7 @@ import mock
 import pytest
 
 from h import db
-from h.features.models import Feature
+from h.models import Feature
 
 
 @pytest.mark.usefixtures('features_override',
@@ -16,7 +16,7 @@ class TestFeature(object):
         assert feat.description == 'A test flag for testing with.'
 
     def test_all_creates_annotations_that_dont_exist(self):
-        features = Feature.all()
+        features = Feature.all(db.Session)
 
         assert len(features) == 1
         assert features[0].name == 'notification'
@@ -30,7 +30,7 @@ class TestFeature(object):
         session.add_all([new, pending, old])
         session.flush()
 
-        features = Feature.all()
+        features = Feature.all(session)
 
         assert len(features) == 1
         assert features[0].name == 'notification'

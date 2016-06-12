@@ -64,7 +64,8 @@ class Client(object):
 
     def _load(self):
         """Loads the feature flag states into the internal cache."""
-        self._cache = {f.name: self._state(f) for f in self._fetcher()}
+        features = self._fetcher(self.request.db)
+        self._cache = {f.name: self._state(f) for f in features}
 
     def _state(self, feature):
         # Features that are on for everyone are on.

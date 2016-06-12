@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pyramid import httpexceptions
 from pyramid.testing import DummyRequest
 import pytest
 
@@ -22,74 +21,71 @@ features_save_fixtures = pytest.mark.usefixtures('Feature',
 
 
 @features_save_fixtures
-def test_features_save_sets_attributes_when_checkboxes_on(Feature):
+def test_features_save_sets_attributes_when_checkboxes_on(Feature, req):
     foo = DummyFeature(name='foo')
     bar = DummyFeature(name='bar')
     Feature.all.return_value = [foo, bar]
-    request = DummyRequest(post={'foo[everyone]': 'on',
-                                 'foo[staff]': 'on',
-                                 'bar[admins]': 'on'})
+    req.POST = {'foo[everyone]': 'on',
+                'foo[staff]': 'on',
+                'bar[admins]': 'on'}
 
-    views.features_save(request)
+    views.features_save(req)
 
     assert foo.everyone == foo.staff == bar.admins == True
 
 
 @features_save_fixtures
-def test_features_save_sets_attributes_when_checkboxes_off(Feature):
+def test_features_save_sets_attributes_when_checkboxes_off(Feature, req):
     foo = DummyFeature(name='foo')
     foo.everyone = True
     foo.staff = True
     Feature.all.return_value = [foo]
-    request = DummyRequest(post={})
+    req.POST = {}
 
-    views.features_save(request)
+    views.features_save(req)
 
     assert foo.everyone == foo.staff == False
 
 
 @features_save_fixtures
-def test_features_save_ignores_unknown_fields(Feature):
+def test_features_save_ignores_unknown_fields(Feature, req):
     foo = DummyFeature(name='foo')
     Feature.all.return_value = [foo]
-    request = DummyRequest(post={'foo[wibble]': 'on',
-                                 'foo[admins]': 'ignoreme'})
+    req.POST = {'foo[wibble]': 'on',
+                'foo[admins]': 'ignoreme'}
 
-    views.features_save(request)
+    views.features_save(req)
 
     assert foo.admins == False
 
 
 @features_save_fixtures
-def test_features_save_checks_csrf_token(Feature, check_csrf_token):
+def test_features_save_checks_csrf_token(Feature, check_csrf_token, req):
     Feature.all.return_value = []
-    request = DummyRequest(post={})
+    req.POST = {}
 
-    views.features_save(request)
+    views.features_save(req)
 
-    check_csrf_token.assert_called_with(request)
+    check_csrf_token.assert_called_with(req)
 
 
-def test_cohorts_index_without_cohorts():
-    req = DummyRequest(db=db.Session)
+def test_cohorts_index_without_cohorts(req):
     result = views.cohorts_index({}, req)
     assert result["results"] == []
 
 
-def test_cohorts_index_with_cohorts():
-    req = DummyRequest(db=db.Session)
+def test_cohorts_index_with_cohorts(req):
     cohort1 = models.FeatureCohort(name='cohort1')
     cohort2 = models.FeatureCohort(name='cohort2')
-    db.Session.add(cohort1)
-    db.Session.add(cohort2)
-    db.Session.flush()
+    req.db.add(cohort1)
+    req.db.add(cohort2)
+    req.db.flush()
 
     result = views.cohorts_index({}, req)
     assert len(result["results"]) == 2
 
 
-def test_cohorts_add_creates_cohort_with_no_members():
-    req = DummyRequest(db=db.Session)
+def test_cohorts_add_creates_cohort_with_no_members(req):
     req.params['add'] = 'cohort'
     views.cohorts_add(req)
 
@@ -101,16 +97,15 @@ def test_cohorts_add_creates_cohort_with_no_members():
     assert len(cohort.members) == 0
 
 
-def test_cohorts_edit_add_user():
-    req = DummyRequest(db=db.Session)
+def test_cohorts_edit_add_user(req):
     user = models.User(username='benoit',
                        password='mandelbrot',
                        email='benoit@example.com')
     cohort = models.FeatureCohort(name='FractalCohort')
 
-    db.Session.add(user)
-    db.Session.add(cohort)
-    db.Session.flush()
+    req.db.add(user)
+    req.db.add(cohort)
+    req.db.flush()
 
     req.matchdict['id'] = cohort.id
     req.params['add'] = user.username
@@ -120,17 +115,16 @@ def test_cohorts_edit_add_user():
     assert cohort.members[0].username == user.username
 
 
-def test_cohorts_edit_remove_user():
-    req = DummyRequest(db=db.Session)
+def test_cohorts_edit_remove_user(req):
     user = models.User(username='benoit',
                        password='mandelbrot',
                        email='benoit@example.com')
     cohort = models.FeatureCohort(name='FractalCohort')
     cohort.members.append(user)
 
-    db.Session.add(user)
-    db.Session.add(cohort)
-    db.Session.flush()
+    req.db.add(user)
+    req.db.add(cohort)
+    req.db.flush()
 
     assert len(cohort.members) == 1
 
@@ -141,11 +135,10 @@ def test_cohorts_edit_remove_user():
     assert len(cohort.members) == 0
 
 
-def test_cohorts_edit_with_no_users():
-    req = DummyRequest(db=db.Session)
+def test_cohorts_edit_with_no_users(req):
     cohort = models.FeatureCohort(name='FractalCohort')
-    db.Session.add(cohort)
-    db.Session.flush()
+    req.db.add(cohort)
+    req.db.flush()
 
     req.matchdict['id'] = cohort.id
     result = views.cohorts_edit({}, req)
@@ -154,8 +147,7 @@ def test_cohorts_edit_with_no_users():
     assert len(result['cohort'].members) == 0
 
 
-def test_cohorts_edit_with_users():
-    req = DummyRequest(db=db.Session)
+def test_cohorts_edit_with_users(req):
     cohort = models.FeatureCohort(name='FractalCohort')
     user1 = models.User(username='benoit',
                         password='mandelbrot',
@@ -176,6 +168,11 @@ def test_cohorts_edit_with_users():
 
     assert result['cohort'].id == cohort.id
     assert len(result['cohort'].members) == 2
+
+
+@pytest.fixture
+def req(db_session):
+    return DummyRequest(db=db_session)
 
 
 @pytest.fixture(autouse=True)

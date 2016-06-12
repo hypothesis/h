@@ -68,14 +68,14 @@ class Feature(Base):
         return FEATURES[self.name]
 
     @classmethod
-    def all(cls):
+    def all(cls, session):
         """Fetch (or, if necessary, create) rows for all defined features."""
         results = []
         for name in FEATURES:
-            feat = cls.query.filter(cls.name == name).first()
+            feat = session.query(cls).filter(cls.name == name).first()
             if feat is None:
                 feat = cls(name=name)
-                cls.query.session.add(feat)
+                session.add(feat)
             results.append(feat)
         return results
 

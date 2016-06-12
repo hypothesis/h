@@ -13,8 +13,8 @@ from h.i18n import TranslationString as _
              request_method='GET',
              renderer='h:templates/admin/features.html.jinja2',
              permission='admin_features')
-def features_index(_):
-    return {"features": models.Feature.all()}
+def features_index(request):
+    return {"features": models.Feature.all(request.db)}
 
 
 @view_config(route_name='admin_features',
@@ -22,7 +22,7 @@ def features_index(_):
              permission='admin_features')
 def features_save(request):
     session.check_csrf_token(request)
-    for feat in models.Feature.all():
+    for feat in models.Feature.all(request.db):
         for attr in ['everyone', 'admins', 'staff']:
             val = request.POST.get('{0}[{1}]'.format(feat.name, attr))
             if val == 'on':
