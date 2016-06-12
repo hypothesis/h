@@ -51,6 +51,7 @@ INSTALL_REQUIRES = [
     'psycogreen>=1.0',
     'psycopg2>=2.6.1',
     'pyramid-multiauth>=0.8.0,<0.9.0',
+    'pyramid-services==0.4',
     'pyramid_mailer>=0.13',
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
