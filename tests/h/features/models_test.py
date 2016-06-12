@@ -49,7 +49,7 @@ class TestFeature(object):
         session.add_all([new, pending, old])
         session.flush()
 
-        Feature.remove_old_flags()
+        Feature.remove_old_flags(session)
 
         remaining = set([f.name for f in session.query(Feature).all()])
         assert remaining == {'abouttoberemoved', 'notification'}

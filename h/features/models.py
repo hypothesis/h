@@ -80,7 +80,7 @@ class Feature(Base):
         return results
 
     @classmethod
-    def remove_old_flags(cls):
+    def remove_old_flags(cls, session):
         """
         Remove old/unknown data from the feature table.
 
@@ -94,7 +94,7 @@ class Feature(Base):
         # N.B. We remove only those features we know absolutely nothing about,
         # which means that FEATURES_PENDING_REMOVAL are left alone.
         known = set(FEATURES) | set(FEATURES_PENDING_REMOVAL)
-        unknown_flags = cls.query.filter(sa.not_(cls.name.in_(known)))
+        unknown_flags = session.query(cls).filter(sa.not_(cls.name.in_(known)))
         count = unknown_flags.delete(synchronize_session=False)
         if count > 0:
             log.info('removed %d old/unknown feature flags from database', count)
