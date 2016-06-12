@@ -29,8 +29,10 @@ function isSelectionBackwards(selection) {
 }
 
 /**
- * Returns true if `node` is between the `startContainer` and `endContainer` of
- * the given `range`, inclusive.
+ * Returns true if `node` lies within a range.
+ *
+ * This is a simplified version of `Range.isPointInRange()` for compatibility
+ * with IE.
  *
  * @param {Range} range
  * @param {Node} node
@@ -40,13 +42,14 @@ function isNodeInRange(range, node) {
     return true;
   }
 
-  /* jshint -W016 */
-  var isAfterStart = range.startContainer.compareDocumentPosition(node) &
-   Node.DOCUMENT_POSITION_FOLLOWING;
-  var isBeforeEnd = range.endContainer.compareDocumentPosition(node) &
-   Node.DOCUMENT_POSITION_PRECEDING;
-
-  return isAfterStart && isBeforeEnd;
+  var nodeRange = node.ownerDocument.createRange();
+  nodeRange.selectNode(node);
+  var isAtOrBeforeStart =
+    range.compareBoundaryPoints(Range.START_TO_START, nodeRange) <= 0;
+  var isAtOrAfterEnd =
+    range.compareBoundaryPoints(Range.END_TO_END, nodeRange) >= 0;
+  nodeRange.detach();
+  return isAtOrBeforeStart && isAtOrAfterEnd;
 }
 
 /**
@@ -141,6 +144,8 @@ function selectionFocusRect(selection) {
 }
 
 module.exports = {
+  getTextBoundingBoxes: getTextBoundingBoxes,
+  isNodeInRange: isNodeInRange,
   isSelectionBackwards: isSelectionBackwards,
   selectionFocusRect: selectionFocusRect,
 };

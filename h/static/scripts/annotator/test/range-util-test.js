@@ -2,6 +2,13 @@
 
 var rangeUtil = require('../range-util');
 
+function createRange(node, start, end) {
+  var range = node.ownerDocument.createRange();
+  range.setStart(node, start);
+  range.setEnd(node, end);
+  return range;
+}
+
 describe('range-util', function () {
   var selection;
   var testNode;
@@ -24,6 +31,41 @@ describe('range-util', function () {
     range.selectNodeContents(node);
     selection.addRange(range);
   }
+
+  describe('#isNodeInRange', function () {
+    it('is true for a node in the range', function () {
+      var rng = createRange(testNode, 0, 1);
+      assert.equal(rangeUtil.isNodeInRange(rng, testNode.firstChild), true);
+    });
+
+    it('is false for a node before the range', function () {
+      testNode.innerHTML = 'one <b>two</b> three';
+      var rng = createRange(testNode, 1, 2);
+      assert.equal(rangeUtil.isNodeInRange(rng, testNode.firstChild), false);
+    });
+
+    it('is false for a node after the range', function () {
+      testNode.innerHTML = 'one <b>two</b> three';
+      var rng = createRange(testNode, 1, 2);
+      assert.equal(rangeUtil.isNodeInRange(rng, testNode.childNodes.item(2)), false);
+    });
+  });
+
+  describe('#getTextBoundingBoxes', function () {
+    it('gets the bounding box of a range in a text node', function () {
+      testNode.innerHTML = 'plain text';
+      var rng = createRange(testNode.firstChild, 0, 5);
+      var boxes = rangeUtil.getTextBoundingBoxes(rng);
+      assert.ok(boxes.length);
+    });
+
+    it('gets the bounding box of a range containing a text node', function () {
+      testNode.innerHTML = 'plain text';
+      var rng = createRange(testNode, 0, 1);
+      var boxes = rangeUtil.getTextBoundingBoxes(rng);
+      assert.ok(boxes.length);
+    });
+  });
 
   describe('#selectionFocusRect', function () {
     it('returns null if the selection is empty', function () {
