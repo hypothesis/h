@@ -191,6 +191,27 @@ def test_features_save_sets_cohorts_when_checkboxes_on(req):
     assert cohort in feat.cohorts
 
 
+@pytest.mark.usefixtures('check_csrf_token')
+@mock.patch.dict('h.features.models.FEATURES', {'feat': 'A test feature'})
+def test_features_save_sets_cohorts_when_checkboxes_off(req):
+    feat = models.Feature(name='feat')
+    cohort = models.FeatureCohort(name='cohort')
+    feat.cohorts.append(cohort)
+
+    req.db.add(feat)
+    req.db.add(cohort)
+    req.db.flush()
+
+    req.POST = {'feat[cohort]': 'off'}
+    views.features_save(req)
+
+    feat = models.Feature.query.filter_by(name='feat').first()
+    cohort = models.FeatureCohort.query.filter_by(name='cohort').first()
+
+    assert len(feat.cohorts) == 0
+    assert cohort not in feat.cohorts
+
+
 @pytest.fixture
 def req(db_session):
     return DummyRequest(db=db_session)
