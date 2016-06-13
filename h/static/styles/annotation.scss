@@ -9,6 +9,7 @@ $annotation-card-left-padding: 10px;
 .annotation-card {
   box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.10);
   border-radius: 2px;
+  cursor: pointer;
   padding: $layout-h-margin;
   background-color: $white;
 }
