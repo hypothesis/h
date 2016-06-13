@@ -2,6 +2,7 @@
 
 from pyramid.testing import DummyRequest
 import pytest
+import mock
 
 from h import db
 from h import models
@@ -168,6 +169,26 @@ def test_cohorts_edit_with_users(req):
 
     assert result['cohort'].id == cohort.id
     assert len(result['cohort'].members) == 2
+
+
+@pytest.mark.usefixtures('check_csrf_token')
+@mock.patch.dict('h.features.models.FEATURES', {'feat': 'A test feature'})
+def test_features_save_sets_cohorts_when_checkboxes_on(req):
+    feat = models.Feature(name='feat')
+    cohort = models.FeatureCohort(name='cohort')
+
+    req.db.add(feat)
+    req.db.add(cohort)
+    req.db.flush()
+
+    req.POST = {'feat[cohort]': 'on'}
+    views.features_save(req)
+
+    feat = models.Feature.query.filter_by(name='feat').first()
+    cohort = models.FeatureCohort.query.filter_by(name='cohort').first()
+
+    assert len(feat.cohorts) == 1
+    assert cohort in feat.cohorts
 
 
 @pytest.fixture
