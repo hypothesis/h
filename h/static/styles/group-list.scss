@@ -92,6 +92,10 @@ $group-list-spacing-below: 50px;
 .group-list-label__label {
   font-size: $body2-font-size;
   font-weight:bold;
+  display: none;
+  @include breakpoint(435px) {
+    display: inherit;
+  }
 }
 
 // the name of a group in the groups drop-down list

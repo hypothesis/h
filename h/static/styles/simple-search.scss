@@ -1,5 +1,6 @@
 @import "base.scss";
 @import "mixins/icons";
+@import "mixins/responsive";
 
 .simple-search-form {
   display: flex;
@@ -19,6 +20,7 @@
 
 @at-root {
   $expanded-max-width: 150px;
+  $expanded-max-width-small: 90px;
 
   .simple-search-input {
     flex-grow: 1;
@@ -49,8 +51,12 @@
     // expand the search input when focused (triggered by clicking
     // on the search icon) or when `is-expanded` is applied
     &:focus,&.is-expanded {
-      max-width: $expanded-max-width;
+      max-width: $expanded-max-width-small;
       padding-left: 6px;
+
+      @include breakpoint(380px) {
+        max-width: $expanded-max-width;
+      }
     }
   }
 }
