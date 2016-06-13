@@ -21,7 +21,10 @@ def _remove_old_flags_on_boot(event):
     if 'H_SCRIPT' in os.environ:
         return
 
-    models.Feature.remove_old_flags()
+    # FIXME: This function should create its own transient session rather than
+    # relying on a scoped session.
+    from h.db import Session
+    models.Feature.remove_old_flags(Session)
     transaction.commit()
 
 

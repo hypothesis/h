@@ -5,9 +5,9 @@ from pyramid.testing import DummyRequest
 import pytest
 
 from h.auth import role
+from h.models import Feature
 from h.features.client import Client
 from h.features.client import UnknownFeatureError
-from h.features.models import Feature
 
 
 class TestClient(object):
@@ -17,13 +17,13 @@ class TestClient(object):
     def test_enabled_loads_features(self, client, fetcher):
         client.enabled('foo')
 
-        fetcher.assert_called_once_with()
+        fetcher.assert_called_once_with(mock.sentinel.db_session)
 
     def test_enabled_caches_features(self, client, fetcher):
         client.enabled('foo')
         client.enabled('bar')
 
-        fetcher.assert_called_once_with()
+        fetcher.assert_called_once_with(mock.sentinel.db_session)
 
     def test_enabled_caches_empty_result_sets(self, client, fetcher):
         """Even an empty result set from the fetcher should be cached."""
@@ -37,7 +37,7 @@ class TestClient(object):
         except UnknownFeatureError:
             pass
 
-        fetcher.assert_called_once_with()
+        fetcher.assert_called_once_with(mock.sentinel.db_session)
 
     def test_enabled_raises_for_unknown_features(self, client):
         with pytest.raises(UnknownFeatureError):
@@ -74,13 +74,13 @@ class TestClient(object):
     def test_all_loads_features(self, client, fetcher):
         client.all()
 
-        fetcher.assert_called_once_with()
+        fetcher.assert_called_once_with(mock.sentinel.db_session)
 
     def test_all_caches_features(self, client, fetcher):
         client.all()
         client.all()
 
-        fetcher.assert_called_once_with()
+        fetcher.assert_called_once_with(mock.sentinel.db_session)
 
     def test_all_caches_empty_result_sets(self, client, fetcher):
         """Even an empty result set from the fetcher should be cached."""
@@ -88,7 +88,7 @@ class TestClient(object):
         client.all()
         client.all()
 
-        fetcher.assert_called_once_with()
+        fetcher.assert_called_once_with(mock.sentinel.db_session)
 
     def test_all_returns_feature_dictionary(self, client, config):
         config.testing_securitypolicy('acct:foo@example.com',
