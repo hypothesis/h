@@ -10,6 +10,16 @@ Features
   the Hypothesis service by not saving "file://" URLs with annotations made on
   PDFs (#3441).
 
+Bug fixes
+---------
+
+- Fix cursor style for annotation cards (#3463).
+
+- Fix styling of quotes in annotation bodies (#3464).
+
+- Fix annotation adder not being shown if the page already has a selection when
+  Hypothesis is activated (#3453).
+
 0.27.0 (2016-06-09)
 ===================
 
