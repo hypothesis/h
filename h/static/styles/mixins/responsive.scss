@@ -40,7 +40,7 @@ $break-desktop: 1024px !default;
   }
 }
 
-// Mobile first media queries. Encorages development to work with mobile and
+// Mobile first media queries. Encourages development to work with mobile and
 // modify as the viewport grows rather than designing for individual bands.
 @mixin wide-handheld-and-up {
   @include breakpoint($break-wide-handheld + 1) {
