@@ -58,7 +58,10 @@ class AnnotationHTMLPresenter(object):
 
     def __init__(self, annotation):
         self.annotation = annotation
-        self.document = DocumentHTMLPresenter(self.annotation.document)
+        if self.annotation.document:
+            self.document = DocumentHTMLPresenter(self.annotation.document)
+        else:
+            self.document = None
 
     @property
     def uri(self):
@@ -108,32 +111,50 @@ class AnnotationHTMLPresenter(object):
     @property
     def document_link(self):
         """Return a link to this annotation's document."""
-        return self.document.link
+        if self.document:
+            return self.document.link
+        else:
+            return ''
 
     @property
     def filename(self):
         """Return the filename of this annotation's document."""
-        return self.document.filename
+        if self.document:
+            return self.document.filename
+        else:
+            return ''
 
     @property
     def hostname_or_filename(self):
         """Return the hostname of this annotation's document."""
-        return self.document.hostname_or_filename
+        if self.document:
+            return self.document.hostname_or_filename
+        else:
+            return ''
 
     @property
     def href(self):
         """Return an href for this annotation's document, or ""."""
-        return self.document.href
+        if self.document:
+            return self.document.href
+        else:
+            return ''
 
     @property
     def link_text(self):
         """Return some link text for this annotation's document."""
-        return self.document.link_text
+        if self.document:
+            return self.document.link_text
+        else:
+            return ''
 
     @property
     def title(self):
         """Return a title for this annotation."""
-        return self.document.title
+        if self.document:
+            return self.document.title
+        else:
+            return ''
 
     # Explicitly forward some annotation properties for convenient access.
     @property
