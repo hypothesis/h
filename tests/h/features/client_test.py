@@ -5,7 +5,7 @@ from pyramid.testing import DummyRequest
 import pytest
 
 from h.auth import role
-from h.models import Feature
+from h.models import Feature, FeatureCohort, User
 from h.features.client import Client
 from h.features.client import UnknownFeatureError
 
@@ -71,6 +71,13 @@ class TestClient(object):
     def test_call_true_if_everyone_true(self, client):
         assert client('on-for-everyone') is True
 
+    def test_call_false_if_cohort_disabled(self, client):
+        assert client('on-for-cohort') is False
+
+    @mock.patch('h.features.models.FeatureCohort.members', ['acct:foo@example.com'])
+    def test_call_true_if_cohort_enabled(self, client):
+        assert client('on-for-cohort') is True
+
     def test_all_loads_features(self, client, fetcher):
         client.all()
 
@@ -102,6 +109,7 @@ class TestClient(object):
             'on-for-everyone': True,
             'on-for-staff': True,
             'on-for-admins': False,
+            'on-for-cohort': False,
         }
 
     def test_clear_resets_cache(self, client, fetcher):
@@ -125,11 +133,13 @@ class TestClient(object):
             Feature(name='on-for-everyone', everyone=True),
             Feature(name='on-for-staff', staff=True),
             Feature(name='on-for-admins', admins=True),
+            Feature(name='on-for-cohort', cohorts=[FeatureCohort(name='cohort')])
         ])
 
     @pytest.fixture
     def req(self):
-        return DummyRequest(db=mock.sentinel.db_session)
+        return DummyRequest(db=mock.sentinel.db_session,
+                            authenticated_user='acct:foo@example.com')
 
     @pytest.fixture
     def client(self, req, fetcher):
