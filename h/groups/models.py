@@ -82,23 +82,14 @@ class Group(Base, mixins.Timestamps):
         return documents
 
     @classmethod
-    def get_by_pubid(cls, pubid):
+    def get_by_pubid(cls, session, pubid):
         """Return the group with the given pubid, or None."""
-        return cls.query.filter(cls.pubid == pubid).first()
+        return session.query(cls).filter(cls.pubid == pubid).first()
 
     @classmethod
-    def get_by_id(cls, id_):
-        """Return the group with the given id, or None."""
-        try:
-            return cls.query.filter(
-                cls.id == id_).one()
-        except exc.NoResultFound:
-            return None
-
-    @classmethod
-    def created_by(cls, user):
+    def created_by(cls, session, user):
         """Return a query object filtering groups by creator."""
-        return cls.query.filter(Group.creator == user)
+        return session.query(cls).filter(Group.creator == user)
 
 
 USER_GROUP_TABLE = sa.Table(

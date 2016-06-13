@@ -127,7 +127,7 @@ def read(request):
     pubid = request.matchdict["pubid"]
     slug = request.matchdict.get("slug")
 
-    group = models.Group.get_by_pubid(pubid)
+    group = models.Group.get_by_pubid(request.db, pubid)
     if group is None:
         raise exc.HTTPNotFound()
 
@@ -154,7 +154,7 @@ def join(request):
         raise exc.HTTPNotFound()
 
     pubid = request.matchdict["pubid"]
-    group = models.Group.get_by_pubid(pubid)
+    group = models.Group.get_by_pubid(request.db, pubid)
 
     if group is None:
         raise exc.HTTPNotFound()
@@ -185,7 +185,7 @@ def leave(request):
         raise exc.HTTPNotFound()
 
     pubid = request.matchdict["pubid"]
-    group = models.Group.get_by_pubid(pubid)
+    group = models.Group.get_by_pubid(request.db, pubid)
 
     if group is None:
         raise exc.HTTPNotFound()

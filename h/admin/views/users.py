@@ -99,7 +99,7 @@ def delete_user(request, user):
     message.
     """
 
-    if models.Group.created_by(user).count() > 0:
+    if models.Group.created_by(request.db, user).count() > 0:
         raise UserDeletionError('Cannot delete user who is a group creator.')
 
     user.groups = []
