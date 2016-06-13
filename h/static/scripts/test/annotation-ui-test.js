@@ -32,6 +32,18 @@ describe('annotationUI', function () {
       annotationUI.addAnnotations([annot]);
       assert.deepEqual(annotationUI.getState().annotations, [annot]);
     });
+
+    it('adds required fields if missing', function () {
+      var annot = {id: 'foo'};
+      annotationUI.addAnnotations([annot]);
+
+      var addedAnnot = annotationUI.getState().annotations[0];
+      assert.deepEqual(addedAnnot, {
+        id: 'foo',
+        tags: [],
+        text: '',
+      });
+    });
   });
 
   describe('#removeAnnotations()', function () {
@@ -66,7 +78,7 @@ describe('annotationUI', function () {
     it('notifies subscribers when the UI state changes', function () {
       var listener = sinon.stub();
       annotationUI.subscribe(listener);
-      annotationUI.addAnnotations(annotationFixtures.defaultAnnotation());
+      annotationUI.addAnnotations([annotationFixtures.defaultAnnotation()]);
       assert.called(listener);
     });
   });

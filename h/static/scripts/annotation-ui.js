@@ -84,11 +84,31 @@ function excludeAnnotations(current, annotations) {
   });
 }
 
+/**
+ * Initialize all required fields of `annot` to the expected types.
+ *
+ * Initializing these fields when annotations are added allows the rest of the
+ * app to assume their existence.
+ */
+function addRequiredFields(annot) {
+  // Modify `annot` rather than returning a copy because `annot` is currently
+  // a `store.AnnotationResource` instance rather than a plain object and has
+  // non-enumerable fields (eg. `$$tag`).
+  if (!Array.isArray(annot.tags)) {
+    annot.tags = [];
+  }
+  if (typeof annot.text === 'undefined') {
+    annot.text = '';
+  }
+  return annot;
+}
+
 function annotationsReducer(state, action) {
   switch (action.type) {
     case types.ADD_ANNOTATIONS:
+      var annots = action.annotations.map(addRequiredFields);
       return Object.assign({}, state,
-        {annotations: state.annotations.concat(action.annotations)});
+        {annotations: state.annotations.concat(annots)});
     case types.REMOVE_ANNOTATIONS:
       return Object.assign({}, state,
         {annotations: excludeAnnotations(state.annotations, action.annotations)});
