@@ -44,6 +44,8 @@
 .markdown-body {
   @include styled-text;
 
+  cursor: text;
+
   // Margin between bottom of ascent of username and top of
   // x-height of annotation-body should be ~15px.
   // Remove additional margin-top added by the first p within
