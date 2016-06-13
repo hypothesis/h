@@ -293,6 +293,15 @@ describe('annotation', function() {
           'default permissions for __world__');
       });
 
+      it('sets the tags and text fields for new annotations', function () {
+        var annotation = fixtures.newAnnotation();
+        delete annotation.tags;
+        delete annotation.text;
+        createDirective(annotation);
+        assert.equal(annotation.text, '');
+        assert.deepEqual(annotation.tags, []);
+      });
+
       it('preserves the permissions of existing annotations', function() {
         var annotation = fixtures.newAnnotation();
         annotation.permissions = {
@@ -385,7 +394,7 @@ describe('annotation', function() {
       it('edits annotations with drafts on initialization', function() {
         var annotation = fixtures.oldAnnotation();
         // The drafts service has some draft changes for this annotation.
-        fakeDrafts.get.returns('foo');
+        fakeDrafts.get.returns({text: 'foo', tags: []});
 
         var controller = createDirective(annotation).controller;
 
@@ -411,7 +420,7 @@ describe('annotation', function() {
         // and then change focus to another group and back without saving the
         // highlight, in which case the highlight will have draft edits.
         // This highlight has draft edits.
-        fakeDrafts.get.returns('foo');
+        fakeDrafts.get.returns({text: '', tags: []});
 
         var controller = createDirective(annotation).controller;
 
@@ -1186,7 +1195,7 @@ describe('annotation', function() {
         assert.equal(controller.action, 'edit');
         controller.form.text = 'this should be reverted';
         controller.revert();
-        assert.equal(controller.form.text, void 0);
+        assert.equal(controller.form.text, '');
       });
 
       it('reverts to the most recently saved version',

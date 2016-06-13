@@ -222,6 +222,10 @@ function AnnotationController(
     if (!domainModel.permissions) {
       domainModel.permissions = permissions['default'](domainModel.group);
     }
+    domainModel.text = domainModel.text || '';
+    if (!Array.isArray(domainModel.tags)) {
+      domainModel.tags = [];
+    }
 
     // Automatically save new highlights to the server when they're created.
     // Note that this line also gets called when the user logs in (since
@@ -398,9 +402,7 @@ function AnnotationController(
     *   otherwise.
     */
   vm.hasContent = function() {
-    var textLength = (vm.form.text || '').length;
-    var tagsLength = (vm.form.tags || []).length;
-    return (textLength > 0 || tagsLength > 0);
+    return vm.form.text.length > 0 || vm.form.tags.length > 0;
   };
 
   /**
