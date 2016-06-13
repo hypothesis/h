@@ -276,7 +276,9 @@ describe('WidgetController', function () {
       var loadSpy = fakeAnnotationMapper.loadAnnotations;
 
       $scope.$broadcast(events.GROUP_FOCUSED);
-      assert.calledWith(fakeAnnotationMapper.unloadAnnotations, [{id: '123'}]);
+      assert.calledWith(fakeAnnotationMapper.unloadAnnotations, [
+        sinon.match({id: '123'}),
+      ]);
       assert.calledWith(annotationUI.addAnnotations, fakeDrafts.unsaved());
       $scope.$digest();
       assert.calledWith(loadSpy, [sinon.match({id: uri + '123'})]);
