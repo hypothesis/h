@@ -2,6 +2,7 @@
 
 var unroll = require('../../test/util').unroll;
 
+var observable = require('../../util/observable');
 var selections = require('../selections');
 
 function FakeDocument() {
@@ -40,7 +41,8 @@ describe('selections', function () {
     fakeDocument = new FakeDocument();
     onSelectionChanged = sinon.stub();
 
-    var ranges = selections(fakeDocument);
+    // Subscribe to selection changes, ignoring the initial event
+    var ranges = observable.drop(selections(fakeDocument), 1);
     rangeSub = ranges.subscribe({next: onSelectionChanged});
 
     range = {};
@@ -63,8 +65,16 @@ describe('selections', function () {
     assert.calledWith(onSelectionChanged, range);
   }, [
     {event: 'mouseup', delay: 20},
-    {event: 'ready', delay: 20},
   ]);
+
+  it('emits an event if there is a selection at the initial subscription', function () {
+    var onInitialSelection = sinon.stub();
+    var ranges = selections(fakeDocument);
+    var sub = ranges.subscribe({next: onInitialSelection});
+    clock.tick(1);
+    assert.called(onInitialSelection);
+    sub.unsubscribe();
+  });
 
   describe('when the selection changes', function () {
     it('emits a selection if the mouse is not down', function () {
