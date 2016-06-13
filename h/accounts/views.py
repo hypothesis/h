@@ -567,6 +567,7 @@ class NotificationsController(object):
     def _user_notifications(self):
         """Fetch the notifications/subscriptions for the logged-in user."""
         return models.Subscriptions.get_subscriptions_for_uri(
+            self.request.db,
             self.request.authenticated_userid)
 
 
