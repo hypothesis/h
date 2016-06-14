@@ -181,7 +181,7 @@ def test_features_save_sets_cohorts_when_checkboxes_on(req):
     req.db.add(cohort)
     req.db.flush()
 
-    req.POST = {'feat[cohort]': 'on'}
+    req.POST = {'feat[cohorts][cohort]': 'on'}
     views.features_save(req)
 
     feat = models.Feature.query.filter_by(name='feat').first()
@@ -193,7 +193,7 @@ def test_features_save_sets_cohorts_when_checkboxes_on(req):
 
 @pytest.mark.usefixtures('check_csrf_token')
 @mock.patch.dict('h.features.models.FEATURES', {'feat': 'A test feature'})
-def test_features_save_sets_cohorts_when_checkboxes_off(req):
+def test_features_save_unsets_cohorts_when_checkboxes_off(req):
     feat = models.Feature(name='feat')
     cohort = models.FeatureCohort(name='cohort')
     feat.cohorts.append(cohort)
@@ -202,7 +202,7 @@ def test_features_save_sets_cohorts_when_checkboxes_off(req):
     req.db.add(cohort)
     req.db.flush()
 
-    req.POST = {'feat[cohort]': 'off'}
+    req.POST = {'feat[cohorts][cohort]': 'off'}
     views.features_save(req)
 
     feat = models.Feature.query.filter_by(name='feat').first()

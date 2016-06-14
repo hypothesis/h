@@ -33,7 +33,7 @@ def features_save(request):
             else:
                 setattr(feat, attr, False)
         for cohort in request.db.query(models.FeatureCohort).all():
-            val = request.POST.get('{0}[{1}]'.format(feat.name, cohort.name))
+            val = request.POST.get('{0}[cohorts][{1}]'.format(feat.name, cohort.name))
             if val == 'on':
                 if cohort not in feat.cohorts:
                     feat.cohorts.append(cohort)
