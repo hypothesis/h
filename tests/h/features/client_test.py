@@ -75,8 +75,6 @@ class TestClient(object):
         assert client('on-for-cohort') is False
 
     def test_call_true_if_cohort_enabled(self, patch, client, user, cohort):
-        cohort_model = patch('h.features.models.FeatureCohort')
-        cohort_model.members = [user]
         user.cohorts = [cohort]
         assert client('on-for-cohort') is True
 
