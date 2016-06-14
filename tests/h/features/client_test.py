@@ -74,8 +74,10 @@ class TestClient(object):
     def test_call_false_if_cohort_disabled(self, client):
         assert client('on-for-cohort') is False
 
-    @mock.patch('h.features.models.FeatureCohort.members', ['acct:foo@example.com'])
-    def test_call_true_if_cohort_enabled(self, client):
+    def test_call_true_if_cohort_enabled(self, patch, client, user, cohort):
+        cohort_model = patch('h.features.models.FeatureCohort')
+        cohort_model.members = [user]
+        user.cohorts = [cohort]
         assert client('on-for-cohort') is True
 
     def test_all_loads_features(self, client, fetcher):
@@ -126,20 +128,28 @@ class TestClient(object):
         assert result is True
 
     @pytest.fixture
-    def fetcher(self):
+    def fetcher(self, cohort):
         return mock.Mock(spec_set=[], return_value=[
             Feature(name='foo'),
             Feature(name='bar'),
             Feature(name='on-for-everyone', everyone=True),
             Feature(name='on-for-staff', staff=True),
             Feature(name='on-for-admins', admins=True),
-            Feature(name='on-for-cohort', cohorts=[FeatureCohort(name='cohort')])
+            Feature(name='on-for-cohort', cohorts=[cohort])
         ])
 
     @pytest.fixture
-    def req(self):
+    def user(self):
+        return User(username='foo', email='foo@example.com', password='bar')
+
+    @pytest.fixture
+    def cohort(self):
+        return FeatureCohort(name='cohort')
+
+    @pytest.fixture
+    def req(self, user):
         return DummyRequest(db=mock.sentinel.db_session,
-                            authenticated_user='acct:foo@example.com')
+                            authenticated_user=user)
 
     @pytest.fixture
     def client(self, req, fetcher):
