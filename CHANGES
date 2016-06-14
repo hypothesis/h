@@ -1,3 +1,12 @@
+Unreleased
+==========
+
+Bug fixes
+---------
+
+- Revert code that loads annotations from database in `/api/search` which caused
+  the request times for certain URIs to skyrocket (9af5b65).
+
 0.28.0 (2016-06-13)
 ===================
 
