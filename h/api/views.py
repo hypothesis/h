@@ -139,12 +139,11 @@ def search(request):
                             separate_replies=separate_replies)
 
     # Run the results through the JSON presenter
-    ids = [r['id'] for r in out['rows']]
-    out['rows'] = _present_annotations(request, ids)
-
+    out['rows'] = [_present_searchdict(request, a)
+                   for a in out['rows']]
     if separate_replies:
-        ids = [r['id'] for r in out['replies']]
-        out['replies'] = _present_annotations(request, ids)
+        out['replies'] = [_present_searchdict(request, a)
+                          for a in out['replies']]
 
     return out
 
@@ -235,10 +234,10 @@ def _json_payload(request):
         raise PayloadError()
 
 
-def _present_annotations(request, ids):
-    """Load annotations by id from the database and present them."""
-    annotations = storage.fetch_ordered_annotations(request.db, ids, load_documents=True)
-    return [AnnotationJSONPresenter(request, ann).asdict() for ann in annotations]
+def _present_searchdict(request, mapping):
+    """Run an object returned from search through a presenter."""
+    ann = storage.annotation_from_dict(mapping)
+    return AnnotationJSONPresenter(request, ann).asdict()
 
 
 def _publish_annotation_event(request,

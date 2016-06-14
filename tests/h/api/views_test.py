@@ -5,8 +5,6 @@ import pytest
 
 from pyramid import testing
 
-from h.api import models
-from h.api import presenters
 from h.api import views
 from h.api.schemas import ValidationError
 
@@ -65,94 +63,59 @@ class TestIndex(object):
         assert links['search']['url'] == host + '/dummy/search'
 
 
-@pytest.mark.usefixtures('search_lib')
+@pytest.mark.usefixtures('search_lib', 'AnnotationJSONPresenter')
 class TestSearch(object):
 
-    def test_it_searches(self, mock_request, search_lib):
-        views.search(mock_request)
+    def test_it_searches(self, search_lib):
+        request = testing.DummyRequest()
 
-        search_lib.search.assert_called_once_with(mock_request,
-                                                  mock_request.params,
+        views.search(request)
+
+        search_lib.search.assert_called_once_with(request,
+                                                  request.params,
                                                   separate_replies=False)
 
-    def test_it_loads_annotations_from_database(self, mock_request, search_lib, storage):
-        search_lib.search.return_value = {'total': 2,
-                                          'rows': [{'id': 'row-1'}, {'id': 'row-2'}]}
+    def test_it_returns_search_results(self, search_lib):
+        request = testing.DummyRequest()
+        search_lib.search.return_value = {'total': 0, 'rows': []}
 
-        views.search(mock_request)
+        result = views.search(request)
 
-        storage.fetch_ordered_annotations.assert_called_once_with(
-            mock_request.db, ['row-1', 'row-2'], load_documents=True)
+        assert result == {'total': 0, 'rows': []}
 
-    def test_it_renders_search_results(self, mock_request, search_lib):
-        ann1 = models.Annotation(userid='luke')
-        ann2 = models.Annotation(userid='sarah')
-        mock_request.db.add_all([ann1, ann2])
-        mock_request.db.flush()
+    def test_it_presents_annotations(self,
+                                     search_lib,
+                                     AnnotationJSONPresenter):
+        request = testing.DummyRequest()
+        search_lib.search.return_value = {'total': 2, 'rows': [{'foo': 'bar'},
+                                                               {'baz': 'bat'}]}
+        presenter = AnnotationJSONPresenter.return_value
+        presenter.asdict.return_value = {'giraffe': True}
 
-        search_lib.search.return_value = {'total': 2,
-                                          'rows': [{'id': ann1.id}, {'id': ann2.id}]}
+        result = views.search(request)
 
-        expected = {
-            'total': 2,
-            'rows': [
-                presenters.AnnotationJSONPresenter(mock_request, ann1).asdict(),
-                presenters.AnnotationJSONPresenter(mock_request, ann2).asdict(),
-            ]
-        }
+        assert result == {'total': 2, 'rows': [{'giraffe': True},
+                                               {'giraffe': True}]}
 
-        assert views.search(mock_request) == expected
-
-    def test_it_loads_replies_from_database(self, mock_request, search_lib, storage):
-        mock_request.params = {'_separate_replies': '1'}
+    def test_it_presents_replies(self, search_lib, AnnotationJSONPresenter):
+        request = testing.DummyRequest(params={'_separate_replies': '1'})
         search_lib.search.return_value = {'total': 1,
-                                          'rows': [{'id': 'row-1'}],
-                                          'replies': [{'id': 'reply-1'},
-                                                      {'id': 'reply-2'}]}
+                                          'rows': [{'foo': 'bar'}],
+                                          'replies': [{'baz': 'bat'},
+                                                      {'baz': 'bat'}]}
+        presenter = AnnotationJSONPresenter.return_value
+        presenter.asdict.return_value = {'giraffe': True}
 
-        views.search(mock_request)
+        result = views.search(request)
 
-        assert mock.call(mock_request.db, ['reply-1', 'reply-2'],
-                         load_documents=True) in storage.fetch_ordered_annotations.call_args_list
-
-    def test_it_renders_replies(self, mock_request, search_lib):
-        ann = models.Annotation(userid='luke')
-        mock_request.db.add(ann)
-        mock_request.db.flush()
-        reply1 = models.Annotation(userid='sarah', references=[ann.id])
-        reply2 = models.Annotation(userid='sarah', references=[ann.id])
-        mock_request.db.add_all([reply1, reply2])
-        mock_request.db.flush()
-
-        search_lib.search.return_value = {'total': 1,
-                                          'rows': [{'id': ann.id}],
-                                          'replies': [{'id': reply1.id}, {'id': reply2.id}],
-                                          }
-
-        mock_request.params = {'_separate_replies': '1'}
-
-        expected = {
-            'total': 1,
-            'rows': [presenters.AnnotationJSONPresenter(mock_request, ann).asdict()],
-            'replies': [
-                presenters.AnnotationJSONPresenter(mock_request, reply1).asdict(),
-                presenters.AnnotationJSONPresenter(mock_request, reply2).asdict(),
-            ]
-        }
-
-        assert views.search(mock_request) == expected
+        assert result == {'total': 1,
+                          'rows': [{'giraffe': True}],
+                          'replies': [{'giraffe': True},
+                                      {'giraffe': True}]}
 
     @pytest.fixture
     def search_lib(self, patch):
         return patch('h.api.views.search_lib')
-
-    @pytest.fixture
-    def storage(self, patch):
-        return patch('h.api.views.storage')
-
-    @pytest.fixture
-    def mock_request(self, db_session):
-        return testing.DummyRequest(db=db_session)
 
 
 @pytest.mark.usefixtures('AnnotationEvent',
