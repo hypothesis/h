@@ -5,6 +5,7 @@ import datetime
 
 import mock
 import pytest
+import sqlalchemy
 
 from h.api import models
 from h.api.models import document
@@ -307,6 +308,25 @@ class TestCreateOrUpdateDocumentMeta(object):
         assert document_meta.created == created
         assert document_meta.updated == updated
 
+    def test_it_flushes_after_creating_a_new_DocumentMeta(self):
+        db_session = mock.Mock()
+
+        # There is no matching DocumentMeta in the db yet, so a new one should
+        # be created.
+        db_session.query.return_value.filter.return_value.one_or_none.return_value = None
+
+        document.create_or_update_document_meta(
+            session=db_session,
+            claimant='http://example.com/claimant',
+            type='title',
+            value='the title',
+            document=document.Document(),
+            created=yesterday(),
+            updated=now(),
+        )
+
+        assert db_session.flush.called
+
     def test_it_updates_an_existing_DocumentMeta_if_there_is_one(self, db_session):
         claimant = 'http://example.com/claimant'
         type_ = 'title'
@@ -434,6 +454,10 @@ class TestMergeDocuments(object):
         return (master, duplicate)
 
 
+@pytest.mark.usefixtures('create_or_update_document_meta',
+                         'create_or_update_document_uri',
+                         'Document',
+                         'merge_documents')
 class TestUpdateDocumentMetadata(object):
 
     def test_it_uses_the_target_uri_to_get_the_document(self,
@@ -605,6 +629,22 @@ class TestUpdateDocumentMetadata(object):
                 updated=annotation.updated,
                 **document_meta_dict
             )
+
+    def test_it_wraps_IntegrityError_from_create_or_update_document_meta(
+            self, annotation, create_or_update_document_meta):
+        create_or_update_document_meta.side_effect = (
+            sqlalchemy.exc.IntegrityError('statement', 'params', 'orig'))
+
+        with pytest.raises(document.ConcurrentDocumentMetaCreateError):
+            document.update_document_metadata(
+                session=mock.Mock(),
+                annotation=annotation,
+                document_meta_dicts=[{
+                    'claimant': 'http://example.com/claimant',
+                    'type': 'title',
+                    'value': 'foo',
+                }],
+                document_uri_dicts=[])
 
     @pytest.fixture
     def annotation(self):
