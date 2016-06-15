@@ -78,6 +78,10 @@ class TestClient(object):
         user.cohorts = [cohort]
         assert client('on-for-cohort') is True
 
+    def test_call_false_if_unauthenticated_user(self, patch, client, req):
+        req.authenticated_user = None
+        assert client('on-for-cohort') is False
+
     def test_all_loads_features(self, client, fetcher):
         client.all()
 
