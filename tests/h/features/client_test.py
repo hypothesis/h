@@ -5,7 +5,7 @@ from pyramid.testing import DummyRequest
 import pytest
 
 from h.auth import role
-from h.models import Feature
+from h.models import Feature, FeatureCohort, User
 from h.features.client import Client
 from h.features.client import UnknownFeatureError
 
@@ -71,6 +71,13 @@ class TestClient(object):
     def test_call_true_if_everyone_true(self, client):
         assert client('on-for-everyone') is True
 
+    def test_call_false_if_cohort_disabled(self, client):
+        assert client('on-for-cohort') is False
+
+    def test_call_true_if_cohort_enabled(self, patch, client, user, cohort):
+        user.cohorts = [cohort]
+        assert client('on-for-cohort') is True
+
     def test_all_loads_features(self, client, fetcher):
         client.all()
 
@@ -102,6 +109,7 @@ class TestClient(object):
             'on-for-everyone': True,
             'on-for-staff': True,
             'on-for-admins': False,
+            'on-for-cohort': False,
         }
 
     def test_clear_resets_cache(self, client, fetcher):
@@ -118,18 +126,28 @@ class TestClient(object):
         assert result is True
 
     @pytest.fixture
-    def fetcher(self):
+    def fetcher(self, cohort):
         return mock.Mock(spec_set=[], return_value=[
             Feature(name='foo'),
             Feature(name='bar'),
             Feature(name='on-for-everyone', everyone=True),
             Feature(name='on-for-staff', staff=True),
             Feature(name='on-for-admins', admins=True),
+            Feature(name='on-for-cohort', cohorts=[cohort])
         ])
 
     @pytest.fixture
-    def req(self):
-        return DummyRequest(db=mock.sentinel.db_session)
+    def user(self):
+        return User(username='foo', email='foo@example.com', password='bar')
+
+    @pytest.fixture
+    def cohort(self):
+        return FeatureCohort(name='cohort')
+
+    @pytest.fixture
+    def req(self, user):
+        return DummyRequest(db=mock.sentinel.db_session,
+                            authenticated_user=user)
 
     @pytest.fixture
     def client(self, req, fetcher):
