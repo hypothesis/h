@@ -32,13 +32,7 @@
 }
 
 .about-this-version-content-feedback {
-  // Margin between bottom of x-height of about content and
-  // top of x-height of about this version feedback has to be
-  // ~20px.
-  margin-top: $layout-h-margin - 4px;
-  // Margin between bottom of x-height of about this version link
-  // and bottom of the dialog should be ~20px.
-  margin-bottom: -$layout-h-margin + 5px;
+   margin-bottom: 15px;
 }
 
 .about-this-version-content-feedback__link {

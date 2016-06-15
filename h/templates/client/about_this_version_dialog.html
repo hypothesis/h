@@ -3,6 +3,20 @@
     role="button"
     title="Close"
     ng-click="vm.onClose()"></i>
+
+  <header class="about-this-version-title">
+    Help
+  </header>
+  
+    <feedback-link
+      version="vm.version"
+      user-agent="vm.userAgent"
+      url="vm.url"
+      document-fingerprint="vm.documentFingerprint"
+      auth="vm.auth"
+      date-time="vm.dateTime">
+    </feedback-link>
+
   <header class="about-this-version-title">
     About this version
   </header>
@@ -23,13 +37,5 @@
     </div>
     <dt class="about-this-version-content__key">Date: </dt>
     <dd class="about-this-version-content__val">{{ vm.dateTime | date:'dd MMM yyyy HH:mm:ss Z' }}</dd>
-    <feedback-link
-      version="vm.version"
-      user-agent="vm.userAgent"
-      url="vm.url"
-      document-fingerprint="vm.documentFingerprint"
-      auth="vm.auth"
-      date-time="vm.dateTime">
-    </feedback-link>
   </div>
 </div>
