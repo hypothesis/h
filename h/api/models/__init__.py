@@ -27,4 +27,5 @@ __all__ = (
     'DocumentURI',
     'elastic',
     'merge_documents',
+    'update_document_metadata',
 )
