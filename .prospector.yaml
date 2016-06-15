@@ -10,6 +10,11 @@ mccabe:
   run: false
 pep8:
   run: false
+pep257:
+  disable:
+    - D203 # "1 blank line required before class docstring" conflicts with
+           # another pep257 rule D211 "No blank lines allowed before class
+           # docstring"!
 pyflakes:
   run: false
 
