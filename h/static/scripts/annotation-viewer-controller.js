@@ -58,18 +58,18 @@ function AnnotationViewerController (
   this.ready = fetchThread(store, id).then(function (annots) {
     annotationMapper.loadAnnotations(annots);
 
-    var topLevelID = annots.filter(function (annot) {
+    var topLevelAnnot = annots.filter(function (annot) {
       return (annot.references || []).length === 0;
     })[0];
 
-    if (!topLevelID) {
+    if (!topLevelAnnot) {
       return;
     }
 
     streamFilter
       .setMatchPolicyIncludeAny()
-      .addClause('/references', 'one_of', topLevelID, true)
-      .addClause('/id', 'equals', topLevelID, true);
+      .addClause('/references', 'one_of', topLevelAnnot.id, true)
+      .addClause('/id', 'equals', topLevelAnnot.id, true);
     streamer.setConfig('filter', { filter: streamFilter.getFilter() });
 
     annots.forEach(function (annot) {
