@@ -44,7 +44,7 @@ function initialState(settings) {
     // present in the map, the default state is used which depends on whether
     // the annotation is a top-level annotation or a reply, whether it is
     // selected and whether it matches the current filter.
-    expanded: {},
+    expanded: initialSelection(settings) || {},
 
     // Set of IDs of annotations that have been explicitly shown
     // by the user even if they do not match the current search filter
