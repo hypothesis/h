@@ -1,13 +1,36 @@
 'use strict';
 
 var angular = require('angular');
-var EventEmitter = require('tiny-emitter');
-var inherits = require('inherits');
 
-function FakeRootThread() {
-  this.thread = sinon.stub();
+// Fake implementation of the API for fetching annotations and replies to
+// annotations.
+function FakeStore(annots) {
+  this.annots = annots;
+
+  this.AnnotationResource = {
+    get: function (query) {
+      var result;
+      if (query.id) {
+        result = annots.find(function (a) {
+          return a.id === query.id;
+        });
+      }
+      return {$promise: Promise.resolve(result)};
+    }
+  };
+
+  this.SearchResource = {
+    get: function (query) {
+      var result;
+      if (query.references) {
+        result = annots.filter(function (a) {
+          return a.references && a.references.indexOf(query.references) !== -1;
+        });
+      }
+      return {$promise: Promise.resolve({rows: result})};
+    }
+  };
 }
-inherits(FakeRootThread, EventEmitter);
 
 describe('AnnotationViewerController', function () {
 
@@ -24,26 +47,22 @@ describe('AnnotationViewerController', function () {
     var $controller;
     angular.mock.inject(function (_$controller_) {
       $controller = _$controller_;
-    }
-    );
+    });
     return $controller;
   }
 
-  function createAnnotationViewerController(opts) {
+  function createController(opts) {
     var locals = {
-      $location: opts.$location || {},
-      $routeParams: opts.$routeParams || { id: 'test_annotation_id' },
-      $scope: opts.$scope || {
+      $location: {},
+      $routeParams: { id: 'test_annotation_id' },
+      $scope: {
         search: {},
       },
-      annotationUI: {subscribe: sinon.stub()},
-      rootThread: new FakeRootThread(),
-      streamer: opts.streamer || { setConfig: function () {} },
-      store: opts.store || {
-        AnnotationResource: { get: sinon.spy() },
-        SearchResource: { get: sinon.spy() }
-      },
-      streamFilter: opts.streamFilter || {
+      annotationUI: {setCollapsed: sinon.stub(), subscribe: sinon.stub()},
+      rootThread: {thread: sinon.stub()},
+      streamer: { setConfig: function () {} },
+      store: opts.store,
+      streamFilter: {
         setMatchPolicyIncludeAny: function () {
           return {
             addClause: function () {
@@ -55,44 +74,52 @@ describe('AnnotationViewerController', function () {
         },
         getFilter: function () {}
       },
-      annotationMapper: opts.annotationMapper || { loadAnnotations: sinon.spy() },
+      annotationMapper: {
+        loadAnnotations: sinon.spy(),
+      },
     };
-    inherits(locals.rootThread, EventEmitter);
-    locals.ctrl = getControllerService()(
-      'AnnotationViewerController', locals);
+    locals.ctrl = getControllerService()('AnnotationViewerController', locals);
     return locals;
   }
 
-  it('fetches the top-level annotation', function () {
-    var controller = createAnnotationViewerController({});
-    assert.calledOnce(controller.store.AnnotationResource.get);
-    assert.calledWith(controller.store.AnnotationResource.get, { id: 'test_annotation_id' });
-  });
-
-  it('fetches any replies referencing the top-level annotation', function () {
-    var controller = createAnnotationViewerController({});
-    assert.calledOnce(controller.store.SearchResource.get);
-    assert.calledWith(controller.store.SearchResource.get, { references: 'test_annotation_id' });
-  });
-
-  it('loads the top-level annotation and replies into annotationMapper', function () {
-    var controller = createAnnotationViewerController({});
-    assert.ok(controller.annotationMapper);
-  });
-
-  it('passes the annotations and replies from search into loadAnnotations', function () {
-    var getAnnotation = sinon.stub().callsArgWith(1, { id: 'foo' });
-    var getReferences = sinon.stub().callsArgWith(1, { rows: [{ id: 'bar' }, { id: 'baz' }] });
-
-    var controller = createAnnotationViewerController({
-      store: {
-        AnnotationResource: { get: getAnnotation },
-        SearchResource: { get: getReferences }
-      }
+  describe('the standalone view for a top-level annotation', function () {
+    it('loads the annotation and all replies', function () {
+      var fakeStore = new FakeStore([
+        {id: 'test_annotation_id'},
+        {id: 'test_reply_id', references: ['test_annotation_id']},
+      ]);
+      var controller = createController({store: fakeStore});
+      return controller.ctrl.ready.then(function () {
+        assert.calledOnce(controller.annotationMapper.loadAnnotations);
+        assert.calledWith(controller.annotationMapper.loadAnnotations,
+          sinon.match(fakeStore.annots));
+      });
     });
-    var annotationMapper = controller.annotationMapper;
+  });
 
-    assert.calledWith(annotationMapper.loadAnnotations, [{ id: 'foo' }]);
-    assert.calledWith(annotationMapper.loadAnnotations, [{ id: 'bar' }, { id: 'baz' }]);
+  describe('the standalone view for a reply', function () {
+    it('loads the top-level annotation and all replies', function () {
+      var fakeStore = new FakeStore([
+        {id: 'parent_id'},
+        {id: 'test_annotation_id', references: ['parent_id']},
+      ]);
+      var controller = createController({store: fakeStore});
+      return controller.ctrl.ready.then(function () {
+        assert.calledWith(controller.annotationMapper.loadAnnotations,
+          sinon.match(fakeStore.annots));
+      });
+    });
+
+    it('expands the thread', function () {
+      var fakeStore = new FakeStore([
+        {id: 'parent_id'},
+        {id: 'test_annotation_id', references: ['parent_id']},
+      ]);
+      var controller = createController({store: fakeStore});
+      return controller.ctrl.ready.then(function () {
+        assert.calledWith(controller.annotationUI.setCollapsed, 'parent_id', false);
+        assert.calledWith(controller.annotationUI.setCollapsed, 'test_annotation_id', false);
+      });
+    });
   });
 });
