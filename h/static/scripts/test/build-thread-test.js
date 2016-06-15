@@ -339,4 +339,23 @@ describe('build-thread', function () {
       assert.deepEqual(thread[0].children[0].depth, 1);
     });
   });
+
+  describe('highlighting', function () {
+    it('does not set highlight state when none are highlighted', function () {
+      var thread = createThread(SIMPLE_FIXTURE, {}, ['dimmed']);
+      thread.forEach(function (child) {
+        assert.equal(child.highlightState, undefined);
+      });
+    });
+
+    it('highlights annotations', function () {
+      var thread = createThread(SIMPLE_FIXTURE, {highlighted: ['1']}, ['highlightState']);
+      assert.equal(thread[0].highlightState, 'highlight');
+    });
+
+    it('dims annotations which are not highlighted', function () {
+      var thread = createThread(SIMPLE_FIXTURE, {highlighted: ['1']}, ['highlightState']);
+      assert.equal(thread[1].highlightState, 'dim');
+    });
+  });
 });

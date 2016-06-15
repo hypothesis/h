@@ -49,6 +49,25 @@ $annotation-card-left-padding: 10px;
   position: relative;
 }
 
+.annotation.is-dimmed {
+  // Lighten the username and bodies of dimmed annotations to make other
+  // annotations which are not dimmed stand out
+  .annotation-header__user,
+  .annotation-body {
+    color: $grey-5;
+  }
+}
+
+.annotation.is-highlighted {
+  // Slightly darken the username and bodies of highlighted annotations to
+  // make them stand out next to others, which will have the `is-dimmed` state
+  // set
+  .annotation-header__user,
+  .annotation-body {
+    color: $grey-7;
+  }
+}
+
 .annotation-link {
   @include font-small;
   color: $grey-4;

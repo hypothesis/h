@@ -28,6 +28,13 @@ var DEFAULT_THREAD_STATE = {
     * including any which have been hidden by filters.
     */
   totalChildren: 0,
+  /**
+   * The highlight state of this annotation:
+   *  undefined - Do not (de-)emphasize this annotation
+   *  'dim' - De-emphasize this annotation
+   *  'highlight' - Emphasize this annotation
+   */
+  highlightState: undefined,
 };
 
 /**
@@ -234,6 +241,8 @@ var defaultOpts = {
    * Mapping of annotation IDs to expansion states.
    */
   expanded: {},
+  /** List of highlighted annotation IDs */
+  highlighted: [],
   /**
    * Less-than comparison function used to compare annotations in order to sort
    * the top-level thread.
@@ -291,10 +300,17 @@ function buildThread(annotations, opts) {
     });
   }
 
-  // Set the visibility of threads based on whether they match
-  // the current search filter
+  // Set the visibility and highlight states of threads
   thread = mapThread(thread, function (thread) {
+    var highlightState;
+    if (opts.highlighted.length > 0) {
+      var isHighlighted = thread.annotation &&
+        opts.highlighted.indexOf(thread.id) !== -1;
+      highlightState = isHighlighted ? 'highlight' : 'dim';
+    }
+
     return Object.assign({}, thread, {
+      highlightState: highlightState,
       visible: thread.visible &&
                thread.annotation &&
                shouldShowThread(thread.annotation),

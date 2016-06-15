@@ -75,6 +75,10 @@ function AnnotationViewerController (
     annots.forEach(function (annot) {
       annotationUI.setCollapsed(annot.id, false);
     });
+
+    if (topLevelAnnot.id !== id) {
+      annotationUI.highlightAnnotations([id]);
+    }
   });
 }
 

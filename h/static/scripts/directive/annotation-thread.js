@@ -62,6 +62,8 @@ function AnnotationThreadController() {
       annotation: true,
       'annotation--reply': this.thread.depth > 0,
       'is-collapsed': this.thread.collapsed,
+      'is-highlighted': this.thread.highlightState === 'highlight',
+      'is-dimmed': this.thread.highlightState === 'dim',
     };
   };
 
