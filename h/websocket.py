@@ -164,6 +164,8 @@ def create_app(global_config, **settings):
     ])
     config.set_authentication_policy(policy)
 
+    config.include('pyramid_services')
+
     config.include('h.auth')
     config.include('h.sentry')
     config.include('h.stats')
@@ -175,6 +177,9 @@ def create_app(global_config, **settings):
 
     # We have to include search to set up the `request.es` property.
     config.include('h.api.search')
+
+    # We have to include nipsa to provide the NIPSA service
+    config.include('h.nipsa')
 
     config.include('h.streamer')
 

@@ -73,6 +73,10 @@ def includeme(config):
     # when the configuration is committed.
     config.action(None, configure_jinja2_assets, args=(config,))
 
+    # Pyramid service layer: provides infrastructure for registering and
+    # retrieving services bound to the request.
+    config.include('pyramid_services')
+
     # Configure the transaction manager to support retrying retryable
     # exceptions. We also register the session factory with the thread-local
     # transaction manager, so that all sessions it creates are registered.
