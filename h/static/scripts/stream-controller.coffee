@@ -2,13 +2,13 @@ angular = require('angular')
 
 module.exports = class StreamController
   this.$inject = [
-    '$scope', '$route', '$rootScope', '$routeParams',
+    '$scope', '$location', '$route', '$rootScope', '$routeParams',
     'annotationUI',
     'queryParser', 'rootThread', 'searchFilter', 'store',
     'streamer', 'streamFilter', 'annotationMapper'
   ]
   constructor: (
-     $scope,   $route,   $rootScope,   $routeParams
+     $scope,  $location,   $route,   $rootScope,   $routeParams
      annotationUI,
      queryParser,   rootThread,   searchFilter,   store,
      streamer,   streamFilter,   annotationMapper
@@ -51,6 +51,11 @@ module.exports = class StreamController
 
     $scope.forceVisible = (id) ->
       annotationUI.setForceVisible(id, true)
+
+    Object.assign $scope.search, {
+      query: -> $routeParams.q || ''
+      update: (q) -> $location.search({q: q})
+    }
 
     thread = ->
       rootThread.thread(annotationUI.getState())

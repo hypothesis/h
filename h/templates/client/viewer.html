@@ -8,7 +8,7 @@
   <search-status-bar
     ng-show="!isLoading()"
     ng-if="!isStream"
-    filter-active="search.query"
+    filter-active="!!search.query()"
     filter-match-count="visibleCount()"
     on-clear-selection="clearSelection()"
     search-query="search ? search.query : ''"

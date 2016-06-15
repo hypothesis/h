@@ -1,6 +1,5 @@
 'use strict';
 
-var angular = require('angular');
 var scrollIntoView = require('scroll-into-view');
 
 var events = require('./events');
@@ -131,20 +130,15 @@ module.exports = function AppController(
   };
 
   $scope.clearSelection = function () {
-    $scope.search.query = '';
     annotationUI.clearSelectedAnnotations();
   };
 
   $scope.search = {
-    query: $location.search().q,
-    clear: function () {
-      $location.search('q', null);
+    query: function () {
+      return annotationUI.getState().filterQuery;
     },
     update: function (query) {
-      if (!angular.equals($location.search().q, query)) {
-        $location.search('q', query || null);
-        annotationUI.clearSelectedAnnotations();
-      }
-    }
+      annotationUI.setFilterQuery(query);
+    },
   };
 };

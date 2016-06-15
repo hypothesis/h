@@ -49,15 +49,9 @@ function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
   function buildRootThread(state) {
     var sortFn = sortFns[state.sortKey];
 
-    var filters;
-    var filterQuery = state.filterQuery;
-
-    if (filterQuery) {
-      filters = searchFilter.generateFacetedFilter(filterQuery);
-    }
-
     var filterFn;
-    if (filterQuery) {
+    if (state.filterQuery) {
+      var filters = searchFilter.generateFacetedFilter(state.filterQuery);
       filterFn = function (annot) {
         return viewFilter.filter([annot], filters).length > 0;
       };

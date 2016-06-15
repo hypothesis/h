@@ -202,6 +202,12 @@ describe('annotationUI', function () {
       annotationUI.clearSelectedAnnotations();
       assert.isNull(annotationUI.getState().selectedAnnotationMap);
     });
+
+    it('clears the current search query', function () {
+      annotationUI.setFilterQuery('foo');
+      annotationUI.clearSelectedAnnotations();
+      assert.isNull(annotationUI.getState().filterQuery);
+    });
   });
 
   describe('#setFilterQuery()', function () {

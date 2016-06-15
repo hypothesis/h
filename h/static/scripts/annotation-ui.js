@@ -63,6 +63,7 @@ function initialState(settings) {
 }
 
 var types = {
+  CLEAR_SELECTION: 'CLEAR_SELECTION',
   SELECT_ANNOTATIONS: 'SELECT_ANNOTATIONS',
   FOCUS_ANNOTATIONS: 'FOCUS_ANNOTATIONS',
   HIGHLIGHT_ANNOTATIONS: 'HIGHLIGHT_ANNOTATIONS',
@@ -107,6 +108,11 @@ function reducer(state, action) {
   state = annotationsReducer(state, action);
 
   switch (action.type) {
+    case types.CLEAR_SELECTION:
+      return Object.assign({}, state, {
+        filterQuery: null,
+        selectedAnnotationMap: null,
+      });
     case types.SELECT_ANNOTATIONS:
       return Object.assign({}, state, {selectedAnnotationMap: action.selection});
     case types.FOCUS_ANNOTATIONS:
@@ -278,7 +284,7 @@ module.exports = function (settings) {
 
     /** De-select all annotations. */
     clearSelectedAnnotations: function () {
-      select({});
+      store.dispatch({type: 'CLEAR_SELECTION'});
     },
 
     /** Add annotations to the currently displayed set. */

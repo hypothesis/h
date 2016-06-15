@@ -1,30 +1,30 @@
-module.exports = ['$http', '$parse', ($http, $parse) ->
-  link: (scope, elem, attr, ctrl) ->
-    button = elem.find('button')
-    input = elem.find('input')
+module.exports = ->
+  bindToController: true
+  controllerAs: 'vm'
+  controller: ['$element', '$http', '$scope', ($element, $http, $scope) ->
+    self = this
+    button = $element.find('button')
+    input = $element.find('input')[0]
+    form = $element.find('form')[0]
 
-    button.on('click', -> input[0].focus())
+    button.on('click', -> input.focus())
 
-    scope.reset = (event) ->
-      event.preventDefault()
-      scope.query = ''
-      scope.searchtext = ''
+    $scope.$watch (-> $http.pendingRequests.length), (pending) ->
+      self.loading = (pending > 0)
 
-    scope.search = (event) ->
-      event.preventDefault()
-      scope.query = scope.searchtext
+    form.onsubmit = (e) ->
+      e.preventDefault()
+      self.onSearch({$query: input.value})
 
-    scope.$watch (-> $http.pendingRequests.length), (pending) ->
-      scope.loading = (pending > 0)
+    this.inputClasses = ->
+      'is-expanded': self.alwaysExpanded || self.query.length > 0
 
-    scope.$watch 'query', (query) ->
-      return if query is undefined
-      scope.searchtext = query
-      if query
-        scope.onSearch?(query: scope.searchtext)
-      else
-        scope.onClear?()
+    this.$onChanges = (changes) ->
+      if changes.query
+        input.value = changes.query.currentValue
 
+    self
+  ]
   restrict: 'E'
   scope:
     # Specifies whether the search input field should always be expanded,
@@ -32,21 +32,23 @@ module.exports = ['$http', '$parse', ($http, $parse) ->
     #
     # If false, it is only expanded when focused or when 'query' is non-empty
     alwaysExpanded: '<'
-    query: '='
+    query: '<'
     onSearch: '&'
-    onClear: '&'
   template: '''
-            <form class="simple-search-form" ng-class="!searchtext && 'simple-search-inactive'" name="searchBox" ng-submit="search($event)">
-              <input class="simple-search-input" type="text" ng-model="searchtext" name="searchText"
-                     placeholder="{{loading && 'Loading' || 'Search'}}…"
-                     ng-disabled="loading"
-                     ng-class="(alwaysExpanded || searchtext.length > 0) ? 'is-expanded' : ''"/>
-              <button type="button" class="simple-search-icon top-bar__btn" ng-hide="loading">
+            <form class="simple-search-form"
+                  name="searchForm"
+                  ng-class="!vm.query && 'simple-search-inactive'">
+              <input class="simple-search-input"
+                     type="text"
+                     name="query"
+                     placeholder="{{vm.loading && 'Loading' || 'Search'}}…"
+                     ng-disabled="vm.loading"
+                     ng-class="vm.inputClasses()"/>
+              <button type="button" class="simple-search-icon top-bar__btn" ng-hide="vm.loading">
                 <i class="h-icon-search"></i>
               </button>
-              <button type="button" class="simple-search-icon btn btn-clean" ng-show="loading" disabled>
+              <button type="button" class="simple-search-icon btn btn-clean" ng-show="vm.loading" disabled>
                 <span class="btn-icon"><span class="spinner"></span></span>
               </button>
             </form>
             '''
-]

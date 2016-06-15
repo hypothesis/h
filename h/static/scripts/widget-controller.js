@@ -264,12 +264,6 @@ module.exports = function WidgetController(
     return crossframe.frames;
   }, loadAnnotations);
 
-  // Watch the inputs that determine which annotations are currently
-  // visible and how they are sorted and rebuild the thread when they change
-  $scope.$watch('search.query', function (query) {
-    annotationUI.setFilterQuery(query);
-  });
-
   $scope.setCollapsed = function (id, collapsed) {
     annotationUI.setCollapsed(id, collapsed);
   };
