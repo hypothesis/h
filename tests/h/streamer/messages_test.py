@@ -21,6 +21,7 @@ class FakeSocket(object):
         self.send = mock.MagicMock()
 
 
+@pytest.mark.usefixtures('fake_sentry', 'fake_stats')
 class TestProcessMessages(object):
     def test_creates_sentry_client(self, fake_sentry, fake_consumer, queue):
         settings = {}
@@ -35,7 +36,24 @@ class TestProcessMessages(object):
         fake_consumer.assert_called_once_with(connection=mock.ANY,
                                               routing_key=mock.ANY,
                                               handler=mock.ANY,
-                                              sentry_client=fake_sentry.get_client.return_value)
+                                              sentry_client=fake_sentry.get_client.return_value,
+                                              statsd_client=mock.ANY)
+
+    def test_creates_statsd_client(self, fake_stats, fake_consumer, queue):
+        settings = {}
+
+        messages.process_messages(settings, 'foobar', queue, raise_error=False)
+
+        fake_stats.get_client.assert_called_once_with(settings)
+
+    def test_passes_stats_client_to_consumer(self, fake_stats, fake_consumer, queue):
+        messages.process_messages({}, 'foobar', queue, raise_error=False)
+
+        fake_consumer.assert_called_once_with(connection=mock.ANY,
+                                              routing_key=mock.ANY,
+                                              handler=mock.ANY,
+                                              sentry_client=mock.ANY,
+                                              statsd_client=fake_stats.get_client.return_value)
 
     def test_passes_routing_key_to_consumer(self, fake_consumer, queue):
         messages.process_messages({}, 'foobar', queue, raise_error=False)
@@ -43,7 +61,8 @@ class TestProcessMessages(object):
         fake_consumer.assert_called_once_with(connection=mock.ANY,
                                               routing_key='foobar',
                                               handler=mock.ANY,
-                                              sentry_client=mock.ANY)
+                                              sentry_client=mock.ANY,
+                                              statsd_client=mock.ANY)
 
     def test_initializes_new_connection(self, fake_realtime, fake_consumer, queue):
         settings = {}
@@ -57,7 +76,8 @@ class TestProcessMessages(object):
         fake_consumer.assert_called_once_with(connection=fake_realtime.get_connection.return_value,
                                               routing_key=mock.ANY,
                                               handler=mock.ANY,
-                                              sentry_client=mock.ANY)
+                                              sentry_client=mock.ANY,
+                                              statsd_client=mock.ANY)
 
     def test_runs_consumer(self, fake_consumer, queue):
         messages.process_messages({}, 'foobar', queue, raise_error=False)
@@ -77,6 +97,10 @@ class TestProcessMessages(object):
     @pytest.fixture
     def fake_sentry(self, patch):
         return patch('h.sentry')
+
+    @pytest.fixture
+    def fake_stats(self, patch):
+        return patch('h.stats')
 
     @pytest.fixture
     def fake_consumer(self, patch):

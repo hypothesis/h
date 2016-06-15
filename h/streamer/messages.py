@@ -14,6 +14,7 @@ from h.auth.util import translate_annotation_principals
 from h.nipsa.logic import has_nipsa
 from h.streamer import websocket
 import h.sentry
+import h.stats
 
 log = logging.getLogger(__name__)
 
@@ -42,9 +43,12 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
 
     conn = realtime.get_connection(settings)
     sentry_client = h.sentry.get_client(settings)
+    statsd_client = h.stats.get_client(settings)
     consumer = Consumer(connection=conn,
                         routing_key=routing_key,
-                        handler=_handler, sentry_client=sentry_client)
+                        handler=_handler,
+                        sentry_client=sentry_client,
+                        statsd_client=statsd_client)
     consumer.run()
 
     if raise_error:
