@@ -172,8 +172,34 @@ function sendEvent(element, eventType) {
   element.dispatchEvent(event);
 }
 
+/**
+ * Return true if a given element is hidden on the page.
+ *
+ * There are many possible ways of hiding DOM elements on a page, this just
+ * looks for approaches that are common in our app.
+ */
+function isHidden(element) {
+  var style = window.getComputedStyle(element);
+
+  if (style.display === 'none') {
+    return true;
+  }
+
+  // Test for element or ancestor being hidden with `ng-hide` directive
+  var el = element;
+  while (el) {
+    if (el.classList.contains('ng-hide')) {
+      return true;
+    }
+    el = el.parentElement;
+  }
+
+  return false;
+}
+
 module.exports = {
   createDirective: createDirective,
+  isHidden: isHidden,
   ngModule: ngModule,
   sendEvent: sendEvent,
 };

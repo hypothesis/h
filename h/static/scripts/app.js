@@ -148,7 +148,7 @@ module.exports = angular.module('h', [
   .directive('shareDialog', require('./directive/share-dialog'))
   .directive('sidebarTutorial', require('./directive/sidebar-tutorial').directive)
   .directive('signinControl', require('./directive/signin-control'))
-  .directive('simpleSearch', require('./directive/simple-search'))
+  .directive('searchInput', require('./directive/search-input'))
   .directive('sortDropdown', require('./directive/sort-dropdown'))
   .directive('spinner', require('./directive/spinner'))
   .directive('statusButton', require('./directive/status-button'))

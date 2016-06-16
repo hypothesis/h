@@ -3,12 +3,12 @@
 <div class="top-bar" ng-class="frame.visible && 'shown'" ng-cloak>
   <!-- Legacy design for top bar, as used in the stream !-->
   <div class="top-bar__inner content" ng-if="::!isSidebar">
-    <simple-search
-      class="simple-search"
+    <search-input
+      class="search-input"
       query="searchController.query()"
       on-search="searchController.update($query)"
       always-expanded="true">
-    </simple-search>
+    </search-input>
     <div class="top-bar__expander"></div>
     <signin-control
       auth="auth"
@@ -26,12 +26,12 @@
   <div class="top-bar__inner content" ng-if="::isSidebar">
     <group-list class="group-list" auth="auth"></group-list>
     <div class="top-bar__expander"></div>
-    <simple-search
-      class="simple-search"
+    <search-input
+      class="search-input"
       query="searchController.query()"
       on-search="searchController.update($query)"
       title="Filter the annotation list">
-    </simple-search>
+    </search-input>
     <sort-dropdown
       sort-keys-available="sortKeysAvailable"
       sort-key="sortKey"
