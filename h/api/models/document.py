@@ -8,6 +8,7 @@ import logging
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
+import transaction
 
 from h.api.db import Base
 from h.api.db import mixins
@@ -15,6 +16,17 @@ from h.api.uri import normalize as uri_normalize
 
 
 log = logging.getLogger(__name__)
+
+
+class ConcurrentDocumentMetaCreateError(transaction.interfaces.TransientError):
+    """
+    Raised when concurrent requests try to create the same DocumentMeta.
+
+    Because this is a TransientError subclass, raising it will cause pyramid_tm
+    to abort the current transaction and try replaying the whole request.
+    """
+
+    pass
 
 
 class Document(Base, mixins.Timestamps):
@@ -312,6 +324,10 @@ def create_or_update_document_meta(session,
         attribute to
     :type updated: datetime.datetime
 
+    :raises :py:exc:`sqlalchemy.exc.IntegrityError`: if a concurrent request
+        commits an equivalent DocumentMeta just before this request attempts
+        to do the same
+
     """
     existing_dm = session.query(DocumentMeta).filter(
         DocumentMeta.claimant_normalized == uri_normalize(claimant),
@@ -326,6 +342,11 @@ def create_or_update_document_meta(session,
                     created=created,
                     updated=updated,
                     ))
+        # If a concurrent request has just committed a DocumentMeta that
+        # conflicts with the one we just added, then flush() will raise
+        # IntegrityError. Best to flush now and have it raised here, rather
+        # than at some random point later in the code.
+        session.flush()
     else:
         existing_dm.value = value
         existing_dm.updated = updated
@@ -384,6 +405,11 @@ def update_document_metadata(session,
         validation from the "document" dict that the client posted
     :type document_uri_dicts: list of dicts
 
+    :raises ConcurrentDocumentMetaCreateError: If a concurrent request
+        commits an equivalent DocumentMeta just before this request attempts
+        to do the same. If uncaught this exception should cause pyramid_tm to
+        try replaying the request.
+
     """
     documents = Document.find_or_create_by_uris(
         session,
@@ -409,10 +435,13 @@ def update_document_metadata(session,
             updated=annotation.updated,
             **document_uri_dict)
 
-    for document_meta_dict in document_meta_dicts:
-        create_or_update_document_meta(
-            session=session,
-            document=document,
-            created=annotation.created,
-            updated=annotation.updated,
-            **document_meta_dict)
+    try:
+        for document_meta_dict in document_meta_dicts:
+            create_or_update_document_meta(
+                session=session,
+                document=document,
+                created=annotation.created,
+                updated=annotation.updated,
+                **document_meta_dict)
+    except sa.exc.IntegrityError:
+        raise ConcurrentDocumentMetaCreateError()
