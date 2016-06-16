@@ -68,6 +68,7 @@ def process_work_queue(settings, queue, session_factory=db.Session):
     code that ensures the database session is appropriately committed and
     closed between messages.
     """
+    s = stats.get_client(settings).pipeline()
     session = session_factory()
     topic_handlers = {
         ANNOTATION_TOPIC: messages.handle_annotation_event,
@@ -75,6 +76,8 @@ def process_work_queue(settings, queue, session_factory=db.Session):
     }
 
     for msg in queue:
+        t_total = s.timer('streamer.msg.handler_total')
+        t_total.start()
         try:
             # All access to the database in the streamer is currently
             # read-only, so enforce that:
@@ -84,9 +87,11 @@ def process_work_queue(settings, queue, session_factory=db.Session):
                             "DEFERRABLE")
 
             if isinstance(msg, messages.Message):
-                messages.handle_message(msg, topic_handlers=topic_handlers)
+                with s.timer('streamer.msg.handler_message'):
+                    messages.handle_message(msg, topic_handlers=topic_handlers)
             elif isinstance(msg, websocket.Message):
-                websocket.handle_message(msg)
+                with s.timer('streamer.msg.handler_websocket'):
+                    websocket.handle_message(msg)
             else:
                 raise UnknownMessageType(repr(msg))
 
@@ -100,6 +105,8 @@ def process_work_queue(settings, queue, session_factory=db.Session):
             session.commit()
         finally:
             session.close()
+        t_total.stop()
+        s.send()
 
 
 def report_stats(settings):
