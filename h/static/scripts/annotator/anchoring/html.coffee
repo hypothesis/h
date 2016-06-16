@@ -50,6 +50,11 @@ exports.anchor = (root, selectors, options = {}) ->
       when 'RangeSelector'
         range = selector
 
+  # Assert that there is a quote selector, since otherwise we cannot validate
+  # the rest of the annotation's selectors.
+  if not quote?
+    return Promise.reject(new Error('quote selector not found'))
+
   # Assert the quote matches the stored quote, if applicable
   maybeAssertQuote = (range) ->
     if quote?.exact? and range.toString() != quote.exact
