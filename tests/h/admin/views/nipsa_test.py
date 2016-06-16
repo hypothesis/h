@@ -1,101 +1,112 @@
 # -*- coding: utf-8 -*-
 
 from pyramid import httpexceptions
-from pyramid.testing import DummyRequest as _DummyRequest
+from pyramid.request import apply_request_extensions
+from pyramid.testing import DummyRequest
 import pytest
 
 from h.admin.views import nipsa as views
 
 
-class DummyRequest(_DummyRequest):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('auth_domain', 'example.com')
-        super(DummyRequest, self).__init__(*args, **kwargs)
+@pytest.mark.usefixtures('nipsa_service', 'routes')
+class TestNipsaIndex(object):
+    def test_lists_flagged_usernames(self, req):
+        result = views.nipsa_index(req)
+
+        assert set(result['usernames']) == set(['kiki', 'ursula', 'osono'])
+
+    def test_lists_flagged_usernames_no_results(self, nipsa_service, req):
+        nipsa_service.flagged = set([])
+
+        result = views.nipsa_index(req)
+
+        assert result['usernames'] == []
 
 
-# The fixtures required to mock all of nipsa_index()'s dependencies.
-nipsa_index_fixtures = pytest.mark.usefixtures('nipsa')
+@pytest.mark.usefixtures('nipsa_service', 'routes')
+class TestNipsaAddRemove(object):
+    def test_add_flags_user(self, nipsa_service, req):
+        req.params = {"add": "carl"}
+
+        views.nipsa_add(req)
+
+        assert 'acct:carl@example.com' in nipsa_service.flagged
+
+    def test_add_ignores_empty_user(self, nipsa_service, req):
+        req.params = {"add": ""}
+
+        views.nipsa_add(req)
+
+        assert 'acct:@example.com' not in nipsa_service.flagged
+
+    def test_add_redirects_to_index(self, req):
+        req.params = {"add": "carl"}
+
+        result = views.nipsa_add(req)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/nipsa'
+
+    def test_remove_unflags_user(self, nipsa_service, req):
+        req.params = {"remove": "kiki"}
+
+        views.nipsa_remove(req)
+
+        assert 'acct:kiki@example.com' not in nipsa_service.flagged
+
+    def test_remove_ignores_empty_user(self, nipsa_service, req):
+        # Add this bogus userid just to make sure it doesn't get removed.
+        nipsa_service.flagged.add('acct:@example.com')
+        req.params = {"remove": ""}
+
+        views.nipsa_remove(req)
+
+        assert 'acct:@example.com' in nipsa_service.flagged
+
+    def test_remove_redirects_to_index(self, req):
+        req.params = {"remove": "kiki"}
+
+        result = views.nipsa_remove(req)
+
+        assert isinstance(result, httpexceptions.HTTPSeeOther)
+        assert result.location == '/adm/nipsa'
 
 
-@nipsa_index_fixtures
-def test_nipsa_index_with_no_nipsad_users(nipsa):
-    nipsa.index.return_value = []
+class FakeNipsaService(object):
+    def __init__(self):
+        self.flagged = {'acct:kiki@example.com',
+                        'acct:ursula@example.com',
+                        'acct:osono@example.com'}
 
-    assert views.nipsa_index(DummyRequest()) == {"usernames": []}
+    @property
+    def flagged_userids(self):
+        return list(self.flagged)
 
+    def flag(self, userid):
+        self.flagged.add(userid)
 
-@nipsa_index_fixtures
-def test_nipsa_index_with_one_nipsad_users(nipsa):
-    nipsa.index.return_value = ["acct:kiki@hypothes.is"]
-
-    assert views.nipsa_index(DummyRequest()) == {"usernames": ["kiki"]}
-
-
-@nipsa_index_fixtures
-def test_nipsa_index_with_multiple_nipsad_users(nipsa):
-    nipsa.index.return_value = [
-        "acct:kiki@hypothes.is", "acct:ursula@hypothes.is",
-        "acct:osono@hypothes.is"]
-
-    assert views.nipsa_index(DummyRequest()) == {
-        "usernames": ["kiki", "ursula", "osono"]}
+    def unflag(self, userid):
+        self.flagged.remove(userid)
 
 
-# The fixtures required to mock all of nipsa_add()'s dependencies.
-nipsa_add_fixtures = pytest.mark.usefixtures('nipsa', 'nipsa_index')
+@pytest.fixture
+def nipsa_service(config):
+    service = FakeNipsaService()
+
+    config.include('pyramid_services')
+    config.register_service(service, name='nipsa')
+
+    return service
 
 
-@nipsa_add_fixtures
-def test_nipsa_add_calls_nipsa_api_with_userid(nipsa):
-    request = DummyRequest(params={"add": "kiki"})
-
-    views.nipsa_add(request)
-
-    nipsa.add_nipsa.assert_called_once_with(
-        request, "acct:kiki@example.com")
+@pytest.fixture
+def req():
+    request = DummyRequest()
+    request.auth_domain = 'example.com'
+    apply_request_extensions(request)
+    return request
 
 
-@nipsa_add_fixtures
-def test_nipsa_add_returns_index(nipsa_index):
-    request = DummyRequest(params={"add": "kiki"})
-    nipsa_index.return_value = "Keine Bange!"
-
-    assert views.nipsa_add(request) == "Keine Bange!"
-
-
-# The fixtures required to mock all of nipsa_remove()'s dependencies.
-nipsa_remove_fixtures = pytest.mark.usefixtures('nipsa')
-
-
-@nipsa_remove_fixtures
-def test_nipsa_remove_calls_nipsa_api_with_userid(nipsa):
-    request = DummyRequest(params={"remove": "kiki"})
-
-    views.nipsa_remove(request)
-
-    nipsa.remove_nipsa.assert_called_once_with(
-        request, "acct:kiki@example.com")
-
-
-@nipsa_remove_fixtures
-def test_nipsa_remove_redirects_to_index():
-    request = DummyRequest(params={"remove": "kiki"})
-
-    response = views.nipsa_remove(request)
-
-    assert isinstance(response, httpexceptions.HTTPSeeOther)
-
-
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def routes(config):
     config.add_route('admin_nipsa', '/adm/nipsa')
-
-
-@pytest.fixture
-def nipsa(patch):
-    return patch('h.admin.views.nipsa.nipsa')
-
-
-@pytest.fixture
-def nipsa_index(patch):
-    return patch('h.admin.views.nipsa.nipsa_index')
