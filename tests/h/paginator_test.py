@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.testing import DummyRequest
 import pytest
 
 from h.paginator import paginate
@@ -46,12 +45,11 @@ def fake_view(total):
     return query, view
 
 
-def test_paginate_returns_resultset():
-    request = DummyRequest()
+def test_paginate_returns_resultset(pyramid_request):
     query, view = fake_view(total=10)
 
     wrapped = paginate(view)
-    result = wrapped(context=None, request=request)
+    result = wrapped(context=None, request=pyramid_request)
 
     assert result['results'] == query
     # Assert that .all() has been called to turn the query into a list.
@@ -59,12 +57,11 @@ def test_paginate_returns_resultset():
 
 
 @pytest.mark.parametrize('total', [10, 20, 40, 87])
-def test_paginate_includes_total(total):
-    request = DummyRequest()
+def test_paginate_includes_total(pyramid_request, total):
     query, view = fake_view(total=total)
 
     wrapped = paginate(view)
-    result = wrapped(context=None, request=request)
+    result = wrapped(context=None, request=pyramid_request)
 
     assert result['total'] == total
 
@@ -96,12 +93,12 @@ def test_paginate_includes_total(total):
     (400, '-19000', 0),
     (400, '?????', 0),
 ])
-def test_paginate_returns_offsets_and_limits_resultset(total, param, offset):
-    request = DummyRequest(params={'page': param})
+def test_paginate_returns_offsets_and_limits_resultset(pyramid_request, total, param, offset):
+    pyramid_request.params = {'page': param}
     query, view = fake_view(total)
 
     wrapped = paginate(view)
-    result = wrapped(context=None, request=request)
+    result = wrapped(context=None, request=pyramid_request)
 
     assert result['results'].offset_param == offset
     assert result['results'].limit_param == 20
@@ -133,13 +130,13 @@ def test_paginate_returns_offsets_and_limits_resultset(total, param, offset):
     (400, '-19000', (1, 20, 2, None)),
     (400, '?????', (1, 20, 2, None)),
 ])
-def test_paginate_returns_page_metadata(total, param, meta):
-    request = DummyRequest(params={'page': param})
+def test_paginate_returns_page_metadata(pyramid_request, total, param, meta):
+    pyramid_request.params = {'page': param}
     query, view = fake_view(total)
     ecur, emax, enext, eprev = meta
 
     wrapped = paginate(view)
-    result = wrapped(context=None, request=request)
+    result = wrapped(context=None, request=pyramid_request)
 
     assert result['page'] == {
         'cur': ecur,
@@ -149,13 +146,13 @@ def test_paginate_returns_page_metadata(total, param, meta):
     }
 
 
-def test_paginate_params():
-    request = DummyRequest(params={'page': 2})
+def test_paginate_params(pyramid_request):
+    pyramid_request.params = {'page': 2}
     query, view = fake_view(20)
 
     decorator = paginate(page_size=5)
     wrapped = decorator(view)
-    result = wrapped(context=None, request=request)
+    result = wrapped(context=None, request=pyramid_request)
 
     assert result['results'].offset_param == 5
     assert result['results'].limit_param == 5

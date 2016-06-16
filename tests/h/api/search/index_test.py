@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import mock
 import pytest
-from pyramid.testing import DummyRequest
 
 import elasticsearch
 
@@ -24,35 +23,39 @@ class GeneratorEquals(object):
 @pytest.mark.usefixtures('presenters')
 class TestIndexAnnotation:
 
-    def test_it_presents_the_annotation(self, es, presenters):
-        request = mock.Mock()
+    def test_it_presents_the_annotation(self, es, presenters, pyramid_request):
         annotation = mock.Mock()
 
-        index.index(es, annotation, request)
+        index.index(es, annotation, pyramid_request)
 
         presenters.AnnotationSearchIndexPresenter.assert_called_once_with(
-            request, annotation)
+            pyramid_request,
+            annotation)
 
-    def test_it_creates_an_annotation_before_save_event(self, es, presenters, AnnotationTransformEvent):
-        request = mock.Mock()
-        presented = (
-            presenters.AnnotationSearchIndexPresenter.return_value.asdict())
+    def test_it_creates_an_annotation_before_save_event(self,
+                                                        AnnotationTransformEvent,
+                                                        es,
+                                                        presenters,
+                                                        pyramid_request):
+        presented = presenters.AnnotationSearchIndexPresenter.return_value.asdict()
 
-        index.index(es, mock.Mock(), request)
+        index.index(es, mock.Mock(), pyramid_request)
 
-        AnnotationTransformEvent.assert_called_once_with(request, presented)
+        AnnotationTransformEvent.assert_called_once_with(pyramid_request, presented)
 
-    def test_it_notifies_before_save_event(self, es, presenters, AnnotationTransformEvent):
-        request = DummyRequest()
-        request.registry.notify = mock.Mock(spec=lambda event: None)
-
-        index.index(es, mock.Mock(), request)
+    def test_it_notifies_before_save_event(self,
+                                           AnnotationTransformEvent,
+                                           es,
+                                           notify,
+                                           presenters,
+                                           pyramid_request):
+        index.index(es, mock.Mock(), pyramid_request)
 
         event = AnnotationTransformEvent.return_value
-        request.registry.notify.assert_called_once_with(event)
+        notify.assert_called_once_with(event)
 
-    def test_it_indexes_the_annotation(self, es, presenters):
-        index.index(es, mock.Mock(), mock.Mock())
+    def test_it_indexes_the_annotation(self, es, presenters, pyramid_request):
+        index.index(es, mock.Mock(), pyramid_request)
 
         es.conn.index.assert_called_once_with(
             index='hypothesis',
@@ -142,32 +145,33 @@ class TestBatchIndexer(object):
             mock.call(indexer, set(['id-1'])),
         ]
 
-    def test_index_indexes_all_annotations_to_es(self, db_session, streaming_bulk):
+    def test_index_indexes_all_annotations_to_es(self, db_session, indexer, streaming_bulk):
         ann_1, ann_2 = self.annotation(), self.annotation()
         db_session.add_all([ann_1, ann_2])
         db_session.flush()
 
-        indexer = self.indexer(session=db_session)
         indexer.index()
 
         streaming_bulk.assert_called_once_with(
             indexer.es_client.conn, GeneratorEquals([ann_1, ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
-    def test_index_indexes_filtered_annotations_to_es(self, db_session, streaming_bulk):
+    def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, streaming_bulk):
         ann_1, ann_2 = self.annotation(), self.annotation()
         db_session.add_all([ann_1, ann_2])
         db_session.flush()
 
-        indexer = self.indexer(session=db_session)
         indexer.index([ann_2.id])
 
         streaming_bulk.assert_called_once_with(
             indexer.es_client.conn, GeneratorEquals([ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
-    def test_index_correctly_presents_bulk_actions(self, db_session, streaming_bulk, mock_request):
-        indexer = self.indexer(session=db_session)
+    def test_index_correctly_presents_bulk_actions(self,
+                                                   db_session,
+                                                   indexer,
+                                                   pyramid_request,
+                                                   streaming_bulk):
         annotation = self.annotation()
         db_session.add(annotation)
         db_session.flush()
@@ -184,7 +188,7 @@ class TestBatchIndexer(object):
         indexer.index()
 
         rendered = presenters.AnnotationSearchIndexPresenter(
-            mock_request, annotation).asdict()
+            pyramid_request, annotation).asdict()
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
         assert results[0] == (
             {'index': {'_type': indexer.es_client.t.annotation,
@@ -193,8 +197,7 @@ class TestBatchIndexer(object):
             rendered
         )
 
-    def test_index_returns_failed_bulk_actions(self, db_session, streaming_bulk):
-        indexer = self.indexer(session=db_session)
+    def test_index_returns_failed_bulk_actions(self, db_session, indexer, streaming_bulk):
         ann_success_1, ann_success_2 = self.annotation(), self.annotation()
         ann_fail_1, ann_fail_2 = self.annotation(), self.annotation()
         db_session.add_all([ann_success_1, ann_success_2,
@@ -214,10 +217,8 @@ class TestBatchIndexer(object):
         assert result == set([ann_fail_1.id, ann_fail_2.id])
 
     @pytest.fixture
-    def indexer(self, session=None):
-        if session is None:
-            session = mock.MagicMock()
-        return index.BatchIndexer(session, mock.MagicMock(), DummyRequest())
+    def indexer(self, db_session, pyramid_request):
+        return index.BatchIndexer(db_session, mock.MagicMock(), pyramid_request)
 
     @pytest.fixture
     def index(self, patch):
@@ -226,10 +227,6 @@ class TestBatchIndexer(object):
     @pytest.fixture
     def streaming_bulk(self, patch):
         return patch('h.api.search.index.es_helpers.streaming_bulk')
-
-    @pytest.fixture
-    def mock_request(self):
-        return DummyRequest()
 
     def annotation(self):
         return models.Annotation(userid="bob", target_uri="http://example.com")
@@ -279,13 +276,16 @@ class TestBatchDeleter(object):
         deleted_ids = deleter.deleted_annotation_ids()
         assert deleted_ids == set(['deleted-from-postgres-id'])
 
-    def test_deleted_annotation_ids_no_changes(self, db_session, es_scan, annotation):
-        request = DummyRequest()
+    def test_deleted_annotation_ids_no_changes(self,
+                                               annotation,
+                                               db_session,
+                                               es_scan,
+                                               pyramid_request):
         deleter = self.deleter(session=db_session)
 
         es_scan.return_value = [
             {'_id': annotation.id,
-             '_source': presenters.AnnotationSearchIndexPresenter(request,
+             '_source': presenters.AnnotationSearchIndexPresenter(pyramid_request,
                                                                   annotation)}]
 
         deleted_ids = deleter.deleted_annotation_ids()

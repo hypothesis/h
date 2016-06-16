@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pyramid.testing import DummyRequest
 import pytest
 
 from h import links
@@ -24,19 +23,19 @@ class FakeDocument(object):
         self.document_uris = []
 
 
-def test_incontext_link(api_request):
+def test_incontext_link(pyramid_request):
     annotation = FakeAnnotation()
 
-    link = links.incontext_link(api_request, annotation)
+    link = links.incontext_link(pyramid_request, annotation)
 
     assert link == 'https://hyp.is/123/example.com/foo/bar'
 
 
-def test_incontext_link_is_none_for_replies(api_request):
+def test_incontext_link_is_none_for_replies(pyramid_request):
     annotation = FakeAnnotation()
     annotation.references = ['parent']
 
-    link = links.incontext_link(api_request, annotation)
+    link = links.incontext_link(pyramid_request, annotation)
 
     assert link is None
 
@@ -48,18 +47,18 @@ def test_incontext_link_is_none_for_replies(api_request):
     ('http://example.com/foo/bar', 'https://hyp.is/123/example.com/foo/bar'),
     ('https://safari.org/giraffes', 'https://hyp.is/123/safari.org/giraffes'),
 ])
-def test_incontext_link_appends_schemaless_uri_if_present(api_request,
+def test_incontext_link_appends_schemaless_uri_if_present(pyramid_request,
                                                           target_uri,
                                                           expected):
     annotation = FakeAnnotation()
     annotation.target_uri = target_uri
 
-    link = links.incontext_link(api_request, annotation)
+    link = links.incontext_link(pyramid_request, annotation)
 
     assert link == expected
 
 
-def test_incontext_link_appends_first_schemaless_uri_for_pdfs_with_document(api_request):
+def test_incontext_link_appends_first_schemaless_uri_for_pdfs_with_document(pyramid_request):
     doc = FakeDocument()
     docuri1 = FakeDocumentURI()
     docuri1.uri = 'http://example.com/foo.pdf'
@@ -72,22 +71,23 @@ def test_incontext_link_appends_first_schemaless_uri_for_pdfs_with_document(api_
     annotation.document = doc
     annotation.target_uri = 'urn:x-pdf:the-fingerprint'
 
-    link = links.incontext_link(api_request, annotation)
+    link = links.incontext_link(pyramid_request, annotation)
 
     assert link == 'https://hyp.is/123/example.com/foo.pdf'
 
 
-def test_incontext_link_skips_uri_for_pdfs_with_no_document(api_request):
+def test_incontext_link_skips_uri_for_pdfs_with_no_document(pyramid_request):
     annotation = FakeAnnotation()
     annotation.target_uri = 'urn:x-pdf:the-fingerprint'
 
-    link = links.incontext_link(api_request, annotation)
+    link = links.incontext_link(pyramid_request, annotation)
 
     assert link == 'https://hyp.is/123'
 
 
 @pytest.fixture
-def api_request():
-    request = DummyRequest()
-    request.registry.settings = {'h.bouncer_url': 'https://hyp.is'}
-    return request
+def pyramid_settings(pyramid_settings):
+    pyramid_settings.update({
+        'h.bouncer_url': 'https://hyp.is',
+    })
+    return pyramid_settings

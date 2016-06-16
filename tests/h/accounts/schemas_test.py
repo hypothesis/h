@@ -1,20 +1,11 @@
 # -*- coding: utf-8 -*-
 import colander
 import pytest
-import mock
 from mock import Mock
 from pyramid.exceptions import BadCSRFToken
-from pyramid.testing import DummyRequest
 from itsdangerous import BadData, SignatureExpired
 
 from h.accounts import schemas
-
-
-class DummyNode(object):
-    def __init__(self):
-        self.bindings = {
-            'request': DummyRequest(db=mock.sentinel.db_session)
-        }
 
 
 class FakeSerializer(object):
@@ -38,97 +29,80 @@ class FakeInvalidSerializer(FakeSerializer):
         raise BadData("Invalid token")
 
 
-def csrf_request(config, **kwargs):
-    request = DummyRequest(db=mock.sentinel.db_session, registry=config.registry, **kwargs)
-    request.headers['X-CSRF-Token'] = request.session.get_csrf_token()
-    return request
-
-
-def test_unblacklisted_username(config):
-    request = DummyRequest()
-    node = colander.SchemaNode(colander.String()).bind(request=request)
+def test_unblacklisted_username(dummy_node):
     blacklist = set(['admin', 'root', 'postmaster'])
 
     # Should not raise for valid usernames
-    schemas.unblacklisted_username(node, "john", blacklist)
-    schemas.unblacklisted_username(node, "Abigail", blacklist)
+    schemas.unblacklisted_username(dummy_node, "john", blacklist)
+    schemas.unblacklisted_username(dummy_node, "Abigail", blacklist)
     # Should raise for usernames in blacklist
     pytest.raises(colander.Invalid,
                   schemas.unblacklisted_username,
-                  node,
+                  dummy_node,
                   "admin",
                   blacklist)
     # Should raise for case variants of usernames in blacklist
     pytest.raises(colander.Invalid,
                   schemas.unblacklisted_username,
-                  node,
+                  dummy_node,
                   "PostMaster",
                   blacklist)
 
 
-def test_unique_email_looks_up_user_by_email(user_model):
-    node = DummyNode()
-
+def test_unique_email_looks_up_user_by_email(dummy_node, pyramid_request, user_model):
     with pytest.raises(colander.Invalid):
-        schemas.unique_email(node, "foo@bar.com")
+        schemas.unique_email(dummy_node, "foo@bar.com")
 
-    user_model.get_by_email.assert_called_with(mock.sentinel.db_session, "foo@bar.com")
+    user_model.get_by_email.assert_called_with(pyramid_request.db, "foo@bar.com")
 
 
-def test_unique_email_invalid_when_user_exists(user_model):
-    node = DummyNode()
-
+def test_unique_email_invalid_when_user_exists(dummy_node, user_model):
     pytest.raises(colander.Invalid,
                   schemas.unique_email,
-                  node,
+                  dummy_node,
                   "foo@bar.com")
 
 
-def test_unique_email_invalid_when_user_does_not_exist(user_model):
-    node = DummyNode()
+def test_unique_email_invalid_when_user_does_not_exist(dummy_node, user_model):
     user_model.get_by_email.return_value = None
 
-    assert schemas.unique_email(node, "foo@bar.com") is None
+    assert schemas.unique_email(dummy_node, "foo@bar.com") is None
 
 
-def test_RegisterSchema_with_password_too_short(user_model):
-    request = DummyRequest(db=mock.sentinel.db_session)
-    schema = schemas.RegisterSchema().bind(request=request)
+def test_RegisterSchema_with_password_too_short(pyramid_request, user_model):
+    schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"password": "a"})
     assert "password" in exc.value.asdict()
 
 
-def test_RegisterSchema_with_username_too_short(user_model):
-    request = DummyRequest(db=mock.sentinel.db_session)
-    schema = schemas.RegisterSchema().bind(request=request)
+def test_RegisterSchema_with_username_too_short(pyramid_request, user_model):
+    schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"username": "a"})
     assert "username" in exc.value.asdict()
 
 
-def test_RegisterSchema_with_username_too_long(user_model):
-    request = DummyRequest(db=mock.sentinel.db_session)
-    schema = schemas.RegisterSchema().bind(request=request)
+def test_RegisterSchema_with_username_too_long(pyramid_request, user_model):
+    schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"username": "a" * 500})
     assert "username" in exc.value.asdict()
 
 
-def test_ResetPasswordSchema_with_password_too_short(config, user_model):
-    schema = schemas.ResetPasswordSchema().bind(request=csrf_request(config))
+def test_ResetPasswordSchema_with_password_too_short(pyramid_csrf_request, user_model):
+    schema = schemas.ResetPasswordSchema().bind(request=pyramid_csrf_request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"password": "a"})
     assert "password" in exc.value.asdict()
 
 
-def test_LoginSchema_with_bad_csrf(config, user_model):
-    request = DummyRequest()
-    schema = schemas.LoginSchema().bind(request=request)
+def test_LoginSchema_with_bad_csrf(pyramid_request, user_model):
+    schema = schemas.LoginSchema().bind(request=pyramid_request)
     user = user_model.get_by_username.return_value
     user.is_activated = True
 
@@ -139,9 +113,8 @@ def test_LoginSchema_with_bad_csrf(config, user_model):
         })
 
 
-def test_LoginSchema_with_bad_username(config, user_model):
-    request = csrf_request(config)
-    schema = schemas.LoginSchema().bind(request=request)
+def test_LoginSchema_with_bad_username(pyramid_csrf_request, user_model):
+    schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
     user_model.get_by_username.return_value = None
     user_model.get_by_email.return_value = None
 
@@ -154,9 +127,8 @@ def test_LoginSchema_with_bad_username(config, user_model):
     assert 'username' in exc.value.asdict()
 
 
-def test_LoginSchema_with_bad_password(config, user_model):
-    request = csrf_request(config)
-    schema = schemas.LoginSchema().bind(request=request)
+def test_LoginSchema_with_bad_password(pyramid_csrf_request, user_model):
+    schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
     user_model.validate_user.return_value = False
 
     with pytest.raises(colander.Invalid) as exc:
@@ -168,12 +140,11 @@ def test_LoginSchema_with_bad_password(config, user_model):
     assert 'password' in exc.value.asdict()
 
 
-def test_LoginSchema_with_valid_request(config, user_model):
-    request = csrf_request(config)
+def test_LoginSchema_with_valid_request(pyramid_csrf_request, user_model):
     user = user_model.get_by_username.return_value
     user.is_activated = True
 
-    schema = schemas.LoginSchema().bind(request=request)
+    schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
 
     assert 'user' in schema.deserialize({
         'username': 'jeannie',
@@ -181,10 +152,9 @@ def test_LoginSchema_with_valid_request(config, user_model):
     })
 
 
-def test_LoginSchema_with_email_instead_of_username(config, user_model):
+def test_LoginSchema_with_email_instead_of_username(pyramid_csrf_request, user_model):
     """If get_by_username() returns None it should try get_by_email()."""
-    request = csrf_request(config)
-    schema = schemas.LoginSchema().bind(request=request)
+    schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
     user_model.get_by_username.return_value = None
     user = user_model.get_by_email.return_value
     user.is_activated = True
@@ -195,11 +165,10 @@ def test_LoginSchema_with_email_instead_of_username(config, user_model):
     })
 
 
-def test_LoginSchema_with_inactive_user_account(config, user_model):
-    request = csrf_request(config)
+def test_LoginSchema_with_inactive_user_account(pyramid_csrf_request, user_model):
     user = user_model.get_by_username.return_value
     user.is_activated = False
-    schema = schemas.LoginSchema().bind(request=request)
+    schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({
@@ -211,9 +180,8 @@ def test_LoginSchema_with_inactive_user_account(config, user_model):
             exc.value.asdict().get('username', ''))
 
 
-def test_ForgotPasswordSchema_invalid_with_no_user(config, user_model):
-    request = csrf_request(config)
-    schema = schemas.ForgotPasswordSchema().bind(request=request)
+def test_ForgotPasswordSchema_invalid_with_no_user(pyramid_csrf_request, user_model):
+    schema = schemas.ForgotPasswordSchema().bind(request=pyramid_csrf_request)
     user_model.get_by_email.return_value = None
 
     with pytest.raises(colander.Invalid) as exc:
@@ -223,9 +191,8 @@ def test_ForgotPasswordSchema_invalid_with_no_user(config, user_model):
     assert 'no user with the email address' in exc.value.asdict()['email']
 
 
-def test_ForgotPasswordSchema_adds_user_to_appstruct(config, user_model):
-    request = csrf_request(config)
-    schema = schemas.ForgotPasswordSchema().bind(request=request)
+def test_ForgotPasswordSchema_adds_user_to_appstruct(pyramid_csrf_request, user_model):
+    schema = schemas.ForgotPasswordSchema().bind(request=pyramid_csrf_request)
     user = user_model.get_by_email.return_value
 
     appstruct = schema.deserialize({'email': 'rapha@example.com'})
@@ -233,10 +200,9 @@ def test_ForgotPasswordSchema_adds_user_to_appstruct(config, user_model):
     assert appstruct['user'] == user
 
 
-def test_ResetPasswordSchema_with_invalid_user_token(config, user_model):
-    request = csrf_request(config)
-    request.registry.password_reset_serializer = FakeInvalidSerializer()
-    schema = schemas.ResetPasswordSchema().bind(request=request)
+def test_ResetPasswordSchema_with_invalid_user_token(pyramid_csrf_request, user_model):
+    pyramid_csrf_request.registry.password_reset_serializer = FakeInvalidSerializer()
+    schema = schemas.ResetPasswordSchema().bind(request=pyramid_csrf_request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({
@@ -248,10 +214,9 @@ def test_ResetPasswordSchema_with_invalid_user_token(config, user_model):
     assert 'reset code is not valid' in exc.value.asdict()['user']
 
 
-def test_ResetPasswordSchema_with_expired_token(config, user_model):
-    request = csrf_request(config)
-    request.registry.password_reset_serializer = FakeExpiredSerializer()
-    schema = schemas.ResetPasswordSchema().bind(request=request)
+def test_ResetPasswordSchema_with_expired_token(pyramid_csrf_request, user_model):
+    pyramid_csrf_request.registry.password_reset_serializer = FakeExpiredSerializer()
+    schema = schemas.ResetPasswordSchema().bind(request=pyramid_csrf_request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({
@@ -264,11 +229,10 @@ def test_ResetPasswordSchema_with_expired_token(config, user_model):
 
 
 @pytest.mark.usefixtures('user_model')
-def test_ResetPasswordSchema_user_has_already_reset_their_password(config,
+def test_ResetPasswordSchema_user_has_already_reset_their_password(pyramid_csrf_request,
                                                                    user_model):
-    request = csrf_request(config)
-    request.registry.password_reset_serializer = FakeSerializer()
-    schema = schemas.ResetPasswordSchema().bind(request=request)
+    pyramid_csrf_request.registry.password_reset_serializer = FakeSerializer()
+    schema = schemas.ResetPasswordSchema().bind(request=pyramid_csrf_request)
     user = user_model.get_by_username.return_value
     user.password_updated = 2
 
@@ -283,10 +247,9 @@ def test_ResetPasswordSchema_user_has_already_reset_their_password(config,
 
 
 @pytest.mark.usefixtures('user_model')
-def test_ResetPasswordSchema_adds_user_to_appstruct(config, user_model):
-    request = csrf_request(config)
-    request.registry.password_reset_serializer = FakeSerializer()
-    schema = schemas.ResetPasswordSchema().bind(request=request)
+def test_ResetPasswordSchema_adds_user_to_appstruct(pyramid_csrf_request, user_model):
+    pyramid_csrf_request.registry.password_reset_serializer = FakeSerializer()
+    schema = schemas.ResetPasswordSchema().bind(request=pyramid_csrf_request)
     user = user_model.get_by_username.return_value
     user.password_updated = 0
 
@@ -298,10 +261,10 @@ def test_ResetPasswordSchema_adds_user_to_appstruct(config, user_model):
     assert appstruct['user'] == user
 
 
-def test_EmailChangeSchema_rejects_non_matching_emails(config, user_model):
+def test_EmailChangeSchema_rejects_non_matching_emails(pyramid_csrf_request, user_model):
     user = Mock()
-    request = csrf_request(config, authenticated_user=user)
-    schema = schemas.EmailChangeSchema().bind(request=request)
+    pyramid_csrf_request.authenticated_user = user
+    schema = schemas.EmailChangeSchema().bind(request=pyramid_csrf_request)
     # The email isn't taken
     user_model.get_by_email.return_value = None
 
@@ -313,10 +276,10 @@ def test_EmailChangeSchema_rejects_non_matching_emails(config, user_model):
     assert 'email_confirm' in exc.value.asdict()
 
 
-def test_EmailChangeSchema_rejects_wrong_password(config, user_model):
+def test_EmailChangeSchema_rejects_wrong_password(pyramid_csrf_request, user_model):
     user = Mock()
-    request = csrf_request(config, authenticated_user=user)
-    schema = schemas.EmailChangeSchema().bind(request=request)
+    pyramid_csrf_request.authenticated_user = user
+    schema = schemas.EmailChangeSchema().bind(request=pyramid_csrf_request)
     # The email isn't taken
     user_model.get_by_email.return_value = None
     # The password does not check out
@@ -331,11 +294,11 @@ def test_EmailChangeSchema_rejects_wrong_password(config, user_model):
     assert 'password' in exc.value.asdict()
 
 
-def test_PasswordChangeSchema_rejects_non_matching_passwords(config,
+def test_PasswordChangeSchema_rejects_non_matching_passwords(pyramid_csrf_request,
                                                              user_model):
     user = Mock()
-    request = csrf_request(config, authenticated_user=user)
-    schema = schemas.PasswordChangeSchema().bind(request=request)
+    pyramid_csrf_request.authenticated_user = user
+    schema = schemas.PasswordChangeSchema().bind(request=pyramid_csrf_request)
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({'new_password': 'wibble',
@@ -345,10 +308,10 @@ def test_PasswordChangeSchema_rejects_non_matching_passwords(config,
     assert 'new_password_confirm' in exc.value.asdict()
 
 
-def test_PasswordChangeSchema_rejects_wrong_password(config, user_model):
+def test_PasswordChangeSchema_rejects_wrong_password(pyramid_csrf_request, user_model):
     user = Mock()
-    request = csrf_request(config, authenticated_user=user)
-    schema = schemas.PasswordChangeSchema().bind(request=request)
+    pyramid_csrf_request.authenticated_user = user
+    schema = schemas.PasswordChangeSchema().bind(request=pyramid_csrf_request)
     # The password does not check out
     user_model.validate_user.return_value = False
 
@@ -364,6 +327,16 @@ def test_PasswordChangeSchema_rejects_wrong_password(config, user_model):
 @pytest.fixture
 def activation_model(patch):
     return patch('h.accounts.schemas.models.Activation')
+
+
+@pytest.fixture
+def dummy_node(pyramid_request):
+    class DummyNode(object):
+        def __init__(self, request):
+            self.bindings = {
+                'request': request
+            }
+    return DummyNode(pyramid_request)
 
 
 @pytest.fixture

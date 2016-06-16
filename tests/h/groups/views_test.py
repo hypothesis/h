@@ -5,7 +5,6 @@ import deform
 import mock
 import pytest
 from pyramid import httpexceptions
-from pyramid import testing
 
 from h.groups import views
 
@@ -529,24 +528,23 @@ def test_leave_publishes_leave_event(Group, session_model):
 
 
 @pytest.fixture
-def share_group_request(Group, config, pubid=u'__world__'):
+def share_group_request(Group, pyramid_config, pyramid_request, pubid=u'__world__'):
     """
     Return a logged-in, already-member request for the group read page.
 
     The user is logged-in and is a member of the group.
 
     """
-    request = testing.DummyRequest(db=mock.sentinel.db_session)
-    request.matchdict.update({'pubid': pubid, 'slug': 'slug'})
+    pyramid_request.matchdict.update({'pubid': pubid, 'slug': 'slug'})
 
     # The user is logged-in.
-    config.testing_securitypolicy('userid')
-    request.authenticated_user = mock.Mock()
+    pyramid_config.testing_securitypolicy('userid')
+    pyramid_request.authenticated_user = mock.Mock()
 
     # The user is a member of the group.
-    request.authenticated_user.groups = [Group.get_by_pubid.return_value]
+    pyramid_request.authenticated_user.groups = [Group.get_by_pubid.return_value]
 
-    return request
+    return pyramid_request
 
 
 @pytest.fixture
@@ -578,8 +576,8 @@ def renderers(patch):
 
 
 @pytest.fixture
-def routes(config):
-    config.add_route('group_read', '/groups/{pubid}/{slug:[^/]*}')
+def routes(pyramid_config):
+    pyramid_config.add_route('group_read', '/groups/{pubid}/{slug:[^/]*}')
 
 
 @pytest.fixture

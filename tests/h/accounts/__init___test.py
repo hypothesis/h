@@ -2,7 +2,6 @@
 import mock
 import pytest
 from pyramid import httpexceptions
-from pyramid import testing
 
 from h import accounts
 
@@ -29,70 +28,68 @@ def test_get_user_returns_None_if_split_user_raises_ValueError(util):
 
 
 @get_user_fixtures
-def test_get_user_returns_None_if_domain_does_not_match(util):
-    request = mock.Mock(auth_domain='hypothes.is')
+def test_get_user_returns_None_if_domain_does_not_match(util, pyramid_request):
     util.user.split_user.return_value = {
         'username': 'username', 'domain': 'other'}
 
-    assert accounts.get_user('userid', request) is None
+    assert accounts.get_user('userid', pyramid_request) is None
 
 
 @get_user_fixtures
-def test_get_user_calls_get_by_username(util, get_by_username):
+def test_get_user_calls_get_by_username(util, get_by_username, pyramid_request):
     """It should call get_by_username() once with the username."""
-    request = mock.Mock(auth_domain='hypothes.is', db=mock.sentinel.db_session)
+    pyramid_request.auth_domain = 'hypothes.is'
     util.user.split_user.return_value = {
         'username': 'username', 'domain': 'hypothes.is'}
 
-    accounts.get_user('acct:username@hypothes.is', request)
+    accounts.get_user('acct:username@hypothes.is', pyramid_request)
 
-    get_by_username.assert_called_once_with(mock.sentinel.db_session, 'username')
+    get_by_username.assert_called_once_with(pyramid_request.db, 'username')
 
 
 @get_user_fixtures
-def test_get_user_returns_user(util, get_by_username):
+def test_get_user_returns_user(util, get_by_username, pyramid_request):
     """It should return the result from get_by_username()."""
-    request = mock.Mock(auth_domain='hypothes.is')
+    pyramid_request.auth_domain = 'hypothes.is'
     util.user.split_user.return_value = {
         'username': 'username', 'domain': 'hypothes.is'}
 
-    assert accounts.get_user('acct:username@hypothes.is', request) == (
-        get_by_username.return_value)
+    result = accounts.get_user('acct:username@hypothes.is', pyramid_request)
+
+    assert result == get_by_username.return_value
 
 
 authenticated_user_fixtures = pytest.mark.usefixtures('get_user')
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_calls_get_user(config, get_user):
+def test_authenticated_user_calls_get_user(get_user, pyramid_config, pyramid_request):
     """It should call get_user() correctly."""
-    request = testing.DummyRequest()
-    config.testing_securitypolicy('userid')
+    pyramid_config.testing_securitypolicy('userid')
 
-    accounts.authenticated_user(request)
+    accounts.authenticated_user(pyramid_request)
 
-    get_user.assert_called_once_with('userid', request)
+    get_user.assert_called_once_with('userid', pyramid_request)
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_invalidates_session_if_user_does_not_exist(config, get_user):
+def test_authenticated_user_invalidates_session_if_user_does_not_exist(get_user, pyramid_config, pyramid_request):
     """It should log the user out if they no longer exist in the db."""
-    request = testing.DummyRequest()
-    request.current_route_url = lambda: '/'
-    request.session.invalidate = mock.Mock()
-    config.testing_securitypolicy('userid')
+    pyramid_request.current_route_url = lambda: '/'
+    pyramid_request.session.invalidate = mock.Mock()
+    pyramid_config.testing_securitypolicy('userid')
     get_user.return_value = None
 
     try:
-        accounts.authenticated_user(request)
+        accounts.authenticated_user(pyramid_request)
     except Exception:
         pass
 
-    request.session.invalidate.assert_called_once_with()
+    pyramid_request.session.invalidate.assert_called_once_with()
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_does_not_invalidate_session_if_not_authenticated(config, get_user):
+def test_authenticated_user_does_not_invalidate_session_if_not_authenticated(get_user, pyramid_config, pyramid_request):
     """
     If authenticated_userid is None it shouldn't invalidate the session.
 
@@ -101,37 +98,35 @@ def test_authenticated_user_does_not_invalidate_session_if_not_authenticated(con
     This also tests that it doesn't raise a redirect in this case.
 
     """
-    request = testing.DummyRequest()
-    request.current_route_url = lambda: '/'
-    request.session.invalidate = mock.Mock()
-    config.testing_securitypolicy()
+    pyramid_request.current_route_url = lambda: '/'
+    pyramid_request.session.invalidate = mock.Mock()
+    pyramid_config.testing_securitypolicy()
     get_user.return_value = None
 
-    accounts.authenticated_user(request)
+    accounts.authenticated_user(pyramid_request)
 
-    assert not request.session.invalidate.called
+    assert not pyramid_request.session.invalidate.called
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_redirects_if_user_does_not_exist(config, get_user):
-    request = testing.DummyRequest()
-    request.current_route_url = lambda: '/the/page/that/I/was/on'
-    config.testing_securitypolicy('userid')
+def test_authenticated_user_redirects_if_user_does_not_exist(get_user, pyramid_config, pyramid_request):
+    pyramid_request.current_route_url = lambda: '/the/page/that/I/was/on'
+    pyramid_config.testing_securitypolicy('userid')
     get_user.return_value = None
 
     with pytest.raises(httpexceptions.HTTPFound) as exc:
-        accounts.authenticated_user(request)
+        accounts.authenticated_user(pyramid_request)
 
     assert exc.value.location == '/the/page/that/I/was/on', (
         'It should redirect to the same page that was requested')
 
 
 @authenticated_user_fixtures
-def test_authenticated_user_returns_user_from_get_user(get_user):
+def test_authenticated_user_returns_user_from_get_user(get_user, pyramid_config, pyramid_request):
     """It should return the user from get_user()."""
-    request = mock.Mock(authenticated_userid='userid')
+    pyramid_config.testing_securitypolicy('userid')
 
-    assert accounts.authenticated_user(request) == get_user.return_value
+    assert accounts.authenticated_user(pyramid_request) == get_user.return_value
 
 
 @pytest.fixture
