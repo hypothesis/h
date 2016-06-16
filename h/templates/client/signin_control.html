@@ -29,7 +29,7 @@
       <a class="dropdown-menu__link" href="{{vm.serviceUrl}}profile" target="_blank">Account settings</a>
     </li>
     <li class="dropdown-menu__row">
-      <a class="dropdown-menu__link" ng-click="vm.onShowAboutVersionDialog()">Help</a>
+      <a class="dropdown-menu__link" ng-click="vm.onShowHelpPanel()">Help</a>
     </li>
     <li class="dropdown-menu__row" ng-if="vm.auth.status === 'signed-in'">
       <a class="dropdown-menu__link dropdown-menu__link--subtle"
@@ -58,10 +58,7 @@
       <a class="dropdown-menu__link" href="{{vm.serviceUrl}}profile" target="_blank">Account</a>
     </li>
     <li class="dropdown-menu__row" >
-      <a class="dropdown-menu__link" href="mailto:support@hypothes.is">Feedback</a>
-    </li>
-    <li class="dropdown-menu__row" >
-      <a class="dropdown-menu__link" href="{{vm.serviceUrl}}docs/help" target="_blank">Help</a>
+      <a class="dropdown-menu__link" ng-click="vm.onShowHelpPanel()">Help</a>
     </li>
     <li class="dropdown-menu__row" ng-if="vm.auth.status === 'signed-in'">
       <a class="dropdown-menu__link" href="{{vm.serviceUrl}}stream?q=user:{{vm.auth.username}}"

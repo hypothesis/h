@@ -46,7 +46,7 @@ module.exports = function AppController(
   // App dialogs
   $scope.accountDialog = {visible: false};
   $scope.shareDialog = {visible: false};
-  $scope.aboutThisVersionDialog = {visible: false};
+  $scope.helpPanel = {visible: false};
 
   // Check to see if we're in the sidebar, or on a standalone page such as
   // the stream page or an individual annotation page.

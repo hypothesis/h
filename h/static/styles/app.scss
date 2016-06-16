@@ -8,7 +8,6 @@ $base-line-height: 20px;
 
 // Components
 // ----------
-@import './about-this-version-dialog';
 @import './annotation';
 @import './annotation-share-dialog';
 @import './annotation-thread';
@@ -16,6 +15,7 @@ $base-line-height: 20px;
 @import './dropdown-menu-btn';
 @import './excerpt';
 @import './group-list';
+@import './help-panel';
 @import './loggedout-message';
 @import './markdown';
 @import './primary-action-btn';
