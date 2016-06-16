@@ -101,7 +101,7 @@ def test_entry_id(util):
 
 def test_entry_author():
     """The authors of entries should come from the annotation usernames."""
-    annotation = factories.Annotation(user='acct:nobu@hypothes.is')
+    annotation = factories.Annotation(userid='acct:nobu@hypothes.is')
 
     feed = atom.feed_from_annotations(
         [annotation], "atom_url", lambda annotation: "annotation url")

@@ -68,7 +68,7 @@ def test_feed_from_annotations_item_titles():
     feed = rss.feed_from_annotations(
         [annotation], _annotation_url(), mock.Mock(), '', '', '')
 
-    assert feed['entries'][0]['title'] == annotation['document']['title']
+    assert feed['entries'][0]['title'] == annotation.document.title
 
 
 def test_feed_from_annotations_item_descriptions():
@@ -85,13 +85,14 @@ def test_feed_from_annotations_item_descriptions():
 
 def test_feed_from_annotations_item_guid():
     """Feed items should use the annotation's HTML URL as their GUID."""
-    feed = rss.feed_from_annotations(
-        [factories.Annotation(
-            id='id',
-            created=datetime.datetime(year=2015, month=3, day=11).isoformat())
-         ], _annotation_url(), mock.Mock(), '', '', '')
+    annotation = factories.Annotation(
+        created=datetime.datetime(year=2015, month=3, day=11))
 
-    assert feed['entries'][0]['guid'] == 'tag:hypothes.is,2015-09:id'
+    feed = rss.feed_from_annotations(
+        [annotation], _annotation_url(), mock.Mock(), '', '', '')
+
+    assert feed['entries'][0]['guid'] == (
+        'tag:hypothes.is,2015-09:' + annotation.id)
 
 
 def test_feed_from_annotations_title():
