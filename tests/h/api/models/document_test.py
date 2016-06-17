@@ -5,6 +5,8 @@ import datetime
 
 import mock
 import pytest
+import sqlalchemy as sa
+import transaction
 
 from h.api import models
 from h.api.models import document
@@ -153,6 +155,17 @@ class TestDocumentFindOrCreateByURIs(object):
         assert docuri.uri == 'https://en.wikipedia.org/wiki/Pluto'
         assert docuri.type == 'self-claim'
 
+    def test_raises_retryable_error_when_flush_fails(self, db_session, monkeypatch):
+        def err():
+            raise sa.exc.IntegrityError(None, None, None)
+        monkeypatch.setattr(db_session, 'flush', err)
+
+        with pytest.raises(transaction.interfaces.TransientError):
+            document.Document.find_or_create_by_uris(
+                db_session,
+                'https://en.wikipedia.org/wiki/Pluto',
+                ['https://m.en.wikipedia.org/wiki/Pluto'])
+
 
 @pytest.mark.usefixtures(
     'log',
@@ -262,6 +275,25 @@ class TestCreateOrUpdateDocumentURI(object):
 
         assert log.warn.call_count == 1
 
+    def test_raises_retryable_error_when_flush_fails(self, db_session, monkeypatch):
+        document_ = document.Document()
+
+        def err():
+            raise sa.exc.IntegrityError(None, None, None)
+        monkeypatch.setattr(db_session, 'flush', err)
+
+        with pytest.raises(transaction.interfaces.TransientError):
+            document.create_or_update_document_uri(
+                session=db_session,
+                claimant='http://example.com',
+                uri='http://example.org',
+                type='rel-canonical',
+                content_type='text/html',
+                document=document_,
+                created=now(),
+                updated=now(),
+            )
+
     @pytest.fixture
     def DocumentURI(self, patch):
         return patch('h.api.models.document.DocumentURI')
@@ -369,6 +401,24 @@ class TestCreateOrUpdateDocumentMeta(object):
 
         assert log.warn.call_count == 1
 
+    def test_raises_retryable_error_when_flush_fails(self, db_session, monkeypatch):
+        document_ = document.Document()
+
+        def err():
+            raise sa.exc.IntegrityError(None, None, None)
+        monkeypatch.setattr(db_session, 'flush', err)
+
+        with pytest.raises(transaction.interfaces.TransientError):
+            document.create_or_update_document_meta(
+                session=db_session,
+                claimant='http://example.com',
+                type='title',
+                value='My Title',
+                document=document_,
+                created=now(),
+                updated=now(),
+            )
+
     @pytest.fixture
     def DocumentMeta(self, patch):
         return patch('h.api.models.document.DocumentMeta')
@@ -409,6 +459,14 @@ class TestMergeDocuments(object):
 
         assert len(master.meta) == 2
         assert len(duplicate.meta) == 0
+
+    def test_raises_retryable_error_when_flush_fails(self, db_session, merge_data, monkeypatch):
+        def err():
+            raise sa.exc.IntegrityError(None, None, None)
+        monkeypatch.setattr(db_session, 'flush', err)
+
+        with pytest.raises(transaction.interfaces.TransientError):
+            document.merge_documents(db_session, merge_data)
 
     @pytest.fixture
     def merge_data(self, db_session, request):
@@ -645,6 +703,8 @@ def mock_db_session():
         def add(self, obj):
             pass
         def query(self, cls):
+            pass
+        def flush(self):
             pass
     return mock.Mock(spec=DB())
 

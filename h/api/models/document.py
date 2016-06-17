@@ -6,6 +6,7 @@ from datetime import datetime
 import logging
 
 import sqlalchemy as sa
+import transaction
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -15,6 +16,10 @@ from h.api.uri import normalize as uri_normalize
 
 
 log = logging.getLogger(__name__)
+
+
+class ConcurrentUpdateError(transaction.interfaces.TransientError):
+    """Raised when concurrent updates to document data conflict."""
 
 
 class Document(Base, mixins.Timestamps):
@@ -82,6 +87,11 @@ class Document(Base, mixins.Timestamps):
                         created=created,
                         updated=updated)
             session.add(doc)
+
+        try:
+            session.flush()
+        except sa.exc.IntegrityError:
+            raise ConcurrentUpdateError('concurrent document creation')
 
         return documents
 
@@ -265,6 +275,11 @@ def create_or_update_document_uri(session,
 
     docuri.updated = updated
 
+    try:
+        session.flush()
+    except sa.exc.IntegrityError:
+        raise ConcurrentUpdateError('concurrent document uri updates')
+
 
 def create_or_update_document_meta(session,
                                    claimant,
@@ -334,6 +349,11 @@ def create_or_update_document_meta(session,
                      "match given Document's id (%d)",
                      existing_dm.id, existing_dm.document_id, document.id)
 
+    try:
+        session.flush()
+    except sa.exc.IntegrityError:
+        raise ConcurrentUpdateError('concurrent document meta updates')
+
 
 def merge_documents(session, documents, updated=datetime.now()):
     """
@@ -358,6 +378,11 @@ def merge_documents(session, documents, updated=datetime.now()):
             m.updated = updated
 
         session.delete(doc)
+
+    try:
+        session.flush()
+    except sa.exc.IntegrityError:
+        raise ConcurrentUpdateError('concurrent document merges')
 
     return master
 
