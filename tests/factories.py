@@ -177,8 +177,10 @@ class User(factory.Factory):
     class Meta(object):
         model = accounts_models.User
 
-    uid = factory.Sequence(lambda n: "test_user_{n}".format(n=n + 1))
-    username = factory.Sequence(lambda n: "test_user_{n}".format(n=n + 1))
-    email = factory.LazyAttribute(
-        lambda n: "{username}@test_users.com".format(username=n.username))
-    password = "pass"
+    username = factory.Faker('user_name')
+    email = factory.Faker('email')
+    password = factory.Faker('password')
+
+    @factory.lazy_attribute
+    def uid(self):
+        return self.username.replace('.', '').lower()
