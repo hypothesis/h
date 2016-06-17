@@ -38,6 +38,7 @@
 
 .help-panel-content__link {
   color: $grey-6;
+  text-decoration: underline;
   &:hover {
     text-decoration: underline;
   }

@@ -15,6 +15,7 @@ module.exports = function () {
       this.userAgent = $window.navigator.userAgent;
       this.version = settings.release;
       this.dateTime = new Date();
+      this.serviceUrl = settings.serviceUrl;
 
       $scope.$watchCollection(
         function () {
