@@ -141,16 +141,15 @@ def document_uris_from_links(link_dicts, claimant):
                 continue
 
         uri_ = link['href']
-        type_ = None
 
         # Handle rel="..." links.
-        if type_ is None and link.get('rel') is not None:
+        if 'rel' in link:
             type_ = 'rel-{}'.format(link['rel'])
+        else:
+            type_ = ''
 
         # The "type" item in link dicts becomes content_type in DocumentURIs.
-        content_type = None
-        if link.get('type'):
-            content_type = link['type']
+        content_type = link.get('type', '')
 
         document_uris.append({
             'claimant': claimant,
@@ -199,7 +198,7 @@ def document_uris_from_highwire_doi(highwire_dict, claimant):
         document_uris.append({'claimant': claimant,
                               'uri': doi,
                               'type': 'highwire-doi',
-                              'content_type': None})
+                              'content_type': ''})
     return document_uris
 
 
@@ -221,7 +220,7 @@ def document_uris_from_dc(dc_dict, claimant):
         document_uris.append({'claimant': claimant,
                               'uri': doi,
                               'type': 'dc-doi',
-                              'content_type': None})
+                              'content_type': ''})
 
     return document_uris
 
@@ -232,5 +231,5 @@ def document_uri_self_claim(claimant):
         'claimant': claimant,
         'uri': claimant,
         'type': u'self-claim',
-        'content_type': None,
+        'content_type': '',
     }
