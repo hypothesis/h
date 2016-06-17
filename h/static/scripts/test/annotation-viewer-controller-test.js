@@ -58,7 +58,11 @@ describe('AnnotationViewerController', function () {
       $scope: {
         search: {},
       },
-      annotationUI: {setCollapsed: sinon.stub(), subscribe: sinon.stub()},
+      annotationUI: {
+        setCollapsed: sinon.stub(),
+        highlightAnnotations: sinon.stub(),
+        subscribe: sinon.stub()
+      },
       rootThread: {thread: sinon.stub()},
       streamer: { setConfig: function () {} },
       store: opts.store,
@@ -95,6 +99,17 @@ describe('AnnotationViewerController', function () {
           sinon.match(fakeStore.annots));
       });
     });
+
+    it('does not highlight any annotations', function () {
+      var fakeStore = new FakeStore([
+        {id: 'test_annotation_id'},
+        {id: 'test_reply_id', references: ['test_annotation_id']},
+      ]);
+      var controller = createController({store: fakeStore});
+      return controller.ctrl.ready.then(function () {
+        assert.notCalled(controller.annotationUI.highlightAnnotations);
+      });
+    });
   });
 
   describe('the standalone view for a reply', function () {
@@ -119,6 +134,18 @@ describe('AnnotationViewerController', function () {
       return controller.ctrl.ready.then(function () {
         assert.calledWith(controller.annotationUI.setCollapsed, 'parent_id', false);
         assert.calledWith(controller.annotationUI.setCollapsed, 'test_annotation_id', false);
+      });
+    });
+
+    it('highlights the reply', function () {
+      var fakeStore = new FakeStore([
+        {id: 'parent_id'},
+        {id: 'test_annotation_id', references: ['parent_id']},
+      ]);
+      var controller = createController({store: fakeStore});
+      return controller.ctrl.ready.then(function () {
+        assert.calledWith(controller.annotationUI.highlightAnnotations,
+          sinon.match(['test_annotation_id']));
       });
     });
   });

@@ -218,4 +218,11 @@ describe('annotationUI', function () {
       assert.deepEqual(annotationUI.getState().expanded, {});
     });
   });
+
+  describe('#highlightAnnotations()', function () {
+    it('sets the highlighted annotations', function () {
+      annotationUI.highlightAnnotations(['id1', 'id2']);
+      assert.deepEqual(annotationUI.getState().highlighted, ['id1', 'id2']);
+    });
+  });
 });

@@ -68,6 +68,7 @@ function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
     return buildThread(state.annotations, {
       forceVisible: truthyKeys(state.forceVisible),
       expanded: state.expanded,
+      highlighted: state.highlighted,
       selected: truthyKeys(state.selectedAnnotationMap || {}),
       sortCompareFn: sortFn,
       filterFn: filterFn,

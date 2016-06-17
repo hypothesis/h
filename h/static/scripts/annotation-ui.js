@@ -50,6 +50,9 @@ function initialState(settings) {
     // by the user even if they do not match the current search filter
     forceVisible: {},
 
+    // IDs of annotations that should be highlighted
+    highlighted: [],
+
     filterQuery: null,
 
     // Key by which annotations are currently sorted.
@@ -62,6 +65,7 @@ function initialState(settings) {
 var types = {
   SELECT_ANNOTATIONS: 'SELECT_ANNOTATIONS',
   FOCUS_ANNOTATIONS: 'FOCUS_ANNOTATIONS',
+  HIGHLIGHT_ANNOTATIONS: 'HIGHLIGHT_ANNOTATIONS',
   SET_HIGHLIGHTS_VISIBLE: 'SET_HIGHLIGHTS_VISIBLE',
   SET_FORCE_VISIBLE: 'SET_FORCE_VISIBLE',
   SET_EXPANDED: 'SET_EXPANDED',
@@ -113,6 +117,8 @@ function reducer(state, action) {
       return Object.assign({}, state, {forceVisible: action.forceVisible});
     case types.SET_EXPANDED:
       return Object.assign({}, state, {expanded: action.expanded});
+    case types.HIGHLIGHT_ANNOTATIONS:
+      return Object.assign({}, state, {highlighted: action.highlighted});
     case types.SET_FILTER_QUERY:
       return Object.assign({}, state, {
         filterQuery: action.query,
@@ -309,6 +315,19 @@ module.exports = function (settings) {
       store.dispatch({
         type: types.SET_SORT_KEY,
         key: key,
+      });
+    },
+
+    /**
+     * Highlight annotations with the given `ids`.
+     *
+     * This is used to indicate the specific annotation in a thread that was
+     * linked to for example.
+     */
+    highlightAnnotations: function (ids) {
+      store.dispatch({
+        type: types.HIGHLIGHT_ANNOTATIONS,
+        highlighted: ids,
       });
     },
   };

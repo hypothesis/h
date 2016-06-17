@@ -31,14 +31,15 @@ describe('rootThread', function () {
     fakeAnnotationUI = {
       state: {
         annotations: [],
-        visibleHighlights: false,
-        focusedAnnotationMap: null,
-        selectedAnnotationMap: null,
         expanded: {},
-        forceVisible: {},
         filterQuery: null,
+        focusedAnnotationMap: null,
+        forceVisible: {},
+        highlighted: [],
+        selectedAnnotationMap: null,
         sortKey: 'Location',
         sortKeysAvailable: ['Location'],
+        visibleHighlights: false,
       },
 
       getState: function () {
@@ -118,6 +119,16 @@ describe('rootThread', function () {
       rootThread.thread(fakeAnnotationUI.state);
       assert.calledWith(fakeBuildThread, [], sinon.match({
         forceVisible: ['id1', 'id2'],
+      }));
+    });
+
+    it('passes the highlighted set to buildThread()', function () {
+      fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state, {
+        highlighted: ['id1', 'id2'],
+      });
+      rootThread.thread(fakeAnnotationUI.state);
+      assert.calledWith(fakeBuildThread, [], sinon.match({
+        highlighted: ['id1', 'id2'],
       }));
     });
   });
