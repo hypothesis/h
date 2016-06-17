@@ -3,7 +3,6 @@
 from collections import namedtuple
 import pytest
 
-from pyramid import testing
 from pyramid import security
 
 from h.auth import role
@@ -36,10 +35,10 @@ FakeGroup = namedtuple('FakeGroup', ['pubid'])
     (FakeUser(admin=True, staff=True, groups=[FakeGroup('donkeys')]),
      ['group:donkeys', role.Admin, role.Staff]),
 ))
-def test_groupfinder(user, principals, accounts):
+def test_groupfinder(user, principals, accounts, pyramid_request):
     accounts.get_user.return_value = user
 
-    result = util.groupfinder('acct:jiji@hypothes.is', testing.DummyRequest())
+    result = util.groupfinder('acct:jiji@hypothes.is', pyramid_request)
 
     if principals is None:
         assert result is None

@@ -3,7 +3,6 @@
 import datetime
 
 import mock
-from pyramid.testing import DummyRequest
 import pytest
 
 from h.api.models import elastic
@@ -18,13 +17,13 @@ from h.notification.reply import Notification
 class TestGenerate(object):
 
     def test_calls_renderers_with_appropriate_context(self,
-                                                      req,
                                                       notification,
                                                       parent_user,
+                                                      pyramid_request,
                                                       reply_user,
                                                       html_renderer,
                                                       text_renderer):
-        generate(req, notification)
+        generate(pyramid_request, notification)
 
         expected_context = {
             'document_title': 'My fascinating page',
@@ -42,8 +41,8 @@ class TestGenerate(object):
         text_renderer.assert_(**expected_context)
 
     def test_falls_back_to_target_uri_for_document_title(self,
-                                                         req,
                                                          notification,
+                                                         pyramid_request,
                                                          storage_driver,
                                                          html_renderer,
                                                          text_renderer):
@@ -52,72 +51,71 @@ class TestGenerate(object):
         else:
             notification.document.meta[0].value = []
 
-        generate(req, notification)
+        generate(pyramid_request, notification)
 
         html_renderer.assert_(document_title='http://example.org/')
         text_renderer.assert_(document_title='http://example.org/')
 
     def test_returns_text_and_body_results_from_renderers(self,
-                                                          req,
                                                           notification,
+                                                          pyramid_request,
                                                           html_renderer,
                                                           text_renderer):
         html_renderer.string_response = 'HTML output'
         text_renderer.string_response = 'Text output'
 
-        _, _, text, html = generate(req, notification)
+        _, _, text, html = generate(pyramid_request, notification)
 
         assert html == 'HTML output'
         assert text == 'Text output'
 
     @pytest.mark.usefixtures('html_renderer', 'text_renderer')
-    def test_returns_subject_with_reply_username(self, req, notification):
-        _, subject, _, _ = generate(req, notification)
+    def test_returns_subject_with_reply_username(self, notification, pyramid_request):
+        _, subject, _, _ = generate(pyramid_request, notification)
 
         assert subject == 'ron has replied to your annotation'
 
     @pytest.mark.usefixtures('html_renderer', 'text_renderer')
-    def test_returns_parent_email_as_recipients(self, req, notification):
-        recipients, _, _, _ = generate(req, notification)
+    def test_returns_parent_email_as_recipients(self, notification, pyramid_request):
+        recipients, _, _, _ = generate(pyramid_request, notification)
 
         assert recipients == ['pat@ric.ia']
 
     @pytest.mark.usefixtures('html_renderer', 'text_renderer')
     def test_calls_token_serializer_with_correct_arguments(self,
-                                                           req,
                                                            notification,
+                                                           pyramid_request,
                                                            token_serializer):
-        generate(req, notification)
+        generate(pyramid_request, notification)
 
         token_serializer.dumps.assert_called_once_with({
             'type': 'reply',
             'uri': 'acct:patricia@example.com',
         })
 
-    def test_jinja_templates_render(self, config, req, notification):
+    def test_jinja_templates_render(self,
+                                    notification,
+                                    pyramid_config,
+                                    pyramid_request):
         """Ensure that the jinja templates don't contain syntax errors"""
-        config.include('pyramid_jinja2')
-        config.add_jinja2_extension('h.jinja_extensions.Filters')
+        pyramid_config.include('pyramid_jinja2')
+        pyramid_config.add_jinja2_extension('h.jinja_extensions.Filters')
 
-        generate(req, notification)
-
-    @pytest.fixture
-    def routes(self, config):
-        config.add_route('annotation', '/ann/{id}')
-        config.add_route('stream.user_query', '/stream/user/{user}')
-        config.add_route('unsubscribe', '/unsub/{token}')
+        generate(pyramid_request, notification)
 
     @pytest.fixture
-    def req(self):
-        return DummyRequest(auth_domain='example.com')
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('annotation', '/ann/{id}')
+        pyramid_config.add_route('stream.user_query', '/stream/user/{user}')
+        pyramid_config.add_route('unsubscribe', '/unsub/{token}')
 
     @pytest.fixture
-    def html_renderer(self, config):
-        return config.testing_add_renderer('h:templates/emails/reply_notification.html.jinja2')
+    def html_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.html.jinja2')
 
     @pytest.fixture
-    def text_renderer(self, config):
-        return config.testing_add_renderer('h:templates/emails/reply_notification.txt.jinja2')
+    def text_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.txt.jinja2')
 
     @pytest.fixture
     def document(self, storage_driver):
@@ -178,8 +176,8 @@ class TestGenerate(object):
         return request.param
 
     @pytest.fixture
-    def token_serializer(self, config):
+    def token_serializer(self, pyramid_config):
         serializer = mock.Mock(spec_set=['dumps'])
         serializer.dumps.return_value = 'FAKETOKEN'
-        config.registry.notification_serializer = serializer
+        pyramid_config.registry.notification_serializer = serializer
         return serializer

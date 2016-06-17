@@ -4,7 +4,6 @@ import datetime
 import mock
 import pytest
 from pyramid import testing
-from pyramid.testing import DummyRequest
 
 from h.api.presenters import AnnotationBasePresenter
 from h.api.presenters import AnnotationJSONPresenter
@@ -20,142 +19,127 @@ from h.api.presenters import utc_iso8601, deep_merge_dict
 @pytest.mark.usefixtures('routes')
 class TestAnnotationBasePresenter(object):
 
-    def test_constructor_args(self):
-        request = DummyRequest()
+    def test_constructor_args(self, pyramid_request):
         annotation = mock.Mock()
 
-        presenter = AnnotationBasePresenter(request, annotation)
+        presenter = AnnotationBasePresenter(pyramid_request, annotation)
 
-        assert presenter.request == request
+        assert presenter.request == pyramid_request
         assert presenter.annotation == annotation
 
-    def test_created_returns_none_if_missing(self):
-        request = DummyRequest()
+    def test_created_returns_none_if_missing(self, pyramid_request):
         annotation = mock.Mock(created=None)
 
-        created = AnnotationBasePresenter(request, annotation).created
+        created = AnnotationBasePresenter(pyramid_request, annotation).created
 
         assert created is None
 
-    def test_created_uses_iso_format(self):
-        request = DummyRequest()
+    def test_created_uses_iso_format(self, pyramid_request):
         when = datetime.datetime(2012, 3, 14, 23, 34, 47, 12)
         annotation = mock.Mock(created=when)
 
-        created = AnnotationBasePresenter(request, annotation).created
+        created = AnnotationBasePresenter(pyramid_request, annotation).created
 
         assert created == '2012-03-14T23:34:47.000012+00:00'
 
-    def test_updated_returns_none_if_missing(self):
-        request = DummyRequest()
+    def test_updated_returns_none_if_missing(self, pyramid_request):
         annotation = mock.Mock(updated=None)
 
-        updated = AnnotationBasePresenter(request, annotation).updated
+        updated = AnnotationBasePresenter(pyramid_request, annotation).updated
 
         assert updated is None
 
-    def test_updated_uses_iso_format(self):
-        request = DummyRequest()
+    def test_updated_uses_iso_format(self, pyramid_request):
         when = datetime.datetime(1983, 8, 31, 7, 18, 20, 98763)
         annotation = mock.Mock(updated=when)
 
-        updated = AnnotationBasePresenter(request, annotation).updated
+        updated = AnnotationBasePresenter(pyramid_request, annotation).updated
 
         assert updated == '1983-08-31T07:18:20.098763+00:00'
 
-    def test_links_empty(self):
-        request = DummyRequest()
+    def test_links_empty(self, pyramid_request):
         annotation = mock.Mock()
 
-        links = AnnotationBasePresenter(request, annotation).links
+        links = AnnotationBasePresenter(pyramid_request, annotation).links
 
         assert links == {}
 
-    def test_links_includes_registered_links(self):
-        request = DummyRequest()
+    def test_links_includes_registered_links(self, pyramid_request):
         annotation = mock.Mock()
-        add_annotation_link_generator(request.registry,
+        add_annotation_link_generator(pyramid_request.registry,
                                       'giraffe',
                                       lambda r, a: 'http://foo.com/bar/123')
 
-        links = AnnotationBasePresenter(request, annotation).links
+        links = AnnotationBasePresenter(pyramid_request, annotation).links
 
         assert links == {
             'giraffe': 'http://foo.com/bar/123'
         }
 
-    def test_links_omits_link_generators_that_return_none(self):
-        request = DummyRequest()
+    def test_links_omits_link_generators_that_return_none(self, pyramid_request):
         annotation = mock.Mock()
-        add_annotation_link_generator(request.registry,
+        add_annotation_link_generator(pyramid_request.registry,
                                       'giraffe',
                                       lambda r, a: 'http://foo.com/bar/123')
-        add_annotation_link_generator(request.registry,
+        add_annotation_link_generator(pyramid_request.registry,
                                       'donkey',
                                       lambda r, a: None)
 
-        links = AnnotationBasePresenter(request, annotation).links
+        links = AnnotationBasePresenter(pyramid_request, annotation).links
 
         assert links == {
             'giraffe': 'http://foo.com/bar/123'
         }
 
-    def test_link_generators_called_with_request_and_annotation(self):
-        request = DummyRequest()
+    def test_link_generators_called_with_pyramid_request_and_annotation(self, pyramid_request):
         annotation = mock.Mock()
         dummy_link_generator = mock.Mock(return_value='')
-        add_annotation_link_generator(request.registry,
+        add_annotation_link_generator(pyramid_request.registry,
                                       'giraffe',
                                       dummy_link_generator)
 
-        links = AnnotationBasePresenter(request, annotation).links
+        links = AnnotationBasePresenter(pyramid_request, annotation).links
 
-        dummy_link_generator.assert_called_once_with(request, annotation)
+        dummy_link_generator.assert_called_once_with(pyramid_request, annotation)
 
-    def test_text(self):
-        request = DummyRequest()
+    def test_text(self, pyramid_request):
         ann = mock.Mock(text='It is magical!')
-        presenter = AnnotationBasePresenter(request, ann)
+        presenter = AnnotationBasePresenter(pyramid_request, ann)
 
         assert 'It is magical!' == presenter.text
 
-    def test_text_missing(self):
-        request = DummyRequest()
+    def test_text_missing(self, pyramid_request):
         ann = mock.Mock(text=None)
-        presenter = AnnotationBasePresenter(request, ann)
+        presenter = AnnotationBasePresenter(pyramid_request, ann)
 
         assert '' == presenter.text
 
-    def test_tags(self):
-        request = DummyRequest()
+    def test_tags(self, pyramid_request):
         ann = mock.Mock(tags=['interesting', 'magic'])
-        presenter = AnnotationBasePresenter(request, ann)
+        presenter = AnnotationBasePresenter(pyramid_request, ann)
 
         assert ['interesting', 'magic'] == presenter.tags
 
-    def test_tags_missing(self):
-        request = DummyRequest()
+    def test_tags_missing(self, pyramid_request):
         ann = mock.Mock(tags=None)
-        presenter = AnnotationBasePresenter(request, ann)
+        presenter = AnnotationBasePresenter(pyramid_request, ann)
 
         assert [] == presenter.tags
 
-    def test_target(self):
-        request = DummyRequest()
+    def test_target(self, pyramid_request):
         ann = mock.Mock(target_uri='http://example.com',
                         target_selectors={'PositionSelector': {'start': 0, 'end': 12}})
 
         expected = [{'source': 'http://example.com', 'selector': {'PositionSelector': {'start': 0, 'end': 12}}}]
-        actual = AnnotationJSONPresenter(request, ann).target
+        actual = AnnotationJSONPresenter(pyramid_request, ann).target
         assert expected == actual
 
-    def test_target_missing_selectors(self):
-        request = DummyRequest()
+    def test_target_missing_selectors(self, pyramid_request):
         ann = mock.Mock(target_uri='http://example.com',
                         target_selectors=None)
 
         expected = [{'source': 'http://example.com'}]
-        actual = AnnotationJSONPresenter(request, ann).target
+        actual = AnnotationJSONPresenter(pyramid_request, ann).target
         assert expected == actual
 
     @pytest.fixture
@@ -165,8 +149,7 @@ class TestAnnotationBasePresenter(object):
 
 
 class TestAnnotationJSONPresenter(object):
-    def test_asdict(self, document_asdict):
-        request = DummyRequest()
+    def test_asdict(self, document_asdict, pyramid_request):
         ann = mock.Mock(id='the-id',
                         created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
                         updated=datetime.datetime(2016, 2, 29, 10, 24, 5, 564),
@@ -202,42 +185,39 @@ class TestAnnotationJSONPresenter(object):
                     'extra-1': 'foo',
                     'extra-2': 'bar'}
 
-        result = AnnotationJSONPresenter(request, ann).asdict()
+        result = AnnotationJSONPresenter(pyramid_request, ann).asdict()
 
         assert result == expected
 
-    def test_asdict_extra_cannot_override_other_data(self, document_asdict):
-        request = DummyRequest()
+    def test_asdict_extra_cannot_override_other_data(self, document_asdict, pyramid_request):
         ann = mock.Mock(id='the-real-id', extra={'id': 'the-extra-id'})
         document_asdict.return_value = {}
 
-        presented = AnnotationJSONPresenter(request, ann).asdict()
+        presented = AnnotationJSONPresenter(pyramid_request, ann).asdict()
         assert presented['id'] == 'the-real-id'
 
-    def test_asdict_extra_uses_copy_of_extra(self, document_asdict):
+    def test_asdict_extra_uses_copy_of_extra(self, document_asdict, pyramid_request):
         extra = {'foo': 'bar'}
-        request = DummyRequest()
         ann = mock.Mock(id='my-id', extra=extra)
         document_asdict.return_value = {}
 
-        presented = AnnotationJSONPresenter(request, ann).asdict()
+        presented = AnnotationJSONPresenter(pyramid_request, ann).asdict()
 
         # Presenting the annotation shouldn't change the "extra" dict.
         assert extra == {'foo': 'bar'}
 
-    def test_asdict_with_link_generators(self, document_asdict):
-        request = DummyRequest()
+    def test_asdict_with_link_generators(self, document_asdict, pyramid_request):
         ann = mock.Mock(id='my-id', extra={})
         document_asdict.return_value = {}
 
-        add_annotation_link_generator(request.registry,
+        add_annotation_link_generator(pyramid_request.registry,
                                       'giraffe',
                                       lambda r, a: 'http://giraffe.com')
-        add_annotation_link_generator(request.registry,
+        add_annotation_link_generator(pyramid_request.registry,
                                       'withid',
                                       lambda r, a: 'http://withid.com/' + a.id)
 
-        presented = AnnotationJSONPresenter(request, ann).asdict()
+        presented = AnnotationJSONPresenter(pyramid_request, ann).asdict()
 
         assert presented['links'] == {
             'giraffe': 'http://giraffe.com',
@@ -252,9 +232,8 @@ class TestAnnotationJSONPresenter(object):
         (mock.Mock(userid='acct:luke'), 'update', ['acct:luke']),
         (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
         ])
-    def test_permissions(self, annotation, action, expected):
-        request = DummyRequest()
-        presenter = AnnotationJSONPresenter(request, annotation)
+    def test_permissions(self, annotation, action, expected, pyramid_request):
+        presenter = AnnotationJSONPresenter(pyramid_request, annotation)
         assert expected == presenter.permissions[action]
 
     @pytest.fixture
@@ -265,8 +244,7 @@ class TestAnnotationJSONPresenter(object):
 @pytest.mark.usefixtures('DocumentJSONPresenter')
 class TestAnnotationSearchIndexPresenter(object):
 
-    def test_asdict(self, DocumentJSONPresenter):
-        request = DummyRequest()
+    def test_asdict(self, DocumentJSONPresenter, pyramid_request):
         annotation = mock.Mock(
             id='xyz123',
             created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
@@ -284,7 +262,7 @@ class TestAnnotationSearchIndexPresenter(object):
         DocumentJSONPresenter.return_value.asdict.return_value = {'foo': 'bar'}
 
         annotation_dict = AnnotationSearchIndexPresenter(
-            request, annotation).asdict()
+            pyramid_request, annotation).asdict()
 
         assert annotation_dict == {
             'id': 'xyz123',
@@ -308,37 +286,34 @@ class TestAnnotationSearchIndexPresenter(object):
             'extra-2': 'bar',
         }
 
-    def test_asdict_extra_cannot_override_other_data(self):
-        request = DummyRequest()
+    def test_asdict_extra_cannot_override_other_data(self, pyramid_request):
         annotation = mock.Mock(id='the-real-id', extra={'id': 'the-extra-id'})
 
         annotation_dict = AnnotationSearchIndexPresenter(
-            request, annotation).asdict()
+            pyramid_request, annotation).asdict()
 
         assert annotation_dict['id'] == 'the-real-id'
 
-    def test_asdict_does_not_modify_extra(self):
+    def test_asdict_does_not_modify_extra(self, pyramid_request):
         extra = {'foo': 'bar'}
-        request = DummyRequest()
         annotation = mock.Mock(id='my-id', extra=extra)
 
-        AnnotationSearchIndexPresenter(request, annotation).asdict()
+        AnnotationSearchIndexPresenter(pyramid_request, annotation).asdict()
 
         assert extra == {'foo': 'bar'}, (
                 "Presenting the annotation shouldn't change the 'extra' dict")
 
-    def test_asdict_does_not_return_links_from_link_generators(self):
-        request = DummyRequest()
+    def test_asdict_does_not_return_links_from_link_generators(self, pyramid_request):
         annotation = mock.Mock(id='my-id', extra={})
-        add_annotation_link_generator(request.registry,
+        add_annotation_link_generator(pyramid_request.registry,
                                       'giraffe',
                                       lambda r, a: 'http://giraffe.com')
-        add_annotation_link_generator(request.registry,
+        add_annotation_link_generator(pyramid_request.registry,
                                       'withid',
                                       lambda r, a: 'http://withid.com/' + a.id)
 
         annotation_dict = AnnotationSearchIndexPresenter(
-            request, annotation).asdict()
+            pyramid_request, annotation).asdict()
 
         assert 'links' not in annotation_dict
 
@@ -352,20 +327,18 @@ class TestAnnotationSearchIndexPresenter(object):
         (mock.Mock(userid='acct:luke'), 'update', ['acct:luke']),
         (mock.Mock(userid='acct:luke'), 'delete', ['acct:luke']),
         ])
-    def test_permissions(self, annotation, action, expected):
-        request = DummyRequest()
-        presenter = AnnotationSearchIndexPresenter(request, annotation)
+    def test_permissions(self, annotation, action, expected, pyramid_request):
+        presenter = AnnotationSearchIndexPresenter(pyramid_request, annotation)
 
         assert expected == presenter.permissions[action]
 
-    def test_it_copies_target_uri_normalized_to_target_scope(self):
-        request = DummyRequest()
+    def test_it_copies_target_uri_normalized_to_target_scope(self, pyramid_request):
         annotation = mock.Mock(
             target_uri_normalized='http://example.com/normalized',
             extra={})
 
         annotation_dict = AnnotationSearchIndexPresenter(
-            request, annotation).asdict()
+            pyramid_request, annotation).asdict()
 
         assert annotation_dict['target'][0]['scope'] == [
             'http://example.com/normalized']
@@ -380,8 +353,7 @@ class TestAnnotationSearchIndexPresenter(object):
 @pytest.mark.usefixtures('routes')
 class TestAnnotationJSONLDPresenter(object):
 
-    def test_asdict(self):
-        request = DummyRequest()
+    def test_asdict(self, pyramid_request):
         annotation = mock.Mock(
             id='foobar',
             created=datetime.datetime(2016, 2, 24, 18, 3, 25, 768),
@@ -408,23 +380,21 @@ class TestAnnotationJSONLDPresenter(object):
                         'selector': [{'TestSelector': 'foobar'}]}]
         }
 
-        result = AnnotationJSONLDPresenter(request, annotation).asdict()
+        result = AnnotationJSONLDPresenter(pyramid_request, annotation).asdict()
 
         assert result == expected
 
-    def test_id_returns_annotation_url(self):
-        request = DummyRequest()
+    def test_id_returns_annotation_url(self, pyramid_request):
         annotation = mock.Mock(id='foobar')
 
-        presenter = AnnotationJSONLDPresenter(request, annotation)
+        presenter = AnnotationJSONLDPresenter(pyramid_request, annotation)
 
         assert presenter.id == 'http://example.com/ann/foobar'
 
-    def test_bodies_returns_textual_body(self):
-        request = DummyRequest()
+    def test_bodies_returns_textual_body(self, pyramid_request):
         annotation = mock.Mock(text='Flib flob flab', tags=None)
 
-        bodies = AnnotationJSONLDPresenter(request, annotation).bodies
+        bodies = AnnotationJSONLDPresenter(pyramid_request, annotation).bodies
 
         assert bodies == [{
             'type': 'TextualBody',
@@ -432,11 +402,10 @@ class TestAnnotationJSONLDPresenter(object):
             'format': 'text/markdown',
         }]
 
-    def test_bodies_appends_tag_bodies(self):
-        request = DummyRequest()
+    def test_bodies_appends_tag_bodies(self, pyramid_request):
         annotation = mock.Mock(text='Flib flob flab', tags=['giraffe', 'lion'])
 
-        bodies = AnnotationJSONLDPresenter(request, annotation).bodies
+        bodies = AnnotationJSONLDPresenter(pyramid_request, annotation).bodies
 
         assert {
             'type': 'TextualBody',
@@ -450,10 +419,8 @@ class TestAnnotationJSONLDPresenter(object):
         } in bodies
 
     @pytest.fixture
-    def routes(self, request):
-        config = testing.setUp()
-        config.add_route('annotation', '/ann/{id}')
-        request.addfinalizer(testing.tearDown)
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('annotation', '/ann/{id}')
 
 
 class TestDocumentJSONPresenter(object):
@@ -526,6 +493,7 @@ class TestDocumentURIJSONPresenter(object):
         presenter = DocumentURIJSONPresenter(docuri)
         assert presenter.rel is None
 
+
 def test_utc_iso8601():
     t = datetime.datetime(2016, 2, 24, 18, 03, 25, 7685)
     assert utc_iso8601(t) == '2016-02-24T18:03:25.007685+00:00'
@@ -562,16 +530,3 @@ class Berlin(datetime.tzinfo):
 
     def dst(self, dt):
         return datetime.timedelta()
-
-
-@pytest.fixture(autouse=True)
-def clear_registry():
-    # If you call add_annotation_link_generator() as some tests in this module
-    # do it'll add stuff to the request registry that you pass to it.
-    # Then when a later test runs and creates a _new_ DummyRequest instance,
-    # that request's registry will still contain the stuff added by the
-    # previous test!
-    # DummyRequest.registry is shared across requests.
-    # So rather than requiring each test that adds to the registry to also
-    # clear it, this autouse fixture just clears the registry after every test.
-    DummyRequest().registry.clear()

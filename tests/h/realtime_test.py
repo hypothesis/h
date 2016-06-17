@@ -2,7 +2,6 @@
 
 from datetime import datetime
 
-from pyramid.testing import DummyRequest
 import pytest
 import mock
 
@@ -98,15 +97,13 @@ class TestConsumer(object):
         return patch('h.realtime.Consumer.generate_queue_name')
 
 
-@pytest.mark.usefixtures('config')
 class TestPublisher(object):
-    def test_publish_annotation(self, producer_pool):
+    def test_publish_annotation(self, producer_pool, pyramid_request):
         payload = {'action': 'create', 'annotation': {'id': 'foobar'}}
         producer = producer_pool['foobar'].acquire().__enter__()
         exchange = realtime.get_exchange()
-        request = DummyRequest()
 
-        publisher = realtime.Publisher(request)
+        publisher = realtime.Publisher(pyramid_request)
         publisher.publish_annotation(payload)
 
         expected_headers = MappingContaining('timestamp')
@@ -116,13 +113,12 @@ class TestPublisher(object):
                                                  routing_key='annotation',
                                                  headers=expected_headers)
 
-    def test_publish_user(self, producer_pool):
+    def test_publish_user(self, producer_pool, pyramid_request):
         payload = {'action': 'create', 'user': {'id': 'foobar'}}
         producer = producer_pool['foobar'].acquire().__enter__()
         exchange = realtime.get_exchange()
-        request = DummyRequest()
 
-        publisher = realtime.Publisher(request)
+        publisher = realtime.Publisher(pyramid_request)
         publisher.publish_user(payload)
 
         expected_headers = MappingContaining('timestamp')

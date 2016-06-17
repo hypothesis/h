@@ -2,7 +2,6 @@
 
 import mock
 import pytest
-from pyramid.testing import DummyRequest
 
 from h.api import events
 from h import indexer
@@ -66,40 +65,33 @@ class TestReindex(object):
 @pytest.mark.usefixtures('add_annotation', 'delete_annotation')
 class TestSubscribeAnnotationEvent(object):
 
-    def test_it_enqueues_add_annotation_celery_task_for_create_action(
-            self, add_annotation, delete_annotation):
-        event = self.event('create', 'test_annotation_id')
+    @pytest.mark.parametrize('action', ['create', 'update'])
+    def test_it_enqueues_add_annotation_celery_task(self,
+                                                    action,
+                                                    add_annotation,
+                                                    delete_annotation,
+                                                    pyramid_request):
+        event = events.AnnotationEvent(pyramid_request,
+                                       {'id': 'test_annotation_id'},
+                                       action)
 
         indexer.subscribe_annotation_event(event)
 
         add_annotation.delay.assert_called_once_with(event.annotation_id)
         assert not delete_annotation.delay.called
 
-    def test_it_enqueues_add_annotation_celery_task_for_update_action(
-            self, add_annotation, delete_annotation):
-        event = self.event('update', 'test_annotation_id')
-
-        indexer.subscribe_annotation_event(event)
-
-        add_annotation.delay.assert_called_once_with(event.annotation_id)
-        assert not delete_annotation.delay.called
-
-    def test_it_enqueues_delete_annotation_celery_task_for_delete_action(
-            self, add_annotation, delete_annotation):
-        event = self.event('delete', 'test_annotation_id')
+    def test_it_enqueues_delete_annotation_celery_task_for_delete(self,
+                                                                  add_annotation,
+                                                                  delete_annotation,
+                                                                  pyramid_request):
+        event = events.AnnotationEvent(pyramid_request,
+                                       {'id': 'test_annotation_id'},
+                                       'delete')
 
         indexer.subscribe_annotation_event(event)
 
         delete_annotation.delay.assert_called_once_with(event.annotation_id)
         assert not add_annotation.delay.called
-
-    def event(self, action, id_):
-        return mock.Mock(
-            spec=events.AnnotationEvent(DummyRequest(),
-                                        {'id': id_},
-                                        action),
-            action=action,
-        )
 
     @pytest.fixture
     def add_annotation(self, patch):
@@ -111,7 +103,13 @@ class TestSubscribeAnnotationEvent(object):
 
 
 @pytest.fixture
-def celery(patch):
+def celery(patch, pyramid_request):
     cel = patch('h.indexer.celery')
-    cel.request = DummyRequest(db=mock.Mock(), es=mock.Mock())
+    cel.request = pyramid_request
     return cel
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request):
+    pyramid_request.es = mock.Mock()
+    return pyramid_request

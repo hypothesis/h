@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import mock
-from pyramid.testing import DummyRequest
 import pytest
 
 from h.auth import role
@@ -11,21 +10,21 @@ from h.features.client import UnknownFeatureError
 
 
 class TestClient(object):
-    def test_init_stores_the_request(self, client, req):
-        assert client.request == req
+    def test_init_stores_the_request(self, client, pyramid_request):
+        assert client.request == pyramid_request
 
-    def test_enabled_loads_features(self, client, fetcher):
+    def test_enabled_loads_features(self, client, fetcher, pyramid_request):
         client.enabled('foo')
 
-        fetcher.assert_called_once_with(mock.sentinel.db_session)
+        fetcher.assert_called_once_with(pyramid_request.db)
 
-    def test_enabled_caches_features(self, client, fetcher):
+    def test_enabled_caches_features(self, client, fetcher, pyramid_request):
         client.enabled('foo')
         client.enabled('bar')
 
-        fetcher.assert_called_once_with(mock.sentinel.db_session)
+        fetcher.assert_called_once_with(pyramid_request.db)
 
-    def test_enabled_caches_empty_result_sets(self, client, fetcher):
+    def test_enabled_caches_empty_result_sets(self, client, fetcher, pyramid_request):
         """Even an empty result set from the fetcher should be cached."""
         fetcher.return_value = []
         try:
@@ -37,7 +36,7 @@ class TestClient(object):
         except UnknownFeatureError:
             pass
 
-        fetcher.assert_called_once_with(mock.sentinel.db_session)
+        fetcher.assert_called_once_with(pyramid_request.db)
 
     def test_enabled_raises_for_unknown_features(self, client):
         with pytest.raises(UnknownFeatureError):
@@ -52,17 +51,17 @@ class TestClient(object):
     def test_enabled_false_when_admins_true_normal_request(self, client):
         assert client.enabled('on-for-admins') is False
 
-    def test_enabled_true_when_admins_true_admin_request(self, client, config):
-        config.testing_securitypolicy('acct:foo@example.com',
-                                      groupids=[role.Admin])
+    def test_enabled_true_when_admins_true_admin_request(self, client, pyramid_config):
+        pyramid_config.testing_securitypolicy('acct:foo@example.com',
+                                              groupids=[role.Admin])
         assert client.enabled('on-for-admins') is True
 
     def test_enabled_false_when_staff_true_normal_request(self, client):
         assert client.enabled('on-for-staff') is False
 
-    def test_enabled_true_when_staff_true_staff_request(self, client, config):
-        config.testing_securitypolicy('acct:foo@example.com',
-                                      groupids=[role.Staff])
+    def test_enabled_true_when_staff_true_staff_request(self, client, pyramid_config):
+        pyramid_config.testing_securitypolicy('acct:foo@example.com',
+                                              groupids=[role.Staff])
         assert client.enabled('on-for-staff') is True
 
     def test_call_false_if_everyone_false(self, client):
@@ -78,32 +77,32 @@ class TestClient(object):
         user.cohorts = [cohort]
         assert client('on-for-cohort') is True
 
-    def test_call_false_if_unauthenticated_user(self, patch, client, req):
-        req.authenticated_user = None
+    def test_call_false_if_unauthenticated_user(self, patch, client, pyramid_request):
+        pyramid_request.authenticated_user = None
         assert client('on-for-cohort') is False
 
-    def test_all_loads_features(self, client, fetcher):
+    def test_all_loads_features(self, client, fetcher, pyramid_request):
         client.all()
 
-        fetcher.assert_called_once_with(mock.sentinel.db_session)
+        fetcher.assert_called_once_with(pyramid_request.db)
 
-    def test_all_caches_features(self, client, fetcher):
+    def test_all_caches_features(self, client, fetcher, pyramid_request):
         client.all()
         client.all()
 
-        fetcher.assert_called_once_with(mock.sentinel.db_session)
+        fetcher.assert_called_once_with(pyramid_request.db)
 
-    def test_all_caches_empty_result_sets(self, client, fetcher):
+    def test_all_caches_empty_result_sets(self, client, fetcher, pyramid_request):
         """Even an empty result set from the fetcher should be cached."""
         fetcher.return_value = []
         client.all()
         client.all()
 
-        fetcher.assert_called_once_with(mock.sentinel.db_session)
+        fetcher.assert_called_once_with(pyramid_request.db)
 
-    def test_all_returns_feature_dictionary(self, client, config):
-        config.testing_securitypolicy('acct:foo@example.com',
-                                      groupids=[role.Staff])
+    def test_all_returns_feature_dictionary(self, client, pyramid_config):
+        pyramid_config.testing_securitypolicy('acct:foo@example.com',
+                                              groupids=[role.Staff])
 
         result = client.all()
 
@@ -149,10 +148,10 @@ class TestClient(object):
         return FeatureCohort(name='cohort')
 
     @pytest.fixture
-    def req(self, user):
-        return DummyRequest(db=mock.sentinel.db_session,
-                            authenticated_user=user)
+    def client(self, pyramid_request, fetcher):
+        return Client(pyramid_request, fetcher)
 
     @pytest.fixture
-    def client(self, req, fetcher):
-        return Client(req, fetcher)
+    def pyramid_request(self, pyramid_request, user):
+        pyramid_request.authenticated_user = user
+        return pyramid_request

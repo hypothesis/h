@@ -1,30 +1,29 @@
 # -*- coding: utf-8 -*-
 
 import mock
-from pyramid.testing import DummyRequest
 
 from h.streamer import views
 
 
-def test_websocket_view_bad_origin(config):
-    config.registry.settings.update({'origins': ['http://good']})
-    req = DummyRequest(headers={'Origin': 'http://bad'})
-    res = views.websocket_view(req)
+def test_websocket_view_bad_origin(pyramid_request):
+    pyramid_request.registry.settings.update({'origins': ['http://good']})
+    pyramid_request.headers = {'Origin': 'http://bad'}
+    res = views.websocket_view(pyramid_request)
     assert res.code == 403
 
 
-def test_websocket_view_good_origin(config):
-    config.registry.settings.update({'origins': ['http://good']})
-    req = DummyRequest(headers={'Origin': 'http://good'})
-    req.get_response = lambda _: mock.sentinel.good_response
-    res = views.websocket_view(req)
+def test_websocket_view_good_origin(pyramid_request):
+    pyramid_request.registry.settings.update({'origins': ['http://good']})
+    pyramid_request.headers = {'Origin': 'http://good'}
+    pyramid_request.get_response = lambda _: mock.sentinel.good_response
+    res = views.websocket_view(pyramid_request)
     assert res == mock.sentinel.good_response
 
 
-def test_websocket_view_same_origin(config):
+def test_websocket_view_same_origin(pyramid_request):
     # example.com is the dummy request default host URL
-    config.registry.settings.update({'origins': []})
-    req = DummyRequest(headers={'Origin': 'http://example.com'})
-    req.get_response = lambda _: mock.sentinel.good_response
-    res = views.websocket_view(req)
+    pyramid_request.registry.settings.update({'origins': []})
+    pyramid_request.headers = {'Origin': 'http://example.com'}
+    pyramid_request.get_response = lambda _: mock.sentinel.good_response
+    res = views.websocket_view(pyramid_request)
     assert res == mock.sentinel.good_response

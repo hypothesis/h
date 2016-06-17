@@ -2,7 +2,6 @@
 
 from collections import namedtuple
 import json
-from pyramid import testing
 
 from gevent.queue import Queue
 import mock
@@ -36,13 +35,12 @@ def test_websocket_removes_self_from_instance_list_when_closed():
     client1.closed(1000)
 
 
-def test_socket_enqueues_incoming_messages():
+def test_socket_enqueues_incoming_messages(pyramid_request):
     queue = Queue()
-    request = testing.DummyRequest()
-    request.registry['streamer.work_queue'] = queue
+    pyramid_request.registry['streamer.work_queue'] = queue
     socket = mock.Mock()
     client = websocket.WebSocket(socket)
-    client.request = request
+    client.request = pyramid_request
     message = FakeMessage('client data')
 
     client.received_message(message)

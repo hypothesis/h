@@ -19,6 +19,9 @@ from h.api import db as api_db
 from h.settings import database_url
 
 
+TEST_DATABASE_URL = database_url(os.environ.get('TEST_DATABASE_URL',
+                                                'postgresql://postgres@localhost/htest'))
+
 class DummyFeature(object):
 
     """
@@ -67,19 +70,10 @@ def autopatcher(request, target, **kwargs):
     return obj
 
 
-@pytest.fixture(scope='session')
-def settings():
-    """Default app settings."""
-    settings = {}
-    settings['sqlalchemy.url'] = database_url(os.environ.get('TEST_DATABASE_URL',
-                                                             'postgresql://postgres@localhost/htest'))
-    return settings
-
-
 @pytest.fixture(scope='session', autouse=True)
-def setup_database(settings):
+def setup_database():
     """Set up the database connection and create tables."""
-    engine = db.make_engine(settings)
+    engine = db.make_engine({'sqlalchemy.url': TEST_DATABASE_URL})
     db.bind_engine(engine, should_create=True, should_drop=True)
     api_db.use_session(db.Session)
 
@@ -109,14 +103,6 @@ def db_session(request, monkeypatch):
     return db.Session()
 
 
-@pytest.fixture
-def config(request, settings):
-    """Pyramid configurator object."""
-    config = testing.setUp(settings=settings)
-    request.addfinalizer(testing.tearDown)
-    return config
-
-
 @pytest.fixture(scope='session', autouse=True)
 def deform():
     """Allow tests that use deform to find our custom templates."""
@@ -124,17 +110,27 @@ def deform():
 
 
 @pytest.fixture
-def mailer(config):
+def fake_feature():
+    return DummyFeature()
+
+
+@pytest.fixture
+def fake_db_session():
+    return DummySession()
+
+
+@pytest.fixture
+def mailer(pyramid_config):
     from pyramid_mailer.interfaces import IMailer
     from pyramid_mailer.testing import DummyMailer
     mailer = DummyMailer()
-    config.registry.registerUtility(mailer, IMailer)
+    pyramid_config.registry.registerUtility(mailer, IMailer)
     return mailer
 
 
 @pytest.fixture
-def notify(config, request):
-    patcher = mock.patch.object(config.registry, 'notify', autospec=True)
+def notify(pyramid_config, request):
+    patcher = mock.patch.object(pyramid_config.registry, 'notify', autospec=True)
     request.addfinalizer(patcher.stop)
     return patcher.start()
 
@@ -142,3 +138,35 @@ def notify(config, request):
 @pytest.fixture
 def patch(request):
     return functools.partial(autopatcher, request)
+
+
+@pytest.yield_fixture
+def pyramid_config(pyramid_settings, pyramid_request):
+    """Pyramid configurator object."""
+    with testing.testConfig(request=pyramid_request,
+                            settings=pyramid_settings) as config:
+        yield config
+
+
+@pytest.fixture
+def pyramid_request(db_session, fake_feature, pyramid_settings):
+    """Dummy Pyramid request object."""
+    request = testing.DummyRequest(db=db_session, feature=fake_feature)
+    request.auth_domain = request.domain
+    request.registry.settings = pyramid_settings
+    return request
+
+
+@pytest.fixture
+def pyramid_csrf_request(pyramid_request):
+    """Dummy Pyramid request object with a valid CSRF token."""
+    pyramid_request.headers['X-CSRF-Token'] = pyramid_request.session.get_csrf_token()
+    return pyramid_request
+
+
+@pytest.fixture
+def pyramid_settings():
+    """Default app settings."""
+    return {
+        'sqlalchemy.url': TEST_DATABASE_URL
+    }

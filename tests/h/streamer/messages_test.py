@@ -1,8 +1,10 @@
-from gevent.queue import Queue
+# -*- coding: utf-8 -*-
+
 import mock
+import pytest
+from gevent.queue import Queue
 from pyramid.request import apply_request_extensions
 from pyramid.testing import DummyRequest
-import pytest
 
 from h.streamer import messages
 
@@ -17,8 +19,10 @@ class FakeSocket(object):
         self.client_id = client_id
         self.terminated = False
         self.filter = mock.MagicMock()
-        self.request = DummyRequest(db=mock.sentinel.db_session)
         self.send = mock.MagicMock()
+        # Each fake socket needs its own request, so can't use the
+        # pyramid_request fixture.
+        self.request = DummyRequest(db=mock.sentinel.db_session)
         apply_request_extensions(self.request)
 
 
@@ -277,11 +281,12 @@ class TestHandleAnnotationEvent(object):
         result = messages.handle_annotation_event(message, socket)
         assert result is None
 
-    def test_sends_nipsad_annotations_to_owners(self, config, presenter_asdict):
+    def test_sends_nipsad_annotations_to_owners(self, presenter_asdict, pyramid_config):
         """NIPSA'd users should see their own annotations."""
-        config.testing_securitypolicy('fred')
+        pyramid_config.testing_securitypolicy('fred')
         message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
+
         presenter_asdict.return_value = self.serialized_annotation({'nipsa': True})
 
         result = messages.handle_annotation_event(message, socket)
@@ -304,9 +309,9 @@ class TestHandleAnnotationEvent(object):
         result = messages.handle_annotation_event(message, socket)
         assert result is not None
 
-    def test_none_if_not_in_group(self, config, presenter_asdict):
+    def test_none_if_not_in_group(self, presenter_asdict, pyramid_config):
         """Users shouldn't see annotations in groups they aren't members of."""
-        config.testing_securitypolicy('fred')
+        pyramid_config.testing_securitypolicy('fred')
         message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
         presenter_asdict.return_value = self.serialized_annotation({
@@ -315,9 +320,9 @@ class TestHandleAnnotationEvent(object):
         result = messages.handle_annotation_event(message, socket)
         assert result is None
 
-    def test_sends_if_in_group(self, config, presenter_asdict):
+    def test_sends_if_in_group(self, presenter_asdict, pyramid_config):
         """Users should see annotations in groups they are members of."""
-        config.testing_securitypolicy('fred', groupids=['group:private-group'])
+        pyramid_config.testing_securitypolicy('fred', groupids=['group:private-group'])
         message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
         presenter_asdict.return_value = self.serialized_annotation({
@@ -351,18 +356,18 @@ class TestHandleAnnotationEvent(object):
         return patch('h.streamer.messages.presenters.AnnotationJSONPresenter.asdict')
 
     @pytest.fixture
-    def nipsa_service(self, config):
+    def nipsa_service(self, pyramid_config):
         service = mock.Mock(spec_set=['is_flagged'])
         service.is_flagged.return_value = False
 
-        config.include('pyramid_services')
-        config.register_service(service, name='nipsa')
+        pyramid_config.include('pyramid_services')
+        pyramid_config.register_service(service, name='nipsa')
 
         return service
 
 class TestHandleUserEvent(object):
-    def test_sends_session_change_when_joining_or_leaving_group(self, config):
-        config.testing_securitypolicy('amy')
+    def test_sends_session_change_when_joining_or_leaving_group(self, pyramid_config):
+        pyramid_config.testing_securitypolicy('amy')
         session_model = mock.Mock()
         message = {
             'type': 'group-join',
@@ -379,9 +384,9 @@ class TestHandleUserEvent(object):
             'model': session_model,
         }
 
-    def test_none_when_socket_is_not_event_users(self, config):
+    def test_none_when_socket_is_not_event_users(self, pyramid_config):
         """Don't send session-change events if the event user is not the socket user."""
-        config.testing_securitypolicy('bob')
+        pyramid_config.testing_securitypolicy('bob')
         message = {
             'type': 'group-join',
             'userid': 'amy',
@@ -391,3 +396,4 @@ class TestHandleUserEvent(object):
         sock = FakeSocket('clientid')
 
         assert messages.handle_user_event(message, sock) is None
+

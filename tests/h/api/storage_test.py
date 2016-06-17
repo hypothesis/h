@@ -6,7 +6,6 @@ import copy
 
 import pytest
 import mock
-from pyramid.testing import DummyRequest
 
 from h.api import storage
 from h.api import schemas
@@ -98,8 +97,8 @@ class TestCreateAnnotation(object):
 
     def test_it_fetches_parent_annotation_for_replies(self,
                                                       config,
-                                                      fetch_annotation):
-        request = self.mock_request()
+                                                      fetch_annotation,
+                                                      pyramid_request):
 
         # Make the annotation's parent belong to 'test-group'.
         fetch_annotation.return_value.groupid = 'test-group'
@@ -112,15 +111,16 @@ class TestCreateAnnotation(object):
         # The annotation is a reply.
         data['references'] = ['parent_annotation_id']
 
-        storage.create_annotation(request, data)
+        storage.create_annotation(pyramid_request, data)
 
-        fetch_annotation.assert_called_once_with(request.db,
+        fetch_annotation.assert_called_once_with(pyramid_request.db,
                                                  'parent_annotation_id')
 
     def test_it_sets_group_for_replies(self,
                                        config,
                                        fetch_annotation,
-                                       models):
+                                       models,
+                                       pyramid_request):
         # Make the annotation's parent belong to 'test-group'.
         fetch_annotation.return_value.groupid = 'test-group'
 
@@ -133,12 +133,13 @@ class TestCreateAnnotation(object):
         # The annotation is a reply.
         data['references'] = ['parent_annotation_id']
 
-        storage.create_annotation(self.mock_request(), data)
+        storage.create_annotation(pyramid_request, data)
 
         assert models.Annotation.call_args[1]['groupid'] == 'test-group'
 
     def test_it_raises_if_parent_annotation_does_not_exist(self,
-                                                           fetch_annotation):
+                                                           fetch_annotation,
+                                                           pyramid_request):
         fetch_annotation.return_value = None
 
         data = self.annotation_data()
@@ -147,87 +148,70 @@ class TestCreateAnnotation(object):
         data['references'] = ['parent_annotation_id']
 
         with pytest.raises(schemas.ValidationError) as exc:
-            storage.create_annotation(self.mock_request(), data)
+            storage.create_annotation(pyramid_request, data)
 
         assert str(exc.value).startswith('references.0: ')
 
-    def test_it_raises_if_user_does_not_have_permissions_for_group(self):
+    def test_it_raises_if_user_does_not_have_permissions_for_group(self, pyramid_request):
         data = self.annotation_data()
         data['groupid'] = 'foo-group'
 
         with pytest.raises(schemas.ValidationError) as exc:
-            storage.create_annotation(self.mock_request(), data)
+            storage.create_annotation(pyramid_request, data)
 
         assert str(exc.value).startswith('group: ')
 
-    def test_it_inits_an_Annotation_model(self, models):
+    def test_it_inits_an_Annotation_model(self, models, pyramid_request):
         data = self.annotation_data()
 
-        storage.create_annotation(self.mock_request(), copy.deepcopy(data))
+        storage.create_annotation(pyramid_request, copy.deepcopy(data))
 
         del data['document']
         models.Annotation.assert_called_once_with(**data)
 
-    def test_it_adds_the_annotation_to_the_database(self, models):
-        request = self.mock_request()
+    def test_it_adds_the_annotation_to_the_database(self, models, pyramid_request):
+        storage.create_annotation(pyramid_request, self.annotation_data())
 
-        storage.create_annotation(request, self.annotation_data())
+        assert models.Annotation.return_value in pyramid_request.db.added
 
-        request.db.add.assert_called_once_with(models.Annotation.return_value)
-
-    def test_it_updates_the_document_metadata_from_the_annotation(
-            self,
-            models,
-            update_document_metadata):
-        request = self.mock_request()
+    def test_it_updates_the_document_metadata_from_the_annotation(self,
+                                                                  models,
+                                                                  pyramid_request,
+                                                                  update_document_metadata):
         annotation_data = self.annotation_data()
         annotation_data['document']['document_meta_dicts'] = (
             mock.sentinel.document_meta_dicts)
         annotation_data['document']['document_uri_dicts'] = (
             mock.sentinel.document_uri_dicts)
 
-        storage.create_annotation(request, annotation_data)
+        storage.create_annotation(pyramid_request, annotation_data)
 
         update_document_metadata.assert_called_once_with(
-            request.db,
+            pyramid_request.db,
             models.Annotation.return_value,
             mock.sentinel.document_meta_dicts,
             mock.sentinel.document_uri_dicts
         )
 
-    def test_it_returns_the_annotation(self, models):
-        annotation = storage.create_annotation(self.mock_request(),
+    def test_it_returns_the_annotation(self, models, pyramid_request):
+        annotation = storage.create_annotation(pyramid_request,
                                                self.annotation_data())
 
         assert annotation == models.Annotation.return_value
 
-    def test_it_does_not_crash_if_target_selectors_is_empty(self):
+    def test_it_does_not_crash_if_target_selectors_is_empty(self, pyramid_request):
         # Page notes have [] for target_selectors.
         data = self.annotation_data()
         data['target_selectors'] = []
 
-        storage.create_annotation(self.mock_request(), data)
+        storage.create_annotation(pyramid_request, data)
 
-    def test_it_does_not_crash_if_no_text_or_tags(self):
+    def test_it_does_not_crash_if_no_text_or_tags(self, pyramid_request):
         # Highlights have no text or tags.
         data = self.annotation_data()
         data['text'] = data['tags'] = ''
 
-        storage.create_annotation(self.mock_request(), data)
-
-    def mock_request(self):
-        request = DummyRequest(authenticated_userid='acct:test@localhost')
-
-        request.registry.notify = mock.Mock(spec=lambda event: None)
-
-        class DBSpec(object):
-            def add(self, annotation):
-                pass
-            def flush():
-                pass
-        request.db = mock.Mock(spec=DBSpec)
-
-        return request
+        storage.create_annotation(pyramid_request, data)
 
     def annotation_data(self):
         return {
@@ -411,6 +395,12 @@ def models(patch):
     models = patch('h.api.storage.models', autospec=False)
     models.Annotation.return_value.is_reply = False
     return models
+
+
+@pytest.fixture
+def pyramid_request(fake_db_session, pyramid_request):
+    pyramid_request.db = fake_db_session
+    return pyramid_request
 
 
 @pytest.fixture

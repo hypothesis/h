@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 import mock
 import pytest
-from pyramid.testing import DummyRequest
 
 from h.nipsa.models import NipsaUser
 from h.nipsa.services import NipsaService
@@ -67,13 +66,11 @@ class TestNipsaService(object):
         assert user_query.one_or_none() is None
 
 
-def test_nipsa_factory():
-    request = DummyRequest(db=mock.sentinel.db_session)
-
-    svc = nipsa_factory(None, request)
+def test_nipsa_factory(pyramid_request):
+    svc = nipsa_factory(None, pyramid_request)
 
     assert isinstance(svc, NipsaService)
-    assert svc.session == mock.sentinel.db_session
+    assert svc.session == pyramid_request.db
 
 
 @pytest.fixture
