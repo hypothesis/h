@@ -79,7 +79,7 @@ class TestSearch(object):
         views.search(pyramid_request)
 
         storage.fetch_ordered_annotations.assert_called_once_with(
-            pyramid_request.db, ['row-1', 'row-2'], load_documents=True)
+            pyramid_request.db, ['row-1', 'row-2'], query_processor=mock.ANY)
 
     def test_it_renders_search_results(self, pyramid_request, search_lib):
         ann1 = models.Annotation(userid='luke')
@@ -110,7 +110,7 @@ class TestSearch(object):
         views.search(pyramid_request)
 
         assert mock.call(pyramid_request.db, ['reply-1', 'reply-2'],
-                         load_documents=True) in storage.fetch_ordered_annotations.call_args_list
+                         query_processor=mock.ANY) in storage.fetch_ordered_annotations.call_args_list
 
     def test_it_renders_replies(self, pyramid_request, search_lib):
         ann = models.Annotation(userid='luke')

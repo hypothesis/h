@@ -19,8 +19,10 @@ objects and Pyramid ACLs in :mod:`h.api.resources`.
 from pyramid import i18n
 from pyramid import security
 from pyramid.view import view_config
+from sqlalchemy.orm import subqueryload
 
 from h.api import cors
+from h.api import models
 from h.api.events import AnnotationEvent
 from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import AnnotationJSONLDPresenter
@@ -237,7 +239,13 @@ def _json_payload(request):
 
 def _present_annotations(request, ids):
     """Load annotations by id from the database and present them."""
-    annotations = storage.fetch_ordered_annotations(request.db, ids, load_documents=True)
+    def eager_load_documents(query):
+        return query.options(
+            subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
+            subqueryload(models.Annotation.document).subqueryload(models.Document.meta))
+
+    annotations = storage.fetch_ordered_annotations(request.db, ids,
+                                                    query_processor=eager_load_documents)
     return [AnnotationJSONPresenter(request, ann).asdict() for ann in annotations]
 
 
