@@ -12,6 +12,7 @@ import mock
 import pytest
 
 from pyramid import testing
+from pyramid.request import apply_request_extensions
 
 from h import db
 from h import form
@@ -145,6 +146,10 @@ def pyramid_config(pyramid_settings, pyramid_request):
     """Pyramid configurator object."""
     with testing.testConfig(request=pyramid_request,
                             settings=pyramid_settings) as config:
+        # Include pyramid_services so it's easy to set up fake services in tests
+        config.include('pyramid_services')
+        apply_request_extensions(pyramid_request)
+
         yield config
 
 
