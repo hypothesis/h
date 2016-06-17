@@ -191,30 +191,6 @@ class DocumentJSONPresenter(object):
         return d
 
 
-class DocumentURIJSONPresenter(object):
-    def __init__(self, document_uri):
-        self.document_uri = document_uri
-
-    def asdict(self):
-        data = {'href': self.document_uri.uri}
-
-        rel = self.rel
-        if rel:
-            data['rel'] = rel
-
-        type = self.document_uri.content_type
-        if type:
-            data['type'] = type
-
-        return data
-
-    @property
-    def rel(self):
-        type = self.document_uri.type
-        if type and type.startswith('rel-'):
-            return self.document_uri.type[4:]
-
-
 def add_annotation_link_generator(registry, name, generator):
     """
     Registers a function which generates a named link for an annotation.

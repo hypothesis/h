@@ -11,7 +11,6 @@ from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import AnnotationSearchIndexPresenter
 from h.api.presenters import AnnotationJSONLDPresenter
 from h.api.presenters import DocumentJSONPresenter
-from h.api.presenters import DocumentURIJSONPresenter
 from h.api.presenters import add_annotation_link_generator
 from h.api.presenters import utc_iso8601, deep_merge_dict
 
@@ -450,50 +449,6 @@ class TestDocumentJSONPresenter(object):
 
         presenter = DocumentJSONPresenter(document)
         assert {'title': ['Foo']} == presenter.asdict()
-
-
-class TestDocumentURIJSONPresenter(object):
-    def test_asdict(self):
-        docuri = mock.Mock(uri='http://example.com/site.pdf',
-                           type='rel-alternate',
-                           content_type='application/pdf')
-        presenter = DocumentURIJSONPresenter(docuri)
-
-        expected = {'href': 'http://example.com/site.pdf',
-                    'rel': 'alternate',
-                    'type': 'application/pdf'}
-
-        assert expected == presenter.asdict()
-
-    def test_asdict_empty_rel(self):
-        docuri = mock.Mock(uri='http://example.com',
-                           type='dc-doi',
-                           content_type='text/html')
-        presenter = DocumentURIJSONPresenter(docuri)
-
-        expected = {'href': 'http://example.com', 'type': 'text/html'}
-
-        assert expected == presenter.asdict()
-
-    def test_asdict_empty_type(self):
-        docuri = mock.Mock(uri='http://example.com',
-                           type='rel-canonical',
-                           content_type=None)
-        presenter = DocumentURIJSONPresenter(docuri)
-
-        expected = {'href': 'http://example.com', 'rel': 'canonical'}
-
-        assert expected == presenter.asdict()
-
-    def test_rel_with_type_rel(self):
-        docuri = mock.Mock(type='rel-canonical')
-        presenter = DocumentURIJSONPresenter(docuri)
-        assert 'canonical' == presenter.rel
-
-    def test_rel_with_non_rel_type(self):
-        docuri = mock.Mock(type='highwire-pdf')
-        presenter = DocumentURIJSONPresenter(docuri)
-        assert presenter.rel is None
 
 
 def test_utc_iso8601():
