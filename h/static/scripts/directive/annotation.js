@@ -471,16 +471,7 @@ function AnnotationController(
     * Creates a new message in reply to this annotation.
     */
   vm.reply = function() {
-    var references = domainModel.references || [];
-
-    // TODO: Remove this check once we have server-side code to ensure that
-    // references is always an array of strings.
-    if (typeof references === 'string') {
-      references = [references];
-    }
-
-    references = references.concat(domainModel.id);
-
+    var references = (domainModel.references || []).concat(domainModel.id);
     var reply = annotationMapper.createAnnotation({
       references: references,
       uri: domainModel.uri
