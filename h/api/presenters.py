@@ -184,10 +184,9 @@ class DocumentJSONPresenter(object):
             return {}
 
         d = {}
-
-        for docmeta in self.document.meta:
-            meta_presenter = DocumentMetaJSONPresenter(docmeta)
-            deep_merge_dict(d, meta_presenter.asdict())
+        title = self.document.title
+        if title:
+            d['title'] = [title]
 
         d['link'] = []
         for docuri in self.document.document_uris:

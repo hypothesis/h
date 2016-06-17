@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import datetime
 import mock
 import pytest
-from pyramid import testing
 
+from h.api import models
 from h.api.presenters import AnnotationBasePresenter
 from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import AnnotationSearchIndexPresenter
@@ -424,20 +425,34 @@ class TestAnnotationJSONLDPresenter(object):
 
 
 class TestDocumentJSONPresenter(object):
-    def test_asdict(self):
-        document = mock.Mock(document_uris=[mock.Mock(uri='http://foo.com', type=None, content_type=None),
-                                            mock.Mock(uri='http://foo.org', type='rel-canonical', content_type=None)],
-                             meta=[mock.Mock(type='twitter.url.main_url', value='http://foo.org'),
-                                   mock.Mock(type='twitter.title', value='Foo')])
-        presenter = DocumentJSONPresenter(document)
+    def test_asdict(self, db_session):
+        document = models.Document(
+            document_uris=[models.DocumentURI(uri='http://foo.com', claimant='http://foo.com'),
+                           models.DocumentURI(uri='http://foo.org', claimant='http://foo.com', type='rel-canonical')],
+            meta=[models.DocumentMeta(type='title', value=['Foo'], claimant='http://foo.com')])
+        db_session.add(document)
+        db_session.flush()
 
+        presenter = DocumentJSONPresenter(document)
         expected = {'link': [{'href': 'http://foo.com'},
                              {'href': 'http://foo.org', 'rel': 'canonical'}],
-                    'twitter': {'title': 'Foo', 'url': {'main_url': 'http://foo.org'}}}
+                    'title': ['Foo']}
         assert expected == presenter.asdict()
 
     def test_asdict_when_none_document(self):
         assert {} == DocumentJSONPresenter(None).asdict()
+
+    def test_asdict_does_not_render_other_meta_than_title(self, db_session):
+        document = models.Document(meta=[
+            models.DocumentMeta(type='title', value=['Foo'], claimant='http://foo.com'),
+            models.DocumentMeta(type='twitter.url', value=['http://foo.com'], claimant='http://foo.com'),
+            models.DocumentMeta(type='facebook.title', value=['FB Title'], claimant='http://foo.com'),
+        ])
+        db_session.add(document)
+        db_session.flush()
+
+        presenter = DocumentJSONPresenter(document)
+        assert {'link': [], 'title': ['Foo']} == presenter.asdict()
 
 
 class TestDocumentMetaJSONPresenter(object):
