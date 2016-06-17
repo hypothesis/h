@@ -433,9 +433,7 @@ class TestDocumentJSONPresenter(object):
         db_session.flush()
 
         presenter = DocumentJSONPresenter(document)
-        expected = {'link': [{'href': 'http://foo.com'},
-                             {'href': 'http://foo.org', 'rel': 'canonical'}],
-                    'title': ['Foo']}
+        expected = {'title': ['Foo']}
         assert expected == presenter.asdict()
 
     def test_asdict_when_none_document(self):
@@ -451,7 +449,7 @@ class TestDocumentJSONPresenter(object):
         db_session.flush()
 
         presenter = DocumentJSONPresenter(document)
-        assert {'link': [], 'title': ['Foo']} == presenter.asdict()
+        assert {'title': ['Foo']} == presenter.asdict()
 
 
 class TestDocumentURIJSONPresenter(object):

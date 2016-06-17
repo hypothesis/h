@@ -188,11 +188,6 @@ class DocumentJSONPresenter(object):
         if title:
             d['title'] = [title]
 
-        d['link'] = []
-        for docuri in self.document.document_uris:
-            uri_presenter = DocumentURIJSONPresenter(docuri)
-            d['link'].append(uri_presenter.asdict())
-
         return d
 
 
