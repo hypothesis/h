@@ -206,6 +206,28 @@ describe 'Guest', ->
 
         emitGuestEvent('getDocumentInfo', assertComplete)
 
+  describe 'getDocumentInfo()', ->
+    guest = null
+
+    beforeEach ->
+      guest = createGuest()
+      guest.plugins.PDF =
+        uri: -> 'urn:x-pdf:001122'
+        getMetadata: sandbox.stub()
+
+    it 'preserves the components of the URI other than the fragment', ->
+      guest.plugins.PDF = null
+      guest.plugins.Document =
+        uri: -> 'http://foobar.com/things?id=42'
+        metadata: {}
+      return guest.getDocumentInfo().then ({uri}) ->
+        assert.equal uri, 'http://foobar.com/things?id=42'
+
+    it 'removes the fragment identifier from URIs', () ->
+      guest.plugins.PDF.uri = -> 'urn:x-pdf:aabbcc#'
+      return guest.getDocumentInfo().then ({uri}) ->
+        assert.equal uri, 'urn:x-pdf:aabbcc'
+
   describe 'onAdderMouseUp', ->
     it 'it prevents the default browser action when triggered', () ->
       event = jQuery.Event('mouseup')
