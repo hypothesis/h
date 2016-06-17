@@ -113,9 +113,11 @@ class TestGenerate(object):
         return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.txt.jinja2')
 
     @pytest.fixture
-    def document(self):
+    def document(self, db_session):
         doc = Document()
-        doc.meta.append(DocumentMeta(type='title', value=['My fascinating page']))
+        doc.meta.append(DocumentMeta(type='title', value=['My fascinating page'], claimant='http://example.org'))
+        db_session.add(doc)
+        db_session.flush()
         return doc
 
     @pytest.fixture
