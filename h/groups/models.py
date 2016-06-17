@@ -100,11 +100,6 @@ class Group(Base, mixins.Timestamps):
         return '<Group: %s>' % self.slug
 
     @classmethod
-    def get_by_pubid(cls, session, pubid):
-        """Return the group with the given pubid, or None."""
-        return session.query(cls).filter(cls.pubid == pubid).first()
-
-    @classmethod
     def created_by(cls, session, user):
         """Return a query object filtering groups by creator."""
         return session.query(cls).filter(Group.creator == user)
