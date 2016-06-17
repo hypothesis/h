@@ -8,7 +8,6 @@ assumed to be validated.
 """
 
 from pyramid import i18n
-from sqlalchemy.orm import subqueryload
 
 from h.api import schemas
 from h.api import models
@@ -50,19 +49,37 @@ def fetch_annotation(session, id_):
         return None
 
 
-def fetch_ordered_annotations(session, ids, load_documents=False):
+def fetch_ordered_annotations(session, ids, query_processor=None):
+    """
+    Fetch all annotations with the given ids and order them based on the list
+    of ids.
+
+    The optional `query_processor` parameter allows for passing in a function
+    that can change the query before it is run, especially useful for
+    eager-loading certain data. The function will get the query as an argument
+    and has to return a query object again.
+
+    :param session: the database session
+    :type session: sqlalchemy.orm.session.Session
+
+    :param ids: the list of annotation ids
+    :type ids: list
+
+    :param query_processor: an optional function that takes the query and
+                            returns an updated query
+    :type query_processor: callable
+
+    :returns: the annotation, if found, or None.
+    :rtype: h.api.models.Annotation, NoneType
+    """
     if not ids:
         return []
 
     ordering = {x: i for i, x in enumerate(ids)}
 
     query = session.query(models.Annotation).filter(models.Annotation.id.in_(ids))
-
-    if load_documents:
-        query = query.options(
-            subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
-            subqueryload(models.Annotation.document).subqueryload(models.Document.meta)
-        )
+    if query_processor:
+        query = query_processor(query)
 
     anns = sorted(query, key=lambda a: ordering.get(a.id))
     return anns
