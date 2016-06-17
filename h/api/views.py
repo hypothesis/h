@@ -242,7 +242,7 @@ def _present_annotations(request, ids):
     def eager_load_documents(query):
         return query.options(
             subqueryload(models.Annotation.document).subqueryload(models.Document.document_uris),
-            subqueryload(models.Annotation.document).subqueryload(models.Document.meta))
+            subqueryload(models.Annotation.document).subqueryload(models.Document.meta_titles))
 
     annotations = storage.fetch_ordered_annotations(request.db, ids,
                                                     query_processor=eager_load_documents)
