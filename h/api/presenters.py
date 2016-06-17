@@ -196,22 +196,6 @@ class DocumentJSONPresenter(object):
         return d
 
 
-class DocumentMetaJSONPresenter(object):
-    def __init__(self, document_meta):
-        self.document_meta = document_meta
-
-    def asdict(self):
-        # This turns a keypath into a nested dict by first reversing the
-        # keypath and then creating the dict from inside-out. Rather than
-        # using recursion to create the dict from the outside in.
-        reversed_path = self.document_meta.type.split('.')[::-1]
-        d = self.document_meta.value
-        for nested in reversed_path:
-            d = {nested: d}
-
-        return d
-
-
 class DocumentURIJSONPresenter(object):
     def __init__(self, document_uri):
         self.document_uri = document_uri

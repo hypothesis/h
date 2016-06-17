@@ -11,7 +11,6 @@ from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import AnnotationSearchIndexPresenter
 from h.api.presenters import AnnotationJSONLDPresenter
 from h.api.presenters import DocumentJSONPresenter
-from h.api.presenters import DocumentMetaJSONPresenter
 from h.api.presenters import DocumentURIJSONPresenter
 from h.api.presenters import add_annotation_link_generator
 from h.api.presenters import utc_iso8601, deep_merge_dict
@@ -453,16 +452,6 @@ class TestDocumentJSONPresenter(object):
 
         presenter = DocumentJSONPresenter(document)
         assert {'link': [], 'title': ['Foo']} == presenter.asdict()
-
-
-class TestDocumentMetaJSONPresenter(object):
-    def test_asdict(self):
-        meta = mock.Mock(type='twitter.url.main_url',
-                         value='https://example.com')
-        presenter = DocumentMetaJSONPresenter(meta)
-
-        expected = {'twitter': {'url': {'main_url': 'https://example.com'}}}
-        assert expected == presenter.asdict()
 
 
 class TestDocumentURIJSONPresenter(object):
