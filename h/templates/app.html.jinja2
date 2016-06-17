@@ -28,7 +28,7 @@
       on-login="login()"
       on-logout="logout()"
       on-share-page="share()"
-      on-show-about-version-dialog="aboutThisVersionDialog.visible = true"
+      on-show-help-panel="helpPanel.visible = true"
       is-sidebar="::isSidebar"
       search-controller="search"
       sort-key="sortKey()"
@@ -54,10 +54,10 @@
         ng-if="shareDialog.visible"
         on-close="shareDialog.visible = false">
       </share-dialog>
-      <about-this-version-dialog ng-if="aboutThisVersionDialog.visible"
-        on-close="aboutThisVersionDialog.visible = false"
+      <help-panel ng-if="helpPanel.visible"
+        on-close="helpPanel.visible = false"
         auth="auth">
-      </about-this-version-dialog>
+      </help-panel>
       <main ng-view=""></main>
     </div>
 

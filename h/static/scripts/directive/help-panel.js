@@ -2,7 +2,7 @@
 
 /**
  * @ngdoc directive
- * @name aboutThisVersionDialog
+ * @name helpPanel
  * @description Displays product version and environment info
  */
 // @ngInject
@@ -15,6 +15,7 @@ module.exports = function () {
       this.userAgent = $window.navigator.userAgent;
       this.version = settings.release;
       this.dateTime = new Date();
+      this.serviceUrl = settings.serviceUrl;
 
       $scope.$watchCollection(
         function () {
@@ -30,7 +31,7 @@ module.exports = function () {
       );
     },
     restrict: 'E',
-    template: require('../../../templates/client/about_this_version_dialog.html'),
+    template: require('../../../templates/client/help_panel.html'),
     scope: {
       auth: '<',
       onClose: '&',

@@ -6,7 +6,7 @@ module.exports = function () {
     scope: {
       auth: '<',
       isSidebar: '<',
-      onShowAboutVersionDialog: '&',
+      onShowHelpPanel: '&',
       onLogin: '&',
       onLogout: '&',
       onSharePage: '&',

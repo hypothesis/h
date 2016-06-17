@@ -5,7 +5,7 @@ module.exports = function () {
     bindToController: true,
     controllerAs: 'vm',
     restrict: 'E',
-    template: require('../../../templates/client/feedback_link.html'),
+    template: require('../../../templates/client/help_link.html'),
     controller: function () {},
     scope: {
       version: '<',

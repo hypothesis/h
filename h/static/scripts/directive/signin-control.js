@@ -17,7 +17,7 @@ module.exports = function () {
       /**
        * Called when the user clicks on the "About this version" text.
        */
-      onShowAboutVersionDialog: '&',
+      onShowHelpPanel: '&',
       /**
        * Called when the user clicks on the "Sign in" text.
        */
