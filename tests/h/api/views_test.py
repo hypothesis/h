@@ -5,6 +5,8 @@ import pytest
 
 from pyramid import testing
 
+from h.api import models
+from h.api import presenters
 from h.api import views
 from h.api.schemas import ValidationError
 
@@ -60,7 +62,7 @@ class TestIndex(object):
         assert links['search']['url'] == host + '/dummy/search'
 
 
-@pytest.mark.usefixtures('search_lib', 'AnnotationJSONPresenter')
+@pytest.mark.usefixtures('search_lib')
 class TestSearch(object):
 
     def test_it_searches(self, pyramid_request, search_lib):
@@ -70,50 +72,80 @@ class TestSearch(object):
                                                   pyramid_request.params,
                                                   separate_replies=False)
 
-    def test_it_returns_search_results(self, pyramid_request, search_lib):
-        search_lib.search.return_value = {'total': 0, 'rows': []}
+    def test_it_loads_annotations_from_database(self, pyramid_request, search_lib, storage):
+        search_lib.search.return_value = {'total': 2,
+                                          'rows': [{'id': 'row-1'}, {'id': 'row-2'}]}
 
-        result = views.search(pyramid_request)
+        views.search(pyramid_request)
 
-        assert result == {'total': 0, 'rows': []}
+        storage.fetch_ordered_annotations.assert_called_once_with(
+            pyramid_request.db, ['row-1', 'row-2'], load_documents=True)
 
-    def test_it_presents_annotations(self,
-                                     pyramid_request,
-                                     search_lib,
-                                     AnnotationJSONPresenter):
-        search_lib.search.return_value = {'total': 2, 'rows': [{'foo': 'bar'},
-                                                               {'baz': 'bat'}]}
-        presenter = AnnotationJSONPresenter.return_value
-        presenter.asdict.return_value = {'giraffe': True}
+    def test_it_renders_search_results(self, pyramid_request, search_lib):
+        ann1 = models.Annotation(userid='luke')
+        ann2 = models.Annotation(userid='sarah')
+        pyramid_request.db.add_all([ann1, ann2])
+        pyramid_request.db.flush()
 
-        result = views.search(pyramid_request)
+        search_lib.search.return_value = {'total': 2,
+                                          'rows': [{'id': ann1.id}, {'id': ann2.id}]}
 
-        assert result == {'total': 2, 'rows': [{'giraffe': True},
-                                               {'giraffe': True}]}
+        expected = {
+            'total': 2,
+            'rows': [
+                presenters.AnnotationJSONPresenter(pyramid_request, ann1).asdict(),
+                presenters.AnnotationJSONPresenter(pyramid_request, ann2).asdict(),
+            ]
+        }
 
-    def test_it_presents_replies(self,
-                                 pyramid_request,
-                                 search_lib,
-                                 AnnotationJSONPresenter):
+        assert views.search(pyramid_request) == expected
+
+    def test_it_loads_replies_from_database(self, pyramid_request, search_lib, storage):
         pyramid_request.params = {'_separate_replies': '1'}
         search_lib.search.return_value = {'total': 1,
-                                          'rows': [{'foo': 'bar'}],
-                                          'replies': [{'baz': 'bat'},
-                                                      {'baz': 'bat'}]}
-        presenter = AnnotationJSONPresenter.return_value
-        presenter.asdict.return_value = {'giraffe': True}
+                                          'rows': [{'id': 'row-1'}],
+                                          'replies': [{'id': 'reply-1'},
+                                                      {'id': 'reply-2'}]}
 
-        result = views.search(pyramid_request)
+        views.search(pyramid_request)
 
-        assert result == {'total': 1,
-                          'rows': [{'giraffe': True}],
-                          'replies': [{'giraffe': True},
-                                      {'giraffe': True}]}
+        assert mock.call(pyramid_request.db, ['reply-1', 'reply-2'],
+                         load_documents=True) in storage.fetch_ordered_annotations.call_args_list
+
+    def test_it_renders_replies(self, pyramid_request, search_lib):
+        ann = models.Annotation(userid='luke')
+        pyramid_request.db.add(ann)
+        pyramid_request.db.flush()
+        reply1 = models.Annotation(userid='sarah', references=[ann.id])
+        reply2 = models.Annotation(userid='sarah', references=[ann.id])
+        pyramid_request.db.add_all([reply1, reply2])
+        pyramid_request.db.flush()
+
+        search_lib.search.return_value = {'total': 1,
+                                          'rows': [{'id': ann.id}],
+                                          'replies': [{'id': reply1.id}, {'id': reply2.id}],
+                                          }
+
+        pyramid_request.params = {'_separate_replies': '1'}
+
+        expected = {
+            'total': 1,
+            'rows': [presenters.AnnotationJSONPresenter(pyramid_request, ann).asdict()],
+            'replies': [
+                presenters.AnnotationJSONPresenter(pyramid_request, reply1).asdict(),
+                presenters.AnnotationJSONPresenter(pyramid_request, reply2).asdict(),
+            ]
+        }
+
+        assert views.search(pyramid_request) == expected
 
     @pytest.fixture
     def search_lib(self, patch):
         return patch('h.api.views.search_lib')
 
+    @pytest.fixture
+    def storage(self, patch):
+        return patch('h.api.views.storage')
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
