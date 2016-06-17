@@ -38,16 +38,19 @@ class Document(Base, mixins.Timestamps):
                                backref='document',
                                order_by='DocumentMeta.updated.desc()')
 
+    meta_titles = sa.orm.relationship('DocumentMeta',
+                                      primaryjoin='and_(Document.id==DocumentMeta.document_id, DocumentMeta.type==u"title")',
+                                      order_by='DocumentMeta.updated.asc()',
+                                      viewonly=True)
+
     def __repr__(self):
         return '<Document %s>' % self.id
 
     @property
     def title(self):
-        titles = [m.value for m in self.meta if m.type == 'title']
-        try:
-            return titles[0][0]
-        except IndexError:
-            return None
+        for meta in self.meta_titles:
+            if meta.value:
+                return meta.value[0]
 
     @classmethod
     def find_by_uris(cls, session, uris):
