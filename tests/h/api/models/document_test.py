@@ -167,6 +167,85 @@ class TestDocumentFindOrCreateByURIs(object):
                 ['https://m.en.wikipedia.org/wiki/Pluto'])
 
 
+class TestDocumentURI(object):
+
+    def test_type_defaults_to_empty_string(self, db_session):
+        document_uri = document.DocumentURI(claimant='http://www.example.com',
+                                            uri='http://www.example.com',
+                                            type=None,
+                                            content_type='bar',
+                                            document=document.Document())
+        db_session.add(document_uri)
+
+        db_session.flush()
+
+        assert document_uri.type == ''
+
+    def test_you_cannot_set_type_to_null(self, db_session):
+        document_uri = document.DocumentURI(claimant='http://www.example.com',
+                                            uri='http://www.example.com',
+                                            type='foo',
+                                            content_type='bar',
+                                            document=document.Document())
+        db_session.add(document_uri)
+        db_session.flush()
+
+        document_uri.type = None
+
+        with pytest.raises(sa.exc.IntegrityError):
+            db_session.flush()
+
+    def test_content_type_defaults_to_empty_string(self, db_session):
+        document_uri = document.DocumentURI(claimant='http://www.example.com',
+                                            uri='http://www.example.com',
+                                            type='bar',
+                                            content_type=None,
+                                            document=document.Document())
+        db_session.add(document_uri)
+
+        db_session.flush()
+
+        assert document_uri.content_type == ''
+
+    def test_you_cannot_set_content_type_to_null(self, db_session):
+        document_uri = document.DocumentURI(claimant='http://www.example.com',
+                                            uri='http://www.example.com',
+                                            type='foo',
+                                            content_type='bar',
+                                            document=document.Document())
+        db_session.add(document_uri)
+        db_session.flush()
+
+        document_uri.content_type = None
+
+        with pytest.raises(sa.exc.IntegrityError):
+            db_session.flush()
+
+    def test_you_cannot_add_duplicate_document_uris(self, db_session):
+        """
+        You can't add duplicate DocumentURI's to the database.
+
+        You can't add DocumentURI's with the same claimant, uri, type and
+        content_type, even if they have different documents.
+
+        """
+        db_session.add_all([
+            document.DocumentURI(claimant='http://www.example.com',
+                                 uri='http://www.example.com',
+                                 type='foo',
+                                 content_type='bar',
+                                 document=document.Document()),
+            document.DocumentURI(claimant='http://www.example.com',
+                                 uri='http://www.example.com',
+                                 type='foo',
+                                 content_type='bar',
+                                 document=document.Document())
+        ])
+
+        with pytest.raises(sa.exc.IntegrityError):
+            db_session.commit()
+
+
 @pytest.mark.usefixtures(
     'log',
 )
@@ -176,7 +255,7 @@ class TestCreateOrUpdateDocumentURI(object):
         claimant = 'http://example.com/example_claimant.html'
         uri = 'http://example.com/example_uri.html'
         type_ = 'self-claim'
-        content_type = None
+        content_type = ''
         document_ = document.Document()
         created = yesterday()
         updated = yesterday()
@@ -212,7 +291,7 @@ class TestCreateOrUpdateDocumentURI(object):
         claimant = 'http://example.com/example_claimant.html'
         uri = 'http://example.com/example_uri.html'
         type_ = 'self-claim'
-        content_type = None
+        content_type = ''
         document_ = document.Document()
         created = yesterday()
         updated = yesterday()

@@ -124,8 +124,14 @@ class DocumentURI(Base, mixins.Timestamps):
                                 nullable=False,
                                 index=True)
 
-    type = sa.Column(sa.UnicodeText)
-    content_type = sa.Column(sa.UnicodeText)
+    type = sa.Column(sa.UnicodeText,
+                     nullable=False,
+                     default='',
+                     server_default='')
+    content_type = sa.Column(sa.UnicodeText,
+                             nullable=False,
+                             default='',
+                             server_default='')
 
     document_id = sa.Column(sa.Integer,
                             sa.ForeignKey('document.id'),
