@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sqlalchemy as sa
+from pyramid import security
 from sqlalchemy.orm import exc
 import slugify
 
@@ -12,6 +13,17 @@ from h import pubid
 
 GROUP_NAME_MIN_LENGTH = 4
 GROUP_NAME_MAX_LENGTH = 25
+
+
+class GroupFactory(object):
+    def __init__(self, request):
+        self.request = request
+
+    def __getitem__(self, pubid):
+        try:
+            return self.request.db.query(Group).filter_by(pubid=pubid).one()
+        except exc.NoResultFound:
+            raise KeyError()
 
 
 class Group(Base, mixins.Timestamps):
@@ -56,9 +68,6 @@ class Group(Base, mixins.Timestamps):
         """A version of this group's name suitable for use in a URL."""
         return slugify.slugify(self.name)
 
-    def __repr__(self):
-        return '<Group: %s>' % self.slug
-
     def documents(self, limit=25):
         """
         Return this group's most recently annotated documents.
@@ -80,6 +89,15 @@ class Group(Base, mixins.Timestamps):
                     break
 
         return documents
+
+    def __acl__(self):
+        return [
+            (security.Allow, 'group:{}'.format(self.pubid), 'read'),
+            security.DENY_ALL,
+        ]
+
+    def __repr__(self):
+        return '<Group: %s>' % self.slug
 
     @classmethod
     def get_by_pubid(cls, session, pubid):
