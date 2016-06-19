@@ -20,6 +20,7 @@ var fixtures = immutable({
 describe('rootThread', function () {
   var fakeAnnotationUI;
   var fakeBuildThread;
+  var fakeFeatures;
   var fakeSearchFilter;
   var fakeViewFilter;
 
@@ -41,7 +42,6 @@ describe('rootThread', function () {
         sortKeysAvailable: ['Location'],
         visibleHighlights: false,
       },
-
       getState: function () {
         return this.state;
       },
@@ -50,9 +50,14 @@ describe('rootThread', function () {
       removeSelectedAnnotation: sinon.stub(),
       addAnnotations: sinon.stub(),
       setCollapsed: sinon.stub(),
+      selectTab: sinon.stub(),
     };
 
     fakeBuildThread = sinon.stub().returns(fixtures.emptyThread);
+
+    fakeFeatures = {
+      flagEnabled: sinon.stub().returns(true),
+    };
 
     fakeSearchFilter = {
       generateFacetedFilter: sinon.stub(),
@@ -64,6 +69,7 @@ describe('rootThread', function () {
 
     angular.module('app', [])
       .value('annotationUI', fakeAnnotationUI)
+      .value('features', fakeFeatures)
       .value('searchFilter', fakeSearchFilter)
       .value('viewFilter', fakeViewFilter)
       .service('rootThread', proxyquire('../root-thread', {
@@ -177,6 +183,47 @@ describe('rootThread', function () {
       {order: 'Oldest', expectedOrder: [3,0,2,1]},
       {order: 'Newest', expectedOrder: [1,2,0,3]},
     ]);
+  });
+
+  describe('when the thread filter query is set', function () {
+    it('generates a thread filter function to match annotations', function () {
+      fakeBuildThread.reset();
+
+      fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state,
+        {selectedTab: 'annotation'});
+
+      rootThread.thread(fakeAnnotationUI.state);
+      var threadFilterFn = fakeBuildThread.args[0][1].threadFilterFn;
+
+      var annotation = {target: [{ selector: {} }]};
+      assert(threadFilterFn({annotation: annotation}));
+    });
+
+    it('generates a thread filter function to match notes', function () {
+      fakeBuildThread.reset();
+      fakeBuildThread.annotation = {target: [{}]};
+
+      fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state,
+        {selectedTab: 'note'});
+
+      rootThread.thread(fakeAnnotationUI.state);
+      var threadFilterFn = fakeBuildThread.args[0][1].threadFilterFn;
+
+      assert.equal(threadFilterFn(fakeBuildThread), true);
+    });
+
+    it('generates a thread filter function for annotations, when all annotations are of type notes', function () {
+      fakeBuildThread.reset();
+      fakeBuildThread.annotation = {target: [{}]};
+
+      fakeAnnotationUI.state = Object.assign({}, fakeAnnotationUI.state,
+        {selectedTab: 'annotation'});
+
+      rootThread.thread(fakeAnnotationUI.state);
+      var threadFilterFn = fakeBuildThread.args[0][1].threadFilterFn;
+
+      assert.equal(threadFilterFn(fakeBuildThread), undefined);
+    });
   });
 
   describe('when the filter query changes', function () {

@@ -10,8 +10,12 @@ module.exports = function () {
       filterMatchCount: '<',
       onClearSelection: '&',
       searchQuery: '<',
+      selectedTab: '<',
       selectionCount: '<',
-      totalCount: '<',
+      tabAnnotations: '<',
+      tabNotes: '<',
+      totalAnnotations: '<',
+      totalNotes: '<',
     },
     template: require('../../../templates/client/search_status_bar.html'),
   };

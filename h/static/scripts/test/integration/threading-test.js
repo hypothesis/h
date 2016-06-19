@@ -9,12 +9,14 @@ var fixtures = immutable({
   annotations: [{
     id: '1',
     references: [],
+    target: [{selector: []}],
     text: 'first annotation',
     updated: 50,
   },{
     id: '2',
     references: [],
     text: 'second annotation',
+    target: [{selector: []}],
     updated: 200,
   },{
     id: '3',
@@ -34,11 +36,16 @@ describe('annotation threading', function () {
       fold: function (s) { return s; },
     };
 
+    var fakeFeatures = {
+      flagEnabled: sinon.stub().returns(true),
+    };
+
     angular.module('app', [])
       .service('annotationUI', require('../../annotation-ui'))
       .service('rootThread', require('../../root-thread'))
       .service('searchFilter', require('../../search-filter'))
       .service('viewFilter', require('../../view-filter'))
+      .value('features', fakeFeatures)
       .value('settings', {})
       .value('unicode', fakeUnicode);
 

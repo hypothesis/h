@@ -239,4 +239,12 @@ describe('annotationUI', function () {
       assert.deepEqual(annotationUI.getState().highlighted, ['id1', 'id2']);
     });
   });
+
+  describe('#selectTab()', function () {
+    it('sets the selected tab', function () {
+      var annotationTab = 'annotation';
+      annotationUI.selectTab(annotationTab);
+      assert.equal(annotationUI.getState().selectedTab, annotationTab);
+    });
+  });
 });

@@ -54,6 +54,7 @@ describe('WidgetController', function () {
   var fakeAnnotationMapper;
   var fakeCrossFrame;
   var fakeDrafts;
+  var fakeFeatures;
   var fakeGroups;
   var fakeRootThread;
   var fakeSettings;
@@ -90,8 +91,13 @@ describe('WidgetController', function () {
       call: sinon.stub(),
       frames: [],
     };
+
     fakeDrafts = {
       unsaved: sandbox.stub().returns([]),
+    };
+
+    fakeFeatures = {
+      flagEnabled: sandbox.stub().returns(true),
     };
 
     fakeStreamer = {
@@ -124,6 +130,7 @@ describe('WidgetController', function () {
     $provide.value('annotationUI', annotationUI);
     $provide.value('crossframe', fakeCrossFrame);
     $provide.value('drafts', fakeDrafts);
+    $provide.value('features', fakeFeatures);
     $provide.value('rootThread', fakeRootThread);
     $provide.value('store', fakeStore);
     $provide.value('streamer', fakeStreamer);

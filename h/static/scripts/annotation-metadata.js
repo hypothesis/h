@@ -46,30 +46,42 @@ function isNew(annotation) {
   return !annotation.id;
 }
 
+/** Return `true` if the given annotation is a page note, `false` otherwise. */
+function isPageNote(annotation) {
+  return !isAnnotation(annotation) && !isReply(annotation)
+}
+
+/** Return `true` if the given annotation is a top level annotation, `false` otherwise. */
+function isAnnotation(annotation) {
+  return (annotation.target && annotation.target.length > 0 && annotation.target[0].selector);
+}
+
 /** Return a numeric key that can be used to sort annotations by location.
  *
  * @return {number} - A key representing the location of the annotation in
  *                    the document, where lower numbers mean closer to the
  *                    start.
  */
- function location(annotation) {
-   if (annotation) {
-     var targets = annotation.target || [];
-     for (var i=0; i < targets.length; i++) {
-       var selectors = targets[i].selector || [];
-       for (var k=0; k < selectors.length; k++) {
-         if (selectors[k].type === 'TextPositionSelector') {
-           return selectors[k].start;
-         }
-       }
-     }
-   }
-   return Number.POSITIVE_INFINITY;
- }
+function location(annotation) {
+  if (annotation) {
+    var targets = annotation.target || [];
+    for (var i = 0; i < targets.length; i++) {
+      var selectors = targets[i].selector || [];
+      for (var k = 0; k < selectors.length; k++) {
+        if (selectors[k].type === 'TextPositionSelector') {
+          return selectors[k].start;
+        }
+      }
+    }
+  }
+  return Number.POSITIVE_INFINITY;
+}
 
 module.exports = {
   extractDocumentMetadata: extractDocumentMetadata,
-  isReply: isReply,
+  isAnnotation: isAnnotation,
   isNew: isNew,
+  isPageNote: isPageNote,
+  isReply: isReply,
   location: location,
 };
