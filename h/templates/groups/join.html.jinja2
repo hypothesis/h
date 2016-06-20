@@ -14,7 +14,7 @@
       <img class="group-form__invite-icon" src="/assets/images/icons/group-invite.svg">
       <div class="group-form__name-label">You have been invited to annotate with the group</div>
       <div class="group-form__name-input">{{ group.name }}</div>
-      {% if is_logged_in %}
+      {% if request.authenticated_userid %}
         <form method="POST">
           <button class="primary-action-btn" type="submit">
             Join {{ group.name }}

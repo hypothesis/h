@@ -8,6 +8,8 @@
 {% endfor %}
 {% endblock %}
 
+{% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
+
 {% block content %}
   <div class="content content--narrow">
     <div class="group-form is-member-of-group">
