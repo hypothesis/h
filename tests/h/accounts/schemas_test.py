@@ -74,23 +74,37 @@ def test_RegisterSchema_with_password_too_short(pyramid_request, user_model):
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"password": "a"})
-    assert "password" in exc.value.asdict()
+    assert exc.value.asdict()['password'] == "Shorter than minimum length 2"
 
 
 def test_RegisterSchema_with_username_too_short(pyramid_request, user_model):
     schema = schemas.RegisterSchema().bind(request=pyramid_request)
+    user_model.get_by_username.return_value = None
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"username": "a"})
-    assert "username" in exc.value.asdict()
+    assert exc.value.asdict()['username'] == "Shorter than minimum length 3"
 
 
 def test_RegisterSchema_with_username_too_long(pyramid_request, user_model):
     schema = schemas.RegisterSchema().bind(request=pyramid_request)
+    user_model.get_by_username.return_value = None
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({"username": "a" * 500})
-    assert "username" in exc.value.asdict()
+    assert exc.value.asdict()['username'] == "Longer than maximum length 30"
+
+
+def test_RegisterSchema_with_invalid_characters_in_username(pyramid_request,
+                                                            user_model):
+    user_model.get_by_username.return_value = None
+    schema = schemas.RegisterSchema().bind(request=pyramid_request)
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({"username": "Fred Flintstone"})
+    assert exc.value.asdict()['username'] == ("Must contain only letters, "
+                                              "numbers, periods, and "
+                                              "underscores")
 
 
 def test_ResetPasswordSchema_with_password_too_short(pyramid_csrf_request, user_model):
