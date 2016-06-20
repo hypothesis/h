@@ -4,7 +4,6 @@ from collections import namedtuple
 
 import mock
 import pytest
-from pyramid.request import apply_request_extensions
 
 from h.nipsa import subscribers
 
@@ -31,13 +30,8 @@ def test_transform_annotation(ann, flagged, nipsa_service, pyramid_request):
 
 
 @pytest.fixture
-def nipsa_service(pyramid_config, pyramid_request):
+def nipsa_service(pyramid_config):
     service = mock.Mock(spec_set=['is_flagged'])
     service.is_flagged.return_value = False
-
-    pyramid_config.include('pyramid_services')
     pyramid_config.register_service(service, name='nipsa')
-
-    apply_request_extensions(pyramid_request)
-
     return service

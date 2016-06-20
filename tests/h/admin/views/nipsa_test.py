@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from pyramid import httpexceptions
-from pyramid.request import apply_request_extensions
 import pytest
 
 from h.admin.views import nipsa as views
@@ -89,14 +88,9 @@ class FakeNipsaService(object):
 
 
 @pytest.fixture
-def nipsa_service(pyramid_config, pyramid_request):
+def nipsa_service(pyramid_config):
     service = FakeNipsaService()
-
-    pyramid_config.include('pyramid_services')
     pyramid_config.register_service(service, name='nipsa')
-
-    apply_request_extensions(pyramid_request)
-
     return service
 
 

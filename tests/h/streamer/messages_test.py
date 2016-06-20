@@ -359,10 +359,7 @@ class TestHandleAnnotationEvent(object):
     def nipsa_service(self, pyramid_config):
         service = mock.Mock(spec_set=['is_flagged'])
         service.is_flagged.return_value = False
-
-        pyramid_config.include('pyramid_services')
         pyramid_config.register_service(service, name='nipsa')
-
         return service
 
 class TestHandleUserEvent(object):
