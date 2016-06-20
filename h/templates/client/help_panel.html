@@ -27,8 +27,10 @@
     <dd class="help-panel-content__val">{{ vm.version }}</dd>
     <dt class="help-panel-content__key">User agent: </dt>
     <dd class="help-panel-content__val">{{ vm.userAgent }}</dd>
-    <dt class="help-panel-content__key">URL: </dt>
-    <dd class="help-panel-content__val">{{ vm.url }}</dd>
+    <div ng-if="vm.url">
+      <dt class="help-panel-content__key">URL: </dt>
+      <dd class="help-panel-content__val">{{ vm.url }}</dd>
+    </div>
     <div ng-if="vm.documentFingerprint">
       <dt class="help-panel-content__key">PDF fingerprint: </dt>
       <dd class="help-panel-content__val">{{ vm.documentFingerprint }}</dd>
