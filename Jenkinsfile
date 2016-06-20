@@ -19,7 +19,7 @@ node {
         // Run our Python tests inside the built container
         img.inside("-u root -e TEST_DATABASE_URL=${databaseUrl}") {
             sh 'pip install -q tox'
-            sh 'tox'
+            sh 'tox -r'
         }
     }
 
