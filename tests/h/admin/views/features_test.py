@@ -3,7 +3,6 @@
 import pytest
 import mock
 
-from h import db
 from h import models
 from h.admin.views import features as views
 
@@ -158,10 +157,10 @@ def test_cohorts_edit_with_users(pyramid_request):
     cohort.members.append(user1)
     cohort.members.append(user2)
 
-    db.Session.add(user1)
-    db.Session.add(user2)
-    db.Session.add(cohort)
-    db.Session.flush()
+    pyramid_request.db.add(user1)
+    pyramid_request.db.add(user2)
+    pyramid_request.db.add(cohort)
+    pyramid_request.db.flush()
 
     pyramid_request.matchdict['id'] = cohort.id
     result = views.cohorts_edit({}, pyramid_request)

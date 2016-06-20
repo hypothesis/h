@@ -3,7 +3,6 @@
 import mock
 import pytest
 
-from h import db
 from h.models import Feature
 
 
@@ -15,43 +14,41 @@ class TestFeature(object):
 
         assert feat.description == 'A test flag for testing with.'
 
-    def test_all_creates_annotations_that_dont_exist(self):
-        features = Feature.all(db.Session)
+    def test_all_creates_annotations_that_dont_exist(self, db_session):
+        features = Feature.all(db_session)
 
         assert len(features) == 1
         assert features[0].name == 'notification'
 
-    def test_all_only_returns_current_flags(self):
+    def test_all_only_returns_current_flags(self, db_session):
         """The .all() method should only return named current feature flags."""
-        session = db.Session
         new, pending, old = [Feature(name='notification'),
                              Feature(name='abouttoberemoved'),
                              Feature(name='somethingelse')]
-        session.add_all([new, pending, old])
-        session.flush()
+        db_session.add_all([new, pending, old])
+        db_session.flush()
 
-        features = Feature.all(session)
+        features = Feature.all(db_session)
 
         assert len(features) == 1
         assert features[0].name == 'notification'
 
-    def test_remove_old_flag_removes_old_flags(self):
+    def test_remove_old_flag_removes_old_flags(self, db_session):
         """
         The remove_old_flags function should remove unknown flags.
 
         New flags and flags pending removal should be left alone, but completely
         unknown flags should be removed.
         """
-        session = db.Session
         new, pending, old = [Feature(name='notification'),
                              Feature(name='abouttoberemoved'),
                              Feature(name='somethingelse')]
-        session.add_all([new, pending, old])
-        session.flush()
+        db_session.add_all([new, pending, old])
+        db_session.flush()
 
-        Feature.remove_old_flags(session)
+        Feature.remove_old_flags(db_session)
 
-        remaining = set([f.name for f in session.query(Feature).all()])
+        remaining = set([f.name for f in db_session.query(Feature).all()])
         assert remaining == {'abouttoberemoved', 'notification'}
 
     @pytest.fixture
