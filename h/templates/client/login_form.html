@@ -30,7 +30,8 @@
                 >Please enter your username or email address.</li>
             <li class="form-error"
                 ng-show="login.username.$error.response"
-                >{{login.username.responseErrorMessage}}</li>
+                ng-bind-html="login.username.responseErrorMessage">
+            </li>
           </ul>
         </div>
 
