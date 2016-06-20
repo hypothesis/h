@@ -77,7 +77,7 @@ class TestDocumentURIsFromLinks(object):
         assert alternate_document_uri == {
             'type': 'rel-alternate',
             'claimant': 'http://localhost:5000/docs/help',
-            'content_type': None,
+            'content_type': '',
             'uri': alternate_url,
         }
 
@@ -296,7 +296,7 @@ class TestDocumentURIsFromHighwireDOI(object):
                 'claimant': 'http://example.com/example.html',
                 'uri': doi,
                 'type': 'highwire-doi',
-                'content_type': None,
+                'content_type': '',
             }
 
     def test_doi_is_prepended_to_highwire_dois(self):
@@ -336,7 +336,7 @@ class TestDocumentURIsFromDC(object):
                 'claimant': 'http://example.com/example.html',
                 'uri': doi,
                 'type': 'dc-doi',
-                'content_type': None,
+                'content_type': '',
             }
 
     def test_doi_is_prepended_to_dc_identifiers(self):
@@ -364,7 +364,7 @@ class TestDocumentURISelfClaim(object):
             'claimant': claimant,
             'uri': claimant,
             'type': 'self-claim',
-            'content_type': None,
+            'content_type': '',
         }
 
 
