@@ -54,12 +54,7 @@ metadata = MetaData(naming_convention={
     "pk": "pk__%(table_name)s"
 })
 
-
-# Provide a very simple base class with a dynamic query property.
-class _Base(object):
-    query = Session.query_property()
-
-Base = declarative_base(cls=_Base, metadata=metadata)
+Base = declarative_base(metadata=metadata)
 
 
 def bind_engine(engine,
@@ -102,5 +97,3 @@ def includeme(config):
         'should_create': should_create,
         'should_drop': should_drop
     }, order=10)
-
-    api_db.use_session(Session)
