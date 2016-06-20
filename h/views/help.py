@@ -23,7 +23,7 @@ def custom_onboarding_page(context, request):
 @view_config(renderer='h:templates/help.html.jinja2', route_name='onboarding')
 def onboarding_page(context, request):
     return exc.HTTPFound(request.route_url('custom_onboarding',
-                                           welcome_slug=_random_word()))
+                                           slug=_random_word()))
 
 
 @view_config(renderer='h:templates/help.html.jinja2', route_name='help')
