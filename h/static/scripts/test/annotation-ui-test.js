@@ -16,11 +16,19 @@ describe('annotationUI', function () {
   describe('initialization', function () {
     it('does not set a selection when settings.annotations is null', function () {
       assert.isFalse(annotationUI.hasSelectedAnnotations());
+      assert.equal(Object.keys(annotationUI.getState().expanded).length, 0);
     });
 
     it('sets the selection when settings.annotations is set', function () {
       annotationUI = annotationUIFactory({annotations: 'testid'});
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
+        testid: true,
+      });
+    });
+
+    it('expands the selected annotations when settings.annotations is set', function () {
+      annotationUI = annotationUIFactory({annotations: 'testid'});
+      assert.deepEqual(annotationUI.getState().expanded, {
         testid: true,
       });
     });
@@ -201,6 +209,12 @@ describe('annotationUI', function () {
       annotationUI.selectAnnotations([{id: 1}]);
       annotationUI.clearSelectedAnnotations();
       assert.isNull(annotationUI.getState().selectedAnnotationMap);
+    });
+
+    it('clears the current search query', function () {
+      annotationUI.setFilterQuery('foo');
+      annotationUI.clearSelectedAnnotations();
+      assert.isNull(annotationUI.getState().filterQuery);
     });
   });
 

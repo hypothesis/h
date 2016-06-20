@@ -96,6 +96,7 @@ describe 'StreamController', ->
   beforeEach inject (_$controller_, $rootScope) ->
     $controller = _$controller_
     $scope = $rootScope.$new()
+    $scope.search = {}
 
   afterEach ->
     sandbox.restore()
