@@ -19,6 +19,17 @@ animationPromise = (fn) ->
       catch error
         reject(error)
 
+# Normalize the URI for an annotation. This makes it absolute and strips
+# the fragment identifier.
+normalizeURI = (uri, baseURI) ->
+  # Convert to absolute URL
+  url = new URL(uri, baseURI)
+  # Remove the fragment identifier.
+  # This is done on the serialized URL rather than modifying `url.hash` due
+  # to a bug in Safari.
+  # See https://github.com/hypothesis/h/issues/3471#issuecomment-226713750
+  return url.toString().replace(/#.*/, '');
+
 module.exports = class Guest extends Annotator
   SHOW_HIGHLIGHTS_CLASS = 'annotator-highlights-always-on'
 
@@ -95,12 +106,8 @@ module.exports = class Guest extends Annotator
       link: [{href: decodeURIComponent(window.location.href)}]
     })
 
-    return metadataPromise.then (metadata) =>
-      return uriPromise.then (href) =>
-        uri = new URL(href, baseURI)
-        uri.hash = ''
-        uri = uri.toString()
-        return {uri, metadata}
+    return Promise.all([metadataPromise, uriPromise]).then ([metadata, href]) ->
+      return {uri: normalizeURI(href, baseURI), metadata}
 
   _connectAnnotationSync: (crossframe) ->
     this.subscribe 'annotationDeleted', (annotation) =>
