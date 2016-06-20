@@ -1,3 +1,38 @@
+Unreleased
+==================
+
+Features
+--------
+
+- Add '#annotated' hashtag to default tweet message to make following
+  annotation activity on social media easier (#3482).
+
+- Unify the 'About this Version', 'Feedback' and 'Help' menu items in the
+  client (#3485).
+
+- Automatically expand the conversation when direct-linking to annotations
+  (#3489).
+
+Bug fixes
+---------
+
+- Fix group names wrapping onto multiple lines in sidebar (#3469).
+
+- Fix the permalink pages for annotation replies. These now show the complete
+  conversation thread which the reply appeared in, highlighting the reply
+  matching the URL (#3474, #3483).
+
+- Fix annotations without quotes resulting in entire pages or large sections of
+  pages being highlighted (#3475).
+
+- Fix annotations made on PDFs in browsers other than Safari not appearing when
+  the same PDF was viewed in Safari and vice-versa (#3494).
+
+Miscellanea
+-----------
+
+- Record message processing times in realtime update service (#3484, #3486).
+
 0.28.1 (2016-06-14)
 ===================
 
