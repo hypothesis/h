@@ -193,7 +193,8 @@ class RegisterSchema(CSRFSchema):
             unblacklisted_username,
         ),
         title=_('Username:'),
-        hint=_('between {min} and {max} characters').format(
+        hint=_('between {min} and {max} characters, containing only letters, '
+               'numbers, periods, and underscores').format(
             min=models.USERNAME_MIN_LENGTH,
             max=models.USERNAME_MAX_LENGTH
         ),
