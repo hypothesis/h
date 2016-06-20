@@ -250,7 +250,7 @@ class TestCreateOrUpdateDocumentURI(object):
         assert document_uri.created > created
         assert document_uri.updated > updated
 
-    def test_it_logs_a_warning_if_document_ids_differ(self, log, DocumentURI):
+    def test_it_logs_a_warning_if_document_ids_differ(self, log):
         """
         It should log a warning on Document objects mismatch.
 
@@ -258,13 +258,15 @@ class TestCreateOrUpdateDocumentURI(object):
         different to the given document it shoulg log a warning.
 
         """
+        session = mock_db_session()
+
         # existing_document_uri.document won't be equal to the given document.
         existing_document_uri = mock.Mock(document=mock_document())
-        DocumentURI.query.filter.return_value.first.return_value = (
+        session.query.return_value.filter.return_value.first.return_value = (
             existing_document_uri)
 
         document.create_or_update_document_uri(
-            session=mock_db_session(),
+            session=session,
             claimant='http://example.com/example_claimant.html',
             uri='http://example.com/example_uri.html',
             type='self-claim',
@@ -293,10 +295,6 @@ class TestCreateOrUpdateDocumentURI(object):
                 created=now(),
                 updated=now(),
             )
-
-    @pytest.fixture
-    def DocumentURI(self, patch):
-        return patch('h.api.models.document.DocumentURI')
 
 
 class TestCreateOrUpdateDocumentMeta(object):
@@ -375,7 +373,7 @@ class TestCreateOrUpdateDocumentMeta(object):
         assert len(db_session.query(document.DocumentMeta).all()) == 1, (
             "It shouldn't have added any new objects to the db")
 
-    def test_it_logs_a_warning(self, DocumentMeta, log):
+    def test_it_logs_a_warning(self, log):
         """
         It should warn on document mismatches.
 
@@ -383,14 +381,15 @@ class TestCreateOrUpdateDocumentMeta(object):
         Document.
 
         """
+        session = mock_db_session()
         document_one = mock_document()
         document_two = mock_document()
         existing_document_meta = mock_document_meta(document=document_one)
-        DocumentMeta.query.filter.return_value.one_or_none\
+        session.query.return_value.filter.return_value.one_or_none\
             .return_value = existing_document_meta
 
         document.create_or_update_document_meta(
-            session=mock_db_session(),
+            session=session,
             claimant='http://example.com/claimant',
             type='title',
             value='new value',
@@ -418,10 +417,6 @@ class TestCreateOrUpdateDocumentMeta(object):
                 created=now(),
                 updated=now(),
             )
-
-    @pytest.fixture
-    def DocumentMeta(self, patch):
-        return patch('h.api.models.document.DocumentMeta')
 
 
 @pytest.mark.usefixtures('merge_data')
