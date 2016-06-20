@@ -19,7 +19,8 @@ def includeme(config):
 
     # help
     config.add_route('help', '/docs/help')
-    config.add_route('onboarding', '/welcome')
+    config.add_route('onboarding', '/welcome/')
+    config.add_route('custom_onboarding', '/welcome/{welcome_slug}')
 
     # main
     config.add_route('annotation',
