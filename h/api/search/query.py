@@ -170,13 +170,18 @@ class UriFilter(object):
         self.request = request
 
     def __call__(self, params):
-        uristr = params.pop('uri', None)
-        if uristr is None:
+        if 'uri' not in params:
             return None
+        query_uris = [v for k, v in params.items() if k == 'uri']
+        del params['uri']
 
-        uris = storage.expand_uri(self.request.db, uristr)
-        scopes = [uri.normalize(u) for u in uris]
-        return {"terms": {"target.scope": scopes}}
+        uris = set()
+        for query_uri in query_uris:
+            us = [uri.normalize(u)
+                  for u in storage.expand_uri(self.request.db, query_uri)]
+            uris.update(us)
+
+        return {"terms": {"target.scope": list(uris)}}
 
 
 class AnyMatcher(object):
