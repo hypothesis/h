@@ -9,7 +9,7 @@ from h.models import Group
 from h.groups.services import GroupsService
 from h.groups.services import groups_factory
 
-from ... import factories
+from ...common import factories
 
 
 class TestGroupsService(object):

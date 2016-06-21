@@ -4,7 +4,7 @@ import pytest
 from h import api
 from h.groups import models
 
-from ... import factories
+from ...common import factories
 
 
 def test_init(db_session):
