@@ -9,7 +9,7 @@ from sqlalchemy import exc
 from h import db
 from h.accounts import models
 
-from ... import factories
+from ...common import factories
 
 
 def test_activation_has_asciinumeric_code():

@@ -7,7 +7,7 @@ import mock
 from h.api import models
 from h.feeds import atom
 
-from ... import factories
+from ...common import factories
 
 
 def _annotation(**kwargs):

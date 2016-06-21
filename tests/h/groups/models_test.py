@@ -5,7 +5,7 @@ from h import api
 from h import db
 from h.groups import models
 
-from ... import factories
+from ...common import factories
 
 
 def test_init():

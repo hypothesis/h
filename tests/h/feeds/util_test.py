@@ -4,7 +4,7 @@ import mock
 
 from h.feeds import util
 
-from ... import factories
+from ...common import factories
 
 
 def test_tag_uri_for_annotation():
