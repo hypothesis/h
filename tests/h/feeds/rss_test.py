@@ -5,8 +5,6 @@ import mock
 from h import models
 from h.feeds import rss
 
-from ...common import factories
-
 
 def _annotation_url():
     """Return a mock annotation_url() function.
@@ -50,7 +48,7 @@ def test_feed_annotations_pubDate():
     assert feed['entries'][0]['pubDate'] == 'Wed, 11 Mar 2015 10:43:54 +0000'
 
 
-def test_feed_from_annotations_html_links():
+def test_feed_from_annotations_html_links(factories):
     """Items should include links to the annotations' HTML pages."""
     annotation_url = _annotation_url()
 
@@ -61,7 +59,7 @@ def test_feed_from_annotations_html_links():
     assert item['link'] == annotation_url.return_value
 
 
-def test_feed_from_annotations_item_titles():
+def test_feed_from_annotations_item_titles(factories):
     """Feed items should include the annotation's document's title."""
     annotation = factories.Annotation()
 
@@ -71,7 +69,7 @@ def test_feed_from_annotations_item_titles():
     assert feed['entries'][0]['title'] == annotation.document.title
 
 
-def test_feed_from_annotations_item_descriptions():
+def test_feed_from_annotations_item_descriptions(factories):
     """Feed items should include a description of the annotation."""
     with mock.patch(
             "h.feeds.rss.presenters.AnnotationHTMLPresenter.description",
@@ -83,7 +81,7 @@ def test_feed_from_annotations_item_descriptions():
             description.return_value)
 
 
-def test_feed_from_annotations_item_guid():
+def test_feed_from_annotations_item_guid(factories):
     """Feed items should use the annotation's HTML URL as their GUID."""
     annotation = factories.Annotation(
         created=datetime.datetime(year=2015, month=3, day=11))
@@ -128,7 +126,7 @@ def test_feed_from_annotations_with_0_annotations():
     assert feed['entries'] == []
 
 
-def test_feed_from_annotations_with_1_annotation():
+def test_feed_from_annotations_with_1_annotation(factories):
     """If there's 1 annotation it should return 1 entry."""
     feed = rss.feed_from_annotations(
         [factories.Annotation()], _annotation_url(), mock.Mock(), '', '', '')
@@ -136,7 +134,7 @@ def test_feed_from_annotations_with_1_annotation():
     assert len(feed['entries']) == 1
 
 
-def test_feed_from_annotations_with_3_annotations():
+def test_feed_from_annotations_with_3_annotations(factories):
     """If there are 3 annotations it should return 3 entries."""
     annotations = [factories.Annotation(), factories.Annotation(),
                    factories.Annotation()]

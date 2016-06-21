@@ -9,8 +9,6 @@ from h.models import Group
 from h.groups.services import GroupsService
 from h.groups.services import groups_factory
 
-from ...common import factories
-
 
 class TestGroupsService(object):
     def test_create_returns_group(self, db_session, users):
@@ -151,7 +149,7 @@ class TestGroupsFactory(object):
 
 
 @pytest.fixture
-def users():
+def users(factories):
     return {
         'cazimir': factories.User(username='cazimir'),
         'theresa': factories.User(username='theresa'),

@@ -120,6 +120,14 @@ def deform():
     form.init()
 
 
+@pytest.yield_fixture
+def factories(db_session):
+    from ..common import factories
+    factories.SESSION = db_session
+    yield factories
+    factories.SESSION = None
+
+
 @pytest.fixture
 def fake_feature():
     return DummyFeature()
