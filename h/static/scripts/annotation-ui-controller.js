@@ -21,7 +21,7 @@ function AnnotationUIController($rootScope, $scope, annotationUI) {
   });
 
   $rootScope.$on(events.ANNOTATION_DELETED, function (event, annotation) {
-    annotationUI.removeSelectedAnnotation(annotation);
+    annotationUI.removeSelectedAnnotation(annotation.id);
   });
 }
 

@@ -15,28 +15,16 @@
  * that the messages are broadcast out to other frames.
  */
 // @ngInject
-function AnnotationUISync($rootScope, $window, bridge, annotationSync,
-  annotationUI) {
-  // Retrieves annotations from the annotationSync cache.
-  var getAnnotationsByTags = function (tags) {
-    return tags.map(annotationSync.getAnnotationForTag, annotationSync);
-  };
-
+function AnnotationUISync($rootScope, $window, annotationUI, bridge) {
   var channelListeners = {
     showAnnotations: function (tags) {
-      tags = tags || [];
-      var annotations = getAnnotationsByTags(tags);
-      annotationUI.selectAnnotations(annotations);
+      annotationUI.selectAnnotations(tags || []);
     },
     focusAnnotations: function (tags) {
-      tags = tags || [];
-      var annotations = getAnnotationsByTags(tags);
-      annotationUI.focusAnnotations(annotations);
+      annotationUI.focusAnnotations(tags || []);
     },
     toggleAnnotationSelection: function (tags) {
-      tags = tags || [];
-      var annotations = getAnnotationsByTags(tags);
-      annotationUI.toggleSelectedAnnotations(annotations);
+      annotationUI.toggleSelectedAnnotations(tags || []);
     },
     setVisibleHighlights: function (state) {
       if (typeof state !== 'boolean') {

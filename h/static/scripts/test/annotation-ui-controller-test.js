@@ -53,10 +53,7 @@ describe('AnnotationUIController', function () {
   });
 
   it('updates the focused annotations when the focus map changes', function () {
-    annotationUI.focusAnnotations([
-      {$$tag: '1'},
-      {$$tag: '2'},
-    ]);
+    annotationUI.focusAnnotations(['1', '2']);
     assert.deepEqual($scope.focusedAnnotations, { 1: true, 2: true });
   });
 
