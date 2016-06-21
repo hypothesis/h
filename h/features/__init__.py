@@ -4,8 +4,7 @@ from __future__ import unicode_literals
 
 import os
 
-import transaction
-
+from h import db
 from h.features import client
 from h.features import models
 
@@ -21,11 +20,12 @@ def _remove_old_flags_on_boot(event):
     if 'H_SCRIPT' in os.environ:
         return
 
-    # FIXME: This function should create its own transient session rather than
-    # relying on a scoped session.
-    from h.db import Session
-    models.Feature.remove_old_flags(Session)
-    transaction.commit()
+    engine = db.make_engine(event.app.registry.settings)
+    session = db.Session(bind=engine)
+    models.Feature.remove_old_flags(session)
+    session.commit()
+    session.close()
+    engine.dispose()
 
 
 def includeme(config):

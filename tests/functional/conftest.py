@@ -4,8 +4,6 @@ import os
 
 import pytest
 from webtest import TestApp
-from sqlalchemy import engine_from_config
-from sqlalchemy.orm import sessionmaker
 
 TEST_SETTINGS = {
     'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
@@ -18,16 +16,10 @@ TEST_SETTINGS = {
                                      'postgresql://postgres@localhost/htest')
 }
 
-Session = sessionmaker()
-
 
 @pytest.fixture
 def config():
     from h.config import configure
-    from h.db import Session
-
-    # Expire any previous database session
-    Session.remove()
 
     config = configure()
     config.registry.settings.update(TEST_SETTINGS)
@@ -42,13 +34,17 @@ def app(config):
     return TestApp(config.make_wsgi_app())
 
 
-@pytest.fixture
+@pytest.yield_fixture
 def db_session(request, config):
     """Get a standalone database session for preparing database state."""
-    engine = engine_from_config(config.registry.settings, 'sqlalchemy.')
-    session = Session(bind=engine)
-    request.addfinalizer(session.close)
-    return session
+    from h import db
+    engine = db.make_engine(config.registry.settings)
+    session = db.Session(bind=engine)
+    try:
+        yield session
+    finally:
+        session.close()
+        engine.dispose()
 
 
 def _drop_indices(settings):

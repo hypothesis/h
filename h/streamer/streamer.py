@@ -59,7 +59,7 @@ def start(event):
     gevent.spawn(supervise, greenlets)
 
 
-def process_work_queue(settings, queue, session_factory=db.Session):
+def process_work_queue(settings, queue, session_factory=None):
     """
     Process each message from the queue in turn, handling exceptions.
 
@@ -68,8 +68,10 @@ def process_work_queue(settings, queue, session_factory=db.Session):
     code that ensures the database session is appropriately committed and
     closed between messages.
     """
+    if session_factory is None:
+        session_factory = _get_session
     s = stats.get_client(settings).pipeline()
-    session = session_factory()
+    session = session_factory(settings)
     topic_handlers = {
         ANNOTATION_TOPIC: messages.handle_annotation_event,
         USER_TOPIC: messages.handle_user_event,
@@ -131,6 +133,11 @@ def supervise(greenlets):
     # If the worker greenlets exit early, our best option is to kill the worker
     # process and let the app server take care of restarting it.
     sys.exit(1)
+
+
+def _get_session(settings):
+    engine = db.make_engine(settings)
+    return db.Session(bind=engine)
 
 
 def includeme(config):
