@@ -183,8 +183,8 @@ def test_features_save_sets_cohorts_when_checkboxes_on(pyramid_request):
     pyramid_request.POST = {'feat[cohorts][cohort]': 'on'}
     views.features_save(pyramid_request)
 
-    feat = models.Feature.query.filter_by(name='feat').first()
-    cohort = models.FeatureCohort.query.filter_by(name='cohort').first()
+    feat = pyramid_request.db.query(models.Feature).filter_by(name='feat').first()
+    cohort = pyramid_request.db.query(models.FeatureCohort).filter_by(name='cohort').first()
 
     assert len(feat.cohorts) == 1
     assert cohort in feat.cohorts
@@ -204,8 +204,8 @@ def test_features_save_unsets_cohorts_when_checkboxes_off(pyramid_request):
     pyramid_request.POST = {'feat[cohorts][cohort]': 'off'}
     views.features_save(pyramid_request)
 
-    feat = models.Feature.query.filter_by(name='feat').first()
-    cohort = models.FeatureCohort.query.filter_by(name='cohort').first()
+    feat = pyramid_request.db.query(models.Feature).filter_by(name='feat').first()
+    cohort = pyramid_request.db.query(models.FeatureCohort).filter_by(name='cohort').first()
 
     assert len(feat.cohorts) == 0
     assert cohort not in feat.cohorts

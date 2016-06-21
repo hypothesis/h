@@ -514,7 +514,7 @@ class TestMergeDocuments(object):
         document.merge_documents(db_session, merge_data)
         db_session.flush()
 
-        assert document.Document.query.get(duplicate.id) is None
+        assert db_session.query(document.Document).get(duplicate.id) is None
 
     def test_merge_documents_rewires_document_uris(self, db_session, merge_data):
         master, duplicate = merge_data

@@ -30,11 +30,6 @@ metadata = MetaData(naming_convention={
 Base = declarative.declarative_base(metadata=metadata)  # pylint: disable=invalid-name
 
 
-def use_session(session, base=Base):
-    """Configure the SQLAlchemy base class to use the given session."""
-    base.query = session.query_property()
-
-
 def bind_engine(engine, base=Base, should_create=False, should_drop=False):
     """Bind the SQLAlchemy base class to the given engine."""
     base.metadata.bind = engine

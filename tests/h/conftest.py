@@ -76,7 +76,6 @@ def setup_database():
     """Set up the database connection and create tables."""
     engine = db.make_engine({'sqlalchemy.url': TEST_DATABASE_URL})
     db.bind_engine(engine, should_create=True, should_drop=True)
-    api_db.use_session(db.Session)
 
 
 @pytest.fixture(autouse=True)

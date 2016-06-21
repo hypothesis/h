@@ -58,5 +58,4 @@ def setup_database(request, settings):
     """Set up the database connection and create tables."""
     engine = engine_from_config(settings, 'sqlalchemy.')
     db.bind_engine(engine, should_create=True, should_drop=True)
-    db.use_session(Session)
     request.addfinalizer(Session.remove)
