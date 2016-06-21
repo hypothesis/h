@@ -4,7 +4,6 @@ import datetime
 
 import pytest
 
-from h import db
 from h.auth import models
 from h.auth import tokens
 
@@ -119,7 +118,7 @@ def test_userid_from_api_token_returns_None_when_token_doesnt_start_with_prefix(
     """
     token = models.Token('acct:foo@example.com')
     token.value = u'abc123'
-    db.Session.add(token)
+    pyramid_request.db.add(token)
 
     result = tokens.userid_from_api_token(u'abc123', pyramid_request)
 
@@ -136,7 +135,7 @@ def test_userid_from_api_token_returns_None_for_nonexistent_tokens(pyramid_reque
 
 def test_userid_from_api_token_returns_userid_for_valid_tokens(pyramid_request):
     token = models.Token('acct:foo@example.com')
-    db.Session.add(token)
+    pyramid_request.db.add(token)
 
     result = tokens.userid_from_api_token(token.value, pyramid_request)
 

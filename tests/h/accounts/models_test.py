@@ -6,22 +6,21 @@ import re
 import pytest
 from sqlalchemy import exc
 
-from h import db
 from h.accounts import models
 
 from ... import factories
 
 
-def test_activation_has_asciinumeric_code():
+def test_activation_has_asciinumeric_code(db_session):
     act = models.Activation()
 
-    db.Session.add(act)
-    db.Session.flush()
+    db_session.add(act)
+    db_session.flush()
 
     assert re.match(r'[A-Za-z0-9]{12}', act.code)
 
 
-def test_cannot_create_dot_variant_of_user():
+def test_cannot_create_dot_variant_of_user(db_session):
     fred = models.User(username='fredbloggs',
                        email='fred@example.com',
                        password='123')
@@ -29,13 +28,13 @@ def test_cannot_create_dot_variant_of_user():
                         email='fred@example.org',
                         password='456')
 
-    db.Session.add(fred)
-    db.Session.add(fred2)
+    db_session.add(fred)
+    db_session.add(fred2)
     with pytest.raises(exc.IntegrityError):
-        db.Session.flush()
+        db_session.flush()
 
 
-def test_cannot_create_case_variant_of_user():
+def test_cannot_create_case_variant_of_user(db_session):
     bob = models.User(username='BobJones',
                       email='bob@example.com',
                       password='123')
@@ -43,10 +42,10 @@ def test_cannot_create_case_variant_of_user():
                        email='bob@example.org',
                        password='456')
 
-    db.Session.add(bob)
-    db.Session.add(bob2)
+    db_session.add(bob)
+    db_session.add(bob2)
     with pytest.raises(exc.IntegrityError):
-        db.Session.flush()
+        db_session.flush()
 
 
 def test_cannot_create_user_with_too_short_username():
@@ -69,15 +68,15 @@ def test_cannot_create_user_with_too_short_password():
         models.User(password='a')
 
 
-def test_User_activate_activates_user():
+def test_User_activate_activates_user(db_session):
     user = models.User(username='kiki', email='kiki@kiki.com',
                        password='password')
     activation = models.Activation()
     user.activation = activation
-    db.Session.add(user)
-    db.Session.flush()
+    db_session.add(user)
+    db_session.flush()
 
     user.activate()
-    db.Session.commit()
+    db_session.commit()
 
     assert user.is_activated
