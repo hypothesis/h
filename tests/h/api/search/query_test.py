@@ -335,6 +335,34 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
     }
 
 
+def test_urifilter_queries_multiple_uris(storage, uri):
+    """
+    Uses a `terms` filter against target.scope to filter for URI.
+
+    When multiple "uri" fields are supplied, the normalized URIs of all of
+    them should be collected into a set and sent in the query.
+    """
+    request = mock.Mock()
+    params = multidict.MultiDict()
+    params.add("uri", "http://example.com")
+    params.add("uri", "http://example.net")
+    storage.expand_uri.side_effect = [
+        ["http://giraffes.com/", "https://elephants.com/"],
+        ["http://tigers.com/", "https://elephants.com/"],
+    ]
+    uri.normalize.side_effect = lambda x: x[:-1]  # Strip the trailing slash
+    urifilter = query.UriFilter(request)
+
+    result = urifilter(params)
+    query_uris = result["terms"]["target.scope"]
+
+    storage.expand_uri.assert_any_call(request.db, "http://example.com")
+    storage.expand_uri.assert_any_call(request.db, "http://example.net")
+    assert sorted(query_uris) == sorted(["http://giraffes.com",
+                                         "https://elephants.com",
+                                         "http://tigers.com"])
+
+
 def test_anymatcher():
     anymatcher = query.AnyMatcher()
 
