@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# Tag the specified Docker image for the Hypothesis service as a given version
+# and also the 'latest' release.
+#
+# The image must have been built and pushed to Docker Hub before this script is
+# run.
+
+IMAGE=hypothesis/hypothesis
+TAG_NAME=latest
+
+set -eu
+
+if [ $# -lt 2 ]; then
+    cat <<- __END__
+Usage: $0 <digest> <version>
+
+  <digest> - Hash of the image (eg. 'sha256:aabb...')
+  <version> - Version string of the form X.Y.Z
+__END__
+    exit 1
+fi
+
+DIGEST=$1
+MAJOR_MINOR_PATCH_VER=$2
+MAJOR_MINOR_VER=$(echo $MAJOR_MINOR_PATCH_VER | sed 's/\.[0-9]$//')
+
+cat <<- __END__
+Tagging Docker image $DIGEST as:
+ '$MAJOR_MINOR_PATCH_VER', '$MAJOR_MINOR_VER' and '$TAG_NAME'
+__END__
+
+docker pull $IMAGE@$DIGEST
+docker tag $IMAGE@$DIGEST $IMAGE:$MAJOR_MINOR_VER
+docker tag $IMAGE@$DIGEST $IMAGE:$MAJOR_MINOR_PATCH_VER
+docker tag -f $IMAGE@$DIGEST $IMAGE:$TAG_NAME
+docker push $IMAGE:$MAJOR_MINOR_VER
+docker push $IMAGE:$MAJOR_MINOR_PATCH_VER
+docker push $IMAGE:$TAG_NAME
+
