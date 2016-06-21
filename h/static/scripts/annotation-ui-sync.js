@@ -9,7 +9,6 @@ var uiConstants = require('./ui-constants');
  * @name AnnotationUISync
  * @param {$window} $window An Angular window service.
  * @param {Bridge} bridge
- * @param {AnnotationSync} annotationSync
  * @param {AnnotationUI} annotationUI An instance of the AnnotatonUI service
  * @description
  * Listens for incoming events over the bridge concerning the annotation
@@ -17,29 +16,36 @@ var uiConstants = require('./ui-constants');
  * that the messages are broadcast out to other frames.
  */
 // @ngInject
-function AnnotationUISync($rootScope, $window, bridge, annotationSync,
-  annotationUI) {
-  // Retrieves annotations from the annotationSync cache.
-  var getAnnotationsByTags = function (tags) {
-    return tags.map(annotationSync.getAnnotationForTag, annotationSync);
-  };
+function AnnotationUISync($rootScope, $window, annotationUI, bridge) {
+  function lookupByTag(tag) {
+    return annotationUI.getState().annotations.find(function (annot) {
+      return annot.$$tag === tag;
+    });
+  }
+
+  function findIDsForTags(tags) {
+    var ids = [];
+    tags.forEach(function (tag) {
+      var annot = lookupByTag(tag);
+      if (annot && annot.id) {
+        ids.push(annot.id);
+      }
+    });
+    return ids;
+  }
 
   var channelListeners = {
     showAnnotations: function (tags) {
-      tags = tags || [];
-      var annotations = getAnnotationsByTags(tags);
-      annotationUI.selectAnnotations(annotations);
+      var ids = findIDsForTags(tags || []);
+      annotationUI.selectAnnotations(ids);
       annotationUI.selectTab(uiConstants.TAB_ANNOTATIONS);
     },
     focusAnnotations: function (tags) {
-      tags = tags || [];
-      var annotations = getAnnotationsByTags(tags);
-      annotationUI.focusAnnotations(annotations);
+      annotationUI.focusAnnotations(tags || []);
     },
     toggleAnnotationSelection: function (tags) {
-      tags = tags || [];
-      var annotations = getAnnotationsByTags(tags);
-      annotationUI.toggleSelectedAnnotations(annotations);
+      var ids = findIDsForTags(tags || []);
+      annotationUI.toggleSelectedAnnotations(ids);
     },
     setVisibleHighlights: function (state) {
       if (typeof state !== 'boolean') {
