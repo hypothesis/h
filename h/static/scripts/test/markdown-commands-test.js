@@ -104,17 +104,26 @@ describe('markdown commands', function () {
       return commands.convertSelectionToLink(parseState(text), linkType);
     };
 
-    it('converts text to links', function () {
-      var output = linkify('one <sel>two</sel> three');
+    unroll('converts text to links', function (testCase) {
+      var sel = testCase.selection;
+      var output = linkify('one <sel>' + sel + '</sel> three');
       assert.equal(formatState(output),
-        'one [two](<sel>http://insert-your-link-here.com</sel>) three');
-    });
+        'one [' + sel + '](<sel>http://insert-your-link-here.com</sel>) three');
+    },[
+      {selection: 'two'},
+      {selection: 'jim:smith'}
+    ]);
 
-    it('converts URLs to links', function () {
-      var output = linkify('one <sel>http://foobar.com</sel> three');
+    unroll('converts URLs to links', function (testCase) {
+      var sel = testCase.selection;
+      var output = linkify('one <sel>' + sel + '</sel> three');
       assert.equal(formatState(output),
-        'one [<sel>Description</sel>](http://foobar.com) three');
-    });
+        'one [<sel>Description</sel>](' + sel + ') three');
+    },[
+      {selection: 'http://foobar.com'},
+      {selection: 'https://twitter.com/username'},
+      {selection: ' http://example.com/url-with-a-leading-space'},
+    ]);
 
     it('converts URLs to image links', function () {
       var output = linkify('one <sel>http://foobar.com</sel> three',
