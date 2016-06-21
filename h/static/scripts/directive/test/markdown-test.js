@@ -181,7 +181,7 @@ describe('markdown', function () {
       });
       var input = inputElement(editor);
       input.value = 'new text';
-      util.sendEvent(input, 'change');
+      util.sendEvent(input, 'input');
       assert.called(onEditText);
       assert.calledWith(onEditText, 'new text');
     });
