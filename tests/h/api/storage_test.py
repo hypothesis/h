@@ -96,15 +96,16 @@ class TestExpandURI(object):
 class TestCreateAnnotation(object):
 
     def test_it_fetches_parent_annotation_for_replies(self,
-                                                      config,
                                                       fetch_annotation,
+                                                      pyramid_config,
                                                       pyramid_request):
 
         # Make the annotation's parent belong to 'test-group'.
         fetch_annotation.return_value.groupid = 'test-group'
 
         # The request will need permission to write to 'test-group'.
-        config.testing_securitypolicy('acct:foo@example.com', groupids=['group:test-group'])
+        pyramid_config.testing_securitypolicy('acct:foo@example.com',
+                                              groupids=['group:test-group'])
 
         data = self.annotation_data()
 
@@ -117,15 +118,16 @@ class TestCreateAnnotation(object):
                                                  'parent_annotation_id')
 
     def test_it_sets_group_for_replies(self,
-                                       config,
                                        fetch_annotation,
                                        models,
+                                       pyramid_config,
                                        pyramid_request):
         # Make the annotation's parent belong to 'test-group'.
         fetch_annotation.return_value.groupid = 'test-group'
 
         # The request will need permission to write to 'test-group'.
-        config.testing_securitypolicy('acct:foo@example.com', groupids=['group:test-group'])
+        pyramid_config.testing_securitypolicy('acct:foo@example.com',
+                                              groupids=['group:test-group'])
 
         data = self.annotation_data()
         assert data['groupid'] != 'test-group'
