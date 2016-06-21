@@ -104,11 +104,7 @@
   <!-- / Tags -->
 
   <footer class="annotation-footer">
-    <div class="annotation-form-actions" ng-if="vm.editing()" ng-switch="vm.action">
-      <button ng-switch-when="delete"
-        ng-click="vm.save()"
-        class="dropdown-menu-btn"
-        aria-label="Delete" h-tooltip><i class="h-icon-check btn-icon"></i></button>
+    <div class="annotation-form-actions" ng-if="vm.editing()">
       <publish-annotation-btn
         class="publish-annotation-btn"
         group="vm.group()"
