@@ -101,7 +101,7 @@ function convertSelectionToLink(state, linkType) {
   }
 
   var newState;
-  if (selection.match(/[a-z]+:.*/)) {
+  if (selection.match(/[a-z]+:\/\/.*/)) {
     // Selection is a URL, wrap it with a link and use the selection as
     // the target.
     var dummyLabel = 'Description';
