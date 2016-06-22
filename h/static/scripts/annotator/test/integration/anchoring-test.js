@@ -99,22 +99,4 @@ describe('anchoring', function () {
     ],
     expectFail: true,
   }]);
-
-  unroll('should silently fail when an annotation does not have a quote selector', function (testCase) {
-    var annotation = testCase.annotation;
-    var anchored = guest.anchor(annotation);
-
-    return anchored.then(function (result) {
-      assert.deepEqual(result, []);
-    });
-  }, [{
-    annotation: [{
-      target: [{
-        selector: [{
-          type: 'FragmentSelector',
-          value: 't=30,60'
-        }]
-      }]
-    }],
-  }]);
 });
