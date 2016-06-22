@@ -9,19 +9,23 @@ describe('pdf-metadata', function () {
 
     var event = document.createEvent('Event');
     event.initEvent('documentload', false, false);
+    fakeApp.url = 'http://fake.com';
     fakeApp.documentFingerprint = 'fakeFingerprint';
     window.dispatchEvent(event);
 
     return pdfMetadata.getUri().then(function (uri) {
-      assert.equal(uri, 'urn:x-pdf:fakeFingerprint');
+      assert.equal(uri, 'http://fake.com');
     });
   });
 
   it('does not wait for the PDF to load if it has already loaded', function () {
-    var fakePDFViewerApplication = {documentFingerprint: 'fakeFingerprint'};
+    var fakePDFViewerApplication = {
+      url: 'http://fake.com',
+      documentFingerprint: 'fakeFingerprint',
+    };
     var pdfMetadata = new PDFMetadata(fakePDFViewerApplication);
     return pdfMetadata.getUri().then(function (uri) {
-      assert.equal(uri, 'urn:x-pdf:fakeFingerprint');
+      assert.equal(uri, 'http://fake.com');
     });
   });
 
@@ -37,7 +41,7 @@ describe('pdf-metadata', function () {
           'dc:title': 'fakeTitle',
         }
       },
-      url: 'fakeUrl',
+      url: 'http://fake.com',
     };
 
     beforeEach(function () {
@@ -45,7 +49,19 @@ describe('pdf-metadata', function () {
     });
 
     describe('#getUri', function () {
-      it('returns the URN-ified document fingerprint as its URI', function () {
+      it('returns the non-file URI', function() {
+        return pdfMetadata.getUri().then(function (uri) {
+          assert.equal(uri, 'http://fake.com');
+        });
+      });
+
+      it('returns the fingerprint as a URN when the PDF URL is a local file', function () {
+        var fakePDFViewerApplication = {
+          url: 'file:///test.pdf',
+          documentFingerprint: 'fakeFingerprint',
+        };
+        var pdfMetadata = new PDFMetadata(fakePDFViewerApplication);
+
         return pdfMetadata.getUri().then(function (uri) {
           assert.equal(uri, 'urn:x-pdf:fakeFingerprint');
         });
@@ -88,7 +104,7 @@ describe('pdf-metadata', function () {
         var pdfMetadata;
         var fakePDFViewerApplication = {
           documentFingerprint: 'fakeFingerprint',
-          url: 'file://fakeUrl',
+          url: 'file://fake.pdf',
         };
         var expectedMetadata = {
           link: [{href: 'urn:x-pdf:' + fakePDFViewerApplication.documentFingerprint}],

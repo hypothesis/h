@@ -27,7 +27,11 @@ function PDFMetadata(app) {
  */
 PDFMetadata.prototype.getUri = function () {
   return this._loaded.then(function (app) {
-    return fingerprintToURN(app.documentFingerprint);
+    var uri = getPDFURL(app);
+    if (!uri) {
+      uri = fingerprintToURN(app.documentFingerprint);
+    }
+    return uri;
   });
 };
 
@@ -52,11 +56,9 @@ PDFMetadata.prototype.getMetadata = function () {
       {href: fingerprintToURN(app.documentFingerprint)}
     ];
 
-    // Local file:// URLs should not be saved in document metadata.
-    // Entries in document.link should be URIs. In the case of
-    // local files, omit the URL.
-    if (app.url.indexOf('file://') !== 0) {
-      link.push({href: app.url});
+    var url = getPDFURL(app);
+    if (url) {
+      link.push({href: url});
     }
 
     return {
@@ -69,6 +71,17 @@ PDFMetadata.prototype.getMetadata = function () {
 
 function fingerprintToURN(fingerprint) {
   return 'urn:x-pdf:' + String(fingerprint);
+}
+
+function getPDFURL(app) {
+  // Local file:// URLs should not be saved in document metadata.
+  // Entries in document.link should be URIs. In the case of
+  // local files, omit the URL.
+  if (app.url.indexOf('file://') !== 0) {
+    return app.url;
+  }
+
+  return null;
 }
 
 module.exports = PDFMetadata;
