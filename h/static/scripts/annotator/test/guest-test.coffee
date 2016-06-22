@@ -1,9 +1,17 @@
 Annotator = require('annotator')
+proxyquire = require('proxyquire')
+
+adder = require('../adder')
+Observable = require('../../util/observable').Observable
+
 $ = Annotator.$
 Annotator['@noCallThru'] = true;
 
-highlighter = {}
+Guest = null
 anchoring = {}
+highlighter = {}
+rangeUtil = null
+selections = null
 
 raf = sinon.stub().yields()
 raf['@noCallThru'] = true
@@ -11,14 +19,15 @@ raf['@noCallThru'] = true
 scrollIntoView = sinon.stub()
 scrollIntoView['@noCallThru'] = true
 
-proxyquire = require('proxyquire')
-Guest = proxyquire('../guest', {
-  './highlighter': highlighter,
-  './anchoring/html': anchoring,
-  'annotator': Annotator,
-  'raf': raf,
-  'scroll-into-view': scrollIntoView,
-})
+class FakeAdder
+  instance: null
+
+  constructor: ->
+    FakeAdder::instance = this
+
+    this.hide = sinon.stub()
+    this.showAt = sinon.stub()
+    this.target = sinon.stub()
 
 # A little helper which returns a promise that resolves after a timeout
 timeoutPromise = (millis = 0) ->
@@ -34,6 +43,28 @@ describe 'Guest', ->
     return new Guest(element, options || {})
 
   beforeEach ->
+    FakeAdder::instance = null
+    rangeUtil = {
+      isSelectionBackwards: sinon.stub()
+      selectionFocusRect: sinon.stub()
+    }
+    selections = null
+
+    Guest = proxyquire('../guest', {
+      './adder': {Adder: FakeAdder},
+      './anchoring/html': anchoring,
+      './highlighter': highlighter,
+      './range-util': rangeUtil,
+      './selections': (document) ->
+        new Observable((obs) ->
+          selections = obs
+          return () ->
+        )
+      'annotator': Annotator,
+      'raf': raf,
+      'scroll-into-view': scrollIntoView,
+    })
+
     fakeCrossFrame = {
       onConnect: sinon.stub()
       on: sinon.stub()
@@ -205,6 +236,28 @@ describe 'Guest', ->
         guest.plugins.PDF.getMetadata.returns(promise)
 
         emitGuestEvent('getDocumentInfo', assertComplete)
+
+  describe 'when the selection changes', ->
+    it 'shows the adder if the selection contains text', ->
+      guest = createGuest()
+      rangeUtil.selectionFocusRect.returns({left: 0, top: 0, width: 5, height: 5})
+      FakeAdder::instance.target.returns({
+        left: 0, top: 0, arrowDirection: adder.ARROW_POINTING_UP
+      })
+      selections.next({})
+      assert.called FakeAdder::instance.showAt
+
+    it 'hides the adder if the selection does not contain text', ->
+      guest = createGuest()
+      rangeUtil.selectionFocusRect.returns(null)
+      selections.next({})
+      assert.called FakeAdder::instance.hide
+      assert.notCalled FakeAdder::instance.showAt
+
+    it 'hides the adder if the selection is empty', ->
+      guest = createGuest()
+      selections.next(null)
+      assert.called FakeAdder::instance.hide
 
   describe '#getDocumentInfo()', ->
     guest = null

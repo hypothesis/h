@@ -350,6 +350,14 @@ module.exports = class Guest extends Annotator
     @crossframe?.call('focusAnnotations', tags)
 
   _onSelection: (range) ->
+    selection = Annotator.Util.getGlobal().getSelection()
+    isBackwards = rangeUtil.isSelectionBackwards(selection)
+    focusRect = rangeUtil.selectionFocusRect(selection)
+    if !focusRect
+      # The selected range does not contain any text
+      this._onClearSelection()
+      return
+
     @selectedRanges = [range]
 
     Annotator.$('.annotator-toolbar .h-icon-note')
@@ -357,9 +365,6 @@ module.exports = class Guest extends Annotator
       .removeClass('h-icon-note')
       .addClass('h-icon-annotate');
 
-    selection = Annotator.Util.getGlobal().getSelection()
-    isBackwards = rangeUtil.isSelectionBackwards(selection)
-    focusRect = rangeUtil.selectionFocusRect(selection)
     {left, top, arrowDirection} = this.adderCtrl.target(focusRect, isBackwards)
     this.adderCtrl.showAt(left, top, arrowDirection)
 
