@@ -536,6 +536,9 @@ function AnnotationController(
           id: updatedModel.id
         }).then(function () {
           drafts.remove(domainModel);
+          // Preserve the local tag which is not copied when cloning the model
+          // and performing the $update() call.
+          updatedModel.$$tag = domainModel.$$tag;
           $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
         });
         break;
