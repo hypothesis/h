@@ -143,7 +143,7 @@ module.exports = function WidgetController(
     annotationUI.addAnnotations(drafts.unsaved());
   }
 
-  function _loadAnnotationsFor(uri, group) {
+  function _loadAnnotationsFor(uris, group) {
     var searchClient = new SearchClient(store.SearchResource, {
       // If no group is specified, we are fetching annotations from
       // all groups in order to find out which group contains the selected
@@ -177,7 +177,7 @@ module.exports = function WidgetController(
       // Remove client from list of active search clients
       searchClients.splice(searchClients.indexOf(searchClient), 1);
     });
-    searchClient.get({uri: uri, group: group});
+    searchClient.get({uri: uris, group: group});
   }
 
   function isLoading() {
@@ -197,12 +197,14 @@ module.exports = function WidgetController(
       client.cancel();
     });
 
-    var urls = frames.reduce(function (urls, frame) {
-      if (urls.indexOf(frame.uri) !== -1) {
-        return urls;
-      } else {
-        return urls.concat(frame.uri);
+    var searchUris = frames.reduce(function (uris, frame) {
+      for (var i = 0; i < frame.searchUris.length; i++) {
+        var uri = frame.searchUris[i];
+        if (uris.indexOf(uri) === -1) {
+          uris.push(uri);
+        }
       }
+      return uris;
     }, []);
 
     // If there is no selection, load annotations only for the focused group.
@@ -219,12 +221,10 @@ module.exports = function WidgetController(
     var group = annotationUI.hasSelectedAnnotations() ?
       null : groups.focused().id;
 
-    for (var i=0; i < urls.length; i++) {
-      _loadAnnotationsFor(urls[i], group);
-    }
+    if (searchUris.length > 0) {
+      _loadAnnotationsFor(searchUris, group);
 
-    if (urls.length > 0) {
-      streamFilter.resetFilter().addClause('/uri', 'one_of', urls);
+      streamFilter.resetFilter().addClause('/uri', 'one_of', searchUris);
       streamer.setConfig('filter', {filter: streamFilter.getFilter()});
     }
   }

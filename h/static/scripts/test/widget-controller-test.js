@@ -19,8 +19,12 @@ function FakeSearchClient(resource, opts) {
   this.get = sinon.spy(function (query) {
     assert.ok(query.uri);
 
-    this.emit('results', [{id: query.uri + '123', group: '__world__'}]);
-    this.emit('results', [{id: query.uri + '456', group: 'private-group'}]);
+    for (var i = 0; i < query.uri.length; i++) {
+      var uri = query.uri[i];
+      this.emit('results', [{id: uri + '123', group: '__world__'}]);
+      this.emit('results', [{id: uri + '456', group: 'private-group'}]);
+    }
+
     this.emit('end');
   });
 }
@@ -143,10 +147,12 @@ describe('WidgetController', function () {
       // When new clients connect, all existing annotations should be unloaded
       // before reloading annotations for each currently-connected client
       annotationUI.addAnnotations([{id: '123'}]);
-      fakeCrossFrame.frames.push({uri: 'http://example.com/page-a'});
+      var uri1 = 'http://example.com/page-a';
+      fakeCrossFrame.frames.push({uri: uri1, searchUris: [uri1]});
       $scope.$digest();
       fakeAnnotationMapper.unloadAnnotations = sandbox.spy();
-      fakeCrossFrame.frames.push({uri: 'http://example.com/page-b'});
+      var uri2 = 'http://example.com/page-b';
+      fakeCrossFrame.frames.push({uri: uri2, searchUris: [uri2]});
       $scope.$digest();
       assert.calledWith(fakeAnnotationMapper.unloadAnnotations,
         annotationUI.getState().annotations);
@@ -154,17 +160,29 @@ describe('WidgetController', function () {
 
     it('loads all annotations for a frame', function () {
       var uri = 'http://example.com';
-      fakeCrossFrame.frames.push({uri: uri});
+      fakeCrossFrame.frames.push({uri: uri, searchUris: [uri]});
       $scope.$digest();
       var loadSpy = fakeAnnotationMapper.loadAnnotations;
       assert.calledWith(loadSpy, [sinon.match({id: uri + '123'})]);
       assert.calledWith(loadSpy, [sinon.match({id: uri + '456'})]);
     });
 
+    it('loads all annotations for a frame with multiple urls', function () {
+      var uri = 'http://example.com/test.pdf';
+      var fingerprint = 'urn:x-pdf:fingerprint';
+      fakeCrossFrame.frames.push({uri: uri, searchUris: [uri, fingerprint]});
+      $scope.$digest();
+      var loadSpy = fakeAnnotationMapper.loadAnnotations;
+      assert.calledWith(loadSpy, [sinon.match({id: uri + '123'})]);
+      assert.calledWith(loadSpy, [sinon.match({id: fingerprint + '123'})]);
+      assert.calledWith(loadSpy, [sinon.match({id: uri + '456'})]);
+      assert.calledWith(loadSpy, [sinon.match({id: fingerprint + '456'})]);
+    });
+
     it('loads all annotations for all frames', function () {
       var uris = ['http://example.com', 'http://foobar.com'];
       fakeCrossFrame.frames = uris.map(function (uri) {
-        return {uri: uri};
+        return {uri: uri, searchUris: [uri]};
       });
       $scope.$digest();
       var loadSpy = fakeAnnotationMapper.loadAnnotations;
@@ -179,7 +197,7 @@ describe('WidgetController', function () {
       var id = uri + '123';
 
       beforeEach(function () {
-        fakeCrossFrame.frames = [{uri: uri}];
+        fakeCrossFrame.frames = [{uri: uri, searchUris: [uri]}];
         annotationUI.selectAnnotations([id]);
         $scope.$digest();
       });
@@ -197,7 +215,7 @@ describe('WidgetController', function () {
       });
 
       it('fetches annotations for all groups', function () {
-        assert.calledWith(searchClients[0].get, {uri: uri, group: null});
+        assert.calledWith(searchClients[0].get, {uri: [uri], group: null});
       });
 
       it('loads annotations in one batch', function () {
@@ -209,7 +227,7 @@ describe('WidgetController', function () {
       var uri = 'http://example.com';
 
       beforeEach(function () {
-        fakeCrossFrame.frames = [{uri: uri}];
+        fakeCrossFrame.frames = [{uri: uri, searchUris: [uri]}];
         fakeGroups.focused = function () { return { id: 'a-group' }; };
         $scope.$digest();
       });
@@ -219,7 +237,7 @@ describe('WidgetController', function () {
       });
 
       it('fetches annotations for the current group', function () {
-        assert.calledWith(searchClients[0].get, {uri: uri, group: 'a-group'});
+        assert.calledWith(searchClients[0].get, {uri: [uri], group: 'a-group'});
       });
 
       it('loads annotations in batches', function () {
@@ -232,7 +250,7 @@ describe('WidgetController', function () {
       var id = uri + 'does-not-exist';
 
       beforeEach(function () {
-        fakeCrossFrame.frames = [{uri: uri}];
+        fakeCrossFrame.frames = [{uri: uri, searchUris: [uri]}];
         annotationUI.selectAnnotations([id]);
         fakeGroups.focused = function () { return { id: 'private-group' }; };
         $scope.$digest();
@@ -250,7 +268,7 @@ describe('WidgetController', function () {
     it('focuses and scrolls to the annotation if already selected', function () {
       var uri = 'http://example.com';
       annotationUI.selectAnnotations(['123']);
-      fakeCrossFrame.frames.push({uri: uri});
+      fakeCrossFrame.frames.push({uri: uri, searchUris: [uri]});
       var annot = {
         $$tag: 'atag',
         id: '123',
@@ -272,7 +290,7 @@ describe('WidgetController', function () {
 
       fakeDrafts.unsaved.returns([{id: uri + '123'}, {id: uri + '456'}]);
 
-      fakeCrossFrame.frames.push({uri: uri});
+      fakeCrossFrame.frames.push({uri: uri, searchUris: [uri]});
       var loadSpy = fakeAnnotationMapper.loadAnnotations;
 
       $scope.$broadcast(events.GROUP_FOCUSED);

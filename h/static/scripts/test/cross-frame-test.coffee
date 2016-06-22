@@ -72,5 +72,23 @@ describe 'CrossFrame', ->
       fakeBridge.onConnect.yields(channel)
       crossframe.connect()
       assert.deepEqual(crossframe.frames, [
-        {channel: channel, uri: uri, documentFingerprint: null}
+        {channel: channel, uri: uri, searchUris: [uri], documentFingerprint: null}
+      ])
+
+    it 'updates the frames array with multiple search uris when the document is a PDF', ->
+      uri = 'http://example.com/test.pdf'
+      fingerprint = 'urn:x-pdf:fingerprint'
+      channel = {
+        call: sandbox.stub().yields(null, {
+          uri: uri,
+          metadata: {
+            link: [{href: uri}, {href: fingerprint}],
+            documentFingerprint: fingerprint,
+          },
+        })
+      }
+      fakeBridge.onConnect.yields(channel)
+      crossframe.connect()
+      assert.deepEqual(crossframe.frames, [
+        {channel: channel, uri: uri, searchUris: [uri, fingerprint], documentFingerprint: fingerprint}
       ])
