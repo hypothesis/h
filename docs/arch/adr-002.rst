@@ -1,0 +1,61 @@
+ADR 2: Service layer for testable business logic
+================================================
+
+Context
+-------
+
+As we are currently using it, Pyramid is a model-view-template (MVT) web
+application framework. Models describe domain objects and manage their
+persistence, views handle HTTP requests, and templates define the user
+interface.
+
+"Business logic" is a shorthand for the heart of what the application actually
+does. It is the code that manages the interactions of our domain objects, rather
+than code that handles generic concerns such as HTTP request handling or SQL
+generation.
+
+It is not always clear where to put "business logic" in an MVT application:
+
+- Some logic can live with its associated domain object(s) in the models layer,
+  but this quickly gets complicated when dealing with multiple models from
+  different parts of the system. It is easy to create circular import
+  dependencies.
+
+- Putting logic in the views typically makes them extremely hard to test, as
+  this makes a single component responsible for receiving and validating data
+  from the client, performing business logic operations, and preparing response
+  data.
+
+There are other problems associated with encapsulating business logic in views.
+Business logic typically interacts directly with the model layer. This means
+that either a) all view tests (including those which don't test business logic)
+need a database, or b) we stub out the models layer for some or all view tests.
+Stubbing out the database layer in a way that doesn't couple tests to the view
+implementation is exceedingly difficult, in part due to the large interface of
+SQLAlchemy.
+
+One way to resolve this problem is to introduce a "services layer" between views
+and the rest of the application, which is intended to encapsulate the bulk of
+application business logic and hide persistence concerns from the views.
+
+Decision
+--------
+
+We will employ a "services layer" to encapsulate non-trivial business logic.
+This layer can be tested independently of views, and used from both views and
+other parts of the application which have access to a request object.
+
+Services will take the form of instances with some defined interface which are
+associated with a request and can be retrieved from the request object.
+
+Status
+------
+
+Proposed.
+
+Consequences
+------------
+
+New features which require non-trivial business logic changes or additions
+should evolve the services layer by modifying existing services or adding new
+ones to provide a clean interface to the relevant business concerns.
