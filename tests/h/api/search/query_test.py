@@ -327,12 +327,11 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
     urifilter = query.UriFilter(request)
 
     result = urifilter({"uri": "http://example.com/"})
+    query_uris = result["terms"]["target.scope"]
 
     storage.expand_uri.assert_called_with(request.db, "http://example.com/")
-
-    assert result == {"terms":
-        {"target.scope": ["http://giraffes.com", "https://elephants.com"]}
-    }
+    assert sorted(query_uris) == sorted(["http://giraffes.com",
+                                         "https://elephants.com"])
 
 
 def test_urifilter_queries_multiple_uris(storage, uri):
