@@ -383,12 +383,23 @@ describe('annotation', function() {
         assert.notCalled(annotation.$create);
       });
 
-      it('edits new annotations on initialization', function() {
+      it('creates drafts for new annotations on initialization', function() {
         var annotation = fixtures.newAnnotation();
+        createDirective(annotation);
+        assert.calledWith(fakeDrafts.update, annotation, {
+          isPrivate: false,
+          tags: annotation.tags,
+          text: annotation.text,
+        });
+      });
 
-        var controller = createDirective(annotation).controller;
-
-        assert.isTrue(controller.editing());
+      it('does not create drafts for new highlights on initialization', function() {
+        var annotation = fixtures.newHighlight();
+        // We have to set annotation.$create() because it'll try to call it.
+        annotation.$create = sandbox.stub().returns({
+          then: function() {}
+        });
+        assert.notCalled(fakeDrafts.update);
       });
 
       it('edits annotations with drafts on initialization', function() {
@@ -400,51 +411,25 @@ describe('annotation', function() {
 
         assert.isTrue(controller.editing());
       });
-
-      it('does not edit new highlights on initialization', function() {
-        var annotation = fixtures.newHighlight();
-        // We have to set annotation.$create() because it'll try to call it.
-        annotation.$create = sandbox.stub().returns({
-          then: function() {}
-        });
-
-        var controller = createDirective(annotation).controller;
-
-        assert.isFalse(controller.editing());
-      });
-
-      it('edits highlights with drafts on initialization', function() {
-        var annotation = fixtures.oldHighlight();
-        // You can edit a highlight, enter some text or tags, and save it (the
-        // highlight then becomes an annotation). You can also edit a highlight
-        // and then change focus to another group and back without saving the
-        // highlight, in which case the highlight will have draft edits.
-        // This highlight has draft edits.
-        fakeDrafts.get.returns({text: '', tags: []});
-
-        var controller = createDirective(annotation).controller;
-
-        assert.isTrue(controller.editing());
-      });
     });
 
-    describe('.editing()', function() {
-      it('returns true if action is "create"', function() {
+    describe('#editing()', function() {
+      it('returns false if the annotation does not have a draft', function () {
         var controller = createDirective().controller;
-        controller.action = 'create';
-        assert(controller.editing());
+        assert.notOk(controller.editing());
       });
 
-      it('returns true if action is "edit"', function() {
+      it('returns true if the annotation has a draft', function () {
         var controller = createDirective().controller;
-        controller.action = 'edit';
-        assert(controller.editing());
+        fakeDrafts.get.returns({tags: [], text: '', isPrivate: false});
+        assert.isTrue(controller.editing());
       });
 
-      it('returns false if action is "view"', function() {
+      it('returns false if the annotation has a draft but is being saved', function () {
         var controller = createDirective().controller;
-        controller.action = 'view';
-        assert(!controller.editing());
+        fakeDrafts.get.returns({tags: [], text: '', isPrivate: false});
+        controller.isSaving = true;
+        assert.isFalse(controller.editing());
       });
     });
 
@@ -811,19 +796,25 @@ describe('annotation', function() {
       var annotation;
 
       beforeEach(function() {
-        annotation = fixtures.defaultAnnotation();
+        annotation = fixtures.newAnnotation();
         annotation.$create = sandbox.stub();
       });
 
       function controllerWithActionCreate() {
         var controller = createDirective(annotation).controller;
-        controller.action = 'create';
         controller.form.text = 'new annotation';
         return controller;
       }
 
-      it(
-        'emits annotationCreated when saving an annotation succeeds',
+      it('removes the draft when saving an annotation succeeds', function () {
+        var controller = controllerWithActionCreate();
+        annotation.$create.returns(Promise.resolve());
+        return controller.save().then(function () {
+          assert.calledWith(fakeDrafts.remove, annotation);
+        });
+      });
+
+      it('emits annotationCreated when saving an annotation succeeds',
         function(done) {
           var controller = controllerWithActionCreate();
           sandbox.spy($rootScope, '$emit');
@@ -885,14 +876,13 @@ describe('annotation', function() {
         }));
         var saved = controller.save();
         assert.equal(controller.isSaving, true);
-        assert.equal(controller.action, 'view');
         create();
         return saved.then(function () {
           assert.equal(controller.isSaving, false);
         });
       });
 
-      it('reverts to edit mode if saving fails', function () {
+      it('does not remove the draft if saving fails', function () {
         var controller = controllerWithActionCreate();
         var failCreation;
         annotation.$create.returns(new Promise(function (resolve, reject) {
@@ -903,7 +893,7 @@ describe('annotation', function() {
         failCreation({status: -1});
         return saved.then(function () {
           assert.equal(controller.isSaving, false);
-          assert.ok(controller.editing());
+          assert.notCalled(fakeDrafts.remove);
         });
       });
 
@@ -919,7 +909,6 @@ describe('annotation', function() {
           };
           annotation.$create = sinon.stub().returns(Promise.resolve());
           var controller = createDirective(annotation).controller;
-          controller.action = 'create';
           return controller.save().then(function() {
             assert.equal(annotation.$create.lastCall.thisValue.group,
               'test-id');
@@ -938,7 +927,6 @@ describe('annotation', function() {
 
       function controllerWithActionEdit() {
         var controller = createDirective(annotation).controller;
-        controller.action = 'edit';
         controller.form.text = 'updated text';
         return controller;
       }
@@ -1192,7 +1180,6 @@ describe('annotation', function() {
           user: 'acct:bill@localhost',
         }).controller;
         controller.edit();
-        assert.equal(controller.action, 'edit');
         controller.form.text = 'this should be reverted';
         controller.revert();
         assert.equal(controller.form.text, '');

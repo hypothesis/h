@@ -146,9 +146,6 @@ function AnnotationController(
     * can call the methods.
     */
   function init() {
-    /** The currently active action - 'view', 'create' or 'edit'. */
-    vm.action = 'view';
-
     /** vm.form is the read-write part of vm for the templates: it contains
      *  the variables that the templates will write changes to via ng-model. */
     vm.form = {};
@@ -307,14 +304,6 @@ function AnnotationController(
     }
   }
 
-  /** Switches the view to a viewer, closing the editor controls if they're
-   *  open.
-    * @name annotation.AnnotationController#view
-    */
-  function view() {
-    vm.action = 'view';
-  }
-
   /**
     * @ngdoc method
     * @name annotation.AnnotationController#authorize
@@ -359,8 +348,15 @@ function AnnotationController(
     * @description Switches the view to an editor.
     */
   vm.edit = function() {
+    if (!drafts.get(vm.annotation)) {
+      drafts.update(vm.annotation, {
+        tags: vm.annotation.tags,
+        text: vm.annotation.text,
+        isPrivate: permissions.isPrivate(vm.annotation.permissions,
+          session.state.userid),
+      });
+    }
     restoreFromDrafts(drafts, vm);
-    vm.action = isNew(vm.annotation) ? 'create' : 'edit';
   };
 
   /**
@@ -370,11 +366,7 @@ function AnnotationController(
    *   (i.e. the annotation editor form should be open), `false` otherwise.
    */
   vm.editing = function() {
-    if (vm.action === 'create' || vm.action === 'edit') {
-      return true;
-    } else {
-      return false;
-    }
+    return drafts.get(vm.annotation) && !vm.isSaving;
   };
 
   /**
@@ -485,11 +477,10 @@ function AnnotationController(
     */
   vm.revert = function() {
     drafts.remove(vm.annotation);
-    if (vm.action === 'create') {
+    if (isNew(vm.annotation)) {
       $rootScope.$emit(events.ANNOTATION_DELETED, vm.annotation);
     } else {
       updateView();
-      view();
     }
   };
 
@@ -503,45 +494,36 @@ function AnnotationController(
       flash.info('Please sign in to save your annotations.');
       return Promise.resolve();
     }
-    if ((vm.action === 'create' || vm.action === 'edit') &&
-        !vm.hasContent() && vm.isShared()) {
+    if (!vm.hasContent() && vm.isShared()) {
       flash.info('Please add text or a tag before publishing.');
       return Promise.resolve();
     }
 
     var saved;
-    switch (vm.action) {
-      case 'create':
-        updateDomainModel(vm.annotation, vm, permissions);
-        saved = vm.annotation.$create().then(function () {
-          $rootScope.$emit(events.ANNOTATION_CREATED, vm.annotation);
-          updateView();
-          drafts.remove(vm.annotation);
-        });
-        break;
-
-      case 'edit':
-        var updatedModel = angular.copy(vm.annotation);
-        updateDomainModel(updatedModel, vm, permissions);
-        saved = updatedModel.$update({
-          id: updatedModel.id
-        }).then(function () {
-          drafts.remove(vm.annotation);
-          // Preserve the local tag which is not copied when cloning the model
-          // and performing the $update() call.
-          updatedModel.$$tag = vm.annotation.$$tag;
-          $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
-        });
-        break;
-
-      default:
-        throw new Error('Tried to save an annotation that is not being edited');
+    if (!vm.annotation.id) {
+      updateDomainModel(vm.annotation, vm, permissions);
+      saved = vm.annotation.$create().then(function () {
+        $rootScope.$emit(events.ANNOTATION_CREATED, vm.annotation);
+        updateView();
+        drafts.remove(vm.annotation);
+      });
+    } else {
+      var updatedModel = angular.copy(vm.annotation);
+      updateDomainModel(updatedModel, vm, permissions);
+      saved = updatedModel.$update({
+        id: updatedModel.id
+      }).then(function () {
+        drafts.remove(vm.annotation);
+        // Preserve the local tag which is not copied when cloning the model
+        // and performing the $update() call.
+        updatedModel.$$tag = vm.annotation.$$tag;
+        $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
+      });
     }
 
     // optimistically switch back to view mode and display the saving
     // indicator
     vm.isSaving = true;
-    view();
 
     return saved.then(function () {
       vm.isSaving = false;
