@@ -206,7 +206,7 @@ describe 'Guest', ->
 
         emitGuestEvent('getDocumentInfo', assertComplete)
 
-  describe 'getDocumentInfo()', ->
+  describe '#getDocumentInfo()', ->
     guest = null
 
     beforeEach ->
@@ -228,7 +228,7 @@ describe 'Guest', ->
       return guest.getDocumentInfo().then ({uri}) ->
         assert.equal uri, 'urn:x-pdf:aabbcc'
 
-  describe 'onAdderMouseUp', ->
+  describe '#onAdderMouseUp()', ->
     it 'it prevents the default browser action when triggered', () ->
       event = jQuery.Event('mouseup')
       guest = createGuest()
@@ -241,7 +241,7 @@ describe 'Guest', ->
       guest.onAdderMouseup(event)
       assert.isTrue(event.isPropagationStopped())
 
-  describe 'createAnnotation()', ->
+  describe '#createAnnotation()', ->
     it 'adds metadata to the annotation object', ->
       guest = createGuest()
       sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
@@ -269,7 +269,7 @@ describe 'Guest', ->
 
       guest.createAnnotation()
 
-  describe 'createComment()', ->
+  describe '#createComment()', ->
     it 'adds metadata to the annotation object', ->
       guest = createGuest()
       sinon.stub(guest, 'getDocumentInfo').returns(Promise.resolve({
@@ -303,7 +303,7 @@ describe 'Guest', ->
 
       guest.createComment()
 
-  describe 'anchor()', ->
+  describe '#anchor()', ->
     el = null
     range = null
 
@@ -434,7 +434,7 @@ describe 'Guest', ->
           assert.calledOnce(stub)
       .then(done, done)
 
-  describe 'detach()', ->
+  describe '#detach()', ->
     it 'removes the anchors from the "anchors" instance variable', ->
       guest = createGuest()
       annotation = {}
