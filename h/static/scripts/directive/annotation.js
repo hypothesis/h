@@ -34,46 +34,6 @@ function errorMessage(reason) {
   return message;
 }
 
-
-
-/** Restore unsaved changes to this annotation from the drafts service.
- *
- * If there are no draft changes to this annotation, does nothing.
- *
- */
-function restoreFromDrafts(drafts, vm) {
-  var draft = drafts.get(vm.annotation);
-  if (draft) {
-    vm.isPrivate = draft.isPrivate;
-    vm.form.tags = draft.tags;
-    vm.form.text = draft.text;
-  }
-}
-
-/**
-  * Save the given annotation to the drafts service.
-  *
-  * Any existing drafts for this annotation will be overwritten.
-  *
-  * @param {object} drafts - The drafts service
-  * @param {object} vm.annotation - The full vm.annotation object of the
-  *   annotation to be saved. This full vm.annotation model is not retrieved
-  *   again from drafts, it's only used to identify the annotation's draft in
-  *   order to retrieve the fields below.
-  * @param {object} vm - The view model object containing the user's unsaved
-  *   changes to the annotation.
-  *
-  */
-function saveToDrafts(drafts, vm) {
-  drafts.update(
-    vm.annotation,
-    {
-      isPrivate: vm.isPrivate,
-      tags: vm.form.tags,
-      text: vm.form.text,
-    });
-}
-
 /** Update `annotation` from vm.
  *
  * Copy any properties from vm that might have been modified by the user into
@@ -84,9 +44,9 @@ function saveToDrafts(drafts, vm) {
  *
  */
 function updateDomainModel(annotation, vm, permissions) {
-  annotation.text = vm.form.text;
-  annotation.tags = vm.form.tags;
-  if (vm.isPrivate) {
+  annotation.text = vm.state().text;
+  annotation.tags = vm.state().tags;
+  if (vm.state().isPrivate) {
     annotation.permissions = permissions.private();
   } else {
     annotation.permissions = permissions.shared(annotation.group);
@@ -94,13 +54,7 @@ function updateDomainModel(annotation, vm, permissions) {
 }
 
 /** Update the view model from the domain model changes. */
-function updateViewModel($scope, vm, permissions) {
-
-  vm.form = {
-    text: vm.annotation.text,
-    tags: vm.annotation.tags,
-  };
-
+function updateViewModel($scope, vm) {
   if (vm.annotation.links) {
     vm.linkInContext = vm.annotation.links.incontext ||
                        vm.annotation.links.html ||
@@ -110,9 +64,6 @@ function updateViewModel($scope, vm, permissions) {
     vm.linkInContext = '';
     vm.linkHTML = '';
   }
-
-  vm.isPrivate = permissions.isPrivate(
-    vm.annotation.permissions, vm.annotation.user);
 
   var documentMetadata = extractDocumentMetadata(vm.annotation);
   vm.documentTitle = documentTitle(documentMetadata);
@@ -146,10 +97,6 @@ function AnnotationController(
     * can call the methods.
     */
   function init() {
-    /** vm.form is the read-write part of vm for the templates: it contains
-     *  the variables that the templates will write changes to via ng-model. */
-    vm.form = {};
-
     // The remaining properties on vm are read-only properties for the
     // templates.
 
@@ -158,9 +105,6 @@ function AnnotationController(
 
     /** Give the template access to the feature flags. */
     vm.feature = features.flagEnabled;
-
-    /** Whether or not this annotation is private. */
-    vm.isPrivate = false;
 
     /** Determines whether controls to expand/collapse the annotation body
      * are displayed adjacent to the tags field.
@@ -196,9 +140,6 @@ function AnnotationController(
     // When a new annotation is created, remove any existing annotations that
     // are empty
     $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, deleteIfNewAndEmpty);
-
-    // Call `onDestroy()` when the component is destroyed.
-    $scope.$on('$destroy', onDestroy);
 
     // Call `onGroupFocused()` whenever the currently-focused group changes.
     $scope.$on(events.GROUP_FOCUSED, onGroupFocused);
@@ -240,26 +181,13 @@ function AnnotationController(
 
   function onAnnotationUpdated(event, updatedDomainModel) {
     if (updatedDomainModel.id === vm.annotation.id) {
-      vm.annotation = updatedDomainModel;
       updateView();
     }
   }
 
   function deleteIfNewAndEmpty() {
-    if (isNew(vm.annotation) && !vm.form.text && vm.form.tags.length === 0) {
+    if (isNew(vm.annotation) && !vm.state().text && vm.state().tags.length === 0) {
       vm.revert();
-    }
-  }
-
-  function onDestroy() {
-    // If the annotation component is destroyed whilst the annotation is being
-    // edited, persist temporary state so that we can restore it if the
-    // annotation editor is later recreated.
-    //
-    // The annotation component may be destroyed when switching accounts,
-    // when switching groups or when the component is scrolled off-screen.
-    if (vm.editing()) {
-      saveToDrafts(drafts, vm);
     }
   }
 
@@ -300,7 +228,7 @@ function AnnotationController(
       });
     } else {
       // User isn't logged in, save to drafts.
-      saveToDrafts(drafts, vm);
+      drafts.update(vm.annotation, vm.state());
     }
   }
 
@@ -349,14 +277,8 @@ function AnnotationController(
     */
   vm.edit = function() {
     if (!drafts.get(vm.annotation)) {
-      drafts.update(vm.annotation, {
-        tags: vm.annotation.tags,
-        text: vm.annotation.text,
-        isPrivate: permissions.isPrivate(vm.annotation.permissions,
-          session.state.userid),
-      });
+      drafts.update(vm.annotation, vm.state());
     }
-    restoreFromDrafts(drafts, vm);
   };
 
   /**
@@ -385,7 +307,7 @@ function AnnotationController(
     *   otherwise.
     */
   vm.hasContent = function() {
-    return vm.form.text.length > 0 || vm.form.tags.length > 0;
+    return vm.state().text.length > 0 || vm.state().tags.length > 0;
   };
 
   /**
@@ -431,7 +353,7 @@ function AnnotationController(
     * current group or with everyone).
     */
   vm.isShared = function() {
-    return !vm.isPrivate;
+    return !vm.state().isPrivate;
   };
 
   // Save on Meta + Enter or Ctrl + Enter.
@@ -462,7 +384,7 @@ function AnnotationController(
     reply.group = vm.annotation.group;
 
     if (session.state.userid) {
-      if (vm.isPrivate) {
+      if (vm.state().isPrivate) {
         reply.permissions = permissions.private();
       } else {
         reply.permissions = permissions.shared(reply.group);
@@ -554,7 +476,11 @@ function AnnotationController(
     if (!isReply(vm.annotation)) {
       permissions.setDefault(privacy);
     }
-    vm.isPrivate = (privacy === 'private');
+    drafts.update(vm.annotation, {
+      tags: vm.state().tags,
+      text: vm.state().text,
+      isPrivate: privacy === 'private'
+    });
   };
 
   vm.tagStreamURL = function(tag) {
@@ -597,11 +523,32 @@ function AnnotationController(
   };
 
   vm.setText = function (text) {
-    vm.form.text = text;
+    drafts.update(vm.annotation, {
+      isPrivate: vm.state().isPrivate,
+      tags: vm.state().tags,
+      text: text,
+    });
   };
 
   vm.setTags = function (tags) {
-    vm.form.tags = tags;
+    drafts.update(vm.annotation, {
+      isPrivate: vm.state().isPrivate,
+      tags: tags,
+      text: vm.state().text,
+    });
+  };
+
+  vm.state = function () {
+    var draft = drafts.get(vm.annotation);
+    if (draft) {
+      return draft;
+    }
+    return {
+      tags: vm.annotation.tags,
+      text: vm.annotation.text,
+      isPrivate: permissions.isPrivate(vm.annotation.permissions,
+        vm.annotation.user),
+    };
   };
 
   init();

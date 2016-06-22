@@ -22,7 +22,7 @@
           target="_blank" ng-if="vm.group() && vm.group().url" href="{{vm.group().url}}">
           <i class="h-icon-group"></i><span class="annotation-header__group-name">{{vm.group().name}}</span>
         </a>
-        <span ng-show="vm.isPrivate"
+        <span ng-show="vm.state().isPrivate"
           title="This annotation is visible only to you.">
           <i class="h-icon-lock"></i><span class="annotation-header__group-name" ng-show="!vm.group().url">Only me</span>
         </span>
@@ -73,8 +73,8 @@
       collapse="vm.collapseBody"
       collapsed-height="400"
       overflow-hysteresis="20"
-      content-data="vm.form.text">
-      <markdown text="vm.form.text"
+      content-data="vm.state().text">
+      <markdown text="vm.state().text"
         on-edit-text="vm.setText(text)"
         read-only="!vm.editing()">
       </markdown>
@@ -84,14 +84,14 @@
 
   <!-- Tags -->
   <div class="annotation-body form-field" ng-if="vm.editing()">
-    <tag-editor tags="vm.form.tags"
+    <tag-editor tags="vm.state().tags"
                 on-edit-tags="vm.setTags(tags)"></tag-editor>
   </div>
 
   <div class="annotation-body u-layout-row tags tags-read-only"
-       ng-if="(vm.canCollapseBody || vm.form.tags.length) && !vm.editing()">
+       ng-if="(vm.canCollapseBody || vm.state().tags.length) && !vm.editing()">
     <ul class="tag-list">
-      <li class="tag-item" ng-repeat="tag in vm.form.tags">
+      <li class="tag-item" ng-repeat="tag in vm.state().tags">
         <a ng-href="{{vm.tagStreamURL(tag)}}" target="_blank">{{tag}}</a>
       </li>
     </ul>
@@ -169,7 +169,7 @@
         <annotation-share-dialog
           group="vm.group()"
           uri="vm.linkInContext"
-          is-private="vm.isPrivate"
+          is-private="vm.state().isPrivate"
           is-open="vm.showShareDialog"
           on-close="vm.showShareDialog = false">
         </annotation-share-dialog>
