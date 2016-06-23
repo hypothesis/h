@@ -187,6 +187,15 @@ module.exports = class Guest extends Annotator
     annotation.target ?= []
 
     locate = (target) ->
+      # Check that the anchor has a TextQuoteSelector -- without a
+      # TextQuoteSelector we have no basis on which to verify that we have
+      # reanchored correctly and so we shouldn't even try.
+      #
+      # Returning an anchor without a range will result in this annotation being
+      # treated as an orphan (assuming no other targets anchor).
+      if not (target.selector ? []).some((s) => s.type == 'TextQuoteSelector')
+        return Promise.resolve({annotation, target})
+
       # Find a target using the anchoring module.
       options = {
         cache: self.anchoringCache

@@ -341,7 +341,11 @@ describe 'Guest', ->
 
     it "doesn't mark an annotation in which the target anchors as an orphan", ->
       guest = createGuest()
-      annotation = {target: [{selector: []}]}
+      annotation = {
+        target: [
+          {selector: [{type: 'TextQuoteSelector', exact: 'hello'}]},
+        ]
+      }
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
 
       guest.anchor(annotation).then ->
@@ -349,7 +353,12 @@ describe 'Guest', ->
 
     it "doesn't mark an annotation in which at least one target anchors as an orphan", ->
       guest = createGuest()
-      annotation = {target: [{selector: []}, {selector: []}]}
+      annotation = {
+        target: [
+          {selector: [{type: 'TextQuoteSelector', exact: 'notinhere'}]},
+          {selector: [{type: 'TextQuoteSelector', exact: 'hello'}]},
+        ]
+      }
       sandbox.stub(anchoring, 'anchor')
         .onFirstCall().returns(Promise.reject())
         .onSecondCall().returns(Promise.resolve(range))
@@ -359,7 +368,11 @@ describe 'Guest', ->
 
     it "marks an annotation in which the target fails to anchor as an orphan", ->
       guest = createGuest()
-      annotation = target: [{selector: []}]
+      annotation = {
+        target: [
+          {selector: [{type: 'TextQuoteSelector', exact: 'notinhere'}]},
+        ]
+      }
       sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
 
       guest.anchor(annotation).then ->
@@ -367,11 +380,42 @@ describe 'Guest', ->
 
     it "marks an annotation in which all (suitable) targets fail to anchor as an orphan", ->
       guest = createGuest()
-      annotation = target: [{selector: []}, {selector: []}]
+      annotation = {
+        target: [
+          {selector: [{type: 'TextQuoteSelector', exact: 'notinhere'}]},
+          {selector: [{type: 'TextQuoteSelector', exact: 'neitherami'}]},
+        ]
+      }
       sandbox.stub(anchoring, 'anchor').returns(Promise.reject())
 
       guest.anchor(annotation).then ->
         assert.isTrue(annotation.$orphan)
+
+    it "marks an annotation where the target has no TextQuoteSelectors as an orphan", ->
+      guest = createGuest()
+      annotation = {
+        target: [
+          {selector: [{type: 'TextPositionSelector', start: 0, end: 5}]},
+        ]
+      }
+      # This shouldn't be called, but if it is, we successfully anchor so that
+      # this test is guaranteed to fail.
+      sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
+
+      guest.anchor(annotation).then ->
+        assert.isTrue(annotation.$orphan)
+
+    it "does not attempt to anchor targets which have no TextQuoteSelector", ->
+      guest = createGuest()
+      annotation = {
+        target: [
+          {selector: [{type: 'TextPositionSelector', start: 0, end: 5}]},
+        ]
+      }
+      sandbox.spy(anchoring, 'anchor')
+
+      guest.anchor(annotation).then ->
+        assert.notCalled(anchoring.anchor)
 
     it 'updates the cross frame and bucket bar plugins', (done) ->
       guest = createGuest()
@@ -390,7 +434,7 @@ describe 'Guest', ->
       highlights = [document.createElement('span')]
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       sandbox.stub(highlighter, 'highlightRange').returns(highlights)
-      target = [{selector: []}]
+      target = {selector: [{type: 'TextQuoteSelector', exact: 'hello'}]}
       guest.anchor({target: [target]}).then (anchors) ->
         assert.equal(anchors.length, 1)
       .then(done, done)
@@ -400,7 +444,7 @@ describe 'Guest', ->
       highlights = [document.createElement('span')]
       sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       sandbox.stub(highlighter, 'highlightRange').returns(highlights)
-      target = [{selector: []}]
+      target = {selector: [{type: 'TextQuoteSelector', exact: 'hello'}]}
       annotation = {target: [target]}
       guest.anchor(annotation).then ->
         assert.equal(guest.anchors.length, 1)
@@ -426,7 +470,7 @@ describe 'Guest', ->
 
     it 'does not reanchor targets that are already anchored', (done) ->
       guest = createGuest()
-      annotation = target: [{selector: "test"}]
+      annotation = target: [{selector: [{type: 'TextQuoteSelector', exact: 'hello'}]}]
       stub = sandbox.stub(anchoring, 'anchor').returns(Promise.resolve(range))
       guest.anchor(annotation).then ->
         guest.anchor(annotation).then ->
