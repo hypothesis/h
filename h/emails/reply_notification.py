@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from h import links
 from h import util
 
 from pyramid.renderers import render
@@ -21,7 +22,9 @@ def generate(request, notification):
         document_title = notification.parent.target_uri
 
     parent_url = request.route_url('annotation', id=notification.parent.id)
-    reply_url = request.route_url('annotation', id=notification.reply.id)
+    reply_url = links.incontext_link(request, notification.reply)
+    if not reply_url:
+        reply_url = request.route_url('annotation', id=notification.reply.id)
 
     reply_user_url = request.route_url('stream.user_query',
                                        user=notification.reply_user.username)
