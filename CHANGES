@@ -1,3 +1,29 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Users now get their own clean welcome page when they finish installing the
+  browser extension (#3505).
+
+- The search API can now accept multiple `uri` parameters and will return
+  annotations made on any of the passed URIs (#3517).
+
+- The annotation client now uses the multiple-`uri`-parameter feature to ensure 
+  that all annotations are loaded on PDFs (#3524).
+
+Bug fixes
+---------
+
+- Fix an issue where highlights weren't shown correctly in PDFs (#3531).
+
+Miscellanea
+-----------
+
+- Our brief experiment with using PDF fingerprint URNs as target `source`
+  properties has ended (#3524).
+
 0.29.0 (2016-06-20)
 ===================
 
