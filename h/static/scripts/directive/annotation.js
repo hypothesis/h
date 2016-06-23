@@ -34,23 +34,29 @@ function errorMessage(reason) {
   return message;
 }
 
-/** Update `annotation` from vm.
- *
- * Copy any properties from vm that might have been modified by the user into
- * `annotation`, overwriting any existing properties in `annotation`.
- *
- * @param {object} annotation The object to copy properties to
- * @param {object} vm The object to copy properties from
- *
+/**
+ * Return a copy of `annotation` with properties updated from changes made
+ * in the editor.
  */
-function updateDomainModel(annotation, vm, permissions) {
-  annotation.text = vm.state().text;
-  annotation.tags = vm.state().tags;
-  if (vm.state().isPrivate) {
-    annotation.permissions = permissions.private();
-  } else {
-    annotation.permissions = permissions.shared(annotation.group);
-  }
+function updateModel(annotation, changes, permissions, store) {
+  // Create a copy of `annotation` excluding all private/local-only properties
+  var model = Object.keys(annotation).reduce(function (m, key) {
+    if (key[0] === '$') {
+      return m;
+    }
+    m[key] = annotation[key];
+    return m;
+  }, {});
+
+  // Apply the changes from the draft
+  Object.assign(model, {
+    tags: changes.tags,
+    text: changes.text,
+    permissions: changes.isPrivate ?
+      permissions.private() : permissions.shared(model.group),
+  });
+
+  return new store.AnnotationResource(model);
 }
 
 /** Update the view model from the domain model changes. */
@@ -70,16 +76,11 @@ function updateViewModel($scope, vm) {
   vm.documentDomain = documentDomain(documentMetadata);
 }
 
-/**
-  * @ngdoc type
-  * @name annotation.AnnotationController
-  *
-  */
 // @ngInject
 function AnnotationController(
   $document, $q, $rootScope, $scope, $timeout, $window, annotationUI,
   annotationMapper, drafts, flash, features, groups, permissions, session,
-  settings) {
+  settings, store) {
 
   var vm = this;
   var newlyCreatedByHighlightButton;
@@ -406,11 +407,6 @@ function AnnotationController(
     }
   };
 
-  /**
-    * @ngdoc method
-    * @name annotation.AnnotationController#save
-    * @description Saves any edits and returns to the viewer.
-    */
   vm.save = function() {
     if (!vm.annotation.user) {
       flash.info('Please sign in to save your annotations.');
@@ -421,27 +417,9 @@ function AnnotationController(
       return Promise.resolve();
     }
 
-    var saved;
-    if (!vm.annotation.id) {
-      updateDomainModel(vm.annotation, vm, permissions);
-      saved = vm.annotation.$create().then(function () {
-        $rootScope.$emit(events.ANNOTATION_CREATED, vm.annotation);
-        updateView();
-        drafts.remove(vm.annotation);
-      });
-    } else {
-      var updatedModel = angular.copy(vm.annotation);
-      updateDomainModel(updatedModel, vm, permissions);
-      saved = updatedModel.$update({
-        id: updatedModel.id
-      }).then(function () {
-        drafts.remove(vm.annotation);
-        // Preserve the local tag which is not copied when cloning the model
-        // and performing the $update() call.
-        updatedModel.$$tag = vm.annotation.$$tag;
-        $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
-      });
-    }
+    var updatedModel = updateModel(vm.annotation, vm.state(), permissions, store);
+    var saved = isNew(vm.annotation) ?
+      updatedModel.$create() : updatedModel.$update({id: updatedModel.id});
 
     // optimistically switch back to view mode and display the saving
     // indicator
@@ -449,6 +427,16 @@ function AnnotationController(
 
     return saved.then(function () {
       vm.isSaving = false;
+
+      var event = isNew(vm.annotation) ?
+        events.ANNOTATION_CREATED : events.ANNOTATION_UPDATED;
+
+      // Copy across the local tag which is used by the sidebar to link
+      // annotations in the app with those shown in the page
+      updatedModel.$$tag = vm.annotation.$$tag;
+      drafts.remove(vm.annotation);
+
+      $rootScope.$emit(event, updatedModel);
     }).catch(function (reason) {
       vm.isSaving = false;
       vm.edit();
@@ -578,7 +566,7 @@ module.exports = {
   // to be unit tested.
   // FIXME: The code should be refactored to enable unit testing without having
   // to do this.
-  updateDomainModel: updateDomainModel,
+  updateModel: updateModel,
 
   // These are meant to be the public API of this module.
   directive: annotation,
