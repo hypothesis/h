@@ -1,12 +1,11 @@
 /* jshint node: true */
 'use strict';
 
-var angular = require('angular');
-
 var annotationMetadata = require('../annotation-metadata');
 var documentDomain = require('../filter/document-domain');
 var documentTitle = require('../filter/document-title');
 var events = require('../events');
+var memoize = require('../util/memoize');
 var persona = require('../filter/persona');
 
 var isNew = annotationMetadata.isNew;
@@ -57,23 +56,6 @@ function updateModel(annotation, changes, permissions, store) {
   });
 
   return new store.AnnotationResource(model);
-}
-
-/** Update the view model from the domain model changes. */
-function updateViewModel($scope, vm) {
-  if (vm.annotation.links) {
-    vm.linkInContext = vm.annotation.links.incontext ||
-                       vm.annotation.links.html ||
-                       '';
-    vm.linkHTML = vm.annotation.links.html || '';
-  } else {
-    vm.linkInContext = '';
-    vm.linkHTML = '';
-  }
-
-  var documentMetadata = extractDocumentMetadata(vm.annotation);
-  vm.documentTitle = documentTitle(documentMetadata);
-  vm.documentDomain = documentDomain(documentMetadata);
 }
 
 // @ngInject
@@ -131,13 +113,6 @@ function AnnotationController(
       */
     newlyCreatedByHighlightButton = vm.annotation.$highlight || false;
 
-    // Call `onAnnotationUpdated()` whenever the "annotationUpdated" event is
-    // emitted. This event is emitted after changes to the annotation are
-    // successfully saved to the server, and also when changes to the
-    // annotation made by another client are received by this client from the
-    // server.
-    $rootScope.$on(events.ANNOTATION_UPDATED, onAnnotationUpdated);
-
     // When a new annotation is created, remove any existing annotations that
     // are empty
     $rootScope.$on(events.BEFORE_ANNOTATION_CREATED, deleteIfNewAndEmpty);
@@ -164,8 +139,6 @@ function AnnotationController(
     // log in.
     saveNewHighlight();
 
-    updateView();
-
     // If this annotation is not a highlight and if it's new (has just been
     // created by the annotate button) or it has edits not yet saved to the
     // server - then open the editor on AnnotationController instantiation.
@@ -173,16 +146,6 @@ function AnnotationController(
       if (isNew(vm.annotation) || drafts.get(vm.annotation)) {
         vm.edit();
       }
-    }
-  }
-
-  function updateView() {
-    updateViewModel($scope, vm, permissions);
-  }
-
-  function onAnnotationUpdated(event, updatedDomainModel) {
-    if (updatedDomainModel.id === vm.annotation.id) {
-      updateView();
     }
   }
 
@@ -225,7 +188,6 @@ function AnnotationController(
       vm.annotation.permissions = permissions.private();
       vm.annotation.$create().then(function() {
         $rootScope.$emit(events.ANNOTATION_CREATED, vm.annotation);
-        updateView();
       });
     } else {
       // User isn't logged in, save to drafts.
@@ -402,8 +364,6 @@ function AnnotationController(
     drafts.remove(vm.annotation);
     if (isNew(vm.annotation)) {
       $rootScope.$emit(events.ANNOTATION_DELETED, vm.annotation);
-    } else {
-      updateView();
     }
   };
 
@@ -495,6 +455,17 @@ function AnnotationController(
     return isReply(vm.annotation);
   };
 
+  vm.links = function () {
+    if (vm.annotation.links) {
+      return {incontext: vm.annotation.links.incontext ||
+                         vm.annotation.links.html ||
+                         '',
+              html: vm.annotation.links.html};
+    } else {
+      return {incontext: '', html: ''};
+    }
+  };
+
   /**
    * Sets whether or not the controls for expanding/collapsing the body of
    * lengthy annotations should be shown.
@@ -537,6 +508,18 @@ function AnnotationController(
       isPrivate: permissions.isPrivate(vm.annotation.permissions,
         vm.annotation.user),
     };
+  };
+
+  var documentMeta = memoize(function (annot) {
+    var meta = extractDocumentMetadata(annot);
+    return {
+      title: documentTitle(meta),
+      domain: documentDomain(meta),
+    };
+  });
+
+  vm.documentMeta = function () {
+    return documentMeta(vm.annotation);
   };
 
   init();

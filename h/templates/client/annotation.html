@@ -28,11 +28,11 @@
         </span>
         <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing()" title="This is a highlight. Click 'edit' to add a note or tag."></i>
         <span class="annotation-citation"
-          ng-bind-html="vm.documentTitle"
+          ng-bind-html="vm.documentMeta().title"
           ng-if="::vm.showDocumentInfo">
         </span>
         <span class="annotation-citation-domain"
-          ng-bind-html="vm.documentDomain"
+          ng-bind-html="vm.documentMeta().domain"
           ng-if="::vm.showDocumentInfo">
         </span>
       </span>
@@ -43,7 +43,7 @@
     <timestamp
       class-name="'annotation-header__timestamp'"
       timestamp="vm.updated()"
-      href="vm.linkHTML"
+      href="vm.links().html"
       ng-if="!vm.editing() && vm.updated()"></timestamp>
   </header>
 
@@ -168,7 +168,7 @@
         </button>
         <annotation-share-dialog
           group="vm.group()"
-          uri="vm.linkInContext"
+          uri="vm.links().incontext"
           is-private="vm.state().isPrivate"
           is-open="vm.showShareDialog"
           on-close="vm.showShareDialog = false">
