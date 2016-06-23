@@ -1,10 +1,19 @@
 'use strict';
 
+var immutable = require('seamless-immutable');
+
 var annotationUIFactory = require('../annotation-ui');
-
 var annotationFixtures = require('./annotation-fixtures');
-
 var unroll = require('./util').unroll;
+
+var defaultAnnotation = annotationFixtures.defaultAnnotation;
+
+var fixtures = immutable({
+  pair: [
+    Object.assign(defaultAnnotation(), {id: 1, $$tag: 't1'}),
+    Object.assign(defaultAnnotation(), {id: 2, $$tag: 't2'}),
+  ],
+});
 
 describe('annotationUI', function () {
   var annotationUI;
@@ -36,7 +45,7 @@ describe('annotationUI', function () {
 
   describe('#addAnnotations()', function () {
     it('adds annotations to the current state', function () {
-      var annot = annotationFixtures.defaultAnnotation();
+      var annot = defaultAnnotation();
       annotationUI.addAnnotations([annot]);
       assert.deepEqual(annotationUI.getState().annotations, [annot]);
     });
@@ -44,16 +53,28 @@ describe('annotationUI', function () {
 
   describe('#removeAnnotations()', function () {
     it('removes annotations from the current state', function () {
-      var annot = annotationFixtures.defaultAnnotation();
+      var annot = defaultAnnotation();
       annotationUI.addAnnotations([annot]);
       annotationUI.removeAnnotations([annot]);
       assert.deepEqual(annotationUI.getState().annotations, []);
+    });
+
+    it('matches annotations to remove by ID', function () {
+      annotationUI.addAnnotations(fixtures.pair);
+      annotationUI.removeAnnotations([{id: fixtures.pair[0].id}]);
+      assert.deepEqual(annotationUI.getState().annotations, [fixtures.pair[1]]);
+    });
+
+    it('matches annotations to remove by tag', function () {
+      annotationUI.addAnnotations(fixtures.pair);
+      annotationUI.removeAnnotations([{$$tag: fixtures.pair[0].$$tag}]);
+      assert.deepEqual(annotationUI.getState().annotations, [fixtures.pair[1]]);
     });
   });
 
   describe('#clearAnnotations()', function () {
     it('removes all annotations', function () {
-      var annot = annotationFixtures.defaultAnnotation();
+      var annot = defaultAnnotation();
       annotationUI.addAnnotations([annot]);
       annotationUI.clearAnnotations();
       assert.deepEqual(annotationUI.getState().annotations, []);
