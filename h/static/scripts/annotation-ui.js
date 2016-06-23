@@ -77,15 +77,24 @@ var types = {
   SET_SORT_KEY: 'SET_SORT_KEY',
 };
 
+/**
+ * Return a copy of `current` with all matching annotations in `annotations`
+ * removed.
+ */
 function excludeAnnotations(current, annotations) {
-  var idsAndTags = annotations.reduce(function (map, annot) {
-    var id = annot.id || annot.$$tag;
-    map[id] = true;
-    return map;
-  }, {});
+  var idsAndTags = {};
+  annotations.forEach(function (annot) {
+    if (annot.id) {
+      idsAndTags[annot.id] = true;
+    }
+    if (annot.$$tag) {
+      idsAndTags[annot.$$tag] = true;
+    }
+  });
   return current.filter(function (annot) {
-    var id = annot.id || annot.$$tag;
-    return !idsAndTags[id];
+    var shouldRemove = (annot.id && idsAndTags[annot.id]) ||
+                       (annot.$$tag && idsAndTags[annot.$$tag]);
+    return !shouldRemove;
   });
 }
 

@@ -49,6 +49,21 @@ describe('annotationUI', function () {
       annotationUI.removeAnnotations([annot]);
       assert.deepEqual(annotationUI.getState().annotations, []);
     });
+
+    it('matches annotations to remove by ID', function () {
+      var annot = annotationFixtures.defaultAnnotation();
+      annotationUI.addAnnotations([annot]);
+      annotationUI.removeAnnotations([{id: annot.id}]);
+      assert.deepEqual(annotationUI.getState().annotations, []);
+    });
+
+    it('matches annotations to remove by tag', function () {
+      var annot = annotationFixtures.defaultAnnotation();
+      annot.$$tag = 'atag';
+      annotationUI.addAnnotations([annot]);
+      annotationUI.removeAnnotations([{$$tag: annot.$$tag}]);
+      assert.deepEqual(annotationUI.getState().annotations, []);
+    });
   });
 
   describe('#clearAnnotations()', function () {
