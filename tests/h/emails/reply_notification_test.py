@@ -38,12 +38,9 @@ class TestGenerate(object):
             'document_title': 'My fascinating page',
             'document_url': 'http://example.org/',
             'parent': notification.parent,
-            'parent_url': 'http://example.com/ann/foo123',
-            'parent_user': parent_user,
             'reply': notification.reply,
             'reply_url': links.incontext_link.return_value,
             'reply_user': reply_user,
-            'reply_user_url': 'http://example.com/stream/user/ron',
             'unsubscribe_url': 'http://example.com/unsub/FAKETOKEN',
         }
         html_renderer.assert_(**expected_context)
@@ -86,11 +83,9 @@ class TestGenerate(object):
             'document_title': 'My fascinating page',
             'document_url': 'http://example.org/',
             'parent': notification.parent,
-            'parent_user': parent_user,
             'reply': notification.reply,
             'reply_url': 'http://example.com/ann/bar456',
             'reply_user': reply_user,
-            'reply_user_url': 'http://example.com/stream/user/ron',
             'unsubscribe_url': 'http://example.com/unsub/FAKETOKEN',
         }
         html_renderer.assert_(**expected_context)
