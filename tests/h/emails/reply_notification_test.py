@@ -104,19 +104,16 @@ class TestGenerate(object):
         assert html == 'HTML output'
         assert text == 'Text output'
 
-    @pytest.mark.usefixtures('html_renderer', 'text_renderer')
     def test_returns_subject_with_reply_username(self, notification, pyramid_request):
         _, subject, _, _ = generate(pyramid_request, notification)
 
         assert subject == 'ron has replied to your annotation'
 
-    @pytest.mark.usefixtures('html_renderer', 'text_renderer')
     def test_returns_parent_email_as_recipients(self, notification, pyramid_request):
         recipients, _, _, _ = generate(pyramid_request, notification)
 
         assert recipients == ['pat@ric.ia']
 
-    @pytest.mark.usefixtures('html_renderer', 'text_renderer')
     def test_calls_token_serializer_with_correct_arguments(self,
                                                            notification,
                                                            pyramid_request,
