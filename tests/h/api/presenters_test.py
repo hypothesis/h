@@ -143,8 +143,8 @@ class TestAnnotationBasePresenter(object):
         assert expected == actual
 
     @pytest.fixture
-    def routes(self, config):
-        config.add_route('api.annotation', '/dummy/:id')
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('api.annotation', '/dummy/:id')
 
 
 

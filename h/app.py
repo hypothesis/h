@@ -4,16 +4,14 @@
 
 from __future__ import unicode_literals
 
-import collections
 import logging
 
+import transaction
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.settings import asbool
 from pyramid.tweens import EXCVIEW
-import zope.sqlalchemy
 
 from h import assets
-from h import db
 from h.auth.policy import AuthenticationPolicy
 from h.config import configure
 
@@ -78,15 +76,14 @@ def includeme(config):
     config.include('pyramid_services')
 
     # Configure the transaction manager to support retrying retryable
-    # exceptions. We also register the session factory with the thread-local
-    # transaction manager, so that all sessions it creates are registered.
+    # exceptions, and generate a new transaction manager for each request.
     config.add_settings({
         "tm.attempts": 3,
+        "tm.manager_hook": lambda request: transaction.TransactionManager(),
         "tm.activate_hook": tm_activate_hook,
         "tm.annotate_user": False,
     })
     config.include('pyramid_tm')
-    zope.sqlalchemy.register(db.Session)
 
     # Enable a Content Security Policy
     # This is initially copied from:

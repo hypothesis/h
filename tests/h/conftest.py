@@ -11,17 +11,20 @@ import os
 import mock
 import pytest
 
+import sqlalchemy
 from pyramid import testing
 from pyramid.request import apply_request_extensions
+from sqlalchemy.orm import sessionmaker
 
 from h import db
 from h import form
-from h.api import db as api_db
 from h.settings import database_url
-
 
 TEST_DATABASE_URL = database_url(os.environ.get('TEST_DATABASE_URL',
                                                 'postgresql://postgres@localhost/htest'))
+
+Session = sessionmaker()
+
 
 class DummyFeature(object):
 
@@ -71,42 +74,58 @@ def autopatcher(request, target, **kwargs):
     return obj
 
 
-@pytest.fixture(scope='session', autouse=True)
-def setup_database():
+@pytest.fixture(scope='session')
+def db_engine():
     """Set up the database connection and create tables."""
-    engine = db.make_engine({'sqlalchemy.url': TEST_DATABASE_URL})
-    db.bind_engine(engine, should_create=True, should_drop=True)
+    engine = sqlalchemy.create_engine(TEST_DATABASE_URL)
+    db.init(engine, should_create=True, should_drop=True)
+    return engine
 
 
-@pytest.fixture(autouse=True)
-def db_session(request, monkeypatch):
+@pytest.yield_fixture
+def db_session(db_engine):
     """
     Prepare the SQLAlchemy session object.
 
     We enable fast repeatable database tests by setting up the database only
-    once per session (see :func:`setup_database`) and then wrapping each test
-    function in a SAVEPOINT/ROLLBACK TO SAVEPOINT within the transaction.
+    once per session (see :func:`db_engine`) and then wrapping each test
+    function in a transaction that is rolled back.
+
+    Additionally, we set a SAVEPOINT before entering the test, and if we
+    detect that the test has committed (i.e. released the savepoint) we
+    immediately open another. This has the effect of preventing test code from
+    committing the outer transaction.
     """
-    db.Session.begin_nested()
-    request.addfinalizer(db.Session.rollback)
+    conn = db_engine.connect()
+    trans = conn.begin()
+    session = Session(bind=conn)
+    session.begin_nested()
 
-    # Prevent the session from committing, but simulate the effects of a commit
-    # within our transaction. N.B. we must not only flush SQLA state to the
-    # database but also expire the persistence state of all objects.
-    def _fake_commit():
-        db.Session.flush()
-        db.Session.expire_all()
-    monkeypatch.setattr(db.Session, 'commit', _fake_commit)
-    # Prevent the session from closing (make it a no-op):
-    monkeypatch.setattr(db.Session, 'remove', lambda: None)
+    @sqlalchemy.event.listens_for(session, "after_transaction_end")
+    def restart_savepoint(session, transaction):
+        if transaction.nested and not transaction._parent.nested:
+            session.begin_nested()
 
-    return db.Session()
+    try:
+        yield session
+    finally:
+        session.close()
+        trans.rollback()
+        conn.close()
 
 
 @pytest.fixture(scope='session', autouse=True)
 def deform():
     """Allow tests that use deform to find our custom templates."""
     form.init()
+
+
+@pytest.yield_fixture
+def factories(db_session):
+    from ..common import factories
+    factories.SESSION = db_session
+    yield factories
+    factories.SESSION = None
 
 
 @pytest.fixture

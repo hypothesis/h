@@ -4,10 +4,8 @@ import pytest
 from h import api
 from h.groups import models
 
-from ...common import factories
 
-
-def test_init(db_session):
+def test_init(db_session, factories):
     name = "My Hypothesis Group"
     user = factories.User()
 
@@ -24,20 +22,20 @@ def test_init(db_session):
     assert group.members == [user]
 
 
-def test_with_short_name():
+def test_with_short_name(factories):
     """Should raise ValueError if name shorter than 4 characters."""
     with pytest.raises(ValueError):
         models.Group(name="abc", creator=factories.User())
 
 
-def test_with_long_name():
+def test_with_long_name(factories):
     """Should raise ValueError if name longer than 25 characters."""
     with pytest.raises(ValueError):
         models.Group(name="abcdefghijklmnopqrstuvwxyz",
                      creator=factories.User())
 
 
-def test_slug(db_session):
+def test_slug(db_session, factories):
     name = "My Hypothesis Group"
     user = factories.User()
 
@@ -48,7 +46,7 @@ def test_slug(db_session):
     assert group.slug == "my-hypothesis-group"
 
 
-def test_repr(db_session):
+def test_repr(db_session, factories):
     name = "My Hypothesis Group"
     user = factories.User()
 
@@ -59,7 +57,7 @@ def test_repr(db_session):
     assert repr(group) == "<Group: my-hypothesis-group>"
 
 
-def test_created_by(db_session):
+def test_created_by(db_session, factories):
     name_1 = "My first group"
     name_2 = "My second group"
     user = factories.User()
@@ -253,7 +251,7 @@ def documents(db_session):
 
 
 @pytest.fixture
-def group(db_session):
+def group(db_session, factories):
     """Add a new group to the db and return it."""
     group_ = models.Group(name='test-group', creator=factories.User())
     db_session.add(group_)

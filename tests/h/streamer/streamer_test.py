@@ -13,7 +13,7 @@ def test_process_work_queue_sends_realtime_messages_to_messages_handle_message(s
     message = messages.Message(topic='foo', payload='bar')
     queue = [message]
 
-    streamer.process_work_queue({}, queue, session_factory=lambda: session)
+    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
     messages.handle_message.assert_called_once_with(message,
                                                     topic_handlers=mock.ANY)
@@ -25,7 +25,7 @@ def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_message
 
     streamer.process_work_queue({},
                                 queue,
-                                session_factory=lambda: session)
+                                session_factory=lambda _: session)
 
     topic_handlers = {
         'annotation': messages.handle_annotation_event,
@@ -40,7 +40,7 @@ def test_process_work_queue_sends_websocket_messages_to_websocket_handle_message
     message = websocket.Message(socket=mock.sentinel.SOCKET, payload='bar')
     queue = [message]
 
-    streamer.process_work_queue({}, queue, session_factory=lambda: session)
+    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
     websocket.handle_message.assert_called_once_with(message)
 
@@ -50,7 +50,7 @@ def test_process_work_queue_commits_after_each_message(session):
     message2 = messages.Message(topic='user', payload='bar')
     queue = [message1, message2]
 
-    streamer.process_work_queue({}, queue, session_factory=lambda: session)
+    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
     assert session.commit.call_count == 2
 
@@ -61,7 +61,7 @@ def test_process_work_queue_rolls_back_on_handler_exception(session):
 
     messages.handle_message.side_effect = RuntimeError('explosion')
 
-    streamer.process_work_queue({}, queue, session_factory=lambda: session)
+    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
     session.commit.assert_not_called()
     session.rollback.assert_called_once_with()
@@ -71,7 +71,7 @@ def test_process_work_queue_rolls_back_on_unknown_message_type(session):
     message = 'something that is not a message'
     queue = [message]
 
-    streamer.process_work_queue({}, queue, session_factory=lambda: session)
+    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
     session.commit.assert_not_called()
     session.rollback.assert_called_once_with()
@@ -81,7 +81,7 @@ def test_process_work_queue_calls_close_after_commit(session):
     message = messages.Message(topic='annotation', payload='bar')
     queue = [message]
 
-    streamer.process_work_queue({}, queue, session_factory=lambda: session)
+    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
     assert session.method_calls[-2:] == [
         call.commit(),
@@ -95,7 +95,7 @@ def test_process_work_queue_calls_close_after_rollback(session):
 
     messages.handle_message.side_effect = RuntimeError('explosion')
 
-    streamer.process_work_queue({}, queue, session_factory=lambda: session)
+    streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
     assert session.method_calls[-2:] == [
         call.rollback(),

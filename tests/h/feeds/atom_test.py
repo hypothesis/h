@@ -7,8 +7,6 @@ import mock
 from h.api import models
 from h.feeds import atom
 
-from ...common import factories
-
 
 def _annotation(**kwargs):
     args = {
@@ -43,7 +41,7 @@ def test_feed_subtitle():
 
 
 @mock.patch('h.feeds.atom._feed_entry_from_annotation')
-def test_feed_contains_entries(_feed_entry_from_annotation):
+def test_feed_contains_entries(_feed_entry_from_annotation, factories):
     """The feed should contain an entry for each annotation."""
     annotations = [
         factories.Annotation(), factories.Annotation(), factories.Annotation()]
@@ -86,7 +84,7 @@ def test_html_url_link():
 
 
 @mock.patch("h.feeds.util")
-def test_entry_id(util):
+def test_entry_id(util, factories):
     """The ids of feed entries should come from tag_uri_for_annotation()."""
     annotation = factories.Annotation()
     annotations_url_function = lambda annotation: "annotation url"
@@ -99,7 +97,7 @@ def test_entry_id(util):
     assert feed['entries'][0]['id'] == util.tag_uri_for_annotation.return_value
 
 
-def test_entry_author():
+def test_entry_author(factories):
     """The authors of entries should come from the annotation usernames."""
     annotation = factories.Annotation(userid='acct:nobu@hypothes.is')
 
@@ -109,7 +107,7 @@ def test_entry_author():
     assert feed['entries'][0]['author']['name'] == 'nobu'
 
 
-def test_entry_title():
+def test_entry_title(factories):
     """The titles of feed entries should come from annotation.title."""
     with mock.patch("h.feeds.atom.presenters.AnnotationHTMLPresenter.title",
                     new_callable=mock.PropertyMock) as mock_title:
@@ -144,7 +142,7 @@ def test_entry_published():
     assert feed['entries'][0]['published'] == '2016-05-31T12:15:45.537626+00:00'
 
 
-def test_entry_content():
+def test_entry_content(factories):
     """The contents of entries come from annotation.description."""
     with mock.patch(
             "h.feeds.atom.presenters.AnnotationHTMLPresenter.description",
@@ -159,7 +157,7 @@ def test_entry_content():
 
 
 @mock.patch('h.feeds.util')
-def test_annotation_url_links(_):
+def test_annotation_url_links(_, factories):
     """Entries should contain links to the HTML pages for the annotations."""
     annotation = factories.Annotation()
     annotation_url = mock.Mock()
@@ -175,7 +173,7 @@ def test_annotation_url_links(_):
 
 
 @mock.patch('h.feeds.util')
-def test_annotation_api_url_links(_):
+def test_annotation_api_url_links(_, factories):
     """Entries should contain links to the JSON pages for the annotations."""
     annotation = factories.Annotation()
     annotation_api_url = mock.Mock()

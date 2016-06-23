@@ -8,28 +8,47 @@ import random
 
 import factory
 import faker
+from sqlalchemy import orm
 
-from h import db
 from h import models
 from h.accounts import models as accounts_models
 from h.api import models as api_models
 
 
 FAKER = faker.Factory.create()
+SESSION = None
 
 
-class Document(factory.alchemy.SQLAlchemyModelFactory):
+class ModelFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:  # pylint: disable=no-init, old-style-class
+        abstract = True
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        # We override SQLAlchemyModelFactory's default _create classmethod so
+        # that rather than fetching the session from cls._meta (which is
+        # created at parse time... ugh) we fetch it from the SESSION global,
+        # which is dynamically filled out by the `factories` fixture when
+        # used.
+        if SESSION is None:
+            raise RuntimeError('no session: did you use the factories fixture?')
+        obj = model_class(*args, **kwargs)
+        SESSION.add(obj)
+        if cls._meta.force_flush:
+            SESSION.flush()
+        return obj
+
+
+class Document(ModelFactory):
 
     class Meta:  # pylint: disable=no-init, old-style-class
         model = models.Document
-        sqlalchemy_session = db.Session
 
 
-class DocumentMeta(factory.alchemy.SQLAlchemyModelFactory):
+class DocumentMeta(ModelFactory):
 
     class Meta:  # pylint: disable=no-init, old-style-class
         model = models.DocumentMeta
-        sqlalchemy_session = db.Session
 
     # Trying to add two DocumentMetas with the same claimant and type to the
     # db will crash. We use a sequence instead of something like FAKER.url()
@@ -52,11 +71,10 @@ class DocumentMeta(factory.alchemy.SQLAlchemyModelFactory):
             return [FAKER.bs()]
 
 
-class DocumentURI(factory.alchemy.SQLAlchemyModelFactory):
+class DocumentURI(ModelFactory):
 
     class Meta:  # pylint: disable=no-init, old-style-class
         model = models.DocumentURI
-        sqlalchemy_session = db.Session
 
     # Trying to add two DocumentURIs with the same claimant, uri, type and
     # content_type to the db will crash. We use a sequence instead of something
@@ -73,11 +91,10 @@ class DocumentURI(factory.alchemy.SQLAlchemyModelFactory):
     document = factory.SubFactory(Document)
 
 
-class Annotation(factory.alchemy.SQLAlchemyModelFactory):
+class Annotation(ModelFactory):
 
     class Meta:  # pylint: disable=no-init, old-style-class
         model = models.Annotation
-        sqlalchemy_session = db.Session
         force_flush = True  # Always flush the db to generate annotation.id.
 
     tags = factory.LazyFunction(
@@ -158,7 +175,7 @@ class Annotation(factory.alchemy.SQLAlchemyModelFactory):
             document_meta_dicts.append(document_meta_dict(type='title'))
 
         api_models.update_document_metadata(
-            db.Session,
+            orm.object_session(self),
             self,
             document_meta_dicts=document_meta_dicts,
             document_uri_dicts=document_uri_dicts,

@@ -161,10 +161,11 @@ class TestDocumentFindOrCreateByURIs(object):
         monkeypatch.setattr(db_session, 'flush', err)
 
         with pytest.raises(transaction.interfaces.TransientError):
-            document.Document.find_or_create_by_uris(
-                db_session,
-                'https://en.wikipedia.org/wiki/Pluto',
-                ['https://m.en.wikipedia.org/wiki/Pluto'])
+            with db_session.no_autoflush:  # prevent premature IntegrityError
+                document.Document.find_or_create_by_uris(
+                    db_session,
+                    'https://en.wikipedia.org/wiki/Pluto',
+                    ['https://m.en.wikipedia.org/wiki/Pluto'])
 
 
 class TestDocumentURI(object):
@@ -364,16 +365,17 @@ class TestCreateOrUpdateDocumentURI(object):
         monkeypatch.setattr(db_session, 'flush', err)
 
         with pytest.raises(transaction.interfaces.TransientError):
-            document.create_or_update_document_uri(
-                session=db_session,
-                claimant='http://example.com',
-                uri='http://example.org',
-                type='rel-canonical',
-                content_type='text/html',
-                document=document_,
-                created=now(),
-                updated=now(),
-            )
+            with db_session.no_autoflush:  # prevent premature IntegrityError
+                document.create_or_update_document_uri(
+                    session=db_session,
+                    claimant='http://example.com',
+                    uri='http://example.org',
+                    type='rel-canonical',
+                    content_type='text/html',
+                    document=document_,
+                    created=now(),
+                    updated=now(),
+                )
 
 
 class TestCreateOrUpdateDocumentMeta(object):
@@ -487,15 +489,16 @@ class TestCreateOrUpdateDocumentMeta(object):
         monkeypatch.setattr(db_session, 'flush', err)
 
         with pytest.raises(transaction.interfaces.TransientError):
-            document.create_or_update_document_meta(
-                session=db_session,
-                claimant='http://example.com',
-                type='title',
-                value='My Title',
-                document=document_,
-                created=now(),
-                updated=now(),
-            )
+            with db_session.no_autoflush:  # prevent premature IntegrityError
+                document.create_or_update_document_meta(
+                    session=db_session,
+                    claimant='http://example.com',
+                    type='title',
+                    value='My Title',
+                    document=document_,
+                    created=now(),
+                    updated=now(),
+                )
 
 
 @pytest.mark.usefixtures('merge_data')

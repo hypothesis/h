@@ -4,10 +4,8 @@ import mock
 
 from h.feeds import util
 
-from ...common import factories
 
-
-def test_tag_uri_for_annotation():
+def test_tag_uri_for_annotation(factories):
     """Entry IDs should be tag URIs based on domain, day and annotation ID."""
     annotation = factories.Annotation(
         created=datetime.datetime(year=2015, month=3, day=19))

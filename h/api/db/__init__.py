@@ -30,9 +30,8 @@ metadata = MetaData(naming_convention={
 Base = declarative.declarative_base(metadata=metadata)  # pylint: disable=invalid-name
 
 
-def bind_engine(engine, base=Base, should_create=False, should_drop=False):
-    """Bind the SQLAlchemy base class to the given engine."""
-    base.metadata.bind = engine
+def init(engine, base=Base, should_create=False, should_drop=False):
+    """Initialise the database tables managed by `h.api.db`."""
     if should_drop:
         base.metadata.drop_all(engine)
     if should_create:
