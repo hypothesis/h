@@ -17,19 +17,6 @@ from h.api.db import types
 _ = i18n.TranslationStringFactory(__package__)
 
 
-def annotation_from_dict(data):
-    """
-    Create an annotation model object from the passed dict, without saving.
-
-    :param data: a dictionary of annotation properties
-    :type data: dict
-
-    :returns: the created annotation
-    :rtype: dict
-    """
-    return models.elastic.Annotation(data)
-
-
 def fetch_annotation(session, id_):
     """
     Fetch the annotation with the given id.
