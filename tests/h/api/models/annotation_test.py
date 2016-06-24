@@ -32,6 +32,31 @@ def test_document_not_found(annotation, db_session):
     assert annotation.document is None
 
 
+def test_thread_root_id_returns_id_if_no_references():
+    assert Annotation(id='test_id').thread_root_id == 'test_id'
+
+
+def test_thread_root_id_returns_id_if_references_empty():
+    assert Annotation(id='test_id', references=[]).thread_root_id == (
+        'test_id')
+
+
+def test_thread_root_id_returns_reference_if_only_one_reference():
+    annotation = Annotation(id='test_id',
+                            references=['AVMG6tocH9ZO4OKSk1WS'])
+
+    assert annotation.thread_root_id == 'AVMG6tocH9ZO4OKSk1WS'
+
+
+def test_thread_root_id_returns_first_reference_if_many_references():
+    annotation = Annotation(id='test_id',
+                            references=['AVMG6tocH9ZO4OKSk1WS',
+                                        'AVMG6tocH9ZO4OKSk1WSaa',
+                                        'Qe7fpc5ZRgWy0RSHEP9UNg'])
+
+    assert annotation.thread_root_id == 'AVMG6tocH9ZO4OKSk1WS'
+
+
 def test_parent_id_of_direct_reply():
     ann = Annotation(references=['parent_id'])
 
