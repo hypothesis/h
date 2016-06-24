@@ -24,24 +24,10 @@ def _get_client(settings):
     return Client(host, index, **kwargs)
 
 
-def _legacy_get_client(settings):
-    """Return a client for the legacy Elasticsearch index."""
-    host = settings['es.host']
-    index = settings['legacy.es.index']
-    kwargs = {}
-    kwargs['timeout'] = settings.get('es.client_timeout', 10)
-
-    if 'es.client_poolsize' in settings:
-        kwargs['maxsize'] = settings['es.client_poolsize']
-
-    return Client(host, index, **kwargs)
-
-
 def includeme(config):
     settings = config.registry.settings
     settings.setdefault('es.host', 'http://localhost:9200')
     settings.setdefault('es.index', 'hypothesis')
-    settings.setdefault('legacy.es.index', 'annotator')
 
     # Allow users of this module to register additional search filter and
     # search matcher factories.
@@ -60,16 +46,6 @@ def includeme(config):
         name='es',
         reify=True)
 
-    # request.legacy_es is always a client for the legacy Elasticsearch index,
-    # regardless of whether the 'postgres' feature flag is on.
-    # This should be used to write to the legacy search index.
-    # TODO: Remove when postgres migration is done
-    config.add_request_method(
-        lambda r: _legacy_get_client(r.registry.settings),
-        name='legacy_es',
-        reify=True)
-
     # If requested, automatically configure the index
     if asbool(settings.get('h.search.autoconfig', False)):
         configure_index(_get_client(settings))
-        configure_index(_legacy_get_client(settings))

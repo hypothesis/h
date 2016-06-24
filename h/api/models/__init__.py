@@ -11,7 +11,6 @@ direct to the submodules of this package, but rather through the helper
 functions in `h.api.storage`.
 """
 
-from h.api.models import elastic
 from h.api.models.annotation import Annotation
 from h.api.models.document import create_or_update_document_meta
 from h.api.models.document import create_or_update_document_uri
@@ -29,6 +28,5 @@ __all__ = (
     'Document',
     'DocumentMeta',
     'DocumentURI',
-    'elastic',
     'merge_documents',
 )

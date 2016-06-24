@@ -8,7 +8,6 @@ from webtest import TestApp
 TEST_SETTINGS = {
     'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
     'es.index': 'hypothesis-test',
-    'legacy.es.index': 'annotator-test',
     'h.db.should_create_all': True,
     'h.db.should_drop_all': True,
     'h.search.autoconfig': True,
@@ -52,6 +51,6 @@ def _drop_indices(settings):
 
     conn = elasticsearch.Elasticsearch([settings['es.host']])
 
-    for name in [settings['es.index'], settings['legacy.es.index']]:
-        if conn.indices.exists(index=name):
-            conn.indices.delete(index=name)
+    name = settings['es.index']
+    if conn.indices.exists(index=name):
+        conn.indices.delete(index=name)

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from annotator import es as legacy_es
 from sqlalchemy import MetaData
 from sqlalchemy.ext import declarative
 
@@ -39,17 +38,3 @@ def init(engine, base=Base, should_create=False, should_drop=False):
         # extension.
         engine.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
         base.metadata.create_all(engine)
-
-
-def includeme(config):
-    """Configure Elasticsearch client."""
-    settings = config.registry.settings
-
-    if 'es.host' in settings:
-        legacy_es.host = settings['es.host']
-
-    if 'legacy.es.index' in settings:
-        legacy_es.index = settings['legacy.es.index']
-
-    if 'es.compatibility' in settings:
-        legacy_es.compatibility_mode = settings['es.compatibility']
