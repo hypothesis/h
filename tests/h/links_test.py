@@ -7,7 +7,7 @@ from h import links
 
 class FakeAnnotation(object):
     def __init__(self):
-        self.id = '123'
+        self.thread_root_id = '123'
         self.references = None
         self.target_uri = 'http://example.com/foo/bar'
         self.document = None
@@ -29,15 +29,6 @@ def test_incontext_link(pyramid_request):
     link = links.incontext_link(pyramid_request, annotation)
 
     assert link == 'https://hyp.is/123/example.com/foo/bar'
-
-
-def test_incontext_link_is_none_for_replies(pyramid_request):
-    annotation = FakeAnnotation()
-    annotation.references = ['parent']
-
-    link = links.incontext_link(pyramid_request, annotation)
-
-    assert link is None
 
 
 @pytest.mark.parametrize('target_uri,expected', [
