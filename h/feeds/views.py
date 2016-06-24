@@ -13,7 +13,7 @@ def _annotations(request):
     """Return the annotations from the search API."""
     rows = search.search(request, request.params)['rows']
     ids = [r['id'] for r in rows]
-    return storage.fetch_ordered_annotations(request.db, ids, load_documents=True)
+    return storage.fetch_ordered_annotations(request.db, ids)
 
 
 @view_config(route_name='stream_atom')

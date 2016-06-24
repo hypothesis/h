@@ -19,8 +19,10 @@ objects and Pyramid ACLs in :mod:`h.api.resources`.
 from pyramid import i18n
 from pyramid import security
 from pyramid.view import view_config
+from sqlalchemy.orm import subqueryload
 
 from h.api import cors
+from h.api import models
 from h.api.events import AnnotationEvent
 from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import AnnotationJSONLDPresenter
@@ -139,11 +141,12 @@ def search(request):
                             separate_replies=separate_replies)
 
     # Run the results through the JSON presenter
-    out['rows'] = [_present_searchdict(request, a)
-                   for a in out['rows']]
+    ids = [r['id'] for r in out['rows']]
+    out['rows'] = _present_annotations(request, ids)
+
     if separate_replies:
-        out['replies'] = [_present_searchdict(request, a)
-                          for a in out['replies']]
+        ids = [r['id'] for r in out['replies']]
+        out['replies'] = _present_annotations(request, ids)
 
     return out
 
@@ -234,10 +237,15 @@ def _json_payload(request):
         raise PayloadError()
 
 
-def _present_searchdict(request, mapping):
-    """Run an object returned from search through a presenter."""
-    ann = storage.annotation_from_dict(mapping)
-    return AnnotationJSONPresenter(request, ann).asdict()
+def _present_annotations(request, ids):
+    """Load annotations by id from the database and present them."""
+    def eager_load_documents(query):
+        return query.options(
+            subqueryload(models.Annotation.document).subqueryload(models.Document.meta_titles))
+
+    annotations = storage.fetch_ordered_annotations(request.db, ids,
+                                                    query_processor=eager_load_documents)
+    return [AnnotationJSONPresenter(request, ann).asdict() for ann in annotations]
 
 
 def _publish_annotation_event(request,

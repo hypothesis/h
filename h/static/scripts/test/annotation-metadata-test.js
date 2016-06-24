@@ -17,26 +17,6 @@ describe('annotation-metadata', function () {
         assert.equal(extractDocumentMetadata(model).domain, 'example.com');
       });
 
-      context('when model.uri starts with "urn"', function() {
-        it(
-          'uses the first document.link uri that doesn\'t start with "urn"',
-          function() {
-            var model = {
-              uri: 'urn:isbn:0451450523',
-              document: {
-                link: [
-                  {href: 'urn:isan:0000-0000-9E59-0000-O-0000-0000-2'},
-                  {href: 'http://example.com/'}
-                ]
-              }
-            };
-
-            assert.equal(
-              extractDocumentMetadata(model).uri, 'http://example.com/');
-          }
-        );
-      });
-
       context('when model.uri does not start with "urn"', function() {
         it('uses model.uri as the uri', function() {
           var model = {
@@ -49,27 +29,13 @@ describe('annotation-metadata', function () {
         });
       });
 
-      context('when document.title is a string', function() {
-        it('returns document.title as title', function() {
-          var model = {
-            uri: 'http://example.com/',
-            document: {
-              title: 'My Document'
-            }
-          };
-
-          assert.equal(
-            extractDocumentMetadata(model).title, model.document.title);
-        });
-      });
-
-      context('when document.title is an array', function() {
-        it('returns document.title[0] as title', function() {
+      context('when document.title is an available', function() {
+        it('uses the first document title as the title', function() {
           var model = {
             uri: 'http://example.com/',
             document: {
               title: ['My Document', 'My Other Document']
-            }
+            },
           };
 
           assert.equal(
@@ -114,8 +80,8 @@ describe('annotation-metadata', function () {
         var model = {
           uri: 'http://example.com/',
           document: {
-            title: 'My Really Really Long Document Title'
-          }
+            title: ['My Really Really Long Document Title'],
+          },
         };
 
         assert.equal(

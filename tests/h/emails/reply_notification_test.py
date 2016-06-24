@@ -5,7 +5,6 @@ import datetime
 import mock
 import pytest
 
-from h.api.models import elastic
 from h.emails.reply_notification import generate
 from h.models import Annotation
 from h.models import Document, DocumentMeta
@@ -43,13 +42,9 @@ class TestGenerate(object):
     def test_falls_back_to_target_uri_for_document_title(self,
                                                          notification,
                                                          pyramid_request,
-                                                         storage_driver,
                                                          html_renderer,
                                                          text_renderer):
-        if storage_driver == 'elastic':
-            notification.document['title'] = []
-        else:
-            notification.document.meta[0].value = []
+        notification.document.meta[0].value = []
 
         generate(pyramid_request, notification)
 
@@ -118,42 +113,32 @@ class TestGenerate(object):
         return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.txt.jinja2')
 
     @pytest.fixture
-    def document(self, storage_driver):
-        title = 'My fascinating page'
-        if storage_driver == 'elastic':
-            return elastic.Document(title=[title])
-        else:
-            doc = Document()
-            doc.meta.append(DocumentMeta(type='title', value=[title]))
-            return doc
+    def document(self, db_session):
+        doc = Document()
+        doc.meta.append(DocumentMeta(type='title', value=['My fascinating page'], claimant='http://example.org'))
+        db_session.add(doc)
+        db_session.flush()
+        return doc
 
     @pytest.fixture
-    def parent(self, storage_driver):
+    def parent(self):
         common = {
             'id': 'foo123',
             'created': datetime.datetime.utcnow(),
             'updated': datetime.datetime.utcnow(),
             'text': 'Foo is true',
         }
-        uri = 'http://example.org/'
-        if storage_driver == 'elastic':
-            return elastic.Annotation(uri=uri, **common)
-        else:
-            return Annotation(target_uri=uri, **common)
+        return Annotation(target_uri='http://example.org/', **common)
 
     @pytest.fixture
-    def reply(self, storage_driver):
+    def reply(self):
         common = {
             'id': 'bar456',
             'created': datetime.datetime.utcnow(),
             'updated': datetime.datetime.utcnow(),
             'text': 'No it is not!',
         }
-        uri = 'http://example.org/'
-        if storage_driver == 'elastic':
-            return elastic.Annotation(uri=uri, **common)
-        else:
-            return Annotation(target_uri=uri, **common)
+        return Annotation(target_uri='http://example.org/', **common)
 
     @pytest.fixture
     def notification(self, reply, reply_user, parent, parent_user, document):
@@ -170,10 +155,6 @@ class TestGenerate(object):
     @pytest.fixture
     def reply_user(self):
         return User(username='ron', email='ron@thesmiths.com')
-
-    @pytest.fixture(params=['elastic', 'postgres'])
-    def storage_driver(self, request):
-        return request.param
 
     @pytest.fixture
     def token_serializer(self, pyramid_config):

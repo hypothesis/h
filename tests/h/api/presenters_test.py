@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import datetime
 import mock
 import pytest
-from pyramid import testing
 
+from h.api import models
 from h.api.presenters import AnnotationBasePresenter
 from h.api.presenters import AnnotationJSONPresenter
 from h.api.presenters import AnnotationSearchIndexPresenter
 from h.api.presenters import AnnotationJSONLDPresenter
 from h.api.presenters import DocumentJSONPresenter
-from h.api.presenters import DocumentMetaJSONPresenter
-from h.api.presenters import DocumentURIJSONPresenter
 from h.api.presenters import add_annotation_link_generator
 from h.api.presenters import utc_iso8601, deep_merge_dict
 
@@ -424,74 +423,32 @@ class TestAnnotationJSONLDPresenter(object):
 
 
 class TestDocumentJSONPresenter(object):
-    def test_asdict(self):
-        document = mock.Mock(document_uris=[mock.Mock(uri='http://foo.com', type=None, content_type=None),
-                                            mock.Mock(uri='http://foo.org', type='rel-canonical', content_type=None)],
-                             meta=[mock.Mock(type='twitter.url.main_url', value='http://foo.org'),
-                                   mock.Mock(type='twitter.title', value='Foo')])
-        presenter = DocumentJSONPresenter(document)
+    def test_asdict(self, db_session):
+        document = models.Document(
+            document_uris=[models.DocumentURI(uri='http://foo.com', claimant='http://foo.com'),
+                           models.DocumentURI(uri='http://foo.org', claimant='http://foo.com', type='rel-canonical')],
+            meta=[models.DocumentMeta(type='title', value=['Foo'], claimant='http://foo.com')])
+        db_session.add(document)
+        db_session.flush()
 
-        expected = {'link': [{'href': 'http://foo.com'},
-                             {'href': 'http://foo.org', 'rel': 'canonical'}],
-                    'twitter': {'title': 'Foo', 'url': {'main_url': 'http://foo.org'}}}
+        presenter = DocumentJSONPresenter(document)
+        expected = {'title': ['Foo']}
         assert expected == presenter.asdict()
 
     def test_asdict_when_none_document(self):
         assert {} == DocumentJSONPresenter(None).asdict()
 
+    def test_asdict_does_not_render_other_meta_than_title(self, db_session):
+        document = models.Document(meta=[
+            models.DocumentMeta(type='title', value=['Foo'], claimant='http://foo.com'),
+            models.DocumentMeta(type='twitter.url', value=['http://foo.com'], claimant='http://foo.com'),
+            models.DocumentMeta(type='facebook.title', value=['FB Title'], claimant='http://foo.com'),
+        ])
+        db_session.add(document)
+        db_session.flush()
 
-class TestDocumentMetaJSONPresenter(object):
-    def test_asdict(self):
-        meta = mock.Mock(type='twitter.url.main_url',
-                         value='https://example.com')
-        presenter = DocumentMetaJSONPresenter(meta)
-
-        expected = {'twitter': {'url': {'main_url': 'https://example.com'}}}
-        assert expected == presenter.asdict()
-
-
-class TestDocumentURIJSONPresenter(object):
-    def test_asdict(self):
-        docuri = mock.Mock(uri='http://example.com/site.pdf',
-                           type='rel-alternate',
-                           content_type='application/pdf')
-        presenter = DocumentURIJSONPresenter(docuri)
-
-        expected = {'href': 'http://example.com/site.pdf',
-                    'rel': 'alternate',
-                    'type': 'application/pdf'}
-
-        assert expected == presenter.asdict()
-
-    def test_asdict_empty_rel(self):
-        docuri = mock.Mock(uri='http://example.com',
-                           type='dc-doi',
-                           content_type='text/html')
-        presenter = DocumentURIJSONPresenter(docuri)
-
-        expected = {'href': 'http://example.com', 'type': 'text/html'}
-
-        assert expected == presenter.asdict()
-
-    def test_asdict_empty_type(self):
-        docuri = mock.Mock(uri='http://example.com',
-                           type='rel-canonical',
-                           content_type=None)
-        presenter = DocumentURIJSONPresenter(docuri)
-
-        expected = {'href': 'http://example.com', 'rel': 'canonical'}
-
-        assert expected == presenter.asdict()
-
-    def test_rel_with_type_rel(self):
-        docuri = mock.Mock(type='rel-canonical')
-        presenter = DocumentURIJSONPresenter(docuri)
-        assert 'canonical' == presenter.rel
-
-    def test_rel_with_non_rel_type(self):
-        docuri = mock.Mock(type='highwire-pdf')
-        presenter = DocumentURIJSONPresenter(docuri)
-        assert presenter.rel is None
+        presenter = DocumentJSONPresenter(document)
+        assert {'title': ['Foo']} == presenter.asdict()
 
 
 def test_utc_iso8601():

@@ -184,57 +184,11 @@ class DocumentJSONPresenter(object):
             return {}
 
         d = {}
-
-        for docmeta in self.document.meta:
-            meta_presenter = DocumentMetaJSONPresenter(docmeta)
-            deep_merge_dict(d, meta_presenter.asdict())
-
-        d['link'] = []
-        for docuri in self.document.document_uris:
-            uri_presenter = DocumentURIJSONPresenter(docuri)
-            d['link'].append(uri_presenter.asdict())
+        title = self.document.title
+        if title:
+            d['title'] = [title]
 
         return d
-
-
-class DocumentMetaJSONPresenter(object):
-    def __init__(self, document_meta):
-        self.document_meta = document_meta
-
-    def asdict(self):
-        # This turns a keypath into a nested dict by first reversing the
-        # keypath and then creating the dict from inside-out. Rather than
-        # using recursion to create the dict from the outside in.
-        reversed_path = self.document_meta.type.split('.')[::-1]
-        d = self.document_meta.value
-        for nested in reversed_path:
-            d = {nested: d}
-
-        return d
-
-
-class DocumentURIJSONPresenter(object):
-    def __init__(self, document_uri):
-        self.document_uri = document_uri
-
-    def asdict(self):
-        data = {'href': self.document_uri.uri}
-
-        rel = self.rel
-        if rel:
-            data['rel'] = rel
-
-        type = self.document_uri.content_type
-        if type:
-            data['type'] = type
-
-        return data
-
-    @property
-    def rel(self):
-        type = self.document_uri.type
-        if type and type.startswith('rel-'):
-            return self.document_uri.type[4:]
 
 
 def add_annotation_link_generator(registry, name, generator):

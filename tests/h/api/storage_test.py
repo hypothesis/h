@@ -40,9 +40,9 @@ class TestFetchOrderedAnnotations(object):
         assert [ann_1, ann_2] == storage.fetch_ordered_annotations(db_session,
                                                                    [ann_1.id, ann_2.id])
 
-    def test_it_allows_to_prefetch_document_data(self, db_session):
+    def test_it_allows_to_change_the_query(self, db_session):
         ann_1 = Annotation(userid='luke', target_uri='http://example.com')
-        ann_2 = Annotation(userid='luke', target_uri='http://example.com')
+        ann_2 = Annotation(userid='maria', target_uri='http://example.com')
         db_session.add_all([ann_1, ann_2])
 
         doc = Document(
@@ -53,9 +53,12 @@ class TestFetchOrderedAnnotations(object):
 
         db_session.flush()
 
-        assert [ann_2, ann_1] == storage.fetch_ordered_annotations(db_session,
-                                                                   [ann_2.id, ann_1.id],
-                                                                   load_documents=True)
+        def only_maria(query):
+            return query.filter(Annotation.userid == 'maria')
+
+        assert [ann_2] == storage.fetch_ordered_annotations(db_session,
+                                                            [ann_2.id, ann_1.id],
+                                                            query_processor=only_maria)
 
 
 class TestExpandURI(object):
