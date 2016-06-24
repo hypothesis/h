@@ -173,7 +173,6 @@ def create_app(global_config, **settings):
     # We have to include models and db to set up sqlalchemy metadata.
     config.include('h.models')
     config.include('h.db')
-    config.include('h.api.db')
 
     # We have to include search to set up the `request.es` property.
     config.include('h.api.search')

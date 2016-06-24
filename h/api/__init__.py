@@ -2,7 +2,6 @@
 
 
 def includeme(config):
-    config.include('h.api.db')
     config.include('h.api.eventqueue')
     config.include('h.api.presenters')
     config.include('h.api.search')
