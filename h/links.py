@@ -15,15 +15,11 @@ def html_link(request, annotation):
 
 def incontext_link(request, annotation):
     """Generate a link to an annotation on the page where it was made."""
-    is_reply = bool(annotation.references)
-    if is_reply:
-        return None
-
     bouncer_url = request.registry.settings.get('h.bouncer_url')
     if not bouncer_url:
         return None
 
-    link = urlparse.urljoin(bouncer_url, annotation.id)
+    link = urlparse.urljoin(bouncer_url, annotation.thread_root_id)
     uri = annotation.target_uri
     if uri.startswith(('http://', 'https://')):
         # We can't use urljoin here, because if it detects the second argument
