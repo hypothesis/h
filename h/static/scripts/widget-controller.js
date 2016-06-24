@@ -181,7 +181,17 @@ module.exports = function WidgetController(
   }
 
   function isLoading() {
-    return searchClients.length > 0;
+    if (!crossframe.frames.some(function (frame) { return frame.uri; })) {
+      // The document's URL isn't known so the document must still be loading.
+      return true;
+    }
+
+    if (searchClients.length > 0) {
+      // We're still waiting for annotation search results from the API.
+      return true;
+    }
+
+    return false;
   }
 
   /**

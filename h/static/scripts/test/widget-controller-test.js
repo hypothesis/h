@@ -344,6 +344,17 @@ describe('WidgetController', function () {
   });
 
   describe('direct linking messages', function () {
+
+    beforeEach(function () {
+      // The document has finished loading.
+      fakeCrossFrame.frames = [
+        {
+          uri: 'http://www.example.com',
+          searchUris: [],
+        }
+      ];
+    });
+
     it('displays a message if the selection is unavailable', function () {
       annotationUI.selectAnnotations(['missing']);
       $scope.$digest();
@@ -360,6 +371,18 @@ describe('WidgetController', function () {
     it('does not a show a message if there is no selection', function () {
       annotationUI.selectAnnotations([]);
       $scope.$digest();
+      assert.isFalse($scope.selectedAnnotationUnavailable());
+    });
+
+    it("doesn't show a message if the document isn't loaded yet", function () {
+      // No search requests have been sent yet.
+      searchClients = [];
+      // There is a selection but the selected annotation isn't available.
+      annotationUI.selectAnnotations(['missing']);
+      // The document hasn't finished loading.
+      fakeCrossFrame.frames = [];
+      $scope.$digest();
+
       assert.isFalse($scope.selectedAnnotationUnavailable());
     });
 
