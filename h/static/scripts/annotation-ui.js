@@ -77,15 +77,24 @@ var types = {
   SET_SORT_KEY: 'SET_SORT_KEY',
 };
 
+/**
+ * Return a copy of `current` with all matching annotations in `annotations`
+ * removed.
+ */
 function excludeAnnotations(current, annotations) {
-  var idsAndTags = annotations.reduce(function (map, annot) {
-    var id = annot.id || annot.$$tag;
-    map[id] = true;
-    return map;
-  }, {});
+  var idsAndTags = {};
+  annotations.forEach(function (annot) {
+    if (annot.id) {
+      idsAndTags[annot.id] = true;
+    }
+    if (annot.$$tag) {
+      idsAndTags[annot.$$tag] = true;
+    }
+  });
   return current.filter(function (annot) {
-    var id = annot.id || annot.$$tag;
-    return !idsAndTags[id];
+    var shouldRemove = (annot.id && idsAndTags[annot.id]) ||
+                       (annot.$$tag && idsAndTags[annot.$$tag]);
+    return !shouldRemove;
   });
 }
 
@@ -157,6 +166,19 @@ module.exports = function (settings) {
     });
   }
 
+  function idFromIdOrTag(idOrTag) {
+    var annot = store.getState().annotations.find(function (annot) {
+      return annot.id === idOrTag || annot.$$tag === idOrTag;
+    });
+    if (annot) {
+      return annot.id;
+    } else {
+      // If the annotation has not been loaded yet, assume the provided value
+      // is an ID
+      return idOrTag;
+    }
+  }
+
   return {
     /**
      * Return the current UI state of the sidebar. This should not be modified
@@ -181,14 +203,13 @@ module.exports = function (settings) {
     /**
      * Sets which annotations are currently focused.
      *
-     * @param {Array<Annotation>} annotations
+     * @param {Array<string>} Tags of annotations to focus
      */
-    focusAnnotations: function (annotations) {
-      var selection = {};
-      for (var i = 0, annotation; i < annotations.length; i++) {
-        annotation = annotations[i];
-        selection[annotation.$$tag] = true;
-      }
+    focusAnnotations: function (tags) {
+      var selection = tags.reduce(function (map, tag) {
+        map[tag] = true;
+        return map;
+      }, {});
       store.dispatch({
         type: types.FOCUS_ANNOTATIONS,
         focused: freeze(selection),
@@ -243,27 +264,31 @@ module.exports = function (settings) {
     /**
      * Set the currently selected annotation IDs.
      *
-     * @param {Array<string|{id:string}>} annotations - Annotations or IDs
-     *        of annotations to select.
+     * @param {Array<string>} idsOrTags - The IDs or local tags of the annotations
+     *   to select.
      */
-    selectAnnotations: function (annotations) {
-      var selection = {};
-      for (var i = 0; i < annotations.length; i++) {
-        if (typeof annotations[i] === 'string') {
-          selection[annotations[i]] = true;
-        } else {
-          selection[annotations[i].id] = true;
+    selectAnnotations: function (idsOrTags) {
+      var selection = idsOrTags.reduce(function (map, idOrTag) {
+        var id = idFromIdOrTag(idOrTag);
+        if (!id) {
+          // This annotation has not yet been created, it cannot be selected.
+          return map;
         }
-      }
+        map[id] = true;
+        return map;
+      }, {});
       select(selection);
     },
 
     /** Toggle whether annotations are selected or not. */
-    toggleSelectedAnnotations: function (annotations) {
+    toggleSelectedAnnotations: function (idsOrTags) {
       var selection = Object.assign({}, store.getState().selectedAnnotationMap);
-      for (var i = 0, annotation; i < annotations.length; i++) {
-        annotation = annotations[i];
-        var id = annotation.id;
+      for (var i = 0; i < idsOrTags.length; i++) {
+        var id = idFromIdOrTag(idsOrTags[i]);
+        if (!id) {
+          // This annotation has not been created yet, it cannot be selected
+          continue;
+        }
         if (selection[id]) {
           delete selection[id];
         } else {
@@ -274,12 +299,13 @@ module.exports = function (settings) {
     },
 
     /** De-select an annotation. */
-    removeSelectedAnnotation: function (annotation) {
+    removeSelectedAnnotation: function (id) {
       var selection = Object.assign({}, store.getState().selectedAnnotationMap);
-      if (selection) {
-        delete selection[annotation.id];
-        select(selection);
+      if (!selection || !id) {
+        return;
       }
+      delete selection[id];
+      select(selection);
     },
 
     /** De-select all annotations. */

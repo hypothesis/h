@@ -1,3 +1,5 @@
+'use strict';
+
 var draftsService = require('../drafts');
 
 describe('drafts', function () {
@@ -7,7 +9,7 @@ describe('drafts', function () {
     drafts = draftsService();
   });
 
-  describe('.update', function () {
+  describe('#update', function () {
     it('should save changes', function () {
       var model = {id: 'foo'};
       assert.notOk(drafts.get(model));
@@ -31,9 +33,17 @@ describe('drafts', function () {
       drafts.update(modelB, {isPrivate:true, tags:['foo'], text:'bar'});
       assert.equal(drafts.get(modelA).text, 'bar');
     });
+
+    it('should replace drafts with the same tag', function () {
+      var modelA = {$$tag: 'foo'};
+      var modelB = {$$tag: 'foo'};
+      drafts.update(modelA, {isPrivate:true, tags:['foo'], text:'foo'});
+      drafts.update(modelB, {isPrivate:true, tags:['foo'], text:'bar'});
+      assert.equal(drafts.get(modelA).text, 'bar');
+    });
   });
 
-  describe('.remove', function () {
+  describe('#remove', function () {
     it('should remove drafts', function () {
       var model = {id: 'foo'};
       drafts.update(model, {text: 'bar'});
@@ -42,7 +52,7 @@ describe('drafts', function () {
     });
   });
 
-  describe('.unsaved', function () {
+  describe('#unsaved', function () {
     it('should return drafts for unsaved annotations', function () {
       var model = {};
       drafts.update(model, {text: 'bar'});

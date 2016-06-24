@@ -10,7 +10,6 @@ describe('AnnotationUISync', function () {
   var publish;
   var fakeBridge;
   var annotationUI;
-  var fakeAnnotationSync;
   var createAnnotationUISync;
   var createChannel = function () {
     return { call: sandbox.stub() };
@@ -43,20 +42,10 @@ describe('AnnotationUISync', function () {
       ]
     };
 
-    fakeAnnotationSync = {
-      getAnnotationForTag: function (tag) {
-        return {
-          id: Number(tag.replace('tag', '')),
-          $$tag: tag,
-        };
-      }
-    };
-
     annotationUI = annotationUIFactory({});
     createAnnotationUISync = function () {
       new AnnotationUISync(
-        $rootScope, fakeWindow, fakeBridge, fakeAnnotationSync,
-        annotationUI
+        $rootScope, fakeWindow, annotationUI, fakeBridge
       );
     };
   }));
@@ -91,12 +80,9 @@ describe('AnnotationUISync', function () {
   describe('on "showAnnotations" event', function () {
     it('updates the annotationUI to include the shown annotations', function () {
       createAnnotationUISync();
+      annotationUI.selectAnnotations = sinon.stub();
       publish('showAnnotations', ['tag1', 'tag2', 'tag3']);
-      assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
-        1: true,
-        2: true,
-        3: true,
-      });
+      assert.calledWith(annotationUI.selectAnnotations, ['tag1', 'tag2', 'tag3']);
     });
 
     it('triggers a digest', function () {
@@ -127,12 +113,9 @@ describe('AnnotationUISync', function () {
   describe('on "toggleAnnotationSelection" event', function () {
     it('updates the annotationUI to show the provided annotations', function () {
       createAnnotationUISync();
+      annotationUI.toggleSelectedAnnotations = sinon.stub();
       publish('toggleAnnotationSelection', ['tag1', 'tag2', 'tag3']);
-      assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
-        1: true,
-        2: true,
-        3: true,
-      });
+      assert.calledWith(annotationUI.toggleSelectedAnnotations, ['tag1', 'tag2', 'tag3']);
     });
 
     it('triggers a digest', function () {

@@ -49,6 +49,21 @@ describe('annotationUI', function () {
       annotationUI.removeAnnotations([annot]);
       assert.deepEqual(annotationUI.getState().annotations, []);
     });
+
+    it('matches annotations to remove by ID', function () {
+      var annot = annotationFixtures.defaultAnnotation();
+      annotationUI.addAnnotations([annot]);
+      annotationUI.removeAnnotations([{id: annot.id}]);
+      assert.deepEqual(annotationUI.getState().annotations, []);
+    });
+
+    it('matches annotations to remove by tag', function () {
+      var annot = annotationFixtures.defaultAnnotation();
+      annot.$$tag = 'atag';
+      annotationUI.addAnnotations([annot]);
+      annotationUI.removeAnnotations([{$$tag: annot.$$tag}]);
+      assert.deepEqual(annotationUI.getState().annotations, []);
+    });
   });
 
   describe('#clearAnnotations()', function () {
@@ -95,22 +110,22 @@ describe('annotationUI', function () {
 
   describe('#focusAnnotations()', function () {
     it('adds the passed annotations to the focusedAnnotationMap', function () {
-      annotationUI.focusAnnotations([{ $$tag: 1 }, { $$tag: 2 }, { $$tag: 3 }]);
+      annotationUI.focusAnnotations([1, 2, 3]);
       assert.deepEqual(annotationUI.getState().focusedAnnotationMap, {
         1: true, 2: true, 3: true
       });
     });
 
     it('replaces any annotations originally in the map', function () {
-      annotationUI.focusAnnotations([{ $$tag: 1 }]);
-      annotationUI.focusAnnotations([{ $$tag: 2 }, { $$tag: 3 }]);
+      annotationUI.focusAnnotations([1]);
+      annotationUI.focusAnnotations([2, 3]);
       assert.deepEqual(annotationUI.getState().focusedAnnotationMap, {
         2: true, 3: true
       });
     });
 
     it('nulls the map if no annotations are focused', function () {
-      annotationUI.focusAnnotations([{$$tag: 1}]);
+      annotationUI.focusAnnotations([1]);
       annotationUI.focusAnnotations([]);
       assert.isNull(annotationUI.getState().focusedAnnotationMap);
     });
@@ -118,7 +133,7 @@ describe('annotationUI', function () {
 
   describe('#hasSelectedAnnotations', function () {
     it('returns true if there are any selected annotations', function () {
-      annotationUI.selectAnnotations([{id: 1}]);
+      annotationUI.selectAnnotations([1]);
       assert.isTrue(annotationUI.hasSelectedAnnotations());
     });
 
@@ -129,12 +144,12 @@ describe('annotationUI', function () {
 
   describe('#isAnnotationSelected', function () {
     it('returns true if the id provided is selected', function () {
-      annotationUI.selectAnnotations([{id: 1}]);
+      annotationUI.selectAnnotations([1]);
       assert.isTrue(annotationUI.isAnnotationSelected(1));
     });
 
     it('returns false if the id provided is not selected', function () {
-      annotationUI.selectAnnotations([{id: 1}]);
+      annotationUI.selectAnnotations([1]);
       assert.isFalse(annotationUI.isAnnotationSelected(2));
     });
 
@@ -145,22 +160,22 @@ describe('annotationUI', function () {
 
   describe('#selectAnnotations()', function () {
     it('adds the passed annotations to the selectedAnnotationMap', function () {
-      annotationUI.selectAnnotations([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      annotationUI.selectAnnotations([1, 2, 3]);
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
         1: true, 2: true, 3: true
       });
     });
 
     it('replaces any annotations originally in the map', function () {
-      annotationUI.selectAnnotations([{ id:1 }]);
-      annotationUI.selectAnnotations([{ id: 2 }, { id: 3 }]);
+      annotationUI.selectAnnotations([1]);
+      annotationUI.selectAnnotations([2, 3]);
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
         2: true, 3: true
       });
     });
 
     it('nulls the map if no annotations are selected', function () {
-      annotationUI.selectAnnotations([{id:1}]);
+      annotationUI.selectAnnotations([1]);
       annotationUI.selectAnnotations([]);
       assert.isNull(annotationUI.getState().selectedAnnotationMap);
     });
@@ -168,45 +183,45 @@ describe('annotationUI', function () {
 
   describe('#toggleSelectedAnnotations()', function () {
     it('adds annotations missing from the selectedAnnotationMap', function () {
-      annotationUI.selectAnnotations([{ id: 1 }, { id: 2}]);
-      annotationUI.toggleSelectedAnnotations([{ id: 3 }, { id: 4 }]);
+      annotationUI.selectAnnotations([1, 2]);
+      annotationUI.toggleSelectedAnnotations([3, 4]);
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
         1: true, 2: true, 3: true, 4: true
       });
     });
 
     it('removes annotations already in the selectedAnnotationMap', function () {
-      annotationUI.selectAnnotations([{id: 1}, {id: 3}]);
-      annotationUI.toggleSelectedAnnotations([{ id: 1 }, { id: 2 }]);
+      annotationUI.selectAnnotations([1, 3]);
+      annotationUI.toggleSelectedAnnotations([1, 2]);
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, { 2: true, 3: true });
     });
 
     it('nulls the map if no annotations are selected', function () {
-      annotationUI.selectAnnotations([{id: 1}]);
-      annotationUI.toggleSelectedAnnotations([{ id: 1 }]);
+      annotationUI.selectAnnotations([1]);
+      annotationUI.toggleSelectedAnnotations([1]);
       assert.isNull(annotationUI.getState().selectedAnnotationMap);
     });
   });
 
   describe('#removeSelectedAnnotation()', function () {
     it('removes an annotation from the selectedAnnotationMap', function () {
-      annotationUI.selectAnnotations([{id: 1}, {id: 2}, {id: 3}]);
-      annotationUI.removeSelectedAnnotation({ id: 2 });
+      annotationUI.selectAnnotations([1, 2, 3]);
+      annotationUI.removeSelectedAnnotation(2);
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
         1: true, 3: true
       });
     });
 
     it('nulls the map if no annotations are selected', function () {
-      annotationUI.selectAnnotations([{id: 1}]);
-      annotationUI.removeSelectedAnnotation({ id: 1 });
+      annotationUI.selectAnnotations([1]);
+      annotationUI.removeSelectedAnnotation(1);
       assert.isNull(annotationUI.getState().selectedAnnotationMap);
     });
   });
 
   describe('#clearSelectedAnnotations()', function () {
     it('removes all annotations from the selection', function () {
-      annotationUI.selectAnnotations([{id: 1}]);
+      annotationUI.selectAnnotations([1]);
       annotationUI.clearSelectedAnnotations();
       assert.isNull(annotationUI.getState().selectedAnnotationMap);
     });

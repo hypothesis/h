@@ -19,8 +19,12 @@ function annotationDirective() {
 
   var annotation = proxyquire('../annotation', {
     angular: testUtil.noCallThru(angular),
-    '../filter/document-domain': noop,
-    '../filter/document-title': noop,
+    '../filter/document-domain': function (meta) {
+      return 'domain: ' + meta.domain;
+    },
+    '../filter/document-title': function (meta) {
+      return 'title: ' + meta.title;
+    },
     '../filter/persona': {
       username: noop,
     }
@@ -30,8 +34,8 @@ function annotationDirective() {
 }
 
 describe('annotation', function() {
-  describe('updateDomainModel()', function() {
-    var updateDomainModel = require('../annotation').updateDomainModel;
+  describe('updateModel()', function() {
+    var updateModel = require('../annotation').updateModel;
 
     function fakePermissions() {
       return {
@@ -40,89 +44,53 @@ describe('annotation', function() {
       };
     }
 
-    function fakeGroups() {
-      return {
-        focused: function() {return {};},
-      };
-    }
+    var fakeStore = {
+      AnnotationResource: function (model) {
+        Object.assign(this, model);
+      },
+    };
 
-    it('copies text from viewModel into domainModel', function() {
-      var domainModel = {};
-      var viewModel = {form: {text: 'bar', tags: []}};
-
-      updateDomainModel(domainModel, viewModel, fakePermissions(),
-                        fakeGroups());
-
-      assert.equal(domainModel.text, viewModel.form.text);
+    it('copies tags and text into the new model', function() {
+      var changes = {text: 'bar', tags: ['foo', 'bar']};
+      var newModel = updateModel(fixtures.defaultAnnotation(), changes,
+        fakePermissions(), fakeStore);
+      assert.deepEqual(newModel.tags, changes.tags);
+      assert.equal(newModel.text, changes.text);
     });
 
-    it('overwrites text in domainModel', function() {
-      var domainModel = {text: 'foo'};
-      var viewModel = {form: {text: 'bar', tags: []}};
-
-      updateDomainModel(domainModel, viewModel, fakePermissions(),
-                        fakeGroups());
-
-      assert.equal(domainModel.text, viewModel.form.text);
+    it('preserves non-private properties', function() {
+      var changes = {text: 'bar', tags: ['foo', 'bar']};
+      var annot = fixtures.defaultAnnotation();
+      var newModel = updateModel(annot, changes,
+        fakePermissions(), fakeStore);
+      assert.equal(newModel.id, annot.id);
     });
 
-    it('doesn\'t touch other properties in domainModel', function() {
-      var domainModel = {foo: 'foo', bar: 'bar'};
-      var viewModel = {form: {foo: 'FOO', tags: []}};
-
-      updateDomainModel(domainModel, viewModel, fakePermissions(),
-                        fakeGroups());
-
-      assert.equal(
-        domainModel.bar, 'bar',
-        'updateDomainModel() should not touch properties of domainModel' +
-        'that don\'t exist in viewModel');
+    it('does not preserve private properties', function() {
+      var changes = {text: 'bar', tags: ['foo', 'bar']};
+      var annot = fixtures.defaultAnnotation();
+      annot.$orphan = true;
+      var newModel = updateModel(annot, changes,
+        fakePermissions(), fakeStore);
+      assert.isUndefined(newModel.$orphan);
     });
 
-    it('copies tag texts from viewModel into domainModel', function() {
-      var domainModel = {};
-      var viewModel = {
-        form: {
-          tags: ['foo', 'bar'],
-        }
-      };
-
-      updateDomainModel(domainModel, viewModel, fakePermissions(),
-                        fakeGroups());
-
-      assert.deepEqual(domainModel.tags, ['foo', 'bar']);
-    });
-
-    it('sets domainModel.permissions to private if vm.isPrivate', function() {
-      var domainModel = {};
-      var viewModel = {
-        isPrivate: true,
-        form: {
-          text: 'foo',
-        },
-      };
+    it('sets permissions to private if the draft is private', function() {
+      var changes = {isPrivate: true, text: 'bar', tags: ['foo', 'bar']};
+      var annot = fixtures.defaultAnnotation();
       var permissions = fakePermissions();
       permissions.private = sinon.stub().returns('private permissions');
-
-      updateDomainModel(domainModel, viewModel, permissions, fakeGroups());
-
-      assert.equal(domainModel.permissions, 'private permissions');
+      var newModel = updateModel(annot, changes, permissions, fakeStore);
+      assert.equal(newModel.permissions, 'private permissions');
     });
 
-    it('sets domainModel.permissions to shared if !vm.isPrivate', function() {
-      var domainModel = {};
-      var viewModel = {
-        isPrivate: false,
-        form: {
-          text: 'foo',
-        },
-      };
+    it('sets permissions to shared if the draft is shared', function() {
+      var changes = {isPrivate: false, text: 'bar', tags: ['foo', 'bar']};
+      var annot = fixtures.defaultAnnotation();
       var permissions = fakePermissions();
       permissions.shared = sinon.stub().returns('shared permissions');
-
-      updateDomainModel(domainModel, viewModel, permissions, fakeGroups());
-
-      assert.equal(domainModel.permissions, 'shared permissions');
+      var newModel = updateModel(annot, changes, permissions, fakeStore);
+      assert.equal(newModel.permissions, 'shared permissions');
     });
   });
 
@@ -138,6 +106,7 @@ describe('annotation', function() {
     var fakeGroups;
     var fakePermissions;
     var fakeSession;
+    var fakeStore;
     var sandbox;
 
     function createDirective(annotation) {
@@ -158,8 +127,6 @@ describe('annotation', function() {
         scope: element.scope,
       };
     }
-
-
 
     before(function() {
       angular.module('h', [])
@@ -224,6 +191,14 @@ describe('annotation', function() {
         serviceUrl: 'https://test.hypothes.is/',
       };
 
+      fakeStore = {
+        AnnotationResource: function (model) {
+          Object.assign(this, model);
+          this.$create = sinon.stub().returns(Promise.resolve());
+          this.$update = sinon.stub().returns(Promise.resolve());
+        },
+      };
+
       fakeGroups = {
         focused: function() {
           return {};
@@ -236,10 +211,11 @@ describe('annotation', function() {
       $provide.value('drafts', fakeDrafts);
       $provide.value('features', fakeFeatures);
       $provide.value('flash', fakeFlash);
+      $provide.value('groups', fakeGroups);
       $provide.value('permissions', fakePermissions);
       $provide.value('session', fakeSession);
       $provide.value('settings', fakeSettings);
-      $provide.value('groups', fakeGroups);
+      $provide.value('store', fakeStore);
     }));
 
     beforeEach(
@@ -383,12 +359,23 @@ describe('annotation', function() {
         assert.notCalled(annotation.$create);
       });
 
-      it('edits new annotations on initialization', function() {
+      it('creates drafts for new annotations on initialization', function() {
         var annotation = fixtures.newAnnotation();
+        createDirective(annotation);
+        assert.calledWith(fakeDrafts.update, annotation, {
+          isPrivate: false,
+          tags: annotation.tags,
+          text: annotation.text,
+        });
+      });
 
-        var controller = createDirective(annotation).controller;
-
-        assert.isTrue(controller.editing());
+      it('does not create drafts for new highlights on initialization', function() {
+        var annotation = fixtures.newHighlight();
+        // We have to set annotation.$create() because it'll try to call it.
+        annotation.$create = sandbox.stub().returns({
+          then: function() {}
+        });
+        assert.notCalled(fakeDrafts.update);
       });
 
       it('edits annotations with drafts on initialization', function() {
@@ -400,55 +387,29 @@ describe('annotation', function() {
 
         assert.isTrue(controller.editing());
       });
+    });
 
-      it('does not edit new highlights on initialization', function() {
-        var annotation = fixtures.newHighlight();
-        // We have to set annotation.$create() because it'll try to call it.
-        annotation.$create = sandbox.stub().returns({
-          then: function() {}
-        });
-
-        var controller = createDirective(annotation).controller;
-
-        assert.isFalse(controller.editing());
+    describe('#editing()', function() {
+      it('returns false if the annotation does not have a draft', function () {
+        var controller = createDirective().controller;
+        assert.notOk(controller.editing());
       });
 
-      it('edits highlights with drafts on initialization', function() {
-        var annotation = fixtures.oldHighlight();
-        // You can edit a highlight, enter some text or tags, and save it (the
-        // highlight then becomes an annotation). You can also edit a highlight
-        // and then change focus to another group and back without saving the
-        // highlight, in which case the highlight will have draft edits.
-        // This highlight has draft edits.
-        fakeDrafts.get.returns({text: '', tags: []});
-
-        var controller = createDirective(annotation).controller;
-
+      it('returns true if the annotation has a draft', function () {
+        var controller = createDirective().controller;
+        fakeDrafts.get.returns({tags: [], text: '', isPrivate: false});
         assert.isTrue(controller.editing());
       });
-    });
 
-    describe('.editing()', function() {
-      it('returns true if action is "create"', function() {
+      it('returns false if the annotation has a draft but is being saved', function () {
         var controller = createDirective().controller;
-        controller.action = 'create';
-        assert(controller.editing());
-      });
-
-      it('returns true if action is "edit"', function() {
-        var controller = createDirective().controller;
-        controller.action = 'edit';
-        assert(controller.editing());
-      });
-
-      it('returns false if action is "view"', function() {
-        var controller = createDirective().controller;
-        controller.action = 'view';
-        assert(!controller.editing());
+        fakeDrafts.get.returns({tags: [], text: '', isPrivate: false});
+        controller.isSaving = true;
+        assert.isFalse(controller.editing());
       });
     });
 
-    describe('.isHighlight()', function() {
+    describe('#isHighlight()', function() {
       it('returns true for new highlights', function() {
         var annotation = fixtures.newHighlight();
         // We need to define $create because it'll try to call it.
@@ -596,7 +557,7 @@ describe('annotation', function() {
         'does not add the world readable principal if the parent is private',
         function() {
           var controller = createDirective(annotation).controller;
-          controller.isPrivate = true;
+          fakePermissions.isPrivate.returns(true);
           var reply = {};
           fakeAnnotationMapper.createAnnotation.returns(reply);
           controller.reply();
@@ -620,84 +581,41 @@ describe('annotation', function() {
     describe('#setPrivacy', function() {
       it('makes the annotation private when level is "private"', function() {
         var parts = createDirective();
-
-        // Make this annotation shared.
-        parts.controller.isPrivate = false;
-        fakePermissions.isPrivate.returns(false);
-
-        parts.annotation.$update = sinon.stub().returns(Promise.resolve());
-
-        // Edit the annotation and make it private.
-        parts.controller.edit();
         parts.controller.setPrivacy('private');
-        fakePermissions.isPrivate.returns(true);
-
-        return parts.controller.save().then(function() {
-          // Verify that the permissions are updated once the annotation
-          // is saved.
-          assert.equal(parts.controller.isPrivate, true);
-        });
+        assert.calledWith(fakeDrafts.update, parts.controller.annotation, sinon.match({
+          isPrivate: true,
+        }));
       });
 
       it('makes the annotation shared when level is "shared"', function() {
         var parts = createDirective();
-        parts.controller.isPrivate = true;
-        parts.annotation.$update = sinon.stub().returns(Promise.resolve());
-        parts.controller.edit();
-        parts.controller.form.text = 'test';
         parts.controller.setPrivacy('shared');
-        return parts.controller.save().then(function() {
-          assert.equal(parts.controller.isPrivate, false);
-        });
+        assert.calledWith(fakeDrafts.update, parts.controller.annotation, sinon.match({
+          isPrivate: false,
+        }));
       });
 
-      it('saves the "shared" visibility level to localStorage', function() {
+      it('sets the default visibility level', function() {
         var parts = createDirective();
-        parts.annotation.$update = sinon.stub().returns(Promise.resolve());
-        parts.controller.edit();
         parts.controller.setPrivacy('shared');
-        parts.controller.form.text = 'test';
-        return parts.controller.save().then(function() {
-          assert(fakePermissions.setDefault.calledWithExactly('shared'));
-        });
-      });
-
-      it('saves the "private" visibility level to localStorage', function() {
-        var parts = createDirective();
-        parts.annotation.$update = sinon.stub().returns(Promise.resolve());
-        parts.controller.edit();
-        parts.controller.setPrivacy('private');
-        return parts.controller.save().then(function() {
-          assert(fakePermissions.setDefault.calledWithExactly('private'));
-        });
+        assert.calledWith(fakePermissions.setDefault, 'shared');
       });
 
       it('doesn\'t save the visibility if the annotation is a reply', function() {
-        var parts = createDirective();
-        parts.annotation.$update = sinon.stub().returns(Promise.resolve());
-        parts.annotation.references = ['parent id'];
-        parts.controller.edit();
+        var parts = createDirective(fixtures.oldReply());
         parts.controller.setPrivacy('private');
-        return parts.controller.save().then(function() {
-          assert(!fakePermissions.setDefault.called);
-        });
+        assert.notCalled(fakePermissions.setDefault);
       });
     });
 
     describe('#hasContent', function() {
       it('returns false if the annotation has no tags or text', function() {
-        var controller = createDirective().controller;
-        controller.form.text = '';
-        controller.form.tags = [];
+        var controller = createDirective(fixtures.oldHighlight()).controller;
         assert.ok(!controller.hasContent());
       });
 
       it('returns true if the annotation has tags or text', function() {
-        var controller = createDirective().controller;
-        controller.form.text = 'bar';
-        assert.ok(controller.hasContent());
-        controller.form.text = '';
-        controller.form.tags = ['foo'];
+        var controller = createDirective(fixtures.oldAnnotation()).controller;
         assert.ok(controller.hasContent());
       });
     });
@@ -728,7 +646,7 @@ describe('annotation', function() {
       });
     });
 
-    describe('deleteAnnotation() method', function() {
+    describe('#delete()', function() {
       beforeEach(function() {
         fakeAnnotationMapper.deleteAnnotation = sandbox.stub();
       });
@@ -807,182 +725,157 @@ describe('annotation', function() {
       });
     });
 
+    describe('#meta()', function () {
+      it('returns the title from the annotation\'s document', function () {
+        var annot = fixtures.defaultAnnotation();
+        var controller = createDirective(annot).controller;
+        assert.equal(controller.documentMeta().title,
+          'title: ' + annot.document.title);
+      });
+
+      it('returns the domain from the annotation\'s URI', function () {
+        var annot = fixtures.defaultAnnotation();
+        var controller = createDirective(annot).controller;
+        assert.equal(controller.documentMeta().domain, 'domain: example.com');
+      });
+    });
+
     describe('saving a new annotation', function() {
       var annotation;
+      var $createFn;
 
       beforeEach(function() {
-        annotation = fixtures.defaultAnnotation();
-        annotation.$create = sandbox.stub();
+        annotation = fixtures.newAnnotation();
+        $createFn = sinon.stub().returns(Promise.resolve());
+        fakeStore.AnnotationResource = function (model) {
+          Object.assign(this, model);
+          this.$create = $createFn;
+        };
       });
 
-      function controllerWithActionCreate() {
-        var controller = createDirective(annotation).controller;
-        controller.action = 'create';
-        controller.form.text = 'new annotation';
-        return controller;
+      function createController() {
+        return createDirective(annotation).controller;
       }
 
-      it(
-        'emits annotationCreated when saving an annotation succeeds',
-        function(done) {
-          var controller = controllerWithActionCreate();
-          sandbox.spy($rootScope, '$emit');
-          annotation.$create.returns(Promise.resolve());
-          controller.save().then(function() {
-            assert($rootScope.$emit.calledWith(events.ANNOTATION_CREATED));
-            done();
-          });
-        }
-      );
+      it('removes the draft when saving an annotation succeeds', function () {
+        var controller = createController();
+        return controller.save().then(function () {
+          assert.calledWith(fakeDrafts.remove, annotation);
+        });
+      });
 
-      it(
-        'flashes a generic error if the server can\'t be reached',
-        function(done) {
-          var controller = controllerWithActionCreate();
-          annotation.$create.returns(Promise.reject({
-            status: 0
-          }));
-          controller.save().then(function() {
-            assert(fakeFlash.error.calledWith(
-              'Service unreachable.', 'Saving annotation failed'));
-            done();
-          });
-        }
-      );
+      it('emits annotationCreated when saving an annotation succeeds', function () {
+        var controller = createController();
+        sandbox.spy($rootScope, '$emit');
+        return controller.save().then(function() {
+          assert($rootScope.$emit.calledWith(events.ANNOTATION_CREATED));
+        });
+      });
 
-      it(
-        'flashes an error if saving the annotation fails on the server',
-        function(done) {
-          var controller = controllerWithActionCreate();
-          annotation.$create.returns(Promise.reject({
-            status: 500,
-            statusText: 'Server Error',
-            data: {}
-          }));
-          controller.save().then(function() {
-            assert(fakeFlash.error.calledWith(
-              '500 Server Error', 'Saving annotation failed'));
-            done();
-          });
-        }
-      );
+      it('flashes a generic error if the server can\'t be reached', function () {
+        var controller = createController();
+        $createFn = function () {
+          return Promise.reject({status: 0});
+        };
+        return controller.save().then(function() {
+          assert.calledWith(fakeFlash.error, 'Service unreachable.',
+          'Saving annotation failed');
+        });
+      });
 
-      it(
-        'doesn\'t flash an error when saving an annotation succeeds',
-        function() {
-          var controller = controllerWithActionCreate();
-          annotation.$create.returns(Promise.resolve());
-          controller.save();
-          assert(fakeFlash.error.notCalled);
-        }
-      );
+      it('flashes an error if saving the annotation fails on the server', function () {
+        var controller = createController();
+        $createFn = function () {
+          return Promise.reject({status: 500, statusText: 'Server Error'});
+        };
+        return controller.save().then(function() {
+          assert.calledWith(fakeFlash.error, '500 Server Error',
+            'Saving annotation failed');
+        });
+      });
+
+      it('doesn\'t flash an error when saving an annotation succeeds', function() {
+        var controller = createController();
+        return controller.save().then(function () {
+          assert.notCalled(fakeFlash.error);
+        });
+      });
 
       it('shows a saving indicator when saving an annotation', function() {
-        var controller = controllerWithActionCreate();
-        var create;
-        annotation.$create.returns(new Promise(function (resolve) {
-          create = resolve;
-        }));
+        var controller = createController();
         var saved = controller.save();
         assert.equal(controller.isSaving, true);
-        assert.equal(controller.action, 'view');
-        create();
         return saved.then(function () {
           assert.equal(controller.isSaving, false);
         });
       });
 
-      it('reverts to edit mode if saving fails', function () {
-        var controller = controllerWithActionCreate();
-        var failCreation;
-        annotation.$create.returns(new Promise(function (resolve, reject) {
-          failCreation = reject;
-        }));
-        var saved = controller.save();
-        assert.equal(controller.isSaving, true);
-        failCreation({status: -1});
-        return saved.then(function () {
-          assert.equal(controller.isSaving, false);
-          assert.ok(controller.editing());
+      it('does not remove the draft if saving fails', function () {
+        var controller = createController();
+        $createFn = function () {
+          return Promise.reject({status: -1});
+        };
+        return controller.save().then(function () {
+          assert.notCalled(fakeDrafts.remove);
         });
       });
 
-      it(
-        'Passes group:<id> to the server when saving a new annotation',
-        function() {
-          fakeGroups.focused = function () {
-            return { id: 'test-id' };
-          };
-          var annotation = {
-            user: 'acct:fred@hypothes.is',
-            text: 'foo',
-          };
-          annotation.$create = sinon.stub().returns(Promise.resolve());
-          var controller = createDirective(annotation).controller;
-          controller.action = 'create';
-          return controller.save().then(function() {
-            assert.equal(annotation.$create.lastCall.thisValue.group,
-              'test-id');
-          });
-        }
-      );
+      it('sets the annotation\'s group to the focused group', function() {
+        fakeGroups.focused = function () {
+          return { id: 'test-id' };
+        };
+        var controller = createDirective(fixtures.newAnnotation()).controller;
+        assert.equal(controller.annotation.group, 'test-id');
+      });
     });
 
     describe('saving an edited an annotation', function() {
       var annotation;
+      var $updateFn;
 
       beforeEach(function() {
         annotation = fixtures.defaultAnnotation();
-        annotation.$update = sandbox.stub();
+        $updateFn = sinon.stub().returns(Promise.resolve());
+        fakeStore.AnnotationResource = function (model) {
+          Object.assign(this, model);
+          this.$update = $updateFn;
+        };
+        fakeDrafts.get.returns({text: 'unsaved change'});
       });
 
-      function controllerWithActionEdit() {
-        var controller = createDirective(annotation).controller;
-        controller.action = 'edit';
-        controller.form.text = 'updated text';
-        return controller;
+      function createController() {
+        return createDirective(annotation).controller;
       }
 
-      it(
-        'flashes a generic error if the server cannot be reached',
-        function() {
-          var controller = controllerWithActionEdit();
-          annotation.$update.returns(Promise.reject({
-            status: -1
-          }));
-          return controller.save().then(function() {
-            assert(fakeFlash.error.calledWith(
-              'Service unreachable.', 'Saving annotation failed'));
-          });
-        }
-      );
+      it('flashes a generic error if the server cannot be reached', function() {
+        var controller = createController();
+        $updateFn = function () { return Promise.reject({status: -1}); };
+        return controller.save().then(function() {
+          assert(fakeFlash.error.calledWith(
+            'Service unreachable.', 'Saving annotation failed'));
+        });
+      });
 
-      it(
-        'flashes an error if saving the annotation fails on the server',
-        function() {
-          var controller = controllerWithActionEdit();
-          annotation.$update.returns(Promise.reject({
+      it('flashes an error if saving the annotation fails on the server', function() {
+        var controller = createController();
+        $updateFn = function () {
+          return Promise.reject({
             status: 500,
             statusText: 'Server Error',
             data: {}
-          }));
-          return controller.save().then(function() {
-            assert(fakeFlash.error.calledWith(
-              '500 Server Error', 'Saving annotation failed'));
           });
-        }
-      );
+        };
+        return controller.save().then(function () {
+          assert(fakeFlash.error.calledWith(
+            '500 Server Error', 'Saving annotation failed'));
+        });
+      });
 
-      it(
-        'doesn\'t flash an error if saving the annotation succeeds',
-        function() {
-          var controller = controllerWithActionEdit();
-          annotation.$update.returns(Promise.resolve());
-          controller.form.text = 'updated text';
-          controller.save();
-          assert(fakeFlash.error.notCalled);
-        }
-      );
+      it('doesn\'t flash an error if saving the annotation succeeds', function () {
+        var controller = createController();
+        controller.save();
+        assert(fakeFlash.error.notCalled);
+      });
     });
 
     describe('drafts', function() {
@@ -1001,8 +894,8 @@ describe('annotation', function() {
           text: 'unsaved-text'
         });
         var controller = createDirective().controller;
-        assert.deepEqual(controller.form.tags, ['unsaved-tag']);
-        assert.equal(controller.form.text, 'unsaved-text');
+        assert.deepEqual(controller.state().tags, ['unsaved-tag']);
+        assert.equal(controller.state().text, 'unsaved-text');
       });
 
       it('removes the draft when changes are discarded', function() {
@@ -1016,38 +909,10 @@ describe('annotation', function() {
         var annotation = fixtures.defaultAnnotation();
         annotation.$update = sandbox.stub().returns(Promise.resolve());
         var controller = createDirective(annotation).controller;
-        controller.edit();
-        controller.form.text = 'test annotation';
+        fakeDrafts.get.returns({text: 'unsaved changes'});
         return controller.save().then(function() {
           assert.calledWith(fakeDrafts.remove, annotation);
         });
-      });
-    });
-
-    describe('onAnnotationUpdated()', function() {
-      it('updates vm.form.text', function() {
-        var parts = createDirective();
-        var updatedModel = {
-          id: parts.annotation.id,
-          text: 'new text',
-        };
-
-        $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
-
-        assert.equal(parts.controller.form.text, 'new text');
-      });
-
-      it('doesn\'t update if a different annotation was updated', function() {
-        var parts = createDirective();
-        parts.controller.form.text = 'original text';
-        var updatedModel = {
-          id: 'different annotation id',
-          text: 'new text',
-        };
-
-        $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
-
-        assert.equal(parts.controller.form.text, 'original text');
       });
     });
 
@@ -1061,9 +926,8 @@ describe('annotation', function() {
       });
 
       it('does not remove the current annotation if is is not new', function () {
-        var parts = createDirective(fixtures.defaultAnnotation());
-        parts.controller.form.text = '';
-        parts.controller.form.tags = [];
+        createDirective(fixtures.defaultAnnotation());
+        fakeDrafts.get.returns({text: '', tags: []});
         $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED,
           fixtures.newAnnotation());
         assert.notCalled(fakeDrafts.remove);
@@ -1071,8 +935,8 @@ describe('annotation', function() {
 
       it('does not remove the current annotation if it has text', function () {
         var annotation = fixtures.newAnnotation();
-        var parts = createDirective(annotation);
-        parts.controller.form.text = 'An incomplete thought';
+        createDirective(annotation);
+        fakeDrafts.get.returns({text: 'An incomplete thought'});
         $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED,
           fixtures.newAnnotation());
         assert.notCalled(fakeDrafts.remove);
@@ -1080,46 +944,16 @@ describe('annotation', function() {
 
       it('does not remove the current annotation if it has tags', function () {
         var annotation = fixtures.newAnnotation();
-        var parts = createDirective(annotation);
-        parts.controller.form.tags = ['a-tag'];
+        createDirective(annotation);
+        fakeDrafts.get.returns({tags: ['a-tag']});
         $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED,
           fixtures.newAnnotation());
         assert.notCalled(fakeDrafts.remove);
       });
     });
 
-    describe('when component is destroyed', function () {
-      it('if the annotation is being edited it updates drafts', function() {
-        var parts = createDirective();
-        parts.controller.isPrivate = true;
-        parts.controller.edit();
-        parts.controller.form.text = 'unsaved-text';
-        parts.controller.form.tags = [];
-        fakeDrafts.get = sinon.stub().returns({
-          text: 'old-draft'
-        });
-        fakeDrafts.update = sinon.stub();
-
-        parts.scope.$broadcast('$destroy');
-
-        assert.calledWith(
-          fakeDrafts.update,
-          parts.annotation, {isPrivate:true, tags:[], text:'unsaved-text'});
-      });
-
-      it('if the annotation isn\'t being edited it doesn\'t update drafts', function() {
-         var parts = createDirective();
-         parts.controller.isPrivate = true;
-         fakeDrafts.update = sinon.stub();
-
-         parts.scope.$broadcast('$destroy');
-
-         assert.notCalled(fakeDrafts.update);
-       });
-    });
-
-    describe('onGroupFocused()', function() {
-      it('updates domainModel.group if the annotation is new', function () {
+    describe('when the focusd group changes', function() {
+      it('moves new annotations to the focused group', function () {
         var annotation = fixtures.newAnnotation();
         annotation.group = 'old-group-id';
         createDirective(annotation);
@@ -1130,7 +964,7 @@ describe('annotation', function() {
         assert.equal(annotation.group, 'new-group-id');
       });
 
-      it('does not update domainModel.group if the annotation is not new',
+      it('does not modify the group of saved annotations',
         function () {
           var annotation = fixtures.oldAnnotation();
           annotation.group = 'old-group-id';
@@ -1144,89 +978,17 @@ describe('annotation', function() {
       );
     });
 
-
     describe('reverting edits', function () {
-      // Simulate what happens when the user edits an annotation,
-      // clicks Save, gets an error because the server fails to save the
-      // annotation, then clicks Cancel - in the frontend the annotation should
-      // be restored to its original value, the edits lost.
-      it('restores the original text', function() {
-        var controller = createDirective({
-          id: 'test-annotation-id',
-          user: 'acct:bill@localhost',
-          text: 'Initial annotation body text',
-          // Allow the initial save of the annotation to succeed.
-          $create: function() {
-            return Promise.resolve();
-          },
-          // Simulate saving the edit of the annotation to the server failing.
-          $update: function() {
-            return Promise.reject({
-              status: 500,
-              statusText: 'Server Error',
-              data: {}
-            });
-          }
-        }).controller;
-        var originalText = controller.form.text;
-        // Simulate the user clicking the Edit button on the annotation.
+      it('removes the current draft', function() {
+        var controller = createDirective(fixtures.defaultAnnotation()).controller;
         controller.edit();
-        // Simulate the user typing some text into the annotation editor textarea.
-        controller.form.text = 'changed by test code';
-        // Simulate the user hitting the Save button and wait for the
-        // (unsuccessful) response from the server.
-        controller.save();
-        // At this point the annotation editor controls are still open, and the
-        // annotation's text is still the modified (unsaved) text.
-        assert(controller.form.text === 'changed by test code');
-        // Simulate the user clicking the Cancel button.
         controller.revert();
-        assert(controller.form.text === originalText);
-      });
-
-      // Test that editing reverting changes to an annotation with
-      // no text resets the text to be empty.
-      it('clears the text if the text was originally empty', function() {
-        var controller = createDirective({
-          id: 'test-annotation-id',
-          user: 'acct:bill@localhost',
-        }).controller;
-        controller.edit();
-        assert.equal(controller.action, 'edit');
-        controller.form.text = 'this should be reverted';
-        controller.revert();
-        assert.equal(controller.form.text, '');
-      });
-
-      it('reverts to the most recently saved version',
-        function () {
-
-        var controller = createDirective({
-          user: 'acct:bill@localhost',
-          $create: function () {
-            this.id = 'new-annotation-id';
-            return Promise.resolve();
-          },
-          $update: function () {
-            return Promise.resolve(this);
-          },
-        }).controller;
-        controller.edit();
-        controller.form.text = 'New annotation text';
-        return controller.save().then(function () {
-          controller.edit();
-          controller.form.text = 'Updated annotation text';
-          return controller.save();
-        }).then(function () {
-          controller.edit();
-          controller.revert();
-          assert.equal(controller.form.text, 'Updated annotation text');
-        });
+        assert.calledWith(fakeDrafts.remove, controller.annotation);
       });
     });
 
     describe('tag display', function () {
-      it('displays annotation tags', function () {
+      it('displays links to tags on the stream', function () {
         var directive = createDirective({
           id: '1234',
           tags: ['atag']
@@ -1242,7 +1004,7 @@ describe('annotation', function() {
     });
 
     describe('annotation links', function () {
-      it('linkInContext uses the in-context links when available', function () {
+      it('uses the in-context links when available', function () {
         var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
           links: {
             html: 'https://test.hypothes.is/a/deadbeef',
@@ -1250,22 +1012,20 @@ describe('annotation', function() {
           },
         });
         var controller = createDirective(annotation).controller;
-
-        assert.equal(controller.linkInContext, annotation.links.incontext);
+        assert.equal(controller.links().incontext, annotation.links.incontext);
       });
 
-      it('linkInContext falls back to the HTML link when in-context links are missing', function () {
+      it('falls back to the HTML link when in-context links are missing', function () {
         var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
           links: {
             html: 'https://test.hypothes.is/a/deadbeef',
           },
         });
         var controller = createDirective(annotation).controller;
-
-        assert.equal(controller.linkInContext, annotation.links.html);
+        assert.equal(controller.links().html, annotation.links.html);
       });
 
-      it('linkHTML uses the HTML link when available', function () {
+      it('uses the HTML link when available', function () {
         var annotation = Object.assign({}, fixtures.defaultAnnotation(), {
           links: {
             html: 'https://test.hypothes.is/a/deadbeef',
@@ -1273,22 +1033,19 @@ describe('annotation', function() {
           },
         });
         var controller = createDirective(annotation).controller;
-
-        assert.equal(controller.linkHTML, annotation.links.html);
+        assert.equal(controller.links().html, annotation.links.html);
       });
 
-      it('linkInContext is blank when unknown', function () {
+      it('in-context link is blank when unknown', function () {
         var annotation = fixtures.defaultAnnotation();
         var controller = createDirective(annotation).controller;
-
-        assert.equal(controller.linkInContext, '');
+        assert.equal(controller.links().incontext, '');
       });
 
-      it('linkHTML is blank when unknown', function () {
+      it('HTML is blank when unknown', function () {
         var annotation = fixtures.defaultAnnotation();
         var controller = createDirective(annotation).controller;
-
-        assert.equal(controller.linkHTML, '');
+        assert.equal(controller.links().html, '');
       });
     });
   });

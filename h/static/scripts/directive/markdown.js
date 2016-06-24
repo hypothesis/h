@@ -22,7 +22,6 @@ module.exports = function($sanitize) {
     controller: function () {},
     link: function(scope, elem) {
       var input = elem[0].querySelector('.js-markdown-input');
-      var inputEl = angular.element(input);
       var output = elem[0].querySelector('.js-markdown-preview');
 
       /**
@@ -133,13 +132,12 @@ module.exports = function($sanitize) {
         scope.preview = !scope.preview;
       };
 
-      // React to the changes to the input
       var handleInputChange = debounce(function () {
         scope.$apply(function () {
           scope.onEditText({text: input.value});
         });
       }, 100);
-      inputEl.bind('blur change keyup', handleInputChange);
+      input.addEventListener('input', handleInputChange);
 
       // Re-render the markdown when the view needs updating.
       scope.$watch('text', function () {

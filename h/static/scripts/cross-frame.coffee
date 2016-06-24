@@ -39,7 +39,7 @@ module.exports = class CrossFrame
       new AnnotationSync(bridge, options)
 
     createAnnotationUISync = (annotationSync) ->
-      new AnnotationUISync($rootScope, $window, bridge, annotationSync, annotationUI)
+      new AnnotationUISync($rootScope, $window, annotationUI, bridge)
 
     addFrame = (channel) =>
       channel.call 'getDocumentInfo', (err, info) =>

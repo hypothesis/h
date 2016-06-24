@@ -53,11 +53,6 @@ module.exports = class AnnotationSync
       this._syncCache(channel)
     @bridge.onConnect(onConnect)
 
-  # Provide a public interface to the annotation cache so that other
-  # sync services can lookup annotations by tag.
-  getAnnotationForTag: (tag) ->
-    @cache[tag] or null
-
   sync: (annotations) ->
     annotations = (this._format a for a in annotations)
     @bridge.call 'sync', annotations, (err, annotations = []) =>

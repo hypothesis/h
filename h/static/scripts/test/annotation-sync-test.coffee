@@ -58,20 +58,6 @@ describe 'AnnotationSync', ->
 
       assert.notCalled(channel.call)
 
-  describe '.getAnnotationForTag', ->
-    it 'returns the annotation if present in the cache', ->
-      ann = {id: 1, $$tag: 'tag1'}
-      annSync = createAnnotationSync()
-      annSync.cache['tag1'] = ann
-
-      cached = annSync.getAnnotationForTag('tag1')
-      assert.equal(cached, ann)
-
-    it 'returns null if not present in the cache', ->
-      annSync = createAnnotationSync()
-      cached = annSync.getAnnotationForTag('tag1')
-      assert.isNull(cached)
-
   describe 'channel event handlers', ->
     assertBroadcast = (channelEvent, publishEvent) ->
       it 'broadcasts the "' + publishEvent + '" event over the local event bus', ->
