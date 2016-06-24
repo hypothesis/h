@@ -50,6 +50,35 @@ def test_parent_id_of_annotation():
     assert ann.parent_id is None
 
 
+def test_thread_root_id_returns_id_if_no_references():
+    annotation = Annotation(id='GBhy1DoHEea6htPothzqZQ')
+
+    assert annotation.thread_root_id == 'GBhy1DoHEea6htPothzqZQ'
+
+
+def test_thread_root_id_returns_id_if_references_empty():
+    annotation = Annotation(id='jANlljoHEea6hsv8FY7ipw',
+                            references=[])
+
+    assert annotation.thread_root_id == 'jANlljoHEea6hsv8FY7ipw'
+
+
+def test_thread_root_id_returns_reference_if_only_one_reference():
+    annotation = Annotation(id='qvJnIjoHEea6hiv0nJK7gw',
+                            references=['yiSVIDoHEea6hjcSFuROLw'])
+
+    assert annotation.thread_root_id == 'yiSVIDoHEea6hjcSFuROLw'
+
+
+def test_thread_root_id_returns_first_reference_if_many_references():
+    annotation = Annotation(id='uK9yVjoHEea6hsewWuiKtQ',
+                            references=['1Ife3DoHEea6hpv8vWujdQ',
+                                        'uVuItjoHEea6hiNgv1wvmg',
+                                        'Qe7fpc5ZRgWy0RSHEP9UNg'])
+
+    assert annotation.thread_root_id == '1Ife3DoHEea6hpv8vWujdQ'
+
+
 def test_acl_private():
     ann = Annotation(shared=False, userid='saoirse')
     actual = ann.__acl__()

@@ -186,21 +186,6 @@ class Annotation(annotation.Annotation):
             return ""
 
     @property
-    def thread_root_id(self):
-        """
-        Return the ID of the root annotation of this annotation's thread.
-
-        Return the ID of the root annotation of the thread to which this
-        annotation belongs. May be this annotation's own ID if it is the root
-        annotation of its thread.
-
-        """
-        if self.references:
-            return self.references[0]
-        else:
-            return self.id
-
-    @property
     def parent_id(self):
         """
         Return the id of the thread parent of this annotation, if it exists.

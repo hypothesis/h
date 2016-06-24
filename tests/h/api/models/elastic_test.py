@@ -179,43 +179,6 @@ class TestAnnotation(object):
         annotation = Annotation(target=[{'source': 'target link'}])
         assert annotation.target_links == ['target link']
 
-    def test_thread_root_id_returns_id_if_no_references(self):
-        assert Annotation(id='test_id').thread_root_id == 'test_id'
-
-    def test_thread_root_id_returns_id_if_references_empty(self):
-        assert Annotation(id='test_id', references=[]).thread_root_id == (
-            'test_id')
-
-    def test_thread_root_id_returns_reference_if_only_one_reference(self):
-        annotation = Annotation(id='test_id',
-                                references=['AVMG6tocH9ZO4OKSk1WS'])
-
-        assert annotation.thread_root_id == 'AVMG6tocH9ZO4OKSk1WS'
-
-    def test_thread_root_id_returns_first_reference_if_many_references(self):
-        annotation = Annotation(id='test_id',
-                                references=['AVMG6tocH9ZO4OKSk1WS',
-                                            'AVMG6tocH9ZO4OKSk1WSaa',
-                                            'Qe7fpc5ZRgWy0RSHEP9UNg'])
-
-        assert annotation.thread_root_id == 'AVMG6tocH9ZO4OKSk1WS'
-
-    def test_parent_id_returns_none_if_no_references(self):
-        annotation = Annotation()
-        assert annotation.parent_id is None
-
-    def test_parent_id_returns_none_if_empty_references(self):
-        annotation = Annotation(references=[])
-        assert annotation.parent_id is None
-
-    def test_parent_id_returns_none_if_references_not_list(self):
-        annotation = Annotation(references={'foo': 'bar'})
-        assert annotation.parent_id is None
-
-    def test_parent_id_returns_thread_parent_id(self):
-        annotation = Annotation(references=['abc123', 'def456'])
-        assert annotation.parent_id == 'def456'
-
     def test_document_returns_document_type(self):
         annotation = Annotation(document={'title': 'The title'})
         assert type(annotation.document) == Document
