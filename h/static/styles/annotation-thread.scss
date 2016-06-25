@@ -39,6 +39,9 @@ li:first-child .annotation-thread--top-reply {
 
 .annotation-thread__content {
   flex-grow: 1;
+
+  // Prevent annotation content from overflowing the container
+  max-width: 100%;
 }
 
 // Darken expand/collapse toggle when an annotation is hovered. This is only

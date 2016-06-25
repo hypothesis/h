@@ -190,6 +190,9 @@ $annotation-card-left-padding: 10px;
 
 .annotation-quote {
   @include quote;
+
+  // Prevent long URLs etc. in quote causing overflow
+  overflow-wrap: break-word;
 }
 
 .annotation-citation-domain {
