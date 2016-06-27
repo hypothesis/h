@@ -136,26 +136,28 @@ class TestGenerate(object):
         generate(pyramid_request, notification)
 
     @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('annotation', '/ann/{id}')
-        pyramid_config.add_route('stream.user_query', '/stream/user/{user}')
-        pyramid_config.add_route('unsubscribe', '/unsub/{token}')
-
-    @pytest.fixture
-    def html_renderer(self, pyramid_config):
-        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.html.jinja2')
-
-    @pytest.fixture
-    def text_renderer(self, pyramid_config):
-        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.txt.jinja2')
-
-    @pytest.fixture
     def document(self, db_session):
         doc = Document()
         doc.meta.append(DocumentMeta(type='title', value=['My fascinating page'], claimant='http://example.org'))
         db_session.add(doc)
         db_session.flush()
         return doc
+
+    @pytest.fixture
+    def html_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.html.jinja2')
+
+    @pytest.fixture
+    def links(self, patch):
+        return patch('h.emails.reply_notification.links')
+
+    @pytest.fixture
+    def notification(self, reply, reply_user, parent, parent_user, document):
+        return Notification(reply=reply,
+                            reply_user=reply_user,
+                            parent=parent,
+                            parent_user=parent_user,
+                            document=document)
 
     @pytest.fixture
     def parent(self):
@@ -168,6 +170,10 @@ class TestGenerate(object):
         return Annotation(target_uri='http://example.org/', **common)
 
     @pytest.fixture
+    def parent_user(self):
+        return User(username='patricia', email='pat@ric.ia')
+
+    @pytest.fixture
     def reply(self):
         common = {
             'id': 'bar456',
@@ -178,20 +184,18 @@ class TestGenerate(object):
         return Annotation(target_uri='http://example.org/', **common)
 
     @pytest.fixture
-    def notification(self, reply, reply_user, parent, parent_user, document):
-        return Notification(reply=reply,
-                            reply_user=reply_user,
-                            parent=parent,
-                            parent_user=parent_user,
-                            document=document)
-
-    @pytest.fixture
-    def parent_user(self):
-        return User(username='patricia', email='pat@ric.ia')
-
-    @pytest.fixture
     def reply_user(self):
         return User(username='ron', email='ron@thesmiths.com')
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('annotation', '/ann/{id}')
+        pyramid_config.add_route('stream.user_query', '/stream/user/{user}')
+        pyramid_config.add_route('unsubscribe', '/unsub/{token}')
+
+    @pytest.fixture
+    def text_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.txt.jinja2')
 
     @pytest.fixture
     def token_serializer(self, pyramid_config):
@@ -199,7 +203,3 @@ class TestGenerate(object):
         serializer.dumps.return_value = 'FAKETOKEN'
         pyramid_config.registry.notification_serializer = serializer
         return serializer
-
-    @pytest.fixture
-    def links(self, patch):
-        return patch('h.emails.reply_notification.links')
