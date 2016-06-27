@@ -30,6 +30,7 @@ clean:
 dev: build/manifest.json h.egg-info/.uptodate
 	@hypothesis devserver
 
+## Build the python H distribution
 .PHONY: dist
 dist: dist/h-$(BUILD_ID).tar.gz
 
@@ -114,8 +115,13 @@ node_modules/.uptodate: package.json
 .PHONY: help
 help:
 	@echo "The following targets are available:"
+	@echo
 	@echo " clean      Clean up runtime artifacts (needed after a version update)"
 	@echo " dev        Run the development H server locally"
+	@echo " dist       Build the python H distribution"
 	@echo " docker     Build hypothesis/hypothesis docker image"
 	@echo " extensions Build the browser extensions"
 	@echo " test       Run the test suite (default)"
+	@echo
+	@echo "To run the test suite and build the whole app, you can do:"
+	@echo " $ make clean && make && make dist && make extensions"
