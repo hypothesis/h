@@ -728,7 +728,7 @@ describe('annotation', function() {
       });
     });
 
-    describe('deleteAnnotation() method', function() {
+    describe('#delete()', function() {
       beforeEach(function() {
         fakeAnnotationMapper.deleteAnnotation = sandbox.stub();
       });
