@@ -46,6 +46,9 @@
 
   cursor: text;
 
+  // Prevent long URLs etc. in body causing overflow
+  overflow-wrap: break-word;
+
   // Margin between bottom of ascent of username and top of
   // x-height of annotation-body should be ~15px.
   // Remove additional margin-top added by the first p within
