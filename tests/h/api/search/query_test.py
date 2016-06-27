@@ -308,7 +308,7 @@ def test_urifilter_inactive_when_no_uri_param():
     assert urifilter({"foo": "bar"}) is None
 
 
-def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
+def test_urifilter_expands_and_normalizes_into_terms_filter(storage):
     """
     Uses a `terms` filter against target.scope to filter for URI.
 
@@ -323,7 +323,7 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
         "http://giraffes.com/",
         "https://elephants.com/",
     ]
-    uri.normalize.side_effect = lambda x: x[:-1]  # Strip the trailing slash
+
     urifilter = query.UriFilter(request)
 
     result = urifilter({"uri": "http://example.com/"})
@@ -331,10 +331,12 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(storage, uri):
 
     storage.expand_uri.assert_called_with(request.db, "http://example.com/")
     assert sorted(query_uris) == sorted(["http://giraffes.com",
-                                         "https://elephants.com"])
+                                         "httpx://giraffes.com",
+                                         "https://elephants.com",
+                                         "httpx://elephants.com"])
 
 
-def test_urifilter_queries_multiple_uris(storage, uri):
+def test_urifilter_queries_multiple_uris(storage):
     """
     Uses a `terms` filter against target.scope to filter for URI.
 
@@ -349,7 +351,7 @@ def test_urifilter_queries_multiple_uris(storage, uri):
         ["http://giraffes.com/", "https://elephants.com/"],
         ["http://tigers.com/", "https://elephants.com/"],
     ]
-    uri.normalize.side_effect = lambda x: x[:-1]  # Strip the trailing slash
+
     urifilter = query.UriFilter(request)
 
     result = urifilter(params)
@@ -358,8 +360,11 @@ def test_urifilter_queries_multiple_uris(storage, uri):
     storage.expand_uri.assert_any_call(request.db, "http://example.com")
     storage.expand_uri.assert_any_call(request.db, "http://example.net")
     assert sorted(query_uris) == sorted(["http://giraffes.com",
+                                         "httpx://giraffes.com",
                                          "https://elephants.com",
-                                         "http://tigers.com"])
+                                         "httpx://elephants.com",
+                                         "http://tigers.com",
+                                         "httpx://tigers.com"])
 
 
 def test_anymatcher():

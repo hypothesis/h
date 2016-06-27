@@ -177,8 +177,14 @@ class UriFilter(object):
 
         uris = set()
         for query_uri in query_uris:
-            us = [uri.normalize(u)
-                  for u in storage.expand_uri(self.request.db, query_uri)]
+            expanded = storage.expand_uri(self.request.db, query_uri)
+
+            us = [uri.normalize(u) for u in expanded]
+            uris.update(us)
+
+            # FIXME: remove after httpx normalization is finished
+            us = [uri.normalize(u, httpx_normalization=False)
+                  for u in expanded]
             uris.update(us)
 
         return {"terms": {"target.scope": list(uris)}}
