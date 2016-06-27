@@ -26,7 +26,7 @@ module.exports = class CrossFrame
             formatted[k] = v
           formatted
         parser: (annotation) ->
-          parsed = new store.AnnotationResource()
+          parsed = {}
           for k, v of annotation when k in whitelist
             parsed[k] = v
           parsed

@@ -7,7 +7,7 @@ var angular = require('angular');
 function FakeStore(annots) {
   this.annots = annots;
 
-  this.AnnotationResource = {
+  this.annotation = {
     get: function (query) {
       var result;
       if (query.id) {
@@ -15,20 +15,18 @@ function FakeStore(annots) {
           return a.id === query.id;
         });
       }
-      return {$promise: Promise.resolve(result)};
+      return Promise.resolve(result);
     }
   };
 
-  this.SearchResource = {
-    get: function (query) {
-      var result;
-      if (query.references) {
-        result = annots.filter(function (a) {
-          return a.references && a.references.indexOf(query.references) !== -1;
-        });
-      }
-      return {$promise: Promise.resolve({rows: result})};
+  this.search = function (query) {
+    var result;
+    if (query.references) {
+      result = annots.filter(function (a) {
+        return a.references && a.references.indexOf(query.references) !== -1;
+      });
     }
+    return Promise.resolve({rows: result});
   };
 }
 

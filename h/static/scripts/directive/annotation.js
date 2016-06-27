@@ -129,11 +129,32 @@ function updateViewModel($scope, domainModel,
 function AnnotationController(
   $document, $q, $rootScope, $scope, $timeout, $window, annotationUI,
   annotationMapper, drafts, flash, features, groups, permissions, session,
-  settings) {
+  settings, store) {
 
   var vm = this;
   var domainModel;
   var newlyCreatedByHighlightButton;
+
+  /** Save an annotation to the server. */
+  function save(annot) {
+    var saved;
+    if (annot.id) {
+      saved = store.annotation.update({id: annot.id}, annot);
+    } else {
+      saved = store.annotation.create({}, annot);
+    }
+    return saved.then(function (savedAnnot) {
+      // Copy across internal properties which are not part of the annotation
+      // model saved on the server
+      savedAnnot.$$tag = annot.$$tag;
+      Object.keys(annot).forEach(function (k) {
+        if (k[0] === '$') {
+          savedAnnot[k] = annot[k];
+        }
+      });
+      return savedAnnot;
+    });
+  }
 
   /**
     * Initialize this AnnotationController instance.
@@ -306,8 +327,9 @@ function AnnotationController(
       // User is logged in, save to server.
       // Highlights are always private.
       domainModel.permissions = permissions.private();
-      domainModel.$create().then(function() {
-        $rootScope.$emit(events.ANNOTATION_CREATED, domainModel);
+      save(domainModel).then(function(model) {
+        domainModel = model;
+        $rootScope.$emit(events.ANNOTATION_CREATED, model);
         updateView(domainModel);
       });
     } else {
@@ -518,31 +540,23 @@ function AnnotationController(
       return Promise.resolve();
     }
 
-    var saved;
-    switch (vm.action) {
-      case 'create':
-        updateDomainModel(domainModel, vm, permissions);
-        saved = domainModel.$create().then(function () {
-          $rootScope.$emit(events.ANNOTATION_CREATED, domainModel);
-          updateView(domainModel);
-          drafts.remove(domainModel);
-        });
-        break;
+    var updatedModel = angular.copy(domainModel);
 
-      case 'edit':
-        var updatedModel = angular.copy(domainModel);
-        updateDomainModel(updatedModel, vm, permissions);
-        saved = updatedModel.$update({
-          id: updatedModel.id
-        }).then(function () {
-          drafts.remove(domainModel);
-          $rootScope.$emit(events.ANNOTATION_UPDATED, updatedModel);
-        });
-        break;
+    // Copy across the non-enumerable local tag for the annotation
+    updatedModel.$$tag = domainModel.$$tag;
 
-      default:
-        throw new Error('Tried to save an annotation that is not being edited');
-    }
+    updateDomainModel(updatedModel, vm, permissions);
+    var saved = save(updatedModel).then(function (model) {
+      var isNew = !domainModel.id;
+      drafts.remove(domainModel);
+      domainModel = model;
+      if (isNew) {
+        $rootScope.$emit(events.ANNOTATION_CREATED, domainModel);
+      } else {
+        $rootScope.$emit(events.ANNOTATION_UPDATED, domainModel);
+      }
+      updateView(domainModel);
+    });
 
     // optimistically switch back to view mode and display the saving
     // indicator

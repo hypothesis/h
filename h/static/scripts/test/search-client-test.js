@@ -16,24 +16,20 @@ describe('SearchClient', function () {
     {id: 'four'},
   ];
 
-  var fakeResource;
+  var fakeSearchFn;
 
   beforeEach(function () {
-    fakeResource = {
-      get: sinon.spy(function (params) {
-        return {
-          $promise: Promise.resolve({
-            rows: RESULTS.slice(params.offset,
-              params.offset + params.limit),
-            total: RESULTS.length,
-          }),
-        };
-      }),
-    };
+    fakeSearchFn = sinon.spy(function (params) {
+      return Promise.resolve({
+        rows: RESULTS.slice(params.offset,
+          params.offset + params.limit),
+        total: RESULTS.length,
+      });
+    });
   });
 
   it('emits "results"', function () {
-    var client = new SearchClient(fakeResource);
+    var client = new SearchClient(fakeSearchFn);
     var onResults = sinon.stub();
     client.on('results', onResults);
     client.get({uri: 'http://example.com'});
@@ -43,7 +39,7 @@ describe('SearchClient', function () {
   });
 
   it('emits "results" with chunks in incremental mode', function () {
-    var client = new SearchClient(fakeResource, {chunkSize: 2});
+    var client = new SearchClient(fakeSearchFn, {chunkSize: 2});
     var onResults = sinon.stub();
     client.on('results', onResults);
     client.get({uri: 'http://example.com'});
@@ -54,7 +50,7 @@ describe('SearchClient', function () {
   });
 
   it('emits "results" once in non-incremental mode', function () {
-    var client = new SearchClient(fakeResource,
+    var client = new SearchClient(fakeSearchFn,
       {chunkSize: 2, incremental: false});
     var onResults = sinon.stub();
     client.on('results', onResults);
@@ -66,7 +62,7 @@ describe('SearchClient', function () {
   });
 
   it('does not emit "results" if canceled', function () {
-    var client = new SearchClient(fakeResource);
+    var client = new SearchClient(fakeSearchFn);
     var onResults = sinon.stub();
     var onEnd = sinon.stub();
     client.on('results', onResults);
@@ -81,12 +77,10 @@ describe('SearchClient', function () {
 
   it('emits "error" event if search fails', function () {
     var err = new Error('search failed');
-    fakeResource.get = function () {
-      return {
-        $promise: Promise.reject(err),
-      };
+    fakeSearchFn = function () {
+      return Promise.reject(err);
     };
-    var client = new SearchClient(fakeResource);
+    var client = new SearchClient(fakeSearchFn);
     var onError = sinon.stub();
     client.on('error', onError);
     client.get({uri: 'http://example.com'});

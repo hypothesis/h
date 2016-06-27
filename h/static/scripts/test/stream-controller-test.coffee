@@ -62,9 +62,7 @@ describe 'StreamController', ->
     }
 
     fakeStore = {
-      SearchResource: {
-        get: sandbox.spy()
-      }
+      search: sandbox.spy(-> Promise.resolve({rows: [], total: 0}))
     }
 
     fakeStreamer = {
@@ -103,22 +101,21 @@ describe 'StreamController', ->
 
   it 'calls the search API with _separate_replies: true', ->
     createController()
-    assert.equal(
-      fakeStore.SearchResource.get.firstCall.args[0]._separate_replies, true)
+    assert.equal(fakeStore.search.firstCall.args[0]._separate_replies, true)
 
   it 'passes the annotations and replies from search to loadAnnotations()', ->
-    fakeStore.SearchResource.get = (query, func) ->
-      func({
+    fakeStore.search = (query) ->
+      Promise.resolve({
         'rows': ['annotation_1', 'annotation_2']
         'replies': ['reply_1', 'reply_2', 'reply_3']
       })
 
     createController()
 
-    assert fakeAnnotationMapper.loadAnnotations.calledOnce
-    assert fakeAnnotationMapper.loadAnnotations.calledWith(
-      ['annotation_1', 'annotation_2'], ['reply_1', 'reply_2', 'reply_3']
-    )
+    Promise.resolve().then ->
+      assert.calledOnce fakeAnnotationMapper.loadAnnotations
+      assert.calledWith fakeAnnotationMapper.loadAnnotations,
+        ['annotation_1', 'annotation_2'], ['reply_1', 'reply_2', 'reply_3']
 
 
   describe 'on $routeUpdate', ->

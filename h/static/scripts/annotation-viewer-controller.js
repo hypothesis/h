@@ -9,16 +9,16 @@ var angular = require('angular');
  */
 function fetchThread(store, id) {
   var annot;
-  return store.AnnotationResource.get({id: id}).$promise.then(function (annot) {
+  return store.annotation.get({id: id}).then(function (annot) {
     if (annot.references && annot.references.length) {
       // This is a reply, fetch the top-level annotation
-      return store.AnnotationResource.get({id: annot.references[0]}).$promise;
+      return store.annotation.get({id: annot.references[0]});
     } else {
       return annot;
     }
   }).then(function (annot_) {
     annot = annot_;
-    return store.SearchResource.get({references: annot.id}).$promise;
+    return store.search({references: annot.id});
   }).then(function (searchResult) {
     return [annot].concat(searchResult.rows);
   });

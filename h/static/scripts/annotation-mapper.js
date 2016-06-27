@@ -24,7 +24,7 @@ function annotationMapper($rootScope, annotationUI, store) {
         $rootScope.$emit(events.ANNOTATION_UPDATED, existing);
         return;
       }
-      loaded.push(new store.AnnotationResource(annotation));
+      loaded.push(annotation);
     });
 
     $rootScope.$emit(events.ANNOTATIONS_LOADED, loaded);
@@ -42,13 +42,12 @@ function annotationMapper($rootScope, annotationUI, store) {
   }
 
   function createAnnotation(annotation) {
-    annotation = new store.AnnotationResource(annotation);
     $rootScope.$emit(events.BEFORE_ANNOTATION_CREATED, annotation);
     return annotation;
   }
 
   function deleteAnnotation(annotation) {
-    return annotation.$delete({
+    return store.annotation.delete({
       id: annotation.id
     }).then(function () {
       $rootScope.$emit(events.ANNOTATION_DELETED, annotation);

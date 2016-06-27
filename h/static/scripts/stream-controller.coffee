@@ -20,11 +20,13 @@ module.exports = class StreamController
       searchParams = searchFilter.toObject($routeParams.q)
       query = angular.extend(options, searchParams)
       query._separate_replies = true
-      store.SearchResource.get(query, load)
+      store.search(query)
+        .then(load)
+        .catch((err) -> console.error err)
 
     load = ({rows, replies}) ->
-        offset += rows.length
-        annotationMapper.loadAnnotations(rows, replies)
+      offset += rows.length
+      annotationMapper.loadAnnotations(rows, replies)
 
     # Reload on query change (ignore hash change)
     lastQuery = $routeParams.q

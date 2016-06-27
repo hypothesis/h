@@ -34,10 +34,6 @@ var resolve = {
   sessionState: function (session) {
     return session.load();
   },
-  // @ngInject
-  store: function (store) {
-    return store.$promise;
-  },
   streamer: streamer.connect,
 };
 

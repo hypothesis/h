@@ -8,15 +8,15 @@ var inherits = require('inherits');
  *
  * SearchClient handles paging through results, canceling search etc.
  *
- * @param {Object} resource - ngResource class instance for the /search API
+ * @param {Object} searchFn - Function for querying the search API
  * @param {Object} opts - Search options
  * @constructor
  */
-function SearchClient(resource, opts) {
+function SearchClient(searchFn, opts) {
   opts = opts || {};
 
   var DEFAULT_CHUNK_SIZE = 200;
-  this._resource = resource;
+  this._searchFn = searchFn;
   this._chunkSize = opts.chunkSize || DEFAULT_CHUNK_SIZE;
   if (typeof opts.incremental !== 'undefined') {
     this._incremental = opts.incremental;
@@ -37,7 +37,7 @@ SearchClient.prototype._getBatch = function (query, offset) {
   }, query);
 
   var self = this;
-  this._resource.get(searchQuery).$promise.then(function (results) {
+  this._searchFn(searchQuery).then(function (results) {
     if (self._canceled) {
       return;
     }
