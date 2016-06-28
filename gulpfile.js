@@ -22,14 +22,12 @@ var through = require('through2');
 
 var createBundle = require('./scripts/gulp/create-bundle');
 var manifest = require('./scripts/gulp/manifest');
-var vendorBundles = require('./scripts/gulp/vendor-bundles');
 
 var IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
 var SCRIPT_DIR = 'build/scripts';
 var STYLE_DIR = 'build/styles';
 var FONTS_DIR = 'build/fonts';
 var IMAGES_DIR = 'build/images';
-var TEMPLATES_DIR = 'h/templates/client';
 
 // LiveReloadServer instance for sending messages to connected
 // development clients
@@ -67,22 +65,24 @@ function getEnv(key) {
   return process.env[key];
 }
 
-/** A list of all modules included in vendor bundles. */
-var vendorModules = Object.keys(vendorBundles.bundles)
-  .reduce(function (deps, key) {
-  return deps.concat(vendorBundles.bundles[key]);
-}, []);
+var vendorBundles = {
+  jquery: ['jquery'],
+  bootstrap: ['bootstrap'],
+  raven: ['raven-js'],
+};
+var vendorModules = ['jquery', 'bootstrap', 'raven-js'];
+var vendorNoParseModules = ['jquery'];
 
 // Builds the bundles containing vendor JS code
 gulp.task('build-vendor-js', function () {
   var finished = [];
-  Object.keys(vendorBundles.bundles).forEach(function (name) {
+  Object.keys(vendorBundles).forEach(function (name) {
     finished.push(createBundle({
       name: name,
-      require: vendorBundles.bundles[name],
+      require: vendorBundles[name],
       minify: IS_PRODUCTION_BUILD,
       path: SCRIPT_DIR,
-      noParse: vendorBundles.noParseModules,
+      noParse: vendorNoParseModules,
     }));
   });
   return Promise.all(finished);
@@ -92,21 +92,10 @@ var appBundleBaseConfig = {
   path: SCRIPT_DIR,
   external: vendorModules,
   minify: IS_PRODUCTION_BUILD,
-  noParse: vendorBundles.noParseModules,
+  noParse: vendorNoParseModules,
 };
 
 var appBundles = [{
-  // The sidebar application for displaying and editing annotations
-  name: 'app',
-  transforms: ['coffee'],
-  entry: './h/static/scripts/app',
-},{
-  // The Annotator library which provides annotation controls on
-  // the page and sets up the sidebar
-  name: 'injector',
-  entry: './h/static/scripts/annotator/main',
-  transforms: ['coffee'],
-},{
   // Public-facing website
   name: 'site',
   entry: './h/static/scripts/site',
@@ -142,7 +131,7 @@ var extensionBundleConfig = {
   path: SCRIPT_DIR,
   external: vendorModules,
   minify: IS_PRODUCTION_BUILD,
-  noParse: vendorBundles.noParseModules,
+  noParse: vendorNoParseModules,
 };
 
 gulp.task('build-extension-js', ['build-vendor-js'], function () {
@@ -156,19 +145,13 @@ gulp.task('watch-extension-js', ['build-vendor-js'], function () {
 var styleFiles = [
   // H
   './h/static/styles/admin.scss',
-  './h/static/styles/annotator/inject.scss',
-  './h/static/styles/annotator/pdfjs-overrides.scss',
-  './h/static/styles/app.scss',
   './h/static/styles/front-page/main.css',
   './h/static/styles/help-page.scss',
   './h/static/styles/site.scss',
   './h/static/styles/old-home.scss',
 
   // Vendor
-  './h/static/styles/vendor/angular-csp.css',
   './h/static/styles/vendor/icomoon.css',
-  './h/static/styles/vendor/katex.min.css',
-  './node_modules/angular-toastr/dist/angular-toastr.css',
   './node_modules/bootstrap/dist/css/bootstrap.css',
 ];
 
@@ -227,12 +210,6 @@ gulp.task('watch-images', function () {
   gulp.watch(imageFiles, ['build-images']);
 });
 
-gulp.task('watch-templates', function () {
-  gulp.watch(TEMPLATES_DIR + '/*.html', function (file) {
-    liveReloadServer.notifyChanged([file.path]);
-  });
-});
-
 var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/*.@(js|css|woff|jpg|png|svg)';
 
 var prevManifest = {};
@@ -249,9 +226,9 @@ function changedAssets(prevManifest, newManifest) {
 
 var debouncedLiveReload = debounce(function () {
   // Notify dev clients about the changed assets. Note: This currently has an
-  // issue that if CSS, JS and templates are all changed in quick succession,
-  // some of the assets might be empty/incomplete files that are still being
-  // generated when this is invoked, causing the reload to fail.
+  // issue that if CSS and JS are all changed in quick succession, some of the
+  // assets might be empty/incomplete files that are still being generated when
+  // this is invoked, causing the reload to fail.
   //
   // Live reload notifications are debounced to reduce the likelihood of this
   // happening.
@@ -323,8 +300,7 @@ gulp.task('watch',
            'watch-css',
            'watch-fonts',
            'watch-images',
-           'watch-manifest',
-           'watch-templates']);
+           'watch-manifest']);
 
 function runKarma(baseConfig, opts, done) {
   // See https://github.com/karma-runner/karma-mocha#configuration
