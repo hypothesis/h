@@ -2,7 +2,6 @@
 
 var angular = require('angular');
 
-var annotationUIFactory = require('../annotation-ui');
 var events = require('../events');
 
 describe('annotationMapper', function() {
@@ -16,16 +15,17 @@ describe('annotationMapper', function() {
     fakeStore = {
       AnnotationResource: sandbox.stub().returns({}),
     };
-    annotationUI = annotationUIFactory({});
     angular.module('app', [])
       .service('annotationMapper', require('../annotation-mapper'))
-      .value('annotationUI', annotationUI)
+      .service('annotationUI', require('../annotation-ui'))
+      .value('settings', {})
       .value('store', fakeStore);
     angular.mock.module('app');
 
-    angular.mock.inject(function (_$rootScope_, _annotationMapper_) {
+    angular.mock.inject(function (_$rootScope_, _annotationUI_, _annotationMapper_) {
       $rootScope = _$rootScope_;
       annotationMapper = _annotationMapper_;
+      annotationUI = _annotationUI_;
     });
   });
 

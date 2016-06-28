@@ -52,7 +52,7 @@ describe('AnnotationUISync', function () {
       }
     };
 
-    annotationUI = annotationUIFactory({});
+    annotationUI = annotationUIFactory($rootScope, {});
     createAnnotationUISync = function () {
       new AnnotationUISync(
         $rootScope, fakeWindow, fakeBridge, fakeAnnotationSync,

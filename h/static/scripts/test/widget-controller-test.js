@@ -5,7 +5,6 @@ var inherits = require('inherits');
 var proxyquire = require('proxyquire');
 var EventEmitter = require('tiny-emitter');
 
-var annotationUIFactory = require('../annotation-ui');
 var events = require('../events');
 var noCallThru = require('./util').noCallThru;
 
@@ -65,6 +64,7 @@ describe('WidgetController', function () {
 
   before(function () {
     angular.module('h', [])
+      .service('annotationUI', require('../annotation-ui'))
       .controller('WidgetController', proxyquire('../widget-controller',
         noCallThru({
           angular: angular,
@@ -83,8 +83,6 @@ describe('WidgetController', function () {
       loadAnnotations: sandbox.spy(),
       unloadAnnotations: sandbox.spy()
     };
-
-    annotationUI = annotationUIFactory({});
 
     fakeCrossFrame = {
       call: sinon.stub(),
@@ -111,9 +109,7 @@ describe('WidgetController', function () {
 
     fakeRootThread = new FakeRootThread();
 
-    fakeSettings = {
-      annotations: 'test',
-    };
+    fakeSettings = {};
 
     fakeStore = {
       SearchResource: {},
@@ -121,7 +117,6 @@ describe('WidgetController', function () {
 
     $provide.value('VirtualThreadList', FakeVirtualThreadList);
     $provide.value('annotationMapper', fakeAnnotationMapper);
-    $provide.value('annotationUI', annotationUI);
     $provide.value('crossframe', fakeCrossFrame);
     $provide.value('drafts', fakeDrafts);
     $provide.value('rootThread', fakeRootThread);
@@ -132,9 +127,10 @@ describe('WidgetController', function () {
     $provide.value('settings', fakeSettings);
   }));
 
-  beforeEach(angular.mock.inject(function ($controller, _$rootScope_) {
+  beforeEach(angular.mock.inject(function ($controller, _annotationUI_, _$rootScope_) {
     $rootScope = _$rootScope_;
     $scope = $rootScope.$new();
+    annotationUI = _annotationUI_;
     viewer = $controller('WidgetController', {$scope: $scope});
   }));
 
@@ -353,6 +349,9 @@ describe('WidgetController', function () {
           searchUris: [],
         }
       ];
+
+      // There is a direct-linked annotation
+      fakeSettings.annotations = 'test';
     });
 
     it('displays a message if the selection is unavailable', function () {
