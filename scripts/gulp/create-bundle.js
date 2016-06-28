@@ -7,7 +7,6 @@ var fs = require('fs');
 var path = require('path');
 
 var browserify = require('browserify');
-var coffeeify = require('coffeeify');
 var exorcist = require('exorcist');
 var gulpUtil = require('gulp-util');
 var mkdirp = require('mkdirp');
@@ -28,15 +27,12 @@ function waitForever() {
 }
 
 /**
- * type Transform = 'coffee';
- *
  * interface BundleOptions {
  *   name: string;
  *   path: string;
  *
  *   entry?: string[];
  *   require?: string[];
- *   transforms: Transform[];
  *
  *   minify?: boolean;
  * }
@@ -66,7 +62,6 @@ module.exports = function createBundle(config, buildOpts) {
 
   var bundleOpts = {
     debug: true,
-    extensions: ['.coffee'],
 
     // Browserify will try to detect and automatically provide
     // browser implementations of Node modules.
@@ -156,12 +151,6 @@ module.exports = function createBundle(config, buildOpts) {
 
   bundle.add(config.entry || []);
   bundle.external(config.external || []);
-
-  (config.transforms || []).forEach(function (transform) {
-    if (transform === 'coffee') {
-      bundle.transform(coffeeify);
-    }
-  });
 
   if (config.minify) {
     bundle.transform({global: true}, uglifyify);
