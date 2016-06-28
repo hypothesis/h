@@ -42,6 +42,7 @@
     "gulp-sourcemaps": "^1.6.0",
     "gulp-util": "^3.0.7",
     "hammerjs": "^2.0.4",
+    "hypothesis": "^0.31.0",
     "inherits": "^2.0.1",
     "is-equal-shallow": "^0.1.3",
     "jquery": "1.11.1",
