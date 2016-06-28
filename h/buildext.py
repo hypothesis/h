@@ -171,7 +171,9 @@ def build_extension(args):
         extension_sources.extend([x + '.map' for x in extension_sources])
 
     client_sources = []
-    env = assets.Environment('/public', 'h/assets.ini', 'build/manifest.json')
+    env = assets.Environment('/public',
+                             'h/assets_client.ini',
+                             'node_modules/hypothesis/build/manifest.json')
     for bundle in ['app_js', 'app_css', 'inject_js', 'inject_css']:
         client_sources.extend(env.files(bundle))
     if args.debug:
@@ -184,7 +186,7 @@ def build_extension(args):
         copyfilelist(src='h/browser/chrome/lib',
                      dst=os.path.join(build_dir, 'lib'),
                      filelist=['options.html', 'options.js'])
-        copyfilelist(src='build',
+        copyfilelist(src='node_modules/hypothesis/build',
                      dst=public_dir,
                      filelist=client_sources)
         copyfilelist(src='h/browser/chrome/lib',
