@@ -53,9 +53,10 @@ def document_title(patch):
 
 
 @pytest.fixture
-def pyramid_request(pyramid_request):
-    pyramid_request.assets_env = mock.Mock()
-    return pyramid_request
+def pyramid_config(pyramid_config):
+    # Pretend the client assets environment has been configured
+    pyramid_config.registry['assets_client_env'] = mock.Mock()
+    return pyramid_config
 
 
 @pytest.fixture

@@ -11,6 +11,7 @@ graft docs
 prune docs/_build
 include h/accounts/blacklist
 include h/assets.ini
+include h/assets_client.ini
 graft h/migrations
 graft h/static
 graft h/templates

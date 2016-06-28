@@ -11,7 +11,6 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.settings import asbool
 from pyramid.tweens import EXCVIEW
 
-from h import assets
 from h.auth.policy import AuthenticationPolicy
 from h.config import configure
 
@@ -19,11 +18,11 @@ log = logging.getLogger(__name__)
 
 
 def configure_jinja2_assets(config):
-    assets_env = assets.Environment('/assets',
-                                    'h/assets.ini',
-                                    'build/manifest.json')
     jinja2_env = config.get_jinja2_environment()
-    jinja2_env.globals['asset_urls'] = assets_env.urls
+    jinja2_env.globals['asset_urls'] = config.registry['assets_env'].urls
+    # FIXME: this should not be used by new templates. Once no more templates
+    # depend on app_css this should go.
+    jinja2_env.globals['asset_client_urls'] = config.registry['assets_client_env'].urls
 
 
 def in_debug_mode(request):
