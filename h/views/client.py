@@ -23,7 +23,7 @@ def render_app(request, extra=None):
     """Render a page that serves a preconfigured annotation client."""
     client_sentry_dsn = request.registry.settings.get('h.client.sentry_dsn')
     html = client.render_app_html(
-        assets_env=request.assets_env,
+        assets_env=request.registry['assets_client_env'],
         # FIXME: The '' here is to ensure this has a trailing slash. This seems
         # rather messy, and is inconsistent with the rest of the application's
         # URLs.
@@ -62,7 +62,7 @@ def annotator_token(request):
 def embed(context, request):
     request.response.content_type = b'text/javascript'
     request.response.text = client.render_embed_js(
-        assets_env=request.assets_env,
+        assets_env=request.registry['assets_client_env'],
         app_html_url=request.route_url('widget'),
         base_url=request.route_url('index'))
     return request.response

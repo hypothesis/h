@@ -9,7 +9,7 @@
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block styles %}
-{% for url in asset_urls("app_css") %}
+{% for url in asset_client_urls("app_css") %}
 <link rel="stylesheet" href="{{ url }}">
 {% endfor %}
 {% endblock styles  %}
