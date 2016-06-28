@@ -1,15 +1,11 @@
-{{ reply_user.username }} has just left a reply to your annotation on "{{ document_title }}".
-{{ document_url }}
+{{ reply_user.username }} has left a reply to your annotation on "{{ document_title }}":
 
-On {{ parent.created | human_timestamp }} {{ parent_user.username }} said:
+> {{ reply.text or "" }}
 
-"{{ parent.text or "" }}"
+This was in reply to your annotation:
 
-On {{ reply.created | human_timestamp }} {{ reply_user.username }} said:
+> {{ parent.text or "" }}
 
-"{{ reply.text or "" }}"
-
-View this reply: {{ reply_url }}
-or view {{ reply_user.username }}'s stream: {{ reply_user_url }}
+View the thread: {{ reply_url }}
 
 If you'd rather not receive these notifications you can unsubscribe here: {{ unsubscribe_url }}

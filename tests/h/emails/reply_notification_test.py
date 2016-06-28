@@ -12,8 +12,17 @@ from h.models import User
 from h.notification.reply import Notification
 
 
-@pytest.mark.usefixtures('routes', 'token_serializer')
+@pytest.mark.usefixtures('routes',
+                         'token_serializer',
+                         'html_renderer',
+                         'text_renderer')
 class TestGenerate(object):
+
+    def test_gets_in_context_link(self, notification, links, pyramid_request):
+        generate(pyramid_request, notification)
+
+        links.incontext_link.assert_called_once_with(pyramid_request,
+                                                     notification.reply)
 
     def test_calls_renderers_with_appropriate_context(self,
                                                       notification,
@@ -21,19 +30,17 @@ class TestGenerate(object):
                                                       pyramid_request,
                                                       reply_user,
                                                       html_renderer,
-                                                      text_renderer):
+                                                      text_renderer,
+                                                      links):
         generate(pyramid_request, notification)
 
         expected_context = {
             'document_title': 'My fascinating page',
             'document_url': 'http://example.org/',
             'parent': notification.parent,
-            'parent_url': 'http://example.com/ann/foo123',
-            'parent_user': parent_user,
             'reply': notification.reply,
-            'reply_url': 'http://example.com/ann/bar456',
+            'reply_url': links.incontext_link.return_value,
             'reply_user': reply_user,
-            'reply_user_url': 'http://example.com/stream/user/ron',
             'unsubscribe_url': 'http://example.com/unsub/FAKETOKEN',
         }
         html_renderer.assert_(**expected_context)
@@ -51,6 +58,39 @@ class TestGenerate(object):
         html_renderer.assert_(document_title='http://example.org/')
         text_renderer.assert_(document_title='http://example.org/')
 
+    def test_falls_back_to_individual_page_if_no_bouncer(self,
+                                                         notification,
+                                                         parent_user,
+                                                         pyramid_request,
+                                                         reply_user,
+                                                         html_renderer,
+                                                         text_renderer,
+                                                         links):
+        """
+        It link to individual pages if bouncer isn't available.
+
+        If bouncer isn't enabled direct links in reply notification emails
+        should fall back to linking to the reply's individual page, instead of
+        the bouncer direct link.
+
+        """
+        # incontext_link() returns None if bouncer isn't available.
+        links.incontext_link.return_value = None
+
+        generate(pyramid_request, notification)
+
+        expected_context = {
+            'document_title': 'My fascinating page',
+            'document_url': 'http://example.org/',
+            'parent': notification.parent,
+            'reply': notification.reply,
+            'reply_url': 'http://example.com/ann/bar456',
+            'reply_user': reply_user,
+            'unsubscribe_url': 'http://example.com/unsub/FAKETOKEN',
+        }
+        html_renderer.assert_(**expected_context)
+        text_renderer.assert_(**expected_context)
+
     def test_returns_text_and_body_results_from_renderers(self,
                                                           notification,
                                                           pyramid_request,
@@ -64,19 +104,16 @@ class TestGenerate(object):
         assert html == 'HTML output'
         assert text == 'Text output'
 
-    @pytest.mark.usefixtures('html_renderer', 'text_renderer')
     def test_returns_subject_with_reply_username(self, notification, pyramid_request):
         _, subject, _, _ = generate(pyramid_request, notification)
 
         assert subject == 'ron has replied to your annotation'
 
-    @pytest.mark.usefixtures('html_renderer', 'text_renderer')
     def test_returns_parent_email_as_recipients(self, notification, pyramid_request):
         recipients, _, _, _ = generate(pyramid_request, notification)
 
         assert recipients == ['pat@ric.ia']
 
-    @pytest.mark.usefixtures('html_renderer', 'text_renderer')
     def test_calls_token_serializer_with_correct_arguments(self,
                                                            notification,
                                                            pyramid_request,
@@ -99,26 +136,28 @@ class TestGenerate(object):
         generate(pyramid_request, notification)
 
     @pytest.fixture
-    def routes(self, pyramid_config):
-        pyramid_config.add_route('annotation', '/ann/{id}')
-        pyramid_config.add_route('stream.user_query', '/stream/user/{user}')
-        pyramid_config.add_route('unsubscribe', '/unsub/{token}')
-
-    @pytest.fixture
-    def html_renderer(self, pyramid_config):
-        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.html.jinja2')
-
-    @pytest.fixture
-    def text_renderer(self, pyramid_config):
-        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.txt.jinja2')
-
-    @pytest.fixture
     def document(self, db_session):
         doc = Document()
         doc.meta.append(DocumentMeta(type='title', value=['My fascinating page'], claimant='http://example.org'))
         db_session.add(doc)
         db_session.flush()
         return doc
+
+    @pytest.fixture
+    def html_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.html.jinja2')
+
+    @pytest.fixture
+    def links(self, patch):
+        return patch('h.emails.reply_notification.links')
+
+    @pytest.fixture
+    def notification(self, reply, reply_user, parent, parent_user, document):
+        return Notification(reply=reply,
+                            reply_user=reply_user,
+                            parent=parent,
+                            parent_user=parent_user,
+                            document=document)
 
     @pytest.fixture
     def parent(self):
@@ -131,6 +170,10 @@ class TestGenerate(object):
         return Annotation(target_uri='http://example.org/', **common)
 
     @pytest.fixture
+    def parent_user(self):
+        return User(username='patricia', email='pat@ric.ia')
+
+    @pytest.fixture
     def reply(self):
         common = {
             'id': 'bar456',
@@ -141,20 +184,18 @@ class TestGenerate(object):
         return Annotation(target_uri='http://example.org/', **common)
 
     @pytest.fixture
-    def notification(self, reply, reply_user, parent, parent_user, document):
-        return Notification(reply=reply,
-                            reply_user=reply_user,
-                            parent=parent,
-                            parent_user=parent_user,
-                            document=document)
-
-    @pytest.fixture
-    def parent_user(self):
-        return User(username='patricia', email='pat@ric.ia')
-
-    @pytest.fixture
     def reply_user(self):
         return User(username='ron', email='ron@thesmiths.com')
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('annotation', '/ann/{id}')
+        pyramid_config.add_route('stream.user_query', '/stream/user/{user}')
+        pyramid_config.add_route('unsubscribe', '/unsub/{token}')
+
+    @pytest.fixture
+    def text_renderer(self, pyramid_config):
+        return pyramid_config.testing_add_renderer('h:templates/emails/reply_notification.txt.jinja2')
 
     @pytest.fixture
     def token_serializer(self, pyramid_config):
