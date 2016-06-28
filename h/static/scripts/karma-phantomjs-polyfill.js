@@ -11,9 +11,6 @@
 // by all browsers we support (IE >= 10)
 require('core-js/es5');
 
-// PhantomJS 1.x does not support rAF.
-require('raf').polyfill();
-
 // Additional polyfills for newer features.
 // Be careful that any polyfills used here match what is used in the
 // app itself.

@@ -23,19 +23,10 @@ module.exports = function(config) {
       // Test setup
       './test/bootstrap.js',
 
-      // Empty HTML file to assist with some tests
-      { pattern: './test/empty.html', watched: false },
-
       // Karma watching is disabled for these files because they are
       // bundled with karma-browserify which handles watching itself via
       // watchify
-
-      // Unit tests
-      { pattern: '**/*-test.coffee', watched: false, included: true, served: true },
       { pattern: '**/test/*-test.js', watched: false, included: true, served: true },
-
-      // Integration tests
-      { pattern: '**/integration/*-test.js', watched: false, included: true, served: true }
     ],
 
     // list of files to exclude
@@ -48,17 +39,12 @@ module.exports = function(config) {
       './karma-phantomjs-polyfill.js': ['browserify'],
       './test/bootstrap.js': ['browserify'],
       '**/*-test.js': ['browserify'],
-      '**/*-test.coffee': ['browserify'],
-      '**/*-it.js': ['browserify'],
     },
 
     browserify: {
       debug: true,
-      extensions: ['.coffee'],
-      noParse: [require.resolve('./vendor/katex')],
       configure: function (bundle) {
         bundle
-          .transform('coffeeify')
           .plugin('proxyquire-universal')
           // fix for Proxyquire in PhantomJS 1.x.
           // See https://github.com/bitwit/proxyquireify-phantom-menace

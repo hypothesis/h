@@ -14,11 +14,3 @@ try {
 } catch (err) {
   require('js-polyfills/url');
 }
-
-// document.evaluate() implementation,
-// required by IE 10, 11
-//
-// This sets `window.wgxpath`
-if (!window.document.evaluate) {
-  require('./vendor/wgxpath.install');
-}
