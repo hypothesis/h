@@ -9,7 +9,6 @@ var path = require('path');
 var batch = require('gulp-batch');
 var changed = require('gulp-changed');
 var commander = require('commander');
-var debounce = require('lodash.debounce');
 var endOfStream = require('end-of-stream');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
@@ -28,13 +27,6 @@ var SCRIPT_DIR = 'build/scripts';
 var STYLE_DIR = 'build/styles';
 var FONTS_DIR = 'build/fonts';
 var IMAGES_DIR = 'build/images';
-
-// LiveReloadServer instance for sending messages to connected
-// development clients
-var liveReloadServer;
-// List of file paths that changed since the last live-reload
-// notification was dispatched
-var liveReloadChangedFiles = [];
 
 function parseCommandLine() {
   commander
@@ -212,38 +204,6 @@ gulp.task('watch-images', function () {
 
 var MANIFEST_SOURCE_FILES = 'build/@(fonts|images|scripts|styles)/*.@(js|css|woff|jpg|png|svg)';
 
-var prevManifest = {};
-
-/**
- * Return an array of asset paths that changed between
- * two versions of a manifest.
- */
-function changedAssets(prevManifest, newManifest) {
-  return Object.keys(newManifest).filter(function (asset) {
-    return newManifest[asset] !== prevManifest[asset];
-  });
-}
-
-var debouncedLiveReload = debounce(function () {
-  // Notify dev clients about the changed assets. Note: This currently has an
-  // issue that if CSS and JS are all changed in quick succession, some of the
-  // assets might be empty/incomplete files that are still being generated when
-  // this is invoked, causing the reload to fail.
-  //
-  // Live reload notifications are debounced to reduce the likelihood of this
-  // happening.
-  liveReloadServer.notifyChanged(liveReloadChangedFiles);
-  liveReloadChangedFiles = [];
-}, 250);
-
-function triggerLiveReload(changedFiles) {
-  if (!liveReloadServer) {
-    return;
-  }
-  liveReloadChangedFiles = liveReloadChangedFiles.concat(changedFiles);
-  debouncedLiveReload();
-}
-
 /**
  * Generate a JSON manifest mapping file paths to
  * URLs containing cache-busting query string parameters.
@@ -253,12 +213,6 @@ function generateManifest() {
     .pipe(manifest({name: 'manifest.json'}))
     .pipe(through.obj(function (file, enc, callback) {
       gulpUtil.log('Updated asset manifest');
-
-      var newManifest = JSON.parse(file.contents.toString());
-      var changed = changedAssets(prevManifest, newManifest);
-      prevManifest = newManifest;
-      triggerLiveReload(changed);
-
       this.push(file);
       callback();
     }))
@@ -271,11 +225,6 @@ gulp.task('watch-manifest', function () {
       done();
     });
   }));
-});
-
-gulp.task('start-live-reload-server', function () {
-  var LiveReloadServer = require('./scripts/gulp/live-reload-server');
-  liveReloadServer = new LiveReloadServer(3000, 'http://localhost:5000');
 });
 
 gulp.task('build-app',
@@ -294,8 +243,7 @@ gulp.task('build',
           generateManifest);
 
 gulp.task('watch',
-          ['start-live-reload-server',
-           'watch-app-js',
+          ['watch-app-js',
            'watch-extension-js',
            'watch-css',
            'watch-fonts',
