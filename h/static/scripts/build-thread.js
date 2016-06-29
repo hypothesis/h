@@ -238,6 +238,11 @@ var defaultOpts = {
    */
   filterFn: undefined,
   /**
+   * A filter function which should return true if a given annotation and
+   * its replies should be displayed.
+   */
+  threadFilterFn: undefined,
+  /**
    * Mapping of annotation IDs to expansion states.
    */
   expanded: {},
@@ -340,6 +345,12 @@ function buildThread(annotations, opts) {
   thread.children = thread.children.filter(function (child) {
     return child.visible || hasVisibleChildren(child);
   });
+
+  // Get annotations which are of type notes or annotations depending
+  // on the filter.
+  if (opts.threadFilterFn) {
+    thread.children = thread.children.filter(opts.threadFilterFn);
+  }
 
   // Sort the root thread according to the current search criteria
   thread = sortThread(thread, opts.sortCompareFn, opts.replySortCompareFn);

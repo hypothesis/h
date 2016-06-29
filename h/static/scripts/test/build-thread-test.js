@@ -1,8 +1,9 @@
 'use strict';
 
 var buildThread = require('../build-thread');
+var metadata = require('../annotation-metadata');
 
-// Fixture with two top level annotations and one reply
+// Fixture with two top level annotations, one note and one reply
 var SIMPLE_FIXTURE = [{
   id: '1',
   text: 'first annotation',
@@ -259,6 +260,31 @@ describe('build-thread', function () {
             annotation: SIMPLE_FIXTURE[2],
             children: [],
           }]
+        }]);
+      });
+    });
+
+    describe('thread filtering', function () {
+      var fixture = [{
+        id: '1',
+        text: 'annotation',
+        target: [{selector: {}}],
+      },{
+        id: '2',
+        text: 'note',
+        target: [{selector: undefined}],
+      }];
+
+      it('shows only annotations matching the thread filter', function () {
+        var thread = createThread(fixture, {
+          threadFilterFn: function (thread) {
+            return metadata.isPageNote(thread.annotation);
+          },
+        });
+
+        assert.deepEqual(thread, [{
+          annotation: fixture[1],
+          children: []
         }]);
       });
     });

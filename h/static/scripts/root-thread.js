@@ -4,6 +4,7 @@ var buildThread = require('./build-thread');
 var events = require('./events');
 var memoize = require('./util/memoize');
 var metadata = require('./annotation-metadata');
+var uiConstants = require('./ui-constants');
 
 function truthyKeys(map) {
   return Object.keys(map).filter(function (k) {
@@ -38,7 +39,7 @@ var sortFns = {
  * The root thread is then displayed by viewer.html
  */
 // @ngInject
-function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
+function RootThread($rootScope, annotationUI, features, searchFilter, viewFilter) {
 
   /**
    * Build the root conversation thread from the given UI state.
@@ -57,6 +58,17 @@ function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
       };
     }
 
+    var threadFilterFn;
+    if (features.flagEnabled('selection_tabs') && !state.filterQuery) {
+      threadFilterFn = function (thread) {
+        if (state.selectedTab === uiConstants.TAB_ANNOTATIONS) {
+          return thread.annotation && metadata.isAnnotation(thread.annotation);
+        } else if (state.selectedTab === uiConstants.TAB_NOTES) {
+          return thread.annotation && metadata.isPageNote(thread.annotation);
+        }
+      };
+    }
+
     // Get the currently loaded annotations and the set of inputs which
     // determines what is visible and build the visible thread structure
     return buildThread(state.annotations, {
@@ -66,6 +78,7 @@ function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
       selected: truthyKeys(state.selectedAnnotationMap || {}),
       sortCompareFn: sortFn,
       filterFn: filterFn,
+      threadFilterFn: threadFilterFn,
     });
   }
 
@@ -89,6 +102,16 @@ function RootThread($rootScope, annotationUI, searchFilter, viewFilter) {
 
       // Ensure that newly created annotations are always visible
       if (event.name === events.BEFORE_ANNOTATION_CREATED) {
+
+        // If the annotation is of type note or annotation, make sure
+        // the appropriate tab is selected. If it is of type reply, user
+        // stays in the selected tab.
+        if (metadata.isPageNote(annotation)) {
+          annotationUI.selectTab(uiConstants.TAB_NOTES);
+        } else if (metadata.isAnnotation(annotation)) {
+          annotationUI.selectTab(uiConstants.TAB_ANNOTATIONS);
+        }
+
         (annotation.references || []).forEach(function (parent) {
           annotationUI.setCollapsed(parent, false);
         });

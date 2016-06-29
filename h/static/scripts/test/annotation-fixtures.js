@@ -9,7 +9,7 @@ function defaultAnnotation() {
     document: {
       title: 'A special document'
     },
-    target: [{}],
+    target: [{source: 'source', 'selector': []}],
     uri: 'http://example.com',
     user: 'acct:bill@localhost',
     updated: '2015-05-10T20:18:56.613388+00:00',

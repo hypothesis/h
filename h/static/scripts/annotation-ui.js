@@ -10,6 +10,7 @@
 
 var immutable = require('seamless-immutable');
 var redux = require('redux');
+var uiConstants = require('./ui-constants');
 
 function freeze(selection) {
   if (Object.keys(selection).length) {
@@ -55,6 +56,8 @@ function initialState(settings) {
 
     filterQuery: null,
 
+    selectedTab: uiConstants.TAB_ANNOTATIONS,
+
     // Key by which annotations are currently sorted.
     sortKey: 'Location',
     // Keys by which annotations can be sorted.
@@ -75,6 +78,7 @@ var types = {
   CLEAR_ANNOTATIONS: 'CLEAR_ANNOTATIONS',
   SET_FILTER_QUERY: 'SET_FILTER_QUERY',
   SET_SORT_KEY: 'SET_SORT_KEY',
+  SELECT_TAB: 'SELECT_TAB',
 };
 
 function excludeAnnotations(current, annotations) {
@@ -125,6 +129,8 @@ function reducer(state, action) {
       return Object.assign({}, state, {expanded: action.expanded});
     case types.HIGHLIGHT_ANNOTATIONS:
       return Object.assign({}, state, {highlighted: action.highlighted});
+    case types.SELECT_TAB:
+      return Object.assign({}, state, {selectedTab: action.tab});
     case types.SET_FILTER_QUERY:
       return Object.assign({}, state, {
         filterQuery: action.query,
@@ -306,6 +312,14 @@ module.exports = function (settings) {
     /** Set the currently displayed annotations to the empty set. */
     clearAnnotations: function () {
       store.dispatch({type: types.CLEAR_ANNOTATIONS});
+    },
+
+    /** Set the type annotations to be displayed. */
+    selectTab: function (type) {
+      store.dispatch({
+        type: types.SELECT_TAB,
+        tab: type,
+      });
     },
 
     /** Set the query used to filter displayed annotations. */

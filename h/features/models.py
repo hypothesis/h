@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 
 FEATURES = {
     'new_homepage': "Show the new homepage design?",
+    'selection_tabs': "Show the tabs to select between annotations and notes?",
 }
 
 # Once a feature has been fully deployed, we remove the flag from the codebase.

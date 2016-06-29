@@ -3,7 +3,6 @@
 var angular = require('angular');
 
 var util = require('./util');
-var unroll = require('../../test/util').unroll;
 
 describe('searchStatusBar', function () {
   before(function () {
@@ -26,19 +25,34 @@ describe('searchStatusBar', function () {
   });
 
   context('when there is a selection', function () {
-    var FIXTURES = [
-      {count: 0, message: 'Show all annotations'},
-      {count: 1, message: 'Show all annotations'},
-      {count: 10, message: 'Show all 10 annotations'},
-    ];
-
-    unroll('should display the "Show all annotations" message when there are #count annotations', function (testCase) {
+    it('should display the "Show all annotations (2)" message when there are 2 annotations', function () {
+      var msg = 'Show all annotations';
+      var msgCount = '(2)'
       var elem = util.createDirective(document, 'searchStatusBar', {
         selectionCount: 1,
-        totalCount: testCase.count
+        totalAnnotations: 2,
+        selectedTab: 'annotation',
+        tabAnnotations: 'annotation',
+        tabNotes: 'note',
       });
       var clearBtn = elem[0].querySelector('button');
-      assert.include(clearBtn.textContent, testCase.message);
-    }, FIXTURES);
+      assert.include(clearBtn.textContent, msg);
+      assert.include(clearBtn.textContent, msgCount);
+    });
+
+    it('should display the "Show all notes (3)" message when there are 3 notes', function () {
+      var msg = 'Show all notes';
+      var msgCount = '(3)';
+      var elem = util.createDirective(document, 'searchStatusBar', {
+        selectionCount: 1,
+        totalNotes: 3,
+        selectedTab: 'note',
+        tabAnnotations: 'annotation',
+        tabNotes: 'note',
+      });
+      var clearBtn = elem[0].querySelector('button');
+      assert.include(clearBtn.textContent, msg);
+      assert.include(clearBtn.textContent, msgCount);
+    });
   });
 });

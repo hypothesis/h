@@ -1,5 +1,7 @@
 'use strict';
 
+var uiConstants = require('./ui-constants');
+
 /**
  * Uses a channel between the sidebar and the attached frames to ensure
  * the interface remains in sync.
@@ -27,6 +29,7 @@ function AnnotationUISync($rootScope, $window, bridge, annotationSync,
       tags = tags || [];
       var annotations = getAnnotationsByTags(tags);
       annotationUI.selectAnnotations(annotations);
+      annotationUI.selectTab(uiConstants.TAB_ANNOTATIONS);
     },
     focusAnnotations: function (tags) {
       tags = tags || [];

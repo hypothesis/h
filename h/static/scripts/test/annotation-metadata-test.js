@@ -112,4 +112,39 @@ describe('annotation-metadata', function () {
       }), Number.POSITIVE_INFINITY);
     });
   });
+
+  describe('.isPageNote', function () {
+    it ('returns true for an annotation with an empty target', function () {
+      assert.isTrue(annotationMetadata.isPageNote({
+        target: []
+      }));
+    });
+    it ('returns true for an annotation without selectors', function () {
+      assert.isTrue(annotationMetadata.isPageNote({
+        target: [{selector: undefined}]
+      }));
+    });
+    it ('returns true for an annotation without a target', function () {
+      assert.isTrue(annotationMetadata.isPageNote({
+        target: undefined
+      }));
+    });
+    it ('returns false for an annotation which is a reply', function () {
+      assert.isFalse(annotationMetadata.isPageNote({
+        target: [],
+        references: ['xyz']
+      }));
+    });
+  });
+
+  describe ('.isAnnotation', function () {
+    it ('returns true if an annotation is a top level annotation', function () {
+      assert(annotationMetadata.isAnnotation({
+        target: [{selector: []}]
+      }));
+    });
+    it ('returns false if an annotation has no target', function () {
+      assert.equal(annotationMetadata.isAnnotation({}), undefined);
+    });
+  });
 });
