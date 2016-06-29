@@ -14,7 +14,9 @@ describe('annotationMapper', function() {
 
   beforeEach(function () {
     fakeStore = {
-      AnnotationResource: sandbox.stub().returns({}),
+      annotation: {
+        delete: sinon.stub().returns(Promise.resolve({})),
+      },
     };
     annotationUI = annotationUIFactory({});
     angular.module('app', [])
@@ -40,7 +42,7 @@ describe('annotationMapper', function() {
       annotationMapper.loadAnnotations(annotations);
       assert.called($rootScope.$emit);
       assert.calledWith($rootScope.$emit, events.ANNOTATIONS_LOADED,
-        [{}, {}, {}]);
+        [{id: 1}, {id: 2}, {id: 3}]);
     });
 
     it('also includes replies in the annotationLoaded event', function () {
@@ -50,7 +52,7 @@ describe('annotationMapper', function() {
       annotationMapper.loadAnnotations(annotations, replies);
       assert.called($rootScope.$emit);
       assert.calledWith($rootScope.$emit, events.ANNOTATIONS_LOADED,
-        [{}, {}, {}]);
+        [{id: 1}, {id: 2}, {id: 3}]);
     });
 
     it('triggers the annotationUpdated event for each loaded annotation', function () {
@@ -122,25 +124,16 @@ describe('annotationMapper', function() {
   });
 
   describe('#createAnnotation()', function () {
-    it('creates a new annotaton resource', function () {
+    it('creates a new annotation resource', function () {
       var ann = {};
-      fakeStore.AnnotationResource.returns(ann);
       var ret = annotationMapper.createAnnotation(ann);
       assert.equal(ret, ann);
-    });
-
-    it('creates a new resource with the new keyword', function () {
-      var ann = {};
-      fakeStore.AnnotationResource.returns(ann);
-      annotationMapper.createAnnotation();
-      assert.calledWithNew(fakeStore.AnnotationResource);
     });
 
     it('emits the "beforeAnnotationCreated" event', function () {
       sandbox.stub($rootScope, '$emit');
       var ann = {};
-      fakeStore.AnnotationResource.returns(ann);
-      annotationMapper.createAnnotation();
+      annotationMapper.createAnnotation(ann);
       assert.calledWith($rootScope.$emit,
         events.BEFORE_ANNOTATION_CREATED, ann);
     });
@@ -148,16 +141,14 @@ describe('annotationMapper', function() {
 
   describe('#deleteAnnotation()', function () {
     it('deletes the annotation on the server', function () {
-      var p = Promise.resolve();
-      var ann = {$delete: sandbox.stub().returns(p)};
+      var ann = {id: 'test-id'};
       annotationMapper.deleteAnnotation(ann);
-      assert.called(ann.$delete);
+      assert.calledWith(fakeStore.annotation.delete, {id: 'test-id'});
     });
 
     it('triggers the "annotationDeleted" event on success', function (done) {
       sandbox.stub($rootScope, '$emit');
-      var p = Promise.resolve();
-      var ann = {$delete: sandbox.stub().returns(p)};
+      var ann = {};
       annotationMapper.deleteAnnotation(ann).then(function () {
         assert.calledWith($rootScope.$emit,
           events.ANNOTATION_DELETED, ann);
@@ -165,21 +156,12 @@ describe('annotationMapper', function() {
       $rootScope.$apply();
     });
 
-    it('does nothing on error', function (done) {
+    it('does not emit an event on error', function (done) {
       sandbox.stub($rootScope, '$emit');
-      var p = Promise.reject();
-      var ann = {$delete: sandbox.stub().returns(p)};
+      fakeStore.annotation.delete.returns(Promise.reject());
+      var ann = {id: 'test-id'};
       annotationMapper.deleteAnnotation(ann).catch(function () {
         assert.notCalled($rootScope.$emit);
-      }).then(done, done);
-      $rootScope.$apply();
-    });
-
-    it('return a promise that resolves to the deleted annotation', function (done) {
-      var p = Promise.resolve();
-      var ann = {$delete: sandbox.stub().returns(p)};
-      annotationMapper.deleteAnnotation(ann).then(function (value) {
-        assert.equal(value, ann);
       }).then(done, done);
       $rootScope.$apply();
     });

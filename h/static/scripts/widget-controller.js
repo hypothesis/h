@@ -189,7 +189,7 @@ module.exports = function WidgetController(
   }
 
   function _loadAnnotationsFor(uris, group) {
-    var searchClient = new SearchClient(store.SearchResource, {
+    var searchClient = new SearchClient(store.search, {
       // If no group is specified, we are fetching annotations from
       // all groups in order to find out which group contains the selected
       // annotation, therefore we need to load all chunks before processing

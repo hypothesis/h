@@ -1,8 +1,10 @@
 'use strict';
 
 var angular = require('angular');
+var get = require('lodash.get');
 
 var retryUtil = require('./retry-util');
+var urlUtil = require('./util/url-util');
 
 function prependTransform(defaults, transform) {
   // We can't guarantee that the default transformation is an array
@@ -79,55 +81,60 @@ function serializeParams(params) {
   return parts.join('&');
 }
 
+/**
+ * Creates a function that will make an API call to a named route.
+ *
+ * @param $http - The Angular HTTP service
+ * @param links - Object or promise for an object mapping named API routes to
+ *                URL templates and methods
+ * @param route - The dotted path of the named API route (eg. `annotation.create`)
+ */
+function createAPICall($http, links, route) {
+  return function (params, data) {
+    return links.then(function (links) {
+      var descriptor = get(links, route);
+      var url = urlUtil.replaceURLParams(descriptor.url, params);
+      var req = {
+        data: data,
+        method: descriptor.method,
+        params: url.params,
+        paramSerializer: serializeParams,
+        url: url.url,
+        transformRequest: prependTransform(
+          $http.defaults.transformRequest,
+          stripInternalProperties
+        ),
+      };
+      return $http(req);
+    }).then(function (result) {
+      return result.data;
+    });
+  };
+}
 
 /**
- * @ngdoc factory
- * @name store
- * @description The `store` service handles the backend calls for the restful
- *              API. This is created dynamically from the document returned at
- *              API index so as to ensure that URL paths/methods do not go out
- *              of date.
+ * API client for the Hypothesis REST API.
  *
- *              The service currently exposes two resources:
- *
- *                store.SearchResource, for searching, and
- *                store.AnnotationResource, for CRUD operations on annotations.
+ * Returns an object that with keys that match the routes in
+ * the Hypothesis API (see http://h.readthedocs.io/en/latest/api/).
  */
 // @ngInject
-function store($http, $resource, settings) {
-  var instance = {};
-  var defaultOptions = {
-    paramSerializer: serializeParams,
-    transformRequest: prependTransform(
-      $http.defaults.transformRequest,
-      stripInternalProperties
-    )
-  };
-
-  // We call the API root and it gives back the actions it provides.
-  instance.$promise = retryUtil.retryPromiseOperation(function () {
+function store($http, settings) {
+  var links = retryUtil.retryPromiseOperation(function () {
     return $http.get(settings.apiUrl);
   }).then(function (response) {
-    var links = response.data.links;
-
-    // N.B. in both cases below we explicitly override the default `get`
-    // action because there is no way to provide defaultOptions to the default
-    // action.
-    instance.SearchResource = $resource(links.search.url, {}, {
-      get: angular.extend({url: links.search.url}, defaultOptions),
-    });
-
-    instance.AnnotationResource = $resource(links.annotation.read.url, {}, {
-      get: angular.extend(links.annotation.read, defaultOptions),
-      create: angular.extend(links.annotation.create, defaultOptions),
-      update: angular.extend(links.annotation.update, defaultOptions),
-      delete: angular.extend(links.annotation.delete, defaultOptions),
-    });
-
-    return instance;
+    return response.data.links;
   });
 
-  return instance;
+  return {
+    search: createAPICall($http, links, 'search'),
+    annotation: {
+      create: createAPICall($http, links, 'annotation.create'),
+      delete: createAPICall($http, links, 'annotation.delete'),
+      get: createAPICall($http, links, 'annotation.read'),
+      update: createAPICall($http, links, 'annotation.update'),
+    },
+  };
 }
 
 module.exports = store;
