@@ -15,18 +15,27 @@ import logging
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
-from h.models import DocumentURI
 
 log = logging.getLogger(__name__)
 
+Base = declarative_base()
 Session = sessionmaker()
 
 
-document_uri_table = sa.table('document_uri',
-                              sa.column('type', sa.UnicodeText),
-                              sa.column('content_type', sa.UnicodeText))
+class DocumentURI(Base):
+    __tablename__ = 'document_uri'
+
+    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    updated = sa.Column(sa.DateTime)
+
+    claimant_normalized = sa.Column(sa.UnicodeText)
+    uri_normalized = sa.Column(sa.UnicodeText)
+
+    type = sa.Column(sa.UnicodeText)
+    content_type = sa.Column(sa.UnicodeText)
+
 
 
 def batch_delete(query, session):
