@@ -23,11 +23,10 @@ function DraftStore() {
    * Returns true if 'draft' is a draft for a given
    * annotation.
    *
-   * Annotations are matched by ID and annotation instance (for unsaved
-   * annotations which have no ID)
+   * Annotations are matched by ID or local tag.
    */
   function match(draft, model) {
-    return draft.model === model ||
+    return (draft.model.$$tag && model.$$tag === draft.model.$$tag) ||
            (draft.model.id && model.id === draft.model.id);
   }
 

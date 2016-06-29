@@ -81,15 +81,25 @@ var types = {
   SELECT_TAB: 'SELECT_TAB',
 };
 
+/**
+ * Return a copy of `current` with all matching annotations in `annotations`
+ * removed.
+ */
 function excludeAnnotations(current, annotations) {
-  var idsAndTags = annotations.reduce(function (map, annot) {
-    var id = annot.id || annot.$$tag;
-    map[id] = true;
-    return map;
-  }, {});
+  var ids = {};
+  var tags = {};
+  annotations.forEach(function (annot) {
+    if (annot.id) {
+      ids[annot.id] = true;
+    }
+    if (annot.$$tag) {
+      tags[annot.$$tag] = true;
+    }
+  });
   return current.filter(function (annot) {
-    var id = annot.id || annot.$$tag;
-    return !idsAndTags[id];
+    var shouldRemove = (annot.id && (annot.id in ids)) ||
+                       (annot.$$tag && (annot.$$tag in tags));
+    return !shouldRemove;
   });
 }
 
