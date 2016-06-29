@@ -1,13 +1,13 @@
 ============================
-Making Changes to Model Code
+Making changes to model code
 ============================
 
 
 ---------------------------------
-Guidelines for Writing Model Code
+Guidelines for writing model code
 ---------------------------------
 
-No Length Limits on Database Columns
+No length limits on database columns
 ====================================
 
 Don't put any length limits on your database columns (for example
@@ -28,7 +28,7 @@ supports returning per-field errors to the user.
 
 
 ------------------------------------
-Creating a Database Migration Script
+Creating a database migration script
 ------------------------------------
 
 If you've made any changes to the database schema (for example: added or
@@ -109,7 +109,7 @@ for details, but the basic steps to create a new migration script for h are:
       alembic -c conf/alembic.ini upgrade +1
 
 
-Troubleshooting Migration Scripts
+Troubleshooting migration scripts
 =================================
 
 (sqlite3.OperationalError) near "ALTER"
