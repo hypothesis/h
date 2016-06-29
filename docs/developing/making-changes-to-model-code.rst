@@ -108,6 +108,67 @@ for details, but the basic steps to create a new migration script for h are:
 
       alembic -c conf/alembic.ini upgrade +1
 
+Batch deletes and updates in migration scripts
+==============================================
+
+It's important that migration scripts don't lock database tables for too long,
+so that when the script is run on the production database concurrent database
+transactions from web requests aren't held up.
+
+An SQL ``DELETE`` command acquires a ``FOR UPDATE`` row-level lock on the
+rows that it selects to delete. An ``UPDATE`` acquires a ``FOR UPDATE`` lock on
+the selected rows *if the update modifies any columns that have a unique index
+on them that can be used in a foreign key*. While held this ``FOR UPDATE`` lock
+prevents any concurrent transactions from modifying or deleting the selected
+rows.
+
+So if your migration script is going to ``DELETE`` or ``UPDATE`` a large number
+of rows at once and committing that transaction is going to take a long time
+(longer than 100ms) then you should instead do multiple ``DELETE``\s or
+``UPDATE``\s of smaller numbers of rows, committing each as a separate
+transaction. This will allow concurrent transactions to be sequenced in-between
+your migration script's transactions.
+
+For example, here's some Python code that deletes all the rows that match a
+query in batches of 25:
+
+.. code-block:: python
+
+   query = <some sqlalchemy query>
+   query = query.limit(25)
+   while True:
+       if query.count() == 0:
+           break
+       for row in query:
+           session.delete(row)
+       session.commit()
+
+Separate data and schema migrations
+===================================
+
+It's easier for deployment if you do *data migrations* (code that creates,
+updates or deletes rows) and *schema migrations* (code that modifies the
+database *schema*, for example adding a new column to a table) in separate
+migration scripts instead of combining them into one script. If you have a
+single migration that needs to modify some data and then make a schema change,
+implement it as two consecutive migration scripts instead.
+
+Don't import model classes into migration scripts
+=================================================
+
+Don't import model classes, for example
+``from h.api.models import Annotation``, in migration scripts.
+Instead copy and paste the ``Annotation`` class into your migration script.
+
+This is because the script needs the schema of the ``Annotation`` class
+as it was at a particular point in time, which may be different from the
+schema in ``h.api.models.Annotation`` when the script is run in the future.
+
+The script's copy of the class usually only needs to contain the definitions of
+the primary key column(s) and any other columns that the script uses, and only
+needs the name and type attributes of these columns. Other attributes of the
+columns, columns that the script doesn't use, and methods can usually be left
+out of the script's copy of the model class.
 
 Troubleshooting migration scripts
 =================================
