@@ -20,6 +20,13 @@ function freeze(selection) {
   }
 }
 
+function toSet(list) {
+  return list.reduce(function (set, key) {
+    set[key] = true;
+    return set;
+  }, {});
+}
+
 function initialSelection(settings) {
   var selection = {};
   if (settings.annotations) {
@@ -197,17 +204,12 @@ module.exports = function (settings) {
     /**
      * Sets which annotations are currently focused.
      *
-     * @param {Array<Annotation>} annotations
+     * @param {Array<string>} Tags of annotations to focus
      */
-    focusAnnotations: function (annotations) {
-      var selection = {};
-      for (var i = 0, annotation; i < annotations.length; i++) {
-        annotation = annotations[i];
-        selection[annotation.$$tag] = true;
-      }
+    focusAnnotations: function (tags) {
       store.dispatch({
         type: types.FOCUS_ANNOTATIONS,
-        focused: freeze(selection),
+        focused: freeze(toSet(tags)),
       });
     },
 
@@ -258,28 +260,16 @@ module.exports = function (settings) {
 
     /**
      * Set the currently selected annotation IDs.
-     *
-     * @param {Array<string|{id:string}>} annotations - Annotations or IDs
-     *        of annotations to select.
      */
-    selectAnnotations: function (annotations) {
-      var selection = {};
-      for (var i = 0; i < annotations.length; i++) {
-        if (typeof annotations[i] === 'string') {
-          selection[annotations[i]] = true;
-        } else {
-          selection[annotations[i].id] = true;
-        }
-      }
-      select(selection);
+    selectAnnotations: function (ids) {
+      select(toSet(ids));
     },
 
     /** Toggle whether annotations are selected or not. */
-    toggleSelectedAnnotations: function (annotations) {
+    toggleSelectedAnnotations: function (ids) {
       var selection = Object.assign({}, store.getState().selectedAnnotationMap);
-      for (var i = 0, annotation; i < annotations.length; i++) {
-        annotation = annotations[i];
-        var id = annotation.id;
+      for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
         if (selection[id]) {
           delete selection[id];
         } else {
@@ -290,12 +280,13 @@ module.exports = function (settings) {
     },
 
     /** De-select an annotation. */
-    removeSelectedAnnotation: function (annotation) {
+    removeSelectedAnnotation: function (id) {
       var selection = Object.assign({}, store.getState().selectedAnnotationMap);
-      if (selection) {
-        delete selection[annotation.id];
-        select(selection);
+      if (!selection || !id) {
+        return;
       }
+      delete selection[id];
+      select(selection);
     },
 
     /** De-select all annotations. */
