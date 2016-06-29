@@ -41,6 +41,10 @@ function domainAndTitle(annotation) {
     titleLink = null;
   }
 
+  if (annotation.links && annotation.links.incontext) {
+    titleLink = annotation.links.incontext;
+  }
+
   var domainText;
   if (document.uri && document.uri.indexOf('file://') === 0 && document.title) {
     var parts = document.uri.split('/');
