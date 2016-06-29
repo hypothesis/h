@@ -128,9 +128,12 @@ function connect($rootScope, annotationMapper, groups, session, settings) {
   });
 
   socket.on('message', function (event) {
-    // wrap message dispatches in $rootScope.$apply() so that
+    // Wrap message dispatches in $rootScope.$apply() so that
     // scope watches on app state affected by the received message
     // are updated
+    //
+    // Note: The use of $apply() here will no longer be needed once session
+    // state is moved to the Redux store in `annotationUI`.
     $rootScope.$apply(function () {
       var message = JSON.parse(event.data);
       if (!message) {
