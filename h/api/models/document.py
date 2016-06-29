@@ -382,7 +382,7 @@ def create_or_update_document_meta(session,
         raise ConcurrentUpdateError('concurrent document meta updates')
 
 
-def merge_documents(session, documents, updated=datetime.now()):
+def merge_documents(session, documents, updated=None):
     """
     Takes a list of documents and merges them together. It returns the new
     master document.
@@ -390,6 +390,9 @@ def merge_documents(session, documents, updated=datetime.now()):
     The support for setting a specific value for the `updated` should only
     be used during the Postgres migration. It should be removed afterwards.
     """
+    if updated is None:
+        updated = datetime.utcnow()
+
     master = documents[0]
     duplicates = documents[1:]
 
