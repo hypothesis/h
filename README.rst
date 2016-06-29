@@ -7,9 +7,6 @@ Hypothesis
 .. image:: https://codecov.io/github/hypothesis/h/coverage.svg?branch=master
    :target: https://codecov.io/github/hypothesis/h?branch=master
    :alt: Code Coverage
-.. image:: https://landscape.io/github/hypothesis/h/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/hypothesis/h/master
-   :alt: Code Health
 .. image:: https://img.shields.io/badge/IRC-%23hypothes.is-blue.svg
    :target: `#hypothes.is`_
    :alt: #hypothes.is IRC channel
