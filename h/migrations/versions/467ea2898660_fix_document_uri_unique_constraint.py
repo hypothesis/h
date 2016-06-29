@@ -11,12 +11,15 @@ from __future__ import unicode_literals
 revision = '467ea2898660'
 down_revision = '296573bb30b3'
 
+import logging
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 
 from h.models import DocumentURI
 
+log = logging.getLogger(__name__)
 
 Session = sessionmaker()
 
@@ -34,13 +37,16 @@ def batch_delete(query, session):
     from will be locked for at once.
 
     """
+    n = 0
     query = query.limit(25)
     while True:
         if query.count() == 0:
             break
         for row in query:
+            n += 1
             session.delete(row)
         session.commit()
+    return n
 
 
 def merge_duplicate_document_uris(session):
@@ -77,6 +83,8 @@ def merge_duplicate_document_uris(session):
                  DocumentURI.content_type)
         .having(sa.func.count('*') > 1))
 
+    n = 0
+
     for group in groups:
         document_uris = (
             session.query(DocumentURI)
@@ -86,7 +94,9 @@ def merge_duplicate_document_uris(session):
                         content_type=group[3])
             .order_by(DocumentURI.updated.desc())
             .offset(1))
-        batch_delete(document_uris, session)
+        n += batch_delete(document_uris, session)
+
+    log.info('deleted %d duplicate rows from document_uri (NULL)' % n)
 
 
 def delete_conflicting_document_uris(session):
@@ -115,6 +125,8 @@ def delete_conflicting_document_uris(session):
             DocumentURI.content_type == '',
         )
     )
+
+    n = 0
 
     for doc_uri in doc_uris:
 
@@ -152,8 +164,9 @@ def delete_conflicting_document_uris(session):
                 ),
             )
 
-        batch_delete(conflicting_doc_uris, session)
+        n += batch_delete(conflicting_doc_uris, session)
 
+    log.info('deleted %d duplicate rows from document_uri (empty string/NULL)' % n)
 
 def change_nulls_to_empty_strings(session):
     """
@@ -163,6 +176,8 @@ def change_nulls_to_empty_strings(session):
     content_type columns with crashing.
 
     """
+    n = 0
+
     while True:
         doc_uris = (
             session.query(DocumentURI)
@@ -179,10 +194,13 @@ def change_nulls_to_empty_strings(session):
             break
 
         for doc_uri in doc_uris:
+            n += 1
             doc_uri.type = doc_uri.type or ''
             doc_uri.content_type = doc_uri.content_type or ''
 
         session.commit()
+
+    log.info("replaced NULL with '' in %d rows" % n)
 
 
 def upgrade():
