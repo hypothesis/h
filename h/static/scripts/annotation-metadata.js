@@ -12,7 +12,7 @@
  *   uri, domain and title.
  *
  */
-function extractDocumentMetadata(annotation) {
+function documentMetadata(annotation) {
   var uri = annotation.uri;
   var domain = new URL(uri).hostname;
   var title = domain;
@@ -21,14 +21,50 @@ function extractDocumentMetadata(annotation) {
     title = annotation.document.title[0];
   }
 
-  if (title.length > 30) {
-    title = title.slice(0, 30) + '…';
-  }
-
   return {
     uri: uri,
     domain: domain,
     title: title,
+  };
+}
+
+/**
+ * Return the domain and title of an annotation for display on an annotation
+ * card.
+ */
+function domainAndTitle(annotation) {
+  var document = documentMetadata(annotation);
+  var titleLink = document.uri;
+
+  if (titleLink && !(titleLink.indexOf('http://') === 0 || titleLink.indexOf('https://') === 0)) {
+    // We only link to http(s) URLs.
+    titleLink = null;
+  }
+
+  if (annotation.links && annotation.links.incontext) {
+    titleLink = annotation.links.incontext;
+  }
+
+  var domainText;
+  if (document.uri && document.uri.indexOf('file://') === 0 && document.title) {
+    var parts = document.uri.split('/');
+    var filename = parts[parts.length - 1];
+    if (filename) {
+      domainText = filename;
+    }
+  } else if (document.domain && document.domain !== document.title) {
+    domainText = document.domain;
+  }
+
+  var titleText = document.title;
+  if (titleText.length > 30) {
+    titleText = titleText.slice(0, 30) + '…';
+  }
+
+  return {
+    domain: domainText,
+    titleText: titleText,
+    titleLink: titleLink,
   };
 }
 
@@ -78,7 +114,8 @@ function location(annotation) {
 }
 
 module.exports = {
-  extractDocumentMetadata: extractDocumentMetadata,
+  documentMetadata: documentMetadata,
+  domainAndTitle: domainAndTitle,
   isAnnotation: isAnnotation,
   isNew: isNew,
   isPageNote: isPageNote,
