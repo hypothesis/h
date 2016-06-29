@@ -1,3 +1,30 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Show annotations and page notes in separate tabs in the sidebar (feature
+  flagged: selection_tabs) (#3504)
+
+- The 'Share' action for replies is now a direct link to the parent annotation
+  and its associated conversation in context (#3539).
+
+- Reply notification emails now contain direct links to see the original
+  annotation and its associated conversation in context (#3536).
+
+Bug fixes
+---------
+
+- Fix adder not responding to selection changes after making a selection
+  which does not contain any text (#3522, #3526).
+
+- Fix incorrect 'You do not have permission to see this annotation' message in
+  the client when direct-linking to an annotation in a PDF (#3529).
+
+- Fix annotation cards containing long URLs overflowing their container
+  (#3546).
+
 0.30.0 (2016-06-23)
 ===================
 
