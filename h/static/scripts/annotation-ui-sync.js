@@ -52,20 +52,10 @@ function AnnotationUISync($rootScope, $window, bridge, annotationSync,
     }
   };
 
-  // Because the channel events are all outside of the angular framework we
-  // need to inform Angular that it needs to re-check it's state and re-draw
-  // any UI that may have been affected by the handlers.
-  var ensureDigest = function (fn) {
-    return function () {
-      fn.apply(this, arguments);
-      $rootScope.$digest();
-    };
-  };
-
   for (var channel in channelListeners) {
     if (Object.prototype.hasOwnProperty.call(channelListeners, channel)) {
       var listener = channelListeners[channel];
-      bridge.on(channel, ensureDigest(listener));
+      bridge.on(channel, listener);
     }
   }
 

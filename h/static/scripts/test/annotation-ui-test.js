@@ -17,9 +17,11 @@ var fixtures = immutable({
 
 describe('annotationUI', function () {
   var annotationUI;
+  var fakeRootScope;
 
   beforeEach(function () {
-    annotationUI = annotationUIFactory({});
+    fakeRootScope = {$applyAsync: sinon.stub()};
+    annotationUI = annotationUIFactory(fakeRootScope, {});
   });
 
   describe('initialization', function () {
@@ -29,14 +31,14 @@ describe('annotationUI', function () {
     });
 
     it('sets the selection when settings.annotations is set', function () {
-      annotationUI = annotationUIFactory({annotations: 'testid'});
+      annotationUI = annotationUIFactory(fakeRootScope, {annotations: 'testid'});
       assert.deepEqual(annotationUI.getState().selectedAnnotationMap, {
         testid: true,
       });
     });
 
     it('expands the selected annotations when settings.annotations is set', function () {
-      annotationUI = annotationUIFactory({annotations: 'testid'});
+      annotationUI = annotationUIFactory(fakeRootScope, {annotations: 'testid'});
       assert.deepEqual(annotationUI.getState().expanded, {
         testid: true,
       });

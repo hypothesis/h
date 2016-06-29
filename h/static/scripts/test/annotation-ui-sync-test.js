@@ -6,7 +6,6 @@ var annotationUIFactory = require('../annotation-ui');
 
 describe('AnnotationUISync', function () {
   var sandbox = sinon.sandbox.create();
-  var $digest;
   var publish;
   var fakeBridge;
   var annotationUI;
@@ -24,7 +23,6 @@ describe('AnnotationUISync', function () {
 
   beforeEach(angular.mock.module('h'));
   beforeEach(angular.mock.inject(function (AnnotationUISync, $rootScope) {
-    $digest = sandbox.stub($rootScope, '$digest');
     var listeners = {};
     publish = function (method) {
       var args = [].slice.apply(arguments);
@@ -52,7 +50,7 @@ describe('AnnotationUISync', function () {
       }
     };
 
-    annotationUI = annotationUIFactory({});
+    annotationUI = annotationUIFactory($rootScope, {});
     createAnnotationUISync = function () {
       new AnnotationUISync(
         $rootScope, fakeWindow, fakeBridge, fakeAnnotationSync,
@@ -98,12 +96,6 @@ describe('AnnotationUISync', function () {
         3: true,
       });
     });
-
-    it('triggers a digest', function () {
-      createAnnotationUISync();
-      publish('showAnnotations', ['tag1', 'tag2', 'tag3']);
-      assert.called($digest);
-    });
   });
 
   describe('on "focusAnnotations" event', function () {
@@ -116,12 +108,6 @@ describe('AnnotationUISync', function () {
         tag3: true,
       });
     });
-
-    it('triggers a digest', function () {
-      createAnnotationUISync();
-      publish('focusAnnotations', ['tag1', 'tag2', 'tag3']);
-      assert.called($digest);
-    });
   });
 
   describe('on "toggleAnnotationSelection" event', function () {
@@ -133,12 +119,6 @@ describe('AnnotationUISync', function () {
         2: true,
         3: true,
       });
-    });
-
-    it('triggers a digest', function () {
-      createAnnotationUISync();
-      publish('toggleAnnotationSelection', ['tag1', 'tag2', 'tag3']);
-      assert.called($digest);
     });
   });
 
@@ -153,12 +133,6 @@ describe('AnnotationUISync', function () {
       createAnnotationUISync();
       publish('setVisibleHighlights', true);
       assert.calledWith(fakeBridge.call, 'setVisibleHighlights', true);
-    });
-
-    it('triggers a digest of the application state', function () {
-      createAnnotationUISync();
-      publish('setVisibleHighlights', true);
-      assert.called($digest);
     });
   });
 });

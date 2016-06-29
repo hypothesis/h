@@ -24,7 +24,7 @@ describe('AnnotationUIController', function () {
     $scope = $rootScope.$new();
     $scope.search = {};
 
-    annotationUI = annotationUIFactory({});
+    annotationUI = annotationUIFactory($rootScope, {});
 
     $controller('AnnotationUIController', {
       $scope: $scope,

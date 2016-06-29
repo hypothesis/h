@@ -155,16 +155,43 @@ function reducer(state, action) {
 }
 
 /**
+ * Redux middleware which triggers an Angular change-detection cycle
+ * if no cycle is currently in progress.
+ *
+ * This ensures that Angular UI components are updated after the UI
+ * state changes in response to external inputs (eg. WebSocket messages,
+ * messages arriving from other frames in the page, async network responses).
+ *
+ * See http://redux.js.org/docs/advanced/Middleware.html
+ */
+function angularDigestMiddleware($rootScope) {
+  return function (next) {
+    return function (action) {
+      next(action);
+
+      // '$$phase' is set if Angular is in the middle of a digest cycle already
+      if (!$rootScope.$$phase) {
+        // $applyAsync() is similar to $apply() but provides debouncing.
+        // See http://stackoverflow.com/questions/30789177
+        $rootScope.$applyAsync(function () {});
+      }
+    };
+  };
+}
+
+/**
  * Stores the UI state of the annotator in connected clients.
  *
  * This includes:
  * - The IDs of annotations that are currently selected or focused
  * - The state of the bucket bar
- *
  */
 // @ngInject
-module.exports = function (settings) {
-  var store = redux.createStore(reducer, initialState(settings));
+module.exports = function ($rootScope, settings) {
+  var enhancer = redux.applyMiddleware(
+    angularDigestMiddleware.bind(null, $rootScope)
+  );
+  var store = redux.createStore(reducer, initialState(settings), enhancer);
 
   function select(annotations) {
     store.dispatch({
