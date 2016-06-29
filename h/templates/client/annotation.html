@@ -27,13 +27,15 @@
           <i class="h-icon-lock"></i><span class="annotation-header__group-name" ng-show="!vm.group().url">Only me</span>
         </span>
         <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing()" title="This is a highlight. Click 'edit' to add a note or tag."></i>
-        <span class="annotation-citation"
-          ng-bind-html="vm.documentTitle"
-          ng-if="::vm.showDocumentInfo">
-        </span>
-        <span class="annotation-citation-domain"
-          ng-bind-html="vm.documentDomain"
-          ng-if="::vm.showDocumentInfo">
+        <span ng-if="::vm.showDocumentInfo">
+          <span class="annotation-citation" ng-if="vm.documentMeta.titleLink">
+            on "<a ng-href="{{vm.documentMeta.titleLink}}">{{vm.documentMeta.titleText}}</a>"
+          </span>
+          <span class="annotation-citation" ng-if="!vm.documentMeta.titleLink">
+            on "{{vm.documentMeta.titleText}}"
+          </span>
+          <span class="annotation-citation-domain"
+                ng-if="vm.documentMeta.domain">({{vm.documentMeta.domain}})</span>
         </span>
       </span>
     </span>

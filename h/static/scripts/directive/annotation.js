@@ -4,14 +4,11 @@
 var angular = require('angular');
 
 var annotationMetadata = require('../annotation-metadata');
-var documentDomain = require('../filter/document-domain');
-var documentTitle = require('../filter/document-title');
 var events = require('../events');
 var persona = require('../filter/persona');
 
 var isNew = annotationMetadata.isNew;
 var isReply = annotationMetadata.isReply;
-var extractDocumentMetadata = annotationMetadata.extractDocumentMetadata;
 
 /** Return a human-readable error message for the given server error.
  *
@@ -115,9 +112,7 @@ function updateViewModel($scope, domainModel,
   vm.isPrivate = permissions.isPrivate(
     domainModel.permissions, domainModel.user);
 
-  var documentMetadata = extractDocumentMetadata(domainModel);
-  vm.documentTitle = documentTitle(documentMetadata);
-  vm.documentDomain = documentDomain(documentMetadata);
+  vm.documentMeta = annotationMetadata.domainAndTitle(domainModel);
 }
 
 /**
