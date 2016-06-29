@@ -1,15 +1,15 @@
-"""Fix document_uri unique constraint.
+"""
+Fix document_uri type fields
 
 Revision ID: 467ea2898660
-Revises: 296573bb30b3
+Revises: 40740282ae9e
 Create Date: 2016-06-16 18:37:20.703447
-
 """
+
 from __future__ import unicode_literals
 
-# revision identifiers, used by Alembic.
 revision = '467ea2898660'
-down_revision = '296573bb30b3'
+down_revision = '40740282ae9e'
 
 import logging
 
@@ -217,13 +217,7 @@ def upgrade():
     merge_duplicate_document_uris(session)
     delete_conflicting_document_uris(session)
     change_nulls_to_empty_strings(session)
-    op.alter_column(
-        'document_uri', 'type', nullable=False, server_default=u'')
-    op.alter_column(
-        'document_uri', 'content_type', nullable=False, server_default=u'')
 
 
 def downgrade():
-    op.alter_column('document_uri', 'type', nullable=True, server_default=None)
-    op.alter_column(
-        'document_uri', 'content_type', nullable=True, server_default=None)
+    pass
