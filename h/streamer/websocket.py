@@ -7,7 +7,6 @@ import weakref
 
 from gevent.queue import Full
 import jsonschema
-from pyramid.threadlocal import get_current_request
 from ws4py.websocket import WebSocket as _WebSocket
 
 from h.api import storage
@@ -27,13 +26,20 @@ class WebSocket(_WebSocket):
     # Instance attributes
     client_id = None
     filter = None
-    request = None
     query = None
 
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('heartbeat_freq', 30.0)
-        super(WebSocket, self).__init__(*args, **kwargs)
-        self.request = get_current_request()
+    def __init__(self, sock, protocols=None, extensions=None, environ=None):
+        super(WebSocket, self).__init__(sock,
+                                        protocols=protocols,
+                                        extensions=extensions,
+                                        environ=environ,
+                                        heartbeat_freq=30.0)
+
+        self.authenticated_userid = environ['h.ws.authenticated_userid']
+        self.effective_principals = environ['h.ws.effective_principals']
+        self.registry = environ['h.ws.registry']
+
+        self._work_queue = environ['h.ws.streamer_work_queue']
 
     def __new__(cls, *args, **kwargs):
         instance = super(WebSocket, cls).__new__(cls, *args, **kwargs)
@@ -41,10 +47,9 @@ class WebSocket(_WebSocket):
         return instance
 
     def received_message(self, msg):
-        work_queue = self.request.registry['streamer.work_queue']
         try:
-            work_queue.put(Message(socket=self, payload=msg.data),
-                           timeout=0.1)
+            self._work_queue.put(Message(socket=self, payload=msg.data),
+                                 timeout=0.1)
         except Full:
             log.warn('Streamer work queue full! Unable to queue message from '
                      'WebSocket client having waited 0.1s: giving up.')
@@ -71,7 +76,6 @@ def handle_message(message, session=None):
     communication with the database.
     """
     socket = message.socket
-    socket.request.feature.clear()
 
     data = json.loads(message.payload)
 
@@ -96,12 +100,7 @@ def handle_message(message, session=None):
         log.exception("Parsing filter: %s", data)
         socket.close()
         raise
-    finally:
-        # Ensure that we aren't holding onto any database connections.
-        #
-        # TODO: We really shouldn't be using socket.request.db at all, but
-        # instead using the single session created by process_work_queue.
-        socket.request.db.close()
+
 
 def _expand_clauses(session, payload):
     for clause in payload['clauses']:

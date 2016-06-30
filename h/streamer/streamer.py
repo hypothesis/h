@@ -90,10 +90,10 @@ def process_work_queue(settings, queue, session_factory=None):
 
             if isinstance(msg, messages.Message):
                 with s.timer('streamer.msg.handler_message'):
-                    messages.handle_message(msg, topic_handlers=topic_handlers)
+                    messages.handle_message(msg, session, topic_handlers)
             elif isinstance(msg, websocket.Message):
                 with s.timer('streamer.msg.handler_websocket'):
-                    websocket.handle_message(msg)
+                    websocket.handle_message(msg, session)
             else:
                 raise UnknownMessageType(repr(msg))
 
@@ -138,8 +138,3 @@ def supervise(greenlets):
 def _get_session(settings):
     engine = db.make_engine(settings)
     return db.Session(bind=engine)
-
-
-def includeme(config):
-    # Store a reference to the work queue on the registry for websocket clients
-    config.registry['streamer.work_queue'] = WORK_QUEUE

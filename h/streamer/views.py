@@ -8,7 +8,7 @@ from pyramid.view import view_config
 from ws4py.exc import HandshakeError
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
-from h.streamer import websocket
+from h.streamer import streamer, websocket
 
 
 @view_config(route_name='ws')
@@ -21,6 +21,19 @@ def websocket_view(request):
     if origin is not None:
         if origin != request.host_url and origin not in allowed:
             return httpexceptions.HTTPForbidden()
+
+    # Provide environment which the WebSocket handler can use...
+    request.environ.update({
+        'h.ws.authenticated_userid': request.authenticated_userid,
+        'h.ws.effective_principals': request.effective_principals,
+        'h.ws.registry': request.registry,
+        'h.ws.streamer_work_queue': streamer.WORK_QUEUE,
+    })
+
+    # ...and ensure that any persistent connections associated with this
+    # WebSocket connection are closed.
+    request.db.close()
+
     app = WebSocketWSGIApplication(handler_cls=websocket.WebSocket)
     return request.get_response(app)
 
