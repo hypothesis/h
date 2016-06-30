@@ -28,13 +28,17 @@ The following sections will explain how to install these system dependencies
 and services.
 
 
-Installing the system dependencies
-----------------------------------
+Installing the website in a development environment
+---------------------------------------------------
 
-Installing h's system dependencies is different on different operating systems.
-Follow either the
+The code for the https://hypothes.is/ website lives in a
+`Git repo named h <https://github.com/hypothesis/h>`_. To get this code running
+in a local development environment the first thing you need to do is install
+h's system dependencies. Follow either the
 `Installing the system dependencies on Ubuntu 14.04`_ or the
-`Installing the system dependencies on OS X`_ section below.
+`Installing the system dependencies on OS X`_ section below, depending on which
+operating system you're using, then move on to `Installing the services`_ and
+the sections that follow it.
 
 
 Installing the system dependencies on Ubuntu 14.04
@@ -93,7 +97,7 @@ Install the following packages:
 
 
 Installing the services
------------------------
+```````````````````````
 
 h requires the following external services:
 
@@ -178,7 +182,7 @@ installed on:
 
 
 Installing the gulp command
----------------------------
+```````````````````````````
 
 Install ``gulp-cli`` to get the ``gulp`` command:
 
@@ -188,7 +192,7 @@ Install ``gulp-cli`` to get the ``gulp`` command:
 
 
 Getting the h source code from GitHub
--------------------------------------
+`````````````````````````````````````
 
 Use ``git`` to download the h source code:
 
@@ -208,7 +212,7 @@ process:
 
 
 Creating a Python virtual environment
--------------------------------------
+`````````````````````````````````````
 
 Create a Python virtual environment to install and run the h Python code and
 Python dependencies in:
@@ -221,7 +225,7 @@ Python dependencies in:
 .. _activating_your_virtual_environment:
 
 Activating your virtual environment
------------------------------------
+```````````````````````````````````
 
 Activate the virtual environment that you've created:
 
@@ -241,7 +245,7 @@ Activate the virtual environment that you've created:
 
 
 Running h
----------
+`````````
 
 Start a development server:
 
@@ -266,8 +270,8 @@ useful when developing the frontend.
 
 .. _running-the-tests:
 
-Running the tests
------------------
+Running h's tests
+`````````````````
 
 There are test suites for both the frontend and backend code. To run the
 complete set of tests, run:
@@ -302,7 +306,7 @@ argument or mocha's `.only()`_ modifier.
 
 
 Debugging h
------------
+```````````
 
 The `pyramid_debugtoolbar`_ package is loaded by default in the development
 environment.  This will provide stack traces for exceptions and allow basic
@@ -323,7 +327,7 @@ turn on result set logging as well.
 
 
 Feature flags
--------------
+`````````````
 
 Features flags allow admins to enable or disable features for certain groups
 of users. You can enable or disable them from the Administration Dashboard.
