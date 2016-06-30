@@ -84,6 +84,12 @@ def handle_message(message, topic_handlers):
         if not socket.terminated:
             socket.send(json.dumps(reply))
 
+        # Ensure that we aren't holding onto any database connections.
+        #
+        # TODO: We really shouldn't be using socket.request.db at all, but
+        # instead using the single session created by process_work_queue.
+        socket.request.db.close()
+
 
 def handle_annotation_event(message, socket):
     """

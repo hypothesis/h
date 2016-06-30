@@ -22,7 +22,7 @@ class FakeSocket(object):
         self.send = mock.MagicMock()
         # Each fake socket needs its own request, so can't use the
         # pyramid_request fixture.
-        self.request = DummyRequest(db=mock.sentinel.db_session)
+        self.request = DummyRequest(db=mock.MagicMock())
         apply_request_extensions(self.request)
 
 
