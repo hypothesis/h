@@ -78,10 +78,6 @@ class TestIndexAnnotation:
         }
         return presenters
 
-    @pytest.fixture
-    def AnnotationTransformEvent(self, patch):
-        return patch('h.api.search.index.AnnotationTransformEvent')
-
 
 @pytest.mark.usefixtures('log')
 class TestDeleteAnnotation:
@@ -190,6 +186,46 @@ class TestBatchIndexer(object):
         rendered = presenters.AnnotationSearchIndexPresenter(
             pyramid_request, annotation).asdict()
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
+        assert results[0] == (
+            {'index': {'_type': indexer.es_client.t.annotation,
+                       '_index': indexer.es_client.index,
+                       '_id': annotation.id}},
+            rendered
+        )
+
+    def test_index_emits_AnnotationTransformEvent_when_presenting_bulk_actions(self,
+                                                                               db_session,
+                                                                               indexer,
+                                                                               pyramid_request,
+                                                                               streaming_bulk,
+                                                                               pyramid_config):
+
+        annotation = self.annotation()
+        db_session.add(annotation)
+        db_session.flush()
+        results = []
+
+        def fake_streaming_bulk(*args, **kwargs):
+            ann = list(args[1])[0]
+            callback = kwargs.get('expand_action_callback')
+            results.append(callback(ann))
+            return set()
+
+        streaming_bulk.side_effect = fake_streaming_bulk
+
+        def transform(event):
+            data = event.annotation_dict
+            data['transformed'] = True
+
+        pyramid_config.add_subscriber(transform, 'h.api.events.AnnotationTransformEvent')
+
+        indexer.index()
+
+        rendered = presenters.AnnotationSearchIndexPresenter(
+            pyramid_request, annotation).asdict()
+        rendered['transformed'] = True
+        rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
+
         assert results[0] == (
             {'index': {'_type': indexer.es_client.t.annotation,
                        '_index': indexer.es_client.index,
@@ -384,3 +420,8 @@ def es():
     mock_es.index = 'hypothesis'
     mock_es.t.annotation = 'annotation'
     return mock_es
+
+
+@pytest.fixture
+def AnnotationTransformEvent(patch):
+    return patch('h.api.search.index.AnnotationTransformEvent')

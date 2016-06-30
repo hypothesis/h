@@ -140,6 +140,9 @@ class BatchIndexer(object):
                             '_id': annotation.id}}
         data = presenters.AnnotationSearchIndexPresenter(self.request, annotation).asdict()
 
+        event = AnnotationTransformEvent(self.request, data)
+        self.request.registry.notify(event)
+
         return (action, data)
 
     def _stream_all_annotations(self, chunksize=2000):
