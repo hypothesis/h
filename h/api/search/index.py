@@ -38,8 +38,8 @@ def index(es, annotation, request):
     :type annotation: h.api.models.Annotation
 
     """
-    annotation_dict = presenters.AnnotationSearchIndexPresenter(
-        request, annotation).asdict()
+    presenter = presenters.AnnotationSearchIndexPresenter(annotation)
+    annotation_dict = presenter.asdict()
 
     event = AnnotationTransformEvent(request, annotation_dict)
     request.registry.notify(event)
@@ -138,7 +138,7 @@ class BatchIndexer(object):
         action = {'index': {'_index': self.es_client.index,
                             '_type': self.es_client.t.annotation,
                             '_id': annotation.id}}
-        data = presenters.AnnotationSearchIndexPresenter(self.request, annotation).asdict()
+        data = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
 
         return (action, data)
 

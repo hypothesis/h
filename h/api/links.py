@@ -90,5 +90,15 @@ def add_annotation_link_generator(registry, name, generator, hidden=False):
     registry[LINK_GENERATORS_KEY][name] = (generator, hidden)
 
 
+def _add_annotation_link_generator(config, name, generator, hidden=False):
+    add_annotation_link_generator(config.registry,
+                                  name,
+                                  generator,
+                                  hidden=hidden)
+
+
 def includeme(config):  # pragma: no cover
     config.register_service_factory(links_factory, name='links')
+
+    config.add_directive('add_annotation_link_generator',
+                         _add_annotation_link_generator)

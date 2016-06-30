@@ -28,9 +28,7 @@ class TestIndexAnnotation:
 
         index.index(es, annotation, pyramid_request)
 
-        presenters.AnnotationSearchIndexPresenter.assert_called_once_with(
-            pyramid_request,
-            annotation)
+        presenters.AnnotationSearchIndexPresenter.assert_called_once_with(annotation)
 
     def test_it_creates_an_annotation_before_save_event(self,
                                                         AnnotationTransformEvent,
@@ -187,8 +185,7 @@ class TestBatchIndexer(object):
 
         indexer.index()
 
-        rendered = presenters.AnnotationSearchIndexPresenter(
-            pyramid_request, annotation).asdict()
+        rendered = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
         assert results[0] == (
             {'index': {'_type': indexer.es_client.t.annotation,
@@ -285,8 +282,7 @@ class TestBatchDeleter(object):
 
         es_scan.return_value = [
             {'_id': annotation.id,
-             '_source': presenters.AnnotationSearchIndexPresenter(pyramid_request,
-                                                                  annotation)}]
+             '_source': presenters.AnnotationSearchIndexPresenter(annotation)}]
 
         deleted_ids = deleter.deleted_annotation_ids()
         assert len(deleted_ids) == 0

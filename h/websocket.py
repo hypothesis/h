@@ -174,11 +174,27 @@ def create_app(global_config, **settings):
     config.include('h.models')
     config.include('h.db')
 
-    # We have to include search to set up the `request.es` property.
+    # We have to include parts of the `h.api` package in order to provide,
+    # among other things:
+    #
+    #   - the links service
+    #   - the default presenters (and their link registrations)
+    #   - the `request.es` property
+    config.include('h.api.links')
+    config.include('h.api.presenters')
     config.include('h.api.search')
+
+    # We include links in order to set up the alternative link registrations
+    # for annotations.
+    config.include('h.links')
 
     # We have to include nipsa to provide the NIPSA service
     config.include('h.nipsa')
+
+    # And finally we add static routes which can be used for URL generation
+    # within the websocket server.
+    config.add_route('annotation', '/a/{id}', static=True)
+    config.add_route('api.annotation', '/api/annotations/{id}', static=True)
 
     config.include('h.streamer')
 

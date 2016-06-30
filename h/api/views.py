@@ -161,8 +161,10 @@ def create(request):
     annotation = storage.create_annotation(request, appstruct)
 
     _publish_annotation_event(request, annotation, 'create')
-    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-    return annotation_dict
+
+    links_service = request.find_service(name='links')
+    presenter = AnnotationJSONPresenter(annotation, links_service)
+    return presenter.asdict()
 
 
 @api_config(route_name='api.annotation',
@@ -170,7 +172,8 @@ def create(request):
             permission='read')
 def read(annotation, request):
     """Return the annotation (simply how it was stored in the database)."""
-    presenter = AnnotationJSONPresenter(request, annotation)
+    links_service = request.find_service(name='links')
+    presenter = AnnotationJSONPresenter(annotation, links_service)
     return presenter.asdict()
 
 
@@ -181,7 +184,8 @@ def read_jsonld(annotation, request):
     request.response.content_type = 'application/ld+json'
     request.response.content_type_params = {
         'profile': AnnotationJSONLDPresenter.CONTEXT_URL}
-    presenter = AnnotationJSONLDPresenter(request, annotation)
+    links_service = request.find_service(name='links')
+    presenter = AnnotationJSONLDPresenter(annotation, links_service)
     return presenter.asdict()
 
 
@@ -201,8 +205,9 @@ def update(annotation, request):
 
     _publish_annotation_event(request, annotation, 'update')
 
-    annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
-    return annotation_dict
+    links_service = request.find_service(name='links')
+    presenter = AnnotationJSONPresenter(annotation, links_service)
+    return presenter.asdict()
 
 
 @api_config(route_name='api.annotation',
@@ -245,16 +250,20 @@ def _present_annotations(request, ids):
 
     annotations = storage.fetch_ordered_annotations(request.db, ids,
                                                     query_processor=eager_load_documents)
-    return [AnnotationJSONPresenter(request, ann).asdict() for ann in annotations]
+    links_service = request.find_service(name='links')
+    return [AnnotationJSONPresenter(ann, links_service).asdict()
+            for ann in annotations]
 
 
 def _publish_annotation_event(request,
                               annotation,
                               action):
     """Publish an event to the annotations queue for this annotation action."""
+    links_service = request.find_service(name='links')
     annotation_dict = None
     if action == 'delete':
-        annotation_dict = AnnotationJSONPresenter(request, annotation).asdict()
+        presenter = AnnotationJSONPresenter(annotation, links_service)
+        annotation_dict = presenter.asdict()
 
     event = AnnotationEvent(request, annotation.id, action, annotation_dict)
     request.notify_after_commit(event)
