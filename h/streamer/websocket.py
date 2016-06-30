@@ -82,7 +82,12 @@ def handle_message(message):
         log.exception("Parsing filter: %s", data)
         socket.close()
         raise
-
+    finally:
+        # Ensure that we aren't holding onto any database connections.
+        #
+        # TODO: We really shouldn't be using socket.request.db at all, but
+        # instead using the single session created by process_work_queue.
+        socket.request.db.close()
 
 def _expand_clauses(request, payload):
     for clause in payload['clauses']:
