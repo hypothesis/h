@@ -287,13 +287,6 @@ This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
 
-This command also starts a server on port 3000 (http://localhost:3000) which
-serves a page with an embedded Hypothesis client which will automatically reload
-when styles, templates or JavaScript source files are changed. This can be
-useful when developing the frontend.
-
-.. _Gulp: http://gulpjs.com/
-
 
 .. _running-the-tests:
 
@@ -433,14 +426,33 @@ your website development environment to your client to make your website use
 your development copy of the client instead of the client from npm.
 
 To link your website development environment to your development client
-run ``sudo npm link`` in the ``client`` directory then ``npm link hypothesis``
+run ``npm link`` in the ``client`` directory then ``npm link hypothesis``
 in the ``h`` directory:
 
 .. code-block:: bash
 
-   client> sudo npm link
+   client> npm link
    client> cd ../h
    h> npm link hypothesis
+
+.. tip::
+
+   If you get a *permission denied* error when running ``npm link`` you
+   probably need to tell npm to install packages into a directory in your
+   home directory that you have permission to write to. On linux:
+
+   .. code-block:: bash
+
+      npm config set prefix /home/<YOUR_USERNAME>/npm
+
+   On macOS:
+
+   .. code-block:: bash
+
+      npm config set prefix /Users/<YOUR_USERNAME>/npm
+
+   npm will now install executable files into ``$HOME/npm/bin``, so add that
+   directory to your ``$PATH``.
 
 To unlink your website run ``npm unlink hypothesis`` then ``make clean``, it
 will go back to using the client from npm:
