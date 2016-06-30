@@ -72,9 +72,7 @@ def test_handle_message_sets_socket_client_id_for_client_id_messages():
     assert socket.client_id == 'abcd1234'
 
 
-@mock.patch('h.api.storage.expand_uri')
-def test_handle_message_sets_socket_filter_for_filter_messages(expand_uri):
-    expand_uri.return_value = ['http://example.com']
+def test_handle_message_sets_socket_filter_for_filter_messages():
     socket = mock.Mock()
     socket.filter = None
     message = websocket.Message(socket=socket, payload=json.dumps({
@@ -95,10 +93,11 @@ def test_handle_message_sets_socket_filter_for_filter_messages(expand_uri):
 
 
 @mock.patch('h.api.storage.expand_uri')
-def test_handle_message_expands_uris_in_uri_filter(expand_uri):
+def test_handle_message_expands_uris_in_uri_filter_with_session(expand_uri):
     expand_uri.return_value = ['http://example.com',
                                'http://example.com/alter',
                                'http://example.com/print']
+    session = mock.sentinel.db_session
     socket = mock.Mock()
     socket.filter = None
     message = websocket.Message(socket=socket, payload=json.dumps({
@@ -113,7 +112,7 @@ def test_handle_message_expands_uris_in_uri_filter(expand_uri):
         }
     }))
 
-    websocket.handle_message(message)
+    websocket.handle_message(message, session=session)
 
     uri_filter = socket.filter.filter['clauses'][0]
     uri_values = uri_filter['value']
@@ -121,3 +120,26 @@ def test_handle_message_expands_uris_in_uri_filter(expand_uri):
     assert 'http://example.com' in uri_values
     assert 'http://example.com/alter' in uri_values
     assert 'http://example.com/print' in uri_values
+
+
+@mock.patch('h.api.storage.expand_uri')
+def test_handle_message_expands_uris_using_passed_session(expand_uri):
+    expand_uri.return_value = ['http://example.com', 'http://example.org/']
+    session = mock.sentinel.db_session
+    socket = mock.Mock()
+    socket.filter = None
+    message = websocket.Message(socket=socket, payload=json.dumps({
+        'filter': {
+            'actions': {},
+            'match_policy': 'include_all',
+            'clauses': [{
+                'field': '/uri',
+                'operator': 'equals',
+                'value': 'http://example.com',
+            }],
+        }
+    }))
+
+    websocket.handle_message(message, session=session)
+
+    expand_uri.assert_called_once_with(session, 'http://example.com')

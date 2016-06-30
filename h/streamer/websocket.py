@@ -56,7 +56,20 @@ class WebSocket(_WebSocket):
             pass
 
 
-def handle_message(message):
+def handle_message(message, session=None):
+    """
+    Handle an incoming message from a client websocket.
+
+    Receives a :py:class:`~h.streamer.websocket.Message` instance, which holds
+    references to the :py:class:`~h.streamer.websocket.WebSocket` instance
+    associated with the client connection, as well as the message payload.
+
+    It updates state on the :py:class:`~h.streamer.websocket.WebSocket`
+    instance in response to the message content.
+
+    It may also passed a database session which *must* be used for any
+    communication with the database.
+    """
     socket = message.socket
     socket.request.feature.clear()
 
@@ -71,8 +84,9 @@ def handle_message(message):
             # Let's try to validate the schema
             jsonschema.validate(payload, filter.SCHEMA)
 
-            # Add backend expands for clauses
-            _expand_clauses(socket.request, payload)
+            if session is not None:
+                # Add backend expands for clauses
+                _expand_clauses(session, payload)
 
             socket.filter = filter.FilterHandler(payload)
         elif msg_type == 'client_id':
@@ -89,10 +103,10 @@ def handle_message(message):
         # instead using the single session created by process_work_queue.
         socket.request.db.close()
 
-def _expand_clauses(request, payload):
+def _expand_clauses(session, payload):
     for clause in payload['clauses']:
         if clause['field'] == '/uri':
-            _expand_uris(request.db, clause)
+            _expand_uris(session, clause)
 
 
 def _expand_uris(session, clause):
