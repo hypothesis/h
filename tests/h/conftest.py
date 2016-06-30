@@ -148,6 +148,12 @@ def mailer(pyramid_config):
 
 
 @pytest.fixture
+def matchers():
+    from ..common import matchers
+    return matchers
+
+
+@pytest.fixture
 def notify(pyramid_config, request):
     patcher = mock.patch.object(pyramid_config.registry, 'notify', autospec=True)
     request.addfinalizer(patcher.stop)
