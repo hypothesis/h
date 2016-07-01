@@ -26,6 +26,13 @@ class TestAddAnnotation(object):
 
         index.assert_called_once_with(celery.request.es, annotation, celery.request)
 
+    def test_it_skips_indexing_when_annotation_cannot_be_loaded(self, fetch_annotation, index, celery):
+        fetch_annotation.return_value = None
+
+        indexer.add_annotation('test-annotation-id')
+
+        assert index.called is False
+
     @pytest.fixture
     def index(self, patch):
         return patch('h.indexer.index')

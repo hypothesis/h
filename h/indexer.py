@@ -22,7 +22,8 @@ log = logging.getLogger(__name__)
 @celery.task
 def add_annotation(id_):
     annotation = storage.fetch_annotation(celery.request.db, id_)
-    index(celery.request.es, annotation, celery.request)
+    if annotation:
+        index(celery.request.es, annotation, celery.request)
 
 
 @celery.task
