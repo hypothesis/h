@@ -218,8 +218,7 @@ class TestBatchIndexer(object):
 
         indexer.index()
 
-        rendered = presenters.AnnotationSearchIndexPresenter(
-            pyramid_request, annotation).asdict()
+        rendered = presenters.AnnotationSearchIndexPresenter(annotation).asdict()
         rendered['transformed'] = True
         rendered['target'][0]['scope'] = [annotation.target_uri_normalized]
 
