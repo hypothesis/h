@@ -16,6 +16,7 @@ def test_process_work_queue_sends_realtime_messages_to_messages_handle_message(s
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
     messages.handle_message.assert_called_once_with(message,
+                                                    session,
                                                     topic_handlers=mock.ANY)
 
 
@@ -33,6 +34,7 @@ def test_process_work_queue_uses_appropriate_topic_handlers_for_realtime_message
     }
 
     messages.handle_message.assert_called_once_with(mock.ANY,
+                                                    session,
                                                     topic_handlers=topic_handlers)
 
 
@@ -42,7 +44,7 @@ def test_process_work_queue_sends_websocket_messages_to_websocket_handle_message
 
     streamer.process_work_queue({}, queue, session_factory=lambda _: session)
 
-    websocket.handle_message.assert_called_once_with(message)
+    websocket.handle_message.assert_called_once_with(message, session)
 
 
 def test_process_work_queue_commits_after_each_message(session):
@@ -111,6 +113,7 @@ def session():
 @pytest.fixture(autouse=True)
 def websocket_handle_message(patch):
     return patch('h.streamer.websocket.handle_message')
+
 
 @pytest.fixture(autouse=True)
 def messages_handle_message(patch):

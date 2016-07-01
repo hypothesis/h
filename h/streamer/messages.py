@@ -10,7 +10,9 @@ from h import realtime
 from h.realtime import Consumer
 from h.api import presenters
 from h.api import storage
+from h.api.links import LinksService
 from h.auth.util import translate_annotation_principals
+from h.nipsa.services import NipsaService
 from h.streamer import websocket
 import h.sentry
 import h.stats
@@ -54,7 +56,7 @@ def process_messages(settings, routing_key, work_queue, raise_error=True):
         raise RuntimeError('Realtime consumer quit unexpectedly!')
 
 
-def handle_message(message, topic_handlers):
+def handle_message(message, session, topic_handlers):
     """
     Deserialize and process a message from the reader.
 
@@ -78,20 +80,14 @@ def handle_message(message, topic_handlers):
     # happens Python will throw a "Set changed size during iteration" error.
     sockets = list(websocket.WebSocket.instances)
     for socket in sockets:
-        reply = handler(data, socket)
+        reply = handler(data, socket, session)
         if reply is None:
             continue
         if not socket.terminated:
             socket.send(json.dumps(reply))
 
-        # Ensure that we aren't holding onto any database connections.
-        #
-        # TODO: We really shouldn't be using socket.request.db at all, but
-        # instead using the single session created by process_work_queue.
-        socket.request.db.close()
 
-
-def handle_annotation_event(message, socket):
+def handle_annotation_event(message, socket, session):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -124,23 +120,23 @@ def handle_annotation_event(message, socket):
     if action == 'delete':
         serialized = message['annotation_dict']
     else:
-        annotation = storage.fetch_annotation(socket.request.db, id_)
+        annotation = storage.fetch_annotation(session, id_)
         if annotation is None:
             return None
 
-        # FIXME: This method of retrieving the links service is temporary. We
-        # will shortly not rely on `socket.request` at all.
-        links_service = socket.request.find_service(name='links')
+        base_url = socket.registry.settings.get('h.app_url',
+                                                'http://localhost:5000')
+        links_service = LinksService(base_url, socket.registry)
         serialized = presenters.AnnotationJSONPresenter(annotation,
                                                         links_service).asdict()
 
     userid = serialized.get('user')
-    nipsa_service = socket.request.find_service(name='nipsa')
-    if nipsa_service.is_flagged(userid) and socket.request.authenticated_userid != userid:
+    nipsa_service = NipsaService(session)
+    if nipsa_service.is_flagged(userid) and socket.authenticated_userid != userid:
         return None
 
     permissions = serialized.get('permissions')
-    if not _authorized_to_read(socket.request, permissions):
+    if not _authorized_to_read(socket.effective_principals, permissions):
         return None
 
     if not socket.filter.match(serialized, action):
@@ -152,7 +148,7 @@ def handle_annotation_event(message, socket):
     return notification
 
 
-def handle_user_event(message, socket):
+def handle_user_event(message, socket, _):
     """
     Get message about user event `message` to be sent to `socket`.
 
@@ -162,7 +158,7 @@ def handle_user_event(message, socket):
     Returns None if the socket should not receive any message about this user
     event, otherwise a dict containing information about the event.
     """
-    if socket.request.authenticated_userid != message['userid']:
+    if socket.authenticated_userid != message['userid']:
         return None
 
     # for session state change events, the full session model
@@ -175,7 +171,7 @@ def handle_user_event(message, socket):
     }
 
 
-def _authorized_to_read(request, permissions):
+def _authorized_to_read(effective_principals, permissions):
     """Return True if the passed request is authorized to read the annotation.
 
     If the annotation belongs to a private group, this will return False if the
@@ -183,6 +179,6 @@ def _authorized_to_read(request, permissions):
     """
     read_permissions = permissions.get('read', [])
     read_principals = translate_annotation_principals(read_permissions)
-    if set(read_principals).intersection(request.effective_principals):
+    if set(read_principals).intersection(effective_principals):
         return True
     return False

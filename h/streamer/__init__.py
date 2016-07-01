@@ -2,7 +2,6 @@
 
 
 def includeme(config):
-    config.include('h.streamer.streamer')
     config.include('h.streamer.views')
 
     config.add_route('ws', 'ws')
