@@ -43,7 +43,7 @@ COPY vendor ./vendor/
 # Build frontend assets
 RUN SASS_BINARY_PATH=$PWD/vendor/node-sass-linux-x64.node npm install --production \
   && SASS_BINARY_PATH=$PWD/vendor/node-sass-linux-x64.node NODE_ENV=production node_modules/.bin/gulp build-app \
-  && rm -rf node_modules \
+  && (find node_modules -name hypothesis -prune -o -mindepth 1 -maxdepth 1 -print0 | xargs -0 rm -r) \
   && npm cache clean
 
 # Expose the default port.
