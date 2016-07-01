@@ -1,8 +1,0 @@
-@import "../variables";
-
-// In order for our highlights to be visible we need to use solid colors.
-#viewer.has-transparent-text-layer .textLayer {
-  opacity: 1;
-  ::selection { background: rgba(0, 0, 255, .2); }
-  ::-moz-selection { background: rgba(0 , 0 , 255, .2); }
-}
