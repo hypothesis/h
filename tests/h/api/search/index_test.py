@@ -12,14 +12,6 @@ from h.api.search import client
 from h.api.search import index
 
 
-class GeneratorEquals(object):
-    def __init__(self, items):
-        self.items = items
-
-    def __eq__(self, other):
-        return list(other) == self.items
-
-
 @pytest.mark.usefixtures('presenters')
 class TestIndexAnnotation:
 
@@ -139,7 +131,7 @@ class TestBatchIndexer(object):
             mock.call(indexer, set(['id-1'])),
         ]
 
-    def test_index_indexes_all_annotations_to_es(self, db_session, indexer, streaming_bulk):
+    def test_index_indexes_all_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk):
         ann_1, ann_2 = self.annotation(), self.annotation()
         db_session.add_all([ann_1, ann_2])
         db_session.flush()
@@ -147,10 +139,10 @@ class TestBatchIndexer(object):
         indexer.index()
 
         streaming_bulk.assert_called_once_with(
-            indexer.es_client.conn, GeneratorEquals([ann_1, ann_2]),
+            indexer.es_client.conn, matchers.iterable_with([ann_1, ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
-    def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, streaming_bulk):
+    def test_index_indexes_filtered_annotations_to_es(self, db_session, indexer, matchers, streaming_bulk):
         ann_1, ann_2 = self.annotation(), self.annotation()
         db_session.add_all([ann_1, ann_2])
         db_session.flush()
@@ -158,7 +150,7 @@ class TestBatchIndexer(object):
         indexer.index([ann_2.id])
 
         streaming_bulk.assert_called_once_with(
-            indexer.es_client.conn, GeneratorEquals([ann_2]),
+            indexer.es_client.conn, matchers.iterable_with([ann_2]),
             chunk_size=mock.ANY, raise_on_error=False, expand_action_callback=mock.ANY)
 
     def test_index_correctly_presents_bulk_actions(self,

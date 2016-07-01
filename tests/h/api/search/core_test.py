@@ -115,10 +115,12 @@ def test_default_querybuilder_passes_private_to_AuthFilter(private, query, pyram
     'UriFilter',
     'GroupFilter'
 ])
-def test_default_querybuilder_includes_default_filters(filter_type, pyramid_request):
+def test_default_querybuilder_includes_default_filters(filter_type, matchers, pyramid_request):
+    from h.api.search import query
     builder = core.default_querybuilder(pyramid_request)
+    type_ = getattr(query, filter_type)
 
-    assert instance_of_type(filter_type) in builder.filters
+    assert matchers.instance_of(type_) in builder.filters
 
 
 def test_default_querybuilder_includes_registered_filters(pyramid_request):
@@ -136,10 +138,12 @@ def test_default_querybuilder_includes_registered_filters(pyramid_request):
     'AnyMatcher',
     'TagsMatcher',
 ])
-def test_default_querybuilder_includes_default_matchers(matcher_type, pyramid_request):
+def test_default_querybuilder_includes_default_matchers(matchers, matcher_type, pyramid_request):
+    from h.api.search import query
     builder = core.default_querybuilder(pyramid_request)
+    type_ = getattr(query, matcher_type)
 
-    assert instance_of_type(matcher_type) in builder.matchers
+    assert matchers.instance_of(type_) in builder.matchers
 
 
 def test_default_querybuilder_includes_registered_matchers(pyramid_request):
@@ -151,17 +155,6 @@ def test_default_querybuilder_includes_registered_matchers(pyramid_request):
 
     matcher_factory.assert_called_once_with(pyramid_request)
     assert mock.sentinel.MY_MATCHER in builder.matchers
-
-
-class instance_of_type(object):
-    def __init__(self, typename):
-        self.typename = typename
-
-    def __eq__(self, other):
-        return type(other).__name__ == self.typename
-
-    def __repr__(self):
-        return '<matcher for instance of type "{}">'.format(self.typename)
 
 
 def dummy_search_results(start=1, count=0, name='annotation'):

@@ -53,7 +53,7 @@ class TestConsumer(object):
 
         handler.assert_called_once_with(body)
 
-    def test_handle_message_records_queue_time_if_timestamp_present(self, handler, statsd_client):
+    def test_handle_message_records_queue_time_if_timestamp_present(self, handler, matchers, statsd_client):
         consumer = realtime.Consumer(mock.sentinel.connection,
                                      'annotation',
                                      handler,
@@ -64,7 +64,7 @@ class TestConsumer(object):
         consumer.handle_message({}, message)
 
         statsd_client.timing.assert_called_once_with('streamer.msg.queueing',
-                                                     InstanceOf(int))
+                                                     matchers.instance_of(int))
 
     def test_handle_message_doesnt_explode_if_timestamp_missing(self, handler, statsd_client):
         consumer = realtime.Consumer(mock.sentinel.connection,
@@ -98,7 +98,7 @@ class TestConsumer(object):
 
 
 class TestPublisher(object):
-    def test_publish_annotation(self, producer_pool, pyramid_request):
+    def test_publish_annotation(self, matchers, producer_pool, pyramid_request):
         payload = {'action': 'create', 'annotation': {'id': 'foobar'}}
         producer = producer_pool['foobar'].acquire().__enter__()
         exchange = realtime.get_exchange()
@@ -106,14 +106,14 @@ class TestPublisher(object):
         publisher = realtime.Publisher(pyramid_request)
         publisher.publish_annotation(payload)
 
-        expected_headers = MappingContaining('timestamp')
+        expected_headers = matchers.mapping_containing('timestamp')
         producer.publish.assert_called_once_with(payload,
                                                  exchange=exchange,
                                                  declare=[exchange],
                                                  routing_key='annotation',
                                                  headers=expected_headers)
 
-    def test_publish_user(self, producer_pool, pyramid_request):
+    def test_publish_user(self, matchers, producer_pool, pyramid_request):
         payload = {'action': 'create', 'user': {'id': 'foobar'}}
         producer = producer_pool['foobar'].acquire().__enter__()
         exchange = realtime.get_exchange()
@@ -121,7 +121,7 @@ class TestPublisher(object):
         publisher = realtime.Publisher(pyramid_request)
         publisher.publish_user(payload)
 
-        expected_headers = MappingContaining('timestamp')
+        expected_headers = matchers.mapping_containing('timestamp')
         producer.publish.assert_called_once_with(payload,
                                                  exchange=exchange,
                                                  declare=[exchange],
@@ -170,26 +170,3 @@ class TestGetConnection(object):
     @pytest.fixture
     def Connection(self, patch):
         return patch('h.realtime.kombu.Connection')
-
-
-class MappingContaining(object):
-    """An object __eq__ to any mapping with the passed `key`."""
-    def __init__(self, key):
-        self.key = key
-
-    def __eq__(self, other):
-        try:
-            other[self.key]
-        except (TypeError, KeyError):
-            return False
-        else:
-            return True
-
-
-class InstanceOf(object):
-    """An object __eq__ to any object which is an instance of `type_`."""
-    def __init__(self, type_):
-        self.type_ = type_
-
-    def __eq__(self, other):
-        return isinstance(other, self.type_)
