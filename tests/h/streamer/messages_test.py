@@ -171,7 +171,7 @@ class TestHandleMessage(object):
         return patch('h.streamer.websocket.WebSocket')
 
 
-@pytest.mark.usefixtures('fetch_annotation', 'nipsa_service')
+@pytest.mark.usefixtures('fetch_annotation', 'links_service', 'nipsa_service')
 class TestHandleAnnotationEvent(object):
     def test_it_fetches_the_annotation(self, fetch_annotation, presenter_asdict):
         message = {
@@ -205,6 +205,7 @@ class TestHandleAnnotationEvent(object):
 
     def test_it_serializes_the_annotation(self,
                                           fetch_annotation,
+                                          links_service,
                                           presenters):
         message = {'action': '_', 'annotation_id': '_', 'src_client_id': '_'}
         socket = FakeSocket('giraffe')
@@ -214,7 +215,8 @@ class TestHandleAnnotationEvent(object):
         messages.handle_annotation_event(message, socket)
 
         presenters.AnnotationJSONPresenter.assert_called_once_with(
-            socket.request, fetch_annotation.return_value)
+            fetch_annotation.return_value,
+            links_service)
         assert presenters.AnnotationJSONPresenter.return_value.asdict.called
 
     def test_notification_format(self, presenter_asdict):
@@ -354,6 +356,12 @@ class TestHandleAnnotationEvent(object):
     @pytest.fixture
     def presenter_asdict(self, patch):
         return patch('h.streamer.messages.presenters.AnnotationJSONPresenter.asdict')
+
+    @pytest.fixture
+    def links_service(self, pyramid_config):
+        service = mock.Mock(spec_set=['get', 'get_all'])
+        pyramid_config.register_service(service, name='links')
+        return service
 
     @pytest.fixture
     def nipsa_service(self, pyramid_config):

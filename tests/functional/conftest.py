@@ -8,6 +8,7 @@ from webtest import TestApp
 TEST_SETTINGS = {
     'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
     'es.index': 'hypothesis-test',
+    'h.app_url': 'http://localhost',
     'h.db.should_create_all': True,
     'h.db.should_drop_all': True,
     'h.search.autoconfig': True,

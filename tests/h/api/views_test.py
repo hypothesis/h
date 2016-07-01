@@ -62,7 +62,7 @@ class TestIndex(object):
         assert links['search']['url'] == host + '/dummy/search'
 
 
-@pytest.mark.usefixtures('search_lib')
+@pytest.mark.usefixtures('links_service', 'search_lib')
 class TestSearch(object):
 
     def test_it_searches(self, pyramid_request, search_lib):
@@ -81,7 +81,7 @@ class TestSearch(object):
         storage.fetch_ordered_annotations.assert_called_once_with(
             pyramid_request.db, ['row-1', 'row-2'], query_processor=mock.ANY)
 
-    def test_it_renders_search_results(self, pyramid_request, search_lib):
+    def test_it_renders_search_results(self, links_service, pyramid_request, search_lib):
         ann1 = models.Annotation(userid='luke')
         ann2 = models.Annotation(userid='sarah')
         pyramid_request.db.add_all([ann1, ann2])
@@ -93,8 +93,8 @@ class TestSearch(object):
         expected = {
             'total': 2,
             'rows': [
-                presenters.AnnotationJSONPresenter(pyramid_request, ann1).asdict(),
-                presenters.AnnotationJSONPresenter(pyramid_request, ann2).asdict(),
+                presenters.AnnotationJSONPresenter(ann1, links_service).asdict(),
+                presenters.AnnotationJSONPresenter(ann2, links_service).asdict(),
             ]
         }
 
@@ -112,7 +112,7 @@ class TestSearch(object):
         assert mock.call(pyramid_request.db, ['reply-1', 'reply-2'],
                          query_processor=mock.ANY) in storage.fetch_ordered_annotations.call_args_list
 
-    def test_it_renders_replies(self, pyramid_request, search_lib):
+    def test_it_renders_replies(self, links_service, pyramid_request, search_lib):
         ann = models.Annotation(userid='luke')
         pyramid_request.db.add(ann)
         pyramid_request.db.flush()
@@ -130,10 +130,10 @@ class TestSearch(object):
 
         expected = {
             'total': 1,
-            'rows': [presenters.AnnotationJSONPresenter(pyramid_request, ann).asdict()],
+            'rows': [presenters.AnnotationJSONPresenter(ann, links_service).asdict()],
             'replies': [
-                presenters.AnnotationJSONPresenter(pyramid_request, reply1).asdict(),
-                presenters.AnnotationJSONPresenter(pyramid_request, reply2).asdict(),
+                presenters.AnnotationJSONPresenter(reply1, links_service).asdict(),
+                presenters.AnnotationJSONPresenter(reply2, links_service).asdict(),
             ]
         }
 
@@ -149,6 +149,7 @@ class TestSearch(object):
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
+                         'links_service',
                          'schemas',
                          'storage')
 class TestCreate(object):
@@ -208,12 +209,14 @@ class TestCreate(object):
 
     def test_it_inits_AnnotationJSONPresenter(self,
                                               AnnotationJSONPresenter,
+                                              links_service,
                                               pyramid_request,
                                               storage):
         views.create(pyramid_request)
 
         AnnotationJSONPresenter.assert_called_once_with(
-            pyramid_request, storage.create_annotation.return_value)
+            storage.create_annotation.return_value,
+            links_service)
 
     def test_it_publishes_annotation_event(self,
                                            AnnotationEvent,
@@ -245,21 +248,25 @@ class TestCreate(object):
         return pyramid_request
 
 
-@pytest.mark.usefixtures('AnnotationJSONPresenter')
+@pytest.mark.usefixtures('AnnotationJSONPresenter', 'links_service')
 class TestRead(object):
 
-    def test_it_returns_presented_annotation(self, AnnotationJSONPresenter, pyramid_request):
+    def test_it_returns_presented_annotation(self,
+                                             AnnotationJSONPresenter,
+                                             links_service,
+                                             pyramid_request):
         annotation = mock.Mock()
         presenter = mock.Mock()
         AnnotationJSONPresenter.return_value = presenter
 
         result = views.read(annotation, pyramid_request)
 
-        AnnotationJSONPresenter.assert_called_once_with(pyramid_request, annotation)
+        AnnotationJSONPresenter.assert_called_once_with(annotation,
+                                                        links_service)
         assert result == presenter.asdict()
 
 
-@pytest.mark.usefixtures('AnnotationJSONLDPresenter')
+@pytest.mark.usefixtures('AnnotationJSONLDPresenter', 'links_service')
 class TestReadJSONLD(object):
 
     def test_it_sets_correct_content_type(self, AnnotationJSONLDPresenter, pyramid_request):
@@ -274,7 +281,10 @@ class TestReadJSONLD(object):
             'profile': 'http://foo.com/context.jsonld'
         }
 
-    def test_it_returns_presented_annotation(self, AnnotationJSONLDPresenter, pyramid_request):
+    def test_it_returns_presented_annotation(self,
+                                             AnnotationJSONLDPresenter,
+                                             links_service,
+                                             pyramid_request):
         annotation = mock.Mock()
         presenter = mock.Mock()
         AnnotationJSONLDPresenter.return_value = presenter
@@ -282,7 +292,8 @@ class TestReadJSONLD(object):
 
         result = views.read_jsonld(annotation, pyramid_request)
 
-        AnnotationJSONLDPresenter.assert_called_once_with(pyramid_request, annotation)
+        AnnotationJSONLDPresenter.assert_called_once_with(annotation,
+                                                          links_service)
         assert result == presenter.asdict()
 
     @pytest.fixture
@@ -292,6 +303,7 @@ class TestReadJSONLD(object):
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
+                         'links_service',
                          'schemas',
                          'storage')
 class TestUpdate(object):
@@ -374,12 +386,14 @@ class TestUpdate(object):
 
     def test_it_inits_a_presenter(self,
                                   AnnotationJSONPresenter,
+                                  links_service,
                                   pyramid_request,
                                   storage):
         views.update(mock.Mock(), pyramid_request)
 
         AnnotationJSONPresenter.assert_any_call(
-            pyramid_request, storage.update_annotation.return_value)
+            storage.update_annotation.return_value,
+            links_service)
 
     def test_it_dictizes_the_presenter(self,
                                        AnnotationJSONPresenter,
@@ -405,45 +419,48 @@ class TestUpdate(object):
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
+                         'links_service',
                          'storage')
 class TestDelete(object):
 
-    def test_it_deletes_then_annotation_from_storage(self, storage):
+    def test_it_deletes_then_annotation_from_storage(self, pyramid_request, storage):
         annotation = mock.Mock()
-        request = mock.Mock()
 
-        views.delete(annotation, request)
+        views.delete(annotation, pyramid_request)
 
-        storage.delete_annotation.assert_called_once_with(request.db,
+        storage.delete_annotation.assert_called_once_with(pyramid_request.db,
                                                           annotation.id)
 
-    def test_it_serializes_the_annotation(self, AnnotationJSONPresenter):
+    def test_it_serializes_the_annotation(self,
+                                          AnnotationJSONPresenter,
+                                          links_service,
+                                          pyramid_request):
         annotation = mock.Mock()
-        request = mock.Mock()
 
-        views.delete(annotation, request)
+        views.delete(annotation, pyramid_request)
 
-        AnnotationJSONPresenter.assert_called_once_with(request, annotation)
+        AnnotationJSONPresenter.assert_called_once_with(annotation, links_service)
 
     def test_it_inits_and_fires_an_AnnotationEvent(self,
                                                    AnnotationEvent,
-                                                   AnnotationJSONPresenter):
+                                                   AnnotationJSONPresenter,
+                                                   pyramid_request):
         annotation = mock.Mock()
-        request = mock.Mock()
         event = AnnotationEvent.return_value
         annotation_dict = AnnotationJSONPresenter.return_value.asdict.return_value
 
-        views.delete(annotation, request)
+        views.delete(annotation, pyramid_request)
 
-        AnnotationEvent.assert_called_once_with(request, annotation.id, 'delete',
+        AnnotationEvent.assert_called_once_with(pyramid_request,
+                                                annotation.id,
+                                                'delete',
                                                 annotation_dict=annotation_dict)
-        request.notify_after_commit.assert_called_once_with(event)
+        pyramid_request.notify_after_commit.assert_called_once_with(event)
 
-    def test_it_returns_object(self):
+    def test_it_returns_object(self, pyramid_request):
         annotation = mock.Mock()
-        request = mock.Mock()
 
-        result = views.delete(annotation, request)
+        result = views.delete(annotation, pyramid_request)
 
         assert result == {'id': annotation.id, 'deleted': True}
 
@@ -456,6 +473,19 @@ def AnnotationEvent(patch):
 @pytest.fixture
 def AnnotationJSONPresenter(patch):
     return patch('h.api.views.AnnotationJSONPresenter')
+
+
+@pytest.fixture
+def links_service(pyramid_config):
+    service = mock.Mock(spec_set=['get', 'get_all'])
+    pyramid_config.register_service(service, name='links')
+    return service
+
+
+@pytest.fixture
+def pyramid_request(pyramid_request):
+    pyramid_request.notify_after_commit = mock.Mock(spec_set=[])
+    return pyramid_request
 
 
 @pytest.fixture

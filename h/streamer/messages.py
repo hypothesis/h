@@ -128,8 +128,11 @@ def handle_annotation_event(message, socket):
         if annotation is None:
             return None
 
-        serialized = presenters.AnnotationJSONPresenter(
-            socket.request, annotation).asdict()
+        # FIXME: This method of retrieving the links service is temporary. We
+        # will shortly not rely on `socket.request` at all.
+        links_service = socket.request.find_service(name='links')
+        serialized = presenters.AnnotationJSONPresenter(annotation,
+                                                        links_service).asdict()
 
     userid = serialized.get('user')
     nipsa_service = socket.request.find_service(name='nipsa')

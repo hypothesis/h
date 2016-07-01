@@ -40,15 +40,27 @@ class TestLinksService(object):
 
         assert result == 'http://example.com/annotations/12345'
 
-    def test_get_all_returns_nonhidden_links(self, registry):
+    def test_get_all_includes_nonhidden_links(self, registry):
         svc = LinksService(base_url='http://example.com', registry=registry)
 
         result = svc.get_all(mock.sentinel.annotation)
 
-        assert result == {
-            'giraffe': 'http://giraffes.com',
-            'elephant': 'https://elephant.org',
-        }
+        assert result['giraffe'] == 'http://giraffes.com'
+        assert result['elephant'] == 'https://elephant.org'
+
+    def test_get_all_does_not_include_hidden_links(self, registry):
+        svc = LinksService(base_url='http://example.com', registry=registry)
+
+        result = svc.get_all(mock.sentinel.annotation)
+
+        assert 'kiwi' not in result
+
+    def test_get_all_does_not_include_links_returning_none(self, registry):
+        svc = LinksService(base_url='http://example.com', registry=registry)
+
+        result = svc.get_all(mock.sentinel.annotation)
+
+        assert 'returnsnone' not in result
 
 
 class TestLinksFactory(object):
@@ -93,9 +105,11 @@ def registry(pyramid_config):
                                   lambda r, a: 'http://kiwi.net',
                                   hidden=True)
     add_annotation_link_generator(registry,
+                                  'returnsnone',
+                                  lambda r, a: None)
+    add_annotation_link_generator(registry,
                                   'namedroute',
-                                  lambda r, a: r.route_url('some.named.route'),
-                                  hidden=True)
+                                  lambda r, a: r.route_url('some.named.route'))
     add_annotation_link_generator(registry,
                                   'paramroute',
                                   lambda r, a: r.route_url('param.route', id=a.id),

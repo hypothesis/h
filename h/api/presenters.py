@@ -6,13 +6,12 @@ Presenters for API data.
 import collections
 import copy
 
-LINK_GENERATORS_KEY = 'h.api.presenters.link_generators'
-
 
 class AnnotationBasePresenter(object):
-    def __init__(self, request, annotation):
+    def __init__(self, annotation, links_service):
         self.annotation = annotation
-        self.request = request
+
+        self._links_service = links_service
 
     @property
     def created(self):
@@ -27,16 +26,7 @@ class AnnotationBasePresenter(object):
     @property
     def links(self):
         """A dictionary of named hypermedia links for this annotation."""
-        # Named link generators are registered elsewhere in the code. See
-        # :py:func:`h.api.presenters.add_annotation_link_generator` for
-        # details.
-        link_generators = self.request.registry.get(LINK_GENERATORS_KEY, {})
-        out = {}
-        for name, generator in link_generators.items():
-            link = generator(self.request, self.annotation)
-            if link is not None:
-                out[name] = link
-        return out
+        return self._links_service.get_all(self.annotation)
 
     @property
     def text(self):
@@ -99,6 +89,8 @@ class AnnotationJSONPresenter(AnnotationBasePresenter):
 class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
 
     """Present an annotation in the JSON format used in the search index."""
+    def __init__(self, annotation):
+        self.annotation = annotation
 
     def asdict(self):
         docpresenter = DocumentJSONPresenter(self.annotation.document)
@@ -126,6 +118,12 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
         annotation.update(base)
 
         return annotation
+
+    @property
+    def links(self):
+        # The search index presenter has no need to generate links, and so the
+        # `links_service` parameter has been removed from the constructor.
+        raise NotImplementedError("search index presenter doesn't have links")
 
     @property
     def permissions(self):
@@ -157,7 +155,7 @@ class AnnotationJSONLDPresenter(AnnotationBasePresenter):
 
     @property
     def id(self):
-        return self.request.route_url('annotation', id=self.annotation.id)
+        return self._links_service.get(self.annotation, 'jsonld_id')
 
     @property
     def bodies(self):
@@ -191,21 +189,6 @@ class DocumentJSONPresenter(object):
         return d
 
 
-def add_annotation_link_generator(registry, name, generator):
-    """
-    Registers a function which generates a named link for an annotation.
-
-    Annotation hypermedia links are added to the rendered annotations in a
-    `links` property or similar. `name` is the unique identifier for the link
-    type, and `generator` is a callable which accepts two arguments -- the
-    current request, and the annotation for which to generate a link -- and
-    returns a string.
-    """
-    if LINK_GENERATORS_KEY not in registry:
-        registry[LINK_GENERATORS_KEY] = {}
-    registry[LINK_GENERATORS_KEY][name] = generator
-
-
 def utc_iso8601(datetime):
     return datetime.strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')
 
@@ -224,6 +207,10 @@ def deep_merge_dict(a, b):
 
 def _json_link(request, annotation):
     return request.route_url('api.annotation', id=annotation.id)
+
+
+def _jsonld_id_link(request, annotation):
+    return request.route_url('annotation', id=annotation.id)
 
 
 def _permissions(annotation):
@@ -245,9 +232,12 @@ def _permissions(annotation):
 
 
 def includeme(config):
-    config.add_directive(
-        'add_annotation_link_generator',
-        lambda c, n, g: add_annotation_link_generator(c.registry, n, g))
-
     # Add a default 'json' link type
     config.add_annotation_link_generator('json', _json_link)
+
+    # Add a 'jsonld_id' link type for generating the "id" field for JSON-LD
+    # annotations. This is hidden, and so not rendered in the annotation's
+    # "links" field.
+    config.add_annotation_link_generator('jsonld_id',
+                                         _jsonld_id_link,
+                                         hidden=True)
