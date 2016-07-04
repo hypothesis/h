@@ -38,12 +38,26 @@ One way to resolve this problem is to introduce a "services layer" between views
 and the rest of the application, which is intended to encapsulate the bulk of
 application business logic and hide persistence concerns from the views.
 
+[This blog post][1] by [Nando Farestan][2] may help provide additional
+background on the motivation for a "services layer."
+
+[1]: http://nando.oui.com.br/2014/04/01/large_apps_with_sqlalchemy__architecture.html
+[2]: http://nando.oui.com.br/index.html
+
 Decision
 --------
 
-We will employ a "services layer" to encapsulate non-trivial business logic.
-This layer can be tested independently of views, and used from both views and
-other parts of the application which have access to a request object.
+We will employ a "services layer" to encapsulate business logic that satifies
+one or both of the following conditions:
+
+1. The logic is of "non-trivial" complexity. This is clearly open to
+   interpretation. As a rule of thumb: if you have to ask yourself the question
+   "is this trivial" then it is probably not.
+
+2. The business logic handles more than one type of domain objects.
+
+The services layer will be tested independently of views, and used from both
+views and other parts of the application which have access to a request object.
 
 Services will take the form of instances with some defined interface which are
 associated with a request and can be retrieved from the request object.
@@ -56,6 +70,20 @@ Proposed.
 Consequences
 ------------
 
-New features which require non-trivial business logic changes or additions
-should evolve the services layer by modifying existing services or adding new
-ones to provide a clean interface to the relevant business concerns.
+We hope that adding a services layer will substantially simplify the process of
+writing and, in particular, testing view code.
+
+Views tests will likely be able to run faster, as they can be unit tested
+against a stubbed service, rather than having to hit the database.
+
+We will no longer need to stub or mock SQLAlchemy interfaces for testing, thus
+reducing the extent to which tests are coupled to the implementation of the
+system under test.
+
+To achieve these things we are introducing additional concepts ("service",
+"service factory") the purpose of which may not be immediately apparent,
+especially to programmers new to the codebase.
+
+There will likely be non-service-based views code in the codebase for some time,
+thus we are potentially introducing inconsistency between different parts of the
+code.
