@@ -57,6 +57,10 @@ class Document(Base, mixins.Timestamps):
         """Find documents by a list of uris."""
         query_uris = [uri_normalize(u) for u in uris]
 
+        # FIXME: remove after httpx normalization is finished
+        query_uris.extend([uri_normalize(u, httpx_normalization=False)
+                           for u in uris])
+
         matching_claims = (
             session.query(DocumentURI)
                    .filter(DocumentURI.uri_normalized.in_(query_uris))
@@ -268,6 +272,14 @@ def create_or_update_document_uri(session,
         DocumentURI.type == type,
         DocumentURI.content_type == content_type).first()
 
+    # FIXME: remove after httpx normalization is finished
+    if docuri is None:
+        docuri = session.query(DocumentURI).filter(
+            DocumentURI.claimant_normalized == uri_normalize(claimant, httpx_normalization=False),
+            DocumentURI.uri_normalized == uri_normalize(uri, httpx_normalization=False),
+            DocumentURI.type == type,
+            DocumentURI.content_type == content_type).first()
+
     if docuri is None:
         docuri = DocumentURI(claimant=claimant,
                              uri=uri,
@@ -341,6 +353,12 @@ def create_or_update_document_meta(session,
         DocumentMeta.claimant_normalized == uri_normalize(claimant),
         DocumentMeta.type == type).one_or_none()
 
+    # FIXME: remove after httpx normalization is finished
+    if existing_dm is None:
+        existing_dm = session.query(DocumentMeta).filter(
+            DocumentMeta.claimant_normalized == uri_normalize(claimant, httpx_normalization=False),
+            DocumentMeta.type == type).one_or_none()
+
     if existing_dm is None:
         session.add(DocumentMeta(
                     claimant=claimant,
@@ -364,7 +382,7 @@ def create_or_update_document_meta(session,
         raise ConcurrentUpdateError('concurrent document meta updates')
 
 
-def merge_documents(session, documents, updated=datetime.now()):
+def merge_documents(session, documents, updated=None):
     """
     Takes a list of documents and merges them together. It returns the new
     master document.
@@ -372,6 +390,9 @@ def merge_documents(session, documents, updated=datetime.now()):
     The support for setting a specific value for the `updated` should only
     be used during the Postgres migration. It should be removed afterwards.
     """
+    if updated is None:
+        updated = datetime.utcnow()
+
     master = documents[0]
     duplicates = documents[1:]
 

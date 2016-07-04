@@ -21,6 +21,7 @@ SUBCOMMANDS = (
     'h.cli.commands.initdb.initdb',
     'h.cli.commands.migrate.migrate',
     'h.cli.commands.move_uri.move_uri',
+    'h.cli.commands.normalize_uris.normalize_uris',
     'h.cli.commands.reindex.reindex',
 )
 
