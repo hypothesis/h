@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from collections import namedtuple
-import json
 import logging
 
 from gevent.queue import Full
@@ -67,8 +66,6 @@ def handle_message(message, session, topic_handlers):
     object. It is assumed that there is a 1:1 request-reply mapping between
     incoming messages and messages to be sent out over the websockets.
     """
-    data = message.payload
-
     try:
         handler = topic_handlers[message.topic]
     except KeyError:
@@ -79,15 +76,43 @@ def handle_message(message, session, topic_handlers):
     # to stop connections being added or dropped during iteration, and if that
     # happens Python will throw a "Set changed size during iteration" error.
     sockets = list(websocket.WebSocket.instances)
+    handler(message.payload, sockets, session)
+
+
+def handle_annotation_event(message, sockets, session):
+    id_ = message['annotation_id']
+    annotation = storage.fetch_annotation(session, id_)
+
+    # FIXME: It isn't really nice to try and get the userid from the fetched
+    # annotation or otherwise get it from the maybe-already serialized
+    # annotation dict, to then only access the database for the nipsa flag once.
+    # We do this because the event action is `delete` at which point we can't
+    # load the annotation from the database. Handling annotation deletions is
+    # a known problem and will be fixed in the future.
+    userid = None
+    if annotation:
+        userid = annotation.userid
+    else:
+        userid = message.get('annotation_dict', {}).get('userid')
+    nipsa_service = NipsaService(session)
+    user_nipsad = nipsa_service.is_flagged(userid)
+
     for socket in sockets:
-        reply = handler(data, socket, session)
+        reply = _generate_annotation_event(message, socket, annotation, user_nipsad)
         if reply is None:
             continue
-        if not socket.terminated:
-            socket.send(json.dumps(reply))
+        socket.send_json(reply)
 
 
-def handle_annotation_event(message, socket, session):
+def handle_user_event(message, sockets, _):
+    for socket in sockets:
+        reply = _generate_user_event(message, socket)
+        if reply is None:
+            continue
+        socket.send_json(reply)
+
+
+def _generate_annotation_event(message, socket, annotation, user_nipsad):
     """
     Get message about annotation event `message` to be sent to `socket`.
 
@@ -120,7 +145,6 @@ def handle_annotation_event(message, socket, session):
     if action == 'delete':
         serialized = message['annotation_dict']
     else:
-        annotation = storage.fetch_annotation(session, id_)
         if annotation is None:
             return None
 
@@ -131,8 +155,7 @@ def handle_annotation_event(message, socket, session):
                                                         links_service).asdict()
 
     userid = serialized.get('user')
-    nipsa_service = NipsaService(session)
-    if nipsa_service.is_flagged(userid) and socket.authenticated_userid != userid:
+    if user_nipsad and socket.authenticated_userid != userid:
         return None
 
     permissions = serialized.get('permissions')
@@ -148,7 +171,7 @@ def handle_annotation_event(message, socket, session):
     return notification
 
 
-def handle_user_event(message, socket, _):
+def _generate_user_event(message, socket):
     """
     Get message about user event `message` to be sent to `socket`.
 
