@@ -127,7 +127,7 @@ UNRESERVED_QUERY_VALUE = "-._~:@!$'()*,="
 VIA_PREFIX = "https://via.hypothes.is/"
 
 
-def normalize(uristr, httpx_normalization=True):
+def normalize(uristr):
     """Translate the given URI into a normalized form."""
     uristr = uristr.encode('utf-8')
 
@@ -148,7 +148,7 @@ def normalize(uristr, httpx_normalization=True):
     if uri.hostname is None:
         return text_type(uristr, 'utf-8')
 
-    scheme = _normalize_scheme(uri, httpx_normalization=httpx_normalization)
+    scheme = _normalize_scheme(uri)
     netloc = _normalize_netloc(uri)
     path = _normalize_path(uri)
     query = _normalize_query(uri)
@@ -159,10 +159,10 @@ def normalize(uristr, httpx_normalization=True):
     return text_type(uri.geturl(), 'utf-8')
 
 
-def _normalize_scheme(uri, httpx_normalization=True):
+def _normalize_scheme(uri):
     scheme = uri.scheme
 
-    if httpx_normalization and scheme in URL_SCHEMES:
+    if scheme in URL_SCHEMES:
         scheme = 'httpx'
 
     return scheme
