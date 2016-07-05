@@ -25,6 +25,11 @@ class FakeSocket(object):
         self.registry = registry.Registry('streamer_test')
         self.registry.settings = {'h.app_url': 'http://streamer'}
 
+        self.send_json_payloads = []
+
+    def send_json(self, payload):
+        self.send_json_payloads.append(payload)
+
 
 @pytest.mark.usefixtures('fake_sentry', 'fake_stats')
 class TestProcessMessages(object):
@@ -121,7 +126,7 @@ class TestProcessMessages(object):
 
 
 class TestHandleMessage(object):
-    def test_calls_handler_once_per_socket_with_deserialized_message(self, websocket):
+    def test_calls_handler_with_list_of_sockets(self, websocket):
         handler = mock.Mock(return_value=None)
         session = mock.sentinel.db_session
         message = messages.Message(topic='foo', payload={'foo': 'bar'})
@@ -129,44 +134,7 @@ class TestHandleMessage(object):
 
         messages.handle_message(message, session, topic_handlers={'foo': handler})
 
-        assert handler.mock_calls == [
-            mock.call({'foo': 'bar'}, websocket.instances[0], session),
-            mock.call({'foo': 'bar'}, websocket.instances[1], session),
-        ]
-
-    def test_sends_serialized_messages_down_websocket(self, websocket):
-        handler = mock.Mock(return_value={'just': 'some message'})
-        session = mock.sentinel.db_session
-        message = messages.Message(topic='foo', payload={'foo': 'bar'})
-        socket = FakeSocket('a')
-        websocket.instances = [socket]
-
-        messages.handle_message(message, session, topic_handlers={'foo': handler})
-
-        socket.send.assert_called_once_with('{"just": "some message"}')
-
-    def test_does_not_send_messages_down_websocket_if_handler_response_is_none(self, websocket):
-        handler = mock.Mock(return_value=None)
-        session = mock.sentinel.db_session
-        message = messages.Message(topic='foo', payload={'foo': 'bar'})
-        socket = FakeSocket('a')
-        websocket.instances = [socket]
-
-        messages.handle_message(message, session, topic_handlers={'foo': handler})
-
-        assert socket.send.call_count == 0
-
-    def test_does_not_send_messages_down_websocket_if_socket_terminated(self, websocket):
-        handler = mock.Mock(return_value={'just': 'some message'})
-        session = mock.sentinel.db_session
-        message = messages.Message(topic='foo', payload={'foo': 'bar'})
-        socket = FakeSocket('a')
-        socket.terminated = True
-        websocket.instances = [socket]
-
-        messages.handle_message(message, session, topic_handlers={'foo': handler})
-
-        assert socket.send.call_count == 0
+        handler.assert_called_once_with(message.payload, list(websocket.instances), session)
 
     @pytest.fixture
     def websocket(self, patch):
@@ -185,7 +153,7 @@ class TestHandleAnnotationEvent(object):
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation()
 
-        messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
         fetch_annotation.assert_called_once_with(session, 'panda')
 
@@ -205,7 +173,7 @@ class TestHandleAnnotationEvent(object):
         session = mock.sentinel.db_session
         fetch_annotation.return_value = None
 
-        result = messages.handle_annotation_event(message, socket, session)
+        result = messages.handle_annotation_event(message, [socket], session)
 
         assert result is None
 
@@ -219,7 +187,7 @@ class TestHandleAnnotationEvent(object):
         presenters.AnnotationJSONPresenter.return_value.asdict.return_value = (
             self.serialized_annotation())
 
-        messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
         presenters.AnnotationJSONPresenter.assert_called_once_with(
             fetch_annotation.return_value,
@@ -237,26 +205,26 @@ class TestHandleAnnotationEvent(object):
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation()
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result == {
+        assert socket.send_json_payloads[0] == {
             'payload': [self.serialized_annotation()],
             'type': 'annotation-notification',
             'options': {'action': 'update'},
         }
 
-    def test_none_for_sender_socket(self, presenter_asdict):
+    def test_no_send_for_sender_socket(self, presenter_asdict):
         """Should return None if the socket's client_id matches the message's."""
         message = {'src_client_id': 'pigeon', 'annotation_id': '_', 'action': '_'}
         socket = FakeSocket('pigeon')
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation()
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is None
+        assert socket.send_json_payloads == []
 
-    def test_none_if_no_socket_filter(self, presenter_asdict):
+    def test_no_send_if_no_socket_filter(self, presenter_asdict):
         """Should return None if the socket has no filter."""
         message = {'src_client_id': '_', 'annotation_id': '_', 'action': '_'}
         socket = FakeSocket('giraffe')
@@ -264,22 +232,22 @@ class TestHandleAnnotationEvent(object):
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation()
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is None
+        assert socket.send_json_payloads == []
 
-    def test_none_if_action_is_read(self, presenter_asdict):
+    def test_no_send_if_action_is_read(self, presenter_asdict):
         """Should return None if the message action is 'read'."""
         message = {'action': 'read', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation()
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is None
+        assert socket.send_json_payloads == []
 
-    def test_none_if_filter_does_not_match(self, presenter_asdict):
+    def test_no_send_if_filter_does_not_match(self, presenter_asdict):
         """Should return None if the socket filter doesn't match the message."""
         message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
@@ -287,11 +255,11 @@ class TestHandleAnnotationEvent(object):
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation()
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is None
+        assert socket.send_json_payloads == []
 
-    def test_none_if_annotation_nipsad(self, nipsa_service, presenter_asdict):
+    def test_no_send_if_annotation_nipsad(self, nipsa_service, presenter_asdict):
         """Should return None if the annotation is from a NIPSA'd user."""
         message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
@@ -299,9 +267,9 @@ class TestHandleAnnotationEvent(object):
         presenter_asdict.return_value = self.serialized_annotation()
         nipsa_service.return_value.is_flagged.return_value = True
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is None
+        assert socket.send_json_payloads == []
 
     def test_sends_nipsad_annotations_to_owners(self, presenter_asdict):
         """NIPSA'd users should see their own annotations."""
@@ -311,9 +279,9 @@ class TestHandleAnnotationEvent(object):
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation({'nipsa': True})
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is not None
+        assert len(socket.send_json_payloads) == 1
 
     def test_sends_if_annotation_public(self, presenter_asdict):
         """
@@ -330,11 +298,11 @@ class TestHandleAnnotationEvent(object):
         session = mock.sentinel.db_session
         presenter_asdict.return_value = self.serialized_annotation()
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is not None
+        assert len(socket.send_json_payloads) == 1
 
-    def test_none_if_not_in_group(self, presenter_asdict):
+    def test_no_send_if_not_in_group(self, presenter_asdict):
         """Users shouldn't see annotations in groups they aren't members of."""
         message = {'action': '_', 'src_client_id': '_', 'annotation_id': '_'}
         socket = FakeSocket('giraffe')
@@ -343,9 +311,9 @@ class TestHandleAnnotationEvent(object):
         presenter_asdict.return_value = self.serialized_annotation({
             'permissions': {'read': ['group:private-group']}})
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is None
+        assert socket.send_json_payloads == []
 
     def test_sends_if_in_group(self, presenter_asdict):
         """Users should see annotations in groups they are members of."""
@@ -357,9 +325,9 @@ class TestHandleAnnotationEvent(object):
         presenter_asdict.return_value = self.serialized_annotation({
             'permissions': {'read': ['group:private-group']}})
 
-        result = messages.handle_annotation_event(message, socket, session)
+        messages.handle_annotation_event(message, [socket], session)
 
-        assert result is not None
+        assert len(socket.send_json_payloads) == 1
 
     def serialized_annotation(self, data=None):
         if data is None:
@@ -405,24 +373,27 @@ class TestHandleUserEvent(object):
             'group': 'groupid',
             'session_model': session_model,
         }
-        sock = FakeSocket('clientid')
-        sock.authenticated_userid = 'amy'
+        socket = FakeSocket('clientid')
+        socket.authenticated_userid = 'amy'
 
-        assert messages.handle_user_event(message, sock, None) == {
+        messages.handle_user_event(message, [socket], None)
+
+        assert socket.send_json_payloads[0] == {
             'type': 'session-change',
             'action': 'group-join',
             'model': session_model,
         }
 
-    def test_none_when_socket_is_not_event_users(self):
+    def test_no_send_when_socket_is_not_event_users(self):
         """Don't send session-change events if the event user is not the socket user."""
         message = {
             'type': 'group-join',
             'userid': 'amy',
             'group': 'groupid',
         }
-        sock = FakeSocket('clientid')
-        sock.authenticated_userid = 'bob'
+        socket = FakeSocket('clientid')
+        socket.authenticated_userid = 'bob'
 
-        assert messages.handle_user_event(message, sock, None) is None
+        messages.handle_user_event(message, [socket], None)
 
+        assert socket.send_json_payloads == []

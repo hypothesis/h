@@ -72,6 +72,28 @@ def test_socket_sets_registry_from_environ(fake_environ):
     assert client.registry == mock.sentinel.registry
 
 
+def test_socket_send_json(fake_environ, fake_json, fake_socket_send):
+    socket = mock.Mock()
+    client = websocket.WebSocket(socket, environ=fake_environ)
+
+    payload = {'foo': 'bar'}
+    client.send_json(payload)
+
+    fake_json.dumps.assert_called_once_with(payload)
+    fake_socket_send.assert_called_once_with(client, fake_json.dumps.return_value)
+
+
+def test_socket_send_json_skips_when_terminated(fake_environ, fake_json, fake_socket_send, fake_socket_terminated):
+    socket = mock.Mock()
+    client = websocket.WebSocket(socket, environ=fake_environ)
+
+    fake_socket_terminated.return_value = True
+    client.send_json({'foo': 'bar'})
+
+    assert not fake_json.dumps.called
+    assert not fake_socket_send.called
+
+
 def test_handle_message_sets_socket_client_id_for_client_id_messages():
     socket = mock.Mock()
     socket.client_id = None
@@ -168,3 +190,18 @@ def fake_environ():
         'h.ws.registry': mock.sentinel.registry,
         'h.ws.streamer_work_queue': Queue(),
     }
+
+
+@pytest.fixture
+def fake_json(patch):
+    return patch('h.streamer.websocket.json')
+
+
+@pytest.fixture
+def fake_socket_send(patch):
+    return patch('h.streamer.websocket.WebSocket.send')
+
+
+@pytest.fixture
+def fake_socket_terminated(patch):
+    return patch('h.streamer.websocket.WebSocket.terminated')

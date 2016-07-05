@@ -60,6 +60,10 @@ class WebSocket(_WebSocket):
         except KeyError:
             pass
 
+    def send_json(self, payload):
+        if not self.terminated:
+            self.send(json.dumps(payload))
+
 
 def handle_message(message, session=None):
     """
