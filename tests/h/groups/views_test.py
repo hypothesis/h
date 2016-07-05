@@ -79,10 +79,8 @@ class TestGroupRead(object):
 
         result = views.read(group, pyramid_request)
 
-        assert result == {
-            'group': group,
-            'document_links': ['link1', 'link2'],
-        }
+        assert result['group'] == group
+        assert result['document_links'] == ['link1', 'link2']
 
     def test_renders_join_template_if_not_member(self,
                                                  pyramid_config,

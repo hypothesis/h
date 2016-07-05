@@ -69,7 +69,13 @@ def read(group, request):
 
     return {'group': group,
             'document_links': [presenters.DocumentHTMLPresenter(d).link
-                               for d in group.documents()]}
+                               for d in group.documents()],
+            'meta_attrs': [
+                # Ask browsers not to send the page's URL (which can be used to
+                # join the group) to other websites in the Referer header.
+                {'name': 'referrer', 'content': 'origin'},
+                          ],
+            }
 
 
 @view_config(route_name='group_read',
