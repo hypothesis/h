@@ -95,20 +95,6 @@ class TestDocumentFindByURIs(object):
             db_session, ['https://de.wikipedia.org/wiki/Hauptseite'])
         assert actual.count() == 0
 
-    def test_finds_pre_httpx_normalized_documents(self, db_session):
-        document_ = document.Document()
-        document_.document_uris.append(document.DocumentURI(
-            _claimant='https://en.wikipedia.org/wiki/Main_Page',
-            _claimant_normalized='https://en.wikipedia.org/wiki/Main_Page',
-            _uri='https://en.wikipedia.org/wiki/Main_Page',
-            _uri_normalized='https://en.wikipedia.org/wiki/Main_Page'))
-        db_session.add(document_)
-        db_session.flush()
-
-        actual = document.Document.find_by_uris(
-            db_session, ['https://en.wikipedia.org/wiki/Main_Page'])
-        assert actual.first() == document_
-
 
 class TestDocumentFindOrCreateByURIs(object):
 
@@ -302,44 +288,6 @@ class TestCreateOrUpdateDocumentURI(object):
         assert len(db_session.query(document.DocumentURI).all()) == 1, (
             "It shouldn't have added any new objects to the db")
 
-    def test_it_updates_the_existing_DocumentURI_when_it_is_normalized_pre_httpx(self, db_session):
-        claimant = 'http://example.com/example_claimant.html'
-        uri = 'http://example.com/example_uri.html'
-        type_ = 'self-claim'
-        content_type = ''
-        document_ = document.Document()
-        created = yesterday()
-        updated = yesterday()
-        document_uri = document.DocumentURI(
-            _claimant=claimant,
-            _claimant_normalized=claimant,
-            _uri=uri,
-            _uri_normalized=uri,
-            type=type_,
-            content_type=content_type,
-            document=document_,
-            created=created,
-            updated=updated,
-        )
-        db_session.add(document_uri)
-
-        now_ = now()
-        document.create_or_update_document_uri(
-            session=db_session,
-            claimant=claimant,
-            uri=uri,
-            type=type_,
-            content_type=content_type,
-            document=document_,
-            created=now_,
-            updated=now_,
-        )
-
-        assert document_uri.created == created
-        assert document_uri.updated == now_
-        assert len(db_session.query(document.DocumentURI).all()) == 1, (
-            "It shouldn't have added any new objects to the db")
-
     def test_it_creates_a_new_DocumentURI_if_there_is_no_existing_one(self, db_session):
         claimant = 'http://example.com/example_claimant.html'
         uri = 'http://example.com/example_uri.html'
@@ -479,43 +427,6 @@ class TestCreateOrUpdateDocumentMeta(object):
         updated = now()
         document_meta = document.DocumentMeta(
             claimant=claimant,
-            type=type_,
-            value=value,
-            document=document_,
-            created=created,
-            updated=updated,
-        )
-        db_session.add(document_meta)
-
-        new_updated = now()
-        document.create_or_update_document_meta(
-            session=db_session,
-            claimant=claimant,
-            type=type_,
-            value='new value',
-            document=document.Document(),  # This should be ignored.
-            created=now(),  # This should be ignored.
-            updated=new_updated,
-        )
-
-        assert document_meta.value == 'new value'
-        assert document_meta.updated == new_updated
-        assert document_meta.created == created, "It shouldn't update created"
-        assert document_meta.document == document_, (
-            "It shouldn't update document")
-        assert len(db_session.query(document.DocumentMeta).all()) == 1, (
-            "It shouldn't have added any new objects to the db")
-
-    def test_it_updates_the_existing_DocumentMeta_when_it_is_normalized_pre_httpx(self, db_session):
-        claimant = 'http://example.com/claimant'
-        type_ = 'title'
-        value = 'the title'
-        document_ = document.Document()
-        created = yesterday()
-        updated = now()
-        document_meta = document.DocumentMeta(
-            _claimant=claimant,
-            _claimant_normalized=claimant,
             type=type_,
             value=value,
             document=document_,

@@ -72,16 +72,12 @@ def test_it_deletes_duplicate_document_uri_objects(req):
 
 
 def test_it_merges_documents_when_duplicates_found(req):
-    docuri_1 = models.DocumentURI(_claimant='http://example.org/',
-                                  _claimant_normalized='http://example.org',
-                                  _uri='http://example.org/',
-                                  _uri_normalized='http://example.org',
+    docuri_1 = models.DocumentURI(claimant='http://example.org/',
+                                  uri='http://example.org/',
                                   type='self-claim')
-    docuri_2 = models.DocumentURI(_claimant='https://example.org/',
-                                  _claimant_normalized='https://example.org',
-                                  _uri='https://example.org/',
-                                  _uri_normalized='https://example.org',
-                                  type='self-claim')
+    docuri_2 = models.DocumentURI(claimant='https://example.net/',
+                                  uri='https://example.org/',
+                                  type='rel-canonical')
 
     req.db.add_all([
         models.Document(document_uris=[docuri_1]),
@@ -92,7 +88,6 @@ def test_it_merges_documents_when_duplicates_found(req):
     normalize_uris.normalize_document_uris(req)
 
     assert req.db.query(models.Document).count() == 1
-    assert req.db.query(models.DocumentURI).count() == 1
 
 
 def test_it_normalizes_document_meta_claimant(req):

@@ -330,9 +330,7 @@ def test_urifilter_expands_and_normalizes_into_terms_filter(storage):
     query_uris = result["terms"]["target.scope"]
 
     storage.expand_uri.assert_called_with(request.db, "http://example.com/")
-    assert sorted(query_uris) == sorted(["http://giraffes.com",
-                                         "httpx://giraffes.com",
-                                         "https://elephants.com",
+    assert sorted(query_uris) == sorted(["httpx://giraffes.com",
                                          "httpx://elephants.com"])
 
 
@@ -359,11 +357,8 @@ def test_urifilter_queries_multiple_uris(storage):
 
     storage.expand_uri.assert_any_call(request.db, "http://example.com")
     storage.expand_uri.assert_any_call(request.db, "http://example.net")
-    assert sorted(query_uris) == sorted(["http://giraffes.com",
-                                         "httpx://giraffes.com",
-                                         "https://elephants.com",
+    assert sorted(query_uris) == sorted(["httpx://giraffes.com",
                                          "httpx://elephants.com",
-                                         "http://tigers.com",
                                          "httpx://tigers.com"])
 
 

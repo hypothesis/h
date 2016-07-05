@@ -177,15 +177,3 @@ def test_normalize(url_in, url_out):
 @pytest.mark.parametrize("url,_", TEST_URLS)
 def test_normalize_returns_unicode(url, _):
     assert isinstance(uri.normalize(url), text_type)
-
-
-@pytest.mark.parametrize("url_in,url_out", [
-    # Should not replace http and https protocol with httpx
-    ("https://example.org", "https://example.org"),
-    ("http://example.org", "http://example.org"),
-    # or when scheme is not http or https
-    ("ftp://example.org", "ftp://example.org"),
-    ("file://example.org", "file://example.org"),
-])
-def test_normalize_with_httpx_turned_off(url_in, url_out):
-    assert uri.normalize(url_in, httpx_normalization=False) == url_out

@@ -182,11 +182,6 @@ class UriFilter(object):
             us = [uri.normalize(u) for u in expanded]
             uris.update(us)
 
-            # FIXME: remove after httpx normalization is finished
-            us = [uri.normalize(u, httpx_normalization=False)
-                  for u in expanded]
-            uris.update(us)
-
         return {"terms": {"target.scope": list(uris)}}
 
 
