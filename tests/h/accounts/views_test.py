@@ -610,7 +610,7 @@ class TestActivateController(object):
 
         If the activation code doesn't match any activation then we redirect to
         the front page and flash a message suggesting that they may already be
-        activated and can sign in.
+        activated and can log in.
 
         This happens if a user clicks on an activation link from an email after
         they've already been activated, for example.
@@ -735,7 +735,7 @@ class TestActivateController(object):
         assert isinstance(result, httpexceptions.HTTPFound)
         assert success_flash
         assert success_flash[0].startswith(
-            "Your account has been activated and you're now signed in")
+            "Your account has been activated and you're now logged in")
 
     def test_get_when_logged_in_already_logged_in_to_different_account(self, pyramid_request):
         pyramid_request.authenticated_user = mock.Mock(id=124, spec=['id'])
@@ -748,7 +748,7 @@ class TestActivateController(object):
         assert isinstance(result, httpexceptions.HTTPFound)
         assert error_flash
         assert error_flash[0].startswith(
-            "You're already signed in to a different account")
+            "You're already logged in to a different account")
 
     @pytest.fixture
     def routes(self, pyramid_config):

@@ -78,7 +78,7 @@ class AuthController(object):
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
         self.form = deform.Form(self.schema,
-                                buttons=(_('Sign in'),),
+                                buttons=(_('Log in'),),
                                 footer=form_footer)
 
         self.login_redirect = self.request.params.get(
@@ -383,7 +383,7 @@ class RegisterController(object):
         self.request.session.flash(jinja2.Markup(_(
             'Thank you for creating an account! '
             "We've sent you an email with an activation link, "
-            'before you can sign in <strong>please check your email and open '
+            'before you can log in <strong>please check your email and open '
             'the link to activate your account</strong>.')), 'success')
         self.request.registry.notify(RegistrationEvent(self.request, user))
 
@@ -416,7 +416,7 @@ class ActivateController(object):
             self.request.session.flash(jinja2.Markup(_(
                 "We didn't recognize that activation link. "
                 "Perhaps you've already activated your account? "
-                'If so, try <a href="{url}">signing in</a> using the username '
+                'If so, try <a href="{url}">logging in</a> using the username '
                 'and password that you provided.').format(
                     url=self.request.route_url('login'))),
                 'error')
@@ -431,7 +431,7 @@ class ActivateController(object):
 
         self.request.session.flash(jinja2.Markup(_(
             'Your account has been activated! '
-            'You can now <a href="{url}">sign in</a> using the password you '
+            'You can now <a href="{url}">log in</a> using the password you '
             'provided.').format(url=self.request.route_url('login'))),
             'success')
 
@@ -452,15 +452,15 @@ class ActivateController(object):
             raise httpexceptions.HTTPNotFound()
 
         if id_ == self.request.authenticated_user.id:
-            # The user is already signed in to the account (so the account
+            # The user is already logged in to the account (so the account
             # must already be activated).
             self.request.session.flash(jinja2.Markup(_(
-                "Your account has been activated and you're now signed "
+                "Your account has been activated and you're now logged "
                 "in!")), 'success')
         else:
             self.request.session.flash(jinja2.Markup(_(
-                "You're already signed in to a different account. "
-                '<a href="{url}">Sign out</a> then try opening the '
+                "You're already logged in to a different account. "
+                '<a href="{url}">Log out</a> then try opening the '
                 'activation link again.').format(
                     url=self.request.route_url('logout'))),
                 'error')
