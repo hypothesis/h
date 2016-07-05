@@ -75,9 +75,9 @@
         <ul class="nav navbar-nav pull-right login">
           {% if username %}
             <li><a href="{{ user_profile_link }}">{{ username }}</a></li>
-            <li><a href="{{ request.route_url("logout") }}">Sign out</a></li>
+            <li><a href="{{ request.route_url("logout") }}">Log out</a></li>
           {% else %}
-            <li><a href="{{ base_url }}login">Sign in</a></li>
+            <li><a href="{{ base_url }}login">Log in</a></li>
             <li><a href="{{ base_url }}register">Create an account</a></li>
           {% endif %}
         </ul>

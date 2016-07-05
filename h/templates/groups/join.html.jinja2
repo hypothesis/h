@@ -24,7 +24,7 @@
       <form method="GET" action="{{ request.route_url('login') }}">
         <input type="hidden" name="next" value="{{ request.path }}">
         <button class="primary-action-btn" type="submit">
-          Sign in to join {{ group.name }}
+          Log in to join {{ group.name }}
         </button>
       </form>
       {% endif %}

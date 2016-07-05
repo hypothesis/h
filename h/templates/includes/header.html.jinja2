@@ -79,9 +79,9 @@
           <li class="nav-bar__item nav-bar__item--login">
             {% if username %}
               <a href="{{ user_profile_link }}">{{ username }}</a>
-            / <a href="{{ request.route_url("logout") }}">Sign out</a>
+            / <a href="{{ request.route_url("logout") }}">Log out</a>
             {% else %}
-               <a href="/login" title="Sign in to Hypothesis">Login</a>
+              <a href="/login" title="Log in to Hypothesis">Log in</a>
             / <a href="/register" title="Create a new Hypothesis account">Sign up</a>
             {% endif %}
           </li>
