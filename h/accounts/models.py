@@ -59,20 +59,36 @@ class User(Base):
 
     id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
-    # Normalised user identifier
+    #: Normalised user identifier
     uid = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
-    # Username as chosen by the user on registration
+    #: Username as chosen by the user on registration
     _username = sa.Column('username',
                           sa.UnicodeText(),
                           nullable=False,
                           unique=True)
 
+    #: The display name which will be used when rendering an annotation.
+    display_name = sa.Column(sa.UnicodeText())
+
+    #: A short user description/bio
+    description = sa.Column(sa.UnicodeText())
+
+    #: A free-form column to allow the user to say where they are
+    location = sa.Column(sa.UnicodeText())
+
+    #: The user's URI/link on the web
+    uri = sa.Column(sa.UnicodeText())
+
+    #: The user's ORCID ID
+    orcid = sa.Column(sa.UnicodeText())
+
+    #: Is this user an admin member?
     admin = sa.Column(sa.Boolean,
                       default=False,
                       nullable=False,
                       server_default=sa.sql.expression.false())
 
-    # Is this user a staff member?
+    #: Is this user a staff member?
     staff = sa.Column(sa.Boolean,
                       nullable=False,
                       default=False,
