@@ -2,6 +2,7 @@
 
 
 def includeme(config):
+    config.include('h.views.activity')
     config.include('h.views.exceptions')
     config.include('h.views.help')
     config.include('h.views.home')
@@ -21,6 +22,9 @@ def includeme(config):
     config.add_route('help', '/docs/help')
     config.add_route('onboarding', '/welcome/')
     config.add_route('custom_onboarding', '/welcome/{slug}')
+
+    # activity pages
+    config.add_route('activity.search', '/search')
 
     # main
     config.add_route('annotation',

@@ -1,0 +1,27 @@
+<form>
+  <input name="q" value="{{ q }}" placeholder="Search query">
+  <input type="submit" value="Search">
+</form>
+
+{% for result in results %}
+<hr>
+
+<table>
+  <tr><th>ID</th><td>{{ result.annotation.id }}</td></tr>
+  <tr><th>User</th><td>{{ result.annotation.userid }}</td></tr>
+  <tr><th>Group</th><td>{{ result.group.name }}</td></tr>
+  <tr><th>Shared</th><td>{{ result.annotation.shared }}</td></tr>
+  <tr><th>URI</th><td>{{ result.annotation.target_uri }}</td></tr>
+  <tr><th>Text</th><td>{{ result.annotation.text }}</td></tr>
+  <tr>
+    <th>Tags</th>
+    <td>
+      <ul>
+        {% for tag in result.annotation.tags %}
+        <li>{{ tag }}</li>
+        {% endfor %}
+      </ul>
+    </td>
+    </tr>
+</table>
+{% endfor %}
