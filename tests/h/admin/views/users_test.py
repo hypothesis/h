@@ -187,7 +187,7 @@ def test_users_delete_user_not_found_error(User, pyramid_request):
     views.users_delete(pyramid_request)
 
     assert pyramid_request.session.peek_flash('error') == [
-        'Cannot find user with username bob'
+        "User bob doesn't exist!"
     ]
 
 

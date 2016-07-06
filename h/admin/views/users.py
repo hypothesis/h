@@ -9,10 +9,16 @@ from h import models
 from h import util
 from h.accounts.events import ActivationEvent
 from h.api import storage
+from h.api.search.index import BatchIndexer
 from h.i18n import TranslationString as _
+from h.util.user import userid_from_username
 
 
 class UserDeletionError(Exception):
+    pass
+
+
+class UserRenameError(Exception):
     pass
 
 
@@ -46,13 +52,9 @@ def users_index(request):
              request_param='username',
              permission='admin_users')
 def users_activate(request):
-    username = request.params['username']
-    user = models.User.get_by_username(request.db, username)
+    user = _form_request_user(request)
 
     if user is None:
-        request.session.flash(jinja2.Markup(_(
-            "User {name} doesn't exist!".format(name=username))),
-            'error')
         return httpexceptions.HTTPFound(
             location=request.route_path('admin_users'))
 
@@ -69,23 +71,86 @@ def users_activate(request):
                                     _query=(('username', user.username),)))
 
 
+@view_config(route_name='admin_users_rename',
+             request_method='POST',
+             permission='admin_users')
+def users_rename(request):
+    user = _form_request_user(request)
+
+    if user is None:
+        return httpexceptions.HTTPFound(
+            location=request.route_path('admin_users'))
+
+    old_username = user.username
+    new_username = request.params.get('new_username')
+
+    try:
+        rename_user(request, user, new_username)
+
+        request.session.flash(
+            'Successfully renamed user "%s" to "%s"' %
+            (old_username, new_username), 'success')
+
+        return httpexceptions.HTTPFound(
+            location=request.route_path('admin_users',
+                                        _query=(('username', new_username),)))
+
+    except (UserRenameError, ValueError) as e:
+        request.session.flash(str(e), 'error')
+        return httpexceptions.HTTPFound(
+            location=request.route_path('admin_users',
+                                        _query=(('username', old_username),)))
+
+
+def rename_user(request, user, new_username):
+    """
+    Change the username of `user` to `new_username`.
+
+    Validates the new username and updates the User. The permissions of
+    the user's annotations are updated to reflect the new username.
+
+    May raise a ValueError if the new username does not validate or
+    UserRenameError if the new username is already taken by another account.
+    """
+    existing_user = models.User.get_by_username(request.db, new_username)
+
+    if existing_user:
+        raise UserRenameError('Another user already has the username "%s"' % new_username)
+
+    old_userid = userid_from_username(user.username, request)
+    new_userid = userid_from_username(new_username, request)
+
+    user.username = new_username
+
+    annotations = request.db.query(models.Annotation).filter(
+        models.Annotation.userid == old_userid).yield_per(100)
+    ids = set()
+    for annotation in annotations:
+        annotation.userid = new_userid
+        ids.add(annotation.id)
+
+    request.tm.commit()
+
+    indexer = BatchIndexer(request.db, request.es, request)
+    indexer.index(ids)
+
+
 @view_config(route_name='admin_users_delete',
              request_method='POST',
              permission='admin_users')
 def users_delete(request):
-    username = request.params.get('username')
-    user = models.User.get_by_username(request.db, username)
+    user = _form_request_user(request)
 
     if user is None:
+        return httpexceptions.HTTPFound(
+            location=request.route_path('admin_users'))
+
+    try:
+        delete_user(request, user)
         request.session.flash(
-            'Cannot find user with username %s' % username, 'error')
-    else:
-        try:
-            delete_user(request, user)
-            request.session.flash(
-                'Successfully deleted user %s' % username, 'success')
-        except UserDeletionError as e:
-            request.session.flash(str(e), 'error')
+            'Successfully deleted user %s' % user.username, 'success')
+    except UserDeletionError as e:
+        request.session.flash(str(e), 'error')
 
     return httpexceptions.HTTPFound(
         location=request.route_path('admin_users'))
@@ -121,6 +186,19 @@ def _all_user_annotations_query(request, user):
             'query': {'match_all': {}}
         }
     }
+
+
+def _form_request_user(request):
+    """Return the User which a user admin form action relates to."""
+    username = request.params['username']
+    user = models.User.get_by_username(request.db, username)
+
+    if user is None:
+        request.session.flash(jinja2.Markup(_(
+            "User {name} doesn't exist!".format(name=username))),
+            'error')
+
+    return user
 
 
 def includeme(config):
