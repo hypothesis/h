@@ -45,6 +45,8 @@ class Group(Base, mixins.Timestamps):
         sa.Integer, sa.ForeignKey('user.id'), nullable=False)
     creator = sa.orm.relationship('User')
 
+    description = sa.Column(sa.UnicodeText())
+
     # Group membership
     members = sa.orm.relationship(
         'User', secondary='user_group', backref=sa.orm.backref(
