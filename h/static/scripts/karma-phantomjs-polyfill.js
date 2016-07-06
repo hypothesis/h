@@ -16,3 +16,7 @@ require('core-js/es5');
 // app itself.
 require('./polyfills');
 
+// Include URL polyfill because PhantomJS 2.x has a broken URL
+// constructor. See https://github.com/hypothesis/client/pull/16
+require('js-polyfills/url');
+

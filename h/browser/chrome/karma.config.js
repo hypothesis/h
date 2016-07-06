@@ -47,12 +47,7 @@ module.exports = function(config) {
     browserify: {
       debug: true,
       configure: function(bundle) {
-        bundle
-          .plugin('proxyquire-universal')
-          // fix for Proxyquire in PhantomJS 1.x.
-          // See https://github.com/bitwit/proxyquireify-phantom-menace
-          .require(require.resolve('phantom-ownpropertynames/implement'),
-            {entry: true});
+        bundle.plugin('proxyquire-universal');
       },
     },
 
