@@ -37,12 +37,8 @@ def users_index(request):
             user = models.User.get_by_email(request.db, username)
 
     if user is not None:
-        # Fetch information on how many annotations the user has created
-        query = _all_user_annotations_query(request, user)
-        result = request.es.conn.count(index=request.es.index,
-                                       doc_type=request.es.t.annotation,
-                                       body={'query': query})
-        user_meta['annotations_count'] = result['count']
+        n_annots = _all_user_annotations(request, user.username).count()
+        user_meta['annotations_count'] = n_annots
 
     return {'username': username, 'user': user, 'user_meta': user_meta}
 
@@ -117,17 +113,16 @@ def rename_user(request, user, new_username):
     if existing_user:
         raise UserRenameError('Another user already has the username "%s"' % new_username)
 
-    old_userid = userid_from_username(user.username, request)
-    new_userid = userid_from_username(new_username, request)
+    old_userid = userid_from_username(user.username, request.auth_domain)
+    new_userid = userid_from_username(new_username, request.auth_domain)
 
-    user.username = new_username
-
-    annotations = request.db.query(models.Annotation).filter(
-        models.Annotation.userid == old_userid).yield_per(100)
+    annotations = _all_user_annotations(request, user.username)
     ids = set()
     for annotation in annotations:
         annotation.userid = new_userid
         ids.add(annotation.id)
+
+    user.username = new_username
 
     request.tm.commit()
 
@@ -179,13 +174,19 @@ def delete_user(request, user):
 
 def _all_user_annotations_query(request, user):
     """Query matching all annotations (shared and private) owned by user."""
-    userid = util.user.userid_from_username(user.username, request.auth_domain)
+    userid = userid_from_username(user.username, request.auth_domain)
     return {
         'filtered': {
             'filter': {'term': {'user': userid.lower()}},
             'query': {'match_all': {}}
         }
     }
+
+
+def _all_user_annotations(request, username):
+    userid = userid_from_username(username, request.auth_domain)
+    return request.db.query(models.Annotation).filter(
+        models.Annotation.userid == userid).yield_per(100)
 
 
 def _form_request_user(request):

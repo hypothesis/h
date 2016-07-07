@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import mock
 from mock import Mock
 from mock import MagicMock
@@ -40,25 +42,16 @@ def test_users_index_looks_up_users_by_email(User, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_queries_annotation_count_by_userid(User, pyramid_request):
-    pyramid_request.params = {"username": "Bob"}
-    es = pyramid_request.es
+def test_users_index_queries_annotation_count_by_userid(User, db_session, factories, pyramid_request):
+    User.get_by_username.return_value = mock.MagicMock(username='bob')
+    userid = "acct:bob@{}".format(pyramid_request.auth_domain)
+    for _ in xrange(8):
+        db_session.add(factories.Annotation(userid=userid))
+    db_session.flush()
 
-    User.get_by_username.return_value.username = 'Robert'
-
-    views.users_index(pyramid_request)
-
-    expected_query = {
-        'query': {
-            'filtered': {
-                'filter': {'term': {'user': u'acct:robert@example.com'}},
-                'query': {'match_all': {}}
-            }
-        }
-    }
-    es.conn.count.assert_called_with(index=es.index,
-                                     doc_type=es.t.annotation,
-                                     body=expected_query)
+    pyramid_request.params = {"username": "bob"}
+    result = views.users_index(pyramid_request)
+    assert result['user_meta']['annotations_count'] == 8
 
 
 @users_index_fixtures
@@ -73,16 +66,15 @@ def test_users_index_no_user_found(User, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_user_found(User, pyramid_request):
+def test_users_index_user_found(User, pyramid_request, db_session, factories):
     pyramid_request.params = {"username": "bob"}
-    pyramid_request.es.conn.count.return_value = {'count': 43}
 
     result = views.users_index(pyramid_request)
 
     assert result == {
         'username': "bob",
         'user': User.get_by_username.return_value,
-        'user_meta': {'annotations_count': 43},
+        'user_meta': {'annotations_count': 0},
     }
 
 
