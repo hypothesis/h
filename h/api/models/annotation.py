@@ -49,7 +49,6 @@ class Annotation(Base):
     updated = sa.Column(sa.DateTime,
                         server_default=sa.func.now(),
                         default=datetime.datetime.utcnow,
-                        onupdate=datetime.datetime.utcnow,
                         nullable=False)
 
     #: The full userid (e.g. 'acct:foo@example.com') of the owner of this
