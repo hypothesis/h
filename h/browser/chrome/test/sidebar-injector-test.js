@@ -179,14 +179,14 @@ describe('SidebarInjector', function () {
       describe('when file access is enabled', function () {
         it('loads the PDFjs viewer', function () {
           var spy = fakeChromeTabs.update.yields([]);
-          var url = 'file://foo.pdf';
+          var url = 'file:///foo.pdf';
           contentType = 'PDF';
 
           return injector.injectIntoTab({id: 1, url: url}).then(
             function () {
               assert.called(spy);
               assert.calledWith(spy, 1, {
-                url: PDF_VIEWER_BASE_URL + encodeURIComponent('file://foo.pdf')
+                url: PDF_VIEWER_BASE_URL + encodeURIComponent('file:///foo.pdf')
               });
             }
           );
