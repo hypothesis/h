@@ -186,7 +186,7 @@ class RegisterSchema(CSRFSchema):
                 min=models.USERNAME_MIN_LENGTH,
                 max=models.USERNAME_MAX_LENGTH),
             colander.Regex(
-                '(?i)^[A-Z0-9._]+$',
+                models.USERNAME_PATTERN,
                 msg=_("Must contain only letters, numbers, periods, and "
                       "underscores")),
             unique_username,

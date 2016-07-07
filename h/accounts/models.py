@@ -2,6 +2,7 @@
 import datetime
 import hashlib
 import random
+import re
 import string
 
 import cryptacular.bcrypt
@@ -15,6 +16,7 @@ from h._compat import text_type
 CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
+USERNAME_PATTERN = '(?i)^[A-Z0-9._]+$'
 EMAIL_MAX_LENGTH = 100
 PASSWORD_MIN_LENGTH = 2
 
@@ -103,6 +105,10 @@ class User(Base):
         return self._username
 
     def _set_username(self, value):
+        if not re.match(USERNAME_PATTERN, value):
+            raise ValueError('Username can only contain letters, numbers, periods'
+                             ' and underscores.')
+
         if not USERNAME_MIN_LENGTH <= len(value) <= USERNAME_MAX_LENGTH:
             raise ValueError('username must be between {min} and {max} '
                              'characters long'.format(
