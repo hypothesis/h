@@ -7,6 +7,8 @@ for storing and retrieving annotations. Data passed to these functions is
 assumed to be validated.
 """
 
+from datetime import datetime
+
 from pyramid import i18n
 
 from h.api import schemas
@@ -152,6 +154,7 @@ def update_annotation(session, id_, data):
     document = data.pop('document', None)
 
     annotation = session.query(models.Annotation).get(id_)
+    annotation.updated = datetime.utcnow()
 
     annotation.extra.update(data.pop('extra', {}))
 

@@ -304,6 +304,13 @@ class TestUpdateAnnotation(object):
 
         assert annotation.extra == {'one': 1, 'two': 2}
 
+    def test_it_changes_the_updated_timestamp(self, annotation_data, session, datetime):
+        annotation = storage.update_annotation(session,
+                                               'test_annotation_id',
+                                               annotation_data)
+
+        assert annotation.updated == datetime.utcnow()
+
     def test_it_updates_the_annotation(self, annotation_data, session):
         annotation = session.query.return_value.get.return_value
 
@@ -373,6 +380,10 @@ class TestUpdateAnnotation(object):
             },
             'extra': {},
         }
+
+    @pytest.fixture
+    def datetime(self, patch):
+        return patch('h.api.storage.datetime')
 
 
 class TestDeleteAnnotation(object):
