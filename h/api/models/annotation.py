@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import datetime
+
 from pyramid import security
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
@@ -11,11 +13,10 @@ from sqlalchemy.ext.mutable import MutableDict
 
 from h.api import uri
 from h.api.db import Base
-from h.api.db import mixins
 from h.api.db import types
 
 
-class Annotation(Base, mixins.Timestamps):
+class Annotation(Base):
 
     """Model class representing a single annotation."""
 
@@ -37,6 +38,19 @@ class Annotation(Base, mixins.Timestamps):
     id = sa.Column(types.URLSafeUUID,
                    server_default=sa.func.uuid_generate_v1mc(),
                    primary_key=True)
+
+    #: The timestamp when the annotation was created.
+    created = sa.Column(sa.DateTime,
+                        default=datetime.datetime.utcnow,
+                        server_default=sa.func.now(),
+                        nullable=False)
+
+    #: The timestamp when the user edited the annotation last.
+    updated = sa.Column(sa.DateTime,
+                        server_default=sa.func.now(),
+                        default=datetime.datetime.utcnow,
+                        onupdate=datetime.datetime.utcnow,
+                        nullable=False)
 
     #: The full userid (e.g. 'acct:foo@example.com') of the owner of this
     #: annotation.
