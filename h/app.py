@@ -113,6 +113,7 @@ def includeme(config):
     config.include('h.api', route_prefix='/api')
 
     # Core site modules
+    config.include('h.activity')
     config.include('h.assets')
     config.include('h.auth')
     config.include('h.db')
