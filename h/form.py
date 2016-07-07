@@ -49,7 +49,7 @@ class Jinja2Renderer(object):
             searchpath = [resolver.resolve(path).abspath()
                           for path in SEARCH_PATHS]
             loader = pyramid_jinja2.SmartAssetSpecLoader(searchpath)
-            self._env = self._base_env.overlay(loader=loader)
+            self._env = self._base_env.overlay(autoescape=True, loader=loader)
         return self._env
 
     def __call__(self, template_name, **kwargs):

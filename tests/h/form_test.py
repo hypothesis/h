@@ -44,3 +44,16 @@ class TestJinja2Renderer(object):
         html = renderer('textinput', cstruct='', field=mock.Mock())
 
         assert isinstance(html, jinja2.Markup)
+
+    def test_it_escapes_user_text(self):
+        """It should escape user text even if the base jinja2 env doesn't."""
+        base_env = jinja2.Environment()  # This base env doesn't have
+                                         # autoescape enabled.
+        renderer = form.Jinja2Renderer(base_env)
+
+        html = renderer(
+            'textinput',
+            cstruct='I am hacking you"><script>foo</script>',
+            field=mock.Mock())
+
+        assert '<script>foo</script>' not in html
