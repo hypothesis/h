@@ -116,8 +116,8 @@ def db_session(db_engine):
 
 @pytest.fixture(scope='session', autouse=True)
 def deform():
-    """Allow tests that use deform to find our custom templates."""
-    form.init()
+    """Use our custom Deform renderer instead of Deform's default one."""
+    form.initialize_deform_renderer(config=mock.Mock())
 
 
 @pytest.yield_fixture
