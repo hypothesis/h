@@ -12,12 +12,12 @@
       {% trans %}Your current email address is:{% endtrans %}
       <strong>{{ email }}</strong>.
     </legend>
-    {{ email_form | safe }}
+    {{ email_form }}
 
     <h2 class="form-heading">
       <span>{% trans %}Change your password{% endtrans %}</span>
     </h2>
-    {{ password_form | safe }}
+    {{ password_form }}
 
     <h2 class="form-heading">
       <span>{% trans %}Delete account{% endtrans %}</span>
