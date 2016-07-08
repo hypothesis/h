@@ -65,7 +65,7 @@ associated with a request and can be retrieved from the request object.
 Status
 ------
 
-Proposed.
+Accepted.
 
 Consequences
 ------------
