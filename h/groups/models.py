@@ -116,5 +116,6 @@ USER_GROUP_TABLE = sa.Table(
     sa.Column('group_id',
               sa.Integer,
               sa.ForeignKey('group.id'),
-              nullable=False)
+              nullable=False),
+    sa.UniqueConstraint('user_id', 'group_id'),
 )
