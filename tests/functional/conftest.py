@@ -5,6 +5,8 @@ import os
 import pytest
 from webtest import TestApp
 
+import tests.common.factories
+
 TEST_SETTINGS = {
     'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
     'es.index': 'hypothesis-test',
@@ -45,6 +47,13 @@ def db_session(request, config):
     finally:
         session.close()
         engine.dispose()
+
+
+@pytest.yield_fixture
+def factories(db_session):
+    tests.common.factories.SESSION = db_session
+    yield tests.common.factories
+    tests.common.factories.SESSION = None
 
 
 def _drop_indices(settings):

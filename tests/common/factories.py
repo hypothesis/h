@@ -201,3 +201,13 @@ class User(factory.Factory):
     @factory.lazy_attribute
     def uid(self):
         return self.username.replace('.', '').lower()
+
+
+class Group(ModelFactory):
+
+    class Meta:  # pylint: disable=no-init, old-style-class
+        model = models.Group
+        force_flush = True
+
+    name = factory.Sequence(lambda n:'Test Group {n}'.format(n=str(n)))
+    creator = factory.SubFactory(User)
