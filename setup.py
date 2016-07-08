@@ -56,6 +56,7 @@ INSTALL_REQUIRES = [
     'python-dateutil>=2.1',
     'python-slugify>=1.1.3,<1.2.0',
     'pyramid-jinja2>=2.3.3',
+    'pyparsing>=2.1.5',
     'raven>=5.10.2,<5.11.0',
     'requests>=2.7.0',
     'statsd>=3.2.1,<3.3.0',
