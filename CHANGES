@@ -1,3 +1,38 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Treat HTTP/HTTPS URLs that are the same except for their protocol as
+  equivalent (#3558).
+
+- Improve performance of real-time updates service (#3574).
+
+- Use consistent terminology for 'Log in', 'Log out' and 'Sign up' actions
+  (#3578).
+
+Bug fixes
+---------
+
+- Fix missing escaping of user input in server-rendered forms (#3585).
+
+- Prevent browsers disclosing group URLs to websites linked to from groups
+  pages (#3579).
+
+- Fix a problem where data migrations would update annotations' last-update
+  timestamp (#3586).
+
+Miscellanea
+-----------
+
+- Remove assets that relate to the Hypothesis client.  These are now part of
+  the hypothesis/client repository (#3577, #3571)
+
+- Update Hypothesis client to v0.32.0. See
+  https://github.com/hypothesis/client/releases/tag/v0.32.0
+
+
 0.31.0 (2016-06-29)
 ===================
 
