@@ -14,7 +14,7 @@ Building the Chrome extension for development
 
 To build and install the Chrome extension:
 
-1. Do an :doc:`h development install <install>`.
+1. Do an :doc:`h development install <install/index>`.
 
 2. Run this command to build the Chrome extension:
 

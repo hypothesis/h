@@ -1,63 +1,7 @@
-Installing h in a development environment
-#########################################
+Website dev install
+===================
 
-.. _Git: https://git-scm.com/
-.. _Python: http://python.org/
-.. _Node: http://nodejs.org/
-.. _Git repo named h: https://github.com/hypothesis/h/
-.. _Git repo named client: https://github.com/hypothesis/client/
-.. _built copy of the Hypothesis client from npm: https://www.npmjs.com/package/hypothesis/
-
-
-This document contains instructions for setting up a development environment
-for Hypothesis.
-
-
-Requirements
-------------
-
-To run Hypothesis in a development environment you'll need these system
-dependencies installed:
-
--  Git_
--  Python_ v2.7
--  Node_ v4+ and its package manager, npm
-
-You'll also need to run these external services:
-
-.. include:: services.rst
-
-
-The website and client codebases
---------------------------------
-
-The Hypothesis system is built from two main codebases:
-
-1. The code for the https://hypothes.is/ website itself, which lives in a
-   `Git repo named h`_. This includes an HTTP API for fetching and saving
-   annotations.
-
-2. The code for the Hypothesis annotation client (the sidebar), which lives in
-   a `Git repo named client`_. The client sends HTTP requests to the web
-   service to fetch and save annotations.
-
-If you just want to work on the https://hypothes.is/ website and API then
-you can just follow the
-`Installing the website in a development environment`_ instructions and it
-will automatically use a
-`built copy of the Hypothesis client from npm`_.
-
-If you want to work on the Hypothesis client code then you need to install
-local development copies of both the website/API *and* the Hypothesis client.
-First follow the `Installing the website in a development environment`_
-instructions and then the `Installing the client in a development environment`_
-section.
-
-
-Installing the website in a development environment
----------------------------------------------------
-
-The code for the https://hypothes.is/ website lives in a
+The code for the https://hypothes.is/ website and API lives in a
 `Git repo named h`_. To get this code running in a local development
 environment the first thing you need to do is install h's system dependencies.
 
@@ -69,7 +13,7 @@ the sections that follow it.
 
 
 Installing the system dependencies on Ubuntu 14.04
-``````````````````````````````````````````````````
+--------------------------------------------------
 
 This section describes how to install h's system dependencies on Ubuntu 14.04.
 These steps will also probably work with few or no changes on other versions
@@ -104,7 +48,7 @@ Upgrade pip, virtualenv and npm:
 
 
 Installing the system dependencies on OS X
-``````````````````````````````````````````
+------------------------------------------
 
 This section describes how to install h's system dependencies on Mac OS X.
 
@@ -124,11 +68,20 @@ Install the following packages:
 
 
 Installing the services
-```````````````````````
+-----------------------
 
 h requires the following external services:
 
-.. include:: services.rst
+- PostgreSQL_ 9.4+
+- Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
+- RabbitMQ_ v3.5+
+- Redis_ v2.4+
+
+.. _PostgreSQL: http://www.postgresql.org/
+.. _Elasticsearch: http://www.elasticsearch.org/
+.. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
+.. _RabbitMQ: https://rabbitmq.com/
+.. _Redis: http://redis.io/
 
 You can install these services however you want, but the easiest way is by
 using Docker. This should work on any operating system that Docker can be
@@ -209,7 +162,7 @@ installed on:
 
 
 Installing the gulp command
-```````````````````````````
+---------------------------
 
 Install ``gulp-cli`` to get the ``gulp`` command:
 
@@ -219,7 +172,7 @@ Install ``gulp-cli`` to get the ``gulp`` command:
 
 
 Getting the h source code from GitHub
-`````````````````````````````````````
+-------------------------------------
 
 Use ``git`` to download the h source code:
 
@@ -239,7 +192,7 @@ process:
 
 
 Creating a Python virtual environment
-`````````````````````````````````````
+-------------------------------------
 
 Create a Python virtual environment to install and run the h Python code and
 Python dependencies in:
@@ -252,7 +205,7 @@ Python dependencies in:
 .. _activating_your_virtual_environment:
 
 Activating your virtual environment
-```````````````````````````````````
+-----------------------------------
 
 Activate the virtual environment that you've created:
 
@@ -272,7 +225,7 @@ Activate the virtual environment that you've created:
 
 
 Running h
-`````````
+---------
 
 Start a development server:
 
@@ -291,7 +244,7 @@ it crash for some reason.
 .. _running-the-tests:
 
 Running h's tests
-`````````````````
+-----------------
 
 There are test suites for both the frontend and backend code. To run the
 complete set of tests, run:
@@ -326,7 +279,7 @@ argument or mocha's `.only()`_ modifier.
 
 
 Debugging h
-```````````
+-----------
 
 The `pyramid_debugtoolbar`_ package is loaded by default in the development
 environment.  This will provide stack traces for exceptions and allow basic
@@ -347,7 +300,7 @@ turn on result set logging as well.
 
 
 Feature flags
-`````````````
+-------------
 
 Features flags allow admins to enable or disable features for certain groups
 of users. You can enable or disable them from the Administration Dashboard.
@@ -356,116 +309,12 @@ To access the Administration Dashboard, you will need to first create a
 user account in your local instance of H and then give that account
 admin access rights using H's command-line tools.
 
-See the :doc:`administration` documentation for information
+See the :doc:`/developing/administration` documentation for information
 on how to give the initial user admin rights and access the Administration
 Dashboard.
 
-
-Installing the client in a development environment
---------------------------------------------------
-
-If you want to work on the source code of Hypothesis annotation client (the
-sidebar) then you first need to follow
-`Installing the website in a development environment`_ and then follow the
-steps below to install the client code in its own development environment.
-
-The client code lives in a `Git repo named client`_.
-To install it:
-
-1. Clone the ``client`` git repo and ``cd`` into it:
-
-   .. code-block:: bash
-
-      git clone https://github.com/hypothesis/client.git
-      cd client
-
-2. Install the client's JavaScript dependencies:
-
-   .. code-block:: bash
-
-      npm install
-
-3. Run the client's test to make sure everything's working:
-
-   .. code-block:: bash
-
-      make test
-
-4. You can now test the client in a web browser by running the live reload
-   server.
-
-   First run the web service on http://localhost:5000/, the client won't work
-   without this because it sends HTTP requests to http://localhost:5000/ to
-   fetch and to save annotations. In the ``h`` directory run:
-
-   .. code-block:: bash
-
-      h> make dev
-
-   Now in another terminal, in the ``client`` directory, run the live reload
-   server:
-
-   .. code-block:: bash
-
-      client> gulp watch
-
-   Now open http://localhost:3000/ in a browser to see the client running in
-   the live reload server. The live reload server automatically reloads the
-   client whenever you modify any of its styles, templates or scripts.
-
-
-Linking your website and client development environments
---------------------------------------------------------
-
-When you run the https://hypothes.is/ site in a development environment
-(by following `Installing the website in a development environment`_) it uses
-a `built copy of the Hypothesis client from npm`_.
-If you've also installed the Hypothesis client in a development environment
-(see `Installing the client in a development environment`_), then you can link
-your website development environment to your client to make your website use
-your development copy of the client instead of the client from npm.
-
-To link your website development environment to your development client
-run ``npm link`` in the ``client`` directory then ``npm link hypothesis``
-in the ``h`` directory:
-
-.. code-block:: bash
-
-   client> npm link
-   client> cd ../h
-   h> npm link hypothesis
-
-.. tip::
-
-   If you get a *permission denied* error when running ``npm link`` you
-   probably need to tell npm to install packages into a directory in your
-   home directory that you have permission to write to. On linux:
-
-   .. code-block:: bash
-
-      npm config set prefix /home/<YOUR_USERNAME>/npm
-
-   On macOS:
-
-   .. code-block:: bash
-
-      npm config set prefix /Users/<YOUR_USERNAME>/npm
-
-   npm will now install executable files into ``$HOME/npm/bin``, so add that
-   directory to your ``$PATH``.
-
-To unlink your website run ``npm unlink hypothesis`` then ``make clean``, it
-will go back to using the client from npm:
-
-.. code-block:: bash
-
-   h> npm unlink hypothesis
-   h> make clean dev
-
-
 Troubleshooting
 ---------------
-
 
 Cannot connect to the Docker daemon
 ```````````````````````````````````
@@ -485,3 +334,6 @@ to either:
   instructions for your operating system on the `Docker website`_), or
 
 * Prefix all ``docker`` commands with ``sudo``.
+
+
+.. include:: targets.rst
