@@ -81,6 +81,10 @@ def test_parse(query_in, query_out):
     ('tag:"""""', MultiDict([('tag', '"""""')])),
     ('"""""', MultiDict([('any', '"""""')])),
     ("'''''", MultiDict([('any', "'''''")])),
+    ('""0', MultiDict([('any', ''), ('any', '0')])),
+    ('0""', MultiDict([('any', '0""')])),
+    ('\'\'0""', MultiDict([('any', '0""')])),
+    ('\'0"', MultiDict([('any', '\'0"')])),
 ])
 def test_parse_with_odd_quotes_combinations(query_in, query_out):
     assert query.parse(query_in) == query_out
@@ -94,12 +98,15 @@ def test_parse_always_return_a_multidict(text):
     assert isinstance(result, MultiDict)
 
 
-nonwhitespace_chars = st.characters(blacklist_characters=query.whitespace)
+# Combinations of strings containing any number of quotes are already tested
+# separately.
+char_blacklist = query.whitespace.union(set('\'"'))
+nonwhitespace_chars = st.characters(blacklist_characters=char_blacklist)
 nonwhitespace_text = st.text(alphabet=nonwhitespace_chars, min_size=1)
 
 
 @given(nonwhitespace_text)
 @pytest.mark.fuzz
 def test_parse_with_any_nonwhitespace_text(text):
-    result = query.parse('{}'.format(text))
+    result = query.parse(text)
     assert result.get('any') == text

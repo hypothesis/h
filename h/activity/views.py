@@ -10,6 +10,7 @@ from pyramid import httpexceptions
 from pyramid.view import view_config
 
 from h import models
+from h.activity import query
 from h.api import search as search_lib
 from h.api import storage
 
@@ -23,10 +24,9 @@ def search(request):
 
     results = []
     if 'q' in request.params:
-        # TODO: parse free-text search query to a multi-dict that search_lib understands
-        query = {}
+        search_query = query.parse(request.params['q'])
 
-        out = search_lib.search(request, query)
+        out = search_lib.search(request, search_query)
         anns = storage.fetch_ordered_annotations(request.db,
                                                  [r['id'] for r in out['rows']])
         for ann in anns:

@@ -10,7 +10,7 @@ from __future__ import unicode_literals
 import pyparsing as pp
 from webob.multidict import MultiDict
 
-whitespace = (
+whitespace = set([
     "\u0009",  # character tabulation
     "\u000a",  # line feed
     "\u000b",  # line tabulation
@@ -36,7 +36,7 @@ whitespace = (
     "\u202f",  # narrow no-break space
     "\u205f",  # medium mathematical space
     "\u3000",  # ideographic space
-)
+])
 
 parser = None
 
