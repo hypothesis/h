@@ -1,6 +1,5 @@
 -e .
 certifi
 cffi
-pyramid_redis_sessions
 requests[security]
 wsaccel

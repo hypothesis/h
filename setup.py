@@ -52,6 +52,7 @@ INSTALL_REQUIRES = [
     'pyramid-multiauth>=0.8.0,<0.9.0',
     'pyramid-services==0.4',
     'pyramid_mailer>=0.13',
+    'pyramid-redis-sessions>=1.0.1,<1.2.0',
     'pyramid_tm>=0.7',
     'python-dateutil>=2.1',
     'python-slugify>=1.1.3,<1.2.0',

@@ -122,6 +122,7 @@ def includeme(config):
     config.include('h.models')
     config.include('h.realtime')
     config.include('h.sentry')
+    config.include('h.session')
     config.include('h.stats')
     config.include('h.views')
 

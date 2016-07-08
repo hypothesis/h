@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from pyramid.session import SignedCookieSessionFactory
-
-from h.security import derive_key
 
 
 def model(request):
@@ -58,10 +55,9 @@ def _current_groups(request):
 
 
 def includeme(config):
-    registry = config.registry
-    settings = registry.settings
-
-    session_secret = derive_key(settings['secret_key'], b'h.session')
-    session_factory = SignedCookieSessionFactory(session_secret, httponly=True)
-
-    config.set_session_factory(session_factory)
+    config.add_settings({
+        "redis.sessions.cookie_httponly": True,
+        "redis.sessions.cookie_max_age": 2592000,
+        "redis.sessions.timeout": 604800,
+    })
+    config.include('pyramid_redis_sessions')
