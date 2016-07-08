@@ -114,7 +114,7 @@ def delete_user(request, user):
 
 def _all_user_annotations_query(request, user):
     """Query matching all annotations (shared and private) owned by user."""
-    userid = util.user.userid_from_username(user.username, request)
+    userid = util.user.userid_from_username(user.username, request.auth_domain)
     return {
         'filtered': {
             'filter': {'term': {'user': userid.lower()}},

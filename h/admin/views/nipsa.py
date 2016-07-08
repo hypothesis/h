@@ -25,7 +25,7 @@ def nipsa_add(request):
     username = request.params["add"]
 
     if username:
-        userid = util.user.userid_from_username(username, request)
+        userid = util.user.userid_from_username(username, request.auth_domain)
         nipsa_service = request.find_service(name='nipsa')
         nipsa_service.flag(userid)
     else:
@@ -43,7 +43,7 @@ def nipsa_remove(request):
     username = request.params["remove"]
 
     if username:
-        userid = util.user.userid_from_username(username, request)
+        userid = util.user.userid_from_username(username, request.auth_domain)
         nipsa_service = request.find_service(name='nipsa')
         nipsa_service.unflag(userid)
     else:

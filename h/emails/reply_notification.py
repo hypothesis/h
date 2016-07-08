@@ -52,5 +52,5 @@ def generate(request, notification):
 
 def _unsubscribe_token(request, user):
     serializer = request.registry.notification_serializer
-    userid = util.user.userid_from_username(user.username, request)
+    userid = util.user.userid_from_username(user.username, request.auth_domain)
     return serializer.dumps({'type': 'reply', 'uri': userid})
