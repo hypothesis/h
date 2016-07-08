@@ -109,6 +109,7 @@ class Group(Base, mixins.Timestamps):
 
 USER_GROUP_TABLE = sa.Table(
     'user_group', Base.metadata,
+    sa.Column('id', sa.Integer, autoincrement=True, primary_key=True),
     sa.Column('user_id',
               sa.Integer,
               sa.ForeignKey('user.id'),
