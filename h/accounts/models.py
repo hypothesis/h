@@ -138,13 +138,6 @@ class User(Base):
     activation_id = sa.Column(sa.Integer, sa.ForeignKey(Activation.id))
     activation = sa.orm.relationship('Activation', backref='user')
 
-    @sa.orm.validates('email')
-    def validate_email(self, key, email):
-        if len(email) > EMAIL_MAX_LENGTH:
-            raise ValueError('email must be less than {max} characters '
-                             'long'.format(max=EMAIL_MAX_LENGTH))
-        return email
-
     @property
     def is_activated(self):
         if self.activation_id is None:
@@ -184,6 +177,13 @@ class User(Base):
             self.salt = _generate_random_string(24)
 
         return text_type(CRYPT.encode(password + self.salt))
+
+    @sa.orm.validates('email')
+    def validate_email(self, key, email):
+        if len(email) > EMAIL_MAX_LENGTH:
+            raise ValueError('email must be less than {max} characters '
+                             'long'.format(max=EMAIL_MAX_LENGTH))
+        return email
 
     @classmethod
     def get_by_email(cls, session, email):
