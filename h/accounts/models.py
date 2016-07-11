@@ -173,16 +173,10 @@ class User(Base):
 
     @password.setter
     def password(self, value):
-        self._set_password(value)
-
-    def _get_password(self):
-        return self._password
-
-    def _set_password(self, raw_password):
-        if len(raw_password) < PASSWORD_MIN_LENGTH:
+        if len(value) < PASSWORD_MIN_LENGTH:
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
-        self._password = self._hash_password(raw_password)
+        self._password = self._hash_password(value)
         self.password_updated = datetime.datetime.utcnow()
 
     def _hash_password(self, password):
