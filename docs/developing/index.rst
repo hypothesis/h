@@ -8,7 +8,7 @@ and how to contribute code or documentation to the project.
    :maxdepth: 1
 
    cla
-   install
+   install/index
    administration
    chrome-extension
    submitting-a-pr

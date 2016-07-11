@@ -1,44 +1,19 @@
-Installing h in a development environment
-#########################################
+Website dev install
+===================
 
-This document contains instructions for setting up a development environment
-for h.
+The code for the https://hypothes.is/ website and API lives in a
+`Git repo named h`_. To get this code running in a local development
+environment the first thing you need to do is install h's system dependencies.
 
-
-Requirements
-------------
-
-To run h in a development environment you'll need these system dependencies
-installed:
-
--  Git_
--  Python_ v2.7
--  Node_ v4+ and its package manager, npm
-
-You'll also need to run these external services:
-
-.. include:: services.rst
-
-.. _Git: https://git-scm.com/
-.. _Python: http://python.org/
-.. _Node: http://nodejs.org/
-
-
-The following sections will explain how to install these system dependencies
-and services.
-
-
-Installing the system dependencies
-----------------------------------
-
-Installing h's system dependencies is different on different operating systems.
 Follow either the
 `Installing the system dependencies on Ubuntu 14.04`_ or the
-`Installing the system dependencies on OS X`_ section below.
+`Installing the system dependencies on OS X`_ section below, depending on which
+operating system you're using, then move on to `Installing the services`_ and
+the sections that follow it.
 
 
 Installing the system dependencies on Ubuntu 14.04
-``````````````````````````````````````````````````
+--------------------------------------------------
 
 This section describes how to install h's system dependencies on Ubuntu 14.04.
 These steps will also probably work with few or no changes on other versions
@@ -73,7 +48,7 @@ Upgrade pip, virtualenv and npm:
 
 
 Installing the system dependencies on OS X
-``````````````````````````````````````````
+------------------------------------------
 
 This section describes how to install h's system dependencies on Mac OS X.
 
@@ -97,7 +72,16 @@ Installing the services
 
 h requires the following external services:
 
-.. include:: services.rst
+- PostgreSQL_ 9.4+
+- Elasticsearch_ v1.0+, with the `Elasticsearch ICU Analysis`_ plugin
+- RabbitMQ_ v3.5+
+- Redis_ v2.4+
+
+.. _PostgreSQL: http://www.postgresql.org/
+.. _Elasticsearch: http://www.elasticsearch.org/
+.. _Elasticsearch ICU Analysis: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-icu-plugin.html
+.. _RabbitMQ: https://rabbitmq.com/
+.. _Redis: http://redis.io/
 
 You can install these services however you want, but the easiest way is by
 using Docker. This should work on any operating system that Docker can be
@@ -256,17 +240,10 @@ This will start the server on port 5000 (http://localhost:5000), reload the
 application whenever changes are made to the source code, and restart it should
 it crash for some reason.
 
-This command also starts a server on port 3000 (http://localhost:3000) which
-serves a page with an embedded Hypothesis client which will automatically reload
-when styles, templates or JavaScript source files are changed. This can be
-useful when developing the frontend.
-
-.. _Gulp: http://gulpjs.com/
-
 
 .. _running-the-tests:
 
-Running the tests
+Running h's tests
 -----------------
 
 There are test suites for both the frontend and backend code. To run the
@@ -332,14 +309,12 @@ To access the Administration Dashboard, you will need to first create a
 user account in your local instance of H and then give that account
 admin access rights using H's command-line tools.
 
-See the :doc:`administration` documentation for information
+See the :doc:`/developing/administration` documentation for information
 on how to give the initial user admin rights and access the Administration
 Dashboard.
 
-
 Troubleshooting
 ---------------
-
 
 Cannot connect to the Docker daemon
 ```````````````````````````````````
@@ -359,3 +334,6 @@ to either:
   instructions for your operating system on the `Docker website`_), or
 
 * Prefix all ``docker`` commands with ``sudo``.
+
+
+.. include:: targets.rst
