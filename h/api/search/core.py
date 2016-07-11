@@ -78,6 +78,7 @@ def default_querybuilder(request, private=True):
     builder.append_filter(query.AuthFilter(request, private=private))
     builder.append_filter(query.UriFilter(request))
     builder.append_filter(query.GroupFilter())
+    builder.append_filter(query.UserFilter())
     builder.append_matcher(query.AnyMatcher())
     builder.append_matcher(query.TagsMatcher())
     for factory in request.registry.get(FILTERS_KEY, []):
