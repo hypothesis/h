@@ -56,6 +56,11 @@ def test_cannot_create_user_with_too_long_username():
         models.User(username='1234567890123456789012345678901')
 
 
+def test_cannot_create_user_with_invalid_chars():
+    with pytest.raises(ValueError):
+        models.User(username='foo-bar')
+
+
 def test_cannot_create_user_with_too_long_email():
     with pytest.raises(ValueError):
         models.User(email='bob@b' + 'o'*100 +'b.com')

@@ -124,7 +124,8 @@ class AuthController(object):
     def _login(self, user):
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
-        userid = util.user.userid_from_username(user.username, self.request)
+        userid = util.user.userid_from_username(user.username,
+            self.request.auth_domain)
         headers = security.remember(self.request, userid)
         return headers
 
