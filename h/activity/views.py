@@ -23,10 +23,13 @@ def search(request):
         raise httpexceptions.HTTPNotFound()
 
     results = []
+    total = None
     if 'q' in request.params:
         search_query = query.parse(request.params['q'])
 
         out = search_lib.search(request, search_query)
+        total = out['total']
+
         anns = storage.fetch_ordered_annotations(request.db,
                                                  [r['id'] for r in out['rows']])
         for ann in anns:
@@ -39,6 +42,7 @@ def search(request):
 
     return {
         'q': request.params.get('q', ''),
+        'total': total,
         'results': results
     }
 
