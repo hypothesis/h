@@ -395,7 +395,7 @@ class TestAnyMatcher():
 
         assert result == {
             "simple_query_string": {
-                "fields": ["quote", "tags", "text", "uri.parts", "user"],
+                "fields": ["quote", "tags", "text", "uri.parts"],
                 "query": "foo",
             }
         }
@@ -411,7 +411,7 @@ class TestAnyMatcher():
 
         assert result == {
             "simple_query_string": {
-                "fields": ["quote", "tags", "text", "uri.parts", "user"],
+                "fields": ["quote", "tags", "text", "uri.parts"],
                 "query": "howdy there",
             }
         }

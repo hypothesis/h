@@ -213,7 +213,7 @@ class AnyMatcher(object):
         qs = ' '.join([v for k, v in params.items() if k == "any"])
         result = {
             "simple_query_string": {
-                "fields": ["quote", "tags", "text", "uri.parts", "user"],
+                "fields": ["quote", "tags", "text", "uri.parts"],
                 "query": qs,
             }
         }
