@@ -113,7 +113,8 @@ def test_default_querybuilder_passes_private_to_AuthFilter(private, query, pyram
 @pytest.mark.parametrize('filter_type', [
     'AuthFilter',
     'UriFilter',
-    'GroupFilter'
+    'UserFilter',
+    'GroupFilter',
 ])
 def test_default_querybuilder_includes_default_filters(filter_type, matchers, pyramid_request):
     from h.api.search import query
