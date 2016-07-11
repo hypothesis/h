@@ -185,6 +185,22 @@ class UriFilter(object):
         return {"terms": {"target.scope": list(uris)}}
 
 
+class UserFilter(object):
+
+    """
+    A filter that selects only annotations where the 'user' parameter matches.
+    """
+
+    def __call__(self, params):
+        if 'user' not in params:
+            return None
+
+        users = [v for k, v in params.items() if k == 'user']
+        del params['user']
+
+        return {'terms': {'user': users}}
+
+
 class AnyMatcher(object):
 
     """
