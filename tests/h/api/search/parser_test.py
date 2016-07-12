@@ -107,6 +107,7 @@ nonwhitespace_text = st.text(alphabet=nonwhitespace_chars, min_size=1)
 
 @given(kw=st.sampled_from(parser.named_fields),
        value=nonwhitespace_text)
+@pytest.mark.fuzz
 def test_parse_with_any_nonwhitespace_text(kw, value):
     result = parser.parse(kw + ':' + value)
     assert result.get(kw) == value
