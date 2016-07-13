@@ -13,7 +13,6 @@ log = logging.getLogger(__name__)
 
 FEATURES = {
     'activity_pages': "Show the new activity pages?",
-    'new_homepage': "Show the new homepage design?",
     'selection_tabs': "Show the tabs to select between annotations and notes?",
 }
 
