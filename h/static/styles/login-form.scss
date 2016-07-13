@@ -1,0 +1,148 @@
+.login-form {
+  font-size: $body2-font-size;
+
+  margin-top: 57px; // When you add the height and margin-top of
+                    // .logged-out-navbar to this, it makes 100px between the
+                    // top of the document and the top of the login form.
+
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+
+  // Keep a little white space around the form, even on small screens.
+  // This is the same size as the margin-left on the logged-out-navbar.
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.login-form__heading {
+  font-size: $font-size-heading2;
+  font-weight: normal;
+  margin-top: 0;
+  margin-bottom: 30px;
+}
+
+.login-form .form-field {
+  position: relative;
+}
+
+.login-form .form-input {
+  border: 1px solid $grey-3;
+  border-radius: 2px;
+
+  color: $grey-6;
+  font-size: $font-size-body2;
+
+  margin: 0;
+  margin-bottom: 15px;
+
+  padding: 0;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-top: 29px; // This padding-top is to leave space for the <input>'s
+                     // <label>, which will be absolutely positioned so that
+                     // it's inside the <input>'s padding-top area.
+
+  width: 100%;
+}
+
+.login-form .form-input:hover {
+  border-color: $grey-4;
+}
+
+.login-form .form-input:focus {
+  border: 2px solid $grey-6;
+
+  // Turn off the browser's focus glow, we're using our own border instead.
+  outline: none;
+
+  border-radius: 4px;
+  // Because we increase the border-radius on focus, we also need to
+  // correspondingly decrease the margin and padding, so that the <input>'s box
+  // model as a whole remains the same size and does not push down elements
+  // that are positioned inside or below the <input> by a couple of pixels on
+  // focus.
+  margin-bottom: 14px;
+  padding-top: 28px;
+  padding-left: 9px;
+}
+
+.login-form .form-field-error .form-input {
+  border-color: $brand-color;
+}
+
+.login-form .form-label {
+  color: $grey-5;
+  font-size: $normal-font-size;
+
+  // Position the <label> _inside_ the <input>'s border.
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+
+.login-form .form-error-list {
+  color: $error-color;
+  font-size: $normal-font-size;
+  max-width: 250px;
+
+  // Position any validation errors _inside_ the <input>'s border.
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.login-form .form-actions {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 20px;
+}
+
+.login-form .form-actions-buttons button {
+  background-color: $grey-6;
+  color: white;
+
+  border: none;
+  border-radius: 2px;
+
+  font-size: $normal-font-size;
+  font-weight: bold;
+
+  height: 30px;
+
+  padding: 0;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.login-form .form-actions-message a {
+  color: $grey-4;
+  border-bottom: 1px dotted $grey-4;
+  font-size: $small-font-size;
+  padding-bottom: 2px;
+}
+
+.login-form-footer {
+  border-top: 1px solid $grey-3;
+  color: $grey-5;
+  font-size: $normal-font-size;
+  margin-top: 80px;
+  padding-top: 15px;
+}
+
+.login-form-footer a {
+  border-bottom: 1px dotted $grey-5;
+  color: $grey-5;
+  padding-bottom: 2px;
+}
+
+.login-form button:hover {
+  background-color: $brand-color;
+}
+
+.login-form a:hover {
+  color: $brand-color;
+}

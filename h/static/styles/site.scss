@@ -1,6 +1,3 @@
-// minimal bootstrap CSS
-@import './vendor/bootstrap/bootstrap';
-
 // shared styling used by both the app and the website
 @import './base';
 @import './reset';
@@ -18,6 +15,8 @@
 @import './header';
 @import './flashbar';
 @import './footer';
+@import './login-form';
+@import './logged-out-navbar';
 @import './modal';
 
 // pages
