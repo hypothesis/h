@@ -354,6 +354,39 @@ class TestUriFilter(object):
         return uri
 
 
+class TestUserFilter(object):
+    def test_term_filters_for_user(self):
+        userfilter = query.UserFilter()
+
+        assert userfilter({"user": "luke"}) == {"terms": {"user": ["luke"]}}
+
+    def test_supports_filtering_for_multiple_users(self):
+        userfilter = query.UserFilter()
+
+        params = multidict.MultiDict()
+        params.add("user", "alice")
+        params.add("user", "luke")
+
+        assert userfilter(params) == {
+            "terms": {
+                "user": ["alice", "luke"]
+            }
+        }
+
+    def test_strips_param(self):
+        userfilter = query.UserFilter()
+        params = {"user": "luke"}
+
+        userfilter(params)
+
+        assert params == {}
+
+    def test_returns_none_when_no_param(self):
+        userfilter = query.UserFilter()
+
+        assert userfilter({}) is None
+
+
 class TestAnyMatcher():
     def test_any_query(self):
         anymatcher = query.AnyMatcher()
@@ -362,7 +395,7 @@ class TestAnyMatcher():
 
         assert result == {
             "simple_query_string": {
-                "fields": ["quote", "tags", "text", "uri.parts", "user"],
+                "fields": ["quote", "tags", "text", "uri.parts"],
                 "query": "foo",
             }
         }
@@ -378,7 +411,7 @@ class TestAnyMatcher():
 
         assert result == {
             "simple_query_string": {
-                "fields": ["quote", "tags", "text", "uri.parts", "user"],
+                "fields": ["quote", "tags", "text", "uri.parts"],
                 "query": "howdy there",
             }
         }
