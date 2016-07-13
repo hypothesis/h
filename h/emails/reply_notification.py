@@ -22,19 +22,19 @@ def generate(request, notification):
         document_title = notification.parent.target_uri
 
     parent_user_url = request.route_url('stream.user_query',
-                                        user=notification.parent_user.username) 
+                                        user=notification.parent_user.username)
 
     reply_url = links.incontext_link(request, notification.reply)
     if not reply_url:
         reply_url = request.route_url('annotation', id=notification.reply.id)
 
     reply_user_url = request.route_url('stream.user_query',
-                                        user=notification.reply_user.username)
+                                       user=notification.reply_user.username)
 
-    unsubscribe_token=_unsubscribe_token(request, notification.parent_user)
-    unsubscribe_url=request.route_url('unsubscribe', token = unsubscribe_token)
+    unsubscribe_token = _unsubscribe_token(request, notification.parent_user)
+    unsubscribe_url = request.route_url('unsubscribe', token=unsubscribe_token)
 
-    context={
+    context = {
         'document_title': document_title,
         'document_url': notification.parent.target_uri,
         'parent': notification.parent,
@@ -48,18 +48,19 @@ def generate(request, notification):
     }
 
     subject = '{user} has replied to your annotation'.format(
-        user = notification.reply_user.username)
-    text=render('h:templates/emails/reply_notification.txt.jinja2',
+        user=notification.reply_user.username)
+    text = render('h:templates/emails/reply_notification.txt.jinja2',
                   context,
-                  request = request)
-    html=render('h:templates/emails/reply_notification.html.jinja2',
+                  request=request)
+    html = render('h:templates/emails/reply_notification.html.jinja2',
                   context,
-                  request = request)
+                  request=request)
 
     return [notification.parent_user.email], subject, text, html
 
 
 def _unsubscribe_token(request, user):
-    serializer=request.registry.notification_serializer
-    userid=util.user.userid_from_username(user.username, request.auth_domain)
+    serializer = request.registry.notification_serializer
+    userid = util.user.userid_from_username(user.username, request.auth_domain)
     return serializer.dumps({'type': 'reply', 'uri': userid})
+

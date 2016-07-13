@@ -144,7 +144,8 @@ class TestGenerate(object):
     @pytest.fixture
     def document(self, db_session):
         doc = Document()
-        doc.meta.append(DocumentMeta(type='title', value=['My fascinating page'], claimant='http://example.org'))
+        doc.meta.append(DocumentMeta(
+            type='title', value=['My fascinating page'], claimant='http://example.org'))
         db_session.add(doc)
         db_session.flush()
         return doc
