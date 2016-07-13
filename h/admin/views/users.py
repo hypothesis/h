@@ -7,6 +7,7 @@ from pyramid.view import view_config
 
 from h import models
 from h.accounts.events import ActivationEvent
+from h.admin import worker
 from h.admin.services.user import UserRenameError
 from h.api import storage
 from h.i18n import TranslationString as _
@@ -77,10 +78,12 @@ def users_rename(request):
 
     try:
         svc = request.find_service(name='rename_user')
-        svc.rename(old_username, new_username)
+        svc.check(old_username, new_username)
+
+        worker.rename_user.delay(old_username, new_username)
 
         request.session.flash(
-            'Successfully renamed user "%s" to "%s"' %
+            'The user "%s" will be renamed to "%s" in the backgroud. Refresh this page to see if it\'s already done' %
             (old_username, new_username), 'success')
 
         return httpexceptions.HTTPFound(
