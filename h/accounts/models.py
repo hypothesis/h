@@ -7,7 +7,6 @@ import string
 
 import cryptacular.bcrypt
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from h.db import Base
@@ -101,27 +100,14 @@ class User(Base):
                                            server_default=(
                                                 sa.sql.expression.false()))
 
-    def _get_username(self):
+    @hybrid_property
+    def username(self):
         return self._username
 
-    def _set_username(self, value):
-        if not re.match(USERNAME_PATTERN, value):
-            raise ValueError('Username can only contain letters, numbers, periods'
-                             ' and underscores.')
-
-        if not USERNAME_MIN_LENGTH <= len(value) <= USERNAME_MAX_LENGTH:
-            raise ValueError('username must be between {min} and {max} '
-                             'characters long'.format(
-                                 min=USERNAME_MIN_LENGTH,
-                                 max=USERNAME_MAX_LENGTH))
+    @username.setter
+    def username(self, value):
         self._username = value
         self.uid = _username_to_uid(value)
-
-    @declared_attr
-    def username(self):
-        return sa.orm.synonym('_username',
-                              descriptor=property(self._get_username,
-                                                  self._set_username))
 
     email = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
 
@@ -137,13 +123,6 @@ class User(Base):
     # Activation foreign key
     activation_id = sa.Column(sa.Integer, sa.ForeignKey(Activation.id))
     activation = sa.orm.relationship('Activation', backref='user')
-
-    @sa.orm.validates('email')
-    def validate_email(self, key, email):
-        if len(email) > EMAIL_MAX_LENGTH:
-            raise ValueError('email must be less than {max} characters '
-                             'long'.format(max=EMAIL_MAX_LENGTH))
-        return email
 
     @property
     def is_activated(self):
@@ -173,16 +152,10 @@ class User(Base):
 
     @password.setter
     def password(self, value):
-        self._set_password(value)
-
-    def _get_password(self):
-        return self._password
-
-    def _set_password(self, raw_password):
-        if len(raw_password) < PASSWORD_MIN_LENGTH:
+        if len(value) < PASSWORD_MIN_LENGTH:
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
-        self._password = self._hash_password(raw_password)
+        self._password = self._hash_password(value)
         self.password_updated = datetime.datetime.utcnow()
 
     def _hash_password(self, password):
@@ -190,6 +163,27 @@ class User(Base):
             self.salt = _generate_random_string(24)
 
         return text_type(CRYPT.encode(password + self.salt))
+
+    @sa.orm.validates('email')
+    def validate_email(self, key, email):
+        if len(email) > EMAIL_MAX_LENGTH:
+            raise ValueError('email must be less than {max} characters '
+                             'long'.format(max=EMAIL_MAX_LENGTH))
+        return email
+
+    @sa.orm.validates('_username')
+    def validate_username(self, key, username):
+        if not USERNAME_MIN_LENGTH <= len(username) <= USERNAME_MAX_LENGTH:
+            raise ValueError('username must be between {min} and {max} '
+                             'characters long'.format(
+                                 min=USERNAME_MIN_LENGTH,
+                                 max=USERNAME_MAX_LENGTH))
+
+        if not re.match(USERNAME_PATTERN, username):
+            raise ValueError('username must contain only letters, numbers, '
+                             'periods, and underscores.')
+
+        return username
 
     @classmethod
     def get_by_email(cls, session, email):
