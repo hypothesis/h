@@ -1,22 +1,25 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
+{% block body_tag %}<body class="body--white">{% endblock%}
+
 {% block page_title %}Log in{% endblock %}
 
 {% block styles %}
-{% for url in asset_client_urls("app_css") %}
+{% for url in asset_urls("site_css") %}
 <link rel="stylesheet" href="{{ url }}">
 {% endfor %}
 {% endblock styles  %}
 
 {% block content %}
-  <div class="content paper">
-    {% include "h:templates/includes/logo-header.html.jinja2" %}
-    <div class="form-vertical">
-      <ul class="nav nav-tabs">
-        <li class="active"><a href="{{ request.route_path('login') }}">Log in</a></li>{#
-        #}<li><a href="{{ request.route_path('register') }}">Create an account</a></li>
-      </ul>
-      {{ form }}
+  {% include  "h:templates/includes/logged-out-navbar.html.jinja2" %}
+  <div class="login-form">
+    <h1 class="login-form__heading">Log in</h1>
+
+    {{ form }}
+
+    <div class="login-form-footer">
+      Don't have a Hypothesis account?
+      <a href="{{ request.route_path('register') }}">Sign up</a>
     </div>
   </div>
 {% endblock content %}
