@@ -6,19 +6,14 @@ from pyramid import httpexceptions
 from pyramid.view import view_config
 
 from h import models
-from h import util
 from h.accounts.events import ActivationEvent
+from h.admin.services.user import UserRenameError
 from h.api import storage
-from h.api.search.index import BatchIndexer
 from h.i18n import TranslationString as _
 from h.util.user import userid_from_username
 
 
 class UserDeletionError(Exception):
-    pass
-
-
-class UserRenameError(Exception):
     pass
 
 
@@ -81,7 +76,8 @@ def users_rename(request):
     new_username = request.params.get('new_username')
 
     try:
-        rename_user(request, user, new_username)
+        svc = request.find_service(name='rename_user')
+        svc.rename(old_username, new_username)
 
         request.session.flash(
             'Successfully renamed user "%s" to "%s"' %
@@ -96,38 +92,6 @@ def users_rename(request):
         return httpexceptions.HTTPFound(
             location=request.route_path('admin_users',
                                         _query=(('username', old_username),)))
-
-
-def rename_user(request, user, new_username):
-    """
-    Change the username of `user` to `new_username`.
-
-    Validates the new username and updates the User. The permissions of
-    the user's annotations are updated to reflect the new username.
-
-    May raise a ValueError if the new username does not validate or
-    UserRenameError if the new username is already taken by another account.
-    """
-    existing_user = models.User.get_by_username(request.db, new_username)
-
-    if existing_user:
-        raise UserRenameError('Another user already has the username "%s"' % new_username)
-
-    old_userid = userid_from_username(user.username, request.auth_domain)
-    new_userid = userid_from_username(new_username, request.auth_domain)
-
-    annotations = _all_user_annotations(request, user.username)
-    ids = set()
-    for annotation in annotations:
-        annotation.userid = new_userid
-        ids.add(annotation.id)
-
-    user.username = new_username
-
-    request.tm.commit()
-
-    indexer = BatchIndexer(request.db, request.es, request)
-    indexer.index(ids)
 
 
 @view_config(route_name='admin_users_delete',
