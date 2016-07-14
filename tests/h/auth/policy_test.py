@@ -9,7 +9,7 @@ from h.auth.policy import TokenAuthenticationPolicy
 
 SESSION_AUTH_PATHS = (
     '/login',
-    '/account/profile',
+    '/account/settings',
     '/api/badge',
     '/api/token',
 )

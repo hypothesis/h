@@ -31,7 +31,7 @@ def index(context, request):
     if request.authenticated_user:
         username = request.authenticated_user.username
         context['username'] = username
-        context['user_profile_link'] = (
+        context['user_account_link'] = (
             request.route_url("stream") +
             "?q=user:{username}".format(username=username)
         )
