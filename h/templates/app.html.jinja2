@@ -22,50 +22,8 @@
       {% endfor %}
     {% endif %}
   </head>
-  <body ng-app="h" ng-strict-di ng-controller="AppController" ng-csp="">
-    <top-bar
-      auth="auth"
-      on-login="login()"
-      on-logout="logout()"
-      on-share-page="share()"
-      on-show-help-panel="helpPanel.visible = true"
-      is-sidebar="::isSidebar"
-      search-controller="search"
-      sort-key="sortKey()"
-      sort-keys-available="sortKeysAvailable()"
-      on-change-sort-key="setSortKey(sortKey)">
-    </top-bar>
-
-    {#
-      The client is transitioning from using "signed-out" as an auth status to
-      "logged-out". For the moment we recognise either.
-
-      TODO: remove the "signed-out" option when the client no longer uses it.
-    #}
-    <div class="create-account-banner" ng-if="isSidebar && (auth.status === 'signed-out' || auth.status === 'logged-out')" ng-cloak>
-      To annotate this document
-      <a href="{{ register_url }}" target="_blank">
-        create a free account
-      </a>
-      or <a href="" ng-click="login()">log in</a>
-    </div>
-
-    <div class="content" ng-cloak>
-      <login-form
-        ng-if="accountDialog.visible"
-        on-close="accountDialog.visible = false">
-      </login-form>
-      <sidebar-tutorial ng-if="isSidebar"></sidebar-tutorial>
-      <share-dialog
-        ng-if="shareDialog.visible"
-        on-close="shareDialog.visible = false">
-      </share-dialog>
-      <help-panel ng-if="helpPanel.visible"
-        on-close="helpPanel.visible = false"
-        auth="auth">
-      </help-panel>
-      <main ng-view=""></main>
-    </div>
+  <body ng-csp="">
+    <hypothesis-app></hypothesis-app>
 
     <!-- App Configuration !-->
     <script class="js-hypothesis-settings" type="application/json">
