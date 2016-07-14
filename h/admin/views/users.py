@@ -78,9 +78,9 @@ def users_rename(request):
 
     try:
         svc = request.find_service(name='rename_user')
-        svc.check(old_username, new_username)
+        svc.check(user.id, new_username)
 
-        worker.rename_user.delay(old_username, new_username)
+        worker.rename_user.delay(user.id, new_username)
 
         request.session.flash(
             'The user "%s" will be renamed to "%s" in the backgroud. Refresh this page to see if it\'s already done' %

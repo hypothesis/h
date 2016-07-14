@@ -10,6 +10,6 @@ log = get_task_logger(__name__)
 
 
 @celery.task
-def rename_user(old_username, new_username):
+def rename_user(user_id, new_username):
     svc = celery.request.find_service(name='rename_user')
-    svc.rename(old_username, new_username)
+    svc.rename(user_id, new_username)
