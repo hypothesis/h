@@ -13,7 +13,7 @@ Some of the API URLs documented below require a valid API token.
 To use these API URLs you should:
 
 1. Generate yourself an API token on your
-   `Hypothesis developer page <https://hypothes.is/profile/developer>`_
+   `Hypothesis developer page <https://hypothes.is/account/developer>`_
    (you must be logged in to Hypothesis to get to this page).
 
 2. Put the API token in the ``Authorization`` header in your requests to the
