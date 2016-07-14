@@ -1,6 +1,6 @@
-{{ reply_user.username }} has just left a reply to your annotation on "{{ document_title }}":
+{{ reply_user.username }} has replied to your annotation on "{{ document_title }}":
 
-On {{ parent.created | human_timestamp }} {{ parent_user.username }} said:
+On {{ parent.created | human_timestamp }} {{ parent_user.username }} commented:
 
 > {{ parent.text or "" }}
 
@@ -10,4 +10,4 @@ On {{ reply.created | human_timestamp }} {{ reply_user.username }} replied:
 
 View the thread and respond: {{ reply_url }}
 
-If you'd rather not receive these notifications you can unsubscribe here: {{ unsubscribe_url }}
+If you'd rather not receive these notifications you can unsubscribe: {{ unsubscribe_url }}

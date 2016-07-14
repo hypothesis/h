@@ -1,12 +1,26 @@
-<p><a href="{{ reply_user_url }}">{{ reply_user.username }}</a> has
-<a href="{{ reply_url }}">replied to your annotation</a>
-on <a href="{{ reply_url }}">&ldquo;{{ document_title }}&rdquo;</a>:</p>
+<p>
+  <a href="{{ reply_user_url }}">{{ reply_user.username }}</a>
+  has
+  <a href="{{ reply_url }}">replied to your annotation</a>
+  on
+  <a href="{{ document_url }}">&ldquo;{{ document_title }}&rdquo;</a>:
+</p>
 
-<p>On <a href="{{ parent_path }}">{{ parent_timestamp }}</a> <a href="{{ parent_user_url }}">{{ parent_user }}</a> commented:</p>
+<p>
+  On
+  {{ parent.created | human_timestamp }}
+  <a href="{{ parent_user_url }}">{{ parent_user.username }}</a>
+  commented:
+</p>
 
 <blockquote>{{ parent.text or "" }}</blockquote>
 
-<p>On <a href="{{ reply_path }}">{{ reply_timestamp }}</a> <a href="{{ reply_user_url }}">{{ reply_user }}</a> replied:</p>
+<p>
+  On
+  {{ reply.created | human_timestamp }}
+  <a href="{{ reply_user_url }}">{{ reply_user.username }}</a>
+  replied:
+</p>
 
 <blockquote>{{ reply.text or "" }}</blockquote>
 
