@@ -123,41 +123,14 @@ $normal-line-height: 17px;
 $small-font-size: 11px;
 $small-line-height: 12px;
 
-// Front page typography
-// -------------------------
-// These are part of the new design at https://trello.com/c/h6kQMQG8/187-new-homepage-design)
-// and the styles/sizes across the sidebar, site, frontpage and blog need to be
-// made consistent
-$font-size-body1: 13px;
-$font-size-body2: 15px;
-$font-size-heading1: 27px;
-$font-size-heading2: 19px;
-$font-family-site-sans: "Source Sans Pro", sans-serif;
-$font-weight-light: 300;
-
-$line-height-tall: 1.3em;
-
-
 // Stance Colors
 // -------------------------
 $positive: #3aab39;
 $negative: #d11c2b;
 $neutral: #0171ba;
 
-
-// Layout margins
-// -------------------------
-$layout-h-margin: 15px;
-
-
-// Animations
-// -------------------------
-$anim-duration-normal: .3s; // a good default choice for transition lengths
-
-
 // Z-Index Scale
 // -------------------------
-$zindex-dropdown-menu: 10;
 $zindex-tooltip: 20;
 
 

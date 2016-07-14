@@ -21,7 +21,7 @@ def via_redirect(context, request):
 
 @view_config(route_name='index',
              request_method='GET',
-             renderer='h:templates/old-home.html.jinja2')
+             renderer='h:templates/home.html.jinja2')
 def index(context, request):
     context = {
         "chrome_extension_link": ("https://chrome.google.com/webstore/detail/"
@@ -35,9 +35,6 @@ def index(context, request):
             request.route_url("stream") +
             "?q=user:{username}".format(username=username)
         )
-
-    if request.feature('new_homepage'):
-        request.override_renderer = 'h:templates/home.html.jinja2'
 
     return context
 
