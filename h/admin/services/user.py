@@ -63,8 +63,9 @@ class RenameUserService(object):
         return ids
 
     def _reindex_annotations(self, ids):
-        indexer = index.BatchIndexer(self.request.db, self.request.es, self.request)
-        indexer.index(ids)
+        if ids:
+            indexer = index.BatchIndexer(self.request.db, self.request.es, self.request)
+            indexer.index(ids)
 
     def _fetch_annotations(self, username):
         userid = userid_from_username(username, self.request.auth_domain)
