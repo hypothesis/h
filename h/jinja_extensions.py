@@ -17,6 +17,15 @@ class Filters(Extension):
         super(Filters, self).__init__(environment)
 
         environment.filters['to_json'] = to_json
+        environment.filters['human_timestamp'] = human_timestamp
+
+
+def human_timestamp(timestamp, now=datetime.datetime.utcnow):
+    """Turn a :py:class:`datetime.datetime` into a human-friendly string."""
+    fmt = '%d %B at %H:%M'
+    if timestamp.year < now().year:
+        fmt = '%d %B %Y at %H:%M'
+    return timestamp.strftime(fmt)
 
 
 def to_json(value):

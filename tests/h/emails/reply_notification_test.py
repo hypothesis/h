@@ -38,9 +38,12 @@ class TestGenerate(object):
             'document_title': 'My fascinating page',
             'document_url': 'http://example.org/',
             'parent': notification.parent,
+            'parent_user': parent_user,
+            'parent_user_url': 'http://example.com/stream/user/patricia',
             'reply': notification.reply,
             'reply_url': links.incontext_link.return_value,
             'reply_user': reply_user,
+            'reply_user_url': 'http://example.com/stream/user/ron',
             'unsubscribe_url': 'http://example.com/unsub/FAKETOKEN',
         }
         html_renderer.assert_(**expected_context)
@@ -83,9 +86,12 @@ class TestGenerate(object):
             'document_title': 'My fascinating page',
             'document_url': 'http://example.org/',
             'parent': notification.parent,
+            'parent_user': parent_user,
+            'reply_user_url': 'http://example.com/stream/user/patricia',
             'reply': notification.reply,
             'reply_url': 'http://example.com/ann/bar456',
             'reply_user': reply_user,
+            'reply_user_url': 'http://example.com/stream/user/ron',
             'unsubscribe_url': 'http://example.com/unsub/FAKETOKEN',
         }
         html_renderer.assert_(**expected_context)
@@ -138,7 +144,8 @@ class TestGenerate(object):
     @pytest.fixture
     def document(self, db_session):
         doc = Document()
-        doc.meta.append(DocumentMeta(type='title', value=['My fascinating page'], claimant='http://example.org'))
+        doc.meta.append(DocumentMeta(
+            type='title', value=['My fascinating page'], claimant='http://example.org'))
         db_session.add(doc)
         db_session.flush()
         return doc
