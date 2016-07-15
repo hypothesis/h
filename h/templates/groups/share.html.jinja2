@@ -1,5 +1,7 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
+{% set style_bundle = 'site_css' %}
+
 {% block page_title %}{{ group.name }}{% endblock page_title %}
 
 {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}

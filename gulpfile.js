@@ -140,6 +140,7 @@ var styleFiles = [
   './h/static/styles/front-page/main.css',
   './h/static/styles/help-page.scss',
   './h/static/styles/site.scss',
+  './h/static/styles/site-v2.scss',
   './h/static/styles/old-home.scss',
 
   // Vendor
