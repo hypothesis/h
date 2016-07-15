@@ -685,9 +685,9 @@ def includeme(config):
     config.add_route('forgot_password', '/forgot_password')
     config.add_route('reset_password', '/reset_password')
     config.add_route('reset_password_with_code', '/reset_password/{code}')
-    config.add_route('profile', '/profile')
-    config.add_route('profile_notifications', '/profile/notifications')
-    config.add_route('profile_developer', '/profile/developer')
+    config.add_route('profile', '/account/settings')
+    config.add_route('profile_notifications', '/account/settings/notifications')
+    config.add_route('profile_developer', '/account/developer')
     config.add_route('claim_account_legacy', '/claim_account/{token}')
     config.add_route('dismiss_sidebar_tutorial',
                      '/app/dismiss_sidebar_tutorial')
