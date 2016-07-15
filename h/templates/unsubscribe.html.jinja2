@@ -1,12 +1,8 @@
 {% extends "layouts/base.html.jinja2" %}
 
-{% block title %}Unsubscribed{% endblock %}
+{% set uses_legacy_styles = True %}
 
-{% block styles %}
-{% for url in asset_client_urls("app_css") %}
-<link rel="stylesheet" href="{{ url }}">
-{% endfor %}
-{% endblock %}
+{% block title %}Unsubscribed{% endblock %}
 
 {% block content %}
   <main class="content paper styled-text page">

@@ -1,12 +1,8 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
-{% block page_title %}Claim account{% endblock page_title %}
+{% set uses_legacy_styles = True %}
 
-{% block styles %}
-{% for url in asset_client_urls("app_css") %}
-<link rel="stylesheet" href="{{ url }}">
-{% endfor %}
-{% endblock %}
+{% block page_title %}Claim account{% endblock page_title %}
 
 {% block content %}
   <div id="claim" class="content paper">

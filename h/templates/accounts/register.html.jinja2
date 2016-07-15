@@ -1,12 +1,8 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
-{% block page_title %}Create an account{% endblock %}
+{% set uses_legacy_styles = True %}
 
-{% block styles %}
-{% for url in asset_client_urls("app_css") %}
-<link rel="stylesheet" href="{{ url }}">
-{% endfor %}
-{% endblock styles  %}
+{% block page_title %}Create an account{% endblock %}
 
 {% block content %}
   <div class="content paper">

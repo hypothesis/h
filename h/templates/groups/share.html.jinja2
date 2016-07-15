@@ -2,12 +2,6 @@
 
 {% block page_title %}{{ group.name }}{% endblock page_title %}
 
-{% block styles %}
-{% for url in asset_urls("site_css") %}
-<link rel="stylesheet" href="{{ url }}">
-{% endfor %}
-{% endblock %}
-
 {% set group_url = request.route_url('group_read', pubid=group.pubid, slug=group.slug) %}
 
 {% block content %}

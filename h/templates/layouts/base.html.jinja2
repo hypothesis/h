@@ -1,3 +1,8 @@
+{#- NOT FOR USE by new templates, this flag controls whether the template uses
+    legacy styles provided by the client bundle. -#}
+{%- set uses_legacy_styles = uses_legacy_styles|default(False) -%}
+{#- Controls the name of the default style bundle included on the page. -#}
+{%- set style_bundle = style_bundle|default('site_css') -%}
 <!DOCTYPE html>
 <html lang="en" prefix="og: http://ogp.me/ns#">
   <head>
@@ -26,7 +31,18 @@
     {% for attrs in link_attrs -%}
       <link {% for key, value in attrs.items() %}{{ key }}="{{ value }}" {% endfor %}/>
     {% endfor -%}
-    {% block styles %}{% endblock %}
+
+    {% block styles %}
+      {% if uses_legacy_styles %}
+        {% for url in asset_client_urls("app_css") %}
+        <link rel="stylesheet" href="{{ url }}">
+        {% endfor %}
+      {% else %}
+        {% for url in asset_urls(style_bundle) %}
+        <link rel="stylesheet" href="{{ url }}">
+        {% endfor %}
+      {% endif %}
+    {% endblock %}
 
     <link rel="apple-touch-icon" sizes="152x152"
           href="{{ base_url }}assets/images/apple-touch-icon-152x152.png">
