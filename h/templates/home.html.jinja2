@@ -1,4 +1,5 @@
 {% set rss_feed_url = base_url + "feed/" %}
+{% set style_bundle = "front_page_css" %}
 
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
@@ -10,12 +11,6 @@
   <link rel="chrome-webstore-item"
         href="{{ chrome_extension_link }}">
   <link href="{{ rss_feed_url }}" rel="alternate" type="application/rss+xml">
-{% endblock %}
-
-{% block styles %}
-{% for url in asset_urls("front_page_css") %}
-<link rel="stylesheet" href="{{ url }}">
-{% endfor %}
 {% endblock %}
 
 {% block content %}

@@ -1,5 +1,6 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
+{%- set uses_legacy_styles = True -%}
 {%- set nav_pages = [
     ('account', 'Account'),
     ('account_notifications', 'Notifications'),
@@ -7,12 +8,6 @@
 ] -%}
 
 {% block page_title %}{{ page_title }}{% endblock %}
-
-{% block styles %}
-{% for url in asset_client_urls("app_css") %}
-<link rel="stylesheet" href="{{ url }}">
-{% endfor %}
-{% endblock styles  %}
 
 {% block content %}
   <div class="content paper">

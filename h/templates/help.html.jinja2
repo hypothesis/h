@@ -1,5 +1,7 @@
 {% extends "layouts/base.html.jinja2" %}
 
+{% set style_bundle = 'help_page_css' %}
+
 {% block meta %}
   <link href='//fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
   {{ super() }}
@@ -7,12 +9,6 @@
   {% if not is_onboarding %}
     <script async defer src="{{ embed_js_url }}"></script>
   {% endif %}
-{% endblock %}
-
-{% block styles %}
-{% for url in asset_urls("help_page_css") %}
-<link rel="stylesheet" href="{{ url }}">
-{% endfor %}
 {% endblock %}
 
 {% block content %}

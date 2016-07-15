@@ -2,12 +2,6 @@
 
 {% block page_title %}Create a new group{% endblock page_title %}
 
-{% block styles %}
-{% for url in asset_urls("site_css") %}
-<link rel="stylesheet" href="{{url}}">
-{% endfor %}
-{% endblock %}
-
 {% block content %}
   <div class="content content--narrow">
     <div class="group-form">
