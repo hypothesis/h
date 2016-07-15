@@ -470,10 +470,10 @@ class ActivateController(object):
             location=self.request.route_url('index'))
 
 
-@view_defaults(route_name='profile',
-               renderer='h:templates/accounts/profile.html.jinja2',
+@view_defaults(route_name='account',
+               renderer='h:templates/accounts/account.html.jinja2',
                effective_principals=security.Authenticated)
-class ProfileController(object):
+class AccountController(object):
 
     def __init__(self, request):
         self.request = request
@@ -492,14 +492,14 @@ class ProfileController(object):
 
     @view_config(request_method='GET')
     def get(self):
-        """Show the user's profile."""
+        """Show the user's account."""
         return {'email': self.request.authenticated_user.email,
                 'email_form': self.forms['email'].render(),
                 'password_form': self.forms['password'].render()}
 
     @view_config(request_method='POST')
     def post(self):
-        """Handle POST payload from profile update form."""
+        """Handle POST payload from account update form."""
         formid = self.request.POST.get('__formid__')
         if formid is None or formid not in self.forms:
             raise httpexceptions.HTTPBadRequest()
@@ -517,7 +517,7 @@ class ProfileController(object):
         self.request.session.flash(_("Success. We've saved your changes."),
                                    'success')
         return httpexceptions.HTTPFound(
-            location=self.request.route_url('profile'))
+            location=self.request.route_url('account'))
 
     def _handle_email_form(self):
         appstruct = self.forms['email'].validate(self.request.POST.items())
@@ -528,7 +528,7 @@ class ProfileController(object):
         self.request.authenticated_user.password = appstruct['new_password']
 
 
-@view_defaults(route_name='profile_notifications',
+@view_defaults(route_name='account_notifications',
                renderer='h:templates/accounts/notifications.html.jinja2',
                effective_principals=security.Authenticated)
 class NotificationsController(object):
@@ -563,7 +563,7 @@ class NotificationsController(object):
         self.request.session.flash(_("Success. We've saved your changes."),
                                    'success')
         return httpexceptions.HTTPFound(
-            location=self.request.route_url('profile_notifications'))
+            location=self.request.route_url('account_notifications'))
 
     def _user_notifications(self):
         """Fetch the notifications/subscriptions for the logged-in user."""
@@ -572,7 +572,7 @@ class NotificationsController(object):
             self.request.authenticated_userid)
 
 
-@view_defaults(route_name='profile_developer',
+@view_defaults(route_name='account_developer',
                renderer='h:templates/accounts/developer.html.jinja2',
                effective_principals=security.Authenticated)
 class DeveloperController(object):
@@ -685,9 +685,9 @@ def includeme(config):
     config.add_route('forgot_password', '/forgot_password')
     config.add_route('reset_password', '/reset_password')
     config.add_route('reset_password_with_code', '/reset_password/{code}')
-    config.add_route('profile', '/account/settings')
-    config.add_route('profile_notifications', '/account/settings/notifications')
-    config.add_route('profile_developer', '/account/developer')
+    config.add_route('account', '/account/settings')
+    config.add_route('account_notifications', '/account/settings/notifications')
+    config.add_route('account_developer', '/account/developer')
     config.add_route('claim_account_legacy', '/claim_account/{token}')
     config.add_route('dismiss_sidebar_tutorial',
                      '/app/dismiss_sidebar_tutorial')

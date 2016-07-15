@@ -758,21 +758,21 @@ class TestActivateController(object):
 
 
 @pytest.mark.usefixtures('routes')
-class TestProfileController(object):
+class TestAccountController(object):
 
     def test_post_400s_with_no_formid(self, pyramid_request):
         with pytest.raises(httpexceptions.HTTPBadRequest):
-            views.ProfileController(pyramid_request).post()
+            views.AccountController(pyramid_request).post()
 
     def test_post_400s_with_bogus_formid(self, pyramid_request):
         pyramid_request.POST = {'__formid__': 'hax0rs'}
 
         with pytest.raises(httpexceptions.HTTPBadRequest):
-            views.ProfileController(pyramid_request).post()
+            views.AccountController(pyramid_request).post()
 
     def test_post_changing_email_with_valid_data_updates_email(self, pyramid_request, user):
         pyramid_request.POST = {'__formid__': 'email'}
-        controller = views.ProfileController(pyramid_request)
+        controller = views.AccountController(pyramid_request)
         controller.forms['email'] = form_validating_to(
             {'email': 'amrit@example.com'})
 
@@ -782,7 +782,7 @@ class TestProfileController(object):
 
     def test_post_changing_email_with_valid_data_redirects(self, pyramid_request):
         pyramid_request.POST = {'__formid__': 'email'}
-        controller = views.ProfileController(pyramid_request)
+        controller = views.AccountController(pyramid_request)
         controller.forms['email'] = form_validating_to(
             {'email': 'amrit@example.com'})
 
@@ -792,7 +792,7 @@ class TestProfileController(object):
 
     def test_post_changing_email_with_invalid_data_returns_form(self, pyramid_request):
         pyramid_request.POST = {'__formid__': 'email'}
-        controller = views.ProfileController(pyramid_request)
+        controller = views.AccountController(pyramid_request)
         controller.forms['email'] = invalid_form()
 
         result = controller.post()
@@ -801,7 +801,7 @@ class TestProfileController(object):
 
     def test_post_changing_email_with_invalid_data_does_not_update_email(self, pyramid_request, user):
         pyramid_request.POST = {'__formid__': 'email'}
-        controller = views.ProfileController(pyramid_request)
+        controller = views.AccountController(pyramid_request)
         controller.forms['email'] = invalid_form()
 
         controller.post()
@@ -810,7 +810,7 @@ class TestProfileController(object):
 
     def test_post_changing_password_with_valid_data_updates_password(self, pyramid_request, user):
         pyramid_request.POST = {'__formid__': 'password'}
-        controller = views.ProfileController(pyramid_request)
+        controller = views.AccountController(pyramid_request)
         controller.forms['password'] = form_validating_to(
             {'new_password': 'secrets!'})
 
@@ -820,7 +820,7 @@ class TestProfileController(object):
 
     def test_post_changing_password_with_valid_data_redirects(self, pyramid_request):
         pyramid_request.POST = {'__formid__': 'password'}
-        controller = views.ProfileController(pyramid_request)
+        controller = views.AccountController(pyramid_request)
         controller.forms['password'] = form_validating_to(
             {'new_password': 'secrets!'})
 
@@ -830,7 +830,7 @@ class TestProfileController(object):
 
     def test_post_changing_password_with_invalid_data_returns_form(self, pyramid_request):
         pyramid_request.POST = {'__formid__': 'password'}
-        controller = views.ProfileController(pyramid_request)
+        controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
 
         result = controller.post()
@@ -839,7 +839,7 @@ class TestProfileController(object):
 
     def test_post_changing_password_with_invalid_data_does_not_update_password(self, pyramid_request, user):
         pyramid_request.POST = {'__formid__': 'password'}
-        controller = views.ProfileController(pyramid_request)
+        controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
 
         controller.post()
@@ -854,7 +854,7 @@ class TestProfileController(object):
 
     @pytest.fixture
     def routes(self, pyramid_config):
-        pyramid_config.add_route('profile', '/my/profile')
+        pyramid_config.add_route('account', '/my/account')
 
     @pytest.fixture
     def user(self):
@@ -932,7 +932,7 @@ class TestNotificationsController(object):
 
     @pytest.fixture
     def routes(self, pyramid_config):
-        pyramid_config.add_route('profile_notifications', '/p/notifications')
+        pyramid_config.add_route('account_notifications', '/p/notifications')
 
 
 @pytest.mark.usefixtures('models')
