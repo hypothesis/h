@@ -195,7 +195,7 @@ class UserFilter(object):
         if 'user' not in params:
             return None
 
-        users = [v for k, v in params.items() if k == 'user']
+        users = [v.lower() for k, v in params.items() if k == 'user']
         del params['user']
 
         return {'terms': {'user': users}}
