@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import collections
+from pyramid import httpexceptions
 
 
 def auth_token(handler, registry):
@@ -96,3 +97,20 @@ def content_security_policy_tween_factory(handler, registry):
         return resp
 
     return content_security_policy_tween
+
+
+def redirect_tween_factory(handler, registry):
+    redirects = {
+        '/profile': 'account',
+        '/profile/notifications': 'account_notifications',
+        '/profile/developer': 'account_developer'
+    }
+
+    def redirect_tween(request):
+        redirect = redirects.get(request.path, False)
+        if redirect:
+            return httpexceptions.HTTPMovedPermanently(location=request.route_url(redirect))
+        else:
+            return handler(request)
+
+    return redirect_tween
