@@ -137,7 +137,7 @@ gulp.task('watch-extension-js', ['build-vendor-js'], function () {
 var styleFiles = [
   // H
   './h/static/styles/admin.scss',
-  './h/static/styles/front-page/main.css',
+  './h/static/styles/front-page.css',
   './h/static/styles/help-page.scss',
   './h/static/styles/site.scss',
   './h/static/styles/site-v2.scss',
