@@ -1,6 +1,4 @@
 // Common form styles.
-@import 'mixins/forms';
-
 .form-field {
   @include pie-clearfix;
   clear: both;

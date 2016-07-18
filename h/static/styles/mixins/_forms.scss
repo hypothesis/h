@@ -1,5 +1,3 @@
-@import 'partials/base';
-
 // See http://compass-style.org/reference/compass/utilities/general/clearfix/#mixin-pie-clearfix
 @mixin pie-clearfix {
   &:after {
@@ -7,6 +5,13 @@
     display: table;
     clear: both;
   }
+}
+
+/* Style input placeholders */
+@mixin placeholder {
+  &.placeholder { @content; }
+  &:placeholder { @content; }
+  &::placeholder { @content; }
 }
 
 @mixin focus-outline {
@@ -89,4 +94,3 @@
 @function shade($color, $percent){
   @return mix(black, $color, $percent);
 }
-

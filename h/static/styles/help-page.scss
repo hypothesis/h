@@ -1,10 +1,19 @@
 $base-font-size: 16px;
 $base-line-height: 22px;
 
+@import 'partials/base';
 @import 'partials/reset';
-@import 'partials/common';
+@import 'partials/forms';
+@import 'partials/grid';
 @import 'partials/elements';
-@import 'mixins/icons';
+
+// Note: These includes are currently source-order
+// dependent.
+@import 'partials/styled-text';
+@import 'partials/page';
+
+// FIXME: unify this partial and this entrypoint
+@import 'partials/help-page';
 
 body {
   background: #fff;

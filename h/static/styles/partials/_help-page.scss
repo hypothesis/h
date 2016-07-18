@@ -1,13 +1,3 @@
-@import 'partials/base';
-@import 'partials/forms';
-@import 'partials/grid';
-@import 'mixins/responsive';
-
-// Note: These includes are currently source-order
-// dependent.
-@import 'partials/styled-text';
-@import 'partials/page';
-
 //ELEMENT STYLES////////////////////////////////
 body {
   position: relative;

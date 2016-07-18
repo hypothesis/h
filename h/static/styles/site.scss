@@ -11,7 +11,7 @@
 @import 'partials/group-form';
 
 .body {
-  @include grey-background;
+  background: $grey-2;
   font-family: $sans-font-family;
 }
 
