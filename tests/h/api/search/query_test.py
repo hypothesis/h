@@ -373,6 +373,11 @@ class TestUserFilter(object):
             }
         }
 
+    def test_lowercases_value(self):
+        userfilter = query.UserFilter()
+
+        assert userfilter({"user": "LUkE"}) == {"terms": {"user": ["luke"]}}
+
     def test_strips_param(self):
         userfilter = query.UserFilter()
         params = {"user": "luke"}
