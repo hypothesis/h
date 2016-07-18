@@ -1,12 +1,12 @@
-@import './base';
-@import './forms';
-@import './grid';
-@import './mixins/responsive';
+@import 'partials/base';
+@import 'partials/forms';
+@import 'partials/grid';
+@import 'mixins/responsive';
 
 // Note: These includes are currently source-order
 // dependent.
-@import './styled-text';
-@import './page';
+@import 'partials/styled-text';
+@import 'partials/page';
 
 //ELEMENT STYLES////////////////////////////////
 body {

@@ -1,4 +1,4 @@
-@import "./variables";
+@import 'partials/variables';
 
 /* Style input placeholders */
 @mixin placeholder {
@@ -28,4 +28,3 @@
 @mixin grey-background {
   background: $grey-2;
 }
-
