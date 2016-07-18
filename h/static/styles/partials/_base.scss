@@ -20,15 +20,12 @@ $color-gray: #818181;
 $color-silver-chalice: #a6a6a6;
 $color-silver: #bbb;
 $color-alto: #dedede;
-$color-mercury: #e2e2e2;
-$color-gallery: #ececec;
 $color-seashell: #f1f1f1;
 $color-wild-sand: #f5f5f5;
 
 
 // Colors
 // ---------------------
-$color-cardinal: #bd1c2b;
 $brand-color: #bd1c2b !default;
 
 $button-text-color: $gray-dark !default;
@@ -38,9 +35,6 @@ $button-background-gradient: to bottom, $button-background-start, $button-backgr
 
 $error-color: #f0480c !default;
 $success-color: #1cbd41 !default;
-
-$mask-start-color: rgba($white, 0) !default;
-$mask-end-color: $white !default;
 
 
 // Variables for the new color palette
@@ -97,16 +91,10 @@ $link-color-hover:       color-weight($brand-color, 700) !default;
 // Typography
 // -------------------------
 $sans-font-family:        "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !default;
-$serif-font-family:       Georgia, "Bitstream Charter", "Times", "Times New Roman", serif !default;
 $mono-font-family:        Open Sans Mono, Menlo, DejaVu Sans Mono, monospace !default;
 
 $base-font-size:          16px !default;
-$base-font-family:        $sans-font-family !default;
 $base-line-height:        20px !default;
-$alt-font-family:         $serif-font-family !default;
-
-$headings-font-family:    inherit !default;
-$headings-color:          inherit !default;
 
 $body1-font-size:         12px;
 $body1-line-height:       1.4em;
