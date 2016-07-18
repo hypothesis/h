@@ -1,14 +1,14 @@
 // shared styling used by both the app and the website
-@import './base';
-@import './reset';
-@import './elements';
+@import 'base';
+@import 'reset';
+@import 'elements';
 
 // shared components
-@import './primary-action-btn';
-@import './share-link';
+@import 'primary-action-btn';
+@import 'share-link';
 
 // website-specific components
-@import './group-form';
+@import 'group-form';
 
 .body {
   @include grey-background;
