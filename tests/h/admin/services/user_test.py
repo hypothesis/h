@@ -8,6 +8,7 @@ import pytest
 from h import models
 from h.admin.services.user import RenameUserService
 from h.admin.services.user import UserRenameError
+from h.admin.services.user import make_indexer
 from h.util.user import userid_from_username
 
 
@@ -34,36 +35,31 @@ class TestRenameUserService(object):
 
         assert db_session.query(models.User).get(user.id).username == 'panda'
 
-    @pytest.mark.usefixtures('index')
-    def test_rename_changes_the_users_annotations_userid(self, service, user, annotations, db_session):
+    def test_rename_changes_the_users_annotations_userid(self, service, pyramid_request, user, annotations, db_session):
         service.rename(user, 'panda')
 
-        expected = userid_from_username('panda', service.request.auth_domain)
+        expected = userid_from_username('panda', pyramid_request.auth_domain)
 
         userids = [ann.userid for ann in db_session.query(models.Annotation)]
         assert set([expected]) == set(userids)
 
-    def test_rename_reindexes_the_users_annotations(self, service, user, annotations, index):
-        indexer = index.BatchIndexer.return_value
-        ids = [ann.id for ann in annotations]
-
+    def test_rename_reindexes_the_users_annotations(self, service, user, annotations, indexer):
         service.rename(user, 'panda')
-
-        indexer.index.assert_called_once_with(set(ids))
+        indexer.assert_called_once_with({ann.id for ann in annotations})
 
     @pytest.fixture
-    def service(self, req):
-        return RenameUserService(req)
+    def indexer(self):
+        return mock.Mock(spec_set=[])
+
+    @pytest.fixture
+    def service(self, pyramid_request, indexer):
+        return RenameUserService(session=pyramid_request.db,
+                                 auth_domain=pyramid_request.auth_domain,
+                                 reindex=indexer)
 
     @pytest.fixture
     def check(self, patch):
         return patch('h.admin.services.user.RenameUserService.check')
-
-    @pytest.fixture
-    def req(self, pyramid_request):
-        pyramid_request.tm = mock.MagicMock()
-        pyramid_request.es = mock.MagicMock()
-        return pyramid_request
 
     @pytest.fixture
     def user(self, factories, db_session):
@@ -73,15 +69,37 @@ class TestRenameUserService(object):
         return user
 
     @pytest.fixture
-    def annotations(self, user, factories, db_session, req):
+    def annotations(self, user, factories, db_session, pyramid_request):
         anns = []
         for _ in range(8):
-            userid = userid_from_username(user.username, req.auth_domain)
+            userid = userid_from_username(user.username, pyramid_request.auth_domain)
             anns.append(factories.Annotation(userid=userid))
         db_session.add_all(anns)
         db_session.flush()
 
         return anns
+
+
+class TestMakeIndexer(object):
+    def test_it_indexes_the_given_ids(self, req, index):
+        indexer = make_indexer(req)
+        indexer([1, 2, 3])
+
+        batch_indexer = index.BatchIndexer.return_value
+        batch_indexer.index.assert_called_once_with([1, 2, 3])
+
+    def test_it_skips_indexing_when_no_ids_given(self, req, index):
+        indexer = make_indexer(req)
+
+        indexer([])
+
+        assert not index.BatchIndexer.called
+
+    @pytest.fixture
+    def req(self, pyramid_request):
+        pyramid_request.tm = mock.MagicMock()
+        pyramid_request.es = mock.MagicMock()
+        return pyramid_request
 
     @pytest.fixture
     def index(self, patch):
