@@ -1,5 +1,5 @@
-@import "mixins/responsive";
-@import "mixins/grid";
+@import 'mixins/responsive';
+@import 'mixins/grid';
 
 // A mobile first grid system. Requires the columns to be wrapped in a
 // .grid container. Each column then should have a width applied. See
