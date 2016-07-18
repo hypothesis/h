@@ -12,13 +12,8 @@ from h.util.user import userid_from_username
 
 
 class TestRenameUserService(object):
-    def test_check_returns_true_when_checks_are_successful(self, service, user):
-        assert service.check(user.id, 'panda') is True
-
-    def test_check_raises_when_user_id_cannot_be_found(self, service):
-        with pytest.raises(UserRenameError) as err:
-            service.check(1, 'luke')
-        assert err.value.message == 'Could not find existing user with id "1"'
+    def test_check_returns_true_when_new_username_does_not_exist(self, service):
+        assert service.check('panda') is True
 
     def test_check_raises_when_new_userid_is_already_taken(self, service, user, db_session, factories):
         user_taken = factories.User(username='panda')
@@ -26,22 +21,22 @@ class TestRenameUserService(object):
         db_session.flush()
 
         with pytest.raises(UserRenameError) as err:
-            service.check(user.id, 'panda')
+            service.check('panda')
         assert err.value.message == 'Another user already has the username "panda"'
 
     def test_rename_checks_first(self, service, check, user):
-        service.rename(user.id, 'panda')
+        service.rename(user, 'panda')
 
-        check.assert_called_once_with(service, user.id, 'panda')
+        check.assert_called_once_with(service, 'panda')
 
     def test_rename_changes_the_username(self, service, user, db_session):
-        service.rename(user.id, 'panda')
+        service.rename(user, 'panda')
 
         assert db_session.query(models.User).get(user.id).username == 'panda'
 
     @pytest.mark.usefixtures('index')
     def test_rename_changes_the_users_annotations_userid(self, service, user, annotations, db_session):
-        service.rename(user.id, 'panda')
+        service.rename(user, 'panda')
 
         expected = userid_from_username('panda', service.request.auth_domain)
 
@@ -52,7 +47,7 @@ class TestRenameUserService(object):
         indexer = index.BatchIndexer.return_value
         ids = [ann.id for ann in annotations]
 
-        service.rename(user.id, 'panda')
+        service.rename(user, 'panda')
 
         indexer.index.assert_called_once_with(set(ids))
 

@@ -78,7 +78,7 @@ def users_rename(request):
 
     try:
         svc = request.find_service(name='rename_user')
-        svc.check(user.id, new_username)
+        svc.check(new_username)
 
         worker.rename_user.delay(user.id, new_username)
 

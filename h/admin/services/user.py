@@ -28,21 +28,16 @@ class RenameUserService(object):
         self.request = request
         self.session = request.db
 
-    def check(self, user_id, new_username):
-        user = self.session.query(models.User).get(user_id)
-        if user is None:
-            raise UserRenameError('Could not find existing user with id "%d"' % user_id)
-
+    def check(self, new_username):
         existing_user = models.User.get_by_username(self.session, new_username)
         if existing_user:
             raise UserRenameError('Another user already has the username "%s"' % new_username)
 
         return True
 
-    def rename(self, user_id, new_username):
-        self.check(user_id, new_username)
+    def rename(self, user, new_username):
+        self.check(new_username)
 
-        user = self.session.query(models.User).get(user_id)
         old_username = user.username
 
         user.username = new_username
