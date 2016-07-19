@@ -91,24 +91,12 @@ def test_users_activate_gets_user(User, pyramid_request):
 
 
 @users_activate_fixtures
-def test_users_activate_flashes_error_if_no_user(User, pyramid_request):
+def test_users_activate_user_not_found_error(User, pyramid_request):
     pyramid_request.params = {"username": "bob"}
     User.get_by_username.return_value = None
 
-    views.users_activate(pyramid_request)
-    error_flash = pyramid_request.session.peek_flash('error')
-
-    assert error_flash
-
-
-@users_activate_fixtures
-def test_users_activate_redirects_if_no_user(User, pyramid_request):
-    pyramid_request.params = {"username": "bob"}
-    User.get_by_username.return_value = None
-
-    result = views.users_activate(pyramid_request)
-
-    assert isinstance(result, httpexceptions.HTTPFound)
+    with pytest.raises(views.UserNotFoundError):
+        views.users_activate(pyramid_request)
 
 
 @users_activate_fixtures
@@ -162,25 +150,13 @@ users_delete_fixtures = pytest.mark.usefixtures('User', 'delete_user')
 
 
 @users_delete_fixtures
-def test_users_delete_redirect(User, pyramid_request):
-    pyramid_request.params = {"username": "bob"}
-    User.get_by_username.return_value = None
-
-    result = views.users_delete(pyramid_request)
-    assert result.__class__ == httpexceptions.HTTPFound
-
-
-@users_delete_fixtures
 def test_users_delete_user_not_found_error(User, pyramid_request):
     pyramid_request.params = {"username": "bob"}
 
     User.get_by_username.return_value = None
 
-    views.users_delete(pyramid_request)
-
-    assert pyramid_request.session.peek_flash('error') == [
-        "User bob doesn't exist!"
-    ]
+    with pytest.raises(views.UserNotFoundError):
+        views.users_delete(pyramid_request)
 
 
 @users_delete_fixtures

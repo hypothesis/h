@@ -18,6 +18,10 @@ class UserDeletionError(Exception):
     pass
 
 
+class UserNotFoundError(Exception):
+    pass
+
+
 @view_config(route_name='admin_users',
              request_method='GET',
              renderer='h:templates/admin/users.html.jinja2',
@@ -46,10 +50,6 @@ def users_index(request):
 def users_activate(request):
     user = _form_request_user(request)
 
-    if user is None:
-        return httpexceptions.HTTPFound(
-            location=request.route_path('admin_users'))
-
     user.activate()
 
     request.session.flash(jinja2.Markup(_(
@@ -68,10 +68,6 @@ def users_activate(request):
              permission='admin_users')
 def users_rename(request):
     user = _form_request_user(request)
-
-    if user is None:
-        return httpexceptions.HTTPFound(
-            location=request.route_path('admin_users'))
 
     old_username = user.username
     new_username = request.params.get('new_username')
@@ -103,10 +99,6 @@ def users_rename(request):
 def users_delete(request):
     user = _form_request_user(request)
 
-    if user is None:
-        return httpexceptions.HTTPFound(
-            location=request.route_path('admin_users'))
-
     try:
         delete_user(request, user)
         request.session.flash(
@@ -116,6 +108,12 @@ def users_delete(request):
 
     return httpexceptions.HTTPFound(
         location=request.route_path('admin_users'))
+
+
+@view_config(context=UserNotFoundError)
+def user_not_found(exc, request):
+    request.session.flash(jinja2.Markup(_(exc.message)), 'error')
+    return httpexceptions.HTTPFound(location=request.route_path('admin_users'))
 
 
 def delete_user(request, user):
@@ -162,9 +160,7 @@ def _form_request_user(request):
     user = models.User.get_by_username(request.db, username)
 
     if user is None:
-        request.session.flash(jinja2.Markup(_(
-            "User {name} doesn't exist!".format(name=username))),
-            'error')
+        raise UserNotFoundError("Could not find user with username %s" % username)
 
     return user
 
