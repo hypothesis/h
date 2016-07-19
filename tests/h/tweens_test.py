@@ -77,3 +77,36 @@ def test_tween_csp_header(pyramid_request):
         "script-src 'self'; style-src 'self' fonts.googleapis.com"
 
     assert expected == response.headers['Content-Security-Policy']
+
+
+def test_tween_redirect_non_redirected_route(pyramid_request):
+    redirects = {'/foo': 'bar'}
+
+    pyramid_request.path = '/quux'
+
+    tween = tweens.redirect_tween_factory(
+        lambda req: req.response,
+        pyramid_request.registry,
+        redirects)
+
+    response = tween(pyramid_request)
+
+    assert response.status_code == 200
+
+
+def test_tween_redirect_redirected_route(pyramid_request, pyramid_config):
+    redirects = {'/foo': 'bar'}
+
+    pyramid_config.add_route('bar', '/bar')
+
+    pyramid_request.path = '/foo'
+
+    tween = tweens.redirect_tween_factory(
+        lambda req: req.response,
+        pyramid_request.registry,
+        redirects)
+
+    response = tween(pyramid_request)
+
+    assert response.status_code == 301
+    assert response.location == 'http://example.com/bar'

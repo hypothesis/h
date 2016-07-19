@@ -99,13 +99,14 @@ def content_security_policy_tween_factory(handler, registry):
     return content_security_policy_tween
 
 
-def redirect_tween_factory(handler, registry):
-    redirects = {
-        '/profile': 'account',
-        '/profile/notifications': 'account_notifications',
-        '/profile/developer': 'account_developer'
-    }
+REDIRECTS = {
+    '/profile': 'account',
+    '/profile/notifications': 'account_notifications',
+    '/profile/developer': 'account_developer'
+}
 
+
+def redirect_tween_factory(handler, registry, redirects=REDIRECTS):
     def redirect_tween(request):
         redirect = redirects.get(request.path, False)
         if redirect:
