@@ -7,25 +7,31 @@
 Total: {{ total }}
 {% endif %}
 
-{% for result in results %}
-<hr>
-
-<table>
-  <tr><th>ID</th><td>{{ result.annotation.id }}</td></tr>
-  <tr><th>User</th><td>{{ result.annotation.userid }}</td></tr>
-  <tr><th>Group</th><td>{{ result.group.name }}</td></tr>
-  <tr><th>Shared</th><td>{{ result.annotation.shared }}</td></tr>
-  <tr><th>URI</th><td>{{ result.annotation.target_uri }}</td></tr>
-  <tr><th>Text</th><td>{{ result.annotation.text }}</td></tr>
-  <tr>
-    <th>Tags</th>
-    <td>
-      <ul>
-        {% for tag in result.annotation.tags %}
-        <li>{{ tag }}</li>
+<ol>
+  {% for timeframe in timeframes %}
+    <li>
+      <p><strong>{{ timeframe.label }}</strong></p>
+      <ol>
+        {% for document, results in timeframe.document_buckets.items() %}
+          <li>
+            <p><strong>{{ document.title }}</strong> ({{ document.id }}), <strong>{{ results|length }}</strong></p>
+            <ol>
+              {% for result in results %}
+                <li>
+                  <p>ID: {{ result.annotation.id }}</p>
+                  <p>Updated: {{ result.annotation.updated.strftime('%d %b %Y') }}</p>
+                  <p>User: {{ result.annotation.userid }}</p>
+                  <p>Group: {{ result.group.name }}</p>
+                  <p>Shared: {{ result.annotation.shared }}</p>
+                  <p>URI: {{ result.annotation.target_uri }}</p>
+                  <p>Text: {{ result.annotation.text }}</p>
+                  <p>Tags: {{ ','.join(result.annotation.tags) }}</p>
+                </li>
+              {% endfor %}
+            </ol>
+          </li>
         {% endfor %}
-      </ul>
-    </td>
-    </tr>
-</table>
-{% endfor %}
+      </ol>
+    </li>
+  {% endfor %}
+</ol>

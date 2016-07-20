@@ -8,8 +8,10 @@ from __future__ import unicode_literals
 
 from pyramid import httpexceptions
 from pyramid.view import view_config
+from sqlalchemy.orm import subqueryload
 
 from h import models
+from h.activity import bucketing
 from h.api import search as search_lib
 from h.api.search import parser
 from h.api.search import query
@@ -33,7 +35,14 @@ def search(request):
         result = search_request.run(search_query)
         total = result.total
 
-        anns = storage.fetch_ordered_annotations(request.db, result.annotation_ids)
+        def eager_load_documents(query):
+            return query.options(
+                subqueryload(models.Annotation.document)
+                .subqueryload(models.Document.meta_titles))
+
+        anns = storage.fetch_ordered_annotations(
+            request.db, result.annotation_ids,
+            query_processor=eager_load_documents)
 
         for ann in anns:
             group = request.db.query(models.Group).filter(models.Group.pubid == ann.groupid).one_or_none()
@@ -46,7 +55,7 @@ def search(request):
     return {
         'q': request.params.get('q', ''),
         'total': total,
-        'results': results
+        'timeframes': bucketing.bucket(results)
     }
 
 
