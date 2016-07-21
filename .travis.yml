@@ -16,7 +16,7 @@ matrix:
       python: '2.7'
 
     # Test web application frontend
-    - env: ACTION=gulp GULPTASK=test-app
+    - env: ACTION=gulp GULPTASK=test
       language: node_js
       node_js: '4.3'
 before_install: ./.travis/before_install

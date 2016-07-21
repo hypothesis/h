@@ -80,14 +80,14 @@ gulp.task('build-vendor-js', function () {
   return Promise.all(finished);
 });
 
-var appBundleBaseConfig = {
+var bundleBaseConfig = {
   path: SCRIPT_DIR,
   external: vendorModules,
   minify: IS_PRODUCTION_BUILD,
   noParse: vendorNoParseModules,
 };
 
-var appBundles = [{
+var bundles = [{
   // Public-facing website
   name: 'site',
   entry: './h/static/scripts/site',
@@ -101,18 +101,18 @@ var appBundles = [{
   entry: './h/static/scripts/legacy-site',
 }];
 
-var appBundleConfigs = appBundles.map(function (config) {
-  return Object.assign({}, appBundleBaseConfig, config);
+var bundleConfigs = bundles.map(function (config) {
+  return Object.assign({}, bundleBaseConfig, config);
 });
 
-gulp.task('build-app-js', ['build-vendor-js'], function () {
-  return Promise.all(appBundleConfigs.map(function (config) {
+gulp.task('build-js', ['build-vendor-js'], function () {
+  return Promise.all(bundleConfigs.map(function (config) {
     return createBundle(config);
   }));
 });
 
-gulp.task('watch-app-js', ['build-vendor-js'], function () {
-  appBundleConfigs.map(function (config) {
+gulp.task('watch-js', ['build-vendor-js'], function () {
+  bundleConfigs.map(function (config) {
     createBundle(config, {watch: true});
   });
 });
@@ -211,22 +211,22 @@ gulp.task('watch-manifest', function () {
   }));
 });
 
-gulp.task('build-app',
-          ['build-app-js',
+gulp.task('build',
+          ['build-js',
            'build-css',
            'build-fonts',
            'build-images'],
           generateManifest);
 
 gulp.task('build',
-          ['build-app-js',
+          ['build-js',
            'build-css',
            'build-fonts',
            'build-images'],
           generateManifest);
 
 gulp.task('watch',
-          ['watch-app-js',
+          ['watch-js',
            'watch-css',
            'watch-fonts',
            'watch-images',
@@ -256,16 +256,16 @@ function runKarma(baseConfig, opts, done) {
   }, cliOpts, opts), done).start();
 }
 
-gulp.task('test-app', function (callback) {
+gulp.task('test', function (callback) {
   runKarma('./h/static/scripts/karma.config.js', {singleRun:true}, callback);
 });
 
-gulp.task('test-watch-app', function (callback) {
+gulp.task('test-watch', function (callback) {
   runKarma('./h/static/scripts/karma.config.js', {}, callback);
 });
 
 gulp.task('upload-sourcemaps',
-          ['build-app-js'], function () {
+          ['build-js'], function () {
   var uploadToSentry = require('./scripts/gulp/upload-to-sentry');
 
   var opts = {

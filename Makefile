@@ -49,7 +49,7 @@ docker: dist/h-$(BUILD_ID)
 test: node_modules/.uptodate
 	@pip install -q tox
 	tox
-	$(NPM_BIN)/gulp test-app
+	$(NPM_BIN)/gulp test
 
 ################################################################################
 
