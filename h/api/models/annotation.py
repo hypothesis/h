@@ -99,8 +99,9 @@ class Annotation(Base):
                       nullable=False)
 
     document = sa.orm.relationship('Document',
-                                   secondary='join(DocumentURI, Document, DocumentURI.document_id == Document.id)',
+                                   secondary='document_uri',
                                    primaryjoin='Annotation.target_uri_normalized == DocumentURI.uri_normalized',
+                                   secondaryjoin='DocumentURI.document_id == Document.id',
                                    viewonly=True,
                                    uselist=False,
                                    backref='annotations')
