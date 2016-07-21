@@ -15,30 +15,10 @@ matrix:
       language: python
       python: '2.7'
 
-    # Test frontend (client/app)
+    # Test web application frontend
     - env: ACTION=gulp GULPTASK=test-app
       language: node_js
       node_js: '4.3'
-
-    # Test browser extension
-    - env: ACTION=gulp GULPTASK=test-extension
-      language: node_js
-      node_js: '4.3'
-
-    # Build browser extensions
-    - env: ACTION=extensions
-      language: python
-      python: '2.7'
-      addons:
-        artifacts:
-          paths:
-            # Upload all built extension packages
-            - $(ls build/*.zip build/*.xpi | tr "\n" ":")
-      before_install:
-        # Unfortunately it seems to be impossible to call `nvm install` from an
-        # external script on Travis, so we have to inline this one.
-        - nvm install 4.3
-        - npm install gulp-cli
 before_install: ./.travis/before_install
 install: ./.travis/install
 script: ./.travis/script

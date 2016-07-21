@@ -7,35 +7,18 @@ if (appLinkEl) {
   };
 }
 
-// When run from a Chrome or Firefox extension, load resources bundled with the
-// extension. Note that in Firefox, the 'chrome' object is accessible as a
-// global but not attached to the 'window' object.
-var resourceRoot;
-if (typeof chrome !== 'undefined' &&
-    typeof chrome.extension !== 'undefined' &&
-    typeof chrome.extension.getURL !== 'undefined') {
-  resourceRoot = chrome.extension.getURL('/');
-}
-
-function resolve(url) {
-  if (!resourceRoot) {
-    return url;
-  }
-  return new URL(url, resourceRoot).href;
-}
-
 function injectStylesheet(href) {
   var link = document.createElement('link');
   link.rel = 'stylesheet';
   link.type = 'text/css';
-  link.href = resolve(href);
+  link.href = href;
   document.head.appendChild(link);
 };
 
 function injectScript(src) {
   var script = document.createElement('script');
   script.type = 'text/javascript';
-  script.src = resolve(src);
+  script.src = src;
 
   // Set 'async' to false to maintain execution order of scripts.
   // See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
@@ -66,7 +49,7 @@ function install() {
 // presence of the Hypothesis client on the page.
 var baseUrl = document.createElement('link');
 baseUrl.rel = 'sidebar';
-baseUrl.href = resolve('{{ app_html_url }}');
+baseUrl.href = '{{ app_html_url }}';
 baseUrl.type = 'application/annotator+html';
 document.head.appendChild(baseUrl);
 
