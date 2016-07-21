@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import mock
 from mock import Mock
 from mock import MagicMock
@@ -40,25 +42,16 @@ def test_users_index_looks_up_users_by_email(User, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_queries_annotation_count_by_userid(User, pyramid_request):
-    pyramid_request.params = {"username": "Bob"}
-    es = pyramid_request.es
+def test_users_index_queries_annotation_count_by_userid(User, db_session, factories, pyramid_request):
+    User.get_by_username.return_value = mock.MagicMock(username='bob')
+    userid = "acct:bob@{}".format(pyramid_request.auth_domain)
+    for _ in xrange(8):
+        db_session.add(factories.Annotation(userid=userid))
+    db_session.flush()
 
-    User.get_by_username.return_value.username = 'Robert'
-
-    views.users_index(pyramid_request)
-
-    expected_query = {
-        'query': {
-            'filtered': {
-                'filter': {'term': {'user': u'acct:robert@example.com'}},
-                'query': {'match_all': {}}
-            }
-        }
-    }
-    es.conn.count.assert_called_with(index=es.index,
-                                     doc_type=es.t.annotation,
-                                     body=expected_query)
+    pyramid_request.params = {"username": "bob"}
+    result = views.users_index(pyramid_request)
+    assert result['user_meta']['annotations_count'] == 8
 
 
 @users_index_fixtures
@@ -73,16 +66,15 @@ def test_users_index_no_user_found(User, pyramid_request):
 
 
 @users_index_fixtures
-def test_users_index_user_found(User, pyramid_request):
+def test_users_index_user_found(User, pyramid_request, db_session, factories):
     pyramid_request.params = {"username": "bob"}
-    pyramid_request.es.conn.count.return_value = {'count': 43}
 
     result = views.users_index(pyramid_request)
 
     assert result == {
         'username': "bob",
         'user': User.get_by_username.return_value,
-        'user_meta': {'annotations_count': 43},
+        'user_meta': {'annotations_count': 0},
     }
 
 
@@ -99,24 +91,12 @@ def test_users_activate_gets_user(User, pyramid_request):
 
 
 @users_activate_fixtures
-def test_users_activate_flashes_error_if_no_user(User, pyramid_request):
+def test_users_activate_user_not_found_error(User, pyramid_request):
     pyramid_request.params = {"username": "bob"}
     User.get_by_username.return_value = None
 
-    views.users_activate(pyramid_request)
-    error_flash = pyramid_request.session.peek_flash('error')
-
-    assert error_flash
-
-
-@users_activate_fixtures
-def test_users_activate_redirects_if_no_user(User, pyramid_request):
-    pyramid_request.params = {"username": "bob"}
-    User.get_by_username.return_value = None
-
-    result = views.users_activate(pyramid_request)
-
-    assert isinstance(result, httpexceptions.HTTPFound)
+    with pytest.raises(views.UserNotFoundError):
+        views.users_activate(pyramid_request)
 
 
 @users_activate_fixtures
@@ -170,25 +150,13 @@ users_delete_fixtures = pytest.mark.usefixtures('User', 'delete_user')
 
 
 @users_delete_fixtures
-def test_users_delete_redirect(User, pyramid_request):
-    pyramid_request.params = {"username": "bob"}
-    User.get_by_username.return_value = None
-
-    result = views.users_delete(pyramid_request)
-    assert result.__class__ == httpexceptions.HTTPFound
-
-
-@users_delete_fixtures
 def test_users_delete_user_not_found_error(User, pyramid_request):
     pyramid_request.params = {"username": "bob"}
 
     User.get_by_username.return_value = None
 
-    views.users_delete(pyramid_request)
-
-    assert pyramid_request.session.peek_flash('error') == [
-        'Cannot find user with username bob'
-    ]
+    with pytest.raises(views.UserNotFoundError):
+        views.users_delete(pyramid_request)
 
 
 @users_delete_fixtures

@@ -2,6 +2,8 @@
 
 
 def includeme(config):
+    config.register_service_factory('.services.user.rename_user_factory', name='rename_user')
+
     config.include('.views')
 
     config.add_route('admin_index', '/')
@@ -17,3 +19,4 @@ def includeme(config):
     config.add_route('admin_users', '/users')
     config.add_route('admin_users_activate', '/users/activate')
     config.add_route('admin_users_delete', '/users/delete')
+    config.add_route('admin_users_rename', '/users/rename')

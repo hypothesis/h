@@ -60,6 +60,16 @@
         </tbody>
       </table>
 
+      <h3>Please-be-careful Zone</h3>
+
+      <form method="POST" action="{{request.route_path('admin_users_rename')}}" class="form-inline">
+        <input type="hidden" name="username" value="{{user.username}}">
+        <input type="text" name="new_username" placeholder="New Username">
+        <button class="btn" type="submit">Change username</button>
+      </form>
+
+      <h3>Danger Zone</h3>
+
       <form id="js-users-delete-form" method="POST" action="{{request.route_path('admin_users_delete')}}" class="form-inline">
         <input type="hidden" name="username" value="{{user.username}}">
 
