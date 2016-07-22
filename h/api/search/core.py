@@ -15,7 +15,7 @@ SearchResult = namedtuple('SearchResult', [
     'reply_ids'])
 
 
-def search(request, params, private=True, separate_replies=False):
+def search(request, params, separate_replies=False):
     """
     Search with the given params and return the matching annotations.
 
@@ -25,15 +25,11 @@ def search(request, params, private=True, separate_replies=False):
     :param params: the search parameters
     :type params: dict-like
 
-    :param private: whether or not to include private annotations in the search
-        results
-    :type private: bool
-
     :param separate_replies: Whether or not to include a "replies" key in the
         result containing a list of all replies to the annotations in the
         "rows" key. If this is True then the "rows" key will include only
         top-level annotations, not replies.
-    :type private: bool
+    :type separate_replies: bool
 
     :returns: A dict with keys:
       "rows" (the list of matching annotations, as dicts)
@@ -42,7 +38,7 @@ def search(request, params, private=True, separate_replies=False):
         separate_replies=True was passed)
     :rtype: dict
     """
-    builder = default_querybuilder(request, private=private)
+    builder = default_querybuilder(request)
     if separate_replies:
         builder.append_filter(query.TopLevelAnnotationsFilter())
 
@@ -57,7 +53,7 @@ def search(request, params, private=True, separate_replies=False):
     if separate_replies:
         # Do a second query for all replies to the annotations from the first
         # query.
-        builder = default_querybuilder(request, private=private)
+        builder = default_querybuilder(request)
         builder.append_matcher(query.RepliesMatcher(annotation_ids))
         reply_response = es.conn.search(index=es.index,
                                         doc_type=es.t.annotation,
@@ -74,9 +70,9 @@ def search(request, params, private=True, separate_replies=False):
     return SearchResult(total, annotation_ids, reply_ids)
 
 
-def default_querybuilder(request, private=True):
+def default_querybuilder(request):
     builder = query.Builder()
-    builder.append_filter(query.AuthFilter(request, private=private))
+    builder.append_filter(query.AuthFilter(request))
     builder.append_filter(query.UriFilter(request))
     builder.append_filter(query.GroupFilter())
     builder.append_filter(query.UserFilter())

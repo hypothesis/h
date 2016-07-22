@@ -99,13 +99,6 @@ def test_search_does_not_log_a_warning_if_there_are_not_too_many_replies(log, py
     assert not log.warn.called
 
 
-@pytest.mark.parametrize('private', [True, False])
-def test_default_querybuilder_passes_private_to_AuthFilter(private, query, pyramid_request):
-    core.default_querybuilder(pyramid_request, private=private)
-
-    query.AuthFilter.assert_called_once_with(pyramid_request, private=private)
-
-
 @pytest.mark.parametrize('filter_type', [
     'AuthFilter',
     'UriFilter',
