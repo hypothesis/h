@@ -1,3 +1,29 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Add ability to rename users from admin control panel (#3584)
+
+- Improve the copy on reply notification emails (#3602)
+
+Bug fixes
+---------
+
+- Fix case sensitivity in user search queries (#3611)
+
+Miscellanea
+-----------
+
+- Move the URLs for account settings from /profile to /accounts (#3604)
+
+- The Hypothesis browser extension has now been moved to its own repository
+  (#3620)
+
+- Update Hypothesis client to v0.35.0. See
+  https://github.com/hypothesis/client/releases/tag/v0.35.0
+
 0.33.0 (2016-07-13)
 ===================
 
@@ -87,7 +113,7 @@ Features
 - The search API can now accept multiple `uri` parameters and will return
   annotations made on any of the passed URIs (#3517).
 
-- The annotation client now uses the multiple-`uri`-parameter feature to ensure 
+- The annotation client now uses the multiple-`uri`-parameter feature to ensure
   that all annotations are loaded on PDFs (#3524).
 
 Bug fixes
