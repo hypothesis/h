@@ -2,7 +2,7 @@ from pyramid import httpexceptions
 
 from h import models
 from h.util.view import json_view
-from h.api import search as search_lib
+from h.api import search
 
 
 @json_view(route_name='badge')
@@ -24,7 +24,8 @@ def badge(request):
     if models.Blocklist.is_blocked(request.db, uri):
         return {'total': 0}
 
-    result = search_lib.search(request, {'uri': uri, 'limit': 0})
+    query = {'uri': uri, 'limit': 0}
+    result = search.Search(request).run(query)
 
     return {'total': result.total}
 

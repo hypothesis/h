@@ -27,7 +27,7 @@ def search(request):
     if 'q' in request.params:
         query = parser.parse(request.params['q'])
 
-        result = search_lib.search(request, query)
+        result = search_lib.Search(request).run(query)
         total = result.total
 
         anns = storage.fetch_ordered_annotations(request.db, result.annotation_ids)
