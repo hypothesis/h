@@ -227,6 +227,28 @@ class TestBuilder(object):
             "bool": {"must": [{"match": {"giraffe": "nose"}}]},
         }
 
+    def test_passes_params_to_aggregations(self):
+        testaggregation = mock.Mock()
+        builder = query.Builder()
+        builder.append_aggregation(testaggregation)
+
+        builder.build({"foo": "bar"})
+
+        testaggregation.assert_called_with({"foo": "bar"})
+
+    def test_adds_aggregations_to_query(self):
+        testaggregation = mock.Mock(key="foobar")
+        # testaggregation.key.return_value = "foobar"
+        testaggregation.return_value = {"terms": {"field": "foo"}}
+        builder = query.Builder()
+        builder.append_aggregation(testaggregation)
+
+        q = builder.build({})
+
+        assert q["aggs"] == {
+            "foobar": {"terms": {"field": "foo"}}
+        }
+
 
 class TestAuthFilter(object):
     def test_world_not_in_principals(self):
