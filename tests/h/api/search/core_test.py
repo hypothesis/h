@@ -3,100 +3,143 @@ import pytest
 
 from h.api.search import core
 
-search_fixtures = pytest.mark.usefixtures('query', 'log')
+
+class TestSearch(object):
+    def test_run_searches_annotations(self, pyramid_request, search_annotations):
+        params = mock.Mock()
+
+        search_annotations.return_value = (0, [])
+
+        search = core.Search(pyramid_request)
+        search.run(params)
+
+        search_annotations.assert_called_once_with(search, params)
+
+    def test_run_searches_replies(self,
+                                  pyramid_request,
+                                  search_replies,
+                                  search_annotations):
+        annotation_ids = [mock.Mock(), mock.Mock()]
+        search_annotations.return_value = (2, annotation_ids)
+
+        search = core.Search(pyramid_request)
+        search.run({})
+
+        search_replies.assert_called_once_with(search, annotation_ids)
+
+    def test_run_returns_search_results(self,
+                                        pyramid_request,
+                                        search_annotations,
+                                        search_replies):
+        total = 4
+        annotation_ids = ['id-1', 'id-3', 'id-6', 'id-5']
+        reply_ids = ['reply-8', 'reply-5']
+        search_annotations.return_value = (total, annotation_ids)
+        search_replies.return_value = reply_ids
+
+        search = core.Search(pyramid_request)
+        result = search.run({})
+
+        assert result == core.SearchResult(total, annotation_ids, reply_ids)
+
+    def test_search_annotations_includes_replies_by_default(self, pyramid_request, query):
+        search = core.Search(pyramid_request)
+        search.search_annotations({})
+
+        assert not query.TopLevelAnnotationsFilter.called, (
+                "Replies should not be filtered out of the 'rows' list if "
+                "separate_replies=True is not given")
+
+    def test_search_replies_skips_search_by_default(self, pyramid_request):
+        search = core.Search(pyramid_request)
+        search.search_replies(['id-1', 'id-2'])
+
+        assert not search.es.conn.search.called
+
+    def test_search_annotations_excludes_replies_when_asked(self, pyramid_request, query):
+        search = core.Search(pyramid_request, separate_replies=True)
+
+        search.search_annotations({})
+
+        assert mock.call(query.TopLevelAnnotationsFilter()) in \
+            search.builder.append_filter.call_args_list
+
+    def test_search_replies_adds_a_replies_matcher(self, pyramid_request, query):
+        search = core.Search(pyramid_request, separate_replies=True)
+
+        search.search_replies(['id-1', 'id-2'])
+
+        assert mock.call(query.RepliesMatcher(['id-1', 'id-2'])) in \
+            search.reply_builder.append_matcher.call_args_list
+
+    def test_search_replies_searches_replies_when_asked(self, pyramid_request):
+        search = core.Search(pyramid_request, separate_replies=True)
+
+        search.es.conn.search.return_value = {
+            'hits': {
+                'total': 2,
+                'hits': [{'_id': 'reply-1'}, {'_id': 'reply-2'}],
+            }
+        }
+
+        assert search.search_replies(['id-1']) == ['reply-1', 'reply-2']
+
+    def test_search_replies_logs_warning_if_there_are_too_many_replies(self, pyramid_request, log):
+        search = core.Search(pyramid_request, separate_replies=True)
+
+        search.es.conn.search.return_value = {
+            'hits': {
+                'total': 1100,
+                'hits': [{'_id': 'reply-1'}],
+            }
+        }
+
+        search.search_replies(['id-1'])
+        assert log.warn.call_count == 1
+
+    @pytest.fixture
+    def search_annotations(self, patch):
+        return patch('h.api.search.core.Search.search_annotations')
+
+    @pytest.fixture
+    def search_replies(self, patch):
+        return patch('h.api.search.core.Search.search_replies')
+
+    @pytest.fixture
+    def query(self, patch):
+        return patch('h.api.search.core.query')
+
+    @pytest.fixture
+    def log(self, patch):
+        return patch('h.api.search.core.log')
 
 
-@search_fixtures
-def test_search_does_not_exclude_replies(query, pyramid_request):
-    result = core.search(pyramid_request, {})
-
-    assert not query.TopLevelAnnotationsFilter.called, (
-        "Replies should not be filtered out of the 'rows' list if "
-        "separate_replies=True is not given")
-    assert 'replies' not in result, (
-        "The separate 'replies' list should not be included in the result if "
-        "separate_replies=True is not given")
-
-
-@search_fixtures
-def test_search_queries_for_replies(query, pyramid_request):
-    """It should do a second query for replies to the results of the first."""
-    # Mock the Builder objects that Builder() returns.
-    builder = mock.Mock()
-    query.Builder.side_effect = [
-        mock.Mock(),  # We don't care about the first Builder in this test.
-        builder
-    ]
-
-    # Mock the search results.
-    pyramid_request.es.conn.search.side_effect = [
-        # The first time search() is called it returns the result of querying
-        # for the top-level annotations only.
-        dummy_search_results(count=3),
-        # The second call returns the result of querying for all the replies to
-        # those annotations
-        dummy_search_results(start=4, count=3, name='reply'),
-    ]
-
-    core.search(pyramid_request, {}, separate_replies=True)
-
-    # It should construct a RepliesMatcher for replies to the annotations from
-    # the first search.
-    query.RepliesMatcher.assert_called_once_with(['id_1', 'id_2', 'id_3'])
-
-    # It should append the RepliesMatcher to the query builder.
-    builder.append_matcher.assert_called_with(query.RepliesMatcher.return_value)
-
-    # It should call search() a second time with the body from the
-    # query builder.
-    assert pyramid_request.es.conn.search.call_count == 2
-    _, last_call_kwargs = pyramid_request.es.conn.search.call_args_list[-1]
-    assert last_call_kwargs['body'] == builder.build.return_value
+# @search_fixtures
+# def test_search_logs_a_warning_if_there_are_too_many_replies(log, pyramid_request):
+#     """It should log a warning if there's more than one page of replies."""
+#     parent_results = dummy_search_results(count=3)
+#     replies_results = dummy_search_results(count=100, name='reply')
+#     # The second call to search() returns 'total': 11000 but only returns
+#     # the first 100 of 11000 hits.
+#     replies_results['hits']['total'] = 11000
+#     pyramid_request.es.conn.search.side_effect = [parent_results, replies_results]
+#
+#     core.search(pyramid_request, {}, separate_replies=True)
+#
+#     assert log.warn.call_count == 1
 
 
-@search_fixtures
-def test_search_returns_replies(pyramid_request):
-    """It should return an annotation dict for each reply from search()."""
-    pyramid_request.es.conn.search.side_effect = [
-        # The first time search() is called it returns the result of querying
-        # for the top-level annotations only.
-        dummy_search_results(count=1),
-        # The second call returns the result of querying for all the replies to
-        # those annotations
-        dummy_search_results(start=2, count=3, name='reply'),
-    ]
-
-    result = core.search(pyramid_request, {}, separate_replies=True)
-
-    assert result.reply_ids == ['id_2', 'id_3', 'id_4']
-
-
-@search_fixtures
-def test_search_logs_a_warning_if_there_are_too_many_replies(log, pyramid_request):
-    """It should log a warning if there's more than one page of replies."""
-    parent_results = dummy_search_results(count=3)
-    replies_results = dummy_search_results(count=100, name='reply')
-    # The second call to search() returns 'total': 11000 but only returns
-    # the first 100 of 11000 hits.
-    replies_results['hits']['total'] = 11000
-    pyramid_request.es.conn.search.side_effect = [parent_results, replies_results]
-
-    core.search(pyramid_request, {}, separate_replies=True)
-
-    assert log.warn.call_count == 1
-
-
-@search_fixtures
-def test_search_does_not_log_a_warning_if_there_are_not_too_many_replies(log, pyramid_request):
-    """It should not log a warning if there's less than one page of replies."""
-    pyramid_request.es.conn.search.side_effect = [
-        dummy_search_results(count=3),
-        dummy_search_results(count=100, start=4, name='reply'),
-    ]
-
-    core.search(pyramid_request, {}, separate_replies=True)
-
-    assert not log.warn.called
+# @search_fixtures
+# def test_search_does_not_log_a_warning_if_there_are_not_too_many_replies(log, pyramid_request):
+#     """It should not log a warning if there's less than one page of replies."""
+#     pyramid_request.es.conn.search.side_effect = [
+#         dummy_search_results(count=3),
+#         dummy_search_results(count=100, start=4, name='reply'),
+#     ]
+#
+#     core.search(pyramid_request, {}, separate_replies=True)
+#
+#     assert not log.warn.called
 
 
 @pytest.mark.parametrize('filter_type', [
@@ -167,11 +210,6 @@ def pyramid_request(pyramid_request):
     pyramid_request.es = mock.Mock(spec_set=['conn', 'index', 't'])
     pyramid_request.es.conn.search.return_value = dummy_search_results(0)
     return pyramid_request
-
-
-@pytest.fixture
-def query(patch):
-    return patch('h.api.search.core.query')
 
 
 @pytest.fixture

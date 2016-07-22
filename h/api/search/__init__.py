@@ -4,11 +4,11 @@ from pyramid.settings import asbool
 
 from h.api.search.client import Client
 from h.api.search.config import configure_index
-from h.api.search.core import search
+from h.api.search.core import Search
 from h.api.search.core import FILTERS_KEY
 from h.api.search.core import MATCHERS_KEY
 
-__all__ = ('search',)
+__all__ = ('Search',)
 
 
 def _get_client(settings):
