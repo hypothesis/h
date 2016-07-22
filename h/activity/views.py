@@ -12,6 +12,7 @@ from pyramid.view import view_config
 from h import models
 from h.api import search as search_lib
 from h.api.search import parser
+from h.api.search import query
 from h.api import storage
 
 
@@ -24,14 +25,19 @@ def search(request):
 
     results = []
     total = None
+    tags = []
     if 'q' in request.params:
-        query = parser.parse(request.params['q'])
+        search_query = parser.parse(request.params['q'])
 
-        out = search_lib.search(request, query)
-        total = out['total']
+        search_request = search_lib.Search(request)
+        search_request.append_filter(query.TopLevelAnnotationsFilter())
+        search_request.append_aggregation(query.TagsAggregation(limit=10))
+        result = search_request.run(search_query)
+        total = result.total
+        tags = result.aggregations['tags']
 
-        anns = storage.fetch_ordered_annotations(request.db,
-                                                 [r['id'] for r in out['rows']])
+        anns = storage.fetch_ordered_annotations(request.db, result.annotation_ids)
+
         for ann in anns:
             group = request.db.query(models.Group).filter(models.Group.pubid == ann.groupid).one_or_none()
             result = {
@@ -43,7 +49,8 @@ def search(request):
     return {
         'q': request.params.get('q', ''),
         'total': total,
-        'results': results
+        'results': results,
+        'tags': tags,
     }
 
 

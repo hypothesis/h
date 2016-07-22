@@ -68,27 +68,25 @@ class TestSearch(object):
     def test_it_searches(self, pyramid_request, search_lib):
         views.search(pyramid_request)
 
-        search_lib.search.assert_called_once_with(pyramid_request,
-                                                  pyramid_request.params,
-                                                  separate_replies=False)
+        search = search_lib.Search.return_value
+        search_lib.Search.assert_called_with(pyramid_request, separate_replies=False)
+        search.run.assert_called_once_with(pyramid_request.params)
 
-    def test_it_loads_annotations_from_database(self, pyramid_request, search_lib, storage):
-        search_lib.search.return_value = {'total': 2,
-                                          'rows': [{'id': 'row-1'}, {'id': 'row-2'}]}
+    def test_it_loads_annotations_from_database(self, pyramid_request, search_run, storage):
+        search_run.return_value = mock.Mock(total=2, annotation_ids=['row-1', 'row-2'])
 
         views.search(pyramid_request)
 
         storage.fetch_ordered_annotations.assert_called_once_with(
             pyramid_request.db, ['row-1', 'row-2'], query_processor=mock.ANY)
 
-    def test_it_renders_search_results(self, links_service, pyramid_request, search_lib):
+    def test_it_renders_search_results(self, links_service, pyramid_request, search_run):
         ann1 = models.Annotation(userid='luke')
         ann2 = models.Annotation(userid='sarah')
         pyramid_request.db.add_all([ann1, ann2])
         pyramid_request.db.flush()
 
-        search_lib.search.return_value = {'total': 2,
-                                          'rows': [{'id': ann1.id}, {'id': ann2.id}]}
+        search_run.return_value = mock.Mock(total=2, annotation_ids=[ann1.id, ann2.id])
 
         expected = {
             'total': 2,
@@ -100,19 +98,17 @@ class TestSearch(object):
 
         assert views.search(pyramid_request) == expected
 
-    def test_it_loads_replies_from_database(self, pyramid_request, search_lib, storage):
+    def test_it_loads_replies_from_database(self, pyramid_request, search_run, storage):
         pyramid_request.params = {'_separate_replies': '1'}
-        search_lib.search.return_value = {'total': 1,
-                                          'rows': [{'id': 'row-1'}],
-                                          'replies': [{'id': 'reply-1'},
-                                                      {'id': 'reply-2'}]}
+        search_run.return_value = mock.Mock(
+            total=1, annotation_ids=['row-1'], reply_ids=['reply-1', 'reply-2'])
 
         views.search(pyramid_request)
 
         assert mock.call(pyramid_request.db, ['reply-1', 'reply-2'],
                          query_processor=mock.ANY) in storage.fetch_ordered_annotations.call_args_list
 
-    def test_it_renders_replies(self, links_service, pyramid_request, search_lib):
+    def test_it_renders_replies(self, links_service, pyramid_request, search_run):
         ann = models.Annotation(userid='luke')
         pyramid_request.db.add(ann)
         pyramid_request.db.flush()
@@ -121,10 +117,8 @@ class TestSearch(object):
         pyramid_request.db.add_all([reply1, reply2])
         pyramid_request.db.flush()
 
-        search_lib.search.return_value = {'total': 1,
-                                          'rows': [{'id': ann.id}],
-                                          'replies': [{'id': reply1.id}, {'id': reply2.id}],
-                                          }
+        search_run.return_value = mock.Mock(
+            total=1, annotation_ids=[ann.id], reply_ids=[reply1.id, reply2.id])
 
         pyramid_request.params = {'_separate_replies': '1'}
 
@@ -144,8 +138,13 @@ class TestSearch(object):
         return patch('h.api.views.search_lib')
 
     @pytest.fixture
+    def search_run(self, search_lib):
+        return search_lib.Search.return_value.run
+
+    @pytest.fixture
     def storage(self, patch):
         return patch('h.api.views.storage')
+
 
 @pytest.mark.usefixtures('AnnotationEvent',
                          'AnnotationJSONPresenter',
