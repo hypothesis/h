@@ -460,3 +460,42 @@ class TestAnyMatcher():
         assert len(result['bool']['must']) == 2
         assert {'match': {'tags': {'query': 'foo', 'operator': 'and'}}} in result['bool']['must']
         assert {'match': {'tags': {'query': 'bar', 'operator': 'and'}}} in result['bool']['must']
+
+
+class TestTagsAggregations(object):
+    def test_key_is_tags(self):
+        assert query.TagsAggregation().key == 'tags'
+
+    def test_elasticsearch_aggregation(self):
+        agg = query.TagsAggregation()
+        assert agg({}) == {
+            'terms': {'field': 'tags', 'size': 0}
+        }
+
+    def test_it_allows_to_set_a_limit(self):
+        agg = query.TagsAggregation(limit=14)
+        assert agg({}) == {
+            'terms': {'field': 'tags', 'size': 14}
+        }
+
+    def parse_result(self):
+        agg = query.TagsAggregation()
+        elasticsearch_result = {
+            'buckets': [
+                {'key': 'tag-4', 'doc_count': 42},
+                {'key': 'tag-2', 'doc_count': 28},
+            ]
+        }
+
+        assert agg(elasticsearch_result) == [
+            {'tag': 'tag-4', 'count': 42},
+            {'tag': 'tag-2', 'count': 28},
+        ]
+
+    def parse_result_with_none(self):
+        agg = query.TagsAggregation()
+        assert agg.parse_result(None) == {}
+
+    def parse_result_with_empty(self):
+        agg = query.TagsAggregation()
+        assert agg.parse_result({}) == {}

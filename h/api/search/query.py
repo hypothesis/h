@@ -244,3 +244,26 @@ class RepliesMatcher(object):
         return {
             'terms': {'references': self.annotation_ids}
         }
+
+
+class TagsAggregation(object):
+    def __init__(self, limit=0):
+        self.key = 'tags'
+        self.limit = limit
+
+    def __call__(self, _):
+        return {
+            "terms": {
+                "field": "tags",
+                "size": self.limit
+            }
+        }
+
+    def parse_result(self, result):
+        if not result:
+            return {}
+
+        return [
+            {'tag': b['key'], 'count': b['doc_count']}
+            for b in result['buckets']
+        ]
