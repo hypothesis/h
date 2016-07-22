@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from collections import namedtuple
 
 from h.api.search import query
 
@@ -7,6 +8,11 @@ FILTERS_KEY = 'h.api.search.filters'
 MATCHERS_KEY = 'h.api.search.matchers'
 
 log = logging.getLogger(__name__)
+
+SearchResult = namedtuple('SearchResult', [
+    'total',
+    'annotation_ids',
+    'reply_ids'])
 
 
 def search(request, params, private=True, separate_replies=False):
@@ -41,36 +47,31 @@ def search(request, params, private=True, separate_replies=False):
         builder.append_filter(query.TopLevelAnnotationsFilter())
 
     es = request.es
-    results = es.conn.search(index=es.index,
-                             doc_type=es.t.annotation,
-                             body=builder.build(params))
-    total = results['hits']['total']
-    docs = results['hits']['hits']
-    rows = [dict(d['_source'], id=d['_id']) for d in docs]
-    return_value = {"rows": rows, "total": total}
+    response = es.conn.search(index=es.index,
+                              doc_type=es.t.annotation,
+                              body=builder.build(params))
+    total = response['hits']['total']
+    annotation_ids = [hit['_id'] for hit in response['hits']['hits']]
+    reply_ids = []
 
     if separate_replies:
         # Do a second query for all replies to the annotations from the first
         # query.
         builder = default_querybuilder(request, private=private)
-        builder.append_matcher(query.RepliesMatcher(
-            [h['_id'] for h in results['hits']['hits']]))
-        reply_results = es.conn.search(index=es.index,
-                                       doc_type=es.t.annotation,
-                                       body=builder.build({'limit': 200}))
+        builder.append_matcher(query.RepliesMatcher(annotation_ids))
+        reply_response = es.conn.search(index=es.index,
+                                        doc_type=es.t.annotation,
+                                        body=builder.build({'limit': 200}))
 
-        if len(reply_results['hits']['hits']) < reply_results['hits']['total']:
+        if len(reply_response['hits']['hits']) < reply_response['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "
                      "of the Elasticsearch query. We currently don't handle "
                      "this, our search API doesn't support pagination of the "
                      "reply set.")
 
-        reply_docs = reply_results['hits']['hits']
-        reply_rows = [dict(d['_source'], id=d['_id']) for d in reply_docs]
+        reply_ids = [hit['_id'] for hit in reply_response['hits']['hits']]
 
-        return_value["replies"] = reply_rows
-
-    return return_value
+    return SearchResult(total, annotation_ids, reply_ids)
 
 
 def default_querybuilder(request, private=True):
