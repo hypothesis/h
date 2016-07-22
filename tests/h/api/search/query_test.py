@@ -245,18 +245,6 @@ class TestAuthFilter(object):
             'terms': {'permissions.read': ['group:__world__', 'foo']}
         }
 
-    def test_with_private_removed_authenticated_userid_principal(self):
-        request = mock.Mock(
-            effective_principals=[
-                'group:__world__', 'group:foo', 'acct:thom@hypothes.is'],
-            authenticated_userid='acct:thom@hypothes.is'
-        )
-        authfilter = query.AuthFilter(request, private=False)
-
-        assert authfilter({}) == {
-            'terms': {'permissions.read': ['group:__world__', 'group:foo']}
-        }
-
 
 class TestGroupFilter(object):
     def test_term_filters_for_group(self):
