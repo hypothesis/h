@@ -40,6 +40,7 @@ ANNOTATION_MAPPING = {
             },
         },
         'user': {'type': 'string', 'index': 'analyzed', 'analyzer': 'user'},
+        'user_raw': {'type': 'string', 'index': 'not_analyzed'},
         'target': {
             'properties': {
                 'source': {

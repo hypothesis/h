@@ -100,6 +100,7 @@ class AnnotationSearchIndexPresenter(AnnotationBasePresenter):
             'created': self.created,
             'updated': self.updated,
             'user': self.annotation.userid,
+            'user_raw': self.annotation.userid,
             'uri': self.annotation.target_uri,
             'text': self.text,
             'tags': self.tags,
