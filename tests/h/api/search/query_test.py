@@ -499,3 +499,42 @@ class TestTagsAggregations(object):
     def parse_result_with_empty(self):
         agg = query.TagsAggregation()
         assert agg.parse_result({}) == {}
+
+
+class TestUsersAggregation(object):
+    def test_key_is_users(self):
+        assert query.UsersAggregation().key == 'users'
+
+    def test_elasticsearch_aggregation(self):
+        agg = query.UsersAggregation()
+        assert agg({}) == {
+            'terms': {'field': 'user_raw', 'size': 0}
+        }
+
+    def test_it_allows_to_set_a_limit(self):
+        agg = query.UsersAggregation(limit=14)
+        assert agg({}) == {
+            'terms': {'field': 'user_raw', 'size': 14}
+        }
+
+    def parse_result(self):
+        agg = query.UsersAggregation()
+        elasticsearch_result = {
+            'buckets': [
+                {'key': 'alice', 'doc_count': 42},
+                {'key': 'luke', 'doc_count': 28},
+            ]
+        }
+
+        assert agg(elasticsearch_result) == [
+            {'user': 'alice', 'count': 42},
+            {'user': 'luke', 'count': 28},
+        ]
+
+    def parse_result_with_none(self):
+        agg = query.UsersAggregation()
+        assert agg.parse_result(None) == {}
+
+    def parse_result_with_empty(self):
+        agg = query.UsersAggregation()
+        assert agg.parse_result({}) == {}

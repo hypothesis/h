@@ -267,3 +267,26 @@ class TagsAggregation(object):
             {'tag': b['key'], 'count': b['doc_count']}
             for b in result['buckets']
         ]
+
+
+class UsersAggregation(object):
+    def __init__(self, limit=0):
+        self.key = 'users'
+        self.limit = limit
+
+    def __call__(self, _):
+        return {
+            "terms": {
+                "field": "user_raw",
+                "size": self.limit
+            }
+        }
+
+    def parse_result(self, result):
+        if not result:
+            return {}
+
+        return [
+            {'user': b['key'], 'count': b['doc_count']}
+            for b in result['buckets']
+        ]
