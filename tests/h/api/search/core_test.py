@@ -68,11 +68,7 @@ def test_search_returns_replies(pyramid_request):
 
     result = core.search(pyramid_request, {}, separate_replies=True)
 
-    assert result['replies'] == [
-        {'name': 'reply_2', 'id': 'id_2'},
-        {'name': 'reply_3', 'id': 'id_3'},
-        {'name': 'reply_4', 'id': 'id_4'},
-    ]
+    assert result.reply_ids == ['id_2', 'id_3', 'id_4']
 
 
 @search_fixtures

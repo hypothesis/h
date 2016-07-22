@@ -27,11 +27,11 @@ def search(request):
     if 'q' in request.params:
         query = parser.parse(request.params['q'])
 
-        out = search_lib.search(request, query)
-        total = out['total']
+        result = search_lib.search(request, query)
+        total = result.total
 
-        anns = storage.fetch_ordered_annotations(request.db,
-                                                 [r['id'] for r in out['rows']])
+        anns = storage.fetch_ordered_annotations(request.db, result.annotation_ids)
+
         for ann in anns:
             group = request.db.query(models.Group).filter(models.Group.pubid == ann.groupid).one_or_none()
             result = {
