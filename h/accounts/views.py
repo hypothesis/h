@@ -381,13 +381,12 @@ class RegisterController(object):
         message = activation_email(self.request, user)
         mailer.send.delay(**message)
 
-        self.request.session.flash(jinja2.Markup(_(
-            'Thank you for creating an account! '
-            "We've sent you an email with an activation link, "
-            'before you can log in <strong>please check your email and open '
-            'the link to activate your account</strong>.')), 'success')
-        self.request.registry.notify(RegistrationEvent(self.request, user))
-
+    self.request.session.flash(jinja2.Markup(_(
+        'Thank you for creating an account! '
+        "We've sent you an email with an activation link, "
+        '<strong>Please check your email and open the link'
+        ' to activate your account.</strong>')), 'success')
+    self.request.registry.notify(RegistrationEvent(self.request, user))
 
 @view_defaults(route_name='activate')
 class ActivateController(object):
@@ -631,7 +630,7 @@ def reset_password_email(user, reset_code, reset_link):
 
     """
     emailtext = ("Hello, {username}!\n\n"
-                 "Someone requested resetting your password. If it was "
+                 "Someone has requested to reset your password. If it was "
                  "you, reset your password by using this reset code:\n\n"
                  "{code}\n\n"
                  "Alternatively, you can reset your password by "
