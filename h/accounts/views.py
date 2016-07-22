@@ -384,7 +384,7 @@ class RegisterController(object):
     self.request.session.flash(jinja2.Markup(_(
         'Thank you for creating an account! '
         "We've sent you an email with an activation link, "
-        '<strong>Please check your email and open the link'
+        '<strong>please check your email and open the link'
         ' to activate your account.</strong>')), 'success')
     self.request.registry.notify(RegistrationEvent(self.request, user))
 
