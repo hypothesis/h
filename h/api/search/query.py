@@ -15,12 +15,16 @@ class Builder(object):
     def __init__(self):
         self.filters = []
         self.matchers = []
+        self.aggregations = []
 
     def append_filter(self, f):
         self.filters.append(f)
 
     def append_matcher(self, m):
         self.matchers.append(m)
+
+    def append_aggregation(self, a):
+        self.aggregations.append(a)
 
     def build(self, params):
         """Get the resulting query object from this query builder."""
@@ -32,6 +36,7 @@ class Builder(object):
 
         filters = [f(params) for f in self.filters]
         matchers = [m(params) for m in self.matchers]
+        aggregations = {a.key: a(params) for a in self.aggregations}
         filters = [f for f in filters if f is not None]
         matchers = [m for m in matchers if m is not None]
 
@@ -57,6 +62,7 @@ class Builder(object):
             "size": p_size,
             "sort": p_sort,
             "query": query,
+            "aggs": aggregations,
         }
 
 
