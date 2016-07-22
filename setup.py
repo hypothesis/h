@@ -87,7 +87,6 @@ ENTRY_POINTS = {
     ],
     'console_scripts': [
         'hypothesis=h.cli:main',
-        'hypothesis-buildext=h.buildext:main',
     ],
 }
 

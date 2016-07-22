@@ -49,53 +49,7 @@ docker: dist/h-$(BUILD_ID)
 test: node_modules/.uptodate
 	@pip install -q tox
 	tox
-	$(NPM_BIN)/gulp test-app
-	$(NPM_BIN)/gulp test-extension
-
-################################################################################
-
-# Extension build
-.PHONY: extensions
-extensions: build/$(ISODATE)-$(BUILD_ID)-chrome-stage.zip
-extensions: build/$(ISODATE)-$(BUILD_ID)-chrome-prod.zip
-extensions: build/$(ISODATE)-$(BUILD_ID)-firefox-stage.xpi
-extensions: build/$(ISODATE)-$(BUILD_ID)-firefox-prod.xpi
-
-build/%-chrome-stage.zip: build/manifest.json
-	@rm -rf build/chrome $@
-	hypothesis-buildext chrome \
-		--service 'https://stage.hypothes.is' \
-		--websocket 'wss://stage.hypothes.is/ws' \
-		--sentry-public-dsn '$(SENTRY_DSN_STAGE)' \
-		--bouncer 'https://bouncer-stage.hypothes.is'
-	@zip -qr $@ build/chrome
-
-build/%-chrome-prod.zip: build/manifest.json
-	@rm -rf build/chrome $@
-	hypothesis-buildext chrome \
-		--service 'https://hypothes.is' \
-		--websocket 'wss://hypothes.is/ws' \
-		--sentry-public-dsn '$(SENTRY_DSN_PROD)' \
-		--bouncer 'https://hyp.is'
-	@zip -qr $@ build/chrome
-
-build/%-firefox-stage.xpi: build/manifest.json
-	@rm -rf build/firefox $@
-	hypothesis-buildext firefox \
-		--service 'https://stage.hypothes.is' \
-		--websocket 'wss://stage.hypothes.is/ws' \
-		--sentry-public-dsn '$(SENTRY_DSN_STAGE)' \
-		--bouncer 'https://bouncer-stage.hypothes.is'
-	@cd build/firefox && zip -qr $(abspath $@) .
-
-build/%-firefox-prod.xpi: build/manifest.json
-	@rm -rf build/firefox $@
-	hypothesis-buildext firefox \
-		--service 'https://hypothes.is' \
-		--websocket 'wss://hypothes.is/ws' \
-		--sentry-public-dsn '$(SENTRY_DSN_PROD)' \
-		--bouncer 'https://hyp.is'
-	@cd build/firefox && zip -qr $(abspath $@) .
+	$(NPM_BIN)/gulp test
 
 ################################################################################
 
@@ -117,5 +71,4 @@ help:
 	@echo " clean      Clean up runtime artifacts (needed after a version update)"
 	@echo " dev        Run the development H server locally"
 	@echo " docker     Build hypothesis/hypothesis docker image"
-	@echo " extensions Build the browser extensions"
 	@echo " test       Run the test suite (default)"

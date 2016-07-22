@@ -258,7 +258,7 @@ For example:
 
 .. code-block:: bash
 
-    gulp test-app
+    gulp test
 
 When working on the front-end code, you can run the Karma test runner in
 auto-watch mode which will re-run the tests whenever a change is made to the
@@ -266,14 +266,14 @@ source code. To start the test runner in auto-watch mode, run:
 
 .. code-block:: bash
 
-    gulp test-watch-app
+    gulp test-watch
 
 To run only a subset of tests for front-end code, use the ``--grep``
 argument or mocha's `.only()`_ modifier.
 
 .. code-block:: bash
 
-    gulp test-watch-app --grep <pattern>
+    gulp test-watch --grep <pattern>
 
 .. _.only(): http://jaketrent.com/post/run-single-mocha-test/
 

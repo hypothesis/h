@@ -11,11 +11,4 @@ case "$ACTION" in
     gulp)
         gulp "$GULPTASK"
         ;;
-    extensions)
-        if [ -n "$TRAVIS_TAG" ]; then
-            export SENTRY_RELEASE_VERSION=$(echo "$TRAVIS_TAG" | cut -dv -f2-)
-            gulp build upload-sourcemaps
-        fi
-        make extensions
-        ;;
 esac
