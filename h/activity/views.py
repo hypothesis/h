@@ -12,6 +12,7 @@ from pyramid.view import view_config
 from h import models
 from h.api import search as search_lib
 from h.api.search import parser
+from h.api.search import query
 from h.api import storage
 
 
@@ -25,9 +26,11 @@ def search(request):
     results = []
     total = None
     if 'q' in request.params:
-        query = parser.parse(request.params['q'])
+        search_query = parser.parse(request.params['q'])
 
-        result = search_lib.Search(request).run(query)
+        search_request = search_lib.Search(request)
+        search_request.append_filter(query.TopLevelAnnotationsFilter())
+        result = search_request.run(search_query)
         total = result.total
 
         anns = storage.fetch_ordered_annotations(request.db, result.annotation_ids)
