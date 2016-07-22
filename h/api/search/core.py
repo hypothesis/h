@@ -50,6 +50,16 @@ class Search(object):
 
         return SearchResult(total, annotation_ids, reply_ids)
 
+    def append_filter(self, filter_):
+        """Append a search filter to the annotation and reply query."""
+        self.builder.append_filter(filter_)
+        self.reply_builder.append_filter(filter_)
+
+    def append_matcher(self, matcher):
+        """Append a search matcher to the annotation and reply query."""
+        self.builder.append_matcher(matcher)
+        self.reply_builder.append_matcher(matcher)
+
     def search_annotations(self, params):
         if self.separate_replies:
             self.builder.append_filter(query.TopLevelAnnotationsFilter())

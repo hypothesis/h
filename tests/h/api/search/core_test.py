@@ -97,6 +97,42 @@ class TestSearch(object):
         search.search_replies(['id-1'])
         assert log.warn.call_count == 1
 
+    def test_append_filter_appends_to_annotation_builder(self, pyramid_request):
+        filter_ = mock.Mock()
+        search = core.Search(pyramid_request)
+        search.builder = mock.Mock()
+
+        search.append_filter(filter_)
+
+        search.builder.append_filter.assert_called_once_with(filter_)
+
+    def test_append_filter_appends_to_reply_builder(self, pyramid_request):
+        filter_ = mock.Mock()
+        search = core.Search(pyramid_request)
+        search.reply_builder = mock.Mock()
+
+        search.append_filter(filter_)
+
+        search.reply_builder.append_filter.assert_called_once_with(filter_)
+
+    def test_append_matcher_appends_to_annotation_builder(self, pyramid_request):
+        matcher = mock.Mock()
+
+        search = core.Search(pyramid_request)
+        search.builder = mock.Mock()
+        search.append_matcher(matcher)
+
+        search.builder.append_matcher.assert_called_once_with(matcher)
+
+    def test_append_matcher_appends_to_reply_builder(self, pyramid_request):
+        matcher = mock.Mock()
+        search = core.Search(pyramid_request)
+        search.reply_builder = mock.Mock()
+
+        search.append_matcher(matcher)
+
+        search.reply_builder.append_matcher.assert_called_once_with(matcher)
+
     @pytest.fixture
     def search_annotations(self, patch):
         return patch('h.api.search.core.Search.search_annotations')
