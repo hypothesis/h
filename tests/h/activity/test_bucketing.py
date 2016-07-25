@@ -137,6 +137,30 @@ class TestBucket(object):
             }),
         ]
 
+    def test_annotations_from_different_days_in_same_month(self):
+        """
+        Test bucketing multiple annotations from different days of same month.
+
+        Annotations from different days of the same month should go into one
+        bucket.
+
+        """
+        document = factories.Document()
+        one_month_ago = UTCNOW - datetime.timedelta(days=30)
+        results = [
+            self.result(document=document, updated=one_month_ago),
+            self.result(document=document,
+                        updated=one_month_ago - datetime.timedelta(days=1)),
+            self.result(document=document,
+                        updated=one_month_ago - datetime.timedelta(days=2)),
+        ]
+
+        timeframes = bucketing.bucket(results)
+
+        assert timeframes == [
+            TimeframeMatcher('Jan 1970', {document: results})]
+
+
     def result(self, *args, **kwargs):
         return {'annotation': factories.Annotation(*args, **kwargs)}
 

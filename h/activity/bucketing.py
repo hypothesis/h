@@ -91,8 +91,9 @@ class TimeframeGenerator(object):
 
         cutoff_time = datetime.datetime(year=annotation.updated.year,
                                         month=annotation.updated.month,
-                                        day=annotation.updated.day)
-        timeframe = Timeframe(cutoff_time.strftime('%b %Y'), cutoff_time)
+                                        day=1)
+        timeframe = Timeframe(annotation.updated.strftime('%b %Y'),
+                              cutoff_time)
         return timeframe
 
 
