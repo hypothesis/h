@@ -15,70 +15,85 @@ SearchResult = namedtuple('SearchResult', [
     'reply_ids'])
 
 
-def search(request, params, private=True, separate_replies=False):
+class Search(object):
     """
-    Search with the given params and return the matching annotations.
+    Search is the primary way to initiate a search on the annotation index.
 
     :param request: the request object
     :type request: pyramid.request.Request
 
-    :param params: the search parameters
-    :type params: dict-like
-
-    :param private: whether or not to include private annotations in the search
-        results
-    :type private: bool
-
-    :param separate_replies: Whether or not to include a "replies" key in the
-        result containing a list of all replies to the annotations in the
-        "rows" key. If this is True then the "rows" key will include only
-        top-level annotations, not replies.
-    :type private: bool
-
-    :returns: A dict with keys:
-      "rows" (the list of matching annotations, as dicts)
-      "total" (the number of matching annotations, an int)
-      "replies": (the list of all replies to the annotations in "rows", if
-        separate_replies=True was passed)
-    :rtype: dict
+    :param separate_replies: Wheter or not to return all replies to the
+        annotations returned by this search. If this is True then the
+        resulting annotations will only include top-leve annotations, not replies.
+    :type separate_replies: bool
     """
-    builder = default_querybuilder(request, private=private)
-    if separate_replies:
-        builder.append_filter(query.TopLevelAnnotationsFilter())
+    def __init__(self, request, separate_replies=False):
+        self.request = request
+        self.es = request.es
+        self.separate_replies = separate_replies
 
-    es = request.es
-    response = es.conn.search(index=es.index,
-                              doc_type=es.t.annotation,
-                              _source=False,
-                              body=builder.build(params))
-    total = response['hits']['total']
-    annotation_ids = [hit['_id'] for hit in response['hits']['hits']]
-    reply_ids = []
+        self.builder = default_querybuilder(request)
+        self.reply_builder = default_querybuilder(request)
 
-    if separate_replies:
-        # Do a second query for all replies to the annotations from the first
-        # query.
-        builder = default_querybuilder(request, private=private)
-        builder.append_matcher(query.RepliesMatcher(annotation_ids))
-        reply_response = es.conn.search(index=es.index,
-                                        doc_type=es.t.annotation,
-                                        _source=False,
-                                        body=builder.build({'limit': 200}))
+    def run(self, params):
+        """
+        Execute the search query
 
-        if len(reply_response['hits']['hits']) < reply_response['hits']['total']:
+        :param params: the search parameters
+        :type params: dict-like
+
+        :returns: The search results
+        :rtype: SearchResult
+        """
+        total, annotation_ids = self.search_annotations(params)
+        reply_ids = self.search_replies(annotation_ids)
+
+        return SearchResult(total, annotation_ids, reply_ids)
+
+    def append_filter(self, filter_):
+        """Append a search filter to the annotation and reply query."""
+        self.builder.append_filter(filter_)
+        self.reply_builder.append_filter(filter_)
+
+    def append_matcher(self, matcher):
+        """Append a search matcher to the annotation and reply query."""
+        self.builder.append_matcher(matcher)
+        self.reply_builder.append_matcher(matcher)
+
+    def search_annotations(self, params):
+        if self.separate_replies:
+            self.builder.append_filter(query.TopLevelAnnotationsFilter())
+
+        response = self.es.conn.search(index=self.es.index,
+                                       doc_type=self.es.t.annotation,
+                                       _source=False,
+                                       body=self.builder.build(params))
+        total = response['hits']['total']
+        annotation_ids = [hit['_id'] for hit in response['hits']['hits']]
+        return (total, annotation_ids)
+
+    def search_replies(self, annotation_ids):
+        if not self.separate_replies:
+            return []
+
+        self.reply_builder.append_matcher(query.RepliesMatcher(annotation_ids))
+        response = self.es.conn.search(index=self.es.index,
+                                       doc_type=self.es.t.annotation,
+                                       _source=False,
+                                       body=self.reply_builder.build({'limit': 200}))
+
+        if len(response['hits']['hits']) < response['hits']['total']:
             log.warn("The number of reply annotations exceeded the page size "
                      "of the Elasticsearch query. We currently don't handle "
                      "this, our search API doesn't support pagination of the "
                      "reply set.")
 
-        reply_ids = [hit['_id'] for hit in reply_response['hits']['hits']]
-
-    return SearchResult(total, annotation_ids, reply_ids)
+        return [hit['_id'] for hit in response['hits']['hits']]
 
 
-def default_querybuilder(request, private=True):
+def default_querybuilder(request):
     builder = query.Builder()
-    builder.append_filter(query.AuthFilter(request, private=private))
+    builder.append_filter(query.AuthFilter(request))
     builder.append_filter(query.UriFilter(request))
     builder.append_filter(query.GroupFilter())
     builder.append_filter(query.UserFilter())
