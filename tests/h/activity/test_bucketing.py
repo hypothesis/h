@@ -40,7 +40,8 @@ class TestBucket(object):
     ])
     def test_one_annotation(self, annotation_datetime, timeframe_label):
         document = factories.Document()
-        results = [self.result(document=document, updated=annotation_datetime)]
+        results = [factories.Annotation(document=document,
+                                        updated=annotation_datetime)]
 
         timeframes = bucketing.bucket(results)
 
@@ -56,7 +57,8 @@ class TestBucket(object):
             self, annotation_datetime, timeframe_label):
         document = factories.Document()
         results = [
-            self.result(document=document, updated=annotation_datetime)
+            factories.Annotation(document=document,
+                                 updated=annotation_datetime)
             for _ in range(3)]
 
         timeframes = bucketing.bucket(results)
@@ -75,9 +77,12 @@ class TestBucket(object):
         document_2 = factories.Document()
         document_3 = factories.Document()
         results = [
-            self.result(document=document_1, updated=annotation_datetime),
-            self.result(document=document_2, updated=annotation_datetime),
-            self.result(document=document_3, updated=annotation_datetime),
+            factories.Annotation(document=document_1,
+                                 updated=annotation_datetime),
+            factories.Annotation(document=document_2,
+                                 updated=annotation_datetime),
+            factories.Annotation(document=document_3,
+                                 updated=annotation_datetime),
         ]
 
         timeframes = bucketing.bucket(results)
@@ -93,9 +98,10 @@ class TestBucket(object):
     def test_annotations_of_the_same_document_in_different_timeframes(self):
         document = factories.Document()
         results = [
-            self.result(document=document),
-            self.result(document=document, updated=FIFTH_NOVEMBER_1969),
-            self.result(document=document, updated=THIRD_MARCH_1968),
+            factories.Annotation(document=document),
+            factories.Annotation(document=document,
+                                 updated=FIFTH_NOVEMBER_1969),
+            factories.Annotation(document=document, updated=THIRD_MARCH_1968),
         ]
 
         timeframes = bucketing.bucket(results)
@@ -114,12 +120,15 @@ class TestBucket(object):
         document_5 = factories.Document()
         document_6 = factories.Document()
         results = [
-            self.result(document=document_1),
-            self.result(document=document_2),
-            self.result(document=document_3),
-            self.result(document=document_4, updated=THIRD_MARCH_1968),
-            self.result(document=document_5, updated=THIRD_MARCH_1968),
-            self.result(document=document_6, updated=THIRD_MARCH_1968),
+            factories.Annotation(document=document_1),
+            factories.Annotation(document=document_2),
+            factories.Annotation(document=document_3),
+            factories.Annotation(document=document_4,
+                                 updated=THIRD_MARCH_1968),
+            factories.Annotation(document=document_5,
+                                 updated=THIRD_MARCH_1968),
+            factories.Annotation(document=document_6,
+                                 updated=THIRD_MARCH_1968),
         ]
 
         timeframes = bucketing.bucket(results)
@@ -148,10 +157,10 @@ class TestBucket(object):
         document = factories.Document()
         one_month_ago = UTCNOW - datetime.timedelta(days=30)
         results = [
-            self.result(document=document, updated=one_month_ago),
-            self.result(document=document,
+            factories.Annotation(document=document, updated=one_month_ago),
+            factories.Annotation(document=document,
                         updated=one_month_ago - datetime.timedelta(days=1)),
-            self.result(document=document,
+            factories.Annotation(document=document,
                         updated=one_month_ago - datetime.timedelta(days=2)),
         ]
 
@@ -160,9 +169,6 @@ class TestBucket(object):
         assert timeframes == [
             TimeframeMatcher('Jan 1970', {document: results})]
 
-
-    def result(self, *args, **kwargs):
-        return {'annotation': factories.Annotation(*args, **kwargs)}
 
     @pytest.fixture
     def utcnow(self, patch):

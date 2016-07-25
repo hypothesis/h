@@ -44,18 +44,21 @@ def search(request):
             request.db, result.annotation_ids,
             query_processor=eager_load_documents)
 
-        for ann in anns:
-            group = request.db.query(models.Group).filter(models.Group.pubid == ann.groupid).one_or_none()
-            result = {
-                'annotation': ann,
-                'group': group,
-            }
-            results.append(result)
+        timeframes = bucketing.bucket(anns)
+
+        for timeframe in timeframes:
+            for document, annotations in timeframe.document_buckets.items():
+                results = []
+                for annotation in annotations:
+                    group = request.db.query(models.Group).filter(
+                        models.Group.pubid == annotation.groupid).one_or_none()
+                    results.append({'annotation': annotation, 'group': group})
+                timeframe.document_buckets[document] = results
 
     return {
         'q': request.params.get('q', ''),
         'total': total,
-        'timeframes': bucketing.bucket(results)
+        'timeframes': timeframes
     }
 
 

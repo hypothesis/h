@@ -25,7 +25,7 @@ class Timeframe(object):
         self.cutoff_time = cutoff_time
         self.document_buckets = collections.OrderedDict()
 
-    def append(self, result):
+    def append(self, annotation):
         """
         Append an annotation to its document bucket in this timeframe.
 
@@ -33,14 +33,13 @@ class Timeframe(object):
         timeframe, the caller is required to do that.
 
         """
-        annotation = result['annotation']
         document_bucket = self.document_buckets.get(annotation.document)
 
         if document_bucket is None:
             document_bucket = []
             self.document_buckets[annotation.document] = document_bucket
 
-        document_bucket.append(result)
+        document_bucket.append(annotation)
 
     def within_cutoff(self, annotation):
         """
@@ -97,30 +96,28 @@ class TimeframeGenerator(object):
         return timeframe
 
 
-def bucket(results):
+def bucket(annotations):
     """
     Return the given annotations bucketed by timeframe and document.
 
-    :param results: A chronologically-ordered list of dicts with keys
-        'annotation' (an Annotation object) and 'group'
-        (the annotation's group). This list of annotations is assumed to be
-        sorted most recently updated annotation first, otherwise the bucketing
-        algorithm will not return the right results.
+    :param annotations: A chronologically-ordered list of annotations.
+        This list of annotations is assumed to be sorted most recently updated
+        annotation first, otherwise the bucketing algorithm will not return the
+        right results.
 
     :rtype: chronologically-ordered list of Timeframe objects
 
     """
-    if not results:
+    if not annotations:
         return []
 
     generator = TimeframeGenerator()
-    timeframes = [generator.next(results[0]['annotation'])]
+    timeframes = [generator.next(annotations[0])]
 
-    for result in results:
-        annotation = result['annotation']
+    for annotation in annotations:
         if not timeframes[-1].within_cutoff(annotation):
             timeframes.append(generator.next(annotation))
-        timeframes[-1].append(result)
+        timeframes[-1].append(annotation)
 
     return timeframes
 
