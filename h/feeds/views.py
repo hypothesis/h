@@ -11,9 +11,8 @@ _ = i18n.TranslationStringFactory(__package__)
 
 def _annotations(request):
     """Return the annotations from the search API."""
-    rows = search.search(request, request.params)['rows']
-    ids = [r['id'] for r in rows]
-    return storage.fetch_ordered_annotations(request.db, ids)
+    result = search.search(request, request.params)
+    return storage.fetch_ordered_annotations(request.db, result.annotation_ids)
 
 
 @view_config(route_name='stream_atom')

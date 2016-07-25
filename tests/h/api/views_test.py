@@ -9,6 +9,7 @@ from h.api import models
 from h.api import presenters
 from h.api import views
 from h.api.schemas import ValidationError
+from h.api.search.core import SearchResult
 
 
 class TestError(object):
@@ -73,8 +74,7 @@ class TestSearch(object):
                                                   separate_replies=False)
 
     def test_it_loads_annotations_from_database(self, pyramid_request, search_lib, storage):
-        search_lib.search.return_value = {'total': 2,
-                                          'rows': [{'id': 'row-1'}, {'id': 'row-2'}]}
+        search_lib.search.return_value = SearchResult(2, ['row-1', 'row-2'], [])
 
         views.search(pyramid_request)
 
@@ -87,8 +87,7 @@ class TestSearch(object):
         pyramid_request.db.add_all([ann1, ann2])
         pyramid_request.db.flush()
 
-        search_lib.search.return_value = {'total': 2,
-                                          'rows': [{'id': ann1.id}, {'id': ann2.id}]}
+        search_lib.search.return_value = SearchResult(2, [ann1.id, ann2.id], [])
 
         expected = {
             'total': 2,
@@ -102,10 +101,7 @@ class TestSearch(object):
 
     def test_it_loads_replies_from_database(self, pyramid_request, search_lib, storage):
         pyramid_request.params = {'_separate_replies': '1'}
-        search_lib.search.return_value = {'total': 1,
-                                          'rows': [{'id': 'row-1'}],
-                                          'replies': [{'id': 'reply-1'},
-                                                      {'id': 'reply-2'}]}
+        search_lib.search.return_value = SearchResult(1, ['row-1'], ['reply-1', 'reply-2'])
 
         views.search(pyramid_request)
 
@@ -121,10 +117,7 @@ class TestSearch(object):
         pyramid_request.db.add_all([reply1, reply2])
         pyramid_request.db.flush()
 
-        search_lib.search.return_value = {'total': 1,
-                                          'rows': [{'id': ann.id}],
-                                          'replies': [{'id': reply1.id}, {'id': reply2.id}],
-                                          }
+        search_lib.search.return_value = SearchResult(1, [ann.id], [reply1.id, reply2.id])
 
         pyramid_request.params = {'_separate_replies': '1'}
 

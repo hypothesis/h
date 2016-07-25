@@ -136,17 +136,16 @@ def search(request):
     params = request.params.copy()
 
     separate_replies = params.pop('_separate_replies', False)
-    out = search_lib.search(request,
-                            params,
-                            separate_replies=separate_replies)
+    result = search_lib.search(request, params,
+                               separate_replies=separate_replies)
 
-    # Run the results through the JSON presenter
-    ids = [r['id'] for r in out['rows']]
-    out['rows'] = _present_annotations(request, ids)
+    out = {
+        'total': result.total,
+        'rows': _present_annotations(request, result.annotation_ids)
+    }
 
     if separate_replies:
-        ids = [r['id'] for r in out['replies']]
-        out['replies'] = _present_annotations(request, ids)
+        out['replies'] = _present_annotations(request, result.reply_ids)
 
     return out
 

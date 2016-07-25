@@ -24,8 +24,9 @@ def badge(request):
     if models.Blocklist.is_blocked(request.db, uri):
         return {'total': 0}
 
-    return {
-        'total': search_lib.search(request, {'uri': uri, 'limit': 0})['total']}
+    result = search_lib.search(request, {'uri': uri, 'limit': 0})
+
+    return {'total': result.total}
 
 
 def includeme(config):
