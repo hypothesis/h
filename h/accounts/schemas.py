@@ -229,7 +229,7 @@ class ResetCode(colander.SchemaType):
                                                      max_age=72*3600,
                                                      return_timestamp=True)
         except SignatureExpired:
-            raise colander.Invalid(node, _('Your reset code has expired, please reset your password again'))
+            raise colander.Invalid(node, _('Your reset code has expired: please reset your password again'))
         except BadData:
             raise colander.Invalid(node, _('Your reset code is not valid'))
 
