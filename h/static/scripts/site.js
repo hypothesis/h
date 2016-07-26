@@ -1,6 +1,6 @@
 'use strict';
 
-// configure error reporting
+// Configure error reporting
 var settings = require('./settings')(document);
 if (settings.raven) {
   require('./raven').init(settings.raven);
@@ -8,23 +8,13 @@ if (settings.raven) {
 
 require('./polyfills');
 
-var page = require('./page');
-
 var CreateGroupFormController = require('./create-group-form');
 var FormSelectOnFocusController = require('./form-select-onfocus-controller');
+var upgradeElements = require('./upgrade-elements');
 
-page('/groups/new', function () {
-  new CreateGroupFormController(document.body);
-});
+var controllers = {
+  '.js-create-group-form': CreateGroupFormController,
+  '.js-select-onfocus': FormSelectOnFocusController,
+};
 
-page('/login', function() {
-  new FormSelectOnFocusController(document.body);
-});
-
-page('/register', function() {
-  new FormSelectOnFocusController(document.body);
-});
-
-page('/forgot_password', function() {
-  new FormSelectOnFocusController(document.body);
-});
+upgradeElements(document.body, controllers);

@@ -70,7 +70,9 @@
 
       <h3>Danger Zone</h3>
 
-      <form id="js-users-delete-form" method="POST" action="{{request.route_path('admin_users_delete')}}" class="form-inline">
+      <form method="POST"
+            action="{{request.route_path('admin_users_delete')}}"
+            class="form-inline js-users-delete-form">
         <input type="hidden" name="username" value="{{user.username}}">
 
         {% if user_meta['annotations_count'] > 100 %}

@@ -1,3 +1,5 @@
+'use strict';
+
 function CreateGroupFormController(element) {
   // Create Group form handling
   var self = this;
@@ -6,7 +8,7 @@ function CreateGroupFormController(element) {
   this._infoLink = element.querySelector('.js-group-info-link');
   this._infoText = element.querySelector('.js-group-info-text');
 
-  function groupNameChanged(event) {
+  function groupNameChanged() {
     self._submitBtn.disabled = self._groupNameInput.value.trim().length === 0;
   }
 
