@@ -74,7 +74,7 @@ class TestSearch(object):
         search.run.assert_called_once_with(pyramid_request.params)
 
     def test_it_loads_annotations_from_database(self, pyramid_request, search_run, storage):
-        search_run.return_value = SearchResult(2, ['row-1', 'row-2'], [])
+        search_run.return_value = SearchResult(2, ['row-1', 'row-2'], [], {})
 
         views.search(pyramid_request)
 
@@ -87,7 +87,7 @@ class TestSearch(object):
         pyramid_request.db.add_all([ann1, ann2])
         pyramid_request.db.flush()
 
-        search_run.return_value = SearchResult(2, [ann1.id, ann2.id], [])
+        search_run.return_value = SearchResult(2, [ann1.id, ann2.id], [], {})
 
         expected = {
             'total': 2,
@@ -101,7 +101,7 @@ class TestSearch(object):
 
     def test_it_loads_replies_from_database(self, pyramid_request, search_run, storage):
         pyramid_request.params = {'_separate_replies': '1'}
-        search_run.return_value = SearchResult(1, ['row-1'], ['reply-1', 'reply-2'])
+        search_run.return_value = SearchResult(1, ['row-1'], ['reply-1', 'reply-2'], {})
 
         views.search(pyramid_request)
 
@@ -117,7 +117,7 @@ class TestSearch(object):
         pyramid_request.db.add_all([reply1, reply2])
         pyramid_request.db.flush()
 
-        search_run.return_value = SearchResult(1, [ann.id], [reply1.id, reply2.id])
+        search_run.return_value = SearchResult(1, [ann.id], [reply1.id, reply2.id], {})
 
         pyramid_request.params = {'_separate_replies': '1'}
 

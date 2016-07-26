@@ -27,13 +27,16 @@ def search(request):
 
     results = []
     total = None
+    tags = []
     if 'q' in request.params:
         search_query = parser.parse(request.params['q'])
 
         search_request = search_lib.Search(request)
         search_request.append_filter(query.TopLevelAnnotationsFilter())
+        search_request.append_aggregation(query.TagsAggregation(limit=10))
         result = search_request.run(search_query)
         total = result.total
+        tags = result.aggregations['tags']
 
         def eager_load_documents(query):
             return query.options(
@@ -58,7 +61,8 @@ def search(request):
     return {
         'q': request.params.get('q', ''),
         'total': total,
-        'timeframes': timeframes
+        'tags': tags,
+        'timeframes': timeframes,
     }
 
 

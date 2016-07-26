@@ -12,7 +12,8 @@ log = logging.getLogger(__name__)
 SearchResult = namedtuple('SearchResult', [
     'total',
     'annotation_ids',
-    'reply_ids'])
+    'reply_ids',
+    'aggregations'])
 
 
 class Search(object):
@@ -45,10 +46,10 @@ class Search(object):
         :returns: The search results
         :rtype: SearchResult
         """
-        total, annotation_ids = self.search_annotations(params)
+        total, annotation_ids, aggregations = self.search_annotations(params)
         reply_ids = self.search_replies(annotation_ids)
 
-        return SearchResult(total, annotation_ids, reply_ids)
+        return SearchResult(total, annotation_ids, reply_ids, aggregations)
 
     def append_filter(self, filter_):
         """Append a search filter to the annotation and reply query."""
@@ -60,6 +61,9 @@ class Search(object):
         self.builder.append_matcher(matcher)
         self.reply_builder.append_matcher(matcher)
 
+    def append_aggregation(self, aggregation):
+        self.builder.append_aggregation(aggregation)
+
     def search_annotations(self, params):
         if self.separate_replies:
             self.builder.append_filter(query.TopLevelAnnotationsFilter())
@@ -70,7 +74,8 @@ class Search(object):
                                        body=self.builder.build(params))
         total = response['hits']['total']
         annotation_ids = [hit['_id'] for hit in response['hits']['hits']]
-        return (total, annotation_ids)
+        aggregations = self._parse_aggregation_results(response.get('aggregations', None))
+        return (total, annotation_ids, aggregations)
 
     def search_replies(self, annotation_ids):
         if not self.separate_replies:
@@ -89,6 +94,21 @@ class Search(object):
                      "reply set.")
 
         return [hit['_id'] for hit in response['hits']['hits']]
+
+    def _parse_aggregation_results(self, aggregations):
+        if not aggregations:
+            return {}
+
+        results = {}
+        for key, result in aggregations.iteritems():
+            for agg in self.builder.aggregations:
+                if key != agg.key:
+                    continue
+
+                results[key] = agg.parse_result(result)
+                break
+
+        return results
 
 
 def default_querybuilder(request):

@@ -8,7 +8,7 @@ class TestSearch(object):
     def test_run_searches_annotations(self, pyramid_request, search_annotations):
         params = mock.Mock()
 
-        search_annotations.return_value = (0, [])
+        search_annotations.return_value = (0, [], {})
 
         search = core.Search(pyramid_request)
         search.run(params)
@@ -20,7 +20,7 @@ class TestSearch(object):
                                   search_replies,
                                   search_annotations):
         annotation_ids = [mock.Mock(), mock.Mock()]
-        search_annotations.return_value = (2, annotation_ids)
+        search_annotations.return_value = (2, annotation_ids, {})
 
         search = core.Search(pyramid_request)
         search.run({})
@@ -34,13 +34,14 @@ class TestSearch(object):
         total = 4
         annotation_ids = ['id-1', 'id-3', 'id-6', 'id-5']
         reply_ids = ['reply-8', 'reply-5']
-        search_annotations.return_value = (total, annotation_ids)
+        aggregations = {'foo': 'bar'}
+        search_annotations.return_value = (total, annotation_ids, aggregations)
         search_replies.return_value = reply_ids
 
         search = core.Search(pyramid_request)
         result = search.run({})
 
-        assert result == core.SearchResult(total, annotation_ids, reply_ids)
+        assert result == core.SearchResult(total, annotation_ids, reply_ids, aggregations)
 
     def test_search_annotations_includes_replies_by_default(self, pyramid_request, query):
         search = core.Search(pyramid_request)
@@ -49,6 +50,40 @@ class TestSearch(object):
         assert not query.TopLevelAnnotationsFilter.called, (
                 "Replies should not be filtered out of the 'rows' list if "
                 "separate_replies=True is not given")
+
+    def test_search_annotations_parses_aggregation_results(self, pyramid_request):
+        search = core.Search(pyramid_request)
+        search.es.conn.search.return_value = {
+            'hits': {
+                'total': 0,
+                'hits': [],
+            },
+            'aggregations': {
+                'foobar': {'foo': 'bar'},
+                'bazqux': {'baz': 'qux'},
+            }
+        }
+        foobaragg = mock.Mock(key='foobar')
+        bazquxagg = mock.Mock(key='bazqux')
+        search.append_aggregation(foobaragg)
+        search.append_aggregation(bazquxagg)
+
+        search.search_annotations({})
+
+        foobaragg.parse_result.assert_called_with({'foo': 'bar'})
+        bazquxagg.parse_result.assert_called_with({'baz': 'qux'})
+
+    def test_search_annotations_returns_parsed_aggregations(self, pyramid_request):
+        search = core.Search(pyramid_request)
+        search.es.conn.search.return_value = {
+            'hits': {'total': 0, 'hits': []},
+            'aggregations': {'foobar': {'foo': 'bar'}}
+        }
+        foobaragg = mock.Mock(key='foobar')
+        search.append_aggregation(foobaragg)
+
+        _, _, aggregations = search.search_annotations({})
+        assert aggregations == {'foobar': foobaragg.parse_result.return_value}
 
     def test_search_replies_skips_search_by_default(self, pyramid_request):
         search = core.Search(pyramid_request)
@@ -132,6 +167,15 @@ class TestSearch(object):
         search.append_matcher(matcher)
 
         search.reply_builder.append_matcher.assert_called_once_with(matcher)
+
+    def test_append_aggregation_appends_to_annotation_builder(self, pyramid_request):
+        aggregation = mock.Mock()
+        search = core.Search(pyramid_request)
+        search.builder = mock.Mock()
+
+        search.append_aggregation(aggregation)
+
+        search.builder.append_aggregation.assert_called_once_with(aggregation)
 
     @pytest.fixture
     def search_annotations(self, patch):

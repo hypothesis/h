@@ -4,7 +4,20 @@
 </form>
 
 {% if total %}
-Total: {{ total }}
+<p>
+Total annotations: {{ total }}
+</p>
+{% endif %}
+
+{% if tags %}
+<p>
+Tags (first ten):
+<ul>
+  {% for tag in tags %}
+  <li>{{ tag.tag }} ({{ tag.count }})</li>
+  {% endfor %}
+</ul>
+</p>
 {% endif %}
 
 <ol>
