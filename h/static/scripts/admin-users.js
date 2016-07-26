@@ -1,6 +1,8 @@
 'use strict';
 
 function AdminUsersController(element, window_) {
+  window_ = window_ || window;
+
   this._form = element;
 
   function confirmFormSubmit() {
