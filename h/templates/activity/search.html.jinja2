@@ -20,6 +20,17 @@ Tags (first ten):
 </p>
 {% endif %}
 
+{% if users %}
+<p>
+Users (first ten):
+<ul>
+  {% for user in users %}
+  <li>{{ user.user }} ({{ user.count }})</li>
+  {% endfor %}
+</ul>
+</p>
+{% endif %}
+
 <ol>
   {% for timeframe in timeframes %}
     <li>

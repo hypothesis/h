@@ -212,6 +212,7 @@ class TestAnnotationSearchIndexPresenter(object):
             'created': '2016-02-24T18:03:25.000768+00:00',
             'updated': '2016-02-29T10:24:05.000564+00:00',
             'user': 'acct:luke@hypothes.is',
+            'user_raw': 'acct:luke@hypothes.is',
             'uri': 'http://example.com',
             'text': 'It is magical!',
             'tags': ['magic'],
