@@ -125,7 +125,7 @@ class AuthController(object):
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
         userid = util.user.userid_from_username(user.username,
-            self.request.auth_domain)
+                                                self.request.auth_domain)
         headers = security.remember(self.request, userid)
         return headers
 
@@ -384,8 +384,8 @@ class RegisterController(object):
         self.request.session.flash(jinja2.Markup(_(
             'Thank you for creating an account! '
             "We've sent you an email with an activation link, "
-            'before you can log in <strong>please check your email and open '
-            'the link to activate your account</strong>.')), 'success')
+            '<strong>please check your email and open the link'
+            ' to activate your account.</strong>')), 'success')
         self.request.registry.notify(RegistrationEvent(self.request, user))
 
 
@@ -631,7 +631,7 @@ def reset_password_email(user, reset_code, reset_link):
 
     """
     emailtext = ("Hello, {username}!\n\n"
-                 "Someone requested resetting your password. If it was "
+                 "Someone has requested to reset your password. If it was "
                  "you, reset your password by using this reset code:\n\n"
                  "{code}\n\n"
                  "Alternatively, you can reset your password by "
@@ -686,7 +686,8 @@ def includeme(config):
     config.add_route('reset_password', '/reset_password')
     config.add_route('reset_password_with_code', '/reset_password/{code}')
     config.add_route('account', '/account/settings')
-    config.add_route('account_notifications', '/account/settings/notifications')
+    config.add_route(
+        'account_notifications', '/account/settings/notifications')
     config.add_route('account_developer', '/account/developer')
     config.add_route('claim_account_legacy', '/claim_account/{token}')
     config.add_route('dismiss_sidebar_tutorial',
