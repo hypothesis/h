@@ -25,7 +25,7 @@ def search(request):
     if not request.feature('activity_pages'):
         raise httpexceptions.HTTPNotFound()
 
-    results = []
+    timeframes = []
     total = None
     tags = []
     users = []
