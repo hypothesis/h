@@ -16,6 +16,9 @@
     <div class="form-actions-message">
       {%- if field.footer %}{{ field.footer | safe }}{% endif -%}
     </div>
+    {% if feature('activity_pages') %}
+    <div class="u-stretch"></div>
+    {% endif %}
     <div class="form-actions-buttons">
       {%- for button in field.buttons -%}
         <button id="{{ field.formid + button.name }}"
@@ -27,7 +30,7 @@
                 disabled="disabled"
                 {% endif -%}
                 >
-        <span>{{ _(button.title) }}</span>
+        {{ _(button.title) }}
         </button>
       {% endfor -%}
     </div>

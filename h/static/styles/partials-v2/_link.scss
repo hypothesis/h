@@ -1,0 +1,14 @@
+// Text links
+// ----------
+// Styling for text links. Note that these are not used for links to pages
+// for specific objects (eg. a document, a tag, a profile).
+
+.link {
+  color: inherit;
+  padding-bottom: 2px;
+  border-bottom: 1px dotted;
+}
+
+.link:hover {
+  color: $brand;
+}

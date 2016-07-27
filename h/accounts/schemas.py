@@ -111,12 +111,12 @@ class CSRFSchema(colander.Schema):
 class LoginSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
-        title=_('Username or email address:'),
+        title=_('Username / email'),
         widget=deform.widget.TextInputWidget(autofocus=True),
     )
     password = colander.SchemaNode(
         colander.String(),
-        title=_('Password:'),
+        title=_('Password'),
         widget=deform.widget.PasswordWidget()
     )
 
@@ -246,11 +246,11 @@ class ResetPasswordSchema(CSRFSchema):
     # call it `user` because when validated, it will return a `User` object.
     user = colander.SchemaNode(
         ResetCode(),
-        title=_('Your reset code:'),
+        title=_('Reset code'),
         hint=_('this will be emailed to you'),
         widget=deform.widget.TextInputWidget(disable_autocomplete=True))
     password = password_node(
-        title=_('New password:'),
+        title=_('New password'),
         widget=deform.widget.PasswordWidget(disable_autocomplete=True))
 
 
