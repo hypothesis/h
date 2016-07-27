@@ -6,6 +6,7 @@ import pytest
 
 from h.auth.policy import AuthenticationPolicy
 from h.auth.policy import TokenAuthenticationPolicy
+from h.auth.policy import WebSocketAuthenticationPolicy
 
 SESSION_AUTH_PATHS = (
     '/login',
@@ -209,3 +210,19 @@ class TestTokenAuthenticationPolicy(object):
     @pytest.fixture
     def jwt(self, patch):
         return patch('h.auth.tokens.userid_from_jwt')
+
+
+class TestWebSocketAuthenticationPolicy(object):
+
+    def test_policy_is_multiauth_policy(self):
+        from pyramid_multiauth import MultiAuthenticationPolicy
+        policy = WebSocketAuthenticationPolicy()
+        assert isinstance(policy, MultiAuthenticationPolicy)
+
+    def test_policy_has_correct_policies(self, matchers, patch):
+        multi = patch('pyramid_multiauth.MultiAuthenticationPolicy.__init__')
+        policy = WebSocketAuthenticationPolicy()
+        multi.assert_called_once_with(policy, [
+            matchers.instance_of(TokenAuthenticationPolicy),
+            matchers.instance_of(SessionAuthenticationPolicy),
+        ])

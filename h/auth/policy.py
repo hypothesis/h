@@ -3,6 +3,7 @@
 from pyramid import interfaces
 from pyramid.authentication import (CallbackAuthenticationPolicy,
                                     SessionAuthenticationPolicy)
+from pyramid_multiauth import MultiAuthenticationPolicy
 from zope import interface
 
 from h._compat import text_type
@@ -100,6 +101,24 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
 
         return (tokens.userid_from_api_token(token, request) or
                 tokens.userid_from_jwt(token, request))
+
+
+@interface.implementer(interfaces.IAuthenticationPolicy)
+class WebSocketAuthenticationPolicy(MultiAuthenticationPolicy):
+
+    """
+    An authentication policy for the websocket server.
+
+    This is a "multiauth" policy that tries a series of alternate
+    authentication policies in turn: first an API token policy, and then a
+    session authentication policy.
+    """
+
+    def __init__(self):
+        super(WebSocketAuthenticationPolicy, self).__init__([
+            TokenAuthenticationPolicy(callback=util.groupfinder),
+            SessionAuthenticationPolicy(callback=util.groupfinder),
+        ])
 
 
 def _is_api_request(request):
