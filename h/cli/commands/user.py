@@ -5,10 +5,16 @@ import click
 from h import models
 
 
-@click.command()
+@click.group()
+def user():
+    """Manage users."""
+
+
+@user.command()
 @click.argument('username')
+@click.option('--on/--off', default=True)
 @click.pass_context
-def admin(ctx, username):
+def admin(ctx, username, on):
     """
     Make a user an admin.
 
@@ -19,6 +25,11 @@ def admin(ctx, username):
     user = models.User.get_by_username(request.db, username)
     if user is None:
         raise click.ClickException('no user with username "{}"'.format(username))
-    else:
-        user.admin = True
+
+    user.admin = on
     request.tm.commit()
+
+    click.echo("{username} is now {status}an administrator"
+               .format(username=username,
+                       status='' if on else 'NOT '),
+               err=True)
