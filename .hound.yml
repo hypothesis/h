@@ -1,11 +1,7 @@
 coffeescript:
   enabled: false
-javascript:
-  config_file: .jshintrc
-  ignore_file: .jshintignore
-jscs:
+jshint:
   enabled: false
-  config_file: .jscsrc
 ruby:
   enabled: false
 scss:
