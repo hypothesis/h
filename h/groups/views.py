@@ -25,9 +25,9 @@ class GroupCreateController(object):
                                css_class='primary-action-btn '
                                          'group-form__submit-btn '
                                          'js-create-group-create-btn')
-        self.form = deform.Form(self.schema,
-                                css_class='group-form__form',
-                                buttons=(submit,))
+        self.form = request.create_form(self.schema,
+                                        css_class='group-form__form',
+                                        buttons=(submit,))
 
     @view_config(request_method='GET')
     def get(self):

@@ -77,9 +77,9 @@ class AuthController(object):
 
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
-        self.form = deform.Form(self.schema,
-                                buttons=(_('Log in'),),
-                                footer=form_footer)
+        self.form = request.create_form(self.schema,
+                                        buttons=(_('Log in'),),
+                                        footer=form_footer)
 
         self.login_redirect = self.request.params.get(
             'next',
@@ -145,7 +145,7 @@ class AjaxAuthController(AuthController):
     def __init__(self, request):
         self.request = request
         self.schema = schemas.LoginSchema().bind(request=self.request)
-        self.form = deform.Form(self.schema)
+        self.form = request.create_form(self.schema)
 
     @view_config(request_param='__formid__=login')
     def login(self):
@@ -189,7 +189,7 @@ class ForgotPasswordController(object):
     def __init__(self, request):
         self.request = request
         self.schema = schemas.ForgotPasswordSchema().bind(request=self.request)
-        self.form = deform.Form(self.schema, buttons=(_('Request reset'),))
+        self.form = request.create_form(self.schema, buttons=(_('Request reset'),))
 
     @view_config(request_method='GET')
     def get(self):
@@ -243,7 +243,7 @@ class ResetPasswordController(object):
     def __init__(self, request):
         self.request = request
         self.schema = schemas.ResetPasswordSchema().bind(request=self.request)
-        self.form = deform.Form(
+        self.form = request.create_form(
             schema=self.schema,
             action=self.request.route_path('reset_password'),
             buttons=(_('Save'),))
@@ -327,9 +327,9 @@ class RegisterController(object):
 
         self.request = request
         self.schema = schemas.RegisterSchema().bind(request=self.request)
-        self.form = deform.Form(self.schema,
-                                buttons=(_('Sign up'),),
-                                footer=form_footer)
+        self.form = request.create_form(self.schema,
+                                        buttons=(_('Sign up'),),
+                                        footer=form_footer)
 
     @view_config(request_method='GET')
     def get(self):
@@ -482,12 +482,12 @@ class AccountController(object):
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
         self.forms = {
-            'email': deform.Form(email_schema,
-                                 buttons=(_('Change email address'),),
-                                 formid='email'),
-            'password': deform.Form(password_schema,
-                                    buttons=(_('Change password'),),
-                                    formid='password'),
+            'email': request.create_form(email_schema,
+                                         buttons=(_('Change email address'),),
+                                         formid='email'),
+            'password': request.create_form(password_schema,
+                                            buttons=(_('Change password'),),
+                                            formid='password'),
         }
 
     @view_config(request_method='GET')
@@ -536,8 +536,8 @@ class NotificationsController(object):
     def __init__(self, request):
         self.request = request
         self.schema = schemas.NotificationsSchema().bind(request=self.request)
-        self.form = deform.Form(self.schema,
-                                buttons=(_('Save changes'),))
+        self.form = request.create_form(self.schema,
+                                        buttons=(_('Save changes'),))
 
     @view_config(request_method='GET')
     def get(self):

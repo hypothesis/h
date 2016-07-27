@@ -114,12 +114,6 @@ def db_session(db_engine):
         conn.close()
 
 
-@pytest.fixture(scope='session', autouse=True)
-def deform():
-    """Use our custom Deform renderer instead of Deform's default one."""
-    form.initialize_deform_renderer(config=mock.Mock())
-
-
 @pytest.yield_fixture
 def factories(db_session):
     from ..common import factories
@@ -182,6 +176,7 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
     """Dummy Pyramid request object."""
     request = testing.DummyRequest(db=db_session, feature=fake_feature)
     request.auth_domain = request.domain
+    request.create_form = mock.Mock()
     request.registry.settings = pyramid_settings
     return request
 
