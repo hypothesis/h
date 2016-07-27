@@ -1,3 +1,16 @@
+Unreleased
+==========
+
+Miscellanea
+-----------
+
+- Refactor `h.api.search` interface, it is now a `Search` class which can be
+  customized on a per-query basis, the return value also changed to be a new
+  `SearchResult` (#3622, #3623).
+
+- Update Hypothesis client to v0.36.0. See
+  https://github.com/hypothesis/client/releases/tag/v0.36.0
+
 0.35.0 (2016-07-22)
 ===================
 
