@@ -44,7 +44,6 @@ from gunicorn.workers.ggevent import (GeventPyWSGIWorker, PyWSGIHandler,
 from ws4py import format_addresses
 
 from h import features
-from h.auth.policy import WebSocketAuthenticationPolicy
 from h.config import configure
 
 log = logging.getLogger(__name__)
@@ -156,7 +155,7 @@ def create_app(global_config, **settings):
 
     config.include('h.auth')
     # Override the default authentication policy.
-    config.set_authentication_policy(WebSocketAuthenticationPolicy())
+    config.set_authentication_policy('h.auth.WEBSOCKET_POLICY')
 
     config.include('h.authz')
     config.include('h.session')

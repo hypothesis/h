@@ -2,9 +2,23 @@
 
 """Authentication configuration."""
 
-from h.auth.policy import AuthenticationPolicy
+from pyramid.authentication import SessionAuthenticationPolicy
+from pyramid_multiauth import MultiAuthenticationPolicy
 
-__all__ = ()
+from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
+from h.auth.util import groupfinder
+
+__all__ = (
+    'DEFAULT_POLICY',
+    'WEBSOCKET_POLICY',
+)
+
+SESSION_POLICY = SessionAuthenticationPolicy(callback=groupfinder)
+TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
+
+DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
+                                      fallback_policy=SESSION_POLICY)
+WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY, SESSION_POLICY])
 
 
 def auth_domain(request):
@@ -22,4 +36,4 @@ def includeme(config):
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
-    config.set_authentication_policy(AuthenticationPolicy())
+    config.set_authentication_policy(DEFAULT_POLICY)
