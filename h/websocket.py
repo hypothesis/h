@@ -41,14 +41,11 @@ import logging
 from gevent.pool import Pool
 from gunicorn.workers.ggevent import (GeventPyWSGIWorker, PyWSGIHandler,
                                       PyWSGIServer)
-from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid_multiauth import MultiAuthenticationPolicy
 from ws4py import format_addresses
 
 from h import features
-from h.auth.policy import TokenAuthenticationPolicy
-from h.auth.util import groupfinder
+from h.auth.policy import WebSocketAuthenticationPolicy
 from h.config import configure
 
 log = logging.getLogger(__name__)
@@ -157,12 +154,7 @@ def create_app(global_config, **settings):
     config.add_request_method(features.Client, name='feature', reify=True)
 
     config.set_authorization_policy(ACLAuthorizationPolicy())
-
-    policy = MultiAuthenticationPolicy([
-        TokenAuthenticationPolicy(callback=groupfinder),
-        SessionAuthenticationPolicy(callback=groupfinder),
-    ])
-    config.set_authentication_policy(policy)
+    config.set_authentication_policy(WebSocketAuthenticationPolicy())
 
     config.include('pyramid_services')
 
