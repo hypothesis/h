@@ -7,11 +7,9 @@ from __future__ import unicode_literals
 import logging
 
 import transaction
-from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.settings import asbool
 from pyramid.tweens import EXCVIEW
 
-from h.auth.policy import AuthenticationPolicy
 from h.config import configure
 
 log = logging.getLogger(__name__)
@@ -97,14 +95,6 @@ def includeme(config):
         },
     })
 
-    # Set up pyramid authentication and authorization policies. See the Pyramid
-    # documentation at:
-    #
-    #   http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/security.html
-    #
-    config.set_authentication_policy(AuthenticationPolicy())
-    config.set_authorization_policy(ACLAuthorizationPolicy())
-
     # API module
     #
     # We include this first so that:
@@ -116,6 +106,7 @@ def includeme(config):
     # Core site modules
     config.include('h.assets')
     config.include('h.auth')
+    config.include('h.authz')
     config.include('h.db')
     config.include('h.features')
     config.include('h.form')

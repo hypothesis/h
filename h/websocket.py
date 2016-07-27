@@ -41,7 +41,6 @@ import logging
 from gevent.pool import Pool
 from gunicorn.workers.ggevent import (GeventPyWSGIWorker, PyWSGIHandler,
                                       PyWSGIServer)
-from pyramid.authorization import ACLAuthorizationPolicy
 from ws4py import format_addresses
 
 from h import features
@@ -153,12 +152,13 @@ def create_app(global_config, **settings):
 
     config.add_request_method(features.Client, name='feature', reify=True)
 
-    config.set_authorization_policy(ACLAuthorizationPolicy())
-    config.set_authentication_policy(WebSocketAuthenticationPolicy())
-
     config.include('pyramid_services')
 
     config.include('h.auth')
+    # Override the default authentication policy.
+    config.set_authentication_policy(WebSocketAuthenticationPolicy())
+
+    config.include('h.authz')
     config.include('h.session')
     config.include('h.sentry')
     config.include('h.stats')
