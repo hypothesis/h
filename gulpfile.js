@@ -278,3 +278,13 @@ gulp.task('upload-sourcemaps',
   return gulp.src(['build/scripts/*.js', 'build/scripts/*.map'])
     .pipe(uploadToSentry(opts, projects, release));
 });
+
+gulp.task('lint', function () {
+  // Adapted from usage example at https://www.npmjs.com/package/gulp-eslint
+  // `gulp-eslint` is loaded lazily so that it is not required during Docker image builds
+  var eslint = require('gulp-eslint');
+  return gulp.src(['h/static/scripts/**/*.js'])
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
+});
