@@ -15,7 +15,6 @@ from h import __version__
 log = logging.getLogger('h')
 
 SUBCOMMANDS = (
-    'h.cli.commands.admin.admin',
     'h.cli.commands.celery.celery',
     'h.cli.commands.devserver.devserver',
     'h.cli.commands.initdb.initdb',
@@ -23,6 +22,7 @@ SUBCOMMANDS = (
     'h.cli.commands.move_uri.move_uri',
     'h.cli.commands.normalize_uris.normalize_uris',
     'h.cli.commands.reindex.reindex',
+    'h.cli.commands.user.user',
 )
 
 
