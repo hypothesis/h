@@ -2,7 +2,10 @@
 
 """Authentication configuration."""
 
-from pyramid.authentication import SessionAuthenticationPolicy
+import logging
+
+from pyramid.authentication import (RemoteUserAuthenticationPolicy,
+                                    SessionAuthenticationPolicy)
 from pyramid_multiauth import MultiAuthenticationPolicy
 
 from h.auth.policy import AuthenticationPolicy, TokenAuthenticationPolicy
@@ -13,6 +16,10 @@ __all__ = (
     'WEBSOCKET_POLICY',
 )
 
+log = logging.getLogger(__name__)
+
+PROXY_POLICY = RemoteUserAuthenticationPolicy(environ_key='HTTP_X_FORWARDED_USER',
+                                              callback=groupfinder)
 SESSION_POLICY = SessionAuthenticationPolicy(callback=groupfinder)
 TOKEN_POLICY = TokenAuthenticationPolicy(callback=groupfinder)
 
@@ -31,9 +38,24 @@ def auth_domain(request):
 
 
 def includeme(config):
-    # Allow retrieval of the auth_domain from the request object.
-    config.add_request_method(auth_domain, name='auth_domain', reify=True)
+    global DEFAULT_POLICY
+    global WEBSOCKET_POLICY
+
+    if config.registry.settings.get('h.proxy_auth'):
+        log.warn('Enabling proxy authentication mode: you MUST ensure that '
+                 'the X-Forwarded-User request header can ONLY be set by '
+                 'trusted downstream reverse proxies! Failure to heed this '
+                 'warning will result in ALL DATA stored by this service '
+                 'being available to ANYONE!')
+
+        DEFAULT_POLICY = AuthenticationPolicy(api_policy=TOKEN_POLICY,
+                                              fallback_policy=PROXY_POLICY)
+        WEBSOCKET_POLICY = MultiAuthenticationPolicy([TOKEN_POLICY,
+                                                      PROXY_POLICY])
 
     # Set the default authentication policy. This can be overridden by modules
     # that include this one.
     config.set_authentication_policy(DEFAULT_POLICY)
+
+    # Allow retrieval of the auth_domain from the request object.
+    config.add_request_method(auth_domain, name='auth_domain', reify=True)
