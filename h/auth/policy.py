@@ -1,46 +1,43 @@
 # -*- coding: utf-8 -*-
 
 from pyramid import interfaces
-from pyramid.authentication import (CallbackAuthenticationPolicy,
-                                    SessionAuthenticationPolicy)
-from pyramid_multiauth import MultiAuthenticationPolicy
+from pyramid.authentication import CallbackAuthenticationPolicy
 from zope import interface
 
 from h._compat import text_type
 from h.auth import tokens
-from h.auth import util
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
 class AuthenticationPolicy(object):
-    def __init__(self):
-        self.session_policy = SessionAuthenticationPolicy(callback=util.groupfinder)
-        self.token_policy = TokenAuthenticationPolicy(callback=util.groupfinder)
+    def __init__(self, api_policy, fallback_policy):
+        self.api_policy = api_policy
+        self.fallback_policy = fallback_policy
 
     def authenticated_userid(self, request):
         if _is_api_request(request):
-            return self.token_policy.authenticated_userid(request)
-        return self.session_policy.authenticated_userid(request)
+            return self.api_policy.authenticated_userid(request)
+        return self.fallback_policy.authenticated_userid(request)
 
     def unauthenticated_userid(self, request):
         if _is_api_request(request):
-            return self.token_policy.unauthenticated_userid(request)
-        return self.session_policy.unauthenticated_userid(request)
+            return self.api_policy.unauthenticated_userid(request)
+        return self.fallback_policy.unauthenticated_userid(request)
 
     def effective_principals(self, request):
         if _is_api_request(request):
-            return self.token_policy.effective_principals(request)
-        return self.session_policy.effective_principals(request)
+            return self.api_policy.effective_principals(request)
+        return self.fallback_policy.effective_principals(request)
 
     def remember(self, request, userid, **kw):
         if _is_api_request(request):
-            return self.token_policy.remember(request, userid, **kw)
-        return self.session_policy.remember(request, userid, **kw)
+            return self.api_policy.remember(request, userid, **kw)
+        return self.fallback_policy.remember(request, userid, **kw)
 
     def forget(self, request):
         if _is_api_request(request):
-            return self.token_policy.forget(request)
-        return self.session_policy.forget(request)
+            return self.api_policy.forget(request)
+        return self.fallback_policy.forget(request)
 
 
 @interface.implementer(interfaces.IAuthenticationPolicy)
@@ -101,24 +98,6 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
 
         return (tokens.userid_from_api_token(token, request) or
                 tokens.userid_from_jwt(token, request))
-
-
-@interface.implementer(interfaces.IAuthenticationPolicy)
-class WebSocketAuthenticationPolicy(MultiAuthenticationPolicy):
-
-    """
-    An authentication policy for the websocket server.
-
-    This is a "multiauth" policy that tries a series of alternate
-    authentication policies in turn: first an API token policy, and then a
-    session authentication policy.
-    """
-
-    def __init__(self):
-        super(WebSocketAuthenticationPolicy, self).__init__([
-            TokenAuthenticationPolicy(callback=util.groupfinder),
-            SessionAuthenticationPolicy(callback=util.groupfinder),
-        ])
 
 
 def _is_api_request(request):
