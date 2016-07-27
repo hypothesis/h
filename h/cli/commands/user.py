@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import click
+import sqlalchemy
 
 from h import models
 
@@ -8,6 +9,30 @@ from h import models
 @click.group()
 def user():
     """Manage users."""
+
+
+@user.command()
+@click.option('--username', prompt=True)
+@click.option('--email', prompt=True)
+@click.password_option()
+@click.pass_context
+def add(ctx, username, email, password):
+    """Create a new user."""
+    request = ctx.obj['bootstrap']()
+
+    user = models.User(username=username, email=email, password=password)
+    request.db.add(user)
+
+    try:
+        request.tm.commit()
+    except sqlalchemy.exc.IntegrityError as err:
+        upstream_error = '\n'.join('    ' + line
+                                   for line in err.message.split('\n'))
+        message = ('could not create user due to integrity constraint.\n\n{}'
+                   .format(upstream_error))
+        raise click.ClickException(message)
+
+    click.echo("{username} created".format(username=username), err=True)
 
 
 @user.command()
