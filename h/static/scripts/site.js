@@ -6,6 +6,8 @@ if (settings.raven) {
   require('./raven').init(settings.raven);
 }
 
+require('./polyfills');
+
 var page = require('./page');
 
 var CreateGroupFormController = require('./create-group-form');
