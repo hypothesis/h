@@ -25,7 +25,7 @@ def includeme(config):
     # main
     config.add_route('annotation',
                      '/a/{id}',
-                     factory='h.api.resources:AnnotationFactory',
+                     factory='memex.resources:AnnotationFactory',
                      traverse='/{id}')
     config.add_route('robots', '/robots.txt')
     config.add_route('session', '/app')

@@ -5,7 +5,7 @@ from pyramid import security
 from sqlalchemy.orm import exc
 import slugify
 
-from h.api import models
+from memex import models
 from h.db import Base
 from h.db import mixins
 from h import pubid

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from h import api
-from h.groups import models
+import memex
+from h import models
 
 
 def test_init(db_session, factories):
@@ -157,7 +157,7 @@ def test_documents_does_not_return_null_documents(db_session, group):
     it should not return None in the list of documents that it returns.
 
     """
-    db_session.add(api.models.Annotation(
+    db_session.add(memex.models.Annotation(
         userid=u'fred', groupid=group.pubid, shared=True))
 
     assert None not in group.documents()
@@ -165,7 +165,7 @@ def test_documents_does_not_return_null_documents(db_session, group):
 
 def annotation(session, document_, groupid, shared):
     """Add a new annotation of the given document to the db and return it."""
-    annotation_ = api.models.Annotation(
+    annotation_ = memex.models.Annotation(
         userid=u'fred', groupid=groupid, shared=shared,
         target_uri=document_.document_uris[0].uri)
     session.add(annotation_)
@@ -174,13 +174,13 @@ def annotation(session, document_, groupid, shared):
 
 def document(session, uri):
     """Add a new Document for the given uri to the db and return it."""
-    document_ = api.models.Document()
+    document_ = memex.models.Document()
     session.add(document_)
 
     # Flush the session so that document.id gets generated.
     session.flush()
 
-    session.add(api.models.DocumentURI(
+    session.add(memex.models.DocumentURI(
         claimant=uri, document_id=document_.id, uri=uri))
 
     return document_

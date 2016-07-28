@@ -2,7 +2,7 @@
 
 import click
 
-from h.api.search import index
+from memex.search import index
 
 
 @click.command()

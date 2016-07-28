@@ -127,7 +127,7 @@ def test_handle_message_sets_socket_filter_for_filter_messages():
     assert socket.filter is not None
 
 
-@mock.patch('h.api.storage.expand_uri')
+@mock.patch('memex.storage.expand_uri')
 def test_handle_message_expands_uris_in_uri_filter_with_session(expand_uri):
     expand_uri.return_value = ['http://example.com',
                                'http://example.com/alter',
@@ -157,7 +157,7 @@ def test_handle_message_expands_uris_in_uri_filter_with_session(expand_uri):
     assert 'http://example.com/print' in uri_values
 
 
-@mock.patch('h.api.storage.expand_uri')
+@mock.patch('memex.storage.expand_uri')
 def test_handle_message_expands_uris_using_passed_session(expand_uri):
     expand_uri.return_value = ['http://example.com', 'http://example.org/']
     session = mock.sentinel.db_session

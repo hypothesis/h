@@ -50,9 +50,9 @@ def includeme(config):
     config.add_subscriber('h.subscribers.add_renderer_globals',
                           'pyramid.events.BeforeRender')
     config.add_subscriber('h.subscribers.publish_annotation_event',
-                          'h.api.events.AnnotationEvent')
+                          'memex.events.AnnotationEvent')
     config.add_subscriber('h.subscribers.send_reply_notifications',
-                          'h.api.events.AnnotationEvent')
+                          'memex.events.AnnotationEvent')
 
     config.add_tween('h.tweens.conditional_http_tween_factory', under=EXCVIEW)
     config.add_tween('h.tweens.redirect_tween_factory')
@@ -98,10 +98,10 @@ def includeme(config):
     # API module
     #
     # We include this first so that:
-    # - configuration directives provided by modules in `h.api` are available
+    # - configuration directives provided by modules in `memex` are available
     #   to the rest of the application at startup.
-    # - we can override behaviour from `h.api` if necessary.
-    config.include('h.api', route_prefix='/api')
+    # - we can override behaviour from `memex` if necessary.
+    config.include('memex', route_prefix='/api')
 
     # Core site modules
     config.include('h.assets')

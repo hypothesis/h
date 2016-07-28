@@ -1,8 +1,8 @@
 from pyramid.view import view_config
 from pyramid import i18n
 
-from h.api import search
-from h.api import storage
+from memex import search
+from memex import storage
 from h import feeds
 
 

@@ -3,7 +3,7 @@
 import mock
 import pytest
 
-from h.api import events
+from memex import events
 from h import indexer
 
 

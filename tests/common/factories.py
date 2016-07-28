@@ -12,7 +12,7 @@ from sqlalchemy import orm
 
 from h import models
 from h.accounts import models as accounts_models
-from h.api import models as api_models
+from memex import models as api_models
 
 
 FAKER = faker.Factory.create()

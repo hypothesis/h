@@ -15,7 +15,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 
-from h.api.db import types
+from memex.db import types
 
 
 def upgrade():

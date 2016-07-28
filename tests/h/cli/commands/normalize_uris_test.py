@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.api import models
+from memex import models
 from h.cli.commands import normalize_uris
 
 

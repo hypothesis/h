@@ -9,7 +9,7 @@ from h import models
 from h.accounts.events import ActivationEvent
 from h.admin import worker
 from h.admin.services.user import UserRenameError
-from h.api import storage
+from memex import storage
 from h.i18n import TranslationString as _
 from h.util.user import userid_from_username
 

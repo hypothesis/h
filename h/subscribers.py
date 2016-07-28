@@ -4,7 +4,7 @@
 from h import __version__
 from h import emails
 from h import mailer
-from h.api import storage
+from memex import storage
 from h.notification import reply
 
 

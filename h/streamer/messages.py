@@ -7,9 +7,9 @@ from gevent.queue import Full
 
 from h import realtime
 from h.realtime import Consumer
-from h.api import presenters
-from h.api import storage
-from h.api.links import LinksService
+from memex import presenters
+from memex import storage
+from memex.links import LinksService
 from h.auth.util import translate_annotation_principals
 from h.nipsa.services import NipsaService
 from h.streamer import websocket

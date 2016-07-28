@@ -12,10 +12,10 @@ from sqlalchemy.orm import subqueryload
 
 from h import models
 from h.activity import bucketing
-from h.api import search as search_lib
-from h.api.search import parser
-from h.api.search import query
-from h.api import storage
+from memex import search as search_lib
+from memex.search import parser
+from memex.search import query
+from memex import storage
 
 
 @view_config(route_name='activity.search',

@@ -2,8 +2,8 @@
 
 from h.accounts import models as accounts_models
 from h.auth import models as auth_models
-from h.api.models.annotation import Annotation
-from h.api.models.document import Document, DocumentMeta, DocumentURI
+from memex.models.annotation import Annotation
+from memex.models.document import Document, DocumentMeta, DocumentURI
 from h.features import models as features_models
 from h.groups import models as groups_models
 from h.nipsa import models as nipsa_models

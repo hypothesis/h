@@ -4,10 +4,10 @@ import logging
 
 from h.celery import celery
 
-from h.api import storage
-from h.api.search.index import index
-from h.api.search.index import delete
-from h.api.search.index import reindex
+from memex import storage
+from memex.search.index import index
+from memex.search.index import delete
+from memex.search.index import reindex
 
 __all__ = (
     'add_annotation',
@@ -45,4 +45,4 @@ def subscribe_annotation_event(event):
 
 def includeme(config):
     config.add_subscriber('h.indexer.subscribe_annotation_event',
-                          'h.api.events.AnnotationEvent')
+                          'memex.events.AnnotationEvent')

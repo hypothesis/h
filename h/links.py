@@ -38,7 +38,7 @@ def incontext_link(request, annotation):
 def includeme(config):
     # Add an annotation link generator for the `annotation` view -- this adds a
     # named link called "html" to API rendered views of annotations. See
-    # :py:mod:`h.api.presenters` for details.
+    # :py:mod:`memex.presenters` for details.
     config.add_annotation_link_generator('html', html_link)
 
     # Add an annotation link generator for viewing annotations in context on
