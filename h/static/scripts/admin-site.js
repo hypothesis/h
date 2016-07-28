@@ -9,10 +9,12 @@ if (settings.raven) {
 window.$ = window.jQuery = require('jquery');
 require('bootstrap');
 
-var page = require('./page');
-
 var AdminUsersController = require('./admin-users');
+var upgradeElements = require('./upgrade-elements');
 
-page('/admin/users', function() {
-  new AdminUsersController(document.body, window);
-});
+var controllers = {
+  '.js-users-delete-form': AdminUsersController,
+};
+
+upgradeElements(document.body, controllers);
+
