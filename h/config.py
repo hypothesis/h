@@ -74,6 +74,7 @@ SETTINGS = [
     EnvSetting('h.client_secret', 'CLIENT_SECRET'),
     EnvSetting('h.db.should_create_all', 'MODEL_CREATE_ALL', type=asbool),
     EnvSetting('h.db.should_drop_all', 'MODEL_DROP_ALL', type=asbool),
+    EnvSetting('h.proxy_auth', 'PROXY_AUTH', type=asbool),
     EnvSetting('h.search.autoconfig', 'SEARCH_AUTOCONFIG', type=asbool),
     EnvSetting('h.websocket_url', 'WEBSOCKET_URL'),
     # The client Sentry DSN should be of the public kind, lacking the password
