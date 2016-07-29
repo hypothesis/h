@@ -1,10 +1,29 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
+{% if not feature('activity_pages') %}
 {% set uses_legacy_styles = True %}
+{% endif %}
 
-{% block page_title %}Create an account{% endblock %}
+{% block page_title %}
+{% if feature('activity_pages') %}
+Sign up for Hypothesis
+{% else %}
+Create account
+{% endif %}
+{% endblock %}
 
 {% block content %}
+  {%if feature('activity_pages') %}
+    {% include "h:templates/includes/logo-header.html.jinja2" %}
+    <div class="form content">
+      <h1 class="form-header">Sign up for Hypothesis</h1>
+      {{ form }}
+      <footer class="form-footer">
+        Already have an account?
+        <a class="link" href="{{ request.route_path('login') }}">Log in</a>
+      </footer>
+    </div>
+  {% else %}
   <div class="content paper">
     {% include "h:templates/includes/logo-header.html.jinja2" %}
     <div class="form-vertical">
@@ -15,6 +34,7 @@
       {{ form }}
     </div>
   </div>
+  {% endif %}
 {% endblock content %}
 
 {% block scripts %}

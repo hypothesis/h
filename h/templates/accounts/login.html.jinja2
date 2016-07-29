@@ -1,20 +1,34 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
+{% if not feature('activity_pages') %}
 {% set uses_legacy_styles = True %}
+{% endif %}
 
 {% block page_title %}Log in{% endblock %}
 
 {% block content %}
-  <div class="content paper">
+  {%if feature('activity_pages') %}
     {% include "h:templates/includes/logo-header.html.jinja2" %}
-    <div class="form-vertical">
-      <ul class="nav nav-tabs">
-        <li class="active"><a href="{{ request.route_path('login') }}">Log in</a></li>{#
-        #}<li><a href="{{ request.route_path('register') }}">Create an account</a></li>
-      </ul>
+    <div class="form content">
+      <h1 class="form-header">Log in</h1>
       {{ form }}
+      <footer class="form-footer">
+        Don't have a Hypothesis account?
+        <a class="link" href="{{ request.route_path('register') }}">Sign up</a>
+      </footer>
     </div>
-  </div>
+  {% else %}
+    <div class="content paper">
+      {% include "h:templates/includes/logo-header.html.jinja2" %}
+      <div class="form-vertical">
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="{{ request.route_path('login') }}">Log in</a></li>{#
+          #}<li><a href="{{ request.route_path('register') }}">Create an account</a></li>
+        </ul>
+        {{ form }}
+      </div>
+    </div>
+  {% endif %}
 {% endblock content %}
 
 {% block scripts %}

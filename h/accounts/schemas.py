@@ -155,7 +155,7 @@ class ForgotPasswordSchema(CSRFSchema):
     email = colander.SchemaNode(
         colander.String(),
         validator=colander.All(colander.Email()),
-        title=_('Please enter your email address:'),
+        title=_('Email address'),
         widget=deform.widget.TextInputWidget(template='emailinput',
                                              autofocus=True),
     )
@@ -191,7 +191,7 @@ class RegisterSchema(CSRFSchema):
             unique_username,
             unblacklisted_username,
         ),
-        title=_('Username:'),
+        title=_('Username'),
         hint=_('between {min} and {max} characters, containing only letters, '
                'numbers, periods, and underscores').format(
             min=models.USERNAME_MIN_LENGTH,
@@ -199,8 +199,8 @@ class RegisterSchema(CSRFSchema):
         ),
         widget=deform.widget.TextInputWidget(autofocus=True),
     )
-    email = email_node(title=_('Email address:'))
-    password = password_node(title=_('Password:'))
+    email = email_node(title=_('Email address'))
+    password = password_node(title=_('Password'))
 
 
 class ResetCode(colander.SchemaType):
