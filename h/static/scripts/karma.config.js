@@ -12,7 +12,7 @@ module.exports = function(config) {
       'browserify',
       'mocha',
       'chai',
-      'sinon'
+      'sinon',
     ],
 
     // list of files / patterns to load in the browser
@@ -45,7 +45,7 @@ module.exports = function(config) {
       debug: true,
       configure: function (bundle) {
         bundle.plugin('proxyquire-universal');
-      }
+      },
     },
 
     mochaReporter: {

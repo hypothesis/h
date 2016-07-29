@@ -10,9 +10,9 @@ function fakeExceptionData(scriptURL) {
         stacktrace: {
           frames: [{
             filename: scriptURL,
-          }]
-        }
-      }]
+          }],
+        },
+      }],
     },
     culprit: scriptURL,
   };

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var CreateGroupFormController = require('../create-group-form');
 
