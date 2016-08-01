@@ -1,6 +1,9 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
+{% if not feature('activity_pages') %}
 {%- set uses_legacy_styles = True -%}
+{% endif %}
+
 {%- set nav_pages = [
     ('account', 'Account'),
     ('account_notifications', 'Notifications'),

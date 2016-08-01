@@ -71,7 +71,7 @@ def error_validation(error, request):
 class AuthController(object):
 
     def __init__(self, request):
-        form_footer = '<a href="{href}">{text}</a>'.format(
+        form_footer = '<a class="link" href="{href}">{text}</a>'.format(
             href=request.route_path('forgot_password'),
             text=_('Forgot your password?'))
 
@@ -189,7 +189,7 @@ class ForgotPasswordController(object):
     def __init__(self, request):
         self.request = request
         self.schema = schemas.ForgotPasswordSchema().bind(request=self.request)
-        self.form = request.create_form(self.schema, buttons=(_('Request reset'),))
+        self.form = request.create_form(self.schema, buttons=(_('Reset'),))
 
     @view_config(request_method='GET')
     def get(self):
@@ -315,14 +315,14 @@ class ResetPasswordController(object):
 class RegisterController(object):
 
     def __init__(self, request):
-        tos_link = ('<a href="/terms-of-service">' +
+        tos_link = ('<a class="link" href="/terms-of-service">' +
                     _('Terms of Service') +
                     '</a>')
-        cg_link = ('<a href="/community-guidelines">' +
+        cg_link = ('<a class="link" href="/community-guidelines">' +
                    _('Community Guidelines') +
                    '</a>')
         form_footer = _(
-            'You are agreeing to be bound by our {tos_link} and '
+            'You are agreeing to our {tos_link} and '
             '{cg_link}.').format(tos_link=tos_link, cg_link=cg_link)
 
         self.request = request

@@ -1,0 +1,123 @@
+// Form input fields
+// -----------------
+// Specs: https://goo.gl/pEV9E1
+
+@at-root {
+  $border-radius: 3px;
+
+  // Padding between top border of input and input text. This includes space
+  // for the field label
+  $top-padding: 35px;
+  // Padding between bottom border of input and input text.
+  $bottom-padding: 15px;
+
+  // Horizontal padding between focus ring and input field / validation messages
+  $h-padding: 10px;
+  // Max width of validation error messages when shown to the right of the
+  // input field
+  $validation-message-width: 200px;
+
+  .form-input {
+    // Margin between input fields
+    margin-bottom: 15px;
+    position: relative;
+
+    background-color: $white;
+  }
+
+  .form-input.is-error {
+    & > .form-input__label {
+      color: $brand;
+    }
+
+    & > .form-input__input {
+      color: $brand;
+    }
+  }
+
+  // Descriptive label above the input field
+  .form-input__label {
+    @include font-normal;
+
+    position: absolute;
+    top: 10px;
+    left: $h-padding;
+
+    color: $grey-5;
+  }
+
+  // The actual <input> element for the field
+  .form-input__input {
+    padding-top: $top-padding;
+    padding-left: $h-padding;
+    padding-right: $h-padding;
+    padding-bottom: $bottom-padding;
+    width: 100%;
+
+    background: none;
+    color: $grey-6;
+    font-size: $input-font-size;
+    outline: none;
+    border: 1px solid $grey-3;
+    border-radius: 3px;
+  }
+
+  .form-input__input:hover {
+    border: 1px solid $grey-4;
+  }
+
+  @mixin thick-border {
+    // Adjust padding so that the input field's text is in the same position
+    // as when the input has a thin border
+    padding-bottom: $bottom-padding - 1px;
+    padding-left: $h-padding - 1px;
+    padding-right: $h-padding - 1px;
+    padding-top: $top-padding - 1px;
+
+    border-width: 2px;
+  }
+
+  .form-input__input:focus {
+    @include thick-border;
+    border-color: $grey-6;
+  }
+
+  .form-input.is-error > .form-input__input {
+    @include thick-border;
+    border-color: $brand;
+    padding-right: $validation-message-width + 10px;
+  }
+
+  .form-input__input:invalid {
+    // Disable default glow for invalid input fields in Firefox.
+    // See https://hyp.is/Z3bV7FV8EeaKSc_QAoTqRw
+    box-shadow: none;
+  }
+
+  // Validation error message
+  .form-input__error-item {
+    max-width: $validation-message-width;
+    position: absolute;
+    right: $h-padding;
+    top: $h-padding;
+
+    color: $brand;
+  }
+
+  // On narrow screens, display validation error messages underneath the
+  // input field.
+  @media screen and (max-width: $max-phone-width) {
+    .form-input.is-error > .form-input__input {
+      padding-bottom: $bottom-padding + 25px;
+      padding-right: $h-padding - 1px;
+    }
+
+    .form-input__error-item {
+      top: unset;
+      bottom: 10px;
+      left: $h-padding;
+      right: $h-padding;
+      max-width: unset;
+    }
+  }
+}

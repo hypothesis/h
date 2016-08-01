@@ -1,14 +1,11 @@
-// shared styling used by both the app and the website
 @import 'partials/base';
 @import 'partials/reset';
 @import 'partials/elements';
 
-// shared components
+// Components
+@import 'partials/group-form';
 @import 'partials/primary-action-btn';
 @import 'partials/share-link';
-
-// website-specific components
-@import 'partials/group-form';
 
 .body {
   background: $grey-2;
