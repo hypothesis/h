@@ -5,7 +5,13 @@
 {% block meta %}
   <link href='//fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
   {{ super() }}
-  <script type="application/json" class="js-hypothesis-config">{"firstRun":true}</script>
+  <script type="application/json" class="js-hypothesis-config">
+    {
+      "firstRun": true, {# TODO: remove after 2016-09-01, by which time old clients will be gone. #}
+      "openSidebar": true,
+      "openLoginForm": true
+    }
+  </script>
   {% if not is_onboarding %}
     <script async defer src="{{ embed_js_url }}"></script>
   {% endif %}
