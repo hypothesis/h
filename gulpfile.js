@@ -17,6 +17,7 @@ var postcss = require('gulp-postcss');
 var postcssURL = require('postcss-url');
 var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
+var svgmin = require('gulp-svgmin');
 var through = require('through2');
 
 var createBundle = require('./scripts/gulp/create-bundle');
@@ -177,8 +178,13 @@ gulp.task('watch-fonts', function () {
 
 var imageFiles = 'h/static/images/**/*';
 gulp.task('build-images', function () {
+  var shouldMinifySVG = function (file) {
+    return IS_PRODUCTION_BUILD && file.path.match(/\.svg$/);
+  };
+
   gulp.src(imageFiles)
     .pipe(changed(IMAGES_DIR))
+    .pipe(gulpIf(shouldMinifySVG, svgmin()))
     .pipe(gulp.dest(IMAGES_DIR));
 });
 

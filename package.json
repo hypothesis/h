@@ -19,6 +19,7 @@
     "gulp-postcss": "^6.1.0",
     "gulp-sass": "^2.2.0",
     "gulp-sourcemaps": "^1.6.0",
+    "gulp-svgmin": "^1.2.2",
     "gulp-util": "^3.0.7",
     "hypothesis": "^0.36.0",
     "is-equal-shallow": "^0.1.3",
