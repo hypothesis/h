@@ -12,7 +12,23 @@ import click
               default=False,
               is_flag=True,
               help='Serve HTTPS rather than plain HTTP.')
-def devserver(https):
+@click.option('--web/--no-web',
+              default=True,
+              help="Whether or not to run the Pyramid app process "
+                   "(default: --web).")
+@click.option('--ws/--no-ws',
+              default=True,
+              help="Whether or not to run the WebSocket process "
+                   "(default: --ws).")
+@click.option('--worker/--no-worker',
+              default=True,
+              help="Whether or not to run the Celery worker process "
+                   "(default: --worker).")
+@click.option('--assets/--no-assets',
+              default=True,
+              help="Whether or not to run the gulp watch process "
+                   "(default: --assets).")
+def devserver(https, web, ws, worker, assets):
     """
     Run a development server.
 
@@ -55,13 +71,21 @@ def devserver(https):
         os.environ['WEBSOCKET_URL'] = 'ws://localhost:5001/ws'
 
     m = Manager()
-    m.add_process('web',
-                  'MODEL_CREATE_ALL=true '
-                  'SEARCH_AUTOCONFIG=true '
-                  'gunicorn --reload --paste conf/development-app.ini %s' % gunicorn_args)
-    m.add_process('ws', 'gunicorn --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
-    m.add_process('worker', 'hypothesis --dev celery worker --autoreload')
-    m.add_process('assets', 'gulp watch')
+    if web:
+        m.add_process('web',
+                      'MODEL_CREATE_ALL=true '
+                      'SEARCH_AUTOCONFIG=true '
+                      'gunicorn --reload --paste conf/development-app.ini %s' % gunicorn_args)
+
+    if ws:
+        m.add_process('ws', 'gunicorn --reload --paste conf/development-websocket.ini %s' % gunicorn_args)
+
+    if worker:
+        m.add_process('worker', 'hypothesis --dev celery worker --autoreload')
+
+    if assets:
+        m.add_process('assets', 'gulp watch')
+
     m.loop()
 
     sys.exit(m.returncode)
