@@ -219,7 +219,7 @@ class ForgotPasswordController(object):
         self._send_forgot_password_email(user)
 
         return httpexceptions.HTTPFound(
-            self.request.route_path('reset_password'))
+            self.request.route_path('account_reset'))
 
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
@@ -229,14 +229,14 @@ class ForgotPasswordController(object):
         serializer = self.request.registry.password_reset_serializer
         code = serializer.dumps(user.username)
 
-        link = reset_password_link(self.request, code)
-        message = reset_password_email(user, code, link)
+        link = account_reset_link(self.request, code)
+        message = account_reset_email(user, code, link)
         mailer.send.delay(**message)
 
 
-@view_defaults(route_name='reset_password',
-               renderer='h:templates/accounts/reset_password.html.jinja2')
-class ResetPasswordController(object):
+@view_defaults(route_name='account_reset',
+               renderer='h:templates/accounts/reset.html.jinja2')
+class ResetController(object):
 
     """Controller for handling password reset forms."""
 
@@ -245,7 +245,7 @@ class ResetPasswordController(object):
         self.schema = schemas.ResetPasswordSchema().bind(request=self.request)
         self.form = request.create_form(
             schema=self.schema,
-            action=self.request.route_path('reset_password'),
+            action=self.request.route_path('account_reset'),
             buttons=(_('Save'),))
 
     @view_config(request_method='GET')
@@ -253,7 +253,7 @@ class ResetPasswordController(object):
         """Render the reset password form."""
         return {'form': self.form.render(), 'has_code': False}
 
-    @view_config(route_name='reset_password_with_code',
+    @view_config(route_name='account_reset_with_code',
                  request_method='GET')
     def get_with_prefilled_code(self):
         """Render the reset password form with a prefilled code."""
@@ -310,9 +310,9 @@ class ResetPasswordController(object):
         self.request.registry.notify(PasswordResetEvent(self.request, user))
 
 
-@view_defaults(route_name='register',
-               renderer='h:templates/accounts/register.html.jinja2')
-class RegisterController(object):
+@view_defaults(route_name='signup',
+               renderer='h:templates/accounts/signup.html.jinja2')
+class SignupController(object):
 
     def __init__(self, request):
         tos_link = ('<a class="link" href="/terms-of-service">' +
@@ -353,7 +353,7 @@ class RegisterController(object):
         except deform.ValidationFailure:
             return {'form': self.form.render()}
 
-        self._register(username=appstruct['username'],
+        self._signup(username=appstruct['username'],
                        email=appstruct['email'],
                        password=appstruct['password'])
 
@@ -364,7 +364,7 @@ class RegisterController(object):
         if self.request.authenticated_userid is not None:
             raise httpexceptions.HTTPFound(self.request.route_url('stream'))
 
-    def _register(self, username, email, password):
+    def _signup(self, username, email, password):
         user = User(username=username, email=email, password=password)
         self.request.db.add(user)
 
@@ -624,7 +624,7 @@ def activation_email(request, user):
     }
 
 
-def reset_password_email(user, reset_code, reset_link):
+def account_reset_email(user, reset_code, reset_link):
     """Return the data for a 'reset your password' email for the given user.
 
     :rtype: dict
@@ -649,9 +649,9 @@ def reset_password_email(user, reset_code, reset_link):
     }
 
 
-def reset_password_link(request, reset_code):
-    """Transform an activation code into a password reset link."""
-    return request.route_url('reset_password_with_code', code=reset_code)
+def account_reset_link(request, reset_code):
+    """Transform an activation code into an account reset link."""
+    return request.route_url('account_reset_with_code', code=reset_code)
 
 
 # TODO: This can be removed after October 2016, which will be >1 year from the
@@ -680,11 +680,11 @@ def dismiss_sidebar_tutorial(request):
 def includeme(config):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
-    config.add_route('register', '/register')
+    config.add_route('signup', '/signup')
     config.add_route('activate', '/activate/{id}/{code}')
-    config.add_route('forgot_password', '/forgot_password')
-    config.add_route('reset_password', '/reset_password')
-    config.add_route('reset_password_with_code', '/reset_password/{code}')
+    config.add_route('forgot_password', '/forgot-password')
+    config.add_route('account_reset', '/account/reset')
+    config.add_route('account_reset_with_code', '/account/reset/{code}')
     config.add_route('account', '/account/settings')
     config.add_route(
         'account_notifications', '/account/settings/notifications')

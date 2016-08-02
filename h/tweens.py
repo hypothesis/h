@@ -102,7 +102,9 @@ def content_security_policy_tween_factory(handler, registry):
 REDIRECTS = {
     '/profile': 'account',
     '/profile/notifications': 'account_notifications',
-    '/profile/developer': 'account_developer'
+    '/profile/developer': 'account_developer',
+    '/register': 'signup',
+    '/forgot_password': 'forgot_password'
 }
 
 

@@ -14,7 +14,7 @@
       {{ form }}
       <footer class="form-footer">
         Don't have a Hypothesis account?
-        <a class="link" href="{{ request.route_path('register') }}">Sign up</a>
+        <a class="link" href="{{ request.route_path('signup') }}">Sign up</a>
       </footer>
     </div>
   {% else %}
@@ -23,7 +23,7 @@
       <div class="form-vertical">
         <ul class="nav nav-tabs">
           <li class="active"><a href="{{ request.route_path('login') }}">Log in</a></li>{#
-          #}<li><a href="{{ request.route_path('register') }}">Create an account</a></li>
+          #}<li><a href="{{ request.route_path('signup') }}">Create an account</a></li>
         </ul>
         {{ form }}
       </div>
