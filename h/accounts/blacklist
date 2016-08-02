@@ -19,7 +19,6 @@ all
 analytics
 android
 announcements
-anon
 anonymous
 anywhere
 api
@@ -31,7 +30,6 @@ app
 apps
 archive
 aside
-atom
 auth
 authentication
 author
@@ -42,7 +40,6 @@ backup
 badges
 banner
 banners
-beta
 billing
 bin
 bins
@@ -51,7 +48,6 @@ blogs
 board
 bookmark
 bookmarks
-bot
 bots
 bugs
 business
@@ -83,7 +79,6 @@ delete
 demo
 design
 designer
-dev
 devel
 developers
 devices
@@ -92,13 +87,11 @@ direct
 directory
 discover
 discovery
-doc
 docs
 domain
 donate
 donor
 donors
-download
 downloads
 ecommerce
 edit
@@ -144,7 +137,6 @@ graphs
 greetings
 group
 groups
-guest
 head
 help
 history
@@ -182,7 +174,6 @@ js
 kickstarter
 knowledgebase
 last
-law
 legal
 license
 link
@@ -211,7 +202,6 @@ messenger
 mine
 mob
 mobile
-msg
 msn
 mx
 my
@@ -226,7 +216,6 @@ nickname
 notes
 notifications
 nudge
-null
 oauth
 old
 online
@@ -270,7 +259,6 @@ promo
 pub
 public
 put
-random
 reg
 register
 registration
@@ -315,7 +303,6 @@ stage
 staging
 start
 stat
-static
 statistics
 stats
 status
@@ -350,7 +337,6 @@ upload
 url
 urls
 usage
-user
 username
 users
 verify
