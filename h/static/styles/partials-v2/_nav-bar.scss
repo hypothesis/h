@@ -1,0 +1,82 @@
+// Navigation bar displayed at the top of the page
+// -----------------------------------------------
+// Specs: https://trello.com/c/atjT8T9p
+
+.nav-bar {
+  position: relative;
+
+  border-bottom: 1px solid $grey-3;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+// Nav bar content which lays out nav bar items, except for the search input
+// on small screens
+.nav-bar__content {
+  display: flex;
+  flex-direction: row;
+}
+
+.nav-bar__logo {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.nav-bar__search {
+  flex-grow: 2;
+  max-width: 650px;
+}
+
+.nav-bar-links {
+  margin-left: 10px;
+  margin-right: 60px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+// Links/menus displayed on the right-hand side of the nav bar
+.nav-bar-links__item {
+  @include font-normal;
+
+  height: 18px;
+  margin-left: 10px;
+  margin-right: 10px;
+
+  color: $grey-5;
+}
+
+.nav-bar-links__item:first-child {
+  margin-left: 0;
+}
+
+.nav-bar-links__item:last-child {
+  margin-right: 0;
+}
+
+@media screen and (max-width: $tablet-width) {
+  // Reduce horizontal margins on smaller screens to provide more space for
+  // search bar
+  .nav-bar__logo {
+    margin-left: 10px;
+  }
+
+  .nav-bar-links {
+    margin-right: 10px;
+  }
+}
+
+@media screen and (max-width: $max-phone-width) {
+  // Display search bar underneath main menu on mobile
+  .nav-bar {
+    height: 90px;
+  }
+
+  .nav-bar__search {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    right: 10px;
+  }
+}

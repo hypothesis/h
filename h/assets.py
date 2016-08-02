@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+import json
 import os
 
-import json
 from pyramid.settings import aslist
 from pyramid.static import static_view
 
