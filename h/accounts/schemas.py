@@ -169,9 +169,7 @@ class ForgotPasswordSchema(CSRFSchema):
 
         if user is None:
             err = colander.Invalid(node)
-            err['email'] = _('We have no user with the email address '
-                             '"{email}". Correct this address or try '
-                             'another.').format(email=email)
+            err['email'] = _('Unknown email address')
             raise err
 
         value['user'] = user

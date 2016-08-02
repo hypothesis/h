@@ -202,7 +202,7 @@ def test_ForgotPasswordSchema_invalid_with_no_user(pyramid_csrf_request, user_mo
         schema.deserialize({'email': 'rapha@example.com'})
 
     assert 'email' in exc.value.asdict()
-    assert 'no user with the email address' in exc.value.asdict()['email']
+    assert exc.value.asdict()['email'] == 'Unknown email address'
 
 
 def test_ForgotPasswordSchema_adds_user_to_appstruct(pyramid_csrf_request, user_model):
