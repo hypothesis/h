@@ -70,6 +70,10 @@ def includeme(config):
     # when the configuration is committed.
     config.action(None, configure_jinja2_assets, args=(config,))
 
+    # Pyramid layouts: provides support for reusable components ('panels')
+    # that are used across multiple pages
+    config.include('pyramid_layout')
+
     # Pyramid service layer: provides infrastructure for registering and
     # retrieving services bound to the request.
     config.include('pyramid_services')

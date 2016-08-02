@@ -30,11 +30,15 @@ $title-font-size: 19px;
 
 $input-font-size: 15px;
 
+// Z-index scale
+$zindex-dropdown-menu: 10;
+
 // Mobile device size breakpoints
 // ------------------------------
 // See the CSS width/height values at http://mydevice.io/devices/
 
 $max-phone-width: 500px;
+$tablet-width: 768px;
 
 // Include all mixins, making them available to the stylesheet. N.B. Mixins
 // should *never* output CSS, so this is safe.
