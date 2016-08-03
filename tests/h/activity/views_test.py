@@ -12,7 +12,7 @@ from h.activity import views
 # is turned off.
 class TestSearch(object):
     def test_it_returns_404_when_feature_turned_off(self, pyramid_request):
-        pyramid_request.feature.flags['activity_pages'] = False
+        pyramid_request.feature.flags['search_page'] = False
 
         with pytest.raises(httpexceptions.HTTPNotFound):
             views.search(pyramid_request)
