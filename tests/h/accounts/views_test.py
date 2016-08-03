@@ -760,89 +760,71 @@ class TestActivateController(object):
 @pytest.mark.usefixtures('routes')
 class TestAccountController(object):
 
-    def test_post_400s_with_no_formid(self, pyramid_request):
-        with pytest.raises(httpexceptions.HTTPBadRequest):
-            views.AccountController(pyramid_request).post()
-
-    def test_post_400s_with_bogus_formid(self, pyramid_request):
-        pyramid_request.POST = {'__formid__': 'hax0rs'}
-
-        with pytest.raises(httpexceptions.HTTPBadRequest):
-            views.AccountController(pyramid_request).post()
-
     def test_post_changing_email_with_valid_data_updates_email(self, pyramid_request, user):
-        pyramid_request.POST = {'__formid__': 'email'}
         controller = views.AccountController(pyramid_request)
         controller.forms['email'] = form_validating_to(
             {'email': 'amrit@example.com'})
 
-        controller.post()
+        controller.post_email_form()
 
         assert user.email == 'amrit@example.com'
 
     def test_post_changing_email_with_valid_data_redirects(self, pyramid_request):
-        pyramid_request.POST = {'__formid__': 'email'}
         controller = views.AccountController(pyramid_request)
         controller.forms['email'] = form_validating_to(
             {'email': 'amrit@example.com'})
 
-        result = controller.post()
+        result = controller.post_email_form()
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
     def test_post_changing_email_with_invalid_data_returns_form(self, pyramid_request):
-        pyramid_request.POST = {'__formid__': 'email'}
         controller = views.AccountController(pyramid_request)
         controller.forms['email'] = invalid_form()
 
-        result = controller.post()
+        result = controller.post_email_form()
 
         assert 'email_form' in result
 
     def test_post_changing_email_with_invalid_data_does_not_update_email(self, pyramid_request, user):
-        pyramid_request.POST = {'__formid__': 'email'}
         controller = views.AccountController(pyramid_request)
         controller.forms['email'] = invalid_form()
 
-        controller.post()
+        controller.post_email_form()
 
         assert user.email is None
 
     def test_post_changing_password_with_valid_data_updates_password(self, pyramid_request, user):
-        pyramid_request.POST = {'__formid__': 'password'}
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = form_validating_to(
             {'new_password': 'secrets!'})
 
-        controller.post()
+        controller.post_password_form()
 
         assert user.password == 'secrets!'
 
     def test_post_changing_password_with_valid_data_redirects(self, pyramid_request):
-        pyramid_request.POST = {'__formid__': 'password'}
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = form_validating_to(
             {'new_password': 'secrets!'})
 
-        result = controller.post()
+        result = controller.post_password_form()
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
     def test_post_changing_password_with_invalid_data_returns_form(self, pyramid_request):
-        pyramid_request.POST = {'__formid__': 'password'}
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
 
-        result = controller.post()
+        result = controller.post_password_form()
 
         assert 'password_form' in result
 
     def test_post_changing_password_with_invalid_data_does_not_update_password(self, pyramid_request, user):
-        pyramid_request.POST = {'__formid__': 'password'}
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
 
-        controller.post()
+        controller.post_password_form()
 
         assert user.password is None
 
