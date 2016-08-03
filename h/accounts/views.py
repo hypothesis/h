@@ -493,9 +493,7 @@ class AccountController(object):
     @view_config(request_method='GET')
     def get(self):
         """Show the user's account."""
-        return {'email': self.request.authenticated_user.email,
-                'email_form': self.forms['email'].render(),
-                'password_form': self.forms['password'].render()}
+        return self._template_data()
 
     @view_config(request_method='POST')
     def post(self):
@@ -510,9 +508,7 @@ class AccountController(object):
             elif formid == 'password':
                 self._handle_password_form()
         except deform.ValidationFailure:
-            return {'email': self.request.authenticated_user.email,
-                    'email_form': self.forms['email'].render(),
-                    'password_form': self.forms['password'].render()}
+            return self._template_data()
 
         self.request.session.flash(_("Success. We've saved your changes."),
                                    'success')
@@ -526,6 +522,12 @@ class AccountController(object):
     def _handle_password_form(self):
         appstruct = self.forms['password'].validate(self.request.POST.items())
         self.request.authenticated_user.password = appstruct['new_password']
+
+    def _template_data(self):
+        """Return the data needed to render accounts.html.jinja2."""
+        return {'email': self.request.authenticated_user.email,
+                'email_form': self.forms['email'].render(),
+                'password_form': self.forms['password'].render()}
 
 
 @view_defaults(route_name='account_notifications',
