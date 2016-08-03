@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 FEATURES = {
     'activity_pages': "Show the new activity pages?",
     'orphans_tab': "Show the orphans tab to separate anchored and unanchored annotations?",
+    'search_page': "Show the activity pages search skeleton page?",
     'selection_tabs': "Show the tabs to select between annotations and notes?",
 }
 

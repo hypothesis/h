@@ -22,7 +22,7 @@ from h.api import storage
              request_method='GET',
              renderer='h:templates/activity/search.html.jinja2')
 def search(request):
-    if not request.feature('activity_pages'):
+    if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
 
     timeframes = []
