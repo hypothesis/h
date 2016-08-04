@@ -36,11 +36,18 @@ Users (first ten):
     <li>
       <p><strong>{{ timeframe.label }}</strong></p>
       <ol>
-        {% for document, results in timeframe.document_buckets.items() %}
+        {% for bucket in timeframe.document_buckets.values() %}
           <li>
-            <p><strong>{{ document.title }}</strong> ({{ document.id }}), <strong>{{ results|length }}</strong></p>
+            <p><strong>{{ bucket.title }}</strong></p>
+            <p style="font-size: 0.8em;">
+            Domain: {{ bucket.domain }}<br>
+            URI: {{ bucket.uri }}<br>
+            Count: {{ bucket.annotations_count }}<br>
+            Tags: {{ bucket.tags }}<br>
+            Users: {{ bucket.users }}
+            </p>
             <ol>
-              {% for result in results %}
+              {% for result in bucket.annotations %}
                 <li>
                   <p>ID: {{ result.annotation.id }}</p>
                   <p>Updated: {{ result.annotation.updated.strftime('%d %b %Y') }}</p>
