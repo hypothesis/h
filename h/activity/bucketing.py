@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Code for bucketing annotations by time frame and document."""
 
 from __future__ import unicode_literals
@@ -7,8 +8,59 @@ import datetime
 
 from pyramid import i18n
 
+from h._compat import urlparse
+
 
 _ = i18n.TranslationStringFactory(__package__)
+
+
+class DocumentBucket(object):
+    def __init__(self, document, annotations=None):
+        self.annotations = []
+        self.tags = set()
+        self.users = set()
+        self.uri = None
+        self.domain = None
+
+        self.title = document.title
+
+        parsed = self._find_http_or_https_uri(document)
+        if parsed:
+            self.uri = parsed.geturl()
+            self.domain = parsed.netloc
+
+        if annotations:
+            self.update(annotations)
+
+    @property
+    def annotations_count(self):
+        return len(self.annotations)
+
+    def append(self, annotation):
+        self.annotations.append(annotation)
+        self.tags.update(set(annotation.tags))
+        self.users.add(annotation.userid)
+
+    def update(self, annotations):
+        for annotation in annotations:
+            self.append(annotation)
+
+    def _find_http_or_https_uri(self, document):
+        for docuri in document.document_uris:
+            uri = urlparse.urlparse(docuri.uri)
+            if uri.scheme in ['http', 'https']:
+                return uri
+
+        return None
+
+    def __eq__(self, other):
+        return (
+            self.annotations == other.annotations and
+            self.tags == other.tags and
+            self.users == other.users and
+            self.uri == other.uri and
+            self.domain == other.domain and
+            self.title == other.title)
 
 
 class Timeframe(object):
