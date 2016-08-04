@@ -228,7 +228,9 @@ class TestBucket(object):
         timeframes = bucketing.bucket(results)
 
         assert timeframes == [
-            TimeframeMatcher(timeframe_label, {document: results})
+            TimeframeMatcher(timeframe_label, {
+                document: bucketing.DocumentBucket(document, results)
+            })
         ]
 
     @pytest.mark.parametrize('annotation_datetime,timeframe_label', [
@@ -246,7 +248,9 @@ class TestBucket(object):
         timeframes = bucketing.bucket(results)
 
         assert timeframes == [
-            TimeframeMatcher(timeframe_label, {document: results}),
+            TimeframeMatcher(timeframe_label, {
+                document: bucketing.DocumentBucket(document, results)
+            }),
         ]
 
     @pytest.mark.parametrize("annotation_datetime,timeframe_label", [
@@ -271,9 +275,9 @@ class TestBucket(object):
 
         assert timeframes == [
             TimeframeMatcher(timeframe_label, {
-                document_1: [results[0]],
-                document_2: [results[1]],
-                document_3: [results[2]],
+                document_1: bucketing.DocumentBucket(document_1, [results[0]]),
+                document_2: bucketing.DocumentBucket(document_2, [results[1]]),
+                document_3: bucketing.DocumentBucket(document_3, [results[2]]),
             }),
         ]
 
@@ -288,10 +292,14 @@ class TestBucket(object):
 
         timeframes = bucketing.bucket(results)
 
+        expected_bucket_1 = bucketing.DocumentBucket(document, [results[0]])
+        expected_bucket_2 = bucketing.DocumentBucket(document, [results[1]])
+        expected_bucket_3 = bucketing.DocumentBucket(document, [results[2]])
+
         assert timeframes == [
-            TimeframeMatcher('Last 7 days', {document: [results[0]]}),
-            TimeframeMatcher('Nov 1969', {document: [results[1]]}),
-            TimeframeMatcher('Mar 1968', {document: [results[2]]}),
+            TimeframeMatcher('Last 7 days', {document: expected_bucket_1}),
+            TimeframeMatcher('Nov 1969', {document: expected_bucket_2}),
+            TimeframeMatcher('Mar 1968', {document: expected_bucket_3}),
         ]
 
     def test_recent_and_older_annotations_together(self):
@@ -315,16 +323,23 @@ class TestBucket(object):
 
         timeframes = bucketing.bucket(results)
 
+        expected_bucket_1 = bucketing.DocumentBucket(document_1, [results[0]])
+        expected_bucket_2 = bucketing.DocumentBucket(document_2, [results[1]])
+        expected_bucket_3 = bucketing.DocumentBucket(document_3, [results[2]])
+        expected_bucket_4 = bucketing.DocumentBucket(document_4, [results[3]])
+        expected_bucket_5 = bucketing.DocumentBucket(document_5, [results[4]])
+        expected_bucket_6 = bucketing.DocumentBucket(document_6, [results[5]])
+
         assert timeframes == [
             TimeframeMatcher('Last 7 days', {
-                document_1: [results[0]],
-                document_2: [results[1]],
-                document_3: [results[2]],
+                document_1: expected_bucket_1,
+                document_2: expected_bucket_2,
+                document_3: expected_bucket_3,
             }),
             TimeframeMatcher('Mar 1968', {
-                document_4: [results[3]],
-                document_5: [results[4]],
-                document_6: [results[5]],
+                document_4: expected_bucket_4,
+                document_5: expected_bucket_5,
+                document_6: expected_bucket_6,
             }),
         ]
 
@@ -338,19 +353,21 @@ class TestBucket(object):
         """
         document = factories.Document()
         one_month_ago = UTCNOW - datetime.timedelta(days=30)
-        results = [
+        annotations = [
             factories.Annotation(document=document, updated=one_month_ago),
             factories.Annotation(document=document,
-                        updated=one_month_ago - datetime.timedelta(days=1)),
+                                 updated=one_month_ago - datetime.timedelta(days=1)),
             factories.Annotation(document=document,
-                        updated=one_month_ago - datetime.timedelta(days=2)),
+                                 updated=one_month_ago - datetime.timedelta(days=2)),
         ]
 
-        timeframes = bucketing.bucket(results)
+        timeframes = bucketing.bucket(annotations)
+
+        expected_bucket = bucketing.DocumentBucket(document)
+        expected_bucket.update(annotations)
 
         assert timeframes == [
-            TimeframeMatcher('Jan 1970', {document: results})]
-
+            TimeframeMatcher('Jan 1970', {document: expected_bucket})]
 
     @pytest.fixture
     def utcnow(self, patch):

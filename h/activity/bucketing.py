@@ -88,7 +88,7 @@ class Timeframe(object):
         document_bucket = self.document_buckets.get(annotation.document)
 
         if document_bucket is None:
-            document_bucket = []
+            document_bucket = DocumentBucket(annotation.document)
             self.document_buckets[annotation.document] = document_bucket
 
         document_bucket.append(annotation)
