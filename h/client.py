@@ -58,7 +58,6 @@ def _app_html_context(assets_env, api_url, service_url, ga_tracking_id,
         'app_js_urls': assets_env.urls('app_js'),
         'ga_tracking_id': ga_tracking_id,
         'ga_cookie_domain': ga_cookie_domain,
-        'register_url': service_url + 'register',
     }
 
 
