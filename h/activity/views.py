@@ -54,13 +54,11 @@ def search(request):
         timeframes = bucketing.bucket(anns)
 
         for timeframe in timeframes:
-            for document, annotations in timeframe.document_buckets.items():
-                results = []
-                for annotation in annotations:
+            for document, bucket in timeframe.document_buckets.items():
+                for index, annotation in enumerate(bucket.annotations):
                     group = request.db.query(models.Group).filter(
                         models.Group.pubid == annotation.groupid).one_or_none()
-                    results.append({'annotation': annotation, 'group': group})
-                timeframe.document_buckets[document] = results
+                    bucket.annotations[index] = {'annotation': annotation, 'group': group}
 
     return {
         'q': request.params.get('q', ''),
