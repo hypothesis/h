@@ -1,0 +1,11 @@
+.form-checkbox {
+  @include font-normal;
+  border: 1px solid $grey-3;
+  border-radius: 3px;
+  color: $grey-6;
+  padding: 15px;
+}
+
+.form-checkbox__label {
+  padding-left: 10px;
+}

@@ -1,7 +1,7 @@
 <input type="hidden" name="__start__" value="{{ field.name }}:sequence">
 <div class="form-checkbox-list">
   {% for value, title in field.widget.values %}
-  <div class="form-checkbox-item">
+  <div class="form-checkbox">
     <input type="checkbox"
            name="checkbox"
            value="{{ value }}"
@@ -15,7 +15,10 @@
            {% if value in cstruct %}
            checked="True"
            {% endif %}>
-    <label for="{{ field.oid }}-{{ loop.index0 }}">{{ title }}</label>
+    <label for="{{ field.oid }}-{{ loop.index0 }}"
+           class="form-checkbox__label">
+      {{ title }}
+    </label>
   </div>
   {% endfor %}
 </div>
