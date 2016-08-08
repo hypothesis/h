@@ -495,33 +495,40 @@ class AccountController(object):
         """Show the user's account."""
         return self._template_data()
 
-    @view_config(request_method='POST')
-    def post(self):
-        """Handle POST payload from account update form."""
-        formid = self.request.POST.get('__formid__')
-        if formid is None or formid not in self.forms:
-            raise httpexceptions.HTTPBadRequest()
+    @view_config(request_method='POST',
+                 request_param='__formid__=email')
+    def post_email_form(self):
+        """Called by Pyramid when the change email form is submitted."""
+        return self.handle_form_submission(
+            self.forms['email'],
+            on_success=self.update_email_address)
 
+    @view_config(request_method='POST',
+                 request_param='__formid__=password')
+    def post_password_form(self):
+        """Called by Pyramid when the change password form is submitted."""
+        return self.handle_form_submission(
+            self.forms['password'],
+            on_success=self.update_password)
+
+    def update_email_address(self, appstruct):
+        self.request.authenticated_user.email = appstruct['email']
+
+    def update_password(self, appstruct):
+        self.request.authenticated_user.password = appstruct['new_password']
+
+    def handle_form_submission(self, form, on_success):
+        """Handle the submission of the given form."""
         try:
-            if formid == 'email':
-                self._handle_email_form()
-            elif formid == 'password':
-                self._handle_password_form()
+            appstruct = form.validate(self.request.POST.items())
         except deform.ValidationFailure:
             return self._template_data()
 
+        on_success(appstruct)
         self.request.session.flash(_("Success. We've saved your changes."),
                                    'success')
         return httpexceptions.HTTPFound(
             location=self.request.route_url('account'))
-
-    def _handle_email_form(self):
-        appstruct = self.forms['email'].validate(self.request.POST.items())
-        self.request.authenticated_user.email = appstruct['email']
-
-    def _handle_password_form(self):
-        appstruct = self.forms['password'].validate(self.request.POST.items())
-        self.request.authenticated_user.password = appstruct['new_password']
 
     def _template_data(self):
         """Return the data needed to render accounts.html.jinja2."""
