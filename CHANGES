@@ -1,3 +1,27 @@
+Unreleased
+==========
+
+Features
+--------
+
+- Add "proxy" auth policy mode (#3638).
+
+- Implement new form designs for logged out forms under a feature flag (#3640).
+
+Miscellanea
+-----------
+
+- Add `hypothesis user add` command (#3634) and move admin command under the
+  users subcommand as well (#3632).
+
+- Replace "firstRun" config option with "openSidebar" and "openLoginForm"
+  (#3643).
+
+- Change URL paths for reset password, forgot password and register (#3651).
+
+- Update Hypothesis client to v0.38.0. See
+  https://github.com/hypothesis/client/releases/tag/v0.38.0
+
 0.36.0 (2016-07-27)
 ===================
 
