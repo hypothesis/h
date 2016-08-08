@@ -5,7 +5,6 @@ import os
 import pytest
 from webtest import TestApp
 
-import tests.common.factories
 
 TEST_SETTINGS = {
     'es.host': os.environ.get('ELASTICSEARCH_HOST', 'http://localhost:9200'),
@@ -51,9 +50,10 @@ def db_session(request, config):
 
 @pytest.yield_fixture
 def factories(db_session):
-    tests.common.factories.SESSION = db_session
-    yield tests.common.factories
-    tests.common.factories.SESSION = None
+    from ..common import factories
+    factories.SESSION = db_session
+    yield factories
+    factories.SESSION = None
 
 
 def _drop_indices(settings):
