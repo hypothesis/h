@@ -38,6 +38,26 @@ def ajax_payload(request, data):
     return payload
 
 
+def to_xhr_response(request, non_xhr_result, form):
+    """
+    Return an XHR response for the given ``form``, or ``non_xhr_result``.
+
+    If the given ``request`` is an XMLHttpRequest then return an XHR form
+    submission response for the given form (contains only the ``<form>``
+    element as an HTML snippet, not the entire HTML page).
+
+    If ``request`` is not an XHR request then return ``non_xhr_result``, which
+    should be the result that the view callable would normally return if this
+    were not an XHR request.
+
+    """
+    if not request.is_xhr:
+        return non_xhr_result
+
+    request.override_renderer = 'string'
+    return form.render()
+
+
 @json_view(context=BadCSRFToken)
 def bad_csrf_token(context, request):
     request.response.status_code = 403
@@ -522,19 +542,21 @@ class AccountController(object):
         try:
             appstruct = form.validate(self.request.POST.items())
         except deform.ValidationFailure:
-            return self._template_data()
+            result = self._template_data()
+        else:
+            on_success(appstruct)
+            self.request.session.flash(_("Success. We've saved your changes."),
+                                       'success')
+            result = httpexceptions.HTTPFound(
+                location=self.request.route_url('account'))
 
-        on_success(appstruct)
-        self.request.session.flash(_("Success. We've saved your changes."),
-                                   'success')
-        return httpexceptions.HTTPFound(
-            location=self.request.route_url('account'))
+        return to_xhr_response(self.request, result, form)
 
     def _template_data(self):
         """Return the data needed to render accounts.html.jinja2."""
         return {'email': self.request.authenticated_user.email,
-                'email_form': self.forms['email'].render(),
-                'password_form': self.forms['password'].render()}
+                'email_form': self.forms['email'],
+                'password_form': self.forms['password']}
 
 
 @view_defaults(route_name='account_notifications',

@@ -828,10 +828,139 @@ class TestAccountController(object):
 
         assert user.password is None
 
+    def test_post_email_form_xhr_calls_validate(self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['email'] = form_validating_to(
+            {'email': 'amrit@example.com'})
+        pyramid_request.is_xhr = True
+
+        controller.post_email_form()
+
+        controller.forms['email'].validate.assert_called_once_with(
+            pyramid_request.POST.items())
+
+    def test_post_email_form_xhr_changes_email(self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['email'] = form_validating_to(
+            {'email': 'amrit@example.com'})
+        pyramid_request.is_xhr = True
+
+        controller.post_email_form()
+
+        assert pyramid_request.authenticated_user.email == 'amrit@example.com'
+
+    def test_post_email_form_xhr_does_not_crash_if_validate_fails(
+            self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['email'] = invalid_form()
+        pyramid_request.is_xhr = True
+
+        controller.post_email_form()
+
+    def test_post_email_form_xhr_does_not_set_email_if_validate_fails(
+            self, pyramid_request):
+        original_email = pyramid_request.authenticated_user.email
+        controller = views.AccountController(pyramid_request)
+        controller.forms['email'] = invalid_form()
+        pyramid_request.is_xhr = True
+
+        controller.post_email_form()
+
+        assert pyramid_request.authenticated_user.email == original_email
+
+    def test_post_email_form_xhr_response(self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['email'] = form_validating_to(
+            {'email': 'amrit@example.com'})
+        pyramid_request.is_xhr = True
+
+        response = controller.post_email_form()
+
+        assert response.status_int == 200
+        assert response.content_type == 'text/plain'
+        assert response.body == controller.forms['email'].render.return_value
+
+    def test_post_email_form_xhr_invalid_response(self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['email'] = invalid_form()
+        pyramid_request.is_xhr = True
+
+        response = controller.post_email_form()
+
+        assert response.status_int == 200
+        assert response.content_type == 'text/plain'
+        assert response.body == controller.forms['email'].render.return_value
+
+    def test_post_password_form_xhr_calls_validate(self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['password'] = form_validating_to(
+            {'new_password': 'new_password'})
+        pyramid_request.is_xhr = True
+
+        controller.post_password_form()
+
+        controller.forms['password'].validate.assert_called_once_with(
+            pyramid_request.POST.items())
+
+    def test_post_password_form_xhr_changes_password(self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['password'] = form_validating_to(
+            {'new_password': 'new_password'})
+        pyramid_request.is_xhr = True
+
+        controller.post_password_form()
+
+        assert pyramid_request.authenticated_user.password == 'new_password'
+
+    def test_post_password_form_xhr_does_not_crash_if_validate_fails(
+            self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['password'] = invalid_form()
+        pyramid_request.is_xhr = True
+
+        controller.post_password_form()
+
+    def test_post_password_form_xhr_does_not_set_password_if_validate_fails(
+            self, pyramid_request):
+        original_password = pyramid_request.authenticated_user.password
+        controller = views.AccountController(pyramid_request)
+        controller.forms['password'] = invalid_form()
+        pyramid_request.is_xhr = True
+
+        controller.post_password_form()
+
+        assert pyramid_request.authenticated_user.password == original_password
+
+    def test_post_password_form_xhr_response(self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['password'] = form_validating_to(
+            {'new_password': 'new_password'})
+        pyramid_request.is_xhr = True
+
+        response = controller.post_password_form()
+
+        assert response.status_int == 200
+        assert response.content_type == 'text/plain'
+        assert response.body == (
+            controller.forms['password'].render.return_value)
+
+    def test_post_password_form_xhr_invalid_response(self, pyramid_request):
+        controller = views.AccountController(pyramid_request)
+        controller.forms['password'] = invalid_form()
+        pyramid_request.is_xhr = True
+
+        response = controller.post_password_form()
+
+        assert response.status_int == 200
+        assert response.content_type == 'text/plain'
+        assert response.body == (
+            controller.forms['password'].render.return_value)
+
     @pytest.fixture
     def pyramid_request(self, pyramid_request, user):
         pyramid_request.POST = {}
         pyramid_request.authenticated_user = user
+        pyramid_request.is_xhr = False
         return pyramid_request
 
     @pytest.fixture
@@ -841,7 +970,6 @@ class TestAccountController(object):
     @pytest.fixture
     def user(self):
         return FakeUser()
-
 
 
 @pytest.mark.usefixtures('pyramid_config',
