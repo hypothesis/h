@@ -32,6 +32,7 @@ INSTALL_REQUIRES = [
     'SQLAlchemy>=1.0.13',
     'elasticsearch>=1.1.0,<2.0.0',
     'jsonschema>=2.5.1,<2.6',
+    'mistune>=0.7.3,<0.8',
     'psycopg2>=2.6.1,<2.7',
     'pyparsing>=2.1.5,<2.2',
     'pyramid-services==0.4',

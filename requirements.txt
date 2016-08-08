@@ -38,6 +38,7 @@ jsonschema==2.5.1
 kombu==3.0.35
 Mako==1.0.4               # via alembic
 MarkupSafe==0.23          # via jinja2, mako, pyramid-jinja2
+mistune==0.7.3
 PasteDeploy==1.5.2        # via pyramid
 pbkdf2==1.3               # via cryptacular
 peppercorn==0.5           # via deform
