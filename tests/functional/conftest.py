@@ -13,6 +13,7 @@ TEST_SETTINGS = {
     'h.db.should_create_all': True,
     'h.db.should_drop_all': True,
     'h.search.autoconfig': True,
+    'pyramid.debug_all': True,
     'sqlalchemy.url': os.environ.get('TEST_DATABASE_URL',
                                      'postgresql://postgres@localhost/htest')
 }
