@@ -99,21 +99,22 @@ def content_security_policy_tween_factory(handler, registry):
     return content_security_policy_tween
 
 
-REDIRECTS = {
-    '/profile': 'account',
-    '/profile/notifications': 'account_notifications',
-    '/profile/developer': 'account_developer',
-    '/register': 'signup',
-    '/forgot_password': 'forgot_password'
-}
+REDIRECTS = [
+    ('/profile/notifications', 'account_notifications'),
+    ('/profile/developer', 'account_developer'),
+    ('/profile', 'account'),
+    ('/register', 'signup'),
+    ('/forgot_password', 'forgot_password'),
+]
 
 
 def redirect_tween_factory(handler, registry, redirects=REDIRECTS):
     def redirect_tween(request):
-        redirect = redirects.get(request.path, False)
-        if redirect:
-            return httpexceptions.HTTPMovedPermanently(location=request.route_url(redirect))
-        else:
-            return handler(request)
+        for old_path, route_name in redirects:
+            if request.path.startswith(old_path):
+                url = request.route_url(route_name)
+                suffix = request.path.replace(old_path, '', 1)
+                return httpexceptions.HTTPMovedPermanently(location=(url + suffix))
+        return handler(request)
 
     return redirect_tween
