@@ -66,6 +66,8 @@ class Annotation(Base):
 
     #: The textual body of the annotation.
     text = sa.Column(sa.UnicodeText)
+    #: The Markdown-rendered and HTML-sanitized textual body of the annotation.
+    text_rendered = sa.Column(sa.UnicodeText)
     #: The tags associated with the annotation.
     tags = sa.Column(
         types.MutableList.as_mutable(
@@ -145,10 +147,6 @@ class Annotation(Base):
             return self.references[0]
         else:
             return self.id
-
-    @property
-    def text_rendered(self):
-        return markdown.render(self.text)
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
