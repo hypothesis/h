@@ -18,8 +18,12 @@ node {
 
         // Run our Python tests inside the built container
         img.inside("-u root -e TEST_DATABASE_URL=${databaseUrl}") {
+            // Test dependencies
+            sh 'apk-install build-base libffi-dev postgresql-dev python-dev'
             sh 'pip install -q tox'
-            sh 'tox -r'
+
+            // Unit tests
+            sh 'cd /var/lib/hypothesis && tox'
         }
     }
 
