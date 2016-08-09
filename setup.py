@@ -46,6 +46,7 @@ INSTALL_REQUIRES = [
     'jsonpointer==1.0',
     'jsonschema>=2.5.1,<2.6',
     'kombu>=3.0.35,<3.1',
+    'lxml>=3.5.0,<4.0',
     'pyramid>=1.6,<1.7',
     'psycogreen>=1.0',
     'psycopg2>=2.6.1',

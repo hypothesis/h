@@ -13,6 +13,9 @@
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block content %}
+  {% if feature('activity_pages') %}
+  {% include "h:templates/includes/navbar.html.jinja2" %}
+  {% endif %}
   <div class="content paper">
     {% include "h:templates/includes/logo-header.html.jinja2" %}
     <ul class="nav nav-tabs">

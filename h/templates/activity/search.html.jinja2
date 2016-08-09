@@ -1,7 +1,6 @@
-<form>
-  <input name="q" value="{{ q }}" placeholder="Search query">
-  <input type="submit" value="Search">
-</form>
+{% extends "h:templates/layouts/base.html.jinja2" %}
+{% block content %}
+{% include "h:templates/includes/navbar.html.jinja2" %}
 
 {% if total %}
 <p>
@@ -66,3 +65,4 @@ Users (first ten):
     </li>
   {% endfor %}
 </ol>
+{% endblock %}

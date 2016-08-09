@@ -1,0 +1,33 @@
+{% if feature('activity_pages') %}
+<header class="nav-bar">
+  <div class="nav-bar__content">
+    <a href="/" title="Hypothesis homepage"><!--
+      !--><img alt="Hypothesis logo" class="nav-bar__logo" src="/assets/images/logo.svg"></a>
+
+    <div class="nav-bar__search">
+      <form class="search-bar" action="{{ request.route_url("activity.search") }}">
+        <input class="search-bar__input" name="q" value="{{ q }}" placeholder="Search…">
+        {{ svg_icon('search', 'search-bar__icon') }}
+      </form>
+    </div>
+
+    <div class="u-stretch"></div>
+
+    <div class="nav-bar-links">
+      {% if request.authenticated_user %}
+      <a class="nav-bar-links__item"
+         href="{{ request.route_url('stream') + "?q=user:{}".format(request.authenticated_user.username) }}">
+        {{ request.authenticated_user.username }}
+      </a>
+      <a class="nav-bar-links__item" href="" title="Groups">Groups</a>
+      <a class="nav-bar-links__item" href="{{ request.route_url("account") }}" title="Settings">
+        {{ svg_icon('settings') }}
+      </a>
+      {% else %}
+      <a class="nav-bar-links__item" href="{{ request.route_url('login') }}">Log in</a>
+      <a class="nav-bar-links__item" href="{{ request.route_url('signup') }}">Sign up</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+{% endif %}
