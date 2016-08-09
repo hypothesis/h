@@ -105,6 +105,7 @@ REDIRECTS = [
     ('/profile', 'account'),
     ('/register', 'signup'),
     ('/forgot_password', 'forgot_password'),
+    ('/reset_password', 'account_reset'),
 ]
 
 
