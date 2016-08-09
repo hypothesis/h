@@ -178,6 +178,7 @@ def pyramid_request(db_session, fake_feature, pyramid_settings):
     request.auth_domain = request.domain
     request.create_form = mock.Mock()
     request.registry.settings = pyramid_settings
+    request.is_xhr = False
     return request
 
 
