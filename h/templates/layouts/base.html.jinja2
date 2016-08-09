@@ -86,6 +86,10 @@
   {% block body_tag %}<body class="body">{% endblock %}
     {% block content %}{% endblock %}
     {% block templates %}{% endblock %}
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+    {% for url in asset_urls("site_js") %}
+    <script src="{{ url }}"></script>
+    {% endfor %}
+    {% endblock %}
   </body>
 </html>
