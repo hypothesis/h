@@ -10,6 +10,7 @@ from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.mutable import MutableDict
 
+from memex import markdown
 from memex import uri
 from memex.db import Base
 from memex.db import types
@@ -144,6 +145,10 @@ class Annotation(Base):
             return self.references[0]
         else:
             return self.id
+
+    @property
+    def text_rendered(self):
+        return markdown.render(self.text)
 
     def __acl__(self):
         """Return a Pyramid ACL for this annotation."""
