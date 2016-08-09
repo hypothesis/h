@@ -50,6 +50,14 @@ def to_xhr_response(request, non_xhr_result, form):
     should be the result that the view callable would normally return if this
     were not an XHR request.
 
+    :param request: the Pyramid request
+
+    :param non_xhr_result: the view callable result that should be returned if
+        ``request`` is *not* an XHR request
+
+    :param form: the form that was submitted
+    :type form: deform.form.Form
+
     """
     if not request.is_xhr:
         return non_xhr_result
@@ -65,7 +73,7 @@ def handle_form_submission(request, form, on_success, on_failure):
     :param request: the Pyramid request
 
     :param form: the form that was submitted
-    :type form:
+    :type form: deform.form.Form
 
     :param on_success: A callback function to be called if the form validates
         successfully. This function should carry out the action that the form
