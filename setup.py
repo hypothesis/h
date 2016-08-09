@@ -30,6 +30,7 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = [
     'SQLAlchemy>=1.0.13',
+    'bleach>=1.4.3,<1.5',
     'elasticsearch>=1.1.0,<2.0.0',
     'jsonschema>=2.5.1,<2.6',
     'mistune>=0.7.3,<0.8',
