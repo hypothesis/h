@@ -1,4 +1,4 @@
-FROM gliderlabs/alpine:3.3
+FROM gliderlabs/alpine:3.4
 MAINTAINER Hypothes.is Project and contributors
 
 # Install system build and runtime dependencies.
