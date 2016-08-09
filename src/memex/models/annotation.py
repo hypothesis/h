@@ -65,9 +65,9 @@ class Annotation(Base):
                         index=True)
 
     #: The textual body of the annotation.
-    text = sa.Column(sa.UnicodeText)
+    _text = sa.Column('text', sa.UnicodeText)
     #: The Markdown-rendered and HTML-sanitized textual body of the annotation.
-    text_rendered = sa.Column(sa.UnicodeText)
+    _text_rendered = sa.Column('text_rendered', sa.UnicodeText)
     #: The tags associated with the annotation.
     tags = sa.Column(
         types.MutableList.as_mutable(
@@ -121,6 +121,19 @@ class Annotation(Base):
     @hybrid_property
     def target_uri_normalized(self):
         return self._target_uri_normalized
+
+    @hybrid_property
+    def text(self):
+        return self._text
+
+    @text.setter
+    def text(self, value):
+        self._text = value
+        self._text_rendered = markdown.render(value)
+
+    @hybrid_property
+    def text_rendered(self):
+        return self._text_rendered
 
     @property
     def parent_id(self):
