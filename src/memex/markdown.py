@@ -4,7 +4,20 @@ from __future__ import unicode_literals
 
 import re
 
+import bleach
 import mistune
+
+MARKDOWN_TAGS = [
+    'a', 'blockquote', 'code', 'em', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'img', 'li', 'ol', 'p', 'pre', 'strong', 'ul',
+]
+ALLOWED_TAGS = set(bleach.ALLOWED_TAGS + MARKDOWN_TAGS)
+
+MARKDOWN_ATTRIBUTES = {
+    'a': ['href', 'title'],
+    'img': ['alt', 'src', 'title'],
+}
+ALLOWED_ATTRIBUTES = dict(bleach.ALLOWED_ATTRIBUTES.items() + MARKDOWN_ATTRIBUTES.items())
 
 # Singleton instance of the Markdown instance
 markdown = None
@@ -52,8 +65,14 @@ class MathRenderer(mistune.Renderer):
 def render(text):
     if text is not None:
         render = _get_markdown()
-        return render(text)
+        return sanitize(render(text))
     return None
+
+
+def sanitize(text):
+    return bleach.clean(text,
+                        tags=ALLOWED_TAGS,
+                        attributes=ALLOWED_ATTRIBUTES)
 
 
 def _get_markdown():
