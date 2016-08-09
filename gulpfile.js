@@ -224,13 +224,6 @@ gulp.task('build',
            'build-images'],
           generateManifest);
 
-gulp.task('build',
-          ['build-js',
-           'build-css',
-           'build-fonts',
-           'build-images'],
-          generateManifest);
-
 gulp.task('watch',
           ['watch-js',
            'watch-css',
