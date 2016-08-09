@@ -270,21 +270,6 @@ gulp.task('test-watch', function (callback) {
   runKarma('./h/static/scripts/karma.config.js', {}, callback);
 });
 
-gulp.task('upload-sourcemaps',
-          ['build-js'], function () {
-  var uploadToSentry = require('./scripts/gulp/upload-to-sentry');
-
-  var opts = {
-    key: getEnv('SENTRY_API_KEY'),
-    organization: getEnv('SENTRY_ORGANIZATION'),
-  };
-  var projects = getEnv('SENTRY_PROJECTS').split(',');
-  var release = getEnv('SENTRY_RELEASE_VERSION');
-
-  return gulp.src(['build/scripts/*.js', 'build/scripts/*.map'])
-    .pipe(uploadToSentry(opts, projects, release));
-});
-
 gulp.task('lint', function () {
   // Adapted from usage example at https://www.npmjs.com/package/gulp-eslint
   // `gulp-eslint` is loaded lazily so that it is not required during Docker image builds
