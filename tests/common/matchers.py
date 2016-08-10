@@ -28,7 +28,7 @@ output if it fails, e.g.
 """
 
 
-class instance_of(object):
+class instance_of(object):  # noqa: N801
     """An object __eq__ to any object which is an instance of `type_`."""
 
     def __init__(self, type_):
@@ -41,7 +41,7 @@ class instance_of(object):
         return '<instance of {!r}>'.format(self.type)
 
 
-class iterable_with(object):
+class iterable_with(object):  # noqa: N801
     """An object __eq__ to any iterable which yields `items`."""
 
     def __init__(self, items):
@@ -54,7 +54,7 @@ class iterable_with(object):
         return '<iterable with {!r}>'.format(self.items)
 
 
-class mapping_containing(object):
+class mapping_containing(object):  # noqa: N801
     """An object __eq__ to any mapping with the passed `key`."""
     def __init__(self, key):
         self.key = key
