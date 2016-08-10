@@ -32,7 +32,7 @@ class GroupCreateController(object):
     @view_config(request_method='GET')
     def get(self):
         """Render the form for creating a new group."""
-        return {'form': self.form.render()}
+        return self._template_data()
 
     @view_config(request_method='POST')
     def post(self):
@@ -40,7 +40,7 @@ class GroupCreateController(object):
         try:
             appstruct = self.form.validate(self.request.POST.items())
         except deform.ValidationFailure:
-            return {'form': self.form.render()}
+            return self._template_data()
 
         groups_service = self.request.find_service(name='groups')
         group = groups_service.create(name=appstruct['name'],
@@ -50,6 +50,10 @@ class GroupCreateController(object):
                                       pubid=group.pubid,
                                       slug=group.slug)
         return HTTPSeeOther(url)
+
+    def _template_data(self):
+        """Return the data needed to render this controller's page."""
+        return {'form': self.form.render()}
 
 
 @view_config(route_name='group_read',
