@@ -26,6 +26,7 @@ output if it fails, e.g.
     E       Actual call: set_value('a string')
 
 """
+from pyramid import httpexceptions
 
 
 class instance_of(object):  # noqa: N801
@@ -70,3 +71,15 @@ class mapping_containing(object):  # noqa: N801
 
     def __repr__(self):
         return '<mapping containing {!r}>'.format(self.key)
+
+
+class redirect_302_to(object):
+    """Matches any HTTPFound redirect to the given URL."""
+
+    def __init__(self, location):
+        self.location = location
+
+    def __eq__(self, other):
+        if not isinstance(other, httpexceptions.HTTPFound):
+            return False
+        return other.location == self.location
