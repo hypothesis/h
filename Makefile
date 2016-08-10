@@ -1,7 +1,6 @@
-PATH := $(shell pwd)/bin:$(PATH)
-SHELL := /bin/bash
-NPM_BIN := $(shell npm bin)
 DOCKER_TAG = dev
+
+GULP := node_modules/.bin/gulp
 
 # Unless the user has specified otherwise in their environment, it's probably a
 # good idea to refuse to install unless we're in an activated virtualenv.
@@ -14,7 +13,7 @@ export PIP_REQUIRE_VIRTUALENV
 default: test
 
 build/manifest.json: node_modules/.uptodate
-	$(NPM_BIN)/gulp build
+	$(GULP) build
 
 ## Clean up runtime artifacts (needed after a version update)
 .PHONY: clean
@@ -27,7 +26,7 @@ clean:
 ## Run the development H server locally
 .PHONY: dev
 dev: build/manifest.json .pydeps
-	@hypothesis devserver
+	@bin/hypothesis devserver
 
 ## Build hypothesis/hypothesis docker image
 .PHONY: docker
@@ -39,7 +38,7 @@ docker:
 test: node_modules/.uptodate
 	@pip install -q tox
 	tox
-	$(NPM_BIN)/gulp test
+	$(GULP) test
 
 ################################################################################
 
@@ -51,7 +50,7 @@ test: node_modules/.uptodate
 
 node_modules/.uptodate: package.json
 	@echo installing javascript dependencies
-	@$(NPM_BIN)/check-dependencies 2>/dev/null || npm install
+	@node_modules/.bin/check-dependencies 2>/dev/null || npm install
 	@touch $@
 
 # Self documenting Makefile
