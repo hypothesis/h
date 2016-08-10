@@ -3,9 +3,9 @@
 import click
 
 from h import models
-from h.api import uri
-from h.api.search.index import BatchIndexer
-from h.api.models import merge_documents
+from memex import uri
+from memex.search.index import BatchIndexer
+from memex.models import merge_documents
 
 
 @click.command('move-uri')

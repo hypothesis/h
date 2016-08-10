@@ -8,8 +8,6 @@ Important views which don't form part of any other major feature package.
 
 from __future__ import unicode_literals
 
-import pkg_resources
-
 from pyramid import httpexceptions
 from pyramid import response
 from pyramid.view import view_config
@@ -47,10 +45,9 @@ def annotation_page(annotation, request):
 
 @view_config(route_name='robots', http_cache=(86400, {'public': True}))
 def robots(context, request):
-    fp = pkg_resources.resource_stream('h', 'static/robots.txt')
-    request.response.content_type = b'text/plain'
-    request.response.app_iter = response.FileIter(fp)
-    return request.response
+    return response.FileResponse('h/static/robots.txt',
+                                 request=request,
+                                 content_type=b'text/plain')
 
 
 @view_config(route_name='stream')

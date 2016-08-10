@@ -4,7 +4,7 @@
 from datetime import datetime
 import mock
 
-from h.api import models
+from memex import models
 from h.feeds import atom
 
 

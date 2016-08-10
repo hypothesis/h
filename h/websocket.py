@@ -166,15 +166,15 @@ def create_app(global_config, **settings):
     config.include('h.models')
     config.include('h.db')
 
-    # We have to include parts of the `h.api` package in order to provide,
+    # We have to include parts of the `memex` package in order to provide,
     # among other things:
     #
     #   - the links service
     #   - the default presenters (and their link registrations)
     #   - the `request.es` property
-    config.include('h.api.links')
-    config.include('h.api.presenters')
-    config.include('h.api.search')
+    config.include('memex.links')
+    config.include('memex.presenters')
+    config.include('memex.search')
 
     # We include links in order to set up the alternative link registrations
     # for annotations.

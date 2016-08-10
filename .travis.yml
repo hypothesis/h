@@ -3,26 +3,24 @@ sudo: false
 matrix:
   include:
     # Python (backend) tests
-    - env: ACTION=tox TOXENV=py27
+    - env: ACTION=tox
       language: python
       python: '2.7'
       addons:
         postgresql: "9.4"
+      before_install: pip install tox
       before_script: createdb htest
-
-    # Check Python package manifest
-    - env: ACTION=tox TOXENV=manifest
-      language: python
-      python: '2.7'
+      script: tox
+      after_success:
+        tox -e coverage
+        tox -e codecov
 
     # Test web application frontend
-    - env: ACTION=gulp GULPTASK=test
+    - env: ACTION=gulp
       language: node_js
       node_js: '4.3'
-before_install: ./.travis/before_install
-install: ./.travis/install
-script: ./.travis/script
-after_success: ./.travis/after_success
+      before_install: npm install gulp-cli
+      script: gulp test
 cache:
   directories:
     - node_modules

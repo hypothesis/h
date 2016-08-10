@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pkg_resources import resource_stream
+from codecs import open
 import logging
 
 import colander
@@ -29,8 +29,9 @@ def get_blacklist():
         # can't load the file, then don't crash out, just log a warning about
         # the problem.
         try:
-            blacklist = resource_stream(__package__, 'blacklist').readlines()
-        except IOError:
+            with open('h/accounts/blacklist', encoding='utf-8') as fp:
+                blacklist = fp.readlines()
+        except (IOError, ValueError):
             log.exception('unable to load blacklist')
             blacklist = []
         USERNAME_BLACKLIST = set(l.strip().lower() for l in blacklist)

@@ -7,7 +7,7 @@ from pyramid.events import subscriber
 
 from h import auth
 from h import accounts
-from h.api import storage
+from memex import storage
 from h.notification.models import Subscriptions
 from h.accounts.events import RegistrationEvent
 
@@ -25,15 +25,15 @@ class Notification(namedtuple('Notification', [
     A data structure representing a notification of a reply to an annotation.
 
     :param reply: the reply annotation
-    :type reply: h.models.Annotation (or h.api.models.elastic.Annotation)
+    :type reply: h.models.Annotation (or memex.models.elastic.Annotation)
     :param reply_user: the user who made the reply annotation
     :type reply_user: h.models.User
     :param parent: the annotation being replied to
-    :type parent: h.models.Annotation (or h.api.models.elastic.Annotation)
+    :type parent: h.models.Annotation (or memex.models.elastic.Annotation)
     :param parent_user: the user being replied to
     :type parent_user: h.models.User
     :param document: the document for the page on which the reply happened
-    :type document: h.models.Document (or h.api.models.elastic.Document)
+    :type document: h.models.Document (or memex.models.elastic.Document)
     """
 
 
@@ -49,7 +49,7 @@ def get_notification(request, annotation, action):
     :param request: the current request object
     :type request: pyramid.request.Request
     :param annotation: the reply annotation
-    :type annotation: h.api.models.elastic.Annotation or h.models.Annotation
+    :type annotation: memex.models.elastic.Annotation or h.models.Annotation
     :param action: the event action
     :type action: str
 

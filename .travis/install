@@ -1,9 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-case "$ACTION" in
-    gulp)
-        npm install
-        ;;
-esac

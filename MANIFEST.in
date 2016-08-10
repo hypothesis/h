@@ -1,22 +1,5 @@
-include Makefile AUTHORS CHANGES CODE_OF_CONDUCT LICENSE NOTICE
+include AUTHORS CHANGES CODE_OF_CONDUCT LICENSE NOTICE
 include *.rst
-include Dockerfile
-include gulpfile.js
-include gunicorn.conf.py
-include package.json
-include requirements.txt
-exclude Jenkinsfile
-graft conf
-graft docs
-prune docs/_build
-include h/accounts/blacklist
-include h/assets.ini
-include h/assets_client.ini
-graft h/migrations
-graft h/static
-graft h/templates
-graft scripts
-prune tests
-graft vendor
+graft src
 global-exclude __pycache__
 global-exclude *.py[co]

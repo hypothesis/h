@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from h import models
-from h.api.search import index
+from memex.search import index
 from h.util.user import userid_from_username
 
 

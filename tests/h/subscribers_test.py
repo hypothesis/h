@@ -5,7 +5,7 @@ import mock
 import pytest
 
 from h import subscribers
-from h.api.events import AnnotationEvent
+from memex.events import AnnotationEvent
 
 
 class FakeMailer(object):

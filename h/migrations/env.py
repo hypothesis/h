@@ -14,11 +14,11 @@ from h.settings import database_url
 config = context.config
 
 from h import db
-from h.api import db as api_db
+from memex import db as api_db
 
 # Import all model modules here in order to populate the metadata
 from h import models  # noqa
-from h.api.models import annotation  # noqa
+from memex.models import annotation  # noqa
 
 # Since we have multiple MetaData objects (one from the app and one from the
 # API), we need to merge them all for alembic autogenerate to work correctly.

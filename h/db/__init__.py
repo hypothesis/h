@@ -20,7 +20,7 @@ from pyramid.settings import asbool
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from h.api import db as api_db
+from memex import db as api_db
 
 __all__ = (
     'Base',
@@ -36,7 +36,7 @@ __all__ = (
 #   http://docs.sqlalchemy.org/en/latest/core/constraints.html#configuring-constraint-naming-conventions
 #
 # N.B. This must be kept in sync with the naming conventions in
-# :py:mod:`h.api.db`.
+# :py:mod:`memex.db`.
 #
 metadata = sqlalchemy.MetaData(naming_convention={
     "ix": "ix__%(column_0_label)s",
