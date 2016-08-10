@@ -2,10 +2,10 @@
 
 import datetime
 
+from jinja2 import Markup
 import pytest
 
 from h import jinja_extensions as ext
-
 
 @pytest.mark.parametrize("value_in,json_out", [
     ({"foo": 42}, "{\"foo\": 42}")
@@ -29,3 +29,37 @@ def test_human_timestamp(timestamp_in, string_out):
         timestamp_in, now=lambda: datetime.datetime(2016, 4, 14))
 
     assert result == string_out
+
+
+def test_svg_icon_loads_icon():
+    def read_icon(name):
+        return '<svg id="{}"></svg>'.format(name)
+
+    result = ext.svg_icon(read_icon, 'settings')
+
+    assert result == Markup('<svg id="settings" />')
+
+
+def test_svg_icon_removes_title():
+    def read_icon(name):
+        return '<svg xmlns="http://www.w3.org/2000/svg"><title>foo</title></svg>'
+
+    assert (ext.svg_icon(read_icon, 'icon') ==
+        Markup('<svg xmlns="http://www.w3.org/2000/svg" />'))
+
+
+def test_svg_icon_strips_default_xml_namespace():
+    def read_icon(name):
+        return '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
+
+    assert (ext.svg_icon(read_icon, 'icon') ==
+        Markup('<svg xmlns="http://www.w3.org/2000/svg" />'))
+
+
+def test_svg_icon_sets_css_class():
+    def read_icon(name):
+        return '<svg></svg>'
+
+    result = ext.svg_icon(read_icon, 'icon', css_class='fancy-icon')
+
+    assert result == Markup('<svg class="fancy-icon" />')
