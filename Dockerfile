@@ -1,35 +1,33 @@
-FROM gliderlabs/alpine:3.3
+FROM gliderlabs/alpine:3.4
 MAINTAINER Hypothes.is Project and contributors
 
 # Install system build and runtime dependencies.
-RUN apk add --update \
+RUN apk-install \
     ca-certificates \
     libffi \
     libpq \
     python \
     py-pip \
     nodejs \
-    git \
-  && apk add \
-    libffi-dev \
-    g++ \
-    make \
-    postgresql-dev \
-    python-dev \
-  && pip install --no-cache-dir -U pip \
-  && rm -rf /var/cache/apk/*
+    git
 
 # Create the hypothesis user, group, home directory and package directory.
-RUN addgroup -S hypothesis \
-  && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
+RUN addgroup -S hypothesis && adduser -S -G hypothesis -h /var/lib/hypothesis hypothesis
 WORKDIR /var/lib/hypothesis
 
 # Copy minimal data to allow installation of dependencies.
 COPY src/memex/__init__.py ./src/memex/
 COPY README.rst setup.* requirements.txt ./
 
-# Install application dependencies.
-RUN pip install --no-cache-dir -r requirements.txt
+# Install build deps, build, and then clean up.
+RUN apk-install --virtual build-deps \
+    build-base \
+    libffi-dev \
+    postgresql-dev \
+    python-dev \
+  && pip install --no-cache-dir -U pip \
+  && pip install --no-cache-dir -r requirements.txt \
+  && apk del build-deps
 
 # Copy the rest of the application files.
 COPY . .
