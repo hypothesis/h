@@ -56,6 +56,7 @@ class iterable_with(object):  # noqa: N801
 
 class mapping_containing(object):  # noqa: N801
     """An object __eq__ to any mapping with the passed `key`."""
+
     def __init__(self, key):
         self.key = key
 
