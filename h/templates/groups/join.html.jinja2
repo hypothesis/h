@@ -30,9 +30,3 @@
     </div>
   </div>
 {% endblock content %}
-
-{% block scripts %}
-{% for url in asset_urls("site_js") %}
-<script src="{{ url }}"></script>
-{% endfor %}
-{% endblock scripts %}
