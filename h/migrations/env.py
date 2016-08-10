@@ -60,10 +60,10 @@ def run_migrations_offline():
     script output.
 
     """
-    context.configure(url=get_database_url())
+    context.configure(url=get_database_url(),
+                      transaction_per_migration=True)
 
-    with context.begin_transaction():
-        context.run_migrations()
+    context.run_migrations()
 
 
 def run_migrations_online():
@@ -85,12 +85,12 @@ def run_migrations_online():
     connection = engine.connect()
     context.configure(
         connection=connection,
-        target_metadata=target_metadata
+        target_metadata=target_metadata,
+        transaction_per_migration=True,
     )
 
     try:
-        with context.begin_transaction():
-            context.run_migrations()
+        context.run_migrations()
     finally:
         connection.close()
 
