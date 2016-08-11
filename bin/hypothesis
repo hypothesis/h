@@ -5,4 +5,7 @@ set -eu
 cd "$(dirname "$0")"
 cd ..
 
+export PYTHONPATH="${PWD}:${PYTHONPATH:-}"
+export PATH="${PWD}/bin:${PATH:-}"
+
 exec python -m h "$@"
