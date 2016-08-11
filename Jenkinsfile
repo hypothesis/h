@@ -11,12 +11,14 @@ node {
         returnStdout: true
     ).trim()
 
-    // Set build metadata
-    currentBuild.displayName = buildVersion
-
     // Docker tags may not contain '+'
     dockerTag = buildVersion.replace('+', '-')
 
+    // Set build metadata
+    currentBuild.displayName = buildVersion
+    currentBuild.description = "Docker: ${dockerTag}"
+
+    // Build docker image
     sh "make docker DOCKER_TAG=${dockerTag}"
     img = docker.image "hypothesis/hypothesis:${dockerTag}"
 
