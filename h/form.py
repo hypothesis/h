@@ -9,8 +9,11 @@ necessary.
 """
 import deform
 import jinja2
+from pyramid import httpexceptions
 import pyramid_jinja2
 from pyramid.path import AssetResolver
+
+from h import i18n
 
 
 ENVIRONMENT_KEY = 'h.form.jinja2_environment'
@@ -19,6 +22,9 @@ SEARCH_PATHS = (
     'h:templates/deform/',
     'deform_jinja2:bootstrap_templates/',
 )
+
+
+_ = i18n.TranslationString
 
 
 class Jinja2Renderer(object):
@@ -87,6 +93,69 @@ def configure_environment(config):  # pragma: no cover
     """Configure the form template environment and store it in the registry."""
     base = config.get_jinja2_environment()
     config.registry[ENVIRONMENT_KEY] = create_environment(base)
+
+
+def handle_form_submission(request, form, on_success, on_failure):
+    """
+    Handle the submission of the given form in a standard way.
+
+    :param request: the Pyramid request
+
+    :param form: the form that was submitted
+    :type form: deform.form.Form
+
+    :param on_success: A callback function to be called if the form validates
+        successfully. This function should carry out the action that the form
+        submission requests. For example for a change password form, this
+        function would change the user's password.
+    :type on_success: callable
+
+    :param on_failure: A callback function that will be called if form validation
+        fails in order to get the view callable result that should be returned.
+        Note that the result returned by on_failure() will *not* be used if the
+        request is an XHR request.
+    :type on_failure: callable
+
+    """
+    try:
+        appstruct = form.validate(request.POST.items())
+    except deform.ValidationFailure:
+        result = on_failure()
+    else:
+        on_success(appstruct)
+        result = httpexceptions.HTTPFound(location=request.url)
+        request.session.flash(_("Success. We've saved your changes."),
+                              'success')
+
+    return to_xhr_response(request, result, form)
+
+
+def to_xhr_response(request, non_xhr_result, form):
+    """
+    Return an XHR response for the given ``form``, or ``non_xhr_result``.
+
+    If the given ``request`` is an XMLHttpRequest then return an XHR form
+    submission response for the given form (contains only the ``<form>``
+    element as an HTML snippet, not the entire HTML page).
+
+    If ``request`` is not an XHR request then return ``non_xhr_result``, which
+    should be the result that the view callable would normally return if this
+    were not an XHR request.
+
+    :param request: the Pyramid request
+
+    :param non_xhr_result: the view callable result that should be returned if
+        ``request`` is *not* an XHR request
+
+    :param form: the form that was submitted
+    :type form: deform.form.Form
+
+    """
+    if not request.is_xhr:
+        return non_xhr_result
+
+    request.override_renderer = 'string'
+    return form.render()
 
 
 def includeme(config):  # pragma: no cover

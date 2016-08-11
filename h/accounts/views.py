@@ -11,6 +11,7 @@ from pyramid.exceptions import BadCSRFToken
 from pyramid.view import view_config, view_defaults
 
 from h import accounts
+from h import form
 from h import i18n
 from h import mailer
 from h import models
@@ -36,69 +37,6 @@ def ajax_payload(request, data):
                'model': session.model(request)}
     payload.update(data)
     return payload
-
-
-def to_xhr_response(request, non_xhr_result, form):
-    """
-    Return an XHR response for the given ``form``, or ``non_xhr_result``.
-
-    If the given ``request`` is an XMLHttpRequest then return an XHR form
-    submission response for the given form (contains only the ``<form>``
-    element as an HTML snippet, not the entire HTML page).
-
-    If ``request`` is not an XHR request then return ``non_xhr_result``, which
-    should be the result that the view callable would normally return if this
-    were not an XHR request.
-
-    :param request: the Pyramid request
-
-    :param non_xhr_result: the view callable result that should be returned if
-        ``request`` is *not* an XHR request
-
-    :param form: the form that was submitted
-    :type form: deform.form.Form
-
-    """
-    if not request.is_xhr:
-        return non_xhr_result
-
-    request.override_renderer = 'string'
-    return form.render()
-
-
-def handle_form_submission(request, form, on_success, on_failure):
-    """
-    Handle the submission of the given form in a standard way.
-
-    :param request: the Pyramid request
-
-    :param form: the form that was submitted
-    :type form: deform.form.Form
-
-    :param on_success: A callback function to be called if the form validates
-        successfully. This function should carry out the action that the form
-        submission requests. For example for a change password form, this
-        function would change the user's password.
-    :type on_success: callable
-
-    :param on_failure: A callback function that will be called if form validation
-        fails in order to get the view callable result that should be returned.
-        Note that the result returned by on_failure() will *not* be used if the
-        request is an XHR request.
-    :type on_failure: callable
-
-    """
-    try:
-        appstruct = form.validate(request.POST.items())
-    except deform.ValidationFailure:
-        result = on_failure()
-    else:
-        on_success(appstruct)
-        request.session.flash(_("Success. We've saved your changes."),
-                              'success')
-        result = httpexceptions.HTTPFound(location=request.url)
-
-    return to_xhr_response(request, result, form)
 
 
 @json_view(context=BadCSRFToken)
@@ -562,7 +500,7 @@ class AccountController(object):
                  request_param='__formid__=email')
     def post_email_form(self):
         """Called by Pyramid when the change email form is submitted."""
-        return handle_form_submission(
+        return form.handle_form_submission(
             self.request,
             self.forms['email'],
             on_success=self.update_email_address,
@@ -572,7 +510,7 @@ class AccountController(object):
                  request_param='__formid__=password')
     def post_password_form(self):
         """Called by Pyramid when the change password form is submitted."""
-        return handle_form_submission(
+        return form.handle_form_submission(
             self.request,
             self.forms['password'],
             on_success=self.update_password,
