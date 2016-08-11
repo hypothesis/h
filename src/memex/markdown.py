@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import re
 
 import bleach
+from bleach import callbacks as linkify_callbacks
 import mistune
 
 MARKDOWN_TAGS = [
@@ -13,8 +14,18 @@ MARKDOWN_TAGS = [
 ]
 ALLOWED_TAGS = set(bleach.ALLOWED_TAGS + MARKDOWN_TAGS)
 
+
+def _filter_link_attributes(name, value):
+    if name in ['href', 'title']:
+        return True
+
+    if name == 'target' and value == '_blank':
+        return True
+
+    return False
+
 MARKDOWN_ATTRIBUTES = {
-    'a': ['href', 'title'],
+    'a': _filter_link_attributes,
     'img': ['alt', 'src', 'title'],
 }
 ALLOWED_ATTRIBUTES = dict(bleach.ALLOWED_ATTRIBUTES.items() + MARKDOWN_ATTRIBUTES.items())
@@ -70,7 +81,11 @@ def render(text):
 
 
 def sanitize(text):
-    return bleach.clean(text,
+    linkified = bleach.linkify(text, callbacks=[
+        linkify_callbacks.target_blank
+    ])
+
+    return bleach.clean(linkified,
                         tags=ALLOWED_TAGS,
                         attributes=ALLOWED_ATTRIBUTES)
 

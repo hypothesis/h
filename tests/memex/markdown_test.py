@@ -72,3 +72,8 @@ class TestSanitize(object):
     ])
     def test_it_escapes_evil_html(self, text, expected):
         assert markdown.sanitize(text) == expected
+
+    def test_it_adds_target_blank_to_links(self):
+        actual = markdown.sanitize('<a href="https://example.org">Hello</a>')
+
+        assert actual == '<a href="https://example.org" target="_blank">Hello</a>'
