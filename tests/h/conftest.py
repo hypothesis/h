@@ -11,6 +11,7 @@ import os
 import mock
 import pytest
 
+import click.testing
 import sqlalchemy
 from pyramid import testing
 from pyramid.request import apply_request_extensions
@@ -72,6 +73,13 @@ def autopatcher(request, target, **kwargs):
     obj = patcher.start()
     request.addfinalizer(patcher.stop)
     return obj
+
+
+@pytest.yield_fixture
+def cli():
+    runner = click.testing.CliRunner()
+    with runner.isolated_filesystem():
+        yield runner
 
 
 @pytest.fixture(scope='session')
