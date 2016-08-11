@@ -104,16 +104,22 @@ def handle_form_submission(request, form, on_success, on_failure):
     :param form: the form that was submitted
     :type form: deform.form.Form
 
-    :param on_success: A callback function to be called if the form validates
-        successfully. This function should carry out the action that the form
-        submission requests. For example for a change password form, this
-        function would change the user's password.
+    :param on_success:
+        A callback function to be called if the form validates successfully.
+
+        This function should carry out the action that the form submission
+        requests (for example for a change password form, this function would
+        change the user's password) and return the view callable result that
+        should be returned if this is not an XHR request.
+
+        If on_success() returns ``None`` then ``handle_form_submission()``
+        will return ``HTTPFound(location=request.url)`` by default.
     :type on_success: callable
 
-    :param on_failure: A callback function that will be called if form validation
-        fails in order to get the view callable result that should be returned.
-        Note that the result returned by on_failure() will *not* be used if the
-        request is an XHR request.
+    :param on_failure:
+        A callback function that will be called if form validation fails in
+        order to get the view callable result that should be returned if this is
+        not an XHR request.
     :type on_failure: callable
 
     """
@@ -122,8 +128,11 @@ def handle_form_submission(request, form, on_success, on_failure):
     except deform.ValidationFailure:
         result = on_failure()
     else:
-        on_success(appstruct)
-        result = httpexceptions.HTTPFound(location=request.url)
+        result = on_success(appstruct)
+
+        if result is None:
+            result = httpexceptions.HTTPFound(location=request.url)
+
         request.session.flash(_("Success. We've saved your changes."),
                               'success')
 
