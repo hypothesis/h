@@ -55,8 +55,8 @@ Users (first ten):
                   <p>Group: {{ result.group.name }}</p>
                   <p>Shared: {{ result.annotation.shared }}</p>
                   <p>URI: {{ result.annotation.target_uri }}</p>
-                  <p>Text: {{ result.annotation.text }}</p>
                   <p>Tags: {{ ','.join(result.annotation.tags) }}</p>
+                  <p>Text:<br>{{ result.annotation.text_rendered|safe }}</p>
                 </li>
               {% endfor %}
             </ol>

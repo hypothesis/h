@@ -79,6 +79,17 @@ def test_thread_root_id_returns_first_reference_if_many_references():
     assert annotation.thread_root_id == '1Ife3DoHEea6hpv8vWujdQ'
 
 
+def test_text_setter_renders_markdown(markdown):
+    markdown.render.return_value = '<p>foobar</p>'
+
+    annotation = Annotation()
+    annotation.text = 'foobar'
+
+    markdown.render.assert_called_once_with('foobar')
+
+    annotation.text_rendered == markdown.render.return_value
+
+
 def test_acl_private():
     ann = Annotation(shared=False, userid='saoirse')
     actual = ann.__acl__()
@@ -205,3 +216,8 @@ def annotation(db_session):
     db_session.add(ann)
     db_session.flush()
     return ann
+
+
+@pytest.fixture
+def markdown(patch):
+    return patch('memex.models.annotation.markdown')
