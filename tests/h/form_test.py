@@ -230,13 +230,38 @@ class TestHandleFormSubmission(object):
 
         form.handle_form_submission(pyramid_request,
                                     form_,
-                                    mock.Mock(),
+                                    mock.Mock(return_value=None),
                                     mock.Mock())
 
         to_xhr_response.assert_called_once_with(
             pyramid_request,
             matchers.redirect_302_to(pyramid_request.url),
             form_)
+
+    def test_if_validation_succeeds_it_passes_on_success_result_to_to_xhr_response(
+            self,
+            matchers,
+            pyramid_request,
+            to_xhr_response):
+        """
+        A result from on_success() is passed to to_xhr_response().
+
+        If on_success() returns something other than None, it passes that
+        something to to_xhr_response().
+
+        """
+        form_ = conftest.form_validating_to('anything')
+
+        form.handle_form_submission(pyramid_request,
+                                    form_,
+                                    mock.Mock(return_value=mock.sentinel.result),
+                                    mock.Mock())
+
+        to_xhr_response.assert_called_once_with(
+            pyramid_request,
+            mock.sentinel.result,
+            form_)
+        form_ = conftest.form_validating_to('anything')
 
     def test_if_validation_succeeds_it_returns_to_xhr_response(self,
                                                                pyramid_request,
