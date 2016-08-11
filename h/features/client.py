@@ -38,7 +38,7 @@ class Client(object):
         feature flags from the database first.
         """
         if self._cache is None:
-            self.load()
+            self._load()
 
         if name not in self._cache:
             raise UnknownFeatureError(
@@ -55,15 +55,15 @@ class Client(object):
         feature flags from the database first.
         """
         if self._cache is None:
-            self.load()
+            self._load()
 
         return self._cache
 
     def clear(self):
         self._cache = None
 
-    def load(self):
-        """Load the feature flag states into the internal cache."""
+    def _load(self):
+        """Loads the feature flag states into the internal cache."""
         features = self._fetcher(self.request.db)
         self._cache = {f.name: self._state(f) for f in features}
 
