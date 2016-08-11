@@ -8,6 +8,8 @@ import bleach
 from bleach import callbacks as linkify_callbacks
 import mistune
 
+LINK_REL = 'nofollow noopener'
+
 MARKDOWN_TAGS = [
     'a', 'blockquote', 'code', 'em', 'hr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'img', 'li', 'ol', 'p', 'pre', 'strong', 'ul',
@@ -20,6 +22,9 @@ def _filter_link_attributes(name, value):
         return True
 
     if name == 'target' and value == '_blank':
+        return True
+
+    if name == 'rel' and value == LINK_REL:
         return True
 
     return False
@@ -82,12 +87,22 @@ def render(text):
 
 def sanitize(text):
     linkified = bleach.linkify(text, callbacks=[
-        linkify_callbacks.target_blank
+        linkify_callbacks.target_blank,
+        linkify_rel,
     ])
 
     return bleach.clean(linkified,
                         tags=ALLOWED_TAGS,
                         attributes=ALLOWED_ATTRIBUTES)
+
+
+def linkify_rel(attrs, new=False):
+    if attrs['href'].startswith('mailto:'):
+        return attrs
+
+    attrs['rel'] = LINK_REL
+
+    return attrs
 
 
 def _get_markdown():
