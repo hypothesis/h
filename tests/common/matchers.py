@@ -29,6 +29,14 @@ output if it fails, e.g.
 from pyramid import httpexceptions
 
 
+class any_callable(object):  # noqa: N801
+    """An object __eq__ to any callable object."""
+
+    def __eq__(self, other):
+        """Return ``True`` if ``other`` is callable, ``False`` otherwise."""
+        return callable(other)
+
+
 class instance_of(object):  # noqa: N801
     """An object __eq__ to any object which is an instance of `type_`."""
 
@@ -81,5 +89,17 @@ class redirect_302_to(object):
 
     def __eq__(self, other):
         if not isinstance(other, httpexceptions.HTTPFound):
+            return False
+        return other.location == self.location
+
+
+class redirect_303_to(object):
+    """Matches any HTTPSeeOther redirect to the given URL."""
+
+    def __init__(self, location):
+        self.location = location
+
+    def __eq__(self, other):
+        if not isinstance(other, httpexceptions.HTTPSeeOther):
             return False
         return other.location == self.location

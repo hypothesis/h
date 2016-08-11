@@ -6,6 +6,7 @@ from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
                                     HTTPSeeOther)
 from pyramid.view import view_config, view_defaults
 
+from h import form
 from h import i18n
 from h import presenters
 from h.groups import schemas
@@ -37,19 +38,22 @@ class GroupCreateController(object):
     @view_config(request_method='POST')
     def post(self):
         """Respond to a submission of the create group form."""
-        try:
-            appstruct = self.form.validate(self.request.POST.items())
-        except deform.ValidationFailure:
-            return self._template_data()
+        def on_success(appstruct):
+            groups_service = self.request.find_service(name='groups')
+            group = groups_service.create(
+                name=appstruct['name'],
+                userid=self.request.authenticated_userid)
 
-        groups_service = self.request.find_service(name='groups')
-        group = groups_service.create(name=appstruct['name'],
-                                      userid=self.request.authenticated_userid)
+            url = self.request.route_path('group_read',
+                                          pubid=group.pubid,
+                                          slug=group.slug)
+            return HTTPSeeOther(url)
 
-        url = self.request.route_path('group_read',
-                                      pubid=group.pubid,
-                                      slug=group.slug)
-        return HTTPSeeOther(url)
+        return form.handle_form_submission(
+            self.request,
+            self.form,
+            on_success=on_success,
+            on_failure=self._template_data)
 
     def _template_data(self):
         """Return the data needed to render this controller's page."""
