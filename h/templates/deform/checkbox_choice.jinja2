@@ -2,21 +2,21 @@
 <div class="form-checkbox-list">
   {% for value, title in field.widget.values %}
   <div class="form-checkbox">
-    <input type="checkbox"
-           name="checkbox"
-           value="{{ value }}"
-           id="{{ field.oid }}-{{ loop.index0 }}"
-           {%- if field.widget.css_class -%}
-           class="{{ field.widget.css_class }}"
-           {% endif -%}
-           {%- if field.error -%}
-           aria-invalid="true"
-           {% endif -%}
-           {% if value in cstruct %}
-           checked="True"
-           {% endif %}>
     <label for="{{ field.oid }}-{{ loop.index0 }}"
            class="form-checkbox__label">
+      <input type="checkbox"
+             name="checkbox"
+             value="{{ value }}"
+             id="{{ field.oid }}-{{ loop.index0 }}"
+             class="form-checkbox__input {%- if field.widget.css_class -%}
+             {{ field.widget.css_class }}
+             {% endif -%}"
+             {%- if field.error -%}
+             aria-invalid="true"
+             {% endif -%}
+             {% if value in cstruct %}
+             checked="True"
+             {% endif %}>
       {{ title }}
     </label>
   </div>

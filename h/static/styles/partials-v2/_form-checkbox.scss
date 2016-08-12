@@ -3,9 +3,23 @@
   border: 1px solid $grey-3;
   border-radius: 3px;
   color: $grey-6;
-  padding: 15px;
+
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.form-checkbox__input {
+  margin-right: 15px;
 }
 
 .form-checkbox__label {
-  padding-left: 10px;
+  min-height: 50px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 15px;
+
+  cursor: pointer;
 }
