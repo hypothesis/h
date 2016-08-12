@@ -279,6 +279,24 @@ class LegacyEmailChangeSchema(CSRFSchema):
             raise exc
 
 
+class EmailChangeSchema(CSRFSchema):
+    email = email_node(title=_('Email address'))
+    # No validators: all validation is done on the email field
+    password = password_node(title=_('Confirm password'))
+
+    def validator(self, node, value):
+        super(EmailChangeSchema, self).validator(node, value)
+        exc = colander.Invalid(node)
+        request = node.bindings['request']
+        user = request.authenticated_user
+
+        if not models.User.validate_user(user, value.get('password')):
+            exc['password'] = _('Incorrect password. Please try again.')
+
+        if exc.children:
+            raise exc
+
+
 class PasswordChangeSchema(CSRFSchema):
     password = password_node(title=_('Current password'))
     new_password = password_node(title=_('New password'))
