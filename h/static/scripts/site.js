@@ -8,10 +8,10 @@ if (settings.raven) {
 
 require('./polyfills');
 
-var CreateGroupFormController = require('./create-group-form');
-var DropdownMenuController = require('./dropdown-menu-controller');
-var FormSelectOnFocusController = require('./form-select-onfocus-controller');
-var upgradeElements = require('./upgrade-elements');
+var CreateGroupFormController = require('./controllers/create-group-form-controller');
+var DropdownMenuController = require('./controllers/dropdown-menu-controller');
+var FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
+var upgradeElements = require('./controllers/upgrade-elements');
 
 var controllers = {
   '.js-create-group-form': CreateGroupFormController,

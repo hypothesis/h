@@ -1,6 +1,6 @@
 'use strict';
 
-var AdminUsersController = require('../admin-users');
+var AdminUsersController = require('../controllers/admin-users-controller');
 
 // helper to dispatch a native event to an element
 function sendEvent(element, eventType) {

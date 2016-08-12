@@ -1,6 +1,6 @@
 'use strict';
 
-var CreateGroupFormController = require('../create-group-form');
+var CreateGroupFormController = require('../controllers/create-group-form-controller');
 
 function isHidden(elt) {
   return elt.classList.contains('is-hidden');

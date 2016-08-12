@@ -1,6 +1,6 @@
 'use strict';
 
-var DropdownMenuController = require('../dropdown-menu-controller');
+var DropdownMenuController = require('../controllers/dropdown-menu-controller');
 var util = require('./util');
 
 var TEMPLATE = ['<div class="js-dropdown-menu">',

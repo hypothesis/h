@@ -1,6 +1,6 @@
 'use strict';
 
-var upgradeElements = require('../upgrade-elements');
+var upgradeElements = require('../controllers/upgrade-elements');
 
 describe('upgradeElements', function () {
   it('should upgrade elements matching selectors', function () {

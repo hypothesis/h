@@ -1,6 +1,6 @@
 'use strict';
 
-var FormSelectOnFocusController = require('../form-select-onfocus-controller');
+var FormSelectOnFocusController = require('../controllers/form-select-onfocus-controller');
 
 // helper to dispatch a native event to an element
 function sendEvent(element, eventType) {

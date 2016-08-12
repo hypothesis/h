@@ -1,6 +1,6 @@
 'use strict';
 
-var upgradeElements = require('../upgrade-elements');
+var upgradeElements = require('../controllers/upgrade-elements');
 
 /**
  * Utility function for use with 'proxyquire' that prevents calls to
