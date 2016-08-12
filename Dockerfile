@@ -44,6 +44,7 @@ EXPOSE 5000
 # Set the application environment
 ENV PATH /var/lib/hypothesis/bin:$PATH
 ENV PYTHONIOENCODING utf_8
+ENV PYTHONPATH /var/lib/hypothesis:$PYTHONPATH
 
 # Start the web server by default
 USER hypothesis
