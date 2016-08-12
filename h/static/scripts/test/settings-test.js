@@ -1,6 +1,6 @@
 'use strict';
 
-var settings = require('../settings');
+var settings = require('../base/settings');
 
 function createJSONScriptTag(obj, className) {
   var el = document.createElement('script');

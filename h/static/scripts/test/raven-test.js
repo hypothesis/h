@@ -16,7 +16,7 @@ describe('raven', function () {
       captureException: sinon.stub(),
     };
 
-    raven = proxyquire('../raven', noCallThru({
+    raven = proxyquire('../base/raven', noCallThru({
       'raven-js': fakeRavenJS,
     }));
   });
