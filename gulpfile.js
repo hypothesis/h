@@ -15,12 +15,11 @@ var gulpIf = require('gulp-if');
 var gulpUtil = require('gulp-util');
 var postcss = require('gulp-postcss');
 var postcssURL = require('postcss-url');
-var sass = require('gulp-sass');
-var sourcemaps = require('gulp-sourcemaps');
 var svgmin = require('gulp-svgmin');
 var through = require('through2');
 
 var createBundle = require('./scripts/gulp/create-bundle');
+var createStyleBundle = require('./scripts/gulp/create-style-bundle');
 var manifest = require('./scripts/gulp/manifest');
 
 var IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production';
@@ -46,10 +45,6 @@ function parseCommandLine() {
 }
 
 var taskArgs = parseCommandLine();
-
-function isSASSFile(file) {
-  return file.path.match(/\.scss$/);
-}
 
 function getEnv(key) {
   if (!process.env.hasOwnProperty(key)) {
@@ -118,50 +113,58 @@ gulp.task('watch-js', ['build-vendor-js'], function () {
   });
 });
 
-var styleFiles = [
-  // H
-  './h/static/styles/admin.scss',
-  './h/static/styles/front-page.css',
-  './h/static/styles/help-page.scss',
-  './h/static/styles/site.scss',
-  './h/static/styles/site-v2.scss',
-  './h/static/styles/old-home.scss',
+// Rewrite font URLs to look for fonts in 'build/fonts' instead of
+// 'build/styles/fonts'
+function rewriteCSSURL(url) {
+  return url.replace(/^fonts\//, '../fonts/');
+}
 
-  // Vendor
-  './h/static/styles/vendor/icomoon.css',
-  './node_modules/bootstrap/dist/css/bootstrap.css',
-];
+gulp.task('build-vendor-css', function () {
+  var vendorCSSFiles = [
+    // `front-page.css` is a pre-built bundle of legacy CSS used by the home
+    // page
+    './h/static/styles/front-page.css',
 
-gulp.task('build-css', function () {
-  // Rewrite font URLs to look for fonts in 'build/fonts' instead of
-  // 'build/styles/fonts'
-  function rewriteCSSURL(url) {
-    return url.replace(/^fonts\//, '../fonts/');
-  }
-
-  var sassOpts = {
-    outputStyle: IS_PRODUCTION_BUILD ? 'compressed' : 'nested',
-  };
+    // Icon font
+    './h/static/styles/vendor/icomoon.css',
+    './node_modules/bootstrap/dist/css/bootstrap.css',
+  ];
 
   var cssURLRewriter = postcssURL({
     url: rewriteCSSURL,
   });
 
-  return gulp.src(styleFiles)
-    .pipe(sourcemaps.init())
-    .pipe(gulpIf(isSASSFile, sass(sassOpts).on('error', sass.logError)))
-    .pipe(postcss([require('autoprefixer'), cssURLRewriter]))
-    .pipe(sourcemaps.write('.'))
+  return gulp.src(vendorCSSFiles)
+    .pipe(postcss([cssURLRewriter]))
     .pipe(gulp.dest(STYLE_DIR));
 });
 
-gulp.task('watch-css', function () {
-  var vendorCSS = styleFiles.filter(function (path) {
-    return path.endsWith('.css');
-  });
-  var styleFileGlobs = vendorCSS.concat('./h/static/styles/**/*.scss');
+var styleBundleEntryFiles = [
+  './h/static/styles/admin.scss',
+  './h/static/styles/help-page.scss',
+  './h/static/styles/site.scss',
+  './h/static/styles/site-v2.scss',
+  './h/static/styles/old-home.scss',
+];
 
-  gulp.watch(styleFileGlobs, ['build-css']);
+function buildStyleBundle(entryFile, options) {
+  return createStyleBundle({
+    input: entryFile,
+    output: './build/styles/' + path.basename(entryFile, '.scss') + '.css',
+    minify: IS_PRODUCTION_BUILD,
+    urlRewriter: rewriteCSSURL,
+    watch: options.watch,
+  });
+}
+
+gulp.task('build-css', ['build-vendor-css'], function () {
+  return Promise.all(styleBundleEntryFiles.map(buildStyleBundle));
+});
+
+gulp.task('watch-css', ['build-vendor-css'], function () {
+  styleBundleEntryFiles.forEach(function (input) {
+    buildStyleBundle(input, {watch: true});
+  });
 });
 
 var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
