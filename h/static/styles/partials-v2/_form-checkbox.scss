@@ -1,0 +1,25 @@
+.form-checkbox {
+  @include font-normal;
+  border: 1px solid $grey-3;
+  border-radius: 3px;
+  color: $grey-6;
+
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.form-checkbox__input {
+  margin-right: 15px;
+}
+
+.form-checkbox__label {
+  min-height: 50px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 15px;
+
+  cursor: pointer;
+}

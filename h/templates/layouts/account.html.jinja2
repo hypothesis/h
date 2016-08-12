@@ -18,23 +18,45 @@
   {% endif %}
   <div class="content paper">
     {% include "h:templates/includes/logo-header.html.jinja2" %}
-    <ul class="nav nav-tabs">
-      {% for route, title in nav_pages %}
-        <li{% if route == page_route %} class="active"{% endif %}>
-            <a href="{{ request.route_url(route) }}">{{ title }}</a>
-        </li>
-      {% endfor %}
-    </ul>
-
-    {% if request.session.peek_flash('success') -%}
-    <div class="form-flash">
-      {% for message in request.session.pop_flash('success') %}
-        <p>{{ message }}</p>
-      {%- endfor %}
-    </div>
-    {%- endif %}
-
-    {% block page_content %}
-    {% endblock page_content %}
+    {% if feature('activity_pages') %}
+      <div class="form">
+        <nav class="tabs">
+          <ul>
+            {% for route, title in nav_pages %}
+              <li class="tabs__item">
+                  <a href="{{ request.route_url(route) }}"
+                     class="tabs__link{% if route == page_route %} is-active{% endif %}">
+                    {{ title }}
+                  </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+        {% if request.session.peek_flash('success') -%}
+          <div class="form-flash">
+            {% for message in request.session.pop_flash('success') %}
+              <p>{{ message }}</p>
+            {%- endfor %}
+          </div>
+        {%- endif %}
+        {{ self.page_content() }}
+      </div>
+    {% else %}
+      <ul class="nav nav-tabs">
+        {% for route, title in nav_pages %}
+          <li{% if route == page_route %} class="active"{% endif %}>
+              <a href="{{ request.route_url(route) }}">{{ title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if request.session.peek_flash('success') -%}
+      <div class="form-flash">
+        {% for message in request.session.pop_flash('success') %}
+          <p>{{ message }}</p>
+        {%- endfor %}
+      </div>
+      {%- endif %}
+      {{ self.page_content() }}
+    {% endif %}
   </div>
 {% endblock content %}
