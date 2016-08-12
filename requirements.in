@@ -19,6 +19,7 @@ kombu
 psycogreen
 psycopg2
 pyramid < 1.7
+pyramid_layout
 pyramid-jinja2
 pyramid-multiauth
 pyramid-services

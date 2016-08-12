@@ -51,6 +51,7 @@ pycparser==2.14           # via cffi
 PyJWT==1.4.1
 pyparsing==2.1.5
 pyramid-jinja2==2.6.2
+pyramid-layout==1.0
 pyramid-mailer==0.14.1
 pyramid-multiauth==0.8.0
 pyramid-redis-sessions==1.0.1

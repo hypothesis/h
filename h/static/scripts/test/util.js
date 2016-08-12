@@ -1,5 +1,7 @@
 'use strict';
 
+var upgradeElements = require('../upgrade-elements');
+
 /**
  * Utility function for use with 'proxyquire' that prevents calls to
  * stubs 'calling through' to the _original_ dependency if a particular
@@ -76,7 +78,24 @@ function unroll(description, testFn, fixtures) {
   });
 }
 
+/**
+ * Helper to set up a component for a controller test
+ *
+ * @param {Document} document - Document to create component in
+ * @param {string} template - HTML markup for the component
+ * @param {object} controllers - Map of class names to controller classes used to
+                   upgrade the components using `upgradeElements()`
+ */
+function setupComponent(document, template, controllers) {
+  var container = document.createElement('div');
+  container.innerHTML = template;
+  document.body.appendChild(container);
+  upgradeElements(container, controllers);
+  return container;
+}
+
 module.exports = {
   noCallThru: noCallThru,
+  setupComponent: setupComponent,
   unroll: unroll,
 };

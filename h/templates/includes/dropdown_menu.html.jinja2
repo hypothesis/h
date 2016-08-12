@@ -1,0 +1,38 @@
+{#
+  Dropdown menu component.
+
+  Render a dropdown menu and the link that opens and closes it.
+
+  Usage:
+    {% call dropdown_menu(items, title='Menu') %}
+      <a href="/link-used-if-JS-is-inactive">Menu</a>
+    {% endcall %}
+
+  :param items: List of items to include in the menu
+  :param title: Title to display at the top of the menu
+  :param footer_item: Optional item to display at the bottom of the menu,
+                      visually separated from the rest of the menu items
+#}
+{% macro dropdown_menu(items, title='', footer_item=None) -%}
+<div class="dropdown-menu js-dropdown-menu">
+  <span class="js-dropdown-menu-toggle">
+    {{ caller() }}
+  </span>
+  <div class="dropdown-menu__menu js-dropdown-menu-content">
+    <h2 class="dropdown-menu__title">{{ title }}</h2>
+    <ul>
+      {% for item in items %}
+      <li>
+        <a class="dropdown-menu__item" href="{{ item.link }}">{{ item.title }}</a>
+      </li>
+      {% endfor %}
+      {% if footer_item %}
+      <li>
+        <a class="dropdown-menu__item dropdown-menu__item--footer"
+           href="{{ footer_item.link }}">{{ footer_item.title }}</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+{%- endmacro %}

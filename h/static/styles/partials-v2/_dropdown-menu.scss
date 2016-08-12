@@ -1,0 +1,63 @@
+// Dropdown menu
+// -------------
+// Specs: https://trello.com/c/atjT8T9p
+
+@at-root {
+  @mixin menu-item {
+    height: 25px;
+    margin: 0;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  // Container holding the dropdown menu toggle link and the menu content
+  .dropdown-menu {
+    position: relative;
+  }
+
+  // The content of the dropdown menu
+  .dropdown-menu__menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 5px);
+    display: none;
+    z-index: $zindex-dropdown-menu;
+
+    background-color: $white;
+    border: 1px solid $grey-3;
+    border-radius: 2px;
+  }
+
+  .dropdown-menu__menu.is-open {
+    display: block;
+  }
+
+  // Title displayed at the top of the menu
+  .dropdown-menu__title {
+    @include font-small;
+    @include menu-item;
+
+    color: $grey-5;
+    font-weight: bold;
+  }
+
+  .dropdown-menu__item {
+    @include menu-item;
+
+    color: $grey-6;
+    white-space: nowrap;
+  }
+
+  .dropdown-menu__item:hover {
+    background-color: $grey-2;
+  }
+
+  // Item at the bottom of the menu which is separated from the rest by a border
+  .dropdown-menu__item--footer {
+    border-top: 1px solid $grey-3;
+  }
+}

@@ -7,6 +7,7 @@ def includeme(config):
     config.include('h.views.home')
     config.include('h.views.main')
     config.include('h.views.client')
+    config.include('h.views.panels')
 
     # homepage
     config.add_route('index', '/')
