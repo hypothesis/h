@@ -3,26 +3,7 @@
 var proxyquire = require('proxyquire');
 var noCallThru = require('./util').noCallThru;
 
-function fakeExceptionData(scriptURL) {
-  return {
-    exception: {
-      values: [{
-        stacktrace: {
-          frames: [{
-            filename: scriptURL,
-          }],
-        },
-      }],
-    },
-    culprit: scriptURL,
-  };
-}
-
 describe('raven', function () {
-  // A stub for the callback that the Angular plugin installs with
-  // Raven.setDataCallback()
-  var fakeAngularTransformer;
-  var fakeAngularPlugin;
   var fakeRavenJS;
   var raven;
 
@@ -33,24 +14,10 @@ describe('raven', function () {
       }),
 
       captureException: sinon.stub(),
-
-      setDataCallback: function (callback) {
-        this._globalOptions.dataCallback = callback;
-      },
-
-      _globalOptions: {
-        dataCallback: undefined,
-      },
     };
-
-    fakeAngularTransformer = sinon.stub();
-    fakeAngularPlugin = sinon.spy(function (Raven) {
-      Raven.setDataCallback(fakeAngularTransformer);
-    });
 
     raven = proxyquire('../raven', noCallThru({
       'raven-js': fakeRavenJS,
-      'raven-js/plugins/angular': fakeAngularPlugin,
     }));
   });
 
@@ -67,36 +34,6 @@ describe('raven', function () {
 
       assert.calledWith(fakeRavenJS.captureException, event.reason,
         sinon.match.any);
-    });
-  });
-
-  describe('pre-submission data transformation', function () {
-    var dataCallback;
-
-    beforeEach(function () {
-      raven.init({dsn: 'dsn', release: 'release'});
-      var configOpts = fakeRavenJS.config.args[0][1];
-      dataCallback = configOpts && configOpts.dataCallback;
-    });
-
-    it('installs a transformer', function () {
-      assert.ok(dataCallback);
-    });
-
-    it('replaces non-HTTP URLs with filenames', function () {
-      var scriptURL = 'chrome-extension://1234/public/bundle.js';
-      var transformed = dataCallback(fakeExceptionData(scriptURL));
-      assert.equal(transformed.culprit, 'bundle.js');
-      var transformedStack = transformed.exception.values[0].stacktrace;
-      assert.equal(transformedStack.frames[0].filename, 'bundle.js');
-    });
-
-    it('does not modify HTTP URLs', function () {
-      var scriptURL = 'https://hypothes.is/assets/scripts/bundle.js';
-      var transformed = dataCallback(fakeExceptionData(scriptURL));
-      assert.equal(transformed.culprit, scriptURL);
-      var transformedStack = transformed.exception.values[0].stacktrace;
-      assert.equal(transformedStack.frames[0].filename, scriptURL);
     });
   });
 
@@ -119,37 +56,6 @@ describe('raven', function () {
           url: 'foobar.com',
         },
       });
-    });
-  });
-
-  describe('.angularModule()', function () {
-    var angularStub;
-
-    beforeEach(function () {
-      angularStub = {
-        module: sinon.stub(),
-      };
-    });
-
-    it('installs the Angular plugin', function () {
-      raven.init('dsn');
-      raven.angularModule(angularStub);
-      assert.calledWith(fakeAngularPlugin, fakeRavenJS, angularStub);
-    });
-
-    it('installs the data transformers', function () {
-      raven.init('dsn');
-      var originalTransformer = sinon.stub();
-      fakeRavenJS._globalOptions.dataCallback = originalTransformer;
-      raven.angularModule(angularStub);
-      fakeRavenJS._globalOptions.dataCallback(
-        fakeExceptionData('app.bundle.js')
-      );
-
-      // Check that both our data transformer and the one provided by
-      // the Angular plugin were invoked
-      assert.called(originalTransformer);
-      assert.called(fakeAngularTransformer);
     });
   });
 });
