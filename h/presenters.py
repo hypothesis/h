@@ -81,8 +81,7 @@ class AnnotationHTMLPresenter(object):
 
     @property
     def quote(self):
-        """The text in the document which this annotation refers to"""
-
+        """The text in the document which this annotation refers to."""
         selection = self._get_selection()
         if selection:
             return jinja2.escape(selection)
