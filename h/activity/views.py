@@ -11,6 +11,7 @@ from pyramid.view import view_config
 from sqlalchemy.orm import subqueryload
 
 from h import models
+from h import presenters
 from h.activity import bucketing
 from memex import search as search_lib
 from memex.search import parser
@@ -58,7 +59,7 @@ def search(request):
                 for index, annotation in enumerate(bucket.annotations):
                     group = request.db.query(models.Group).filter(
                         models.Group.pubid == annotation.groupid).one_or_none()
-                    bucket.annotations[index] = {'annotation': annotation, 'group': group}
+                    bucket.annotations[index] = {'annotation': presenters.AnnotationHTMLPresenter(annotation), 'group': group}
 
     return {
         'q': request.params.get('q', ''),
