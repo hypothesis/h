@@ -81,6 +81,10 @@
       </script>
     {% endif %}
 
+    <script>
+    {% include "h:../build/scripts/header.bundle.js" %}
+    </script>
+
     {% block base_tag %}{% endblock %}
   </head>
   {% block body_tag %}<body class="body">{% endblock %}
