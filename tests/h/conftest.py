@@ -150,22 +150,27 @@ def fake_db_session():
     return DummySession()
 
 
-def form_validating_to(appstruct):
-    form = mock.MagicMock()
-    form.validate.return_value = appstruct
-    form.render.return_value = 'valid form'
-    return form
+@pytest.fixture
+def form_validating_to():
+    def form_validating_to(appstruct):
+        form = mock.MagicMock()
+        form.validate.return_value = appstruct
+        form.render.return_value = 'valid form'
+        return form
+    return form_validating_to
 
 
 @pytest.fixture
-def invalid_form(errors=None):
-    if errors is None:
-        errors = {}
-    invalid = FakeInvalid(errors)
-    form = mock.MagicMock()
-    form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
-    form.render.return_value = 'invalid form'
-    return form
+def invalid_form():
+    def invalid_form(errors=None):
+        if errors is None:
+            errors = {}
+        invalid = FakeInvalid(errors)
+        form = mock.MagicMock()
+        form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
+        form.render.return_value = 'invalid form'
+        return form
+    return invalid_form
 
 
 @pytest.fixture

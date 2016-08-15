@@ -10,8 +10,6 @@ from pyramid import httpexceptions
 from h import accounts
 from h.accounts import views
 
-from tests.h import conftest
-
 
 class FakeSubscription(object):
     def __init__(self, type_, active):
@@ -53,10 +51,13 @@ class TestAuthController(object):
 
         assert e.value.location == '/foo/bar'
 
-    def test_post_returns_form_when_validation_fails(self, pyramid_config, pyramid_request):
+    def test_post_returns_form_when_validation_fails(self,
+                                                     invalid_form,
+                                                     pyramid_config,
+                                                     pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = conftest.invalid_form()
+        controller.form = invalid_form()
 
         result = controller.post()
 
@@ -65,36 +66,39 @@ class TestAuthController(object):
     @mock.patch('h.accounts.views.LoginEvent', autospec=True)
     def test_post_no_event_when_validation_fails(self,
                                                  loginevent,
+                                                 invalid_form,
                                                  notify,
                                                  pyramid_config,
                                                  pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = conftest.invalid_form()
+        controller.form = invalid_form()
 
         controller.post()
 
         assert not loginevent.called
         assert not notify.called
 
-    def test_post_redirects_when_validation_succeeds(self, pyramid_config, pyramid_request):
+    def test_post_redirects_when_validation_succeeds(self,
+                                                     form_validating_to,
+                                                     pyramid_config,
+                                                     pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = conftest.form_validating_to(
-            {"user": FakeUser(username='cara')})
+        controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
         result = controller.post()
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
     def test_post_redirects_to_next_param_when_validation_succeeds(self,
+                                                                   form_validating_to,
                                                                    pyramid_config,
                                                                    pyramid_request):
         pyramid_request.params = {'next': '/foo/bar'}
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = conftest.form_validating_to(
-            {"user": FakeUser(username='cara')})
+        controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
         result = controller.post()
 
@@ -104,13 +108,14 @@ class TestAuthController(object):
     @mock.patch('h.accounts.views.LoginEvent', autospec=True)
     def test_post_event_when_validation_succeeds(self,
                                                  loginevent,
+                                                 form_validating_to,
                                                  notify,
                                                  pyramid_config,
                                                  pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         elephant = FakeUser(username='avocado')
         controller = views.AuthController(pyramid_request)
-        controller.form = conftest.form_validating_to({"user": elephant})
+        controller.form = form_validating_to({"user": elephant})
 
         controller.post()
 
@@ -158,11 +163,11 @@ class TestAuthController(object):
 @pytest.mark.usefixtures('session')
 class TestAjaxAuthController(object):
 
-    def test_login_returns_status_okay_when_validation_succeeds(self, pyramid_request):
+    def test_login_returns_status_okay_when_validation_succeeds(
+            self, form_validating_to, pyramid_request):
         pyramid_request.json_body = {}
         controller = views.AjaxAuthController(pyramid_request)
-        controller.form = conftest.form_validating_to(
-            {'user': FakeUser(username='bob')})
+        controller.form = form_validating_to({'user': FakeUser(username='bob')})
 
         result = controller.login()
 
@@ -228,10 +233,12 @@ class TestAjaxAuthController(object):
             assert sorted(pstruct) == sorted([('username', 'user'),
                                               ('password', expected_output)])
 
-    def test_login_raises_ValidationFailure_on_ValidationFailure(self, pyramid_request):
+    def test_login_raises_ValidationFailure_on_ValidationFailure(self,
+                                                                 invalid_form,
+                                                                 pyramid_request):
         pyramid_request.json_body = {}
         controller = views.AjaxAuthController(pyramid_request)
-        controller.form = conftest.invalid_form({'password': 'too short'})
+        controller.form = invalid_form({'password': 'too short'})
 
         with pytest.raises(deform.ValidationFailure) as exc_info:
             controller.login()
@@ -249,9 +256,11 @@ class TestAjaxAuthController(object):
                          'routes')
 class TestForgotPasswordController(object):
 
-    def test_post_returns_form_when_validation_fails(self, pyramid_request):
+    def test_post_returns_form_when_validation_fails(self,
+                                                     invalid_form,
+                                                     pyramid_request):
         controller = views.ForgotPasswordController(pyramid_request)
-        controller.form = conftest.invalid_form()
+        controller.form = invalid_form()
 
         result = controller.post()
 
@@ -259,20 +268,24 @@ class TestForgotPasswordController(object):
 
     def test_post_creates_no_activations_when_validation_fails(self,
                                                                activation_model,
+                                                               invalid_form,
                                                                pyramid_request):
         controller = views.ForgotPasswordController(pyramid_request)
-        controller.form = conftest.invalid_form()
+        controller.form = invalid_form()
 
         controller.post()
 
         assert activation_model.call_count == 0
 
     @mock.patch('h.accounts.views.account_reset_link')
-    def test_post_generates_reset_link(self, reset_link, pyramid_request):
+    def test_post_generates_reset_link(self,
+                                       reset_link,
+                                       form_validating_to,
+                                       pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
         user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
-        controller.form = conftest.form_validating_to({"user": user})
+        controller.form = form_validating_to({"user": user})
 
         controller.post()
 
@@ -284,11 +297,12 @@ class TestForgotPasswordController(object):
                                  reset_link,
                                  reset_mail,
                                  activation_model,
+                                 form_validating_to,
                                  pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
         user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
-        controller.form = conftest.form_validating_to({"user": user})
+        controller.form = form_validating_to({"user": user})
         reset_link.return_value = "http://example.com"
         reset_mail.return_value = {
             'recipients': [],
@@ -301,11 +315,12 @@ class TestForgotPasswordController(object):
         reset_mail.assert_called_with(user, "faketoken", "http://example.com")
 
     @mock.patch('h.accounts.views.account_reset_email')
-    def test_post_sends_mail(self, reset_mail, mailer, pyramid_request):
+    def test_post_sends_mail(
+            self, reset_mail, form_validating_to, mailer, pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
         user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
-        controller.form = conftest.form_validating_to({"user": user})
+        controller.form = form_validating_to({"user": user})
         reset_mail.return_value = {
             'recipients': ['giraffe@thezoo.org'],
             'subject': 'subject',
@@ -318,11 +333,11 @@ class TestForgotPasswordController(object):
                                                   subject='subject',
                                                   body='body')
 
-    def test_post_redirects_on_success(self, pyramid_request):
+    def test_post_redirects_on_success(self, form_validating_to, pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
         user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
-        controller.form = conftest.form_validating_to({"user": user})
+        controller.form = form_validating_to({"user": user})
 
         result = controller.post()
 
@@ -344,41 +359,46 @@ class TestForgotPasswordController(object):
 @pytest.mark.usefixtures('routes')
 class TestResetController(object):
 
-    def test_post_returns_form_when_validation_fails(self, pyramid_request):
+    def test_post_returns_form_when_validation_fails(self,
+                                                     invalid_form,
+                                                     pyramid_request):
         controller = views.ResetController(pyramid_request)
-        controller.form = conftest.invalid_form()
+        controller.form = invalid_form()
 
         result = controller.post()
 
         assert result == {'form': 'invalid form'}
 
-    def test_post_sets_user_password_from_form(self, pyramid_request):
+    def test_post_sets_user_password_from_form(self,
+                                               form_validating_to,
+                                               pyramid_request):
         elephant = FakeUser(password='password1')
         controller = views.ResetController(pyramid_request)
-        controller.form = conftest.form_validating_to({'user': elephant,
-                                                       'password': 's3cure!'})
+        controller.form = form_validating_to({'user': elephant,
+                                              'password': 's3cure!'})
 
         controller.post()
 
         assert elephant.password == 's3cure!'
 
     @mock.patch('h.accounts.views.PasswordResetEvent', autospec=True)
-    def test_post_emits_event(self, event, notify, pyramid_request):
+    def test_post_emits_event(
+            self, event, form_validating_to, notify, pyramid_request):
         user = FakeUser(password='password1')
         controller = views.ResetController(pyramid_request)
-        controller.form = conftest.form_validating_to({'user': user,
-                                                       'password': 's3cure!'})
+        controller.form = form_validating_to({'user': user,
+                                              'password': 's3cure!'})
 
         controller.post()
 
         event.assert_called_with(pyramid_request, user)
         notify.assert_called_with(event.return_value)
 
-    def test_post_redirects_on_success(self, pyramid_request):
+    def test_post_redirects_on_success(self, form_validating_to, pyramid_request):
         user = FakeUser(password='password1')
         controller = views.ResetController(pyramid_request)
-        controller.form = conftest.form_validating_to({'user': user,
-                                                       'password': 's3cure!'})
+        controller.form = form_validating_to({'user': user,
+                                              'password': 's3cure!'})
 
         result = controller.post()
 
@@ -400,17 +420,22 @@ class TestResetController(object):
                          'user_model')
 class TestSignupController(object):
 
-    def test_post_returns_errors_when_validation_fails(self, pyramid_request):
+    def test_post_returns_errors_when_validation_fails(self,
+                                                       invalid_form,
+                                                       pyramid_request):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.invalid_form()
+        controller.form = invalid_form()
 
         result = controller.post()
 
         assert result == {"form": "invalid form"}
 
-    def test_post_creates_user_from_form_data(self, pyramid_request, user_model):
+    def test_post_creates_user_from_form_data(self,
+                                              form_validating_to,
+                                              pyramid_request,
+                                              user_model):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.form_validating_to({
+        controller.form = form_validating_to({
             "username": "bob",
             "email": "bob@example.com",
             "password": "s3crets",
@@ -423,9 +448,12 @@ class TestSignupController(object):
                                       email="bob@example.com",
                                       password="s3crets")
 
-    def test_post_adds_new_user_to_session(self, pyramid_request, user_model):
+    def test_post_adds_new_user_to_session(self,
+                                           form_validating_to,
+                                           pyramid_request,
+                                           user_model):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.form_validating_to({
+        controller.form = form_validating_to({
             "username": "bob",
             "email": "bob@example.com",
             "password": "s3crets",
@@ -435,9 +463,13 @@ class TestSignupController(object):
 
         assert user_model.return_value in pyramid_request.db.added
 
-    def test_post_creates_new_activation(self, activation_model, pyramid_request, user_model):
+    def test_post_creates_new_activation(self,
+                                         activation_model,
+                                         form_validating_to,
+                                         pyramid_request,
+                                         user_model):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.form_validating_to({
+        controller.form = form_validating_to({
             "username": "bob",
             "email": "bob@example.com",
             "password": "s3crets",
@@ -451,10 +483,11 @@ class TestSignupController(object):
     @mock.patch('h.accounts.views.activation_email')
     def test_post_generates_activation_email_from_user(self,
                                                        activation_email,
+                                                       form_validating_to,
                                                        pyramid_request,
                                                        user_model):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.form_validating_to({
+        controller.form = form_validating_to({
             "username": "bob",
             "email": "bob@example.com",
             "password": "s3crets",
@@ -471,9 +504,13 @@ class TestSignupController(object):
         activation_email.assert_called_once_with(pyramid_request, new_user)
 
     @mock.patch('h.accounts.views.activation_email')
-    def test_post_sends_email(self, activation_email, mailer, pyramid_request):
+    def test_post_sends_email(self,
+                              activation_email,
+                              form_validating_to,
+                              mailer,
+                              pyramid_request):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.form_validating_to({
+        controller.form = form_validating_to({
             "username": "bob",
             "email": "bob@example.com",
             "password": "s3crets",
@@ -491,9 +528,13 @@ class TestSignupController(object):
                                                   body='body')
 
     @mock.patch('h.accounts.views.RegistrationEvent')
-    def test_post_no_event_when_validation_fails(self, event, notify, pyramid_request):
+    def test_post_no_event_when_validation_fails(self,
+                                                 event,
+                                                 invalid_form,
+                                                 notify,
+                                                 pyramid_request):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.invalid_form()
+        controller.form = invalid_form()
 
         controller.post()
 
@@ -503,11 +544,12 @@ class TestSignupController(object):
     @mock.patch('h.accounts.views.RegistrationEvent')
     def test_post_event_when_validation_succeeds(self,
                                                  event,
+                                                 form_validating_to,
                                                  notify,
                                                  pyramid_request,
                                                  user_model):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.form_validating_to({
+        controller.form = form_validating_to({
             "username": "bob",
             "email": "bob@example.com",
             "password": "s3crets",
@@ -519,9 +561,11 @@ class TestSignupController(object):
         event.assert_called_with(pyramid_request, new_user)
         notify.assert_called_with(event.return_value)
 
-    def test_post_event_redirects_on_success(self, pyramid_request):
+    def test_post_event_redirects_on_success(self,
+                                             form_validating_to,
+                                             pyramid_request):
         controller = views.SignupController(pyramid_request)
-        controller.form = conftest.form_validating_to({
+        controller.form = form_validating_to({
             "username": "bob",
             "email": "bob@example.com",
             "password": "s3crets",
@@ -737,9 +781,10 @@ class TestActivateController(object):
 class TestAccountController(object):
 
     def test_post_email_form_with_valid_data_changes_email(self,
+                                                           form_validating_to,
                                                            pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['email'] = conftest.form_validating_to({
+        controller.forms['email'] = form_validating_to({
             'email': 'new_email_address'})
 
         controller.post_email_form()
@@ -749,7 +794,7 @@ class TestAccountController(object):
     def test_post_email_form_with_invalid_data_does_not_change_email(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['email'] = invalid_form
+        controller.forms['email'] = invalid_form()
         original_email = pyramid_request.authenticated_user.email
 
         controller.post_email_form()
@@ -759,7 +804,7 @@ class TestAccountController(object):
     def test_post_email_form_with_invalid_data_returns_template_data(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['email'] = invalid_form
+        controller.forms['email'] = invalid_form()
 
         result = controller.post_email_form()
 
@@ -770,9 +815,9 @@ class TestAccountController(object):
         }
 
     def test_post_password_form_with_valid_data_changes_password(
-            self, pyramid_request):
+            self, form_validating_to, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['password'] = conftest.form_validating_to({
+        controller.forms['password'] = form_validating_to({
             'new_password': 'my_new_password'})
 
         controller.post_password_form()
@@ -782,7 +827,7 @@ class TestAccountController(object):
     def test_post_password_form_with_invalid_data_does_not_change_password(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['password'] = invalid_form
+        controller.forms['password'] = invalid_form()
         original_password = pyramid_request.authenticated_user.password
 
         controller.post_password_form()
@@ -792,7 +837,7 @@ class TestAccountController(object):
     def test_post_password_form_with_invalid_data_returns_template_data(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['password'] = invalid_form
+        controller.forms['password'] = invalid_form()
 
         result = controller.post_password_form()
 
@@ -823,6 +868,7 @@ class TestAccountController(object):
 class TestNotificationsController(object):
 
     def test_get_sets_subscriptions_data_in_form(self,
+                                                 form_validating_to,
                                                  pyramid_config,
                                                  pyramid_request,
                                                  subscriptions_model):
@@ -832,7 +878,7 @@ class TestNotificationsController(object):
             FakeSubscription('foo', False),
         ]
         controller = views.NotificationsController(pyramid_request)
-        controller.form = conftest.form_validating_to({})
+        controller.form = form_validating_to({})
 
         controller.get()
 
@@ -840,17 +886,21 @@ class TestNotificationsController(object):
             'notifications': set(['reply']),
         })
 
-    def test_post_with_invalid_data_returns_form(self, pyramid_config, pyramid_request):
+    def test_post_with_invalid_data_returns_form(self,
+                                                 invalid_form,
+                                                 pyramid_config,
+                                                 pyramid_request):
         pyramid_request.POST = {}
         pyramid_config.testing_securitypolicy('jerry')
         controller = views.NotificationsController(pyramid_request)
-        controller.form = conftest.invalid_form()
+        controller.form = invalid_form()
 
         result = controller.post()
 
         assert 'form' in result
 
     def test_post_with_valid_data_updates_subscriptions(self,
+                                                        form_validating_to,
                                                         pyramid_config,
                                                         pyramid_request,
                                                         subscriptions_model):
@@ -862,9 +912,7 @@ class TestNotificationsController(object):
         ]
         subscriptions_model.get_subscriptions_for_uri.return_value = subs
         controller = views.NotificationsController(pyramid_request)
-        controller.form = conftest.form_validating_to({
-            'notifications': set(['foo'])
-        })
+        controller.form = form_validating_to({'notifications': set(['foo'])})
 
         controller.post()
 
@@ -872,6 +920,7 @@ class TestNotificationsController(object):
         assert subs[1].active is True
 
     def test_post_with_valid_data_redirects(self,
+                                            form_validating_to,
                                             pyramid_config,
                                             pyramid_request,
                                             subscriptions_model):
@@ -879,7 +928,7 @@ class TestNotificationsController(object):
         pyramid_config.testing_securitypolicy('fiona')
         subscriptions_model.get_subscriptions_for_uri.return_value = []
         controller = views.NotificationsController(pyramid_request)
-        controller.form = conftest.form_validating_to({})
+        controller.form = form_validating_to({})
 
         result = controller.post()
 

@@ -5,8 +5,6 @@ import pytest
 
 from h import form
 
-from tests.h import conftest
-
 
 class TestJinja2Renderer(object):
 
@@ -172,7 +170,7 @@ class TestHandleFormSubmission(object):
         on_failure = mock_callable()
 
         form.handle_form_submission(pyramid_request,
-                                    invalid_form,
+                                    invalid_form(),
                                     mock.sentinel.on_success,
                                     on_failure)
 
@@ -183,28 +181,31 @@ class TestHandleFormSubmission(object):
                                                           pyramid_request,
                                                           to_xhr_response):
         on_failure = mock_callable()
+        form_ = invalid_form()
 
         form.handle_form_submission(pyramid_request,
-                                    invalid_form,
+                                    form_,
                                     mock.sentinel.on_success,
                                     on_failure)
 
         to_xhr_response.assert_called_once_with(
-            pyramid_request, on_failure.return_value, invalid_form)
+            pyramid_request, on_failure.return_value, form_)
 
     def test_if_validation_fails_it_returns_to_xhr_response(self,
                                                             invalid_form,
                                                             pyramid_request,
                                                             to_xhr_response):
         result = form.handle_form_submission(pyramid_request,
-                                             invalid_form,
+                                             invalid_form(),
                                              mock.sentinel.on_success,
                                              mock_callable())
 
         assert result == to_xhr_response.return_value
 
-    def test_if_validation_succeeds_it_calls_on_success(self, pyramid_request):
-        form_ = conftest.form_validating_to(mock.sentinel.appstruct)
+    def test_if_validation_succeeds_it_calls_on_success(self,
+                                                        form_validating_to,
+                                                        pyramid_request):
+        form_ = form_validating_to(mock.sentinel.appstruct)
         on_success = mock_callable()
 
         form.handle_form_submission(pyramid_request,
@@ -215,19 +216,21 @@ class TestHandleFormSubmission(object):
         on_success.assert_called_once_with(mock.sentinel.appstruct)
 
     def test_if_validation_succeeds_it_shows_a_flash_message(self,
+                                                             form_validating_to,
                                                              pyramid_request):
         form.handle_form_submission(pyramid_request,
-                                    conftest.form_validating_to('anything'),
+                                    form_validating_to('anything'),
                                     mock_callable(),
                                     mock.sentinel.on_failure)
 
         assert pyramid_request.session.peek_flash('success')
 
     def test_if_validation_succeeds_it_calls_to_xhr_response(self,
+                                                             form_validating_to,
                                                              matchers,
                                                              pyramid_request,
                                                              to_xhr_response):
-        form_ = conftest.form_validating_to('anything')
+        form_ = form_validating_to('anything')
 
         form.handle_form_submission(pyramid_request,
                                     form_,
@@ -241,6 +244,7 @@ class TestHandleFormSubmission(object):
 
     def test_if_validation_succeeds_it_passes_on_success_result_to_to_xhr_response(
             self,
+            form_validating_to,
             matchers,
             pyramid_request,
             to_xhr_response):
@@ -251,7 +255,7 @@ class TestHandleFormSubmission(object):
         something to to_xhr_response().
 
         """
-        form_ = conftest.form_validating_to('anything')
+        form_ = form_validating_to('anything')
 
         form.handle_form_submission(pyramid_request,
                                     form_,
@@ -263,13 +267,13 @@ class TestHandleFormSubmission(object):
             pyramid_request,
             mock.sentinel.result,
             form_)
-        form_ = conftest.form_validating_to('anything')
 
     def test_if_validation_succeeds_it_returns_to_xhr_response(self,
+                                                               form_validating_to,
                                                                pyramid_request,
                                                                to_xhr_response):
         result = form.handle_form_submission(pyramid_request,
-                                             conftest.form_validating_to('anything'),
+                                             form_validating_to('anything'),
                                              mock_callable(),
                                              mock.sentinel.on_failure)
 
