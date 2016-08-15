@@ -129,13 +129,12 @@ class TestToXHRResponse(object):
 
         """
         pyramid_request.is_xhr = False
-        non_xhr_result = mock.Mock()
 
         result = form.to_xhr_response(pyramid_request,
-                                      non_xhr_result,
-                                      mock.Mock())
+                                      mock.sentinel.non_xhr_result,
+                                      mock.sentinel.form)
 
-        assert result == non_xhr_result
+        assert result == mock.sentinel.non_xhr_result
 
     def test_returns_form_if_xhr(self, pyramid_request):
         """
@@ -147,7 +146,9 @@ class TestToXHRResponse(object):
         pyramid_request.is_xhr = True
         form_ = mock.Mock()
 
-        result = form.to_xhr_response(pyramid_request, mock.Mock(), form_)
+        result = form.to_xhr_response(pyramid_request,
+                                      mock.sentinel.non_xhr_result,
+                                      form_)
 
         assert result == form_.render.return_value
 
@@ -161,7 +162,7 @@ class TestHandleFormSubmission(object):
         form.handle_form_submission(pyramid_request,
                                     form_,
                                     mock.Mock(),
-                                    mock.Mock())
+                                    mock.sentinel.on_failure)
 
         form_.validate.assert_called_once_with(pyramid_request.POST.items())
 
@@ -172,7 +173,7 @@ class TestHandleFormSubmission(object):
 
         form.handle_form_submission(pyramid_request,
                                     invalid_form,
-                                    mock.Mock(),
+                                    mock.sentinel.on_success,
                                     on_failure)
 
         on_failure.assert_called_once_with()
@@ -185,7 +186,7 @@ class TestHandleFormSubmission(object):
 
         form.handle_form_submission(pyramid_request,
                                     invalid_form,
-                                    mock.Mock(),
+                                    mock.sentinel.on_success,
                                     on_failure)
 
         to_xhr_response.assert_called_once_with(
@@ -197,7 +198,7 @@ class TestHandleFormSubmission(object):
                                                             to_xhr_response):
         result = form.handle_form_submission(pyramid_request,
                                              invalid_form,
-                                             mock.Mock(),
+                                             mock.sentinel.on_success,
                                              mock.Mock())
 
         assert result == to_xhr_response.return_value
@@ -209,7 +210,7 @@ class TestHandleFormSubmission(object):
         form.handle_form_submission(pyramid_request,
                                     form_,
                                     on_success,
-                                    mock.Mock())
+                                    mock.sentinel.on_failure)
 
         on_success.assert_called_once_with(mock.sentinel.appstruct)
 
@@ -218,7 +219,7 @@ class TestHandleFormSubmission(object):
         form.handle_form_submission(pyramid_request,
                                     conftest.form_validating_to('anything'),
                                     mock.Mock(),
-                                    mock.Mock())
+                                    mock.sentinel.on_failure)
 
         assert pyramid_request.session.peek_flash('success')
 
@@ -231,7 +232,7 @@ class TestHandleFormSubmission(object):
         form.handle_form_submission(pyramid_request,
                                     form_,
                                     mock.Mock(return_value=None),
-                                    mock.Mock())
+                                    mock.sentinel.on_failure)
 
         to_xhr_response.assert_called_once_with(
             pyramid_request,
@@ -255,7 +256,7 @@ class TestHandleFormSubmission(object):
         form.handle_form_submission(pyramid_request,
                                     form_,
                                     mock.Mock(return_value=mock.sentinel.result),
-                                    mock.Mock())
+                                    mock.sentinel.on_failure)
 
         to_xhr_response.assert_called_once_with(
             pyramid_request,
@@ -269,7 +270,7 @@ class TestHandleFormSubmission(object):
         result = form.handle_form_submission(pyramid_request,
                                              conftest.form_validating_to('anything'),
                                              mock.Mock(),
-                                             mock.Mock())
+                                             mock.sentinel.on_failure)
 
         assert result == to_xhr_response.return_value
 
