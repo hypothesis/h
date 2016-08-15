@@ -3,9 +3,32 @@
 import datetime
 
 import jwt
+from zope.interface import implementer
 
 from h._compat import text_type
 from h.auth import models
+from h.auth.interfaces import IAuthenticationToken
+
+
+@implementer(IAuthenticationToken)
+class LegacyClientJWT(object):
+
+    """
+    A wrapper around JWT issued to the Hypothesis client.
+
+    Exposes the standard "auth token" interface on top of legacy tokens.
+    """
+
+    def __init__(self, body, key, audience=None, leeway=240):
+        self.payload = jwt.decode(body,
+                                  key=key,
+                                  audience=audience,
+                                  leeway=leeway,
+                                  algorithms=['HS256'])
+
+    @property
+    def userid(self):
+        return self.payload.get('sub')
 
 
 def generate_jwt(request, expires_in):
