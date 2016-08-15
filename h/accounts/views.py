@@ -16,7 +16,6 @@ from h import i18n
 from h import mailer
 from h import models
 from h import session
-from h import util
 from h.accounts import schemas
 from h.accounts.models import User
 from h.accounts.models import Activation
@@ -124,9 +123,7 @@ class AuthController(object):
     def _login(self, user):
         user.last_login_date = datetime.datetime.utcnow()
         self.request.registry.notify(LoginEvent(self.request, user))
-        userid = util.user.userid_from_username(user.username,
-                                                self.request.auth_domain)
-        headers = security.remember(self.request, userid)
+        headers = security.remember(self.request, user.userid)
         return headers
 
     def _logout(self):

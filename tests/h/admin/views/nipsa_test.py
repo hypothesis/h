@@ -6,7 +6,7 @@ import pytest
 from h.admin.views import nipsa as views
 
 
-@pytest.mark.usefixtures('nipsa_service', 'routes')
+@pytest.mark.usefixtures('nipsa_service', 'routes', 'users')
 class TestNipsaIndex(object):
     def test_lists_flagged_usernames(self, pyramid_request):
         result = views.nipsa_index(pyramid_request)
@@ -21,7 +21,7 @@ class TestNipsaIndex(object):
         assert result['usernames'] == []
 
 
-@pytest.mark.usefixtures('nipsa_service', 'routes')
+@pytest.mark.usefixtures('nipsa_service', 'routes', 'users')
 class TestNipsaAddRemove(object):
     def test_add_flags_user(self, nipsa_service, pyramid_request):
         pyramid_request.params = {"add": "carl"}
@@ -30,10 +30,12 @@ class TestNipsaAddRemove(object):
 
         assert 'acct:carl@example.com' in nipsa_service.flagged
 
-    def test_add_ignores_empty_user(self, nipsa_service, pyramid_request):
-        pyramid_request.params = {"add": ""}
+    @pytest.mark.parametrize('user', ['', 'donkeys', '\x00'])
+    def test_add_raises_when_user_not_found(self, user, nipsa_service, pyramid_request):
+        pyramid_request.params = {"add": user}
 
-        views.nipsa_add(pyramid_request)
+        with pytest.raises(views.UserNotFoundError):
+            views.nipsa_add(pyramid_request)
 
         assert 'acct:@example.com' not in nipsa_service.flagged
 
@@ -52,14 +54,17 @@ class TestNipsaAddRemove(object):
 
         assert 'acct:kiki@example.com' not in nipsa_service.flagged
 
-    def test_remove_ignores_empty_user(self, nipsa_service, pyramid_request):
+    @pytest.mark.parametrize('user', ['', 'donkeys', '\x00'])
+    def test_remove_raises_when_user_not_found(self, user, nipsa_service, pyramid_request):
         # Add this bogus userid just to make sure it doesn't get removed.
-        nipsa_service.flagged.add('acct:@example.com')
-        pyramid_request.params = {"remove": ""}
+        nonexistent_userid = 'acct:{0}@example.com'.format(user)
+        nipsa_service.flagged.add(nonexistent_userid)
+        pyramid_request.params = {"remove": user}
 
-        views.nipsa_remove(pyramid_request)
+        with pytest.raises(views.UserNotFoundError):
+            views.nipsa_remove(pyramid_request)
 
-        assert 'acct:@example.com' in nipsa_service.flagged
+        assert nonexistent_userid in nipsa_service.flagged
 
     def test_remove_redirects_to_index(self, pyramid_request):
         pyramid_request.params = {"remove": "kiki"}
@@ -97,3 +102,14 @@ def nipsa_service(pyramid_config):
 @pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('admin_nipsa', '/adm/nipsa')
+
+
+@pytest.fixture
+def users(db_session, factories):
+    users = [factories.User(username='carl'),
+             factories.User(username='kiki'),
+             factories.User(username='ursula'),
+             factories.User(username='osono')]
+    db_session.add_all(users)
+    db_session.flush()
+    return users
