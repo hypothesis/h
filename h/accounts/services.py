@@ -43,6 +43,7 @@ class UserSignupService(object):
         All keyword arguments are passed to the :py:class:`h.models.User`
         constructor.
         """
+        kwargs.setdefault('authority', self.default_authority)
         user = User(**kwargs)
         self.session.add(user)
 

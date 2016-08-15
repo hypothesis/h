@@ -96,10 +96,8 @@ def test_cohorts_add_creates_cohort_with_no_members(pyramid_request):
     assert len(cohort.members) == 0
 
 
-def test_cohorts_edit_add_user(pyramid_request):
-    user = models.User(username='benoit',
-                       password='mandelbrot',
-                       email='benoit@example.com')
+def test_cohorts_edit_add_user(factories, pyramid_request):
+    user = factories.User(username='benoit')
     cohort = models.FeatureCohort(name='FractalCohort')
 
     pyramid_request.db.add(user)
@@ -114,10 +112,8 @@ def test_cohorts_edit_add_user(pyramid_request):
     assert cohort.members[0].username == user.username
 
 
-def test_cohorts_edit_remove_user(pyramid_request):
-    user = models.User(username='benoit',
-                       password='mandelbrot',
-                       email='benoit@example.com')
+def test_cohorts_edit_remove_user(factories, pyramid_request):
+    user = factories.User(username='benoit')
     cohort = models.FeatureCohort(name='FractalCohort')
     cohort.members.append(user)
 
@@ -146,14 +142,10 @@ def test_cohorts_edit_with_no_users(pyramid_request):
     assert len(result['cohort'].members) == 0
 
 
-def test_cohorts_edit_with_users(pyramid_request):
+def test_cohorts_edit_with_users(factories, pyramid_request):
     cohort = models.FeatureCohort(name='FractalCohort')
-    user1 = models.User(username='benoit',
-                        password='mandelbrot',
-                        email='benoit@example.com')
-    user2 = models.User(username='emily',
-                        password='noether',
-                        email='emily@example.com')
+    user1 = factories.User(username='benoit')
+    user2 = factories.User(username='emily')
     cohort.members.append(user1)
     cohort.members.append(user2)
 

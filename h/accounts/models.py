@@ -68,6 +68,14 @@ class User(Base):
                           nullable=False,
                           unique=True)
 
+    #: The "authority" for this user. This represents the "namespace" in which
+    #: this user lives. By default, all users are created in the namespace
+    #: corresponding to `request.domain`, but this can be overridden with the
+    #: `AUTH_DOMAIN` environment variable.
+    authority = sa.Column('authority',
+                          sa.UnicodeText(),
+                          nullable=False)
+
     #: The display name which will be used when rendering an annotation.
     display_name = sa.Column(sa.UnicodeText())
 
