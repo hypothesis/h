@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import binascii
+import datetime
 import os
 
 import sqlalchemy
@@ -43,6 +44,13 @@ class Token(Base, mixins.Timestamps):
     def __init__(self, userid):
         self.userid = userid
         self.regenerate()
+
+    def is_valid(self):
+        """Check if the token is valid (unexpired). Returns a boolean."""
+        if self.expires is None:
+            return True
+        now = datetime.datetime.utcnow()
+        return now < self.expires
 
     @classmethod
     def get_by_userid(cls, session, userid):

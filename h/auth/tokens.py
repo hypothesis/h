@@ -26,6 +26,12 @@ class LegacyClientJWT(object):
                                   leeway=leeway,
                                   algorithms=['HS256'])
 
+    def is_valid(self):
+        """Check if the token is valid. Always true for JWTs."""
+        # JWT validity checks happen at construction time. If an instance is
+        # successfully constructed, it is by definition valid.
+        return True
+
     @property
     def userid(self):
         return self.payload.get('sub')

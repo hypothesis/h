@@ -9,3 +9,6 @@ class IAuthenticationToken(Interface):
     """Represents an authentication token."""
 
     userid = Attribute("""The userid to which this token was issued.""")
+
+    def is_valid(self):
+        """Checks token validity (such as expiry date)."""
