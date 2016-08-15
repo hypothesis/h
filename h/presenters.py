@@ -20,16 +20,16 @@ def _format_document_link(href, title, link_text, host_or_filename):
 
     """
     if href and host_or_filename and host_or_filename in link_text:
-        host_or_filename = ""
+        host_or_filename = ''
     elif not href and title == host_or_filename:
-        title = ""
+        title = ''
 
     def truncate(content, length=55):
         """Truncate the given string to at most length chars."""
         if len(content) <= length:
             return content
         else:
-            return content[:length] + jinja2.Markup("&hellip;")
+            return content[:length] + jinja2.Markup('&hellip;')
 
     host_or_filename = truncate(host_or_filename)
     link_text = truncate(link_text)
@@ -63,9 +63,31 @@ class AnnotationHTMLPresenter(object):
         else:
             self.document = None
 
+    def _get_selection(self):
+        selectors = self.annotation.target_selectors
+        for selector in selectors:
+            if 'exact' in selector:
+                return selector['exact']
+
     @property
     def uri(self):
         return jinja2.escape(self.annotation.target_uri)
+
+    @property
+    def text_rendered(self):
+        """The body text of this annotation."""
+
+        return self.annotation.text_rendered
+
+    @property
+    def quote(self):
+        """The text in the document which this annotation refers to"""
+
+        selection = self._get_selection()
+        if selection:
+            return jinja2.escape(selection)
+
+        return ''
 
     @property
     def description(self):
@@ -76,24 +98,19 @@ class AnnotationHTMLPresenter(object):
         itself.
 
         """
-        def get_selection():
-            selectors = self.annotation.target_selectors
-            for selector in selectors:
-                if "exact" in selector:
-                    return selector["exact"]
 
-        description = ""
+        description = ''
 
-        selection = get_selection()
+        selection = self._get_selection()
         if selection:
             selection = jinja2.escape(selection)
-            description += "&lt;blockquote&gt;{selection}&lt;/blockquote&gt;".format(
+            description += '&lt;blockquote&gt;{selection}&lt;/blockquote&gt;'.format(
                 selection=selection)
 
         text = self.annotation.text
         if text:
             text = jinja2.escape(text)
-            description += "{text}".format(text=text)
+            description += '{text}'.format(text=text)
 
         return description
 
@@ -106,7 +123,7 @@ class AnnotationHTMLPresenter(object):
 
         """
         created_string = jinja2.escape(self.annotation.created)
-        return parser.parse(created_string).strftime("%Y-%m-%d")
+        return parser.parse(created_string).strftime('%Y-%m-%d')
 
     @property
     def document_link(self):
@@ -134,7 +151,7 @@ class AnnotationHTMLPresenter(object):
 
     @property
     def href(self):
-        """Return an href for this annotation's document, or ""."""
+        """Return an href for this annotation's document, or ''."""
         if self.document:
             return self.document.href
         else:
@@ -183,10 +200,10 @@ class DocumentHTMLPresenter(object):
     @property
     def filename(self):
         """
-        Return the filename of this document, or "".
+        Return the filename of this document, or ''.
 
         If the document's URI is a file:// URI then return the filename part
-        of it, otherwise return "".
+        of it, otherwise return ''.
 
         The filename is escaped and safe to be rendered.
 
@@ -194,15 +211,15 @@ class DocumentHTMLPresenter(object):
         Markup object so it won't be double-escaped.
 
         """
-        if self.uri.lower().startswith("file:///"):
-            return jinja2.escape(self.uri.split("/")[-1])
+        if self.uri.lower().startswith('file:///'):
+            return jinja2.escape(self.uri.split('/')[-1])
         else:
-            return ""
+            return ''
 
     @property
     def href(self):
         """
-        Return an href for this document, or "".
+        Return an href for this document, or ''.
 
         Returns a value suitable for use as the value of the href attribute in
         an <a> element in an HTML document.
@@ -216,11 +233,11 @@ class DocumentHTMLPresenter(object):
 
         """
         uri = self.uri
-        if (uri.lower().startswith("http://") or
-                uri.lower().startswith("https://")):
+        if (uri.lower().startswith('http://') or
+                uri.lower().startswith('https://')):
             return jinja2.escape(uri)
         else:
-            return ""
+            return ''
 
     @property
     def hostname_or_filename(self):
@@ -228,7 +245,7 @@ class DocumentHTMLPresenter(object):
         Return the hostname or filename of this document.
 
         Returns the hostname part of the document's URI, e.g.
-        "www.example.com" for "http://www.example.com/example.html".
+        'www.example.com' for 'http://www.example.com/example.html'.
 
         If the URI is a file:// URI then return the filename part of it
         instead.
@@ -245,7 +262,7 @@ class DocumentHTMLPresenter(object):
             hostname = urlparse.urlparse(self.uri).hostname
 
             # urlparse()'s .hostname is sometimes None.
-            hostname = hostname or ""
+            hostname = hostname or ''
 
             return jinja2.escape(hostname)
 
@@ -270,7 +287,7 @@ class DocumentHTMLPresenter(object):
         - {link_text} is the same as {title}, but truncated with &hellip; if
           it's too long
         - {hostname} is the hostname name of the document's uri without
-          the scheme (http(s)://) and www parts, e.g. "example.com".
+          the scheme (http(s)://) and www parts, e.g. 'example.com'.
           If it's a local file:// uri then the filename is used as the
           hostname.
           If the hostname is too long it is truncated with &hellip;.
@@ -312,7 +329,7 @@ class DocumentHTMLPresenter(object):
         # has no title). In those cases we want to remove the http(s):// from
         # the front and unquote it for link text.
         lower = title.lower()
-        if lower.startswith("http://") or lower.startswith("https://"):
+        if lower.startswith('http://') or lower.startswith('https://'):
             parts = urlparse.urlparse(title)
             return urllib2.unquote(parts.netloc + parts.path)
 

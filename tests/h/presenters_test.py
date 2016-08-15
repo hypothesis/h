@@ -32,6 +32,23 @@ class TestAnnotationHTMLPresenter(object):
         assert isinstance(self._annotation(target_uri="http://foo.com").uri,
                           jinja2.Markup)
 
+    def test_quote(self):
+        annotation = self._annotation(
+            annotation=mock.Mock(
+                target_selectors=[{'exact': 'selected text'}],
+                text="entered text"
+            )
+        )
+
+        assert annotation.quote == ("selected text")
+
+    def test_text_rendered(self):
+        annotation = self._annotation(
+            annotation=mock.Mock()
+        )
+
+        assert annotation.text_rendered == annotation.annotation.text_rendered
+
     def test_description(self):
         annotation = self._annotation(
             annotation=mock.Mock(
