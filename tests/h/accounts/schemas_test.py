@@ -275,10 +275,10 @@ def test_ResetPasswordSchema_adds_user_to_appstruct(pyramid_csrf_request, user_m
     assert appstruct['user'] == user
 
 
-def test_EmailChangeSchema_rejects_non_matching_emails(pyramid_csrf_request, user_model):
+def test_LegacyEmailChangeSchema_rejects_non_matching_emails(pyramid_csrf_request, user_model):
     user = Mock()
     pyramid_csrf_request.authenticated_user = user
-    schema = schemas.EmailChangeSchema().bind(request=pyramid_csrf_request)
+    schema = schemas.LegacyEmailChangeSchema().bind(request=pyramid_csrf_request)
     # The email isn't taken
     user_model.get_by_email.return_value = None
 
@@ -290,10 +290,10 @@ def test_EmailChangeSchema_rejects_non_matching_emails(pyramid_csrf_request, use
     assert 'email_confirm' in exc.value.asdict()
 
 
-def test_EmailChangeSchema_rejects_wrong_password(pyramid_csrf_request, user_model):
+def test_LegacyEmailChangeSchema_rejects_wrong_password(pyramid_csrf_request, user_model):
     user = Mock()
     pyramid_csrf_request.authenticated_user = user
-    schema = schemas.EmailChangeSchema().bind(request=pyramid_csrf_request)
+    schema = schemas.LegacyEmailChangeSchema().bind(request=pyramid_csrf_request)
     # The email isn't taken
     user_model.get_by_email.return_value = None
     # The password does not check out

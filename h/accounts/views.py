@@ -541,7 +541,11 @@ class AccountController(object):
     def __init__(self, request):
         self.request = request
 
-        email_schema = schemas.EmailChangeSchema().bind(request=request)
+        if request.feature('activity_pages'):
+            email_schema = schemas.EmailChangeSchema().bind(request=request)
+        else:
+            email_schema = schemas.LegacyEmailChangeSchema().bind(request=request)
+
         password_schema = schemas.PasswordChangeSchema().bind(request=request)
 
         self.forms = {
