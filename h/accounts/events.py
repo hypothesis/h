@@ -16,12 +16,6 @@ class LogoutEvent(object):
         self.request = request
 
 
-class RegistrationEvent(object):
-    def __init__(self, request, user):
-        self.request = request
-        self.user = user
-
-
 class PasswordResetEvent(object):
     def __init__(self, request, user):
         self.request = request

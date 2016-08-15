@@ -24,7 +24,6 @@ from h.accounts.events import ActivationEvent
 from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
-from h.accounts.events import RegistrationEvent
 from h.util.view import json_view
 
 _ = i18n.TranslationString
@@ -354,9 +353,16 @@ class SignupController(object):
         except deform.ValidationFailure:
             return {'form': self.form.render()}
 
-        self._signup(username=appstruct['username'],
-                       email=appstruct['email'],
-                       password=appstruct['password'])
+        signup_service = self.request.find_service(name='user_signup')
+        signup_service.signup(username=appstruct['username'],
+                              email=appstruct['email'],
+                              password=appstruct['password'])
+
+        self.request.session.flash(jinja2.Markup(_(
+            'Thank you for creating an account! '
+            "We've sent you an email with an activation link: "
+            'please check your email and open the link '
+            'to activate your account.')), 'success')
 
         return httpexceptions.HTTPFound(
             location=self.request.route_url('index'))
@@ -364,30 +370,6 @@ class SignupController(object):
     def _redirect_if_logged_in(self):
         if self.request.authenticated_userid is not None:
             raise httpexceptions.HTTPFound(self.request.route_url('stream'))
-
-    def _signup(self, username, email, password):
-        user = User(username=username, email=email, password=password)
-        self.request.db.add(user)
-
-        # Create a new activation for the user
-        activation = Activation()
-        self.request.db.add(activation)
-        user.activation = activation
-
-        # Flush the session to ensure that the user can be created and the
-        # activation is successfully wired up
-        self.request.db.flush()
-
-        # Send the activation email
-        message = activation_email(self.request, user)
-        mailer.send.delay(**message)
-
-        self.request.session.flash(jinja2.Markup(_(
-            'Thank you for creating an account! '
-            "We've sent you an email with an activation link: "
-            'please check your email and open the link '
-            'to activate your account.')), 'success')
-        self.request.registry.notify(RegistrationEvent(self.request, user))
 
 
 @view_defaults(route_name='activate')
@@ -618,23 +600,6 @@ class DeveloperController(object):
             self.request.db.add(token)
 
         return {'token': token.value}
-
-
-def activation_email(request, user):
-    """Return the data for an 'activate your account' email for the given user.
-
-    :rtype: dict
-
-    """
-    link = request.route_url('activate', id=user.id, code=user.activation.code)
-    emailtext = ("Please validate your email and activate your account by "
-                 "visiting: {link}")
-    body = emailtext.format(link=link)
-    return {
-        "subject": _("Please activate your account"),
-        "recipients": [user.email],
-        "body": body
-    }
 
 
 def account_reset_email(user, reset_code, reset_link):
