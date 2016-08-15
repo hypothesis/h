@@ -3,9 +3,10 @@
 import datetime
 
 import pytest
+from hypothesis import strategies as st
+from hypothesis import assume, given
 
-from h.auth import models
-from h.auth import tokens
+from h.auth import models, tokens
 
 
 def test_generate_jwt_calls_encode(jwt, pyramid_config, pyramid_request):
@@ -140,6 +141,62 @@ def test_userid_from_api_token_returns_userid_for_valid_tokens(pyramid_request):
     result = tokens.userid_from_api_token(token.value, pyramid_request)
 
     assert result == 'acct:foo@example.com'
+
+
+@pytest.mark.usefixtures('token')
+class TestAuthToken(object):
+    def test_retrieves_token_for_request(self, pyramid_request, token):
+        pyramid_request.headers['Authorization'] = 'Bearer ' + token.value
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert result == token
+
+    def test_returns_none_when_no_authz_header(self, pyramid_request, token):
+        result = tokens.auth_token(pyramid_request)
+
+        assert result is None
+
+    def test_returns_none_for_empty_token(self, pyramid_request, token):
+        pyramid_request.headers['Authorization'] = 'Bearer '
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert result is None
+
+    def test_returns_none_for_malformed_header(self, pyramid_request, token):
+        pyramid_request.headers['Authorization'] = token.value
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert result is None
+
+    @given(header=st.text())
+    @pytest.mark.fuzz
+    def test_returns_none_for_malformed_header_fuzz(self,
+                                                    header,
+                                                    pyramid_request,
+                                                    token):
+        assume(header != 'Bearer ' + token.value)
+        pyramid_request.headers['Authorization'] = header
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert result is None
+
+    def test_returns_none_for_invalid_token(self, pyramid_request):
+        pyramid_request.headers['Authorization'] = 'Bearer abcd1234'
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert result is None
+
+    @pytest.fixture
+    def token(self, db_session):
+        token = models.Token(userid='acct:foo@example.com')
+        db_session.add(token)
+        db_session.flush()
+        return token
 
 
 @pytest.fixture

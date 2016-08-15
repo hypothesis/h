@@ -4,6 +4,7 @@ import datetime
 
 import jwt
 
+from h._compat import text_type
 from h.auth import models
 
 
@@ -100,3 +101,30 @@ def userid_from_api_token(token, request):
         return token_obj.userid
     else:
         return None
+
+
+def auth_token(request):
+    """
+    Fetch the token (if any) associated with a request.
+
+    :param request: the request object
+    :type request: pyramid.request.Request
+
+    :returns: the auth token carried by the request, or None
+    :rtype: h.auth.models.Token or None
+    """
+    try:
+        header = request.headers['Authorization']
+    except KeyError:
+        return None
+
+    if not header.startswith('Bearer '):
+        return None
+
+    token = text_type(header[len('Bearer '):]).strip()
+    # If the token is empty at this point, it is clearly invalid and we
+    # should reject it.
+    if not token:
+        return None
+
+    return request.db.query(models.Token).filter_by(value=token).one_or_none()
