@@ -27,3 +27,18 @@ $break-desktop: 1024px !default;
     @content;
   }
 }
+
+// Mixin for styling elements to make them more finger-friendly on touch-input
+// devices.
+//
+// Use interaction media queries where available (see
+// http://caniuse.com/#feat=css-media-interaction) or fall back to relying on a
+// JS-added class on the <html> or <body> elements otherwise.
+@mixin touch-input {
+  @media (pointer: coarse) {
+    @content;
+  }
+  .env-touch {
+    @content;
+  }
+}
