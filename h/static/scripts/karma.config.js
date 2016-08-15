@@ -21,12 +21,12 @@ module.exports = function(config) {
       './polyfills.js',
 
       // Test setup
-      './test/bootstrap.js',
+      './tests/bootstrap.js',
 
       // Karma watching is disabled for these files because they are
       // bundled with karma-browserify which handles watching itself via
       // watchify
-      { pattern: '**/test/*-test.js', watched: false, included: true, served: true },
+      { pattern: 'tests/**/*-test.js', watched: false, included: true, served: true },
     ],
 
     // list of files to exclude
@@ -37,8 +37,8 @@ module.exports = function(config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       './polyfills.js': ['browserify'],
-      './test/bootstrap.js': ['browserify'],
-      '**/*-test.js': ['browserify'],
+      './tests/bootstrap.js': ['browserify'],
+      './tests/**/*-test.js': ['browserify'],
     },
 
     browserify: {

@@ -1,7 +1,7 @@
 'use strict';
 
 var proxyquire = require('proxyquire');
-var noCallThru = require('./util').noCallThru;
+var noCallThru = require('../util').noCallThru;
 
 describe('raven', function () {
   var fakeRavenJS;
@@ -16,7 +16,7 @@ describe('raven', function () {
       captureException: sinon.stub(),
     };
 
-    raven = proxyquire('../base/raven', noCallThru({
+    raven = proxyquire('../../base/raven', noCallThru({
       'raven-js': fakeRavenJS,
     }));
   });
