@@ -593,7 +593,10 @@ class AccountController(object):
         email = self.request.authenticated_user.email
         password_form = self.forms['password'].render()
 
-        email_form = self.forms['email'].render()
+        if self.request.feature('activity_pages'):
+            email_form = self.forms['email'].render({'email': email})
+        else:
+            email_form = self.forms['email'].render()
 
         return {'email': email,
                 'email_form': email_form,

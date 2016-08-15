@@ -5,6 +5,7 @@
 
 {% block page_content %}
   <div class="form-vertical">
+    {% if not feature('activity_pages') -%}
     <h2 class="form-heading">
       <span>{% trans %}Change your email address{% endtrans %}</span>
     </h2>
@@ -12,13 +13,17 @@
       {% trans %}Your current email address is:{% endtrans %}
       <strong>{{ email }}</strong>.
     </legend>
+    {%- endif %}
     {{ email_form }}
 
+    {% if not feature('activity_pages') -%}
     <h2 class="form-heading">
       <span>{% trans %}Change your password{% endtrans %}</span>
     </h2>
+    {%- endif %}
     {{ password_form }}
 
+    {% if not feature('activity_pages') -%}
     <h2 class="form-heading">
       <span>{% trans %}Delete account{% endtrans %}</span>
     </h2>
@@ -29,5 +34,6 @@
         registered email address, and we'll take it from there.
       {% endtrans %}
     </legend>
+    {%- endif %}
   </div>
 {% endblock page_content %}

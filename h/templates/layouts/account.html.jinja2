@@ -17,7 +17,6 @@
   {{ panel('navbar') }}
   {% endif %}
   <div class="content paper">
-    {% include "h:templates/includes/logo-header.html.jinja2" %}
     {% if feature('activity_pages') %}
       <div class="form">
         <nav class="tabs">
@@ -42,6 +41,7 @@
         {{ self.page_content() }}
       </div>
     {% else %}
+      {% include "h:templates/includes/logo-header.html.jinja2" %}
       <ul class="nav nav-tabs">
         {% for route, title in nav_pages %}
           <li{% if route == page_route %} class="active"{% endif %}>
