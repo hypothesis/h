@@ -161,7 +161,7 @@ class TestHandleFormSubmission(object):
 
         form.handle_form_submission(pyramid_request,
                                     form_,
-                                    mock.Mock(spec_set=['__call__']),
+                                    mock_callable(),
                                     mock.sentinel.on_failure)
 
         form_.validate.assert_called_once_with(pyramid_request.POST.items())
@@ -169,7 +169,7 @@ class TestHandleFormSubmission(object):
     def test_if_validation_fails_it_calls_on_failure(self,
                                                      pyramid_request,
                                                      invalid_form):
-        on_failure = mock.Mock(spec_set=['__call__'])
+        on_failure = mock_callable()
 
         form.handle_form_submission(pyramid_request,
                                     invalid_form,
@@ -182,7 +182,7 @@ class TestHandleFormSubmission(object):
                                                           invalid_form,
                                                           pyramid_request,
                                                           to_xhr_response):
-        on_failure = mock.Mock(spec_set=['__call__'])
+        on_failure = mock_callable()
 
         form.handle_form_submission(pyramid_request,
                                     invalid_form,
@@ -199,13 +199,13 @@ class TestHandleFormSubmission(object):
         result = form.handle_form_submission(pyramid_request,
                                              invalid_form,
                                              mock.sentinel.on_success,
-                                             mock.Mock(spec_set=['__call__']))
+                                             mock_callable())
 
         assert result == to_xhr_response.return_value
 
     def test_if_validation_succeeds_it_calls_on_success(self, pyramid_request):
         form_ = conftest.form_validating_to(mock.sentinel.appstruct)
-        on_success = mock.Mock(spec_set=['__call__'])
+        on_success = mock_callable()
 
         form.handle_form_submission(pyramid_request,
                                     form_,
@@ -218,7 +218,7 @@ class TestHandleFormSubmission(object):
                                                              pyramid_request):
         form.handle_form_submission(pyramid_request,
                                     conftest.form_validating_to('anything'),
-                                    mock.Mock(spec_set=['__call__']),
+                                    mock_callable(),
                                     mock.sentinel.on_failure)
 
         assert pyramid_request.session.peek_flash('success')
@@ -231,8 +231,7 @@ class TestHandleFormSubmission(object):
 
         form.handle_form_submission(pyramid_request,
                                     form_,
-                                    mock.Mock(spec_set=['__call__'],
-                                              return_value=None),
+                                    mock_callable(return_value=None),
                                     mock.sentinel.on_failure)
 
         to_xhr_response.assert_called_once_with(
@@ -256,8 +255,8 @@ class TestHandleFormSubmission(object):
 
         form.handle_form_submission(pyramid_request,
                                     form_,
-                                    mock.Mock(spec_set=['__call__'],
-                                              return_value=mock.sentinel.result),
+                                    mock_callable(
+                                        return_value=mock.sentinel.result),
                                     mock.sentinel.on_failure)
 
         to_xhr_response.assert_called_once_with(
@@ -271,7 +270,7 @@ class TestHandleFormSubmission(object):
                                                                to_xhr_response):
         result = form.handle_form_submission(pyramid_request,
                                              conftest.form_validating_to('anything'),
-                                             mock.Mock(spec_set=['__call__']),
+                                             mock_callable(),
                                              mock.sentinel.on_failure)
 
         assert result == to_xhr_response.return_value
@@ -279,3 +278,15 @@ class TestHandleFormSubmission(object):
     @pytest.fixture
     def to_xhr_response(self, patch):
         return patch('h.form.to_xhr_response')
+
+
+def mock_callable(**kwargs):
+    """
+    Return a mock than can be called but doesn't have any accessible properties.
+
+    The mock can be called like ``my_mock_callable()`` but trying to access any
+    other properties like ``my_mock_callable.foo`` will fail. This is a useful
+    value to use when the method under test requires a callable as an argument.
+
+    """
+    return mock.Mock(spec_set=['__call__'], **kwargs)
