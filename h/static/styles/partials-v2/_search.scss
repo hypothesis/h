@@ -1,0 +1,149 @@
+// Search page
+// -----------
+// Styles for the search page which displays the results
+// of activity queries.
+
+.search-result-container {
+  font-size: $normal-font-size;
+  margin-top: 20px;
+  color: $grey-6;
+}
+
+.search-result-list {
+  max-width: 950px;
+
+  // Remove default padding from <ol>
+  list-style: none;
+  padding-left: 0;
+  padding-right: 0;
+
+  // These margins are set so that the left edge of the search result list
+  // aligns with the left edge of the navbar content
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.search-result__timeframe {
+  font-weight: bold;
+  padding-bottom: 10px;
+  border-bottom: 1px solid $grey-2;
+  margin-top: 30px;
+}
+
+// A group of search results
+.search-result-bucket {
+  display: flex;
+  flex-direction: row;
+  padding: 10px 10px;
+  background-color: $grey-2;
+  border-bottom: 1px solid $grey-3;
+
+  &:hover {
+    background-color: $grey-2;
+  }
+}
+
+.search-result-bucket__domain {
+  width: 120px;
+  color: $grey-4;
+}
+
+.search-result-bucket__content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.search-result-bucket__header {
+  display: flex;
+  flex-direction: row;
+}
+
+.search-result-bucket__title {
+  font-weight: bold;
+  flex-grow: 1;
+}
+
+.search-result-bucket__annotation-cards-container {
+  display: flex;
+}
+
+.search-result-bucket__annotation-cards {
+  flex-grow: 1;
+}
+
+.search-result-bucket__annotations-count-container {
+  width: 30px;
+  padding: 5px 0px;
+  background-color: $grey-2;
+  text-align: center;
+  border-radius: 2px;
+  float: right;
+}
+
+.search-result-bucket__annotations-count {
+  font-weight: bold;
+  width: 75px;
+}
+
+.search-result-bucket__annotation-cards-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+.search-result-bucket__annotation-cards {
+  max-width: 500px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+// Card displaying stats about a group of annotations in search results
+.search-bucket-stats {
+  @include font-normal;
+  width: 210px;
+  margin-left: 30px;
+  word-wrap: break-word;
+}
+
+.search-bucket-stats__key {
+  color: $grey-4;
+}
+
+.search-bucket-stats__val {
+  color: $grey-6;
+  margin-bottom: 20px;
+}
+
+// On large tablets and below, display bucket contents beneath rather than
+// alongside the domain
+@media screen and (max-width: $tablet-width + 100px) {
+    .search-result-bucket {
+      flex-direction: column;
+    }
+
+    .search-result-bucket__content {
+      margin-top: 10px;
+    }
+}
+
+// On normal tablets and below, display annotation stats below annotation list
+@media screen and (max-width: $tablet-width) {
+
+  // Reduce margins on tablet and below to match navbar left/right margins
+  // on these screen sizes
+  .search-result-list {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .search-result-bucket__annotation-cards-container {
+    flex-direction: column;
+  }
+
+  .search-bucket-stats {
+    margin-left: 5px;
+    margin-top: 10px;
+  }
+}

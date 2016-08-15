@@ -42,6 +42,15 @@ class TestAnnotationHTMLPresenter(object):
 
         assert annotation.quote == ("selected text")
 
+    def test_username(self):
+        annotation = self._annotation(
+            annotation=mock.Mock(
+                userid="acct:jdoe@hypothes.is"
+            )
+        )
+
+        assert annotation.username == ("jdoe")
+
     def test_text_rendered(self):
         annotation = self._annotation(
             annotation=mock.Mock()

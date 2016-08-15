@@ -1,0 +1,23 @@
+{% macro annotation_card(annotation, request) -%}
+
+<li class="annotation-card">
+  <header class="annotation-card__header">
+    <a href="{{ request.route_url('stream') }}?q=user:{{ annotation.username }}"
+      class="annotation-card__username">
+      {{ annotation.username }}
+    </a>
+    <a href="{{ request.route_url('annotation', id=annotation.id) }}"
+      class="annotation-card__timestamp">
+      {{ annotation.updated.strftime('%d %b %Y') }}
+    </a>
+  </header>
+  {% if annotation.quote %}
+    <section class="annotation-card__quote">
+      {{ annotation.quote|safe }}
+    </section>
+  {% endif %}
+  <section class="annotation-card__text">
+    {{ annotation.text_rendered|safe }}
+  </section>
+</li>
+{%- endmacro %}

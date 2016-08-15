@@ -189,6 +189,9 @@ class AnnotationHTMLPresenter(object):
     def userid(self):
         return self.annotation.userid
 
+    @property
+    def username(self):
+        return self.annotation.userid.split(':')[1].split('@')[0]
 
 class DocumentHTMLPresenter(object):
     """Wraps Document model objects and adds some HTML properties."""
