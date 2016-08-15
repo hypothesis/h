@@ -150,4 +150,20 @@ def auth_token(request):
     if not token:
         return None
 
-    return request.db.query(models.Token).filter_by(value=token).one_or_none()
+    api_token = (request.db.query(models.Token)
+                 .filter_by(value=token)
+                 .one_or_none())
+    if api_token is not None:
+        return api_token
+
+    # If we've got this far it's possible the token is a legacy client JWT.
+    return _maybe_jwt(token, request)
+
+
+def _maybe_jwt(token, request):
+    try:
+        return LegacyClientJWT(token,
+                               key=request.registry.settings['h.client_secret'],
+                               audience=request.host_url)
+    except jwt.InvalidTokenError:
+        return None

@@ -280,6 +280,17 @@ class TestAuthToken(object):
 
         assert result is None
 
+    @pytest.mark.usefixture('pyramid_settings')
+    def test_returns_legacy_client_jwt_when_jwt(self, pyramid_request):
+        token = jwt.encode({'aud': pyramid_request.host_url,
+                            'exp': _seconds_from_now(3600)},
+                           key='secret')
+        pyramid_request.headers['Authorization'] = 'Bearer ' + token
+
+        result = tokens.auth_token(pyramid_request)
+
+        assert isinstance(result, tokens.LegacyClientJWT)
+
     @pytest.fixture
     def token(self, db_session):
         token = models.Token(userid='acct:foo@example.com')
