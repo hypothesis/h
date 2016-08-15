@@ -929,8 +929,8 @@ class TestAccountController(object):
 
         assert result == {
             'email': pyramid_request.authenticated_user.email,
-            'email_form': controller.forms['email'],
-            'password_form': controller.forms['password'],
+            'email_form': controller.forms['email'].render(),
+            'password_form': controller.forms['password'].render(),
         }
 
     def test_post_password_form_with_valid_data_changes_password(
@@ -962,8 +962,8 @@ class TestAccountController(object):
 
         assert result == {
             'email': pyramid_request.authenticated_user.email,
-            'email_form': controller.forms['email'],
-            'password_form': controller.forms['password'],
+            'email_form': controller.forms['email'].render(),
+            'password_form': controller.forms['password'].render(),
         }
 
     @pytest.fixture
