@@ -20,3 +20,9 @@
   margin-top: 55px;
   padding-bottom: 30px;
 }
+
+@media screen and (max-width: $max-phone-width) {
+  .tabs__item {
+    font-size: $input-font-size;
+  }
+}
