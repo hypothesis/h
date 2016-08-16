@@ -113,6 +113,7 @@ class TestGroupsService(object):
         publish.assert_called_once_with('group-leave', 'abc123', 'cazimir')
 
 
+@pytest.mark.usefixtures('user_service')
 class TestGroupsFactory(object):
     def test_returns_groups_service(self, pyramid_request):
         svc = groups_factory(None, pyramid_request)
@@ -124,13 +125,12 @@ class TestGroupsFactory(object):
 
         assert svc.session == pyramid_request.db
 
-    def test_wraps_get_user_as_user_fetcher(self, patch, pyramid_request):
-        get_user = patch('h.groups.services.get_user')
+    def test_wraps_user_service_as_user_fetcher(self, pyramid_request, user_service):
         svc = groups_factory(None, pyramid_request)
 
         svc.user_fetcher('foo')
 
-        get_user.assert_called_once_with('foo', pyramid_request)
+        user_service.fetch.assert_called_once_with('foo')
 
     def test_provides_realtime_publisher_as_publish(self, patch, pyramid_request):
         pyramid_request.realtime = mock.Mock(spec_set=['publish_user'])
@@ -146,6 +146,14 @@ class TestGroupsFactory(object):
             'userid': 'theresa',
             'group': 'abc123',
         })
+
+
+@pytest.fixture
+def user_service(pyramid_config):
+    service = mock.Mock(spec_set=['fetch'])
+    service.fetch.return_value = None
+    pyramid_config.register_service(service, name='user')
+    return service
 
 
 @pytest.fixture
