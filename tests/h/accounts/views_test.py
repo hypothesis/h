@@ -33,172 +33,6 @@ class FakeSerializer(object):
         return {'username': 'foo@bar.com'}
 
 
-# A fake version of colander.Invalid
-class FakeInvalid(object):
-    def __init__(self, errors):
-        self.errors = errors
-
-    def asdict(self):
-        return self.errors
-
-
-def form_validating_to(appstruct):
-    form = mock.MagicMock()
-    form.validate.return_value = appstruct
-    form.render.return_value = 'valid form'
-    return form
-
-
-@pytest.fixture
-def invalid_form(errors=None):
-    if errors is None:
-        errors = {}
-    invalid = FakeInvalid(errors)
-    form = mock.MagicMock()
-    form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
-    form.render.return_value = 'invalid form'
-    return form
-
-
-class TestToXHRResponse(object):
-    """Unit tests for to_xhr_response()."""
-
-    def test_returns_given_result_if_not_xhr(self, pyramid_request):
-        """
-        If ``request`` isn't an XHR request it returns ``non_xhr_result``.
-
-        The calling view callable passes in the result that it would have
-        returned normally if this were not an XHR request as the
-        ``non_xhr_result`` argument. If the given ``request`` is not an XHR
-        request then ``non_xhr_result`` should just be returned unmodified.
-
-        """
-        pyramid_request.is_xhr = False
-        non_xhr_result = mock.Mock()
-
-        result = views.to_xhr_response(pyramid_request,
-                                       non_xhr_result,
-                                       mock.Mock())
-
-        assert result == non_xhr_result
-
-    def test_returns_form_if_xhr(self, pyramid_request):
-        """
-        If ``request`` is an XHR request it should return the rendered ``form``.
-
-        It should return ``form`` rendered to a ``<form>`` element HTML snippet.
-
-        """
-        pyramid_request.is_xhr = True
-        form = mock.Mock()
-
-        result = views.to_xhr_response(pyramid_request, mock.Mock(), form)
-
-        assert result == form.render.return_value
-
-
-@pytest.mark.usefixtures('to_xhr_response')
-class TestHandleFormSubmission(object):
-
-    def test_it_calls_validate(self, pyramid_request):
-        form = mock.Mock()
-
-        views.handle_form_submission(pyramid_request,
-                                     form,
-                                     mock.Mock(),
-                                     mock.Mock())
-
-        form.validate.assert_called_once_with(pyramid_request.POST.items())
-
-    def test_if_validation_fails_it_calls_on_failure(self,
-                                                     pyramid_request,
-                                                     invalid_form):
-        on_failure = mock.Mock()
-
-        views.handle_form_submission(pyramid_request,
-                                     invalid_form,
-                                     mock.Mock(),
-                                     on_failure)
-
-
-        on_failure.assert_called_once_with()
-
-    def test_if_validation_fails_it_calls_to_xhr_response(self,
-                                                          invalid_form,
-                                                          pyramid_request,
-                                                          to_xhr_response):
-        on_failure = mock.Mock()
-
-        views.handle_form_submission(pyramid_request,
-                                     invalid_form,
-                                     mock.Mock(),
-                                     on_failure)
-
-        to_xhr_response.assert_called_once_with(
-            pyramid_request, on_failure.return_value, invalid_form)
-
-    def test_if_validation_fails_it_returns_to_xhr_response(self,
-                                                            invalid_form,
-                                                            pyramid_request,
-                                                            to_xhr_response):
-        result = views.handle_form_submission(pyramid_request,
-                                              invalid_form,
-                                              mock.Mock(),
-                                              mock.Mock())
-
-        assert result == to_xhr_response.return_value
-
-    def test_if_validation_succeeds_it_calls_on_success(self, pyramid_request):
-        form = form_validating_to(mock.sentinel.appstruct)
-        on_success = mock.Mock()
-
-        views.handle_form_submission(pyramid_request,
-                                     form,
-                                     on_success,
-                                     mock.Mock())
-
-        on_success.assert_called_once_with(mock.sentinel.appstruct)
-
-    def test_if_validation_succeeds_it_shows_a_flash_message(self,
-                                                             pyramid_request):
-        views.handle_form_submission(pyramid_request,
-                                     form_validating_to('anything'),
-                                     mock.Mock(),
-                                     mock.Mock())
-
-        assert pyramid_request.session.peek_flash('success')
-
-    def test_if_validation_succeeds_it_calls_to_xhr_response(self,
-                                                             matchers,
-                                                             pyramid_request,
-                                                             to_xhr_response):
-        form = form_validating_to('anything')
-
-        views.handle_form_submission(pyramid_request,
-                                     form,
-                                     mock.Mock(),
-                                     mock.Mock())
-
-        to_xhr_response.assert_called_once_with(
-            pyramid_request,
-            matchers.redirect_302_to(pyramid_request.url),
-            form)
-
-    def test_if_validation_succeeds_it_returns_to_xhr_response(self,
-                                                               pyramid_request,
-                                                               to_xhr_response):
-        result = views.handle_form_submission(pyramid_request,
-                                              form_validating_to('anything'),
-                                              mock.Mock(),
-                                              mock.Mock())
-
-        assert result == to_xhr_response.return_value
-
-    @pytest.fixture
-    def to_xhr_response(self, patch):
-        return patch('h.accounts.views.to_xhr_response')
-
-
 @pytest.mark.usefixtures('routes')
 class TestAuthController(object):
 
@@ -217,7 +51,10 @@ class TestAuthController(object):
 
         assert e.value.location == '/foo/bar'
 
-    def test_post_returns_form_when_validation_fails(self, pyramid_config, pyramid_request):
+    def test_post_returns_form_when_validation_fails(self,
+                                                     invalid_form,
+                                                     pyramid_config,
+                                                     pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
         controller.form = invalid_form()
@@ -229,6 +66,7 @@ class TestAuthController(object):
     @mock.patch('h.accounts.views.LoginEvent', autospec=True)
     def test_post_no_event_when_validation_fails(self,
                                                  loginevent,
+                                                 invalid_form,
                                                  notify,
                                                  pyramid_config,
                                                  pyramid_request):
@@ -241,24 +79,26 @@ class TestAuthController(object):
         assert not loginevent.called
         assert not notify.called
 
-    def test_post_redirects_when_validation_succeeds(self, pyramid_config, pyramid_request):
+    def test_post_redirects_when_validation_succeeds(self,
+                                                     form_validating_to,
+                                                     pyramid_config,
+                                                     pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = form_validating_to(
-            {"user": FakeUser(username='cara')})
+        controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
         result = controller.post()
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
     def test_post_redirects_to_next_param_when_validation_succeeds(self,
+                                                                   form_validating_to,
                                                                    pyramid_config,
                                                                    pyramid_request):
         pyramid_request.params = {'next': '/foo/bar'}
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = form_validating_to(
-            {"user": FakeUser(username='cara')})
+        controller.form = form_validating_to({"user": FakeUser(username='cara')})
 
         result = controller.post()
 
@@ -268,6 +108,7 @@ class TestAuthController(object):
     @mock.patch('h.accounts.views.LoginEvent', autospec=True)
     def test_post_event_when_validation_succeeds(self,
                                                  loginevent,
+                                                 form_validating_to,
                                                  notify,
                                                  pyramid_config,
                                                  pyramid_request):
@@ -322,11 +163,11 @@ class TestAuthController(object):
 @pytest.mark.usefixtures('session')
 class TestAjaxAuthController(object):
 
-    def test_login_returns_status_okay_when_validation_succeeds(self, pyramid_request):
+    def test_login_returns_status_okay_when_validation_succeeds(
+            self, form_validating_to, pyramid_request):
         pyramid_request.json_body = {}
         controller = views.AjaxAuthController(pyramid_request)
-        controller.form = form_validating_to(
-            {'user': FakeUser(username='bob')})
+        controller.form = form_validating_to({'user': FakeUser(username='bob')})
 
         result = controller.login()
 
@@ -392,7 +233,9 @@ class TestAjaxAuthController(object):
             assert sorted(pstruct) == sorted([('username', 'user'),
                                               ('password', expected_output)])
 
-    def test_login_raises_ValidationFailure_on_ValidationFailure(self, pyramid_request):
+    def test_login_raises_ValidationFailure_on_ValidationFailure(self,
+                                                                 invalid_form,
+                                                                 pyramid_request):
         pyramid_request.json_body = {}
         controller = views.AjaxAuthController(pyramid_request)
         controller.form = invalid_form({'password': 'too short'})
@@ -413,7 +256,9 @@ class TestAjaxAuthController(object):
                          'routes')
 class TestForgotPasswordController(object):
 
-    def test_post_returns_form_when_validation_fails(self, pyramid_request):
+    def test_post_returns_form_when_validation_fails(self,
+                                                     invalid_form,
+                                                     pyramid_request):
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = invalid_form()
 
@@ -423,6 +268,7 @@ class TestForgotPasswordController(object):
 
     def test_post_creates_no_activations_when_validation_fails(self,
                                                                activation_model,
+                                                               invalid_form,
                                                                pyramid_request):
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = invalid_form()
@@ -432,7 +278,10 @@ class TestForgotPasswordController(object):
         assert activation_model.call_count == 0
 
     @mock.patch('h.accounts.views.account_reset_link')
-    def test_post_generates_reset_link(self, reset_link, pyramid_request):
+    def test_post_generates_reset_link(self,
+                                       reset_link,
+                                       form_validating_to,
+                                       pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
         user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
@@ -448,6 +297,7 @@ class TestForgotPasswordController(object):
                                  reset_link,
                                  reset_mail,
                                  activation_model,
+                                 form_validating_to,
                                  pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
         user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
@@ -465,7 +315,8 @@ class TestForgotPasswordController(object):
         reset_mail.assert_called_with(user, "faketoken", "http://example.com")
 
     @mock.patch('h.accounts.views.account_reset_email')
-    def test_post_sends_mail(self, reset_mail, mailer, pyramid_request):
+    def test_post_sends_mail(
+            self, reset_mail, form_validating_to, mailer, pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
         user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
@@ -482,7 +333,7 @@ class TestForgotPasswordController(object):
                                                   subject='subject',
                                                   body='body')
 
-    def test_post_redirects_on_success(self, pyramid_request):
+    def test_post_redirects_on_success(self, form_validating_to, pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
         user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
@@ -508,7 +359,9 @@ class TestForgotPasswordController(object):
 @pytest.mark.usefixtures('routes')
 class TestResetController(object):
 
-    def test_post_returns_form_when_validation_fails(self, pyramid_request):
+    def test_post_returns_form_when_validation_fails(self,
+                                                     invalid_form,
+                                                     pyramid_request):
         controller = views.ResetController(pyramid_request)
         controller.form = invalid_form()
 
@@ -516,7 +369,9 @@ class TestResetController(object):
 
         assert result == {'form': 'invalid form'}
 
-    def test_post_sets_user_password_from_form(self, pyramid_request):
+    def test_post_sets_user_password_from_form(self,
+                                               form_validating_to,
+                                               pyramid_request):
         elephant = FakeUser(password='password1')
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': elephant,
@@ -527,7 +382,8 @@ class TestResetController(object):
         assert elephant.password == 's3cure!'
 
     @mock.patch('h.accounts.views.PasswordResetEvent', autospec=True)
-    def test_post_emits_event(self, event, notify, pyramid_request):
+    def test_post_emits_event(
+            self, event, form_validating_to, notify, pyramid_request):
         user = FakeUser(password='password1')
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': user,
@@ -538,7 +394,7 @@ class TestResetController(object):
         event.assert_called_with(pyramid_request, user)
         notify.assert_called_with(event.return_value)
 
-    def test_post_redirects_on_success(self, pyramid_request):
+    def test_post_redirects_on_success(self, form_validating_to, pyramid_request):
         user = FakeUser(password='password1')
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': user,
@@ -564,7 +420,9 @@ class TestResetController(object):
                          'user_model')
 class TestSignupController(object):
 
-    def test_post_returns_errors_when_validation_fails(self, pyramid_request):
+    def test_post_returns_errors_when_validation_fails(self,
+                                                       invalid_form,
+                                                       pyramid_request):
         controller = views.SignupController(pyramid_request)
         controller.form = invalid_form()
 
@@ -572,7 +430,10 @@ class TestSignupController(object):
 
         assert result == {"form": "invalid form"}
 
-    def test_post_creates_user_from_form_data(self, pyramid_request, user_model):
+    def test_post_creates_user_from_form_data(self,
+                                              form_validating_to,
+                                              pyramid_request,
+                                              user_model):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to({
             "username": "bob",
@@ -587,7 +448,10 @@ class TestSignupController(object):
                                       email="bob@example.com",
                                       password="s3crets")
 
-    def test_post_adds_new_user_to_session(self, pyramid_request, user_model):
+    def test_post_adds_new_user_to_session(self,
+                                           form_validating_to,
+                                           pyramid_request,
+                                           user_model):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to({
             "username": "bob",
@@ -599,7 +463,11 @@ class TestSignupController(object):
 
         assert user_model.return_value in pyramid_request.db.added
 
-    def test_post_creates_new_activation(self, activation_model, pyramid_request, user_model):
+    def test_post_creates_new_activation(self,
+                                         activation_model,
+                                         form_validating_to,
+                                         pyramid_request,
+                                         user_model):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to({
             "username": "bob",
@@ -615,6 +483,7 @@ class TestSignupController(object):
     @mock.patch('h.accounts.views.activation_email')
     def test_post_generates_activation_email_from_user(self,
                                                        activation_email,
+                                                       form_validating_to,
                                                        pyramid_request,
                                                        user_model):
         controller = views.SignupController(pyramid_request)
@@ -635,7 +504,11 @@ class TestSignupController(object):
         activation_email.assert_called_once_with(pyramid_request, new_user)
 
     @mock.patch('h.accounts.views.activation_email')
-    def test_post_sends_email(self, activation_email, mailer, pyramid_request):
+    def test_post_sends_email(self,
+                              activation_email,
+                              form_validating_to,
+                              mailer,
+                              pyramid_request):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to({
             "username": "bob",
@@ -655,7 +528,11 @@ class TestSignupController(object):
                                                   body='body')
 
     @mock.patch('h.accounts.views.RegistrationEvent')
-    def test_post_no_event_when_validation_fails(self, event, notify, pyramid_request):
+    def test_post_no_event_when_validation_fails(self,
+                                                 event,
+                                                 invalid_form,
+                                                 notify,
+                                                 pyramid_request):
         controller = views.SignupController(pyramid_request)
         controller.form = invalid_form()
 
@@ -667,6 +544,7 @@ class TestSignupController(object):
     @mock.patch('h.accounts.views.RegistrationEvent')
     def test_post_event_when_validation_succeeds(self,
                                                  event,
+                                                 form_validating_to,
                                                  notify,
                                                  pyramid_request,
                                                  user_model):
@@ -683,7 +561,9 @@ class TestSignupController(object):
         event.assert_called_with(pyramid_request, new_user)
         notify.assert_called_with(event.return_value)
 
-    def test_post_event_redirects_on_success(self, pyramid_request):
+    def test_post_event_redirects_on_success(self,
+                                             form_validating_to,
+                                             pyramid_request):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to({
             "username": "bob",
@@ -901,6 +781,7 @@ class TestActivateController(object):
 class TestAccountController(object):
 
     def test_post_email_form_with_valid_data_changes_email(self,
+                                                           form_validating_to,
                                                            pyramid_request):
         controller = views.AccountController(pyramid_request)
         controller.forms['email'] = form_validating_to({
@@ -913,7 +794,7 @@ class TestAccountController(object):
     def test_post_email_form_with_invalid_data_does_not_change_email(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['email'] = invalid_form
+        controller.forms['email'] = invalid_form()
         original_email = pyramid_request.authenticated_user.email
 
         controller.post_email_form()
@@ -923,7 +804,7 @@ class TestAccountController(object):
     def test_post_email_form_with_invalid_data_returns_template_data(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['email'] = invalid_form
+        controller.forms['email'] = invalid_form()
 
         result = controller.post_email_form()
 
@@ -934,7 +815,7 @@ class TestAccountController(object):
         }
 
     def test_post_password_form_with_valid_data_changes_password(
-            self, pyramid_request):
+            self, form_validating_to, pyramid_request):
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = form_validating_to({
             'new_password': 'my_new_password'})
@@ -946,7 +827,7 @@ class TestAccountController(object):
     def test_post_password_form_with_invalid_data_does_not_change_password(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['password'] = invalid_form
+        controller.forms['password'] = invalid_form()
         original_password = pyramid_request.authenticated_user.password
 
         controller.post_password_form()
@@ -956,7 +837,7 @@ class TestAccountController(object):
     def test_post_password_form_with_invalid_data_returns_template_data(
             self, invalid_form, pyramid_request):
         controller = views.AccountController(pyramid_request)
-        controller.forms['password'] = invalid_form
+        controller.forms['password'] = invalid_form()
 
         result = controller.post_password_form()
 
@@ -987,6 +868,7 @@ class TestAccountController(object):
 class TestNotificationsController(object):
 
     def test_get_sets_subscriptions_data_in_form(self,
+                                                 form_validating_to,
                                                  pyramid_config,
                                                  pyramid_request,
                                                  subscriptions_model):
@@ -1004,7 +886,10 @@ class TestNotificationsController(object):
             'notifications': set(['reply']),
         })
 
-    def test_post_with_invalid_data_returns_form(self, pyramid_config, pyramid_request):
+    def test_post_with_invalid_data_returns_form(self,
+                                                 invalid_form,
+                                                 pyramid_config,
+                                                 pyramid_request):
         pyramid_request.POST = {}
         pyramid_config.testing_securitypolicy('jerry')
         controller = views.NotificationsController(pyramid_request)
@@ -1015,6 +900,7 @@ class TestNotificationsController(object):
         assert 'form' in result
 
     def test_post_with_valid_data_updates_subscriptions(self,
+                                                        form_validating_to,
                                                         pyramid_config,
                                                         pyramid_request,
                                                         subscriptions_model):
@@ -1026,9 +912,7 @@ class TestNotificationsController(object):
         ]
         subscriptions_model.get_subscriptions_for_uri.return_value = subs
         controller = views.NotificationsController(pyramid_request)
-        controller.form = form_validating_to({
-            'notifications': set(['foo'])
-        })
+        controller.form = form_validating_to({'notifications': set(['foo'])})
 
         controller.post()
 
@@ -1036,6 +920,7 @@ class TestNotificationsController(object):
         assert subs[1].active is True
 
     def test_post_with_valid_data_redirects(self,
+                                            form_validating_to,
                                             pyramid_config,
                                             pyramid_request,
                                             subscriptions_model):

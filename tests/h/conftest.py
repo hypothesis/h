@@ -8,6 +8,7 @@ to put fixture functions that are useful application-wide.
 import functools
 import os
 
+import deform
 import mock
 import pytest
 
@@ -63,6 +64,15 @@ class DummySession(object):
 
     def flush(self):
         self.flushed = True
+
+
+# A fake version of colander.Invalid
+class FakeInvalid(object):
+    def __init__(self, errors):
+        self.errors = errors
+
+    def asdict(self):
+        return self.errors
 
 
 def autopatcher(request, target, **kwargs):
@@ -138,6 +148,29 @@ def fake_feature():
 @pytest.fixture
 def fake_db_session():
     return DummySession()
+
+
+@pytest.fixture
+def form_validating_to():
+    def form_validating_to(appstruct):
+        form = mock.MagicMock()
+        form.validate.return_value = appstruct
+        form.render.return_value = 'valid form'
+        return form
+    return form_validating_to
+
+
+@pytest.fixture
+def invalid_form():
+    def invalid_form(errors=None):
+        if errors is None:
+            errors = {}
+        invalid = FakeInvalid(errors)
+        form = mock.MagicMock()
+        form.validate.side_effect = deform.ValidationFailure(None, None, invalid)
+        form.render.return_value = 'invalid form'
+        return form
+    return invalid_form
 
 
 @pytest.fixture

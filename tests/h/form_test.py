@@ -111,3 +111,186 @@ class TestCreateForm(object):
     def pyramid_request(self, pyramid_request):
         pyramid_request.registry[form.ENVIRONMENT_KEY] = mock.sentinel.jinja2_env
         return pyramid_request
+
+
+class TestToXHRResponse(object):
+    """Unit tests for to_xhr_response()."""
+
+    def test_returns_given_result_if_not_xhr(self, pyramid_request):
+        """
+        If ``request`` isn't an XHR request it returns ``non_xhr_result``.
+
+        The calling view callable passes in the result that it would have
+        returned normally if this were not an XHR request as the
+        ``non_xhr_result`` argument. If the given ``request`` is not an XHR
+        request then ``non_xhr_result`` should just be returned unmodified.
+
+        """
+        pyramid_request.is_xhr = False
+
+        result = form.to_xhr_response(pyramid_request,
+                                      mock.sentinel.non_xhr_result,
+                                      mock.sentinel.form)
+
+        assert result == mock.sentinel.non_xhr_result
+
+    def test_returns_form_if_xhr(self, pyramid_request):
+        """
+        If ``request`` is an XHR request it should return the rendered ``form``.
+
+        It should return ``form`` rendered to a ``<form>`` element HTML snippet.
+
+        """
+        pyramid_request.is_xhr = True
+        form_ = mock.Mock(spec_set=['render'])
+
+        result = form.to_xhr_response(pyramid_request,
+                                      mock.sentinel.non_xhr_result,
+                                      form_)
+
+        assert result == form_.render.return_value
+
+
+@pytest.mark.usefixtures('to_xhr_response')
+class TestHandleFormSubmission(object):
+
+    def test_it_calls_validate(self, pyramid_request):
+        form_ = mock.Mock(spec_set=['validate'])
+
+        form.handle_form_submission(pyramid_request,
+                                    form_,
+                                    mock_callable(),
+                                    mock.sentinel.on_failure)
+
+        form_.validate.assert_called_once_with(pyramid_request.POST.items())
+
+    def test_if_validation_fails_it_calls_on_failure(self,
+                                                     pyramid_request,
+                                                     invalid_form):
+        on_failure = mock_callable()
+
+        form.handle_form_submission(pyramid_request,
+                                    invalid_form(),
+                                    mock.sentinel.on_success,
+                                    on_failure)
+
+        on_failure.assert_called_once_with()
+
+    def test_if_validation_fails_it_calls_to_xhr_response(self,
+                                                          invalid_form,
+                                                          pyramid_request,
+                                                          to_xhr_response):
+        on_failure = mock_callable()
+        form_ = invalid_form()
+
+        form.handle_form_submission(pyramid_request,
+                                    form_,
+                                    mock.sentinel.on_success,
+                                    on_failure)
+
+        to_xhr_response.assert_called_once_with(
+            pyramid_request, on_failure.return_value, form_)
+
+    def test_if_validation_fails_it_returns_to_xhr_response(self,
+                                                            invalid_form,
+                                                            pyramid_request,
+                                                            to_xhr_response):
+        result = form.handle_form_submission(pyramid_request,
+                                             invalid_form(),
+                                             mock.sentinel.on_success,
+                                             mock_callable())
+
+        assert result == to_xhr_response.return_value
+
+    def test_if_validation_succeeds_it_calls_on_success(self,
+                                                        form_validating_to,
+                                                        pyramid_request):
+        form_ = form_validating_to(mock.sentinel.appstruct)
+        on_success = mock_callable()
+
+        form.handle_form_submission(pyramid_request,
+                                    form_,
+                                    on_success,
+                                    mock.sentinel.on_failure)
+
+        on_success.assert_called_once_with(mock.sentinel.appstruct)
+
+    def test_if_validation_succeeds_it_shows_a_flash_message(self,
+                                                             form_validating_to,
+                                                             pyramid_request):
+        form.handle_form_submission(pyramid_request,
+                                    form_validating_to('anything'),
+                                    mock_callable(),
+                                    mock.sentinel.on_failure)
+
+        assert pyramid_request.session.peek_flash('success')
+
+    def test_if_validation_succeeds_it_calls_to_xhr_response(self,
+                                                             form_validating_to,
+                                                             matchers,
+                                                             pyramid_request,
+                                                             to_xhr_response):
+        form_ = form_validating_to('anything')
+
+        form.handle_form_submission(pyramid_request,
+                                    form_,
+                                    mock_callable(return_value=None),
+                                    mock.sentinel.on_failure)
+
+        to_xhr_response.assert_called_once_with(
+            pyramid_request,
+            matchers.redirect_302_to(pyramid_request.url),
+            form_)
+
+    def test_if_validation_succeeds_it_passes_on_success_result_to_to_xhr_response(
+            self,
+            form_validating_to,
+            matchers,
+            pyramid_request,
+            to_xhr_response):
+        """
+        A result from on_success() is passed to to_xhr_response().
+
+        If on_success() returns something other than None, it passes that
+        something to to_xhr_response().
+
+        """
+        form_ = form_validating_to('anything')
+
+        form.handle_form_submission(pyramid_request,
+                                    form_,
+                                    mock_callable(
+                                        return_value=mock.sentinel.result),
+                                    mock.sentinel.on_failure)
+
+        to_xhr_response.assert_called_once_with(
+            pyramid_request,
+            mock.sentinel.result,
+            form_)
+
+    def test_if_validation_succeeds_it_returns_to_xhr_response(self,
+                                                               form_validating_to,
+                                                               pyramid_request,
+                                                               to_xhr_response):
+        result = form.handle_form_submission(pyramid_request,
+                                             form_validating_to('anything'),
+                                             mock_callable(),
+                                             mock.sentinel.on_failure)
+
+        assert result == to_xhr_response.return_value
+
+    @pytest.fixture
+    def to_xhr_response(self, patch):
+        return patch('h.form.to_xhr_response')
+
+
+def mock_callable(**kwargs):
+    """
+    Return a mock than can be called but doesn't have any accessible properties.
+
+    The mock can be called like ``my_mock_callable()`` but trying to access any
+    other properties like ``my_mock_callable.foo`` will fail. This is a useful
+    value to use when the method under test requires a callable as an argument.
+
+    """
+    return mock.Mock(spec_set=['__call__'], **kwargs)
