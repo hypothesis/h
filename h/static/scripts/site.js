@@ -11,7 +11,7 @@ require('./polyfills');
 var CreateGroupFormController = require('./controllers/create-group-form-controller');
 var DropdownMenuController = require('./controllers/dropdown-menu-controller');
 var FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
-var upgradeElements = require('./controllers/upgrade-elements');
+var upgradeElements = require('./base/upgrade-elements');
 
 var controllers = {
   '.js-create-group-form': CreateGroupFormController,

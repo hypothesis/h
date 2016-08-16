@@ -1,6 +1,6 @@
 'use strict';
 
-var upgradeElements = require('../../controllers/upgrade-elements');
+var upgradeElements = require('../../base/upgrade-elements');
 
 /**
  * Helper to set up a component for a controller test

@@ -10,7 +10,7 @@ window.$ = window.jQuery = require('jquery');
 require('bootstrap');
 
 var AdminUsersController = require('./controllers/admin-users-controller');
-var upgradeElements = require('./controllers/upgrade-elements');
+var upgradeElements = require('./base/upgrade-elements');
 
 var controllers = {
   '.js-users-delete-form': AdminUsersController,
