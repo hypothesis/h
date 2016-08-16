@@ -137,7 +137,7 @@ class LoginSchema(CSRFSchema):
             err['username'] = _('User does not exist.')
             raise err
 
-        if not models.User.validate_user(user, password):
+        if not user.check_password(password):
             err = colander.Invalid(node)
             err['password'] = _('Incorrect password. Please try again.')
             raise err
@@ -272,7 +272,7 @@ class LegacyEmailChangeSchema(CSRFSchema):
         if value.get('email') != value.get('email_confirm'):
             exc['email_confirm'] = _('The emails must match')
 
-        if not models.User.validate_user(user, value.get('password')):
+        if not user.check_password(value.get('password')):
             exc['password'] = _('Incorrect password. Please try again.')
 
         if exc.children:
@@ -316,7 +316,7 @@ class PasswordChangeSchema(CSRFSchema):
         if value.get('new_password') != value.get('new_password_confirm'):
             exc['new_password_confirm'] = _('The passwords must match')
 
-        if not models.User.validate_user(user, value.get('password')):
+        if not user.check_password(value.get('password')):
             exc['password'] = _('Incorrect password. Please try again.')
 
         if exc.children:

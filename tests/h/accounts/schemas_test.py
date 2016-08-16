@@ -143,7 +143,8 @@ def test_LoginSchema_with_bad_username(pyramid_csrf_request, user_model):
 
 def test_LoginSchema_with_bad_password(pyramid_csrf_request, user_model):
     schema = schemas.LoginSchema().bind(request=pyramid_csrf_request)
-    user_model.validate_user.return_value = False
+    user = user_model.get_by_username.return_value
+    user.check_password.return_value = False
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({
@@ -297,14 +298,14 @@ def test_LegacyEmailChangeSchema_rejects_wrong_password(pyramid_csrf_request, us
     # The email isn't taken
     user_model.get_by_email.return_value = None
     # The password does not check out
-    user_model.validate_user.return_value = False
+    user.check_password.return_value = False
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({'email': 'foo@bar.com',
                             'email_confirm': 'foo@bar.com',
                             'password': 'flibble'})
 
-    user_model.validate_user.assert_called_once_with(user, 'flibble')
+    user.check_password.assert_called_once_with('flibble')
     assert 'password' in exc.value.asdict()
 
 
@@ -327,14 +328,14 @@ def test_PasswordChangeSchema_rejects_wrong_password(pyramid_csrf_request, user_
     pyramid_csrf_request.authenticated_user = user
     schema = schemas.PasswordChangeSchema().bind(request=pyramid_csrf_request)
     # The password does not check out
-    user_model.validate_user.return_value = False
+    user.check_password.return_value = False
 
     with pytest.raises(colander.Invalid) as exc:
         schema.deserialize({'new_password': 'wibble',
-                            'new_password_confirm': 'wibble!',
+                            'new_password_confirm': 'wibble',
                             'password': 'flibble'})
 
-    user_model.validate_user.assert_called_once_with(user, 'flibble')
+    user.check_password.assert_called_once_with('flibble')
     assert 'password' in exc.value.asdict()
 
 
