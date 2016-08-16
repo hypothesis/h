@@ -78,6 +78,22 @@ def _session(request):
     else:
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
+    # pyramid_tm doesn't always close the database session for us.
+    #
+    # For example if an exception view accesses the session and causes a new
+    # transaction to be opened, pyramid_tm won't close this connection because
+    # pyramid_tm's transaction has already ended before exception views are
+    # executed.
+    # Connections opened by NewResponse and finished callbacks aren't closed by
+    # pyramid_tm either.
+    #
+    # So add our own callback here to make sure db sessions are always closed.
+    #
+    # See: https://github.com/Pylons/pyramid_tm/issues/40
+    @request.add_finished_callback
+    def close_the_sqlalchemy_session(request):
+        session.close()
+
     return session
 
 
