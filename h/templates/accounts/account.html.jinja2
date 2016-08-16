@@ -30,17 +30,19 @@
     {%- endif %}
     {% if feature('activity_pages') -%}
     <footer class="form-footer">
+      {% trans %}
+        If you would like to delete your account, please email us at
+        <a class="link" href="mailto:support@hypothes.is">support@hypothes.is</a> from your
+        registered email address, and we'll take it from there.
+      {% endtrans %}
+    </footer>
     {% else %}
     <legend>
-    {%- endif %}
       {% trans %}
         If you would like to delete your account, please email us at
         <a href="mailto:support@hypothes.is">support@hypothes.is</a> from your
         registered email address, and we'll take it from there.
       {% endtrans %}
-    {% if feature('activity_pages') -%}
-    </footer>
-    {% else %}
     </legend>
     {%- endif %}
   </div>
