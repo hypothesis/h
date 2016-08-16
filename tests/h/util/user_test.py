@@ -13,9 +13,3 @@ def test_split_user():
 def test_split_user_no_match():
     with pytest.raises(ValueError):
         user_util.split_user("donkeys")
-
-
-def test_userid_from_username():
-    userid = user_util.userid_from_username('douglas', 'example.com')
-
-    assert userid == 'acct:douglas@example.com'
