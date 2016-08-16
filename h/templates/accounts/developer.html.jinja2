@@ -5,11 +5,26 @@
 
 {% block page_content %}
   <div class="form-vertical">
+    {% if not feature('activity_pages') -%}
     <h2 class="form-heading">
       <span>{% trans %}Generate your API token{% endtrans %}</span>
     </h2>
+    {% endif %}
 
     {% if token %}
+      {% if feature('activity_pages') %}
+        <p>
+        <label for="token">{% trans %}Your API token is:{% endtrans %}</label>
+        </p>
+        <input id="token"
+               type="text"
+               value="{{ token }}"
+               readonly="readonly"
+               class="api-token">
+        <p class="help-block">
+          Please keep your API token safe as it can be used to access your account.
+        </p>
+      {% else %}
       <label for="token">{% trans %}Your API token is:{% endtrans %}</label>
       <input id="token" type="text" value="{{ token }}" readonly="readonly"
              class="api-token-input">
@@ -17,13 +32,28 @@
         Please keep your API token safe as it can be used to access your
         account.
       </span>
+      {% endif %}
     {% else %}
+      {% if not feature('activity_pages') -%}
       <legend>
         {% trans %}You haven't generated an API token yet.{% endtrans %}
       </legend>
+      {%- endif %}
     {% endif %}
 
       <form method="POST">
+        {% if feature('activity_pages') %}
+          {% if token %}
+            <button type="submit" class="btn btn-danger"
+                    title="{% trans %}Delete your API token and generate a new one{% endtrans%}">
+              Regenerate your API token
+            </button>
+          {% else %}
+            <button type="submit" class="btn btn-primary">
+              {% trans %}Generate your API token{% endtrans %}
+            </button>
+          {% endif %}
+        {% else %}
         <div class="form-actions">
           <div class="form-actions-buttons">
 
@@ -39,7 +69,14 @@
     {% endif %}
           </div>
         </div>
+        {% endif %}
       </form>
+      {% if feature('activity_pages') -%}
+      <footer class="form-footer">
+        You can learn more about the Hypothesis API at
+        <a class="link" href="https://h.readthedocs.io/en/latest/api.html">h.readthedocs.io/en/latest/api.html</a>
+      </footer>
+      {% else %}
       <h2 class="form-heading">
         <span>{% trans %}API documentation{% endtrans %}</span>
       </h2>
@@ -47,5 +84,6 @@
         You can learn more about the Hypothesis API at
         <a href="https://h.readthedocs.io/en/latest/api.html">h.readthedocs.io/en/latest/api.html</a>.
       </legend>
+      {%- endif %}
   </div>
 {% endblock page_content %}
