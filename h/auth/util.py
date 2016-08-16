@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from pyramid import authorization
 from pyramid import security
 
-from h import accounts
 from h.auth import role
 
 
@@ -23,7 +21,8 @@ def groupfinder(userid, request):
     :returns: additional principals for the user (possibly empty) or None
     :rtype: list or None
     """
-    user = accounts.get_user(userid, request)
+    user_service = request.find_service(name='user')
+    user = user_service.fetch(userid)
     if user is None:
         return None
 
