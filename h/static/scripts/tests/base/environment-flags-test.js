@@ -30,6 +30,17 @@ describe('EnvironmentFlags', function () {
       clock.tick(TIMEOUT_DELAY);
       assert.isTrue(el.classList.contains('env-js-timeout'));
     });
+
+    it('should not add "env-touch" flag if touch events are not supported', function () {
+      flags.init();
+      assert.isFalse(el.classList.contains('env-touch'));
+    });
+
+    it('should add "env-touch" flag if touch events are available', function () {
+      el.ontouchstart = function () {};
+      flags.init();
+      assert.isTrue(el.classList.contains('env-touch'));
+    });
   });
 
   describe('#ready', function () {

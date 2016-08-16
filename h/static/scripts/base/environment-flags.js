@@ -52,7 +52,7 @@ EnvironmentFlags.prototype.init = function () {
   // Set a flag to indicate touch support. Useful for browsers that do not
   // support interaction media queries.
   // See http://caniuse.com/#feat=css-media-interaction
-  this.set('touch', 'ontouchstart' in this._element);
+  this.set('touch', this._element.ontouchstart);
 
   // Set an additional flag if scripts fail to load in a reasonable period of
   // time
