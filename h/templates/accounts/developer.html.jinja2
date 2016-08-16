@@ -21,7 +21,7 @@
                value="{{ token }}"
                readonly="readonly"
                class="api-token">
-        <p class="help-block form-help-text">
+        <p class="form-help-text">
           Please keep your API token safe as it can be used to access your account.
         </p>
       {% else %}
@@ -44,7 +44,7 @@
       <form method="POST">
         {% if feature('activity_pages') %}
           {% if token %}
-            <button type="submit" class="btn btn-danger"
+            <button type="submit" class="btn"
                     title="{% trans %}Delete your API token and generate a new one{% endtrans%}">
               Regenerate your API token
             </button>
