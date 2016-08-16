@@ -590,9 +590,17 @@ class AccountController(object):
 
     def _template_data(self):
         """Return the data needed to render accounts.html.jinja2."""
-        return {'email': self.request.authenticated_user.email,
-                'email_form': self.forms['email'],
-                'password_form': self.forms['password']}
+        email = self.request.authenticated_user.email
+        password_form = self.forms['password'].render()
+
+        if self.request.feature('activity_pages'):
+            email_form = self.forms['email'].render({'email': email})
+        else:
+            email_form = self.forms['email'].render()
+
+        return {'email': email,
+                'email_form': email_form,
+                'password_form': password_form}
 
 
 @view_defaults(route_name='account_notifications',
