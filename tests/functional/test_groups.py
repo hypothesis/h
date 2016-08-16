@@ -6,7 +6,7 @@ import pytest
 
 
 @pytest.mark.functional
-def test_group_page_includes_referrer_tag(app, db_session, factories):
+def test_group_page_includes_referrer_tag(app, db_session, factories, user):
     """
     The group read page should include a referrer tag.
 
@@ -18,17 +18,61 @@ def test_group_page_includes_referrer_tag(app, db_session, factories):
     This is because the group's URL is secret - if you have it you can join
     the group.
     """
-    user = factories.User(password='pass')
     group = factories.Group(creator=user)
     db_session.commit()
-
-    res = app.get('/login')
-    res.form['username'] = user.username
-    res.form['password'] = 'pass'
-    res = res.form.submit()
 
     res = app.get('/groups/{pubid}/{slug}'.format(pubid=group.pubid,
                                                   slug=group.slug))
 
     assert res.html.head.find(
         'meta', attrs={'name': 'referrer'}, content='origin')
+
+
+@pytest.mark.functional
+def test_submit_create_group_form_without_xhr_returns_full_html_page(app):
+    res = app.get('/groups/new')
+    group_form = res.forms['deform']
+    group_form['name'] = 'My New Group'
+
+    res = group_form.submit().follow()
+
+    assert res.body.startswith('<!DOCTYPE html>')
+
+
+@pytest.mark.functional
+def test_submit_create_group_form_with_xhr_returns_partial_html_snippet(app):
+    res = app.get('/groups/new')
+    group_form = res.forms['deform']
+    group_form['name'] = 'My New Group'
+
+    res = group_form.submit(xhr=True)
+
+    assert res.body.startswith('<form')
+
+
+@pytest.mark.functional
+def test_submit_create_group_form_with_xhr_returns_plain_text(app):
+    res = app.get('/groups/new')
+    group_form = res.forms['deform']
+    group_form['name'] = 'My New Group'
+
+    res = group_form.submit(xhr=True)
+
+    assert res.content_type == 'text/plain'
+
+
+@pytest.fixture
+def user(db_session, factories):
+    user = factories.User(password='pass')
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
+def app(app, user):
+    res = app.get('/login')
+    res.form['username'] = user.username
+    res.form['password'] = 'pass'
+    res.form.submit()
+    return app
