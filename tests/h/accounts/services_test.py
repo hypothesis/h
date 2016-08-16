@@ -5,8 +5,34 @@ from __future__ import unicode_literals
 import mock
 import pytest
 
-from h.accounts.services import UserSignupService, user_signup_service_factory
+from h.accounts.services import (
+    UserService,
+    UserSignupService,
+    user_service_factory,
+    user_signup_service_factory,
+)
 from h.models import Activation, Subscriptions, User
+
+
+class TestUserService(object):
+
+    @pytest.mark.usefixtures('users')
+    def test_fetch_retrieves_user_by_userid(self, svc):
+        result = svc.fetch('acct:jacqui@foo.com')
+
+        assert isinstance(result, User)
+
+    @pytest.fixture
+    def svc(self, db_session):
+        return UserService(session=db_session)
+
+    @pytest.fixture
+    def users(self, db_session, factories):
+        users = [factories.User(username='jacqui', authority='foo.com'),
+                 factories.User(username='steve', authority='example.com')]
+        db_session.add_all(users)
+        db_session.flush()
+        return users
 
 
 class TestUserSignupService(object):
@@ -94,6 +120,18 @@ class TestUserSignupService(object):
     @pytest.fixture
     def stats(self):
         return mock.Mock(spec_set=['incr'])
+
+
+class TestUserServiceFactory(object):
+    def test_returns_user_service(self, pyramid_request):
+        svc = user_service_factory(None, pyramid_request)
+
+        assert isinstance(svc, UserService)
+
+    def test_provides_request_db_as_session(self, pyramid_request):
+        svc = user_service_factory(None, pyramid_request)
+
+        assert svc.session == pyramid_request.db
 
 
 class TestUserSignupServiceFactory(object):
