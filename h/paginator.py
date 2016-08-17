@@ -22,11 +22,15 @@ def paginate(request, total, page_size):
     next_ = current_page + 1 if current_page < page_max else None
     prev = current_page - 1 if current_page > 1 else None
 
+    def url_for(page):
+        return request.current_route_path(_query={'page': page})
+
     return {
         'cur': current_page,
         'max': page_max,
         'next': next_,
         'prev': prev,
+        'url_for': url_for,
     }
 
 

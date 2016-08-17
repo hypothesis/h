@@ -6,7 +6,7 @@
       </li>
     {% else %}
       <li>
-        <a href="?page={{ page.prev }}" aria-label="{% trans %}Previous{% endtrans %}">
+        <a href="{{ page.url_for(page.prev) }}" aria-label="{% trans %}Previous{% endtrans %}">
           <span aria-hidden="true">&laquo;</span>
         </a>
       </li>
@@ -17,7 +17,7 @@
           <span>{{ n }} <span class="sr-only">({% trans %}current{% endtrans %})</span></span>
         </li>
       {% else %}
-        <li><a href="?page={{ n }}">{{ n }}</a></li>
+        <li><a href="{{ page.url_for(n) }}">{{ n }}</a></li>
       {% endif %}
     {% endfor %}
     {% if page.next is none %}
@@ -26,7 +26,7 @@
       </li>
     {% else %}
       <li>
-        <a href="?page={{ page.next }}" aria-label="{% trans %}Next{% endtrans %}">
+        <a href="{{ page.url_for(page.next) }}" aria-label="{% trans %}Next{% endtrans %}">
           <span aria-hidden="true">&raquo;</span>
         </a>
       </li>

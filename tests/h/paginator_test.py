@@ -2,6 +2,7 @@
 
 import mock
 import pytest
+from webob.multidict import NestedMultiDict
 
 from h.paginator import paginate
 from h.paginator import paginate_query
@@ -79,6 +80,42 @@ class TestPaginate(object):
     def test_prev(self, pyramid_request, page_param, expected):
         pyramid_request.params = {'page': page_param}
         assert paginate(pyramid_request, 600, 10)['prev'] == expected
+
+    @pytest.mark.parametrize('params,expected', [
+        # Normally url_for() just replaces the 'page' param with the requested
+        # new page number.
+        ([{'page': '32'}], {'page': 26}),
+
+        # If there is no 'page' param it just adds a 'page' param for the
+        # requested page.
+        ([{}], {'page': 26}),
+
+        # Existing query params (other than 'page') should be preserved.
+        (
+            [{'q': 'user:jeremydean', 'foo': 'bar'}],
+            {'q': ['user:jeremydean'], 'foo': ['bar'], 'page': 26}
+        ),
+        (
+            [{'q': 'user:jeremydean', 'foo': 'bar', 'page': '32'}],
+            {'q': ['user:jeremydean'], 'foo': ['bar'], 'page': 26}
+        ),
+
+        # Repeated params should be preserved.
+        (
+            [{'foo': 'one'}, {'foo': 'two'}],
+            {'foo': ['one', 'two'], 'page': 26}
+        ),
+    ])
+    def test_url_for(self, pyramid_request, params, expected):
+        pyramid_request.params = NestedMultiDict(*params)
+        pyramid_request.current_route_path = mock.Mock(spec_set=['__call__'])
+        url_for = paginate(pyramid_request, 600, 10)['url_for']
+
+        url = url_for(page=26)  # Request the URL for page 26.
+
+        pyramid_request.current_route_path.assert_called_once_with(
+            _query=expected)
+        assert url == pyramid_request.current_route_path.return_value
 
 
 @pytest.mark.usefixtures('paginate')
