@@ -8,7 +8,7 @@ matrix:
       python: '2.7'
       addons:
         postgresql: "9.4"
-      before_install: pip install tox
+      install: pip install tox
       before_script: createdb htest
       script: tox
       after_success:
