@@ -16,11 +16,6 @@ def logout(event):
     event.request.stats.incr('auth.local.logout')
 
 
-@subscriber(events.RegistrationEvent)
-def registration(event):
-    event.request.stats.incr('auth.local.register')
-
-
 @subscriber(events.PasswordResetEvent)
 def password_reset(event):
     event.request.stats.incr('auth.local.reset_password')

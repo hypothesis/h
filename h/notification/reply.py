@@ -3,13 +3,9 @@
 from collections import namedtuple
 import logging
 
-from pyramid.events import subscriber
-
-from h import auth
 from h import accounts
 from memex import storage
 from h.notification.models import Subscriptions
-from h.accounts.events import RegistrationEvent
 
 log = logging.getLogger(__name__)
 
@@ -108,25 +104,6 @@ def get_notification(request, annotation, action):
         return
 
     return Notification(reply, reply_user, parent, parent_user, reply.document)
-
-
-# Create a reply template for a uri
-def create_subscription(request, uri, active):
-    subs = Subscriptions(
-        uri=uri,
-        type='reply',
-        active=active
-    )
-
-    request.db.add(subs)
-    request.db.flush()
-
-
-@subscriber(RegistrationEvent)
-def registration_subscriptions(event):
-    request = event.request
-    user_uri = u'acct:{}@{}'.format(event.user.username, request.domain)
-    create_subscription(event.request, user_uri, True)
 
 
 def includeme(config):

@@ -412,12 +412,9 @@ class TestResetController(object):
         pyramid_config.add_route('account_reset_with_code', '/reset-with-code')
 
 
-@pytest.mark.usefixtures('activation_model',
-                         'pyramid_config',
-                         'mailer',
-                         'notify',
+@pytest.mark.usefixtures('pyramid_config',
                          'routes',
-                         'user_model')
+                         'user_signup_service')
 class TestSignupController(object):
 
     def test_post_returns_errors_when_validation_fails(self,
@@ -433,7 +430,7 @@ class TestSignupController(object):
     def test_post_creates_user_from_form_data(self,
                                               form_validating_to,
                                               pyramid_request,
-                                              user_model):
+                                              user_signup_service):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to({
             "username": "bob",
@@ -444,126 +441,24 @@ class TestSignupController(object):
 
         controller.post()
 
-        user_model.assert_called_with(username="bob",
-                                      email="bob@example.com",
-                                      password="s3crets")
+        user_signup_service.signup.assert_called_with(username="bob",
+                                                      email="bob@example.com",
+                                                      password="s3crets")
 
-    def test_post_adds_new_user_to_session(self,
-                                           form_validating_to,
-                                           pyramid_request,
-                                           user_model):
-        controller = views.SignupController(pyramid_request)
-        controller.form = form_validating_to({
-            "username": "bob",
-            "email": "bob@example.com",
-            "password": "s3crets",
-        })
-
-        controller.post()
-
-        assert user_model.return_value in pyramid_request.db.added
-
-    def test_post_creates_new_activation(self,
-                                         activation_model,
-                                         form_validating_to,
-                                         pyramid_request,
-                                         user_model):
-        controller = views.SignupController(pyramid_request)
-        controller.form = form_validating_to({
-            "username": "bob",
-            "email": "bob@example.com",
-            "password": "s3crets",
-        })
-        new_user = user_model.return_value
-
-        controller.post()
-
-        assert new_user.activation == activation_model.return_value
-
-    @mock.patch('h.accounts.views.activation_email')
-    def test_post_generates_activation_email_from_user(self,
-                                                       activation_email,
-                                                       form_validating_to,
-                                                       pyramid_request,
-                                                       user_model):
-        controller = views.SignupController(pyramid_request)
-        controller.form = form_validating_to({
-            "username": "bob",
-            "email": "bob@example.com",
-            "password": "s3crets",
-        })
-        new_user = user_model.return_value
-        activation_email.return_value = {
-            'recipients': [],
-            'subject': '',
-            'body': ''
-        }
-
-        controller.post()
-
-        activation_email.assert_called_once_with(pyramid_request, new_user)
-
-    @mock.patch('h.accounts.views.activation_email')
-    def test_post_sends_email(self,
-                              activation_email,
-                              form_validating_to,
-                              mailer,
-                              pyramid_request):
-        controller = views.SignupController(pyramid_request)
-        controller.form = form_validating_to({
-            "username": "bob",
-            "email": "bob@example.com",
-            "password": "s3crets",
-        })
-        activation_email.return_value = {
-            'recipients': ['bob@example.com'],
-            'subject': 'subject',
-            'body': 'body'
-        }
-
-        controller.post()
-
-        mailer.send.delay.assert_called_once_with(recipients=['bob@example.com'],
-                                                  subject='subject',
-                                                  body='body')
-
-    @mock.patch('h.accounts.views.RegistrationEvent')
-    def test_post_no_event_when_validation_fails(self,
-                                                 event,
-                                                 invalid_form,
-                                                 notify,
-                                                 pyramid_request):
+    def test_post_does_not_create_user_when_validation_fails(self,
+                                                             invalid_form,
+                                                             pyramid_request,
+                                                             user_signup_service):
         controller = views.SignupController(pyramid_request)
         controller.form = invalid_form()
 
         controller.post()
 
-        assert not event.called
-        assert not notify.called
+        assert not user_signup_service.signup.called
 
-    @mock.patch('h.accounts.views.RegistrationEvent')
-    def test_post_event_when_validation_succeeds(self,
-                                                 event,
-                                                 form_validating_to,
-                                                 notify,
-                                                 pyramid_request,
-                                                 user_model):
-        controller = views.SignupController(pyramid_request)
-        controller.form = form_validating_to({
-            "username": "bob",
-            "email": "bob@example.com",
-            "password": "s3crets",
-        })
-        new_user = user_model.return_value
-
-        controller.post()
-
-        event.assert_called_with(pyramid_request, new_user)
-        notify.assert_called_with(event.return_value)
-
-    def test_post_event_redirects_on_success(self,
-                                             form_validating_to,
-                                             pyramid_request):
+    def test_post_redirects_on_success(self,
+                                       form_validating_to,
+                                       pyramid_request):
         controller = views.SignupController(pyramid_request)
         controller.form = form_validating_to({
             "username": "bob",
@@ -583,15 +478,7 @@ class TestSignupController(object):
             controller.get()
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, fake_db_session):
-        # Override the database session with a fake session implementation.
-        # FIXME: don't mock models...
-        pyramid_request.db = fake_db_session
-        return pyramid_request
-
-    @pytest.fixture
     def routes(self, pyramid_config):
-        pyramid_config.add_route('activate', '/activate')
         pyramid_config.add_route('index', '/index')
         pyramid_config.add_route('stream', '/stream')
 
@@ -1049,3 +936,10 @@ def mailer(patch):
 @pytest.fixture
 def models(patch):
     return patch('h.accounts.views.models')
+
+
+@pytest.fixture
+def user_signup_service(pyramid_config):
+    service = mock.Mock(spec_set=['signup'])
+    pyramid_config.register_service(service, name='user_signup')
+    return service

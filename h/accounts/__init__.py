@@ -73,6 +73,9 @@ def includeme(config):
     config.add_request_method(
         authenticated_user, name='authenticated_user', reify=True)
 
+    config.register_service_factory('.services.user_signup_service_factory',
+                                    name='user_signup')
+
     config.include('.schemas')
     config.include('.subscribers')
     config.include('.views')

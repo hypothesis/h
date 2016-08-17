@@ -20,8 +20,12 @@ def add(ctx, username, email, password):
     """Create a new user."""
     request = ctx.obj['bootstrap']()
 
-    user = models.User(username=username, email=email, password=password)
-    request.db.add(user)
+    signup_service = request.find_service(name='user_signup')
+
+    user = signup_service.signup(username=username,
+                                 email=email,
+                                 password=password)
+    user.activate()
 
     try:
         request.tm.commit()
