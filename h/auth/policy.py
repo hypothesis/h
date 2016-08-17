@@ -81,7 +81,7 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         :rtype: unicode or None
         """
         token = getattr(request, 'auth_token', None)
-        if token is None:
+        if token is None or not token.is_valid():
             return None
 
         return token.userid

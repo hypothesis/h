@@ -74,6 +74,18 @@ class TestLegacyClientJWT(object):
 
         assert result.payload == payload
 
+    def test_always_valid(self):
+        payload = {'aud': 'http://foo.com',
+                   'exp': _seconds_from_now(3600),
+                   'sub': 'foobar'}
+        token = jwt.encode(payload, key='s3cr37')
+
+        result = tokens.LegacyClientJWT(token,
+                                        audience='http://foo.com',
+                                        key='s3cr37')
+
+        assert result.is_valid()
+
     def test_userid_gets_payload_sub(self):
         payload = {'aud': 'http://foo.com',
                    'exp': _seconds_from_now(3600),

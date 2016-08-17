@@ -129,6 +129,15 @@ class TestTokenAuthenticationPolicy(object):
 
         assert result == 'acct:foo@example.com'
 
+    def test_unauthenticated_userid_returns_none_if_token_invalid(self, pyramid_request):
+        policy = TokenAuthenticationPolicy()
+        token = DummyToken(valid=False)
+        pyramid_request.auth_token = token
+
+        result = policy.unauthenticated_userid(pyramid_request)
+
+        assert result is None
+
     def test_authenticated_userid_uses_callback(self, fake_token, pyramid_request):
         def callback(userid, request):
             return None
@@ -153,4 +162,13 @@ class TestTokenAuthenticationPolicy(object):
 
     @pytest.fixture
     def fake_token(self):
-        return mock.Mock(userid='acct:foo@example.com', spec_set=['userid'])
+        return DummyToken()
+
+
+class DummyToken(object):
+    def __init__(self, userid='acct:foo@example.com', valid=True):
+        self.userid = userid
+        self._valid = valid
+
+    def is_valid(self):
+        return self._valid
