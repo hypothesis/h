@@ -42,6 +42,11 @@ class TestClient(object):
         with pytest.raises(UnknownFeatureError):
             client.enabled('wibble')
 
+    def test_enabled_true_if_feature_query_param_set(self, client, pyramid_request):
+        pyramid_request.GET['__feature__[foo]'] = ''
+
+        assert client.enabled('foo') is True
+
     def test_enabled_false_if_everyone_false(self, client):
         assert client.enabled('foo') is False
 

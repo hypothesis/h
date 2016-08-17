@@ -68,6 +68,11 @@ class Client(object):
         self._cache = {f.name: self._state(f) for f in features}
 
     def _state(self, feature):
+        # If "__feature__[<featurename>]" is in the query string, then the
+        # feature is on. This allows testing feature flags for logged-out
+        # users.
+        if '__feature__[{}]'.format(feature.name) in self.request.GET:
+            return True
         # Features that are on for everyone are on.
         if feature.everyone:
             return True
