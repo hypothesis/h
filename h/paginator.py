@@ -8,6 +8,28 @@ import math
 PAGE_SIZE = 20
 
 
+def paginate(request, total, page_size):
+    page_max = int(math.ceil(total / page_size))
+    page_max = max(1, page_max)  # There's always at least one page.
+
+    try:
+        current_page = int(request.params['page'])
+    except (KeyError, ValueError):
+        current_page = 1
+    current_page = max(1, current_page)
+    current_page = min(current_page, page_max)
+
+    next_ = current_page + 1 if current_page < page_max else None
+    prev = current_page - 1 if current_page > 1 else None
+
+    return {
+        'cur': current_page,
+        'max': page_max,
+        'next': next_,
+        'prev': prev,
+    }
+
+
 def paginate_query(wrapped=None, page_size=PAGE_SIZE):
     """
     Decorate a view function, providing basic pagination facilities.
@@ -56,28 +78,11 @@ def paginate_query(wrapped=None, page_size=PAGE_SIZE):
     def wrapper(context, request):
         result = wrapped(context, request)
         total = result.count()
-        page_max = int(math.ceil(total / page_size))
-        page_max = max(1, page_max)  # there's always at least one page
-
-        try:
-            page = int(request.params['page'])
-        except (KeyError, ValueError):
-            page = 1
-        page = max(1, page)
-        page = min(page, page_max)
-
-        offset = (page - 1) * page_size
-        limit = page_size
-
-        out = {
-            'results': result.offset(offset).limit(limit).all(),
+        page = paginate(request, total, page_size)
+        offset = (page['cur'] - 1) * page_size
+        return {
+            'results': result.offset(offset).limit(page_size).all(),
             'total': total,
-            'page': {
-                'cur': page,
-                'max': page_max,
-                'next': page + 1 if page < page_max else None,
-                'prev': page - 1 if page > 1 else None,
-            }
+            'page': page,
         }
-        return out
     return wrapper
