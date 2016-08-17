@@ -2,7 +2,7 @@
 
 import pytest
 
-from h.paginator import paginate
+from h.paginator import paginate_query
 
 
 class FakeQuery(object):
@@ -48,7 +48,7 @@ def fake_view(total):
 def test_paginate_returns_resultset(pyramid_request):
     query, view = fake_view(total=10)
 
-    wrapped = paginate(view)
+    wrapped = paginate_query(view)
     result = wrapped(context=None, request=pyramid_request)
 
     assert result['results'] == query
@@ -60,7 +60,7 @@ def test_paginate_returns_resultset(pyramid_request):
 def test_paginate_includes_total(pyramid_request, total):
     query, view = fake_view(total=total)
 
-    wrapped = paginate(view)
+    wrapped = paginate_query(view)
     result = wrapped(context=None, request=pyramid_request)
 
     assert result['total'] == total
@@ -97,7 +97,7 @@ def test_paginate_returns_offsets_and_limits_resultset(pyramid_request, total, p
     pyramid_request.params = {'page': param}
     query, view = fake_view(total)
 
-    wrapped = paginate(view)
+    wrapped = paginate_query(view)
     result = wrapped(context=None, request=pyramid_request)
 
     assert result['results'].offset_param == offset
@@ -135,7 +135,7 @@ def test_paginate_returns_page_metadata(pyramid_request, total, param, meta):
     query, view = fake_view(total)
     ecur, emax, enext, eprev = meta
 
-    wrapped = paginate(view)
+    wrapped = paginate_query(view)
     result = wrapped(context=None, request=pyramid_request)
 
     assert result['page'] == {
@@ -150,7 +150,7 @@ def test_paginate_params(pyramid_request):
     pyramid_request.params = {'page': 2}
     query, view = fake_view(20)
 
-    decorator = paginate(page_size=5)
+    decorator = paginate_query(page_size=5)
     wrapped = decorator(view)
     result = wrapped(context=None, request=pyramid_request)
 

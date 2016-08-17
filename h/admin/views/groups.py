@@ -10,7 +10,7 @@ from h import paginator
              request_method='GET',
              renderer='h:templates/admin/groups.html.jinja2',
              permission='admin_groups')
-@paginator.paginate
+@paginator.paginate_query
 def groups_index(context, request):
     return request.db.query(models.Group).order_by(models.Group.created.desc())
 

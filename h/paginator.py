@@ -8,7 +8,7 @@ import math
 PAGE_SIZE = 20
 
 
-def paginate(wrapped=None, page_size=PAGE_SIZE):
+def paginate_query(wrapped=None, page_size=PAGE_SIZE):
     """
     Decorate a view function, providing basic pagination facilities.
 
@@ -17,7 +17,7 @@ def paginate(wrapped=None, page_size=PAGE_SIZE):
     the results for the current page and page metadata. For example, the simple
     view function
 
-        @paginate
+        @paginate_query
         def my_view(context, request):
             return request.db.query(User)
 
@@ -34,12 +34,12 @@ def paginate(wrapped=None, page_size=PAGE_SIZE):
             }
         }
 
-    You can also call :py:func:`paginate` as a function which returns a
+    You can also call :py:func:`paginate_query` as a function which returns a
     decorator, if you wish to modify the options used by the function:
 
-        paginate = paginator.paginate(page_size=10)
+        paginate = paginator.paginate_query(page_size=10)
 
-        @paginate
+        @paginate_query
         def my_view(...):
             ...
 
@@ -49,7 +49,7 @@ def paginate(wrapped=None, page_size=PAGE_SIZE):
     """
     if wrapped is None:
         def decorator(wrap):
-            return paginate(wrap, page_size=page_size)
+            return paginate_query(wrap, page_size=page_size)
         return decorator
 
     @functools.wraps(wrapped)
