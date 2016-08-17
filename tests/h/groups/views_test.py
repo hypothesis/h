@@ -9,52 +9,96 @@ from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
 from h.groups import views
 
 
-@pytest.mark.usefixtures('groups_service', 'routes')
+@pytest.mark.usefixtures('groups_service', 'handle_form_submission', 'routes')
 class TestGroupCreateController(object):
 
-    def test_get_renders_form(self, pyramid_request):
-        controller = views.GroupCreateController(pyramid_request)
+    def test_get_renders_form(self, controller):
         controller.form = form_validating_to({})
 
         result = controller.get()
 
         assert result == {'form': 'valid form'}
 
-    def test_post_creates_group_when_form_valid(self,
-                                                groups_service,
-                                                pyramid_config,
-                                                pyramid_request):
+    def test_post_calls_handle_form_submission(self,
+                                               controller,
+                                               handle_form_submission,
+                                               matchers):
+        controller.post()
+
+        handle_form_submission.assert_called_once_with(
+            controller.request,
+            controller.form,
+            matchers.any_callable(),
+            matchers.any_callable(),
+        )
+
+    def test_post_returns_handle_form_submission(self,
+                                                 controller,
+                                                 handle_form_submission):
+        assert controller.post() == handle_form_submission.return_value
+
+    def test_post_creates_new_group_if_form_valid(self,
+                                                  controller,
+                                                  groups_service,
+                                                  handle_form_submission,
+                                                  pyramid_config):
         pyramid_config.testing_securitypolicy('ariadna')
-        controller = views.GroupCreateController(pyramid_request)
-        controller.form = form_validating_to({'name': 'Kangaroo Tamers'})
+
+        # If the form submission is valid then handle_form_submission() should
+        # call on_success() with the appstruct.
+        def call_on_success(request, form, on_success, on_failure):
+            on_success({'name': 'my_new_group'})
+        handle_form_submission.side_effect = call_on_success
 
         controller.post()
 
-        assert ('Kangaroo Tamers', 'ariadna') in groups_service.created
+        assert groups_service.created == [('my_new_group', 'ariadna')]
 
-    def test_post_redirects_to_group_when_form_valid(self,
-                                                     pyramid_config,
-                                                     pyramid_request):
-        pyramid_config.testing_securitypolicy('ariadna')
-        controller = views.GroupCreateController(pyramid_request)
-        controller.form = form_validating_to({'name': 'Kangaroo Tamers'})
+    def test_post_redirects_if_form_valid(self,
+                                          controller,
+                                          handle_form_submission,
+                                          matchers):
+        # If the form submission is valid then handle_form_submission() should
+        # return the redirect that on_success() returns.
+        def return_on_success(request, form, on_success, on_failure):
+            return on_success({'name': 'my_new_group'})
+        handle_form_submission.side_effect = return_on_success
 
-        result = controller.post()
+        assert controller.post() == matchers.redirect_303_to(
+            '/g/abc123/fake-group')
 
-        assert isinstance(result, HTTPSeeOther)
-        assert result.location == '/g/abc123/fake-group'
+    def test_post_does_not_create_group_if_form_invalid(self,
+                                                        controller,
+                                                        groups_service,
+                                                        handle_form_submission):
+        # If the form submission is invalid then handle_form_submission() should
+        # call on_failure().
+        def call_on_failure(request, form, on_success, on_failure):
+            on_failure()
+        handle_form_submission.side_effect = call_on_failure
 
+        controller.post()
 
-    def test_post_rerenders_form_when_form_invalid(self,
-                                                   pyramid_config,
-                                                   pyramid_request):
-        pyramid_config.testing_securitypolicy('ariadna')
-        controller = views.GroupCreateController(pyramid_request)
-        controller.form = invalid_form()
+        assert groups_service.created == []
 
-        result = controller.post()
+    def test_post_returns_template_data_if_form_invalid(self,
+                                                        controller,
+                                                        handle_form_submission):
+        # If the form submission is invalid then handle_form_submission() should
+        # return the template data that on_failure() returns.
+        def return_on_failure(request, form, on_success, on_failure):
+            return on_failure()
+        handle_form_submission.side_effect = return_on_failure
 
-        assert result == {'form': 'invalid form'}
+        assert controller.post() == {'form': controller.form.render.return_value}
+
+    @pytest.fixture
+    def controller(self, pyramid_request):
+        return views.GroupCreateController(pyramid_request)
+
+    @pytest.fixture
+    def handle_form_submission(self, patch):
+        return patch('h.groups.views.form.handle_form_submission')
 
 
 @pytest.mark.usefixtures('groups_service', 'routes')
