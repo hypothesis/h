@@ -9,22 +9,30 @@ from __future__ import unicode_literals
 from pyramid import httpexceptions
 from pyramid.view import view_config
 
-from memex.search import parser
-
 from h.activity import query
 
 
 @view_config(route_name='activity.search',
              request_method='GET',
              renderer='h:templates/activity/search.html.jinja2')
+@view_config(route_name='activity.group_search',
+             request_method='GET',
+             renderer='h:templates/activity/search.html.jinja2')
+@view_config(route_name='activity.user_search',
+             request_method='GET',
+             renderer='h:templates/activity/search.html.jinja2')
 def search(request):
     if not request.feature('search_page'):
         raise httpexceptions.HTTPNotFound()
 
-    if 'q' not in request.params:
+    q = query.extract(request)
+    if q is None:
         return {}
 
-    q = parser.parse(request.params['q'])
+    # Check whether a redirect is required
+    query.check_url(request, q)
+
+    # Fetch results
     result = query.execute(request, q)
 
     return {
