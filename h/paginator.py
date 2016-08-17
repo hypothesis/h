@@ -23,7 +23,9 @@ def paginate(request, total, page_size):
     prev = current_page - 1 if current_page > 1 else None
 
     def url_for(page):
-        return request.current_route_path(_query={'page': page})
+        query = request.params.dict_of_lists()
+        query['page'] = page
+        return request.current_route_path(_query=query)
 
     return {
         'cur': current_page,
