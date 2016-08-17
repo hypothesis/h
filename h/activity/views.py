@@ -10,6 +10,7 @@ from pyramid import httpexceptions
 from pyramid.view import view_config
 
 from h.activity import query
+from h.paginator import paginate
 
 
 @view_config(route_name='activity.search',
@@ -40,6 +41,7 @@ def search(request):
         'total': result.total,
         'aggregations': result.aggregations,
         'timeframes': result.timeframes,
+        'page': paginate(request, result.total),
     }
 
 
