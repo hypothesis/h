@@ -47,8 +47,10 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
     A bearer token authentication policy.
 
     This is a Pyramid authentication policy in which the user's identity is
-    provided by and authenticated by the presence of a valid bearer token in
-    the "Authorization" HTTP request header.
+    provided by and authenticated by the presence of a valid authentication
+    token associated with the request. The token is retrieved from the
+    ``request.auth_token`` property, which is provided by the
+    :py:func:`h.auth.token.auth_token` function.
 
     It uses Pyramid's CallbackAuthenticationPolicy to divide responsibility
     between this component (which is responsible only for establishing
@@ -72,32 +74,17 @@ class TokenAuthenticationPolicy(CallbackAuthenticationPolicy):
         """
         Return the userid implied by the token in the passed request, if any.
 
-        This function inspects the passed request for bearer tokens, and
-        attempts to interpret any found tokens as either API tokens or JWTs,
-        in that order.
-
         :param request: a request object
         :type request: pyramid.request.Request
 
         :returns: the userid authenticated for the passed request or None
         :rtype: unicode or None
         """
-        try:
-            header = request.headers['Authorization']
-        except KeyError:
+        token = getattr(request, 'auth_token', None)
+        if token is None:
             return None
 
-        if not header.startswith('Bearer '):
-            return None
-
-        token = text_type(header[len('Bearer '):]).strip()
-        # If the token is empty at this point, it is clearly invalid and we
-        # should reject it.
-        if not token:
-            return None
-
-        return (tokens.userid_from_api_token(token, request) or
-                tokens.userid_from_jwt(token, request))
+        return token.userid
 
 
 def _is_api_request(request):

@@ -105,7 +105,6 @@ class TestAuthenticationPolicy(object):
         assert result == self.api_policy.forget.return_value
 
 
-@pytest.mark.usefixtures('api_token', 'jwt')
 class TestTokenAuthenticationPolicy(object):
     def test_remember_does_nothing(self, pyramid_request):
         policy = TokenAuthenticationPolicy()
@@ -117,83 +116,34 @@ class TestTokenAuthenticationPolicy(object):
 
         assert policy.forget(pyramid_request) == []
 
-    def test_unauthenticated_userid_is_none_if_header_missing(self, pyramid_request):
+    def test_unauthenticated_userid_is_none_if_no_token(self, pyramid_request):
         policy = TokenAuthenticationPolicy()
 
         assert policy.unauthenticated_userid(pyramid_request) is None
 
-    @pytest.mark.parametrize('value', [
-        'junk header',
-        'bearer:wibble',
-        'Bearer',
-        'Bearer ',
-    ])
-    def test_unauthenticated_userid_is_none_if_header_incorrectly_formatted(self, pyramid_request, value):
+    def test_unauthenticated_userid_returns_userid_from_token(self, fake_token, pyramid_request):
         policy = TokenAuthenticationPolicy()
-        pyramid_request.headers = {'Authorization': value}
-
-        assert policy.unauthenticated_userid(pyramid_request) is None
-
-    def test_unauthenticated_userid_passes_token_to_extractor_functions(self, jwt, api_token, pyramid_request):
-        policy = TokenAuthenticationPolicy()
-        api_token.return_value = None
-        jwt.return_value = None
-        pyramid_request.headers = {'Authorization': 'Bearer f00ba12'}
-
-        policy.unauthenticated_userid(pyramid_request)
-
-        api_token.assert_called_once_with('f00ba12', pyramid_request)
-        jwt.assert_called_once_with('f00ba12', pyramid_request)
-
-    def test_unauthenticated_userid_returns_userid_from_api_token_if_present(self, jwt, api_token, pyramid_request):
-        policy = TokenAuthenticationPolicy()
-        api_token.return_value = 'acct:foo@example.com'
-        jwt.return_value = 'acct:bar@example.com'
-        pyramid_request.headers = {'Authorization': 'Bearer f00ba12'}
+        pyramid_request.auth_token = fake_token
 
         result = policy.unauthenticated_userid(pyramid_request)
 
         assert result == 'acct:foo@example.com'
 
-    def test_unauthenticated_userid_returns_userid_from_jwt_as_fallback(self, jwt, api_token, pyramid_request):
-        policy = TokenAuthenticationPolicy()
-        api_token.return_value = None
-        jwt.return_value = 'acct:bar@example.com'
-        pyramid_request.headers = {'Authorization': 'Bearer f00ba12'}
-
-        result = policy.unauthenticated_userid(pyramid_request)
-
-        assert result == 'acct:bar@example.com'
-
-    def test_unauthenticated_userid_returns_none_if_neither_token_valid(self, jwt, api_token, pyramid_request):
-        policy = TokenAuthenticationPolicy()
-        api_token.return_value = None
-        jwt.return_value = None
-        pyramid_request.headers = {'Authorization': 'Bearer f00ba12'}
-
-        result = policy.unauthenticated_userid(pyramid_request)
-
-        assert result is None
-
-    def test_authenticated_userid_uses_callback(self, jwt, api_token, pyramid_request):
+    def test_authenticated_userid_uses_callback(self, fake_token, pyramid_request):
         def callback(userid, request):
             return None
         policy = TokenAuthenticationPolicy(callback=callback)
-        api_token.return_value = 'acct:foo@example.com'
-        jwt.return_value = None
-        pyramid_request.headers = {'Authorization': 'Bearer f00ba12'}
+        pyramid_request.auth_token = fake_token
 
         result = policy.authenticated_userid(pyramid_request)
 
         assert result is None
 
-    def test_effective_principals_uses_callback(self, jwt, api_token, pyramid_request):
+    def test_effective_principals_uses_callback(self, fake_token, pyramid_request):
         def callback(userid, request):
             return [userid + '.foo', 'group:donkeys']
         policy = TokenAuthenticationPolicy(callback=callback)
-        api_token.return_value = 'acct:foo@example.com'
-        jwt.return_value = None
-        pyramid_request.headers = {'Authorization': 'Bearer f00ba12'}
+        pyramid_request.auth_token = fake_token
 
         result = policy.effective_principals(pyramid_request)
 
@@ -202,9 +152,5 @@ class TestTokenAuthenticationPolicy(object):
                                   'group:donkeys'])
 
     @pytest.fixture
-    def api_token(self, patch):
-        return patch('h.auth.tokens.userid_from_api_token')
-
-    @pytest.fixture
-    def jwt(self, patch):
-        return patch('h.auth.tokens.userid_from_jwt')
+    def fake_token(self):
+        return mock.Mock(userid='acct:foo@example.com', spec_set=['userid'])

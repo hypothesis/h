@@ -6,11 +6,14 @@ import binascii
 import os
 
 import sqlalchemy
+from zope.interface import implementer
 
+from h.auth.interfaces import IAuthenticationToken
 from h.db import Base
 from h.db import mixins
 
 
+@implementer(IAuthenticationToken)
 class Token(Base, mixins.Timestamps):
 
     """A long-lived API token for a user."""
@@ -40,10 +43,6 @@ class Token(Base, mixins.Timestamps):
     @classmethod
     def get_by_userid(cls, session, userid):
         return session.query(cls).filter(cls.userid == userid).first()
-
-    @classmethod
-    def get_by_value(cls, session, value):
-        return session.query(cls).filter(cls.value == value).first()
 
     def regenerate(self):
         self.value = self.prefix + _token()
