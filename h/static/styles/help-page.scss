@@ -7,10 +7,7 @@ $base-line-height: 22px;
 @import 'partials/grid';
 @import 'partials/elements';
 
-// Note: These includes are currently source-order
-// dependent.
 @import 'partials/styled-text';
-@import 'partials/page';
 
 // FIXME: unify this partial and this entrypoint
 @import 'partials/help-page';
