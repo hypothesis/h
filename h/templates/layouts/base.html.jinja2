@@ -81,9 +81,9 @@
       </script>
     {% endif %}
 
-    <script>
-    {% include "h:../build/scripts/header.bundle.js" %}
-    </script>
+    {% for url in asset_urls("header_js") %}
+    <script src="{{ url }}"></script>
+    {% endfor %}
 
     {% block base_tag %}{% endblock %}
   </head>
