@@ -1,11 +1,10 @@
 [run]
 branch = True
-source = h
 omit =
     # development
     h/testing.py
 
 [paths]
 source =
-   h
-   .tox/*/lib/python*/site-packages/h
+   src/memex
+   .tox/*/lib/python*/site-packages/memex
