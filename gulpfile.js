@@ -95,6 +95,10 @@ var bundles = [{
   // Legacy site bundle (for old homepage)
   name: 'legacy-site',
   entry: './h/static/scripts/legacy-site',
+},{
+  // Header script inserted inline at the top of the page
+  name: 'header',
+  entry: './h/static/scripts/header',
 }];
 
 var bundleConfigs = bundles.map(function (config) {

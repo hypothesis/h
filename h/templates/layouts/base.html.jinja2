@@ -81,6 +81,10 @@
       </script>
     {% endif %}
 
+    {% for url in asset_urls("header_js") %}
+    <script src="{{ url }}"></script>
+    {% endfor %}
+
     {% block base_tag %}{% endblock %}
   </head>
   {% block body_tag %}<body class="body">{% endblock %}

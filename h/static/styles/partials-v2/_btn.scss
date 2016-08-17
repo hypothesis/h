@@ -20,12 +20,7 @@
   background-color: $brand;
 }
 
-// Touch accessibility. Note: Pointer media queries are only supported by recent
-// versions of Chrome, Safari and Edge. We should provide a fallback for older
-// browsers. See http://caniuse.com/#feat=css-media-interaction and
-// http://stackoverflow.com/questions/11387805 In doing so, we should also
-// extract this styling into a helper.
-@media (pointer: coarse) {
+@include touch-input {
   .btn {
     min-height: 44px;
   }

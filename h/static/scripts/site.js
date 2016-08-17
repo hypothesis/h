@@ -20,3 +20,7 @@ var controllers = {
 };
 
 upgradeElements(document.body, controllers);
+
+if (window.envFlags) {
+  window.envFlags.ready();
+}
