@@ -1,70 +1,83 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
-{% block content %}
-{{ panel('navbar') }}
 
-{% if total %}
-<p>
-Total annotations: {{ total }}
-</p>
-{% endif %}
+{% from '../includes/annotation_card.html.jinja2' import annotation_card %}
 
-{% if tags %}
-<p>
-Tags (first ten):
-<ul>
-  {% for tag in tags %}
-  <li>{{ tag.tag }} ({{ tag.count }})</li>
-  {% endfor %}
-</ul>
-</p>
-{% endif %}
+{# Card displaying statistics about a bucket of annotations. #}
+{% macro search_bucket_stats(bucket) %}
+<div class="search-bucket-stats">
+  <div class="search-bucket-stats__key">
+    Address
+  </div>
+  <div class="search-bucket-stats__val">
+    {{ bucket.uri }}
+  </div>
+  {% if bucket.tags %}
+    <div class="search-bucket-stats__key">
+      Tags
+    </div>
+    <ul class="search-bucket-stats__val">
+      {% for tag in bucket.tags %}
+        <li>{{ tag }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <div class="search-bucket-stats__key">
+    Annotators
+  </div>
+  <ul class="search-bucket-stats__val">
+    {% for user in bucket.users %}
+      <li>{{ user.split(':')[1] }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
 
-{% if users %}
-<p>
-Users (first ten):
-<ul>
-  {% for user in users %}
-  <li>{{ user.user }} ({{ user.count }})</li>
-  {% endfor %}
-</ul>
-</p>
-{% endif %}
-
-<ol>
-  {% for timeframe in timeframes %}
-    <li>
-      <p><strong>{{ timeframe.label }}</strong></p>
-      <ol>
-        {% for bucket in timeframe.document_buckets.values() %}
-          <li>
-            <p><strong>{{ bucket.title }}</strong></p>
-            <p style="font-size: 0.8em;">
-            Domain: {{ bucket.domain }}<br>
-            URI: {{ bucket.uri }}<br>
-            Count: {{ bucket.annotations_count }}<br>
-            Tags: {{ bucket.tags }}<br>
-            Users: {{ bucket.users }}
-            </p>
-            <ol>
-              {% for result in bucket.annotations %}
-                <li>
-                  <p>ID: {{ result.annotation.id }}</p>
-                  <p>Updated: {{ result.annotation.updated.strftime('%d %b %Y') }}</p>
-                  <p>User: {{ result.annotation.userid }}</p>
-                  <p>Group: {{ result.group.name }}</p>
-                  <p>Shared: {{ result.annotation.shared }}</p>
-                  <p>URI: {{ result.annotation.target_uri }}</p>
-                  <p>Tags: {{ ','.join(result.annotation.tags) }}</p>
-                  <p>Quote:<br>{{ result.annotation.quote|safe }}</p>
-                  <p>Text:<br>{{ result.annotation.text_rendered|safe }}</p>
-                  <p>Desc:<br>{{ result.annotation.description|safe }}</p>
-                </li>
-              {% endfor %}
-            </ol>
-          </li>
+{#
+  A collapsible bucket/group of annotations
+#}
+{% macro search_result_bucket(bucket) %}
+<div class="search-result-bucket">
+  <div class="search-result-bucket__domain">
+    {{ bucket.domain }}
+  </div>
+  <div class="search-result-bucket__content">
+    <div class="search-result-bucket__header">
+      <div class="search-result-bucket__title">{{ bucket.title }}</div>
+      <div class="search-result-bucket__annotations-count">
+        <div class="search-result-bucket__annotations-count-container">
+          {{ bucket.annotations_count }}
+        </div>
+      </div>
+    </div>
+    <div class="search-result-bucket__annotation-cards-container">
+      <ol class="search-result-bucket__annotation-cards">
+        {% for result in bucket.annotations %}
+          {{ annotation_card(result.annotation, request) }}
         {% endfor %}
       </ol>
-    </li>
-  {% endfor %}
-</ol>
+      {{ search_bucket_stats(bucket) }}
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% block content %}
+
+  {{ panel('navbar') }}
+
+  <div class="search-result-container">
+    <ol class="search-result-list">
+      {% for timeframe in timeframes %}
+        <li class="search-result__timeframe">
+          {{ timeframe.label }}
+        </li>
+        <li>
+          {% for bucket in timeframe.document_buckets.values() %}
+            {{ search_result_bucket(bucket) }}
+          {% endfor %}
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+
 {% endblock %}
