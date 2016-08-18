@@ -74,7 +74,8 @@ class GroupEditController(object):
         self.request = request
         self.schema = schemas.GroupSchema().bind(request=self.request)
         self.form = request.create_form(self.schema,
-                                        buttons=(_('Save'),))
+                                        buttons=(_('Save'),),
+                                        use_inline_editing=True)
 
     @view_config(request_method='GET')
     def get(self):

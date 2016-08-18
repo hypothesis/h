@@ -11,6 +11,7 @@ require('./polyfills');
 var CharacterLimitController = require('./controllers/character-limit-controller');
 var CreateGroupFormController = require('./controllers/create-group-form-controller');
 var DropdownMenuController = require('./controllers/dropdown-menu-controller');
+var FormController = require('./controllers/form-controller');
 var FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
 var SearchBarController = require('./controllers/search-bar-controller');
 var SearchBucketController = require('./controllers/search-bucket-controller');
@@ -22,6 +23,7 @@ var controllers = {
   '.js-character-limit': CharacterLimitController,
   '.js-create-group-form': CreateGroupFormController,
   '.js-dropdown-menu': DropdownMenuController,
+  '.js-form': FormController,
   '.js-select-onfocus': FormSelectOnFocusController,
   '.js-search-bar': SearchBarController,
   '.js-search-bucket': SearchBucketController,
