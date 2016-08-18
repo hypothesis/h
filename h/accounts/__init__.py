@@ -4,9 +4,6 @@ from pyramid import httpexceptions
 
 from h.security import derive_key
 
-from h import util
-from h.accounts import models
-
 
 class Error(Exception):
 
@@ -25,28 +22,6 @@ class JSONError(Error):
     """
 
     pass
-
-
-def get_user(userid, request):
-    """Return the User object for the given userid, or None.
-
-    This will also return None if the given userid is None, if it isn't a valid
-    userid, if its domain doesn't match the site's domain, or if there's just
-    no user with that userid.
-
-    """
-    if userid is None:
-        return None
-
-    try:
-        parts = util.user.split_user(userid)
-    except ValueError:
-        return
-
-    if parts['domain'] != request.auth_domain:
-        return None
-
-    return models.User.get_by_username(request.db, parts['username'])
 
 
 def authenticated_user(request):

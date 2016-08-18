@@ -5,59 +5,6 @@ from pyramid import httpexceptions
 
 from h import accounts
 
-# The fixtures required to mock all of get_user()'s dependencies.
-get_user_fixtures = pytest.mark.usefixtures('util', 'get_by_username')
-
-
-@get_user_fixtures
-def test_get_user_calls_split_user(util):
-    """It should call split_user() once with the given userid."""
-    util.user.split_user.return_value = {
-        'username': 'fred', 'domain': 'hypothes.is'}
-
-    accounts.get_user('acct:fred@hypothes.is', mock.Mock())
-
-    util.user.split_user.assert_called_once_with('acct:fred@hypothes.is')
-
-
-@get_user_fixtures
-def test_get_user_returns_None_if_split_user_raises_ValueError(util):
-    util.user.split_user.side_effect = ValueError
-
-    assert accounts.get_user('userid', mock.Mock()) is None
-
-
-@get_user_fixtures
-def test_get_user_returns_None_if_domain_does_not_match(util, pyramid_request):
-    util.user.split_user.return_value = {
-        'username': 'username', 'domain': 'other'}
-
-    assert accounts.get_user('userid', pyramid_request) is None
-
-
-@get_user_fixtures
-def test_get_user_calls_get_by_username(util, get_by_username, pyramid_request):
-    """It should call get_by_username() once with the username."""
-    pyramid_request.auth_domain = 'hypothes.is'
-    util.user.split_user.return_value = {
-        'username': 'username', 'domain': 'hypothes.is'}
-
-    accounts.get_user('acct:username@hypothes.is', pyramid_request)
-
-    get_by_username.assert_called_once_with(pyramid_request.db, 'username')
-
-
-@get_user_fixtures
-def test_get_user_returns_user(util, get_by_username, pyramid_request):
-    """It should return the result from get_by_username()."""
-    pyramid_request.auth_domain = 'hypothes.is'
-    util.user.split_user.return_value = {
-        'username': 'username', 'domain': 'hypothes.is'}
-
-    result = accounts.get_user('acct:username@hypothes.is', pyramid_request)
-
-    assert result == get_by_username.return_value
-
 
 @pytest.mark.usefixtures('user_service')
 class TestAuthenticatedUser(object):
@@ -127,16 +74,6 @@ class TestAuthenticatedUser(object):
         result = accounts.authenticated_user(pyramid_request)
 
         assert result == user
-
-
-@pytest.fixture
-def util(patch):
-    return patch('h.accounts.util')
-
-
-@pytest.fixture
-def get_by_username(patch):
-    return patch('h.accounts.models.User.get_by_username', autospec=False)
 
 
 @pytest.fixture
