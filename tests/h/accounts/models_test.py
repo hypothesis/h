@@ -50,6 +50,30 @@ def test_cannot_create_case_variant_of_user(db_session):
         db_session.flush()
 
 
+def test_userid_derived_from_username_and_authority():
+    fred = models.User(authority='example.net',
+                       username='fredbloggs',
+                       email='fred@example.com',
+                       password='123')
+
+    assert fred.userid == 'acct:fredbloggs@example.net'
+
+
+def test_userid_as_class_property(db_session):
+    fred = models.User(authority='example.net',
+                       username='fredbloggs',
+                       email='fred@example.com',
+                       password='123')
+    db_session.add(fred)
+    db_session.flush()
+
+    result = (db_session.query(models.User)
+              .filter_by(userid='acct:fredbloggs@example.net')
+              .one())
+
+    assert result == fred
+
+
 def test_cannot_create_user_with_too_short_username():
     with pytest.raises(ValueError):
         models.User(username='aa')

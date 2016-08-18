@@ -117,6 +117,10 @@ class User(Base):
         self._username = value
         self.uid = _username_to_uid(value)
 
+    @hybrid_property
+    def userid(self):
+        return u'acct:' + self.username + u'@' + self.authority
+
     email = sa.Column(sa.UnicodeText(), nullable=False, unique=True)
 
     last_login_date = sa.Column(sa.TIMESTAMP(timezone=False),
