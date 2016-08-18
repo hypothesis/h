@@ -11,6 +11,31 @@ from h.emails import signup
 from h.models import Activation, Subscriptions, User
 
 
+class UserService(object):
+
+    """A service for retrieving and performing common operations on users."""
+
+    def __init__(self, session):
+        """
+        Create a new user service.
+
+        :param session: the SQLAlchemy session object
+        """
+        self.session = session
+
+    def fetch(self, userid):
+        """
+        Fetch a user by userid, e.g. 'acct:foo@example.com'
+
+        :returns: a user instance, if found
+        :rtype: h.models.User or None
+        """
+
+        return (self.session.query(User)
+                .filter_by(userid=userid)
+                .one_or_none())
+
+
 class UserSignupService(object):
 
     """A service for registering users."""
@@ -75,6 +100,11 @@ class UserSignupService(object):
             self.stats.incr('auth.local.register')
 
         return user
+
+
+def user_service_factory(context, request):
+    """Return a UserService instance for the passed context and request."""
+    return UserService(session=request.db)
 
 
 def user_signup_service_factory(context, request):
