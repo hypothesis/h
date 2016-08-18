@@ -5,11 +5,13 @@ from __future__ import unicode_literals
 from collections import namedtuple
 
 from memex.search import Search
+from memex.search import parser
 from memex.search.query import (
     TagsAggregation,
     TopLevelAnnotationsFilter,
     UsersAggregation,
 )
+from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm import subqueryload
 
 from h import presenters
@@ -23,6 +25,73 @@ class ActivityResults(namedtuple('ActivityResults', [
     'timeframes',
 ])):
     pass
+
+
+def extract(request, parse=parser.parse):
+    """
+    Extract and process the query present in the passed request.
+
+    Assumes that the 'q' query parameter contains a string query in a format
+    which can be parsed by :py:func:`memex.search.parser.parse`. Extracts and
+    parses the query, adds terms implied by the current matched route, if
+    necessary, and returns it.
+
+    If no query is present in the passed request, returns ``None``.
+    """
+    if 'q' not in request.params:
+        return None
+
+    q = parse(request.params['q'])
+
+    # If the query sent to a {group, user} search page includes a {group,
+    # user}, we override it, because otherwise we'll display the union of the
+    # results for those two {groups, users}, which would makes no sense.
+    #
+    # (Note that a query for the *intersection* of >1 users or groups is by
+    # definition empty)
+    if request.matched_route.name == 'activity.group_search':
+        q['group'] = request.matchdict['pubid']
+    elif request.matched_route.name == 'activity.user_search':
+        q['user'] = request.matchdict['username']
+
+    return q
+
+
+def check_url(request, query, unparse=parser.unparse):
+    """
+    Checks the request and raises a redirect if implied by the query.
+
+    If a query contains a single group or user term, then the user is
+    redirected to the specific group or user search page with that term
+    removed. For example, a request to
+
+        /search?q=group:abc123+tag:foo
+
+    will be redirected to
+
+        /groups/abc123/search?q=tag:foo
+
+    Queries containing more than one group or user term are unaffected.
+    """
+    if request.matched_route.name != 'activity.search':
+        return
+
+    redirect = None
+
+    if _single_entry(query, 'group'):
+        pubid = query.pop('group')
+        redirect = request.route_path('activity.group_search',
+                                      pubid=pubid,
+                                      _query={'q': unparse(query)})
+
+    if _single_entry(query, 'user'):
+        username = query.pop('user')
+        redirect = request.route_path('activity.user_search',
+                                      username=username,
+                                      _query={'q': unparse(query)})
+
+    if redirect is not None:
+        raise HTTPFound(location=redirect)
 
 
 def execute(request, query):
@@ -67,8 +136,7 @@ def aggregations_for(query):
     aggregations = [TagsAggregation(limit=10)]
 
     # Should we aggregate by user?
-    include_users_aggregation = len(query.getall('group')) == 1
-    if include_users_aggregation:
+    if _single_entry(query, 'group'):
         aggregations.append(UsersAggregation(limit=10))
 
     return aggregations
@@ -84,3 +152,7 @@ def _fetch_annotations(session, ids):
 
 def _fetch_groups(session, pubids):
     return session.query(Group).filter(Group.pubid.in_(pubids))
+
+
+def _single_entry(query, key):
+    return len(query.getall(key)) == 1
