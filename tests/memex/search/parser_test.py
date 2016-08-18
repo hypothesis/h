@@ -111,3 +111,49 @@ nonwhitespace_text = st.text(alphabet=nonwhitespace_chars, min_size=1)
 def test_parse_with_any_nonwhitespace_text(kw, value):
     result = parser.parse(kw + ':' + value)
     assert result.get(kw) == value
+
+
+@pytest.mark.parametrize("query", [
+    # Plain dictionary
+    {'user': 'luke'},
+    {'user': 'luke', 'tag': 'foo'},
+
+    # MultiDict
+    MultiDict([('user', 'luke')]),
+    MultiDict([('user', 'luke'), ('user', 'alice')]),
+
+    # Items containing whitespace
+    {'user': 'luke duke'},
+    {'user': 'luke\u00a0duke'},
+    MultiDict([('user', 'luke duke')]),
+    MultiDict([('user', 'luke duke'), ('user', 'alice and friends')]),
+
+    # Minimally quoted terms including quotes
+    {'user': "luke's duke"},
+    {'tag': 'and then he said "no way" yes really'},
+
+    # Items which used escape sequences rather than using alternate quotes,
+    # e.g. original queries such as:
+    #
+    #     group:"foo \"hello\" bar"
+    #     tag:'wibble \'giraffe\' bang'
+    {'group': 'foo \\"hello\\" bar'},
+    {'tag': 'wibble \\\'giraffe\\\' bang'},
+
+    # Items which contain both single and double quotes
+    {'group': 'but "that can\\\'t be", can it?'},
+    {'tag': "that is 'one \\\"interesting\\\" way' of looking at it"},
+
+    # 'any' terms
+    {'any': 'foo'},
+    MultiDict([('any', 'foo')]),
+    MultiDict([('any', 'foo'), ('any', 'bar baz')]),
+    MultiDict([('user', 'donkeys'), ('any', 'foo'), ('any', 'bar baz')]),
+])
+def test_unparse(query):
+    result = parser.unparse(query)
+
+    # We can't trivially test that the output is exactly what we expect,
+    # because of uncertainty in the ordering of keys. Instead, we check that
+    # parsing the result gives us an object equal to the original query.
+    assert parser.parse(result) == query

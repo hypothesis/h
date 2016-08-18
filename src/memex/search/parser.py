@@ -76,6 +76,26 @@ def parse(q):
     return MultiDict([m for m in parse_results if isinstance(m, Match)])
 
 
+def unparse(q):
+    """
+    Turn a dict-like object into a Lucene-like query string.
+
+    This can be considered the reverse of the
+    :py:func:`memex.search.parser.parse` function, as it can be used to
+    transform the MultiDict returned from that function back into a string
+    query.
+    """
+    terms = []
+
+    for key, val in q.iteritems():
+        if key == 'any':
+            terms.append(_escape_term(val))
+        else:
+            terms.append('{key}:{val}'.format(key=key, val=_escape_term(val)))
+
+    return ' '.join(terms)
+
+
 def _get_parser():
     global parser
     if parser is None:
@@ -110,3 +130,21 @@ def _decorate_match(key):
     def parse_action_impl(t):
         return Match(key, t[0])
     return parse_action_impl
+
+
+def _escape_term(term):
+    # Only surround with quotes if the term contains whitespace
+    if whitespace.intersection(term):
+        # Originally double quoted and contained escaped double quotes
+        if '\\"' in term:
+            return '"' + term + '"'
+        # Originally single quoted and contained escaped single quotes
+        elif "\\'" in term:
+            return "'" + term + "'"
+        # Contains unescaped single quotes, so easiest to double quote
+        elif "'" in term:
+            return '"' + term + '"'
+        # None of the above: prefer single quotes
+        else:
+            return "'" + term + "'"
+    return term
