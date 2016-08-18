@@ -61,6 +61,10 @@ def authenticated_user(request):
     # This happens when we delete a user account but the user still has a
     # valid session for that account (because we don't invalidate sessions
     # when we delete user accounts).
+    #
+    # FIXME: switch to authentication ticket based sessions so that we *can*
+    # invalidate sessions when deleting users. Throwing a 302 in the middle of
+    # an arbitrary request is NOT safe (e.g. POST requests).
     if request.authenticated_userid and not user:
         request.session.invalidate()
         raise httpexceptions.HTTPFound(
