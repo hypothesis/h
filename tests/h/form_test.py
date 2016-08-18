@@ -191,6 +191,17 @@ class TestHandleFormSubmission(object):
         to_xhr_response.assert_called_once_with(
             pyramid_request, on_failure.return_value, form_)
 
+    def test_if_validation_fails_it_sets_response_status_to_400(self,
+                                                                invalid_form,
+                                                                pyramid_request,
+                                                                to_xhr_response):
+        form.handle_form_submission(pyramid_request,
+                                    invalid_form(),
+                                    mock.sentinel.on_success,
+                                    mock_callable())
+
+        assert to_xhr_response.call_args[0][0].response.status_int == 400
+
     def test_if_validation_fails_it_returns_to_xhr_response(self,
                                                             invalid_form,
                                                             pyramid_request,
