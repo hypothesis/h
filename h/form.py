@@ -127,6 +127,7 @@ def handle_form_submission(request, form, on_success, on_failure):
         appstruct = form.validate(request.POST.items())
     except deform.ValidationFailure:
         result = on_failure()
+        request.response.status_int = 400
     else:
         result = on_success(appstruct)
 
