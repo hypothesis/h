@@ -52,5 +52,9 @@
   font-size: 12px;
   font-style: italic;
   letter-spacing: 0.1px;
-  border-left: 3px solid #d3d3d3;
+  border-left: 3px solid $grey-3;
+}
+
+.annotation-card__text {
+  @include styled-text;
 }
