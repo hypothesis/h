@@ -30,6 +30,19 @@ class TestUserSignupService(object):
 
         assert isinstance(user.activation, Activation)
 
+    def test_signup_sets_default_authority(self, svc):
+        user = svc.signup(username='foo', email='foo@bar.com', password='baz')
+
+        assert user.authority == 'example.org'
+
+    def test_signup_allows_authority_override(self, svc):
+        user = svc.signup(username='foo',
+                          email='foo@bar.com',
+                          password='baz',
+                          authority='bar-client.com')
+
+        assert user.authority == 'bar-client.com'
+
     def test_passes_user_info_to_signup_email(self, svc, signup_email):
         user = svc.signup(username='foo', email='foo@bar.com', password='baz')
 

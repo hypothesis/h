@@ -101,23 +101,16 @@ def routes(pyramid_config):
 
 
 @pytest.fixture
-def users(db_session):
-    from h import models
-
+def users(db_session, factories):
     staff = ['agnos', 'bojan', 'cristof']
     nonstaff = ['david', 'eva', 'flora']
 
     users = {}
 
     for staff in staff:
-        users[staff] = models.User(username=staff,
-                                   email=staff + '@example.com',
-                                   password='secret',
-                                   staff=True)
+        users[staff] = factories.User(username=staff, staff=True)
     for nonstaff in nonstaff:
-        users[nonstaff] = models.User(username=nonstaff,
-                                      email=nonstaff + '@example.com',
-                                      password='secret')
+        users[nonstaff] = factories.User(username=nonstaff)
 
     db_session.add_all(list(users.values()))
     db_session.flush()

@@ -194,6 +194,7 @@ class User(factory.Factory):
     class Meta(object):
         model = accounts_models.User
 
+    authority = 'example.com'
     username = factory.Faker('user_name')
     email = factory.Faker('email')
     password = factory.Faker('password')

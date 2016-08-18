@@ -19,10 +19,12 @@ def test_activation_has_asciinumeric_code(db_session):
 
 
 def test_cannot_create_dot_variant_of_user(db_session):
-    fred = models.User(username='fredbloggs',
+    fred = models.User(authority='example.com',
+                       username='fredbloggs',
                        email='fred@example.com',
                        password='123')
-    fred2 = models.User(username='fred.bloggs',
+    fred2 = models.User(authority='example.com',
+                        username='fred.bloggs',
                         email='fred@example.org',
                         password='456')
 
@@ -33,10 +35,12 @@ def test_cannot_create_dot_variant_of_user(db_session):
 
 
 def test_cannot_create_case_variant_of_user(db_session):
-    bob = models.User(username='BobJones',
+    bob = models.User(authority='example.com',
+                      username='BobJones',
                       email='bob@example.com',
                       password='123')
-    bob2 = models.User(username='bobjones',
+    bob2 = models.User(authority='example.com',
+                       username='bobjones',
                        email='bob@example.org',
                        password='456')
 
@@ -72,7 +76,9 @@ def test_cannot_create_user_with_too_short_password():
 
 
 def test_User_activate_activates_user(db_session):
-    user = models.User(username='kiki', email='kiki@kiki.com',
+    user = models.User(authority='example.com',
+                       username='kiki',
+                       email='kiki@kiki.com',
                        password='password')
     activation = models.Activation()
     user.activation = activation
