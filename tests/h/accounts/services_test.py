@@ -37,12 +37,12 @@ class TestUserService(object):
 
 class TestUserSignupService(object):
     def test_signup_returns_user(self, svc):
-        user = svc.signup(username='foo', email='foo@bar.com', password='baz')
+        user = svc.signup(username='foo', email='foo@bar.com')
 
         assert isinstance(user, User)
 
     def test_signup_creates_user_in_db(self, db_session, svc):
-        svc.signup(username='foo', email='foo@bar.com', password='baz')
+        svc.signup(username='foo', email='foo@bar.com')
 
         db_session.commit()
         db_session.close()
@@ -52,32 +52,31 @@ class TestUserSignupService(object):
         assert user is not None
 
     def test_signup_creates_activation_for_user(self, svc):
-        user = svc.signup(username='foo', email='foo@bar.com', password='baz')
+        user = svc.signup(username='foo', email='foo@bar.com')
 
         assert isinstance(user.activation, Activation)
 
     def test_signup_sets_default_authority(self, svc):
-        user = svc.signup(username='foo', email='foo@bar.com', password='baz')
+        user = svc.signup(username='foo', email='foo@bar.com')
 
         assert user.authority == 'example.org'
 
     def test_signup_allows_authority_override(self, svc):
         user = svc.signup(username='foo',
                           email='foo@bar.com',
-                          password='baz',
                           authority='bar-client.com')
 
         assert user.authority == 'bar-client.com'
 
     def test_passes_user_info_to_signup_email(self, svc, signup_email):
-        user = svc.signup(username='foo', email='foo@bar.com', password='baz')
+        user = svc.signup(username='foo', email='foo@bar.com')
 
         signup_email.assert_called_once_with(id=user.id,
                                              email='foo@bar.com',
                                              activation_code=user.activation.code)
 
     def test_signup_sends_email(self, mailer, svc):
-        svc.signup(username='foo', email='foo@bar.com', password='baz')
+        svc.signup(username='foo', email='foo@bar.com')
 
         mailer.send.delay.assert_called_once_with(['test@example.com'],
                                                   'My subject',
@@ -85,7 +84,7 @@ class TestUserSignupService(object):
                                                   '<p>HTML</p>')
 
     def test_signup_creates_reply_notification_subscription(self, db_session, svc):
-        svc.signup(username='foo', email='foo@bar.com', password='baz')
+        svc.signup(username='foo', email='foo@bar.com')
 
         sub = (db_session.query(Subscriptions)
                .filter_by(uri='acct:foo@example.org')
@@ -96,7 +95,7 @@ class TestUserSignupService(object):
     def test_signup_records_stats_if_present(self, svc, stats):
         svc.stats = stats
 
-        svc.signup(username='foo', email='foo@bar.com', password='baz')
+        svc.signup(username='foo', email='foo@bar.com')
 
         stats.incr.assert_called_once_with('auth.local.register')
 

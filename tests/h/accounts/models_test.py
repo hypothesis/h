@@ -21,12 +21,10 @@ def test_activation_has_asciinumeric_code(db_session):
 def test_cannot_create_dot_variant_of_user(db_session):
     fred = models.User(authority='example.com',
                        username='fredbloggs',
-                       email='fred@example.com',
-                       password='123')
+                       email='fred@example.com')
     fred2 = models.User(authority='example.com',
                         username='fred.bloggs',
-                        email='fred@example.org',
-                        password='456')
+                        email='fred@example.org')
 
     db_session.add(fred)
     db_session.add(fred2)
@@ -37,12 +35,10 @@ def test_cannot_create_dot_variant_of_user(db_session):
 def test_cannot_create_case_variant_of_user(db_session):
     bob = models.User(authority='example.com',
                       username='BobJones',
-                      email='bob@example.com',
-                      password='123')
+                      email='bob@example.com')
     bob2 = models.User(authority='example.com',
                        username='bobjones',
-                       email='bob@example.org',
-                       password='456')
+                       email='bob@example.org')
 
     db_session.add(bob)
     db_session.add(bob2)
@@ -53,8 +49,7 @@ def test_cannot_create_case_variant_of_user(db_session):
 def test_userid_derived_from_username_and_authority():
     fred = models.User(authority='example.net',
                        username='fredbloggs',
-                       email='fred@example.com',
-                       password='123')
+                       email='fred@example.com')
 
     assert fred.userid == 'acct:fredbloggs@example.net'
 
@@ -62,8 +57,7 @@ def test_userid_derived_from_username_and_authority():
 def test_userid_as_class_property(db_session):
     fred = models.User(authority='example.net',
                        username='fredbloggs',
-                       email='fred@example.com',
-                       password='123')
+                       email='fred@example.com')
     db_session.add(fred)
     db_session.flush()
 
@@ -116,8 +110,7 @@ def test_check_password_false_with_incorrect_password():
 def test_User_activate_activates_user(db_session):
     user = models.User(authority='example.com',
                        username='kiki',
-                       email='kiki@kiki.com',
-                       password='password')
+                       email='kiki@kiki.com')
     activation = models.Activation()
     user.activation = activation
     db_session.add(user)

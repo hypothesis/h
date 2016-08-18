@@ -197,7 +197,6 @@ class User(factory.Factory):
     authority = 'example.com'
     username = factory.Faker('user_name')
     email = factory.Faker('email')
-    password = factory.Faker('password')
 
     @factory.lazy_attribute
     def uid(self):
