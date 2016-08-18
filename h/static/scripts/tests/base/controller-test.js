@@ -47,4 +47,21 @@ describe('Controller', function () {
       });
     });
   });
+
+  describe('#reload', function () {
+    it("replaces the element's content", function () {
+      ctrl.reload('<div class="is-updated"></div>');
+      assert.isTrue(ctrl.element.classList.contains('is-updated'));
+    });
+
+    it('reinitializes refs', function () {
+      ctrl.reload('<div class="is-updated" data-ref="updated"></div>');
+      assert.deepEqual(ctrl.refs, {updated: ctrl.element});
+    });
+
+    it("resets the controller's state", function () {
+      ctrl.reload('<div class="is-updated"></div>');
+      assert.deepEqual(ctrl.state, {});
+    });
+  });
 });

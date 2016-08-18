@@ -29,4 +29,20 @@ describe('util/dom', function () {
       assert.deepEqual(Array.from(btn.classList), []);
     });
   });
+
+  describe('replaceElement', function () {
+    it('replaces the DOM element', function () {
+      var container = createDOM('<div><button></button></div>');
+      var btn = domUtil.replaceElement(container.querySelector('button'),
+        '<button class="updated"></button>');
+      assert.equal(btn.outerHTML, '<button class="updated"></button>');
+    });
+
+    it('throws if the element does not have a parent', function () {
+      var el = document.createElement('div');
+      assert.throws(function () {
+        domUtil.replaceElement(el, '<div></div>');
+      });
+    });
+  });
 });

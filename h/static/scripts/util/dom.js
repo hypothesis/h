@@ -9,6 +9,23 @@ var hyphenate = stringUtil.hyphenate;
  */
 
 /**
+ * Replace a DOM element with an HTML string and return the new DOM element.
+ *
+ * @param {Element} el - DOM Element to replace
+ * @param {string} html - HTML string that replaces the entire element
+ */
+function replaceElement(el, html) {
+  if (!el.parentElement) {
+    throw new Error('Cannot replace an element without a parent');
+  }
+  var parentEl = el.parentElement;
+  var siblings = Array.from(parentEl.children);
+  var nodeIndex = siblings.indexOf(el);
+  el.outerHTML = html;
+  return parentEl.children[nodeIndex];
+}
+
+/**
  * Set the state classes (`is-$state`) on an element.
  *
  * @param {Element} el
@@ -24,5 +41,6 @@ function setElementState(el, state) {
 }
 
 module.exports = {
+  replaceElement: replaceElement,
   setElementState: setElementState,
 };

@@ -2,7 +2,7 @@
 {% set field_class = 'form-input' %}
 {% set field_error_state_class = 'is-error' %}
 {% set field_label_class = 'form-input__label' %}
-{% set field_error_list_class = '' %}
+{% set field_error_list_class = 'form-input__error-list' %}
 {% set field_error_item_class = 'form-input__error-item' %}
 {% else %}
 {% set field_class = 'form-group form-field' %}
@@ -15,7 +15,9 @@
 {%- if not field.widget.hidden -%}
 <div class="{{ field_class }}
             {% if field.error %}{{ field_error_state_class }}{% endif %}
-            {% if field.widget.template == 'textarea' and field.widget.max_length -%}js-character-limit{% endif %}"
+            {% if field.widget.template == 'textarea' and field.widget.max_length -%}js-character-limit{% endif %}
+            js-form-input-container
+            "
      {%- if field.description -%}
      title="{{ _(field.description) }}"
      {% endif %}

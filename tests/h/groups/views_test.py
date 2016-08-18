@@ -297,7 +297,7 @@ class FakeForm(object):
     def set_appstruct(self, appstruct):
         self.appstruct = appstruct
 
-    def render(self):
+    def render(self, **kwargs):
         return self.appstruct
 
 

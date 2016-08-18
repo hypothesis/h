@@ -1,5 +1,19 @@
 'use strict';
 
+var dom = require('../util/dom');
+
+function addRef(map, ref, el) {
+  if (map[ref]) {
+    if (Array.isArray(map[ref])) {
+      map[ref].push(el);
+    } else {
+      map[ref] = [map[ref], el];
+    }
+  } else {
+    map[ref] = el;
+  }
+}
+
 /**
  * Search the DOM tree starting at `el` and return a map of "data-ref" attribute
  * values to elements.
@@ -10,18 +24,10 @@ function findRefs(el, map) {
   }
   map = map || {};
 
-  var ref = el.dataset.ref;
-  if (ref) {
-    if (map[ref]) {
-      if (Array.isArray(map[ref])) {
-        map[ref].push(el);
-      } else {
-        map[ref] = [map[ref], el];
-      }
-    } else {
-      map[ref] = el;
-    }
-  }
+  var refs = (el.dataset.ref || '').split(' ');
+  refs.forEach(function (ref) {
+    addRef(map, ref, el);
+  });
 
   for (var i=0; i < el.children.length; i++) {
     var node = el.children[i];
@@ -82,6 +88,19 @@ Controller.prototype.setState = function (changes) {
  */
 Controller.prototype.forceUpdate = function () {
   this.update(this.state, this.state);
+};
+
+/*
+ * Replace the HTML content of the element with an updated version from the
+ * server.
+ */
+Controller.prototype.reload = function (html) {
+  this.element.controllers = null;
+  var root = dom.replaceElement(this.element, html);
+
+  this.element = root;
+  this.refs = findRefs(root);
+  this.state = {};
 };
 
 module.exports = Controller;
