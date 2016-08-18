@@ -38,7 +38,13 @@
   background-color: $grey-2;
   border-bottom: 1px solid $grey-3;
 
-  &:hover {
+  .env-js-capable & {
+    background-color: $white;
+  }
+
+  .env-js-capable &:hover,
+  .env-js-capable &.is-expanded,
+  .env-js-timeout & {
     background-color: $grey-2;
   }
 }
@@ -59,6 +65,9 @@
 .search-result-bucket__header {
   display: flex;
   flex-direction: row;
+
+  cursor: pointer;
+  user-select: none;
 }
 
 .search-result-bucket__title {
@@ -69,6 +78,12 @@
 
 .search-result-bucket__annotation-cards-container {
   display: flex;
+  .env-js-capable & {
+    display: none;
+  }
+  .env-js-capable &.is-expanded, .env-js-timeout & {
+    display: flex;
+  }
 }
 
 .search-result-bucket__annotation-cards {

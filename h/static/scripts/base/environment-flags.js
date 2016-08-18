@@ -68,8 +68,6 @@ EnvironmentFlags.prototype.ready = function () {
   if (this._jsLoadTimeout) {
     clearTimeout(this._jsLoadTimeout);
   }
-  this.set('js-ready', true);
-  this.set('js-timeout', false);
 };
 
 module.exports = EnvironmentFlags;

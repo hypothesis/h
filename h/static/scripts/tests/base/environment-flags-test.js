@@ -51,11 +51,11 @@ describe('EnvironmentFlags', function () {
       assert.isFalse(el.classList.contains('env-js-timeout'));
     });
 
-    it('should clear timeout flag if already set', function () {
+    it('should not clear timeout flag if already set', function () {
       flags.init();
       clock.tick(TIMEOUT_DELAY);
       flags.ready();
-      assert.isFalse(el.classList.contains('env-js-timeout'));
+      assert.isTrue(el.classList.contains('env-js-timeout'));
     });
   });
 
