@@ -98,6 +98,20 @@ def test_cannot_create_user_with_too_short_password():
     with pytest.raises(ValueError):
         models.User(password='a')
 
+def test_check_password_false_with_null_password():
+    user = models.User(username='barnet')
+
+    assert not user.check_password('anything')
+
+def test_check_password_true_with_matching_password():
+    user = models.User(username='barnet', password='s3cr37')
+
+    assert user.check_password('s3cr37')
+
+def test_check_password_false_with_incorrect_password():
+    user = models.User(username='barnet', password='s3cr37')
+
+    assert not user.check_password('somethingelse')
 
 def test_User_activate_activates_user(db_session):
     user = models.User(authority='example.com',

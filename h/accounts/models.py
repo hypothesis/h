@@ -176,6 +176,12 @@ class User(Base):
 
         return text_type(CRYPT.encode(password + self.salt))
 
+    def check_password(self, password):
+        """Check the passed password for this user."""
+        if self.password is None:
+            return False
+        return CRYPT.check(self.password, password + self.salt)
+
     @sa.orm.validates('email')
     def validate_email(self, key, email):
         if len(email) > EMAIL_MAX_LENGTH:
@@ -212,19 +218,6 @@ class User(Base):
         ).first()
 
         return user
-
-    @classmethod
-    def validate_user(cls, user, password):
-        """Validate the passed password for the specified user."""
-        if not user:
-            return None
-
-        if user.password is None:
-            valid = False
-        else:
-            valid = CRYPT.check(user.password, password + user.salt)
-
-        return valid
 
     @classmethod
     def get_by_username(cls, session, username):
