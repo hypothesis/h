@@ -50,7 +50,7 @@ def features_save(request):
              request_method='GET',
              renderer='h:templates/admin/cohorts.html.jinja2',
              permission='admin_features')
-@paginator.paginate
+@paginator.paginate_query
 def cohorts_index(context, request):
     query = request.db.query(models.FeatureCohort)
     return query.order_by(models.FeatureCohort.name)
