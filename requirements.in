@@ -1,6 +1,7 @@
 PyJWT
 SQLAlchemy
 alembic
+bcrypt
 celery
 certifi
 cffi
@@ -16,6 +17,7 @@ itsdangerous
 jsonpointer == 1.0
 jsonschema
 kombu
+passlib
 psycogreen
 psycopg2
 pyramid < 1.7
