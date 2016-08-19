@@ -13,6 +13,7 @@ var endOfStream = require('end-of-stream');
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gulpUtil = require('gulp-util');
+var newer = require('gulp-newer');
 var postcss = require('gulp-postcss');
 var postcssURL = require('postcss-url');
 var svgmin = require('gulp-svgmin');
@@ -139,6 +140,7 @@ gulp.task('build-vendor-css', function () {
   });
 
   return gulp.src(vendorCSSFiles)
+    .pipe(newer(STYLE_DIR))
     .pipe(postcss([cssURLRewriter]))
     .pipe(gulp.dest(STYLE_DIR));
 });
