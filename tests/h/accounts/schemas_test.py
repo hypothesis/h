@@ -69,6 +69,26 @@ def test_unique_email_invalid_when_user_does_not_exist(dummy_node, user_model):
     assert schemas.unique_email(dummy_node, "foo@bar.com") is None
 
 
+def test_unique_email_valid_when_authorized_users_email(dummy_node,
+                                                        pyramid_config,
+                                                        pyramid_request,
+                                                        user_model):
+    """
+    If the given email is the authorized user's current email it's valid.
+
+    This is so that we don't get a "That email is already taken" validation
+    error when a user tries to change their email address to the same email
+    address that they already have it set to.
+
+    """
+    pyramid_config.testing_securitypolicy('acct:elliot@hypothes.is')
+    user_model.get_by_email.return_value = Mock(
+        spec_set=('userid',),
+        userid='acct:elliot@hypothes.is')
+
+    schemas.unique_email(dummy_node, "elliot@bar.com")
+
+
 def test_RegisterSchema_with_password_too_short(pyramid_request, user_model):
     schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
