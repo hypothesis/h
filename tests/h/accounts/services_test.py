@@ -22,6 +22,16 @@ class TestUserService(object):
 
         assert isinstance(result, User)
 
+    @pytest.mark.usefixtures('users')
+    def test_fetch_caches_fetched_users(self):
+        session = mock.Mock()
+        svc = UserService(session=session)
+
+        svc.fetch('acct:jacqui@foo.com')
+        svc.fetch('acct:jacqui@foo.com')
+
+        assert session.query.call_count == 1
+
     @pytest.fixture
     def svc(self, db_session):
         return UserService(session=db_session)
