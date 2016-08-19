@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 from functools import partial
 
+import sqlalchemy
+
 from h import mailer
 from h._compat import text_type
 from h.emails import signup
@@ -24,6 +26,12 @@ class UserService(object):
 
         # Local cache of fetched users.
         self._cache = {}
+
+        # But don't allow the cache to persist after the session is closed.
+        @sqlalchemy.event.listens_for(session, 'after_commit')
+        @sqlalchemy.event.listens_for(session, 'after_rollback')
+        def flush_cache(session):
+            self._cache = {}
 
     def fetch(self, userid):
         """

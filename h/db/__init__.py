@@ -48,7 +48,7 @@ metadata = sqlalchemy.MetaData(naming_convention={
 
 Base = declarative_base(metadata=metadata)
 
-Session = sessionmaker()
+Session = sessionmaker(expire_on_commit=False)
 
 
 def init(engine, base=Base, should_create=False, should_drop=False):

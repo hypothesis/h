@@ -14,23 +14,34 @@ from h.accounts.services import (
 from h.models import Activation, Subscriptions, User
 
 
+@pytest.mark.usefixtures('users')
 class TestUserService(object):
 
-    @pytest.mark.usefixtures('users')
     def test_fetch_retrieves_user_by_userid(self, svc):
         result = svc.fetch('acct:jacqui@foo.com')
 
         assert isinstance(result, User)
 
-    @pytest.mark.usefixtures('users')
-    def test_fetch_caches_fetched_users(self):
-        session = mock.Mock()
-        svc = UserService(session=session)
+    def test_fetch_caches_fetched_users(self, db_session, svc, users):
+        jacqui, _ = users
 
         svc.fetch('acct:jacqui@foo.com')
-        svc.fetch('acct:jacqui@foo.com')
+        db_session.delete(jacqui)
+        db_session.flush()
+        user = svc.fetch('acct:jacqui@foo.com')
 
-        assert session.query.call_count == 1
+        assert user is not None
+        assert user.username == 'jacqui'
+
+    def test_flushes_cache_on_session_commit(self, db_session, svc, users):
+        jacqui, _ = users
+
+        svc.fetch('acct:jacqui@foo.com')
+        db_session.delete(jacqui)
+        db_session.commit()
+        user = svc.fetch('acct:jacqui@foo.com')
+
+        assert user is None
 
     @pytest.fixture
     def svc(self, db_session):
