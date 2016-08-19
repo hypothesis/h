@@ -63,7 +63,6 @@ def includeme(config):
 
     config.include('.schemas')
     config.include('.subscribers')
-    config.include('.views')
 
     secret = config.registry.settings['secret_key']
     derived = derive_key(secret, b'h.accounts')

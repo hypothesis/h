@@ -176,6 +176,9 @@ def create_app(global_config, **settings):
     config.include('memex.presenters')
     config.include('memex.search')
 
+    # accounts provides the UserService
+    config.include('h.accounts')
+
     # We include links in order to set up the alternative link registrations
     # for annotations.
     config.include('h.links')

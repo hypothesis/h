@@ -125,6 +125,7 @@ def includeme(config):
 
     # Site modules
     config.include('h.accounts')
+    config.include('h.accounts.views')
     config.include('h.activity')
     config.include('h.admin', route_prefix='/admin')
     config.include('h.badge')
