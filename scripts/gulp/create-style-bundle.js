@@ -60,6 +60,9 @@ function compileSass(options) {
   }).then(result => {
     fs.writeFileSync(options.output, result.css);
     fs.writeFileSync(sourcemapPath, result.map.toString());
+  }).catch(srcErr => {
+    // Rewrite error so that the message property contains the file path
+    throw new Error(`SASS build error in ${srcErr.file}: ${srcErr.message}`);
   });
 }
 
