@@ -22,6 +22,9 @@ class UserService(object):
         """
         self.session = session
 
+        # Local cache of fetched users.
+        self._cache = {}
+
     def fetch(self, userid):
         """
         Fetch a user by userid, e.g. 'acct:foo@example.com'
@@ -29,10 +32,12 @@ class UserService(object):
         :returns: a user instance, if found
         :rtype: h.models.User or None
         """
+        if userid not in self._cache:
+            self._cache[userid] = (self.session.query(User)
+                                   .filter_by(userid=userid)
+                                   .one_or_none())
 
-        return (self.session.query(User)
-                .filter_by(userid=userid)
-                .one_or_none())
+        return self._cache[userid]
 
 
 class UserSignupService(object):
