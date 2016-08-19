@@ -17,14 +17,6 @@ class FakeSubscription(object):
         self.active = active
 
 
-class FakeUser(object):
-    def __init__(self, **kwargs):
-        defaults = {'activation': None, 'email': None, 'password': None}
-        defaults.update(kwargs)
-        for k, v in defaults.items():
-            setattr(self, k, v)
-
-
 class FakeSerializer(object):
     def dumps(self, obj):
         return 'faketoken'
@@ -80,25 +72,27 @@ class TestAuthController(object):
         assert not notify.called
 
     def test_post_redirects_when_validation_succeeds(self,
+                                                     factories,
                                                      form_validating_to,
                                                      pyramid_config,
                                                      pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = form_validating_to({"user": FakeUser(username='cara')})
+        controller.form = form_validating_to({"user": factories.User(username='cara')})
 
         result = controller.post()
 
         assert isinstance(result, httpexceptions.HTTPFound)
 
     def test_post_redirects_to_next_param_when_validation_succeeds(self,
+                                                                   factories,
                                                                    form_validating_to,
                                                                    pyramid_config,
                                                                    pyramid_request):
         pyramid_request.params = {'next': '/foo/bar'}
         pyramid_config.testing_securitypolicy(None)  # Logged out
         controller = views.AuthController(pyramid_request)
-        controller.form = form_validating_to({"user": FakeUser(username='cara')})
+        controller.form = form_validating_to({"user": factories.User(username='cara')})
 
         result = controller.post()
 
@@ -108,12 +102,13 @@ class TestAuthController(object):
     @mock.patch('h.accounts.views.LoginEvent', autospec=True)
     def test_post_event_when_validation_succeeds(self,
                                                  loginevent,
+                                                 factories,
                                                  form_validating_to,
                                                  notify,
                                                  pyramid_config,
                                                  pyramid_request):
         pyramid_config.testing_securitypolicy(None)  # Logged out
-        elephant = FakeUser(username='avocado')
+        elephant = factories.User(username='avocado')
         controller = views.AuthController(pyramid_request)
         controller.form = form_validating_to({"user": elephant})
 
@@ -163,11 +158,13 @@ class TestAuthController(object):
 @pytest.mark.usefixtures('session')
 class TestAjaxAuthController(object):
 
-    def test_login_returns_status_okay_when_validation_succeeds(
-            self, form_validating_to, pyramid_request):
+    def test_login_returns_status_okay_when_validation_succeeds(self,
+                                                                factories,
+                                                                form_validating_to,
+                                                                pyramid_request):
         pyramid_request.json_body = {}
         controller = views.AjaxAuthController(pyramid_request)
-        controller.form = form_validating_to({'user': FakeUser(username='bob')})
+        controller.form = form_validating_to({'user': factories.User(username='bob')})
 
         result = controller.login()
 
@@ -280,10 +277,11 @@ class TestForgotPasswordController(object):
     @mock.patch('h.accounts.views.account_reset_link')
     def test_post_generates_reset_link(self,
                                        reset_link,
+                                       factories,
                                        form_validating_to,
                                        pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
-        user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+        user = factories.User(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = form_validating_to({"user": user})
 
@@ -297,10 +295,11 @@ class TestForgotPasswordController(object):
                                  reset_link,
                                  reset_mail,
                                  activation_model,
+                                 factories,
                                  form_validating_to,
                                  pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
-        user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+        user = factories.User(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = form_validating_to({"user": user})
         reset_link.return_value = "http://example.com"
@@ -315,10 +314,14 @@ class TestForgotPasswordController(object):
         reset_mail.assert_called_with(user, "faketoken", "http://example.com")
 
     @mock.patch('h.accounts.views.account_reset_email')
-    def test_post_sends_mail(
-            self, reset_mail, form_validating_to, mailer, pyramid_request):
+    def test_post_sends_mail(self,
+                             reset_mail,
+                             factories,
+                             form_validating_to,
+                             mailer,
+                             pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
-        user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+        user = factories.User(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = form_validating_to({"user": user})
         reset_mail.return_value = {
@@ -333,9 +336,12 @@ class TestForgotPasswordController(object):
                                                   subject='subject',
                                                   body='body')
 
-    def test_post_redirects_on_success(self, form_validating_to, pyramid_request):
+    def test_post_redirects_on_success(self,
+                                       factories,
+                                       form_validating_to,
+                                       pyramid_request):
         pyramid_request.registry.password_reset_serializer = FakeSerializer()
-        user = FakeUser(username='giraffe', email='giraffe@thezoo.org')
+        user = factories.User(username='giraffe', email='giraffe@thezoo.org')
         controller = views.ForgotPasswordController(pyramid_request)
         controller.form = form_validating_to({"user": user})
 
@@ -370,21 +376,26 @@ class TestResetController(object):
         assert result == {'form': 'invalid form'}
 
     def test_post_sets_user_password_from_form(self,
+                                               factories,
                                                form_validating_to,
                                                pyramid_request):
-        elephant = FakeUser(password='password1')
+        elephant = factories.User(password='password1')
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': elephant,
                                               'password': 's3cure!'})
 
         controller.post()
 
-        assert elephant.password == 's3cure!'
+        assert elephant.check_password('s3cure!')
 
     @mock.patch('h.accounts.views.PasswordResetEvent', autospec=True)
-    def test_post_emits_event(
-            self, event, form_validating_to, notify, pyramid_request):
-        user = FakeUser(password='password1')
+    def test_post_emits_event(self,
+                              event,
+                              factories,
+                              form_validating_to,
+                              notify,
+                              pyramid_request):
+        user = factories.User(password='password1')
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': user,
                                               'password': 's3cure!'})
@@ -394,8 +405,11 @@ class TestResetController(object):
         event.assert_called_with(pyramid_request, user)
         notify.assert_called_with(event.return_value)
 
-    def test_post_redirects_on_success(self, form_validating_to, pyramid_request):
-        user = FakeUser(password='password1')
+    def test_post_redirects_on_success(self,
+                                       factories,
+                                       form_validating_to,
+                                       pyramid_request):
+        user = factories.User(password='password1')
         controller = views.ResetController(pyramid_request)
         controller.form = form_validating_to({'user': user,
                                               'password': 's3cure!'})
@@ -709,17 +723,18 @@ class TestAccountController(object):
 
         controller.post_password_form()
 
-        assert pyramid_request.authenticated_user.password == 'my_new_password'
+        assert pyramid_request.authenticated_user.check_password('my_new_password')
 
     def test_post_password_form_with_invalid_data_does_not_change_password(
             self, invalid_form, pyramid_request):
+        user = pyramid_request.authenticated_user
+        user.password = 'original password'
         controller = views.AccountController(pyramid_request)
         controller.forms['password'] = invalid_form()
-        original_password = pyramid_request.authenticated_user.password
 
         controller.post_password_form()
 
-        assert pyramid_request.authenticated_user.password == original_password
+        assert user.check_password('original password')
 
     def test_post_password_form_with_invalid_data_returns_template_data(
             self, invalid_form, pyramid_request):
@@ -735,18 +750,14 @@ class TestAccountController(object):
         }
 
     @pytest.fixture
-    def pyramid_request(self, pyramid_request, user):
+    def pyramid_request(self, factories, pyramid_request):
         pyramid_request.POST = {}
-        pyramid_request.authenticated_user = user
+        pyramid_request.authenticated_user = factories.User()
         return pyramid_request
 
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route('account', '/my/account')
-
-    @pytest.fixture
-    def user(self):
-        return FakeUser()
 
 
 @pytest.mark.usefixtures('pyramid_config',

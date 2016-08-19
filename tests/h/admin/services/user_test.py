@@ -9,7 +9,6 @@ from h import models
 from h.admin.services.user import RenameUserService
 from h.admin.services.user import UserRenameError
 from h.admin.services.user import make_indexer
-from h.util.user import userid_from_username
 
 
 class TestRenameUserService(object):
@@ -35,13 +34,11 @@ class TestRenameUserService(object):
 
         assert db_session.query(models.User).get(user.id).username == 'panda'
 
-    def test_rename_changes_the_users_annotations_userid(self, service, pyramid_request, user, annotations, db_session):
+    def test_rename_changes_the_users_annotations_userid(self, service, user, annotations, db_session):
         service.rename(user, 'panda')
 
-        expected = userid_from_username('panda', pyramid_request.auth_domain)
-
         userids = [ann.userid for ann in db_session.query(models.Annotation)]
-        assert set([expected]) == set(userids)
+        assert set([user.userid]) == set(userids)
 
     def test_rename_reindexes_the_users_annotations(self, service, user, annotations, indexer):
         service.rename(user, 'panda')
@@ -54,7 +51,6 @@ class TestRenameUserService(object):
     @pytest.fixture
     def service(self, pyramid_request, indexer):
         return RenameUserService(session=pyramid_request.db,
-                                 auth_domain=pyramid_request.auth_domain,
                                  reindex=indexer)
 
     @pytest.fixture
@@ -72,8 +68,7 @@ class TestRenameUserService(object):
     def annotations(self, user, factories, db_session, pyramid_request):
         anns = []
         for _ in range(8):
-            userid = userid_from_username(user.username, pyramid_request.auth_domain)
-            anns.append(factories.Annotation(userid=userid))
+            anns.append(factories.Annotation(userid=user.userid))
         db_session.add_all(anns)
         db_session.flush()
 

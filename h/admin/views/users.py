@@ -11,7 +11,6 @@ from h.admin import worker
 from h.admin.services.user import UserRenameError
 from memex import storage
 from h.i18n import TranslationString as _
-from h.util.user import userid_from_username
 
 
 class UserDeletionError(Exception):
@@ -37,7 +36,7 @@ def users_index(request):
             user = models.User.get_by_email(request.db, username)
 
     if user is not None:
-        n_annots = _all_user_annotations(request, user.username).count()
+        n_annots = _all_user_annotations(request, user).count()
         user_meta['annotations_count'] = n_annots
 
     return {'username': username, 'user': user, 'user_meta': user_meta}
@@ -139,19 +138,18 @@ def delete_user(request, user):
 
 def _all_user_annotations_query(request, user):
     """Query matching all annotations (shared and private) owned by user."""
-    userid = userid_from_username(user.username, request.auth_domain)
     return {
         'filtered': {
-            'filter': {'term': {'user': userid.lower()}},
+            'filter': {'term': {'user': user.userid.lower()}},
             'query': {'match_all': {}}
         }
     }
 
 
-def _all_user_annotations(request, username):
-    userid = userid_from_username(username, request.auth_domain)
-    return request.db.query(models.Annotation).filter(
-        models.Annotation.userid == userid).yield_per(100)
+def _all_user_annotations(request, user):
+    return (request.db.query(models.Annotation)
+            .filter(models.Annotation.userid == user.userid)
+            .yield_per(100))
 
 
 def _form_request_user(request):

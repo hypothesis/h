@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from h import links
-from h import util
 
 from pyramid.renderers import render
 
@@ -61,6 +60,4 @@ def generate(request, notification):
 
 def _unsubscribe_token(request, user):
     serializer = request.registry.notification_serializer
-    userid = util.user.userid_from_username(user.username, request.auth_domain)
-    return serializer.dumps({'type': 'reply', 'uri': userid})
-
+    return serializer.dumps({'type': 'reply', 'uri': user.userid})

@@ -8,7 +8,6 @@ import pytest
 from h.emails.reply_notification import generate
 from h.models import Annotation
 from h.models import Document, DocumentMeta
-from h.models import User
 from h.notification.reply import Notification
 
 
@@ -177,8 +176,8 @@ class TestGenerate(object):
         return Annotation(target_uri='http://example.org/', **common)
 
     @pytest.fixture
-    def parent_user(self):
-        return User(username='patricia', email='pat@ric.ia')
+    def parent_user(self, factories):
+        return factories.User(username='patricia', email='pat@ric.ia')
 
     @pytest.fixture
     def reply(self):
@@ -191,8 +190,8 @@ class TestGenerate(object):
         return Annotation(target_uri='http://example.org/', **common)
 
     @pytest.fixture
-    def reply_user(self):
-        return User(username='ron', email='ron@thesmiths.com')
+    def reply_user(self, factories):
+        return factories.User(username='ron', email='ron@thesmiths.com')
 
     @pytest.fixture
     def routes(self, pyramid_config):

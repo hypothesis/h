@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from functools import partial
 
 from h import mailer
-from h import util
 from h._compat import text_type
 from h.emails import signup
 from h.models import Activation, Subscriptions, User
@@ -90,9 +89,7 @@ class UserSignupService(object):
         # FIXME: this is horrible, but is needed until the
         # notification/subscription system is made opt-out rather than opt-in
         # (at least from the perspective of the database).
-        sub_userid = util.user.userid_from_username(user.username,
-                                                    self.default_authority)
-        sub = Subscriptions(uri=sub_userid, type='reply', active=True)
+        sub = Subscriptions(uri=user.userid, type='reply', active=True)
         self.session.add(sub)
 
         # Record a registration with the stats service

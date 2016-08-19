@@ -19,14 +19,3 @@ def split_user(userid):
             'domain': match.groups()[1]
         }
     raise ValueError("{userid} isn't a valid userid".format(userid=userid))
-
-
-def userid_from_username(username, auth_domain):
-    """Return the full user ID for the given username.
-
-    For example for username "seanh" return "acct:seanh@hypothes.is"
-    (if we're at domain "hypothes.is").
-
-    """
-    return u"acct:{username}@{domain}".format(username=username,
-                                              domain=auth_domain)

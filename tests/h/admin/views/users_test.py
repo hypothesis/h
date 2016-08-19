@@ -24,6 +24,8 @@ def test_users_index(pyramid_request):
 @users_index_fixtures
 def test_users_index_looks_up_users_by_username(User, pyramid_request):
     pyramid_request.params = {"username": "bob"}
+    User.get_by_username.return_value = None
+    User.get_by_email.return_value = None
 
     views.users_index(pyramid_request)
 
@@ -33,8 +35,8 @@ def test_users_index_looks_up_users_by_username(User, pyramid_request):
 @users_index_fixtures
 def test_users_index_looks_up_users_by_email(User, pyramid_request):
     pyramid_request.params = {"username": "bob@builder.com"}
-
     User.get_by_username.return_value = None
+    User.get_by_email.return_value = None
 
     views.users_index(pyramid_request)
 
@@ -43,7 +45,7 @@ def test_users_index_looks_up_users_by_email(User, pyramid_request):
 
 @users_index_fixtures
 def test_users_index_queries_annotation_count_by_userid(User, db_session, factories, pyramid_request):
-    User.get_by_username.return_value = mock.MagicMock(username='bob')
+    User.get_by_username.return_value = factories.User(username='bob')
     userid = "acct:bob@{}".format(pyramid_request.auth_domain)
     for _ in xrange(8):
         db_session.add(factories.Annotation(userid=userid))
@@ -68,12 +70,13 @@ def test_users_index_no_user_found(User, pyramid_request):
 @users_index_fixtures
 def test_users_index_user_found(User, pyramid_request, db_session, factories):
     pyramid_request.params = {"username": "bob"}
+    user = User.get_by_username.return_value = factories.User(username='bob')
 
     result = views.users_index(pyramid_request)
 
     assert result == {
         'username': "bob",
-        'user': User.get_by_username.return_value,
+        'user': user,
         'user_meta': {'annotations_count': 0},
     }
 
@@ -212,9 +215,9 @@ def test_delete_user_disassociate_group_memberships(fake_db_session, pyramid_req
 
 
 @delete_user_fixtures
-def test_delete_user_queries_annotations(elasticsearch_helpers, fake_db_session, pyramid_request):
+def test_delete_user_queries_annotations(elasticsearch_helpers, factories, fake_db_session, pyramid_request):
     pyramid_request.db = fake_db_session
-    user = MagicMock(username=u'bob')
+    user = factories.User(username=u'bob')
 
     views.delete_user(pyramid_request, user)
 
