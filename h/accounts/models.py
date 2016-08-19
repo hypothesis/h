@@ -149,14 +149,11 @@ class User(Base):
         session.delete(self.activation)
 
     # Hashed password
-    _password = sa.Column('password', sa.UnicodeText(), nullable=False)
+    _password = sa.Column('password', sa.UnicodeText(), nullable=True)
     # Password salt
-    salt = sa.Column(sa.UnicodeText(), nullable=False)
+    salt = sa.Column(sa.UnicodeText(), nullable=True)
     # Last password update
-    password_updated = sa.Column(sa.DateTime(),
-                                 default=datetime.datetime.utcnow,
-                                 server_default=sa.func.now(),
-                                 nullable=False)
+    password_updated = sa.Column(sa.DateTime(), nullable=True)
 
     @hybrid_property
     def password(self):
@@ -167,18 +164,13 @@ class User(Base):
         if len(value) < PASSWORD_MIN_LENGTH:
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
-        self._password = self._hash_password(value)
+        self.salt = _generate_random_string(24)
+        self._password = text_type(CRYPT.encode(value + self.salt))
         self.password_updated = datetime.datetime.utcnow()
-
-    def _hash_password(self, password):
-        if not self.salt:
-            self.salt = _generate_random_string(24)
-
-        return text_type(CRYPT.encode(password + self.salt))
 
     def check_password(self, password):
         """Check the passed password for this user."""
-        if self.password is None:
+        if self.password is None or self.salt is None:
             return False
         return CRYPT.check(self.password, password + self.salt)
 

@@ -146,7 +146,7 @@ class TestClient(object):
 
     @pytest.fixture
     def user(self):
-        return User(username='foo', email='foo@example.com', password='bar')
+        return User(username='foo', email='foo@example.com')
 
     @pytest.fixture
     def cohort(self):
