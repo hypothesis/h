@@ -290,7 +290,7 @@ class EmailChangeSchema(CSRFSchema):
         request = node.bindings['request']
         user = request.authenticated_user
 
-        if not models.User.validate_user(user, value.get('password')):
+        if not user.check_password(value.get('password')):
             exc['password'] = _('Incorrect password. Please try again.')
 
         if exc.children:
