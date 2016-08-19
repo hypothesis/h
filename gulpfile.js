@@ -165,10 +165,12 @@ gulp.task('build-css', ['build-vendor-css'], function () {
   return Promise.all(styleBundleEntryFiles.map(buildStyleBundle));
 });
 
-gulp.task('watch-css', ['build-vendor-css'], function () {
-  styleBundleEntryFiles.forEach(function (input) {
-    buildStyleBundle(input, {watch: true});
-  });
+gulp.task('watch-css', function () {
+  // Build initial CSS bundles. This is done rather than adding 'build-css' as
+  // a dependency of this task so that the process continues in the event of an
+  // error.
+  Promise.all(styleBundleEntryFiles.map(buildStyleBundle)).catch(gulpUtil.log);
+  gulp.watch('h/static/styles/**/*.scss', ['build-css']);
 });
 
 var fontFiles = 'h/static/styles/vendor/fonts/*.woff';
