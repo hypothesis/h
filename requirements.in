@@ -6,7 +6,6 @@ celery
 certifi
 cffi
 click
-cryptacular
 cryptography
 deform < 1.0
 deform-jinja2
