@@ -3,7 +3,6 @@
 from collections import namedtuple
 import logging
 
-from h import accounts
 from memex import storage
 from h.notification.models import Subscriptions
 
@@ -68,14 +67,16 @@ def get_notification(request, annotation, action):
     if parent is None:
         return
 
+    user_service = request.find_service(name='user')
+
     # If the parent user doesn't exist (anymore), we can't send an email.
-    parent_user = accounts.get_user(parent.userid, request)
+    parent_user = user_service.fetch(parent.userid)
     if parent_user is None:
         return
 
     # If the reply user doesn't exist (anymore), we can't send an email, but
     # this would be super weird, so log a warning.
-    reply_user = accounts.get_user(reply.userid, request)
+    reply_user = user_service.fetch(reply.userid)
     if reply_user is None:
         log.warn('user who just replied no longer exists: %s', reply.userid)
         return

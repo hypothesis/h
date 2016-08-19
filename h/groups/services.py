@@ -3,7 +3,6 @@
 from functools import partial
 
 from h import session
-from h.accounts import get_user
 from h.models import Group
 
 
@@ -69,10 +68,9 @@ class GroupsService(object):
 
 def groups_factory(context, request):
     """Return a GroupsService instance for the passed context and request."""
-    def user_fetcher(userid):
-        return get_user(userid, request)
+    user_service = request.find_service(name='user')
     return GroupsService(session=request.db,
-                         user_fetcher=user_fetcher,
+                         user_fetcher=user_service.fetch,
                          publish=partial(_publish, request))
 
 

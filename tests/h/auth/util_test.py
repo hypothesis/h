@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 import pytest
+import mock
 
 from pyramid import security
 
@@ -35,8 +36,8 @@ FakeGroup = namedtuple('FakeGroup', ['pubid'])
     (FakeUser(admin=True, staff=True, groups=[FakeGroup('donkeys')]),
      ['group:donkeys', role.Admin, role.Staff]),
 ))
-def test_groupfinder(user, principals, accounts, pyramid_request):
-    accounts.get_user.return_value = user
+def test_groupfinder(user, principals, pyramid_request, user_service):
+    user_service.fetch.return_value = user
 
     result = util.groupfinder('acct:jiji@hypothes.is', pyramid_request)
 
@@ -69,5 +70,8 @@ def test_translate_annotation_principals(p_in, p_out):
 
 
 @pytest.fixture
-def accounts(patch):
-    return patch('h.auth.util.accounts')
+def user_service(pyramid_config):
+    service = mock.Mock(spec_set=['fetch'])
+    service.fetch.return_value = None
+    pyramid_config.register_service(service, name='user')
+    return service

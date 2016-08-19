@@ -4,9 +4,6 @@ from pyramid import httpexceptions
 
 from h.security import derive_key
 
-from h import util
-from h.accounts import models
-
 
 class Error(Exception):
 
@@ -27,35 +24,17 @@ class JSONError(Error):
     pass
 
 
-def get_user(userid, request):
-    """Return the User object for the given userid, or None.
-
-    This will also return None if the given userid is None, if it isn't a valid
-    userid, if its domain doesn't match the site's domain, or if there's just
-    no user with that userid.
-
-    """
-    if userid is None:
-        return None
-
-    try:
-        parts = util.user.split_user(userid)
-    except ValueError:
-        return
-
-    if parts['domain'] != request.auth_domain:
-        return None
-
-    return models.User.get_by_username(request.db, parts['username'])
-
-
 def authenticated_user(request):
     """Return the authenticated user or None.
 
     :rtype: h.accounts.models.User or None
 
     """
-    user = get_user(request.authenticated_userid, request)
+    if request.authenticated_userid is None:
+        return None
+
+    user_service = request.find_service(name='user')
+    user = user_service.fetch(request.authenticated_userid)
 
     # If the authenticated user doesn't exist in the db then log them out.
     # This happens when we delete a user account but the user still has a
@@ -67,10 +46,10 @@ def authenticated_user(request):
     # an arbitrary request is NOT safe (e.g. POST requests).
     if request.authenticated_userid and not user:
         request.session.invalidate()
-        raise httpexceptions.HTTPFound(
-            location=request.current_route_url())
+        raise httpexceptions.HTTPFound(location=request.url)
 
     return user
+
 
 def includeme(config):
     """A local identity provider."""
