@@ -74,6 +74,7 @@ class User(Base):
     #: `AUTH_DOMAIN` environment variable.
     authority = sa.Column('authority',
                           sa.UnicodeText(),
+                          index=True,
                           nullable=False)
 
     #: The display name which will be used when rendering an annotation.
