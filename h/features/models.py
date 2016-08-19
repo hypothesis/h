@@ -73,14 +73,17 @@ class Feature(Base):
     @classmethod
     def all(cls, session):
         """Fetch (or, if necessary, create) rows for all defined features."""
-        results = []
-        for name in FEATURES:
-            feat = session.query(cls).filter(cls.name == name).first()
-            if feat is None:
-                feat = cls(name=name)
-                session.add(feat)
-            results.append(feat)
-        return results
+        features = {f.name: f
+                    for f in session.query(cls)
+                    if f.name in FEATURES}
+
+        # Add missing features
+        missing = [cls(name=n)
+                   for n in FEATURES
+                   if n not in features]
+        session.add_all(missing)
+
+        return list(features.values()) + missing
 
     @classmethod
     def remove_old_flags(cls, session):
