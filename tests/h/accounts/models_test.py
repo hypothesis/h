@@ -68,6 +68,17 @@ def test_userid_as_class_property(db_session):
     assert result == fred
 
 
+def test_userid_as_class_property_invalid_userid(db_session):
+    # This is to ensure that we don't expose the ValueError that could
+    # potentially be thrown by split_user.
+
+    result = (db_session.query(models.User)
+              .filter_by(userid='fredbloggsexample.net')
+              .all())
+
+    assert result == []
+
+
 def test_cannot_create_user_with_too_short_username():
     with pytest.raises(ValueError):
         models.User(username='aa')
