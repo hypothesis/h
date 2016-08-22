@@ -12,8 +12,12 @@
   padding: 7px 10px 7px 10px;
 }
 
-.pager__item:hover {
+.pager__item:not(.is-disabled):hover {
   background-color: $grey-3;
+}
+
+.pager__item--more {
+  color: $grey-4;
 }
 
 .pager__item--begin {

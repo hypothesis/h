@@ -80,7 +80,7 @@
     </ol>
   </div>
 
-  {% if page %}
+  {% if page and page.max > 1 %}
     {% include "h:templates/includes/paginator.html.jinja2" %}
   {% endif %}
 {% endblock %}
