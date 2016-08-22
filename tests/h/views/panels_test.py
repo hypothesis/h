@@ -46,6 +46,7 @@ def test_navbar_username_link_when_logged_in(pyramid_request, authenticated_user
 @pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('account', '/account')
+    pyramid_config.add_route('account_profile', '/account/profile')
     pyramid_config.add_route('account_notifications', '/account/notifications')
     pyramid_config.add_route('account_developer', '/account/developer')
     pyramid_config.add_route('activity.search', '/search')

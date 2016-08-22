@@ -34,6 +34,7 @@ def navbar(context, request):
     return {
         'settings_menu_items': [
             {'title': _('Account details'), 'link': request.route_url('account')},
+            {'title': _('Edit profile'), 'link': request.route_url('account_profile')},
             {'title': _('Notifications'), 'link': request.route_url('account_notifications')},
             {'title': _('Developer'), 'link': request.route_url('account_developer')},
         ],
