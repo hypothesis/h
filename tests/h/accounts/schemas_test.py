@@ -420,11 +420,6 @@ class TestPasswordChangeSchema(object):
 
 
 @pytest.fixture
-def activation_model(patch):
-    return patch('h.accounts.schemas.models.Activation')
-
-
-@pytest.fixture
 def dummy_node(pyramid_request):
     class DummyNode(object):
         def __init__(self, request):
