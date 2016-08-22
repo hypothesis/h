@@ -1,0 +1,37 @@
+.search-results-pager {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  left: 30%;
+  position: fixed;
+  margin-top: 45px;
+  font-weight: bold;
+}
+
+.search-results-pager__item {
+  border-radius: 2px;
+  color: $grey-6;
+  padding: 7px 10px 7px 10px;
+}
+
+.item-highlight {
+  background-color: #ececec;
+}
+
+.item-begin {
+  background-color: #ececec;
+  margin-right: 10px;
+}
+
+.item-end {
+  background-color: #ececec;
+  margin-left: 10px;
+}
+
+.item-link {
+  color: inherit;
+}
+
+.item-disabled {
+  color: $grey-4;
+}
