@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy import exc
 
 from h.accounts import models
+from h.security import password_context
 
 
 def test_activation_has_asciinumeric_code(db_session):
@@ -103,20 +104,79 @@ def test_cannot_create_user_with_too_short_password():
     with pytest.raises(ValueError):
         models.User(password='a')
 
+
 def test_check_password_false_with_null_password():
     user = models.User(username='barnet')
 
     assert not user.check_password('anything')
+
 
 def test_check_password_true_with_matching_password():
     user = models.User(username='barnet', password='s3cr37')
 
     assert user.check_password('s3cr37')
 
+
 def test_check_password_false_with_incorrect_password():
     user = models.User(username='barnet', password='s3cr37')
 
     assert not user.check_password('somethingelse')
+
+
+def test_check_password_validates_old_style_passwords():
+    user = models.User(username='barnet')
+    user.salt = 'somesalt'
+    # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=10)
+    user._password = '$2a$10$il7Mi/T5WtvbqP5m3dbjeeohDf5XeDx35N5tdwyJ8uRB35NnIlozy'
+
+    assert user.check_password('foobar')
+    assert not user.check_password('somethingelse')
+
+
+def test_check_password_upgrades_old_style_passwords():
+    user = models.User(username='barnet')
+    user.salt = 'somesalt'
+    # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=10)
+    user._password = '$2a$10$il7Mi/T5WtvbqP5m3dbjeeohDf5XeDx35N5tdwyJ8uRB35NnIlozy'
+
+    user.check_password('foobar')
+
+    assert user.salt is None
+    assert not password_context.needs_update(user._password)
+
+
+def test_check_password_only_upgrades_when_password_is_correct():
+    user = models.User(username='barnet')
+    user.salt = 'somesalt'
+    # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=10)
+    user._password = '$2a$10$il7Mi/T5WtvbqP5m3dbjeeohDf5XeDx35N5tdwyJ8uRB35NnIlozy'
+
+    user.check_password('donkeys')
+
+    assert user.salt is not None
+    assert password_context.needs_update(user._password)
+
+
+def test_check_password_works_after_upgrade():
+    user = models.User(username='barnet')
+    user.salt = 'somesalt'
+    # Generated with passlib.hash.bcrypt.encrypt('foobar' + 'somesalt', rounds=10)
+    user._password = '$2a$10$il7Mi/T5WtvbqP5m3dbjeeohDf5XeDx35N5tdwyJ8uRB35NnIlozy'
+
+    user.check_password('foobar')
+
+    assert user.check_password('foobar')
+
+
+def test_check_password_upgrades_new_style_passwords():
+    user = models.User(username='barnet')
+    # Generated with passlib.hash.bcrypt.encrypt('foobar', rounds=4, ident='2b')
+    user._password = '$2b$04$L2j.vXxlLt9JJNHHsy0EguslcaphW7vssSpHbhqCmf9ECsMiuTd1y'
+
+    user.check_password('foobar')
+
+    assert not password_context.needs_update(user._password)
+
 
 def test_User_activate_activates_user(db_session):
     user = models.User(authority='example.com',

@@ -5,15 +5,14 @@ import random
 import re
 import string
 
-import cryptacular.bcrypt
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 
-from h.db import Base
 from h._compat import text_type
+from h.db import Base
+from h.security import password_context
 from h.util.user import split_user
 
-CRYPT = cryptacular.bcrypt.BCRYPTPasswordManager()
 USERNAME_MIN_LENGTH = 3
 USERNAME_MAX_LENGTH = 30
 USERNAME_PATTERN = '(?i)^[A-Z0-9._]+$'
@@ -185,12 +184,19 @@ class User(Base):
         session = sa.orm.object_session(self)
         session.delete(self.activation)
 
-    # Hashed password
+    #: Hashed password
     _password = sa.Column('password', sa.UnicodeText(), nullable=True)
-    # Password salt
-    salt = sa.Column(sa.UnicodeText(), nullable=True)
-    # Last password update
+    #: Last password update
     password_updated = sa.Column(sa.DateTime(), nullable=True)
+
+    #: Password salt
+    #:
+    #: N.B. This field is DEPRECATED. The password context we use already
+    #: manages the generation of a random salt when hashing a password and we
+    #: don't need a separate salt column. This remains for "legacy" passwords
+    #: which were, sadly, double-salted. As users log in, we are slowly
+    #: upgrading their passwords and setting this column to None.
+    salt = sa.Column(sa.UnicodeText(), nullable=True)
 
     @hybrid_property
     def password(self):
@@ -201,15 +207,37 @@ class User(Base):
         if len(value) < PASSWORD_MIN_LENGTH:
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
-        self.salt = _generate_random_string(24)
-        self._password = text_type(CRYPT.encode(value + self.salt))
+        self._password = password_context.encrypt(value)
         self.password_updated = datetime.datetime.utcnow()
 
-    def check_password(self, password):
+    def check_password(self, value):
         """Check the passed password for this user."""
-        if self.password is None or self.salt is None:
+        if self.password is None:
             return False
-        return CRYPT.check(self.password, password + self.salt)
+
+        # Old-style separate salt.
+        #
+        # TODO: remove this deprecated code path when a suitable proportion of
+        # users have updated their password by logging-in. (Check how many
+        # users still have a non-null salt in the database.)
+        if self.salt is not None:
+            verified = password_context.verify(value + self.salt,
+                                               self.password)
+
+            # If the password is correct, take this opportunity to upgrade the
+            # password and remove the salt.
+            if verified:
+                self.salt = None
+                self.password = value
+
+            return verified
+
+        verified, new_hash = password_context.verify_and_update(value,
+                                                                self.password)
+        if new_hash is not None:
+            self._password = new_hash
+
+        return verified
 
     @sa.orm.validates('email')
     def validate_email(self, key, email):
