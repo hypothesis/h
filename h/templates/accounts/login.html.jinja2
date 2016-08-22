@@ -1,7 +1,7 @@
 {% extends "h:templates/layouts/base.html.jinja2" %}
 
 {% if not feature('activity_pages') %}
-{% set uses_legacy_styles = True %}
+{% set style_bundle = 'legacy_site_css' %}
 {% endif %}
 
 {% block page_title %}Log in{% endblock %}
