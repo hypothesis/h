@@ -388,7 +388,6 @@ class TestEmailChangeSchema(object):
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({
                 'email': 'foo@bar.com',
-                'email_confirm': 'foo@bar.com',
                 'password': 'flibble'  # Not the correct password!
             })
 
