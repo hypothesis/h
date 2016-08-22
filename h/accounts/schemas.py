@@ -42,7 +42,7 @@ def unique_email(node, value):
     '''Colander validator that ensures no user with this email exists.'''
     request = node.bindings['request']
     user = models.User.get_by_email(request.db, value)
-    if user:
+    if user and user.userid != request.authenticated_userid:
         msg = _("Sorry, an account with this email address already exists.")
         raise colander.Invalid(node, msg)
 
