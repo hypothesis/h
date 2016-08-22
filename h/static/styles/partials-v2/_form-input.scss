@@ -11,6 +11,10 @@
   // Padding between bottom border of input and input text.
   $bottom-padding: 15px;
 
+  // Extra vertical padding added above input content for form fields displaying
+  // inline hints
+  $hint-height: 35px;
+
   // Horizontal padding between focus ring and input field / validation messages
   $h-padding: 10px;
   // Max width of validation error messages when shown to the right of the
@@ -46,6 +50,16 @@
     color: $grey-5;
   }
 
+  .form-input__hint {
+    @include font-normal;
+
+    position: absolute;
+    top: 40px;
+    left: $h-padding;
+
+    color: $grey-5;
+  }
+
   // The actual <input> element for the field
   .form-input__input {
     padding-top: $top-padding;
@@ -62,18 +76,25 @@
     border-radius: 3px;
   }
 
+  .form-input__input.has-hint {
+    padding-top: $top-padding + $hint-height;
+  }
+
   .form-input__input:hover {
     border: 1px solid $grey-4;
   }
 
+  // Thicker border used when input field has focus or has a validation error
   @mixin thick-border {
-    // Adjust padding so that the input field's text is in the same position
-    // as when the input has a thin border
-    padding-bottom: $bottom-padding - 1px;
-    padding-left: $h-padding - 1px;
-    padding-right: $h-padding - 1px;
-    padding-top: $top-padding - 1px;
-
+    // Adjust position of <input> to keep input field content at the same
+    // position, given the thicker border. We adjust the position rather than
+    // the padding because there are other states (eg. whether the form field
+    // has a hint) that affect the amount of padding required and this avoids
+    // doubling the number of those states.
+    position: relative;
+    left: -1px;
+    top: -1px;
+    padding-bottom: $bottom-padding - 2px;
     border-width: 2px;
   }
 
