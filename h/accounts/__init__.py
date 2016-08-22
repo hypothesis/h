@@ -53,8 +53,17 @@ def authenticated_user(request):
 
 def includeme(config):
     """A local identity provider."""
-    config.add_request_method(
-        authenticated_user, name='authenticated_user', reify=True)
+
+    # Add a `request.authenticated_user` property.
+    #
+    # N.B. we use `property=True` and not `reify=True` here because it is
+    # important that responsibility for caching user lookups is left to the
+    # UserService and not duplicated here.
+    #
+    # This prevents retried requests (those that raise
+    # `transaction.interfaces.TransientError`) gaining access to a stale
+    # `User` instance.
+    config.add_request_method(authenticated_user, property=True)
 
     config.register_service_factory('.services.user_service_factory',
                                     name='user')
