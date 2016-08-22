@@ -130,6 +130,10 @@ gulp.task('build-vendor-css', function () {
     // page
     './h/static/styles/front-page.css',
 
+    // `legacy-site.css` is a pre-built bundle of legacy CSS used by the
+    // login and account settings pages
+    './h/static/styles/legacy-site.css',
+
     // Icon font
     './h/static/styles/vendor/icomoon.css',
     './node_modules/bootstrap/dist/css/bootstrap.css',

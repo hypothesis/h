@@ -34,7 +34,7 @@
 
     {% block styles %}
       {% if uses_legacy_styles %}
-        {% for url in asset_client_urls("app_css") %}
+        {% for url in asset_urls("legacy_site_css") %}
         <link rel="stylesheet" href="{{ url }}">
         {% endfor %}
       {% else %}
