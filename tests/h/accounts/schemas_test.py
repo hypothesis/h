@@ -30,6 +30,7 @@ class TestUnblacklistedUsername(object):
                       blacklist)
 
 
+@pytest.mark.usefixtures('user_model')
 class TestUniqueEmail(object):
 
     def test_it_looks_up_user_by_email(self,
@@ -42,7 +43,7 @@ class TestUniqueEmail(object):
         user_model.get_by_email.assert_called_with(pyramid_request.db,
                                                    "foo@bar.com")
 
-    def test_it_is_invalid_when_user_exists(self, dummy_node, user_model):
+    def test_it_is_invalid_when_user_exists(self, dummy_node):
         pytest.raises(colander.Invalid,
                       schemas.unique_email,
                       dummy_node,
@@ -58,7 +59,6 @@ class TestUniqueEmail(object):
     def test_it_is_valid_when_authorized_users_email(self,
                                                      dummy_node,
                                                      pyramid_config,
-                                                     pyramid_request,
                                                      user_model):
         """
         If the given email is the authorized user's current email it's valid.
@@ -76,9 +76,10 @@ class TestUniqueEmail(object):
         schemas.unique_email(dummy_node, "elliot@bar.com")
 
 
+@pytest.mark.usefixtures('user_model')
 class TestRegisterSchema(object):
 
-    def test_it_with_password_too_short(self, pyramid_request, user_model):
+    def test_it_with_password_too_short(self, pyramid_request):
         schema = schemas.RegisterSchema().bind(request=pyramid_request)
 
         with pytest.raises(colander.Invalid) as exc:
@@ -117,6 +118,7 @@ class TestRegisterSchema(object):
                                                   "underscores")
 
 
+@pytest.mark.usefixtures('user_model')
 class TestLoginSchema(object):
 
     def test_it_with_bad_csrf(self, pyramid_request, user_model):
@@ -198,6 +200,7 @@ class TestLoginSchema(object):
                 exc.value.asdict().get('username', ''))
 
 
+@pytest.mark.usefixtures('user_model')
 class TestForgotPasswordSchema(object):
 
     def test_it_is_invalid_with_no_user(self,
@@ -213,9 +216,7 @@ class TestForgotPasswordSchema(object):
         assert 'email' in exc.value.asdict()
         assert exc.value.asdict()['email'] == 'Unknown email address'
 
-    def test_it_adds_user_to_appstruct(self,
-                                       pyramid_csrf_request,
-                                       user_model):
+    def test_it_adds_user_to_appstruct(self, pyramid_csrf_request, user_model):
         schema = schemas.ForgotPasswordSchema().bind(
             request=pyramid_csrf_request)
         user = user_model.get_by_email.return_value
@@ -225,11 +226,10 @@ class TestForgotPasswordSchema(object):
         assert appstruct['user'] == user
 
 
+@pytest.mark.usefixtures('user_model')
 class TestResetPasswordSchema(object):
 
-    def test_it_with_password_too_short(self,
-                                        pyramid_csrf_request,
-                                        user_model):
+    def test_it_with_password_too_short(self, pyramid_csrf_request):
         schema = schemas.ResetPasswordSchema().bind(
             request=pyramid_csrf_request)
 
@@ -237,9 +237,7 @@ class TestResetPasswordSchema(object):
             schema.deserialize({"password": "a"})
         assert "password" in exc.value.asdict()
 
-    def test_it_with_invalid_user_token(self,
-                                        pyramid_csrf_request,
-                                        user_model):
+    def test_it_with_invalid_user_token(self, pyramid_csrf_request):
         pyramid_csrf_request.registry.password_reset_serializer = (
             self.FakeInvalidSerializer())
         schema = schemas.ResetPasswordSchema().bind(
@@ -254,7 +252,7 @@ class TestResetPasswordSchema(object):
         assert 'user' in exc.value.asdict()
         assert 'reset code is not valid' in exc.value.asdict()['user']
 
-    def test_it_with_expired_token(self, pyramid_csrf_request, user_model):
+    def test_it_with_expired_token(self, pyramid_csrf_request):
         pyramid_csrf_request.registry.password_reset_serializer = (
             self.FakeExpiredSerializer())
         schema = schemas.ResetPasswordSchema().bind(
@@ -269,7 +267,6 @@ class TestResetPasswordSchema(object):
         assert 'user' in exc.value.asdict()
         assert 'reset code has expired' in exc.value.asdict()['user']
 
-    @pytest.mark.usefixtures('user_model')
     def test_it_user_has_already_reset_their_password(self,
                                                       pyramid_csrf_request,
                                                       user_model):
@@ -289,7 +286,6 @@ class TestResetPasswordSchema(object):
         assert 'user' in exc.value.asdict()
         assert 'already reset your password' in exc.value.asdict()['user']
 
-    @pytest.mark.usefixtures('user_model')
     def test_it_adds_user_to_appstruct(self, pyramid_csrf_request, user_model):
         pyramid_csrf_request.registry.password_reset_serializer = (
             self.FakeSerializer())
@@ -324,6 +320,7 @@ class TestResetPasswordSchema(object):
             raise BadData("Invalid token")
 
 
+@pytest.mark.usefixtures('user_model')
 class TestLegacyEmailChangeSchema(object):
 
     def test_it_rejects_non_matching_emails(self,
@@ -362,6 +359,7 @@ class TestLegacyEmailChangeSchema(object):
         assert 'password' in exc.value.asdict()
 
 
+@pytest.mark.usefixtures('user_model')
 class TestEmailChangeSchema(object):
 
     def test_it_raises_if_password_wrong(self,
@@ -384,9 +382,7 @@ class TestEmailChangeSchema(object):
 
 class TestPasswordChangeSchema(object):
 
-    def test_it_rejects_non_matching_passwords(self,
-                                               pyramid_csrf_request,
-                                               user_model):
+    def test_it_rejects_non_matching_passwords(self, pyramid_csrf_request):
         user = Mock()
         pyramid_csrf_request.authenticated_user = user
         schema = schemas.PasswordChangeSchema().bind(
@@ -399,7 +395,7 @@ class TestPasswordChangeSchema(object):
 
         assert 'new_password_confirm' in exc.value.asdict()
 
-    def test_it_rejects_wrong_password(self, pyramid_csrf_request, user_model):
+    def test_it_rejects_wrong_password(self, pyramid_csrf_request):
         user = Mock()
         pyramid_csrf_request.authenticated_user = user
         schema = schemas.PasswordChangeSchema().bind(
