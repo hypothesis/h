@@ -1,33 +1,56 @@
 <nav>
-  <ul class="pagination">
+  <ul class="pager">
     {% if page.prev is none %}
-      <li class="disabled">
-        <span aria-hidden="true">&laquo;</span>
+      <li>
+        <span class="pager__item pager__item--begin is-disabled"
+          aria-hidden="true">
+          &#x3c;
+        </span>
       </li>
     {% else %}
       <li>
-        <a href="{{ page.url_for(page.prev) }}" aria-label="{% trans %}Previous{% endtrans %}">
-          <span aria-hidden="true">&laquo;</span>
+        <a class="pager__item pager__item--begin pager__item--link"
+          href="{{ page.url_for(page.prev) }}"
+          aria-label="{% trans %}Go to previous page{% endtrans %}">
+          <span aria-hidden="true">&#x3c;</span>
         </a>
       </li>
     {% endif %}
     {% for n in range(1, page.max + 1) %}
       {% if n == page.cur %}
-        <li class="active">
-          <span>{{ n }} <span class="sr-only">({% trans %}current{% endtrans %})</span></span>
+        <li>
+          <span class="pager__item is-highlighted"
+            aria-label="Page {{ n }}">
+            {{ n }}
+          </span>
+        </li>
+      {% elif n == '...' %}
+        <li>
+          <span class="pager__item pager__item--link">
+            &#133;
+          </span>
         </li>
       {% else %}
-        <li><a href="{{ page.url_for(n) }}">{{ n }}</a></li>
+        <li>
+          <a class="pager__item pager__item--link"
+            href="{{ page.url_for(n) }}"
+            aria-label="Go to page {{ n }}">
+            {{ n }}
+          </a>
+        </li>
       {% endif %}
     {% endfor %}
     {% if page.next is none %}
-      <li class="disabled">
-        <span aria-hidden="true">&raquo;</span>
+      <li>
+        <span class="pager__item pager__item--end is-disabled "
+          aria-hidden="true">&#x3e;</span>
       </li>
     {% else %}
       <li>
-        <a href="{{ page.url_for(page.next) }}" aria-label="{% trans %}Next{% endtrans %}">
-          <span aria-hidden="true">&raquo;</span>
+        <a class="pager__item pager__item--end pager__item--link"
+          href="{{ page.url_for(page.next) }}"
+          aria-label="{% trans %}Go to next page{% endtrans %}">
+          <span aria-hidden="true">&#x3e;</span>
         </a>
       </li>
     {% endif %}

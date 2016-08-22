@@ -1,0 +1,45 @@
+.pager {
+  display: flex;
+  flex-direction: row;
+  margin-top: 50px;
+  font-weight: bold;
+  justify-content: center;
+}
+
+.pager__item {
+  border-radius: 2px;
+  color: $grey-6;
+  padding: 7px 10px 7px 10px;
+}
+
+.pager__item:hover {
+  background-color: $grey-3;
+}
+
+.pager__item--begin {
+  background-color: $grey-3;
+  margin-right: 10px;
+}
+
+.pager__item--end {
+  background-color: $grey-3;
+  margin-left: 10px;
+}
+
+.pager__item--end:not(.is-disabled):hover,
+.pager__item--begin:not(.is-disabled):hover {
+  background-color: $brand;
+  color: $white;
+}
+
+.pager__item--link {
+  color: inherit;
+}
+
+.pager__item.is-highlighted {
+  background-color: $grey-3;
+}
+
+.pager__item.is-disabled {
+  color: $grey-4;
+}
