@@ -380,9 +380,15 @@ class TestEmailChangeSchema(object):
     def test_it_is_invalid_if_password_wrong(self,
                                              db_session,
                                              factories,
-                                             pyramid_csrf_request):
+                                             pyramid_csrf_request,
+                                             user_model):
+        # There isn't already an account with the email address that we're
+        # trying to change to.
+        user_model.get_by_email.return_value = None
+
         pyramid_csrf_request.authenticated_user = factories.User()
         db_session.add(pyramid_csrf_request.authenticated_user)
+
         schema = schemas.EmailChangeSchema().bind(request=pyramid_csrf_request)
 
         with pytest.raises(colander.Invalid) as exc:
