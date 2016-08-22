@@ -8,27 +8,6 @@ from itsdangerous import BadData, SignatureExpired
 from h.accounts import schemas
 
 
-class FakeSerializer(object):
-    def dumps(self, obj):
-        return 'faketoken'
-
-    def loads(self, token, max_age=0, return_timestamp=False):
-        payload = {'username': 'foo@bar.com'}
-        if return_timestamp:
-            return payload, 1
-        return payload
-
-
-class FakeExpiredSerializer(FakeSerializer):
-    def loads(self, token, max_age=0, return_timestamp=False):
-        raise SignatureExpired("Token has expired")
-
-
-class FakeInvalidSerializer(FakeSerializer):
-    def loads(self, token, max_age=0, return_timestamp=False):
-        raise BadData("Invalid token")
-
-
 class TestUnblacklistedUsername(object):
 
     def test(self, dummy_node):
@@ -262,7 +241,7 @@ class TestResetPasswordSchema(object):
                                         pyramid_csrf_request,
                                         user_model):
         pyramid_csrf_request.registry.password_reset_serializer = (
-            FakeInvalidSerializer())
+            self.FakeInvalidSerializer())
         schema = schemas.ResetPasswordSchema().bind(
             request=pyramid_csrf_request)
 
@@ -277,7 +256,7 @@ class TestResetPasswordSchema(object):
 
     def test_it_with_expired_token(self, pyramid_csrf_request, user_model):
         pyramid_csrf_request.registry.password_reset_serializer = (
-            FakeExpiredSerializer())
+            self.FakeExpiredSerializer())
         schema = schemas.ResetPasswordSchema().bind(
             request=pyramid_csrf_request)
 
@@ -295,7 +274,7 @@ class TestResetPasswordSchema(object):
                                                       pyramid_csrf_request,
                                                       user_model):
         pyramid_csrf_request.registry.password_reset_serializer = (
-            FakeSerializer())
+            self.FakeSerializer())
         schema = schemas.ResetPasswordSchema().bind(
             request=pyramid_csrf_request)
         user = user_model.get_by_username.return_value
@@ -313,7 +292,7 @@ class TestResetPasswordSchema(object):
     @pytest.mark.usefixtures('user_model')
     def test_it_adds_user_to_appstruct(self, pyramid_csrf_request, user_model):
         pyramid_csrf_request.registry.password_reset_serializer = (
-            FakeSerializer())
+            self.FakeSerializer())
         schema = schemas.ResetPasswordSchema().bind(
             request=pyramid_csrf_request)
         user = user_model.get_by_username.return_value
@@ -325,6 +304,24 @@ class TestResetPasswordSchema(object):
         })
 
         assert appstruct['user'] == user
+
+    class FakeSerializer(object):
+        def dumps(self, obj):
+            return 'faketoken'
+
+        def loads(self, token, max_age=0, return_timestamp=False):
+            payload = {'username': 'foo@bar.com'}
+            if return_timestamp:
+                return payload, 1
+            return payload
+
+    class FakeExpiredSerializer(FakeSerializer):
+        def loads(self, token, max_age=0, return_timestamp=False):
+            raise SignatureExpired("Token has expired")
+
+    class FakeInvalidSerializer(FakeSerializer):
+        def loads(self, token, max_age=0, return_timestamp=False):
+            raise BadData("Invalid token")
 
 
 class TestLegacyEmailChangeSchema(object):
