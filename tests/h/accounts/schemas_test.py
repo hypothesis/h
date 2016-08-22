@@ -329,6 +329,23 @@ def test_LegacyEmailChangeSchema_rejects_wrong_password(pyramid_csrf_request, us
     assert 'password' in exc.value.asdict()
 
 
+def test_EmailChangeSchema_raises_if_password_wrong(db_session,
+                                                    factories,
+                                                    pyramid_csrf_request):
+    pyramid_csrf_request.authenticated_user = factories.User()
+    db_session.add(pyramid_csrf_request.authenticated_user)
+    schema = schemas.EmailChangeSchema().bind(request=pyramid_csrf_request)
+
+    with pytest.raises(colander.Invalid) as exc:
+        schema.deserialize({
+            'email': 'foo@bar.com',
+            'email_confirm': 'foo@bar.com',
+            'password': 'flibble'  # Not the correct password!
+        })
+
+    assert 'password' in exc.value.asdict()
+
+
 def test_PasswordChangeSchema_rejects_non_matching_passwords(pyramid_csrf_request,
                                                              user_model):
     user = Mock()
