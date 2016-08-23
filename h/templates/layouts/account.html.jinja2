@@ -4,11 +4,20 @@
 {% set style_bundle = 'legacy_site_css' %}
 {% endif %}
 
+{% if feature('activity_pages') %}
+{%- set nav_pages = [
+    ('account', 'Account'),
+    ('account_profile', 'Edit profile'),
+    ('account_notifications', 'Notifications'),
+    ('account_developer', 'Developer'),
+] -%}
+{% else %}
 {%- set nav_pages = [
     ('account', 'Account'),
     ('account_notifications', 'Notifications'),
     ('account_developer', 'Developer'),
 ] -%}
+{% endif %}
 
 {% block page_title %}{{ page_title }}{% endblock %}
 

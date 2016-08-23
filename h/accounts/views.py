@@ -520,6 +520,50 @@ class AccountController(object):
                 'password_form': password_form}
 
 
+@view_defaults(route_name='account_profile',
+               renderer='h:templates/accounts/profile.html.jinja2',
+               effective_principals=security.Authenticated)
+class EditProfileController(object):
+
+    def __init__(self, request):
+        self.request = request
+        self.schema = schemas.EditProfileSchema().bind(request=self.request)
+        self.form = request.create_form(self.schema,
+                                        buttons=(_('Save'),))
+
+    @view_config(request_method='GET')
+    def get(self):
+        """Render the 'Edit Profile' form"""
+        user = self.request.authenticated_user
+        self.form.set_appstruct({
+            'display_name': user.display_name or '',
+            'description': user.description or '',
+            'location': user.location or '',
+            'link': user.uri or '',
+            'orcid': user.orcid or '',
+        })
+        return self._template_data()
+
+    @view_config(request_method='POST')
+    def post(self):
+        return form.handle_form_submission(
+            self.request,
+            self.form,
+            on_success=self._update_user,
+            on_failure=self._template_data)
+
+    def _template_data(self):
+        return {'form': self.form.render()}
+
+    def _update_user(self, appstruct):
+        user = self.request.authenticated_user
+        user.display_name = appstruct['display_name']
+        user.description = appstruct['description']
+        user.location = appstruct['location']
+        user.uri = appstruct['link']
+        user.orcid = appstruct['orcid']
+
+
 @view_defaults(route_name='account_notifications',
                renderer='h:templates/accounts/notifications.html.jinja2',
                effective_principals=security.Authenticated)
@@ -661,6 +705,7 @@ def includeme(config):
     config.add_route('account_reset', '/account/reset')
     config.add_route('account_reset_with_code', '/account/reset/{code}')
     config.add_route('account', '/account/settings')
+    config.add_route('account_profile', '/account/profile')
     config.add_route(
         'account_notifications', '/account/settings/notifications')
     config.add_route('account_developer', '/account/developer')

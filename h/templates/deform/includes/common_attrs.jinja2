@@ -7,7 +7,11 @@
 name="{{ field.name }}"
 value="{{ cstruct }}"
 id="{{ field.oid }}"
-class="{{field_css_class}}{% if field.widget.css_class %} {{ field.widget.css_class }}{% endif %}{% if field.widget.autofocus %} js-select-onfocus{% endif %}"
+class="{{field_css_class}}
+      {% if field.widget.css_class %} {{ field.widget.css_class }} {% endif %}
+      {% if field.widget.autofocus %} js-select-onfocus{% endif %}
+      {% if field.schema.hint %} has-hint {% endif %}
+      "
 {%- if field.widget.size -%}
 size="{{ field.widget.size }}"
 {% endif -%}

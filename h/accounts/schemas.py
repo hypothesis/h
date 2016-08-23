@@ -15,6 +15,7 @@ from h.accounts.models import (
     USERNAME_MIN_LENGTH,
     USERNAME_PATTERN,
 )
+from h.accounts import util
 
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
@@ -325,6 +326,56 @@ class PasswordChangeSchema(CSRFSchema):
 
         if exc.children:
             raise exc
+
+
+def validate_url(node, cstruct):
+    try:
+        util.validate_url(cstruct)
+    except ValueError as exc:
+        raise colander.Invalid(node, str(exc))
+
+
+def validate_orcid(node, cstruct):
+    try:
+        util.validate_orcid(cstruct)
+    except ValueError as exc:
+        raise colander.Invalid(node, str(exc))
+
+
+class EditProfileSchema(CSRFSchema):
+    display_name = colander.SchemaNode(
+        colander.String(),
+        missing=None,
+        validator=colander.Length(max=30),
+        title=_('Display name'))
+
+    description = colander.SchemaNode(
+        colander.String(),
+        missing=None,
+        validator=colander.Length(max=250),
+        widget=deform.widget.TextAreaWidget(rows=2, cols=60),
+        title=_('Description'))
+
+    location = colander.SchemaNode(
+        colander.String(),
+        missing=None,
+        validator=colander.Length(max=100),
+        title=_('Location'))
+
+    link = colander.SchemaNode(
+        colander.String(),
+        missing=None,
+        validator=colander.All(
+            colander.Length(max=250),
+            validate_url),
+        title=_('Link'))
+
+    orcid = colander.SchemaNode(
+        colander.String(),
+        missing=None,
+        validator=validate_orcid,
+        title=_('ORCID'),
+        hint=_('ORCID provides a persistent identifier for researchers (see http://orcid.org/)'))
 
 
 class NotificationsSchema(CSRFSchema):

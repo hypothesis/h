@@ -11,6 +11,14 @@ from h import accounts
 from h.accounts import views
 
 
+class FakeForm(object):
+    def set_appstruct(self, appstruct):
+        self.appstruct = appstruct
+
+    def render(self):
+        return self.appstruct
+
+
 class FakeSubscription(object):
     def __init__(self, type_, active):
         self.type = type_
@@ -835,6 +843,51 @@ class TestNotificationsController(object):
     @pytest.fixture
     def routes(self, pyramid_config):
         pyramid_config.add_route('account_notifications', '/p/notifications')
+
+
+class TestEditProfileController(object):
+
+    def test_get_reads_user_properties(self, pyramid_request):
+        pyramid_request.authenticated_user = mock.Mock()
+        pyramid_request.create_form.return_value = FakeForm()
+        user = pyramid_request.authenticated_user
+        user.display_name = 'Jim Smith'
+        user.description = 'Job Description'
+        user.orcid = 'ORCID ID'
+        user.uri = 'http://foo.org'
+        user.location = 'Paris'
+
+        result = views.EditProfileController(pyramid_request).get()
+
+        assert result == {
+            'form': {
+                'display_name': 'Jim Smith',
+                'description': 'Job Description',
+                'orcid': 'ORCID ID',
+                'link': 'http://foo.org',
+                'location': 'Paris',
+            }
+        }
+
+    def test_post_sets_user_properties(self, form_validating_to, pyramid_request):
+        pyramid_request.authenticated_user = mock.Mock()
+        user = pyramid_request.authenticated_user
+
+        ctrl = views.EditProfileController(pyramid_request)
+        ctrl.form = form_validating_to({
+            'display_name': 'Jim Smith',
+            'description': 'Job Description',
+            'orcid': 'ORCID ID',
+            'link': 'http://foo.org',
+            'location': 'Paris',
+        })
+        ctrl.post()
+
+        assert user.display_name == 'Jim Smith'
+        assert user.description == 'Job Description'
+        assert user.orcid == 'ORCID ID'
+        assert user.uri == 'http://foo.org'
+        assert user.location == 'Paris'
 
 
 @pytest.mark.usefixtures('models')

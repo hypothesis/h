@@ -33,6 +33,10 @@
   </label>
 {% endif -%}
 
+{% if field.schema.hint and feature('activity_pages') %}
+<div class="form-input__hint" id="hint-{{ field.oid }}">{{ field.schema.hint }}</div>
+{% endif %}
+
 {{ field.serialize(cstruct) }}
 
 {%- if field.error and not field.widget.hidden -%}
