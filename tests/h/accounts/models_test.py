@@ -178,6 +178,17 @@ def test_check_password_upgrades_new_style_passwords():
     assert not password_context.needs_update(user._password)
 
 
+def test_setting_password_unsets_salt():
+    user = models.User(username='barnet')
+    user.salt = 'somesalt'
+    user._password = 'whatever'
+
+    user.password = 'flibble'
+
+    assert user.salt is None
+    assert user.check_password('flibble')
+
+
 def test_User_activate_activates_user(db_session):
     user = models.User(authority='example.com',
                        username='kiki',
