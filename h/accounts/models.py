@@ -210,7 +210,7 @@ class User(Base):
         # Remove any existing explicit salt (the password context salts the
         # password automatically).
         self.salt = None
-        self._password = password_context.encrypt(value)
+        self._password = text_type(password_context.encrypt(value))
         self.password_updated = datetime.datetime.utcnow()
 
     def check_password(self, value):
@@ -237,7 +237,7 @@ class User(Base):
         verified, new_hash = password_context.verify_and_update(value,
                                                                 self.password)
         if new_hash is not None:
-            self._password = new_hash
+            self._password = text_type(new_hash)
 
         return verified
 
