@@ -20,7 +20,11 @@ _ = i18n.TranslationString
 class GroupCreateController(object):
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.LegacyGroupSchema().bind(request=self.request)
+
+        if request.feature('activity_pages'):
+            self.schema = schemas.GroupSchema().bind(request=self.request)
+        else:
+            self.schema = schemas.LegacyGroupSchema().bind(request=self.request)
 
         submit = deform.Button(title=_('Create a new group'),
                                css_class='primary-action-btn '
@@ -42,6 +46,7 @@ class GroupCreateController(object):
             groups_service = self.request.find_service(name='groups')
             group = groups_service.create(
                 name=appstruct['name'],
+                description=appstruct.get('description'),
                 userid=self.request.authenticated_userid)
 
             url = self.request.route_path('group_read',

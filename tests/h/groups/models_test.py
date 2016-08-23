@@ -7,14 +7,16 @@ from h import models
 
 def test_init(db_session, factories):
     name = "My Hypothesis Group"
+    description = "This group is awesome"
     user = factories.User()
 
-    group = models.Group(name=name, creator=user)
+    group = models.Group(name=name, creator=user, description=description)
     db_session.add(group)
     db_session.flush()
 
     assert group.id
     assert group.name == name
+    assert group.description == description
     assert group.created
     assert group.updated
     assert group.creator == user

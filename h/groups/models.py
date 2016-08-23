@@ -13,6 +13,7 @@ from h import pubid
 
 GROUP_NAME_MIN_LENGTH = 4
 GROUP_NAME_MAX_LENGTH = 25
+GROUP_DESCRIPTION_MAX_LENGTH = 250
 
 
 class GroupFactory(object):
@@ -52,8 +53,9 @@ class Group(Base, mixins.Timestamps):
         'User', secondary='user_group', backref=sa.orm.backref(
             'groups', order_by='Group.name'))
 
-    def __init__(self, name, creator):
+    def __init__(self, name, creator, description=None):
         self.name = name
+        self.description = description
         self.creator = creator
         self.members.append(creator)
 

@@ -63,9 +63,21 @@
       @include flex-center-column();
     }
 
-    &__name-label {
+    &__description-label, &__name-label {
       font-size: 18px;
       margin-bottom: 10px;
+    }
+
+    &__description-input {
+      display: block;
+      margin-bottom: 40px;
+      width: 350px;
+      height: 105px;
+      border: none;
+
+      &:placeholder {
+        color: $color-alto;
+      }
     }
 
     &__name-input {
