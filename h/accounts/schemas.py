@@ -7,8 +7,14 @@ import deform
 from pyramid.session import check_csrf_token
 from itsdangerous import BadData, SignatureExpired
 
-from h import i18n
-from h.accounts import models
+from h import i18n, models
+from h.accounts.models import (
+    EMAIL_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    USERNAME_MAX_LENGTH,
+    USERNAME_MIN_LENGTH,
+    USERNAME_PATTERN,
+)
 
 _ = i18n.TranslationString
 log = logging.getLogger(__name__)
@@ -62,7 +68,7 @@ def email_node(**kwargs):
     return colander.SchemaNode(
         colander.String(),
         validator=colander.All(
-            colander.Length(max=models.EMAIL_MAX_LENGTH),
+            colander.Length(max=EMAIL_MAX_LENGTH),
             colander.Email(),
             unique_email,
         ),
@@ -87,7 +93,7 @@ def password_node(**kwargs):
     kwargs.setdefault('widget', deform.widget.PasswordWidget())
     return colander.SchemaNode(
         colander.String(),
-        validator=colander.Length(min=models.PASSWORD_MIN_LENGTH),
+        validator=colander.Length(min=PASSWORD_MIN_LENGTH),
         **kwargs)
 
 
@@ -180,11 +186,9 @@ class RegisterSchema(CSRFSchema):
     username = colander.SchemaNode(
         colander.String(),
         validator=colander.All(
-            colander.Length(
-                min=models.USERNAME_MIN_LENGTH,
-                max=models.USERNAME_MAX_LENGTH),
+            colander.Length(min=USERNAME_MIN_LENGTH, max=USERNAME_MAX_LENGTH),
             colander.Regex(
-                models.USERNAME_PATTERN,
+                USERNAME_PATTERN,
                 msg=_("Must contain only letters, numbers, periods, and "
                       "underscores")),
             unique_username,
@@ -193,8 +197,8 @@ class RegisterSchema(CSRFSchema):
         title=_('Username'),
         hint=_('between {min} and {max} characters, containing only letters, '
                'numbers, periods, and underscores').format(
-            min=models.USERNAME_MIN_LENGTH,
-            max=models.USERNAME_MAX_LENGTH
+            min=USERNAME_MIN_LENGTH,
+            max=USERNAME_MAX_LENGTH
         ),
         widget=deform.widget.TextInputWidget(autofocus=True),
     )
