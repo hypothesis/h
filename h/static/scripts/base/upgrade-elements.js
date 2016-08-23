@@ -11,6 +11,9 @@ function isJSDisabled(document) {
  * If `root` lives in a document whose URL contains the query string parameter
  * `nojs=1` then `upgradeElements()` will return immediately.
  *
+ * Controllers attached to upgraded elements are accessible via the `controllers`
+ * property on the element.
+ *
  * @param {Element} root - The root element to search for matching elements
  * @param {Object} controllers - Object mapping selectors to controller classes.
  *        For each element matching a given selector, an instance of the
@@ -27,7 +30,12 @@ function upgradeElements(root, controllers) {
     elements.forEach(function (el) {
       var ControllerClass = controllers[selector];
       try {
-        new ControllerClass(el);
+        var ctrl = new ControllerClass(el);
+        if (!el.controllers) {
+          el.controllers = [ctrl];
+        } else {
+          el.controllers.push(ctrl);
+        }
       } catch (err) {
         console.error('Failed to upgrade element %s with controller', el, ControllerClass, ':', err.toString());
 
