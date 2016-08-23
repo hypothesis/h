@@ -11,7 +11,7 @@ class="{{field_css_class}}
       {% if field.widget.css_class %} {{ field.widget.css_class }} {% endif %}
       {% if field.widget.autofocus %} js-select-onfocus{% endif %}
       {% if field.schema.hint %} has-hint {% endif %}
-      "
+      {% if field.widget.template == 'textarea' and field.widget.max_length %}js-character-limit-input{% endif %}"
 {%- if field.widget.size -%}
 size="{{ field.widget.size }}"
 {% endif -%}
@@ -26,6 +26,9 @@ autofocus
 {% endif -%}
 {%- if field.widget.disable_autocomplete -%}
 autocomplete="off"
+{% endif -%}
+{%- if field.widget.max_length -%}
+data-maxlength="{{ field.widget.max_length }}"
 {% endif -%}
 {%- if field.widget.placeholder -%}
 placeholder="{{ field.widget.placeholder }}"
