@@ -20,7 +20,7 @@ _ = i18n.TranslationString
 class GroupCreateController(object):
     def __init__(self, request):
         self.request = request
-        self.schema = schemas.GroupSchema().bind(request=self.request)
+        self.schema = schemas.LegacyGroupSchema().bind(request=self.request)
 
         submit = deform.Button(title=_('Create a new group'),
                                css_class='primary-action-btn '

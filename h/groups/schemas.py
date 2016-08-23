@@ -12,9 +12,9 @@ from h.groups.models import GROUP_NAME_MAX_LENGTH
 _ = i18n.TranslationString
 
 
-class GroupSchema(CSRFSchema):
+class LegacyGroupSchema(CSRFSchema):
 
-    """The schema for the create-a-new-group form."""
+    """The legacy schema for the create-a-new-group form."""
 
     name = colander.SchemaNode(
         colander.String(),
