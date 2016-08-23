@@ -24,6 +24,7 @@ from h.accounts.events import PasswordResetEvent
 from h.accounts.events import LogoutEvent
 from h.accounts.events import LoginEvent
 from h.util.view import json_view
+from h._compat import urlparse
 
 _ = i18n.TranslationString
 
@@ -37,8 +38,23 @@ def ajax_payload(request, data):
     return payload
 
 
+@view_config(context=BadCSRFToken,
+             accept='text/html',
+             renderer='h:templates/accounts/session_invalid.html.jinja2')
+def bad_csrf_token_html(context, request):
+    request.response.status_code = 403
+
+    next_path = '/'
+    referer = urlparse.urlparse(request.referer or '')
+    if referer.hostname == request.domain:
+        next_path = referer.path
+
+    login_path = request.route_path('login', _query={'next': next_path})
+    return {'login_path': login_path}
+
+
 @json_view(context=BadCSRFToken)
-def bad_csrf_token(context, request):
+def bad_csrf_token_json(context, request):
     request.response.status_code = 403
     reason = _('Session is invalid. Please try again.')
     return {

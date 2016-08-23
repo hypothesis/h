@@ -1,0 +1,8 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}Invalid Session{% endblock %}
+
+{% block content %}
+Sorry, but your session has expired.
+Please <a href="{{ login_path }}">go back</a> and try again.
+{% endblock content %}

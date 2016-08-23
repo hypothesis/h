@@ -34,6 +34,36 @@ class FakeSerializer(object):
 
 
 @pytest.mark.usefixtures('routes')
+class TestBadCSRFTokenHTML(object):
+    def test_it_returns_login_with_root_next_as_default(self, pyramid_request):
+        pyramid_request.referer = None
+        result = views.bad_csrf_token_html(None, pyramid_request)
+
+        assert result['login_path'] == '/login?next=%2F'
+
+    def test_it_returns_login_with_referer_path_as_next(self, pyramid_request):
+        pyramid_request.referer = 'http://' + \
+                                  pyramid_request.domain + \
+                                  '/account/settings'
+
+        result = views.bad_csrf_token_html(None, pyramid_request)
+
+        assert result['login_path'] == '/login?next=%2Faccount%2Fsettings'
+
+    def test_it_returns_login_with_root_when_hostnames_are_different(self, pyramid_request):
+        pyramid_request.domain = 'example.org'
+        pyramid_request.referer = 'http://example.com/account/settings'
+
+        result = views.bad_csrf_token_html(None, pyramid_request)
+
+        assert result['login_path'] == '/login?next=%2F'
+
+    @pytest.fixture
+    def routes(self, pyramid_config):
+        pyramid_config.add_route('login', '/login')
+
+
+@pytest.mark.usefixtures('routes')
 class TestAuthController(object):
 
     def test_post_redirects_when_logged_in(self, pyramid_config, pyramid_request):
