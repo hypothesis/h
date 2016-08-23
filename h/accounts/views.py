@@ -38,7 +38,7 @@ def ajax_payload(request, data):
 
 
 @json_view(context=BadCSRFToken)
-def bad_csrf_token(context, request):
+def bad_csrf_token_json(context, request):
     request.response.status_code = 403
     reason = _('Session is invalid. Please try again.')
     return {
