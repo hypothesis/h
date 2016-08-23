@@ -22,17 +22,18 @@ class GroupsService(object):
         self.user_fetcher = user_fetcher
         self.publish = publish
 
-    def create(self, name, userid):
+    def create(self, name, userid, description=None):
         """
         Create a new group.
 
         :param name: the human-readable name of the group
         :param userid: the userid of the group creator
+        :param description: the description of the group
 
         :returns: the created group
         """
         creator = self.user_fetcher(userid)
-        group = Group(name=name, creator=creator)
+        group = Group(name=name, creator=creator, description=description)
         self.session.add(group)
         self.session.flush()
 

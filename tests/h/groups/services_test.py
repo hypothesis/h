@@ -32,6 +32,20 @@ class TestGroupsService(object):
 
         assert group.creator == users['cazimir']
 
+    def test_create_sets_description_when_present(self, db_session, users):
+        svc = GroupsService(db_session, users.get)
+
+        group = svc.create('Anteater fans', 'cazimir', 'all about ant eaters')
+
+        assert group.description == 'all about ant eaters'
+
+    def test_create_skips_setting_description_when_missing(self, db_session, users):
+        svc = GroupsService(db_session, users.get)
+
+        group = svc.create('Anteater fans', 'cazimir')
+
+        assert group.description is None
+
     def test_create_adds_group_to_session(self, db_session, users):
         svc = GroupsService(db_session, users.get)
 

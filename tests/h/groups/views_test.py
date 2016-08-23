@@ -47,12 +47,29 @@ class TestGroupCreateController(object):
         # If the form submission is valid then handle_form_submission() should
         # call on_success() with the appstruct.
         def call_on_success(request, form, on_success, on_failure):
+            on_success({'name': 'my_new_group', 'description': 'foobar'})
+        handle_form_submission.side_effect = call_on_success
+
+        controller.post()
+
+        assert groups_service.created == [('my_new_group', 'ariadna', 'foobar')]
+
+    def test_post_creates_new_group_if_legacy_form_valid(self,
+                                                         controller,
+                                                         groups_service,
+                                                         handle_form_submission,
+                                                         pyramid_config):
+        pyramid_config.testing_securitypolicy('ariadna')
+
+        # If the form submission is valid then handle_form_submission() should
+        # call on_success() with the appstruct.
+        def call_on_success(request, form, on_success, on_failure):
             on_success({'name': 'my_new_group'})
         handle_form_submission.side_effect = call_on_success
 
         controller.post()
 
-        assert groups_service.created == [('my_new_group', 'ariadna')]
+        assert groups_service.created == [('my_new_group', 'ariadna', None)]
 
     def test_post_redirects_if_form_valid(self,
                                           controller,
@@ -223,8 +240,8 @@ class FakeGroupsService(object):
         self.joined = []
         self.left = []
 
-    def create(self, name, userid):
-        self.created.append((name, userid))
+    def create(self, name, userid, description):
+        self.created.append((name, userid, description))
         return FakeGroup('abc123', 'fake-group')
 
     def member_join(self, group, userid):
