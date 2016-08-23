@@ -75,12 +75,9 @@
     {% for url in asset_urls("header_js") %}
     <script src="{{ url }}"></script>
     {% endfor %}
-
-    {% block base_tag %}{% endblock %}
   </head>
-  {% block body_tag %}<body class="body">{% endblock %}
+  <body class="body">
     {% block content %}{% endblock %}
-    {% block templates %}{% endblock %}
     {% block scripts %}
     {% for url in asset_urls("site_js") %}
     <script src="{{ url }}"></script>
