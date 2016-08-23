@@ -236,6 +236,9 @@ class User(Base):
 
         verified, new_hash = password_context.verify_and_update(value,
                                                                 self.password)
+        if not verified:
+            return False
+
         if new_hash is not None:
             self._password = text_type(new_hash)
 
