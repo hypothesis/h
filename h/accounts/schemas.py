@@ -89,7 +89,15 @@ def unblacklisted_username(node, value, blacklist=None):
 
 
 def password_node(**kwargs):
-    """Return a Colander schema node for a user password."""
+    """Return a Colander schema node for an existing user password."""
+    kwargs.setdefault('widget', deform.widget.PasswordWidget())
+    return colander.SchemaNode(
+        colander.String(),
+        **kwargs)
+
+
+def new_password_node(**kwargs):
+    """Return a Colander schema node for a new user password."""
     kwargs.setdefault('widget', deform.widget.PasswordWidget())
     return colander.SchemaNode(
         colander.String(),
@@ -203,7 +211,7 @@ class RegisterSchema(CSRFSchema):
         widget=deform.widget.TextInputWidget(autofocus=True),
     )
     email = email_node(title=_('Email address'))
-    password = password_node(title=_('Password'))
+    password = new_password_node(title=_('Password'))
 
 
 class ResetCode(colander.SchemaType):
@@ -252,7 +260,7 @@ class ResetPasswordSchema(CSRFSchema):
         title=_('Reset code'),
         hint=_('this will be emailed to you'),
         widget=deform.widget.TextInputWidget(disable_autocomplete=True))
-    password = password_node(
+    password = new_password_node(
         title=_('New password'),
         widget=deform.widget.PasswordWidget(disable_autocomplete=True))
 
@@ -265,7 +273,7 @@ class LegacyEmailChangeSchema(CSRFSchema):
         colander.String(),
         title=_('Confirm new email address'),
         widget=deform.widget.TextInputWidget(template='emailinput'))
-    password = password_node(title=_('Current password'))
+    password = new_password_node(title=_('Current password'))
 
     def validator(self, node, value):
         super(LegacyEmailChangeSchema, self).validator(node, value)

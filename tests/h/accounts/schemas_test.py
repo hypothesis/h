@@ -377,27 +377,138 @@ class TestLegacyEmailChangeSchema(object):
 @pytest.mark.usefixtures('user_model')
 class TestEmailChangeSchema(object):
 
-    def test_it_is_invalid_if_password_wrong(self,
-                                             db_session,
-                                             factories,
-                                             pyramid_csrf_request,
-                                             user_model):
-        # There isn't already an account with the email address that we're
-        # trying to change to.
-        user_model.get_by_email.return_value = None
+    # The user's password.
+    PASSWORD = 'flibble'
 
-        pyramid_csrf_request.authenticated_user = factories.User()
-        db_session.add(pyramid_csrf_request.authenticated_user)
+    def test_it_returns_the_new_email_when_valid(self, schema):
+        appstruct = schema.deserialize({
+            'email': 'foo@bar.com',
+            'password': self.PASSWORD,
+        })
 
-        schema = schemas.EmailChangeSchema().bind(request=pyramid_csrf_request)
+        assert appstruct['email'] == 'foo@bar.com'
+
+    def test_it_is_valid_if_email_same_as_users_existing_email(self,
+                                                               schema,
+                                                               user,
+                                                               user_model,
+                                                               pyramid_config):
+        """
+        It is valid if the new email is the same as the user's existing one.
+
+        Trying to change your email to what your email already is should not
+        return an error.
+
+        """
+        user_model.get_by_email.return_value = Mock(spec_set=['userid'],
+                                                    userid=user.userid)
+        pyramid_config.testing_securitypolicy(user.userid)
+
+        schema.deserialize({'email': user.email, 'password': self.PASSWORD})
+
+    def test_it_is_invalid_if_csrf_token_missing(self,
+                                                 pyramid_request,
+                                                 schema):
+        del pyramid_request.headers['X-CSRF-Token']
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize({
+                'email': 'foo@bar.com',
+                'password': self.PASSWORD,
+            })
+
+    def test_it_is_invalid_if_csrf_token_wrong(self, pyramid_request, schema):
+        pyramid_request.headers['X-CSRF-Token'] = 'WRONG'
+
+        with pytest.raises(BadCSRFToken):
+            schema.deserialize({
+                'email': 'foo@bar.com',
+                'password': self.PASSWORD,
+            })
+
+    def test_it_is_invalid_if_password_wrong(self, schema):
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'email': 'foo@bar.com',
+                'password': 'WRONG'  # Not the correct password!
+            })
+
+        assert exc.value.asdict() == {
+            'password': 'Incorrect password. Please try again.'}
+
+    def test_it_returns_incorrect_password_error_if_password_too_short(
+            self, schema):
+        """
+        The schema should be invalid if the password is too short.
+
+        Test that this returns a "that was not the right password" error rather
+        than a "that password is too short error" as it used to (the user is
+        entering their current password for authentication, they aren't
+        choosing a new password).
+
+        """
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'email': 'foo@bar.com',
+                'password': 'a'  # Too short to be a valid password.
+            })
+
+        assert exc.value.asdict() == {
+            'password': 'Incorrect password. Please try again.'}
+
+    def test_it_is_invalid_if_email_too_long(self, schema):
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'email': 'a' * 100 + '@bar.com',
+                'password': self.PASSWORD,
+            })
+
+        assert exc.value.asdict() == {
+            'email': u'Longer than maximum length 100'}
+
+    def test_it_is_invalid_if_email_not_a_valid_email_address(self, schema):
+        with pytest.raises(colander.Invalid) as exc:
+            schema.deserialize({
+                'email': 'this is not a valid email address',
+                'password': self.PASSWORD,
+            })
+
+        assert exc.value.asdict() == {'email': 'Invalid email address'}
+
+    def test_it_is_invalid_if_email_already_taken(self, user_model, schema):
+        user_model.get_by_email.return_value = Mock(spec_set=['userid'])
 
         with pytest.raises(colander.Invalid) as exc:
             schema.deserialize({
                 'email': 'foo@bar.com',
-                'password': 'flibble'  # Not the correct password!
+                'password': self.PASSWORD,
             })
 
-        assert 'password' in exc.value.asdict()
+        assert exc.value.asdict() == {'email': 'Sorry, an account with this '
+                                               'email address already exists.'}
+
+    @pytest.fixture
+    def pyramid_request(self, pyramid_csrf_request, user):
+        pyramid_csrf_request.authenticated_user = user
+        return pyramid_csrf_request
+
+    @pytest.fixture
+    def schema(self, pyramid_request):
+        return schemas.EmailChangeSchema().bind(request=pyramid_request)
+
+    @pytest.fixture
+    def user(self, factories):
+        return factories.User(password=self.PASSWORD)
+
+    @pytest.fixture
+    def user_model(self, patch):
+        user_model = patch('h.accounts.schemas.models.User')
+
+        # By default there isn't already an account with the email address that
+        # we're trying to change to.
+        user_model.get_by_email.return_value = None
+
+        return user_model
 
 
 class TestPasswordChangeSchema(object):
