@@ -14,6 +14,11 @@ from raven.utils.wsgi import get_environ
 
 from h import __version__
 
+PROCESSORS = (
+    'raven.processors.SanitizePasswordsProcessor',
+    'raven.processors.RemovePostDataProcessor',
+)
+
 
 def http_context_data(request):
     return {
@@ -43,8 +48,9 @@ def get_client(settings):
     transport_name = settings.get('raven.transport')
     transport = GeventedHTTPTransport if transport_name == 'gevent' else None
 
-    client = raven.Client(release=__version__, transport=transport)
-    return client
+    return raven.Client(release=__version__,
+                        transport=transport,
+                        processors=PROCESSORS)
 
 
 def _get_request_client(request):
