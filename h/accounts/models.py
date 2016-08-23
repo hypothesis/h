@@ -207,6 +207,9 @@ class User(Base):
         if len(value) < PASSWORD_MIN_LENGTH:
             raise ValueError('password must be more than {min} characters '
                              'long'.format(min=PASSWORD_MIN_LENGTH))
+        # Remove any existing explicit salt (the password context salts the
+        # password automatically).
+        self.salt = None
         self._password = password_context.encrypt(value)
         self.password_updated = datetime.datetime.utcnow()
 
@@ -227,7 +230,6 @@ class User(Base):
             # If the password is correct, take this opportunity to upgrade the
             # password and remove the salt.
             if verified:
-                self.salt = None
                 self.password = value
 
             return verified
