@@ -79,7 +79,7 @@ def _session(request):
         tm = request.tm
     except AttributeError:
         log.warn('request does not have a transaction manager')
-        request.sentry.captureMessage('request does not have a transaction manager')
+        request.sentry.captureMessage('request does not have a transaction manager', stack=True)
     else:
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
@@ -99,7 +99,7 @@ def _session(request):
     def close_the_sqlalchemy_session(request):
         if session.dirty:
             log.warn('closing a dirty session')
-            request.sentry.captureMessage('closing a dirty session', extra={
+            request.sentry.captureMessage('closing a dirty session', stack=True, extra={
                 'dirty': session.dirty,
             })
         session.close()
