@@ -5,8 +5,10 @@
   "description": "The Internet, peer reviewed.",
   "dependencies": {
     "autoprefixer": "^6.0.3",
+    "babel-preset-es2015": "^6.14.0",
+    "babelify": "^7.3.0",
     "bootstrap": "3.3.5",
-    "browserify": "^13.0.0",
+    "browserify": "^13.1.0",
     "browserify-shim": "^3.8.12",
     "commander": "^2.9.0",
     "core-js": "^1.2.5",
@@ -46,7 +48,7 @@
     "eslint-config-hypothesis": "^1.0.0",
     "gulp-eslint": "^3.0.1",
     "karma": "^1.1.0",
-    "karma-browserify": "^5.0.5",
+    "karma-browserify": "^5.1.0",
     "karma-chai": "^0.1.0",
     "karma-mocha": "^1.1.1",
     "karma-mocha-reporter": "^2.0.4",
@@ -55,7 +57,7 @@
     "mocha": "^2.4.5",
     "proxyquire": "^1.7.4",
     "proxyquire-universal": "^1.0.8",
-    "proxyquireify": "^3.1.1",
+    "proxyquireify": "^3.2.1",
     "sinon": "^1.17.3",
     "websocket": "^1.0.22"
   },
@@ -73,6 +75,7 @@
   "homepage": "https://github.com/hypothesis/h",
   "browserify": {
     "transform": [
+      "babelify",
       "browserify-shim"
     ]
   },
