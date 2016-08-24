@@ -8,6 +8,11 @@ def includeme(config):
 
     config.add_route('group_create', '/new')
 
+    config.add_route('group_edit',
+                     '/{pubid}/edit',
+                     factory='h.groups.models:GroupFactory',
+                     traverse='/{pubid}')
+
     config.add_route('group_leave',
                      '/{pubid}/leave',
                      factory='h.groups.models:GroupFactory',

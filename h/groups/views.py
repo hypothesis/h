@@ -3,7 +3,7 @@
 import deform
 from pyramid import security
 from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPSeeOther)
+                                    HTTPSeeOther, HTTPNotFound)
 from pyramid.view import view_config, view_defaults
 
 from h import form
@@ -63,6 +63,47 @@ class GroupCreateController(object):
     def _template_data(self):
         """Return the data needed to render this controller's page."""
         return {'form': self.form.render()}
+
+
+@view_defaults(route_name='group_edit',
+               renderer='h:templates/groups/edit.html.jinja2',
+               permission='admin')
+class GroupEditController(object):
+    def __init__(self, group, request):
+        self.group = group
+        self.request = request
+        self.schema = schemas.GroupSchema().bind(request=self.request)
+        self.form = request.create_form(self.schema,
+                                        buttons=(_('Save'),))
+
+    @view_config(request_method='GET')
+    def get(self):
+        self.form.set_appstruct({
+            'name': self.group.name or '',
+            'description': self.group.description or '',
+        })
+
+        return self._template_data()
+
+    @view_config(request_method='POST')
+    def post(self):
+        return form.handle_form_submission(
+                self.request,
+                self.form,
+                on_success=self._update_group,
+                on_failure=self._template_data)
+
+    def _template_data(self):
+        return {
+            'form': self.form.render(),
+            'group_path': self.request.route_path('group_read',
+                                                  pubid=self.group.pubid,
+                                                  slug=self.group.slug)
+        }
+
+    def _update_group(self, appstruct):
+        self.group.name = appstruct['name']
+        self.group.description = appstruct['description']
 
 
 @view_config(route_name='group_read',
