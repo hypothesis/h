@@ -16,7 +16,7 @@
         </a>
       </li>
     {% endif %}
-    {% for n in range(1, page.max + 1) %}
+    {% for n in page.numbers %}
       {% if n == page.cur %}
         <li>
           <span class="pager__item is-highlighted"
@@ -26,7 +26,7 @@
         </li>
       {% elif n == '...' %}
         <li>
-          <span class="pager__item pager__item--link">
+          <span class="pager__item pager__item--more is-disabled">
             &#133;
           </span>
         </li>
@@ -42,7 +42,7 @@
     {% endfor %}
     {% if page.next is none %}
       <li>
-        <span class="pager__item pager__item--end is-disabled "
+        <span class="pager__item pager__item--end is-disabled"
           aria-hidden="true">&#x3e;</span>
       </li>
     {% else %}

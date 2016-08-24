@@ -19,6 +19,38 @@ class TestPaginate(object):
         assert page['cur'] == 1
 
     @pytest.mark.parametrize('page_param,expected', [
+      # If the current page is the first page.
+      ('1',  [1, 2, 3, 4, '...', 60]),
+
+      # If the current page is the last page.
+      ('60',  [1, '...', 57, 58, 59, 60]),
+
+      # If the current page is in the middle.
+      ('30',  [1, '...',27, 28, 29, 30, 31, 32, 33, '...', 60]),
+
+      # If the current page is near the first page.
+      ('2',  [1, 2, 3, 4, 5, '...', 60]),
+
+      # If the current page is near the last page.
+      ('59',  [1, '...', 56, 57, 58, 59, 60]),
+    ])
+    def test_numbers_large_result_set(self, pyramid_request, page_param, expected):
+        pyramid_request.params = {'page': page_param}
+        assert paginate(pyramid_request, 600, 10)['numbers'] == expected
+
+    @pytest.mark.parametrize('page_param,expected', [
+      # If the current page is the first page.
+      ('1',  [1, 2, 3, 4, 5]),
+      # If the current page is the last page.
+      ('5',  [1, 2, 3, 4, 5]),
+      # If the current page is in the middle.
+      ('3',  [1, 2, 3, 4, 5]),
+    ])
+    def test_numbers_small_result_set(self, pyramid_request, page_param, expected):
+        pyramid_request.params = {'page': page_param}
+        assert paginate(pyramid_request, 50, 10)['numbers'] == expected
+
+    @pytest.mark.parametrize('page_param,expected', [
         # Normally the current page just comes directly from the request's
         # 'page' param.
         ('32', 32),

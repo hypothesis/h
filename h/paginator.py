@@ -9,6 +9,7 @@ PAGE_SIZE = 20
 
 
 def paginate(request, total, page_size=PAGE_SIZE):
+    first = 1
     page_max = int(math.ceil(total / page_size))
     page_max = max(1, page_max)  # There's always at least one page.
 
@@ -22,6 +23,53 @@ def paginate(request, total, page_size=PAGE_SIZE):
     next_ = current_page + 1 if current_page < page_max else None
     prev = current_page - 1 if current_page > 1 else None
 
+    # Construct the page_numbers array so that the first and the
+    # last pages are always shown. There should be at most 3 pages
+    # to the left and 3 to the right of the current page. Any more
+    # pages than that are represented by ellipses on either side.
+    # Ex: [1, '...',27, 28, 29, 30, 31, 32, 33, '...', 60]
+
+    page_numbers = []
+    buffer = 3
+
+    # Add the first page.
+    if first < current_page:
+        page_numbers.append(first)
+
+    # If there are more than 3 pages to the left of current, add the
+    # ellipsis.
+    max_left = current_page - buffer
+
+    if (max_left - first) > 1:
+        page_numbers.append('...')
+
+    # If there are 1-3 pages to the left of current, add the pages.
+    i = current_page - buffer
+    while i >= max_left and i < current_page:
+        if i > first:
+            page_numbers.append(i)
+        i += 1
+
+    # Add the current page.
+    page_numbers.append(current_page)
+
+    # If there are 1-3 pages to the right of current, add the pages.
+    max_right = current_page + buffer
+
+    i = current_page + 1
+    while i <= max_right and i > current_page and i < page_max:
+        page_numbers.append(i)
+        i += 1
+
+    # If there are more than 3 pages to the right of current, add the
+    # ellipsis.
+    if (page_max - max_right) > 1:
+        page_numbers.append('...')
+
+    # Add the last page.
+    if page_max > current_page:
+        page_numbers.append(page_max)
+
     def url_for(page):
         query = request.params.dict_of_lists()
         query['page'] = page
@@ -31,6 +79,7 @@ def paginate(request, total, page_size=PAGE_SIZE):
         'cur': current_page,
         'max': page_max,
         'next': next_,
+        'numbers': page_numbers,
         'prev': prev,
         'url_for': url_for,
     }
