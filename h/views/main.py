@@ -111,7 +111,7 @@ def _configure_noisy_session_logging(request):
 
     @event.listens_for(request.db, 'after_flush')
     def after_flush(sess, flush_context):
-        log.info('after_attach sess=%r flush_context=%r', sess, flush_context)
+        log.info('after_flush sess=%r flush_context=%r', sess, flush_context)
 
     @event.listens_for(request.db, 'before_commit')
     def before_commit(sess):
