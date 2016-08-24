@@ -130,19 +130,10 @@ def redirect_tween_factory(handler, registry, redirects=REDIRECTS):
 def debug_tm_tween_factory(handler, registry):
     old_commit_veto = registry.settings.get('pyramid_tm.commit_veto', None)
     commit_veto = registry.settings.get('tm.commit_veto', old_commit_veto)
-    activate = registry.settings.get('tm.activate_hook')
     commit_veto = resolver.maybe_resolve(commit_veto) if commit_veto else None
 
     def debug_tm_tween(request):
-        if 'repoze.tm.active' in request.environ:
-            log.info('repoze.tm.active in request.environ: would skip tm (%s)', request.path)
-
-        if activate is not None:
-            if not activate(request):
-                log.info('activate hook would skip tm (%s)', request.path)
-
         manager = request.tm
-
         try:
             response = handler(request)
             if getattr(request, '_debug_tm', None) is None:
