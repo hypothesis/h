@@ -1,49 +1,47 @@
 'use strict';
 
-var inherits = require('inherits');
-
 var Controller = require('../base/controller');
 var setElementState = require('../util/dom').setElementState;
 
 /**
  * Controller for dropdown menus.
  */
-function DropdownMenuController(element) {
-  Controller.call(this, element);
+class DropdownMenuController extends Controller {
+  constructor(element) {
+    super(element);
 
-  var self = this;
-  var toggleEl = this.refs.dropdownMenuToggle;
+    var toggleEl = this.refs.dropdownMenuToggle;
 
-  var handleClickOutside = function (event) {
-    if (!self.refs.dropdownMenuContent.contains(event.target)) {
-      // When clicking outside the menu on the toggle element, stop the event
-      // so that it does not re-trigger the menu
-      if (toggleEl.contains(event.target)) {
-        event.stopPropagation();
-        event.preventDefault();
+    var handleClickOutside = event => {
+      if (!this.refs.dropdownMenuContent.contains(event.target)) {
+        // When clicking outside the menu on the toggle element, stop the event
+        // so that it does not re-trigger the menu
+        if (toggleEl.contains(event.target)) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
+
+        this.setState({open: false});
+
+        element.ownerDocument.removeEventListener('click', handleClickOutside,
+          true /* capture */);
       }
+    };
 
-      self.setState({open: false});
+    toggleEl.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
 
-      element.ownerDocument.removeEventListener('click', handleClickOutside,
+      this.setState({open: true});
+
+      element.ownerDocument.addEventListener('click', handleClickOutside,
         true /* capture */);
-    }
-  };
+    });
+  }
 
-  toggleEl.addEventListener('click', function (event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    self.setState({open: true});
-
-    element.ownerDocument.addEventListener('click', handleClickOutside,
-      true /* capture */);
-  });
+  update(state) {
+    setElementState(this.refs.dropdownMenuContent, {open: state.open});
+  }
 }
-inherits(DropdownMenuController, Controller);
-
-DropdownMenuController.prototype.update = function (state) {
-  setElementState(this.refs.dropdownMenuContent, {open: state.open});
-};
 
 module.exports = DropdownMenuController;
