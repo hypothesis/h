@@ -156,6 +156,8 @@ def debug_tm_tween_factory(handler, registry):
             else:
                 log.info('would commit normally')
         except:
+            if getattr(request, '_debug_tm', None) is None:
+                raise
             exc_info = sys.exc_info()
             try:
                 retryable = manager._retryable(*exc_info[:-1])
