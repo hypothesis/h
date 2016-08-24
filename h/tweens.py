@@ -135,11 +135,11 @@ def debug_tm_tween_factory(handler, registry):
 
     def debug_tm_tween(request):
         if 'repoze.tm.active' in request.environ:
-            log.warn('repoze.tm.active in request.environ: would skip tm (%s)', request.path)
+            log.info('repoze.tm.active in request.environ: would skip tm (%s)', request.path)
 
         if activate is not None:
             if not activate(request):
-                log.warn('activate hook would skip tm (%s)', request.path)
+                log.info('activate hook would skip tm (%s)', request.path)
 
         manager = request.tm
 
@@ -148,11 +148,11 @@ def debug_tm_tween_factory(handler, registry):
             if getattr(request, '_debug_tm', None) is None:
                 return response
             if manager.isDoomed():
-                log.warn('transaction manager explicitly doomed')
+                log.info('transaction manager explicitly doomed')
             elif commit_veto is not None:
                 veto = commit_veto(request, response)
                 if veto:
-                    log.warn('commit veto would trigger abort')
+                    log.info('commit veto would trigger abort')
             else:
                 log.info('would commit normally')
         except:
