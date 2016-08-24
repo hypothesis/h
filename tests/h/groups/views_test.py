@@ -4,9 +4,10 @@ import deform
 import mock
 import pytest
 from pyramid.httpexceptions import (HTTPMovedPermanently, HTTPNoContent,
-                                    HTTPSeeOther)
+                                    HTTPSeeOther, HTTPNotFound)
 
 from h.groups import views
+from h.models import (Group, User)
 
 
 @pytest.mark.usefixtures('groups_service', 'handle_form_submission', 'routes')
@@ -116,6 +117,46 @@ class TestGroupCreateController(object):
     @pytest.fixture
     def handle_form_submission(self, patch):
         return patch('h.groups.views.form.handle_form_submission')
+
+
+@pytest.mark.usefixtures('routes')
+class TestGroupEditController(object):
+
+    def test_get_reads_group_properties(self, pyramid_request):
+        pyramid_request.create_form.return_value = FakeForm()
+
+        creator = User(username='luke', authority='example.org')
+        group = Group(name='Birdwatcher Community',
+                      description='We watch birds all day long',
+                      creator=creator)
+        group.pubid = 'the-test-pubid'
+
+        result = views.GroupEditController(group, pyramid_request).get()
+
+        assert result == {
+            'form': {
+                'name': 'Birdwatcher Community',
+                'description': 'We watch birds all day long',
+            },
+            'group_path': '/g/the-test-pubid/birdwatcher-community'
+        }
+
+    def test_post_sets_group_properties(self, form_validating_to, pyramid_request):
+        creator = User(username='luke', authority='example.org')
+        group = Group(name='Birdwatcher Community',
+                      description='We watch birds all day long',
+                      creator=creator)
+        group.pubid = 'the-test-pubid'
+
+        controller = views.GroupEditController(group, pyramid_request)
+        controller.form = form_validating_to({
+            'name': 'Alligatorwatcher Comm.',
+            'description': 'We are all about the alligators now',
+        })
+        controller.post()
+
+        assert group.name == 'Alligatorwatcher Comm.'
+        assert group.description == 'We are all about the alligators now'
 
 
 @pytest.mark.usefixtures('groups_service', 'routes')
@@ -234,6 +275,7 @@ class FakeGroup(object):
         self.pubid = pubid
         self.slug = slug
 
+
 class FakeGroupsService(object):
     def __init__(self):
         self.created = []
@@ -250,6 +292,13 @@ class FakeGroupsService(object):
     def member_leave(self, group, userid):
         self.left.append((group, userid))
 
+
+class FakeForm(object):
+    def set_appstruct(self, appstruct):
+        self.appstruct = appstruct
+
+    def render(self):
+        return self.appstruct
 
 
 def form_validating_to(appstruct):

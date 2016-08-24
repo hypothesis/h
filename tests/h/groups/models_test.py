@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from pyramid import security
+
 import memex
 from h import models
 
@@ -163,6 +165,17 @@ def test_documents_does_not_return_null_documents(db_session, group):
         userid=u'fred', groupid=group.pubid, shared=True))
 
     assert None not in group.documents()
+
+
+def test_acl(group, factories):
+    group.pubid = 'testing-pubid'
+    group.creator = factories.User(username='luke', authority='foobar.org')
+
+    assert group.__acl__() == [
+        (security.Allow, 'group:testing-pubid', 'read'),
+        (security.Allow, 'acct:luke@foobar.org', 'admin'),
+        security.DENY_ALL,
+    ]
 
 
 def annotation(session, document_, groupid, shared):

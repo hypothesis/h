@@ -1,0 +1,20 @@
+{% extends "h:templates/layouts/base.html.jinja2" %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+  {{ panel('navbar') }}
+
+  <div class="content paper">
+    <div class="form">
+      {% if request.session.peek_flash('success') -%}
+        <div class="form-flash">
+          {% for message in request.session.pop_flash('success') %}
+            <p>{{ message }}</p>
+          {%- endfor %}
+        </div>
+      {%- endif %}
+      {{ self.page_content() }}
+    </div>
+  </div>
+{% endblock content %}

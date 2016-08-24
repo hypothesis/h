@@ -1,0 +1,13 @@
+{% extends "h:templates/layouts/group.html.jinja2" %}
+
+{% set page_route = 'group_edit' %}
+{% set page_title = 'Edit Group' %}
+
+{% block page_content %}
+  <h1 class="form-header">Edit group details</h1>
+  {{ form }}
+
+  <footer class="form-footer">
+    <a class="link" href="{{ group_path }}">&#8592; Back to the groups page</a>
+  </footer>
+{% endblock page_content %}

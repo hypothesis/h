@@ -21,7 +21,7 @@ class GroupSchema(CSRFSchema):
 
     name = colander.SchemaNode(
         colander.String(),
-        title=_("What do you want to call the group?"),
+        title=_("Name"),
         validator=colander.Length(
             min=GROUP_NAME_MIN_LENGTH,
             max=GROUP_NAME_MAX_LENGTH),
@@ -30,20 +30,18 @@ class GroupSchema(CSRFSchema):
             css_class="group-form__name-input js-group-name-input",
             disable_autocomplete=True,
             label_css_class="group-form__name-label",
-            max_length=GROUP_NAME_MAX_LENGTH,
-            placeholder=_("Group Name")))
+            max_length=GROUP_NAME_MAX_LENGTH))
 
     description = colander.SchemaNode(
         colander.String(),
-        title=_("Description:"),
+        title=_("Description"),
         validator=colander.Length(max=GROUP_DESCRIPTION_MAX_LENGTH),
         missing=None,
         widget=deform.widget.TextAreaWidget(
             css_class="group-form__description-input",
             label_css_class="group-form__description-label",
             min_length=0,
-            max_length=GROUP_DESCRIPTION_MAX_LENGTH,
-            placeholder=_("Group Description")))
+            max_length=GROUP_DESCRIPTION_MAX_LENGTH))
 
 
 class LegacyGroupSchema(CSRFSchema):
