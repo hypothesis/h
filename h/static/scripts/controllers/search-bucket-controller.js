@@ -1,22 +1,30 @@
 'use strict';
 
+var inherits = require('inherits');
 var scrollIntoView = require('scroll-into-view');
 
-function SearchBucketController(element) {
-  this.scrollTo = scrollIntoView;
+var Controller = require('../base/controller');
+var setElementState = require('../util/dom').setElementState;
 
-  var header = element.querySelector('.js-header');
-  var content = element.querySelector('.js-content');
+function SearchBucketController(element) {
+  Controller.call(this, element);
+
+  this.scrollTo = scrollIntoView;
   var self = this;
 
-  header.addEventListener('click', function () {
-    element.classList.toggle('is-expanded');
-    content.classList.toggle('is-expanded');
-
-    if (element.classList.contains('is-expanded')) {
-      self.scrollTo(element);
-    }
+  this.refs.header.addEventListener('click', function () {
+    self.setState({expanded: !self.state.expanded});
   });
 }
+inherits(SearchBucketController, Controller);
+
+SearchBucketController.prototype.update = function (state) {
+  setElementState(this.refs.content, {expanded: state.expanded});
+  setElementState(this.refs.header, {expanded: state.expanded});
+
+  if (state.expanded) {
+    this.scrollTo(this.element);
+  }
+};
 
 module.exports = SearchBucketController;

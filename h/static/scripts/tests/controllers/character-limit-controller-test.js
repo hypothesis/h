@@ -5,12 +5,12 @@ var util = require('./util');
 
 describe('CharacterLimitController', function () {
 
-  var containerEl;
+  var ctrl;
 
   afterEach(function () {
-    if (containerEl) {
-      containerEl.remove();
-      containerEl = null;
+    if (ctrl) {
+      ctrl.element.remove();
+      ctrl = null;
     }
   });
 
@@ -22,25 +22,18 @@ describe('CharacterLimitController', function () {
     maxlength = maxlength || 250;
 
     var template = '<div class="js-character-limit">';
-    template += '<textarea class="js-character-limit-input" data-maxlength="' + maxlength + '">';
+    template += '<textarea data-ref="characterLimitInput" data-maxlength="' + maxlength + '">';
     if (value) {
       template += value;
     }
-    template += '</textarea><span class="js-character-limit-counter">Foo</span>';
+    template += '</textarea><span data-ref="characterLimitCounter">Foo</span>';
     template += '</div>';
 
-    containerEl = util.setupComponent(document, template, {
-      '.js-character-limit': CharacterLimitController,
-    });
-    var divEl = containerEl.querySelector('.js-character-limit');
-    var counterEl = containerEl.querySelector('.js-character-limit-counter');
-    var textarea = containerEl.querySelector('textarea');
-    var ctrl = divEl.controllers[0];
+    ctrl = util.setupComponent(document, template, CharacterLimitController);
 
     return {
-      containerEl: containerEl,
-      counterEl: counterEl,
-      textarea: textarea,
+      counterEl: ctrl.refs.characterLimitCounter,
+      textarea: ctrl.refs.characterLimitInput,
       ctrl: ctrl,
     };
   }

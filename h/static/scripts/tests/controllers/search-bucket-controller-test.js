@@ -5,34 +5,30 @@ var util = require('./util');
 
 var TEMPLATE = [
   '<div class="js-search-bucket">',
-  '<div class="js-header"></div>',
-  '<div class="js-content"></div>',
+  '<div data-ref="header"></div>',
+  '<div data-ref="content"></div>',
   '</div>',
-];
+].join('\n');
 
 describe('SearchBucketController', function () {
-  var container;
-  var headerEl;
-  var contentEl;
   var ctrl;
 
   beforeEach(function () {
-    container = util.setupComponent(document, TEMPLATE, {
-      '.js-search-bucket': SearchBucketController,
-    });
-    headerEl = container.querySelector('.js-header');
-    contentEl = container.querySelector('.js-content');
-    ctrl = container.querySelector('.js-search-bucket').controllers[0];
+    ctrl = util.setupComponent(document, TEMPLATE, SearchBucketController);
+  });
+
+  afterEach(function () {
+    ctrl.element.remove();
   });
 
   it('toggles content expanded state when clicked', function () {
-    headerEl.dispatchEvent(new Event('click'));
-    assert.isTrue(contentEl.classList.contains('is-expanded'));
+    ctrl.refs.header.dispatchEvent(new Event('click'));
+    assert.isTrue(ctrl.refs.content.classList.contains('is-expanded'));
   });
 
   it('scrolls element into view when expanded', function () {
     ctrl.scrollTo = sinon.stub();
-    headerEl.dispatchEvent(new Event('click'));
-    assert.calledWith(ctrl.scrollTo, container.querySelector('.js-search-bucket'));
+    ctrl.refs.header.dispatchEvent(new Event('click'));
+    assert.calledWith(ctrl.scrollTo, ctrl.element);
   });
 });
