@@ -97,6 +97,7 @@ class Group(Base, mixins.Timestamps):
     def __acl__(self):
         return [
             (security.Allow, 'group:{}'.format(self.pubid), 'read'),
+            (security.Allow, self.creator.userid, 'admin'),
             security.DENY_ALL,
         ]
 
