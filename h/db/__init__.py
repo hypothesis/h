@@ -14,6 +14,8 @@ Most application code should access the database session using the request
 property `request.db` which is provided by this module.
 """
 
+import logging
+
 import sqlalchemy
 import zope.sqlalchemy
 from pyramid.settings import asbool
@@ -28,6 +30,8 @@ __all__ = (
     'init',
     'make_engine',
 )
+
+log = logging.getLogger(__name__)
 
 # Create a default metadata object with naming conventions for indexes and
 # constraints. This makes changing such constraints and indexes with alembic
@@ -92,6 +96,11 @@ def _session(request):
     # See: https://github.com/Pylons/pyramid_tm/issues/40
     @request.add_finished_callback
     def close_the_sqlalchemy_session(request):
+        if session.dirty:
+            log.warn('closing a dirty session')
+            request.sentry.captureMessage('closing a dirty session', extra={
+                'dirty': session.dirty,
+            })
         session.close()
 
     return session

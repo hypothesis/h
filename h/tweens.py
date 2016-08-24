@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import collections
+import logging
+import sys
 from pyramid import httpexceptions
+from pyramid.util import DottedNameResolver
+
+log = logging.getLogger(__name__)
+resolver = DottedNameResolver(None)
 
 
 def auth_token(handler, registry):
@@ -119,3 +125,48 @@ def redirect_tween_factory(handler, registry, redirects=REDIRECTS):
         return handler(request)
 
     return redirect_tween
+
+
+def debug_tm_tween_factory(handler, registry):
+    old_commit_veto = registry.settings.get('pyramid_tm.commit_veto', None)
+    commit_veto = registry.settings.get('tm.commit_veto', old_commit_veto)
+    activate = registry.settings.get('tm.activate_hook')
+    commit_veto = resolver.maybe_resolve(commit_veto) if commit_veto else None
+
+    def debug_tm_tween(request):
+        if 'repoze.tm.active' in request.environ:
+            log.warn('repoze.tm.active in request.environ: would skip tm (%s)', request.path)
+
+        if activate is not None:
+            if not activate(request):
+                log.warn('activate hook would skip tm (%s)', request.path)
+
+        manager = request.tm
+
+        try:
+            response = handler(request)
+            if getattr(request, '_debug_tm', None) is None:
+                return response
+            if manager.isDoomed():
+                log.warn('transaction manager explicitly doomed')
+            elif commit_veto is not None:
+                veto = commit_veto(request, response)
+                if veto:
+                    log.warn('commit veto would trigger abort')
+            else:
+                log.info('would commit normally')
+        except:
+            exc_info = sys.exc_info()
+            try:
+                retryable = manager._retryable(*exc_info[:-1])
+                if retryable:
+                    log.exception('caught retryable exception')
+                else:
+                    log.exception('caught non-retryable exception')
+                raise
+            finally:
+                del exc_info  # avoid leak
+
+        return response
+
+    return debug_tm_tween
