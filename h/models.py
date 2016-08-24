@@ -18,6 +18,9 @@ key to. So for convenience the test module can instead just do
 
 """
 
+import sqlalchemy as sa
+from h.db import Base
+
 from h.accounts import models as accounts_models
 from h.auth import models as auth_models
 from memex.models.annotation import Annotation
@@ -32,6 +35,7 @@ __all__ = (
     'Activation',
     'Annotation',
     'Blocklist',
+    'DebugCounter',
     'Document',
     'DocumentMeta',
     'DocumentURI',
@@ -53,6 +57,14 @@ NipsaUser = nipsa_models.NipsaUser
 Token = auth_models.Token
 Subscriptions = notification_models.Subscriptions
 User = accounts_models.User
+
+
+# FIXME: Remove this. Temporary model for debugging.
+class DebugCounter(Base):
+    __tablename__ = 'counter'
+
+    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+    val = sa.Column(sa.Integer)
 
 
 def includeme(_):
