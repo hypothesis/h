@@ -71,9 +71,8 @@ def includeme(config):
     # that are used across multiple pages
     config.include('pyramid_layout')
 
-    config.add_settings({
-        "mail.default_sender": '"Annotation Daemon" <no-reply@localhost>',
-    })
+    config.registry.settings.setdefault('mail.default_sender',
+                                        '"Annotation Daemon" <no-reply@localhost>')
     config.include('pyramid_mailer')
 
     # Pyramid service layer: provides infrastructure for registering and
