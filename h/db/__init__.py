@@ -80,11 +80,6 @@ def _session(request):
     except AttributeError:
         pass
     else:
-        if session.transaction._connections:
-            log.warn('session transaction already begun')
-            request.sentry.captureMessage('session transaction already begun', stack=True, extra={
-                'conns': session.transaction._connections,
-            })
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
     # pyramid_tm doesn't always close the database session for us.
