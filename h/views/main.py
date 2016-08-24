@@ -8,13 +8,17 @@ Important views which don't form part of any other major feature package.
 
 from __future__ import unicode_literals
 
+import logging
+import random
+
 from pyramid import httpexceptions
 from pyramid import response
 from pyramid.view import view_config
 
-from h.auth import role
 from h.models import DebugCounter
 from h.views.client import render_app
+
+log = logging.getLogger(__name__)
 
 
 @view_config(route_name='annotation', permission='read')
@@ -81,6 +85,10 @@ def stream_user_redirect(request):
 # FIXME: Remove this. Temporary view for debugging.
 @view_config(route_name='debug.counter', renderer='string')
 def debug_counter(request):
+    setattr(request, '_debug_tm', True)
+
+    _configure_noisy_session_logging(request)
+
     cnt = request.db.query(DebugCounter).one_or_none()
 
     if cnt is None:
@@ -90,7 +98,28 @@ def debug_counter(request):
         cnt.val = 0
 
     cnt.val += 1
+
     return 'count={}'.format(cnt.val)
+
+
+def _configure_noisy_session_logging(request):
+    from sqlalchemy import event
+
+    @event.listens_for(request.db, 'after_attach')
+    def after_attach(sess, instance):
+        log.warn('after_attach sess=%r instance=%r', sess, instance)
+
+    @event.listens_for(request.db, 'after_flush')
+    def after_flush(sess, flush_context):
+        log.warn('after_attach sess=%r flush_context=%r', sess, flush_context)
+
+    @event.listens_for(request.db, 'before_commit')
+    def before_commit(sess):
+        log.warn('before_commit sess=%r', sess)
+
+    @event.listens_for(request.db, 'after_rollback')
+    def after_rollback(sess):
+        log.warn('after_rollback sess=%r', sess)
 
 
 def includeme(config):
