@@ -19,6 +19,7 @@ import logging
 import sqlalchemy
 import zope.sqlalchemy
 from pyramid.settings import asbool
+from sqlalchemy import event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -74,12 +75,22 @@ def _session(request):
     engine = request.registry['sqlalchemy.engine']
     session = Session(bind=engine)
 
+    if request.path == '/account/_debug/counter':
+        log.info('created session: sess=%r', session)
+        _configure_noisy_session_logging(session)
+
     # If the request has a transaction manager, associate the session with it.
     try:
         tm = request.tm
     except AttributeError:
         pass
     else:
+        if request.path == '/account/_debug/counter':
+            log.info('registering session with tm: sess=%r, tm=%r', session, tm)
+            trans = request.tm.get()
+            trans.addBeforeCommitHook(log.info, args=('tm before commit',))
+            trans.addAfterCommitHook(lambda success, msg: log.info(msg, success),
+                                     args=('tm after commit: success=%r',))
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
     # pyramid_tm doesn't always close the database session for us.
@@ -104,6 +115,21 @@ def _session(request):
         session.close()
 
     return session
+
+
+def _configure_noisy_session_logging(session):
+    event.listen(session, 'after_begin', _log_event('after_begin'))
+    event.listen(session, 'after_attach', _log_event('after_attach'))
+    event.listen(session, 'after_flush', _log_event('after_flush'))
+    event.listen(session, 'before_commit', _log_event('before_commit'))
+    event.listen(session, 'after_commit', _log_event('after_commit'))
+    event.listen(session, 'after_rollback', _log_event('after_rollback'))
+
+
+def _log_event(name):
+    def _log(*args):
+        log.info('%s %r', name, args)
+    return _log
 
 
 def includeme(config):
