@@ -78,8 +78,7 @@ def _session(request):
     try:
         tm = request.tm
     except AttributeError:
-        log.warn('request does not have a transaction manager')
-        request.sentry.captureMessage('request does not have a transaction manager', stack=True)
+        pass
     else:
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
