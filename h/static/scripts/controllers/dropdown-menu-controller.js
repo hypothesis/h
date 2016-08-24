@@ -1,21 +1,30 @@
 'use strict';
 
+var inherits = require('inherits');
+
+var Controller = require('../base/controller');
+var setElementState = require('../util/dom').setElementState;
+
 /**
  * Controller for dropdown menus.
  */
 function DropdownMenuController(element) {
-  var toggleEl = element.querySelector('.js-dropdown-menu-toggle');
-  var contentEl = element.querySelector('.js-dropdown-menu-content');
+  Controller.call(this, element);
+
+  var self = this;
+  var toggleEl = this.refs.dropdownMenuToggle;
 
   var handleClickOutside = function (event) {
-    if (!contentEl.contains(event.target)) {
+    if (!self.refs.dropdownMenuContent.contains(event.target)) {
       // When clicking outside the menu on the toggle element, stop the event
       // so that it does not re-trigger the menu
       if (toggleEl.contains(event.target)) {
         event.stopPropagation();
         event.preventDefault();
       }
-      contentEl.classList.remove('is-open');
+
+      self.setState({open: false});
+
       element.ownerDocument.removeEventListener('click', handleClickOutside,
         true /* capture */);
     }
@@ -25,11 +34,16 @@ function DropdownMenuController(element) {
     event.preventDefault();
     event.stopPropagation();
 
-    contentEl.classList.add('is-open');
+    self.setState({open: true});
 
     element.ownerDocument.addEventListener('click', handleClickOutside,
       true /* capture */);
   });
 }
+inherits(DropdownMenuController, Controller);
+
+DropdownMenuController.prototype.update = function (state) {
+  setElementState(this.refs.dropdownMenuContent, {open: state.open});
+};
 
 module.exports = DropdownMenuController;

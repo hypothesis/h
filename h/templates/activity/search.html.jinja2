@@ -41,7 +41,7 @@
     {{ bucket.domain }}
   </div>
   <div class="search-result-bucket__content">
-    <div class="search-result-bucket__header js-header">
+    <div class="search-result-bucket__header" data-ref="header">
       <div class="search-result-bucket__title">{{ bucket.title }}</div>
       <div class="search-result-bucket__annotations-count">
         <div class="search-result-bucket__annotations-count-container">
@@ -49,7 +49,7 @@
         </div>
       </div>
     </div>
-    <div class="search-result-bucket__annotation-cards-container js-content">
+    <div class="search-result-bucket__annotation-cards-container" data-ref="content">
       <ol class="search-result-bucket__annotation-cards">
         {% for result in bucket.annotations %}
           {{ annotation_card(result.annotation, request) }}

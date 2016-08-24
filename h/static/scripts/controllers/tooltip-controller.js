@@ -1,5 +1,9 @@
 'use strict';
 
+var inherits = require('inherits');
+
+var Controller = require('../base/controller');
+
 /**
  * A custom tooltip similar to the one used in Google Docs which appears
  * instantly when activated on a target element.
@@ -16,6 +20,8 @@
  * @param {Element} el - The container for the tooltip.
  */
 function TooltipController(el) {
+  Controller.call(this, el);
+
   var self = this;
 
   // With mouse input, show the tooltip on hover. On touch devices we rely on
@@ -31,34 +37,30 @@ function TooltipController(el) {
     self.setState({target: null});
   });
 
-  this.setState = function (state) {
-    this.state = Object.freeze(Object.assign({}, this.state, state));
-    this.render();
-  };
-
-  this.render = function () {
-    if (!this.state.target) {
-      this._el.style.visibility = 'hidden';
-      return;
-    }
-
-    var target = this.state.target;
-    var label = target.getAttribute('aria-label');
-    this._labelEl.textContent = label;
-
-    Object.assign(this._el.style, {
-      visibility: '',
-      bottom: 'calc(100% + 5px)',
-    });
-  };
-
   this._el = el.ownerDocument.createElement('div');
   this._el.innerHTML = '<span class="tooltip-label js-tooltip-label"></span>';
   this._el.className = 'tooltip';
   el.appendChild(this._el);
   this._labelEl = this._el.querySelector('.js-tooltip-label');
 
-  this.setState({});
+  this.setState({target: null});
 }
+inherits(TooltipController, Controller);
+
+TooltipController.prototype.update = function (state) {
+  if (!state.target) {
+    this._el.style.visibility = 'hidden';
+    return;
+  }
+
+  var target = state.target;
+  var label = target.getAttribute('aria-label');
+  this._labelEl.textContent = label;
+
+  Object.assign(this._el.style, {
+    visibility: '',
+    bottom: 'calc(100% + 5px)',
+  });
+};
 
 module.exports = TooltipController;
