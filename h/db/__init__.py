@@ -113,6 +113,12 @@ def _session(request):
             request.sentry.captureMessage('closing a dirty session', stack=True, extra={
                 'dirty': session.dirty,
             })
+        # Try and find out under what conditions (i.e. for which requests) the
+        # session is leaked.
+        if id(session) in zope.sqlalchemy.datamanager._SESSION_STATE:
+            request.sentry.captureMessage('zope.sqlalchemy failed to clean up the session', stack=True, extra={
+                '_SESSION_STATE': zope.sqlalchemy.datamanager._SESSION_STATE
+            })
         session.close()
 
     return session
