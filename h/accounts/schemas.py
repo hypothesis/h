@@ -364,7 +364,7 @@ class EditProfileSchema(CSRFSchema):
         widget=deform.widget.TextAreaWidget(
             cols=60,
             max_length=250,
-            rows=2,
+            rows=4,
         ),
         title=_('Description'))
 
