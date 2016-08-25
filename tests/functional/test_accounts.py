@@ -32,7 +32,7 @@ class TestAccountSettings(object):
 
         res = email_form.submit(xhr=True, status=200)
 
-        assert res.body.startswith('<form')
+        assert res.body.strip('\n').startswith('<form')
 
     def test_submit_email_form_with_xhr_returns_plain_text(self, app):
         res = app.get('/account/settings')
@@ -80,7 +80,7 @@ class TestAccountSettings(object):
 
         res = password_form.submit(xhr=True)
 
-        assert res.body.startswith('<form')
+        assert res.body.strip('\n').startswith('<form')
 
     def test_submit_password_form_with_xhr_returns_plain_text(self, app):
         res = app.get('/account/settings')

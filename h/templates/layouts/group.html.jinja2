@@ -6,7 +6,7 @@
   {{ panel('navbar') }}
 
   <div class="content paper">
-    <div class="form">
+    <div class="form-container">
       {% if request.session.peek_flash('success') -%}
         <div class="form-flash">
           {% for message in request.session.pop_flash('success') %}

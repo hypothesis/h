@@ -1,11 +1,17 @@
+{% if feature('activity_pages') %}
+{% set form_buttons_class = 'form-actions__buttons' %}
+{% set form_message_class = 'form-actions__message' %}
+{% else %}
+{% set form_buttons_class = 'form-actions-buttons' %}
+{% set form_message_class = 'form-actions-message' %}
+{% endif %}
+
 <form id="{{ field.formid }}"
       action="{{ field.action }}"
       method="{{ field.method }}"
       enctype="multipart/form-data"
       accept-charset="utf-8"
-      {% if field.css_class -%}
-      class="{{ field.css_class }}"
-      {%- endif -%}>
+      class="form {% if field.css_class %}{{ field.css_class }} {% endif %}">
   <input type="hidden" name="__formid__" value="{{ field.formid }}" />
 
   {%- for f in field.children -%}
@@ -13,13 +19,13 @@
   {% endfor -%}
 
   <div class="form-actions">
-    <div class="form-actions-message">
+    <div class="{{ form_message_class }}">
       {%- if field.footer %}{{ field.footer | safe }}{% endif -%}
     </div>
     {% if feature('activity_pages') %}
     <div class="u-stretch"></div>
     {% endif %}
-    <div class="form-actions-buttons">
+    <div class="{{ form_buttons_class }}">
       {%- for button in field.buttons -%}
         <button id="{{ field.formid + button.name }}"
                 name="{{ button.name }}"
