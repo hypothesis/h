@@ -21,7 +21,11 @@ var controllers = {
   '.js-search-bucket': SearchBucketController,
 };
 
-upgradeElements(document.body, controllers);
+var doUpgrade = !window.envFlags || window.envFlags.get('js-capable');
+
+if (doUpgrade) {
+  upgradeElements(document.body, controllers);
+}
 
 if (window.envFlags) {
   window.envFlags.ready();

@@ -1,9 +1,5 @@
 'use strict';
 
-function isJSDisabled(document) {
-  return document.location.search.match(/\bnojs=1\b/);
-}
-
 /**
  * Upgrade elements on the page with additional functionality
  *
@@ -21,10 +17,6 @@ function isJSDisabled(document) {
  *        order to upgrade it.
  */
 function upgradeElements(root, controllers) {
-  if (isJSDisabled(root.ownerDocument)) {
-    return;
-  }
-
   Object.keys(controllers).forEach(function (selector) {
     var elements = Array.from(root.querySelectorAll(selector));
     elements.forEach(function (el) {
