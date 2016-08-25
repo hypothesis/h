@@ -92,7 +92,10 @@ def _session(request):
             trans.addBeforeCommitHook(log.info, args=('tm before commit',))
             trans.addAfterCommitHook(lambda success, msg: log.info(msg, success),
                                      args=('tm after commit: success=%r',))
-            log.info('session state: %r', _SESSION_STATE.get(id(session), None))
+            session_state = _SESSION_STATE.get(id(session), None)
+            log.info('session state: %r', session_state)
+            if session_state is not None:
+                log.info('_SESSION_STATE: %r', _SESSION_STATE)
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
     # pyramid_tm doesn't always close the database session for us.
