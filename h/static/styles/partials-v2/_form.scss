@@ -30,3 +30,13 @@
 .form-help-text {
   color: $grey-5;
 }
+
+.form-footer__required {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.form-footer__symbol {
+  color: $brand;
+  margin-right: 3px;
+}

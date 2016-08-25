@@ -87,6 +87,10 @@
     color: $grey-5;
   }
 
+  .form-input__required {
+    color: $brand;
+  }
+
   .form-input__hint-icon {
     display: none;
     margin-left: 6px;

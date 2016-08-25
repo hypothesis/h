@@ -1,29 +1,44 @@
-{% extends "h:templates/layouts/base.html.jinja2" %}
+{% extends "h:templates/layouts/group.html.jinja2" %}
 
-{% set style_bundle = 'site_css' %}
+{% set page_title = 'Create a new group' %}
 
-{% block page_title %}Create a new group{% endblock page_title %}
+{% block page_content %}
+  {% if feature('activity_pages') %}
+    <h1 class="form-header">Create a new group</h1>
+    {{ form }}
 
-{% block content %}
-  <div class="content content--narrow js-create-group-form">
-    <div class="group-form">
-      <i class="h-icon-group group-form__heading-icon"></i>
-      <div class="group-form__heading">Create a new group</div>
-      {{ form | safe }}
-    </div>
-    <div class="group-form-footer">
-      <a href="" class="group-form-footer__explain-link js-group-info-link">Tell me more about groups</a>
-      <div class="group-form-footer__explain-text js-group-info-text is-hidden">
-        {% include "about-groups.html.jinja2" %}
-        <p class="group-form-footer__heading">How to use groups</p>
-        <ol class="group-form-footer__list">
-          <li>Choose a name for your group</li>
-          <li>We'll give you a link which you can copy and paste</li>
-          <li>Send this link to the people you want to annotate with.
-              They will be able to create a Hypothes.is account and will
-              be able to publish and read annotations in this group.</li>
-        </ol>
+    <footer class="form-footer">
+      {# This form has at least one required field. If that changes we should update this footer. #}
+      <span class="form-footer__required">
+        <span class="form-footer__symbol">
+        *
+        </span>
+        <span class="form-footer__text">
+          Required
+        </span>
+      </span>
+    </footer>
+  {% else %}
+    <div class="content content--narrow js-create-group-form">
+      <div class="group-form">
+        <i class="h-icon-group group-form__heading-icon"></i>
+        <div class="group-form__heading">Create a new group</div>
+        {{ form | safe }}
+      </div>
+      <div class="group-form-footer">
+        <a href="" class="group-form-footer__explain-link js-group-info-link">Tell me more about groups</a>
+        <div class="group-form-footer__explain-text js-group-info-text is-hidden">
+          {% include "about-groups.html.jinja2" %}
+          <p class="group-form-footer__heading">How to use groups</p>
+          <ol class="group-form-footer__list">
+            <li>Choose a name for your group</li>
+            <li>We'll give you a link which you can copy and paste</li>
+            <li>Send this link to the people you want to annotate with.
+                They will be able to create a Hypothes.is account and will
+                be able to publish and read annotations in this group.</li>
+          </ol>
+        </div>
       </div>
     </div>
-  </div>
-{% endblock content %}
+  {%- endif %}
+{% endblock page_content %}
