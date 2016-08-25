@@ -18,6 +18,7 @@ import logging
 
 import sqlalchemy
 import zope.sqlalchemy
+import zope.sqlalchemy.datamanager
 from pyramid.settings import asbool
 from sqlalchemy import event
 from sqlalchemy.ext.declarative import declarative_base
@@ -75,6 +76,16 @@ def _session(request):
     engine = request.registry['sqlalchemy.engine']
     session = Session(bind=engine)
 
+    # Work around what appears to be a consistency/synchronisation bug in
+    # zope.sqlalchemy, in which old sessions aren't correctly cleared from
+    # _SESSION_STATE, causing new sessions to not be registered with the
+    # request transaction manager.
+    #
+    # N.B. This is *only* safe as long as we use a synchronous web worker in
+    # single-threaded mode.
+    #
+    # TODO: Remove this as and when we have a fix upstream.
+    zope.sqlalchemy.datamanager._SESSION_STATE.clear()
 
     # If the request has a transaction manager, associate the session with it.
     try:
