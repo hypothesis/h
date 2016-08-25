@@ -15,6 +15,9 @@ var TEMPLATE = `
     <div class="js-form-input">
       <input id="deformField2" data-ref="formInput secondInput" value="original value 2">
     </div>
+    <div class="js-form-input">
+      <input id="deformField3" data-ref="formInput checkboxInput" type="checkbox">
+    </div>
     <div data-ref="formActions">
       <button data-ref="testSaveBtn">Save</button>
       <button data-ref="cancelBtn">Cancel</button>
@@ -257,6 +260,27 @@ describe('FormController', function () {
         assert.equal(document.activeElement, ctrl.refs.firstInput);
         done();
       });
+    });
+  });
+
+  context('when a checkbox is toggled', function () {
+    beforeEach(function () {
+      fakeSubmitForm.returns(Promise.resolve({status: 200, form: UPDATED_FORM}));
+      ctrl.refs.checkboxInput.focus();
+      ctrl.refs.checkboxInput.dispatchEvent(new Event('change', {bubbles: true}));
+    });
+
+    afterEach(function () {
+      // Wait for form submission to complete
+      return Promise.resolve();
+    });
+
+    it('does not show form save buttons', function () {
+      assert.isTrue(ctrl.refs.formActions.classList.contains('is-hidden'));
+    });
+
+    it('automatically submits the form', function () {
+      assert.calledWith(fakeSubmitForm, ctrl.element);
     });
   });
 });

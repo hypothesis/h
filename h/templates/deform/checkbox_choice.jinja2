@@ -7,11 +7,11 @@
            class="form-checkbox__label">
       <input type="checkbox"
              name="checkbox"
+             data-ref="formInput"
              value="{{ value }}"
              id="{{ field.oid }}-{{ loop.index0 }}"
-             class="form-checkbox__input {% if field.widget.css_class -%}
-               {{ field.widget.css_class }}
-             {% endif -%}"
+             class="form-checkbox__input
+             {%- if field.widget.css_class %} {{ field.widget.css_class }}{% endif -%}"
              {%- if field.error -%}
              aria-invalid="true"
              {% endif -%}
