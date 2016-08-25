@@ -22,6 +22,6 @@
 
 @include touch-input {
   .btn {
-    min-height: 44px;
+    min-height: $touch-target-size;
   }
 }
