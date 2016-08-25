@@ -18,6 +18,7 @@ import logging
 
 import sqlalchemy
 import zope.sqlalchemy
+from zope.sqlalchemy.datamanager import _SESSION_STATE
 from pyramid.settings import asbool
 from sqlalchemy import event
 from sqlalchemy.ext.declarative import declarative_base
@@ -91,6 +92,7 @@ def _session(request):
             trans.addBeforeCommitHook(log.info, args=('tm before commit',))
             trans.addAfterCommitHook(lambda success, msg: log.info(msg, success),
                                      args=('tm after commit: success=%r',))
+            log.info('session state: %r', _SESSION_STATE.get(id(session), None))
         zope.sqlalchemy.register(session, transaction_manager=tm)
 
     # pyramid_tm doesn't always close the database session for us.
