@@ -3,6 +3,8 @@
 import colander
 import deform
 
+import slugify
+
 from h import i18n
 from h.accounts.schemas import CSRFSchema
 from h.groups.models import (
@@ -14,6 +16,15 @@ from h.groups.models import (
 
 _ = i18n.TranslationString
 
+GROUPSLUG_BLACKLIST = set(['edit', 'leave'])
+
+
+def unblacklisted_group_name_slug(node, value, blacklist=GROUPSLUG_BLACKLIST):
+    """Colander validator that ensures the "slugified" group name is not blacklisted."""
+    if slugify.slugify(value).lower() in blacklist:
+        raise colander.Invalid(node, _("Sorry, this group name is not allowed. "
+                                       "Please choose another one."))
+
 
 class GroupSchema(CSRFSchema):
 
@@ -22,9 +33,9 @@ class GroupSchema(CSRFSchema):
     name = colander.SchemaNode(
         colander.String(),
         title=_("Name"),
-        validator=colander.Length(
-            min=GROUP_NAME_MIN_LENGTH,
-            max=GROUP_NAME_MAX_LENGTH),
+        validator=colander.All(
+            colander.Length(min=GROUP_NAME_MIN_LENGTH, max=GROUP_NAME_MAX_LENGTH),
+            unblacklisted_group_name_slug),
         widget=deform.widget.TextInputWidget(
             autofocus=True,
             css_class="group-form__name-input js-group-name-input",
