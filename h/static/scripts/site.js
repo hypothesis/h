@@ -8,6 +8,7 @@ if (settings.raven) {
 
 require('./polyfills');
 
+var CharacterLimitController = require('./controllers/character-limit-controller');
 var CreateGroupFormController = require('./controllers/create-group-form-controller');
 var DropdownMenuController = require('./controllers/dropdown-menu-controller');
 var FormSelectOnFocusController = require('./controllers/form-select-onfocus-controller');
@@ -15,6 +16,7 @@ var SearchBucketController = require('./controllers/search-bucket-controller');
 var upgradeElements = require('./base/upgrade-elements');
 
 var controllers = {
+  '.js-character-limit': CharacterLimitController,
   '.js-create-group-form': CreateGroupFormController,
   '.js-dropdown-menu': DropdownMenuController,
   '.js-select-onfocus': FormSelectOnFocusController,

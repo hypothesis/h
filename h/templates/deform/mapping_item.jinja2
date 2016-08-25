@@ -13,7 +13,9 @@
 {% endif %}
 
 {%- if not field.widget.hidden -%}
-<div class="{{ field_class }}{% if field.error %} {{ field_error_state_class }}{% endif %}"
+<div class="{{ field_class }}
+            {% if field.error %}{{ field_error_state_class }}{% endif %}
+            {% if field.widget.template == 'textarea' and field.widget.max_length -%}js-character-limit{% endif %}"
      {%- if field.description -%}
      title="{{ _(field.description) }}"
      {% endif %}
