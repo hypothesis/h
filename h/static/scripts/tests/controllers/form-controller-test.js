@@ -24,10 +24,11 @@ var UPDATED_FORM = TEMPLATE.replace('js-form', 'js-form is-updated');
 describe('FormController', function () {
   var ctrl;
   var fakeSubmitForm;
+  var FormController;
 
   beforeEach(function () {
     fakeSubmitForm = sinon.stub();
-    var FormController = proxyquire('../../controllers/form-controller', {
+    FormController = proxyquire('../../controllers/form-controller', {
       '../util/submit-form': noCallThru(fakeSubmitForm),
     });
 
@@ -144,6 +145,19 @@ describe('FormController', function () {
     assert.isTrue(isSaving());
     return saved.then(function () {
       assert.isFalse(isSaving());
+    });
+  });
+
+  it('automatically submits the form when a checkbox is changed', function () {
+    var checkboxForm = TEMPLATE.replace('<input', '<input type="checkbox"');
+    var ctrl = util.setupComponent(document, checkboxForm, FormController);
+    fakeSubmitForm.returns(Promise.resolve({status: 200, form: UPDATED_FORM}));
+    ctrl.refs.formInput.dispatchEvent(new Event('change'));
+
+    assert.calledWith(fakeSubmitForm, ctrl.refs.form);
+
+    return Promise.resolve().then(function () {
+      ctrl.element.remove();
     });
   });
 });

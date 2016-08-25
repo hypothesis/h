@@ -48,14 +48,22 @@ FormController.prototype._init = function (element) {
 
   // Begin editing when an input field is focused
   [].concat(this.refs.formInput).forEach(function (inputEl) {
-    inputEl.addEventListener('focus', function () {
-      if (self.state.editingField !== inputEl) {
-        self.setState({
-          editingField: inputEl,
-          initialValue: inputEl.value,
-        });
-      }
-    });
+    var autosubmitTypes = ['checkbox', 'radio'];
+
+    if (autosubmitTypes.indexOf(inputEl.type) !== -1) {
+      inputEl.addEventListener('change', function () {
+        self.submit();
+      });
+    } else {
+      inputEl.addEventListener('focus', function () {
+        if (self.state.editingField !== inputEl) {
+          self.setState({
+            editingField: inputEl,
+            initialValue: inputEl.value,
+          });
+        }
+      });
+    }
   });
 
   // Setup AJAX handling for forms
