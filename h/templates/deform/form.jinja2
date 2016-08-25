@@ -11,7 +11,7 @@
       method="{{ field.method }}"
       enctype="multipart/form-data"
       accept-charset="utf-8"
-      class="form {% if field.css_class %}{{ field.css_class }} {% endif %}"
+      class="form {% if field.css_class %}{{ field.css_class }} {% endif %}">
   <input type="hidden" name="__formid__" value="{{ field.formid }}" />
 
   {%- for f in field.children -%}
