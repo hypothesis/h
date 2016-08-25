@@ -41,6 +41,22 @@ describe('EnvironmentFlags', function () {
       flags.init();
       assert.isTrue(el.classList.contains('env-touch'));
     });
+
+    it('should add flags specified in the document URL', function () {
+      flags.init('http://example.org/?__env__=touch;js-timeout');
+      assert.isTrue(el.classList.contains('env-touch'));
+      assert.isTrue(el.classList.contains('env-js-timeout'));
+    });
+
+    it('should remove flags with a "no-" prefix specified in the document URL', function () {
+      flags.init('http://example.org/?__env__=no-js-capable');
+      assert.isFalse(el.classList.contains('env-js-capable'));
+    });
+
+    it('should remove "js-capable" flag if "nojs=1" is present in URL', function () {
+      flags.init('http://example.org/?nojs=1');
+      assert.isFalse(el.classList.contains('env-js-capable'));
+    });
   });
 
   describe('#ready', function () {

@@ -16,21 +16,6 @@ describe('upgradeElements', function () {
     root.remove();
   });
 
-  it('does not upgrade elements if JS is disabled', function () {
-    var TestController = sinon.spy();
-    var root = {
-      querySelectorAll: function () {
-        // Array with one fake Element to upgrade
-        return [{}];
-      },
-      ownerDocument: {
-        location: { search: '?nojs=1' },
-      },
-    };
-    upgradeElements(root, {'.js-test': TestController});
-    assert.notCalled(TestController);
-  });
-
   it('exposes controllers via the `.controllers` element property', function () {
     function TestController() {}
 

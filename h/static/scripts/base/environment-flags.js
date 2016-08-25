@@ -36,13 +36,35 @@ EnvironmentFlags.prototype.set = function (flag, on) {
 };
 
 /**
+ * Extract environment flags from `url`.
+ *
+ * @param {string} url
+ * @return {Array<string>} flags
+ */
+function envFlagsFromUrl(url) {
+  var match = /\b__env__=([^&]+)/.exec(url);
+  var flags = [];
+  if (match) {
+    flags = match[1].split(';');
+  }
+
+  // Convenience shorthand to disable JS
+  if (url.match(/\bnojs=1\b/)) {
+    flags.push('no-js-capable');
+  }
+  return flags;
+}
+
+/**
  * Detect user agent capabilities and set default flags.
  *
  * This sets the `js-capable` flag but clears it if `ready()` is not called
  * within 5000ms. This can be used to hide elements of the page assuming that
  * they can later be shown via JS but show them again if scripts fail to load.
+ *
+ * @param {string?} url - Optional value to use as the URL for flag overrides
  */
-EnvironmentFlags.prototype.init = function () {
+EnvironmentFlags.prototype.init = function (url) {
   var JS_LOAD_TIMEOUT = 5000;
   var self = this;
 
@@ -59,6 +81,16 @@ EnvironmentFlags.prototype.init = function () {
   this._jsLoadTimeout = setTimeout(function () {
     self.set('js-timeout', true);
   }, JS_LOAD_TIMEOUT);
+
+  // Process flag overrides specified in URL
+  var flags = envFlagsFromUrl(url || this._element.ownerDocument.location.href);
+  flags.forEach(function (flag) {
+    if (flag.indexOf('no-') === 0) {
+      self.set(flag.slice(3), false);
+    } else {
+      self.set(flag, true);
+    }
+  });
 };
 
 /**
