@@ -43,6 +43,15 @@ def test_navbar_username_link_when_logged_in(pyramid_request, authenticated_user
     assert result['username_link'] == 'http://example.com/search?q=user:vannevar'
 
 
+@pytest.mark.usefixtures('routes')
+def test_navbar_includes_search_query(pyramid_request):
+    pyramid_request.authenticated_user = None
+    pyramid_request.params['q'] = 'tag:question'
+    result = panels.navbar({}, pyramid_request)
+
+    assert result['q'] == 'tag:question'
+
+
 @pytest.fixture
 def routes(pyramid_config):
     pyramid_config.add_route('account', '/account')
