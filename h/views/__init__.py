@@ -33,7 +33,3 @@ def includeme(config):
     config.add_route('stream', '/stream')
     config.add_route('stream.user_query', '/u/{user}')
     config.add_route('stream.tag_query', '/t/{tag}')
-
-    # FIXME: Remove this. Temporary model for debugging. Lives under
-    # "/account" so we don't have to futz with nginx routing.
-    config.add_route('debug.counter', '/account/_debug/counter')
