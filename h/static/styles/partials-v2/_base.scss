@@ -33,6 +33,7 @@ $input-font-size: 15px;
 
 // Z-index scale
 $zindex-dropdown-menu: 10;
+$zindex-tooltip: 20;
 
 // Mobile device size breakpoints
 // ------------------------------
@@ -40,6 +41,7 @@ $zindex-dropdown-menu: 10;
 
 $max-phone-width: 500px;
 $tablet-width: 768px;
+$touch-target-size: 44px;
 
 // Include all mixins, making them available to the stylesheet. N.B. Mixins
 // should *never* output CSS, so this is safe.

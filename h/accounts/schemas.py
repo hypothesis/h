@@ -387,7 +387,7 @@ class EditProfileSchema(CSRFSchema):
         missing=None,
         validator=validate_orcid,
         title=_('ORCID'),
-        hint=_('ORCID provides a persistent identifier for researchers (see http://orcid.org/)'))
+        hint=_('ORCID provides a persistent identifier for researchers (see orcid.org)'))
 
 
 class NotificationsSchema(CSRFSchema):
